@@ -50,7 +50,7 @@ import type {
 } from '../../Combat/combat.encounter.types';
 import type { ActiveEffect } from '../../Effects/types';
 import { lookupEffect } from '../../Effects';
-import { SANDBOX_CARD_SETS, applySandboxSet } from '../cards.sandbox-sets';
+import { SEQUENCING_MICROSET_CARDS, applyFixtureCards } from '../../test-utils/retired-verb-cards';
 import { clearSandboxCards } from '../cards.sandbox';
 import { scoreCard } from '../cards.pricing';
 import { rankToRarity } from '../types';
@@ -61,7 +61,10 @@ afterEach(() => {
     clearSandboxCards();
 });
 
-const SEQ_SET = SANDBOX_CARD_SETS['sequencing-microset']!;
+/** PROFANE CANON (2026-08-08): the `sequencing-microset` sandbox SET died
+ *  with the spec-32 library; its carriers survive as synthetic fixtures so the
+ *  turn-shape predicate grammar stays under test. */
+const SEQ_CARDS = SEQUENCING_MICROSET_CARDS;
 const MICROSET_IDS = [
     'captatio-benevolentiae', 'in-medias-res', 'coda',
     'dying-echo', 'wages-of-weakness', 'answered-in-kind',
@@ -125,15 +128,15 @@ function play(before: CombatEncounterState, paid: boolean): {
 
 describe('sequencing-microset — registry shape and rank-band honesty', () => {
     it('carries exactly the six cards, 2 × 3 themes, 2 per condition family', () => {
-        expect(SEQ_SET.cards.map(c => c.id)).toEqual([...MICROSET_IDS]);
-        expect(SEQ_SET.overrides ?? []).toHaveLength(0);
+        expect(SEQ_CARDS.map(c => c.id)).toEqual([...MICROSET_IDS]);
 
-        const themes = SEQ_SET.cards.map(c => c.theme);
-        for (const theme of ['peroration', 'echo', 'akrasia'] as const) {
+        const themes = SEQ_CARDS.map(c => c.theme);
+        // Canon re-slug (2026-08-08): peroration -> trial, echo -> grave, akrasia -> debt.
+        for (const theme of ['trial', 'grave', 'debt'] as const) {
             expect(themes.filter(t => t === theme), theme).toHaveLength(2);
         }
 
-        const kinds = SEQ_SET.cards.map(c => c.synergy?.statePredicate?.kind);
+        const kinds = SEQ_CARDS.map(c => c.synergy?.statePredicate?.kind);
         expect(kinds.filter(k => k === 'opening')).toHaveLength(2);
         expect(kinds.filter(k => k === 'finale')).toHaveLength(2);
         // The after-cost pair: one reads the RECOIL ledger, one the
@@ -143,13 +146,13 @@ describe('sequencing-microset — registry shape and rank-band honesty', () => {
 
         // Every condition rides the ONE conditional gate (CardSynergy), and
         // every rider is priced (scoreCard applies the threshold ×0.5).
-        for (const card of SEQ_SET.cards) {
+        for (const card of SEQ_CARDS) {
             expect(card.synergy?.statePredicate, `${card.id}: statePredicate`).toBeDefined();
             expect(card.synergy?.rider, `${card.id}: rider`).toBeDefined();
         }
     });
 
-    it.each(SEQ_SET.cards.map(c => [c.id, c] as const))(
+    it.each(SEQ_CARDS.map(c => [c.id, c] as const))(
         '%s prices inside its printed rank band',
         (_id, card) => {
             const [lo, hi] = RANK_BANDS[rankToRarity(card.rank)];
@@ -162,7 +165,7 @@ describe('sequencing-microset — registry shape and rank-band honesty', () => {
     );
 
     it('the authored // pts arithmetic matches scoreCard (regression anchors)', () => {
-        const byId = (id: string) => SEQ_SET.cards.find(c => c.id === id)!;
+        const byId = (id: string) => SEQ_CARDS.find(c => c.id === id)!;
         expect(scoreCard(byId('captatio-benevolentiae'))).toBeCloseTo(4.125, 2);
         expect(scoreCard(byId('in-medias-res'))).toBeCloseTo(6.535, 2); // spec 33 D4: poison i1 d2 at the 1.83 cadence
         expect(scoreCard(byId('coda'))).toBeCloseTo(8.0, 2);
@@ -188,7 +191,7 @@ describe('sequencing-microset — registry shape and rank-band honesty', () => {
     });
 
     it('no TICK vocabulary anywhere in the set (TICK is ratified dead)', () => {
-        for (const card of SEQ_SET.cards) {
+        for (const card of SEQ_CARDS) {
             expect(card.free?.tickOne, `${card.id}: FREE tickOne`).toBeUndefined();
             expect(card.free?.tickAllDots, `${card.id}: FREE tickAllDots`).toBeUndefined();
             expect(card.synergy?.rider?.tickOne, `${card.id}: rider tickOne`).toBeUndefined();
@@ -197,7 +200,7 @@ describe('sequencing-microset — registry shape and rank-band honesty', () => {
     });
 
     it('every effect id on the six cards resolves in the Effects library', () => {
-        for (const card of SEQ_SET.cards) {
+        for (const card of SEQ_CARDS) {
             for (const ce of card.combatEffects ?? []) {
                 expect(lookupEffect(ce.effectId), `${card.id} -> ${ce.effectId}`).toBeDefined();
             }
@@ -250,7 +253,7 @@ describe('checkStatePredicate — the WS5 turn-shape predicates', () => {
 // ─── 3. Per-card condition gates (fire / silent, real units) ─────────────────
 
 describe('sequencing-microset — condition gates', () => {
-    beforeEach(() => { applySandboxSet('sequencing-microset'); });
+    beforeEach(() => { applyFixtureCards(SEQ_CARDS); });
 
     it('captatio-benevolentiae: OPENING fires as the FIRST spell (+5 Guard, +1 Premise), silent afterwards', () => {
         // Fixture default: spellsPlayedThisTurn 0 → this IS the opening.
@@ -295,9 +298,9 @@ describe('sequencing-microset — condition gates', () => {
             ...s,
             hand: [
                 { uid: 'under-test', cardId: 'coda' },
-                { uid: 'f1', cardId: 'slippery-slope' },
-                { uid: 'f2', cardId: 'slippery-slope' },
-                { uid: 'f3', cardId: 'slippery-slope' },
+                { uid: 'f1', cardId: 'unction-of-boils' },
+                { uid: 'f2', cardId: 'unction-of-boils' },
+                { uid: 'f3', cardId: 'unction-of-boils' },
             ],
         })), true);
         expect(conditionEvent(silent.events, 'your closing play')).toBeUndefined();
@@ -310,9 +313,9 @@ describe('sequencing-microset — condition gates', () => {
             ...s,
             hand: [
                 { uid: 'under-test', cardId: 'dying-echo' },
-                { uid: 'f1', cardId: 'slippery-slope' },
-                { uid: 'f2', cardId: 'slippery-slope' },
-                { uid: 'f3', cardId: 'slippery-slope' },
+                { uid: 'f1', cardId: 'unction-of-boils' },
+                { uid: 'f2', cardId: 'unction-of-boils' },
+                { uid: 'f3', cardId: 'unction-of-boils' },
             ],
         })), true);
 
@@ -370,8 +373,8 @@ describe('sequencing-microset — condition gates', () => {
 const SEQ_HAND = [
     'captatio-benevolentiae', // microset: OPENING → +5 Guard, +1 Premise
     'dying-echo',             // microset: closing play → poison i3 d4 instead of i1
-    'mounting-case',          // library: MARK d3 + poison i1 d4 + Premises
-    'slippery-slope',         // library: poison i1 d4 (card-played clock)
+    'reading-of-the-charges', // library: MARK i1 d2 + 2 PREMISES (canon re-slug)
+    'unction-of-boils',       // library: poison i1 d4 (card-played clock)
     'brace-for-impact',       // library: Guard 8
 ] as const;
 
@@ -486,7 +489,7 @@ function runOrder(threat: CombatThreatPhase, order: string[]): OrderResult {
 
 describe('WS5.3 — sequencing grammar is real (the falsifiable test)', () => {
     beforeEach(() => {
-        applySandboxSet('sequencing-microset');
+        applyFixtureCards(SEQ_CARDS);
         mockSequentialRng(0.5);
     });
 
@@ -515,15 +518,15 @@ describe('WS5.3 — sequencing grammar is real (the falsifiable test)', () => {
         // Pure witness pairs on the no-noise threat: same card SET, only the
         // microset card's position flips — the condition is the delta.
         const opener = runOrder(THREATS['stonewall']!,
-            ['captatio-benevolentiae', 'mounting-case', 'slippery-slope']);
+            ['captatio-benevolentiae', 'reading-of-the-charges', 'unction-of-boils']);
         const latecomer = runOrder(THREATS['stonewall']!,
-            ['mounting-case', 'slippery-slope', 'captatio-benevolentiae']);
+            ['reading-of-the-charges', 'unction-of-boils', 'captatio-benevolentiae']);
         expect(opener.signature, 'OPENING first vs last must differ').not.toBe(latecomer.signature);
 
         const finale = runOrder(THREATS['stonewall']!,
-            ['mounting-case', 'slippery-slope', 'dying-echo']);
+            ['reading-of-the-charges', 'unction-of-boils', 'dying-echo']);
         const prelude = runOrder(THREATS['stonewall']!,
-            ['dying-echo', 'mounting-case', 'slippery-slope']);
+            ['dying-echo', 'reading-of-the-charges', 'unction-of-boils']);
         expect(finale.signature, 'finale last vs first must differ').not.toBe(prelude.signature);
     });
 
@@ -537,11 +540,10 @@ describe('WS5.3 — sequencing grammar is real (the falsifiable test)', () => {
         const distinctWinners = new Set(
             Object.values(winners).map(w => w.order.join(' > ')),
         );
-        // Observed under the pinned RNG/fixture (2026-07-11, for the record —
-        // the assertion below is what is load-bearing, not these literals):
-        //   batterer:  slippery-slope > mounting-case > dying-echo @ 449
-        //   stonewall: slippery-slope > mounting-case > dying-echo @ 466
-        //   purger:    mounting-case > slippery-slope > dying-echo @ 266
+        // Observed under the pinned RNG/fixture (2026-07-11 shape, re-slugged
+        // onto the canon fillers 2026-08-08 — the assertion below is what is
+        // load-bearing, never these literals): the poison-lead order wins the
+        // batterer and the stonewall, and the purger flips the lead.
         // The purger flips the lead because enemyCleanse strips the
         // FIRST-inserted debuff entry: leading with the MARK sacrifices the
         // cheap amplifier to the scour and shields the poison stack.

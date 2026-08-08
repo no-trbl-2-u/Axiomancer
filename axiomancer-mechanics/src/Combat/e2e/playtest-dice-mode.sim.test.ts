@@ -28,7 +28,7 @@ import { isUpgradeableDiceEnabled, setUpgradeableDice } from '../combat.upgradea
 const TINY = {
     stages: ['early'] as const,
     policies: ['greedy'] as const,
-    decks: [{ kind: 'preset', presetId: 'erosion' } as const],
+    decks: [{ kind: 'preset', presetId: 'threadbare' } as const],
     enemySlugs: ['grave-larva'],
     runsPerCell: 1,
     seed: 1,
@@ -63,13 +63,19 @@ describe('playtest report declares its dice model', () => {
 
 const PKG_ROOT = resolve(__dirname, '..', '..', '..');
 const CLI = resolve(PKG_ROOT, 'src', 'CLI', 'combat-playtest.cli.ts');
-const BASE_ARGS = ['--stage=early', '--policy=greedy', '--enemy=grave-larva', '--deck=preset:erosion', '--runs=1', '--json'];
+const BASE_ARGS = ['--stage=early', '--policy=greedy', '--enemy=grave-larva', '--deck=preset:threadbare', '--runs=1', '--json'];
+
+// Spawn ts-node through NODE, not through `npx`: on Windows `npx` is a .cmd
+// shim that execFileSync cannot exec without a shell, so the child dies on a
+// signal (status null) and every CLI assertion reads as a failure regardless
+// of what the CLI actually did. Resolving the bin keeps the harness portable.
+const TS_NODE_BIN = require.resolve('ts-node/dist/bin.js');
 
 function runCli(args: readonly string[]): { stdout: string; status: number; stderr: string } {
     try {
         const stdout = execFileSync(
-            'npx',
-            ['ts-node', CLI, ...args],
+            process.execPath,
+            [TS_NODE_BIN, CLI, ...args],
             { cwd: PKG_ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
         );
         return { stdout, status: 0, stderr: '' };

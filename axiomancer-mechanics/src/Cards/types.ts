@@ -260,6 +260,18 @@ export type CardSpecialMechanic =
     /** CONJURE — create a one-use Thoughtform card into hand (removed from the
      *  combat after it is played or the combat ends). */
     | { kind: 'conjure_card'; cardId: string }
+    /** IMMOLATE (profane-canon rework) — burn the `count` LOWEST-RANK other
+     *  cards in hand as a printed COST: they leave the combat entirely (never
+     *  reshuffle back), then `rider` fires. With nothing else in hand the play
+     *  fizzles the rider (the pyre must be fed). Burning an enemy-injected
+     *  CURSE this way is pure profit — the exploit/madness verb. Combat-engine
+     *  owned; the legacy card engine no-ops it. */
+    | { kind: 'immolate'; count: number; rider: CardRider }
+    /** PURGE (profane-canon rework) — playing this card exiles it from the
+     *  combat entirely (hand and deck cycle; mirrors the CONJURE one-use law).
+     *  Reserved for CURSE cards: the PAID line buys the deck clean at the cost
+     *  of a die and a tempo beat. Combat-engine owned. */
+    | { kind: 'purge_self' }
     /** RIDER — an UNCONDITIONAL rider fired by the PAID line (the generic
      *  draw/heal/cleanse/guard verb carrier; same executor as condition riders). */
     | { kind: 'rider'; rider: CardRider };
@@ -394,7 +406,11 @@ export type SynergyStatePredicate =
     | { kind: 'opening'; maxPriorSpells: number }
     | { kind: 'finale'; cardsLeftAtMost: number }
     | { kind: 'recoil-paid-this-turn' }
-    | { kind: 'enemy-drew-blood' };
+    | { kind: 'enemy-drew-blood' }
+    /** REQUIEM N (profane-canon rework) — true when the player's discard pile
+     *  holds ≥ `n` cards at play time (the delirium/threshold read: the dead
+     *  remember). Prices at the threshold ×0.5 condition discount. */
+    | { kind: 'requiem'; n: number };
 
 /**
  * Phase 66 — Tier 2 synergy clause. Optional payload on `Card` that

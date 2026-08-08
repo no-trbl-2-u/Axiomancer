@@ -1303,19 +1303,18 @@ function gainSouls(
     events: CombatEvent[],
 ): CombatEncounterState {
     if (amount <= 0) return state;
-    const souls = (state.souls ?? 0) + amount;
-    let enemy = state.enemy;
-    let directDamage = state.directDamageDealt;
+    let souls = (state.souls ?? 0) + amount;
     events.push({ kind: 'soul-gained', amount, total: souls, reason });
-    if (zoneHas(state, 'bone-orchard') && !isDefeated(enemy)) {
-        // Damage-instance clock advances on the drip; its washouts yield no
-        // Soul HERE (granting inside gainSouls would recurse the drip).
-        const hit = applyEnemyDamage(enemy, amount, state.round, events);
-        enemy = hit.enemy;
-        directDamage += amount + hit.clockDamage;
-        events.push({ kind: 'damage-dealt', cardId: 'bone-orchard', target: 'enemy', amount });
+    // `choirbone-reliquary` (E, profane canon): the box counts every ending —
+    // each affliction that expires or is consumed yields +1 SOUL and SWAY 1
+    // on top of the base law. Gated on reason so its OWN grants never recurse.
+    let next: CombatEncounterState = { ...state, souls };
+    if (reason !== 'granted' && zoneHas(state, 'choirbone-reliquary')) {
+        souls += amount;
+        events.push({ kind: 'soul-gained', amount, total: souls, reason: 'granted' });
+        next = gainSway({ ...next, souls }, amount, events);
     }
-    return { ...state, souls, enemy, directDamageDealt: directDamage };
+    return next;
 }
 
 /** SWAY gain (spec 32 v3 §9, reworked by plan/tuning/
@@ -1572,6 +1571,29 @@ function applyRiderToState(
             const tierGuard = tiersCrossed * AKRASIA_DEBT_TIER_GUARD;
             guard += tierGuard;
             events.push({ kind: 'debt-tier-payoff', tiersCrossed, guard: tierGuard, total: akrasiaDebt });
+        }
+        // Profane canon — the debt-payoff pair fires on FREE-line recoil too
+        // (the ledger forwards every drop, whoever signed it).
+        if (zoneHas(next, 'the-red-ledger') && !isDefeated(enemy)) {
+            const bleedDef = lookupEffectDef('debuff_bleed');
+            if (bleedDef) {
+                const billed = applyEffect(enemy.effects, bleedDef, next.round, {
+                    intensityDelta: 1, durationMode: 'additive', durationDelta: 2,
+                    sourceId: 'the-red-ledger',
+                });
+                enemy = { ...enemy, effects: billed.activeEffects };
+                events.push({
+                    kind: 'effect-landed', cardId: 'the-red-ledger', effectId: 'debuff_bleed',
+                    target: 'enemy', effectKind: 'dot',
+                    intensity: billed.result.activeEffect?.intensity ?? 1, effect: bleedDef,
+                });
+            }
+        }
+        if (zoneHas(next, 'joint-and-several') && !isDefeated(enemy)) {
+            const liable = Math.min(r.recoil, enemy.health);
+            enemy = applyDamage(enemy, liable);
+            directDamage += liable;
+            events.push({ kind: 'damage-dealt', cardId: 'joint-and-several', target: 'enemy', amount: liable });
         }
     }
     if (r.cleanse) {
@@ -2202,6 +2224,12 @@ function playBottomAction(
     let pipsSpentThisPlay = 0;
     let pipGuardExtra = 0;
     const reprisedFreeRiders: CardRider[] = [];
+    // IMMOLATE (profane-canon rework): card ids burned from hand this play —
+    // they leave the combat entirely (hand now, deck cycle at assembly).
+    const immolatedIds: string[] = [];
+    // PURGE (profane-canon rework): this play exiles ITSELF from the combat
+    // (the curse-card self-removal law; honored at the discard-routing site).
+    let purgeSelf = false;
     // FORGE (spec 32 v3 §5): a freshly forged floating die joins the TRAY NOW —
     // collected here and merged into `dice` after the powering-die spend.
     const forgedFloating: CombatManaDie[] = [];
@@ -2209,11 +2237,18 @@ function playBottomAction(
     // play — removed from the tray after the powering-die spend.
     const transmutedXIds: string[] = [];
 
-    // Local SOUL gain (bone-orchard drips 1 HP per Soul gained — soul-gated).
+    // Local SOUL gain. `choirbone-reliquary` (E, profane canon): every
+    // affliction that expires or is consumed mid-play also yields +1 SOUL and
+    // SWAY 1 (gated on reason so its own grants never recurse).
     const gainSoulsLocal = (n: number, reason: 'expiry' | 'consumed' | 'granted'): void => {
         if (n <= 0) return;
         souls += n;
         events.push({ kind: 'soul-gained', amount: n, total: souls, reason });
+        if (reason !== 'granted' && zoneHas(state, 'choirbone-reliquary')) {
+            souls += n;
+            events.push({ kind: 'soul-gained', amount: n, total: souls, reason: 'granted' });
+            swayGained += n;
+        }
         if (zoneHas(state, 'bone-orchard')) {
             // Damage-instance clock advances on the drip; its washouts yield
             // no Soul HERE (a self-grant would recurse this drip).
@@ -2278,6 +2313,41 @@ function playBottomAction(
             case 'rider': {
                 // The generic unconditional PAID verb carrier (draw/heal/…).
                 firedRiders.push(mech.rider);
+                break;
+            }
+            case 'immolate': {
+                // IMMOLATE (profane-canon rework) — burn the `count` lowest-
+                // rank OTHER cards in hand as a printed cost; each burned card
+                // leaves the combat entirely (never reshuffles back). The
+                // rider fires only if at least one card burned — the pyre must
+                // be fed. CONJURED tokens burn like anything else (they were
+                // leaving anyway); a curse is usually the cheapest fuel.
+                const rankOf = (id: string): number => lookupCard(id)?.rank ?? 0;
+                const burned: string[] = [];
+                for (let i = 0; i < mech.count; i++) {
+                    const candidates = hand.filter(h => h.uid !== uid);
+                    if (candidates.length === 0) break;
+                    const lowest = candidates.reduce((best, h) =>
+                        (rankOf(h.cardId) < rankOf(best.cardId) ? h : best), candidates[0]);
+                    hand = hand.filter(h => h.uid !== lowest.uid);
+                    conjuredUids = conjuredUids.filter(u => u !== lowest.uid);
+                    immolatedIds.push(lowest.cardId);
+                    burned.push(lowest.cardId);
+                }
+                if (burned.length > 0) {
+                    events.push({ kind: 'immolated', cardId: card.id, burned });
+                    firedRiders.push(mech.rider);
+                } else {
+                    events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'nothing in hand to burn' });
+                }
+                break;
+            }
+            case 'purge_self': {
+                // PURGE (profane-canon rework) — the played card exiles itself
+                // from the combat (curse self-removal). Routed at the discard
+                // site below, mirroring the CONJURE one-use law.
+                purgeSelf = true;
+                events.push({ kind: 'purged', cardId: card.id });
                 break;
             }
             case 'recoil': {
@@ -2643,6 +2713,22 @@ function playBottomAction(
                 if (returned.length > 0) {
                     events.push({ kind: 'reprised', cardId: card.id, returned });
                     stuckDrip();
+                    // `the-sextons-count` (E, profane canon): he rings once
+                    // for every body raised — a RECALL lands DOOM 1 on the foe.
+                    if (zoneHas(state, 'the-sextons-count')) {
+                        const doomDef = lookupEffectDef('debuff_creeping_doom');
+                        if (doomDef) {
+                            const tolled = applyEffect(enemy.effects, doomDef, state.round, {
+                                intensityDelta: 1, sourceId: 'the-sextons-count',
+                            });
+                            enemy = { ...enemy, effects: tolled.activeEffects };
+                            events.push({
+                                kind: 'effect-landed', cardId: 'the-sextons-count',
+                                effectId: 'debuff_creeping_doom', target: 'enemy', effectKind: 'dot',
+                                intensity: tolled.result.activeEffect?.intensity ?? 1, effect: doomDef,
+                            });
+                        }
+                    }
                 } else {
                     events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'the discard pile is empty' });
                 }
@@ -2678,6 +2764,22 @@ function playBottomAction(
                     }
                     events.push({ kind: 'echoed', cardId: lastCard.id });
                     stuckDrip();
+                    // `the-sextons-count` (E, profane canon): a REPLAY is a
+                    // body raised — the bell tolls DOOM 1 onto the foe.
+                    if (zoneHas(state, 'the-sextons-count')) {
+                        const doomDef = lookupEffectDef('debuff_creeping_doom');
+                        if (doomDef) {
+                            const tolled = applyEffect(enemy.effects, doomDef, state.round, {
+                                intensityDelta: 1, sourceId: 'the-sextons-count',
+                            });
+                            enemy = { ...enemy, effects: tolled.activeEffects };
+                            events.push({
+                                kind: 'effect-landed', cardId: 'the-sextons-count',
+                                effectId: 'debuff_creeping_doom', target: 'enemy', effectKind: 'dot',
+                                intensity: tolled.result.activeEffect?.intensity ?? 1, effect: doomDef,
+                            });
+                        }
+                    }
                 } else {
                     events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: 'no prior spell to replay' });
                 }
@@ -3068,6 +3170,16 @@ function playBottomAction(
                 events.push({ kind: 'hand-drawn', cards: draw.drawn });
             }
         }
+        if (r.millCards) {
+            // MILL — the cards go straight to the discard, never to hand (the
+            // grave's own draw). The profane canon prints MILL on PAID riders
+            // (first-spadeful, spadework), so the in-play applier has to
+            // deliver it too — printed == applied.
+            const mill = drawCombatCards(drawPile, discard, state.deck, r.millCards, _rng);
+            drawPile = mill.drawPile;
+            discard = [...mill.discard, ...mill.drawn];
+            events.push({ kind: 'cards-milled', cards: mill.drawn });
+        }
         if (r.premises) premisesGained += r.premises;
         if (r.sway) swayGained += r.sway;
         if (r.souls) gainSoulsLocal(r.souls, 'granted');
@@ -3206,10 +3318,52 @@ function playBottomAction(
             tierGuardBonus = tiersCrossed * AKRASIA_DEBT_TIER_GUARD;
             events.push({ kind: 'debt-tier-payoff', tiersCrossed, guard: tierGuardBonus, total: akrasiaDebt });
         }
+        // `the-red-ledger` (E, profane canon): every RECOIL paid this play is
+        // billed again at the enemy's vein — BLEED 1 (2 turns), once per play.
+        if (zoneHas(state, 'the-red-ledger') && !isDefeated(enemy)) {
+            const bleedDef = lookupEffectDef('debuff_bleed');
+            if (bleedDef) {
+                const billed = applyEffect(enemy.effects, bleedDef, state.round, {
+                    intensityDelta: 1, durationMode: 'additive', durationDelta: 2,
+                    sourceId: 'the-red-ledger',
+                });
+                enemy = { ...enemy, effects: billed.activeEffects };
+                events.push({
+                    kind: 'effect-landed', cardId: 'the-red-ledger', effectId: 'debuff_bleed',
+                    target: 'enemy', effectKind: 'dot',
+                    intensity: billed.result.activeEffect?.intensity ?? 1, effect: bleedDef,
+                });
+            }
+        }
+        // `joint-and-several` (D, profane canon): liability is shared — the
+        // enemy loses HP equal to every RECOIL paid this play (engine-drip
+        // channel; the strike stays dead).
+        if (zoneHas(state, 'joint-and-several') && !isDefeated(enemy)) {
+            const liable = Math.min(recoilTaken, enemy.health);
+            const hpBefore = enemy.health;
+            enemy = applyDamage(enemy, liable);
+            directDamage += liable;
+            attribution = recordAttribution(attribution, 'joint-and-several', 'Joint and Several', null, liable, hpBefore);
+            events.push({ kind: 'damage-dealt', cardId: 'joint-and-several', target: 'enemy', amount: liable });
+        }
+    }
+
+    // IMMOLATE / PURGE (profane-canon rework) — burned cards leave the deck
+    // cycle: one instance per burned id is struck from the persistent deck
+    // list so no reshuffle resurrects them this combat.
+    let deckAfterBurn = state.deck;
+    if (immolatedIds.length > 0 || purgeSelf) {
+        deckAfterBurn = [...state.deck];
+        const strike = purgeSelf ? [...immolatedIds, sourceCard.id] : immolatedIds;
+        for (const id of strike) {
+            const at = deckAfterBurn.indexOf(id);
+            if (at >= 0) deckAfterBurn.splice(at, 1);
+        }
     }
 
     let next: CombatEncounterState = {
         ...state, player, enemy, dice, reserve, resonance, conviction,
+        deck: deckAfterBurn,
         revealedStances, hand, drawPile, discard, attribution,
         chainEffectIds: [...chainBefore, ...newChainIds],
         guard: (state.guard ?? 0) + guardGain + tierGuardBonus,
@@ -3249,8 +3403,10 @@ function playBottomAction(
         recoilPaidThisTurn: (state.recoilPaidThisTurn ?? 0) + recoilTaken,
     };
     // Discard the played card — a CONJURED Thoughtform is one-use: it leaves
-    // the combat entirely instead of entering the discard pile.
-    if (conjuredUids.includes(uid)) {
+    // the combat entirely instead of entering the discard pile. A PURGED card
+    // (profane-canon rework: the curse buying itself out) leaves the same way
+    // — its deck-cycle instance was already struck above.
+    if (purgeSelf || conjuredUids.includes(uid)) {
         next = {
             ...next,
             hand: next.hand.filter(h => h.uid !== uid),
@@ -3525,6 +3681,9 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     // Phase 33d (GLYPHS pilot) — hoisted the same way for the same reason:
     // the loop's glyphShatter hook mutates this local.
     let glyphs = state.glyphs ?? [];
+    // Profane-canon rework — curse cards this phase's threat shuffles into the
+    // player's combat deck cycle (the deck-contamination vector).
+    const injectedCurses: string[] = [];
     // GUARD (one-shot, per-phase) absorbs first; BARRIER (persistent, stacking)
     // soaks the remainder; RIPOSTE parries and — spec 32 v3 — counters ONLY when
     // the attack was FULLY blocked (reflect class). All no-op when unset.
@@ -3563,6 +3722,13 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         enemy = hit.enemy;
         directDamage += drip + hit.clockDamage;
         events.push({ kind: 'backfired', amount: drip, rungs: rungsForBackfire });
+    }
+    // `the-assize-bell` (E, profane canon): one bronze syllable per objection
+    // sustained — every rung this phase's telegraph lost becomes 1 PREMISE.
+    // Raw tally add (the CONCEDE check runs on the next `gainPremises`).
+    if (zoneHas(state, 'the-assize-bell') && rungsForBackfire > 0) {
+        premises += rungsForBackfire;
+        events.push({ kind: 'premise-gained', amount: rungsForBackfire, total: premises });
     }
 
     // ARMOR (defenseModifier) — flat per-hit reduction of the incoming telegraph,
@@ -3630,6 +3796,23 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                             events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'self' });
                         }
                     }
+                    // `caltrops-under-the-snow` (D, profane canon): whatever
+                    // reaches you walked the field to do it — every damaging
+                    // hit the enemy lands seeds BLEED 2 on the striker.
+                    if (zoneHas(state, 'caltrops-under-the-snow')) {
+                        const bleedDef = lookupEffectDef('debuff_bleed');
+                        if (bleedDef) {
+                            const seeded = applyEffect(enemy.effects, bleedDef, state.round, {
+                                intensityDelta: 2, sourceId: 'caltrops-under-the-snow',
+                            });
+                            enemy = { ...enemy, effects: seeded.activeEffects };
+                            events.push({
+                                kind: 'effect-landed', cardId: 'caltrops-under-the-snow',
+                                effectId: 'debuff_bleed', target: 'enemy', effectKind: 'dot',
+                                intensity: seeded.result.activeEffect?.intensity ?? 2, effect: bleedDef,
+                            });
+                        }
+                    }
                 }
                 else {
                     attacksFullyBlocked += 1;
@@ -3661,7 +3844,16 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                 }
             }
             if (eff.enemyHeal && eff.enemyHeal > 0 && !doubtId) {
-                const healAmt = Math.round(eff.enemyHeal * getHealingReceivedMult(enemy));
+                // `edict-of-the-open-wound` (D, profane canon): the salve is
+                // confiscated — the enemy's healing fails while the writ stands.
+                const edicted = zoneHas(state, 'edict-of-the-open-wound');
+                const healAmt = edicted ? 0 : Math.round(eff.enemyHeal * getHealingReceivedMult(enemy));
+                if (edicted) {
+                    events.push({
+                        kind: 'effect-fizzled', cardId: 'edict-of-the-open-wound', effectId: '',
+                        message: 'the wound stays open — its healing fails',
+                    });
+                }
                 if (healAmt > 0) {
                     enemy = decayDotsOnHeal(heal(enemy, healAmt)).combatant;
                 }
@@ -3710,6 +3902,14 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                 }
                 glyphs = glyphs.filter((_, i) => i !== lowestIdx);
                 events.push({ kind: 'glyph-shattered', phaseIndex: phase.index });
+            }
+            // Profane-canon rework — CURSE INJECTION: the curse joins the
+            // player's combat deck cycle (collected here; shuffled into the
+            // draw pile at assembly below). Persistent collection untouched;
+            // an unknown id is a silent no-op (the resolve-filter law).
+            if (eff.curseCardId && !doubtId && getCard(eff.curseCardId)) {
+                injectedCurses.push(eff.curseCardId);
+                events.push({ kind: 'curse-injected', phaseIndex: phase.index, cardId: eff.curseCardId });
             }
             penaltiesApplied.push(eff);
         }
@@ -3828,6 +4028,21 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         events.push({ kind: 'rung-regrown', rungs: BOSS_RUNG_REGROWTH, total: nextBossRungGrowth });
     }
 
+    // Profane-canon rework — CURSE INJECTION lands in the deck cycle: each
+    // injected curse joins the persistent combat deck list AND the draw pile
+    // at an rng-chosen depth (seeded-deterministic; never the persistent
+    // collection — the contamination dies with the encounter).
+    let contaminatedDeck = state.deck;
+    let contaminatedDrawPile = state.drawPile;
+    if (injectedCurses.length > 0) {
+        contaminatedDeck = [...state.deck, ...injectedCurses];
+        contaminatedDrawPile = [...state.drawPile];
+        for (const curseId of injectedCurses) {
+            const at = Math.floor(rng() * (contaminatedDrawPile.length + 1));
+            contaminatedDrawPile.splice(at, 0, curseId);
+        }
+    }
+
     let next: CombatEncounterState = {
         ...state,
         player,
@@ -3837,6 +4052,8 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         swayMilestoneFalteringFired,
         premises,
         glyphs,
+        deck: contaminatedDeck,
+        drawPile: contaminatedDrawPile,
         directDamageDealt: directDamage,
         guard: 0,                       // brace is spent on this phase's threat; resets each phase
         barrier,                        // persistent soak — carries the unspent remainder across phases
@@ -3942,29 +4159,30 @@ export function processBetweenPhases(
     // 2. Process a full round of effects on the enemy — DoT ERODES real enemy HP
     //    (the status damage engine; no track, the HP loss is the win progress).
     const enemyStart = processRoundStartEffects(state.enemy, state.round);
-    // `the-tithe` (D): enemy afflictions expire 1 turn sooner — an EXTRA
-    // duration decrement before the normal end-of-round tick (faster churn →
-    // faster Souls). Spec 32 v3 T7.
-    let tithedTarget = enemyStart.target;
+    // `edict-of-the-open-wound` (D, profane canon): the enemy's wounds refuse
+    // to close — an EXTRA +1 duration on every calendar-clocked enemy debuff
+    // BEFORE the normal end-of-round decrement, so the net calendar movement
+    // is zero: DoTs no longer expire while the writ stands. No-calendar
+    // effects (DOOM, MARK) need no freezing; BLEED's per-trigger intensity
+    // decay survives untouched (decay is not calendar). Side effect kept
+    // deliberately: frozen wounds never EXPIRE, so the expiry Soul law goes
+    // quiet under the edict — the parish takes its fee.
+    let edictTarget = enemyStart.target;
     const tithedExpired: ActiveEffect[] = [];
-    if (zoneHas(state, 'the-tithe')) {
-        const remaining: ActiveEffect[] = [];
-        for (const ae of tithedTarget.effects) {
-            const def = lookupEffectDef(ae.effectId);
-            // WS3: no-calendar effects (`calendarExpiry === false`) have no
-            // countdown for the tithe to hasten — same skip as tickAllEffects.
-            if (ae.remainingDuration === -1 || def?.type !== 'debuff'
-                || def.payload.dotModifiers?.calendarExpiry === false) {
-                remaining.push(ae);
-                continue;
-            }
-            const ticked = { ...ae, remainingDuration: ae.remainingDuration - 1 };
-            if (ticked.remainingDuration <= 0) tithedExpired.push(ticked);
-            else remaining.push(ticked);
-        }
-        tithedTarget = { ...tithedTarget, effects: remaining };
+    if (zoneHas(state, 'edict-of-the-open-wound')) {
+        edictTarget = {
+            ...edictTarget,
+            effects: edictTarget.effects.map(ae => {
+                const def = lookupEffectDef(ae.effectId);
+                if (ae.remainingDuration === -1 || def?.type !== 'debuff'
+                    || def.payload.dotModifiers?.calendarExpiry === false) {
+                    return ae;
+                }
+                return { ...ae, remainingDuration: ae.remainingDuration + 1 };
+            }),
+        };
     }
-    const enemyEnd = processRoundEndEffects(tithedTarget, state.round);
+    const enemyEnd = processRoundEndEffects(edictTarget, state.round);
     let enemy = enemyEnd.target as Enemy;
     const enemyDotTicks = clampDotTickBreakdown(
         projectedEnemyDotTicks,
@@ -3990,12 +4208,49 @@ export function processBetweenPhases(
     // EROSION deck. It now rides the event ticks accumulated across the turn
     // (`enemyDotDamageThisRound`, folded in `withLog`) PLUS any round-clock
     // ticks this round, so the drip equals the round's true DoT total.
-    const roundDotTotal = (state.enemyDotDamageThisRound ?? 0)
-        + enemyDotTicks.reduce((sum, t) => sum + t.amount, 0);
-    if (zoneHas(state, 'suppurating-curse') && roundDotTotal > 0 && !isDefeated(enemy)) {
-        const suppurationDamage = Math.min(roundDotTotal, enemy.health);
-        enemy = applyDamage(enemy, suppurationDamage);
-        events.push({ kind: 'dot-tick', effectId: 'suppurating-curse', label: 'Suppuration', amount: suppurationDamage, target: 'enemy' });
+    // ── The profane canon's round-end persistent battery (enchant/disenchant
+    //    hooks; each is one sentence of engine text, gated by its zone card).
+    // `the-untended-garden` (E): end-of-round FESTER 1 — every enemy DoT
+    // gains +1 intensity. The roots go one ring deeper each night.
+    if (zoneHas(state, 'the-untended-garden') && !isDefeated(enemy)) {
+        const affected: string[] = [];
+        enemy = {
+            ...enemy,
+            effects: enemy.effects.map(ae => {
+                const def = lookupEffectDef(ae.effectId);
+                if (def?.type === 'debuff' && def.payload.damageOverTime) {
+                    affected.push(ae.effectId);
+                    return { ...ae, intensity: Math.min(MAX_EFFECT_INTENSITY, ae.intensity + 1) };
+                }
+                return ae;
+            }),
+        };
+        if (affected.length > 0) events.push({ kind: 'dots-boosted', intensity: 1, affected });
+    }
+    // `writ-of-attainder` (D): the sentence compounds — a fresh DOOM 1 lands
+    // at each round's end onto a stack that already grows as the foe acts.
+    if (zoneHas(state, 'writ-of-attainder') && !isDefeated(enemy)) {
+        const doomDef = lookupEffectDef('debuff_creeping_doom');
+        if (doomDef) {
+            const applied = applyEffect(enemy.effects, doomDef, state.round, {
+                intensityDelta: 1, sourceId: 'writ-of-attainder',
+            });
+            enemy = { ...enemy, effects: applied.activeEffects };
+            events.push({
+                kind: 'effect-landed', cardId: 'writ-of-attainder', effectId: 'debuff_creeping_doom',
+                target: 'enemy', effectKind: 'dot',
+                intensity: applied.result.activeEffect?.intensity ?? 1, effect: doomDef,
+            });
+        }
+    }
+    // `the-congregation-below` (D): at the close of each round the dead read
+    // the minutes into the record — 1 HP per 3 cards in the discard pile.
+    if (zoneHas(state, 'the-congregation-below') && !isDefeated(enemy)) {
+        const testimony = Math.min(Math.floor(state.discard.length / 3), enemy.health);
+        if (testimony > 0) {
+            enemy = applyDamage(enemy, testimony);
+            events.push({ kind: 'dot-tick', effectId: 'the-congregation-below', label: 'The Congregation Below', amount: testimony, target: 'enemy' });
+        }
     }
 
     // VULNERABLE DoT surcharge: the natural tick above lands at ×1 (already
@@ -4199,8 +4454,23 @@ export function processBetweenPhases(
     }
 
     // SOULS from expiry (base law: 1 per expired enemy affliction instance).
+    // `choirbone-reliquary`'s per-ending bonus rides inside `gainSouls`.
     if (expiredAfflictions > 0) {
         omenState = gainSouls(omenState, expiredAfflictions, 'expiry', events);
+    }
+    // `every-stone-an-oath` (E, profane canon): a bloodless round lays a new
+    // course — +3 persistent GUARD when the enemy dealt no damage this round.
+    if (zoneHas(state, 'every-stone-an-oath') && (state.enemyDamageThisTurn ?? 0) === 0
+        && !isDefeated(omenState.player) && !isDefeated(omenState.enemy)) {
+        // Silent like the between-phases glyph tick — the growing barrier
+        // total is its own visible surface on the combat HUD.
+        omenState = { ...omenState, barrier: (omenState.barrier ?? 0) + 3 };
+    }
+    // `the-long-amen` (D, profane canon): the held word accrues — the enemy
+    // gains SWAY equal to the Souls you hold, every round's end. Reads the
+    // bank, never spends it (the deliberate hold-or-spend tension).
+    if (zoneHas(state, 'the-long-amen') && (omenState.souls ?? 0) > 0 && !isDefeated(omenState.enemy)) {
+        omenState = gainSway(omenState, omenState.souls ?? 0, events);
     }
 
     // SWAY decays at the turn boundary (ratified A2) unless `irresistible-grace`

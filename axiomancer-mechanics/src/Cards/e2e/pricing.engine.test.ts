@@ -44,16 +44,14 @@ const RANK_BANDS: Record<'common' | 'uncommon' | 'rare', [number, number]> = {
     rare: [7, 19],
 };
 
-const spells = cardLibrary.filter(c => c.cardType === 'spell');
+// Profane canon (2026-08-08): CURSE cards are deliberately worthless
+// enemy-injected junk — unpriced by design, exempt from the band lint.
+const spells = cardLibrary.filter(c => c.cardType === 'spell' && c.theme !== 'curse');
 
 describe('pricing lint — every spell lands in its rank band', () => {
-    it('covers all 65 spells (the enchant/disenchant 21 are engine text; 50→55 via the D8 valve ledger, 55→64 via the 2026-07-19 promotions, 64→65 via phase 39)', () => {
-        // Phase D8 ten-in/ten-out: 9 valve spells + 1 valve enchantment in,
-        // 4 spells + 2 enchantments + 4 disenchants out (the reward-only ten).
-        // 2026-07-19: nine promoted swap-pool spells in (no passives).
-        // Phase 39 (2026-08-08): seven theme-symmetry restorations in — six
-        // enchant/disenchant + one spell (heart-of-the-matter).
-        expect(spells.length).toBe(65);
+    it('covers all 41 priced spells (the profane canon: 45 spells minus the 4 unpriced curses; the 12 enchant/disenchant are engine text)', () => {
+        expect(spells.length).toBe(41);
+        expect(cardLibrary.filter(c => c.cardType === 'spell' && c.theme === 'curse').length).toBe(4);
     });
 
     it.each(spells.map(s => [s.id, s] as const))('%s scores within its band', (_id, card) => {
@@ -173,47 +171,37 @@ describe('pricing table — pinned anchors from the spec §4 arithmetic (WS3.5 c
         expect(CONDITION_DISCOUNTS.fallen).toBe(0.5);
     });
 
-    it('the starter pair prices at its authored comments (regression anchors)', () => {
-        const slipperySlope = spells.find(s => s.id === 'slippery-slope')!;
-        // phase 36b + spec 33 D4: poison i1 d4 is a RAMP (big ticks at rounds
-        // 3-4) so the tempo horizon discounts it hard, and D4 re-derives the
-        // card-played cadence to 1.83 — printed lifetime 18.3 → tempo-weighted
-        // 11.81, ÷3 = 3.94 + FREE MARK seed i1 d1 (0.75) = 4.69 (was 5.05 at the
-        // 2-play cadence). Still comfortably mid-band; the assertion tracks the
-        // live function, so this stays true through the re-derivation.
-        expect(scoreCard(slipperySlope))
-            .toBeCloseTo(dotTempoWeightedHp('debuff_poison', 1, 4) / 3 + 0.75, 2);
-        const brace = spells.find(s => s.id === 'brace-for-impact')!;
-        // Guard 8/4 + FREE persistent GUARD 2/3 = 2.67 (phase 30: BARRIER
-        // merged into GUARD — bulwark's FREE line lays a brick, not a chip)
-        expect(scoreCard(brace)).toBeCloseTo(2 + 2 / 3, 2);
+    it('the starter pair prices at its authored comments (profane-canon regression anchors)', () => {
+        const poultice = spells.find(s => s.id === 'spoiled-poultice')!;
+        // Deliberately weak: poison i1 d2 tempo-weighted ÷3 + FREE MARK i1 d1
+        // (0.75) — the 2-turn poison dies before it ramps; the clunk is the
+        // lesson. The assertion tracks the live function.
+        expect(scoreCard(poultice))
+            .toBeCloseTo(dotTempoWeightedHp('debuff_poison', 1, 2) / 3 + 0.75, 2);
+        const chilblain = spells.find(s => s.id === 'chilblain-watch')!;
+        // GUARD 6/4 + THORNS i1 d2 (1.5) + FREE GUARD 4/4 (1.0) = 4.0.
+        expect(scoreCard(chilblain)).toBeCloseTo(6 / 4 + statusPoints('buff_thorns', 1, 2) + 4 / 4, 2);
     });
 
-    it('phase 36a — SWAY reprices at 0.9/stack (soft-word regression anchor)', () => {
-        // soft-word: SWAY 3 (3×0.9) + FREE RAPPORT i1 d2 seed (0.75×1×2). The
-        // SWAY currency carries the CAPITULATE-parity reprice; every other term
-        // is unchanged. (The color-match dieBonus rider was removed — a matching
-        // die is now the only way to pay, so the rider was never conditional.)
-        const softWord = spells.find(s => s.id === 'soft-word')!;
-        const expected =
-            3 * VERB_POINTS.swayPerStack
-            + statusPoints('debuff_rapport', 1, 2);
-        expect(scoreCard(softWord)).toBeCloseTo(expected, 2); // 4.20
+    it('SWAY prices at 0.9/stack (thin-hymn regression anchor)', () => {
+        // thin-hymn: SWAY 3 (2.7) + FREE SWAY 1 (0.9) — the CAPITULATE
+        // currency at its whisper-volume starter ratio.
+        const hymn = spells.find(s => s.id === 'thin-hymn')!;
+        expect(scoreCard(hymn)).toBeCloseTo(4 * VERB_POINTS.swayPerStack, 2); // 3.60
     });
 
-    it('phase 36a — CONCEDE alt-win prices its +3 capstone (the-closing-word anchor)', () => {
-        // PERORATION at 6 rider (ruptureMarks 3 · draw 2 · +2 Conviction = 8)
-        // + the flat concede capstone (concedeAt set) + FREE 1 Premise. Before
-        // 36a the concedeAt win priced at 0, floating the card near the Axiom
-        // floor while it literally ends the game.
-        const closingWord = spells.find(s => s.id === 'the-closing-word')!;
+    it('CONCEDE alt-win prices its +3 capstone (the-black-cap anchor)', () => {
+        // DOOM i2 (tempo-weighted ÷3) + PERORATION-at-6 rider (ruptureMarks 2
+        // · draw 1) + the flat concede capstone + FREE DOOM i1 + 1 PREMISE.
+        const blackCap = spells.find(s => s.id === 'the-black-cap')!;
         const perorationRider =
-            3 * VERB_POINTS.ruptureMarksPerHp
-            + 2 * VERB_POINTS.draw
-            + 2 * VERB_POINTS.conviction;
+            2 * VERB_POINTS.ruptureMarksPerHp
+            + 1 * VERB_POINTS.draw;
         const expected =
-            perorationRider + VERB_POINTS.concedeCapstone
+            dotTempoWeightedHp('debuff_creeping_doom', 2, 3) / 3
+            + perorationRider + VERB_POINTS.concedeCapstone
+            + dotTempoWeightedHp('debuff_creeping_doom', 1, 3) / 3
             + 1 * VERB_POINTS.premise;
-        expect(scoreCard(closingWord)).toBeCloseTo(expected, 2); // 11.80
+        expect(scoreCard(blackCap)).toBeCloseTo(expected, 2);
     });
 });

@@ -205,6 +205,10 @@ export const VERB_POINTS = Object.freeze({
      *  unscored here, matching the "one line fires" convention every other
      *  fallback verb follows). */
     glyphChargePerCharge: 0.4,
+    /** IMMOLATE (profane-canon rework) — the per-card-burned cost credit.
+     *  Softer than a full draw (2) because the burn also thins junk/curses
+     *  out of the cycle, which is value the player keeps. */
+    immolateCredit: 1,
 });
 
 /** Conditional discounts (spec 32 v3 §4): the rider prices at a fraction. */
@@ -563,6 +567,14 @@ export function scoreMechanic(mechanic: CardSpecialMechanic): number {
         case 'replay_last': return mechanic.times * V.replayPerTime;
         case 'conjure_card': return V.conjure;
         case 'rider': return scoreRider(mechanic.rider);
+        // Profane-canon rework — IMMOLATE: the rider at full value, minus a
+        // flat 1-point credit per card burned (a real cost, but softer than a
+        // draw's full 2: the burn also thins junk/curses, which is value).
+        case 'immolate':
+            return scoreRider(mechanic.rider) - mechanic.count * V.immolateCredit;
+        // PURGE — curse self-exile: deliberately unpriced (curse cards are
+        // worthless by design and exempt from the band lint).
+        case 'purge_self': return 0;
     }
 }
 

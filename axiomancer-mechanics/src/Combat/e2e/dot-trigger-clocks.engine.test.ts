@@ -221,12 +221,13 @@ describe("engine call site — 'card-played' (player-side plays only, ratified)"
         mockSequentialRng(0.5);
         const before = stateWithEnemyEffects(
             [ae('ws3x_card_played', 2, 4)],
-            [{ uid: 't1', cardId: 'slippery-slope' }],
+            [{ uid: 't1', cardId: 'spoiled-poultice' }],
         );
         const { state: after, events } = playCombatCard(before, { uid: 't1' }, true);
 
-        // The whole enemy-HP delta IS the clock tick: slippery-slope only
-        // applies a status (the strike is dead — doctrine witness).
+        // The whole enemy-HP delta IS the clock tick: spoiled-poultice only
+        // applies a status (the strike is dead — doctrine witness), and its
+        // own fresh POISON stack is clock-capped out (WS3.3 eligibility).
         expect(before.enemy.health - after.enemy.health).toBe(6);
         const ticks = findEvents(events, 'dot-tick').filter(e => e.effectId === 'ws3x_card_played');
         expect(ticks).toEqual([{ kind: 'dot-tick', effectId: 'ws3x_card_played', label: 'ws3x_card_played', amount: 6, target: 'enemy' }]);
@@ -239,7 +240,7 @@ describe("engine call site — 'card-played' (player-side plays only, ratified)"
         mockSequentialRng(0.5);
         const before = stateWithEnemyEffects(
             [ae('ws3x_cp_decay', 1, -1)],
-            [{ uid: 't1', cardId: 'slippery-slope' }],
+            [{ uid: 't1', cardId: 'spoiled-poultice' }],
         );
         const { state: after, events } = playCombatCard(before, { uid: 't1' }, true);
 
@@ -255,9 +256,11 @@ describe("engine call site — 'card-played' (player-side plays only, ratified)"
 describe("engine call site — 'payoff' (rupture / consume_affliction / reap_all)", () => {
     it('the rupture verb ticks payoff-clocked DoTs BEFORE consuming them', () => {
         mockSequentialRng(0.5);
+        // Profane Canon (2026-08-08): the rupture carrier is now
+        // communion-of-the-worm (RUPTURE ALL + SIPHON) — same payoff verb.
         const before = stateWithEnemyEffects(
             [ae('ws3x_payoff', 1, 3)],
-            [{ uid: 't1', cardId: 'peroratio-interrupta' }],
+            [{ uid: 't1', cardId: 'communion-of-the-worm' }],
         );
         const { state: after, events } = playCombatCard(before, { uid: 't1' }, true);
 
@@ -436,7 +439,7 @@ describe('legacy parity — an untagged DoT keeps exactly the old behavior', () 
         mockSequentialRng(0.5);
         const before = stateWithEnemyEffects(
             [ae('ws3x_legacy', 2, 4)],
-            [{ uid: 't1', cardId: 'slippery-slope' }],
+            [{ uid: 't1', cardId: 'spoiled-poultice' }],
         );
         const { state: after, events } = playCombatCard(before, { uid: 't1' }, true);
         expect(before.enemy.health - after.enemy.health).toBe(0);

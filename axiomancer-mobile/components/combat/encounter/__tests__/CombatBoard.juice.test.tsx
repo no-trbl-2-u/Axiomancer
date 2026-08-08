@@ -24,7 +24,7 @@ jest.mock('@/lib/juice', () => {
     };
 });
 
-const CARDS = ['slippery-slope', 'recurring-symptom', 'brace-for-impact', 'soft-word'];
+const CARDS = ['spoiled-poultice', 'unction-of-boils', 'frostbitten-palisade', 'thin-hymn'];
 
 function freshCard() {
     const { store } = withAllProviders(<></>);

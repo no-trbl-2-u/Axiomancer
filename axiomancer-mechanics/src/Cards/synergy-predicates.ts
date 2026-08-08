@@ -64,6 +64,9 @@ export interface SynergyLedgerView {
     /** The current hand — only its LENGTH is read (the played card is still
      *  in it at eval time). Structural: `CombatHandEntry[]` satisfies this. */
     hand?: readonly unknown[];
+    /** The discard pile — only its LENGTH is read (REQUIEM, profane-canon
+     *  rework). Structural: `string[]` satisfies this. */
+    discard?: readonly unknown[];
 }
 
 /**
@@ -94,6 +97,9 @@ export function checkStatePredicate(
         case 'enemy-drew-blood':
             return (ledgers.enemyDamageThisTurn ?? 0) > 0
                 || (ledgers.enemyDamageLastRound ?? 0) > 0;
+        case 'requiem':
+            // The dead remember: ≥ n cards in the discard pile at play time.
+            return (ledgers.discard?.length ?? 0) >= predicate.n;
     }
 }
 

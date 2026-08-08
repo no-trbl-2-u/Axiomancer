@@ -49,7 +49,7 @@ import type { Card } from './types';
  */
 const cinder: Card = {
     id: 'tf-cinder',
-    theme: 'forge',
+    theme: 'grave',
     name: 'Cinder',
     philosophicalAspect: 'mind',
     description:
@@ -75,7 +75,7 @@ const cinder: Card = {
 
 const minorPremise: Card = {
     id: 'tf-minor-premise',
-    theme: 'peroration',
+    theme: 'trial',
     name: 'Minor Premise',
     philosophicalAspect: 'heart',
     description:

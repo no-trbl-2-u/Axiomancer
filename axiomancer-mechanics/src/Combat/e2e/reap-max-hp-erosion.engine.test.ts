@@ -8,9 +8,9 @@
  * needed, `health <= maxHealth` holds automatically because both fields
  * drop by the identical amount. Covers:
  *
- *   1. `reap_all` (`the-reaping`) reduces both `health` and `maxHealth` by
+ *   1. `reap_all` (`miserere`) reduces both `health` and `maxHealth` by
  *      the reported burst.
- *   2. `reap` (single, `the-gleaners-due`) reduces both by the
+ *   2. `reap` (single, `the-offertory-plate`) reduces both by the
  *      cost-derived erosion (`round(cost * REAP_EROSION_PER_SOUL)`) — a
  *      NEW effect for this card, which deals no current-HP damage
  *      otherwise.
@@ -72,9 +72,9 @@ function playPaid(state: CombatEncounterState): { events: CombatEvent[]; after: 
 }
 
 describe('Phase 32 part 1 — REAP attacks MAXIMUM HP', () => {
-    describe("reap_all ('the-reaping')", () => {
+    describe("reap_all ('miserere')", () => {
         it('reduces both health and maxHealth by the reported burst, and never lets health exceed maxHealth', () => {
-            const before = stateFor('the-reaping', 10, 500, 500);
+            const before = stateFor('miserere', 10, 500, 500);
             const { events, after } = playPaid(before);
 
             const fizzle = events.find(e => e.kind === 'effect-fizzled');
@@ -87,7 +87,7 @@ describe('Phase 32 part 1 — REAP attacks MAXIMUM HP', () => {
 
             const [eroded] = findEvents(events, 'max-hp-eroded');
             expect(eroded).toBeDefined();
-            expect(eroded!.cardId).toBe('the-reaping');
+            expect(eroded!.cardId).toBe('miserere');
             expect(eroded!.amount).toBe(burst);
             expect(eroded!.newMax).toBe(500 - burst);
 
@@ -98,7 +98,7 @@ describe('Phase 32 part 1 — REAP attacks MAXIMUM HP', () => {
 
         it('erosion floors at 0 against a nearly-dead enemy (no negative maxHealth)', () => {
             // burstPerSoul 4 x 100 souls = 400, dwarfing the enemy's 5 HP.
-            const before = stateFor('the-reaping', 100, 5, 5);
+            const before = stateFor('miserere', 100, 5, 5);
             const { events, after } = playPaid(before);
 
             const [eroded] = findEvents(events, 'max-hp-eroded');
@@ -112,17 +112,17 @@ describe('Phase 32 part 1 — REAP attacks MAXIMUM HP', () => {
         });
     });
 
-    describe("reap (single, 'the-gleaners-due')", () => {
+    describe("reap (single, 'the-offertory-plate')", () => {
         it('reduces both health and maxHealth by the cost-derived erosion — a NEW effect, no current-HP burst before this', () => {
-            const before = stateFor('the-gleaners-due', 5, 500, 500);
+            const before = stateFor('the-offertory-plate', 5, 500, 500);
             const { events, after } = playPaid(before);
 
             const fizzle = events.find(e => e.kind === 'effect-fizzled');
             expect(fizzle, 'unexpected fizzle').toBeUndefined();
 
-            const cost = 2; // the-gleaners-due's specialMechanics[0].cost
+            const cost = 3; // the-offertory-plate's specialMechanics[0].cost
             const expectedErosion = Math.round(cost * REAP_EROSION_PER_SOUL);
-            expect(expectedErosion).toBe(4);
+            expect(expectedErosion).toBe(6);
 
             const [reaped] = findEvents(events, 'reaped');
             expect(reaped).toBeDefined();
@@ -130,7 +130,7 @@ describe('Phase 32 part 1 — REAP attacks MAXIMUM HP', () => {
 
             const [eroded] = findEvents(events, 'max-hp-eroded');
             expect(eroded).toBeDefined();
-            expect(eroded!.cardId).toBe('the-gleaners-due');
+            expect(eroded!.cardId).toBe('the-offertory-plate');
             expect(eroded!.amount).toBe(expectedErosion);
             expect(eroded!.newMax).toBe(500 - expectedErosion);
 
@@ -140,12 +140,12 @@ describe('Phase 32 part 1 — REAP attacks MAXIMUM HP', () => {
         });
 
         it('erosion floors at 0 against a nearly-dead enemy (no negative maxHealth)', () => {
-            const before = stateFor('the-gleaners-due', 5, 2, 2);
+            const before = stateFor('the-offertory-plate', 5, 2, 2);
             const { events, after } = playPaid(before);
 
             const [eroded] = findEvents(events, 'max-hp-eroded');
             expect(eroded).toBeDefined();
-            expect(eroded!.amount).toBe(4); // round(2 * REAP_EROSION_PER_SOUL)
+            expect(eroded!.amount).toBe(6); // round(cost 3 * REAP_EROSION_PER_SOUL)
             expect(eroded!.newMax).toBe(0);
 
             expect(after.enemy.maxHealth).toBe(0);
@@ -153,7 +153,7 @@ describe('Phase 32 part 1 — REAP attacks MAXIMUM HP', () => {
         });
 
         it('fizzles (no erosion, no event) when Souls are insufficient', () => {
-            const before = stateFor('the-gleaners-due', 1, 500, 500); // cost 2, only 1 Soul banked
+            const before = stateFor('the-offertory-plate', 1, 500, 500); // cost 2, only 1 Soul banked
             const { events, after } = playPaid(before);
 
             expect(events.some(e => e.kind === 'effect-fizzled')).toBe(true);
@@ -163,11 +163,14 @@ describe('Phase 32 part 1 — REAP attacks MAXIMUM HP', () => {
         });
     });
 
-    it('sim policies never crash across every policy and seed with a shrinking enemy ceiling (Harvest/Tithe deck)', () => {
-        const harvestDeck = buildPresetDeck('tithe');
+    it('sim policies never crash across every policy and seed with a shrinking enemy ceiling (the late snapshot + the harvest package)', () => {
+        // PROFANE CANON (2026-08-08): the choir's REAP cards are draft-path
+        // rewards, not seated preset content — the sweep drives the late
+        // campaign snapshot with the harvest package added on top.
+        const harvestDeck = [...buildPresetDeck('apostate'), 'miserere', 'the-offertory-plate'];
         expect(harvestDeck.length).toBeGreaterThan(0);
-        expect(harvestDeck).toContain('the-reaping');
-        expect(harvestDeck).toContain('the-gleaners-due');
+        expect(harvestDeck).toContain('miserere');
+        expect(harvestDeck).toContain('the-offertory-plate');
 
         function makePlayer(): Character {
             const p = deepClone(Player);

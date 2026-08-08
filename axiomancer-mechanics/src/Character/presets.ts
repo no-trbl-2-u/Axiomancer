@@ -51,34 +51,35 @@ export interface CharacterPreset {
 
 // ─── Preset records ───────────────────────────────────────────────────────────
 
+// Profane-canon rework (2026-08-08): the ladder presets seed from the
+// Threadbare Office starters (tier 1), the first reward commons (tier 2),
+// and the mid-game uncommons (tier 3).
 const TIER_1_CARDS = [
-    'brief-candle',
-    'red-herring',
-    'soft-word',
-    'currys-conversion', // straw-mans-jab retired in D8; festering-argument already rides in TIER_3
-    'glimpse',
-    'sketch-of-a-thought',
-    'disarming-smile', // Charm opener (v3 — Befriend lives in signatures)
+    'spoiled-poultice',
+    'chilblain-watch',
+    'petty-indictment',
+    'thin-hymn',
+    'first-spadeful',
+    'thumbprick-oath',
+    'threadbare-cope',
 ];
 
 const TIER_2_CARDS = [
-    'sweet-poison',
-    'undistributed-middle',
-    'slippery-slope',
+    'unction-of-boils',
+    'scolds-bridle',
+    'promissory-cut',
 ];
 
 const TIER_3_CARDS = [
-    'festering-argument',
-    'self-flagellant',
-    'bootstrap-loop',
+    'the-long-lent',
+    'hoarfrost-teeth',
+    'shallow-grave',
 ];
 
-// The synergy-payoff line. sketch-of-a-thought (a setup piece) already rides
-// in TIER_1_CARDS — knownCards is a set-like catalogue, so the lists stay
-// disjoint to avoid duplicate ids. (straw-mans-jab, the other historical
-// setup piece, was retired in D8.)
+// The synergy-payoff line — knownCards is a set-like catalogue, so the lists
+// stay disjoint to avoid duplicate ids.
 const TIER_2_SYNERGY_CARDS = [
-    'resonance-detonation',
+    'communion-of-the-worm',
 ];
 
 export const apprenticePreset: CharacterPreset = {

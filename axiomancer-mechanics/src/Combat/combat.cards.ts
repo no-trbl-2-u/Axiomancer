@@ -218,7 +218,11 @@ export function riderText(r: CardRider, opts?: { selfTargetCard?: boolean }): st
     if (r.souls) parts.push(`+${r.souls} Soul${r.souls === 1 ? '' : 's'}`);
     if (r.foretell) parts.push(`FORETELL ${r.foretell}`);
     if (r.applyEffect) {
-        const label = r.applyEffect.effectId.replace(/^(debuff|buff)_/, '');
+        // `debuff_creeping_doom` is printed DOOM on every face; the raw effect
+        // slug ("creeping_doom") is not a word the game ever says out loud.
+        const label = r.applyEffect.effectId === 'debuff_creeping_doom'
+            ? 'DOOM'
+            : r.applyEffect.effectId.replace(/^(debuff|buff)_/, '');
         const i = r.applyEffect.intensity ?? 1;
         const d = r.applyEffect.duration;
         const toSelf = r.applyEffect.to === 'self';
@@ -257,6 +261,8 @@ export function statePredicateText(p: SynergyStatePredicate): string {
             return 'blood already paid (you paid RECOIL earlier this turn)';
         case 'enemy-drew-blood':
             return 'the enemy drew blood since your last turn';
+        case 'requiem':
+            return `REQUIEM ${p.n} (${p.n}+ cards in your discard pile)`;
     }
 }
 
@@ -294,7 +300,9 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         // KW-3 (phase 29): FESTER→PROLONG, TRANSMUTE→REARGUE (renames).
         case 'extend_dots': return `PROLONG +${m.turns} duration to ALL your DoTs`;
         case 'convert_dots': return `REARGUE — convert bleed↔poison, +${m.bonusIntensity} intensity`;
-        case 'boost_all_dots': return `PROLONG +${m.intensity} intensity to ALL enemy DoTs`;
+        // Profane canon (2026-08-08): FESTER earns its own registry row — the
+        // intensity half of the old PROLONG double-duty splits out.
+        case 'boost_all_dots': return `FESTER ${m.intensity} — every DoT on the enemy gains +${m.intensity} intensity`;
         case 'soul_gain': return `+${m.count} Soul${m.count === 1 ? '' : 's'}`;
         // KW-2 (phase 29): re-mapped Soul→Rupture — extends RUPTURE's
         // printed sense ("consume N afflictions") instead of a redundant
@@ -331,6 +339,9 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         case 'reroll_spent': return 're-roll every spent/dead die';
         case 'befriend_attempt': return 'Befriend attempt';
         case 'strip_random_buff': return 'strip a random buff';
+        // Profane-canon rework — the pyre verbs.
+        case 'immolate': return `IMMOLATE ${m.count} — burn the lowest card${m.count === 1 ? '' : 's'} in hand from the fight: ${riderText(m.rider)}`;
+        case 'purge_self': return 'PURGE — this card leaves the fight entirely';
         default: return null;
     }
 }
@@ -360,7 +371,13 @@ export function paidText(card: Card, lookupEffect: EffectLookup): string {
         }
         const toSelf = ce.appliedTo === 'self';
         if (toSelf !== (card.targetType === 'self')) notes.push(toSelf ? 'self' : 'enemy');
-        parts.push(`${label} i${i} d${d}${notes.length ? ` (${notes.join(', ')})` : ''}`);
+        // DOOM never counts its duration down and grows every time the foe
+        // acts — printing `d3` would promise an expiry the engine will not
+        // honour. Print the clock the keyword actually obeys instead.
+        const grows = def.payload.dotModifiers?.growth === 'per-enemy-action'
+            && def.payload.dotModifiers?.calendarExpiry === false;
+        const clock = grows ? ' (grows +1 each time the foe acts)' : ` d${d}`;
+        parts.push(`${label} i${i}${clock}${notes.length ? ` (${notes.join(', ')})` : ''}`);
     }
     for (const m of card.specialMechanics ?? []) {
         const t = mechanicText(m);

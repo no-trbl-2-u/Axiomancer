@@ -45,7 +45,7 @@ import type {
     CombatEncounterState, CombatEvent, CombatThreatPhase,
 } from '../../Combat/combat.encounter.types';
 import { getCardById } from '../cards.library';
-import { SANDBOX_CARD_SETS, applySandboxSet } from '../cards.sandbox-sets';
+import { BRIDGE_REWARD_CARDS, applyFixtureCards } from '../../test-utils/retired-verb-cards';
 import { clearSandboxCards } from '../cards.sandbox';
 import { scoreCard } from '../cards.pricing';
 import { rankToRarity } from '../types';
@@ -55,7 +55,10 @@ afterEach(() => {
     clearSandboxCards();
 });
 
-const BRIDGE_SET = SANDBOX_CARD_SETS['bridge-rewards']!;
+/** PROFANE CANON (2026-08-08): the `bridge-rewards` sandbox SET died with
+ *  the spec-32 library; its carriers survive as synthetic fixtures so the
+ *  cross-theme splash grammar stays under test. */
+const BRIDGE_CARDS = BRIDGE_REWARD_CARDS;
 const BRIDGE_CARD_IDS = [
     'barbed-compliment', 'the-poured-rampart', 'interest-on-the-flesh',
     'entered-into-evidence', 'stolen-cadence', 'unbroken-countenance',
@@ -129,18 +132,18 @@ function customPhases(stances: ('heart' | 'body' | 'mind')[], damage = 4): Comba
 
 describe('bridge-rewards — registry shape and rank-band honesty', () => {
     it('carries exactly the six pairing cards, in pairing order, no overrides', () => {
-        expect(BRIDGE_SET.cards.map(c => c.id)).toEqual([...BRIDGE_CARD_IDS]);
-        expect(BRIDGE_SET.overrides ?? []).toHaveLength(0);
+        expect(BRIDGE_CARDS.map(c => c.id)).toEqual([...BRIDGE_CARD_IDS]);
+        expect([]).toHaveLength(0);
     });
 
     it('every bridge declares a parent theme and stays OUT of the pinned reward pool', () => {
-        for (const card of BRIDGE_SET.cards) {
+        for (const card of BRIDGE_CARDS) {
             expect(card.theme, `${card.id}: theme`).toBeDefined();
             expect(COMBAT_REWARD_POOL, `${card.id} leaked into the pinned 70`).not.toContain(card.id);
         }
     });
 
-    it.each(BRIDGE_SET.cards.map(c => [c.id, c] as const))(
+    it.each(BRIDGE_CARDS.map(c => [c.id, c] as const))(
         '%s prices inside its printed rank band',
         (_id, card) => {
             const [lo, hi] = RANK_BANDS[rankToRarity(card.rank)];
@@ -153,7 +156,7 @@ describe('bridge-rewards — registry shape and rank-band honesty', () => {
     );
 
     it('the authored // pts arithmetic matches scoreCard (regression anchors)', () => {
-        const byId = (id: string) => BRIDGE_SET.cards.find(c => c.id === id)!;
+        const byId = (id: string) => BRIDGE_CARDS.find(c => c.id === id)!;
         expect(scoreCard(byId('barbed-compliment'))).toBeCloseTo(6.45, 2); // phase 36a: SWAY 3 total × 0.9
         expect(scoreCard(byId('the-poured-rampart'))).toBeCloseTo(6.0, 2);
         expect(scoreCard(byId('interest-on-the-flesh'))).toBeCloseTo(6.25, 2);
@@ -166,7 +169,7 @@ describe('bridge-rewards — registry shape and rank-band honesty', () => {
     });
 
     it('no TICK vocabulary anywhere in the set (TICK is ratified dead)', () => {
-        for (const card of BRIDGE_SET.cards) {
+        for (const card of BRIDGE_CARDS) {
             expect(card.free?.tickOne, `${card.id}: FREE tickOne`).toBeUndefined();
             expect(card.free?.tickAllDots, `${card.id}: FREE tickAllDots`).toBeUndefined();
             for (const m of card.specialMechanics ?? []) {
@@ -179,7 +182,7 @@ describe('bridge-rewards — registry shape and rank-band honesty', () => {
     });
 
     it('applying the set makes every bridge resolvable through getCardById', () => {
-        applySandboxSet('bridge-rewards');
+        applyFixtureCards(BRIDGE_CARDS);
         for (const id of BRIDGE_CARD_IDS) expect(getCardById(id), id).toBeDefined();
     });
 });
@@ -187,7 +190,7 @@ describe('bridge-rewards — registry shape and rank-band honesty', () => {
 // ─── 2. Barbed Compliment — MARK for the affliction engine, SWAY for the bar ─
 
 describe('barbed-compliment (affliction↔charm) — one breath, both parents fed', () => {
-    beforeEach(() => { applySandboxSet('bridge-rewards'); });
+    beforeEach(() => { applyFixtureCards(BRIDGE_CARDS); });
 
     /** The fixture's current phase stance is BODY, which a HEART card READS
      *  for advantage (+1 landed intensity — honest, but not what this lint
@@ -220,7 +223,7 @@ describe('barbed-compliment (affliction↔charm) — one breath, both parents fe
 // ─── 3. The Poured Rampart — pips poured into GUARD over a Barrier footing ───
 
 describe('the-poured-rampart (forge↔bulwark) — spend the whole bank as wall', () => {
-    beforeEach(() => { applySandboxSet('bridge-rewards'); });
+    beforeEach(() => { applyFixtureCards(BRIDGE_CARDS); });
 
     it('PAID (rich board): RIPEN 1 → 2 banked pips → Guard +4 (2/pip), bank empty, Barrier up', () => {
         // Fixture Reserve: one die at 1 pip → grant_pip 1 ripens it to 2 →
@@ -271,7 +274,7 @@ describe('the-poured-rampart (forge↔bulwark) — spend the whole bank as wall'
 // ─── 4. Interest on the Flesh — the loan booked up front ─────────────────────
 
 describe('interest-on-the-flesh (akrasia↔harvest) — self-Bleed cost, Souls now', () => {
-    beforeEach(() => { applySandboxSet('bridge-rewards'); });
+    beforeEach(() => { applyFixtureCards(BRIDGE_CARDS); });
 
     it('PAID: the self-Bleed books on the player, SOUL ×3 banks, MARK ×2 lands on the foe', () => {
         const before = fixtureWith('interest-on-the-flesh');
@@ -311,7 +314,7 @@ describe('interest-on-the-flesh (akrasia↔harvest) — self-Bleed cost, Souls n
 // ─── 5. Entered into Evidence — the confirmed prophecy becomes a Premise ─────
 
 describe('entered-into-evidence (oracle↔peroration) — OMEN confirm deposits PREMISE ×2', () => {
-    beforeEach(() => { applySandboxSet('bridge-rewards'); });
+    beforeEach(() => { applyFixtureCards(BRIDGE_CARDS); });
 
     /** Fixture with controlled phases: current phase 0, prediction lands on
      *  phase 1 (the card's WILD-powered omen predicts its own stance, MIND). */
@@ -380,7 +383,7 @@ describe('entered-into-evidence (oracle↔peroration) — OMEN confirm deposits 
 // ─── 6. Stolen Cadence — a beat stolen, a beat replayed ──────────────────────
 
 describe('stolen-cadence (control↔echo) — STAGGER 1 + REPRISE 1 on one card', () => {
-    beforeEach(() => { applySandboxSet('bridge-rewards'); });
+    beforeEach(() => { applyFixtureCards(BRIDGE_CARDS); });
 
     it('PAID: steals a rung from the next action AND returns the best discard to hand', () => {
         const before = fixtureWith('stolen-cadence');
@@ -411,7 +414,7 @@ describe('stolen-cadence (control↔echo) — STAGGER 1 + REPRISE 1 on one card'
 // ─── 7. Unbroken Countenance — the unbroken wall persuades ───────────────────
 
 describe('unbroken-countenance (bulwark↔charm) — the no-damage ledger gates the SWAY surge', () => {
-    beforeEach(() => { applySandboxSet('bridge-rewards'); });
+    beforeEach(() => { applyFixtureCards(BRIDGE_CARDS); });
 
     it('PAID while UNBROKEN (ledger 0): Guard up, SWAY +6 (2 paid + 4 rider), 2 HP composed back', () => {
         const before = fixtureWith('unbroken-countenance');

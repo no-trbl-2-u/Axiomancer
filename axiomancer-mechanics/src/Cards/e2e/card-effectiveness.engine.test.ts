@@ -107,6 +107,14 @@ const FIXTURE_OVERRIDES: Readonly<Record<string, (state: CombatEncounterState) =
     }),
 };
 
+/** IMMOLATE burns the lowest-rank OTHER cards in hand as a printed cost, so
+ *  its carriers need a pyre. Every other card is played from a hand holding
+ *  only itself (the shared convention above). */
+const HAND_FODDER: Readonly<Record<string, readonly string[]>> = {
+    distraint: ['spoiled-poultice'],
+    'paupers-pyre': ['spoiled-poultice', 'chilblain-watch'],
+};
+
 // ── Known, honest defects ─────────────────────────────────────────────────────
 // Empty: no card in the current library fails its strict effectiveness
 // assertion (Ouroboros's ruptureMarks-on-the-FREE-line bug — the shape this
@@ -139,9 +147,10 @@ function playPaid(cardId: string): PlayResult {
     mockSequentialRng(0.5); // neutral d20 (no fumble/crit) on the rare Tier-2-buff roll
     const patch = FIXTURE_OVERRIDES[cardId];
     const staged = buildFixtureState();
+    const fodder = (HAND_FODDER[cardId] ?? []).map((id, i) => ({ uid: `fodder-${i}`, cardId: id }));
     const before = {
         ...(patch ? patch(staged) : staged),
-        hand: [{ uid: 'under-test', cardId }],
+        hand: [{ uid: 'under-test', cardId }, ...fodder],
     };
     const { state: after, events } = playCombatCard(before, { uid: 'under-test' }, true);
     return { events, before, after };
@@ -265,7 +274,17 @@ function assertRiderPromise(
         expect(after.barrier ?? 0, label('barrier')).toBeGreaterThan(before.barrier ?? 0);
     }
     if (rider.recoil) {
-        expect(after.player.health, label('recoil')).toBeLessThan(before.player.health);
+        // A rider may print RECOIL and HEAL together (distraint's FREE line
+        // bleeds 1 and binds 4). Net-positive lines still have to prove the
+        // blood was really paid — the heal must land SHORT of its printed
+        // figure by exactly the recoil.
+        const healed = rider.healHp ?? 0;
+        if (healed <= rider.recoil) {
+            expect(after.player.health, label('recoil')).toBeLessThan(before.player.health);
+        } else {
+            expect(after.player.health - before.player.health, label('recoil'))
+                .toBeLessThan(healed);
+        }
     }
     if (rider.millCards) {
         expect(
@@ -491,6 +510,27 @@ function assertMechanic(
         case 'rider':
             assertRiderPromise(card.id, mech.rider, events, before, after);
             return;
+        case 'immolate': {
+            // IMMOLATE — the pyre is fed from hand (the fodder is staged in
+            // HAND_FODDER), then the rider fires.
+            const burned = findEvent(events, 'immolated');
+            expect(burned, label).toBeDefined();
+            expect(burned!.burned.length, label).toBe(mech.count);
+            // The pyre consumes them: a burned card never joins the discard
+            // (the fixture pile may already hold copies, so count, don't scan).
+            const tally = (pile: readonly string[], id: string) => pile.filter(x => x === id).length;
+            for (const id of burned!.burned) {
+                expect(tally(after.discard, id), `${label}: ${id} reached the discard`)
+                    .toBeLessThanOrEqual(tally(before.discard, id));
+            }
+            assertRiderPromise(card.id, mech.rider, events, before, after);
+            return;
+        }
+        case 'purge_self':
+            // PURGE — the curse exiles itself: gone from hand, never discarded.
+            expect(events.some(e => e.kind === 'purged'), label).toBe(true);
+            expect(after.discard, label).not.toContain(card.id);
+            return;
         // ── Kinds with no current library exerciser — generic fallback ────────
         case 'strip_random_buff':
         case 'befriend_attempt':
@@ -543,24 +583,21 @@ function assertCardEffective(cardId: string): void {
 // ── Suite ──────────────────────────────────────────────────────────────────────
 
 describe('card effectiveness lint — every PAID face produces its promised observable delta', () => {
-    it('the coverage universe is the 86-card themed library (spec 32 v3 §7 + the 2026-07-19 promotions + the phase-39 restorations)', () => {
-        expect(cardLibrary.length).toBe(86);
+    it('the coverage universe is the 57-card Profane Canon (docs/profane-canon.md §2)', () => {
+        expect(cardLibrary.length).toBe(57);
     });
 
-    it('GENERICALLY_ASSERTED kinds in the library are exactly the D8 valve die-verbs '
-        + '(their strict payloads still assert; the die-verb legitimately no-ops in this fixture)', () => {
-        // Pre-D8 the pin was "none". The Phase D8 valve promotion seated five
-        // library cards on `reroll_spent` / `convert_die_color` (recurring-
-        // symptom, bleed-for-it, change-of-heart / break-the-tempo,
-        // second-sight). Each of those cards ALSO carries a strictly-asserted
-        // payload (poison / bleed / sway / stagger / foretell), so no card is
-        // generically asserted end-to-end; the die-verb portion rides the
-        // documented fixture no-op. `strip_random_buff` / `befriend_attempt`
-        // stay unexercised.
+    it('GENERICALLY_ASSERTED kinds in the library are exactly the canon valve die-verb '
+        + '(its strict payload still asserts; the die-verb legitimately no-ops in this fixture)', () => {
+        // PROFANE CANON (2026-08-08): one library card rides `reroll_spent`
+        // (the knucklebone-recant valve). It ALSO carries a strictly-asserted
+        // payload, so no card is generically asserted end-to-end; the die-verb
+        // portion rides the documented fixture no-op. `convert_die_color`,
+        // `strip_random_buff` and `befriend_attempt` stay unexercised.
         const usedKinds = new Set<string>();
         for (const c of cardLibrary) for (const m of c.specialMechanics ?? []) usedKinds.add(m.kind);
         const exercisedGenerics = GENERICALLY_ASSERTED.filter(k => usedKinds.has(k)).sort();
-        expect(exercisedGenerics).toEqual(['convert_die_color', 'reroll_spent']);
+        expect(exercisedGenerics).toEqual(['reroll_spent']);
     });
 
     const strictCases = cardLibrary

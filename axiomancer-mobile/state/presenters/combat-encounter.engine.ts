@@ -1108,6 +1108,13 @@ export function resolvePrimary(card: CombatCard, sourceCard: Card | undefined): 
         const primary = self[0] ?? null;
         return { kind: 'inert', ce: primary, guardAmount: null, riders: self.filter(s => s !== primary), mech: null };
     }
+    // PROFANE CANON (2026-08-08): a declared PERORATION outranks whatever
+    // status the same card also lands. The Black Cap prints DOOM 2 alongside
+    // its verdict, and a DOOM headline would bury the alt-win (and the
+    // tier-floored CONCEDE readout) behind a routine DoT face.
+    const peroration = findMech('peroration');
+    if (peroration) return { kind: 'mechanic', ce: null, guardAmount: null, riders: (sourceCard?.combatEffects ?? []), mech: peroration };
+
     // direct-dot | direct-control | stat-debuff → opponent effects
     const opp = (sourceCard?.combatEffects ?? []).filter(e => e.appliedTo === 'opponent');
     // card-overhaul (2026-07-03): a self-cost/self-buff effect riding a card
@@ -1153,6 +1160,10 @@ interface CardCalc extends PrimaryResolution {
     // DoT. Event-triggered DoTs tick per game event, NOT per turn, so their
     // face/detail must not print the round-clock "total over Nt" fiction.
     dotTrigger: 'card-played' | 'damage-instance' | 'payoff' | null;
+    // Profane Canon (2026-08-08) — DOOM: a DoT with NO calendar that grows +1
+    // intensity every time the foe acts. "N over 3 turns" is a lie for it
+    // (nothing expires, and the bite rises), so the face prints its real clock.
+    dotGrowsOnEnemyAction: boolean;
     // ── 0.34.0 authored statics (real units; live swings stay live) ──
     vulnPct: number;       // +N% damage taken (from damageTakenMult)
     reflectN: number;      // thorns reflect per hit (reflectDamage × intensity)
@@ -1182,6 +1193,7 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
         ...pr, keyword: null, glyph: '◆', categoryColor: PAYOFF_COLOR,
         perTurn: 0, turns: 0, total: 0, freePerTurn: 0, freeTurns: 0, freeTotal: 0,
         skips: 0, dpr: 0, intensity: 1, stacks: false, dotTrigger: null,
+        dotGrowsOnEnemyAction: false,
         vulnPct: 0, reflectN: 0, barrierAmt: 0, siphonPct: 0,
         riposteDmg: 0, riposteReduce: 0, reapCost: 0, reapPerSoul: 0,
         markAmp: 0, backfireN: 0,
@@ -1201,6 +1213,9 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
             // round clock. `undefined`/`round-start`/`round-end` = round-clock.
             const trig = p.damageOverTime?.trigger;
             out.dotTrigger = trig === 'card-played' || trig === 'damage-instance' || trig === 'payoff' ? trig : null;
+            const clockMods = (p as { dotModifiers?: { calendarExpiry?: false; growth?: string } }).dotModifiers;
+            out.dotGrowsOnEnemyAction = clockMods?.growth === 'per-enemy-action'
+                && clockMods?.calendarExpiry === false;
             // Fate Engine P1 — RAMP-AWARE lifetime totals (canonical poison /
             // unraveling escalate): mirror the engine's exact tick math so the
             // face equals `bottomDamagePreview` (printed == applied).
@@ -1552,6 +1567,21 @@ function mechanicHeadline(mech: CardSpecialMechanic | null, enemyDifficulty?: En
         // REAP's live Soul-spend).
         case 'turnabout':
             return { keyword: kw ?? 'Backfire', heroText: `${mech.burstPerRung}×`, heroSub: 'per rung ever denied', verbLine: 'cash the whole denial ledger — then it resets' };
+        // Profane Canon (2026-08-08) — the rework's two new printed costs.
+        case 'immolate':
+            return {
+                keyword: kw ?? 'Immolate',
+                heroText: `${mech.count}`,
+                heroSub: `card${mech.count === 1 ? '' : 's'} · burned from hand`,
+                verbLine: `burn your ${mech.count} lowest-rank other card${mech.count === 1 ? '' : 's'} as a cost — then the rider fires`,
+            };
+        case 'purge_self':
+            return {
+                keyword: kw ?? 'Purge',
+                heroText: '',
+                heroSub: 'exile this curse',
+                verbLine: 'this curse leaves the fight entirely — hand, discard and deck',
+            };
         default:
             return null;
     }
@@ -1567,6 +1597,10 @@ const MECH_HEADLINE_PRIORITY: readonly string[] = [
     // carriers, but this session's WS2.1 Thoughtform work ships live sandbox
     // conjure cards — the mechanic is card-local vocabulary, not a ghost.)
     'foretell', 'extend_dots', 'convert_dots', 'boost_all_dots', 'recoil_x', 'recoil',
+    // Profane Canon: PURGE is the whole card (a curse's only reason to exist),
+    // so it outranks IMMOLATE's printed cost, which in turn outranks the plain
+    // rider it pays for.
+    'purge_self', 'immolate',
     'conjure_card', 'strip_random_buff', 'echo', 'echo_next_spell', 'rider',
 ];
 
@@ -1671,6 +1705,11 @@ export function faceStats(card: CombatCard, sourceCard?: Card, enemyDifficulty?:
                         ? { hero: `${c.perTurn}/payoff`, sub: `per payoff you detonate · ${c.turns}t`, verb: 'foe loses VITAE each payoff you detonate' }
                         : null;
             if (evt) return { ...base, kind: 'dot', keyword: kw, heroText: evt.hero, heroSub: evt.sub, freeHeroText: free, freeHeroSub: null, verbLine: evt.verb, powerRail: c.keyword ?? 'DoT', readDependent: true, inert: false, guardBase: null, statusBase: c.perTurn, statusAdv: perTickAdv, statusDis: c.perTurn };
+            // DOOM: no calendar, and the stack grows every time the foe acts —
+            // print the per-turn bite and the growth clause, never a lifetime.
+            if (c.dotGrowsOnEnemyAction) {
+                return { ...base, kind: 'dot', keyword: kw, heroText: `${c.perTurn}/turn`, heroSub: 'grows each time the foe acts', freeHeroText: free, freeHeroSub: null, verbLine: 'foe loses VITAE each turn, and the doom deepens as it acts', powerRail: c.keyword ?? 'DoT', readDependent: true, inert: false, guardBase: null, statusBase: c.perTurn, statusAdv: Math.floor(c.dpr * (c.intensity + READ_ADVANTAGE_INTENSITY_BONUS)), statusDis: c.perTurn };
+            }
             // Round-clock DoT: the honest "total over N turns" face stands.
             return { ...base, kind: 'dot', keyword: kw, heroText: `${c.total}`, heroSub: `over ${c.turns} turns`, freeHeroText: free, freeHeroSub: null, verbLine: 'foe loses VITAE each turn', powerRail: c.keyword ?? 'DoT', readDependent: true, inert: false, guardBase: null, statusBase: c.total, statusAdv: c.totalAdv, statusDis: c.totalDis };
         }

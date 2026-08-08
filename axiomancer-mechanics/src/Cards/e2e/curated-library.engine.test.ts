@@ -1,11 +1,12 @@
 /**
- * Hermetic E2E — the spec 32 v3 THEMED library shape contract.
+ * Hermetic E2E — the PROFANE CANON library shape contract (2026-08-08).
  *
- * The 2026-07-08 overhaul replaced the 49-card curated pool wholesale:
- * 70 unique cards, 10 self-contained themes × 7, rank ladder 1-6 with
- * derived rarity, three card types (spell / enchantment / disenchant), and
- * THE STRIKE IS DEAD at the schema level — no card carries an HP-damage
- * field, and this suite is the regression gate (spec §1, ledger #1).
+ * The rework replaced the spec-32 themed pool wholesale: 57 unique cards —
+ * 8 starters (the Threadbare Office), 3 dice-valve relics, 4 enemy-injected
+ * curses, and six archetype packages of 7 (2 commons, 2 uncommons, 1 rare
+ * spell, 1 enchantment, 1 disenchant). Rank ladder 1-6 with derived rarity,
+ * three card types, and THE STRIKE stays DEAD at the schema level — no card
+ * carries an HP-damage field, and this suite is the regression gate.
  */
 
 import { readFileSync } from 'node:fs';
@@ -15,31 +16,61 @@ import { describe, it, expect } from 'vitest';
 
 import { cardLibrary, getCardById } from '../cards.library';
 import { CARD_RANK_NAMES } from '../types';
+import { CARD_THEMES } from '../card-themes';
 import type { Card } from '../types';
 import { COMBAT_REWARD_POOL, STARTING_CARD_IDS } from '../../Combat/combat.rewards';
-import { listDeckPresets, cardOrigin, PRESET_COLOR_BORROWS } from '../../Combat/combat.starter-deck-presets';
+import { listDeckPresets, cardOrigin } from '../../Combat/combat.starter-deck-presets';
 
-/** The ten theme tags (spec §6) — every card carries exactly one. */
-const THEMES = [
-    'affliction', 'peroration', 'forge', 'akrasia', 'control',
-    'oracle', 'harvest', 'charm', 'bulwark', 'echo',
-] as const;
+/** The seven theme tags — every card carries exactly one. */
+const THEMES = CARD_THEMES;
 
 function themeOf(card: Card): string | undefined {
     const themes = (card.tags ?? []).filter(t => (THEMES as readonly string[]).includes(t));
     return themes.length === 1 ? themes[0] : undefined;
 }
 
-describe('themed library — shape contract (spec 32 v3 §6-7)', () => {
-    it('is exactly 86 unique cards (70 post-D8 + the 9 owner-ratified 2026-07-19 swap-pool promotions + the 7 phase-39 theme-symmetry restorations)', () => {
-        expect(cardLibrary.length).toBe(86);
+const ARCHETYPES = ['rot', 'debt', 'grave', 'vigil', 'trial', 'choir'] as const;
+
+describe('profane canon — shape contract', () => {
+    it('is exactly 57 unique cards', () => {
+        expect(cardLibrary.length).toBe(57);
         const ids = cardLibrary.map(c => c.id);
         expect(new Set(ids).size).toBe(ids.length);
     });
 
-    it('every card carries exactly one of the ten theme tags', () => {
+    it('every card carries exactly one of the seven theme tags', () => {
         for (const card of cardLibrary) {
             expect(themeOf(card), `${card.id} must carry exactly one theme tag`).toBeDefined();
+        }
+    });
+
+    it('each archetype delivers its 7-card package (2 commons, 2 uncommons, 1 rare spell, 1 enchantment, 1 disenchant)', () => {
+        for (const theme of ARCHETYPES) {
+            const pack = cardLibrary.filter(c => c.theme === theme
+                && !(c.tags ?? []).some(t => t === 'starter' || t === 'valve' || t === 'curse'));
+            expect(pack.length, theme).toBe(7);
+            const spells = pack.filter(c => c.cardType === 'spell');
+            expect(spells.filter(c => c.rank <= 2).length, `${theme} commons`).toBe(2);
+            expect(spells.filter(c => c.rank === 3 || c.rank === 4).length, `${theme} uncommons`).toBe(2);
+            expect(spells.filter(c => c.rank >= 5).length, `${theme} rare spell`).toBe(1);
+            expect(pack.filter(c => c.cardType === 'enchantment').length, `${theme} enchantment`).toBe(1);
+            expect(pack.filter(c => c.cardType === 'disenchant').length, `${theme} disenchant`).toBe(1);
+        }
+    });
+
+    it('the special classes have their exact populations (8 starters, 3 valves, 4 curses)', () => {
+        expect(cardLibrary.filter(c => (c.tags ?? []).includes('starter')).length).toBe(8);
+        const valves = cardLibrary.filter(c => (c.tags ?? []).includes('valve'));
+        expect(valves.length).toBe(3);
+        expect(valves.map(v => v.philosophicalAspect).sort()).toEqual(['body', 'heart', 'mind']);
+        expect(cardLibrary.filter(c => c.theme === 'curse').length).toBe(4);
+    });
+
+    it('every curse is rank-1 junk with a PURGE exit', () => {
+        for (const curse of cardLibrary.filter(c => c.theme === 'curse')) {
+            expect(curse.rank, curse.id).toBe(1);
+            expect(curse.cardType, curse.id).toBe('spell');
+            expect((curse.specialMechanics ?? []).some(m => m.kind === 'purge_self'), curse.id).toBe(true);
         }
     });
 
@@ -50,7 +81,7 @@ describe('themed library — shape contract (spec 32 v3 §6-7)', () => {
     });
 });
 
-describe('themed library — FREE/PAID anatomy (spec §2)', () => {
+describe('profane canon — FREE/PAID anatomy', () => {
     it('every SPELL carries an authored FREE rider with substance', () => {
         for (const card of cardLibrary.filter(c => c.cardType === 'spell')) {
             expect(card.free, `${card.id} (spell) must author a FREE line`).toBeDefined();
@@ -64,59 +95,54 @@ describe('themed library — FREE/PAID anatomy (spec §2)', () => {
         }
     });
 
-    it('enchantments and disenchants carry no AUTHORED free rider — spec 32 v4 FREE line is engine-derived (a timed instance of the passive)', () => {
+    it('enchantments and disenchants carry no AUTHORED free rider (the timed FREE line is engine-derived)', () => {
         for (const card of cardLibrary.filter(c => c.cardType !== 'spell')) {
-            expect(card.free, `${card.id} (${card.cardType}) must not carry an authored FREE rider — the timed FREE line is derived by the engine`).toBeUndefined();
+            expect(card.free, `${card.id} (${card.cardType})`).toBeUndefined();
         }
     });
 
-    it('every enchantment and disenchant carries a persistentEffect summary — spec 32 v4 (its hooked passive is otherwise invisible to the card UI + catalog)', () => {
+    it('every enchantment and disenchant carries a persistentEffect summary', () => {
         for (const card of cardLibrary.filter(c => c.cardType !== 'spell')) {
-            expect(card.persistentEffect, `${card.id} (${card.cardType}) must carry a one-line persistentEffect summary`).toBeTruthy();
+            expect(card.persistentEffect, `${card.id} (${card.cardType})`).toBeTruthy();
         }
     });
 
-    it('every library card declares a `theme` that matches its tag-derived theme (spec 32)', () => {
+    it('every library card declares a `theme` that matches its tag-derived theme', () => {
         for (const card of cardLibrary) {
             expect(card.theme, `${card.id} must declare a theme`).toBeDefined();
             expect(card.theme, `${card.id} theme must equal its tag theme`).toBe(themeOf(card));
         }
     });
 
-    it("a starter card's `theme` matches its preset deck's theme, or it is a documented color-law borrow", () => {
-        // 5/5/5 recipe color law (spec 32 §12 item 9, ratified 2026-07-12):
-        // presets may borrow cross-theme cards of a missing color; the borrow
-        // map is pinned in PRESET_COLOR_BORROWS and asserted exactly by
-        // src/Combat/e2e/deck-presets.engine.test.ts.
+    it('presets never seat a curse; every preset card resolves', () => {
         for (const preset of listDeckPresets()) {
-            const borrows = PRESET_COLOR_BORROWS[preset.id] ?? [];
             for (const id of new Set(preset.cardIds)) {
-                if (borrows.includes(id)) continue;
-                expect(getCardById(id)?.theme, `${id} in preset ${preset.id}`).toBe(preset.theme);
+                const card = getCardById(id);
+                expect(card, `${preset.id}: ${id}`).toBeDefined();
+                expect(card!.theme, `${preset.id}: ${id}`).not.toBe('curse');
             }
         }
     });
 
-    it('cardOrigin tags every library card as a starter, except the twenty-four documented reward-only cards', () => {
-        // The 5/5/5 color law squeezes 10 cards (the D8 valves, flag-on-only
-        // seats) out of every recipe, and the 2026-07-19 promotions unseated
-        // 8 incumbents (pinned by id in deck-presets.engine.test.ts); phase 39
-        // (2026-08-08) restored 7 more cards (§A) of which 2 landed a forced
-        // preset seat (entropy-tax/foundry, heart-of-the-matter/grace) and 4
-        // did not (achilles-and-the-tortoise — measured DEAD in grace, no
-        // seat elsewhere; captive-audience, fated-course, the-tithe — no
-        // forced seat), and its foundry/grace color-law compensating
-        // shuffle (§B) evicted 2 more incumbents (anvil-of-form,
-        // irresistible-grace, the latter re-picked to resonant-chamber after
-        // A/B showed the first candidate regressed grace). All 24 remain in
-        // the reward pool and surface through drafts instead.
+    it('cardOrigin splits the library into 34 campaign starters and 23 reward/injected cards', () => {
+        // The campaign-preset union (threadbare ∪ pilgrim ∪ apostate) seats 34
+        // uniques; the other 23 are the 3 flag-on valve relics, the 4
+        // enemy-injected curses, spadework + the-congregation-below (grave's
+        // reward-only pair), and the whole trial + choir packages (drafted
+        // through rewards, not seated in the canonical lineage).
         const rewardOnly: string[] = [];
         for (const card of cardLibrary) {
             const origin = cardOrigin(card.id);
             if (origin.source === 'reward') { rewardOnly.push(card.id); continue; }
             expect(origin.presetDeck, `${card.id} presetDeck`).toBeTruthy();
         }
-        expect(rewardOnly.length, `reward-only starters: ${rewardOnly.join(', ')}`).toBe(24);
+        expect(rewardOnly.length, `reward-only: ${rewardOnly.join(', ')}`).toBe(23);
+        for (const theme of ['trial', 'choir'] as const) {
+            for (const card of cardLibrary.filter(c => c.theme === theme
+                && !(c.tags ?? []).some(t => t === 'starter' || t === 'valve'))) {
+                expect(rewardOnly, `${card.id} (${theme}) should be draft-only`).toContain(card.id);
+            }
+        }
     });
 
     it('cardOrigin tags a non-preset id as a reward', () => {
@@ -133,11 +159,8 @@ describe('themed library — FREE/PAID anatomy (spec §2)', () => {
     });
 });
 
-describe('themed library — THE STRIKE IS DEAD (spec §1 schema gate)', () => {
+describe('profane canon — THE STRIKE IS DEAD (schema gate)', () => {
     it("the library source never mentions 'basePower' or 'chipHp'", () => {
-        // Schema-level regression gate: the fields were DELETED from Card/
-        // CardRider, so any reintroduction is a compile error — this string
-        // sweep additionally catches comments, casts, and `as any` smuggling.
         const source = readFileSync(resolve(__dirname, '..', 'cards.library.ts'), 'utf8');
         expect(source.includes('basePower')).toBe(false);
         expect(source.includes('chipHp')).toBe(false);
@@ -153,8 +176,8 @@ describe('themed library — THE STRIKE IS DEAD (spec §1 schema gate)', () => {
     });
 });
 
-describe('themed library — id hygiene and provenance', () => {
-    it('every card has the v3 required shape', () => {
+describe('profane canon — id hygiene and provenance', () => {
+    it('every card has the required shape', () => {
         for (const card of cardLibrary) {
             expect(card.id).toMatch(/^[a-z][a-z0-9-]*$/);
             expect([1, 2, 3]).toContain(card.tier);
@@ -162,16 +185,13 @@ describe('themed library — id hygiene and provenance', () => {
             expect(['spell', 'enchantment', 'disenchant']).toContain(card.cardType);
             expect(['self', 'enemy']).toContain(card.targetType);
             expect(['body', 'mind', 'heart']).toContain(card.philosophicalAspect);
-            // 2026-07-08 = the v3 wholesale replacement; 2026-07-17 = the D4
-            // dice valves (promoted into the library in Phase D8);
-            // 2026-07-18 = the swap-pool authoring date of the nine cards
-            // promoted 2026-07-19 (valve precedent: authoring date kept).
-            expect(['2026-07-08', '2026-07-17', '2026-07-18']).toContain(card.addedIn);
+            // 2026-08-08 — the Profane Canon wholesale replacement.
+            expect(card.addedIn).toBe('2026-08-08');
         }
     });
 
     it('the starting pair resolves and teaches a mechanic each', () => {
-        expect(STARTING_CARD_IDS).toEqual(['slippery-slope', 'brace-for-impact']);
+        expect(STARTING_CARD_IDS).toEqual(['spoiled-poultice', 'chilblain-watch']);
         for (const id of STARTING_CARD_IDS) {
             const card = getCardById(id);
             expect(card, id).toBeDefined();
@@ -180,25 +200,19 @@ describe('themed library — id hygiene and provenance', () => {
         }
     });
 
-    it('the reward pool is the whole 86-card library and every id resolves', () => {
-        expect(COMBAT_REWARD_POOL.length).toBe(86);
+    it('the reward pool is the library minus the curse class, and every id resolves', () => {
+        expect(COMBAT_REWARD_POOL.length).toBe(53);
         for (const id of COMBAT_REWARD_POOL) {
             expect(getCardById(id), `reward pool: ${id}`).toBeDefined();
+            expect(getCardById(id)!.theme, `${id} — a curse is never a reward`).not.toBe('curse');
         }
     });
 });
 
-describe('themed library — dieBonus reachability under THE COLOR LAW (dice-law rework 2026-07-09)', () => {
-    // Under the color law a card is only ever powered by a die of ITS OWN
-    // stance, a WILD die, or (fate cards only) a dead X. A specific onColor can
-    // therefore fire only when it EQUALS the card's stance ('match' is the
-    // honest spelling of that), and onColor:'off' — a non-wild die of another
-    // stance — can never fire at all: the play would have fizzled first.
-    //
-    // tu-quoque (HEART card, was onColor:'body') was the one KNOWN dead line —
-    // handoff audit item 1 — fixed in phase 28 (recolored to 'heart', its own
-    // philosophicalAspect). The pin has tightened to zero; the next author who
-    // ships a dead dieBonus line reopens this list.
+describe('profane canon — dieBonus reachability under THE COLOR LAW', () => {
+    // A card is only ever powered by a die of ITS OWN stance, a WILD die, or
+    // (fate cards) a dead X — so only onColor:'match' can fire. The pin holds
+    // at zero dead lines; the next author who ships one reopens this list.
     const KNOWN_DEAD: string[] = [];
     it("no card authors an unreachable dieBonus line (onColor 'off' or an off-stance color)", () => {
         const dead = cardLibrary

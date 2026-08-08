@@ -17,7 +17,7 @@
  * Seeded / stubbed RNG only (src/test-utils/rng.ts); no disk / network / TTY.
  */
 
-import { describe, it, expect, afterEach, vi } from 'vitest';
+import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
@@ -29,17 +29,55 @@ import type { ActiveEffect } from '../../Effects/types';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveCombatPhase,
     resolveThreatPhase, processBetweenPhases, draftStanceDie, startTurn, endTurn,
-    discardCombatCard, getFloatingDiceColors, getDraftedDie, selectCapitulationChoice,
+    getFloatingDiceColors, getDraftedDie, selectCapitulationChoice,
 } from '../combat.engine';
 import { FLOATING_DICE_CAP } from '../combat.dice';
 import { runHazardCombatAutoEncounter } from '../combat.autoplay';
 import { THREAT_RUNGS } from '../effects';
 import { buildPresetDeck, COMBAT_DECK_PRESET_ORDER } from '../combat.starter-deck-presets';
+import { registerSandboxCards, clearSandboxCards } from '../../Cards/cards.sandbox';
+import type { Card } from '../../Cards/types';
 import type {
     CombatDieColor, CombatEncounterState, CombatEvent, CombatManaDie, CombatThreatPhase,
 } from '../combat.encounter.types';
 
-afterEach(() => { vi.restoreAllMocks(); });
+afterEach(() => { vi.restoreAllMocks(); clearSandboxCards(); });
+
+/**
+ * Carrier-less verb fixtures. FORGE-a-floating-die and OMEN survived the
+ * Profane-Canon rework as ENGINE verbs but lost their library carriers
+ * (`ex-nihilo`, `signs-and-portents`) with the spec-32 library. The mechanics
+ * are still under test here; only the printed card moved into the fixture.
+ */
+const FIXTURE_FORGE: Card = {
+    id: 'fx-ex-nihilo',
+    theme: 'grave',
+    name: 'Ex Nihilo (fixture)',
+    philosophicalAspect: 'mind',
+    description: 'Test carrier for FORGE — a WILD floating die out of nothing.',
+    tier: 2, rank: 4, cardType: 'spell',
+    targetType: 'self',
+    paidSummary: 'FORGE a WILD floating die.',
+    free: { pips: 1 },
+    specialMechanics: [{ kind: 'forge_floating_die', color: 'wild' }],
+    addedIn: '2026-08-08',
+    tags: ['grave', 'dice', 'floating'],
+};
+
+const FIXTURE_OMEN: Card = {
+    id: 'fx-signs-and-portents',
+    theme: 'trial',
+    name: 'Signs and Portents (fixture)',
+    philosophicalAspect: 'heart',
+    description: 'Test carrier for OMEN — stake a claim on the next stance.',
+    tier: 1, rank: 2, cardType: 'spell',
+    targetType: 'self',
+    paidSummary: 'OMEN — stake a claim in window 1-2, ante 2 Conviction. On a hit, DRAW 2.',
+    free: { foretell: 1 },
+    specialMechanics: [{ kind: 'omen', maxWindow: 2, anteConviction: 2, rider: { drawCards: 2 } }],
+    addedIn: '2026-08-08',
+    tags: ['trial'],
+};
 
 const ae = (effectId: string, intensity = 1, remainingDuration = 3, tier: 1 | 2 | 3 = 2): ActiveEffect =>
     ({ effectId, intensity, remainingDuration, appliedAt: 1, tier });
@@ -98,7 +136,8 @@ function customPhases(stances: ('heart' | 'body' | 'mind')[], damage = 6): Comba
 // ── FLOATING DICE — the live tray (spec 32 v3 §5) ────────────────────────────
 
 describe('FLOATING DICE — forge, spend-forever, cap, exemptions', () => {
-    const FORGE = 'ex-nihilo'; // mind spell: FORGE a WILD floating die (v3 rework)
+    const FORGE = FIXTURE_FORGE.id; // mind spell: FORGE a WILD floating die
+    beforeEach(() => { registerSandboxCards([FIXTURE_FORGE]); });
 
     it('FORGE joins the tray NOW, persists into the next turn, and is draft-exempt', () => {
         mockSequentialRng(0.05);
@@ -106,7 +145,7 @@ describe('FLOATING DICE — forge, spend-forever, cap, exemptions', () => {
         const res = playFromHand(state, FORGE);
         const floated = res.events.find(e => e.kind === 'die-floated') as { dieId: string; color: string } | undefined;
         expect(floated).toBeDefined();
-        expect(floated!.color).toBe('wild'); // ex-nihilo forges a WILD die (v3 rework)
+        expect(floated!.color).toBe('wild'); // the fixture forges a WILD die
         // In the tray NOW (spendable this turn) and in the persistent pool.
         expect(res.state.dice.some(d => d.id === floated!.dieId && d.floating)).toBe(true);
         expect(res.state.floatingDice?.map(d => d.id)).toEqual([floated!.dieId]);
@@ -129,7 +168,7 @@ describe('FLOATING DICE — forge, spend-forever, cap, exemptions', () => {
 
     it('spending a floating die removes it FOREVER (refresh effects cannot save it)', () => {
         mockSequentialRng(0.05);
-        const DOT = 'slippery-slope';
+        const DOT = 'spoiled-poultice';
         let state = openAndDraft(makePlayer([FORGE, DOT]), makeEnemy(300, 'mind'), [FORGE, DOT, DOT], 'mind');
         const forged = playFromHand(state, FORGE);
         const floatId = (forged.events.find(e => e.kind === 'die-floated') as { dieId: string }).dieId;
@@ -161,9 +200,9 @@ describe('FLOATING DICE — forge, spend-forever, cap, exemptions', () => {
 
     it('the opening tray materializes the character save-file pool', () => {
         mockSequentialRng(0.05);
-        const player = makePlayer(['slippery-slope']);
+        const player = makePlayer(['spoiled-poultice']);
         (player as Character & { floatingDice?: string[] }).floatingDice = ['wild', 'heart'];
-        let state = initializeCombatEncounter(player, makeEnemy(100, 'mind'), ['slippery-slope'], 7);
+        let state = initializeCombatEncounter(player, makeEnemy(100, 'mind'), ['spoiled-poultice'], 7);
         expect(state.floatingDice?.map(d => d.color)).toEqual(['wild', 'heart']);
         state = rollEncounterDice(state).state;
         // The floating pool is merged into the first turn's tray.
@@ -174,8 +213,8 @@ describe('FLOATING DICE — forge, spend-forever, cap, exemptions', () => {
 // ── PREMISES + PERORATION (T2) ───────────────────────────────────────────────
 
 describe('PREMISES / PERORATION — the declared conclusion and the CONCEDE alt-win', () => {
-    const CLOSER = 'the-closing-word'; // PERORATION at 6 (CONCEDE at 8); rider: marks×3, draw 2, +2◆
-    const OPENER = 'exordium';         // FREE: +1 Premise
+    const CLOSER = 'the-black-cap';      // PERORATION at 6 (CONCEDE at 8); rider: marks×2, draw 1
+    const OPENER = 'petty-indictment';   // FREE: +1 Premise
 
     function declared(enemyEffects: ActiveEffect[] = []): CombatEncounterState {
         mockSequentialRng(0.05);
@@ -197,10 +236,11 @@ describe('PREMISES / PERORATION — the declared conclusion and the CONCEDE alt-
         expect(res.events.some(e => e.kind === 'peroration-fired')).toBe(true);
         expect(res.state.premises).toBe(0);                       // tally resets
         expect(res.state.peroration).toMatchObject({ cardId: CLOSER }); // stays declared
-        // ruptureMarks 3 × 2 consumed stacks = 6 burst; +2 Conviction.
-        expect(hpBefore - res.state.enemy.health).toBe(6);
+        // ruptureMarks 2 × 2 consumed stacks = 4 burst; the rider draws 1.
+        expect(hpBefore - res.state.enemy.health).toBe(4);
         expect(res.state.enemy.effects.some(e => e.effectId === 'debuff_mark')).toBe(false);
-        expect(res.state.conviction).toBe(Math.min(12, convBefore + 2));
+        expect(res.state.conviction).toBe(convBefore); // the canon rider antes no Conviction
+        expect(res.events.some(e => e.kind === 'hand-drawn')).toBe(true);
     });
 
     it('reaching 8 Premises first wins the argument outright — CONCEDE (spec §9)', () => {
@@ -216,10 +256,10 @@ describe('PREMISES / PERORATION — the declared conclusion and the CONCEDE alt-
 // ── STAGGER + BACKFIRE (T5) ──────────────────────────────────────────────────
 
 describe('STAGGER rungs — full removal denies the turn; BACKFIRE drips per rung', () => {
-    const ZENO = 'zenos-half-step'; // STAGGER 1
+    const ZENO = 'scolds-bridle'; // STAGGER 1 + BACKFIRE 1
 
     it('stripping every rung DENIES the telegraph and BACKFIRE drips per denied rung', () => {
-        // 0.2 rolls BODY dice — zeno's-half-step is a body spell and the color
+        // 0.2 rolls BODY dice — Scold's Bridle is a body spell and the color
         // law (2026-07-09) demands a matching (or wild) powering die. No seed:
         // a seed installs its own rng stream and the mock would never apply.
         mockSequentialRng(0.2);
@@ -243,11 +283,20 @@ describe('STAGGER rungs — full removal denies the turn; BACKFIRE drips per run
         const resolved = res.events.find(e => e.kind === 'phase-resolved') as { mark: string };
         expect(resolved.mark).toBe('clear');
         expect(res.state.player.health).toBe(200); // the denied blow never landed
-        // BACKFIRE i1 × THREAT_RUNGS(2) denied rungs = 2 HP inward.
+        // BACKFIRE drips intensity × denied rungs. Scold's Bridle carries its
+        // own BACKFIRE on BOTH faces, and `resolveCombatPhase` drains the FREE
+        // tops too, so the standing stack by resolution is the seeded 1 plus
+        // 2 plays × (PAID 1 + FREE 1) = 5 — read it off the last landing
+        // rather than pinning a literal that the card text owns.
+        const landed = res.events.filter(
+            (e): e is Extract<CombatEvent, { kind: 'effect-landed' }> =>
+                e.kind === 'effect-landed' && e.effectId === 'debuff_backfire',
+        );
+        const stack = landed[landed.length - 1]!.intensity;
         const backfired = res.events.find(e => e.kind === 'backfired') as { amount: number; rungs: number } | undefined;
         expect(backfired).toBeDefined();
         expect(backfired!.rungs).toBe(THREAT_RUNGS);
-        expect(backfired!.amount).toBe(THREAT_RUNGS);
+        expect(backfired!.amount).toBe(THREAT_RUNGS * stack);
     });
 
     it('partial rung loss WEAKENS the hit proportionally and still drips', () => {
@@ -278,7 +327,8 @@ describe('STAGGER rungs — full removal denies the turn; BACKFIRE drips per run
 // ── OMEN (T6) ────────────────────────────────────────────────────────────────
 
 describe('OMEN — declare with the powering die; resolve at the phase boundary', () => {
-    const OMEN_CARD = 'signs-and-portents'; // OMEN: on hit, draw 2
+    const OMEN_CARD = FIXTURE_OMEN.id; // OMEN: on hit, draw 2
+    beforeEach(() => { registerSandboxCards([FIXTURE_OMEN]); });
 
     function withPhases(state: CombatEncounterState, stances: ('heart' | 'body' | 'mind')[]): CombatEncounterState {
         return {
@@ -319,7 +369,7 @@ describe('OMEN — declare with the powering die; resolve at the phase boundary'
             makePlayer([OMEN_CARD]), makeEnemy(300, 'mind'),
             [OMEN_CARD, OMEN_CARD, OMEN_CARD, OMEN_CARD, OMEN_CARD], 7);
         state = rollEncounterDice(state).state;
-        // signs-and-portents is a HEART spell: the color law demands a heart
+        // the OMEN fixture is a HEART spell: the color law demands a heart
         // (or wild) powering die, so the MISS comes from the phases instead —
         // the heart die predicts HEART, but the next phase stays MIND.
         state = withPhases(state, ['mind', 'mind']);
@@ -361,51 +411,50 @@ describe('SOULS — expiry yields, REAP spends, REAP-all bursts under the cap', 
         expect(mark).toMatchObject({ intensity: 2, remainingDuration: 1 }); // held, not counted down
     });
 
-    it('REAP fizzles underfunded; funded, it spends the Souls and fires (draw + KINDLE)', () => {
+    it('REAP fizzles underfunded; funded, it spends the Souls and fires (SWAY + RAPPORT + KINDLE)', () => {
         mockSequentialRng(0.05);
-        const GLEAN = 'the-gleaners-due'; // REAP cost 2: KINDLE(mind) + draw 2 + 1 Soul back
-        const DOT = 'slippery-slope';
-        const deck = [GLEAN, GLEAN, GLEAN, GLEAN, GLEAN, DOT, DOT, DOT, DOT];
-        const broke = openAndDraft(makePlayer([GLEAN, DOT]), makeEnemy(300, 'mind'), deck, 'mind');
-        const fizzled = playFromHand(broke, GLEAN);
+        const PLATE = 'the-offertory-plate'; // REAP cost 3: SWAY 5 + RAPPORT 2 + KINDLE(heart)
+        const DOT = 'spoiled-poultice';
+        const deck = [PLATE, PLATE, PLATE, PLATE, PLATE, DOT, DOT, DOT, DOT];
+        const broke = openAndDraft(makePlayer([PLATE, DOT]), makeEnemy(300, 'heart'), deck, 'heart');
+        const fizzled = playFromHand(broke, PLATE);
         expect(fizzled.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
         expect(fizzled.state.souls ?? 0).toBe(0);
+        expect(fizzled.state.sway ?? 0).toBe(0); // the underfunded REAP applies NOTHING
 
-        let funded = openAndDraft(makePlayer([GLEAN, DOT]), makeEnemy(300, 'mind'), deck, 'mind');
-        funded = { ...funded, souls: 3 };
-        funded = discardCombatCard(funded, funded.hand[1].uid).state; // room for the draws
-        const res = playFromHand(funded, GLEAN);
-        expect(res.state.souls).toBe(2); // 3 − cost 2 + 1 Soul back ("a coin pressed back")
+        let funded = openAndDraft(makePlayer([PLATE, DOT]), makeEnemy(300, 'heart'), deck, 'heart');
+        funded = { ...funded, souls: 5 };
+        const res = playFromHand(funded, PLATE);
+        expect(res.state.souls).toBe(2); // 5 − cost 3
         expect(res.events.some(e => e.kind === 'reaped')).toBe(true);
         expect(res.events.some(e => e.kind === 'die-forged')).toBe(true); // KINDLE joins the Reserve
-        expect(res.state.reserve?.some(d => d.color === 'mind' && d.temporary)).toBe(true);
-        const drawn = res.events.find(e => e.kind === 'hand-drawn') as { cards: string[] } | undefined;
-        expect(drawn).toBeDefined();
-        expect(drawn!.cards.length).toBe(2);
+        expect(res.state.reserve?.some(d => d.color === 'heart' && d.temporary)).toBe(true);
+        expect(res.state.sway ?? 0).toBe(5);
+        expect(res.state.enemy.effects.some(e => e.effectId === 'debuff_rapport')).toBe(true);
     });
 
     it('REAP-all spends EVERY Soul and the burst is UNCAPPED (WS7.1, spec 32 §12 item 5)', () => {
         mockSequentialRng(0.05);
-        const REAP = 'the-reaping'; // REAP all: 4 per Soul (v3 rework)
-        let state = openAndDraft(makePlayer([REAP]), makeEnemy(600, 'body'), [REAP, REAP, REAP], 'body');
+        const REAP = 'miserere'; // REAP all: 3 per Soul (profane canon)
+        let state = openAndDraft(makePlayer([REAP]), makeEnemy(600, 'heart'), [REAP, REAP, REAP], 'heart');
         state = { ...state, souls: 60 };
         const hpBefore = state.enemy.health;
         const res = playFromHand(state, REAP);
         const reaped = res.events.find(e => e.kind === 'reaped') as { soulsSpent: number; amount: number };
         expect(reaped.soulsSpent).toBe(60);
-        // 4 × 60 = 240 lands whole (neutral read: body die vs body foe) — the
+        // 3 × 60 = 180 lands whole (neutral read: heart die vs heart foe) — the
         // ALL-spender's price is the emptied bank, not a cap (the old 200 flat
-        // cap would have swallowed 40 of it).
-        expect(reaped.amount).toBe(240);
+        // cap would have swallowed some of it).
+        expect(reaped.amount).toBe(180);
         expect(res.state.souls).toBe(0);
-        expect(hpBefore - res.state.enemy.health).toBe(240);
+        expect(hpBefore - res.state.enemy.health).toBe(180);
     });
 });
 
 // ── SWAY (T8) ────────────────────────────────────────────────────────────────
 
 describe('SWAY — gain, per-turn decay, CAPITULATE, irresistible-grace', () => {
-    const SOFT = 'soft-word'; // SWAY 3
+    const SOFT = 'thin-hymn'; // SWAY 3
 
     it('gains stack and decays 1 at the turn boundary', () => {
         mockSequentialRng(0.05);
@@ -448,10 +497,10 @@ describe('SWAY — gain, per-turn decay, CAPITULATE, irresistible-grace', () => 
         // Engine-truth pin for the capitulate/victory tie: sway 3 vs a foe about
         // to die to the burst must record VICTORY.
         mockSequentialRng(0.05);
-        const REAP = 'the-reaping';
-        let state = openAndDraft(makePlayer([REAP]), makeEnemy(6, 'body'), [REAP, REAP, REAP], 'body');
+        const REAP = 'miserere';
+        let state = openAndDraft(makePlayer([REAP]), makeEnemy(6, 'heart'), [REAP, REAP, REAP], 'heart');
         state = { ...state, souls: 10, sway: 3 };
-        const res = playFromHand(state, REAP); // burst 20 → HP 0
+        const res = playFromHand(state, REAP); // burst 30 → HP 0
         expect(res.state.finalOutcome).toBe('victory');
     });
 
@@ -469,15 +518,15 @@ describe('SWAY — gain, per-turn decay, CAPITULATE, irresistible-grace', () => 
 // ── ECHO + REPRISE (T10) ─────────────────────────────────────────────────────
 
 describe('ECHO — the PAID payload fires twice; stuck-in-their-head drips per echo', () => {
-    const REFRAIN = 'refrain'; // mark d2, ECHO
+    const REFRAIN = 'dirge-for-the-disinterred'; // DOOM i1, ECHO (mind)
 
     it('an ECHO card lands its status twice (intensity stacks)', () => {
         mockSequentialRng(0.05);
         const state = openAndDraft(makePlayer([REFRAIN]), makeEnemy(300, 'mind'), [REFRAIN, REFRAIN, REFRAIN], 'mind');
         const res = playFromHand(state, REFRAIN);
         expect(res.events.some(e => e.kind === 'echoed')).toBe(true);
-        const mark = res.state.enemy.effects.find(e => e.effectId === 'debuff_mark');
-        expect(mark?.intensity).toBe(2); // applied twice
+        const doom = res.state.enemy.effects.find(e => e.effectId === 'debuff_creeping_doom');
+        expect(doom?.intensity).toBe(2); // applied twice
     });
 
     it('stuck-in-their-head (D) drips 2 on every echo', () => {
@@ -495,19 +544,19 @@ describe('ECHO — the PAID payload fires twice; stuck-in-their-head drips per e
 
     it('a pending echo_next_spell charge echoes the NEXT spell, then is consumed', () => {
         mockSequentialRng(0.05);
-        // ad-nauseam — the library's only echo_next_spell CARRIER — was
-        // retired in D8 (plan/tuning/2026-07-18-d8-preset-dice-valves.md).
-        // The engine mechanic itself is still live, so the charge is seeded
-        // directly on the state and the surviving bleeder bleed-for-it
-        // witnesses the doubled payload + charge consumption.
-        const BLEEDER = 'bleed-for-it';
-        // Enemy stance BODY: the wild die re-reads as the bleeder's body stance,
-        // so the read stays NEUTRAL and no read-intensity bonus muddies the echo.
+        // The library has carried no echo_next_spell CARRIER since D8; the
+        // engine mechanic itself is still live, so the charge is seeded
+        // directly on the state and a canon bleeder witnesses the doubled
+        // payload + charge consumption.
+        const BLEEDER = 'the-sextons-bell'; // BLEED i2 d2 + DOOM i1 (heart)
+        // Enemy stance HEART: the wild die re-reads as the bleeder's heart
+        // stance, so the read stays NEUTRAL and no read-intensity bonus
+        // muddies the echo.
         let state = openAndDraft(
-            makePlayer([BLEEDER]), makeEnemy(300, 'body'),
+            makePlayer([BLEEDER]), makeEnemy(300, 'heart'),
             [BLEEDER, BLEEDER, BLEEDER, BLEEDER], 'mind');
         // A banked Reserve die powers the spell (WILD — the color law demands
-        // a matching die for the body spell, and wild is the exception).
+        // a matching die for the heart spell, and wild is the exception).
         state = {
             ...state,
             reserve: [{ id: 'bank-echo', color: 'wild', state: 'available', temporary: false, pips: 0 }],
@@ -524,24 +573,43 @@ describe('ECHO — the PAID payload fires twice; stuck-in-their-head drips per e
 describe('REPRISE — returns the highest-rank discard; fireFree fires its FREE line', () => {
     it('reprise picks the HIGHEST-RANK card out of the discard pile', () => {
         mockSequentialRng(0.05);
-        const SECOND = 'second-thoughts'; // REPRISE 1
-        let state = openAndDraft(makePlayer([SECOND]), makeEnemy(300, 'mind'), [SECOND, SECOND, SECOND], 'mind');
-        state = { ...state, discard: ['slippery-slope', 'ouroboros', 'exordium'] }; // ranks 1, 5, 1
+        const SECOND = 'shallow-grave'; // RECALL 1 (heart)
+        let state = openAndDraft(makePlayer([SECOND]), makeEnemy(300, 'heart'), [SECOND, SECOND, SECOND], 'heart');
+        // ranks 1, 5, 1 — the pile's highest rank is the one that comes back.
+        state = { ...state, discard: ['spoiled-poultice', 'open-every-grave', 'petty-indictment'] };
         const res = playFromHand(state, SECOND);
         const reprised = res.events.find(e => e.kind === 'reprised') as { returned: string[] } | undefined;
         expect(reprised).toBeDefined();
-        expect(reprised!.returned).toEqual(['ouroboros']);
-        expect(res.state.hand.some(h => h.cardId === 'ouroboros')).toBe(true);
-        expect(res.state.discard).not.toContain('ouroboros');
+        expect(reprised!.returned).toEqual(['open-every-grave']);
+        expect(res.state.hand.some(h => h.cardId === 'open-every-grave')).toBe(true);
+        expect(res.state.discard).not.toContain('open-every-grave');
     });
 
-    it('circular-reasoning also fires the reprised card\'s FREE line now', () => {
+    it('a fireFree RECALL also fires the reprised FREE line', () => {
+        // PROFANE CANON (2026-08-08): no library card prints `fireFree` any
+        // more (circular-reasoning died with the spec-32 library), so the verb
+        // is exercised through a synthetic carrier — the ENGINE branch, not the
+        // retired card, is what this pins.
         mockSequentialRng(0.05);
-        const CIRC = 'circular-reasoning'; // REPRISE 1 + fireFree
-        let state = openAndDraft(makePlayer([CIRC]), makeEnemy(300, 'mind'), [CIRC, CIRC, CIRC], 'mind');
-        state = { ...state, discard: ['exordium'] }; // FREE: +1 Premise
-        const res = playFromHand(state, CIRC);
-        expect(res.state.hand.some(h => h.cardId === 'exordium')).toBe(true);
+        const CIRC: Card = {
+            id: 'fx-circular-reasoning',
+            theme: 'grave',
+            name: 'Circular Reasoning (fixture)',
+            philosophicalAspect: 'mind',
+            description: 'Test carrier for RECALL + fireFree.',
+            tier: 1, rank: 2, cardType: 'spell',
+            targetType: 'self',
+            paidSummary: 'RECALL 1 card and fire its FREE line.',
+            free: { foretell: 1 },
+            specialMechanics: [{ kind: 'reprise', count: 1, fireFree: true }],
+            addedIn: '2026-08-08',
+            tags: ['grave'],
+        };
+        registerSandboxCards([CIRC]);
+        let state = openAndDraft(makePlayer([CIRC.id]), makeEnemy(300, 'mind'), [CIRC.id, CIRC.id, CIRC.id], 'mind');
+        state = { ...state, discard: ['petty-indictment'] }; // FREE: +1 Premise
+        const res = playFromHand(state, CIRC.id);
+        expect(res.state.hand.some(h => h.cardId === 'petty-indictment')).toBe(true);
         expect(res.state.premises).toBe(1); // the reprised FREE line fired
     });
 });
@@ -549,12 +617,14 @@ describe('REPRISE — returns the highest-rank discard; fireFree fires its FREE 
 // ── ENCHANT / DISENCHANT — FREE timed instance vs PAID permanent (spec 32 v4 §2) ─
 
 describe('ENCHANT / DISENCHANT — FREE timed line, PAID permanent, unique-in-play', () => {
-    const ENCH = 'venom-and-vein';       // T1 enchantment
-    const CURSE = 'suppurating-curse';   // T1 disenchant
+    // PROFANE CANON carriers (both mind): the enchantment bills BLEED on every
+    // RECOIL paid; the disenchant drips off the discard pile at end of round.
+    const ENCH = 'the-red-ledger';            // rot/debt enchantment
+    const CURSE = 'the-congregation-below';   // grave disenchant
 
     it('FREE (dieless): drops a TIMED enchant into tempZone for 3 rounds and RECYCLES the card', () => {
         mockSequentialRng(0.05);
-        const state = openAndDraft(makePlayer([ENCH]), makeEnemy(300, 'body'), [ENCH, ENCH, ENCH], 'body');
+        const state = openAndDraft(makePlayer([ENCH]), makeEnemy(300, 'mind'), [ENCH, ENCH, ENCH], 'mind');
         const res = playFromHand(state, ENCH, false);
         expect(res.events.some(e => e.kind === 'enchant-played'
             && (e as { temporary?: boolean }).temporary === true)).toBe(true);
@@ -574,14 +644,16 @@ describe('ENCHANT / DISENCHANT — FREE timed line, PAID permanent, unique-in-pl
         expect(res.state.enemyAttachments).toEqual([]);            // NOT permanent
     });
 
-    it('a TEMP enchant fires the exact same hook as the permanent one (venom blesses a DoT)', () => {
+    it('a TEMP enchant fires the exact same hook as the permanent one (the ledger bills a RECOIL)', () => {
         mockSequentialRng(0.05);
-        const DOT = 'slippery-slope'; // body spell — color law needs a body die (neutral read vs body foe)
-        let state = openAndDraft(makePlayer([DOT]), makeEnemy(300, 'body'), [DOT, DOT, DOT], 'body');
-        state = { ...state, tempZone: [{ cardId: 'venom-and-vein', roundsLeft: 3 }] };
-        const res = playFromHand(state, DOT);
-        const poison = res.state.enemy.effects.find(e => e.effectId === 'debuff_poison');
-        expect(poison?.intensity).toBe(2); // authored i1 + venom blessing, from the TIMED instance
+        const DEBT = 'the-vig'; // mind spell, RECOIL 2 — color law needs a mind die
+        let state = openAndDraft(makePlayer([DEBT]), makeEnemy(300, 'mind'), [DEBT, DEBT, DEBT], 'mind');
+        state = { ...state, tempZone: [{ cardId: ENCH, roundsLeft: 3 }] };
+        const res = playFromHand(state, DEBT);
+        // The billed BLEED comes from the TIMED instance, not a permanent one.
+        expect(res.state.enemy.effects.some(e => e.effectId === 'debuff_bleed')).toBe(true);
+        expect(res.events.some(e => e.kind === 'effect-landed'
+            && (e as { cardId?: string }).cardId === ENCH)).toBe(true);
     });
 
     it('a TEMP enchant ticks out after 3 rounds (enchant-expired), no longer in the zone', () => {
@@ -600,7 +672,7 @@ describe('ENCHANT / DISENCHANT — FREE timed line, PAID permanent, unique-in-pl
 
     it('PAID: enters the PERMANENT zone, consumes the die, and leaves the deck cycle (no reshuffle back)', () => {
         mockSequentialRng(0.05);
-        const state = openAndDraft(makePlayer([ENCH]), makeEnemy(300, 'body'), [ENCH, ENCH, ENCH], 'body');
+        const state = openAndDraft(makePlayer([ENCH]), makeEnemy(300, 'mind'), [ENCH, ENCH, ENCH], 'mind');
         const res = playFromHand(state, ENCH);
         expect(res.events.some(e => e.kind === 'enchant-played'
             && !(e as { temporary?: boolean }).temporary)).toBe(true);
@@ -612,7 +684,7 @@ describe('ENCHANT / DISENCHANT — FREE timed line, PAID permanent, unique-in-pl
 
     it('PAID promotes a live FREE instance: drops it from tempZone into the permanent zone', () => {
         mockSequentialRng(0.05);
-        let state = openAndDraft(makePlayer([ENCH]), makeEnemy(300, 'body'), [ENCH, ENCH, ENCH], 'body');
+        let state = openAndDraft(makePlayer([ENCH]), makeEnemy(300, 'mind'), [ENCH, ENCH, ENCH], 'mind');
         state = { ...state, tempZone: [{ cardId: ENCH, roundsLeft: 2 }] };
         const res = playFromHand(state, ENCH);
         expect(res.state.persistentZone).toEqual([ENCH]);
@@ -621,7 +693,7 @@ describe('ENCHANT / DISENCHANT — FREE timed line, PAID permanent, unique-in-pl
 
     it('FREE fizzles when the PERMANENT version is already standing', () => {
         mockSequentialRng(0.05);
-        let state = openAndDraft(makePlayer([ENCH]), makeEnemy(300, 'body'), [ENCH, ENCH, ENCH], 'body');
+        let state = openAndDraft(makePlayer([ENCH]), makeEnemy(300, 'mind'), [ENCH, ENCH, ENCH], 'mind');
         state = { ...state, persistentZone: [ENCH] };
         const res = playFromHand(state, ENCH, false);
         expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
@@ -630,7 +702,7 @@ describe('ENCHANT / DISENCHANT — FREE timed line, PAID permanent, unique-in-pl
 
     it('unique-in-play: a second PAID copy fizzles', () => {
         mockSequentialRng(0.05);
-        let state = openAndDraft(makePlayer([ENCH]), makeEnemy(300, 'body'), [ENCH, ENCH, ENCH], 'body');
+        let state = openAndDraft(makePlayer([ENCH]), makeEnemy(300, 'mind'), [ENCH, ENCH, ENCH], 'mind');
         state = { ...state, persistentZone: [ENCH] };
         const res = playFromHand(state, ENCH);
         expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
@@ -647,29 +719,23 @@ describe('ENCHANT / DISENCHANT — FREE timed line, PAID permanent, unique-in-pl
     });
 });
 
-describe('persistent hooks — venom-and-vein, mirror-of-guilt, crumbling-resolve', () => {
-    it('venom-and-vein (E): bleed/poison land +1 intensity', () => {
+describe('persistent hooks — the-red-ledger, mirror-of-guilt, crumbling-resolve', () => {
+    it('the-red-ledger (E): every RECOIL paid is billed again as BLEED at the enemy vein', () => {
         mockSequentialRng(0.05);
-        const DOT = 'slippery-slope'; // body spell — color law needs a body die (neutral read vs body foe)
-        let state = openAndDraft(makePlayer([DOT]), makeEnemy(300, 'body'), [DOT, DOT, DOT], 'body');
-        state = { ...state, persistentZone: ['venom-and-vein'] };
-        const res = playFromHand(state, DOT);
-        const poison = res.state.enemy.effects.find(e => e.effectId === 'debuff_poison');
-        expect(poison?.intensity).toBe(2); // authored i1 + venom blessing
+        const DEBT = 'the-vig'; // mind spell, RECOIL 2 — color law needs a mind die
+        let state = openAndDraft(makePlayer([DEBT]), makeEnemy(300, 'mind'), [DEBT, DEBT, DEBT], 'mind');
+        state = { ...state, persistentZone: ['the-red-ledger'] };
+        const res = playFromHand(state, DEBT);
+        const bleed = res.state.enemy.effects.find(e => e.effectId === 'debuff_bleed');
+        expect(bleed, 'the ledger must bill the recoil').toBeDefined();
+        expect(bleed!.intensity).toBe(1);
     });
 
-    it('mirror-of-guilt (D): a self-debuff lands 1 stack of itself on the enemy too', () => {
-        mockSequentialRng(0.05);
-        const AMJ = 'against-my-judgment'; // PAID: draw 2 + self-mark d2
-        let state = openAndDraft(makePlayer([AMJ]), makeEnemy(300, 'heart'), [AMJ, AMJ, AMJ], 'heart');
-        state = { ...state, enemyAttachments: ['mirror-of-guilt'] };
-        const res = playFromHand(state, AMJ);
-        expect(res.state.player.effects.some(e => e.effectId === 'debuff_mark')).toBe(true);
-        const mirrored = res.state.enemy.effects.find(e => e.effectId === 'debuff_mark');
-        expect(mirrored).toBeDefined();
-        expect(mirrored!.intensity).toBe(1);
-    });
-
+    // (The self-debuff reflection witness was retired with the Profane Canon:
+    //  no canon card lands a DEBUFF on its own caster, so the outbound half of
+    //  the mirror-of-guilt hook has no carrier to drive it. The hook itself is
+    //  scheduled for the dead-hook cleanup sweep; the inbound guard below is
+    //  the ruling that still matters.)
     it('mirror-of-guilt (D): an ENEMY-inflicted debuff does NOT reflect (owner ruling 2026-07-12, Bucket B #16)', () => {
         // The face is the contract: "every self-debuff your OWN cards land".
         // The old resolveThreatPhase hook mirrored enemy-inflicted debuffs
@@ -701,38 +767,34 @@ describe('persistent hooks — venom-and-vein, mirror-of-guilt, crumbling-resolv
     });
 });
 
-// ── WI-1 — suppurating-curse rides the EVENT ticks, not the empty round-clock ─
+// ── The round-end persistent battery — the canon disenchant clock ───────────
 
-describe('WI-1 — suppurating-curse doubles the round\'s REAL DoT total', () => {
-    const CURSE = 'suppurating-curse';
+describe('the-congregation-below (D) — the discard pile IS the kill clock', () => {
+    const CURSE = 'the-congregation-below';
 
-    it('drips the event-tick total accumulated this round (POISON/BLEED never touch the round-clock)', () => {
-        // Simulate a turn that ticked the enemy for 10 via event clocks
-        // (card-played poison / damage-instance bleed) — the accumulator the
-        // engine folds in `withLog`. The enemy carries NO round-clock DoT, so
-        // the OLD gate (`enemyDotTicks.length > 0`) would have dripped zero.
+    it('drips 1 HP per 3 cards in the discard pile at the close of the round', () => {
+        // PROFANE CANON (2026-08-08): the old suppurating-curse hook (double
+        // the round's real DoT total) died with its carrier; the grave's
+        // disenchant replaces it with a clock the deck's own MILL engine feeds.
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
         const seeded: CombatEncounterState = {
             ...base,
-            enemy: { ...base.enemy, effects: [ae('debuff_poison', 2, 4)] }, // card-played → round-clock empty
             enemyAttachments: [CURSE],
-            enemyDotDamageThisRound: 10,
+            discard: Array.from({ length: 10 }, () => 'spoiled-poultice'), // floor(10 / 3) = 3
         };
         const res = processBetweenPhases(seeded);
-        const supp = res.events.find(e => e.kind === 'dot-tick'
+        const drip = res.events.find(e => e.kind === 'dot-tick'
             && (e as { effectId: string }).effectId === CURSE) as { amount: number } | undefined;
-        expect(supp?.amount).toBe(10);                         // doubles the round's real DoT
-        expect(300 - res.state.enemy.health).toBe(10);         // only the suppuration drip hit HP
-        expect(res.state.enemyDotDamageThisRound).toBe(0);     // accumulator reset for next round
+        expect(drip?.amount).toBe(3);
+        expect(300 - res.state.enemy.health).toBe(3); // only the testimony hit HP
     });
 
-    it('is inert with no real ticks this round (no phantom drip off a standing poison)', () => {
+    it('is inert below the first rung (a two-card pile reads out nothing)', () => {
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
         const seeded: CombatEncounterState = {
             ...base,
-            enemy: { ...base.enemy, effects: [ae('debuff_poison', 2, 4)] },
             enemyAttachments: [CURSE],
-            enemyDotDamageThisRound: 0,
+            discard: ['spoiled-poultice', 'spoiled-poultice'],
         };
         const res = processBetweenPhases(seeded);
         expect(res.events.some(e => e.kind === 'dot-tick'
@@ -740,25 +802,24 @@ describe('WI-1 — suppurating-curse doubles the round\'s REAL DoT total', () =>
         expect(300 - res.state.enemy.health).toBe(0);
     });
 
-    it('LIVE: an EROSION opener ticks poison per card played, then the curse exacts it again', () => {
+    it('LIVE: the pile the player actually built is the number that lands', () => {
         mockSequentialRng(0.05);
-        // Enemy already bears poison i2 (a prior turn's application); this turn's
-        // card play advances the card-played clock on those pre-existing stacks.
         const enemy = makeEnemy(300, 'heart', [ae('debuff_poison', 2, 4)]);
-        let state = openAndDraft(makePlayer(['exordium']), enemy, ['exordium', 'exordium', 'exordium'], 'heart');
-        state = { ...state, enemyAttachments: [CURSE] };
-        const afterPlay = playFromHand(state, 'exordium').state;
-        const ticked = afterPlay.enemyDotDamageThisRound ?? 0;
-        expect(ticked).toBeGreaterThan(0); // the card-played poison clock really fired
+        const OPENER = 'thin-hymn'; // heart spell — the color law needs a heart die
+        let state = openAndDraft(makePlayer([OPENER]), enemy, [OPENER, OPENER, OPENER], 'heart');
+        state = {
+            ...state,
+            enemyAttachments: [CURSE],
+            discard: Array.from({ length: 5 }, () => 'spoiled-poultice'),
+        };
+        const afterPlay = playFromHand(state, OPENER).state;
+        const expected = Math.floor(afterPlay.discard.length / 3);
+        expect(expected).toBeGreaterThan(0); // the played card joined the pile
 
-        const hpBeforeBetween = afterPlay.enemy.health;
         const btw = processBetweenPhases(afterPlay);
-        const supp = btw.events.find(e => e.kind === 'dot-tick'
+        const drip = btw.events.find(e => e.kind === 'dot-tick'
             && (e as { effectId: string }).effectId === CURSE) as { amount: number } | undefined;
-        expect(supp?.amount).toBe(ticked);                              // drip == the round's real DoT
-        // Poison is card-played (never round-clock), so the ONLY HP loss in
-        // between-phases is the suppuration drip.
-        expect(hpBeforeBetween - btw.state.enemy.health).toBe(ticked);
+        expect(drip?.amount).toBe(expected);
     });
 });
 
@@ -812,23 +873,18 @@ describe('MARK — +1 per stack on EVERY DoT tick on the bearer (ratified A3)', 
 // ── Per-preset theme-engine ignition smoke (spec §8 gate, loose) ─────────────
 
 describe('preset ignition — every themed deck reaches its engine within a few rounds', () => {
-    /** The theme-engine signal each preset must show in its event log. */
+    /** The theme-engine signal each campaign snapshot must show in its log.
+     *  PROFANE CANON (2026-08-08): the ten theme presets became three
+     *  snapshots of ONE evolving deck, so the signal is the stage's spine —
+     *  rot's DoT clock throughout, joined by debt's RECOIL at the pilgrim
+     *  trimming and vigil's reflect wall at the apostate one. */
     const SIGNALS: Record<string, (e: CombatEvent) => boolean> = {
-        erosion: e => e.kind === 'dot-tick' && e.target === 'enemy',
-        oratory: e => e.kind === 'premise-gained',
-        foundry: e => e.kind === 'die-forged' || e.kind === 'die-floated',
-        penitent: e => e.kind === 'recoil-paid'
-            || (e.kind === 'effect-landed' && e.target === 'self' && e.effectId.startsWith('debuff_')),
-        standstill: e => e.kind === 'staggered' || e.kind === 'backfired',
-        augury: e => e.kind === 'foretold' || e.kind === 'omen-declared',
-        tithe: e => e.kind === 'soul-gained',
-        grace: e => e.kind === 'sway-gained',
-        // 2026-07-19: pebble-in-the-boot/the-anvil-speaks carry the reflect
-        // theme's sting line into the seated deck (nettle-cloak, the thorns
-        // carrier, is unseated) — either engine ignition counts.
-        bastion: e => e.kind === 'effect-landed'
-            && (e.effectId === 'buff_thorns' || e.effectId === 'debuff_nettle_sting'),
-        refrain: e => e.kind === 'echoed' || e.kind === 'reprised',
+        threadbare: e => e.kind === 'dot-tick' && e.target === 'enemy',
+        pilgrim: e => (e.kind === 'dot-tick' && e.target === 'enemy')
+            || e.kind === 'recoil-paid',
+        apostate: e => (e.kind === 'dot-tick' && e.target === 'enemy')
+            || e.kind === 'recoil-paid'
+            || (e.kind === 'effect-landed' && e.effectId === 'buff_thorns'),
     };
 
     // Gate 0 (2026-07-11 round-turn law) — the old harness fed every hand card

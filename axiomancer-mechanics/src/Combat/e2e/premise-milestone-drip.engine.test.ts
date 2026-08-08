@@ -11,22 +11,30 @@
  * accrues alongside, does NOT reset when a Peroration pays off or CONCEDE
  * fires — a milestone already paid stays paid.
  *
+ * Profane-canon refit (2026-08-08): the PREMISE depositor under test is now
+ * `petty-indictment` (trial theme: FREE +1 Premise; PAID `premise` count 1 —
+ * the retired `exordium`/`videtur-quod` seat), and the declared
+ * Peroration carrier is `the-black-cap` (at 6, concedeAt 8). The milestone
+ * engine itself is unchanged.
+ *
  * Covers:
  *   1. Pure tier-crossing arithmetic (`premiseMilestonesCrossed`).
  *   2. A single Premise grant below the first tier accrues the lifetime
  *      counter but pays no dividend.
- *   3. Crossing the first tier (FREE-line `exordium`) grants the printed
- *      STAGGER rungs and fires `premise-milestone` alongside `premise-gained`.
+ *   3. Crossing the first tier (FREE-line `petty-indictment`) grants the
+ *      printed STAGGER rungs and fires `premise-milestone` alongside
+ *      `premise-gained`.
  *   4. The SAME accrual fires on the PAID-line `premise` specialMechanics
- *      path (`exordium` played PAID).
+ *      path (`petty-indictment` played PAID).
  *   5. The lifetime counter does NOT reset when a Peroration payoff zeroes
  *      the spendable `premises` tally — a milestone banked before the payoff
  *      stays banked, and further grants keep crossing new tiers from where
  *      the lifetime counter left off.
  *   6. Per-combat scope: starts at 0 for a fresh combat.
- *   7. A full `COMBAT_SIM_POLICY_ORDER` × seed sweep on the Oratory preset
- *      deck runs without crashing (mirrors the TURNABOUT-ledger test's
- *      cross-policy pattern from Part 4a).
+ *   7. A full `COMBAT_SIM_POLICY_ORDER` × seed sweep on the Threadbare preset
+ *      deck (the campaign snapshot carrying the trial starter) runs without
+ *      crashing (mirrors the TURNABOUT-ledger test's cross-policy pattern
+ *      from Part 4a).
  *
  * Fixture/RNG conventions follow `akrasia-debt-ledger.engine.test.ts` /
  * `turnabout-ledger.engine.test.ts` (shared builder in
@@ -107,9 +115,9 @@ describe('Phase 32 part 4b — pure tier-crossing arithmetic', () => {
     });
 });
 
-describe("exordium ('exordium') — FREE-line milestone accrual", () => {
+describe("petty-indictment — FREE-line milestone accrual", () => {
     it('a grant below the first tier accrues the lifetime counter but pays no dividend', () => {
-        const before = stateFor('exordium', 0);
+        const before = stateFor('petty-indictment', 0);
         const { events, after } = playFree(before);
 
         const [gained] = findEvents(events, 'premise-gained');
@@ -121,7 +129,7 @@ describe("exordium ('exordium') — FREE-line milestone accrual", () => {
     });
 
     it('crossing the first tier grants the printed STAGGER rungs', () => {
-        const before = stateFor('exordium', PREMISE_MILESTONE_EVERY - 1, { staggerRungs: 0 });
+        const before = stateFor('petty-indictment', PREMISE_MILESTONE_EVERY - 1, { staggerRungs: 0 });
         const { events, after } = playFree(before);
 
         const [milestone] = findEvents(events, 'premise-milestone');
@@ -134,9 +142,9 @@ describe("exordium ('exordium') — FREE-line milestone accrual", () => {
     });
 });
 
-describe("exordium ('exordium') — PAID-line milestone accrual (same funnel)", () => {
+describe("petty-indictment — PAID-line milestone accrual (same funnel)", () => {
     it('the PAID `premise` specialMechanics path posts to the SAME lifetime counter', () => {
-        const before = stateFor('exordium', PREMISE_MILESTONE_EVERY - 1, { staggerRungs: 0 });
+        const before = stateFor('petty-indictment', PREMISE_MILESTONE_EVERY - 1, { staggerRungs: 0 });
         const { events, after } = playPaid(before);
 
         const [milestone] = findEvents(events, 'premise-milestone');
@@ -149,13 +157,15 @@ describe("exordium ('exordium') — PAID-line milestone accrual (same funnel)", 
 
 describe('the lifetime counter survives a Peroration payoff resetting `premises`', () => {
     it('a milestone banked before the payoff stays banked, and new grants keep crossing tiers from there', () => {
-        // `the-closing-word` declares a Peroration at 6 Premises (`peroration.at`);
+        // `the-black-cap` declares a Peroration at 6 Premises (`peroration.at`);
         // reaching it fires the rider and zeroes the spendable `premises` tally.
-        // Stage the lifetime counter one grant short of its SECOND tier so the
-        // very card play that pays off the Peroration also crosses it.
-        const before = stateFor('exordium', 2 * PREMISE_MILESTONE_EVERY - 1, {
+        // (`concedeAt` deliberately unstaged: this pins the payoff-reset path,
+        // not the CONCEDE alt-win.) Stage the lifetime counter one grant short
+        // of its SECOND tier so the very card play that pays off the
+        // Peroration also crosses it.
+        const before = stateFor('petty-indictment', 2 * PREMISE_MILESTONE_EVERY - 1, {
             premises: 5,
-            peroration: { cardId: 'the-closing-word', at: 6 },
+            peroration: { cardId: 'the-black-cap', at: 6 },
             staggerRungs: 0,
         });
         const { events, after } = playFree(before);
@@ -177,16 +187,16 @@ describe('premiseMilestoneTotal — per-combat scope', () => {
         expect(s.premiseMilestoneTotal).toBe(0);
     });
 
-    it('sim policies never crash across every policy and seed with the counter live (Oratory deck)', () => {
-        const oratoryDeck = buildPresetDeck('oratory');
-        expect(oratoryDeck.length).toBeGreaterThan(0);
-        // 2026-07-19: videtur-quod (a PREMISE depositor like the exordium it
-        // evicted) keeps the milestone counter live in the seated deck.
-        expect(oratoryDeck).toContain('videtur-quod');
+    it('sim policies never crash across every policy and seed with the counter live (Threadbare deck)', () => {
+        const threadbareDeck = buildPresetDeck('threadbare');
+        expect(threadbareDeck.length).toBeGreaterThan(0);
+        // 2026-08-08: petty-indictment (the canon's starter PREMISE depositor)
+        // keeps the milestone counter live in the seated deck.
+        expect(threadbareDeck).toContain('petty-indictment');
 
         function makeSimPlayer(): Character {
             const p = deepClone(Player);
-            p.knownCards = oratoryDeck.slice();
+            p.knownCards = threadbareDeck.slice();
             return p;
         }
 
@@ -194,7 +204,7 @@ describe('premiseMilestoneTotal — per-combat scope', () => {
             for (const seed of [1, 2, 3, 11]) {
                 const p = makeSimPlayer();
                 const e = deepClone(GraveLarva);
-                const run = runOneEncounter(p, e, seed, policy, { deck: oratoryDeck });
+                const run = runOneEncounter(p, e, seed, policy, { deck: threadbareDeck });
                 expect(run.outcome).toBeDefined();
             }
         }

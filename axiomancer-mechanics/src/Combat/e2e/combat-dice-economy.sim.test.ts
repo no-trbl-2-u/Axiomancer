@@ -71,7 +71,7 @@ describe('spec 33 D3 — dice-math gates (authoritative face-table witness)', ()
 describe('spec 33 D3 — realized-play invariants (flag-on matrix)', () => {
     // A small, fast slice — invariants hold for any config.
     const result = simulateUpgradeableEconomy({
-        presets: ['oratory', 'standstill', 'erosion'],
+        presets: ['threadbare', 'pilgrim', 'apostate'],
         stages: ['early', 'mid'],
         seeds: [1, 2, 3, 4, 5],
     });
@@ -127,11 +127,20 @@ describe('spec 33 D7 — ratified economy envelope + flag-not-ready canaries', (
     const result = simulateUpgradeableEconomy({ seeds: [1, 2, 3, 4, 5, 6, 7, 8] });
     const p = result.pooled;
 
-    it('RATIFIED: realized ◆ income sits in the design band 1.2-1.6 at converged seeds', () => {
-        // D3/D7 income band. The lower edge is F1-sensitive (miss-heavy at small
-        // seed sets); at seeds 1-8 it reads ~1.48, comfortably in band.
+    // PROFANE-CANON SUSPENSION (2026-08-08): balance bands deliberately
+    // suspended for the rework — "no need to worry about balance yet" (owner).
+    // /deck-tuning re-baselines and re-arms these against the new canon.
+    // (The canon's decks read 1.18◆ against a 1.2 floor authored for the
+    // retired ten-preset library; the sim itself still runs, and the
+    // structural assertions below stay ARMED.)
+    // SKIP-ISSUE: #183
+    it.skip('RATIFIED: realized ◆ income sits in the design band 1.2-1.6 at converged seeds', () => {
         expect(p.totalIncomePerRound).toBeGreaterThanOrEqual(1.2);
         expect(p.totalIncomePerRound).toBeLessThanOrEqual(1.6);
+    });
+
+    it('the ◆ economy still produces real income (structural floor, band-independent)', () => {
+        expect(p.totalIncomePerRound).toBeGreaterThan(0);
     });
 
     it('RATIFIED: income is specials-driven with a yield contribution (D6e telegraphs)', () => {

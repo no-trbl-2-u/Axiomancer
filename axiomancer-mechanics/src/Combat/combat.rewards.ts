@@ -21,13 +21,15 @@ import { playerArchetype } from './combat.signature';
 import type { PlayerArchetype } from './combat.encounter.types';
 
 /**
- * The card-reward pool — spec 32 v3: the ENTIRE 70-card themed library. Drop
- * odds are governed by PER-RARITY weights (the generalized gold-weighting,
- * ledger #16): common cards drop freely, uncommons less, rares are the prize.
- * Invalid ids are filtered at roll time so the list stays safe to edit.
+ * The card-reward pool — the Profane Canon: the whole library EXCEPT the
+ * curse class (theme `'curse'` cards are enemy-injected junk — offering one
+ * as a reward would be a cruelty the reward screen does not stock). Drop
+ * odds are governed by PER-RARITY weights: common cards drop freely,
+ * uncommons less, rares are the prize. Invalid ids are filtered at roll time
+ * so the list stays safe to edit.
  */
 export const COMBAT_REWARD_POOL: readonly string[] = Object.freeze(
-    cardLibrary.map(card => card.id),
+    cardLibrary.filter(card => card.theme !== 'curse').map(card => card.id),
 );
 
 /** Per-rarity drop weights (spec 32 v3 §4 — the reward-roll lever). Tunable. */
@@ -39,13 +41,13 @@ export const REWARD_RARITY_WEIGHTS: Readonly<Record<'common' | 'uncommon' | 'rar
  *  through ethical-dilemma events via `unlockCardViaDilemma`. The mobile
  *  bootstrap seeds a new character's `knownCards` from this list. */
 export const STARTING_CARD_IDS: readonly string[] = Object.freeze([
-    'slippery-slope',       // opening offense
-    'brace-for-impact',     // basic defense (GUARD) — guard from turn one
+    'spoiled-poultice',     // opening offense (the rot seed)
+    'chilblain-watch',      // basic defense (GUARD) — guard from turn one
 ]);
 
 /** The single OFFENSIVE card a brand-new player starts with. Kept for
  *  back-compat; prefer `STARTING_CARD_IDS` (which also grants a defense card). */
-export const STARTING_CARD_ID = 'slippery-slope';
+export const STARTING_CARD_ID = 'spoiled-poultice';
 
 /**
  * A valid reward-pool entry must resolve to a real card. `extraPool` (WS6.2 —

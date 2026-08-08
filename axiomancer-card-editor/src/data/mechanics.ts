@@ -175,6 +175,9 @@ export const SPECIAL_MECHANIC_KINDS = [
     'replay_last',
     'conjure_card',
     'rider',
+    // Profane-canon rework — the pyre verbs
+    'immolate',
+    'purge_self',
 ] as const;
 export type SpecialMechanicKind = (typeof SPECIAL_MECHANIC_KINDS)[number];
 

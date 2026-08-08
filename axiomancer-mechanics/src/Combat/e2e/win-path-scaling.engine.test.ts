@@ -4,7 +4,7 @@
  * let Oratory/Standstill sit at 100% win rate on EVERY stage while Grace's
  * CAPITULATE was unreachable late (Battle Lab round 2).
  *
- *   (A) CONCEDE — the-closing-word's Premise requirement floors at the
+ *   (A) CONCEDE — The Black Cap's Premise requirement floors at the
  *       enemy's own `difficulty` classification (CONCEDE_PREMISES_BASE/
  *       _ELITE/_BOSS), not a flat 8 everywhere.
  *   (B) CAPITULATE — SWAY >= capitulateThreshold(enemy), a Dawncaster
@@ -98,8 +98,8 @@ function customPhases(stances: ('heart' | 'body' | 'mind')[], damage = 6): Comba
 // ── (A) CONCEDE scales with enemy difficulty ─────────────────────────────────
 
 describe('CONCEDE Premises scale with enemy difficulty (item 1a)', () => {
-    const CLOSER = 'the-closing-word'; // PERORATION at 6; concedeAt (printed) 8
-    const OPENER = 'exordium';         // FREE: +1 Premise
+    const CLOSER = 'the-black-cap';    // PERORATION at 6; concedeAt (printed) 8
+    const OPENER = 'petty-indictment'; // FREE: +1 Premise
 
     function declared(enemy: Enemy): CombatEncounterState {
         mockSequentialRng(0.05);

@@ -27,7 +27,7 @@ describe('keyword registry — KW-1 (no unmapped effect id renders a blank face)
 });
 
 describe('keyword registry — KW-2/KW-3 (count pinned, no dead references)', () => {
-    it('the glossary holds exactly 37 entries (34 + SPECIAL/HONE/TEMPER, spec 33 D4)', () => {
+    it('the glossary holds exactly 42 entries (37 + the five profane-canon words)', () => {
         // Pins the count so a future add/retire is a deliberate, visible diff —
         // see the module doc in keywords.ts for the phase-29 ledger. The 33rd
         // entry is DOOM (WS3.4): a ratified CARD-LOCAL species gloss, not a
@@ -36,7 +36,9 @@ describe('keyword registry — KW-2/KW-3 (count pinned, no dead references)', ()
         // echo cards with no gloss anywhere — three carriers clears the bar.
         // 35-37 are SPECIAL / HONE / TEMPER (spec 33 §6, D4 2026-07-17): the
         // die-gear face payload + the two blacksmith upgrade verbs.
-        expect(allRegistryKeywords().length).toBe(37);
+        // 38-42 are the Profane Canon's rework vocabulary (2026-08-08):
+        // FESTER, REPLAY, REQUIEM, IMMOLATE, PURGE.
+        expect(allRegistryKeywords().length).toBe(42);
     });
 
     it('every mechanic-kind mapping resolves to a glossed keyword', () => {
@@ -53,8 +55,11 @@ describe('keyword registry — KW-2/KW-3 (count pinned, no dead references)', ()
         expect(unresolved).toEqual([]);
     });
 
-    it('retired keywords (BARRIER, CONJURE, PERORATION, FESTER, TRANSMUTE, REPRISE) are gone', () => {
-        const stillPresent = ['Barrier', 'Conjure', 'Peroration', 'Fester', 'Transmute', 'Reprise']
+    it('retired keywords (BARRIER, CONJURE, PERORATION, TRANSMUTE, REPRISE) are gone', () => {
+        // FESTER left this list on 2026-08-08: the Profane Canon promoted it
+        // back to a printed keyword (gangrene-gospel, The Untended Garden), so
+        // it needs a gloss again.
+        const stillPresent = ['Barrier', 'Conjure', 'Peroration', 'Transmute', 'Reprise']
             .filter(retired => keywordGloss(retired) !== null);
         expect(stillPresent).toEqual([]);
     });

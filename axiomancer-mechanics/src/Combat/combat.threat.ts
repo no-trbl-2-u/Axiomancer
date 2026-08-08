@@ -63,6 +63,10 @@ export interface AuthoredThreatPhase {
      *  no-op when the player controls no glyph (a sandbox-only mechanic —
      *  every non-glyph deck sees this field do nothing). */
     glyphShatter?: boolean;
+    /** Profane-canon rework — CURSE INJECTION: on Overwhelm, this curse card
+     *  is shuffled into the player's combat deck cycle (deck contamination —
+     *  the StS/Arkham attack vector). Authorable on any phase. */
+    curseCardId?: string;
     /** Threat description WITHOUT the damage number — the resolver appends "(+N damage[, Effect])". */
     actionText: string;
     isFinalPhase?: boolean;
@@ -207,7 +211,7 @@ function difficultyMult(enemy: Enemy): number {
  *  win-progress, or Phase 33d's GLYPHS-zone counterplay). */
 function effectIsDebuff(eff: CombatThreatEffect): boolean {
     return !!eff.effectId || (eff.swayCleanse ?? 0) > 0 || (eff.premiseShed ?? 0) > 0
-        || eff.glyphShatter === true;
+        || eff.glyphShatter === true || !!eff.curseCardId;
 }
 
 /**
@@ -291,6 +295,8 @@ interface ThreatActionRiders {
     premiseShed?: number;
     /** Phase 33d (GLYPHS pilot) — see `AuthoredThreatPhase.glyphShatter`. */
     glyphShatter?: boolean;
+    /** Profane-canon rework — see `AuthoredThreatPhase.curseCardId`. */
+    curseCardId?: string;
 }
 
 /** Builds a `CombatThreatAction` from authored intent + the computed damage. */
@@ -298,7 +304,7 @@ function buildThreatAction(
     actionText: string, damage: number, effectId?: string, intensity?: number,
     riders?: ThreatActionRiders,
 ): CombatThreatAction {
-    const { enemyHeal, enemyCleanse, swayCleanse, premiseShed, glyphShatter } = riders ?? {};
+    const { enemyHeal, enemyCleanse, swayCleanse, premiseShed, glyphShatter, curseCardId } = riders ?? {};
     const effects: CombatThreatEffect[] = [];
     if (damage > 0) effects.push({ damage });
     if (effectId) effects.push({ effectId, intensity: intensity ?? 1 });
@@ -307,6 +313,7 @@ function buildThreatAction(
     if (swayCleanse && swayCleanse > 0) effects.push({ swayCleanse });
     if (premiseShed && premiseShed > 0) effects.push({ premiseShed });
     if (glyphShatter) effects.push({ glyphShatter });
+    if (curseCardId) effects.push({ curseCardId });
     const parts = [`+${damage} damage`];
     if (effectId) parts.push(effectLabel(effectId));
     if (enemyHeal && enemyHeal > 0) parts.push(`heals ${enemyHeal}`);
@@ -318,6 +325,7 @@ function buildThreatAction(
         parts.push(`unravels ${premiseShed} premise${premiseShed === 1 ? '' : 's'}`);
     }
     if (glyphShatter) parts.push('shatters a glyph');
+    if (curseCardId) parts.push('hexes a curse into your deck');
     return { description: `${actionText} (${parts.join(', ')}).`, effects };
 }
 
@@ -350,6 +358,7 @@ function resolveBranchOutcome(
         swayCleanse: p.swayCleanse,
         premiseShed: p.premiseShed,
         glyphShatter: p.glyphShatter,
+        curseCardId: p.curseCardId,
     });
     return {
         enemyStance: p.enemyStance,
@@ -398,7 +407,7 @@ function resolveAuthored(enemy: Enemy, authored: AuthoredThreatStep[]): CombatTh
             threatAction: buildThreatAction(p.actionText, damage, p.threatEffectId, p.threatIntensity, {
                 enemyHeal: p.enemyHeal, enemyCleanse: p.enemyCleanse,
                 swayCleanse: p.swayCleanse, premiseShed: p.premiseShed,
-                glyphShatter: p.glyphShatter,
+                glyphShatter: p.glyphShatter, curseCardId: p.curseCardId,
             }),
             isFinalPhase: p.isFinalPhase ?? i === authored.length - 1,
             stanceHint: p.stanceHint ?? enemyStanceHint(enemy) ?? DEFAULT_STANCE_HINTS[p.enemyStance],

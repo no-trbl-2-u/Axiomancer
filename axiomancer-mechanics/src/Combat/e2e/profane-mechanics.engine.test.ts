@@ -1,0 +1,182 @@
+/**
+ * Hermetic E2E — the Profane Canon's NEW mechanics (2026-08-08 rework), LIVE
+ * through the HP-model combat engine:
+ *
+ *   1. IMMOLATE — burn the lowest-rank other cards in hand as a printed cost
+ *      (they leave the combat entirely — hand, discard, AND deck cycle), then
+ *      the rider fires; with nothing to burn, the rider fizzles.
+ *   2. PURGE — a curse card exiles itself from the combat when played (never
+ *      enters the discard; its deck-cycle instance is struck).
+ *   3. REQUIEM — the discard-size state predicate gates a free rider.
+ *   4. CURSE INJECTION — an enemy threat action shuffles a curse card into
+ *      the player's combat deck cycle (deck + draw pile; collection untouched).
+ */
+
+import { describe, it, expect, afterEach, vi } from 'vitest';
+
+import { Player } from '../../Character/characters.mock';
+import type { Character } from '../../Character/types';
+import type { Enemy } from '../../Enemy/types';
+import { GraveLarva } from '../../Enemy/enemy.library';
+import { deepClone } from '../../Utils';
+import { mockSequentialRng } from '../../test-utils/rng';
+import {
+    initializeCombatEncounter, rollEncounterDice, draftStanceDie, playCombatCard,
+    resolveThreatPhase,
+} from '../combat.engine';
+import type {
+    CombatDieColor, CombatEncounterState, CombatThreatPhase, CombatTransition,
+} from '../combat.encounter.types';
+
+afterEach(() => { vi.restoreAllMocks(); });
+
+const DISTRAINT = 'distraint';            // IMMOLATE 1 → BLEED 2 (3t) + GUARD 4 (body)
+const POULTICE = 'spoiled-poultice';      // rank 1 — the expected pyre fuel
+const CURSE = 'mouthful-of-brine';        // PURGE carrier (body)
+const DIRGE = 'dirge-for-the-disinterred'; // REQUIEM 8 carrier (mind)
+
+function makePlayer(cards: string[]): Character {
+    const p = deepClone(Player);
+    p.knownCards = [...new Set(cards)];
+    p.baseStats = { heart: 8, body: 8, mind: 8 };
+    p.health = 200; p.maxHealth = 200; p.effects = [];
+    return p;
+}
+
+function makeEnemy(hp: number): Enemy {
+    const e = deepClone(GraveLarva);
+    e.id = 'enemy-test-dummy';
+    e.health = hp; e.maxHealth = hp; e.effects = [];
+    return e;
+}
+
+/** Forces this turn's draft pool to known colors (deterministic reads). */
+function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatEncounterState {
+    const turn = state.turn || 1;
+    const dice = colors.map((c, i) => ({
+        id: `t${turn}-d${i}`, color: c,
+        state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
+    }));
+    return { ...state, dice, draftedDieId: null, turn };
+}
+
+function openAndDraft(deck: string[], dieColor: CombatDieColor, seed = 7): CombatEncounterState {
+    let state = initializeCombatEncounter(makePlayer(deck), makeEnemy(400), deck, seed);
+    state = rollEncounterDice(state).state;
+    state = setDice(state, [dieColor, 'x']);
+    state = draftStanceDie(state, state.dice[0].id).state;
+    return state;
+}
+
+function play(state: CombatEncounterState, cardId: string): CombatTransition {
+    const uid = state.hand.find(h => h.cardId === cardId)!.uid;
+    return playCombatCard(state, { uid }, true);
+}
+
+const countIn = (ids: readonly string[], id: string): number =>
+    ids.filter(x => x === id).length;
+
+describe('IMMOLATE — the pyre must be fed', () => {
+    it('burns the lowest-rank other card from hand and the deck cycle, then fires the rider', () => {
+        mockSequentialRng(0.05);
+        const deck = [DISTRAINT, POULTICE, POULTICE, POULTICE, POULTICE];
+        const state = openAndDraft(deck, 'body');
+        const handPoultices = countIn(state.hand.map(h => h.cardId), POULTICE);
+        expect(handPoultices).toBeGreaterThan(0);
+
+        const res = play(state, DISTRAINT);
+        const burned = res.events.find(e => e.kind === 'immolated');
+        expect(burned).toBeDefined();
+        expect((burned as { burned: string[] }).burned).toEqual([POULTICE]);
+        // The burned card left the combat entirely: one fewer in hand than a
+        // plain discard would leave, never in the discard pile, and its deck-
+        // cycle instance is struck (no reshuffle resurrection).
+        expect(countIn(res.state.hand.map(h => h.cardId), POULTICE)).toBe(handPoultices - 1);
+        expect(res.state.discard).not.toContain(POULTICE);
+        expect(countIn(res.state.deck, POULTICE)).toBe(3);
+        // The rider fired: BLEED 2 landed on the foe and GUARD rose.
+        expect(res.state.enemy.effects.some(e => e.effectId === 'debuff_bleed')).toBe(true);
+        expect(res.state.guard ?? 0).toBeGreaterThan(0);
+    });
+
+    it('fizzles the rider when nothing else is in hand to burn', () => {
+        mockSequentialRng(0.05);
+        const deck = [DISTRAINT];
+        let state = openAndDraft(deck, 'body');
+        // The engine pads a short deck with copies — strip the hand down to
+        // the single played card so the pyre genuinely has no fuel.
+        state = { ...state, hand: [state.hand.find(h => h.cardId === DISTRAINT)!] };
+        const res = play(state, DISTRAINT);
+        expect(res.events.some(e => e.kind === 'immolated')).toBe(false);
+        expect(res.events.some(e => e.kind === 'effect-fizzled'
+            && (e as { message?: string }).message === 'nothing in hand to burn')).toBe(true);
+        // No rider: the pyre was never fed.
+        expect(res.state.enemy.effects.some(e => e.effectId === 'debuff_bleed')).toBe(false);
+    });
+});
+
+describe('PURGE — the curse buys itself out', () => {
+    it('playing a curse exiles it from hand, discard, and the deck cycle', () => {
+        mockSequentialRng(0.05);
+        const deck = [CURSE, POULTICE, POULTICE, POULTICE, POULTICE];
+        const state = openAndDraft(deck, 'body');
+        const res = play(state, CURSE);
+        expect(res.events.some(e => e.kind === 'purged')).toBe(true);
+        expect(res.state.hand.map(h => h.cardId)).not.toContain(CURSE);
+        expect(res.state.discard).not.toContain(CURSE);
+        expect(res.state.deck).not.toContain(CURSE);
+    });
+});
+
+describe('REQUIEM — the dead remember', () => {
+    it('fires the gated rider only while the discard pile holds n+ cards', () => {
+        mockSequentialRng(0.05);
+        const deck = [DIRGE, POULTICE, POULTICE, POULTICE, POULTICE];
+
+        // Below the gate: no requiem rider.
+        const cold = play(openAndDraft(deck, 'mind'), DIRGE);
+        expect(cold.events.some(e => e.kind === 'die-bonus-fired'
+            && (e as { riderText?: string }).riderText?.includes('REQUIEM'))).toBe(false);
+
+        // At the gate (8 in the discard): the rider fires free.
+        let state = openAndDraft(deck, 'mind');
+        state = { ...state, discard: Array.from({ length: 8 }, () => POULTICE) };
+        const warm = play(state, DIRGE);
+        expect(warm.events.some(e => e.kind === 'die-bonus-fired'
+            && (e as { riderText?: string }).riderText?.includes('REQUIEM'))).toBe(true);
+    });
+});
+
+describe('CURSE INJECTION — the enemy hexes your deck', () => {
+    it('a landed threat shuffles the curse into deck and draw pile (combat-scoped)', () => {
+        mockSequentialRng(0.05);
+        const deck = [POULTICE, POULTICE, POULTICE, POULTICE, POULTICE, POULTICE, POULTICE];
+        let state = openAndDraft(deck, 'body');
+        const phase: CombatThreatPhase = {
+            ...state.threatPhases[state.currentPhaseIndex],
+            threatAction: {
+                description: 'The tide files a claim (hexes a curse into your deck).',
+                effects: [{ damage: 3 }, { curseCardId: CURSE }],
+            },
+        };
+        state = {
+            ...state,
+            threatPhases: state.threatPhases.map((p, i) =>
+                i === state.currentPhaseIndex ? phase : p),
+        };
+        const before = countIn(state.deck, CURSE);
+        expect(before).toBe(0);
+
+        const res = resolveThreatPhase(state);
+        expect(res.events.some(e => e.kind === 'curse-injected')).toBe(true);
+        expect(countIn(res.state.deck, CURSE)).toBe(1);
+        // The curse is somewhere in the live cycle (draw pile, or the hand
+        // after the boundary refill) — never silently dropped.
+        const inCycle = countIn(res.state.drawPile, CURSE)
+            + countIn(res.state.hand.map(h => h.cardId), CURSE)
+            + countIn(res.state.discard, CURSE);
+        expect(inCycle).toBe(1);
+        // The persistent collection is untouched.
+        expect(res.state.player.knownCards).not.toContain(CURSE);
+    });
+});

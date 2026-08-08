@@ -9,7 +9,7 @@
  *     precondition buffet: enemy afflictions with DoT fuel + MARK stacks,
  *     Souls, Premises, discard fodder, reserve/floating dice with pip
  *     headroom, a pre-damaged Fallen player, a banked TURNABOUT denial
- *     ledger. Every one of the 70 cards' PAID-face preconditions is
+ *     ledger. Every one of the 57 cards' PAID-face preconditions is
  *     satisfiable here.
  *   - CLEAN (`{ clean: true }`) — the doctrine witness's null board: the
  *     SAME player and die tray, but the enemy carries NO pre-applied
@@ -38,7 +38,7 @@ import { cardLibrary } from '../Cards/cards.library';
 
 /** Filler deck/draw-pile content: a real, always-playable spell, so `drawCards`
  *  riders never starve regardless of how many cards a given test draws. */
-export const FIXTURE_FILLER: readonly string[] = Array<string>(12).fill('slippery-slope');
+export const FIXTURE_FILLER: readonly string[] = Array<string>(12).fill('spoiled-poultice');
 export const FIXTURE_SEED = 20260708;
 
 export function buildFixtureState(options: { clean?: boolean } = {}): CombatEncounterState {
@@ -112,14 +112,14 @@ export function buildFixtureState(options: { clean?: boolean } = {}): CombatEnco
         omenHits: 0,
         echoNextSpell: false,
         spellsPlayedThisTurn: 0,
-        lastSpellCardId: 'slippery-slope', // a real, different, replayable spell (ouroboros fodder)
-        // Phase 39 (2026-08-08): ouroboros's REPLAY_LAST precondition-width
+        lastSpellCardId: 'spoiled-poultice', // a real, different, replayable spell (REPLAY fodder)
+        // Phase 39 (2026-08-08): REPLAY_LAST's precondition-width
         // retune requires `lastSpellRound === round` ("landed THIS turn") —
         // the fixture's `round` is 1 (initializeCombatEncounter's default).
         lastSpellRound: 1,
         persistentZone: [],
         enemyAttachments: [],
-        discard: ['slippery-slope', 'currys-conversion', 'festering-argument'], // reprise fodder (straw-mans-jab retired in D8)
+        discard: ['spoiled-poultice', 'thin-hymn', 'the-long-lent'], // RECALL fodder (canon re-slug 2026-08-08)
         drawPile: FIXTURE_FILLER.slice(),
         deck: FIXTURE_FILLER.slice(),
         hand: [],

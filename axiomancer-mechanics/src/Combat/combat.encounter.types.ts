@@ -260,6 +260,13 @@ export interface CombatThreatEffect {
      *  destroys the LOWEST-charge glyph (stable first-on-tie, no RNG).
      *  Authorable on any threat phase, branch or linear. */
     glyphShatter?: boolean;
+    /** Profane-canon rework — CURSE INJECTION (the StS/Arkham deck-
+     *  contamination vector): when the action fires, this curse card is
+     *  shuffled into the player's COMBAT deck cycle (persistent collection
+     *  untouched; the injection dies with the encounter). The player answers
+     *  with PURGE (playing the curse exiles it) or IMMOLATE (burning it as
+     *  fuel). Mirrors `swayCleanse`/`premiseShed`'s authoring shape. */
+    curseCardId?: string;
 }
 
 export interface CombatThreatAction {
@@ -612,6 +619,13 @@ export type CombatEvent =
     // lifetime premiseMilestoneTotal counter).
     | { kind: 'threat-sway-cleansed'; phaseIndex: number; amount: number }
     | { kind: 'threat-premise-shed'; phaseIndex: number; amount: number }
+    // Profane-canon rework — deck contamination + its answers. `curse-injected`
+    // fires when an enemy action shuffles a curse into the player's combat
+    // deck cycle; `immolated` when a play burns hand cards as fuel (they leave
+    // the combat); `purged` when a curse card exiles itself on play.
+    | { kind: 'curse-injected'; phaseIndex: number; cardId: string }
+    | { kind: 'immolated'; cardId: string; burned: string[] }
+    | { kind: 'purged'; cardId: string }
     // Phase 33d (GLYPHS pilot) — the charge-and-crack seal zone. Inscribe
     // (PAID line), charge (FREE line or the between-phases tick — the tick
     // itself is silent, see `processBetweenPhases`), crack (`crackGlyph`),

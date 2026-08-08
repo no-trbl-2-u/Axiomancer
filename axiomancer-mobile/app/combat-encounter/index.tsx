@@ -40,7 +40,7 @@ function readDeckOverride(): string[] | undefined {
     return Array.isArray(g) && g.every((x) => typeof x === 'string') ? (g as string[]) : undefined;
 }
 
-const DEMO_CARDS = ['slippery-slope', 'festering-argument', 'brace-for-impact', 'soft-word'];
+const DEMO_CARDS = ['spoiled-poultice', 'the-long-lent', 'chilblain-watch', 'thin-hymn'];
 function withDemoDeck<T extends { knownCards?: string[]; baseStats?: { heart: number; body: number; mind: number }; health?: number; maxHealth?: number }>(player: T): T {
     const known = player.knownCards ?? [];
     if (known.length >= 3) return player;

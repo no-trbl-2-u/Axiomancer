@@ -55,6 +55,10 @@ afterEach(() => {
 
 // Spec 32 v3: basePower is deleted at the schema level — no card can strike.
 // The "damage class" fixture is a bare RUPTURE payoff (affliction-gated burst).
+// Profane Canon (2026-08-08): the round-clock DoT lost its library carrier
+// (nettle-cloak retired; poison/bleed ride EVENT clocks), so the round-boundary
+// witness is a SYNTHETIC carrier of the still-live `debuff_nettle_sting`
+// effect (carrier-less-verb policy: engine behavior stays under test).
 registerSandboxCards([{
     id: 'qa-payoff-burst',
     name: 'QA Payoff Burst (test fixture)',
@@ -65,10 +69,20 @@ registerSandboxCards([{
     cardType: 'spell',
     targetType: 'enemy',
     specialMechanics: [{ kind: 'rupture' }],
+}, {
+    id: 'qa-round-dot',
+    name: 'QA Round-Clock DoT (test fixture)',
+    philosophicalAspect: 'body',
+    description: 'Test-only fixture: a round-end-clock DoT carrier (nettle sting).',
+    tier: 1,
+    rank: 1,
+    cardType: 'spell',
+    targetType: 'enemy',
+    combatEffects: [{ effectId: 'debuff_nettle_sting', appliedTo: 'opponent', intensity: 1, duration: 2 }],
 }]);
 
-const DOT_BODY = 'slippery-slope';       // body starter, applies debuff_poison (ramping DoT)
-const CONTROL_CARD = 'red-herring';      // mind, tier 1, BACKFIRE (control)
+const DOT_BODY = 'spoiled-poultice';     // body starter, applies debuff_poison (card-played-clock DoT)
+const CONTROL_CARD = 'scolds-bridle';    // body, tier 2, STAGGER + BACKFIRE (control)
 const DAMAGE_BODY = 'qa-payoff-burst';   // body, tier 1, RUPTURE payoff (sandbox fixture)
 
 function makePlayer(cards: string[]): Character {
@@ -333,8 +347,9 @@ describe('Spec 25 §4.5 — between-phases processing', () => {
     it('fires enemy DoT ticks (erodes HP), ticks effect durations, refills the hand', () => {
         mockSequentialRng(0.05);
         // WS3.3: poison/bleed ride EVENT clocks now — the round-boundary
-        // witness here is Nettle Cloak's Nettle Sting (round-end round clock).
-        const NETTLE = 'nettle-cloak';
+        // witness is the synthetic nettle-sting carrier (round-end round
+        // clock); its library carrier retired with the Profane Canon.
+        const NETTLE = 'qa-round-dot';
         let state = initializeCombatEncounter(makePlayer([NETTLE]), makeEnemy(80, 'mind'), [NETTLE], 5);
         state = rollEncounterDice(state).state;
         state = setDice(state, ['body', 'heart']);
@@ -609,8 +624,8 @@ describe('Spec 26b tuning — variety-gated combo + projection + carry', () => {
 
         // Variety: a DoT then a DISTINCT control status — the new status refreshes
         // the die for a genuine combo chain (the Mage-Knight "big turn").
-        // WILD draft: the color law would bar one die from powering both the
-        // body DoT and the mind control card; wild is the printed exception.
+        // WILD draft: wild powers any color (both canon carriers happen to be
+        // body now, but the wild path keeps the test carrier-agnostic).
         let varied = initializeCombatEncounter(makePlayer([DOT_BODY, CONTROL_CARD]), makeEnemy(160, 'mind'), [DOT_BODY, CONTROL_CARD], 7);
         varied = rollEncounterDice(varied).state;
         varied = setDice(varied, ['wild', 'heart']);

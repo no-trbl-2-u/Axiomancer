@@ -152,16 +152,16 @@ describe('AMPLIFICATION — the combo registry is surfaced honestly', () => {
 
 describe('RUPTURE — detonate the foe afflictions for the pending total', () => {
     // A PLAIN rupture card (no bonusPct) so `burst === projectRupture` — the
-    // projection-honesty invariant. (resonance-detonation/the-overtake carry a
-    // deliberate bonusPct amplifier and would burst ABOVE the pending total.)
-    const RUP = 'peroratio-interrupta';
+    // projection-honesty invariant. Communion of the Worm is the canon's one
+    // detonation and carries no amplifier (its SIPHON only feeds the player).
+    const RUP = 'communion-of-the-worm';
 
     it('strips ALL afflictions, bursts for projectRupture, and yields Souls per instance', () => {
         mockSequentialRng(0.05);
         const enemyEffects = [ae('debuff_poison', 2, 4), ae('debuff_bleed', 1, 4)];
-        // MIND die on the mind card (color law) vs a mind foe → neutral read ×1.
-        const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'mind', enemyEffects), [RUP, RUP, RUP], 'mind');
-        const projected = projectRupture(state); // neutral read (mind die vs mind) → ×1
+        // HEART die on the heart card (color law) vs a heart foe → neutral read ×1.
+        const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'heart', enemyEffects), [RUP, RUP, RUP], 'heart');
+        const projected = projectRupture(state); // neutral read (heart die vs heart) → ×1
         // WS3.3 clock fuel: poison RAMPS + Hemorrhage on the card-played
         // clock (2 expected ticks/round): per-round dprs 6,6,9,9 × 2 = 60;
         // bleed i1 DECAYS — exactly one tick of 3. pending = 63.
@@ -183,7 +183,7 @@ describe('RUPTURE — detonate the foe afflictions for the pending total', () =>
     it('adds a flat burst per NON-DoT affliction stack consumed (marks)', () => {
         mockSequentialRng(0.05);
         const enemyEffects = [ae('debuff_mark', 3, 2)];
-        const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'mind', enemyEffects), [RUP, RUP, RUP], 'mind');
+        const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'heart', enemyEffects), [RUP, RUP, RUP], 'heart');
         const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true);
         const det = res.events.find(e => e.kind === 'rupture-detonated') as { amount: number } | undefined;
         // No DoT fuel; RUPTURE_PER_AFFLICTION_STACK (3) × 3 mark stacks = 9.
@@ -195,7 +195,7 @@ describe('RUPTURE — detonate the foe afflictions for the pending total', () =>
         // HP — round(F × maxHp), no flat floor.
         mockSequentialRng(0.05);
         const enemyEffects = [ae('debuff_poison', 10, 10)];
-        const state = openAndDraft(makePlayer([RUP]), makeEnemy(900, 'mind', enemyEffects), [RUP, RUP, RUP], 'mind');
+        const state = openAndDraft(makePlayer([RUP]), makeEnemy(900, 'heart', enemyEffects), [RUP, RUP, RUP], 'heart');
         const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true);
         const det = res.events.find(e => e.kind === 'rupture-detonated') as { amount: number } | undefined;
         expect(ruptureBurstCap(900)).toBe(Math.round(RUPTURE_CAP_FRACTION * 900));
@@ -205,7 +205,7 @@ describe('RUPTURE — detonate the foe afflictions for the pending total', () =>
     it('the cap is a pure fraction on a small enemy too — the flat floor is retired (WS7.1)', () => {
         mockSequentialRng(0.05);
         const enemyEffects = [ae('debuff_poison', 10, 10)];
-        const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'mind', enemyEffects), [RUP, RUP, RUP], 'mind');
+        const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'heart', enemyEffects), [RUP, RUP, RUP], 'heart');
         const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true);
         const det = res.events.find(e => e.kind === 'rupture-detonated') as { amount: number } | undefined;
         // No floor term: round(F × 300), full stop. Against truly small pools
@@ -307,8 +307,8 @@ describe('THORNS — the foe telegraphed hit rebounds onto it', () => {
 describe('BARRIER — a persistent, stacking soak', () => {
     it('a powered Adamant Wall STACKS onto any existing barrier', () => {
         mockSequentialRng(0.05);
-        const WALL = 'the-adamant-wall';
-        const state = openAndDraft(makePlayer([WALL]), makeEnemy(300, 'body'), [WALL, WALL, WALL], 'body');
+        const WALL = 'nothing-crossed-the-ice';
+        const state = openAndDraft(makePlayer([WALL]), makeEnemy(300, 'mind'), [WALL, WALL, WALL], 'mind');
         const seeded = { ...state, barrier: 10 };
         const res = playCombatCard(seeded, { uid: seeded.hand.find(h => h.cardId === WALL)!.uid }, true);
         expect(res.state.barrier ?? 0).toBeGreaterThan(10); // stacked, not replaced
@@ -389,10 +389,10 @@ describe('RIPOSTE — counters only when Guard/Barrier fully blocked the attack'
         expect(res.state.riposte).toBeUndefined();                  // still clears
     });
 
-    it('a powered Measured Answer arms the parry AND grants Guard', () => {
+    it('a powered Reprisal Bell arms the parry AND grants Guard', () => {
         mockSequentialRng(0.05);
-        const MA = 'measured-answer';
-        const state = openAndDraft(makePlayer([MA]), makeEnemy(300, 'body'), [MA, MA, MA], 'body');
+        const MA = 'the-reprisal-bell';
+        const state = openAndDraft(makePlayer([MA]), makeEnemy(300, 'heart'), [MA, MA, MA], 'heart');
         const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === MA)!.uid }, true);
         expect(res.state.riposte).toBeDefined();
         expect(res.state.guard ?? 0).toBeGreaterThan(0);
@@ -452,17 +452,16 @@ describe('INVARIANT — no new behavior fires without its marker', () => {
 describe('card projection — the v3 library classifies + advertises sensibly', () => {
     const cases: Array<[string, string, string]> = [
         // [cardId, expected verbClass, expected effectKind/track]
-        ['resonance-detonation', 'direct-damage', 'none'],   // RUPTURE finisher
-        ['the-reaping', 'direct-damage', 'none'],            // REAP-all finisher
-        ['slippery-slope', 'direct-dot', 'dot'],
-        ['sweet-poison', 'direct-dot', 'dot'],
-        ['zenos-half-step', 'direct-control', 'control'],    // STAGGER
-        ['turnabout', 'direct-damage', 'none'],              // TURNABOUT — banked-denial finisher (phase 32 part 4a)
-        ['soft-word', 'direct-control', 'control'],          // SWAY
-        ['brace-for-impact', 'defend', 'none'],
-        ['the-adamant-wall', 'defend', 'none'],
-        ['venom-and-vein', 'enchant', 'none'],
-        ['suppurating-curse', 'disenchant', 'control'],
+        ['communion-of-the-worm', 'direct-damage', 'none'],   // RUPTURE finisher
+        ['miserere', 'direct-damage', 'none'],               // REAP-all finisher
+        ['spoiled-poultice', 'direct-dot', 'dot'],
+        ['unction-of-boils', 'direct-dot', 'dot'],
+        ['scolds-bridle', 'direct-control', 'control'],      // STAGGER
+        ['thin-hymn', 'direct-control', 'control'],          // SWAY
+        ['chilblain-watch', 'defend', 'none'],
+        ['nothing-crossed-the-ice', 'defend', 'none'],
+        ['the-untended-garden', 'enchant', 'none'],
+        ['the-congregation-below', 'disenchant', 'control'],
     ];
 
     for (const [id, verbClass, track] of cases) {
@@ -478,8 +477,12 @@ describe('card projection — the v3 library classifies + advertises sensibly', 
         });
     }
 
-    it('DoT cards preview their REAL lifetime HP (slippery-slope prints "2,2,3,3 = 10")', () => {
-        expect(toCombatCard('slippery-slope', getCardById, lookupEffect)!.bottomDamagePreview).toBe(10);
-        expect(toCombatCard('sweet-poison', getCardById, lookupEffect)!.bottomDamagePreview).toBeGreaterThan(0);
+    it('DoT cards preview their REAL lifetime HP (a longer calendar previews more)', () => {
+        const short = toCombatCard('spoiled-poultice', getCardById, lookupEffect)!.bottomDamagePreview;
+        const long = toCombatCard('unction-of-boils', getCardById, lookupEffect)!.bottomDamagePreview;
+        expect(short).toBeGreaterThan(0);
+        // Same POISON i1, twice the calendar (d2 vs d4) — the preview is the
+        // real ramped lifetime, so the longer one previews strictly more.
+        expect(long).toBeGreaterThan(short);
     });
 });
