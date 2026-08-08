@@ -1062,7 +1062,7 @@ product-level pivot that VOIDS several previously "locked" doctrines).**
       "Campaign" ruled DESCRIPTIVE. All three LOCKED MECHANICS names kept,
       so **no `GAME_STATE_VERSION` migration is owed by the retheme** and
       44b's guard resolves to "do not touch".
-- [ ] Phase 43 — Objective function v2 (replaces the parked "metric v2"
+- [x] Phase 43 — Objective function v2 (replaces the parked "metric v2"
       design session, `plan/AUDIT.md`). The parked row wanted a
       player-side, arc-aware successor to `statusEngagement`. The
       unshackling makes it urgent AND changes the target:
@@ -1082,6 +1082,16 @@ product-level pivot that VOIDS several previously "locked" doctrines).**
       is a failed metric. Measuring how well they are USED is fair game
       and probably desirable. (mechanics — harness) Deps: 41.
       Brief: to generate.
+      — `feat(mechanics): objective function v2 — the Combat Quality Index — phase 43` (21a68f2)
+      Shipped as `combatQualityIndex` (spec 35), beside `statusEngagement`
+      rather than replacing it. `0.40·spine + 0.25·arc + 0.20·width +
+      0.15·identity`; spine is the largest weight because the three LOCKED
+      systems are the only permanent structure left after the unshackling,
+      and each enters as a geometric mean of fed×used so ignoring one scores
+      0. `assertLockedMechanicsFirstClass` throws on a dropped, zeroed or
+      negative locked term. **Baseline NOT re-stamped** — run
+      `npm run baseline:regen` on a clean tree; it was already STALE by 4
+      mechanics-source commits before this phase.
 
 **Retheme execution (44a-44i) — decomposed 2026-08-08 at T's request.
 Whole-product scope. Each sub-phase is independently shippable and

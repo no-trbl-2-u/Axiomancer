@@ -36,6 +36,48 @@
 > replacement may now be authored freely, including with normal damage.
 > See `plan/bearings.md` § "THE UNSHACKLING".
 
+### `dominantCardShare` is broken post-strike-death
+- category: debt
+- impact: 7
+- ease: 5
+- detail: filed 2026-08-08 by Phase 43. The raw attribution ledger's
+  `dotDamage` is filled at SUMMARY time, so the ledger itself carries direct
+  damage only and collapses onto whichever signature burst last — it reads
+  ~100% on nearly every matrix cell. CQI's identity term routes around it
+  (cards from the sim's per-line HP swing), so the new metric is unaffected,
+  but the standalone stat is wrong wherever else it is read. Left untouched
+  because other suites consume it; repair is separate work.
+
+### `npm run combat-sim`'s default loadout no longer exists
+- category: debt
+- impact: 6
+- ease: 9
+- detail: filed 2026-08-08 by Phase 43. The default is
+  `slippery-slope,brace-for-impact` — both cards deleted by the Profane Canon
+  (`84ef85b`). Every default-invocation run therefore reports 0% win, 0%
+  statusEngagement, cqi ~29%. Pre-existing rot, not caused by Phase 43, and
+  outside its "surface the new metric additively" scope. Anyone reading a
+  bare `combat-sim` run right now is reading noise.
+
+### The Surge meter is the least-used locked system, and most rolled dice never power a line
+- category: divergence
+- impact: 5
+- ease: 3
+- detail: filed 2026-08-08 by Phase 43's first CQI reading. Chain completion
+  is 35% matrix-wide (the chain breaks ~2x for every surge), the lowest
+  locked sub-score everywhere; `dice-spent` is 29% against a 0.5 reference.
+  **Information, not work** — bearings' "the current card library is
+  transitional" rule forbids tuning against it. Re-read after the redesign.
+
+### `/deck-tuning` and `/combat-playtest` still name `statusEngagement` as the objective function
+- category: docs
+- impact: 6
+- ease: 9
+- detail: filed 2026-08-08 by Phase 43. The skill files in `skills/` and
+  `.claude/commands/` were outside that phase's ownership. They should be
+  repointed at `cqi` / spec 35, or the next tuning pass will optimise the
+  dead law the phase exists to retire.
+
 ### [needs-user-call] The product name "Axiomancer" under the whole-product pivot
 - category: content
 - impact: 6
