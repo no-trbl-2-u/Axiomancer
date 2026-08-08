@@ -60,6 +60,18 @@ export {
     dotLifetimeHp, dotTempoWeightedHp,
 } from './cards.pricing';
 
+// Phase 52a — deck removal: the primitive, the floor, and the escalating
+// per-run price (PROVISIONAL until 52f calibrates it).
+export {
+    removeCardFromCombatDeck, MIN_COMBAT_DECK_SIZE,
+    CARD_REMOVAL_PRICING_PLACEHOLDER,
+    cardRemovalPrice, cardRemovalPriceFor, cardRemovalsOf, canAffordCardRemoval,
+} from './card.removal';
+export type {
+    CardRemovalResult, CardRemovalAccepted, CardRemovalRefused,
+    CardRemovalRefusal, CardRemovalRefusalCode, CardRemovalSource,
+} from './card.removal';
+
 // Card themes + their keyword families (spec 32 §3/§6) — the public shape
 // mobile's KW-6 parity lint (phase 29) checks its glossary against.
 export type { CardTheme } from './card-themes';

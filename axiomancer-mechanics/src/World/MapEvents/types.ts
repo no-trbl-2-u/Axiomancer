@@ -66,10 +66,29 @@ export interface GatheringPayload {
     description?: string;
 }
 
+/**
+ * Shelter class of a rest node (Phase 52b).
+ *
+ * `'inn'` is a PAID, tended shelter — full-recovery semantics, and the
+ * only place hazard-scarred max-VITAE is mended back toward baseline.
+ * `'camp'` is anything in the wild: a spring, a mossy log, a corner of
+ * the labyrinth the house forgot to make uncomfortable.
+ *
+ * This replaces the retired `healFraction >= 1.0` heuristic, which was
+ * wrong on the authored content: `nf-4`, `nf-24` and every `fvRestPool`
+ * node were all authored at 1.0, so two forest springs mended scars like
+ * a paid shelter. "Is this an inn?" is now authored, never inferred.
+ */
+export type RestShelter = 'camp' | 'inn';
+
 export interface RestPayload {
     kind: 'rest';
-    /** Fraction of `player.maxHealth` to heal. Defaults to 1.0 (full rest). */
-    healFraction?: number;
+    /**
+     * Shelter class. Defaults to `'camp'` — a node that forgot to say is
+     * wilderness. Never infer this from a heal magnitude; see
+     * `rest-shelter.ts`.
+     */
+    shelter?: RestShelter;
     description?: string;
 }
 
@@ -194,7 +213,11 @@ export type ResolvedEvent =
     | { kind: 'encounter';   encounter: Encounter; isBoss: boolean }
     | { kind: 'interaction'; npcName: string; dialogue?: DialogueTree }
     | { kind: 'gathering';   items: Item[] }
-    | { kind: 'rest';        healed: number; healFraction: number }
+    // Phase 52b — the authored `healFraction` is retired; the resolved rest
+    // event carries the SHELTER CLASS so hosts (and 52c's rest-choice
+    // engine) decide the heal from an honest marker rather than a number.
+    // `healed` remains a computed OUTCOME, not an authoring knob.
+    | { kind: 'rest';        healed: number; shelter: RestShelter }
     | { kind: 'village';     villageName: string; merchants: NPC[]; shop?: ShopInventory }
     | { kind: 'cutscene';    lines: readonly string[] }
     | { kind: 'hazard';      effects: ActiveEffect[]; damage: number }

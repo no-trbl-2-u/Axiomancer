@@ -1,0 +1,440 @@
+/**
+ * Hermetic E2E — Phase 52a: the deck-removal primitive + the escalating price.
+ *
+ * Driven entirely through the PUBLIC BARREL (`../../index`), the same module
+ * path 52d's mobile screen will import, so the barrel export is proven along
+ * with the behaviour. No RNG, no clock, no disk: removal is deterministic by
+ * construction — there is nothing to roll — so no stub is needed and none is
+ * installed.
+ *
+ * What is pinned here:
+ *   - `combatRewardCards` drains BEFORE `knownCards`, one copy at a time;
+ *   - the `knownCards` fall-through, including the duplicate-entry case the
+ *     mobile starter-bundle path produces;
+ *   - loadout reconciliation ACTUALLY shrinks `buildCombatDeck`'s output;
+ *   - refusals are first-class values (unknown card, deck at the floor) that
+ *     leave the character byte-identical and never advance the counter;
+ *   - the floor's DERIVATION from the shipped Profane Canon lineage;
+ *   - the price curve at 0/1/2/3 removals and its linearity.
+ */
+
+import { describe, it, expect } from 'vitest';
+
+import {
+    removeCardFromCombatDeck,
+    MIN_COMBAT_DECK_SIZE,
+    cardRemovalPrice,
+    cardRemovalPriceFor,
+    cardRemovalsOf,
+    canAffordCardRemoval,
+    CARD_REMOVAL_PRICING_PLACEHOLDER,
+    buildCombatDeck,
+    createCharacter,
+    addToLoadout,
+    getCombatLoadout,
+    getDeckPreset,
+    PRESET_LINEAGE,
+    COMBAT_HAND_SIZE,
+} from '../../index';
+import type { Character } from '../../index';
+
+// The Threadbare Office — real canon ids, so the fixtures are the shape a real
+// early-campaign save carries.
+const OFFICE = [
+    'spoiled-poultice', 'chilblain-watch', 'petty-indictment', 'first-spadeful',
+    'grandmothers-psalter', 'thumbprick-oath', 'thin-hymn', 'threadbare-cope',
+] as const;
+// Earned rewards — enough to sit the fixture deck comfortably above the floor.
+const EARNED = [
+    'unction-of-boils', 'the-sextons-bell', 'the-long-lent', 'promissory-cut',
+    'the-vig', 'dead-pledge', 'shallow-grave', 'paupers-pyre',
+] as const;
+
+function fixture(known: readonly string[], rewards: readonly string[] = []): Character {
+    const base = createCharacter({
+        name: 'Removal Fixture',
+        level: 1,
+        baseStats: { heart: 5, body: 5, mind: 5 },
+    });
+    return { ...base, knownCards: [...known], combatRewardCards: [...rewards] };
+}
+
+/** A fixture whose deck sits at exactly `size` cards (all above the floor). */
+function deckOf(size: number): Character {
+    const known = [...OFFICE].slice(0, Math.min(size, OFFICE.length));
+    const rewards: string[] = [];
+    while (known.length + rewards.length < size) {
+        rewards.push(EARNED[rewards.length % EARNED.length]);
+    }
+    return fixture(known, rewards);
+}
+
+const sum = (r: Record<string, number>): number =>
+    Object.values(r).reduce((a, n) => a + n, 0);
+
+describe('Phase 52a — removeCardFromCombatDeck: source ordering', () => {
+    it('drains combatRewardCards BEFORE knownCards when both hold the id', () => {
+        const player = fixture(OFFICE, [...EARNED, 'thin-hymn', 'thin-hymn']);
+        const result = removeCardFromCombatDeck(player, 'thin-hymn');
+
+        expect(result.ok).toBe(true);
+        if (!result.ok) return;
+        expect(result.removedFrom).toBe('rewards');
+        // The unlock set is the base — it keeps the card.
+        expect(result.player.knownCards).toContain('thin-hymn');
+        // Exactly one reward copy left.
+        expect(result.player.combatRewardCards!.filter(id => id === 'thin-hymn'))
+            .toHaveLength(1);
+        expect(result.deckSizeAfter).toBe(result.deckSizeBefore - 1);
+    });
+
+    it('removes exactly ONE copy of a duplicated reward card, never all of them', () => {
+        const player = fixture(OFFICE, [...EARNED, 'the-vig', 'the-vig', 'the-vig']);
+        const before = buildCombatDeck(player).filter(id => id === 'the-vig').length;
+        expect(before).toBe(4); // one from EARNED + the three extras
+
+        const result = removeCardFromCombatDeck(player, 'the-vig');
+        expect(result.ok).toBe(true);
+        if (!result.ok) return;
+        expect(buildCombatDeck(result.player).filter(id => id === 'the-vig')).toHaveLength(3);
+        expect(result.deckSizeAfter).toBe(result.deckSizeBefore - 1);
+    });
+
+    it('falls through to knownCards when no reward copy exists', () => {
+        const player = fixture(OFFICE, EARNED);
+        const result = removeCardFromCombatDeck(player, 'threadbare-cope');
+
+        expect(result.ok).toBe(true);
+        if (!result.ok) return;
+        expect(result.removedFrom).toBe('known');
+        expect(result.loadoutReconciled).toBe(false);
+        expect(result.player.knownCards).not.toContain('threadbare-cope');
+        expect(buildCombatDeck(result.player)).not.toContain('threadbare-cope');
+        expect(result.deckSizeAfter).toBe(result.deckSizeBefore - 1);
+    });
+
+    it('a duplicated knownCards entry leaves ENTIRELY — the deck only ever held one copy', () => {
+        // The mobile starter-bundle path writes the preset recipe verbatim,
+        // duplicates and all, into `knownCards`; `buildCombatDeck` de-dupes it.
+        // Stripping one entry would leave the deck unchanged — an invisible
+        // removal, the exact failure this phase exists to avoid.
+        const player = fixture(
+            ['spoiled-poultice', 'spoiled-poultice', 'spoiled-poultice', ...OFFICE.slice(1)],
+            EARNED,
+        );
+        const result = removeCardFromCombatDeck(player, 'spoiled-poultice');
+
+        expect(result.ok).toBe(true);
+        if (!result.ok) return;
+        expect(result.player.knownCards).not.toContain('spoiled-poultice');
+        expect(buildCombatDeck(result.player)).not.toContain('spoiled-poultice');
+        // One DECK copy left, though three list entries did.
+        expect(result.deckSizeAfter).toBe(result.deckSizeBefore - 1);
+    });
+
+    it('never mutates the character or the lists it was handed', () => {
+        const player = fixture(OFFICE, EARNED);
+        const knownSnapshot = [...player.knownCards];
+        const rewardSnapshot = [...player.combatRewardCards!];
+
+        removeCardFromCombatDeck(player, 'thin-hymn');
+        removeCardFromCombatDeck(player, 'the-vig');
+
+        expect(player.knownCards).toEqual(knownSnapshot);
+        expect(player.combatRewardCards).toEqual(rewardSnapshot);
+        expect(player.cardRemovals).toBeUndefined();
+    });
+});
+
+describe('Phase 52a — loadout reconciliation', () => {
+    /** Flags seating a curated loadout over the Office + one earned card. */
+    function loadoutFlags(ids: readonly string[]): string[] {
+        let flags: string[] = [];
+        for (const id of ids) flags = addToLoadout(flags, id);
+        return flags;
+    }
+
+    it('drops the loadout slot so buildCombatDeck ACTUALLY shrinks', () => {
+        const seated = [...OFFICE, ...EARNED.slice(0, 6)];
+        const flags = loadoutFlags(seated);
+        const player = fixture(OFFICE, EARNED.slice(0, 6));
+
+        const deckBefore = buildCombatDeck(player, flags);
+        expect(deckBefore).toContain('grandmothers-psalter');
+
+        const result = removeCardFromCombatDeck(player, 'grandmothers-psalter', flags);
+        expect(result.ok).toBe(true);
+        if (!result.ok) return;
+        expect(result.removedFrom).toBe('known');
+        expect(result.loadoutReconciled).toBe(true);
+        expect(getCombatLoadout(result.flags)).not.toContain('grandmothers-psalter');
+
+        const deckAfter = buildCombatDeck(result.player, result.flags);
+        expect(deckAfter).not.toContain('grandmothers-psalter');
+        expect(deckAfter.length).toBe(deckBefore.length - 1);
+    });
+
+    it('without reconciliation the removal would be INVISIBLE (the regression this guards)', () => {
+        const flags = loadoutFlags([...OFFICE, ...EARNED.slice(0, 6)]);
+        const player = fixture(OFFICE, EARNED.slice(0, 6));
+
+        // Strip the id from `knownCards` only — what a naive removal would do.
+        const naive: Character = {
+            ...player,
+            knownCards: player.knownCards.filter(id => id !== 'grandmothers-psalter'),
+        };
+        expect(buildCombatDeck(naive, flags)).toContain('grandmothers-psalter');
+
+        const result = removeCardFromCombatDeck(player, 'grandmothers-psalter', flags);
+        expect(result.ok).toBe(true);
+        if (!result.ok) return;
+        expect(buildCombatDeck(result.player, result.flags)).not.toContain('grandmothers-psalter');
+    });
+
+    it('a multi-slot loadout entry is evicted WHOLE — the base is de-duped before it is dealt', () => {
+        // `buildCombatDeck` de-dupes whichever card base is in force, loadout
+        // included: three `combat-loadout-card:thin-hymn:*` slots deal ONE copy.
+        // Dropping a single slot would therefore shrink nothing.
+        const seated = [...OFFICE, 'thin-hymn', 'thin-hymn', ...EARNED.slice(0, 5)];
+        const flags = loadoutFlags(seated);
+        expect(getCombatLoadout(flags).filter(id => id === 'thin-hymn')).toHaveLength(3);
+        const player = fixture(OFFICE, EARNED.slice(0, 5));
+        expect(buildCombatDeck(player, flags).filter(id => id === 'thin-hymn')).toHaveLength(1);
+
+        const result = removeCardFromCombatDeck(player, 'thin-hymn', flags);
+        expect(result.ok).toBe(true);
+        if (!result.ok) return;
+        expect(result.removedFrom).toBe('known');
+        expect(result.loadoutReconciled).toBe(true);
+        expect(getCombatLoadout(result.flags)).not.toContain('thin-hymn');
+        expect(result.player.knownCards).not.toContain('thin-hymn');
+        // Three slots left, but exactly ONE deck copy did.
+        expect(buildCombatDeck(result.player, result.flags).length)
+            .toBe(result.deckSizeBefore - 1);
+    });
+
+    it('other cards\' loadout slots are untouched by the eviction', () => {
+        const flags = loadoutFlags([...OFFICE, 'thin-hymn', ...EARNED.slice(0, 5)]);
+        const player = fixture(OFFICE, EARNED.slice(0, 5));
+        const result = removeCardFromCombatDeck(player, 'thin-hymn', flags);
+
+        expect(result.ok).toBe(true);
+        if (!result.ok) return;
+        const survivors = getCombatLoadout(result.flags);
+        expect(survivors).toEqual([...OFFICE, ...EARNED.slice(0, 5)].filter(id => id !== 'thin-hymn'));
+        // Non-loadout flags in the array are preserved verbatim.
+        const withNoise = ['starter-bundle-chosen', ...flags, 'bundle:threadbare'];
+        const noisy = removeCardFromCombatDeck(player, 'thin-hymn', withNoise);
+        expect(noisy.ok).toBe(true);
+        expect(noisy.flags).toContain('starter-bundle-chosen');
+        expect(noisy.flags).toContain('bundle:threadbare');
+    });
+
+    it('a reward removal leaves the loadout alone — the reward copy is the one that left', () => {
+        const flags = loadoutFlags([...OFFICE, ...EARNED.slice(0, 6)]);
+        const player = fixture(OFFICE, [...EARNED.slice(0, 6), 'thin-hymn']);
+
+        const result = removeCardFromCombatDeck(player, 'thin-hymn', flags);
+        expect(result.ok).toBe(true);
+        if (!result.ok) return;
+        expect(result.removedFrom).toBe('rewards');
+        expect(result.loadoutReconciled).toBe(false);
+        expect(result.flags).toEqual(flags);
+        expect(getCombatLoadout(result.flags)).toContain('thin-hymn');
+    });
+});
+
+describe('Phase 52a — refusals are first-class, loud, and inert', () => {
+    it('refuses a card that is not in the deck at all', () => {
+        const player = fixture(OFFICE, EARNED);
+        const result = removeCardFromCombatDeck(player, 'no-such-card');
+
+        expect(result.ok).toBe(false);
+        if (result.ok) return;
+        expect(result.refusal.code).toBe('not-in-deck');
+        expect(result.refusal.reason).toMatch(/not in the combat deck/i);
+        expect(result.refusal.reason).toContain('no-such-card');
+        // The player reference itself comes straight back — provably untouched.
+        expect(result.player).toBe(player);
+        expect(result.removedFrom).toBeNull();
+        expect(result.deckSizeAfter).toBe(result.deckSizeBefore);
+    });
+
+    it('refuses a known-but-benched card the loadout does not seat', () => {
+        let flags: string[] = [];
+        for (const id of [...OFFICE.slice(0, 7), ...EARNED]) flags = addToLoadout(flags, id);
+        const player = fixture(OFFICE, EARNED);
+
+        // 'threadbare-cope' is known, but the curated loadout never seats it —
+        // so it is not in the deck, and benching it was already free.
+        expect(buildCombatDeck(player, flags)).not.toContain('threadbare-cope');
+        const result = removeCardFromCombatDeck(player, 'threadbare-cope', flags);
+
+        expect(result.ok).toBe(false);
+        if (result.ok) return;
+        expect(result.refusal.code).toBe('not-in-deck');
+        expect(result.player).toBe(player);
+    });
+
+    it('refuses AT the floor — refused, never clamped', () => {
+        const player = deckOf(MIN_COMBAT_DECK_SIZE);
+        expect(buildCombatDeck(player)).toHaveLength(MIN_COMBAT_DECK_SIZE);
+
+        const result = removeCardFromCombatDeck(player, buildCombatDeck(player)[0]);
+        expect(result.ok).toBe(false);
+        if (result.ok) return;
+        expect(result.refusal.code).toBe('deck-at-floor');
+        expect(result.refusal.reason).toMatch(/floor of 12 cards/);
+        expect(result.refusal.floor).toBe(MIN_COMBAT_DECK_SIZE);
+        expect(result.refusal.deckSize).toBe(MIN_COMBAT_DECK_SIZE);
+        expect(result.player).toBe(player);
+        // Nothing was clamped down to the floor — the deck is exactly as it was.
+        expect(buildCombatDeck(result.player)).toHaveLength(MIN_COMBAT_DECK_SIZE);
+    });
+
+    it('the LAST legal removal lands the deck exactly on the floor, and the next is refused', () => {
+        const player = deckOf(MIN_COMBAT_DECK_SIZE + 1);
+        const first = removeCardFromCombatDeck(player, buildCombatDeck(player)[0]);
+
+        expect(first.ok).toBe(true);
+        if (!first.ok) return;
+        expect(first.deckSizeAfter).toBe(MIN_COMBAT_DECK_SIZE);
+
+        const second = removeCardFromCombatDeck(
+            first.player, buildCombatDeck(first.player)[0], first.flags,
+        );
+        expect(second.ok).toBe(false);
+        if (second.ok) return;
+        expect(second.refusal.code).toBe('deck-at-floor');
+    });
+
+    it('a refusal never advances the removal counter (and so never raises the price)', () => {
+        const atFloor = deckOf(MIN_COMBAT_DECK_SIZE);
+        const refused = removeCardFromCombatDeck(atFloor, buildCombatDeck(atFloor)[0]);
+
+        expect(refused.ok).toBe(false);
+        expect(refused.removals).toBe(0);
+        expect(cardRemovalsOf(refused.player)).toBe(0);
+        expect(cardRemovalPriceFor(refused.player)).toBe(cardRemovalPrice(0));
+    });
+
+    it('refuses without throwing — the refusal is a returned value, not an exception', () => {
+        const player = fixture(OFFICE, EARNED);
+        expect(() => removeCardFromCombatDeck(player, 'no-such-card')).not.toThrow();
+        expect(() => removeCardFromCombatDeck(deckOf(MIN_COMBAT_DECK_SIZE), 'thin-hymn'))
+            .not.toThrow();
+    });
+});
+
+describe('Phase 52a — the per-run counter', () => {
+    it('every accepted removal advances cardRemovals by one', () => {
+        let player = fixture(OFFICE, [...EARNED, ...EARNED]);
+        expect(cardRemovalsOf(player)).toBe(0);
+
+        for (let expected = 1; expected <= 3; expected++) {
+            const result = removeCardFromCombatDeck(player, buildCombatDeck(player)[0]);
+            expect(result.ok, `removal ${expected}`).toBe(true);
+            if (!result.ok) return;
+            expect(result.removals).toBe(expected);
+            expect(result.player.cardRemovals).toBe(expected);
+            player = result.player;
+        }
+    });
+
+    it('the primitive spends NO currency — pricing is the caller\'s transaction', () => {
+        const player = { ...fixture(OFFICE, EARNED), currency: 100 };
+        const result = removeCardFromCombatDeck(player, 'thin-hymn');
+        expect(result.ok).toBe(true);
+        expect(result.player.currency).toBe(100);
+    });
+
+    it('an absent counter reads as 0', () => {
+        const player = fixture(OFFICE, EARNED);
+        expect(player.cardRemovals).toBeUndefined();
+        expect(cardRemovalsOf(player)).toBe(0);
+        expect(cardRemovalsOf({ cardRemovals: 4 })).toBe(4);
+        expect(cardRemovalsOf({ cardRemovals: -3 })).toBe(0);
+    });
+});
+
+describe('Phase 52a — the escalating price (PROVISIONAL, 52f calibrates)', () => {
+    it('is exactly 15 / 25 / 35 / 45 at 0 / 1 / 2 / 3 removals', () => {
+        expect(cardRemovalPrice(0)).toBe(15);
+        expect(cardRemovalPrice(1)).toBe(25);
+        expect(cardRemovalPrice(2)).toBe(35);
+        expect(cardRemovalPrice(3)).toBe(45);
+    });
+
+    it('is LINEAR, not exponential — the step never grows', () => {
+        const steps: number[] = [];
+        for (let n = 0; n < 10; n++) steps.push(cardRemovalPrice(n + 1) - cardRemovalPrice(n));
+        expect(new Set(steps)).toEqual(new Set([CARD_REMOVAL_PRICING_PLACEHOLDER.step]));
+        // The tenth removal is still payable, which is the whole point of linear.
+        expect(cardRemovalPrice(9)).toBe(105);
+    });
+
+    it('is driven by the named provisional constants, not by literals', () => {
+        const { base, step } = CARD_REMOVAL_PRICING_PLACEHOLDER;
+        expect(base).toBe(15);
+        expect(step).toBe(10);
+        for (let n = 0; n < 6; n++) expect(cardRemovalPrice(n)).toBe(base + step * n);
+    });
+
+    it('cardRemovalPriceFor tracks a character across real removals', () => {
+        let player = fixture(OFFICE, [...EARNED, ...EARNED]);
+        expect(cardRemovalPriceFor(player)).toBe(15);
+
+        const first = removeCardFromCombatDeck(player, buildCombatDeck(player)[0]);
+        expect(first.ok).toBe(true);
+        if (!first.ok) return;
+        player = first.player;
+        expect(cardRemovalPriceFor(player)).toBe(25);
+
+        const second = removeCardFromCombatDeck(player, buildCombatDeck(player)[0]);
+        expect(second.ok).toBe(true);
+        if (!second.ok) return;
+        expect(cardRemovalPriceFor(second.player)).toBe(35);
+    });
+
+    it('canAffordCardRemoval reads the purse against the next price only', () => {
+        const player = { ...fixture(OFFICE, EARNED), currency: 15 };
+        expect(canAffordCardRemoval(player)).toBe(true);
+        expect(canAffordCardRemoval({ ...player, currency: 14 })).toBe(false);
+        expect(canAffordCardRemoval({ ...player, currency: 15, cardRemovals: 1 })).toBe(false);
+        expect(canAffordCardRemoval({ ...player, currency: 25, cardRemovals: 1 })).toBe(true);
+    });
+});
+
+describe('Phase 52a — MIN_COMBAT_DECK_SIZE is DERIVED from the shipped canon', () => {
+    it('is the low-water mark of the Profane Canon lineage (18 − PILGRIM_REMOVED)', () => {
+        const threadbare = getDeckPreset('threadbare')!.cardIds.length;
+        const pilgrim = getDeckPreset('pilgrim')!.cardIds.length;
+        expect(threadbare).toBe(18);
+        expect(pilgrim).toBe(30);
+
+        // The two dips the canon's own removal story takes: 18 − 6 = 12, 30 − 8 = 22.
+        const afterPilgrimCut = threadbare - sum(PRESET_LINEAGE.pilgrim.removed);
+        const afterApostateCut = pilgrim - sum(PRESET_LINEAGE.apostate.removed);
+        expect(afterPilgrimCut).toBe(12);
+        expect(afterApostateCut).toBe(22);
+
+        // The floor is the tightest one under which every documented removal in
+        // the shipped campaign is still legal.
+        expect(MIN_COMBAT_DECK_SIZE).toBe(Math.min(afterPilgrimCut, afterApostateCut));
+    });
+
+    it('clears every shipped preset shape (no preset is born below the floor)', () => {
+        for (const id of ['threadbare', 'pilgrim', 'apostate']) {
+            expect(getDeckPreset(id)!.cardIds.length, id)
+                .toBeGreaterThanOrEqual(MIN_COMBAT_DECK_SIZE);
+        }
+    });
+
+    it('survives the preset laws at the floor: aspect thirds and more than two hands', () => {
+        // Exact aspect thirds (4/4/4) are still expressible at the floor; 10 —
+        // the brief's pre-canon proposal — is not divisible by 3.
+        expect(MIN_COMBAT_DECK_SIZE % 3).toBe(0);
+        // Below ~2 hands the draw pile reshuffles inside a single round.
+        expect(MIN_COMBAT_DECK_SIZE).toBeGreaterThan(COMBAT_HAND_SIZE * 2);
+    });
+});

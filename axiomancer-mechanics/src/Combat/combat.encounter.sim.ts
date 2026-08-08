@@ -33,6 +33,14 @@ import type {
     CombatAttributionRow, CombatCard, CombatEncounterState, CombatEvent, CombatOutcome,
 } from './combat.encounter.types';
 import { COMBAT_SIM_POLICIES, type CombatSimPolicy, type CombatSimPolicyId } from './combat.sim-policies';
+// Phase 43 — objective function v2. Added BESIDE `statusEngagement`, which
+// stays computed and reported: the old metric is now a warning light, not the
+// target (see `combat.objective.ts` for the decision and its justification).
+import {
+    addObjectiveTelemetry, damageCentroid, emptyObjectiveTelemetry, foldObjectiveEvents,
+    type CombatObjectiveTelemetry,
+} from './combat.objective.telemetry';
+import { scoreCombatObjective, type CombatQualityScore } from './combat.objective';
 
 /**
  * `greedy` — a competent omniscient witness: drafts using the enemy's hidden
@@ -73,8 +81,21 @@ export interface CombatSimStats {
      *  the consistency witness — a high spread means the deck's clock depends
      *  on drawing the right cards, the duplicate-more signal. */
     roundsStdDev: number;
-    /** Average share of plays that landed a status effect on the enemy (engagement witness). */
+    /** Average share of plays that landed a status effect on the enemy.
+     *  **Phase 43 (objective function v2): this is now a WARNING LIGHT, not the
+     *  objective.** It measured adherence to the status-dominance doctrine that
+     *  THE UNSHACKLING voided; it stays computed and asserted because existing
+     *  suites read it and a collapse in it is still worth seeing. The objective
+     *  function is `combatQuality` below. */
     statusEngagement: number;
+    /** **THE OBJECTIVE FUNCTION (Phase 43).** The Combat Quality Index and its
+     *  four weighted components — SPINE (Conviction + Surge + Dice, the locked
+     *  systems), ARC, WIDTH, IDENTITY. See `combat.objective.ts`. */
+    combatQuality: CombatQualityScore;
+    /** The raw counters behind `combatQuality`, pooled over the runs. Exposed
+     *  so a stage/preset rollup can MERGE telemetry across cells and re-score
+     *  rather than averaging nonlinear component scores. */
+    objectiveTelemetry: CombatObjectiveTelemetry;
     /** Average Conviction spent on Signature Skills per run. */
     avgConvictionSpent: number;
     /** Fraction of total enemy HP loss delivered by DoT ticks (0–1).
@@ -217,6 +238,24 @@ function selectCard(
     return best;
 }
 
+/**
+ * Phase 43 (objective v2) — the LEGAL card options at one powering die: hand
+ * entries whose stance that die can power and that have not already fizzled.
+ * Pure observation — it mirrors `selectCard`'s filter without ranking, scoring,
+ * consuming rng or touching state, so instrumenting decision width can never
+ * perturb a seeded run.
+ */
+function countLiveOptions(
+    s: CombatEncounterState,
+    notUids: ReadonlySet<string>,
+    matchColor: string,
+): number {
+    return handCards(s).filter(c =>
+        c.card.verbClass !== 'retreat'
+        && !notUids.has(c.uid)
+        && (matchColor === 'wild' || c.card.stance === matchColor)).length;
+}
+
 /** An affordable Signature (kind allowed by the policy) to spend banked
  *  Conviction on. Without a policy `rankSignature`, the FIRST affordable match
  *  in `state.signatures` order wins — the legacy `greedy`/`blind` behavior. */
@@ -309,6 +348,21 @@ function momentumSourceScore(color: string, want: string | null): number {
 }
 
 /**
+ * What one played threat phase reports back. `decisionPoints`/`liveOptions`
+ * are the Phase 43 decision-width sample (see `countLiveOptions`); everything
+ * else predates it and is unchanged.
+ */
+interface PlayPhaseResult {
+    state: CombatEncounterState;
+    plays: number;
+    statusPlays: number;
+    /** Powered-play decisions the driver made this phase. */
+    decisionPoints: number;
+    /** Σ legal card options at those decisions. */
+    liveOptions: number;
+}
+
+/**
  * Spec 33 (Upgradeable Dice, flag-on) — the four-die play phase. No draft: the
  * four fixed dice (+ Reserve + surge floats) each power one paid line of their
  * color (gold = wild), momentum-steered toward the chain successor. A whiffed
@@ -325,10 +379,12 @@ function upgradeablePlayPhase(
     usage: Record<string, CombatCardUsage>,
     lines: Record<string, CombatCardLineTelemetry>,
     focusIds?: ReadonlySet<string>,
-): { state: CombatEncounterState; plays: number; statusPlays: number } {
+): PlayPhaseResult {
     let working = state;
     let plays = 0;
     let statusPlays = 0;
+    let decisionPoints = 0;
+    let liveOptions = 0;
     let guard = 0;
     const fizzledUids = new Set<string>();
 
@@ -342,7 +398,7 @@ function upgradeablePlayPhase(
     // ── The ONE legal tray roll for this phase (rolls the four fixed dice). ───
     if (working.dice.length === 0 && !working.turnTakenThisPhase) {
         working = startTurn(working).state;
-        if (working.phase !== 'phase-play') return { state: working, plays, statusPlays };
+        if (working.phase !== 'phase-play') return { state: working, plays, statusPlays, decisionPoints, liveOptions };
     }
 
     // Press Fate (§4): a full-miss round rerolls its misses once for 1◆ — cast
@@ -386,6 +442,9 @@ function upgradeablePlayPhase(
             const card = selectCard(working, policy, rng, fizzledUids, focusIds, src.color);
             if (!card) continue;
             attempted = true;
+            // Phase 43 — decision width, sampled where the driver actually chose.
+            decisionPoints++;
+            liveOptions += countLiveOptions(working, fizzledUids, src.color);
             const res = playCombatCard(working, { uid: card.uid }, true, src.dieId, undefined, chosenXFor(card.card));
             if (res.events.some(e => e.kind === 'effect-fizzled')) {
                 lineRow(lines, card.card.id).fizzles++;
@@ -420,7 +479,7 @@ function upgradeablePlayPhase(
     if (working.phase === 'phase-play' && !working.finalOutcome && working.turnTakenThisPhase) {
         working = endTurn(working).state;
     }
-    return { state: working, plays, statusPlays };
+    return { state: working, plays, statusPlays, decisionPoints, liveOptions };
 }
 
 /**
@@ -443,11 +502,13 @@ function policyPlayPhase(
     usage: Record<string, CombatCardUsage>,
     lines: Record<string, CombatCardLineTelemetry>,
     focusIds?: ReadonlySet<string>,
-): { state: CombatEncounterState; plays: number; statusPlays: number } {
+): PlayPhaseResult {
     if (isUpgradeableDiceEnabled()) return upgradeablePlayPhase(state, policy, rng, usage, lines, focusIds);
     let working = state;
     let plays = 0;
     let statusPlays = 0;
+    let decisionPoints = 0;
+    let liveOptions = 0;
     let guard = 0;
     const fizzledUids = new Set<string>();
 
@@ -477,7 +538,7 @@ function policyPlayPhase(
     // ── The ONE legal tray roll + stance draft for this phase ────────────────
     if (working.dice.length === 0 && working.draftedDieId === null && !working.turnTakenThisPhase) {
         working = startTurn(working).state;
-        if (working.phase !== 'phase-play') return { state: working, plays, statusPlays };
+        if (working.phase !== 'phase-play') return { state: working, plays, statusPlays, decisionPoints, liveOptions };
     }
     if (working.draftedDieId === null && working.dice.some(d => !d.floating)) {
         const want = selectCard(working, policy, rng, fizzledUids, focusIds);
@@ -548,6 +609,9 @@ function policyPlayPhase(
             const want = selectCard(working, policy, rng, fizzledUids, focusIds, src.color);
             if (!want) continue;
             attempted = true;
+            // Phase 43 — decision width, sampled where the driver actually chose.
+            decisionPoints++;
+            liveOptions += countLiveOptions(working, fizzledUids, src.color);
             const res = playCombatCard(working, { uid: want.uid }, true, src.dieId, undefined, chosenXFor(want.card));
             if (res.events.some(e => e.kind === 'effect-fizzled')) {
                 // Token-gated with no banked token — skip it (the wind-down
@@ -582,7 +646,7 @@ function policyPlayPhase(
         working = endTurn(working).state;
     }
 
-    return { state: working, plays, statusPlays };
+    return { state: working, plays, statusPlays, decisionPoints, liveOptions };
 }
 
 /**
@@ -597,7 +661,7 @@ export function playSimPhase(
     rng: () => number,
     usage: Record<string, CombatCardUsage> = {},
     lines: Record<string, CombatCardLineTelemetry> = {},
-): { state: CombatEncounterState; plays: number; statusPlays: number } {
+): PlayPhaseResult {
     const policy = COMBAT_SIM_POLICIES[policyId];
     if (!policy) throw new Error(`Unknown combat sim policy '${String(policyId)}'`);
     return policyPlayPhase(state, policy, rng, usage, lines);
@@ -644,12 +708,21 @@ export function runOneEncounter(
      *  surfaced, not recomputed) so the detailed sim can aggregate the
      *  dominant-card share across runs. */
     attribution: Record<string, CombatAttributionRow>;
+    /** Phase 43 (objective function v2) — this run's raw counters for the
+     *  Combat Quality Index: the three LOCKED systems (Conviction / Surge /
+     *  Dice) read off their own events, plus the arc, width and identity
+     *  readings. Additive: callers pool it across runs and RE-SCORE. */
+    objective: CombatObjectiveTelemetry;
 } {
     const policyObj = COMBAT_SIM_POLICIES[policy];
     if (!policyObj) throw new Error(`Unknown combat sim policy '${String(policy)}'`);
     const focusIds = options?.focusCardIds ? new Set(options.focusCardIds) : undefined;
     const deck = options?.deck ? [...options.deck] : undefined;
     let state = initializeCombatEncounter(player, enemy, deck, seed);
+    // Phase 43 — the opening Conviction bank emits no `conviction-gained`
+    // event, so the objective telemetry seeds income from it; without this the
+    // spend SHARE can exceed 1 (spending ◆ the transcript never granted).
+    const openingConviction = state.conviction;
     // Metrics slate — the opening deal emits no `hand-drawn` event; seed the
     // draw ledger from the initialized hand before play begins.
     const cardDrawCounts: Record<string, number> = {};
@@ -668,6 +741,12 @@ export function runOneEncounter(
     let loopGuard = 0;
     let guardOnAttack = 0;
     let playerHpTaken = 0;
+    // Phase 43 — the ARC sample: enemy HP at every round boundary (plus the
+    // post-fight value pushed after the loop). `damageCentroid` turns the
+    // series into "when in the fight did the HP actually fall?".
+    const enemyHpSamples: number[] = [];
+    let decisionPoints = 0;
+    let liveOptions = 0;
     const activeEffectSamples: number[] = [];
     const cardUsage: Record<string, CombatCardUsage> = {};
     const cardLineTelemetry: Record<string, CombatCardLineTelemetry> = {};
@@ -684,10 +763,13 @@ export function runOneEncounter(
             continue;
         }
         if (state.phase === 'phase-play') {
+            enemyHpSamples.push(state.enemy.health);
             const r = policyPlayPhase(state, policyObj, rng, cardUsage, cardLineTelemetry, focusIds);
             state = r.state;
             plays += r.plays;
             statusPlays += r.statusPlays;
+            decisionPoints += r.decisionPoints;
+            liveOptions += r.liveOptions;
             if (state.finalOutcome) break;
             if (state.capitulationChoiceActive) {
                 state = selectCapitulationChoice(state, 'accept').state;
@@ -751,6 +833,41 @@ export function runOneEncounter(
     // directDamageDealt includes mechanic bursts; subtract them to get pure strikes.
     const directHpDamage = Math.max(0, state.directDamageDealt - mechanicBurstDamage);
 
+    // ── Phase 43 — objective-function telemetry for this run ─────────────────
+    // Locked-mechanic counters come straight off the transcript; arc, width and
+    // identity come from the loop above and the engine's own damage ledger.
+    enemyHpSamples.push(state.enemy.health);
+    const objective = emptyObjectiveTelemetry();
+    foldObjectiveEvents(state.log, objective);
+    objective.convictionGained += openingConviction;
+    objective.runs = 1;
+    objective.rounds = state.round;
+    const centroid = damageCentroid(enemyHpSamples);
+    if (centroid !== null) {
+        objective.arcRuns = 1;
+        objective.arcCentroidSum = centroid;
+    }
+    objective.decisionPoints = decisionPoints;
+    objective.liveOptions = liveOptions;
+    // IDENTITY denominator. Deliberately NOT `state.attribution` alone: post
+    // strike-death that ledger's `dotDamage` is filled at SUMMARY time, so the
+    // raw rows carry direct damage only and the whole fight collapses onto
+    // whichever signature burst last — which is why `dominantCardShare` reads
+    // ~100% on nearly every cell. Cards are credited from the sim's own
+    // per-line HP swing (immediate + projected DoT, the `playHpSwing`
+    // measure); non-card damage sources still in the ledger (signatures,
+    // engine drips) are folded in afterwards so "the generic engine won it"
+    // stays visible as an identity failure rather than disappearing.
+    for (const row of Object.values(cardLineTelemetry)) {
+        const dmg = row.freeHpSwing + row.paidHpSwing;
+        if (dmg > 0) objective.damageByCard[row.cardId] = (objective.damageByCard[row.cardId] ?? 0) + dmg;
+    }
+    for (const row of Object.values(state.attribution)) {
+        if (cardLineTelemetry[row.cardId]) continue;
+        const dmg = row.dotDamage + row.damageDealt;
+        if (dmg > 0) objective.damageByCard[row.cardId] = (objective.damageByCard[row.cardId] ?? 0) + dmg;
+    }
+
     return {
         outcome: state.finalOutcome ?? 'defeat',
         rounds: state.round,
@@ -774,6 +891,7 @@ export function runOneEncounter(
         cardLineTelemetry,
         cardDrawCounts,
         attribution: state.attribution,
+        objective,
     };
 }
 
@@ -860,6 +978,10 @@ export function simulateHazardPatternCombatDetailed(
     // Per-card enemy-HP damage across all runs (dominant-card witness).
     const damageByCard: Record<string, number> = {};
     const cardUsage: Record<string, CombatCardUsage> = {};
+    // Phase 43 — pooled objective telemetry across the runs (scored once, at
+    // the end: the components are nonlinear, so pooling counters is the only
+    // correct aggregation).
+    const objectiveTelemetry = emptyObjectiveTelemetry();
 
     for (let i = 0; i < count; i++) {
         const r = runOneEncounter(options.player, options.enemy, startSeed + i, policy, {
@@ -867,6 +989,7 @@ export function simulateHazardPatternCombatDetailed(
             focusCardIds: options.focusCardIds,
         });
         winPathCounts[r.outcome]++;
+        addObjectiveTelemetry(objectiveTelemetry, r.objective);
         if (r.outcome === 'victory') victories++;
         // Spec 32 v3 §9 — CAPITULATE (SWAY) and CONCEDE (Peroration) are
         // merciful resolutions: they count with the mercy wins.
@@ -949,6 +1072,8 @@ export function simulateHazardPatternCombatDetailed(
         roundsStdDev: Math.sqrt(Math.max(0,
             totalRoundsSq / count - (totalRounds / count) ** 2)),
         statusEngagement: totalPlays > 0 ? totalStatusPlays / totalPlays : 0,
+        combatQuality: scoreCombatObjective(objectiveTelemetry),
+        objectiveTelemetry,
         avgConvictionSpent: totalConviction / count,
         dotHpFraction: totalDotHp / totalEnemyHpLost,
         strikeFraction: totalDirectHp / totalEnemyHpLost,

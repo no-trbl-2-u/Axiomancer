@@ -14,6 +14,15 @@
 //      phase title already exists open, reuse it; if closed, reopen and
 //      log a "phase work resumed" comment; if none, create.
 //
+//   3) The closing-trailer sweep ("close-trailers") — the load-bearing
+//      auto-close for BOTH flavors since Phase 48. Runs on every push to
+//      `main` from .github/workflows/close-trailers.yml, scans every
+//      commit in the pushed range, and closes what the commit prose says
+//      it closes. Neither GitHub's native parser (inert here) nor an
+//      agent reaching Step 7 of skills/iterate.md (skipped whenever a
+//      loop turn ends before CI goes green) can be relied on. See the
+//      "closing-trailer sweep (Phase 48)" block below for the evidence.
+//
 // Subcommands:
 //
 //   open --severity <high|med|low>
@@ -259,7 +268,269 @@ function closeIssue(number, repo) {
   return { closed: false, error: out.trim() || `gh issue close exited ${r.status}` }
 }
 
+// --- closing-trailer sweep (Phase 48) ---------------------------------
+//
+// ROOT CAUSE, 2026-08-08. The 2026-08-03 fix (`0441c554`, issue #166) was
+// correct but incomplete, and the "resolved" claim rested on no witness.
+// What the #174-vs-#175 comparison actually proves:
+//
+//   * #175 closed at 19:44:48Z, 7m47s after `1004894` landed on `main`.
+//     Its only comment is `buildCloseCommentBody()` verbatim — so the
+//     closer was OUR `close-comment` API call, not GitHub's parser. The
+//     native parser had a full 7 minutes on the default branch and did
+//     nothing.
+//   * #174 has NO loop comment at all. `close-comment` was never invoked
+//     for it. The march run that shipped `615ff26b` (31184116798) ended
+//     with `result: "Waiting on CI — will resume once the verify-mobile
+//     run for commit 615ff26b finishes."` — the agent's turn ended while
+//     CI was still amber, and nothing resumes: the container dies and the
+//     next tick re-audits from scratch. #174 sat open 11 hours until a
+//     human closed it by hand during /oversight.
+//
+// So the bullet prefix is not the cause, the push shape is not the cause,
+// and batched-push tip-only scanning is not the cause (both commits were
+// the tip of their own single-commit push, seconds apart from a follow-up
+// plan-only push). The cause is that the ONLY working close path was a
+// best-effort prose step in `skills/iterate.md` Step 7, gated behind
+// `npm run deploy:check` going green — and an agent turn that ends before
+// CI concludes skips it silently, forever. The `Closes #N` trailer that
+// the docs call a "belt-and-suspenders backup" has never been observed
+// closing anything in this repo; WHY GitHub's parser stays inert here
+// could not be determined, which is exactly why nothing may depend on it.
+//
+// The fix: make this script the single explicit authority. `close-trailers`
+// scans EVERY commit in a pushed range (not just the tip), parses the
+// closing keywords out of prose (fences, quoted bodies and inline code
+// spans excluded), and closes each referenced issue via the API,
+// idempotently. `.github/workflows/close-trailers.yml` runs it on every
+// push to `main`, so the close no longer depends on an agent surviving
+// long enough to reach Step 7.
+
+// GitHub's documented closing keywords, in every accepted inflection.
+const CLOSE_KEYWORD_SRC = 'close[sd]?|fix(?:e[sd])?|resolve[sd]?'
+
+// `Closes #12` · `- Fixes #12` · `Resolved: GH-12` · `Closes owner/repo#12`.
+const CLOSE_REF_SRC =
+  String.raw`\b(?:${CLOSE_KEYWORD_SRC})\b\s*:?\s+` +
+  String.raw`(?:(?<owner>[A-Za-z0-9_.-]+)\/(?<repo>[A-Za-z0-9_.-]+))?(?:#|GH-)(?<number>\d+)\b`
+
+// Drop everything that is quoted or code from a commit message, so a
+// trailer that only *appears* in a message (a doc example, a quoted prior
+// comment, `Closes #N` inside a fenced block) never closes a live issue.
+// Fenced blocks (``` and ~~~), quote lines (`>`), and inline code spans.
+export function stripNonProse(message) {
+  const kept = []
+  let fence = null
+  for (const line of String(message ?? '').split(/\r?\n/)) {
+    const open = line.match(/^\s{0,3}(`{3,}|~{3,})/)
+    if (open) {
+      const marker = open[1][0]
+      if (fence === null) fence = marker
+      else if (fence === marker) fence = null
+      continue
+    }
+    if (fence !== null) continue
+    if (/^\s*>/.test(line)) continue
+    kept.push(line.replace(/`[^`\n]*`/g, ' '))
+  }
+  return kept.join('\n')
+}
+
+// Parse the issue numbers a single commit message closes, in order, deduped.
+// A qualified `owner/repo#N` reference only counts when it names `repo`.
+export function parseCloseTrailers(message, { repo } = {}) {
+  const [wantOwner = '', wantRepo = ''] = String(repo ?? '').split('/')
+  const re = new RegExp(CLOSE_REF_SRC, 'gi')
+  const seen = new Set()
+  const out = []
+  for (const m of stripNonProse(message).matchAll(re)) {
+    const g = m.groups ?? {}
+    if (g.owner) {
+      if (!wantOwner) continue
+      if (g.owner.toLowerCase() !== wantOwner.toLowerCase()) continue
+      if (g.repo.toLowerCase() !== wantRepo.toLowerCase()) continue
+    }
+    const n = Number(g.number)
+    if (!Number.isInteger(n) || n <= 0 || seen.has(n)) continue
+    seen.add(n)
+    out.push(n)
+  }
+  return out
+}
+
+// Fold a pushed RANGE of commits into one close list. Every commit is
+// scanned, not just the tip — the batched-push suspect from the phase
+// brief is closed off by construction. First commit to reference an issue
+// owns the attribution.
+export function collectCloseTargets(commits, { repo } = {}) {
+  const seen = new Map()
+  for (const c of commits ?? []) {
+    for (const number of parseCloseTrailers(c?.message, { repo })) {
+      if (seen.has(number)) continue
+      seen.set(number, { number, sha: c?.sha ?? null, subject: subjectOf(c?.message) })
+    }
+  }
+  return [...seen.values()]
+}
+
+function subjectOf(message) {
+  return String(message ?? '').split(/\r?\n/)[0]?.trim() ?? ''
+}
+
+// Parse `git log --format=%H%x1e%B%x1f` output into { sha, message } records.
+export function parseGitLogRecords(stdout) {
+  return String(stdout ?? '')
+    .split('\x1f')
+    .map((rec) => rec.replace(/^[\r\n]+/, ''))
+    .filter((rec) => rec.trim().length > 0)
+    .map((rec) => {
+      const i = rec.indexOf('\x1e')
+      if (i === -1) return null
+      return { sha: rec.slice(0, i).trim(), message: rec.slice(i + 1).replace(/[\r\n]+$/, '') }
+    })
+    .filter(Boolean)
+}
+
+const ZERO_SHA = /^0{7,40}$/
+
+// Resolve a push range into commits. A missing/zero base (branch creation,
+// force-push, unavailable history) degrades to the head commit alone rather
+// than failing the sweep.
+export function resolveRangeArgs({ range, sha }) {
+  if (range && range.includes('..')) {
+    const [base, head] = range.split('..')
+    if (base && !ZERO_SHA.test(base) && head) return ['log', '--format=%H%x1e%B%x1f', `${base}..${head}`]
+    if (head) return ['log', '-1', '--format=%H%x1e%B%x1f', head]
+  }
+  const target = sha || range || 'HEAD'
+  return ['log', '-1', '--format=%H%x1e%B%x1f', target]
+}
+
+function readCommits(args) {
+  const r = spawnSync('git', args, { encoding: 'utf-8' })
+  if ((r.status ?? 1) !== 0) return { error: (r.stderr ?? '').trim() || `git ${args[0]} exited ${r.status}` }
+  return { commits: parseGitLogRecords(r.stdout ?? '') }
+}
+
+export function buildTrailerCloseCommentBody({ number, sha, subject }) {
+  return [
+    `Closed by \`${String(sha ?? '').slice(0, 8)}\`${subject ? ` ("${subject}")` : ''}, whose commit message closes #${number}.`,
+    '',
+    "_Closed by `scripts/loop-issue.mjs close-trailers` — the repo's own closing-trailer sweep, which runs on every push to `main`. GitHub's native `Closes #N` parser is inert here; this sweep is the authority._",
+  ].join('\n')
+}
+
+// The gh-backed IO the sweep drives. Split out so tests can inject a fake
+// and stay hermetic — no network, no gh, no TTY.
+export function defaultSweepIo(repo) {
+  return {
+    getIssueState(number) {
+      const r = ghCall(['issue', 'view', String(number), '--repo', repo, '--json', 'state'])
+      if (r.status !== 0) {
+        const out = `${r.stderr ?? ''}${r.stdout ?? ''}`
+        // A number that is a PR, or simply does not exist, is not an error:
+        // commit prose references those all the time.
+        if (/could not resolve|not found|no issue found/i.test(out)) return { state: 'MISSING' }
+        return { error: out.trim() || `gh issue view exited ${r.status}` }
+      }
+      try {
+        return { state: String(JSON.parse(r.stdout || '{}').state ?? '').toUpperCase() }
+      } catch (e) {
+        return { error: `gh issue view returned non-JSON: ${e.message}` }
+      }
+    },
+    closeIssue: (number) => closeIssue(number, repo),
+    comment(number, body) {
+      const r = ghCall(['issue', 'comment', String(number), '--repo', repo, '--body', body])
+      if (r.status === 0) return { ok: true }
+      return { error: (`${r.stderr ?? ''}${r.stdout ?? ''}`).trim() || `gh issue comment exited ${r.status}` }
+    },
+  }
+}
+
+// Idempotent close sweep. Pure over `io` — an already-closed issue is a
+// no-op, not an error; a missing issue is a no-op; only a real API failure
+// lands in `errors` (and only `errors` makes the CLI exit non-zero).
+export function sweepCloseTrailers({ commits, repo, io, dryRun = false }) {
+  const targets = collectCloseTargets(commits, { repo })
+  const closed = []
+  const noop = []
+  const errors = []
+  const warnings = []
+  for (const t of targets) {
+    // Dry-run is fully offline on purpose: it reports what a real sweep
+    // would touch without making a single API call.
+    if (dryRun) {
+      noop.push({ ...t, reason: 'dry-run' })
+      continue
+    }
+    const state = io.getIssueState(t.number) ?? {}
+    if (state.error) {
+      errors.push({ ...t, error: state.error })
+      continue
+    }
+    if (state.state === 'CLOSED') {
+      noop.push({ ...t, reason: 'already-closed' })
+      continue
+    }
+    if (state.state === 'MISSING') {
+      noop.push({ ...t, reason: 'not-found' })
+      continue
+    }
+    const res = io.closeIssue(t.number) ?? {}
+    if (res.error) {
+      errors.push({ ...t, error: res.error })
+      continue
+    }
+    closed.push(t)
+    if (io.comment) {
+      const c = io.comment(t.number, buildTrailerCloseCommentBody(t)) ?? {}
+      // The comment is a courtesy; the close is the point.
+      if (c.error) warnings.push({ ...t, error: c.error, phase: 'comment' })
+    }
+  }
+  return { targets, closed, noop, errors, warnings }
+}
+
 // --- subcommands ------------------------------------------------------
+
+function cmdCloseTrailers(flags) {
+  const repo = process.env.GH_REPO
+  const dryRun = flags['dry-run'] === 'true' || flags['dry-run'] === true
+
+  if (!repo) {
+    process.stderr.write('loop-issue: GH_REPO missing (set in .env)\n')
+    process.exit(1)
+  }
+  if (!dryRun && !process.env.GH_TOKEN) {
+    process.stderr.write('loop-issue: GH_TOKEN missing from env (.env not loaded?)\n')
+    process.exit(1)
+  }
+
+  const read = readCommits(resolveRangeArgs({ range: flags.range, sha: flags.sha }))
+  if (read.error) {
+    process.stderr.write(`loop-issue: could not read the commit range: ${read.error}\n`)
+    process.exit(1)
+  }
+
+  const result = sweepCloseTrailers({
+    commits: read.commits,
+    repo,
+    io: defaultSweepIo(repo),
+    dryRun,
+  })
+
+  process.stdout.write(
+    `loop-issue: scanned ${read.commits.length} commit(s), ${result.targets.length} closing reference(s)\n`,
+  )
+  for (const t of result.closed) process.stdout.write(`  closed #${t.number} (${String(t.sha).slice(0, 8)})\n`)
+  for (const t of result.noop) process.stdout.write(`  skipped #${t.number} (${t.reason})\n`)
+  for (const w of result.warnings) process.stderr.write(`  warn #${w.number}: ${w.phase} failed: ${w.error}\n`)
+  for (const e of result.errors) process.stderr.write(`  ERROR #${e.number}: ${e.error}\n`)
+
+  // A close that failed is the exact bug this phase exists to stop hiding.
+  if (result.errors.length > 0) process.exit(1)
+}
 
 function cmdOpen(flags) {
   const { severity, category, source, title } = flags
@@ -574,6 +845,8 @@ function main(argv) {
       return cmdPhaseOpen(flags)
     case 'phase-close':
       return cmdPhaseClose(flags)
+    case 'close-trailers':
+      return cmdCloseTrailers(flags)
     case '--help':
     case '-h':
     case 'help':
@@ -612,6 +885,18 @@ Usage:
       (reliable on every push route; the Closes #N trailer is a backup).
       (alternatively pass --number <N> to skip the lookup)
 
+  node scripts/loop-issue.mjs close-trailers \\
+      --range <base-sha>..<head-sha>   (or --sha <sha> for one commit)
+      [--dry-run]
+      → scans EVERY commit in the range, parses the closing keywords out
+      of the commit prose (code fences, quotes and inline code excluded),
+      and closes each referenced issue via the API, idempotently. This is
+      the load-bearing auto-close: GitHub's native parser is inert in this
+      repo and the agent-driven close-comment step is skipped whenever a
+      loop turn ends before CI goes green (Phase 48). Wired to every push
+      to main by .github/workflows/close-trailers.yml. Exits 1 if a close
+      actually failed.
+
 Env (from .env or shell):
   GH_TOKEN, GH_REPO
 `)
@@ -626,6 +911,13 @@ export const __test = {
   buildPhaseShippedCommentBody,
   phaseTitlePrefix,
   isPhaseMatch,
+  stripNonProse,
+  parseCloseTrailers,
+  collectCloseTargets,
+  parseGitLogRecords,
+  resolveRangeArgs,
+  sweepCloseTrailers,
+  buildTrailerCloseCommentBody,
   LABEL_PALETTE,
   VALID_SEVERITY,
   VALID_CATEGORY,

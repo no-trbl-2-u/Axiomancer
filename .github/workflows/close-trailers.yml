@@ -1,0 +1,87 @@
+name: close-trailers
+
+# The auto-close authority (build-plan Phase 48).
+#
+# Every push to `main` is swept: `scripts/loop-issue.mjs close-trailers`
+# reads EVERY commit in the pushed range, parses the closing keywords out
+# of the commit prose, and closes each referenced issue through the API,
+# idempotently. This exists because neither of the two mechanisms the loop
+# used to lean on actually holds:
+#
+#   * GitHub's native `Closes #N` parser is inert in this repo. #175 sat
+#     open for 7m47s after `1004894` landed directly on `main` carrying
+#     `- Closes #175`; the parser never fired, and the issue was finally
+#     closed by our own API call. No loop issue has ever been observed
+#     closing by the native parser. Why it stays inert could not be
+#     determined — which is the reason nothing may depend on it.
+#
+#   * The agent-driven close (`skills/iterate.md` Step 7 ->
+#     `loop-issue.mjs close-comment`) is gated behind `npm run
+#     deploy:check` going green, so it is skipped whenever a loop turn
+#     ends while CI is still amber. That is exactly what happened to
+#     #174: march run 31184116798 finished with `result: "Waiting on CI —
+#     will resume once the verify-mobile run for commit 615ff26b
+#     finishes."`. Nothing resumes; the container dies and the next tick
+#     re-audits from scratch. #174 leaked for 11 hours until a human
+#     closed it by hand.
+#
+# `close-comment` / `phase-close` still run and still post the richer
+# deploy comment. This workflow is the floor underneath them: it runs on
+# the push itself, so it cannot be skipped by an agent turn ending early,
+# and it is idempotent, so it costs nothing when they did their job.
+#
+# The witness runs FIRST and gates the sweep: if the parser or the sweep
+# regresses, `main` goes red instead of silently leaking issues again.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/loop-issue.mjs'
+      - 'scripts/loop-issue.test.mjs'
+      - '.github/workflows/close-trailers.yml'
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  # Serialize per ref: two overlapping sweeps of adjacent pushes would only
+  # race to make the same idempotent call. Never cancel — a cancelled sweep
+  # is a leaked issue, which is the whole bug.
+  group: close-trailers-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  sweep:
+    name: close issues named by the pushed commits
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout (full history — the sweep reads a commit range)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Zero dependencies (node:test + node:assert), so no install step.
+      - name: Witness — closing-trailer parser + close sweep
+        run: node --test scripts/loop-issue.test.mjs
+
+      - name: Sweep the pushed range
+        if: github.event_name == 'push'
+        env:
+          # GH_PAT when present (same token the loop pushes with); the
+          # default GITHUB_TOKEN is a working fallback here because this
+          # job only writes issue state, it never pushes.
+          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          node scripts/loop-issue.mjs close-trailers \
+            --range "${{ github.event.before }}..${{ github.sha }}"

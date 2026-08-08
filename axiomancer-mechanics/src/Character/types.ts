@@ -168,6 +168,20 @@ export interface Character {
      * Mirrors the sparse-optional precedent of `floatingDice` / `bankedSouls`.
      */
     dieGear?: Partial<Record<'heart' | 'body' | 'mind' | 'wild', UpgradeableDieGear>>;
+    /**
+     * Phase 52a — how many cards this character has REMOVED from their combat
+     * deck THIS RUN. Not per node, not lifetime-across-runs: T's "every time
+     * the player does this across the game" reads as the campaign the player
+     * is in, and a run is the campaign.
+     *
+     * The escalating removal price reads it (`cardRemovalPrice` —
+     * `Cards/card.removal.pricing.ts`), and `removeCardFromCombatDeck`
+     * increments it on every accepted removal. Optional + sparse — absent
+     * means 0, same convention as `floatingDice` / `bankedSouls`; read it
+     * through `cardRemovalsOf` rather than dereferencing, so a fresh save
+     * (absent) and a v16-migrated save (materialised 0) answer identically.
+     */
+    cardRemovals?: number;
 }
 
 /**

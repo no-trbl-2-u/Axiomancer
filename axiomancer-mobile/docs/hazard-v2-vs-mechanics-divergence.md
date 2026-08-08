@@ -202,15 +202,18 @@ These are live in mobile as best-effort adapters and should become mechanics-own
   `maxhp` consequence still bakes the scar into `player.maxHealth` at
   claim, and additionally records the *actually applied* magnitude as a
   durable `hazard-scar:<n>` flag (the floor-5 clamp may soften the
-  nominal `HAZARD_MAXHP_SCAR`). An **inn-grade** rest — one whose
-  authored `healFraction >= 1.0`, i.e. a full-recovery shelter rather
-  than a wilderness field camp (`healFraction: 0.5`) — sums those
-  flags back into `maxHealth` and clears them
-  (`claimRestOutcomeAction`, gated on `RestSession.baseHealFraction`).
-  Field-camp watches restore current VITAE only and leave the scar
-  flags + `maxHealth` untouched. There is no first-class "inn"
-  map-event kind; the inn/camp split rides on the existing
-  `baseHealFraction` rather than new event plumbing. Engine owns no
+  nominal `HAZARD_MAXHP_SCAR`). A rest at an **inn** sums those flags
+  back into `maxHealth` and clears them (`claimRestOutcomeAction`).
+  Camp watches restore current VITAE only and leave the scar flags +
+  `maxHealth` untouched.
+  **Re-homed 2026-08-08 (Phase 52b):** the gate is now the authored
+  `RestPayload.shelter` (`'camp' | 'inn'`, default `'camp'`), carried
+  on `MobileRestSlice.shelter`. It was previously inferred from
+  `RestSession.baseHealFraction >= 1.0` — a heuristic the authored
+  content broke: `nf-4` (cold spring) and `nf-24` (hidden grove) were
+  both authored at 1.0, so two wilderness springs mended scars exactly
+  like a paid shelter. The inn/camp split now rides on real event
+  plumbing rather than a heal magnitude. Engine owns no
   scar-recovery truth (`RestOutcome` has no max-VITAE field), so this
   stays a documented mobile adapter — same family as the scar-apply
   adapter and `hazard-token-banked:` / `night-keepsake:` flags.

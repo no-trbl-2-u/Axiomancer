@@ -215,3 +215,8 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-08T14:49:24Z | subagent | Explore | claude-fable-5 | main | Map mobile/editor card coupling |
 | 2026-08-08T19:07:21Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-08T19:09:56Z | skill | critique | claude-sonnet-5 | main | - |
+| 2026-08-08T21:35:47Z | subagent | general-purpose | claude-opus-5 | main | Phase 42 dark fantasy bible |
+| 2026-08-08T21:36:21Z | subagent | general-purpose | claude-opus-5 | main | Phase 43 objective function v2 |
+| 2026-08-08T21:36:46Z | subagent | general-purpose | claude-opus-5 | main | Phase 52a deck removal primitive |
+| 2026-08-08T21:37:13Z | subagent | general-purpose | claude-opus-5 | main | Phase 52b first-class inn |
+| 2026-08-08T21:37:40Z | subagent | general-purpose | claude-opus-5 | main | Phase 48 Closes-N root cause |

@@ -8,6 +8,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createGameStore } from '../../Game/store';
+import { GAME_STATE_VERSION } from '../../Game/game.reducer';
 import { nullAdapter } from '../../Game/persistence/null.adapter';
 import { createDefaultFactionReputations, applyFactionReputationDeltas } from '../faction.engine';
 
@@ -106,7 +107,12 @@ describe('Boss befriend faction reputation integration', () => {
         // In a new game state, faction reputation should be initialized
         expect(state.factionReputations).toBeDefined();
         expect(typeof state.factionReputations).toBe('object');
-        expect(state.version).toBe(15); // Phase D5 bumped 14 → 15 (backfill die-gear rail)
+        // Symbolic: this asserts a freshly-bootstrapped store is CURRENT, and
+        // a fresh store is current by construction. Pinning the digit only
+        // guaranteed that every bump broke this test for no signal (D5's
+        // 14 -> 15, then phase 52a's 15 -> 16). game.migrate's own suites are
+        // where a specific version number is load-bearing.
+        expect(state.version).toBe(GAME_STATE_VERSION);
     });
 
     it('demonstrates boss befriend tradeoff pattern', () => {

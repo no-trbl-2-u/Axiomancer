@@ -34,7 +34,7 @@ describe('selectEventArtSlug', () => {
     });
 
     it('maps minigame-intercepted kinds (rest / gathering / loot-cache) to the generic fallback — Phase 137', () => {
-        expect(selectEventArtSlug({ kind: 'rest', healed: 5, healFraction: 1 })).toBe('interaction-generic');
+        expect(selectEventArtSlug({ kind: 'rest', healed: 5, shelter: 'camp' })).toBe('interaction-generic');
         expect(selectEventArtSlug({ kind: 'gathering', items: [] })).toBe('interaction-generic');
         expect(selectEventArtSlug({ kind: 'loot-cache', items: [], currency: 0 })).toBe('interaction-generic');
     });
@@ -63,7 +63,7 @@ describe('selectEventArtSlug', () => {
         const cases: ResolvedEvent[] = [
             { kind: 'encounter', encounter: { enemies: [{ name: 'x' }], origin: 'fishing-village:fv-3' } as never, isBoss: false },
             { kind: 'encounter', encounter: { enemies: [{ name: 'x' }], origin: 'fishing-village:fv-3' } as never, isBoss: true },
-            { kind: 'rest', healed: 1, healFraction: 1 },
+            { kind: 'rest', healed: 1, shelter: 'camp' },
             { kind: 'gathering', items: [] },
             { kind: 'loot-cache', items: [], currency: 0 },
             { kind: 'interaction', npcName: 'X' },
@@ -80,7 +80,7 @@ describe('selectEventArtSlug', () => {
 
 describe('defaultBodyForEvent', () => {
     it('returns a non-empty string for kinds that need a default', () => {
-        expect(defaultBodyForEvent({ kind: 'rest', healed: 1, healFraction: 1 })).not.toBe('');
+        expect(defaultBodyForEvent({ kind: 'rest', healed: 1, shelter: 'camp' })).not.toBe('');
         expect(defaultBodyForEvent({ kind: 'gathering', items: [] })).not.toBe('');
         expect(defaultBodyForEvent({ kind: 'village', villageName: 'X', merchants: [] })).not.toBe('');
     });
