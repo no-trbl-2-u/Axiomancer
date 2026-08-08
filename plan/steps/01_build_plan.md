@@ -987,7 +987,7 @@ product-level pivot that VOIDS several previously "locked" doctrines).**
 > unshackling phases below — scope preserved, order changed. See the
 > Queue change log.
 
-- [ ] Phase 41 — Constraint demolition (do this FIRST; everything below
+- [x] Phase 41 — Constraint demolition (do this FIRST; everything below
       depends on it). Remove the machinery that enforces the three
       retired constraints, so later phases are not fighting their own
       test suite: (a) `src/Cards/e2e/doctrine-strike-dead.engine.test.ts`
@@ -1014,7 +1014,8 @@ product-level pivot that VOIDS several previously "locked" doctrines).**
       re-home any assertion that happens to pin one of the locked systems
       into a suite that survives, rather than dropping it with the file.
       See `plan/bearings.md` § "LOCKED MECHANICS". (mechanics)
-      Deps: none. Brief: to generate.
+      Deps: none. Brief: `plan/phases/phase_41_constraint_demolition.md`.
+      — `feat(mechanics): constraint demolition — phase 41` (08745441, 1bd9bd2b)
 - [ ] Phase 42 — The Dark Fantasy campaign bible (design phase; output is
       a spec, not code). **T ratified the direction 2026-08-08: "Dark
       Fantasy deckbuilding RPG campaign", WHOLE PRODUCT** — so this is no
