@@ -133,6 +133,7 @@ describe('spec 33 D7 — ratified economy envelope + flag-not-ready canaries', (
     // (The canon's decks read 1.18◆ against a 1.2 floor authored for the
     // retired ten-preset library; the sim itself still runs, and the
     // structural assertions below stay ARMED.)
+    // SKIP-ISSUE: #183
     it.skip('RATIFIED: realized ◆ income sits in the design band 1.2-1.6 at converged seeds', () => {
         expect(p.totalIncomePerRound).toBeGreaterThanOrEqual(1.2);
         expect(p.totalIncomePerRound).toBeLessThanOrEqual(1.6);

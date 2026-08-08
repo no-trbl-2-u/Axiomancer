@@ -59,6 +59,7 @@ describe('profane canon — the payoff-loadout sim machinery survives the rework
 // PROFANE-CANON SUSPENSION (2026-08-08): balance bands deliberately
 // suspended for the rework — "no need to worry about balance yet" (owner).
 // /deck-tuning re-baselines and re-arms these against the new canon.
+// SKIP-ISSUE: #183
 describe.skip('profane canon — win/engagement bands (SUSPENDED, re-armed by /deck-tuning)', () => {
     it('the pure DoT loadout wins at least sometimes WITH real status engagement', () => {
         const s = simulateHazardPatternCombat(loadout(DOT), LittleBelle, RUNS, SEED);

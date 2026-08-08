@@ -92,6 +92,7 @@ describe('HP combat — no degenerate stalemates (the safety cap never binds in 
 // PROFANE-CANON SUSPENSION (2026-08-08): balance bands deliberately
 // suspended for the rework — "no need to worry about balance yet" (owner).
 // /deck-tuning re-baselines and re-arms these against the new canon.
+// SKIP-ISSUE: #183
 describe.skip('HP combat — SUSPENDED balance bands (status play wins, alt-wins fire)', () => {
     it('a DoT loadout wins at least sometimes and lands status on easy foes', () => {
         for (const enemy of [LittleBelle, WaterHolger]) {
