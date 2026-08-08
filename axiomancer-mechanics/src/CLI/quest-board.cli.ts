@@ -37,7 +37,8 @@ import {
 import {
     createQuestBoardSession,
     beginQuestBoard,
-    rollQuestBone,
+    castQuestBones,
+    takeQuestStep,
     useQuestCharm,
     chooseQuestSpaceOption,
     continueQuestSpace,
@@ -221,7 +222,7 @@ async function manualTurn(state: QuestBoardSession): Promise<QuestBoardSession> 
         );
         const primed = state.charms.filter(c => !c.used && !c.primed);
         const choices: Array<{ name: string; value: string }> = [
-            { name: 'CAST THE BONE — roll and move', value: 'roll' },
+            { name: 'CAST THE BONES — throw two, take one step', value: 'cast' },
         ];
         for (const c of primed) {
             choices.push({ name: `PRIME CHARM — ${c.id}`, value: `charm:${c.id}` });
@@ -233,7 +234,27 @@ async function manualTurn(state: QuestBoardSession): Promise<QuestBoardSession> 
             const charmId = pick.slice('charm:'.length);
             return step('useQuestCharm', state, useQuestCharm(state, charmId as never), { charmId });
         }
-        return step('rollQuestBone', state, rollQuestBone(state), {});
+        return step('castQuestBones', state, castQuestBones(state), {});
+    }
+
+    if (state.phase === 'choosing') {
+        // The 2026-08-08 two-bone redesign: the player picks a DESTINATION,
+        // not a number, so both bones print where they land and what waits.
+        const bones = state.bones ?? [];
+        log('\n  Two bones on the boards. One step, one banked.');
+        const describe = (bone: typeof bones[number], i: number): string =>
+            `${bone.total} → ${bone.targetName} (${bone.targetKind})` +
+            (bone.fitsAtSlipway ? ' · FITS AT THE SLIPWAY' : '') +
+            ` — leaves ${bones[i === 0 ? 1 : 0]!.windIfLeft} wind behind`;
+        // Echo the pair so script / --json-events runs carry the choice that
+        // was on offer, not just the one that was taken.
+        for (const [i, bone] of bones.entries()) log(`    [${i + 1}] ${describe(bone, i)}`);
+        const choices = bones.map((bone, i) => ({ name: describe(bone, i), value: `bone:${i}` }));
+        const { pick } = await prompt<{ pick: string }>([{
+            type: 'rawlist', name: 'pick', message: 'Which step?', choices,
+        }]);
+        const boneIndex = Number(pick.split(':')[1]);
+        return step('takeQuestStep', state, takeQuestStep(state, boneIndex), { boneIndex });
     }
 
     // phase === 'space'
@@ -274,6 +295,33 @@ interface BoardResult {
     vowsKept: number;
 }
 
+/**
+ * The `--auto` bot's bone choice. Mirrors `quest-board.sim.ts`'s
+ * `chooseBone`: score each destination by the policy's appetite, add a heavy
+ * bonus for fitting carried parts onto the hull, and break ties toward the
+ * shorter step (whose twin banks more wind).
+ */
+function autoBoneIndex(state: QuestBoardSession, policy: QuestBoardPolicyId): number {
+    const bones = state.bones ?? [];
+    if (bones.length === 0) return 0;
+    const appetite: Record<QuestBoardPolicyId, Partial<Record<string, number>>> = {
+        safe:      { hearth: 5, cache: 4, omen: 4, slipway: 4, market: 3, parley: 3, gather: 1, duel: 0, snag: 0 },
+        gambler:   { duel: 5, gather: 4, cache: 3, market: 2, parley: 2, omen: 1, hearth: 1, snag: 1, slipway: 1 },
+        economist: { market: 5, cache: 4, gather: 3, parley: 3, omen: 2, slipway: 2, hearth: 2, duel: 0, snag: 0 },
+    };
+    const carried = state.parts.plank + state.parts.pitch + state.parts.cloth + state.parts.nail;
+    let best = 0;
+    let bestScore = -Infinity;
+    for (let i = 0; i < bones.length; i++) {
+        const bone = bones[i]!;
+        let score = appetite[policy][bone.targetKind] ?? 2;
+        if (bone.fitsAtSlipway && carried > 0) score += 6;
+        if (bone.die < bones[i === 0 ? 1 : 0]!.die) score += 0.5;
+        if (score > bestScore) { bestScore = score; best = i; }
+    }
+    return best;
+}
+
 async function playBoard(flags: QuestBoardCliFlags, runIndex: number): Promise<BoardResult> {
     const def = getQuestBoardDef(flags.boardId);
     const seed = seedToNumber(flags.seed, runIndex);
@@ -292,7 +340,10 @@ async function playBoard(flags: QuestBoardCliFlags, runIndex: number): Promise<B
             if (state.phase === 'dusk') {
                 state = step('acknowledgeQuestDusk', state, acknowledgeQuestDusk(state), {});
             } else if (state.phase === 'idle') {
-                state = step('rollQuestBone', state, rollQuestBone(state), {});
+                state = step('castQuestBones', state, castQuestBones(state), {});
+            } else if (state.phase === 'choosing') {
+                const boneIndex = autoBoneIndex(state, flags.policy);
+                state = step('takeQuestStep', state, takeQuestStep(state, boneIndex), { boneIndex });
             } else if (state.phase === 'space') {
                 const optionId = autoOption(state, flags.policy);
                 if (optionId !== null) {

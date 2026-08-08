@@ -8,10 +8,10 @@
  *
  * State machine:
  *
- *   intro ──beginQuestBoard──▶ idle ──rollQuestBone──▶ space
- *     ▲                          │  ▲                    │
- *     │                          │  └─continueQuestSpace─┤ (stretches left)
- *   create                       │ ◀──acknowledgeQuestDusk    │
+ *   intro ─beginQuestBoard─▶ idle ─castQuestBones─▶ choosing ─takeQuestStep─▶ space
+ *     ▲                        │  ▲                                            │
+ *     │                        │  └────────────continueQuestSpace──────────────┤ (stretches left)
+ *   create                     │ ◀──acknowledgeQuestDusk    │
  *                                │        ▲                   │
  *                                │       dusk ◀───────────────┤ (day spent / collapse)
  *                                │                            │
@@ -47,6 +47,7 @@ import {
     type QuestBoardMetrics,
     type QuestBoardOutcome,
     type QuestBoardSession,
+    type QuestBone,
     type QuestCharmId,
     type QuestCharmState,
     type QuestMarketOffer,
@@ -218,6 +219,7 @@ export function createQuestBoardSession(seed: SeedInput, boardId: string): Quest
         parts: { ...EMPTY_PART_TALLY },
         fitted: { ...EMPTY_PART_TALLY },
         lastRoll: null,
+        bones: null,
         pending: null,
         charms,
         vows,
@@ -225,6 +227,8 @@ export function createQuestBoardSession(seed: SeedInput, boardId: string): Quest
         collapsedToday: false,
         metrics: {
             rolls: 0,
+            shortStepsTaken: 0,
+            windBanked: 0,
             duelsWon: 0,
             duelsLost: 0,
             snagsSuffered: 0,
@@ -274,60 +278,121 @@ export function useQuestCharm(s: QuestBoardSession, id: QuestCharmId): QuestBoar
  * roll-charms, advances the piece, fits carried parts when the move
  * lands on or crosses the slipway, and opens the arrival space.
  */
-export function rollQuestBone(s: QuestBoardSession): QuestBoardSession {
-    if (s.phase !== 'idle' || s.outcome !== null) return s;
+/** Where a bone of `total` spaces would land the piece, and what waits there. */
+function previewBone(
+    s: QuestBoardSession,
+    die: number,
+    bonus: number,
+): QuestBone {
     const def = getQuestBoardDef(s.boardId);
+    const len = def.spaces.length;
+    const total = die + bonus;
+    const rawTarget = s.pos + total;
+    const target = rawTarget % len;
+    const space = spaceAt(def, target);
+    return {
+        die,
+        bonus,
+        total,
+        target,
+        targetKind: space.kind,
+        targetName: space.name,
+        fitsAtSlipway: rawTarget >= len || target === 0,
+        windIfLeft: Math.min(die, T.windBankCap),
+    };
+}
+
+/**
+ * CAST THE BONES — roll TWO and put them on the table.
+ *
+ * Pre-2026-08-08 this rolled one bone and moved that many spaces, full stop.
+ * The Boy's Almanac was a roll-and-move board: the only action available at
+ * idle was "roll", so a player made no decision about where they went, which
+ * is the one decision a board game is for.
+ *
+ * Now the cast produces two bones, each previewed with the space it would
+ * land on, and the player takes one step. The bone LEFT BEHIND banks its pips
+ * as wind (capped), so the choice is never just "which square is nicer" — it
+ * is position against tempo. Taking the short step to reach the HEARTH means
+ * banking the long one for next turn; taking the long step to skip a SNAG
+ * means arriving next turn with nothing in hand.
+ */
+export function castQuestBones(s: QuestBoardSession): QuestBoardSession {
+    if (s.phase !== 'idle' || s.outcome !== null) return s;
     let rng = s.rng;
     let charms = s.charms;
 
-    // Die — GULL FEATHER rolls twice, keeps the higher.
-    let die: number;
-    {
-        const first = rollDie(rng);
-        rng = first.state;
-        die = first.value;
-        if (isPrimed(s, 'gull-feather')) {
-            const second = rollDie(rng);
-            rng = second.state;
-            die = Math.max(die, second.value);
-            charms = consumeCharm(charms, 'gull-feather');
-        }
+    const first = rollDie(rng);
+    rng = first.state;
+    const second = rollDie(rng);
+    rng = second.state;
+    let faces: [number, number] = [first.value, second.value];
+
+    // GULL FEATHER — cast a third bone and drop the worst of the three, so
+    // the player still chooses between two but from a better pair.
+    if (isPrimed(s, 'gull-feather')) {
+        const third = rollDie(rng);
+        rng = third.state;
+        const all = [faces[0], faces[1], third.value].sort((a, b) => b - a);
+        faces = [all[0]!, all[1]!];
+        charms = consumeCharm(charms, 'gull-feather');
     }
 
-    // Bonus — banked wind plus THE FRIEND'S WHISTLE.
+    // Bonus — banked wind plus THE FRIEND'S WHISTLE, applied to both bones so
+    // it never silently steers the choice.
     let bonus = s.wind;
     if (charms.some(c => c.id === 'friends-whistle' && c.primed)) {
         bonus += 2;
         charms = consumeCharm(charms, 'friends-whistle');
     }
-    const total = die + bonus;
+
+    const staged: QuestBoardSession = { ...s, rng, charms };
+    return {
+        ...staged,
+        phase: 'choosing',
+        bones: [previewBone(staged, faces[0], bonus), previewBone(staged, faces[1], bonus)],
+    };
+}
+
+/**
+ * Take one of the two cast bones. The other's pips bank as wind for the next
+ * cast — see `castQuestBones` for why the choice has two sides.
+ */
+export function takeQuestStep(s: QuestBoardSession, boneIndex: number): QuestBoardSession {
+    if (s.phase !== 'choosing' || s.bones === null || s.outcome !== null) return s;
+    const chosen = s.bones[boneIndex];
+    const left = s.bones[boneIndex === 0 ? 1 : 0];
+    if (!chosen || !left) return s;
+
+    const def = getQuestBoardDef(s.boardId);
 
     // Movement. Crossing or landing on space 0 (the slipway) fits
     // carried parts onto the hull.
-    const len = def.spaces.length;
-    const rawTarget = s.pos + total;
-    const crossedSlipway = rawTarget >= len;
-    const pos = rawTarget % len;
-
     let fitted = s.fitted;
     let parts = s.parts;
-    if (crossedSlipway || pos === 0) {
+    if (chosen.fitsAtSlipway) {
         const next = fitCarriedParts(def, parts, fitted);
         fitted = next.fitted;
         parts = next.parts;
     }
 
+    const bankedWind = left.windIfLeft;
     const moved: QuestBoardSession = {
         ...s,
-        rng,
-        charms,
-        pos,
+        phase: 'idle',
+        bones: null,
+        pos: chosen.target,
         parts,
         fitted,
-        wind: 0,
+        wind: bankedWind,
         stretch: s.stretch + 1,
-        lastRoll: { die, bonus, total },
-        metrics: { ...s.metrics, rolls: s.metrics.rolls + 1 },
+        lastRoll: { die: chosen.die, bonus: chosen.bonus, total: chosen.total },
+        metrics: {
+            ...s.metrics,
+            rolls: s.metrics.rolls + 1,
+            shortStepsTaken: s.metrics.shortStepsTaken + (chosen.die < left.die ? 1 : 0),
+            windBanked: s.metrics.windBanked + bankedWind,
+        },
     };
 
     // The boat may now be complete — outcome pre-empts the arrival space.
@@ -336,6 +401,18 @@ export function rollQuestBone(s: QuestBoardSession): QuestBoardSession {
     }
 
     return arriveAtSpace(moved);
+}
+
+/**
+ * Legacy single-bone move, kept as the composition of the two new steps so
+ * the replay scripts, sim bots and tests that predate the 2026-08-08 two-bone
+ * redesign still have a one-call path. It always takes the FIRST bone, which
+ * is the closest thing to "the old roll" — no choice, whatever came up.
+ */
+export function rollQuestBone(s: QuestBoardSession): QuestBoardSession {
+    const cast = castQuestBones(s);
+    if (cast === s) return s;
+    return takeQuestStep(cast, 0);
 }
 
 function fitCarriedParts(

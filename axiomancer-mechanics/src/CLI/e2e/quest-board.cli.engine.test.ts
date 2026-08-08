@@ -80,7 +80,9 @@ describe('QuestBoard CLI — deterministic auto playthrough', () => {
             const logs = readLog(logPath);
             const claim = logs.find(r => r.action === 'claimQuestBoardCompletion');
             expect(claim).toBeDefined();
-            const rolls = logs.filter(r => r.action === 'rollQuestBone').length;
+            // Since the 2026-08-08 two-bone redesign a turn is a CAST followed
+            // by a chosen STEP; the step is the move, so count those.
+            const rolls = logs.filter(r => r.action === 'takeQuestStep').length;
             return { rolls, tier: claim!.event.tier as string };
         };
 
@@ -122,21 +124,21 @@ describe('QuestBoard CLI — deterministic auto playthrough', () => {
 
 describe('QuestBoard CLI — illegal action handling', () => {
     it('warns, skips, and logs a no-op roll-during-space attempt with a snapshot', async () => {
-        // Manual script: roll once to open the arrival space, then try to ROLL
-        // AGAIN while a space is open — an illegal no-op regardless of the seed
-        // (rollQuestBone only fires from 'idle'). The board's idle prompt offers
-        // 'roll' (plus any charm); answering 'roll' from a space card is parsed
-        // by the space-card prompt, but the script feeds raw answers in order —
-        // we drive the engine verbs through the manual loop.
+        // Manual script: cast and step once to open the arrival space, then
+        // feed a bogus option id — an illegal no-op regardless of the seed.
+        // The manual loop prompts idle -> choosing -> space, and the script
+        // feeds raw answers in that order.
         const scriptPath = tmpPath('script', 'json');
         // The manual loop prompts:
-        //   idle → choose 'roll'
-        //   space → choose an option OR continue
+        //   idle     -> 'cast'
+        //   choosing -> which bone to take
+        //   space    -> choose an option OR continue
         // We answer to land on the SLIPWAY (a result-only space) and continue,
         // then keep continuing; the illegal path is exercised by an explicit
         // bad option id on an open space.
         fs.writeFileSync(scriptPath, JSON.stringify([
-            { pick: 'roll' },                 // idle: cast the bone
+            { pick: 'cast' },                 // idle: cast the two bones
+            { pick: 'bone:0' },               // choosing: take the first step
             { pick: 'option:__bogus__' },     // space: illegal option id (no-op)
             { pick: 'continue' },             // recover: continue if a result card
         ]));

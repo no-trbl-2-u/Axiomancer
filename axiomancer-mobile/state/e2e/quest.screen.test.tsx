@@ -92,6 +92,44 @@ describe('quest screen', () => {
         }
     });
 
+    /**
+     * Cast and take a step. Since the 2026-08-08 two-bone redesign the board
+     * no longer moves you on the cast — it puts two bones on the table and
+     * waits. `boneIndex` picks which step to take.
+     */
+    function castAndStep(boneIndex = 0): void {
+        fireEvent.press(screen.getByTestId('quest-roll'));
+        fireEvent.press(screen.getByTestId(`quest-bone-${boneIndex}`));
+    }
+
+    it('the cast offers two steps and moves only once one is taken', () => {
+        // The 2026-08-08 redesign's whole surface: before it, pressing CAST
+        // moved you. Now it deals a choice, and the choice is a destination —
+        // each button names the space it lands on.
+        const { store, actions } = mount(<QuestScreen />);
+        act(() => {
+            actions.beginQuestBoard({ seed: 7 });
+            actions.startQuestBoardPlay();
+        });
+        const before = store.getState().quest.session!.pos;
+
+        fireEvent.press(screen.getByTestId('quest-roll'));
+        expect(store.getState().quest.session!.phase).toBe('choosing');
+        expect(store.getState().quest.session!.pos).toBe(before);
+        expect(screen.getByTestId('quest-bones')).toBeTruthy();
+        expect(screen.getByTestId('quest-bone-0')).toBeTruthy();
+        expect(screen.getByTestId('quest-bone-1')).toBeTruthy();
+        // The cast button is gone while the choice is open.
+        expect(screen.queryByTestId('quest-roll')).toBeNull();
+
+        const bones = store.getState().quest.session!.bones!;
+        fireEvent.press(screen.getByTestId('quest-bone-1'));
+        const after = store.getState().quest.session!;
+        expect(after.pos).toBe(bones[1]!.target);
+        // The bone left behind banks its pips as wind — the cost side.
+        expect(after.wind).toBe(bones[0]!.windIfLeft);
+    });
+
     it('casting the bone tumbles, walks the piece, then opens a space card; continue returns to the die', () => {
         jest.useFakeTimers();
         try {
@@ -100,7 +138,7 @@ describe('quest screen', () => {
                 actions.beginQuestBoard({ seed: 7 });
                 actions.startQuestBoardPlay();
             });
-            fireEvent.press(screen.getByTestId('quest-roll'));
+            castAndStep();
             const s = store.getState().quest.session!;
             // Engine has resolved, but the card stays shut while the die
             // tumbles and the piece walks.
@@ -139,7 +177,7 @@ describe('quest screen', () => {
                 actions.beginQuestBoard({ seed: 7 });
                 actions.startQuestBoardPlay();
             });
-            fireEvent.press(screen.getByTestId('quest-roll'));
+            castAndStep();
             const dest = store.getState().quest.session!.pos;
 
             // Settle the die → walking begins; the destination is flagged but
@@ -236,7 +274,7 @@ describe('quest screen', () => {
                 parts: { ...BUILD_THE_BOAT_BOARD.partsRequired },
             });
         });
-        fireEvent.press(screen.getByTestId('quest-roll'));
+        castAndStep();
         expect(store.getState().quest.session!.phase).toBe('outcome');
         expect(screen.getByTestId('quest-outcome')).toBeTruthy();
         fireEvent.press(screen.getByTestId('quest-claim'));

@@ -41,6 +41,7 @@ export type {
     QuestSpaceResult,
     QuestSpaceOption,
     QuestPendingSpace,
+    QuestBone,
     QuestBoardMetrics,
     QuestOutcomeTier,
     QuestBoardOutcome,
@@ -95,6 +96,8 @@ export {
     beginQuestBoard,
     // play
     useQuestCharm,
+    castQuestBones,
+    takeQuestStep,
     rollQuestBone,
     chooseQuestSpaceOption,
     continueQuestSpace,
