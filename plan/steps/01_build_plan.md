@@ -958,31 +958,25 @@ missing-layers survey):**
 **Balance doctrine repair (promoted via /oversight 2026-08-08, T direct —
 the queue had fully drained and the red curve had no phase assigned):**
 
-- [ ] Phase 39 — Post-D8 flag-on curve repair + library theme-symmetry
-      restoration. ONE bounded tuning phase merging three standing
-      candidates (curve repair, theme symmetry, starter-library
-      trim/duplication + `scoreCard` v2 retune — same seats, same
-      evidence; do NOT ship them separately). The gap: blind flag-on
-      reads early 61.1% / mid 0.0% / late 0% / impossible 0% against the
-      80/50/25-35/0 doctrine, byte-identical across six consecutive
-      nightly baselines (08-01 → 08-07). Levers already ranked by the
-      07-18 metrics accumulation + Card Ledger: duplicate proven staples
-      into the failing decks (venom-and-vein pattern, 13 charted), cut
-      the flag-off-seated drags (crown-of-thorns −19 dWR, mirror-of-guilt
-      −15, self-flagellant −10), retune the fizz gates (ouroboros 25%,
-      second-thoughts 16%), give each deck an oratory-style mid-game
-      second gear, and author the replacement rare ench/dis cards that
-      restore spec-32 §6-7 symmetry (peroration ench+dis, forge dis,
-      control ench, oracle dis, harvest dis) — those new cards ARE the
-      second-gear payoffs, which is why the two rows merged. **Owner
-      ruling folded in: foundry/grace 0% statusEngagement is a doctrine
-      failure, not an identity** — restore `entropy-tax` to foundry's
-      seat and `heart-of-the-matter` to grace's in this same pass. Ends
-      with the `POST_D8_SHAPE` pin in `curated-library.engine.test.ts`
-      restored to a symmetric law and the matrix as the before/after
-      witness. (mechanics — content/tuning; `/deck-tuning` owns the
-      sandbox-first court) Deps: none — unblocked and measurable since
-      D8. Brief: to generate.
+- [x] Phase 39 — Post-D8 flag-on curve repair + library theme-symmetry
+      restoration (shipped `8d50591e`). Restored 7 of the D8 "dead 10"
+      cards verbatim, filling peroration/forge/control/oracle/harvest's
+      missing ench/dis seats; `entropy-tax`'s engine hook re-added.
+      `POST_D8_SHAPE` re-pinned symmetric, `cardLibrary` 79 → 86. Owner
+      ruling applied: `entropy-tax` seated into foundry (replacing the
+      mirror-of-longing borrow), `heart-of-the-matter` into grace
+      (replacing the ouroboros borrow) — both with the color-law
+      compensating shuffle shown in the preset comments. Ouroboros's
+      REPLAY_LAST retuned toward its ~25% fizz target (landed 11-17%).
+      Duplication/cut levers investigated but NOT force-applied: the
+      13-candidate staple list is mostly already-deployed or stale, and
+      the already-staple-heavy presets still sit at 0% mid — filed as
+      needs-user-call (mid cliff looks engine/enemy-scaling-shaped, not
+      card-shaped) rather than churned blind. Foundry's early win rate
+      regressed 73%→44% losing its sole SWAY win-path with no
+      replacement in the library — flagged as its own needs-user-call
+      follow-up, applied anyway per the owner's explicit ruling. Brief:
+      `plan/phases/phase_39_curve_repair_and_symmetry.md`.
 - [ ] Phase 40 — Card-text grammar + full copy pass. Ruled R4 on
       2026-07-18, released via /oversight 2026-08-08. Adopt the
       templating grammar (seven clause templates; one effect one
