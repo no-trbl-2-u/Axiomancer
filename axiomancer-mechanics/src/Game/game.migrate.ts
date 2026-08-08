@@ -7,10 +7,10 @@
  * fresh game. The equipment-signature epic (phases 18-21) re-introduces a short
  * targeted chain: v11 → v12 (Phase 18, re-slot equipment to the 5-slot model),
  * v12 → v13 (Phase 19, seed the signet relics), v13 → v14 (Phase 21, purge
- * non-relic equipment now that the procedural library is retired), and v14 →
- * v15 (Phase D5, backfill the die-gear rail). The hops chain, so a v11 save
- * lands at v15 in one `migrate` call. Every other version mismatch still
- * rejects.
+ * non-relic equipment now that the procedural library is retired), v14 → v15
+ * (Phase D5, backfill the die-gear rail), and v15 → v16 (Phase 52a, default
+ * the per-run card-removal counter). The hops chain, so a v11 save lands at
+ * v16 in one `migrate` call. Every other version mismatch still rejects.
  */
 
 import { GameState } from './types';
@@ -190,6 +190,33 @@ function migrateV14ToV15(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
+ * v15 → v16 (Phase 52a): default the per-run card-removal counter. A pre-52a
+ * save has no `player.cardRemovals`; the escalating removal price
+ * (`cardRemovalPrice`) reads that counter, and `cardRemovalsOf` already treats
+ * an absent field as 0, so this hop is a materialisation rather than a repair —
+ * a loaded save carries the counter explicitly, exactly as the die-gear hop
+ * makes the rail a real per-save object. A save that somehow already carries a
+ * count keeps it (a negative or non-numeric value is normalised to 0). Only the
+ * counter is added; every other field passes through untouched. Pure over a raw
+ * save payload.
+ */
+function migrateV15ToV16(raw: Record<string, unknown>): Record<string, unknown> {
+    const player = raw.player as (Partial<Character> & Record<string, unknown>) | undefined;
+    if (!player || typeof player !== 'object') {
+        return { ...raw, version: 16 };
+    }
+    const prior = player.cardRemovals;
+    const carried = typeof prior === 'number' && Number.isFinite(prior) && prior > 0
+        ? Math.floor(prior)
+        : 0;
+    return {
+        ...raw,
+        player: { ...player, cardRemovals: carried },
+        version: 16,
+    };
+}
+
+/**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
  * game). The name/signature is kept so the persistence layer's call site is
@@ -213,9 +240,10 @@ export function migrate(
     let working = raw as Record<string, unknown>;
     let version = fromVersion;
 
-    // Supported hops: v11 → v12 re-slots equipment to the Phase-18 model; then
-    // v12 → v13 seeds the Phase-19 signet relics. Chained so a v11 save lands at
-    // v13 in one call.
+    // Supported hops: v11 → v12 re-slots equipment to the Phase-18 model; v12 →
+    // v13 seeds the Phase-19 signet relics; v13 → v14 purges non-relic gear;
+    // v14 → v15 backfills the die-gear rail; v15 → v16 defaults the card-removal
+    // counter. Chained so a v11 save lands at v16 in one call.
     if (version === 11 && toVersion >= 12) {
         working = migrateV11ToV12(working);
         version = 12;
@@ -231,6 +259,10 @@ export function migrate(
     if (version === 14 && toVersion >= 15) {
         working = migrateV14ToV15(working);
         version = 15;
+    }
+    if (version === 15 && toVersion >= 16) {
+        working = migrateV15ToV16(working);
+        version = 16;
     }
 
     if (version !== toVersion) {

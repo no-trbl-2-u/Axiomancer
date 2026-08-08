@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { migrate, createNewGameState } from '../index';
+import { migrate, createNewGameState, GAME_STATE_VERSION } from '../index';
 import { calculateMaxHealth } from '../../Utils';
 import { getSignaturesForLoadout } from '../../Items/relic.library';
 import type { Equipment } from '../../Items/types';
@@ -84,7 +84,7 @@ describe('migrate v13 → v14 — purge non-relic equipment', () => {
         // A v12 save chained all the way to current (v14): the old sword parked in
         // inventory at v13 is stripped at v14; only relic equipment survives.
         const migrated = migrate(v12Save(), 12);
-        expect(migrated.version).toBe(15); // chains v12 → current (D5 bumped 14 → 15)
+        expect(migrated.version).toBe(GAME_STATE_VERSION); // chains v12 → current
         const equipmentIds = migrated.player.inventory
             .filter((i): i is typeof i => (i as { category?: string }).category === 'equipment')
             .map(i => i.id);
@@ -111,7 +111,7 @@ describe('migrate v13 → v14 — purge non-relic equipment', () => {
             },
         };
         const migrated = migrate(v13, 13);
-        expect(migrated.version).toBe(15); // chains v13 → current (D5 bumped 14 → 15)
+        expect(migrated.version).toBe(GAME_STATE_VERSION); // chains v13 → current
         // The procedural weapon slot is backfilled with the default weapon relic.
         expect(migrated.player.equipment.weapon?.id).toBe('relic-overwhelming');
         expect(migrated.player.equipment.armor?.id).toBe('relic-read');

@@ -70,8 +70,13 @@ import { STARTING_CARD_IDS } from '../Combat/combat.rewards';
  *   (`player.dieGear`) with the concrete default 4-color loadout so upgrades
  *   write to a real per-save object and never mutate the frozen
  *   `DEFAULT_DIE_GEAR` (see `game.migrate.ts`).
+ * Phase 52a — bumped 15 → 16: the deck-removal primitive adds the per-run
+ *   counter `player.cardRemovals` (the escalating removal price reads it).
+ *   The migration materialises it to 0 on older saves (see `game.migrate.ts`);
+ *   the field stays sparse-optional on fresh characters, and `cardRemovalsOf`
+ *   is the seam that reads both shapes as 0.
  */
-export const GAME_STATE_VERSION = 15;
+export const GAME_STATE_VERSION = 16;
 
 /** Builds a brand-new GameState with default player and world. */
 export function createNewGameState(): GameState {
