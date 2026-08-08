@@ -17,6 +17,7 @@ import { useRouter } from 'expo-router';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { ScreenBg } from '@/components/ScreenBg';
+import { AxmIcon } from '@/components/icons';
 import { useGameActions, useGameState } from '@/state/GameStoreProvider';
 import { selectVillageVM } from '@/state/presenters/village.engine';
 import { FONTS } from '@/theme/axm';
@@ -43,7 +44,10 @@ export default function VillageScreen() {
     return (
         <ScreenBg>
             <ScrollView contentContainerStyle={styles.scroll}>
-                <Text style={styles.eyebrow}>⌂ SETTLEMENT</Text>
+                <View style={styles.eyebrowRow}>
+                    <AxmIcon name="action-village" size={18} />
+                    <Text style={styles.eyebrow}>SETTLEMENT</Text>
+                </View>
                 <Text style={styles.title}>{vm.villageName.toUpperCase()}</Text>
                 <Text style={styles.body}>{vm.body}</Text>
 
@@ -158,6 +162,11 @@ export default function VillageScreen() {
 
 const useStyles = makeStyles((AXM) => ({
     scroll: { padding: 14, paddingBottom: 24 },
+    eyebrowRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
     eyebrow: {
         fontFamily: FONTS.sans,
         fontSize: 10,

@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 
 import { ScreenBg } from '@/components/ScreenBg';
+import { AxmIcon } from '@/components/icons';
 import { SectionLabel } from '@/components/SectionLabel';
 import { TooltipTarget } from '@/components/tooltip/TooltipTarget';
 import { useGameState } from '@/state/GameStoreProvider';
@@ -256,7 +257,10 @@ export default function MemoirScreen() {
 
                 {/* Remains (Phase 6) */}
                 <View style={styles.section} testID="memoir-remains">
-                    <SectionLabel size={10}>{vm.remainsEyebrow}</SectionLabel>
+                    <View style={styles.remainsEyebrowRow}>
+                        <AxmIcon name="action-tombstone" size={14} color={AXM.bone} />
+                        <SectionLabel size={10}>{vm.remainsEyebrow}</SectionLabel>
+                    </View>
                     <Text style={styles.remainsLine} testID="memoir-death-line">
                         {vm.remains.deathLine}
                     </Text>
@@ -297,6 +301,11 @@ const useStyles = makeStyles((AXM) => ({
         fontSize: 11,
         color: AXM.bone,
         marginTop: 2,
+    },
+    remainsEyebrowRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
     },
     section: { padding: 14, paddingTop: 12 },
     emptyLine: {

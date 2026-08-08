@@ -195,6 +195,16 @@ const MAP_NODE_CONTENT: Record<string, TooltipContent> = {
         body: 'the ground itself turns against you. a short minigame — read the route, brave it, and you pass; falter and it costs vitae.',
         footnote: 'no combat · costs vitae',
     },
+    blacksmith: {
+        title: 'THE ANVIL',
+        body: 'a smith for your dice. pay to hone a face, temper a payload, or swap gear; the forge takes coin and gives no refunds.',
+        footnote: 'no combat · costs coin',
+    },
+    village: {
+        title: 'VILLAGE',
+        body: 'a haven of roofs and wares. trade, sell, and hear what the settled know; nothing here bites — yet.',
+        footnote: 'no combat',
+    },
     current: {
         title: 'HERE',
         body: 'where you stand. tap an adjacent node to step toward it.',

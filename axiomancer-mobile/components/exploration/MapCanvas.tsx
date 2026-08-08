@@ -6,6 +6,7 @@ import Animated, {
     useSharedValue,
 } from 'react-native-reanimated';
 import Svg, { Path, Circle, G, Defs, RadialGradient, Stop, Rect } from 'react-native-svg';
+import { Image } from 'expo-image';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import { Splatter } from '@/components/Splatter';
 import type { ExplorationNode, ExplorationEdge } from '@/state/presenters/exploration.engine';
@@ -13,6 +14,8 @@ import type { ExplorationNode, ExplorationEdge } from '@/state/presenters/explor
 interface MapCanvasProps {
     nodes: readonly ExplorationNode[];
     edges: readonly ExplorationEdge[];
+    /** Engraving plate rendered dimmed under the chart (see assets/images/maps). */
+    backdrop?: number | null;
     children: React.ReactNode;
 }
 
@@ -57,7 +60,7 @@ const CONTOUR_GROUPS: readonly string[][] = [
     ],
 ];
 
-export function MapCanvas({ nodes, edges, children }: MapCanvasProps) {
+export function MapCanvas({ nodes, edges, backdrop, children }: MapCanvasProps) {
     const styles = useStyles();
     const AXM = usePalette();
     const nodeById = React.useMemo(() => {
@@ -156,6 +159,17 @@ export function MapCanvas({ nodes, edges, children }: MapCanvasProps) {
 
             <GestureDetector gesture={composed}>
                 <Animated.View style={[styles.canvas, mapTransform]}>
+                    {/* The engraving plate — pans and zooms with the chart so the
+                        wood feels painted onto the page, dimmed so roads and
+                        nodes keep contrast (dim, never blur). */}
+                    {backdrop != null && (
+                        <Image
+                            source={backdrop}
+                            style={styles.backdropPlate}
+                            contentFit="cover"
+                            testID="map-backdrop"
+                        />
+                    )}
                     {/* SVG edges — drawn across the spread canvas */}
                     <Svg viewBox="0 0 360 400" width={CANVAS_W} height={CANVAS_H} style={StyleSheet.absoluteFillObject}>
                         {/* The chart sheet: diagonal hatch + contour hills under the roads */}
@@ -275,5 +289,9 @@ const useStyles = makeStyles((AXM) => ({
         right: 10,
         bottom: 10,
         opacity: 0.85,
+    },
+    backdropPlate: {
+        ...StyleSheet.absoluteFillObject,
+        opacity: 0.2,
     },
 }));

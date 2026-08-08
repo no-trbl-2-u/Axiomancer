@@ -46,6 +46,13 @@ const MANIFEST = {
     'effect-buff': 'delapouite/biceps',
     'effect-debuff': 'lorc/despair',
     'effect-shield': 'lorc/bordered-shield',
+    'action-rest': 'lorc/campfire',
+    'action-herbs': 'delapouite/herbs-bundle',
+    'action-hazard': 'delapouite/falling-rocks',
+    'action-anvil': 'lorc/anvil',
+    'action-coin': 'lorc/crown-coin',
+    'action-tombstone': 'lorc/tombstone',
+    'action-village': 'delapouite/huts-village',
 };
 
 const rows = Object.entries(MANIFEST).map(([name, source]) => {

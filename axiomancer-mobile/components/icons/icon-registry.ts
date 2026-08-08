@@ -60,6 +60,13 @@ const ICON_LABELS: Record<GameIconName, string> = {
     'effect-buff': 'Buff effect',
     'effect-debuff': 'Debuff effect',
     'effect-shield': 'Shield effect',
+    'action-rest': 'Campfire or rest',
+    'action-herbs': 'Herbs or gathering',
+    'action-hazard': 'Falling rocks or hazard',
+    'action-anvil': 'Anvil or blacksmith',
+    'action-coin': 'Coin or currency',
+    'action-tombstone': 'Tombstone or remains',
+    'action-village': 'Village',
 };
 
 function buildSpecs(): Record<GameIconName, AxmIconSpec> {

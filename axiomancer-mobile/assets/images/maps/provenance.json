@@ -1,0 +1,12 @@
+{
+  "generated_by": "public-domain-acquisition",
+  "date": "2026-08-08",
+  "tool": "Wikimedia Commons download + Pillow post-process",
+  "source": "https://commons.wikimedia.org/wiki/File:Gustave_Dor%C3%A9_-_Dante_Alighieri_-_Inferno_-_Plate_1_(I_found_myself_within_a_forest_dark...).jpg",
+  "artist": "Gustave Doré (1832-1883), engraving for Dante's Inferno, Canto I",
+  "license": "Public domain (author died 1883)",
+  "post_process": "plate margins + caption band cropped, grayscale, resized to 1120px tall, brightness 0.62 / contrast 1.08 toward the void, WebP q44",
+  "spec_section": "phase V (Woodcut Codex) - map backdrops",
+  "covers": "forest-dark.webp",
+  "used_by": ["assets/images/maps/index.ts (map backdrop registry)"]
+}
