@@ -14,7 +14,29 @@
 
 ## Pending
 
-### Doctrine-curve confirmation post-Phase-39: violation persists — matrix is the witness
+> **BANNER (/oversight 2026-08-08 — the unshackling).** The seven
+> byte-identical "Doctrine-curve confirmation" rows below (07-20 →
+> 08-07) measure adherence to the status-dominance doctrine, which T
+> voided this day. They are **historical readings of a dead law**, not
+> open findings: do not drain them, do not act on their 80/50/25-35/0
+> target band, and do not file another identical nightly. The next
+> `/consolidate` should compact the seven into one historical row, and
+> `/digest` should stop emitting them until **Phase 43** defines the
+> replacement objective function.
+>
+> The **post-Phase-39 row immediately below is different** and stays
+> live: it is a post-phase verification rather than an eighth identical
+> nightly, and its numbers are the honest record of what Phase 39 did.
+> Read it with the caveat that its target band is void — Phase 43
+> decides whether mid 2.0% / late 0.0% is a defect at all. Likewise the
+> two `[needs-user-call]` rows it spawned are genuinely open, and the
+> unshackling **changes one of them**: the foundry row's blocker ("no
+> card in the current 86-card library gives forge a heart-aspect
+> win-path alternative") is no longer a constraint, because a
+> replacement may now be authored freely, including with normal damage.
+> See `plan/bearings.md` § "THE UNSHACKLING".
+
+### [x] Doctrine-curve confirmation post-Phase-39: violation persists — RESOLVED via /oversight 2026-08-08: accepted, library is transitional
 - category: content
 - impact: 8
 - ease: 2
@@ -36,13 +58,18 @@
   fresh matrix corroborates that read rather than contradicting it. Also
   see `plan/CRITIQUE.md`'s `[HIGH] late-stage global collapse` row,
   updated this cycle to record that Phase 39 landed without draining it.
-- next: /oversight — this is an owner-scoped call, not an `/iterate` pick.
-  Phase 39's own recommendation was a dedicated mid/late enemy-threat-
-  scaling follow-up phase (a manual engine-constant change, out of
-  `/deck-tuning`'s card-only remit per the standing rail). Two related
-  needs-user-call rows below carry Phase 39's other unresolved items.
+- **[x] RESOLVED via /oversight 2026-08-08 — T: "This is fine. We're
+  working on a new card redesign anyway."** The violation is ACCEPTED,
+  not actioned: the numbers are honest, the band they violate is void
+  (the status-dominance doctrine died the same day), and the library
+  they measure is transitional. No mid/late enemy-threat-scaling phase
+  is promoted off this row. Re-measure after the card redesign lands and
+  after **Phase 43** defines what band, if any, replaces 80/50/25-35/0 —
+  a fresh reading against a live objective function is worth something;
+  another reading against a dead one is not.
+- next: (drained — do not re-file this row's successor)
 
-### [needs-user-call] Phase 39: foundry's SWAY win-path removal regressed early-stage 73% -> 44%
+### [x] [needs-user-call] Phase 39: foundry's SWAY win-path removal regressed early-stage 73% -> 44% — RESOLVED via /oversight 2026-08-08: accepted as the settled cost
 - category: design
 - impact: 6
 - ease: 2
@@ -57,12 +84,21 @@
   The phase author flagged this as a real, expected cost of the ruling,
   not a bug, but recommends forge get an authored win-condition card as
   a follow-up.
-- next: /oversight — owner call on whether to queue an authored
-  win-condition card for foundry (routes to `/deck-tuning` once
-  scoped), or accept the regressed early-stage number as the settled
-  cost of the status-doctrine identity ruling.
+- **[x] RESOLVED via /oversight 2026-08-08 — T: "This is fine. We're
+  working on a new card redesign anyway."** T took the second option:
+  **accept the regressed early-stage number as the settled cost** of the
+  status-doctrine identity ruling. No authored win-condition card is
+  queued for foundry now — the incoming redesign is the place for it,
+  and authoring one against the current library would be work thrown
+  away. Note for whoever does the redesign: this row's original blocker
+  ("no card in the 86-card library gives forge a heart-aspect win-path
+  alternative") is no longer a constraint at all — the unshackling
+  permits authoring one freely, including with normal damage, which did
+  not exist as an option when this was filed.
+- next: (drained — carry the foundry win-path gap into the card
+  redesign, not into a standalone `/deck-tuning` pass)
 
-### [needs-user-call] Phase 39: mid-game doctrine cliff reads engine/enemy-scaling shaped, not card-shaped
+### [x] [needs-user-call] Phase 39: mid-game doctrine cliff reads engine/enemy-scaling shaped, not card-shaped — RESOLVED via /oversight 2026-08-08: enemy-scaling phase declined for now
 - category: design
 - impact: 7
 - ease: 2
@@ -78,10 +114,17 @@
   cycle's fresh baseline (see the "Doctrine-curve confirmation
   post-Phase-39" row above) corroborates: mid moved only 0.0% -> 2.0%
   (150 runs) despite Phase 39 landing.
-- next: /oversight — scope and promote (or decline) a dedicated
-  mid/late enemy-threat-scaling phase. Per the standing rail, engine
-  constants are tuned manually; this loop does not vote on its own
-  constraints.
+- **[x] RESOLVED via /oversight 2026-08-08 — T: "This is fine. We're
+  working on a new card redesign anyway." DECLINED for now.** No
+  dedicated mid/late enemy-threat-scaling phase is promoted. The finding
+  itself still looks right — the cliff reads engine-shaped, and 10/13
+  staples already being deployed is good evidence — but a redesign
+  changes the inputs to that diagnosis, so scoping enemy scaling against
+  the current library would be premature. Re-derive after the redesign
+  lands and Phase 43 is live. The standing rail is unchanged: engine
+  constants are tuned manually, never by `/deck-tuning`.
+- next: (drained — re-open after the card redesign + Phase 43, if the
+  cliff survives both)
 
 ### `Closes #N` auto-close is still not firing reliably — the 2026-08-03 fix does not hold
 - category: debt
@@ -104,7 +147,10 @@
   #174) were closed by hand during /oversight 2026-08-08 with a comment
   citing the shipping commit — so the CURRENT queue is clean and this
   row is about the mechanism, not the backlog.
-- next: /iterate — re-open the root-cause hunt. Compare `615ff26b` vs
+- **PROMOTED to build-plan Phase 48 via /oversight 2026-08-08** (T:
+  "make phases for everything you mentioned") — it is no longer competing
+  with Phase 39 for an `/iterate` slot.
+- next: Phase 48 — re-open the root-cause hunt. Compare `615ff26b` vs
   `1004894` end to end (push event shape, whether `scripts/loop-issue.mjs`
   or GitHub's own trailer parser did the closing, whether one landed
   inside a batched push where only the tip commit's trailers are
@@ -564,10 +610,19 @@
   know the sanctioned path.
 - next: /iterate (deploy-check.mjs env fallback + a bearings note)
 
-### `skills/oversight.md` assumes direct push to `main` — web sessions must ship via branch + PR
+### [x] `skills/oversight.md` assumes direct push to `main` — RESOLVED via /oversight 2026-08-08: no change needed, direct push is sanctioned
 - category: docs
 - impact: 2
 - ease: 8
+- **resolution (T direct, 2026-08-08): "Direct pushes to main are fine,
+  keep going."** The row's premise — that a remote web session *cannot*
+  push `main` and must ship via branch + PR — is falsified: this session
+  pushed `main` directly (`3cb3c3d`, `463a3bc`) after two branch+PR
+  rounds, and T ratified the direct path. So §6 of the skill is already
+  correct as written and needs **no** "remote-session delivery" note.
+  The branch+PR path stays available and is still the right call for
+  anything a reviewer should see before it lands; it is simply not
+  mandatory. Filed as a standing decision in `plan/bearings.md`.
 - detail: filed 2026-07-18 (oversight session residue). §6 of the skill
   commits and pushes `origin main`, but attended oversight from a
   Claude Code web session runs under a mandated `claude/*` branch and
@@ -578,7 +633,7 @@
   + ready-for-review PR + owner merge; rebase-merge preferred so the
   audit-trail commit lands intact) so future web oversights don't stall
   at the push step or improvise.
-- next: /iterate (doc-only edit to skills/oversight.md §6)
+- next: (drained — no doc edit required)
 
 ### [x] Gate the first-map blacksmith MapEvent node back to dev-only — RESOLVED 2026-07-23 (issue #151)
 - category: content
@@ -1054,8 +1109,15 @@
   shape, win-path attribution). Loop guidance meanwhile: do not
   build new tuning conclusions on statusEngagement alone; treat its
   numbers as suspect per the known blind spots.
-- next: attended session (T-gated — not loop work; do not auto-ship
-  a metric rewrite)
+- **PROMOTED to build-plan Phase 43 via /oversight 2026-08-08** — and
+  the target moved. `statusEngagement` was the objective function
+  *because* status play was the doctrine; the unshackling voids that
+  doctrine, so the metric now measures adherence to a rule the game no
+  longer has. Phase 43 defines what "good combat" means under the new
+  rules rather than merely fixing the old metric's blind spots. The
+  "treat its numbers as suspect" guidance hardens to: **every existing
+  doctrine-curve reading measures a dead law** until 43 lands.
+- next: Phase 43 (no longer a parked attended session)
 
 ### [x] Hermes-decided work is invisible to the loop — RESOLVED via /oversight 2026-07-18: convention adopted
 - category: divergence
