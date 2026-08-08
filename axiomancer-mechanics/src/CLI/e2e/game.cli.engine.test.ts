@@ -26,6 +26,7 @@ import {
 
 // Import the game engine components
 import { createGameStore } from '../../Game/store';
+import { GAME_STATE_VERSION } from '../../Game/game.reducer';
 import { createEventEmitter } from '../../Game/events';
 import { nullAdapter } from '../../Game/persistence/null.adapter';
 import { createNodeAdapter } from '../../Game/persistence/node.adapter';
@@ -73,7 +74,11 @@ describe('CLI Game Driver', () => {
         
         expect(store.getState().player.name).toBe('Player');
         expect(store.getState().player.level).toBe(1);
-        expect(store.getState().version).toBe(15);
+        // Symbolic, not a literal: a bootstrapped store is current by
+        // construction, so pinning the digit only breaks every version bump
+        // (phase 52a's 15 -> 16 broke it here). game.migrate's own suites are
+        // where a specific version number is load-bearing.
+        expect(store.getState().version).toBe(GAME_STATE_VERSION);
     });
 
     it('should bootstrap game store with node adapter for save/load', async () => {
