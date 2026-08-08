@@ -28,9 +28,8 @@ import type { Card } from './types';
 // authored as /deck-tuning measurement-seat candidates for the preset recipes
 // (`--deck=preset:<id>+swap:<out>/<in>` + `--sandbox=swap-<theme>`). Never
 // player-facing; promotion into cards.library.ts is the only shipping path.
-// Contract pinned by src/Cards/e2e/swap-pool.engine.test.ts. NOTE: these are
-// deliberately TEN sets, not one umbrella — the doctrine sweep registers every
-// set at once, so a duplicate-cards umbrella would collide.
+// NOTE: these are deliberately TEN sets, not one umbrella — a set may be
+// registered alongside any other, so a duplicate-cards umbrella would collide.
 import { SWAP_POOL_AFFLICTION } from './swap-pool/affliction.swap-pool';
 import { SWAP_POOL_AKRASIA } from './swap-pool/akrasia.swap-pool';
 import { SWAP_POOL_BULWARK } from './swap-pool/bulwark.swap-pool';
