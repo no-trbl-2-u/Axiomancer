@@ -1,13 +1,28 @@
 # Critique log
 
-> Last pass: 2026-08-08 at commit 18eb0ddb
-> Pass count: 19
+> Last pass: 2026-08-08 at commit dc1270ca
+> Pass count: 20
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 20, 2026-08-08, commit dc1270ca] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
+> mobile (375×812) and desktop (1280×800); the cold drive again
+> reached past "ENTER COMBAT" into the live combat-board at both
+> viewports (10/10 captures, 0 with nav trouble). Zero console/page
+> errors besides the same benign `navigator.vibrate` warning seen
+> every prior pass. Self-assessed all 10 captures against the current
+> Pending/Done log: title, onboarding, and combat pre-fight copy hold
+> clean; the pass-19 `regionProgress`/legend mismatch row still
+> reproduces exactly as filed (not re-filed). One fresh finding: on the
+> desktop viewport only, the exploration-hub node-legend's right-hand
+> string collapses to a bare "25" (the "nodes · 22 sealed" suffix is
+> clipped) — traced to a component-nesting bug, not a copy bug; filed
+> below. Zero other findings.
 
 > **[critique pass 19, 2026-08-08, commit 18eb0ddb] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
@@ -126,6 +141,43 @@
 > pass "ENTER COMBAT".
 
 ## Pending
+
+### [MED] exploration hub — node-legend's "N nodes · M sealed" count is clipped to a bare number on the desktop viewport
+- pass: 20 (commit dc1270ca)
+- viewport: desktop (1280×800) only — mobile (375×812) unaffected
+- category: visual
+- observation: on the exploration-hub map, the legend's right-hand
+  string reads "25 nodes · 22 sealed" on mobile but renders as a bare
+  "25" in the map's bottom-right corner on desktop — "nodes · 22
+  sealed" is clipped off. This is the same node-legend the sibling
+  Pending row below already flags as disagreeing with the header
+  count; on desktop the legend loses its own meaning too, since a
+  lone "25" with no unit reads as noise.
+- evidence: `axiomancer-mobile/.critique-artifacts/desktop/05-exploration-hub.png`
+  (bottom-right of the map box) vs `.../mobile/05-exploration-hub.png`
+  (same string renders in full). Root cause traced in
+  `axiomancer-mobile/components/exploration/MapCanvas.tsx:218`: `{children}`
+  (which includes `<MapOverlays>`, the component that renders the
+  legend — `axiomancer-mobile/components/exploration/MapOverlays.tsx:22-25`)
+  is rendered *inside* the pannable/zoomable `<Animated.View
+  style={[styles.canvas, mapTransform]}>`, so the legend's
+  `position: 'absolute', bottom: 8, left: 12, right: 12` resolves
+  against the 936×1040 canvas, not the viewport. The genuinely
+  viewport-fixed furniture (vignette + compass rose SVGs, explicitly
+  commented "Viewport-fixed chart furniture — never pans with the
+  map" at line 222) lives *outside* that `Animated.View`, siblings of
+  it — `MapOverlays` should live there too. The initial centering
+  translate (`MapCanvas.tsx`'s `cx = viewport.w / 2 - ax * SPREAD`)
+  depends on viewport width, so the legend's on-screen position shifts
+  per viewport; at 1280px wide, `graphWrap`'s `overflow: 'hidden'`
+  (line 263) clips most of the right-hand text.
+- suggested fix: move `<MapOverlays legend={vm.legend} />` (and the
+  compass/node-graph-label text it renders) out of `MapCanvas`'s
+  `children` slot and render it as a sibling of the vignette/compass
+  SVGs (after the `</GestureDetector>` closing tag, still inside
+  `graphWrap`), so it's positioned against the viewport like the rest
+  of the "chart furniture" instead of the pannable canvas.
+- source: critique pass 20 (unattended, critique:drive artifacts)
 
 ### [MED] exploration hub — static `regionProgress` header count doesn't reconcile with the dynamic node-legend on the same screen
 - pass: 19 (commit 18eb0ddb)
