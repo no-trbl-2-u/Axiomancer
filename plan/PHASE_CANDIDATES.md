@@ -46,15 +46,20 @@
   trial-first picks (pre-simulation design estimates from the post-merge
   card-expert pass). The pass should open with these, then let the matrix
   arbitrate.
-- **GATED: the owner asked to be checked in with BEFORE this runs**
-  (2026-07-18 session). Do not let a cron tick start it; the owner's go
-  is the trigger.
-- [needs-user-call] riders the pass should surface for ratification:
-  (a) forge — OVERHEAT ruled theme-engine manufacture, NOT a
-  die-interaction line for the one-line law (working ruling in the pool
-  header); (b) echo — `synergy` state predicates read as the same
-  condition-line class per spec 32 §2; (c) peroration — 7 off-seat reach
-  cards are unswappable without a coordinated multi-seat recolor.
+- ~~**GATED: the owner asked to be checked in with BEFORE this runs**
+  (2026-07-18 session).~~ **UNGATED via /oversight 2026-08-08** — the
+  owner's go was given; a cron tick may now start this pass. It should
+  run against the Phase 39 tree (curve repair + theme symmetry), not the
+  pre-repair one.
+- [x] [needs-user-call] riders — **ALL THREE RATIFIED via /oversight
+  2026-08-08**; the pass proceeds on these as settled law, no re-ask:
+  (a) forge — OVERHEAT **is** theme-engine manufacture, NOT a
+  die-interaction line for the one-line law (the working ruling in the
+  pool header is now the ruling); (b) echo — `synergy` state predicates
+  **are** the same condition-line class per spec 32 §2; (c) peroration —
+  its 7 off-seat reach cards **are** unswappable without a coordinated
+  multi-seat recolor, so the pass leaves them alone rather than
+  attempting the recolor.
 
 ### In-house crash capture — global handlers + next-launch crash prompt (owner-ruled 2026-07-20)
 - source: owner session 2026-07-20 (missing-layers survey). The 2026-07-20
@@ -101,7 +106,12 @@
   pricing lint over library + swap pools, and fix the handful of cards
   whose comments lean on the fiction.
 
-### Post-D8 flag-on curve repair — the bounded tuning phase D8 hands off
+### ~~Post-D8 flag-on curve repair~~ PROMOTED to Phase 39 via /oversight 2026-08-08
+> Merged with "Library theme-symmetry restoration" (below) into ONE
+> bounded phase, per this row's own "promote as ONE bounded phase, not
+> three" instruction. Full row kept here for the phase brief to draw on;
+> see `## Promoted` for the promotion record.
+
 - source: Phase D8 ship (10ec4fe8, 2026-07-18). The D8 brief's own law:
   "a red curve becomes the next bounded tuning phase" — that phase is now
   unblocked and MEASURABLE (every preset exposes a live valve; casts/run
@@ -122,7 +132,11 @@
   "Starter-library trim + duplication" and "scoreCard v2 re-tune"
   candidates below — promote as ONE bounded phase, not three.
 
-### Library theme-symmetry restoration (post-D8 ragged shape)
+### ~~Library theme-symmetry restoration (post-D8 ragged shape)~~ PROMOTED to Phase 39 via /oversight 2026-08-08
+> Merged into the curve-repair phase above — the owner took the
+> "promote both together" option precisely because this row's new cards
+> can BE the mid-game second gear the failing decks need.
+
 - source: Phase D8 ten-in/ten-out ledger (forced by the preset-reference
   law; 10ec4fe8). The spec-32 §6-7 per-theme symmetry is broken and
   pinned as-is in `curated-library.engine.test.ts` (POST_D8_SHAPE):
@@ -265,7 +279,13 @@
   ship as its own small item with the impossible-stage matrix cell as the
   before/after witness.
 
-### Card-text grammar + full copy pass (owner-ruled 2026-07-18)
+### Card-text grammar + full copy pass (owner-ruled 2026-07-18) — UNLOCKED via /oversight 2026-08-08
+> **Promoted to build-plan Phase 40** (2026-08-08). Ruled approved
+> 2026-07-18 but never queued; the owner released it this oversight.
+> Sequencing: runs AFTER Phase 39, so the copy pass covers whatever card
+> set the curve repair leaves standing rather than rewriting faces that
+> are about to change.
+
 - source: fan-out ballot ruling R4 + the wording audit (Dawncaster corpus,
   1,592 faces). Diagnosis: mean face length is already genre-normal (12.8w
   vs 12.9) — the failures are variance and dialect: four competing status
@@ -536,8 +556,12 @@
   `/world-spec`) with the owner BEFORE any engine/mobile work — this is
   identity design, not implementation. Output: a spec or decisive brief,
   then a phase row.
-- status: candidate — awaiting design session; do not promote to a
-  build-plan phase until the surface is chosen.
+- status: **design session AUTHORIZED via /oversight 2026-08-08** — the
+  owner released this thread; the attended `/brainstorm-mechanics` (or
+  `/world-spec`) session may now be scheduled. Still do NOT promote to a
+  build-plan phase until that session picks the surface — the session's
+  output (a spec or decisive brief) is the promotion trigger, and the
+  session is attended, so a cron tick cannot run it unsupervised.
 
 ### Doctrine-curve check in the nightly baseline (harness promotion)
 - source: T direct, 2026-07-17 chat session (price-experiment follow-up).
@@ -579,8 +603,16 @@
   migration) — a full phase, and per the source doc worthless until the
   library/preset foundation settles (starter trim + scoreCard-v2 retune
   + D-FLIP/D8 first).
-- status: parked, `[needs-user-call]` — owner decides at a future
-  oversight whether/when to design it; do not self-promote.
+- status: **parked with a concrete unpark trigger** (owner call via
+  /oversight 2026-08-08, resolving the standing `[needs-user-call]`).
+  The open-ended "owner decides at some future oversight" is closed: the
+  ruling is *stay parked*, and the trigger is **Phase 39 landing**
+  (curve repair + theme symmetry) — that is the "library/preset
+  foundation settles" condition this row's own source doc names as the
+  precondition. Until Phase 39 is `[x]`, this row is NOT a
+  needs-user-call and must not be re-surfaced by the oversight standing
+  sweep; once it is, the next `/oversight` re-asks design-now vs drop.
+  Still do not self-promote.
 
 ### [score 7.0] GLYPHS pilot (Phase 33d) post-ship follow-ups — mobile UI, sim policy, promotion court
 - proposed: 2026-07-21, expand pass 1
@@ -717,6 +749,42 @@
   touched.
 
 ## Promoted
+
+### Post-D8 flag-on curve repair + library theme-symmetry restoration (owner-selected 2026-08-08)
+- promoted: 2026-08-08 via `/oversight`, as **Phase 39** — the first
+  build-plan row since the queue drained at Phase 38.
+- source rows (both stay in `## Pending` above, struck through, so the
+  phase brief can draw on their full evidence): "Post-D8 flag-on curve
+  repair" + "Library theme-symmetry restoration". Merged per the former's
+  own instruction ("promote as ONE bounded phase, not three") and the
+  latter's ("pairs naturally with the curve-repair phase above").
+- why now: the flag-on curve has read blind early 61.1% / mid 0.0% /
+  late 0% / impossible 0% against the 80/50/25-35/0 doctrine for SIX
+  consecutive nightly baselines (08-01 → 08-07), byte-identical every
+  read; `plan/CRITIQUE.md` carries the same signal as its only [HIGH]
+  ("late-stage global collapse — all 10 presets 0.00 late"). D8's brief
+  promised "a red curve becomes the next bounded tuning phase" and that
+  phase had never been queued — so `/march` had nothing but 2.x-score
+  hygiene rows to pick, and shipped test files while the doctrine stayed
+  contradicted by the project's own measurements.
+- **owner ruling folded in (2026-08-08): foundry/grace 0% statusEngagement
+  is a DOCTRINE FAILURE, not an identity.** Both decks post 0% at every
+  stage in every arm and win ~100% by CAPITULATE/SWAY (foundry 1,783 of
+  1,784 wins). Restore `entropy-tax` to foundry's seat (it is foundry's
+  ONLY status engine; its exile also causes `the-overtake`'s empty
+  detonations) and `heart-of-the-matter` to grace's (its authored SWAY
+  finisher, seat currently held by off-theme fizzly `ouroboros`) — both
+  are in the stable dead-10, both handled inside THIS phase's authoring
+  pass rather than a separate one. The SWAY/RAPPORT metric blind spot
+  (statusEngagement counts only enemy-side lands) is acknowledged but is
+  NOT the accepted explanation — the owner declined the "exempt them and
+  fix the metric" reading.
+- absorbs (do not promote separately): "Starter-library trim +
+  duplication pass" and "Re-tune the starter library against `scoreCard`
+  v2" — same seats, same evidence base.
+- execution: `/deck-tuning` owns the sandbox-first court; the
+  swap-pool measurement pass (ungated the same day) runs against THIS
+  tree, not the pre-repair one.
 
 ### Central juice/animation layer (mobile — owner-selected 2026-07-20)
 - source: owner session 2026-07-20 (missing-layers survey). Reanimated

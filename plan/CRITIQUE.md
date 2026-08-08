@@ -511,6 +511,13 @@ one level down, in the routing helper `onApply` calls next).
   tests green.
 
 ### [HIGH] late-stage global collapse — all 10 presets 0.00 late
+- **ASSIGNED to build-plan Phase 39 via /oversight 2026-08-08.** Do NOT
+  let `/iterate` pick this row and attempt a partial fix — it is the same
+  signal as `plan/AUDIT.md`'s nightly doctrine-curve confirmations
+  (byte-identical blind reads 08-01 → 08-07: early 61.1% / mid 0.0% /
+  late 0% / impossible 0% against 80/50/25-35/0), and the owner promoted
+  one bounded phase to carry it rather than three overlapping candidates.
+  This row drains when Phase 39 lands, with the matrix as the witness.
 - pass: session-closeout 2026-07-12 (commit ffadca96)
 - viewport: n/a
 - category: design

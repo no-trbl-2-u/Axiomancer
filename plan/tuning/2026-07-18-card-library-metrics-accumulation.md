@@ -167,7 +167,15 @@ the doctrine's expected ordering, still intact.
   standstill/penitent/augury/erosion/tithe are the wounded five.
 - **/deck-tuning:** oratory impossible-stage dominance (§2, CONCEDE pricing);
   fizz league + paid-line orphans (§5); dead-card trim list (§5).
-- **Needs-user-call (already filed in the metrics-slate residue):** foundry/
-  grace identity vs the status doctrine (§3).
+- ~~**Needs-user-call (already filed in the metrics-slate residue):** foundry/
+  grace identity vs the status doctrine (§3).~~ **RESOLVED via /oversight
+  2026-08-08 — ruled a DOCTRINE FAILURE, not an identity.** Restore
+  `entropy-tax` (foundry's only status engine) and `heart-of-the-matter`
+  (grace's authored SWAY finisher, seat held by off-theme `ouroboros`) to
+  their seats, inside build-plan **Phase 39**. The §3 metric blind spot
+  (statusEngagement counts only enemy-side lands, so player-side
+  SWAY/RAPPORT reads as zero by construction) is acknowledged but was
+  explicitly NOT accepted as the explanation — the owner declined the
+  "exempt both decks and fix the metric" option.
 - **Instrument:** blind-only doctrine flag; a card-holding policy to make
   opp% discriminating.
