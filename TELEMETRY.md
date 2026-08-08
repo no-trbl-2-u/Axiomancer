@@ -208,3 +208,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-08T07:37:19Z | subagent | card-expert | claude-sonnet-5 | main | Implement Phase 39 curve repair + library symmetry |
 | 2026-08-08T09:22:59Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-08-08T09:23:01Z | skill | digest | unknown | main | - |
+| 2026-08-08T13:25:19Z | slash-prompt | /march | unknown | user/ci | /march |
