@@ -1016,7 +1016,7 @@ product-level pivot that VOIDS several previously "locked" doctrines).**
       See `plan/bearings.md` § "LOCKED MECHANICS". (mechanics)
       Deps: none. Brief: `plan/phases/phase_41_constraint_demolition.md`.
       — `feat(mechanics): constraint demolition — phase 41` (08745441, 1bd9bd2b)
-- [ ] Phase 42 — The Dark Fantasy campaign bible (design phase; output is
+- [x] Phase 42 — The Dark Fantasy campaign bible (design phase; output is
       a spec, not code). **T ratified the direction 2026-08-08: "Dark
       Fantasy deckbuilding RPG campaign", WHOLE PRODUCT** — so this is no
       longer a three-proposal ballot, it is the authoring of
@@ -1052,6 +1052,16 @@ product-level pivot that VOIDS several previously "locked" doctrines).**
       through 44a with a `GAME_STATE_VERSION` check. A bible that leaves
       Conviction or the surge meter thematically homeless has failed this
       phase. Deps: none (parallel to 41). Brief: to generate.
+      — `docs(specs): the Dark Fantasy campaign bible — phase 42` (4580373)
+      Ratified as `axiomancer-mechanics/specs/34-dark-fantasy-campaign.md`.
+      Codifies the Profane Canon (`84ef85b`) rather than competing with it:
+      the naming law is induced from the 57 shipped card names. 15 renames
+      over 42 glossary rows + 8 system terms; 35 keywords survive untouched.
+      Morality kept and re-skinned (spec 10 → GRACE, spec 14 → THE OATHS)
+      with persisted keys frozen. VITAE + STANCE survive; MORALE → GRACE.
+      "Campaign" ruled DESCRIPTIVE. All three LOCKED MECHANICS names kept,
+      so **no `GAME_STATE_VERSION` migration is owed by the retheme** and
+      44b's guard resolves to "do not touch".
 - [ ] Phase 43 — Objective function v2 (replaces the parked "metric v2"
       design session, `plan/AUDIT.md`). The parked row wanted a
       player-side, arc-aware successor to `statusEngagement`. The
@@ -1094,7 +1104,12 @@ none may start early (bearings forbids opportunistic renaming).**
       and `docs/LEXICON.md` is its human mirror. Ship the map and the
       guard with ZERO renames applied, so 44b-44i are pure execution.
       (tooling) Deps: 42, 41. Brief: to generate.
-- [ ] Phase 44b — Keyword registry + glossary retheme. The ~29 registry
+- [ ] Phase 44b — Keyword registry + glossary retheme. **CORRECTED by
+      spec 34 §5 (Phase 42): the live registry is 42 `KEYWORD_GLOSS` rows
+      + 8 system terms, not ~29.** All 50 are ruled there — 15 renames, 35
+      survivors. Spec 34 §4.1 also rules all three LOCKED MECHANICS names
+      KEPT, so this phase's LOCKED GUARD resolves to "do not touch" and no
+      `GAME_STATE_VERSION` migration is owed on their account. The registry
       keywords, mechanics-side effect ids, mobile's
       `state/combat/keywords.ts`, and `SYSTEM_GLOSSARY`. Bearings' rule
       "never rename engine effect ids for player text" yields here — the
@@ -1113,14 +1128,21 @@ none may start early (bearings forbids opportunistic renaming).**
       Brief: to generate.
 - [ ] Phase 44c — Card library retheme. ~70 library cards plus the
       sandbox sets, Thoughtforms and `SIGNATURE_SKILLS`: ids, display
-      names and faces. The philosophy names are the most visible part of
-      the pivot (`achilles-and-the-tortoise`, `circular-reasoning`,
-      `straw-mans-jab`, `memento-mori`, `the-closing-word`…). Note
+      names and faces. **CORRECTED by spec 34 (Phase 42): this row is far
+      larger than the work. All five cards it names as the marquee renames
+      — `achilles-and-the-tortoise`, `circular-reasoning`, `straw-mans-jab`,
+      `memento-mori`, `the-closing-word` — were DELETED by the Profane Canon
+      (`84ef85b`), which already rethemed the library to 57 dark-fantasy
+      cards. Re-scope against the shipped tree before starting; what remains
+      is the rank ladder (spec 34 §5.2 R-14) and stragglers, not ~70 cards.**
+      Note
       `axiomancer-card-editor` reads/writes `src/Cards/cards.library.ts`
       in place, so its gate runs too. Faces must still satisfy the
       honesty guard. (mechanics + card-editor) Deps: 44b.
       Brief: to generate.
-- [ ] Phase 44d — Themes + presets retheme. The 10 theme names, the
+- [ ] Phase 44d — Themes + presets retheme. **CORRECTED by spec 34
+      (Phase 42): 6 archetypes + curse, not 10 themes — the Profane Canon
+      re-cut them.** The theme names, the
       preset deck names, `card-themes.ts` `THEME_KEYWORDS`, and the
       shape pins in `curated-library.engine.test.ts`. (mechanics)
       Deps: 44c. Brief: to generate.
@@ -1230,7 +1252,7 @@ the replacement must be reachable before the Night Watch comes out, or
 > "reuse the blacksmith screen, do not rebuild it" still holds and is
 > now cheaper, but read the current file, not the pre-Woodcut one.
 
-- [ ] Phase 52a — Deck-removal engine primitive + the escalating price.
+- [x] Phase 52a — Deck-removal engine primitive + the escalating price.
       The engine has no card removal at all today (`removeCardFromDeck`
       in `World/Hazard/hazard.engagement.ts` is a *hazard-deck* helper —
       not this, do not extend it). Add
@@ -1243,7 +1265,14 @@ the replacement must be reachable before the Night Watch comes out, or
       `cardRemovalPrice(n)` = **15 + 10n** (provisional).
       `GAME_STATE_VERSION` 15 → 16. (mechanics) Deps: none.
       Brief: `plan/phases/phase_52a_deck_removal_primitive.md`.
-- [ ] Phase 52b — Make the inn a first-class thing. T's "inns exempt" is
+      — `feat(mechanics): deck-removal primitive and the escalating price — phase 52a` (dd5c46a)
+      Floor shipped at **12, not the brief's 10** — 10 was justified as the
+      smallest shipped preset shape, and that justification died with the
+      Profane Canon. 12 is the LINEAGE LAW's low-water mark (threadbare 18
+      − 6 documented removals), keeps aspect-thirds expressible, and clears
+      two hands; the derivation is pinned by a test. Price 15+10n shipped
+      PROVISIONAL for 52f.
+- [-] Phase 52b — Make the inn a first-class thing. T's "inns exempt" is
       unimplementable against current data: `INN_REST_HEAL_FRACTION`
       makes "is this an inn?" mean `healFraction >= 1.0`, and **three
       wilderness nodes are authored at 1.0** (`nf-4` cold spring, `nf-24`
@@ -1255,6 +1284,13 @@ the replacement must be reachable before the Night Watch comes out, or
       Changes no heal numbers — 52c does the arithmetic, so a regression
       here stays legible. (mechanics + mobile) Deps: none.
       Brief: `plan/phases/phase_52b_first_class_inn.md`.
+      — `feat(mechanics,mobile): make the inn a first-class thing — phase 52b` (8444922)
+      **CARRY-OVER:** retiring a per-node knob was not fully number-neutral.
+      Four nodes whose sub-1.0 authoring had nowhere to go now heal at the
+      carried-forward default 1.0 (`nf-11` 0.75, labyrinth act default 0.2,
+      waystones 0.35/0.5). 52c overwrites all four — until it ships, those
+      rests are player-favorable. `REST_PASSIVE_HEAL_FRACTION` is marked
+      carried-forward-pending-52c; do not tune it elsewhere.
 - [ ] Phase 52c — The rest-choice engine. A new pure `World/RestChoice/`
       following the established two-way minigame contract (never reads
       `GameState`; `(session, …) → session`; host settles an outcome
@@ -1369,7 +1405,7 @@ batch concurrently with 44* — both churn the whole mobile surface.**
       auto-adopt. (mobile + CI) Deps: 47b, 47c, 47d.
       Brief: to generate.
 
-- [ ] Phase 48 — Root-cause the `Closes #N` auto-close, for real. The
+- [x] Phase 48 — Root-cause the `Closes #N` auto-close, for real. The
       2026-08-03 fix (`0441c554`, issue #166) does not hold: #174 stayed
       open despite `615ff26b` ending `- Closes #174`, while sibling
       `1004894` closed #175 with the byte-identical trailer in the same
@@ -1380,6 +1416,14 @@ batch concurrently with 44* — both churn the whole mobile surface.**
       Ship a witness that FAILS when the mechanism regresses — the 08-03
       "resolved" claim stood for five days on no witness at all.
       (tooling) Deps: none. Small. Brief: to generate.
+      — `fix(tooling): root-cause and replace the Closes #N auto-close — phase 48` (0aac2d3)
+      All three hypotheses in this row are ELIMINATED. Real cause: the only
+      working close path was a prose step gated behind `deploy:check` going
+      green, so a turn ending while CI is amber skips it forever (#174's
+      march run ended "Waiting on CI"). GitHub's native parser is inert here
+      and has never closed anything. `close-trailers` + its workflow are now
+      the authority; 36 hermetic tests, mutation-tested against 5 injected
+      regressions.
 - [ ] Phase 49 — GLYPHS follow-up 1: completeness-critic touch-UX pass.
       The source doc's own pre-mobile-UI gate. (design/mechanics)
       Deps: none. Brief: to generate.
