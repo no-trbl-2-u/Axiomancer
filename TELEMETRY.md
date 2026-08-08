@@ -213,3 +213,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-08T13:25:19Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-08T14:43:46Z | subagent | scout | claude-opus-5 | main | Scout MTG/PvE card research |
 | 2026-08-08T14:49:24Z | subagent | Explore | claude-fable-5 | main | Map mobile/editor card coupling |
+| 2026-08-08T19:07:21Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-08T19:09:56Z | skill | critique | claude-sonnet-5 | main | - |

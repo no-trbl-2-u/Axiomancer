@@ -1131,11 +1131,19 @@ none may start early (bearings forbids opportunistic renaming).**
       Brief: to generate.
 - [ ] Phase 44f — World, maps and minigame naming. `W-01` (the Aporia
       labyrinth continent), the Fishing Village node ids (`fv-*`), map
-      events, and the four authored minigame names — The Gleaning
-      (gathering), The Reliquary (loot-cache), The Night Watch (rest),
-      The Boy's Almanac (quest board). Some of these already read dark
-      fantasy; keep what works. Node ids are referenced by route-audit
-      tooling and tests — rename via the 44a map, not by hand.
+      events, and the authored minigame names — The Gleaning
+      (gathering), The Reliquary (loot-cache), The Boy's Almanac (quest
+      board). Some of these already read dark fantasy; keep what works.
+      Node ids are referenced by route-audit tooling and tests — rename
+      via the 44a map, not by hand.
+      **Amended 2026-08-08:** this row originally named FOUR minigames,
+      including The Night Watch (rest). Phase 52e retires the Night Watch
+      entirely, so there are three — but the **rest node still exists**
+      as the new one-shot three-way choice (52c/52d), which deliberately
+      ships under neutral working names (`RestChoice` / `rest` / `anvil`
+      / `cut`) precisely so this phase can name it from the Phase 42
+      bible. Naming that node is IN SCOPE here. If 52e has not shipped
+      when this phase runs, retheme nothing about rest and say so.
       (mechanics + mobile) Deps: 44a. Brief: to generate.
 - [ ] Phase 44g — Characters, story, dialogue and quests. `C-01 the
       Sophist`, `S-01` fishing-village dilemmas, dialogue trees, quest
@@ -1164,21 +1172,147 @@ none may start early (bearings forbids opportunistic renaming).**
       already exempts `**Status:** HISTORICAL` files.
       (docs + mobile) Deps: 44a-44h. Brief: to generate.
 
-- [ ] Phase 45a — Re-home dice upgrades: design session (attended). D5's
-      HONE/TEMPER die-gear economy is built and priced with placeholders
-      but has no player-facing home; the blacksmith screen is
-      dev-menu-only and T ruled it the wrong surface on 2026-07-18
-      (candidates named: rest site, relic, event). Cadence — how often a
-      player upgrades dice across a run — is decided in the SAME session,
-      not separately. Output: a spec or decisive brief naming the
-      surface. Authorized via /oversight 2026-08-08. Deps: none (but
-      the surface should be named in Phase 42's fiction if it is a new
-      place). Brief: to generate.
-- [ ] Phase 45b — Re-home dice upgrades: implementation. Build the
-      surface 45a chose, move the HONE/TEMPER affordance onto it,
-      de-placeholder the prices against the between-combat economy, and
-      retire or repurpose the dev-menu-only blacksmith screen.
-      (mechanics + mobile) Deps: 45a. Brief: to generate.
+- [skipped] Phase 45a — Re-home dice upgrades: design session (attended).
+      **ANSWERED BY T DIRECT, attended chat 2026-08-08 — no session
+      needed.** 45a existed to decide where D5's HONE/TEMPER die-gear
+      economy lives, given the blacksmith screen is dev-menu-only and T
+      ruled it the wrong surface on 2026-07-18 (candidates named: rest
+      site, relic, event). T picked the **rest site**, unprompted, as
+      part of the rest-choice ruling: the anvil is one of three doors on
+      every rest node, at rest-node cadence — which settles the cadence
+      half of 45a in the same stroke. Superseded by **Phases 52a-52f**;
+      see the Queue change log.
+- [skipped] Phase 45b — Re-home dice upgrades: implementation.
+      Superseded by **52c** (the anvil offer, composing the existing D5
+      blacksmith engine), **52d** (the screen — which makes the anvil
+      player-reachable for the first time and retires the dev-menu-only
+      entry as the sole door) and **52f** (de-placeholdering the prices
+      against measured shilling income). Nothing in 45b's scope is
+      dropped; it is redistributed.
+
+**The rest-choice epic (52a-52f) — T direct, attended chat 2026-08-08.
+Removes the Night Watch rest minigame and replaces the rest node with a
+ONE-SHOT THREE-WAY CHOICE: heal 20%, upgrade a die at the anvil for a
+high price, or cut a card from the deck for a low-but-escalating price.
+Once an option is chosen the node is done and locked. Ship IN ORDER —
+the replacement must be reachable before the Night Watch comes out, or
+`main` ships a map node with no host screen.**
+
+> T verbatim: *"I want you to plan and add phases to remove the Rest
+> mini-game and replace it with a choice for the players: 1) Rest (heal
+> 20% of the player's health) 2) Use the blacksmith (upgrade a die for a
+> high price of whatever currency name we have) 3) Remove a card from the
+> player's deck (Low price to start, but every time the player does this
+> across the game, it costs a little more). Once the player chooses an
+> option, the rest is done/completed/locked."*
+>
+> The currency is **SHILLINGS** (`Character.currency`). Four follow-up
+> rulings in the same session: **full retirement** of the Night Watch
+> (over park-behind-a-flag / keep-as-rare-node); **flat 20%, inns
+> exempt**; **prices proposed now, calibrated later** in a dedicated
+> phase; and **45a/45b collapse into this epic**.
+>
+> Naming is theme-bearing and Phase 42 has not ratified the bible yet —
+> `plan/bearings.md` forbids improvising dark-fantasy flavor in passing.
+> Every phase below uses NEUTRAL working names (`RestChoice`, `rest` /
+> `anvil` / `cut`) and keeps player copy in the mobile copy layer so
+> Phase 44f can rename it properly. Do not name this node poetically.
+>
+> **Interaction with the V-sequence (noted 2026-08-08 at merge).** The
+> Woodcut Codex landed while this epic was being planned; the two queues
+> touch in two places. (a) **V5** wires backgrounds into "encounter
+> screens" — `/rest` is one, and **52e deletes the Night Watch screen**.
+> Whichever runs second wins; running V5 first means styling a screen
+> about to be replaced. Prefer 52d/52e first, or have V5 skip `/rest`
+> and pick it up after. V6's glyph unification names hazard / gathering
+> / cache / combat and NOT rest, so it is unaffected. (b) **V1 already
+> restyled `axiomancer-mobile/app/blacksmith/index.tsx`** — 52d's
+> "reuse the blacksmith screen, do not rebuild it" still holds and is
+> now cheaper, but read the current file, not the pre-Woodcut one.
+
+- [ ] Phase 52a — Deck-removal engine primitive + the escalating price.
+      The engine has no card removal at all today (`removeCardFromDeck`
+      in `World/Hazard/hazard.engagement.ts` is a *hazard-deck* helper —
+      not this, do not extend it). Add
+      `removeCardFromCombatDeck(player, cardId)`: drains
+      `combatRewardCards` before `knownCards`, removes ONE copy of a
+      duplicate, **reconciles the loadout flags** (or the removal is
+      invisible — `buildCombatDeck` prefers the curated list over
+      `knownCards`), refuses loudly below a `MIN_COMBAT_DECK_SIZE` floor.
+      Plus persisted `Character.cardRemovals` and
+      `cardRemovalPrice(n)` = **15 + 10n** (provisional).
+      `GAME_STATE_VERSION` 15 → 16. (mechanics) Deps: none.
+      Brief: `plan/phases/phase_52a_deck_removal_primitive.md`.
+- [ ] Phase 52b — Make the inn a first-class thing. T's "inns exempt" is
+      unimplementable against current data: `INN_REST_HEAL_FRACTION`
+      makes "is this an inn?" mean `healFraction >= 1.0`, and **three
+      wilderness nodes are authored at 1.0** (`nf-4` cold spring, `nf-24`
+      hidden grove, and every `fvRestPool` node) — so two forest springs
+      currently mend hazard-scarred max-VITAE like a paid shelter. That
+      is a live bug the flat-20% rule would cement. Add
+      `RestPayload.shelter: 'camp' | 'inn'`, re-author all six rest
+      pools, re-home the scar mend onto it, retire `healFraction`.
+      Changes no heal numbers — 52c does the arithmetic, so a regression
+      here stays legible. (mechanics + mobile) Deps: none.
+      Brief: `plan/phases/phase_52b_first_class_inn.md`.
+- [ ] Phase 52c — The rest-choice engine. A new pure `World/RestChoice/`
+      following the established two-way minigame contract (never reads
+      `GameState`; `(session, …) → session`; host settles an outcome
+      ledger at claim). Three offers with per-offer affordability and
+      loud `disabledReason`s: `rest` free (20% of MAX vitae; inn branch
+      full-heal + scar mend), `anvil` **50 shillings** for exactly ONE
+      HONE-or-TEMPER — composing the **already-built** D5
+      `World/Blacksmith` engine, not rebuilding it — and `cut` at
+      52a's escalating price. One commit, then locked; the other two
+      vanish. `rest` is free, so a broke player is never dead-ended.
+      Also **resolves the standing `[needs-user-call]` at
+      `World/MapEvents/types.ts:141-146`** (blacksmith placement/cadence)
+      with T's ruling. SWAP is not offered — no map authors variant gear.
+      (mechanics) Deps: 52a, 52b.
+      Brief: `plan/phases/phase_52c_rest_choice_engine.md`.
+- [ ] Phase 52d — The rest-choice screen, and the anvil finally reaches
+      players. Repurpose the `/rest` route (path unchanged — the route
+      contract is locked); three priced cards with the purse shown and
+      unaffordable options **visibly disabled with their reason**, per
+      the owner-UI doctrine. **No back-out** — `resolveMapEvent` consumes
+      the node on ENTRY (step 5), before any choice, so a cancel path
+      burns the node for nothing; verify the Android hardware-back case
+      explicitly. Anvil hands off to the existing `/blacksmith` screen,
+      which stops being dev-menu-only after ~6 weeks unreachable. Removal
+      picker lists the real deck (duplicates and all) and **previews the
+      next price before the player commits** — the escalation is the
+      mechanic. (mobile) Deps: 52c.
+      Brief: `plan/phases/phase_52d_rest_choice_mobile.md`.
+- [ ] Phase 52e — Retire the Night Watch. **After 52d, never before.**
+      Delete `World/Rest/` entire, the `rest` CLI sub-command + npm
+      script, both barrel re-exports (⇒ all three workspace gates), the
+      mobile tutorial + debug button, `.claude/commands/rest-tuning.md`
+      and `.github/workflows/rest-tuning.yml`, and **void** the `Rest
+      meagre-but-never-lethal (posture gradient)` doctrine row in
+      `plan/bearings.md`. KEEP: the `rest` MapEvent kind, `RestGate`, the
+      `'rest'` seed key, the scar mend (re-homed in 52b), and
+      `night-keepsake:*` flags — `/memoir`'s REMAINS section reads them
+      and deleting them erases run history. `GAME_STATE_VERSION` 16 → 17;
+      a player mid-night at update must land somewhere valid. **Also
+      update Phase 44f's row in the same commit** — it lists "The Night
+      Watch (rest)" as one of four minigame names to retheme, and there
+      will be three. (mechanics + mobile + harness) Deps: 52d.
+      Brief: `plan/phases/phase_52e_night_watch_retirement.md`.
+- [ ] Phase 52f — Calibrate the shilling economy. Three price sets are
+      currently guesses stacked on each other:
+      `BLACKSMITH_PRICING_PLACEHOLDER` (hone 2 / temper 3 / swap 4) has
+      read "PLACEHOLDER pending D7's economy ratification" since D5 —
+      **D7 never ran** — plus 52c's anvil 50 and 52a's 15+10n. Measure
+      shilling income per act first (loot-cache `DEFAULT_CACHE_CURRENCY`
+      is 10; shop wares run 1-12), then derive all three against a stated
+      doctrine: a die upgrade is a major purchase, the first cut is
+      obviously affordable, the fourth or fifth cut is a real sacrifice,
+      `rest` stays free. De-placeholder D5's constants and retire the
+      ◆/souls unit language. **Decide the tuning home** — 52e deletes
+      `/rest-tuning`, and leaving the node with no lane is exactly how
+      D5's prices went unratified for a month. (mechanics — tuning)
+      Deps: 52e. Brief:
+      `plan/phases/phase_52f_shilling_economy_calibration.md`.
 
 - [ ] Phase 46a — Early-game rethink: design session. Decide whether the
       opening is canned preset-deck tutorials with deckbuilding deferred
@@ -1350,28 +1484,52 @@ before regarding the direction of the game's design"; master plan:
 `plan/phases/phase_V_visual_redesign_masterplan.md` — sub-briefs generate
 on pickup):**
 
-- [ ] Phase V1 — Iconography canon: one data-driven icon registry
+- [x] Phase V1 — Iconography canon: one data-driven icon registry
       (`components/icons/` — `<AxmIcon>` + curated game-icons.net
       silhouettes extracted from the owner-provided `Potential Assets/`
       library via `scripts/extract-game-icons.mjs`); `ActionIcon` /
       `EffectGlyph` become thin adapters; kill the verbatim path
       duplicates (tab bar, CombatVictoryPanel, pixel-heart pair); orphan
       components resolved (mobile)
-- [ ] Phase V2 — The map as an artifact: WILDS map scene redesign —
+      SHIPPED 2026-08-08 (PR #179): registry (27 marks, per-entry
+      attribution), adapters, tab-bar + CombatVictoryPanel dedupe,
+      registry test suite. RESIDUE (see Carry-overs): pixel-heart pair
+      dedupe and orphan resolution (`BodyDiagram`/`MindMark`/
+      `FriendshipMeter`) did NOT ship.
+- [-] Phase V2 — The map as an artifact: WILDS map scene redesign —
       parchment-void backdrop (hatch + vignette + torn frame,
       procedural), registry node/kind icons (treasure→chest), compass
       rose, region-accent theming (mobile; after V1)
-- [ ] Phase V3 — Menus & chrome: tab bar on the registry with the
+      PARTIAL via PR #179: chart sheet (hatch + contour hills), compass
+      rose, edge vignette, registry node/kind icons (treasure→chest,
+      boss→crowned skull; blacksmith + village promoted to first-class
+      NodeTypes with anvil/huts marks, tags, colors, tooltips), plus a
+      REAL backdrop ahead of schedule — Doré Inferno Plate 1 as
+      `assets/images/maps/forest-dark.webp` (provenance-stamped) behind
+      a `mapBackdropFor(region)` registry and a `MapCanvas` art slot.
+      REMAINING: torn frame, region-accent theming, legend refresh.
+- [-] Phase V3 — Menus & chrome: tab bar on the registry with the
       handoff active treatment, ✠-eyebrow header convention audited into
       one shared component, panel-furniture consistency pass across
       SELF/SATCHEL/MEMOIR + modals (mobile; after V1)
+      PARTIAL via PR #179: tab bar consumes the registry (5 inline path
+      copies deleted) + sulfur active-tick; screen-furniture marks
+      landed (anvil/THE ANVIL, huts/SETTLEMENT, tombstone/REMAINS).
+      REMAINING: shared ✠-eyebrow header component, panel-furniture
+      (TornPanel/rivets/seals) consistency pass.
 - [ ] Phase V4 — Background acquisition pipeline: scout public-domain
       woodcut/engraving + CC0 texture sources; provenance.json + webp
       budget per the labyrinth/cards convention; deliver per-region map
       backdrops, encounter-screen backgrounds, title candidates (assets)
+      HEAD START via PR #179: the acquisition pattern is proven
+      end-to-end (Wikimedia Commons → Pillow post-process → webp +
+      provenance.json) with one plate delivered (forest-dark).
 - [ ] Phase V5 — Backgrounds wired: `ScreenBg` keyed art slot with
       dim/vignette; encounter screens + map regions consume V4 art;
       combat arena variety; procedural fallback stays (mobile; after V2+V4)
+      HEAD START via PR #179: the WILDS map already consumes its plate
+      through `mapBackdropFor` + the `MapCanvas` backdrop prop with the
+      dim-never-blur treatment; V5 generalizes this to `ScreenBg`.
 - [ ] Phase V6 — Combat & minigame glyph unification: shared subset of
       hazard/gathering/cache/combat glyph kits folds into the registry;
       keyword-mark canon audit (mobile; after V1)
@@ -1416,8 +1574,20 @@ See the status rows above; generate briefs on demand.
 
 ## Carry-overs / known gaps (update as phases ship)
 
-(Empty until phases ship. Add `[-]` rows for partial-but-shipped
-phases with linked notes here.)
+(Add `[-]` rows for partial-but-shipped phases with linked notes here.)
+
+- [-] **V1 residue (filed 2026-08-08, post-#179 merge):** the
+  pixel-heart emblem pair still coexists
+  (`components/aftermath/PixelHeartEmblem.tsx` vs
+  `components/event/aftermath/PixelEmblem.tsx` — near-duplicates; keep
+  the PixelEmblem carve-out, collapse to one), and the three orphaned
+  components (`BodyDiagram`, `MindMark`, `FriendshipMeter` — zero
+  non-test importers) are still undecided (delete, or wire via a V3/V6
+  surface). Small, bounded; fold into the next V-phase pickup rather
+  than a bespoke tick.
+- [-] **V2/V3 remainders:** listed inline on their `[-]` rows above —
+  torn frame, region-accent theming, legend refresh (V2); shared
+  ✠-eyebrow header component, panel-furniture pass (V3).
 
 ## Queue change log
 
@@ -1504,6 +1674,34 @@ phases with linked notes here.)
   master plan `plan/phases/phase_V_visual_redesign_masterplan.md`; V1
   (map + menus slice) implemented in the same session/PR that lands this
   row.
+- **2026-08-08** — actor: **T direct** (attended chat session, this
+  worktree — not `/oversight`, not Hermes). Action: **added Phases
+  52a-52f** (the rest-choice epic: deck-removal primitive, first-class
+  inn, rest-choice engine, mobile screen, Night Watch retirement,
+  shilling-economy calibration); **marked Phases 45a and 45b
+  `[skipped]`** as superseded by them; and **amended Phase 44f's row**
+  to drop The Night Watch from its four-minigame rename list while
+  keeping the surviving rest node in scope for naming. Confirmed T's
+  request: yes — T gave the instruction directly and verbatim: *"I want
+  you to plan and add phases to remove the Rest mini-game and replace it
+  with a choice for the players: 1) Rest (heal 20% of the player's
+  health) 2) Use the blacksmith (upgrade a die for a high price of
+  whatever currency name we have, I forget) 3) Remove a card from the
+  player's deck (Low price to start, but every time the player does this
+  across the game, it costs a little more). Once the player chooses an
+  option, the rest is done/completed/locked."* T's stated reason: not
+  stated beyond the instruction itself. Four follow-up rulings were
+  collected in the same session and are recorded in the 52a-52f block:
+  full retirement of the Night Watch (chosen over park-behind-a-flag and
+  keep-as-a-rare-node), flat 20% heal with inns exempt, prices proposed
+  now and calibrated in a dedicated later phase, and the collapse of
+  45a/45b into this epic. Note this ruling **answers 45a's open design
+  question** (where dice upgrades live — the rest site) and **resolves
+  the standing `[needs-user-call]` at
+  `axiomancer-mechanics/src/World/MapEvents/types.ts:141-146`**
+  (blacksmith map placement and cadence), both open since 2026-07-18.
+  Resulting commit: this one; six briefs generated under
+  `plan/phases/phase_52*.md`.
 
 ## Phase log (commit hashes)
 
