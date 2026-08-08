@@ -1009,6 +1009,44 @@ the queue had fully drained and the red curve had no phase assigned):**
 > to `main`. Matches the issue's acceptance criteria structurally; no
 > queued phase needed. Not yet confirmed via a live manual run.
 
+**The Woodcut Codex — full visual redesign (T-directed 2026-08-08, web
+session: "keys to the kingdom … full wipe on all the constraints I had
+before regarding the direction of the game's design"; master plan:
+`plan/phases/phase_V_visual_redesign_masterplan.md` — sub-briefs generate
+on pickup):**
+
+- [ ] Phase V1 — Iconography canon: one data-driven icon registry
+      (`components/icons/` — `<AxmIcon>` + curated game-icons.net
+      silhouettes extracted from the owner-provided `Potential Assets/`
+      library via `scripts/extract-game-icons.mjs`); `ActionIcon` /
+      `EffectGlyph` become thin adapters; kill the verbatim path
+      duplicates (tab bar, CombatVictoryPanel, pixel-heart pair); orphan
+      components resolved (mobile)
+- [ ] Phase V2 — The map as an artifact: WILDS map scene redesign —
+      parchment-void backdrop (hatch + vignette + torn frame,
+      procedural), registry node/kind icons (treasure→chest), compass
+      rose, region-accent theming (mobile; after V1)
+- [ ] Phase V3 — Menus & chrome: tab bar on the registry with the
+      handoff active treatment, ✠-eyebrow header convention audited into
+      one shared component, panel-furniture consistency pass across
+      SELF/SATCHEL/MEMOIR + modals (mobile; after V1)
+- [ ] Phase V4 — Background acquisition pipeline: scout public-domain
+      woodcut/engraving + CC0 texture sources; provenance.json + webp
+      budget per the labyrinth/cards convention; deliver per-region map
+      backdrops, encounter-screen backgrounds, title candidates (assets)
+- [ ] Phase V5 — Backgrounds wired: `ScreenBg` keyed art slot with
+      dim/vignette; encounter screens + map regions consume V4 art;
+      combat arena variety; procedural fallback stays (mobile; after V2+V4)
+- [ ] Phase V6 — Combat & minigame glyph unification: shared subset of
+      hazard/gathering/cache/combat glyph kits folds into the registry;
+      keyword-mark canon audit (mobile; after V1)
+- [ ] Phase V7 — Illustration upgrades: replace remaining procedural
+      illustration SVGs with acquired art per `SVG_ASSET_SPEC.md` §5–8;
+      PixelEmblem carve-out preserved (assets + mobile; after V4)
+- [ ] Phase V8 — Closure: `/critic-loop` screenshot pass, contrast/a11y
+      audit, placeholder teardown, `SVG_ASSET_SPEC.md` reconciled,
+      `docs/VISUAL_LANGUAGE.md` (mobile; after V1–V7)
+
 > **After the queue drains:** `/march` transitions to `/iterate`
 > — draining `plan/AUDIT.md` + `plan/CRITIQUE.md`, doc-drift,
 > `as any` clusters, hex-literal -> AXM migration, a11y, and
@@ -1073,6 +1111,20 @@ phases with linked notes here.)
   hygiene rows to pick while the flag-on balance curve had read mid 0.0%
   / late 0% for six consecutive nightly baselines with no phase assigned
   to it. Resulting commit: this one; briefs still to generate.
+- **2026-08-08** — actor: **T via attended web session** (Claude Code on
+  the web, branch `claude/game-visual-redesign-5v21po`). Action: **added
+  the V-sequence** (Phases V1–V8, the Woodcut Codex full visual
+  redesign). Confirmed T's request: yes — verbatim: *"I am giving you
+  complete freedom to take the game in any visual theme. I am currently
+  trying to do a full wipe on all the constraints I had before regarding
+  the direction of the game's design"*, with explicit instructions to
+  plan the phases into the loop, replace the app's scattered SVGs with
+  the provided icon/glyph directory, and add acquired background
+  imagery; map first, then menus. T's stated reason: full game visual
+  redesign toward a "finished" visual design. Resulting artifacts:
+  master plan `plan/phases/phase_V_visual_redesign_masterplan.md`; V1
+  (map + menus slice) implemented in the same session/PR that lands this
+  row.
 
 ## Phase log (commit hashes)
 

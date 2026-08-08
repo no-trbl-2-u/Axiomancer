@@ -1,62 +1,46 @@
 /**
- * Hermetic component tests — EffectGlyph. Pins the switch
- * contract: each known kind picks its own SVG branch (asserted
- * via Path count, which uniquely identifies each branch since
- * the paths-per-kind table differs), and unknown kinds fall
- * back to a colored placeholder View.
+ * Hermetic component tests — EffectGlyph. Pins the adapter contract
+ * (Phase V1): each known status-effect kind resolves to its registry
+ * silhouette (an Svg with at least one Path), and unknown kinds fall
+ * back to a colored placeholder View — the loud "this effect has no
+ * mark yet" signal.
  *
- * Sibling to the EffectChip suite (the chip consumes this
- * glyph). Pure presentation — no async, no store.
+ * Sibling to the EffectChip suite (the chip consumes this glyph).
+ * Pure presentation — no async, no store.
  */
 
 import { describe, expect, it } from '@jest/globals';
 import { render } from '@testing-library/react-native';
 import React from 'react';
 import { View } from 'react-native';
-import { Path, Circle } from 'react-native-svg';
+import { Path } from 'react-native-svg';
 
 import { EffectGlyph } from '@/components/EffectGlyph';
 
-describe('EffectGlyph: kind → SVG branch', () => {
-    it('renders 3 paths + 1 circle for kind="poison"', () => {
-        const tree = render(<EffectGlyph kind="poison" />);
-        expect(tree.UNSAFE_getAllByType(Path)).toHaveLength(3);
-        expect(tree.UNSAFE_getAllByType(Circle)).toHaveLength(1);
+const KNOWN_KINDS: readonly string[] = [
+    'poison',
+    'bleed',
+    'stun',
+    'regen',
+    'burn',
+    'buff',
+    'debuff',
+    'shield',
+];
+
+describe('EffectGlyph: kind → registry silhouette', () => {
+    it.each(KNOWN_KINDS)('kind="%s" renders at least one Path', (kind) => {
+        const tree = render(<EffectGlyph kind={kind} />);
+        expect(tree.UNSAFE_getAllByType(Path).length).toBeGreaterThanOrEqual(1);
     });
 
-    it('renders 3 paths for kind="bleed"', () => {
-        const tree = render(<EffectGlyph kind="bleed" />);
-        expect(tree.UNSAFE_getAllByType(Path)).toHaveLength(3);
-    });
-
-    it('renders 1 path for kind="stun"', () => {
-        const tree = render(<EffectGlyph kind="stun" />);
-        expect(tree.UNSAFE_getAllByType(Path)).toHaveLength(1);
-    });
-
-    it('renders 2 paths for kind="regen"', () => {
-        const tree = render(<EffectGlyph kind="regen" />);
-        expect(tree.UNSAFE_getAllByType(Path)).toHaveLength(2);
-    });
-
-    it('renders 1 path for kind="burn"', () => {
-        const tree = render(<EffectGlyph kind="burn" />);
-        expect(tree.UNSAFE_getAllByType(Path)).toHaveLength(1);
-    });
-
-    it('renders 1 path for kind="buff" (upward triangle)', () => {
-        const tree = render(<EffectGlyph kind="buff" />);
-        expect(tree.UNSAFE_getAllByType(Path)).toHaveLength(1);
-    });
-
-    it('renders 1 path for kind="debuff" (downward triangle)', () => {
-        const tree = render(<EffectGlyph kind="debuff" />);
-        expect(tree.UNSAFE_getAllByType(Path)).toHaveLength(1);
-    });
-
-    it('renders 1 path for kind="shield"', () => {
-        const tree = render(<EffectGlyph kind="shield" />);
-        expect(tree.UNSAFE_getAllByType(Path)).toHaveLength(1);
+    it.each(KNOWN_KINDS)('kind="%s" exposes the registry a11y label', (kind) => {
+        const tree = render(<EffectGlyph kind={kind} />);
+        const label = `${kind[0].toUpperCase()}${kind.slice(1)} effect`.replace(
+            'Regen effect',
+            'Regeneration effect',
+        );
+        expect(tree.getByLabelText(label)).toBeTruthy();
     });
 });
 
@@ -86,7 +70,7 @@ describe('EffectGlyph: default branch', () => {
             return (style as { backgroundColor?: string })?.backgroundColor === '#abcdef';
         });
         expect(styled).toBeDefined();
-        
+
         // Extract style properties from array or direct object
         const style = styled?.props.style;
         let width, height;
@@ -99,7 +83,7 @@ describe('EffectGlyph: default branch', () => {
             width = (style as { width: number })?.width;
             height = (style as { height: number })?.height;
         }
-        
+
         expect(width).toBe(24);
         expect(height).toBe(24);
     });

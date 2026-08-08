@@ -5,7 +5,7 @@ import Animated, {
     useAnimatedStyle,
     useSharedValue,
 } from 'react-native-reanimated';
-import Svg, { Path, Circle, G } from 'react-native-svg';
+import Svg, { Path, Circle, G, Defs, RadialGradient, Stop, Rect } from 'react-native-svg';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import { Splatter } from '@/components/Splatter';
 import type { ExplorationNode, ExplorationEdge } from '@/state/presenters/exploration.engine';
@@ -23,6 +23,39 @@ interface MapCanvasProps {
 const SPREAD = 2.6;
 const CANVAS_W = 360 * SPREAD;
 const CANVAS_H = 400 * SPREAD;
+
+// Phase V1/V2 (the Woodcut Codex) — the map reads as a chart, not a
+// void: a faint diagonal hatch over the whole sheet (the handoff's
+// `.axm-hatch` texture, redrawn as strokes so no Pattern support is
+// needed), cartographic contour "hills" in the dead zones, a
+// viewport-fixed compass rose, and an edge vignette. All tokenized;
+// swapped for real backdrop art at Phase V5 (procedural stays as the
+// fallback).
+const HATCH_STEP = 18;
+const HATCH_LINES: readonly string[] = (() => {
+    const lines: string[] = [];
+    // 45° lines across the 360×400 sheet: sweep the x-intercept from
+    // -400 (line entering from the left edge) to 360.
+    for (let x0 = -400; x0 <= 360; x0 += HATCH_STEP) {
+        lines.push(`M ${x0} 0 L ${x0 + 400} 400`);
+    }
+    return lines;
+})();
+
+/** Nested contour rings — hand-authored cartographic hills. */
+const CONTOUR_GROUPS: readonly string[][] = [
+    [
+        'M40 250 q 20 -22 44 -10 q 12 14 -10 20 q -26 4 -34 -10 z',
+        'M50 252 q 14 -14 28 -6 q 8 9 -7 13 q -16 3 -21 -7 z',
+    ],
+    [
+        'M250 280 q 30 -22 62 -6 q 10 20 -20 24 q -40 -2 -42 -18 z',
+        'M262 282 q 20 -13 40 -4 q 6 12 -13 15 q -25 -1 -27 -11 z',
+    ],
+    [
+        'M282 74 q 18 -16 38 -6 q 8 12 -12 16 q -22 2 -26 -10 z',
+    ],
+];
 
 export function MapCanvas({ nodes, edges, children }: MapCanvasProps) {
     const styles = useStyles();
@@ -125,6 +158,19 @@ export function MapCanvas({ nodes, edges, children }: MapCanvasProps) {
                 <Animated.View style={[styles.canvas, mapTransform]}>
                     {/* SVG edges — drawn across the spread canvas */}
                     <Svg viewBox="0 0 360 400" width={CANVAS_W} height={CANVAS_H} style={StyleSheet.absoluteFillObject}>
+                        {/* The chart sheet: diagonal hatch + contour hills under the roads */}
+                        <G stroke={AXM.parchment} strokeWidth={0.4} opacity={0.05}>
+                            {HATCH_LINES.map((d) => (
+                                <Path key={d} d={d} fill="none" />
+                            ))}
+                        </G>
+                        {CONTOUR_GROUPS.map((group, gi) => (
+                            <G key={gi} opacity={0.45} stroke={AXM.ash} strokeWidth={1} fill="none">
+                                {group.map((d) => (
+                                    <Path key={d} d={d} />
+                                ))}
+                            </G>
+                        ))}
                         {edges.map((e) => {
                             const A = nodeById.get(e.fromId);
                             const B = nodeById.get(e.toId);
@@ -153,15 +199,43 @@ export function MapCanvas({ nodes, edges, children }: MapCanvasProps) {
                                 </G>
                             );
                         })}
-                        <G opacity={0.4} stroke={AXM.bone} strokeWidth={1} fill="none">
-                            <Path d="M40 250 q 20 -20 40 -10 q 10 12 -10 18 q -22 4 -30 -8 z" />
-                            <Path d="M250 280 q 30 -20 60 -5 q 8 18 -20 22 q -38 -2 -40 -17 z" />
-                        </G>
                     </Svg>
 
                     {children}
                 </Animated.View>
             </GestureDetector>
+
+            {/* Viewport-fixed chart furniture — never pans with the map */}
+            <Svg
+                style={StyleSheet.absoluteFillObject}
+                pointerEvents="none"
+                testID="map-vignette"
+            >
+                <Defs>
+                    <RadialGradient id="axmMapVignette" cx="50%" cy="50%" rx="72%" ry="66%">
+                        <Stop offset="55%" stopColor={AXM.deepBg} stopOpacity={0} />
+                        <Stop offset="100%" stopColor={AXM.deepBg} stopOpacity={0.6} />
+                    </RadialGradient>
+                </Defs>
+                <Rect x="0" y="0" width="100%" height="100%" fill="url(#axmMapVignette)" />
+            </Svg>
+            <Svg
+                width={52}
+                height={52}
+                viewBox="0 0 52 52"
+                style={styles.compassRose}
+                pointerEvents="none"
+                accessibilityRole="image"
+                accessibilityLabel="Compass rose"
+                testID="map-compass"
+            >
+                <Circle cx={26} cy={26} r={21} stroke={AXM.bone} strokeWidth={1} fill="none" opacity={0.45} />
+                <Circle cx={26} cy={26} r={16} stroke={AXM.bone} strokeWidth={0.6} fill="none" opacity={0.3} strokeDasharray="2 4" />
+                <Path d="M6 26 H16 M36 26 H46 M26 36 V46" stroke={AXM.bone} strokeWidth={1} opacity={0.4} />
+                <Path d="M26 6 L29 26 L26 32 L23 26 Z" fill={AXM.blood} opacity={0.75} />
+                <Path d="M26 46 L29 26 L23 26 Z" fill={AXM.bone} opacity={0.5} />
+                <Circle cx={26} cy={26} r={2} fill={AXM.parchment} opacity={0.7} />
+            </Svg>
         </View>
     );
 }
@@ -195,5 +269,11 @@ const useStyles = makeStyles((AXM) => ({
         bottom: 30,
         left: -20,
         opacity: 0.18,
+    },
+    compassRose: {
+        position: 'absolute',
+        right: 10,
+        bottom: 10,
+        opacity: 0.85,
     },
 }));

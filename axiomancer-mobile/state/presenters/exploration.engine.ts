@@ -131,8 +131,11 @@ export const ACTION_ICON_BY_TYPE: Record<NodeType, string> = {
     gather: 'bag',
     current: 'eye',
     encounter: 'sword',
-    treasure: 'scroll',
-    boss: 'crown',
+    // Phase V1 — treasure reads as a chest, not a scroll (the scroll
+    // stays the quest/document mark), and a boss node wears the crowned
+    // skull rather than the plain crown (the crown stays the SELF mark).
+    treasure: 'chest',
+    boss: 'boss',
     quest: 'scroll',
     hazard: 'arcane',
 };
