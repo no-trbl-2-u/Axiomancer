@@ -248,7 +248,10 @@ ambiguity.)
   2. **`/deck-tuning` has full card authority** — no sandbox-first
      quarantine, no byte-identity law, no recolor-not-repartition rule,
      no per-change owner ballot, no `[needs-user-call]` on recolors or
-     new cards. Anything about any card is fair game.
+     new cards. Anything about any card is fair game — **bounded only by
+     the LOCKED MECHANICS carve-out below**: cards may do anything to
+     Conviction, the Surge meter and the Dice system except make them
+     irrelevant.
   3. **Philosophy theming is retired** as the organising fiction.
      **RATIFIED the same day — the replacement is "a Dark Fantasy
      deckbuilding RPG campaign", WHOLE PRODUCT.** T's framing:
@@ -270,6 +273,42 @@ ambiguity.)
   and deploy gates, the nexus hard rules, and `GAME_STATE_VERSION`
   migration discipline. "Remove constraints" was about DESIGN law, not
   engineering rigour.
+- **LOCKED MECHANICS — the carve-out from the unshackling (T direct,
+  /oversight 2026-08-08).** T, verbatim: *"the Conviction, Surge meter,
+  and Dice mechanics system, those are LOCKED into place and will need to
+  stay. Cards can effect them, but agents should not remove the
+  mechanics."* The unshackling's "full freedom" **stops here**. Three
+  systems are permanently in the game:
+  1. **Conviction** — the banked combat resource that funds Signature
+     Skills. Anchors: `CombatEncounterState.conviction`
+     (`Combat/combat.encounter.types.ts`), the `conviction-gained` /
+     `special-fired` events, `fate-tapped`'s `'conviction'` choice,
+     `die-forged`'s `'conviction'` destination, `SPECIAL_CONVICTION_DEFAULT`,
+     and every `SIGNATURE_SKILLS` cost. Spec 26 / 26b.
+  2. **The Surge meter** — the global momentum wheel and its surge.
+     Anchors: `MOMENTUM_CHAIN_ORDER`, `MOMENTUM_SURGE_LENGTH`,
+     `SURGE_DIE_PREFIX`, the `momentum-surged` event, and
+     `die-overflowed`'s `'surge'` source. Spec 31.
+  3. **The Dice mechanics system** — `Combat/dice.ts`,
+     `Combat/combat.dice.ts`, `Combat/combat.upgradeable-dice.ts`,
+     `DEFAULT_DIE_GEAR` / `activeDieGear`, the HONE/TEMPER die-gear
+     economy, and the Upgradeable-Dice model that D-FLIP made the default
+     (legacy dice stays as the explicit comparison mode). Spec 33.
+  **What is allowed:** cards, keywords, enemies and content MAY read,
+  feed, spend, block, amplify or otherwise interact with all three — that
+  is explicitly encouraged, and normal damage does not displace them.
+  **What is forbidden without a new T ruling:** removing, replacing,
+  no-op'ing, feature-flagging off, or routing around any of the three;
+  deleting their tests as "dead doctrine" during Phase 41; or letting a
+  balance pass tune them out of relevance. If a phase genuinely cannot
+  ship without touching one of these, **stop and surface it as
+  `[needs-user-call]`** — do not decide it under the standing
+  big-decisions authority, which this carve-out explicitly overrides.
+  **On renaming:** the LOCK is on the mechanics, not the words, but all
+  three names already read dark fantasy, so the default is **keep the
+  names too**. A Phase 42 proposal to rename any of them must say so
+  out loud, route through the Phase 44a map, and check
+  `GAME_STATE_VERSION` — the mechanic survives either way.
 - **Balance doctrines (per encounter):** ~~status-effect play is
   the dominant win path (combat)~~ — **VOID for combat via the
   unshackling above; Phase 43 defines the replacement objective

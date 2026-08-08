@@ -1004,7 +1004,16 @@ product-level pivot that VOIDS several previously "locked" doctrines).**
       dozens of plan docs. **Do NOT add damage to any card in this
       phase**; this phase only removes the walls. Keep every hermeticity
       and determinism gate (injected RNG, no disk/network in engine
-      tests) — those are not the constraints being lifted. (mechanics)
+      tests) — those are not the constraints being lifted. **LOCKED
+      MECHANICS GUARD (T direct 2026-08-08): Conviction, the Surge meter
+      and the Dice system are carved out of the unshackling and must
+      survive this phase untouched.** This is the phase most likely to
+      break that by accident — it deletes doctrine tests, and some of
+      those transitively pin dice / Conviction / surge behavior. Delete
+      ONLY the assertions enforcing the three retired constraints;
+      re-home any assertion that happens to pin one of the locked systems
+      into a suite that survives, rather than dropping it with the file.
+      See `plan/bearings.md` § "LOCKED MECHANICS". (mechanics)
       Deps: none. Brief: to generate.
 - [ ] Phase 42 — The Dark Fantasy campaign bible (design phase; output is
       a spec, not code). **T ratified the direction 2026-08-08: "Dark
@@ -1033,8 +1042,15 @@ product-level pivot that VOIDS several previously "locked" doctrines).**
       descriptive; "opens a lot of doors" argues they want the option
       open. Recommend one, do not build it here. Also state plainly what
       does NOT change: engine mechanics, keyword *behavior*, the dice
-      model, the minigame doctrines. Deps: none (parallel to 41).
-      Brief: to generate.
+      model, the minigame doctrines. **LOCKED MECHANICS (T direct
+      2026-08-08): Conviction, the Surge meter and the Dice system stay
+      in the game permanently — the fiction must be authored to HOUSE
+      them, not around them.** All three names already read dark fantasy,
+      so the default is to keep the names as well as the mechanics; if a
+      proposal wants to rename one, say so explicitly and route it
+      through 44a with a `GAME_STATE_VERSION` check. A bible that leaves
+      Conviction or the surge meter thematically homeless has failed this
+      phase. Deps: none (parallel to 41). Brief: to generate.
 - [ ] Phase 43 — Objective function v2 (replaces the parked "metric v2"
       design session, `plan/AUDIT.md`). The parked row wanted a
       player-side, arc-aware successor to `statusEngagement`. The
@@ -1048,7 +1064,13 @@ product-level pivot that VOIDS several previously "locked" doctrines).**
       — decide, don't collect all of them), implement it beside the old
       metric, and re-stamp a baseline under it. Until this lands, treat
       ALL existing doctrine-curve readings as measuring a dead law.
-      (mechanics — harness) Deps: 41. Brief: to generate.
+      **LOCKED MECHANICS GUARD: the new objective function must treat
+      Conviction, the Surge meter and the Dice system as permanent
+      first-class systems** — a metric that rewards decks ignoring them,
+      or that would let a later balance pass tune them into irrelevance,
+      is a failed metric. Measuring how well they are USED is fair game
+      and probably desirable. (mechanics — harness) Deps: 41.
+      Brief: to generate.
 
 **Retheme execution (44a-44i) — decomposed 2026-08-08 at T's request.
 Whole-product scope. Each sub-phase is independently shippable and
@@ -1079,7 +1101,14 @@ none may start early (bearings forbids opportunistic renaming).**
       text must move TOGETHER in this phase, and any persisted id needs a
       `GAME_STATE_VERSION` migration. Keep the survivors (POISON, BLEED,
       MARK, DOOM, THORNS, GUARD, RIPOSTE) untouched; renaming what
-      already works is churn. (mechanics + mobile) Deps: 44a.
+      already works is churn. **LOCKED MECHANICS GUARD: Conviction, the
+      Surge meter (`MOMENTUM_CHAIN_ORDER` / `MOMENTUM_SURGE_LENGTH` /
+      `SURGE_DIE_PREFIX` / `momentum-surged`) and the dice vocabulary are
+      not ordinary keywords** — they are locked systems whose ids thread
+      through persisted state and the sim harness. Default: do not rename
+      them at all. If Phase 42 explicitly ruled a rename, it goes through
+      the 44a map with a `GAME_STATE_VERSION` migration, and the mechanic
+      is unchanged either way. (mechanics + mobile) Deps: 44a.
       Brief: to generate.
 - [ ] Phase 44c — Card library retheme. ~70 library cards plus the
       sandbox sets, Thoughtforms and `SIGNATURE_SKILLS`: ids, display
@@ -1269,7 +1298,14 @@ RESEQUENCED the same day behind the unshackling — see above):**
       (all 10 never-played cards are reward-pool-only, so "never played"
       measured the instrument's reach, not card quality) — this phase
       does duplication, reseats and symmetry authoring, NOT trims.
-      Deps: 41, 43, and 44 if the retheme renames the cards it touches.
+      **LOCKED MECHANICS GUARD: this is a tuning phase, so it is the
+      other place the carve-out can be broken quietly** — cards may
+      freely interact with Conviction, the Surge meter and the Dice
+      system, but no tuning decision may leave them vestigial. D8's own
+      law ("every preset exposes a live valve") is the precedent: if a
+      rebalance drops dice casts/run toward zero or makes Conviction
+      unspent, that is a regression, not a simplification. Deps: 41, 43,
+      and 44a-44d if the retheme renames the cards it touches.
       Brief: to generate.
 - [ ] Phase 40 — Card-text grammar + full copy pass. Ruled R4 on
       2026-07-18, released via /oversight 2026-08-08. Adopt the
@@ -1404,6 +1440,20 @@ phases with linked notes here.)
   reason, near-verbatim: *"It's looser, not that different from what we
   already have, and should be an easy pivot while opening up A LOT of
   doors for us."* Resulting commit: this one; briefs still to generate.
+- **2026-08-08** — actor: **T via `/oversight`** (attended web session,
+  fourth batch). Action: **carved three systems out of the unshackling**
+  and wrote the guard into Phases 41, 42, 43, 44b and 39 (no rows added,
+  removed or reordered — this narrows the scope of existing rows).
+  Confirmed T's request: yes, unprompted and verbatim: *"the Conviction,
+  Surge meter, and Dice mechanics system, those are LOCKED into place and
+  will need to stay. Cards can effect them, but agents should not remove
+  the mechanics."* T's stated reason: not stated beyond "LOCKED into
+  place and will need to stay". Effect: the unshackling's "full freedom"
+  no longer extends to removing/replacing/no-op'ing Conviction, the Surge
+  meter or the Dice system; those decisions are explicitly excluded from
+  the standing big-decisions authority and must surface as
+  `[needs-user-call]`. See `plan/bearings.md` § "LOCKED MECHANICS".
+  Resulting commit: this one.
 
 ## Phase log (commit hashes)
 
