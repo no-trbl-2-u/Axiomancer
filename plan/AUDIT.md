@@ -58,11 +58,16 @@
   fresh matrix corroborates that read rather than contradicting it. Also
   see `plan/CRITIQUE.md`'s `[HIGH] late-stage global collapse` row,
   updated this cycle to record that Phase 39 landed without draining it.
-- next: /oversight — this is an owner-scoped call, not an `/iterate` pick.
-  Phase 39's own recommendation was a dedicated mid/late enemy-threat-
-  scaling follow-up phase (a manual engine-constant change, out of
-  `/deck-tuning`'s card-only remit per the standing rail). Two related
-  needs-user-call rows below carry Phase 39's other unresolved items.
+- **[x] RESOLVED via /oversight 2026-08-08 — T: "This is fine. We're
+  working on a new card redesign anyway."** The violation is ACCEPTED,
+  not actioned: the numbers are honest, the band they violate is void
+  (the status-dominance doctrine died the same day), and the library
+  they measure is transitional. No mid/late enemy-threat-scaling phase
+  is promoted off this row. Re-measure after the card redesign lands and
+  after **Phase 43** defines what band, if any, replaces 80/50/25-35/0 —
+  a fresh reading against a live objective function is worth something;
+  another reading against a dead one is not.
+- next: (drained — do not re-file this row's successor)
 
 ### [needs-user-call] Phase 39: foundry's SWAY win-path removal regressed early-stage 73% -> 44%
 - category: design
@@ -79,10 +84,19 @@
   The phase author flagged this as a real, expected cost of the ruling,
   not a bug, but recommends forge get an authored win-condition card as
   a follow-up.
-- next: /oversight — owner call on whether to queue an authored
-  win-condition card for foundry (routes to `/deck-tuning` once
-  scoped), or accept the regressed early-stage number as the settled
-  cost of the status-doctrine identity ruling.
+- **[x] RESOLVED via /oversight 2026-08-08 — T: "This is fine. We're
+  working on a new card redesign anyway."** T took the second option:
+  **accept the regressed early-stage number as the settled cost** of the
+  status-doctrine identity ruling. No authored win-condition card is
+  queued for foundry now — the incoming redesign is the place for it,
+  and authoring one against the current library would be work thrown
+  away. Note for whoever does the redesign: this row's original blocker
+  ("no card in the 86-card library gives forge a heart-aspect win-path
+  alternative") is no longer a constraint at all — the unshackling
+  permits authoring one freely, including with normal damage, which did
+  not exist as an option when this was filed.
+- next: (drained — carry the foundry win-path gap into the card
+  redesign, not into a standalone `/deck-tuning` pass)
 
 ### [needs-user-call] Phase 39: mid-game doctrine cliff reads engine/enemy-scaling shaped, not card-shaped
 - category: design
@@ -100,10 +114,17 @@
   cycle's fresh baseline (see the "Doctrine-curve confirmation
   post-Phase-39" row above) corroborates: mid moved only 0.0% -> 2.0%
   (150 runs) despite Phase 39 landing.
-- next: /oversight — scope and promote (or decline) a dedicated
-  mid/late enemy-threat-scaling phase. Per the standing rail, engine
-  constants are tuned manually; this loop does not vote on its own
-  constraints.
+- **[x] RESOLVED via /oversight 2026-08-08 — T: "This is fine. We're
+  working on a new card redesign anyway." DECLINED for now.** No
+  dedicated mid/late enemy-threat-scaling phase is promoted. The finding
+  itself still looks right — the cliff reads engine-shaped, and 10/13
+  staples already being deployed is good evidence — but a redesign
+  changes the inputs to that diagnosis, so scoping enemy scaling against
+  the current library would be premature. Re-derive after the redesign
+  lands and Phase 43 is live. The standing rail is unchanged: engine
+  constants are tuned manually, never by `/deck-tuning`.
+- next: (drained — re-open after the card redesign + Phase 43, if the
+  cliff survives both)
 
 ### `Closes #N` auto-close is still not firing reliably — the 2026-08-03 fix does not hold
 - category: debt

@@ -51,6 +51,17 @@
   owner's go was given; a cron tick may now start this pass. It should
   run against the Phase 39 tree (curve repair + theme symmetry), not the
   pre-repair one.
+- **RE-HELD later the same day (/oversight 2026-08-08, superseding the
+  ungate two rulings above).** T: *"This is fine. We're working on a new
+  card redesign anyway."* — and bearings now carries "the current card
+  library is transitional; do not spend tuning effort on it". This pass
+  is exactly that kind of effort: it swaps candidates into preset seats
+  in the present 86-card library and measures the result. Running it now
+  produces evidence about a library that is being replaced. **Do not
+  start it until the card redesign lands and Phase 43 provides a live
+  objective function.** The ungate itself is NOT revoked — T's go still
+  stands and does not need re-asking; only the timing moved. The three
+  ratified riders below likewise stand.
 - [x] [needs-user-call] riders — **ALL THREE RATIFIED via /oversight
   2026-08-08**; the pass proceeds on these as settled law, no re-ask:
   (a) forge — OVERHEAT **is** theme-engine manufacture, NOT a

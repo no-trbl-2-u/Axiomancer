@@ -1314,9 +1314,15 @@ RESEQUENCED the same day behind the unshackling — see above):**
       carries a decimal. Witnesses:
       `paid-summary-honesty.engine.test.ts`, the mobile keyword-scanner
       lints, one screenshot confirming the 130c render cap.
-      (mechanics + mobile) **Deps: 44a-44i (retheme) only — Phase 39 has
-      since shipped (`8d50591e`), so the original "after 39" half of this
-      dependency is already satisfied.** Originally "after 39" so the pass would not
+      (mechanics + mobile) **Deps: 44a-44i (retheme) AND the card
+      redesign T reported in flight 2026-08-08.** Phase 39 has since
+      shipped (`8d50591e`), so the original "after 39" half is satisfied
+      — but a redesign means the card SET this pass writes copy for is
+      itself changing, not just its names. Writing 12 before→after
+      rewrites and 4 machine-text faces against a library about to be
+      redesigned is the clearest possible case of thrown-away work.
+      Confirm the redesign's scope at an `/oversight` before starting.
+      Originally "after 39" so the pass would not
       rewrite faces the curve repair was about to change; the retheme
       makes that argument stronger, since Phase 44 may rename every card
       this pass would otherwise write copy for. Run it last of the batch.

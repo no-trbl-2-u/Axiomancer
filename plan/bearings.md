@@ -273,6 +273,26 @@ ambiguity.)
   and deploy gates, the nexus hard rules, and `GAME_STATE_VERSION`
   migration discipline. "Remove constraints" was about DESIGN law, not
   engineering rigour.
+- **THE CURRENT CARD LIBRARY IS TRANSITIONAL — do not spend tuning
+  effort on it** (T direct, /oversight 2026-08-08). Asked to rule on
+  Phase 39's two open findings, T answered: *"This is fine. We're
+  working on a new card redesign anyway."* Standing consequences:
+  1. **A card redesign is in flight.** Its scope was not specified to the
+     loop, and the loop must NOT assume it is the same thing as Phase
+     44c (the retheme, which changes names and faces). "Redesign" reads
+     mechanical. If a tick needs to know, ask at the next `/oversight`
+     — do not infer, and do not start it.
+  2. **Balance findings against the present 86-card library are
+     information, not work.** File them; do not promote phases off them,
+     do not open `/deck-tuning` passes to chase them, and do not author
+     replacement cards to patch measured regressions. Foundry's
+     73%→44% early-stage regression is the worked example: real, filed,
+     and deliberately not fixed.
+  3. **This does not silence measurement.** `/digest` may keep reading
+     baselines; it simply must not spawn tuning work off them until the
+     redesign lands and **Phase 43** provides a live objective function.
+  4. **Not a licence to skip the retheme phases.** 44a-44i still run —
+     they are thematic and structural, not balance work.
 - **LOCKED MECHANICS — the carve-out from the unshackling (T direct,
   /oversight 2026-08-08).** T, verbatim: *"the Conviction, Surge meter,
   and Dice mechanics system, those are LOCKED into place and will need to

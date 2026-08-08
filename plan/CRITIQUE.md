@@ -549,6 +549,12 @@ one level down, in the routing helper `onApply` calls next).
   tests green.
 
 ### [HIGH] late-stage global collapse — all 10 presets 0.00 late
+- **PARKED behind the card redesign (/oversight 2026-08-08).** T, ruling
+  on this row's Phase 39 successors: *"This is fine. We're working on a
+  new card redesign anyway."* Do not pick this row, do not promote a
+  phase off it, and do not author cards to move its numbers — the
+  library it measures is transitional. It re-opens for assessment once
+  the redesign lands and Phase 43 defines a live objective function.
 - **SUPERSEDED AS A TARGET by the unshackling (/oversight 2026-08-08).**
   "All 10 presets 0.00 late" was a failure *against the status-dominance
   doctrine*, which T voided this day. Whether a 0.00 late win rate is
