@@ -1006,23 +1006,35 @@ product-level pivot that VOIDS several previously "locked" doctrines).**
       and determinism gate (injected RNG, no disk/network in engine
       tests) — those are not the constraints being lifted. (mechanics)
       Deps: none. Brief: to generate.
-- [ ] Phase 42 — The new organising fiction (design phase; output is a
-      spec, not code). Philosophy is retired but nothing replaces it yet,
-      and ~70 card ids, 10 theme names, the keyword registry, the world
-      (`W-01 Aporia`), the characters (`C-01 the Sophist`), the
-      alignment system (spec 14) and the moral-difficulty meter (spec 10)
-      are all philosophy-native. Author **three** fully-realised
-      direction proposals — each with a name, a one-paragraph premise, a
-      sample re-skin of five existing cards, what happens to the morality
-      system, and an honest blast radius (files touched, specs
-      invalidated) — then T picks one and it becomes
-      `specs/34-<theme>.md`. Explicitly in scope for the decision: how
-      deep the retheme cuts (combat/cards only vs. the whole product
-      including world, story, characters and `spec.md`'s "your worldview
-      is a mechanical input" premise). **Author nothing downstream until
-      T ratifies one proposal** — this is the one call in the batch that
-      cannot be derived from repo state. Deps: none (can run parallel to
-      41). Brief: to generate.
+- [ ] Phase 42 — The Dark Fantasy campaign bible (design phase; output is
+      a spec, not code). **T ratified the direction 2026-08-08: "Dark
+      Fantasy deckbuilding RPG campaign", WHOLE PRODUCT** — so this is no
+      longer a three-proposal ballot, it is the authoring of
+      `specs/34-dark-fantasy-campaign.md`. T's framing: *"It's looser,
+      not that different from what we already have, and should be an easy
+      pivot while opening up A LOT of doors."* Treat "looser" as the
+      design constraint — this is a re-skin plus permission, not a
+      ground-up redesign. Must settle, in writing, before any of 44*
+      starts: (a) tone + voice register (supersedes the "cold and old"
+      entry in bearings — dark fantasy likely keeps it, say so
+      explicitly); (b) the **naming law** — how a card, keyword, theme,
+      enemy, place and NPC earns its name, so 44* is mechanical rather
+      than improvised; (c) the concept-level rename map — note that
+      POISON / BLEED / MARK / DOOM / THORNS / GUARD / RIPOSTE already
+      read dark-fantasy and should SURVIVE UNCHANGED, while PREMISE /
+      CAPITULATE / SWAY / RAPPORT / REARGUE / CONCEDE / PERORATION are
+      philosophy-native and need replacements; (d) what happens to the
+      morality system (spec 14 philosophical-alignment + spec 10
+      moral-difficulty meter) — dark fantasy has a strong morality
+      tradition, so the default is re-skin-and-keep, not delete; (e)
+      whether VITAE / STANCE / MORALE survive (VITAE already fits); and
+      (f) **what "campaign" means** — descriptive, or a mechanical ask
+      for run/meta-progression structure? T's "easy pivot" wording argues
+      descriptive; "opens a lot of doors" argues they want the option
+      open. Recommend one, do not build it here. Also state plainly what
+      does NOT change: engine mechanics, keyword *behavior*, the dice
+      model, the minigame doctrines. Deps: none (parallel to 41).
+      Brief: to generate.
 - [ ] Phase 43 — Objective function v2 (replaces the parked "metric v2"
       design session, `plan/AUDIT.md`). The parked row wanted a
       player-side, arc-aware successor to `statusEngagement`. The
@@ -1037,44 +1049,162 @@ product-level pivot that VOIDS several previously "locked" doctrines).**
       metric, and re-stamp a baseline under it. Until this lands, treat
       ALL existing doctrine-curve readings as measuring a dead law.
       (mechanics — harness) Deps: 41. Brief: to generate.
-- [ ] Phase 44 — Retheme execution. Apply Phase 42's ratified spec across
-      the surface it claims: card ids + names + faces, theme names, the
-      keyword registry, presenter copy, and (if 42's scope decision says
-      so) world/story/character specs and `spec.md` itself. Mechanical
-      but wide; expect a rename-map artifact + a codemod rather than hand
-      edits, and note that `@mechanics` is consumed as source by mobile
-      and card-editor so the barrel's public names are load-bearing.
-      (mechanics + mobile + card-editor) Deps: 42 ratified, 41.
+
+**Retheme execution (44a-44i) — decomposed 2026-08-08 at T's request.
+Whole-product scope. Each sub-phase is independently shippable and
+verifiable; run them IN ORDER — the map and the guard come first so every
+later phase has a safety net, and the product shell comes last because it
+describes what the others changed. All depend on Phase 42 being ratified;
+none may start early (bearings forbids opportunistic renaming).**
+
+- [ ] Phase 44a — Rename infrastructure (no user-visible change). Build
+      the machine that makes the other eight safe: (a) a
+      `docs/retheme-map.json` artifact — old→new for every card id, card
+      name, keyword, theme, preset, place, NPC and enemy, derived from
+      Phase 42's naming law; (b) a codemod that applies it, so renames
+      are reproducible and reviewable rather than 2,000 hand edits; (c)
+      register every retired philosophy term in
+      `axiomancer-mechanics/docs/lexicon.json`, whose lint
+      (`scripts/check-lexicon.mjs`, already wired into CI via
+      `check-lexicon.yml`) then fails loudly on any regression — that
+      registry is the single best retheme guard this repo already owns,
+      and `docs/LEXICON.md` is its human mirror. Ship the map and the
+      guard with ZERO renames applied, so 44b-44i are pure execution.
+      (tooling) Deps: 42, 41. Brief: to generate.
+- [ ] Phase 44b — Keyword registry + glossary retheme. The ~29 registry
+      keywords, mechanics-side effect ids, mobile's
+      `state/combat/keywords.ts`, and `SYSTEM_GLOSSARY`. Bearings' rule
+      "never rename engine effect ids for player text" yields here — the
+      rename is deliberate and whole-product — but engine ids and player
+      text must move TOGETHER in this phase, and any persisted id needs a
+      `GAME_STATE_VERSION` migration. Keep the survivors (POISON, BLEED,
+      MARK, DOOM, THORNS, GUARD, RIPOSTE) untouched; renaming what
+      already works is churn. (mechanics + mobile) Deps: 44a.
       Brief: to generate.
-- [ ] Phase 45 — Re-home dice upgrades off the blacksmith (design session
-      → implementation). D5's HONE/TEMPER die-gear economy is built and
-      priced with placeholders but has no player-facing home; the
-      blacksmith screen is dev-menu-only and T ruled it the wrong surface
-      on 2026-07-18 (candidates named: rest site, relic, event). Cadence
-      (how often a player upgrades dice across a run) is decided in the
-      same session, not separately. Authorized via /oversight 2026-08-08.
-      (design → mechanics + mobile) Deps: none. Brief: to generate.
-- [ ] Phase 46 — Early-game rethink: canned preset-deck tutorials +
-      re-derive the dropped Quest Board tutorial. Drains the `[MED]`
-      critique row open since 2026-07-08 ("rethink early-game as canned
-      preset-deck tutorial, defer deckbuilding to labyrinth choice") and
-      the score-4.0 candidate. Design session first, then N content/
-      mobile phases. Deps: 42 (tutorial copy is theme-bearing).
+- [ ] Phase 44c — Card library retheme. ~70 library cards plus the
+      sandbox sets, Thoughtforms and `SIGNATURE_SKILLS`: ids, display
+      names and faces. The philosophy names are the most visible part of
+      the pivot (`achilles-and-the-tortoise`, `circular-reasoning`,
+      `straw-mans-jab`, `memento-mori`, `the-closing-word`…). Note
+      `axiomancer-card-editor` reads/writes `src/Cards/cards.library.ts`
+      in place, so its gate runs too. Faces must still satisfy the
+      honesty guard. (mechanics + card-editor) Deps: 44b.
       Brief: to generate.
-- [ ] Phase 47 — Expo decouple (CI/CD re-platform). T's "not now" from
-      2026-07-18 is lifted by the unshackling's "remove constraints
-      across the entire application". Decision inputs already banked in
-      the candidate: the coupling is at the app shell (`expo-router`
-      biggest, plus image/font/haptics/constants/linking/splash-screen/
-      status-bar/navigation-bar), while Reanimated 4 / gesture-handler /
-      rn-svg / screens / safe-area-context are bare-RN and carry over;
-      post-decouple the RN↔native-lib version matrix becomes manually
-      managed (Expo SDK 54 curates it today);
-      `@shopify/react-native-skia` is the parked post-decouple upgrade
-      path. Sequence as its own multi-phase batch when reached — this row
-      is the entry point, not the whole job. (mobile + CI) Deps: none
-      hard, but it will churn every mobile phase in flight — do not run
-      it concurrently with 44. Brief: to generate.
+- [ ] Phase 44d — Themes + presets retheme. The 10 theme names, the
+      preset deck names, `card-themes.ts` `THEME_KEYWORDS`, and the
+      shape pins in `curated-library.engine.test.ts`. (mechanics)
+      Deps: 44c. Brief: to generate.
+- [ ] Phase 44e — Enemies + threat sequences retheme. Enemy names,
+      archetypes, telegraph copy and `combat.threat-sequences.ts` —
+      including the boss currently named The Incompleteness. Behavior
+      unchanged; names and flavor only. (mechanics) Deps: 44b.
+      Brief: to generate.
+- [ ] Phase 44f — World, maps and minigame naming. `W-01` (the Aporia
+      labyrinth continent), the Fishing Village node ids (`fv-*`), map
+      events, and the four authored minigame names — The Gleaning
+      (gathering), The Reliquary (loot-cache), The Night Watch (rest),
+      The Boy's Almanac (quest board). Some of these already read dark
+      fantasy; keep what works. Node ids are referenced by route-audit
+      tooling and tests — rename via the 44a map, not by hand.
+      (mechanics + mobile) Deps: 44a. Brief: to generate.
+- [ ] Phase 44g — Characters, story, dialogue and quests. `C-01 the
+      Sophist`, `S-01` fishing-village dilemmas, dialogue trees, quest
+      board content. This is authored prose, not mechanical substitution
+      — the 44a codemod gets it wrong by design, so this phase is
+      hand-written against Phase 42's voice section. The heaviest
+      creative sub-phase; consider the `/story-spec` and
+      `/character-spec` design skills. (mechanics content)
+      Deps: 42, 44a. Brief: to generate.
+- [ ] Phase 44h — Morality + alignment retheme. Spec 14
+      (philosophical-alignment) and spec 10 (moral-difficulty meter),
+      plus the surfaces that render them (memoir / REMAINS, the moral
+      choice consequences). Per Phase 42's ruling this is expected to be
+      re-skin-and-keep — dark fantasy is a natural home for a morality
+      meter — but if 42 rules otherwise this is where it lands.
+      (mechanics + mobile) Deps: 42, 44b. Brief: to generate.
+- [ ] Phase 44i — Product shell + docs. `spec.md` itself (including the
+      "your worldview is a mechanical input" premise, which is the line
+      that made this an RPG rather than a deckbuilder — 42 decides its
+      fate), the root README, `docs/`, mobile tab labels and shell copy,
+      the copy canon (VITAE / STANCE / MORALE), and `plan/bearings.md`'s
+      "What we're building" section. LAST, because it documents what
+      44a-44h actually did rather than what they intended. Historical
+      records (devlog entries, dated tuning reports, `plan/` history)
+      are NOT rewritten — they are dated records and the lexicon lint
+      already exempts `**Status:** HISTORICAL` files.
+      (docs + mobile) Deps: 44a-44h. Brief: to generate.
+
+- [ ] Phase 45a — Re-home dice upgrades: design session (attended). D5's
+      HONE/TEMPER die-gear economy is built and priced with placeholders
+      but has no player-facing home; the blacksmith screen is
+      dev-menu-only and T ruled it the wrong surface on 2026-07-18
+      (candidates named: rest site, relic, event). Cadence — how often a
+      player upgrades dice across a run — is decided in the SAME session,
+      not separately. Output: a spec or decisive brief naming the
+      surface. Authorized via /oversight 2026-08-08. Deps: none (but
+      the surface should be named in Phase 42's fiction if it is a new
+      place). Brief: to generate.
+- [ ] Phase 45b — Re-home dice upgrades: implementation. Build the
+      surface 45a chose, move the HONE/TEMPER affordance onto it,
+      de-placeholder the prices against the between-combat economy, and
+      retire or repurpose the dev-menu-only blacksmith screen.
+      (mechanics + mobile) Deps: 45a. Brief: to generate.
+
+- [ ] Phase 46a — Early-game rethink: design session. Decide whether the
+      opening is canned preset-deck tutorials with deckbuilding deferred
+      to a labyrinth choice, and re-derive the Quest Board tutorial that
+      was dropped. Drains the `[MED]` critique row open since 2026-07-08
+      and the score-4.0 candidate. Deps: 42 (tutorial copy is
+      theme-bearing). Brief: to generate.
+- [ ] Phase 46b — Early-game: canned preset-deck tutorial content.
+      Implements 46a's ruling. (mechanics content + mobile) Deps: 46a.
+      Brief: to generate.
+- [ ] Phase 46c — Early-game: Quest Board tutorial re-derivation. The
+      dropped first-crossing tutorial, rebuilt to match 46a.
+      (mechanics + mobile) Deps: 46a. Brief: to generate.
+
+**Expo decouple (47a-47e) — decomposed 2026-08-08 at T's request. T's
+"not now" from 2026-07-18 is lifted by the unshackling. Do NOT run this
+batch concurrently with 44* — both churn the whole mobile surface.**
+
+- [ ] Phase 47a — Decouple inventory + shim layer. Freeze an exact
+      inventory of every `expo-*` import site, then route each through a
+      thin local module (`lib/platform/*`-style) so the app depends on
+      OUR interface rather than Expo's directly. Zero behavior change,
+      zero dependency change — this is the seam that makes 47b-47e
+      mechanical. Bare-RN libraries (Reanimated 4, gesture-handler,
+      rn-svg, screens, safe-area-context) are NOT in scope: they carry
+      over unchanged. (mobile) Deps: none. Brief: to generate.
+- [ ] Phase 47b — Navigation: `expo-router` → a bare-RN router
+      (react-navigation the obvious candidate). The single biggest
+      coupling — file-based routes under `app/` become explicit route
+      config, and every route in the locked URL/route contract must
+      still resolve. Do this alone; it will touch every screen.
+      (mobile) Deps: 47a. Brief: to generate.
+- [ ] Phase 47c — Assets: `expo-image`, `expo-font` +
+      `@expo-google-fonts/*` → bare-RN equivalents, preserving the
+      existing font-bundle splitting. (mobile) Deps: 47a.
+      Brief: to generate.
+- [ ] Phase 47d — Device APIs: `expo-haptics` (→
+      react-native-haptic-feedback or similar), `expo-constants`,
+      `expo-linking`, `expo-splash-screen`, `expo-status-bar`,
+      `expo-navigation-bar`. Note Phase 38's juice layer already
+      co-fires haptics through a single wrapper — that wrapper was built
+      as the Expo-decouple swap point, so use it. (mobile) Deps: 47a.
+      Brief: to generate.
+- [ ] Phase 47e — Build + CI re-platform. `jest-expo` → the bare RN
+      Jest preset, `expo lint` → direct ESLint, the `expo start` dev/web
+      scripts and dev-server container, and the EAS build path
+      (`deploy:preview` / `deploy:production`) → whatever replaces it.
+      Post-decouple the RN↔native-lib version matrix becomes manually
+      managed (Expo SDK 54 curates it today) — document that explicitly
+      in bearings as part of this phase. `@shopify/react-native-skia`
+      becomes available here as the parked D6f roll-ritual upgrade path
+      (adds a native binary + a CanvasKit-WASM web-loading step that
+      should be wired ONCE, into the kept pipeline) — evaluate, do not
+      auto-adopt. (mobile + CI) Deps: 47b, 47c, 47d.
+      Brief: to generate.
+
 - [ ] Phase 48 — Root-cause the `Closes #N` auto-close, for real. The
       2026-08-03 fix (`0441c554`, issue #166) does not hold: #174 stayed
       open despite `615ff26b` ending `- Closes #174`, while sibling
@@ -1262,6 +1392,18 @@ phases with linked notes here.)
   status-dominance balance, philosophy theming, the Expo "not now") under
   the source-of-truth hierarchy; see `plan/bearings.md` § "THE
   UNSHACKLING". Resulting commit: this one; briefs still to generate.
+- **2026-08-08** — actor: **T via `/oversight`** (attended web session,
+  third batch). Action: **ratified the replacement fiction** — "Dark
+  Fantasy deckbuilding RPG campaign", whole product — which collapsed
+  **Phase 42** from a three-proposal ballot into authoring a single
+  bible; and **decomposed Phases 44, 45, 46 and 47** into **44a-44i,
+  45a-45b, 46a-46c and 47a-47e** (23 rows where there were 4). Confirmed
+  T's request: yes — T named the direction and the whole-product scope
+  unprompted, then said *"I want you to decompose everything you
+  mentioned above into phases if you haven't already."* T's stated
+  reason, near-verbatim: *"It's looser, not that different from what we
+  already have, and should be an easy pivot while opening up A LOT of
+  doors for us."* Resulting commit: this one; briefs still to generate.
 
 ## Phase log (commit hashes)
 

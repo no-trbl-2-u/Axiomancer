@@ -14,6 +14,15 @@ description of Axiomancer. Read once at session start. The TL;DR:
 > by a deterministic TypeScript rules engine, where your
 > worldview is a mechanical input rather than flavor.
 
+**PIVOTING (T direct, 2026-08-08):** the product is becoming **a Dark
+Fantasy deckbuilding RPG campaign**, whole-product. The TL;DR above and
+`spec.md` itself are rewritten in **Phase 44i** — deliberately last, so
+the spec documents what the retheme actually did rather than what it
+intended. Until then the line above still describes the shipped product,
+and the open question it raises ("your worldview is a mechanical input"
+is what makes this an RPG rather than a deckbuilder) is settled in
+**Phase 42**, not here. See § "THE UNSHACKLING".
+
 Three-package npm-workspaces monorepo: a pure rules **engine**
 (`axiomancer-mechanics`), an Expo/React-Native **app**
 (`axiomancer-mobile`) that consumes the engine as local source,
@@ -240,12 +249,22 @@ ambiguity.)
      quarantine, no byte-identity law, no recolor-not-repartition rule,
      no per-change owner ballot, no `[needs-user-call]` on recolors or
      new cards. Anything about any card is fair game.
-  3. **Philosophy theming is retired** as the organising fiction. Nothing
-     replaces it yet — **Phase 42** authors three direction proposals and
-     T ratifies one. Until that ratification, do NOT rename cards,
-     themes, keywords, world/story/character specs, or `spec.md`, and do
-     NOT invent a replacement theme in passing: the retheme executes in
-     Phase 44 against a ratified spec, not opportunistically.
+  3. **Philosophy theming is retired** as the organising fiction.
+     **RATIFIED the same day — the replacement is "a Dark Fantasy
+     deckbuilding RPG campaign", WHOLE PRODUCT.** T's framing:
+     *"It's looser, not that different from what we already have, and
+     should be an easy pivot while opening up A LOT of doors for us."*
+     Read "looser" as the governing constraint: this is a re-skin plus
+     permission, **not** a ground-up redesign — engine mechanics, keyword
+     *behavior*, the dice model and the minigame doctrines all survive.
+     **Phase 42** authors the bible (`specs/34-dark-fantasy-campaign.md`)
+     and **Phases 44a-44i** execute it across cards, keywords, themes,
+     enemies, world, story, morality and the product shell. Until 42 is
+     ratified, do NOT rename anything and do NOT improvise dark-fantasy
+     flavor in passing — the retheme runs off a map and a lint
+     (Phase 44a), not opportunistically. Keywords that already read dark
+     fantasy (POISON, BLEED, MARK, DOOM, THORNS, GUARD, RIPOSTE) are
+     expected to survive unchanged; renaming what already works is churn.
   What does NOT fall (still binding): every hermeticity and determinism
   rule (injected RNG, no disk/network/TTY in engine tests), the verify
   and deploy gates, the nexus hard rules, and `GAME_STATE_VERSION`
