@@ -1,13 +1,27 @@
 # Critique log
 
-> Last pass: 2026-08-07 at commit a0882f60
-> Pass count: 18
+> Last pass: 2026-08-08 at commit 18eb0ddb
+> Pass count: 19
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 19, 2026-08-08, commit 18eb0ddb] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
+> mobile (375×812) and desktop (1280×800); the cold drive again
+> reached past "ENTER COMBAT" into the live combat-board at both
+> viewports (10/10 captures, 0 with nav trouble). Zero console/page
+> errors besides the same benign `navigator.vibrate` warning seen
+> every prior pass. Self-assessed all 10 captures against the current
+> Pending/Done log: title, onboarding, and combat pre-fight copy hold
+> clean; the hand-card 3-line clip on Festering Argument / Slippery
+> Slope is the known [LOW] row, not a new finding. One fresh finding:
+> the exploration hub's static `regionProgress` header count doesn't
+> reconcile with the dynamic node-legend on the same screen — filed
+> below. Zero other findings.
 
 > **[critique pass 18, 2026-08-07, commit a0882f60] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
@@ -112,6 +126,30 @@
 > pass "ENTER COMBAT".
 
 ## Pending
+
+### [MED] exploration hub — static `regionProgress` header count doesn't reconcile with the dynamic node-legend on the same screen
+- pass: 19 (commit 18eb0ddb)
+- viewport: mobile + desktop (both)
+- category: comprehension
+- observation: the Fishing Village exploration screen shows "Map i of
+  ii · 24 paths open" as a header directly above a node graph whose
+  own legend reads "25 nodes · 22 sealed". A first-time player reads
+  two node/progress counts on one screen that don't agree (24 vs 25;
+  "open" vs only ~3 unsealed by the legend's math) and has no way to
+  tell which is current. The header string is authored-static and
+  never changes as the player unlocks/seals nodes; the legend is
+  computed live from `MapDefinition`.
+- evidence: `axiomancer-mobile/state/exploration-maps/fishing-village.layout.ts:7`
+  (`regionProgress: 'Map i of ii · 24 paths open'`, hardcoded) vs
+  `axiomancer-mobile/state/presenters/exploration.engine.ts:418`
+  (`` `${def.nodes.length} nodes · ${locked.length} sealed` ``,
+  computed). Same pattern on the second map:
+  `northern-forest.layout.ts:7` (`'Map ii of ii · 9 paths remain'`).
+- suggested fix: derive the header count from the same live node
+  state the legend already reads (or drop the number from
+  `regionProgress` and keep just "Map i of ii"), so the two counts on
+  screen can't disagree.
+- source: critique pass 19 (unattended, critique:drive artifacts)
 
 ### [x] [MED] combat — authored `paidSummary` card text still prints round-clock "for N turns" for event-triggered poison/bleed, reopening the WI-2 "RESOLVED — stale" closure — RESOLVED 2026-08-05 (commit d320ee12, issue #170)
 - pass: 16 (commit 63574686)
