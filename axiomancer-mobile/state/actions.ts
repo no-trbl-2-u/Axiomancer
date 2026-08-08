@@ -111,6 +111,7 @@ import {
     claimGatheringSpoilsAction,
     continueGatheringAfterReprisalAction,
     descendGatheringAction,
+    readGatheringSiteAction,
     harvestGatheringPlotAction,
     payGatheringOfferingAction,
     selectGatheringApproachAction,
@@ -556,6 +557,8 @@ export interface AppActions {
     harvestGatheringPlot: (uid: string) => void;
     /** Descend one stratum (one-way; richer, angrier). */
     descendGathering: () => void;
+    /** READ THE SITE — buy the hidden eruption point for the price of a turn. */
+    readGatheringSite: () => void;
     /** Pay an offering demand (affordability-gated). Returns success. */
     payGatheringOffering: (offeringId: string) => boolean;
     /** Use a one-shot field tool. */
@@ -1025,6 +1028,7 @@ export function createAppActions(store: AppStore): AppActions {
         selectGatheringApproach: (approach) => selectGatheringApproachAction(store, approach),
         harvestGatheringPlot: (uid) => harvestGatheringPlotAction(store, uid),
         descendGathering: () => descendGatheringAction(store),
+        readGatheringSite: () => readGatheringSiteAction(store),
         payGatheringOffering: (offeringId) => payGatheringOfferingAction(store, offeringId),
         useGatheringTool: (toolId) => useGatheringToolAction(store, toolId),
         continueGatheringAfterReprisal: () => continueGatheringAfterReprisalAction(store),

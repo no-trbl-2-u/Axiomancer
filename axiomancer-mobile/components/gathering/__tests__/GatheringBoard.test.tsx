@@ -71,6 +71,8 @@ const mockGatheringVm: GatheringViewModel = {
             traitLabel: null,
             yieldRichness: 2,
             wrathCost: 1,
+            wrathSpread: 0,
+            wrathCostLabel: '1',
             isBreath: false,
             flavor: 'Glowing with ethereal light',
             keywords: [
@@ -88,6 +90,8 @@ const mockGatheringVm: GatheringViewModel = {
             traitLabel: 'Gift',
             yieldRichness: 3,
             wrathCost: 2,
+            wrathSpread: 0,
+            wrathCostLabel: '2',
             isBreath: false,
             flavor: 'Hard as forged metal',
             keywords: [],
@@ -103,12 +107,15 @@ const mockGatheringVm: GatheringViewModel = {
             traitLabel: 'Breath',
             yieldRichness: 0,
             wrathCost: -2,
+            wrathSpread: 0,
+            wrathCostLabel: '-2',
             isBreath: true,
             flavor: 'A moment of peace',
             keywords: [],
             accessibilityLabel: 'Calm Breath. BONE family. 0 richness yield. -2 wrath cost (relief).',
         },
     ],
+    read: { available: false, name: 'READ THE SITE', desc: 'Kneel and listen.' },
     wrath: { 
         value: 3, 
         max: 10, 
@@ -117,7 +124,14 @@ const mockGatheringVm: GatheringViewModel = {
         duskFallen: false, 
         watcherWoken: false, 
         mired: false, 
-        sickled: false 
+        sickled: false,
+        temperKnown: false,
+        omen: 'calm' as const,
+        omenName: 'THE PLACE IS QUIET',
+        omenDesc: 'Water moves, insects work.',
+        lastSurge: 0,
+        communionWrathMax: 4,
+        despoilWrathMin: 8,
     },
     boons: [],
     withdrawEnabled: true,
@@ -129,6 +143,7 @@ const mockGatheringVm: GatheringViewModel = {
 };
 
 const mockCallbacks = {
+    onRead: jest.fn(),
     onHarvest: jest.fn(),
     onInspect: jest.fn(),
     onDescend: jest.fn(),

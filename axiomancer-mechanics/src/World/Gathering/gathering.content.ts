@@ -12,6 +12,7 @@ import type {
     GatherBoonDef,
     GatherFamily,
     GatherOfferingDef,
+    GatherOmen,
     GatherPlotDef,
     GatherReprisalId,
     GatherSiteDef,
@@ -155,6 +156,41 @@ export const GATHERING_REPRISALS: Record<GatherReprisalId | 'eruption' | 'veiled
     eruption: { name: 'THE SITE ERUPTS', desc: 'The place rises against you and claws back what it can.' },
     veiled: { name: 'THE VEIL HOLDS', desc: 'The site’s anger passes over you like weather.' },
 };
+
+// ---------------------------------------------------------------------------
+// Omens (the site's tell)
+// ---------------------------------------------------------------------------
+
+/**
+ * Copy for the four omen grades. The site's true temper is never printed —
+ * these lines are the whole of what the player gets to go on, so they have to
+ * be unambiguous about direction while staying vague about the number.
+ */
+export const GATHERING_OMENS: Record<GatherOmen, { name: string; desc: string }> = {
+    calm: {
+        name: 'THE PLACE IS QUIET',
+        desc: 'Water moves, insects work. Nothing here has noticed you yet.',
+    },
+    stirring: {
+        name: 'SOMETHING STIRS',
+        desc: 'The insects have gone off. Whatever lives here knows you are in it now.',
+    },
+    roused: {
+        name: 'THE GROUND IS AWAKE',
+        desc: 'The air has gone thick and the light is wrong. Two more takings, maybe. Maybe one.',
+    },
+    seething: {
+        name: 'IT IS ABOUT TO TURN',
+        desc: 'Everything is holding still in the way things hold still before they do not. Leave.',
+    },
+};
+
+/** Copy for the READ THE SITE action (the price of certainty). */
+export const GATHERING_READ = {
+    name: 'READ THE SITE',
+    desc: 'Kneel and listen. Costs a turn, takes nothing — and you will know exactly how much this place will bear.',
+    revealed: 'You put your palm flat to the ground and count. The place will bear so much and no more.',
+} as const;
 
 // ---------------------------------------------------------------------------
 // Boons (rolled objectives)

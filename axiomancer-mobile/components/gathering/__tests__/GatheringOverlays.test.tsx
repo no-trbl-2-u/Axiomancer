@@ -99,6 +99,8 @@ const plot: GatherPlotVM = {
     traitLabel: 'GIFT',
     yieldRichness: 3,
     wrathCost: 2,
+    wrathSpread: 0,
+    wrathCostLabel: '2',
     isBreath: false,
     flavor: 'A crown of pale leaves.',
     keywords: [
@@ -119,6 +121,8 @@ const breathPlot: GatherPlotVM = {
     traitLabel: 'BREATH',
     yieldRichness: 0,
     wrathCost: -3,
+    wrathSpread: 0,
+    wrathCostLabel: '-3',
     isBreath: true,
     keywords: [{ id: 'breath', name: 'Breath', desc: 'Soothes the site instead of taking.' }],
 };

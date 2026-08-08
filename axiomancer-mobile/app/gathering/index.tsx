@@ -84,6 +84,7 @@ export default function GatheringScreen() {
                     onDescend={() => actions.descendGathering()}
                     onPayOffering={(id) => actions.payGatheringOffering(id)}
                     onUseTool={(id) => actions.useGatheringTool(id)}
+                    onRead={() => actions.readGatheringSite()}
                     onWithdraw={() => actions.withdrawFromGathering()}
                 />
             )}

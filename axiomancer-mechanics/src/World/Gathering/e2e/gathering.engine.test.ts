@@ -17,9 +17,15 @@ import {
     gatheringFamilyTotals,
     gatheringHarvestWrath,
     gatheringHarvestYield,
+    gatheringCommunionWrathMax,
+    gatheringDespoilWrathMin,
+    gatheringOmen,
+    gatheringOmenFor,
     gatheringTierOf,
+    gatheringWrathSpread,
     harvestGatheringPlot,
     payGatheringOffering,
+    readGatheringSite,
     selectGatheringApproach,
     useGatheringTool,
     withdrawFromGathering,
@@ -35,6 +41,7 @@ import {
 import {
     GATHER_DUSK_AFTER,
     GATHER_SPREAD_SIZE,
+    GATHER_TEMPER_MIN,
     GATHER_WRATH_MAX,
     GATHER_WRATH_THRESHOLDS,
     GATHERING_TUNING,
@@ -149,12 +156,16 @@ describe('harvest', () => {
         expect(next.satchel[0].richness).toBe(GATHERING_TUNING.approaches.glean.richnessCap);
     });
 
-    it('STRIP adds +1 richness and +1 wrath per taking', () => {
+    it('STRIP adds +1 richness and pays for it in VARIANCE, not a flat surcharge', () => {
+        // Since 2026-08-08 the stripping hand's cost is the unsteady hand's
+        // spread (expected +1, actual 0..2) rather than a flat +1 — same
+        // expected wrath, no longer a number you can plan around.
         const def = getGatherPlotDef('widow-moss');
         const s = rig(foraging(7, 'strip'), { spread: [plot('a', 'widow-moss')] });
         const next = harvestGatheringPlot(s, 'a');
         expect(next.satchel[0].richness).toBe(def.richness + 1);
-        expect(next.wrath).toBe(def.wrath + 1);
+        expect(next.wrath).toBeGreaterThanOrEqual(def.wrath);
+        expect(next.wrath).toBeLessThanOrEqual(def.wrath + GATHERING_TUNING.unsteadyHand.strip);
     });
 
     it('GIFT plots cost no wrath', () => {
@@ -211,6 +222,153 @@ describe('harvest', () => {
 // ---------------------------------------------------------------------------
 // Wrath thresholds, reprisals, eruption
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// The site's temper, its omens, and the unsteady hand (2026-08-08 redesign)
+// ---------------------------------------------------------------------------
+
+describe("the site's temper", () => {
+    it('rolls inside the band and is hidden until read', () => {
+        for (let seed = 1; seed <= 40; seed++) {
+            const s = freshSession(seed);
+            expect(s.temper).toBeGreaterThanOrEqual(GATHER_TEMPER_MIN);
+            expect(s.temper).toBeLessThanOrEqual(GATHER_WRATH_MAX);
+            expect(s.temperKnown).toBe(false);
+        }
+    });
+
+    it('varies across seeds — the whole point is that it is not a constant', () => {
+        const tempers = new Set<number>();
+        for (let seed = 1; seed <= 60; seed++) tempers.add(freshSession(seed).temper);
+        expect(tempers.size).toBeGreaterThan(1);
+    });
+
+    it('is stable for a fixed seed', () => {
+        expect(freshSession(31).temper).toBe(freshSession(31).temper);
+    });
+
+    it('erupts at the rolled temper, not at the meter ceiling', () => {
+        const s = rig(foraging(), { temper: 10, wrath: 9, spread: [plot('a', 'widow-moss')] });
+        const next = harvestGatheringPlot(s, 'a');
+        expect(next.erupted).toBe(true);
+        expect(next.pendingReprisals[0]!.kind).toBe('eruption');
+        // Erupting reveals the number the session was guessing at.
+        expect(next.temperKnown).toBe(true);
+    });
+
+    it('does not erupt at the old fixed point when the site is more patient', () => {
+        const s = rig(foraging(), { temper: 15, wrath: 11, spread: [plot('a', 'widow-moss')] });
+        const next = harvestGatheringPlot(s, 'a');
+        expect(next.erupted).toBe(false);
+    });
+});
+
+describe('omens', () => {
+    it('grades on the GAP between temper and wrath, not on wrath alone', () => {
+        // The same wrath reads differently at different sites — which is
+        // exactly what makes the omen worth watching instead of the meter.
+        // Wrath 6 is a quiet afternoon at a patient site and a warning at a
+        // brittle one — the meter alone tells you nothing.
+        expect(gatheringOmenFor(6, 15)).toBe('calm');      // gap 9
+        expect(gatheringOmenFor(6, 10)).toBe('stirring');  // gap 4
+        expect(gatheringOmenFor(9, 12)).toBe('roused');    // gap 3
+        expect(gatheringOmenFor(9, 10)).toBe('seething');  // gap 1
+    });
+
+    it('walks all four grades as the site is worked', () => {
+        expect(gatheringOmenFor(0, 12)).toBe('calm');
+        expect(gatheringOmenFor(7, 12)).toBe('stirring');
+        expect(gatheringOmenFor(9, 12)).toBe('roused');
+        expect(gatheringOmenFor(12, 12)).toBe('seething');
+    });
+
+    it('is republished on every wrath change, and eases when the site is soothed', () => {
+        const s = rig(foraging(), { temper: 12, wrath: 12, spread: [plot('a', 'green-breath')] });
+        expect(gatheringOmen(s)).toBe('seething');
+        const breathDef = getGatherPlotDef('green-breath');
+        expect(breathDef.trait).toBe('breath');
+        const next = harvestGatheringPlot(s, 'a');
+        expect(next.wrath).toBeLessThan(s.wrath);
+        expect(next.omen).toBe(gatheringOmenFor(next.wrath, next.temper));
+    });
+});
+
+describe('the unsteady hand', () => {
+    it('GLEAN takes exactly what the plot prints — the tender hand never surprises', () => {
+        const def = getGatherPlotDef('widow-moss');
+        const s = foraging(7, 'glean');
+        expect(gatheringWrathSpread(s)).toBe(0);
+        for (let seed = 1; seed <= 20; seed++) {
+            const run = rig(foraging(seed, 'glean'), { spread: [plot('a', 'widow-moss')], temper: 15 });
+            expect(harvestGatheringPlot(run, 'a').wrath).toBe(gatheringHarvestWrath(run, def));
+        }
+    });
+
+    it('STRIP never costs LESS than the printed floor, and sometimes costs more', () => {
+        const def = getGatherPlotDef('widow-moss');
+        const spread = gatheringWrathSpread(foraging(7, 'strip'));
+        expect(spread).toBeGreaterThan(0);
+
+        const costs = new Set<number>();
+        for (let seed = 1; seed <= 40; seed++) {
+            const run = rig(foraging(seed, 'strip'), { spread: [plot('a', 'widow-moss')], temper: 15 });
+            const floorCost = gatheringHarvestWrath(run, def);
+            const next = harvestGatheringPlot(run, 'a');
+            expect(next.wrath).toBeGreaterThanOrEqual(floorCost);
+            expect(next.wrath).toBeLessThanOrEqual(floorCost + spread);
+            costs.add(next.wrath);
+        }
+        // If every roll landed on the floor the stance would be free.
+        expect(costs.size).toBeGreaterThan(1);
+    });
+
+    it('records the surge so the flash copy can name the surprise', () => {
+        let sawSurge = false;
+        for (let seed = 1; seed <= 40 && !sawSurge; seed++) {
+            const run = rig(foraging(seed, 'strip'), { spread: [plot('a', 'widow-moss')], temper: 15 });
+            const next = harvestGatheringPlot(run, 'a');
+            if (next.lastSurge > 0) {
+                sawSurge = true;
+                expect(next.metrics.surgeWrath).toBe(next.lastSurge);
+            }
+        }
+        expect(sawSurge).toBe(true);
+    });
+
+    it('a sickled harvest still costs nothing at all', () => {
+        const s = rig(foraging(7, 'strip'), { spread: [plot('a', 'widow-moss')], sickled: true });
+        const next = harvestGatheringPlot(s, 'a');
+        expect(next.wrath).toBe(0);
+        expect(next.lastSurge).toBe(0);
+    });
+});
+
+describe('reading the site', () => {
+    it('buys the exact temper for the price of a turn', () => {
+        const s = foraging();
+        const next = readGatheringSite(s);
+        expect(next.temperKnown).toBe(true);
+        expect(next.turn).toBe(s.turn + GATHERING_TUNING.read.turnCost);
+        expect(next.metrics.reads).toBe(1);
+        // It takes nothing and angers nothing.
+        expect(next.wrath).toBe(s.wrath);
+        expect(next.satchel).toEqual(s.satchel);
+    });
+
+    it('is idempotent and refused outside foraging', () => {
+        const once = readGatheringSite(foraging());
+        expect(readGatheringSite(once)).toBe(once);
+        const preApproach = freshSession();
+        expect(readGatheringSite(preApproach)).toBe(preApproach);
+    });
+
+    it('pushes dusk closer — certainty is not free', () => {
+        let s = foraging();
+        for (let i = 0; i < GATHER_DUSK_AFTER - 1; i++) s = rig(s, { turn: s.turn + 1 });
+        expect(gatheringDuskFallen(s)).toBe(false);
+        expect(gatheringDuskFallen(readGatheringSite(s))).toBe(true);
+    });
+});
 
 describe('wrath and reprisals', () => {
     it('crossing a threshold draws a reprisal and enters the reprisal phase', () => {
@@ -476,15 +634,34 @@ describe('outcome', () => {
     });
 
     it('COMMUNION needs grace, low wrath, and a non-empty satchel', () => {
-        expect(gatheringTierOf({ erupted: false, grace: 2, wrath: 4, satchel: [] }, 1)).toBe('communion');
-        expect(gatheringTierOf({ erupted: false, grace: 2, wrath: 4, satchel: [] }, 0)).toBe('laden');
-        expect(gatheringTierOf({ erupted: false, grace: 1, wrath: 2, satchel: [] }, 1)).toBe('laden');
-        expect(gatheringTierOf({ erupted: false, grace: 2, wrath: 5, satchel: [] }, 1)).toBe('laden');
+        // The wrath cuts are fractions of the site's own TEMPER since
+        // 2026-08-08 — you are judged against what THIS place could bear.
+        const temper = 12;
+        const max = gatheringCommunionWrathMax({ temper });
+        const base = { erupted: false, satchel: [], temper };
+        expect(gatheringTierOf({ ...base, grace: 2, wrath: max }, 1)).toBe('communion');
+        expect(gatheringTierOf({ ...base, grace: 2, wrath: max }, 0)).toBe('laden');
+        expect(gatheringTierOf({ ...base, grace: 1, wrath: 2 }, 1)).toBe('laden');
+        expect(gatheringTierOf({ ...base, grace: 2, wrath: max + 1 }, 1)).toBe('laden');
+    });
+
+    it('scales both outcome cuts with the site\'s temper', () => {
+        // A patient site forgives a heavier hand than a brittle one.
+        expect(gatheringCommunionWrathMax({ temper: 15 }))
+            .toBeGreaterThan(gatheringCommunionWrathMax({ temper: 10 }));
+        expect(gatheringDespoilWrathMin({ temper: 15 }))
+            .toBeGreaterThan(gatheringDespoilWrathMin({ temper: 10 }));
+        // And the two never cross.
+        for (const temper of [10, 11, 12, 13, 14, 15]) {
+            expect(gatheringCommunionWrathMax({ temper }))
+                .toBeLessThan(gatheringDespoilWrathMin({ temper }));
+        }
     });
 
     it('withdrawing at high wrath is DESPOILMENT (scarred)', () => {
-        const s = rig(foraging(), {
-            wrath: GATHERING_TUNING.outcome.despoilWrathMin,
+        const base = foraging();
+        const s = rig(base, {
+            wrath: gatheringDespoilWrathMin(base),
             thresholdsFired: [true, true],
             satchel: [piece('s1', 'widow-moss', 'bloom', 2)],
         });

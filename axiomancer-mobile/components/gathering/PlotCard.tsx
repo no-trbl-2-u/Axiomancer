@@ -51,15 +51,27 @@ export const PlotArt = React.memo(function PlotArt({
 });
 
 /** The wrath price chip: the eye + the cost (or relief for breaths). */
-function WrathChip({ cost, size = 12, isBreath }: { cost: number; size?: number; isBreath: boolean }) {
+/**
+ * The price chip.
+ *
+ * `spread > 0` is THE UNSTEADY HAND (2026-08-08): the printed cost is a
+ * FLOOR and the taking rolls somewhere in `[cost, cost + spread]`. The chip
+ * must show the whole range — a bare floor would read as a price and put the
+ * player back to doing arithmetic on a number that is not true.
+ */
+function WrathChip({
+    cost, label, spread, size = 12, isBreath,
+}: { cost: number; label: string; spread: number; size?: number; isBreath: boolean }) {
     const AXM = usePalette();
     const relief = cost < 0;
-    const color = relief ? '#5b86c4' : cost === 0 ? CARD_INK2 : AXM.blood;
+    const free = cost === 0 && spread === 0;
+    const color = relief ? '#5b86c4' : free ? CARD_INK2 : AXM.blood;
+    const worst = cost + spread;
     return (
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3 }}>
-            <WrathEye open={relief || cost === 0 ? 0.1 : Math.min(1, cost / 4)} size={size + 4} color={color} />
+            <WrathEye open={relief || free ? 0.1 : Math.min(1, worst / 4)} size={size + 4} color={color} />
             <Text style={{ fontFamily: FONTS.gothic, fontSize: size + 4, lineHeight: size + 5, color }}>
-                {relief ? `${cost}` : cost === 0 ? 'free' : `+${cost}`}
+                {relief ? `${cost}` : free ? 'free' : `+${label}`}
             </Text>
             {isBreath && relief && (
                 <Text style={{ fontFamily: FONTS.sans, fontSize: Math.max(10, size - 1), letterSpacing: 0.5, color }}>WRATH</Text>
@@ -135,9 +147,9 @@ export const PlotCard = React.memo(function PlotCard({
                             </View>
                         )}
                     </View>
-                    <View style={[styles.detailRow, { borderColor: plot.wrathCost > 0 ? AXM.blood : CARD_EDGE }]}>
+                    <View style={[styles.detailRow, { borderColor: plot.wrathCost + plot.wrathSpread > 0 ? AXM.blood : CARD_EDGE }]}>
                         <Text style={styles.detailRowLabel}>PRICE</Text>
-                        <WrathChip cost={plot.wrathCost} isBreath={plot.isBreath} size={13} />
+                        <WrathChip cost={plot.wrathCost} label={plot.wrathCostLabel} spread={plot.wrathSpread} isBreath={plot.isBreath} size={13} />
                     </View>
                     <Text style={styles.detailFlavor}>“{plot.flavor}”</Text>
                 </View>
@@ -165,7 +177,7 @@ export const PlotCard = React.memo(function PlotCard({
                     <Text style={[styles.familyMini, { color: c.dark }]}>{plot.isBreath ? '' : plot.familyLabel}</Text>
                 </View>
                 <View style={[styles.priceRow, { borderTopColor: `${c.c}66` }]}>
-                    <WrathChip cost={plot.wrathCost} isBreath={plot.isBreath} size={compact ? 9 : 11} />
+                    <WrathChip cost={plot.wrathCost} label={plot.wrathCostLabel} spread={plot.wrathSpread} isBreath={plot.isBreath} size={compact ? 9 : 11} />
                 </View>
             </View>
             {trait && plot.trait && (

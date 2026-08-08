@@ -9,6 +9,8 @@ import {
     GATHER_APPROACH_COPY,
     GATHERING_KEYWORDS,
     GATHERING_REPRISALS,
+    GATHERING_OMENS,
+    GATHERING_READ,
     GATHER_SET_REFINEMENTS,
     getGatherBoonDef,
     getGatherOfferingDef,
@@ -26,6 +28,9 @@ import {
     gatheringFamilyTotals,
     gatheringHarvestWrath,
     gatheringHarvestYield,
+    gatheringWrathSpread,
+    gatheringCommunionWrathMax,
+    gatheringDespoilWrathMin,
 } from '@mechanics';
 import {
     GATHER_WRATH_MAX,
@@ -37,6 +42,7 @@ import type {
     GatherBoonReward,
     GatherBoonStatus,
     GatherFamily,
+    GatherOmen,
     GatherOutcomeTier,
     GatherPlotTrait,
     GatherReprisalEvent,
@@ -60,8 +66,17 @@ export interface GatherPlotVM {
     traitLabel: string | null;
     /** Richness this plot yields RIGHT NOW (stance applied). 0 for breaths. */
     yieldRichness: number;
-    /** Wrath this taking costs RIGHT NOW (≤ 0 = relief, breaths). */
+    /** Wrath this taking costs RIGHT NOW, at minimum (≤ 0 = relief, breaths). */
     wrathCost: number;
+    /**
+     * How far ABOVE `wrathCost` the unsteady hand could land — 0 when the
+     * cost is exact (gleaning, a sickled taking, a GIFT). Render the cost as
+     * a range whenever this is non-zero: the printed number is a floor, not a
+     * price, and hiding that turns a gamble back into arithmetic.
+     */
+    wrathSpread: number;
+    /** Ready-to-render cost, e.g. "2" or "2-5". */
+    wrathCostLabel: string;
     isBreath: boolean;
     flavor: string;
     keywords: { id: string; name: string; desc: string }[];
@@ -79,6 +94,12 @@ export interface GatherSatchelFamilyVM {
 
 export interface GatherWrathVM {
     value: number;
+    /**
+     * The meter's denominator. This is the top of the TEMPER band while the
+     * site's true patience is unknown, and the true temper once the player has
+     * read it — NEVER the hidden number before then. Rendering the real temper
+     * early would hand the player the one thing the redesign hides.
+     */
     max: number;
     /** Threshold positions with their fired state. */
     thresholds: { at: number; fired: boolean }[];
@@ -88,6 +109,24 @@ export interface GatherWrathVM {
     watcherWoken: boolean;
     mired: boolean;
     sickled: boolean;
+    /** True once READ THE SITE has bought the exact eruption point. */
+    temperKnown: boolean;
+    /** The site's tell — the player's only read on the eruption point. */
+    omen: GatherOmen;
+    omenName: string;
+    omenDesc: string;
+    /** Wrath the last taking woke ABOVE its printed floor (0 = no surprise). */
+    lastSurge: number;
+    /** Cuts for the outcome tiers, scaled to this site's temper. */
+    communionWrathMax: number;
+    despoilWrathMin: number;
+}
+
+/** The READ THE SITE action — buy the exact temper for the price of a turn. */
+export interface GatherReadVM {
+    available: boolean;
+    name: string;
+    desc: string;
 }
 
 export interface GatherOfferingVM {
@@ -186,6 +225,7 @@ export interface GatheringViewModel {
     turn: number;
     duskNote: string | null;
     wrath: GatherWrathVM;
+    read: GatherReadVM;
     grace: number;
     graceNote: string | null;
     spread: GatherPlotVM[];
@@ -352,7 +392,14 @@ const EMPTY_VM: GatheringViewModel = Object.freeze({
     bagCount: 0,
     turn: 0,
     duskNote: null,
-    wrath: { value: 0, max: GATHER_WRATH_MAX, thresholds: [], ratio: 0, duskFallen: false, watcherWoken: false, mired: false, sickled: false },
+    wrath: {
+        value: 0, max: GATHER_WRATH_MAX, thresholds: [], ratio: 0,
+        duskFallen: false, watcherWoken: false, mired: false, sickled: false,
+        temperKnown: false, omen: 'calm',
+        omenName: GATHERING_OMENS.calm.name, omenDesc: GATHERING_OMENS.calm.desc,
+        lastSurge: 0, communionWrathMax: 0, despoilWrathMin: 0,
+    },
+    read: { available: false, name: GATHERING_READ.name, desc: GATHERING_READ.desc },
     grace: 0,
     graceNote: null,
     spread: [],
@@ -388,6 +435,11 @@ export function selectGatheringViewModel(
         const wrathCost = gatheringHarvestWrath(session, def);
         const yieldRichness = gatheringHarvestYield(session, def);
         const isBreath = def.trait === 'breath';
+        // THE UNSTEADY HAND — the printed cost is a floor. Breaths, GIFTs and
+        // a sickled taking are exact; everything else under a stripping hand
+        // rolls above it, and the card has to say so.
+        const exact = isBreath || def.trait === 'gift' || session.sickled;
+        const wrathSpread = exact ? 0 : gatheringWrathSpread(session);
         return {
             uid: entry.uid,
             plotId: entry.plotId,
@@ -398,12 +450,18 @@ export function selectGatheringViewModel(
             traitLabel: def.trait ? TRAIT_LABEL[def.trait] : null,
             yieldRichness,
             wrathCost,
+            wrathSpread,
+            wrathCostLabel: wrathSpread > 0
+                ? `${wrathCost}-${wrathCost + wrathSpread}`
+                : `${wrathCost}`,
             isBreath,
             flavor: def.flavor,
             keywords: keywordsOf(def.trait ?? null),
             accessibilityLabel: isBreath
                 ? `${def.name}, tend the site: wrath eases by ${Math.abs(wrathCost)}`
-                : `${def.name}, ${FAMILY_LABEL[def.family]} plot: yields ${yieldRichness}, costs ${wrathCost} wrath`,
+                : `${def.name}, ${FAMILY_LABEL[def.family]} plot: yields ${yieldRichness}, costs ${
+                    wrathSpread > 0 ? `${wrathCost} to ${wrathCost + wrathSpread}` : `${wrathCost}`
+                } wrath`,
         };
     });
 
@@ -525,18 +583,36 @@ export function selectGatheringViewModel(
         bagCount: session.bags[session.depth].length,
         turn: session.turn,
         duskNote: duskFallen ? 'DUSK FALLS — every taking angers it one more' : null,
-        wrath: {
-            value: session.wrath,
-            max: GATHER_WRATH_MAX,
-            thresholds: GATHER_WRATH_THRESHOLDS.map((at, i) => ({
-                at,
-                fired: session.thresholdsFired[i] === true,
-            })),
-            ratio: session.wrath / GATHER_WRATH_MAX,
-            duskFallen,
-            watcherWoken: session.watcherWoken,
-            mired: session.mired,
-            sickled: session.sickled,
+        wrath: (() => {
+            // The meter tops out at the BAND's ceiling until the player buys
+            // the site's real temper — showing the true number early would
+            // give away the thing the whole encounter is played against.
+            const max = session.temperKnown ? session.temper : GATHER_WRATH_MAX;
+            return {
+                value: session.wrath,
+                max,
+                thresholds: GATHER_WRATH_THRESHOLDS.map((at, i) => ({
+                    at,
+                    fired: session.thresholdsFired[i] === true,
+                })),
+                ratio: Math.min(1, session.wrath / max),
+                duskFallen,
+                watcherWoken: session.watcherWoken,
+                mired: session.mired,
+                sickled: session.sickled,
+                temperKnown: session.temperKnown,
+                omen: session.omen,
+                omenName: GATHERING_OMENS[session.omen].name,
+                omenDesc: GATHERING_OMENS[session.omen].desc,
+                lastSurge: session.lastSurge,
+                communionWrathMax: gatheringCommunionWrathMax(session),
+                despoilWrathMin: gatheringDespoilWrathMin(session),
+            };
+        })(),
+        read: {
+            available: session.phase === 'foraging' && !session.temperKnown,
+            name: GATHERING_READ.name,
+            desc: GATHERING_READ.desc,
         },
         grace: session.grace,
         graceNote: session.grace > 0 ? `GRACE ${session.grace} — the place is listening` : null,

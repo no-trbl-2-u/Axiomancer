@@ -3,6 +3,13 @@
  * Threshold notches mark where the place answers; the eye opens wider
  * as the meter fills. Status tags (dusk / mire / watcher / sickle)
  * ride alongside so every active surcharge is visible at a glance.
+ *
+ * Since the 2026-08-08 redesign the meter's ceiling is a QUESTION, not a
+ * fact: the site's true eruption point is rolled per session and hidden,
+ * so the bar runs to the top of the band and carries a trailing `?` until
+ * the player spends a turn to READ THE SITE. The OMEN line beneath it is
+ * the real instrument — it grades how close the site is to turning, and
+ * it is the only warning a player gets.
  */
 
 import React from 'react';
@@ -14,6 +21,14 @@ import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
 import { GraceMark, WrathEye } from './glyphs';
+
+/** Omen colour ramp — quiet bone through to the blood of an imminent turn. */
+const OMEN_TONE: Record<GatherWrathVM['omen'], (AXM: Palette) => string> = {
+    calm: (AXM) => AXM.bone,
+    stirring: (AXM) => AXM.sulfur,
+    roused: () => '#8a3a1e',
+    seething: (AXM) => AXM.blood,
+};
 
 export function segmentColor(index: number, vm: GatherWrathVM, AXM: Palette): string {
     if (index >= vm.value) return 'rgba(0,0,0,0.45)';
@@ -50,7 +65,7 @@ export function WrathMeter({
                     <View style={styles.labelRow}>
                         <Text style={styles.label}>
                             WRATH <Text style={[styles.value, { color: vm.ratio > 0.6 ? AXM.blood : AXM.parchment }]}>{vm.value}</Text>
-                            <Text style={styles.max}> / {vm.max}</Text>
+                            <Text style={styles.max}> / {vm.max}{vm.temperKnown ? '' : '?'}</Text>
                         </Text>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
                             <GraceMark size={13} color={grace > 0 ? AXM.sulfur : AXM.ash} />
@@ -61,7 +76,9 @@ export function WrathMeter({
                     </View>
                     <View
                         style={styles.bar}
-                        accessibilityLabel={`Wrath ${vm.value} of ${vm.max}${vm.duskFallen ? ', dusk has fallen' : ''}`}
+                        accessibilityLabel={`Wrath ${vm.value} of ${
+                            vm.temperKnown ? vm.max : `an unknown limit, at most ${vm.max}`
+                        }. ${vm.omenName}.${vm.duskFallen ? ' Dusk has fallen.' : ''}`}
                     >
                         {Array.from({ length: vm.max }, (_, i) => {
                             const notch = vm.thresholds.find((t) => t.at === i + 1);
@@ -81,6 +98,20 @@ export function WrathMeter({
                         })}
                     </View>
                 </View>
+            </View>
+            <View style={styles.omenBox} testID="gathering-omen">
+                <Text style={[styles.omenName, { color: OMEN_TONE[vm.omen](AXM) }]}>{vm.omenName}</Text>
+                <Text style={styles.omenDesc}>{vm.omenDesc}</Text>
+                {vm.lastSurge > 0 && (
+                    <Text style={[styles.omenSurge, { color: AXM.blood }]} testID="gathering-surge">
+                        The ground gave more than you meant to take — {vm.lastSurge} beyond the floor.
+                    </Text>
+                )}
+                {vm.temperKnown && (
+                    <Text style={styles.omenKnown} testID="gathering-temper-known">
+                        READ — it breaks at {vm.max}. Communion needs {vm.communionWrathMax} or less; {vm.despoilWrathMin} despoils.
+                    </Text>
+                )}
             </View>
             {(tags.length > 0 || graceNote !== null) && (
                 <View style={styles.tagRow}>
@@ -127,4 +158,9 @@ const useStyles = makeStyles((AXM) => ({
         paddingVertical: 1,
     },
     graceNote: { fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 0.5, color: AXM.sulfur },
+    omenBox: { marginTop: 6, borderLeftWidth: 2, borderLeftColor: AXM.ash, paddingLeft: 7 },
+    omenName: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.6 },
+    omenDesc: { fontFamily: FONTS.serifItalic, fontSize: 12, color: AXM.bone, marginTop: 1 },
+    omenSurge: { fontFamily: FONTS.mono, fontSize: 11, marginTop: 3 },
+    omenKnown: { fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 0.4, color: AXM.sulfur, marginTop: 3 },
 }));
