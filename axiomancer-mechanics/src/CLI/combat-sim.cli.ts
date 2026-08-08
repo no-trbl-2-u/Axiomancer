@@ -25,6 +25,9 @@ import type { Enemy } from '../Enemy/types';
 import { LittleBelle, TheFerryman, KingOfRevenge, FateSpinner } from '../Enemy/enemy.library';
 import { deepClone } from '../Utils';
 import { simulateHazardPatternCombat, type CombatSimPolicyId } from '../Combat/combat.encounter.sim';
+// Phase 43 — objective function v2 (Combat Quality Index), surfaced beside the
+// legacy `statusEngagement` warning light.
+import { formatCombatQuality } from '../Combat/combat.objective';
 
 export const ENEMIES: Record<string, Enemy> = { LittleBelle, TheFerryman, KingOfRevenge, FateSpinner };
 
@@ -56,7 +59,10 @@ if (require.main === module) {
     process.stdout.write(
         `\nHazard combat sim — policy=${policy} runs=${runs} seed=${seed} loadout=[${loadout.join(', ')}]\n`
         + `(win = enemy HP→0 or a merciful resolution (befriend/capitulate/concede); `
-        + `V/M/D/R = victory/merciful/defeat/retreat)\n\n`,
+        + `V/M/D/R = victory/merciful/defeat/retreat)\n`
+        + '(cqi = OBJECTIVE FUNCTION v2, Combat/combat.objective.ts: spine = the LOCKED systems\n'
+        + '  con/sur/dic = Conviction / Surge meter / Dice; arc = per-turn shape; wid = decision\n'
+        + '  width; idn = deck identity. statusEng is the legacy doctrine warning light.)\n\n',
     );
     for (const name of names) {
         const enemy = ENEMIES[name];
@@ -70,6 +76,8 @@ if (require.main === module) {
             + `  V/M/D/R=${s.victories}/${s.mercies}/${s.defeats}/${s.retreats}`
             + `  rounds=${s.avgRounds.toFixed(1).padStart(4)}`
             + `  statusEng=${(s.statusEngagement * 100).toFixed(0).padStart(3)}%`
+            // Phase 43 — the objective function, beside the legacy warning light.
+            + `  ${formatCombatQuality(s.combatQuality)}`
             + `  conviction=${s.avgConvictionSpent.toFixed(1).padStart(4)}`
             + `  dotFrac=${(s.dotHpFraction * 100).toFixed(0).padStart(3)}%`
             + `  strikeFrac=${(s.strikeFraction * 100).toFixed(0).padStart(3)}%`
