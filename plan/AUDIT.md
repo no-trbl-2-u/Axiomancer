@@ -36,7 +36,7 @@
 > replacement may now be authored freely, including with normal damage.
 > See `plan/bearings.md` § "THE UNSHACKLING".
 
-### Doctrine-curve confirmation post-Phase-39: violation persists — matrix is the witness
+### [x] Doctrine-curve confirmation post-Phase-39: violation persists — RESOLVED via /oversight 2026-08-08: accepted, library is transitional
 - category: content
 - impact: 8
 - ease: 2
@@ -69,7 +69,7 @@
   another reading against a dead one is not.
 - next: (drained — do not re-file this row's successor)
 
-### [needs-user-call] Phase 39: foundry's SWAY win-path removal regressed early-stage 73% -> 44%
+### [x] [needs-user-call] Phase 39: foundry's SWAY win-path removal regressed early-stage 73% -> 44% — RESOLVED via /oversight 2026-08-08: accepted as the settled cost
 - category: design
 - impact: 6
 - ease: 2
@@ -98,7 +98,7 @@
 - next: (drained — carry the foundry win-path gap into the card
   redesign, not into a standalone `/deck-tuning` pass)
 
-### [needs-user-call] Phase 39: mid-game doctrine cliff reads engine/enemy-scaling shaped, not card-shaped
+### [x] [needs-user-call] Phase 39: mid-game doctrine cliff reads engine/enemy-scaling shaped, not card-shaped — RESOLVED via /oversight 2026-08-08: enemy-scaling phase declined for now
 - category: design
 - impact: 7
 - ease: 2
