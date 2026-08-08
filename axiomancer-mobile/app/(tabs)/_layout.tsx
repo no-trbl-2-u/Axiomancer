@@ -1,9 +1,9 @@
 import { Tabs } from 'expo-router';
 import React, { useMemo } from 'react';
 import { View, Text } from 'react-native';
-import Svg, { Path, Circle } from 'react-native-svg';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
+import { AxmIcon, type AxmIconName } from '@/components/icons';
 import { useCombatMode } from '@/state/combat-mode';
 import { TAB_TITLES } from '@/state/presenters/tabs.engine';
 import { useGameState } from '@/state/GameStoreProvider';
@@ -21,65 +21,44 @@ function TabBadge({ text, kind }: { text: string; kind: 'event' | 'levelup' }) {
   );
 }
 
-function TabIconWithBadge({ 
-  kind, 
-  color, 
-  size, 
-  badge 
-}: { 
-  kind: string; 
-  color: string; 
-  size: number; 
+// Tab icons come from the icon canon (Phase V1) — the same registry
+// marks the exploration drawer and combat surfaces draw, so the art
+// upgrades in one place. Per-tab a11y labels override the registry's
+// generic ones. The active tab wears the handoff active-tick: a short
+// sulfur bar above the icon (design handoff 2026-05-23, tab contract).
+const TAB_ICONS: Record<string, { name: AxmIconName; label: string }> = {
+  eye: { name: 'action-eye', label: 'Exploration tab' },
+  sword: { name: 'action-sword', label: 'Combat tab' },
+  crown: { name: 'action-crown', label: 'Character tab' },
+  bag: { name: 'action-bag', label: 'Inventory tab' },
+  scroll: { name: 'action-scroll', label: 'Event tab' },
+  quill: { name: 'action-quill', label: 'Memoir tab' },
+};
+
+function TabIconWithBadge({
+  kind,
+  color,
+  size,
+  focused,
+  badge,
+}: {
+  kind: string;
+  color: string;
+  size: number;
+  focused: boolean;
   badge: { text: string; kind: 'event' | 'levelup' } | null;
 }) {
   const styles = useStyles();
+  const AXM = usePalette();
+  const icon = TAB_ICONS[kind];
+  if (!icon) return null;
   return (
     <View style={styles.iconContainer}>
-      <TabIcon kind={kind} color={color} size={size} />
+      <View style={[styles.activeTick, focused && { backgroundColor: AXM.sulfur }]} />
+      <AxmIcon name={icon.name} size={size} color={color} label={icon.label} />
       {badge && <TabBadge text={badge.text} kind={badge.kind} />}
     </View>
   );
-}
-
-function TabIcon({ kind, color, size }: { kind: string; color: string; size: number }) {
-  switch (kind) {
-    case 'eye':
-      return (
-        <Svg viewBox="0 0 32 32" width={size} height={size} fill="none" accessibilityRole="image" accessibilityLabel="Exploration tab">
-          <Path d="M2 16 C 8 6 24 6 30 16 C 24 26 8 26 2 16 Z" fill={color} fillOpacity={0.1} stroke={color} strokeWidth={2} />
-          <Circle cx={16} cy={16} r={5} fill={color} />
-        </Svg>
-      );
-    case 'sword':
-      return (
-        <Svg viewBox="0 0 32 32" width={size} height={size} fill="none" accessibilityRole="image" accessibilityLabel="Combat tab">
-          <Path d="M22 4 L28 4 L28 10 L13 25 L10 28 L4 28 L4 22 L7 19 Z" fill={color} fillOpacity={0.15} stroke={color} strokeWidth={2} strokeLinejoin="round" />
-        </Svg>
-      );
-    case 'crown':
-      return (
-        <Svg viewBox="0 0 32 32" width={size} height={size} fill="none" accessibilityRole="image" accessibilityLabel="Character tab">
-          <Path d="M3 10 L8 22 H24 L29 10 L23 14 L16 6 L9 14 Z" fill={color} fillOpacity={0.18} stroke={color} strokeWidth={2} strokeLinejoin="round" />
-          <Path d="M3 26 H29" stroke={color} strokeWidth={2} />
-        </Svg>
-      );
-    case 'bag':
-      return (
-        <Svg viewBox="0 0 32 32" width={size} height={size} fill="none" accessibilityRole="image" accessibilityLabel="Inventory tab">
-          <Path d="M8 10 H24 L26 28 H6 Z" fill={color} fillOpacity={0.15} stroke={color} strokeWidth={2} strokeLinejoin="round" />
-          <Path d="M11 10 V7 A5 5 0 0 1 21 7 V10" stroke={color} strokeWidth={2} />
-        </Svg>
-      );
-    case 'scroll':
-      return (
-        <Svg viewBox="0 0 32 32" width={size} height={size} fill="none" accessibilityRole="image" accessibilityLabel="Event tab">
-          <Path d="M6 6 H26 V22 C26 25 24 27 21 27 H8 C5 27 3 25 3 22 V9 C3 7 5 5 6 6 Z" fill={color} fillOpacity={0.12} stroke={color} strokeWidth={2} strokeLinejoin="round" />
-          <Path d="M10 12 H22 M 10 16 H22 M 10 20 H18" stroke={color} strokeWidth={2} />
-        </Svg>
-      );
-    default:
-      return null;
-  }
 }
 
 export default function TabLayout() {
@@ -139,11 +118,12 @@ export default function TabLayout() {
         options={{
           title: TAB_TITLES.exploration,
           tabBarLabel: TAB_TITLES.exploration,
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size, focused }) => (
             <TabIconWithBadge
               kind="eye"
               color={color}
               size={size}
+              focused={focused}
               badge={badges.exploration}
             />
           ),
@@ -163,11 +143,12 @@ export default function TabLayout() {
         options={{
           title: TAB_TITLES.character,
           tabBarLabel: TAB_TITLES.character,
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size, focused }) => (
             <TabIconWithBadge
               kind="crown"
               color={color}
               size={size}
+              focused={focused}
               badge={badges.character}
             />
           ),
@@ -179,11 +160,12 @@ export default function TabLayout() {
         options={{
           title: TAB_TITLES.memoir,
           tabBarLabel: TAB_TITLES.memoir,
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size, focused }) => (
             <TabIconWithBadge
-              kind="scroll"
+              kind="quill"
               color={color}
               size={size}
+              focused={focused}
               badge={badges.memoir}
             />
           ),
@@ -195,11 +177,12 @@ export default function TabLayout() {
         options={{
           title: TAB_TITLES.inventory,
           tabBarLabel: TAB_TITLES.inventory,
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ color, size, focused }) => (
             <TabIconWithBadge
               kind="bag"
               color={color}
               size={size}
+              focused={focused}
               badge={badges.inventory}
             />
           ),
@@ -233,6 +216,15 @@ const useStyles = makeStyles((AXM) => ({
   },
   iconContainer: {
     position: 'relative',
+    alignItems: 'center',
+  },
+  // The handoff tab contract's active tick — a short bar above the
+  // icon; transparent when the tab is at rest so layout never shifts.
+  activeTick: {
+    width: 14,
+    height: 2,
+    marginBottom: 2,
+    backgroundColor: 'transparent',
   },
   badge: {
     position: 'absolute',

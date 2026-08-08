@@ -3,18 +3,10 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import { ActionIcon } from '@/components/ActionIcon';
-import type { ExplorationOption, NodeType } from '@/state/presenters/exploration.engine';
-
-const OPTION_ICON: Record<NodeType, string> = {
-    rest: 'flame',
-    gather: 'bag',
-    current: 'eye',
-    encounter: 'sword',
-    treasure: 'diamond',
-    boss: 'crown',
-    quest: 'scroll',
-    hazard: 'warning',
-};
+import {
+    ACTION_ICON_BY_TYPE,
+    type ExplorationOption,
+} from '@/state/presenters/exploration.engine';
 
 interface OptionRowProps {
     option: ExplorationOption;
@@ -42,7 +34,7 @@ export function OptionRow({ option: opt, onPress, leaguesLabel }: OptionRowProps
         >
             <View style={[styles.stepCardIconBox, { borderColor: AXM.bone }]}>
                 <ActionIcon
-                    kind={OPTION_ICON[opt.type]}
+                    kind={ACTION_ICON_BY_TYPE[opt.type]}
                     size={18}
                     color={accent}
                 />
