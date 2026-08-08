@@ -457,7 +457,7 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
 // battle" — a flat wall of identical encounters with no recovery was both
 // monotonous and unwinnable in playtests. The map now spreads 25 nodes across
 // a real mix, with encounters kept a slight plurality:
-//   - 8 ENCOUNTER nodes  (7 regular + the fv-6 boss — the spine),
+//   - 7 ENCOUNTER nodes  (6 regular + the fv-6 boss — the spine),
 //   - 4 REST nodes       (recover HP — "The Night Watch"), one on the spine
 //                         just before the boss,
 //   - 4 GATHERING nodes  (low-risk materials — "The Gleaning"),
@@ -465,21 +465,36 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
 //   - 3 LOOT-CACHE nodes (a few coins the tide left behind),
 //   - 1 NARRATION node   (fv-14, the dialogue-backed monologue shell),
 //   - 1 INTERACTION node (fv-19, a coastal NPC),
-//   - 1 QUEST node       (fv-15, the story hook), and
+//   - 1 QUEST node       (fv-15, the story hook),
+//   - 1 CUTSCENE node    (fv-1, the arrival — see `fvArrival` below), and
 //   - 1 BOSS node        (fv-6, the region climax — an encounter w/ isBoss).
 // This block supersedes the legacy authored pools above (kept in source for
 // reference). Foes stay on the gentlest L1–L2 roster; the boss is pinned to a
 // low absolute level so a fresh player can actually win the climax (the shared
 // coastal-tyrant is endgame-tier elsewhere, so we override the level here).
 
-const FV_NEW_PLAYER_FOES: ReadonlyArray<{ slug: EnemySlug; description: string }> = [
-    { slug: 'grave-larva',      description: 'A grave larva gums its way up from under the dock pilings.' },
-    { slug: 'float-eye',        description: 'A float-eye drifts out of the fog, already watching.' },
-    { slug: 'chattering-skull', description: 'A chattering skull rattles its last word among the crates.' },
-    { slug: 'little-belle',     description: 'A small orange vesper rings a bell for a service no one held.' },
-    { slug: 'foot-stealer',     description: 'A foot-stealer scuttles between the shacks, low and grasping.' },
-    { slug: 'water-holger',     description: 'A drowned deckhand wades up the strand, still standing his watch.' },
-];
+// Foes, assigned per node and ordered ALONG THE MAP rather than by node id.
+//
+// Pre-2026-08-08 this was a bare list consumed by a `foeIdx++` fall-through in
+// node-id order, so which foe a player met where was an accident of numbering:
+// the gentlest enemy sat on the start node nobody could reach, and the ramp
+// through the village ran backwards in places. The first-map audit made the
+// assignment explicit and monotonic — column 1 is the softest thing in the
+// village, column 9 the hardest thing short of the breakwater itself.
+const FV_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description: string }> = {
+    // c1 — first blood, the gentlest foe on the roster.
+    'fv-12': { slug: 'grave-larva',      description: 'A grave larva gums its way up from under the dock pilings.' },
+    // c2
+    'fv-16': { slug: 'float-eye',        description: 'A float-eye drifts out of the fog, already watching.' },
+    // c3 — last fight before the pre-boss breath.
+    'fv-4':  { slug: 'chattering-skull', description: 'A chattering skull rattles its last word among the crates.' },
+    // c6 — the far side of the breakwater.
+    'fv-7':  { slug: 'little-belle',     description: 'A small orange vesper rings a bell for a service no one held.' },
+    // c7
+    'fv-21': { slug: 'foot-stealer',     description: 'A foot-stealer scuttles between the shacks, low and grasping.' },
+    // c9 — the last thing between the player and the coast road.
+    'fv-24': { slug: 'water-holger',     description: 'A drowned deckhand wades up the strand, still standing his watch.' },
+};
 
 function fvEncounterPool(nodeId: string, foe: { slug: EnemySlug; description: string }): MapEventPool {
     return {
@@ -612,6 +627,32 @@ const fvBuildTheBoatQuest: MapEventPool = {
     }],
 };
 
+// The map's opening beat, on the node the player starts standing on.
+//
+// Pre-2026-08-08 the start node fell through to a regular ENCOUNTER pool that
+// no player ever saw: `createMapState` puts the player ON fv-1, and events
+// only resolve on ARRIVAL at a node, so fv-1's authored content was dead. The
+// first-map audit reclaimed the slot as the arrival cutscene — a kind that is
+// safe to fire the moment the map opens, unlike a fight the player has had no
+// chance to prepare for. Mobile resolves it on first mount of the exploration
+// screen; the CLI's `--resolve-start` flag has always done the same.
+const fvArrival: MapEventPool = {
+    id: 'fv-1.cutscene',
+    entries: [{
+        kind: 'cutscene', weight: 1,
+        payload: {
+            kind: 'cutscene',
+            lines: [
+                'Salt in the boards, salt in the bread, salt working its slow way into everything that stays.',
+                'The village lies along the water the way a rope lies where it was dropped. Nobody here has hauled a full net since the breakwater went quiet.',
+                'Three ways out of the yard: the wharf road, the middle track, the lane that runs inland past the shuttered houses.',
+                'Whichever you take, the breakwater is at the end of it.',
+            ],
+            description: 'You step out of the hovel into the grey of it.',
+        },
+    }],
+};
+
 // The region boss — king-of-revenge, but pinned to a low absolute level so a
 // fresh player can win the climax (the shared enemy is mid-tier elsewhere).
 const FV_BOSS_LEVEL = 3;
@@ -632,8 +673,9 @@ const fvGauntletBoss: MapEventPool = {
 // Per-node kind assignment. Rest sits at fv-3 (spine, before the fv-6 boss) so
 // the player can heal before the climax; the rest of the kinds salt the map for
 // variety. Every node fv-1..fv-25 is assigned exactly once; anything not named
-// in these maps (and not the boss/quest/narration/interaction nodes below)
-// falls through to a regular ENCOUNTER, keeping encounters a slight plurality.
+// in these maps (and not the boss/quest/narration/interaction/arrival nodes)
+// must carry an explicit entry in `FV_ENCOUNTER_FOES` above — an unassigned
+// node now throws on import rather than silently drawing a rotation foe.
 const FV_REST_NODES: Record<string, string> = {
     'fv-3':  'A fisher’s lean-to, the embers still warm. You stop to bind your wounds.',
     'fv-9':  'A roofless cottage out of the wind. Enough shelter to catch your breath.',
@@ -657,10 +699,11 @@ const fvShoreInteraction = fvInteractionPool(
 const FISHING_VILLAGE_NEW_PLAYER_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> =
     (() => {
         const out: Array<{ nodeId: string; pool: MapEventPool }> = [];
-        let foeIdx = 0;
         for (let i = 1; i <= 25; i++) {
             const nodeId = `fv-${i}`;
-            if (nodeId === 'fv-6') {
+            if (nodeId === 'fv-1') {
+                out.push({ nodeId, pool: fvArrival });
+            } else if (nodeId === 'fv-6') {
                 out.push({ nodeId, pool: fvGauntletBoss });
             } else if (nodeId === 'fv-15') {
                 out.push({ nodeId, pool: fvBuildTheBoatQuest });
@@ -677,8 +720,8 @@ const FISHING_VILLAGE_NEW_PLAYER_POOLS: ReadonlyArray<{ nodeId: string; pool: Ma
             } else if (nodeId in FV_LOOT_NODES) {
                 out.push({ nodeId, pool: fvLootCachePool(nodeId, FV_LOOT_CACHES[FV_LOOT_NODES[nodeId]!]!) });
             } else {
-                const foe = FV_NEW_PLAYER_FOES[foeIdx % FV_NEW_PLAYER_FOES.length]!;
-                foeIdx++;
+                const foe = FV_ENCOUNTER_FOES[nodeId];
+                if (!foe) throw new Error(`fishing-village: ${nodeId} has no authored event kind or foe.`);
                 out.push({ nodeId, pool: fvEncounterPool(nodeId, foe) });
             }
         }

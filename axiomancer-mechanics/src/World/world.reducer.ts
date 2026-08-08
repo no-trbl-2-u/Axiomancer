@@ -3,7 +3,7 @@
  * makes sense (locking/unlocking, completing).
  */
 
-import { WorldState, MapState, MapNode, NodeId, HazardNodeOutcome } from './types';
+import { WorldState, MapState, MapDefinition, MapNode, NodeId, HazardNodeOutcome } from './types';
 import { MapName, ContinentName } from './map.library';
 import { getMapDefinition } from './map.registry';
 
@@ -355,4 +355,134 @@ export function isRouteBlocked(state: MapState, from: NodeId, to: NodeId): strin
                  (route.from === to && route.to === from)
     );
     return blockedRoute?.reason;
+}
+
+// ── Traversal audit (2026-08-08 first-map audit) ─────────────────────────────
+
+/**
+ * The nodes the player may legally move to from `map.currentNode` right now.
+ *
+ * This is the single source of truth for "where can I go" — `moveToNode`'s
+ * validation, expressed as a query instead of an exception. Gauntlet maps
+ * exclude completed and locked nodes (no back-travel); labyrinth maps allow
+ * re-entry into solved rooms. Blocked routes are excluded on both.
+ */
+export function legalMovesFrom(map: MapState): NodeId[] {
+    const def = getMapDefinition(map.continent, map.name);
+    const node = def.nodes.find(n => n.id === map.currentNode);
+    if (!node) return [];
+    const labyrinth = def.traversal === 'labyrinth';
+    return node.connectedNodes.filter(id => {
+        if (!labyrinth && map.completedNodes.includes(id)) return false;
+        if (!labyrinth && map.lockedNodes.includes(id)) return false;
+        return isRouteBlocked(map, map.currentNode, id) === undefined;
+    });
+}
+
+/**
+ * True when the player has no legal move left. On a gauntlet map that is
+ * either the authored end of the map (`connectedNodes: []`) or a STRAND — a
+ * run that walked itself into a corner and cannot continue.
+ *
+ * Distinguish the two with `isMapTerminalNode`.
+ */
+export function isStranded(map: MapState): boolean {
+    return legalMovesFrom(map).length === 0;
+}
+
+/**
+ * True when `nodeId` is an AUTHORED terminal node — one the map definition
+ * gives no outgoing edges at all. Running out of moves here is the map
+ * ending, not a soft-lock.
+ */
+export function isMapTerminalNode(map: MapState, nodeId: NodeId): boolean {
+    const def = getMapDefinition(map.continent, map.name);
+    const node = def.nodes.find(n => n.id === nodeId);
+    return node !== undefined && node.connectedNodes.length === 0;
+}
+
+/** One strand a traversal audit found: entering `nodeId` by `via` dead-ends. */
+export interface MapStrand {
+    /** The node the run walked into with no legal move left. */
+    nodeId: NodeId;
+    /** The node it arrived from. */
+    via: NodeId;
+    /** The full route, start node first. */
+    route: NodeId[];
+}
+
+/** The verdict of `auditMapTraversal`. */
+export interface MapTraversalAudit {
+    mapName: string;
+    /** Nodes with no outgoing edges at all — the authored ends of the map. */
+    terminalNodes: NodeId[];
+    /**
+     * Routes that ran out of legal moves on a NON-terminal node. Any entry
+     * here is a soft-lock: the player is alive, the map is unfinished, and
+     * the UI has nothing to offer. Empty is the invariant.
+     */
+    strands: MapStrand[];
+    /** Nodes no legal route can ever reach from the starting node. */
+    unreachableNodes: NodeId[];
+    /** Length in nodes of the longest legal single-life route. */
+    longestRoute: number;
+    /** Total distinct routes walked to exhaustion. */
+    routesExplored: number;
+}
+
+/**
+ * Exhaustively walks every legal single-life route through a gauntlet map
+ * and reports the ways it can end. Pure and definition-only — it reads the
+ * static `MapDefinition`, never a live `MapState`, so content tests can run
+ * it over the whole registry.
+ *
+ * Only meaningful for gauntlet maps: labyrinth traversal permits re-entry,
+ * so a labyrinth route never runs out of moves and the walk would not
+ * terminate. Callers should skip those (`auditMapTraversal` returns an empty
+ * audit for them rather than hanging).
+ *
+ * `maxRoutes` bounds the search on pathological content; exceeding it stops
+ * the walk early rather than looping forever, and the returned
+ * `routesExplored` will equal the cap.
+ */
+export function auditMapTraversal(
+    def: MapDefinition,
+    maxRoutes = 500_000,
+): MapTraversalAudit {
+    const byId = new Map(def.nodes.map(n => [n.id, n]));
+    const terminalNodes = def.nodes.filter(n => n.connectedNodes.length === 0).map(n => n.id);
+    const audit: MapTraversalAudit = {
+        mapName: def.name,
+        terminalNodes,
+        strands: [],
+        unreachableNodes: [],
+        longestRoute: 0,
+        routesExplored: 0,
+    };
+    if (def.traversal === 'labyrinth') return audit;
+
+    const reached = new Set<NodeId>([def.startingNode.id]);
+    const walk = (cur: NodeId, completed: Set<NodeId>, route: NodeId[]): void => {
+        if (audit.routesExplored >= maxRoutes) return;
+        const options = (byId.get(cur)?.connectedNodes ?? []).filter(id => !completed.has(id));
+        if (options.length === 0) {
+            audit.routesExplored += 1;
+            audit.longestRoute = Math.max(audit.longestRoute, route.length);
+            if (!terminalNodes.includes(cur)) {
+                audit.strands.push({ nodeId: cur, via: route[route.length - 2] ?? cur, route: [...route] });
+            }
+            return;
+        }
+        for (const next of options) {
+            reached.add(next);
+            completed.add(next);
+            route.push(next);
+            walk(next, completed, route);
+            route.pop();
+            completed.delete(next);
+        }
+    };
+    walk(def.startingNode.id, new Set([def.startingNode.id]), [def.startingNode.id]);
+    audit.unreachableNodes = def.nodes.map(n => n.id).filter(id => !reached.has(id));
+    return audit;
 }

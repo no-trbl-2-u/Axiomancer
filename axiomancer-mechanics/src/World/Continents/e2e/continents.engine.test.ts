@@ -27,18 +27,22 @@ describe('World/Continents Engine Tests', () => {
     });
 
     it('has properly connected node network', () => {
-      // Test spine connectivity (preserved from Phase 1)
+      // The 2026-08-08 first-map audit re-layered the village into three
+      // lanes across ten columns; the branch ids below moved with it. The
+      // property under test is the same: the start opens onto every lane,
+      // a mid-map spine node keeps a spine exit plus both flanks, and the
+      // map has an authored end.
       const fv1 = fishingVillage.nodes.find(n => n.id === 'fv-1');
-      expect(fv1?.connectedNodes).toContain('fv-2');
-      expect(fv1?.connectedNodes).toContain('fv-11');
+      expect(fv1?.connectedNodes).toContain('fv-2');   // spine
+      expect(fv1?.connectedNodes).toContain('fv-12');  // wharf lane
+      expect(fv1?.connectedNodes).toContain('fv-13');  // inland lane
 
-      // Test branching structure from Phase 65
       const fv3 = fishingVillage.nodes.find(n => n.id === 'fv-3');
       expect(fv3?.connectedNodes).toContain('fv-4');
-      expect(fv3?.connectedNodes).toContain('fv-13');
-      expect(fv3?.connectedNodes).toContain('fv-16');
+      expect(fv3?.connectedNodes).toContain('fv-17');
+      expect(fv3?.connectedNodes).toContain('fv-14');
 
-      // Test dead ends
+      // Terminal column — the only place a run is allowed to run out of moves.
       const fv10 = fishingVillage.nodes.find(n => n.id === 'fv-10');
       expect(fv10?.connectedNodes).toHaveLength(0);
     });
@@ -93,20 +97,19 @@ describe('World/Continents Engine Tests', () => {
     });
 
     it('has proper sub-area connectivity', () => {
-      // Test Mist Ridge sub-area
+      // Re-layered 2026-08-08 alongside the village (same soft-lock defect).
+      // Edges now run strictly forward one column, so the sub-area ids that
+      // used to point backwards point onward instead.
       const nf11 = northernForest.nodes.find(n => n.id === 'nf-11');
       expect(nf11?.location).toEqual([4, -1]);
-      expect(nf11?.connectedNodes).toContain('nf-7');
+      expect(nf11?.connectedNodes).toContain('nf-8');
 
-      // Test Glen Path sub-area
       const nf12 = northernForest.nodes.find(n => n.id === 'nf-12');
-      expect(nf12?.connectedNodes).toContain('nf-3');
+      expect(nf12?.connectedNodes).toContain('nf-4');
       expect(nf12?.connectedNodes).toContain('nf-13');
-      expect(nf12?.connectedNodes).toContain('nf-20');
 
-      // Test Bone Hollow sub-area
       const nf15 = northernForest.nodes.find(n => n.id === 'nf-15');
-      expect(nf15?.connectedNodes).toContain('nf-6');
+      expect(nf15?.connectedNodes).toContain('nf-7');
       expect(nf15?.connectedNodes).toContain('nf-16');
     });
   });

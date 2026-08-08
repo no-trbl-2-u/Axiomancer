@@ -287,34 +287,31 @@ describe('Phase 65 — expanded fishing-village layout', () => {
         }
     });
 
-    it('extends (does not replace) the spine connectedNodes with new branch IDs', () => {
+    it('keeps the spine branching onto both flanking lanes', () => {
+        // Pre-audit this read "extends (does not replace) the spine
+        // connectedNodes" and named fv-13 / fv-16 as sub-area branches. The
+        // 2026-08-08 re-layer turned the free-form sub-areas into three
+        // lanes; the property that matters is unchanged and now explicit —
+        // a spine node opens onto its own lane AND both flanks.
         const map = fv();
-        // fv-3 gains fv-13 (harbor) + fv-16 (inland) on top of the spine fv-4.
         const fv3 = map.nodes.find(n => n.id === 'fv-3')!;
-        expect(fv3.connectedNodes).toContain('fv-4');   // spine preserved
-        expect(fv3.connectedNodes).toContain('fv-13');  // harbor branch
-        expect(fv3.connectedNodes).toContain('fv-16');  // inland branch
+        expect(fv3.connectedNodes).toContain('fv-4');   // spine ahead
+        expect(fv3.connectedNodes).toContain('fv-17');  // wharf lane
+        expect(fv3.connectedNodes).toContain('fv-14');  // inland lane
     });
 
-    it('fv-15 (gull crag) is a dead-end via fv-14', () => {
+    it('leaves no dead-end spurs off the lanes', () => {
+        // These three assertions replace the Phase 65 tests that REQUIRED
+        // fv-15, fv-25 and the fv-17/fv-19 loop to be dead ends. Under the
+        // gauntlet's completed-node lock those spurs were soft-locks, not
+        // level design: entering fv-15 ended the run outright, four nodes in.
         const map = fv();
-        const fv15 = map.nodes.find(n => n.id === 'fv-15')!;
-        expect(fv15.connectedNodes).toEqual(['fv-14']);
-    });
-
-    it('fv-25 (gulls nest) is a dead-end via fv-24', () => {
-        const map = fv();
-        const fv25 = map.nodes.find(n => n.id === 'fv-25')!;
-        expect(fv25.connectedNodes).toEqual(['fv-24']);
-    });
-
-    it('fv-17 ↔ fv-19 small loop in the inland streets sub-area', () => {
-        const map = fv();
-        const fv17 = map.nodes.find(n => n.id === 'fv-17')!;
-        const fv19 = map.nodes.find(n => n.id === 'fv-19')!;
-        // Loop: fv-17 → fv-19 and fv-19 → fv-17 (bidirectional).
-        expect(fv17.connectedNodes).toContain('fv-19');
-        expect(fv19.connectedNodes).toContain('fv-17');
+        const terminal = map.nodes.filter(n => n.connectedNodes.length === 0);
+        expect(terminal.map(n => n.id).sort()).toEqual(['fv-10', 'fv-24']);
+        for (const id of ['fv-15', 'fv-25', 'fv-17', 'fv-19']) {
+            const node = map.nodes.find(n => n.id === id)!;
+            expect(node.connectedNodes.length, `${id} must keep a way onward`).toBeGreaterThan(0);
+        }
     });
 
     it('all 25 nodes have a registered MapEventPool', () => {
@@ -346,41 +343,25 @@ describe('Phase 117 — expanded northern-forest layout', () => {
         expect(nf().nodes.length).toBe(25);
     });
 
-    it('preserves existing nf-1..nf-10 structure', () => {
+    it('opens the treeline onto all three lanes', () => {
         const map = nf();
-        // Verify the existing fork-and-rejoin pattern is intact
         const nf1 = map.nodes.find(n => n.id === 'nf-1')!;
-        const nf6 = map.nodes.find(n => n.id === 'nf-6')!;
         expect(nf1.connectedNodes).toContain('nf-2');
         expect(nf1.connectedNodes).toContain('nf-3');
-        expect(nf6.connectedNodes).toContain('nf-7');
+        expect(nf1.connectedNodes).toContain('nf-12');
     });
 
-    it('nf-3 branches to glen path via nf-12', () => {
+    it('leaves no dead-end spurs off the lanes', () => {
+        // Replaces the Phase 117 tests that REQUIRED nf-17 / nf-21 to be
+        // dead ends and nf-24 <-> nf-25 to loop back on itself. Same defect
+        // as the village: under the gauntlet lock those were soft-locks.
         const map = nf();
-        const nf3 = map.nodes.find(n => n.id === 'nf-3')!;
-        expect(nf3.connectedNodes).toContain('nf-12');
-    });
-
-    it('nf-17 (bone circle) is a dead-end via nf-16', () => {
-        const map = nf();
-        const nf17 = map.nodes.find(n => n.id === 'nf-17')!;
-        expect(nf17.connectedNodes).toEqual(['nf-16']);
-    });
-
-    it('nf-21 (ranger cairn) is a dead-end via nf-20', () => {
-        const map = nf();
-        const nf21 = map.nodes.find(n => n.id === 'nf-21')!;
-        expect(nf21.connectedNodes).toEqual(['nf-20']);
-    });
-
-    it('nf-24 ↔ nf-25 small loop in the mist ridge sub-area', () => {
-        const map = nf();
-        const nf24 = map.nodes.find(n => n.id === 'nf-24')!;
-        const nf25 = map.nodes.find(n => n.id === 'nf-25')!;
-        // Loop: nf-24 → nf-25 and nf-25 → nf-24 (bidirectional).
-        expect(nf24.connectedNodes).toContain('nf-25');
-        expect(nf25.connectedNodes).toContain('nf-24');
+        const terminal = map.nodes.filter(n => n.connectedNodes.length === 0);
+        expect(terminal.map(n => n.id).sort()).toEqual(['nf-10', 'nf-24', 'nf-25']);
+        for (const id of ['nf-17', 'nf-21', 'nf-12']) {
+            const node = map.nodes.find(n => n.id === id)!;
+            expect(node.connectedNodes.length, `${id} must keep a way onward`).toBeGreaterThan(0);
+        }
     });
 
     it('all 25 nodes have a registered MapEventPool', () => {

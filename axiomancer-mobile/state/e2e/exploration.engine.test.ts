@@ -111,7 +111,7 @@ describe('selectExplorationViewModel: engine reads', () => {
 
         const vm = selectExplorationViewModel(store.getState());
 
-        expect(vm.options.map((o) => o.nodeId).sort()).toEqual(['fv-2', 'fv-11'].sort());
+        expect(vm.options.map((o) => o.nodeId).sort()).toEqual(['fv-2', 'fv-12', 'fv-13'].sort());
         expect(vm.options[0].description.length).toBeGreaterThan(0);
     });
 
@@ -119,16 +119,16 @@ describe('selectExplorationViewModel: engine reads', () => {
         const store = createAppStore({ adapter: createMemoryAdapter() });
         const actions = createAppActions(store);
 
-        // fv-2's engine neighbours: fv-12 (encounter) and fv-3 (a rest node in
-        // the rebalanced map).
+        // fv-2's engine neighbours after the 2026-08-08 first-map re-layer:
+        // fv-16 (encounter), fv-3 (rest) and fv-11 (loot-cache).
         actions.moveTo('fv-2');
 
         const vm = selectExplorationViewModel(store.getState());
-        const fv12 = vm.nodes.find((n) => n.id === 'fv-12')!;
+        const fv16 = vm.nodes.find((n) => n.id === 'fv-16')!;
         const fv3 = vm.nodes.find((n) => n.id === 'fv-3')!;
-        expect(fv12.kind).toBe('available');
-        expect(fv12.type).toBe('encounter');
-        expect(fv12.triggersCombat).toBe(true);
+        expect(fv16.kind).toBe('available');
+        expect(fv16.type).toBe('encounter');
+        expect(fv16.triggersCombat).toBe(true);
         // The rest node does not start combat.
         expect(fv3.kind).toBe('available');
         expect(fv3.type).toBe('rest');
@@ -148,13 +148,13 @@ describe('selectExplorationViewModel: engine reads', () => {
         // future refactor doesn't silently revert.
         const store = createAppStore({ adapter: createMemoryAdapter() });
         const actions = createAppActions(store);
-        actions.moveTo('fv-2'); // unlocks fv-12 (encounter) as an option
+        actions.moveTo('fv-2'); // unlocks fv-16 (encounter) as an option
 
         const vm = selectExplorationViewModel(store.getState());
-        const encounterOption = vm.options.find((o) => o.nodeId === 'fv-12');
+        const encounterOption = vm.options.find((o) => o.nodeId === 'fv-16');
         expect(encounterOption).toBeDefined();
         // actions[i] mirrors options[i] order; find the matching action.
-        const idx = vm.options.findIndex((o) => o.nodeId === 'fv-12');
+        const idx = vm.options.findIndex((o) => o.nodeId === 'fv-16');
         const encounterAction = vm.actions[idx];
         expect(encounterAction.iconKey).toBe('sword');
         expect(encounterAction.iconKey).not.toBe('flee');
@@ -178,10 +178,11 @@ describe('moveTo action: happy path', () => {
         expect(vm.currentNodeId).toBe('fv-2');
         const byId = Object.fromEntries(vm.nodes.map((n) => [n.id, n]));
         expect(byId['fv-2'].kind).toBe('current');
-        // fv-3 and fv-12 are the layout-declared neighbours of fv-2 and
+        // fv-3, fv-16 and fv-11 are the engine neighbours of fv-2 and
         // should now be reachable.
         expect(byId['fv-3'].kind).toBe('available');
-        expect(byId['fv-12'].kind).toBe('available');
+        expect(byId['fv-16'].kind).toBe('available');
+        expect(byId['fv-11'].kind).toBe('available');
     });
 
     it('refreshes the options drawer with the new available nodes after a move', () => {
@@ -192,7 +193,7 @@ describe('moveTo action: happy path', () => {
 
         const vm = selectExplorationViewModel(store.getState());
         const optionIds = vm.options.map((o) => o.nodeId).sort();
-        expect(optionIds).toEqual(['fv-11', 'fv-12', 'fv-3'].sort());
+        expect(optionIds).toEqual(['fv-11', 'fv-16', 'fv-3'].sort());
     });
 });
 
@@ -304,19 +305,19 @@ describe('exploration lifecycle: multi-step navigation', () => {
         const actions = createAppActions(store);
 
         actions.moveTo('fv-2');  // loot-cache — consumed on entry
-        actions.moveTo('fv-12'); // encounter — reusable, not completed
+        actions.moveTo('fv-16'); // encounter — reusable, not completed
 
         const completed = store.getState().world.currentMap.completedNodes;
-        // fv-12 is an engine `encounter` kind, so it does not complete on entry —
+        // fv-16 is an engine `encounter` kind, so it does not complete on entry —
         // it stays re-fightable (the loot-cache fv-2 is a one-shot).
-        expect(completed).not.toContain('fv-12');
+        expect(completed).not.toContain('fv-16');
 
         const vm = selectExplorationViewModel(store.getState());
         const byId = Object.fromEntries(vm.nodes.map((n) => [n.id, n]));
-        expect(byId['fv-12'].kind).toBe('current');
-        // fv-11 and fv-13 are fv-12's neighbours in the ENGINE graph.
-        expect(byId['fv-11'].kind).toBe('available');
-        expect(byId['fv-13'].kind).toBe('available');
+        expect(byId['fv-16'].kind).toBe('current');
+        // fv-4 and fv-17 are fv-16's forward neighbours in the ENGINE graph.
+        expect(byId['fv-4'].kind).toBe('available');
+        expect(byId['fv-17'].kind).toBe('available');
     });
 
     it('a move does not implicitly call adapter.save (Spec 09 hook)', () => {

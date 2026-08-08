@@ -10,7 +10,7 @@
  */
 
 import type { GameStore, MapEventKind } from '@mechanics';
-import { getMapDefinition, getNodePrimaryEventKind, getNodeEventPool } from '@mechanics';
+import { getMapDefinition, getNodePrimaryEventKind, getNodeEventPool, legalMovesFrom } from '@mechanics';
 
 import { readCurrentNodeId } from '../actions';
 import { getMapLayout } from '@/state/exploration-maps';
@@ -93,6 +93,15 @@ export interface ExplorationViewModel {
     mapId: string;
     /** Engine node id of the player's current location. */
     currentNodeId: string;
+    /**
+     * True while the map's STARTING node still has an unresolved event.
+     *
+     * Events fire on arrival, and the player never arrives at the node they
+     * are placed on, so a map's starting-node content used to be unreachable
+     * (2026-08-08 first-map audit). The exploration screen watches this flag
+     * and resolves the node once per map entry.
+     */
+    startNodePending: boolean;
     nodes: readonly ExplorationNode[];
     edges: readonly ExplorationEdge[];
     actions: readonly ExplorationAction[];
@@ -196,15 +205,27 @@ function engineNodeType(continent: string, mapName: string, nodeId: string): Nod
     return KIND_TO_NODE_TYPE[kind];
 }
 
+/**
+ * `available` here means REACHABLE RIGHT NOW — the engine's
+ * `legalMovesFrom`, not the map's cumulative `availableNodes` unlock set.
+ *
+ * The two used to be conflated, and the 2026-08-08 first-map audit made the
+ * gap visible on every move: `availableNodes` accumulates every node ever
+ * unlocked, so the map lit up (and the drawer offered) nodes that
+ * `moveToNode` would refuse as non-adjacent. Tapping one opened a confirm
+ * panel that then did nothing. A node you have seen but cannot walk to from
+ * where you stand reads as 'locked' — which is exactly what the gauntlet's
+ * no-back-travel rule makes it.
+ */
 function classifyNode(
     nodeId: string,
     currentNodeId: string,
     completed: readonly string[],
-    available: readonly string[],
+    reachable: readonly string[],
 ): NodeKind {
     if (nodeId === currentNodeId) return 'current';
     if (completed.includes(nodeId)) return 'completed';
-    if (available.includes(nodeId)) return 'available';
+    if (reachable.includes(nodeId)) return 'available';
     return 'locked';
 }
 
@@ -255,11 +276,11 @@ function leaguesFromDistance(d: number): LeagueBucket {
 function buildOptions(
     metaById: ReadonlyMap<string, ResolvedNodeMeta>,
     orderById: ReadonlyMap<string, number>,
-    available: readonly string[],
+    reachable: readonly string[],
     currentNodeId: string,
 ): ExplorationOption[] {
     const current = metaById.get(currentNodeId) ?? null;
-    return available
+    return reachable
         // Don't offer the node the player is standing on (reusable encounter
         // nodes stay in `availableNodes`, but you're already there).
         .filter((id) => id !== currentNodeId && metaById.has(id))
@@ -300,6 +321,7 @@ const FALLBACK_VM: ExplorationViewModel = {
     regionProgress: '',
     mapId: '',
     currentNodeId: '',
+    startNodePending: false,
     nodes: [],
     edges: [],
     actions: [],
@@ -368,13 +390,15 @@ function computeExplorationViewModel(state: GameStore): ExplorationViewModel {
             region: layout.region,
             mapId: mapName,
             currentNodeId: readCurrentNodeId(world),
+            startNodePending: false,
         });
     }
 
     const completed = world.currentMap.completedNodes as readonly string[];
-    const available = world.currentMap.availableNodes as readonly string[];
     const locked = world.currentMap.lockedNodes as readonly string[];
     const currentNodeId = readCurrentNodeId(world);
+    // The engine owns "where can I go from here" (see `classifyNode`).
+    const reachable: readonly string[] = legalMovesFrom(world.currentMap);
 
     // Per-node display meta: position/label/blurb from the mobile layout (by id),
     // kind/icon from the engine's authored event pools. Nodes without an authored
@@ -395,7 +419,7 @@ function computeExplorationViewModel(state: GameStore): ExplorationViewModel {
 
     const nodes: ExplorationNode[] = def.nodes.map((eng) => {
         const meta = metaById.get(eng.id)!;
-        const nodeKind = classifyNode(eng.id, currentNodeId, completed, available);
+        const nodeKind = classifyNode(eng.id, currentNodeId, completed, reachable);
         return {
             id: eng.id,
             x: meta.x,
@@ -407,7 +431,18 @@ function computeExplorationViewModel(state: GameStore): ExplorationViewModel {
         };
     });
 
-    const options = buildOptions(metaById, orderById, available, currentNodeId);
+    // Only pending while the player is still standing where the map put
+    // them, the node carries authored content, and nothing has consumed it.
+    // Whether it is SAFE to resolve right now (no event or combat already
+    // owning the screen) is the screen's call, not the map's — this view
+    // model is memoised on `state.world` and must not read the event slice.
+    const consumed = (world.currentMap.consumedNodes ?? []) as readonly string[];
+    const startNodePending =
+        currentNodeId === def.startingNode.id
+        && !consumed.includes(currentNodeId)
+        && getNodeEventPool(continent, mapName, currentNodeId) !== undefined;
+
+    const options = buildOptions(metaById, orderById, reachable, currentNodeId);
     const actions = buildActions(options);
     const edges = buildEdges(def.nodes, completed, locked);
 
@@ -417,6 +452,7 @@ function computeExplorationViewModel(state: GameStore): ExplorationViewModel {
         regionProgress: layout.regionProgress,
         mapId: mapName,
         currentNodeId,
+        startNodePending,
         nodes,
         edges,
         actions,

@@ -358,7 +358,7 @@ export {
     applyDialogueChoice,
     emptyQuestLog, isQuestComplete, findActiveQuest, findQuest,
     startQuest, progressQuest, completeQuest, discoverQuest,
-    reachableObjectives, killObjectives, collectObjectives,
+    reachableObjectives, killObjectives, collectObjectives, advanceKillObjectives,
     seedInputToUint32, minigameRunSeed, branchMinigameSeed,
 } from './World';
 
@@ -398,6 +398,8 @@ export {
     // Phase 135: Persistence functions
     recordHazardOutcome, blockMapRoute, getHazardOutcomesForNode, isRouteBlocked,
     validateMoveToNode, findAlternativePaths, getBlockedRoutesFromNode, getReachableNodes,
+    // 2026-08-08 first-map audit: traversal queries + the strand audit.
+    legalMovesFrom, isStranded, isMapTerminalNode, auditMapTraversal,
     // Phase 148: Minigame Harness
     runMinigameHarness, summarizeHarnessReport,
 } from './World';

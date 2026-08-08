@@ -44,7 +44,7 @@ export type { GenerateEncounterOptions } from './encounter';
 export {
     emptyQuestLog, isQuestComplete, findActiveQuest, findQuest,
     startQuest, progressQuest, completeQuest, discoverQuest,
-    reachableObjectives, killObjectives, collectObjectives,
+    reachableObjectives, killObjectives, collectObjectives, advanceKillObjectives,
 } from './quest.engine';
 
 export {
@@ -54,7 +54,10 @@ export {
     revealAdjacent, markNodeConsumed, unlockAdjacent,
     recordHazardOutcome, blockMapRoute, getHazardOutcomesForNode, isRouteBlocked,
     teleportToNode, unblockMapRoute,
+    // 2026-08-08 first-map audit: traversal queries + the strand audit.
+    legalMovesFrom, isStranded, isMapTerminalNode, auditMapTraversal,
 } from './world.reducer';
+export type { MapStrand, MapTraversalAudit } from './world.reducer';
 
 export {
     validateMoveToNode, findAlternativePaths, getBlockedRoutesFromNode, getReachableNodes,

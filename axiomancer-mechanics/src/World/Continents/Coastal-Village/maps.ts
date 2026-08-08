@@ -401,47 +401,79 @@ const fishingVillage: MapDefinition = {
     name: 'fishing-village',
     continent: 'coastal-continent',
     description: 'Your home town: familiar faces, salty air, old shacks lining the docks.',
-    // Phase 65 — expanded from a linear 10-node chain to a 25-node
-    // branching grid with three sub-areas: Harbor District (y=+1..+2),
-    // Inland Streets (y=-1..-2), and Cliff Path (y=+1..+2 east). Spine
-    // fv-1..fv-10 preserved verbatim along y=0 so existing tests / Phase
-    // 43 / Phase 62 / Phase 63 wiring continue to work unmodified; new
-    // connectedNodes extend (don't replace) the spine entries.
+    // 2026-08-08 first-map audit — re-layered from the Phase 65 free-form
+    // grid into a COLUMN-LAYERED forward gauntlet (the Slay-the-Spire
+    // shape). The Phase 65 grid mixed one-way spine edges with two-way
+    // sub-area edges under the gauntlet's completed-node lock, and that
+    // combination stranded runs: eight nodes could be entered with every
+    // remaining neighbour already completed, leaving zero legal moves and
+    // no UI recovery. The shortest strand was four nodes deep
+    // (fv-1 → fv-11 → fv-14 → fv-15), and across all 260 possible routes
+    // the breakwater boss (fv-6) and the quest-board node (fv-15) were
+    // NEVER co-reachable in one life. See `docs/reports/FIRST-MAP-AUDIT.md`.
+    //
+    // The layering law, enforced by `auditMapTraversal` + the hermetic
+    // invariant test in `src/World/e2e/map-traversal.engine.test.ts`:
+    //
+    //   Every edge runs from column x to column x+1, where a node's
+    //   column IS its `location[0]`.
+    //
+    // Because a run therefore visits exactly one node per column and can
+    // never revisit a column, no node's forward neighbours can already be
+    // completed — strands become structurally impossible rather than
+    // patched. `connectedNodes` lists forward neighbours only; that
+    // one-way authoring is now deliberate and is what the invariant reads.
+    //
+    // Ten columns, three lanes: the WHARF LANE (y=+1), the SPINE (y=0),
+    // and the INLAND LANE (y=-1). Lanes drift — a node at y reaches every
+    // next-column node within one step of y — so a route is a real
+    // sequence of choices rather than a committed corridor. Column 5 holds
+    // fv-6 alone, so every single run now fights the King of Revenge.
+    // Spine ids fv-1..fv-10 stay on y=0 at x=0..9 (Phase 65 D1).
     startingNode: {
         id: 'fv-1',
         location: [0, 0],
-        connectedNodes: ['fv-2', 'fv-11'],
+        connectedNodes: ['fv-2', 'fv-12', 'fv-13'],
     },
     nodes: [
-        // ── Spine (Phase 1 era; preserved by Phase 65 D1) ────────────
-        { id: 'fv-1',  location: [0, 0], connectedNodes: ['fv-2', 'fv-11'] },
-        { id: 'fv-2',  location: [1, 0], connectedNodes: ['fv-3', 'fv-12'] },
-        { id: 'fv-3',  location: [2, 0], connectedNodes: ['fv-4', 'fv-13', 'fv-16'] },
-        { id: 'fv-4',  location: [3, 0], connectedNodes: ['fv-5', 'fv-17'] },
-        { id: 'fv-5',  location: [4, 0], connectedNodes: ['fv-6', 'fv-18'] },
-        { id: 'fv-6',  location: [5, 0], connectedNodes: ['fv-7'] },
-        { id: 'fv-7',  location: [6, 0], connectedNodes: ['fv-8', 'fv-21'] },
-        { id: 'fv-8',  location: [7, 0], connectedNodes: ['fv-9', 'fv-22'] },
-        { id: 'fv-9',  location: [8, 0], connectedNodes: ['fv-10'] },
+        // ── c0 — the shore you wake on ───────────────────────────────
+        { id: 'fv-1',  location: [0, 0], connectedNodes: ['fv-2', 'fv-12', 'fv-13'] },
+        // ── c1 — encounter / loot / gathering ────────────────────────
+        { id: 'fv-12', location: [1, 1], connectedNodes: ['fv-3', 'fv-16'] },
+        { id: 'fv-2',  location: [1, 0], connectedNodes: ['fv-3', 'fv-16', 'fv-11'] },
+        { id: 'fv-13', location: [1, -1], connectedNodes: ['fv-3', 'fv-11'] },
+        // ── c2 — encounter / rest / loot ─────────────────────────────
+        { id: 'fv-16', location: [2, 1], connectedNodes: ['fv-4', 'fv-17'] },
+        { id: 'fv-3',  location: [2, 0], connectedNodes: ['fv-4', 'fv-17', 'fv-14'] },
+        { id: 'fv-11', location: [2, -1], connectedNodes: ['fv-4', 'fv-14'] },
+        // ── c3 — loot / encounter / narration. This column alone opens
+        //        onto ALL of c4 (lane drift relaxed) so every route can
+        //        reach the pre-boss rest at fv-20 — the pre-audit map's
+        //        stated "heal before the climax" intent, now guaranteed.
+        { id: 'fv-17', location: [3, 1], connectedNodes: ['fv-15', 'fv-5', 'fv-20'] },
+        { id: 'fv-4',  location: [3, 0], connectedNodes: ['fv-15', 'fv-5', 'fv-20'] },
+        { id: 'fv-14', location: [3, -1], connectedNodes: ['fv-15', 'fv-5', 'fv-20'] },
+        // ── c4 — the last breath: quest board / gathering / REST ─────
+        { id: 'fv-15', location: [4, 1], connectedNodes: ['fv-6'] },
+        { id: 'fv-5',  location: [4, 0], connectedNodes: ['fv-6'] },
+        { id: 'fv-20', location: [4, -1], connectedNodes: ['fv-6'] },
+        // ── c5 — the breakwater. Every route passes through here. ────
+        { id: 'fv-6',  location: [5, 0], connectedNodes: ['fv-18', 'fv-7', 'fv-19'] },
+        // ── c6 — hazard / encounter / interaction ────────────────────
+        { id: 'fv-18', location: [6, 1], connectedNodes: ['fv-8', 'fv-21'] },
+        { id: 'fv-7',  location: [6, 0], connectedNodes: ['fv-8', 'fv-21', 'fv-25'] },
+        { id: 'fv-19', location: [6, -1], connectedNodes: ['fv-8', 'fv-25'] },
+        // ── c7 — encounter / gathering / rest ────────────────────────
+        { id: 'fv-21', location: [7, 1], connectedNodes: ['fv-9', 'fv-22'] },
+        { id: 'fv-8',  location: [7, 0], connectedNodes: ['fv-9', 'fv-22', 'fv-23'] },
+        { id: 'fv-25', location: [7, -1], connectedNodes: ['fv-9', 'fv-23'] },
+        // ── c8 — gathering / rest / hazard ───────────────────────────
+        { id: 'fv-22', location: [8, 1], connectedNodes: ['fv-24', 'fv-10'] },
+        { id: 'fv-9',  location: [8, 0], connectedNodes: ['fv-24', 'fv-10'] },
+        { id: 'fv-23', location: [8, -1], connectedNodes: ['fv-10'] },
+        // ── c9 — the coast road out. Authored terminal column. ───────
+        { id: 'fv-24', location: [9, 1], connectedNodes: [] },
         { id: 'fv-10', location: [9, 0], connectedNodes: [] },
-        // ── Harbor district (Phase 65; y=+1..+2; fv-15 dead-end) ──────
-        { id: 'fv-11', location: [0, 1], connectedNodes: ['fv-1', 'fv-12', 'fv-14'] },
-        { id: 'fv-12', location: [1, 1], connectedNodes: ['fv-2', 'fv-11', 'fv-13'] },
-        { id: 'fv-13', location: [2, 1], connectedNodes: ['fv-3', 'fv-12'] },
-        { id: 'fv-14', location: [0, 2], connectedNodes: ['fv-11', 'fv-15'] },
-        { id: 'fv-15', location: [1, 2], connectedNodes: ['fv-14'] },
-        // ── Inland streets (Phase 65; y=-1..-2; fv-17 ↔ fv-19 loop) ──
-        { id: 'fv-16', location: [2, -1], connectedNodes: ['fv-3', 'fv-17'] },
-        { id: 'fv-17', location: [3, -1], connectedNodes: ['fv-4', 'fv-16', 'fv-18', 'fv-19'] },
-        { id: 'fv-18', location: [4, -1], connectedNodes: ['fv-5', 'fv-17', 'fv-19'] },
-        { id: 'fv-19', location: [3, -2], connectedNodes: ['fv-17', 'fv-18', 'fv-20'] },
-        { id: 'fv-20', location: [4, -2], connectedNodes: ['fv-19'] },
-        // ── Cliff path (Phase 65; y=+1..+2 east; fv-25 dead-end) ─────
-        { id: 'fv-21', location: [6, 1], connectedNodes: ['fv-7', 'fv-22', 'fv-24'] },
-        { id: 'fv-22', location: [7, 1], connectedNodes: ['fv-8', 'fv-21', 'fv-23'] },
-        { id: 'fv-23', location: [8, 1], connectedNodes: ['fv-22', 'fv-24'] },
-        { id: 'fv-24', location: [8, 2], connectedNodes: ['fv-21', 'fv-23', 'fv-25'] },
-        { id: 'fv-25', location: [9, 2], connectedNodes: ['fv-24'] },
     ],
     npcs: [oldMarrow, tideShopkeeper, coastalBeggar, captainBlackwater, fishermansDaughter, villageHealer, unionLeader, merchantWidow],
     enemies: [],
@@ -457,50 +489,58 @@ const northernForest: MapDefinition = {
     name: 'northern-forest',
     continent: 'coastal-continent',
     description: 'A pine-thick wood inland from the village; cold springs, low light, and a cave mouth at the far edge.',
+    // 2026-08-08 first-map audit — re-layered onto the same column law as
+    // fishing-village above (see that block's comment for the full
+    // rationale and the invariant test). The Phase-65-era forest carried
+    // the identical defect: seven nodes could strand a run outright, the
+    // longest single life covered 13 of 25 nodes, and nf-9/nf-22 and
+    // nf-10/nf-23 shared grid coordinates so the map canvas drew them
+    // stacked on top of each other.
+    //
+    // Nine columns, three lanes: the RIDGE (y=+1), the TRAIL (y=0), and
+    // the GLEN (y=-1). nf-10 — the cave mouth the `get-to-cave` quest
+    // reaches for — moves to the authored terminal column so the map ends
+    // where the story says it ends.
     startingNode: {
         id: 'nf-1',
         location: [0, 0],
-        connectedNodes: ['nf-2', 'nf-3'],
+        connectedNodes: ['nf-3', 'nf-2', 'nf-12'],
     },
     nodes: [
-        // Existing spine (preserved)
-        { id: 'nf-1',  location: [0, 0], connectedNodes: ['nf-2', 'nf-3'] },
-        { id: 'nf-2',  location: [1, 0], connectedNodes: ['nf-4'] },
-        { id: 'nf-3',  location: [1, 1], connectedNodes: ['nf-5', 'nf-12'] },
-        { id: 'nf-4',  location: [2, 0], connectedNodes: ['nf-6'] },
-        { id: 'nf-5',  location: [2, 1], connectedNodes: ['nf-6', 'nf-20'] },
-        { id: 'nf-6',  location: [3, 0], connectedNodes: ['nf-7', 'nf-15'] },
-        { id: 'nf-7',  location: [4, 0], connectedNodes: ['nf-8', 'nf-11'] },
-        { id: 'nf-8',  location: [5, 0], connectedNodes: ['nf-9', 'nf-18'] },
-        { id: 'nf-9',  location: [6, 0], connectedNodes: ['nf-10', 'nf-22'] },
-        { id: 'nf-10', location: [7, 0], connectedNodes: [] },
-        
-        // Mist Ridge sub-area
-        { id: 'nf-11', location: [4, -1], connectedNodes: ['nf-7'] },
-        
-        // Glen Path sub-area
-        { id: 'nf-12', location: [1, -1], connectedNodes: ['nf-3', 'nf-13', 'nf-20'] },
-        { id: 'nf-13', location: [2, -1], connectedNodes: ['nf-12', 'nf-14'] },
-        { id: 'nf-14', location: [3, -1], connectedNodes: ['nf-13'] },
-        
-        // Bone Hollow sub-area
-        { id: 'nf-15', location: [3, 1], connectedNodes: ['nf-6', 'nf-16'] },
-        { id: 'nf-16', location: [4, 1], connectedNodes: ['nf-15', 'nf-17'] },
-        { id: 'nf-17', location: [5, 1], connectedNodes: ['nf-16'] },
-        
-        // Mist Ridge continued
-        { id: 'nf-18', location: [5, -1], connectedNodes: ['nf-8', 'nf-19'] },
-        { id: 'nf-19', location: [6, -1], connectedNodes: ['nf-18'] },
-        
-        // Glen Path lower branch
-        { id: 'nf-20', location: [1, -2], connectedNodes: ['nf-5', 'nf-12', 'nf-21'] },
-        { id: 'nf-21', location: [2, -2], connectedNodes: ['nf-20'] },
-        
-        // Mist Ridge east
-        { id: 'nf-22', location: [6, 0], connectedNodes: ['nf-9', 'nf-23'] },
-        { id: 'nf-23', location: [7, 0], connectedNodes: ['nf-22', 'nf-24'] },
-        { id: 'nf-24', location: [7, -1], connectedNodes: ['nf-23', 'nf-25'] },
-        { id: 'nf-25', location: [8, -1], connectedNodes: ['nf-24'] },
+        // ── c0 — the treeline ────────────────────────────────────────
+        { id: 'nf-1',  location: [0, 0], connectedNodes: ['nf-3', 'nf-2', 'nf-12'] },
+        // ── c1 — interaction / gathering / encounter ─────────────────
+        { id: 'nf-3',  location: [1, 1], connectedNodes: ['nf-5', 'nf-4'] },
+        { id: 'nf-2',  location: [1, 0], connectedNodes: ['nf-5', 'nf-4', 'nf-13'] },
+        { id: 'nf-12', location: [1, -1], connectedNodes: ['nf-4', 'nf-13'] },
+        // ── c2 — interaction / rest / gathering ──────────────────────
+        { id: 'nf-5',  location: [2, 1], connectedNodes: ['nf-15', 'nf-6'] },
+        { id: 'nf-4',  location: [2, 0], connectedNodes: ['nf-15', 'nf-6', 'nf-14'] },
+        { id: 'nf-13', location: [2, -1], connectedNodes: ['nf-6', 'nf-14'] },
+        // ── c3 — hazard / encounter / interaction ────────────────────
+        { id: 'nf-15', location: [3, 1], connectedNodes: ['nf-16', 'nf-7'] },
+        { id: 'nf-6',  location: [3, 0], connectedNodes: ['nf-16', 'nf-7', 'nf-11'] },
+        { id: 'nf-14', location: [3, -1], connectedNodes: ['nf-7', 'nf-11'] },
+        // ── c4 — loot / interaction / rest ───────────────────────────
+        { id: 'nf-16', location: [4, 1], connectedNodes: ['nf-17', 'nf-8'] },
+        { id: 'nf-7',  location: [4, 0], connectedNodes: ['nf-17', 'nf-8', 'nf-20'] },
+        { id: 'nf-11', location: [4, -1], connectedNodes: ['nf-8', 'nf-20'] },
+        // ── c5 — cutscene / village / loot ───────────────────────────
+        { id: 'nf-17', location: [5, 1], connectedNodes: ['nf-21', 'nf-9'] },
+        { id: 'nf-8',  location: [5, 0], connectedNodes: ['nf-21', 'nf-9', 'nf-19'] },
+        { id: 'nf-20', location: [5, -1], connectedNodes: ['nf-9', 'nf-19'] },
+        // ── c6 — cutscene / interaction / encounter ──────────────────
+        { id: 'nf-21', location: [6, 1], connectedNodes: ['nf-22', 'nf-23'] },
+        { id: 'nf-9',  location: [6, 0], connectedNodes: ['nf-22', 'nf-23', 'nf-18'] },
+        { id: 'nf-19', location: [6, -1], connectedNodes: ['nf-23', 'nf-18'] },
+        // ── c7 — gathering / interaction / village ───────────────────
+        { id: 'nf-22', location: [7, 1], connectedNodes: ['nf-24', 'nf-10'] },
+        { id: 'nf-23', location: [7, 0], connectedNodes: ['nf-24', 'nf-10', 'nf-25'] },
+        { id: 'nf-18', location: [7, -1], connectedNodes: ['nf-10', 'nf-25'] },
+        // ── c8 — rest / THE CAVE MOUTH / hazard. Terminal column. ────
+        { id: 'nf-24', location: [8, 1], connectedNodes: [] },
+        { id: 'nf-10', location: [8, 0], connectedNodes: [] },
+        { id: 'nf-25', location: [8, -1], connectedNodes: [] },
     ],
     npcs: [shrineKeeper, chronicler, wanderingPhilosopher, forestRanger, hermitSage, lostTrader],
     enemies: [],

@@ -71,6 +71,22 @@ export default function ExplorationScreen() {
     // first combat-prelude event and stays mounted until aftermath
     // dismissal completes (via the combat-mode hook above).
     const hasEvent = useGameState(selectHasActiveEvent);
+
+    // 2026-08-08 first-map audit — resolve the START node's event once, on
+    // arrival at the map. Events fire on ARRIVAL at a node, and the player
+    // never "arrives" at the node they are placed on, so whatever the map
+    // authored for its starting node was dead content: on fishing-village
+    // that silently swallowed fv-1's entire pool. The mechanics CLI has
+    // resolved the start node behind `--resolve-start` since Phase 14; this
+    // is the app's equivalent. `resolveCurrentMapEvent` marks the node
+    // consumed, so `startNodePending` makes it a genuine one-shot per map.
+    // Held off while anything else owns the screen — resolving on top of a
+    // live event or an in-flight encounter would clobber it.
+    useEffect(() => {
+        if (vm.startNodePending && !hasEvent && !inEncounterModal && !inCombat) {
+            actions.resolveCurrentMapEvent();
+        }
+    }, [vm.mapId, vm.startNodePending, hasEvent, inEncounterModal, inCombat, actions]);
     // Phase 63c — the modal mount lifecycle now spans the full
     // encounter session (prelude → combat → aftermath), not just
     // the moment `selectHasActiveEvent` returns true. Once combat
