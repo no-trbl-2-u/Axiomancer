@@ -33,7 +33,7 @@ import {
     initializeCombatEncounter, rollEncounterDice, resolveThreatPhase, projectIncomingThreat,
 } from '../combat.engine';
 import { getThreatSequence } from '../combat.threat';
-import { THREAT_RUNGS, THREAT_RUNGS_BOSS } from '../effects';
+import { THREAT_RUNGS_BOSS } from '../effects';
 import type { CombatEncounterState } from '../combat.encounter.types';
 
 afterEach(() => vi.restoreAllMocks());

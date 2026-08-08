@@ -29,7 +29,7 @@ import type { ActiveEffect } from '../../Effects/types';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveCombatPhase,
     resolveThreatPhase, processBetweenPhases, draftStanceDie, startTurn, endTurn,
-    discardCombatCard, getFloatingDiceColors, getDraftedDie, selectCapitulationChoice,
+    getFloatingDiceColors, getDraftedDie, selectCapitulationChoice,
 } from '../combat.engine';
 import { FLOATING_DICE_CAP } from '../combat.dice';
 import { runHazardCombatAutoEncounter } from '../combat.autoplay';
