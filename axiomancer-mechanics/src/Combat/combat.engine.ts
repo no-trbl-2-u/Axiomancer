@@ -2653,10 +2653,18 @@ function playBottomAction(
                 // STATUS on the enemy (phase 32 part 4f — `lastSpellCardId` skips
                 // over any no-status play in between) says itself again, `times`
                 // times. Never chains into another replay.
+                // Phase 39 (2026-08-08) precondition-width retune: `lastSpellCardId`
+                // never reset across turns, so once ANY spell had landed a status
+                // this whole combat, ouroboros essentially never fizzled again
+                // (measured 3-10% — far under the ~25% doctrine target). Narrowed
+                // via `lastSpellRound` to "the argument you just made THIS TURN"
+                // (round is the turn counter) — the FIRST spell of a turn, with
+                // nothing said yet THIS turn to repeat, is now a real fizzle.
                 const lastId = state.lastSpellCardId;
                 const lastCard = lastId && lastId !== sourceCard.id ? lookupCard(lastId) : undefined;
                 const replayable = lastCard
                     && lastCard.cardType === 'spell'
+                    && state.lastSpellRound === state.round
                     && !(lastCard.specialMechanics ?? []).some(m2 => m2.kind === 'replay_last');
                 if (replayable && lastCard) {
                     for (let i = 0; i < mech.times; i++) {
@@ -3141,8 +3149,21 @@ function playBottomAction(
     // FORGE (spec 32 v3 §5) — the forged floating die joins the tray NOW, so it
     // can power a play THIS turn (the "bigger turns" intent).
     if (forgedFloating.length > 0) dice = [...dice, ...forgedFloating];
-    // (`entropy-tax`'s kindled/floating-spend mark hook was retired with the
-    //  card in Phase D8's ten-in/ten-out promotion ledger.)
+    // `entropy-tax` (D): spending a KINDLED (temporary) or FLOATING die marks
+    // the enemy — the manufactured resource has a price (spec 32 v3 T3).
+    // Restored Phase 39 (2026-08-08) alongside the card (retired at D8).
+    if (zoneHas(state, 'entropy-tax')
+        && (poweringSource === 'floating' || (poweringSource === 'reserve' && powering.temporary))) {
+        const markDef = lookupEffectDef('debuff_mark');
+        if (markDef) {
+            const applied = applyEffect(enemy.effects, markDef, state.round, { intensityDelta: 1, sourceId: 'entropy-tax' });
+            enemy = { ...enemy, effects: applied.activeEffects };
+            events.push({
+                kind: 'effect-landed', cardId: 'entropy-tax', effectId: markDef.id, target: 'enemy',
+                effectKind: 'control', intensity: applied.result.activeEffect?.intensity ?? 1, effect: markDef,
+            });
+        }
+    }
 
     // Defense card → GUARD (read-scaled + color-match + pips). Absorbed in
     // `resolveThreatPhase`.
@@ -3219,6 +3240,10 @@ function playBottomAction(
         // no-op) leaves the prior status-landing spell in place instead of
         // overwriting it with a card that has nothing to re-land.
         lastSpellCardId: landedOnEnemy ? sourceCard.id : state.lastSpellCardId,
+        // Phase 39 (2026-08-08) — the round-stamp ouroboros's precondition-
+        // width retune reads (see `replay_last` below): only set alongside
+        // `lastSpellCardId`, on the SAME condition.
+        lastSpellRound: landedOnEnemy ? state.round : state.lastSpellRound,
         // Spec 32 §12 #4 — both blood-price sites (the `recoil` mech case and
         // the fate-recoil pay) accumulate into `recoilTaken` above.
         recoilPaidThisTurn: (state.recoilPaidThisTurn ?? 0) + recoilTaken,

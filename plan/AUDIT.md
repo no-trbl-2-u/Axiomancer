@@ -14,15 +14,96 @@
 
 ## Pending
 
-> **BANNER (/oversight 2026-08-08 — the unshackling).** Every
-> "Doctrine-curve confirmation" row below (seven of them, 07-20 → 08-07)
-> measures adherence to the status-dominance doctrine, which T voided
-> this day. They are now **historical readings of a dead law**, not open
-> findings: do not drain them, do not act on their 80/50/25-35/0 target
-> band, and do not file an eighth. `/digest`'s nightly pass should stop
-> emitting them until **Phase 43** defines the replacement objective
-> function; the next `/consolidate` should compact the seven into one
-> historical row. See `plan/bearings.md` § "THE UNSHACKLING".
+> **BANNER (/oversight 2026-08-08 — the unshackling).** The seven
+> byte-identical "Doctrine-curve confirmation" rows below (07-20 →
+> 08-07) measure adherence to the status-dominance doctrine, which T
+> voided this day. They are **historical readings of a dead law**, not
+> open findings: do not drain them, do not act on their 80/50/25-35/0
+> target band, and do not file another identical nightly. The next
+> `/consolidate` should compact the seven into one historical row, and
+> `/digest` should stop emitting them until **Phase 43** defines the
+> replacement objective function.
+>
+> The **post-Phase-39 row immediately below is different** and stays
+> live: it is a post-phase verification rather than an eighth identical
+> nightly, and its numbers are the honest record of what Phase 39 did.
+> Read it with the caveat that its target band is void — Phase 43
+> decides whether mid 2.0% / late 0.0% is a defect at all. Likewise the
+> two `[needs-user-call]` rows it spawned are genuinely open, and the
+> unshackling **changes one of them**: the foundry row's blocker ("no
+> card in the current 86-card library gives forge a heart-aspect
+> win-path alternative") is no longer a constraint, because a
+> replacement may now be authored freely, including with normal damage.
+> See `plan/bearings.md` § "THE UNSHACKLING".
+
+### Doctrine-curve confirmation post-Phase-39: violation persists — matrix is the witness
+- category: content
+- impact: 8
+- ease: 2
+- detail: filed 2026-08-08 (digest). `baseline:check` opened this cycle
+  stale by one mechanics-source commit (`8d50591e`, Phase 39 — "post-D8
+  curve repair + library theme-symmetry", the phase explicitly promoted
+  via `/oversight` 2026-08-08 to close this exact doctrine gap).
+  Re-measured with the reduced-nightly pass, committed at `8eb33fb8`.
+  Read (blind policy-pick, doctrine early ~80 / mid ~50 / late 25-35 /
+  impossible 0): early 61.1% (unchanged from the six prior byte-identical
+  reads), mid 2.0% (up from 0.0% — 3 wins across 150 runs, first
+  measured movement since 07-30, still a deep violation against ~50),
+  late 0.0% (unchanged — zero movement despite being Phase 39's named
+  target), impossible 0% (unchanged, correct). Phase 39's own shipping
+  commit (`8d50591e`) already flagged this in its `needs-user-call`
+  section: the mid-cliff persists even in presets that already carry
+  every proven staple, which the phase author reads as
+  engine/enemy-scaling shaped rather than card-composition shaped — the
+  fresh matrix corroborates that read rather than contradicting it. Also
+  see `plan/CRITIQUE.md`'s `[HIGH] late-stage global collapse` row,
+  updated this cycle to record that Phase 39 landed without draining it.
+- next: /oversight — this is an owner-scoped call, not an `/iterate` pick.
+  Phase 39's own recommendation was a dedicated mid/late enemy-threat-
+  scaling follow-up phase (a manual engine-constant change, out of
+  `/deck-tuning`'s card-only remit per the standing rail). Two related
+  needs-user-call rows below carry Phase 39's other unresolved items.
+
+### [needs-user-call] Phase 39: foundry's SWAY win-path removal regressed early-stage 73% -> 44%
+- category: design
+- impact: 6
+- ease: 2
+- detail: filed 2026-08-08 (digest, mined from Phase 39's shipping
+  commit `8d50591e`). The owner-ruled status-doctrine seat swap
+  (`entropy-tax` replaces the `mirror-of-longing` borrow in `foundry`,
+  restoring forge's own disenchant/status-engine identity) was applied
+  regardless of win-rate delta, per the ruling. Cost: foundry lost its
+  sole SWAY/capitulate win path, and no card in the current 86-card
+  library gives forge a heart-aspect win-path alternative — early-stage
+  win rate measured 73% -> 44% in the phase's own before/after sweep.
+  The phase author flagged this as a real, expected cost of the ruling,
+  not a bug, but recommends forge get an authored win-condition card as
+  a follow-up.
+- next: /oversight — owner call on whether to queue an authored
+  win-condition card for foundry (routes to `/deck-tuning` once
+  scoped), or accept the regressed early-stage number as the settled
+  cost of the status-doctrine identity ruling.
+
+### [needs-user-call] Phase 39: mid-game doctrine cliff reads engine/enemy-scaling shaped, not card-shaped
+- category: design
+- impact: 7
+- ease: 2
+- detail: filed 2026-08-08 (digest, mined from Phase 39's shipping
+  commit `8d50591e`). Phase 39's §C duplication-sweep found 10 of the
+  Card Ledger dashboard's 13 "ready to duplicate" staples were already
+  fully deployed pre-phase (3 more stale post-2026-07-19-promotions),
+  and presets already carrying proven staples still sat at 0% mid win
+  rate — evidence the mid-cliff is not a card-composition gap. The
+  phase author explicitly did not force further duplication on that
+  basis and recommended a follow-up phase on mid-stage threat scaling
+  as a manual engine constant, not a `/deck-tuning` card change. This
+  cycle's fresh baseline (see the "Doctrine-curve confirmation
+  post-Phase-39" row above) corroborates: mid moved only 0.0% -> 2.0%
+  (150 runs) despite Phase 39 landing.
+- next: /oversight — scope and promote (or decline) a dedicated
+  mid/late enemy-threat-scaling phase. Per the standing rail, engine
+  constants are tuned manually; this loop does not vote on its own
+  constraints.
 
 ### `Closes #N` auto-close is still not firing reliably — the 2026-08-03 fix does not hold
 - category: debt

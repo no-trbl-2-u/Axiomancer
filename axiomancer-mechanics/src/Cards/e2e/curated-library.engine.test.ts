@@ -37,8 +37,8 @@ for (const card of cardLibrary) {
 }
 
 describe('themed library — shape contract (spec 32 v3 §6-7)', () => {
-    it('is exactly 79 unique cards (70 post-D8 + the 9 owner-ratified 2026-07-19 swap-pool promotions)', () => {
-        expect(cardLibrary.length).toBe(79);
+    it('is exactly 86 unique cards (70 post-D8 + the 9 owner-ratified 2026-07-19 swap-pool promotions + the 7 phase-39 theme-symmetry restorations)', () => {
+        expect(cardLibrary.length).toBe(86);
         const ids = cardLibrary.map(c => c.id);
         expect(new Set(ids).size).toBe(ids.length);
     });
@@ -53,27 +53,34 @@ describe('themed library — shape contract (spec 32 v3 §6-7)', () => {
     // spec-32 per-theme symmetry (7 cards / 2C 2U 3R / 1 ench + 1 dis per
     // theme). The retirement ledger was FORCED — only the reward-only ten
     // were unreferenced by presets, and they measured zero plays in 345,600
-    // encounters (plan/tuning/2026-07-18-d8-preset-dice-valves.md). The
-    // post-D8 shape is pinned EXACTLY below so drift is still caught;
-    // restoring per-theme symmetry (authoring replacement ench/dis cards) is
-    // the next library phase's work, not an accident to lint away.
+    // encounters (plan/tuning/2026-07-18-d8-preset-dice-valves.md).
     // 2026-07-19: the nine owner-ratified swap-pool promotions (all spells)
     // grew seven themes — affliction/forge +1 common, peroration +1 common
     // +1 rare, oracle/charm/echo +1 uncommon, bulwark +1 common +1 rare.
     // Ench/dis counts unchanged (no passive was promoted).
-    it('each theme matches the pinned post-promotion shape (cards / rarities / types)', () => {
+    // Phase 39 (2026-08-08): the theme-symmetry restoration — seven of the
+    // ten D8-retired reward-only cards (practiced-cadence, captive-audience,
+    // entropy-tax, achilles-and-the-tortoise, fated-course, the-tithe,
+    // heart-of-the-matter) are restored verbatim, each filling its theme's
+    // missing ench/dis seat (or, for heart-of-the-matter, grace's SWAY-
+    // finisher ruling). straw-mans-jab / ad-nauseam / memento-mori stay
+    // retired — their themes already met the pin without them. The shape is
+    // pinned EXACTLY below so drift is still caught; akrasia and bulwark are
+    // untouched by this restoration (their 8/10-card counts are unrelated
+    // 2026-07-19 swap-pool promotions, not an ench/dis gap).
+    it('each theme matches the pinned post-restoration shape (cards / rarities / types)', () => {
         const POST_D8_SHAPE: Record<string, {
             n: number; common: number; uncommon: number; rare: number;
             enchantment: number; disenchant: number;
         }> = {
             affliction: { n: 8, common: 2, uncommon: 3, rare: 3, enchantment: 1, disenchant: 1 },
-            peroration: { n: 8, common: 3, uncommon: 3, rare: 2, enchantment: 0, disenchant: 0 },
-            forge:      { n: 8, common: 3, uncommon: 2, rare: 3, enchantment: 2, disenchant: 0 },
+            peroration: { n: 10, common: 3, uncommon: 3, rare: 4, enchantment: 1, disenchant: 1 },
+            forge:      { n: 9,  common: 3, uncommon: 2, rare: 4, enchantment: 2, disenchant: 1 },
             akrasia:    { n: 8, common: 2, uncommon: 3, rare: 3, enchantment: 1, disenchant: 1 },
-            control:    { n: 7, common: 2, uncommon: 3, rare: 2, enchantment: 0, disenchant: 1 },
-            oracle:     { n: 8, common: 2, uncommon: 4, rare: 2, enchantment: 1, disenchant: 0 },
-            harvest:    { n: 6, common: 1, uncommon: 3, rare: 2, enchantment: 1, disenchant: 0 },
-            charm:      { n: 8, common: 2, uncommon: 4, rare: 2, enchantment: 1, disenchant: 1 },
+            control:    { n: 8,  common: 2, uncommon: 3, rare: 3, enchantment: 1, disenchant: 1 },
+            oracle:     { n: 9,  common: 2, uncommon: 4, rare: 3, enchantment: 1, disenchant: 1 },
+            harvest:    { n: 7,  common: 1, uncommon: 3, rare: 3, enchantment: 1, disenchant: 1 },
+            charm:      { n: 9,  common: 2, uncommon: 4, rare: 3, enchantment: 1, disenchant: 1 },
             bulwark:    { n: 10, common: 4, uncommon: 2, rare: 4, enchantment: 1, disenchant: 1 },
             echo:       { n: 8, common: 3, uncommon: 2, rare: 3, enchantment: 1, disenchant: 1 },
         };
@@ -93,8 +100,8 @@ describe('themed library — shape contract (spec 32 v3 §6-7)', () => {
                 expect(rankToRarity(c.rank), `${theme} ${c.id}`).toBe('rare');
             }
         }
-        // The raggedness sums back to the 79-card law.
-        expect(Object.values(POST_D8_SHAPE).reduce((s, p) => s + p.n, 0)).toBe(79);
+        // The raggedness sums back to the 86-card law.
+        expect(Object.values(POST_D8_SHAPE).reduce((s, p) => s + p.n, 0)).toBe(86);
     });
 
     it('every rank is a named rung on the ladder', () => {
@@ -151,18 +158,26 @@ describe('themed library — FREE/PAID anatomy (spec §2)', () => {
         }
     });
 
-    it('cardOrigin tags every library card as a starter, except the eighteen documented reward-only cards', () => {
+    it('cardOrigin tags every library card as a starter, except the twenty-four documented reward-only cards', () => {
         // The 5/5/5 color law squeezes 10 cards (the D8 valves, flag-on-only
         // seats) out of every recipe, and the 2026-07-19 promotions unseated
-        // 8 incumbents (pinned by id in deck-presets.engine.test.ts); all 18
-        // remain in the reward pool and surface through drafts instead.
+        // 8 incumbents (pinned by id in deck-presets.engine.test.ts); phase 39
+        // (2026-08-08) restored 7 more cards (§A) of which 2 landed a forced
+        // preset seat (entropy-tax/foundry, heart-of-the-matter/grace) and 4
+        // did not (achilles-and-the-tortoise — measured DEAD in grace, no
+        // seat elsewhere; captive-audience, fated-course, the-tithe — no
+        // forced seat), and its foundry/grace color-law compensating
+        // shuffle (§B) evicted 2 more incumbents (anvil-of-form,
+        // irresistible-grace, the latter re-picked to resonant-chamber after
+        // A/B showed the first candidate regressed grace). All 24 remain in
+        // the reward pool and surface through drafts instead.
         const rewardOnly: string[] = [];
         for (const card of cardLibrary) {
             const origin = cardOrigin(card.id);
             if (origin.source === 'reward') { rewardOnly.push(card.id); continue; }
             expect(origin.presetDeck, `${card.id} presetDeck`).toBeTruthy();
         }
-        expect(rewardOnly.length, `reward-only starters: ${rewardOnly.join(', ')}`).toBe(18);
+        expect(rewardOnly.length, `reward-only starters: ${rewardOnly.join(', ')}`).toBe(24);
     });
 
     it('cardOrigin tags a non-preset id as a reward', () => {
@@ -274,8 +289,8 @@ describe('themed library — id hygiene and provenance', () => {
         }
     });
 
-    it('the reward pool is the whole 79-card library and every id resolves', () => {
-        expect(COMBAT_REWARD_POOL.length).toBe(79);
+    it('the reward pool is the whole 86-card library and every id resolves', () => {
+        expect(COMBAT_REWARD_POOL.length).toBe(86);
         for (const id of COMBAT_REWARD_POOL) {
             expect(getCardById(id), `reward pool: ${id}`).toBeDefined();
         }

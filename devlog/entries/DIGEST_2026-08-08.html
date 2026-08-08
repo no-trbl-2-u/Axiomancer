@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Axiomancer digest — 2026-08-08</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #0e1116; --fg: #d7dde5; --fg-strong: #f0f3f7; --muted: #6b7480;
+  --accent: #8ab4f8; --panel: #161b22; --card: #12171f; --border: #222833;
+  --row: #141a22; --code-bg: #1b212b; --th: #aeb7c2; --list-head: #9aa4b0;
+  --add: rgba(80,200,120,.16); --del: rgba(230,90,90,.16);
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f7f5ef; --fg: #33302a; --fg-strong: #1a160f; --muted: #6f6656;
+    --accent: #3a5db0; --panel: #efece3; --card: #fbfaf5; --border: #ddd7c9;
+    --row: #efece3; --code-bg: #e9e5d9; --th: #5c5344; --list-head: #6f6656;
+    --add: rgba(35,140,75,.16); --del: rgba(190,55,55,.16);
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+.wrap { max-width: 46rem; margin: 0 auto; padding: 20px 18px 80px; }
+header.top {
+  position: sticky; top: 0; z-index: 5;
+  background: var(--bg); border-bottom: 1px solid var(--border); margin: 0 0 20px;
+}
+header.top .wrap { padding-top: 14px; padding-bottom: 14px; display: flex; align-items: baseline; gap: 14px; }
+header.top a.home, header.top .home { color: var(--accent); text-decoration: none; font-weight: 600; }
+header.top .crumb { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+h1, h2, h3, h4 { line-height: 1.25; color: var(--fg-strong); }
+h1 { font-size: 26px; margin: 0 0 6px; }
+h2 { font-size: 19px; margin: 0; }
+a { color: var(--accent); }
+p { margin: 8px 0; }
+code { background: var(--code-bg); padding: 1px 6px; border-radius: 5px; font-size: 0.86em; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+pre { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+.tablewrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { background: var(--panel); color: var(--th); font-weight: 600; white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+ul, ol { padding-left: 22px; }
+li { margin: 4px 0; }
+.muted { color: var(--muted); }
+
+.st { font-weight: 600; white-space: nowrap; }
+.st::before { content: ""; display: inline-block; width: .5em; height: .5em; border-radius: 50%; margin-right: .38em; background: currentColor; vertical-align: middle; }
+.st-ok { color: #4bb96a; }
+.st-neutral { color: var(--muted); }
+.st-warn { color: #d0a92b; }
+.st-bad { color: #e0574b; }
+
+.headline { font-size: 19px; color: var(--fg-strong); margin: 0 0 12px; }
+.counts { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 22px; }
+
+.chip {
+  display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; padding: 2px 9px; border-radius: 999px;
+  color: #0b0d10; background: var(--cat, var(--accent)); white-space: nowrap;
+}
+.cat-mechanics { --cat: #d0a92b; }
+.cat-ui { --cat: #5aa9e6; }
+.cat-content { --cat: #7fc45a; }
+.cat-infra { --cat: #b08bf0; }
+.cat-balance { --cat: #e6864b; }
+
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-left: 4px solid var(--cat, var(--accent));
+  border-radius: 10px; padding: 14px 18px; margin: 14px 0; scroll-margin-top: 72px;
+}
+.card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.card-head h2 { font-size: 18px; }
+.field { margin: 6px 0; }
+.flabel {
+  display: inline-block; min-width: 3.2em; margin-right: 4px; color: var(--muted);
+  font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .04em;
+}
+.commits { margin: 8px 0 2px; }
+.commit { font-size: 12px; }
+
+.panel { margin: 22px 0; scroll-margin-top: 72px; }
+.panel > h2 { padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+
+.diff {
+  border: 1px solid var(--border); border-radius: 8px; overflow-x: auto; margin: 12px 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.5;
+  background: var(--bg);
+}
+.dl { padding: 0 12px; white-space: pre; }
+.dl.add { background: var(--add); }
+.dl.del { background: var(--del); }
+.dl.hunk { color: var(--accent); }
+.dl.meta { color: var(--muted); }
+
+figure.shotset { margin: 14px 0; }
+figure.shotset > figcaption { font-size: 14px; color: var(--fg); margin-bottom: 8px; }
+.shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.shot { margin: 0; }
+.shot .role { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); text-align: center; margin-bottom: 3px; }
+.shot img { width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; display: block; }
+
+.entry-list { list-style: none; padding: 0; margin: 8px 0 0; }
+.entry-list li { margin: 0; border-bottom: 1px solid var(--border); }
+.entry-list a { display: block; padding: 14px 4px; text-decoration: none; color: var(--fg); }
+.entry-list a:hover { background: var(--row); }
+.entry-list .date { color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
+.entry-list .head { color: var(--list-head); font-size: 14px; margin: 2px 0 6px; }
+footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+
+/* ── Hub (landing page) ──────────────────────────────────────────────── */
+.hub { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 14px; margin: 22px 0 0; }
+.hub a {
+  display: block; text-decoration: none; color: var(--fg);
+  background: var(--card); border: 1px solid var(--border);
+  border-left: 4px solid var(--hue, var(--accent));
+  border-radius: 12px; padding: 18px 20px; transition: background .12s, transform .12s;
+}
+.hub a:hover { background: var(--row); transform: translateY(-1px); }
+.hub .h-title { font-size: 19px; font-weight: 700; color: var(--fg-strong); margin: 0 0 4px; }
+.hub .h-sub { font-size: 14px; color: var(--muted); }
+.hub .h-glyph { font-size: 22px; line-height: 1; margin-bottom: 8px; display: block; }
+.hue-cards { --hue: #5aa9e6; }
+.hue-enemies { --hue: #e0574b; }
+.hue-effects { --hue: #b08bf0; }
+.hue-log { --hue: #d0a92b; }
+.hue-tuning { --hue: #3ec9b0; }
+
+/* ── Catalog: cards grid ─────────────────────────────────────────────── */
+.searchbar { margin: 14px 0 4px; }
+.searchbar input {
+  width: 100%; padding: 10px 14px; border-radius: 10px; font-size: 15px;
+  background: var(--card); color: var(--fg); border: 1px solid var(--border);
+}
+.count-note { color: var(--muted); font-size: 13px; margin: 6px 0 16px; }
+.grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 16px; }
+.gcard {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden; display: flex; flex-direction: column;
+}
+.gcard .art { aspect-ratio: 4 / 3; background: var(--panel); overflow: hidden; }
+.gcard .art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gcard .art.none { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 26px; }
+.gcard .body { padding: 12px 14px 14px; }
+.gcard .name { font-weight: 700; color: var(--fg-strong); margin: 0 0 8px; }
+.gcard .statrow { margin: 0 0 8px; }
+
+/* ── Catalog: enemies ────────────────────────────────────────────────── */
+.grid-enemies { display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); gap: 16px; }
+.ecard { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+/* Enemy paintings are alpha-matted (figures float on a keyed-out black), so a
+   solid black plate behind them reads as intended in both themes. */
+.ecard .portrait { aspect-ratio: 1 / 1; background: #000; overflow: hidden; }
+.ecard .portrait img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.ecard .portrait.none { display: flex; align-items: center; justify-content: center; color: #6b7480; font-size: 34px; }
+.ecard .body { padding: 12px 15px 15px; }
+.ecard .name { font-size: 18px; font-weight: 700; color: var(--fg-strong); margin: 0; }
+.ecard .sub { color: var(--muted); font-size: 13px; margin: 2px 0 10px; text-transform: capitalize; }
+.statrow { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+.stat { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--panel); border: 1px solid var(--border); color: var(--fg); white-space: nowrap; }
+.stat .k { color: var(--muted); font-weight: 600; margin-right: 3px; }
+.stat.hp { --sc: #e0574b; } .stat.body { --sc: #e6864b; } .stat.mind { --sc: #5aa9e6; } .stat.heart { --sc: #7fc45a; }
+.stat.hp, .stat.body, .stat.mind, .stat.heart { border-color: color-mix(in srgb, var(--sc) 55%, var(--border)); }
+.sec-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; margin: 10px 0 5px; }
+.fights { font-size: 14px; margin: 0 0 4px; }
+.hint { font-size: 13px; color: var(--muted); font-style: italic; margin: 4px 0 0; }
+.skill { border-top: 1px solid var(--border); padding: 8px 0 0; margin: 8px 0 0; }
+.skill .sk-name { font-weight: 700; color: var(--fg-strong); font-size: 14px; }
+.skill .sk-text { font-size: 13px; color: var(--fg); margin: 2px 0 0; }
+.no-skills { font-size: 13px; color: var(--muted); }
+
+/* ── Catalog: effects ────────────────────────────────────────────────── */
+.eff-list { display: grid; gap: 10px; margin: 8px 0 0; }
+.eff {
+  display: grid; grid-template-columns: 3rem 1fr; gap: 14px; align-items: start;
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+}
+.eff .glyph {
+  width: 3rem; height: 3rem; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 26px; line-height: 1; color: #0b0d10; font-weight: 700;
+  background: var(--gc, var(--accent)); box-shadow: inset 0 0 0 1px rgba(0,0,0,.15);
+}
+.eff .name { font-weight: 700; color: var(--fg-strong); margin: 0 0 6px; }
+.eff .statrow { margin: 0 0 6px; }
+
+/* ── Raw-stat mechanic lines (cards + effects) ───────────────────────── */
+.mods { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 3px; }
+.mods li {
+  margin: 0; font-size: 13px; line-height: 1.4; color: var(--fg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  padding-left: 12px; position: relative;
+}
+.mods li::before { content: "›"; position: absolute; left: 0; color: var(--muted); }
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="home" href="../log.html">← DevLog</a><span class="crumb">2026-08-08</span></div></header>
+<main class="wrap">
+<h1 id="headline">2026-08-08</h1>
+<p class="headline">The queue shipped its first bounded balance phase in weeks — Phase</p>
+<div class="counts"><span class="chip cat-ui">1 UI</span><span class="chip cat-balance">1 balance</span></div>
+<section class="card cat-balance" id="phase-39-ships-but-the-doctrine-curve-gate-it-was-built-to-close-stays-red"><div class="card-head"><span class="chip cat-balance">balance</span><h2>Phase 39 ships — but the doctrine-curve gate it was built to close stays red</h2></div>
+<p class="field"><span class="flabel">What</span> restored 7 of D8's 10 retired cards (filling</p>
+<p class="field"><span class="flabel">Why</span> six consecutive nightly baselines (08-01 → 08-07) had read</p>
+<p class="commits"><code class="commit">`8d50591e`</code> <code class="commit">(phase</code> <code class="commit">issue</code> <code class="commit">#177)</code> <code class="commit">`8eb33fb8`</code> <code class="commit">(build-plan</code></p>
+<p>peroration/forge/control/oracle/harvest's missing enchantment/ disenchant seats, <code>cardLibrary</code> 79 → 86), reseated <code>foundry</code> and <code>grace</code>'s status-doctrine identity cards per owner ruling (<code>entropy-tax</code> replaces the <code>mirror-of-longing</code> borrow; <code>heart-of-the- matter</code> replaces the <code>ouroboros</code> borrow), resolved the resulting color-law mismatch with a compensating enchantment-seat shuffle, and retuned <code>ouroboros</code>'s <code>REPLAY_LAST</code> fizzle gate toward its ~25% target (landed 11-17%). byte-identical against doctrine (early ~80 / mid ~50 / late 25-35 / impossible 0): early 61.1%, mid 0.0%, late 0%, impossible 0%. The owner promoted one bounded phase via <code>/oversight</code> on 2026-08-08 to carry the repair rather than let three overlapping candidates keep restating the same signal. flip)</p>
+<div class="diff" role="img" aria-label="code diff"><div class="dl ctx">     if (forgedFloating.length &gt; 0) dice = [...dice, ...forgedFloating];</div><div class="dl del">-    // (`entropy-tax`'s kindled/floating-spend mark hook was retired with the</div><div class="dl del">-    //  card in Phase D8's ten-in/ten-out promotion ledger.)</div><div class="dl add">+    // `entropy-tax` (D): spending a KINDLED (temporary) or FLOATING die marks</div><div class="dl add">+    // the enemy — the manufactured resource has a price (spec 32 v3 T3).</div><div class="dl add">+    // Restored Phase 39 (2026-08-08) alongside the card (retired at D8).</div><div class="dl add">+    if (zoneHas(state, 'entropy-tax')</div><div class="dl add">+        &amp;&amp; (poweringSource === 'floating' || (poweringSource === 'reserve' &amp;&amp; powering.temporary))) {</div><div class="dl add">+        const markDef = lookupEffectDef('debuff_mark');</div><div class="dl add">+        if (markDef) {</div><div class="dl add">+            const applied = applyEffect(enemy.effects, markDef, state.round, { intensityDelta: 1, sourceId: 'entropy-tax' });</div><div class="dl add">+            enemy = { ...enemy, effects: applied.activeEffects };</div><div class="dl add">+            events.push({</div><div class="dl add">+                kind: 'effect-landed', cardId: 'entropy-tax', effectId: markDef.id, target: 'enemy',</div><div class="dl add">+                effectKind: 'control', intensity: applied.result.activeEffect?.intensity ?? 1, effect: markDef,</div><div class="dl add">+            });</div><div class="dl add">+        }</div><div class="dl add">+    }</div></div>
+<p><strong>But the gate stayed red.</strong> This digest's re-measure (reduced nightly, committed at <code>8eb33fb8</code>) reads blind policy-pick early 61.1% (unchanged) / mid 2.0% (up from 0.0% — 3 wins across 150 runs, the first movement since 07-30, still deep in violation against ~50) / late 0.0% (unchanged, zero movement on the phase's named target) / impossible 0% (unchanged, correct). Phase 39's own shipping commit already flagged this as a <code>needs-user-call</code>: presets that already carried every proven staple still sat at 0% mid, which reads as engine/enemy-scaling shaped, not card-composition shaped. Filed as three <code>plan/AUDIT.md</code> rows this cycle (doctrine-curve confirmation + foundry's early-stage regression + the mid-cliff needs-user-call) and <code>plan/CRITIQUE.md</code>'s <code>[HIGH] late-stage global collapse</code> row updated to record that Phase 39 landed without draining it. See Tuning proposals below.</p></section>
+<section class="card cat-ui" id="combat-board-surfaces-the-kill-path-readout-it-always-had-the-data-for"><div class="card-head"><span class="chip cat-ui">UI</span><h2>Combat board surfaces the kill-path readout it always had the data for</h2></div>
+<p class="field"><span class="flabel">What</span> forwarded mechanics' <code>projectCombatOutcome</code> selector</p>
+<p class="field"><span class="flabel">Why</span> build-plan Phase 2 shipped the selector but nothing in</p>
+<p class="commits"><code class="commit">`615ff26b`</code> <code class="commit">(fix</code> <code class="commit">issue</code> <code class="commit">#174)</code> <code class="commit">`1c915ac0`</code> <code class="commit">(audit</code> <code class="commit">finding</code></p>
+<p>(pending DoT / rounds-to-kill / lethal-in-flight) onto <code>CombatEnemyPaneVM</code> and rendered it on the combat board as a "DOT PENDING" / "LETHAL IN N" readout, reusing the existing <code>AltWinMeter</code> component slot. <code>axiomancer-mobile</code> ever consumed it — the status kill-path stayed invisible to players exactly as <code>plan/CRITIQUE.md</code>'s "[LOW] Combat kill-path legibility" row (audit score 2.8) described. closed)</p></section>
+<section class="panel" id="tests-gatesockets-gets-coverage-a-month-after-landing"><h2>[tests] GateSockets gets coverage a month after landing</h2>
+<p><strong>What:</strong> 9 colocated tests for <code>GateSockets.tsx</code> (the Gate of Assent / Foundation socket UI) pinning socket rendering, the <code>distinctWords</code> pocket dedupe, lay/take-back/clear behavior, the <code>openSockets</code> capacity guard, and submit ordering. <strong>Why:</strong> an <code>/iterate</code> audit sweep found the component owned real interactive state with zero coverage since it landed 2026-07-07, and the labyrinth e2e suite never touches <code>testID="labyrinth-gate"</code>. <strong>Commits:</strong> <code>10048947</code> (test, issue #175), <code>1d2917e5</code> (audit finding closed)</p></section>
+<section class="panel" id="while-you-were-out"><h2>While you were out</h2>
+<div class="tablewrap"><table><thead><tr><th>Tick (UTC)</th><th>Verb</th><th>Outcome</th></tr></thead><tbody><tr><td>08-07 13:44 → 13:58</td><td><code>/march</code> → <code>/iterate</code></td><td><span class="st st-ok">shipped</span> — combat kill-path legibility (#174)</td></tr><tr><td>08-07 19:25 → 19:45</td><td><code>/march</code> → <code>/iterate</code></td><td><span class="st st-ok">shipped</span> — GateSockets test coverage (#175)</td></tr><tr><td>08-07 ~21:08 (attended)</td><td><code>/oversight</code></td><td>promoted Phase 39 + Phase 40, drained 4 <span class="st st-warn">needs-user</span>-calls (#176)</td></tr><tr><td>08-08 02:26 → 02:38</td><td><code>/march</code> → <code>/critique</code></td><td><span class="st st-ok">pass</span> 19 — 1 finding (exploration hub regionProgress mismatch)</td></tr><tr><td>08-08 07:26 → 08:52</td><td><code>/march</code> → <code>/ship-a-phase</code></td><td><span class="st st-ok">shipped</span> — Phase 39 curve repair + library theme-symmetry (#177)</td></tr></tbody></table></div>
+<ul><li><code>loop:phase</code> GitHub issues (the phase mirror): unchanged cadence,</li></ul>
+<p>no stale-open rows found this sweep.</p>
+<ul><li><code>plan/AUDIT.md</code>: 3 new Pending rows filed this cycle (doctrine-curve</li></ul>
+<p>confirmation + 2 needs-user-call rows mined from Phase 39's own commit body); 2 rows drained since last digest (#174, #175).</p>
+<ul><li><code>plan/CRITIQUE.md</code>: pass 19 today (commit <code>18eb0ddb</code> → <code>469a5694</code>),</li></ul>
+<p>1 fresh MED finding (exploration hub static/dynamic node-count mismatch); the standing <code>[HIGH] late-stage global collapse</code> row updated to record Phase 39 landing without draining it.</p>
+<ul><li><code>plan/PHASE_CANDIDATES.md</code>: 34 pending candidates; the "Post-D8</li></ul>
+<p>flag-on curve repair + library theme-symmetry" candidate moved to Promoted (now Phase 39, shipped).</p>
+<ul><li><code>triage:needs-user</code> / <code>loop:do</code> issues: 0 open. No open PRs.</li><li>Deploy: nothing to check yet — HEAD is inside the grace window, no</li></ul>
+<p>gated <code>verify-*</code> workflow triggered for this digest commit's paths.</p>
+<ul><li>Breadth check (<code>npm --workspace axiomancer-mobile run e2e:minigames</code>)</li></ul>
+<p>ran full and green: hazard, combat, gathering, encounter-routing, exploration/combat-prelude round-trip, and upgradeable-dice all <code>ALL PASS</code>.</p>
+<ul><li>Deck-matrix baseline re-measured this cycle — see Tuning proposals.</li></ul></section>
+<section class="panel" id="needs-you"><h2>Needs you</h2>
+<p>Three new <code>[needs-user-call]</code> rows filed to <code>plan/AUDIT.md</code> this cycle, all routed to <code>/oversight</code> (owner-scoped calls, not <code>/iterate</code> picks):</p>
+<ol><li><strong>Doctrine-curve confirmation post-Phase-39</strong> — the mid/late</li></ol>
+<p>collapse the phase was promoted to fix is still in violation (late 0.0%, mid 2.0% against ~50). Needs a decision on whether to scope a dedicated mid/late enemy-threat-scaling phase (manual engine constant, per the standing rail that this loop doesn't tune its own constraints).</p>
+<ol><li><strong>Foundry's early-stage regression (73% → 44%)</strong> — a real,</li></ol>
+<p>expected cost of the status-doctrine seat ruling per Phase 39's own commit, not a bug. Needs a call on whether to queue an authored win-condition card for foundry or accept the number as settled.</p>
+<ol><li><strong>Mid-cliff attribution</strong> — Phase 39's duplication sweep found</li></ol>
+<p>10/13 staple candidates already fully deployed pre-phase with no effect on mid win rate, pointing at engine/enemy-scaling rather than card composition. Same decision as #1; filed separately since it's the evidence trail, not the ask.</p>
+<p>No <code>triage:needs-user</code> issues, no blocked build-plan rows — Phase 40 (card-text grammar + copy pass) is next in queue, unblocked now that Phase 39 has landed.</p></section>
+<section class="panel" id="tuning-proposals"><h2>Tuning proposals</h2>
+<p><code>baseline:check</code> opened this cycle <strong>stale by exactly one mechanics-source commit</strong> (<code>8d50591e</code>, Phase 39 itself) — re-measured with the reduced nightly pass (<code>npm run baseline:regen -- --runs=30 --confidence=reduced-nightly</code>), now committed at <code>8eb33fb8</code>.</p>
+<p>This is the first baseline read to actually move since 07-30 — the prior six were byte-identical because nothing in that window touched <code>scoreCard</code> or <code>draftCombatDeck</code>'s construction path. Phase 39 does touch both (card restorations, preset reseats, a fizzle-gate retune), so a real diff was expected. Read (blind policy-pick, doctrine early ~80 / mid ~50 / late 25-35 / impossible 0): early 61.1% (unchanged), mid 2.0% (up from 0.0%, 3 wins / 150 runs — real movement, but two orders of magnitude short of the ~50 target), late 0.0% (unchanged — the phase's named target didn't move at all), impossible 0% (unchanged, correct).</p>
+<p>No new tuning action from this digest — the repair already ran, and its own commit correctly diagnosed why the gate stayed red (see Needs you above). Filed as findings, not proposals, because the fix this data points at is a manual engine constant (enemy HP/threat scaling), which is explicitly outside <code>/deck-tuning</code>'s card-only remit and outside this loop's authority to self-legislate. Full detail in <code>plan/AUDIT.md</code> and the updated <code>plan/CRITIQUE.md</code> <code>[HIGH]</code> row.</p></section>
+<section class="panel" id="todays-intent"><h2>Today's intent</h2>
+<p>No baseline screenshots changed since the last digest, so no UI shots this cycle. The headline number here isn't the two small findings that drained clean — it's that a phase explicitly scoped and promoted to fix a six-cycle-confirmed doctrine violation shipped clean, green, and fully verified, and the violation is still there. That's not a failure of execution (the phase's own commit reasoned through why, correctly, in real time) — it's a signal that the next productive move on this thread is an owner call on engine constants, not another card-tuning pass. Filed as three findings rather than one, so <code>/oversight</code> can act on the specific asks (scope a scaling phase? queue foundry's win-condition card?) instead of re-deriving them from a wall of prose.</p></section>
+<footer class="foot">Axiomancer DevLog &middot; generated by <code>scripts/build-devlog.mjs</code></footer>
+</main>
+</body>
+</html>

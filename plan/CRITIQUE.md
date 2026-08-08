@@ -1,13 +1,27 @@
 # Critique log
 
-> Last pass: 2026-08-07 at commit a0882f60
-> Pass count: 18
+> Last pass: 2026-08-08 at commit 18eb0ddb
+> Pass count: 19
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 19, 2026-08-08, commit 18eb0ddb] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
+> mobile (375×812) and desktop (1280×800); the cold drive again
+> reached past "ENTER COMBAT" into the live combat-board at both
+> viewports (10/10 captures, 0 with nav trouble). Zero console/page
+> errors besides the same benign `navigator.vibrate` warning seen
+> every prior pass. Self-assessed all 10 captures against the current
+> Pending/Done log: title, onboarding, and combat pre-fight copy hold
+> clean; the hand-card 3-line clip on Festering Argument / Slippery
+> Slope is the known [LOW] row, not a new finding. One fresh finding:
+> the exploration hub's static `regionProgress` header count doesn't
+> reconcile with the dynamic node-legend on the same screen — filed
+> below. Zero other findings.
 
 > **[critique pass 18, 2026-08-07, commit a0882f60] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
@@ -112,6 +126,30 @@
 > pass "ENTER COMBAT".
 
 ## Pending
+
+### [MED] exploration hub — static `regionProgress` header count doesn't reconcile with the dynamic node-legend on the same screen
+- pass: 19 (commit 18eb0ddb)
+- viewport: mobile + desktop (both)
+- category: comprehension
+- observation: the Fishing Village exploration screen shows "Map i of
+  ii · 24 paths open" as a header directly above a node graph whose
+  own legend reads "25 nodes · 22 sealed". A first-time player reads
+  two node/progress counts on one screen that don't agree (24 vs 25;
+  "open" vs only ~3 unsealed by the legend's math) and has no way to
+  tell which is current. The header string is authored-static and
+  never changes as the player unlocks/seals nodes; the legend is
+  computed live from `MapDefinition`.
+- evidence: `axiomancer-mobile/state/exploration-maps/fishing-village.layout.ts:7`
+  (`regionProgress: 'Map i of ii · 24 paths open'`, hardcoded) vs
+  `axiomancer-mobile/state/presenters/exploration.engine.ts:418`
+  (`` `${def.nodes.length} nodes · ${locked.length} sealed` ``,
+  computed). Same pattern on the second map:
+  `northern-forest.layout.ts:7` (`'Map ii of ii · 9 paths remain'`).
+- suggested fix: derive the header count from the same live node
+  state the legend already reads (or drop the number from
+  `regionProgress` and keep just "Map i of ii"), so the two counts on
+  screen can't disagree.
+- source: critique pass 19 (unattended, critique:drive artifacts)
 
 ### [x] [MED] combat — authored `paidSummary` card text still prints round-clock "for N turns" for event-triggered poison/bleed, reopening the WI-2 "RESOLVED — stale" closure — RESOLVED 2026-08-05 (commit d320ee12, issue #170)
 - pass: 16 (commit 63574686)
@@ -511,21 +549,33 @@ one level down, in the routing helper `onApply` calls next).
   tests green.
 
 ### [HIGH] late-stage global collapse — all 10 presets 0.00 late
-- **SUPERSEDED LATER THE SAME DAY by the unshackling.** "All 10 presets
-  0.00 late" was a failure *against the status-dominance doctrine*, which
-  T voided on 2026-08-08. Whether a 0.00 late win rate is still a defect
-  is now an open question that **Phase 43** (objective function v2)
-  answers — and normal damage, newly legal, is the most obvious lever if
-  it is. Keep this row open as evidence; do not treat its target band as
-  live. The Phase 39 assignment below stands, but 39 is itself rescoped
-  and now sequenced behind 41/43.
-- **ASSIGNED to build-plan Phase 39 via /oversight 2026-08-08.** Do NOT
-  let `/iterate` pick this row and attempt a partial fix — it is the same
-  signal as `plan/AUDIT.md`'s nightly doctrine-curve confirmations
-  (byte-identical blind reads 08-01 → 08-07: early 61.1% / mid 0.0% /
-  late 0% / impossible 0% against 80/50/25-35/0), and the owner promoted
-  one bounded phase to carry it rather than three overlapping candidates.
-  This row drains when Phase 39 lands, with the matrix as the witness.
+- **SUPERSEDED AS A TARGET by the unshackling (/oversight 2026-08-08).**
+  "All 10 presets 0.00 late" was a failure *against the status-dominance
+  doctrine*, which T voided this day. Whether a 0.00 late win rate is
+  still a defect is now an open question that **Phase 43** (objective
+  function v2) answers — and normal damage, newly legal, is the most
+  obvious lever if it is. Keep this row open as evidence; do not treat
+  its 80/50/25-35/0 target band as live. The post-Phase-39 reading below
+  is a faithful record of the measurement, but it measures the old law.
+- **Phase 39 landed 2026-08-08 (commit `8d50591e`) but did NOT drain
+  this row — the matrix is the witness, and it still reads a
+  violation.** The digest's first post-Phase-39 baseline (reduced
+  nightly, regenerated at `8eb33fb8` — see `plan/AUDIT.md`'s new
+  "Doctrine-curve confirmation post-Phase-39" row for full numbers)
+  reads blind policy-pick early 61.1% (unchanged) / mid 2.0% (up from
+  0.0%, still a
+  deep violation against ~50) / late 0.0% (unchanged) / impossible 0%
+  (unchanged, correct) against the 80/50/25-35/0 doctrine. This
+  corroborates Phase 39's own shipped `needs-user-call`: the mid/late
+  cliff reads as engine/enemy-scaling shaped, not card-composition
+  shaped (10/13 staple-duplication candidates were already fully
+  deployed pre-Phase-39 and those presets still sat at 0% mid). Do NOT
+  let `/iterate` pick this row for a partial card-level fix — per the
+  original assignment, per Phase 39's own finding, and per this
+  project's standing rail that engine constants are tuned manually
+  (not via `/deck-tuning`), the next move is an owner-scoped call via
+  `/oversight` on whether to open a dedicated mid/late enemy-scaling
+  phase.
 - pass: session-closeout 2026-07-12 (commit ffadca96)
 - viewport: n/a
 - category: design

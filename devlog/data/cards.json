@@ -1,5 +1,58 @@
 [
  {
+  "id": "achilles-and-the-tortoise",
+  "name": "Achilles and the Tortoise",
+  "image": "./assets/catalog/cards/will-o-wisp.webp",
+  "pricing": "persistent draw 1 per denied enemy turn ≈ 2 × ~5 denies gated, min-4 ≈ 12 → Axiom",
+  "face": {
+   "freeGlyph": "❖",
+   "freeKw": "ENCHANT",
+   "freeVal": "3r",
+   "paid": "DRAW 1 whenever your STAGGER denies an enemy turn."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Axiom (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "enchantment"
+   },
+   {
+    "k": "Theme",
+    "v": "control"
+   },
+   {
+    "k": "Keywords",
+    "v": "STAGGER · BACKFIRE · FORETELL · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "reward"
+   }
+  ],
+  "lines": [
+   "FREE — the printed passive for 3 rounds.",
+   "PAID (rest of combat) — DRAW 1 whenever your STAGGER denies an enemy turn."
+  ]
+ },
+ {
   "id": "against-my-judgment",
   "name": "Against My Judgment",
   "image": "./assets/catalog/cards/devil-book.webp",
@@ -102,11 +155,7 @@
    },
    {
     "k": "Source",
-    "v": "starter"
-   },
-   {
-    "k": "Preset",
-    "v": "Foundry"
+    "v": "reward"
    }
   ],
   "lines": [
@@ -563,6 +612,59 @@
   "lines": [
    "FREE — gain 1 SOUL.",
    "Applies Bleed ×2, 1t → enemy"
+  ]
+ },
+ {
+  "id": "captive-audience",
+  "name": "Captive Audience",
+  "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
+  "pricing": "engine text — while you hold 4+ Premises the enemy stays marked (Aporia)",
+  "face": {
+   "freeGlyph": "☠",
+   "freeKw": "CURSE",
+   "freeVal": "3r",
+   "paid": "Hold 4+ PREMISEs: MARK the enemy +1 each turn (to 10). Costs 1 die. Attaches to the enemy."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "heart"
+   },
+   {
+    "k": "Type"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Aporia (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "disenchant"
+   },
+   {
+    "k": "Theme",
+    "v": "peroration"
+   },
+   {
+    "k": "Keywords",
+    "v": "PREMISE · DRAW · GUARD"
+   },
+   {
+    "k": "Source",
+    "v": "reward"
+   }
+  ],
+  "lines": [
+   "FREE — the printed passive for 3 rounds.",
+   "PAID (rest of combat) — Hold 4+ PREMISEs: MARK the enemy +1 each turn (to 10). (attaches to the enemy)"
   ]
  },
  {
@@ -1082,6 +1184,63 @@
   ]
  },
  {
+  "id": "entropy-tax",
+  "name": "Entropy Tax",
+  "image": "./assets/catalog/cards/devil-book.webp",
+  "pricing": "engine text — every kindled/floating spend marks the enemy (Aporia)",
+  "face": {
+   "freeGlyph": "☠",
+   "freeKw": "CURSE",
+   "freeVal": "3r",
+   "paid": "A KINDLEd or FORGEd die powering a card MARKs the enemy (i1, once per play). Costs 1 die. Attaches to the enemy."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Aporia (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "disenchant"
+   },
+   {
+    "k": "Theme",
+    "v": "forge"
+   },
+   {
+    "k": "Keywords",
+    "v": "KINDLE · PIP · FORGE · DRAW"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Foundry"
+   }
+  ],
+  "lines": [
+   "FREE — the printed passive for 3 rounds.",
+   "PAID (rest of combat) — A KINDLEd or FORGEd die powering a card MARKs the enemy (i1, once per play). (attaches to the enemy)"
+  ]
+ },
+ {
   "id": "ex-nihilo",
   "name": "Ex Nihilo",
   "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
@@ -1250,6 +1409,59 @@
    "FREE — MARK 1 for 1 turn on yourself, then DRAW 1.",
    "Applies Bleed ×2, 3t → enemy",
    "Fallen: HEAL 4"
+  ]
+ },
+ {
+  "id": "fated-course",
+  "name": "Fated Course",
+  "image": "./assets/catalog/cards/god-eye-silver.webp",
+  "pricing": "engine text — every hit omen marks the foe, rest of combat (Aporia)",
+  "face": {
+   "freeGlyph": "☠",
+   "freeKw": "CURSE",
+   "freeVal": "3r",
+   "paid": "Every OMEN that hits MARKs the foe (i1). Costs 1 die. Attaches to the enemy."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Aporia (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "disenchant"
+   },
+   {
+    "k": "Theme",
+    "v": "oracle"
+   },
+   {
+    "k": "Keywords",
+    "v": "FORETELL · OMEN · DRAW · RUPTURE"
+   },
+   {
+    "k": "Source",
+    "v": "reward"
+   }
+  ],
+  "lines": [
+   "FREE — the printed passive for 3 rounds.",
+   "PAID (rest of combat) — Every OMEN that hits MARKs the foe (i1). (attaches to the enemy)"
   ]
  },
  {
@@ -1541,6 +1753,66 @@
   ]
  },
  {
+  "id": "heart-of-the-matter",
+  "name": "Heart of the Matter",
+  "image": "./assets/catalog/cards/bright-sphere-yellow.webp",
+  "pricing": "SWAY 6 x ECHO (engine echoFactor) + heal-4 rider (NOT echoed) + FREE",
+  "face": {
+   "freeGlyph": "∿",
+   "freeKw": "SWAY",
+   "freeVal": "1",
+   "paid": "SWAY 6 + ECHO + heal 4."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "heart"
+   },
+   {
+    "k": "Type"
+   },
+   {
+    "k": "Tier",
+    "v": "3"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Axiom (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "spell"
+   },
+   {
+    "k": "Theme",
+    "v": "charm"
+   },
+   {
+    "k": "Keywords",
+    "v": "SWAY · RAPPORT · CLEANSE · HEAL"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Grace"
+   }
+  ],
+  "lines": [
+   "FREE — SWAY 1.",
+   "SWAY 6",
+   "ECHO",
+   "heal 4",
+   "Threshold: 5× heart die fires a rider"
+  ]
+ },
+ {
   "id": "hedgehogs-dilemma",
   "name": "Hedgehog's Dilemma",
   "image": "./assets/catalog/cards/guard-3.webp",
@@ -1696,11 +1968,7 @@
    },
    {
     "k": "Source",
-    "v": "starter"
-   },
-   {
-    "k": "Preset",
-    "v": "Grace"
+    "v": "reward"
    }
   ],
   "lines": [
@@ -1921,7 +2189,7 @@
    },
    {
     "k": "Preset",
-    "v": "Foundry"
+    "v": "Standstill"
    }
   ],
   "lines": [
@@ -2151,7 +2419,7 @@
    },
    {
     "k": "Preset",
-    "v": "Grace"
+    "v": "Refrain"
    }
   ],
   "lines": [
@@ -2334,6 +2602,63 @@
   "lines": [
    "FREE — gain 1 PREMISE.",
    "RUPTURE ALL"
+  ]
+ },
+ {
+  "id": "practiced-cadence",
+  "name": "Practiced Cadence",
+  "image": "./assets/catalog/cards/light-ring.webp",
+  "pricing": "persistent +1 Premise on the first card each turn ≈ 0.8 × ~10 turns, min-4 law ≈ 12 → Axiom",
+  "face": {
+   "freeGlyph": "❖",
+   "freeKw": "ENCHANT",
+   "freeVal": "3r",
+   "paid": "+1 PREMISE on your first card each turn."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "heart"
+   },
+   {
+    "k": "Type"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "self"
+   },
+   {
+    "k": "Rank",
+    "v": "Axiom (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "enchantment"
+   },
+   {
+    "k": "Theme",
+    "v": "peroration"
+   },
+   {
+    "k": "Keywords",
+    "v": "PREMISE · DRAW · GUARD"
+   },
+   {
+    "k": "Source",
+    "v": "starter"
+   },
+   {
+    "k": "Preset",
+    "v": "Foundry"
+   }
+  ],
+  "lines": [
+   "FREE — the printed passive for 3 rounds.",
+   "PAID (rest of combat) — +1 PREMISE on your first card each turn."
   ]
  },
  {
@@ -2787,7 +3112,7 @@
    },
    {
     "k": "Preset",
-    "v": "Bastion"
+    "v": "Grace"
    }
   ],
   "lines": [
@@ -4096,6 +4421,59 @@
    "FREE — BLEED 1 for 1 turn.",
    "REAP ALL — 4 damage per Soul",
    "SIPHON 40%"
+  ]
+ },
+ {
+  "id": "the-tithe",
+  "name": "The Tithe",
+  "image": "./assets/catalog/cards/meat-pecker.webp",
+  "pricing": "engine text — enemy afflictions expire 1 turn sooner (faster Soul churn) (Aporia)",
+  "face": {
+   "freeGlyph": "☠",
+   "freeKw": "CURSE",
+   "freeVal": "3r",
+   "paid": "Enemy afflictions expire one turn sooner (faster SOUL churn). Costs 1 die. Attaches to the enemy."
+  },
+  "chips": [
+   {
+    "k": "Stance",
+    "v": "mind"
+   },
+   {
+    "k": "Type"
+   },
+   {
+    "k": "Tier",
+    "v": "2"
+   },
+   {
+    "k": "Target",
+    "v": "enemy"
+   },
+   {
+    "k": "Rank",
+    "v": "Aporia (rare)"
+   },
+   {
+    "k": "Kind",
+    "v": "disenchant"
+   },
+   {
+    "k": "Theme",
+    "v": "harvest"
+   },
+   {
+    "k": "Keywords",
+    "v": "SOUL · REAP · MARK"
+   },
+   {
+    "k": "Source",
+    "v": "reward"
+   }
+  ],
+  "lines": [
+   "FREE — the printed passive for 3 rounds.",
+   "PAID (rest of combat) — Enemy afflictions expire one turn sooner (faster SOUL churn). (attaches to the enemy)"
   ]
  },
  {

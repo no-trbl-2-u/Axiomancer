@@ -138,20 +138,42 @@ export const COMBAT_DECK_PRESETS: Record<string, CombatDeckPreset> = {
         theme: 'forge',
         focus: 'utility',
         description: 'Manufacture dice from nothing, ripen the pips, then spend every one in a single overwhelming stride.',
-        // Colors 5/5/5: heart = signs×4 + mirror-of-longing | body =
+        // Colors 5/5/5: heart = signs×4 + practiced-cadence | body =
         // tempered-edge×4 + overtake | mind = bootstrap×2 + ex-nihilo×2 +
-        // anvil.
+        // entropy-tax.
         // Borrows: signs-and-portents (oracle, heart — OMEN rides any
-        // powering die, pure draw utility), mirror-of-longing (charm, heart
-        // dis — half-step/overtake guard converts to SWAY).
+        // powering die, pure draw utility), practiced-cadence (peroration,
+        // heart ench — see phase-39 note below).
         // 2026-07-19 promotion: tempered-edge (arm f2) evicts half-step at
         // the x4 body common seat — foundry's first in-theme enemy-facing
         // line (early 0.60→0.80, ON band; sE 0.00→0.21). half-step remains a
         // library/reward card.
+        // Phase 39 (2026-08-08) — owner-ruled identity seat: `entropy-tax`
+        // (forge's own missing dis, restored §A) replaces the `mirror-of-
+        // longing` (charm) borrow at the disenchant seat — forge finally
+        // polices its OWN manufactured-die spend instead of borrowing a
+        // charm alt-win passive it can't otherwise use (status-doctrine
+        // ruling, applied regardless of win-rate delta; swap-sweep evidence
+        // in the phase-39 report). Color-law fallout: entropy-tax is `mind`,
+        // vacating `mirror-of-longing`'s `heart` seat and overfilling `mind`
+        // to 6 — `mind`'s OTHER single-copy seat, the enchantment
+        // (`anvil-of-form`, forge's own, also `mind`), is the only lever that
+        // nets exactly ±1 without touching `body` (both commons are fixed at
+        // 4 copies; the two uncommons are both `mind` already). anvil-of-form
+        // is swapped for `practiced-cadence` (peroration, `heart`, restored
+        // §A) — a heart RARE enchantment, giving §A's restoration a mid-game
+        // second gear (§C4) instead of orphaning it reward-only. anvil-of-
+        // form itself becomes reward-only (precedented — half-step, the-
+        // adamant-wall, etc. are evicted-not-deleted the same way); its D8
+        // valve seat (`forge-masters-stamp` replacing it) is re-pointed to
+        // `ex-nihilo` (still `mind`, still in this recipe) in
+        // PRESET_DICE_VALVES below. 5/5/5 check: heart = signs×4 (4) +
+        // practiced-cadence (1) = 5; mind = bootstrap×2 (2) + ex-nihilo×2 (2)
+        // + entropy-tax (1) = 5; body = tempered-edge×4 (4) + overtake (1) = 5.
         cardIds: recipe(
             'signs-and-portents', 'tempered-edge',
             'bootstrap-loop', 'ex-nihilo',
-            'the-overtake', 'anvil-of-form', 'mirror-of-longing',
+            'the-overtake', 'practiced-cadence', 'entropy-tax',
         ),
     },
     penitent: {
@@ -242,12 +264,12 @@ export const COMBAT_DECK_PRESETS: Record<string, CombatDeckPreset> = {
         // pointed at the deck's real texture.
         focus: 'control',
         description: 'The deck that never strikes: build SWAY past their resolve and win by capitulation — or mercy.',
-        // Colors 5/5/5: heart = soft-word×4 + irresistible | mind =
-        // second-thoughts×4 + ouroboros | body = olive×2 + grace-under-fire×2
-        // + crumbling.
+        // Colors 5/5/5: heart = soft-word×4 + heart-of-the-matter | mind =
+        // second-thoughts×4 + resonant-chamber | body = olive×2 +
+        // grace-under-fire×2 + crumbling.
         // Borrows: second-thoughts (echo, mind — zero-damage draw/reprise
-        // utility), ouroboros (echo, mind — replays soft-word for double
-        // SWAY), crumbling-resolve (bulwark, body dis — NOTE: its
+        // utility), resonant-chamber (echo, mind ench — see phase-39 note
+        // below), crumbling-resolve (bulwark, body dis — NOTE: its
         // standing-wall drip deals HP, a documented dent in grace's
         // never-touches-HP purity, traded for survival).
         // 2026-07-19 promotion: grace-under-fire (arm g2) evicts the
@@ -255,10 +277,46 @@ export const COMBAT_DECK_PRESETS: Record<string, CombatDeckPreset> = {
         // survival whose composure-under-fire converts to SWAY (early
         // 0.689→0.811, ON band). measured-answer remains a library/reward
         // card. The grace HP-purity direction ballot item stays open.
+        // Phase 39 (2026-08-08) — owner-ruled identity seat: `heart-of-the-
+        // matter` (charm's own SWAY finisher, restored §A) replaces the
+        // `ouroboros` (echo) borrow at the rare-spell seat — grace's
+        // capstone finally speaks charm's own vocabulary (SWAY+ECHO+heal)
+        // instead of borrowing echo's MARK-detonation payoff it has no MARK
+        // engine to feed (status-doctrine ruling, applied regardless of
+        // win-rate delta; swap-sweep evidence in the phase-39 report).
+        // Color-law fallout: heart-of-the-matter is `heart`, vacating
+        // ouroboros's `mind` seat and overfilling `heart` to 6 — `heart`'s
+        // OTHER single-copy seat, the enchantment (`irresistible-grace`,
+        // charm's own, also `heart`), is the only lever that nets exactly ±1
+        // without touching `body` (both commons fixed at 4 copies; both
+        // uncommons already heart/body respectively).
+        //
+        // The compensating card is DELIBERATELY NOT `achilles-and-the-
+        // tortoise` (control, mind, restored §A — the first pick): measured
+        // A/B (full preset:grace, all stages × all policies, seed 1) showed
+        // it net-REGRESSED grace (mid win 11%→5% aggregate) because it is
+        // synergy-dead here (grace has zero STAGGER) while the card it would
+        // evict, `irresistible-grace` (SWAY-never-decays + compounding), was
+        // load-bearing for a SWAY-capitulation deck. `resonant-chamber`
+        // (echo, mind, rank 5 ench — "your first spell each turn gains
+        // ECHO", a GENERIC echo, not gated on the target card's own `echo`
+        // mechanic; `combat.engine.ts`'s `chamberEcho`) is real, on-theme
+        // synergy instead: it doubles whichever SWAY spell (soft-word / the-
+        // olive-branch / grace-under-fire / heart-of-the-matter) leads the
+        // turn — more SWAY, faster capitulation, the deck's actual win
+        // condition. `irresistible-grace` still becomes reward-only
+        // (precedented eviction, as with foundry's anvil-of-form) — no
+        // better mind-aspect alternative reclaims its SWAY-compounding role,
+        // so this is a real, reported loss, not a wash. No D8 valve
+        // collateral (grace's valve seat replaces `soft-word`, not this
+        // card). 5/5/5 check: heart = soft-word×4 (4) + heart-of-the-matter
+        // (1) = 5; mind = second-thoughts×4 (4) + resonant-chamber (1) = 5;
+        // body = olive×2 (2) + grace-under-fire×2 (2) + crumbling-resolve
+        // (1) = 5.
         cardIds: recipe(
             'soft-word', 'second-thoughts',
             'the-olive-branch', 'grace-under-fire',
-            'ouroboros', 'irresistible-grace', 'crumbling-resolve',
+            'heart-of-the-matter', 'resonant-chamber', 'crumbling-resolve',
         ),
     },
     bastion: {
@@ -331,7 +389,11 @@ export const COMBAT_DECK_PRESETS: Record<string, CombatDeckPreset> = {
 export const PRESET_COLOR_BORROWS: Readonly<Record<string, readonly string[]>> = Object.freeze({
     erosion: ['opening-statement'],
     oratory: ['brace-for-impact', 'venom-and-vein', 'quagmire-of-doubt'],
-    foundry: ['signs-and-portents', 'mirror-of-longing'],
+    // Phase 39 (2026-08-08): foundry retires the mirror-of-longing (charm)
+    // borrow — entropy-tax is forge's OWN disenchant (native, not a borrow)
+    // — and picks up practiced-cadence (peroration) at the enchantment seat
+    // (the color-law compensating shuffle; see the foundry preset comment).
+    foundry: ['signs-and-portents', 'practiced-cadence'],
     penitent: ['undistributed-middle', 'delphic-ambiguity'],
     standstill: ['cassandras-burden', 'fallen-grace', 'hedgehogs-dilemma', 'mirror-of-longing'],
     // 2026-07-19 promotions: augury/grace/refrain each retired one borrow
@@ -339,7 +401,13 @@ export const PRESET_COLOR_BORROWS: Readonly<Record<string, readonly string[]>> =
     // card — the borrow maps shrink accordingly.
     augury: ['arrow-paradox', 'crumbling-resolve'],
     tithe: ['disarming-smile', 'circular-reasoning', 'stuck-in-their-head'],
-    grace: ['second-thoughts', 'ouroboros', 'crumbling-resolve'],
+    // Phase 39 (2026-08-08): grace retires the ouroboros (echo) borrow —
+    // heart-of-the-matter is charm's OWN rare spell (native, not a borrow)
+    // — and picks up a SECOND echo borrow, resonant-chamber, at the
+    // enchantment seat (the color-law compensating shuffle, re-picked after
+    // A/B showed the first candidate regressed the deck — see the grace
+    // preset comment).
+    grace: ['second-thoughts', 'resonant-chamber', 'crumbling-resolve'],
     bastion: ['sketch-of-a-thought', 'common-ground', 'resonant-chamber', 'mirror-of-longing'],
     refrain: ['opening-statement', 'winnowing', 'venom-and-vein'],
 });
@@ -430,11 +498,20 @@ export interface PresetDiceValveSeat {
  * the-adamant-wall→the-anvil-speaks (body). All three are same-aspect
  * like-for-like instance swaps, so the valve-law arithmetic (5/5/5, one
  * displaced instance) holds; flag-on cells re-ratified in
- * docs/reports/deck-tuning-2026-07-19-promotions.md. */
+ * docs/reports/deck-tuning-2026-07-19-promotions.md.
+ *
+ * Phase 39 (2026-08-08) re-seat (forced by the foundry color-law
+ * compensating shuffle — §B of the phase-39 brief evicted `anvil-of-form`
+ * from foundry's recipe to make room for `practiced-cadence`'s heart seat):
+ * foundry anvil-of-form→ex-nihilo (mind — the valve law only requires
+ * matching `philosophicalAspect`, not `cardType`; ex-nihilo is still in the
+ * foundry recipe post-swap). grace's valve seat (`change-of-heart`
+ * replacing `soft-word`) is untouched by grace's own compensating shuffle —
+ * soft-word never moved. */
 export const PRESET_DICE_VALVES: Readonly<Record<string, PresetDiceValveSeat>> = Object.freeze({
     erosion: { valveId: 'recurring-symptom', replacesId: 'poisoned-well' },
     oratory: { valveId: 'restate-the-point', replacesId: 'videtur-quod' },
-    foundry: { valveId: 'forge-masters-stamp', replacesId: 'anvil-of-form' },
+    foundry: { valveId: 'forge-masters-stamp', replacesId: 'ex-nihilo' },
     penitent: { valveId: 'bleed-for-it', replacesId: 'pact-of-akrasia' },
     standstill: { valveId: 'break-the-tempo', replacesId: 'red-herring' },
     augury: { valveId: 'second-sight', replacesId: 'prophecy-fulfilled' },

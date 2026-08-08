@@ -313,6 +313,42 @@ const theClosingWord: Card = {
     tags: ['peroration', 'payoff', 'alt-win'],
 };
 
+// Phase 39 (2026-08-08) — theme-symmetry restoration: `practiced-cadence`
+// (enchantment) and `captive-audience` (disenchant) were retired at D8 as
+// reward-only / zero-played, then restored verbatim here to fill peroration's
+// missing ench/dis pair (POST_D8_SHAPE, curated-library.engine.test.ts).
+const practicedCadence: Card = {
+    id: 'practiced-cadence',
+    theme: 'peroration',
+    persistentEffect: '+1 PREMISE on your first card each turn.',
+    name: 'Practiced Cadence',
+    philosophicalAspect: 'heart',
+    description:
+        'The rhythm carries the argument when the content flags. From here ' +
+        'on, every opening remark counts toward the close.',
+    tier: 2, rank: 5, cardType: 'enchantment',
+    targetType: 'self',
+    // pts: persistent +1 Premise on the first card each turn ≈ 0.8 × ~10 turns, min-4 law ≈ 12 → Axiom
+    addedIn: '2026-07-08',
+    tags: ['peroration', 'enchantment'],
+};
+
+const captiveAudience: Card = {
+    id: 'captive-audience',
+    theme: 'peroration',
+    persistentEffect: 'Hold 4+ PREMISEs: MARK the enemy +1 each turn (to 10).',
+    name: 'Captive Audience',
+    philosophicalAspect: 'heart',
+    description:
+        'While the case is building they cannot look away — and what cannot ' +
+        'look away stands exposed.',
+    tier: 2, rank: 6, cardType: 'disenchant',
+    targetType: 'enemy',
+    // pts: engine text — while you hold 4+ Premises the enemy stays marked (Aporia)
+    addedIn: '2026-07-08',
+    tags: ['peroration', 'disenchant'],
+};
+
 // ─── T3 — FORGE (dice from nothing: kindle, ripen, float, overtake) ──────────
 
 const sketchOfAThought: Card = {
@@ -480,6 +516,27 @@ const anvilOfForm: Card = {
     // pts: persistent +1 pip on every kindled/floating die ≈ 1.5 × ~6 forges, min-4 ≈ 12 → Axiom
     addedIn: '2026-07-08',
     tags: ['forge', 'enchantment'],
+};
+
+// Phase 39 (2026-08-08) — theme-symmetry restoration: `entropy-tax`
+// (disenchant) restored verbatim to fill forge's missing dis pair AND
+// foundry's status-engine ruling (see combat.starter-deck-presets.ts §B). Its
+// engine hook (a KINDLEd/FLOATING die spend MARKs the enemy) is restored
+// alongside it in `combat.engine.ts` `playBottomAction`.
+const entropyTax: Card = {
+    id: 'entropy-tax',
+    theme: 'forge',
+    persistentEffect: 'A KINDLEd or FORGEd die powering a card MARKs the enemy (i1, once per play).',
+    name: 'Entropy Tax',
+    philosophicalAspect: 'mind',
+    description:
+        'Nothing is created free. Every manufactured die you spend, the ' +
+        'universe bills to them.',
+    tier: 2, rank: 6, cardType: 'disenchant',
+    targetType: 'enemy',
+    // pts: engine text — every kindled/floating spend marks the enemy (Aporia)
+    addedIn: '2026-07-08',
+    tags: ['forge', 'disenchant'],
 };
 
 // ─── T4 — AKRASIA (acting against your own judgment; the debt pays) ──────────
@@ -798,6 +855,26 @@ const turnabout: Card = {
     tags: ['control', 'payoff'],
 };
 
+// Phase 39 (2026-08-08) — theme-symmetry restoration: `achilles-and-the-
+// tortoise` (enchantment) restored verbatim to fill control's missing ench
+// pair. No engine work — its persistentEffect composes the existing
+// STAGGER-denial hook already live in `combat.engine.ts`.
+const achillesAndTheTortoise: Card = {
+    id: 'achilles-and-the-tortoise',
+    theme: 'control',
+    persistentEffect: 'DRAW 1 whenever your STAGGER denies an enemy turn.',
+    name: 'Achilles and the Tortoise',
+    philosophicalAspect: 'mind',
+    description:
+        'While they chase the conclusion they can never reach, you read. ' +
+        'Every denied turn is a page.',
+    tier: 2, rank: 5, cardType: 'enchantment',
+    targetType: 'self',
+    // pts: persistent draw 1 per denied enemy turn ≈ 2 × ~5 denies gated, min-4 ≈ 12 → Axiom
+    addedIn: '2026-07-08',
+    tags: ['control', 'enchantment'],
+};
+
 const quagmireOfDoubt: Card = {
     id: 'quagmire-of-doubt',
     theme: 'control',
@@ -973,6 +1050,26 @@ const theOraclesEye: Card = {
     tags: ['oracle', 'enchantment'],
 };
 
+// Phase 39 (2026-08-08) — theme-symmetry restoration: `fated-course`
+// (disenchant) restored verbatim to fill oracle's missing dis pair. No
+// engine work — its persistentEffect composes the existing OMEN-hit MARK
+// hook already live in `combat.engine.ts`.
+const fatedCourse: Card = {
+    id: 'fated-course',
+    theme: 'oracle',
+    persistentEffect: 'Every OMEN that hits MARKs the foe (i1).',
+    name: 'Fated Course',
+    philosophicalAspect: 'mind',
+    description:
+        'A curse of inevitability: the future you named is the only one left ' +
+        'to them, and walking into it leaves a mark.',
+    tier: 2, rank: 6, cardType: 'disenchant',
+    targetType: 'enemy',
+    // pts: engine text — every hit omen marks the foe, rest of combat (Aporia)
+    addedIn: '2026-07-08',
+    tags: ['oracle', 'disenchant'],
+};
+
 // ─── T7 — HARVEST (short afflictions churn into Souls; Souls into the scythe) ─
 
 const briefCandle: Card = {
@@ -1083,6 +1180,26 @@ const boneOrchard: Card = {
     tags: ['harvest', 'enchantment'],
 };
 
+// Phase 39 (2026-08-08) — theme-symmetry restoration: `the-tithe`
+// (disenchant) restored verbatim to fill harvest's missing dis pair. No
+// engine work — its persistentEffect composes the existing affliction-
+// expiry hook already live in `combat.engine.ts`.
+const theTithe: Card = {
+    id: 'the-tithe',
+    theme: 'harvest',
+    persistentEffect: 'Enemy afflictions expire one turn sooner (faster SOUL churn).',
+    name: 'The Tithe',
+    philosophicalAspect: 'mind',
+    description:
+        'A tenth of everything, taken early. Their afflictions ripen a turn ' +
+        'sooner, and the collection plate is yours.',
+    tier: 2, rank: 6, cardType: 'disenchant',
+    targetType: 'enemy',
+    // pts: engine text — enemy afflictions expire 1 turn sooner (faster Soul churn) (Aporia)
+    addedIn: '2026-07-08',
+    tags: ['harvest', 'disenchant'],
+};
+
 // ─── T8 — CHARM (SWAY toward CAPITULATION — the deck that never strikes) ─────
 
 const softWord: Card = {
@@ -1165,6 +1282,37 @@ const theOliveBranch: Card = {
     ],
     addedIn: '2026-07-08',
     tags: ['charm', 'defense'],
+};
+
+// Phase 39 (2026-08-08) — theme-symmetry restoration: `heart-of-the-matter`
+// (spell, alt-win) restored verbatim per grace's SWAY-finisher ruling — this
+// IS the seat that replaces `ouroboros` in grace's `cardIds` (see
+// combat.starter-deck-presets.ts §B). No engine work — composes generic
+// `sway`/`echo`/`rider` `specialMechanics`, no per-card hook.
+const heartOfTheMatter: Card = {
+    id: 'heart-of-the-matter',
+    theme: 'charm',
+    name: 'Heart of the Matter',
+    philosophicalAspect: 'heart',
+    description:
+        'You say the thing they have been not-saying their whole life. Said ' +
+        'once, it is heard; said again, in the same breath, it is believed. ' +
+        'The fight goes out of a person who feels seen, seen twice over.',
+    tier: 3, rank: 5, cardType: 'spell',
+    targetType: 'enemy',
+    // pts: SWAY 6 x ECHO (engine echoFactor) + heal-4 rider (NOT echoed) + FREE
+    // sway 1 + threshold(SWAY +4) -- this IS the Late-stage finisher burst
+    // (rebalance 2026-07-08, Late SWAY ceiling pass). Self-ECHO only doubles the
+    // specialMechanics 'sway' entry; free/threshold sway riders add flat.
+    free: { sway: 1 },
+    specialMechanics: [
+        { kind: 'sway', amount: 6 },
+        { kind: 'echo' },
+        { kind: 'rider', rider: { healHp: 4 } },
+    ],
+    threshold: { color: 'heart', count: 5, rider: { sway: 4 } },
+    addedIn: '2026-07-08',
+    tags: ['charm', 'alt-win'],
 };
 
 const irresistibleGrace: Card = {
@@ -2029,25 +2177,25 @@ export const cardLibrary: Card[] = [
     resonanceDetonation, venomAndVein, suppuratingCurse,
     // T2 Peroration
     exordium, openingStatement, mountingCase, peroratioInterrupta,
-    theClosingWord, 
+    theClosingWord, practicedCadence, captiveAudience,
     // T3 Forge
     sketchOfAThought, halfStep, bootstrapLoop, exNihilo,
-    theOvertake, anvilOfForm, 
+    theOvertake, anvilOfForm, entropyTax,
     // T4 Akrasia
     againstMyJudgment, sweetPoison, selfFlagellant, fallenGrace,
     pactOfAkrasia, crownOfThorns, mirrorOfGuilt,
     // T5 Control
     zenosHalfStep, redHerring, undistributedMiddle, arrowParadox,
-    turnabout, quagmireOfDoubt,
+    turnabout, achillesAndTheTortoise, quagmireOfDoubt,
     // T6 Oracle
     glimpse, signsAndPortents, cassandrasBurden, delphicAmbiguity,
-    prophecyFulfilled, theOraclesEye, 
+    prophecyFulfilled, theOraclesEye, fatedCourse,
     // T7 Harvest
     briefCandle, winnowing, theGleanersDue,
-    theReaping, boneOrchard, 
+    theReaping, boneOrchard, theTithe,
     // T8 Charm
     softWord, disarmingSmile, commonGround, theOliveBranch,
-    irresistibleGrace, mirrorOfLonging,
+    heartOfTheMatter, irresistibleGrace, mirrorOfLonging,
     // T9 Bulwark
     braceForImpact, nettleCloak, tuQuoque, measuredAnswer,
     theAdamantWall, hedgehogsDilemma, crumblingResolve,

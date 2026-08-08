@@ -165,9 +165,12 @@ describe('thoughtform registry — excluded from every library-derived pool', ()
         for (const id of tfIds) {
             expect(libraryIds.has(id), `${id} must not be a library card (C-11)`).toBe(false);
         }
-        expect(cardLibrary.length).toBe(79);
-        // 50→55 spells via the Phase D8 valve ledger (ten-in/ten-out).
-        expect(cardLibrary.filter(c => c.cardType === 'spell').length).toBe(64);
+        expect(cardLibrary.length).toBe(86);
+        // 50→55 spells via the Phase D8 valve ledger (ten-in/ten-out); 64→65
+        // via phase 39's restoration (only heart-of-the-matter, the seven
+        // restorations' one spell, is cardType 'spell' — the other six are
+        // enchantment/disenchant).
+        expect(cardLibrary.filter(c => c.cardType === 'spell').length).toBe(65);
     });
 
     it('never appears in COMBAT_REWARD_POOL', () => {

@@ -201,3 +201,10 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-07T19:27:07Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-07T19:27:42Z | skill | iterate | claude-sonnet-5 | main | - |
 | 2026-08-08T00:38:47Z | slash-prompt | /oversight | unknown | user/ci | /oversight |
+| 2026-08-08T02:27:40Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-08T02:27:43Z | skill | march | unknown | main | - |
+| 2026-08-08T02:30:45Z | skill | critique | claude-sonnet-5 | main | - |
+| 2026-08-08T07:27:43Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-08T07:37:19Z | subagent | card-expert | claude-sonnet-5 | main | Implement Phase 39 curve repair + library symmetry |
+| 2026-08-08T09:22:59Z | slash-prompt | /digest | unknown | user/ci | /digest |
+| 2026-08-08T09:23:01Z | skill | digest | unknown | main | - |

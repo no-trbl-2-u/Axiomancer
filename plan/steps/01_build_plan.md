@@ -1259,54 +1259,44 @@ batch concurrently with 44* — both churn the whole mobile surface.**
 the queue had fully drained and the red curve had no phase assigned;
 RESEQUENCED the same day behind the unshackling — see above):**
 
-- [ ] Phase 39 — Post-D8 flag-on curve repair + library theme-symmetry
-      restoration. ONE bounded tuning phase merging three standing
-      candidates (curve repair, theme symmetry, starter-library
-      trim/duplication + `scoreCard` v2 retune — same seats, same
-      evidence; do NOT ship them separately). The gap: blind flag-on
-      reads early 61.1% / mid 0.0% / late 0% / impossible 0% against the
-      80/50/25-35/0 doctrine, byte-identical across six consecutive
-      nightly baselines (08-01 → 08-07). Levers already ranked by the
-      07-18 metrics accumulation + Card Ledger: duplicate proven staples
-      into the failing decks (venom-and-vein pattern, 13 charted), cut
-      the flag-off-seated drags (crown-of-thorns −19 dWR, mirror-of-guilt
-      −15, self-flagellant −10), retune the fizz gates (ouroboros 25%,
-      second-thoughts 16%), give each deck an oratory-style mid-game
-      second gear, and author the replacement rare ench/dis cards that
-      restore spec-32 §6-7 symmetry (peroration ench+dis, forge dis,
-      control ench, oracle dis, harvest dis) — those new cards ARE the
-      second-gear payoffs, which is why the two rows merged. **Owner
-      ruling folded in: foundry/grace 0% statusEngagement is a doctrine
-      failure, not an identity** — restore `entropy-tax` to foundry's
-      seat and `heart-of-the-matter` to grace's in this same pass. Ends
-      with the `POST_D8_SHAPE` pin in `curated-library.engine.test.ts`
-      restored to a symmetric law and the matrix as the before/after
-      witness. (mechanics — content/tuning) **RESCOPED by the unshackling
-      the same day — read this before generating the brief:** (i) the
-      80/50/25-35/0 target band came from the status-dominance doctrine,
-      which is void — Phase 43 defines what band, if any, replaces it, so
-      do NOT tune toward the old numbers; (ii) normal damage is now legal
-      and is the single largest lever available, which was not true when
-      this phase was scoped; (iii) `/deck-tuning` is no longer
-      sandbox-first and may change anything about any card, so the
-      "sandbox-first court" this row assumed is gone; (iv) the
-      foundry/grace reseat ruling (entropy-tax, heart-of-the-matter) was
-      made under the old doctrine — re-derive it rather than executing it
-      blind, since "0% statusEngagement" may not be a defect once
-      statusEngagement stops being the objective; (v) the trim half of
-      the absorbed starter-library candidate is PAUSED under ruling R2
-      (all 10 never-played cards are reward-pool-only, so "never played"
-      measured the instrument's reach, not card quality) — this phase
-      does duplication, reseats and symmetry authoring, NOT trims.
-      **LOCKED MECHANICS GUARD: this is a tuning phase, so it is the
-      other place the carve-out can be broken quietly** — cards may
-      freely interact with Conviction, the Surge meter and the Dice
-      system, but no tuning decision may leave them vestigial. D8's own
-      law ("every preset exposes a live valve") is the precedent: if a
-      rebalance drops dice casts/run toward zero or makes Conviction
-      unspent, that is a regression, not a simplification. Deps: 41, 43,
-      and 44a-44d if the retheme renames the cards it touches.
-      Brief: to generate.
+- [x] Phase 39 — Post-D8 flag-on curve repair + library theme-symmetry
+      restoration (shipped `8d50591e`). Restored 7 of the D8 "dead 10"
+      cards verbatim, filling peroration/forge/control/oracle/harvest's
+      missing ench/dis seats; `entropy-tax`'s engine hook re-added.
+      `POST_D8_SHAPE` re-pinned symmetric, `cardLibrary` 79 → 86. Owner
+      ruling applied: `entropy-tax` seated into foundry (replacing the
+      mirror-of-longing borrow), `heart-of-the-matter` into grace
+      (replacing the ouroboros borrow) — both with the color-law
+      compensating shuffle shown in the preset comments. Ouroboros's
+      REPLAY_LAST retuned toward its ~25% fizz target (landed 11-17%).
+      Duplication/cut levers investigated but NOT force-applied: the
+      13-candidate staple list is mostly already-deployed or stale, and
+      the already-staple-heavy presets still sit at 0% mid — filed as
+      needs-user-call (mid cliff looks engine/enemy-scaling-shaped, not
+      card-shaped) rather than churned blind. Foundry's early win rate
+      regressed 73%→44% losing its sole SWAY win-path with no
+      replacement in the library — flagged as its own needs-user-call
+      follow-up, applied anyway per the owner's explicit ruling. Brief:
+      `plan/phases/phase_39_curve_repair_and_symmetry.md`.
+      **SHIPPED UNDER THE PRE-UNSHACKLING DOCTRINE (reconciled via
+      /oversight 2026-08-08).** This phase landed at 08:48Z, hours before
+      the unshackling merged, so it executed against rules that are now
+      void: it tuned toward the 80/50/25-35/0 status-dominance band,
+      normal damage was still illegal and therefore unavailable as a
+      lever, `/deck-tuning` was still sandbox-first, and the
+      foundry/grace reseat was applied blind per the then-standing owner
+      ruling rather than re-derived. **Do not revert or re-run it** — the
+      library work (7 cards restored, `POST_D8_SHAPE` symmetric,
+      `cardLibrary` 79 → 86) is good regardless of doctrine, and its two
+      `needs-user-call` findings are more useful now than when filed.
+      Specifically: the foundry regression row says "no card in the
+      current 86-card library gives forge a heart-aspect win-path
+      alternative" — under the unshackling that is no longer a
+      constraint, since a replacement may now be authored freely,
+      including with normal damage. Phase 43 decides whether the residual
+      mid/late numbers are a defect at all before any follow-up tunes
+      toward them.
+
 - [ ] Phase 40 — Card-text grammar + full copy pass. Ruled R4 on
       2026-07-18, released via /oversight 2026-08-08. Adopt the
       templating grammar (seven clause templates; one effect one
@@ -1324,8 +1314,9 @@ RESEQUENCED the same day behind the unshackling — see above):**
       carries a decimal. Witnesses:
       `paid-summary-honesty.engine.test.ts`, the mobile keyword-scanner
       lints, one screenshot confirming the 130c render cap.
-      (mechanics + mobile) **Deps: 44 (retheme) THEN 39 — resequenced by
-      the unshackling.** Originally "after 39" so the pass would not
+      (mechanics + mobile) **Deps: 44a-44i (retheme) only — Phase 39 has
+      since shipped (`8d50591e`), so the original "after 39" half of this
+      dependency is already satisfied.** Originally "after 39" so the pass would not
       rewrite faces the curve repair was about to change; the retheme
       makes that argument stronger, since Phase 44 may rename every card
       this pass would otherwise write copy for. Run it last of the batch.
