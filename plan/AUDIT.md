@@ -14,6 +14,34 @@
 
 ## Pending
 
+### `Closes #N` auto-close is still not firing reliably — the 2026-08-03 fix does not hold
+- category: debt
+- impact: 5
+- ease: 4
+- detail: filed 2026-08-08 (oversight session sweep). The candidate
+  "Root-cause + fix the `Closes #N` trailer silently no-op'ing on
+  direct-to-main pushes" was marked RESOLVED 2026-08-03 (commit
+  `0441c554`, issue #166), but the behavior is back — or never fully
+  fixed. Evidence from this session's GitHub sweep: **#174 was still
+  open** despite its fix landing the same day at `615ff26b`, whose body
+  ends `- Closes #174`. Its sibling `1004894` used the byte-identical
+  trailer shape (`- Closes #175`) and #175 DID close. Same push window,
+  same branch, same leading-`- ` bullet form, opposite outcomes — so the
+  root cause is NOT the bullet prefix, and the 08-03 fix is at best
+  intermittent. Additionally **five `loop:phase` issues sat open for
+  phases the build plan records as `[x]`**: #83 (Phase 32), #98 (D1),
+  #139 (Phase 37), #140 (Phase 38), #143 (Phase 33d).
+- cleanup already done: all six issues (#83, #98, #139, #140, #143,
+  #174) were closed by hand during /oversight 2026-08-08 with a comment
+  citing the shipping commit — so the CURRENT queue is clean and this
+  row is about the mechanism, not the backlog.
+- next: /iterate — re-open the root-cause hunt. Compare `615ff26b` vs
+  `1004894` end to end (push event shape, whether `scripts/loop-issue.mjs`
+  or GitHub's own trailer parser did the closing, whether one landed
+  inside a batched push where only the tip commit's trailers are
+  scanned). The 08-03 "resolved" claim should be treated as unproven
+  until a witness exists that fails when the mechanism regresses.
+
 ### [x] [tests] GateSockets has zero test coverage on real state logic — RESOLVED 2026-08-07 (issue #175)
 - category: tests
 - impact: 5
@@ -397,10 +425,39 @@
   mutation going forward. Do NOT rewrite existing queue history as
   reconstruction — this is a forward-looking log, starting now.
 
-### hazard/gathering "paradox-token" reward vocabulary outlives the card category
+### hazard/gathering "paradox-token" reward vocabulary outlives the card category — OWNER CALL MADE 2026-08-08: rename to QUANDARY
 - category: divergence
 - impact: 2
 - ease: 4
+- **decision (owner, /oversight 2026-08-08 — this row is no longer a
+  `[needs-user-call]`, it is a ready-to-ship /iterate row):** RENAME, do
+  not remove and do not leave. The reward economy stays exactly as it is;
+  only the vocabulary changes. **"paradox token" → "QUANDARY".** Removal
+  was explicitly declined — the token is a live reward tail in two
+  minigames, so deleting it is an economy change needing its own phase,
+  not an /iterate row. Leaving it was declined too: the word points at
+  nothing in the game after phase 37.
+- rename target vetting (done at the call): `quandary`, `conundrum` and
+  `sophism` are all zero-hit across `axiomancer-mechanics/src`,
+  `axiomancer-mobile/state` and `axiomancer-mobile/components`, so none
+  collides. `aporia` was ruled OUT — it is already W-01's continent
+  (`specs/world/W-01-aporia-labyrinth-continent.md`) and also appears in
+  C-01 and spec 32. QUANDARY chosen: same cold/archaic register, no
+  collision, and it means what the paradox token meant without pointing
+  at a retired card category.
+- scope when /iterate takes it (5 sites, all mobile, no engine change):
+  `HAZARD_TOKEN_FLAG_PREFIX` + its doc comment
+  (`state/hazard/store-actions.ts` ~L76/L484), the gathering flag prefix
+  + doc comment (`state/gathering/store-actions.ts` ~L64/L269), the two
+  reward blurbs `+${r.amount} paradox token(s)`
+  (`state/presenters/hazard.engine.ts` ~L369,
+  `state/presenters/gathering.engine.ts` ~L241), and the
+  `case 'paradox'` glyph (`components/hazard/glyphs.tsx`). Persisted
+  flag prefixes are save-visible — check whether the change needs a
+  `GAME_STATE_VERSION` migration before renaming the prefix strings, or
+  keep the prefix and rename only player-facing copy. Re-grep first;
+  distinguish from the `arrow-paradox` card id and `Item.category`
+  (both unrelated, both stay).
 - detail: filed 2026-07-18 (phase 37 planning residue). Phase 37 retires
   the `fallacy`/`paradox` card **category** + the dead `combatResources`
   token pool, but deliberately leaves the separate hazard/gathering
@@ -417,8 +474,7 @@
   reward token (to what?) vs. remove it vs. leave it. Do NOT bundle into
   phase 37 (owner scoped it out). Re-grep before acting; distinguish from the
   `arrow-paradox` card id (unrelated) and `Item.category` (unrelated).
-- next: /oversight (owner call on rename-vs-remove-vs-keep) → then /iterate
-  or a small phase to execute the chosen verb
+- next: /iterate — the owner call is made (rename → QUANDARY); execute it.
 
 ### `deploy:check` is unusable from remote web sessions — 401 "Token rejected"
 - category: debt

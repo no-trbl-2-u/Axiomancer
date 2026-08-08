@@ -955,6 +955,55 @@ missing-layers survey):**
       `plan/phases/phase_38_juice_layer.md`.
       — `feat(mobile): central juice/animation layer — phase 38` (6f291ece)
 
+**Balance doctrine repair (promoted via /oversight 2026-08-08, T direct —
+the queue had fully drained and the red curve had no phase assigned):**
+
+- [ ] Phase 39 — Post-D8 flag-on curve repair + library theme-symmetry
+      restoration. ONE bounded tuning phase merging three standing
+      candidates (curve repair, theme symmetry, starter-library
+      trim/duplication + `scoreCard` v2 retune — same seats, same
+      evidence; do NOT ship them separately). The gap: blind flag-on
+      reads early 61.1% / mid 0.0% / late 0% / impossible 0% against the
+      80/50/25-35/0 doctrine, byte-identical across six consecutive
+      nightly baselines (08-01 → 08-07). Levers already ranked by the
+      07-18 metrics accumulation + Card Ledger: duplicate proven staples
+      into the failing decks (venom-and-vein pattern, 13 charted), cut
+      the flag-off-seated drags (crown-of-thorns −19 dWR, mirror-of-guilt
+      −15, self-flagellant −10), retune the fizz gates (ouroboros 25%,
+      second-thoughts 16%), give each deck an oratory-style mid-game
+      second gear, and author the replacement rare ench/dis cards that
+      restore spec-32 §6-7 symmetry (peroration ench+dis, forge dis,
+      control ench, oracle dis, harvest dis) — those new cards ARE the
+      second-gear payoffs, which is why the two rows merged. **Owner
+      ruling folded in: foundry/grace 0% statusEngagement is a doctrine
+      failure, not an identity** — restore `entropy-tax` to foundry's
+      seat and `heart-of-the-matter` to grace's in this same pass. Ends
+      with the `POST_D8_SHAPE` pin in `curated-library.engine.test.ts`
+      restored to a symmetric law and the matrix as the before/after
+      witness. (mechanics — content/tuning; `/deck-tuning` owns the
+      sandbox-first court) Deps: none — unblocked and measurable since
+      D8. Brief: to generate.
+- [ ] Phase 40 — Card-text grammar + full copy pass. Ruled R4 on
+      2026-07-18, released via /oversight 2026-08-08. Adopt the
+      templating grammar (seven clause templates; one effect one
+      sentence; gate/cost/condition before payoff; colon = trigger label
+      only; em-dash/semicolon banned from faces; parens carry numbers
+      only; bare keywords, panel is the gloss; "the foe" fixed
+      vocabulary; ≤16 words target / 130-char hard cap / lead clause ≤5
+      words) and run the full pass: 12 before→after rewrites, author the
+      4 machine-text faces (straw-mans-jab renders raw "bleed i2 d2"), 6
+      gloss rewrites (Pip, Omen, Riposte, Forge, Doom, Poison), tighten
+      the honesty-guard budget 200 → 130 chars, add an em-dash/semicolon
+      lint. Sub-calls approved in the same ruling: drop PERORATION from
+      the-closing-word's face (SYSTEM_GLOSSARY row stays); reprice
+      the-overtake's `fuelPerPip` 3.5 → integer via A/B so no face
+      carries a decimal. Witnesses:
+      `paid-summary-honesty.engine.test.ts`, the mobile keyword-scanner
+      lints, one screenshot confirming the 130c render cap.
+      (mechanics + mobile) **Deps: Phase 39 — runs AFTER, so the pass
+      covers the card set the curve repair leaves standing rather than
+      rewriting faces that are about to change.** Brief: to generate.
+
 > **Note (issue-triage 2026-07-19):** issue #132 asked for a
 > `devlog-build` GitHub Action; re-triage found it re-classified as
 > `enhancement` (was `docs`, stale after the owner corrected the issue
@@ -1017,8 +1066,19 @@ phases with linked notes here.)
 > "reason not stated" — never invent one), and the resulting
 > commit/issue/phase-brief when available.
 
-(Empty — no Hermes-originated queue mutation has landed since
-this log was created.)
+- **2026-08-08** — actor: **T via `/oversight`** (attended web session,
+  not Hermes). Action: **added Phase 39** (post-D8 flag-on curve repair +
+  library theme-symmetry restoration, merged from three standing
+  candidates) and **Phase 40** (card-text grammar + full copy pass,
+  ruled 2026-07-18 but never queued), and recorded Phase 40 as dependent
+  on Phase 39. Confirmed T's request: yes — both promotions were chosen
+  by T from an `/oversight` questionnaire ("Promote curve-repair +
+  theme-symmetry together"; "Card-text grammar + full copy pass" among
+  the unlocked gated candidates). T's stated reason: the build-plan queue
+  had fully drained at Phase 38, leaving `/march` nothing but 2.x-score
+  hygiene rows to pick while the flag-on balance curve had read mid 0.0%
+  / late 0% for six consecutive nightly baselines with no phase assigned
+  to it. Resulting commit: this one; briefs still to generate.
 
 ## Phase log (commit hashes)
 

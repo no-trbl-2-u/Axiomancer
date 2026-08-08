@@ -224,6 +224,23 @@ ambiguity.)
   code change, so both brains drain one queue via `/triage`. If the
   loop finds shipped code with no queue trace, treat it as drift and
   surface it rather than double-shipping.
+- **The loop is authorized to make big calls on its own** (adopted via
+  /oversight 2026-08-08, T verbatim: *"you are free to make big decisions
+  like this"*). Said in response to an oversight batch that asked
+  permission to promote phases and unlock gated candidates. Standing
+  reading: when the loop can see the decision is right from state it
+  already holds, it **decides and ships** rather than parking the item
+  for the next attended session — including promoting a candidate to a
+  build-plan phase, merging overlapping candidates, unblocking work that
+  was gated only on "check with the owner first", and setting scope. The
+  question budget is for calls the state genuinely cannot settle. This
+  does NOT relax: the `AskUserQuestion`-only-in-`/oversight` rule (the
+  autonomous verbs still never ask — they decide), the hard rules
+  (no destructive git, no secrets, verify gate), irreversible or
+  outward-facing actions, or anything an explicit prior T ruling already
+  settled the other way. When the loop uses this authority on something
+  load-bearing, it files the call + reasoning as residue (standing rule
+  7) so T can audit it after the fact instead of before.
 - **Hermes-originated queue mutations get a provenance log entry**
   (adopted via /oversight 2026-07-30, issue #129): any time a
   Hermes-originated instruction changes `plan/steps/01_build_plan.md`'s

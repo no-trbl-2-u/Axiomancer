@@ -163,7 +163,7 @@ decimal.
 | Card-text grammar + full copy pass + guard tightening 200→130 + 4 unauthored faces + 6 glosses | own copy-pass item; honesty guard + mobile keyword lints are the witnesses | ruled R4, queue row added |
 | Enchantment paid-line orphans; dWR drag residue; self-flagellant RECOIL A/B | post-D8 re-measure | parked with dates |
 | Choice-width instrument (playable-set width + forced-turn rate per arm) | instrument follow-up, feeds the D8 evaluation and the gamble-agency question | queue row added |
-| Foundry/grace identity vs status doctrine | standing `[needs-user-call]` (metrics-slate residue) — now with card-level evidence (entropy-tax / heart-of-the-matter) | unchanged, evidence linked |
+| Foundry/grace identity vs status doctrine | ~~standing `[needs-user-call]`~~ **RESOLVED via /oversight 2026-08-08: doctrine failure, not identity** — restore `entropy-tax` to foundry's seat and `heart-of-the-matter` to grace's, folded into build-plan **Phase 39** (curve repair + theme symmetry). The owner declined the "exempt them and fix the statusEngagement blind spot instead" reading. | closed, routed to Phase 39 |
 
 Full agent reports live in this session's transcript only; every load-bearing
 number above also appears in the committed metrics files at `0f7f0500`.
