@@ -94,7 +94,7 @@ describe('navigation.engine', () => {
                     ...EMPTY_EVENT_SLICE,
                     pending: {
                         state: undefined as never,
-                        event: { kind: 'rest', healed: 1, healFraction: 1 },
+                        event: { kind: 'rest', healed: 1, shelter: 'camp' },
                     },
                 },
             });
@@ -178,7 +178,7 @@ describe('navigation.engine', () => {
                     ...EMPTY_EVENT_SLICE,
                     pending: {
                         state: undefined as never,
-                        event: { kind: 'rest', healed: 1, healFraction: 1 },
+                        event: { kind: 'rest', healed: 1, shelter: 'camp' },
                     },
                 },
                 notifications: { ...DEFAULT_NOTIFICATIONS_SLICE, levelUpAcknowledged: false },

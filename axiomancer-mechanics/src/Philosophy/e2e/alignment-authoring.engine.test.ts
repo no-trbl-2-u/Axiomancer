@@ -194,7 +194,7 @@ describe('Phase 43 — map-event pool-entry alignmentDelta', () => {
             entries: [{
                 kind: 'rest',
                 weight: 1,
-                payload: { kind: 'rest', healFraction: 0 },
+                payload: { kind: 'rest', shelter: 'camp' },
                 alignmentDelta: { epistemology: -5, scope: 8 },
             }],
         };
@@ -219,7 +219,7 @@ describe('Phase 43 — map-event pool-entry alignmentDelta', () => {
             entries: [{
                 kind: 'rest',
                 weight: 1,
-                payload: { kind: 'rest', healFraction: 0 },
+                payload: { kind: 'rest', shelter: 'camp' },
             }],
         };
         registerMapEventPool(pool);

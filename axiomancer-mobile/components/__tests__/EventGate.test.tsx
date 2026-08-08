@@ -80,7 +80,7 @@ function makeEncounterResult(): ResolveMapEventResult {
 function makeRestResult(healed: number): ResolveMapEventResult {
     return {
         state: undefined as never,
-        event: { kind: 'rest', healed, healFraction: 1 },
+        event: { kind: 'rest', healed, shelter: 'camp' },
     };
 }
 

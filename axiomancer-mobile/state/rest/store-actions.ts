@@ -4,9 +4,14 @@
  * The pure engine lives in `axiomancer-mechanics` (World/Rest); these
  * wrappers thread the night through the mobile `rest` slice and, at
  * claim, apply the dawn outcome to the real `GameState`: vitae
- * restored by `healFraction`, lingering effects cleansed when the
- * fire held, dream keepsakes banked as flags. A night never harms
- * the player — the engine guarantees heal ≥ 0.
+ * restored by the dawn ledger's `healFraction`, lingering effects
+ * cleansed when the fire held, dream keepsakes banked as flags. A night
+ * never harms the player — the engine guarantees heal ≥ 0.
+ *
+ * Phase 52b — the night's SHELTER (`'camp' | 'inn'`) is authored on the
+ * map event's `RestPayload` and carried on the slice. It is the sole
+ * gate on the hazard-scar max-VITAE mend; it used to be inferred from
+ * `baseHealFraction >= 1.0`, which two forest springs also passed.
  */
 
 import type { GameState } from '@mechanics';
@@ -17,8 +22,11 @@ import {
     claimRestOutcome as engineClaim,
     continueRestWatch as engineContinue,
     createRestSession,
+    DEFAULT_REST_SHELTER,
+    REST_PASSIVE_HEAL_FRACTION,
+    isInnShelter,
 } from '@mechanics';
-import type { RestOutcomeTier, RestPosture, RestSession } from '@mechanics';
+import type { RestOutcomeTier, RestPosture, RestSession, RestShelter } from '@mechanics';
 import { bankedScarMagnitude, HAZARD_SCAR_FLAG_PREFIX } from '../hazard/store-actions';
 import { resolveMinigameSeed } from '../minigame-seeds';
 import { EMPTY_REST_SLICE, type AppStore } from '../store';
@@ -38,18 +46,6 @@ export const REST_TUTORIAL_FLAG = 'night-watch-tutorial-done';
 export const REST_TUTORIAL_SEED = 41;
 
 /**
- * A rest is "inn-grade" (a full-recovery shelter) when its authored
- * heal fraction restores the whole bar; wilderness field-camp watches
- * are authored at a partial fraction (`healFraction: 0.5`). Only an
- * inn-grade night mends hazard-scarred max-VITAE — field camps restore
- * current VITAE only. There is no first-class "inn" map-event kind; the
- * `baseHealFraction` carried on the session is the existing data the
- * inn/camp split rides on. See
- * docs/hazard-v2-vs-mechanics-divergence.md.
- */
-export const INN_REST_HEAL_FRACTION = 1.0;
-
-/**
  * Dev/test seed override (`globalThis.__AXM_REST_SEED__`), mirroring
  * the hazard/gathering/quest hooks.
  */
@@ -65,8 +61,12 @@ function setSession(store: AppStore, session: RestSession | null): void {
 
 export interface BeginRestOptions {
     seed?: number;
-    /** Authored baseline from the map-event payload (default 1.0). */
-    healFraction?: number;
+    /**
+     * Authored shelter class from the map-event payload (Phase 52b).
+     * Defaults to `'camp'` — silence is never a paid bed. Only an
+     * `'inn'` night mends hazard-scarred max-VITAE.
+     */
+    shelter?: RestShelter;
     /** Start the guided first night (pinned seed unless overridden). */
     tutorial?: boolean;
 }
@@ -81,7 +81,14 @@ export function beginRestAction(store: AppStore, options: BeginRestOptions = {})
         options.tutorial ? REST_TUTORIAL_SEED : undefined,
     );
     store.setState({
-        rest: { session: createRestSession(seed, options.healFraction ?? 1.0), tutorial: options.tutorial === true },
+        rest: {
+            // Phase 52b — the per-node heal knob is retired; the night runs at
+            // the carried-forward shipped default until 52c derives the heal
+            // from the shelter. The inn/camp split now rides on `shelter`.
+            session: createRestSession(seed, REST_PASSIVE_HEAL_FRACTION),
+            shelter: options.shelter ?? DEFAULT_REST_SHELTER,
+            tutorial: options.tutorial === true,
+        },
     });
     return true;
 }
@@ -110,7 +117,7 @@ export interface ClaimRestOutcomeResult {
     cleansed: boolean;
     tier: RestOutcomeTier | null;
     keepsakes: readonly string[];
-    /** Max-VITAE mended back from hazard scars (inn rest only). */
+    /** Max-VITAE mended back from hazard scars (`shelter === 'inn'` only). */
     scarMended: number;
 }
 
@@ -129,15 +136,20 @@ const NOOP_CLAIM: ClaimRestOutcomeResult = Object.freeze({
  * when the fire held, keepsakes banked as flags. Clears the slice and
  * persists.
  *
- * An inn-grade night (`baseHealFraction >= INN_REST_HEAL_FRACTION`)
- * additionally mends hazard-scarred max-VITAE: every banked
- * `hazard-scar:` flag is summed back into `maxHealth` and the flags are
- * cleared. The recovered max is the heal cap, so the inn night can also
- * top current VITAE up to the restored bar. Field-camp watches leave
+ * A night at an INN (`shelter === 'inn'`, authored on the map event's
+ * `RestPayload`) additionally mends hazard-scarred max-VITAE: every
+ * banked `hazard-scar:` flag is summed back into `maxHealth` and the
+ * flags are cleared. The recovered max is the heal cap, so the inn night
+ * can also top current VITAE up to the restored bar. Camp watches leave
  * the scar flags and `maxHealth` untouched.
+ *
+ * Phase 52b re-homed this off the old `baseHealFraction >= 1.0`
+ * heuristic, which called two authored forest springs (`nf-4`, `nf-24`)
+ * inn-grade and mended scars there for free.
  */
 export function claimRestOutcomeAction(store: AppStore): ClaimRestOutcomeResult {
-    const s = store.getState().rest?.session;
+    const slice = store.getState().rest;
+    const s = slice?.session;
     if (!s || !s.outcome) return NOOP_CLAIM;
     const done = engineClaim(s);
     if (done.phase !== 'done') return NOOP_CLAIM;
@@ -148,8 +160,8 @@ export function claimRestOutcomeAction(store: AppStore): ClaimRestOutcomeResult 
 
     let flags = state.flags ?? [];
 
-    // Inn-grade nights mend max-VITAE scars back toward baseline.
-    const isInnRest = s.baseHealFraction >= INN_REST_HEAL_FRACTION;
+    // Inn nights mend max-VITAE scars back toward baseline. Camps do not.
+    const isInnRest = isInnShelter(slice?.shelter ?? DEFAULT_REST_SHELTER);
     const scarMended = isInnRest ? bankedScarMagnitude(flags) : 0;
     if (scarMended > 0) {
         flags = flags.filter((f) => !f.startsWith(HAZARD_SCAR_FLAG_PREFIX));

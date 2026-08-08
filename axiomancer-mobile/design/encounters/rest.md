@@ -177,7 +177,9 @@ Watch kind glyphs (exported from presenter): `REST_WATCH_GLYPHS`:
 `state/rest/store-actions.ts`:
 
 ```
-beginRestAction(healFraction?)        ← called by resolveCurrentMapEvent
+beginRestAction({shelter?})           ← called by resolveCurrentMapEvent
+                                        shelter: 'camp' | 'inn' (Phase 52b,
+                                        default 'camp'); gates the scar mend
 chooseRestPostureAction(posture)      ← 'deep' | 'doze' | 'watch'
 chooseRestOptionAction(optionId)      ← watch choice (hold/fade, feed/hoard, etc.)
 continueRestWatchAction()             ← advance past watch result card
@@ -186,7 +188,9 @@ claimRestOutcomeAction()              ← apply heal + cleanse + keepsakes, clea
 
 **State restoration:** mobile reverts the engine's passive pre-event heal and lets
 only the Rest outcome `healFraction` apply. This prevents double-healing if the
-session is abandoned.
+session is abandoned. (The engine's passive heal runs at the constant
+`REST_PASSIVE_HEAL_FRACTION` since Phase 52b retired the per-node
+`RestPayload.healFraction`; Phase 52c re-derives it from `shelter`.)
 
 Keepsakes held during a dream are banked to persistent `flags` by the claim action.
 

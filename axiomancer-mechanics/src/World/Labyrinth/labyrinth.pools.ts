@@ -107,7 +107,8 @@ function buildDefaultPool(act: LabyrinthActDef): MapEventPool {
             },
             {
                 kind: 'rest', weight: t.weights.rest,
-                payload: { kind: 'rest', healFraction: 0.2, description: 'A corner the house forgot to make uncomfortable.' },
+                // Phase 52b — the house is not an innkeeper. Camp.
+                payload: { kind: 'rest', shelter: 'camp', description: 'A corner the house forgot to make uncomfortable.' },
             },
             {
                 kind: 'narration', weight: t.weights.narration,
@@ -150,17 +151,17 @@ function overridePool(act: LabyrinthActDef, room: LabyrinthRoomDef): MapEventPoo
     }
 
     if (room.waystone) {
-        // One-shot meagre rest; the LAST waystone of the act is authored at
-        // the generous end of the band (the finale resource floor).
-        const waystones = act.rooms.filter(r => r.waystone).map(r => r.nodeId);
-        const isLast = waystones[waystones.length - 1] === room.nodeId;
+        // One-shot meagre rest. Phase 52b — a waystone is a CAMP: the stone
+        // holds your place, it does not keep an inn. The per-waystone
+        // healFraction band (0.35 / 0.5, generous on the act's LAST stone)
+        // was retired with the knob; 52c re-derives the heal from `shelter`.
         return {
             id,
             entries: [{
                 kind: 'rest', weight: 1,
                 payload: {
                     kind: 'rest',
-                    healFraction: isLast ? 0.5 : 0.35,
+                    shelter: 'camp',
                     description: `${room.name}. Rest your hand on the stone; the house will hold your place.`,
                 },
             }],
@@ -225,6 +226,15 @@ export function registerAporiaEventPools(): void {
             setNodeEventPoolOverride('labyrinth-continent', act.mapName, room.nodeId, pool.id);
         }
     }
+}
+
+/**
+ * Test-only: drops the idempotence guard so `registerAporiaEventPools()`
+ * can replay after `_clearMapEventPoolRegistry()`. Mirrors the MapEvents
+ * registry's own test hook; never call from production code.
+ */
+export function _resetAporiaEventPoolRegistration(): void {
+    registered = false;
 }
 
 registerAporiaEventPools();
