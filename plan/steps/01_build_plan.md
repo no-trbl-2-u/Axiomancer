@@ -1484,28 +1484,52 @@ before regarding the direction of the game's design"; master plan:
 `plan/phases/phase_V_visual_redesign_masterplan.md` — sub-briefs generate
 on pickup):**
 
-- [ ] Phase V1 — Iconography canon: one data-driven icon registry
+- [x] Phase V1 — Iconography canon: one data-driven icon registry
       (`components/icons/` — `<AxmIcon>` + curated game-icons.net
       silhouettes extracted from the owner-provided `Potential Assets/`
       library via `scripts/extract-game-icons.mjs`); `ActionIcon` /
       `EffectGlyph` become thin adapters; kill the verbatim path
       duplicates (tab bar, CombatVictoryPanel, pixel-heart pair); orphan
       components resolved (mobile)
-- [ ] Phase V2 — The map as an artifact: WILDS map scene redesign —
+      SHIPPED 2026-08-08 (PR #179): registry (27 marks, per-entry
+      attribution), adapters, tab-bar + CombatVictoryPanel dedupe,
+      registry test suite. RESIDUE (see Carry-overs): pixel-heart pair
+      dedupe and orphan resolution (`BodyDiagram`/`MindMark`/
+      `FriendshipMeter`) did NOT ship.
+- [-] Phase V2 — The map as an artifact: WILDS map scene redesign —
       parchment-void backdrop (hatch + vignette + torn frame,
       procedural), registry node/kind icons (treasure→chest), compass
       rose, region-accent theming (mobile; after V1)
-- [ ] Phase V3 — Menus & chrome: tab bar on the registry with the
+      PARTIAL via PR #179: chart sheet (hatch + contour hills), compass
+      rose, edge vignette, registry node/kind icons (treasure→chest,
+      boss→crowned skull; blacksmith + village promoted to first-class
+      NodeTypes with anvil/huts marks, tags, colors, tooltips), plus a
+      REAL backdrop ahead of schedule — Doré Inferno Plate 1 as
+      `assets/images/maps/forest-dark.webp` (provenance-stamped) behind
+      a `mapBackdropFor(region)` registry and a `MapCanvas` art slot.
+      REMAINING: torn frame, region-accent theming, legend refresh.
+- [-] Phase V3 — Menus & chrome: tab bar on the registry with the
       handoff active treatment, ✠-eyebrow header convention audited into
       one shared component, panel-furniture consistency pass across
       SELF/SATCHEL/MEMOIR + modals (mobile; after V1)
+      PARTIAL via PR #179: tab bar consumes the registry (5 inline path
+      copies deleted) + sulfur active-tick; screen-furniture marks
+      landed (anvil/THE ANVIL, huts/SETTLEMENT, tombstone/REMAINS).
+      REMAINING: shared ✠-eyebrow header component, panel-furniture
+      (TornPanel/rivets/seals) consistency pass.
 - [ ] Phase V4 — Background acquisition pipeline: scout public-domain
       woodcut/engraving + CC0 texture sources; provenance.json + webp
       budget per the labyrinth/cards convention; deliver per-region map
       backdrops, encounter-screen backgrounds, title candidates (assets)
+      HEAD START via PR #179: the acquisition pattern is proven
+      end-to-end (Wikimedia Commons → Pillow post-process → webp +
+      provenance.json) with one plate delivered (forest-dark).
 - [ ] Phase V5 — Backgrounds wired: `ScreenBg` keyed art slot with
       dim/vignette; encounter screens + map regions consume V4 art;
       combat arena variety; procedural fallback stays (mobile; after V2+V4)
+      HEAD START via PR #179: the WILDS map already consumes its plate
+      through `mapBackdropFor` + the `MapCanvas` backdrop prop with the
+      dim-never-blur treatment; V5 generalizes this to `ScreenBg`.
 - [ ] Phase V6 — Combat & minigame glyph unification: shared subset of
       hazard/gathering/cache/combat glyph kits folds into the registry;
       keyword-mark canon audit (mobile; after V1)
@@ -1550,8 +1574,20 @@ See the status rows above; generate briefs on demand.
 
 ## Carry-overs / known gaps (update as phases ship)
 
-(Empty until phases ship. Add `[-]` rows for partial-but-shipped
-phases with linked notes here.)
+(Add `[-]` rows for partial-but-shipped phases with linked notes here.)
+
+- [-] **V1 residue (filed 2026-08-08, post-#179 merge):** the
+  pixel-heart emblem pair still coexists
+  (`components/aftermath/PixelHeartEmblem.tsx` vs
+  `components/event/aftermath/PixelEmblem.tsx` — near-duplicates; keep
+  the PixelEmblem carve-out, collapse to one), and the three orphaned
+  components (`BodyDiagram`, `MindMark`, `FriendshipMeter` — zero
+  non-test importers) are still undecided (delete, or wire via a V3/V6
+  surface). Small, bounded; fold into the next V-phase pickup rather
+  than a bespoke tick.
+- [-] **V2/V3 remainders:** listed inline on their `[-]` rows above —
+  torn frame, region-accent theming, legend refresh (V2); shared
+  ✠-eyebrow header component, panel-furniture pass (V3).
 
 ## Queue change log
 
