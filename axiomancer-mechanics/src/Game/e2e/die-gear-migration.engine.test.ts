@@ -21,8 +21,11 @@ function v14Save(): Record<string, unknown> {
 }
 
 describe('migrate v14 → v15 — backfill the die-gear rail', () => {
-    it('the runtime version is 15', () => {
-        expect(GAME_STATE_VERSION).toBe(15);
+    it('the v14 → v15 hop is still on the supported chain', () => {
+        // The runtime version moves on (Phase 52a took it to 16); what this
+        // suite owns is that the D5 hop survives every later bump.
+        expect(GAME_STATE_VERSION).toBeGreaterThanOrEqual(15);
+        expect(migrate(v14Save(), 14, 15).version).toBe(15);
     });
 
     it('backfills the full concrete default rail on a pre-D5 save', () => {

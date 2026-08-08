@@ -26,6 +26,7 @@ import { getMapDefinition } from '../map.registry';
 import { ENEMY_REGISTRY, type EnemySlug } from '../../Enemy/enemy.library';
 import { getQuestBoardDef } from '../QuestBoard/quest-board.content';
 import { validateDieGear, type DieGearColor } from '../../Character/dieGear.reducer';
+import { REST_PASSIVE_HEAL_FRACTION, restShelterOf } from './rest-shelter';
 import type {
     EncounterPayload, InteractionPayload, GatheringPayload, RestPayload,
     VillagePayload, CutscenePayload, HazardPayload, LootCachePayload,
@@ -109,19 +110,23 @@ export function resolveRest(
     state: GameState,
     payload: RestPayload,
 ): ResolveMapEventResult {
-    const fraction = payload.healFraction ?? 1.0;
+    // Phase 52b — the per-node `healFraction` knob is retired. The passive
+    // heal runs at the carried-forward shipped default until 52c derives it
+    // from `shelter`; see `rest-shelter.ts` for why the number is pinned.
+    const shelter = restShelterOf(payload);
     const before = state.player.health;
     const newHp = Math.min(
         state.player.maxHealth,
-        before + Math.round(state.player.maxHealth * fraction),
+        before + Math.round(state.player.maxHealth * REST_PASSIVE_HEAL_FRACTION),
     );
     const healed = newHp - before;
     const player: Character = { ...state.player, health: newHp };
     return {
         state: withPlayer(state, player),
-        // healFraction rides along so hosts that replace the passive heal
-        // with the Night Watch minigame keep the authored baseline.
-        event: { kind: 'rest', healed, healFraction: fraction },
+        // `shelter` rides along so hosts that replace the passive heal with
+        // their own rest flow keep the authored inn/camp signal — and so the
+        // hazard-scar mend has an honest trigger.
+        event: { kind: 'rest', healed, shelter },
     };
 }
 

@@ -118,7 +118,7 @@ describe('resolveMapEvent — per-kind', () => {
             id: 'pool.rest',
             entries: [{
                 kind: 'rest', weight: 1,
-                payload: { kind: 'rest', healFraction: 1.0 },
+                payload: { kind: 'rest', shelter: 'inn' },
             }],
         });
         const result = resolveMapEvent(state);
@@ -392,7 +392,7 @@ describe('resolveMapEvent — reach-objective auto-advance', () => {
             entries: [{
                 kind: 'rest',
                 weight: 1,
-                payload: { kind: 'rest', healFraction: 0.5 },
+                payload: { kind: 'rest', shelter: 'camp' },
             }],
         });
         const atFv2 = { ...base, world: { ...base.world, currentMap: { ...base.world.currentMap, currentNode: 'fv-2' } } };
@@ -495,7 +495,7 @@ describe('resolveMapEvent — collect-objective auto-advance', () => {
         mockSequentialRng(0.5);
         const base = withPool(freshState(), {
             id: 'pool.collect-noop-test',
-            entries: [{ kind: 'rest', weight: 1, payload: { kind: 'rest', healFraction: 0.5 } }],
+            entries: [{ kind: 'rest', weight: 1, payload: { kind: 'rest', shelter: 'camp' } }],
         });
         const state = seedCollectQuest(base, 'driftwood');
 

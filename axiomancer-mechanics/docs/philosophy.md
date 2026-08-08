@@ -162,7 +162,7 @@ Example — the fv-9 unattended-campfire rest in
 ```ts
 {
     kind: 'rest', weight: 1,
-    payload: { kind: 'rest', healFraction: 1.0, description: '...' },
+    payload: { kind: 'rest', shelter: 'camp', description: '...' },
     // Peaceful rest at someone else's campfire: small optimistic +
     // relational pull.
     alignmentDelta: { outlook: 2, scope: 1 },

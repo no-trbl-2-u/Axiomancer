@@ -72,6 +72,137 @@
 > replacement may now be authored freely, including with normal damage.
 > See `plan/bearings.md` § "THE UNSHACKLING".
 
+### `dominantCardShare` is broken post-strike-death
+- category: debt
+- impact: 7
+- ease: 5
+- detail: filed 2026-08-08 by Phase 43. The raw attribution ledger's
+  `dotDamage` is filled at SUMMARY time, so the ledger itself carries direct
+  damage only and collapses onto whichever signature burst last — it reads
+  ~100% on nearly every matrix cell. CQI's identity term routes around it
+  (cards from the sim's per-line HP swing), so the new metric is unaffected,
+  but the standalone stat is wrong wherever else it is read. Left untouched
+  because other suites consume it; repair is separate work.
+
+### `npm run combat-sim`'s default loadout no longer exists
+- category: debt
+- impact: 6
+- ease: 9
+- detail: filed 2026-08-08 by Phase 43. The default is
+  `slippery-slope,brace-for-impact` — both cards deleted by the Profane Canon
+  (`84ef85b`). Every default-invocation run therefore reports 0% win, 0%
+  statusEngagement, cqi ~29%. Pre-existing rot, not caused by Phase 43, and
+  outside its "surface the new metric additively" scope. Anyone reading a
+  bare `combat-sim` run right now is reading noise.
+
+### The Surge meter is the least-used locked system, and most rolled dice never power a line
+- category: divergence
+- impact: 5
+- ease: 3
+- detail: filed 2026-08-08 by Phase 43's first CQI reading. Chain completion
+  is 35% matrix-wide (the chain breaks ~2x for every surge), the lowest
+  locked sub-score everywhere; `dice-spent` is 29% against a 0.5 reference.
+  **Information, not work** — bearings' "the current card library is
+  transitional" rule forbids tuning against it. Re-read after the redesign.
+
+### `/deck-tuning` and `/combat-playtest` still name `statusEngagement` as the objective function
+- category: docs
+- impact: 6
+- ease: 9
+- detail: filed 2026-08-08 by Phase 43. The skill files in `skills/` and
+  `.claude/commands/` were outside that phase's ownership. They should be
+  repointed at `cqi` / spec 35, or the next tuning pass will optimise the
+  dead law the phase exists to retire.
+
+### [needs-user-call] The product name "Axiomancer" under the whole-product pivot
+- category: content
+- impact: 6
+- ease: 9
+- detail: filed 2026-08-08 by Phase 42. Spec 34 rules the title KEPT under
+  its NL-9 proper-noun carve-out (the Parish's older names survive; the rule
+  licenses nothing new). But "Axiomancer" is philosophy-native, and a
+  whole-product pivot is exactly the moment a title gets reconsidered — that
+  is a T-level call, above the loop's standing big-decisions authority.
+  Phases 44a-44i execute identically either way, so this blocks nothing.
+  Bearings' "Name is capitalized: Axiomancer, always" stands until ruled on.
+
+### Phase 52b's shelter retheme raised four rest nodes' heal for an open window
+- category: divergence
+- impact: 6
+- ease: 7
+- detail: filed 2026-08-08 by Phase 52b (`8444922`). Its brief said "changes
+  no heal numbers", but retiring a PER-NODE knob could not be fully
+  number-neutral: four nodes whose sub-1.0 authoring had nowhere to go now
+  heal at the carried-forward default 1.0 — `nf-11` was 0.75, the labyrinth
+  act default 0.2, the waystone overrides 0.35 and 0.5. `nf-4`, `nf-24` and
+  all four fishing-village inns are unchanged. **Phase 52c overwrites every
+  one of these** (camp flat 20%, inn full), so the fix is already queued —
+  but 52c did NOT ship alongside 52b, so the window is open until it does,
+  not for a single tick as the shipping agent framed it. Player-favorable,
+  legible, and `REST_PASSIVE_HEAL_FRACTION` is marked
+  carried-forward-pending-52c. Drain by shipping 52c, not by tuning here.
+
+### [needs-user-call] Should any map outside the fishing village read as an inn?
+- category: content
+- impact: 4
+- ease: 9
+- detail: filed 2026-08-08 by Phase 52b. `shelter: 'camp' | 'inn'` now says
+  it explicitly instead of inferring it from `healFraction >= 1.0`. Shipped
+  with the most-defensible default — the four fishing-village rest nodes are
+  the only inns; everything else is a camp, pinned as a COMPLETE set so a new
+  inn cannot appear silently. Authored content question, not a code one.
+
+### The starter bundle collapses to 8 cards in the live app
+- category: divergence
+- impact: 8
+- ease: 4
+- detail: filed 2026-08-08 by Phase 52a. `ensureStarterCards`
+  (`axiomancer-mobile/state/combat/store-actions.ts`) writes
+  `knownCards = [...preset.cardIds]` — the 18-entry Threadbare recipe WITH
+  its 3x copies — and `buildCombatDeck` de-dupes the card base, yielding an
+  **8-card deck**. The shipped 18/30/45 preset shapes only reach a real fight
+  through `buildPresetDeck` (sim/CLI). So the MTG-style copy law the presets
+  are machine-checked against has no effect in the app, and sim measurements
+  are taken against a deck the player never plays. Directly contests what
+  "deck size" means, which is what 52a's floor of 12 and 52f's pricing both
+  rest on. See the paired candidate in `plan/PHASE_CANDIDATES.md`.
+
+### The Phase-169 loadout path is dead in the shipped runtime
+- category: debt
+- impact: 5
+- ease: 5
+- detail: filed 2026-08-08 by Phase 52a. `createNewGameState` seeds only the
+  2 `STARTING_CARD_IDS` loadout flags and mobile never writes loadout flags
+  afterward, while `initializeCombatEncounter` calls `buildCombatDeck(player)`
+  with no flags at all. 52a's loadout reconciliation is correct and tested,
+  but nothing exercises it end to end. Pairs with the row above.
+
+### `specs/README.md` has no row for spec 34
+- category: docs
+- impact: 3
+- ease: 10
+- detail: filed 2026-08-08 by Phase 42; the authoring agent's file ownership
+  forbade editing the index. One-line add.
+
+### Dead id-keyed engine hooks survive the retired spec-32 library
+- category: debt
+- impact: 5
+- ease: 6
+- detail: filed 2026-08-08 by Phase 42. Engine hooks still keyed to
+  `achilles-and-the-tortoise`, `the-closing-word`, `circular-reasoning` —
+  cards the Profane Canon (`84ef85b`) deleted. Dead, and now actively
+  misleading: Phase 44c's build-plan row cites those same ids as its scope.
+  Related stale registry rows: `SYSTEM_TERM_COVERED_BY` names a nonexistent
+  `CLARITY` keyword, and mobile fixtures still deck `slippery-slope` /
+  `straw-mans-jab`.
+
+### `RELEASES.md` and `CHANGELOG.md` describe the retired `healFraction` as current
+- category: docs
+- impact: 2
+- ease: 9
+- detail: filed 2026-08-08 by Phase 52b. Left alone as dated release records;
+  the next release cut should note the retirement rather than rewriting them.
+
 ### axio-query overview still publishes the retired "THE STRIKE IS DEAD" doctrine after Phase 41
 - category: divergence
 - impact: 8

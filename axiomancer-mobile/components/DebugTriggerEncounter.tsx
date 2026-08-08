@@ -200,8 +200,9 @@ export function DebugTriggerEncounter() {
                 return;
             case 'rest':
                 // "The Night Watch" — <RestGate> routes to /rest. Mirror
-                // the live interceptor's default half-heal.
-                actions.beginRest({ healFraction: 0.5 });
+                // the live interceptor's default shelter (Phase 52b: a
+                // node that forgot to say is wilderness).
+                actions.beginRest({ shelter: 'camp' });
                 return;
             case 'gather':
                 // "The Gleaning" — <GatheringGate> routes to /gathering.

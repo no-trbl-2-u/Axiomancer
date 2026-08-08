@@ -15,7 +15,7 @@ import {
 
 import type { GatheringSessionState } from '@mechanics';
 import type { HazardSessionState } from '@mechanics';
-import type { BlacksmithSession, Item, LootCacheSession, QuestBoardSession, RestSession } from '@mechanics';
+import type { BlacksmithSession, Item, LootCacheSession, QuestBoardSession, RestSession, RestShelter } from '@mechanics';
 import type { LabyrinthActId, WorldState } from '@mechanics';
 
 /**
@@ -115,6 +115,14 @@ export interface MobileQuestSlice {
  */
 export interface MobileRestSlice {
     session: RestSession | null;
+    /**
+     * Authored shelter class of the node this night was started from
+     * (Phase 52b). `'inn'` is the ONLY thing that unlocks the
+     * hazard-scar max-VITAE mend at claim — it used to be inferred from
+     * `baseHealFraction >= 1.0`, which two forest springs also passed.
+     * Defaults to `'camp'` outside a rest and whenever a node is silent.
+     */
+    shelter: RestShelter;
     /**
      * True while this session is the guided first night. The coach
      * overlay (`components/rest/TutorialCoach.tsx`) renders on top of
@@ -249,6 +257,7 @@ export const EMPTY_QUEST_SLICE: MobileQuestSlice = Object.freeze({ session: null
 
 export const EMPTY_REST_SLICE: MobileRestSlice = Object.freeze({
     session: null,
+    shelter: 'camp',
     tutorial: false,
 });
 

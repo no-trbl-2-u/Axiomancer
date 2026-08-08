@@ -49,6 +49,9 @@ import {
     simulateHazardPatternCombatDetailed,
     type CombatCardUsage, type CombatSimStats, type WinPathCounts,
 } from './combat.encounter.sim';
+// Phase 43 — objective function v2, reported BESIDE `statusEngagement`.
+import { poolObjectiveTelemetry } from './combat.objective.telemetry';
+import { formatCombatQuality, scoreCombatObjective, type CombatQualityScore } from './combat.objective';
 
 /** One frozen measurement: stage × enemy × policy × deck × runs × seed. */
 export interface PlaytestCellSpec {
@@ -97,7 +100,11 @@ export interface PlaytestStageSummary {
     stage: CombatStageId;
     cells: number;
     winRate: number;
+    /** Warning light (the voided status doctrine) — kept, not the objective. */
     statusEngagement: number;
+    /** **THE OBJECTIVE FUNCTION (Phase 43).** Scored from the stage's cells'
+     *  POOLED objective telemetry, not averaged from their per-cell indices. */
+    combatQuality: CombatQualityScore;
     dotHpFraction: number;
     avgRounds: number;
     /** Runs-weighted mean of the cells' per-cell rounds σ (a spread witness,
@@ -136,7 +143,11 @@ export interface PlaytestPresetStageRow {
     stage: CombatStageId;
     cells: number;
     winRate: number;
+    /** Warning light (the voided status doctrine) — kept, not the objective. */
     statusEngagement: number;
+    /** **THE OBJECTIVE FUNCTION (Phase 43)** for this preset × stage, scored
+     *  from the row's POOLED objective telemetry. */
+    combatQuality: CombatQualityScore;
     avgRounds: number;
     /** Runs-weighted mean of per-cell rounds σ (consistency witness). */
     roundsStdDev: number;
@@ -157,6 +168,11 @@ export interface PlaytestPresetStageRow {
 export interface PlaytestPresetSummary {
     presetId: string;
     stages: PlaytestPresetStageRow[];
+    /** **THE OBJECTIVE FUNCTION (Phase 43)** for this preset across every stage
+     *  it was measured on, scored from the preset's POOLED telemetry. One deck,
+     *  so the IDENTITY component is meaningful here (see `combat.objective.ts`)
+     *  — this is the row `/deck-tuning` should rank decks by. */
+    combatQuality: CombatQualityScore;
     /** Mean |doctrineDelta| over the measured stages — one number for "how far
      *  off the doctrine curve is this deck?" (0 = every stage in-band). */
     curveDeviation: number;
@@ -183,6 +199,11 @@ export interface PlaytestReport {
      *  which combat the numbers describe. */
     diceModel: CombatDiceModel;
     cells: PlaytestCellResult[];
+    /** **THE OBJECTIVE FUNCTION (Phase 43)** for the WHOLE sweep — scored from
+     *  every cell's pooled objective telemetry. This is the headline number
+     *  `/deck-tuning` and `/combat-playtest` optimise; `statusEngagement` is
+     *  kept beside it as a warning light for the doctrine it used to enforce. */
+    combatQuality: CombatQualityScore;
     /** Aggregated over cells, weighted by runs. */
     stageSummaries: PlaytestStageSummary[];
     /** Per-preset rollups over every `preset`-deck cell in the matrix (empty
@@ -306,6 +327,9 @@ function summarizeStage(stage: CombatStageId, cells: readonly PlaytestCellResult
         cells: mine.length,
         winRate: win / denom,
         statusEngagement: engagement / denom,
+        combatQuality: scoreCombatObjective(
+            poolObjectiveTelemetry(mine.map(c => c.stats.objectiveTelemetry)),
+        ),
         dotHpFraction: dot / denom,
         avgRounds: rounds / denom,
         roundsStdDev: roundsSd / denom,
@@ -383,6 +407,9 @@ function summarizePresets(cells: readonly PlaytestCellResult[]): PlaytestPresetS
                 cells: stageCells.length,
                 winRate,
                 statusEngagement: engagement / denom,
+                combatQuality: scoreCombatObjective(
+                    poolObjectiveTelemetry(stageCells.map(c => c.stats.objectiveTelemetry)),
+                ),
                 avgRounds: rounds / denom,
                 roundsStdDev: roundsSd / denom,
                 deckUtilization: util / denom,
@@ -421,6 +448,9 @@ function summarizePresets(cells: readonly PlaytestCellResult[]): PlaytestPresetS
         summaries.push({
             presetId,
             stages,
+            combatQuality: scoreCombatObjective(
+                poolObjectiveTelemetry(mine.map(c => c.stats.objectiveTelemetry)),
+            ),
             curveDeviation,
             skillGap,
             bestPolicyId,
@@ -484,6 +514,9 @@ export function runPlaytestMatrix(options: PlaytestMatrixOptions = {}): Playtest
     return {
         diceModel: isUpgradeableDiceEnabled() ? 'upgradeable' : 'legacy',
         cells,
+        combatQuality: scoreCombatObjective(
+            poolObjectiveTelemetry(cells.map(c => c.stats.objectiveTelemetry)),
+        ),
         stageSummaries,
         presetSummaries: summarizePresets(cells),
         cardCoverage: { exercised, neverPlayed, deadCardRate },
@@ -521,14 +554,38 @@ export function formatPlaytestReport(report: PlaytestReport, opts?: { perCard?: 
     lines.push('Hazard combat playtest matrix');
     lines.push(`Dice model: ${diceModelLabel(report.diceModel)}`);
     lines.push('(win = enemy HP→0 or befriend-spare; V/M/D/R = victory/mercy/defeat/retreat;');
-    lines.push(' statusEng + dotFrac are the doctrine witnesses: status play is the efficient path;');
+    lines.push(' statusEng + dotFrac are LEGACY warning lights — the status-dominance doctrine they');
+    lines.push('   enforced was voided by THE UNSHACKLING; they are informational, not the target;');
     lines.push(' util=deck utilization, H=play entropy, dom=dominant-card HP share (>70% = spam))');
+    lines.push('');
+    // ── Phase 43 — THE OBJECTIVE FUNCTION, printed first because it is what
+    //    /deck-tuning and /combat-playtest are supposed to be optimising. ─────
+    lines.push('OBJECTIVE FUNCTION v2 — Combat Quality Index (see Combat/combat.objective.ts)');
+    lines.push('  "good combat" = the deck\'s engine runs: it assembles across turns (arc), offers');
+    lines.push('  more than one line at each powering die (width), has a lead card without becoming');
+    lines.push('  one card (identity), and flows through the three LOCKED systems — Conviction, the');
+    lines.push('  Surge meter, the Dice (spine, weight 0.40 — a spine-blind deck cannot score well).');
+    lines.push(`  matrix ${formatCombatQuality(report.combatQuality)}`);
+    lines.push('  (idn is a PER-DECK reading — pooling several decks dilutes the dominant share and');
+    lines.push('   inflates it. Read idn off a cell or a preset row, not off a multi-deck matrix.)');
+    {
+        const r = report.combatQuality.readings;
+        lines.push(
+            `    readings: ◆/round=${r.convictionPerRound.toFixed(2)} ◆spent=${pct(r.convictionSpendShare)}`
+            + `  chain/round=${r.momentumStepsPerRound.toFixed(2)} surge-completion=${pct(r.surgeCompletionShare)}`
+            + `  dice-spent=${pct(r.diceSpendShare)} die-economy-verbs=${r.diceEconomyBreadth}`,
+        );
+        lines.push(
+            `              arc-centroid=${r.arcCentroid === null ? 'n/a' : r.arcCentroid.toFixed(3)}`
+            + `  live-options=${r.meanLiveOptions.toFixed(2)}  dominant-share=${pct(r.dominantCardShare)}`,
+        );
+    }
     lines.push('');
 
     const header = `  ${'stage'.padEnd(11)}${'enemy'.padEnd(26)}${'policy'.padEnd(13)}${'deck'.padEnd(22)}`
         + `${'win'.padStart(5)}  ${'V/M/D/R'.padEnd(12)}${'rounds'.padStart(6)}`
         + `${'statusEng'.padStart(10)}${'dotFrac'.padStart(8)}${'strike'.padStart(7)}`
-        + `${'util'.padStart(6)}${'H'.padStart(5)}${'dom'.padStart(6)}`;
+        + `${'util'.padStart(6)}${'H'.padStart(5)}${'dom'.padStart(6)}${'cqi'.padStart(6)}`;
     lines.push(header);
     for (const cell of report.cells) {
         const s = cell.stats;
@@ -538,7 +595,8 @@ export function formatPlaytestReport(report: PlaytestReport, opts?: { perCard?: 
             + `${pct(s.winRate)}  ${`${s.victories}/${s.mercies}/${s.defeats}/${s.retreats}`.padEnd(12)}`
             + `${s.avgRounds.toFixed(1).padStart(6)}`
             + `${pct(s.statusEngagement).padStart(10)}${pct(s.dotHpFraction).padStart(8)}${pct(s.strikeFraction).padStart(7)}`
-            + `${pct(s.deckUtilization).padStart(6)}${s.usageEntropy.toFixed(2).padStart(5)}${pct(s.dominantCardShare).padStart(6)}`,
+            + `${pct(s.deckUtilization).padStart(6)}${s.usageEntropy.toFixed(2).padStart(5)}${pct(s.dominantCardShare).padStart(6)}`
+            + `${pct(s.combatQuality.index).padStart(6)}`,
         );
     }
 
@@ -572,6 +630,7 @@ export function formatPlaytestReport(report: PlaytestReport, opts?: { perCard?: 
             `             win-path: vic=${w.victory} mer=${w.mercy} cap=${w.capitulate}`
             + ` con=${w.concede} def=${w.defeat}`,
         );
+        lines.push(`             ${formatCombatQuality(summary.combatQuality)}`);
     }
 
     if (report.presetSummaries.length > 0) {
@@ -590,6 +649,7 @@ export function formatPlaytestReport(report: PlaytestReport, opts?: { perCard?: 
                 ? `skill-gap=${pct(preset.skillGap)} (${preset.bestPolicyId} > ${preset.worstPolicyId})`
                 : 'skill-gap=n/a (one policy)';
             lines.push(`  ${preset.presetId.padEnd(11)}curve-dev=${pct(preset.curveDeviation)}  ${gapNote}  ${cxNote}`);
+            lines.push(`    ${formatCombatQuality(preset.combatQuality)}  <- rank decks by this`);
             for (const row of preset.stages) {
                 const sign = row.doctrineDelta > 0 ? '+' : '';
                 lines.push(
@@ -599,6 +659,7 @@ export function formatPlaytestReport(report: PlaytestReport, opts?: { perCard?: 
                     + `  rounds=${row.avgRounds.toFixed(1)}±${row.roundsStdDev.toFixed(1)}`
                     + `  util=${pct(row.deckUtilization)}  H=${row.usageEntropy.toFixed(2)}`,
                 );
+                lines.push(`      ${formatCombatQuality(row.combatQuality)}`);
             }
             if (cx && cx.orphanKeywords.length > 0) {
                 lines.push(`    orphan keywords: ${cx.orphanKeywords.join(', ')}`);

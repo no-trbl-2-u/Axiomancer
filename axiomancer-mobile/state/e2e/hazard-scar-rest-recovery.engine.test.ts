@@ -1,14 +1,20 @@
 /**
  * Hermetic E2E Tests — Hazard max-VITAE scar recovery at inn rest.
  *
- * Pins the Phase 128 contract through the store action layer:
+ * Pins the Phase 128 contract through the store action layer, re-homed by
+ * Phase 52b onto the authored `RestPayload.shelter` marker:
  *  - a `maxhp` hazard scar bakes the loss into maxHealth AND records a
  *    durable `hazard-scar:` flag;
- *  - an inn-grade rest (`healFraction >= 1.0`) mends the scarred
- *    max-VITAE back toward baseline and clears the scar flags;
- *  - a wilderness field-camp watch (`healFraction: 0.5`) does NOT mend
- *    the scar and leaves the flags intact;
+ *  - a rest at an INN (`shelter: 'inn'`) mends the scarred max-VITAE
+ *    back toward baseline and clears the scar flags;
+ *  - a CAMP watch (`shelter: 'camp'`, and the default when a node is
+ *    silent) does NOT mend the scar and leaves the flags intact;
  *  - recovered max-VITAE never exceeds the pre-scar baseline.
+ *
+ * The old trigger was `baseHealFraction >= 1.0`, which two authored
+ * wilderness springs (`nf-4`, `nf-24`) also passed — they mended scars
+ * like a paid shelter. The BEHAVIOUR below is unchanged; only its
+ * trigger is honest now.
  * Seeded; no timers, no network.
  */
 
@@ -120,8 +126,8 @@ describe('hazard scar recovery at inn rest', () => {
         const scarredMax = (store.getState() as unknown as GameState).player.maxHealth;
         expect(scarredMax).toBe(baseline - scar);
 
-        // Inn rest: default healFraction is 1.0 (full-recovery shelter).
-        expect(actions.beginRest({ seed: 7 })).toBe(true);
+        // Inn rest: the authored paid shelter (fishing-village rest nodes).
+        expect(actions.beginRest({ seed: 7, shelter: 'inn' })).toBe(true);
         playRestToDawn(store, actions);
         const result = actions.claimRestOutcome();
 
@@ -134,15 +140,15 @@ describe('hazard scar recovery at inn rest', () => {
         expect(after.player.health).toBeLessThanOrEqual(after.player.maxHealth);
     });
 
-    it('a field-camp watch does NOT mend the scar and leaves the flag intact', () => {
+    it('a camp watch does NOT mend the scar and leaves the flag intact', () => {
         const { store, actions } = makeStoreAndActions();
         const baseline = (store.getState() as unknown as GameState).player.maxHealth;
         const scar = scarThePlayer(store, actions);
         const scarredMax = (store.getState() as unknown as GameState).player.maxHealth;
         expect(scarredMax).toBe(baseline - scar);
 
-        // Field camp: authored wilderness rests heal only half the bar.
-        expect(actions.beginRest({ seed: 7, healFraction: 0.5 })).toBe(true);
+        // Camp: every authored wilderness rest node.
+        expect(actions.beginRest({ seed: 7, shelter: 'camp' })).toBe(true);
         playRestToDawn(store, actions);
         const result = actions.claimRestOutcome();
 
@@ -154,14 +160,89 @@ describe('hazard scar recovery at inn rest', () => {
         expect(bankedScarMagnitude(after.flags ?? [])).toBe(scar); // flag intact
     });
 
+    it('a rest with NO authored shelter defaults to camp and does NOT mend', () => {
+        // Phase 52b — silence is never a paid bed. This is the regression
+        // that mattered: `nf-4` / `nf-24` were full-heal wilderness springs
+        // and the old `>= 1.0` heuristic mended their scars for free.
+        const { store, actions } = makeStoreAndActions();
+        const scar = scarThePlayer(store, actions);
+        const scarredMax = (store.getState() as unknown as GameState).player.maxHealth;
+
+        expect(actions.beginRest({ seed: 7 })).toBe(true);
+        playRestToDawn(store, actions);
+        const result = actions.claimRestOutcome();
+
+        expect(result.applied).toBe(true);
+        expect(result.scarMended).toBe(0);
+
+        const after = store.getState() as unknown as GameState;
+        expect(after.player.maxHealth).toBe(scarredMax);
+        expect(bankedScarMagnitude(after.flags ?? [])).toBe(scar);
+    });
+
     it('a scarless inn rest leaves maxHealth unchanged', () => {
         const { store, actions } = makeStoreAndActions();
         const baseline = (store.getState() as unknown as GameState).player.maxHealth;
-        expect(actions.beginRest({ seed: 7 })).toBe(true);
+        expect(actions.beginRest({ seed: 7, shelter: 'inn' })).toBe(true);
         playRestToDawn(store, actions);
         const result = actions.claimRestOutcome();
         expect(result.applied).toBe(true);
         expect(result.scarMended).toBe(0);
         expect((store.getState() as unknown as GameState).player.maxHealth).toBe(baseline);
+    });
+
+    it('the fishing-village inn node routes an inn rest through the live interceptor', () => {
+        // End-to-end witness that the AUTHORED marker (not a heal number)
+        // is what reaches the claim: fv-3 is an `fvRestPool` node.
+        const { store, actions } = makeStoreAndActions();
+        const scar = scarThePlayer(store, actions);
+
+        const before = store.getState() as unknown as GameState;
+        store.setState({
+            world: {
+                ...before.world,
+                currentMap: {
+                    ...before.world.currentMap,
+                    continent: 'coastal-continent',
+                    name: 'fishing-village',
+                    currentNode: 'fv-3',
+                },
+            },
+        } as never);
+
+        expect(actions.resolveCurrentMapEvent()).toBe(true);
+        expect(store.getState().rest.shelter).toBe('inn');
+
+        playRestToDawn(store, actions);
+        expect(actions.claimRestOutcome().scarMended).toBe(scar);
+    });
+
+    it('a northern-forest spring routes a CAMP rest through the live interceptor', () => {
+        // nf-4 (cold spring) was authored at healFraction 1.0 and therefore
+        // mended scars under the retired heuristic. It must not any more.
+        const { store, actions } = makeStoreAndActions();
+        const scar = scarThePlayer(store, actions);
+        const scarredMax = (store.getState() as unknown as GameState).player.maxHealth;
+
+        const before = store.getState() as unknown as GameState;
+        store.setState({
+            world: {
+                ...before.world,
+                currentMap: {
+                    ...before.world.currentMap,
+                    continent: 'coastal-continent',
+                    name: 'northern-forest',
+                    currentNode: 'nf-4',
+                },
+            },
+        } as never);
+
+        expect(actions.resolveCurrentMapEvent()).toBe(true);
+        expect(store.getState().rest.shelter).toBe('camp');
+
+        playRestToDawn(store, actions);
+        expect(actions.claimRestOutcome().scarMended).toBe(0);
+        expect((store.getState() as unknown as GameState).player.maxHealth).toBe(scarredMax);
+        expect(bankedScarMagnitude((store.getState() as unknown as GameState).flags ?? [])).toBe(scar);
     });
 });

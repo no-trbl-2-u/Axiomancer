@@ -45,8 +45,13 @@ const T = REST_TUNING;
 
 /**
  * Deals the night: 3 watch slips from the bag, dreams in seeded order.
- * `baseHealFraction` is the authored map-event baseline (default 1.0)
- * and scales the whole night's heal.
+ * `baseHealFraction` scales the whole night's heal.
+ *
+ * Phase 52b — it is no longer an authored per-node figure: `RestPayload`
+ * carries `shelter` (`'camp' | 'inn'`) and no heal number at all. Hosts
+ * pass `REST_PASSIVE_HEAL_FRACTION` (the carried-forward shipped default
+ * of 1.0) until Phase 52c derives the heal from the shelter; sims still
+ * sweep the parameter directly.
  */
 export function createRestSession(seed: SeedInput, baseHealFraction = 1.0): RestSession {
     let rng: RestRngState = seedRng(seed);

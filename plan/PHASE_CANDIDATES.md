@@ -37,6 +37,63 @@
   traversal law implies the former; the `completedMaps` field implies someone
   once meant the latter.
 
+### Reconcile the card base: do duplicates reach the deck, and are loadout flags wired?
+- source: filed 2026-08-08 by Phase 52a (`dd5c46a`), paired with two
+  `plan/AUDIT.md` rows. `buildCombatDeck` de-dupes whichever card base is in
+  force, so the Threadbare recipe's 3x copies collapse and a live starting run
+  deals 8 cards against a machine-checked 18. Separately, `GameState.flags`
+  never reaches `initializeCombatEncounter`, so the loadout path is dead in
+  the shipped runtime.
+- shape: one decision with two implementations. Either the card base honours
+  duplicates (making the preset recipes real in-app, and the LINEAGE LAW
+  measurable against what players hold), or the presets are declared unique
+  sets and the sim stops measuring a deck nobody plays. Then wire flags
+  through `initializeCombatEncounter` so the loadout path is live.
+- why it matters now: it decides what "deck size" means, and both Phase 52a's
+  floor of 12 and Phase 52f's price calibration rest on that number. **Should
+  land before 52f**, and 52f should recheck the floor afterward — if
+  duplicates start reaching the deck, 12 becomes conservative.
+
+### Loop turns that end while CI is amber leave post-green work undone, with no retry
+- source: filed 2026-08-08 by Phase 48 (`0aac2d3`) from march run
+  31184116798, which ended with `result: "Waiting on CI — will resume once
+  the verify-mobile run for commit 615ff26b finishes."` Nothing resumes: the
+  container dies and the next tick re-audits from scratch.
+- shape: `close-trailers` fixes the issue-close symptom by moving it onto the
+  push. The general defect is untouched — the same early exit skips the
+  deploy-URL comment and every other `deploy:check`-gated step. Either resume
+  on deploy-gate completion, or make the post-green steps unconditional and
+  idempotent so a later tick can safely re-run them.
+
+### Reconcile shipped `[x]` build-plan rows against open `loop:phase` issues
+- source: filed 2026-08-08 by Phase 48. Six issues (#83, #98, #139, #140,
+  #143, #174) were closed by hand during `/oversight` on 08-08; only prose
+  records why, so the leak was invisible until someone looked.
+- shape: a periodic reconciliation now that `close-trailers` is the authority
+  — anything shipped-and-ticked whose issue is still open is a leak. Cheap,
+  and it turns a human sweep into a witness.
+
+### Run/meta-progression as a wrapper over `PRESET_LINEAGE`
+- source: filed 2026-08-08 by Phase 42. Spec 34 §7 rules "campaign"
+  DESCRIPTIVE for the 44 series — the shipped threadbare -> pilgrim ->
+  apostate arc already is the campaign — while noting T's "opens a lot of
+  doors" argues they want the option open.
+- shape: **BLOCKED on T; do not start.** Recorded so the door stays visible.
+
+### The 27 damned exemplars + 81 besetting sins hiding inside Phase 44h
+- source: filed 2026-08-08 by Phase 42. Spec 34 §6 keeps spec 14's 27 cells
+  and re-skins `philosopher` -> damned exemplar, `literaryCharacter` ->
+  cautionary tale, `fallacies` -> besetting sins.
+- shape: that is a substantial authored-prose job, not a rename. It is the
+  clean cut if 44h runs long — split it rather than rushing the prose.
+
+### `/world-tuning` still lists rest `healFraction` as a tuning lever
+- source: filed 2026-08-08 by Phase 52b. `.claude/commands/world-tuning.md`
+  lines 77 and 98 name a field that no longer exists.
+- shape: one-line harness fix. Phase 52f's "decide the tuning home" is the
+  natural owner, since 52e deletes `/rest-tuning` and the rest node would
+  otherwise have no lane — which is exactly how D5's prices went unratified
+  for a month.
 
 ### AXM Log follow-ups — minigame engine taps, Sentry slot, native clipboard
 - source: repo-wide structured logging shipped 2026-07-20 (owner-directed,

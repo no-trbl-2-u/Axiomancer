@@ -4,11 +4,16 @@
  * Hazard-Pattern Combat playtest CLI — the stage x policy x deck matrix.
  *
  * Sweeps `runPlaytestMatrix` (campaign stages x sim policies x deck
- * selections) and prints the aligned report — win rates NEXT TO the doctrine
- * witnesses (statusEngagement, dotHpFraction), because status effects are the
- * MAIN fun: HP is the sole win condition and status is the EFFICIENT way to
- * drop it. Low status engagement is a balance failure even when win rates
- * look healthy.
+ * selections) and prints the aligned report.
+ *
+ * **Phase 43 — the objective function is `cqi`, the Combat Quality Index**
+ * (`src/Combat/combat.objective.ts`): does the deck's engine RUN — assembling
+ * across turns (arc), offering more than one line per powering die (width),
+ * carried by a lead card that isn't the whole deck (identity), and flowing
+ * through the three LOCKED systems, Conviction / the Surge meter / the Dice
+ * (spine, the heaviest term). `statusEngagement` and `dotHpFraction` are still
+ * printed beside it, but THE UNSHACKLING voided the status-dominance doctrine
+ * they enforced: read them as warning lights, never as the target.
  *
  * Usage:
  *   npm run combat-playtest                                        # all stages, greedy witness, policy-pick decks
@@ -213,6 +218,10 @@ function main(): void {
                 statusEngagement: cell.stats.statusEngagement,
                 dotHpFraction: cell.stats.dotHpFraction,
                 avgRounds: cell.stats.avgRounds,
+                // Phase 43 — the objective function, per cell, in the replay index.
+                combatQualityIndex: cell.stats.combatQuality.index,
+                combatQualityComponents: cell.stats.combatQuality.components,
+                combatQualitySpine: cell.stats.combatQuality.spineComponents,
             });
         }
     }

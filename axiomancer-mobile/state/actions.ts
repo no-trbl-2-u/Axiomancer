@@ -1727,7 +1727,8 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
             // completion/skip keeps every later rest organic.
             const tutorialDone = (gameState.flags ?? []).includes(REST_TUTORIAL_FLAG);
             beginRestAction(store, {
-                healFraction: result.event.healFraction,
+                // Phase 52b — the authored inn/camp marker, not a heal number.
+                shelter: result.event.shelter,
                 tutorial: !tutorialDone,
             });
             return true;

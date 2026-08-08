@@ -232,6 +232,32 @@ export type {
     PlaytestStageSummary, PlaytestReport,
     WinRateCurveClass, WinRateCurvePoint, WinRateCurveResult, CurveShapeTolerances,
 } from './Combat';
+export type { PlaytestPresetSummary, PlaytestPresetStageRow } from './Combat/combat.playtest';
+
+// ─── Objective function v2 — the Combat Quality Index (Phase 43) ──────────────
+// THE metric `/deck-tuning` and `/combat-playtest` optimise, replacing the
+// voided status-dominance doctrine that `statusEngagement` enforced.
+// `assertLockedMechanicsFirstClass` is the guard that keeps Conviction, the
+// Surge meter and the Dice system permanently first-class in the score.
+export {
+    scoreCombatObjective, formatCombatQuality, assertLockedMechanicsFirstClass,
+    scoreConvictionUse, scoreSurgeUse, scoreDiceUse,
+    scoreArcShape, scoreDecisionWidth, scoreDeckIdentity,
+    COMBAT_QUALITY_WEIGHTS, SPINE_SUBWEIGHTS, COMBAT_QUALITY_CALIBRATION,
+    LOCKED_MECHANIC_TERMS, LOCKED_SPINE_WEIGHT_FLOOR,
+} from './Combat/combat.objective';
+export type {
+    CombatQualityScore, CombatQualityWeights, CombatQualityComponents,
+    CombatSpineComponents, CombatQualityReadings, LockedMechanicTerm,
+} from './Combat/combat.objective';
+export {
+    emptyObjectiveTelemetry, addObjectiveTelemetry, mergeObjectiveTelemetry,
+    poolObjectiveTelemetry, foldObjectiveEvents, damageCentroid,
+    diceEconomyBreadth, DICE_ECONOMY_VERBS,
+} from './Combat/combat.objective.telemetry';
+export type {
+    CombatObjectiveTelemetry, DiceEconomyVerb,
+} from './Combat/combat.objective.telemetry';
 
 // ─── Sandbox cards — the deck-forge experimentation surface ───────────────────
 // New experimental cards + numeric overrides of library cards, live everywhere
@@ -246,6 +272,20 @@ export {
     SANDBOX_CARD_SETS, listSandboxSets, applySandboxSet,
 } from './Cards/cards.sandbox-sets';
 export type { SandboxCardSet } from './Cards/cards.sandbox-sets';
+
+// ─── Deck removal (Phase 52a) — taking a card OUT, and what that costs ───────
+// The engine's first removal primitive plus the per-run escalating price. The
+// rest-choice engine (52c) and the picker screen (52d) consume these; prices
+// are PROVISIONAL until Phase 52f calibrates them against measured income.
+export {
+    removeCardFromCombatDeck, MIN_COMBAT_DECK_SIZE,
+    CARD_REMOVAL_PRICING_PLACEHOLDER,
+    cardRemovalPrice, cardRemovalPriceFor, cardRemovalsOf, canAffordCardRemoval,
+} from './Cards/card.removal';
+export type {
+    CardRemovalResult, CardRemovalAccepted, CardRemovalRefused,
+    CardRemovalRefusal, CardRemovalRefusalCode, CardRemovalSource,
+} from './Cards/card.removal';
 
 // ─── Effects ──────────────────────────────────────────────────────────────────
 export {
@@ -418,6 +458,12 @@ export type {
     EncounterPayload, InteractionPayload, GatheringPayload, RestPayload,
     VillagePayload, CutscenePayload, HazardPayload, LootCachePayload,
     QuestEventPayload, NarrationPayload, BlacksmithPayload, ResolvedEvent, ResolveMapEventResult,
+} from './World';
+// Phase 52b — rest shelter classification (retires the healFraction >= 1.0
+// inn heuristic). Mobile gates the hazard-scar max-VITAE mend on this.
+export type { RestShelter } from './World';
+export {
+    DEFAULT_REST_SHELTER, REST_PASSIVE_HEAL_FRACTION, restShelterOf, isInnShelter,
 } from './World';
 // W-01 — The Labyrinth (THE APORIA). Additive surface for the mobile
 // dev-menu entry + labyrinth presenters.

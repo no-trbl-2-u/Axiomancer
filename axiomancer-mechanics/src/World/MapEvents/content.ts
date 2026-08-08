@@ -70,7 +70,10 @@ const nfSpring: MapEventPool = {
         kind: 'rest', weight: 1,
         payload: {
             kind: 'rest',
-            healFraction: 1.0,
+            // Phase 52b — a cold spring in the woods is a CAMP. It was
+            // authored at healFraction 1.0, which the retired heuristic read
+            // as inn-grade; it mended hazard scars for free. It no longer does.
+            shelter: 'camp',
             description: 'A clearing with a cold spring. You catch your breath.',
         },
         // Phase 43 — the spring's hush invites the larger picture:
@@ -203,7 +206,7 @@ const nfMossyClearing: MapEventPool = {
         kind: 'rest', weight: 1,
         payload: {
             kind: 'rest',
-            healFraction: 0.75,
+            shelter: 'camp',
             description: 'A mossy clearing with a fallen log that serves as a natural bench.',
         },
         alignmentDelta: { scope: 1 },
@@ -389,7 +392,9 @@ const nfHiddenGrove: MapEventPool = {
         kind: 'rest', weight: 1,
         payload: {
             kind: 'rest',
-            healFraction: 1.0,
+            // Phase 52b — a natural spring is a CAMP, not a paid bed. Same
+            // 1.0-authoring bug as `nf-4`.
+            shelter: 'camp',
             description: 'A hidden grove surrounds a natural spring. The water runs clear and cold.',
         },
         alignmentDelta: { scope: 2 },
@@ -506,10 +511,15 @@ function fvEncounterPool(nodeId: string, foe: { slug: EnemySlug; description: st
     };
 }
 
+/**
+ * Fishing-village rest nodes are the game's INNS (Phase 52b): tended,
+ * paid shelter inside a settlement, and the only rests that mend
+ * hazard-scarred max-VITAE.
+ */
 function fvRestPool(nodeId: string, description: string): MapEventPool {
     return {
         id: `${nodeId}.rest`,
-        entries: [{ kind: 'rest', weight: 1, payload: { kind: 'rest', healFraction: 1.0, description } }],
+        entries: [{ kind: 'rest', weight: 1, payload: { kind: 'rest', shelter: 'inn', description } }],
     };
 }
 

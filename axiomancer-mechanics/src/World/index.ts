@@ -84,6 +84,12 @@ export type {
     VillagePayload, CutscenePayload, HazardPayload, LootCachePayload,
     QuestEventPayload, NarrationPayload, BlacksmithPayload, ResolvedEvent, ResolveMapEventResult,
 } from './MapEvents/types';
+// Phase 52b — rest shelter classification (replaces the healFraction >= 1.0
+// inn heuristic). Mobile gates the hazard-scar mend on `shelter === 'inn'`.
+export type { RestShelter } from './MapEvents/types';
+export {
+    DEFAULT_REST_SHELTER, REST_PASSIVE_HEAL_FRACTION, restShelterOf, isInnShelter,
+} from './MapEvents/rest-shelter';
 
 export {
     applyDialogueChoice,
