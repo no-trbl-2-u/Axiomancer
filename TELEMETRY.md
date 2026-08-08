@@ -210,3 +210,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-08T09:23:01Z | skill | digest | unknown | main | - |
 | 2026-08-08T11:37:10Z | subagent | Explore | claude-fable-5 | main | Inventory inline SVG usage |
 | 2026-08-08T11:37:15Z | subagent | Explore | claude-fable-5 | main | Distill design handoff intent |
+| 2026-08-08T13:25:19Z | slash-prompt | /march | unknown | user/ci | /march |

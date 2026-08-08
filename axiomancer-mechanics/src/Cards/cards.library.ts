@@ -316,7 +316,8 @@ const theClosingWord: Card = {
 // Phase 39 (2026-08-08) — theme-symmetry restoration: `practiced-cadence`
 // (enchantment) and `captive-audience` (disenchant) were retired at D8 as
 // reward-only / zero-played, then restored verbatim here to fill peroration's
-// missing ench/dis pair (POST_D8_SHAPE, curated-library.engine.test.ts).
+// missing ench/dis pair (the exact-shape pin that motivated this retired in
+// Phase 41 — see curated-library.engine.test.ts).
 const practicedCadence: Card = {
     id: 'practiced-cadence',
     theme: 'peroration',

@@ -1,14 +1,30 @@
 # Spec 32 — The Themed Deck Library: 10 themes, 70 cards, 30 keywords
 
+> **SUPERSEDED IN PART (T direct, /oversight 2026-08-08 — "THE
+> UNSHACKLING," commit `ad934542`; executed by Phase 41,
+> `plan/phases/phase_41_constraint_demolition.md`):** §1's no-strike
+> doctrine and the FREE-line law below (amendment item 1) are VOID. Cards
+> MAY deal raw enemy-HP damage; a FREE line is no longer required to
+> deposit theme currency. Both retired laws' enforcing tests
+> (`doctrine-strike-dead.engine.test.ts`, the curated-library
+> FREE-CURRENCY-LAW block) are deleted, not just disabled. This phase adds
+> NO damage to any card — it only removes the law and its lint; a later
+> phase decides what (if anything) is authored under the new freedom.
+> Everything else below (card anatomy, keyword registry, rarity model,
+> the 70-card catalogue, presets, win paths, the engine-change ledger,
+> owner decisions) remains the historical record of what shipped and is
+> UNCHANGED by this supersession.
+>
 > **AMENDMENT (owner-ratified 2026-07-10, engagement-audit session —
 > decisions of record in
 > `plan/tuning/2026-07-10-engagement-overhaul-roadmap.md` §4):**
-> 1. **FREE-line law (amends §2):** every FREE line must deposit theme
->    currency (Premises, Souls, pips, DoT seeds, rapport, wheel/loop
+> 1. **FREE-line law (amends §2) — VOID 2026-08-08, see supersession
+>    note above.** ~~every FREE line must deposit theme currency
+>    (Premises, Souls, pips, DoT seeds, rapport, wheel/loop
 >    advancement…) — never damage, never a bare generic draw. A
 >    weak-enough deposit MAY additionally carry a `DRAW 1`-class utility
 >    kicker. Lint-enforced like the no-strike gate. Executes as the
->    70-card pass in `plan/tuning/2026-07-10-turn-texture.md` §1 (EA-5).
+>    70-card pass in `plan/tuning/2026-07-10-turn-texture.md` §1 (EA-5).~~
 > 2. **TICK is retired from the registry (amends §3):** killed entirely,
 >    not renamed; the 10 `free: tickOne` lines die with the FREE pass and
 >    PAID tick effects re-author as theme verbs. The registry count may
@@ -84,6 +100,11 @@
 ---
 
 ## 1. Doctrine — the strike stays dead (v2 §1, restated + extended)
+
+> **VOID 2026-08-08 — see the supersession note at the top of this doc.**
+> The strike is alive again; this section is kept verbatim as the
+> historical record of the doctrine that shipped and governed the 70-card
+> library's design. No enforcement of it survives in the test suite.
 
 **Removed from the player's vocabulary entirely, now at the SCHEMA
 level:** `basePower`, `chipHp`, strike/chip projection text. The fields

@@ -36,6 +36,24 @@
 > replacement may now be authored freely, including with normal damage.
 > See `plan/bearings.md` § "THE UNSHACKLING".
 
+### axio-query overview still publishes the retired "THE STRIKE IS DEAD" doctrine after Phase 41
+- category: divergence
+- impact: 8
+- ease: 9
+- detail: filed 2026-08-08 by the scheduled SomberSoft roundtable against
+  clean current `main` at `e24f9723`. The live `axio_overview` response still
+  says `THE STRIKE IS DEAD — no card touches HP...` because
+  `scripts/axio-mcp-server.mjs::extractDoctrine()` selects that phrase from the
+  stale header of `axiomancer-mechanics/src/Cards/cards.library.ts`. T voided
+  that doctrine in the 2026-08-08 unshackling, and Phase 41 removed its hard
+  test, but the engine-truth MCP now presents the dead law as current doctrine.
+  Historical plan/devlog mentions are not the defect; the live overview is.
+- next: update the card-library header to state that direct damage is legal
+  while Conviction, Surge and Dice remain locked, update the MCP doctrine
+  selector if necessary, and add a server smoke assertion that the overview
+  cannot publish the retired phrase. Verify `axio_overview` against the live
+  server plus the nearest MCP smoke test.
+
 ### [x] Doctrine-curve confirmation post-Phase-39: violation persists — RESOLVED via /oversight 2026-08-08: accepted, library is transitional
 - category: content
 - impact: 8

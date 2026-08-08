@@ -1,5 +1,5 @@
 ---
-description: Card Forge balance loop for Hazard-Pattern Combat — sandbox-first card and deck tuning; A/B experimental cards/overrides and measurement-seat swap sweeps through the playtest matrix, tune presets/draft weights, promote proven cards into the library, deliver report + changes via PR. Engine constants are tuned manually, not here.
+description: Card Forge balance loop for Hazard-Pattern Combat — full card authority (no sandbox-first quarantine) with sandbox/A-B tooling still available as recommended practice; measurement-seat swap sweeps through the playtest matrix, tune presets/draft weights, promote proven cards into the library, deliver report + changes via PR. Engine constants are tuned manually, not here.
 ---
 
 > **⚙️ Runs against the `axiomancer-mechanics` package.** Repo-relative paths below
@@ -31,12 +31,16 @@ description: Card Forge balance loop for Hazard-Pattern Combat — sandbox-first
 > (threat/Conviction economy) are tuned manually — the combat-tuning loop was
 > trimmed at the monorepo merge; this skill owns the cards themselves.
 
-> **High autonomy within hard guardrails, sandbox-first.** New card ideas and
-> numeric nudges to existing cards are prototyped as SANDBOX cards/overrides
-> (`src/Cards/cards.sandbox-sets.ts`), A/B-tested through the playtest matrix
-> (`npm run combat-playtest -- --sandbox=<set>`), and only promoted into the
-> library with the evidence table attached. Deliver findings and changes on
-> ONE new branch + PR. Nothing auto-lands on `main`.
+> **Full card authority (THE UNSHACKLING, T direct 2026-08-08 — Phase 41):
+> no sandbox-first quarantine, no byte-identity law, no
+> recolor-not-repartition rule, no per-change owner ballot.** New card
+> ideas and numeric nudges may land directly in `cards.library.ts`;
+> prototyping them first as SANDBOX cards/overrides
+> (`src/Cards/cards.sandbox-sets.ts`) and A/B-testing through the playtest
+> matrix (`npm run combat-playtest -- --sandbox=<set>`) is still the
+> recommended way to build confidence, not a precondition. Deliver
+> findings and changes on ONE new branch + PR. Nothing auto-lands on
+> `main`.
 
 ## Disambiguation — three combat loops, one doctrine
 
@@ -149,8 +153,8 @@ The tunable surface is TIERED. Work from the freest tier inward:
   `src/Combat/combat.starter-deck-presets.ts` and the draft weights/defaults
   in `src/Combat/combat.deck-draft.ts` (focus weight 4x, size 10, max copies
   2) are directly editable with before/after matrix evidence. A shipping
-  recipe change still needs the color-law arithmetic (spec 32 §12), and a
-  recolor stays a standing owner call.
+  recipe change still needs the color-law arithmetic (spec 32 §12); a
+  recolor is no longer a standing owner call (THE UNSHACKLING — Phase 41).
 
 - **Free — measurement-seat swap sweeps (owner-ratified 2026-07-18).** The
   lever for measuring a card the shipped recipes cannot reach. Run the
@@ -164,25 +168,27 @@ The tunable surface is TIERED. Work from the freest tier inward:
   | Swap-in source | `--sandbox` needed? | Typical question |
   |---|---|---|
   | The theme's library cards not seated in the recipe — incl. the 10 reward-pool-only cards post-5/5/5 | no | "does this unseated/reward card earn a seat?" |
-  | The theme's swap-pool candidate set `swap-<theme>` (`src/Cards/swap-pool/<theme>.swap-pool.ts` — 30 spells each, 10/12/8 common/uncommon/rare; contract pinned by `src/Cards/e2e/swap-pool.engine.test.ts`) | yes — `--sandbox=swap-<theme>` | "does this candidate beat the incumbent seat?" |
+  | The theme's swap-pool candidate set `swap-<theme>` (`src/Cards/swap-pool/<theme>.swap-pool.ts` — 30 spells each, 10/12/8 common/uncommon/rare; the pool data stays live, its dedicated witness test retired in Phase 41) | yes — `--sandbox=swap-<theme>` | "does this candidate beat the incumbent seat?" |
 
-  A cross-theme swap-in is a RECOLOR, not a measurement — standing owner
-  call, never done silently. **Per-run exception:** a run dispatched with
-  `--cross-theme-swaps=true` (§2) carries the owner's authorization to RUN
-  out-of-theme measurement arms. Under the flag: any theme's swap-pool
-  candidates or unseated library cards are legal swap-ins for any preset
-  (apply the donor theme's set via `--sandbox=swap-<theme>`; comma-separate
-  sets when mixing); tag every such arm `[cross-theme]` in the report and
-  state which theme donated the card. The flag authorizes EVIDENCE only —
-  applying an out-of-theme card to a shipped recipe is still a recolor:
-  color-law arithmetic plus its own explicit owner call, never implied by
-  the flag. Flag off (the default, and always on scheduled runs), the
-  in-theme law above is absolute. In both modes prefer rarity-legal seats
-  (swap like rarity for like); when a candidate has no rarity-legal seat
-  in its target preset, record that as a seat-grid finding rather than
-  forcing an off-rarity arm.
-  Swap variants are EVIDENCE devices: they may break the color law and
-  never ship as-is. Before designing arms, read the per-card design
+  **The recolor-not-repartition rule is VOID (THE UNSHACKLING, T direct
+  2026-08-08 — Phase 41).** A cross-theme swap-in is no longer a standing
+  owner call; any theme's swap-pool candidates or unseated library cards
+  are legal swap-ins for any preset directly (apply the donor theme's set
+  via `--sandbox=swap-<theme>`; comma-separate sets when mixing) and MAY
+  ship as a shipped recipe change like any other card change — no separate
+  ballot. Still tag a cross-theme arm `[cross-theme]` in the report and
+  state which theme donated the card, for traceability. The
+  `--cross-theme-swaps=true` flag (§2) remains available to force
+  out-of-theme measurement arms on scheduled/default runs, but is no
+  longer required to ship a cross-theme result. Prefer rarity-legal seats
+  (swap like rarity for like) as a default, not a gate; when a candidate
+  has no rarity-legal seat in its target preset, record that as a
+  seat-grid finding rather than forcing an off-rarity arm. The raw
+  `--sandbox=swap-<theme>` CLI arm is still a measurement device only (it
+  may substitute a seat without regard to the 5/5/5 color law); a winning
+  candidate ships by actually moving it into the recipe with real
+  color-law bookkeeping in the same PR, not by leaving the swap flag on.
+  Before designing arms, read the per-card design
   estimates ledger (`docs/reports/swap-pool-estimates-2026-07-18.json`) and
   report estimate-vs-measured deltas — that calibrates the next authoring
   pass. Standing ruling, same date: TRIMS of never-played cards are PAUSED —
@@ -190,30 +196,32 @@ The tunable surface is TIERED. Work from the freest tier inward:
   numbers (never-played in a preset-only sweep is a reachability fact, not
   a quality verdict — `plan/tuning/2026-07-18-card-library-fanout-synthesis.md`).
 
-- **Free — swap-pool candidate authoring (owner-approved 2026-07-18).**
-  Authoring candidate cards per theme is approved, with two hard
-  constraints: candidates compose the EXISTING registry keywords only
-  (carrier-density doctrine — reinforce hallmarks toward ≥8 home carriers,
-  don't mint vocabulary), and they live in sandbox swap-pool sets as seat
-  candidates for preset refinement. They are NOT a player-facing
-  mid-library: Act 1 is the player cycling through the 10 presets to learn
-  the mechanics, Act 2 is picking one deck (where reward cards unlock) — so
-  the presets themselves are the product this pool serves. A candidate
-  enters `cards.library.ts` only via the normal promotion path, and enters
-  a RECIPE only by beating the incumbent seat in swap-variant A/Bs across
-  ≥ 2 stages and ≥ 2 policies (promotion of pool cards to player-facing is
-  itself gated on a standing `[needs-user-call]` — see the owner-call queue
-  in `plan/tuning/2026-07-19-swap-pool-measurement-residue.md`).
+- **Free — swap-pool candidate authoring.** Authoring candidate cards per
+  theme composes the EXISTING registry keywords by default (carrier-density
+  doctrine — reinforce hallmarks toward ≥8 home carriers is still good
+  practice, not a hard constraint post-unshackling), and they live in
+  sandbox swap-pool sets as seat candidates for preset refinement, or are
+  authored straight into `cards.library.ts` if the change is obviously
+  good — either path is legal. **The standing `[needs-user-call]` gate on
+  promoting a pool card to player-facing is VOID** (THE UNSHACKLING —
+  Phase 41): a candidate enters `cards.library.ts` and a recipe directly,
+  no owner-call queue, no required A/B win-streak. Measurement evidence
+  (below) is still the recommended way to build confidence in a change,
+  just no longer a precondition for shipping it.
 
-- **Guarded — library card numerics.** `combatEffects` intensity/duration,
-  `specialMechanics` amounts, and rider numerics in
-  `src/Cards/cards.library.ts` may be changed ONLY after a sandbox-override
-  A/B of the exact same patch shows the intended effect (same seeds, with vs
-  without `--sandbox=<set>`). No cold edits to library literals. Every
-  numeric change updates the card's `// pts:` arithmetic comment — the
-  pricing lint (`src/Cards/e2e/pricing.engine.test.ts`) checks the sum
-  against the printed rank's band. (`basePower`/`scalingMultiplier` were
-  deleted with spec 32 v3 — raw damage fields no longer exist.)
+- **Library card numerics — direct edits allowed.** `combatEffects`
+  intensity/duration, `specialMechanics` amounts, and rider numerics in
+  `src/Cards/cards.library.ts` may be changed directly; a sandbox-override
+  A/B first (same seeds, with vs without `--sandbox=<set>`) is still the
+  recommended way to know a patch does what you think, not a prerequisite
+  gate (THE UNSHACKLING — Phase 41 voided "no cold edits to library
+  literals"). Every numeric change still updates the card's `// pts:`
+  arithmetic comment — the pricing lint (`src/Cards/e2e/pricing.engine.test.ts`)
+  checks the sum against the printed rank's band; that lint is unrelated to
+  the three retired doctrines and stays in force. (`basePower`/
+  `scalingMultiplier` were deleted with spec 32 v3; if a card needs to deal
+  raw HP damage, author the field/verb it needs — Phase 41 removed the
+  prohibition, it did not restore the old fields.)
   <!-- lexicon-ok: base-power -->
 
 - **Propose-only — structure.** New `specialMechanics` kinds, new verb
@@ -229,10 +237,12 @@ The tunable surface is TIERED. Work from the freest tier inward:
   metric slate — not just win rate. Re-run the SAME matrix (same seeds, same
   flags) after. Cite exact invocations.
 
-- **Promotion path.** A sandbox card that proves out across >= 2 stages and
-  >= 2 policies without breaking the balance-band e2e is promoted: move the
-  literal into `cards.library.ts` in the SAME PR, with the evidence table in
-  the report. Update the card-count pin if the library grows.
+- **Promotion path.** Move the literal into `cards.library.ts` in the SAME
+  PR, with whatever evidence table the report has for it. Proving out
+  across >= 2 stages and >= 2 policies is best practice, not a
+  precondition (THE UNSHACKLING voided the per-change owner ballot —
+  Phase 41); a card may promote on design judgment alone when the change
+  is obviously good. Update the card-count pin if the library grows.
 
 - **The verify gate is non-negotiable.** `npm run verify` after any change —
   including the card-coverage e2e (a promoted card must be playable) and the
@@ -362,7 +372,7 @@ do not build it inside this loop).
 - `npm run baseline:check` (ROOT) — the SessionStart hook prints this too;
   note the baseline's stamp and confidence, and cite it in the report.
 - Run the deck suites cold:
-  `npx vitest run src/Combat/e2e/combat-deck-draft.engine.test.ts src/Cards/e2e/cards-sandbox.engine.test.ts src/Cards/e2e/swap-pool.engine.test.ts src/Combat/e2e/combat-playtest.balance-bands.sim.test.ts src/Combat/e2e/combat-playtest.card-coverage.sim.test.ts`.
+  `npx vitest run src/Combat/e2e/combat-deck-draft.engine.test.ts src/Cards/e2e/cards-sandbox.engine.test.ts src/Combat/e2e/combat-playtest.balance-bands.sim.test.ts src/Combat/e2e/combat-playtest.card-coverage.sim.test.ts`.
 - If anything fails before you touch a file, stop and report.
 
 ### Step 1 — Read the forge surface
@@ -431,11 +441,12 @@ axis at a time; measure each before the next.
 
 ### Step 4 — Apply, promote, verify
 - Preset/draft changes: apply directly with the before/after evidence.
-- Library numerics: apply only the patch the sandbox override proved out.
-- Promotions: move the proven sandbox card literal into `cards.library.ts`
-  (same PR, evidence table attached); leave the sandbox set in place as the
-  provenance record or prune it — your call, say which. Swap-pool
-  candidates additionally need the standing promotion-gate owner call (§3).
+- Library numerics: apply directly (evidence recommended, not required).
+- Promotions: move the sandbox card literal into `cards.library.ts` (same
+  PR, evidence table attached if there is one); leave the sandbox set in
+  place as the provenance record or prune it — your call, say which. No
+  standing owner-call gate on swap-pool promotions (THE UNSHACKLING —
+  Phase 41).
 - `npm run verify` after each applied change. Broken test → revert, record
   under "Considered but not applied".
 - Any applied change (promotion, preset/draft edit, library nudge) re-stamps
@@ -483,13 +494,9 @@ and the headline status-engagement / band delta.
   mechanics in `cards.sandbox.ts`, or the effects engine. The forge surface
   is card DATA: sandbox sets, swap pools, presets, draft weights, and
   (guarded) library literals.
-- **Never edit library card literals without a sandbox A/B first.**
-- **Never swap in a card from another theme without the flag** — a
-  cross-theme swap-in is a recolor, a standing owner call (§3). Swap-ins
-  come from the preset's own theme: its unseated library cards or its
-  `swap-<theme>` candidates. The ONLY exception is a run dispatched with
-  `--cross-theme-swaps=true`, which authorizes cross-theme MEASUREMENT
-  arms (tagged `[cross-theme]` in the report) — never a shipped recolor.
+- **Cross-theme swap-ins are permitted directly** (THE UNSHACKLING voided
+  the recolor-not-repartition rule — Phase 41); tag a cross-theme arm
+  `[cross-theme]` in the report and note which theme donated the card.
 - **Never invent new `specialMechanics` kinds, verb classes, or effect ids**
   — sandbox prototypes compose existing kinds only; new kinds are
   propose-only.
@@ -586,7 +593,6 @@ only; interpretation stays here).
 **Tests (witnesses):**
 - Balance bands (THE contract): `src/Combat/e2e/combat-playtest.balance-bands.sim.test.ts`
 - Card coverage (no dead cards): `src/Combat/e2e/combat-playtest.card-coverage.sim.test.ts`
-- Swap-pool contract (quotas, pricing, on-theme): `src/Cards/e2e/swap-pool.engine.test.ts`
 - Line telemetry (85/15 soft bands): `src/Combat/e2e/combat-playtest.line-telemetry.sim.test.ts`
 - Draft mechanics: `src/Combat/e2e/combat-deck-draft.engine.test.ts`
 - Sandbox registry: `src/Cards/e2e/cards-sandbox.engine.test.ts`
