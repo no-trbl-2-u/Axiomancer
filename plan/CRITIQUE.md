@@ -1,13 +1,31 @@
 # Critique log
 
-> Last pass: 2026-08-08 at commit dc1270ca
-> Pass count: 20
+> Last pass: 2026-08-09 at commit 75ba5a34
+> Pass count: 21
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 21, 2026-08-09, commit 75ba5a34] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
+> mobile (375×812) and desktop (1280×800); the cold drive again
+> reached past "ENTER COMBAT" into the live combat-board at both
+> viewports (10/10 captures, 0 with nav trouble). Zero console/page
+> errors besides the same benign `navigator.vibrate` warning seen
+> every prior pass. Self-assessed all 10 captures against the current
+> Pending/Done log: title, onboarding, exploration-hub cutscene
+> redirect, and combat pre-fight copy hold clean; the pass-19/20
+> node-legend/`regionProgress` rows still reproduce exactly as filed
+> (not re-filed). One fresh finding: the momentum chain chip's empty
+> state ("○ no momentum", `CombatBoard.tsx:627`) renders as bare
+> `AXM.ash` text with no background chip, directly over the busy
+> arena floor art — barely legible on mobile and fully invisible on
+> desktop at the same combat state (T1, no stance played yet, the most
+> common opening state of every fight). Filed below. Zero other
+> findings.
 
 > **[critique pass 20, 2026-08-08, commit dc1270ca] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
@@ -141,6 +159,40 @@
 > pass "ENTER COMBAT".
 
 ## Pending
+
+### [MED] combat — the momentum chain chip's empty state ("no momentum") has no contrast against the arena floor art
+- pass: 21 (commit 75ba5a34)
+- viewport: mobile (375×812) barely legible; desktop (1280×800) fully invisible — same underlying bug, worse at the wider viewport
+- category: visual
+- observation: at the start of every fight (T1, no stance played yet
+  — the most common opening state a player sees), the momentum chain
+  chip renders its empty state as bare `○ no momentum` text directly
+  over the busy arena floor artwork, just above the "NO STANCE" chip.
+  On mobile it's a faint grey smear, barely readable against the
+  floor texture. On desktop, at the same combat state, it does not
+  render visibly at all — the text is in the DOM (confirmed via
+  `critique-drive`'s extracted innerText) but produces zero visible
+  pixels against the lighter floor art there. Every other momentum
+  state (charged/surged/broke/chain-in-progress) has a colored
+  border + alpha-fill background box behind its text, so only the
+  empty state lacks a contrast-guaranteeing container.
+- evidence: `axiomancer-mobile/.critique-artifacts/mobile/04-combat-board.png`
+  vs `.../desktop/04-combat-board.png` (both T1, no stance played;
+  compare the strip directly above "NO STANCE"). DOM text for both
+  confirms `○ no momentum` is present in `04-combat-board.txt` for
+  both viewports despite the desktop screenshot showing nothing there.
+  Root cause: `axiomancer-mobile/components/combat/encounter/CombatBoard.tsx:627`
+  — `<Text style={[styles.chainEmpty, { color: AXM.ash }]}>○ no momentum</Text>`
+  — `chainEmpty` (line 1818) sets only font/size/spacing, no
+  background or border, unlike `chainNode` (the filled-link style,
+  which sets `backgroundColor` + `borderColor`) and `wheelCharged`/
+  `chainBroke` (which set `textShadowColor`).
+- suggested fix: give the empty-state text the same kind of
+  contrast-guaranteeing container the other momentum states get —
+  e.g. wrap it in a `chainNode`-style box (dark alpha background +
+  ash border) instead of bare text, or at minimum add a
+  `textShadowColor` matching the other chip states.
+- source: critique pass 21 (unattended, critique:drive artifacts)
 
 ### [MED] exploration hub — node-legend's "N nodes · M sealed" count is clipped to a bare number on the desktop viewport
 - pass: 20 (commit dc1270ca)

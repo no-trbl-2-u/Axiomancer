@@ -227,3 +227,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-09T07:40:57Z | subagent | card-expert | claude-sonnet-5 | main | Implement phase 44b keyword retheme |
 | 2026-08-09T09:24:30Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-08-09T09:24:32Z | skill | digest | unknown | main | - |
+| 2026-08-09T13:29:25Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-09T13:30:04Z | skill | critique | claude-sonnet-5 | main | - |
