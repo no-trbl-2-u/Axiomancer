@@ -1100,7 +1100,7 @@ later phase has a safety net, and the product shell comes last because it
 describes what the others changed. All depend on Phase 42 being ratified;
 none may start early (bearings forbids opportunistic renaming).**
 
-- [ ] Phase 44a — Rename infrastructure (no user-visible change). Build
+- [x] Phase 44a — Rename infrastructure (no user-visible change). Build
       the machine that makes the other eight safe: (a) a
       `docs/retheme-map.json` artifact — old→new for every card id, card
       name, keyword, theme, preset, place, NPC and enemy, derived from
@@ -1113,7 +1113,16 @@ none may start early (bearings forbids opportunistic renaming).**
       registry is the single best retheme guard this repo already owns,
       and `docs/LEXICON.md` is its human mirror. Ship the map and the
       guard with ZERO renames applied, so 44b-44i are pure execution.
-      (tooling) Deps: 42, 41. Brief: to generate.
+      (tooling) Deps: 42, 41. Brief: `plan/phases/phase_44a_rename_infrastructure.md`.
+      — `feat(retheme): rename infrastructure — map, codemod, naming-law lint — phase 44a` (c5e0f13b)
+      Item (c) shipped as a NEW naming-law lint (`scripts/check-naming-law.mjs`,
+      NL-8/NL-4/NL-5/V-1) for candidate names on new content, sourced live from
+      the map — not as `lexicon.json` rows. Registering the retired terms
+      there now, against a codebase and ~40 live docs that still (correctly)
+      use the pre-retheme vocabulary, was deferred to each rename's own
+      landing phase (44b/44c/44g/44h), which adds its own rows at the commit
+      that actually retires the term — matching how every existing
+      `lexicon.json` row was added. Filed as residue: `plan/AUDIT.md`.
 - [ ] Phase 44b — Keyword registry + glossary retheme. **CORRECTED by
       spec 34 §5 (Phase 42): the live registry is 42 `KEYWORD_GLOSS` rows
       + 8 system terms, not ~29.** All 50 are ruled there — 15 renames, 35
