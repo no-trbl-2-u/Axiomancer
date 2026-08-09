@@ -16,7 +16,7 @@ import { MapOverlays } from '@/components/exploration/MapOverlays';
 import { useAesthetic } from '@/state/aesthetic-mode';
 import { useCombatMode } from '@/state/combat-mode';
 import { selectExplorationCodexHeader } from '@/state/presenters/exploration.codex.engine';
-import { useGameActions, useGameState } from '@/state/GameStoreProvider';
+import { useGameActions, useGameState, useGameStore } from '@/state/GameStoreProvider';
 import {
     selectExplorationViewModel,
     type ExplorationNode,
@@ -26,6 +26,7 @@ import {
     selectEventViewModel,
     selectHasActiveEvent,
 } from '@/state/presenters/event.engine';
+import { selectHasAnyActiveSession } from '@/state/presenters/navigation.engine';
 import { EncounterModalOverlay } from '@/components/event/EncounterModalOverlay';
 import type { Enemy } from '@mechanics';
 
@@ -71,6 +72,7 @@ export default function ExplorationScreen() {
     // first combat-prelude event and stays mounted until aftermath
     // dismissal completes (via the combat-mode hook above).
     const hasEvent = useGameState(selectHasActiveEvent);
+    const anySession = useGameState(selectHasAnyActiveSession);
 
     // 2026-08-08 first-map audit — resolve the START node's event once, on
     // arrival at the map. Events fire on ARRIVAL at a node, and the player
@@ -80,13 +82,30 @@ export default function ExplorationScreen() {
     // resolved the start node behind `--resolve-start` since Phase 14; this
     // is the app's equivalent. `resolveCurrentMapEvent` marks the node
     // consumed, so `startNodePending` makes it a genuine one-shot per map.
-    // Held off while anything else owns the screen — resolving on top of a
-    // live event or an in-flight encounter would clobber it.
+    //
+    // Two guards, and CI taught me both of them.
+    //
+    // WHAT counts as busy: every minigame owns its own slice, so the arrival
+    // has to stand down for ANY of them, not just a paced event — see
+    // `selectHasAnyActiveSession`. Checking only the event slice let the dev
+    // treasure trigger (which opens the CACHE slice) look idle, and the
+    // cutscene stole its route to /cache.
+    //
+    // WHEN to decide: callers navigate to this screen and open their session
+    // in the same handler — `DebugTriggerEncounter.onPress` does
+    // `router.push('/(tabs)/exploration')` and then `fire(kind)` — so this
+    // screen can mount one commit BEFORE that session exists. Deciding on the
+    // render-time reading would see an idle app that is about to be busy, so
+    // let the interaction settle and re-read the store at fire time.
+    const store = useGameStore();
     useEffect(() => {
-        if (vm.startNodePending && !hasEvent && !inEncounterModal && !inCombat) {
+        if (!vm.startNodePending || anySession || inEncounterModal || inCombat) return;
+        const settle = setTimeout(() => {
+            if (selectHasAnyActiveSession(store.getState())) return;
             actions.resolveCurrentMapEvent();
-        }
-    }, [vm.mapId, vm.startNodePending, hasEvent, inEncounterModal, inCombat, actions]);
+        }, 0);
+        return () => clearTimeout(settle);
+    }, [vm.mapId, vm.startNodePending, anySession, inEncounterModal, inCombat, store, actions]);
     // Phase 63c — the modal mount lifecycle now spans the full
     // encounter session (prelude → combat → aftermath), not just
     // the moment `selectHasActiveEvent` returns true. Once combat

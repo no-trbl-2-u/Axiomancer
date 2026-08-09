@@ -14,8 +14,8 @@
  * Hermetic = self-contained + deterministic + isolated. See `docs/testing.md`.
  */
 
-import { afterEach, describe, expect, it, jest } from '@jest/globals';
-import { render } from '@testing-library/react-native';
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { act, render } from '@testing-library/react-native';
 import React from 'react';
 
 jest.mock('expo-router', () => {
@@ -42,9 +42,16 @@ import { GameStoreProvider } from '@/state/GameStoreProvider';
 import { createAppStore, EMPTY_EVENT_SLICE, type AppStore } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import { selectExplorationViewModel } from '@/state/presenters/exploration.engine';
+import { selectHasAnyActiveSession } from '@/state/presenters/navigation.engine';
+import { createAppActions } from '@/state/actions';
 import ExplorationScreen from '@/app/(tabs)/exploration';
 
+beforeEach(() => {
+    jest.useFakeTimers();
+});
+
 afterEach(() => {
+    jest.useRealTimers();
     jest.clearAllMocks();
 });
 
@@ -53,7 +60,7 @@ function makeStore(): AppStore {
 }
 
 function mountExploration(store: AppStore) {
-    return render(
+    const tree = render(
         <AestheticModeProvider skipHydration>
             <CombatModeProvider>
                 <GameStoreProvider store={store}>
@@ -62,6 +69,13 @@ function mountExploration(store: AppStore) {
             </CombatModeProvider>
         </AestheticModeProvider>,
     );
+    // The arrival is deliberately deferred a tick so a caller that navigates
+    // here and opens its own session in the same handler wins the race — see
+    // the effect's comment in `app/(tabs)/exploration/index.tsx`. Advance by
+    // a tick rather than `runAllTimers()`: the screen also arms long-lived
+    // UI timers (the map hint) that re-schedule and would never drain.
+    act(() => { jest.advanceTimersByTime(1); });
+    return tree;
 }
 
 describe('start-node arrival: the map resolves the node it puts you on', () => {
@@ -88,6 +102,51 @@ describe('start-node arrival: the map resolves the node it puts you on', () => {
 
         expect(store.getState().world.currentMap.consumedNodes).toContain('fv-1');
         expect(selectExplorationViewModel(store.getState()).startNodePending).toBe(false);
+    });
+
+    it('stands down when another session already owns the app', () => {
+        // The regression CI caught on PR #186. Every minigame owns its own
+        // slice, so a caller can navigate to this screen and open a CACHE (or
+        // hazard, or rest…) session without ever touching `state.event`. The
+        // arrival used to check only the event slice, see an "idle" app, and
+        // steal the caller's route — the dev treasure trigger ended up on
+        // /cutscene instead of /cache.
+        const store = makeStore();
+        const actions = createAppActions(store);
+        actions.beginLootCache({ items: [], currency: 25 });
+        expect(selectHasAnyActiveSession(store.getState())).toBe(true);
+
+        mountExploration(store);
+
+        // The cache session is untouched and no cutscene was armed.
+        expect(store.getState().event?.pending ?? null).toBeNull();
+        expect(store.getState().world.currentMap.consumedNodes).not.toContain('fv-1');
+        expect(selectHasAnyActiveSession(store.getState())).toBe(true);
+    });
+
+    it('stands down when the session opens a tick AFTER this screen mounts', () => {
+        // The other half of the same bug: callers push this route and open
+        // their session in the same handler, so the screen can mount one
+        // commit before the session exists. Deciding on the render-time
+        // reading would fire into a caller that is about to be busy.
+        const store = makeStore();
+        const actions = createAppActions(store);
+
+        render(
+            <AestheticModeProvider skipHydration>
+                <CombatModeProvider>
+                    <GameStoreProvider store={store}>
+                        <ExplorationScreen />
+                    </GameStoreProvider>
+                </CombatModeProvider>
+            </AestheticModeProvider>,
+        );
+        // Mounted, decision still pending — now the caller opens its session.
+        act(() => { actions.beginLootCache({ items: [], currency: 25 }); });
+        act(() => { jest.advanceTimersByTime(1); });
+
+        expect(store.getState().event?.pending ?? null).toBeNull();
+        expect(store.getState().world.currentMap.consumedNodes).not.toContain('fv-1');
     });
 
     it('does not fire again on a re-mount of the same map', () => {
