@@ -71,6 +71,24 @@
   back as a required-looking status check on the same PR list a reviewer
   reads. Whatever the doctrine says, the repository has a deploy surface
   with a per-PR URL.
+- **the URL shape, observed rather than inferred.** The Pages bot comments
+  on the PR with both addresses and edits the comment in place as the build
+  finishes:
+  - per-deployment: `https://<deploy-hash>.axiomancer.pages.dev`
+  - **per-branch: `https://<branch-slug>.axiomancer.pages.dev`** — for this
+    row's own branch, `https://claude-first-map-audit-minig.axiomancer.pages.dev`.
+    The slug is the branch name truncated, so the address is guessable from
+    a branch name alone.
+  That answers the "name the URL shape" half of this row for free. Still
+  open, still needing a ruling: whether these are intended and what is safe
+  to publish there. **Knowing the address is not deciding the door should be
+  open** — do not read this bullet as draining the question above it.
+- one thing deliberately NOT done while filing: the row asks whether
+  anything unintended is reachable without auth, the private DevLog being
+  the obvious candidate since `build-devlog.yml` commits its generated HTML
+  to `main` specifically for Pages to serve. Probing a live host for
+  unauthenticated private content is a deliberate act, not a side effect of
+  filing a row. Whoever drains this should do it knowingly.
 - why this matters beyond bookkeeping: the "no hosted surface" premise is
   load-bearing in at least two places. `/critique` and the `reader`
   subagent are built to visit a live site as a stranger; a doctrine that
