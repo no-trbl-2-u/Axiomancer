@@ -1147,7 +1147,7 @@ none may start early (bearings forbids opportunistic renaming).**
       Brief: `plan/phases/phase_44b_keyword_registry_retheme.md` —
       `feat(retheme): keyword registry + glossary retheme — phase 44b`
       (04c75d22)
-- [ ] Phase 44c — Card library retheme. ~70 library cards plus the
+- [x] Phase 44c — Card library retheme. ~70 library cards plus the
       sandbox sets, Thoughtforms and `SIGNATURE_SKILLS`: ids, display
       names and faces. **CORRECTED by spec 34 (Phase 42): this row is far
       larger than the work. All five cards it names as the marquee renames
@@ -1160,7 +1160,13 @@ none may start early (bearings forbids opportunistic renaming).**
       `axiomancer-card-editor` reads/writes `src/Cards/cards.library.ts`
       in place, so its gate runs too. Faces must still satisfy the
       honesty guard. (mechanics + card-editor) Deps: 44b.
-      Brief: to generate.
+      Brief: `plan/phases/phase_44c_card_library_retheme.md` —
+      `feat(retheme): card library retheme — phase 44c` (d64bcadc)
+      Rank ladder (R-14), card types OATH/HEX (R-9/R-10), HAUNT class +
+      tf-/ht- id prefix (R-13), and eight signature-skill display names
+      (§5.5). `tf-minor-premise` further renamed to `ht-minor-charge` /
+      "Minor Charge" (44c's own call, flagged in the retheme map). No
+      `GAME_STATE_VERSION` bump — nothing renamed is persisted.
 - [ ] Phase 44d — Themes + presets retheme. **CORRECTED by spec 34
       (Phase 42): 6 archetypes + curse, not 10 themes — the Profane Canon
       re-cut them.** The theme names, the
