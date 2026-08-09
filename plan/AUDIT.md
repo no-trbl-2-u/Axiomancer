@@ -63,6 +63,14 @@
   HTML to `main` explicitly "so the existing Cloudflare Pages integration
   can serve them" — so the integration is not a surprise to the tooling,
   only to the doctrine file every skill reads first.
+- **confirmed first-party while this row was being filed.** PR #190 reports
+  two check runs, and one of them is named **`Cloudflare Pages`** —
+  `conclusion: success`, `details_url` pointing at
+  `dash.cloudflare.com/.../pages/view/axiomancer/<deployment>`. Pages is not
+  merely integrated; it builds and publishes on pull requests, and reports
+  back as a required-looking status check on the same PR list a reviewer
+  reads. Whatever the doctrine says, the repository has a deploy surface
+  with a per-PR URL.
 - why this matters beyond bookkeeping: the "no hosted surface" premise is
   load-bearing in at least two places. `/critique` and the `reader`
   subagent are built to visit a live site as a stranger; a doctrine that
