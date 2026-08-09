@@ -1377,6 +1377,91 @@ the replacement must be reachable before the Night Watch comes out, or
       Deps: 52e. Brief:
       `plan/phases/phase_52f_shilling_economy_calibration.md`.
 
+**Narrative encounters (53a-53e) — added 2026-08-09 at T's request
+("add phases in order to make sure narrative encounters work"). Evidence:
+`axiomancer-mechanics/docs/reports/NARRATIVE-ENCOUNTER-AUDIT.md`; design:
+`specs/story/S-02-fishing-village-voices.md`. Ship IN ORDER — the sequence
+is machinery → placement → content → reactivity, because authoring against
+a broken gate ships more dead content, which is how this state arose.
+Orthogonal to 44g: that phase rewrites what existing lines SAY, this batch
+changes which lines a player can REACH. Either order works; 53a first grows
+44g's surface from 3 reachable trees to 7.**
+
+- [ ] Phase 53a — Narrative reachability: the guard, then the mismatches.
+      11 of 14 authored dialogue trees cannot be reached by legal play,
+      because `resolveInteraction` looks an NPC up by name and falls back
+      to a mute card when the name is absent — silently, the same failure
+      class as the first-map audit's F5. Add the guard first, mirroring
+      `FV_ENCOUNTER_FOES`'s throw-on-import: every `interaction` payload's
+      `npcName` must resolve in its host map's roster, and every rostered
+      NPC carrying a `dialogueTree` must be either homed on a node or
+      declared written-not-staged with a reason (so the test can tell a
+      deliberate omission from a lost NPC). Then fix what it catches:
+      `nf-7` names `Forest Hermit` for the roster's `Hermit Sage`; `nf-14`
+      and `nf-23` use the `interaction` kind for a standing stone and an
+      echo — scenery, not people, so they become `cutscene`. `fv-19` is
+      left to 53c, which reclaims it. **Widens the pending AUDIT row
+      "[world] Map-event content has no coverage guard against unreachable
+      authoring" — drain that row here.** (mechanics) Deps: none.
+      Brief: `plan/phases/phase_53a_narrative_reachability_guard.md`.
+- [ ] Phase 53b — The dialogue gate context, completed in the live path.
+      44 gated choices are authored across the rosters; 39 of them can
+      never render in the app. `composeNpcDialogue` builds its
+      `DialogueContext` by hand and supplies three of five fields —
+      `alignment` and `lastSeenAlignmentCellId` are absent, and
+      `visibleChoices` fails closed by design, so every `requiresAlignment`
+      (33) and `playerAlignmentCellChangedSince` (6) gate evaluates false
+      for every player forever. The engine is correct and proven at engine
+      level by `old-marrow-observer.engine.test.ts`; the break is mobile's.
+      `state.philosophicalAlignment` is already on the store; the observer
+      half needs more — mobile never writes `lastSeenAlignmentCells` at
+      all, so the write-back must be carried through for the gate to have
+      anything to compare against. Witness: Captain Blackwater's greeting
+      renders five replies in the app, not two. **Must precede 53c-53e** —
+      until it lands, authoring a gated branch ships dead content.
+      (mobile) Deps: none (independent of 53a; both must precede 53c).
+      Brief: `plan/phases/phase_53b_dialogue_gate_context.md`.
+- [ ] Phase 53c — Placement: the quest-giver on the spine, and a coverage
+      floor. `starting-quest` is started from exactly two authored sites,
+      both inside Old Marrow's unreachable tree, so the first map's premise
+      quest is **never active in real play** — the kill-objective repair
+      shipped 2026-08-08 advances a quest nobody holds. Narrow column 1 to
+      a single node (`fv-1 → fv-2` only; `fv-2` opens onto all three
+      column-2 nodes) and put Old Marrow there, restoring the placement
+      `docs/story.md` and `maps.ts`'s own header comment both still assert.
+      Home the Coastal Beggar before the boss and Captain Blackwater +
+      the Fisherman's Daughter after it, per S-02; move the arrival
+      cutscene's road-pointing line into Marrow's mouth. Grid stays at 25 —
+      encounter nodes change hands, nothing is added, because adding
+      re-opens the strand class the last audit closed. Re-run
+      `auditMapTraversal` and the coverage walk; ship a **coverage floor
+      test** so load-bearing narrative can never silently land on a 29%
+      lane again. (mechanics) Deps: 53a, 53b.
+      Brief: `plan/phases/phase_53c_narrative_placement.md`.
+- [ ] Phase 53d — Author S-01's four dilemmas. Designed 2026-07-xx,
+      never wired; both of that spec's open questions were answered
+      2026-08-09 at planning time (displace encounter nodes, grid stays
+      at 25; flags only, no `moralDelta`) and its intended hosts are
+      superseded — read the table under S-01's Open Question 1. Each
+      dilemma displaces one encounter node and must sit in a strictly
+      earlier column than whatever reads its flag, because a gauntlet has
+      no back-travel. New prose ships in spec 34 §2's ratified register
+      from the first draft, so 44g inherits nothing to redo.
+      (mechanics content) Deps: 53c.
+      Brief: `plan/phases/phase_53d_s01_dilemmas.md`.
+- [ ] Phase 53e — The read-back web: consequences that come back. Across
+      every authored map there is exactly **one** `requires.flag` gate in
+      the whole game. `fv-14`'s three father flags and `marrow_pressed`
+      are set correctly and read by nothing but their own tests, so every
+      dilemma is currently a fork with one outcome. Gate a branch on each
+      in the post-boss NPCs (Beggar, Blackwater, the Daughter), strictly
+      forward-only. Branches are **additive** — a player who set no flag
+      sees a complete conversation with nothing visibly missing. The
+      Daughter's reactive branches set no `moralDelta`: the dilemmas
+      refuse to score themselves, and an NPC who scores them retroactively
+      overrules that refusal. (mechanics content) Deps: 53d.
+      Brief: `plan/phases/phase_53e_read_back_web.md`.
+
 - [ ] Phase 46a — Early-game rethink: design session. Decide whether the
       opening is canned preset-deck tutorials with deckbuilding deferred
       to a labyrinth choice, and re-derive the Quest Board tutorial that
@@ -1773,6 +1858,30 @@ See the status rows above; generate briefs on demand.
   (blacksmith map placement and cadence), both open since 2026-07-18.
   Resulting commit: this one; six briefs generated under
   `plan/phases/phase_52*.md`.
+- **2026-08-09** — actor: **T direct** (attended web session, not Hermes).
+  Action: **added Phases 53a-53e** (narrative encounters — reachability
+  guard, dialogue gate context, placement + coverage floor, S-01's four
+  dilemmas, the read-back web), inserted as an ordered batch between the
+  52* block and 46a. No existing row was reordered, rescoped or
+  renumbered. Confirmed T's request: yes — T's instruction, verbatim:
+  *"file both audit rows, then add phases in order to make sure
+  'narrative' encounters work. Author content using the skills
+  available."* T's stated reason: not stated beyond the instruction
+  itself; the batch follows a first-map audit T commissioned the day
+  before, whose residue this drains. Scope was derived rather than
+  dictated — the six findings behind these rows come from a fresh audit
+  run in the same session
+  (`axiomancer-mechanics/docs/reports/NARRATIVE-ENCOUNTER-AUDIT.md`), and
+  the two critical ones are that no NPC conversation in the game is
+  reachable by legal play and that the first map's premise quest has no
+  giver. Deliberately NOT promoted in the same pass: inter-map travel
+  (already a phase candidate from the first-map audit) and any retheme of
+  existing dialogue prose (Phase 44g owns it by name). Two content calls
+  were made at planning time rather than left blocking, both reversible
+  and both recorded in the specs they touch: S-01's node-reslotting and
+  `moralDelta` questions. Resulting commit: this one; briefs generated
+  under `plan/phases/phase_53*.md`; design record
+  `specs/story/S-02-fishing-village-voices.md`.
 
 ## Phase log (commit hashes)
 
