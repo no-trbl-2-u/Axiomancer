@@ -221,3 +221,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-08T21:37:13Z | subagent | general-purpose | claude-opus-5 | main | Phase 52b first-class inn |
 | 2026-08-08T21:37:40Z | subagent | general-purpose | claude-opus-5 | main | Phase 48 Closes-N root cause |
 | 2026-08-09T02:34:43Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-09T07:29:50Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-09T07:29:52Z | skill | march | unknown | main | - |
+| 2026-08-09T07:31:16Z | subagent | Explore | claude-sonnet-5 | main | Map keyword registry rename targets |
