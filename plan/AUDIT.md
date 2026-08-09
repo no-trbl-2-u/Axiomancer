@@ -14,6 +14,107 @@
 
 ## Pending
 
+### [contract] `exploration-combat-roundtrip-e2e` regression: FLEE leaves the tab bar hidden
+- category: contract
+- impact: 8
+- ease: 5
+- detail: filed 2026-08-09 (digest, nightly `e2e:minigames` breadth check).
+  `scripts/exploration-combat-roundtrip-e2e.mjs` — the browser-driven guard
+  for the "FIGHT-modal-unmount class" (Phase 10) — now fails at its FLEE
+  step: `FAIL — tab bar (Character tab) still hidden after FLEE closed the
+  modal`. The modal itself closes correctly (`encounter-modal-fight` goes
+  hidden); only the tab-bar unlock is stuck, i.e. the exact
+  `inEncounterModal`/tab-bar desync class this script exists to catch.
+  Reproduced locally (`npm --workspace axiomancer-mobile run e2e:minigames`),
+  not a CI-only flake — the other four legs (hazard, combat, gathering,
+  encounter-routing) all passed clean first.
+- likely mechanism (code-read, not yet instrumented): the script arms the
+  encounter modal via the `debug-trigger-encounter-encounter` dev button,
+  which routes to `/exploration` and fires the combat-prelude directly —
+  the player never actually "moves" off the map's starting node, so
+  `state.world.currentMap.consumedNodes` never gains that node and
+  `selectExplorationViewModel`'s `startNodePending` stays true
+  (`axiomancer-mobile/state/presenters/exploration.engine.ts:440-443`).
+  `61ea5513` (First-map audit, #186, 2026-08-08) added a new effect at
+  `axiomancer-mobile/app/(tabs)/exploration/index.tsx:101-108` that fires
+  `actions.resolveCurrentMapEvent()` on a deferred `setTimeout(0)` whenever
+  `startNodePending` is true and nothing else is busy. FLEE
+  (`onEncounterFlee` -> `pickEventChoice('flee')`) clears `state.event` and
+  should let the existing close-effect (lines 146-150, Phase 118 /
+  issue #191) drop `inEncounterModal`, unhiding the tab bar — but on the
+  very next tick the new start-node effect can see an idle app
+  (`!anySession && !inEncounterModal`) and re-fire
+  `resolveCurrentMapEvent()`, re-opening the start node's authored event
+  and re-arming the modal before the tab bar ever unhides. This would only
+  bite the dev-trigger entry path (and any real path that flees before
+  ever leaving the start node) — not confirmed with a debugger/log
+  instrumentation, but it lines up commit-for-commit with the only
+  relevant change since this script last passed.
+- next: instrument (a console log on `resolveCurrentMapEvent` calls, or a
+  breakpoint) to confirm the double-fire, then either gate the start-node
+  effect on `lastOutcome === null` the same way the close-effect already
+  gates on it, or have `onEncounterFlee`/FLEE mark the start node consumed
+  the way a real move does. Verify with
+  `ROUNDTRIP_E2E_REUSE_EXPORT=1 node scripts/exploration-combat-roundtrip-e2e.mjs`
+  plus a full `npm --workspace axiomancer-mobile run e2e:minigames`.
+
+### [gap] `march` ticks are creeping toward the 90-minute job timeout; one was killed mid-cycle
+- category: gap
+- impact: 6
+- ease: 5
+- detail: filed 2026-08-09 (digest pulse). Run `31301228665` (started
+  07:28:30, triggered by the scheduled `march` workflow) hit
+  `.github/workflows/march.yml`'s `timeout_minutes: 90` exactly
+  (`1:30:18` wall clock) and was force-cancelled by the runner, surfacing
+  as `conclusion: cancelled` rather than `success` in `gh run list`. The
+  job log shows it had already committed and pushed both phase 44b halves
+  cleanly (`04c75d22` feature, `f96f0584` DoD tick, landed at 08:52:30 and
+  08:52:43) — no corruption, nothing half-committed — but the run kept
+  going for another ~6 minutes past that push before the timeout killed
+  it, and whatever work was in flight in that window (most likely starting
+  the next phase) is gone with no trace, same as the already-filed
+  "loop turns that end while CI is amber leave post-green work undone"
+  class in `plan/PHASE_CANDIDATES.md`, but here the cause is the job
+  ceiling itself rather than a CI wait. This is the first confirmed
+  timeout-kill; the prior run (`2026-08-08T07:26:19Z`) already ran
+  `1:26:24` — 4 minutes under the ceiling — so this reads as a trend
+  (ticks that chain two full phases, like 44a+44b did here, run long
+  enough to threaten the ceiling) rather than a one-off.
+- next: a phase-candidate, not a direct edit to `march.yml` — see
+  `plan/PHASE_CANDIDATES.md`'s new "march tick timeout" row for the
+  proposal. This row is the evidence; the proposal is not this loop's to
+  apply directly.
+
+### [docs] `skills/digest.md` §3b still reads baseline health against the win-rate doctrine curve Phase 43 retired
+- category: docs
+- impact: 5
+- ease: 8
+- detail: filed 2026-08-09 (digest). §3b instructs: "READ the new numbers
+  against the locked doctrine curve (early ~80 / mid ~50 / late 25-35 /
+  impossible 0, blind policy-pick): each band that moved gets a line in
+  the Tuning proposals panel, and a doctrine violation ... gets a
+  `plan/AUDIT.md` row." `46b5a5df` (phase 43, "objective function v2 — the
+  Combat Quality Index", 2026-08-08) retired win rate as a grading term
+  outright — "Win rate is not a term at all: the doctrine curve grades
+  WHETHER a deck should win, CQI grades HOW the fight played, and a 0%-win
+  cell scoring well is pinned as correct" — and the already-filed
+  `plan/AUDIT.md` row "`/deck-tuning` and `/combat-playtest` still name
+  `statusEngagement` as the objective function" flags the identical drift
+  in those two skills. `skills/digest.md` was outside phase 43's file
+  ownership (same as those two) and has the same problem: followed
+  literally tonight, §3b would have filed a doctrine-violation row against
+  early 54.5% / mid 8.3% / late 0% / impossible 0% — a live reading of a
+  retired law. This digest read `combatQuality.index` instead (see the
+  now-resolved CQI-baseline row above) and skipped the win-rate violation
+  filing on that basis, but the skill text itself still says otherwise for
+  next time.
+- next: repoint §3b at `combatQuality.index` (spine/arc/width/identity
+  weights, 0.40/0.25/0.20/0.15) once spec 35 or Phase 43's follow-up
+  defines what "moved" or "violates" means for CQI — there is no CQI band
+  yet to grade against, only the first stamped reading, so this may need a
+  design ruling (what CQI range is "good") before the skill text can be
+  rewritten, not just a search-and-replace of the metric name.
+
 ### [docs] Phase 44a deferred its `lexicon.json` registrations to the phases that actually rename each concept
 - category: docs
 - impact: 4
@@ -140,7 +241,7 @@
   only** (checked; no runtime reference survives). Same root as the
   `combat-sim` default-loadout row above, which IS a live defect.
 
-### The deck-matrix baseline needs re-stamping under CQI before Phase 43 is usable
+### [x] The deck-matrix baseline needs re-stamping under CQI before Phase 43 is usable — RESOLVED 2026-08-09 by digest (reduced-nightly regen)
 - category: gap
 - impact: 7
 - ease: 8
@@ -153,6 +254,24 @@
   to optimise against and would fall back on `statusEngagement` — the dead
   law Phase 43 exists to retire. Pairs with the `/deck-tuning` naming row
   above: the metric and the skills that consume it must move together.
+- **[x] RESOLVED 2026-08-09 (digest, reduced-nightly).** `npm run
+  baseline:regen -- --runs=30 --confidence=reduced-nightly` stamped
+  `deck-matrix-baseline.json` at `f96f0584` (7 mechanics-source commits
+  since the prior stamp, including Phase 43 itself, the Profane Canon card
+  rework, the first-map audit, and phases 44a/44b). CQI is now populated
+  per stage for the first time via the standard regen path: early 0.746,
+  mid 0.739, late 0.814, impossible 0.820 (`combatQuality.index`,
+  0.40·spine + 0.25·arc + 0.20·width + 0.15·identity per spec 35/Phase 43).
+  `statusEngagement` is still reported alongside (0.210 / 0.190 / 0.205 /
+  0.218) but per Phase 43's own ruling is dead-law noise, not a target.
+  Win rate (54.5% / 8.3% / 0% / 0%) is likewise no longer a grading term —
+  see the fresh "Doctrine-curve confirmation" row below for why this digest
+  did not file a doctrine-violation row against it. The `dominantCardShare`
+  and default-loadout rows below this one are untouched; this resolution is
+  the baseline stamp only.
+- next: (drained — `/deck-tuning` and `/combat-playtest` can now read a
+  stamped CQI reference; re-check the two still-open rows below
+  (`dominantCardShare`, default loadout) independently)
 
 ### `dominantCardShare` is broken post-strike-death
 - category: debt

@@ -9,6 +9,32 @@
 
 ## Pending
 
+### Raise (or split around) the `march` workflow's 90-minute job ceiling
+- source: filed 2026-08-09 by digest, from the pulse. Run `31301228665`
+  (2026-08-09) chained phases 44a and 44b into one tick and hit
+  `.github/workflows/march.yml`'s `timeout_minutes: 90` exactly
+  (`1:30:18`), getting force-cancelled by the runner — see the paired
+  `plan/AUDIT.md` "march ticks are creeping toward the 90-minute job
+  timeout" row for the evidence. The prior tick (`2026-08-08T07:26:19Z`)
+  already ran `1:26:24`, 4 minutes under the ceiling, so this reads as a
+  trend (multi-phase ticks) rather than a one-off.
+- shape: a design decision, not a mechanical bump — either raise
+  `timeout_minutes` (simplest, but just moves the cliff further out for
+  the next multi-phase tick), or have `march`/`ship-a-phase` cap itself to
+  one phase per tick so a tick's own scope stays well under any ceiling
+  (addresses the cause rather than the symptom, but changes loop cadence
+  — more ticks needed to drain the same queue). A third option: keep
+  chaining phases but checkpoint progress mid-tick so a timeout-kill loses
+  only the in-flight phase, not silently — related to, but distinct from,
+  the already-filed "Loop turns that end while CI is amber leave
+  post-green work undone, with no retry" row below (that one is about
+  CI-wait early exits; this is about the job's own wall-clock ceiling).
+- why it matters now: ticks that ship two full phases (design + build +
+  verify + commit, twice) are apparently common enough to threaten the
+  ceiling twice in two days. A future tick that times out mid-*commit*
+  (rather than the ~6 idle minutes this one wasted after its last push)
+  would be a worse outcome than either fix costs.
+
 ### Inter-map travel — the first map has no exit
 - source: first-map audit 2026-08-08 (`axiomancer-mechanics/docs/reports/FIRST-MAP-AUDIT.md`,
   finding F4). Filed as a candidate rather than shipped in that pass: it is a
