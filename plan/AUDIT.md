@@ -14,6 +14,26 @@
 
 ## Pending
 
+### [debt] `telemetry.mjs` writes `TELEMETRY.md` relative to cwd, so a workspace-cd forks the log
+- category: debt
+- impact: 3
+- ease: 8
+- detail: filed 2026-08-09. Invoking a skill while the shell's cwd is inside
+  a workspace makes the hook create a **second** `TELEMETRY.md` there
+  (observed: `axiomancer-mechanics/TELEMETRY.md`, one row, full header)
+  instead of appending to the tracked root log. The row is not lost, but it
+  lands untracked in the wrong package, the stop hook flags it as an
+  uncommitted file, and the canonical log silently misses the invocation
+  unless someone notices and moves it. Any agent that `cd`s into a package
+  to run a script — which is routine — reproduces it.
+- this instance was repaired by hand: the row was appended verbatim to the
+  root log and the stray file deleted. Rows were not edited, per the
+  standing rule.
+- next: /iterate — resolve the path from `CLAUDE_PROJECT_DIR` (the hook
+  already receives it; `guard.mjs` uses it) rather than from cwd, and add a
+  smoke assertion that a hook fired from a subdirectory still appends to the
+  root log.
+
 ### [tests] The verify gate is blind to the Playwright journeys, and a real regression proved it
 - category: tests
 - impact: 7
