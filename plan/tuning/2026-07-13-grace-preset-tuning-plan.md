@@ -1,5 +1,11 @@
 # Grace Preset Tuning Plan
 
+> **Status: HISTORICAL / SUPERSEDED (2026-08-09).** The Profane Canon
+> (`84ef85bd`) retired Grace and the former ten theme presets. The current
+> shipped campaign presets are `threadbare`, `pilgrim`, and `apostate` in
+> `combat.starter-deck-presets.ts`. Do not execute this plan or use its gates to
+> tune current main; preserve it as evidence of the retired campaign.
+>
 > **For Hermes:** Tune this preset alone. Do not screen, modify, or plan another preset in this file.
 
 **Goal:** Calibrate Grace against the full encounter curve while preserving its explicit SWAY → ACCEPT / CONTINUE → CAPITULATE identity.

@@ -1,45 +1,70 @@
 # Preset Deck Rework Status
 
-**Scope:** All ten shipped combat preset decks.
+> **Superseded campaign — factual reconciliation 2026-08-09.** The Profane
+> Canon (`84ef85bd`) retired the former ten theme presets and replaced them with
+> three campaign snapshots: **The Threadbare Office**, **The Pilgrim's Burden**,
+> and **The Apostate's Canon**. The former ten-deck roll call is retained below
+> as history, not as current shipped-preset truth. Its Grace plan is not
+> executable against the live card library.
 
-**Law:** One deck receives one preset-specific plan at a time. A cheap cross-preset screen does not promote a deck out of `untouched`; it only helps select the next deck.
+**Current scope:** The three shipped campaign preset decks in
+`axiomancer-mechanics/src/Combat/combat.starter-deck-presets.ts`.
+
+**Law:** One deck receives one preset-specific plan at a time. A cheap
+cross-preset screen does not promote a deck out of `untouched`; it only helps
+select the next deck. Do not open a current preset plan while the campaign
+snapshots are transitional or before Phase 44d settles their names/themes.
 
 ## Category definitions
 
-- **Audited** — received a preset-specific, full-roster/multi-policy investigation, but has no active preset-specific plan. Historical numbers must be reproduced if `main` has advanced.
+- **Audited** — received a preset-specific, full-roster/multi-policy investigation, but has no active preset-specific plan.
 - **Player audited** — T has personally judged the deck's current feel. This is valuable player evidence, but it does not silently become an automated balance pass.
 - **Planned** — has the one active preset-specific rework plan. This status supersedes `audited` while that plan remains open.
 - **Untouched** — has no qualifying preset-specific audit, player verdict, or active plan. Cross-preset screening alone does not count.
+- **Closed/fixed** — current preset-specific gates passed, or a documented calibration freeze closed the plan.
 
-Each preset appears exactly once below.
+Each currently shipped preset appears exactly once below.
 
 ## Audited
 
-- **Oratory** — historical full-roster, all-policy, three-seed baseline and curve diagnosis exist. The evidence predates later hand-size/combat changes and must be reproduced before any adjustment. No Oratory plan exists yet.
+None.
 
 ## Player audited
 
-None. T's later authority, recorded in
-[`COMBAT_SYSTEM_FOUNDATIONAL_REDESIGN_PLAN.md`](../ideas/COMBAT_SYSTEM_FOUNDATIONAL_REDESIGN_PLAN.md),
-corrected the earlier Erosion classification: it has not received a qualifying
-player audit.
+None.
 
 ## Planned
 
-- **Grace** — active plan: [`2026-07-13-grace-preset-tuning-plan.md`](./2026-07-13-grace-preset-tuning-plan.md). Card-face wording audit is complete across the preset and Charm library. Its historical balance marker is explicitly stale after upstream combat changes; current rebaseline remains the first open gate.
+None.
 
 ## Untouched
 
-- **Erosion** — later owner authority supersedes the stale player-audited row;
-  cross-preset screens and wording work do not promote it from this category.
-- **Foundry**
-- **Penitent**
-- **Standstill**
-- **Augury**
-- **Tithe**
-- **Bastion**
-- **Refrain**
+- **The Threadbare Office** (`threadbare`)
+- **The Pilgrim's Burden** (`pilgrim`)
+- **The Apostate's Canon** (`apostate`)
+
+## Closed/fixed
+
+None.
 
 ## Queue rule
 
-Grace remains the only planned deck. Do not create the Oratory plan—or any other preset plan—until Grace is closed or T explicitly changes the active deck.
+There is no active preset-specific plan. Do not revive Grace or create a second
+legacy-theme plan. Current preset planning waits on the Profane Canon redesign
+settling as live product truth and Phase 44d's preset/theme retheme.
+
+## Historical campaign — retired presets
+
+The former campaign tracked ten theme presets:
+
+- **Audited:** Oratory
+- **Player audited:** none
+- **Planned:** Grace — historical plan:
+  [`2026-07-13-grace-preset-tuning-plan.md`](./2026-07-13-grace-preset-tuning-plan.md)
+- **Untouched:** Erosion, Foundry, Penitent, Standstill, Augury, Tithe, Bastion, Refrain
+- **Closed/fixed:** none
+
+These decks were retired rather than calibrated closed. T's direct Grace player
+audit was due by end of day 2026-07-14 America/New_York and was never recorded;
+that historical commitment remains unmet, but it must not be performed against
+a deck that no longer ships.
