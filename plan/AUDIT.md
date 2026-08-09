@@ -14,6 +14,72 @@
 
 ## Pending
 
+### [tests] The verify gate is blind to the Playwright journeys, and a real regression proved it
+- category: tests
+- impact: 7
+- ease: 5
+- detail: filed 2026-08-09 (first-map audit follow-up, offered to T at the
+  close of PR #186 and accepted). `npm run verify` is lint + typecheck +
+  jest/vitest in every workspace — the eight `e2e:*` journeys
+  (`hazard`, `combat`, `gathering`, `encounters`, `theme`, `loot`,
+  `exploration-roundtrip`, `upgradeable-dice`) are **not** in any verify
+  script. They exist only as separate steps inside `verify-mechanics.yml`
+  and `verify-mobile.yml`, so they run in CI and nowhere else. This is not
+  theoretical: PR #186 shipped a start-node arrival guard that passed a
+  clean three-workspace local verify and then failed
+  `encounter-routing-e2e` in CI ("treasure did not route to /cache —
+  landed on /cutscene"). The bug was real, the gate that was supposed to
+  be the pre-flight check could not see it, and the loop's doctrine
+  ("foreground verify gate, never backgrounded") bought nothing because
+  the gate does not contain the test that fails.
+- the general defect: `plan/bearings.md` § "Verify gate" presents
+  `npm run verify` as THE pre-commit gate, and every shipping skill cites
+  it as such. The journeys are the only coverage for cross-slice routing —
+  exactly the class of bug unit tests structurally cannot catch, since each
+  minigame slice passes its own tests in isolation while the router picks
+  the wrong one. An unattended `/march` tick that runs verify, sees green,
+  and pushes is shipping unverified routing on every tick.
+- next: /iterate. The journeys are runnable locally today — they need
+  `*_E2E_CHROME=/opt/pw-browsers/chromium-1194/chrome-linux/chrome`
+  because the repo's pinned Playwright expects a headless-shell build this
+  container lacks. Decide whether they join `verify` outright (slow but
+  honest), become a `verify:journeys` leg the shipping skills must run
+  when they touch routing or a store slice, or stay CI-only with bearings
+  amended to stop calling verify a sufficient pre-flight. Any of the three
+  beats the current state, where the doc and the gate disagree.
+
+### [divergence] Bearings says there is no hosted web surface; Cloudflare Pages has been publishing one
+- category: divergence
+- impact: 6
+- ease: 6
+- detail: filed 2026-08-09 (first-map audit follow-up, offered to T at the
+  close of PR #186 and accepted). `plan/bearings.md` L35-37 states, as a
+  standing decision, "**No hosted web surface.** The product ships as a
+  mobile app via manual EAS builds; `main` does not auto-deploy," and
+  § Surface reinforces it: "This is not a website... an expo-web build used
+  only for dev/e2e/playtesting." Observed during PR #186: Cloudflare Pages
+  publishes a preview per branch. The repo already knows this in one
+  place — `.github/workflows/build-devlog.yml` L6 commits generated DevLog
+  HTML to `main` explicitly "so the existing Cloudflare Pages integration
+  can serve them" — so the integration is not a surprise to the tooling,
+  only to the doctrine file every skill reads first.
+- why this matters beyond bookkeeping: the "no hosted surface" premise is
+  load-bearing in at least two places. `/critique` and the `reader`
+  subagent are built to visit a live site as a stranger; a doctrine that
+  says no such site exists tells them there is nothing to visit. And the
+  `[needs-user-call]` product-name row above weighs "Axiomancer" under a
+  whole-product pivot — a decision that reads differently if branch
+  previews are already public URLs versus if nothing is published at all.
+- `[needs-user-call]` on which way to reconcile: whether the previews are
+  intended (bearings should describe them, name the URL shape, and say
+  what is safe to publish there) or incidental (the Pages integration
+  should be scoped or turned off). Do not "fix" this by editing bearings
+  to match observed reality — the sentence is a standing decision, and
+  only T can restate it. What /iterate CAN do without a ruling is confirm
+  the current publish scope: which branches build, what the URLs are, and
+  whether anything unintended (the private DevLog among them) is reachable
+  without auth.
+
 ### [contract] `exploration-combat-roundtrip-e2e` regression: FLEE leaves the tab bar hidden
 - category: contract
 - impact: 8
