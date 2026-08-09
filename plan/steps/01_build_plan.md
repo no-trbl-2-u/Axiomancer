@@ -1123,7 +1123,7 @@ none may start early (bearings forbids opportunistic renaming).**
       landing phase (44b/44c/44g/44h), which adds its own rows at the commit
       that actually retires the term — matching how every existing
       `lexicon.json` row was added. Filed as residue: `plan/AUDIT.md`.
-- [ ] Phase 44b — Keyword registry + glossary retheme. **CORRECTED by
+- [x] Phase 44b — Keyword registry + glossary retheme. **CORRECTED by
       spec 34 §5 (Phase 42): the live registry is 42 `KEYWORD_GLOSS` rows
       + 8 system terms, not ~29.** All 50 are ruled there — 15 renames, 35
       survivors. Spec 34 §4.1 also rules all three LOCKED MECHANICS names
@@ -1144,7 +1144,9 @@ none may start early (bearings forbids opportunistic renaming).**
       them at all. If Phase 42 explicitly ruled a rename, it goes through
       the 44a map with a `GAME_STATE_VERSION` migration, and the mechanic
       is unchanged either way. (mechanics + mobile) Deps: 44a.
-      Brief: to generate.
+      Brief: `plan/phases/phase_44b_keyword_registry_retheme.md` —
+      `feat(retheme): keyword registry + glossary retheme — phase 44b`
+      (04c75d22)
 - [ ] Phase 44c — Card library retheme. ~70 library cards plus the
       sandbox sets, Thoughtforms and `SIGNATURE_SKILLS`: ids, display
       names and faces. **CORRECTED by spec 34 (Phase 42): this row is far
