@@ -1,6 +1,6 @@
 # Lexicon — canonical and retired Axiomancer terminology
 
-<!-- lexicon-ok: src-skills-path, base-power, chip-hp, pressure-tracks -->
+<!-- lexicon-ok: src-skills-path, base-power, chip-hp, pressure-tracks, doxa, lemma, thesis, theorem, axiom, enchantment, disenchant, thoughtform -->
 
 > The machine-authoritative retired-terms registry is
 > [`lexicon.json`](./lexicon.json) — `node scripts/check-lexicon.mjs`
@@ -27,8 +27,9 @@
   exists at the schema level. `basePower` / `chipHp` are retired words
   except when describing their removal.
 - **tier vs rank — never conflate:** `tier` (1-3) is the RESIST axis;
-  `rank` (1-6: Doxa/Lemma/Thesis/Theorem/Axiom/Aporia) is the QUALITY
-  axis; rarity derives from rank.
+  `rank` (1-6: Ash/Tooth/Splinter/Rib/Skull/Saint — spec 34 R-14, was
+  Doxa/Lemma/Thesis/Theorem/Axiom/Aporia) is the QUALITY axis; rarity
+  derives from rank.
 - **Equipment (post-phase-18):** 5 pieces across 3 slot kinds — 1
   weapon, 1 armor, 3 accessories (`AccessoryKind`: head / hands / feet
   / amulet / ring / charm). The 7-slot model and (per the phase 19-23

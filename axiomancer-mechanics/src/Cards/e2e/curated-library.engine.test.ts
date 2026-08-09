@@ -4,7 +4,7 @@
  * The rework replaced the spec-32 themed pool wholesale: 57 unique cards —
  * 8 starters (the Threadbare Office), 3 dice-valve relics, 4 enemy-injected
  * curses, and six archetype packages of 7 (2 commons, 2 uncommons, 1 rare
- * spell, 1 enchantment, 1 disenchant). Rank ladder 1-6 with derived rarity,
+ * spell, 1 oath, 1 hex). Rank ladder 1-6 with derived rarity,
  * three card types, and THE STRIKE stays DEAD at the schema level — no card
  * carries an HP-damage field, and this suite is the regression gate.
  */
@@ -44,7 +44,7 @@ describe('profane canon — shape contract', () => {
         }
     });
 
-    it('each archetype delivers its 7-card package (2 commons, 2 uncommons, 1 rare spell, 1 enchantment, 1 disenchant)', () => {
+    it('each archetype delivers its 7-card package (2 commons, 2 uncommons, 1 rare spell, 1 oath, 1 hex)', () => {
         for (const theme of ARCHETYPES) {
             const pack = cardLibrary.filter(c => c.theme === theme
                 && !(c.tags ?? []).some(t => t === 'starter' || t === 'valve' || t === 'curse'));
@@ -53,8 +53,8 @@ describe('profane canon — shape contract', () => {
             expect(spells.filter(c => c.rank <= 2).length, `${theme} commons`).toBe(2);
             expect(spells.filter(c => c.rank === 3 || c.rank === 4).length, `${theme} uncommons`).toBe(2);
             expect(spells.filter(c => c.rank >= 5).length, `${theme} rare spell`).toBe(1);
-            expect(pack.filter(c => c.cardType === 'enchantment').length, `${theme} enchantment`).toBe(1);
-            expect(pack.filter(c => c.cardType === 'disenchant').length, `${theme} disenchant`).toBe(1);
+            expect(pack.filter(c => c.cardType === 'oath').length, `${theme} oath`).toBe(1);
+            expect(pack.filter(c => c.cardType === 'hex').length, `${theme} hex`).toBe(1);
         }
     });
 
@@ -95,13 +95,13 @@ describe('profane canon — FREE/PAID anatomy', () => {
         }
     });
 
-    it('enchantments and disenchants carry no AUTHORED free rider (the timed FREE line is engine-derived)', () => {
+    it('oaths and hexes carry no AUTHORED free rider (the timed FREE line is engine-derived)', () => {
         for (const card of cardLibrary.filter(c => c.cardType !== 'spell')) {
             expect(card.free, `${card.id} (${card.cardType})`).toBeUndefined();
         }
     });
 
-    it('every enchantment and disenchant carries a persistentEffect summary', () => {
+    it('every oath and hex carries a persistentEffect summary', () => {
         for (const card of cardLibrary.filter(c => c.cardType !== 'spell')) {
             expect(card.persistentEffect, `${card.id} (${card.cardType})`).toBeTruthy();
         }
@@ -149,11 +149,11 @@ describe('profane canon — FREE/PAID anatomy', () => {
         expect(cardOrigin('no-such-card-not-in-any-preset').source).toBe('reward');
     });
 
-    it('enchantments sit player-side; disenchants attach to the enemy', () => {
-        for (const card of cardLibrary.filter(c => c.cardType === 'enchantment')) {
+    it('oaths sit player-side; hexes attach to the enemy', () => {
+        for (const card of cardLibrary.filter(c => c.cardType === 'oath')) {
             expect(card.targetType, `${card.id}`).toBe('self');
         }
-        for (const card of cardLibrary.filter(c => c.cardType === 'disenchant')) {
+        for (const card of cardLibrary.filter(c => c.cardType === 'hex')) {
             expect(card.targetType, `${card.id}`).toBe('enemy');
         }
     });
@@ -182,7 +182,7 @@ describe('profane canon — id hygiene and provenance', () => {
             expect(card.id).toMatch(/^[a-z][a-z0-9-]*$/);
             expect([1, 2, 3]).toContain(card.tier);
             expect([1, 2, 3, 4, 5, 6]).toContain(card.rank);
-            expect(['spell', 'enchantment', 'disenchant']).toContain(card.cardType);
+            expect(['spell', 'oath', 'hex']).toContain(card.cardType);
             expect(['self', 'enemy']).toContain(card.targetType);
             expect(['body', 'mind', 'heart']).toContain(card.philosophicalAspect);
             // 2026-08-08 — the Profane Canon wholesale replacement.
@@ -195,7 +195,7 @@ describe('profane canon — id hygiene and provenance', () => {
         for (const id of STARTING_CARD_IDS) {
             const card = getCardById(id);
             expect(card, id).toBeDefined();
-            expect(card!.rank).toBe(1); // starters are Doxa
+            expect(card!.rank).toBe(1); // starters are Ash
             expect(card!.tags).toContain('starter');
         }
     });

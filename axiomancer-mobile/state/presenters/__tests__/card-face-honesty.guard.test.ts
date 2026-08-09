@@ -41,7 +41,7 @@ describe('card-face honesty guard', () => {
     });
 
     it("no persistent card lies about its FREE line — 'PAID only' is dead (spec 32 v4)", () => {
-        // The engine prints BOTH lines on enchant/disenchant cards: the FREE
+        // The engine prints BOTH lines on oath/hex cards: the FREE
         // play is a TIMED instance ('FREE (3 rounds) — <passive>'), the PAID
         // play is permanent. A presenter surface that claims 'PAID only' (the
         // 2026-07-11 playtest report) or drops the timed truth is the lie this
@@ -52,7 +52,7 @@ describe('card-face honesty guard', () => {
         const offenders: string[] = [];
         for (const { id } of cardLibrary) {
             const card = getCard(id);
-            if (!card || (card.cardType !== 'enchantment' && card.cardType !== 'disenchant')) continue;
+            if (!card || (card.cardType !== 'oath' && card.cardType !== 'hex')) continue;
             const f = faceStats(card, getCardById(id));
             const d = detailStats(card, getCardById(id));
             const surfaces = [f.freeHeroText, f.freeValue ?? '', d.freeLine, d.freePill, d.outcomeLine, d.readNote];
@@ -65,13 +65,13 @@ describe('card-face honesty guard', () => {
             // order) — the inspect panel is PAYLOAD keywords ONLY: the type
             // already reads on the frame's type strip, so a type chip in the
             // panel is the regression this guard now blocks.
-            const typeChips = d.keywords.filter(k => k.name === 'ENCHANTMENT' || k.name === 'DISENCHANT');
+            const typeChips = d.keywords.filter(k => k.name === 'OATH' || k.name === 'HEX');
             if (typeChips.length > 0) offenders.push(`${id} → type chip '${typeChips[0].name}' rendered in the keyword panel`);
-            const payload = d.keywords.filter(k => k.name !== 'ENCHANTMENT' && k.name !== 'DISENCHANT');
+            const payload = d.keywords.filter(k => k.name !== 'OATH' && k.name !== 'HEX');
             if (payload.length === 0) offenders.push(`${id} → no payload keyword chip resolved from its passive`);
             // The face's verb slot must lead with a PAYLOAD keyword (what the
             // card DOES), never the bare type word, whenever a payload resolves.
-            if (payload.length > 0 && (f.keyword === 'ENCHANTMENT' || f.keyword === 'DISENCHANT')) {
+            if (payload.length > 0 && (f.keyword === 'OATH' || f.keyword === 'HEX')) {
                 offenders.push(`${id} → verb slot shows the bare type word despite payload '${payload[0].name}'`);
             }
         }

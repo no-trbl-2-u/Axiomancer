@@ -82,8 +82,8 @@ const SUPPORT_KEYWORD: Record<string, string> = {
 /** Verb class → keyword for cards whose action is the keyword itself. */
 const VERB_KEYWORD: Record<string, string> = {
     defend: 'Guard',
-    enchant: 'Enchantment',
-    disenchant: 'Disenchant',
+    oath: 'Oath',
+    hex: 'Hex',
 };
 
 /**
@@ -251,8 +251,8 @@ const KEYWORD_GLOSS: Record<string, string> = {
     Temper: "A blacksmith upgrade: turns a mana face into a BOON face. A colored die caps at 2 boon and 1 miss; gold at 1.",
     // ── Card types (labels, not keywords — never rendered in the inspect
     // keyword panel since 2026-07-12; kept for help surfaces + the KW lints) ──
-    Enchantment: 'A passive on your side: 3 rounds when played free, permanent when paid with a die.',
-    Disenchant: 'A standing curse on the enemy: 3 rounds when played free, permanent when paid with a die.',
+    Oath: 'A passive on your side: 3 rounds when played free, permanent when paid with a die.',
+    Hex: 'A standing curse on the enemy: 3 rounds when played free, permanent when paid with a die.',
 };
 
 /**
@@ -274,14 +274,14 @@ const PERSISTENT_TEXT_ALIAS: Record<string, string> = {
 /**
  * 2026-07-11 card-face-truth fix — PAYLOAD keywords for a persistent card.
  *
- * An enchant/disenchant's passive lives in ENGINE HOOKS keyed by card id (no
+ * An oath/hex's passive lives in ENGINE HOOKS keyed by card id (no
  * effect id ever reaches mobile), so the payload keyword is recovered from the
  * card's authored one-line summary (`Card.persistentEffect`), which prints its
  * mechanics as UPPERCASE registry words ('Every BLEED or POISON you apply…' —
  * the KW-5 lint guarantees at least one resolves for every library card).
  * Returns Title-Case registry keywords in text order, deduped; [] when nothing
  * resolves (callers keep the type-label-only fallback). The card-TYPE labels
- * (Enchantment/Disenchant) are types, not payloads, and are never returned.
+ * (Oath/Hex) are types, not payloads, and are never returned.
  */
 export function keywordsInPersistentText(text: string | null | undefined): string[] {
     if (!text) return [];
@@ -290,7 +290,7 @@ export function keywordsInPersistentText(text: string | null | undefined): strin
     for (const run of text.match(/[A-Z]{2,}/g) ?? []) {
         const title = run.charAt(0) + run.slice(1).toLowerCase();
         const kw = PERSISTENT_TEXT_ALIAS[run] ?? (KEYWORD_GLOSS[title] ? title : null);
-        if (!kw || kw === 'Enchantment' || kw === 'Disenchant' || seen.has(kw)) continue;
+        if (!kw || kw === 'Oath' || kw === 'Hex' || seen.has(kw)) continue;
         seen.add(kw);
         out.push(kw);
     }

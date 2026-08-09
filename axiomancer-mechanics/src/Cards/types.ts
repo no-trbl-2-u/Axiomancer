@@ -25,35 +25,36 @@ export type CardTier = 1 | 2 | 3;
 
 /**
  * Spec 32 v3 — the rank ladder (quality axis, distinct from `tier`):
- * 1 Doxa · 2 Lemma · 3 Thesis · 4 Theorem · 5 Axiom · 6 Aporia.
+ * 1 Ash · 2 Tooth · 3 Splinter · 4 Rib · 5 Skull · 6 Saint.
  */
 export type CardRank = 1 | 2 | 3 | 4 | 5 | 6;
 
 /** Display names for the rank ladder (printed on card faces). */
 export const CARD_RANK_NAMES: Readonly<Record<CardRank, string>> = Object.freeze({
-    1: 'Doxa', 2: 'Lemma', 3: 'Thesis', 4: 'Theorem', 5: 'Axiom', 6: 'Aporia',
+    1: 'Ash', 2: 'Tooth', 3: 'Splinter', 4: 'Rib', 5: 'Skull', 6: 'Saint',
 });
 
 /** Spec 32 v3 — rarity band, derived from rank (§4). Drives the deck recipe
  *  and reward drop weights. */
 export type CardRarity = 'common' | 'uncommon' | 'rare';
 
-/** Maps a rank to its rarity band: common = Doxa/Lemma, uncommon =
- *  Thesis/Theorem, rare = Axiom/Aporia. */
+/** Maps a rank to its rarity band: common = Ash/Tooth, uncommon =
+ *  Splinter/Rib, rare = Skull/Saint. */
 export function rankToRarity(rank: CardRank): CardRarity {
     return rank <= 2 ? 'common' : rank <= 4 ? 'uncommon' : 'rare';
 }
 
 /**
- * Spec 32 v3 — card type. Open enum (more types to come).
- * - `spell`       — play → discard; recycled by the reshuffle law.
- * - `enchantment` — POSITIVE passive, player-side. Spec 32 v4: FREE line = a TIMED
- *                   instance (3 rounds, dieless); PAID line = the same passive made
- *                   permanent (rest of combat, unique, leaves the deck cycle).
- * - `disenchant`  — NEGATIVE passive attached to the ENEMY. Same FREE-timed / PAID-
- *                   permanent split as `enchantment`.
+ * Spec 32 v3 — card type. Open enum (more types to come). Spec 34 R-9/R-10:
+ * `enchantment`/`disenchant` renamed to `oath`/`hex` (display + literal).
+ * - `spell` — play → discard; recycled by the reshuffle law.
+ * - `oath`  — POSITIVE passive, player-side. Spec 32 v4: FREE line = a TIMED
+ *             instance (3 rounds, dieless); PAID line = the same passive made
+ *             permanent (rest of combat, unique, leaves the deck cycle).
+ * - `hex`   — NEGATIVE passive attached to the ENEMY. Same FREE-timed / PAID-
+ *             permanent split as `oath`.
  */
-export type CardType = 'spell' | 'enchantment' | 'disenchant';
+export type CardType = 'spell' | 'oath' | 'hex';
 
 /**
  * Targeting scope for a card effect.
@@ -257,7 +258,7 @@ export type CardSpecialMechanic =
     /** REPLAY LAST — replay the PAID payload of the last spell you played this
      *  combat, `times` times (never chains into another replay). */
     | { kind: 'replay_last'; times: number }
-    /** CONJURE — create a one-use Thoughtform card into hand (removed from the
+    /** CONJURE — create a one-use Haunt card into hand (removed from the
      *  combat after it is played or the combat ends). */
     | { kind: 'conjure_card'; cardId: string }
     /** IMMOLATE (profane-canon rework) — burn the `count` LOWEST-RANK other
@@ -433,7 +434,7 @@ export type SynergyStatePredicate =
  *      combatants (Phase 60 set-bonus passives included — design
  *      intent per Phase 66 D9).
  *   4. `applyEffectOnFire` applies a fresh effect (typically used to
- *      "swap type" — body Thorns → heart Bat-Swarm-Thoughtform).
+ *      "swap type" — body Thorns → heart Bat-Swarm-Haunt).
  *
  * Synergy runs in `executeCard` AFTER `calculateCardDamage` but
  * BEFORE the card's own `combatEffects` apply, so consumed effects
@@ -495,17 +496,17 @@ export interface Card {
     tier: CardTier;
     targetType: CardTarget;
     /**
-     * Spec 32 v3 — the RANK ladder (quality axis): 1 Doxa · 2 Lemma · 3 Thesis
-     * · 4 Theorem · 5 Axiom · 6 Aporia. Rarity derives from it (§4):
+     * Spec 32 v3 — the RANK ladder (quality axis): 1 Ash · 2 Tooth · 3 Splinter
+     * · 4 Rib · 5 Skull · 6 Saint. Rarity derives from it (§4):
      * common = 1-2, uncommon = 3-4, rare = 5-6. Orthogonal to `tier` (resist).
      */
     rank: CardRank;
     /**
      * Spec 32 v3 — card type. `spell` plays → discard (FREE + PAID lines).
-     * Spec 32 v4 — `enchantment` / `disenchant` now carry BOTH lines: the FREE
+     * Spec 32 v4 — `oath` / `hex` now carry BOTH lines: the FREE
      * (dieless) line grants a TIMED instance of the passive (3 rounds); the PAID
      * line makes the same passive permanent (rest of combat), unique-in-play, and
-     * leaves the deck cycle. The enchantment sits player-side; the disenchant
+     * leaves the deck cycle. The oath sits player-side; the hex
      * attaches to the ENEMY as a standing curse.
      */
     cardType: CardType;
@@ -520,17 +521,17 @@ export interface Card {
     /**
      * Spec 32 v3 — the authored FREE (dieless) line for SPELLS. Budget law:
      * FREE ≈ 25-35% of the card's total points.
-     * Spec 32 v4 — enchant/disenchant carry NO authored `free` rider: their FREE
+     * Spec 32 v4 — oath/hex carry NO authored `free` rider: their FREE
      * line is engine-derived (a timed instance of the same hooked passive), so this
      * field stays undefined for them.
      */
     free?: CardRider;
     /**
-     * Spec 32 v4 — a one-line mechanical summary of an enchant/disenchant's
+     * Spec 32 v4 — a one-line mechanical summary of an oath/hex's
      * HOOKED passive (the effect lives in the engine, not in `combatEffects`, so
      * it is otherwise invisible to the catalog and the card UI). Rendered on both
      * lines: FREE grants it for a few rounds (timed), PAID makes it permanent —
-     * same effect, only the duration differs. Required for enchant/disenchant;
+     * same effect, only the duration differs. Required for oath/hex;
      * ignored for spells.
      */
     persistentEffect?: string;
@@ -543,7 +544,7 @@ export interface Card {
      * appear verbatim in this text, and every UPPERCASE token must be a real
      * keyword — both enforced by `paid-summary-honesty.engine.test.ts`.
      * Absent → the projection falls back to the generated `paidText`.
-     * Ignored for enchant/disenchant (their authored line is
+     * Ignored for oath/hex (their authored line is
      * `persistentEffect`).
      */
     paidSummary?: string;

@@ -67,13 +67,13 @@ describe('EquipDeltaPanel', () => {
                 mode: 'swap',
                 signatures: {
                     gained: [{ id: 'sig-second-wind', name: 'Second Wind' }],
-                    lost: [{ id: 'sig-read-opponent', name: 'Read the Opponent' }],
+                    lost: [{ id: 'sig-read-opponent', name: 'Read the Entrails' }],
                 },
             }),
         );
         expect(getByTestId(`equip-delta-signatures-${ITEM_ID}`)).toBeTruthy();
         expect(getByText('grants Second Wind')).toBeTruthy();
-        expect(getByText('loses Read the Opponent')).toBeTruthy();
+        expect(getByText('loses Read the Entrails')).toBeTruthy();
     });
 
     it('omits the signature row when nothing changes', () => {

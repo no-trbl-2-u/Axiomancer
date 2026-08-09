@@ -231,3 +231,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-09T13:30:04Z | skill | critique | claude-sonnet-5 | main | - |
 | 2026-08-09T19:10:25Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-09T19:10:57Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
+| 2026-08-09T19:16:58Z | subagent | card-expert | claude-sonnet-5 | main | Implement phase 44c card library retheme |

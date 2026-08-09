@@ -353,8 +353,8 @@ export {
     CARD_RANK_NAMES, rankToRarity,
     getAvailableCards, learnCard,
     cardLibrary, getCardById,
-    // WS2.1 — the Thoughtform registry (CONJURE targets; outside the pinned 70)
-    thoughtformLibrary, getThoughtformById,
+    // WS2.1 — the Haunt registry (spec 34 R-13: was Thoughtform; CONJURE targets; outside the pinned 70)
+    hauntLibrary, getHauntById,
     // Phase 142 — Extended synergy predicate functionality
     evaluateExtendedSynergyPredicate, checkSinglePredicate, checkAnyCountPredicate,
     checkAllRequiredPredicate, checkBuffDebuffCombo, checkTotalIntensityPredicate,

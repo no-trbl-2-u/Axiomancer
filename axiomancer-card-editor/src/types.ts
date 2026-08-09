@@ -36,9 +36,9 @@ export interface CardDraft {
     description: string;
     tier: CardTier;
     targetType: CardTarget;
-    /** Spec 32 v3 — the rank ladder (1 Doxa … 6 Aporia); rarity derives from it. */
+    /** Spec 32 v3 — the rank ladder (1 Ash … 6 Saint); rarity derives from it. */
     rank: CardRank;
-    /** Spec 32 v3 — spell / enchantment / disenchant. */
+    /** Spec 32 v3 — spell / oath / hex. */
     cardType: CardType;
     /** Spec 32 v3 — the authored FREE (dieless) line. Round-tripped verbatim;
      *  edited in source (the rider is a real-unit bundle, not a form field). */

@@ -20,7 +20,7 @@ describe('createCharacter — seedStartingRelics', () => {
         const relicIds = c.inventory.filter(i => i.id.startsWith('relic-')).map(i => i.id);
         expect(relicIds).toHaveLength(8);
         // Owner call 2026-07-18: the Gambler's Knot (Press Fate) is default-worn;
-        // the Venom Sigil (Conviction Strike) is benched.
+        // the Venom Sigil (The Oath Kept) is benched.
         expect(relicIds.slice(0, 5)).toEqual([
             'relic-overwhelming', 'relic-read',
             'relic-clever-gambit', 'relic-disarming-plea', 'relic-press-the-point',

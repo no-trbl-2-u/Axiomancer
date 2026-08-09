@@ -401,7 +401,7 @@ describe('Spec 25 §4.5 — between-phases processing', () => {
 // ── Signature Skills (§4) ────────────────────────────────────────────────────
 
 describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
-    it('Read the Opponent reveals the current + next phase stance', () => {
+    it('Read the Entrails reveals the current + next phase stance', () => {
         mockSequentialRng(0.5);
         let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(60, 'mind'), [DOT_BODY], 2);
         state = rollEncounterDice(state).state;
@@ -413,7 +413,7 @@ describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
         expect(r.events.some(e => e.kind === 'signature-cast')).toBe(true);
     });
 
-    it('Conviction Strike applies a guaranteed DoT to the enemy', () => {
+    it('The Oath Kept applies a guaranteed DoT to the enemy', () => {
         mockSequentialRng(0.5);
         let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(90, 'mind'), [DOT_BODY], 4);
         state = rollEncounterDice(state).state;
@@ -470,7 +470,7 @@ describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
         expect(next.scrapsThisTurn).toBe(0);
     });
 
-    it('Overwhelming Argument PETRIFIES a normal foe — real hard control, not the old inert BACKFIRE (WI-8)', () => {
+    it('The Stilling PETRIFIES a normal foe — real hard control, not the old inert BACKFIRE (WI-8)', () => {
         mockSequentialRng(0.5);
         let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(90, 'heart'), [DOT_BODY], 4);
         state = rollEncounterDice(state).state;
@@ -504,7 +504,7 @@ describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
     // Funded-path (success) kill-path witness: the unit test above checks the
     // isolated cast; this runs the loop — PETRIFY denies the telegraph outright
     // (hard control, no STAGGER needed), then stacked DoT grinds to an HP-kill.
-    it('a funded Overwhelming Argument PETRIFIES the telegraph away, en route to victory (WI-8)', () => {
+    it('The Stilling, funded, PETRIFIES the telegraph away, en route to victory (WI-8)', () => {
         mockSequentialRng(0.05);
         const player = makePlayer([DOT_BODY]);
         const enemy = makeEnemy(30, 'heart');
@@ -726,7 +726,7 @@ describe('Spec 26b §B/§C/§D — archetype kit, rewards, unlock, difficulty fl
         expect(hpBefore - r.state.enemy.health).toBe(1); // floor(max(1, 0 stacks))
     });
 
-    it('Disarming Plea (heart mercy) applies QUARTER and lands the disarming hit', () => {
+    it('The Open Hand (heart mercy) applies QUARTER and lands the disarming hit', () => {
         mockSequentialRng(0.5);
         let state = initializeCombatEncounter(makePlayer([CONTROL_CARD]), makeEnemy(120, 'body'), [CONTROL_CARD], 1);
         state = rollEncounterDice(state).state;

@@ -89,6 +89,59 @@
       "replacement": "GHOST ✦ (R-12) — the forged, never-rerolling die",
       "since": "2026-08-09 (phase 44b, spec 34 §5.2 R-12)",
       "note": "scoped to the glyph-adjacent form so ordinary prose use of 'floating' (e.g. UI-layout descriptions) elsewhere in the repo is not flagged"
+    },
+    {
+      "id": "enchantment",
+      "pattern": "\\bENCHANTMENT\\b",
+      "replacement": "OATH (R-9) — the card type; the CardType literal also moved 'enchantment' -> 'oath'",
+      "since": "2026-08-09 (phase 44c, spec 34 §5.2 R-9)"
+    },
+    {
+      "id": "disenchant",
+      "pattern": "\\bDISENCHANT\\b",
+      "replacement": "HEX (R-10) — the card type; the CardType literal also moved 'disenchant' -> 'hex'",
+      "since": "2026-08-09 (phase 44c, spec 34 §5.2 R-10)"
+    },
+    {
+      "id": "thoughtform",
+      "pattern": "\\bTHOUGHTFORM\\b",
+      "replacement": "HAUNT (R-13) — the CONJURE-only card class; id prefix 'tf-' also moved to 'ht-'",
+      "since": "2026-08-09 (phase 44c, spec 34 §5.2 R-13)"
+    },
+    {
+      "id": "doxa",
+      "pattern": "\\bDoxa\\b",
+      "replacement": "Ash (R-14, rank 1)",
+      "since": "2026-08-09 (phase 44c, spec 34 §5.2 R-14)",
+      "note": "Doxa has no ordinary-English collision risk, so the bare word is safe unscoped (unlike Thesis/Theorem/Axiom below)"
+    },
+    {
+      "id": "lemma",
+      "pattern": "\\bLemma\\b",
+      "replacement": "Tooth (R-14, rank 2)",
+      "since": "2026-08-09 (phase 44c, spec 34 §5.2 R-14)",
+      "note": "Lemma has no ordinary-English collision risk in this repo's prose, so the bare word is safe unscoped"
+    },
+    {
+      "id": "thesis",
+      "pattern": "Lemma[^\\n]{0,20}Thesis|Thesis[^\\n]{0,20}Theorem",
+      "replacement": "Splinter (R-14, rank 3)",
+      "since": "2026-08-09 (phase 44c, spec 34 §5.2 R-14)",
+      "note": "scoped to the rank-ladder enumeration context (adjacent to Lemma or Theorem) — 'thesis' is common English (academic thesis) and false-positives unscoped, e.g. docs/references/all-paradoxes-reference.md's unrelated math prose"
+    },
+    {
+      "id": "theorem",
+      "pattern": "Thesis[^\\n]{0,20}Theorem|Theorem[^\\n]{0,20}Axiom",
+      "replacement": "Rib (R-14, rank 4)",
+      "since": "2026-08-09 (phase 44c, spec 34 §5.2 R-14)",
+      "note": "scoped to the rank-ladder enumeration context — 'theorem' is common math English (e.g. Bell's Theorem) and false-positives unscoped"
+    },
+    {
+      "id": "axiom",
+      "pattern": "Theorem[^\\n]{0,20}Axiom|Axiom[^\\n]{0,20}Aporia",
+      "replacement": "Skull (R-14, rank 5)",
+      "since": "2026-08-09 (phase 44c, spec 34 §5.2 R-14)",
+      "note": "scoped to the rank-ladder enumeration context, not the bare word — 'axiom' is ordinary philosophy/math English (and the product name Axiomancer itself), so an unscoped \\bAxiom\\b would false-positive across the repo's own philosophy-jargon prose. Aporia itself gets no row (NL-9 — 'the Aporia' survives as the labyrinth place name)"
     }
   ]
 }

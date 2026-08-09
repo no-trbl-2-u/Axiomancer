@@ -44,12 +44,13 @@ export {
     cardLibrary, getCardById,
 } from './cards.library';
 
-// WS2.1 — the Thoughtform registry: the cards CONJURE creates. Real `Card`
-// records outside the pinned 70-card library (correction C-11); resolved by
-// `getCardById` via the sandbox → thoughtform → library chain.
+// WS2.1 — the Haunt registry (spec 34 R-13: renamed from Thoughtform): the
+// cards CONJURE creates. Real `Card` records outside the pinned 70-card
+// library (correction C-11); resolved by `getCardById` via the sandbox →
+// haunt → library chain.
 export {
-    thoughtformLibrary, getThoughtformById,
-} from './cards.thoughtforms';
+    hauntLibrary, getHauntById,
+} from './cards.haunts';
 
 // Spec 32 v3 — rank ladder + card types (§4) and the pricing table (ledger #2).
 export type { CardRank, CardRarity, CardType, CardRider } from './types';

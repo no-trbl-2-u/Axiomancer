@@ -1153,7 +1153,7 @@ export function discardCombatCard(state: CombatEncounterState, uid: string): Com
     const scrapsThisTurn = state.scrapsThisTurn ?? 0;
     const pays = scrapsThisTurn < SCRAP_CONVICTION_CAP_PER_TURN;
     const conviction = pays ? Math.min(CONVICTION_CAP, state.conviction + 1) : state.conviction;
-    // WS2.1: scrapping a conjured Thoughtform (when it pays) still earns its +1
+    // WS2.1: scrapping a conjured Haunt (when it pays) still earns its +1
     // Conviction, but the one-use token leaves the combat — it never joins the
     // discard cycle (where a reshuffle would resurrect it as a permanent card).
     const conjured = (state.conjuredUids ?? []).includes(uid);
@@ -1186,7 +1186,7 @@ function discardEntry(state: CombatEncounterState, uid: string): CombatEncounter
 
 /**
  * Removes a played hand entry honoring the CONJURE one-use law (spec 32 v3,
- * WS2.1): a conjured Thoughtform leaves the combat ENTIRELY — it never enters
+ * WS2.1): a conjured Haunt leaves the combat ENTIRELY — it never enters
  * the discard pile, so it can never reshuffle back into the deck cycle.
  * Anything else discards normally.
  */
@@ -1777,7 +1777,7 @@ function playFreeEnchant(
     card: CombatCard,
     sourceCard: Card,
 ): CombatTransition {
-    const isEnchant = sourceCard.cardType === 'enchantment';
+    const isEnchant = sourceCard.cardType === 'oath';
     const permanentZone = isEnchant ? state.persistentZone : (state.enemyAttachments ?? []);
     if (permanentZone.includes(sourceCard.id)) {
         const fizzle: CombatEvent[] = [{
@@ -1831,7 +1831,7 @@ function playTopAction(
     ];
     // Discard the played card BEFORE the free rider fires so a printed
     // "draw N" is never blocked by the card's own hand slot (P0-truth).
-    // WS2.1: a conjured Thoughtform is one-use on EITHER face — a FREE play
+    // WS2.1: a conjured Haunt is one-use on EITHER face — a FREE play
     // removes it from the combat instead of feeding the discard cycle.
     let next = removePlayedEntry(state, uid);
     if (sourceCard?.free) {
@@ -1983,8 +1983,8 @@ function playBottomAction(
     // ── Spec 32 v3 §2.1 — ENCHANT / DISENCHANT routing. Persistent cards skip
     //    the spell pipeline entirely: the die is spent, the card leaves the deck
     //    cycle into its zone, and its passive lives at the engine's hook sites.
-    if (sourceCard.cardType === 'enchantment' || sourceCard.cardType === 'disenchant') {
-        const zone = sourceCard.cardType === 'enchantment' ? state.persistentZone : (state.enemyAttachments ?? []);
+    if (sourceCard.cardType === 'oath' || sourceCard.cardType === 'hex') {
+        const zone = sourceCard.cardType === 'oath' ? state.persistentZone : (state.enemyAttachments ?? []);
         if (zone.includes(sourceCard.id)) {
             const fizzle: CombatEvent[] = [{ kind: 'effect-fizzled', cardId: card.id, effectId: '', message: `${card.name} is already in play (unique)` }];
             return { state: withLog(state, fizzle), events: fizzle };
@@ -2002,7 +2002,7 @@ function playBottomAction(
             dice = spendDice(dice, [powering.id]);
         }
         events.push({ kind: 'die-spent', dieId: powering.id, color: powering.color });
-        events.push(sourceCard.cardType === 'enchantment'
+        events.push(sourceCard.cardType === 'oath'
             ? { kind: 'enchant-played', cardId: card.id, name: card.name }
             : { kind: 'disenchant-attached', cardId: card.id, name: card.name });
         // Spec 32 v4 — a PAID play makes the passive PERMANENT; if a FREE-line timed
@@ -2010,9 +2010,9 @@ function playBottomAction(
         // temp zone so the same id is not counted twice).
         let next: CombatEncounterState = {
             ...state, dice, reserve, floatingDice,
-            persistentZone: sourceCard.cardType === 'enchantment'
+            persistentZone: sourceCard.cardType === 'oath'
                 ? [...state.persistentZone, sourceCard.id] : state.persistentZone,
-            enemyAttachments: sourceCard.cardType === 'disenchant'
+            enemyAttachments: sourceCard.cardType === 'hex'
                 ? [...(state.enemyAttachments ?? []), sourceCard.id] : state.enemyAttachments,
             tempZone: (state.tempZone ?? []).filter(t => t.cardId !== sourceCard.id),
             enemyTempAttachments: (state.enemyTempAttachments ?? []).filter(t => t.cardId !== sourceCard.id),
@@ -3403,7 +3403,7 @@ function playBottomAction(
         // the fate-recoil pay) accumulate into `recoilTaken` above.
         recoilPaidThisTurn: (state.recoilPaidThisTurn ?? 0) + recoilTaken,
     };
-    // Discard the played card — a CONJURED Thoughtform is one-use: it leaves
+    // Discard the played card — a CONJURED Haunt is one-use: it leaves
     // the combat entirely instead of entering the discard pile. A PURGED card
     // (profane-canon rework: the curse buying itself out) leaves the same way
     // — its deck-cycle instance was already struck above.
@@ -4528,7 +4528,7 @@ export function processBetweenPhases(
     //    is a real cost — a dead card clogs the hand until it is played or
     //    scrapped. `achilles-and-the-tortoise` raises the refill target by 1
     //    after a denied turn; omen-hit draws raise it too (see omenBonusDraw).
-    //    WS2.1 one-use law still holds: an unplayed CONJURED Thoughtform
+    //    WS2.1 one-use law still holds: an unplayed CONJURED Haunt
     //    leaves the combat ENTIRELY at the boundary — it never enters the
     //    hand-carryover (or the discard pile, where a reshuffle would
     //    resurrect it as a permanent deck card) and its uid is released from
@@ -4825,7 +4825,7 @@ export function selectMercyChoice(
 /**
  * Casts a signature skill, spending Conviction (◆). Always available regardless
  * of the hand. Fizzles (no-op + event) when underfunded. Can trigger an
- * immediate outcome (e.g. Overwhelming Argument saturating the control track).
+ * immediate outcome (e.g. The Stilling saturating the control track).
  */
 export function playSignatureSkill(
     state: CombatEncounterState,

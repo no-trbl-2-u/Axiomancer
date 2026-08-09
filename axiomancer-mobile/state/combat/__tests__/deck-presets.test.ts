@@ -120,7 +120,7 @@ describe('Combat deck presets', () => {
                 const card = getCard(id);
                 expect(card).toBeTruthy();
                 expect(card!.rarity).toMatch(/^(common|uncommon|rare)$/);
-                expect(card!.cardType).toMatch(/^(spell|enchantment|disenchant)$/);
+                expect(card!.cardType).toMatch(/^(spell|oath|hex)$/);
             }
         }
     });

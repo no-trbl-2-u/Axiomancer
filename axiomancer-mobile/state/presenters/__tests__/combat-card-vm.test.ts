@@ -8,8 +8,8 @@
  *   - frostbitten-palisade    Guard 8                   → FREE Guard 5
  *   - communion-of-the-worm   RUPTURE                   → a word, never a number
  *   - miserere                REAP all (3/Soul)         → live burst, never headlined
- *   - the-untended-garden     enchantment               → FREE timed (3 rounds) / PAID permanent
- *   - the-congregation-below  disenchant                → standing curse, FREE timed / PAID permanent
+ *   - the-untended-garden     oath                      → FREE timed (3 rounds) / PAID permanent
+ *   - the-congregation-below  hex                       → standing curse, FREE timed / PAID permanent
  *   - petty-indictment        MARK i1 d2                → +1 per DoT tick
  *   - contempt-of-court       BACKFIRE i2 d3            → 2 per denied rung
  *   - fx-ember (synthetic)    round-clock kindling ember → the "N over M turns" face
@@ -138,31 +138,31 @@ describe('faceStats — honest real-unit faces', () => {
         expect(f.heroText).toBe('all Souls');
         expect(f.heroSub).toBe('3 per Soul'); // burstPerSoul — a real authored unit
     });
-    it('The Untended Garden (enchantment) → FREE = timed instance, PAID = rest of combat (spec 32 v4)', () => {
+    it('The Untended Garden (oath) → FREE = timed instance, PAID = rest of combat (spec 32 v4)', () => {
         const { card, sourceCard } = cardOf('the-untended-garden');
         const f = faceStats(card, sourceCard);
-        expect(f.kind).toBe('enchant');
+        expect(f.kind).toBe('oath');
         expect(f.heroSub).toBe('rest of combat');            // the ◆ PAID rail truth
         // The ◇ FREE line is the ENGINE's timed instance — never 'PAID only'.
         expect(f.freeHeroText).toContain('3 rounds');
         expect(f.freeHeroText).toContain('FESTER');          // the passive itself, engine-printed
         expect(f.freeHeroText).not.toMatch(/paid only/i);
-        expect(card.cardType).toBe('enchantment');
+        expect(card.cardType).toBe('oath');
     });
-    it('The Congregation Below (disenchant) → a standing curse; FREE = timed instance', () => {
+    it('The Congregation Below (hex) → a standing curse; FREE = timed instance', () => {
         const { card, sourceCard } = cardOf('the-congregation-below');
         const f = faceStats(card, sourceCard);
-        expect(f.kind).toBe('disenchant');
+        expect(f.kind).toBe('hex');
         expect(f.freeHeroText).toContain('3 rounds');
         expect(f.freeHeroText).not.toMatch(/paid only/i);
-        expect(card.cardType).toBe('disenchant');
+        expect(card.cardType).toBe('hex');
     });
     it('persistent verb slot leads with the PAYLOAD keyword, never the bare type word (owner, 2026-07-12)', () => {
         // Every Stone an Oath lays GUARD on a bloodless round — the outcome
         // verb (GUARD) wins, not the trigger.
         const stones = cardOf('every-stone-an-oath');
         expect(faceStats(stones.card, stones.sourceCard).keyword).toBe('GUARD');
-        // The Untended Garden FESTERs every DoT — a payload keyword, not ENCHANTMENT.
+        // The Untended Garden FESTERs every DoT — a payload keyword, not OATH.
         const garden = cardOf('the-untended-garden');
         expect(faceStats(garden.card, garden.sourceCard).keyword).toBe('FESTER');
         // Caltrops leads with its payload verb (BLEED), not the type word.
@@ -201,17 +201,16 @@ describe('Option A split rail — freeKeyword/freeValue + typeStrip (owner-picke
         expect(f.freeKeyword).toBe('GUARD');
         expect(f.freeValue).toBe('5');
     });
-    it('enchantment / disenchant → ◇ FREE · timed rounds rail; disenchant foot prints CURSE', () => {
+    it('oath / hex → ◇ FREE · timed rounds rail; hex foot prints HEX', () => {
         const venom = cardOf('the-untended-garden');
         const fv = faceStats(venom.card, venom.sourceCard);
         expect(fv.freeKeyword).toBeNull();
         expect(fv.freeValue).toBe('3 rounds');   // the engine's FREE_ENCHANT_ROUNDS truth, via topActionText
-        expect(fv.typeStrip).toContain('ENCHANTMENT');
+        expect(fv.typeStrip).toContain('OATH');
         const curse = cardOf('the-congregation-below');
         const fc = faceStats(curse.card, curse.sourceCard);
         expect(fc.freeValue).toBe('3 rounds');
-        expect(fc.typeStrip).toContain('CURSE');
-        expect(fc.typeStrip).not.toContain('DISENCHANT');
+        expect(fc.typeStrip).toContain('HEX');
     });
     it("multi-clause free line keeps the head clause and marks the rest with '+'", () => {
         const { card, sourceCard } = cardOf('promissory-cut');  // free: draw 1 · RECOIL 1
@@ -256,7 +255,7 @@ describe('detailStats — same numbers as the face', () => {
         // D-fix: the FREE-line MARK rider now renders its keyword panel.
         expect(d.keywords.map(k => k.name)).toContain('MARK');
         // The meta chip surfaces the rank name + card type (where gold used to sit).
-        expect(d.metaChip).toContain('DOXA');
+        expect(d.metaChip).toContain('ASH');
         expect(d.metaChip).toContain('SPELL');
     });
     it('Frostbitten Palisade (Guard) → terse "Gain Guard 8."', () => {
@@ -265,11 +264,11 @@ describe('detailStats — same numbers as the face', () => {
         expect(d.outcomeLine).toBe('Gain Guard 8.');
         expect(d.stacksText).toBeNull();
     });
-    it('Enchantment detail leans on the engine-generated PAID text', () => {
+    it('Oath detail leans on the engine-generated PAID text', () => {
         const { card, sourceCard } = cardOf('the-untended-garden');
         const d = detailStats(card, sourceCard);
         expect(d.powerLine).toContain(card.bottomActionText);
-        expect(d.metaChip).toContain('ENCHANTMENT');
+        expect(d.metaChip).toContain('OATH');
     });
     it('persistent detail tells the v4 fork (FREE timed / PAID permanent), never PAID only', () => {
         const { card, sourceCard } = cardOf('the-congregation-below');
@@ -282,18 +281,18 @@ describe('detailStats — same numbers as the face', () => {
         expect(d.freeLine).toContain('3 rounds');
     });
     it('persistent keyword chips are PAYLOAD-only — the type never enters the panel (owner, 2026-07-12)', () => {
-        // Enchantment/Curse/Disenchant are card TYPES: they read on the frame's
+        // Oath/Hex are card TYPES: they read on the frame's
         // type strip, so the inspect panel carries only what the passive DOES.
         // The Congregation Below reads the discard pile — MILL leads.
         const curse = cardOf('the-congregation-below');
         const names = detailStats(curse.card, curse.sourceCard).keywords.map(k => k.name);
-        expect(names).not.toContain('DISENCHANT');
-        expect(names).not.toContain('ENCHANTMENT');
+        expect(names).not.toContain('HEX');
+        expect(names).not.toContain('OATH');
         expect(names).toEqual(expect.arrayContaining(['MILL']));
         // The Untended Garden deepens every DoT — FESTER leads.
         const garden = cardOf('the-untended-garden');
         const vk = detailStats(garden.card, garden.sourceCard).keywords;
-        expect(vk.map(k => k.name)).not.toContain('ENCHANTMENT');
+        expect(vk.map(k => k.name)).not.toContain('OATH');
         expect(vk.map(k => k.name)).toEqual(expect.arrayContaining(['FESTER']));
         expect(vk.every(k => k.def.length > 0)).toBe(true);  // every chip carries its gloss
     });
@@ -376,8 +375,8 @@ describe('resolvePrimary + armedReadValue', () => {
         expect(resolvePrimary(getCard('spoiled-poultice')!, getCardById('spoiled-poultice')).kind).toBe('dot');
         expect(resolvePrimary(getCard('communion-of-the-worm')!, getCardById('communion-of-the-worm')).kind).toBe('rupture');
         expect(resolvePrimary(getCard('miserere')!, getCardById('miserere')).kind).toBe('reap');
-        expect(resolvePrimary(getCard('the-untended-garden')!, getCardById('the-untended-garden')).kind).toBe('enchant');
-        expect(resolvePrimary(getCard('the-congregation-below')!, getCardById('the-congregation-below')).kind).toBe('disenchant');
+        expect(resolvePrimary(getCard('the-untended-garden')!, getCardById('the-untended-garden')).kind).toBe('oath');
+        expect(resolvePrimary(getCard('the-congregation-below')!, getCardById('the-congregation-below')).kind).toBe('hex');
     });
     it('armedReadValue scales Guard by the DAMAGE read (+colour match)', () => {
         const guard = faceStats(getCard('frostbitten-palisade')!, getCardById('frostbitten-palisade'));

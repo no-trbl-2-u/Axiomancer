@@ -563,11 +563,11 @@ function assertCardEffective(cardId: string): void {
     const fizzle = events.find(e => e.kind === 'effect-fizzled');
     expect(fizzle, `${cardId}: unexpected fizzle`).toBeUndefined();
 
-    if (card!.cardType === 'enchantment') {
+    if (card!.cardType === 'oath') {
         expect(after.persistentZone, cardId).toContain(cardId);
         return;
     }
-    if (card!.cardType === 'disenchant') {
+    if (card!.cardType === 'hex') {
         expect(after.enemyAttachments ?? [], cardId).toContain(cardId);
         return;
     }

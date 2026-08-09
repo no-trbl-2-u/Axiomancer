@@ -105,17 +105,17 @@ export const TIERS: Option<CardTier>[] = [
     { value: 3, label: 'III' },
 ];
 
-/** Spec 32 v3 §4 — the rank ladder (Doxa → Aporia), printed on the face. */
+/** Spec 32 v3 §4 — the rank ladder (Ash → Saint), printed on the face. */
 export const RANKS: Option<CardRank>[] = ([1, 2, 3, 4, 5, 6] as CardRank[]).map((r) => ({
     value: r,
     label: CARD_RANK_NAMES[r].toUpperCase(),
 }));
 
-/** Spec 32 v3 §2 — card type (spell / enchantment / disenchant). */
+/** Spec 32 v3 §2 — card type (spell / oath / hex). */
 export const CARD_TYPES: Option<CardType>[] = [
     { value: 'spell', label: 'SPELL' },
-    { value: 'enchantment', label: 'ENCHANT' },
-    { value: 'disenchant', label: 'DISENCHANT' },
+    { value: 'oath', label: 'OATH' },
+    { value: 'hex', label: 'HEX' },
 ];
 
 /** Targeting scope. */
@@ -199,8 +199,8 @@ export const VERB_CLASSES: CombatVerbClass[] = [
     'direct-damage',
     'befriend',
     'defend',
-    'enchant',
-    'disenchant',
+    'oath',
+    'hex',
     'retreat',
 ];
 

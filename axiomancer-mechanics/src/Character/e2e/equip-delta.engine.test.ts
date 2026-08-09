@@ -64,7 +64,7 @@ describe('computeEquipDelta (Phase 23 — stat + signature diff only)', () => {
         const relic = makeEquipment('relic-x', { grantsSignature: 'sig-overwhelming-argument' });
         const d = computeEquipDelta(relic, null);
         expect(d.signatures.gained).toEqual([
-            { id: 'sig-overwhelming-argument', name: 'Overwhelming Argument' },
+            { id: 'sig-overwhelming-argument', name: 'The Stilling' },
         ]);
         expect(d.signatures.lost).toEqual([]);
         expect(d.isEmpty).toBe(false);
@@ -74,7 +74,7 @@ describe('computeEquipDelta (Phase 23 — stat + signature diff only)', () => {
         const relic = makeEquipment('relic-x', { grantsSignature: 'sig-read-opponent' });
         const d = computeEquipDelta(relic, relic);
         expect(d.mode).toBe('unequip');
-        expect(d.signatures.lost).toEqual([{ id: 'sig-read-opponent', name: 'Read the Opponent' }]);
+        expect(d.signatures.lost).toEqual([{ id: 'sig-read-opponent', name: 'Read the Entrails' }]);
         expect(d.signatures.gained).toEqual([]);
     });
 

@@ -491,12 +491,12 @@ detail in the card/card library files themselves, not duplicated here):
   `the-final-word` / `unmoved-mover` / `achilles-overtake`, all now retired)
   was deleted with no rescues (owner rule); unknown ids drop gracefully from
   any deck that still references them.
-- **Rank / rarity / card-type axes (Spec 32 v3).** Every card carries a
-  `rank: CardRank` (1 Doxa · 2 Lemma · 3 Thesis · 4 Theorem · 5 Axiom ·
-  6 Aporia — quality axis, orthogonal to `tier` which stays the resist
-  axis) and a `cardType: CardType` (`'spell' | 'enchantment' |
-  'disenchant'` — `spell` plays straight to discard; `enchantment` /
-  `disenchant` carry both a FREE and a PAID line). `rankToRarity(rank)`
+- **Rank / rarity / card-type axes (Spec 32 v3; spec 34 R-9/R-10/R-14).**
+  Every card carries a `rank: CardRank` (1 Ash · 2 Tooth · 3 Splinter ·
+  4 Rib · 5 Skull · 6 Saint — quality axis, orthogonal to `tier` which
+  stays the resist axis) and a `cardType: CardType` (`'spell' | 'oath' |
+  'hex'` — `spell` plays straight to discard; `oath` /
+  `hex` carry both a FREE and a PAID line). `rankToRarity(rank)`
   derives the display rarity band (`common` = 1-2, `uncommon` = 3-4,
   `rare` = 5-6) consumed by mobile via `CARD_RANK_NAMES`. This axis family
   replaced the old ad hoc "gold card" list (`GOLD_CARD_IDS` / `isGoldCard`
@@ -637,7 +637,7 @@ progression levers, keeping status effects the win path.
 | `generateDefaultThreatSequence(enemy)` | Generates a 3-phase fallback threat sequence from the enemy's dominant stance, rotating through Heart / Body / Mind. Used automatically by `getThreatSequence` when no authored sequence exists. |
 | `rerollSpentDice(state, rng?)` / `hasRerollableDice(state)` / `dieIsRerollable(die)` | PR #190 — partial Press Fate re-roll: re-rolls only spent/exhausted + dead `x`-face dice, leaving usable dice in play. A no-op (refunds Conviction) when nothing is rerollable. |
 | `THREAT_WEAKEN_PER_ROLL` / `THREAT_DENY_AT` / `THREAT_WEAKEN_FLOOR` | Soft-control and stat-debuff threat tunables (0.33.0). Each point of enemy roll penalty (from confusion, fear, blind, slow, accuracy/attack-down etc.) reduces the incoming hit by `THREAT_WEAKEN_PER_ROLL` (default 0.06). When the cumulative roll penalty reaches `THREAT_DENY_AT` (default 8), the turn is fully denied (same as hard control). `THREAT_WEAKEN_FLOOR` (default 0.4) clamps the minimum damage multiplier for a weakened-but-not-denied enemy. Read these to display soft-control thresholds in the UI. |
-| `COMBAT_DECK_PRESETS` / `COMBAT_DECK_PRESET_ORDER` / `listDeckPresets()` / `getDeckPreset(id)` / `buildPresetDeck(id)` | The ten spec 32 v3 themed preset decks (`src/Combat/combat.starter-deck-presets.ts`): Erosion, Oratory, Foundry, Penitent, Standstill, Augury, Tithe, Grace, Bastion, Refrain — each a fixed 15-card recipe (4/4/2/2/1/1/1: two commons ×4, two uncommons ×2, the theme's rare spell + enchantment + disenchant ×1), strictly self-contained with zero cross-theme card overlap. Originally a PR #190 five-preset lineup (Erosion, Saturation, Bulwark, Onslaught, Generalist); the names/functions were kept but the content and count were fully replaced. `buildPresetDeck` appends no escape card — there is no in-combat retreat — and is ready to feed `initializeCombatEncounter`. |
+| `COMBAT_DECK_PRESETS` / `COMBAT_DECK_PRESET_ORDER` / `listDeckPresets()` / `getDeckPreset(id)` / `buildPresetDeck(id)` | The ten spec 32 v3 themed preset decks (`src/Combat/combat.starter-deck-presets.ts`): Erosion, Oratory, Foundry, Penitent, Standstill, Augury, Tithe, Grace, Bastion, Refrain — each a fixed 15-card recipe (4/4/2/2/1/1/1: two commons ×4, two uncommons ×2, the theme's rare spell + oath + hex ×1), strictly self-contained with zero cross-theme card overlap. Originally a PR #190 five-preset lineup (Erosion, Saturation, Bulwark, Onslaught, Generalist); the names/functions were kept but the content and count were fully replaced. `buildPresetDeck` appends no escape card — there is no in-combat retreat — and is ready to feed `initializeCombatEncounter`. |
 | `CombatDeckPreset`, `CombatDeckFocus` | `CombatDeckPreset` describes a single named preset deck entry (id, name, theme, focus, description, cardIds). `CombatDeckFocus` is the discriminated string union of the (now six) coarse design-lever tags used by draft/sim-policy consumers — `'dot' \| 'control' \| 'utility' \| 'damage' \| 'rush-execute' \| 'balanced'` (not the old per-preset name union). Both are importable as `import type { CombatDeckPreset, CombatDeckFocus } from 'axiomancer-mechanics'`. |
 | `CardDieCost` | Die-cost helper type — `{ cost: number; advantage: boolean }` returned by `resolveCardDieCost` and `cardDieCostPreview`. Importable as `import type { CardDieCost } from 'axiomancer-mechanics'`. |
 | `CombatIntentType`, `CombatReadResult`, `SignatureSkill`, `SignatureSkillId`, `SignatureSkillKind`, `PlayerArchetype` | The depth-layer type family. |

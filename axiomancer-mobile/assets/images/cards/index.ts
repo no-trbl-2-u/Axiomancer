@@ -7,7 +7,7 @@
  * the radiant rings, choir → the hummingbird + light) with the rare cards
  * taking the strongest painting in the family. Curses take the devil book —
  * they should look like something you were handed against your will.
- * Unmapped ids (sandbox / conjured Thoughtforms) fall back to the circe
+ * Unmapped ids (sandbox / conjured Haunts) fall back to the circe
  * placeholder.
  *
  * Metro needs static require literals, so this map is the one place a card id

@@ -68,8 +68,8 @@ function controlKeyword(effectId: string, skipTurn: boolean): KeywordId {
 /** Best-effort: the card's primary keyword + its representative value. */
 function primaryKeyword(card: CardDraft): { kw: KeywordId; val: number } {
     // Persistent cards read as their card type.
-    if (card.cardType === 'enchantment') return { kw: 'enchant', val: 0 };
-    if (card.cardType === 'disenchant') return { kw: 'disenchant', val: 0 };
+    if (card.cardType === 'oath') return { kw: 'oath', val: 0 };
+    if (card.cardType === 'hex') return { kw: 'hex', val: 0 };
     const sm = card.specialMechanics[0];
     if (sm) {
         switch (sm.kind) {
@@ -167,9 +167,9 @@ function primaryKeyword(card: CardDraft): { kw: KeywordId; val: number } {
  *  real riders. An applied effect wins first (mirrors the mobile
  *  `freeGlyphMeta` priority). */
 function freeKeyword(card: CardDraft): { kw: KeywordId | string; val: number } {
-    if (card.cardType === 'enchantment' || card.cardType === 'disenchant') {
+    if (card.cardType === 'oath' || card.cardType === 'hex') {
         // PAID only — no free line exists on persistent cards.
-        return { kw: card.cardType === 'enchantment' ? 'enchant' : 'disenchant', val: 0 };
+        return { kw: card.cardType === 'oath' ? 'oath' : 'hex', val: 0 };
     }
     const f = card.free;
     if (!f) return { kw: 'control', val: 0 };
@@ -401,14 +401,14 @@ export function KwGlyph({
                 </svg>
             );
         case 'forge':
-        case 'enchant':
+        case 'oath':
             return (
                 <svg viewBox="0 0 24 24" style={s} fill={color}>
                     <path d="M12 1 L15 5.5 L12 10 L9 5.5 Z M12 14 L15 18.5 L12 23 L9 18.5 Z M5.5 7.5 L8.5 12 L5.5 16.5 L2.5 12 Z M18.5 7.5 L21.5 12 L18.5 16.5 L15.5 12 Z" />
                 </svg>
             );
         case 'doom':
-        case 'disenchant':
+        case 'hex':
             return (
                 <svg viewBox="0 0 24 24" style={s} fill={color} fillRule="evenodd">
                     <path d="M12 2 C7.3 2 4 5.4 4 9.4 C4 12.3 5.7 14.5 8 15.6 L8 20 H10.2 L10.2 17.2 H11.2 L11.2 20 H12.8 L12.8 17.2 H13.8 L13.8 20 H16 L16 15.6 C18.3 14.5 20 12.3 20 9.4 C20 5.4 16.7 2 12 2 Z M8.8 8 A2 2 0 1 0 8.8 12 A2 2 0 1 0 8.8 8 Z M15.2 8 A2 2 0 1 0 15.2 12 A2 2 0 1 0 15.2 8 Z" />
@@ -553,11 +553,11 @@ export function CardFace({
     // sentence at the foot. Skinnier per owner directive 2026-07-16.
     const railW = px(18);
     const railDark = `color-mix(in srgb, ${band} 45%, #000)`;
-    // Persistent cards (enchant / disenchant) have no dieless FREE line to badge.
-    const persistent = card.cardType === 'enchantment' || card.cardType === 'disenchant';
+    // Persistent cards (oath / hex) have no dieless FREE line to badge.
+    const persistent = card.cardType === 'oath' || card.cardType === 'hex';
     const typeLabel =
         card.philosophicalAspect.toUpperCase() +
-        (card.cardType ? ` · ${card.cardType === 'disenchant' ? 'CURSE' : card.cardType.toUpperCase()}` : '');
+        (card.cardType ? ` · ${card.cardType.toUpperCase()}` : '');
     // ② PAID = the composed sentence; fall back to the terse keyword+value line.
     const paid = paidSentence(card);
     const paidFallback = `${KEYWORDS[face.paidKw] ? KEYWORDS[face.paidKw].label : 'DIE'} ${fmtVal(face.paidKw, face.paidVal)}`.trim();

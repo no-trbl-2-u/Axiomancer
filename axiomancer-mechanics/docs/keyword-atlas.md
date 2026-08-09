@@ -54,9 +54,10 @@ a full Dawncaster pass per keyword is a follow-up, not fabricated here.
 
 **CONJURE gate credit (2026-07-11, banked for the row's return):** the
 row stays retired (its carriers — foundry-sprite, corollary, the
-tf-* Thoughtforms — are sandbox-only; the row-count gate holds), but
+ht-* Haunts (spec 34 R-13; id prefix `tf-`→`ht-`, was "Thoughtforms")
+— are sandbox-only; the row-count gate holds), but
 the WS2.1 evidence pass EXERCISED it clean: all 3 clauses PASS
-(tf-cinder 411/411 and 304/304 bottom-line conversions, token fizzle
+(ht-cinder, under its pre-rename id at the time, 411/411 and 304/304 bottom-line conversions, token fizzle
 0–2%, no dominance in 288 cells). Receipt:
 `plan/tuning/2026-07-11-honest-rebaseline-and-evidence.md` §2 WS2.1.
 If promotion ever restores the row, it starts at `+???`, not `????`.

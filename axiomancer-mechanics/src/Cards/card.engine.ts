@@ -177,18 +177,19 @@ export function executeCard(
         // knownCards-only check wrongly rejected legitimately-dealt reward cards
         // and crashed combat when one was played.
         const playerCaster = caster as Character;
-        // WS2.1 (spec 32 v3 CONJURE): a Thoughtform is never learned and never
-        // a reward — it can only reach a hand through a `conjure_card` play, so
-        // the conjuring play IS its ownership provenance. The tag lives on the
-        // registry record (`cards.thoughtforms.ts`), not on player state.
-        const thoughtform = (lookupCard(cardId)?.tags ?? []).includes('thoughtform');
+        // WS2.1 (spec 32 v3 CONJURE): a Haunt (spec 34 R-13: was Thoughtform)
+        // is never learned and never a reward — it can only reach a hand
+        // through a `conjure_card` play, so the conjuring play IS its
+        // ownership provenance. The tag lives on the registry record
+        // (`cards.haunts.ts`), not on player state.
+        const haunt = (lookupCard(cardId)?.tags ?? []).includes('haunt');
         // PROFANE CANON (2026-08-08): a CURSE is never learned and never a
         // reward — an enemy hexes it into the combat deck (`curseCardId`), and
         // the whole point of PURGE is that the player can play it back out.
         // The hex IS its ownership provenance, exactly as the conjuring play is
-        // a Thoughtform's.
+        // a Haunt's.
         const cursed = lookupCard(cardId)?.theme === 'curse';
-        const owned = thoughtform || cursed
+        const owned = haunt || cursed
             || playerCaster.knownCards.includes(cardId)
             || (playerCaster.combatRewardCards ?? []).includes(cardId);
         if (!owned) {

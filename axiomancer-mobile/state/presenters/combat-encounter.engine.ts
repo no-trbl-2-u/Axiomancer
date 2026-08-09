@@ -64,7 +64,7 @@ const STANCE_LABELS: Record<string, string> = { heart: 'HEART', body: 'BODY', mi
 // mechanics src/Cards/types.ts but is NOT re-exported through the barrel,
 // so mirrored here (kept in sync by hand).
 const RANK_NAMES: Record<number, string> = Object.freeze({
-    1: 'Doxa', 2: 'Lemma', 3: 'Thesis', 4: 'Theorem', 5: 'Axiom', 6: 'Aporia',
+    1: 'Ash', 2: 'Tooth', 3: 'Splinter', 4: 'Rib', 5: 'Skull', 6: 'Saint',
 });
 // Verb-class card colours (these map to verbs, not Effects, so they aren't in GLYPH_COLORS).
 const GUARD_COLOR = '#9aa0a6';
@@ -81,7 +81,7 @@ const ENCHANT_COLOR = '#7fb3a6';
 function persistentFreeText(card: CombatCard): string {
     return card.topActionText
         .replace(/^FREE\s*/, '')
-        .replace(/\s*\((?:Doxa|Lemma|Thesis|Theorem|Axiom|Aporia)\)\s*$/, '')
+        .replace(/\s*\((?:Ash|Tooth|Splinter|Rib|Skull|Saint)\)\s*$/, '')
         .replace(/\.\s*$/, '');
 }
 
@@ -116,11 +116,11 @@ function deabbreviateShorthand(text: string): string {
 }
 
 /** The authored FREE (no-die) line in real engine units — riderText over the
- *  card's `free` rider; a persistent (enchant/disenchant) card's FREE line is
+ *  card's `free` rider; a persistent (oath/hex) card's FREE line is
  *  its engine-printed timed instance (spec 32 v4: 3 rounds of the passive).
  *  Never a fabricated number. */
 function freeLineText(card: CombatCard, sourceCard?: Card): string {
-    if (card.cardType === 'enchantment' || card.cardType === 'disenchant') return persistentFreeText(card);
+    if (card.cardType === 'oath' || card.cardType === 'hex') return persistentFreeText(card);
     // selfTargetCard: a rider crossing the card's printed target names its side
     // ('mark ×1 (enemy)' on the self-target ad-nauseam — card-clarity audit).
     return sourceCard?.free
@@ -173,7 +173,7 @@ function riderPairs(r: CardRider): [string, string][] {
 }
 
 function freeRail(card: CombatCard, sourceCard?: Card): { freeKeyword: string | null; freeValue: string | null } {
-    if (card.cardType === 'enchantment' || card.cardType === 'disenchant') {
+    if (card.cardType === 'oath' || card.cardType === 'hex') {
         // Spec 32 v4 — the FREE play is a real, timed instance of the passive
         // (never 'PAID only'): the rail prints the engine's own round count.
         return { freeKeyword: null, freeValue: persistentFreeRounds(card) };
@@ -197,8 +197,8 @@ const FREE_KW_GLYPH: Record<string, string> = {
 /** The FREE glyph plus the KEYWORD that drives it — the key lets the face swap
  *  the text rune for the effect's SILHOUETTE (glyphShapes.ts) when one exists. */
 function freeGlyphMeta(card: CombatCard, sourceCard?: Card): { glyph: string; key: string | null } {
-    if (card.cardType === 'enchantment') return { glyph: '❖', key: 'ENCHANT' };
-    if (card.cardType === 'disenchant') return { glyph: '☠', key: 'CURSE' };
+    if (card.cardType === 'oath') return { glyph: '❖', key: 'OATH' };
+    if (card.cardType === 'hex') return { glyph: '☠', key: 'HEX' };
     const r: CardRider | undefined = sourceCard?.free;
     if (!r) return { glyph: '', key: null };
     if (r.applyEffect?.effectId) {
@@ -210,10 +210,10 @@ function freeGlyphMeta(card: CombatCard, sourceCard?: Card): { glyph: string; ke
     return kw ? { glyph: FREE_KW_GLYPH[kw] ?? '◆', key: kw } : { glyph: '', key: null };
 }
 
-/** Option A type strip — stance + player-facing card type (CURSE for disenchant). */
+/** Option A type strip — stance + player-facing card type (HEX for a curse). */
 function typeStripText(card: CombatCard): string {
-    const typeLabel = card.cardType === 'enchantment' ? 'ENCHANTMENT'
-        : card.cardType === 'disenchant' ? 'CURSE'
+    const typeLabel = card.cardType === 'oath' ? 'OATH'
+        : card.cardType === 'hex' ? 'HEX'
             : card.cardType === 'spell' ? 'SPELL' : null;
     return [card.stance.toUpperCase(), ...(typeLabel ? [typeLabel] : [])].join(' · ');
 }
@@ -235,7 +235,7 @@ export interface CombatEffectChipVM {
     effectId: string; glyph: StatusGlyph; intensity: number; duration: number; isMax: boolean;
     /** General keyword definition for the on-board status tooltip (null if unmapped). */
     gloss: string | null;
-    /** 2026-07-12 (card-wording audit) — a STANDING enchant/curse chip
+    /** 2026-07-12 (card-wording audit) — a STANDING oath/hex chip
      *  synthesized from the persistent zones (no effect id ever backs the
      *  passive, so `effectId` holds the CARD id). duration 0 = permanent;
      *  intensity is meaningless and its badge is hidden. */
@@ -400,8 +400,8 @@ export type CombatCardKind =
     | 'backfire'     // spec 32 v3 — the enemy takes N per action rung it loses
     | 'rupture'      // detonate stored afflictions (live total → a word, no fabricated number)
     | 'reap'         // spec 32 v3 — spend Souls for a burst (live total → a word)
-    | 'enchant'      // spec 32 v3 — persistent player-side passive (rest of combat)
-    | 'disenchant'   // spec 32 v3 — standing curse attached to the enemy
+    | 'oath'         // spec 32 v3 — persistent player-side passive (rest of combat; spec 34 R-9: was 'enchant')
+    | 'hex'          // spec 32 v3 — standing curse attached to the enemy (spec 34 R-10: was 'disenchant')
     | 'forge'        // die-manipulation verbs (FORGE / KINDLE / PIP / TRANSMUTE)
     | 'barrier'      // stacking soak shield on YOU
     | 'thorns'       // reflect attacker damage back
@@ -448,8 +448,8 @@ export interface CombatCardFaceVM {
      *  '3 rounds' instance); the overlay's freePill keeps the full prose. */
     freeKeyword: string | null;
     freeValue: string | null;
-    /** Option A type strip at the card foot — 'BODY · SPELL' (CURSE for
-     *  disenchant; the engine term never prints). */
+    /** Option A type strip at the card foot — 'BODY · SPELL' (HEX for
+     *  a curse card). */
     typeStrip: string;
     verbLine: string;              // plain who/what
     powerRail: string;
@@ -514,11 +514,11 @@ export interface CombatCardVM {
     /** Spec 32 v3 — rarity band derived from the rank ladder. The RARE frame
      *  keys off `rarity === 'rare'` (the gold tier is gone). */
     rarity?: 'common' | 'uncommon' | 'rare';
-    /** Spec 32 v3 — rank 1-6 (Doxa → Aporia) + its printed name. */
+    /** Spec 32 v3 — rank 1-6 (Ash → Saint) + its printed name. */
     rank?: 1 | 2 | 3 | 4 | 5 | 6;
     rankName: string | null;
-    /** Spec 32 v3 — spell / enchantment / disenchant. */
-    cardType?: 'spell' | 'enchantment' | 'disenchant';
+    /** Spec 32 v3 — spell / oath / hex. */
+    cardType?: 'spell' | 'oath' | 'hex';
     tier: 1 | 2 | 3;
     topActionText: string; bottomActionText: string; bottomDamagePreview: number;
     /** Fate Engine P1 — the card's printed die lines (real units), if any. */
@@ -1062,10 +1062,10 @@ export function resolvePrimary(card: CombatCard, sourceCard: Card | undefined): 
         return { kind: 'guard', ce: null, guardAmount: g?.amount ?? 0, riders: [], mech: null };
     }
     if (vc === 'befriend') return { kind: 'befriend', ce: null, guardAmount: null, riders: [], mech: null };
-    // Spec 32 v3 — persistent cards (player enchantment / enemy-attached curse).
+    // Spec 32 v3 — persistent cards (player oath / enemy-attached hex).
     // Their honest text is the engine-generated PAID line; no headline number.
-    if (vc === 'enchant') return { kind: 'enchant', ce: null, guardAmount: null, riders: [], mech: null };
-    if (vc === 'disenchant') return { kind: 'disenchant', ce: null, guardAmount: null, riders: [], mech: null };
+    if (vc === 'oath') return { kind: 'oath', ce: null, guardAmount: null, riders: [], mech: null };
+    if (vc === 'hex') return { kind: 'hex', ce: null, guardAmount: null, riders: [], mech: null };
     if (vc === 'direct-damage') {
         // Spec 32 v3 — 'direct-damage' is the status-payoff class ONLY (the strike
         // is dead): RUPTURE detonates afflictions, REAP spends Souls. Their live
@@ -1421,11 +1421,11 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
         // authored effect id wins; else the verb is recovered from the
         // persistentEffect summary; the bare type word is the no-payload
         // fallback only.
-        case 'enchant':
-            out.keyword = persistentPayloadKeyword(sourceCard) ?? 'Enchantment';
+        case 'oath':
+            out.keyword = persistentPayloadKeyword(sourceCard) ?? 'Oath';
             out.glyph = '◈'; out.categoryColor = ENCHANT_COLOR; break;
-        case 'disenchant':
-            out.keyword = persistentPayloadKeyword(sourceCard) ?? 'Disenchant';
+        case 'hex':
+            out.keyword = persistentPayloadKeyword(sourceCard) ?? 'Hex';
             out.glyph = '⛓'; out.categoryColor = GLYPH_COLORS.control; break;
         case 'guard':
             out.keyword = 'Guard'; out.glyph = '🛡'; out.categoryColor = GUARD_COLOR; break;
@@ -1519,7 +1519,7 @@ function mechanicHeadline(mech: CardSpecialMechanic | null, enemyDifficulty?: En
         // Phase 32 part 4d — OMEN v2: a staked stance/window claim, not a
         // silent die-derived guess. No picker UI yet (follow-up), so no
         // live claim number to headline here — same "no live number, static
-        // copy" shape enchant/disenchant already use.
+        // copy" shape oath/hex already use.
         case 'omen':
             return { keyword: kw ?? 'Omen', heroText: '', heroSub: `ante ${mech.anteConviction}◆ at window 1`, verbLine: 'stake a stance/window claim — a hit fires the payoff free, a miss keeps the ante' };
         case 'soul_gain':
@@ -1594,7 +1594,7 @@ const MECH_HEADLINE_PRIORITY: readonly string[] = [
     'peroration', 'sway', 'turnabout', 'stagger', 'lock_stance', 'reprise', 'replay_last',
     'omen', 'consume_affliction', 'soul_gain', 'spend_premises', 'premise',
     // (`conjure_card` stays: cloud phase 29 retired CONJURE off zero library
-    // carriers, but this session's WS2.1 Thoughtform work ships live sandbox
+    // carriers, but this session's WS2.1 Haunt work ships live sandbox
     // conjure cards — the mechanic is card-local vocabulary, not a ghost.)
     'foretell', 'extend_dots', 'convert_dots', 'boost_all_dots', 'recoil_x', 'recoil',
     // Profane Canon: PURGE is the whole card (a curse's only reason to exist),
@@ -1626,17 +1626,17 @@ function buildDetailKeywords(card: CombatCard, c: CardCalc, sourceCard?: Card): 
     };
     if (c.kind === 'guard') push(keywordForVerb(card.verbClass), false);
     // 2026-07-12 (owner playtest, REVERSING the 07-11 type-chip-first order) —
-    // Enchantment/Curse/Disenchant are card TYPES, not payload keywords: the
+    // Oath/Hex are card TYPES, not payload keywords: the
     // type already reads on the card frame's type strip, so the inspect panel
     // carries PAYLOAD keywords ONLY (the face's verb-slot keyword, then any
     // authored effect ids, then the rest of the persistentEffect summary's
     // keywords). A persistent card whose passive resolves nothing renders an
     // empty panel rather than restating its type (KW-5 guarantees every
     // library card resolves at least one).
-    else if (c.kind === 'enchant' || c.kind === 'disenchant') {
+    else if (c.kind === 'oath' || c.kind === 'hex') {
         // (c.keyword falls back to the bare type word on a payload-less card —
         // that fallback belongs to the FACE verb slot, never to this panel.)
-        if (c.keyword !== 'Enchantment' && c.keyword !== 'Disenchant') push(c.keyword, false);
+        if (c.keyword !== 'Oath' && c.keyword !== 'Hex') push(c.keyword, false);
         for (const ce of sourceCard?.combatEffects ?? []) push(keywordForEffect(ce.effectId), false);
         for (const kw of keywordsInPersistentText(sourceCard?.persistentEffect)) push(kw, false);
     } else push(c.keyword, c.kind === 'inert');
@@ -1738,9 +1738,9 @@ export function faceStats(card: CombatCard, sourceCard?: Card, enemyDifficulty?:
         case 'forge': { const clause = forgeClause(c.mech) ?? 'shape your dice'; return { ...base, kind: 'forge', keyword: kw, heroText: '', heroSub: clause, freeHeroText: free, freeHeroSub: null, verbLine: clause, powerRail: c.keyword ?? 'Forge', readDependent: false, inert: false, guardBase: null }; }
         // 2026-07-12 — the verb slot is the PAYLOAD keyword (cardCalc), never
         // the bare type word unless no payload resolves; the type stays on the
-        // type strip (ENCHANTMENT / CURSE) and the type chip.
-        case 'enchant': return { ...base, kind: 'enchant', keyword: kw ?? 'ENCHANTMENT', heroText: '', heroSub: 'rest of combat', freeHeroText: free, freeHeroSub: null, verbLine: 'a persistent passive on your side', powerRail: c.keyword ?? 'Enchantment', readDependent: false, inert: false, guardBase: null };
-        case 'disenchant': return { ...base, kind: 'disenchant', keyword: kw ?? 'DISENCHANT', heroText: '', heroSub: 'curse · rest of combat', freeHeroText: free, freeHeroSub: null, verbLine: 'a standing curse attached to the enemy', powerRail: c.keyword ?? 'Disenchant', readDependent: false, inert: false, guardBase: null };
+        // type strip (OATH / HEX) and the type chip.
+        case 'oath': return { ...base, kind: 'oath', keyword: kw ?? 'OATH', heroText: '', heroSub: 'rest of combat', freeHeroText: free, freeHeroSub: null, verbLine: 'a persistent passive on your side', powerRail: c.keyword ?? 'Oath', readDependent: false, inert: false, guardBase: null };
+        case 'hex': return { ...base, kind: 'hex', keyword: kw ?? 'HEX', heroText: '', heroSub: 'curse · rest of combat', freeHeroText: free, freeHeroSub: null, verbLine: 'a standing curse attached to the enemy', powerRail: c.keyword ?? 'Hex', readDependent: false, inert: false, guardBase: null };
         case 'mechanic': { const h = mechanicHeadline(c.mech, enemyDifficulty); return { ...base, kind: 'mechanic', keyword: kw, heroText: h?.heroText ?? '', heroSub: h?.heroSub ?? null, freeHeroText: free, freeHeroSub: null, verbLine: h?.verbLine ?? '', powerRail: c.keyword ?? '—', readDependent: false, inert: false, guardBase: null }; }
         case 'inert':
         default: return { ...base, kind: 'inert', keyword: kw ?? 'DEBUFF', heroText: '', heroSub: card.verbClass === 'buff-self' ? 'buff yourself' : 'weakens the foe', freeHeroText: free, freeHeroSub: null, verbLine: card.verbClass === 'buff-self' ? 'buff yourself' : 'weakens the foe', powerRail: c.keyword ?? '—', readDependent: false, inert: true, guardBase: null };
@@ -1753,12 +1753,12 @@ function detailCore(card: CombatCard, sourceCard?: Card, enemyDifficulty?: Enemy
     const Title = c.keyword ?? '';
     const STANCE = STANCE_LABELS[card.stance] ?? card.stance.toUpperCase();
     // Spec 32 v3 — the meta chip surfaces the RANK NAME + CARD TYPE (where the
-    // gold tag used to sit): e.g. 'BODY · DOXA · SPELL · DOT'.
+    // gold tag used to sit): e.g. 'BODY · ASH · SPELL · DOT'.
     const rankName = card.rank ? RANK_NAMES[card.rank] : null;
-    // Player-facing type vocabulary (owner directive 2026-07-09): a disenchant
-    // prints as CURSE — the engine term stays `disenchant` internally.
-    const typeLabel = card.cardType === 'enchantment' ? 'ENCHANTMENT'
-        : card.cardType === 'disenchant' ? 'CURSE'
+    // Player-facing type vocabulary (owner directive 2026-07-09): a hex
+    // prints as HEX — the engine term stays `hex` internally.
+    const typeLabel = card.cardType === 'oath' ? 'OATH'
+        : card.cardType === 'hex' ? 'HEX'
             : card.cardType === 'spell' ? 'SPELL' : null;
     const metaChip = [
         card.stance.toUpperCase(),
@@ -1821,8 +1821,8 @@ function detailCore(card: CombatCard, sourceCard?: Card, enemyDifficulty?: Enemy
         // Spec 32 v4 — persistent cards carry BOTH lines: the FREE play is a
         // timed instance of the passive; the PAID play makes it permanent,
         // unique in play, and pulls the card out of the deck cycle.
-        case 'enchant': return { subtitle: 'Enchantment — a persistent passive on your side.', metaChip, outcomeLine: `FREE: yours for ${persistentFreeRounds(card)}. PAID: rest of combat.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: `Played FREE it runs ${persistentFreeRounds(card)} and ticks out; paid with a die it is permanent — unique in play, and it leaves the deck cycle.`, mathLine: 'A standing rule, not a number — its text is the engine text.', keywords };
-        case 'disenchant': return { subtitle: 'Disenchant — a standing curse on the enemy.', metaChip, outcomeLine: `FREE: on the enemy for ${persistentFreeRounds(card)}. PAID: rest of combat.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: `Played FREE it holds ${persistentFreeRounds(card)} and ticks out; paid with a die it is permanent — unique in play, and it leaves the deck cycle.`, mathLine: 'A standing rule, not a number — its text is the engine text.', keywords };
+        case 'oath': return { subtitle: 'Oath — a persistent passive on your side.', metaChip, outcomeLine: `FREE: yours for ${persistentFreeRounds(card)}. PAID: rest of combat.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: `Played FREE it runs ${persistentFreeRounds(card)} and ticks out; paid with a die it is permanent — unique in play, and it leaves the deck cycle.`, mathLine: 'A standing rule, not a number — its text is the engine text.', keywords };
+        case 'hex': return { subtitle: 'Hex — a standing curse on the enemy.', metaChip, outcomeLine: `FREE: on the enemy for ${persistentFreeRounds(card)}. PAID: rest of combat.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: `Played FREE it holds ${persistentFreeRounds(card)} and ticks out; paid with a die it is permanent — unique in play, and it leaves the deck cycle.`, mathLine: 'A standing rule, not a number — its text is the engine text.', keywords };
         case 'mechanic': { const h = mechanicHeadline(c.mech, enemyDifficulty); const val = [h?.heroText, h?.heroSub].filter(Boolean).join(' '); return { subtitle: `${Title} — ${h?.verbLine ?? 'a special mechanic'}.`, metaChip, outcomeLine: val ? `${Title} ${val}.` : `${Title}.`, outcomeStats: h?.heroText ? [{ label: Title.toUpperCase(), value: h.heroText }] : [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: `${Title} takes no read — the printed line is the applied effect.`, mathLine: `${Title}: ${h?.verbLine ?? card.bottomActionText}.`, keywords }; }
         case 'inert':
         default: return { subtitle: `${Title || 'Effect'} — minor right now.`, metaChip, outcomeLine: `${Title || 'This effect'} — minor for now.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: 'The engine text above is the whole truth for this card.', mathLine: `${Title || 'This effect'} carries no headline number — the printed line is the applied effect.`, keywords };
@@ -1866,7 +1866,7 @@ function mechPaidPart(m: CardSpecialMechanic, enemyDifficulty?: EnemyDifficulty)
 function paidLine(c: CardCalc, face: CombatCardFaceVM, sourceCard?: Card, enemyDifficulty?: EnemyDifficulty): string | null {
     // Persistent cards: the paid play is the same passive made permanent — the
     // face + durationFooter carry it; an enumeration would restate the passive.
-    if (c.kind === 'enchant' || c.kind === 'disenchant') return null;
+    if (c.kind === 'oath' || c.kind === 'hex') return null;
     const parts: string[] = [];
     const seen = new Set<string>();
     const add = (kw: string | null | undefined, val?: string | null) => {
@@ -1945,7 +1945,7 @@ export function detailStats(card: CombatCard, sourceCard?: Card, enemyDifficulty
     const diePaidLine = paidLine(c, face, sourceCard, enemyDifficulty);
     // Spec 32 v4 persistent fork, restated as ONE footer line (the audit's
     // 6-deck "3 rounds vs rest of combat" confusion) — never a stacked panel.
-    const durationFooter = c.kind === 'enchant' || c.kind === 'disenchant'
+    const durationFooter = c.kind === 'oath' || c.kind === 'hex'
         ? `${persistentFreeRounds(card)} free · permanent with a die`
         : null;
     // The colour law (dice-law rework 2026-07-09) — rendered ONCE per modal.

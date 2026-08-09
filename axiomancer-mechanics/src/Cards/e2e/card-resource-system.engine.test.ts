@@ -33,7 +33,7 @@ describe('Card library structural invariants', () => {
             // Spec 32 v3 — the quality axis + card type replace the deleted
             // basePower/scalingStat damage fields (THE STRIKE IS DEAD).
             expect([1, 2, 3, 4, 5, 6]).toContain(card.rank);
-            expect(['spell', 'enchantment', 'disenchant']).toContain(card.cardType);
+            expect(['spell', 'oath', 'hex']).toContain(card.cardType);
         }
     });
 

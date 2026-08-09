@@ -38,7 +38,7 @@ export const SIGNATURE_SKILLS: Record<SignatureSkillId, SignatureSkill> = {
         // everything telegraphs openly). Reinterpreted: buy the NEXT phase's
         // stance check (punish/yield) and reactive branch EARLY, before you
         // commit the play that sets your stance. Cost re-derived to 1◆ (D3).
-        id: 'sig-read-opponent', name: 'Read the Opponent', kind: 'scout', cost: 1, magnitude: 0,
+        id: 'sig-read-opponent', name: 'Read the Entrails', kind: 'scout', cost: 1, magnitude: 0,
         description: "Reveal the next phase's stance check and reactive branch early — see its punish/yield and how it answers your play before you commit. Cheap; cast it early.",
     },
     'sig-press-the-point': {
@@ -50,7 +50,7 @@ export const SIGNATURE_SKILLS: Record<SignatureSkillId, SignatureSkill> = {
         description: 'Draw 2 cards and recover a little health — recover from a dead hand.',
     },
     'sig-overwhelming-argument': {
-        id: 'sig-overwhelming-argument', name: 'Overwhelming Argument', kind: 'control', cost: 8,
+        id: 'sig-overwhelming-argument', name: 'The Stilling', kind: 'control', cost: 8,
         // WI-8 (2026-07-12) — was wired to `debuff_backfire`, which only pays on
         // rung loss: 4 casts in one fight moved the enemy's HP by ZERO. Now it
         // applies REAL hard control (`debuff_petrify`, a 1-phase skipTurn honored
@@ -70,23 +70,23 @@ export const SIGNATURE_SKILLS: Record<SignatureSkillId, SignatureSkill> = {
     // this lever fires. Price parity lets both compete once a policy
     // actually holds 8◆, instead of dot auto-winning the 7-7 window.
     'sig-conviction-strike': {
-        id: 'sig-conviction-strike', name: 'Conviction Strike', kind: 'dot', cost: 8,
+        id: 'sig-conviction-strike', name: 'The Oath Kept', kind: 'dot', cost: 8,
         magnitude: 3, effectKind: 'dot', effectId: 'debuff_poison',
         description: 'A guaranteed venom at boosted intensity — DoT that cannot fizzle.',
     },
     // ── Per-archetype exclusives ─────────────────────────────────────────────
     'sig-disarming-plea': {
-        id: 'sig-disarming-plea', name: 'Disarming Plea', kind: 'mercy', cost: 6,
+        id: 'sig-disarming-plea', name: 'The Open Hand', kind: 'mercy', cost: 6,
         magnitude: 6, effectKind: 'control', effectId: 'debuff_quarter',
         description: 'HEART — charm the foe (it falters) and strike, softening it toward mercy.',
     },
     'sig-rallying-blow': {
-        id: 'sig-rallying-blow', name: 'Conclusion', kind: 'conclude', cost: 6,
+        id: 'sig-rallying-blow', name: "The Butcher's Bill", kind: 'conclude', cost: 6,
         magnitude: 0,
         description: 'BODY — a finisher: deals damage for every stack of every effect on the enemy, then refreshes your stance die. Build the board, then conclude.',
     },
     'sig-clever-gambit': {
-        id: 'sig-clever-gambit', name: 'Clever Gambit', kind: 'draw', cost: 4,
+        id: 'sig-clever-gambit', name: 'Cold Counsel', kind: 'draw', cost: 4,
         magnitude: 2,
         description: 'MIND — draw 2 and refresh your stance die: turn information into tempo.',
     },
@@ -111,7 +111,7 @@ export function getSignatureSkill(id: string): SignatureSkill | undefined {
 /** Heal granted by Second Wind = a fraction of the player's max HP. */
 const SECOND_WIND_HEAL_FRAC = 0.12;
 
-/** Damage dealt per stack of any active effect on the enemy (Conclusion finisher). */
+/** Damage dealt per stack of any active effect on the enemy (The Butcher's Bill finisher). */
 export const CONCLUDE_DMG_PER_STACK = 2;
 
 /** WI-8 — STAGGER rungs a HARD-control signature lays on a boss/unique instead
@@ -236,7 +236,7 @@ export function applySignatureSkill(
                 }
             }
             // mercy = a disarming hit: a flat-magnitude chip that softens the
-            // foe toward the mercy screen (Disarming Plea's ratified exception).
+            // foe toward the mercy screen (The Open Hand's ratified exception).
             if (skill.kind === 'mercy') {
                 const dmg = skill.magnitude;
                 const hpBefore = enemy.health;

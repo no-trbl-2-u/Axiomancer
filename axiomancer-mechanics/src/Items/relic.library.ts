@@ -53,20 +53,20 @@ const RELIC_SPECS: readonly RelicSpec[] = [
     // ── Weapons (2) — Body bumps ──────────────────────────────────────────────
     {
         id: 'relic-overwhelming', name: 'Gorgon Brand',
-        description: 'A blade that turns the argument to stone. Grants Overwhelming Argument.',
+        description: 'A blade that turns the argument to stone. Grants The Stilling.',
         slot: 'weapon', grantsSignature: 'sig-overwhelming-argument',
         stat: 'body', value: 2, defaultWorn: true,
     },
     {
         id: 'relic-conclusion', name: 'Capstone Maul',
-        description: 'The finisher made manifest. Grants Conclusion.',
+        description: "The finisher made manifest. Grants The Butcher's Bill.",
         slot: 'weapon', grantsSignature: 'sig-rallying-blow',
         stat: 'body', value: 2, defaultWorn: false,
     },
     // ── Armor (2) — maxHp bumps ───────────────────────────────────────────────
     {
         id: 'relic-read', name: 'Coldglass Aegis',
-        description: 'See the blow before it lands. Grants Read the Opponent.',
+        description: 'See the blow before it lands. Grants Read the Entrails.',
         slot: 'armor', grantsSignature: 'sig-read-opponent',
         stat: 'maxHp', value: 5, defaultWorn: true,
     },
@@ -81,29 +81,29 @@ const RELIC_SPECS: readonly RelicSpec[] = [
         // Benched by owner call 2026-07-18 (was default-worn): the Gambler's
         // Knot takes this seat so every starter opens with Press Fate — the
         // spec-33 whiff valve and the economy's only recurring ◆ sink. At 8◆,
-        // Conviction Strike was the least-castable signature under the leaner
+        // The Oath Kept was the least-castable signature under the leaner
         // flag-on income; it waits in inventory.
         id: 'relic-conviction-strike', name: 'Venom Sigil',
-        description: 'A venom that cannot fizzle. Grants Conviction Strike.',
+        description: 'A venom that cannot fizzle. Grants The Oath Kept.',
         slot: 'accessory', accessoryKind: 'amulet', grantsSignature: 'sig-conviction-strike',
         stat: 'mind', value: 2, defaultWorn: false,
     },
     {
         id: 'relic-clever-gambit', name: 'Gambit Chit',
-        description: 'Turn information into tempo. Grants Clever Gambit.',
+        description: 'Turn information into tempo. Grants Cold Counsel.',
         slot: 'accessory', accessoryKind: 'charm', grantsSignature: 'sig-clever-gambit',
         stat: 'mind', value: 2, defaultWorn: true,
     },
     {
         id: 'relic-disarming-plea', name: "Suppliant's Ring",
-        description: 'Soften the foe toward mercy. Grants Disarming Plea.',
+        description: 'Soften the foe toward mercy. Grants The Open Hand.',
         slot: 'accessory', accessoryKind: 'ring', grantsSignature: 'sig-disarming-plea',
         stat: 'heart', value: 2, defaultWorn: true,
     },
     {
         // Default-worn by owner call 2026-07-18 (drains D7 report F3): Press
-        // Fate + Disarming Plea (Befriend) are the two must-have starters;
-        // Overwhelming Argument keeps the weapon seat.
+        // Fate + The Open Hand (Befriend) are the two must-have starters;
+        // The Stilling keeps the weapon seat.
         id: 'relic-press-the-point', name: "Gambler's Knot",
         description: 'Bend fate on the bad dice. Grants Press Fate.',
         slot: 'accessory', accessoryKind: 'charm', grantsSignature: 'sig-press-the-point',

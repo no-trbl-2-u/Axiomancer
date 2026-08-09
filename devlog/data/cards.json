@@ -28,7 +28,7 @@
    },
    {
     "k": "Rank",
-    "v": "Doxa (common)"
+    "v": "Ash (common)"
    },
    {
     "k": "Kind",
@@ -83,7 +83,7 @@
    },
    {
     "k": "Rank",
-    "v": "Doxa (common)"
+    "v": "Ash (common)"
    },
    {
     "k": "Kind",
@@ -136,7 +136,7 @@
    },
    {
     "k": "Rank",
-    "v": "Axiom (rare)"
+    "v": "Skull (rare)"
    },
    {
     "k": "Kind",
@@ -171,7 +171,7 @@
   "pricing": "engine text — BLEED i2 seeded per enemy damage instance:",
   "face": {
    "freeGlyph": "☠",
-   "freeKw": "CURSE",
+   "freeKw": "HEX",
    "freeVal": "3r",
    "paid": "Whenever the enemy deals you damage, it gains BLEED 2 (ticks each hit they take). Costs 1 die. Attaches to the enemy."
   },
@@ -193,11 +193,11 @@
    },
    {
     "k": "Rank",
-    "v": "Aporia (rare)"
+    "v": "Saint (rare)"
    },
    {
     "k": "Kind",
-    "v": "disenchant"
+    "v": "hex"
    },
    {
     "k": "Theme",
@@ -250,7 +250,7 @@
    },
    {
     "k": "Rank",
-    "v": "Doxa (common)"
+    "v": "Ash (common)"
    },
    {
     "k": "Kind",
@@ -286,7 +286,7 @@
   "pricing": "engine text — ~6-8 expiries/consumes per fight × (soul 0.75 +",
   "face": {
    "freeGlyph": "❖",
-   "freeKw": "ENCHANT",
+   "freeKw": "OATH",
    "freeVal": "3r",
    "paid": "Whenever an affliction on the enemy expires or is consumed, gain 1 SOUL and PLEA 1."
   },
@@ -308,11 +308,11 @@
    },
    {
     "k": "Rank",
-    "v": "Axiom (rare)"
+    "v": "Skull (rare)"
    },
    {
     "k": "Kind",
-    "v": "enchantment"
+    "v": "oath"
    },
    {
     "k": "Theme",
@@ -361,7 +361,7 @@
    },
    {
     "k": "Rank",
-    "v": "Axiom (rare)"
+    "v": "Skull (rare)"
    },
    {
     "k": "Kind",
@@ -419,7 +419,7 @@
    },
    {
     "k": "Rank",
-    "v": "Theorem (uncommon)"
+    "v": "Rib (uncommon)"
    },
    {
     "k": "Kind",
@@ -474,7 +474,7 @@
    },
    {
     "k": "Rank",
-    "v": "Theorem (uncommon)"
+    "v": "Rib (uncommon)"
    },
    {
     "k": "Kind",
@@ -533,7 +533,7 @@
    },
    {
     "k": "Rank",
-    "v": "Theorem (uncommon)"
+    "v": "Rib (uncommon)"
    },
    {
     "k": "Kind",
@@ -569,7 +569,7 @@
   "pricing": "engine text — freezes the enemy-side DoT calendar (a standing",
   "face": {
    "freeGlyph": "☠",
-   "freeKw": "CURSE",
+   "freeKw": "HEX",
    "freeVal": "3r",
    "paid": "The enemy's wounds refuse to close: its POISON, BLEED and DOOM no longer lose duration, and its HEAL fails. Costs 1 die. Attaches to the enemy."
   },
@@ -591,11 +591,11 @@
    },
    {
     "k": "Rank",
-    "v": "Aporia (rare)"
+    "v": "Saint (rare)"
    },
    {
     "k": "Kind",
-    "v": "disenchant"
+    "v": "hex"
    },
    {
     "k": "Theme",
@@ -626,7 +626,7 @@
   "pricing": "engine text — 3 persistent GUARD per engineered quiet round ≈",
   "face": {
    "freeGlyph": "❖",
-   "freeKw": "ENCHANT",
+   "freeKw": "OATH",
    "freeVal": "3r",
    "paid": "At the end of each round in which the enemy dealt you no damage, gain GUARD 3 that persists."
   },
@@ -648,11 +648,11 @@
    },
    {
     "k": "Rank",
-    "v": "Axiom (rare)"
+    "v": "Skull (rare)"
    },
    {
     "k": "Kind",
-    "v": "enchantment"
+    "v": "oath"
    },
    {
     "k": "Theme",
@@ -705,7 +705,7 @@
    },
    {
     "k": "Rank",
-    "v": "Doxa (common)"
+    "v": "Ash (common)"
    },
    {
     "k": "Kind",
@@ -762,7 +762,7 @@
    },
    {
     "k": "Rank",
-    "v": "Doxa (common)"
+    "v": "Ash (common)"
    },
    {
     "k": "Kind",
@@ -820,7 +820,7 @@
    },
    {
     "k": "Rank",
-    "v": "Theorem (uncommon)"
+    "v": "Rib (uncommon)"
    },
    {
     "k": "Kind",
@@ -879,7 +879,7 @@
    },
    {
     "k": "Rank",
-    "v": "Doxa (common)"
+    "v": "Ash (common)"
    },
    {
     "k": "Kind",
@@ -932,7 +932,7 @@
    },
    {
     "k": "Rank",
-    "v": "Axiom (rare)"
+    "v": "Skull (rare)"
    },
    {
     "k": "Kind",
@@ -989,7 +989,7 @@
    },
    {
     "k": "Rank",
-    "v": "Lemma (common)"
+    "v": "Tooth (common)"
    },
    {
     "k": "Kind",
@@ -1025,7 +1025,7 @@
   "pricing": "engine text — mirrors every RECOIL paid onto the enemy, rest of",
   "face": {
    "freeGlyph": "☠",
-   "freeKw": "CURSE",
+   "freeKw": "HEX",
    "freeVal": "3r",
    "paid": "Whenever you pay RECOIL, the enemy loses the same amount of VITAE — they are liable for your debts. Costs 1 die. Attaches to the enemy."
   },
@@ -1047,11 +1047,11 @@
    },
    {
     "k": "Rank",
-    "v": "Aporia (rare)"
+    "v": "Saint (rare)"
    },
    {
     "k": "Kind",
-    "v": "disenchant"
+    "v": "hex"
    },
    {
     "k": "Theme",
@@ -1104,7 +1104,7 @@
    },
    {
     "k": "Rank",
-    "v": "Lemma (common)"
+    "v": "Tooth (common)"
    },
    {
     "k": "Kind",
@@ -1158,7 +1158,7 @@
    },
    {
     "k": "Rank",
-    "v": "Thesis (uncommon)"
+    "v": "Splinter (uncommon)"
    },
    {
     "k": "Kind",
@@ -1212,7 +1212,7 @@
    },
    {
     "k": "Rank",
-    "v": "Axiom (rare)"
+    "v": "Skull (rare)"
    },
    {
     "k": "Kind",
@@ -1267,7 +1267,7 @@
    },
    {
     "k": "Rank",
-    "v": "Doxa (common)"
+    "v": "Ash (common)"
    },
    {
     "k": "Kind",
@@ -1320,7 +1320,7 @@
    },
    {
     "k": "Rank",
-    "v": "Thesis (uncommon)"
+    "v": "Splinter (uncommon)"
    },
    {
     "k": "Kind",
@@ -1379,7 +1379,7 @@
    },
    {
     "k": "Rank",
-    "v": "Axiom (rare)"
+    "v": "Skull (rare)"
    },
    {
     "k": "Kind",
@@ -1437,7 +1437,7 @@
    },
    {
     "k": "Rank",
-    "v": "Lemma (common)"
+    "v": "Tooth (common)"
    },
    {
     "k": "Kind",
@@ -1491,7 +1491,7 @@
    },
    {
     "k": "Rank",
-    "v": "Doxa (common)"
+    "v": "Ash (common)"
    },
    {
     "k": "Kind",
@@ -1549,7 +1549,7 @@
    },
    {
     "k": "Rank",
-    "v": "Doxa (common)"
+    "v": "Ash (common)"
    },
    {
     "k": "Kind",
@@ -1607,7 +1607,7 @@
    },
    {
     "k": "Rank",
-    "v": "Doxa (common)"
+    "v": "Ash (common)"
    },
    {
     "k": "Kind",
@@ -1661,7 +1661,7 @@
    },
    {
     "k": "Rank",
-    "v": "Lemma (common)"
+    "v": "Tooth (common)"
    },
    {
     "k": "Kind",
@@ -1715,7 +1715,7 @@
    },
    {
     "k": "Rank",
-    "v": "Lemma (common)"
+    "v": "Tooth (common)"
    },
    {
     "k": "Kind",
@@ -1774,7 +1774,7 @@
    },
    {
     "k": "Rank",
-    "v": "Doxa (common)"
+    "v": "Ash (common)"
    },
    {
     "k": "Kind",
@@ -1828,7 +1828,7 @@
    },
    {
     "k": "Rank",
-    "v": "Doxa (common)"
+    "v": "Ash (common)"
    },
    {
     "k": "Kind",
@@ -1863,7 +1863,7 @@
   "pricing": "engine text — +1 CHARGE per denied rung × ~12-15 rungs across a",
   "face": {
    "freeGlyph": "❖",
-   "freeKw": "ENCHANT",
+   "freeKw": "OATH",
    "freeVal": "3r",
    "paid": "Whenever your STAGGER removes a rung from the enemy's telegraph, gain 1 CHARGE."
   },
@@ -1885,11 +1885,11 @@
    },
    {
     "k": "Rank",
-    "v": "Axiom (rare)"
+    "v": "Skull (rare)"
    },
    {
     "k": "Kind",
-    "v": "enchantment"
+    "v": "oath"
    },
    {
     "k": "Theme",
@@ -1938,7 +1938,7 @@
    },
    {
     "k": "Rank",
-    "v": "Axiom (rare)"
+    "v": "Skull (rare)"
    },
    {
     "k": "Kind",
@@ -1998,7 +1998,7 @@
    },
    {
     "k": "Rank",
-    "v": "Axiom (rare)"
+    "v": "Skull (rare)"
    },
    {
     "k": "Kind",
@@ -2030,7 +2030,7 @@
   "pricing": "engine text — end-of-round drip of floor(discard ÷ 3): the",
   "face": {
    "freeGlyph": "☠",
-   "freeKw": "CURSE",
+   "freeKw": "HEX",
    "freeVal": "3r",
    "paid": "At the end of each round, the foe takes 1 damage per 3 cards you MILL or spend into your discard pile. Costs 1 die. Attaches to the enemy."
   },
@@ -2052,11 +2052,11 @@
    },
    {
     "k": "Rank",
-    "v": "Aporia (rare)"
+    "v": "Saint (rare)"
    },
    {
     "k": "Kind",
-    "v": "disenchant"
+    "v": "hex"
    },
    {
     "k": "Theme",
@@ -2105,7 +2105,7 @@
    },
    {
     "k": "Rank",
-    "v": "Thesis (uncommon)"
+    "v": "Splinter (uncommon)"
    },
    {
     "k": "Kind",
@@ -2142,7 +2142,7 @@
   "pricing": "engine text — PLEA drip = souls held, per round, compounding",
   "face": {
    "freeGlyph": "☠",
-   "freeKw": "CURSE",
+   "freeKw": "HEX",
    "freeVal": "3r",
    "paid": "At the end of each round, the enemy gains PLEA equal to the number of Souls you hold. Costs 1 die. Attaches to the enemy."
   },
@@ -2164,11 +2164,11 @@
    },
    {
     "k": "Rank",
-    "v": "Aporia (rare)"
+    "v": "Saint (rare)"
    },
    {
     "k": "Kind",
-    "v": "disenchant"
+    "v": "hex"
    },
    {
     "k": "Theme",
@@ -2217,7 +2217,7 @@
    },
    {
     "k": "Rank",
-    "v": "Thesis (uncommon)"
+    "v": "Splinter (uncommon)"
    },
    {
     "k": "Kind",
@@ -2275,7 +2275,7 @@
    },
    {
     "k": "Rank",
-    "v": "Theorem (uncommon)"
+    "v": "Rib (uncommon)"
    },
    {
     "k": "Kind",
@@ -2329,7 +2329,7 @@
    },
    {
     "k": "Rank",
-    "v": "Thesis (uncommon)"
+    "v": "Splinter (uncommon)"
    },
    {
     "k": "Kind",
@@ -2384,7 +2384,7 @@
    },
    {
     "k": "Rank",
-    "v": "Doxa (common)"
+    "v": "Ash (common)"
    },
    {
     "k": "Kind",
@@ -2437,7 +2437,7 @@
    },
    {
     "k": "Rank",
-    "v": "Thesis (uncommon)"
+    "v": "Splinter (uncommon)"
    },
    {
     "k": "Kind",
@@ -2494,7 +2494,7 @@
    },
    {
     "k": "Rank",
-    "v": "Thesis (uncommon)"
+    "v": "Splinter (uncommon)"
    },
    {
     "k": "Kind",
@@ -2527,7 +2527,7 @@
   "pricing": "engine text — BLEED 1 per RECOIL paid × ~8 recoil events in a",
   "face": {
    "freeGlyph": "❖",
-   "freeKw": "ENCHANT",
+   "freeKw": "OATH",
    "freeVal": "3r",
    "paid": "Whenever you pay RECOIL, afflict the enemy with BLEED 1 (ticks each hit they take; 2 turns)."
   },
@@ -2549,11 +2549,11 @@
    },
    {
     "k": "Rank",
-    "v": "Axiom (rare)"
+    "v": "Skull (rare)"
    },
    {
     "k": "Kind",
-    "v": "enchantment"
+    "v": "oath"
    },
    {
     "k": "Theme",
@@ -2606,7 +2606,7 @@
    },
    {
     "k": "Rank",
-    "v": "Theorem (uncommon)"
+    "v": "Rib (uncommon)"
    },
    {
     "k": "Kind",
@@ -2665,7 +2665,7 @@
    },
    {
     "k": "Rank",
-    "v": "Thesis (uncommon)"
+    "v": "Splinter (uncommon)"
    },
    {
     "k": "Kind",
@@ -2719,7 +2719,7 @@
    },
    {
     "k": "Rank",
-    "v": "Lemma (common)"
+    "v": "Tooth (common)"
    },
    {
     "k": "Kind",
@@ -2755,7 +2755,7 @@
   "pricing": "engine text — DOOM 1 per RECALL/REPLAY across a recursion deck's",
   "face": {
    "freeGlyph": "❖",
-   "freeKw": "ENCHANT",
+   "freeKw": "OATH",
    "freeVal": "3r",
    "paid": "Whenever you RECALL or REPLAY a card, inflict DOOM 1 on the foe."
   },
@@ -2777,11 +2777,11 @@
    },
    {
     "k": "Rank",
-    "v": "Axiom (rare)"
+    "v": "Skull (rare)"
    },
    {
     "k": "Kind",
-    "v": "enchantment"
+    "v": "oath"
    },
    {
     "k": "Theme",
@@ -2812,7 +2812,7 @@
   "pricing": "engine text — a standing end-of-round FESTER ≈ boost_all_dots 5.0",
   "face": {
    "freeGlyph": "❖",
-   "freeKw": "ENCHANT",
+   "freeKw": "OATH",
    "freeVal": "3r",
    "paid": "At the end of each round, FESTER 1 — every DoT on the enemy gains +1 intensity."
   },
@@ -2834,11 +2834,11 @@
    },
    {
     "k": "Rank",
-    "v": "Axiom (rare)"
+    "v": "Skull (rare)"
    },
    {
     "k": "Kind",
-    "v": "enchantment"
+    "v": "oath"
    },
    {
     "k": "Theme",
@@ -2891,7 +2891,7 @@
    },
    {
     "k": "Rank",
-    "v": "Lemma (common)"
+    "v": "Tooth (common)"
    },
    {
     "k": "Kind",
@@ -2950,7 +2950,7 @@
    },
    {
     "k": "Rank",
-    "v": "Doxa (common)"
+    "v": "Ash (common)"
    },
    {
     "k": "Kind",
@@ -3007,7 +3007,7 @@
    },
    {
     "k": "Rank",
-    "v": "Doxa (common)"
+    "v": "Ash (common)"
    },
    {
     "k": "Kind",
@@ -3065,7 +3065,7 @@
    },
    {
     "k": "Rank",
-    "v": "Doxa (common)"
+    "v": "Ash (common)"
    },
    {
     "k": "Kind",
@@ -3123,7 +3123,7 @@
    },
    {
     "k": "Rank",
-    "v": "Doxa (common)"
+    "v": "Ash (common)"
    },
    {
     "k": "Kind",
@@ -3158,7 +3158,7 @@
   "pricing": "engine text — a fresh DOOM 1 each round onto a stack that already",
   "face": {
    "freeGlyph": "☠",
-   "freeKw": "CURSE",
+   "freeKw": "HEX",
    "freeVal": "3r",
    "paid": "At the end of each round, inflict DOOM 1 on the enemy — the sentence compounds for the rest of the trial. Costs 1 die. Attaches to the enemy."
   },
@@ -3180,11 +3180,11 @@
    },
    {
     "k": "Rank",
-    "v": "Aporia (rare)"
+    "v": "Saint (rare)"
    },
    {
     "k": "Kind",
-    "v": "disenchant"
+    "v": "hex"
    },
    {
     "k": "Theme",

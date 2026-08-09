@@ -63,7 +63,7 @@ export interface RarityMeta {
 export const RARITY: Record<RarityKey, RarityMeta> = {
     common: { label: 'COMMON', color: '#8a8273', glow: 0, border: 1.5 },
     uncommon: { label: 'UNCOMMON', color: '#6b8eb0', glow: 0, border: 1.5 },
-    // RARE (Axiom/Aporia) keys the special frame — the gold tier is gone.
+    // RARE (Skull/Saint) keys the special frame — the gold tier is gone.
     rare: { label: 'RARE', color: '#9a6ad6', glow: 13, border: 2 },
 };
 export const RARITY_ORDER: RarityKey[] = ['common', 'uncommon', 'rare'];
@@ -118,8 +118,8 @@ export const KEYWORDS = {
     forge: { label: 'FORGE', family: 'special', unit: '', blurb: 'Create a floating die that persists across combats until spent.' },
     tick: { label: 'TICK', family: 'dot', unit: '', blurb: 'One enemy DoT deals its per-turn damage now; duration untouched.' },
     draw: { label: 'DRAW', family: 'special', unit: '', blurb: 'Draw cards from your deck.' },
-    enchant: { label: 'ENCHANT', family: 'special', unit: '', blurb: 'A persistent player-side passive, rest of combat. Paid only.' },
-    disenchant: { label: 'DISENCHANT', family: 'special', unit: '', blurb: 'A standing curse attached to the enemy, rest of combat. Paid only.' },
+    oath: { label: 'OATH', family: 'special', unit: '', blurb: 'A persistent player-side passive, rest of combat. Paid only.' },
+    hex: { label: 'HEX', family: 'special', unit: '', blurb: 'A standing curse attached to the enemy, rest of combat. Paid only.' },
     // ── Profane Canon (2026-08-08) — the rework vocabulary ──
     doom: { label: 'DOOM', family: 'dot', unit: '×', blurb: 'A DoT that grows +1 intensity each time the foe acts. No calendar — ends only by consumption.' },
     immolate: { label: 'IMMOLATE', family: 'special', unit: '', blurb: 'Burn the lowest-rank cards in hand as a cost — they leave the fight entirely.' },

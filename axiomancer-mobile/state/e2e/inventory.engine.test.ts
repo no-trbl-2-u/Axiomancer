@@ -130,7 +130,7 @@ describe('selectInventoryViewModel: signet relic granted signature (Phase 19)', 
         const relic = getRelicById('relic-overwhelming')!;
         const vm = selectInventoryViewModel(makeStore([relic]).getState());
         const row = vm.items.find((r) => r.id === 'relic-overwhelming');
-        expect(row?.grantsSignature).toBe('Overwhelming Argument');
+        expect(row?.grantsSignature).toBe('The Stilling');
     });
 
     it('leaves non-relic equipment without a granted signature', () => {
@@ -145,7 +145,7 @@ describe('selectInventoryViewModel: signet relic granted signature (Phase 19)', 
         const weaponSlot = vm.equipmentDock.slots.find((s) => s.key === 'weapon');
         // A lone worn weapon relic surfaces its signature in the dock slot.
         if (weaponSlot?.item) {
-            expect(weaponSlot.item.grantsSignature).toBe('Overwhelming Argument');
+            expect(weaponSlot.item.grantsSignature).toBe('The Stilling');
         }
     });
 });

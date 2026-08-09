@@ -1,24 +1,24 @@
 /**
- * The THOUGHTFORM registry — the cards CONJURE creates (spec 32 v3 §3:
- * "create a one-use Thoughtform card into hand (removed after play /
- * combat end)").
+ * The HAUNT registry (spec 34 R-13: THOUGHTFORM renamed HAUNT) — the cards
+ * CONJURE creates (spec 32 v3 §3: "create a one-use Thoughtform card into
+ * hand (removed after play / combat end)").
  *
  * WS2.1 (plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md,
- * correction C-11): Thoughtforms are REAL `Card` records resolved through
+ * correction C-11): Haunts are REAL `Card` records resolved through
  * `getCardById`'s lookup chain, but they must NOT live in
  * `cards.library.ts` — the library is pinned at 70 cards / 50 spells
- * (effectiveness + pricing lints), and a Thoughtform is unreachable
+ * (effectiveness + pricing lints), and a Haunt is unreachable
  * except through a `conjure_card` play. Keeping them in a separate
  * registry means they are automatically excluded from the reward pool
  * (`COMBAT_REWARD_POOL` maps over `cardLibrary`), from stage pools
  * (`stageEligibleCardIds` reads `cardLibrary`), and from every
  * library-pinned lint — asserted by
- * `src/Cards/e2e/thoughtforms.engine.test.ts`.
+ * `src/Cards/e2e/haunts.engine.test.ts`.
  *
  * Contract:
- *   - every entry carries the `'thoughtform'` tag — the ownership gate in
- *     `executeCard` (card.engine.ts) accepts a thoughtform-tagged card as
- *     owned-by-conjuring, since a Thoughtform can only reach a hand
+ *   - every entry carries the `'haunt'` tag — the ownership gate in
+ *     `executeCard` (card.engine.ts) accepts a haunt-tagged card as
+ *     owned-by-conjuring, since a Haunt can only reach a hand
  *     through a `conjure_card` play;
  *   - entries are one-use at the engine level (`conjuredUids`,
  *     combat.engine.ts): a played, free-played, or scrapped conjured card
@@ -48,7 +48,7 @@ import type { Card } from './types';
  * line can cash.
  */
 const cinder: Card = {
-    id: 'tf-cinder',
+    id: 'ht-cinder',
     theme: 'grave',
     name: 'Cinder',
     philosophicalAspect: 'mind',
@@ -61,48 +61,48 @@ const cinder: Card = {
     // registry-wide, FREE deposits forge's currency, a PIP, instead):
     // ember i3 d3 (printed lifetime 9 → phase-36b tempo-weighted 6.94 ÷ 3 =
     // 2.31; round-clocked ramp-free, so the horizon shaves the round-2/3 ticks)
-    // + FREE pip 1 (1.5) = 3.81 → Doxa band 1.5-7.5. Verified against scoreCard() in
-    // thoughtforms.engine.test.ts (the pricing lint pins only the 50
-    // library spells; the thoughtform suite carries the band check).
+    // + FREE pip 1 (1.5) = 3.81 → Ash band 1.5-7.5. Verified against scoreCard() in
+    // haunts.engine.test.ts (the pricing lint pins only the 50
+    // library spells; the haunt suite carries the band check).
     free: { pips: 1 },
     combatEffects: [{ effectId: 'debuff_kindling_ember', appliedTo: 'opponent', intensity: 3, duration: 3 }],
     addedIn: '2026-07-11',
-    tags: ['thoughtform', 'forge', 'dot'],
+    tags: ['haunt', 'forge', 'dot'],
 };
 
-// ─── Peroration — Minor Premise (conjured by Corollary, sandbox set
+// ─── Peroration — Minor Charge (conjured by Corollary, sandbox set
 //     'conjure-exercise') ──────────────────────────────────────────────────────
 
-const minorPremise: Card = {
-    id: 'tf-minor-premise',
+const minorCharge: Card = {
+    id: 'ht-minor-charge',
     theme: 'trial',
-    name: 'Minor Premise',
+    name: 'Minor Charge',
     philosophicalAspect: 'heart',
     description:
         'Small, undeniable, already conceded. Say it once and it has done ' +
         'its work; the case keeps the weight, not the words.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'self',
-    // pts: CHARGE 1 (0.8) + FREE premise 1 (0.8) = 1.6 → Doxa band
+    // pts: CHARGE 1 (0.8) + FREE premise 1 (0.8) = 1.6 → Ash band
     // 1.5-7.5 (floor-adjacent by design: a one-use tally token). Either
     // face cashes the same premise — the FREE face just costs no die.
     free: { premises: 1 },
     specialMechanics: [{ kind: 'premise', count: 1 }],
     addedIn: '2026-07-11',
-    tags: ['thoughtform', 'peroration'],
+    tags: ['haunt', 'peroration'],
 };
 
 /**
- * Every Thoughtform in existence. NOT part of the 70-card library — the
+ * Every Haunt in existence. NOT part of the 70-card library — the
  * 70/50 pins do not count these, and no reward/stage/draft pool ever
  * offers one.
  */
-export const thoughtformLibrary: Card[] = [cinder, minorPremise];
+export const hauntLibrary: Card[] = [cinder, minorCharge];
 
-const registry = new Map<string, Card>(thoughtformLibrary.map(card => [card.id, card]));
+const registry = new Map<string, Card>(hauntLibrary.map(card => [card.id, card]));
 
-/** O(1) Thoughtform lookup by card id (the middle link of `getCardById`'s
- *  sandbox → thoughtform → library chain). */
-export function getThoughtformById(id: string): Card | undefined {
+/** O(1) Haunt lookup by card id (the middle link of `getCardById`'s
+ *  sandbox → haunt → library chain). */
+export function getHauntById(id: string): Card | undefined {
     return registry.get(id);
 }

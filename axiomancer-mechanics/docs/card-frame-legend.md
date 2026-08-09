@@ -1,5 +1,7 @@
 # Card frame legend — the structure every card shares
 
+<!-- lexicon-ok: doxa, lemma, thesis, theorem, axiom -->
+
 The [keyword atlas](./keyword-atlas.md) defines the *verbs* (STAGGER, POISON, …).
 This legend defines the *frame* they sit in — the die economy, the two-line
 FREE/PAID split, the conditional die-line glyphs, and the status notation. It is
@@ -15,9 +17,9 @@ Every card prints two lines:
   colour) to fire. Every PAID line costs exactly one die, so the cards no longer
   print it.
 
-Enchantments split by *duration* instead: **FREE (N rounds) —** grants the
+Oaths split by *duration* instead: **FREE (N rounds) —** grants the
 passive for N rounds; **PAID (rest of combat) —** makes it permanent. A
-disenchant's passive **attaches to the enemy**.
+hex's passive **attaches to the enemy**.
 
 ## Die-line glyphs (conditional riders)
 
@@ -48,5 +50,6 @@ atlas uses (`PLEA 4`, `draw 1`, `+1 intensity · STAGGER 1`).
 
 ## Rank tag
 
-`Doxa · Lemma · Thesis · Theorem · Axiom · Aporia` is the rarity ladder. It
+`Ash · Tooth · Splinter · Rib · Skull · Saint` (spec 34 R-14; was
+`Doxa · Lemma · Thesis · Theorem · Axiom · Aporia`) is the rarity ladder. It
 shows as a chip, not on the face — it never affects resolution.

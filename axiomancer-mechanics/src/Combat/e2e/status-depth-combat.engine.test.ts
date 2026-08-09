@@ -460,8 +460,8 @@ describe('card projection — the v3 library classifies + advertises sensibly', 
         ['thin-hymn', 'direct-control', 'control'],          // PLEA
         ['chilblain-watch', 'defend', 'none'],
         ['nothing-crossed-the-ice', 'defend', 'none'],
-        ['the-untended-garden', 'enchant', 'none'],
-        ['the-congregation-below', 'disenchant', 'control'],
+        ['the-untended-garden', 'oath', 'none'],
+        ['the-congregation-below', 'hex', 'control'],
     ];
 
     for (const [id, verbClass, track] of cases) {

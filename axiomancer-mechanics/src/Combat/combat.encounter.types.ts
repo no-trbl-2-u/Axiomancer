@@ -94,8 +94,8 @@ export type CombatVerbClass =
     | 'direct-damage'     // status-payoff bursts (RUPTURE / REAP) — never raw strikes
     | 'befriend'          // Befriend card → opens the mercy choice (§6 Q6)
     | 'defend'            // Guard/defense card → shields against the enemy's next threat
-    | 'enchant'           // spec 32 v3 — persistent player-side passive
-    | 'disenchant'        // spec 32 v3 — persistent curse attached to the enemy
+    | 'oath'              // spec 32 v3 — persistent player-side passive (spec 34 R-9: renamed from enchant)
+    | 'hex'               // spec 32 v3 — persistent curse attached to the enemy (spec 34 R-10: renamed from disenchant)
     | 'retreat';          // dead — no card ever produces this verb class any more.
                            // No in-combat retreat exists; combat resolves only
                            // by winning or losing. Kept in the union rather than
@@ -127,10 +127,10 @@ export interface CombatCard {
     /** Spec 32 v3 — rarity band derived from the rank ladder (§4). Drives the
      *  deck recipe, drop weights, and the mobile frame. */
     rarity?: 'common' | 'uncommon' | 'rare';
-    /** Spec 32 v3 — rank 1-6 (Doxa → Aporia); printed on the face. */
+    /** Spec 32 v3 — rank 1-6 (Ash → Saint); printed on the face. */
     rank?: 1 | 2 | 3 | 4 | 5 | 6;
-    /** Spec 32 v3 — card type (spell / enchantment / disenchant). */
-    cardType?: 'spell' | 'enchantment' | 'disenchant';
+    /** Spec 32 v3 — card type (spell / oath / hex). */
+    cardType?: 'spell' | 'oath' | 'hex';
     /** Human-readable description of the FREE top action. */
     topActionText: string;
     /** Human-readable description of the powered BOTTOM action. */
@@ -975,7 +975,7 @@ export interface CombatEncounterState {
      *  budgeted hit soaked to 0 by riposte/guard/barrier). Persists until the
      *  next threat resolves (WS9 `prior-threat-fully-blocked` branch fuel). */
     lastThreatFullyBlocked?: boolean;
-    /** Spec 32 v3 — uids of CONJURED one-use Thoughtforms (removed on play). */
+    /** Spec 32 v3 — uids of CONJURED one-use Haunts (removed on play). */
     conjuredUids?: string[];
     threatPhases: CombatThreatPhase[];     // enemy's authored / generated threat sequence
     threatMarks: CombatThreatMark[];       // O / X ledger per phase (hindered / acted)

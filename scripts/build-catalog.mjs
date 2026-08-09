@@ -136,7 +136,7 @@ const KEYWORD_WORDS = [
   "STRIP BUFF", "HEAL SELF", "POISON", "BLEED", "MARK", "GUARD",
   "RIPOSTE", "STAGGER", "BACKFIRE",
   "PLEA", "REAP", "SOUL", "SOULS", "FORETELL", "CHARGE", "ECHO", "FORGE", "DRAW",
-  "SIPHON", "RUPTURE", "ENCHANT", "DISENCHANT",
+  "SIPHON", "RUPTURE", "OATH", "HEX",
   "PROLONG", "RECALL", "SENTENCE", "CONDEMN", "RELENT", "THORNS",
   "TICK", "DOT", "CLEANSE", "PERORATE", "PIP", "PIPS",
   // 2026-07-16 (authored paid summaries) — registry words the list was missing.
@@ -210,7 +210,7 @@ const GLYPH_SHAPES = {
   POISON: SHAPE_FLASK, FESTER: SHAPE_FLASK, ACID: SHAPE_FLASK,
   BURN: SHAPE_FLAME, DOT: SHAPE_FLAME,
   FROSTBITE: SHAPE_CRYSTAL,
-  DOOM: SHAPE_SKULL, CURSE: SHAPE_SKULL,
+  DOOM: SHAPE_SKULL, HEX: SHAPE_SKULL,
   SHOCK: SHAPE_BOLT,
   PETRIFY: SHAPE_STONE,
   GRACE_MOMENTUM: SHAPE_CHEVRONS_RIGHT,
@@ -230,7 +230,7 @@ const GLYPH_SHAPES = {
   RECOIL: SHAPE_DOWN_ARROW,
   STAGGER: SHAPE_STAGGERED_BARS,
   REFRESH: SHAPE_CYCLE_ARROW,
-  ENCHANT: SHAPE_DIAMONDS,
+  OATH: SHAPE_DIAMONDS,
   CONVICTION: SHAPE_DIAMOND,
   CHARGE: SHAPE_BOOKMARK,
   PLEA: SHAPE_WAVES,
@@ -263,7 +263,7 @@ function cardFaceHtml(c) {
   const stance = (chipVal(c.chips, "Stance") || "body").toLowerCase();
   const rc = STANCE_COLOR[stance] || "#8a8273";
   const kind = (chipVal(c.chips, "Kind") || "spell").toLowerCase();
-  const kindLabel = kind === "disenchant" ? "CURSE" : kind.toUpperCase();
+  const kindLabel = kind.toUpperCase();
   const typeLabel = `${stance.toUpperCase()} · ${kindLabel}`;
   const rarKey = (chipVal(c.chips, "Rank").match(/\((\w+)\)/)?.[1] || "common").toLowerCase();
   const rar = RARITY_META[rarKey] || RARITY_META.common;

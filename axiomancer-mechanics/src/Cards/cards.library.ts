@@ -49,7 +49,7 @@
 
 import { Card } from './types';
 import { bindSandboxLibraryGuard, getSandboxCard } from './cards.sandbox';
-import { getThoughtformById } from './cards.thoughtforms';
+import { getHauntById } from './cards.haunts';
 
 // ─── THE THREADBARE OFFICE — the 8 starters (weak on purpose) ────────────────
 // Six teach one archetype verb each at whisper volume; the heirloom stays
@@ -539,12 +539,12 @@ const theUntendedGarden: Card = {
         'No shears, no salt, no gardener — only what the ground wanted all ' +
         'along. Each night the roots go one ring deeper. Nothing planted ' +
         'here has ever asked permission.',
-    tier: 2, rank: 5, cardType: 'enchantment',
+    tier: 2, rank: 5, cardType: 'oath',
     targetType: 'self',
     // pts: engine text — a standing end-of-round FESTER ≈ boost_all_dots 5.0
     // × ~3 remaining rounds ≈ 15-equivalent → Axiom.
     addedIn: '2026-08-08',
-    tags: ['rot', 'enchantment'],
+    tags: ['rot', 'oath'],
 };
 
 const edictOfTheOpenWound: Card = {
@@ -559,13 +559,13 @@ const edictOfTheOpenWound: Card = {
         'By order of the parish that buried its last surgeon: let nothing ' +
         'close. The scab is annulled, the salve confiscated, the prayer for ' +
         'mending struck from the book. The wound stays open for inspection.',
-    tier: 2, rank: 6, cardType: 'disenchant',
+    tier: 2, rank: 6, cardType: 'hex',
     targetType: 'enemy',
     // pts: engine text — freezes the enemy-side DoT calendar (a standing
     // PROLONG every round) and denies the enemy's heal riders → Aporia.
     // BLEED's per-trigger intensity decay survives (decay is not calendar).
     addedIn: '2026-08-08',
-    tags: ['rot', 'disenchant'],
+    tags: ['rot', 'hex'],
 };
 
 // ─── DEBT — The Reckoning (power bought in blood) ────────────────────────────
@@ -717,12 +717,12 @@ const theRedLedger: Card = {
     description:
         'Every drop is entered. The book forgives nothing; it forwards. ' +
         'What you pay at your own vein it bills again, promptly, at theirs.',
-    tier: 2, rank: 5, cardType: 'enchantment',
+    tier: 2, rank: 5, cardType: 'oath',
     targetType: 'self',
     // pts: engine text — BLEED 1 per RECOIL paid × ~8 recoil events in a
     // committed debt deck ≈ 8 → Axiom.
     addedIn: '2026-08-08',
-    tags: ['debt', 'enchantment', 'recoil-payoff'],
+    tags: ['debt', 'oath', 'recoil-payoff'],
 };
 
 const jointAndSeveral: Card = {
@@ -738,12 +738,12 @@ const jointAndSeveral: Card = {
         'liability shall be joint and several. From this clause forward, ' +
         'whatever the signatory bleeds, the counterparty bleeds also — coin ' +
         'for coin, drop for drop.',
-    tier: 2, rank: 6, cardType: 'disenchant',
+    tier: 2, rank: 6, cardType: 'hex',
     targetType: 'enemy',
     // pts: engine text — mirrors every RECOIL paid onto the enemy, rest of
     // combat (engine-drip channel; suppurating-curse precedent) → Aporia.
     addedIn: '2026-08-08',
-    tags: ['debt', 'disenchant', 'recoil-payoff'],
+    tags: ['debt', 'hex', 'recoil-payoff'],
 };
 
 // ─── GRAVE — The Exhumation (the discard pile as reliquary) ──────────────────
@@ -890,12 +890,12 @@ const theSextonsCount: Card = {
     description:
         'He rings once for every body raised, as courtesy demands. The bell ' +
         'does not mourn. It counts.',
-    tier: 2, rank: 5, cardType: 'enchantment',
+    tier: 2, rank: 5, cardType: 'oath',
     targetType: 'self',
     // pts: engine text — DOOM 1 per RECALL/REPLAY across a recursion deck's
     // ~5-7 triggers, each compounding under DOOM's growth ≈ Axiom.
     addedIn: '2026-08-08',
-    tags: ['grave', 'enchantment', 'doom'],
+    tags: ['grave', 'oath', 'doom'],
 };
 
 const theCongregationBelow: Card = {
@@ -910,12 +910,12 @@ const theCongregationBelow: Card = {
         'Every burial is a deposition. Below the frost line the parish ' +
         'keeps perfect minutes, and at the close of each round the dead ' +
         'read them into the record — all of them, at once, in your favor.',
-    tier: 2, rank: 6, cardType: 'disenchant',
+    tier: 2, rank: 6, cardType: 'hex',
     targetType: 'enemy',
     // pts: engine text — end-of-round drip of floor(discard ÷ 3): the
     // theme's native clock, scaling with its own MILL engine → Aporia.
     addedIn: '2026-08-08',
-    tags: ['grave', 'disenchant', 'requiem', 'clock'],
+    tags: ['grave', 'hex', 'requiem', 'clock'],
 };
 
 // ─── VIGIL — The Cold Watch (winter siegecraft) ──────────────────────────────
@@ -1059,12 +1059,12 @@ const everyStoneAnOath: Card = {
         'The masons swore as they laid each course — not to any saint, but ' +
         'to the stone beneath it. A promise stacked on a promise, mortared ' +
         'with breath. Every bloodless night, the congregation grows by one.',
-    tier: 2, rank: 5, cardType: 'enchantment',
+    tier: 2, rank: 5, cardType: 'oath',
     targetType: 'self',
     // pts: engine text — 3 persistent GUARD per engineered quiet round ≈
     // Axiom-weight standing engine.
     addedIn: '2026-08-08',
-    tags: ['vigil', 'enchantment', 'engine'],
+    tags: ['vigil', 'oath', 'engine'],
 };
 
 const caltropsUnderTheSnow: Card = {
@@ -1080,13 +1080,13 @@ const caltropsUnderTheSnow: Card = {
         'Whatever reaches you has already walked the field to do it. The ' +
         'snow hides them and keeps the tally, and the red comes up through ' +
         'the white like an early spring.',
-    tier: 2, rank: 6, cardType: 'disenchant',
+    tier: 2, rank: 6, cardType: 'hex',
     targetType: 'enemy',
     // pts: engine text — BLEED i2 seeded per enemy damage instance:
     // self-refreshing against aggression; the rare's DOOM covers the passive
     // tail → Aporia.
     addedIn: '2026-08-08',
-    tags: ['vigil', 'disenchant', 'reflect'],
+    tags: ['vigil', 'hex', 'reflect'],
 };
 
 // ─── TRIAL — The Indictment (the witch-trial prosecuted mid-combat) ──────────
@@ -1224,12 +1224,12 @@ const theAssizeBell: Card = {
         'One bronze syllable above the hall, struck for every objection ' +
         'sustained. The jury stopped hearing words some hours ago. They are ' +
         'counting tolls.',
-    tier: 2, rank: 5, cardType: 'enchantment',
+    tier: 2, rank: 5, cardType: 'oath',
     targetType: 'self',
     // pts: engine text — +1 CHARGE per denied rung × ~12-15 rungs across a
     // trial deck's fight ≈ Axiom.
     addedIn: '2026-08-08',
-    tags: ['trial', 'enchantment', 'objection'],
+    tags: ['trial', 'oath', 'objection'],
 };
 
 const writOfAttainder: Card = {
@@ -1244,12 +1244,12 @@ const writOfAttainder: Card = {
         'By this writ the blood itself stands condemned: nothing it feeds ' +
         'may inherit, nothing it warms may be spared. Each dawn the seal is ' +
         'pressed anew, and each dawn it bites deeper into the vein.',
-    tier: 2, rank: 6, cardType: 'disenchant',
+    tier: 2, rank: 6, cardType: 'hex',
     targetType: 'enemy',
     // pts: engine text — a fresh DOOM 1 each round onto a stack that already
     // grows as the foe acts: a compounding clock → Aporia.
     addedIn: '2026-08-08',
-    tags: ['trial', 'disenchant', 'doom'],
+    tags: ['trial', 'hex', 'doom'],
 };
 
 // ─── CHOIR — The Pale Choir (sung mercy and harvested souls) ─────────────────
@@ -1390,13 +1390,13 @@ const choirboneReliquary: Card = {
         'A box of jaws that remembers every ending it has witnessed. When ' +
         'something in the enemy gutters out — a fever, a wound, a curse run ' +
         'dry — the box counts it, and hums.',
-    tier: 2, rank: 5, cardType: 'enchantment',
+    tier: 2, rank: 5, cardType: 'oath',
     targetType: 'self',
     // pts: engine text — ~6-8 expiries/consumes per fight × (soul 0.75 +
     // sway 0.9) ≈ Axiom. Stacks with the ambient soul-on-expiry engine rule
     // (the card's grant is its own, on top).
     addedIn: '2026-08-08',
-    tags: ['choir', 'harvest', 'enchantment'],
+    tags: ['choir', 'harvest', 'oath'],
 };
 
 const theLongAmen: Card = {
@@ -1412,13 +1412,13 @@ const theLongAmen: Card = {
         'candle-stubs, past the congregation\'s patience. It does not ' +
         'resolve; it accrues. Every soul you keep lends it another voice, ' +
         'and the enemy stands in the nave, listening — agreeing.',
-    tier: 2, rank: 6, cardType: 'disenchant',
+    tier: 2, rank: 6, cardType: 'hex',
     targetType: 'enemy',
     // pts: engine text — PLEA drip = souls held, per round, compounding
     // toward RELENT; rewards HOLDING souls while the plate rewards
     // spending them (a real decision, kept deliberately) → Aporia.
     addedIn: '2026-08-08',
-    tags: ['choir', 'plea', 'disenchant'],
+    tags: ['choir', 'plea', 'hex'],
 };
 
 export const cardLibrary: Card[] = [
@@ -1456,9 +1456,9 @@ const registry = new Map<string, Card>(cardLibrary.map(card => [card.id, card]))
 bindSandboxLibraryGuard(id => registry.get(id));
 
 /** O(1) lookup by card id; sandbox-aware. Chain (WS2.1): sandbox first (so
- *  experiments can shadow anything), then the Thoughtform registry (CONJURE
+ *  experiments can shadow anything), then the Haunt registry (CONJURE
  *  targets — real cards, deliberately outside the pinned library), then the
  *  curated library. */
 export function getCardById(id: string): Card | undefined {
-    return getSandboxCard(id) ?? getThoughtformById(id) ?? registry.get(id);
+    return getSandboxCard(id) ?? getHauntById(id) ?? registry.get(id);
 }

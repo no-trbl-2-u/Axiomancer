@@ -95,15 +95,15 @@ const PAYOFF_KINDS: ReadonlySet<string> = new Set(['rupture', 'reap_all', 'reap'
 
 /**
  * Classifies a card into a verb class + the effect kind its PAID action
- * advances. Priority: enchant/disenchant > befriend > defend > DoT > control >
+ * advances. Priority: oath/hex > befriend > defend > DoT > control >
  * exposure > payoff > utility.
  */
 export function classifyVerbClass(
     card: Card,
     lookupEffect: EffectLookup,
 ): { verbClass: CombatVerbClass; track: CardEffectKind } {
-    if (card.cardType === 'enchantment') return { verbClass: 'enchant', track: 'none' };
-    if (card.cardType === 'disenchant') return { verbClass: 'disenchant', track: 'control' };
+    if (card.cardType === 'oath') return { verbClass: 'oath', track: 'none' };
+    if (card.cardType === 'hex') return { verbClass: 'hex', track: 'control' };
 
     const mechs = card.specialMechanics ?? [];
     if (mechs.some(m => m.kind === 'befriend_attempt')) {
@@ -397,7 +397,7 @@ export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffec
 
     const { verbClass, track } = classifyVerbClass(card, lookupEffect);
     const preview = bottomDamagePreview(card, lookupEffect);
-    const persistent = card.cardType === 'enchantment' || card.cardType === 'disenchant';
+    const persistent = card.cardType === 'oath' || card.cardType === 'hex';
 
     // 2026-07-16 — an authored `paidSummary` (spells only) replaces the
     // generated telegraphese wholesale; the honesty guard pins its numbers
@@ -405,7 +405,7 @@ export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffec
     // surface (no auto dot-suffix gets appended on top of it).
     const authored = !persistent ? card.paidSummary : undefined;
     const paid = authored ?? paidText(card, lookupEffect);
-    // Spec 32 v4 — an enchant/disenchant's passive lives in engine hooks, so its
+    // Spec 32 v4 — an oath/hex's passive lives in engine hooks, so its
     // authored one-line summary (`persistentEffect`) is what the card prints; fall
     // back to the effect-derived text only if a card is missing the summary.
     const passive = persistent ? (card.persistentEffect ?? paid) : paid;
@@ -431,7 +431,7 @@ export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffec
     });
     const dotSuffix = authored ? '' : dotFace ? ` (${dotFace})` : preview > 0 && !speciesGlossed ? ` (${preview} over its run)` : '';
     const bottomActionText = persistent
-        ? `PAID (rest of combat) — ${passive} Costs 1 die.${card.cardType === 'disenchant' ? ' Attaches to the enemy.' : ''}`
+        ? `PAID (rest of combat) — ${passive} Costs 1 die.${card.cardType === 'hex' ? ' Attaches to the enemy.' : ''}`
         : authored
             ? `PAID — ${authored} Costs 1 die.`
             : `PAID — ${paid}${dotSuffix}. Costs 1 die.`;

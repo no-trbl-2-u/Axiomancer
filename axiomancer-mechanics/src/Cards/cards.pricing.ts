@@ -127,7 +127,7 @@ export const VERB_POINTS = Object.freeze({
     repriseFireFree: 1.5,
     /** REPLAY LAST, per replay of the last spell's PAID payload. */
     replayPerTime: 5,
-    /** CONJURE — a one-use Thoughtform into hand. */
+    /** CONJURE — a one-use Haunt into hand. */
     conjure: 2,
     /** OMEN — declaring the prognostication glimpses the telegraph (info). */
     omenInfo: 1,

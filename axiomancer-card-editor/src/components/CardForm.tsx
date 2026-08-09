@@ -400,11 +400,11 @@ export function CardForm({ card, setCard }: { card: CardDraft; setCard: (c: Card
             {/* ════ RANK & TYPE (spec 32 v3 — replaces the dead POWER & SCALING) ════ */}
             <Section title="RANK & TYPE" defaultOpen>
                 <div>
-                    <FieldLabel hint="Doxa 1 … Aporia 6 · rarity derives from it">RANK</FieldLabel>
+                    <FieldLabel hint="Ash 1 … Saint 6 · rarity derives from it">RANK</FieldLabel>
                     <Segmented options={RANKS} value={card.rank} onChange={(v) => set({ rank: v })} />
                 </div>
                 <div>
-                    <FieldLabel hint="spell · persistent enchantment · enemy curse">CARD TYPE</FieldLabel>
+                    <FieldLabel hint="spell · persistent oath · enemy hex">CARD TYPE</FieldLabel>
                     <Segmented options={CARD_TYPES} value={card.cardType} onChange={(v) => set({ cardType: v })} />
                 </div>
                 {card.free != null && (
@@ -687,8 +687,8 @@ function MechanicFields({ mechanic, patch }: { mechanic: CardSpecialMechanic; pa
         case 'conjure_card':
             return (
                 <div>
-                    <FieldLabel hint="Thoughtform card id">CARD ID</FieldLabel>
-                    <TextField value={mechanic.cardId} onChange={(v) => patch({ cardId: v })} placeholder="e.g. thoughtform-…" />
+                    <FieldLabel hint="Haunt card id">CARD ID</FieldLabel>
+                    <TextField value={mechanic.cardId} onChange={(v) => patch({ cardId: v })} placeholder="e.g. haunt-…" />
                 </div>
             );
         case 'rider':

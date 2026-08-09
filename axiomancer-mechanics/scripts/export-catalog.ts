@@ -184,13 +184,13 @@ function effectKw(effectId: string): string {
 // the effect-shaped silhouette downstream), ② the authored PAID sentence
 // (composed through the real engine, keywords bolded downstream).
 function cardFace(c: any): { freeGlyph: string; freeKw: string | null; freeVal: string | null; paid: string } {
-    const persistent = c.cardType === 'enchantment' || c.cardType === 'disenchant';
+    const persistent = c.cardType === 'oath' || c.cardType === 'hex';
     let freeGlyph = '';
     let freeKw: string | null = null;
     let freeVal: string | null = null;
     if (persistent) {
-        freeGlyph = c.cardType === 'disenchant' ? '☠' : '❖';
-        freeKw = c.cardType === 'disenchant' ? 'CURSE' : 'ENCHANT';
+        freeGlyph = c.cardType === 'hex' ? '☠' : '❖';
+        freeKw = c.cardType === 'hex' ? 'HEX' : 'OATH';
         freeVal = `${FREE_ENCHANT_ROUNDS}r`;
     } else if (c.free?.applyEffect?.effectId) {
         const eff = lookupEffect(c.free.applyEffect.effectId);
@@ -286,8 +286,8 @@ function cardStats(c: any): { chips: Chip[]; lines: string[] } {
     // Spec 32 v4 — enchant/disenchant passives live in engine hooks; their authored
     // `persistentEffect` summary is the only card-facing description. Render it on
     // both lines: FREE grants it timed (a few rounds), PAID makes it permanent.
-    if ((c.cardType === 'enchantment' || c.cardType === 'disenchant') && c.persistentEffect) {
-        const target = c.cardType === 'disenchant' ? ' (attaches to the enemy)' : '';
+    if ((c.cardType === 'oath' || c.cardType === 'hex') && c.persistentEffect) {
+        const target = c.cardType === 'hex' ? ' (attaches to the enemy)' : '';
         // The FREE line matches the glyph's "3r" badge (a timed run of the
         // passive) instead of restating the card's printed text twice.
         lines.push(`FREE — the printed passive for ${FREE_ENCHANT_ROUNDS} rounds.`);

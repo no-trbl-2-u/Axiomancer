@@ -23,7 +23,7 @@ import type { Card } from '../Cards/types';
 // ── WS4.1 (spec 32 §12 item 4/5) — forge theme-role pass (`roles-forge`) ─────
 
 /**
- * Slag Runoff — forge Lemma, the KINDLE-species driller (WS10.3): RIPEN the
+ * Slag Runoff — forge Tooth, the KINDLE-species driller (WS10.3): RIPEN the
  * Reserve, and every pip that finds no room (Reserve at `RESERVE_PIP_CAP`, or
  * empty) converts into a Kindling Ember on the foe instead of vanishing. The
  * forge's waste heat is never wasted — which also makes the card's floor
@@ -44,7 +44,7 @@ const slagRunoff: Card = {
     // pts: PAID grant_pip 2 (2 × 1.5 = 3.0) + overflow→ember (kindling_ember
     // i1 d3 printed 3 → phase-36b tempo-weighted 2.31 ÷ 3 = 0.77 per overflowed
     // pip × expectedOverflowPips 1 = 0.77) + FREE pips 1 (1.5) = 5.27 → common
-    // band 1.5-7.5 (Lemma). FREE share 1.5/5.27 = 28.5% ✓ the 25-35% window.
+    // band 1.5-7.5 (Tooth). FREE share 1.5/5.27 = 28.5% ✓ the 25-35% window.
     free: { pips: 1 },
     specialMechanics: [{
         kind: 'grant_pip', count: 2,
@@ -55,7 +55,7 @@ const slagRunoff: Card = {
 };
 
 /**
- * Ingot of Ruin — forge Axiom, the uncapped ALL-spender the theme lacked
+ * Ingot of Ruin — forge Skull, the uncapped ALL-spender the theme lacked
  * (WS7 landed: the flat floors are gone; spec 32 §12 item 5 ratifies that an
  * ALL-spender's price is the input opportunity cost). One last hammer-fall
  * (RIPEN 1), then pour EVERYTHING: +1 MARK per 2 pips spent — UNCAPPED — and
@@ -78,7 +78,7 @@ const ingotOfRuin: Card = {
     // pts: grant_pip 1 (1.5) + spend_all_pips (1.0) + markPer 2 (expected
     // floor(2/2) = 1 MARK stack → statusPoints mark i1 d2 = 1.5; UNCAPPED
     // upside rides the real bank) + closer ruptureMarks 3 (3 × 2/3 = 2.0) +
-    // FREE pips 1 (1.5) = 7.5 → rare band 7-19 (Axiom, floor-adjacent by
+    // FREE pips 1 (1.5) = 7.5 → rare band 7-19 (Skull, floor-adjacent by
     // design: the neutral read carries ~2 pips; the ceiling is the emptied
     // bank, §12 item 5).
     free: { pips: 1 },
@@ -97,7 +97,7 @@ const ingotOfRuin: Card = {
 // ratified supporting cast: a non-reactive sting + the ledger-read wall.
 
 /**
- * Grit Between Stones — bulwark Theorem: the wall that stings without being
+ * Grit Between Stones — bulwark Rib: the wall that stings without being
  * struck. Applies Nettle Sting (the theme's non-reactive DoT species) plus a
  * payoff-class tick: `ruptureMarks` fires the WS3 'payoff' clock and cashes
  * every MARK on the foe at 2 HP per stack — closing the loop Hedgehog's
@@ -118,7 +118,7 @@ const gritBetweenStones: Card = {
     // currency, a persistent BARRIER brick, instead of the fading chip
     // guard): nettle sting i2 d3 (printed 12 → phase-36b tempo-weighted 9.25
     // ÷ 3 = 3.08) + Guard 6 (1.5) + payoff-class closer ruptureMarks 2 (2 × 2/3
-    // = 1.33) + FREE barrier 2 (0.67) = 6.58 → uncommon band 4.5-13 (Theorem).
+    // = 1.33) + FREE barrier 2 (0.67) = 6.58 → uncommon band 4.5-13 (Rib).
     free: { barrier: 2 },
     combatEffects: [
         { effectId: 'debuff_nettle_sting', appliedTo: 'opponent', intensity: 2, duration: 3 },
@@ -132,7 +132,7 @@ const gritBetweenStones: Card = {
 };
 
 /**
- * The Unmoved Mover — bulwark Thesis, the first combat-ledger condition card
+ * The Unmoved Mover — bulwark Splinter, the first combat-ledger condition card
  * (spec 32 §12 item 4): reads `enemyDamageLastRound` through the extended
  * CardSynergy state-predicate gate. If the enemy dealt you no damage last
  * round — fully blocked, denied, or idle — the wall answers: THORNS i2 d2 +
@@ -153,7 +153,7 @@ const theUnmovedMover: Card = {
     // currency, a persistent BARRIER brick, instead of the fading chip
     // guard): BARRIER 8 (8 ÷ 3 = 2.67) + UNMOVED condition rider [thorns i2
     // d2 self (0.75 × 2 × 2 = 3.0) + guard 4 (1.0)] × threshold 0.5 = 2.0 +
-    // FREE barrier 2 (0.67) = 5.33 → uncommon band 4.5-13 (Thesis).
+    // FREE barrier 2 (0.67) = 5.33 → uncommon band 4.5-13 (Splinter).
     free: { barrier: 2 },
     specialMechanics: [{ kind: 'barrier', amount: 8 }],
     synergy: {
@@ -175,7 +175,7 @@ const theUnmovedMover: Card = {
 // unconditionally-ratified card.
 
 /**
- * A Sweeter Poison — charm Theorem: the compliment with the pit left in.
+ * A Sweeter Poison — charm Rib: the compliment with the pit left in.
  * PAID: PLEA 3, then the RUPTURE-class closer (`ruptureMarks` — a payoff-class
  * verb: it fires the WS3 'payoff' trigger clock, then cashes every STANDING
  * MARK at 2 HP per stack), and only THEN plants MARK ×2 for the next twist of
@@ -183,7 +183,7 @@ const theUnmovedMover: Card = {
  * order), so the closer consumes PRE-EXISTING marks only — on a clean board it
  * is silence, not a strike in disguise. A full `rupture` was rejected twice
  * over: it prices at 12 (V.rupture 4 + expected fuel 8 — rank-dishonest for a
- * Theorem also carrying PLEA + MARK), and it consumes ALL afflictions —
+ * Rib also carrying PLEA + MARK), and it consumes ALL afflictions —
  * including QUARTER, the charm state the rest of the deck builds.
  */
 const aSweeterPoison: Card = {
@@ -199,7 +199,7 @@ const aSweeterPoison: Card = {
     targetType: 'enemy',
     // pts (phase 36a: PLEA 0.8→0.9): PLEA 3 (2.7) + closer ruptureMarks 2
     // (2 × 2/3 = 1.33) + MARK ×2 (mark i2 d2 = 3.0) + FREE [sway 2 (1.8) +
-    // heal 2 (0.67)] = 9.5 → uncommon band 4.5-13 (Theorem). FREE share
+    // heal 2 (0.67)] = 9.5 → uncommon band 4.5-13 (Rib). FREE share
     // 2.47/9.5 = 26.0% ✓ window.
     free: { sway: 2, healHp: 2 },
     specialMechanics: [
@@ -217,7 +217,7 @@ const aSweeterPoison: Card = {
 // payoff belongs to Phase 32; these two are its supporting cast.
 
 /**
- * The Long Ledger — harvest Thesis: call in two accounts at once. PAID: TWO
+ * The Long Ledger — harvest Splinter: call in two accounts at once. PAID: TWO
  * payoff-class DoT fires — each `consume_affliction` is a payoff-class verb
  * (the engine fires the WS3 'payoff' trigger clock inside it), and the picked
  * affliction's ENTIRE remaining fuel ticks NOW — then a short Bleed is booked
@@ -240,7 +240,7 @@ const theLongLedger: Card = {
     targetType: 'enemy',
     // pts: consume_affliction ×2 (2 × 5.5 = 11.0) + rider bleed i1 d1
     // (damage-instance clock: one 3-HP tick then washout = 3 ÷ 3 = 1.0) +
-    // FREE souls 1 (0.75) = 12.75 → uncommon band 4.5-13 (Thesis,
+    // FREE souls 1 (0.75) = 12.75 → uncommon band 4.5-13 (Splinter,
     // ceiling-adjacent by design). FREE share 0.75/12.75 = 5.9% — under the
     // 25-35% window, `intentionallyAsymmetric`: the double-payoff PAID line
     // alone fills the band, so ANY in-window FREE overflows the 13 ceiling
@@ -257,7 +257,7 @@ const theLongLedger: Card = {
 };
 
 /**
- * Seedcorn Sacrifice — harvest Theorem: closes the flywheel. PAID: REAP 2
+ * Seedcorn Sacrifice — harvest Rib: closes the flywheel. PAID: REAP 2
  * Souls (fizzles underfunded — the printed cost is real) → sow a heavy short
  * Bleed (i3, one round on the damage-instance clock: two ticks then washout —
  * next season's Souls) and draw 1 (keep the cycle turning). FREE: the
@@ -278,7 +278,7 @@ const seedcornSacrifice: Card = {
     targetType: 'enemy',
     // pts: REAP 2 → rider [bleed i3 d1 (9+6 = 15 HP ÷ 3 = 5.0) + draw (2.0)]
     // − soul cost 2 × 0.75 × SELF_COST_CREDIT 0.75 (= −1.125) = 5.875 + FREE
-    // [souls 1 (0.75) + draw (2.0)] = 8.625 → uncommon band 4.5-13 (Theorem).
+    // [souls 1 (0.75) + draw (2.0)] = 8.625 → uncommon band 4.5-13 (Rib).
     // FREE share 2.75/8.625 = 31.9% ✓ window.
     free: { souls: 1, drawCards: 1 },
     specialMechanics: [{
@@ -305,7 +305,7 @@ const seedcornSacrifice: Card = {
 // falsifiable test AND the WS5.4 draft-appeal evidence (post-Phase-26).
 
 /**
- * Captatio Benevolentiae — peroration Lemma, the OPENING witness: the
+ * Captatio Benevolentiae — peroration Tooth, the OPENING witness: the
  * classical opening bid for goodwill. Worth a Premise and a modest Guard any
  * time; worth double when it actually OPENS (first spell of the turn).
  */
@@ -322,7 +322,7 @@ const captatioBenevolentiae: Card = {
     // pts: PAID [guard 5 (1.25) + CHARGE 1 (0.8)] = 2.05 + OPENING rider
     // [guard 5 (1.25) + premise 1 (0.8)] × threshold 0.5 = 1.025 + FREE
     // [premise 1 (0.8) + guard 1 (0.25)] = 1.05 → 4.125 → common band
-    // 1.5-7.5 (Lemma). FREE share 1.05/4.125 = 25.5% ✓ window.
+    // 1.5-7.5 (Tooth). FREE share 1.05/4.125 = 25.5% ✓ window.
     free: { premises: 1, guard: 1 },
     specialMechanics: [
         { kind: 'guard', amount: 5 },
@@ -337,7 +337,7 @@ const captatioBenevolentiae: Card = {
 };
 
 /**
- * In Medias Res — peroration Thesis, the looser OPENING (first OR second
+ * In Medias Res — peroration Splinter, the looser OPENING (first OR second
  * spell): start inside the action and the poison you open with runs deeper
  * (+1 intensity on this play's statuses) while the thread pulls a card.
  */
@@ -354,7 +354,7 @@ const inMediasRes: Card = {
     // pts: PAID [poison i1 d2 (spec 33 D4 1.83 cadence: tempo-weighted 6.4 ÷ 3
     // = 2.14) + CHARGE 1 (0.8)] = 2.94 + OPENING(≤1) rider [bonusIntensity 1
     // (1.5) + draw (2.0)] × threshold 0.5 = 1.75 + FREE [premises 2 (1.6) +
-    // guard 1 (0.25)] = 1.85 → 6.54 → uncommon band 4.5-13 (Thesis). FREE
+    // guard 1 (0.25)] = 1.85 → 6.54 → uncommon band 4.5-13 (Splinter). FREE
     // share 1.85/6.54 = 28.3% ✓ window.
     free: { premises: 2, guard: 1 },
     combatEffects: [
@@ -370,7 +370,7 @@ const inMediasRes: Card = {
 };
 
 /**
- * Coda — echo Thesis, the finale REPRISE: when the verse runs out (≤ 2 cards
+ * Coda — echo Splinter, the finale REPRISE: when the verse runs out (≤ 2 cards
  * left behind), the refrain returns and the hand refills. The reprise itself
  * pulls a spent card back, so the coda writes the next movement.
  */
@@ -386,7 +386,7 @@ const coda: Card = {
     targetType: 'enemy',
     // pts: PAID [REPRISE 1 (2.0) + mark i1 d2 (1.5)] = 3.5 + closing-play
     // rider [draw 2 (4.0)] × threshold 0.5 = 2.0 + FREE [mark i1 d2 (1.5) +
-    // conviction 1 (1.0)] = 2.5 → 8.0 → uncommon band 4.5-13 (Thesis).
+    // conviction 1 (1.0)] = 2.5 → 8.0 → uncommon band 4.5-13 (Splinter).
     // FREE share 2.5/8.0 = 31.3% ✓ window.
     free: { applyEffect: { effectId: 'debuff_mark', duration: 2 }, conviction: 1 },
     combatEffects: [
@@ -402,7 +402,7 @@ const coda: Card = {
 };
 
 /**
- * Dying Echo — echo Lemma, the finale DoT: a small poison that rings loudest
+ * Dying Echo — echo Tooth, the finale DoT: a small poison that rings loudest
  * as the last note (played with ≤ 2 cards left behind it lands +2 intensity,
  * +1 turn). Early it is a whisper the card-played clock multiplies; late it
  * is the note that hangs after the music stops.
@@ -420,7 +420,7 @@ const dyingEcho: Card = {
     // pts: PAID poison i1 d2 (spec 33 D4 1.83 cadence: tempo-weighted 6.4 ÷ 3
     // = 2.14) + closing-play rider [bonusIntensity 2 (3.0) + bonusDuration 1
     // (1.0)] × threshold 0.5 = 2.0 + FREE [mark i1 d1 (0.75) + conviction 1
-    // (1.0)] = 1.75 → 5.89 → common band 1.5-7.5 (Lemma). FREE share
+    // (1.0)] = 1.75 → 5.89 → common band 1.5-7.5 (Tooth). FREE share
     // 1.75/5.89 = 29.7% ✓ window.
     free: { applyEffect: { effectId: 'debuff_mark', duration: 1 }, conviction: 1 },
     combatEffects: [
@@ -435,7 +435,7 @@ const dyingEcho: Card = {
 };
 
 /**
- * Wages of Weakness — akrasia Thesis, the Frenzy after RECOIL: a bleed and a
+ * Wages of Weakness — akrasia Splinter, the Frenzy after RECOIL: a bleed and a
  * mark any time, but if a blood price is already on this turn's ledger
  * (`recoilPaidThisTurn > 0` — a PRIOR play paid it; this card pays none), the
  * spilled blood answers: a second bleed and 3 HP back.
@@ -453,7 +453,7 @@ const wagesOfWeakness: Card = {
     // pts: PAID [bleed i2 d2 (9 HP ÷ 3 = 3.0) + mark i1 d2 (1.5)] = 4.5 +
     // blood-paid rider [bleed i2 d2 (3.0) + heal 3 (1.0)] × threshold 0.5 =
     // 2.0 + FREE [mark i1 d2 (1.5) + heal 3 (1.0)] = 2.5 → 9.0 → uncommon
-    // band 4.5-13 (Thesis). FREE share 2.5/9.0 = 27.8% ✓ window.
+    // band 4.5-13 (Splinter). FREE share 2.5/9.0 = 27.8% ✓ window.
     free: { applyEffect: { effectId: 'debuff_mark', duration: 2 }, healHp: 3 },
     combatEffects: [
         { effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 2 },
@@ -471,7 +471,7 @@ const wagesOfWeakness: Card = {
 };
 
 /**
- * Answered in Kind — akrasia Lemma, the Frenzy after the enemy's hit: a short
+ * Answered in Kind — akrasia Tooth, the Frenzy after the enemy's hit: a short
  * heavy bleed any time; if the enemy drew blood since your last turn
  * (`enemyDamageLastRound > 0` — threats land between player turns), the
  * answer marks them deep (MARK ×2) and closes 2 HP of the wound.
@@ -492,7 +492,7 @@ const answeredInKind: Card = {
     // deposit utility kicker): PAID bleed i2 d1 (9 HP ÷ 3 = 3.0) +
     // drew-blood rider [mark i2 d2 (3.0) + heal 2 (0.67)] × threshold 0.5 =
     // 1.83 + FREE [self-mark i1 d1 (0.75) + heal 2 (0.67)] = 1.42 → 6.25 →
-    // common band 1.5-7.5 (Lemma). FREE share 1.42/6.25 = 22.7%.
+    // common band 1.5-7.5 (Tooth). FREE share 1.42/6.25 = 22.7%.
     free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1, to: 'self' }, healHp: 2 },
     combatEffects: [
         { effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 2, duration: 1 },
@@ -529,7 +529,7 @@ const answeredInKind: Card = {
 //     the stolen beat and the returned card arrive together, uncoupled.
 
 /**
- * Barbed Compliment — affliction↔charm (theme home: affliction, Lemma). The
+ * Barbed Compliment — affliction↔charm (theme home: affliction, Tooth). The
  * bridge IS the double-count: MARK is utility vocabulary that reads as an
  * affliction (every DoT tick and payoff hit cashes it; RUPTURE/REAP consume
  * it) AND the same breath deposits PLEA on the RELENT bar. An affliction
@@ -548,7 +548,7 @@ const barbedCompliment: Card = {
     targetType: 'enemy',
     // pts (phase 36a: PLEA 0.8→0.9): MARK i2 d2 (0.75 × 2 × 2 = 3.0) + PLEA 2
     // (1.8) = 4.8 + FREE [mark i1 d1 (0.75) + sway 1 (0.9)] = 1.65 → 6.45 →
-    // common band 1.5-7.5 (Lemma). FREE share 1.65/6.45 = 25.6% ✓ the 25-35% window.
+    // common band 1.5-7.5 (Tooth). FREE share 1.65/6.45 = 25.6% ✓ the 25-35% window.
     free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 }, sway: 1 },
     combatEffects: [
         { effectId: 'debuff_mark', appliedTo: 'opponent', intensity: 2, duration: 2 },
@@ -559,7 +559,7 @@ const barbedCompliment: Card = {
 };
 
 /**
- * The Poured Rampart — forge↔bulwark (theme home: forge, Lemma). Pips → the
+ * The Poured Rampart — forge↔bulwark (theme home: forge, Tooth). Pips → the
  * wall: RIPEN once, then pour the WHOLE bank into Guard (2 per pip spent —
  * `spend_all_pips.guardPerPip`, the existing engine verb) over a small
  * BARRIER footing. Drills the BARRIER/GUARD species per WS10.3: the forge
@@ -578,7 +578,7 @@ const thePouredRampart: Card = {
     targetType: 'self',
     // pts: PIP 1 (1.5) + spend_all_pips guardPerPip 2 (1.0 + 2 × 0.5 = 2.0) +
     // BARRIER 3 (3 ÷ 3 = 1.0) = 4.5 + FREE pips 1 (1.5) = 6.0 → common band
-    // 1.5-7.5 (Lemma). FREE share 1.5/6.0 = 25.0% ✓ window.
+    // 1.5-7.5 (Tooth). FREE share 1.5/6.0 = 25.0% ✓ window.
     free: { pips: 1 },
     specialMechanics: [
         { kind: 'grant_pip', count: 1 },
@@ -590,7 +590,7 @@ const thePouredRampart: Card = {
 };
 
 /**
- * Interest on the Flesh — akrasia↔harvest (theme home: akrasia, Thesis). The
+ * Interest on the Flesh — akrasia↔harvest (theme home: akrasia, Splinter). The
  * NEAREST BUILDABLE SHAPE of "self-affliction expiry → Souls" (no engine hook
  * for player-side expiry yields — flagged above): the loan is booked up
  * front. PAID: a short self-Bleed (the akratic printed cost, library
@@ -610,7 +610,7 @@ const interestOnTheFlesh: Card = {
     targetType: 'enemy',
     // pts: self BLEED i1 d1 (3 HP ÷ 3 = 1.0, self-debuff credit −0.75) +
     // SOUL 3 (2.25) + MARK i2 d2 (3.0) = 4.5 + FREE [souls 1 (0.75) + heal 3
-    // (1.0)] = 1.75 → 6.25 → uncommon band 4.5-13 (Thesis). FREE share
+    // (1.0)] = 1.75 → 6.25 → uncommon band 4.5-13 (Splinter). FREE share
     // 1.75/6.25 = 28.0% ✓ window.
     free: { souls: 1, healHp: 3 },
     combatEffects: [
@@ -623,7 +623,7 @@ const interestOnTheFlesh: Card = {
 };
 
 /**
- * Entered into Evidence — oracle↔peroration (theme home: oracle, Thesis).
+ * Entered into Evidence — oracle↔peroration (theme home: oracle, Splinter).
  * FORETELL confirm → Premise, exactly as the pairing prints it: FORETELL 2
  * reads the future, the OMEN declares it, and when the prediction CONFIRMS at
  * the phase boundary the rider deposits CHARGE ×2 onto the running tally
@@ -649,7 +649,7 @@ const enteredIntoEvidence: Card = {
     // two rank-2/3 LIBRARY omen carriers' anteConviction 2 — proportioned
     // to its own rider the same way, see cards.library.ts) credits at
     // −0.75× = −0.75, netting mechanic sum 3.96 − 0.75 = 3.21 + FREE 1.8 =
-    // 5.01 → still uncommon band 4.5-13 (Thesis). This IS checked by
+    // 5.01 → still uncommon band 4.5-13 (Splinter). This IS checked by
     // bridge-rewards.engine.test.ts's own band + regression-anchor lints
     // (not exempt just for being a sandbox card).
     free: { premises: 1, foretell: 1 },
@@ -662,7 +662,7 @@ const enteredIntoEvidence: Card = {
 };
 
 /**
- * Stolen Cadence — control↔echo (theme home: control, Thesis). The NEAREST
+ * Stolen Cadence — control↔echo (theme home: control, Splinter). The NEAREST
  * BUILDABLE SHAPE of "STAGGER'd rung → REPRISE fuel" (no rungs-denied ledger
  * exists to gate on — flagged above): STAGGER 1 steals a beat from their next
  * action and REPRISE 1 replays a beat of yours, together on one card. The
@@ -680,7 +680,7 @@ const stolenCadence: Card = {
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
     // pts: STAGGER 1 (2.0) + REPRISE 1 (2.0) = 4.0 + FREE [mark i1 d1 (0.75)
-    // + conviction 1 (1.0)] = 1.75 → 5.75 → uncommon band 4.5-13 (Thesis).
+    // + conviction 1 (1.0)] = 1.75 → 5.75 → uncommon band 4.5-13 (Splinter).
     // FREE share 1.75/5.75 = 30.4% ✓ window. (FREE deposits MARK + Conviction
     // — the coda/dying-echo precedent; rider-line STAGGER is PAID-path-only
     // in the engine, so the FREE face never prints a silent no-op.)
@@ -694,7 +694,7 @@ const stolenCadence: Card = {
 };
 
 /**
- * Unbroken Countenance — bulwark↔charm (theme home: charm, Theorem). Unbroken
+ * Unbroken Countenance — bulwark↔charm (theme home: charm, Rib). Unbroken
  * GUARD → PLEA: raise the wall and press the bar; if the enemy dealt you NO
  * damage last round (fully blocked, denied, or idle — the ratified
  * `enemy-dealt-no-damage-last-round` ledger predicate, The Unmoved Mover's
@@ -714,7 +714,7 @@ const unbrokenCountenance: Card = {
     // pts (phase 36a: PLEA 0.8→0.9): GUARD 8 (8 ÷ 4 = 2.0) + PLEA 2 (1.8) =
     // 3.8 + UNBROKEN condition rider [sway 4 (3.6) + heal 2 (0.67)] ×
     // threshold 0.5 = 2.14 + FREE [guard 2 (0.5) + sway 2 (1.8)] = 2.3 →
-    // 8.23 → uncommon band 4.5-13 (Theorem). FREE share 2.3/8.23 = 27.9% ✓ window.
+    // 8.23 → uncommon band 4.5-13 (Rib). FREE share 2.3/8.23 = 27.9% ✓ window.
     free: { guard: 2, sway: 2 },
     specialMechanics: [
         { kind: 'guard', amount: 8 },

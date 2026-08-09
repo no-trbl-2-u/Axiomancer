@@ -59,14 +59,14 @@ describe('Starter bundles — the pre-run deck picker (the campaign snapshots)',
 
         // The rot clock runs from the first snapshot to the last; the wall
         // arrives with the pilgrim trimming; the persistent zones are the
-        // apostate's signature (the canon seats no enchantment before then).
+        // apostate's signature (the canon seats no oath before then).
         for (const id of ['threadbare', 'pilgrim', 'apostate']) {
             expect(has(id, effect('poison'))).toBe(true);
         }
         expect(has('threadbare', (c) => c.verbClass === 'defend')).toBe(true);
         expect(has('pilgrim', (c) => c.verbClass === 'defend')).toBe(true);
-        expect(has('apostate', (c) => c.cardType === 'enchantment')).toBe(true);
-        expect(has('apostate', (c) => c.cardType === 'disenchant')).toBe(true);
+        expect(has('apostate', (c) => c.cardType === 'oath')).toBe(true);
+        expect(has('apostate', (c) => c.cardType === 'hex')).toBe(true);
     });
 
     it('seeding a reward-archetype bundle tags the run with its hidden archetype', () => {
