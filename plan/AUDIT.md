@@ -14,6 +14,34 @@
 
 ## Pending
 
+### [docs] Phase 44a deferred its `lexicon.json` registrations to the phases that actually rename each concept
+- category: docs
+- impact: 4
+- ease: 8
+- detail: filed 2026-08-09 by Phase 44a. The build-plan row and spec 34 §5.9
+  item 2 both ask 44a to register the fifteen §5.2 renames, the six rank
+  names, and the V-1 word list in `axiomancer-mechanics/docs/lexicon.json`
+  right now, even though 44a ships ZERO renames. `scripts/check-lexicon.mjs`
+  scans every live `.md` file outside `plan/` (except `bearings.md`) — about
+  240 files — and every one of those existing rows was added at the commit
+  that actually retired the concept from code, never earlier (see the four
+  shipped rows' `since` dates). Registering now, while ~40 live docs
+  (`axiomancer-mechanics/docs/philosophy.md`, `morality.md`,
+  `keyword-atlas.md`, `card-frame-legend.md`, `combat.md`, `api.md`,
+  `effects.md`, `gameloop.md`, `npcs.md`, `quickstart.md`, `testing.md`,
+  `hazard-minigame.md`, `references/*`, `axiomancer-mechanics/CLAUDE.md`,
+  `axiomancer-mechanics/README.md`, plus mobile docs and `.claude/`
+  agent/skill prompts) still correctly describe the pre-retheme system,
+  would force premature rewrites of accurate docs or blanket
+  pragma-tagging dozens of files for a guard that protects nothing yet.
+  **Fix:** each of 44b (the §5.2 keyword/system-term renames), 44c (the rank
+  ladder), and 44g/44h (the broader V-1 prose vocabulary) adds its own
+  `lexicon.json` rows in the same commit that performs its rename, and
+  triages whatever `check-lexicon.mjs` then flags the normal way (fix
+  wording / HISTORICAL banner / `<!-- lexicon-ok -->` pragma). See
+  `plan/phases/phase_44a_rename_infrastructure.md` "Decisions made upfront"
+  for the full reasoning.
+
 ### [world] Map-event content has no coverage guard against unreachable authoring
 - source: first-map audit 2026-08-08 (finding F5). `fv-1` carried a fully
   authored encounter pool that no player could ever see, because map events
