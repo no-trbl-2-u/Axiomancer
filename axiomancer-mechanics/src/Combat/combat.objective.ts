@@ -37,7 +37,7 @@
  *     "comeback" would measure the driver's guard counters, not the design.
  *   - *Win-path diversity* — already first-class as `winPathCounts`, and it is
  *     a property of the LIBRARY, not of a fight's quality: rot should not be
- *     penalised for never reaching CAPITULATE.
+ *     penalised for never reaching RELENT.
  * Both remain reported elsewhere; neither is part of the objective.
  *
  * ─── The locked-mechanics guard ─────────────────────────────────────────────
@@ -107,8 +107,8 @@ export interface CombatQualityWeights {
  * was the parked AUDIT row's own diagnosis of what `statusEngagement` got
  * wrong. Every one of the six shipped archetypes (`docs/profane-canon.md` §2)
  * is a setup→payoff engine: rot plants then RUPTUREs, debt borrows then bills,
- * grave fills then REQUIEMs, vigil banks quiet rounds, trial stacks PREMISE
- * toward CONCEDE, choir hoards SOUL then REAPs. A flat damage profile means
+ * grave fills then REQUIEMs, vigil banks quiet rounds, trial stacks CHARGE
+ * toward CONDEMN, choir hoards SOUL then REAPs. A flat damage profile means
  * the archetype is not being played as designed, and no other term sees that.
  *
  * `width` **0.20** — the other named blind spot (a metric that rewards more

@@ -457,7 +457,7 @@ describe('card projection — the v3 library classifies + advertises sensibly', 
         ['spoiled-poultice', 'direct-dot', 'dot'],
         ['unction-of-boils', 'direct-dot', 'dot'],
         ['scolds-bridle', 'direct-control', 'control'],      // STAGGER
-        ['thin-hymn', 'direct-control', 'control'],          // SWAY
+        ['thin-hymn', 'direct-control', 'control'],          // PLEA
         ['chilblain-watch', 'defend', 'none'],
         ['nothing-crossed-the-ice', 'defend', 'none'],
         ['the-untended-garden', 'enchant', 'none'],

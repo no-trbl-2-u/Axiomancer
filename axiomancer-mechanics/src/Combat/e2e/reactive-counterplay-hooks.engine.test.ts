@@ -1,11 +1,11 @@
 /**
  * Hermetic E2E — Phase 33a (plan/phases/phase_33a_reactive_verb_core.md):
- * SWAY/Premise enemy counterplay hooks.
+ * PLEA/Premise enemy counterplay hooks.
  *
  * `CombatThreatEffect.swayCleanse` / `.premiseShed` let an authored threat
- * phase shed the player's live SWAY (charm/grace CAPITULATE track) or
- * spendable Premise tally (peroration/oratory CONCEDE track) — the two
- * hooks Phase 33b's CAUTERIZE/Premise-shed/SWAY-cleanse enemy archetypes
+ * phase shed the player's live PLEA (charm/grace RELENT track) or
+ * spendable Premise tally (peroration/oratory CONDEMN track) — the two
+ * hooks Phase 33b's CAUTERIZE/Premise-shed/PLEA-cleanse enemy archetypes
  * need and didn't have (CAUTERIZE already works via the existing
  * `enemyCleanse` hook, shipped under WS9).
  *
@@ -14,7 +14,7 @@
  * often as the authored phase recurs" implicit cooldown) but a simpler
  * guardrail, since `sway`/`premises` are scalars racing a fixed threshold,
  * not a list: flat amount, floored at 0, never touching the one-way
- * milestone flags (SWAY) or the lifetime counter (Premise).
+ * milestone flags (PLEA) or the lifetime counter (Premise).
  *
  * Fixture/RNG conventions follow `turnabout-ledger.engine.test.ts`'s direct
  * `resolveThreatPhase` harness — a single custom `CombatThreatPhase` on a
@@ -49,7 +49,7 @@ function makePlayer(): Character {
 
 /** A non-boss enemy well above any test's sway/premise values, so
  *  `capitulateThreshold` (0.35×maxHealth, floored at 10) never trips
- *  CAPITULATE mid-test. */
+ *  RELENT mid-test. */
 function makeEnemy(hp = 300): Enemy {
     const e = deepClone(GraveLarva);
     e.id = 'enemy-reactive-hooks-dummy';
@@ -99,7 +99,7 @@ describe('Phase 33a — swayCleanse', () => {
         expect(res.state.sway).toBe(0);
     });
 
-    it('never resets the SWAY milestone-fired flags — only the raw counter moves', () => {
+    it('never resets the PLEA milestone-fired flags — only the raw counter moves', () => {
         const s = phaseState([{ swayCleanse: 3 }], { sway: 10 });
         const withMilestones: CombatEncounterState = {
             ...s, swayMilestoneWaveringFired: true, swayMilestoneFalteringFired: true,

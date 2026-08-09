@@ -2,33 +2,33 @@
  * Hermetic E2E — Phase 32 part 4e (Charm — Resolve milestones,
  * plan/phases/phase_32_theme_deep_work.md §Part 4e).
  *
- * Scope (see brief's Decisions): SWAY crossing a NAMED FRACTIONAL WAYPOINT
+ * Scope (see brief's Decisions): PLEA crossing a NAMED FRACTIONAL WAYPOINT
  * of the enemy's LIVE `capitulateThreshold` ("resolve") pays a small
  * one-time dividend, engine-side, at the SINGLE `gainSway` insertion point
- * every SWAY source funnels through (mirrors `gainPremises` in Part 4b):
+ * every PLEA source funnels through (mirrors `gainPremises` in Part 4b):
  *   - Wavering (SWAY_WAVERING_FRACTION of resolve) lands one stack of
- *     RAPPORT on the enemy (Charm's own rapport-building idiom).
+ *     QUARTER on the enemy (Charm's own rapport-building idiom).
  *   - Faltering (SWAY_FALTERING_FRACTION of resolve) grants a small bonus
- *     SWAY nudge, unscaled by buff_grace_momentum.
+ *     PLEA nudge, unscaled by buff_grace_momentum.
  * Each milestone fires AT MOST ONCE per combat and NEVER un-fires or claws
  * back a dividend already paid, even if the enemy's live resolve later
  * shrinks below the threshold that was crossed.
  *
  * Covers:
  *   1. Pure threshold arithmetic (`swayResolveMilestoneThresholds`).
- *   2. Crossing Wavering only (RAPPORT lands, Faltering stays unfired).
+ *   2. Crossing Wavering only (QUARTER lands, Faltering stays unfired).
  *   3. Crossing BOTH Wavering and Faltering in one gain (a single played
  *      card's sway pushes the running total past both waypoints at once).
  *   4. A shrinking live resolve after Wavering already fired does not
- *      re-fire it or claw back the RAPPORT stack already landed.
+ *      re-fire it or claw back the QUARTER stack already landed.
  *   5. Per-combat, per-enemy reset (`initializeCombatEncounter` starts both
  *      flags false).
  *   6. A full `COMBAT_SIM_POLICY_ORDER` × seed sweep on the `threadbare`
- *      preset deck (its `thin-hymn` copies are the SWAY carriers) runs
+ *      preset deck (its `thin-hymn` copies are the PLEA carriers) runs
  *      without crashing.
  *
  * Profane Canon re-pin (2026-08-08): the sway carrier under test is
- * `thin-hymn` (flat SWAY 3, `{ kind: 'sway', amount: 3 }`, no self-echo) —
+ * `thin-hymn` (flat PLEA 3, `{ kind: 'sway', amount: 3 }`, no self-echo) —
  * the old `change-of-heart` / `soft-word` charm cards retired with the
  * library rework; the `grace` preset gave way to the campaign presets.
  *
@@ -102,9 +102,9 @@ describe('Phase 32 part 4e — pure resolve-milestone threshold arithmetic', () 
 });
 
 describe('Crossing Wavering only', () => {
-    it('a gain that clears Wavering but not Faltering lands one RAPPORT stack and fires exactly one milestone event', () => {
-        // thin-hymn (the Profane Canon's choir SWAY starter) pays a flat
-        // SWAY 3 ({ kind: 'sway', amount: 3 }, no self-echo). resolve = 35
+    it('a gain that clears Wavering but not Faltering lands one QUARTER stack and fires exactly one milestone event', () => {
+        // thin-hymn (the Profane Canon's choir PLEA starter) pays a flat
+        // PLEA 3 ({ kind: 'sway', amount: 3 }, no self-echo). resolve = 35
         // (maxHealth 100) -> wavering 16 / faltering 28. Pre-seeded sway 14
         // + the 3-point gain = 17: clears wavering (16), stays under
         // faltering (28).
@@ -120,15 +120,15 @@ describe('Crossing Wavering only', () => {
         const { events, after } = playPaid(before);
 
         const [gained] = findEvents(events, 'sway-gained');
-        expect(gained.amount).toBe(3); // printed SWAY 3, no echo
+        expect(gained.amount).toBe(3); // printed PLEA 3, no echo
         const milestones = findEvents(events, 'sway-milestone');
         expect(milestones).toHaveLength(1);
-        expect(milestones[0]).toMatchObject({ milestone: 'wavering', threshold: wavering, effectId: 'debuff_rapport', intensity: 1 });
+        expect(milestones[0]).toMatchObject({ milestone: 'wavering', threshold: wavering, effectId: 'debuff_quarter', intensity: 1 });
         expect(after.sway).toBe(17); // 14 + 3, no Faltering bonus yet
         expect(after.swayMilestoneWaveringFired).toBe(true);
         expect(after.swayMilestoneFalteringFired).toBeFalsy();
 
-        const rapport = after.enemy.effects.find(e => e.effectId === 'debuff_rapport');
+        const rapport = after.enemy.effects.find(e => e.effectId === 'debuff_quarter');
         expect(rapport).toBeDefined();
         expect(rapport!.intensity).toBe(1);
     });
@@ -137,7 +137,7 @@ describe('Crossing Wavering only', () => {
 describe('Crossing BOTH Wavering and Faltering in one gain', () => {
     it('a single played card that jumps the running total past both waypoints fires both milestone events in one gainSway call', () => {
         // resolve = 14 (the fixture's default maxHealth 40) -> wavering 6 /
-        // faltering 11. thin-hymn's flat SWAY 3 is echoed to 6 by a
+        // faltering 11. thin-hymn's flat PLEA 3 is echoed to 6 by a
         // PENDING ECHO CHARGE (state.echoNextSpell, consumed by this play):
         // pre-seeded sway 5 (below wavering) + the 6-point gain = 11: clears
         // BOTH waypoints in this one gainSway call.
@@ -155,7 +155,7 @@ describe('Crossing BOTH Wavering and Faltering in one gain', () => {
         expect(milestones.map(m => m.milestone).sort()).toEqual(['faltering', 'wavering']);
 
         const waveringEvt = milestones.find(m => m.milestone === 'wavering')!;
-        expect(waveringEvt).toMatchObject({ threshold: 6, effectId: 'debuff_rapport', intensity: 1 });
+        expect(waveringEvt).toMatchObject({ threshold: 6, effectId: 'debuff_quarter', intensity: 1 });
 
         const falteringEvt = milestones.find(m => m.milestone === 'faltering')!;
         expect(falteringEvt).toMatchObject({ threshold: 11, bonus: SWAY_FALTERING_BONUS });
@@ -169,29 +169,29 @@ describe('Crossing BOTH Wavering and Faltering in one gain', () => {
         expect(after.swayMilestoneFalteringFired).toBe(true);
         expect(after.phase).not.toBe('mercy-choice');
 
-        const rapportStacks = after.enemy.effects.filter(e => e.effectId === 'debuff_rapport');
+        const rapportStacks = after.enemy.effects.filter(e => e.effectId === 'debuff_quarter');
         expect(rapportStacks).toHaveLength(1);
         expect(rapportStacks[0].intensity).toBe(1);
     });
 });
 
 describe('A shrinking live resolve never re-fires or claws back an already-crossed milestone', () => {
-    it('Wavering stays fired (and its RAPPORT stack stays landed) even after the enemy\'s resolve later shrinks below the crossed threshold', () => {
+    it('Wavering stays fired (and its QUARTER stack stays landed) even after the enemy\'s resolve later shrinks below the crossed threshold', () => {
         // First play crosses Wavering only (mirrors the "Wavering only" case
         // above): resolve 35 (maxHealth 100), wavering 16, faltering 28.
-        // thin-hymn's SWAY 3 on pre-seed 14 -> 17: past 16, under 28.
+        // thin-hymn's PLEA 3 on pre-seed 14 -> 17: past 16, under 28.
         const bigEnemy = { ...buildFixtureState({ clean: true }).enemy, maxHealth: 100, health: 100, effects: [] };
         const first = stateFor('thin-hymn', 14, { enemy: bigEnemy });
         const firstResult = playPaid(first);
         expect(firstResult.after.swayMilestoneWaveringFired).toBe(true);
         expect(firstResult.after.swayMilestoneFalteringFired).toBeFalsy();
-        const rapportAfterFirst = firstResult.after.enemy.effects.find(e => e.effectId === 'debuff_rapport');
+        const rapportAfterFirst = firstResult.after.enemy.effects.find(e => e.effectId === 'debuff_quarter');
         expect(rapportAfterFirst!.intensity).toBe(1);
 
         // Now shrink the enemy's HP pool drastically (its live resolve falls
         // well below the ALREADY-crossed Wavering threshold of 16) and play
         // a second small sway card. Wavering must NOT fire again (no second
-        // RAPPORT stack, no second 'wavering' milestone event, no clawback
+        // QUARTER stack, no second 'wavering' milestone event, no clawback
         // of the stack already on the enemy).
         const shrunkEnemy = { ...firstResult.after.enemy, maxHealth: 20, health: 20 };
         const shrunkResolve = capitulateThreshold(shrunkEnemy);
@@ -208,7 +208,7 @@ describe('A shrinking live resolve never re-fires or claws back an already-cross
         const milestones = findEvents(events, 'sway-milestone');
         expect(milestones.filter(m => m.milestone === 'wavering')).toHaveLength(0); // no re-fire
         expect(after.swayMilestoneWaveringFired).toBe(true); // still true — never un-crossed
-        const rapportStacks = after.enemy.effects.filter(e => e.effectId === 'debuff_rapport');
+        const rapportStacks = after.enemy.effects.filter(e => e.effectId === 'debuff_quarter');
         expect(rapportStacks).toHaveLength(1);
         expect(rapportStacks[0].intensity).toBe(1); // unchanged — no clawback, no double-stack
     });

@@ -67,8 +67,8 @@
   "stanceHint": "A creature of pure mourning; it acts on raw feeling, not calculation.",
   "cards": [
    {
-    "name": "Soft Word",
-    "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
+    "name": "Thin Hymn",
+    "text": "One verse, half-remembered, sung alone in a room built for forty voices. It barely carries. But even a thin hymn tells the listener a choir exists, and that it knows their name."
    }
   ]
  },
@@ -106,8 +106,8 @@
   "stanceHint": "Grief moves it more than hunger — the sea returned the feeling parts.",
   "cards": [
    {
-    "name": "Soft Word",
-    "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
+    "name": "Thin Hymn",
+    "text": "One verse, half-remembered, sung alone in a room built for forty voices. It barely carries. But even a thin hymn tells the listener a choir exists, and that it knows their name."
    }
   ]
  },
@@ -145,8 +145,8 @@
   "stanceHint": "It calculates its hunger — every request is a trap already sprung.",
   "cards": [
    {
-    "name": "Red Herring",
-    "text": "Something glints in the corner of the argument. They lunge for it — and every lunge you deny becomes the wound."
+    "name": "Scold's Bridle",
+    "text": "An iron cage for the jaw and a spike to keep the tongue devout. Whatever they meant to howl is entered in the record as silence. Silence, the court agrees, has always been a confession."
    }
   ]
  },
@@ -184,8 +184,8 @@
   "stanceHint": "He answers everything with the cleaver — force is his entire rhetoric.",
   "cards": [
    {
-    "name": "Sweet Poison",
-    "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
+    "name": "Unction of Boils",
+    "text": "The chrism went rancid a century back, and the parish anoints with it anyway. Thumb to brow, brow to blister, blister to the blood beneath. Be patient: the blessing takes."
    }
   ]
  },
@@ -206,16 +206,16 @@
   "stanceHint": "A grievance with a crown — he answers everything with feeling first, and the feeling is old.",
   "cards": [
    {
-    "name": "Half-Step",
-    "text": "Zeno was half right: you can always take half a step back. What waits behind the guard ripens twice as fast when you learn to be patient about it — push it further and the kiln might just boil over."
+    "name": "Knucklebone Recant",
+    "text": "Testimony may be withdrawn; so may a bad cast. Sweep the bones off the table before they finish speaking, breathe your side of it across them, and throw again. They lie less the second time."
    },
    {
-    "name": "Brief Candle",
-    "text": "Out, out. It burns bright, it burns fast, and what it leaves behind is yours to gather — some of it before it even finishes burning."
+    "name": "Passing-Bell",
+    "text": "In the pale parish the bell is rung before the death, to spare the ringer a second climb. Each round it tolls a little louder, so the body knows its cue. The first soul is collected as a deposit."
    },
    {
-    "name": "Red Herring",
-    "text": "Something glints in the corner of the argument. They lunge for it — and every lunge you deny becomes the wound."
+    "name": "Scold's Bridle",
+    "text": "An iron cage for the jaw and a spike to keep the tongue devout. Whatever they meant to howl is entered in the record as silence. Silence, the court agrees, has always been a confession."
    }
   ]
  },
@@ -236,8 +236,8 @@
   "stanceHint": "She works on the feelings first — the bargain is already half-made in your chest.",
   "cards": [
    {
-    "name": "Soft Word",
-    "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
+    "name": "Thin Hymn",
+    "text": "One verse, half-remembered, sung alone in a room built for forty voices. It barely carries. But even a thin hymn tells the listener a choir exists, and that it knows their name."
    }
   ]
  },
@@ -258,16 +258,16 @@
   "stanceHint": "He answers every motion with a jamb — where you would step, a threshold has already been installed.",
   "cards": [
    {
-    "name": "Red Herring",
-    "text": "Something glints in the corner of the argument. They lunge for it — and every lunge you deny becomes the wound."
+    "name": "Scold's Bridle",
+    "text": "An iron cage for the jaw and a spike to keep the tongue devout. Whatever they meant to howl is entered in the record as silence. Silence, the court agrees, has always been a confession."
    },
    {
-    "name": "Undistributed Middle",
-    "text": "The middle term never quite connects, and neither does their swing. Somewhere between premise and blow, the force goes missing."
+    "name": "Petty Indictment",
+    "text": "Loitering with intent to exist. The charge will not hold — it does not need to hold. It needs a file, a name on the file, and a drawer that never quite closes."
    },
    {
-    "name": "Half-Step",
-    "text": "Zeno was half right: you can always take half a step back. What waits behind the guard ripens twice as fast when you learn to be patient about it — push it further and the kiln might just boil over."
+    "name": "Knucklebone Recant",
+    "text": "Testimony may be withdrawn; so may a bad cast. Sweep the bones off the table before they finish speaking, breathe your side of it across them, and throw again. They lie less the second time."
    }
   ]
  },
@@ -288,8 +288,8 @@
   "stanceHint": "A cold calculator of crossings; only at the end does the pole swing on feeling.",
   "cards": [
    {
-    "name": "Festering Argument",
-    "text": "Left unanswered, a wound of reasoning does not close. You decline to answer it. Everything they carry runs a little longer."
+    "name": "The Long Lent",
+    "text": "Forty days, says the canon. But nowhere does it say the fast ends when the forty are spent — only that the flesh must keep giving things up. Your wounds observe the season."
    }
   ]
  },
@@ -310,8 +310,8 @@
   "stanceHint": "It measures and portends — every knock is a calculation about your ending.",
   "cards": [
    {
-    "name": "Red Herring",
-    "text": "Something glints in the corner of the argument. They lunge for it — and every lunge you deny becomes the wound."
+    "name": "Scold's Bridle",
+    "text": "An iron cage for the jaw and a spike to keep the tongue devout. Whatever they meant to howl is entered in the record as silence. Silence, the court agrees, has always been a confession."
    }
   ]
  },
@@ -332,8 +332,8 @@
   "stanceHint": "It grieves what it knows — the prophecy hurts it more than you can.",
   "cards": [
    {
-    "name": "Slippery Slope",
-    "text": "One concession, then the next, then the avalanche you promised was inevitable. The ground tilts, and they slide the whole way down."
+    "name": "Spoiled Poultice",
+    "text": "Bread mold and honey, bound in linen the way grandmother taught. It was meant to draw the sickness out — nobody wrote down which direction was out. Press it to their wound and count backward from ten."
    }
   ]
  },
@@ -371,8 +371,8 @@
   "stanceHint": "It consults before it strikes — three small gods, all of them owed.",
   "cards": [
    {
-    "name": "Glimpse",
-    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back — the wound starts arriving a beat before the blow that causes it."
+    "name": "Shallow Grave",
+    "text": "Buried in haste is remembered in full. What the ground barely holds, the hand barely needs to reach for — and the disturbed dead, being briefly awake, are briefly generous. And briefly angry."
    }
   ]
  },
@@ -393,16 +393,16 @@
   "stanceHint": "It files before it strikes — by the time the blow lands, your counter is already catalogued under errata.",
   "cards": [
    {
-    "name": "Festering Argument",
-    "text": "Left unanswered, a wound of reasoning does not close. You decline to answer it. Everything they carry runs a little longer."
+    "name": "The Long Lent",
+    "text": "Forty days, says the canon. But nowhere does it say the fast ends when the forty are spent — only that the flesh must keep giving things up. Your wounds observe the season."
    },
    {
-    "name": "Glimpse",
-    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back — the wound starts arriving a beat before the blow that causes it."
+    "name": "Shallow Grave",
+    "text": "Buried in haste is remembered in full. What the ground barely holds, the hand barely needs to reach for — and the disturbed dead, being briefly awake, are briefly generous. And briefly angry."
    },
    {
-    "name": "Red Herring",
-    "text": "Something glints in the corner of the argument. They lunge for it — and every lunge you deny becomes the wound."
+    "name": "Scold's Bridle",
+    "text": "An iron cage for the jaw and a spike to keep the tongue devout. Whatever they meant to howl is entered in the record as silence. Silence, the court agrees, has always been a confession."
    }
   ]
  },
@@ -423,8 +423,8 @@
   "stanceHint": "It fights the way it cries: continuously, and at you.",
   "cards": [
    {
-    "name": "Soft Word",
-    "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
+    "name": "Thin Hymn",
+    "text": "One verse, half-remembered, sung alone in a room built for forty voices. It barely carries. But even a thin hymn tells the listener a choir exists, and that it knows their name."
    }
   ]
  },
@@ -462,8 +462,8 @@
   "stanceHint": "The cane is a metronome — he strikes on beats you have not learned yet.",
   "cards": [
    {
-    "name": "Half-Step",
-    "text": "Zeno was half right: you can always take half a step back. What waits behind the guard ripens twice as fast when you learn to be patient about it — push it further and the kiln might just boil over."
+    "name": "Knucklebone Recant",
+    "text": "Testimony may be withdrawn; so may a bad cast. Sweep the bones off the table before they finish speaking, breathe your side of it across them, and throw again. They lie less the second time."
    }
   ]
  },
@@ -501,12 +501,12 @@
   "stanceHint": "It counts your errors through whichever eye you fail to watch.",
   "cards": [
    {
-    "name": "Red Herring",
-    "text": "Something glints in the corner of the argument. They lunge for it — and every lunge you deny becomes the wound."
+    "name": "Scold's Bridle",
+    "text": "An iron cage for the jaw and a spike to keep the tongue devout. Whatever they meant to howl is entered in the record as silence. Silence, the court agrees, has always been a confession."
    },
    {
-    "name": "Brief Candle",
-    "text": "Out, out. It burns bright, it burns fast, and what it leaves behind is yours to gather — some of it before it even finishes burning."
+    "name": "Passing-Bell",
+    "text": "In the pale parish the bell is rung before the death, to spare the ringer a second climb. Each round it tolls a little louder, so the body knows its cue. The first soul is collected as a deposit."
    }
   ]
  },
@@ -527,8 +527,8 @@
   "stanceHint": "It stands its ground because it IS its ground — the curse assembles one word per skull.",
   "cards": [
    {
-    "name": "Sweet Poison",
-    "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
+    "name": "Unction of Boils",
+    "text": "The chrism went rancid a century back, and the parish anoints with it anyway. Thumb to brow, brow to blister, blister to the blood beneath. Be patient: the blessing takes."
    }
   ]
  },
@@ -549,8 +549,8 @@
   "stanceHint": "It thinks in loose threads — and every thread it loses, it takes from something else.",
   "cards": [
    {
-    "name": "Festering Argument",
-    "text": "Left unanswered, a wound of reasoning does not close. You decline to answer it. Everything they carry runs a little longer."
+    "name": "The Long Lent",
+    "text": "Forty days, says the canon. But nowhere does it say the fast ends when the forty are spent — only that the flesh must keep giving things up. Your wounds observe the season."
    }
   ]
  },
@@ -571,16 +571,16 @@
   "stanceHint": "He argues in your grammar — every stance you take, he has already taken it better, and returned it used.",
   "cards": [
    {
-    "name": "Bootstrap Loop",
-    "text": "The proof assumes itself and, scandalously, works. Even a dead premise funds its own cause."
+    "name": "The Ossuary Drawer",
+    "text": "Each drawer bears a clerk's label: which knuckle, which saint, what the loan settled. File the bone back into the dark and let it ripen there. The dead keep immaculate accounts and charge almost nothing for storage."
    },
    {
-    "name": "Glimpse",
-    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back — the wound starts arriving a beat before the blow that causes it."
+    "name": "Shallow Grave",
+    "text": "Buried in haste is remembered in full. What the ground barely holds, the hand barely needs to reach for — and the disturbed dead, being briefly awake, are briefly generous. And briefly angry."
    },
    {
-    "name": "Red Herring",
-    "text": "Something glints in the corner of the argument. They lunge for it — and every lunge you deny becomes the wound."
+    "name": "Scold's Bridle",
+    "text": "An iron cage for the jaw and a spike to keep the tongue devout. Whatever they meant to howl is entered in the record as silence. Silence, the court agrees, has always been a confession."
    }
   ]
  },
@@ -601,8 +601,8 @@
   "stanceHint": "Pure study moves it — the flesh was a distraction it graded and discarded.",
   "cards": [
    {
-    "name": "Slippery Slope",
-    "text": "One concession, then the next, then the avalanche you promised was inevitable. The ground tilts, and they slide the whole way down."
+    "name": "Spoiled Poultice",
+    "text": "Bread mold and honey, bound in linen the way grandmother taught. It was meant to draw the sickness out — nobody wrote down which direction was out. Press it to their wound and count backward from ten."
    }
   ]
  },
@@ -623,16 +623,16 @@
   "stanceHint": "The verdict is felt before it is reasoned — the red court rules from the chest.",
   "cards": [
    {
-    "name": "Festering Argument",
-    "text": "Left unanswered, a wound of reasoning does not close. You decline to answer it. Everything they carry runs a little longer."
+    "name": "The Long Lent",
+    "text": "Forty days, says the canon. But nowhere does it say the fast ends when the forty are spent — only that the flesh must keep giving things up. Your wounds observe the season."
    },
    {
-    "name": "Sweet Poison",
-    "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
+    "name": "Unction of Boils",
+    "text": "The chrism went rancid a century back, and the parish anoints with it anyway. Thumb to brow, brow to blister, blister to the blood beneath. Be patient: the blessing takes."
    },
    {
-    "name": "Bootstrap Loop",
-    "text": "The proof assumes itself and, scandalously, works. Even a dead premise funds its own cause."
+    "name": "The Ossuary Drawer",
+    "text": "Each drawer bears a clerk's label: which knuckle, which saint, what the loan settled. File the bone back into the dark and let it ripen there. The dead keep immaculate accounts and charge almost nothing for storage."
    }
   ]
  },
@@ -653,12 +653,12 @@
   "stanceHint": "The armor swings on muscle memory — the oath does the aiming.",
   "cards": [
    {
-    "name": "Half-Step",
-    "text": "Zeno was half right: you can always take half a step back. What waits behind the guard ripens twice as fast when you learn to be patient about it — push it further and the kiln might just boil over."
+    "name": "Knucklebone Recant",
+    "text": "Testimony may be withdrawn; so may a bad cast. Sweep the bones off the table before they finish speaking, breathe your side of it across them, and throw again. They lie less the second time."
    },
    {
-    "name": "Soft Word",
-    "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
+    "name": "Thin Hymn",
+    "text": "One verse, half-remembered, sung alone in a room built for forty voices. It barely carries. But even a thin hymn tells the listener a choir exists, and that it knows their name."
    }
   ]
  },
@@ -679,8 +679,8 @@
   "stanceHint": "It throws itself forward — its will is elsewhere, holding the leash.",
   "cards": [
    {
-    "name": "Sweet Poison",
-    "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
+    "name": "Unction of Boils",
+    "text": "The chrism went rancid a century back, and the parish anoints with it anyway. Thumb to brow, brow to blister, blister to the blood beneath. Be patient: the blessing takes."
    }
   ]
  },
@@ -701,12 +701,12 @@
   "stanceHint": "Everything she does is affection, scaled wrong — the choosing came from the heart.",
   "cards": [
    {
-    "name": "Soft Word",
-    "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
+    "name": "Thin Hymn",
+    "text": "One verse, half-remembered, sung alone in a room built for forty voices. It barely carries. But even a thin hymn tells the listener a choir exists, and that it knows their name."
    },
    {
-    "name": "Soft Word",
-    "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
+    "name": "Thin Hymn",
+    "text": "One verse, half-remembered, sung alone in a room built for forty voices. It barely carries. But even a thin hymn tells the listener a choir exists, and that it knows their name."
    }
   ]
  },
@@ -727,8 +727,8 @@
   "stanceHint": "It feeds on wanting — the whole fight is an appeal to your appetite.",
   "cards": [
    {
-    "name": "Soft Word",
-    "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
+    "name": "Thin Hymn",
+    "text": "One verse, half-remembered, sung alone in a room built for forty voices. It barely carries. But even a thin hymn tells the listener a choir exists, and that it knows their name."
    }
   ]
  },
@@ -749,8 +749,8 @@
   "stanceHint": "Coils first, questions never — it swallows counterarguments whole.",
   "cards": [
    {
-    "name": "Sweet Poison",
-    "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
+    "name": "Unction of Boils",
+    "text": "The chrism went rancid a century back, and the parish anoints with it anyway. Thumb to brow, brow to blister, blister to the blood beneath. Be patient: the blessing takes."
    }
   ]
  },
@@ -771,8 +771,8 @@
   "stanceHint": "It could fly and chooses to crawl — everything it does is a pointed refusal.",
   "cards": [
    {
-    "name": "Half-Step",
-    "text": "Zeno was half right: you can always take half a step back. What waits behind the guard ripens twice as fast when you learn to be patient about it — push it further and the kiln might just boil over."
+    "name": "Knucklebone Recant",
+    "text": "Testimony may be withdrawn; so may a bad cast. Sweep the bones off the table before they finish speaking, breathe your side of it across them, and throw again. They lie less the second time."
    }
   ]
  },
@@ -793,16 +793,16 @@
   "stanceHint": "A cellar-thing of pure muscle — the courtesy is over.",
   "cards": [
    {
-    "name": "Sweet Poison",
-    "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
+    "name": "Unction of Boils",
+    "text": "The chrism went rancid a century back, and the parish anoints with it anyway. Thumb to brow, brow to blister, blister to the blood beneath. Be patient: the blessing takes."
    },
    {
-    "name": "Half-Step",
-    "text": "Zeno was half right: you can always take half a step back. What waits behind the guard ripens twice as fast when you learn to be patient about it — push it further and the kiln might just boil over."
+    "name": "Knucklebone Recant",
+    "text": "Testimony may be withdrawn; so may a bad cast. Sweep the bones off the table before they finish speaking, breathe your side of it across them, and throw again. They lie less the second time."
    },
    {
-    "name": "Brief Candle",
-    "text": "Out, out. It burns bright, it burns fast, and what it leaves behind is yours to gather — some of it before it even finishes burning."
+    "name": "Passing-Bell",
+    "text": "In the pale parish the bell is rung before the death, to spare the ringer a second climb. Each round it tolls a little louder, so the body knows its cue. The first soul is collected as a deposit."
    }
   ]
  },
@@ -823,16 +823,16 @@
   "stanceHint": "Every move a reasoned counter — the web was drafted before you arrived.",
   "cards": [
    {
-    "name": "Glimpse",
-    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back — the wound starts arriving a beat before the blow that causes it."
+    "name": "Shallow Grave",
+    "text": "Buried in haste is remembered in full. What the ground barely holds, the hand barely needs to reach for — and the disturbed dead, being briefly awake, are briefly generous. And briefly angry."
    },
    {
-    "name": "Red Herring",
-    "text": "Something glints in the corner of the argument. They lunge for it — and every lunge you deny becomes the wound."
+    "name": "Scold's Bridle",
+    "text": "An iron cage for the jaw and a spike to keep the tongue devout. Whatever they meant to howl is entered in the record as silence. Silence, the court agrees, has always been a confession."
    },
    {
-    "name": "Slippery Slope",
-    "text": "One concession, then the next, then the avalanche you promised was inevitable. The ground tilts, and they slide the whole way down."
+    "name": "Spoiled Poultice",
+    "text": "Bread mold and honey, bound in linen the way grandmother taught. It was meant to draw the sickness out — nobody wrote down which direction was out. Press it to their wound and count backward from ten."
    }
   ]
  },
@@ -853,12 +853,12 @@
   "stanceHint": "What remains of it is the part that says no — force, distilled.",
   "cards": [
    {
-    "name": "Half-Step",
-    "text": "Zeno was half right: you can always take half a step back. What waits behind the guard ripens twice as fast when you learn to be patient about it — push it further and the kiln might just boil over."
+    "name": "Knucklebone Recant",
+    "text": "Testimony may be withdrawn; so may a bad cast. Sweep the bones off the table before they finish speaking, breathe your side of it across them, and throw again. They lie less the second time."
    },
    {
-    "name": "Glimpse",
-    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back — the wound starts arriving a beat before the blow that causes it."
+    "name": "Shallow Grave",
+    "text": "Buried in haste is remembered in full. What the ground barely holds, the hand barely needs to reach for — and the disturbed dead, being briefly awake, are briefly generous. And briefly angry."
    }
   ]
  },
@@ -879,16 +879,16 @@
   "stanceHint": "Cold administration — every strike is a decree, countersigned.",
   "cards": [
    {
-    "name": "Bootstrap Loop",
-    "text": "The proof assumes itself and, scandalously, works. Even a dead premise funds its own cause."
+    "name": "The Ossuary Drawer",
+    "text": "Each drawer bears a clerk's label: which knuckle, which saint, what the loan settled. File the bone back into the dark and let it ripen there. The dead keep immaculate accounts and charge almost nothing for storage."
    },
    {
-    "name": "Slippery Slope",
-    "text": "One concession, then the next, then the avalanche you promised was inevitable. The ground tilts, and they slide the whole way down."
+    "name": "Spoiled Poultice",
+    "text": "Bread mold and honey, bound in linen the way grandmother taught. It was meant to draw the sickness out — nobody wrote down which direction was out. Press it to their wound and count backward from ten."
    },
    {
-    "name": "Undistributed Middle",
-    "text": "The middle term never quite connects, and neither does their swing. Somewhere between premise and blow, the force goes missing."
+    "name": "Petty Indictment",
+    "text": "Loitering with intent to exist. The charge will not hold — it does not need to hold. It needs a file, a name on the file, and a drawer that never quite closes."
    }
   ]
  },
@@ -909,12 +909,12 @@
   "stanceHint": "Courtesy is the weapon — the feelings are real, which is the trap.",
   "cards": [
    {
-    "name": "Soft Word",
-    "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
+    "name": "Thin Hymn",
+    "text": "One verse, half-remembered, sung alone in a room built for forty voices. It barely carries. But even a thin hymn tells the listener a choir exists, and that it knows their name."
    },
    {
-    "name": "Soft Word",
-    "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
+    "name": "Thin Hymn",
+    "text": "One verse, half-remembered, sung alone in a room built for forty voices. It barely carries. But even a thin hymn tells the listener a choir exists, and that it knows their name."
    }
   ]
  },
@@ -935,12 +935,12 @@
   "stanceHint": "Two minds, one patient argument — they disagree only about which of them loves you less.",
   "cards": [
    {
-    "name": "Red Herring",
-    "text": "Something glints in the corner of the argument. They lunge for it — and every lunge you deny becomes the wound."
+    "name": "Scold's Bridle",
+    "text": "An iron cage for the jaw and a spike to keep the tongue devout. Whatever they meant to howl is entered in the record as silence. Silence, the court agrees, has always been a confession."
    },
    {
-    "name": "Glimpse",
-    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back — the wound starts arriving a beat before the blow that causes it."
+    "name": "Shallow Grave",
+    "text": "Buried in haste is remembered in full. What the ground barely holds, the hand barely needs to reach for — and the disturbed dead, being briefly awake, are briefly generous. And briefly angry."
    }
   ]
  },
@@ -961,12 +961,12 @@
   "stanceHint": "The same metronome, colder — the river taught him new beats.",
   "cards": [
    {
-    "name": "Half-Step",
-    "text": "Zeno was half right: you can always take half a step back. What waits behind the guard ripens twice as fast when you learn to be patient about it — push it further and the kiln might just boil over."
+    "name": "Knucklebone Recant",
+    "text": "Testimony may be withdrawn; so may a bad cast. Sweep the bones off the table before they finish speaking, breathe your side of it across them, and throw again. They lie less the second time."
    },
    {
-    "name": "Slippery Slope",
-    "text": "One concession, then the next, then the avalanche you promised was inevitable. The ground tilts, and they slide the whole way down."
+    "name": "Spoiled Poultice",
+    "text": "Bread mold and honey, bound in linen the way grandmother taught. It was meant to draw the sickness out — nobody wrote down which direction was out. Press it to their wound and count backward from ten."
    }
   ]
  },
@@ -987,12 +987,12 @@
   "stanceHint": "The tally continues without a reason — cold arithmetic, self-sustaining.",
   "cards": [
    {
-    "name": "Brief Candle",
-    "text": "Out, out. It burns bright, it burns fast, and what it leaves behind is yours to gather — some of it before it even finishes burning."
+    "name": "Passing-Bell",
+    "text": "In the pale parish the bell is rung before the death, to spare the ringer a second climb. Each round it tolls a little louder, so the body knows its cue. The first soul is collected as a deposit."
    },
    {
-    "name": "Festering Argument",
-    "text": "Left unanswered, a wound of reasoning does not close. You decline to answer it. Everything they carry runs a little longer."
+    "name": "The Long Lent",
+    "text": "Forty days, says the canon. But nowhere does it say the fast ends when the forty are spent — only that the flesh must keep giving things up. Your wounds observe the season."
    }
   ]
  },
@@ -1013,12 +1013,12 @@
   "stanceHint": "A plague with posture — it spreads by main force now.",
   "cards": [
    {
-    "name": "Sweet Poison",
-    "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
+    "name": "Unction of Boils",
+    "text": "The chrism went rancid a century back, and the parish anoints with it anyway. Thumb to brow, brow to blister, blister to the blood beneath. Be patient: the blessing takes."
    },
    {
-    "name": "Half-Step",
-    "text": "Zeno was half right: you can always take half a step back. What waits behind the guard ripens twice as fast when you learn to be patient about it — push it further and the kiln might just boil over."
+    "name": "Knucklebone Recant",
+    "text": "Testimony may be withdrawn; so may a bad cast. Sweep the bones off the table before they finish speaking, breathe your side of it across them, and throw again. They lie less the second time."
    }
   ]
  },
@@ -1039,12 +1039,12 @@
   "stanceHint": "It thinks in shapes language was built to avoid.",
   "cards": [
    {
-    "name": "Slippery Slope",
-    "text": "One concession, then the next, then the avalanche you promised was inevitable. The ground tilts, and they slide the whole way down."
+    "name": "Spoiled Poultice",
+    "text": "Bread mold and honey, bound in linen the way grandmother taught. It was meant to draw the sickness out — nobody wrote down which direction was out. Press it to their wound and count backward from ten."
    },
    {
-    "name": "Glimpse",
-    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back — the wound starts arriving a beat before the blow that causes it."
+    "name": "Shallow Grave",
+    "text": "Buried in haste is remembered in full. What the ground barely holds, the hand barely needs to reach for — and the disturbed dead, being briefly awake, are briefly generous. And briefly angry."
    }
   ]
  },
@@ -1065,12 +1065,12 @@
   "stanceHint": "A furnace with a genealogy — everything he does is a hammer blow.",
   "cards": [
    {
-    "name": "Sweet Poison",
-    "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
+    "name": "Unction of Boils",
+    "text": "The chrism went rancid a century back, and the parish anoints with it anyway. Thumb to brow, brow to blister, blister to the blood beneath. Be patient: the blessing takes."
    },
    {
-    "name": "Half-Step",
-    "text": "Zeno was half right: you can always take half a step back. What waits behind the guard ripens twice as fast when you learn to be patient about it — push it further and the kiln might just boil over."
+    "name": "Knucklebone Recant",
+    "text": "Testimony may be withdrawn; so may a bad cast. Sweep the bones off the table before they finish speaking, breathe your side of it across them, and throw again. They lie less the second time."
    }
   ]
  },
@@ -1091,12 +1091,12 @@
   "stanceHint": "It administers rather than rages — the contract is the cage.",
   "cards": [
    {
-    "name": "Red Herring",
-    "text": "Something glints in the corner of the argument. They lunge for it — and every lunge you deny becomes the wound."
+    "name": "Scold's Bridle",
+    "text": "An iron cage for the jaw and a spike to keep the tongue devout. Whatever they meant to howl is entered in the record as silence. Silence, the court agrees, has always been a confession."
    },
    {
-    "name": "Bootstrap Loop",
-    "text": "The proof assumes itself and, scandalously, works. Even a dead premise funds its own cause."
+    "name": "The Ossuary Drawer",
+    "text": "Each drawer bears a clerk's label: which knuckle, which saint, what the loan settled. File the bone back into the dark and let it ripen there. The dead keep immaculate accounts and charge almost nothing for storage."
    }
   ]
  },
@@ -1117,16 +1117,16 @@
   "stanceHint": "Grief that learned sorcery — every curse arrives still weeping.",
   "cards": [
    {
-    "name": "Soft Word",
-    "text": "It turns away wrath — not by winning, but by making wrath feel over-dressed for the occasion."
+    "name": "Thin Hymn",
+    "text": "One verse, half-remembered, sung alone in a room built for forty voices. It barely carries. But even a thin hymn tells the listener a choir exists, and that it knows their name."
    },
    {
-    "name": "Festering Argument",
-    "text": "Left unanswered, a wound of reasoning does not close. You decline to answer it. Everything they carry runs a little longer."
+    "name": "The Long Lent",
+    "text": "Forty days, says the canon. But nowhere does it say the fast ends when the forty are spent — only that the flesh must keep giving things up. Your wounds observe the season."
    },
    {
-    "name": "Glimpse",
-    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back — the wound starts arriving a beat before the blow that causes it."
+    "name": "Shallow Grave",
+    "text": "Buried in haste is remembered in full. What the ground barely holds, the hand barely needs to reach for — and the disturbed dead, being briefly awake, are briefly generous. And briefly angry."
    }
   ]
  },
@@ -1147,16 +1147,16 @@
   "stanceHint": "The two voices agree now — consensus, it turns out, was the threat.",
   "cards": [
    {
-    "name": "Glimpse",
-    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back — the wound starts arriving a beat before the blow that causes it."
+    "name": "Shallow Grave",
+    "text": "Buried in haste is remembered in full. What the ground barely holds, the hand barely needs to reach for — and the disturbed dead, being briefly awake, are briefly generous. And briefly angry."
    },
    {
-    "name": "Bootstrap Loop",
-    "text": "The proof assumes itself and, scandalously, works. Even a dead premise funds its own cause."
+    "name": "The Ossuary Drawer",
+    "text": "Each drawer bears a clerk's label: which knuckle, which saint, what the loan settled. File the bone back into the dark and let it ripen there. The dead keep immaculate accounts and charge almost nothing for storage."
    },
    {
-    "name": "Red Herring",
-    "text": "Something glints in the corner of the argument. They lunge for it — and every lunge you deny becomes the wound."
+    "name": "Scold's Bridle",
+    "text": "An iron cage for the jaw and a spike to keep the tongue devout. Whatever they meant to howl is entered in the record as silence. Silence, the court agrees, has always been a confession."
    }
   ]
  },
@@ -1177,16 +1177,16 @@
   "stanceHint": "A fire gone white with age — it burns the way glaciers move: entirely.",
   "cards": [
    {
-    "name": "Sweet Poison",
-    "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
+    "name": "Unction of Boils",
+    "text": "The chrism went rancid a century back, and the parish anoints with it anyway. Thumb to brow, brow to blister, blister to the blood beneath. Be patient: the blessing takes."
    },
    {
-    "name": "Half-Step",
-    "text": "Zeno was half right: you can always take half a step back. What waits behind the guard ripens twice as fast when you learn to be patient about it — push it further and the kiln might just boil over."
+    "name": "Knucklebone Recant",
+    "text": "Testimony may be withdrawn; so may a bad cast. Sweep the bones off the table before they finish speaking, breathe your side of it across them, and throw again. They lie less the second time."
    },
    {
-    "name": "Brief Candle",
-    "text": "Out, out. It burns bright, it burns fast, and what it leaves behind is yours to gather — some of it before it even finishes burning."
+    "name": "Passing-Bell",
+    "text": "In the pale parish the bell is rung before the death, to spare the ringer a second climb. Each round it tolls a little louder, so the body knows its cue. The first soul is collected as a deposit."
    }
   ]
  },
@@ -1207,16 +1207,16 @@
   "stanceHint": "The smoking mirror calculates — it shows you the you that already lost.",
   "cards": [
    {
-    "name": "Glimpse",
-    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back — the wound starts arriving a beat before the blow that causes it."
+    "name": "Shallow Grave",
+    "text": "Buried in haste is remembered in full. What the ground barely holds, the hand barely needs to reach for — and the disturbed dead, being briefly awake, are briefly generous. And briefly angry."
    },
    {
-    "name": "Bootstrap Loop",
-    "text": "The proof assumes itself and, scandalously, works. Even a dead premise funds its own cause."
+    "name": "The Ossuary Drawer",
+    "text": "Each drawer bears a clerk's label: which knuckle, which saint, what the loan settled. File the bone back into the dark and let it ripen there. The dead keep immaculate accounts and charge almost nothing for storage."
    },
    {
-    "name": "Festering Argument",
-    "text": "Left unanswered, a wound of reasoning does not close. You decline to answer it. Everything they carry runs a little longer."
+    "name": "The Long Lent",
+    "text": "Forty days, says the canon. But nowhere does it say the fast ends when the forty are spent — only that the flesh must keep giving things up. Your wounds observe the season."
    }
   ]
  },
@@ -1237,16 +1237,16 @@
   "stanceHint": "Appetite promoted past restraint — the violence is administrative.",
   "cards": [
    {
-    "name": "Sweet Poison",
-    "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
+    "name": "Unction of Boils",
+    "text": "The chrism went rancid a century back, and the parish anoints with it anyway. Thumb to brow, brow to blister, blister to the blood beneath. Be patient: the blessing takes."
    },
    {
-    "name": "Half-Step",
-    "text": "Zeno was half right: you can always take half a step back. What waits behind the guard ripens twice as fast when you learn to be patient about it — push it further and the kiln might just boil over."
+    "name": "Knucklebone Recant",
+    "text": "Testimony may be withdrawn; so may a bad cast. Sweep the bones off the table before they finish speaking, breathe your side of it across them, and throw again. They lie less the second time."
    },
    {
-    "name": "Bootstrap Loop",
-    "text": "The proof assumes itself and, scandalously, works. Even a dead premise funds its own cause."
+    "name": "The Ossuary Drawer",
+    "text": "Each drawer bears a clerk's label: which knuckle, which saint, what the loan settled. File the bone back into the dark and let it ripen there. The dead keep immaculate accounts and charge almost nothing for storage."
    }
   ]
  },
@@ -1267,16 +1267,16 @@
   "stanceHint": "It is not cruel. It is punctual, and it has already read your schedule.",
   "cards": [
    {
-    "name": "Slippery Slope",
-    "text": "One concession, then the next, then the avalanche you promised was inevitable. The ground tilts, and they slide the whole way down."
+    "name": "Spoiled Poultice",
+    "text": "Bread mold and honey, bound in linen the way grandmother taught. It was meant to draw the sickness out — nobody wrote down which direction was out. Press it to their wound and count backward from ten."
    },
    {
-    "name": "Festering Argument",
-    "text": "Left unanswered, a wound of reasoning does not close. You decline to answer it. Everything they carry runs a little longer."
+    "name": "The Long Lent",
+    "text": "Forty days, says the canon. But nowhere does it say the fast ends when the forty are spent — only that the flesh must keep giving things up. Your wounds observe the season."
    },
    {
-    "name": "Bootstrap Loop",
-    "text": "The proof assumes itself and, scandalously, works. Even a dead premise funds its own cause."
+    "name": "The Ossuary Drawer",
+    "text": "Each drawer bears a clerk's label: which knuckle, which saint, what the loan settled. File the bone back into the dark and let it ripen there. The dead keep immaculate accounts and charge almost nothing for storage."
    }
   ]
  },
@@ -1297,16 +1297,16 @@
   "stanceHint": "Each fly is a small opinion; together they are policy.",
   "cards": [
    {
-    "name": "Sweet Poison",
-    "text": "You taste it first, to prove the vintage. The enemy drinks deeper — but you did drink."
+    "name": "Unction of Boils",
+    "text": "The chrism went rancid a century back, and the parish anoints with it anyway. Thumb to brow, brow to blister, blister to the blood beneath. Be patient: the blessing takes."
    },
    {
-    "name": "Glimpse",
-    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back — the wound starts arriving a beat before the blow that causes it."
+    "name": "Shallow Grave",
+    "text": "Buried in haste is remembered in full. What the ground barely holds, the hand barely needs to reach for — and the disturbed dead, being briefly awake, are briefly generous. And briefly angry."
    },
    {
-    "name": "Bootstrap Loop",
-    "text": "The proof assumes itself and, scandalously, works. Even a dead premise funds its own cause."
+    "name": "The Ossuary Drawer",
+    "text": "Each drawer bears a clerk's label: which knuckle, which saint, what the loan settled. File the bone back into the dark and let it ripen there. The dead keep immaculate accounts and charge almost nothing for storage."
    }
   ]
  },
@@ -1327,16 +1327,16 @@
   "stanceHint": "It feels everything it never got to be — the grief predates the griever.",
   "cards": [
    {
-    "name": "Bootstrap Loop",
-    "text": "The proof assumes itself and, scandalously, works. Even a dead premise funds its own cause."
+    "name": "The Ossuary Drawer",
+    "text": "Each drawer bears a clerk's label: which knuckle, which saint, what the loan settled. File the bone back into the dark and let it ripen there. The dead keep immaculate accounts and charge almost nothing for storage."
    },
    {
-    "name": "Slippery Slope",
-    "text": "One concession, then the next, then the avalanche you promised was inevitable. The ground tilts, and they slide the whole way down."
+    "name": "Spoiled Poultice",
+    "text": "Bread mold and honey, bound in linen the way grandmother taught. It was meant to draw the sickness out — nobody wrote down which direction was out. Press it to their wound and count backward from ten."
    },
    {
-    "name": "Glimpse",
-    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back — the wound starts arriving a beat before the blow that causes it."
+    "name": "Shallow Grave",
+    "text": "Buried in haste is remembered in full. What the ground barely holds, the hand barely needs to reach for — and the disturbed dead, being briefly awake, are briefly generous. And briefly angry."
    }
   ]
  },
@@ -1357,16 +1357,16 @@
   "stanceHint": "It cannot be read from inside any system you carry; every tell is consistent, and none is complete.",
   "cards": [
    {
-    "name": "Bootstrap Loop",
-    "text": "The proof assumes itself and, scandalously, works. Even a dead premise funds its own cause."
+    "name": "The Ossuary Drawer",
+    "text": "Each drawer bears a clerk's label: which knuckle, which saint, what the loan settled. File the bone back into the dark and let it ripen there. The dead keep immaculate accounts and charge almost nothing for storage."
    },
    {
-    "name": "Slippery Slope",
-    "text": "One concession, then the next, then the avalanche you promised was inevitable. The ground tilts, and they slide the whole way down."
+    "name": "Spoiled Poultice",
+    "text": "Bread mold and honey, bound in linen the way grandmother taught. It was meant to draw the sickness out — nobody wrote down which direction was out. Press it to their wound and count backward from ten."
    },
    {
-    "name": "Glimpse",
-    "text": "A crack in the next moment, wide enough for one eye. You look, and mark what looks back — the wound starts arriving a beat before the blow that causes it."
+    "name": "Shallow Grave",
+    "text": "Buried in haste is remembered in full. What the ground barely holds, the hand barely needs to reach for — and the disturbed dead, being briefly awake, are briefly generous. And briefly angry."
    }
   ]
  }

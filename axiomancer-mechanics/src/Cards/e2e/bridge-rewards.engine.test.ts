@@ -11,7 +11,7 @@
  *      `COMBAT_REWARD_POOL` (they reach reward screens ONLY via the WS6.1
  *      harness sandbox hook).
  *   2. BARBED COMPLIMENT (affliction↔charm) — one breath, both bars: MARK
- *      stacks (affliction fuel) AND SWAY on the CAPITULATE bar.
+ *      stacks (affliction fuel) AND PLEA on the RELENT bar.
  *   3. THE POURED RAMPART (forge↔bulwark) — pips → GUARD: RIPEN 1, then
  *      `spend_all_pips.guardPerPip 2` pours the WHOLE bank into Guard over a
  *      small Barrier footing; the bank reads 0 after.
@@ -25,9 +25,9 @@
  *   6. STOLEN CADENCE (control↔echo) — nearest buildable shape of "STAGGER'd
  *      rung → REPRISE fuel" (no rungs-denied ledger): STAGGER 1 + REPRISE 1
  *      together on one card.
- *   7. UNBROKEN COUNTENANCE (bulwark↔charm) — unbroken GUARD → SWAY via the
+ *   7. UNBROKEN COUNTENANCE (bulwark↔charm) — unbroken GUARD → PLEA via the
  *      ratified `enemy-dealt-no-damage-last-round` ledger predicate: rider
- *      SWAY ×4 + heal 2 fires ONLY while the ledger reads 0.
+ *      PLEA ×4 + heal 2 fires ONLY while the ledger reads 0.
  *
  * Fixture + RNG conventions follow roles-themes.engine.test.ts:
  * `buildFixtureState()` (rich board; `{ clean: true }` for witnesses),
@@ -157,7 +157,7 @@ describe('bridge-rewards — registry shape and rank-band honesty', () => {
 
     it('the authored // pts arithmetic matches scoreCard (regression anchors)', () => {
         const byId = (id: string) => BRIDGE_CARDS.find(c => c.id === id)!;
-        expect(scoreCard(byId('barbed-compliment'))).toBeCloseTo(6.45, 2); // phase 36a: SWAY 3 total × 0.9
+        expect(scoreCard(byId('barbed-compliment'))).toBeCloseTo(6.45, 2); // phase 36a: PLEA 3 total × 0.9
         expect(scoreCard(byId('the-poured-rampart'))).toBeCloseTo(6.0, 2);
         expect(scoreCard(byId('interest-on-the-flesh'))).toBeCloseTo(6.25, 2);
         // phase 32 part 4d (OMEN v2): anteConviction 1 credits at −0.75×
@@ -165,7 +165,7 @@ describe('bridge-rewards — registry shape and rank-band honesty', () => {
         // // pts comment in cards.sandbox-sets.ts.
         expect(scoreCard(byId('entered-into-evidence'))).toBeCloseTo(5.01, 2);
         expect(scoreCard(byId('stolen-cadence'))).toBeCloseTo(5.75, 2);
-        expect(scoreCard(byId('unbroken-countenance'))).toBeCloseTo(8.23, 2); // phase 36a: SWAY (2+2 flat, 4 synergy×0.5) × 0.9
+        expect(scoreCard(byId('unbroken-countenance'))).toBeCloseTo(8.23, 2); // phase 36a: PLEA (2+2 flat, 4 synergy×0.5) × 0.9
     });
 
     it('no TICK vocabulary anywhere in the set (TICK is ratified dead)', () => {
@@ -187,7 +187,7 @@ describe('bridge-rewards — registry shape and rank-band honesty', () => {
     });
 });
 
-// ─── 2. Barbed Compliment — MARK for the affliction engine, SWAY for the bar ─
+// ─── 2. Barbed Compliment — MARK for the affliction engine, PLEA for the bar ─
 
 describe('barbed-compliment (affliction↔charm) — one breath, both parents fed', () => {
     beforeEach(() => { applyFixtureCards(BRIDGE_CARDS); });
@@ -201,7 +201,7 @@ describe('barbed-compliment (affliction↔charm) — one breath, both parents fe
         threatPhases: s.threatPhases.map(p => ({ ...p, enemyStance: 'heart' as const })),
     });
 
-    it('PAID (neutral read): MARK +2 deepens the affliction fuel AND SWAY +2 presses the bar', () => {
+    it('PAID (neutral read): MARK +2 deepens the affliction fuel AND PLEA +2 presses the bar', () => {
         const before = fixtureWith('barbed-compliment', {}, neutralRead);
         expect(enemyEffect(before, 'debuff_mark')!.intensity).toBe(3);
 
@@ -212,7 +212,7 @@ describe('barbed-compliment (affliction↔charm) — one breath, both parents fe
         expect(findEvent(events, 'sway-gained')).toBeDefined();
     });
 
-    it('FREE: the seed deposit — MARK +1 and SWAY +1, nothing else moves', () => {
+    it('FREE: the seed deposit — MARK +1 and PLEA +1, nothing else moves', () => {
         const before = fixtureWith('barbed-compliment', {}, neutralRead);
         const { after } = play(before, false);
         expect(enemyEffect(after, 'debuff_mark')!.intensity).toBe(4);
@@ -313,7 +313,7 @@ describe('interest-on-the-flesh (akrasia↔harvest) — self-Bleed cost, Souls n
 
 // ─── 5. Entered into Evidence — the confirmed prophecy becomes a Premise ─────
 
-describe('entered-into-evidence (oracle↔peroration) — OMEN confirm deposits PREMISE ×2', () => {
+describe('entered-into-evidence (oracle↔peroration) — OMEN confirm deposits CHARGE ×2', () => {
     beforeEach(() => { applyFixtureCards(BRIDGE_CARDS); });
 
     /** Fixture with controlled phases: current phase 0, prediction lands on
@@ -339,7 +339,7 @@ describe('entered-into-evidence (oracle↔peroration) — OMEN confirm deposits 
         expect(after.pendingOmens).toHaveLength(1);
     });
 
-    it('CONFIRM: the prediction comes true at the boundary → PREMISE ×2 joins the tally', () => {
+    it('CONFIRM: the prediction comes true at the boundary → CHARGE ×2 joins the tally', () => {
         const before = omenFixture('mind');
         const premisesBefore = before.premises ?? 0;
         const { after: played } = play(before, true);
@@ -369,7 +369,7 @@ describe('entered-into-evidence (oracle↔peroration) — OMEN confirm deposits 
         expect(res.state.omenHits ?? 0).toBe(0);
     });
 
-    it('FREE: the twin deposits — PREMISE 1 and FORETELL 1', () => {
+    it('FREE: the twin deposits — CHARGE 1 and FORETELL 1', () => {
         const before = fixtureWith('entered-into-evidence');
         const { after, events } = play(before, false);
         const gained = findEvent(events, 'premise-gained');
@@ -413,10 +413,10 @@ describe('stolen-cadence (control↔echo) — STAGGER 1 + REPRISE 1 on one card'
 
 // ─── 7. Unbroken Countenance — the unbroken wall persuades ───────────────────
 
-describe('unbroken-countenance (bulwark↔charm) — the no-damage ledger gates the SWAY surge', () => {
+describe('unbroken-countenance (bulwark↔charm) — the no-damage ledger gates the PLEA surge', () => {
     beforeEach(() => { applyFixtureCards(BRIDGE_CARDS); });
 
-    it('PAID while UNBROKEN (ledger 0): Guard up, SWAY +6 (2 paid + 4 rider), 2 HP composed back', () => {
+    it('PAID while UNBROKEN (ledger 0): Guard up, PLEA +6 (2 paid + 4 rider), 2 HP composed back', () => {
         const before = fixtureWith('unbroken-countenance');
         expect(before.enemyDamageLastRound ?? 0).toBe(0); // fresh encounter
 
@@ -432,7 +432,7 @@ describe('unbroken-countenance (bulwark↔charm) — the no-damage ledger gates 
         expect(fired, 'the printed condition line must be evented').toBeDefined();
     });
 
-    it('PAID after the enemy drew blood last round: the base line only — SWAY +2, no heal', () => {
+    it('PAID after the enemy drew blood last round: the base line only — PLEA +2, no heal', () => {
         const before = fixtureWith('unbroken-countenance', {}, s => ({ ...s, enemyDamageLastRound: 5 }));
         const { after, events } = play(before, true);
 
@@ -444,7 +444,7 @@ describe('unbroken-countenance (bulwark↔charm) — the no-damage ledger gates 
         )).toBeUndefined();
     });
 
-    it('FREE: the twin deposits — Guard 2 and SWAY 2, no condition on the dieless face', () => {
+    it('FREE: the twin deposits — Guard 2 and PLEA 2, no condition on the dieless face', () => {
         const before = fixtureWith('unbroken-countenance');
         const { after } = play(before, false);
         expect(after.guard).toBe((before.guard ?? 0) + 2);

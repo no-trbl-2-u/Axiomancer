@@ -11,7 +11,7 @@
  *   2. The deterministic read rule lands the printed numbers EXACTLY on a
  *      neutral read; a color match adds exactly +1 duration (Fate Engine R7).
  *   3. `projectCardImpact` never advertises a strike number — there is none.
- *   4. RAPPORT (the v3 charm-vocabulary debuff) really dampens the enemy's
+ *   4. QUARTER (the v3 charm-vocabulary debuff) really dampens the enemy's
  *      outgoing threat damage; CHARM's forced stance is visible to the read.
  */
 
@@ -217,8 +217,8 @@ describe('P0-truth — threat-side payloads bite for real', () => {
         expect(s.player.health - after.player.health).toBe(BASE_HIT);
     });
 
-    it('RAPPORT on the enemy dampens ITS outgoing hit (-10%/stack, spec 32 v3 T8)', () => {
-        const s = threatState([{ damage: 10 }], { enemyEffects: [activeEffect('debuff_rapport', 2, 2)] });
+    it('QUARTER on the enemy dampens ITS outgoing hit (-10%/stack, spec 32 v3 T8)', () => {
+        const s = threatState([{ damage: 10 }], { enemyEffects: [activeEffect('debuff_quarter', 2, 2)] });
         const after = resolveThreatPhase(s).state;
         expect(s.player.health - after.player.health).toBe(Math.round(10 * THREAT_DAMAGE_SCALE * 0.8));
     });

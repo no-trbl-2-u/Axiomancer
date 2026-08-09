@@ -201,7 +201,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             const isBoss = enemy.difficulty === 'boss';
             const regionSpared = state.regionConsequences.sparedRegions.includes(enemy.mapName);
             if (isBoss && regionSpared) {
-                const openMindedEffect = lookupEffect('buff_open_minded');
+                const openMindedEffect = lookupEffect('buff_absolved');
                 if (openMindedEffect) {
                     scaledEnemy = {
                         ...scaledEnemy,

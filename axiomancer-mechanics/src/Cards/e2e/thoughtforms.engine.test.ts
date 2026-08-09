@@ -91,7 +91,7 @@ const corollary: Card = {
         'phrased. You did not argue it; it follows.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'self',
-    // pts: PREMISE 1 (0.8) + CONJURE (2) + FREE premise 1 (0.8) = 3.6 by
+    // pts: CHARGE 1 (0.8) + CONJURE (2) + FREE premise 1 (0.8) = 3.6 by
     // scoreCard → common band 1.5-7.5 (Lemma).
     free: { premises: 1 },
     specialMechanics: [

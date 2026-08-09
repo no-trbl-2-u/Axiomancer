@@ -208,15 +208,15 @@ function trayDice(page) {
     return page.getByTestId('combat-dice-tray').locator('[data-testid^="combat-die-"]')
 }
 
-/** Read the enemy SWAY meter's current value (the `combat-sway-meter` a11y
- *  label reads "SWAY <value> of <target>"). Returns null when the meter is
- *  absent. The demo deck feeds SWAY, so the meter renders from 0 — a clean
- *  before/after read for the paid-commit guard. */
+/** Read the enemy PLEA meter's current value (the `combat-sway-meter` a11y
+ *  label reads "PLEA <value> of <target>" — renamed from SWAY, phase 44b).
+ *  Returns null when the meter is absent. The demo deck feeds PLEA, so the
+ *  meter renders from 0 — a clean before/after read for the paid-commit guard. */
 async function swayValue(page) {
     const meter = page.getByTestId('combat-sway-meter')
     if (!(await has(meter))) return null
     const label = (await meter.getAttribute('aria-label').catch(() => '')) || ''
-    const m = label.match(/SWAY\s+(\d+)/i)
+    const m = label.match(/PLEA\s+(\d+)/i)
     return m ? Number(m[1]) : null
 }
 
@@ -244,7 +244,7 @@ async function assertFlagOnBoard(page, { capture }) {
     // Face states surface through a11y — at least a special or a miss face
     // should be readable somewhere on the four rolled dice.
     const dieLabels = await trayDice(page).evaluateAll((ns) => ns.map((n) => n.getAttribute('aria-label') ?? ''))
-    const faceyLabels = dieLabels.filter((l) => /SPECIAL face|a miss|drafted|floating|banked|cracked/i.test(l))
+    const faceyLabels = dieLabels.filter((l) => /BOON face|a miss|drafted|ghost|banked|cracked/i.test(l))
     if (faceyLabels.length === 0) note('no die a11y label named a face state this roll (labels: ' + dieLabels.join(' | ') + ')')
     else log(`step 1: ${faceyLabels.length}/${dieCount} dice name a face state in a11y`)
 
@@ -334,7 +334,7 @@ async function assertSwayCommit(page) {
         const id = (n.getAttribute('data-testid') ?? '').replace('combat-die-', '')
         const label = (n.getAttribute('aria-label') ?? '')
         const color = (label.match(/^(\w+)\s+stance die/i)?.[1] ?? '').toLowerCase()
-        const usable = /available|drafted|floating|banked|SPECIAL face/i.test(label)
+        const usable = /available|drafted|ghost|banked|BOON face/i.test(label)
             && !/a miss|blocked|spent|cracked/i.test(label)
         return { id, color, usable }
     }))
@@ -397,7 +397,7 @@ async function drivePowerAndMomentum(page, { capture }) {
         const id = (n.getAttribute('data-testid') ?? '').replace('combat-die-', '')
         const label = (n.getAttribute('aria-label') ?? '')
         const color = (label.match(/^(\w+)\s+stance die/i)?.[1] ?? '').toLowerCase()
-        const usable = /available|drafted|floating|banked|SPECIAL face/i.test(label)
+        const usable = /available|drafted|ghost|banked|BOON face/i.test(label)
             && !/a miss|blocked|spent|cracked/i.test(label)
         return { id, color, usable }
     }))

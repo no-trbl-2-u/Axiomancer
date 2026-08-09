@@ -145,7 +145,7 @@ export const SCRAP_CONVICTION_CAP_PER_TURN = 2;
 // to weight. Every HP source is DoT ticks, status payoffs, engine-gated drips,
 // or reflect.
 
-/** Spec 32 v3 T8 — SWAY decays this much at every turn boundary (the tension
+/** Spec 32 v3 T8 — PLEA decays this much at every turn boundary (the tension
  *  knob, ratified A2; `irresistible-grace` removes the decay). Tunable. */
 export const SWAY_DECAY_PER_TURN = 1;
 
@@ -435,7 +435,7 @@ export function initializeCombatEncounter(
     let uid = 0;
     const hand = draw.drawn.map(cardId => ({ uid: `c${++uid}`, cardId }));
 
-    // Spec 32 v3 §5 — the character's persistent FLOATING dice arrive in the
+    // Spec 32 v3 §5 — the character's persistent GHOST dice arrive in the
     // opening tray (they were forged in earlier combats and never spent).
     const floatingDice = materializeFloatingDice(clonedPlayer.floatingDice ?? []);
 
@@ -473,7 +473,7 @@ export function initializeCombatEncounter(
         premises: 0,
         // Phase 32 part 4b (Oratory — milestone drip): per-COMBAT lifetime
         // Premise total, like `souls`/`akrasiaDebt` — never resets when
-        // `premises` itself resets on a Peroration payoff or CONCEDE.
+        // `premises` itself resets on a Peroration payoff or CONDEMN.
         premiseMilestoneTotal: 0,
         peroration: null,
         souls: 0,
@@ -645,7 +645,7 @@ export function startTurn(
     if (state.permanentWildDice || state.permanentDeadDice) {
         dice = [...dice, ...rollPermanentBonusDice(turn, state.permanentWildDice ?? 0, state.permanentDeadDice ?? 0)];
     }
-    // Spec 32 v3 §5 — FLOATING dice join every turn's tray. They are the same
+    // Spec 32 v3 §5 — GHOST dice join every turn's tray. They are the same
     // persistent objects each turn (stable ids), never reroll, and are only
     // removed from the pool when SPENT.
     if ((state.floatingDice ?? []).length > 0) {
@@ -717,7 +717,7 @@ export function draftStanceDie(
     if (isUpgradeableDiceEnabled()) return { state, events: [] };
     if (state.phase !== 'phase-play') return { state, events: [] };
     if (state.draftedDieId !== null) return { state, events: [] };
-    // Spec 32 v3 §5 — a FLOATING die cannot be drafted as the stance: it is an
+    // Spec 32 v3 §5 — a GHOST die cannot be drafted as the stance: it is an
     // extra power source beyond the turn's 2-die draft (the "bigger turns"
     // intent), spent directly on PAID plays like a Reserve die.
     const drafted = state.dice.find(d => d.id === dieId && !d.floating);
@@ -1059,7 +1059,7 @@ export function playCombatCard(
 
 /**
  * Spec 33 §2/§3 (flag-gated) — post-play bookkeeping for a LANDED PAID play:
- * 1. SPECIAL payload (§1, owner-ratified use-triggered rule): the powering die's
+ * 1. BOON payload (§1, owner-ratified use-triggered rule): the powering die's
  *    special face fires its gear payload (+◆) because it was USED.
  * 2. Stance-from-cards: the player's stance becomes this card's stance.
  * 3. Momentum: start / advance / break-to-NULL (owner-locked D1); a completed
@@ -1080,7 +1080,7 @@ function applyStanceAndMomentumV2(
     if (state.phase === 'complete') return transition;
     const events: CombatEvent[] = [];
 
-    // 1. SPECIAL fires on USE (the single ratified switch).
+    // 1. BOON fires on USE (the single ratified switch).
     if (SPECIAL_FIRES_ON_USE && played.dieId) {
         const preDie = preState.dice.find(d => d.id === played.dieId)
             ?? (preState.reserve ?? []).find(d => d.id === played.dieId);
@@ -1306,7 +1306,7 @@ function gainSouls(
     let souls = (state.souls ?? 0) + amount;
     events.push({ kind: 'soul-gained', amount, total: souls, reason });
     // `choirbone-reliquary` (E, profane canon): the box counts every ending —
-    // each affliction that expires or is consumed yields +1 SOUL and SWAY 1
+    // each affliction that expires or is consumed yields +1 SOUL and PLEA 1
     // on top of the base law. Gated on reason so its OWN grants never recurse.
     let next: CombatEncounterState = { ...state, souls };
     if (reason !== 'granted' && zoneHas(state, 'choirbone-reliquary')) {
@@ -1317,16 +1317,16 @@ function gainSouls(
     return next;
 }
 
-/** SWAY gain (spec 32 v3 §9, reworked by plan/tuning/
+/** PLEA gain (spec 32 v3 §9, reworked by plan/tuning/
  *  2026-07-08-win-path-scaling.md item 1a to a Dawncaster Charmed-style
- *  `resolve` threshold — see `capitulateThreshold`): SWAY ≥ the enemy's
+ *  `resolve` threshold — see `capitulateThreshold`): PLEA ≥ the enemy's
  *  resolve opens an explicit ACCEPT / CONTINUE choice. It never resolves the
  *  outcome by itself. Eligibility is checked after gains and at boundaries.
  *
  *  Phase 32 part 4e (Charm — Resolve milestones): the SINGLE insertion point
- *  every SWAY source funnels through (mirrors `gainPremises` being Oratory's
+ *  every PLEA source funnels through (mirrors `gainPremises` being Oratory's
  *  one insertion point in Part 4b) — so the Wavering/Faltering dividends
- *  below are universal across every SWAY source, not scoped to a single
+ *  below are universal across every PLEA source, not scoped to a single
  *  card. Checked AFTER the scaled gain lands, against the LIVE
  *  `capitulateThreshold` (resolve can itself shrink as the enemy's HP
  *  falls) — see `swayResolveMilestoneThresholds`. */
@@ -1337,8 +1337,8 @@ function gainSway(
 ): CombatEncounterState {
     if (amount <= 0) return state;
     // Grace late-stage rebalance (2026-07-08): buff_grace_momentum (stacked
-    // at the turn boundary while irresistible-grace holds SWAY from decaying
-    // — see processBetweenPhases) multiplies every SWAY gain by its payload's
+    // at the turn boundary while irresistible-grace holds PLEA from decaying
+    // — see processBetweenPhases) multiplies every PLEA gain by its payload's
     // outgoingSwayGainMulPct per stack. "Protect the stack" becomes a
     // genuinely compounding payoff instead of just a decay-proof floor.
     const momentum = state.player.effects.find(e => e.effectId === 'buff_grace_momentum');
@@ -1362,10 +1362,10 @@ function gainSway(
     const { wavering, faltering } = swayResolveMilestoneThresholds(resolve);
     if (!waveringFired && sway >= wavering) {
         waveringFired = true;
-        // Wavering — one stack of RAPPORT on the enemy, Charm's own
+        // Wavering — one stack of QUARTER on the enemy, Charm's own
         // rapport-building idiom (soft-word / disarming-smile /
         // common-ground / the-olive-branch's exact payload).
-        const def = lookupEffectDef('debuff_rapport');
+        const def = lookupEffectDef('debuff_quarter');
         let landedIntensity = SWAY_WAVERING_RAPPORT;
         if (def) {
             const applied = applyEffect(enemy.effects, def, state.round, {
@@ -1377,14 +1377,14 @@ function gainSway(
         }
         events.push({
             kind: 'sway-milestone', milestone: 'wavering', threshold: wavering, total: sway,
-            effectId: 'debuff_rapport', intensity: landedIntensity,
+            effectId: 'debuff_quarter', intensity: landedIntensity,
         });
     }
     if (!falteringFired && sway >= faltering) {
         falteringFired = true;
-        // Faltering — a small bonus SWAY nudge (unscaled by momentum; see
+        // Faltering — a small bonus PLEA nudge (unscaled by momentum; see
         // SWAY_FALTERING_BONUS's own doc comment for why GUARD/heal were
-        // rejected in favor of SWAY at this call site).
+        // rejected in favor of PLEA at this call site).
         sway += SWAY_FALTERING_BONUS;
         events.push({ kind: 'sway-milestone', milestone: 'faltering', threshold: faltering, total: sway, bonus: SWAY_FALTERING_BONUS });
     }
@@ -1422,9 +1422,9 @@ function offerCapitulation(state: CombatEncounterState, events: CombatEvent[]): 
     return { state: withLog(choosing, [offered]), events: [...events, offered] };
 }
 
-/** PREMISE gain + the PERORATION trigger (spec 32 v3 T2). When the declared
+/** CHARGE gain + the SENTENCE trigger (spec 32 v3 T2). When the declared
  *  conclusion's threshold is met the rider fires FREE and the tally resets;
- *  reaching `concedeAt` first wins the argument outright (CONCEDE). */
+ *  reaching `concedeAt` first wins the argument outright (CONDEMN). */
 function gainPremises(
     state: CombatEncounterState,
     amount: number,
@@ -1458,7 +1458,7 @@ function gainPremises(
     if (!decl) return { state: next, concede: false };
     const total = next.premises ?? 0;
     // Win-path scaling (plan/tuning/2026-07-08-win-path-scaling.md item 1a):
-    // the-closing-word's flat concedeAt (8) let Oratory land CONCEDE
+    // the-closing-word's flat concedeAt (8) let Oratory land CONDEMN
     // identically against a 100 HP early wolf and a 1,500+ HP late boss —
     // Battle Lab round 2 clocked it at 100% win rate on EVERY stage. The
     // required Premise count now floors at the enemy's own `difficulty`
@@ -1878,7 +1878,7 @@ function playBottomAction(
 
     // 1. Resolve the POWERING die — Fate Engine P1 R8: the dieId the player
     //    dragged is HONORED. It may name the drafted die (default when absent),
-    //    a banked Reserve die (R2), a FLOATING die in the tray (spec 32 v3 §5),
+    //    a banked Reserve die (R2), a GHOST die in the tray (spec 32 v3 §5),
     //    or — for `fate` cards only — a locked X die in the tray (R4). Anything
     //    else is an explicit fizzle.
     const drafted = draftedDie(state);
@@ -2083,7 +2083,7 @@ function playBottomAction(
     let mercyOpened = res.activateMercyChoice === true;
 
     // ── Fate Engine P1 — resonance, thresholds, die riders, pips (spec 31 §1) ──
-    // Spending the powering die feeds the RESONANCE tally (R1): its own color,
+    // Spending the powering die feeds the TOLL tally (R1): its own color,
     // or the card's stance for a Wild; a fate-X feeds nothing.
     let resonance = { heart: 0, body: 0, mind: 0, ...(state.resonance ?? {}) };
     let conviction = state.conviction;
@@ -2239,7 +2239,7 @@ function playBottomAction(
 
     // Local SOUL gain. `choirbone-reliquary` (E, profane canon): every
     // affliction that expires or is consumed mid-play also yields +1 SOUL and
-    // SWAY 1 (gated on reason so its own grants never recurse).
+    // PLEA 1 (gated on reason so its own grants never recurse).
     const gainSoulsLocal = (n: number, reason: 'expiry' | 'consumed' | 'granted'): void => {
         if (n <= 0) return;
         souls += n;
@@ -2440,7 +2440,7 @@ function playBottomAction(
                     pips += d.pips ?? 0;
                     return (d.pips ?? 0) > 0 ? { ...d, pips: 0 } : d;
                 });
-                // Foundry engagement fix (2026-07-08): a persistent FLOATING die
+                // Foundry engagement fix (2026-07-08): a persistent GHOST die
                 // (forged by Ex Nihilo) sitting in the tray previously never
                 // counted toward this spend — only Reserve pips did, decoupling
                 // the deck's two signature mechanics from each other. Floating
@@ -2765,7 +2765,8 @@ function playBottomAction(
                     events.push({ kind: 'echoed', cardId: lastCard.id });
                     stuckDrip();
                     // `the-sextons-count` (E, profane canon): a REPLAY is a
-                    // body raised — the bell tolls DOOM 1 onto the foe.
+                    // body raised — the bell adds DOOM 1 onto the foe (not
+                    // "tolls" — TOLL is now its own registry word, R-11).
                     if (zoneHas(state, 'the-sextons-count')) {
                         const doomDef = lookupEffectDef('debuff_creeping_doom');
                         if (doomDef) {
@@ -2816,7 +2817,7 @@ function playBottomAction(
             }
             case 'float_x_die': {
                 // TRANSMUTE (dice-law 2026-07-09) — a dead X face in the tray
-                // becomes a FLOATING WILD die: dead fate turned live. Falls back
+                // becomes a GHOST WILD die: dead fate turned live. Falls back
                 // to +1 Conviction (printed) with no X or at the floating cap.
                 const xDie = state.dice.find(d =>
                     d.color === 'x' && d.state !== 'spent' && !d.floating && !transmutedXIds.includes(d.id));
@@ -3202,7 +3203,7 @@ function playBottomAction(
     // 5. Die spend / refresh — the powering die's fate. The variety chain keeps
     //    the turn alive on a NEW status (unchanged, R9); a refresh rider/mechanic
     //    always refreshes; CONVERT returns it as WILD; BANK_SPENT_DIE parks it in
-    //    the Reserve. A FLOATING die is GONE FOREVER when spent (spec 32 v3 §5) —
+    //    the Reserve. A GHOST die is GONE FOREVER when spent (spec 32 v3 §5) —
     //    refresh effects cannot save it.
     const chainBefore = state.chainEffectIds ?? [];
     const newChainIds = landedOffensiveIds.filter(id => !chainBefore.includes(id));
@@ -3261,7 +3262,7 @@ function playBottomAction(
     // FORGE (spec 32 v3 §5) — the forged floating die joins the tray NOW, so it
     // can power a play THIS turn (the "bigger turns" intent).
     if (forgedFloating.length > 0) dice = [...dice, ...forgedFloating];
-    // `entropy-tax` (D): spending a KINDLED (temporary) or FLOATING die marks
+    // `entropy-tax` (D): spending a KINDLED (temporary) or GHOST die marks
     // the enemy — the manufactured resource has a price (spec 32 v3 T3).
     // Restored Phase 39 (2026-08-08) alongside the card (retired at D8).
     if (zoneHas(state, 'entropy-tax')
@@ -3671,7 +3672,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     let player = state.player;
     let enemy = state.enemy;
     // Phase 33a — hoisted above the effect loop (was declared after it, for
-    // the unrelated mirror-of-longing SWAY-on-block interaction only) so the
+    // the unrelated mirror-of-longing PLEA-on-block interaction only) so the
     // loop's swayCleanse hook can mutate the same locals `mirror-of-longing`
     // reads/writes further down.
     let sway = state.sway ?? 0;
@@ -3724,8 +3725,8 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         events.push({ kind: 'backfired', amount: drip, rungs: rungsForBackfire });
     }
     // `the-assize-bell` (E, profane canon): one bronze syllable per objection
-    // sustained — every rung this phase's telegraph lost becomes 1 PREMISE.
-    // Raw tally add (the CONCEDE check runs on the next `gainPremises`).
+    // sustained — every rung this phase's telegraph lost becomes 1 CHARGE.
+    // Raw tally add (the CONDEMN check runs on the next `gainPremises`).
     if (zoneHas(state, 'the-assize-bell') && rungsForBackfire > 0) {
         premises += rungsForBackfire;
         events.push({ kind: 'premise-gained', amount: rungsForBackfire, total: premises });
@@ -3974,20 +3975,20 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     if (idx < threatMarks.length) threatMarks[idx] = mark;
 
     // `mirror-of-longing` (D): the damage your defenses prevented converts to
-    // SWAY — their aggression argues your case (spec 32 v3 T8). `sway` /
+    // PLEA — their aggression argues your case (spec 32 v3 T8). `sway` /
     // the milestone flags are hoisted above the effect loop now (Phase 33a)
     // so this reads/writes the SAME locals the swayCleanse hook may have
     // already moved this phase.
     if (zoneHas(state, 'mirror-of-longing') && damagePrevented > 0) {
         // Routed through gainSway (not a bare `sway += amount`) so
         // buff_grace_momentum's per-stack multiplier applies here too, not
-        // just to card-driven SWAY gains (2026-07-08 Grace rebalance).
-        // Phase 32 part 4e — gainSway can also land a Wavering RAPPORT stack
+        // just to card-driven PLEA gains (2026-07-08 Grace rebalance).
+        // Phase 32 part 4e — gainSway can also land a Wavering QUARTER stack
         // on `enemy` and flip the milestone-fired flags; the FULL returned
         // state is captured here (not just `.sway`) so that dividend isn't
         // silently dropped at this one call site. `guard` is deliberately
         // NOT read back from gainSway's result even though the Faltering
-        // payoff is SWAY (not GUARD) precisely so this fragile site — GUARD
+        // payoff is PLEA (not GUARD) precisely so this fragile site — GUARD
         // resets to 0 a few lines below regardless — never needs to care.
         const swayResult = gainSway({ ...state, player, enemy, sway }, damagePrevented, events);
         sway = swayResult.sway ?? sway;
@@ -4447,7 +4448,7 @@ export function processBetweenPhases(
             }
         }
         omenState = { ...omenState, pendingOmens: remaining };
-        // An omen-granted Premise may complete a CONCEDE-grade Peroration.
+        // An omen-granted Premise may complete a CONDEMN-grade Peroration.
         if (omenState.finalOutcome === 'concede') {
             return { state: withLog(omenState, events), events: [...priorEvents, ...events] };
         }
@@ -4467,13 +4468,13 @@ export function processBetweenPhases(
         omenState = { ...omenState, barrier: (omenState.barrier ?? 0) + 3 };
     }
     // `the-long-amen` (D, profane canon): the held word accrues — the enemy
-    // gains SWAY equal to the Souls you hold, every round's end. Reads the
+    // gains PLEA equal to the Souls you hold, every round's end. Reads the
     // bank, never spends it (the deliberate hold-or-spend tension).
     if (zoneHas(state, 'the-long-amen') && (omenState.souls ?? 0) > 0 && !isDefeated(omenState.enemy)) {
         omenState = gainSway(omenState, omenState.souls ?? 0, events);
     }
 
-    // SWAY decays at the turn boundary (ratified A2) unless `irresistible-grace`
+    // PLEA decays at the turn boundary (ratified A2) unless `irresistible-grace`
     // holds it; `captive-audience` (D) keeps the enemy marked while you hold
     // 4+ Premises.
     let sway = omenState.sway ?? 0;
@@ -4482,7 +4483,7 @@ export function processBetweenPhases(
         events.push({ kind: 'sway-decayed', total: sway });
     } else if (sway > 0 && zoneHas(state, 'irresistible-grace')) {
         // Grace late-stage rebalance (2026-07-08): every turn boundary the
-        // player holds SWAY continuously under Irresistible Grace's decay
+        // player holds PLEA continuously under Irresistible Grace's decay
         // immunity, buff_grace_momentum stacks one further (capped at
         // GRACE_MOMENTUM_MAX_STACKS) — "protect the stack" becomes a real,
         // compounding payoff (read by gainSway) instead of just a floor.
@@ -4738,7 +4739,7 @@ export function resolveCombatPhase(
             working = drafted.state; allEvents.push(...drafted.events);
             // Gate 0 (round-turn law) — the phase's one tray roll may already
             // be spent; a fresh draft cannot be conjured. Fall back to a
-            // color-legal Reserve or FLOATING die (legal extra power WITHIN
+            // color-legal Reserve or GHOST die (legal extra power WITHIN
             // the turn — the law caps tray rolls, not card plays).
             if (dieId === undefined) {
                 const cur = getDraftedDie(working);
@@ -4769,7 +4770,7 @@ export function resolveCombatPhase(
 
 // ── Capitulation + mercy choices ──────────────────────────────────────────────
 
-/** SWAY makes the foe's yield available; only the player can author the end. */
+/** PLEA makes the foe's yield available; only the player can author the end. */
 export function selectCapitulationChoice(
     state: CombatEncounterState,
     choice: 'accept' | 'continue',

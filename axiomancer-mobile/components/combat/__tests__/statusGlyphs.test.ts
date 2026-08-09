@@ -40,7 +40,7 @@ describe('statusGlyphs — resolution', () => {
         // Mark/Backfire/Rapport ARE the keyword system — no generic category icons.
         expect(effectGlyph({ id: 'debuff_mark', type: 'debuff' }).glyph).toBe('◉');
         expect(effectGlyph({ id: 'debuff_backfire', type: 'debuff' }).glyph).toBe('⟲');
-        expect(effectGlyph({ id: 'debuff_rapport', type: 'debuff' }).glyph).toBe('☙');
+        expect(effectGlyph({ id: 'debuff_quarter', type: 'debuff' }).glyph).toBe('☙');
         // The two live DoT species no longer share one 🔥.
         const ember = effectGlyph({ id: 'debuff_kindling_ember', type: 'debuff', payload: { damageOverTime: {} } }).glyph;
         const nettle = effectGlyph({ id: 'debuff_nettle_sting', type: 'debuff', payload: { damageOverTime: {} } }).glyph;

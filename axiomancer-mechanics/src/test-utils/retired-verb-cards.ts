@@ -168,23 +168,23 @@ const theUnmovedMover: Card = {
 };
 
 // ── WS4.3 (spec 32 §12 item 4) — charm theme-role pass (`roles-charm`) ───────
-// Ratified CONDITIONAL: Steadfast Regard (the one-turn SWAY decay-pause) and
-// Crescendo of Affection (SWAY + half-current-SWAY scaling) are NOT built —
+// Ratified CONDITIONAL: Steadfast Regard (the one-turn PLEA decay-pause) and
+// Crescendo of Affection (PLEA + half-current-PLEA scaling) are NOT built —
 // spec 32 §12 item 4 keeps both conditional on post-Phase-26/27 telemetry
 // STILL showing the charm late hole. This set ships only the
 // unconditionally-ratified card.
 
 /**
  * A Sweeter Poison — charm Theorem: the compliment with the pit left in.
- * PAID: SWAY 3, then the RUPTURE-class closer (`ruptureMarks` — a payoff-class
+ * PAID: PLEA 3, then the RUPTURE-class closer (`ruptureMarks` — a payoff-class
  * verb: it fires the WS3 'payoff' trigger clock, then cashes every STANDING
  * MARK at 2 HP per stack), and only THEN plants MARK ×2 for the next twist of
  * the knife. Rider order is engine order (firedRiders resolve in insertion
  * order), so the closer consumes PRE-EXISTING marks only — on a clean board it
  * is silence, not a strike in disguise. A full `rupture` was rejected twice
  * over: it prices at 12 (V.rupture 4 + expected fuel 8 — rank-dishonest for a
- * Theorem also carrying SWAY + MARK), and it consumes ALL afflictions —
- * including RAPPORT, the charm state the rest of the deck builds.
+ * Theorem also carrying PLEA + MARK), and it consumes ALL afflictions —
+ * including QUARTER, the charm state the rest of the deck builds.
  */
 const aSweeterPoison: Card = {
     id: 'a-sweeter-poison',
@@ -197,7 +197,7 @@ const aSweeterPoison: Card = {
         'going down, and already naming the next two.',
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'enemy',
-    // pts (phase 36a: SWAY 0.8→0.9): SWAY 3 (2.7) + closer ruptureMarks 2
+    // pts (phase 36a: PLEA 0.8→0.9): PLEA 3 (2.7) + closer ruptureMarks 2
     // (2 × 2/3 = 1.33) + MARK ×2 (mark i2 d2 = 3.0) + FREE [sway 2 (1.8) +
     // heal 2 (0.67)] = 9.5 → uncommon band 4.5-13 (Theorem). FREE share
     // 2.47/9.5 = 26.0% ✓ window.
@@ -319,7 +319,7 @@ const captatioBenevolentiae: Card = {
         + 'is a foundation; spoken third, it is only a pleasantry.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'self',
-    // pts: PAID [guard 5 (1.25) + PREMISE 1 (0.8)] = 2.05 + OPENING rider
+    // pts: PAID [guard 5 (1.25) + CHARGE 1 (0.8)] = 2.05 + OPENING rider
     // [guard 5 (1.25) + premise 1 (0.8)] × threshold 0.5 = 1.025 + FREE
     // [premise 1 (0.8) + guard 1 (0.25)] = 1.05 → 4.125 → common band
     // 1.5-7.5 (Lemma). FREE share 1.05/4.125 = 25.5% ✓ window.
@@ -352,7 +352,7 @@ const inMediasRes: Card = {
     tier: 1, rank: 3, cardType: 'spell',
     targetType: 'enemy',
     // pts: PAID [poison i1 d2 (spec 33 D4 1.83 cadence: tempo-weighted 6.4 ÷ 3
-    // = 2.14) + PREMISE 1 (0.8)] = 2.94 + OPENING(≤1) rider [bonusIntensity 1
+    // = 2.14) + CHARGE 1 (0.8)] = 2.94 + OPENING(≤1) rider [bonusIntensity 1
     // (1.5) + draw (2.0)] × threshold 0.5 = 1.75 + FREE [premises 2 (1.6) +
     // guard 1 (0.25)] = 1.85 → 6.54 → uncommon band 4.5-13 (Thesis). FREE
     // share 1.85/6.54 = 28.3% ✓ window.
@@ -532,7 +532,7 @@ const answeredInKind: Card = {
  * Barbed Compliment — affliction↔charm (theme home: affliction, Lemma). The
  * bridge IS the double-count: MARK is utility vocabulary that reads as an
  * affliction (every DoT tick and payoff hit cashes it; RUPTURE/REAP consume
- * it) AND the same breath deposits SWAY on the CAPITULATE bar. An affliction
+ * it) AND the same breath deposits PLEA on the RELENT bar. An affliction
  * origin picks it for the amp stacks; a charm origin picks it for the bar.
  */
 const barbedCompliment: Card = {
@@ -546,7 +546,7 @@ const barbedCompliment: Card = {
         + 'in them starts wanting to agree with you.',
     tier: 1, rank: 2, cardType: 'spell',
     targetType: 'enemy',
-    // pts (phase 36a: SWAY 0.8→0.9): MARK i2 d2 (0.75 × 2 × 2 = 3.0) + SWAY 2
+    // pts (phase 36a: PLEA 0.8→0.9): MARK i2 d2 (0.75 × 2 × 2 = 3.0) + PLEA 2
     // (1.8) = 4.8 + FREE [mark i1 d1 (0.75) + sway 1 (0.9)] = 1.65 → 6.45 →
     // common band 1.5-7.5 (Lemma). FREE share 1.65/6.45 = 25.6% ✓ the 25-35% window.
     free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 }, sway: 1 },
@@ -626,9 +626,9 @@ const interestOnTheFlesh: Card = {
  * Entered into Evidence — oracle↔peroration (theme home: oracle, Thesis).
  * FORETELL confirm → Premise, exactly as the pairing prints it: FORETELL 2
  * reads the future, the OMEN declares it, and when the prediction CONFIRMS at
- * the phase boundary the rider deposits PREMISE ×2 onto the running tally
+ * the phase boundary the rider deposits CHARGE ×2 onto the running tally
  * (the omen-resolution path already carries `rider.premises` — an omen-fed
- * Premise can even complete a CONCEDE-grade Peroration).
+ * Premise can even complete a CONDEMN-grade Peroration).
  */
 const enteredIntoEvidence: Card = {
     id: 'entered-into-evidence',
@@ -695,10 +695,10 @@ const stolenCadence: Card = {
 
 /**
  * Unbroken Countenance — bulwark↔charm (theme home: charm, Theorem). Unbroken
- * GUARD → SWAY: raise the wall and press the bar; if the enemy dealt you NO
+ * GUARD → PLEA: raise the wall and press the bar; if the enemy dealt you NO
  * damage last round (fully blocked, denied, or idle — the ratified
  * `enemy-dealt-no-damage-last-round` ledger predicate, The Unmoved Mover's
- * gate), the composure itself persuades: SWAY ×4 + 2 HP composed back.
+ * gate), the composure itself persuades: PLEA ×4 + 2 HP composed back.
  */
 const unbrokenCountenance: Card = {
     id: 'unbroken-countenance',
@@ -711,7 +711,7 @@ const unbrokenCountenance: Card = {
         + 'as weather, and begin to suspect you might simply be right.',
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'self',
-    // pts (phase 36a: SWAY 0.8→0.9): GUARD 8 (8 ÷ 4 = 2.0) + SWAY 2 (1.8) =
+    // pts (phase 36a: PLEA 0.8→0.9): GUARD 8 (8 ÷ 4 = 2.0) + PLEA 2 (1.8) =
     // 3.8 + UNBROKEN condition rider [sway 4 (3.6) + heal 2 (0.67)] ×
     // threshold 0.5 = 2.14 + FREE [guard 2 (0.5) + sway 2 (1.8)] = 2.3 →
     // 8.23 → uncommon band 4.5-13 (Theorem). FREE share 2.3/8.23 = 27.9% ✓ window.

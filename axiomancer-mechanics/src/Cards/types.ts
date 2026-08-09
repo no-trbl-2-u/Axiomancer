@@ -159,13 +159,13 @@ export type CardSpecialMechanic =
      *  Reserve at 0 pips (if a slot is free; otherwise it is spent normally). */
     | { kind: 'bank_spent_die' }
     // ── Spec 32 v3 — the themed-deck verb set (all combat-engine owned) ────────
-    /** FORGE — create a FLOATING die: joins the tray now, never rerolls, persists
+    /** FORGE — create a GHOST die: joins the tray now, never rerolls, persists
      *  across rounds AND combats, gone forever when spent. Cap 3; forging at cap
      *  converts to +1 Conviction (printed). `color: 'powering'` = the powering
      *  die's color; `'wild'` on premium cards. */
     | { kind: 'forge_floating_die'; color: 'powering' | 'wild' }
     /** TRANSMUTE (dice-law 2026-07-09) — convert one dead X die in the tray into
-     *  a FLOATING WILD die (all floating rules apply: joins the tray now, never
+     *  a GHOST WILD die (all floating rules apply: joins the tray now, never
      *  rerolls, persists across combats, gone forever when spent). With no X in
      *  the tray, or at the floating cap, it burns for +1 Conviction (printed). */
     | { kind: 'float_x_die' }
@@ -195,14 +195,14 @@ export type CardSpecialMechanic =
      *  the pre-v2 die-derived stance (byte-compatible default until a
      *  mobile picker ships — see the phase 32 part 4d brief's Follow-ups). */
     | { kind: 'omen'; maxWindow: number; anteConviction: number; rider: CardRider }
-    /** PREMISE — add `count` Premises to the running tally (Peroration theme). */
+    /** CHARGE — add `count` Charges to the running tally (Sentence theme). */
     | { kind: 'premise'; count: number }
-    /** PERORATION — declare the conclusion (one in play at a time): when the
-     *  Premise tally reaches `at`, `rider` fires FREE and the tally resets.
-     *  If the tally reaches `concedeAt` first, the enemy CONCEDES the argument
+    /** SENTENCE — declare the conclusion (one in play at a time): when the
+     *  Charge tally reaches `at`, `rider` fires FREE and the tally resets.
+     *  If the tally reaches `concedeAt` first, the enemy is CONDEMNED
      *  outright (alt-win, spec 32 v3 §9). */
     | { kind: 'peroration'; at: number; rider: CardRider; concedeAt?: number }
-    /** SPEND PREMISES — cash the whole tally early: +1 MARK stack per
+    /** SPEND CHARGES — cash the whole tally early: +1 MARK stack per
      *  `markPer` spent and draw 1 per `drawPer` spent. */
     | { kind: 'spend_premises'; markPer: number; drawPer: number }
     /** SPEND ALL PIPS — zero every pip on the powering die + Reserve; a paired
@@ -243,8 +243,8 @@ export type CardSpecialMechanic =
      *  ledger. Mirrors `reap_all`'s shape exactly, but CONSUMES rather than
      *  reads a still-growing counter — the theme finally banks what it does. */
     | { kind: 'turnabout'; burstPerRung: number }
-    /** SWAY — add `amount` SWAY to the enemy. SWAY decays 1/turn; if SWAY ≥ the
-     *  enemy's current HP at a turn boundary, it CAPITULATES (alt-win). */
+    /** PLEA — add `amount` PLEA to the enemy. PLEA decays 1/turn; if PLEA ≥ the
+     *  enemy's current HP at a turn boundary, it RELENTS (alt-win). */
     | { kind: 'sway'; amount: number }
     /** ECHO — this card's PAID payload fires twice. */
     | { kind: 'echo' }
@@ -307,9 +307,9 @@ export interface CardRider {
     /** Draw N cards. */
     drawCards?: number;
     // ── Spec 32 v3 — themed-deck rider verbs ─────────────────────────────────
-    /** +N Premises (Peroration tally). */
+    /** +N Charges (Charge tally). */
     premises?: number;
-    /** +N SWAY on the enemy. */
+    /** +N PLEA on the enemy. */
     sway?: number;
     /** +N Souls (Harvest currency). */
     souls?: number;
@@ -582,7 +582,7 @@ export interface Card {
     //    fate / die-manipulation / react; Tier-1 at most one. All combat-engine
     //    owned; the card engine ignores them. ───────────────────────────────────
     /**
-     * RESONANCE THRESHOLD (Spirit Island element thresholds): when the
+     * TOLL THRESHOLD (Spirit Island element thresholds): when the
      * encounter's spent-die tally of `color` is ≥ `count` at play time, the
      * rider fires automatically, free. One spend, two payoffs.
      */

@@ -1,5 +1,9 @@
 # Phase 36b proof gate — seeds=5 re-run on post-33b main
 
+**Status:** HISTORICAL — a dated price-experiment snapshot; keyword prose
+below (capitulate/concede) reflects the registry as it read at capture time,
+not the live phase-44b-renamed vocabulary (CHARGE/CONDEMN/PLEA/RELENT).
+
 _Row-mandated proof gate: re-run the scratch ladder + 10-preset sweep +
 fix-test ON TOP OF phase 33b's enemies at seeds ≥ 5 (the original
 `FINDINGS.md` data was seeds=2 on a pre-33b branch), with the down-scaler

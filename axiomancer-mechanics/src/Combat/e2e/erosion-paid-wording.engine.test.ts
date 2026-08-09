@@ -23,7 +23,7 @@ const EXPECTED_PAID_LINES: Readonly<Record<string, string>> = {
     'chilblain-watch':
         'PAID — GUARD 6. Gain THORNS 1 for 2 turns. Costs 1 die.',
     'petty-indictment':
-        'PAID — Apply MARK 1 for 2 turns. Gain 1 PREMISE. Costs 1 die.',
+        'PAID — Apply MARK 1 for 2 turns. Gain 1 CHARGE. Costs 1 die.',
     'first-spadeful':
         'PAID — MILL 2. FORETELL 1. Costs 1 die.',
     'grandmothers-psalter':
@@ -31,7 +31,7 @@ const EXPECTED_PAID_LINES: Readonly<Record<string, string>> = {
     'thumbprick-oath':
         'PAID — RECOIL 1. DRAW 1 and gain 1 Conviction. Costs 1 die.',
     'thin-hymn':
-        'PAID — SWAY 3. Costs 1 die.',
+        'PAID — PLEA 3. Costs 1 die.',
     'threadbare-cope':
         'PAID — GUARD 4. DRAW 1. Costs 1 die.',
     'knucklebone-recant':

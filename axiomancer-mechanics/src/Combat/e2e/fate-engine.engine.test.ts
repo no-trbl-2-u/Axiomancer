@@ -2,7 +2,7 @@
  * Hermetic E2E — Fate Engine P1 (spec 31 §1): the dice get a second read.
  *
  * Pins every new dice mechanic to exact engine behavior, in real units:
- *   R1 RESONANCE — every spent die tallies its color; card THRESHOLDS fire free riders
+ *   R1 TOLL — every spent die tallies its color; card THRESHOLDS fire free riders
  *   R2 RESERVE — bank-or-burn at draft; banked dice RIPEN +1 pip per threat phase;
  *      pips cash as +1 intensity per pip (status) or +2 Guard per pip (defend)
  *   R4 FATE — an X die powers a `fate` card (printed rider + recoil) and the
@@ -95,7 +95,7 @@ function open(cards: string[], enemyStance: 'heart' | 'body' | 'mind' = 'body', 
     return s;
 }
 
-describe('R1 RESONANCE + thresholds', () => {
+describe('R1 TOLL + thresholds', () => {
     it('spent dice tally their color and a met threshold fires its rider FREE, in real units', () => {
         let s = open(['qa-threshold-dot'], 'body');
         s = setDice(s, ['body', 'heart']);

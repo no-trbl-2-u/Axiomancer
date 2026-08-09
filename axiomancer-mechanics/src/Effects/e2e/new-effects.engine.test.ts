@@ -25,7 +25,7 @@ const V3_DEBUFF_IDS = [
     'debuff_bleed',
     'debuff_mark',
     'debuff_backfire',
-    'debuff_rapport',
+    'debuff_quarter',
 ];
 
 const ALL_V3_IDS = [...V3_BUFF_IDS, ...V3_DEBUFF_IDS];
@@ -108,8 +108,8 @@ describe('v3 card vocabulary — pinned payload numbers (spec 32 §3)', () => {
         expect((backfire.payload as { backfirePerRung?: number }).backfirePerRung).toBe(1);
     });
 
-    it('debuff_rapport softens outgoing enemy damage by 10% per stack', () => {
-        const rapport = lookupEffect('debuff_rapport')!;
+    it('debuff_quarter softens outgoing enemy damage by 10% per stack', () => {
+        const rapport = lookupEffect('debuff_quarter')!;
         expect(rapport.payload.outgoingDamageMulPct).toBe(-10);
     });
 

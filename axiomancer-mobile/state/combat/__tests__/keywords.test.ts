@@ -34,7 +34,7 @@ describe('keyword registry — KW-2/KW-3 (count pinned, no dead references)', ()
         // registry row — it still needs a glossary definition for its face.
         // The 34th is MILL (card-wording audit 2026-07-12): printed on three
         // echo cards with no gloss anywhere — three carriers clears the bar.
-        // 35-37 are SPECIAL / HONE / TEMPER (spec 33 §6, D4 2026-07-17): the
+        // 35-37 are BOON / HONE / TEMPER (spec 33 §6, D4 2026-07-17): the
         // die-gear face payload + the two blacksmith upgrade verbs.
         // 38-42 are the Profane Canon's rework vocabulary (2026-08-08):
         // FESTER, REPLAY, REQUIEM, IMMOLATE, PURGE.
@@ -55,7 +55,7 @@ describe('keyword registry — KW-2/KW-3 (count pinned, no dead references)', ()
         expect(unresolved).toEqual([]);
     });
 
-    it('retired keywords (BARRIER, CONJURE, PERORATION, TRANSMUTE, REPRISE) are gone', () => {
+    it('retired keywords (BARRIER, CONJURE, SENTENCE, TRANSMUTE, REPRISE) are gone', () => {
         // FESTER left this list on 2026-08-08: the Profane Canon promoted it
         // back to a printed keyword (gangrene-gospel, The Untended Garden), so
         // it needs a gloss again.

@@ -32,14 +32,14 @@ import { paidText } from '../combat.cards';
 const KNOWN_UPPER = new Set([
     // registry keywords
     'DRAW', 'FORGE', 'GUARD', 'TICK', 'MARK', 'CLEANSE', 'HEAL', 'RUPTURE',
-    'SIPHON', 'PROLONG', 'REARGUE', 'POISON', 'BLEED', 'DOOM', 'PREMISE',
-    'PREMISES', 'KINDLE', 'PIP', 'PIPS', 'RECOIL', 'FALLEN', 'STAGGER',
-    'BACKFIRE', 'FORETELL', 'OMEN', 'SOUL', 'SOULS', 'REAP', 'SWAY',
-    'RAPPORT', 'THORNS', 'RIPOSTE', 'ECHO', 'RECALL', 'MILL',
+    'SIPHON', 'PROLONG', 'CURDLE', 'POISON', 'BLEED', 'DOOM', 'CHARGE',
+    'CHARGES', 'KINDLE', 'PIP', 'PIPS', 'RECOIL', 'FALLEN', 'STAGGER',
+    'BACKFIRE', 'FORETELL', 'OMEN', 'SOUL', 'SOULS', 'REAP', 'PLEA',
+    'QUARTER', 'THORNS', 'RIPOSTE', 'ECHO', 'RECALL', 'MILL',
     // profane canon (2026-08-08) — the rework's new vocabulary
     'REPLAY', 'REQUIEM', 'FESTER', 'IMMOLATE', 'PURGE',
     // structural / system words the faces already print in caps
-    'FREE', 'ALL', 'WILD', 'VITAE', 'CONCEDE', 'PERORATION', 'OPENING',
+    'FREE', 'ALL', 'WILD', 'VITAE', 'CONDEMN', 'SENTENCE', 'OPENING',
     'DOT', 'DOTS', 'HP',
 ]);
 

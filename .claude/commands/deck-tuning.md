@@ -2,6 +2,9 @@
 description: Card Forge balance loop for Hazard-Pattern Combat — full card authority (no sandbox-first quarantine) with sandbox/A-B tooling still available as recommended practice; measurement-seat swap sweeps through the playtest matrix, tune presets/draft weights, promote proven cards into the library, deliver report + changes via PR. Engine constants are tuned manually, not here.
 ---
 
+<!-- lexicon-ok: sway -->
+
+
 > **⚙️ Runs against the `axiomancer-mechanics` package.** Repo-relative paths below
 > (`src/…`, `docs/…`) are relative to that package — run from it (`cd axiomancer-mechanics`) or via
 > `npm run <script> -w axiomancer-mechanics`. Exception: `npm run baseline:check`

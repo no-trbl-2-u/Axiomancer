@@ -258,8 +258,8 @@
       ]
     },
     {
-      "id": "buff_open_minded",
-      "name": "Open-Minded",
+      "id": "buff_absolved",
+      "name": "Absolved",
       "description": "A mind prepared to consider mercy, softened by witnessing compassion to lesser foes. This status has no mechanical effect beyond qualifying the bearer for befriend paths.",
       "type": "buff",
       "category": "special",

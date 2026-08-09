@@ -1,5 +1,10 @@
 # Card Pricing vs Win-Rate — Findings
 
+**Status:** HISTORICAL — a dated price-experiment snapshot; keyword prose
+below (capitulate/concede/sway/rapport) reflects the registry as it read at
+capture time, not the live phase-44b-renamed vocabulary (CHARGE/CONDEMN/
+PLEA/RELENT/QUARTER).
+
 _Source: `scratch/price-experiment/out/*.json` (10 preset files, 2 ladders, 1 fix-test). Policy `blind`, seeds 2, runs 40–60/cell. "Card price" = the `scoreCard` power-budget (`cards.pricing.ts`); die cost is fixed at 1 die per PAID line, so a higher price packs more status/burst power per die. `winRate` = victory+mercy+capitulate+concede. `avgRoundsToVictory` is victory-only._
 
 ## Headline answer

@@ -4,13 +4,13 @@
  *
  * 30 KEYWORDS (down from a drifted 32 — the "exactly 30" directive yields
  * to earned support: see `plan/tuning/2026-07-10-keyword-registry.md`).
- * Spec 33 §6 (D4, 2026-07-17) registers three more die-gear rows: SPECIAL
+ * Spec 33 §6 (D4, 2026-07-17) registers three more die-gear rows: BOON
  * (the face payload) plus the blacksmith upgrade verbs HONE and TEMPER.
  * Phase 29 (`plan/phases/phase_29_keyword_registry.md`) folded six
  * previously-unmapped debuff ids into registry keywords, renamed three
- * colliding words (FESTER→PROLONG, TRANSMUTE→REARGUE, REPRISE→RECALL),
+ * colliding words (FESTER→PROLONG, TRANSMUTE→CURDLE, REPRISE→RECALL),
  * retired/merged three ghosts (BARRIER into GUARD, CONJURE — zero library
- * cards, PERORATION — demoted to card-local text on its sole carrier), and
+ * cards, SENTENCE — demoted to card-local text on its sole carrier), and
  * promoted one (SIPHON — was raw unglossed text). TICK and KINDLE are
  * UNCHANGED this phase: TICK's retirement rides Phase 30's FREE-line
  * rework, and KINDLE's fold-into-FORGE is conditional on Phase 30/32
@@ -38,7 +38,7 @@ const EFFECT_KEYWORD: Record<string, string> = {
     debuff_bleed: 'Bleed',
     debuff_mark: 'Mark',
     debuff_backfire: 'Backfire',
-    debuff_rapport: 'Rapport',
+    debuff_quarter: 'Quarter',
     buff_thorns: 'Thorns',
     // ── KW-1 fold (phase 29): DoT-species ids that had no keyword home and
     // rendered the blank "◆ DIE" face. Presentation-only — no payloads
@@ -68,7 +68,7 @@ const SUPPORT_KEYWORD: Record<string, string> = {
     buff_regeneration: 'Heal',
     buff_phoenix_vigor: 'Heal',
     buff_cleanse: 'Cleanse',
-    buff_open_minded: 'Cleanse',
+    buff_absolved: 'Cleanse',
     buff_damage_reduction: 'Guard',
     buff_all_stats_up: 'Guard',
     buff_invincibility: 'Guard',
@@ -90,7 +90,7 @@ const VERB_KEYWORD: Record<string, string> = {
  * Special-mechanic kind → keyword (Title-Case). The MISSING half of the
  * vocabulary map: `EFFECT_KEYWORD` covers effect-backed cards (Poison / Mark /
  * …), but a card whose PAID identity is a `specialMechanics` verb (STAGGER,
- * SWAY, …) had no keyword resolution and fell through to the ambiguous
+ * PLEA, …) had no keyword resolution and fell through to the ambiguous
  * "DEBUFF / buff yourself" face. Every headline-able mechanic maps to a real
  * glossary keyword here so the face can always print `KEYWORD · value`.
  *
@@ -99,11 +99,11 @@ const VERB_KEYWORD: Record<string, string> = {
  * reach the generic mechanic path.
  *
  * Phase 29 (KW-2/KW-3): `peroration` demoted (no keyword entry — its sole
- * carrier, the-closing-word, prints "PERORATION at N" via `mechanicText`
- * directly; the PREMISE gloss below explains the trigger). `consume_affliction`
+ * carrier, the-closing-word, prints "SENTENCE at N" via `mechanicText`
+ * directly; the CHARGE gloss below explains the trigger). `consume_affliction`
  * re-mapped Soul→Rupture (extends RUPTURE's printed sense instead of minting
  * CONSUME). `reprise`→Recall, `extend_dots`/`boost_all_dots`→Prolong,
- * `convert_dots`→Reargue (renames). `replay_last`→Echo mapping DELETED
+ * `convert_dots`→Curdle (renames). `replay_last`→Echo mapping DELETED
  * (ouroboros is a 1-of rare; `mechanicText`'s own case already gives it full
  * descriptive text — no keyword badge needed). `conjure_card` DELETED
  * (CONJURE retired — zero library cards). `siphon` PROMOTED to a real
@@ -120,9 +120,9 @@ const MECHANIC_KEYWORD: Record<string, string> = {
     // ── Oracle ──
     foretell: 'Foretell',
     omen: 'Omen',
-    // ── Peroration ──
-    premise: 'Premise',
-    spend_premises: 'Premise',
+    // ── Sentence ──
+    premise: 'Charge',
+    spend_premises: 'Charge',
     // ── Akrasia ──
     recoil: 'Recoil',
     // Chosen X-cost (WS7.2): same keyword family — the blood price, sized by
@@ -133,14 +133,14 @@ const MECHANIC_KEYWORD: Record<string, string> = {
     consume_affliction: 'Rupture',
     siphon: 'Siphon',
     // ── Charm ──
-    sway: 'Sway',
+    sway: 'Plea',
     // ── Echo ──
     echo: 'Echo',
     echo_next_spell: 'Echo',
     reprise: 'Recall',
     // ── Affliction glue ──
     extend_dots: 'Prolong',
-    convert_dots: 'Reargue',
+    convert_dots: 'Curdle',
     boost_all_dots: 'Fester',
     // ── The pyre verbs (Profane Canon rework, 2026-08-08) ──
     immolate: 'Immolate',
@@ -165,7 +165,7 @@ const KEYWORD_GLOSS: Record<string, string> = {
     // ── Utility (9) ──
     Draw: 'Draw that many cards from your deck, up to your hand limit.',
     Forge:
-        'Forges a FLOATING die (or revives a dead X die as WILD) that plays beside your drafted die and is spent for good; '
+        'Forges a GHOST die (or revives a dead X die as WILD) that plays beside your drafted die and is spent for good; '
         + 'at 3 dice it grants +1 Conviction instead.',
     Guard:
         'Blocks that much incoming attack damage during the next threat phase. '
@@ -182,22 +182,22 @@ const KEYWORD_GLOSS: Record<string, string> = {
     // ── Affliction (T1) ──
     Prolong: 'Adds that many turns to every damage-over-time effect you have on the enemy.',
     Fester: 'Every damage-over-time effect on the enemy gains that much intensity.',
-    Reargue: "Flips the enemy's Bleed into Poison and its Poison into Bleed, each landing that much harder.",
+    Curdle: "Flips the enemy's Bleed into Poison and its Poison into Bleed, each landing that much harder.",
     Poison:
         'Each time a card is played, the enemy loses 2 VITAE per Poison stack — and the longer it holds, the harder it bites.',
     Bleed: 'Each hit the bearer takes deals 3 more VITAE per Bleed stack, then removes a stack.',
     Doom:
         'Deals 1 VITAE per stack at the start of each round and grows a stack every time the enemy acts. '
         + 'It ends only when consumed.',
-    // ── Peroration (T2) ──
-    Premise:
+    // ── Sentence (T2) ──
+    Charge:
         'A running tally. When it reaches the count printed on the card that spends it, that payoff fires free and the tally resets.',
     // ── Forge (T3) ──
     Kindle:
         'Creates a temporary die of the printed color in your Reserve. '
         + 'If the Reserve is full, it grants +1 Conviction instead.',
     Pip:
-        'A charge a Reserve die gains each threat phase it survives, capped at 2 '
+        'Each threat phase a Reserve die survives, it gains one, capped at 2 '
         + '— some cards can push past that cap and risk a bust. '
         + 'Each pip spent adds +1 intensity, or +2 Guard on a defend card.',
     // ── Akrasia (T4) ──
@@ -222,9 +222,9 @@ const KEYWORD_GLOSS: Record<string, string> = {
     Soul: 'You gain 1 Soul each time an affliction on the enemy expires or is consumed.',
     Reap: 'Spends the printed number of Souls to fire the printed effect — with fewer Souls, it fizzles.',
     // ── Charm (T8) ──
-    Sway:
-        'Builds on the enemy and decays 1 each round; at their resolve (~35% of max VITAE) they capitulate.',
-    Rapport: "The enemy's attacks deal 10% less damage per Rapport stack.",
+    Plea:
+        'Builds on the enemy and decays 1 each round; at their resolve (~35% of max VITAE) they relent.',
+    Quarter: "The enemy's attacks deal 10% less damage per Quarter stack.",
     // ── Bulwark (T9) ──
     Thorns: 'The enemy takes 1 VITAE per Thorns stack each threat phase it attacks you — even through a full block.',
     Riposte:
@@ -244,11 +244,11 @@ const KEYWORD_GLOSS: Record<string, string> = {
     // the card-keyword doctrine's registry bar.
     Mill: 'Sends that many cards from your deck to your discard pile.',
     // ── Die gear (spec 33 Upgradeable Dice §6, registered D4 2026-07-17) —
-    // SPECIAL is the face payload; HONE/TEMPER are the blacksmith upgrade verbs.
-    // ("SPECIAL" is the most generic registry name — rename deferred, D1.) ──
-    Special: "A die's SPECIAL face powers a card of its color and grants Conviction — its equipped gear sets how much (2 by default).",
+    // BOON is the face payload; HONE/TEMPER are the blacksmith upgrade verbs.
+    // (Renamed from SPECIAL — R-8, phase 44b.) ──
+    Boon: "A die's BOON face powers a card of its color and grants Conviction — its equipped gear sets how much (2 by default).",
     Hone: "A blacksmith upgrade: adds a mana face to a die's gear, so more of its rolls power a card.",
-    Temper: "A blacksmith upgrade: turns a mana face into a SPECIAL face. A colored die caps at 2 special and 1 miss; gold at 1.",
+    Temper: "A blacksmith upgrade: turns a mana face into a BOON face. A colored die caps at 2 boon and 1 miss; gold at 1.",
     // ── Card types (labels, not keywords — never rendered in the inspect
     // keyword panel since 2026-07-12; kept for help surfaces + the KW lints) ──
     Enchantment: 'A passive on your side: 3 rounds when played free, permanent when paid with a die.',
@@ -261,8 +261,8 @@ const KEYWORD_GLOSS: Record<string, string> = {
  */
 export const ARCHETYPE_KEYWORDS: Record<string, string[]> = {
     bleeder: ['Poison', 'Bleed', 'Tick', 'Rupture', 'Soul', 'Reap', 'Recoil', 'Fallen'],
-    guardian: ['Guard', 'Thorns', 'Riposte', 'Heal', 'Cleanse', 'Rapport', 'Sway'],
-    controller: ['Stagger', 'Backfire', 'Mark', 'Foretell', 'Omen', 'Premise', 'Echo', 'Recall'],
+    guardian: ['Guard', 'Thorns', 'Riposte', 'Heal', 'Cleanse', 'Quarter', 'Plea'],
+    controller: ['Stagger', 'Backfire', 'Mark', 'Foretell', 'Omen', 'Charge', 'Echo', 'Recall'],
 };
 
 /** Authored persistentEffect spellings that predate the phase-29 renames —
@@ -359,17 +359,17 @@ export function allRegistryKeywords(): readonly string[] {
  */
 export const SYSTEM_GLOSSARY: readonly { term: string; def: string }[] = [
     { term: 'CONVICTION ◆', def: 'A spend-anytime resource banked from unspent dice and overflow. It never decays.' },
-    { term: 'RESONANCE ⬡', def: 'A running tally, for the whole combat, of dice you spend by color. A ⬡ threshold line fires once you have spent that many dice of its color this combat.' },
+    { term: 'TOLL ⬡', def: 'A running tally, for the whole combat, of dice you spend by color. A ⬡ threshold line fires once you have spent that many dice of its color this combat.' },
     { term: 'RESERVE & PIPS', def: 'Up to 2 dice held between phases instead of played. Each gains +1 pip per phase it survives, spent for extra intensity or Guard.' },
-    { term: 'FLOATING ✦', def: 'A forged die that plays alongside your drafted die, never rerolls, and is gone forever when spent.' },
+    { term: 'GHOST ✦', def: 'A forged die that plays alongside your drafted die, never rerolls, and is gone forever when spent.' },
     { term: 'RUNGS', def: "The steps of the enemy's telegraphed action — 2 on a normal action, 3 on a boss. Losing all of them denies the action." },
     { term: 'WILD / X', def: 'A WILD die counts as any color. A dead X die powers nothing, but can be Forged wild or fate-tapped.' },
     // 2026-07-12 (owner directive: every printed term pops a definition) —
-    // the two card-local Peroration-payoff words. PERORATION was demoted from
+    // the two card-local Sentence-payoff words. SENTENCE was demoted from
     // the keyword registry (phase 29) but still prints on the-closing-word;
-    // CONCEDE is the alt-win it can escalate to. Neither had a popup anywhere.
-    { term: 'PERORATION', def: 'A declared conclusion: when your Premise tally reaches the printed count, its payoff fires free and the tally resets.' },
-    { term: 'CONCEDE', def: 'An alternate win — reaching the printed Premise count in one Peroration ends the fight. Elites and bosses demand the higher printed count.' },
+    // CONDEMN is the alt-win it can escalate to. Neither had a popup anywhere.
+    { term: 'SENTENCE', def: 'A declared conclusion: when your Charge tally reaches the printed count, its payoff fires free and the tally resets.' },
+    { term: 'CONDEMN', def: 'An alternate win — reaching the printed Charge count in one Sentence ends the fight. Elites and bosses demand the higher printed count.' },
     // 2026-07-18 (owner playtest) — INTENSITY and FREE are RETIRED from the
     // overlay glossary: both read plainly enough in context, and their rows
     // padded every inspect (they were the 07-12 audit's additions).
@@ -380,23 +380,26 @@ export const SYSTEM_GLOSSARY: readonly { term: string; def: string }[] = [
  *  keyword glosses, which would drag the whole dump back in. */
 const SYSTEM_TERM_MATCH: Record<string, RegExp> = {
     'CONVICTION ◆': /\bconviction\b/i,
-    'RESONANCE ⬡': /\bresonance\b|⬡/,
+    'TOLL ⬡': /\bresonance\b|⬡/,
     'RESERVE & PIPS': /\breserve\b|\bpips?\b/i,
-    'FLOATING ✦': /\bfloating\b/i,
+    'GHOST ✦': /\bghost\b/i,
     'RUNGS': /\brungs?\b/i,
     'WILD / X': /\bwild\b|\bX die\b/,
-    'PERORATION': /\bPERORATION\b/,
-    'CONCEDE': /\bCONCEDE\b/,
+    'SENTENCE': /\bSENTENCE\b/,
+    'CONDEMN': /\bCONDEMN\b/,
 };
 
 /** Keyword chips whose own gloss already explains a system term — when such a
  *  chip renders on the card, the system entry is a duplicate and is skipped
  *  (owner directive 2026-07-12: each term explained at most once per overlay). */
 const SYSTEM_TERM_COVERED_BY: Record<string, readonly string[]> = {
-    'FLOATING ✦': ['FORGE'],           // the Forge gloss defines floating dice
+    'GHOST ✦': ['FORGE'],           // the Forge gloss defines ghost dice
     'RESERVE & PIPS': ['PIP', 'KINDLE'], // Pip/Kindle glosses define the Reserve
     'RUNGS': ['STAGGER', 'BACKFIRE'],  // both glosses define rungs
-    'WILD / X': ['FORGE', 'CLARITY'],  // Forge (X→WILD) / Clarity (next die WILD)
+    // 2026-08-09 (phase 44b, spec 34 §5.2.1) — CLARITY dropped: it named no
+    // KEYWORD_GLOSS row (stale since before this phase; Forge alone covers X→WILD).
+    'WILD / X': ['FORGE'],
+
 };
 
 /**

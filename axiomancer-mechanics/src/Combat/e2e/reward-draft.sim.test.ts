@@ -108,7 +108,7 @@ describe('WS6.2 — the sandbox-injection hook (extra cards at the reward screen
             description: 'A synthetic reward-screen candidate (WS6.2 hook fixture).',
             tier: 1, rank: 3, cardType: 'spell',
             targetType: 'self',
-            paidSummary: 'Gain SWAY 1 (3 turns).',
+            paidSummary: 'Gain PLEA 1 (3 turns).',
             combatEffects: [{ effectId: 'buff_sway', appliedTo: 'self', intensity: 1, duration: 3 }],
             tags: ['e2e-fixture'],
         },

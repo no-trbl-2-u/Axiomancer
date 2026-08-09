@@ -8,10 +8,10 @@
  * {@link PREMISE_MILESTONE_RUNGS} STAGGER rungs per milestone crossed. The
  * lifetime counter rides EVERY `gainPremises` call (own-card FREE/PAID lines,
  * borrowed FREE riders alike) and, unlike the spendable `premises` tally it
- * accrues alongside, does NOT reset when a Peroration pays off or CONCEDE
+ * accrues alongside, does NOT reset when a Peroration pays off or CONDEMN
  * fires — a milestone already paid stays paid.
  *
- * Profane-canon refit (2026-08-08): the PREMISE depositor under test is now
+ * Profane-canon refit (2026-08-08): the CHARGE depositor under test is now
  * `petty-indictment` (trial theme: FREE +1 Premise; PAID `premise` count 1 —
  * the retired `exordium`/`videtur-quod` seat), and the declared
  * Peroration carrier is `the-black-cap` (at 6, concedeAt 8). The milestone
@@ -160,7 +160,7 @@ describe('the lifetime counter survives a Peroration payoff resetting `premises`
         // `the-black-cap` declares a Peroration at 6 Premises (`peroration.at`);
         // reaching it fires the rider and zeroes the spendable `premises` tally.
         // (`concedeAt` deliberately unstaged: this pins the payoff-reset path,
-        // not the CONCEDE alt-win.) Stage the lifetime counter one grant short
+        // not the CONDEMN alt-win.) Stage the lifetime counter one grant short
         // of its SECOND tier so the very card play that pays off the
         // Peroration also crosses it.
         const before = stateFor('petty-indictment', 2 * PREMISE_MILESTONE_EVERY - 1, {
@@ -190,7 +190,7 @@ describe('premiseMilestoneTotal — per-combat scope', () => {
     it('sim policies never crash across every policy and seed with the counter live (Threadbare deck)', () => {
         const threadbareDeck = buildPresetDeck('threadbare');
         expect(threadbareDeck.length).toBeGreaterThan(0);
-        // 2026-08-08: petty-indictment (the canon's starter PREMISE depositor)
+        // 2026-08-08: petty-indictment (the canon's starter CHARGE depositor)
         // keeps the milestone counter live in the seated deck.
         expect(threadbareDeck).toContain('petty-indictment');
 

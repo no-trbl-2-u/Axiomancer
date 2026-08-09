@@ -28,7 +28,7 @@ import {
  *   - Axiom (5):            7 – 19. Spec's sketch said 8, but shipped rank-5
  *     spells price honestly outside it under the table: at the FLOOR,
  *     `pact-of-akrasia` (7.25: the forge is cheap BECAUSE the blood credits
- *     bite) and `the-closing-word` (pre-36a 8.80: the CONCEDE alt-win priced
+ *     bite) and `the-closing-word` (pre-36a 8.80: the CONDEMN alt-win priced
  *     at 0 — 36a's +3 concede capstone lifts it to 11.80, more rank-honest for
  *     a card that literally wins the game); at the CEILING, two DELIBERATE
  *     big finishers —
@@ -142,7 +142,7 @@ describe('pricing table — pinned anchors from the spec §4 arithmetic (WS3.5 c
     it('non-DoT statuses price at 0.75 per intensity-turn', () => {
         expect(statusPoints('debuff_mark', 1, 2)).toBeCloseTo(1.5);      // MARK d2
         expect(statusPoints('debuff_backfire', 1, 2)).toBeCloseTo(1.5);  // BACKFIRE i1 d2
-        expect(statusPoints('debuff_rapport', 1, 2)).toBeCloseTo(1.5);   // RAPPORT i1 d2
+        expect(statusPoints('debuff_quarter', 1, 2)).toBeCloseTo(1.5);   // QUARTER i1 d2
         expect(statusPoints('buff_thorns', 3, 2)).toBeCloseTo(4.5);      // THORNS i3 d2
     });
 
@@ -152,11 +152,11 @@ describe('pricing table — pinned anchors from the spec §4 arithmetic (WS3.5 c
         expect(VERB_POINTS.barrierPerHp).toBeCloseTo(1 / 3);
         expect(VERB_POINTS.healPerHp).toBeCloseTo(1 / 3);
         expect(VERB_POINTS.cleanse).toBe(1.5);
-        expect(VERB_POINTS.swayPerStack).toBe(0.9); // phase 36a: 0.8 → 0.9 (CAPITULATE parity)
+        expect(VERB_POINTS.swayPerStack).toBe(0.9); // phase 36a: 0.8 → 0.9 (RELENT parity)
         expect(VERB_POINTS.staggerPerRung).toBe(2); // full 2-rung deny = 4
         expect(VERB_POINTS.foretellPerCard).toBe(1);
         expect(VERB_POINTS.premise).toBe(0.8); // phase 36a: build currency, deliberately NOT repriced
-        expect(VERB_POINTS.concedeCapstone).toBe(3); // phase 36a: the CONCEDE alt-win lump
+        expect(VERB_POINTS.concedeCapstone).toBe(3); // phase 36a: the CONDEMN alt-win lump
         expect(VERB_POINTS.soul).toBe(0.75);
         expect(VERB_POINTS.kindle).toBe(2.5);
         expect(VERB_POINTS.pip).toBe(1.5);
@@ -183,16 +183,16 @@ describe('pricing table — pinned anchors from the spec §4 arithmetic (WS3.5 c
         expect(scoreCard(chilblain)).toBeCloseTo(6 / 4 + statusPoints('buff_thorns', 1, 2) + 4 / 4, 2);
     });
 
-    it('SWAY prices at 0.9/stack (thin-hymn regression anchor)', () => {
-        // thin-hymn: SWAY 3 (2.7) + FREE SWAY 1 (0.9) — the CAPITULATE
+    it('PLEA prices at 0.9/stack (thin-hymn regression anchor)', () => {
+        // thin-hymn: PLEA 3 (2.7) + FREE PLEA 1 (0.9) — the RELENT
         // currency at its whisper-volume starter ratio.
         const hymn = spells.find(s => s.id === 'thin-hymn')!;
         expect(scoreCard(hymn)).toBeCloseTo(4 * VERB_POINTS.swayPerStack, 2); // 3.60
     });
 
-    it('CONCEDE alt-win prices its +3 capstone (the-black-cap anchor)', () => {
-        // DOOM i2 (tempo-weighted ÷3) + PERORATION-at-6 rider (ruptureMarks 2
-        // · draw 1) + the flat concede capstone + FREE DOOM i1 + 1 PREMISE.
+    it('CONDEMN alt-win prices its +3 capstone (the-black-cap anchor)', () => {
+        // DOOM i2 (tempo-weighted ÷3) + SENTENCE-at-6 rider (ruptureMarks 2
+        // · draw 1) + the flat concede capstone + FREE DOOM i1 + 1 CHARGE.
         const blackCap = spells.find(s => s.id === 'the-black-cap')!;
         const perorationRider =
             2 * VERB_POINTS.ruptureMarksPerHp

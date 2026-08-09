@@ -54,7 +54,7 @@ export interface CombatManaDie {
     /** Created by card effects; expires between phases (display + cleanup). */
     temporary: boolean;
     /**
-     * Spec 32 v3 §5 — a FLOATING die: forged by the FORGE verb, joins the tray
+     * Spec 32 v3 §5 — a GHOST die: forged by the FORGE verb, joins the tray
      * NOW, is exempt from every reroll, persists across rounds AND combats
      * (written to the character save at combat end), and is gone forever when
      * spent. Absent/false for rolled, temporary, and Reserve dice.
@@ -89,7 +89,7 @@ export interface CombatManaDie {
 export type CombatVerbClass =
     | 'direct-dot'        // applies DoT debuffs (Poison, Bleed) → erodes HP
     | 'direct-control'    // hinders the enemy's turn (STAGGER / BACKFIRE)
-    | 'stat-debuff'       // applies exposure debuffs (MARK / RAPPORT) → soft control
+    | 'stat-debuff'       // applies exposure debuffs (MARK / QUARTER) → soft control
     | 'buff-self'         // buffs the player / engine verbs → utility
     | 'direct-damage'     // status-payoff bursts (RUPTURE / REAP) — never raw strikes
     | 'befriend'          // Befriend card → opens the mercy choice (§6 Q6)
@@ -241,15 +241,15 @@ export interface CombatThreatEffect {
      *  afflictions when the action fires (spec 29 guardrail: a fraction,
      *  never the last one). Written only by the threat-branch resolver. */
     enemyCleanse?: number;
-    /** Phase 33a — enemy counterplay against the player's SWAY
-     *  (charm/grace CAPITULATE) track: reduces the live `sway` value by
+    /** Phase 33a — enemy counterplay against the player's PLEA
+     *  (charm/grace RELENT) track: reduces the live `sway` value by
      *  this flat amount, floored at 0. Never resets the milestone-fired
      *  flags (`swayMilestoneWaveringFired`/`swayMilestoneFalteringFired`)
      *  — only the raw counter moves. Authorable on any threat phase,
      *  branch or linear. */
     swayCleanse?: number;
     /** Phase 33a — enemy counterplay against the player's Premise
-     *  (peroration/oratory CONCEDE) track: reduces the live, spendable
+     *  (peroration/oratory CONDEMN) track: reduces the live, spendable
      *  `premises` tally by this flat amount, floored at 0. Never touches
      *  `premiseMilestoneTotal` (the lifetime milestone-drip counter).
      *  Authorable on any threat phase, branch or linear. */
@@ -445,7 +445,7 @@ export interface CombatSummary {
 export type CombatOutcome =
     | 'victory'    // enemy HP → 0 (DoT erosion + status payoffs)
     | 'mercy'      // spared a low-HP foe via Befriend (the friendship path)
-    | 'capitulate' // SWAY reached live resolve and the player explicitly accepted the yield
+    | 'capitulate' // PLEA reached live resolve and the player explicitly accepted the yield
     | 'concede'    // spec 32 v3 §9 — an 8-Premise Peroration wins the argument
     | 'defeat'     // player HP → 0
     | 'retreat';   // dead — no in-combat retreat exists; combat resolves only
@@ -576,13 +576,13 @@ export type CombatEvent =
     | { kind: 'max-hp-eroded'; cardId: string; amount: number; newMax: number }
     | { kind: 'sway-gained'; amount: number; total: number }
     // Phase 32 part 4e (Charm — Resolve milestones): fires alongside
-    // 'sway-gained' whenever SWAY crosses a NEW named fractional waypoint of
+    // 'sway-gained' whenever PLEA crosses a NEW named fractional waypoint of
     // the enemy's live `capitulateThreshold` — own event (not a field on
     // 'sway-gained') so existing 'sway-gained' consumers are unaffected,
     // matching 'premise-milestone'/'debt-tier-payoff' precedent. 'threshold'
     // is the live waypoint value crossed (see `swayResolveMilestoneThresholds`);
-    // 'total' is the SWAY total AFTER this milestone's own dividend (the
-    // Faltering bonus SWAY included). Discriminated by 'milestone' so each
+    // 'total' is the PLEA total AFTER this milestone's own dividend (the
+    // Faltering bonus PLEA included). Discriminated by 'milestone' so each
     // variant's own payoff field is real, not a shared/optional guess.
     | { kind: 'sway-milestone'; milestone: 'wavering'; threshold: number; total: number; effectId: string; intensity: number }
     | { kind: 'sway-milestone'; milestone: 'faltering'; threshold: number; total: number; bonus: number }
@@ -615,7 +615,7 @@ export type CombatEvent =
     // WS9 — the enemy's reactive cleanse shed some of its own afflictions.
     | { kind: 'threat-cleansed'; phaseIndex: number; effectIds: string[] }
     // Phase 33a — the enemy's reactive counterplay shed the player's live
-    // SWAY / spendable Premise tally (never their milestone flags / the
+    // PLEA / spendable Premise tally (never their milestone flags / the
     // lifetime premiseMilestoneTotal counter).
     | { kind: 'threat-sway-cleansed'; phaseIndex: number; amount: number }
     | { kind: 'threat-premise-shed'; phaseIndex: number; amount: number }
@@ -661,7 +661,7 @@ export type CombatEvent =
     // The 3-color chain completed: a temporary gold die (until spent, this
     // combat) is granted and momentum resets to null.
     | { kind: 'momentum-surged'; dieId: string }
-    // A SPECIAL face fired its gear payload because its die was USED to power a
+    // A BOON face fired its gear payload because its die was USED to power a
     // card (the owner-ratified use-triggered rule).
     | { kind: 'special-fired'; dieId: string; conviction: number; total: number }
     // Press Fate (flag-on form): 1 Conviction rerolled ALL miss faces, honestly.
@@ -773,7 +773,7 @@ export interface CombatEncounterState {
      */
     reserve?: CombatManaDie[];
     /**
-     * Fate Engine P1 (spec 31 R1) — the RESONANCE tally: every die spent this
+     * Fate Engine P1 (spec 31 R1) — the TOLL tally: every die spent this
      * encounter (powering, burning for Conviction, banking) adds 1 of its color;
      * a Wild adds to the color of the card it powered. Cards with a `threshold`
      * check this tally at play time. Optional for back-compat (absent = zeros).
@@ -817,7 +817,7 @@ export interface CombatEncounterState {
      *  bestiary) + disenchants IT attached to the player live here. Optional. */
     enemyEnchantments?: string[];
     playerAttachments?: string[];
-    /** Spec 32 v3 §5 — the FLOATING die pool (live tray): merged into every
+    /** Spec 32 v3 §5 — the GHOST die pool (live tray): merged into every
      *  turn's dice, exempt from rerolls, persists across combats. Optional. */
     floatingDice?: CombatManaDie[];
     /** Phase 31 (EA-6) — the combat MOMENTUM wheel, engine-native (kills the
@@ -851,17 +851,17 @@ export interface CombatEncounterState {
      *  way a slow round does. Monotonic (never decreases). Optional (absent
      *  = 0, the pre-STAKE behavior). */
     stakeEscalationBonus?: number;
-    /** Spec 32 v3 T2 — the PREMISE tally (Peroration theme). Optional. */
+    /** Spec 32 v3 T2 — the CHARGE tally (Peroration theme). Optional. */
     premises?: number;
     /** Phase 32 part 4b (Oratory — milestone drip): cumulative Premises EVER
      *  gained THIS COMBAT — every source that feeds `gainPremises`. Per-combat,
      *  like `souls`/`akrasiaDebt` — reset to 0 in `initializeCombatEncounter`
      *  only. UNLIKE the spendable `premises` tally above, this does NOT reset
-     *  when a Peroration pays off or CONCEDE fires, so a milestone already
+     *  when a Peroration pays off or CONDEMN fires, so a milestone already
      *  crossed stays crossed. Optional (absent = 0, back-compat with existing
      *  state literals). */
     premiseMilestoneTotal?: number;
-    /** Spec 32 v3 T2 — the declared PERORATION (one in play at a time). */
+    /** Spec 32 v3 T2 — the declared SENTENCE (one in play at a time). */
     peroration?: { cardId: string; at: number; concedeAt?: number } | null;
     /** Spec 32 v3 T5 — STAGGER rungs accumulated against the enemy's NEXT
      *  telegraphed action (consumed at threat resolution). Optional. */
@@ -890,13 +890,13 @@ export interface CombatEncounterState {
     omenHits?: number;
     /** Spec 32 v3 T7 — the SOUL bank (Harvest currency). Optional. */
     souls?: number;
-    /** Spec 32 v3 T8 — SWAY on the enemy (decays 1/turn; ≥ enemy HP at a turn
-     *  boundary → CAPITULATE). Optional. */
+    /** Spec 32 v3 T8 — PLEA on the enemy (decays 1/turn; ≥ enemy HP at a turn
+     *  boundary → RELENT). Optional. */
     sway?: number;
     /** Phase 32 part 4e (Charm — Resolve milestones): has the Wavering
-     *  waypoint (SWAY ≥ {@link swayResolveMilestoneThresholds}'s `wavering`,
+     *  waypoint (PLEA ≥ {@link swayResolveMilestoneThresholds}'s `wavering`,
      *  a fraction of the LIVE `capitulateThreshold`) already paid its
-     *  one-time RAPPORT dividend THIS COMBAT? Per-combat, like `souls`/
+     *  one-time QUARTER dividend THIS COMBAT? Per-combat, like `souls`/
      *  `akrasiaDebt` — reset to `false` in `initializeCombatEncounter` only.
      *  Once true, NEVER reset back to false even if the live resolve later
      *  shrinks below the threshold that was crossed (a milestone already
@@ -904,11 +904,11 @@ export interface CombatEncounterState {
      *  existing state literals). */
     swayMilestoneWaveringFired?: boolean;
     /** Phase 32 part 4e (Charm — Resolve milestones): the Faltering waypoint
-     *  sibling of {@link swayMilestoneWaveringFired} (pays a bonus-SWAY
-     *  dividend instead of RAPPORT). Same per-combat, never-claws-back
+     *  sibling of {@link swayMilestoneWaveringFired} (pays a bonus-PLEA
+     *  dividend instead of QUARTER). Same per-combat, never-claws-back
      *  lifecycle. Optional (absent = false). */
     swayMilestoneFalteringFired?: boolean;
-    /** SWAY has broken the foe's will; the player must accept the yield or
+    /** PLEA has broken the foe's will; the player must accept the yield or
      * continue fighting. Never resolves combat on threshold alone. */
     capitulationChoiceActive?: boolean;
     /** The player rejected this foe's yield; do not reopen the same offer. */

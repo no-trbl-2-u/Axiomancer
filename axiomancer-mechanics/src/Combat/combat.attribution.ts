@@ -63,8 +63,8 @@ export function recordAttribution(
 const HEADLINES: Record<CombatOutcome, string> = {
     victory: 'Victory — the enemy falls',
     mercy: 'Mercy — the enemy is spared',
-    capitulate: 'Capitulation — the enemy yields, swayed',
-    concede: 'Concession — the argument is won outright',
+    capitulate: 'Relented — the enemy yields',
+    concede: 'Condemned — the argument is won outright',
     defeat: 'Defeat',
     // No in-combat retreat exists (the Retreat card was removed) — this entry
     // stays only because `CombatOutcome` is a Record key and must stay

@@ -104,8 +104,8 @@ export interface CombatEncounterPanelProps {
 
 type StoreLike = ReturnType<typeof useGameStore>;
 
-/** Spec 32 v3 §9 — the merciful resolutions. Befriend (mercy), CAPITULATE
- *  (SWAY ≥ enemy VITAE) and CONCEDE (the 8-Premise Peroration) all reward like
+/** Spec 32 v3 §9 — the merciful resolutions. Befriend (mercy), RELENT
+ *  (PLEA ≥ enemy VITAE) and CONDEMN (the 8-Charge Sentence) all reward like
  *  mercy: XP flows, no corpse loot. */
 function isMercifulWin(outcome: CombatOutcome): boolean {
     return outcome === 'mercy' || outcome === 'capitulate' || outcome === 'concede';
@@ -116,7 +116,7 @@ function isMercifulWin(outcome: CombatOutcome): boolean {
  * engine omits. Victory and the merciful wins (mercy / capitulate / concede)
  * grant XP (+ cascade level-ups); victory also rolls item loot. Final HP
  * persists for every outcome except defeat (the host's run-reset full-heals
- * there). The FLOATING-die pool (spec 32 v3 §5) writes back to the character
+ * there). The GHOST-die pool (spec 32 v3 §5) writes back to the character
  * on every outcome — forged dice persist across combats until spent. Phase 32
  * part 1b: unspent Harvest Souls write back the same way — `player.bankedSouls`
  * accumulates `finalState.souls`, "the jar travels" regardless of how the
@@ -474,7 +474,7 @@ export function CombatEncounterPanel({
             // Fate Engine P1 R8 — the dragged die is HONORED: a banked Reserve die
             // (or, for fate cards, a dead X die) powers the play directly; a fresh
             // tray die drafts first (bank-or-burn applies to the spare die).
-            // Spec 32 v3 §5 — a Reserve / fate-X / FLOATING die is its own power
+            // Spec 32 v3 §5 — a Reserve / fate-X / GHOST die is its own power
             // source (explicit dieId, never drafted); a fresh tray die drafts
             // first. Routing extracted to `resolveApplyRouting` (tested).
             const routing = resolveApplyRouting(s, dieId);
@@ -706,14 +706,14 @@ export function CombatEncounterPanel({
                 </View>
             )}
 
-            {/* SWAY opens a yield; the player, not the threshold, authors the outcome. */}
+            {/* PLEA opens a yield; the player, not the threshold, authors the outcome. */}
             {capitulation && (
                 <View style={styles.backdrop} testID="combat-capitulation">
                     <View style={[styles.modal, { borderColor: AXM.sulfur }]}>
                         <Text style={styles.modalTitle}>{live.enemy.name} yields.</Text>
-                        <Text style={styles.modalSub}>Accept their capitulation, or continue the fight.</Text>
+                        <Text style={styles.modalSub}>Accept the yield, or continue the fight.</Text>
                         <View style={styles.modalBtns}>
-                            <Pressable onPress={() => onCapitulation('accept')} testID="combat-capitulation-accept" accessibilityRole="button" accessibilityLabel="Accept capitulation" style={[styles.modalBtn, { borderColor: '#5bbf6a' }]}><Text style={[styles.modalBtnText, { color: '#5bbf6a' }]}>ACCEPT</Text></Pressable>
+                            <Pressable onPress={() => onCapitulation('accept')} testID="combat-capitulation-accept" accessibilityRole="button" accessibilityLabel="Accept the yield" style={[styles.modalBtn, { borderColor: '#5bbf6a' }]}><Text style={[styles.modalBtnText, { color: '#5bbf6a' }]}>ACCEPT</Text></Pressable>
                             <Pressable onPress={() => onCapitulation('continue')} testID="combat-capitulation-continue" accessibilityRole="button" accessibilityLabel="Continue fighting" style={[styles.modalBtn, { borderColor: AXM.blood }]}><Text style={[styles.modalBtnText, { color: AXM.blood }]}>CONTINUE</Text></Pressable>
                         </View>
                     </View>

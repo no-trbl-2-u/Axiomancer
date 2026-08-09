@@ -104,7 +104,7 @@ export function buildFixtureState(options: { clean?: boolean } = {}): CombatEnco
         // must have zero rungs banked to consume (same doctrine as souls).
         rungsDeniedTotal: clean ? 0 : 20,
         premises: 3,
-        peroration: null, // tallied but undeclared — a 'premise' gain never trips CONCEDE mid-assertion
+        peroration: null, // tallied but undeclared — a 'premise' gain never trips CONDEMN mid-assertion
         sway: 0,
         staggerRungs: 0,
         revealedStances: [],

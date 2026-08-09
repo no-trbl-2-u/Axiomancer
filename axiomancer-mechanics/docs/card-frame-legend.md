@@ -31,7 +31,7 @@ Riders print after the PAID line, each led by a glyph naming its trigger:
 | `◆ <condition>` | **Synergy** — a combat-state condition holds | rider fires while true |
 
 The text after the colon is the rider's full payload, in the same units the
-atlas uses (`SWAY 4`, `draw 1`, `+1 intensity · STAGGER 1`).
+atlas uses (`PLEA 4`, `draw 1`, `+1 intensity · STAGGER 1`).
 
 ## Status notation
 

@@ -1,5 +1,7 @@
 # The Profane Canon — the dark-fantasy PvE card rework (2026-08-08)
 
+<!-- lexicon-ok: premise, concede, sway, capitulate, rapport, reargue -->
+
 *Magic: The Gathering, if it were a solo, dark-fantasy, PvE campaign.* This
 document is the design record for the 2026-08-08 wholesale card rework: the
 tonal brief, the keyword set, the three campaign presets and their lineage,

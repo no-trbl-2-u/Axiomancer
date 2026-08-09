@@ -2,11 +2,11 @@
  * Hermetic E2E — spec 32 v3 themed-deck mechanics, LIVE through the engine.
  *
  * One describe per new mechanic:
- *   FLOATING DICE (forge → tray now → next turn → spent forever → cap 3 →
- *   reroll/draft-exempt → save-back), PREMISES / PERORATION (+ CONCEDE at 8),
+ *   GHOST DICE (forge → tray now → next turn → spent forever → cap 3 →
+ *   reroll/draft-exempt → save-back), PREMISES / SENTENCE (+ CONDEMN at 8),
  *   STAGGER rungs (deny + partial weaken) + BACKFIRE drip, OMEN
  *   declare/hit/miss, SOULS (expiry + REAP fizzle/spend + REAP-all cap),
- *   SWAY (gain / decay / capitulate / irresistible-grace), ECHO (doubles
+ *   PLEA (gain / decay / capitulate / irresistible-grace), ECHO (doubles
  *   statuses + stuck-in-their-head drip + echo-next-spell charge), REPRISE
  *   (highest rank back + fireFree), ENCHANT/DISENCHANT zone play (FREE timed
  *   instance / PAID permanent, unique-in-play, leaves the deck cycle) +
@@ -133,9 +133,9 @@ function customPhases(stances: ('heart' | 'body' | 'mind')[], damage = 6): Comba
     }));
 }
 
-// ── FLOATING DICE — the live tray (spec 32 v3 §5) ────────────────────────────
+// ── GHOST DICE — the live tray (spec 32 v3 §5) ────────────────────────────
 
-describe('FLOATING DICE — forge, spend-forever, cap, exemptions', () => {
+describe('GHOST DICE — forge, spend-forever, cap, exemptions', () => {
     const FORGE = FIXTURE_FORGE.id; // mind spell: FORGE a WILD floating die
     beforeEach(() => { registerSandboxCards([FIXTURE_FORGE]); });
 
@@ -210,10 +210,10 @@ describe('FLOATING DICE — forge, spend-forever, cap, exemptions', () => {
     });
 });
 
-// ── PREMISES + PERORATION (T2) ───────────────────────────────────────────────
+// ── PREMISES + SENTENCE (T2) ───────────────────────────────────────────────
 
-describe('PREMISES / PERORATION — the declared conclusion and the CONCEDE alt-win', () => {
-    const CLOSER = 'the-black-cap';      // PERORATION at 6 (CONCEDE at 8); rider: marks×2, draw 1
+describe('PREMISES / SENTENCE — the declared conclusion and the CONDEMN alt-win', () => {
+    const CLOSER = 'the-black-cap';      // SENTENCE at 6 (CONDEMN at 8); rider: marks×2, draw 1
     const OPENER = 'petty-indictment';   // FREE: +1 Premise
 
     function declared(enemyEffects: ActiveEffect[] = []): CombatEncounterState {
@@ -243,7 +243,7 @@ describe('PREMISES / PERORATION — the declared conclusion and the CONCEDE alt-
         expect(res.events.some(e => e.kind === 'hand-drawn')).toBe(true);
     });
 
-    it('reaching 8 Premises first wins the argument outright — CONCEDE (spec §9)', () => {
+    it('reaching 8 Premises first wins the argument outright — CONDEMN (spec §9)', () => {
         let state = declared();
         state = { ...state, premises: 7 };
         const res = playFromHand(state, OPENER, false); // +1 → 8 ≥ concedeAt
@@ -268,7 +268,7 @@ describe('STAGGER rungs — full removal denies the turn; BACKFIRE drips per run
             initializeCombatEncounter(makePlayer([ZENO]), enemy, [ZENO, ZENO, ZENO, ZENO, ZENO]),
         ).state;
         // Gate 0 (round-turn law): the second ZENO can no longer ride a free
-        // tray re-roll — arm a FLOATING body die so both plays are legal
+        // tray re-roll — arm a GHOST body die so both plays are legal
         // inside the phase's ONE turn (the multi-source turn is the intent).
         const float: CombatManaDie = { id: 'float-qa-stagger', color: 'body', state: 'available', temporary: false, floating: true };
         opened = { ...opened, dice: [...opened.dice, float], floatingDice: [...(opened.floatingDice ?? []), float] };
@@ -411,9 +411,9 @@ describe('SOULS — expiry yields, REAP spends, REAP-all bursts under the cap', 
         expect(mark).toMatchObject({ intensity: 2, remainingDuration: 1 }); // held, not counted down
     });
 
-    it('REAP fizzles underfunded; funded, it spends the Souls and fires (SWAY + RAPPORT + KINDLE)', () => {
+    it('REAP fizzles underfunded; funded, it spends the Souls and fires (PLEA + QUARTER + KINDLE)', () => {
         mockSequentialRng(0.05);
-        const PLATE = 'the-offertory-plate'; // REAP cost 3: SWAY 5 + RAPPORT 2 + KINDLE(heart)
+        const PLATE = 'the-offertory-plate'; // REAP cost 3: PLEA 5 + QUARTER 2 + KINDLE(heart)
         const DOT = 'spoiled-poultice';
         const deck = [PLATE, PLATE, PLATE, PLATE, PLATE, DOT, DOT, DOT, DOT];
         const broke = openAndDraft(makePlayer([PLATE, DOT]), makeEnemy(300, 'heart'), deck, 'heart');
@@ -430,7 +430,7 @@ describe('SOULS — expiry yields, REAP spends, REAP-all bursts under the cap', 
         expect(res.events.some(e => e.kind === 'die-forged')).toBe(true); // KINDLE joins the Reserve
         expect(res.state.reserve?.some(d => d.color === 'heart' && d.temporary)).toBe(true);
         expect(res.state.sway ?? 0).toBe(5);
-        expect(res.state.enemy.effects.some(e => e.effectId === 'debuff_rapport')).toBe(true);
+        expect(res.state.enemy.effects.some(e => e.effectId === 'debuff_quarter')).toBe(true);
     });
 
     it('REAP-all spends EVERY Soul and the burst is UNCAPPED (WS7.1, spec 32 §12 item 5)', () => {
@@ -451,25 +451,25 @@ describe('SOULS — expiry yields, REAP spends, REAP-all bursts under the cap', 
     });
 });
 
-// ── SWAY (T8) ────────────────────────────────────────────────────────────────
+// ── PLEA (T8) ────────────────────────────────────────────────────────────────
 
-describe('SWAY — gain, per-turn decay, CAPITULATE, irresistible-grace', () => {
-    const SOFT = 'thin-hymn'; // SWAY 3
+describe('PLEA — gain, per-turn decay, RELENT, irresistible-grace', () => {
+    const SOFT = 'thin-hymn'; // PLEA 3
 
     it('gains stack and decays 1 at the turn boundary', () => {
         mockSequentialRng(0.05);
         const state = openAndDraft(makePlayer([SOFT]), makeEnemy(300, 'heart'), [SOFT, SOFT, SOFT, SOFT, SOFT], 'heart');
         const res = playFromHand(state, SOFT);
-        expect(res.state.sway).toBe(3); // SWAY 3
+        expect(res.state.sway).toBe(3); // PLEA 3
         const after = resolveThreatPhase(res.state);
         expect(after.state.sway).toBe(2); // decayed 1 (ratified A2)
         expect(after.events.some(e => e.kind === 'sway-decayed')).toBe(true);
     });
 
-    it('SWAY >= enemy current HP opens a player-authored capitulation choice', () => {
+    it('PLEA >= enemy current HP opens a player-authored capitulation choice', () => {
         mockSequentialRng(0.05);
         const state = openAndDraft(makePlayer([SOFT]), makeEnemy(4, 'heart'), [SOFT, SOFT, SOFT, SOFT, SOFT], 'heart');
-        const res = playFromHand(state, SOFT); // SWAY 3 meets the 4-HP foe's capitulate threshold
+        const res = playFromHand(state, SOFT); // PLEA 3 meets the 4-HP foe's capitulate threshold
         expect(res.state.finalOutcome).toBeNull();
         expect(res.state.phase).toBe('mercy-choice');
         expect(res.state.capitulationChoiceActive).toBe(true);
@@ -493,7 +493,7 @@ describe('SWAY — gain, per-turn decay, CAPITULATE, irresistible-grace', () => 
         expect(continued.events).toContainEqual({ kind: 'capitulation-declined' });
     });
 
-    it('a DEFEATED enemy cannot capitulate — HP 0 resolves as victory even with SWAY up', () => {
+    it('a DEFEATED enemy cannot capitulate — HP 0 resolves as victory even with PLEA up', () => {
         // Engine-truth pin for the capitulate/victory tie: sway 3 vs a foe about
         // to die to the burst must record VICTORY.
         mockSequentialRng(0.05);
@@ -504,7 +504,7 @@ describe('SWAY — gain, per-turn decay, CAPITULATE, irresistible-grace', () => 
         expect(res.state.finalOutcome).toBe('victory');
     });
 
-    it('irresistible-grace (E) holds the SWAY — no decay at the boundary', () => {
+    it('irresistible-grace (E) holds the PLEA — no decay at the boundary', () => {
         mockSequentialRng(0.05);
         let state = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
         state = rollEncounterDice(state).state;

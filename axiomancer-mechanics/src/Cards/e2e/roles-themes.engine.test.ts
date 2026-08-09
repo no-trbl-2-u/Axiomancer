@@ -27,7 +27,7 @@
  *      the CardSynergy state predicate `enemy-dealt-no-damage-last-round`
  *      reads `enemyDamageLastRound` (spec 32 §12 item 4 ledger); rider fires
  *      ONLY while the ledger is 0, and prices at the threshold ×0.5 discount.
- *   6. A SWEETER POISON (WS4.3) — SWAY + the RUPTURE-class mark closer +
+ *   6. A SWEETER POISON (WS4.3) — PLEA + the RUPTURE-class mark closer +
  *      MARK ×2 planted AFTER the closer (rider order = engine order): the
  *      closer cashes PRE-EXISTING marks only. Doctrine witness: on a clean
  *      board the closer is silence — the card's own fresh marks never
@@ -198,7 +198,7 @@ describe('roles-* theme sets — registry shape and rank-band honesty', () => {
         expect(scoreCard(byId('ingot-of-ruin'))).toBeCloseTo(7.5, 2);
         expect(scoreCard(byId('grit-between-stones'))).toBeCloseTo(6.5833, 2); // phase 36b: nettle-sting tempo-discounted
         expect(scoreCard(byId('the-unmoved-mover'))).toBeCloseTo(5.33, 2); // post-Phase-30: FREE barrier 2
-        expect(scoreCard(byId('a-sweeter-poison'))).toBeCloseTo(9.5, 2); // phase 36a: SWAY 5 total × 0.9
+        expect(scoreCard(byId('a-sweeter-poison'))).toBeCloseTo(9.5, 2); // phase 36a: PLEA 5 total × 0.9
 
         expect(scoreCard(byId('the-long-ledger'))).toBeCloseTo(12.75, 2);
         expect(scoreCard(byId('seedcorn-sacrifice'))).toBeCloseTo(8.625, 2);
@@ -429,12 +429,12 @@ describe('the-unmoved-mover (WS4.2) — the combat-ledger state predicate', () =
     });
 });
 
-// ─── 6. A Sweeter Poison — SWAY + the RUPTURE-class closer + the late plant ──
+// ─── 6. A Sweeter Poison — PLEA + the RUPTURE-class closer + the late plant ──
 
-describe('a-sweeter-poison (WS4.3) — SWAY + mark closer; MARK ×2 planted AFTER it', () => {
+describe('a-sweeter-poison (WS4.3) — PLEA + mark closer; MARK ×2 planted AFTER it', () => {
     beforeEach(() => { applyFixtureCards(ROLES_CHARM_CARDS); });
 
-    it('PAID (rich board): SWAY +3; the closer cashes exactly the 3 PRE-EXISTING marks; MARK ×2 lands after', () => {
+    it('PAID (rich board): PLEA +3; the closer cashes exactly the 3 PRE-EXISTING marks; MARK ×2 lands after', () => {
         const before = fixtureWith('a-sweeter-poison');
         const hpBefore = before.enemy.health;
         expect(enemyEffect(before, 'debuff_mark')!.intensity).toBe(3);
@@ -473,7 +473,7 @@ describe('a-sweeter-poison (WS4.3) — SWAY + mark closer; MARK ×2 planted AFTE
         )).toBeUndefined();
     });
 
-    it('FREE: the charm deposit — SWAY 2 + heal 2, board untouched', () => {
+    it('FREE: the charm deposit — PLEA 2 + heal 2, board untouched', () => {
         const before = fixtureWith('a-sweeter-poison');
         const { after } = play(before, false);
         expect(after.sway ?? 0).toBe((before.sway ?? 0) + 2);

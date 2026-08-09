@@ -1,5 +1,37 @@
 [
  {
+  "id": "buff_absolved",
+  "name": "Absolved",
+  "type": "buff",
+  "glyph": "▲",
+  "kw": "CLEANSE",
+  "color": "#5bbf6a",
+  "kind": "statup",
+  "chips": [
+   {
+    "k": "Type",
+    "v": "buff"
+   },
+   {
+    "k": "Category",
+    "v": "special"
+   },
+   {
+    "k": "Tier",
+    "v": "0"
+   },
+   {
+    "k": "Duration",
+    "v": "permanent"
+   },
+   {
+    "k": "Stacking",
+    "v": "none"
+   }
+  ],
+  "lines": []
+ },
+ {
   "id": "buff_critical_damage_up",
   "name": "Banach-Tarski Strike",
   "type": "buff",
@@ -266,38 +298,6 @@
   "lines": [
    "Advantage: body, mind, heart"
   ]
- },
- {
-  "id": "buff_open_minded",
-  "name": "Open-Minded",
-  "type": "buff",
-  "glyph": "▲",
-  "kw": "CLEANSE",
-  "color": "#5bbf6a",
-  "kind": "statup",
-  "chips": [
-   {
-    "k": "Type",
-    "v": "buff"
-   },
-   {
-    "k": "Category",
-    "v": "special"
-   },
-   {
-    "k": "Tier",
-    "v": "0"
-   },
-   {
-    "k": "Duration",
-    "v": "permanent"
-   },
-   {
-    "k": "Stacking",
-    "v": "none"
-   }
-  ],
-  "lines": []
  },
  {
   "id": "buff_phoenix_vigor",
@@ -782,11 +782,11 @@
   ]
  },
  {
-  "id": "debuff_rapport",
-  "name": "Rapport",
+  "id": "debuff_quarter",
+  "name": "Quarter",
   "type": "debuff",
   "glyph": "☙",
-  "kw": "RAPPORT",
+  "kw": "QUARTER",
   "color": "#e08a3c",
   "kind": "statdown",
   "chips": [

@@ -53,7 +53,7 @@ export interface BlacksmithDieVM {
     manaFaces: number;
     missFaces: number;
     specialConviction: number;
-    /** Compact face read, e.g. "1 SPECIAL · 2 MANA · 3 MISS". */
+    /** Compact face read, e.g. "1 BOON · 2 MANA · 3 MISS". */
     faceSummary: string;
     hone: BlacksmithOfferVM;
     temper: BlacksmithOfferVM;
@@ -127,7 +127,7 @@ export function selectHasActiveBlacksmith(state: Pick<AppStoreState, 'blacksmith
 
 function faceSummary(gear: UpgradeableDieGear): string {
     const miss = dieGearMissFaces(gear);
-    return `${gear.specialFaces} SPECIAL · ${gear.manaFaces} MANA · ${miss} MISS`;
+    return `${gear.specialFaces} BOON · ${gear.manaFaces} MANA · ${miss} MISS`;
 }
 
 /** Combine a cap reason with the affordability reason into one loud line. */

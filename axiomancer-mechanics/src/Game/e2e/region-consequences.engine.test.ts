@@ -68,7 +68,7 @@ describe('Phase 109 — Region consequences for befriend choices', () => {
 
             // Verify boss has open-minded effect
             const hasOpenMinded = boss.effects.some(
-                (effect: ActiveEffect) => effect.effectId === 'buff_open_minded'
+                (effect: ActiveEffect) => effect.effectId === 'buff_absolved'
             );
             expect(hasOpenMinded).toBe(true);
         });
@@ -90,7 +90,7 @@ describe('Phase 109 — Region consequences for befriend choices', () => {
 
             // Verify boss has open-minded effect
             const openMindedEffect = boss.effects.find(
-                (effect: ActiveEffect) => effect.effectId === 'buff_open_minded'
+                (effect: ActiveEffect) => effect.effectId === 'buff_absolved'
             );
             expect(openMindedEffect).toBeTruthy();
             expect(openMindedEffect?.intensity).toBe(1);

@@ -86,7 +86,7 @@ function playFromHand(state: CombatEncounterState, cardId: string, useBottom = t
     return playCombatCard(state, { uid: entry!.uid }, useBottom, dieId);
 }
 
-describe('FLOATING DICE — cross-combat persistence (the save-back seam, full loop)', () => {
+describe('GHOST DICE — cross-combat persistence (the save-back seam, full loop)', () => {
     it('forge in fight 1 → save-back → fight 2 opening tray → spend → fight 3 empty', () => {
         // ── FIGHT 1: forge the float ────────────────────────────────────────
         const player1 = makePlayer([FORGE, DOT, DOT, DOT, DOT]);

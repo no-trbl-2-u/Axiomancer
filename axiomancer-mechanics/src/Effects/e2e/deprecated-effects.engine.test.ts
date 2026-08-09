@@ -5,7 +5,7 @@
  * (~126 effect ids) and rebuilt the CARD-side registry as exactly six effects:
  *
  *   debuff_poison · debuff_bleed · debuff_mark · debuff_backfire ·
- *   debuff_rapport · buff_thorns
+ *   debuff_quarter · buff_thorns
  *
  * Effect ids that non-card content (items, consumables, the Cards system,
  * enemy passives) still resolves were restored with tags
@@ -44,7 +44,7 @@ const CARD_EFFECT_SET = new Set([
     'debuff_bleed',
     'debuff_mark',
     'debuff_backfire',
-    'debuff_rapport',
+    'debuff_quarter',
     'buff_thorns',
     // card-local species (card-keyword doctrine, 2026-07-10):
     'debuff_kindling_ember',
@@ -101,7 +101,7 @@ const RETIRED_CARD_VOCABULARY = [
     'buff_life_steal', 'buff_advantage_body', 'buff_advantage_mind',
     'buff_advantage_heart', 'buff_focus', 'buff_resolute',
     'buff_petitio_pulse', 'buff_gettiters_flicker', 'buff_ad_hoc_patch',
-    'buff_open_minded', 'buff_promethean_ember', 'buff_brazen_thorns',
+    'buff_absolved', 'buff_promethean_ember', 'buff_brazen_thorns',
     'buff_oracle_foresight', 'buff_stoic_bulwark', 'buff_minor_fortitude',
     'buff_phoenix_vigor', 'buff_quine_resolve', 'buff_apollonian_clarity',
     'buff_aegis_recursion', 'buff_dionysian_surge',

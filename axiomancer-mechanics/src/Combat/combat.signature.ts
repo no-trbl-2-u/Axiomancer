@@ -77,7 +77,7 @@ export const SIGNATURE_SKILLS: Record<SignatureSkillId, SignatureSkill> = {
     // ── Per-archetype exclusives ─────────────────────────────────────────────
     'sig-disarming-plea': {
         id: 'sig-disarming-plea', name: 'Disarming Plea', kind: 'mercy', cost: 6,
-        magnitude: 6, effectKind: 'control', effectId: 'debuff_rapport',
+        magnitude: 6, effectKind: 'control', effectId: 'debuff_quarter',
         description: 'HEART — charm the foe (it falters) and strike, softening it toward mercy.',
     },
     'sig-rallying-blow': {

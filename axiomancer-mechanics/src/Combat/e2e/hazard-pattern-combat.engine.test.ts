@@ -726,15 +726,15 @@ describe('Spec 26b §B/§C/§D — archetype kit, rewards, unlock, difficulty fl
         expect(hpBefore - r.state.enemy.health).toBe(1); // floor(max(1, 0 stacks))
     });
 
-    it('Disarming Plea (heart mercy) applies RAPPORT and lands the disarming hit', () => {
+    it('Disarming Plea (heart mercy) applies QUARTER and lands the disarming hit', () => {
         mockSequentialRng(0.5);
         let state = initializeCombatEncounter(makePlayer([CONTROL_CARD]), makeEnemy(120, 'body'), [CONTROL_CARD], 1);
         state = rollEncounterDice(state).state;
         state = { ...state, conviction: 8 };
         const hpBefore = state.enemy.health;
         const r = playSignatureSkill(state, 'sig-disarming-plea');
-        // RAPPORT (v3 mercy vocabulary) lands on the enemy and it takes the hit.
-        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_rapport')).toBe(true);
+        // QUARTER (v3 mercy vocabulary) lands on the enemy and it takes the hit.
+        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_quarter')).toBe(true);
         expect(r.state.enemy.health).toBeLessThan(hpBefore);
     });
 

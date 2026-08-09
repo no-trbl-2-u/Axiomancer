@@ -4,7 +4,7 @@
  * Four fixed, single-color d6 rolled every round — Body (red), Mind (blue),
  * Heart (purple) at 1 special / 2 mana / 3 miss, and the wild Gold die at
  * 1 special / 1 mana / 4 miss. Face semantics: a MANA die may power one paid
- * line of its color (gold = any color); a MISS is dead; a SPECIAL powers a
+ * line of its color (gold = any color); a MISS is dead; a BOON powers a
  * card AND fires its gear payload (+2◆ by default) when USED (the ratified
  * use-triggered rule, kept as one switchable constant below).
  *
@@ -69,7 +69,7 @@ export const PRESS_FATE_COST = 1;
 export const OVERHEAT_CRACK_CHANCE = 0.35;
 
 /**
- * §6 owner-ratified fires-on-use rule (D7): a SPECIAL face fires its payload
+ * §6 owner-ratified fires-on-use rule (D7): a BOON face fires its payload
  * only when the die is USED to power a card. Keep this the single switch —
  * nothing else may encode the trigger timing.
  */

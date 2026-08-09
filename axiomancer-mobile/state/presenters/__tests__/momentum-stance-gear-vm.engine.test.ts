@@ -231,7 +231,7 @@ describe('die-gear rail + payload-only inspection (flag-on)', () => {
         expect(heart.specialFaces).toBe(DEFAULT_DIE_GEAR.heart.specialFaces);
         expect(heart.manaFaces).toBe(DEFAULT_DIE_GEAR.heart.manaFaces);
         expect(heart.missFaces).toBe(6 - heart.specialFaces - heart.manaFaces);
-        expect(heart.faceTable).toMatch(/special .* mana .* miss/);
+        expect(heart.faceTable).toMatch(/boon .* mana .* miss/);
         expect(heart.payload).toBe(`+${DEFAULT_DIE_GEAR.heart.specialConviction} ◆`);
         expect(heart.upgraded).toBe(false);
     });

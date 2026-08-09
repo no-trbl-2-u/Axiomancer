@@ -256,7 +256,7 @@ function DiceRow({
             {vm.dice.map((die) => {
                 // Fate Engine P1 — a Reserve die is a SECOND power source: draggable
                 // onto a card any time (the single-die law still holds per play).
-                // Spec 32 v3 §5 — a FLOATING die likewise bypasses the one-die
+                // Spec 32 v3 §5 — a GHOST die likewise bypasses the one-die
                 // draft: draggable whenever it is unspent, drafted or not.
                 // Presenter-computed (CombatDieVM.draggable) so it can never flip
                 // while the die's own drag is live — that unmounted the
@@ -308,7 +308,7 @@ function DiceRow({
                         ) : null}
                         {die.floating ? (
                             <Text style={[styles.dieConv, { color: AXM.sulfur }]} testID={`combat-floating-${die.id}`}>
-                                ✦ FLOATING
+                                ✦ GHOST
                             </Text>
                         ) : null}
                         {draggable && !die.reserve && !die.floating && die.readPip && die.readPip !== 'none' ? (
@@ -684,7 +684,7 @@ function StanceChip({ vm }: { vm: CombatStanceChipVM }) {
 // on every surface, legacy kill-switch included. Engine plumbing
 // (`placeStake`/`settleStake`) awaits its own mechanics-side removal.
 
-// ── Premise track + CONCEDE beat (phase 28) ──────────────────────────────────
+// ── Charge track + CONDEMN beat (phase 28) ──────────────────────────────────
 
 /** Peroration was fully engine-side state with zero combat-UI rendering
  *  before phase 28 — "the deck's whole win condition is invisible." */
@@ -693,13 +693,13 @@ function PerorationTrack({ peroration }: { peroration: CombatPerorationVM }) {
     const styles = useStyles();
     if (!peroration.active) return null;
     const pct = peroration.at > 0 ? Math.min(1, peroration.premises / peroration.at) : 0;
-    const a11y = `Peroration declared: ${peroration.cardName}. Premise ${peroration.premises} of ${peroration.at}`
-        + (peroration.concedeAt ? `, concedes the fight outright at ${peroration.concedeAt} Premises.` : '.');
+    const a11y = `Sentence declared: ${peroration.cardName}. Charge ${peroration.premises} of ${peroration.at}`
+        + (peroration.concedeAt ? `, condemns the fight outright at ${peroration.concedeAt} Charges.` : '.');
     return (
         <View style={styles.perorationTrack} testID="combat-peroration" accessible accessibilityRole="text" accessibilityLabel={a11y}>
             <Text style={styles.perorationLabel} numberOfLines={1} allowFontScaling={false}>
                 ☞ {peroration.cardName.toUpperCase()} · {peroration.premises}/{peroration.at}
-                {peroration.concedeAt ? ` · CONCEDE ${peroration.concedeAt}` : ''}
+                {peroration.concedeAt ? ` · CONDEMN ${peroration.concedeAt}` : ''}
             </Text>
             <View style={styles.perorationBarTrack}>
                 <View style={[styles.perorationBarFill, { width: `${pct * 100}%`, backgroundColor: AXM.sulfur }]} />
@@ -1314,7 +1314,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                 {/* Spec 33 §2 (flag-on) — the player's current-stance chip. */}
                 {vm.playerStance ? <StanceChip vm={vm.playerStance} /> : null}
 
-                {/* Premise track + CONCEDE beat (phase 28) — the peroration theme's win condition */}
+                {/* Charge track + CONDEMN beat (phase 28) — the Sentence theme's win condition */}
                 <PerorationTrack peroration={vm.peroration} />
 
                 {/* player status strip — IN FLOW (not floated over the fan, where the
@@ -1858,7 +1858,7 @@ const useStyles = makeStyles((AXM) => ({
         paddingHorizontal: 5, paddingVertical: 2, overflow: 'hidden',
     },
 
-    // ── Premise track (phase 28) ──
+    // ── Charge track (phase 28) ──
     perorationTrack: { paddingHorizontal: 12, paddingBottom: 6, gap: 3 },
     perorationLabel: { fontFamily: FONTS.mono, fontSize: 10, color: '#d9b44a', letterSpacing: 0.4 },
     perorationBarTrack: { height: 4, borderRadius: 2, backgroundColor: 'rgba(0,0,0,0.6)', overflow: 'hidden' },

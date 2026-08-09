@@ -101,8 +101,8 @@
       ]
     },
     {
-      "id": "debuff_rapport",
-      "name": "Rapport",
+      "id": "debuff_quarter",
+      "name": "Quarter",
       "description": "It is harder to strike what has listened. Their blows arrive apologizing.",
       "type": "debuff",
       "category": "stat",

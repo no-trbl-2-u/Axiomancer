@@ -132,7 +132,7 @@ export function akrasiaDebtTiersCrossed(before: number, after: number): number {
  *  §Part 4b): every {@link PREMISE_MILESTONE_EVERY}rd Premise the player has EVER
  *  gained this combat (tracked by `CombatEncounterState.premiseMilestoneTotal`, a
  *  lifetime counter that — unlike the spendable `premises` tally it rides alongside
- *  — never resets on a Peroration payoff or CONCEDE) pays a small STAGGER dividend.
+ *  — never resets on a Peroration payoff or CONDEMN) pays a small STAGGER dividend.
  *  "The build pays small dividends DURING construction — the arc gets rungs"
  *  (source doc). Sized at the theme's own smallest Premise grant (1) so a single
  *  Exordium doesn't itself cross a tier, but three plays (or one `mounting-case`)
@@ -150,7 +150,7 @@ export function premiseMilestonesCrossed(before: number, after: number): number 
     const a = Math.max(0, Math.floor(after / PREMISE_MILESTONE_EVERY));
     return Math.max(0, a - b);
 }
-/** CONCEDE Premises required (plan/tuning/2026-07-08-win-path-scaling.md item
+/** CONDEMN Premises required (plan/tuning/2026-07-08-win-path-scaling.md item
  *  1a): `the-closing-word`'s flat 8-Premise `concedeAt` let Oratory land its
  *  alt-win identically against a 100 HP early wolf and a 1,500+ HP late boss
  *  — Battle Lab round 2 clocked it at 100% win rate on EVERY stage. The
@@ -162,7 +162,7 @@ export function premiseMilestonesCrossed(before: number, after: number): number 
 export const CONCEDE_PREMISES_BASE = 8;
 export const CONCEDE_PREMISES_ELITE = 10;
 export const CONCEDE_PREMISES_BOSS = 12;
-/** The Premise-tally FLOOR a CONCEDE Peroration must clear against an enemy of
+/** The Premise-tally FLOOR a CONDEMN Peroration must clear against an enemy of
  *  this difficulty — the SINGLE source the engine's concede resolution AND every
  *  presenter/catalog surface read, so a card face can never advertise the base 8
  *  while the live fight demands 10 (elite) or 12 (boss/unique). WI-6. */
@@ -173,21 +173,21 @@ export function concedeFloorFor(difficulty: EnemyDifficulty | undefined): number
             ? CONCEDE_PREMISES_ELITE
             : CONCEDE_PREMISES_BASE;
 }
-/** CAPITULATE resolve threshold (Dawncaster Charmed-style rework, plan/
- *  tuning/2026-07-08-win-path-scaling.md item 1a): the old check (SWAY ≥
+/** RELENT resolve threshold (Dawncaster Charmed-style rework, plan/
+ *  tuning/2026-07-08-win-path-scaling.md item 1a): the old check (PLEA ≥
  *  enemy CURRENT HP) made Grace's alt-win match a boss's ENTIRE HP bar —
  *  unreachable against a 1,000+ HP late pool (0% in Battle Lab round 2).
  *  `resolve` is a per-enemy stat well below max HP:
  *  CAPITULATE_RESOLVE_FRACTION of maxHealth, floored at CAPITULATE_MIN (a
- *  tiny enemy still asks for a token SWAY commitment) and — via
+ *  tiny enemy still asks for a token PLEA commitment) and — via
  *  `capitulateThreshold` — never allowed to exceed the enemy's CURRENT
  *  health, so a nearly-dead enemy still yields at the old low bar. Against a
  *  small early enemy 0.35×maxHealth usually sits above current HP anyway,
  *  so early behavior barely moves; against a boss it turns "match the whole
- *  bar" into "commit a real but reachable SWAY investment". Tunable. */
+ *  bar" into "commit a real but reachable PLEA investment". Tunable. */
 export const CAPITULATE_RESOLVE_FRACTION = 0.35;
 export const CAPITULATE_MIN = 10;
-/** CAPITULATE resolve threshold for a given enemy — see CAPITULATE_RESOLVE_FRACTION. */
+/** RELENT resolve threshold for a given enemy — see CAPITULATE_RESOLVE_FRACTION. */
 export function capitulateThreshold(enemy: Pick<Enemy, 'health' | 'maxHealth'>): number {
     const resolve = Math.max(CAPITULATE_MIN, Math.round(CAPITULATE_RESOLVE_FRACTION * enemy.maxHealth));
     return Math.min(resolve, enemy.health);
@@ -195,9 +195,9 @@ export function capitulateThreshold(enemy: Pick<Enemy, 'health' | 'maxHealth'>):
 /** Phase 32 part 4e (Charm — Resolve milestones, plan/phases/
  *  phase_32_theme_deep_work.md §Part 4e, plan/tuning/2026-07-10-theme-
  *  identity.md "Charm / grace" — "Resolve milestones… the track gets rungs
- *  and a face"): SWAY crossing a named fractional waypoint of the enemy's
+ *  and a face"): PLEA crossing a named fractional waypoint of the enemy's
  *  LIVE `capitulateThreshold` ("resolve") pays a small one-time dividend.
- *  Fractions of the LIVE resolve — NOT a fixed absolute SWAY number, and NOT
+ *  Fractions of the LIVE resolve — NOT a fixed absolute PLEA number, and NOT
  *  a fraction of maxHealth — so the waypoints track `capitulateThreshold`'s
  *  own live shrink (it falls with the enemy's current health, per
  *  `CAPITULATE_RESOLVE_FRACTION`'s own doc comment) exactly the way the
@@ -213,23 +213,23 @@ export function capitulateThreshold(enemy: Pick<Enemy, 'health' | 'maxHealth'>):
  *  Tunable. */
 export const SWAY_WAVERING_FRACTION = 0.45;
 export const SWAY_FALTERING_FRACTION = 0.8;
-/** Wavering dividend — one stack of RAPPORT on the enemy (Charm's own
+/** Wavering dividend — one stack of QUARTER on the enemy (Charm's own
  *  rapport-building idiom: the exact payload `soft-word` / `disarming-smile`
  *  / `common-ground` / `the-olive-branch` already print). The foe's
  *  resistance visibly softens as their will starts to waver — this is the
  *  "small dividend" speaking Charm's OWN vocabulary, not a borrowed one. */
 export const SWAY_WAVERING_RAPPORT = 1;
-/** Faltering dividend — a small BONUS SWAY nudge (unscaled by
+/** Faltering dividend — a small BONUS PLEA nudge (unscaled by
  *  `buff_grace_momentum`: a flat ledger dividend, not a re-scaled gain, same
  *  "modest ledger bonus" idiom as `AKRASIA_DEBT_TIER_GUARD`/
  *  `PREMISE_MILESTONE_RUNGS`). Commitment breeds more commitment as their
  *  will visibly breaks — the two-stage arc escalates from softening THEM
- *  (Wavering/RAPPORT) to accelerating YOUR OWN climb (Faltering/SWAY).
+ *  (Wavering/QUARTER) to accelerating YOUR OWN climb (Faltering/PLEA).
  *  Deliberately NOT a GUARD payoff: `gainSway` is called from inside
- *  `resolveThreatPhase` (the `mirror-of-longing` SWAY-conversion site, see
+ *  `resolveThreatPhase` (the `mirror-of-longing` PLEA-conversion site, see
  *  that call site's own comment) where GUARD is unconditionally reset to 0
  *  the SAME phase — a GUARD dividend paid there would evaporate before it
- *  could ever matter. SWAY is never reset mid-function at any `gainSway`
+ *  could ever matter. PLEA is never reset mid-function at any `gainSway`
  *  call site, so it is the one payoff type safe everywhere `gainSway` fires
  *  from. Tunable. */
 export const SWAY_FALTERING_BONUS = 2;

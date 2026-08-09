@@ -41,7 +41,7 @@ function isControl(effect: Effect): boolean {
     return !!r && (r.skipTurn === true || r.forcedStance !== undefined || (r.blockedStances?.length ?? 0) > 0);
 }
 
-/** True if the effect is an exposure / soft debuff (MARK / RAPPORT class). */
+/** True if the effect is an exposure / soft debuff (MARK / QUARTER class). */
 function isStatDebuff(effect: Effect): boolean {
     if (effect.type !== 'debuff') return false;
     const mods = effect.payload.statModifiers ?? [];
@@ -213,8 +213,8 @@ export function riderText(r: CardRider, opts?: { selfTargetCard?: boolean }): st
     if (r.cleanse) parts.push(`cleanse ${r.cleanse}`);
     if (r.healHp) parts.push(`heal ${r.healHp}`);
     if (r.drawCards) parts.push(`draw ${r.drawCards}`);
-    if (r.premises) parts.push(`+${r.premises} Premise${r.premises === 1 ? '' : 's'}`);
-    if (r.sway) parts.push(`SWAY ${r.sway}`);
+    if (r.premises) parts.push(`+${r.premises} Charge${r.premises === 1 ? '' : 's'}`);
+    if (r.sway) parts.push(`PLEA ${r.sway}`);
     if (r.souls) parts.push(`+${r.souls} Soul${r.souls === 1 ? '' : 's'}`);
     if (r.foretell) parts.push(`FORETELL ${r.foretell}`);
     if (r.applyEffect) {
@@ -280,26 +280,26 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         // and no player surface defines "fuel" (card-wording audit 2026-07-13).
         case 'rupture': return `RUPTURE ALL${m.fuelPerPip ? ` (+${m.fuelPerPip} damage per spent pip; needs 2+ pips)` : ''}${m.fuelPerOmenHit ? ` (+${m.fuelPerOmenHit} damage per omen hit)` : ''}`;
         case 'siphon': return `SIPHON ${Math.round(m.pct * 100)}%`;
-        case 'forge_floating_die': return `FORGE a ${m.color === 'wild' ? 'WILD' : "the powering die's color"} floating die`;
-        case 'float_x_die': return 'FORGE a dead X die into a WILD floating die (no X: +1 Conviction)';
+        case 'forge_floating_die': return `FORGE a ${m.color === 'wild' ? 'WILD' : "the powering die's color"} ghost die`;
+        case 'float_x_die': return 'FORGE a dead X die into a WILD ghost die (no X: +1 Conviction)';
         case 'stagger': return `STAGGER ${m.rungs}`;
         case 'lock_stance': return "lock the enemy's next stance";
         case 'foretell': return `FORETELL ${m.count}`;
         // Phase 32 part 4d — OMEN v2: claim a window (1-N phases, ante +
         // rider both scale 1/window) instead of a silent die-derived guess.
         case 'omen': return `OMEN — stake claim (window 1-${m.maxWindow}, ante ${m.anteConviction}◆ at window 1): on hit, ${riderText(m.rider)}`;
-        case 'premise': return `+${m.count} Premise${m.count === 1 ? '' : 's'}`;
+        case 'premise': return `+${m.count} Charge${m.count === 1 ? '' : 's'}`;
         // The declared conclusion prints its full payload — the rider used to
-        // be dropped — and the CONCEDE bar names the elite/boss floors
+        // be dropped — and the CONDEMN bar names the elite/boss floors
         // (`concedeFloorFor` raises the authored value against them).
-        case 'peroration': return `PERORATION at ${m.at} — ${riderText(m.rider)}${m.concedeAt ? ` (CONCEDE at ${m.concedeAt} — you win; elite ${CONCEDE_PREMISES_ELITE} · boss ${CONCEDE_PREMISES_BOSS})` : ''}`;
-        case 'spend_premises': return `spend ALL Premises — +1 mark per ${m.markPer}, draw 1 per ${m.drawPer}`;
+        case 'peroration': return `SENTENCE at ${m.at} — ${riderText(m.rider)}${m.concedeAt ? ` (CONDEMN at ${m.concedeAt} — you win; elite ${CONCEDE_PREMISES_ELITE} · boss ${CONCEDE_PREMISES_BOSS})` : ''}`;
+        case 'spend_premises': return `spend ALL Charges — +1 mark per ${m.markPer}, draw 1 per ${m.drawPer}`;
         case 'spend_all_pips': return `spend ALL pips${m.guardPerPip ? ` (+${m.guardPerPip} Guard per pip)` : ''}${m.markPer ? ` (+1 MARK per ${m.markPer} spent, uncapped)` : ''}`;
         case 'recoil': return `RECOIL ${m.hp}`;
         case 'recoil_x': return `RECOIL X (min ${m.min}): POISON per ${Math.round(1 / m.poisonPerX)}`;
-        // KW-3 (phase 29): FESTER→PROLONG, TRANSMUTE→REARGUE (renames).
+        // KW-3 (phase 29): FESTER→PROLONG, TRANSMUTE→CURDLE (renames).
         case 'extend_dots': return `PROLONG +${m.turns} duration to ALL your DoTs`;
-        case 'convert_dots': return `REARGUE — convert bleed↔poison, +${m.bonusIntensity} intensity`;
+        case 'convert_dots': return `CURDLE — convert bleed↔poison, +${m.bonusIntensity} intensity`;
         // Profane canon (2026-08-08): FESTER earns its own registry row — the
         // intensity half of the old PROLONG double-duty splits out.
         case 'boost_all_dots': return `FESTER ${m.intensity} — every DoT on the enemy gains +${m.intensity} intensity`;
@@ -314,7 +314,7 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         // badged as BACKFIRE's own "ALL" variant (REAP ALL / RUPTURE ALL
         // precedent), not a new registry keyword.
         case 'turnabout': return `BACKFIRE ALL — ${m.burstPerRung} damage per rung ever denied`;
-        case 'sway': return `SWAY ${m.amount}`;
+        case 'sway': return `PLEA ${m.amount}`;
         case 'echo': return 'ECHO';
         case 'echo_next_spell': return 'your next spell gains ECHO';
         // KW-3 (phase 29): REPRISE→RECALL (rename; frees REPRISE — see the

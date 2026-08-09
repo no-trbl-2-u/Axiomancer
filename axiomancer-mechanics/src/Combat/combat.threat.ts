@@ -48,14 +48,14 @@ export interface AuthoredThreatPhase {
      *  reactive cleanse; now directly authorable on any phase, linear or
      *  branch. An explicit value here wins over that implicit fallback. */
     enemyCleanse?: number;
-    /** Phase 33a/33b — sheds this much of the player's live SWAY value on
-     *  Overwhelm (the SWAY-cleanse archetype: enemy counterplay against the
-     *  charm/grace CAPITULATE track). Flat amount, floored at 0; never
+    /** Phase 33a/33b — sheds this much of the player's live PLEA value on
+     *  Overwhelm (the PLEA-cleanse archetype: enemy counterplay against the
+     *  charm/grace RELENT track). Flat amount, floored at 0; never
      *  touches the one-way milestone-fired flags. */
     swayCleanse?: number;
     /** Phase 33a/33b — sheds this much of the player's spendable Premise
      *  tally on Overwhelm (the Premise-shed archetype: enemy counterplay
-     *  against the oratory/peroration CONCEDE track). Flat amount, floored
+     *  against the oratory/peroration CONDEMN track). Flat amount, floored
      *  at 0; never touches the lifetime `premisesThisCombat` counter. */
     premiseShed?: number;
     /** Phase 33d (GLYPHS pilot) — destroys the player's LOWEST-charge glyph
@@ -207,7 +207,7 @@ function difficultyMult(enemy: Enemy): number {
 // ── Spec 26 §2 — intent derivation (the telegraph; stance stays hidden) ──────
 
 /** True when a threat effect debuffs the player (an applied effectId, or
- *  Phase 33a's counterplay hooks stripping the player's SWAY/Premise
+ *  Phase 33a's counterplay hooks stripping the player's PLEA/Premise
  *  win-progress, or Phase 33d's GLYPHS-zone counterplay). */
 function effectIsDebuff(eff: CombatThreatEffect): boolean {
     return !!eff.effectId || (eff.swayCleanse ?? 0) > 0 || (eff.premiseShed ?? 0) > 0

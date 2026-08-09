@@ -69,7 +69,7 @@ export const GLYPH_SHAPES: Record<string, GlyphShape> = {
     GRACE_MOMENTUM: CHEVRONS_RIGHT,
     MARK: CROSSHAIR,
     BACKFIRE: RETURN_ARROW,
-    RAPPORT: SPEECH,
+    QUARTER: SPEECH,
     STUN: BURST, RUPTURE: BURST, THORNS: BURST,
     // ── currencies / verbs ──
     GUARD: SHIELD, BARRIER: SHIELD,
@@ -86,8 +86,8 @@ export const GLYPH_SHAPES: Record<string, GlyphShape> = {
     REFRESH: CYCLE_ARROW,
     ENCHANT: DIAMONDS,
     CONVICTION: DIAMOND,
-    PREMISE: BOOKMARK,
-    SWAY: WAVES,
+    CHARGE: BOOKMARK,
+    PLEA: WAVES,
     INTENSITY: CHEVRONS_UP,
     MILL: SPILL_CARDS,
 };

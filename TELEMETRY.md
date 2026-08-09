@@ -224,3 +224,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-09T07:29:50Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-09T07:29:52Z | skill | march | unknown | main | - |
 | 2026-08-09T07:31:16Z | subagent | Explore | claude-sonnet-5 | main | Map keyword registry rename targets |
+| 2026-08-09T07:40:57Z | subagent | card-expert | claude-sonnet-5 | main | Implement phase 44b keyword retheme |

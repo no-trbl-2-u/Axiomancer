@@ -464,8 +464,8 @@ export function CardForm({ card, setCard }: { card: CardDraft; setCard: (c: Card
                 </Btn>
             </Section>
 
-            {/* ════ SPECIAL MECHANICS ════ */}
-            <Section title="SPECIAL MECHANICS" badge={card.specialMechanics.length || undefined}>
+            {/* ════ BOON MECHANICS ════ */}
+            <Section title="BOON MECHANICS" badge={card.specialMechanics.length || undefined}>
                 {card.specialMechanics.length === 0 && (
                     <div style={{ fontFamily: WX.serif, fontStyle: 'italic', fontSize: 13, color: WX.ash }}>no bespoke mechanics</div>
                 )}
@@ -619,13 +619,13 @@ function MechanicFields({ mechanic, patch }: { mechanic: CardSpecialMechanic; pa
                 </>
             );
         case 'premise':
-            return numRow('PREMISES', 'added to the tally', mechanic.count, 'count', 1, 5);
+            return numRow('CHARGES', 'added to the tally', mechanic.count, 'count', 1, 5);
         case 'peroration':
             return (
                 <>
-                    {numRow('FIRES AT', 'Premise count', mechanic.at, 'at', 1, 12)}
+                    {numRow('FIRES AT', 'Charge count', mechanic.at, 'at', 1, 12)}
                     <div>
-                        <FieldLabel hint="0 = no concede clause">CONCEDE AT</FieldLabel>
+                        <FieldLabel hint="0 = no condemn clause">CONDEMN AT</FieldLabel>
                         <Stepper value={mechanic.concedeAt ?? 0} onChange={(v) => patch({ concedeAt: v === 0 ? undefined : v })} min={0} max={12} />
                     </div>
                     {riderNote}
@@ -679,7 +679,7 @@ function MechanicFields({ mechanic, patch }: { mechanic: CardSpecialMechanic; pa
         case 'turnabout':
             return numRow('BURST / RUNG', 'HP per rung banked in rungsDeniedTotal, then the ledger resets', mechanic.burstPerRung, 'burstPerRung', 1, 10);
         case 'sway':
-            return numRow('SWAY', 'decays 1/turn · ≥ enemy VITAE = capitulate', mechanic.amount, 'amount', 1, 12);
+            return numRow('PLEA', 'decays 1/turn · ≥ enemy VITAE = relent', mechanic.amount, 'amount', 1, 12);
         case 'reprise':
             return numRow('COUNT', 'cards returned from the discard', mechanic.count, 'count', 1, 5);
         case 'replay_last':

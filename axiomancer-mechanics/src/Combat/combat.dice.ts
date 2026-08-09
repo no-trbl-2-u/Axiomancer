@@ -176,7 +176,7 @@ export function overheatReserve(
 /**
  * A die Press Fate (the `reroll` signature) re-rolls: one you have USED this turn
  * (`spent`/`exhausted`) or a dead `x` face that can't power anything. A still-
- * usable die — an `available` colored/wild die — is LEFT ALONE. FLOATING dice
+ * usable die — an `available` colored/wild die — is LEFT ALONE. GHOST dice
  * (spec 32 v3 §5) NEVER reroll — that invariant is part of their identity.
  */
 export function dieIsRerollable(die: CombatManaDie): boolean {
@@ -185,7 +185,7 @@ export function dieIsRerollable(die: CombatManaDie): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// Spec 32 v3 §5 — FLOATING dice (the live-tray model)
+// Spec 32 v3 §5 — GHOST dice (the live-tray model)
 // ---------------------------------------------------------------------------
 
 /** Hard cap on the floating-die pool. Forging at cap → +1 Conviction instead. */

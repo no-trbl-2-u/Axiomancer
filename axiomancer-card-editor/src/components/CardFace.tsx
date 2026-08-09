@@ -180,7 +180,7 @@ function freeKeyword(card: CardDraft): { kw: KeywordId | string; val: number } {
         if (id.includes('bleed') || id.includes('poison')) return { kw: dotKeyword(id), val: i };
         if (id.includes('fester') || id.includes('acid')) return { kw: 'poison', val: i };
         if (id.includes('burn')) return { kw: 'dot', val: i };
-        if (id.includes('rapport')) return { kw: 'rapport', val: i };
+        if (id.includes('quarter')) return { kw: 'quarter', val: i };
         if (id.includes('backfire')) return { kw: 'backfire', val: i };
         if (id.includes('doom')) return { kw: 'doom', val: i };
         return { kw: 'control', val: 0 };
@@ -352,7 +352,7 @@ export function KwGlyph({
                     <path d="M14 3 A7 7 0 0 1 14 17 H11 V21 L4 15 L11 9 V13 H14 A3 3 0 0 0 14 7 H8 V3 Z" />
                 </svg>
             );
-        case 'rapport':
+        case 'quarter':
             return (
                 <svg viewBox="0 0 24 24" style={s} fill={color}>
                     <path d="M3 4 H21 V16 H12 L7 21 V16 H3 Z" />

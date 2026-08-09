@@ -3,7 +3,7 @@
  *
  * Successor to the retired `grace-card-wording` suite: the ten theme presets
  * became three campaign snapshots, so the wording pin now rides an ARCHETYPE
- * (choir — the canon's most verb-dense family: SWAY, SOUL, REAP, RAPPORT,
+ * (choir — the canon's most verb-dense family: PLEA, SOUL, REAP, QUARTER,
  * CLEANSE, SIPHON, and both persistent zones) plus a projection smoke over
  * every card the three campaign presets actually seat.
  *
@@ -49,16 +49,16 @@ describe('projection smoke — the seated canon', () => {
 });
 
 describe('Pale Choir card wording', () => {
-    it('Thin Hymn states both SWAY gains and nothing else', () => {
+    it('Thin Hymn states both PLEA gains and nothing else', () => {
         const text = face('thin-hymn');
-        expect(text).toContain('FREE — SWAY 1.');
-        expect(text).toContain('PAID — SWAY 3.');
+        expect(text).toContain('FREE — PLEA 1.');
+        expect(text).toContain('PAID — PLEA 3.');
     });
 
-    it('Alms of Breath states its RAPPORT duration, SWAY, and CLEANSE', () => {
+    it('Alms of Breath states its QUARTER duration, PLEA, and CLEANSE', () => {
         const text = face('alms-of-breath');
-        expect(text).toContain('Apply RAPPORT 1 for 2 turns');
-        expect(text).toContain('SWAY 2');
+        expect(text).toContain('Apply QUARTER 1 for 2 turns');
+        expect(text).toContain('PLEA 2');
         expect(text).toContain('CLEANSE 1');
         expect(text).toContain('+1 Soul');
     });
@@ -80,8 +80,8 @@ describe('Pale Choir card wording', () => {
     it('The Offertory Plate states its REAP price, every payoff, and the threshold', () => {
         const text = face('the-offertory-plate');
         expect(text).toContain('REAP 3');
-        expect(text).toContain('SWAY 5');
-        expect(text).toContain('apply RAPPORT 2 for 2 turns');
+        expect(text).toContain('PLEA 5');
+        expect(text).toContain('apply QUARTER 2 for 2 turns');
         expect(text).toContain('KINDLE a heart die');
         expect(text).toContain('HEART ×3 spent: +2 Souls');
     });
@@ -99,13 +99,13 @@ describe('Pale Choir card wording', () => {
         expect(text).toContain('FREE (3 rounds)');
         expect(text).toContain('PAID (rest of combat)');
         expect(text).toContain('Whenever an affliction on the enemy expires or is consumed');
-        expect(text).toContain('gain 1 SOUL and SWAY 1');
+        expect(text).toContain('gain 1 SOUL and PLEA 1');
     });
 
     it('The Long Amen names its clock, its scaling, and that it rides the enemy', () => {
         const text = face('the-long-amen');
         expect(text).toContain('At the end of each round');
-        expect(text).toContain('the enemy gains SWAY equal to the number of Souls you hold');
+        expect(text).toContain('the enemy gains PLEA equal to the number of Souls you hold');
         expect(text).toContain('Attaches to the enemy');
     });
 });

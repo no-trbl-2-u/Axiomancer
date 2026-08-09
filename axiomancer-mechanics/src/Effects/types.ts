@@ -271,7 +271,7 @@ export interface EffectPayload {
      */
     cleanse?: boolean;
     /**
-     * Grace Momentum (spec, 2026-07-08 Grace rebalance) — every SWAY the bearer
+     * Grace Momentum (spec, 2026-07-08 Grace rebalance) — every PLEA the bearer
      * gains is multiplied by `1 + (outgoingSwayGainMulPct/100) × intensity`.
      * Read in `gainSway` (`src/Combat/combat.engine.ts`). Declared here so the
      * field is discoverable from the payload shape rather than only via a local

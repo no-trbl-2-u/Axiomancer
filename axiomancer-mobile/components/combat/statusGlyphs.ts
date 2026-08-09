@@ -106,12 +106,12 @@ const EFFECT_GLYPHS: Record<string, string> = {
     buff_taunt: '🎯',
     // ── Stat-down / marks ──
     // 2026-07-12 (card-wording audit) — the three CORE keyword afflictions
-    // (Mark / Backfire / Rapport ARE the keyword system) had no curated glyph
+    // (Mark / Backfire / Quarter ARE the keyword system) had no curated glyph
     // and rendered generic category icons while ~40 curated rows below point
     // at legacy ids that no longer exist in the live library.
     debuff_mark: '◉',
     debuff_backfire: '⟲',
-    debuff_rapport: '☙',
+    debuff_quarter: '☙',
     tier1_mind_mark: '◎',
     debuff_all_stats_down: '▽',
     debuff_curse: '🧿',

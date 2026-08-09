@@ -37,8 +37,8 @@ function loadout(cards: string[]): Character {
 
 // Profane Canon loadouts (2026-08-08 rework, old ids retired):
 const DOT = ['spoiled-poultice', 'the-long-lent', 'unction-of-boils']; // rot seed + PROLONG + tier-2 poison
-const CONTROL = ['scolds-bridle', 'petty-indictment'];                 // STAGGER + BACKFIRE, PREMISE chip
-const CHARM = ['thin-hymn', 'alms-of-breath', 'the-offertory-plate'];  // SWAY toward capitulation
+const CONTROL = ['scolds-bridle', 'petty-indictment'];                 // STAGGER + BACKFIRE, CHARGE chip
+const CHARM = ['thin-hymn', 'alms-of-breath', 'the-offertory-plate'];  // PLEA toward capitulation
 const TURTLE = ['chilblain-watch', 'hoarfrost-teeth', 'spoiled-poultice']; // wall + thorns + DoT
 
 describe('HP combat — combats terminate for every loadout family (structural, armed)', () => {
@@ -113,8 +113,8 @@ describe.skip('HP combat — SUSPENDED balance bands (status play wins, alt-wins
         expect(s.winRate).toBeGreaterThan(0);
     });
 
-    it('a CHARM (SWAY) loadout produces merciful resolutions on an easy foe', () => {
-        // CAPITULATE counts into `mercies` (a merciful resolution) — Charm's
+    it('a CHARM (PLEA) loadout produces merciful resolutions on an easy foe', () => {
+        // RELENT counts into `mercies` (a merciful resolution) — Charm's
         // identity: it can win without ever touching HP.
         const m = simulateHazardPatternCombat(loadout(CHARM), LittleBelle, RUNS, SEED);
         expect(m.winRate).toBeGreaterThan(0);

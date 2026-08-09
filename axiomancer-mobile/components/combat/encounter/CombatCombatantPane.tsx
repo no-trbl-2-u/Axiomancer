@@ -114,10 +114,10 @@ function EnemyHpBar({ pct, value, max }: { pct: number; value: number; max: numb
     );
 }
 
-/** WI-5 — a slim alt-win meter under the VITAE bar (SWAY → CAPITULATE, PREMISE
+/** WI-5 — a slim alt-win meter under the VITAE bar (PLEA → RELENT, CHARGE
  *  → ORATORY). These currencies used to accumulate with NO combat surface: a
  *  GRACE run could play its whole plan and die with zero feedback on progress.
- *  `target` 0 renders the tally with no fill bar (an undeclared premise count). */
+ *  `target` 0 renders the tally with no fill bar (an undeclared charge count). */
 function AltWinMeter({ glyph, label, value, target, color, testID }: {
     glyph: string; label: string; value: number; target: number; color: string; testID: string;
 }) {
@@ -581,12 +581,12 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                     {metaLine ? <Text style={styles.hudMeta} allowFontScaling={false}>{metaLine}</Text> : null}
                 </View>
                 <EnemyHpBar pct={enemy.hpPct} value={enemy.hp} max={enemy.maxHp} />
-                {/* WI-5 — alt-win meters (SWAY → capitulate, PREMISE → oratory) */}
+                {/* WI-5 — alt-win meters (PLEA → relent, CHARGE → oratory) */}
                 {enemy.swayVisible ? (
-                    <AltWinMeter glyph="🕊" label="SWAY" value={enemy.sway} target={enemy.swayTarget} color={AXM.sulfur} testID="combat-sway-meter" />
+                    <AltWinMeter glyph="🕊" label="PLEA" value={enemy.sway} target={enemy.swayTarget} color={AXM.sulfur} testID="combat-sway-meter" />
                 ) : null}
                 {enemy.premiseVisible ? (
-                    <AltWinMeter glyph="☞" label="PREMISE" value={enemy.premises} target={enemy.premiseAt} color={AXM.sulfur} testID="combat-premise-meter" />
+                    <AltWinMeter glyph="☞" label="CHARGE" value={enemy.premises} target={enemy.premiseAt} color={AXM.sulfur} testID="combat-premise-meter" />
                 ) : null}
                 {/* Phase 2 (spec 30) — the status kill-path foresight. Makes the
                     DoT win path foreseeable instead of invisible accumulation:
@@ -665,7 +665,7 @@ const useStyles = makeStyles((AXM) => ({
     },
     crestMax: { fontFamily: FONTS.mono, fontSize: 9, lineHeight: 10, color: AXM.bone, marginTop: -1 },
 
-    // WI-5 — slim alt-win meters under the VITAE bar (SWAY / PREMISE).
+    // WI-5 — slim alt-win meters under the VITAE bar (PLEA / CHARGE).
     altMeter: { marginTop: 4 },
     altMeterLabel: {
         fontFamily: FONTS.sans, fontSize: 10, letterSpacing: 1, color: AXM.bone,

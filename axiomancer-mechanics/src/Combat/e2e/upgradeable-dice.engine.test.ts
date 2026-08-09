@@ -4,7 +4,7 @@
  * Pins the flag-on model to exact engine behavior:
  *   §1 ROLL LAW — 4 fixed-color dice every round, faces from the gear tables;
  *      the color law gates powering (gold = wild); no draft, no single-die law
- *   §1 SPECIAL — fires its gear payload (+2◆) only when the die is USED
+ *   §1 BOON — fires its gear payload (+2◆) only when the die is USED
  *      (the owner-ratified use-triggered rule), including from the Reserve
  *   §1 CEILING — 7 die objects; overflow converts to +1◆, never silently drops
  *   §2 STANCE — stance = last PAID card's stance; FREE lines never shift it;
@@ -84,7 +84,7 @@ function seqRng(...vals: number[]): () => number {
 
 // Face windows for the colored gear (1 special / 2 mana / 3 miss):
 // floor(v*6): 0 → special, 1-2 → mana, 3-5 → miss.
-const SPECIAL = 0.05;   // idx 0
+const BOON = 0.05;   // idx 0
 const MANA = 0.25;      // idx 1
 const MISS = 0.95;      // idx 5
 // Gold gear (1 special / 1 mana / 4 miss): idx 0 special, idx 1 mana, 2-5 miss.
@@ -135,7 +135,7 @@ function events(res: { events: CombatEvent[] }, kind: CombatEvent['kind']): Comb
 
 describe('spec 33 §1 — the four-die roll law', () => {
     it('rolls exactly one die per fixed color with faces from the gear tables', () => {
-        const s = open([SPECIAL, MANA, MISS, MISS]);
+        const s = open([BOON, MANA, MISS, MISS]);
         const tray = s.dice.filter(d => !d.floating);
         expect(tray.map(d => d.color)).toEqual([...UPGRADEABLE_DIE_COLORS]);
         expect(trayDie(s, 'body').face).toBe('special');
@@ -180,11 +180,11 @@ describe('spec 33 §1 — the four-die roll law', () => {
     });
 });
 
-// ── §1 — SPECIAL fires on use ───────────────────────────────────────────────
+// ── §1 — BOON fires on use ───────────────────────────────────────────────
 
-describe('spec 33 §1/§6 — the SPECIAL payload (ratified use-triggered rule)', () => {
+describe('spec 33 §1/§6 — the BOON payload (ratified use-triggered rule)', () => {
     it('a special die USED to power a card fires +2◆', () => {
-        const s = open([SPECIAL, MANA, MANA, MANA]);
+        const s = open([BOON, MANA, MANA, MANA]);
         const before = s.conviction;
         const res = paid(s, 'ud-body-dot', trayDie(s, 'body').id);
         expect(events(res, 'special-fired')).toHaveLength(1);
@@ -192,7 +192,7 @@ describe('spec 33 §1/§6 — the SPECIAL payload (ratified use-triggered rule)'
     });
 
     it('an UNSPENT special grants nothing at end of round (use-triggered, not roll-triggered)', () => {
-        const s = open([SPECIAL, MANA, MANA, MANA]);
+        const s = open([BOON, MANA, MANA, MANA]);
         const before = s.conviction;
         const ended = endTurn(s);
         expect(ended.state.conviction).toBe(before);
@@ -200,7 +200,7 @@ describe('spec 33 §1/§6 — the SPECIAL payload (ratified use-triggered rule)'
     });
 
     it('a banked special still fires its payload when spent from the Reserve', () => {
-        let s = open([SPECIAL, MANA, MANA, MANA]);
+        let s = open([BOON, MANA, MANA, MANA]);
         // End of round banks the best die — the special.
         const ended = endTurn(s);
         const banked = events(ended, 'die-banked')[0];
@@ -221,7 +221,7 @@ describe('spec 33 §1/§6 — the SPECIAL payload (ratified use-triggered rule)'
         // Master's Stamp (`forge-masters-stamp`, a library card since Phase
         // D8) is wired at the special-fired hook by card id — like
         // anvil-of-form. It amplifies the PAYLOAD, not the special's identity.
-        const base = open([SPECIAL, MANA, MANA, MANA]);
+        const base = open([BOON, MANA, MANA, MANA]);
         const before = base.conviction;
         // Control (same seed/state, no enchant) — the gear default, +2◆.
         const control = paid(base, 'ud-body-dot', trayDie(base, 'body').id);
@@ -241,7 +241,7 @@ describe('spec 33 §4 — Press Fate (1◆, all misses, once per round, honest)'
     it('costs 1◆ and rerolls ONLY the miss faces', () => {
         let s = open([MANA, MISS, MISS, MISS]);
         s = { ...s, conviction: 3 };
-        const res = playSignatureSkill(s, 'sig-press-the-point', seqRng(SPECIAL, MANA, MANA));
+        const res = playSignatureSkill(s, 'sig-press-the-point', seqRng(BOON, MANA, MANA));
         expect(res.state.conviction).toBe(3 - PRESS_FATE_COST);
         const rerolled = events(res, 'press-fate-rerolled')[0];
         expect(rerolled.kind === 'press-fate-rerolled' && rerolled.dieIds).toHaveLength(3);

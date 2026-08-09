@@ -11,7 +11,7 @@
  *    carries `enemyCleanse?` / `swayCleanse?` / `premiseShed?` directly, and
  *    2-3 mid/late enemies per class exercise each hook: CAUTERIZE (Fire
  *    Giant, Elder Fire Giant, alongside the pre-existing Tri-Eyes),
- *    Premise-shed (The Sophist, Zoma), SWAY-cleanse (Lady Gabriella, Rangda).
+ *    Premise-shed (The Sophist, Zoma), PLEA-cleanse (Lady Gabriella, Rangda).
  *
  * 2. VARIABLE-RUNG TELEGRAPHS: `CombatThreatPhase.rungs` (1-4) overrides the
  *    flat `THREAT_RUNGS`/`THREAT_RUNGS_BOSS` default for that one phase, so
@@ -113,7 +113,7 @@ describe('Phase 33b — Premise-shed archetype, directly authored', () => {
     });
 });
 
-describe('Phase 33b — SWAY-cleanse archetype, directly authored', () => {
+describe('Phase 33b — PLEA-cleanse archetype, directly authored', () => {
     it('Lady Gabriella carries swayCleanse on her "clinical accuracy" phase', () => {
         const seq = getThreatSequence(deepClone(LadyGabriella));
         const phase = seq[1];

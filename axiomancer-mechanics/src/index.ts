@@ -140,9 +140,9 @@ export {
     computeRoundsToKill, projectCombatOutcome,
     // Spec 32 v3 — floating dice save-back + sway decay knob
     getFloatingDiceColors, SWAY_DECAY_PER_TURN,
-    // CAPITULATE (SWAY) resolve threshold — the sway meter's target (WI-5)
+    // RELENT (PLEA) resolve threshold — the sway meter's target (WI-5)
     capitulateThreshold,
-    // CONCEDE Premise floor per difficulty — the concede-ladder source (WI-6)
+    // CONDEMN Premise floor per difficulty — the concede-ladder source (WI-6)
     concedeFloorFor,
     // Spec 26b tuning §B/§C/§D
     playerArchetype, CONCLUDE_DMG_PER_STACK,

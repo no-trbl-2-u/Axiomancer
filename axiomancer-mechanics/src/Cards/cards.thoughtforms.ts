@@ -83,7 +83,7 @@ const minorPremise: Card = {
         'its work; the case keeps the weight, not the words.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'self',
-    // pts: PREMISE 1 (0.8) + FREE premise 1 (0.8) = 1.6 → Doxa band
+    // pts: CHARGE 1 (0.8) + FREE premise 1 (0.8) = 1.6 → Doxa band
     // 1.5-7.5 (floor-adjacent by design: a one-use tally token). Either
     // face cashes the same premise — the FREE face just costs no die.
     free: { premises: 1 },

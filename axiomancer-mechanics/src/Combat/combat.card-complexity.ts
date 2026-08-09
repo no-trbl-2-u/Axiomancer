@@ -33,19 +33,19 @@ import { getDeckPreset } from './combat.starter-deck-presets';
  *  (mirrors the honesty test's structural set). */
 const STRUCTURAL_UPPER: ReadonlySet<string> = new Set([
     'FREE', 'PAID', 'ALL', 'WILD', 'VITAE', 'HP', 'DOT', 'DOTS',
-    'CONCEDE', 'PERORATION', 'OPENING', 'X',
+    'CONDEMN', 'SENTENCE', 'OPENING', 'X',
 ]);
 
 /** Plural face-forms → the singular registry keyword. */
 const PLURAL_TO_SINGULAR: Readonly<Record<string, string>> = Object.freeze({
-    PREMISES: 'PREMISE', SOULS: 'SOUL', PIPS: 'PIP',
+    PREMISES: 'CHARGE', SOULS: 'SOUL', PIPS: 'PIP',
 });
 
 /** Rider verb fields → the keyword they imply even when no prose prints it. */
 const RIDER_KEYWORDS: readonly (readonly [keyof CardRider, string])[] = [
     ['drawCards', 'DRAW'], ['guard', 'GUARD'], ['barrier', 'GUARD'],
-    ['healHp', 'HEAL'], ['cleanse', 'CLEANSE'], ['premises', 'PREMISE'],
-    ['sway', 'SWAY'], ['souls', 'SOUL'], ['foretell', 'FORETELL'],
+    ['healHp', 'HEAL'], ['cleanse', 'CLEANSE'], ['premises', 'CHARGE'],
+    ['sway', 'PLEA'], ['souls', 'SOUL'], ['foretell', 'FORETELL'],
     ['tickOne', 'TICK'], ['tickAllDots', 'TICK'], ['stagger', 'STAGGER'],
     ['pips', 'PIP'], ['intensityPerPip', 'PIP'], ['recoil', 'RECOIL'],
     ['millCards', 'MILL'], ['ruptureMarks', 'RUPTURE'],

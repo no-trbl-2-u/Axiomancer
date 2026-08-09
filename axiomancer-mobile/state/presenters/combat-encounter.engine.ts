@@ -149,8 +149,8 @@ function riderPairs(r: CardRider): [string, string][] {
     if (r.cleanse) pairs.push(['CLEANSE', `${r.cleanse}`]);
     if (r.healHp) pairs.push(['HEAL', `${r.healHp}`]);
     if (r.drawCards) pairs.push(['DRAW', `${r.drawCards}`]);
-    if (r.premises) pairs.push(['PREMISE', `+${r.premises}`]);
-    if (r.sway) pairs.push(['SWAY', `${r.sway}`]);
+    if (r.premises) pairs.push(['CHARGE', `+${r.premises}`]);
+    if (r.sway) pairs.push(['PLEA', `${r.sway}`]);
     if (r.souls) pairs.push(['SOUL', `+${r.souls}`]);
     if (r.foretell) pairs.push(['FORETELL', `${r.foretell}`]);
     if (r.applyEffect) {
@@ -190,7 +190,7 @@ function freeRail(card: CombatCard, sourceCard?: Card): { freeKeyword: string | 
 // their effect's board glyph; currency riders (guard/draw/premise…) map to a
 // terse rune. '' when the card has no free line.
 const FREE_KW_GLYPH: Record<string, string> = {
-    GUARD: '❖', HEAL: '✚', DRAW: '⚑', PREMISE: '❡', SWAY: '∿', SOUL: '✦',
+    GUARD: '❖', HEAL: '✚', DRAW: '⚑', CHARGE: '❡', PLEA: '∿', SOUL: '✦',
     FORETELL: '◉', TICK: '❋', CLEANSE: '✦', PIP: '⬡', STAGGER: '⚔',
     RECOIL: '▽', MILL: '⁇', RUPTURE: '❋',
 };
@@ -312,11 +312,11 @@ export interface CombatEnemyPaneVM {
     stanceLabel: string;      // 'HEART' / '?' …
     stanceHint: string;       // the thematic tell (always shown)
     /** WI-5 — the invisible alt-win currencies, now surfaced as slim meters
-     *  under the VITAE bar. `sway`/`swayTarget` drive the CAPITULATE track
-     *  (SWAY ≥ target at a turn boundary ends the fight); `premises`/`premiseAt`
-     *  drive the ORATORY track (a declared PERORATION fires on its tally). Each
+     *  under the VITAE bar. `sway`/`swayTarget` drive the RELENT track
+     *  (PLEA ≥ target at a turn boundary ends the fight); `premises`/`premiseAt`
+     *  drive the ORATORY track (a declared SENTENCE fires on its tally). Each
      *  meter renders when its value > 0 OR the player holds a card that feeds it
-     *  (so a whole-plan-is-SWAY preset like GRACE sees the track from turn 1). */
+     *  (so a whole-plan-is-PLEA preset like GRACE sees the track from turn 1). */
     sway: number; swayTarget: number; swayVisible: boolean;
     premises: number; premiseAt: number; premiseVisible: boolean;
     /** Phase 2 (spec 30) — the status kill-path foresight. `pendingDot` is the
@@ -341,7 +341,7 @@ export interface CombatDieVM {
     pips?: number;
     /** A dead X face that can still be FATE-TAPPED this turn (R4). */
     fateTappable?: boolean;
-    /** Spec 32 v3 §5 — a FLOATING die: always spendable (bypasses the one-die
+    /** Spec 32 v3 §5 — a GHOST die: always spendable (bypasses the one-die
      *  draft), consumed forever when spent, persists across combats. */
     floating?: boolean;
     /** 2026-07-12 (stale-powered fix) — the drafted die already powered a play
@@ -416,7 +416,7 @@ export type CombatCardKind =
     | 'clarity'       // buff_clarity → next die counts as WILD
     | 'resolute'      // buff_resolute → real -N% damage-taken reduction (the inverse of vulnerable)
     // ── card-honesty (2026-07-10) — the generic MECHANIC-LED face ──
-    | 'mechanic';     // a specialMechanics verb (STAGGER / SWAY / PERORATION / …) or a
+    | 'mechanic';     // a specialMechanics verb (STAGGER / PLEA / SENTENCE / …) or a
                       // rider-carried verb (DRAW / HEAL / …) is the card's paid identity;
                       // keyword + value come from the mechanic, never a fabricated fallback
 
@@ -553,14 +553,14 @@ export interface CombatReadVM {
     active: boolean; result: CombatReadResult; dieStance: string; enemyStance: string | null;
     text: string;
 }
-/** phase 28 — the Premise track + CONCEDE beat (Peroration theme). Was fully
+/** phase 28 — the Charge track + CONDEMN beat (Sentence theme). Was fully
  *  engine-side state with zero combat-UI rendering before this phase. */
 export interface CombatPerorationVM {
     active: boolean;
     premises: number;
-    /** Premise count at which the declared card's rider fires (tally resets). */
+    /** Charge count at which the declared card's rider fires (tally resets). */
     at: number;
-    /** Premise count at which the fight ends outright (CONCEDE) — tier-floored
+    /** Charge count at which the fight ends outright (CONDEMN) — tier-floored
      *  by enemy difficulty; null if the declared card carries no concede line. */
     concedeAt: number | null;
     cardName: string;
@@ -634,7 +634,7 @@ export interface CombatDieGearSlotVM {
     specialConviction: number;
     /** Terse face table, e.g. '1 special · 2 mana · 3 miss'. */
     faceTable: string;
-    /** Payload text for the SPECIAL face, e.g. '+2 ◆'. */
+    /** Payload text for the BOON face, e.g. '+2 ◆'. */
     payload: string;
     /** True when this slot's gear differs from the stock default (upgraded). */
     upgraded: boolean;
@@ -670,7 +670,7 @@ export interface CombatViewModel {
     discardCount: number;
     /** phase 28 — discard-pile card ids + names, for the REPRISE songbook picker. */
     discardCards: { id: string; name: string }[];
-    /** phase 28 — the Premise track + CONCEDE beat. */
+    /** phase 28 — the Premise track + CONDEMN beat. */
     peroration: CombatPerorationVM;
     /** Phase 31 — the engine-native momentum wheel's lit nodes (empty = no
      *  cycle in progress). `charged` mirrors the panel's old derivation: a
@@ -823,7 +823,7 @@ function intentVM(state: CombatEncounterState): CombatIntentVM {
 
 /** WI-5 — does any card the player can still draw feed one of these alt-win
  *  currencies? Scans the whole combat deck (not just the current hand) so a
- *  whole-plan-is-SWAY preset like GRACE shows its meter from turn 1, before the
+ *  whole-plan-is-PLEA preset like GRACE shows its meter from turn 1, before the
  *  first sway card is drawn. */
 function deckFeedsMechanic(state: CombatEncounterState, kinds: readonly string[]): boolean {
     const ids = new Set<string>([...state.deck, ...state.hand.map(h => h.cardId)]);
@@ -841,8 +841,8 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
     const stance = revealed ? cur?.enemyStance ?? null : null;
     const isBoss = e.difficulty === 'boss' || e.difficulty === 'unique'
         || (e.tags ?? []).includes('boss') || (e.tags ?? []).includes('unique');
-    // WI-5 — the alt-win meters. SWAY target is the engine-owned capitulate
-    // threshold; the PREMISE target is a declared PERORATION's tally (0 until one
+    // WI-5 — the alt-win meters. PLEA target is the engine-owned capitulate
+    // threshold; the CHARGE target is a declared SENTENCE's tally (0 until one
     // is declared). Each meter shows when it has a value OR the deck feeds it.
     const sway = state.sway ?? 0;
     const premises = state.premises ?? 0;
@@ -871,7 +871,7 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
         sway, swayTarget: capitulateThreshold(e),
         swayVisible: sway > 0 || deckFeedsMechanic(state, ['sway']),
         premises, premiseAt: state.peroration?.at ?? 0,
-        // Only the UNDECLARED tally: once a PERORATION is declared, the existing
+        // Only the UNDECLARED tally: once a SENTENCE is declared, the existing
         // peroration track (combat-peroration) owns the premises/at readout.
         premiseVisible: !state.peroration
             && (premises > 0 || deckFeedsMechanic(state, ['premise', 'peroration', 'spend_premises'])),
@@ -975,7 +975,7 @@ type EffectPayloadLike = {
     // ── spec 32 v3 — the themed-deck payload keys ──
     tickAmplifyFlat?: number;      // debuff_mark → +N per DoT tick per stack
     backfirePerRung?: number;      // debuff_backfire → N per rung the enemy's action loses
-    outgoingDamageMulPct?: number; // debuff_rapport → the enemy deals N% less damage (<0)
+    outgoingDamageMulPct?: number; // debuff_quarter → the enemy deals N% less damage (<0)
     // ── card-overhaul (2026-07-03) ──
     defenseModifier?: number;          // debuff_exposure → real -N DEF number
     restrictsSurgeAccess?: boolean;    // debuff_doubt → forces the foe's next play to weak-tier
@@ -1003,7 +1003,7 @@ export function engineHonestKind(
     if (p.actionRestriction?.skipTurn) return 'stun';
     if ((p.regeneration?.healthPerRound ?? 0) > 0) return 'regen';
     // Spec 32 v3 — the themed-deck payloads, all engine-read (honest):
-    // MARK amplifies every DoT tick; BACKFIRE bites per denied rung; RAPPORT
+    // MARK amplifies every DoT tick; BACKFIRE bites per denied rung; QUARTER
     // (negative outgoing-damage %) weakens the enemy's hits.
     if ((p.tickAmplifyFlat ?? 0) > 0) return 'mark';
     if ((p.backfirePerRung ?? 0) > 0) return 'backfire';
@@ -1108,10 +1108,10 @@ export function resolvePrimary(card: CombatCard, sourceCard: Card | undefined): 
         const primary = self[0] ?? null;
         return { kind: 'inert', ce: primary, guardAmount: null, riders: self.filter(s => s !== primary), mech: null };
     }
-    // PROFANE CANON (2026-08-08): a declared PERORATION outranks whatever
+    // PROFANE CANON (2026-08-08): a declared SENTENCE outranks whatever
     // status the same card also lands. The Black Cap prints DOOM 2 alongside
     // its verdict, and a DOOM headline would bury the alt-win (and the
-    // tier-floored CONCEDE readout) behind a routine DoT face.
+    // tier-floored CONDEMN readout) behind a routine DoT face.
     const peroration = findMech('peroration');
     if (peroration) return { kind: 'mechanic', ce: null, guardAmount: null, riders: (sourceCard?.combatEffects ?? []), mech: peroration };
 
@@ -1137,7 +1137,7 @@ export function resolvePrimary(card: CombatCard, sourceCard: Card | undefined): 
                                         : k === 'sensoryNull' ? 'sensoryNull'
                                             : k === 'isolated' ? 'isolated'
                                                 : 'inert';
-    // A card classified by verb (e.g. direct-control STAGGER/SWAY) with no
+    // A card classified by verb (e.g. direct-control STAGGER/PLEA) with no
     // engine-honest opponent EFFECT lands here as 'inert'. Headline its driving
     // MECHANIC instead of the ambiguous fallback; the effects ride as chips.
     if (kind === 'inert') {
@@ -1458,9 +1458,9 @@ function cardCalc(card: CombatCard, sourceCard: Card | undefined): CardCalc {
 function forgeClause(mech: CardSpecialMechanic | null): string | null {
     switch (mech?.kind) {
         case 'forge_floating_die':
-            return `forge a ${mech.color === 'wild' ? 'WILD' : 'matching'} FLOATING die`;
+            return `forge a ${mech.color === 'wild' ? 'WILD' : 'matching'} GHOST die`;
         case 'float_x_die':
-            return 'dead X die → WILD FLOATING die (no X: +1 ◆)';
+            return 'dead X die → WILD GHOST die (no X: +1 ◆)';
         case 'create_temporary_die':
             return `KINDLE a ${mech.color} die to the Reserve`;
         case 'grant_pip':
@@ -1490,10 +1490,10 @@ function mechanicHeadline(mech: CardSpecialMechanic | null, enemyDifficulty?: En
         case 'lock_stance':
             return { keyword: kw ?? 'Stagger', heroText: '', heroSub: "lock the foe's next stance", verbLine: "the foe's next stance is locked and revealed" };
         case 'sway':
-            return { keyword: kw ?? 'Sway', heroText: `+${mech.amount}`, heroSub: 'toward capitulation', verbLine: 'push the foe toward capitulation' };
+            return { keyword: kw ?? 'Plea', heroText: `+${mech.amount}`, heroSub: 'toward relenting', verbLine: 'push the foe toward relenting' };
         case 'peroration': {
-            // KW-2 (phase 29): PERORATION demoted — its sole carrier
-            // (the-closing-word) headlines under PREMISE, the keyword whose
+            // KW-2 (phase 29): SENTENCE demoted — its sole carrier
+            // (the-closing-word) headlines under CHARGE, the keyword whose
             // gloss already explains the payoff-trigger mechanic.
             // WI-6 — the concede threshold tier-FLOORS against the live foe
             // (base 8 / elite 10 / boss 12). The old face printed the raw
@@ -1504,16 +1504,16 @@ function mechanicHeadline(mech: CardSpecialMechanic | null, enemyDifficulty?: En
             const concedeSub = authored === undefined
                 ? 'fires free'
                 : enemyDifficulty
-                    ? `concede at ${Math.max(authored, concedeFloorFor(enemyDifficulty))} vs this foe`
-                    : `concede ${Math.max(authored, CONCEDE_PREMISES_BASE)}`
+                    ? `condemn at ${Math.max(authored, concedeFloorFor(enemyDifficulty))} vs this foe`
+                    : `condemn ${Math.max(authored, CONCEDE_PREMISES_BASE)}`
                         + `/${Math.max(authored, CONCEDE_PREMISES_ELITE)} elite`
                         + `/${Math.max(authored, CONCEDE_PREMISES_BOSS)} boss`;
-            return { keyword: kw ?? 'Premise', heroText: `at ${mech.at}`, heroSub: concedeSub, verbLine: 'a declared conclusion that fires on your Premise tally' };
+            return { keyword: kw ?? 'Charge', heroText: `at ${mech.at}`, heroSub: concedeSub, verbLine: 'a declared conclusion that fires on your Charge tally' };
         }
         case 'premise':
-            return { keyword: kw ?? 'Premise', heroText: `+${mech.count}`, heroSub: 'to the tally', verbLine: 'add to your Premise tally' };
+            return { keyword: kw ?? 'Charge', heroText: `+${mech.count}`, heroSub: 'to the tally', verbLine: 'add to your Charge tally' };
         case 'spend_premises':
-            return { keyword: kw ?? 'Premise', heroText: '', heroSub: 'spend the tally', verbLine: 'spend your whole Premise tally' };
+            return { keyword: kw ?? 'Charge', heroText: '', heroSub: 'spend the tally', verbLine: 'spend your whole Charge tally' };
         case 'foretell':
             return { keyword: kw ?? 'Foretell', heroText: `${mech.count}`, heroSub: 'look ahead', verbLine: "reveal the foe's next stance and reorder your deck" };
         // Phase 32 part 4d — OMEN v2: a staked stance/window claim, not a
@@ -1551,7 +1551,7 @@ function mechanicHeadline(mech: CardSpecialMechanic | null, enemyDifficulty?: En
         case 'boost_all_dots':
             return { keyword: kw ?? 'Prolong', heroText: `+${mech.intensity}`, heroSub: 'intensity · all DoTs', verbLine: "amplify every affliction on the foe" };
         case 'convert_dots':
-            return { keyword: kw ?? 'Reargue', heroText: `+${mech.bonusIntensity}`, heroSub: 'intensity · bleed ↔ poison', verbLine: "flip the foe's Bleed and Poison, each landing harder" };
+            return { keyword: kw ?? 'Curdle', heroText: `+${mech.bonusIntensity}`, heroSub: 'intensity · bleed ↔ poison', verbLine: "flip the foe's Bleed and Poison, each landing harder" };
         case 'strip_random_buff':
             return { keyword: 'Cleanse', heroText: '', heroSub: mech.appliedTo === 'enemy' ? 'strip a foe buff' : 'strip a buff', verbLine: 'strip a random buff' };
         case 'rider': {
@@ -1588,8 +1588,8 @@ function mechanicHeadline(mech: CardSpecialMechanic | null, enemyDifficulty?: En
 }
 
 /** Priority order for WHICH mechanic a multi-mechanic card headlines: the
- *  identity/payoff verb wins over its modifiers (ECHO doubles SWAY → headline
- *  SWAY), and a plain `rider` verb is the last resort. */
+ *  identity/payoff verb wins over its modifiers (ECHO doubles PLEA → headline
+ *  PLEA), and a plain `rider` verb is the last resort. */
 const MECH_HEADLINE_PRIORITY: readonly string[] = [
     'peroration', 'sway', 'turnabout', 'stagger', 'lock_stance', 'reprise', 'replay_last',
     'omen', 'consume_affliction', 'soul_gain', 'spend_premises', 'premise',
@@ -1652,9 +1652,9 @@ function buildDetailKeywords(card: CombatCard, c: CardCalc, sourceCard?: Card): 
     for (const ce of sourceCard?.combatEffects ?? []) push(keywordForEffect(ce.effectId), false);
     for (const m of sourceCard?.specialMechanics ?? []) {
         push(keywordForMechanic(m.kind), false);
-        // PERORATION is card-local (demoted, phase 29): the PREMISE gloss
+        // SENTENCE is card-local (demoted, phase 29): the CHARGE gloss
         // explains its trigger; the word itself pops via the system glossary.
-        if (m.kind === 'peroration') push('Premise', false);
+        if (m.kind === 'peroration') push('Charge', false);
     }
     const printed = [card.topActionText, card.bottomActionText, ...(card.dieLines ?? []), freeLineText(card, sourceCard)].join(' ');
     for (const kw of keywordsInPersistentText(printed)) push(kw, false);
@@ -1668,9 +1668,9 @@ function buildDetailKeywords(card: CombatCard, c: CardCalc, sourceCard?: Card): 
             if (keywordGloss(title)) push(title, false);
         }
     }
-    // Owner playtest 2026-07-18 — the flag-on always-on SPECIAL gloss is GONE:
+    // Owner playtest 2026-07-18 — the flag-on always-on BOON gloss is GONE:
     // a die-face rule is unrelated to the card being inspected, so it no longer
-    // rides every panel. SPECIAL/HONE/TEMPER still resolve through the printed
+    // rides every panel. BOON/HONE/TEMPER still resolve through the printed
     // sweep above whenever a card's OWN lines name them.
     return out;
 }
@@ -1981,7 +1981,7 @@ export function armedReadValue(face: CombatCardFaceVM, read: CombatReadResult, c
 
 /**
  * How an APPLY commit routes its dragged die (dice-law 2026-07-09 / spec 32 v3
- * §5): a Reserve, fate-X, or FLOATING die is its OWN power source — it is
+ * §5): a Reserve, fate-X, or GHOST die is its OWN power source — it is
  * forwarded to `playCombatCard` as the explicit dieId and must never be
  * drafted (the engine rejects drafting a floating die, which used to make the
  * drop silently fizzle and snap back). A fresh tray die drafts first.
@@ -1997,7 +1997,7 @@ export function resolveApplyRouting(
     // `playBottomAction` REQUIRES an explicit die — `dieId === undefined`
     // fizzles "choose a die to power this card"). Draft-first would call
     // `draftStanceDie`, a flag-on no-op, leaving `explicitDieId` undefined and
-    // fizzling the play while spending nothing — the D6d "die spent, SWAY 0,
+    // fizzling the play while spending nothing — the D6d "die spent, PLEA 0,
     // card bounces" bug. Flag-off keeps the draft-model routing byte-identical.
     if (isUpgradeableDiceEnabled()) {
         return { draftFirst: false, explicitDieId: dieId ?? undefined };
@@ -2022,7 +2022,7 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
         const preview = drafted ? cardReadPreview(state, card) : null;
         const sourceCard = getCardById(card.id);
         // WI-6 — the hand is IN combat, so the live enemy difficulty is known:
-        // a CONCEDE face resolves its tier-floored threshold ("concede at 10 vs
+        // a CONDEMN face resolves its tier-floored threshold ("concede at 10 vs
         // this foe") instead of the raw authored 8.
         const rawFace = faceStats(card, sourceCard, state.enemy.difficulty);
         // phase 28 — RUPTURE's live burst is an honest, already-computed engine
@@ -2163,10 +2163,10 @@ export function rewardCardVMs(ids: readonly string[]): CombatCardVM[] {
     return out;
 }
 
-// ── phase 28 — Premise track + CONCEDE beat ──────────────────────────────────
+// ── phase 28 — Charge track + CONDEMN beat ──────────────────────────────────
 
 /** Mirrors `gainPremises`'s tier-floor exactly (combat.engine.ts) so the
- *  displayed CONCEDE threshold never lies about the live one. */
+ *  displayed CONDEMN threshold never lies about the live one. */
 function perorationVM(state: CombatEncounterState): CombatPerorationVM {
     const decl = state.peroration;
     if (!decl) return { active: false, premises: 0, at: 0, concedeAt: null, cardName: '' };
@@ -2283,14 +2283,14 @@ function gearSlotVM(state: CombatEncounterState, color: 'heart' | 'body' | 'mind
     const upgraded = gear.specialFaces !== stock.specialFaces
         || gear.manaFaces !== stock.manaFaces
         || gear.specialConviction !== stock.specialConviction;
-    const faceTable = `${gear.specialFaces} special · ${gear.manaFaces} mana · ${missFaces} miss`;
+    const faceTable = `${gear.specialFaces} boon · ${gear.manaFaces} mana · ${missFaces} miss`;
     const payload = `+${gear.specialConviction} ◆`;
     const label = STANCE_LABELS[color] ?? color.toUpperCase();
     return {
         color, label, glyph: DIE_GLYPHS[color] ?? '?', colorHex: STANCE_COLORS[color] ?? '#888',
         specialFaces: gear.specialFaces, manaFaces: gear.manaFaces, missFaces,
         specialConviction: gear.specialConviction, faceTable, payload, upgraded,
-        a11y: `${label} die gear — ${faceTable}. Special face grants ${payload}.`
+        a11y: `${label} die gear — ${faceTable}. Boon face grants ${payload}.`
             + (upgraded ? ' Upgraded from stock.' : ' Stock.'),
     };
 }

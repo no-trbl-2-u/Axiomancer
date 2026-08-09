@@ -112,7 +112,7 @@ describe('floating-die APPLY routing (the snap-back bug)', () => {
     // GestureDetector mid-gesture — on web the pan died without onEnd, so the
     // drop never resolved. `draggable` is now presenter-owned and depends only
     // on engine state, never on live drag state.
-    // ── Flag-ON regression (D6d, the "die spent, SWAY 0, card bounces" bug) ──
+    // ── Flag-ON regression (D6d, the "die spent, PLEA 0, card bounces" bug) ──
     // Under the Upgradeable-Dice model the DRAFT is retired: `draftStanceDie` is
     // a no-op and the engine's flag-on `playBottomAction` REQUIRES an explicit
     // `dieId` (undefined fizzles "choose a die"). The presenter used to route a
@@ -120,7 +120,7 @@ describe('floating-die APPLY routing (the snap-back bug)', () => {
     // the commit reached the engine with no die and fizzled while the tray die
     // read spent + the card bounced. The fix: flag-on, ANY dropped die is an
     // explicit power source.
-    describe('flag-ON tray-die APPLY routing (D6d SWAY-commit bug)', () => {
+    describe('flag-ON tray-die APPLY routing (D6d PLEA-commit bug)', () => {
         afterEach(() => setUpgradeableDice(false));
 
         function openHeartEncounter(): CombatEncounterState {
@@ -141,7 +141,7 @@ describe('floating-die APPLY routing (the snap-back bug)', () => {
             expect(routing.explicitDieId).toBe('u-heart');
         });
 
-        it('a heart tray die COMMITS Soft Word paid — SWAY rises, die spends, card leaves hand, no fizzle', () => {
+        it('a heart tray die COMMITS Soft Word paid — PLEA rises, die spends, card leaves hand, no fizzle', () => {
             setUpgradeableDice(true);
             const s = openHeartEncounter();
             s.dice = [heartMana()];
@@ -151,7 +151,7 @@ describe('floating-die APPLY routing (the snap-back bug)', () => {
             // card-played:1, fizzled:0 (the hermetic probe's exact signature).
             expect(res.events.some(e => e.kind === 'card-played')).toBe(true);
             expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(false);
-            // SWAY 0 → >0 (the meter that stayed 0/31 in the bug).
+            // PLEA 0 → >0 (the meter that stayed 0/31 in the bug).
             expect(res.state.sway ?? 0).toBeGreaterThan(0);
             // Die spent (gone/locked from the tray) and the card left hand.
             expect(res.state.dice.find(d => d.id === 'u-heart')?.state).not.toBe('available');

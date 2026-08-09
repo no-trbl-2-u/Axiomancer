@@ -2,12 +2,12 @@
  * Hermetic E2E — plan/tuning/2026-07-08-win-path-scaling.md item 1: alt-win
  * paths scale with the stage curve instead of the flat pre-fix checks that
  * let Oratory/Standstill sit at 100% win rate on EVERY stage while Grace's
- * CAPITULATE was unreachable late (Battle Lab round 2).
+ * RELENT was unreachable late (Battle Lab round 2).
  *
- *   (A) CONCEDE — The Black Cap's Premise requirement floors at the
+ *   (A) CONDEMN — The Black Cap's Premise requirement floors at the
  *       enemy's own `difficulty` classification (CONCEDE_PREMISES_BASE/
  *       _ELITE/_BOSS), not a flat 8 everywhere.
- *   (B) CAPITULATE — SWAY >= capitulateThreshold(enemy), a Dawncaster
+ *   (B) RELENT — PLEA >= capitulateThreshold(enemy), a Dawncaster
  *       Charmed-style `resolve` well below max HP, clamped to never exceed
  *       CURRENT health (so a nearly-dead enemy still yields at the old bar).
  *   (C) Boss/unique rung REGROWTH — an anti-permalock: a boss/unique whose
@@ -95,10 +95,10 @@ function customPhases(stances: ('heart' | 'body' | 'mind')[], damage = 6): Comba
     }));
 }
 
-// ── (A) CONCEDE scales with enemy difficulty ─────────────────────────────────
+// ── (A) CONDEMN scales with enemy difficulty ─────────────────────────────────
 
-describe('CONCEDE Premises scale with enemy difficulty (item 1a)', () => {
-    const CLOSER = 'the-black-cap';    // PERORATION at 6; concedeAt (printed) 8
+describe('CONDEMN Premises scale with enemy difficulty (item 1a)', () => {
+    const CLOSER = 'the-black-cap';    // SENTENCE at 6; concedeAt (printed) 8
     const OPENER = 'petty-indictment'; // FREE: +1 Premise
 
     function declared(enemy: Enemy): CombatEncounterState {
@@ -151,9 +151,9 @@ describe('CONCEDE Premises scale with enemy difficulty (item 1a)', () => {
     });
 });
 
-// ── (B) CAPITULATE resolve threshold (Dawncaster Charmed-style) ─────────────
+// ── (B) RELENT resolve threshold (Dawncaster Charmed-style) ─────────────
 
-describe('CAPITULATE resolve threshold (item 1a) — capitulateThreshold formula', () => {
+describe('RELENT resolve threshold (item 1a) — capitulateThreshold formula', () => {
     it('floors at CAPITULATE_MIN for a small enemy, never above current HP', () => {
         expect(CAPITULATE_RESOLVE_FRACTION).toBe(0.35);
         expect(CAPITULATE_MIN).toBe(10);
@@ -164,8 +164,8 @@ describe('CAPITULATE resolve threshold (item 1a) — capitulateThreshold formula
 
     it('pins the old flat-check contract for a tiny enemy (regression pin)', () => {
         // The existing themed-decks.engine.test.ts pin: makeEnemy(4, 'heart'),
-        // SWAY 4 capitulates. 0.35*4=1.4->1, floored to 10, clamped to current
-        // health 4 -> byte-identical to the old `SWAY >= 4` check.
+        // PLEA 4 capitulates. 0.35*4=1.4->1, floored to 10, clamped to current
+        // health 4 -> byte-identical to the old `PLEA >= 4` check.
         expect(capitulateThreshold({ health: 4, maxHealth: 4 })).toBe(4);
     });
 
@@ -177,12 +177,12 @@ describe('CAPITULATE resolve threshold (item 1a) — capitulateThreshold formula
 
     it('never exceeds the enemy CURRENT health — a nearly-dead boss still yields low', () => {
         // A 1000-maxHealth boss beaten down to 50 current HP: resolve (350)
-        // clamps to the current health (50), matching the OLD SWAY>=currentHP
+        // clamps to the current health (50), matching the OLD PLEA>=currentHP
         // contract for a nearly-dead target.
         expect(capitulateThreshold({ health: 50, maxHealth: 1000 })).toBe(50);
     });
 
-    it('engine: SWAY below the computed threshold does not capitulate; at it, does', () => {
+    it('engine: PLEA below the computed threshold does not capitulate; at it, does', () => {
         mockSequentialRng(0.05);
         const boss = makeEnemy(1000, 'mind', 'boss');
         let state = initializeCombatEncounter(makePlayer([]), boss, undefined, 7);

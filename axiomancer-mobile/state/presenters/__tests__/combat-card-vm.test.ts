@@ -63,7 +63,7 @@ describe('engineHonestKind — the honesty gate', () => {
         expect(engineHonestKind('debuff_bleed')).toBe('dot');
         expect(engineHonestKind('debuff_mark')).toBe('mark');           // tickAmplifyFlat
         expect(engineHonestKind('debuff_backfire')).toBe('backfire');   // backfirePerRung
-        expect(engineHonestKind('debuff_rapport')).toBe('weaken');      // outgoingDamageMulPct < 0
+        expect(engineHonestKind('debuff_quarter')).toBe('weaken');      // outgoingDamageMulPct < 0
         expect(engineHonestKind('buff_thorns')).toBe('thorns');         // reflectDamage
         expect(engineHonestKind(null)).toBeNull();
     });
@@ -101,15 +101,15 @@ describe('faceStats — honest real-unit faces', () => {
         expect(f.heroSub).toBe('over 3 turns');
         expect(f.verbLine).toBe('foe loses VITAE each turn');
     });
-    it('The Black Cap (CONCEDE) tier-floors: ladder in catalog, effective vs the live foe (WI-6)', () => {
-        // The face used to print the raw authored "concede at 8" unconditionally
+    it('The Black Cap (CONDEMN) tier-floors: ladder in catalog, effective vs the live foe (WI-6)', () => {
+        // The face used to print the raw authored "condemn at 8" unconditionally
         // — a lie against an elite (10) or boss (12). Static catalog shows the
         // whole ladder; in combat the live difficulty resolves the real number.
         const { card, sourceCard } = cardOf('the-black-cap');
-        expect(faceStats(card, sourceCard).heroSub).toBe('concede 8/10 elite/12 boss');
-        expect(faceStats(card, sourceCard, 'elite').heroSub).toBe('concede at 10 vs this foe');
-        expect(faceStats(card, sourceCard, 'boss').heroSub).toBe('concede at 12 vs this foe');
-        expect(faceStats(card, sourceCard, 'normal').heroSub).toBe('concede at 8 vs this foe');
+        expect(faceStats(card, sourceCard).heroSub).toBe('condemn 8/10 elite/12 boss');
+        expect(faceStats(card, sourceCard, 'elite').heroSub).toBe('condemn at 10 vs this foe');
+        expect(faceStats(card, sourceCard, 'boss').heroSub).toBe('condemn at 12 vs this foe');
+        expect(faceStats(card, sourceCard, 'normal').heroSub).toBe('condemn at 8 vs this foe');
     });
     it('Frostbitten Palisade (Guard) → Guard 8 · the authored FREE Guard 5', () => {
         const { card, sourceCard } = cardOf('frostbitten-palisade');
@@ -304,21 +304,21 @@ describe('detailStats — same numbers as the face', () => {
         const stones = cardOf('every-stone-an-oath');
         expect(detailStats(stones.card, stones.sourceCard).systemTerms.map(s => s.term)).toEqual([]);
         // The Saint's Finger-Bone prints '+1 Conviction' → CONVICTION renders;
-        // FLOATING/WILD are already explained by its FORGE keyword chip →
+        // GHOST/WILD are already explained by its FORGE keyword chip →
         // deduped away.
         const relic = cardOf('saints-finger-bone');
         const d = detailStats(relic.card, relic.sourceCard);
         const terms = d.systemTerms.map(s => s.term);
         expect(terms).toEqual(expect.arrayContaining(['CONVICTION ◆']));
-        expect(terms).not.toContain('FLOATING ✦');
+        expect(terms).not.toContain('GHOST ✦');
         expect(terms).not.toContain('WILD / X');
         expect(terms).not.toContain('RUNGS');
         expect(d.keywords.map(k => k.name)).toContain('FORGE');
         // The Offertory Plate carries a '⬡ HEART ×3 spent' threshold line →
-        // RESONANCE renders on the card that actually prints it.
+        // TOLL renders on the card that actually prints it.
         const plate = cardOf('the-offertory-plate');
         expect(detailStats(plate.card, plate.sourceCard).systemTerms.map(s => s.term))
-            .toEqual(expect.arrayContaining(['RESONANCE ⬡']));
+            .toEqual(expect.arrayContaining(['TOLL ⬡']));
     });
 });
 
@@ -333,12 +333,12 @@ describe('card-wording audit (2026-07-12) — the +DIE row carries only what the
         expect(d.readLegend).toBeNull();
     });
     it('a multi-clause card enumerates every clause on the +DIE row', () => {
-        // Petty Indictment prints MARK and PREMISE — a face can only headline
+        // Petty Indictment prints MARK and CHARGE — a face can only headline
         // one, so the +DIE row is where both stay visible.
         const { card, sourceCard } = cardOf('petty-indictment');
         const d = detailStats(card, sourceCard);
         expect(d.diePaidLine).toContain('MARK');
-        expect(d.diePaidLine).toContain('PREMISE');
+        expect(d.diePaidLine).toContain('CHARGE');
         expect(d.dieTriplet).toBeNull();  // a MARK face takes no read triplet
     });
     it('Miserere surfaces its riding SIPHON on the paid line', () => {

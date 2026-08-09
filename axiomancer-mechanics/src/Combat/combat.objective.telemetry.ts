@@ -58,13 +58,13 @@ export interface CombatObjectiveTelemetry {
 
     // ── LOCKED MECHANIC 1 — CONVICTION ───────────────────────────────────────
     /** Σ `conviction-gained`.amount — every income source (unpicked die, read
-     *  win, fate tap, SPECIAL, surge overflow, scrap, card effects). */
+     *  win, fate tap, BOON, surge overflow, scrap, card effects). */
     convictionGained: number;
     /** Σ `signature-cast`.cost — Conviction actually CONVERTED into a play. */
     convictionSpent: number;
     /** `signature-cast` count. */
     signatureCasts: number;
-    /** `special-fired` count — the die-gear SPECIAL payload paying ◆ on use. */
+    /** `special-fired` count — the die-gear BOON payload paying ◆ on use. */
     specialsFired: number;
 
     // ── LOCKED MECHANIC 2 — THE SURGE METER ──────────────────────────────────

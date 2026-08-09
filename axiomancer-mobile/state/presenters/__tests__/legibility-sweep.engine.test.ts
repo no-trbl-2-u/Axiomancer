@@ -1,6 +1,6 @@
 /**
  * Phase 28 (Show the Engine legibility sweep) — presenter coverage for the
- * mobile-side surfaces: the Premise/CONCEDE VM, discard-pile names (the
+ * mobile-side surfaces: the Premise/CONDEMN VM, discard-pile names (the
  * REPRISE picker's data source), the live rupture-burst card face, the
  * `needsReprisalChoice` flag, and the wall-math intent projection.
  */
@@ -23,14 +23,14 @@ function openState(): CombatEncounterState {
     return rollEncounterDice(state).state;
 }
 
-describe('CombatViewModel.peroration — the Premise track + CONCEDE beat (phase 28)', () => {
+describe('CombatViewModel.peroration — the Premise track + CONDEMN beat (phase 28)', () => {
     it('is inactive with no declared Peroration', () => {
         const vm = buildCombatViewModel(openState());
         expect(vm.peroration.active).toBe(false);
         expect(vm.peroration.premises).toBe(0);
     });
 
-    it('surfaces the declared card, tally, and tier-floored CONCEDE threshold', () => {
+    it('surfaces the declared card, tally, and tier-floored CONDEMN threshold', () => {
         let s = openState();
         // createMockEncounterEnemy is difficulty 'elite' -> CONCEDE_PREMISES_ELITE (10)
         // floors The Black Cap's authored concedeAt (8).
@@ -44,17 +44,17 @@ describe('CombatViewModel.peroration — the Premise track + CONCEDE beat (phase
     });
 });
 
-// WI-5 — the invisible alt-win currencies (SWAY → CAPITULATE, PREMISE →
+// WI-5 — the invisible alt-win currencies (PLEA → RELENT, CHARGE →
 // ORATORY) now render as meters on the enemy pane. A GRACE run used to play its
 // whole plan and die with zero feedback on progress.
-describe('WI-5 — SWAY / PREMISE alt-win meters', () => {
+describe('WI-5 — PLEA / CHARGE alt-win meters', () => {
     function deckState(deck: string[], seed = 7): CombatEncounterState {
         const player = createCharacter({ name: 'Hero', level: 3, baseStats: { heart: 8, body: 8, mind: 8 } });
         player.knownCards = deck.slice();
         return rollEncounterDice(initializeCombatEncounter(player, createMockEncounterEnemy(), deck, seed)).state;
     }
 
-    it('surfaces the SWAY meter with the engine capitulate target when sway accrues', () => {
+    it('surfaces the PLEA meter with the engine capitulate target when sway accrues', () => {
         const s = { ...openState(), sway: 5 };
         const vm = buildCombatViewModel(s);
         expect(vm.enemy.swayVisible).toBe(true);
@@ -62,13 +62,13 @@ describe('WI-5 — SWAY / PREMISE alt-win meters', () => {
         expect(vm.enemy.swayTarget).toBe(capitulateThreshold(s.enemy)); // engine-owned, not duplicated
     });
 
-    it('shows the SWAY meter from turn 1 when the deck plan is SWAY, before any is gained (GRACE)', () => {
+    it('shows the PLEA meter from turn 1 when the deck plan is PLEA, before any is gained (GRACE)', () => {
         const vm = buildCombatViewModel(deckState(['thin-hymn', 'thin-hymn', 'thin-hymn']));
         expect(vm.enemy.sway).toBe(0);
         expect(vm.enemy.swayVisible).toBe(true);
     });
 
-    it('surfaces the undeclared PREMISE tally, then yields to the peroration track once declared', () => {
+    it('surfaces the undeclared CHARGE tally, then yields to the peroration track once declared', () => {
         let s = deckState(['petty-indictment', 'petty-indictment', 'petty-indictment']);
         s = { ...s, premises: 2 };
         let vm = buildCombatViewModel(s);
@@ -76,7 +76,7 @@ describe('WI-5 — SWAY / PREMISE alt-win meters', () => {
         expect(vm.enemy.premises).toBe(2);
         expect(vm.enemy.premiseAt).toBe(0); // no target bar until a Peroration is declared
 
-        // Declaring a PERORATION hands the readout to the existing peroration track.
+        // Declaring a SENTENCE hands the readout to the existing peroration track.
         s = { ...s, peroration: { cardId: 'the-black-cap', at: 6, concedeAt: 8 } };
         vm = buildCombatViewModel(s);
         expect(vm.enemy.premiseVisible).toBe(false);

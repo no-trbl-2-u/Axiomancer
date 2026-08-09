@@ -15,9 +15,9 @@
  *           REQUIEM gates, IMMOLATE the unworthy.
  *   vigil — the Cold Watch: GUARD/BARRIER walls, THORNS and RIPOSTE, payoffs
  *           for bloodless nights; winter itself as the clock.
- *   trial — the Indictment: PREMISE toward the declared verdict (CONCEDE
+ *   trial — the Indictment: CHARGE toward the declared verdict (CONDEMN
  *           alt-win), STAGGER objections, BACKFIRE contempt, MARK as evidence.
- *   choir — the Pale Choir: SWAY toward CAPITULATE, RAPPORT, SOULs harvested
+ *   choir — the Pale Choir: PLEA toward RELENT, QUARTER, SOULs harvested
  *           from expiring afflictions, REAP to spend the collection.
  *
  * THE STRIKE stays DEAD (spec 32 v3): no card deals raw HP damage. Enemy HP
@@ -157,9 +157,9 @@ const pettyIndictment: Card = {
         'that never quite closes.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'Apply MARK 1 for 2 turns. Gain 1 PREMISE.',
-    // pts: MARK i1 d2 (1.5) + 1 PREMISE (0.8) = 2.3 + FREE 1 PREMISE (0.8)
-    // ≈ 3.1 → Doxa. One premise a play against an 8-premise CONCEDE is
+    paidSummary: 'Apply MARK 1 for 2 turns. Gain 1 CHARGE.',
+    // pts: MARK i1 d2 (1.5) + 1 CHARGE (0.8) = 2.3 + FREE 1 CHARGE (0.8)
+    // ≈ 3.1 → Doxa. One premise a play against an 8-premise CONDEMN is
     // glacial — the tally verb taught at a pace that makes the player crave
     // real prosecution cards.
     free: { premises: 1 },
@@ -180,14 +180,14 @@ const thinHymn: Card = {
         'a choir exists, and that it knows their name.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'SWAY 3.',
-    // pts: SWAY 3 (2.7) + FREE SWAY 1 (0.9) ≈ 3.6 → Doxa. SWAY decays
-    // 1/turn, so a lone 3-stack mostly evaporates — teaches the CAPITULATE
+    paidSummary: 'PLEA 3.',
+    // pts: PLEA 3 (2.7) + FREE PLEA 1 (0.9) ≈ 3.6 → Doxa. PLEA decays
+    // 1/turn, so a lone 3-stack mostly evaporates — teaches the RELENT
     // currency and why it needs a chorus behind it.
     free: { sway: 1 },
     specialMechanics: [{ kind: 'sway', amount: 3 }],
     addedIn: '2026-08-08',
-    tags: ['choir', 'sway', 'starter'],
+    tags: ['choir', 'plea', 'starter'],
 };
 
 const grandmothersPsalter: Card = {
@@ -1102,7 +1102,7 @@ const readingOfTheCharges: Card = {
         'things it never witnessed. That is the point of reading them aloud.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'Apply MARK 1 for 2 turns. Gain 2 PREMISES.',
+    paidSummary: 'Apply MARK 1 for 2 turns. Gain 2 CHARGES.',
     // pts: mark i1 d2 (1.5) + 2 PREMISES (1.6) + FREE [mark i1 d1 (0.75) +
     // 1 premise (0.8)] ≈ 4.65 → Doxa.
     free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1 }, premises: 1 },
@@ -1144,7 +1144,7 @@ const thePrickingNeedle: Card = {
         'conclusion. Each dry wound is another count, written down twice.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'Apply MARK 2 for 3 turns. Gain 2 PREMISES.',
+    paidSummary: 'Apply MARK 2 for 3 turns. Gain 2 CHARGES.',
     // pts: mark i2 d3 (4.5) + 2 PREMISES (1.6) + dieBonus match [2 premises
     // (1.6)] × 0.6 (0.96) + FREE [mark i1 d2 (1.5) + 2 premises (1.6)]
     // ≈ 10.2 → Thesis.
@@ -1196,10 +1196,10 @@ const theBlackCap: Card = {
     tier: 2, rank: 5, cardType: 'spell',
     targetType: 'enemy',
     paidSummary:
-        'Inflict DOOM 2 (grows +1 each time the foe acts). PERORATION at 6 — ' +
-        'consume all MARK: 2 damage per stack, then DRAW 1 (CONCEDE at 8 — ' +
+        'Inflict DOOM 2 (grows +1 each time the foe acts). SENTENCE at 6 — ' +
+        'consume all MARK: 2 damage per stack, then DRAW 1 (CONDEMN at 8 — ' +
         'you win; elite 10 · boss 12).',
-    // pts: DOOM i2 (2.9) + PERORATION-at-6 rider [ruptureMarks 2 (1.33) +
+    // pts: DOOM i2 (2.9) + SENTENCE-at-6 rider [ruptureMarks 2 (1.33) +
     // draw 1 (2)] + concedeCapstone (3) + FREE [DOOM i1 (2.0) + 1 premise
     // (0.8)] ≈ 12.0 → Axiom. The declaring card carries no condition line —
     // the sentence was drafted before the arraignment.
@@ -1219,14 +1219,14 @@ const theAssizeBell: Card = {
     philosophicalAspect: 'mind',
     persistentEffect:
         'Whenever your STAGGER removes a rung from the enemy\'s telegraph, ' +
-        'gain 1 PREMISE.',
+        'gain 1 CHARGE.',
     description:
         'One bronze syllable above the hall, struck for every objection ' +
         'sustained. The jury stopped hearing words some hours ago. They are ' +
         'counting tolls.',
     tier: 2, rank: 5, cardType: 'enchantment',
     targetType: 'self',
-    // pts: engine text — +1 PREMISE per denied rung × ~12-15 rungs across a
+    // pts: engine text — +1 CHARGE per denied rung × ~12-15 rungs across a
     // trial deck's fight ≈ Axiom.
     addedIn: '2026-08-08',
     tags: ['trial', 'enchantment', 'objection'],
@@ -1266,17 +1266,17 @@ const almsOfBreath: Card = {
         'as debt.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'Apply RAPPORT 1 for 2 turns. SWAY 2. CLEANSE 1.',
+    paidSummary: 'Apply QUARTER 1 for 2 turns. PLEA 2. CLEANSE 1.',
     // pts: rapport i1 d2 (1.5) + sway 2 (1.8) + cleanse 1 (1.5) = 4.8 +
     // FREE [sway 1 (0.9) + soul 1 (0.75)] ≈ 6.45 → Doxa.
     free: { sway: 1, souls: 1 },
-    combatEffects: [{ effectId: 'debuff_rapport', appliedTo: 'opponent', intensity: 1, duration: 2 }],
+    combatEffects: [{ effectId: 'debuff_quarter', appliedTo: 'opponent', intensity: 1, duration: 2 }],
     specialMechanics: [
         { kind: 'sway', amount: 2 },
         { kind: 'rider', rider: { cleanse: 1 } },
     ],
     addedIn: '2026-08-08',
-    tags: ['choir', 'sway', 'mercy'],
+    tags: ['choir', 'plea', 'mercy'],
 };
 
 const passingBell: Card = {
@@ -1335,7 +1335,7 @@ const theOffertoryPlate: Card = {
         'with your name worked into the descant.',
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'REAP 3 — SWAY 5, apply RAPPORT 2 for 2 turns, and KINDLE a heart die.',
+    paidSummary: 'REAP 3 — PLEA 5, apply QUARTER 2 for 2 turns, and KINDLE a heart die.',
     // pts: REAP rider [sway 5 (4.5) + rapport i2 d2 (3.0)] + kindle heart
     // (2.5) − soul cost 3 (−3 × 0.75 ≈ −2.25) = 7.75 + threshold HEART×3
     // [souls 2 (1.5)] × 0.5 (0.75) + FREE [souls 2 (1.5) + sway 2 (1.8)]
@@ -1344,7 +1344,7 @@ const theOffertoryPlate: Card = {
     specialMechanics: [
         {
             kind: 'reap', cost: 3, kindle: 'heart',
-            rider: { sway: 5, applyEffect: { effectId: 'debuff_rapport', intensity: 2, duration: 2 } },
+            rider: { sway: 5, applyEffect: { effectId: 'debuff_quarter', intensity: 2, duration: 2 } },
         },
     ],
     threshold: { color: 'heart', count: 3, rider: { souls: 2 } },
@@ -1385,7 +1385,7 @@ const choirboneReliquary: Card = {
     philosophicalAspect: 'body',
     persistentEffect:
         'Whenever an affliction on the enemy expires or is consumed, gain 1 ' +
-        'SOUL and SWAY 1.',
+        'SOUL and PLEA 1.',
     description:
         'A box of jaws that remembers every ending it has witnessed. When ' +
         'something in the enemy gutters out — a fever, a wound, a curse run ' +
@@ -1405,7 +1405,7 @@ const theLongAmen: Card = {
     name: 'The Long Amen',
     philosophicalAspect: 'mind',
     persistentEffect:
-        'At the end of each round, the enemy gains SWAY equal to the number ' +
+        'At the end of each round, the enemy gains PLEA equal to the number ' +
         'of Souls you hold.',
     description:
         'The final word of the service, held past the organ, past the ' +
@@ -1414,11 +1414,11 @@ const theLongAmen: Card = {
         'and the enemy stands in the nave, listening — agreeing.',
     tier: 2, rank: 6, cardType: 'disenchant',
     targetType: 'enemy',
-    // pts: engine text — SWAY drip = souls held, per round, compounding
-    // toward CAPITULATE; rewards HOLDING souls while the plate rewards
+    // pts: engine text — PLEA drip = souls held, per round, compounding
+    // toward RELENT; rewards HOLDING souls while the plate rewards
     // spending them (a real decision, kept deliberately) → Aporia.
     addedIn: '2026-08-08',
-    tags: ['choir', 'sway', 'disenchant'],
+    tags: ['choir', 'plea', 'disenchant'],
 };
 
 export const cardLibrary: Card[] = [

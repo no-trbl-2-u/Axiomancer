@@ -136,7 +136,7 @@ export interface Character {
      */
     combatRewardCards?: string[];
     /**
-     * Spec 32 v3 §5 — the FLOATING DIE pool (live-tray model). Forged in combat
+     * Spec 32 v3 §5 — the GHOST DIE pool (live-tray model). Forged in combat
      * by the FORGE verb; never rerolls; carried ACROSS combats until spent.
      * Written back from `CombatEncounterState.floatingDice` at combat end
      * (`getFloatingDiceColors`). Cap 3. Optional + sparse — absent means none.

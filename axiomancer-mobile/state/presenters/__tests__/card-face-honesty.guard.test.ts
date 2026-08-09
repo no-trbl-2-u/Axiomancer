@@ -81,7 +81,7 @@ describe('card-face honesty guard', () => {
     it('every explainer term renders at most once per overlay (no dump, no double-gloss)', () => {
         // 2026-07-12 (owner playtest) — the inspect overlay may explain each
         // term at most once: keyword chips are deduped, and the per-card
-        // systems slice may not restate a chip (e.g. FLOATING beside FORGE) or
+        // systems slice may not restate a chip (e.g. GHOST beside FORGE) or
         // repeat a term. Also pins the dump eviction: a card whose printed
         // lines reference no system token gets NO systems entries at all.
         const offenders: string[] = [];
@@ -156,7 +156,7 @@ describe('card-face honesty guard', () => {
         // The WI-2 sweep above only reads `faceStats`'s own 'dot' classification,
         // which reflects a card's single PRIMARY effect (`resolvePrimary`) — a
         // card whose primary effect is something else (e.g. Opening Statement's
-        // MARK, Exordium's PREMISE) skips that sweep entirely even though its
+        // MARK, Exordium's CHARGE) skips that sweep entirely even though its
         // printed PAID sentence — the authored `paidSummary`, rendered verbatim
         // as `bottomActionText` via `cleanPaidSentence` on the hand card — still
         // carries a secondary event-triggered DoT (critique pass 16, 2026-08-05:
@@ -212,8 +212,8 @@ describe('card-face honesty guard', () => {
         // 2026-07-12 (owner directive): the inspect overlay is the popup layer.
         // Every UPPERCASE registry word on the printed lines must render a
         // keyword chip WITH a gloss; every authored status effect must resolve
-        // its keyword chip; the card-local Peroration words (PERORATION /
-        // CONCEDE) must surface their system-glossary entry.
+        // its keyword chip; the card-local Peroration words (SENTENCE /
+        // CONDEMN) must surface their system-glossary entry.
         const offenders: string[] = [];
         for (const { id } of cardLibrary) {
             const card = getCard(id);
@@ -230,8 +230,8 @@ describe('card-face honesty guard', () => {
                 const kw = keywordForEffect(ce.effectId);
                 if (kw && !chips.has(kw.toUpperCase())) offenders.push(`${id} → applies ${ce.effectId} but renders no ${kw.toUpperCase()} chip`);
             }
-            if (/\bPERORATION\b/.test(printed) && !sys.has('PERORATION')) offenders.push(`${id} → prints PERORATION with no popup`);
-            if (/\bCONCEDE\b/.test(printed) && !sys.has('CONCEDE')) offenders.push(`${id} → prints CONCEDE with no popup`);
+            if (/\bPERORATION\b/.test(printed) && !sys.has('SENTENCE')) offenders.push(`${id} → prints SENTENCE with no popup`);
+            if (/\bCONCEDE\b/.test(printed) && !sys.has('CONDEMN')) offenders.push(`${id} → prints CONDEMN with no popup`);
         }
         expect(offenders).toEqual([]);
     });
@@ -257,13 +257,13 @@ describe('card-face honesty guard', () => {
         expect(offenders).toEqual([]);
     });
 
-    it('spec 33 die-gear keywords (SPECIAL/HONE/TEMPER) resolve a gloss — a gear card can never fall through', () => {
+    it('spec 33 die-gear keywords (BOON/HONE/TEMPER) resolve a gloss — a gear card can never fall through', () => {
         // D4 (spec 33 §6, 2026-07-17): the blacksmith/die-gear vocabulary is
         // registered ahead of its card carriers (die gear + blacksmith land in
         // D5). Pinning the glosses here means the first card face that prints
-        // SPECIAL, HONE, or TEMPER resolves a keyword chip instead of the
+        // BOON, HONE, or TEMPER resolves a keyword chip instead of the
         // ambiguous PAID fallback the rest of this file guards against.
-        const missing = ['Special', 'Hone', 'Temper'].filter(kw => !keywordGloss(kw));
+        const missing = ['Boon', 'Hone', 'Temper'].filter(kw => !keywordGloss(kw));
         expect(missing).toEqual([]);
     });
 

@@ -263,7 +263,7 @@ describe('sequencing-microset — condition gates', () => {
             s => ({ ...s, spellsPlayedThisTurn: 1 }));
         const silent = play(silentFrom, true);
 
-        // The PAID line lands on both faces (guard mech + PREMISE 1); the
+        // The PAID line lands on both faces (guard mech + CHARGE 1); the
         // rider is worth EXACTLY +5 unscaled Guard and +1 Premise on top.
         expect((fired.after.premises ?? 0) - (firedFrom.premises ?? 0)).toBe(2);
         expect((silent.after.premises ?? 0) - (silentFrom.premises ?? 0)).toBe(1);

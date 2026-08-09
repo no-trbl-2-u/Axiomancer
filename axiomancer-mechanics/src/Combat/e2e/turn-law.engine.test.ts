@@ -142,7 +142,7 @@ describe('Gate 0 — the round-turn law (one tray roll per threat phase)', () =>
         let s = open(['heart', 'body', 'mind']);
         expect((s.floatingDice ?? []).map(d => d.color).sort()).toEqual(['body', 'heart', 'mind']);
 
-        // Play one color-matched paid card per FLOATING die — all inside the
+        // Play one color-matched paid card per GHOST die — all inside the
         // one legal turn (no startTurn between plays; the law is never touched).
         let floatsSpent = 0;
         for (const color of ['heart', 'body', 'mind'] as const) {

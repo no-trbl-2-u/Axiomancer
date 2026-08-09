@@ -48,7 +48,7 @@ function seqRng(...vals: number[]): () => number {
     let i = 0;
     return () => vals[Math.min(i++, vals.length - 1)];
 }
-const SPECIAL = 0.05; // idx 0 → special
+const BOON = 0.05; // idx 0 → special
 const MANA = 0.25;    // idx 1 → mana
 const MISS = 0.95;    // idx 5 → miss
 
@@ -93,7 +93,7 @@ describe('die-gear rail → combat', () => {
             c.dieGear = { body: { dieColor: 'body', specialFaces: 1, manaFaces: 2, specialConviction: 5 } };
         });
         let s = initializeCombatEncounter(player, makeEnemy(), DECK, 7);
-        s = rollEncounterDice(s, seqRng(SPECIAL, MANA, MANA, MANA)).state; // body = special
+        s = rollEncounterDice(s, seqRng(BOON, MANA, MANA, MANA)).state; // body = special
         const before = s.conviction;
         const res = paid(s, trayDie(s, 'body').id);
         expect(events(res, 'special-fired')).toHaveLength(1);
@@ -105,7 +105,7 @@ describe('die-gear rail → combat', () => {
             c.dieGear = { body: { dieColor: 'body', specialFaces: 1, manaFaces: 2, specialConviction: 5 } };
         });
         let s = initializeCombatEncounter(player, makeEnemy(), DECK, 7);
-        s = rollEncounterDice(s, seqRng(SPECIAL, MISS, MISS, MISS)).state;
+        s = rollEncounterDice(s, seqRng(BOON, MISS, MISS, MISS)).state;
         s = endTurn(s).state;                       // banks the special into Reserve
         expect(s.reserve?.[0]?.face).toBe('special');
         const reservedId = s.reserve![0].id;

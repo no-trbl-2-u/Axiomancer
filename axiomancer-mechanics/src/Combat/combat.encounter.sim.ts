@@ -991,7 +991,7 @@ export function simulateHazardPatternCombatDetailed(
         winPathCounts[r.outcome]++;
         addObjectiveTelemetry(objectiveTelemetry, r.objective);
         if (r.outcome === 'victory') victories++;
-        // Spec 32 v3 §9 — CAPITULATE (SWAY) and CONCEDE (Peroration) are
+        // Spec 32 v3 §9 — RELENT (PLEA) and CONDEMN (Peroration) are
         // merciful resolutions: they count with the mercy wins.
         else if (r.outcome === 'mercy' || r.outcome === 'capitulate' || r.outcome === 'concede') mercies++;
         else if (r.outcome === 'retreat') retreats++;

@@ -462,7 +462,7 @@ async function resolveCliCapitulationChoice(
         : (await prompt<{ choice: 'accept' | 'continue' }>([{
             type: 'rawlist', name: 'choice', message: `${state.enemy.name} yields:`,
             choices: [
-                { name: 'accept the capitulation', value: 'accept' },
+                { name: 'accept the yield', value: 'accept' },
                 { name: 'refuse and continue', value: 'continue' },
             ],
         }])).choice;
@@ -696,8 +696,8 @@ export async function runHazardCombatCliEncounter(
     const outcomeLabel: Record<CombatOutcome, string> = {
         victory: 'Victory',
         mercy: 'Mercy / Befriended',
-        capitulate: 'Capitulation — the enemy yields (SWAY)',
-        concede: 'Concession — the argument is won (Peroration)',
+        capitulate: 'Relented — the enemy yields (PLEA)',
+        concede: 'Condemned — the argument is won (SENTENCE)',
         defeat: 'Defeat',
         retreat: 'Retreated',
     };

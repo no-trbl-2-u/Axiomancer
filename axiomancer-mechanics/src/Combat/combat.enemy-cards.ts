@@ -330,7 +330,7 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         swayCleanse: 2,
         actionText: 'An adjuster reviews your appeal to its better nature, and denies the claim',
         stanceHint: 'It does have a better nature on file. The file is sealed, and the seal has outlived three notaries.',
-        // The faction\'s anti-CAPITULATE tool (spec 33a swayCleanse). Heart stance because the card IS about feeling — appraised, then declined. Kept off befriendable roster members (hasshaku-sama).
+        // The faction\'s anti-RELENT tool (spec 33a swayCleanse). Heart stance because the card IS about feeling — appraised, then declined. Kept off befriendable roster members (hasshaku-sama).
     },
     'compound-interest': {
         name: 'Compound Interest',
@@ -500,7 +500,7 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         swayCleanse: 2,
         actionText: 'The drowned congregation sings your mercy back into its pews',
         stanceHint: 'They have heard kinder sermons than yours, and drowned anyway.',
-        // Mid band (0.9). The archetype\'s SWAY counterplay: the parish grieves in rows and will not be consoled out of order. Deliberately kept OFF the befriendable bosses (Ferryman, King) so it never fights their designed mercy win-path; it lives on weeping-head, cursed-head, and brine-hag.
+        // Mid band (0.9). The archetype\'s PLEA counterplay: the parish grieves in rows and will not be consoled out of order. Deliberately kept OFF the befriendable bosses (Ferryman, King) so it never fights their designed mercy win-path; it lives on weeping-head, cursed-head, and brine-hag.
     },
     'dp-ninth-bell': {
         name: 'The Ninth Bell',
@@ -1022,7 +1022,7 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         premiseShed: 2,
         actionText: 'It answers itself before you can, and your part of the conversation is deemed redundant',
         stanceHint: 'The voices differ only about which of them loves you less.',
-        // Zoma\'s premiseShed identity as a card (existing phase 2 verbatim in spirit): the archetype\'s counterplay against the CONCEDE track — your premises are struck as already-answered. Lives in the zoma family plus tri-eyes-hollowed (see deck note). Mid band 1.05.
+        // Zoma\'s premiseShed identity as a card (existing phase 2 verbatim in spirit): the archetype\'s counterplay against the CONDEMN track — your premises are struck as already-answered. Lives in the zoma family plus tri-eyes-hollowed (see deck note). Mid band 1.05.
     },
     'the-written-line': {
         name: 'The Written Line',
@@ -1328,7 +1328,7 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         premiseShed: 3,
         actionText: 'He strikes your best premise from the record and signs the deletion in thirds',
         stanceHint: 'Centuries of clerkship: what he cannot win he redacts.',
-        // Mid-spike 1.2, the premiseShed identity card — sheds 3 spendable Premises on Overwhelm, the flagship counterplay against the CONCEDE track. Preserves the Phase 33b calibration exactly.
+        // Mid-spike 1.2, the premiseShed identity card — sheds 3 spendable Premises on Overwhelm, the flagship counterplay against the CONDEMN track. Preserves the Phase 33b calibration exactly.
     },
     'your-opening-perfected': {
         name: 'Your Opening Move, Perfected',

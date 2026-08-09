@@ -220,22 +220,22 @@ describe('Press Fate signature rune (flag-on reshape — owner call 2026-07-19)'
     });
 });
 
-describe('inspect modal — SPECIAL die-gear gloss (owner playtest 2026-07-18)', () => {
+describe('inspect modal — BOON die-gear gloss (owner playtest 2026-07-18)', () => {
     it('never rides a card inspect unprompted — a die-face rule is not card vocabulary', () => {
-        // The D6a always-on SPECIAL push is retired: the gloss surfaces only
+        // The D6a always-on BOON push is retired: the gloss surfaces only
         // when a card's OWN printed lines name it (via the printed sweep).
         const on = openEncounter();
         setUpgradeableDice(true);
         const onHand = buildCombatViewModel(on).hand;
         expect(onHand.length).toBeGreaterThan(0);
         for (const card of onHand) {
-            expect(card.detail.keywords.map(k => k.name)).not.toContain('SPECIAL');
+            expect(card.detail.keywords.map(k => k.name)).not.toContain('BOON');
         }
 
         setUpgradeableDice(false);
         const offHand = buildCombatViewModel(openEncounter()).hand;
         for (const card of offHand) {
-            expect(card.detail.keywords.map(k => k.name)).not.toContain('SPECIAL');
+            expect(card.detail.keywords.map(k => k.name)).not.toContain('BOON');
         }
     });
 });

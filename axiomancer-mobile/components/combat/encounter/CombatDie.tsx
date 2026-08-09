@@ -102,11 +102,11 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
     const statePhrase =
         cracked ? ', cracked — dead this round'
             : die.face === 'miss' ? ', a miss — dead, powers nothing'
-                : die.face === 'special' ? ', a SPECIAL face — powers a card and grants Conviction'
+                : die.face === 'special' ? ', a BOON face — powers a card and grants Conviction'
                     : die.drafted ? (die.spent ? ', spent as your stance' : ', drafted as your stance')
                         : die.isX ? ', blocked'
                             : die.reserve ? ', banked in the Reserve'
-                                : die.floating ? ', floating — a second power source'
+                                : die.floating ? ', ghost — a second power source'
                                     : die.draggable === false ? ', spent — burned for Conviction'
                                         : ', available to draft';
     return (
@@ -199,7 +199,7 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
                             <Path d="M 50 33 L 50 67" stroke="rgba(255,255,255,0.4)" strokeWidth={1.2} />
                         </>
                     )}
-                    {/* SPECIAL — the crystal sparkles (the +◆ payload face) */}
+                    {/* BOON — the crystal sparkles (the +◆ payload face) */}
                     {special && !dead && (
                         <>
                             <Path d={sparklePath(66, 32, 8)} fill="#ffffff" opacity={0.95} />
