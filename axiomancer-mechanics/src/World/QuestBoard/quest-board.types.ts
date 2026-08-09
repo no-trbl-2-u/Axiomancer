@@ -341,6 +341,37 @@ export interface QuestPendingSpace {
 }
 
 // ---------------------------------------------------------------------------
+// The two bones (the movement choice)
+// ---------------------------------------------------------------------------
+
+/**
+ * One cast bone, with everything the player needs to choose between it and
+ * its twin: how far it moves, where that lands, and what is waiting there.
+ *
+ * The preview is the whole point. A bone that only said "4" would leave the
+ * player picking a number; a bone that says "4 — THE GULL KING, a duel" lets
+ * them pick a DESTINATION, which is the difference between rolling and
+ * playing.
+ */
+export interface QuestBone {
+    /** Die face, 1..6. */
+    die: number;
+    /** Wind and charm bonuses folded in. */
+    bonus: number;
+    /** Spaces this bone would move. */
+    total: number;
+    /** Board index this bone would land on. */
+    target: number;
+    /** The space waiting there. */
+    targetKind: QuestSpaceKind;
+    targetName: string;
+    /** True when taking this bone crosses or lands on the slipway (parts fit). */
+    fitsAtSlipway: boolean;
+    /** Pips banked as wind if this bone is the one LEFT BEHIND. */
+    windIfLeft: number;
+}
+
+// ---------------------------------------------------------------------------
 // Metrics & outcome
 // ---------------------------------------------------------------------------
 
@@ -348,6 +379,10 @@ export interface QuestPendingSpace {
  *  into play state. Updated at resolution seams only. */
 export interface QuestBoardMetrics {
     rolls: number;
+    /** Times the player took the SHORTER of the two bones on offer. */
+    shortStepsTaken: number;
+    /** Total wind banked from bones left behind. */
+    windBanked: number;
     duelsWon: number;
     duelsLost: number;
     snagsSuffered: number;
@@ -383,7 +418,8 @@ export interface QuestBoardOutcome {
 
 export type QuestBoardPhase =
     | 'intro'    // board-reveal overlay
-    | 'idle'     // awaiting a roll (or a charm)
+    | 'idle'     // awaiting a cast (or a charm)
+    | 'choosing' // two bones are on the table; pick the step you'll take
     | 'space'    // a space interaction is open (options and/or result)
     | 'dusk'     // day-end flash ("home for supper")
     | 'outcome'  // the boat is built; ledger shown
@@ -406,6 +442,14 @@ export interface QuestBoardSession {
     fitted: QuestPartTally;
     /** Last bone-die roll (display): die face, bonus applied, total. */
     lastRoll: { die: number; bonus: number; total: number } | null;
+    /**
+     * THE TWO BONES — the cast on the table, awaiting a choice.
+     *
+     * Populated in phase 'choosing'. The Boy casts two and takes one step;
+     * the other's pips bank as wind. Before 2026-08-08 there was exactly one
+     * bone and no choice at all, which made the whole board roll-and-move.
+     */
+    bones: readonly QuestBone[] | null;
     /** Open space interaction, when phase = 'space'. */
     pending: QuestPendingSpace | null;
     charms: QuestCharmState[];

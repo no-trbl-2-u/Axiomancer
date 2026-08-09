@@ -40,6 +40,7 @@ export type {
     GatherBoonState,
     GatherBoonResult,
     GatherMetrics,
+    GatherOmen,
     GatherDepthPlotEntry,
     GatherSiteDef,
     GatherOutcomeTier,
@@ -53,6 +54,7 @@ export {
     EMPTY_GATHER_METRICS,
     GATHER_FAMILIES,
     GATHER_DEPTH_COUNT,
+    GATHER_OMENS,
 } from './gathering.types';
 
 // ── Seeded RNG (aliased — see module note) ─────────────────────────────────
@@ -69,6 +71,7 @@ export {
     GATHERING_TUNING,
     GATHER_SPREAD_SIZE,
     GATHER_WRATH_MAX,
+    GATHER_TEMPER_MIN,
     GATHER_WRATH_THRESHOLDS,
     GATHER_DUSK_AFTER,
 } from './gathering.tuning';
@@ -86,6 +89,8 @@ export {
     getGatherToolDef,
     GATHERING_REPRISAL_ORDER,
     GATHERING_REPRISALS,
+    GATHERING_OMENS,
+    GATHERING_READ,
     GATHERING_BOONS,
     getGatherBoonDef,
     GATHER_APPROACH_COPY,
@@ -100,16 +105,22 @@ export {
     gatheringHarvestWrath,
     gatheringHarvestYield,
     gatheringDuskFallen,
+    gatheringOmen,
+    gatheringOmenFor,
+    gatheringWrathSpread,
     gatheringFamilyTotals,
     gatheringBoonStatus,
     gatheringBoonResults,
     gatheringTierOf,
+    gatheringCommunionWrathMax,
+    gatheringDespoilWrathMin,
     canPayGatheringOffering,
     // lifecycle
     createGatheringSession,
     selectGatheringApproach,
     // foraging
     harvestGatheringPlot,
+    readGatheringSite,
     descendGathering,
     payGatheringOffering,
     useGatheringTool,

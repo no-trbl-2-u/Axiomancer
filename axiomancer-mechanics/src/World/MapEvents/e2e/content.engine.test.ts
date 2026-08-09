@@ -57,10 +57,15 @@ describe('fishing-village content — new-player map', () => {
             state = r.state;
         }
 
-        // 8 encounter-kind nodes (7 regular + the fv-6 boss) — a slight
+        // 7 encounter-kind nodes (6 regular + the fv-6 boss) — a slight
         // plurality. fv-16 reverted to a plain encounter when the blacksmith
         // map node was gated back to dev-only (owner /oversight 2026-07-18).
-        expect(counts.encounter).toBe(8);
+        // The eighth was fv-1, the START node: the 2026-08-08 first-map audit
+        // found its pool was dead content (events fire on arrival, and nobody
+        // arrives at the node the map places them on) and re-authored it as
+        // the arrival CUTSCENE, which is safe to fire on map entry.
+        expect(counts.encounter).toBe(7);
+        expect(counts.cutscene).toBe(1);
         expect(counts.rest).toBe(4);
         expect(counts.gathering).toBe(4);
         expect(counts.hazard).toBe(3);

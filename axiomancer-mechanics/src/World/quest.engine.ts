@@ -120,6 +120,38 @@ export function collectObjectives(log: QuestLog, itemId: string): Array<{
 }
 
 /**
+ * Advances every active `kill` objective that names `enemyName`, returning the
+ * updated log plus the quests that completed as a result.
+ *
+ * Matching is on the enemy's DISPLAY NAME (`Enemy.name`), which is what the
+ * authored objectives carry — e.g. fishing-village's `starting-quest` targets
+ * "The King of Revenge", not the `king-of-revenge` slug.
+ *
+ * The engine's legacy `endCombat` has always done this inline. It lives here
+ * as a reusable reducer because the live hazard-pattern combat (Spec 26b)
+ * never routes through `endCombat` — the 2026-08-08 first-map audit found
+ * that killing the first map's boss in the app advanced nothing, leaving
+ * `starting-quest` permanently unfinishable and every one of Old Marrow's
+ * reward branches (all gated on `questCompleted: 'starting-quest'`)
+ * unreachable, which in turn made `get-to-forest` ungrantable.
+ */
+export function advanceKillObjectives(
+    log: QuestLog,
+    enemyName: string,
+): { log: QuestLog; completed: QuestName[] } {
+    let next = log;
+    const completed: QuestName[] = [];
+    // Re-read the objectives each pass: progressQuest may move a quest out of
+    // `active`, and one kill can fill objectives on more than one quest.
+    for (const { questName, objectiveId } of killObjectives(log, enemyName)) {
+        const step = progressQuest(next, questName, objectiveId);
+        next = step.log;
+        if (step.completedName) completed.push(step.completedName);
+    }
+    return { log: next, completed };
+}
+
+/**
  * Mark a quest completed explicitly (no objective bookkeeping). Used by event
  * nodes that want to short-circuit objective tracking.
  */

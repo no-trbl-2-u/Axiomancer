@@ -34,11 +34,12 @@ import {
 import {
     GATHER_DUSK_AFTER,
     GATHER_SPREAD_SIZE,
+    GATHER_TEMPER_MIN,
     GATHER_WRATH_MAX,
     GATHER_WRATH_THRESHOLDS,
     GATHERING_TUNING,
 } from './gathering.tuning';
-import { seedRng, shuffle, type GatheringRngState } from './gathering.rng';
+import { nextInt, seedRng, shuffle, type GatheringRngState } from './gathering.rng';
 import { branchMinigameSeed, type SeedInput } from '../seed';
 import {
     EMPTY_GATHER_METRICS,
@@ -53,6 +54,7 @@ import {
     type GatherFamilyTotal,
     type GatherMetrics,
     type GatherOfferingState,
+    type GatherOmen,
     type GatherOutcome,
     type GatherOutcomeTier,
     type GatherPiece,
@@ -111,6 +113,54 @@ function refillSpread(s: GatheringSessionState): GatheringSessionState {
     const bags = s.bags.slice() as GatheringSessionState['bags'];
     bags[s.depth] = draw.bag;
     return { ...s, spread: [...s.spread, ...draw.drawn], bags, uidCounter: draw.uidCounter };
+}
+
+// ---------------------------------------------------------------------------
+// Temper + omens (the hidden eruption point and the tell that reads it)
+// ---------------------------------------------------------------------------
+
+/**
+ * Rolls THE SITE'S TEMPER — the wrath at which this site erupts — off its own
+ * branched stream, so adding or reordering the roll never perturbs the plot
+ * bags and every existing seeded play test stays byte-for-byte stable.
+ */
+function rollTemper(seed: SeedInput): number {
+    const rng = seedRng(branchMinigameSeed(seed, 0x7e33e5));
+    const span = GATHER_WRATH_MAX - GATHER_TEMPER_MIN + 1;
+    return GATHER_TEMPER_MIN + nextInt(rng, span).value;
+}
+
+/**
+ * The site's current tell, graded on the gap between its temper and its wrath.
+ *
+ * Exported because the CLI, the balance sim, and the mobile presenter all need
+ * to say the same thing about the same state — and because a policy bot that
+ * reads the omen is exactly the "skilled" line the balance bands measure
+ * against blind greed.
+ */
+export function gatheringOmenFor(wrath: number, temper: number): GatherOmen {
+    const O = GATHERING_TUNING.omens;
+    const gap = temper - wrath;
+    if (gap >= O.calmGap) return 'calm';
+    if (gap >= O.stirringGap) return 'stirring';
+    if (gap >= O.rousedGap) return 'roused';
+    return 'seething';
+}
+
+/** The session's current tell. */
+export function gatheringOmen(s: GatheringSessionState): GatherOmen {
+    return gatheringOmenFor(s.wrath, s.temper);
+}
+
+/**
+ * How far above its printed wrath a taking harvest might land, given the
+ * stance. GLEAN is 0 — the tender hand knows exactly what it is taking, so
+ * the careful line stays fully computable and the hidden temper is the only
+ * thing a gleaner is gambling on. STRIP tears it out and cannot tell what it
+ * will wake.
+ */
+export function gatheringWrathSpread(s: GatheringSessionState): number {
+    return GATHERING_TUNING.unsteadyHand[s.approach ?? 'glean'];
 }
 
 // ---------------------------------------------------------------------------
@@ -210,16 +260,21 @@ function applyReprisal(s: GatheringSessionState, id: GatherReprisalId): {
  */
 function applyWrathDelta(s: GatheringSessionState, delta: number): GatheringSessionState {
     const wrath = Math.max(0, Math.min(GATHER_WRATH_MAX, s.wrath + delta));
-    let ns: GatheringSessionState = { ...s, wrath };
+    // The omen re-reads on every change — relief walks it back down, which is
+    // what makes offerings and BREATH plots feel like they bought you room.
+    let ns: GatheringSessionState = { ...s, wrath, omen: gatheringOmenFor(wrath, s.temper) };
     if (delta <= 0) return ns;
 
-    if (wrath >= GATHER_WRATH_MAX) {
+    // Eruption fires at the site's own TEMPER, not the meter's ceiling.
+    if (wrath >= ns.temper) {
         const A = gatherApproachDef(ns.approach ?? 'glean');
         const lossCount = Math.ceil((ns.satchel.length * A.eruptionLoss.num) / A.eruptionLoss.den);
         return {
             ...ns,
             erupted: true,
             phase: 'reprisal',
+            // Erupting reveals the number the whole session was guessing at.
+            temperKnown: true,
             pendingReprisals: [
                 { kind: 'eruption', bite: GATHERING_TUNING.eruption.bite, eruptionLost: lossCount },
             ],
@@ -316,6 +371,10 @@ export function createGatheringSession(seed: SeedInput, siteId: string): Gatheri
         bags: bags as GatheringSessionState['bags'],
         satchel: [],
         wrath: 0,
+        temper: rollTemper(seed),
+        temperKnown: false,
+        omen: 'calm',
+        lastSurge: 0,
         grace: 0,
         thresholdsFired: GATHER_WRATH_THRESHOLDS.map(() => false),
         reprisalDeck: rollReprisalDeck(seed),
@@ -406,7 +465,18 @@ export function harvestGatheringPlot(s: GatheringSessionState, uid: string): Gat
         return applyWrathDelta(ns, def.wrath);
     }
 
-    const wrathCost = gatheringHarvestWrath(s, def);
+    const floorCost = gatheringHarvestWrath(s, def);
+    // THE UNSTEADY HAND — the printed wrath is a FLOOR, not a price. What the
+    // taking actually wakes is rolled on top of it, so no take is ever a
+    // solved sum. GLEAN rolls a spread of 0 (see `gatheringWrathSpread`).
+    // Two takings are always exact: a sickled one costs nothing and wakes
+    // nothing, and a GIFT is the site handing something over — the bargain is
+    // the site's, so an unsteady hand cannot spoil it.
+    const exact = s.sickled || def.trait === 'gift';
+    const spread = exact ? 0 : gatheringWrathSpread(s);
+    const surgeRoll = spread > 0 ? nextInt(s.rng, spread + 1) : null;
+    const surge = surgeRoll?.value ?? 0;
+    const wrathCost = floorCost + surge;
     const richness = gatheringHarvestYield(s, def);
     const uidCounter = s.uidCounter + 1;
     const piece: GatherPiece = {
@@ -416,24 +486,47 @@ export function harvestGatheringPlot(s: GatheringSessionState, uid: string): Gat
         richness,
         name: def.yieldName,
     };
-    let spread = s.spread.filter((p) => p.uid !== uid);
-    if (def.trait === 'tangle') spread = [];
+    let nextSpread = s.spread.filter((p) => p.uid !== uid);
+    if (def.trait === 'tangle') nextSpread = [];
     let ns: GatheringSessionState = {
         ...s,
-        spread,
+        spread: nextSpread,
         satchel: [...s.satchel, piece],
         turn: s.turn + 1,
         sickled: false,
         mired: false,
         uidCounter,
+        lastSurge: surge,
+        rng: surgeRoll?.state ?? s.rng,
         metrics: {
             ...s.metrics,
             harvests: s.metrics.harvests + 1,
+            surgeWrath: s.metrics.surgeWrath + surge,
             rootHarvests: s.metrics.rootHarvests + (s.depth === 2 ? 1 : 0),
         },
     };
     ns = refillSpread(ns);
     return applyWrathDelta(ns, wrathCost);
+}
+
+/**
+ * READ THE SITE — spend a turn to learn exactly how much the place will bear.
+ *
+ * The counterweight to the hidden temper: with it, the deep push is an
+ * informed decision; without it, a guess. It costs a turn (dusk creeps
+ * closer, and after dusk every taking costs +1 wrath) and yields nothing, so
+ * reading early is a real trade against just taking one more plot. Idempotent
+ * once the temper is known.
+ */
+export function readGatheringSite(s: GatheringSessionState): GatheringSessionState {
+    if (s.phase !== 'foraging') return s;
+    if (s.temperKnown) return s;
+    return {
+        ...s,
+        temperKnown: true,
+        turn: s.turn + GATHERING_TUNING.read.turnCost,
+        metrics: { ...s.metrics, reads: s.metrics.reads + 1 },
+    };
 }
 
 /** Descend one stratum (one-way). The spread is abandoned and redrawn. */
@@ -613,14 +706,28 @@ export function gatheringBoonResults(s: GatheringSessionState, final: boolean): 
 // ---------------------------------------------------------------------------
 
 export function gatheringTierOf(
-    s: Pick<GatheringSessionState, 'erupted' | 'grace' | 'wrath' | 'satchel'>,
+    s: Pick<GatheringSessionState, 'erupted' | 'grace' | 'wrath' | 'satchel' | 'temper'>,
     keptCount: number,
 ): GatherOutcomeTier {
     const O = GATHERING_TUNING.outcome;
     if (s.erupted) return 'routed';
-    if (s.grace >= O.communionGrace && s.wrath <= O.communionWrathMax && keptCount > 0) return 'communion';
-    if (s.wrath >= O.despoilWrathMin) return 'despoiled';
+    // Judged against what THIS site could bear, not a fixed number — see the
+    // `outcome` block in gathering.tuning.ts.
+    const communionMax = Math.floor(s.temper * O.communionTemperFraction);
+    const despoilMin = Math.ceil(s.temper * O.despoilTemperFraction);
+    if (s.grace >= O.communionGrace && s.wrath <= communionMax && keptCount > 0) return 'communion';
+    if (s.wrath >= despoilMin) return 'despoiled';
     return 'laden';
+}
+
+/** The wrath at or below which a withdrawal can still reach COMMUNION. */
+export function gatheringCommunionWrathMax(s: Pick<GatheringSessionState, 'temper'>): number {
+    return Math.floor(s.temper * GATHERING_TUNING.outcome.communionTemperFraction);
+}
+
+/** The wrath at or above which a withdrawal is DESPOILMENT. */
+export function gatheringDespoilWrathMin(s: Pick<GatheringSessionState, 'temper'>): number {
+    return Math.ceil(s.temper * GATHERING_TUNING.outcome.despoilTemperFraction);
 }
 
 function computeOutcome(s: GatheringSessionState): GatherOutcome {

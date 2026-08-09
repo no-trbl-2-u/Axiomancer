@@ -1,20 +1,30 @@
 /**
  * Gathering balance guard — Monte-Carlo over the real engine with
- * scripted bots (see `state/gathering/sim.ts`). The bands encode the
- * Forage doctrine: the game is about EXTRACTION vs RESTRAINT, so the
- * incentive gradient must hold —
+ * scripted bots (see `gathering.sim.ts`). The bands encode the Forage
+ * doctrine: the game is about EXTRACTION vs RESTRAINT, so the incentive
+ * gradient must hold —
  *
- *   blind greed  < timid restraint < skilled push-your-luck
+ *   blind greed < timid restraint < competent play < INFORMED play
  *
- *   timid    — never erupts, communes often, takes a modest satchel.
- *   balanced — reads the wrath costs, never despoils, takes the most.
  *   greedy   — strips and never stops: the site always answers, and the
- *              eruption + bites leave it with the LEAST.
+ *              eruption + bites leave it with the least.
+ *   timid    — never erupts, communes often, takes a modest satchel.
+ *   balanced — watches the omens and budgets worst-case, but has to leave
+ *              slack for an eruption point it can only estimate.
+ *   reader   — pays a turn to LEARN that point, then spends the slack.
  *
- * If content changes break a band, this suite fails and the numbers
- * need re-tuning (or the band needs a deliberate, documented update).
- * 400 seeded runs per policy keeps the suite fast while holding rate
- * noise to roughly ±5pp.
+ * That last rung is what the 2026-08-08 redesign added and what this suite
+ * now has to protect. Before it, the eruption point was a constant (12) and
+ * every wrath cost was printed on its plot, so "push your luck" had no luck
+ * in it: the whole session was a solved knapsack. With the point hidden
+ * behind a rolled TEMPER and STRIP's cost carrying real variance, the
+ * question "do I take one more?" finally has an answer nobody knows — and
+ * INFORMATION becomes a resource worth spending a turn on.
+ *
+ * If content changes break a band, this suite fails and the numbers need
+ * re-tuning (or the band needs a deliberate, documented update). 400 seeded
+ * runs per policy keeps the suite fast while holding rate noise to roughly
+ * +/-5pp.
  */
 
 import { describe, expect, it } from 'vitest';
@@ -35,6 +45,7 @@ describe('gathering balance bands', () => {
     const timid = runGatheringSim({ runs: RUNS, policy: 'timid' });
     const balanced = runGatheringSim({ runs: RUNS, policy: 'balanced' });
     const greedy = runGatheringSim({ runs: RUNS, policy: 'greedy' });
+    const reader = runGatheringSim({ runs: RUNS, policy: 'reader' });
 
     it('timid restraint is safe: no eruptions, frequent communion, modest take', () => {
         expect(timid.eruptionRate).toBeLessThanOrEqual(0.01);
@@ -45,11 +56,10 @@ describe('gathering balance bands', () => {
         expect(timid.avgBitten).toBeLessThanOrEqual(1);
     });
 
-    it('skilled push-your-luck takes the most without scarring', () => {
+    it('competent play takes more than restraint without ever scarring', () => {
         expect(balanced.eruptionRate).toBeLessThanOrEqual(0.03);
         expect(balanced.tiers.despoiled / RUNS).toBeLessThanOrEqual(0.05);
-        expect(balanced.communionRate).toBeGreaterThanOrEqual(0.12);
-        expect(balanced.avgKeptRichness).toBeGreaterThanOrEqual(10.5);
+        expect(balanced.avgKeptRichness).toBeGreaterThanOrEqual(9.5);
         expect(balanced.avgKeptRichness).toBeLessThanOrEqual(15);
     });
 
@@ -58,9 +68,39 @@ describe('gathering balance bands', () => {
         expect(greedy.avgBitten).toBeGreaterThanOrEqual(3);
     });
 
-    it('the incentive gradient holds: greed < restraint < card', () => {
+    it('READING the site pays for itself — information is the top rung', () => {
+        // The load-bearing assertion of the whole redesign. `reader` plays the
+        // same stance as `balanced` and spends a turn it will never get back;
+        // the only thing it has that `balanced` lacks is the number. If that
+        // stops being worth a turn, the hidden temper is just noise and the
+        // READ THE SITE action is a trap.
+        expect(reader.avgKeptRichness).toBeGreaterThan(balanced.avgKeptRichness);
+        // And it converts knowledge into precision, not recklessness: knowing
+        // exactly where the line is means never crossing it.
+        expect(reader.eruptionRate).toBeLessThanOrEqual(0.01);
+        expect(reader.tiers.despoiled / RUNS).toBeLessThanOrEqual(0.05);
+    });
+
+    it('the incentive gradient holds: greed < restraint < competence < information', () => {
         expect(greedy.avgKeptRichness).toBeLessThan(timid.avgKeptRichness);
         expect(timid.avgKeptRichness).toBeLessThan(balanced.avgKeptRichness);
+        expect(balanced.avgKeptRichness).toBeLessThan(reader.avgKeptRichness);
+    });
+
+    it('the stance fork is real: gleaning and stripping pay in different coin', () => {
+        // Same discipline, opposite stance. GLEAN caps yields but takes exactly
+        // what it means to; STRIP takes uncapped and pays plunder coin, at the
+        // price of a cost it cannot predict. Neither may dominate — if one
+        // does, the choice at the threshold is decoration. The guard is that
+        // each wins its OWN axis, against the other and against the
+        // uninformed line.
+        const plunderer = runGatheringSim({ runs: RUNS, policy: 'plunderer' });
+        expect(reader.avgKeptRichness).toBeGreaterThan(plunderer.avgKeptRichness);
+        expect(plunderer.avgShillings).toBeGreaterThan(reader.avgShillings);
+        expect(reader.avgKeptRichness).toBeGreaterThan(balanced.avgKeptRichness);
+        expect(plunderer.avgShillings).toBeGreaterThan(balanced.avgShillings);
+        // Discipline still keeps the site whole under either stance.
+        expect(plunderer.eruptionRate).toBeLessThanOrEqual(0.05);
     });
 
     for (const site of GATHERING_SITES) {
@@ -73,40 +113,39 @@ describe('gathering balance bands', () => {
     }
 });
 
-describe('gathering new playstyle bots', () => {
-    it('wrath-pusher seeks controlled high wrath for maximum extraction', () => {
+describe('gathering playstyle bots', () => {
+    it('wrath-pusher trades a real chance of eruption for a real haul', () => {
         const wrathPusher = runGatheringSim({ runs: 200, policy: 'wrath-pusher' });
         const balanced = runGatheringSim({ runs: 200, policy: 'balanced' });
-        
-        // Should extract more richness through controlled wrath management
-        expect(wrathPusher.avgKeptRichness).toBeGreaterThan(balanced.avgKeptRichness);
-        // Should maintain reasonable communion rate (not zero)
-        expect(wrathPusher.communionRate).toBeGreaterThan(0.1);
-        // Should keep eruption rate low through careful management
-        expect(wrathPusher.eruptionRate).toBeLessThan(0.1);
+
+        // Rides the omen to SEETHING while stripping, so the unsteady hand
+        // genuinely can tip it over — and usually does. That is the point: it
+        // is the gamble line, not a strictly-better line. Pre-2026-08-08 this
+        // bot could push to a KNOWN ceiling and take more with almost no risk,
+        // which is exactly the tension the redesign restored. It pays out in
+        // plunder coin when it survives, and it very often does not.
+        expect(wrathPusher.avgShillings).toBeGreaterThan(balanced.avgShillings);
+        expect(wrathPusher.eruptionRate).toBeGreaterThan(0.3);
+        expect(wrathPusher.avgBitten).toBeGreaterThan(balanced.avgBitten);
     });
 
-    it('communion-chaser prioritizes early withdrawal over material gain', () => {
+    it('communion-chaser buys the tier and forfeits the take', () => {
         const communionChaser = runGatheringSim({ runs: 200, policy: 'communion-chaser' });
         const timid = runGatheringSim({ runs: 200, policy: 'timid' });
-        
-        // Should be very conservative - withdraws early with much lower richness
+
+        expect(communionChaser.communionRate).toBeGreaterThanOrEqual(0.9);
         expect(communionChaser.avgKeptRichness).toBeLessThan(timid.avgKeptRichness);
-        // Should have zero eruptions due to extreme caution
         expect(communionChaser.eruptionRate).toBe(0);
-        // Should achieve some balance between safety and yield
         expect(communionChaser.avgKeptRichness).toBeGreaterThan(1);
     });
 
-    it('new policies show distinct behavior patterns', () => {
+    it('the policies stay distinguishable — no two bots play the same game', () => {
         const wrathPusher = runGatheringSim({ runs: 100, policy: 'wrath-pusher' });
         const communionChaser = runGatheringSim({ runs: 100, policy: 'communion-chaser' });
-        
-        // Wrath-pusher should extract much more richness through aggressive play
+
         expect(wrathPusher.avgKeptRichness).toBeGreaterThan(communionChaser.avgKeptRichness * 2);
-        // Both should avoid eruptions
-        expect(wrathPusher.eruptionRate).toBeLessThan(0.1);
-        expect(communionChaser.eruptionRate).toBe(0);
+        expect(communionChaser.communionRate).toBeGreaterThan(wrathPusher.communionRate);
+        expect(wrathPusher.eruptionRate).toBeGreaterThan(communionChaser.eruptionRate);
     });
 });
 

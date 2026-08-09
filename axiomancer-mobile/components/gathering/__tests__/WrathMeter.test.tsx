@@ -31,6 +31,13 @@ const baseWrath: GatherWrathVM = {
     watcherWoken: false,
     mired: false,
     sickled: false,
+    temperKnown: false,
+    omen: 'calm' as const,
+    omenName: 'THE PLACE IS QUIET',
+    omenDesc: 'Water moves, insects work.',
+    lastSurge: 0,
+    communionWrathMax: 4,
+    despoilWrathMin: 8,
 };
 
 describe('segmentColor', () => {
@@ -81,6 +88,15 @@ describe('WrathMeter', () => {
             );
             expect(getByTestId('gathering-wrath')).toBeTruthy();
             expect(getByText('3')).toBeTruthy();
+            // The ceiling carries a "?" while the site's true temper is
+            // unknown — the meter must not read as a promise it cannot keep.
+            expect(getByText('/ 8?')).toBeTruthy();
+        });
+
+        it('drops the "?" once the site has been read', () => {
+            const { getByText } = render(
+                <WrathMeter vm={{ ...baseWrath, temperKnown: true }} grace={0} graceNote={null} />,
+            );
             expect(getByText('/ 8')).toBeTruthy();
         });
 
@@ -88,7 +104,7 @@ describe('WrathMeter', () => {
             const { getByLabelText } = render(
                 <WrathMeter vm={baseWrath} grace={0} graceNote={null} />,
             );
-            expect(getByLabelText('Wrath 3 of 8')).toBeTruthy();
+            expect(getByLabelText('Wrath 3 of an unknown limit, at most 8. THE PLACE IS QUIET.')).toBeTruthy();
         });
 
         it('appends the dusk note to the accessibility label when dusk has fallen', () => {
@@ -99,7 +115,41 @@ describe('WrathMeter', () => {
                     graceNote={null}
                 />,
             );
-            expect(getByLabelText('Wrath 3 of 8, dusk has fallen')).toBeTruthy();
+            expect(
+                getByLabelText('Wrath 3 of an unknown limit, at most 8. THE PLACE IS QUIET. Dusk has fallen.'),
+            ).toBeTruthy();
+        });
+    });
+
+    describe('the omen — the only warning the player gets', () => {
+        it('always names the site\'s current tell', () => {
+            const { getByTestId, getByText } = render(
+                <WrathMeter vm={baseWrath} grace={0} graceNote={null} />,
+            );
+            expect(getByTestId('gathering-omen')).toBeTruthy();
+            expect(getByText('THE PLACE IS QUIET')).toBeTruthy();
+            expect(getByText('Water moves, insects work.')).toBeTruthy();
+        });
+
+        it('calls out a taking that woke more than it printed', () => {
+            const { getByTestId, queryByTestId } = render(
+                <WrathMeter vm={{ ...baseWrath, lastSurge: 2 }} grace={0} graceNote={null} />,
+            );
+            expect(getByTestId('gathering-surge')).toBeTruthy();
+            const calm = render(<WrathMeter vm={baseWrath} grace={0} graceNote={null} />);
+            expect(calm.queryByTestId('gathering-surge')).toBeNull();
+            expect(queryByTestId('gathering-temper-known')).toBeNull();
+        });
+
+        it('spells out both outcome cuts once the temper is known', () => {
+            const { getByTestId } = render(
+                <WrathMeter
+                    vm={{ ...baseWrath, temperKnown: true }}
+                    grace={0}
+                    graceNote={null}
+                />,
+            );
+            expect(getByTestId('gathering-temper-known')).toBeTruthy();
         });
     });
 

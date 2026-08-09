@@ -66,6 +66,7 @@ const BOARD_VM: QuestBoardVM = {
     parts: [],
     boatProgress: 0,
     lastRoll: null,
+    bones: [],
     charms: [
         { id: 'gull-feather', name: 'Salt Charm', desc: 'wards the tide', flavor: '', used: false, primed: false, usable: true },
     ],

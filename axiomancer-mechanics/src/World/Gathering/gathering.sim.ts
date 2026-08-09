@@ -6,13 +6,25 @@
  * evidence, mirroring the hazard sim). No I/O, no Math.random — every
  * run is reproducible from its seed.
  *
- * Policies:
+ * Policies. Since the 2026-08-08 redesign the eruption point is HIDDEN (the
+ * site's rolled TEMPER), so every bot below reads the OMEN — the same graded
+ * tell the player gets — instead of comparing wrath to a constant it has no
+ * in-fiction way of knowing. A bot that reasoned in absolute wrath would be
+ * cheating, and the bands it produced would not describe anything a person
+ * could reproduce.
+ *
  *  - `timid`    — gleans, pays what the place asks, takes only cheap
- *                 plots, leaves early. The restraint baseline.
+ *                 plots, leaves as soon as the site stirs. The restraint
+ *                 baseline.
  *  - `balanced` — gleans, descends deliberately, pays offerings under
- *                 pressure, leaves before despoilment.
+ *                 pressure, leaves when the ground wakes.
  *  - `greedy`   — strips, takes the richest plot every time, never pays,
- *                 never leaves. The eruption baseline.
+ *                 never reads, never leaves. The eruption baseline.
+ *  - `reader`   — gleans, READS THE SITE early, then pushes to exactly one
+ *                 short of the temper it paid to learn. The skill line: the
+ *                 bot that buys information should beat the one that guesses.
+ *  - `wrath-pusher`     — strips and rides the omen to SEETHING before bailing.
+ *  - `communion-chaser` — gleans and leaves almost immediately for the tier.
  */
 
 import { getGatherPlotDef, GATHERING_SITES } from './gathering.content';
@@ -23,23 +35,45 @@ import {
     continueGatheringAfterReprisal,
     createGatheringSession,
     descendGathering,
+    gatheringCommunionWrathMax,
+    gatheringDespoilWrathMin,
     gatheringHarvestWrath,
     gatheringHarvestYield,
+    gatheringOmen,
+    gatheringWrathSpread,
     harvestGatheringPlot,
     payGatheringOffering,
+    readGatheringSite,
     selectGatheringApproach,
     withdrawFromGathering,
 } from './gathering.engine';
-import type { GatherOutcome, GatherOutcomeTier, GatherPlotEntry, GatheringSessionState } from './gathering.types';
-// import { GATHERING_TUNING } from './gathering.tuning';
+import { GATHER_TEMPER_MIN, GATHERING_TUNING } from './gathering.tuning';
+import type { GatherOmen, GatherOutcome, GatherOutcomeTier, GatherPlotEntry, GatheringSessionState } from './gathering.types';
 
-export type GatherPolicyId = 'timid' | 'balanced' | 'greedy' | 'wrath-pusher' | 'communion-chaser';
+export type GatherPolicyId = 'timid' | 'balanced' | 'greedy' | 'reader' | 'plunderer' | 'wrath-pusher' | 'communion-chaser';
 
 type PolicyAction =
     | { type: 'harvest'; uid: string }
     | { type: 'descend' }
     | { type: 'offer'; id: string }
+    | { type: 'read' }
     | { type: 'withdraw' };
+
+/** Omen severity, so a policy can say "at or past ROUSED" in one comparison. */
+const OMEN_RANK: Record<GatherOmen, number> = { calm: 0, stirring: 1, roused: 2, seething: 3 };
+
+function omenAtLeast(s: GatheringSessionState, level: GatherOmen): boolean {
+    return OMEN_RANK[gatheringOmen(s)] >= OMEN_RANK[level];
+}
+
+/**
+ * The WORST wrath a taking could cost right now — the printed floor plus the
+ * whole unsteady-hand spread. A careful bot budgets against this, not the
+ * floor, which is exactly the judgement the redesign asks of a player.
+ */
+function worstCaseWrath(s: GatheringSessionState, floorCost: number): number {
+    return floorCost + gatheringWrathSpread(s);
+}
 
 interface PolicyCtx {
     /** Taking harvests made at the current depth (resets on descend). */
@@ -67,14 +101,23 @@ function firstPayableOffering(s: GatheringSessionState): string | null {
 }
 
 function timidPolicy(s: GatheringSessionState): PolicyAction {
-    if (s.wrath >= 4) {
+    // Plays for COMMUNION and nothing else: buys grace with offerings and
+    // leaves while the site can still forgive it. The communion cut is a
+    // published rule against a meter the player can see, so budgeting to it
+    // is fair play — the hidden number is the ERUPTION point, not this.
+    const communionMax = gatheringCommunionWrathMax(s);
+    if (s.wrath >= communionMax || omenAtLeast(s, 'stirring')) {
         const offer = firstPayableOffering(s);
         if (offer) return { type: 'offer', id: offer };
+        const breath = scoredPlots(s).find((p) => p.breath);
+        if (breath && s.wrath > 0) return { type: 'harvest', uid: breath.entry.uid };
+        return { type: 'withdraw' };
     }
-    if (s.wrath >= 5 || s.turn >= 6) return { type: 'withdraw' };
+    if (s.turn >= 6) return { type: 'withdraw' };
     const plots = scoredPlots(s);
     const cheap = plots
-        .filter((p) => !p.breath && p.wrath <= 1 && p.yieldR > 0)
+        .filter((p) => !p.breath && p.wrath <= 1 && p.yieldR > 0
+            && s.wrath + worstCaseWrath(s, p.wrath) <= communionMax)
         .sort((a, b) => b.yieldR - a.yieldR || a.wrath - b.wrath)[0];
     if (cheap) return { type: 'harvest', uid: cheap.entry.uid };
     const breath = plots.find((p) => p.breath);
@@ -83,27 +126,66 @@ function timidPolicy(s: GatheringSessionState): PolicyAction {
 }
 
 function balancedPolicy(s: GatheringSessionState, ctx: PolicyCtx): PolicyAction {
-    if (s.wrath >= 5) {
+    // Works the site until the ground wakes, then buys room or gets out.
+    if (omenAtLeast(s, 'roused')) {
         const offer = firstPayableOffering(s);
         if (offer) return { type: 'offer', id: offer };
+        const breath = scoredPlots(s).find((p) => p.breath);
+        if (breath) return { type: 'harvest', uid: breath.entry.uid };
+        return { type: 'withdraw' };
     }
-    // Leave BELOW the despoilment line (8) — the scar is never worth it.
-    if (s.wrath >= 7 || s.turn >= 9) return { type: 'withdraw' };
+    if (s.turn >= 9) return { type: 'withdraw' };
     if (ctx.harvestsAtDepth >= 3 && s.depth < 2) return { type: 'descend' };
     const plots = scoredPlots(s);
-    if (s.wrath >= 6) {
-        const breath = plots.find((p) => p.breath);
-        if (breath) return { type: 'harvest', uid: breath.entry.uid };
-    }
-    // Only take what keeps wrath below the despoilment line — the
-    // preview cost is on the card; a sensible player reads it.
+    // Budgets against the WORST the unsteady hand could do, and stops short
+    // of this site's despoilment line — the scar is never worth it. With the
+    // temper hidden it can only ESTIMATE that line (it assumes the shallowest
+    // site it could be standing in), which is precisely the slack THE READER
+    // pays a turn to remove.
+    const assumedDespoil = Math.ceil(GATHER_TEMPER_MIN * GATHERING_TUNING.outcome.despoilTemperFraction);
     const best = plots
-        .filter((p) => !p.breath && p.yieldR > 0 && s.wrath + p.wrath < 8)
+        .filter((p) => !p.breath && p.yieldR > 0 && s.wrath + worstCaseWrath(s, p.wrath) < assumedDespoil)
         .sort((a, b) => b.yieldR - a.yieldR - (b.wrath - a.wrath) || a.wrath - b.wrath)[0];
     if (best) return { type: 'harvest', uid: best.entry.uid };
     const soothe = plots.find((p) => p.breath);
-    if (soothe && s.wrath >= 3) return { type: 'harvest', uid: soothe.entry.uid };
-    if (s.depth < 2 && s.wrath < 6) return { type: 'descend' };
+    if (soothe && omenAtLeast(s, 'stirring')) return { type: 'harvest', uid: soothe.entry.uid };
+    if (s.depth < 2 && !omenAtLeast(s, 'roused')) return { type: 'descend' };
+    return { type: 'withdraw' };
+}
+
+/**
+ * THE READER — the skill line the redesign exists to reward.
+ *
+ * Pays a turn up front to learn the site's exact temper, then works the
+ * spread right up to one short of it, budgeting each taking against the worst
+ * the unsteady hand can do. Where `balanced` has to leave slack for a number
+ * it can only estimate, this bot knows, and converts that knowledge into take.
+ */
+function readerPolicy(s: GatheringSessionState, ctx: PolicyCtx): PolicyAction {
+    if (!s.temperKnown) return { type: 'read' };
+    // It knows the real despoilment line for THIS site, so it can work right
+    // up to it instead of assuming the worst — and it still refuses the scar.
+    const despoil = gatheringDespoilWrathMin(s);
+    const headroom = despoil - s.wrath;
+    if (headroom <= 0) {
+        const offer = firstPayableOffering(s);
+        if (offer) return { type: 'offer', id: offer };
+        const breath = scoredPlots(s).find((p) => p.breath);
+        if (breath) return { type: 'harvest', uid: breath.entry.uid };
+        return { type: 'withdraw' };
+    }
+    if (s.turn >= 10) return { type: 'withdraw' };
+    if (ctx.harvestsAtDepth >= 3 && s.depth < 2) return { type: 'descend' };
+    const plots = scoredPlots(s);
+    const best = plots
+        .filter((p) => !p.breath && p.yieldR > 0 && s.wrath + worstCaseWrath(s, p.wrath) < despoil)
+        .sort((a, b) => b.yieldR - a.yieldR || a.wrath - b.wrath)[0];
+    if (best) return { type: 'harvest', uid: best.entry.uid };
+    const soothe = plots.find((p) => p.breath);
+    if (soothe && headroom <= 3) return { type: 'harvest', uid: soothe.entry.uid };
+    if (s.depth < 2) return { type: 'descend' };
+    const offer = firstPayableOffering(s);
+    if (offer) return { type: 'offer', id: offer };
     return { type: 'withdraw' };
 }
 
@@ -118,69 +200,74 @@ function greedyPolicy(s: GatheringSessionState): PolicyAction {
 }
 
 function wrathPusherPolicy(s: GatheringSessionState, _ctx: PolicyCtx): PolicyAction {
-    // Handle offerings when wrath gets dangerous
-    if (s.wrath >= 6) {
+    // Rides the omen up to SEETHING and bails on the last possible beat.
+    // Strips, so the unsteady hand can still tip it over — which is the whole
+    // point of the risk premium STRIP pays for its extra richness.
+    if (omenAtLeast(s, 'seething')) {
+        const offer = firstPayableOffering(s);
+        if (offer) return { type: 'offer', id: offer };
+        return { type: 'withdraw' };
+    }
+
+    const plots = scoredPlots(s);
+
+    if (omenAtLeast(s, 'roused')) {
+        const communion = plots.find((p) => p.breath);
+        if (communion) return { type: 'harvest', uid: communion.entry.uid };
         const offer = firstPayableOffering(s);
         if (offer) return { type: 'offer', id: offer };
     }
-    
-    // Withdraw when wrath is too dangerous for communion (communion needs ≤4 wrath)
-    if (s.wrath >= 7) return { type: 'withdraw' };
-    
-    const plots = scoredPlots(s);
-    
-    // If wrath is moderate (5-6), look for communion plots to reset
-    if (s.wrath >= 5) {
-        const communion = plots.find((p) => p.breath);
-        if (communion) return { type: 'harvest', uid: communion.entry.uid };
-    }
-    
-    // Push wrath to 5-6 range for extraction, but not beyond
+
     const richest = plots
         .filter((p) => !p.breath && p.yieldR > 0)
         .sort((a, b) => b.yieldR - a.yieldR)[0];
-    
-    // Only take if it won't push us too far
-    if (richest && s.wrath + richest.wrath <= 6) {
-        return { type: 'harvest', uid: richest.entry.uid };
-    }
-    
-    // Look for breath plots to manage wrath
+    if (richest) return { type: 'harvest', uid: richest.entry.uid };
+
     const communion = plots.find((p) => p.breath);
-    if (communion && s.wrath >= 4) return { type: 'harvest', uid: communion.entry.uid };
-    
-    // If no good plots, descend for fresh plots  
+    if (communion && omenAtLeast(s, 'stirring')) return { type: 'harvest', uid: communion.entry.uid };
+
     if (s.depth < 2) return { type: 'descend' };
-    
+
     return { type: 'withdraw' };
 }
 
 function communionChaserPolicy(s: GatheringSessionState, _ctx: PolicyCtx): PolicyAction {
-    // Pay offerings when wrath gets moderate
-    if (s.wrath >= 3) {
+    // Chases the COMMUNION tier and forfeits everything else for it. Both of
+    // that tier's conditions are published rules over things the player can
+    // see (grace, wrath, and — since the cut went temper-relative — the site's
+    // patience once read), so this bot buys the number rather than guessing.
+    const C = GATHERING_TUNING.outcome;
+    if (!s.temperKnown) return { type: 'read' };
+    const communionMax = gatheringCommunionWrathMax(s);
+
+    // Grace is the binding constraint: glean opens with 1 and each offering
+    // buys another, so the tier is unreachable without paying at least once.
+    if (s.grace < C.communionGrace) {
         const offer = firstPayableOffering(s);
         if (offer) return { type: 'offer', id: offer };
     }
-    
-    // Withdraw early to ensure communion (wrath ≤ 4, grace ≥ 2)
-    if (s.wrath >= 4 || s.turn >= 5) return { type: 'withdraw' };
-    
+
+    // The window is open and there is something in the satchel — take it.
+    if (s.grace >= C.communionGrace && s.wrath <= communionMax && s.satchel.length > 0) {
+        return { type: 'withdraw' };
+    }
+    if (s.turn >= 7) return { type: 'withdraw' };
+
     const plots = scoredPlots(s);
-    
-    // Always prioritize communion plots for wrath management and grace
-    const communion = plots.find((p) => p.breath);
-    if (communion) return { type: 'harvest', uid: communion.entry.uid };
-    
-    // Take only very safe plots (wrath = 0)
+
+    // Breaths both soothe the site and are free — always worth tending.
+    const breath = plots.find((p) => p.breath);
+    if (breath && s.wrath > 0) return { type: 'harvest', uid: breath.entry.uid };
+
+    // Take only what cannot push past the communion cut, worst case.
     const safest = plots
-        .filter((p) => !p.breath && p.yieldR > 0 && p.wrath === 0)
-        .sort((a, b) => b.yieldR - a.yieldR)[0];
-    
+        .filter((p) => !p.breath && p.yieldR > 0
+            && s.wrath + worstCaseWrath(s, p.wrath) <= communionMax)
+        .sort((a, b) => b.yieldR - a.yieldR || a.wrath - b.wrath)[0];
     if (safest) return { type: 'harvest', uid: safest.entry.uid };
-    
-    // Descend to find new opportunities, but be conservative
+
     if (s.depth < 2 && s.wrath <= 1) return { type: 'descend' };
-    
+
     return { type: 'withdraw' };
 }
 
@@ -201,6 +288,15 @@ const POLICY_APPROACH: Record<GatherPolicyId, 'glean' | 'strip'> = {
     timid: 'glean',
     balanced: 'glean',
     greedy: 'strip',
+    // THE READER gleans: the tender hand's unsteady-hand spread is 0, so the
+    // temper it paid to learn is the ONLY unknown left. Knowledge and
+    // predictability compound — that is the skill line.
+    reader: 'glean',
+    // THE PLUNDERER is the reader's mirror: same discipline, opposite stance.
+    // It exists to keep the GLEAN/STRIP fork honest — if informed stripping
+    // cannot compete with informed gleaning on total value, the stance choice
+    // is decoration.
+    plunderer: 'strip',
     'wrath-pusher': 'strip',
     'communion-chaser': 'glean',
 };
@@ -229,6 +325,7 @@ export function simulateGathering(seed: number, siteId: string, policy: GatherPo
             policy === 'timid' ? timidPolicy(s) :
             policy === 'balanced' ? balancedPolicy(s, ctx) :
             policy === 'greedy' ? greedyPolicy(s) :
+            policy === 'reader' || policy === 'plunderer' ? readerPolicy(s, ctx) :
             policy === 'wrath-pusher' ? wrathPusherPolicy(s, ctx) :
             communionChaserPolicy(s, ctx);
         if (action.type === 'harvest') {
@@ -246,6 +343,9 @@ export function simulateGathering(seed: number, siteId: string, policy: GatherPo
         } else if (action.type === 'offer') {
             const next = payGatheringOffering(s, action.id);
             // A refused offering must not stall the loop.
+            s = next === s ? withdrawFromGathering(s) : next;
+        } else if (action.type === 'read') {
+            const next = readGatheringSite(s);
             s = next === s ? withdrawFromGathering(s) : next;
         } else {
             s = withdrawFromGathering(s);
@@ -390,7 +490,7 @@ export function generateGatheringBalanceReport(runs = 400): GatheringBalanceRepo
     const policies = {} as Record<GatherPolicyId, GatherSimSummary>;
     
     // Run simulations for all policies
-    for (const policy of ['timid', 'balanced', 'greedy', 'wrath-pusher', 'communion-chaser'] as const) {
+    for (const policy of ['timid', 'balanced', 'greedy', 'reader', 'plunderer', 'wrath-pusher', 'communion-chaser'] as const) {
         policies[policy] = runGatheringSim({ runs, policy });
     }
     

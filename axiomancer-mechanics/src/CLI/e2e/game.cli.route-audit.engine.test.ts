@@ -46,10 +46,11 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         expect((summary.resolvedNodeIds as string[]).length).toBe(25);
         expect(summary.combatOutcomes).toEqual({});
 
-        // fv-6 is the authored boss node; fv-1 is a real encounter (Grave
-        // Larva) — the audit inspects wiring, it never fights anyone.
+        // fv-6 is the authored boss node; fv-1 is the arrival cutscene
+        // (2026-08-08 first-map audit) — the audit inspects wiring, it never
+        // fights anyone.
         const eventKinds = summary.eventKinds as Record<string, string>;
-        expect(eventKinds['fv-1']).toBe('encounter');
+        expect(eventKinds['fv-1']).toBe('cutscene');
         expect(eventKinds['fv-6']).toBe('encounter');
 
         const actions = readLog(logPath).map(r => r.action);
@@ -97,7 +98,7 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         expect(summary.unvisitedNodeIds).toContain('fv-7');
     });
 
-    it('--resolve-start resolves fv-1\'s own encounter before walking the route; without it, the start node is explicitly unresolved', async () => {
+    it('--resolve-start resolves fv-1\'s own arrival cutscene before walking the route; without it, the start node is explicitly unresolved', async () => {
         const withFlag = tmpPath('resolve-start-on');
         await runGameCli([
             '--route', 'fv-2',
@@ -111,14 +112,18 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         const onSummary = routeEnd(withFlag);
         expect(onSummary.startNode).toMatchObject({ nodeId: 'fv-1', resolved: true });
         expect(onSummary.resolvedNodeIds).toContain('fv-1');
-        expect((onSummary.combatOutcomes as Record<string, string>)['fv-1']).toBeDefined();
 
+        // The 2026-08-08 first-map audit re-authored fv-1 from a Grave Larva
+        // encounter (which no player could reach — events fire on ARRIVAL, and
+        // the map places the player ON fv-1) into the village's arrival
+        // cutscene, a kind that is safe to fire the moment the map opens.
         const onLogs = readLog(withFlag);
-        const fv1Encounter = onLogs
+        const fv1Event = onLogs
             .filter(r => r.action === 'resolveMapEvent')
-            .map(r => r.event as { kind?: string; encounter?: { enemies?: Array<{ name?: string }> } })
-            .find(e => e.kind === 'encounter');
-        expect(fv1Encounter?.encounter?.enemies?.[0]?.name).toBe('Grave Larva');
+            .map(r => r.event as { kind?: string; lines?: readonly string[] })
+            .find(e => e.kind === 'cutscene');
+        expect(fv1Event).toBeDefined();
+        expect(fv1Event?.lines?.length ?? 0).toBeGreaterThan(0);
 
         const withoutFlag = tmpPath('resolve-start-off');
         await runGameCli([
@@ -137,13 +142,18 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
     it('reports the exact unvisited nodes for a partial legal route', async () => {
         const logPath = tmpPath('partial');
 
-        // PROFANE CANON (2026-08-08): `--combat-max-turns 4` keeps the fv-12
+        // PROFANE CANON (2026-08-08): `--combat-max-turns 4` keeps the fv-16
         // fodder encounter balance-independent — the fight hits the turn cap
         // unresolved (not a defeat), so the walk stays survivorship no matter
         // how the untuned decks trade. This test proves the visited/unvisited
         // ACCOUNTING, not combat strength.
+        //
+        // Route retargeted fv-12 -> fv-16 by the 2026-08-08 first-map audit:
+        // the village re-layer moved fv-12 into the first column (now a
+        // direct neighbour of the start), so fv-2 -> fv-12 is no longer an
+        // edge. fv-16 is the equivalent second-column fodder encounter.
         await runGameCli([
-            '--route', 'fv-2,fv-12',
+            '--route', 'fv-2,fv-16',
             '--auto-combat',
             '--combat-policy', 'status',
             '--combat-seed', '42',
@@ -154,7 +164,7 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         const summary = routeEnd(logPath);
         expect(summary.classification).toBe('survivorship');
         expect(summary.survived).toBe(true);
-        expect(summary.visitedNodeIds).toEqual(['fv-1', 'fv-2', 'fv-12']);
+        expect(summary.visitedNodeIds).toEqual(['fv-1', 'fv-2', 'fv-16']);
         const unvisited = summary.unvisitedNodeIds as string[];
         expect(unvisited).toContain('fv-25');
         expect(unvisited.length).toBe(22);

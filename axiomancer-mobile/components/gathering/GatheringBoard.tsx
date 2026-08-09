@@ -160,6 +160,7 @@ export function GatheringBoard({
     onDescend,
     onPayOffering,
     onUseTool,
+    onRead,
     onWithdraw,
 }: {
     vm: GatheringViewModel;
@@ -168,6 +169,7 @@ export function GatheringBoard({
     onDescend: () => void;
     onPayOffering: (id: string) => void;
     onUseTool: (id: GatherToolId) => void;
+    onRead: () => void;
     onWithdraw: () => void;
 }) {
     const styles = useStyles();
@@ -264,6 +266,25 @@ export function GatheringBoard({
                     richness={vm.satchelRichness}
                 />
             </ScrollView>
+
+            {/* READ THE SITE — buy the hidden eruption point for a turn.
+              * Sits above the two exits because it is the decision that
+              * changes what the exits are worth: without it the deep push is
+              * a guess, with it a calculation. (2026-08-08 redesign.) */}
+            {vm.read.available && (
+                <Animated.View entering={FadeIn.duration(220)}>
+                    <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`${vm.read.name}. ${vm.read.desc}`}
+                        testID="gathering-read"
+                        onPress={onRead}
+                        style={[styles.cta, styles.readCta]}
+                    >
+                        <Text style={styles.readText}>{vm.read.name}</Text>
+                        <Text style={styles.ctaSub}>COSTS A TURN · TAKES NOTHING</Text>
+                    </Pressable>
+                </Animated.View>
+            )}
 
             {/* the two ways out */}
             <Animated.View entering={FadeIn.duration(220)} style={styles.ctaRow}>
@@ -420,6 +441,8 @@ const useStyles = makeStyles((AXM) => ({
         backgroundColor: '#0a0a07',
     },
     cta: { flex: 1, alignItems: 'center', paddingVertical: 8, borderWidth: 2 },
+    readCta: { borderColor: AXM.sulfur, backgroundColor: 'rgba(0,0,0,0.5)', marginHorizontal: 12, marginBottom: 6 },
+    readText: { fontFamily: FONTS.gothic, fontSize: 15, letterSpacing: 1.5, color: AXM.sulfur },
     descendCta: { borderColor: AXM.ash, backgroundColor: 'rgba(0,0,0,0.4)' },
     descendText: { fontFamily: FONTS.gothic, fontSize: 15, letterSpacing: 1.5, color: AXM.bone },
     withdrawCta: { borderColor: AXM.parchment, backgroundColor: AXM.bg },

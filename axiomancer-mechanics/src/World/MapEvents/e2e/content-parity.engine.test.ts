@@ -36,10 +36,12 @@ describe('Phase 161 — map-event content has one source of truth', () => {
     });
 
     it('fishing-village resolves to the new-player layout, not the legacy pools', () => {
-        // The legacy fishing-village block authored fv-1 as a `cutscene` and
-        // fv-3 as a `village` shop. The surviving new-player block makes fv-1
-        // an encounter, fv-3 a rest node, and fv-6 the pinned boss encounter.
-        expect(getNodePrimaryEventKind('coastal-continent', 'fishing-village', 'fv-1')).toBe('encounter');
+        // The legacy fishing-village block authored fv-3 as a `village` shop;
+        // the surviving new-player block makes it a rest node and pins fv-6 as
+        // the boss encounter. fv-1 is the arrival cutscene — the 2026-08-08
+        // first-map audit reclaimed the start node, whose old encounter pool
+        // no player could ever reach (events fire on arrival only).
+        expect(getNodePrimaryEventKind('coastal-continent', 'fishing-village', 'fv-1')).toBe('cutscene');
         expect(getNodePrimaryEventKind('coastal-continent', 'fishing-village', 'fv-3')).toBe('rest');
         expect(getNodePrimaryEventKind('coastal-continent', 'fishing-village', 'fv-6')).toBe('encounter');
         expect(getNodePrimaryEventKind('coastal-continent', 'fishing-village', 'fv-15')).toBe('quest');

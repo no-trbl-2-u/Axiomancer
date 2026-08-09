@@ -69,6 +69,7 @@ function makeVM(opts: {
         parts: [],
         boatProgress: 0,
         lastRoll: opts.lastRoll ?? null,
+        bones: [],
         charms: [],
         vows: [],
         tierPreview: 'driftwood',

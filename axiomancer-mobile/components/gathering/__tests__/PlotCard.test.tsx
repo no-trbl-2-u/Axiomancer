@@ -24,6 +24,8 @@ const mockBloomPlot: GatherPlotVM = {
     traitLabel: null,
     yieldRichness: 3,
     wrathCost: 2,
+    wrathSpread: 0,
+    wrathCostLabel: '2',
     isBreath: false,
     flavor: 'Glowing with ethereal light',
     keywords: [
@@ -43,6 +45,8 @@ const mockVeinPlotWithGift: GatherPlotVM = {
     traitLabel: 'GIFT',
     yieldRichness: 4,
     wrathCost: 1,
+    wrathSpread: 0,
+    wrathCostLabel: '1',
     isBreath: false,
     flavor: 'Hard as forged metal',
     keywords: [
@@ -63,6 +67,8 @@ const mockBoneBreath: GatherPlotVM = {
     traitLabel: 'BREATH',
     yieldRichness: 0,
     wrathCost: -3,
+    wrathSpread: 0,
+    wrathCostLabel: '-3',
     isBreath: true,
     flavor: 'A moment of peace amid the chaos',
     keywords: [
@@ -83,6 +89,8 @@ const mockResinPlotWithLure: GatherPlotVM = {
     traitLabel: 'LURE',
     yieldRichness: 2,
     wrathCost: 0,
+    wrathSpread: 0,
+    wrathCostLabel: '0',
     isBreath: false,
     flavor: 'Sweet and sticky, impossibly pure',
     keywords: [
@@ -322,6 +330,8 @@ describe('PlotCard', () => {
             const highWrathPlot: GatherPlotVM = {
                 ...mockBloomPlot,
                 wrathCost: 7,
+                wrathSpread: 0,
+                wrathCostLabel: '7',
             };
 
             const { getByText } = render(<PlotCard plot={highWrathPlot} mode="detail" />);
@@ -332,6 +342,8 @@ describe('PlotCard', () => {
             const highReliefPlot: GatherPlotVM = {
                 ...mockBoneBreath,
                 wrathCost: -5,
+                wrathSpread: 0,
+                wrathCostLabel: '-5',
             };
 
             const { getByText } = render(<PlotCard plot={highReliefPlot} mode="detail" />);

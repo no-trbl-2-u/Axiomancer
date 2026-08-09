@@ -14,6 +14,42 @@
 
 ## Pending
 
+### [world] Map-event content has no coverage guard against unreachable authoring
+- source: first-map audit 2026-08-08 (finding F5). `fv-1` carried a fully
+  authored encounter pool that no player could ever see, because map events
+  fire on ARRIVAL and `createMapState` places the player ON the start node.
+  It sat there undetected across at least two content passes, and the
+  all-25-nodes pool test passed the whole time — it drives `resolveMapEvent`
+  at each node id directly, which proves the pool is REGISTERED, not that a
+  player can reach it.
+- the general defect: nothing asserts that authored content is reachable by
+  legal play. `auditMapTraversal` (shipped in the same pass) now walks every
+  legal route and could answer this — a test that intersects "nodes any route
+  can visit" with "nodes carrying a pool" would have caught fv-1 immediately,
+  and would catch the next one.
+- scored low-ease/high-impact: the walker exists, so this is one test file.
+  Left unfiled as a fix only because the audit pass had already closed the
+  live instance and adding a second invariant belonged in its own tick.
+
+### [mobile] The live combat exit path bypasses the engine's end-of-combat reducer entirely
+- source: first-map audit 2026-08-08 (finding F3). The kill-objective break
+  was fixed at the symptom — `applyHazardOutcome` now calls
+  `advanceKillObjectives` directly. The root cause is unaddressed: hazard
+  combat (Spec 26b) never calls `endCombat`, so EVERY side effect that reducer
+  owns is silently absent from live play, not just quest progression.
+- `game.reducer.endCombat` was not re-read line by line during the audit. What
+  else it does — flags, codex unlocks, faction deltas, morale, run counters —
+  is unknown, and each one is a candidate for the same class of silent
+  no-op that hid the quest break. Somebody should diff what `endCombat` does
+  against what `applyHazardOutcome` + `handleHazardExit` do, and either route
+  the live path through the reducer or enumerate the deltas deliberately.
+- `[needs-user-call]` on the resolution shape: routing live combat through
+  `endCombat` is the correct-looking fix but the two paths have diverged for
+  a reason (the panel keeps combat state in local React state precisely so the
+  engine's `state.combat` slice could be retired). Reunifying them is a design
+  decision, not a bug fix.
+
+
 > **BANNER (/oversight 2026-08-08 — the unshackling).** The seven
 > byte-identical "Doctrine-curve confirmation" rows below (07-20 →
 > 08-07) measure adherence to the status-dominance doctrine, which T

@@ -40,8 +40,10 @@ export type GatherApproachKey = 'glean' | 'strip';
 
 /**
  * Optional plot traits:
- *  - `gift`   — the site offers this freely (informational; the plot's
- *               authored wrath already reflects the bargain).
+ *  - `gift`   — the site offers this freely. The plot's authored wrath
+ *               already reflects the bargain, and the unsteady hand never
+ *               applies: a gift costs exactly what it says, whatever stance
+ *               you took at the threshold.
  *  - `lure`   — rich and angry (informational; the numbers carry the
  *               temptation, the tag names it).
  *  - `breath` — TENDING, not taking: harvesting yields nothing and
@@ -146,6 +148,22 @@ export interface GatherToolState {
 }
 
 // ---------------------------------------------------------------------------
+// Omens (the site's tell)
+// ---------------------------------------------------------------------------
+
+/**
+ * How close the site is to erupting, graded on the gap between its hidden
+ * TEMPER and current wrath.
+ *
+ * The eruption point is rolled per session and never shown, so the omen is
+ * the player's read on it — enough to know when to stop, not enough to play
+ * the site by arithmetic. Ignoring it is exactly how greed gets punished.
+ */
+export type GatherOmen = 'calm' | 'stirring' | 'roused' | 'seething';
+
+export const GATHER_OMENS: readonly GatherOmen[] = ['calm', 'stirring', 'roused', 'seething'];
+
+// ---------------------------------------------------------------------------
 // Reprisals (the site answers greed)
 // ---------------------------------------------------------------------------
 
@@ -208,6 +226,10 @@ export interface GatherBoonResult {
 export interface GatherMetrics {
     /** Taking harvests committed (breaths excluded). */
     harvests: number;
+    /** Times the site was read for its exact temper. */
+    reads: number;
+    /** Wrath added above the printed floor by the unsteady hand. */
+    surgeWrath: number;
     /** Breath plots tended. */
     breathsTended: number;
     /** Offerings paid. */
@@ -220,6 +242,8 @@ export interface GatherMetrics {
 
 export const EMPTY_GATHER_METRICS: GatherMetrics = Object.freeze({
     harvests: 0,
+    reads: 0,
+    surgeWrath: 0,
     breathsTended: 0,
     offeringsPaid: 0,
     reprisalsSuffered: 0,
@@ -338,6 +362,23 @@ export interface GatheringSessionState {
     bags: [string[], string[], string[]];
     satchel: GatherPiece[];
     wrath: number;
+    /**
+     * THE SITE'S TEMPER — the wrath at which this site erupts, rolled per
+     * session in [temperMin, max]. Engine truth, deliberately NOT surfaced to
+     * the player: presenters must render `omen` (and `temperKnown` when the
+     * player has bought the number) instead of reading this directly.
+     */
+    temper: number;
+    /** True once `readGatheringSite` has bought the exact temper. */
+    temperKnown: boolean;
+    /** The site's current tell. Recomputed on every wrath change. */
+    omen: GatherOmen;
+    /**
+     * Wrath the unsteady hand added above the printed floor on the LAST
+     * taking harvest — the surprise, for the flash copy. 0 when gleaning
+     * (the tender hand never surprises) or when the roll came up short.
+     */
+    lastSurge: number;
     grace: number;
     /** Which wrath thresholds have fired (parallel to tuning thresholds). */
     thresholdsFired: boolean[];

@@ -22,7 +22,8 @@ import {
     continueQuestSpace,
     createQuestBoardSession,
     useQuestCharm,
-    rollQuestBone,
+    castQuestBones,
+    takeQuestStep,
     chooseQuestSpaceOption,
 } from './quest-board.engine';
 import { getQuestBoardDef } from './quest-board.content';
@@ -39,9 +40,81 @@ import type {
 export type QuestBoardPolicyId = 'safe' | 'gambler' | 'economist';
 
 type PolicyAction =
-    | { type: 'roll' }
+    | { type: 'cast' }
+    | { type: 'step'; boneIndex: number }
     | { type: 'charm'; charmId: QuestCharmId }
     | { type: 'option'; optionId: string };
+
+/**
+ * How much a policy WANTS to land on a given space, higher is better.
+ *
+ * This is the whole reason the 2026-08-08 two-bone redesign matters to the
+ * sim: before it, movement was a die roll and no bot had an opinion about
+ * where it went. Now each policy has a route preference, and the bands below
+ * measure whether having one is worth anything.
+ */
+function spaceAppetite(
+    s: QuestBoardSession,
+    kind: QuestSpaceKind,
+    policy: QuestBoardPolicyId,
+): number {
+    const risk = _evaluateSpaceRisk(s, kind);
+    if (policy === 'gambler') {
+        // Chases the spaces that pay: duels and the press-your-luck wade.
+        if (kind === 'duel') return 5;
+        if (kind === 'gather') return 4;
+        if (kind === 'cache') return 3;
+        if (kind === 'market') return 2;
+        return 1;
+    }
+    if (policy === 'economist') {
+        // Wants stalls, finds, and cheap ground; treats vigor as capital.
+        if (kind === 'market') return 5;
+        if (kind === 'cache') return 4;
+        if (kind === 'gather') return 3;
+        if (kind === 'hearth') return s.vigor <= 3 ? 5 : 1;
+        if (kind === 'duel' || kind === 'snag') return 0;
+        return 2;
+    }
+    // safe — avoids the two spaces that can BITE (duel, snag) but still
+    // works the board: GATHER is press-your-luck the player can stop on the
+    // first press, so a cautious plan still routes through it. A bot that
+    // avoided every productive space would just be slow, not safe.
+    if (kind === 'hearth') return s.vigor <= 4 ? 5 : 2;
+    if (kind === 'duel' || kind === 'snag') return risk === 'high' ? 0 : 1;
+    if (kind === 'gather') return 4;
+    if (kind === 'market') return 4;
+    if (kind === 'cache') return 4;
+    return 3;
+}
+
+/**
+ * Choose between the two cast bones. Ties break toward the SHORTER step,
+ * because the bone left behind banks its pips as wind — when the
+ * destinations are equally good, tempo is free.
+ */
+function chooseBone(s: QuestBoardSession, policy: QuestBoardPolicyId): PolicyAction {
+    const bones = s.bones;
+    if (!bones || bones.length === 0) return { type: 'cast' };
+    let bestIndex = 0;
+    let bestScore = -Infinity;
+    for (let i = 0; i < bones.length; i++) {
+        const bone = bones[i]!;
+        let score = spaceAppetite(s, bone.targetKind, policy);
+        // Fitting parts onto the hull is progress toward the only win
+        // condition there is — worth more than any single space.
+        if (bone.fitsAtSlipway && (s.parts.plank + s.parts.pitch + s.parts.cloth + s.parts.nail) > 0) {
+            score += 6;
+        }
+        const other = bones[i === 0 ? 1 : 0]!;
+        if (bone.die < other.die) score += 0.5;
+        if (score > bestScore) {
+            bestScore = score;
+            bestIndex = i;
+        }
+    }
+    return { type: 'step', boneIndex: bestIndex };
+}
 
 interface PolicyCtx {
     /** Fish spent this session (for economist calculations). */
@@ -78,20 +151,23 @@ function _evaluateSpaceRisk(
 function safePolicy(s: QuestBoardSession, _ctx: PolicyCtx): PolicyAction {
     // Always prefer safe options, avoid risk
     if (s.phase === 'idle') {
-        return { type: 'roll' };
+        return { type: 'cast' };
     }
-    
+    if (s.phase === 'choosing') {
+        return chooseBone(s, 'safe');
+    }
+
     if (s.phase === 'space' && s.pending) {
         return naivePolicy(s.pending);
     }
     
-    return { type: 'roll' };
+    return { type: 'cast' };
 }
 
 /** Improved naive policy - still safe but more efficient */
 function naivePolicy(pending: NonNullable<QuestBoardSession['pending']>): PolicyAction {
     const enabled = pending.options.filter(o => !o.disabledReason);
-    if (enabled.length === 0) return { type: 'roll' }; // No valid options
+    if (enabled.length === 0) return { type: 'cast' }; // No valid options
     
     // Market: buy one item if affordable, especially nail deals
     if (pending.kind === 'market') {
@@ -122,12 +198,15 @@ function naivePolicy(pending: NonNullable<QuestBoardSession['pending']>): Policy
 function gamblerPolicy(s: QuestBoardSession, _ctx: PolicyCtx): PolicyAction {
     // Always take risks, maximize rewards
     if (s.phase === 'idle') {
-        return { type: 'roll' };
+        return { type: 'cast' };
+    }
+    if (s.phase === 'choosing') {
+        return chooseBone(s, 'gambler');
     }
     
     if (s.phase === 'space' && s.pending) {
         const enabled = s.pending.options.filter(o => !o.disabledReason);
-        if (enabled.length === 0) return { type: 'roll' };
+        if (enabled.length === 0) return { type: 'cast' };
         
         // Market: aggressive buying (gambler loves spending)
         if (s.pending.kind === 'market') {
@@ -151,18 +230,21 @@ function gamblerPolicy(s: QuestBoardSession, _ctx: PolicyCtx): PolicyAction {
         return { type: 'option', optionId: enabled[0].id };
     }
     
-    return { type: 'roll' };
+    return { type: 'cast' };
 }
 
 function economistPolicy(s: QuestBoardSession, _ctx: PolicyCtx): PolicyAction {
     // Balance risk vs reward - simpler version
     if (s.phase === 'idle') {
-        return { type: 'roll' };
+        return { type: 'cast' };
+    }
+    if (s.phase === 'choosing') {
+        return chooseBone(s, 'economist');
     }
     
     if (s.phase === 'space' && s.pending) {
         const enabled = s.pending.options.filter(o => !o.disabledReason);
-        if (enabled.length === 0) return { type: 'roll' };
+        if (enabled.length === 0) return { type: 'cast' };
         
         const fishRatio = s.fish / Math.max(1, getQuestBoardDef(s.boardId).startFish);
         
@@ -194,7 +276,7 @@ function economistPolicy(s: QuestBoardSession, _ctx: PolicyCtx): PolicyAction {
         return { type: 'option', optionId: enabled[0].id };
     }
     
-    return { type: 'roll' };
+    return { type: 'cast' };
 }
 
 // ---------------------------------------------------------------------------
@@ -242,8 +324,10 @@ export function simulateQuestBoard(
             policy === 'gambler' ? gamblerPolicy(s, ctx) :
             economistPolicy(s, ctx);
 
-        if (action.type === 'roll') {
-            s = rollQuestBone(s);
+        if (action.type === 'cast') {
+            s = castQuestBones(s);
+        } else if (action.type === 'step') {
+            s = takeQuestStep(s, action.boneIndex);
         } else if (action.type === 'charm') {
             s = useQuestCharm(s, action.charmId);
         } else if (action.type === 'option') {

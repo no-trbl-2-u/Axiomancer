@@ -104,7 +104,7 @@ describe('CLI process-level smoke (real ts-node startup)', () => {
             NPX,
             [
                 'ts-node', 'src/CLI/game.cli.ts',
-                '--route', 'fv-2,fv-12', '--auto-combat',
+                '--route', 'fv-2,fv-16', '--auto-combat',
                 '--combat-policy', 'status', '--combat-seed', '42',
                 '--combat-max-turns', '12',
                 '--json-events', '--state-log', logPath,

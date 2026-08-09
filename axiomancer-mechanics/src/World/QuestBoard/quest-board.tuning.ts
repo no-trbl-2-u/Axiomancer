@@ -9,8 +9,20 @@
  */
 
 export const QUEST_BOARD_TUNING = Object.freeze({
-    /** Bone-die rolls per in-game day. Dusk falls after the last. */
+    /** Bone-die casts per in-game day. Dusk falls after the last. */
     stretchesPerDay: 6,
+    /**
+     * THE TWO BONES (2026-08-08) — the pips a bone LEFT BEHIND banks as wind
+     * for the next cast, capped here.
+     *
+     * The cap is what keeps the choice a trade instead of a formality. Banking
+     * a full unchosen die (up to 6) would make "take the short step, bank the
+     * long one" strictly correct almost every turn; banking nothing would make
+     * the unchosen bone worthless and reduce the decision to "which square do
+     * I prefer". At 2 the long step still buys real ground and the short one
+     * still buys real tempo.
+     */
+    windBankCap: 2,
     /** Vigor restored by supper at dusk (capped at max). */
     duskVigor: 2,
     /** Fraction of max vigor restored after a collapse (floor'd). */

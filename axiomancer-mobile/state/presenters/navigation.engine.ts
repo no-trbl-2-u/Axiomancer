@@ -10,6 +10,12 @@ import { selectIsInCombat, type GameStore } from '@mechanics';
 
 import type { AppStoreState } from '../store';
 import { selectHasActiveEvent } from './event.engine';
+import { selectHasActiveBlacksmith } from './blacksmith.engine';
+import { selectHasActiveCache } from './cache.engine';
+import { selectHasActiveGathering } from './gathering.engine';
+import { selectHasActiveHazard } from './hazard.engine';
+import { selectHasActiveQuestBoard } from './quest.engine';
+import { selectHasActiveRest } from './rest.engine';
 import { freezeViewModel } from './freeze';
 
 export type TabRoute = 'exploration' | 'character' | 'memoir' | 'inventory';
@@ -117,4 +123,35 @@ export function selectNavigationViewModel(state: AppStoreState): NavigationViewM
     };
 
     return freezeViewModel(vm);
+}
+
+
+/**
+ * True when ANY full-screen session already owns the app — a paced event or
+ * any of the minigames.
+ *
+ * Each gate (`<EventGate>`, `<HazardGate>`, `<CacheGate>`, …) watches its own
+ * slice and pushes its own route, and those slices are genuinely separate:
+ * `beginLootCache` fills the CACHE slice and never touches `state.event`. So
+ * "is something already happening?" cannot be answered by looking at the
+ * event slice alone, and anything that assumes otherwise will fire into
+ * another gate's flow.
+ *
+ * Added 2026-08-08 after exactly that: the exploration screen's arrival-
+ * cutscene beat checked only `selectHasActiveEvent`, so the dev treasure
+ * trigger — which navigates to the map and then opens the CACHE slice —
+ * arrived to find an "empty" event slice, and the cutscene stole its route to
+ * /cache. Composed from the gates' own selectors rather than re-reading the
+ * slices, so a new gate is one import here and cannot be forgotten twice.
+ */
+export function selectHasAnyActiveSession(state: AppStoreState): boolean {
+    return (
+        selectHasActiveEvent(state)
+        || selectHasActiveHazard(state)
+        || selectHasActiveGathering(state)
+        || selectHasActiveCache(state)
+        || selectHasActiveRest(state)
+        || selectHasActiveQuestBoard(state)
+        || selectHasActiveBlacksmith(state)
+    );
 }

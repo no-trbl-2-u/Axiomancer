@@ -111,6 +111,7 @@ import {
     claimGatheringSpoilsAction,
     continueGatheringAfterReprisalAction,
     descendGatheringAction,
+    readGatheringSiteAction,
     harvestGatheringPlotAction,
     payGatheringOfferingAction,
     selectGatheringApproachAction,
@@ -128,6 +129,8 @@ import {
     claimQuestBoardCompletionAction,
     continueQuestSpaceAction,
     rollQuestBoneAction,
+    castQuestBonesAction,
+    takeQuestStepAction,
     startQuestBoardPlayAction,
     useQuestCharmAction,
     type BeginQuestBoardOptions,
@@ -556,6 +559,8 @@ export interface AppActions {
     harvestGatheringPlot: (uid: string) => void;
     /** Descend one stratum (one-way; richer, angrier). */
     descendGathering: () => void;
+    /** READ THE SITE — buy the hidden eruption point for the price of a turn. */
+    readGatheringSite: () => void;
     /** Pay an offering demand (affordability-gated). Returns success. */
     payGatheringOffering: (offeringId: string) => boolean;
     /** Use a one-shot field tool. */
@@ -589,6 +594,10 @@ export interface AppActions {
     startQuestBoardPlay: () => void;
     /** Cast the bone die: move the piece, fit parts at the slipway, open the space. */
     rollQuestBone: () => void;
+    /** CAST THE BONES — throw two; the move is `takeQuestStep`. */
+    castQuestBones: () => void;
+    /** Take one of the two cast bones; the other banks as wind. */
+    takeQuestStep: (boneIndex: number) => void;
     /** Prime a one-use charm (idle only; consumed by its trigger). */
     useQuestCharm: (charmId: QuestCharmId) => void;
     /** Pick an option on the open space (market stalls stay open until LEAVE). */
@@ -1025,6 +1034,7 @@ export function createAppActions(store: AppStore): AppActions {
         selectGatheringApproach: (approach) => selectGatheringApproachAction(store, approach),
         harvestGatheringPlot: (uid) => harvestGatheringPlotAction(store, uid),
         descendGathering: () => descendGatheringAction(store),
+        readGatheringSite: () => readGatheringSiteAction(store),
         payGatheringOffering: (offeringId) => payGatheringOfferingAction(store, offeringId),
         useGatheringTool: (toolId) => useGatheringToolAction(store, toolId),
         continueGatheringAfterReprisal: () => continueGatheringAfterReprisalAction(store),
@@ -1036,6 +1046,8 @@ export function createAppActions(store: AppStore): AppActions {
         beginQuestBoard: (options) => beginQuestBoardAction(store, options),
         startQuestBoardPlay: () => startQuestBoardPlayAction(store),
         rollQuestBone: () => rollQuestBoneAction(store),
+        castQuestBones: () => castQuestBonesAction(store),
+        takeQuestStep: (boneIndex) => takeQuestStepAction(store, boneIndex),
         useQuestCharm: (charmId) => useQuestCharmAction(store, charmId),
         chooseQuestSpaceOption: (optionId) => chooseQuestSpaceOptionAction(store, optionId),
         continueQuestSpace: () => continueQuestSpaceAction(store),

@@ -160,23 +160,52 @@ export default function QuestScreen() {
                             total={land.stage === 'still' ? vm.lastRoll?.total ?? null : null}
                         />
                     )}
-                    <TouchableOpacity
-                        accessibilityRole="button"
-                        accessibilityLabel="Cast the bone die"
-                        accessibilityState={{ disabled: vm.phase !== 'idle' }}
-                        disabled={vm.phase !== 'idle'}
-                        onPress={actions.rollQuestBone}
-                        style={[styles.rollButton, { opacity: vm.phase === 'idle' ? 1 : 0.4 }]}
-                        testID="quest-roll"
-                    >
-                        <Text style={styles.rollText}>
-                            {land.stage === 'rolling'
-                                ? 'THE BONE FALLS…'
-                                : land.stage === 'walking' || land.stage === 'arrived'
-                                  ? 'WALKING…'
-                                  : 'CAST THE BONE'}
-                        </Text>
-                    </TouchableOpacity>
+                    {/* THE TWO BONES (2026-08-08). The board used to offer a
+                      * single CAST button and move you wherever the die said,
+                      * which is the definition of roll-and-move: no decision,
+                      * every turn. Now the cast puts two bones on the table
+                      * and the player takes one step — each button names the
+                      * space it lands on and what the other bone banks. */}
+                    {vm.phase === 'choosing' ? (
+                        <View style={styles.boneRow} testID="quest-bones">
+                            {vm.bones.map((bone) => (
+                                <TouchableOpacity
+                                    key={bone.index}
+                                    accessibilityRole="button"
+                                    accessibilityLabel={bone.accessibilityLabel}
+                                    onPress={() => actions.takeQuestStep(bone.index)}
+                                    style={[
+                                        styles.boneButton,
+                                        bone.fitsAtSlipway && { borderColor: AXM.sulfur },
+                                    ]}
+                                    testID={`quest-bone-${bone.index}`}
+                                >
+                                    <Text style={styles.boneStep}>{bone.total}</Text>
+                                    <Text style={styles.boneTarget} numberOfLines={2}>{bone.targetName}</Text>
+                                    {bone.fitsAtSlipway && <Text style={styles.boneFits}>FITS THE HULL</Text>}
+                                    <Text style={styles.boneWind}>leaves {bone.windLeftBehind} wind</Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    ) : (
+                        <TouchableOpacity
+                            accessibilityRole="button"
+                            accessibilityLabel="Cast the two bones"
+                            accessibilityState={{ disabled: vm.phase !== 'idle' }}
+                            disabled={vm.phase !== 'idle'}
+                            onPress={actions.castQuestBones}
+                            style={[styles.rollButton, { opacity: vm.phase === 'idle' ? 1 : 0.4 }]}
+                            testID="quest-roll"
+                        >
+                            <Text style={styles.rollText}>
+                                {land.stage === 'rolling'
+                                    ? 'THE BONES FALL…'
+                                    : land.stage === 'walking' || land.stage === 'arrived'
+                                      ? 'WALKING…'
+                                      : 'CAST THE BONES'}
+                            </Text>
+                        </TouchableOpacity>
+                    )}
                 </QuestBoardTrack>
 
                 {/* Legend — what each mark on the track means */}
@@ -304,6 +333,24 @@ const useStyles = makeStyles((AXM) => ({
         letterSpacing: 0.5,
         color: AXM.bone,
     },
+    boneRow: { flexDirection: 'row', gap: 6, marginTop: 6 },
+    boneButton: {
+        flex: 1,
+        borderWidth: 2,
+        borderColor: AXM.parchment,
+        paddingVertical: 5,
+        paddingHorizontal: 8,
+        backgroundColor: AXM.bg,
+        alignItems: 'center',
+        maxWidth: 118,
+    },
+    boneStep: { fontFamily: FONTS.gothic, fontSize: 20, lineHeight: 22, color: AXM.parchment },
+    boneTarget: {
+        fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 0.8,
+        color: AXM.bone, textAlign: 'center', marginTop: 1,
+    },
+    boneFits: { fontFamily: FONTS.sans, fontSize: 8, letterSpacing: 0.8, color: AXM.sulfur, marginTop: 1 },
+    boneWind: { fontFamily: FONTS.mono, fontSize: 8, color: AXM.ash, marginTop: 1 },
     rollButton: {
         marginTop: 6,
         borderWidth: 2,

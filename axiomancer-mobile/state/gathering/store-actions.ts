@@ -19,6 +19,7 @@ import {
     continueGatheringAfterReprisal as engineContinueAfterReprisal,
     createGatheringSession,
     descendGathering as engineDescend,
+    readGatheringSite as engineReadSite,
     harvestGatheringPlot as engineHarvestPlot,
     payGatheringOffering as enginePayOffering,
     selectGatheringApproach as engineSelectApproach,
@@ -159,6 +160,17 @@ export function descendGatheringAction(store: AppStore): void {
     const s = store.getState().gathering?.session;
     if (!s) return;
     setSession(store, engineDescend(s));
+}
+
+/**
+ * READ THE SITE — spend a turn to learn the site's exact TEMPER (the hidden
+ * wrath at which it erupts). Costs no wrath and yields nothing; the price is
+ * a turn, which pushes dusk closer. Idempotent once read.
+ */
+export function readGatheringSiteAction(store: AppStore): void {
+    const s = store.getState().gathering?.session;
+    if (!s) return;
+    setSession(store, engineReadSite(s));
 }
 
 /**

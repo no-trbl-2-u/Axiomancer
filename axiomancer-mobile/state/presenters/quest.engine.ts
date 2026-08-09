@@ -47,6 +47,22 @@ export interface QuestPartVM {
     carried: number;
 }
 
+/** One cast bone, ready to render as a choice. */
+export interface QuestBoneVM {
+    index: number;
+    die: number;
+    bonus: number;
+    total: number;
+    target: number;
+    targetKind: QuestSpaceKind;
+    targetName: string;
+    fitsAtSlipway: boolean;
+    /** Wind the OTHER bone banks if this one is taken. */
+    windLeftBehind: number;
+    label: string;
+    accessibilityLabel: string;
+}
+
 export interface QuestCharmVM {
     id: QuestCharmId;
     name: string;
@@ -125,6 +141,15 @@ export interface QuestBoardVM {
     /** 0..1 — fraction of required parts fitted. */
     boatProgress: number;
     lastRoll: { die: number; bonus: number; total: number } | null;
+    /**
+     * THE TWO BONES on the table, awaiting a choice (phase 'choosing').
+     *
+     * Each carries the space it would land on, so the player picks a
+     * DESTINATION rather than a number. Empty in every other phase.
+     * Before the 2026-08-08 redesign there was one bone and no choice —
+     * the board was roll-and-move.
+     */
+    bones: readonly QuestBoneVM[];
     charms: readonly QuestCharmVM[];
     vows: readonly QuestVowVM[];
     tierPreview: QuestOutcomeTier;
@@ -223,6 +248,7 @@ const EMPTY_VM: QuestBoardVM = Object.freeze({
     parts: Object.freeze([]),
     boatProgress: 0,
     lastRoll: null,
+    bones: Object.freeze([]),
     charms: Object.freeze([]),
     vows: Object.freeze([]),
     tierPreview: 'driftwood',
@@ -337,6 +363,28 @@ export function selectQuestBoardVM(state: Pick<AppStoreState, 'quest'>): QuestBo
         parts,
         boatProgress: requiredTotal === 0 ? 0 : fittedTotal / requiredTotal,
         lastRoll: s.lastRoll,
+        bones: (s.bones ?? []).map((bone, i, all) => {
+            const other = all[i === 0 ? 1 : 0];
+            return {
+                index: i,
+                die: bone.die,
+                bonus: bone.bonus,
+                total: bone.total,
+                target: bone.target,
+                targetKind: bone.targetKind,
+                targetName: bone.targetName,
+                fitsAtSlipway: bone.fitsAtSlipway,
+                // What the OTHER bone banks if this one is taken — the cost
+                // side of the trade, and the thing that stops the choice
+                // from being "which square looks nicer".
+                windLeftBehind: other?.windIfLeft ?? 0,
+                label: `${bone.total} → ${bone.targetName}`,
+                accessibilityLabel:
+                    `Step ${bone.total} to ${bone.targetName}, a ${bone.targetKind} space.`
+                    + (bone.fitsAtSlipway ? ' Fits carried parts at the slipway.' : '')
+                    + ` Leaves ${other?.windIfLeft ?? 0} wind banked.`,
+            };
+        }),
         charms,
         vows,
         tierPreview: questBoardTierOf(s),

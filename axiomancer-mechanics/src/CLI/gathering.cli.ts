@@ -47,15 +47,23 @@ import {
     canPayGatheringOffering,
     gatheringHarvestWrath,
     gatheringHarvestYield,
+    gatheringWrathSpread,
+    gatheringCommunionWrathMax,
+    gatheringDespoilWrathMin,
+    readGatheringSite,
     getGatherPlotDef,
     getGatherOfferingDef,
     getGatherToolDef,
     getGatherSiteDef,
     GATHERING_SITES,
     GATHERING_REPRISALS,
+    GATHERING_OMENS,
+    GATHERING_READ,
+    GATHER_WRATH_MAX,
 } from '../World/Gathering';
 import type {
     GatherApproachKey,
+    GatherPlotDef,
     GatherSiteDef,
     GatherToolId,
     GatheringSessionState,
@@ -152,14 +160,24 @@ type AutoAction =
     | { type: 'harvest'; uid: string }
     | { type: 'descend' }
     | { type: 'offer'; id: string }
+    | { type: 'read' }
     | { type: 'withdraw' };
 
+/**
+ * The `--auto` bot, mirroring `gathering.sim.ts`'s READER policy: buy the
+ * site's temper first, then work right up to its despoilment line, budgeting
+ * every taking against the worst the unsteady hand can do. It reasons from
+ * the same information a player has — the omen and, once bought, the number.
+ */
 function autoAction(s: GatheringSessionState, ctx: AutoCtx): AutoAction {
-    if (s.wrath >= 5) {
+    if (!s.temperKnown) return { type: 'read' };
+    const despoil = gatheringDespoilWrathMin(s);
+    const spread = gatheringWrathSpread(s);
+    if (s.wrath >= despoil || s.turn >= 10) {
         const offer = s.offerings.find((o) => !o.paid && canPayGatheringOffering(s, o.id).payable);
         if (offer) return { type: 'offer', id: offer.id };
+        return { type: 'withdraw' };
     }
-    if (s.wrath >= 7 || s.turn >= 9) return { type: 'withdraw' };
     if (ctx.harvestsAtDepth >= 3 && s.depth < 2) return { type: 'descend' };
     const plots = s.spread.map((entry) => {
         const def = getGatherPlotDef(entry.plotId);
@@ -170,15 +188,15 @@ function autoAction(s: GatheringSessionState, ctx: AutoCtx): AutoAction {
             breath: def.trait === 'breath',
         };
     });
-    if (s.wrath >= 3) {
+    if (despoil - s.wrath <= 3) {
         const soothe = plots.find((p) => p.breath);
         if (soothe) return { type: 'harvest', uid: soothe.entry.uid };
     }
     const best = plots
-        .filter((p) => !p.breath && p.yieldR > 0 && s.wrath + p.wrath < 8)
-        .sort((a, b) => b.yieldR - a.yieldR - (b.wrath - a.wrath) || a.wrath - b.wrath)[0];
+        .filter((p) => !p.breath && p.yieldR > 0 && s.wrath + p.wrath + spread < despoil)
+        .sort((a, b) => b.yieldR - a.yieldR || a.wrath - b.wrath)[0];
     if (best) return { type: 'harvest', uid: best.entry.uid };
-    if (s.depth < 2 && s.wrath < 6) return { type: 'descend' };
+    if (s.depth < 2) return { type: 'descend' };
     return { type: 'withdraw' };
 }
 
@@ -220,12 +238,35 @@ function drainReprisals(state: GatheringSessionState): GatheringSessionState {
 
 // ─── Manual driver (script / stdin / tty) ─────────────────────────────────────
 
+/** The wrath a taking prints, as a range when the hand is unsteady. */
+function wrathLabel(state: GatheringSessionState, def: GatherPlotDef, floorCost: number): string {
+    // Sickled takings and GIFTs are exact; everything else prints a range
+    // when the stance's hand is unsteady.
+    const exact = state.sickled || def.trait === 'gift';
+    const spread = exact ? 0 : gatheringWrathSpread(state);
+    return spread > 0 ? `${floorCost}-${floorCost + spread}` : `${floorCost}`;
+}
+
 async function manualTurn(state: GatheringSessionState): Promise<{ state: GatheringSessionState; done: boolean }> {
     const site = getGatherSiteDef(state.siteId);
+    // The site's TEMPER is hidden until read, so the meter shows the band's
+    // ceiling and the OMEN carries the actual warning.
+    const ceiling = state.temperKnown ? `${state.temper}` : `${GATHER_WRATH_MAX}?`;
     log(
-        `\n  ${site.depthNames[state.depth]} — wrath ${state.wrath}/12 · grace ${state.grace} · ` +
+        `\n  ${site.depthNames[state.depth]} — wrath ${state.wrath}/${ceiling} · grace ${state.grace} · ` +
         `satchel ${state.satchel.length} pieces · takings ${state.turn}`,
     );
+    const omen = GATHERING_OMENS[state.omen];
+    log(`  ${omen.name} — ${omen.desc}`);
+    if (state.temperKnown) {
+        log(
+            `  (known: it erupts at ${state.temper}; communion needs ${gatheringCommunionWrathMax(state)} or less, ` +
+            `${gatheringDespoilWrathMin(state)}+ despoils.)`,
+        );
+    }
+    if (state.lastSurge > 0) {
+        log(`  The ground gave more than you meant to take — ${state.lastSurge} extra wrath.`);
+    }
 
     const choices: Array<{ name: string; value: string }> = [];
     for (const entry of state.spread) {
@@ -234,8 +275,11 @@ async function manualTurn(state: GatheringSessionState): Promise<{ state: Gather
         const yieldR = gatheringHarvestYield(state, def);
         const tag = def.trait === 'breath'
             ? `tend ${def.name} [wrath ${wrath}]`
-            : `take ${def.name} [+${yieldR} ${def.family}, wrath +${wrath}${def.trait ? `, ${def.trait}` : ''}]`;
+            : `take ${def.name} [+${yieldR} ${def.family}, wrath +${wrathLabel(state, def, wrath)}${def.trait ? `, ${def.trait}` : ''}]`;
         choices.push({ name: tag, value: `harvest:${entry.uid}` });
+    }
+    if (!state.temperKnown) {
+        choices.push({ name: `${GATHERING_READ.name} — ${GATHERING_READ.desc}`, value: 'read' });
     }
     for (const o of state.offerings) {
         if (o.paid) continue;
@@ -267,6 +311,11 @@ async function manualTurn(state: GatheringSessionState): Promise<{ state: Gather
     }
     if (verb === 'tool') {
         return { state: step('useGatheringTool', state, useGatheringTool(state, a! as GatherToolId), { toolId: a }), done: false };
+    }
+    if (verb === 'read') {
+        const next = step('readGatheringSite', state, readGatheringSite(state), {});
+        if (next !== state) log(`  ${GATHERING_READ.revealed}`);
+        return { state: next, done: false };
     }
     if (verb === 'descend') {
         return { state: step('descendGathering', state, descendGathering(state), {}), done: false };
@@ -350,6 +399,11 @@ async function playSite(flags: GatheringCliFlags, runIndex: number): Promise<Sit
                 state = next === state
                     ? step('withdrawFromGathering', state, withdrawFromGathering(state), {})
                     : step('payGatheringOffering', state, next, { offeringId: action.id });
+            } else if (action.type === 'read') {
+                const next = readGatheringSite(state);
+                state = next === state
+                    ? step('withdrawFromGathering', state, withdrawFromGathering(state), {})
+                    : step('readGatheringSite', state, next, {});
             } else {
                 state = step('withdrawFromGathering', state, withdrawFromGathering(state), {});
             }

@@ -20,6 +20,8 @@ import {
     createQuestBoardSession,
     QUEST_BOARDS,
     rollQuestBone as engineRoll,
+    castQuestBones as engineCast,
+    takeQuestStep as engineTakeStep,
     useQuestCharm as engineUseCharm,
 } from '@mechanics';
 import type { QuestBoardSession, QuestCharmId, QuestOutcomeTier } from '@mechanics';
@@ -81,6 +83,28 @@ export function startQuestBoardPlayAction(store: AppStore): void {
     setSession(store, engineBegin(s));
 }
 
+/**
+ * CAST THE BONES — throw two and put them on the table. The move itself is
+ * `takeQuestStepAction`; the split is the 2026-08-08 redesign that turned a
+ * roll-and-move board into a route choice.
+ */
+export function castQuestBonesAction(store: AppStore): void {
+    const s = store.getState().quest?.session;
+    if (!s) return;
+    setSession(store, engineCast(s));
+}
+
+/** Take one of the two cast bones; the other's pips bank as wind. */
+export function takeQuestStepAction(store: AppStore, boneIndex: number): void {
+    const s = store.getState().quest?.session;
+    if (!s) return;
+    setSession(store, engineTakeStep(s, boneIndex));
+}
+
+/**
+ * Legacy one-call roll (cast + take the first bone). Kept for the replay
+ * scripts and tests that predate the two-bone cast.
+ */
 export function rollQuestBoneAction(store: AppStore): void {
     const s = store.getState().quest?.session;
     if (!s) return;

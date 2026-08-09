@@ -30,7 +30,7 @@ import {
     startTurn, endTurn, draftStanceDie, discardCombatCard, playSignatureSkill,
     tapFateDie, getPendingDotTotal, getFloatingDiceColors,
     selectEncounterMercyChoice, selectCapitulationChoice, buildCombatSummary,
-    rollLoot, addItem, getLogger,
+    rollLoot, addItem, getLogger, advanceKillObjectives,
     type CombatEncounterState, type CombatOutcome, type Character, type Enemy, type CombatEvent,
 } from '@mechanics';
 
@@ -122,6 +122,13 @@ function isMercifulWin(outcome: CombatOutcome): boolean {
  * accumulates `finalState.souls`, "the jar travels" regardless of how the
  * fight ended. The deckbuilder card is handled separately (rolled into the
  * store on victory, claimed via `claimCombatRewardAction`).
+ *
+ * 2026-08-08 first-map audit — a win also advances any active `kill` quest
+ * objective naming this foe. The legacy engine `endCombat` did this, but the
+ * live hazard combat never calls it, so before this the first map's whole
+ * quest chain was dead: killing the King of Revenge left `starting-quest`
+ * stuck at 0/1 forever, Old Marrow's reward branches never unlocked, and
+ * `get-to-forest` could never be granted.
  */
 export function applyHazardOutcome(
     store: StoreLike,
@@ -155,7 +162,12 @@ export function applyHazardOutcome(
                 player = { ...player, inventory: addItem(player.inventory, drop) };
             }
         }
-        return { player };
+        // Kill objectives match on the foe's DISPLAY name — that is what the
+        // authored quests carry ("The King of Revenge", not the slug).
+        const quests = (outcome === 'victory' || isMercifulWin(outcome)) && s.quests
+            ? advanceKillObjectives(s.quests, enemy.name).log
+            : null;
+        return quests ? { player, quests } : { player };
     });
     // Cascade level-ups through the engine store (applyLevelUps isn't exported,
     // so the LEVEL_UP reducer is the only public path). applyLevelUps already

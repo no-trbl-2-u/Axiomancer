@@ -18,6 +18,8 @@ import {
     questPartsMissing,
     questVowResults,
     rollQuestBone,
+    castQuestBones,
+    takeQuestStep,
     useQuestCharm,
 } from '../quest-board.engine';
 import {
@@ -135,6 +137,121 @@ describe('lifecycle', () => {
         const b = playToOutcome(99);
         expect(a.outcome).toEqual(b.outcome);
         expect(a.metrics).toEqual(b.metrics);
+    });
+});
+
+describe('the two bones — the movement choice (2026-08-08)', () => {
+    // The Boy's Almanac was roll-and-move: the only action at idle was "roll",
+    // so the player made no decision about where the piece went — the one
+    // decision a board game exists to offer. The cast now puts TWO bones on
+    // the table, each previewed with the space it would land on, and the bone
+    // left behind banks its pips as wind. Every turn is a trade between
+    // position and tempo.
+
+    it('casts two bones and waits for a choice instead of moving', () => {
+        const s = idle(7);
+        const cast = castQuestBones(s);
+        expect(cast.phase).toBe('choosing');
+        expect(cast.bones).toHaveLength(2);
+        // Nothing has moved yet — this is the whole change.
+        expect(cast.pos).toBe(s.pos);
+        expect(cast.stretch).toBe(s.stretch);
+        expect(cast.metrics.rolls).toBe(s.metrics.rolls);
+    });
+
+    it('previews each bone with the space it would land on', () => {
+        const cast = castQuestBones(idle(7));
+        for (const bone of cast.bones!) {
+            expect(bone.die).toBeGreaterThanOrEqual(1);
+            expect(bone.die).toBeLessThanOrEqual(6);
+            expect(bone.total).toBe(bone.die + bone.bonus);
+            const expected = (cast.pos + bone.total) % BUILD_THE_BOAT_BOARD.spaces.length;
+            expect(bone.target).toBe(expected);
+            expect(bone.targetKind).toBe(BUILD_THE_BOAT_BOARD.spaces[expected]!.kind);
+            expect(bone.targetName).toBe(BUILD_THE_BOAT_BOARD.spaces[expected]!.name);
+        }
+    });
+
+    it('applies wind and charm bonuses to BOTH bones, so the bonus never steers the choice', () => {
+        const s = { ...idle(7), wind: 3 };
+        const cast = castQuestBones(s);
+        for (const bone of cast.bones!) expect(bone.bonus).toBe(3);
+    });
+
+    it('takes the chosen bone and banks the other as wind', () => {
+        const cast = castQuestBones(idle(7));
+        const chosen = cast.bones![0]!;
+        const left = cast.bones![1]!;
+        const moved = takeQuestStep(cast, 0);
+
+        expect(moved.pos).toBe(chosen.target);
+        expect(moved.stretch).toBe(cast.stretch + 1);
+        expect(moved.metrics.rolls).toBe(cast.metrics.rolls + 1);
+        expect(moved.wind).toBe(left.windIfLeft);
+        expect(moved.metrics.windBanked).toBe(left.windIfLeft);
+        expect(moved.bones).toBeNull();
+    });
+
+    it('caps the banked wind so the short step is a trade, not a formality', () => {
+        // Uncapped, "take the short step and bank the long one" would be
+        // strictly correct nearly every turn and the choice would evaporate.
+        for (let seed = 1; seed <= 30; seed++) {
+            const cast = castQuestBones(idle(seed));
+            for (const bone of cast.bones!) {
+                expect(bone.windIfLeft).toBeLessThanOrEqual(QUEST_BOARD_TUNING.windBankCap);
+                expect(bone.windIfLeft).toBe(Math.min(bone.die, QUEST_BOARD_TUNING.windBankCap));
+            }
+        }
+    });
+
+    it('counts a deliberate short step so the sim can see route discipline', () => {
+        let sawShort = false;
+        for (let seed = 1; seed <= 40 && !sawShort; seed++) {
+            const cast = castQuestBones(idle(seed));
+            const [a, b] = cast.bones!;
+            if (a!.die === b!.die) continue;
+            const shortIndex = a!.die < b!.die ? 0 : 1;
+            const moved = takeQuestStep(cast, shortIndex);
+            expect(moved.metrics.shortStepsTaken).toBe(1);
+            const longMoved = takeQuestStep(cast, shortIndex === 0 ? 1 : 0);
+            expect(longMoved.metrics.shortStepsTaken).toBe(0);
+            sawShort = true;
+        }
+        expect(sawShort).toBe(true);
+    });
+
+    it('offers two genuinely different destinations often enough to matter', () => {
+        // If both bones nearly always landed on the same KIND of space the
+        // choice would be cosmetic. Sample the opening cast across seeds.
+        let differing = 0;
+        const samples = 60;
+        for (let seed = 1; seed <= samples; seed++) {
+            const cast = castQuestBones(idle(seed));
+            const [a, b] = cast.bones!;
+            if (a!.targetKind !== b!.targetKind) differing += 1;
+        }
+        expect(differing / samples).toBeGreaterThan(0.5);
+    });
+
+    it('refuses a step outside the choosing phase or off the end of the pair', () => {
+        const s = idle(7);
+        expect(takeQuestStep(s, 0)).toBe(s);
+        const cast = castQuestBones(s);
+        expect(takeQuestStep(cast, 5)).toBe(cast);
+        expect(castQuestBones(cast)).toBe(cast);
+    });
+
+    it('fits carried parts when the chosen bone crosses the slipway', () => {
+        const cast = castQuestBones({
+            ...idle(7),
+            pos: BUILD_THE_BOAT_BOARD.spaces.length - 2,
+            parts: { plank: 1, pitch: 1, cloth: 1, nail: 1 },
+        });
+        const crossing = cast.bones!.findIndex(b => b.fitsAtSlipway);
+        if (crossing < 0) return; // seed-dependent; the assertion below covers it
+        const moved = takeQuestStep(cast, crossing);
+        const fittedTotal = moved.fitted.plank + moved.fitted.pitch + moved.fitted.cloth + moved.fitted.nail;
+        expect(fittedTotal).toBeGreaterThan(0);
     });
 });
 
@@ -475,15 +592,25 @@ describe('spaces', () => {
         expect(lingered.vigor).toBeGreaterThan(hurt.vigor);
     });
 
-    it('omen banks wind that boosts and then clears on the next roll', () => {
+    it('omen banks wind that boosts the next cast and is then spent', () => {
         const s = landOn('omen');
         expect(s.wind).toBeGreaterThan(0);
         let next = continueQuestSpace(s);
         if (next.phase === 'dusk') next = acknowledgeQuestDusk(next);
         const banked = next.wind;
-        const rolled = rollQuestBone(next);
-        expect(rolled.lastRoll!.bonus).toBe(banked);
-        expect(rolled.wind).toBe(0);
+
+        // The omen's wind rides BOTH bones, so it never silently steers the
+        // choice toward one of them.
+        const cast = castQuestBones(next);
+        expect(cast.phase).toBe('choosing');
+        for (const bone of cast.bones!) expect(bone.bonus).toBe(banked);
+
+        const stepped = takeQuestStep(cast, 0);
+        expect(stepped.lastRoll!.bonus).toBe(banked);
+        // The omen's wind is spent — what remains is the pips of the bone
+        // left behind, which is the two-bone cast's own banking rule and not
+        // a leftover of the omen.
+        expect(stepped.wind).toBe(cast.bones![1]!.windIfLeft);
     });
 });
 
