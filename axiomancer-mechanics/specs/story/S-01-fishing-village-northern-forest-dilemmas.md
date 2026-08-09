@@ -9,6 +9,14 @@
 > reservation — several are currently occupied by other content (see each
 > entry's Cross-references) and will need either re-slotting to an unused
 > node or a deliberate content swap when this spec is picked up.
+>
+> **Update 2026-08-09.** Picked up: queued as build-plan **Phase 53d**, and
+> both open questions are now answered below (displace encounter nodes, grid
+> stays at 25; flags only, no `moralDelta`). The intended hosts named in each
+> entry are **superseded** — see the table under Open Question 1. Read
+> `S-02-fishing-village-voices.md` first: it defines the later-column NPCs
+> who will read these dilemmas' flags, which is what Phase 53e adds and what
+> makes the flags worth setting.
 
 ## Goal
 
@@ -179,17 +187,75 @@ per grounding notes — this dilemma only plants the flag).
 
 ## Open questions
 
+Both were answered on 2026-08-09 during the phase-53 planning pass, not by
+T. They are reversible content calls — overruling either costs one node
+reassignment or one effect field, and invalidates no phase. See
+`S-02-fishing-village-voices.md` and `plan/phases/phase_53d_*.md`.
+
 1. **Node re-slotting.** All four intended hosts above are currently
    occupied by other content. Should the future implementer add new
    nodes to the 25-node grid, or displace/merge with the existing
    payload at that node?
-   > Your answer:
+   > **Answered (phase-53 planning, 2026-08-09): displace; the grid stays
+   > at 25 on both maps, and none of the four original hosts is used.**
+   >
+   > Growing the grid is refused outright. The 2026-08-08 first-map audit
+   > re-layered both maps into column-layered forward gauntlets precisely
+   > so the soft-lock class became structurally impossible; adding nodes
+   > re-opens it and invalidates the route-length and coverage numbers that
+   > audit tuned. Merging two kinds onto one node is also refused —
+   > registration is one-pool-per-node, and the "rest first, dilemma after"
+   > idea floated for dilemma 4 would need an engine change to sequence two
+   > payloads. That is a real feature, but it is not this content pass.
+   >
+   > So each dilemma displaces one **encounter** node, which is the only
+   > kind the maps carry a surplus of, and the intended hosts in this
+   > document are superseded:
+   >
+   > | dilemma | intended host | actual host | why the change |
+   > |---|---|---|---|
+   > | 1. The Borrowed Hook | `fv-8` (gathering) | an encounter node in column 2 | must precede the post-boss NPCs who read its flag |
+   > | 2. The Frightened Friend | `nf-6` (encounter) | an encounter node, northern-forest | unchanged in spirit; nf-6 itself stays a fight |
+   > | 3. The Stranger's Net | `fv-19` (interaction) | an encounter node in column 3 | `fv-19` is being reclaimed for a real, rostered NPC — see S-02 |
+   > | 4. The Crowning Witnessed | `nf-11` (rest) | an encounter node, northern-forest | rest is being rebuilt by phases 52c/52d; do not build on it |
+   >
+   > Exact node ids are Phase 53d's call, under two binding constraints:
+   > **(a)** a dilemma whose flag is read later must sit in a strictly
+   > earlier column than every reader (the gauntlet has no back-travel —
+   > see S-02 § "the law a gauntlet imposes"); **(b)** the strand invariant
+   > and the coverage walk are re-run afterward.
 
 2. **moralDelta / alignmentDelta.** fv-14 sets none except a small
    `alignmentDelta` on the joke-deflection branch. Should these four
    dilemmas stay similarly unsteered, or is it time to start
    accumulating a legible morality signal across dilemmas?
-   > Your answer:
+   > **Answered (phase-53 planning, 2026-08-09): stay unsteered. Flags
+   > only. No `moralDelta` on any of the four, and `alignmentDelta` only
+   > where a branch genuinely names a worldview rather than a virtue.**
+   >
+   > The reason is not caution, it is that the alternative is already
+   > covered. The village has two NPCs whose entire job is to score the
+   > player — Old Marrow (−4 to +5) and the Coastal Beggar (−5 to +5), and
+   > spec 10 names the Beggar as the meter's demonstration NPC. A morality
+   > signal is not missing from the first arc; it is concentrated in the
+   > people who deliver it, which is where a legible signal belongs. The
+   > dilemmas are the opposite register on purpose: nobody is watching, and
+   > the game does not tell the boy what he just was.
+   >
+   > This is the distinction *Tyranny* draws with loyalty/fear — both
+   > states valid, the game declining to moralize — and it collapses the
+   > moment an unwitnessed choice moves a visible meter, because the meter
+   > is the verdict. It would also make dilemma 3 incoherent: "take a few
+   > fish and say nothing" only lands if nothing announces it as theft.
+   >
+   > What the flags get instead is a **reader**, which is what was actually
+   > missing. Phase 53e gates a branch on each dilemma's flag in a
+   > later-column NPC, so the consequence arrives as somebody noticing
+   > rather than as a number moving. `alignmentDelta` stays permitted on a
+   > branch that states a worldview — dilemma 4's "note the spot, mean to
+   > tell someone in the city" is a `scope` move, not a virtue — following
+   > `fv-14`'s own precedent, where only the joke-deflection branch carries
+   > one.
 
 ## Proposed approach
 
@@ -209,7 +275,7 @@ per grounding notes — this dilemma only plants the flag).
 
 ## Acceptance checklist
 
-- [ ] Open questions answered.
+- [x] Open questions answered (2026-08-09, phase-53 planning — reversible).
 - [ ] Node hosts finalized (re-slotted or explicitly swapped).
 - [ ] All four `DialogueTree`s authored and registered.
 - [ ] Flags documented here match the flags actually set in code.
