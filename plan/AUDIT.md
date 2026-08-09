@@ -72,6 +72,60 @@
 > replacement may now be authored freely, including with normal damage.
 > See `plan/bearings.md` § "THE UNSHACKLING".
 
+### The loop's own docs still call the `Closes #N` trailer the closing mechanism
+- category: docs
+- impact: 6
+- ease: 9
+- detail: filed 2026-08-08 by Phase 48. `skills/ship-a-phase.md:325`,
+  `skills/iterate.md:315` and `scripts/loop-issue.mjs:10` describe the
+  trailer as a "belt-and-suspenders backup", and `skills/iterate.md:193`'s
+  issue-body template promises "this issue auto-closes when the commit
+  pushes to main". Phase 48 proved the trailer is inert here and has never
+  closed anything. Those sentences are now TRUE for the first time — but
+  because `close-trailers.yml` runs the sweep, not because GitHub parses the
+  trailer. Reword them to name the sweep, or the next reader re-derives the
+  same wrong mental model this row's parent already cost five days to.
+
+### `SYSTEM_TERM_COVERED_BY` claims WILD / X is covered by a keyword with no glossary row
+- category: contract
+- impact: 4
+- ease: 8
+- detail: filed 2026-08-08 by Phase 42's registry survey.
+  `axiomancer-mobile/state/combat/keywords.ts:399` maps
+  `'WILD / X': ['FORGE', 'CLARITY']`, but **CLARITY has no `KEYWORD_GLOSS`
+  row** — so the system term advertises coverage the player can never read.
+  The mechanic is live (`forceWildOnNextDie`, `combat.engine.ts:624`, the
+  `consumedOnUse` discharge at `effects.ts:374`), so this is a registry gap
+  rather than dead code: either CLARITY earns a gloss or the coverage claim
+  drops it. Spec 34 §5 rules all 42 glossary rows and 8 system terms, so
+  Phase 44b is the natural owner.
+
+### Three mobile source comments still name cards the Profane Canon deleted
+- category: docs
+- impact: 3
+- ease: 9
+- detail: filed 2026-08-08 by Phase 42's survey, scope-checked. Comments in
+  `state/combat/store-actions.ts:69`, `state/actions.ts:775` and
+  `state/selectors/combat-cards.ts:13` explain the starter path in terms of
+  `slippery-slope` and `brace-for-impact`, neither of which exists in the
+  library since `84ef85b`. **Live code is unaffected — these are comments
+  only** (checked; no runtime reference survives). Same root as the
+  `combat-sim` default-loadout row above, which IS a live defect.
+
+### The deck-matrix baseline needs re-stamping under CQI before Phase 43 is usable
+- category: gap
+- impact: 7
+- ease: 8
+- detail: filed 2026-08-08. Phase 43 shipped `combatQualityIndex` but
+  deliberately did not stamp a baseline (a stamp taken mid-batch names a
+  commit that does not contain what it measured). The baseline is now STALE
+  by 5 mechanics-source commits at `8eb33fb8`. Until
+  `npm run baseline:regen && node scripts/check-baseline-freshness.mjs` runs
+  on a clean tree, `/deck-tuning` and `/combat-playtest` have no stamped CQI
+  to optimise against and would fall back on `statusEngagement` — the dead
+  law Phase 43 exists to retire. Pairs with the `/deck-tuning` naming row
+  above: the metric and the skills that consume it must move together.
+
 ### `dominantCardShare` is broken post-strike-death
 - category: debt
 - impact: 7
@@ -311,7 +365,7 @@
 - next: (drained — re-open after the card redesign + Phase 43, if the
   cliff survives both)
 
-### `Closes #N` auto-close is still not firing reliably — the 2026-08-03 fix does not hold
+### [x] `Closes #N` auto-close is still not firing reliably — RESOLVED 2026-08-08 by Phase 48 (`46b5a5d`), and this row's own premise was WRONG
 - category: debt
 - impact: 5
 - ease: 4
@@ -332,7 +386,32 @@
   #174) were closed by hand during /oversight 2026-08-08 with a comment
   citing the shipping commit — so the CURRENT queue is clean and this
   row is about the mechanism, not the backlog.
-- **PROMOTED to build-plan Phase 48 via /oversight 2026-08-08** (T:
+- **RESOLUTION 2026-08-08 (Phase 48). Read this before citing anything
+  above.** The evidence in this row is accurate but its inference is not.
+  Phase 48 compared #174 and #175 end to end and eliminated all three
+  hypotheses: both commits were the tip of their own single-commit push to
+  `main` with byte-identical bullet trailers, so neither the bullet prefix
+  nor batched-push tip-only scanning was ever the cause. The decisive facts
+  are that #175's only comment is `buildCloseCommentBody()` verbatim — so
+  **our own API call closed it, not GitHub's parser** — and #174 has no loop
+  comment at all, meaning `close-comment` was never invoked. March run
+  `31184116798` ended with "Waiting on CI — will resume once the
+  verify-mobile run for commit 615ff26b finishes"; the turn ended while CI
+  was amber, nothing resumes, and #174 leaked for 11 hours.
+- **Actual root cause:** the only working close path was a best-effort prose
+  step gated behind `deploy:check` going green, so any turn ending before CI
+  concluded skipped it silently and forever. **The `Closes #N` trailer is
+  inert in this repo and has never been observed closing anything** — the
+  2026-08-03 fix was not intermittent, it was fixing a mechanism that was
+  never running. Why GitHub's native parser stays inert could not be
+  determined; the fix deliberately does not depend on it.
+- **Fixed by:** `loop-issue.mjs close-trailers` + `.github/workflows/close-trailers.yml`,
+  which scan every commit in a pushed range and close via the API
+  idempotently, with a 36-case hermetic witness (mutation-tested against
+  five injected regressions, all killed). Verified on its first live firing
+  against the `46b5a5d` squash merge — a worst-case body dense with `#NNN`
+  references — which correctly reported `0 closing reference(s)`.
+- (historical) **PROMOTED to build-plan Phase 48 via /oversight 2026-08-08** (T:
   "make phases for everything you mentioned") — it is no longer competing
   with Phase 39 for an `/iterate` slot.
 - next: Phase 48 — re-open the root-cause hunt. Compare `615ff26b` vs

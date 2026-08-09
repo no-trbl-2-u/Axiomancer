@@ -36,6 +36,16 @@
   a sequence of one-way acts or a place you can move around in. The gauntlet
   traversal law implies the former; the `completedMaps` field implies someone
   once meant the latter.
+### Author the Parish's coastal settlements if Phase 44f's brief reads thin
+- source: filed 2026-08-08 by Phase 42 (`46b5a5d`), spec 34 §10.
+- what: spec 34 §1 establishes THE PARISH and its seven estates, but the
+  world content it inherits is one continent (`W-01`) plus the fishing
+  village. 44f renames what exists; it does not author what is missing. If
+  that phase opens and finds the map thinner than the fiction now implies,
+  the gap is settlements — and `/world-spec` is the built tool for it.
+- why not now: speculative until 44f actually runs, and 44f is blocked on
+  44a. Filed so the option is visible rather than rediscovered mid-phase.
+- score: 3.5 (low urgency, high optionality)
 
 ### Reconcile the card base: do duplicates reach the deck, and are loadout flags wired?
 - source: filed 2026-08-08 by Phase 52a (`dd5c46a`), paired with two
