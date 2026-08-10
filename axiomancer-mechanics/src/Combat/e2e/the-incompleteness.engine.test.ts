@@ -1,5 +1,5 @@
 /**
- * The Incompleteness — the impossible playtest ceiling (2026-07-02).
+ * The Unfinished — the impossible playtest ceiling (2026-07-02).
  *
  * Pins the registration contract for the level-55 unique that anchors the
  * `impossible` playtest stage:
@@ -32,12 +32,12 @@ afterEach(() => vi.restoreAllMocks());
 // Flattened (WS9): the sequence is linear, so this is the steps themselves.
 const SEQUENCE = flattenAuthoredSteps(AUTHORED_THREAT_SEQUENCES['enemy-the-incompleteness']);
 
-describe('The Incompleteness — registry wiring', () => {
+describe('The Unfinished — registry wiring', () => {
     it('is registered under the the-incompleteness slug with the unique shape', () => {
         const fromRegistry = ENEMY_REGISTRY['the-incompleteness'];
         expect(fromRegistry).toBe(TheIncompleteness);
         expect(fromRegistry.id).toBe('enemy-the-incompleteness');
-        expect(fromRegistry.name).toBe('The Incompleteness');
+        expect(fromRegistry.name).toBe('The Unfinished');
         // P0-truth pass (2026-07-05): L55/1375 HP became a scripted 200/200 win
         // once the read rule + payload wiring got real — retuned to L110/2750 HP
         // (greedy scrapes 0.095 @ 200 seeds, back near the 1-5% design target).
@@ -68,7 +68,7 @@ describe('The Incompleteness — registry wiring', () => {
     });
 });
 
-describe('The Incompleteness — authored threat sequence', () => {
+describe('The Unfinished — authored threat sequence', () => {
     it('is authored as 4 escalating phases with the final phase flagged', () => {
         expect(SEQUENCE).toBeDefined();
         expect(SEQUENCE).toHaveLength(4);
@@ -96,7 +96,7 @@ describe('The Incompleteness — authored threat sequence', () => {
     });
 });
 
-describe('The Incompleteness — seeded encounter smoke', () => {
+describe('The Unfinished — seeded encounter smoke', () => {
     function impossibleStagePlayer(): Character {
         // Mirrors the `impossible` stage profile shape: level-50 stats, 260 HP,
         // a doctrine-faithful status loadout (DoT erosion + soft control).

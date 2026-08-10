@@ -2110,10 +2110,10 @@ export const Sandbag_01 = createEnemy({
     philosophicalAlignment: { epistemology: 0, outlook: 0, scope: 0 },
 });
 
-// ─── THE INCOMPLETENESS — the impossible playtest ceiling ─────────────────────
+// ─── THE UNFINISHED — the impossible playtest ceiling ─────────────────────────
 
 /**
- * The Incompleteness — level 110 unique, the deliberately UNWINNABLE ceiling the
+ * The Unfinished — level 110 unique, the deliberately UNWINNABLE ceiling the
  * playtest matrix measures the top of the curve against.
  *
  * DESIGN REQUIREMENT: this enemy must NEVER enter `EnemiesByMap` (the random
@@ -2126,7 +2126,7 @@ export const Sandbag_01 = createEnemy({
  */
 export const TheIncompleteness = createEnemy({
     id: 'enemy-the-incompleteness',
-    name: 'The Incompleteness',
+    name: 'The Unfinished',
     stanceHint: 'It cannot be read from inside any system you carry; every tell is consistent, and none is complete.',
     description: 'A proof that cannot be finished, walking. It is true, it cannot be shown, and every axiom sent to contain it becomes the next sentence it is true about.',
     // PLAYTEST-CALIBRATION (P0-truth pass, 2026-07-05): the read rule now lands

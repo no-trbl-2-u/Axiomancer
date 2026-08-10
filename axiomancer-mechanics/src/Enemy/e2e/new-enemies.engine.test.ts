@@ -111,7 +111,7 @@ describe('2026-07-06: the art-driven base roster', () => {
     });
 
     describe('fixtures stay out of the roster', () => {
-        it('keeps the Sandbag and The Incompleteness registered but excluded from the count', () => {
+        it('keeps the Sandbag and The Unfinished registered but excluded from the count', () => {
             expect(ENEMY_REGISTRY['sandbag']).toBe(Sandbag_01);
             expect(ENEMY_REGISTRY['the-incompleteness']).toBe(TheIncompleteness);
         });

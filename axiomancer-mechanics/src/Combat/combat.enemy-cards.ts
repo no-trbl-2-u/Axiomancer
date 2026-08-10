@@ -1350,7 +1350,7 @@ export const ENEMY_CARD_LIBRARY: Record<string, EnemyCard> = {
         damageWeight: 0.21,
         effectId: 'debuff_mark',
         intensity: 2,
-        actionText: 'The Incompleteness plays a truth your system cannot express, and your reply dies unprovable',
+        actionText: 'The Unfinished plays a truth your system cannot express, and your reply dies unprovable',
         stanceHint: 'It begins from outside every axiom you brought; you cannot see the floor it stands on.',
         // HARD CONSTRAINT PRESERVED: damageWeight 0.21, mind, MARK i2 — exact. The L110 unique budget is enormous, so 0.21 still lands ~60-180 HP at scale; the tiny weights ARE the calibration and must not be re-banded.
     },

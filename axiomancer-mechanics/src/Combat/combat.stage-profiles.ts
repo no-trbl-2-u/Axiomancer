@@ -116,7 +116,7 @@ export const COMBAT_STAGE_PROFILES: Record<CombatStageId, CombatStageProfile> = 
     impossible: {
         id: 'impossible',
         name: 'The Unprovable',
-        description: 'The ceiling: a maxed player against The Incompleteness. Losing here is the design — the profile exists to prove the top of the curve stays out of reach.',
+        description: 'The ceiling: a maxed player against The Unfinished. Losing here is the design — the profile exists to prove the top of the curve stays out of reach.',
         // PLAYTEST-CALIBRATION — the L50 ladder preset's exact stat block
         // (src/Character/presets.ts ladderL50Preset), HP = stat sum x 5.
         playerLevel: 50,
