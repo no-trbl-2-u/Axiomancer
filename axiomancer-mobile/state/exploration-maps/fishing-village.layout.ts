@@ -3,7 +3,7 @@ import type { MapLayout } from './types';
 export const fishingVillageLayout: MapLayout = {
     mapId: 'fishing-village',
     continent: 'CONTINENT · COASTAL',
-    region: 'Fishing Village',
+    region: 'the Drowned Parish',
     regionProgress: 'Map i of ii · 24 paths open',
     nodes: [
         // Spine nodes (fv-1..fv-10) — visual positions only; the node graph
