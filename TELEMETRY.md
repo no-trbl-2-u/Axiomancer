@@ -233,3 +233,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-09T19:10:57Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
 | 2026-08-09T19:16:58Z | subagent | card-expert | claude-sonnet-5 | main | Implement phase 44c card library retheme |
 | 2026-08-09T21:40:53Z | skill | story-spec | claude-opus-5 | main | args: Author S-02 for the fishing village's reachable voice: which coastal NPCs get map ho |
+| 2026-08-10T02:40:23Z | slash-prompt | /march | unknown | user/ci | /march |
