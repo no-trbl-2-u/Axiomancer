@@ -1183,22 +1183,17 @@ none may start early (bearings forbids opportunistic renaming).**
       actionText, the impossible-stage description, two test files).
       Ids, archetypes, and L110 calibration weights untouched. Shipped
       `865eb90a`. See `plan/phases/phase_44e_enemies_threat_sequences_retheme.md`.
-- [ ] Phase 44f — World, maps and minigame naming. `W-01` (the Aporia
-      labyrinth continent), the Fishing Village node ids (`fv-*`), map
-      events, and the authored minigame names — The Gleaning
-      (gathering), The Reliquary (loot-cache), The Boy's Almanac (quest
-      board). Some of these already read dark fantasy; keep what works.
-      Node ids are referenced by route-audit tooling and tests — rename
-      via the 44a map, not by hand.
-      **Amended 2026-08-08:** this row originally named FOUR minigames,
-      including The Night Watch (rest). Phase 52e retires the Night Watch
-      entirely, so there are three — but the **rest node still exists**
-      as the new one-shot three-way choice (52c/52d), which deliberately
-      ships under neutral working names (`RestChoice` / `rest` / `anvil`
-      / `cut`) precisely so this phase can name it from the Phase 42
-      bible. Naming that node is IN SCOPE here. If 52e has not shipped
-      when this phase runs, retheme nothing about rest and say so.
-      (mechanics + mobile) Deps: 44a. Brief: to generate.
+- [x] Phase 44f — World, maps and minigame naming. Spec 34 §5.8 resolved
+      almost the entire row: node ids frozen (display names only),
+      minigame names RATIFIED as shipped (zero action), rest node gated
+      on Phase 52e (not shipped this run — retheme nothing about rest,
+      per the row's own instruction). What was left per §10 item 7
+      ("author the coastal settlements"): renamed the Fishing Village
+      map's region display string to "the Drowned Parish" — spec 34's
+      own NL-18 worked example, independently grounded in the
+      drowned-parish estate's fiction. Northern Forest and the rest node
+      are follow-ups. Shipped `4b9083c1` (brief `30dbab98`). See
+      `plan/phases/phase_44f_world_maps_minigame_naming.md`.
 - [ ] Phase 44g — Characters, story, dialogue and quests. `C-01 the
       Sophist`, `S-01` fishing-village dilemmas, dialogue trees, quest
       board content. This is authored prose, not mechanical substitution
