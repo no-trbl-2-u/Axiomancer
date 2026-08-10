@@ -1511,18 +1511,15 @@ function FaceScrim({ w, h, uid, tint }: { w: number; h: number; uid: string; tin
     );
 }
 
-// The PAID sentence for the bottom of the face — the authored bottomActionText,
-// stripped of its "PAID — …" scaffold + "Costs 1 die." (redundant with the die
-// cube) + the die-line suffix (printed separately below).
-function cleanPaidSentence(vm: CombatCardVM): string {
-    let s = vm.bottomActionText || '';
-    if (vm.dieLines?.length) {
-        const suffix = ' ' + vm.dieLines.join(' · ');
-        if (s.endsWith(suffix)) s = s.slice(0, -suffix.length);
-    }
-    s = s.replace(/^PAID(\s*\([^)]*\))?\s*—\s*/i, '');
-    s = s.replace(/\s*Costs\s+1\s+die\.?\s*$/i, '');
-    return s.trim();
+// The PAID value beside the face's keyword — the presenter's honest number
+// (`heroText`), or its qualitative word (`heroSub`) for the kinds that have no
+// number. A leading repeat of the keyword is stripped so the two slots never
+// print the same word twice ('GUARD' + 'Guard 12' → 'GUARD' + '12').
+function paidValueFor(f: CombatCardVM['face'], override?: string): string {
+    const raw = (override ?? f.heroText ?? '').trim() || (f.heroSub ?? '').trim();
+    if (!raw || !f.keyword) return raw;
+    const kw = f.keyword.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return raw.replace(new RegExp(`^${kw}\\s+`, 'i'), '').trim() || raw;
 }
 
 /**
@@ -1533,11 +1530,15 @@ function cleanPaidSentence(vm: CombatCardVM): string {
  *     stance-tint gradient wash;
  *   · the LEFT RAIL (stance colour) carries the card NAME, centred vertically;
  *   · the giant FREE glyph (+ intensity) top-left; rarity tag top-right;
- *   · the bottom block: the TYPE STRIP ("BODY · SPELL" — CURSE for
- *     disenchant), then the PAID sentence (die cube + keyword-bolded text),
- *     then printed die lines (when present).
- * Identical wording at both sizes; definitions/pills/flavor live in the
- * inspect overlay, never on the face.
+ *   · the bottom block: the die cube + the PAID line as `KEYWORD` over its
+ *     value — two words, never a sentence.
+ *
+ * Owner directive 2026-08-10 ("not so much verbage on the cards — the card
+ * details already define the keywords"): the face carries NO prose. The
+ * authored PAID sentence, the type strip, and the printed die lines all moved
+ * to the inspect overlay, which already owns the keyword definitions. The face
+ * is the glance read (name · free glyph · keyword · value); the overlay is the
+ * explanation. Identical wording at both sizes.
  */
 export const CombatCardFace = React.memo(function CombatCardFace({
     card, width, height, large = false, accent = null, readPip = null, heroOverride, children,
@@ -1563,10 +1564,9 @@ export const CombatCardFace = React.memo(function CombatCardFace({
     const baseKw = f.inert ? AXM.ash : f.categoryColor;
     const kwColor = accent ?? baseKw;
     const borderColor = accent ?? f.categoryColor;
-    // ② PAID effect = the authored sentence (keywords bolded), the die cube its
-    // "costs a die" mark. ① FREE effect = the giant glyph + its intensity.
-    const paidSentence = cleanPaidSentence(card);
-    const boldNames = card.detail.keywords.map((k) => k.name);
+    // ② PAID effect = KEYWORD over its value, the die cube its "costs a die"
+    // mark. ① FREE effect = the giant glyph + its intensity.
+    const paidValue = paidValueFor(f, heroOverride);
     const freeInner = compactFree(f.freeValue ?? (f.freeHeroText || null));
     const hasFree = !!f.freeGlyph;
     // Effect-shaped silhouette for the FREE glyph (owner directive 2026-07-16);
@@ -1675,30 +1675,36 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                         {rarity.toUpperCase()}
                     </Text>
                 </View>
-                {/* ③ + ② BOTTOM — the type strip (the name lives on the rail now),
-                    then the paid sentence (die cube + text) */}
+                {/* ② BOTTOM — the die cube + the PAID line: KEYWORD over its
+                    value. No type strip, no sentence, no die-line triplet —
+                    those live in the inspect overlay (owner 2026-08-10). */}
                 <View style={[styles.faceBtm, { left: railW + (large ? 12 : 8) }]}>
-                    <Text style={[styles.faceType, large && styles.faceTypeLarge]} numberOfLines={1}>
-                        {f.typeStrip}
-                    </Text>
                     <View style={styles.paidRow}>
                         <StanceCube color={band} size={large ? 22 : 15} />
                         {readPip ? <Text style={[styles.paidRead, { color: kwColor }]} allowFontScaling={false}>{readPip}</Text> : null}
                         <View style={styles.paidTextWrap}>
-                            <OutcomeText
-                                text={paidSentence}
-                                names={boldNames}
-                                base={[styles.paidText, large && styles.paidTextLarge]}
-                                bold={[styles.paidText, large && styles.paidTextLarge, styles.paidBold, large && styles.paidBoldLarge, { color: kwColor }]}
-                                numberOfLines={large ? 5 : 3}
-                            />
+                            {f.keyword ? (
+                                <Text
+                                    style={[styles.paidKeyword, large && styles.paidKeywordLarge, { color: kwColor }]}
+                                    numberOfLines={1}
+                                    adjustsFontSizeToFit
+                                    minimumFontScale={0.7}
+                                >
+                                    {f.keyword.toUpperCase()}
+                                </Text>
+                            ) : null}
+                            {paidValue ? (
+                                <Text
+                                    style={[styles.paidValue, large && styles.paidValueLarge]}
+                                    numberOfLines={1}
+                                    adjustsFontSizeToFit
+                                    minimumFontScale={0.6}
+                                >
+                                    {paidValue}
+                                </Text>
+                            ) : null}
                         </View>
                     </View>
-                    {card.dieLines?.length ? (
-                        <Text style={[styles.faceDieLine, !large && styles.faceDieLineSmall]} numberOfLines={large ? 2 : 1} adjustsFontSizeToFit>
-                            {card.dieLines.join(' · ')}
-                        </Text>
-                    ) : null}
                 </View>
                 {children}
             </View>
@@ -1795,7 +1801,6 @@ const useStyles = makeStyles((AXM) => ({
     // Drawn X/dud die — a small greyed pip, not a full slot.
     dieXPip: { width: 24, height: 24, borderRadius: 6, borderWidth: 1, borderColor: '#3a3a3a', backgroundColor: 'rgba(0,0,0,0.4)', alignItems: 'center', justifyContent: 'center', opacity: 0.6, alignSelf: 'center' },
     dieFateHint: { fontFamily: FONTS.mono, fontSize: 7, color: '#d4c026', marginTop: 1 },
-    faceDieLine: { fontFamily: FONTS.mono, fontSize: 9, color: '#d4c026', marginTop: 3, letterSpacing: 0.2 },
     // Spec 33 §4 — Press Fate reroll control (flag-on).
     dieXGlyph: { fontFamily: FONTS.sans, fontSize: 12, color: '#8a8273' },
     dieConv: { fontFamily: FONTS.mono, fontSize: 9, color: AXM.bone, textAlign: 'center', marginTop: 2, letterSpacing: 0.5, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },
@@ -1927,24 +1932,21 @@ const useStyles = makeStyles((AXM) => ({
     faceRarity: { position: 'absolute', top: 6, right: 6, backgroundColor: 'rgba(8,7,6,0.7)', borderWidth: 1, paddingHorizontal: 5, paddingVertical: 1 },
     faceRarityText: { fontFamily: FONTS.sans, fontSize: 8, letterSpacing: 1 },
     faceRarityTextLarge: { fontSize: 10, letterSpacing: 1.4 },
-    // ③ + ② bottom-anchored type strip + paid sentence (the name is on the rail).
+    // ② bottom-anchored PAID line — KEYWORD over its value (the name is on the
+    // rail; the sentence, type strip and die lines live in the overlay).
     faceBtm: { position: 'absolute', right: 10, bottom: 10 },
-    faceType: {
-        fontFamily: FONTS.sans, fontSize: 7, letterSpacing: 1.5, color: 'rgba(232,223,200,0.75)',
-        textShadowColor: '#000', textShadowRadius: 4, marginBottom: 4,
-    },
-    faceTypeLarge: { fontSize: 9, letterSpacing: 2, marginBottom: 6 },
     paidRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 6 },
     paidRead: { fontFamily: FONTS.mono, fontSize: 11, marginTop: 1 },
     paidTextWrap: { flex: 1 },
-    paidText: {
-        fontFamily: FONTS.serif, fontSize: 10.5, lineHeight: 14, color: AXM.parchment,
+    // The keyword is the loudest word on the face — it is the whole read now.
+    paidKeyword: {
+        fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 0.8,
+        textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 4,
+    },
+    paidKeywordLarge: { fontSize: 17, letterSpacing: 1.2 },
+    paidValue: {
+        fontFamily: FONTS.mono, fontSize: 11, lineHeight: 15, color: AXM.parchment,
         textShadowColor: 'rgba(0,0,0,0.85)', textShadowRadius: 3,
     },
-    paidTextLarge: { fontSize: 14.5, lineHeight: 19 },
-    // Keywords read a step LARGER than the prose around them (owner directive
-    // 2026-07-16) so the eye catches them before reading the sentence.
-    paidBold: { fontFamily: FONTS.sans, fontSize: 11.5, letterSpacing: 0.5, textTransform: 'uppercase' },
-    paidBoldLarge: { fontSize: 16 },
-    faceDieLineSmall: { fontSize: 7, marginTop: 2 },
+    paidValueLarge: { fontSize: 15, lineHeight: 20 },
 }));

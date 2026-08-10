@@ -34,7 +34,7 @@ import {
     type CombatEncounterState, type CombatOutcome, type Character, type Enemy, type CombatEvent,
 } from '@mechanics';
 
-import { CombatBoard, CombatCardFace, HAND_CARD_W, HAND_CARD_H, type DragController, type DragPayload, type Rect } from '@/components/combat/encounter/CombatBoard';
+import { CombatBoard, CombatCardFace, OutcomeText, HAND_CARD_W, HAND_CARD_H, type DragController, type DragPayload, type Rect } from '@/components/combat/encounter/CombatBoard';
 import { useDragInterruptRecovery } from '@/components/combat/encounter/useDragInterruptRecovery';
 import { type CombatFx } from '@/components/combat/encounter/CombatCombatantPane';
 import { CombatDie, combatDieFootprint } from '@/components/combat/encounter/CombatDie';
@@ -819,9 +819,11 @@ export function CombatEncounterPanel({
                                 </View>
                             )}
 
-                            {/* (2) the LARGE rendered card over a stance-coloured radial halo —
-                                the effect SENTENCE + the type-tab live ON the card (define once /
-                                show once), so no restated outcome line below it. */}
+                            {/* (2) the LARGE rendered card over a stance-coloured radial halo.
+                                The face is the glance read only (name · free glyph · KEYWORD ·
+                                value) since the 2026-08-10 declutter — the sentence, the type
+                                strip and the die triplet it used to carry are restated BELOW,
+                                where the definitions already live. */}
                             <View style={styles.detailCardWrap}>
                                 <Svg width={detailCardW + 120} height={detailCardW + 120} viewBox="0 0 100 100" style={styles.detailHalo} pointerEvents="none">
                                     <Defs>
@@ -835,12 +837,43 @@ export function CombatEncounterPanel({
                                 </Svg>
                                 <CombatCardFace card={detailCard} width={detailCardW} height={Math.round(detailCardW * 1.43)} large />
                             </View>
-                            {detailCard.detail.stacksText ? <Text style={styles.detailStacks}>{detailCard.detail.stacksText}</Text> : null}
+                            {/* the card's own metadata strip — off the face since
+                                2026-08-10, so it reads here instead. */}
+                            <Text style={styles.detailMetaStrip} testID="combat-card-detail-meta">{detailCard.detail.metaChip}</Text>
 
-                            {/* The NO-DIE / +DIE pill table and the colour-law / read legends are
-                                GONE (owner directive 2026-07-16): the FREE glyph, the PAID
-                                sentence, and the printed die lines all live ON the rendered card
-                                above — the overlay never restates the face. */}
+                            {/* (3) the NO-DIE / +DIE fork — RESTORED 2026-08-10. It was retired
+                                on 2026-07-16 because the face carried the free glyph, the paid
+                                sentence and the printed die lines itself; now that the face is
+                                bare, this is the only place a player can read what the card
+                                actually does. Keywords bold out of the sentence and are defined
+                                in the ledger at the top. */}
+                            <View style={styles.detailPlays}>
+                                <View style={styles.detailPlayRow}>
+                                    <Text style={styles.detailPlayTag}>◇ NO DIE</Text>
+                                    <Text style={styles.detailPlayText}>{detailCard.detail.freePill}</Text>
+                                </View>
+                                <View style={[styles.detailPlayRow, styles.detailPlayRowSep]}>
+                                    <Text style={[styles.detailPlayTag, { color: detailCard.face.categoryColor }]}>◆ +DIE</Text>
+                                    <View style={styles.detailPlayBody}>
+                                        <OutcomeText
+                                            text={detailCard.detail.diePaidLine ?? detailCard.detail.outcomeLine}
+                                            names={detailCard.detail.keywords.map(k => k.name)}
+                                            base={styles.detailPlayText}
+                                            bold={[styles.detailPlayText, styles.detailPlayBold, { color: detailCard.face.categoryColor }]}
+                                        />
+                                        {detailCard.dieLines?.length ? (
+                                            <Text style={styles.detailDieLine}>{detailCard.dieLines.join(' · ')}</Text>
+                                        ) : null}
+                                        {detailCard.detail.dieTriplet ? (
+                                            <Text style={styles.detailDieLine}>{detailCard.detail.dieTriplet}</Text>
+                                        ) : null}
+                                    </View>
+                                </View>
+                            </View>
+                            {detailCard.detail.stacksText ? <Text style={styles.detailStacks}>{detailCard.detail.stacksText}</Text> : null}
+                            {detailCard.detail.readLegend ? <Text style={styles.detailLegend}>{detailCard.detail.readLegend}</Text> : null}
+                            {detailCard.detail.durationFooter ? <Text style={styles.detailLegend}>{detailCard.detail.durationFooter}</Text> : null}
+                            <Text style={styles.detailLegend}>{detailCard.detail.colorMatchHint}</Text>
 
                             {/* KW-7 (phase 29, re-scoped 2026-07-12) — system-term definitions
                                 (Conviction, Resonance, Reserve/Pips, Floating, rungs, WILD/X):
@@ -1199,6 +1232,17 @@ const useStyles = makeStyles((AXM) => ({
     detailStatLabel: { fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 0.8, color: AXM.bone },
     detailStatValue: { fontFamily: FONTS.mono, fontSize: 13, color: AXM.parchment },
     detailStacks: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 11, color: AXM.bone, marginTop: 6 },
+    // 2026-08-10 declutter — everything the bare face no longer prints reads here.
+    detailMetaStrip: { fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 1.6, color: AXM.bone, opacity: 0.7, marginBottom: 8 },
+    detailPlays: { alignSelf: 'stretch', borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)', borderRadius: 6, backgroundColor: 'rgba(0,0,0,0.65)', overflow: 'hidden' },
+    detailPlayRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, paddingHorizontal: 10, paddingVertical: 7 },
+    detailPlayRowSep: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: 'rgba(255,255,255,0.14)' },
+    detailPlayTag: { fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 1, color: AXM.bone, width: 58, flexShrink: 0 },
+    detailPlayBody: { flex: 1 },
+    detailPlayText: { fontFamily: FONTS.serif, fontSize: 12.5, color: AXM.parchment, lineHeight: 17, flex: 1 },
+    detailPlayBold: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 0.6, textTransform: 'uppercase' },
+    detailDieLine: { fontFamily: FONTS.mono, fontSize: 10.5, color: AXM.sulfur, letterSpacing: 0.2, marginTop: 3 },
+    detailLegend: { alignSelf: 'stretch', fontFamily: FONTS.sans, fontSize: 9.5, color: AXM.bone, opacity: 0.65, lineHeight: 14, marginTop: 6 },
     detailFreeBox: { alignSelf: 'stretch', marginBottom: 8 },
     detailFreeLine: { fontFamily: FONTS.serif, fontSize: 12.5, color: AXM.bone, lineHeight: 17, marginBottom: 5 },
     detailPowerLine: { fontFamily: FONTS.serif, fontSize: 12.5, lineHeight: 17, marginBottom: 5 },

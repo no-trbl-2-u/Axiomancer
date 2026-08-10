@@ -26,7 +26,7 @@ describe('fishingVillageLayout: structure validation', () => {
     it('has correct metadata matching the expanded scope', () => {
         expect(fishingVillageLayout.mapId).toBe('fishing-village');
         expect(fishingVillageLayout.continent).toBe('CONTINENT · COASTAL');
-        expect(fishingVillageLayout.region).toBe('Fishing Village');
+        expect(fishingVillageLayout.region).toBe('the Drowned Parish');
         expect(fishingVillageLayout.regionProgress).toBe('Map i of ii · 24 paths open');
     });
 
