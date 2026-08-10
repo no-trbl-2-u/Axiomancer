@@ -9,6 +9,50 @@
 
 ## Pending
 
+### Fold treasure/quest/rest/narration into one "encounter" shape; retire the Gathering, Quest Board, and Loot Cache minigames
+- source: filed 2026-08-10 via `/oversight`, T's own framing verbatim:
+  *"I want to discuss folding the treasure, quest, rest, and narration
+  events into a single 'encounter' event, taking away the minigames and
+  replacing them with just a simple 'here are some options, here are
+  their effects'. The minigames as they are are just time consuming and
+  seem to add nothing."*
+- scope, as ruled in the same session: combat/hazard-pattern combat
+  stays a distinct system — the critique is about the four *non-combat*
+  event types only. The Gathering minigame ("The Gleaning"), the Quest
+  Board minigame ("The Boy's Almanac"), and the Loot Cache minigame
+  ("The Reliquary") — plus their tuning skills/CLIs
+  (`gathering-tuning`, `quest-board-tuning`, `loot-cache-tuning`) —
+  retire entirely rather than staying dormant as an opt-in depth layer.
+  Narration/dialogue events fold into the same plain choice+effect shape
+  as the other three.
+- **rest is a special case — likely already substantially covered.**
+  The queued rest-choice epic (build-plan Phases 52c "the rest-choice
+  engine" and 52d "the rest-choice screen") already replaces the Night
+  Watch minigame with exactly this shape: a plain choice among Rest
+  (heal 20%) / Blacksmith (upgrade a die) / Remove a card, no minigame
+  resolution. Whoever scopes this candidate into a phase should read
+  52c/52d's briefs first — the "rest" quarter of this ask may need
+  nothing beyond what's already queued, narrowing the real net-new work
+  to treasure, quest, and narration/dialogue events.
+- not yet scoped as a phase (T chose "file as a candidate now" over a
+  dedicated brainstorm session first). Concretely undefined: what an
+  "encounter" event's choice+effect data shape looks like (is it a
+  static option list with numeric effects, or does it carry
+  conditionals/rolls the way a minigame outcome tier does?), how much of
+  the removed minigames' *tuning depth* (skill vs. greed vs. restraint
+  doctrines each minigame currently encodes) needs to survive in the
+  simpler model vs. being accepted as lost, and what happens to each
+  minigame's existing authored content (card ratios, part economy, dice
+  pools, plot yields) — ported into the new effect tables, or dropped.
+  A design pass (`/plan-a-phase` or a dedicated brainstorm session) is
+  the next step before this becomes a build-plan phase — likely several
+  phases, given four subsystems plus their tuning-skill retirement.
+- why it matters: this is a significant net-reduction pivot — deleting
+  three shipped minigame engines and their tuning skills is a larger
+  removal than any single phase in the current queue. Surfacing it here
+  rather than deciding it inline keeps the decision-of-record with T
+  while giving the loop a landing spot to pick up the design work.
+
 ### Raise (or split around) the `march` workflow's 90-minute job ceiling
 - source: filed 2026-08-09 by digest, from the pulse. Run `31301228665`
   (2026-08-09) chained phases 44a and 44b into one tick and hit
@@ -731,7 +775,7 @@
   Sequencing note: re-stamp after D-FLIP/D8 land — the 07-18 report
   measures the flag-off model.
 
-### Card evolution (`[needs-user-call]` — pointer restored 2026-07-18)
+### Card evolution (`[needs-user-call]` — UNPARKED, ruled design-now via /oversight 2026-08-10)
 - source: `plan/tuning/2026-07-11-card-library-improvement-plan.md` §2
   ("Deliberately deferred / parked", GPT rec 3). That doc says the item
   is "parked as a phase candidate," but no row existed here — the
@@ -745,16 +789,18 @@
   migration) — a full phase, and per the source doc worthless until the
   library/preset foundation settles (starter trim + scoreCard-v2 retune
   + D-FLIP/D8 first).
-- status: **parked with a concrete unpark trigger** (owner call via
-  /oversight 2026-08-08, resolving the standing `[needs-user-call]`).
-  The open-ended "owner decides at some future oversight" is closed: the
-  ruling is *stay parked*, and the trigger is **Phase 39 landing**
-  (curve repair + theme symmetry) — that is the "library/preset
-  foundation settles" condition this row's own source doc names as the
-  precondition. Until Phase 39 is `[x]`, this row is NOT a
-  needs-user-call and must not be re-surfaced by the oversight standing
-  sweep; once it is, the next `/oversight` re-asks design-now vs drop.
-  Still do not self-promote.
+- status: **UNPARKED (2026-08-10).** Phase 39 (curve repair + theme
+  symmetry) shipped, firing this row's own unpark trigger; per its own
+  standing rule the next `/oversight` was obligated to re-ask design-now
+  vs. drop. **Ruled: design now** (T via /oversight 2026-08-10).
+  Not yet promoted to a build-plan phase — the shape ("doctrine-shaped
+  card growth... needs a card-INSTANCE state schema") is not concrete
+  enough for a brief. Next: a dedicated design session (brainstorm on
+  the FREE-line evolution / PAID specialization / cost-consequence-fork
+  shape, and the card-instance schema it needs) before this promotes.
+  Note the V-sequence (visual redesign) and the whole-product pivot are
+  currently consuming design bandwidth — sequence this session
+  accordingly rather than displacing them.
 
 ### ~~[score 7.0] GLYPHS pilot (Phase 33d) post-ship follow-ups~~ PROMOTED to Phases 49-51 via /oversight 2026-08-08
 > Sequenced exactly as this row proposed: 49 completeness-critic touch-UX

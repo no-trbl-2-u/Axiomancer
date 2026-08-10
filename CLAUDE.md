@@ -16,3 +16,10 @@ see AGENTS.md → "Measured truth (baselines)". Source-of-rules questions
 `.claude/hooks/telemetry.mjs` (skills, slash commands, subagent spawns) —
 data for the human, never a work queue. Commit its rows with the tick;
 never edit them.
+
+When doing a PR check-in or otherwise watching a PR (subscribed activity,
+scheduled re-checks), a discovered merge conflict is something to fix, not
+just report: fetch the base branch, merge (or rebase, per the repo's
+convention) it into the PR head, resolve the conflicts, and push. Only fall
+back to asking if a conflict is genuinely ambiguous (both sides changed the
+same logic and picking one loses behavior).
