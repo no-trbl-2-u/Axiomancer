@@ -52,6 +52,7 @@ import { CombatModeProvider } from '@/state/combat-mode';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
 import { createAppStore, type AppStore, EMPTY_EVENT_SLICE } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
+import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import type { ResolveMapEventResult } from '@mechanics';
 
 import CharacterScreen from '@/app/(tabs)/character';
@@ -84,21 +85,17 @@ const REST_EVENT: ResolveMapEventResult = {
     event: { kind: 'rest', healed: 7 } as never,
 };
 
+// A real `createEnemy(...)`-built Enemy, not a hand-rolled literal: since the
+// encounter modal auto-engages (2026-08-10) this fixture boots the live combat
+// panel on render, and the engine reads shape a literal never carried
+// (`effects`, threat sequence). The hand-rolled version threw
+// "bearer.effects is not iterable" the moment the prelude stopped gating.
 const ENCOUNTER_EVENT: ResolveMapEventResult = {
     state: undefined as never,
     event: {
         kind: 'encounter',
         encounter: {
-            enemies: [
-                {
-                    id: 'cairn-rot',
-                    name: 'Cairn-rot',
-                    level: 3,
-                    baseStats: { heart: 2, body: 3, mind: 1 },
-                    health: 24,
-                    maxHealth: 24,
-                },
-            ],
+            enemies: [createMockEncounterEnemy()],
             origin: 'fishing-village:fv-3',
         },
         isBoss: false,

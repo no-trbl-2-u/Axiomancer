@@ -6,25 +6,27 @@
  * modals — the user cannot exit these modals"): when the player taps
  * an encounter or boss node, this overlay rises over the exploration
  * map. The backdrop is intentionally non-dismissible — there is no
- * `onPress` handler on the backdrop View. The only way out is to
- * pick FIGHT or (for non-boss encounters) FLEE.
+ * `onPress` handler on the backdrop View. The only way out is through
+ * the encounter itself.
  *
- * The "SEALED · NO RETREAT" chain bars top and bottom carry the
- * diegetic signal that the encounter is committed; the modal will not
- * close until a choice resolves.
+ * 2026-08-10 (user report) — THE PRELUDE MODAL IS RETIRED. Entering a
+ * fight used to ask twice: this overlay's ENGAGE/FLEE seal (over a
+ * procedural SVG of the foe) and then the combat reveal's ENTER COMBAT
+ * (over the foe's painting, with the whole threat sequence laid out).
+ * Two consecutive agreements to the same fight, the first strictly
+ * poorer than the second. The seal now auto-engages on mount and the
+ * reveal is the single commit gate; retreat moved there too, as the
+ * panel's WITHDRAW (`onWithdraw`), so nothing was lost with the popup.
  *
- * Renders only when the active event VM has `kind === 'combat-prelude'`.
+ * Mounts only when the active event VM has `kind === 'combat-prelude'`.
  * Caller (`app/(tabs)/exploration/index.tsx`) controls mount/unmount
  * via `selectHasActiveEvent` + `vm.kind`.
  *
- * All display strings (eyebrow, sash label, seal-bar label, flee-
- * disabled hint) come from `vm.preludeChrome` — no inline literals
- * per Hard Rule #8. The component returns `null` when
- * `vm.preludeChrome === null` (defensive against narrative-choice
- * variants slipping into the overlay path; the presenter normally
- * guarantees `preludeChrome` is populated for `kind === 'combat-
- * prelude'` VMs via `withPreludeChrome`). Component-level pins live
- * in `components/event/__tests__/EncounterModalOverlay.test.tsx`.
+ * The "SEALED · NO RETREAT" chain bars top and bottom carry the
+ * diegetic signal that the encounter is committed; they still frame the
+ * aftermath panels, which is where the seal chrome is still seen.
+ * Component-level pins live in
+ * `components/event/__tests__/EncounterModalOverlay.test.tsx`.
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -40,7 +42,6 @@ import { CombatDefeatPanel } from '@/components/event/aftermath/CombatDefeatPane
 import { CombatFriendshipPanel } from '@/components/event/aftermath/CombatFriendshipPanel';
 import { CombatVictoryPanel } from '@/components/event/aftermath/CombatVictoryPanel';
 import { ChainBarFixed } from '@/components/event/ChainBarFixed';
-import { EncounterPreludeContent } from '@/components/event/EncounterPreludeContent';
 import { ModalRivet } from '@/components/event/ModalRivet';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import { useCombatMode } from '@/state/combat-mode';
@@ -56,22 +57,23 @@ import type { CombatOutcome, Enemy } from '@mechanics';
 /**
  * Modal mode state machine (Phase 63b).
  *
- * - `prelude`  — initial render: sealed bars + FIGHT/FLEE buttons
- *                (the original Phase 32 design-handoff port).
- * - `combat`   — after the player taps FIGHT, the panel content
- *                swaps to `<CombatPanel>` so the entire encounter
- *                lives inside the same modal that opened on the
- *                encounter trigger. No more `router.replace('/combat')`.
- * - `aftermath`— reserved for Phase 63c (post-round victory / parley
- *                / flee summary inside the modal). Not yet wired.
+ * - `prelude`  — the first frame only. Once the ENGAGE/FLEE seal was
+ *                retired (2026-08-10) nothing renders here but the
+ *                backdrop: the effect below engages immediately.
+ * - `combat`   — the encounter itself, `<CombatEncounterPanel>`, living
+ *                inside the same modal session that opened on the
+ *                encounter trigger. No `router.replace('/combat')`.
+ * - `aftermath`— the post-combat victory / parley / defeat panel, inside
+ *                the seal (Phase 70).
  */
 export type EncounterModalMode = 'prelude' | 'combat' | 'aftermath';
 
 interface EncounterModalOverlayProps {
     vm: EventViewModel;
-    /** Phase 200 — the foe for the in-place hazard combat (null until FIGHT). */
+    /** Phase 200 — the foe for the in-place hazard combat (null until engaged). */
     encounterEnemy?: Enemy | null;
     onFight: () => void;
+    /** Pays the retreat cost. Fired by the reveal's WITHDRAW (see doc-block). */
     onFlee: () => void;
 }
 
@@ -92,6 +94,11 @@ export function EncounterModalOverlay({
     const AXM = usePalette();
     const styles = useStyles();
     const [mode, setMode] = useState<EncounterModalMode>('prelude');
+    // Whether this foe may be walked away from — read off the prelude VM's
+    // own `flee` choice (bosses seal it) at the moment we engage, because
+    // `beginHazardEncounter` clears the event slice on the way in and the VM
+    // is gone by the time the reveal renders its WITHDRAW.
+    const [fleeAllowed, setFleeAllowed] = useState(false);
     const {
         lastOutcome,
         aftermathData,
@@ -101,9 +108,10 @@ export function EncounterModalOverlay({
         closeEncounterModal,
     } = useCombatMode();
     const handleFight = useCallback(() => {
+        setFleeAllowed(vm.choices.find((c) => c.id === 'flee')?.enabled ?? false);
         onFight();
         setMode('combat');
-    }, [onFight]);
+    }, [onFight, vm]);
 
     // Phase 70 Tick A — watch the outcome signal. On 'victory' (the
     // only branch with a Tick A panel), swap mode to 'aftermath'.
@@ -151,6 +159,14 @@ export function EncounterModalOverlay({
         exitCombat();
         closeEncounterModal();
     }, [actions, resetRunStats, exitCombat, closeEncounterModal]);
+
+    // The reveal's WITHDRAW: pay the retreat cost, then tear the session down
+    // the same way any non-defeat exit does. `onFlee` no longer runs through
+    // the event slice (already cleared at engage) — see `fleeEncounter`.
+    const handleWithdraw = useCallback(() => {
+        onFlee();
+        handleHazardExit(null);
+    }, [onFlee, handleHazardExit]);
 
     const aftermathVm = selectAftermathViewModel(aftermathData);
 
@@ -204,16 +220,31 @@ export function EncounterModalOverlay({
     }));
 
     // Phase 63c follow-up (2026-05-21): the prelude branch requires
-    // a `combat-prelude` VM + populated `preludeChrome`, but the
-    // `combat` mode branch MUST stay mounted even after the engine
-    // event slice clears (which `pickEventChoice('fight')` does
-    // synchronously). Gate the early-return on mode: only the
-    // prelude branch needs the prelude VM. Combat mode reads from
-    // the engine combat slice via `<CombatPanel>`; aftermath mode
-    // (Phase 70 Tick A) reads from the snapshot stashed in
-    // `combat-mode` and surfaced via `aftermathVm`.
+    // a `combat-prelude` VM, but the `combat` mode branch MUST stay
+    // mounted even after the engine event slice clears (which engaging
+    // does synchronously). Gate the early-return on mode: only the
+    // pre-engage branch needs the prelude VM. Combat mode reads the
+    // captured foe; aftermath mode (Phase 70 Tick A) reads from the
+    // snapshot stashed in `combat-mode` and surfaced via `aftermathVm`.
     const preludeRenderable = vm.kind === 'combat-prelude' && vm.preludeChrome !== null;
+
+    // Auto-engage (2026-08-10) — the ENGAGE/FLEE seal is retired; the combat
+    // reveal is the one commit gate. The effect (not a render-time call)
+    // keeps the parent's state write out of this render pass.
+    useEffect(() => {
+        if (mode === 'prelude' && preludeRenderable) handleFight();
+    }, [mode, preludeRenderable, handleFight]);
+
     if (mode === 'prelude' && !preludeRenderable) return null;
+    // Pre-engage: the single frame between mount and the effect above. Only
+    // the backdrop — the seal panel would flash an empty leaf for a frame.
+    if (mode === 'prelude') {
+        return (
+            <View style={styles.overlay} testID="encounter-modal-overlay">
+                <Animated.View style={[styles.backdrop, backdropStyle]} />
+            </View>
+        );
+    }
     if (mode === 'aftermath' && aftermathVm === null) {
         // Defensive — should not happen because we only flip into
         // aftermath when aftermathData is non-null. If it does (e.g.
@@ -238,6 +269,7 @@ export function EncounterModalOverlay({
                         enemy={encounterEnemy}
                         bootstrapPlayer={player}
                         persistOutcome
+                        onWithdraw={fleeAllowed ? handleWithdraw : undefined}
                         onExit={handleHazardExit}
                     />
                 </View>
@@ -300,7 +332,7 @@ export function EncounterModalOverlay({
                         onBeginAgain={handleBeginAgain}
                         onLetClose={dismissAftermath}
                     />
-                ) : mode === 'combat' ? (
+                ) : (
                     // Fallback for the impossible-in-practice path where
                     // combat mode is entered without a captured foe. The
                     // live path is the full-screen hazard combat early-return
@@ -320,12 +352,6 @@ export function EncounterModalOverlay({
                             NO FOE CAPTURED
                         </Text>
                     </ScrollView>
-                ) : (
-                    <EncounterPreludeContent
-                        vm={vm}
-                        onFight={handleFight}
-                        onFlee={onFlee}
-                    />
                 )}
             </Animated.View>
             {/* Phase 73 — bottom chain, also outside the panel. */}

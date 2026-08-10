@@ -17,10 +17,12 @@
 // Deterministic: uses the `debug-trigger-encounter-encounter` dev
 // button (components/DebugTriggerEncounter.tsx), which arms the
 // combat-prelude in-place on the WILDS tab immediately — no map walk,
-// no RNG. FLEE (not a full combat playthrough) closes the round trip:
-// `pickEventChoiceAction`'s flee branch is an unconditional morale
-// shift, no dice roll, so the return path is as deterministic as the
-// open. `scripts/combat-encounter-e2e.mjs` already covers playing a
+// no RNG. The modal auto-engages (2026-08-10: the ENGAGE/FLEE prelude
+// popup is retired), so the armed state to assert on is the combat
+// REVEAL. WITHDRAW — retreat's new home, on the reveal beside ENTER
+// COMBAT — closes the round trip: `fleeEncounter` is an unconditional
+// morale shift, no dice roll, so the return path is as deterministic as
+// the open. `scripts/combat-encounter-e2e.mjs` already covers playing a
 // live hazard combat to resolution — duplicating that here would be
 // redundant, not new coverage.
 //
@@ -163,6 +165,11 @@ const CHARACTER_TAB = '[aria-label="Character tab"]:visible'
 // ---------------------------------------------------------------------------
 
 async function runRoundTrip(page, baseUrl) {
+    // A static web export can't surface `extra.devToolsEnabled` at runtime, so
+    // the SELF → /dev affordance this harness drives from needs the documented
+    // opt-in (lib/buildProfile.ts) — the same one upgradeable-dice-e2e sets.
+    // Inert in real builds: nothing sets the global there.
+    await page.addInitScript(() => { globalThis.__AXM_FORCE_DEV_TOOLS__ = true })
     await page.goto(`${baseUrl}/character`, { waitUntil: 'networkidle' })
     await openDevTools(page)
 
@@ -178,9 +185,9 @@ async function runRoundTrip(page, baseUrl) {
         .catch(() => fail('COMBAT trigger did not land on /exploration'))
 
     await page
-        .getByTestId('encounter-modal-fight')
+        .getByTestId('combat-reveal')
         .waitFor({ state: 'visible', timeout: 10000 })
-        .catch(() => fail('combat-prelude armed but encounter-modal-fight never rendered'))
+        .catch(() => fail('combat-prelude armed but the combat reveal never rendered'))
 
     // The decisive cross-screen assertion: the tab bar must be hidden
     // the instant the modal arms, not just the modal itself present.
@@ -190,21 +197,51 @@ async function runRoundTrip(page, baseUrl) {
     }
     log('modal armed; tab bar correctly hidden')
 
-    log('pressing FLEE ...')
-    const flee = page.getByTestId('encounter-modal-flee')
+    // The first-fight tutorial primer animates in OVER the reveal and swallows
+    // pointer events (a fresh store has never seen a fight). Dismiss it before
+    // driving the reveal's own buttons — same treatment as combat-encounter-e2e.
+    for (let k = 0; k < 5; k++) {
+        const skip = page.getByTestId('combat-primer-skip')
+        if (!(await skip.count())) break
+        await skip.click({ timeout: 2000, force: true }).catch(() => {})
+        await page.waitForTimeout(300)
+    }
+
+    log('pressing WITHDRAW ...')
+    const flee = page.getByTestId('combat-withdraw')
     await flee.waitFor({ state: 'visible', timeout: 10000 })
     await flee.click()
 
     await page
-        .getByTestId('encounter-modal-fight')
+        .getByTestId('combat-reveal')
         .waitFor({ state: 'hidden', timeout: 10000 })
-        .catch(() => fail('modal still present after FLEE'))
+        .catch(() => fail('modal still present after WITHDRAW'))
+    if (await page.getByTestId('encounter-modal-overlay').count()) {
+        fail('encounter modal still mounted after WITHDRAW')
+    }
+
+    // With the encounter out of the way the screen is idle again, which lets
+    // the exploration screen's ARRIVAL event for the map's start node resolve
+    // (2026-08-08) — on fishing-village that is an omen cutscene, a full-screen
+    // ROUTE with no tab bar of its own. It is not the tab LOCK, so dismiss it
+    // before reading the bar, or this harness measures the wrong thing.
+    if (await page.getByTestId('cutscene-advance').count()) {
+        log('start-node arrival cutscene took the screen — playing it out')
+        // SKIP only reveals the remaining lines; the scene ends on a tap of the
+        // body once every line is up (`cutscene-advance` → `dismissEvent`).
+        await page.getByTestId('cutscene-skip').click({ timeout: 5000, force: true }).catch(() => {})
+        for (let k = 0; k < 12; k++) {
+            if (!(await page.getByTestId('cutscene-advance').count())) break
+            await page.getByTestId('cutscene-advance').click({ timeout: 3000, force: true }).catch(() => {})
+            await page.waitForTimeout(250)
+        }
+    }
 
     await page
         .locator(CHARACTER_TAB)
         .first()
         .waitFor({ state: 'visible', timeout: 10000 })
-        .catch(() => fail('tab bar (Character tab) still hidden after FLEE closed the modal'))
+        .catch(() => fail('tab bar (Character tab) still hidden after WITHDRAW closed the modal'))
 
     // The map itself — not just the chrome — survived the round trip.
     await page

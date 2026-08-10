@@ -12,9 +12,11 @@
  *   1. Returns null on non-combat-prelude VMs (so a paced /
  *      narrative-choice event never accidentally mounts the
  *      overlay).
- *   2. FLEE is disabled when the event VM's flee choice is
- *      `enabled: false` (boss encounters per chat1's
- *      "no retreat from a boss" intent).
+ *   2. Auto-engage (2026-08-10): the ENGAGE/FLEE prelude seal is
+ *      retired, so mounting on a combat-prelude VM goes straight to
+ *      combat — the reveal is the one commit gate. Retreat rides
+ *      along as the panel's WITHDRAW, offered only when the VM's
+ *      flee choice is enabled (bosses seal it).
  *   3. Backdrop has no `onPress` handler — non-dismissibility
  *      is the diegetic SEALED · NO RETREAT contract (chat1:
  *      "user cannot exit these modals").
@@ -38,7 +40,7 @@ import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 
 // Phase 64 follow-up: overlay now reads `useGameState((s) => s.combat?.phase)`
 // for the auto-scroll-on-phase-change effect, so it requires
-// GameStoreProvider even for prelude-mode mount tests.
+// GameStoreProvider even for mount-condition tests.
 // Phase 70 Tick A follow-up: overlay also reads `useCombatMode()` to
 // watch `lastOutcome` / `aftermathData` for the in-modal aftermath
 // swap. Tests now mount inside <CombatModeProvider> too.
@@ -109,6 +111,26 @@ function makeCombatPreludeVm(overrides: Partial<EventViewModel> = {}): EventView
     };
 }
 
+/** A boss VM — retreat sealed (`flee` disabled). */
+function makeBossPreludeVm(): EventViewModel {
+    return makeCombatPreludeVm({
+        variant: 'boss',
+        choices: [
+            ...makeCombatPreludeVm().choices.slice(0, 1),
+            {
+                id: 'flee',
+                label: 'KNEEL',
+                description: 'Submission · sealed',
+                consequences: [],
+                iconKey: 'flee',
+                accentKey: 'bone',
+                enabled: false,
+                subtitle: null, decode: null,
+            },
+        ],
+    });
+}
+
 function makeNarrativeChoiceVm(): EventViewModel {
     return makeCombatPreludeVm({
         kind: 'narrative-choice',
@@ -140,133 +162,18 @@ describe('EncounterModalOverlay: mount conditions', () => {
         const tree = render(
             withAesthetic(<EncounterModalOverlay vm={makeCombatPreludeVm()} onFight={() => {}} onFlee={() => {}} />),
         );
-        // Two chain bars (top + bottom) carry the SEALED · NO RETREAT
-        // signal — both should be present.
-        const chains = tree.queryAllByTestId('encounter-modal-chain');
-        expect(chains).toHaveLength(2);
-        // Sash + overlay container also present.
-        expect(tree.queryByTestId('encounter-modal-sash')).not.toBeNull();
         expect(tree.queryByTestId('encounter-modal-overlay')).not.toBeNull();
-    });
-
-    it('mounts the codex header when aesthetic mode is codex (Phase 50 tick C)', () => {
-        const tree = render(
-            withAesthetic(
-                <EncounterModalOverlay vm={makeCombatPreludeVm()} onFight={() => {}} onFlee={() => {}} />,
-                'codex',
-            ),
-        );
-        // Tokens come from selectEventCodexHeader — variant=encounter,
-        // kind=combat-prelude → EVENT/ENCOUNTER, KIND/COMBAT.PRELUDE.
-        expect(tree.queryByText('EVENT/ENCOUNTER')).not.toBeNull();
-        expect(tree.queryByText('KIND/COMBAT.PRELUDE')).not.toBeNull();
-    });
-
-    it('omits the codex header in canonical mode', () => {
-        const tree = render(
-            withAesthetic(
-                <EncounterModalOverlay vm={makeCombatPreludeVm()} onFight={() => {}} onFlee={() => {}} />,
-                'canonical',
-            ),
-        );
-        expect(tree.queryByText('EVENT/ENCOUNTER')).toBeNull();
-        expect(tree.queryByText('KIND/COMBAT.PRELUDE')).toBeNull();
-    });
-});
-
-describe('EncounterModalOverlay: FLEE-disabled-for-boss branch', () => {
-    it('FIGHT is enabled regardless of variant', () => {
-        const tree = render(
-            withAesthetic(<EncounterModalOverlay vm={makeCombatPreludeVm()} onFight={() => {}} onFlee={() => {}} />),
-        );
-        const fight = tree.getByTestId('encounter-modal-fight');
-        expect(fight.props.accessibilityState?.disabled).not.toBe(true);
-    });
-
-    it('FLEE is enabled on a regular encounter (variant === "encounter")', () => {
-        const tree = render(
-            withAesthetic(<EncounterModalOverlay vm={makeCombatPreludeVm()} onFight={() => {}} onFlee={() => {}} />),
-        );
-        const flee = tree.getByTestId('encounter-modal-flee');
-        expect(flee.props.accessibilityState?.disabled).not.toBe(true);
-    });
-
-    it('FLEE is disabled when the VM flee choice has enabled: false', () => {
-        const vm = makeCombatPreludeVm({
-            variant: 'boss',
-            choices: [
-                {
-                    id: 'fight',
-                    label: 'FIGHT',
-                    description: 'Combat · BOSS',
-                    consequences: [],
-                    iconKey: 'sword',
-                    accentKey: 'blood',
-                    enabled: true,
-                    subtitle: null, decode: null,
-                },
-                {
-                    id: 'flee',
-                    label: 'FLEE',
-                    description: 'Luck Save',
-                    consequences: [],
-                    iconKey: 'flee',
-                    accentKey: 'bone',
-                    enabled: false,
-                    subtitle: null, decode: null,
-                },
-            ],
-        });
-        const tree = render(
-            withAesthetic(<EncounterModalOverlay vm={vm} onFight={() => {}} onFlee={() => {}} />),
-        );
-        const flee = tree.getByTestId('encounter-modal-flee');
-        expect(flee.props.accessibilityState?.disabled).toBe(true);
-    });
-
-    it('FLEE shows the disabled-hint caption from vm.preludeChrome when disabled', () => {
-        const vm = makeCombatPreludeVm({
-            variant: 'boss',
-            choices: [
-                ...makeCombatPreludeVm().choices.slice(0, 1),
-                {
-                    id: 'flee',
-                    label: 'FLEE',
-                    description: 'Luck Save',
-                    consequences: [],
-                    iconKey: 'flee',
-                    accentKey: 'bone',
-                    enabled: false,
-                    subtitle: null, decode: null,
-                },
-            ],
-        });
-        const tree = render(
-            withAesthetic(<EncounterModalOverlay vm={vm} onFight={() => {}} onFlee={() => {}} />),
-        );
-        // The hint text from vm.preludeChrome.fleeDisabledHint
-        // renders beneath the FLEE label when disabled.
-        expect(tree.queryByText('no retreat from this one.')).not.toBeNull();
-    });
-});
-
-describe('EncounterModalOverlay: non-dismissible backdrop (chat1 invariant)', () => {
-    it('the overlay container has no onPress handler (backdrop swallows taps)', () => {
-        const tree = render(
-            withAesthetic(<EncounterModalOverlay vm={makeCombatPreludeVm()} onFight={() => {}} onFlee={() => {}} />),
-        );
-        const overlay = tree.getByTestId('encounter-modal-overlay');
-        // The pin: a future refactor that adds onPress to the overlay
-        // root would silently break the "user cannot exit" invariant.
-        expect(overlay.props.onPress).toBeUndefined();
+        // Two chain bars (top + bottom) carry the SEALED · NO RETREAT
+        // signal — both should be present once the seal panel renders.
+        expect(tree.queryAllByTestId('encounter-modal-chain')).toHaveLength(2);
     });
 });
 
 // ---------------------------------------------------------------------------
-// Phase 63b — mode state machine (prelude → combat in-place)
+// 2026-08-10 — the ENGAGE/FLEE prelude seal is retired: mounting engages.
 // ---------------------------------------------------------------------------
 
-describe('EncounterModalOverlay: prelude → combat mode transition', () => {
+describe('EncounterModalOverlay: auto-engage (the prelude popup is retired)', () => {
     function withAllProviders(child: React.ReactNode) {
         const store = createAppStore({ adapter: createMemoryAdapter() });
         return (
@@ -280,38 +187,44 @@ describe('EncounterModalOverlay: prelude → combat mode transition', () => {
         );
     }
 
-    it('mounts the prelude content by default (FIGHT button visible)', () => {
+    it('never renders a second agree-to-fight gate (no ENGAGE/FLEE seal)', () => {
         const tree = render(
             withAllProviders(
                 <EncounterModalOverlay vm={makeCombatPreludeVm()} onFight={() => {}} onFlee={() => {}} />,
             ),
         );
-        expect(tree.queryByTestId('encounter-modal-fight')).not.toBeNull();
-        expect(tree.queryByTestId('encounter-modal-combat-mode')).toBeNull();
-    });
-
-    it('transitions to combat mode after FIGHT is pressed', () => {
-        const tree = render(
-            withAllProviders(
-                <EncounterModalOverlay vm={makeCombatPreludeVm()} onFight={() => {}} onFlee={() => {}} />,
-            ),
-        );
-        fireEvent.press(tree.getByTestId('encounter-modal-fight'));
-
-        // Prelude content is gone; combat mode scroll wrap is mounted.
         expect(tree.queryByTestId('encounter-modal-fight')).toBeNull();
-        expect(tree.queryByTestId('encounter-modal-combat-mode')).not.toBeNull();
+        expect(tree.queryByTestId('encounter-modal-flee')).toBeNull();
     });
 
-    it('still calls the onFight callback when FIGHT is pressed', () => {
+    it('fires onFight exactly once, on mount', () => {
         const onFight = jest.fn();
         const tree = render(
             withAllProviders(
                 <EncounterModalOverlay vm={makeCombatPreludeVm()} onFight={onFight} onFlee={() => {}} />,
             ),
         );
-        fireEvent.press(tree.getByTestId('encounter-modal-fight'));
         expect(onFight).toHaveBeenCalledTimes(1);
+        // A re-render with the (now cleared) VM must not re-engage.
+        tree.rerender(
+            withAllProviders(
+                <EncounterModalOverlay
+                    vm={{ ...makeCombatPreludeVm(), kind: 'narrative-choice', preludeChrome: null }}
+                    onFight={onFight}
+                    onFlee={() => {}}
+                />,
+            ),
+        );
+        expect(onFight).toHaveBeenCalledTimes(1);
+    });
+
+    it('lands in combat mode immediately (no foe supplied → the fallback branch)', () => {
+        const tree = render(
+            withAllProviders(
+                <EncounterModalOverlay vm={makeCombatPreludeVm()} onFight={() => {}} onFlee={() => {}} />,
+            ),
+        );
+        expect(tree.queryByTestId('encounter-modal-combat-mode')).not.toBeNull();
     });
 });
 
@@ -336,18 +249,17 @@ describe('EncounterModalOverlay: combat mode survives vm.kind change', () => {
 
     it('combat mode stays mounted even when vm.kind flips to "none" mid-encounter', () => {
         const localRender = render;
-        // Initial vm is combat-prelude; user taps FIGHT; on the next
-        // render the parent (exploration) passes a non-prelude vm
-        // because pickEventChoice('fight') clears the event slice.
-        // The overlay must NOT return null in this state — the user-
-        // facing regression "combat modal disappears when I tap FIGHT".
+        // Initial vm is combat-prelude; the overlay engages on mount; on the
+        // next render the parent (exploration) passes a non-prelude vm
+        // because engaging cleared the event slice. The overlay must NOT
+        // return null in this state — the user-facing regression "combat
+        // modal disappears when I enter the fight".
         const initialVm = makeCombatPreludeVm();
         const { rerender, queryByTestId } = localRender(
             withAllProviders(
                 <EncounterModalOverlay vm={initialVm} onFight={() => {}} onFlee={() => {}} />,
             ),
         );
-        fireEvent.press(queryByTestId('encounter-modal-fight'));
         expect(queryByTestId('encounter-modal-combat-mode')).not.toBeNull();
 
         // Now simulate the parent re-rendering with a cleared event slice
@@ -368,6 +280,18 @@ describe('EncounterModalOverlay: combat mode survives vm.kind change', () => {
         // early-return null). Post-fix: combat mode stays mounted.
         expect(queryByTestId('encounter-modal-overlay')).not.toBeNull();
         expect(queryByTestId('encounter-modal-combat-mode')).not.toBeNull();
+    });
+});
+
+describe('EncounterModalOverlay: non-dismissible backdrop (chat1 invariant)', () => {
+    it('the overlay container has no onPress handler (backdrop swallows taps)', () => {
+        const tree = render(
+            withAesthetic(<EncounterModalOverlay vm={makeCombatPreludeVm()} onFight={() => {}} onFlee={() => {}} />),
+        );
+        const overlay = tree.getByTestId('encounter-modal-overlay');
+        // The pin: a future refactor that adds onPress to the overlay
+        // root would silently break the "user cannot exit" invariant.
+        expect(overlay.props.onPress).toBeUndefined();
     });
 });
 
@@ -419,10 +343,8 @@ describe('EncounterModalOverlay: combat → aftermath swap', () => {
                 />,
             ),
         );
-        // Tap FIGHT to enter combat mode first; the VictoryTrigger
-        // effect then fires exitCombatWith('victory', snapshot),
-        // which the overlay watches via useEffect.
-        fireEvent.press(tree.getByTestId('encounter-modal-fight'));
+        // The overlay engages on mount; the VictoryTrigger effect then fires
+        // exitCombatWith('victory', snapshot), which the overlay watches.
 
         // Aftermath panel mounted; combat ScrollView gone.
         expect(tree.queryByTestId('combat-victory-panel')).not.toBeNull();
@@ -444,7 +366,6 @@ describe('EncounterModalOverlay: combat → aftermath swap', () => {
                 />,
             ),
         );
-        fireEvent.press(tree.getByTestId('encounter-modal-fight'));
         expect(tree.queryByTestId('combat-victory-panel')).not.toBeNull();
 
         // Press CARRY ON; dismissAftermath fires, lastOutcome clears,
@@ -500,7 +421,6 @@ describe('EncounterModalOverlay: combat → aftermath swap (parley)', () => {
                 />,
             ),
         );
-        fireEvent.press(tree.getByTestId('encounter-modal-fight'));
 
         expect(tree.queryByTestId('combat-friendship-panel')).not.toBeNull();
         // Victory panel must NOT mount for the parley path.
@@ -519,7 +439,6 @@ describe('EncounterModalOverlay: combat → aftermath swap (parley)', () => {
                 />,
             ),
         );
-        fireEvent.press(tree.getByTestId('encounter-modal-fight'));
         expect(tree.queryByTestId('combat-friendship-panel')).not.toBeNull();
 
         fireEvent.press(tree.getByTestId('combat-friendship-panel-part-as-friends'));
@@ -573,7 +492,6 @@ describe('EncounterModalOverlay: combat → aftermath swap (defeat)', () => {
                 />,
             ),
         );
-        fireEvent.press(tree.getByTestId('encounter-modal-fight'));
 
         expect(tree.queryByTestId('combat-defeat-panel')).not.toBeNull();
         expect(tree.queryByTestId('combat-victory-panel')).toBeNull();
@@ -590,7 +508,6 @@ describe('EncounterModalOverlay: combat → aftermath swap (defeat)', () => {
                 />,
             ),
         );
-        fireEvent.press(tree.getByTestId('encounter-modal-fight'));
         expect(tree.queryByTestId('combat-defeat-panel')).not.toBeNull();
 
         fireEvent.press(tree.getByTestId('combat-defeat-panel-let-close'));
@@ -607,7 +524,6 @@ describe('EncounterModalOverlay: combat → aftermath swap (defeat)', () => {
                 />,
             ),
         );
-        fireEvent.press(tree.getByTestId('encounter-modal-fight'));
         expect(tree.queryByTestId('combat-defeat-panel')).not.toBeNull();
 
         fireEvent.press(tree.getByTestId('combat-defeat-panel-begin-again'));
@@ -676,7 +592,6 @@ describe('EncounterModalOverlay: combat → aftermath swap (defeat)', () => {
             </AestheticModeProvider>,
         );
 
-        fireEvent.press(tree.getByTestId('encounter-modal-fight'));
         expect(tree.queryByTestId('combat-defeat-panel')).not.toBeNull();
 
         fireEvent.press(tree.getByTestId('combat-defeat-panel-begin-again'));
@@ -706,7 +621,7 @@ describe('EncounterModalOverlay: phase-aware seal chrome', () => {
         );
     }
 
-    it('renders the prelude chain-bar labels (SEALED · AT ARMS + NO RETREAT)', () => {
+    it('renders the combat chain-bar label once engaged (SEALED · ROUND i)', () => {
         const tree = render(
             withAllProviders(
                 <EncounterModalOverlay
@@ -717,27 +632,12 @@ describe('EncounterModalOverlay: phase-aware seal chrome', () => {
             ),
         );
         // Both chain bars mount (top + bottom) — two testIDs.
-        const bars = tree.queryAllByTestId('encounter-modal-chain');
-        expect(bars).toHaveLength(2);
-        expect(tree.queryByText('SEALED · AT ARMS')).not.toBeNull();
-        expect(tree.queryByText('NO RETREAT')).not.toBeNull();
-    });
-
-    it('swaps to a ROUND chain-bar label after FIGHT (combat mode)', () => {
-        const tree = render(
-            withAllProviders(
-                <EncounterModalOverlay
-                    vm={makeCombatPreludeVm()}
-                    onFight={() => {}}
-                    onFlee={() => {}}
-                />,
-            ),
-        );
-        fireEvent.press(tree.getByTestId('encounter-modal-fight'));
+        expect(tree.queryAllByTestId('encounter-modal-chain')).toHaveLength(2);
         // The engine combat slice isn't seeded in this test (no
         // startCombat() called), so round defaults to 1 — the
         // chrome's combat branch fires with round=1 → "ROUND i".
         expect(tree.queryByText('SEALED · ROUND i')).not.toBeNull();
+        // The retired pre-engage label must never render again.
         expect(tree.queryByText('SEALED · AT ARMS')).toBeNull();
     });
 
@@ -766,19 +666,14 @@ describe('EncounterModalOverlay: phase-aware seal chrome', () => {
                 </>,
             ),
         );
-        fireEvent.press(tree.getByTestId('encounter-modal-fight'));
-        // After fight + victory outcome:
         expect(tree.queryByText('IT IS DONE')).not.toBeNull();
         expect(tree.queryByText('CARRY ON')).not.toBeNull();
-        // Old labels are gone.
-        expect(tree.queryByText('SEALED · AT ARMS')).toBeNull();
     });
 });
 
 // ---------------------------------------------------------------------------
 // Phase 200 — in-place hazard-pattern combat (Spec 26b) wired into the modal.
-// Live map encounters now run the NEW combat full-screen over the dimmed map
-// (legacy <CombatPanel> stays only as the no-foe fallback / dev /combat tab).
+// Live map encounters run the NEW combat full-screen over the dimmed map.
 // ---------------------------------------------------------------------------
 
 describe('EncounterModalOverlay: in-place hazard combat (Phase 200)', () => {
@@ -807,7 +702,7 @@ describe('EncounterModalOverlay: in-place hazard combat (Phase 200)', () => {
         });
     }
 
-    it('renders the FULL-SCREEN hazard combat (not legacy CombatPanel) after FIGHT when a foe is supplied', () => {
+    it('renders the FULL-SCREEN hazard combat (not legacy CombatPanel) when a foe is supplied', () => {
         const store = createAppStore({ adapter: createMemoryAdapter() });
         seedPlayerWithDeck(store);
         const tree = render(
@@ -821,12 +716,11 @@ describe('EncounterModalOverlay: in-place hazard combat (Phase 200)', () => {
                 store,
             ),
         );
-        fireEvent.press(tree.getByTestId('encounter-modal-fight'));
 
         // New hazard layer mounts; the legacy combat-mode ScrollView does NOT.
         expect(tree.queryByTestId('encounter-modal-hazard-combat')).not.toBeNull();
         expect(tree.queryByTestId('encounter-modal-combat-mode')).toBeNull();
-        // The new board opens on its reveal screen (read the foe before committing).
+        // The board opens on its reveal screen — the ONE commit gate now.
         expect(tree.queryByTestId('combat-reveal')).not.toBeNull();
     });
 
@@ -842,8 +736,61 @@ describe('EncounterModalOverlay: in-place hazard combat (Phase 200)', () => {
                 store,
             ),
         );
-        fireEvent.press(tree.getByTestId('encounter-modal-fight'));
         expect(tree.queryByTestId('encounter-modal-hazard-combat')).toBeNull();
         expect(tree.queryByTestId('encounter-modal-combat-mode')).not.toBeNull();
+    });
+
+    it('offers WITHDRAW on the reveal when the VM allows retreat', () => {
+        const store = createAppStore({ adapter: createMemoryAdapter() });
+        seedPlayerWithDeck(store);
+        const tree = render(
+            withAllProviders(
+                <EncounterModalOverlay
+                    vm={makeCombatPreludeVm()}
+                    encounterEnemy={createMockEncounterEnemy()}
+                    onFight={() => {}}
+                    onFlee={() => {}}
+                />,
+                store,
+            ),
+        );
+        expect(tree.queryByTestId('combat-withdraw')).not.toBeNull();
+    });
+
+    it('seals retreat on a boss (flee choice disabled → no WITHDRAW)', () => {
+        const store = createAppStore({ adapter: createMemoryAdapter() });
+        seedPlayerWithDeck(store);
+        const tree = render(
+            withAllProviders(
+                <EncounterModalOverlay
+                    vm={makeBossPreludeVm()}
+                    encounterEnemy={createMockEncounterEnemy()}
+                    onFight={() => {}}
+                    onFlee={() => {}}
+                />,
+                store,
+            ),
+        );
+        expect(tree.queryByTestId('combat-reveal')).not.toBeNull();
+        expect(tree.queryByTestId('combat-withdraw')).toBeNull();
+    });
+
+    it('WITHDRAW fires onFlee and tears the modal session down', () => {
+        const store = createAppStore({ adapter: createMemoryAdapter() });
+        seedPlayerWithDeck(store);
+        const onFlee = jest.fn();
+        const tree = render(
+            withAllProviders(
+                <EncounterModalOverlay
+                    vm={makeCombatPreludeVm()}
+                    encounterEnemy={createMockEncounterEnemy()}
+                    onFight={() => {}}
+                    onFlee={onFlee}
+                />,
+                store,
+            ),
+        );
+        fireEvent.press(tree.getByTestId('combat-withdraw'));
+        expect(onFlee).toHaveBeenCalledTimes(1);
     });
 });

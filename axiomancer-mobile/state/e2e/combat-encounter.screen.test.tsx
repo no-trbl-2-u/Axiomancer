@@ -109,3 +109,32 @@ describe('combat-encounter screen — END PHASE + terminal outcome', () => {
         expect(done).toBeTruthy();
     });
 });
+
+// 2026-08-10 (user report) — "show the enemy's card for a moment so the player
+// knows what happened on the enemy's turn". The shaping is pinned in
+// `state/presenters/__tests__/enemy-action-card.engine.test.ts`; this is the
+// wiring pin: the panel actually mounts the reveal off a real resolution.
+describe('combat-encounter screen — the enemy plays its card back at you', () => {
+    it('END PHASE reveals the foe\'s action card', () => {
+        mount();
+        enter();
+        expect(screen.queryByTestId('combat-enemy-action-card')).toBeNull();
+        act(() => { fireEvent.press(screen.getByTestId('combat-end-phase')); });
+        expect(screen.queryByTestId('combat-enemy-action-card')).not.toBeNull();
+    });
+
+    it('never shows over the pre-combat reveal (nothing has resolved yet)', () => {
+        mount();
+        expect(screen.queryByTestId('combat-enemy-action-card')).toBeNull();
+    });
+});
+
+// The dev sandbox route hands the panel no `onWithdraw` — retreat is a live-map
+// concern (it costs morale on the real run), so the sandbox must not offer it.
+describe('combat-encounter screen — retreat is a live-map affordance only', () => {
+    it('the dev route\'s reveal offers no WITHDRAW', () => {
+        mount();
+        expect(screen.getByTestId('combat-reveal')).toBeTruthy();
+        expect(screen.queryByTestId('combat-withdraw')).toBeNull();
+    });
+});

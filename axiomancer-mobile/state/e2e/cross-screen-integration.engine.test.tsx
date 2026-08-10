@@ -149,7 +149,7 @@ describe('integration: exploration + tab-bar lock survive the encounter-modal li
         const store = makeStore();
         const tree = mountBothScreens(store);
 
-        expect(tree.queryByTestId('encounter-modal-fight')).toBeNull();
+        expect(tree.queryByTestId('encounter-modal-overlay')).toBeNull();
         expect(latestTabsScreenOptions()?.tabBarStyle?.display).not.toBe('none');
         expect(latestScreenOptions('character/index')?.href).toBeUndefined();
     });
@@ -159,20 +159,20 @@ describe('integration: exploration + tab-bar lock survive the encounter-modal li
         seedActiveEvent(store, ENCOUNTER_EVENT);
         const tree = mountBothScreens(store);
 
-        expect(tree.queryByTestId('encounter-modal-fight')).not.toBeNull();
+        expect(tree.queryByTestId('encounter-modal-overlay')).not.toBeNull();
         expect(latestTabsScreenOptions()?.tabBarStyle?.display).toBe('none');
         expect(latestScreenOptions('character/index')?.href).toBeNull();
     });
 
-    it('regression pin: FIGHT clears the event slice, but the modal AND the tab lock both survive into combat', () => {
+    it('regression pin: engaging clears the event slice, but the modal AND the tab lock both survive into combat', () => {
         const store = makeStore();
         seedActiveEvent(store, ENCOUNTER_EVENT);
+        // 2026-08-10: the modal auto-engages on mount (the ENGAGE/FLEE prelude
+        // is retired), so the transition this pins now fires without a press.
         const tree = mountBothScreens(store);
 
-        fireEvent.press(tree.getByTestId('encounter-modal-fight'));
-
         // The moment the historical bug fired: `beginHazardEncounter`
-        // clears the event slice the instant FIGHT resolves, so
+        // clears the event slice the instant the encounter is entered, so
         // `hasEvent`/`preludeReady` both flip false. Pre-fix, that
         // flip alone unmounted the modal; a same-shaped drift on the
         // tab-bar gate would re-show the tab bar mid-encounter. Both
@@ -180,20 +180,33 @@ describe('integration: exploration + tab-bar lock survive the encounter-modal li
         // `inCombat` — not by the (now-false) `hasEvent`.
         expect(store.getState().event.pending).toBeNull();
         expect(tree.queryByTestId('encounter-modal-overlay')).not.toBeNull();
+        expect(tree.queryByTestId('combat-reveal')).not.toBeNull();
         expect(latestTabsScreenOptions()?.tabBarStyle?.display).toBe('none');
         expect(latestScreenOptions('character/index')?.href).toBeNull();
     });
 
-    it('round-trip: FLEE closes the modal AND unlocks the tab bar together', () => {
+    it('round-trip: WITHDRAW closes the modal AND unlocks the tab bar together', () => {
         const store = makeStore();
         seedActiveEvent(store, ENCOUNTER_EVENT);
         const tree = mountBothScreens(store);
 
-        fireEvent.press(tree.getByTestId('encounter-modal-flee'));
+        // Retreat lives on the combat reveal now — the old prelude FLEE.
+        fireEvent.press(tree.getByTestId('combat-withdraw'));
 
-        expect(tree.queryByTestId('encounter-modal-fight')).toBeNull();
         expect(tree.queryByTestId('encounter-modal-overlay')).toBeNull();
+        expect(tree.queryByTestId('combat-reveal')).toBeNull();
         expect(latestTabsScreenOptions()?.tabBarStyle?.display).not.toBe('none');
         expect(latestScreenOptions('character/index')?.href).toBeUndefined();
+    });
+
+    it('WITHDRAW pays the retreat cost (morale −2) even though the event slice is already cleared', () => {
+        const store = makeStore();
+        seedActiveEvent(store, ENCOUNTER_EVENT);
+        const before = store.getState().moralMeter;
+        const tree = mountBothScreens(store);
+
+        fireEvent.press(tree.getByTestId('combat-withdraw'));
+
+        expect(store.getState().moralMeter).toBe(before - 2);
     });
 });
