@@ -1,7 +1,7 @@
 {
  "meta": {
-  "generatedAt": "2026-08-09",
-  "commit": "f96f0584",
+  "generatedAt": "2026-08-10",
+  "commit": "1ad39196",
   "command": "npm run combat-playtest -- --stage=all --policy=all --deck=policy-pick --runs=30 --seed=1 --cards --json",
   "seeds": {
    "baseline": 1,
@@ -9,7 +9,7 @@
   },
   "runsPerCell": 30,
   "confidence": "reduced-nightly",
-  "note": "REDUCED (reduced-nightly) re-baseline via scripts/regen-deck-matrix-baseline.mjs at f96f0584 — directionally honest, not confirmation-grade; run the full 3-seed pass before acting on close calls."
+  "note": "REDUCED (reduced-nightly) re-baseline via scripts/regen-deck-matrix-baseline.mjs at 1ad39196 — directionally honest, not confirmation-grade; run the full 3-seed pass before acting on close calls."
  },
  "report": {
   "diceModel": "upgradeable",
