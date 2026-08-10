@@ -240,3 +240,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-10T10:03:30Z | skill | digest | unknown | main | - |
 | 2026-08-10T13:52:03Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-10T13:52:56Z | skill | critique | claude-sonnet-5 | main | - |
+| 2026-08-10T19:28:22Z | slash-prompt | /march | unknown | user/ci | /march |
