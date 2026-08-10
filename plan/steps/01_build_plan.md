@@ -1167,12 +1167,15 @@ none may start early (bearings forbids opportunistic renaming).**
       (§5.5). `tf-minor-premise` further renamed to `ht-minor-charge` /
       "Minor Charge" (44c's own call, flagged in the retheme map). No
       `GAME_STATE_VERSION` bump — nothing renamed is persisted.
-- [ ] Phase 44d — Themes + presets retheme. **CORRECTED by spec 34
+- [x] Phase 44d — Themes + presets retheme. **CORRECTED by spec 34
       (Phase 42): 6 archetypes + curse, not 10 themes — the Profane Canon
       re-cut them.** The theme names, the
       preset deck names, `card-themes.ts` `THEME_KEYWORDS`, and the
       shape pins in `curated-library.engine.test.ts`. (mechanics)
-      Deps: 44c. Brief: to generate.
+      Deps: 44c. Shipped `c73173a5` (brief) — verification-only phase, zero
+      code diff: every item was already shipped by `84ef85bd` (Profane
+      Canon) and `04c75d22` (phase 44b). See
+      `plan/phases/phase_44d_themes_presets_retheme.md`.
 - [ ] Phase 44e — Enemies + threat sequences retheme. Enemy names,
       archetypes, telegraph copy and `combat.threat-sequences.ts` —
       including the boss currently named The Incompleteness. Behavior
