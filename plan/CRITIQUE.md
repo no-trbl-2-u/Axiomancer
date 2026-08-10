@@ -1,13 +1,31 @@
 # Critique log
 
-> Last pass: 2026-08-09 at commit 75ba5a34
-> Pass count: 21
+> Last pass: 2026-08-10 at commit 62cde36e
+> Pass count: 22
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 22, 2026-08-10, commit 62cde36e] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
+> mobile (375×812) and desktop (1280×800); the cold drive again
+> reached past "ENTER COMBAT" into the live combat-board at both
+> viewports (10/10 captures, 0 with nav trouble). Zero console/page
+> errors besides the same benign `navigator.vibrate` warning seen
+> every prior pass. This is the first pass since Phase 44e (enemies +
+> threat sequences retheme, commit 865eb90a) — the pre-fight "A FOE
+> BARS THE WAY" screen's four-phase Threat Sequence now prints the
+> reworded Brine Hag flavor text end to end at both viewports, no
+> truncation, no placeholder leftovers. Self-assessed all 10 captures
+> against the current Pending/Done log: title, onboarding, and the
+> exploration-hub cutscene redirect hold clean (same as pass 21); the
+> pass-19/20 node-legend/`regionProgress` rows and the pass-21 momentum
+> chain empty-state contrast row all reproduce exactly as filed (not
+> re-filed — still open in Pending, unaddressed by `/iterate`). Zero
+> new findings.
 
 > **[critique pass 21, 2026-08-09, commit 75ba5a34] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
