@@ -1176,11 +1176,13 @@ none may start early (bearings forbids opportunistic renaming).**
       code diff: every item was already shipped by `84ef85bd` (Profane
       Canon) and `04c75d22` (phase 44b). See
       `plan/phases/phase_44d_themes_presets_retheme.md`.
-- [ ] Phase 44e — Enemies + threat sequences retheme. Enemy names,
-      archetypes, telegraph copy and `combat.threat-sequences.ts` —
-      including the boss currently named The Incompleteness. Behavior
-      unchanged; names and flavor only. (mechanics) Deps: 44b.
-      Brief: to generate.
+- [x] Phase 44e — Enemies + threat sequences retheme. **Spec 34 §5.7
+      narrowed the row to one rename: The Incompleteness → The Unfinished.**
+      Applied via the retheme codemod scoped to the 5 files naming the
+      enemy (enemy-library entry, the exclusive telegraph card's
+      actionText, the impossible-stage description, two test files).
+      Ids, archetypes, and L110 calibration weights untouched. Shipped
+      `865eb90a`. See `plan/phases/phase_44e_enemies_threat_sequences_retheme.md`.
 - [ ] Phase 44f — World, maps and minigame naming. `W-01` (the Aporia
       labyrinth continent), the Fishing Village node ids (`fv-*`), map
       events, and the authored minigame names — The Gleaning
