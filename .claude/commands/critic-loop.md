@@ -77,7 +77,9 @@ Everything routes through the existing audit tooling:
     Seed minigames for determinism: `__AXM_HAZARD_SEED__`/`__AXM_HAZARD_ID__`,
     `__AXM_GATHER_SEED__`/`__AXM_GATHER_SITE__` (see `scripts/*-e2e.mjs`).
   - Prelude/boss: `debug-trigger-encounter-encounter` / `-boss` then wait for
-    `encounter-modal-overlay`; click `encounter-modal-fight` to enter combat.
+    `encounter-modal-overlay`. The encounter auto-engages onto the combat
+    REVEAL (the ENGAGE/FLEE prelude popup was retired 2026-08-10); click
+    `combat-enter` to reach the board, or `combat-withdraw` to back out.
   - **Known gaps:** `village` and `cutscene` have no dev launch hook — note
     them as un-capturable rather than faking coverage.
 

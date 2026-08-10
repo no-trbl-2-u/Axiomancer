@@ -191,11 +191,13 @@ async function isVisible(page, testId) {
     return page.getByTestId(testId).first().isVisible().catch(() => false)
 }
 
-/** Trigger a combat encounter and step through the prelude into the
- *  round-1 stance picker. */
+/** Trigger a combat encounter and step through the reveal onto the board.
+ *  2026-08-10: the ENGAGE/FLEE prelude modal is retired — triggering an
+ *  encounter lands straight on the combat reveal, whose ENTER COMBAT is now
+ *  the single commit gate. */
 async function enterFight(page) {
     await triggerEncounter(page, 'encounter')
-    await tap(page, 'encounter-modal-fight')
+    await tap(page, 'combat-enter')
     await settle(page, 900)
 }
 

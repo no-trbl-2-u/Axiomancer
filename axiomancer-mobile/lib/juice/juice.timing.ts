@@ -37,6 +37,19 @@ export interface JuiceTiming {
         enterMs: number;
         exitMs: number;
     };
+    /**
+     * The looping "this thing is alive" idle — a breath swell plus a slower
+     * vertical float. Two ends of a weight axis (a scurrying vermin vs a
+     * boss the size of a house); `idleBreathProfile` interpolates between
+     * them. The two periods are deliberately NOT harmonic so the swell and
+     * the float drift out of phase and the loop never reads as a metronome.
+     */
+    idle: {
+        breathMs: { light: number; heavy: number };
+        breathScale: { light: number; heavy: number };
+        floatMs: { light: number; heavy: number };
+        floatPx: { light: number; heavy: number };
+    };
 }
 
 export const JUICE_TIMING: JuiceTiming = {
@@ -45,4 +58,10 @@ export const JUICE_TIMING: JuiceTiming = {
     pulse: { peakScale: 1.12, inMs: 90, outMs: 220 },
     numberPop: { riseDistancePx: 34, fadeDelayMs: 120, fadeDurationMs: 760, riseDurationMs: 880 },
     transitions: { enterMs: 180, exitMs: 140 },
+    idle: {
+        breathMs: { light: 1500, heavy: 2600 },
+        breathScale: { light: 1.014, heavy: 1.032 },
+        floatMs: { light: 2100, heavy: 3300 },
+        floatPx: { light: 2.5, heavy: 6 },
+    },
 };

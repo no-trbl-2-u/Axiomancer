@@ -478,6 +478,14 @@ export interface AppActions {
      *    -> clear (engine already advanced state via resolveMapEvent)
      */
     pickEventChoice: (choiceId: string) => void;
+    /**
+     * Withdraw from an encounter already entered (the combat reveal's
+     * WITHDRAW). Pays the non-boss retreat cost — -2 morale + its toast —
+     * without requiring a pending event slice, which `beginHazardEncounter`
+     * has already cleared by then. Only offered where retreat is allowed;
+     * boss encounters never surface it.
+     */
+    fleeEncounter: () => void;
     /** Clear the pending event without dispatching any engine call. */
     dismissEvent: () => void;
 
@@ -1009,6 +1017,7 @@ export function createAppActions(store: AppStore): AppActions {
         save: () => store.getState().save(),
         resolveCurrentMapEvent: (sourceNodeType?: string) => resolveCurrentMapEventAction(store, sourceNodeType),
         pickEventChoice: (choiceId) => pickEventChoiceAction(store, choiceId),
+        fleeEncounter: () => fleeEncounterAction(store),
         dismissEvent: () => dismissEventAction(store),
         beginHazard: (options) => beginHazardAction(store, options),
         selectHazardRoute: (route) => selectHazardRouteAction(store, route),
@@ -1826,6 +1835,50 @@ function clearEventSlice(store: AppStore): void {
     store.setState({ event: EMPTY_EVENT_SLICE });
 }
 
+/**
+ * The price of walking away from a non-boss encounter.
+ *
+ * [4.5] DRIFT fix (mechanics-vs-UI audit row 10): the retreat chrome reads
+ * `forfeit the path · -ii morale`, so honour it — shift the engine
+ * `moralMeter` by -2 and surface the cost. Boss encounters are sealed (the
+ * retreat is never offered), so this is only ever called for a foe you were
+ * allowed to leave.
+ *
+ * Phase 92 — flee narrative feedback: prose-style narrative in the lowercase
+ * ritual register, carrying the morale cost (deep-playtest F03).
+ */
+function applyFleeCost(store: AppStore): void {
+    store.getState().shiftMoralMeter(-2);
+    const prev = store.getState().notifications;
+    store.setState({
+        notifications: {
+            levelUpAcknowledged: prev?.levelUpAcknowledged ?? true,
+            toast: {
+                text: 'you fled the encounter. the path bends away.\n\nmorale -2',
+                id: (prev?.toast?.id ?? 0) + 1,
+            },
+        },
+    });
+}
+
+/**
+ * Withdraw from an encounter the player has already stepped into — the
+ * combat reveal's WITHDRAW, which replaced the old prelude modal's FLEE
+ * (2026-08-10 user report: two consecutive popups asked to agree to the same
+ * fight). By then `beginHazardEncounter` has already cleared the event slice,
+ * so unlike `pickEventChoice('flee')` this pays the cost without needing a
+ * pending event; the slice is cleared defensively for any path that still has
+ * one. The modal teardown is the caller's (the overlay's) concern.
+ */
+function fleeEncounterAction(store: AppStore): void {
+    try {
+        applyFleeCost(store);
+    } catch (error) {
+        console.error('Failed to process flee action:', error);
+    }
+    clearEventSlice(store);
+}
+
 function pickEventChoiceAction(store: AppStore, choiceId: string): void {
     try {
         const state = store.getState();
@@ -1857,34 +1910,7 @@ function pickEventChoiceAction(store: AppStore, choiceId: string): void {
             }
             if (choiceId === 'flee') {
                 try {
-                    // [4.5] DRIFT fix (mechanics-vs-UI audit row 10):
-                    // the FLEE button's chrome subtitle reads
-                    // `forfeit the path · -ii morale` on non-boss
-                    // encounters. Honour the chrome — shift the
-                    // engine `moralMeter` by -2 so the SELF tab's
-                    // alignment readout reflects the cost. Boss
-                    // flee is engine-disabled in the UI (KNEEL /
-                    // `enabled: false`) and the subtitle reads
-                    // `sealed · no retreat` — no morale delta
-                    // applies there even if the choice somehow
-                    // dispatched.
-                    if (!processed.isBoss) {
-                        store.getState().shiftMoralMeter(-2);
-                        // Phase 92 — flee narrative feedback. Display prose-style
-                        // narrative after successful flee action matching existing
-                        // lowercase ritual register patterns. Combined with morale
-                        // cost feedback as requested in deep-playtest F03.
-                        const prev = store.getState().notifications;
-                        store.setState({
-                            notifications: {
-                                levelUpAcknowledged: prev?.levelUpAcknowledged ?? true,
-                                toast: {
-                                    text: 'you fled the encounter. the path bends away.\n\nmorale -2',
-                                    id: (prev?.toast?.id ?? 0) + 1,
-                                },
-                            },
-                        });
-                    }
+                    if (!processed.isBoss) applyFleeCost(store);
                     clearEventSlice(store);
                 } catch (error) {
                     console.error('Failed to process flee action:', error);

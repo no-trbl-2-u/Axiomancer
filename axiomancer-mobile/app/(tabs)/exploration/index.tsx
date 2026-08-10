@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text } from 'react-native';
 import { FONTS } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
@@ -149,9 +149,19 @@ export default function ExplorationScreen() {
         }
     }, [inEncounterModal, preludeReady, lastOutcome, inCombat, closeEncounterModal]);
     // Phase 200 — drop the captured foe once the modal session fully closes,
-    // so the next encounter bootstraps clean.
+    // so the next encounter bootstraps clean. Strictly on the CLOSING edge:
+    // since the modal auto-engages (2026-08-10) the foe is now captured by a
+    // child effect in the very commit that opens the session, and this screen's
+    // own effects run after its children's — a plain `if (!inEncounterModal)`
+    // wiped that foe the instant it was captured, and every encounter fell
+    // through to the NO FOE CAPTURED fallback.
+    const modalWasOpen = useRef(false);
     useEffect(() => {
-        if (!inEncounterModal) setActiveEnemy(null);
+        if (inEncounterModal) { modalWasOpen.current = true; return; }
+        if (modalWasOpen.current) {
+            modalWasOpen.current = false;
+            setActiveEnemy(null);
+        }
     }, [inEncounterModal]);
 
     // The node the player has tapped but not yet confirmed; resolved against
@@ -210,8 +220,12 @@ export default function ExplorationScreen() {
         enterCombat();
     };
 
+    // 2026-08-10 — retreat now comes from the combat reveal's WITHDRAW, after
+    // the encounter has already been entered and the event slice cleared, so
+    // it pays the cost through `fleeEncounter` rather than the event choice.
+    // The modal owns its own teardown.
     const onEncounterFlee = () => {
-        actions.pickEventChoice('flee');
+        actions.fleeEncounter();
     };
 
     return (
