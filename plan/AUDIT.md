@@ -14,6 +14,11 @@
 
 ## Pending
 
+> Bias: divergence (set via oversight 2026-08-10) — top-score row below
+> (`axio-query overview still publishes the retired "THE STRIKE IS DEAD"
+> doctrine after Phase 41`, score 72, ease 9) has sat unclaimed 2 days;
+> /iterate should weight this category 1.5x until it drains.
+
 ### [debt] `telemetry.mjs` writes `TELEMETRY.md` relative to cwd, so a workspace-cd forks the log
 - category: debt
 - impact: 3
@@ -68,7 +73,7 @@
   amended to stop calling verify a sufficient pre-flight. Any of the three
   beats the current state, where the doc and the gate disagree.
 
-### [divergence] Bearings says there is no hosted web surface; Cloudflare Pages has been publishing one
+### [divergence] Bearings says there is no hosted web surface; Cloudflare Pages has been publishing one — RULED via /oversight 2026-08-10: incidental, scope it down
 - category: divergence
 - impact: 6
 - ease: 6
@@ -125,8 +130,21 @@
   the current publish scope: which branches build, what the URLs are, and
   whether anything unintended (the private DevLog among them) is reachable
   without auth.
+- **RULING (T via /oversight 2026-08-10):** incidental — not an intended
+  public surface. Scope it down (restrict Cloudflare Pages to
+  internal/preview-only use, or turn it off) rather than rewrite
+  bearings to describe a public site. Bearings' "no hosted web surface"
+  sentence stands as the target state; this row stays open until the
+  Pages integration actually matches it.
+- next: /iterate or a small phase — confirm current publish scope first
+  (which branches build, whether the private DevLog is reachable
+  without auth per the bullet above), then restrict/disable the
+  Cloudflare Pages integration (`.github/workflows/build-devlog.yml`'s
+  Pages-serving comment, and/or the Cloudflare project's build settings,
+  which live outside this repo). This is an infra/config change, not a
+  plan edit — `/oversight` does not make it directly.
 
-### [contract] `exploration-combat-roundtrip-e2e` regression: FLEE leaves the tab bar hidden
+### [x] [contract] `exploration-combat-roundtrip-e2e` regression: FLEE leaves the tab bar hidden — RESOLVED via /oversight 2026-08-10: fixed by #194
 - category: contract
 - impact: 8
 - ease: 5
@@ -169,6 +187,18 @@
   the way a real move does. Verify with
   `ROUNDTRIP_E2E_REUSE_EXPORT=1 node scripts/exploration-combat-roundtrip-e2e.mjs`
   plus a full `npm --workspace axiomancer-mobile run e2e:minigames`.
+- **[x] RESOLVED 2026-08-10 (/oversight, verified against commit
+  `a251a325` / PR #194 "combat: breathe the foe, retire the double entry
+  gate, name the enemy's turn").** #194 retired the encounter-modal
+  double-entry gate this row's own root-cause read named as the likely
+  mechanism (auto-engage on mount, single commit gate at the reveal) and
+  its commit body states the roundtrip e2e now "plays out the start-node
+  arrival cutscene... before reading the tab lock it was misattributing
+  to" — the exact desync class this row tracked. Commit body reports
+  `e2e:combat` and `e2e:exploration-roundtrip` passing in a real browser.
+  Not re-run locally by this /oversight pass; drain on the strength of
+  the commit's own evidence. If it recurs, re-file fresh rather than
+  reopen this row.
 
 ### [gap] `march` ticks are creeping toward the 90-minute job timeout; one was killed mid-cycle
 - category: gap
@@ -272,7 +302,7 @@
   Left unfiled as a fix only because the audit pass had already closed the
   live instance and adding a second invariant belonged in its own tick.
 
-### [mobile] The live combat exit path bypasses the engine's end-of-combat reducer entirely
+### [x] [mobile] The live combat exit path bypasses the engine's end-of-combat reducer entirely — RESOLVED via /oversight 2026-08-10: route through endCombat, folded into Phase 54
 - source: first-map audit 2026-08-08 (finding F3). The kill-objective break
   was fixed at the symptom — `applyHazardOutcome` now calls
   `advanceKillObjectives` directly. The root cause is unaddressed: hazard
@@ -289,6 +319,10 @@
   a reason (the panel keeps combat state in local React state precisely so the
   engine's `state.combat` slice could be retired). Reunifying them is a design
   decision, not a bug fix.
+- **RULING (T via /oversight 2026-08-10):** route live combat through
+  `endCombat` — the correctness risk of an unenumerated silent no-op
+  outweighs the refactor cost of reunifying with the panel's local React
+  state. Queued as build-plan **Phase 54**.
 
 
 > **BANNER (/oversight 2026-08-08 — the unshackling).** The seven
@@ -427,7 +461,7 @@
   repointed at `cqi` / spec 35, or the next tuning pass will optimise the
   dead law the phase exists to retire.
 
-### [needs-user-call] The product name "Axiomancer" under the whole-product pivot
+### [needs-user-call] The product name "Axiomancer" under the whole-product pivot — RULED via /oversight 2026-08-10: reconsider, open a naming session
 - category: content
 - impact: 6
 - ease: 9
@@ -438,6 +472,16 @@
   is a T-level call, above the loop's standing big-decisions authority.
   Phases 44a-44i execute identically either way, so this blocks nothing.
   Bearings' "Name is capitalized: Axiomancer, always" stands until ruled on.
+- **RULING (T via /oversight 2026-08-10):** reconsider, not keep-as-is.
+  The name is not finalized here — only the standing question ("does this
+  deserve reconsideration at all?") is closed, answer yes. Open a
+  dedicated naming discussion (candidate names + rationale) as its own
+  session rather than deciding it inline as a multiple-choice; until that
+  session lands, "Axiomancer" remains the working name and Phases 44a-44i
+  are unaffected either way.
+- next: schedule a naming session (own thread, not folded into a phase
+  brief). Row stays open until that session rules a final name (or
+  reaffirms the current one).
 
 ### Phase 52b's shelter retheme raised four rest nodes' heal for an open window
 - category: divergence
@@ -455,7 +499,7 @@
   legible, and `REST_PASSIVE_HEAL_FRACTION` is marked
   carried-forward-pending-52c. Drain by shipping 52c, not by tuning here.
 
-### [needs-user-call] Should any map outside the fishing village read as an inn?
+### [x] [needs-user-call] Should any map outside the fishing village read as an inn? — RESOLVED via /oversight 2026-08-10: no, fishing village only
 - category: content
 - impact: 4
 - ease: 9
@@ -464,6 +508,9 @@
   with the most-defensible default — the four fishing-village rest nodes are
   the only inns; everything else is a camp, pinned as a COMPLETE set so a new
   inn cannot appear silently. Authored content question, not a code one.
+- **RULING (T via /oversight 2026-08-10):** no — confirm the current
+  default as final. The four fishing-village rest nodes stay the
+  COMPLETE inn set; no content change.
 
 ### The starter bundle collapses to 8 cards in the live app
 - category: divergence

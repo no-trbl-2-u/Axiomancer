@@ -1627,6 +1627,34 @@ RESEQUENCED the same day behind the unshackling — see above):**
       "the foe" fixed vocabulary and the six gloss rewrites are
       theme-bearing and must be re-derived against Phase 42's spec.
       Brief: to generate.
+      **(added via /oversight 2026-08-10)** Open PR #193 ("strip the
+      prose off the card face", direct T request, un-routed through the
+      loop) removes the authored PAID sentence/type-strip/die-lines from
+      the combat card FACE and moves them to the inspect overlay —
+      adjacent scope to this phase's copy pass. Re-scope this phase's
+      brief against whatever #193 ships (face vs. overlay text split)
+      before generating it; do not write the 12 before→after rewrites
+      against the pre-#193 face.
+
+- [ ] Phase 54 — Route live combat through `endCombat`. `AUDIT.md`
+      "[mobile] The live combat exit path bypasses the engine's
+      end-of-combat reducer entirely" (first-map audit 2026-08-08,
+      finding F3): hazard combat (Spec 26b) never calls `endCombat`, so
+      every side effect that reducer owns — flags, codex unlocks,
+      faction deltas, morale, run counters, not just the
+      quest-progression break already fixed at the symptom via
+      `applyHazardOutcome` calling `advanceKillObjectives` directly — is
+      silently absent from live play. Ruled via `/oversight` 2026-08-10:
+      route the live path through `endCombat` rather than keep it
+      diverged and enumerate deltas by hand (the correctness risk of an
+      unenumerated silent no-op outweighs the refactor cost of
+      reunifying it with the panel's local React combat state). Read
+      `game.reducer.endCombat` line by line first, diff it against
+      `applyHazardOutcome` + `handleHazardExit`, and either route calls
+      through the reducer or thread each side effect explicitly if a
+      clean call site isn't reachable. Resolves the standing
+      `[needs-user-call]` at `plan/AUDIT.md`'s endCombat row. Brief: to
+      generate.
 
 > **Note (issue-triage 2026-07-19):** issue #132 asked for a
 > `devlog-build` GitHub Action; re-triage found it re-classified as
@@ -1887,6 +1915,19 @@ See the status rows above; generate briefs on demand.
   `moralDelta` questions. Resulting commit: this one; briefs generated
   under `plan/phases/phase_53*.md`; design record
   `specs/story/S-02-fishing-village-voices.md`.
+
+- **2026-08-10** — actor: **T via `/oversight`** (attended session).
+  Action: **added Phase 54** (route live combat through `endCombat`),
+  resolving the standing `[needs-user-call]` at `plan/AUDIT.md`'s "live
+  combat exit path bypasses the engine's end-of-combat reducer entirely"
+  row (first-map audit 2026-08-08, finding F3); and **amended Phase 40's
+  row** to flag scope overlap with open PR #193 ("strip the prose off
+  the card face"), instructing it be re-scoped against whatever #193
+  ships before its brief is generated. Confirmed T's request: yes — T
+  selected "Route through endCombat (Recommended)" for the first and
+  "Note re-scope-after-#193 in Phase 40's row (Recommended)" for the
+  second when asked directly. T's stated reason: not stated beyond the
+  selections themselves. Resulting commit: this one.
 
 ## Phase log (commit hashes)
 
