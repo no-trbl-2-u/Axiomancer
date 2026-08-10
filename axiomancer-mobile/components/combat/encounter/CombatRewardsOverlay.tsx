@@ -126,6 +126,19 @@ export function CombatRewardsOverlay({
                     <View style={[styles.previewPanel, { borderColor: previewCard.face.categoryColor }]}>
                         <ScrollView contentContainerStyle={styles.previewScroll}>
                             <CombatCardFace card={previewCard} width={PREVIEW_W} height={PREVIEW_H} large />
+                            {/* The face carries only KEYWORD · value since the 2026-08-10
+                                declutter, so the preview states the two plays itself —
+                                "nothing is committed to the run unread" still has to hold. */}
+                            <View style={styles.previewPlays}>
+                                <Text style={styles.previewPlayLine}>
+                                    <Text style={styles.previewPlayTag}>◇ NO DIE  </Text>
+                                    {previewCard.detail.freePill}
+                                </Text>
+                                <Text style={styles.previewPlayLine}>
+                                    <Text style={[styles.previewPlayTag, { color: previewCard.face.categoryColor }]}>◆ +DIE  </Text>
+                                    {previewCard.detail.diePaidLine ?? previewCard.detail.outcomeLine}
+                                </Text>
+                            </View>
                             {previewCard.detail.keywords.length > 0 && (
                                 <View style={styles.previewKeywords}>
                                     {previewCard.detail.keywords.map((kw) => (
@@ -187,6 +200,9 @@ const useStyles = makeStyles((AXM) => ({
     previewOverlay: { ...StyleSheet.absoluteFillObject, zIndex: 70, backgroundColor: 'rgba(0,0,0,0.92)', alignItems: 'center', justifyContent: 'center', padding: 14 },
     previewPanel: { width: '100%', maxWidth: 400, maxHeight: '92%', borderWidth: 2, backgroundColor: AXM.panelBg, paddingHorizontal: 14, paddingTop: 16, paddingBottom: 12 },
     previewScroll: { alignItems: 'center', paddingBottom: 10 },
+    previewPlays: { marginTop: 12, alignSelf: 'stretch', paddingTop: 10, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: 'rgba(255,255,255,0.16)' },
+    previewPlayLine: { fontFamily: FONTS.serif, fontSize: 13, color: AXM.parchment, lineHeight: 18, marginBottom: 4 },
+    previewPlayTag: { fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 1, color: AXM.bone },
     previewKeywords: { marginTop: 14, alignSelf: 'stretch' },
     previewKeywordLine: { fontFamily: FONTS.serif, fontSize: 13, color: AXM.parchment, lineHeight: 18, marginBottom: 5 },
     previewKeywordName: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 1.2 },
