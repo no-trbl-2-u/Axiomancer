@@ -41,11 +41,12 @@ import { CombatDie, combatDieFootprint } from '@/components/combat/encounter/Com
 import { CombatSummaryModal } from '@/components/combat/encounter/CombatSummaryModal';
 import { CombatRewardsOverlay } from '@/components/combat/encounter/CombatRewardsOverlay';
 import { CombatTutorialPrimer } from '@/components/combat/encounter/CombatTutorialPrimer';
+import { EnemyActionCard } from '@/components/combat/encounter/EnemyActionCard';
 import { CombatTutorialCoach } from '@/components/combat/encounter/CombatTutorialCoach';
 import { currentCombatTutorialStep } from '@/components/combat/encounter/combat-tutorial-steps';
 import { Image } from 'expo-image';
 import { getEncounterEnemyArt } from '@/assets/images/enemies';
-import { INTENT_ICONS, buildCombatViewModel, resolveApplyRouting, rewardCardVMs, STANCE_COLORS, type CombatCardVM, type CombatEffectChipVM, type CombatSignatureVM } from '@/state/presenters/combat-encounter.engine';
+import { INTENT_ICONS, buildCombatViewModel, resolveApplyRouting, rewardCardVMs, selectEnemyActionCard, STANCE_COLORS, type CombatCardVM, type CombatEffectChipVM, type CombatSignatureVM, type EnemyActionCardVM } from '@/state/presenters/combat-encounter.engine';
 import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
 import { useGameState, useGameStore } from '@/state/GameStoreProvider';
 import {
@@ -98,6 +99,13 @@ export interface CombatEncounterPanelProps {
      * mutate the player's real progression.
      */
     persistOutcome?: boolean;
+    /**
+     * Retreat, offered on the reveal screen only (before a die is rolled).
+     * This is where the retired encounter-prelude modal's FLEE now lives — the
+     * reveal IS the commit gate, so the choice belongs beside ENTER COMBAT.
+     * Omitted (dev sandbox, boss encounters) = no retreat is offered.
+     */
+    onWithdraw?: () => void;
     /** Fired once when the player dismisses the terminal summary. */
     onExit: (outcome: CombatOutcome | null) => void;
 }
@@ -276,6 +284,7 @@ export function CombatEncounterPanel({
     seed,
     forceTutorial = false,
     persistOutcome = false,
+    onWithdraw,
     onExit,
 }: CombatEncounterPanelProps) {
     const styles = useStyles();
@@ -559,6 +568,23 @@ export function CombatEncounterPanel({
     // the seq (captures the events stashed in fxRef just before).
     const fx = useMemo<CombatFx>(() => ({ seq: fxSeq, events: fxRef.current }), [fxSeq]);
 
+    // The enemy's turn, shown back as a card for a beat (user report 2026-08-10:
+    // "show the card so the player knows what happened on the enemy's turn").
+    // Driven off the SAME resolved-event bump the pane's floats ride, and keyed
+    // by that seq so a repeated action still replays. `null` on every bump that
+    // carried no threat resolution — a card APPLY is the player's turn, not the
+    // foe's. The seq ref makes this exactly-once-per-resolve even though `live`
+    // is a dep (the selector needs the post-resolution threat sequence).
+    const [enemyAction, setEnemyAction] = useState<{ key: number; vm: EnemyActionCardVM } | null>(null);
+    const lastCardSeq = useRef(0);
+    useEffect(() => {
+        if (fx.seq === 0 || fx.seq === lastCardSeq.current) return;
+        lastCardSeq.current = fx.seq;
+        const card = selectEnemyActionCard(fx.events, live);
+        setEnemyAction(card ? { key: fx.seq, vm: card } : null);
+    }, [fx, live]);
+    const onEnemyActionDone = useCallback(() => setEnemyAction(null), []);
+
     const handleExit = useCallback(() => {
         if (exitedRef.current) return;
         exitedRef.current = true;
@@ -702,8 +728,35 @@ export function CombatEncounterPanel({
                         <Pressable onPress={onEnter} testID="combat-enter" accessibilityRole="button" accessibilityLabel="Enter combat and roll your first dice" style={[styles.revealBtn, { borderColor: AXM.sulfur }]}>
                             <Text style={[styles.revealBtnText, { color: AXM.sulfur }]}>ENTER COMBAT ›</Text>
                         </Pressable>
+                        {/* The retreat, where the retired prelude modal's FLEE now
+                            lives: the reveal is the commit gate, so the choice sits
+                            beside the commit. Absent when retreat is sealed. */}
+                        {onWithdraw && (
+                            <Pressable
+                                onPress={onWithdraw}
+                                testID="combat-withdraw"
+                                accessibilityRole="button"
+                                accessibilityLabel="Withdraw from this encounter"
+                                style={styles.withdrawBtn}
+                            >
+                                <Text style={[styles.withdrawBtnText, { color: AXM.bone }]}>WITHDRAW</Text>
+                                <Text style={styles.withdrawSub}>forfeit the path · morale −2</Text>
+                            </Pressable>
+                        )}
                     </ScrollView>
                 </View>
+            )}
+
+            {/* the foe's turn, named — rises over the board for a beat after END
+                PHASE, then clears itself. Never over the reveal (nothing has
+                resolved yet there). */}
+            {enemyAction && !showReveal && (
+                <EnemyActionCard
+                    vm={enemyAction.vm}
+                    enemyName={vm.enemy.name}
+                    revealKey={enemyAction.key}
+                    onDone={onEnemyActionDone}
+                />
             )}
 
             {/* PLEA opens a yield; the player, not the threshold, authors the outcome. */}
@@ -1244,6 +1297,11 @@ const useStyles = makeStyles((AXM) => ({
     revealBranchTaken: { color: AXM.parchment },
     revealBtn: { borderWidth: 2, paddingHorizontal: 30, paddingVertical: 12, marginTop: 22, backgroundColor: 'rgba(212,192,38,0.12)' },
     revealBtnText: { fontFamily: FONTS.gothic, fontSize: 18, letterSpacing: 1 },
+    // Retreat reads QUIETER than the commit — it is the lesser road, not the
+    // symmetric other half of a fight-or-flight binary.
+    withdrawBtn: { borderWidth: 1, borderColor: AXM.ash, paddingHorizontal: 20, paddingVertical: 8, marginTop: 12, alignItems: 'center' },
+    withdrawBtnText: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 2 },
+    withdrawSub: { fontFamily: FONTS.mono, fontSize: 8.5, letterSpacing: 0.8, color: AXM.ash, marginTop: 3 },
 
     ghost: { position: 'absolute', top: 0, left: 0, zIndex: 999 },
     // ✕ badge riding the die ghost while it hovers an illegal target.

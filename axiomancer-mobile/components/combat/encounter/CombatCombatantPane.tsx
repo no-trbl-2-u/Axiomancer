@@ -41,7 +41,7 @@ import { getCardById, type CombatEvent } from '@mechanics';
 import { effectGlyph } from '@/components/combat/statusGlyphs';
 import { keywordForEffect } from '@/state/combat/keywords';
 import { IntentIcon } from './IntentIcon';
-import { useJuiceFlash, useJuiceNumberPop, useJuicePulse, useJuiceShake } from '@/lib/juice';
+import { useJuiceFlash, useJuiceIdleBreath, useJuiceNumberPop, useJuicePulse, useJuiceShake } from '@/lib/juice';
 
 /** Full-bleed battlefield backdrop — a storm-lit ruined city over a cracked
  *  stone floor. Sits behind the enemy figure; the SVG `CreatureScene` draws
@@ -496,6 +496,10 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
 
     const enemyAnim = useAnimatedStyle(() => ({ transform: [{ translateX: enemyShift.value }, { scale: enemyScale.value }] }));
 
+    // The between-turns idle: a boss breathes deep and slow, a lesser foe
+    // shallow and quick.
+    const idleStyle = useJuiceIdleBreath(enemy.isBoss ? 1 : 0.3);
+
     // Random painting per encounter (artNonce = encounter seed), stable for the
     // fight's duration — see assets/images/enemies.
     const enemyArt = getEncounterEnemyArt(enemy.artKey, enemy.artNonce);
@@ -514,7 +518,10 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                 />
                 <Animated.View style={[StyleSheet.absoluteFillObject, enemyAnim]}>
                     <View style={styles.enemyFigureWrap}>
-                        {/* grounding shadow so the alpha-matted figure sits ON the floor */}
+                        {/* grounding shadow so the alpha-matted figure sits ON the floor.
+                            It stays OUTSIDE the idle wrapper: the shadow is the floor's,
+                            not the creature's, so the figure breathes over a planted
+                            shadow instead of dragging it up and down. */}
                         <Svg width={240} height={40} style={styles.enemyShadow}>
                             <Defs>
                                 <RadialGradient id="axmEnemyGroundShadow" cx="50%" cy="50%" rx="50%" ry="50%">
@@ -524,14 +531,20 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                             </Defs>
                             <Ellipse cx={120} cy={20} rx={112} ry={17} fill="url(#axmEnemyGroundShadow)" />
                         </Svg>
-                        <Image
-                            source={enemyArt}
-                            style={[styles.enemyFigureImg, enemy.isBoss && styles.enemyFigureImgBoss]}
-                            contentFit="contain"
-                            contentPosition="bottom center"
-                            transition={0}
-                            accessibilityLabel={`${enemy.name} bars the way`}
-                        />
+                        {/* The foe is ALIVE between turns — a slow breath swell + float
+                            (lib/juice `useJuiceIdleBreath`, reduced-motion gated). Its own
+                            wrapper because RN cannot merge two `transform` arrays from a
+                            style list, and the lunge above owns the outer one. */}
+                        <Animated.View style={[styles.enemyIdleWrap, idleStyle]} testID="combat-enemy-figure">
+                            <Image
+                                source={enemyArt}
+                                style={[styles.enemyFigureImg, enemy.isBoss && styles.enemyFigureImgBoss]}
+                                contentFit="contain"
+                                contentPosition="bottom center"
+                                transition={0}
+                                accessibilityLabel={`${enemy.name} bars the way`}
+                            />
+                        </Animated.View>
                     </View>
                 </Animated.View>
                 {/* top scrim — HUD legibility over the scene */}
@@ -633,6 +646,11 @@ const useStyles = makeStyles((AXM) => ({
     // grounding shadow hugs its feet.
     enemyFigureWrap: { position: 'absolute', left: 0, right: 0, top: COMBAT_HUD_HEIGHT - 14, bottom: '9%', alignItems: 'center', justifyContent: 'flex-end' },
     enemyShadow: { position: 'absolute', bottom: -12 },
+    // The idle-breath wrapper fills its parent so the figure's percentage
+    // sizing still resolves against the scene band; `transformOrigin` bottom
+    // pins the swell to the creature's feet (a centre swell lifts it off the
+    // floor and unglues it from its shadow).
+    enemyIdleWrap: { width: '100%', height: '100%', alignItems: 'center', justifyContent: 'flex-end', transformOrigin: 'center bottom' },
     enemyFigureImg: { width: '78%', height: '96%', maxWidth: 380 },
     enemyFigureImgBoss: { width: '92%', maxWidth: 460 },
     floorGlow: { position: 'absolute', left: 0, right: 0, top: '46%', bottom: 0 },

@@ -73,8 +73,17 @@ export default function LabyrinthScreen() {
             closeEncounterModal();
         }
     }, [inEncounterModal, preludeReady, lastOutcome, inCombat, closeEncounterModal]);
+    // Drop the captured foe on the CLOSING edge only — exploration-screen
+    // parity (see its comment): the modal auto-engages, so the foe is captured
+    // by a child effect in the same commit that opens the session, and a plain
+    // `if (!inEncounterModal)` would wipe it the instant it arrived.
+    const modalWasOpen = useRef(false);
     useEffect(() => {
-        if (!inEncounterModal) setActiveEnemy(null);
+        if (inEncounterModal) { modalWasOpen.current = true; return; }
+        if (modalWasOpen.current) {
+            modalWasOpen.current = false;
+            setActiveEnemy(null);
+        }
     }, [inEncounterModal]);
 
     // ── Boss outcome recording (one per modal session) ──
@@ -133,8 +142,11 @@ export default function LabyrinthScreen() {
         setActiveEnemy(enemy);
         enterCombat();
     };
+    // Retreat is the combat reveal's WITHDRAW now (exploration-screen parity):
+    // it fires after the encounter was entered, so the cost is paid through
+    // `fleeEncounter`, not the (already-cleared) event choice.
     const onEncounterFlee = () => {
-        actions.pickEventChoice('flee');
+        actions.fleeEncounter();
     };
 
     // ── Act select ──
