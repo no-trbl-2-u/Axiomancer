@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-08-10 at commit 62cde36e
-> Pass count: 22
+> Last pass: 2026-08-11 at commit c063ac48
+> Pass count: 23
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -177,6 +177,65 @@
 > pass "ENTER COMBAT".
 
 ## Pending
+
+### [HIGH] title screen — tagline says "modern steel", contradicting the shipped anti-modern-word doctrine
+- pass: 23 (commit c063ac48)
+- viewport: mobile (375×812)
+- category: voice
+- observation: the title screen's hero tagline — the first line of prose
+  any player reads, directly under the throne-room/hooded-figure art —
+  reads "The cursed lands await. Carry your ancient knowledge and modern
+  steel into the LEAGUES beyond." "Modern steel" is a jarring register
+  break against the archaic, gothic-cathedral visual and the rest of
+  the game's prose (compare the same session's onboarding deck copy:
+  "a spoiled poultice, a thin hymn, and a psalter that opens to the
+  page you need"; or the Brine Hag encounter: "They have heard kinder
+  sermons than yours, and drowned anyway"). This isn't a style nitpick
+  in isolation — `axiomancer-mechanics/specs/34-dark-fantasy-campaign.md`
+  (the ratified dark-fantasy retheme bible) repeatedly treats "reads
+  modern" as the defect to fix elsewhere in the game (e.g. line 438:
+  "BACKFIRE reads modern at a glance"; line 511: "'open-minded' is
+  modern... replaced"; line 288: "never a modern given name"). The
+  title screen — the one screen every player sees before anything
+  else — still ships the exact word the rest of the retheme is
+  actively removing.
+- evidence: `axiomancer-mobile/.critique-artifacts/mobile/01-title.png`
+  and `01-title.txt`. Source: `axiomancer-mobile/components/TitleScreen.tsx:57-58`
+  — `The cursed lands await. Carry your ancient knowledge and modern
+  steel into the LEAGUES beyond.`
+- suggested fix: swap "modern steel" for an archaic-register synonym
+  (e.g. "tempered steel", "cold iron", "honest steel") — one-line copy
+  change, no code/data plumbing involved.
+- source: critique pass 23 (unattended, critique:drive artifacts)
+
+### [MED] combat — every encounter renders the same fixed "ruined city" arena backdrop, regardless of the encounter's own narrative setting
+- pass: 23 (commit c063ac48)
+- viewport: mobile (375×812)
+- category: visual
+- observation: the live combat board's full-bleed arena backdrop is a
+  single static image used for literally every fight
+  (`axiomancer-mobile/components/combat/encounter/CombatCombatantPane.tsx:49`
+  — `const ARENA_BG = require('@/assets/images/combat/arena-ruined-city.jpg')`,
+  documented in the file's own header comment as "a storm-lit ruined
+  city over a cracked stone floor"). The Brine Hag encounter captured
+  this pass is entirely nautical/liturgical in its own text — "the
+  drowned congregation", "They have heard kinder sermons than yours,
+  and drowned anyway", "The sea breaks over the whole argument at
+  once" — yet the player fights it in front of a generic cityscape
+  with no water, dock, or coastal-village signifier anywhere in frame.
+  Phase 44g just rethemed the coastal-village NPC dialogue prose to
+  lean harder into this nautical flavor, which widens the gap between
+  the (now more vivid) text and the fixed generic art rather than
+  narrowing it.
+- evidence: `axiomancer-mobile/.critique-artifacts/mobile/04-combat-board.png`
+  (arena backdrop behind Brine Hag) + `03-combat.txt` (the encounter's
+  own nautical/liturgical threat-sequence copy).
+- suggested fix: out of scope for a one-line fix — this is a candidate
+  for a dedicated art-asset or backdrop-selection phase (e.g. a small
+  set of backdrops keyed to map/region, coastal-village first) rather
+  than something `/iterate` should attempt piecemeal. Route via
+  `/expand` if picked up.
+- source: critique pass 23 (unattended, critique:drive artifacts)
 
 ### [MED] combat — the momentum chain chip's empty state ("no momentum") has no contrast against the arena floor art
 - pass: 21 (commit 75ba5a34)
