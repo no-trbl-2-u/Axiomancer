@@ -1194,14 +1194,26 @@ none may start early (bearings forbids opportunistic renaming).**
       drowned-parish estate's fiction. Northern Forest and the rest node
       are follow-ups. Shipped `4b9083c1` (brief `30dbab98`). See
       `plan/phases/phase_44f_world_maps_minigame_naming.md`.
-- [ ] Phase 44g — Characters, story, dialogue and quests. `C-01 the
+- [x] Phase 44g — Characters, story, dialogue and quests. `C-01 the
       Sophist`, `S-01` fishing-village dilemmas, dialogue trees, quest
       board content. This is authored prose, not mechanical substitution
       — the 44a codemod gets it wrong by design, so this phase is
       hand-written against Phase 42's voice section. The heaviest
       creative sub-phase; consider the `/story-spec` and
       `/character-spec` design skills. (mechanics content)
-      Deps: 42, 44a. Brief: to generate.
+      Deps: 42, 44a. Brief: `plan/phases/phase_44g_characters_story_dialogue_quests.md`.
+      — `feat(mechanics): dark-fantasy retheme of coastal NPC dialogue —
+      phase 44g` (74f66110)
+      Scope resolution (per S-02): C-01 gated on unshipped W-01, S-01
+      owned by Phase 53d — neither is this phase's content. Rethemed the
+      eight coastal-village dialogue trees' prose (Coastal Beggar,
+      Captain Blackwater, Fisherman's Daughter, Village Healer,
+      Dockworker's Union Leader, Merchant's Widow) against spec 34 §2:
+      dropped exclamation marks, `[Moral meter ±N]` brackets, and
+      modern/corporate register. Renamed quest-board `storyBeat` to "the
+      Drowned Parish" (44f's deferred item). All flags/deltas/node-ids/
+      requires gates byte-for-byte unchanged. Updated three test files
+      whose assertions keyed on literal old prose substrings.
 - [ ] Phase 44h — Morality + alignment retheme. Spec 14
       (philosophical-alignment) and spec 10 (moral-difficulty meter),
       plus the surfaces that render them (memoir / REMAINS, the moral
