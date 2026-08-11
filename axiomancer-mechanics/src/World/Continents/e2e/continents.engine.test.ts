@@ -123,7 +123,7 @@ describe('World/Continents Engine Tests', () => {
       expect(greetNode.choices!).toHaveLength(5);
       
       // Test alignment-gated fair trade choice
-      const fairTradeChoice = greetNode.choices!.find(c => c.text.includes('fair trade'));
+      const fairTradeChoice = greetNode.choices!.find(c => c.text.includes('how you deal fair'));
       expect(fairTradeChoice?.requires?.requiresAlignment?.axis).toBe('scope');
       expect(fairTradeChoice?.requires?.requiresAlignment?.op).toBe('gte');
       expect(fairTradeChoice?.requires?.requiresAlignment?.value).toBe(20);
@@ -148,12 +148,12 @@ describe('World/Continents Engine Tests', () => {
       expect(villageHealer.dialogueTree!.id).toBe('village-healer');
       
       const situationNode = villageHealer.dialogueTree!.nodes['talk_situation'];
-      expect(situationNode.text).toContain('fever spreading');
-      expect(situationNode.text).toContain('wealthy district hoards');
+      expect(situationNode.text).toContain('fever spreads');
+      expect(situationNode.text).toContain('hoarded in the wealthy district');
       
       // Test alignment-gated providence choice
       const providenceChoice = situationNode.choices!.find(c => 
-        c.text.includes('divine providence')
+        c.text.includes('Trust to providence')
       );
       expect(providenceChoice?.requires?.requiresAlignment?.axis).toBe('epistemology');
     });
@@ -163,7 +163,7 @@ describe('World/Continents Engine Tests', () => {
       expect(unionLeader.dialogueTree!.id).toBe('union-leader');
       
       const situationNode = unionLeader.dialogueTree!.nodes['talk_workers_situation'];
-      expect(situationNode.text).toContain('organizing a strike');
+      expect(situationNode.text).toContain('calling a strike');
       
       // Test solidarity choice with flag setting
       const solidarityChoice = situationNode.choices!.find(c => 
@@ -179,7 +179,7 @@ describe('World/Continents Engine Tests', () => {
       
       const troublesNode = merchantWidow.dialogueTree!.nodes['talk_troubles'];
       expect(troublesNode.text).toContain('husband was murdered');
-      expect(troublesNode.text).toContain('justice and mercy');
+      expect(troublesNode.text).toContain('tempering with mercy');
       
       // Test justice with mercy choice
       const mercyChoice = troublesNode.choices!.find(c => 
@@ -301,7 +301,7 @@ describe('World/Continents Engine Tests', () => {
   describe('Dialogue Runtime Integration', () => {
     it('has alignment-gated choices with proper requirements', () => {
       const greetNode = captainBlackwater.dialogueTree!.nodes['greet'];
-      const fairTradeChoice = greetNode.choices!.find(c => c.text.includes('fair trade'));
+      const fairTradeChoice = greetNode.choices!.find(c => c.text.includes('how you deal fair'));
       
       // Choice should require scope >= 20
       expect(fairTradeChoice?.requires?.requiresAlignment?.axis).toBe('scope');
@@ -354,7 +354,7 @@ describe('World/Continents Engine Tests', () => {
     it('handles moral meter effects', () => {
       // Test positive moral effect
       const wisdomNode = fishermansDaughter.dialogueTree!.nodes['worldly_wisdom'];
-      const stayTrueChoice = wisdomNode.choices!.find(c => c.text.includes('Stay true'));
+      const stayTrueChoice = wisdomNode.choices!.find(c => c.text.includes('Hold to what you are'));
       expect(stayTrueChoice?.effect?.moralDelta).toBe(2);
       
       // Test negative moral effect

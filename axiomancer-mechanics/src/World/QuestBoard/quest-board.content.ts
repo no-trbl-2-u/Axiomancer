@@ -113,7 +113,7 @@ export function getQuestVowDef(id: QuestVowId): QuestVowDef {
 export const BUILD_THE_BOAT_BOARD: QuestBoardDef = Object.freeze({
     id: 'build-the-boat',
     title: "THE BOATWRIGHT'S GAMBIT",
-    storyBeat: 'Fishing Village — Main Quest: the Boy must build a boat.',
+    storyBeat: 'the Drowned Parish — Main Quest: the Boy must build a boat.',
     intro:
         'She is down the river and across the lake, and rivers do not ' +
         'carry boys who cannot float. Father gave what he had — a book, ' +

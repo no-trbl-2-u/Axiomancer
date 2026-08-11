@@ -268,12 +268,12 @@ describe('Captain Blackwater — Pragmatic merchant with ethics', () => {
         const greetNode = getDialogueNode(tree, 'greet');
         const choices = visibleChoices(greetNode, emptyCtx);
 
-        const fairTradeChoice = choices.find(c => c.text.includes('fair trade practices'));
+        const fairTradeChoice = choices.find(c => c.text.includes('how you deal fair'));
         expect(fairTradeChoice).toBeFalsy(); // Hidden without high scope alignment
 
         const ctx = ctxWithAlignment(0, 0, 25); // High scope (relational)
         const scopedChoices = visibleChoices(greetNode, ctx);
-        const visibleFairTrade = scopedChoices.find(c => c.text.includes('fair trade practices'));
+        const visibleFairTrade = scopedChoices.find(c => c.text.includes('how you deal fair'));
         expect(visibleFairTrade).toBeTruthy();
     });
 
@@ -282,7 +282,7 @@ describe('Captain Blackwater — Pragmatic merchant with ethics', () => {
         const greetNode = getDialogueNode(tree, 'greet');
         const choices = visibleChoices(greetNode, ctx);
 
-        const profitChoice = choices.find(c => c.text.includes('quickest profit'));
+        const profitChoice = choices.find(c => c.text.includes('quickest coin'));
         expect(profitChoice).toBeTruthy();
         expect(profitChoice!.requires?.requiresAlignment).toEqual({
             axis: 'scope',
@@ -295,15 +295,15 @@ describe('Captain Blackwater — Pragmatic merchant with ethics', () => {
         const fairTradeNode = getDialogueNode(tree, 'fair_trade');
         const choices = visibleChoices(fairTradeNode, emptyCtx);
 
-        const guildChoice = choices.find(c => c.text.includes("traders' guild"));
+        const guildChoice = choices.find(c => c.text.includes('stand behind a guild'));
         expect(guildChoice).toBeTruthy();
         expect(guildChoice!.effect?.setFlag).toBe('guild_support_secured');
     });
 
     it('responds to harsh necessity with moral challenge', () => {
         const harshNode = getDialogueNode(tree, 'harsh_necessity');
-        expect(harshNode.text).toContain('choosing which soul you want to keep');
-        expect(harshNode.text).toContain('poor with honor than rich with shame');
+        expect(harshNode.text).toContain('choosing which soul you keep');
+        expect(harshNode.text).toContain('poor and whole than rich and ashamed');
     });
 });
 
@@ -317,7 +317,7 @@ describe("Fisherman's Daughter — Young idealist seeking guidance", () => {
         const ctx = ctxWithAlignment(0, 0, 15); // High scope for bright observation
         const choices = visibleChoices(greetNode, ctx);
 
-        const brightChoice = choices.find(c => c.text.includes('too bright for just mending nets'));
+        const brightChoice = choices.find(c => c.text.includes('too sharp an eye for net-mending'));
         expect(brightChoice).toBeTruthy();
         expect(brightChoice!.effect?.moralDelta).toBe(1);
     });
@@ -327,7 +327,7 @@ describe("Fisherman's Daughter — Young idealist seeking guidance", () => {
         const greetNode = getDialogueNode(tree, 'greet');
         const choices = visibleChoices(greetNode, ctx);
 
-        const dismissiveChoice = choices.find(c => c.text.includes('Focus on your work, child'));
+        const dismissiveChoice = choices.find(c => c.text.includes('Mind your nets, child'));
         expect(dismissiveChoice).toBeTruthy();
         expect(dismissiveChoice!.effect?.moralDelta).toBe(-2);
     });
@@ -337,7 +337,7 @@ describe("Fisherman's Daughter — Young idealist seeking guidance", () => {
         const ctx = ctxWithAlignment(0, 20, 0); // High outlook (optimistic)
         const choices = visibleChoices(storyNode, ctx);
 
-        const encourageChoice = choices.find(c => c.text.includes('Dream big'));
+        const encourageChoice = choices.find(c => c.text.includes('Dream past this harbor'));
         expect(encourageChoice).toBeTruthy();
         expect(encourageChoice!.effect?.alignmentDelta).toEqual({
             outlook: 2,
@@ -352,21 +352,21 @@ describe("Fisherman's Daughter — Young idealist seeking guidance", () => {
 
         expect(choices).toHaveLength(4);
         const wisdomTexts = choices.map(c => c.text);
-        expect(wisdomTexts).toContain('Every person has wisdom worth learning.');
-        expect(wisdomTexts).toContain('Stay true to your values, no matter the pressure.');
-        expect(wisdomTexts).toContain('Trust yourself, but verify what others tell you.');
+        expect(wisdomTexts).toContain('Every soul carries wisdom worth the hearing.');
+        expect(wisdomTexts).toContain('Hold to what you are, whatever leans against you.');
+        expect(wisdomTexts).toContain('Trust yourself. Test what others tell you.');
 
-        const wisdomChoice = choices.find(c => c.text.includes('Every person has wisdom'));
+        const wisdomChoice = choices.find(c => c.text.includes('Every soul carries wisdom'));
         expect(wisdomChoice!.effect?.setFlag).toBe('mentored_fishermans_daughter_wisdom');
     });
 
     it('validates learning and knowledge pursuit', () => {
         const knowledgeNode = getDialogueNode(tree, 'knowledge_validation');
-        expect(knowledgeNode.text).toContain('Knowledge can serve others');
+        expect(knowledgeNode.text).toContain('Knowledge can serve more than my own curiosity');
 
         const brightNode = getDialogueNode(tree, 'bright_observation');
         const choices = visibleChoices(brightNode, emptyCtx);
-        const validateChoice = choices.find(c => c.text.includes('Knowledge and growth are worthy'));
+        const validateChoice = choices.find(c => c.text.includes('Knowledge is worth the reaching'));
         expect(validateChoice!.effect?.setFlag).toBe('encouraged_daughters_learning');
     });
 });
@@ -456,9 +456,9 @@ describe('Alignment Delta Integration — Philosophical alignment shifts', () =>
             // Shrine Keeper crystal gift
             { npc: shrineKeeper, nodeId: 'veil_thin', choiceText: 'Accept the crystal' },
             // Fisherman's Daughter encouragement  
-            { npc: fishermansDaughter, nodeId: 'story_interest', choiceText: 'Dream big' },
+            { npc: fishermansDaughter, nodeId: 'story_interest', choiceText: 'Dream past this harbor' },
             // Captain Blackwater ethics
-            { npc: captainBlackwater, nodeId: 'trading_goods', choiceText: 'admirable business philosophy' },
+            { npc: captainBlackwater, nodeId: 'trading_goods', choiceText: 'rare way to deal' },
         ];
 
         for (const { npc, nodeId, choiceText } of moralChoices) {
@@ -496,7 +496,7 @@ describe('Alignment Delta Integration — Philosophical alignment shifts', () =>
             // Divine providence (alignment-only)
             const divineCtx = ctxWithAlignment(20, 0, 0);
             const divineChoices = visibleChoices(situationNode, divineCtx);
-            const divineChoice = divineChoices.find(c => c.text.includes('divine providence'));
+            const divineChoice = divineChoices.find(c => c.text.includes('Trust to providence'));
             expect(divineChoice).toBeDefined();
             expect(divineChoice!.effect?.alignmentDelta).toBeDefined();
             expect(divineChoice!.effect?.grantCurrency).toBeUndefined();
@@ -511,7 +511,7 @@ describe('Alignment Delta Integration — Philosophical alignment shifts', () =>
             // Self-interested (gain + pragmatic)
             const pragmaticCtx = ctxWithAlignment(0, -10, 0);
             const pragmaticChoices = visibleChoices(situationNode, pragmaticCtx);
-            const takeChoice = pragmaticChoices.find(c => c.text.includes('take what you need'));
+            const takeChoice = pragmaticChoices.find(c => c.text.includes('Take what you need'));
             expect(takeChoice).toBeDefined();
             expect(takeChoice!.effect?.grantCurrency).toBeGreaterThan(0);
         });
@@ -547,7 +547,7 @@ describe('Alignment Delta Integration — Philosophical alignment shifts', () =>
             // Strike breaking (self-interested)
             const individualistCtx = ctxWithAlignment(0, 0, -15);
             const individualistChoices = visibleChoices(situationNode, individualistCtx);
-            const undermineChoice = individualistChoices.find(c => c.text.includes('cross your picket'));
+            const undermineChoice = individualistChoices.find(c => c.text.includes('cross your line'));
             expect(undermineChoice).toBeDefined();
             expect(undermineChoice!.effect?.grantCurrency).toBeGreaterThan(0);
             expect(undermineChoice!.effect?.setFlag).toBe('strike_breaker');

@@ -202,10 +202,10 @@ const beggarTree: DialogueTree = {
     nodes: {
         greet: {
             id: 'greet',
-            text: "A haggard figure sits against the weathered wall, an empty bowl at their feet. \"Spare a coin for one fallen on hard times? The sea took my nets... my livelihood...\"",
+            text: "A haggard figure sits against the weathered wall, an empty bowl at their feet. \"Spare what you can. The sea took my nets. It kept the rest.\"",
             choices: [
                 {
-                    text: "Give 10 gold generously. \"Here, take this.\"",
+                    text: "Give ten gold. \"Take it.\"",
                     nextNodeId: 'grateful_generous',
                     // Phase 43 — Faith-Optimistic-Relational lean.
                     effect: {
@@ -215,12 +215,12 @@ const beggarTree: DialogueTree = {
                     },
                 },
                 {
-                    text: "Give 5 gold. \"I can spare a little.\"",
+                    text: "Give five gold. \"I can spare this much.\"",
                     nextNodeId: 'grateful_small',
                     effect: { grantCurrency: -5, moralDelta: 1 },
                 },
                 {
-                    text: "Offer to share your rations instead.",
+                    text: "Offer your rations instead.",
                     nextNodeId: 'grateful_kind',
                     // Phase 43 — Agnostic-Optimistic-Relational lean (Atticus
                     // Finch / Dewey cells): practical kindness without
@@ -231,12 +231,12 @@ const beggarTree: DialogueTree = {
                     },
                 },
                 {
-                    text: "\"Everyone has their struggles.\" (Walk away)",
+                    text: "\"Everyone carries something.\" (Walk on.)",
                     nextNodeId: 'dismissed',
                     effect: { moralDelta: -1 },
                 },
                 {
-                    text: "\"Find work like everyone else.\" (Be harsh)",
+                    text: "\"Find work, like everyone else.\" (Speak coldly.)",
                     nextNodeId: 'harsh',
                     // Phase 43 — Logic-Pessimistic-Individual lean: cold
                     // rationality + dismissal of relational obligation.
@@ -252,7 +252,7 @@ const beggarTree: DialogueTree = {
                     // reaches past the individual hears the beggar as a node
                     // in the larger weave; the recognition changes the
                     // encounter.
-                    text: "Sit with them a while. Their grief is part of yours.",
+                    text: "Sit with them a while. Their grief is yours too.",
                     nextNodeId: 'grateful_kind',
                     requires: { requiresAlignment: { axis: 'scope', op: 'gte', value: 34 } },
                     effect: {
@@ -267,7 +267,7 @@ const beggarTree: DialogueTree = {
                     // friendshipReward.flagSet). The beggar's voice softens
                     // when they recognise a fellow listener. Placed LAST per
                     // the same index-stability convention.
-                    text: "\"The little bell by the docks has gone quiet, lately.\" (Mention Little Belle.)",
+                    text: "\"The bell by the docks has gone quiet.\" (Mention Little Belle.)",
                     nextNodeId: 'gull_recognition',
                     requires: { flag: 'befriended-little-belle' },
                     effect: {
@@ -279,23 +279,23 @@ const beggarTree: DialogueTree = {
         },
         grateful_generous: {
             id: 'grateful_generous',
-            text: "The beggar's eyes brighten with genuine gratitude. \"Ten gold! Bless you, kind soul. This will see me through the harsh season.\" They clutch the coins with trembling hands. [Moral meter +5]",
+            text: "The beggar's hands close around the coins, trembling. \"Ten gold. This sees me through the season.\" They do not look up again.",
         },
         grateful_small: {
             id: 'grateful_small',
-            text: "The beggar nods gratefully. \"Five gold is more kindness than most show. Thank you, friend.\" [Moral meter +1]",
+            text: "The beggar nods. \"Five gold is more than most spare. My thanks.\"",
         },
         grateful_kind: {
             id: 'grateful_kind',
-            text: "The beggar's weathered face lights up. \"You would share your own food? Such kindness is rarer than gold. I'll remember this.\" [Moral meter +3]",
+            text: "The beggar's face eases. \"You'd give your own food. That is rarer than gold. I'll remember it.\"",
         },
         dismissed: {
             id: 'dismissed',
-            text: "The beggar nods wearily, accustomed to indifference. \"Aye, we all must find our way.\" They turn back to watching the harbor. [Moral meter -1]",
+            text: "The beggar nods, unsurprised. \"Aye. We all find our own way.\" They turn back to the harbor.",
         },
         harsh: {
             id: 'harsh',
-            text: "The beggar recoils as if struck. \"I... I have tried. But the storms...\" They lower their head in shame and say no more. [Moral meter -5]",
+            text: "The beggar flinches as if struck. \"I have tried. The storms took more than nets.\" They lower their head and say nothing further.",
         },
         gull_recognition: {
             id: 'gull_recognition',

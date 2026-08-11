@@ -109,7 +109,7 @@ describe('Phase 63 — Old Marrow alignment observer', () => {
         // Sanity: beggar tree has no id (only Old Marrow's tree was authored
         // with one per Phase 63 D1).
         expect(beggarTree.id).toBeUndefined();
-        const benign = beggarTree.nodes.greet.choices!.find(c => c.text.startsWith('"Everyone has'))!;
+        const benign = beggarTree.nodes.greet.choices!.find(c => c.text.startsWith('"Everyone carries'))!;
         const next = applyDialogueChoice(store.getState(), beggarTree, benign);
         // The cache stays undefined (cold-start; no other tree wrote it).
         expect(next.gameState.lastSeenAlignmentCells).toBeUndefined();
