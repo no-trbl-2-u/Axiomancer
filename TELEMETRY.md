@@ -252,3 +252,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-12T08:01:41Z | subagent | Explore | claude-sonnet-5 | main | Map mobile morality/alignment surfaces |
 | 2026-08-12T09:48:19Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-08-12T09:48:21Z | skill | digest | unknown | main | - |
+| 2026-08-12T13:55:16Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-12T13:56:56Z | subagent | Explore | claude-sonnet-5 | main | Survey mobile shell copy and docs for phase 44i retheme |
