@@ -1214,13 +1214,24 @@ none may start early (bearings forbids opportunistic renaming).**
       Drowned Parish" (44f's deferred item). All flags/deltas/node-ids/
       requires gates byte-for-byte unchanged. Updated three test files
       whose assertions keyed on literal old prose substrings.
-- [ ] Phase 44h — Morality + alignment retheme. Spec 14
+- [x] Phase 44h — Morality + alignment retheme. Spec 14
       (philosophical-alignment) and spec 10 (moral-difficulty meter),
       plus the surfaces that render them (memoir / REMAINS, the moral
       choice consequences). Per Phase 42's ruling this is expected to be
       re-skin-and-keep — dark fantasy is a natural home for a morality
       meter — but if 42 rules otherwise this is where it lands.
-      (mechanics + mobile) Deps: 42, 44b. Brief: to generate.
+      (mechanics + mobile) Deps: 42, 44b. Brief:
+      `plan/phases/phase_44h_morality_alignment_retheme.md`.
+      — `feat(mechanics,mobile): morality + alignment retheme — GRACE /
+      THE OATHS — phase 44h` (abee6e92)
+      Re-skinned per spec 34 §6, confirmed: spec 10 -> GRACE (3 bands,
+      ±34 thresholds), spec 14 -> THE OATHS (CREED/AUGURY/TROTH axes).
+      `src/Philosophy/` -> `src/Ledger/`; all 27 alignment cells
+      re-authored (damned exemplar / cautionary tale / 3 besetting sins
+      each) against the Parish setting. Mobile: character screen (GRACE
+      pool, THE ACCOUNT ledger), memoir tab bar (THE LEDGER), tooltips.
+      No `GAME_STATE_VERSION` bump — every rename display-only or
+      internal-module-only.
 - [ ] Phase 44i — Product shell + docs. `spec.md` itself (including the
       "your worldview is a mechanical input" premise, which is the line
       that made this an RPG rather than a deckbuilder — 42 decides its
