@@ -24,7 +24,7 @@ canonical entry points. Cross-link to the per-module doc for depth.
 | **Game** | `createGameStore`, save/load + migrators (`GAME_STATE_VERSION` 7), event surface, autosave throttling, persistence adapters, run-loop semantics (`resetRun` + `runId`), Codex slice | 9, 11, 12, 21, 35, 38, 50, 51, 55, 72, 73 | [gameloop.md](./gameloop.md) |
 | **Items** | `addItem` / shop reducers (`buyItem`/`sellItem`/`defaultSellPrice` — Phase 37), set items engine (Phase 54), `previewTemplateAtRarity` UI-tier preview helper (Phase 75 — closes the user-jot for mobile item-library mod-visibility), `previewTemplateAtAllRarities` batch wrapper (Phase 76 — UI tooltip / item-detail rarity-strip views in a single call) | 5, 5b, 37, 54, 75, 76 | [items.md](./items.md), [equipment.md](./equipment.md) |
 | **NPCs** | `getDialogueNode` + `visibleChoices`, alignment gates (Phase 46), tree-id observer cache (Phase 63) | 14, 22, 46, 63 | [npcs.md](./npcs.md) |
-| **Philosophy** | 3-axis alignment cube + 27-cell library, `alignmentDelta` authoring, fallacies-as-spells (Phase 44), enemy alignment + AI bias (Phase 45), alignment-gated content (Phase 46) | 42-46 | [philosophy.md](./philosophy.md) |
+| **The Oaths** | 3-axis alignment cube + 27-cell library, `alignmentDelta` authoring, enemy alignment + AI bias (Phase 45), alignment-gated content (Phase 46) | 42-46 | [oaths.md](./oaths.md) |
 | **Cards** | `executeCard` caster-agnostic (Phase 49), `learnCard` + runtime learning (Phase 30), Tier 1-3 card library + Tier 2 synergy clauses (Phase 66) | 4, 4b, 30, 33, 44, 49, 66 | cards.md |
 | **World** | `createStartingWorld` + per-continent maps, MapEvents engine (`resolveMapEvent`, nine-kind pool taxonomy — Phase 23/24, 'quest' added Phase 137), expanded fishing-village (Phase 65 — 25 nodes, 3 sub-areas) | 8, 23, 24, 25, 31, 65 | [world.md](./world.md) |
 | **Utils** | RNG harness, derived stats, dice / type guards | 11 | — |
@@ -193,7 +193,7 @@ For React Native, implement the `PersistenceAdapter` interface (see
 
 ### Alignment-gated content (Phase 46 + 63)
 
-Player position on the 3-axis Philosophy cube
+Player position on the 3-axis Oaths cube
 (`epistemology × outlook × scope`) drives dialogue + card-learning
 gates:
 

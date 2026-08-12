@@ -501,16 +501,16 @@ export type {
     MinigameHarnessConfig, MinigameHarnessReport, MinigameHarnessSummary,
 } from './World';
 
-// ─── Philosophy (Phase 42 — 3-axis alignment cube + 27-cell registry) ────────
+// ─── Ledger (Phase 42 cube + 27-cell registry; né Philosophy, Phase 44h) ─────
 export {
     bucketAxis, getAlignmentCell, applyAlignmentDelta, defaultAlignment,
     AXIS_HIGH_THRESHOLD, AXIS_LOW_THRESHOLD,
     philosophicalAlignmentLibrary,
-} from './Philosophy';
+} from './Ledger';
 export type {
-    AxisBucket, PhilosophicalAlignment, AlignmentFallacy,
+    AxisBucket, PhilosophicalAlignment, BesettingSin,
     PhilosophicalAlignmentCell,
-} from './Philosophy';
+} from './Ledger';
 
 // ─── Faction (Phase 110 — faction reputation system for boss befriend consequences) ──
 export {

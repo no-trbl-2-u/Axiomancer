@@ -4,7 +4,7 @@
  * Pure mapper from `GameStore` to the journal surface's view-model.
  * All four sections — chronicle, quests, moral + provisional
  * philosophical alignment — read live engine state. The
- * philosopher-quote slot stays `null` until exact alignments + a
+ * exemplar-quote slot stays `null` until exact alignments + a
  * quote inventory ship in a follow-up phase. See the JSDoc on
  * `selectMemoirViewModel` for the per-section read map and the
  * Phase 33 sub-tick history.
@@ -186,12 +186,12 @@ export interface MemoirViewModel {
     moralAlignment: MoralAlignment;
     philosophicalAlignment: PhilosophicalAlignment;
     /**
-     * Philosopher quote slot. Renders nothing when `null` — a
-     * follow-up phase wires the lookup once exact alignments + a
-     * quote inventory are defined. Tick A through Tick D all emit
-     * `null` here.
+     * Damned-exemplar quote slot (Phase 44h — né `philosopherQuote`).
+     * Renders nothing when `null` — a follow-up phase wires the lookup
+     * once exact alignments + a quote inventory are defined. Tick A
+     * through Tick D all emit `null` here.
      */
-    philosopherQuote: string | null;
+    exemplarQuote: string | null;
     /** REMAINS section (Phase 6) — death tally + keepsake read-back. */
     remains: MemoirRemainsViewModel;
     /** Empty-state copy lines, pinned per Phase 33 brief. */
@@ -205,7 +205,7 @@ export interface MemoirViewModel {
 
 const DEFAULT_MORAL: MoralAlignment = Object.freeze({
     value: 0,
-    chip: Object.freeze({ label: 'UNDECLARED', tintKey: 'bone' }),
+    chip: Object.freeze({ label: 'INDIFFERENT', tintKey: 'bone' }),
     isEmpty: true,
 }) as MoralAlignment;
 
@@ -213,13 +213,13 @@ const DEFAULT_MORAL: MoralAlignment = Object.freeze({
  * Empty-state philosophical alignment when no stat has emerged as
  * the player's largest measure (3-way tie). The chip label sits in
  * chrome register (`UNTESTED`, all-caps, no period) so it visually
- * rhymes with the other alignment chips (RUTHLESS / STERN /
- * UNDECLARED / BENEVOLENT / SAINTLY). The screen pairs the chip
- * with the narrative empty-state line `vm.emptyPhilosophical`
- * (`'untested.'`, lowercase + period) per the brief's
- * empty-state copy contract. CRITIQUE pass 7 LOW drain split the
- * two registers — before, both strings were `'untested.'`, which
- * read as a stray narrative fragment promoted into a chrome slot.
+ * rhymes with the other alignment chips (IN ARREARS / INDIFFERENT /
+ * IN GRACE). The screen pairs the chip with the narrative empty-state
+ * line `vm.emptyPhilosophical` (`'untested.'`, lowercase + period)
+ * per the brief's empty-state copy contract. CRITIQUE pass 7 LOW
+ * drain split the two registers — before, both strings were
+ * `'untested.'`, which read as a stray narrative fragment promoted
+ * into a chrome slot.
  */
 const DEFAULT_PHILOSOPHICAL: PhilosophicalAlignment = Object.freeze({
     label: 'UNTESTED',
@@ -228,12 +228,13 @@ const DEFAULT_PHILOSOPHICAL: PhilosophicalAlignment = Object.freeze({
 }) as PhilosophicalAlignment;
 
 /**
- * Moral-meter band lookup (Tick C). Bands per Phase 33 brief
- * §"Sub-tick decomposition / Tick C": -100..-66 RUTHLESS, -65..-34
- * STERN, -33..33 UNDECLARED, 34..65 BENEVOLENT, 66..100 SAINTLY.
- * Pure function; chip is frozen to keep referential equality stable
- * across calls with the same band (lets the screen's React.memo see
- * a stable chip reference).
+ * GRACE band lookup (Tick C; retitled + reduced to 3 bands Phase 44h
+ * per spec 34 §6.1). Bands: -100..-34 IN ARREARS, -33..33 INDIFFERENT,
+ * 34..100 IN GRACE — the ruling's exact thresholds (`±34`, matching
+ * `bucketAxis`'s bucket boundaries elsewhere in the codebase). Pure
+ * function; chip is frozen to keep referential equality stable across
+ * calls with the same band (lets the screen's React.memo see a stable
+ * chip reference).
  */
 const MORAL_BANDS: ReadonlyArray<{
     min: number;
@@ -241,11 +242,9 @@ const MORAL_BANDS: ReadonlyArray<{
     label: string;
     tintKey: MoralAlignment['chip']['tintKey'];
 }> = Object.freeze([
-    { min: -100, max: -66, label: 'RUTHLESS', tintKey: 'blood' },
-    { min: -65, max: -34, label: 'STERN', tintKey: 'rust' },
-    { min: -33, max: 33, label: 'UNDECLARED', tintKey: 'bone' },
-    { min: 34, max: 65, label: 'BENEVOLENT', tintKey: 'sulfur' },
-    { min: 66, max: 100, label: 'SAINTLY', tintKey: 'parchment' },
+    { min: -100, max: -34, label: 'IN ARREARS', tintKey: 'blood' },
+    { min: -33, max: 33, label: 'INDIFFERENT', tintKey: 'bone' },
+    { min: 34, max: 100, label: 'IN GRACE', tintKey: 'parchment' },
 ]);
 
 const MORAL_CHIP_BY_BAND: ReadonlyMap<string, MoralAlignment['chip']> = new Map(
@@ -261,7 +260,7 @@ function buildMoralAlignment(rawValue: unknown): MoralAlignment {
     const value: number = typeof rawValue === 'number' && Number.isFinite(rawValue) ? rawValue : 0;
     const clamped = Math.max(-100, Math.min(100, value));
     const band =
-        MORAL_BANDS.find((b) => clamped >= b.min && clamped <= b.max) ?? MORAL_BANDS[2];
+        MORAL_BANDS.find((b) => clamped >= b.min && clamped <= b.max) ?? MORAL_BANDS[1];
     const chip = MORAL_CHIP_BY_BAND.get(band.label) ?? DEFAULT_MORAL.chip;
     return Object.freeze({
         value: clamped,
@@ -485,7 +484,7 @@ const FALLBACK_VM: MemoirViewModel = Object.freeze({
     }) as MemoirViewModel['quests'],
     moralAlignment: DEFAULT_MORAL,
     philosophicalAlignment: DEFAULT_PHILOSOPHICAL,
-    philosopherQuote: null,
+    exemplarQuote: null,
     remains: DEFAULT_REMAINS,
     emptyChronicle: 'the page is bare.',
     emptyQuests: 'no errands written here.',

@@ -14,7 +14,7 @@ import type { ShopInventory } from '../../Items/shop.types';
 import type { NPC, DialogueTree } from '../../NPCs/types';
 import type { EnemySlug } from '../../Enemy/enemy.library';
 import type { Encounter, NodeId } from '../types';
-import type { PhilosophicalAlignment } from '../../Philosophy/types';
+import type { PhilosophicalAlignment } from '../../Ledger/types';
 import type { BlacksmithVariantOffer } from '../Blacksmith/blacksmith.types';
 
 /**

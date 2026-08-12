@@ -238,12 +238,17 @@ describe('selectTooltipContentFor', () => {
         });
     });
 
-    describe('kind: alignment (Phase 74 walkthrough Tick 2)', () => {
-        it('returns content for each AlignmentAxisKey', () => {
+    describe('kind: alignment (Phase 74 walkthrough Tick 2; retitled Phase 44h — spec 34 §6.2)', () => {
+        it('returns content for each AlignmentAxisKey, titled CREED / AUGURY / TROTH', () => {
+            const expectedTitles: Record<'epistemology' | 'outlook' | 'scope', string> = {
+                epistemology: 'CREED',
+                outlook: 'AUGURY',
+                scope: 'TROTH',
+            };
             for (const key of ['epistemology', 'outlook', 'scope'] as const) {
                 const content = selectTooltipContentFor('alignment', key, EMPTY_STATE);
                 expect(content).not.toBeNull();
-                expect(content?.title).toBe(key.toUpperCase());
+                expect(content?.title).toBe(expectedTitles[key]);
                 expect(typeof content?.body).toBe('string');
                 expect(typeof content?.footnote).toBe('string');
             }
@@ -257,16 +262,16 @@ describe('selectTooltipContentFor', () => {
             expect(selectTooltipContentFor('alignment', '', EMPTY_STATE)).toBeNull();
         });
 
-        it('returns content for the memoir "moral" id (Tick 1 follow-up)', () => {
+        it('returns content for the memoir "moral" id, titled GRACE (Phase 44h)', () => {
             const content = selectTooltipContentFor('alignment', 'moral', EMPTY_STATE);
-            expect(content?.title).toBe('MORAL ALIGNMENT');
-            expect(content?.body).toContain('kindness');
-            expect(content?.footnote).toMatch(/ruthless.*saintly/i);
+            expect(content?.title).toBe('GRACE');
+            expect(content?.body).toContain('mercy');
+            expect(content?.footnote).toMatch(/arrears.*grace/i);
         });
 
-        it('returns content for the memoir "philosophical" id (Tick 1 follow-up)', () => {
+        it('returns content for the memoir "philosophical" id, titled THE BENT (Phase 44h)', () => {
             const content = selectTooltipContentFor('alignment', 'philosophical', EMPTY_STATE);
-            expect(content?.title).toBe('PHILOSOPHICAL DOMINANCE');
+            expect(content?.title).toBe('THE BENT');
             expect(content?.body).toContain('three base stats');
             expect(content?.footnote).toContain('ties');
         });

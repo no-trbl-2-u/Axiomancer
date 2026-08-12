@@ -74,7 +74,7 @@ need to react to the player (every non-random strategy) receive the live
 ## Alignment-driven AI tuning (Phase 45)
 
 `Enemy.philosophicalAlignment?: PhilosophicalAlignment` (optional) pins an
-enemy to a cell on the [Phase 42 27-cell cube](./philosophy.md). When set,
+enemy to a cell on the [Phase 42 27-cell cube](./oaths.md). When set,
 `decideEnemyAction` runs the per-strategy decision and then post-passes the
 result through `applyOutlookBias`:
 
@@ -126,7 +126,7 @@ first-pass cell pins:
 
 23 distinct cells used out of 27; the remaining 4 are headroom for future
 enemies. Cell ids are stable across versions (see
-[docs/philosophy.md](./philosophy.md) for the full registry).
+[docs/oaths.md](./oaths.md) for the full registry).
 
 ## Loot tables
 

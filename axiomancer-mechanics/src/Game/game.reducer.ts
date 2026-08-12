@@ -38,7 +38,7 @@ import { calculateMaxHealth } from '../Utils';
 import { EXPERIENCE_PER_LEVEL, STAT_POINTS_PER_LEVEL } from './game-mechanics.constants';
 import { addItemStacking, rollEncounterLoot, totalEncounterXp } from './combat-grants';
 import { getRng } from '../Utils/rng';
-import { applyAlignmentDelta, defaultAlignment } from '../Philosophy';
+import { applyAlignmentDelta, defaultAlignment } from '../Ledger';
 import { applyFactionReputationDeltas, createDefaultFactionReputations } from '../Faction';
 import { generateRunId } from './run-loop';
 import { addToLoadout } from '../Combat/combat.loadout';

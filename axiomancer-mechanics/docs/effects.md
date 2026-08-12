@@ -645,7 +645,7 @@ All constants above are on the root barrel. The interaction-engine source lives 
 ## Philosophical fallacy payloads (Phase 44)
 
 Phase 44 promotes 3 marquee fallacies from the
-[Phase 42 27-cell library](./philosophy.md) into status-effect payloads.
+[Phase 42 27-cell library](./oaths.md) into status-effect payloads.
 Each carries `sourcedFromCell?: string` on the `Effect` interface (a
 kebab-case `PhilosophicalAlignmentCell.id`) so consumers can trace the
 effect back to its philosophical origin via
@@ -660,7 +660,7 @@ effect back to its philosophical origin via
 All three reuse existing `EffectPayload` primitives — no new payload
 kinds. The fallacy framing is purely thematic on top of the existing
 tier-1/2/3 application + resist machinery. See
-[docs/philosophy.md](./philosophy.md) for the full 27-cell map and
+[docs/oaths.md](./oaths.md) for the full 27-cell map and
 docs/cards.md
 for the matching card payloads.
 

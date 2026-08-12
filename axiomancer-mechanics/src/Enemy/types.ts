@@ -5,7 +5,7 @@ import { BaseStats, DerivedStats } from '../Character/types';
 import { ActiveEffect } from '../Effects/types';
 import { ProcOverrides, ProcUnlocks } from '../Combat/combat-effects';
 import { Item } from '../Items/types';
-import { PhilosophicalAlignment } from '../Philosophy/types';
+import { PhilosophicalAlignment } from '../Ledger/types';
 import { FactionReputationDelta } from '../Faction/types';
 // Phase 73 — CodexEntry's semantic home is src/Game/types.ts (alongside
 // CodexState + the Game-loop persistence surface). It's re-exported here
@@ -120,7 +120,7 @@ export interface FriendshipReward {
      * Phase 69 — optional shift applied to the player's philosophical
      * alignment cube on the friendship outcome. The END_COMBAT reducer
      * routes the delta through `applyAlignmentDelta(state.philosophicalAlignment,
-     * delta)` (Phase 42's clamp helper at `src/Philosophy/alignment.engine.ts`);
+     * delta)` (Phase 42's clamp helper at `src/Ledger/alignment.engine.ts`);
      * each named axis clamps to `[-100, +100]`, missing axes pass through
      * unchanged. Authoring band mirrors Phase 43's dialogue / map-event
      * `alignmentDelta` convention (±1..±5 per axis; ±10 reserved for endgame).

@@ -13,8 +13,8 @@ import {
 } from './quest.engine';
 import { getMapDefinition } from './map.registry';
 import { QuestName } from './quest.library';
-import { applyAlignmentDelta, getAlignmentCell } from '../Philosophy';
-import type { PhilosophicalAlignment } from '../Philosophy/types';
+import { applyAlignmentDelta, getAlignmentCell } from '../Ledger';
+import type { PhilosophicalAlignment } from '../Ledger/types';
 
 /** Result of applying a dialogue choice to the GameState. */
 export interface ApplyDialogueChoiceResult {

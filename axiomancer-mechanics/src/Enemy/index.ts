@@ -4,7 +4,7 @@ import { ActiveEffect } from '../Effects/types';
 import { BaseStats } from '../Character/types';
 import { deriveStats, calculateMaxHealth } from '../Utils';
 import { ProcOverrides, ProcUnlocks } from '../Combat/combat-effects';
-import { PhilosophicalAlignment } from '../Philosophy/types';
+import { PhilosophicalAlignment } from '../Ledger/types';
 import { ENEMY_STAT_PER_LEVEL, ENEMY_GEAR_TIER_PER_LEVEL } from '../Game/game-mechanics.constants';
 import {
     Enemy, EnemyLogic, EnemyDifficulty, Tier1EffectOverrides, LootTableEntry,

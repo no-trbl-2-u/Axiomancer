@@ -1,6 +1,6 @@
 import { Image } from '../Utils/types';
 import { QuestName } from '../World/quest.library';
-import { PhilosophicalAlignment } from '../Philosophy/types';
+import { PhilosophicalAlignment } from '../Ledger/types';
 
 /**
  * Single-clause alignment predicate used by `DialogueChoice.requires` to gate

@@ -289,32 +289,32 @@ const SLOT_CONTENT: Record<string, TooltipContent> = {
 // the axis measures + the bucket-direction convention.
 const ALIGNMENT_CONTENT: Record<string, TooltipContent> = {
     epistemology: {
-        title: 'EPISTEMOLOGY',
-        body: 'how you decide what is true. low trusts the felt and remembered; high trusts the measured and proven.',
-        footnote: 'low ← gnostic · mid ← agnostic · high → empiric',
+        title: 'CREED',
+        body: 'what you take on trust. low leans on faith; high demands what can be shown.',
+        footnote: 'low ← faith · mid ← doubt · high → evidence',
     },
     outlook: {
-        title: 'OUTLOOK',
-        body: 'whether the world is a thing to suffer or a thing to use. low expects ruin; high expects opportunity.',
-        footnote: 'low ← bleak · mid ← neutral · high → ambitious',
+        title: 'AUGURY',
+        body: 'the omen you read in your own days. low reads dread; high reads hope.',
+        footnote: 'low ← dread · mid ← endurance · high → hope',
     },
     scope: {
-        title: 'SCOPE',
-        body: 'who your actions are meant to serve. low keeps the self at the centre; high places the world above the self.',
-        footnote: 'low ← solitary · mid ← relational · high → cosmic',
+        title: 'TROTH',
+        body: 'whom your conduct is pledged to. low keeps troth with the self; high keeps troth with the dead saints.',
+        footnote: 'low ← self · mid ← kin · high → saints',
     },
     // Memoir walkthrough Tick 1 — two derived alignment chips read
     // from `state.moralMeter` + `player.baseStats`. Bands ladder
-    // from RUTHLESS / STERN / UNDECLARED / BENEVOLENT / SAINTLY for
-    // moral; from HEART/BODY/MIND for philosophical (dominant base
+    // from IN ARREARS / INDIFFERENT / IN GRACE for moral (Phase 44h —
+    // spec 34 §6.1); from HEART/BODY/MIND for the bent (dominant base
     // stat, ties land in 'UNDECLARED').
     moral: {
-        title: 'MORAL ALIGNMENT',
-        body: 'where your actions place you on the kindness axis. each merciful or cruel decision nudges the meter; the band on this chip is the band the world currently sees.',
-        footnote: 'ruthless ← stern ← undeclared → benevolent → saintly',
+        title: 'GRACE',
+        body: 'where your mercy and cruelty leave you with the Parish. each choice nudges the account; the band on this chip is what the Parish currently reads.',
+        footnote: 'in arrears ← indifferent → in grace',
     },
     philosophical: {
-        title: 'PHILOSOPHICAL DOMINANCE',
+        title: 'THE BENT',
         body: 'which of the three base stats — heart, body, mind — leads the others. the dominant stat colours how the world reads you; ties leave you undeclared.',
         footnote: 'derived from base stats · ties → undeclared',
     },

@@ -250,8 +250,8 @@ export default function MemoirScreen() {
                             </View>
                         </TooltipTarget>
                     </View>
-                    {vm.philosopherQuote !== null && (
-                        <Text style={styles.quote}>{vm.philosopherQuote}</Text>
+                    {vm.exemplarQuote !== null && (
+                        <Text style={styles.quote}>{vm.exemplarQuote}</Text>
                     )}
                 </View>
 

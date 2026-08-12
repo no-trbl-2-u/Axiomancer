@@ -64,7 +64,7 @@ Two Philosophy-system fields live on `DialogueChoice`:
 - `effect.alignmentDelta?: Partial<PhilosophicalAlignment>` — Phase 43 authoring surface. When the choice is committed via `applyDialogueChoice`, the engine threads the delta through `applyAlignmentDelta(state.philosophicalAlignment, delta)` and surfaces the shift on `ApplyDialogueChoiceResult.effects.philosophicalShift`. Conventional band is ±1..±5 per axis; the helper clamps each axis to `[-100, +100]`.
 - `requires.requiresAlignment?: AlignmentGate` — Phase 46 gating surface. Shape: `{ axis: 'epistemology' | 'outlook' | 'scope', op: 'gte' | 'lte', value: number }`. `visibleChoices` evaluates the gate against the optional `DialogueContext.alignment` (when supplied); choices whose gate misses are hidden from the returned list, identical to the existing `quest` / `flag` / `questCompleted` gating semantics. When `DialogueContext.alignment` is undefined, alignment-gated choices are hidden by default.
 
-Cross-link: `docs/philosophy.md` carries the full authoring guidance in
+Cross-link: `docs/oaths.md` carries the full authoring guidance in
 "Authoring deltas (Phase 43)" + "Authoring gates (Phase 46)" — including
 operator semantics, compound-gate composition, and the first-pass
 authored gates on the Old Marrow and Coastal Beggar dialogue trees.

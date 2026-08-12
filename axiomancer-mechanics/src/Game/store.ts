@@ -40,8 +40,8 @@ import {
     Item, Equipment, EquipmentSlot,
 } from '../Items/types';
 import { DialogueTree, DialogueChoice } from '../NPCs/types';
-import { PhilosophicalAlignment } from '../Philosophy/types';
-import { applyAlignmentDelta } from '../Philosophy/alignment.engine';
+import { PhilosophicalAlignment } from '../Ledger/types';
+import { applyAlignmentDelta } from '../Ledger/alignment.engine';
 import { applyFactionReputationDeltas } from '../Faction/faction.engine';
 import { GameState } from './types';
 import { GameAction } from './actions.types';

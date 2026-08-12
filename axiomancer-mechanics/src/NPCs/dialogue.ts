@@ -9,8 +9,8 @@
  */
 
 import { DialogueChoice, DialogueNode, DialogueTree } from './types';
-import type { PhilosophicalAlignment } from '../Philosophy/types';
-import { getAlignmentCell } from '../Philosophy';
+import type { PhilosophicalAlignment } from '../Ledger/types';
+import { getAlignmentCell } from '../Ledger';
 
 /** Lookup a dialogue node, throwing if the id is unknown. */
 export function getDialogueNode(tree: DialogueTree, nodeId: string): DialogueNode {

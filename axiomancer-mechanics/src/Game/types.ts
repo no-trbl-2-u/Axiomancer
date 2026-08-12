@@ -1,7 +1,7 @@
 import { WorldState, QuestLog, Encounter } from '../World/types';
 import { LabyrinthProgress } from '../World/Labyrinth/types';
 import { Character } from '../Character/types';
-import { PhilosophicalAlignment } from '../Philosophy/types';
+import { PhilosophicalAlignment } from '../Ledger/types';
 import { FactionReputations } from '../Faction/types';
 
 /**

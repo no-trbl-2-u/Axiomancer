@@ -347,7 +347,7 @@ only node-event dispatcher.
   the matching handler runs, surfacing the shift on
   `ResolveMapEventResult.effects.philosophicalShift`. Conventional
   authoring band is ±1..±5 per axis; the helper clamps each axis to
-  `[-100, +100]`. See [`docs/philosophy.md`](./philosophy.md)
+  `[-100, +100]`. See [`docs/oaths.md`](./oaths.md)
   "Authoring deltas (Phase 43)" for the per-axis semantics + the
   first-pass authored deltas on Coastal-Village + Old Marrow maps.
 - **RNG plumbing.** `resolveMapEvent(state, rng?)` accepts a seeded

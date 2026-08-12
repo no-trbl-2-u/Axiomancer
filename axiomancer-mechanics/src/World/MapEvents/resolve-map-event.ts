@@ -22,7 +22,7 @@ import { revealAdjacent, markNodeConsumed, unlockAdjacent } from '../world.reduc
 import { getRng } from '../../Utils/rng';
 import { applyPayload } from './handlers';
 import { reachableObjectives, collectObjectives, progressQuest } from '../quest.engine';
-import { applyAlignmentDelta } from '../../Philosophy';
+import { applyAlignmentDelta } from '../../Ledger';
 import type { QuestLog, NodeId } from '../types';
 import type {
     MapEventPool, MapEventPoolEntry, MapEventKind, ResolveMapEventResult, ResolvedEvent,

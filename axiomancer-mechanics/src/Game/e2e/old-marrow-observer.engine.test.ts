@@ -19,7 +19,7 @@ import { nullAdapter } from '../persistence/null.adapter';
 import { applyDialogueChoice } from '../../World/dialogue.runtime';
 import { visibleChoices } from '../../NPCs';
 import { getMapDefinition } from '../../World/map.registry';
-import { getAlignmentCell } from '../../Philosophy';
+import { getAlignmentCell } from '../../Ledger';
 
 function loadOldMarrow() {
     const fishingVillage = getMapDefinition('coastal-continent', 'fishing-village');

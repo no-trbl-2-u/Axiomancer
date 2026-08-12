@@ -563,9 +563,9 @@ describe('selectCharacterViewModel: alignment slice', () => {
         const vm = selectCharacterViewModel(store.getState());
 
         expect(vm.alignment.axes.map((a) => a.label)).toEqual([
-            'EPISTEMOLOGY',
-            'OUTLOOK',
-            'SCOPE',
+            'CREED',
+            'AUGURY',
+            'TROTH',
         ]);
     });
 

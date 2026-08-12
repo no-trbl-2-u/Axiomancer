@@ -27,13 +27,13 @@ export interface PhilosophicalAlignment {
     scope: number;
 }
 
-/** A single logical-fallacy entry attached to a cell. */
-export interface AlignmentFallacy {
-    /** Display name of the fallacy (e.g. "Appeal to Consequences"). */
+/** A single besetting-sin entry attached to a cell (Phase 44h — spec 34 §6.2.1). */
+export interface BesettingSin {
+    /** Display name of the sin (e.g. "The Shifting Ledger"). */
     name: string;
-    /** Quoted example illustrating the fallacy in context. */
+    /** Quoted example illustrating the sin in context. */
     example: string;
-    /** One-line "why this fallacy aligns with this position" rationale. */
+    /** One-line "why this sin fits this position" rationale. */
     rationale: string;
 }
 
@@ -50,10 +50,10 @@ export interface PhilosophicalAlignmentCell {
     scope: AxisBucket;
     /** Short human-readable label (e.g. "Logic-Optimistic-Individual"). */
     label: string;
-    /** Representative real-world philosopher. */
-    philosopher: string;
-    /** Representative literary character + the work they appear in. */
-    literaryCharacter: { name: string; work: string };
-    /** Three signature logical fallacies for this cell. */
-    fallacies: [AlignmentFallacy, AlignmentFallacy, AlignmentFallacy];
+    /** An in-world Parish figure who held this position, and what it cost them. */
+    damnedExemplar: string;
+    /** A Parish folk story that carries this position, and where it is told. */
+    cautionaryTale: { name: string; toldIn: string };
+    /** Three besetting sins signature to this cell (Phase 44h). */
+    besettingSins: [BesettingSin, BesettingSin, BesettingSin];
 }

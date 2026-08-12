@@ -177,7 +177,7 @@ describe('TAB_TITLES: tab-label contract', () => {
         expect(TAB_TITLES.exploration).toBe('WILDS');
         expect(TAB_TITLES.combat).toBe('STRIFE');
         expect(TAB_TITLES.character).toBe('SELF');
-        expect(TAB_TITLES.memoir).toBe('MEMOIR');
+        expect(TAB_TITLES.memoir).toBe('THE LEDGER');
         expect(TAB_TITLES.inventory).toBe('SATCHEL');
     });
 });

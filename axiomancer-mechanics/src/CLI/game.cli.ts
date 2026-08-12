@@ -53,7 +53,7 @@ import { getAvailableCards } from '../Cards/card.engine';
 import { isConsumable } from '../Items/types';
 import { buyItem, sellItem, defaultSellPrice } from '../Items/shop.reducer';
 import { getConsumableById } from '../Items/consumable.library';
-import { bucketAxis, getAlignmentCell } from '../Philosophy';
+import { bucketAxis, getAlignmentCell } from '../Ledger';
 import { runHazardCombatCliEncounter, type CombatAutoPolicyId } from './combat.cli';
 import type { CombatOutcome } from '../Combat/combat.encounter.types';
 
@@ -561,21 +561,21 @@ async function characterTab(store: GameStoreHandle): Promise<void> {
     log(`Level:    ${p.level}  (XP ${p.experience}/${p.experienceToNextLevel})`);
     log(`Health:   ${p.health}/${p.maxHealth}`);
     log(`Currency: ${p.currency}`);
-    log(`Moral:    ${state.moralMeter}`);
+    log(`Grace:    ${state.moralMeter}`);
     if (p.availableStatPoints > 0) {
         log(`Points:   ${p.availableStatPoints} available to allocate`);
     }
 
-    // Philosophical alignment block (Phase 42).
+    // The Oaths — alignment block (Phase 42 cube, re-skinned Phase 44h).
     const a = state.philosophicalAlignment;
     const cell = getAlignmentCell(a);
-    log('\nPhilosophical alignment:');
-    log(`  Cell:         ${cell.label}`);
-    log(`  Philosopher:  ${cell.philosopher}`);
-    log(`  Character:    ${cell.literaryCharacter.name} — ${cell.literaryCharacter.work}`);
-    log(`  Epistemology: ${bucketAxis(a.epistemology)} (${a.epistemology})`);
-    log(`  Outlook:      ${bucketAxis(a.outlook)} (${a.outlook})`);
-    log(`  Scope:        ${bucketAxis(a.scope)} (${a.scope})`);
+    log('\nThe Oaths:');
+    log(`  Cell:            ${cell.label}`);
+    log(`  Damned exemplar: ${cell.damnedExemplar}`);
+    log(`  Cautionary tale: ${cell.cautionaryTale.name} — ${cell.cautionaryTale.toldIn}`);
+    log(`  Creed:           ${bucketAxis(a.epistemology)} (${a.epistemology})`);
+    log(`  Augury:          ${bucketAxis(a.outlook)} (${a.outlook})`);
+    log(`  Troth:           ${bucketAxis(a.scope)} (${a.scope})`);
 
     log('\nBase stats:');
     log(`  heart ${p.baseStats.heart}   body ${p.baseStats.body}   mind ${p.baseStats.mind}`);

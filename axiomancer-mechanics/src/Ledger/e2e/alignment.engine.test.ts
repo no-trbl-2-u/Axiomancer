@@ -68,15 +68,15 @@ describe('Philosophy — getAlignmentCell', () => {
         expect(cell.epistemology).toBe('high');
         expect(cell.outlook).toBe('high');
         expect(cell.scope).toBe('low');
-        expect(cell.philosopher).toContain('Nietzsche');
+        expect(cell.damnedExemplar).toContain('Bellringer of Thumbprick Hill');
     });
 
-    it('returns the mid-mid-mid cell (Agnostic-Neutral-Relational / Buber)', () => {
+    it('returns the mid-mid-mid cell (Agnostic-Neutral-Relational)', () => {
         // With the full library in place, every triple — including the
         // dead-centre neutral — resolves cleanly.
         const cell = getAlignmentCell({ epistemology: 0, outlook: 0, scope: 0 });
         expect(cell.id).toBe('mid-mid-relational');
-        expect(cell.philosopher).toContain('Buber');
+        expect(cell.damnedExemplar).toContain('Almoner of Fenmark');
     });
 });
 
@@ -148,41 +148,39 @@ describe('Philosophy — library exhaustiveness', () => {
         }
     });
 
-    it('every cell carries exactly 3 fallacies, each with name/example/rationale', () => {
+    it('every cell carries exactly 3 besetting sins, each with name/example/rationale', () => {
         for (const cell of philosophicalAlignmentLibrary) {
-            expect(cell.fallacies.length).toBe(3);
-            for (const f of cell.fallacies) {
-                expect(f.name.length).toBeGreaterThan(0);
-                expect(f.example.length).toBeGreaterThan(0);
-                expect(f.rationale.length).toBeGreaterThan(0);
+            expect(cell.besettingSins.length).toBe(3);
+            for (const sin of cell.besettingSins) {
+                expect(sin.name.length).toBeGreaterThan(0);
+                expect(sin.example.length).toBeGreaterThan(0);
+                expect(sin.rationale.length).toBeGreaterThan(0);
             }
         }
     });
 });
 
-describe('Philosophy — PDF cross-check (cells 1 / 12 / 27)', () => {
-    it('cell 1 — Logic-Optimistic-Individual matches the PDF', () => {
+describe('Philosophy — content spot-check (cells 1 / 12 / 27)', () => {
+    it('cell 1 — Logic-Optimistic-Individual carries its Phase 44h content', () => {
         const cell = getAlignmentCell({ epistemology: 80, outlook: 80, scope: -80 });
-        expect(cell.philosopher).toContain('Nietzsche');
-        expect(cell.literaryCharacter.name).toBe('Prometheus');
-        expect(cell.literaryCharacter.work).toContain('Prometheus Unbound');
-        expect(cell.fallacies[0].name).toBe('Appeal to Consequences');
+        expect(cell.damnedExemplar).toContain('Bellringer of Thumbprick Hill');
+        expect(cell.cautionaryTale.name).toBe('the Boy Who Would Not Kneel');
+        expect(cell.cautionaryTale.toldIn.length).toBeGreaterThan(0);
+        expect(cell.besettingSins[0].name).toBe('Comfort Taken as Proof');
     });
 
-    it('cell 12 — Agnostic-Optimistic-Transcendent matches the PDF', () => {
+    it('cell 12 — Agnostic-Optimistic-Transcendent carries its Phase 44h content', () => {
         const cell = getAlignmentCell({ epistemology: 0, outlook: 80, scope: 80 });
-        expect(cell.philosopher).toContain('William James');
-        expect(cell.literaryCharacter.name).toBe('Pi Patel');
-        expect(cell.literaryCharacter.work).toContain('Life of Pi');
-        expect(cell.fallacies[0].name).toContain("Pascal's Wager");
+        expect(cell.damnedExemplar).toContain('Confessor of Sable Reach');
+        expect(cell.cautionaryTale.name).toBe('the Widow Who Chose to Believe');
+        expect(cell.besettingSins[0].name).toBe('Faith for the Warmth');
     });
 
-    it('cell 27 — Faith-Pessimistic-Transcendent matches the PDF', () => {
+    it('cell 27 — Faith-Pessimistic-Transcendent carries its Phase 44h content', () => {
         const cell = getAlignmentCell({ epistemology: -80, outlook: -80, scope: 80 });
-        expect(cell.philosopher).toContain('Marcion');
-        expect(cell.literaryCharacter.name).toBe('The Grand Inquisitor');
-        expect(cell.literaryCharacter.work).toContain('Brothers Karamazov');
-        expect(cell.fallacies[0].name).toBe('No True Scotsman');
+        expect(cell.damnedExemplar).toContain('Anchorite of the Salt Crypt');
+        expect(cell.cautionaryTale.name).toBe('The Assessor Who Judged the Almoner');
+        expect(cell.besettingSins[0].name).toBe('The Truer Maker');
     });
 });
 

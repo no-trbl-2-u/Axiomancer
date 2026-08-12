@@ -1,31 +1,37 @@
-# Philosophy — 3-axis alignment cube (Phase 42)
+# The Oaths — 3-axis alignment cube (Phase 42; re-skinned Phase 44h)
 
-> Source-of-truth content: `content/philosophy/PhilosAxiosDoc.pdf`.
-> Engine module: `src/Philosophy/`. Reducer wiring: `src/Game/`.
+> Engine module: `src/Ledger/` (né `src/Philosophy/`, renamed Phase 44h per
+> spec 34 §6.2.2 — internal rename only, zero persisted-state risk).
+> Reducer wiring: `src/Game/`. Content re-skin ruling: spec 34 §6.2
+> ("THE UNSHACKLING", 2026-08-08) — the shape, thresholds, and persisted
+> field/action/cell-id names are all unchanged; only display names and the
+> 27-cell authored content moved from real-world philosophy to the Parish.
 
-The philosophical-alignment system encodes a character's position on
-three orthogonal axes drawn from `content/philosophy/PhilosAxiosDoc.pdf`. Each axis is
-an integer in `[-100, +100]`. The current `(low | mid | high)` bucket
-triple indexes one of 27 cells in `philosophicalAlignmentLibrary`,
-each carrying a representative philosopher, a literary character with
-their source work, and three signature logical fallacies.
+THE OATHS names a character's position on three orthogonal axes — three
+things your conduct swears whether you mean to or not. Each axis is an
+integer in `[-100, +100]`. The current `(low | mid | high)` bucket triple
+indexes one of 27 cells in `philosophicalAlignmentLibrary`, each carrying a
+**damned exemplar** (a Parish figure who held this position, and what it
+cost them), a **cautionary tale** (a Parish folk story carrying the same
+position), and three **besetting sins**.
 
-The system is **orthogonal** to `moralMeter` — see
-[Relationship to `moralMeter`](#relationship-to-moralmeter) below.
+The system is **orthogonal** to `moralMeter` / GRACE — see
+[Relationship to GRACE](#relationship-to-grace-moralmeter) below.
 
 ## The three axes
 
-| Axis | low | mid | high |
-|---|---|---|---|
-| `epistemology` | Faith | Agnostic | Logic |
-| `outlook`      | Pessimistic | Neutral | Optimistic |
-| `scope`        | Individual | Relational | Transcendent |
+| Axis (engine field, unchanged) | Display name | low | mid | high |
+|---|---|---|---|---|
+| `epistemology` | **CREED** | Faith | Doubt | Evidence |
+| `outlook` | **AUGURY** | Dread | Endurance | Hope |
+| `scope` | **TROTH** | Self | Kin | Saints |
 
-Polarity is chosen so the "more grounded in reason" / "more
-hopeful" / "larger scope" ends land at the positive pole. The PDF
-display order (Logic first, Optimistic first, Individual first) is
-listing convention, not axis polarity — the engine uses the table
-above.
+Polarity is chosen so the "more grounded in evidence" / "more hopeful" /
+"wider troth" ends land at the positive pole. Creed is what you take on
+trust; Augury is the disposition you read as a prophecy about your own
+days; Troth is the archaic word for whom your conduct is pledged to,
+running from the self, through kin, to the dead saints the Parish still
+bills you for.
 
 ## Bucketing
 
@@ -46,7 +52,9 @@ Thresholds are exposed as `AXIS_HIGH_THRESHOLD` (`34`) and
 
 ## Engine API
 
-All exports are surfaced through `src/index.ts`:
+All exports are surfaced through `src/index.ts`. Every identifier below is
+**unchanged by the Phase 44h retheme** — only the 27-cell content and
+display copy moved (spec 34 §6.2.2):
 
 - `bucketAxis(value: number): AxisBucket`
 - `getAlignmentCell(alignment: PhilosophicalAlignment): PhilosophicalAlignmentCell`
@@ -57,15 +65,16 @@ All exports are surfaced through `src/index.ts`:
   pure shift; missing axes in `delta` pass through; each axis clamps
   to `[-100, +100]`.
 - `defaultAlignment(): PhilosophicalAlignment` — `{0, 0, 0}` (the
-  dead-centre Agnostic-Neutral-Relational / Buber cell).
+  dead-centre Agnostic-Neutral-Relational cell).
 - `philosophicalAlignmentLibrary: readonly PhilosophicalAlignmentCell[]`
   — frozen, length 27.
 
 State + reducer:
 
 - `GameState.philosophicalAlignment: PhilosophicalAlignment` (added
-  in Phase 42; `GAME_STATE_VERSION` 4 → 5).
+  in Phase 42; `GAME_STATE_VERSION` 4 → 5). Field name frozen — persisted.
 - `SHIFT_PHILOSOPHICAL_ALIGNMENT` action (`{ delta: Partial<PhilosophicalAlignment> }`).
+  Action name frozen — persisted/migrator-visible.
 - Store action `shiftPhilosophicalAlignment(delta)` mirrors
   `shiftMoralMeter(delta, gating?)`.
 
@@ -74,50 +83,50 @@ legacy saves (`src/Game/game.migrate.ts`).
 
 ## The 27 cells
 
-PDF cell numbers in parens; ids are kebab-case
-`<epistemology>-<outlook>-<scope>`.
+Ids are kebab-case `<epistemology>-<outlook>-<scope>`, frozen since
+Phase 42 (spec 34 §6.2.2 — cell ids are lookup keys, not display copy).
 
-| # | Cell | Philosopher | Literary character |
+| # | Cell | Damned exemplar | Cautionary tale |
 |---|---|---|---|
-| 1 | `logic-optimistic-individual` | Friedrich Nietzsche (late period) | Prometheus — *Prometheus Unbound* |
-| 2 | `logic-optimistic-relational` | Peter Singer | Dr. Rieux — *The Plague* |
-| 3 | `logic-optimistic-transcendent` | Teilhard de Chardin | Elwin Ransom — *Perelandra* |
-| 4 | `logic-mid-individual` | Albert Camus | Meursault — *The Stranger* |
-| 5 | `logic-mid-relational` | Simone de Beauvoir | Jane Eyre — *Jane Eyre* |
-| 6 | `logic-mid-transcendent` | Baruch Spinoza | The Narrator — *The Library of Babel* |
-| 7 | `logic-pessimistic-individual` | Arthur Schopenhauer | Underground Man — *Notes from Underground* |
-| 8 | `logic-pessimistic-relational` | Thomas Ligotti | Rust Cohle — *True Detective* S1 |
-| 9 | `logic-pessimistic-transcendent` | Gnostics / Hans Jonas | Severian — *Book of the New Sun* |
-| 10 | `mid-optimistic-individual` | Richard Rorty | Huckleberry Finn — *Adventures of Huckleberry Finn* |
-| 11 | `mid-optimistic-relational` | John Dewey | Atticus Finch — *To Kill a Mockingbird* |
-| 12 | `mid-optimistic-transcendent` | William James | Pi Patel — *Life of Pi* |
-| 13 | `mid-mid-individual` | Michel de Montaigne | Ishmael — *Moby-Dick* |
-| 14 | `mid-mid-relational` | Martin Buber | Nick Carraway — *The Great Gatsby* |
-| 15 | `mid-mid-transcendent` | Lao Tzu / Zhuangzi (Taoism) | Siddhartha — *Siddhartha* |
-| 16 | `mid-pessimistic-individual` | Emil Cioran | Hamlet — *Hamlet* |
-| 17 | `mid-pessimistic-relational` | Peter Wessel Zapffe | Captain Ahab — *Moby-Dick* |
-| 18 | `mid-pessimistic-transcendent` | H.P. Lovecraft (cosmicism) | Burroughs — *A Short Stay in Hell* |
-| 19 | `faith-optimistic-individual` | Søren Kierkegaard | Alyosha Karamazov — *The Brothers Karamazov* |
-| 20 | `faith-optimistic-relational` | Desmond Tutu / Ubuntu theology | Jean Valjean — *Les Misérables* |
-| 21 | `faith-optimistic-transcendent` | St. Augustine / Thomas Aquinas | Dante — *Divine Comedy* |
-| 22 | `faith-mid-individual` | Blaise Pascal | Raskolnikov — *Crime and Punishment* |
-| 23 | `faith-mid-relational` | Dorothy Day / Catholic Worker Movement | Father Damien (historical) |
-| 24 | `faith-mid-transcendent` | St. John of the Cross / Mystical Theology | Father Rodrigues — *Silence* |
-| 25 | `faith-pessimistic-individual` | Tertullian | Ivan Karamazov — *The Brothers Karamazov* |
-| 26 | `faith-pessimistic-relational` | Philipp Mainländer | Father Ferreira — *Silence* |
-| 27 | `faith-pessimistic-transcendent` | Marcion / Gnostic Christianity | The Grand Inquisitor — *The Brothers Karamazov* |
+| 1 | `logic-optimistic-individual` | the Bellringer of Thumbprick Hill | the Boy Who Would Not Kneel |
+| 2 | `logic-optimistic-relational` | the Relief-Warden of Long Assize | the Widow Who Fed Two Parishes |
+| 3 | `logic-optimistic-transcendent` | the Precentor of the Nine Wheels | the Cartographer of the Last Amen |
+| 4 | `logic-mid-individual` | the Gravedigger of Hollow Assize | the Woman Who Buried Without Grief |
+| 5 | `logic-mid-relational` | the Confessor of Two Ledgers | the Woman Who Judged by Face, Not by Writ |
+| 6 | `logic-mid-transcendent` | the Recorder of the Unread Stacks | the Archivist Who Sought the Final Shelf |
+| 7 | `logic-pessimistic-individual` | the Wound-Reader of Gallows Row | the Man Who Would Not Be Comforted |
+| 8 | `logic-pessimistic-relational` | the Confessor Who Would Absolve No One | the Child Who Would Not Wake |
+| 9 | `logic-pessimistic-transcendent` | the Sexton Who Renounced the Bell | the Prisoner Who Named His Own Warden |
+| 10 | `mid-optimistic-individual` | the Tallyman of Rushlight | the Ragpicker's Boy |
+| 11 | `mid-optimistic-relational` | the Reeve of Millbrook | the Reeve's Daughter |
+| 12 | `mid-optimistic-transcendent` | the Confessor of Sable Reach | the Widow Who Chose to Believe |
+| 13 | `mid-mid-individual` | the Gravedigger of Hollow Wick | the Doubting Sexton |
+| 14 | `mid-mid-relational` | the Almoner of Fenmark | the Watcher at the Threshold |
+| 15 | `mid-mid-transcendent` | the Hermit of the Long Marsh | the Beggar Who Stopped Asking |
+| 16 | `mid-pessimistic-individual` | the Almoner of Ashpool | the Boy Who Wished Himself Unmade |
+| 17 | `mid-pessimistic-relational` | the Whaler-Priest of Drownmere | the Harpooner Who Argued With the Deep |
+| 18 | `mid-pessimistic-transcendent` | the Confessor of the Drowned Chapter | the Clerk Who Read Too Far |
+| 19 | `faith-optimistic-individual` | the Novice of Thumbprick Chapel | The Barefoot Communicant |
+| 20 | `faith-optimistic-relational` | the Almoner of Gallow's Fen | The Forgiven Poacher |
+| 21 | `faith-optimistic-transcendent` | the Confessor-General of the high assize | The Pilgrim of Nine Terraces |
+| 22 | `faith-mid-individual` | the Assizer's Clerk of Cold Fen | The Wagering Widow |
+| 23 | `faith-mid-relational` | the Almoner of the Leper Yard | The Almoner Who Stayed |
+| 24 | `faith-mid-transcendent` | the Confessor of the Drowned Choir | The Listening Confessor |
+| 25 | `faith-pessimistic-individual` | the Hermit of the Gallows Road | The Boy Who Counted the Dead Children |
+| 26 | `faith-pessimistic-relational` | the Sexton of the Drowned Parish | The Confessor Who Signed the Book |
+| 27 | `faith-pessimistic-transcendent` | the Anchorite of the Salt Crypt | The Assessor Who Judged the Almoner |
 
-## Fallacies — content fuel for future content
+## Besetting sins — content fuel for future content
 
-Each cell carries three signature logical fallacies (name, example,
-rationale). They ship as data but are not wired to gameplay yet.
-Per the PDF's closing line ("This complete system gives you 27
-distinct philosophical positions, each with a representative
-philosopher, literary character, and three characteristic logical
-fallacies that could serve as 'spells' or abilities in your RPG
-system"), the fallacies are reserved as content fuel for a future
-card/effect/spell phase. See `plan/phases/phase_42_philosophical_alignment.md`
-"Follow-ups" for the planned content arcs.
+Each cell carries three besetting sins (name, example, rationale). They
+ship as data but are not wired to gameplay yet — the same "content fuel"
+status the original fallacy content held (see `plan/phases/phase_42_philosophical_alignment.md`
+"Follow-ups"). Two Tier-3 skills and their linked status effects that once
+sourced from this content (`nirvana-fallacy`, `appeal-to-fear`, and their
+`sourcedFromCell`-linked effects) no longer exist in the codebase — the
+Profane Canon rework (`84ef85b`) removed the spec-32 card library they
+belonged to. A future content phase re-authoring skills/effects against
+this library starts from zero, not from those names.
 
 ## Authoring deltas (Phase 43)
 
@@ -142,7 +151,7 @@ mine." choice in `src/World/Continents/Coastal-Village/maps.ts`:
     effect: {
         grantCurrency: 12,
         moralDelta: 5,
-        // Faith-Optimistic-Relational lean (Jean Valjean / Dorothy Day cells).
+        // Faith-Optimistic-Relational lean.
         alignmentDelta: { epistemology: -2, outlook: 3, scope: 3 },
     },
 },
@@ -235,21 +244,23 @@ range form if real content authoring needs it.
 
 ### Phase 46 first-pass authoring
 
-Authored gates (`src/Cards/card.library.ts` +
-`src/World/Continents/Coastal-Village/maps.ts`):
+Authored gates still live (`src/World/Continents/Coastal-Village/maps.ts`):
 
 | Surface | Author | Gate | Rationale |
 |---|---|---|---|
-| Card | `nirvana-fallacy` | `outlook lte -34` | Schopenhauer's metaphysics; only learnable by a pessimistic caster. |
-| Card | `appeal-to-fear` | `scope gte 34` | Lovecraftian indifference; only learnable by a transcendent-leaning caster. |
 | Dialogue | Old Marrow `offer` "You speak like someone who already lost everything" | `outlook lte -34` | Two-broken-people recognition — gate accepts the quest with a different framing. |
 | Dialogue | Coastal Beggar `greet` "Sit with them a while. Their grief is part of yours." | `scope gte 34` | Transcendent player hears the beggar as part of the larger weave. |
+
+The Phase 46 row's two card-side gates (`nirvana-fallacy`, `appeal-to-fear`)
+no longer exist — the Profane Canon rework (`84ef85b`) deleted the
+spec-32 card library they belonged to. `AlignmentGate` still supports a
+card-side gate; a future content phase would re-author one from scratch.
 
 ### Compound gates
 
 Single-clause is the canonical shape. To express "Pessimistic AND
-Transcendent" (e.g. Lovecraft cell), author two distinct gated
-choices that share a `nextNodeId`:
+Transcendent", author two distinct gated choices that share a
+`nextNodeId`:
 
 ```ts
 choices: [
@@ -267,20 +278,14 @@ Compound surfacing patterns (multiple gated branches with same
 outcome) are the in-scope idiom; an `AlignmentGate[]` AND-of-array
 form is a deferred follow-up if content authoring grows compound.
 
-## Relationship to `moralMeter`
+## Relationship to GRACE (`moralMeter`)
 
-`philosophicalAlignment` is **orthogonal** to
-[`moralMeter`](./morality.md), not a replacement. Spec 10 Q4 keeps
-the meter narrative-only (a single compassion ↔ ruthlessness
-integer), and the PDF's three axes don't collapse onto that
-dimension. Both fields persist independently; both are surfaced on
-the CLI Character tab; both are read by save / load.
-
-A future phase may unify the two systems (e.g. reskin `moralMeter`
-as a fourth "ethics" axis or absorb it into `scope`), but that's an
-explicit follow-up — Phase 42 ships them side-by-side. The
-authoring sweep that retro-wires alignment shifts into existing map
-events / dialogue is also a separate follow-up.
+`philosophicalAlignment` (THE OATHS) is **orthogonal** to
+[`moralMeter`](./morality.md) (GRACE), not a replacement. Spec 10 Q4 keeps
+the meter narrative-only (a single compassion ↔ cruelty integer), and the
+cube's three axes don't collapse onto that dimension. Both fields persist
+independently; both are surfaced on the CLI Character tab; both are read
+by save / load. A soul in Dread can still be In Grace.
 
 ## CLI surface
 
@@ -288,13 +293,15 @@ The Character tab (`npm run game` → Character) renders the active
 cell on every visit:
 
 ```
-Philosophical alignment:
-  Cell:         Agnostic-Neutral-Relational
-  Philosopher:  Martin Buber
-  Character:    Nick Carraway — Fitzgerald's "The Great Gatsby"
-  Epistemology: mid (0)
-  Outlook:      mid (0)
-  Scope:        mid (0)
+Grace:    0
+
+The Oaths:
+  Cell:            Agnostic-Neutral-Relational
+  Damned exemplar: the Almoner of Fenmark
+  Cautionary tale: the Watcher at the Threshold — the version the sextons tell, not the one the choir sings, of a stranger who looked at a dying man and called it communion enough
+  Creed:           mid (0)
+  Augury:          mid (0)
+  Troth:           mid (0)
 ```
 
 The bucket label + raw integer pair lets the agent-graded harness

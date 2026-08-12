@@ -53,7 +53,7 @@ describe('selectMemoirViewModel: shape contract', () => {
         // Alignment defaults — Tick C will populate from state.moralMeter
         // and the highest-base-stat heuristic.
         expect(vm.moralAlignment.value).toBe(0);
-        expect(vm.moralAlignment.chip.label).toBe('UNDECLARED');
+        expect(vm.moralAlignment.chip.label).toBe('INDIFFERENT');
         expect(vm.moralAlignment.chip.tintKey).toBe('bone');
         // Chip label sits in chrome register (UNTESTED, no period);
         // the narrative empty-state line is `emptyPhilosophical`
@@ -63,7 +63,7 @@ describe('selectMemoirViewModel: shape contract', () => {
         expect(vm.philosophicalAlignment.provisional).toBe(true);
 
         // Quote slot — null until a follow-up phase wires alignments.
-        expect(vm.philosopherQuote).toBeNull();
+        expect(vm.exemplarQuote).toBeNull();
 
         // Empty-state copy locked per the brief.
         expect(vm.emptyChronicle).toBe('the page is bare.');
@@ -245,8 +245,8 @@ describe('selectMemoirViewModel: quests section', () => {
 // ---------------------------------------------------------------------------
 // Tick C — moral + provisional philosophical alignment
 //
-// Bands per Phase 33 brief §"Tick C": -100..-66 RUTHLESS, -65..-34
-// STERN, -33..33 UNDECLARED, 34..65 BENEVOLENT, 66..100 SAINTLY.
+// GRACE bands, retitled + reduced to 3 Phase 44h (spec 34 §6.1):
+// -100..-34 IN ARREARS, -33..33 INDIFFERENT, 34..100 IN GRACE.
 // Philosophical alignment: highest base stat wins, ties favour Heart,
 // 3-way tie returns the `untested.` empty state.
 // ---------------------------------------------------------------------------
@@ -266,27 +266,23 @@ function setBaseStats(
 }
 
 describe('selectMemoirViewModel: moral alignment', () => {
-    it('defaults to UNDECLARED (bone tint) at moralMeter = 0', () => {
+    it('defaults to INDIFFERENT (bone tint) at moralMeter = 0', () => {
         const store = createGameStore(createMemoryAdapter());
         const vm = selectMemoirViewModel(store.getState());
         expect(vm.moralAlignment.value).toBe(0);
-        expect(vm.moralAlignment.chip).toEqual({ label: 'UNDECLARED', tintKey: 'bone' });
+        expect(vm.moralAlignment.chip).toEqual({ label: 'INDIFFERENT', tintKey: 'bone' });
     });
 
     it.each([
-        [-100, 'RUTHLESS', 'blood'],
-        [-70, 'RUTHLESS', 'blood'],
-        [-66, 'RUTHLESS', 'blood'],
-        [-65, 'STERN', 'rust'],
-        [-40, 'STERN', 'rust'],
-        [-34, 'STERN', 'rust'],
-        [-33, 'UNDECLARED', 'bone'],
-        [33, 'UNDECLARED', 'bone'],
-        [34, 'BENEVOLENT', 'sulfur'],
-        [50, 'BENEVOLENT', 'sulfur'],
-        [65, 'BENEVOLENT', 'sulfur'],
-        [66, 'SAINTLY', 'parchment'],
-        [100, 'SAINTLY', 'parchment'],
+        [-100, 'IN ARREARS', 'blood'],
+        [-70, 'IN ARREARS', 'blood'],
+        [-34, 'IN ARREARS', 'blood'],
+        [-33, 'INDIFFERENT', 'bone'],
+        [0, 'INDIFFERENT', 'bone'],
+        [33, 'INDIFFERENT', 'bone'],
+        [34, 'IN GRACE', 'parchment'],
+        [65, 'IN GRACE', 'parchment'],
+        [100, 'IN GRACE', 'parchment'],
     ])(
         'maps moralMeter %p to band %s (tint %s)',
         (value, label, tint) => {
@@ -304,15 +300,15 @@ describe('selectMemoirViewModel: moral alignment', () => {
         setMoralMeter(store, 200);
         let vm = selectMemoirViewModel(store.getState());
         expect(vm.moralAlignment.value).toBe(100);
-        expect(vm.moralAlignment.chip.label).toBe('SAINTLY');
+        expect(vm.moralAlignment.chip.label).toBe('IN GRACE');
 
         setMoralMeter(store, -500);
         vm = selectMemoirViewModel(store.getState());
         expect(vm.moralAlignment.value).toBe(-100);
-        expect(vm.moralAlignment.chip.label).toBe('RUTHLESS');
+        expect(vm.moralAlignment.chip.label).toBe('IN ARREARS');
     });
 
-    it('marks moralAlignment.isEmpty true only in the undeclared band', () => {
+    it('marks moralAlignment.isEmpty true only in the indifferent band', () => {
         const store = createGameStore(createMemoryAdapter());
         // -33..33 band → empty
         setMoralMeter(store, 0);

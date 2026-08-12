@@ -77,4 +77,4 @@ const { availableNodes, discoveredNodes } = result.state.world;
 
 - Map structure: [`world.md`](./world.md) § Map architecture
 - Fishing village (25-node): [`world.md`](./world.md) § Fishing Village
-- Alignment system: [`philosophy.md`](./philosophy.md) § Authoring deltas
+- Alignment system: [`oaths.md`](./oaths.md) § Authoring deltas

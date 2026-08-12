@@ -6,7 +6,7 @@ import { relicLibrary, getRelicById } from '../Items/relic.library';
 import { consumableLibrary } from '../Items/consumable.library';
 import { cardLibrary } from '../Cards/cards.library';
 import { ENEMY_REGISTRY, EnemySlug } from '../Enemy/enemy.library';
-import type { PhilosophicalAlignment } from '../Philosophy/types';
+import type { PhilosophicalAlignment } from '../Ledger/types';
 import type { createGameStore } from '../Game/store';
 import { clamp } from '../Utils';
 

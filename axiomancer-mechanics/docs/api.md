@@ -492,7 +492,7 @@ hermetic walkthrough.
 ### Philosophy (Phase 42, Phase 43, Phase 44, Phase 46) — Beta
 
 3-axis alignment cube indexing a 27-cell content registry. See
-[docs/philosophy.md](./philosophy.md) for the full table.
+[docs/oaths.md](./oaths.md) for the full table.
 
 - Types (`PhilosophicalAlignment`, `AxisBucket`, `AlignmentFallacy`,
   `PhilosophicalAlignmentCell`) — Beta.
@@ -527,7 +527,7 @@ authoring; the first batch is live as of Phase 44.
 - `DialogueChoice.requires.requiresAlignment?: AlignmentGate` — Beta. Applied by `visibleChoices` (gated choices are hidden when the gate misses).
 - `CardLearningRequirement.requiresAlignment?: AlignmentGate` — Beta. Applied by `meetsLearningRequirement` / `getAvailableCards` / `learnCard` (each accepts an optional `alignment` argument; the `LEARN_CARD` reducer reads `state.philosophicalAlignment` automatically).
 - `DialogueContext.alignment?: PhilosophicalAlignment` — Beta. Optional context field threaded through `visibleChoices` so callers can preview gates without committing dispatch.
-- 2 live gates authored on `nirvana-fallacy` (`outlook ≤ -34`) + `appeal-to-fear` (`scope ≥ 34`); 2 dialogue branches gated on Old Marrow + Coastal Beggar. See [docs/philosophy.md "Authoring gates (Phase 46)"](./philosophy.md) for operator semantics + authoring guidance.
+- 2 live gates authored on `nirvana-fallacy` (`outlook ≤ -34`) + `appeal-to-fear` (`scope ≥ 34`); 2 dialogue branches gated on Old Marrow + Coastal Beggar. See [docs/oaths.md "Authoring gates (Phase 46)"](./oaths.md) for operator semantics + authoring guidance.
 
 ### Faction (Phase 110) — Beta
 

@@ -1,8 +1,9 @@
 /**
- * Philosophy module barrel — 3-axis alignment engine + 27-cell library.
+ * Ledger module barrel — 3-axis alignment engine + 27-cell library
+ * (né `src/Philosophy/`, renamed Phase 44h per spec 34 §6.2.2).
  *
- * Public surface (Phase 42):
- *   - Types: PhilosophicalAlignment, AxisBucket, AlignmentFallacy,
+ * Public surface:
+ *   - Types: PhilosophicalAlignment, AxisBucket, BesettingSin,
  *     PhilosophicalAlignmentCell
  *   - Engine: bucketAxis, getAlignmentCell, applyAlignmentDelta,
  *     defaultAlignment
@@ -13,7 +14,7 @@
 export type {
     AxisBucket,
     PhilosophicalAlignment,
-    AlignmentFallacy,
+    BesettingSin,
     PhilosophicalAlignmentCell,
 } from './types';
 

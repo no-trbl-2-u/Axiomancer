@@ -322,9 +322,9 @@ function buildEquipment(player: Character): readonly EquipmentSlotRow[] {
  * empty until engine Spec 04 ships known-card reads.
  */
 const ALIGNMENT_AXIS_LABELS: Record<AlignmentAxisKey, string> = {
-    epistemology: 'EPISTEMOLOGY',
-    outlook: 'OUTLOOK',
-    scope: 'SCOPE',
+    epistemology: 'CREED',
+    outlook: 'AUGURY',
+    scope: 'TROTH',
 };
 
 function buildAlignmentSlice(state: GameStore): AlignmentSlice {
@@ -391,7 +391,7 @@ export function selectCharacterViewModel(state: GameStore): CharacterViewModel {
                 ? `${effects.length} active effects`
                 : 'No active effects',
             crucibleOpen: 'Open Token Crucible.',
-            alignment: `Philosophical alignment: ${alignment.cellName}. ${alignment.axes.map((a) => `${a.label.toLowerCase()} ${a.bucket}`).join(', ')}.`,
+            alignment: `The Oaths: ${alignment.cellName}. ${alignment.axes.map((a) => `${a.label.toLowerCase()} ${a.bucket}`).join(', ')}.`,
         },
     });
 }

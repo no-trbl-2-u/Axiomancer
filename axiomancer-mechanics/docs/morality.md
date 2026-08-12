@@ -4,6 +4,13 @@
 > dialogue integration, difficulty scaling, and save migration (v2→v3) are live. 
 > The beggar encounter in fishing-village demonstrates the moral choice pipeline, 
 > and difficulty scaling affects all combat encounters.
+>
+> **Display name (Phase 44h):** the player-facing name for this meter is
+> **GRACE**, in three bands — **In Arrears** (≤ -34), **Indifferent**,
+> **In Grace** (≥ +34). Nothing mechanical changes: the engine field stays
+> `moralMeter`, the reducer stays `shiftMoralMeter`, the clamp and every
+> delta band below are untouched (spec 34 §6.1). This doc keeps using
+> `moralMeter` throughout as the engine-level name.
 
 ## Overview
 
@@ -25,7 +32,7 @@ they coexist on `GameState`. No unification is planned in v1 (Spec 10
 Q8 picked "specific story flags as ending selector" with both axes as
 narrative colour, not as gating).
 
-See [`docs/philosophy.md`](./philosophy.md) for the alignment cube +
+See [`docs/oaths.md`](./oaths.md) for the alignment cube +
 27-cell registry; "Relationship to `moralMeter`" on that page reflects
 the same orthogonality from the other side.
 
@@ -99,7 +106,7 @@ narrative axis; `philosophicalAlignment` is the Logic / Outlook / Scope
 cube. Phase 69 just makes the friendship outcome a hook for BOTH
 shifts when the per-enemy authoring opts in. First authored deltas:
 MournfulGull `{ outlook: +3 }`; HollowEyedBeggar `{ scope: -3 }`. See
-`docs/philosophy.md` for the cube + `docs/enemy.md` § "Befriendable
+`docs/oaths.md` for the cube + `docs/enemy.md` § "Befriendable
 enemies (Phase 60)" for the per-enemy authoring table.
 
 ```ts

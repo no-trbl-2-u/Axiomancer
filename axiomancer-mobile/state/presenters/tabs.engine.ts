@@ -52,7 +52,7 @@ export const TAB_TITLES: Record<TabKey, string> = {
     exploration: 'WILDS',
     combat: 'STRIFE',
     character: 'SELF',
-    memoir: 'MEMOIR',
+    memoir: 'THE LEDGER',
     inventory: 'SATCHEL',
 };
 

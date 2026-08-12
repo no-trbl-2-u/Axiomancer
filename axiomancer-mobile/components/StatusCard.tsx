@@ -67,8 +67,8 @@ export function StatusCard(props: StatusCardProps = {}) {
         <View style={styles.moraleRow}>
           <View style={styles.moraleHeader}>
             <View style={styles.moraleLabelRow}>
-              <Text style={styles.moraleLabel}>MORALE</Text>
-              <Text style={styles.moraleGloss}>· RESOLVE TO WALK</Text>
+              <Text style={styles.moraleLabel}>GRACE</Text>
+              <Text style={styles.moraleGloss}>· KEPT BY THE PARISH</Text>
             </View>
             <Text style={styles.moraleValue}>
               {moraleDisplay}<Text style={styles.moraleMax}> / {moraleMax}</Text>
@@ -79,7 +79,7 @@ export function StatusCard(props: StatusCardProps = {}) {
             <View style={[styles.moraleBreakTic, { left: `${moraleBreakPercent}%` }]} />
           </View>
           {moraleDisplay <= 2 && (
-            <Text style={styles.moraleWarning}>the road begins to lie.</Text>
+            <Text style={styles.moraleWarning}>the ledger runs to arrears.</Text>
           )}
         </View>
       </View>

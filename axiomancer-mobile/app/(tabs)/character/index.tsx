@@ -52,7 +52,7 @@ export default function CharacterScreen() {
   // commit / keep-deliberating dismisses. Snapshot the level + base
   // stat values at the moment the modal opens so it has the "before"
   // figures even if the engine mutates underneath us mid-allocation.
-  // Morale ledger is static reference (gain/loss rules); collapsed by
+  // The Account is static reference (gain/loss rules); collapsed by
   // default so the live sheet fits one screen. One tap reveals it.
   const [ledgerOpen, setLedgerOpen] = useState<boolean>(false);
   const [levelUpOpen, setLevelUpOpen] = useState<boolean>(false);
@@ -259,13 +259,13 @@ export default function CharacterScreen() {
         <Text style={styles.deckLinkChevron}>›</Text>
       </Pressable>
 
-      {/* Pools — VITAE + MORALE (Problem 6 design) */}
+      {/* Pools — VITAE + GRACE (Problem 6 design; GRACE né MORALE, Phase 44h) */}
       <View style={styles.section}>
         <SectionLabel size={13}>✠ POOLS</SectionLabel>
         <View style={styles.poolsCard}>
           {[
             { label: 'VITAE', value: player?.health ?? 0, max: player?.maxHealth ?? 1, color: AXM.blood, gloss: 'flesh holds' },
-            { label: 'MORALE', value: Math.max(1, Math.min(10, Math.round(((Number.isFinite(vm.morale) ? vm.morale : 0) + 100) / 20))), max: 10, color: AXM.sulfur, gloss: 'resolve to walk', breakAt: 2 },
+            { label: 'GRACE', value: Math.max(1, Math.min(10, Math.round(((Number.isFinite(vm.morale) ? vm.morale : 0) + 100) / 20))), max: 10, color: AXM.sulfur, gloss: 'kept by the parish', breakAt: 2 },
           ].map((pool) => (
             <View key={pool.label} style={styles.poolRow}>
               <View style={styles.poolHeader}>
@@ -289,10 +289,10 @@ export default function CharacterScreen() {
             style={styles.ledgerHeader}
             onPress={() => setLedgerOpen((o) => !o)}
             accessibilityRole="button"
-            accessibilityLabel={`Morale ledger, ${ledgerOpen ? 'expanded' : 'collapsed'}`}
+            accessibilityLabel={`The Account, ${ledgerOpen ? 'expanded' : 'collapsed'}`}
             testID="self-morale-ledger-toggle"
           >
-            <SectionLabel size={9} color={AXM.sulfur}>MORALE · LEDGER</SectionLabel>
+            <SectionLabel size={9} color={AXM.sulfur}>THE ACCOUNT</SectionLabel>
             <Text style={styles.ledgerChevron}>{ledgerOpen ? '▾' : '▸'}</Text>
           </Pressable>
           {ledgerOpen && (
@@ -316,7 +316,7 @@ export default function CharacterScreen() {
               <Text style={styles.ledgerLore}>
                 {"At "}
                 <Text style={styles.bloodText}>ii or below</Text>
-                {" the road begins to lie. Maps shift. Nodes whisper wrong names."}
+                {" you are in arrears. The Parish remembers everything it was owed."}
               </Text>
             </>
           )}
@@ -380,12 +380,12 @@ export default function CharacterScreen() {
        </View>
       </View>
 
-      {/* Phase 92 — Morale */}
+      {/* Phase 92 — Grace (né Morale, Phase 44h) */}
       <View style={[styles.section, { marginTop: -18 }]}>
-        <SectionLabel size={13}>✠ MORALE</SectionLabel>
+        <SectionLabel size={13}>✠ GRACE</SectionLabel>
         <View style={styles.moraleRow}>
           <Text style={styles.moraleValue}>{Number.isFinite(vm.morale) ? vm.morale : 0}</Text>
-          <Text style={styles.moraleLabel}>willpower</Text>
+          <Text style={styles.moraleLabel}>account</Text>
         </View>
       </View>
 

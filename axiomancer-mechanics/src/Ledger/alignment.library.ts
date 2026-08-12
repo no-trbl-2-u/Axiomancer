@@ -1,778 +1,456 @@
 /**
- * Philosophical alignment library (Phase 42).
+ * Alignment library (Phase 42 cube; content re-authored Phase 44h).
  *
  * The 27-cell registry indexed by the `(epistemology, outlook, scope)`
- * bucket triple. Authored verbatim from `content/philosophy/PhilosAxiosDoc.pdf`:
- * each cell carries its representative philosopher, literary character
- * (with the source work), and three signature logical fallacies (name,
- * example sentence, and alignment rationale).
+ * bucket triple. Each cell carries a damned exemplar (an in-world Parish
+ * figure who held this position, and what it cost them), a cautionary
+ * tale (a Parish folk story carrying the same position), and three
+ * besetting sins (name, example, rationale) — the dark-fantasy re-skin
+ * of the original real-world-philosopher / literary-character / logical-
+ * fallacy content, per spec 34 §6.2.1 (THE UNSHACKLING, 2026-08-08).
  *
- * Axis polarity (see also docs/philosophy.md):
+ * Axis polarity (see also docs/oaths.md):
  *   - epistemology: low = Faith, mid = Agnostic, high = Logic
  *   - outlook:      low = Pessimistic, mid = Neutral, high = Optimistic
  *   - scope:        low = Individual, mid = Relational, high = Transcendent
  *
- * Cell ids are kebab-case `<epistemology>-<outlook>-<scope>`. Cell numbers
- * in the leading comments match the PDF (1-27) so future authoring can be
- * cross-checked against the source artwork.
+ * Cell ids are kebab-case `<epistemology>-<outlook>-<scope>`, unchanged
+ * since Phase 42 (persisted-adjacent via `getAlignmentCell` lookups —
+ * see spec 34 §6.2.2, ids frozen).
  */
 
 import type { PhilosophicalAlignmentCell } from './types';
 
 export const philosophicalAlignmentLibrary: readonly PhilosophicalAlignmentCell[] = Object.freeze([
-    // PDF cell 1 — Logic / Optimistic / Individual.
+    // Cell 1 — Logic / Optimistic / Individual.
     {
         id: 'logic-optimistic-individual',
         epistemology: 'high',
         outlook: 'high',
         scope: 'low',
         label: 'Logic-Optimistic-Individual',
-        philosopher: 'Friedrich Nietzsche (late period)',
-        literaryCharacter: { name: 'Prometheus', work: "Shelley's \"Prometheus Unbound\"" },
-        fallacies: [
-            {
-                name: 'Appeal to Consequences',
-                example: '"This belief makes me stronger, therefore it\'s true".',
-                rationale: 'Nietzsche valued beliefs based on life-affirming power rather than objective truth.',
-            },
-            {
-                name: 'Genetic Fallacy',
-                example: '"Your morality comes from slave resentment, therefore it\'s invalid".',
-                rationale: 'Genealogical critique dismisses ideas based on their psychological origins.',
-            },
-            {
-                name: 'No True Scotsman',
-                example: '"No true Übermensch would accept herd morality".',
-                rationale: 'Constantly redefining the ideal individual to exclude weakness.',
-            },
+        damnedExemplar: "the Bellringer of Thumbprick Hill, who swore the will could out-shout any wound, and rang matins on a shattered arm each dawn until the rot took it and the bell fell silent.",
+        cautionaryTale: { name: 'the Boy Who Would Not Kneel', toldIn: 'told to novices the night before their first tithe, to warn them what pride costs' },
+        besettingSins: [
+            { name: 'Comfort Taken as Proof', example: '"The belief holds me upright, so I call it gospel".', rationale: 'He judged every creed by whether it kept him standing, not by whether the parish agreed it was so.' },
+            { name: 'Tainted Well Reasoning', example: '"Your mercy was born of weakness, so it is no mercy at all".', rationale: 'He struck down any doctrine he could trace to the frightened or the frail, as though its birth were its verdict.' },
+            { name: 'Shifting Rubric', example: '"No bellringer worth the name would ever falter, so the ones who falter were never true to the office".', rationale: 'Each time the unbroken failed him, he redrew the office smaller rather than admit the will could break.' },
         ],
     },
 
-    // PDF cell 2 — Logic / Optimistic / Relational.
+    // Cell 2 — Logic / Optimistic / Relational.
     {
         id: 'logic-optimistic-relational',
         epistemology: 'high',
         outlook: 'high',
         scope: 'mid',
         label: 'Logic-Optimistic-Relational',
-        philosopher: 'Peter Singer',
-        literaryCharacter: { name: 'Dr. Rieux', work: "Camus' \"The Plague\"" },
-        fallacies: [
-            {
-                name: 'Slippery Slope (Positive)',
-                example: '"If we help one person, we can help everyone".',
-                rationale: 'Optimistic chain reasoning about expanding moral circles.',
-            },
-            {
-                name: 'False Equivalence',
-                example: '"A child drowning nearby equals a child starving far away".',
-                rationale: "Singer's famous argument treats geographically distant suffering as morally equivalent.",
-            },
-            {
-                name: 'Appeal to Emotion',
-                example: '"Imagine the suffering we could prevent".',
-                rationale: 'Uses emotional scenarios to motivate logical utilitarian action.',
-            },
+        damnedExemplar: "the Relief-Warden of Long Assize, who swore one parish's hunger was every parish's hunger, and emptied the winter stores past the wall until her own kin starved before thaw.",
+        cautionaryTale: { name: 'the Widow Who Fed Two Parishes', toldIn: 'recited at the almshouse door each Distraint-tide, to shame the miserly' },
+        besettingSins: [
+            { name: 'Ever-Widening Ledger', example: '"Feed one mouth and in time the whole parish feeds itself".', rationale: 'She believed mercy multiplied without limit, each gift begetting the next entry in the same column.' },
+            { name: 'Flattened Distance', example: '"A stranger\'s hunger past the wall weighs the same as my own child\'s".', rationale: 'She entered every hunger in the same column, near or far, kin or stranger, as though distance carried no weight of its own.' },
+            { name: 'Conjured Grief', example: '"Picture the child\'s ribs, and tell me the ledger is wrong".', rationale: 'She proved her sums not with arithmetic but with pictures of suffering, letting pity stand in for reckoning.' },
         ],
     },
 
-    // PDF cell 3 — Logic / Optimistic / Transcendent.
+    // Cell 3 — Logic / Optimistic / Transcendent.
     {
         id: 'logic-optimistic-transcendent',
         epistemology: 'high',
         outlook: 'high',
         scope: 'high',
         label: 'Logic-Optimistic-Transcendent',
-        philosopher: 'Teilhard de Chardin',
-        literaryCharacter: { name: 'Elwin Ransom', work: "C.S. Lewis' \"Perelandra\"" },
-        fallacies: [
-            {
-                name: 'Teleological Argument',
-                example: '"Complexity proves cosmic design and purpose".',
-                rationale: 'Sees evidence of divine direction in evolution itself.',
-            },
-            {
-                name: 'Post Hoc Ergo Propter Hoc',
-                example: '"Evolution leads to consciousness, therefore consciousness was the goal".',
-                rationale: 'Interprets temporal sequence as divine intentionality.',
-            },
-            {
-                name: 'Begging the Question',
-                example: '"The universe evolves toward God because God is the Omega Point".',
-                rationale: 'Assumes transcendent telos to prove transcendent telos.',
-            },
+        damnedExemplar: "the Precentor of the Nine Wheels, who charted every plague and famine on a single wheel and called the turning ascent, until his own name became the wheel's last spoke.",
+        cautionaryTale: { name: 'the Cartographer of the Last Amen', toldIn: 'chalked fresh onto the chapel floor each year and swept away before Advent' },
+        besettingSins: [
+            { name: 'Design Read in Ruin', example: '"The plague took the wicked first, so the plague must be a mercy wearing a harder face".', rationale: 'He saw a design in every scar, as though suffering arranged itself toward an end only he could chart.' },
+            { name: 'Aim Read Backward', example: '"The parish endured to become what it is now, so enduring must have been the aim all along".', rationale: "He read the outcome back into the beginning, as though the final sum had always been the entry's purpose." },
+            { name: 'Self-Proving Circle', example: '"The world climbs toward communion, because communion is where all climbing ends".', rationale: 'His proof and his conclusion were the same sentence, spoken twice and mistaken for two.' },
         ],
     },
 
-    // PDF cell 4 — Logic / Neutral / Individual.
+    // Cell 4 — Logic / Neutral / Individual.
     {
         id: 'logic-mid-individual',
         epistemology: 'high',
         outlook: 'mid',
         scope: 'low',
         label: 'Logic-Neutral-Individual',
-        philosopher: 'Albert Camus',
-        literaryCharacter: { name: 'Meursault', work: "Camus' \"The Stranger\"" },
-        fallacies: [
-            {
-                name: 'Non Sequitur',
-                example: '"The universe is absurd, therefore I am free".',
-                rationale: "Lack of cosmic meaning doesn't logically guarantee freedom, but Camus asserts it.",
-            },
-            {
-                name: 'Appeal to Consequences',
-                example: '"Accepting the absurd allows me to live fully, therefore it\'s the right approach".',
-                rationale: 'Pragmatic justification for philosophical stance.',
-            },
-            {
-                name: 'False Dilemma',
-                example: '"Either suicide, hope in God, or accept the absurd".',
-                rationale: 'Camus frames these as the only three responses to absurdity.',
-            },
+        damnedExemplar: "the Gravedigger of Hollow Assize, who wept at no burial, not even her own mother's, and called the emptiness freedom until the gallows-bell proved her wrong.",
+        cautionaryTale: { name: 'the Woman Who Buried Without Grief', toldIn: 'read from the assize rolls whenever a confession runs dry' },
+        besettingSins: [
+            { name: 'Freedom Assumed from Silence', example: '"Nothing means anything, so nothing binds me".', rationale: "She took the parish's silence as permission, though silence proves no such thing." },
+            { name: 'Ease Sworn as Truth', example: '"Believing nothing matters lets me sleep, so I hold it true".', rationale: 'She judged the creed by how well it let her rest, not by whether the parish would agree.' },
+            { name: 'Counted Doors', example: '"There is the noose, the chapel, or the shrug, and nothing else".', rationale: "She narrowed every soul's reckoning to three doors, as though no fourth had ever been cut." },
         ],
     },
 
-    // PDF cell 5 — Logic / Neutral / Relational.
+    // Cell 5 — Logic / Neutral / Relational.
     {
         id: 'logic-mid-relational',
         epistemology: 'high',
         outlook: 'mid',
         scope: 'mid',
         label: 'Logic-Neutral-Relational',
-        philosopher: 'Simone de Beauvoir',
-        literaryCharacter: { name: 'Jane Eyre', work: "Brontë's \"Jane Eyre\"" },
-        fallacies: [
-            {
-                name: 'Special Pleading',
-                example: '"Our relationship transcends general ethical rules".',
-                rationale: 'Particular relationships create particular ethical obligations beyond universals.',
-            },
-            {
-                name: 'Appeal to Complexity',
-                example: '"You can\'t judge oppression simply; it\'s ambiguous".',
-                rationale: "De Beauvoir's ethics of ambiguity resists clear-cut answers.",
-            },
-            {
-                name: 'Tu Quoque',
-                example: '"You also participate in oppressive systems".',
-                rationale: 'Everyone is complicit; mutual recognition of shared condition.',
-            },
+        damnedExemplar: "the Confessor of Two Ledgers, who kept one rule for kin and another for strangers and called it mercy, until the assize named it favoritism and stripped her cope.",
+        cautionaryTale: { name: 'the Woman Who Judged by Face, Not by Writ', toldIn: "whispered by petitioners waiting outside the confessor's door" },
+        besettingSins: [
+            { name: 'Exempted Bond', example: '"The writ binds strangers; it does not bind us".', rationale: 'She held her own attachments outside the very law she pressed on everyone else.' },
+            { name: 'Shelter of Tangle', example: '"You cannot call it cruelty; the matter is too tangled to name".', rationale: 'She let every wrongdoing hide inside its own complication until no verdict could be reached.' },
+            { name: 'Shared Stain', example: '"You wear the same chains you accuse me of forging".', rationale: 'She answered every charge with a charge of her own, as though shared guilt cancelled the debt.' },
         ],
     },
 
-    // PDF cell 6 — Logic / Neutral / Transcendent.
+    // Cell 6 — Logic / Neutral / Transcendent.
     {
         id: 'logic-mid-transcendent',
         epistemology: 'high',
         outlook: 'mid',
         scope: 'high',
         label: 'Logic-Neutral-Transcendent',
-        philosopher: 'Baruch Spinoza',
-        literaryCharacter: { name: 'The Narrator', work: "Borges' \"The Library of Babel\"" },
-        fallacies: [
-            {
-                name: 'Equivocation',
-                example: '"God and Nature are the same thing".',
-                rationale: 'Uses same term (substance) to mean transcendent and physical reality.',
-            },
-            {
-                name: 'Modal Fallacy',
-                example: '"What is necessary is the same as what is actual".',
-                rationale: "Everything that happens must happen in Spinoza's deterministic system.",
-            },
-            {
-                name: 'Composition Fallacy',
-                example: '"Each part of nature follows laws, therefore all of nature is rational/divine".',
-                rationale: 'Extends property of parts to infinite whole (God).',
-            },
+        damnedExemplar: "the Recorder of the Unread Stacks, who ruled the parish and its absent power were a single ledger read two ways, until he vanished seeking the page that proved it.",
+        cautionaryTale: { name: 'the Archivist Who Sought the Final Shelf', toldIn: 'carved into the ossuary door by a hand nobody has claimed' },
+        besettingSins: [
+            { name: 'Doubled Word', example: '"Call it the parish, call it the world entire; the word costs nothing to change".', rationale: 'He let a single word carry two debts and paid neither one in full.' },
+            { name: 'Fated Ledger', example: '"It happened, therefore it could not have happened otherwise".', rationale: 'He mistook the entry already written for the only entry that could ever be written.' },
+            { name: 'Part Sworn for Whole', example: '"Each grave obeys the sexton\'s order, so the whole earth must obey some order too".', rationale: 'He took the discipline of the small and swore it governed the entire, unseen whole.' },
         ],
     },
 
-    // PDF cell 7 — Logic / Pessimistic / Individual.
+    // Cell 7 — Logic / Pessimistic / Individual.
     {
         id: 'logic-pessimistic-individual',
         epistemology: 'high',
         outlook: 'low',
         scope: 'low',
         label: 'Logic-Pessimistic-Individual',
-        philosopher: 'Arthur Schopenhauer',
-        literaryCharacter: { name: 'Underground Man', work: "Dostoevsky's \"Notes from Underground\"" },
-        fallacies: [
-            {
-                name: 'Hasty Generalization',
-                example: '"I suffer, all conscious beings suffer, therefore existence is suffering".',
-                rationale: "Universalizes personal experience of Will's torment.",
-            },
-            {
-                name: 'Nirvana Fallacy',
-                example: '"Life has suffering, therefore life is not worth living".',
-                rationale: 'Compares reality to ideal of non-existence and finds it wanting.',
-            },
-            {
-                name: 'Appeal to Nature',
-                example: '"Will-to-live is fundamental to nature, proving life is blind striving".',
-                rationale: 'Uses natural world as evidence for metaphysical pessimism.',
-            },
+        damnedExemplar: "the Wound-Reader of Gallows Row, who took his own chilblains as proof the whole parish rotted alike, and gnawed his own fingers rather than be told otherwise.",
+        cautionaryTale: { name: 'the Man Who Would Not Be Comforted', toldIn: 'told to children who complain of small hurts, to quiet them' },
+        besettingSins: [
+            { name: 'Wound Made World', example: '"My chilblains prove the whole parish is rot".', rationale: "He took his own affliction as the measure of every living thing's." },
+            { name: 'Weighed Against Unbeing', example: '"Since living hurts, better never to have drawn breath at all".', rationale: 'He weighed the parish against a peace that never existed, and found the parish wanting.' },
+            { name: "Beast's Verdict", example: '"Even the dog gnaws its own leash; hunger governs all, and hunger is misery".', rationale: 'He read animal appetite as confession, proof that all striving is only suffering dressed as want.' },
         ],
     },
 
-    // PDF cell 8 — Logic / Pessimistic / Relational.
+    // Cell 8 — Logic / Pessimistic / Relational.
     {
         id: 'logic-pessimistic-relational',
         epistemology: 'high',
         outlook: 'low',
         scope: 'mid',
         label: 'Logic-Pessimistic-Relational',
-        philosopher: 'Thomas Ligotti',
-        literaryCharacter: { name: 'Rust Cohle', work: "HBO's \"True Detective\" Season 1" },
-        fallacies: [
-            {
-                name: 'Hasty Generalization',
-                example: '"Consciousness causes suffering, therefore consciousness shouldn\'t exist".',
-                rationale: "Ligotti's \"conspiracy against the human race\" universalizes horror.",
-            },
-            {
-                name: 'Genetic Fallacy',
-                example: '"Your choices come from biology, therefore they\'re not real".',
-                rationale: 'Dismisses human meaning based on evolutionary origins.',
-            },
-            {
-                name: 'Composition Fallacy',
-                example: '"Each individual suffers, therefore humanity is a collective tragedy".',
-                rationale: 'Extends individual horror to species-level catastrophe.',
-            },
+        damnedExemplar: "the Confessor Who Would Absolve No One, and preached that to wake at all was the parish's first and only sin, until she stopped waking anyone, herself included.",
+        cautionaryTale: { name: 'the Child Who Would Not Wake', toldIn: 'sung low over cradles in the leanest winters, to ward off the dread of waking' },
+        besettingSins: [
+            { name: 'Every Waking Cursed Alike', example: '"To feel at all is to suffer, so feeling itself should cease".', rationale: 'She took her own dread at waking and swore it was every creature\'s sentence.' },
+            { name: "Blood Named the Liar", example: '"Your grief is only the body\'s weather, so it proves nothing".', rationale: 'She dismissed every mourner\'s meaning by tracing it back to meat and marrow.' },
+            { name: 'Single Sorrow Ruling All', example: '"One man\'s ruin is proof the whole parish is ruined alike".', rationale: 'She let a single sorrow stand for the entire congregation\'s fate.' },
         ],
     },
 
-    // PDF cell 9 — Logic / Pessimistic / Transcendent.
+    // Cell 9 — Logic / Pessimistic / Transcendent.
     {
         id: 'logic-pessimistic-transcendent',
         epistemology: 'high',
         outlook: 'low',
         scope: 'high',
         label: 'Logic-Pessimistic-Transcendent',
-        philosopher: 'Gnostics (philosophical interpretation) / Hans Jonas',
-        literaryCharacter: { name: 'Severian', work: "Gene Wolfe's \"Book of the New Sun\"" },
-        fallacies: [
-            {
-                name: 'False Dilemma',
-                example: '"Either this world is evil or God is evil; God can\'t be evil, therefore world is".',
-                rationale: 'Gnostic solution to problem of evil splits creator from true God.',
-            },
-            {
-                name: 'No True Scotsman',
-                example: '"The real God wouldn\'t create suffering, therefore the creator isn\'t the real God".',
-                rationale: "Preserves transcendent God's goodness by denying God created matter.",
-            },
-            {
-                name: 'Conspiracy Theory Reasoning',
-                example: '"Archons deliberately trap souls in matter".',
-                rationale: 'Sees malicious intent in cosmic structure.',
-            },
+        damnedExemplar: "the Sexton Who Renounced the Bell, and preached that the parish's saints were jailers in borrowed vestments, guarding a throne long since vacated, until the assize walled him beneath the chancel.",
+        cautionaryTale: { name: 'the Prisoner Who Named His Own Warden', toldIn: 'scratched into the ossuary wall where the assize could not scrub it out' },
+        besettingSins: [
+            { name: 'Choice Narrowed to Two', example: '"Either the parish is cursed or the saints are cruel, and no true saint is cruel, so the parish is cursed".', rationale: 'He allowed only two verdicts and barred the one that would have implicated the altar.' },
+            { name: 'Disowned Maker', example: '"No true saint would author this rot, so whoever authored it was never a saint at all".', rationale: 'He kept his saints blameless by inventing a lesser warden to hold the guilt in their place.' },
+            { name: 'Malice Read in Machinery', example: '"The bells ring on schedule because something wants us penned, not saved".', rationale: "He read deliberate cruelty into the parish's ordinary machinery of debt and bell." },
         ],
     },
 
-    // PDF cell 10 — Agnostic / Optimistic / Individual.
+    // Cell 10 — Agnostic / Optimistic / Individual.
     {
         id: 'mid-optimistic-individual',
         epistemology: 'mid',
         outlook: 'high',
         scope: 'low',
         label: 'Agnostic-Optimistic-Individual',
-        philosopher: 'Richard Rorty',
-        literaryCharacter: { name: 'Huckleberry Finn', work: "Twain's \"Adventures of Huckleberry Finn\"" },
-        fallacies: [
-            {
-                name: 'Moving the Goalposts',
-                example: '"Truth is what works; and what works keeps changing".',
-                rationale: "Rorty's pragmatism redefines truth based on utility.",
-            },
-            {
-                name: 'Appeal to Novelty',
-                example: '"New vocabularies are better because they\'re more useful now".',
-                rationale: 'Values innovation and self-creation over tradition.',
-            },
-            {
-                name: 'Relativist Fallacy',
-                example: '"All truths are relative to communities, but my irony is valid".',
-                rationale: 'Holds relativism while asserting individual self-creation.',
-            },
+        damnedExemplar: 'the Tallyman of Rushlight, who held that a debt was true only so long as it served the debtor, and was struck from the rolls when his own accounts changed too often to trust.',
+        cautionaryTale: { name: "the Ragpicker's Boy", toldIn: 'told a different way at every hearth, and the almoners let it be, since the moral bends with the teller' },
+        besettingSins: [
+            { name: 'The Shifting Ledger', example: '"The debt was owed yesterday. Today the accounting reads different, and so it is."', rationale: 'Like the Tallyman, he calls a thing true only until keeping it true grows costly.' },
+            { name: 'Hunger for the Untried', example: '"The old rite failed twice. Try the new one; it has not failed yet."', rationale: 'The Tallyman prized what was freshly tried over what had merely lasted.' },
+            { name: 'The Excepted Self', example: '"Every parish keeps its own truth. Mine, I keep exact."', rationale: 'He preached that all ledgers bend, then swore his own never had.' },
         ],
     },
 
-    // PDF cell 11 — Agnostic / Optimistic / Relational.
+    // Cell 11 — Agnostic / Optimistic / Relational.
     {
         id: 'mid-optimistic-relational',
         epistemology: 'mid',
         outlook: 'high',
         scope: 'mid',
         label: 'Agnostic-Optimistic-Relational',
-        philosopher: 'John Dewey',
-        literaryCharacter: { name: 'Atticus Finch', work: "Lee's \"To Kill a Mockingbird\"" },
-        fallacies: [
-            {
-                name: 'Appeal to Consequences',
-                example: '"Democracy produces better outcomes, therefore it\'s the right system".',
-                rationale: 'Pragmatic justification based on results rather than metaphysical truth.',
-            },
-            {
-                name: 'Bandwagon (constructive)',
-                example: '"Collective inquiry produces better results than individual reasoning".',
-                rationale: 'Values consensus and community over individual certainty.',
-            },
-            {
-                name: 'Middle Ground',
-                example: '"Truth emerges through dialogue between opposing views".',
-                rationale: "Dewey's experimentalism values synthesis and compromise.",
-            },
+        damnedExemplar: 'the Reeve of Millbrook, who judged every rite by whether the granary was fuller after, and was quietly retired the year a good harvest proved him no wiser than the weather.',
+        cautionaryTale: { name: "the Reeve's Daughter", toldIn: 'read out at every parish moot before the vote is called, so no one mistakes a full larder for proof of anything' },
+        besettingSins: [
+            { name: 'Proof by Full Belly', example: '"The moot decided well. Look how the granary held through winter."', rationale: 'The Reeve counted a decision right whenever the harvest happened to agree with it.' },
+            { name: 'Safety in the Crowd', example: '"The parish agreed together, so the parish could not be wrong."', rationale: "He trusted the moot's consensus the way others trust a written writ." },
+            { name: 'Splitting the Difference', example: '"Both sides brought a claim. Halve it, and call the matter settled."', rationale: 'The Reeve mistook compromise itself for the fair outcome, whatever the claims weighed.' },
         ],
     },
 
-    // PDF cell 12 — Agnostic / Optimistic / Transcendent.
+    // Cell 12 — Agnostic / Optimistic / Transcendent.
     {
         id: 'mid-optimistic-transcendent',
         epistemology: 'mid',
         outlook: 'high',
         scope: 'high',
         label: 'Agnostic-Optimistic-Transcendent',
-        philosopher: 'William James',
-        literaryCharacter: { name: 'Pi Patel', work: "Martel's \"Life of Pi\"" },
-        fallacies: [
-            {
-                name: "Pascal's Wager (variant)",
-                example: '"Believing in transcendent helps me live better, so I should believe".',
-                rationale: "James's \"will to believe\" justifies faith pragmatically.",
-            },
-            {
-                name: 'Appeal to Emotion',
-                example: '"Religious experience feels real, therefore something transcendent exists".',
-                rationale: 'Values subjective experience as evidence for transcendent.',
-            },
-            {
-                name: 'False Dilemma',
-                example: '"Either believe or despair".',
-                rationale: 'James argues some truths only accessible through belief.',
-            },
+        damnedExemplar: 'the Confessor of Sable Reach, who chose each night to believe the ledger balanced somewhere unseen, and was found kneeling to an empty altar the morning the third bell stopped answering.',
+        cautionaryTale: { name: 'the Widow Who Chose to Believe', toldIn: 'sung at every Threadbare wake, though no two mourners agree whether it ends in mercy or in madness' },
+        besettingSins: [
+            { name: 'Faith for the Warmth', example: '"Believing costs me nothing and keeps me standing. So I believe."', rationale: 'The Confessor chose faith not for its truth but for what it let her carry.' },
+            { name: 'The Feeling as Witness', example: '"I felt the third bell answer. That is proof enough for me."', rationale: 'She let the shape of the feeling stand in for the thing itself.' },
+            { name: 'Only Two Doors Offered', example: '"Believe, or lie down in the ashpit. Choose."', rationale: 'The Confessor allowed no doorway between conviction and despair.' },
         ],
     },
 
-    // PDF cell 13 — Agnostic / Neutral / Individual.
+    // Cell 13 — Agnostic / Neutral / Individual.
     {
         id: 'mid-mid-individual',
         epistemology: 'mid',
         outlook: 'mid',
         scope: 'low',
         label: 'Agnostic-Neutral-Individual',
-        philosopher: 'Michel de Montaigne',
-        literaryCharacter: { name: 'Ishmael', work: "Melville's \"Moby-Dick\"" },
-        fallacies: [
-            {
-                name: 'Argument from Ignorance',
-                example: '"I don\'t know anything for certain, therefore suspend all judgment".',
-                rationale: "Montaigne's skeptical method doubts all claims.",
-            },
-            {
-                name: 'Anecdotal Evidence',
-                example: '"This happened to me, so let me explore what it means".',
-                rationale: 'Essays use personal experience as philosophical starting point.',
-            },
-            {
-                name: 'Tu Quoque',
-                example: '"You\'re also uncertain, why do you claim certainty?".',
-                rationale: 'Levels all dogmatic claims by pointing to universal uncertainty.',
-            },
+        damnedExemplar: 'the Gravedigger of Hollow Wick, who answered every question with another question until the assizes stopped calling him to testify at all.',
+        cautionaryTale: { name: 'the Doubting Sexton', toldIn: 'scratched into the sea-wall at low tide, where the water erases half the lesson before anyone reads it twice' },
+        besettingSins: [
+            { name: 'The Comfort of Unknowing', example: '"I cannot be certain of anything, so I will judge nothing."', rationale: "The Gravedigger's doubt of every claim became, in the end, a refuge from all of them." },
+            { name: 'Wound Read as Gospel', example: '"This happened to me once. Let that stand for what is true."', rationale: 'He built his reasoning from what he alone had buried and seen.' },
+            { name: 'The Mirrored Accusation', example: '"You claim certainty. Are you not as blind as I am?"', rationale: "He answered every confident claim by pointing out the asker's own doubt." },
         ],
     },
 
-    // PDF cell 14 — Agnostic / Neutral / Relational.
+    // Cell 14 — Agnostic / Neutral / Relational.
     {
         id: 'mid-mid-relational',
         epistemology: 'mid',
         outlook: 'mid',
         scope: 'mid',
         label: 'Agnostic-Neutral-Relational',
-        philosopher: 'Martin Buber',
-        literaryCharacter: { name: 'Nick Carraway', work: "Fitzgerald's \"The Great Gatsby\"" },
-        fallacies: [
-            {
-                name: 'Special Pleading',
-                example: '"This I-Thou relationship transcends general ethical categories".',
-                rationale: 'Authentic encounter creates unique obligation beyond rules.',
-            },
-            {
-                name: 'False Equivalence',
-                example: '"All people are equally capable of I-Thou encounter".',
-                rationale: 'Treats all relationships as potentially having same sacred quality.',
-            },
-            {
-                name: 'Appeal to Mystery',
-                example: '"The Between cannot be explained, only experienced".',
-                rationale: 'Buber resists systematizing the relational encounter.',
-            },
+        damnedExemplar: 'the Almoner of Fenmark, who claimed one true meeting with a dying stranger absolved him of every other rite in the book, and was never again trusted with the ledger.',
+        cautionaryTale: { name: 'the Watcher at the Threshold', toldIn: 'the version the sextons tell, not the one the choir sings, of a stranger who looked at a dying man and called it communion enough' },
+        besettingSins: [
+            { name: 'An Exception for Love', example: '"That meeting stood outside the rite. It answers to nothing but itself."', rationale: 'The Almoner set his one true encounter above every rule that governed the rest.' },
+            { name: 'The Equal Weighing', example: '"Any stranger might be met as deeply as any other. All are equally near."', rationale: 'He treated all encounters as carrying the same weight, whatever the parting cost.' },
+            { name: 'The Unaccountable Between', example: '"What passed between us cannot be entered in the ledger. Only felt."', rationale: 'He refused to let the meeting be questioned, calling it beyond the reach of the rolls.' },
         ],
     },
 
-    // PDF cell 15 — Agnostic / Neutral / Transcendent.
+    // Cell 15 — Agnostic / Neutral / Transcendent.
     {
         id: 'mid-mid-transcendent',
         epistemology: 'mid',
         outlook: 'mid',
         scope: 'high',
         label: 'Agnostic-Neutral-Transcendent',
-        philosopher: 'Lao Tzu / Zhuangzi (Taoism)',
-        literaryCharacter: { name: 'Siddhartha', work: "Hesse's \"Siddhartha\"" },
-        fallacies: [
-            {
-                name: 'Equivocation',
-                example: '"The Tao is both nothing and everything".',
-                rationale: 'Uses contradictory language to point beyond language.',
-            },
-            {
-                name: 'Appeal to Mystery',
-                example: '"The Tao that can be told is not the eternal Tao".',
-                rationale: 'Deliberately embraces paradox and ineffability.',
-            },
-            {
-                name: 'Denying the Antecedent',
-                example: '"If you strive, you fail; you don\'t strive, therefore you succeed".',
-                rationale: 'Wu-wei logic inverts normal causal reasoning.',
-            },
+        damnedExemplar: 'the Hermit of the Long Marsh, who taught that the truest answer unmade itself in the speaking, and left no writ behind to prove he had ever taught at all.',
+        cautionaryTale: { name: 'the Beggar Who Stopped Asking', toldIn: "passed hand to hand among the almonry's beggars, each one swearing it means the opposite of what the last one meant" },
+        besettingSins: [
+            { name: 'Both Halves at Once', example: '"It is nothing, and it is everything. Both, in the same breath."', rationale: 'The Hermit let a single word carry two meanings and called the contradiction wisdom.' },
+            { name: 'The Unspoken Guarded', example: '"What can be told is not the true thing. So I tell you nothing."', rationale: 'He shielded his teaching from question by claiming it could not survive the telling.' },
+            { name: 'Winning by Not Reaching', example: '"Strive, and you fail. I have not strived. Therefore I have not failed."', rationale: 'The Hermit inverted plain cause into its opposite and called it a wisdom teaching.' },
         ],
     },
 
-    // PDF cell 16 — Agnostic / Pessimistic / Individual.
+    // Cell 16 — Agnostic / Pessimistic / Individual.
     {
         id: 'mid-pessimistic-individual',
         epistemology: 'mid',
         outlook: 'low',
         scope: 'low',
         label: 'Agnostic-Pessimistic-Individual',
-        philosopher: 'Emil Cioran',
-        literaryCharacter: { name: 'Hamlet', work: "Shakespeare's \"Hamlet\"" },
-        fallacies: [
-            {
-                name: 'Nirvana Fallacy',
-                example: '"Existence has suffering, therefore non-existence is preferable".',
-                rationale: "Cioran's antinatalism compares life to impossible ideal of non-being.",
-            },
-            {
-                name: 'Hasty Generalization',
-                example: '"I am miserable, therefore existence itself is miserable".',
-                rationale: 'Universalizes personal despair to cosmic condition.',
-            },
-            {
-                name: 'Appeal to Futility',
-                example: '"All efforts fail eventually, so why try?".',
-                rationale: "Cioran's aphorisms often conclude meaninglessness.",
-            },
+        damnedExemplar: 'the Almoner of Ashpool, who wrote into the parish register that being unborn was the only mercy on offer, and one winter was found to have taken the mercy for himself.',
+        cautionaryTale: { name: 'the Boy Who Wished Himself Unmade', toldIn: 'whispered to children who ask why the bell tolls for the newborn the same as for the dead' },
+        besettingSins: [
+            { name: 'Measured Against the Unmade', example: '"To have never been born beats any life on offer. Weighed so, living always loses."', rationale: 'The Almoner set every life against a mercy no one could actually claim.' },
+            { name: "The World's Single Wound", example: '"My days are ash. Therefore all days are ash."', rationale: 'He took his own grief and wrote it across every ledger in the parish.' },
+            { name: 'The Ledger Closed Early', example: '"Every account ends in arrears eventually. Why keep entering figures at all?"', rationale: 'The Almoner treated the certainty of an ending as reason to stop the work entirely.' },
         ],
     },
 
-    // PDF cell 17 — Agnostic / Pessimistic / Relational.
+    // Cell 17 — Agnostic / Pessimistic / Relational.
     {
         id: 'mid-pessimistic-relational',
         epistemology: 'mid',
         outlook: 'low',
         scope: 'mid',
         label: 'Agnostic-Pessimistic-Relational',
-        philosopher: 'Peter Wessel Zapffe',
-        literaryCharacter: { name: 'Captain Ahab', work: "Melville's \"Moby-Dick\"" },
-        fallacies: [
-            {
-                name: 'Genetic Fallacy',
-                example: '"Consciousness is evolutionary accident, therefore it\'s meaningless".',
-                rationale: 'Zapffe dismisses consciousness based on origins as mistake.',
-            },
-            {
-                name: 'False Dilemma',
-                example: '"Either face cosmic horror or use repression mechanisms".',
-                rationale: "Zapffe's four mechanisms (isolation, anchoring, distraction, sublimation) or madness.",
-            },
-            {
-                name: 'Composition Fallacy',
-                example: '"Each person suffers from consciousness, therefore humanity is collective tragedy".',
-                rationale: 'Extends individual burden to species-level horror.',
-            },
+        damnedExemplar: "the Whaler-Priest of Drownmere, who preached that thought itself was the parish's oldest curse, an accident the bones never asked for, and chased that grievance until the sea took the argument from him.",
+        cautionaryTale: { name: 'the Harpooner Who Argued With the Deep', toldIn: 'the long version the fishwives tell in the dead of winter, never the short one the children hear' },
+        besettingSins: [
+            { name: 'The Accident of Thought', example: '"Thought was never chosen, only suffered into being. So it is worth nothing."', rationale: 'The Whaler-Priest dismissed the mind by pointing only at its accidental birth.' },
+            { name: 'Madness or Small Mercies', example: '"Face the deep bare, or busy your hands until you forget it is there. No third way."', rationale: 'He allowed only ruin or distraction, and no room between them.' },
+            { name: 'The Shared Grief', example: '"Each soul carries this weight alone. Therefore the whole parish drowns together."', rationale: 'He stacked private sorrow into a claim about the fate of everyone at once.' },
         ],
     },
 
-    // PDF cell 18 — Agnostic / Pessimistic / Transcendent.
+    // Cell 18 — Agnostic / Pessimistic / Transcendent.
     {
         id: 'mid-pessimistic-transcendent',
         epistemology: 'mid',
         outlook: 'low',
         scope: 'high',
         label: 'Agnostic-Pessimistic-Transcendent',
-        philosopher: "H.P. Lovecraft's cosmicism (as philosophy)",
-        literaryCharacter: { name: 'Burroughs', work: "Steven Peck's \"A Short Stay in Hell\"" },
-        fallacies: [
-            {
-                name: 'Argument from Ignorance',
-                example: '"We can\'t comprehend the cosmos, therefore it\'s hostile/indifferent".',
-                rationale: 'Lovecraftian assumption that unknowable = horrifying.',
-            },
-            {
-                name: 'Appeal to Fear',
-                example: '"The truth will drive you mad, therefore don\'t seek it".',
-                rationale: 'Knowledge of transcendent destroys human sanity.',
-            },
-            {
-                name: 'Category Error',
-                example: '"Applying human logic to cosmic entities".',
-                rationale: 'Transcendent operates beyond human reason, rendering all logic futile.',
-            },
+        damnedExemplar: 'the Confessor of the Drowned Chapter, who read three pages of the forbidden rota and afterward would answer only in numbers, until the parish walled up the room and struck his name from the rolls.',
+        cautionaryTale: { name: 'the Clerk Who Read Too Far', toldIn: 'never told whole, since the ending is the part that costs the teller something' },
+        besettingSins: [
+            { name: 'Silence Read as Threat', example: '"We cannot make sense of it, so it must mean us harm."', rationale: 'The Confessor mistook his own incomprehension for evidence of malice.' },
+            { name: 'Warning Instead of Answer', example: '"Do not read the third page. It is enough that it broke me."', rationale: 'He offered his ruin as reason enough to stop asking, never an actual answer.' },
+            { name: 'Counting the Uncountable', example: '"I set the parish reckoning against it, as though its ledger could be read the same way."', rationale: 'The Confessor applied ordinary tallying to a thing that owed the parish nothing at all.' },
         ],
     },
 
-    // PDF cell 19 — Faith / Optimistic / Individual.
+    // Cell 19 — Faith / Optimistic / Individual.
     {
         id: 'faith-optimistic-individual',
         epistemology: 'low',
         outlook: 'high',
         scope: 'low',
         label: 'Faith-Optimistic-Individual',
-        philosopher: 'Søren Kierkegaard',
-        literaryCharacter: { name: 'Alyosha Karamazov', work: "Dostoevsky's \"The Brothers Karamazov\"" },
-        fallacies: [
-            {
-                name: 'Appeal to Faith',
-                example: '"Logic can\'t reach religious truth; only faith can".',
-                rationale: "Kierkegaard's leap requires abandoning rational proofs.",
-            },
-            {
-                name: 'False Dilemma',
-                example: '"Either/or: aesthetic life, ethical life, or religious life".',
-                rationale: "Kierkegaard's stages require choosing one authentic path.",
-            },
-            {
-                name: 'Special Pleading',
-                example: '"Abraham\'s willingness to sacrifice Isaac transcends ethics".',
-                rationale: '"Teleological suspension of the ethical" for individual faith.',
-            },
+        damnedExemplar: "the Novice of Thumbprick Chapel, who called proof a coward's crutch and walked bare-footed onto the millpond ice to show faith needed none, and did not walk back.",
+        cautionaryTale: { name: 'The Barefoot Communicant', toldIn: "read at the closing of every novice's vigil, though the sextons never finish it" },
+        besettingSins: [
+            { name: 'The Blind Vow', example: '"I did not wait for the ledger to confirm it. I felt the summons, and I went".', rationale: "The Novice's leap onto the ice took no evidence, only the certainty of the calling." },
+            { name: 'The Single Gate', example: '"There is one door in this parish, and you will choose it or you will choose the frost".', rationale: 'The Barefoot Communicant\'s tale allows only one road to grace, as though no third path were ever dug.' },
+            { name: 'The Exempted Hand', example: '"What is forbidden to the parish was permitted to me, for the bell rang for me alone".', rationale: "The Novice claimed her private calling excused her from the parish's ordinary law, the same claim the Barefoot Communicant made before the ice took her." },
         ],
     },
 
-    // PDF cell 20 — Faith / Optimistic / Relational.
+    // Cell 20 — Faith / Optimistic / Relational.
     {
         id: 'faith-optimistic-relational',
         epistemology: 'low',
         outlook: 'high',
         scope: 'mid',
         label: 'Faith-Optimistic-Relational',
-        philosopher: 'Desmond Tutu / Ubuntu theology',
-        literaryCharacter: { name: 'Jean Valjean', work: "Hugo's \"Les Misérables\"" },
-        fallacies: [
-            {
-                name: 'Appeal to Consequences',
-                example: '"Forgiveness heals communities, therefore it\'s God\'s will".',
-                rationale: 'Ubuntu justifies reconciliation through relational outcomes.',
-            },
-            {
-                name: 'Hasty Generalization',
-                example: '"This act of mercy transformed one person, so mercy transforms all".',
-                rationale: 'Optimistic faith that love converts universally.',
-            },
-            {
-                name: 'Circular Reasoning',
-                example: '"We are one because God made us one; God\'s unity proves our unity".',
-                rationale: 'Faith in communal theology validates communal practice.',
-            },
+        damnedExemplar: "the Almoner of Gallow's Fen, who forgave every debtor's arrears from her own purse until the parish came to collect from her grave instead.",
+        cautionaryTale: { name: 'The Forgiven Poacher', toldIn: "told over the offertory plate whenever a debtor is let go without paying" },
+        besettingSins: [
+            { name: 'The Merciful Ledger', example: '"Forgiving him mended the village, so mercy must be the parish\'s own law".', rationale: "The Almoner judged her forgiveness true because it healed the fen, not because any rite proved it right." },
+            { name: 'The One Kindness', example: '"He gave up thieving after I pardoned him, so pardon cures every thief".', rationale: "The Forgiven Poacher's single reform is retold as though it works on every debtor in the parish." },
+            { name: 'The Closed Circle', example: '"We are bound as one flock because the dead saints made us one, and the dead saints\' unity proves the flock is bound".', rationale: "The Almoner's communion doctrine proves itself by restating itself, the same as a tale that proves the flock's oneness by the flock's oneness." },
         ],
     },
 
-    // PDF cell 21 — Faith / Optimistic / Transcendent.
+    // Cell 21 — Faith / Optimistic / Transcendent.
     {
         id: 'faith-optimistic-transcendent',
         epistemology: 'low',
         outlook: 'high',
         scope: 'high',
         label: 'Faith-Optimistic-Transcendent',
-        philosopher: 'St. Augustine / Thomas Aquinas',
-        literaryCharacter: { name: 'Dante', work: "Dante's \"Divine Comedy\" (especially Paradiso)" },
-        fallacies: [
-            {
-                name: 'Circular Reasoning',
-                example: '"The Bible is true because God wrote it; we know God wrote it because the Bible says so".',
-                rationale: 'Faith establishes premises that validate faith.',
-            },
-            {
-                name: 'Argument from Authority',
-                example: '"The Church says it, therefore it\'s true".',
-                rationale: 'Divine revelation through institutional authority.',
-            },
-            {
-                name: 'Teleological Argument',
-                example: '"The world has design and purpose, therefore God exists".',
-                rationale: "Aquinas's Five Ways use reason to support faith in transcendent designer.",
-            },
+        damnedExemplar: 'the Confessor-General of the high assize, who ruled the gospel true because the gospel said so, and was believed until the parish asked him to prove it and he had nothing but the book.',
+        cautionaryTale: { name: 'The Pilgrim of Nine Terraces', toldIn: 'the version the sextons tell, not the one carved into the ossuary wall' },
+        besettingSins: [
+            { name: 'The Book Proves Itself', example: '"The gospel is true because it is the gospel\'s own word, and the gospel\'s word is true because it is gospel".', rationale: "The Confessor-General's doctrine confirms itself by citing itself, as the Pilgrim's climb is proven holy only by the tale of the climb." },
+            { name: 'The Word From Above', example: '"The high assize has spoken, and what the assize speaks needs no further proof".', rationale: "Belief rests on office rather than evidence, the same weight the Pilgrim's tale gives the terraces simply because a saint once walked them." },
+            { name: 'The Shape of a Maker', example: '"The frost forms in patterns too fine for chance; some hand must have pressed them".', rationale: 'The Confessor-General read design into the cold itself and called the design proof of a maker above the parish.' },
         ],
     },
 
-    // PDF cell 22 — Faith / Neutral / Individual.
+    // Cell 22 — Faith / Neutral / Individual.
     {
         id: 'faith-mid-individual',
         epistemology: 'low',
         outlook: 'mid',
         scope: 'low',
         label: 'Faith-Neutral-Individual',
-        philosopher: 'Blaise Pascal',
-        literaryCharacter: { name: 'Raskolnikov', work: "Dostoevsky's \"Crime and Punishment\"" },
-        fallacies: [
-            {
-                name: "Pascal's Wager",
-                example: '"If God exists and you don\'t believe, you lose everything; if you believe and God doesn\'t exist, you lose little".',
-                rationale: 'Cost-benefit analysis applied to faith despite uncertainty.',
-            },
-            {
-                name: 'Appeal to Fear',
-                example: '"The eternal silence of infinite spaces frightens me".',
-                rationale: 'Pascal uses existential dread to motivate faith choice.',
-            },
-            {
-                name: 'False Dilemma',
-                example: '"Either believe in Christian God or face meaninglessness".',
-                rationale: 'Wager assumes only two options.',
-            },
+        damnedExemplar: "the Assizer's Clerk of Cold Fen, who reckoned belief as a wager against the ledger of the dead and staked his last coin on faith, though he never once felt it.",
+        cautionaryTale: { name: 'The Wagering Widow', toldIn: 'chalked above the almonry door, sum and all, for anyone who can still do the sum' },
+        besettingSins: [
+            { name: 'The Ledger Wager', example: '"If the dead ask and I have believed, I lose an evening\'s doubt; if I have not believed, I lose everything owed".', rationale: "The Clerk staked belief on which outcome cost less, not on which was true, exactly as the Widow reckoned her own soul." },
+            { name: 'The Cold Dread', example: '"The silence past the palisade has no bottom, and it frightens me into the pew".', rationale: 'Terror of the vast cold, not conviction, drove the Clerk to kneel.' },
+            { name: 'The Two Roads', example: '"Either kneel at the rail or walk into the frost with nothing".', rationale: "The wager admits no third road, though the parish is full of them, same as the Widow's tale allows only ruin or belief." },
         ],
     },
 
-    // PDF cell 23 — Faith / Neutral / Relational.
+    // Cell 23 — Faith / Neutral / Relational.
     {
         id: 'faith-mid-relational',
         epistemology: 'low',
         outlook: 'mid',
         scope: 'mid',
         label: 'Faith-Neutral-Relational',
-        philosopher: 'Dorothy Day / Catholic Worker Movement',
-        literaryCharacter: { name: 'Father Damien', work: 'historical figure / various literary depictions' },
-        fallacies: [
-            {
-                name: 'Appeal to Tradition',
-                example: '"The Church has always taught service to the poor".',
-                rationale: 'Faith tradition validates relational praxis.',
-            },
-            {
-                name: 'Appeal to Emotion',
-                example: '"Christ suffered with us, so we must suffer with others".',
-                rationale: "Emotional connection to Christ's passion motivates service.",
-            },
-            {
-                name: 'No True Scotsman',
-                example: '"True faith requires action for the poor".',
-                rationale: 'Defines authentic Christianity through social justice.',
-            },
+        damnedExemplar: 'the Almoner of the Leper Yard, who fed the dying because the parish had always fed the dying, and caught their rot for her trouble.',
+        cautionaryTale: { name: 'The Almoner Who Stayed', toldIn: 'recited at every almonry shift-change, first line only — the rest is understood' },
+        besettingSins: [
+            { name: 'The Old Custom', example: '"The parish has always fed the dying at the yard gate, so it must be fed there still".', rationale: 'The Almoner justified her service by what was always done, not by what was owed.' },
+            { name: 'The Shared Wound', example: '"The dying suffer, and suffering beside them is the only true communion".', rationale: 'Feeling their pain stood in for any rite that would have named the duty.' },
+            { name: 'The Only Faithful', example: '"No true almoner turns from the leper yard".', rationale: 'The tale narrows true service until only the Almoner Who Stayed still fits inside it.' },
         ],
     },
 
-    // PDF cell 24 — Faith / Neutral / Transcendent.
+    // Cell 24 — Faith / Neutral / Transcendent.
     {
         id: 'faith-mid-transcendent',
         epistemology: 'low',
         outlook: 'mid',
         scope: 'high',
         label: 'Faith-Neutral-Transcendent',
-        philosopher: 'St. John of the Cross / Mystical Theology',
-        literaryCharacter: { name: 'Father Rodrigues', work: "Endo's \"Silence\"" },
-        fallacies: [
-            {
-                name: 'Appeal to Mystery',
-                example: '"God\'s ways are not our ways".',
-                rationale: 'Mysticism embraces divine incomprehensibility.',
-            },
-            {
-                name: 'Moving the Goalposts',
-                example: '"God\'s presence in absence is different from absence".',
-                rationale: 'Dark night redefines what divine presence means.',
-            },
-            {
-                name: 'Paradox Acceptance',
-                example: '"God is both present and absent, known and unknowable".',
-                rationale: 'Mystical theology embraces contradictions.',
-            },
+        damnedExemplar: 'the Confessor of the Drowned Choir, who prayed into the dark for forty years and called the silence an answer, since no other came.',
+        cautionaryTale: { name: 'The Listening Confessor', toldIn: 'murmured by novices who keep vigil past matins, never finished before the dawn bell' },
+        besettingSins: [
+            { name: 'The Unasked Question', example: '"The bell does not explain why it tolls, and I have stopped asking".', rationale: 'The Confessor answered every silence with the claim that answers were not owed to him.' },
+            { name: 'The Shifting Sign', example: '"His absence is itself a kind of nearness, if you listen differently".', rationale: "When no sign came, the Confessor redefined what counted as a sign, as the Listening Confessor's tale keeps redefining what silence means." },
+            { name: 'The Held Contradiction', example: '"He is with me and he has abandoned me, and both are true in the same breath".', rationale: 'The Confessor kept two opposite claims in one mouth and called it faith rather than error.' },
         ],
     },
 
-    // PDF cell 25 — Faith / Pessimistic / Individual.
+    // Cell 25 — Faith / Pessimistic / Individual.
     {
         id: 'faith-pessimistic-individual',
         epistemology: 'low',
         outlook: 'low',
         scope: 'low',
         label: 'Faith-Pessimistic-Individual',
-        philosopher: 'Tertullian (early church father)',
-        literaryCharacter: { name: 'Ivan Karamazov', work: "Dostoevsky's \"The Brothers Karamazov\"" },
-        fallacies: [
-            {
-                name: 'Appeal to Absurdity',
-                example: '"It\'s absurd, therefore I believe it".',
-                rationale: 'Faith despite or because of irrationality.',
-            },
-            {
-                name: 'Loaded Question',
-                example: '"If God exists, why do innocent children suffer?".',
-                rationale: "Ivan's challenge assumes God's existence to indict God.",
-            },
-            {
-                name: 'False Dilemma',
-                example: '"Either God is unjust or God doesn\'t exist".',
-                rationale: "Ivan's rebellion rejects both options while remaining in framework.",
-            },
+        damnedExemplar: 'the Hermit of the Gallows Road, who held that the more monstrous the doctrine, the truer it must be, and starved rather than let reason soften it.',
+        cautionaryTale: { name: 'The Boy Who Counted the Dead Children', toldIn: 'not sung, only muttered, and never past the second verse' },
+        besettingSins: [
+            { name: 'The Monstrous Proof', example: '"It cannot be believed, and so I believe it utterly".', rationale: "The Hermit took the doctrine's horror as its credential rather than its indictment." },
+            { name: 'The Poisoned Question', example: '"If the dead saints are just, why do the children still starve at the gate?".', rationale: "The Boy's question already grants the saints' justice in order to condemn it, the same trap the Hermit set for the parish." },
+            { name: 'The Two Verdicts', example: '"Either the ledger is cruel, or there is no ledger at all".', rationale: 'The tale refuses any account where the ledger is merely indifferent, forcing cruelty or nothing.' },
         ],
     },
 
-    // PDF cell 26 — Faith / Pessimistic / Relational.
+    // Cell 26 — Faith / Pessimistic / Relational.
     {
         id: 'faith-pessimistic-relational',
         epistemology: 'low',
         outlook: 'low',
         scope: 'mid',
         label: 'Faith-Pessimistic-Relational',
-        philosopher: 'Philipp Mainländer',
-        literaryCharacter: { name: 'Father Ferreira', work: "Endo's \"Silence\"" },
-        fallacies: [
-            {
-                name: 'Genetic Fallacy',
-                example: '"God died to create universe, therefore universe is death process".',
-                rationale: 'Origin story (divine suicide) determines cosmic meaning.',
-            },
-            {
-                name: 'Appeal to Pity',
-                example: '"Compassion for suffering converts justifies abandoning faith".',
-                rationale: 'Emotional weight of community suffering overrides theology.',
-            },
-            {
-                name: 'False Dilemma',
-                example: '"Either maintain faith and watch them suffer, or apostatize and save them".',
-                rationale: 'Tragic choice between competing loves.',
-            },
+        damnedExemplar: 'the Sexton of the Drowned Parish, who taught that the last saint died to make the world at all, and that the world has been dying of that birth ever since.',
+        cautionaryTale: { name: 'The Confessor Who Signed the Book', toldIn: 'kept out of the psalter entirely, passed mouth to mouth among the almoners' },
+        besettingSins: [
+            { name: 'The Dead Root', example: '"The saint died to birth this world, so the world is nothing but a dying thing".', rationale: "The Sexton judged the whole world's nature by the manner of its making, not by what it has since become." },
+            { name: 'The Weight of Their Tears', example: '"I signed the book because I could not bear their screaming any longer".', rationale: 'The Confessor let the sight of suffering, not any rite of conscience, decide the matter.' },
+            { name: 'The Two Loves', example: '"Either keep faith and watch them boil, or break faith and let them live".', rationale: 'The tale allows no third mercy between apostasy and the pyre, the same narrow choice the Sexton preached.' },
         ],
     },
 
-    // PDF cell 27 — Faith / Pessimistic / Transcendent.
+    // Cell 27 — Faith / Pessimistic / Transcendent.
     {
         id: 'faith-pessimistic-transcendent',
         epistemology: 'low',
         outlook: 'low',
         scope: 'high',
         label: 'Faith-Pessimistic-Transcendent',
-        philosopher: 'Marcion / Gnostic Christianity',
-        literaryCharacter: { name: 'The Grand Inquisitor', work: "Dostoevsky's \"The Brothers Karamazov\"" },
-        fallacies: [
-            {
-                name: 'No True Scotsman',
-                example: '"The real God wouldn\'t create evil world, therefore creator isn\'t real God".',
-                rationale: "Preserves transcendent God's goodness by splitting from creator.",
-            },
-            {
-                name: 'False Dilemma',
-                example: '"Either God is good and didn\'t create matter, or God created matter and isn\'t good".',
-                rationale: 'Gnostic solution to problem of evil.',
-            },
-            {
-                name: 'Appeal to Consequences',
-                example: '"If Christ wanted humans free, humanity would suffer; therefore Christ was wrong/cruel".',
-                rationale: 'Grand Inquisitor judges divine plan by human capacity.',
-            },
+        damnedExemplar: 'the Anchorite of the Salt Crypt, who preached that the thing which made this cold world could not be the same thing owed the tithe, and was bricked into the crypt for the heresy of it.',
+        cautionaryTale: { name: 'The Assessor Who Judged the Almoner', toldIn: 'read once a year at the winter assize, and struck from the record after' },
+        besettingSins: [
+            { name: 'The Truer Maker', example: '"The one owed the tithe would not have made a world this cruel, so some lesser hand must have made it instead".', rationale: 'The Anchorite preserved a good power behind the tithe by inventing a crueler one to blame for the making.' },
+            { name: 'The Split Verdict', example: '"Either the maker is good and made no cold, or the maker made the cold and is no good at all".', rationale: 'The tale admits no maker who is merely careless, only saint or monster.' },
+            { name: 'The Cost of Freedom', example: '"Left free, they starved and froze, so freedom itself was the wrong gift".', rationale: "The Assessor judged the almoner's mercy by its bitter harvest, not by whether mercy was owed." },
         ],
     },
 ]);
