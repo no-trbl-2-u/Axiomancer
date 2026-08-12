@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Axiomancer</title>
+<title>Axiomancer digest — 2026-08-12</title>
 <style>
 :root {
   color-scheme: light dark;
@@ -203,15 +203,33 @@ footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--b
 </style>
 </head>
 <body>
-<header class="top"><div class="wrap"><span class="home">Axiomancer</span></div></header>
+<header class="top"><div class="wrap"><a class="home" href="../log.html">← DevLog</a><span class="crumb">2026-08-12</span></div></header>
 <main class="wrap">
-<h1>Axiomancer</h1>
-<p class="muted">A private index of the game's content and the nightly development log.</p>
-<div class="hub">
-  <a class="hue-cards" href="./catalog.html"><span class="h-glyph">🂠</span><div class="h-title">Catalog</div><div class="h-sub">57 cards · 56 foes · 24 statuses</div></a>
-  <a class="hue-log" href="./log.html"><span class="h-glyph">❯</span><div class="h-title">DevLog</div><div class="h-sub">33 entries</div></a>
-  <a class="hue-tuning" href="./tuning-lab/index.html"><span class="h-glyph">⚖</span><div class="h-title">Tuning Lab</div><div class="h-sub">3 reports</div></a>
-</div>
+<h1 id="headline">2026-08-12</h1>
+<p class="headline">Phase 44h closed the morality/alignment half of the dark-fantasy</p>
+<div class="counts"><span class="chip cat-content">1 content</span></div>
+<section class="card cat-content" id="phase-44h-grace-the-oaths-morality-alignment-retheme"><div class="card-head"><span class="chip cat-content">content</span><h2>Phase 44h — GRACE / THE OATHS morality + alignment retheme</h2></div>
+<p class="field"><span class="flabel">What</span> re-skins spec 10's <code>moralMeter</code> as GRACE (3 bands: In Arrears /</p>
+<p class="field"><span class="flabel">Why</span> spec 34 §6 rules every naming decision for the retheme; this is</p>
+<p class="commits"><code class="commit">`74d4b2fd`</code> <code class="commit">(brief)</code> <code class="commit">`abee6e92`</code> <code class="commit">(ship)</code> <code class="commit">`39aea51b`</code> <code class="commit">(row)</code></p>
+<p>Indifferent / In Grace, ±34 thresholds) and spec 14's alignment cube as THE OATHS (axes display as CREED / AUGURY / TROTH); finishes the <code>src/Philosophy/</code> → <code>src/Ledger/</code> module rename (<code>AlignmentFallacy</code> → <code>BesettingSin</code>, all 27 cells re-authored across three parallel content passes); rethemes mobile surfaces (character screen's GRACE pool and THE ACCOUNT ledger, the memoir tab's THE LEDGER label, tooltip content, StatusCard); <code>docs/philosophy.md</code> → <code>docs/oaths.md</code>. Engine fields and the reducer are byte-unchanged — every rename is display-only or internal-module-only, so no <code>GAME_STATE_VERSION</code> bump. the morality/alignment half, following 44f/44g's place/voice half.</p>
+<div class="diff" role="img" aria-label="code diff"><div class="dl del">-        title: 'EPISTEMOLOGY',</div><div class="dl del">-        body: 'how you decide what is true. low trusts the felt and remembered; high trusts the measured and proven.',</div><div class="dl del">-        footnote: 'low ← gnostic · mid ← agnostic · high → empiric',</div><div class="dl add">+        title: 'CREED',</div><div class="dl add">+        body: 'what you take on trust. low leans on faith; high demands what can be shown.',</div><div class="dl add">+        footnote: 'low ← faith · mid ← doubt · high → evidence',</div></div></section>
+<section class="panel" id="while-you-were-out"><h2>While you were out</h2>
+<div class="tablewrap"><table><thead><tr><th>Tick</th><th>Verb</th><th>Outcome</th></tr></thead><tbody><tr><td>08-11 19:31</td><td>march</td><td>success — critique <span class="st st-ok">pass</span> 23 (2 findings: 1 HIGH, 1 MED)</td></tr><tr><td>08-12 03:01</td><td>march</td><td>success — <span class="st st-neutral">no-op</span> (nothing to ship)</td></tr><tr><td>08-12 07:57</td><td>march</td><td>success — phase 44h (brief + ship, GRACE / THE OATHS)</td></tr></tbody></table></div>
+<ul><li><code>plan/AUDIT.md</code>: no new rows filed tonight; 49 pending, unchanged.</li><li><code>plan/PHASE_CANDIDATES.md</code>: 34 pending, unchanged.</li><li><code>plan/CRITIQUE.md</code>: pass 23 (commit <code>d2231275</code>) — 2 fresh findings</li></ul>
+<p>(HIGH: title-screen tagline says "modern steel," contradicting the shipped anti-modern-word doctrine; MED: the combat arena backdrop is one fixed "ruined city" image for every encounter, mismatched against nautical/liturgical fights like Brine Hag); 21 pending rows, up from 19.</p>
+<ul><li><code>triage:needs-user</code> / <code>loop:do</code> issues: 0 open. No open PRs.</li><li>Deploy: CI green — <code>verify-mobile</code> and <code>verify-mechanics</code> both</li></ul>
+<p>succeeded for <code>39aea51b</code>.</p>
+<ul><li>Breadth check (<code>npm --workspace axiomancer-mobile run e2e:minigames</code>):</li></ul>
+<p><strong>GREEN</strong> — all six legs (hazard, combat, gathering, encounter-routing, exploration↔combat-prelude roundtrip, upgradeable-dice) <code>ALL PASS</code>.</p></section>
+<section class="panel" id="needs-you"><h2>Needs you</h2>
+<p>Nothing new. The two follow-on sessions opened by 2026-08-10's <code>/oversight</code> (the product-name reconsideration, the card-evolution design pass) are still unscheduled but block no queued phase. Critique pass 23's two findings are unclaimed and available to <code>/iterate</code>; the HIGH one (title-screen copy) is a one-line fix.</p></section>
+<section class="panel" id="tuning-proposals"><h2>Tuning proposals</h2>
+<p><code>baseline:check</code> opened this cycle <strong>stale by 2 mechanics-source commits</strong> (<code>74d4b2fd</code>, <code>abee6e92</code> — phase 44h's brief + ship). Re-measured with the reduced-nightly pass and committed at <code>39aea51b</code>.</p>
+<p>The regenerated report is <strong>byte-identical</strong> to yesterday's stamp — only <code>meta.generatedAt</code>/<code>meta.commit</code> changed. Expected result for a mechanics-source commit that only renames display labels and rewrites Ledger-cell prose; the combat sim reads none of that. CQI reads unchanged: early 0.746, mid 0.739, late 0.814, impossible 0.820. No band moved; nothing to file.</p>
+<p>Same standing gap as the last several nights, <strong>not</strong> re-filed: the open <code>[docs]</code> AUDIT row (<code>skills/digest.md §3b still reads the retired win-rate doctrine curve</code>) still needs a design ruling before §3b can be rewritten against CQI directly — read blind against that curve, tonight's numbers (early 54.5% / mid 8.3% / late 0% / impossible 0%) would file as a doctrine violation. They aren't one: Phase 43 retired win rate as a grading term outright, and this exact reading has been byte-identical and already-tracked since before that phase shipped. This digest read <code>combatQuality.index</code> instead and skipped the stale-law filing, same as every night since 2026-08-09.</p></section>
+<section class="panel" id="todays-intent"><h2>Today's intent</h2>
+<p>A single-phase night — 44h closes the morality/alignment half of the dark-fantasy retheme, leaving 44i (product shell + docs) as the next queued build-plan row. The breadth check stayed green for a second night running, and the baseline confirmed a fifth straight byte-identical read — the retheme phases keep proving they don't touch the combat sim, which is exactly what "display-only" is supposed to mean.</p></section>
 <footer class="foot">Axiomancer DevLog &middot; generated by <code>scripts/build-devlog.mjs</code></footer>
 </main>
 </body>
