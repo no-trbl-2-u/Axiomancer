@@ -17,6 +17,35 @@ block to find the next phase. Status vocabulary: `[ ]` pending
 `/oversight` unblocks it); `[-]` partial-with-carry-overs.
 Tick in this file in the same commit that ships the phase.
 
+> **AUDIT-DRAIN MODE (set via /oversight 2026-08-12 — T: "focus the
+> march loop on closing the rest out").** Every `[ ]` row below stays
+> pending but is queue-wide paused: `/march` Step 3a should NOT dispatch
+> to `ship-a-phase` while this banner stands, even though rows remain
+> `[ ]` (this is a whole-queue hold, not per-phase `[blocked]` —
+> individual rows keep their real status so nothing looks abandoned).
+> Fall through past 3a to `/expand`'s normal gating and then
+> `/iterate`, so the loop spends its ticks draining
+> `plan/AUDIT.md`'s Pending queue (a same-day /oversight pass
+> re-verified the ~45 non-historical Pending rows against current code
+> and pruned/promoted what it could — see that file's own header for
+> the live count) instead of shipping new phases. **Note on timing:**
+> when this banner was drafted, Phase 44i was still unshipped and the
+> intent was to hold it too — but the scheduled `march` retried past
+> its earlier CI hiccup (transient Bun-install network failure,
+> unrelated to this banner) and shipped 44i in the same window this
+> banner was being written and pushed, so 44i landed on `main` as
+> `[x]` before the banner did. Left as-is rather than reverted — the
+> ship was already clean and in flight, and the banner's job starts
+> from here forward, not retroactively. Every OTHER `[ ]` row below
+> holds. **One exception:
+> Phase 55** (below) — promoted this same oversight pass specifically
+> to close out the AUDIT queue's stuck top-score row, small/already-
+> scoped (docs + one selector fix) — may ship on its normal turn; it
+> counts as "closing the rest out," not new work, so the banner doesn't
+> hold it. Lift the banner itself via `/oversight` once
+> `plan/AUDIT.md`'s Pending queue is meaningfully clear (or T calls it
+> off directly).
+
 **Already shipped (pre-loop):**
 - [x] Phase 0 — nexus methodology adoption (unified loop harness,
       gates, plan/, this build plan) — `chore: adopt nexus methodology`
@@ -1695,6 +1724,28 @@ RESEQUENCED the same day behind the unshackling — see above):**
       clean call site isn't reachable. Resolves the standing
       `[needs-user-call]` at `plan/AUDIT.md`'s endCombat row. Brief: to
       generate.
+
+- [ ] Phase 55 — Retire the dead "THE STRIKE IS DEAD" doctrine string
+      from the engine-truth MCP. `AUDIT.md` "axio-query overview still
+      publishes the retired 'THE STRIKE IS DEAD' doctrine after Phase 41"
+      (filed 2026-08-08 by the scheduled SomberSoft roundtable, score 72 —
+      the AUDIT queue's top row, given an explicit divergence bias
+      2026-08-10 that two full ticks did not drain). Live `axio_overview`
+      still answers "THE STRIKE IS DEAD — no card touches HP..." because
+      `scripts/axio-mcp-server.mjs::extractDoctrine()` selects that phrase
+      from the stale header of `axiomancer-mechanics/src/Cards/cards.library.ts`.
+      T voided that doctrine in the 2026-08-08 unshackling and Phase 41
+      removed its hard test, but the engine-truth MCP still presents the
+      dead law as current. **Promoted directly via `/oversight` 2026-08-12**
+      (T: "focus the march loop on closing the rest out" — this is the
+      queue's stuck top row, worth a direct promotion rather than a
+      third bias-weighted `/iterate` tick). Update the card-library
+      header to state that direct damage is legal while Conviction, Surge
+      and Dice remain locked; update the MCP doctrine selector if
+      necessary; add a server smoke assertion that the overview cannot
+      publish the retired phrase. Verify `axio_overview` against the live
+      server plus the nearest MCP smoke test. (mechanics; docs + small
+      code fix) Brief: to generate.
 
 > **Note (issue-triage 2026-07-19):** issue #132 asked for a
 > `devlog-build` GitHub Action; re-triage found it re-classified as

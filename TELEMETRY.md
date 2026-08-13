@@ -254,7 +254,15 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-12T09:48:21Z | skill | digest | unknown | main | - |
 | 2026-08-12T13:55:16Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-12T13:56:56Z | subagent | Explore | claude-sonnet-5 | main | Survey mobile shell copy and docs for phase 44i retheme |
+| 2026-08-12T21:41:32Z | slash-prompt | /oversight | unknown | user/ci | /oversight |
+| 2026-08-12T21:41:34Z | skill | oversight | claude-sonnet-5 | main | - |
 | 2026-08-13T03:06:35Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-13T03:37:17Z | subagent | Explore | claude-sonnet-5 | main | Verify AUDIT.md batch 1 (7 findings) |
+| 2026-08-13T03:37:26Z | subagent | Explore | claude-sonnet-5 | main | Verify AUDIT.md batch 2 (7 findings) |
+| 2026-08-13T03:37:34Z | subagent | Explore | claude-sonnet-5 | main | Verify AUDIT.md batch 3 (7 findings) |
+| 2026-08-13T03:37:42Z | subagent | Explore | claude-sonnet-5 | main | Verify AUDIT.md batch 4 (7 findings) |
+| 2026-08-13T03:37:48Z | subagent | Explore | claude-sonnet-5 | main | Verify AUDIT.md batch 5 (7 findings) |
+| 2026-08-13T03:37:55Z | subagent | Explore | claude-sonnet-5 | main | Verify AUDIT.md batch 6 (7 findings) |
 | 2026-08-13T08:00:53Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-13T09:49:14Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-08-13T09:49:16Z | skill | digest | unknown | main | - |
