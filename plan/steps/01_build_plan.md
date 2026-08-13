@@ -1377,7 +1377,7 @@ the replacement must be reachable before the Night Watch comes out, or
       `removeCardFromCombatDeck` itself (needs the full Character to know
       which list owns the copy) — the host performs the real removal at
       claim, mirroring how it writes the anvil outcome's rail back.
-- [ ] Phase 52d — The rest-choice screen, and the anvil finally reaches
+- [x] Phase 52d — The rest-choice screen, and the anvil finally reaches
       players. Repurpose the `/rest` route (path unchanged — the route
       contract is locked); three priced cards with the purse shown and
       unaffordable options **visibly disabled with their reason**, per
@@ -1390,6 +1390,7 @@ the replacement must be reachable before the Night Watch comes out, or
       next price before the player commits** — the escalation is the
       mechanic. (mobile) Deps: 52c.
       Brief: `plan/phases/phase_52d_rest_choice_mobile.md`.
+      — `feat(mobile): rest-choice screen + anvil hand-off — phase 52d` (3dda879a)
 - [ ] Phase 52e — Retire the Night Watch. **After 52d, never before.**
       Delete `World/Rest/` entire, the `rest` CLI sub-command + npm
       script, both barrel re-exports (⇒ all three workspace gates), the
