@@ -340,7 +340,7 @@ describe('selectEventViewModel: combat-prelude composition', () => {
         // alphabet (i,v,x,l,c,d,m) for any positive n, not just i/v/x,
         // so the regex must accept the full alphabet.
         expect(fight.subtitle).toMatch(/^[ivxlcdm0-9]+ · [ivxlcdm0-9]+ vitae · adv\. unknown$/);
-        expect(flee.subtitle).toBe('forfeit the path · -ii morale');
+        expect(flee.subtitle).toBe('forfeit the path · -ii grace');
     });
 
     it('boss combat-prelude flee subtitle reads as sealed-no-retreat (Phase 45)', () => {
@@ -653,17 +653,17 @@ describe('eventActions.pickEventChoice', () => {
 
         expect(startCombatSpy).not.toHaveBeenCalled();
         expect(store.getState().event.pending).toBeNull();
-        // The FLEE chrome subtitle reads `forfeit the path · -ii morale`
+        // The FLEE chrome subtitle reads `forfeit the path · -ii grace`
         // — the action layer must honor it (pre-[4.5] the chrome was
         // a lie; engine moralMeter was unchanged on flee).
         expect(store.getState().moralMeter).toBe(moralBefore - 2);
     });
 
-    it('combat-prelude + flee (boss) -> no morale delta even if dispatched (chrome reads "sealed · no retreat")', () => {
+    it('combat-prelude + flee (boss) -> no grace delta even if dispatched (chrome reads "sealed · no retreat")', () => {
         // Boss flee is engine-disabled in the UI (KNEEL / `enabled:
         // false`). If the dispatch somehow lands anyway, the
         // action layer must NOT shift moralMeter — the boss chrome
-        // subtitle reads `sealed · no retreat`, not a morale cost.
+        // subtitle reads `sealed · no retreat`, not a grace cost.
         const store = makeStore();
         const actions = createAppActions(store);
         setPending(store, makeEncounterResult({ isBoss: true }));

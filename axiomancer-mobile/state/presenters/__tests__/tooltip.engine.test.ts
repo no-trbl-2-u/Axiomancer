@@ -28,7 +28,7 @@ describe('selectTooltipContentFor', () => {
             expect(content).not.toBeNull();
             expect(content?.title).toBe('HEART');
             expect(content?.body).toContain("will to stay");
-            expect(content?.footnote).toContain('morale');
+            expect(content?.footnote).toContain('grace');
         });
 
         it('returns BODY content', () => {

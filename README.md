@@ -1,6 +1,6 @@
 # Axiomancer
 
-Monorepo for **Axiomancer** — a turn-based RPG with philosophical themes.
+Monorepo for **Axiomancer** — a dark fantasy deckbuilding RPG campaign.
 
 ## Packages
 
