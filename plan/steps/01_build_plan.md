@@ -1357,7 +1357,7 @@ the replacement must be reachable before the Night Watch comes out, or
       waystones 0.35/0.5). 52c overwrites all four — until it ships, those
       rests are player-favorable. `REST_PASSIVE_HEAL_FRACTION` is marked
       carried-forward-pending-52c; do not tune it elsewhere.
-- [ ] Phase 52c — The rest-choice engine. A new pure `World/RestChoice/`
+- [x] Phase 52c — The rest-choice engine. A new pure `World/RestChoice/`
       following the established two-way minigame contract (never reads
       `GameState`; `(session, …) → session`; host settles an outcome
       ledger at claim). Three offers with per-offer affordability and
@@ -1372,6 +1372,11 @@ the replacement must be reachable before the Night Watch comes out, or
       with T's ruling. SWAP is not offered — no map authors variant gear.
       (mechanics) Deps: 52a, 52b.
       Brief: `plan/phases/phase_52c_rest_choice_engine.md`.
+      — `feat(mechanics): rest-choice engine — heal / anvil / cut — phase 52c` (e1ae8318)
+      The engine names the removed card for `cut`; it does not call
+      `removeCardFromCombatDeck` itself (needs the full Character to know
+      which list owns the copy) — the host performs the real removal at
+      claim, mirroring how it writes the anvil outcome's rail back.
 - [ ] Phase 52d — The rest-choice screen, and the anvil finally reaches
       players. Repurpose the `/rest` route (path unchanged — the route
       contract is locked); three priced cards with the purse shown and
