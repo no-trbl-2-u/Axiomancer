@@ -6,7 +6,7 @@ Read this before major UX proposals, combat-screen work, mercy/friendship modals
 
 ## Game identity
 
-Axiomancer is an experimental philosophy RPG where mechanics make worldview consequential.
+Axiomancer is a dark fantasy deckbuilding RPG campaign where mechanics make what you owe, and to whom, consequential.
 
 Mobile should make strange mechanics understandable without sanding off their danger.
 

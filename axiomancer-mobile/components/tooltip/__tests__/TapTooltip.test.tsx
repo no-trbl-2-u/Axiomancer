@@ -15,7 +15,7 @@ describe('<TapTooltip>', () => {
             <TapTooltip
                 title="HEART"
                 body="the will to stay with what's difficult."
-                footnote="+1 morale per defend at heart stance"
+                footnote="+1 grace per defend at heart stance"
                 left={48}
                 top={120}
             />,
@@ -25,7 +25,7 @@ describe('<TapTooltip>', () => {
             "will to stay",
         );
         expect(tree.queryByTestId('tap-tooltip-footnote')?.children?.[0]).toContain(
-            'morale',
+            'grace',
         );
     });
 

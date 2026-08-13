@@ -470,14 +470,14 @@ function composeCombatPrelude(encounter: Encounter, isBoss: boolean): Omit<Event
     // Phase 45 port: chrome subtitles under each action button (the
     // italic cost/consequence preview from prototype.jsx:481-489 +
     // :486-489 — 'ix · vi vitae · adv. unknown' on FIGHT, 'forfeit
-    // the path · -ii morale' on FLEE). Lowercase-roman cost line +
+    // the path · -ii grace' on FLEE). Lowercase-roman cost line +
     // ritual-register kicker. Boss variant tightens the kicker
     // since the engine's boss-blocks-flee rule is part of the
     // design intent (KNEEL is sealed, not a real choice).
     const fightSubtitle = `${toRomanLower(enemy.level)} · ${toRomanLower(previewHealth)} vitae · adv. unknown`;
     const fleeSubtitle = isBoss
         ? 'sealed · no retreat'
-        : 'forfeit the path · -ii morale';
+        : 'forfeit the path · -ii grace';
 
     const choices: EventChoice[] = [
         {
@@ -500,7 +500,7 @@ function composeCombatPrelude(encounter: Encounter, isBoss: boolean): Omit<Event
             accentKey: 'bone',
             enabled: !isBoss,
             subtitle: fleeSubtitle,
-            decode: isBoss ? null : 'Give up this node · spend 2 Morale',
+            decode: isBoss ? null : 'Give up this node · spend 2 Grace',
         },
     ];
     let subtitle: string;

@@ -28,12 +28,16 @@ Tick in this file in the same commit that ships the phase.
 > `plan/AUDIT.md`'s Pending queue (a same-day /oversight pass
 > re-verified the ~45 non-historical Pending rows against current code
 > and pruned/promoted what it could — see that file's own header for
-> the live count) instead of shipping new phases. This includes
-> Phase 44i, which has a ready brief but had not yet shipped when this
-> banner landed — it holds too, same as every other `[ ]` row; the
-> next scheduled `march` fire retrying past its earlier CI hiccup
-> (transient Bun-install network failure, unrelated to this banner)
-> should fall through past 3a rather than pick 44i up. **One exception:
+> the live count) instead of shipping new phases. **Note on timing:**
+> when this banner was drafted, Phase 44i was still unshipped and the
+> intent was to hold it too — but the scheduled `march` retried past
+> its earlier CI hiccup (transient Bun-install network failure,
+> unrelated to this banner) and shipped 44i in the same window this
+> banner was being written and pushed, so 44i landed on `main` as
+> `[x]` before the banner did. Left as-is rather than reverted — the
+> ship was already clean and in flight, and the banner's job starts
+> from here forward, not retroactively. Every OTHER `[ ]` row below
+> holds. **One exception:
 > Phase 55** (below) — promoted this same oversight pass specifically
 > to close out the AUDIT queue's stuck top-score row, small/already-
 > scoped (docs + one selector fix) — may ship on its normal turn; it
@@ -1257,7 +1261,7 @@ none may start early (bearings forbids opportunistic renaming).**
       pool, THE ACCOUNT ledger), memoir tab bar (THE LEDGER), tooltips.
       No `GAME_STATE_VERSION` bump — every rename display-only or
       internal-module-only.
-- [ ] Phase 44i — Product shell + docs. `spec.md` itself (including the
+- [x] Phase 44i — Product shell + docs. `spec.md` itself (including the
       "your worldview is a mechanical input" premise, which is the line
       that made this an RPG rather than a deckbuilder — 42 decides its
       fate), the root README, `docs/`, mobile tab labels and shell copy,
@@ -1267,7 +1271,23 @@ none may start early (bearings forbids opportunistic renaming).**
       records (devlog entries, dated tuning reports, `plan/` history)
       are NOT rewritten — they are dated records and the lexicon lint
       already exempts `**Status:** HISTORICAL` files.
-      (docs + mobile) Deps: 44a-44h. Brief: to generate.
+      (docs + mobile) Deps: 44a-44h. Brief:
+      `plan/phases/phase_44i_product_shell_docs.md`.
+      — `docs(mechanics,mobile): product shell + docs retheme — phase
+      44i` (9a1dabde)
+      Closes out the 44-series: spec.md's product thesis rewritten to
+      spec 34 S6.4's successor premise ("what you owe, and to whom, is
+      a mechanical input") + dark fantasy deckbuilding RPG campaign
+      framing (S7); root/mobile READMEs, both VISION.md "Game
+      identity" lines, and root AGENTS.md's orientation line retheme'd
+      to match (opportunistic, per S0.1); bearings' "What we're
+      building" TL;DR rewritten (PIVOTING note discharged) and Voice /
+      Copy canon bullets ratified per S2.1/S5.6 (stale "pending Phase
+      42" parentheticals dropped, Copy canon gains a GRACE row);
+      leftover MORALE->GRACE copy leaks (FLEE/WITHDRAW subtitles,
+      event consequence label, flee toast, HEART tooltip) that 44h's
+      sweep missed are closed out; docs/api.md's stale "Philosophy"
+      heading fixed to match 44h's BesettingSin rename.
 
 - [skipped] Phase 45a — Re-home dice upgrades: design session (attended).
       **ANSWERED BY T DIRECT, attended chat 2026-08-08 — no session

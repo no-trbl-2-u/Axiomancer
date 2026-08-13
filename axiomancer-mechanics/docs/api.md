@@ -489,12 +489,12 @@ hermetic walkthrough.
   `ActiveEffect`, `StatModifier`, `DamageOverTime`,
   `RegenerationConfig`, `ActionRestriction`, etc.) — Stable.
 
-### Philosophy (Phase 42, Phase 43, Phase 44, Phase 46) — Beta
+### The Oaths (Phase 42, Phase 43, Phase 44, Phase 46) — Beta
 
 3-axis alignment cube indexing a 27-cell content registry. See
 [docs/oaths.md](./oaths.md) for the full table.
 
-- Types (`PhilosophicalAlignment`, `AxisBucket`, `AlignmentFallacy`,
+- Types (`PhilosophicalAlignment`, `AxisBucket`, `BesettingSin`,
   `PhilosophicalAlignmentCell`) — Beta.
 - Engine (`bucketAxis`, `getAlignmentCell`, `applyAlignmentDelta`,
   `defaultAlignment`) — Beta.

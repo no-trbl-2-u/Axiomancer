@@ -9,19 +9,20 @@
 
 ## Product
 
-Axiomancer is a turn-based, single-player philosophy RPG for
-mobile (Expo / React Native), backed by a deterministic
-TypeScript rules engine. Its thesis — stated in
-`axiomancer-mechanics/VISION.md` — is that **your worldview is a
-mechanical input, not flavor**: mercy, honesty, restraint, and
-skill are each a mechanically consequential stance, not a
-role-play veneer.
+Axiomancer is a turn-based, single-player dark fantasy
+deckbuilding RPG campaign for mobile (Expo / React Native),
+backed by a deterministic TypeScript rules engine. Its thesis —
+stated in `axiomancer-mechanics/VISION.md` — is that **what you
+owe, and to whom, is a mechanical input, not flavor**: mercy,
+honesty, restraint, and skill are each a mechanically
+consequential stance, not a role-play veneer.
 
 The core loop: explore a map → resolve authored node encounters
 (combat, minigames, dialogue, cutscenes) → make morally charged
-choices that shift a 3-axis philosophical alignment and faction
-reputation → carry those consequences into future world, boss,
-and region state.
+choices that shift THE OATHS (a 3-axis alignment: CREED, AUGURY,
+TROTH), GRACE (a moral-difficulty meter), and faction reputation
+→ carry those consequences into future world, boss, and region
+state.
 
 ## Audience
 
@@ -36,7 +37,7 @@ systems.
 
 ## Pillars
 
-- **Mechanics make worldview consequential.** Strange, legible,
+- **Mechanics make what you owe consequential.** Strange, legible,
   consequential systems over safe RPG imitation.
 - **Status effects are the main fun.** (Load-bearing balance
   doctrine, set 2026-06.) The intended path to a kill is status
@@ -79,9 +80,10 @@ engine, content library, tuning loop, and hermetic e2e tests:
 
 Supporting engines: character / progression / equipment (rarity,
 affixes, set items), effects and interactions, enemy content +
-AI, 3-axis philosophy alignment, faction reputation, NPC dialogue
-trees, world maps / quests / map-events, deterministic seeded
-RNG, and a Monte-Carlo balance-sim harness.
+AI, THE OATHS (a 3-axis CREED/AUGURY/TROTH alignment cube),
+faction reputation, NPC dialogue trees, world maps / quests /
+map-events, deterministic seeded RNG, and a Monte-Carlo
+balance-sim harness.
 
 The mobile app (`axiomancer-mobile` v1.9.0) presents this engine
 through an expo-router shell: a tabbed home (character,

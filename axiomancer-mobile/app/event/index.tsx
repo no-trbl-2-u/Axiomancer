@@ -49,7 +49,7 @@ function consequenceLabel(c: EventConsequence): string {
     if (c.kind === 'currency') return `+${c.amount ?? 0} ${c.amount === 1 ? 'shilling' : 'shillings'}`;
     if (c.kind === 'moral') {
         const delta = c.amount ?? 0;
-        return `${delta > 0 ? '+' : ''}${delta} morale`;
+        return `${delta > 0 ? '+' : ''}${delta} grace`;
     }
     if (c.kind === 'item') return c.label ?? 'item';
     if (c.kind === 'flag') return c.label ?? 'flag';

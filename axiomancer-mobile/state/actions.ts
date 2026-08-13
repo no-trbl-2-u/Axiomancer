@@ -480,7 +480,7 @@ export interface AppActions {
     pickEventChoice: (choiceId: string) => void;
     /**
      * Withdraw from an encounter already entered (the combat reveal's
-     * WITHDRAW). Pays the non-boss retreat cost — -2 morale + its toast —
+     * WITHDRAW). Pays the non-boss retreat cost — -2 grace + its toast —
      * without requiring a pending event slice, which `beginHazardEncounter`
      * has already cleared by then. Only offered where retreat is allowed;
      * boss encounters never surface it.
@@ -1839,13 +1839,13 @@ function clearEventSlice(store: AppStore): void {
  * The price of walking away from a non-boss encounter.
  *
  * [4.5] DRIFT fix (mechanics-vs-UI audit row 10): the retreat chrome reads
- * `forfeit the path · -ii morale`, so honour it — shift the engine
+ * `forfeit the path · -ii grace`, so honour it — shift the engine
  * `moralMeter` by -2 and surface the cost. Boss encounters are sealed (the
  * retreat is never offered), so this is only ever called for a foe you were
  * allowed to leave.
  *
  * Phase 92 — flee narrative feedback: prose-style narrative in the lowercase
- * ritual register, carrying the morale cost (deep-playtest F03).
+ * ritual register, carrying the grace cost (deep-playtest F03).
  */
 function applyFleeCost(store: AppStore): void {
     store.getState().shiftMoralMeter(-2);
@@ -1854,7 +1854,7 @@ function applyFleeCost(store: AppStore): void {
         notifications: {
             levelUpAcknowledged: prev?.levelUpAcknowledged ?? true,
             toast: {
-                text: 'you fled the encounter. the path bends away.\n\nmorale -2',
+                text: 'you fled the encounter. the path bends away.\n\ngrace -2',
                 id: (prev?.toast?.id ?? 0) + 1,
             },
         },

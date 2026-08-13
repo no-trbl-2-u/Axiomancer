@@ -199,7 +199,7 @@ describe('integration: exploration + tab-bar lock survive the encounter-modal li
         expect(latestScreenOptions('character/index')?.href).toBeUndefined();
     });
 
-    it('WITHDRAW pays the retreat cost (morale −2) even though the event slice is already cleared', () => {
+    it('WITHDRAW pays the retreat cost (grace −2) even though the event slice is already cleared', () => {
         const store = makeStore();
         seedActiveEvent(store, ENCOUNTER_EVENT);
         const before = store.getState().moralMeter;

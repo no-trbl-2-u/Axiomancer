@@ -10,18 +10,10 @@
 `spec.md` at the repo root is the product spec — the canonical
 description of Axiomancer. Read once at session start. The TL;DR:
 
-> A turn-based, single-player philosophy RPG for mobile, backed
-> by a deterministic TypeScript rules engine, where your
-> worldview is a mechanical input rather than flavor.
-
-**PIVOTING (T direct, 2026-08-08):** the product is becoming **a Dark
-Fantasy deckbuilding RPG campaign**, whole-product. The TL;DR above and
-`spec.md` itself are rewritten in **Phase 44i** — deliberately last, so
-the spec documents what the retheme actually did rather than what it
-intended. Until then the line above still describes the shipped product,
-and the open question it raises ("your worldview is a mechanical input"
-is what makes this an RPG rather than a deckbuilder) is settled in
-**Phase 42**, not here. See § "THE UNSHACKLING".
+> A turn-based, single-player dark fantasy deckbuilding RPG
+> campaign for mobile, backed by a deterministic TypeScript
+> rules engine, where what you owe, and to whom, is a mechanical
+> input rather than flavor.
 
 Three-package npm-workspaces monorepo: a pure rules **engine**
 (`axiomancer-mechanics`), an Expo/React-Native **app**
@@ -216,9 +208,8 @@ ambiguity.)
 - **Win condition:** HP is the sole win condition. Never
   reintroduce Pressure Tracks / `CombatPressureTracks`.
   <!-- lexicon-ok: pressure-tracks -->
-- **Copy canon:** VITAE, STANCE. Never HEALTH / GUARD. *(Theme-bearing —
-  Phase 42's ratified fiction may replace these terms; until it does they
-  remain canon and copy regressions are still rejected.)*
+- **Copy canon:** VITAE, STANCE, GRACE (né MORALE, spec 34 §5.6 / Phase
+  44h). Never HEALTH / GUARD / MORALE.
 - **Content location:** engine content in mechanics `src/*`
   libraries; player-facing strings in mobile presenters /
   `*.copy.ts`; no hardcoded copy in components; no hex literals
@@ -229,10 +220,7 @@ ambiguity.)
   faces.
 - **Voice:** terse, archaic-flavored, "cold and old" — but **no
   thee/thou/thy/thine/ye**. Mercy/exploit language reads as
-  morally charged, never neutral. *(Theme-bearing — a Phase 42 proposal
-  may argue for a different register, and the "morally charged" clause
-  presumes the morality system survives the retheme. Binding until
-  Phase 42 is ratified; re-derive it there, don't drift from it before.)*
+  morally charged, never neutral.
 - **THE UNSHACKLING (T direct, /oversight 2026-08-08) — three locked
   constraints are VOID.** T, verbatim: *"remove constraints across the
   entire application. Normal damage is allowed, deck tuning is allowed to

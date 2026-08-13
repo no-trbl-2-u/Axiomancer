@@ -4,7 +4,7 @@ This file preserves T's fundamental wants for Axiomancer as they affect the mech
 
 ## Game identity
 
-Axiomancer is an experimental philosophy RPG where mechanics make worldview consequential.
+Axiomancer is a dark fantasy deckbuilding RPG campaign where mechanics make what you owe, and to whom, consequential.
 
 The engine should support strange, legible, consequential systems over safe RPG imitation.
 

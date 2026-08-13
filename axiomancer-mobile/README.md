@@ -1,7 +1,7 @@
 # Axiomancer — Mobile Client
 
-Expo / React Native client for the Axiomancer TTRPG — a philosophical
-tabletop RPG system exploring moral choice through tactical combat and
+Expo / React Native client for Axiomancer — a dark fantasy deckbuilding
+RPG campaign exploring moral choice through tactical combat and
 character alignment. This package lives in the Axiomancer monorepo
 (npm workspaces) and is the **presentation layer** only. Game rules,
 state shape, and randomness live in the sibling

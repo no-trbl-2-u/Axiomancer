@@ -740,7 +740,7 @@ export function CombatEncounterPanel({
                                 style={styles.withdrawBtn}
                             >
                                 <Text style={[styles.withdrawBtnText, { color: AXM.bone }]}>WITHDRAW</Text>
-                                <Text style={styles.withdrawSub}>forfeit the path · morale −2</Text>
+                                <Text style={styles.withdrawSub}>forfeit the path · grace −2</Text>
                             </Pressable>
                         )}
                     </ScrollView>

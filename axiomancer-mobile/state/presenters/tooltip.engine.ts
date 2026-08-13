@@ -62,8 +62,8 @@ export interface TooltipContent {
 const STAT_CONTENT: Record<string, TooltipContent> = {
     HEART: {
         title: 'HEART',
-        body: "the will to stay with what's difficult. governs morale, willpower, and the heart-stance damage curve.",
-        footnote: '+1 morale per defend at heart stance',
+        body: "the will to stay with what's difficult. governs grace, willpower, and the heart-stance damage curve.",
+        footnote: '+1 grace per defend at heart stance',
         accent: 'heart',
     },
     BODY: {

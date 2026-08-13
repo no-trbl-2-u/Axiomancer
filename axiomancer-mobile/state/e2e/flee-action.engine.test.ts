@@ -81,7 +81,7 @@ describe('flee action: narrative feedback', () => {
         
         // Verify narrative toast was set
         expect(state.notifications?.toast?.text).toBe(
-            'you fled the encounter. the path bends away.\n\nmorale -2'
+            'you fled the encounter. the path bends away.\n\ngrace -2'
         );
         expect(state.notifications?.toast?.id).toBe(1);
         
@@ -143,7 +143,7 @@ describe('flee action: narrative feedback', () => {
         
         // F03 fix: flee now provides visible feedback via toast
         expect(state.notifications?.toast?.text).toContain('you fled the encounter');
-        expect(state.notifications?.toast?.text).toContain('morale -2');
+        expect(state.notifications?.toast?.text).toContain('grace -2');
         
         // F03 fix: morale cost is now visible and applied
         expect(typeof state.moralMeter).toBe('number');
