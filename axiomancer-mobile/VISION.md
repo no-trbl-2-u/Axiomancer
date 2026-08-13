@@ -12,7 +12,10 @@ Mobile should make strange mechanics understandable without sanding off their da
 
 ## Combat UX vision
 
-Combat is fundamentally status-effect-centered.
+Combat must make direct damage, statuses, Conviction, Surge, and Dice legible
+without visually forcing status dominance. T's 2026-08-08 unshackling restored
+ordinary direct damage while permanently retaining Conviction, Surge, and the
+Dice mechanics system.
 
 The UI should help the player understand:
 
@@ -22,7 +25,10 @@ The UI should help the player understand:
 4. what status effects exist and matter;
 5. how victory, mercy, or consequence can happen.
 
-The player may sometimes win by attacking or friendliness, but the intended mastery path is skill use, resource planning, status application, and status synergy. Mobile should not visually privilege brute attack or passive defense as the obvious always-correct action.
+The player may resolve combat through direct damage, statuses, mercy, or another
+authored consequence. Mobile should reveal why the chosen path worked without
+presenting brute attack, status stacking, or passive defense as the universal
+always-correct answer.
 
 ## Defend vision
 

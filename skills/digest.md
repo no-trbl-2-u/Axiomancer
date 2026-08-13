@@ -71,11 +71,12 @@ its own cadence.
       Commit the regenerated
       `deck-matrix-baseline.json` with the digest (a
       measurement is briefing, not shipping). Then READ the
-      new numbers against the locked doctrine curve
-      (early ~80 / mid ~50 / late 25-35 / impossible 0,
-      blind policy-pick): each band that moved gets a line in
-      the `Tuning proposals` panel, and a doctrine violation
-      (a stage outside its band) gets a `plan/AUDIT.md` row.
+      new numbers as directional evidence. The former ten-preset
+      curve (early ~80 / mid ~50 / late 25-35 / impossible 0)
+      is historical after the Profane Canon; do not file current
+      three-snapshot results as violations of that retired charter.
+      Report CQI and terminal outcomes separately, and do not spawn
+      tuning work while the current library remains transitional.
       **Measure and report only** — card/deck fixes stay with
       `/deck-tuning`, engine constants stay manual (§4.2-4.3
       rails apply). A reduced pass is directionally honest,

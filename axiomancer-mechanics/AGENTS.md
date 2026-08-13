@@ -6,22 +6,24 @@ Axiomancer Mechanics is a TypeScript TTRPG game engine (Node.js CLI).
 No databases, servers, or containers required. See `README.md` for
 architecture docs.
 
-**Game doctrine is canonical in `VISION.md`** (status effects are the
-main fun; the starter-preset win-rate curve early ~80% / mid ~50% /
-late ~25-35% / impossible 0%) and kept always-in-context in this
-package's `CLAUDE.md` — read both before any mechanics, combat,
-balance, content, mercy, or alignment work. It is deliberately NOT
+**Game doctrine is canonical in `VISION.md`** and kept always-in-context
+in this package's `CLAUDE.md` — read both before any mechanics, combat,
+balance, content, mercy, or alignment work. The former status-dominance
+law and ten-starter-preset curve are historical after T's 2026-08-08
+unshackling and the Profane Canon. Current combat evidence uses CQI for
+fight texture while terminal outcomes and the three campaign snapshots
+await an explicit viability/calibration charter. It is deliberately NOT
 restated here.
 
 **Evidence doctrine (condensed):**
 
-- Command-green playtests can still be design-red. A late-game/boss
-  witness with a starter preset deck is FAILED evidence when it sits
-  outside the 25-35% resolution-success band, records 0 player damage,
-  never exercises Befriend/mercy attempts, or collapses into
-  low-status damage dominance. Capture generated playtest metrics in
-  the dated report, then revert generated tracked reports unless the
-  task explicitly updates those fixtures.
+- Command-green playtests can still be design-red. CQI grades how a fight
+  played, not whether its terminal outcome makes the campaign viable; a
+  high CQI beside universal defeat or capitulation requires separate
+  judgment. Low-run/single-seed matrices are pressure evidence, not tuning
+  authority. Capture generated playtest metrics in the dated report, then
+  revert generated tracked reports unless the task explicitly updates those
+  fixtures.
 - A direct combat CLI run or passing combat tests prove the engine
   command path, not route integration. A route-level combat claim
   must traverse an authored map encounter, enter the HP-only board,

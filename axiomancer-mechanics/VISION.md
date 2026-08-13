@@ -10,16 +10,12 @@ The engine should support strange, legible, consequential systems over safe RPG 
 
 ## Combat vision
 
-Combat is fundamentally status-effect-centered.
-
-**Doctrine (load-bearing, set 2026-06):** Status effects are the MAIN fun and
-the most engaging aspect of combat encounters. Every balance decision, tuning run, content
-addition, and skill/effect design is judged first by "does this make applying
-and exploiting status effects more central and more satisfying?" If a change
-makes basic-attack trading more attractive than status-effect play, it works
-against the vision. The balance loops (`combat-playtest` and `deck-tuning` for
-Hazard-Pattern Combat — the only combat engine) must treat low status-effect
-engagement as a balance failure even when win/loss rates look healthy.
+Combat must make its interacting systems legible and consequential. Status
+effects remain a major authored tool, but T's 2026-08-08 unshackling retired
+status dominance as the governing combat objective and restored ordinary direct
+damage. Cards may use direct damage, statuses, Conviction, Surge, and Dice in any
+combination that preserves the three locked systems rather than making them
+ornamental.
 
 **Hazard-Pattern Combat win model (updated 2026-06-22):** the enemy has ONE bar —
 HP — and dropping it to 0 is the only win condition. Status is the EFFICIENT path
@@ -28,9 +24,8 @@ weak immediate "basic" strike, and control status genuinely HINDERS the enemy (a
 stun/skip robs it of its telegraphed turn) instead of filling a separate meter.
 Befriend at low HP opens the spare/exploit mercy choice. This REPLACES the earlier
 two-Pressure-Track model (DoT Erosion + Control Saturation as the only win
-conditions), which has been removed — but status effects remain the main fun and
-the intended efficient win path; a player who leans on basic strikes should
-struggle, especially against bosses.
+conditions), which has been removed. Status effects remain available and should be satisfying,
+but they are not required to dominate direct-damage paths.
 
 The intended mastery path is:
 
@@ -40,7 +35,8 @@ The intended mastery path is:
 4. apply and exploit status effects;
 5. resolve through victory, mercy, or other consequence.
 
-The player may sometimes win by attacking over and over. The player may sometimes win through friendliness. But if the player is not utilizing skills and planning status effects, the game should be more difficult for them.
+The player may win through direct damage, statuses, mercy, or another authored
+consequence. No one path is doctrine-mandated as the dominant combat route.
 
 **Doctrine (load-bearing, set 2026-07-09; refined 2026-07-10): the FREE line
 builds the engine.** A card's free (dieless) line must never be a dead play or
@@ -56,13 +52,8 @@ pass + FREE-currency lint, `plan/tuning/2026-07-10-turn-texture.md` §1.)
 
 Balance should prove AGGRESSIVE, DEFENSIVE, MIXED, and STRATEGIST play styles. STRATEGIST — skill/status/resource planning — is the witness for the intended mastery path.
 
-**Doctrine (load-bearing, set 2026-07-08): starter preset decks must adhere to
-this win-rate curve.** The 10 theme presets a player starts with (and commits
-to at the labyrinth, per the preset-deck-tutorial rethink in
-`plan/CRITIQUE.md`) are early/mid-game decks by design — they are not meant to
-remain competitive forever, since the player is expected to trade into a new
-mid-game deck after the labyrinth. Their target win-rate curve, blind
-policy-pick, is:
+**Historical calibration charter (2026-07-08; superseded 2026-08-08):** the
+former ten theme presets used this blind-policy-pick target curve:
 
 | Stage | Target win rate |
 |---|---|
@@ -71,14 +62,12 @@ policy-pick, is:
 | Late | ~25-35% |
 | Impossible | 0% (a hard wall, not a rare fluke win) |
 
-A starter preset winning well above this curve at late/impossible is a
-dominance finding, not a success — it means the deck never needed to be
-traded out. A starter preset winning well below it at early/mid is a
-weakness finding. This curve is the objective function for `/deck-tuning`'s
-balance-band work on the starter preset library; see `plan/tuning/2026-07-08-win-path-scaling.md`
-for the correction history and re-derive the live numeric bands
-(`combat-playtest.balance-bands.sim.test.ts`) against it before trusting any
-older target table.
+The Profane Canon retired those ten presets and replaced them with three campaign
+snapshots. Preserve this curve as historical evidence only; do not grade the
+current snapshots against it. Spec 35's Combat Quality Index grades how a fight
+played, not campaign viability. A replacement viability/calibration charter for
+the three snapshots remains an explicit design decision rather than something
+workers may infer from the old bands.
 
 ## Defend vision
 

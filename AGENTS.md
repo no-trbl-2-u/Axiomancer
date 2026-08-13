@@ -5,9 +5,9 @@
 **Axiomancer** is a turn-based, single-player dark fantasy
 deckbuilding RPG campaign for mobile: a deterministic TypeScript
 rules engine where what the player owes, and to whom, is a mechanical
-input, not flavor. Status-effect combat is the core fun; morally
-charged choices carry lasting world consequences. Full product spec:
-`spec.md`.
+input, not flavor. Combat may use direct damage, statuses, Conviction,
+Surge, and Dice without requiring status dominance; morally charged
+choices carry lasting world consequences. Full product spec: `spec.md`.
 
 **Reading order:** loop/plan work → `plan/bearings.md` first; package
 work → that package's `AGENTS.md`; design/balance/content work →
