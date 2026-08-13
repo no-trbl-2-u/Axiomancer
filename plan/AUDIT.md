@@ -14,10 +14,22 @@
 
 ## Pending
 
-> Bias: divergence (set via oversight 2026-08-10) — top-score row below
-> (`axio-query overview still publishes the retired "THE STRIKE IS DEAD"
-> doctrine after Phase 41`, score 72, ease 9) has sat unclaimed 2 days;
-> /iterate should weight this category 1.5x until it drains.
+> AUDIT-DRAIN MODE (set via oversight 2026-08-12 — T: "focus the march
+> loop on closing the rest out"). `plan/steps/01_build_plan.md` now
+> carries a banner pausing `ship-a-phase` dispatch so `/march` falls
+> through to `/iterate` every tick until this Pending queue is
+> meaningfully clear — no category bias needed while that holds;
+> /iterate should just work top-down by score. The prior divergence
+> bias (set 2026-08-10) is retired: its target row, top score 72
+> (`axio-query overview still publishes the retired "THE STRIKE IS
+> DEAD" doctrine after Phase 41`), sat unclaimed across 2 full ticks
+> despite the bias, so it was promoted directly to build-plan **Phase
+> 55** instead of waiting on a third `/iterate` pass — see that row
+> below. The same same-day /oversight pass re-verified every other
+> non-historical row in this Pending section against current code;
+> rows found stale or premise-changed were closed out below with a
+> RESOLVED note, same convention as every other closed row in this
+> file.
 
 ### [debt] `telemetry.mjs` writes `TELEMETRY.md` relative to cwd, so a workspace-cd forks the log
 - category: debt
@@ -361,7 +373,7 @@
   trailer. Reword them to name the sweep, or the next reader re-derives the
   same wrong mental model this row's parent already cost five days to.
 
-### `SYSTEM_TERM_COVERED_BY` claims WILD / X is covered by a keyword with no glossary row
+### [x] `SYSTEM_TERM_COVERED_BY` claims WILD / X is covered by a keyword with no glossary row — RESOLVED by Phase 44b (verified via /oversight 2026-08-12)
 - category: contract
 - impact: 4
 - ease: 8
@@ -374,6 +386,11 @@
   rather than dead code: either CLARITY earns a gloss or the coverage claim
   drops it. Spec 34 §5 rules all 42 glossary rows and 8 system terms, so
   Phase 44b is the natural owner.
+- resolution: `keywords.ts:395-401` now maps `'WILD / X': ['FORGE']` only,
+  with an inline comment recording the 2026-08-09 Phase 44b / spec 34 §5.2.1
+  call: CLARITY dropped (named no glossary row), FORGE alone covers X→WILD
+  and does have a live `KEYWORD_GLOSS` entry. Coverage claim now resolves.
+- next: (drained)
 
 ### Three mobile source comments still name cards the Profane Canon deleted
 - category: docs
@@ -563,7 +580,7 @@
 - detail: filed 2026-08-08 by Phase 52b. Left alone as dated release records;
   the next release cut should note the retirement rather than rewriting them.
 
-### axio-query overview still publishes the retired "THE STRIKE IS DEAD" doctrine after Phase 41
+### [x] axio-query overview still publishes the retired "THE STRIKE IS DEAD" doctrine after Phase 41 — PROMOTED via /oversight 2026-08-12: build-plan Phase 55
 - category: divergence
 - impact: 8
 - ease: 9
@@ -580,6 +597,12 @@
   selector if necessary, and add a server smoke assertion that the overview
   cannot publish the retired phrase. Verify `axio_overview` against the live
   server plus the nearest MCP smoke test.
+- **PROMOTED 2026-08-12 (/oversight).** 2 full ticks (44g, 44h) shipped
+  since the 2026-08-10 divergence bias targeted this row and it still
+  hadn't drained — `ship-a-phase` phase work keeps winning `/march`'s
+  Step 3a ahead of `/iterate`. Promoted directly to build-plan **Phase
+  55** rather than wait on a third bias-weighted pass; the fix itself is
+  unchanged from the "next" note above. See `plan/steps/01_build_plan.md`.
 
 ### [x] Doctrine-curve confirmation post-Phase-39: violation persists — RESOLVED via /oversight 2026-08-08: accepted, library is transitional
 - category: content
@@ -1030,7 +1053,7 @@
   blockers move (a settings screen unlocks audio + a11y toggles; the
   flag registry becomes worth it at the next 2-3 flags).
 
-### `skills/digest.md` §3 cites breadth-check plumbing that doesn't exist in this repo
+### [x] `skills/digest.md` §3 cites breadth-check plumbing that doesn't exist in this repo — RESOLVED (verified via /oversight 2026-08-12)
 - category: divergence
 - impact: 2
 - ease: 6
@@ -1046,6 +1069,11 @@
   the skill file itself still points at dead paths, so a fresh reader
   (or an agent without that precedent in context) would try a command
   that fails outright.
+- resolution: `skills/digest.md` no longer cites the dead command or
+  path — line 49 now reads `npm --workspace axiomancer-mobile run
+  e2e:minigames`, and its only remaining `nexus/` mention explicitly
+  disclaims the retired pre-monorepo tree as non-authoritative.
+- next: (drained)
 - next: /iterate — update `skills/digest.md` §3/§6 to cite the real
   command (`npm --workspace axiomancer-mobile run e2e:minigames`) and
   either drop the `nexus/` pointers or repoint them at wherever this
@@ -1232,7 +1260,7 @@
 - next: /iterate (remove or dev-gate the first-map blacksmith MapEvent
   node; keep the Dev-menu entry)
 
-### Ratify `SPECIAL_FIRES_ON_USE` — drop the PROVISIONAL marker
+### [x] Ratify `SPECIAL_FIRES_ON_USE` — drop the PROVISIONAL marker — RESOLVED (verified via /oversight 2026-08-12)
 - category: docs
 - impact: 2
 - ease: 9
@@ -1243,7 +1271,14 @@
   constant/comments in `combat.upgradeable-dice.ts` (and any spec 33 §6
   PROVISIONAL marker) should now read ratified — comment/doc change
   only, no behavior change.
-- next: /iterate
+- resolution: `combat.upgradeable-dice.ts:71-76`'s doc comment now
+  reads "§6 owner-ratified fires-on-use rule (D7)"; spec 33 §6 likewise
+  reads "RATIFIED rule (D7)." One harmless dangling cross-reference
+  remains at `specs/33-upgradeable-dice.md:276` ("see PROVISIONAL
+  above," pointing at a heading that no longer exists) — low-value
+  wording cleanup, not a live PROVISIONAL marker; left for a future
+  /iterate pass rather than reopening this row over it.
+- next: (drained)
 
 ### Doctrine-curve confirmation (digest 2026-07-21, reduced-nightly): mid's two-day climb reverses, late still dead flat
 - category: content
@@ -1341,7 +1376,7 @@
 - next: /oversight or a dedicated follow-up phase (salvage PR #109's pipeline
   threading + thematic content as an additive layer over the D6e backfill)
 
-### GLYPHS (Phase 33d) has no formal spec — design lives only in a braindump
+### [x] GLYPHS (Phase 33d) has no formal spec — design lives only in a braindump — RESOLVED (verified via /oversight 2026-08-12)
 - category: docs
 - impact: 3
 - ease: 5
@@ -1357,6 +1392,11 @@
   plan-a-phase order-of-authority (spec > bearings > phase call).
 - next: /plan-a-phase 33d (or write a GLYPHS spec) at pickup — do not start
   33d engine work against a braindump alone
+- resolution: `plan/phases/phase_33d_glyphs_pilot.md` (371 lines) states
+  in its own header that it IS the decisive 33d brief this row calls
+  for, satisfying the row's stated minimum bar. Phase 33d shipped
+  against it (`01_build_plan.md`, `[x]`, commit `ac1853b2`).
+- next: (drained)
 
 ### [x] `[needs-user-call]` FORGE identity — RESOLVED via /oversight 2026-07-18: amplifier enchants confirmed
 - category: design
@@ -1412,7 +1452,7 @@
 - next: /oversight (owner decides cadence + whether blacksmith owns dice
   upgrades; then fold into D6c/D7 scope or re-route to another surface)
 
-### Retire two stale worktrees fully landed on `main` (dice + price-experiment)
+### [x] Retire two stale worktrees fully landed on `main` (dice + price-experiment) — RESOLVED (verified via /oversight 2026-08-12)
 - category: debt
 - impact: 3
 - ease: 9
@@ -1490,7 +1530,7 @@
 - next: /iterate (deploy-check.mjs: distinguish cancelled-by-supersession
   from failed; prefer the newest same-ref run)
 
-### `circular-reasoning` sits at exactly the uncommon pricing-lint floor (4.50)
+### [x] `circular-reasoning` sits at exactly the uncommon pricing-lint floor (4.50) — RESOLVED (stale premise via /oversight 2026-08-12)
 - category: tests
 - impact: 2
 - ease: 8
@@ -1505,6 +1545,11 @@
   a hair more printed value (design call → `/deck-tuning`) or widen the
   uncommon floor a touch (lint call). Note for whoever next touches
   Premise pricing.
+- resolution: the card no longer exists — retired entirely by the
+  Profane Canon rework (PR #182, commit `84ef85b`). No pricing-lint
+  floor concern has a subject anymore; only a test-fixture comment
+  references the old id.
+- next: (drained)
 - next: /iterate or /deck-tuning (nudge the card value or the band floor)
 
 ### Playtest harness has no victory-only rounds-to-victory metric
@@ -1650,7 +1695,7 @@
   cites it.
 - next: /iterate
 
-### Stale worktree copy at .claude/worktrees/card-text-paid-effects-3cd590/
+### [x] Stale worktree copy at .claude/worktrees/card-text-paid-effects-3cd590/ — RESOLVED (verified via /oversight 2026-08-12)
 - category: debt
 - impact: 2
 - ease: 8
@@ -1663,9 +1708,12 @@
   (`git worktree list`, no uncommitted work inside) before removing it
   with `git worktree remove`; if it holds unmerged work, surface
   instead of deleting.
-- next: /iterate
+- resolution: `.claude/worktrees/` no longer exists in the repo at all
+  (confirmed via `git worktree list`, which shows only the primary
+  worktree) — the stale copy is gone.
+- next: (drained)
 
-### Metric v2 design session parked until fresh metrics land
+### [x] Metric v2 design session parked until fresh metrics land — RESOLVED (Phase 43 shipped, verified via /oversight 2026-08-12)
 - category: gap
 - impact: 7
 - ease: 2
@@ -1687,7 +1735,11 @@
   rules rather than merely fixing the old metric's blind spots. The
   "treat its numbers as suspect" guidance hardens to: **every existing
   doctrine-curve reading measures a dead law** until 43 lands.
-- next: Phase 43 (no longer a parked attended session)
+- **Phase 43 shipped** (`01_build_plan.md`, `[x]`; `combatQuality`/CQI
+  live in `combat.encounter.sim.ts`, documented as "THE OBJECTIVE
+  FUNCTION," `statusEngagement` demoted to a warning light). The
+  blocking condition ("fresh metrics land") has cleared.
+- next: (drained)
 
 ### [x] Hermes-decided work is invisible to the loop — RESOLVED via /oversight 2026-07-18: convention adopted
 - category: divergence
@@ -1816,6 +1868,15 @@
 - detail: cast clusters at state/test boundaries, esp. the
   `state/actions.ts` engine-store bridge. Recurring drain target,
   not a single fix.
+- update (verified via /oversight 2026-08-12): the originally-cited
+  `state/actions.ts` bridge is now clean of live `as any` casts (only a
+  resolution comment remains, citing the [2.5] event-audit fix);
+  `event.engine.ts` and `exploration.engine.ts` show the same pattern.
+  Remaining `as any` in `axiomancer-mobile/state/` is almost entirely
+  test-file mock casts plus one production line
+  (`state/persistence/migrations.ts:50`). Staying open as the
+  recurring-drain bucket it was always framed as, not because the
+  cited example is still broken.
 - next: /iterate
 
 ### [1.6] Mobile accessibility gaps
@@ -2032,18 +2093,20 @@
   three-workspace `npm run verify` gate passed at `96421aa8`, confirming
   the preferred import is live for package consumers.
 
-### fishing-village CLI + spec08 e2e drive legacy combat
+### [x] fishing-village CLI + spec08 e2e drive legacy combat — RESOLVED (mislabeled header fixed via /oversight 2026-08-12)
 - drained 2026-07-03 (monorepo cleanup): stale — the legacy
   `resolveCombatRound` no longer exists anywhere in
   `axiomancer-mechanics/src`; no fv-15/spec08 script remains in
   package.json. The finding predated the resolver removal.
 
-### Hazard v2 engine ownership (DIV-MECH-002)
+### [x] Hazard v2 engine ownership (DIV-MECH-002) — RESOLVED (mislabeled header fixed via /oversight 2026-08-12)
 - resolved via `/oversight` 2026-07-03: mechanics absorbs
   mobile's duplicate `state/hazard/` engine. Promoted to
-  `plan/PHASE_CANDIDATES.md` -> build plan Phase 13.
+  `plan/PHASE_CANDIDATES.md` -> build plan Phase 13, shipped
+  (re-verified live via /oversight 2026-08-12: `01_build_plan.md`
+  Phase 13 is `[x]`, mobile's local hazard engine is gone).
 
-### [2.0] `combatMana` slice deprecated but still load-bearing
+### [x] [2.0] `combatMana` slice deprecated but still load-bearing — RESOLVED (mislabeled header fixed via /oversight 2026-08-12)
 - drained 2026-07-08 (build-plan Phase 7): stale — the slice was
   actually retired by mobile commit `6ef5f989` (2026-06-20,
   "remove the vestigial client mana model") and its container
