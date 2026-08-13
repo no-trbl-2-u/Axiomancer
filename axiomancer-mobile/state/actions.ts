@@ -136,18 +136,14 @@ import {
     type BeginQuestBoardOptions,
     type ClaimQuestBoardResult,
 } from './quest/store-actions';
-import type { QuestCharmId, RestPosture } from '@mechanics';
+import type { QuestCharmId, RestChoiceOfferId } from '@mechanics';
 import {
-    abandonRestAction,
     beginRestAction,
-    chooseRestOptionAction,
-    chooseRestPostureAction,
-    claimRestOutcomeAction,
-    completeRestTutorialAction,
-    continueRestWatchAction,
-    REST_TUTORIAL_FLAG,
+    chooseRestChoiceOfferAction,
+    claimRestChoiceOutcomeAction,
+    pickRestChoiceCutAction,
     type BeginRestOptions,
-    type ClaimRestOutcomeResult,
+    type ClaimRestChoiceResult,
 } from './rest/store-actions';
 import {
     abandonLootCacheAction,
@@ -168,9 +164,11 @@ import {
 import {
     abandonBlacksmithAction,
     beginBlacksmithAction,
+    beginRestAnvilHandoffAction,
     claimBlacksmithOutcomeAction,
     completeBlacksmithTutorialAction,
     continueBlacksmithCardAction,
+    continueRestAnvilHandoffCardAction,
     honeBlacksmithAction,
     leaveBlacksmithAction,
     startBlacksmithForgingAction,
@@ -620,24 +618,23 @@ export interface AppActions {
     abandonQuestBoard: () => void;
 
     // -----------------------------------------------------------------
-    // Rest encounter ("The Night Watch" — see state/rest/). Phase
-    // order: posture → watch ×3 → outcome → done.
+    // Rest-choice encounter (see state/rest/). One irreversible choice
+    // of three: rest (free heal) / anvil (paid die-gear upgrade,
+    // hands off to /blacksmith) / cut (paid deck removal). No back-out.
     // -----------------------------------------------------------------
 
-    /** Start a night at camp. Returns false if one is underway. */
+    /** Start a rest node. Returns false if one is underway. */
     beginRest: (options?: BeginRestOptions) => boolean;
-    /** Choose how to lie: deep / doze / watch. */
-    chooseRestPosture: (posture: RestPosture) => void;
-    /** Pick an option on the open watch card (embers, dreams). */
-    chooseRestOption: (optionId: string) => void;
-    /** Acknowledge the watch's result; the next watch or dawn follows. */
-    continueRestWatch: () => void;
-    /** Confirm the dawn ledger; applies heal/cleanse/keepsakes and persists. */
-    claimRestOutcome: () => ClaimRestOutcomeResult;
-    /** Clear the night without a heal (dev / escape hatch). */
-    abandonRest: () => void;
-    /** Mark the guided first night done (completed or skipped) and persist. */
-    completeRestTutorial: (skipped: boolean) => void;
+    /** Commit one of the three offers. Locks the other two. */
+    chooseRestChoiceOffer: (offer: RestChoiceOfferId) => void;
+    /** Pick a card to remove (`cut` sub-step). Must be one of the offered ids. */
+    pickRestChoiceCut: (cardId: string) => void;
+    /** Confirm the settled ledger; applies heal/spend/rail/removal and persists. */
+    claimRestOutcome: () => ClaimRestChoiceResult;
+    /** Open the real `/blacksmith` screen for the `anvil` offer's one pick. */
+    beginRestAnvilHandoff: () => boolean;
+    /** Acknowledge the hand-off's open card (accepted pick or refusal retry). */
+    continueRestAnvilHandoffCard: () => void;
 
     // -----------------------------------------------------------------
     // Loot-cache encounter ("The Reliquary" — see state/cache/). Phase
@@ -1098,12 +1095,11 @@ export function createAppActions(store: AppStore): AppActions {
         clearLabyrinthArrivalNote: () => clearLabyrinthArrivalNoteAction(store),
 
         beginRest: (options) => beginRestAction(store, options),
-        chooseRestPosture: (posture) => chooseRestPostureAction(store, posture),
-        chooseRestOption: (optionId) => chooseRestOptionAction(store, optionId),
-        continueRestWatch: () => continueRestWatchAction(store),
-        claimRestOutcome: () => claimRestOutcomeAction(store),
-        abandonRest: () => abandonRestAction(store),
-        completeRestTutorial: (skipped) => completeRestTutorialAction(store, skipped),
+        chooseRestChoiceOffer: (offer) => chooseRestChoiceOfferAction(store, offer),
+        pickRestChoiceCut: (cardId) => pickRestChoiceCutAction(store, cardId),
+        claimRestOutcome: () => claimRestChoiceOutcomeAction(store),
+        beginRestAnvilHandoff: () => beginRestAnvilHandoffAction(store),
+        continueRestAnvilHandoffCard: () => continueRestAnvilHandoffCardAction(store),
         beginLootCache: (options) => beginLootCacheAction(store, options),
         startLootCacheDelving: () => startLootCacheDelvingAction(store),
         delveLootCache: () => delveLootCacheAction(store),
@@ -1720,25 +1716,21 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
             return true;
         }
 
-        // Rest events launch "The Night Watch" instead of the legacy
-        // silent heal. The engine's resolveMapEvent already applied the
-        // passive heal to `result.state`; restore the pre-event player so
-        // the night's dawn outcome is the only thing that touches VITAE.
-        // `<RestGate>` routes to /rest when the slice fills.
+        // Rest events launch the rest-choice node (Phase 52d) instead of
+        // the legacy silent heal. The engine's resolveMapEvent already
+        // applied the passive heal to `result.state`; restore the
+        // pre-event player so the node's settled ledger is the only thing
+        // that touches VITAE/currency/dieGear. `<RestGate>` routes to
+        // /rest when the slice fills.
         if (result.event.kind === 'rest') {
             store.setState({
                 ...resolvedState,
                 player: gameState.player,
                 event: EMPTY_EVENT_SLICE,
             });
-            // The first-ever night runs as the guided tutorial (pinned
-            // seed, coach overlay); the persistent flag set on
-            // completion/skip keeps every later rest organic.
-            const tutorialDone = (gameState.flags ?? []).includes(REST_TUTORIAL_FLAG);
             beginRestAction(store, {
                 // Phase 52b — the authored inn/camp marker, not a heal number.
                 shelter: result.event.shelter,
-                tutorial: !tutorialDone,
             });
             return true;
         }

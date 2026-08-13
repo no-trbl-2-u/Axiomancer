@@ -10,7 +10,7 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { act, render } from '@testing-library/react-native';
 import React from 'react';
-import type { RestSession } from '@mechanics';
+import type { RestChoiceSession } from '@mechanics';
 
 import { RestGate } from '@/components/RestGate';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
@@ -44,7 +44,7 @@ function makeStore(): AppStore {
     return createAppStore({ adapter: createMemoryAdapter() });
 }
 
-function setActiveRestSession(store: AppStore, session: RestSession | null) {
+function setActiveRestSession(store: AppStore, session: RestChoiceSession | null) {
     store.setState({
         rest: {
             ...EMPTY_REST_SLICE,
@@ -57,23 +57,21 @@ function withProvider(store: AppStore, child: React.ReactNode) {
     return <GameStoreProvider store={store}>{child}</GameStoreProvider>;
 }
 
-function makeActiveRestSession(): RestSession {
+function makeActiveRestSession(): RestChoiceSession {
     return {
-        phase: 'posture',
-        posture: null,
-        watch: 1,
-        warmth: 50,
-        wood: 3,
-        comfort: 0,
-        keepsakes: [],
-        pending: null,
+        phase: 'offer',
+        shelter: 'camp',
+        maxHealth: 20,
+        health: 12,
+        currency: 5,
+        rail: {} as never,
+        deckCardIds: [],
+        removals: 0,
+        offers: [],
+        pendingRefusal: null,
         outcome: null,
-        baseHealFraction: 0.5,
-        watchPlan: [],
-        dreamQueue: [],
         seed: 12345,
-        rng: undefined as never,
-    } as RestSession;
+    };
 }
 
 describe('RestGate: active rest sessions route to /rest', () => {

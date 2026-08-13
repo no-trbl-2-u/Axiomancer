@@ -67,7 +67,7 @@ function fail(msg) {
 const CASES = [
     { button: 'treasure', route: '/cache', landing: 'cache-intro', name: 'The Reliquary' },
     { button: 'quest', route: '/quest', landing: 'quest-intro', name: "The Boy's Almanac" },
-    { button: 'rest', route: '/rest', landing: 'rest-fire', name: 'The Night Watch' },
+    { button: 'rest', route: '/rest', landing: 'rest-choice-offers', name: 'the rest-choice node' },
     { button: 'gather', route: '/gathering', landing: 'gathering-intro', name: 'The Gleaning' },
     { button: 'hazard', route: '/hazard', landing: 'hazard-intro-overlay', name: 'Hazard' },
 ]

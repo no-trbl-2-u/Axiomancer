@@ -21,7 +21,7 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import type { GameState } from '@mechanics';
 import { HAZARD_CRACK_CARD } from '@mechanics';
-import type { HazardHandEntry, HazardSessionState, RestSession } from '@mechanics';
+import type { HazardHandEntry, HazardSessionState, RestChoiceSession } from '@mechanics';
 
 import { createAppActions, type AppActions } from '@/state/actions';
 import { createAppStore, type AppStore } from '@/state/store';
@@ -46,7 +46,7 @@ function hazardSession(store: AppStore): HazardSessionState {
     return s;
 }
 
-function restSession(store: AppStore): RestSession {
+function restSession(store: AppStore): RestChoiceSession {
     const s = store.getState().rest.session;
     if (!s) throw new Error('expected an active rest session');
     return s;
@@ -89,22 +89,12 @@ function scarThePlayer(store: AppStore, actions: AppActions): number {
     return maxBefore - maxAfter;
 }
 
-/** Drives a rest night to dawn under a feed-everything policy. */
+/** Commits the free `rest` offer, driving the node straight to its outcome. */
 function playRestToDawn(store: AppStore, actions: AppActions): void {
-    actions.chooseRestPosture('deep');
-    for (let i = 0; i < 30; i++) {
-        const s = restSession(store);
-        if (s.phase === 'outcome') return;
-        if (s.phase !== 'watch' || s.pending === null) throw new Error(`unexpected phase ${s.phase}`);
-        if (s.pending.result === null) {
-            const enabled = s.pending.options.filter((o) => !o.disabledReason);
-            const pick = enabled.find((o) => ['feed', 'fade'].includes(o.id)) ?? enabled[0];
-            actions.chooseRestOption(pick.id);
-        } else {
-            actions.continueRestWatch();
-        }
+    actions.chooseRestChoiceOffer('rest');
+    if (restSession(store).phase !== 'outcome') {
+        throw new Error(`unexpected phase ${restSession(store).phase}`);
     }
-    throw new Error('no dawn after 30 steps');
 }
 
 describe('hazard scar recovery at inn rest', () => {
@@ -211,7 +201,7 @@ describe('hazard scar recovery at inn rest', () => {
         } as never);
 
         expect(actions.resolveCurrentMapEvent()).toBe(true);
-        expect(store.getState().rest.shelter).toBe('inn');
+        expect(restSession(store).shelter).toBe('inn');
 
         playRestToDawn(store, actions);
         expect(actions.claimRestOutcome().scarMended).toBe(scar);
@@ -238,7 +228,7 @@ describe('hazard scar recovery at inn rest', () => {
         } as never);
 
         expect(actions.resolveCurrentMapEvent()).toBe(true);
-        expect(store.getState().rest.shelter).toBe('camp');
+        expect(restSession(store).shelter).toBe('camp');
 
         playRestToDawn(store, actions);
         expect(actions.claimRestOutcome().scarMended).toBe(0);

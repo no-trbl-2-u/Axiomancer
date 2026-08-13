@@ -1,23 +1,25 @@
 /**
- * Hermetic component tests — HardwareBackHandler (Phase 8 decision A).
+ * Hermetic component tests — HardwareBackHandler (Phase 8 decision A;
+ * Phase 52d added the rest-choice node + its anvil hand-off).
  *
  * Side-effect-only component. Registers an Android hardwareBackPress
- * listener that returns `true` (prevent default) while in combat,
- * `false` (allow default) otherwise. Renders null. iOS / other
- * platforms: no listener registered.
- *
- * /iterate pass closes the coverage gap with 6 hermetic cases:
- * the Platform.OS guard, the inCombat branch, the listener
- * cleanup on unmount, and a no-op render assertion.
+ * listener that returns `true` (prevent default) while in combat, an open
+ * rest-choice node, or an open rest-choice anvil hand-off; `false` (allow
+ * default) otherwise. Renders null. iOS / other platforms: no listener
+ * registered.
  */
 
 import { afterAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { act, render } from '@testing-library/react-native';
 import React from 'react';
 import { BackHandler, Platform } from 'react-native';
+import type { RestChoiceSession } from '@mechanics';
 
 import { HardwareBackHandler } from '@/components/HardwareBackHandler';
 import { CombatModeProvider, useCombatMode } from '@/state/combat-mode';
+import { GameStoreProvider } from '@/state/GameStoreProvider';
+import { createAppStore, EMPTY_BLACKSMITH_SLICE, EMPTY_REST_SLICE, type AppStore } from '@/state/store';
+import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 
 type BackAction = () => boolean;
 
@@ -40,8 +42,33 @@ afterAll(() => {
     addListenerSpy.mockRestore();
 });
 
-function withProvider(child: React.ReactNode) {
-    return <CombatModeProvider>{child}</CombatModeProvider>;
+function makeStore(): AppStore {
+    return createAppStore({ adapter: createMemoryAdapter() });
+}
+
+function withProvider(store: AppStore, child: React.ReactNode) {
+    return (
+        <GameStoreProvider store={store}>
+            <CombatModeProvider>{child}</CombatModeProvider>
+        </GameStoreProvider>
+    );
+}
+
+function fakeRestSession(): RestChoiceSession {
+    return {
+        phase: 'offer',
+        shelter: 'camp',
+        maxHealth: 20,
+        health: 20,
+        currency: 0,
+        rail: {} as never,
+        deckCardIds: [],
+        removals: 0,
+        offers: [],
+        pendingRefusal: null,
+        outcome: null,
+        seed: 1,
+    };
 }
 
 /** Captures the latest `backAction` callback registered with BackHandler. */
@@ -70,7 +97,7 @@ describe('HardwareBackHandler: Platform.OS gate', () => {
         const originalOS = Platform.OS;
         (Platform as { OS: string }).OS = 'android';
         try {
-            render(withProvider(<HardwareBackHandler />));
+            render(withProvider(makeStore(), <HardwareBackHandler />));
             expect(addListenerSpy).toHaveBeenCalledTimes(1);
             expect(addListenerSpy.mock.calls[0]?.[0]).toBe('hardwareBackPress');
         } finally {
@@ -82,7 +109,7 @@ describe('HardwareBackHandler: Platform.OS gate', () => {
         const originalOS = Platform.OS;
         (Platform as { OS: string }).OS = 'ios';
         try {
-            render(withProvider(<HardwareBackHandler />));
+            render(withProvider(makeStore(), <HardwareBackHandler />));
             expect(addListenerSpy).not.toHaveBeenCalled();
         } finally {
             (Platform as { OS: string }).OS = originalOS;
@@ -95,7 +122,7 @@ describe('HardwareBackHandler: inCombat branching', () => {
         const originalOS = Platform.OS;
         (Platform as { OS: string }).OS = 'android';
         try {
-            render(withProvider(<HardwareBackHandler />));
+            render(withProvider(makeStore(), <HardwareBackHandler />));
             expect(lastBackAction()()).toBe(false);
         } finally {
             (Platform as { OS: string }).OS = originalOS;
@@ -109,6 +136,7 @@ describe('HardwareBackHandler: inCombat branching', () => {
             let api: ReturnType<typeof useCombatMode> | null = null;
             render(
                 withProvider(
+                    makeStore(),
                     <>
                         <HardwareBackHandler />
                         <CombatModeProbe onMount={(a) => { api = a; }} />
@@ -129,12 +157,66 @@ describe('HardwareBackHandler: inCombat branching', () => {
     });
 });
 
+describe('HardwareBackHandler: rest-choice node branching (Phase 52d)', () => {
+    it('back action returns true while a rest-choice node is open', () => {
+        const originalOS = Platform.OS;
+        (Platform as { OS: string }).OS = 'android';
+        try {
+            const store = makeStore();
+            render(withProvider(store, <HardwareBackHandler />));
+            expect(lastBackAction()()).toBe(false);
+
+            act(() => {
+                store.setState({ rest: { session: fakeRestSession() } });
+            });
+            expect(lastBackAction()()).toBe(true);
+        } finally {
+            (Platform as { OS: string }).OS = originalOS;
+        }
+    });
+
+    it('back action returns true while the anvil hand-off is open, even with no rest session', () => {
+        const originalOS = Platform.OS;
+        (Platform as { OS: string }).OS = 'android';
+        try {
+            const store = makeStore();
+            render(withProvider(store, <HardwareBackHandler />));
+            expect(lastBackAction()()).toBe(false);
+
+            act(() => {
+                store.setState({ blacksmith: { ...EMPTY_BLACKSMITH_SLICE, handoff: 'rest-choice' } });
+            });
+            expect(lastBackAction()()).toBe(true);
+        } finally {
+            (Platform as { OS: string }).OS = originalOS;
+        }
+    });
+
+    it('back action returns false again once the node clears', () => {
+        const originalOS = Platform.OS;
+        (Platform as { OS: string }).OS = 'android';
+        try {
+            const store = makeStore();
+            store.setState({ rest: { session: fakeRestSession() } });
+            render(withProvider(store, <HardwareBackHandler />));
+            expect(lastBackAction()()).toBe(true);
+
+            act(() => {
+                store.setState({ rest: EMPTY_REST_SLICE });
+            });
+            expect(lastBackAction()()).toBe(false);
+        } finally {
+            (Platform as { OS: string }).OS = originalOS;
+        }
+    });
+});
+
 describe('HardwareBackHandler: cleanup', () => {
     it('removes the listener on unmount (Android)', () => {
         const originalOS = Platform.OS;
         (Platform as { OS: string }).OS = 'android';
         try {
-            const tree = render(withProvider(<HardwareBackHandler />));
+            const tree = render(withProvider(makeStore(), <HardwareBackHandler />));
             expect(removeSpy).not.toHaveBeenCalled();
             tree.unmount();
             expect(removeSpy).toHaveBeenCalledTimes(1);
@@ -146,7 +228,7 @@ describe('HardwareBackHandler: cleanup', () => {
 
 describe('HardwareBackHandler: render contract', () => {
     it('renders nothing (side-effect-only)', () => {
-        const tree = render(withProvider(<HardwareBackHandler />));
+        const tree = render(withProvider(makeStore(), <HardwareBackHandler />));
         expect(tree.toJSON()).toBeNull();
     });
 });

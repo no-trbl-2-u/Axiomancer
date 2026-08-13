@@ -1,45 +1,92 @@
 /**
- * /rest — the Rest encounter screen ("The Night Watch").
+ * /rest — the rest-choice screen (Phase 52d, replacing "The Night Watch").
  *
- * One night at camp in three watches: posture at dusk, the fire's
- * warmth against a small store of wood, and what the dark sends.
- * All rules live in `axiomancer-mechanics` (World/Rest); this screen
- * renders the presenter VM and dispatches store actions only.
+ * One irreversible choice of three: REST (free heal), THE ANVIL (paid
+ * die-gear upgrade — hands off to the real `/blacksmith` screen for the
+ * one pick), or THE CUT (paid deck removal). `resolveMapEvent` consumes
+ * the node on entry, before any choice — there is no back-out: no header
+ * back, no swipe-dismiss (`gestureEnabled: false` in the root layout), no
+ * Android hardware-back (`<HardwareBackHandler>`). All rules live in
+ * `axiomancer-mechanics` (World/RestChoice); this screen renders the
+ * presenter VM and dispatches store actions only.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { ScreenBg } from '@/components/ScreenBg';
-import { TutorialCoach } from '@/components/rest/TutorialCoach';
-import { currentTutorialStep } from '@/components/rest/tutorial-steps';
-import { REST_TUTORIAL_FLAG } from '@/state/rest/store-actions';
 import { useGameActions, useGameState } from '@/state/GameStoreProvider';
 import {
-    REST_WATCH_GLYPHS,
     selectRestVM,
-    type RestOptionVM,
+    type RestChoiceCutCardVM,
+    type RestChoiceOfferVM,
 } from '@/state/presenters/rest.engine';
+import {
+    REST_CHOICE_EYEBROW,
+    REST_CHOICE_FREE_LABEL,
+    REST_CHOICE_INTRO,
+    REST_CHOICE_PURSE_LABEL,
+    REST_CHOICE_TITLE,
+    REST_CUT_CONFIRM_LABEL,
+    REST_CUT_NEXT_PRICE_PREFIX,
+    REST_CUT_SHEET_INTRO,
+    REST_CUT_SHEET_TITLE,
+    REST_OUTCOME_CLAIM_LABEL,
+    REST_OUTCOME_EYEBROW,
+    restOutcomeHealChip,
+    restOutcomeRemovedChip,
+    restOutcomeSpendChip,
+} from '@/state/presenters/rest.copy';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
-function OptionRow({ option, onPress }: { option: RestOptionVM; onPress: () => void }) {
+function OfferCard({ offer, onPress }: { offer: RestChoiceOfferVM; onPress: () => void }) {
+    const styles = useStyles();
+    const AXM = usePalette();
+    return (
+        <View style={styles.offerCol}>
+            <TouchableOpacity
+                accessibilityRole="button"
+                accessibilityLabel={
+                    offer.enabled
+                        ? `${offer.label}. ${offer.desc}`
+                        : `${offer.label} unavailable: ${offer.disabledReason}`
+                }
+                accessibilityState={{ disabled: !offer.enabled }}
+                disabled={!offer.enabled}
+                onPress={onPress}
+                style={[styles.offerButton, !offer.enabled && styles.offerDisabled]}
+                testID={`rest-choice-offer-${offer.id}`}
+            >
+                <View style={styles.offerHead}>
+                    <Text style={[styles.offerLabel, !offer.enabled && { color: AXM.bone }]}>{offer.label}</Text>
+                    <Text style={[styles.offerPrice, !offer.enabled && { color: AXM.bone }]}>
+                        {offer.price > 0 ? `${offer.price} SHILLINGS` : REST_CHOICE_FREE_LABEL}
+                    </Text>
+                </View>
+                <Text style={styles.offerDesc}>{offer.desc}</Text>
+            </TouchableOpacity>
+            {!offer.enabled && (
+                <Text style={styles.offerReason} testID={`rest-choice-offer-${offer.id}-reason`}>
+                    {offer.disabledReason}
+                </Text>
+            )}
+        </View>
+    );
+}
+
+function CutRow({ card, onPress }: { card: RestChoiceCutCardVM; onPress: () => void }) {
     const styles = useStyles();
     return (
         <TouchableOpacity
             accessibilityRole="button"
-            accessibilityLabel={`${option.label}, ${option.desc}`}
-            accessibilityState={{ disabled: !option.enabled }}
-            disabled={!option.enabled}
+            accessibilityLabel={`Remove ${card.name} from the deck`}
             onPress={onPress}
-            style={[styles.optionRow, { opacity: option.enabled ? 1 : 0.4 }]}
-            testID={`rest-option-${option.id}`}
+            style={styles.cutRow}
+            testID={`rest-cut-card-${card.key}`}
         >
-            <Text style={styles.optionLabel}>{option.label}</Text>
-            <Text style={styles.optionDesc}>
-                {option.enabled ? option.desc : `${option.desc}  —  ${option.disabledReason}`}
-            </Text>
+            <Text style={styles.cutCardName}>{card.name}</Text>
         </TouchableOpacity>
     );
 }
@@ -48,191 +95,113 @@ export default function RestScreen() {
     const styles = useStyles();
     const AXM = usePalette();
     const slice = useGameState((s) => s.rest);
-    const tutorialDone = useGameState((s) =>
-        ((s as unknown as { flags?: string[] }).flags ?? []).includes(REST_TUTORIAL_FLAG),
-    );
     const vm = useMemo(() => selectRestVM({ rest: slice }), [slice]);
     const actions = useGameActions();
     const router = useRouter();
-
-    // The coach rides the guided first night until its script is done
-    // or skipped; the persistent flag gates it (and the map trigger).
-    const session = slice?.session ?? null;
-    const coachActive = slice?.tutorial === true && session !== null && !tutorialDone;
-    useEffect(() => {
-        if (coachActive && currentTutorialStep(session!, vm) === -1) {
-            actions.completeRestTutorial(false);
-        }
-    }, [coachActive, session, vm, actions]);
 
     useEffect(() => {
         if (!vm.active && router.canGoBack()) router.back();
     }, [vm.active, router]);
 
-    if (!vm.active) return <ScreenBg><View /></ScreenBg>;
+    // The `anvil` offer hands off to the real `/blacksmith` screen for its
+    // one pick (see state/blacksmith/store-actions.ts). Fire the hand-off
+    // exactly once per entry into `anvil-pick` — the ref guards re-renders
+    // from re-opening a second blacksmith session.
+    const handoffFired = useRef(false);
+    useEffect(() => {
+        if (vm.phase === 'anvil-pick' && !handoffFired.current) {
+            handoffFired.current = true;
+            actions.beginRestAnvilHandoff();
+        }
+        if (vm.phase !== 'anvil-pick') handoffFired.current = false;
+    }, [vm.phase, actions]);
 
-    const warmthPips = Array.from({ length: vm.warmthMax }, (_, i) => i < vm.warmth);
+    if (!vm.active) return <ScreenBg><View /></ScreenBg>;
 
     return (
         <ScreenBg scrollable={false}>
             <ScrollView style={styles.scrollOuter} contentContainerStyle={styles.scroll}>
-                <Text style={styles.eyebrow}>THE NIGHT WATCH</Text>
-                <Text style={styles.title}>A CAMP, A FIRE, THE DARK</Text>
+                <Text style={styles.eyebrow}>{REST_CHOICE_EYEBROW}</Text>
+                <Text style={styles.title}>{REST_CHOICE_TITLE}</Text>
 
-                {/* Fire status */}
-                <View style={styles.fireRow} testID="rest-fire">
-                    <Text style={styles.fireLabel}>WARMTH</Text>
-                    <View style={styles.pipRow} accessibilityLabel={`Warmth ${vm.warmth} of ${vm.warmthMax}`}>
-                        {warmthPips.map((lit, i) => (
-                            <Text key={i} style={[styles.pip, { color: lit ? AXM.rust : AXM.ash }]}>✶</Text>
-                        ))}
-                    </View>
-                    <Text style={styles.fireLabel}>WOOD {vm.wood}</Text>
-                    <Text style={styles.fireLabel}>COMFORT {vm.comfort}</Text>
+                <View style={styles.purseRow} testID="rest-purse">
+                    <Text style={styles.purseLabel}>{REST_CHOICE_PURSE_LABEL}</Text>
+                    <Text style={styles.purseValue}>{vm.currency}</Text>
+                    <Text style={styles.purseLabel}>VITAE {vm.health}/{vm.maxHealth}</Text>
                 </View>
 
-                {/* Watch progress */}
-                {vm.phase === 'watch' && (
-                    <Text style={styles.watchCount} testID="rest-watch-count">
-                        {vm.pending ? REST_WATCH_GLYPHS[vm.pending.kind] : ''} WATCH {vm.watch} OF {vm.watchesPerNight}
-                    </Text>
-                )}
-
-                {/* Posture select */}
-                {vm.phase === 'posture' && (
-                    <View testID="rest-postures">
-                        <Text style={styles.body}>
-                            The fire is laid, the blanket unrolled, and the only decision
-                            left is the oldest one: how much to trust the dark.
-                        </Text>
-                        {vm.postures.map(p => (
-                            <TouchableOpacity
-                                key={p.key}
-                                accessibilityRole="button"
-                                accessibilityLabel={`${p.name}. ${p.desc}`}
-                                onPress={() => actions.chooseRestPosture(p.key)}
-                                style={styles.postureCard}
-                                testID={`rest-posture-${p.key}`}
-                            >
-                                <View style={styles.postureHead}>
-                                    <Text style={styles.postureName}>{p.name}</Text>
-                                    <Text style={styles.postureHint}>{p.healHint}</Text>
-                                </View>
-                                <Text style={styles.postureDesc}>{p.desc}</Text>
-                                <Text style={styles.postureFlavor}>{p.flavor}</Text>
-                            </TouchableOpacity>
+                {vm.phase === 'offer' && (
+                    <View testID="rest-choice-offers">
+                        <Text style={styles.body}>{REST_CHOICE_INTRO}</Text>
+                        {vm.offers.map((offer) => (
+                            <OfferCard
+                                key={offer.id}
+                                offer={offer}
+                                onPress={() => actions.chooseRestChoiceOffer(offer.id)}
+                            />
                         ))}
                     </View>
                 )}
 
-                {/* The open watch card */}
-                {vm.phase === 'watch' && vm.pending !== null && (
-                    <View style={styles.card} testID="rest-card">
-                        <Text style={styles.cardTitle}>
-                            {vm.pending.result ? vm.pending.result.title : vm.pending.title}
-                        </Text>
-                        <Text style={styles.body}>
-                            {vm.pending.result ? vm.pending.result.body : vm.pending.body}
-                        </Text>
-
-                        {vm.pending.result !== null && vm.pending.result.rolls.length > 0 && (
-                            <Text style={styles.roll}>⚄ {vm.pending.result.rolls.join(' · ')}</Text>
-                        )}
-                        {vm.pending.result !== null && vm.pending.result.deltaChips.length > 0 && (
-                            <View style={styles.chipRow}>
-                                {vm.pending.result.deltaChips.map((chip, i) => (
-                                    <Text key={i} style={styles.chip}>{chip}</Text>
-                                ))}
-                            </View>
-                        )}
-                        {vm.pending.result?.keepsake && (
-                            <Text style={styles.keepsake} testID="rest-keepsake">
-                                KEEPSAKE — {vm.pending.result.keepsake}
-                            </Text>
-                        )}
-
-                        {vm.pending.result === null
-                            ? vm.pending.options.map(option => (
-                                <OptionRow
-                                    key={option.id}
-                                    option={option}
-                                    onPress={() => actions.chooseRestOption(option.id)}
-                                />
-                            ))
-                            : (
-                                <TouchableOpacity
-                                    accessibilityRole="button"
-                                    accessibilityLabel="Continue the night"
-                                    onPress={actions.continueRestWatch}
-                                    style={styles.bigButton}
-                                    testID="rest-continue"
-                                >
-                                    <Text style={styles.bigButtonText}>THE NIGHT GOES ON</Text>
-                                </TouchableOpacity>
-                            )}
+                {vm.phase === 'anvil-pick' && (
+                    <View testID="rest-anvil-handoff">
+                        <Text style={styles.body}>Carrying your dice to the anvil.</Text>
                     </View>
                 )}
 
-                {/* Dawn ledger */}
+                {vm.phase === 'cut-pick' && vm.cut !== null && (
+                    <View testID="rest-cut-sheet">
+                        <Text style={styles.eyebrow}>{REST_CUT_SHEET_TITLE}</Text>
+                        <Text style={styles.body}>{REST_CUT_SHEET_INTRO}</Text>
+                        <Text style={styles.priceHint} testID="rest-cut-price">
+                            THIS ONE: {vm.cut.price} SHILLINGS — {REST_CUT_NEXT_PRICE_PREFIX} {vm.cut.nextPrice}
+                        </Text>
+                        <View style={styles.cutList}>
+                            {vm.cut.cards.map((card) => (
+                                <CutRow
+                                    key={card.key}
+                                    card={card}
+                                    onPress={() => actions.pickRestChoiceCut(card.cardId)}
+                                />
+                            ))}
+                        </View>
+                        <Text style={styles.cutHint}>{REST_CUT_CONFIRM_LABEL}: tap a card above.</Text>
+                    </View>
+                )}
+
                 {vm.phase === 'outcome' && vm.outcome !== null && (
                     <View style={styles.card} testID="rest-outcome">
-                        <Text style={styles.eyebrow}>DAWN</Text>
-                        <Text style={[styles.cardTitle, { color: AXM.sulfur }]}>{vm.outcome.tierLabel}</Text>
+                        <Text style={styles.eyebrow}>{REST_OUTCOME_EYEBROW}</Text>
+                        <Text style={[styles.cardTitle, { color: AXM.sulfur }]}>{vm.outcome.label}</Text>
                         <View style={styles.chipRow}>
-                            <Text style={styles.chip}>+{vm.outcome.healPercent}% VITAE</Text>
-                            {vm.outcome.cleansed && <Text style={styles.chip}>AILMENTS CLEANSED</Text>}
-                            <Text style={styles.chip}>WARMTH {vm.outcome.warmth}</Text>
-                            <Text style={styles.chip}>COMFORT {vm.outcome.comfort}</Text>
+                            {vm.outcome.healed > 0 && (
+                                <Text style={styles.chip}>{restOutcomeHealChip(vm.outcome.healed)}</Text>
+                            )}
+                            {vm.outcome.spent > 0 && (
+                                <Text style={styles.chip}>{restOutcomeSpendChip(vm.outcome.spent)}</Text>
+                            )}
+                            {vm.outcome.removedCardName !== null && (
+                                <Text style={styles.chip}>{restOutcomeRemovedChip(vm.outcome.removedCardName)}</Text>
+                            )}
                         </View>
-                        {vm.outcome.keepsakes.length > 0 && (
-                            <View style={styles.keepsakeBox}>
-                                {vm.outcome.keepsakes.map((k, i) => (
-                                    <Text key={i} style={styles.keepsake}>— {k}</Text>
-                                ))}
-                            </View>
-                        )}
                         <TouchableOpacity
                             accessibilityRole="button"
-                            accessibilityLabel="Break camp"
+                            accessibilityLabel="Move on"
                             onPress={actions.claimRestOutcome}
                             style={styles.bigButton}
                             testID="rest-claim"
                         >
-                            <Text style={styles.bigButtonText}>BREAK CAMP</Text>
+                            <Text style={styles.bigButtonText}>{REST_OUTCOME_CLAIM_LABEL}</Text>
                         </TouchableOpacity>
                     </View>
                 )}
-
-                {/* Escape hatch */}
-                {vm.phase !== 'outcome' && (
-                    <TouchableOpacity
-                        accessibilityRole="button"
-                        accessibilityLabel="Walk on without resting"
-                        onPress={actions.abandonRest}
-                        style={styles.abandon}
-                        testID="rest-abandon"
-                    >
-                        <Text style={styles.abandonText}>WALK ON WITHOUT RESTING</Text>
-                    </TouchableOpacity>
-                )}
             </ScrollView>
-
-            {coachActive && (
-                <TutorialCoach
-                    session={session!}
-                    vm={vm}
-                    onSkip={() => actions.completeRestTutorial(true)}
-                />
-            )}
         </ScreenBg>
     );
 }
 
 const useStyles = makeStyles((AXM) => ({
     scrollOuter: { flex: 1 },
-    // Centre the Night Watch in the viewport — the option stack left the
-    // bottom ~40% empty black (critic round, same treatment as cache /
-    // dialogue). Taller states still scroll.
     scroll: { padding: 14, paddingBottom: 24, flexGrow: 1, justifyContent: 'center' },
     eyebrow: {
         fontFamily: FONTS.sans,
@@ -243,12 +212,12 @@ const useStyles = makeStyles((AXM) => ({
     },
     title: {
         fontFamily: FONTS.gothic,
-        fontSize: 26,
-        lineHeight: 30,
+        fontSize: 24,
+        lineHeight: 28,
         color: AXM.parchment,
         marginBottom: 10,
     },
-    fireRow: {
+    purseRow: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 10,
@@ -258,21 +227,8 @@ const useStyles = makeStyles((AXM) => ({
         padding: 8,
         marginBottom: 10,
     },
-    fireLabel: {
-        fontFamily: FONTS.sans,
-        fontSize: 12,
-        letterSpacing: 1.5,
-        color: AXM.bone,
-    },
-    pipRow: { flexDirection: 'row', gap: 2 },
-    pip: { fontSize: 14 },
-    watchCount: {
-        fontFamily: FONTS.sans,
-        fontSize: 13,
-        letterSpacing: 2,
-        color: AXM.sulfur,
-        marginBottom: 6,
-    },
+    purseLabel: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 1.5, color: AXM.bone },
+    purseValue: { fontFamily: FONTS.gothic, fontSize: 16, letterSpacing: 1, color: AXM.sulfur },
     body: {
         fontFamily: FONTS.serif,
         fontSize: 13,
@@ -280,18 +236,48 @@ const useStyles = makeStyles((AXM) => ({
         color: AXM.parchment,
         marginBottom: 8,
     },
-    postureCard: {
+    offerCol: { marginBottom: 8 },
+    offerButton: {
         borderWidth: 2,
-        borderColor: AXM.bone,
-        backgroundColor: AXM.bg,
+        borderColor: AXM.sulfur,
         padding: 10,
+        backgroundColor: AXM.bg,
+    },
+    offerDisabled: { borderColor: AXM.ash, opacity: 0.5 },
+    offerHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
+    offerLabel: { fontFamily: FONTS.gothic, fontSize: 17, letterSpacing: 1.2, color: AXM.sulfur },
+    offerPrice: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.sulfur },
+    offerDesc: {
+        fontFamily: FONTS.mono,
+        fontSize: 12,
+        color: AXM.bone,
+        marginTop: 2,
+        textTransform: 'uppercase',
+    },
+    offerReason: {
+        fontFamily: FONTS.serifItalic,
+        fontSize: 11,
+        lineHeight: 15,
+        color: AXM.bone,
+        marginTop: 4,
+    },
+    priceHint: {
+        fontFamily: FONTS.mono,
+        fontSize: 11,
+        letterSpacing: 0.5,
+        color: AXM.sulfur,
         marginBottom: 8,
     },
-    postureHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
-    postureName: { fontFamily: FONTS.gothic, fontSize: 18, color: AXM.parchment, letterSpacing: 1.2 },
-    postureHint: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.sulfur },
-    postureDesc: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.bone, marginTop: 3, textTransform: 'uppercase' },
-    postureFlavor: { fontFamily: FONTS.serifItalic, fontSize: 13, color: AXM.bone, marginTop: 4 },
+    cutList: { marginBottom: 8 },
+    cutRow: {
+        borderWidth: 1,
+        borderColor: AXM.ash,
+        backgroundColor: AXM.bg,
+        padding: 8,
+        marginBottom: 4,
+    },
+    cutCardName: { fontFamily: FONTS.mono, fontSize: 13, color: AXM.parchment },
+    cutHint: { fontFamily: FONTS.serifItalic, fontSize: 12, color: AXM.bone },
     card: {
         borderWidth: 2,
         borderColor: AXM.ash,
@@ -305,7 +291,6 @@ const useStyles = makeStyles((AXM) => ({
         color: AXM.parchment,
         marginBottom: 6,
     },
-    roll: { fontFamily: FONTS.gothic, fontSize: 18, color: AXM.sulfur, marginVertical: 4 },
     chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 4 },
     chip: {
         fontFamily: FONTS.mono,
@@ -317,28 +302,6 @@ const useStyles = makeStyles((AXM) => ({
         paddingHorizontal: 5,
         paddingVertical: 2,
     },
-    keepsake: {
-        fontFamily: FONTS.serifItalic,
-        fontSize: 13,
-        color: AXM.sulfur,
-        marginTop: 6,
-    },
-    keepsakeBox: { marginTop: 4 },
-    optionRow: {
-        borderWidth: 2,
-        borderColor: AXM.bone,
-        padding: 10,
-        marginTop: 8,
-        backgroundColor: AXM.bg,
-    },
-    optionLabel: { fontFamily: FONTS.gothic, fontSize: 17, color: AXM.parchment, letterSpacing: 1.2 },
-    optionDesc: {
-        fontFamily: FONTS.mono,
-        fontSize: 12,
-        color: AXM.bone,
-        marginTop: 2,
-        textTransform: 'uppercase',
-    },
     bigButton: {
         borderWidth: 2,
         borderColor: AXM.sulfur,
@@ -348,6 +311,4 @@ const useStyles = makeStyles((AXM) => ({
         backgroundColor: AXM.bg,
     },
     bigButtonText: { fontFamily: FONTS.gothic, fontSize: 18, letterSpacing: 2, color: AXM.sulfur },
-    abandon: { alignSelf: 'center', marginTop: 18, padding: 6 },
-    abandonText: { fontFamily: FONTS.mono, fontSize: 12, letterSpacing: 2, color: AXM.bone },
 }));

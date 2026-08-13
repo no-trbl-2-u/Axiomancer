@@ -15,7 +15,7 @@ import {
 
 import type { GatheringSessionState } from '@mechanics';
 import type { HazardSessionState } from '@mechanics';
-import type { BlacksmithSession, Item, LootCacheSession, QuestBoardSession, RestSession, RestShelter } from '@mechanics';
+import type { BlacksmithSession, Item, LootCacheSession, QuestBoardSession, RestChoiceSession } from '@mechanics';
 import type { LabyrinthActId, WorldState } from '@mechanics';
 
 /**
@@ -109,27 +109,16 @@ export interface MobileQuestSlice {
 }
 
 /**
- * Mobile-only Rest encounter slice ("The Night Watch"). Holds the
- * active night (engine: World/Rest) — `null` outside a rest. The dawn
- * outcome (heal, cleanse, keepsakes) applies to the player at claim.
+ * Mobile-only Rest-choice slice (Phase 52d, replacing "The Night
+ * Watch"). Holds the active rest node's session (engine:
+ * World/RestChoice) — `null` outside a rest. A node is one
+ * irreversible choice of `rest` / `anvil` / `cut`; the shelter class
+ * (Phase 52b) rides on the session itself (`session.shelter`), not a
+ * sibling slice field. The claim ledger (heal / spend / rail /
+ * removed card) applies to the player at claim.
  */
 export interface MobileRestSlice {
-    session: RestSession | null;
-    /**
-     * Authored shelter class of the node this night was started from
-     * (Phase 52b). `'inn'` is the ONLY thing that unlocks the
-     * hazard-scar max-VITAE mend at claim — it used to be inferred from
-     * `baseHealFraction >= 1.0`, which two forest springs also passed.
-     * Defaults to `'camp'` outside a rest and whenever a node is silent.
-     */
-    shelter: RestShelter;
-    /**
-     * True while this session is the guided first night. The coach
-     * overlay (`components/rest/TutorialCoach.tsx`) renders on top of
-     * the normal screen; completion/skip sets `REST_TUTORIAL_FLAG`,
-     * which gates both the trigger and the coach's visibility.
-     */
-    tutorial: boolean;
+    session: RestChoiceSession | null;
 }
 
 /**
@@ -157,6 +146,16 @@ export interface MobileCacheSlice {
 export interface MobileBlacksmithSlice {
     session: BlacksmithSession | null;
     tutorial: boolean;
+    /**
+     * Phase 52d — set when this visit was opened as the rest-choice
+     * `anvil` offer's hand-off (see `state/rest/store-actions.ts`).
+     * The screen hides its own leave/abandon escape while set (the
+     * rest node has no back-out; leaving without a pick would strand
+     * the rest session in `anvil-pick`), and the accepted-card
+     * continuation routes back into the rest session instead of this
+     * session's own claim.
+     */
+    handoff: 'rest-choice' | null;
 }
 
 /**
@@ -257,8 +256,6 @@ export const EMPTY_QUEST_SLICE: MobileQuestSlice = Object.freeze({ session: null
 
 export const EMPTY_REST_SLICE: MobileRestSlice = Object.freeze({
     session: null,
-    shelter: 'camp',
-    tutorial: false,
 });
 
 export const EMPTY_CACHE_SLICE: MobileCacheSlice = Object.freeze({
@@ -270,6 +267,7 @@ export const EMPTY_CACHE_SLICE: MobileCacheSlice = Object.freeze({
 export const EMPTY_BLACKSMITH_SLICE: MobileBlacksmithSlice = Object.freeze({
     session: null,
     tutorial: false,
+    handoff: null,
 });
 
 export const EMPTY_LABYRINTH_SLICE: MobileLabyrinthSlice = Object.freeze({ session: null });

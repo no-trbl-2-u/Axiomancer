@@ -282,31 +282,91 @@ describe('quest screen', () => {
     });
 });
 
-describe('rest screen', () => {
-    it('walks posture → watch card → dawn ledger → claim', () => {
+describe('rest screen (Phase 52d — rest-choice)', () => {
+    it('the `rest` offer heals to the outcome ledger, then claim clears the node', () => {
         const { store, actions } = mount(<RestScreen />);
         act(() => {
-            actions.beginRest({ seed: 7 });
+            actions.beginRest({ seed: 7, shelter: 'camp' });
         });
-        expect(screen.getByTestId('rest-postures')).toBeTruthy();
-        fireEvent.press(screen.getByTestId('rest-posture-doze'));
-        expect(store.getState().rest.session!.phase).toBe('watch');
-        expect(screen.getByTestId('rest-card')).toBeTruthy();
+        expect(screen.getByTestId('rest-choice-offers')).toBeTruthy();
 
-        // Drive the night through the UI: tap options/continue as offered.
-        for (let i = 0; i < 12 && store.getState().rest.session!.phase === 'watch'; i++) {
-            const s = store.getState().rest.session!;
-            if (s.pending!.result === null) {
-                const enabled = s.pending!.options.filter(o => !o.disabledReason);
-                fireEvent.press(screen.getByTestId(`rest-option-${enabled[0].id}`));
-            } else {
-                fireEvent.press(screen.getByTestId('rest-continue'));
-            }
-        }
+        const before = store.getState().player.health;
+        fireEvent.press(screen.getByTestId('rest-choice-offer-rest'));
         expect(store.getState().rest.session!.phase).toBe('outcome');
         expect(screen.getByTestId('rest-outcome')).toBeTruthy();
+
         fireEvent.press(screen.getByTestId('rest-claim'));
         expect(store.getState().rest.session).toBeNull();
+        expect(store.getState().player.health).toBeGreaterThanOrEqual(before);
+    });
+
+    it('the `anvil` offer commits to anvil-pick and hands off to the blacksmith slice', () => {
+        const { store, actions } = mount(<RestScreen />);
+        act(() => {
+            store.setState({ player: { ...store.getState().player, currency: 999 } } as never);
+            actions.beginRest({ seed: 7, shelter: 'camp' });
+        });
+        fireEvent.press(screen.getByTestId('rest-choice-offer-anvil'));
+        expect(store.getState().rest.session!.phase).toBe('anvil-pick');
+        expect(store.getState().blacksmith.session).toBeTruthy();
+        expect(store.getState().blacksmith.handoff).toBe('rest-choice');
+    });
+
+    it('an unaffordable offer renders disabled with its reason spelled out', () => {
+        const { store, actions } = mount(<RestScreen />);
+        act(() => {
+            store.setState({ player: { ...store.getState().player, currency: 0 } } as never);
+            actions.beginRest({ seed: 7, shelter: 'camp' });
+        });
+        // `rest` is always free — never dead-ended.
+        expect(screen.getByTestId('rest-choice-offer-rest').props.accessibilityState.disabled).toBeFalsy();
+        expect(screen.getByTestId('rest-choice-offer-anvil').props.accessibilityState.disabled).toBe(true);
+        expect(screen.getByTestId('rest-choice-offer-anvil-reason')).toBeTruthy();
+        expect(store.getState().rest.session!.offers.find(o => o.id === 'anvil')!.disabledReason)
+            .toMatch(/cover/i);
+    });
+
+    it('the `cut` offer lists the real deck — duplicates and all — and previews the next price', () => {
+        // A fixture deck: 12 uniques (exactly MIN_COMBAT_DECK_SIZE) plus one
+        // duplicate, so removal is legal AND a repeated card renders twice.
+        const DECK = [
+            'spoiled-poultice', 'chilblain-watch', 'petty-indictment', 'first-spadeful',
+            'grandmothers-psalter', 'thumbprick-oath', 'thin-hymn', 'threadbare-cope',
+            'unction-of-boils', 'the-sextons-bell', 'the-long-lent', 'promissory-cut',
+        ];
+        const { store, actions } = mount(<RestScreen />);
+        act(() => {
+            store.setState({
+                player: {
+                    ...store.getState().player,
+                    knownCards: [...DECK],
+                    // A reward copy of an already-known card — the ONLY list
+                    // whose duplicates reach `buildCombatDeck`'s output
+                    // (the card-base list is de-duplicated before dealing).
+                    combatRewardCards: ['spoiled-poultice'],
+                    currency: 200,
+                    cardRemovals: 0,
+                },
+                flags: [],
+            } as never);
+            actions.beginRest({ seed: 7, shelter: 'camp' });
+        });
+        fireEvent.press(screen.getByTestId('rest-choice-offer-cut'));
+        expect(store.getState().rest.session!.phase).toBe('cut-pick');
+        expect(screen.getByTestId('rest-cut-sheet')).toBeTruthy();
+        expect(screen.getAllByTestId('rest-cut-card-spoiled-poultice:0')).toHaveLength(1);
+        expect(screen.getAllByTestId('rest-cut-card-spoiled-poultice:12')).toHaveLength(1);
+        expect(screen.getByTestId('rest-cut-price').props.children.join('')).toMatch(/15.*25/);
+
+        fireEvent.press(screen.getByTestId('rest-cut-card-thin-hymn:6'));
+        expect(store.getState().rest.session!.phase).toBe('outcome');
+        const outcome = store.getState().rest.session!.outcome!;
+        expect(outcome.chosen).toBe('cut');
+        expect(outcome.removedCardId).toBe('thin-hymn');
+
+        fireEvent.press(screen.getByTestId('rest-claim'));
+        expect(store.getState().rest.session).toBeNull();
+        expect(store.getState().player.cardRemovals).toBe(1);
     });
 });
 

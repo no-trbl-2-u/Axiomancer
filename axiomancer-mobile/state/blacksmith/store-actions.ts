@@ -28,6 +28,7 @@ import {
     claimBlacksmithOutcome as engineClaim,
     concreteDefaultRail,
     DIE_GEAR_COLORS,
+    pickRestChoiceAnvil,
 } from '@mechanics';
 import type {
     BlacksmithSession,
@@ -80,6 +81,8 @@ export interface BeginBlacksmithOptions {
     seed?: number;
     /** Start the guided first visit (sets the `tutorial` flag on the slice). */
     tutorial?: boolean;
+    /** Phase 52d — internal: set by `beginRestAnvilHandoffAction` only. */
+    handoff?: 'rest-choice';
 }
 
 /**
@@ -103,9 +106,59 @@ export function beginBlacksmithAction(store: AppStore, options: BeginBlacksmithO
         blacksmith: {
             session: createBlacksmithSession(seed, rail, budget, variants),
             tutorial: options.tutorial === true,
+            handoff: options.handoff ?? null,
         },
     });
     return true;
+}
+
+/**
+ * Rest-choice `anvil` offer hand-off (Phase 52d): opens the REAL
+ * blacksmith visit — same screen, same die-gear caps — with an
+ * effectively unlimited budget, since the rest node's flat anvil price is
+ * the transaction (the composed visit's own PLACEHOLDER tiers must never
+ * double-charge or double-refuse on affordability; see
+ * `World/RestChoice/restchoice.engine.ts`'s module header). Requires an
+ * active rest session in `anvil-pick`. One hand-off at a time, like any
+ * other blacksmith visit.
+ */
+export function beginRestAnvilHandoffAction(store: AppStore): boolean {
+    const restSession = store.getState().rest?.session;
+    if (!restSession || restSession.phase !== 'anvil-pick') return false;
+    return beginBlacksmithAction(store, { budget: Number.MAX_SAFE_INTEGER, handoff: 'rest-choice' });
+}
+
+/**
+ * Acknowledges the open card during a rest-choice anvil hand-off.
+ *
+ * A REFUSAL (cap violation) just returns to `forging` so the player can
+ * retry a different die/verb — identical to the engine's own
+ * `pickRestChoiceAnvil` refusal contract (stays live, no lock, no spend).
+ *
+ * An ACCEPTED card is the one hone-or-temper the rest node's anvil offer
+ * buys. Rather than trusting this ephemeral session's own ledger (which
+ * would double-charge against Blacksmith's own PLACEHOLDER prices), the
+ * (color, verb) actually picked is replayed through the engine's own
+ * `pickRestChoiceAnvil` against the REST session — deterministic, so it
+ * reproduces exactly what a direct call would have sealed — and this
+ * hand-off session is discarded unclaimed: the rest-choice claim
+ * (`state/rest/store-actions.ts`) is the only thing that ever writes
+ * currency/dieGear for this visit.
+ */
+export function continueRestAnvilHandoffCardAction(store: AppStore): void {
+    const bs = store.getState().blacksmith?.session;
+    if (!bs || bs.phase !== 'card' || !bs.card) return;
+
+    if (bs.card.refused) {
+        setSession(store, engineContinueCard(bs));
+        return;
+    }
+
+    const restSession = store.getState().rest?.session;
+    if (restSession && restSession.phase === 'anvil-pick' && bs.card.verb !== 'swap') {
+        store.setState({ rest: { session: pickRestChoiceAnvil(restSession, bs.card.color, bs.card.verb) } });
+    }
+    store.setState({ blacksmith: EMPTY_BLACKSMITH_SLICE });
 }
 
 /** The anvil acknowledged: intro → forging. */

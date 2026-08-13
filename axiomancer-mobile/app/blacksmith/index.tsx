@@ -121,6 +121,10 @@ export default function BlacksmithScreen() {
     const AXM = usePalette();
     const slice = useGameState((s) => s.blacksmith);
     const vm = useMemo(() => selectBlacksmithVM({ blacksmith: slice }), [slice]);
+    // Phase 52d — a rest-choice `anvil` hand-off: one pick, no leave/abandon
+    // escape (the rest node has no back-out), and the accepted card routes
+    // back into the rest session rather than this visit's own claim.
+    const isRestHandoff = slice?.handoff === 'rest-choice';
     const actions = useGameActions();
     const router = useRouter();
 
@@ -161,12 +165,16 @@ export default function BlacksmithScreen() {
 
                 {vm.phase === 'forging' && (
                     <View testID="blacksmith-forging">
-                        <View style={styles.budgetRow}>
-                            <Text style={styles.budgetLabel}>PURSE</Text>
-                            <Text style={styles.budgetValue} testID="blacksmith-budget">
-                                {vm.budget} ◆
-                            </Text>
-                        </View>
+                        {isRestHandoff ? (
+                            <Text style={styles.body}>Paid for by the rest node — pick one.</Text>
+                        ) : (
+                            <View style={styles.budgetRow}>
+                                <Text style={styles.budgetLabel}>PURSE</Text>
+                                <Text style={styles.budgetValue} testID="blacksmith-budget">
+                                    {vm.budget} ◆
+                                </Text>
+                            </View>
+                        )}
 
                         <Text style={styles.sectionLabel}>YOUR DICE</Text>
                         {vm.dice.map((die) => (
@@ -191,15 +199,17 @@ export default function BlacksmithScreen() {
                             </>
                         )}
 
-                        <TouchableOpacity
-                            accessibilityRole="button"
-                            accessibilityLabel="Take your dice and leave the anvil"
-                            onPress={actions.leaveBlacksmith}
-                            style={styles.bigButton}
-                            testID="blacksmith-leave"
-                        >
-                            <Text style={styles.bigButtonText}>TAKE THEM AND GO</Text>
-                        </TouchableOpacity>
+                        {!isRestHandoff && (
+                            <TouchableOpacity
+                                accessibilityRole="button"
+                                accessibilityLabel="Take your dice and leave the anvil"
+                                onPress={actions.leaveBlacksmith}
+                                style={styles.bigButton}
+                                testID="blacksmith-leave"
+                            >
+                                <Text style={styles.bigButtonText}>TAKE THEM AND GO</Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                 )}
 
@@ -212,16 +222,21 @@ export default function BlacksmithScreen() {
                             {vm.card.title}
                         </Text>
                         <Text style={styles.body}>{vm.card.body}</Text>
-                        {!vm.card.refused && vm.card.cost > 0 && (
+                        {!vm.card.refused && vm.card.cost > 0 && !isRestHandoff && (
                             <View style={styles.chipRow}>
                                 <Text style={styles.chip}>−{vm.card.cost} ◆</Text>
+                                <Text style={styles.chip}>{vm.card.verb.toUpperCase()} · {vm.card.color.toUpperCase()}</Text>
+                            </View>
+                        )}
+                        {!vm.card.refused && isRestHandoff && (
+                            <View style={styles.chipRow}>
                                 <Text style={styles.chip}>{vm.card.verb.toUpperCase()} · {vm.card.color.toUpperCase()}</Text>
                             </View>
                         )}
                         <TouchableOpacity
                             accessibilityRole="button"
                             accessibilityLabel="Continue"
-                            onPress={actions.continueBlacksmithCard}
+                            onPress={isRestHandoff ? actions.continueRestAnvilHandoffCard : actions.continueBlacksmithCard}
                             style={styles.bigButton}
                             testID="blacksmith-continue"
                         >
@@ -253,7 +268,7 @@ export default function BlacksmithScreen() {
                     </View>
                 )}
 
-                {vm.phase !== 'outcome' && vm.phase !== 'card' && (
+                {vm.phase !== 'outcome' && vm.phase !== 'card' && !isRestHandoff && (
                     <TouchableOpacity
                         accessibilityRole="button"
                         accessibilityLabel="Leave the forge untouched"

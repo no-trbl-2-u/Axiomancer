@@ -1,5 +1,5 @@
 /**
- * Dev-only manual rest trigger. Rest map events fire "The Night Watch"
+ * Dev-only manual rest trigger. Rest map events fire the rest-choice node
  * organically, but tuning and visual work need an immediate entry: tap
  * → `actions.beginRest()` → `<RestGate>` routes to `/rest`. Renders
  * null outside dev builds.
@@ -19,38 +19,37 @@ export function DebugRestButton() {
 
     if (!isDevToolsEnabled()) return null;
 
-    const onPress = () => {
-        actions.beginRest();
+    const onCamp = () => {
+        actions.beginRest({ shelter: 'camp' });
         // <RestGate> observes the slice and pushes /rest.
     };
 
-    const onTutorial = () => {
-        // The pinned tutorial session (seed 41). The coach only shows
-        // while the done-flag is unset — once it is set, this is still
-        // useful as a reproducible session for layout work.
-        actions.beginRest({ tutorial: true });
+    const onInn = () => {
+        // The inn shelter mends hazard-scarred max-VITAE at claim — the
+        // one branch a camp node never reaches.
+        actions.beginRest({ shelter: 'inn' });
     };
 
     return (
         <View style={styles.row}>
             <View style={styles.labelCol}>
                 <Text style={styles.label}>DEBUG · REST</Text>
-                <Text style={styles.sub}>start the night watch minigame</Text>
+                <Text style={styles.sub}>start the rest-choice node</Text>
             </View>
             <Pressable
                 style={[styles.button, styles.tutorialButton]}
-                onPress={onTutorial}
+                onPress={onInn}
                 accessibilityRole="button"
-                accessibilityLabel="Start the rest tutorial session"
-                testID="debug-rest-tutorial-button"
+                accessibilityLabel="Start a debug rest node at an inn"
+                testID="debug-rest-inn-button"
             >
-                <Text style={[styles.buttonLabel, styles.tutorialLabel]}>TUTORIAL</Text>
+                <Text style={[styles.buttonLabel, styles.tutorialLabel]}>INN</Text>
             </Pressable>
             <Pressable
                 style={styles.button}
-                onPress={onPress}
+                onPress={onCamp}
                 accessibilityRole="button"
-                accessibilityLabel="Start a debug rest minigame"
+                accessibilityLabel="Start a debug rest node at a camp"
                 testID="debug-rest-button"
             >
                 <Text style={styles.buttonLabel}>GO REST</Text>

@@ -90,7 +90,7 @@ describe('DebugEncounterButtons: press routing', () => {
 
         // After beginRest fires, the engine populates the rest slice.
         expect(store.getState().rest?.session).not.toBeNull();
-        expect(store.getState().rest?.session?.phase).toBe('posture');
+        expect(store.getState().rest?.session?.phase).toBe('offer');
     });
 
     it('cache button calls beginLootCache — engine state has an active cache session afterwards', () => {

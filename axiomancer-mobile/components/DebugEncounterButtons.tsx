@@ -1,7 +1,7 @@
 /**
  * Dev-only manual triggers for the Phase 137 encounters: the Quest
- * Board ("The Boy's Almanac"), the Rest night ("The Night Watch"),
- * and the Loot Cache ("The Reliquary"). Map events fire these
+ * Board ("The Boy's Almanac"), the rest-choice node, and the Loot
+ * Cache ("The Reliquary"). Map events fire these
  * organically; tuning and visual work need immediate entries. Each
  * tap starts a session — the matching Gate routes to the screen.
  * Renders null outside dev builds.
