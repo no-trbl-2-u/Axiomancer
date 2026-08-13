@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Axiomancer</title>
+<title>Axiomancer digest — 2026-08-13</title>
 <style>
 :root {
   color-scheme: light dark;
@@ -203,15 +203,43 @@ footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--b
 </style>
 </head>
 <body>
-<header class="top"><div class="wrap"><span class="home">Axiomancer</span></div></header>
+<header class="top"><div class="wrap"><a class="home" href="../log.html">← DevLog</a><span class="crumb">2026-08-13</span></div></header>
 <main class="wrap">
-<h1>Axiomancer</h1>
-<p class="muted">A private index of the game's content and the nightly development log.</p>
-<div class="hub">
-  <a class="hue-cards" href="./catalog.html"><span class="h-glyph">🂠</span><div class="h-title">Catalog</div><div class="h-sub">57 cards · 56 foes · 24 statuses</div></a>
-  <a class="hue-log" href="./log.html"><span class="h-glyph">❯</span><div class="h-title">DevLog</div><div class="h-sub">34 entries</div></a>
-  <a class="hue-tuning" href="./tuning-lab/index.html"><span class="h-glyph">⚖</span><div class="h-title">Tuning Lab</div><div class="h-sub">3 reports</div></a>
-</div>
+<h1 id="headline">2026-08-13</h1>
+<p class="headline">Two phases shipped back to back — 44i closes out the product-shell/docs</p>
+<div class="counts"><span class="chip cat-mechanics">1 mechanics</span><span class="chip cat-content">1 content</span></div>
+<section class="card cat-content" id="phase-44i-product-shell-docs-retheme"><div class="card-head"><span class="chip cat-content">content</span><h2>Phase 44i — product shell + docs retheme</h2></div>
+<p class="field"><span class="flabel">What</span> rewrites <code>spec.md</code>'s Product section from "philosophy RPG" /</p>
+<p class="field"><span class="flabel">Why</span> spec 34 gives the spec authority over every fiction/name/register</p>
+<p class="commits"><code class="commit">`99acb78f`</code> <code class="commit">(brief)</code> <code class="commit">`9a1dabde`</code> <code class="commit">(ship)</code> <code class="commit">`2bfce5c9`</code> <code class="commit">(row)</code></p>
+<p>"your worldview is a mechanical input" to spec 34 S6.4's successor premise ("what you owe, and to whom, is a mechanical input") and the dark-fantasy deckbuilding-RPG-campaign framing; retitles both READMEs and both <code>VISION.md</code>s to match; rewrites <code>plan/bearings.md</code>'s "What we're building" TL;DR and ratifies the Voice + Copy canon bullets; closes the last MORALE→GRACE copy leaks 44h's sweep missed (flee/withdraw subtitles, event consequence label, HEART tooltip) with matching test updates; fixes a stale <code>docs/api.md</code> heading still naming the retired <code>AlignmentFallacy</code> type. surface in the repo — leaving the doctrine docs stating a thesis spec.md itself no longer states would be a worse inconsistency than the fix.</p>
+<div class="diff" role="img" aria-label="code diff"><div class="dl del">-Axiomancer is a turn-based, single-player philosophy RPG for</div><div class="dl del">-mobile (Expo / React Native), backed by a deterministic</div><div class="dl del">-TypeScript rules engine. Its thesis — stated in</div><div class="dl del">-`axiomancer-mechanics/VISION.md` — is that **your worldview is a</div><div class="dl del">-mechanical input, not flavor**: mercy, honesty, restraint, and</div><div class="dl del">-skill are each a mechanically consequential stance, not a</div><div class="dl del">-role-play veneer.</div><div class="dl add">+Axiomancer is a turn-based, single-player dark fantasy</div><div class="dl add">+deckbuilding RPG campaign for mobile (Expo / React Native),</div><div class="dl add">+backed by a deterministic TypeScript rules engine. Its thesis —</div><div class="dl add">+stated in `axiomancer-mechanics/VISION.md` — is that **what you</div><div class="dl add">+owe, and to whom, is a mechanical input, not flavor**: mercy,</div><div class="dl add">+honesty, restraint, and skill are each a mechanically</div><div class="dl add">+consequential stance, not a role-play veneer.</div></div></section>
+<section class="card cat-mechanics" id="phase-52c-rest-choice-engine-heal-anvil-cut"><div class="card-head"><span class="chip cat-mechanics">mechanics</span><h2>Phase 52c — rest-choice engine (heal / anvil / cut)</h2></div>
+<p class="field"><span class="flabel">What</span> a new pure <code>World/RestChoice</code> engine models a rest node as one</p>
+<p class="field"><span class="flabel">Why</span> resolves the standing <code>[needs-user-call]</code> on blacksmith map</p>
+<p class="commits"><code class="commit">`e1ae8318`</code> <code class="commit">(ship)</code> <code class="commit">`2ecdba6f`</code> <code class="commit">(row)</code></p>
+<p>irreversible pick of three offers — <code>rest</code> (free, partial camp heal or full+mend inn), <code>anvil</code> (50 shillings, one hone-or-temper, composing the existing <code>World/Blacksmith</code> engine for die-gear-cap legality only), or <code>cut</code> (escalating price, one deck removal, composing Phase 52a's card-removal pricing) — committing one locks the other two. The engine never touches <code>GameState</code> or calls <code>removeCardFromCombatDeck</code> itself; it hands the host a claim-time outcome ledger to apply against the real <code>Character</code>. placement/cadence — the anvil is reached through the rest node, never as a standalone map node. The Night Watch stays live and untouched; 52d wires the mobile screen and 52e retires it only once the replacement is reachable.</p>
+<div class="diff" role="img" aria-label="code diff"><div class="dl add">+/** The three offers on the table. Exactly one may be committed. */</div><div class="dl add">+export type RestChoiceOfferId = 'rest' | 'anvil' | 'cut';</div><div class="dl add">+</div><div class="dl add">+/** The two blacksmith verbs the anvil offer exposes (never `swap` — see brief). */</div><div class="dl add">+export type RestChoiceAnvilVerb = 'hone' | 'temper';</div><div class="dl add">+</div><div class="dl add">+/** One offer's price + loud affordability. */</div><div class="dl add">+export interface RestChoiceOffer {</div><div class="dl add">+    id: RestChoiceOfferId;</div><div class="dl add">+    cost: number;</div><div class="dl add">+    disabledReason?: string;</div><div class="dl add">+}</div></div></section>
+<section class="panel" id="while-you-were-out"><h2>While you were out</h2>
+<div class="tablewrap"><table><thead><tr><th>Tick</th><th>Verb</th><th>Outcome</th></tr></thead><tbody><tr><td>08-12 13:53</td><td>march</td><td>success — phase 44i brief filed</td></tr><tr><td>08-12 19:32</td><td>march</td><td><strong>failure</strong> — infra: <code>bun</code> download hit <code>socket hang up</code> twice during setup, zero commits; cleared on its own next tick</td></tr><tr><td>08-13 03:05</td><td>march</td><td>success — phase 44i <span class="st st-ok">shipped</span> (product shell + docs retheme)</td></tr><tr><td>08-13 07:59</td><td>march</td><td>success — phase 52c <span class="st st-ok">shipped</span> (rest-choice engine)</td></tr></tbody></table></div>
+<ul><li><code>plan/AUDIT.md</code>: no new rows filed tonight; 51 pending, unchanged (file</li></ul>
+<p>untouched since yesterday's digest — the count differs slightly from last night's "49" only because two more inline-resolved rows were read as closed this pass, not because anything new landed).</p>
+<ul><li><code>plan/PHASE_CANDIDATES.md</code>: 34 pending, unchanged.</li><li><code>plan/CRITIQUE.md</code>: last pass still 23 (<code>c063ac48</code>, 2026-08-11) — no new</li></ul>
+<p>pass this window; 21 pending rows, unchanged. Pass 23's HIGH finding (title-screen "modern steel" copy) remains unclaimed, still a one-line fix.</p>
+<ul><li><code>triage:needs-user</code> / <code>loop:do</code> issues: 0 open.</li><li>Open PR: <strong>#200</strong> ("oversight: audit-drain mode, Phase 55 promotion,</li></ul>
+<p>naming session, verified backlog") — mergeable, not yet merged, so its AUDIT-DRAIN MODE banner is not active on <code>main</code>; tonight's two phases shipped under ordinary <code>/march</code> cadence.</p>
+<ul><li>Deploy: <code>deploy:check</code> found no gated workflow needed for HEAD</li></ul>
+<p>(<code>2ecdba6f</code> is a docs/plan-only tick — nothing to check).</p>
+<ul><li>Breadth check (<code>npm --workspace axiomancer-mobile run e2e:minigames</code>):</li></ul>
+<p><strong>GREEN</strong> — all six legs (hazard, combat, gathering, encounter-routing, exploration↔combat-prelude roundtrip, upgradeable-dice) <code>ALL PASS</code>.</p></section>
+<section class="panel" id="needs-you"><h2>Needs you</h2>
+<p>PR #200 is open and mergeable, carrying an <code>/oversight</code> pass (audit-drain mode proposal, a Phase 55 promotion, a naming-discussion session, and 13 AUDIT rows closed as stale/resolved) — worth a look when there's a moment; it's been sitting since 03:45 today. Critique pass 23's HIGH title-screen copy fix is still the easiest unclaimed win in the queue.</p></section>
+<section class="panel" id="tuning-proposals"><h2>Tuning proposals</h2>
+<p><code>baseline:check</code> opened this cycle <strong>stale by 1 mechanics-source commit</strong> (<code>e1ae8318</code>, phase 52c's engine addition). Re-measured with the reduced-nightly pass and committed at <code>2ecdba6f</code>.</p>
+<p>The regenerated report is <strong>byte-identical</strong> to yesterday's stamp — only <code>meta.generatedAt</code>/<code>meta.commit</code> changed. Expected: 44i is a display-only docs/copy retheme the combat sim never reads, and 52c ships an engine that nothing in the live encounter path calls yet (the Night Watch is still the reachable rest node; RestChoice wires into mobile at 52d). CQI reads unchanged: early 0.746, mid 0.739, late 0.814, impossible 0.820. No band moved; nothing to file.</p>
+<p>Same standing gap as the last several nights, <strong>not</strong> re-filed: the open <code>[docs]</code> AUDIT row (<code>skills/digest.md §3b still reads the retired win-rate doctrine curve</code>) still needs a design ruling before §3b can be rewritten against CQI directly — read blind against that stale curve, tonight's raw numbers (early 54.5% / mid 8.3% / late 0% / impossible 0%) would file as a doctrine violation. They aren't one: Phase 43 retired win rate as a grading term, and this exact reading has been byte-identical and already-tracked since before that phase shipped. This digest read <code>combatQuality.index</code> instead and skipped the stale-law filing, same as every night since 2026-08-09.</p></section>
+<section class="panel" id="todays-intent"><h2>Today's intent</h2>
+<p>Two phases in one window — 44i finished the product-shell/docs half of the dark-fantasy retheme that 44f-44h carried through content and mobile surfaces, then 52c opened the rest-choice line of work (52d mobile wiring, 52e Night Watch retirement queued next). One infra hiccup cost a tick but no work; breadth held green and the baseline confirmed a sixth straight night that neither retheme prose nor not-yet-wired engine code moves the combat sim.</p></section>
 <footer class="foot">Axiomancer DevLog &middot; generated by <code>scripts/build-devlog.mjs</code></footer>
 </main>
 </body>
