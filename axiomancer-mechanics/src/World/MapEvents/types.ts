@@ -156,11 +156,12 @@ export interface NarrationPayload {
  * hazard/quest minigames use). The handler touches no state — it only
  * validates the offered gear against the die-gear caps.
  *
- * [needs-user-call] Map placement/cadence is deferred: the proposal is that
- * the blacksmith is a NEW MapEvent KIND (registered here), placed via a node
- * event pool exactly like rest / loot-cache — but no map content authors a
- * `blacksmith` node yet. Owner sign-off is needed on WHERE it appears (a
- * village-service tab vs a wilds node) and HOW OFTEN before map content lands.
+ * RULED (T, attended chat, 2026-08-08; resolved Phase 52c): the anvil is
+ * reached THROUGH the rest node, at every rest node, at rest-node cadence —
+ * one of the `World/RestChoice` engine's three offers, not a standalone map
+ * node. The `blacksmith` MapEvent kind stays registered below (built and
+ * tested, and a future dedicated node costs nothing to leave open) but stays
+ * unauthored in map content; nothing places a bare `blacksmith` node.
  */
 export interface BlacksmithPayload {
     kind: 'blacksmith';

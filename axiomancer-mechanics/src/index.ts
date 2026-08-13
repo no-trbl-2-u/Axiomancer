@@ -431,6 +431,11 @@ export * from './World/LootCache';
 // Blacksmith encounter ("The Anvil" — Spec 33 §6 die-gear upgrades: HONE /
 // TEMPER / gear swap). RNG aliased `blacksmith*`.
 export * from './World/Blacksmith';
+// Rest-choice encounter (Phase 52c) — the rest node's replacement for the
+// Night Watch's silent heal: one irreversible choice of `rest` / `anvil` /
+// `cut`, composing the Blacksmith engine and the Cards/card.removal
+// primitive rather than rebuilding either.
+export * from './World/RestChoice';
 export {
     changeMap, completeMap, unlockMap,
     completeNode, unlockNode, changeContinent, completeUniqueEvent,
