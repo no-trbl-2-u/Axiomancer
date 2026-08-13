@@ -85,9 +85,9 @@
   amended to stop calling verify a sufficient pre-flight. Any of the three
   beats the current state, where the doc and the gate disagree.
 
-### [divergence] Bearings says there is no hosted web surface; Cloudflare Pages has been publishing one — RULED via /oversight 2026-08-10: incidental, scope it down
+### [divergence] Bearings says there is no hosted web surface; Cloudflare Pages has been publishing one — RULED via /oversight 2026-08-10: incidental, scope it down — CONFIRMED LIVE EXPOSURE via /oversight 2026-08-12, impact raised
 - category: divergence
-- impact: 6
+- impact: 8
 - ease: 6
 - detail: filed 2026-08-09 (first-map audit follow-up, offered to T at the
   close of PR #186 and accepted). `plan/bearings.md` L35-37 states, as a
@@ -155,6 +155,20 @@
   Pages-serving comment, and/or the Cloudflare project's build settings,
   which live outside this repo). This is an infra/config change, not a
   plan edit — `/oversight` does not make it directly.
+- **CONFIRMED via /oversight 2026-08-12** (the "next" scoping step
+  above, done knowingly per this row's own instruction). The ruling's
+  scope-down action has NOT happened yet — no Cloudflare config exists
+  in-repo, `.github/workflows/build-devlog.yml` is unchanged since
+  2026-08-08 and still commits DevLog HTML to `main` for Pages to
+  serve. Live check: `https://axiomancer.pages.dev` (production domain)
+  returns the live site with no auth wall, and the DevLog it serves at
+  `/devlog/log.html` — generated HTML whose own header literally reads
+  "A private index of the game's content and the nightly development
+  log" — is reachable at that URL **right now, unauthenticated**.
+  Content labeled private is live on the public production domain.
+  Impact raised 6→8 on the strength of this confirmation; the fix
+  itself (restrict/disable Pages) is unchanged from the "next" note
+  above and still needs an infra/config actor, not `/oversight`.
 
 ### [x] [contract] `exploration-combat-roundtrip-e2e` regression: FLEE leaves the tab bar hidden — RESOLVED via /oversight 2026-08-10: fixed by #194
 - category: contract
@@ -296,8 +310,20 @@
   wording / HISTORICAL banner / `<!-- lexicon-ok -->` pragma). See
   `plan/phases/phase_44a_rename_infrastructure.md` "Decisions made upfront"
   for the full reasoning.
-
-### [world] Map-event content has no coverage guard against unreachable authoring
+- update (verified via /oversight 2026-08-12): 44b and 44c followed the
+  fix exactly — `lexicon.json` carries dated rows for all of R-1–R-14.
+  44g explicitly documented a reasoned skip (no renames in scope, same
+  reasoning as 44f). **44h shipped real renames (spec 10→GRACE, spec
+  14→THE OATHS, the three alignment axes→CREED/AUGURY/TROTH,
+  `src/Philosophy/`→`src/Ledger/`) and registered zero `lexicon.json`
+  rows, with no documented rationale like 44f/44g gave.**
+  `check-lexicon.mjs` still passes clean today only because no row
+  exists to check the renamed terms against, and no live doc currently
+  misuses the old names — so there's no active prose leak yet — but
+  44h broke the registration discipline this row asked every renaming
+  phase to follow, silently. Worth a follow-up /iterate pick: register
+  44h's renames retroactively (or document why not, matching 44f/44g's
+  pattern) before the next rename phase treats the gap as precedent.
 - source: first-map audit 2026-08-08 (finding F5). `fv-1` carried a fully
   authored encounter pool that no player could ever see, because map events
   fire on ARRIVAL and `createMapState` places the player ON the start node.
