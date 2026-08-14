@@ -178,36 +178,6 @@
 
 ## Pending
 
-### [HIGH] title screen — tagline says "modern steel", contradicting the shipped anti-modern-word doctrine
-- pass: 23 (commit c063ac48)
-- viewport: mobile (375×812)
-- category: voice
-- observation: the title screen's hero tagline — the first line of prose
-  any player reads, directly under the throne-room/hooded-figure art —
-  reads "The cursed lands await. Carry your ancient knowledge and modern
-  steel into the LEAGUES beyond." "Modern steel" is a jarring register
-  break against the archaic, gothic-cathedral visual and the rest of
-  the game's prose (compare the same session's onboarding deck copy:
-  "a spoiled poultice, a thin hymn, and a psalter that opens to the
-  page you need"; or the Brine Hag encounter: "They have heard kinder
-  sermons than yours, and drowned anyway"). This isn't a style nitpick
-  in isolation — `axiomancer-mechanics/specs/34-dark-fantasy-campaign.md`
-  (the ratified dark-fantasy retheme bible) repeatedly treats "reads
-  modern" as the defect to fix elsewhere in the game (e.g. line 438:
-  "BACKFIRE reads modern at a glance"; line 511: "'open-minded' is
-  modern... replaced"; line 288: "never a modern given name"). The
-  title screen — the one screen every player sees before anything
-  else — still ships the exact word the rest of the retheme is
-  actively removing.
-- evidence: `axiomancer-mobile/.critique-artifacts/mobile/01-title.png`
-  and `01-title.txt`. Source: `axiomancer-mobile/components/TitleScreen.tsx:57-58`
-  — `The cursed lands await. Carry your ancient knowledge and modern
-  steel into the LEAGUES beyond.`
-- suggested fix: swap "modern steel" for an archaic-register synonym
-  (e.g. "tempered steel", "cold iron", "honest steel") — one-line copy
-  change, no code/data plumbing involved.
-- source: critique pass 23 (unattended, critique:drive artifacts)
-
 ### [MED] combat — every encounter renders the same fixed "ruined city" arena backdrop, regardless of the encounter's own narrative setting
 - pass: 23 (commit c063ac48)
 - viewport: mobile (375×812)
@@ -1328,6 +1298,17 @@ one level down, in the routing helper `onApply` calls next).
   green.
 
 ## Done
+
+### [x] [HIGH] title screen — tagline said "modern steel", contradicting the shipped anti-modern-word doctrine — RESOLVED 2026-08-14 (commit 0f408571, issue #204)
+- pass: 23 (commit c063ac48)
+- viewport: mobile (375×812)
+- category: voice
+- resolution: swapped "modern steel" for "cold iron" in the title
+  screen tagline (`axiomancer-mobile/components/TitleScreen.tsx:57-58`)
+  — archaic register, and doubles as folkloric ward-against-curses
+  flavor for "the cursed lands await." One-line copy change, no
+  code/data plumbing.
+- source: critique pass 23 (unattended, critique:drive artifacts)
 
 ### [x] [LOW] [green-lit 2026-07-18] session doc-residue: three AGENTS/CLAUDE additions approved — RESOLVED 2026-07-30 (commit 7c20b4fd, issue #156)
 - pass: session 2026-07-17 (measurement-freshness work)
