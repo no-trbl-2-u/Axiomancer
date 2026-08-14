@@ -480,6 +480,25 @@ deploy gate is unaffected — a skipped job does not fail the run.
 
 - **Loop pushes to trunk (`main`) directly.** Audit after the
   fact via commit bodies + `/oversight`.
+- **Actions-minutes budget (2026-08-14 usage review, PR #205).**
+  Half-month spend was ~2,955 min (march 42%, triage 17%, verify
+  CI 21%, night 11%) against 3,000 included min/mo. Standing
+  consequences for the loop:
+  - **Issues are NOT triaged on arrival** — triage's per-issue
+    trigger was removed; new issues wait for the next `/march`
+    tick (its first gate). `workflow_dispatch` triage remains for
+    an immediate manual pass.
+  - **`/digest` (night) runs on odd days only**, not daily.
+  - Timeouts are budget caps: march 75, night 45. A tick that
+    genuinely needs more should be split, not have its cap raised
+    silently.
+  - T's call: march stays at 4×/6h. If overage still stings,
+    the next levers (owner-call, in order) are march 2×/day, then
+    a self-hosted runner (only inside a dedicated VM — the loop
+    runs `--dangerously-skip-permissions`).
+  - The weekly tuning crons stay disabled ("until next billing
+    cycle" comments in their workflow files); don't re-enable
+    them without an owner call.
 - **A red `verify-*` workflow = a blocked tick.** Verify gate is
   pre-flight; the CI-green deploy gate is post-flight.
 - **Operational secrets** in `.env` (gitignored): `GH_TOKEN`
