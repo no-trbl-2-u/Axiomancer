@@ -12,8 +12,10 @@
 
 **Law:** One deck receives one preset-specific plan at a time. A cheap
 cross-preset screen does not promote a deck out of `untouched`; it only helps
-select the next deck. Do not open a current preset plan while the campaign
-snapshots are transitional or before Phase 44d settles their names/themes.
+select the next deck. Phase 44d has settled the snapshot names/themes; do not
+open a current preset plan while the card redesign remains explicitly
+transitional or before a current viability/calibration charter defines the
+preset-specific gates.
 
 ## Category definitions
 
@@ -50,8 +52,9 @@ None.
 ## Queue rule
 
 There is no active preset-specific plan. Do not revive Grace or create a second
-legacy-theme plan. Current preset planning waits on the Profane Canon redesign
-settling as live product truth and Phase 44d's preset/theme retheme.
+legacy-theme plan. Phase 44d has already settled the current snapshot names and
+themes; current preset planning now waits on the explicitly transitional card
+redesign and a viability/calibration charter that names executable gates.
 
 ## Historical campaign — retired presets
 
