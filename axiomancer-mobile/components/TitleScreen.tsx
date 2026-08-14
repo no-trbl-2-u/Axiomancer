@@ -54,8 +54,8 @@ export function TitleScreen({ onContinue }: TitleScreenProps) {
       {/* Call to action */}
       <View style={styles.content}>
         <Text style={styles.tagline}>
-          The cursed lands await. Carry your ancient knowledge and modern
-          steel into the LEAGUES beyond.
+          The cursed lands await. Carry your ancient knowledge and cold
+          iron into the LEAGUES beyond.
         </Text>
 
         <Pressable
