@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Axiomancer</title>
+<title>Axiomancer digest — 2026-08-14</title>
 <style>
 :root {
   color-scheme: light dark;
@@ -203,15 +203,46 @@ footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--b
 </style>
 </head>
 <body>
-<header class="top"><div class="wrap"><span class="home">Axiomancer</span></div></header>
+<header class="top"><div class="wrap"><a class="home" href="../log.html">← DevLog</a><span class="crumb">2026-08-14</span></div></header>
 <main class="wrap">
-<h1>Axiomancer</h1>
-<p class="muted">A private index of the game's content and the nightly development log.</p>
-<div class="hub">
-  <a class="hue-cards" href="./catalog.html"><span class="h-glyph">🂠</span><div class="h-title">Catalog</div><div class="h-sub">57 cards · 56 foes · 24 statuses</div></a>
-  <a class="hue-log" href="./log.html"><span class="h-glyph">❯</span><div class="h-title">DevLog</div><div class="h-sub">35 entries</div></a>
-  <a class="hue-tuning" href="./tuning-lab/index.html"><span class="h-glyph">⚖</span><div class="h-title">Tuning Lab</div><div class="h-sub">3 reports</div></a>
-</div>
+<h1 id="headline">2026-08-14</h1>
+<p class="headline">AUDIT-DRAIN MODE's first full day: both <code>/march</code> ticks fell through to</p>
+<div class="counts"><span class="chip cat-mechanics">1 mechanics</span><span class="chip cat-ui">1 UI</span><span class="chip cat-content">1 content</span></div>
+<section class="card cat-mechanics" id="phase-55-retire-dead-strike-is-dead-doctrine-from-the-engine-truth-mcp"><div class="card-head"><span class="chip cat-mechanics">mechanics</span><h2>Phase 55 — retire dead STRIKE-IS-DEAD doctrine from the engine-truth MCP</h2></div>
+<p class="field"><span class="flabel">What</span> <code>cards.library.ts</code>'s header doctrine paragraph still told the</p>
+<p class="field"><span class="flabel">Why</span> this was the stuck top-score row <code>/oversight</code> promoted straight</p>
+<p class="commits"><code class="commit">`c95d3310`</code> <code class="commit">(brief)</code> <code class="commit">`20b5a1be`/`bccf1352`</code> <code class="commit">(ship)</code></p>
+<p><code>axio_overview</code> MCP tool "no card deals raw HP damage" — a ban the 2026-08-08 unshackling retired the same day it was written. Replaced it with the current truth (direct damage is legal; Conviction/Surge/dice stay the three locked systems), fixed <code>axio-mcp-server.mjs</code>'s <code>extractDoctrine()</code> selector (it had been matching nothing since the Profane Canon reworded the header, so the tool was silently printing no doctrine line at all), and pinned both halves with a new smoke test. to a phase on 2026-08-12 rather than let ride a third bias-weighted <code>/iterate</code> pass — a design-truth tool quoting a retired rule back to whoever queries it is a worse failure mode than a stale doc nobody reads.</p>
+<div class="diff" role="img" aria-label="code diff"><div class="dl del">-THE STRIKE stays DEAD (spec 32 v3): no card deals raw HP damage. Enemy HP</div><div class="dl del">-falls to DoT ticks, affliction payoffs (RUPTURE/REAP/ruptureMarks), engine</div><div class="dl add">+Direct damage is legal (unshackled 2026-08-08): cards may deal raw HP</div><div class="dl add">+damage directly, alongside DoT ticks, affliction payoffs (RUPTURE/REAP/</div><div class="dl add">+ruptureMarks), engine</div></div></section>
+<section class="card cat-content" id="title-screen-tagline-the-last-modern-steel-leak"><div class="card-head"><span class="chip cat-content">content</span><h2>Title screen tagline — the last "modern steel" leak</h2></div>
+<p class="field"><span class="flabel">What</span> the anti-modern-word doctrine (spec 34) treats "reads modern"</p>
+<p class="field"><span class="flabel">Why</span> flagged HIGH by critique pass 23; the easiest unclaimed win</p>
+<p class="commits"><code class="commit">`0f408571`</code> <code class="commit">(fix)</code> <code class="commit">`c297d923`</code> <code class="commit">(row)</code></p>
+<p>as a defect everywhere else in the retheme, but the title screen's tagline — the first line of prose every player reads — still shipped the literal phrase. Swapped "modern steel" for "cold iron," which keeps the archaic register and doubles as folkloric ward-against-curses flavor for "the cursed lands await." sitting in the queue, closed same-day under AUDIT-DRAIN MODE's <code>/iterate</code> fallthrough.</p>
+<div class="diff" role="img" aria-label="code diff"><div class="dl del">-The cursed lands await. Carry your ancient knowledge and modern</div><div class="dl del">-steel into the LEAGUES beyond.</div><div class="dl add">+The cursed lands await. Carry your ancient knowledge and cold</div><div class="dl add">+iron into the LEAGUES beyond.</div></div></section>
+<section class="card cat-ui" id="phase-52d-rest-choice-screen-anvil-hand-off"><div class="card-head"><span class="chip cat-ui">UI</span><h2>Phase 52d — rest-choice screen + anvil hand-off</h2></div>
+<p class="field"><span class="flabel">What</span> repurposes <code>/rest</code> to render the 52c rest-choice engine as</p>
+<p class="field"><span class="flabel">Why</span> this is the blacksmith's first player-reachable door — resolves</p>
+<p class="commits"><code class="commit">`3dda879a`</code> <code class="commit">(ship)</code> <code class="commit">`dda3bf8d`</code> <code class="commit">(row)</code></p>
+<p>three priced cards (REST / THE ANVIL / THE CUT) with the purse shown and unaffordable options visibly disabled with their reason — no back-out, matching the node's committing-choice doctrine. Picking THE ANVIL opens the real <code>/blacksmith</code> screen and replays the accepted pick through the engine's own resolver so only the rest node's flat anvil price is ever charged; the blacksmith screen stops being dev-menu-only. The Night Watch's mobile plumbing (three-watch screen, tutorial, e2e suites) is retired outright, since the route can't serve two session shapes at once. the standing <code>[needs-user-call]</code> on where die-gear tempering lives.</p></section>
+<section class="panel" id="while-you-were-out"><h2>While you were out</h2>
+<div class="tablewrap"><table><thead><tr><th>Tick</th><th>Verb</th><th>Outcome</th></tr></thead><tbody><tr><td>08-13 13:54</td><td>march</td><td>success — phase 52d <span class="st st-ok">shipped</span> (rest-choice screen + anvil hand-off)</td></tr><tr><td>08-13 16:02</td><td>direct push (not a loop tick)</td><td>docs: reconcile combat doctrine after unshackling</td></tr><tr><td>08-13 17:11</td><td>PR #200 merge</td><td>oversight: AUDIT-DRAIN MODE activated, Phase 55 promoted, naming session opened</td></tr><tr><td>08-13 19:31</td><td>march</td><td>success, <strong>no-op</strong> — no commit produced</td></tr><tr><td>08-14 03:03</td><td>march</td><td>success — phase 55 <span class="st st-ok">shipped</span> (engine-truth MCP doctrine fix)</td></tr><tr><td>08-14 07:55</td><td>march</td><td>success — critique <span class="st st-ok">pass</span> 23 HIGH fixed (title screen tagline)</td></tr></tbody></table></div>
+<ul><li><code>plan/AUDIT.md</code>: 43 pending rows (38 more sit in the Pending section</li></ul>
+<p>already marked <code>[x]</code>-resolved but not yet moved to Done — the AUDIT-DRAIN verification pass is mid-sweep, not finished). Two new rows filed by Phase 55 itself (CLAUDE.md and <code>profane-canon.md</code> still echo the retired doctrine in prose the MCP tool doesn't read).</p>
+<ul><li><code>plan/CRITIQUE.md</code>: last pass still 23 (unattended, <code>critique:drive</code></li></ul>
+<p>artifacts) — its HIGH finding closed today; 20 pending rows remain (all MED/LOW).</p>
+<ul><li><code>plan/PHASE_CANDIDATES.md</code>: 34 pending, unchanged.</li><li><code>triage:needs-user</code> / <code>loop:do</code> issues: 0 open.</li><li>Open PRs: 0.</li><li>Deploy: last gated change (52d, mobile paths) passed <code>verify-mobile</code></li></ul>
+<p>clean; HEAD itself is a docs/plan-only tick with nothing to check.</p>
+<ul><li>Breadth check (<code>npm --workspace axiomancer-mobile run e2e:minigames</code>):</li></ul>
+<p><strong>GREEN</strong> — all six legs (hazard, combat, gathering, encounter-routing, exploration↔combat-prelude roundtrip, upgradeable-dice) <code>ALL PASS</code>.</p></section>
+<section class="panel" id="needs-you"><h2>Needs you</h2>
+<p>The naming session (<code>plan/naming-session-2026-08-12.md</code>) is open and waiting on a read — it lays out the constraint set and a first candidate pass for "Axiomancer" post-pivot but doesn't decide anything; nothing in the queue depends on the outcome yet, so no urgency, just sitting there for whenever there's a moment.</p></section>
+<section class="panel" id="tuning-proposals"><h2>Tuning proposals</h2>
+<p><code>baseline:check</code> opened this cycle <strong>stale by 1 mechanics-source commit</strong> (<code>20b5a1be</code>, Phase 55's <code>cards.library.ts</code> header edit). Re-measured with the reduced-nightly pass and committed at <code>c297d923</code>.</p>
+<p>The regenerated report is <strong>byte-identical</strong> to yesterday's stamp (CQI: early 0.746, mid 0.739, late 0.814, impossible 0.820; win rate: early 54.5%, mid 8.3%, late 0%, impossible 0%) — only <code>meta.generatedAt</code>/ <code>meta.commit</code> changed. Expected: Phase 55 only touched a header comment string and an MCP doctrine-selector regex, neither of which the combat sim reads. Seventh straight night the deck-matrix numbers haven't moved.</p>
+<p>Same standing gap as prior nights, <strong>not</strong> re-filed: the open <code>[docs]</code> AUDIT row on <code>skills/digest.md</code> §3b still reading the retired win-rate curve needs a design ruling before it can be rewritten against CQI directly. This digest reads <code>combatQuality.index</code> and skips the stale-law filing, same as every night since 2026-08-09.</p></section>
+<section class="panel" id="todays-intent"><h2>Today's intent</h2>
+<p>AUDIT-DRAIN MODE's first day under <code>/march</code> proper: both ticks fell through to <code>/iterate</code> exactly as designed, draining one stuck audit row (Phase 55, promoted 2026-08-12) and one HIGH critique finding (the title-screen tagline) instead of opening fresh phase work — the mode is doing its job. 52d's rest-choice screen landed just before the mode activated, giving the blacksmith its first player-reachable door. Queue still carries 43 pending AUDIT rows (many already resolved in body text, pending a cleanup pass) and 20 pending CRITIQUE rows for AUDIT-DRAIN MODE to keep draining.</p></section>
 <footer class="foot">Axiomancer DevLog &middot; generated by <code>scripts/build-devlog.mjs</code></footer>
 </main>
 </body>
