@@ -1,15 +1,20 @@
 name: triage
 
-# Issue triage on arrival: when an issue is opened or reopened, /triage
-# classifies it, applies a triage:* label, comments, and routes it to the
-# right backlog (see skills/triage.md). /march also runs triage as its
-# first gate — this workflow just makes the response immediate instead of
-# next-tick. Cheap when idle: already-labeled issues are skipped.
+# Manual issue triage: /triage classifies an issue, applies a triage:*
+# label, comments, and routes it to the right backlog (see
+# skills/triage.md). /march runs triage as its first gate, so new issues
+# are picked up on the next tick; the per-issue `issues:` trigger was
+# removed 2026-08 to cut Actions spend (~500 min per half-month) — the
+# march gate makes it redundant. Dispatch this manually for an immediate
+# pass on a specific issue.
 
 on:
-  issues:
-    types: [opened, reopened]
   workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number to triage (blank = sweep unlabeled)'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -30,5 +35,5 @@ jobs:
       extra_claude_args: |
         -p
         --dangerously-skip-permissions
-      prompt: '/triage ${{ github.event.issue.number }}'
+      prompt: '/triage ${{ github.event.inputs.issue_number }}'
       timeout_minutes: 30

@@ -40,7 +40,10 @@ jobs:
         -p
         --dangerously-skip-permissions
       prompt: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.focus_phase != '' && format('/ship-a-phase phase {0}', github.event.inputs.focus_phase) || '/march' }}
-      timeout_minutes: 90
+      # Typical tick is ~23 min; at least one wedged run burned the full
+      # 90-min budget (2026-08 usage review). 75 keeps headroom for a big
+      # ship-a-phase tick while capping runaway burn.
+      timeout_minutes: 75
       # /march can dispatch into /critique (rate-limited: ≥12 commits +
       # ≥24h, green deploy), which drives the local expo-web build with the
       # playtester sub-agent over Playwright. Without this the browser tools
