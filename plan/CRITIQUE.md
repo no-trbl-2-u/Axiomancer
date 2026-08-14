@@ -1,13 +1,35 @@
 # Critique log
 
-> Last pass: 2026-08-11 at commit c063ac48
-> Pass count: 23
+> Last pass: 2026-08-14 at commit 127bbc93
+> Pass count: 24
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 24, 2026-08-14, commit 127bbc93] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5) at mobile
+> (375×812) only; the cold drive reached past "ENTER COMBAT" into the
+> live combat-board (5/5 captures, 0 with nav trouble). Zero
+> console/page errors besides the same benign `navigator.vibrate`
+> warning seen every prior pass. Title screen confirms the "modern
+> steel" → "cold iron" tagline fix (commit 0f408571, issue #204) is
+> live: "Carry your ancient knowledge and cold iron into the LEAGUES
+> beyond." Self-assessed all 5 captures against the current
+> Pending/Done log: onboarding and the exploration-hub cutscene
+> redirect hold clean; the same Brine Hag encounter reproduces both
+> still-open Pending rows exactly as filed — the pass-23 "ruined city"
+> arena-backdrop mismatch (nautical enemy text, cityscape art, no
+> water/dock/coastal signifier) and the pass-21 momentum-chain
+> empty-state contrast row (`○ no momentum` still bare `AXM.ash` text
+> over the busy arena floor). Not re-filed. Checked the Threat
+> Sequence's four phases all reading intent label "SURGES" (Brine
+> Hag) against `deriveIntentType` (`combat.threat.ts:221`) — every
+> phase pairs damage with a debuff by design (Mark / curse / Bleed),
+> so `combo` is the correct derived intent, not a placeholder or
+> repeat-label bug. Zero new findings.
 
 > **[critique pass 22, 2026-08-10, commit 62cde36e] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
