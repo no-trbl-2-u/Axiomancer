@@ -1725,8 +1725,8 @@ RESEQUENCED the same day behind the unshackling — see above):**
       `[needs-user-call]` at `plan/AUDIT.md`'s endCombat row. Brief: to
       generate.
 
-- [ ] Phase 55 — Retire the dead "THE STRIKE IS DEAD" doctrine string
-      from the engine-truth MCP. `AUDIT.md` "axio-query overview still
+- [x] Phase 55 — Retire the dead "THE STRIKE IS DEAD" doctrine string
+      from the engine-truth MCP (20b5a1be). `AUDIT.md` "axio-query overview still
       publishes the retired 'THE STRIKE IS DEAD' doctrine after Phase 41"
       (filed 2026-08-08 by the scheduled SomberSoft roundtable, score 72 —
       the AUDIT queue's top row, given an explicit divergence bias
