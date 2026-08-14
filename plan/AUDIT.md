@@ -2110,6 +2110,43 @@
   instances total (#83, #151, #155, #129, #156, #157, #158, #159, #160,
   #162, #163, #164, #165). No new root-cause signal.
 
+### `axiomancer-mechanics/CLAUDE.md` still asserts the retired STRIKE-IS-DEAD / status-primacy doctrine as current
+- category: docs
+- impact: 4
+- ease: 8
+- detail: filed 2026-08-14 by Phase 55 (retiring the same stale doctrine from
+  the `axio-query` MCP). `CLAUDE.md`'s "Load-bearing doctrine (set 2026-06)"
+  section still reads "Status effects are the MAIN fun and the most engaging
+  aspect of combat encounters" and "**Updated 2026-07-08 (spec 32 v3 — THE
+  STRIKE IS DEAD):** raw HP damage was purged at the schema level" as
+  present-tense fact. Both were retired by T's 2026-08-08 unshackling
+  (`axiomancer-mechanics/VISION.md` "Combat vision": "restored ordinary
+  direct damage... No one path is doctrine-mandated as the dominant combat
+  route"). The 2026-08-13 reconciliation pass (`9caf2a26`, "docs: reconcile
+  combat doctrine after unshackling") touched `AGENTS.md`,
+  `axiomancer-mechanics/AGENTS.md`, `VISION.md` (both packages), and
+  `skills/digest.md` — not this file, so it's the one doctrine echo that
+  pass missed.
+- next: reword to match the reconciled `VISION.md` §Combat vision language
+  (direct damage legal; Conviction/Surge/dice the three locked systems);
+  same edit shape as the `9caf2a26` pass.
+
+### `axiomancer-mechanics/docs/profane-canon.md` still asserts "THE STRIKE stays DEAD" as current design law
+- category: docs
+- impact: 3
+- ease: 8
+- detail: filed 2026-08-14 by Phase 55. §1's "Unchanged, by hard constraint"
+  paragraph reads "THE STRIKE stays DEAD: no card deals raw HP damage —
+  enemy HP falls only to DoT ticks, affliction payoffs..." — this is the
+  Profane Canon rework's own design record, written earlier the same day
+  (2026-08-08) as the unshackling that retired the ban later that day. Lower
+  impact than the sibling `CLAUDE.md` row (this is a design-history doc, not
+  live agent-loaded guidance, and doesn't feed the `axio-query` MCP), but
+  still reads as current-tense wrong.
+- next: reword the paragraph to note the ban was retired same-day by the
+  unshackling, or move it under a "design history — since superseded"
+  heading rather than "Unchanged, by hard constraint."
+
 ## Done
 
 ### [x] [3.2] `CardSpecialMechanic` deprecated-name not exported — stale/resolved

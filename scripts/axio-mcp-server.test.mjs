@@ -63,6 +63,15 @@ test('axio_overview returns non-empty counts', async () => {
   assert.match(text, /# Keyword registry — \d+\/30 rows/)
 })
 
+test('axio_overview publishes live doctrine, not the retired STRIKE IS DEAD ban', async () => {
+  const replies = await drive([
+    { jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'axio_overview', arguments: {} } },
+  ])
+  const text = replies.get(1)?.result?.content?.[0]?.text ?? ''
+  assert.doesNotMatch(text, /STRIKE IS DEAD/)
+  assert.match(text, /# Doctrine — Direct damage is legal/)
+})
+
 test('axio_cards finds a known card by keyword substring', async () => {
   const replies = await drive([
     { jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'axio_cards', arguments: { theme: 'affliction', limit: 3 } } },

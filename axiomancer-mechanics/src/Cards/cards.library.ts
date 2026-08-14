@@ -20,9 +20,13 @@
  *   choir — the Pale Choir: PLEA toward RELENT, QUARTER, SOULs harvested
  *           from expiring afflictions, REAP to spend the collection.
  *
- * THE STRIKE stays DEAD (spec 32 v3): no card deals raw HP damage. Enemy HP
- * falls to DoT ticks, affliction payoffs (RUPTURE/REAP/ruptureMarks), engine
- * drips (BACKFIRE, persistent hooks), and reflect (THORNS/RIPOSTE).
+ * Direct damage is legal (the 2026-08-08 unshackling retired the earlier
+ * raw-HP-damage ban): cards may deal raw HP damage, plant DoT (poison /
+ * bleed / mark), or both — Enemy HP falls to any authored mix of strikes,
+ * DoT ticks, affliction payoffs (RUPTURE/REAP/ruptureMarks), engine drips
+ * (BACKFIRE, persistent hooks), and reflect (THORNS/RIPOSTE). Conviction,
+ * Surge, and the dice system remain the three locked systems the
+ * retirement does not touch.
  *
  * The campaign model (the rework's spine): the player STARTS with the weak
  * 18-card Threadbare Office, earns reward cards after encounters, and REMOVES

@@ -116,7 +116,7 @@ function extractDoctrine() {
     .split(/\n\s*\*\s*\n/)
     .map((p) => p.split('\n').map((l) => l.replace(/^\s*\*\/?\s?/, '')).join(' ').replace(/\s+/g, ' ').trim())
     .filter(Boolean)
-  return paragraphs.filter((p) => /STRIKE IS DEAD|Rank ladder/.test(p))
+  return paragraphs.filter((p) => /Direct damage is legal|Rank ladder/.test(p))
 }
 
 // --- tools ------------------------------------------------------------------
@@ -124,7 +124,7 @@ const TOOLS = [
   {
     name: 'axio_overview',
     description:
-      'Counts (cards/enemies/effects), per-theme card counts, rank distribution, keyword-registry coverage, and doctrine one-liners (STRIKE IS DEAD, rank vs tier) sourced from the live libraries. Start here.',
+      'Counts (cards/enemies/effects), per-theme card counts, rank distribution, keyword-registry coverage, and doctrine one-liners (direct-damage legality, locked systems) sourced from the live libraries. Start here.',
     inputSchema: { type: 'object', properties: {}, additionalProperties: false },
     run() {
       const cards = loadJson(CARDS_JSON) ?? []
