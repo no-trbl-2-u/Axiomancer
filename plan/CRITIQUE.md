@@ -1,13 +1,30 @@
 # Critique log
 
-> Last pass: 2026-08-14 at commit 127bbc93
-> Pass count: 24
+> Last pass: 2026-08-15 at commit 7b28b287
+> Pass count: 25
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 25, 2026-08-15, commit 7b28b287] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5) at mobile
+> (375×812) only; the cold drive again reached past "ENTER COMBAT"
+> into the live combat-board (5/5 captures, 0 with nav trouble). Zero
+> console/page errors besides the same benign `navigator.vibrate`
+> warning seen every prior pass. Title screen still reads "Carry your
+> ancient knowledge and cold iron into the LEAGUES beyond" (unchanged
+> since pass 24). Self-assessed all 5 captures against the current
+> Pending/Done log: onboarding (preset picker) and the exploration-hub
+> cutscene redirect hold clean (same as passes 21/22/24 — deliberate
+> paced narration beat, not a bug); the same Brine Hag encounter
+> reproduces both still-open Pending rows exactly as filed — the
+> pass-23 "ruined city" arena-backdrop mismatch and the pass-21
+> momentum-chain empty-state contrast row (`○ no momentum` still bare
+> `AXM.ash` text over the busy arena floor). Not re-filed. Zero new
+> findings.
 
 > **[critique pass 24, 2026-08-14, commit 127bbc93] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5) at mobile
