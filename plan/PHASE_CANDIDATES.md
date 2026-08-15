@@ -1169,6 +1169,24 @@
   wrong dice-upgrade surface entirely (see "Re-home dice upgrades off
   the blacksmith" below + AUDIT). The D7 matrix re-runs after D8 per
   the D8 row.
+- **SUPERSEDED via /oversight 2026-08-15 — build-plan Phase 56.** Call
+  (1) above is reversed: T ruled the starter `sig-press-the-point` grant
+  **and** the dice-valve reroll promotion, both. This is not a
+  contradiction of the 2026-07-18 call but the trigger that call named —
+  D8's row conditioned "no starter Press Fate grant *unless the re-test
+  shows the valves under-sink*", and the post-D8 nightlies read
+  under-sink (mid near-total collapse from digest 2026-07-30, holding
+  mid-0.0 / late-0 for six straight reduced-nightly reads through
+  2026-08-07). Calls (2), (3) and (4) are untouched: the flag is already
+  flipped (D-FLIP shipped), the signature cost machinery stays deferred,
+  and the blacksmith stays ruled the wrong surface.
+- **housekeeping note:** this row's "decision (needs-user-call — owner
+  picks the mechanism)" line above is historical text inside a resolved,
+  already-promoted row. It has twice been matched by `/oversight`'s
+  `[needs-user-call]` sweep as though it were an open item (most
+  recently 2026-08-15). Left in place because rows are not rewritten
+  after the fact, but read it as the record of a question already
+  answered, not a live one.
 
 ## Rejected
 

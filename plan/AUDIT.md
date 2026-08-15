@@ -14,12 +14,15 @@
 
 ## Pending
 
-> AUDIT-DRAIN MODE (set via oversight 2026-08-12 — T: "focus the march
-> loop on closing the rest out"). `plan/steps/01_build_plan.md` now
-> carries a banner pausing `ship-a-phase` dispatch so `/march` falls
-> through to `/iterate` every tick until this Pending queue is
-> meaningfully clear — no category bias needed while that holds;
-> /iterate should just work top-down by score. The prior divergence
+> AUDIT-DRAIN MODE LIFTED (via oversight 2026-08-15 — T called it off).
+> The 2026-08-12 banner in `plan/steps/01_build_plan.md` paused
+> `ship-a-phase` dispatch so `/march` would fall through to `/iterate`
+> every tick until this Pending queue was clear. It did not hold —
+> Phases 52c/52d/52e shipped under it while the drain closed one row in
+> three days — so T lifted it. Phases ship on their normal turn again
+> and this queue drains through `/iterate`'s ordinary place in the
+> rotation. Still no category bias: /iterate works top-down by score.
+> The prior divergence
 > bias (set 2026-08-10) is retired: its target row, top score 72
 > (`axio-query overview still publishes the retired "THE STRIKE IS
 > DEAD" doctrine after Phase 41`), sat unclaimed across 2 full ticks
@@ -169,6 +172,19 @@
   Impact raised 6→8 on the strength of this confirmation; the fix
   itself (restrict/disable Pages) is unchanged from the "next" note
   above and still needs an infra/config actor, not `/oversight`.
+- **QUEUED via /oversight 2026-08-15 — build-plan Phase 57.** Shown that
+  the 2026-08-10 ruling had produced no change in five days precisely
+  because this row routed its whole fix to an actor outside the repo, T
+  ruled: queue the in-repo half now. Phase 57 stops
+  `.github/workflows/build-devlog.yml` committing DevLog HTML to `main`
+  for Pages to serve, and adds a check that fails if it reappears in the
+  served tree — which takes the private content out of what Pages
+  publishes without needing dashboard access. **This row stays open
+  after Phase 57 ships.** The Cloudflare project itself (production
+  domain, and the guessable per-branch
+  `https://<branch-slug>.axiomancer.pages.dev` previews) still needs a
+  human at the dashboard to restrict or disable; that is the remaining
+  half and the reason the row does not close on the phase alone.
 
 ### [x] [contract] `exploration-combat-roundtrip-e2e` regression: FLEE leaves the tab bar hidden — RESOLVED via /oversight 2026-08-10: fixed by #194
 - category: contract
@@ -525,6 +541,20 @@
 - next: schedule a naming session (own thread, not folded into a phase
   brief). Row stays open until that session rules a final name (or
   reaffirms the current one).
+- **STILL OPEN after /oversight 2026-08-15 — T asked for more
+  candidates.** The session opened 2026-08-12
+  (`plan/naming-session-2026-08-12.md`) and its §3 first pass was put to
+  T today; T ruled none of it and asked for a wider set rather than
+  picking from that list or closing on KEEP. A second pass was authored
+  in the same oversight commit as that file's new §5 — six candidates
+  across three deliberately different directions (liturgical hours:
+  Compline, Viaticum; architecture: Lychgate, Sepulchre; the game's own
+  shipped language: Cold Iron, Threnody), each collision-checked against
+  the keyword registry and both source trees. Note recorded there for
+  the next pass: if §5 also misses, T naming a *direction* is a better
+  format than a third cold list. Nothing in the queue waits on this —
+  "Axiomancer" remains the working name and Phases 44a-44i are
+  unaffected either way, exactly as the 2026-08-10 ruling said.
 
 ### Phase 52b's shelter retheme raised four rest nodes' heal for an open window
 - category: divergence
