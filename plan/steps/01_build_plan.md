@@ -1420,21 +1420,23 @@ the replacement must be reachable before the Night Watch comes out, or
       mechanic. (mobile) Deps: 52c.
       Brief: `plan/phases/phase_52d_rest_choice_mobile.md`.
       — `feat(mobile): rest-choice screen + anvil hand-off — phase 52d` (3dda879a)
-- [ ] Phase 52e — Retire the Night Watch. **After 52d, never before.**
-      Delete `World/Rest/` entire, the `rest` CLI sub-command + npm
-      script, both barrel re-exports (⇒ all three workspace gates), the
-      mobile tutorial + debug button, `.claude/commands/rest-tuning.md`
-      and `.github/workflows/rest-tuning.yml`, and **void** the `Rest
-      meagre-but-never-lethal (posture gradient)` doctrine row in
-      `plan/bearings.md`. KEEP: the `rest` MapEvent kind, `RestGate`, the
-      `'rest'` seed key, the scar mend (re-homed in 52b), and
-      `night-keepsake:*` flags — `/memoir`'s REMAINS section reads them
-      and deleting them erases run history. `GAME_STATE_VERSION` 16 → 17;
-      a player mid-night at update must land somewhere valid. **Also
-      update Phase 44f's row in the same commit** — it lists "The Night
-      Watch (rest)" as one of four minigame names to retheme, and there
-      will be three. (mechanics + mobile + harness) Deps: 52d.
+- [x] Phase 52e — Retire the Night Watch. Deleted `World/Rest/` entire,
+      the `rest` CLI sub-command + npm script, both barrel re-exports
+      (all three workspace gates verified clean), `.claude/commands/
+      rest-tuning.md`, and `.github/workflows/rest-tuning.yml`; voided
+      the `Rest meagre-but-never-lethal (posture gradient)` doctrine row
+      in `plan/bearings.md`. KEPT: the `rest` MapEvent kind, `RestGate`,
+      the `'rest'` seed key, the scar mend, `night-keepsake:*` flags, and
+      `DebugRestButton.tsx` (52d had already rewritten it to drive the
+      rest-choice node — not Night-Watch-shaped code). The mobile
+      tutorial/coach files the brief named were already gone, removed by
+      52d's own rewrite of the same route. `GAME_STATE_VERSION` 16 → 17
+      drops the dead tutorial flag and clears a stray `rest` session key
+      from the raw save payload; hermetic migration test added. Updated
+      Phase 44f's brief to drop the "has not shipped" gate note. (mechanics
+      + mobile + harness) Deps: 52d.
       Brief: `plan/phases/phase_52e_night_watch_retirement.md`.
+      — `feat: retire the rest minigame — phase 52e` (d83978cb)
 - [ ] Phase 52f — Calibrate the shilling economy. Three price sets are
       currently guesses stacked on each other:
       `BLACKSMITH_PRICING_PLACEHOLDER` (hone 2 / temper 3 / swap 4) has
