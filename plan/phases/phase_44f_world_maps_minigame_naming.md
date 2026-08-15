@@ -54,10 +54,10 @@ Everything else: **KEEP, zero action.**
   Almanac) — RATIFIED as shipped (§5.8), no code currently spells them
   under a different name.
 - The rest node (`RestChoice` / `rest` / `anvil` / `cut`) — **explicitly
-  skipped.** Phase 52e (Night Watch retirement) has not shipped. The
-  retheme-map's staged pairs for this stay dormant until 52e ships; a
-  future `/ship-a-phase` re-run of 44f (or a small follow-up) applies them
-  then.
+  skipped at the time this phase ran.** Phase 52e (rest minigame
+  retirement) has since shipped (2026-08-15); `docs/retheme-map.json`'s
+  staged pairs for this are no longer gated. The retheme itself is still
+  a follow-up (below), not applied by this note.
 - Northern Forest's `region: 'Northern Forest'` — not a settlement, not
   named in the build-plan row or in §5.8's text, and no spec ruling
   grounds a specific replacement the way the Drowned Parish fiction does
@@ -161,9 +161,9 @@ npm run verify
 ## Follow-ups (out of scope this phase)
 
 - **Rest node naming** (`RestChoice` → The Confessor's House, `rest` →
-  the Hearth, `anvil` → the Anvil, `cut` → the Shears) — apply once Phase
-  52e ships. The `docs/retheme-map.json` pairs are already staged; a
-  future tick just needs `--write` and 52e's green light.
+  the Hearth, `anvil` → the Anvil, `cut` → the Shears) — Phase 52e has
+  shipped; the `docs/retheme-map.json` pairs are unstaged and ready. A
+  future tick just needs `--write`.
 - **Northern Forest region naming** — no spec anchor exists yet; a
   `/world-spec` session (per spec 34 §10 item 7's own suggestion, "if 44f
   finds that too thin a brief, a `/world-spec` session is the right

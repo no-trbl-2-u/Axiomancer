@@ -46,7 +46,7 @@ function hazardSession(store: AppStore): HazardSessionState {
     return s;
 }
 
-function restSession(store: AppStore): RestChoiceSession {
+function restChoiceSession(store: AppStore): RestChoiceSession {
     const s = store.getState().rest.session;
     if (!s) throw new Error('expected an active rest session');
     return s;
@@ -92,8 +92,8 @@ function scarThePlayer(store: AppStore, actions: AppActions): number {
 /** Commits the free `rest` offer, driving the node straight to its outcome. */
 function playRestToDawn(store: AppStore, actions: AppActions): void {
     actions.chooseRestChoiceOffer('rest');
-    if (restSession(store).phase !== 'outcome') {
-        throw new Error(`unexpected phase ${restSession(store).phase}`);
+    if (restChoiceSession(store).phase !== 'outcome') {
+        throw new Error(`unexpected phase ${restChoiceSession(store).phase}`);
     }
 }
 
@@ -201,7 +201,7 @@ describe('hazard scar recovery at inn rest', () => {
         } as never);
 
         expect(actions.resolveCurrentMapEvent()).toBe(true);
-        expect(restSession(store).shelter).toBe('inn');
+        expect(restChoiceSession(store).shelter).toBe('inn');
 
         playRestToDawn(store, actions);
         expect(actions.claimRestOutcome().scarMended).toBe(scar);
@@ -228,7 +228,7 @@ describe('hazard scar recovery at inn rest', () => {
         } as never);
 
         expect(actions.resolveCurrentMapEvent()).toBe(true);
-        expect(restSession(store).shelter).toBe('camp');
+        expect(restChoiceSession(store).shelter).toBe('camp');
 
         playRestToDawn(store, actions);
         expect(actions.claimRestOutcome().scarMended).toBe(0);

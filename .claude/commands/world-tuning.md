@@ -170,7 +170,10 @@ full node table so it can't drift from `content.ts`.
 **Doctrine:** `docs/world.md` · `CLAUDE.md` (load-bearing doctrine).
 
 **Related loops:** minigame-specific payload economies (hazard/gathering/
-rest/loot-cache/quest-board content fired FROM a map node) → their own
-sibling skills (`/hazard-tuning`, `/gathering-tuning`, `/rest-tuning`,
+loot-cache/quest-board content fired FROM a map node) → their own
+sibling skills (`/hazard-tuning`, `/gathering-tuning`,
 `/loot-cache-tuning`, `/quest-board-tuning`); this skill owns only the
-map-level pool weights and dispatch-level payload magnitudes.
+map-level pool weights and dispatch-level payload magnitudes. The rest
+node is a one-shot player choice (`World/RestChoice`), not a tuning
+loop — Phase 52f owns its shilling pricing, not this skill or a
+`rest-tuning` sibling (retired in Phase 52e).

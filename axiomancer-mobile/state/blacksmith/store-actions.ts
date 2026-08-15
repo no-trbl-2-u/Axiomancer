@@ -123,8 +123,8 @@ export function beginBlacksmithAction(store: AppStore, options: BeginBlacksmithO
  * other blacksmith visit.
  */
 export function beginRestAnvilHandoffAction(store: AppStore): boolean {
-    const restSession = store.getState().rest?.session;
-    if (!restSession || restSession.phase !== 'anvil-pick') return false;
+    const restChoiceSession = store.getState().rest?.session;
+    if (!restChoiceSession || restChoiceSession.phase !== 'anvil-pick') return false;
     return beginBlacksmithAction(store, { budget: Number.MAX_SAFE_INTEGER, handoff: 'rest-choice' });
 }
 
@@ -154,9 +154,9 @@ export function continueRestAnvilHandoffCardAction(store: AppStore): void {
         return;
     }
 
-    const restSession = store.getState().rest?.session;
-    if (restSession && restSession.phase === 'anvil-pick' && bs.card.verb !== 'swap') {
-        store.setState({ rest: { session: pickRestChoiceAnvil(restSession, bs.card.color, bs.card.verb) } });
+    const restChoiceSession = store.getState().rest?.session;
+    if (restChoiceSession && restChoiceSession.phase === 'anvil-pick' && bs.card.verb !== 'swap') {
+        store.setState({ rest: { session: pickRestChoiceAnvil(restChoiceSession, bs.card.color, bs.card.verb) } });
     }
     store.setState({ blacksmith: EMPTY_BLACKSMITH_SLICE });
 }

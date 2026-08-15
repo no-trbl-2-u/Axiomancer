@@ -463,8 +463,8 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
 // monotonous and unwinnable in playtests. The map now spreads 25 nodes across
 // a real mix, with encounters kept a slight plurality:
 //   - 7 ENCOUNTER nodes  (6 regular + the fv-6 boss — the spine),
-//   - 4 REST nodes       (recover HP — "The Night Watch"), one on the spine
-//                         just before the boss,
+//   - 4 REST nodes       (recover HP — the rest-choice node), one on the
+//                         spine just before the boss,
 //   - 4 GATHERING nodes  (low-risk materials — "The Gleaning"),
 //   - 3 HAZARD nodes     (light risk — the hazard minigame),
 //   - 3 LOOT-CACHE nodes (a few coins the tide left behind),

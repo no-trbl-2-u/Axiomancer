@@ -189,7 +189,7 @@ app/                       expo-router routes
   hazard/                  hazard minigame
   hazard-deck/             hazard deck builder
   gathering/               gathering minigame (The Gleaning)
-  rest/                    rest encounter (The Night Watch)
+  rest/                    rest-choice encounter (Phase 52d)
   cache/                   loot-cache encounter (The Reliquary)
   quest/                   quest-board minigame (The Boy's Almanac)
   dialogue/                NPC dialogue trees

@@ -901,14 +901,6 @@ export async function runGameCli(rawArgs = process.argv.slice(2)): Promise<void>
         return;
     }
 
-    // Subcommand: `npm run game -- rest [flags]` hands off to the standalone
-    // Night Watch driver, which owns its own flag set.
-    if (rawArgs[0] === 'rest') {
-        const { runRestCli } = await import('./rest.cli');
-        await runRestCli(rawArgs.slice(1));
-        return;
-    }
-
     // Subcommand: `npm run game -- loot-cache [flags]` hands off to the
     // standalone Reliquary driver, which owns its own flag set.
     if (rawArgs[0] === 'loot-cache') {

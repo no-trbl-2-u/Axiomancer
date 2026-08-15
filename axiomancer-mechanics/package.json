@@ -23,7 +23,6 @@
     "game": "ts-node src/CLI/game.cli.ts",
     "hazard": "ts-node src/CLI/game.cli.ts hazard",
     "gathering": "ts-node src/CLI/game.cli.ts gathering",
-    "rest": "ts-node src/CLI/game.cli.ts rest",
     "loot-cache": "ts-node src/CLI/game.cli.ts loot-cache",
     "quest-board": "ts-node src/CLI/game.cli.ts quest-board",
     "combat": "ts-node src/CLI/game.cli.ts combat",

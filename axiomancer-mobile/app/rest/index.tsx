@@ -1,5 +1,6 @@
 /**
- * /rest — the rest-choice screen (Phase 52d, replacing "The Night Watch").
+ * /rest — the rest-choice screen (Phase 52d, replacing the retired rest
+ * minigame — see Phase 52e).
  *
  * One irreversible choice of three: REST (free heal), THE ANVIL (paid
  * die-gear upgrade — hands off to the real `/blacksmith` screen for the

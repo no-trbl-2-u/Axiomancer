@@ -82,7 +82,7 @@ describe('map encounter → minigame routing (northern-forest)', () => {
         expect(selectPacedEventRoute(store.getState())).toBeNull();
     });
 
-    it('rest node opens "The Night Watch", not a paced /event', () => {
+    it('rest node opens the rest-choice session, not a paced /event', () => {
         const { store, actions } = makeStoreAndActions();
         seatAt(store, 'northern-forest', firstNodeOfKind('northern-forest', 'rest'));
 

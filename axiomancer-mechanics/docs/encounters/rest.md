@@ -1,5 +1,10 @@
 # Rest Encounter ("The Night Watch") — Mechanics Source of Truth
 
+> **Status:** HISTORICAL — the Night Watch minigame (`src/World/Rest/`) was
+> retired 2026-08-15 (Phase 52e), replaced by the rest-choice node
+> (`World/RestChoice`, Phase 52c-d). This document describes the retired
+> engine AS SHIPPED before retirement; it is not rewritten.
+>
 > Derived from `src/World/Rest/` as of 2026-06-15.
 > Phase 137 — Live.
 

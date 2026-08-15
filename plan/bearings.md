@@ -338,8 +338,10 @@ ambiguity.)
   a dead law.** Still live for the minigames:
   Gathering greed < restraint <
   skill; Loot-cache informed > blind > coward; Quest Board
-  naive-finishes / deliberate-finishes-well; Rest
-  meagre-but-never-lethal (posture gradient); Hazard -> CDR-0006
+  naive-finishes / deliberate-finishes-well; ~~Rest
+  meagre-but-never-lethal (posture gradient)~~ — **VOID, Phase 52e
+  retired the minigame (the rest-choice node replacing it is a
+  one-shot player pick, not a tuned balance curve)**; Hazard -> CDR-0006
   targets.
 - **Source-of-truth hierarchy:** T's latest explicit decision >
   ADRs/CDRs > build plan > candidates > critique/audit >

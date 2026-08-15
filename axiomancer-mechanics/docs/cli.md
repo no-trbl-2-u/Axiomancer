@@ -187,32 +187,6 @@ npm run gathering -- [flags]         # convenience alias
 | `--json-events` | Emit completion/summary events as JSON on stdout. |
 | `--state-log <path>` | Append a per-decision JSONL trace; illegal actions are logged as `illegalGatheringAction` with a full state snapshot. |
 
-### `rest.cli.ts` - Rest Mini-Game Driver
-
-A standalone driver for the rest mini-game ("The Night Watch"), reachable as a
-**subcommand** of the game CLI. It reuses the same `io.ts` layer as the other
-play-loop CLIs.
-
-**Usage:**
-```bash
-npm run game -- rest [flags]
-npm run rest -- [flags]              # convenience alias
-```
-
-**Flags:**
-
-| Flag | Effect |
-| --- | --- |
-| `--posture deep\|doze\|watch` | The night's posture. Prompts when omitted. |
-| `--auto` | The balance sim's policy plays the night (the posture picks the bot: `deep` → deep-sleeper, `watch` → watcher, `doze` → fire-tender). |
-| `--base-heal <f>` | The authored map-event baseline heal fraction (default **1.0**) scaling the whole night. |
-| `--seed <n\|str>` | Seed the engine's embedded RNG so a run is fully reproducible. |
-| `--runs <n>` | Play N nights back-to-back (default **5**). |
-| `--script <path>` | Scripted answers (JSON array), as in `game.cli.ts`. |
-| `--stdin` | Line-buffered stdin answers. |
-| `--json-events` | Emit `rest:complete` / `rest:summary` events as JSON on stdout. |
-| `--state-log <path>` | Append a per-decision JSONL trace; illegal actions are logged as `illegalRestAction` with a full state snapshot. |
-
 ### `lootcache.cli.ts` - Loot Cache Mini-Game Driver
 
 A standalone driver for the loot-cache push-your-luck mini-game ("The

@@ -1,5 +1,10 @@
 # Rest Encounter ("The Night Watch") — Mobile UX Source of Truth
 
+> **Status:** HISTORICAL — the Night Watch minigame at these same route/file
+> paths was retired 2026-08-15 (Phase 52e) and replaced in place by the
+> rest-choice screen (Phase 52d). This document describes the retired UI AS
+> SHIPPED before replacement; it is not rewritten.
+>
 > Derived from `app/rest/index.tsx`, `state/presenters/rest.engine.ts`,
 > and `state/rest/store-actions.ts` as of 2026-06-15.
 >

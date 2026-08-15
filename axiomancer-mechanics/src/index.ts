@@ -423,18 +423,16 @@ export * from './World/Gathering';
 // Seeded-RNG helpers are aliased (`questBoard*`) per the same doctrine.
 export * from './World/QuestBoard';
 
-// Rest encounter ("The Night Watch" — one night at camp in three watches)
-// and Loot-cache encounter ("The Reliquary" — three layers, sealed trap
-// fates, one probe). RNG aliased `rest*` / `lootCache*`.
-export * from './World/Rest';
+// Loot-cache encounter ("The Reliquary" — three layers, sealed trap
+// fates, one probe). RNG aliased `lootCache*`.
 export * from './World/LootCache';
 // Blacksmith encounter ("The Anvil" — Spec 33 §6 die-gear upgrades: HONE /
 // TEMPER / gear swap). RNG aliased `blacksmith*`.
 export * from './World/Blacksmith';
-// Rest-choice encounter (Phase 52c) — the rest node's replacement for the
-// Night Watch's silent heal: one irreversible choice of `rest` / `anvil` /
-// `cut`, composing the Blacksmith engine and the Cards/card.removal
-// primitive rather than rebuilding either.
+// Rest-choice encounter (Phase 52c-d) — the rest node's one irreversible
+// choice of `rest` / `anvil` / `cut`, composing the Blacksmith engine and
+// the Cards/card.removal primitive rather than rebuilding either. Replaced
+// the former rest minigame, retired in Phase 52e.
 export * from './World/RestChoice';
 export {
     changeMap, completeMap, unlockMap,

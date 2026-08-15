@@ -26,8 +26,10 @@ function v15Save(): Record<string, unknown> {
 }
 
 describe('Phase 52a — migrate v15 → v16: default the card-removal counter', () => {
-    it('the runtime version is 16', () => {
-        expect(GAME_STATE_VERSION).toBe(16);
+    it('the v15 → v16 hop is still on the supported chain', () => {
+        // The runtime version moves on (Phase 52e took it to 17); what this
+        // suite owns is that the 52a hop survives every later bump.
+        expect(GAME_STATE_VERSION).toBeGreaterThanOrEqual(16);
     });
 
     it('a v15 save loads clean at v16 with cardRemovals reading 0', () => {

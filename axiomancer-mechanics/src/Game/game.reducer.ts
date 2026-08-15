@@ -75,8 +75,16 @@ import { STARTING_CARD_IDS } from '../Combat/combat.rewards';
  *   The migration materialises it to 0 on older saves (see `game.migrate.ts`);
  *   the field stays sparse-optional on fresh characters, and `cardRemovalsOf`
  *   is the seam that reads both shapes as 0.
+ * Phase 52e — bumped 16 → 17: retired the rest minigame ("The Night
+ *   Watch"). Drops the dead `night-watch-tutorial-done` flag and clears
+ *   any live rest-minigame session riding along in `flags` / the raw
+ *   payload's `rest` key (a mobile-only slice, not a `GameState` field —
+ *   the old `RestSession` shape is gone, so a stale one must not survive
+ *   into the rest-choice screen's presenter). `night-keepsake:*` flags
+ *   are untouched — `/memoir`'s REMAINS section still reads them back
+ *   (see `game.migrate.ts`).
  */
-export const GAME_STATE_VERSION = 16;
+export const GAME_STATE_VERSION = 17;
 
 /** Builds a brand-new GameState with default player and world. */
 export function createNewGameState(): GameState {

@@ -99,9 +99,8 @@ export type { ApplyDialogueChoiceResult } from './dialogue.runtime';
 // Hazard Minigame (Phase 131)
 export * from './Hazard';
 
-// Quest Board minigame, Rest encounter, Loot-cache encounter (Phase 137)
+// Quest Board minigame, Loot-cache encounter (Phase 137)
 export * from './QuestBoard';
-export * from './Rest';
 export * from './LootCache';
 
 // Gathering Minigame (Phase 142)

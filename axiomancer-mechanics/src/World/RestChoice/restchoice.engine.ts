@@ -1,7 +1,7 @@
 /**
  * Rest-choice engine ("rest" / "anvil" / "cut") — pure engine transitions.
  *
- * Replaces the Night Watch's silent per-node heal with T's ruling (attended
+ * Replaces the former rest minigame's silent per-node heal with T's ruling (attended
  * chat, 2026-08-08): a rest node is one irreversible choice of three. State
  * machine:
  *

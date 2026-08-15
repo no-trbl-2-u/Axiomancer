@@ -58,9 +58,10 @@ systems.
 
 ### Shipped (v1 surface)
 
-The engine (`axiomancer-mechanics` v0.37.0) ships six standalone
+The engine (`axiomancer-mechanics` v0.37.0) ships five standalone
 encounter drivers, each with its own CLI subcommand, seeded
-engine, content library, tuning loop, and hermetic e2e tests:
+engine, content library, tuning loop, and hermetic e2e tests, plus
+one pure-choice rest node with no standalone driver:
 
 - **Hazard-Pattern Combat** — the primary combat system (Spec
   25/26, Spec 32 v3). Card-and-dice; the enemy has ONE bar = HP;
@@ -70,7 +71,9 @@ engine, content library, tuning loop, and hermetic e2e tests:
   is the **sole** win condition.
 - **Hazard minigame** ("v2") — environmental hazard card game.
 - **Gathering** — "The Gleaning."
-- **Rest** — "The Night Watch" (three watches at camp).
+- **Rest** — the rest-choice node (Phase 52c-d): one irreversible
+  choice of heal / anvil / cut. Retired the former rest minigame
+  (Phase 52e).
 - **Loot-cache** — "The Reliquary" (three layers, one probe).
 - **Quest Board** — "The Boy's Almanac" (authored tabletop
   board).

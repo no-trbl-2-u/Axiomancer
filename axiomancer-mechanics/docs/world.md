@@ -129,18 +129,20 @@ values ('quest' joined the original eight in Phase 137; 'narration' joined in 20
 | `none`         | Consumed node (one-shot) or no pool registered.                            |
 
 Note (Phase 137): the engine handlers above remain the CLI map loop's
-behaviour. The mobile host intercepts `rest` / `gathering` / `loot-cache` /
+behaviour. The mobile host intercepts `gathering` / `loot-cache` /
 `hazard` / `quest` results and launches the dedicated minigames instead
-(`World/Rest` "The Night Watch", `World/Gathering` "The Gleaning",
-`World/LootCache` "The Reliquary", `World/Hazard`, `World/QuestBoard`
-"The Boy's Almanac").
+(`World/Gathering` "The Gleaning", `World/LootCache` "The Reliquary",
+`World/Hazard`, `World/QuestBoard` "The Boy's Almanac"); `rest` results
+launch the rest-choice screen (`World/RestChoice`, Phase 52c-d), which
+retired the former rest minigame in Phase 52e.
 
 Standalone CLI play loops (Phase 160b / 160c): the pure minigame engines are
 also driveable directly from the Node host as game-CLI subcommands —
-`npm run gathering`, `npm run hazard`, `npm run rest` (The Night Watch),
-`npm run loot-cache` (The Reliquary), and `npm run quest-board` (The Boy's
-Almanac — `--policy safe|gambler|economist`, `--board <id>`, charms / vows /
-bone rolls / nine space kinds / dusk). Each shares the `src/CLI/io.ts` layer
+`npm run gathering`, `npm run hazard`, `npm run loot-cache` (The Reliquary),
+and `npm run quest-board` (The Boy's Almanac — `--policy safe|gambler|economist`,
+`--board <id>`, charms / vows / bone rolls / nine space kinds / dusk).
+The rest-choice node (Phase 52c-d) has no standalone CLI driver — it is a
+one-shot player choice, not a dealt/replayable session. Each shares the `src/CLI/io.ts` layer
 (`--script` JSON / `--stdin` / `--json-events` / `--state-log`) and an
 `--auto` policy that reuses the matching `*.sim.ts` bot, so a person, a
 replay file, or an agent all drive them through one surface. The hazard
@@ -434,23 +436,15 @@ const report = generateGatheringBalanceReport(400);
 
 Balance bands are verified in `src/World/Gathering/e2e/gathering.balance.sim.test.ts` to ensure tuning changes don't break the incentive gradient where **blind greed < timid restraint < skilled push-your-luck**.
 
-## Rest & Loot-Cache Balance Simulation (Phase 160)
+## Loot-Cache Balance Simulation (Phase 160)
 
-The remaining Phase 137 minigames each gained a deterministic policy-bot sim
-(`rest.sim.ts`, `lootcache.sim.ts`), mirroring the gathering/hazard pattern.
-Together with `quest-board.sim.ts` this gives every minigame a real sim for the
-`rest-tuning` / `loot-cache-tuning` cards to drive.
-
-### Rest ("The Night Watch") — `rest.sim.ts`
-
-Rest is the gentle minigame: a night can be MEAGRE but never lethal, so the
-bands encode a heal-RICHNESS gradient, not a risk-of-ruin axis. Three posture
-bots: **`watcher`** (leanest heal, safest, finds the most keepsakes) <
-**`deep-sleeper`** (rich baseHeal, pays for stirs unwatched) <
-**`fire-tender`** (banks warmth into heal *and* the cleanse line — the skilled
-take). `runRestSim(options)` and `generateRestBalanceReport(runs)` return
-heal-fraction / tier-rate / cleanse-rate / keepsake metrics. Bands verified in
-`src/World/Rest/e2e/rest.balance.sim.test.ts`.
+The remaining Phase 137 minigame gained a deterministic policy-bot sim
+(`lootcache.sim.ts`), mirroring the gathering/hazard pattern. Together with
+`quest-board.sim.ts` this gives every minigame a real sim for the
+`loot-cache-tuning` card to drive. The rest minigame's `rest.sim.ts` and the
+`rest-tuning` card it fed were retired in Phase 52e — the rest node is now a
+one-shot, deterministic player choice (`World/RestChoice`), not a
+balance-simulated minigame.
 
 ### Loot-Cache ("The Reliquary") — `lootcache.sim.ts`
 

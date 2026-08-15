@@ -8,9 +8,10 @@
  * targeted chain: v11 → v12 (Phase 18, re-slot equipment to the 5-slot model),
  * v12 → v13 (Phase 19, seed the signet relics), v13 → v14 (Phase 21, purge
  * non-relic equipment now that the procedural library is retired), v14 → v15
- * (Phase D5, backfill the die-gear rail), and v15 → v16 (Phase 52a, default
- * the per-run card-removal counter). The hops chain, so a v11 save lands at
- * v16 in one `migrate` call. Every other version mismatch still rejects.
+ * (Phase D5, backfill the die-gear rail), v15 → v16 (Phase 52a, default
+ * the per-run card-removal counter), and v16 → v17 (Phase 52e, retire the
+ * rest minigame). The hops chain, so a v11 save lands at v17 in one
+ * `migrate` call. Every other version mismatch still rejects.
  */
 
 import { GameState } from './types';
@@ -217,6 +218,30 @@ function migrateV15ToV16(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
+ * v16 → v17 (Phase 52e): retire the rest minigame.
+ * Drops the dead `night-watch-tutorial-done` tutorial flag (the tutorial
+ * screen it gated is deleted). Clears a live rest-minigame session that
+ * rode along in the raw payload's `rest` key — that key is a mobile-only
+ * store slice, not a formal `GameState` field, so it is untyped here; a
+ * player mid-night at update time simply lands with the node consumed and
+ * no pending choice, same as `resolveMapEvent` already consuming the node
+ * on entry. `night-keepsake:*` flags are LEFT ALONE — `/memoir`'s REMAINS
+ * section reads them back, and they are the only trace of the retired
+ * system a player should still see. Pure over a raw save payload.
+ */
+function migrateV16ToV17(raw: Record<string, unknown>): Record<string, unknown> {
+    const flags = Array.isArray(raw.flags)
+        ? (raw.flags as unknown[]).filter(f => f !== 'night-watch-tutorial-done')
+        : raw.flags;
+    const { rest: _staleRestSession, ...withoutRest } = raw;
+    return {
+        ...withoutRest,
+        flags,
+        version: 17,
+    };
+}
+
+/**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
  * game). The name/signature is kept so the persistence layer's call site is
@@ -243,7 +268,8 @@ export function migrate(
     // Supported hops: v11 → v12 re-slots equipment to the Phase-18 model; v12 →
     // v13 seeds the Phase-19 signet relics; v13 → v14 purges non-relic gear;
     // v14 → v15 backfills the die-gear rail; v15 → v16 defaults the card-removal
-    // counter. Chained so a v11 save lands at v16 in one call.
+    // counter; v16 → v17 retires the rest minigame. Chained so a v11 save lands
+    // at v17 in one call.
     if (version === 11 && toVersion >= 12) {
         working = migrateV11ToV12(working);
         version = 12;
@@ -263,6 +289,10 @@ export function migrate(
     if (version === 15 && toVersion >= 16) {
         working = migrateV15ToV16(working);
         version = 16;
+    }
+    if (version === 16 && toVersion >= 17) {
+        working = migrateV16ToV17(working);
+        version = 17;
     }
 
     if (version !== toVersion) {

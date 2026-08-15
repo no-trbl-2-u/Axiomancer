@@ -606,9 +606,9 @@ function composeNarrative(resolved: ResolvedEvent): Omit<EventViewModel, 'prelud
         // Dead-end kinds (Phase 137 cleanup): rest / gathering /
         // loot-cache / hazard / quest never reach the event slice —
         // `resolveCurrentMapEventAction` intercepts them and starts
-        // their minigame sessions instead ("The Night Watch", "The
-        // Gleaning", "The Reliquary", the hazard board, "The Boy's
-        // Almanac"). 'encounter' renders through the combat-prelude
+        // their minigame/choice sessions instead (the rest-choice
+        // node, "The Gleaning", "The Reliquary", the hazard board,
+        // "The Boy's Almanac"). 'encounter' renders through the combat-prelude
         // path before composeNarrative is reached; 'none' is guarded
         // by selectHasActiveEvent. All fall to the empty VM
         // defensively.

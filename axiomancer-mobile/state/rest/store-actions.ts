@@ -1,6 +1,6 @@
 /**
- * Rest-choice encounter — store action glue (Phase 52d, replacing "The
- * Night Watch").
+ * Rest-choice encounter — store action glue (Phase 52d, replacing the
+ * retired rest minigame — see Phase 52e).
  *
  * The pure engine lives in `axiomancer-mechanics` (World/RestChoice); these
  * wrappers thread a rest node's one irreversible choice — `rest` (free
@@ -8,7 +8,7 @@
  * through the mobile `rest` slice and, at claim, apply the settled ledger
  * to the real `GameState`: heal, shillings spent, `cardRemovals`
  * incremented, the die-gear rail written to `Character.dieGear`, and the
- * inn scar-mend preserved from the retired Night Watch (Phase 52b).
+ * inn scar-mend preserved from the retired rest minigame (Phase 52b).
  *
  * The `anvil` offer hands off to the REAL `/blacksmith` screen (Spec 33 §6)
  * rather than duplicating a picker here — see `beginRestAnvilHandoffAction`

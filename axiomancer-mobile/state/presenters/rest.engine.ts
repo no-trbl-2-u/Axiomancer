@@ -1,5 +1,6 @@
 /**
- * Rest-choice presenter (Phase 52d, replacing "The Night Watch") — maps
+ * Rest-choice presenter (Phase 52d, replacing the retired rest minigame —
+ * see Phase 52e) — maps
  * the engine session (`axiomancer-mechanics` World/RestChoice) onto a
  * render-ready view-model. Pure: no store writes, no rolls, no rule
  * decisions.

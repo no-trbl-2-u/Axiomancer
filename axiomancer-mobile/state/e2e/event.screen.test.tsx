@@ -141,8 +141,8 @@ describe('EventScreen render', () => {
         expect(flee.props.accessibilityState?.disabled).toBe(true);
     });
 
-    // Phase 137 cleanup — rest events launch "The Night Watch" via the
-    // resolve interceptor and never reach this modal; a rest result in
+    // Phase 137 cleanup — rest events launch the rest-choice session via
+    // the resolve interceptor and never reach this modal; a rest result in
     // the slice renders the defensive empty composition (no choices).
     it('renders a rest result as the empty composition (Phase 137)', () => {
         const store = makeStore();

@@ -11,7 +11,6 @@ import { describe, expect, it } from 'vitest';
 import { createHazardSession } from '../Hazard/hazard.engine';
 import { hazardStarterBag } from '../Hazard/hazard.deck-flags';
 import { createGatheringSession } from '../Gathering/gathering.engine';
-import { createRestSession } from '../Rest/rest.engine';
 import { createLootCacheSession } from '../LootCache/lootcache.engine';
 import { createQuestBoardSession } from '../QuestBoard/quest-board.engine';
 import { minigameRunSeed, seedInputToUint32, type SeedInput } from '../seed';
@@ -53,9 +52,10 @@ describe('minigame engine seed contract', () => {
         expectReplayable('Gathering', seed => createGatheringSession(seed, 'mire-mint'));
     });
 
-    it('Rest sessions accept string seeds and replay dealt state', () => {
-        expectReplayable('Rest', seed => createRestSession(seed));
-    });
+    // Rest-choice (Phase 52c-d, replacing the retired rest minigame — Phase
+    // 52e) has no entry here: `createRestChoiceSession` and the `hone` /
+    // `temper` anvil verbs are deterministic given their inputs — no dealt
+    // state depends on the seed, so this contract doesn't apply to it.
 
     it('LootCache sessions accept string seeds and replay sealed trap fates', () => {
         expectReplayable('LootCache', seed => createLootCacheSession(seed, [{ uid: 'i1', name: 'Iron Charm' }], 6));

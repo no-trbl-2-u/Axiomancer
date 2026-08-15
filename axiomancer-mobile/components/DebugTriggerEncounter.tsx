@@ -199,7 +199,7 @@ export function DebugTriggerEncounter() {
                 actions.beginHazard();
                 return;
             case 'rest':
-                // "The Night Watch" — <RestGate> routes to /rest. Mirror
+                // The rest-choice node — <RestGate> routes to /rest. Mirror
                 // the live interceptor's default shelter (Phase 52b: a
                 // node that forgot to say is wilderness).
                 actions.beginRest({ shelter: 'camp' });

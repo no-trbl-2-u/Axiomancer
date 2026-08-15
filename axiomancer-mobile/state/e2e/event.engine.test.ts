@@ -362,8 +362,8 @@ describe('selectEventViewModel: combat-prelude composition', () => {
         }
     });
 
-    // Phase 137 cleanup — rest events launch "The Night Watch"
-    // minigame via the resolve interceptor and never reach the modal;
+    // Phase 137 cleanup — rest events launch the rest-choice session
+    // via the resolve interceptor and never reach the modal;
     // a rest result that somehow lands in the slice composes to the
     // empty VM rather than the old "A FIRE LOWERS" hearth card.
     it('a rest result in the slice composes to the empty VM (Phase 137)', () => {
@@ -555,9 +555,9 @@ describe('selectEventViewModel: referential stability (Maximum-update-depth guar
 
 describe('selectEventViewModel: narrative-choice composition', () => {
     // Phase 137 cleanup — rest / gathering / loot-cache events are
-    // intercepted in resolveCurrentMapEventAction (they launch "The
-    // Night Watch" / "The Gleaning" / "The Reliquary") and never reach
-    // the modal. The composer treats them as dead-end kinds.
+    // intercepted in resolveCurrentMapEventAction (they launch the
+    // rest-choice session / "The Gleaning" / "The Reliquary") and never
+    // reach the modal. The composer treats them as dead-end kinds.
     it('composes minigame-intercepted kinds (rest / gathering / loot-cache) to the empty VM', () => {
         const store = makeStore();
         for (const result of [makeRestResult(7), makeGatheringResult(), makeLootCacheResult()]) {

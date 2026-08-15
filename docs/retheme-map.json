@@ -31,10 +31,10 @@
     { "kind": "signature-skill", "old": "Conclusion", "new": "The Butcher's Bill", "ruling": "§5.5", "applies": "44c", "id": "sig-rallying-blow" },
     { "kind": "signature-skill", "old": "Clever Gambit", "new": "Cold Counsel", "ruling": "§5.5", "applies": "44c", "id": "sig-clever-gambit" },
     { "kind": "enemy", "old": "The Incompleteness", "new": "The Unfinished", "ruling": "§5.7", "applies": "44e", "id": "enemy-the-incompleteness", "note": "display name only; L110 calibration weights (0.21/0.232/0.271/0.326) untouched" },
-    { "kind": "world-node", "old": "RestChoice", "new": "The Confessor's House", "ruling": "§5.8", "applies": "44f", "note": "display name only; working id RestChoice unchanged. DO NOT APPLY until Phase 52e (Night Watch retirement) has shipped — 44f's row says retheme nothing about rest before then" },
-    { "kind": "world-node-offer", "old": "rest", "new": "the Hearth", "ruling": "§5.8", "applies": "44f", "note": "offer id 'rest' unchanged; gated on 52e per the world-node entry above" },
-    { "kind": "world-node-offer", "old": "anvil", "new": "the Anvil", "ruling": "§5.8", "applies": "44f", "note": "offer id 'anvil' unchanged; gated on 52e per the world-node entry above" },
-    { "kind": "world-node-offer", "old": "cut", "new": "the Shears", "ruling": "§5.8", "applies": "44f", "note": "offer id 'cut' unchanged; gated on 52e per the world-node entry above" }
+    { "kind": "world-node", "old": "RestChoice", "new": "The Confessor's House", "ruling": "§5.8", "applies": "44f", "note": "display name only; working id RestChoice unchanged. Phase 52e (rest minigame retirement) has shipped — 44f's gate is now clear" },
+    { "kind": "world-node-offer", "old": "rest", "new": "the Hearth", "ruling": "§5.8", "applies": "44f", "note": "offer id 'rest' unchanged; 52e has shipped, gate clear" },
+    { "kind": "world-node-offer", "old": "anvil", "new": "the Anvil", "ruling": "§5.8", "applies": "44f", "note": "offer id 'anvil' unchanged; 52e has shipped, gate clear" },
+    { "kind": "world-node-offer", "old": "cut", "new": "the Shears", "ruling": "§5.8", "applies": "44f", "note": "offer id 'cut' unchanged; 52e has shipped, gate clear" }
   ],
   "ids": [
     { "kind": "card-id-prefix", "old": "tf-", "new": "ht-", "ruling": "R-13", "applies": "44c" },

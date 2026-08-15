@@ -109,8 +109,8 @@ export interface MobileQuestSlice {
 }
 
 /**
- * Mobile-only Rest-choice slice (Phase 52d, replacing "The Night
- * Watch"). Holds the active rest node's session (engine:
+ * Mobile-only Rest-choice slice (Phase 52d, replacing the rest minigame
+ * retired in Phase 52e). Holds the active rest node's session (engine:
  * World/RestChoice) — `null` outside a rest. A node is one
  * irreversible choice of `rest` / `anvil` / `cut`; the shelter class
  * (Phase 52b) rides on the session itself (`session.shelter`), not a
