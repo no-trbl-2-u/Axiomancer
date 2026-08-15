@@ -82,3 +82,60 @@ rules:
 3. If T keeps "Axiomancer," no further action — the row closes on the
    strength of NL-9's existing KEEP ruling, now with an actual
    considered "why" behind it instead of a technicality.
+
+## 5. Second candidate pass (added via `/oversight` 2026-08-15)
+
+T was shown §3 and asked for more candidates — the first pass was not
+the right set. Reading §3 back, its weakness is narrowness rather than
+quality: four of its six entries are either an `Oath-` derivative or a
+bare liturgical noun, so it offered one direction twice rather than
+several directions once. This pass widens the *kinds* of name on the
+table. It is still not a ranked recommendation.
+
+**Every candidate below was collision-checked** against the live
+30-keyword registry (`axio_keywords`), the locked-system words, and the
+authored content in `axiomancer-mechanics/src` + `axiomancer-mobile/src`
+on 2026-08-15. Names already spoken for in-fiction were dropped during
+that check rather than listed and caveated: **Requiem**, **Miserere**,
+**Ossuary** (Ossuary Sermon, Ossuary Drawer), **Anathema** (Anathema
+Brand) and **Vigil** are all live authored content — and `VIGIL` appears
+upper-cased in engine source, so it is an NL-8 collision outright, not
+merely a reuse. The six below return zero hits in both source trees.
+
+### Direction A — the liturgical hours, done better than *Vespers*
+
+| Candidate | Rationale | Risk / trade-off |
+|---|---|---|
+| **Compline** | The last office of the day — the prayer said before sleep, against the dark. Same shape as *Vespers* but a sharper thematic fit for a game about pressing on into night, and a rarer word, so it is ownable as a search term and a store listing in a way *Vespers* (a common word, many products) is not. | Obscure to anyone outside a liturgical background; carries no hint that this is a game about cards or combat. |
+| **Viaticum** | The provision given to a traveller — and, in its liturgical sense, the last rite administered to the dying. A run-based campaign where you carry what you can and may not come back is *exactly* this word; it is the rare case where the archaic term is a more literal description of the mechanic than a modern one would be. | Four syllables and Latin-looking; hardest of the six to read at a glance on a store tile. |
+
+### Direction B — architecture, not liturgy
+
+| Candidate | Rationale | Risk / trade-off |
+|---|---|---|
+| **Lychgate** | The roofed gate at a churchyard's edge where the dead were set down before burial — a *threshold* word. Reads as gothic without any religious-observance knowledge required, and threshold-crossing is the campaign's actual structure (village → labyrinth → beyond). Compact, one word, strong logo shape. | Slightly better known in Britain than elsewhere; a portion of players will read it as invented rather than real. |
+| **Sepulchre** | Tomb, sung-hard and immediately legible as dark fantasy to a player who knows nothing of the game's vocabulary. The most *marketable* candidate on either pass — it does the genre signalling that neither *Vespers* nor *Compline* does. | The least distinctive: it signals the genre by being genre-generic, and dark-fantasy shelves are crowded with tomb words. Weakest trademark position of the six. |
+
+### Direction C — the game's own shipped language
+
+| Candidate | Rationale | Risk / trade-off |
+|---|---|---|
+| **Cold Iron** | Two plain, hard, Anglo-Saxon words — and already the game's own: the title screen tagline shipped on 2026-08-14 (`0f408571`) reads "Carry your ancient knowledge and **cold iron** into the LEAGUES beyond." A title that is already sitting on the title screen has a rightness no coinage can buy, and it is the one candidate on either pass that needs no glossary from anybody. | Not liturgical at all — it steps outside the cathedral register that the Parish, GRACE and THE OATHS all live in. Also the most generic *as a string*: "cold iron" is folklore-common and hard to own as a mark. |
+| **Threnody** | A song of lamentation for the dead. Keeps the single-word, musical-liturgical shape of *Vespers*/*Compline* while being the only candidate that names an *act of grief* rather than a rite, an hour, or a place — closest in spirit to a game whose morality system is GRACE and whose failures are meant to land. | Same legibility problem as *Compline*, and it reads a touch more literary/soft than the game's woodcut-and-iron visual direction. |
+
+### What this pass deliberately did not do
+
+- **No `-mancer` coinage.** §3's *Oathmancer* was the compromise
+  candidate; if T wanted the "-mancer" shape retained, keeping
+  "Axiomancer" outright is strictly cheaper than minting a new one.
+- **No region names.** §3's *The Drowned Parish* already tested that
+  direction and its own trade-off (binding the product to map one)
+  applies to every other region name equally.
+- **No two-part "Name: Subtitle" constructions.** They are worth
+  reaching for only once the single-word question is settled — a
+  subtitle can be added to any of these later without re-opening this.
+
+If none of these is right either, the useful next move is probably for T
+to name a *direction* (or a title from another game whose naming feels
+right) rather than react to a third list — two passes of cold candidates
+is roughly where that stops being the efficient format.

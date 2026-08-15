@@ -17,34 +17,25 @@ block to find the next phase. Status vocabulary: `[ ]` pending
 `/oversight` unblocks it); `[-]` partial-with-carry-overs.
 Tick in this file in the same commit that ships the phase.
 
-> **AUDIT-DRAIN MODE (set via /oversight 2026-08-12 — T: "focus the
-> march loop on closing the rest out").** Every `[ ]` row below stays
-> pending but is queue-wide paused: `/march` Step 3a should NOT dispatch
-> to `ship-a-phase` while this banner stands, even though rows remain
-> `[ ]` (this is a whole-queue hold, not per-phase `[blocked]` —
-> individual rows keep their real status so nothing looks abandoned).
-> Fall through past 3a to `/expand`'s normal gating and then
-> `/iterate`, so the loop spends its ticks draining
-> `plan/AUDIT.md`'s Pending queue (a same-day /oversight pass
-> re-verified the ~45 non-historical Pending rows against current code
-> and pruned/promoted what it could — see that file's own header for
-> the live count) instead of shipping new phases. **Note on timing:**
-> when this banner was drafted, Phase 44i was still unshipped and the
-> intent was to hold it too — but the scheduled `march` retried past
-> its earlier CI hiccup (transient Bun-install network failure,
-> unrelated to this banner) and shipped 44i in the same window this
-> banner was being written and pushed, so 44i landed on `main` as
-> `[x]` before the banner did. Left as-is rather than reverted — the
-> ship was already clean and in flight, and the banner's job starts
-> from here forward, not retroactively. Every OTHER `[ ]` row below
-> holds. **One exception:
-> Phase 55** (below) — promoted this same oversight pass specifically
-> to close out the AUDIT queue's stuck top-score row, small/already-
-> scoped (docs + one selector fix) — may ship on its normal turn; it
-> counts as "closing the rest out," not new work, so the banner doesn't
-> hold it. Lift the banner itself via `/oversight` once
-> `plan/AUDIT.md`'s Pending queue is meaningfully clear (or T calls it
-> off directly).
+> **AUDIT-DRAIN MODE LIFTED (via /oversight 2026-08-15 — T called it
+> off).** The banner set 2026-08-12 paused `ship-a-phase` dispatch
+> queue-wide so `/march` would fall through to `/iterate` and drain
+> `plan/AUDIT.md`'s Pending queue. It is no longer in force: `/march`
+> Step 3a dispatches normally again, and every `[ ]` row below is
+> pickable on its ordinary turn.
+>
+> **Why it was lifted, recorded honestly.** It did not hold. Phases 52c
+> and 52d shipped 2026-08-13 and 52e on 2026-08-15, none of them the
+> banner's single named exception (Phase 55), while the drain the hold
+> was meant to force closed exactly one AUDIT row in three days
+> (`c297d92`). T's ruling on being shown that: lift it — a hold nothing
+> obeys is worse than no hold, and the queue was already voting with its
+> feet. AUDIT rows keep draining through `/iterate` on its normal turns
+> in the `/march` rotation, which is where that work belonged all along.
+> No category bias was set; `/iterate` works top-down by score.
+> (Historical note kept from the original banner: Phase 44i shipped in
+> the same window the banner was being written, before it landed on
+> `main`, and was left as-is rather than reverted.)
 
 **Already shipped (pre-loop):**
 - [x] Phase 0 — nexus methodology adoption (unified loop harness,
@@ -1749,6 +1740,66 @@ RESEQUENCED the same day behind the unshackling — see above):**
       server plus the nearest MCP smoke test. (mechanics; docs + small
       code fix) Brief: to generate.
 
+**Promoted via `/oversight` 2026-08-15 (T direct, attended web session):**
+
+- [ ] Phase 56 — The dice valves under-sink: add the starter Press Fate
+      grant alongside them. **This supersedes the 2026-07-18 valves-only
+      ruling, on that ruling's own terms.** Phase D8 shipped one dice
+      valve into every starter preset and was declared the F3 sink, with
+      an explicit revisit condition written into its row: "no starter
+      Press Fate grant **unless the re-test shows the valves
+      under-sink**." The post-D8 nightlies are that re-test and they read
+      under-sink — the first default-Upgradeable-Dice nightly (digest
+      2026-07-30) found mid in near-total collapse and late dead flat,
+      and the same mid-0.0 / late-0 shape then held for six straight
+      reduced-nightly reads through 2026-08-07 (see `plan/AUDIT.md`'s
+      Doctrine-curve confirmation rows). The original D7 diagnosis
+      (`plan/tuning/2026-07-18-d7-ratification.md` §10) still describes
+      the mechanism: `sig-press-the-point` is on no starter loadout
+      (verified still true 2026-08-15 — no `sig-press-the-point`
+      reference exists in any loadout/preset source), so Press Fate
+      fires 0.000×/round and the leaner economy's ◆ specials have
+      nowhere to go. **T ruled 2026-08-15, offered the two mechanisms
+      and choosing both:** (1) grant `sig-press-the-point` on starter
+      loadouts, and (2) promote a dice-valve reroll card into the preset
+      recipe — which also drains the deferred `dice-valves-33`
+      promotion. Then re-run the D7 curve/economy witnesses. Expect the
+      flag-not-ready canaries in `combat-dice-economy.sim.test.ts` to go
+      red once the sink is live; that is the phase working, not a
+      regression. **Attribution caveat, since both levers land at once:**
+      measure them separately before the combined read (grant-only, then
+      promote-only, then both) so a curve move can be traced to a lever.
+      Note the D7 flag is already flipped on (Phase D-FLIP, 2026-07-18) —
+      this phase repairs the shipped default's curve, it does not gate a
+      flip. Entangled and still separate: the signature flag-gated cost
+      machinery (D3's 2/3/4 table) and the between-combat souls economy
+      pass. (mechanics; balance-critical, matrix evidence required)
+      Brief: to generate.
+
+- [ ] Phase 57 — Stop publishing the private DevLog: the in-repo half of
+      the Pages scope-down. `plan/AUDIT.md`'s divergence row (impact 8)
+      confirmed on 2026-08-12 that `https://axiomancer.pages.dev` serves
+      `/devlog/log.html` — generated HTML whose own header reads "A
+      private index of the game's content and the nightly development
+      log" — **live and unauthenticated on the production domain**.
+      T ruled "incidental, scope it down" on 2026-08-10; five days on,
+      nothing had changed, because the row's own "next" note said the fix
+      needs an infra actor outside this repo and so no loop verb picked
+      it up. **T ruled 2026-08-15: queue the in-repo half now.** Scope:
+      stop `.github/workflows/build-devlog.yml` committing generated
+      DevLog HTML to `main` for Pages to serve (artifact-only, or an
+      unserved path — pick whichever keeps the DevLog reachable to the
+      humans who use it), and add a check that fails if DevLog HTML
+      reappears in the served tree. That removes the private content from
+      what Pages publishes without needing dashboard access. **Explicitly
+      out of scope and still needing a human at the Cloudflare
+      dashboard:** restricting or disabling the Pages project itself, and
+      the per-branch `https://<branch-slug>.axiomancer.pages.dev` preview
+      URLs, which stay guessable-from-a-branch-name after this phase
+      ships. Do not close the AUDIT row on this phase alone — it drains
+      the half that lives in this repo. (infra/CI; small, no engine risk)
+      Brief: to generate.
+
 > **Note (issue-triage 2026-07-19):** issue #132 asked for a
 > `devlog-build` GitHub Action; re-triage found it re-classified as
 > `enhancement` (was `docs`, stale after the owner corrected the issue
@@ -2021,6 +2072,37 @@ See the status rows above; generate briefs on demand.
   "Note re-scope-after-#193 in Phase 40's row (Recommended)" for the
   second when asked directly. T's stated reason: not stated beyond the
   selections themselves. Resulting commit: this one.
+
+- **2026-08-15** — actor: **T via `/oversight`** (attended web session,
+  not Hermes). Action: **lifted the AUDIT-DRAIN MODE banner** (a
+  queue-wide unblock — every `[ ]` row returns to normal
+  `ship-a-phase` dispatch), and **added Phase 56** (land the D7 reroll
+  sink via both mechanisms, then re-run the flag-on matrix) and **Phase
+  57** (stop publishing the private DevLog — the in-repo half of the
+  Cloudflare Pages scope-down). Confirmed T's request: yes — all three
+  were T's own selections from an `/oversight` questionnaire ("Lift the
+  banner"; "Both — grant and promote"; "Queue the in-repo half now").
+  T's stated reason: not stated beyond the selections themselves; the
+  evidence each selection was made against is recorded in the banner's
+  own replacement text and in the two new phase rows (respectively: the
+  banner was bypassed by Phases 52c/52d/52e while closing one AUDIT row
+  in three days; the post-D8 nightlies show the dice valves under-sink,
+  which is the exact revisit condition Phase D8's row wrote for itself;
+  and the private DevLog has been live unauthenticated on the production
+  domain since at least 2026-08-12 with a 2026-08-10 ruling nobody could
+  execute). **Correction recorded against this pass:** the questionnaire
+  put the D7 sink to T as an open `[needs-user-call]`, which it was not —
+  `plan/PHASE_CANDIDATES.md`'s row had been resolved via `/oversight`
+  2026-07-18 (valves-only, no starter grant) and sits in that file's
+  `## Promoted` section; the sweep matched residual "needs-user-call"
+  wording inside the resolved row's own decision line. T's 2026-08-15
+  answer is therefore a **supersede** of the 2026-07-18 call, not the
+  draining of an open one, and Phase 56's row states it that way. The
+  supersede is well-founded on D8's own revisit clause, so the phase
+  stands as queued. Not mutated in the same pass: the product-name
+  `[needs-user-call]` (genuinely open), which T left open pending a
+  second candidate pass. Resulting commit: this one; briefs for 56 and
+  57 still to generate.
 
 ## Phase log (commit hashes)
 
