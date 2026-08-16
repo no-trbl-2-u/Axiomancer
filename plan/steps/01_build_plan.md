@@ -1460,7 +1460,7 @@ Orthogonal to 44g: that phase rewrites what existing lines SAY, this batch
 changes which lines a player can REACH. Either order works; 53a first grows
 44g's surface from 3 reachable trees to 7.**
 
-- [ ] Phase 53a — Narrative reachability: the guard, then the mismatches.
+- [x] Phase 53a — Narrative reachability: the guard, then the mismatches.
       11 of 14 authored dialogue trees cannot be reached by legal play,
       because `resolveInteraction` looks an NPC up by name and falls back
       to a mute card when the name is absent — silently, the same failure
@@ -1477,6 +1477,7 @@ changes which lines a player can REACH. Either order works; 53a first grows
       "[world] Map-event content has no coverage guard against unreachable
       authoring" — drain that row here.** (mechanics) Deps: none.
       Brief: `plan/phases/phase_53a_narrative_reachability_guard.md`.
+      Shipped `fafc7b4e`.
 - [ ] Phase 53b — The dialogue gate context, completed in the live path.
       44 gated choices are authored across the rosters; 39 of them can
       never render in the app. `composeNpcDialogue` builds its
