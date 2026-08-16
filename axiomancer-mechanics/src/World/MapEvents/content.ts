@@ -113,7 +113,11 @@ const nfHermit: MapEventPool = {
         kind: 'interaction', weight: 1,
         payload: {
             kind: 'interaction',
-            npcName: 'Forest Hermit',
+            // Phase 53a — was 'Forest Hermit', which names nobody on the
+            // northern-forest roster (`hermitSage`'s NPC name is 'Hermit
+            // Sage'). The hut and the sage were written by different hands;
+            // same character, one node.
+            npcName: 'Hermit Sage',
             description: 'A reed hut hides among the pines.',
         },
     }],
@@ -242,14 +246,19 @@ const nfBerryBushes: MapEventPool = {
     }],
 };
 
+// Phase 53a — was authored `interaction`, naming an 'Ancient Stone Marker'
+// that no roster will ever carry: it's scenery, not a person. Re-authored
+// as `cutscene`; the original description survives as the first line.
 const nfStoneMarker: MapEventPool = {
-    id: 'nf-14.interaction',
+    id: 'nf-14.cutscene',
     entries: [{
-        kind: 'interaction', weight: 1,
+        kind: 'cutscene', weight: 1,
         payload: {
-            kind: 'interaction',
-            npcName: 'Ancient Stone Marker',
-            description: 'An old stone marker left by previous travelers. Carved runes mark the way forward.',
+            kind: 'cutscene',
+            lines: [
+                'An old stone marker left by previous travelers. Carved runes mark the way forward.',
+            ],
+            description: 'An ancient stone marker beside the trail.',
         },
     }],
 };
@@ -373,14 +382,19 @@ const nfMoonbellFlowers: MapEventPool = {
     }],
 };
 
+// Phase 53a — was authored `interaction`, naming an 'Echo Stone' that no
+// roster will ever carry: it's scenery, not a person. Re-authored as
+// `cutscene`; the original description survives as the first line.
 const nfEchoStone: MapEventPool = {
-    id: 'nf-23.interaction',
+    id: 'nf-23.cutscene',
     entries: [{
-        kind: 'interaction', weight: 1,
+        kind: 'cutscene', weight: 1,
         payload: {
-            kind: 'interaction',
-            npcName: 'Echo Stone',
-            description: 'A smooth stone formation that echoes back whispered words with perfect clarity.',
+            kind: 'cutscene',
+            lines: [
+                'A smooth stone formation that echoes back whispered words with perfect clarity.',
+            ],
+            description: 'A stone formation that answers in your own voice.',
         },
         alignmentDelta: { epistemology: 1 },
     }],
@@ -700,6 +714,15 @@ const FV_HAZARD_NODES: Record<string, string> = {
 };
 const FV_LOOT_NODES: Record<string, number> = { 'fv-2': 0, 'fv-11': 1, 'fv-17': 2 };
 // One coastal NPC for texture (the narration node fv-14 is wired separately).
+//
+// TODO(53c) — 'Weathered Fisher' names nobody in `fishingVillage.npcs`; it's
+// the one narrative-reachability mismatch Phase 53a leaves standing on
+// purpose (see `plan/phases/phase_53a_narrative_reachability_guard.md`).
+// Phase 53c reclaims this node for a rostered NPC (Old Marrow) and removes
+// this exception; until then it's an accepted entry in the registry-wide
+// invariant test (`e2e/narrative-reachability.engine.test.ts`), not a lost
+// NPC — inventing a 'Weathered Fisher' roster entry would satisfy the guard
+// and lose the point.
 const fvShoreInteraction = fvInteractionPool(
     'fv-19',
     'Weathered Fisher',

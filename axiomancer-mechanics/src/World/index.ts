@@ -59,6 +59,10 @@ export {
 } from './world.reducer';
 export type { MapStrand, MapTraversalAudit } from './world.reducer';
 
+// Phase 53a — narrative reachability guard.
+export { auditNarrativeReachability } from './narrative-reachability';
+export type { NarrativeReachabilityAudit } from './narrative-reachability';
+
 export {
     validateMoveToNode, findAlternativePaths, getBlockedRoutesFromNode, getReachableNodes,
 } from './map.dispatcher';

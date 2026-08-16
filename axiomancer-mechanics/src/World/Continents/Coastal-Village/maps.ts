@@ -483,6 +483,19 @@ const fishingVillage: MapDefinition = {
         mapImage: { alt: '', src: '' },
         combatImage: { alt: '', src: '' },
     },
+    // Phase 53a (S-02) — written-not-staged, not lost. Zero of the eight
+    // roster NPCs have a node today; the guard needs every one of them
+    // accounted for, so all eight are declared here until placement lands.
+    unstagedNpcs: [
+        { name: 'Old Marrow', reason: 'The quest-giver\'s spine placement is Phase 53c\'s column-1 re-layer (S-02) — not yet wired to a node.' },
+        { name: 'Coastal Beggar', reason: 'Post-boss placement (the morality set-piece) lands in Phase 53c (S-02) — not yet wired to a node.' },
+        { name: 'Captain Blackwater', reason: 'Post-boss placement lands in Phase 53c (S-02); also the specimen for Phase 53b\'s dialogue-gate repair — not yet wired to a node.' },
+        { name: "Fisherman's Daughter", reason: 'Post-boss placement lands in Phase 53c (S-02), reacting to fv-14 — not yet wired to a node.' },
+        { name: 'Tide-Shopkeeper', reason: 'isShopkeeper: true, and the shop UI has been out of scope since Spec 08 — a shop node that cannot sell is worse than no shop node (S-02).' },
+        { name: 'Village Healer', reason: 'Wants the context of a rest node; place her once the rest rebuild (phases 52c/52d) has fully settled (S-02).' },
+        { name: "Dockworker's Union Leader", reason: 'A village-politics voice with no village to be political in yet — belongs to whatever map gets a real settlement screen (S-02).' },
+        { name: "Merchant's Widow", reason: 'Same as the Union Leader; also the third grief-shaped character alongside Old Marrow and the Beggar — the register would repeat (S-02).' },
+    ],
 };
 
 const northernForest: MapDefinition = {
@@ -550,6 +563,14 @@ const northernForest: MapDefinition = {
         mapImage: { alt: '', src: '' },
         combatImage: { alt: '', src: '' },
     },
+    // Phase 53a (S-02) — placement beyond repairing the mismatched
+    // `npcName`s is out of scope: northern-forest is unreachable in play
+    // until inter-map travel exists (first-map audit F4, a standing phase
+    // candidate). Staging content there now would be premature.
+    unstagedNpcs: [
+        { name: 'Forest Ranger', reason: 'Northern-forest placement is out of scope beyond the npcName mismatches — the map is unreachable until inter-map travel exists (first-map audit F4; S-02).' },
+        { name: 'Lost Trader', reason: 'Same as the Forest Ranger — unreachable until inter-map travel exists (first-map audit F4; S-02).' },
+    ],
 };
 
 export { fishingVillage, northernForest };

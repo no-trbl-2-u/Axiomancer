@@ -149,6 +149,15 @@ export interface MapDefinition {
      * via `unblockMapRoute`.
      */
     readonly initialBlockedRoutes?: readonly BlockedRoute[];
+    /**
+     * Phase 53a — NPCs on this map's `npcs` roster that are deliberately NOT
+     * homed to any node yet. A written reason (not a boolean) so the
+     * narrative-reachability guard (`auditNarrativeReachability`) can tell a
+     * deliberate omission from a lost NPC — an NPC with a `dialogueTree`
+     * that is neither reachable from a node nor listed here fails the
+     * registry-wide invariant test.
+     */
+    readonly unstagedNpcs?: ReadonlyArray<{ readonly name: string; readonly reason: string }>;
 }
 
 // ─── Hazard Persistence (Phase 135) ────────────────────────────────────────

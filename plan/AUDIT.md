@@ -340,21 +340,6 @@
   phase to follow, silently. Worth a follow-up /iterate pick: register
   44h's renames retroactively (or document why not, matching 44f/44g's
   pattern) before the next rename phase treats the gap as precedent.
-- source: first-map audit 2026-08-08 (finding F5). `fv-1` carried a fully
-  authored encounter pool that no player could ever see, because map events
-  fire on ARRIVAL and `createMapState` places the player ON the start node.
-  It sat there undetected across at least two content passes, and the
-  all-25-nodes pool test passed the whole time — it drives `resolveMapEvent`
-  at each node id directly, which proves the pool is REGISTERED, not that a
-  player can reach it.
-- the general defect: nothing asserts that authored content is reachable by
-  legal play. `auditMapTraversal` (shipped in the same pass) now walks every
-  legal route and could answer this — a test that intersects "nodes any route
-  can visit" with "nodes carrying a pool" would have caught fv-1 immediately,
-  and would catch the next one.
-- scored low-ease/high-impact: the walker exists, so this is one test file.
-  Left unfiled as a fix only because the audit pass had already closed the
-  live instance and adding a second invariant belonged in its own tick.
 
 ### [x] [mobile] The live combat exit path bypasses the engine's end-of-combat reducer entirely — RESOLVED via /oversight 2026-08-10: route through endCombat, folded into Phase 54
 - source: first-map audit 2026-08-08 (finding F3). The kill-objective break
@@ -2185,6 +2170,38 @@
   and the package barrel `axiomancer-mechanics/src/index.ts`. The root
   three-workspace `npm run verify` gate passed at `96421aa8`, confirming
   the preferred import is live for package consumers.
+
+### [x] [world] Map-event content has no coverage guard against unreachable authoring — RESOLVED via Phase 53a
+- source: first-map audit 2026-08-08 (finding F5). `fv-1` carried a fully
+  authored encounter pool that no player could ever see, because map events
+  fire on ARRIVAL and `createMapState` places the player ON the start node.
+  It sat there undetected across at least two content passes, and the
+  all-25-nodes pool test passed the whole time — it drives `resolveMapEvent`
+  at each node id directly, which proves the pool is REGISTERED, not that a
+  player can reach it.
+- the general defect: nothing asserts that authored content is reachable by
+  legal play. `auditMapTraversal` (shipped in the same pass) now walks every
+  legal route and could answer this — a test that intersects "nodes any route
+  can visit" with "nodes carrying a pool" would have caught fv-1 immediately,
+  and would catch the next one.
+- scored low-ease/high-impact: the walker exists, so this is one test file.
+  Left unfiled as a fix only because the audit pass had already closed the
+  live instance and adding a second invariant belonged in its own tick.
+- resolved 2026-08-16 via Phase 53a: the same defect, widened from node
+  topology to NPC dialogue. `auditNarrativeReachability` (`src/World/
+  narrative-reachability.ts`) cross-checks every `interaction` node's
+  `npcName` against its map's roster and flags rostered NPCs no node routes
+  to; a registry-wide hermetic test
+  (`src/World/e2e/narrative-reachability.engine.test.ts`) asserts the
+  invariant holds across `MAP_REGISTRY`. The narrative-encounter audit
+  (2026-08-09) found this had already claimed eleven of fourteen authored
+  dialogue trees on the coastal maps — `nf-7` named a nonexistent 'Forest
+  Hermit' instead of the rostered 'Hermit Sage', and `nf-14`/`nf-23` named
+  scenery ('Ancient Stone Marker', 'Echo Stone') as if they were people.
+  All three are fixed; `fv-19` stays a declared exception until Phase 53c
+  reclaims it. `MapDefinition.unstagedNpcs` lets a map declare an NPC as
+  deliberately not-yet-placed (with a reason) so the guard can tell that
+  apart from a lost NPC.
 
 ### [x] fishing-village CLI + spec08 e2e drive legacy combat — RESOLVED (mislabeled header fixed via /oversight 2026-08-12)
 - drained 2026-07-03 (monorepo cleanup): stale — the legacy

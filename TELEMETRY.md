@@ -285,3 +285,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-15T18:53:48Z | skill | march | unknown | main | - |
 | 2026-08-16T07:07:37Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-16T07:08:13Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
+| 2026-08-16T13:01:01Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-16T13:01:25Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
