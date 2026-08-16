@@ -1,13 +1,32 @@
 # Critique log
 
-> Last pass: 2026-08-15 at commit 7b28b287
-> Pass count: 25
+> Last pass: 2026-08-16 at commit c4f8d42b
+> Pass count: 26
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 26, 2026-08-16, commit c4f8d42b] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
+> mobile (375×812) and desktop (1280×800); the cold drive again
+> reached past "ENTER COMBAT" into the live combat-board at both
+> viewports (10/10 captures, 0 with nav trouble). Zero console/page
+> errors besides the same benign `navigator.vibrate` warning seen
+> every prior pass. Self-assessed all 10 captures against the current
+> Pending/Done log: title (no crop), onboarding (preset picker), and
+> the exploration-hub cutscene redirect all hold clean; the same
+> Brine Hag encounter reproduces both still-open Pending rows exactly
+> as filed at both viewports — the pass-23 "ruined city" arena-backdrop
+> mismatch and the pass-21 momentum-chain empty-state contrast row
+> (`○ no momentum` barely legible over the arena floor on mobile,
+> fully invisible at desktop). Noted but not filed: the "tap" wording
+> ("tap a glowing node to begin", "· tap ·") appears verbatim on the
+> desktop viewport too — reads as a deliberate touch-agnostic voice
+> choice consistent across every prior pass at this viewport, not a
+> new defect. Not re-filed. Zero new findings.
 
 > **[critique pass 25, 2026-08-15, commit 7b28b287] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5) at mobile
