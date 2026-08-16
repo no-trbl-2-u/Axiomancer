@@ -1428,21 +1428,27 @@ the replacement must be reachable before the Night Watch comes out, or
       + mobile + harness) Deps: 52d.
       Brief: `plan/phases/phase_52e_night_watch_retirement.md`.
       — `feat: retire the rest minigame — phase 52e` (d83978cb)
-- [ ] Phase 52f — Calibrate the shilling economy. Three price sets are
-      currently guesses stacked on each other:
-      `BLACKSMITH_PRICING_PLACEHOLDER` (hone 2 / temper 3 / swap 4) has
-      read "PLACEHOLDER pending D7's economy ratification" since D5 —
-      **D7 never ran** — plus 52c's anvil 50 and 52a's 15+10n. Measure
-      shilling income per act first (loot-cache `DEFAULT_CACHE_CURRENCY`
-      is 10; shop wares run 1-12), then derive all three against a stated
-      doctrine: a die upgrade is a major purchase, the first cut is
-      obviously affordable, the fourth or fifth cut is a real sacrifice,
-      `rest` stays free. De-placeholder D5's constants and retire the
-      ◆/souls unit language. **Decide the tuning home** — 52e deletes
-      `/rest-tuning`, and leaving the node with no lane is exactly how
-      D5's prices went unratified for a month. (mechanics — tuning)
-      Deps: 52e. Brief:
-      `plan/phases/phase_52f_shilling_economy_calibration.md`.
+- [x] Phase 52f — Calibrate the shilling economy. Measured the ONLY live
+      deterministic shilling source on the two authored maps (the flat
+      `loot-cache` MapEvent kind — combat grants none, and the deep
+      `World/Hazard`/`World/Gathering`/direct-`'blacksmith'`-node economies
+      are dormant, unwired to any node): a new hermetic test walks every
+      node on both maps and pins fishing-village at 26 guaranteed
+      shillings/act, northern-forest at 18 (one authored `nf-5` cache is
+      dead/unregistered content, flagged as a follow-up, not fixed here).
+      Derived all three price sets against the stated doctrine and
+      de-placeholdered them: `RESTCHOICE_TUNING.anvilPrice` 50 → 25;
+      `CARD_REMOVAL_PRICING` (renamed from `..._PLACEHOLDER`) base/step
+      15/10 → 5/5; `BLACKSMITH_PRICING_PLACEHOLDER` renamed
+      `ANVIL_VERB_PRICING`, hone/temper/swap 2/3/4 → 3/5/8. Retired the
+      ◆/souls unit language from both engine files' docstrings. **Tuning
+      home**: no new skill — `/world-tuning`'s own text (added at 52e)
+      already rules this a one-shot phase, not a recurring loop; this
+      report is that ownership discharged. (mechanics + mobile cross-
+      package rename) Deps: 52e. Brief:
+      `plan/phases/phase_52f_shilling_economy_calibration.md`. Report:
+      `axiomancer-mechanics/docs/reports/shilling-economy-calibration-2026-08-16.md`.
+      — `feat(mechanics): calibrate the shilling economy against measured loot-cache income — phase 52f` (97560058)
 
 **Narrative encounters (53a-53e) — added 2026-08-09 at T's request
 ("add phases in order to make sure narrative encounters work"). Evidence:
