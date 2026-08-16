@@ -223,7 +223,7 @@ export function removeCardFromCombatDeck(
 }
 
 export {
-    CARD_REMOVAL_PRICING_PLACEHOLDER,
+    CARD_REMOVAL_PRICING,
     cardRemovalPrice,
     cardRemovalPriceFor,
     cardRemovalsOf,

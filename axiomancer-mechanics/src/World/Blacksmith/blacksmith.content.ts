@@ -24,7 +24,7 @@ export const HEART_RICH_PAYLOAD_VARIANT: BlacksmithVariantOffer = Object.freeze(
         manaFaces: 2,
         specialConviction: 3,
     }),
-    // PLACEHOLDER price (falls back to the default swap price when omitted).
+    // No override — falls back to ANVIL_VERB_PRICING.swap.
 });
 
 /** The variant offers a D5 blacksmith node may present (witnesses only). */

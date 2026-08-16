@@ -219,3 +219,32 @@ describe('every MapEventKind is covered by the authored content', () => {
         }
     });
 });
+
+describe('Phase 52f — guaranteed per-act shilling income (the calibration input)', () => {
+    // The ONLY live, deterministic shilling source on the authored maps today
+    // is the flat `loot-cache` MapEvent kind (`resolveLootCache` grants
+    // `payload.currency` with no RNG). The deep `World/Hazard` and
+    // `World/Gathering` minigame packages have their own shilling economies,
+    // but neither is wired to a fishing-village or northern-forest node (the
+    // map-level 'hazard'/'gathering' kinds here resolve to flat damage /
+    // items only — see `resolveHazard`/`resolveGathering`). Combat victory
+    // grants XP + loot items but no currency
+    // (`aftermath.engine.ts`'s `currency: null`). This test walks every
+    // authored node on a full map completion and pins the guaranteed
+    // shilling total the Phase 52f price derivation is anchored to — so a
+    // future content edit that changes a loot-cache amount (or adds/removes
+    // one) is forced to revisit the pricing constants instead of silently
+    // drifting past them.
+    it.each([
+        ['fishing-village', 26],
+        ['northern-forest', 18],
+    ] as const)('%s grants exactly %d guaranteed shillings on a full walk', (map, expectedCurrency) => {
+        mockSequentialRng(0.5);
+        let state = freshWorldAt(map);
+        const def = getMapDefinition('coastal-continent', map);
+        for (const node of def.nodes) {
+            state = visit(state, node.id).state;
+        }
+        expect(state.player.currency).toBe(expectedCurrency);
+    });
+});

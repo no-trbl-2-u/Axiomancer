@@ -37,7 +37,7 @@ export interface BlacksmithVariantOffer {
     id: string;
     name: string;
     gear: UpgradeableDieGear;
-    /** PLACEHOLDER price override; falls back to the default swap price. */
+    /** Per-offer price override, in shillings; falls back to the default swap price. */
     price?: number;
 }
 
@@ -81,7 +81,8 @@ export interface BlacksmithSession {
     phase: BlacksmithPhase;
     /** The working rail — starts from the authored payload (or default). */
     rail: DieGearRail;
-    /** Spendable resource remaining (PLACEHOLDER unit; host maps ◆/souls). */
+    /** Spendable resource remaining, in shillings (the mobile host maps
+     *  this to `Character.currency` by default). */
     budget: number;
     /** Total spent so far; the host settles this at claim. */
     spent: number;

@@ -5,16 +5,16 @@
  * no rule decisions.
  *
  * The forge screen's job is to render, per die, the HONE / TEMPER offers
- * with their PLACEHOLDER ◆ prices, and the swap offers — each carrying an
- * `enabled` flag AND, when disabled, the LOUD reason (owner-UI doctrine:
- * an illegal or unaffordable action is greyed AND named, never a silent
- * no-op). The reason strings are the SAME cap authority the engine's
- * refusal card uses (`validateDieGear`), so the greyed-offer copy and the
- * refusal-card copy always agree.
+ * with their shilling prices (`ANVIL_VERB_PRICING`, ratified Phase 52f), and
+ * the swap offers — each carrying an `enabled` flag AND, when disabled, the
+ * LOUD reason (owner-UI doctrine: an illegal or unaffordable action is
+ * greyed AND named, never a silent no-op). The reason strings are the SAME
+ * cap authority the engine's refusal card uses (`validateDieGear`), so the
+ * greyed-offer copy and the refusal-card copy always agree.
  */
 
 import {
-    BLACKSMITH_PRICING_PLACEHOLDER,
+    ANVIL_VERB_PRICING,
     validateDieGear,
     dieGearMissFaces,
     dieSpecialCap,
@@ -139,7 +139,7 @@ function offerReason(capReason: string | null, affordable: boolean, price: numbe
 
 function honeOffer(rail: DieGearRail, color: DieGearColor, budget: number): BlacksmithOfferVM {
     const gear = rail[color];
-    const price = BLACKSMITH_PRICING_PLACEHOLDER.hone;
+    const price = ANVIL_VERB_PRICING.hone;
     const candidate: UpgradeableDieGear = { ...gear, manaFaces: gear.manaFaces + 1 };
     const capReason = validateDieGear(candidate, color);
     const affordable = price <= budget;
@@ -157,7 +157,7 @@ function honeOffer(rail: DieGearRail, color: DieGearColor, budget: number): Blac
 
 function temperOffer(rail: DieGearRail, color: DieGearColor, budget: number): BlacksmithOfferVM {
     const gear = rail[color];
-    const price = BLACKSMITH_PRICING_PLACEHOLDER.temper;
+    const price = ANVIL_VERB_PRICING.temper;
     const affordable = price <= budget;
     let capReason: string | null;
     if (gear.manaFaces < 1) {
@@ -203,7 +203,7 @@ export function selectBlacksmithVM(state: Pick<AppStoreState, 'blacksmith'>): Bl
 
     const swaps: BlacksmithSwapVM[] = s.variants.map(v => {
         const color = v.gear.dieColor as DieGearColor;
-        const price = v.price ?? BLACKSMITH_PRICING_PLACEHOLDER.swap;
+        const price = v.price ?? ANVIL_VERB_PRICING.swap;
         const capReason = validateDieGear(v.gear, color);
         const affordable = price <= budget;
         const reason = offerReason(capReason, affordable, price);

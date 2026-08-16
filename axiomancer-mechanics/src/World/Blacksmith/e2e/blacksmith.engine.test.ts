@@ -2,7 +2,7 @@
  * Blacksmith ("The Anvil") engine — hermetic unit suite (Spec 33 §6 / D5).
  *
  * Seeded RNG only; no timers, no network, no Math.random. Covers the upgrade
- * verbs (HONE / TEMPER / gear SWAP), PLACEHOLDER pricing + budget gating,
+ * verbs (HONE / TEMPER / gear SWAP), shilling pricing + budget gating,
  * LOUD refusals for cap violations and unaffordable spends, invalid-call
  * no-ops, and the claim-time outcome ledger.
  */
@@ -18,7 +18,7 @@ import {
     continueBlacksmithCard,
     leaveBlacksmith,
     claimBlacksmithOutcome,
-    BLACKSMITH_PRICING_PLACEHOLDER as P,
+    ANVIL_VERB_PRICING as P,
 } from '../blacksmith.engine';
 import { HEART_RICH_PAYLOAD_VARIANT } from '../blacksmith.content';
 import { concreteDefaultRail, dieGearMissFaces } from '../../../Character/dieGear.reducer';
@@ -42,7 +42,7 @@ describe('blacksmith — lifecycle + invalid calls', () => {
 });
 
 describe('blacksmith — HONE', () => {
-    it('charges the placeholder price and adds a mana face', () => {
+    it('charges the shilling price and adds a mana face', () => {
         const s = honeBlacksmith(forging(100), 'heart');
         expect(s.phase).toBe('card');
         expect(s.card?.refused).toBe(false);

@@ -27,7 +27,7 @@ import {
     cardRemovalPriceFor,
     cardRemovalsOf,
     canAffordCardRemoval,
-    CARD_REMOVAL_PRICING_PLACEHOLDER,
+    CARD_REMOVAL_PRICING,
     buildCombatDeck,
     createCharacter,
     addToLoadout,
@@ -357,51 +357,51 @@ describe('Phase 52a — the per-run counter', () => {
     });
 });
 
-describe('Phase 52a — the escalating price (PROVISIONAL, 52f calibrates)', () => {
-    it('is exactly 15 / 25 / 35 / 45 at 0 / 1 / 2 / 3 removals', () => {
-        expect(cardRemovalPrice(0)).toBe(15);
-        expect(cardRemovalPrice(1)).toBe(25);
-        expect(cardRemovalPrice(2)).toBe(35);
-        expect(cardRemovalPrice(3)).toBe(45);
+describe('Phase 52a — the escalating price (RATIFIED Phase 52f, measured income)', () => {
+    it('is exactly 5 / 10 / 15 / 20 at 0 / 1 / 2 / 3 removals', () => {
+        expect(cardRemovalPrice(0)).toBe(5);
+        expect(cardRemovalPrice(1)).toBe(10);
+        expect(cardRemovalPrice(2)).toBe(15);
+        expect(cardRemovalPrice(3)).toBe(20);
     });
 
     it('is LINEAR, not exponential — the step never grows', () => {
         const steps: number[] = [];
         for (let n = 0; n < 10; n++) steps.push(cardRemovalPrice(n + 1) - cardRemovalPrice(n));
-        expect(new Set(steps)).toEqual(new Set([CARD_REMOVAL_PRICING_PLACEHOLDER.step]));
+        expect(new Set(steps)).toEqual(new Set([CARD_REMOVAL_PRICING.step]));
         // The tenth removal is still payable, which is the whole point of linear.
-        expect(cardRemovalPrice(9)).toBe(105);
+        expect(cardRemovalPrice(9)).toBe(50);
     });
 
-    it('is driven by the named provisional constants, not by literals', () => {
-        const { base, step } = CARD_REMOVAL_PRICING_PLACEHOLDER;
-        expect(base).toBe(15);
-        expect(step).toBe(10);
+    it('is driven by the named ratified constants, not by literals', () => {
+        const { base, step } = CARD_REMOVAL_PRICING;
+        expect(base).toBe(5);
+        expect(step).toBe(5);
         for (let n = 0; n < 6; n++) expect(cardRemovalPrice(n)).toBe(base + step * n);
     });
 
     it('cardRemovalPriceFor tracks a character across real removals', () => {
         let player = fixture(OFFICE, [...EARNED, ...EARNED]);
-        expect(cardRemovalPriceFor(player)).toBe(15);
+        expect(cardRemovalPriceFor(player)).toBe(5);
 
         const first = removeCardFromCombatDeck(player, buildCombatDeck(player)[0]);
         expect(first.ok).toBe(true);
         if (!first.ok) return;
         player = first.player;
-        expect(cardRemovalPriceFor(player)).toBe(25);
+        expect(cardRemovalPriceFor(player)).toBe(10);
 
         const second = removeCardFromCombatDeck(player, buildCombatDeck(player)[0]);
         expect(second.ok).toBe(true);
         if (!second.ok) return;
-        expect(cardRemovalPriceFor(second.player)).toBe(35);
+        expect(cardRemovalPriceFor(second.player)).toBe(15);
     });
 
     it('canAffordCardRemoval reads the purse against the next price only', () => {
-        const player = { ...fixture(OFFICE, EARNED), currency: 15 };
+        const player = { ...fixture(OFFICE, EARNED), currency: 5 };
         expect(canAffordCardRemoval(player)).toBe(true);
-        expect(canAffordCardRemoval({ ...player, currency: 14 })).toBe(false);
-        expect(canAffordCardRemoval({ ...player, currency: 15, cardRemovals: 1 })).toBe(false);
-        expect(canAffordCardRemoval({ ...player, currency: 25, cardRemovals: 1 })).toBe(true);
+        expect(canAffordCardRemoval({ ...player, currency: 4 })).toBe(false);
+        expect(canAffordCardRemoval({ ...player, currency: 5, cardRemovals: 1 })).toBe(false);
+        expect(canAffordCardRemoval({ ...player, currency: 10, cardRemovals: 1 })).toBe(true);
     });
 });
 

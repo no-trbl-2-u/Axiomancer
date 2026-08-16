@@ -279,7 +279,7 @@ export type { SandboxCardSet } from './Cards/cards.sandbox-sets';
 // are PROVISIONAL until Phase 52f calibrates them against measured income.
 export {
     removeCardFromCombatDeck, MIN_COMBAT_DECK_SIZE,
-    CARD_REMOVAL_PRICING_PLACEHOLDER,
+    CARD_REMOVAL_PRICING,
     cardRemovalPrice, cardRemovalPriceFor, cardRemovalsOf, canAffordCardRemoval,
 } from './Cards/card.removal';
 export type {

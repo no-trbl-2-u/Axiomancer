@@ -41,7 +41,7 @@ describe('Phase 52a — migrate v15 → v16: default the card-removal counter', 
         expect(migrated.player.cardRemovals).toBe(0);
         expect(cardRemovalsOf(migrated.player)).toBe(0);
         // A migrated save is charged the opening price, not a mid-run one.
-        expect(cardRemovalPriceFor(migrated.player)).toBe(15);
+        expect(cardRemovalPriceFor(migrated.player)).toBe(5);
     });
 
     it('carries everything else through untouched', () => {
@@ -58,7 +58,7 @@ describe('Phase 52a — migrate v15 → v16: default the card-removal counter', 
         (raw.player as { cardRemovals?: unknown }).cardRemovals = 3;
         const migrated = migrate(raw, 15, 16);
         expect(migrated.player.cardRemovals).toBe(3);
-        expect(cardRemovalPriceFor(migrated.player)).toBe(45);
+        expect(cardRemovalPriceFor(migrated.player)).toBe(20);
     });
 
     it('normalises a junk count to 0 rather than carrying it into the price', () => {

@@ -17,9 +17,12 @@
  * so a cap-violating upgrade is refused identically here and in the reducer.
  * Refusals are LOUD (a refusal card) and leave the rail + budget untouched.
  *
- * Prices are PLACEHOLDER pending D7 ratification — echoing D3's derived
- * signature tiers (2 / 3 / 4◆) against the ~1.2◆/round income; the unit the
- * host maps to ◆/souls is not fixed by this engine.
+ * Prices are ratified (Phase 52f) in SHILLINGS, ready for a future map node
+ * to author the (currently dormant) `blacksmith` MapEvent kind directly —
+ * the live anvil access today is `World/RestChoice`'s single flat
+ * `anvilPrice`, which bypasses these per-verb tiers entirely (unlimited
+ * verb uses once paid). The mobile host maps `budget` to
+ * `Character.currency` by default.
  */
 
 import { seedRng } from './blacksmith.rng';
@@ -41,21 +44,23 @@ import type {
 } from './blacksmith.types';
 
 // ---------------------------------------------------------------------------
-// Tuning (PLACEHOLDER — D7 ratifies)
+// Tuning (ratified Phase 52f)
 // ---------------------------------------------------------------------------
 
 /**
- * Upgrade prices, PLACEHOLDER pending D7's economy ratification. The tiers
- * echo D3's derived signature costs (utility 2 / control 3 / finisher 4◆);
- * the host maps the unit to ◆/souls. DO NOT treat these as final.
+ * Upgrade prices in shillings, ratified Phase 52f against measured
+ * loot-cache income (~26 shillings/act) — sized so a single anvil visit
+ * (hone + temper + swap once each = 16) still leaves room for shop wares,
+ * while HONE < TEMPER < SWAP keeps the D3-derived ordering (a full gear
+ * swap costs more than one face upgrade).
  */
-export const BLACKSMITH_PRICING_PLACEHOLDER = Object.freeze({
-    /** PLACEHOLDER — HONE (add a mana face, −1 miss). */
-    hone: 2,
-    /** PLACEHOLDER — TEMPER (upgrade a mana face to a special face). */
-    temper: 3,
-    /** PLACEHOLDER — SWAP (replace a die's gear with an offered variant). */
-    swap: 4,
+export const ANVIL_VERB_PRICING = Object.freeze({
+    /** HONE (add a mana face, −1 miss). */
+    hone: 3,
+    /** TEMPER (upgrade a mana face to a special face). */
+    temper: 5,
+    /** SWAP (replace a die's gear with an offered variant). */
+    swap: 8,
 });
 
 const VERB_CHROME: Readonly<Record<BlacksmithVerb, { title: string; body: string }>> = Object.freeze({
@@ -212,7 +217,7 @@ function refuseUnaffordable(
 export function honeBlacksmith(s: BlacksmithSession, color: DieGearColor): BlacksmithSession {
     if (s.phase !== 'forging') return s;
     const gear = s.rail[color];
-    const price = BLACKSMITH_PRICING_PLACEHOLDER.hone;
+    const price = ANVIL_VERB_PRICING.hone;
     const unaffordable = refuseUnaffordable(s, 'hone', color, gear, price);
     if (unaffordable) return unaffordable;
 
@@ -230,7 +235,7 @@ export function honeBlacksmith(s: BlacksmithSession, color: DieGearColor): Black
 export function temperBlacksmith(s: BlacksmithSession, color: DieGearColor): BlacksmithSession {
     if (s.phase !== 'forging') return s;
     const gear = s.rail[color];
-    const price = BLACKSMITH_PRICING_PLACEHOLDER.temper;
+    const price = ANVIL_VERB_PRICING.temper;
     const unaffordable = refuseUnaffordable(s, 'temper', color, gear, price);
     if (unaffordable) return unaffordable;
 
@@ -259,7 +264,7 @@ export function swapBlacksmith(s: BlacksmithSession, variantId: string): Blacksm
 
     const color = offer.gear.dieColor as DieGearColor;
     const gear = { ...offer.gear };
-    const price = offer.price ?? BLACKSMITH_PRICING_PLACEHOLDER.swap;
+    const price = offer.price ?? ANVIL_VERB_PRICING.swap;
     const unaffordable = refuseUnaffordable(s, 'swap', color, gear, price);
     if (unaffordable) return unaffordable;
 

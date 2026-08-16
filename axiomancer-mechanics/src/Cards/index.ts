@@ -65,7 +65,7 @@ export {
 // per-run price (PROVISIONAL until 52f calibrates it).
 export {
     removeCardFromCombatDeck, MIN_COMBAT_DECK_SIZE,
-    CARD_REMOVAL_PRICING_PLACEHOLDER,
+    CARD_REMOVAL_PRICING,
     cardRemovalPrice, cardRemovalPriceFor, cardRemovalsOf, canAffordCardRemoval,
 } from './card.removal';
 export type {

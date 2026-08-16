@@ -101,7 +101,7 @@ describe('blacksmith refusals are loud and no-op', () => {
     it('an unaffordable HONE refuses with a reason and leaves rail + budget untouched', () => {
         const { store, actions } = makeStoreAndActions();
         setCurrency(store, 100);
-        actions.beginBlacksmith({ budget: 1 }); // hone costs 2
+        actions.beginBlacksmith({ budget: 1 }); // hone costs 3
         actions.startBlacksmithForging();
 
         const railBefore = JSON.stringify(session(store).rail);

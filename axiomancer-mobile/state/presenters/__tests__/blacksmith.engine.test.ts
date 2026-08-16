@@ -13,7 +13,7 @@ import {
     continueBlacksmithCard,
     concreteDefaultRail,
     HEART_RICH_PAYLOAD_VARIANT,
-    BLACKSMITH_PRICING_PLACEHOLDER,
+    ANVIL_VERB_PRICING,
     type BlacksmithSession,
 } from '@mechanics';
 
@@ -39,8 +39,8 @@ describe('forge offer VM (enabled / disabled + reason)', () => {
         for (const die of vm.dice) {
             expect(die.hone.verb).toBe('hone');
             expect(die.temper.verb).toBe('temper');
-            expect(die.hone.price).toBe(BLACKSMITH_PRICING_PLACEHOLDER.hone);
-            expect(die.temper.price).toBe(BLACKSMITH_PRICING_PLACEHOLDER.temper);
+            expect(die.hone.price).toBe(ANVIL_VERB_PRICING.hone);
+            expect(die.temper.price).toBe(ANVIL_VERB_PRICING.temper);
         }
     });
 

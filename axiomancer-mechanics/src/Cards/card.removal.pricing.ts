@@ -10,13 +10,15 @@
  * The counter is PER RUN (`Character.cardRemovals`), not per node and not
  * lifetime-across-runs.
  *
- * PRICES ARE PROVISIONAL. They are anchored on the shipped economy only
- * loosely — the loot-cache default purse is 10 shillings
- * (`DEFAULT_CACHE_CURRENCY`) and shop wares run ~1-12 — and **Phase 52f
- * calibrates them against MEASURED income**. Marked the same way
- * `BLACKSMITH_PRICING_PLACEHOLDER` marks its own unratified tiers. Do not
- * treat these numbers as final, and do not fork copies of them: read the
- * constant.
+ * PRICES ARE RATIFIED (Phase 52f) against MEASURED income: the fishing-village
+ * act's three authored loot-cache nodes grant a guaranteed 26 shillings on a
+ * full walk (`src/World/MapEvents/content.ts`'s `FV_LOOT_CACHES`), and shop
+ * wares run ~1-12. `base` sits well under a single loot-cache find so the
+ * first cut is obviously affordable early; `step` is sized so the fourth/fifth
+ * cut (20 / 25) approaches a full act's income — a real sacrifice, not a
+ * lockout. See `plan/phases/phase_52f_shilling_economy_calibration.md` and its
+ * report for the full derivation. Do not fork copies of these numbers: read
+ * the constant.
  *
  * This module charges nothing. `removeCardFromCombatDeck` deliberately does
  * not spend currency — pricing is the CALLER's transaction (52c's rest-choice
@@ -27,14 +29,14 @@
 import type { Character } from '../Character/types';
 
 /**
- * The removal curve, PLACEHOLDER pending Phase 52f's calibration against
- * measured income. Currency unit is SHILLINGS (`Character.currency`).
+ * The removal curve, ratified by Phase 52f against measured income. Currency
+ * unit is SHILLINGS (`Character.currency`).
  */
-export const CARD_REMOVAL_PRICING_PLACEHOLDER = Object.freeze({
-    /** PLACEHOLDER — what the FIRST removal of a run costs. */
-    base: 15,
-    /** PLACEHOLDER — what each subsequent removal adds. Linear, not a factor. */
-    step: 10,
+export const CARD_REMOVAL_PRICING = Object.freeze({
+    /** What the FIRST removal of a run costs. */
+    base: 5,
+    /** What each subsequent removal adds. Linear, not a factor. */
+    step: 5,
 });
 
 /**
@@ -49,13 +51,13 @@ export function cardRemovalsOf(player: Pick<Character, 'cardRemovals'>): number 
 
 /**
  * The price of the NEXT removal given how many have already been made this
- * run: 15 / 25 / 35 / 45 … Negative or non-finite input floors at 0 removals.
+ * run: 5 / 10 / 15 / 20 … Negative or non-finite input floors at 0 removals.
  *
  * @param removals - Removals already made this run (`Character.cardRemovals`).
  */
 export function cardRemovalPrice(removals: number): number {
     const n = Number.isFinite(removals) && removals > 0 ? Math.floor(removals) : 0;
-    return CARD_REMOVAL_PRICING_PLACEHOLDER.base + CARD_REMOVAL_PRICING_PLACEHOLDER.step * n;
+    return CARD_REMOVAL_PRICING.base + CARD_REMOVAL_PRICING.step * n;
 }
 
 /** The price of this character's next removal. Sugar over `cardRemovalPrice`. */

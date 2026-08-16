@@ -356,7 +356,7 @@ describe('rest screen (Phase 52d — rest-choice)', () => {
         expect(screen.getByTestId('rest-cut-sheet')).toBeTruthy();
         expect(screen.getAllByTestId('rest-cut-card-spoiled-poultice:0')).toHaveLength(1);
         expect(screen.getAllByTestId('rest-cut-card-spoiled-poultice:12')).toHaveLength(1);
-        expect(screen.getByTestId('rest-cut-price').props.children.join('')).toMatch(/15.*25/);
+        expect(screen.getByTestId('rest-cut-price').props.children.join('')).toMatch(/5.*10/);
 
         fireEvent.press(screen.getByTestId('rest-cut-card-thin-hymn:6'));
         expect(store.getState().rest.session!.phase).toBe('outcome');

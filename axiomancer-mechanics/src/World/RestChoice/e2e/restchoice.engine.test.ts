@@ -71,7 +71,7 @@ describe('rest-choice — offer phase + lifecycle', () => {
     });
 
     it('disables `cut` when the escalating price outruns the purse', () => {
-        const s = offerSession({ removals: 5, currency: 1 }); // price = 15 + 10*5 = 65
+        const s = offerSession({ removals: 5, currency: 1 }); // price = 5 + 5*5 = 30
         const cut = s.offers.find(o => o.id === 'cut')!;
         expect(cut.cost).toBe(cardRemovalPrice(5));
         expect(cut.disabledReason).toMatch(/cover/i);
