@@ -84,6 +84,26 @@
   non-goal, no bearings contract.
 
 ### Fold treasure/quest/rest/narration into one "encounter" shape; retire the Gathering, Quest Board, and Loot Cache minigames
+- **PARTIALLY PROMOTED 2026-08-15 (T direct, attended web session) —
+  build-plan Phases 58-65. This candidate stays OPEN for its remaining
+  quarter.** T defined rest, loot cache and quest outright in that
+  session and said "queue all of these up". What that covers: **rest**
+  (Phase 59 — heal 25% / cut, and the anvil re-homed by Phase 60,
+  finishing what 52c/52d/52e started); **quest** (Phase 61 — the Boy's
+  Almanac minigame retired entire, though T narrowed the ruling to the
+  minigame only: the QuestLog objective tracker and `starting-quest`
+  survive, so Phase 53c is NOT voided); **loot cache** (Phase 63 — the
+  Reliquary's delving session replaced by a card / item / sacrifice
+  choice, with a per-map goodwill counter, Phases 64-65 paying it back
+  through the journal and village); and **narration**, which turned out
+  to be the session's real headline (Phase 58 — 59 authored node
+  descriptions exist and are dropped at the resolver because
+  `ResolvedEvent` has no field to carry them).
+- **what is STILL open on this candidate: the Gathering minigame ("The
+  Gleaning") and its `gathering-tuning` skill/CLI.** This candidate names
+  it for retirement; T did not rule on it in the 2026-08-15 session and
+  was not asked. It was deliberately left out of Phases 58-65 rather than
+  swept in by implication, so the candidate does not close here.
 - source: filed 2026-08-10 via `/oversight`, T's own framing verbatim:
   *"I want to discuss folding the treasure, quest, rest, and narration
   events into a single 'encounter' event, taking away the minigames and

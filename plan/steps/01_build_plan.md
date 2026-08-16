@@ -1800,6 +1800,140 @@ RESEQUENCED the same day behind the unshackling — see above):**
       the half that lives in this repo. (infra/CI; small, no engine risk)
       Brief: to generate.
 
+**The encounter reshape (58-65) — T direct, attended web session
+2026-08-15.** T opened the session asking that "every encounter has a
+narration with it so the player has some flavor in terms of what's
+happening," then defined three of the non-combat events outright. This
+block is that definition, queued. It continues the arc 52a-52f started
+(the rest minigame retired for a choice screen) and partially executes
+the standing candidate T filed 2026-08-10 — *"folding the treasure,
+quest, rest, and narration events into a single 'encounter' event,
+taking away the minigames... The minigames as they are are just time
+consuming and seem to add nothing."* **Deliberately NOT in scope:** the
+Gathering minigame ("The Gleaning") and the hazard board both survive
+this pass — the candidate names Gathering for retirement but T did not
+rule on it here, so it stays open rather than being swept in by
+implication. Combat and Hazard-Pattern Combat are untouched.
+
+- [ ] Phase 58 — Carry authored narration to the player. Every
+      `MapEventPayload` already declares `description?: string` and
+      `MapEvents/content.ts` fills it in on **59 of 74 authored nodes**,
+      in the game's voice ("A wall of thorn-brush. You bleed easing
+      through."). None of it ever reaches a player: `ResolvedEvent`
+      (`World/MapEvents/types.ts:213`) declares no description field on
+      any variant, and `resolve-map-event.ts` never reads one, so the
+      text dies at the resolver. Mobile documents the gap in a comment
+      (`state/presenters/event.engine.ts:585`) and routes around it to
+      `DEFAULT_BODY_BY_KIND` — eleven three-word placeholders
+      ("Something stirs.", "A quiet place.", "The air turns."). Scope:
+      thread `description` through `ResolvedEvent` for every kind that
+      can carry one, have the presenter prefer it over the placeholder,
+      and keep the placeholder table only as the empty-string fallback.
+      This is the phase that actually answers T's opening ask, and it
+      needs no design call — the authoring layer and the prose both
+      already exist and are simply not connected. Ship it first.
+      (mechanics + mobile; plumbing, no new content)
+      Brief: to generate.
+
+- [ ] Phase 59 — Rest is two offers: heal 25%, or cut a card. **T
+      direct, 2026-08-15:** *"Rest: Heal 25% health or remove a card.
+      One liner narration."* Today `RestChoiceOfferId` is
+      `'rest' | 'anvil' | 'cut'` (`World/RestChoice/restchoice.types.ts:21`)
+      — the anvil leaves the rest screen under this ruling (its
+      replacement door is Phase 60). Scope: drop the `anvil` offer and
+      its `anvil-pick` step from the rest-choice engine and screen, pin
+      the heal at a flat 25% of max VITAE (today it computes against a
+      cap), and give the node its one-line narration. **Assumption
+      recorded, not ruled:** `cut` keeps Phase 52a's escalating removal
+      price — T said "remove a card", not "remove a card free", and
+      making it free would orphan a primitive that shipped 2026-08-06.
+      Flip it only on an explicit call. Deps: 60 (land the anvil's new
+      door first, or the surface is briefly unreachable).
+      (mechanics + mobile) Brief: to generate.
+
+- [ ] Phase 60 — Re-home the Anvil to its own map node. Phase 59 takes
+      the anvil off the rest screen, and rest was its ONLY route: the
+      `blacksmith` MapEventKind is built, registered and tested but
+      deliberately unplaced in map content (`MapEvents/types.ts:159`
+      records T's 2026-08-08 ruling that the anvil is reached *through*
+      rest). Without this phase, Phase 59 silently orphans the whole
+      Blacksmith surface — Phase D5 plus D6a-D6f, a seven-phase series
+      with a screen, tray rework and gear-inspection panel. Scope: place
+      `blacksmith` nodes in authored map content at a defensible cadence
+      and confirm the existing interceptor path reaches the D6 screen
+      unchanged. **Provenance note:** T was asked directly whether the
+      anvil should be re-homed or retired with D5/D6a-f, and answered
+      "queue all of these up" against a table in which this row was
+      listed as the re-home option — so re-home is read from that
+      selection, not from silence. It is also the reversible choice:
+      nothing is deleted, and retiring the surface later stays available.
+      If T meant retire, this row is what gets cut, and 59 absorbs the
+      deletion instead. (mechanics + mobile) Brief: to generate.
+
+- [ ] Phase 61 — Retire the Quest Board minigame ("The Boy's Almanac").
+      **T direct, 2026-08-15:** the quest event is *"a little bit harder
+      for now, let's just remove it entirely"* — then, asked which of the
+      two systems named "quest" that meant, *"Minigame only and keep
+      it."* Scope: delete `World/QuestBoard/` entire, the `quest`
+      MapEventKind and its `beginQuestBoardAction` interceptor
+      (`axiomancer-mobile/state/actions.ts:1710`), `quest-board.cli.ts`,
+      the npm script, the `quest-board-tuning` skill and its workflow,
+      and the `app/quest` route — plus a `GAME_STATE_VERSION` hop
+      clearing any live board session from the save payload. Phase 52e
+      (`d83978c`) is the near-exact template. **Explicitly UNTOUCHED:**
+      `World/quest.engine.ts` and `quest.library.ts` — the QuestLog
+      objective tracker holding `starting-quest` — which T ruled stays.
+      Phase 53c therefore survives and gets MORE load-bearing, not less:
+      with no quest node on any map, its quest-giver becomes the only way
+      a player ever learns a quest exists. Note that alongside 53c.
+      (mechanics + mobile; deletion) Brief: to generate.
+
+- [ ] Phase 62 — Ally cards. The loot-cache sacrifice chain (Phase 65)
+      pays out an "ally card reward", and no ally concept exists anywhere
+      in the card schema today. T ruled the full chain in scope
+      2026-08-15 ("everything including Ally"), so this is the schema
+      question that has to be answered before 65 can pay anything out:
+      what an ally card IS mechanically (a card type? a rank? a
+      persistent companion?), how it prices under `cards.pricing.ts`,
+      and whether it lives in the curated 70-card library or outside it.
+      Needs a design pass, not just wiring — take it through
+      `/brainstorm-mechanics` or `card-expert` before implementing.
+      Blocks 65. (mechanics; design + schema) Brief: to generate.
+
+- [ ] Phase 63 — The loot cache becomes a three-way choice. **T direct,
+      2026-08-15:** *"Card reward, item reward, or sacrifice reward."*
+      Scope: replace The Reliquary's dice-pool delving session with a
+      plain three-offer choice on the existing resolver (same shape 52c
+      gave rest), and add the per-map goodwill counter the sacrifice
+      branch writes — T's framing: *"if the player decides to sacrifice
+      the reward, it'll be noted on their journal as 'Helped <current
+      map> n times'."* The counter is net-new state; nothing like it
+      exists (the flag system has exactly one `requires.flag` gate in the
+      whole game, per Phase 53e's finding). Design it as a per-map tally
+      on `GameState`, not a flag, since it must count rather than latch.
+      This also hands Phase 53e's read-back web its first real consumer.
+      Retires `loot-cache-tuning` + its CLI/workflow with the minigame.
+      (mechanics + mobile) Brief: to generate.
+
+- [ ] Phase 64 — The journal reads the goodwill back. Render Phase 63's
+      per-map counter as "Helped <map> N times" on the memoir tab
+      (`axiomancer-mobile/app/(tabs)/memoir/index.tsx`), which already
+      exists and already reads keepsake flags. Small, but it is the half
+      that makes the sacrifice legible — a counter the player cannot see
+      is not a choice, it is a silent tax. Deps: 63.
+      (mobile) Brief: to generate.
+
+- [ ] Phase 65 — Village goodwill rewards. T's framing: *"When they
+      visit a village in that map, they'll receive discounts at the shop,
+      an ally card reward, and other various rewards."* Scope: a price
+      hook on the shop — `ShopInventory` is today just `{ wares }`
+      (`Items/shop.types.ts:20`) with no multiplier anywhere, so the
+      discount is net-new plumbing — plus the ally-card grant from Phase
+      62, both gated on Phase 63's per-map counter. **"Other various
+      rewards" is deliberately left unspecified here**; author them in
+      the brief against the counter's tiers rather than guessing now.
+      Deps: 62, 63. (mechanics + mobile) Brief: to generate.
+
 > **Note (issue-triage 2026-07-19):** issue #132 asked for a
 > `devlog-build` GitHub Action; re-triage found it re-classified as
 > `enhancement` (was `docs`, stale after the owner corrected the issue
@@ -2103,6 +2237,33 @@ See the status rows above; generate briefs on demand.
   `[needs-user-call]` (genuinely open), which T left open pending a
   second candidate pass. Resulting commit: this one; briefs for 56 and
   57 still to generate.
+
+- **2026-08-15** — actor: **T via attended web session** (design
+  conversation, not Hermes, and not `/oversight` — T asked directly).
+  Action: **added Phases 58-65**, the encounter reshape. Confirmed T's
+  request: yes — T opened with *"I want to make sure that every encounter
+  has a narration with it so the player has some flavor in terms of
+  what's happening"*, then defined three events verbatim (**Rest:**
+  *"Heal 25% health or remove a card. One liner narration."*; **Loot
+  cache:** *"Card reward, item reward, or sacrifice reward... noted on
+  their journal as 'Helped <current map> n times'... discounts at the
+  shop, an ally card reward, and other various rewards"*; **Quest:**
+  *"let's just remove it entirely"*, narrowed on question to *"Minigame
+  only and keep it"*), ruled the ally-card chain in scope ("everything
+  including Ally"), and closed with *"queue all of these up"* against the
+  eight-row table these rows are written from. T's stated reason,
+  near-verbatim: the minigames *"are just time consuming and seem to add
+  nothing"* (T's 2026-08-10 framing on the standing fold candidate, which
+  this batch partially executes). **Two items recorded as inference, not
+  instruction, so a later reader can correct them:** (1) Phase 60's
+  anvil **re-home** is read from T selecting a table in which it was the
+  listed option, after being asked re-home vs. retire — the reversible
+  reading, and the row says so; (2) Phase 59 keeps Phase 52a's escalating
+  card-removal price, since T said "remove a card" without ruling on
+  cost. **Not swept in by implication:** the Gathering minigame, which
+  the fold candidate names for retirement but T did not rule on here —
+  it stays a live surface and an open candidate. Resulting commit: this
+  one; briefs for 58-65 still to generate.
 
 ## Phase log (commit hashes)
 
