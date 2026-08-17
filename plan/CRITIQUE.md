@@ -1,13 +1,31 @@
 # Critique log
 
-> Last pass: 2026-08-16 at commit c4f8d42b
-> Pass count: 26
+> Last pass: 2026-08-17 at commit bf39b391
+> Pass count: 27
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 27, 2026-08-17, commit bf39b391] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
+> mobile (375×812) and desktop (1280×800) against the cold-enterable
+> screen set (title, onboarding/deck-picker, combat-encounter preview,
+> live combat board post-ENTER COMBAT, exploration hub — the last of
+> which redirects a cold session into the intro OMEN cutscene by
+> design, per `critique-drive.mjs`'s own screen comment). All 10
+> captures clean: zero console/page errors besides the same benign
+> `navigator.vibrate` autoplay warning seen every prior pass. The open
+> **[MED] momentum chain empty-state contrast** row (pass 21)
+> reconfirmed live and unchanged on both viewports — mobile DOM shows
+> `○ no momentum` present but barely legible, desktop shows the same
+> text with zero visible pixels against the arena floor art — no
+> regression, no new evidence, not re-filed. VITAE-vs-HP and DoT
+> round-clock rows both continue to hold their prior resolved/reconfirmed
+> state (icon-only `♥ 90/90` readout, no duration-phrased card faces in
+> the visible hand). No new findings filed.
 
 > **[critique pass 26, 2026-08-16, commit c4f8d42b] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
