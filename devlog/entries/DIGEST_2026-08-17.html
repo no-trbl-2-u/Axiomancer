@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<title>Axiomancer</title>
+<title>Axiomancer digest — 2026-08-17</title>
 <style>
 :root {
   color-scheme: light dark;
@@ -203,15 +203,52 @@ footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--b
 </style>
 </head>
 <body>
-<header class="top"><div class="wrap"><span class="home">Axiomancer</span></div></header>
+<header class="top"><div class="wrap"><a class="home" href="../log.html">← DevLog</a><span class="crumb">2026-08-17</span></div></header>
 <main class="wrap">
-<h1>Axiomancer</h1>
-<p class="muted">A private index of the game's content and the nightly development log.</p>
-<div class="hub">
-  <a class="hue-cards" href="./catalog.html"><span class="h-glyph">🂠</span><div class="h-title">Catalog</div><div class="h-sub">57 cards · 56 foes · 24 statuses</div></a>
-  <a class="hue-log" href="./log.html"><span class="h-glyph">❯</span><div class="h-title">DevLog</div><div class="h-sub">37 entries</div></a>
-  <a class="hue-tuning" href="./tuning-lab/index.html"><span class="h-glyph">⚖</span><div class="h-title">Tuning Lab</div><div class="h-sub">3 reports</div></a>
-</div>
+<h1 id="headline">2026-08-17</h1>
+<p class="headline">The narrative-content spine that phase 53a widened its guard to catch</p>
+<div class="counts"><span class="chip cat-mechanics">2 mechanics</span><span class="chip cat-infra">1 infra</span><span class="chip cat-balance">1 balance</span></div>
+<section class="card cat-mechanics" id="narrative-reachability-guard-added-three-live-npc-mismatches-fixed"><div class="card-head"><span class="chip cat-mechanics">mechanics</span><h2>Narrative reachability guard added, three live NPC mismatches fixed</h2></div>
+<p class="field"><span class="flabel">What</span> <code>auditNarrativeReachability</code> (<code>axiomancer-mechanics/src/World/narrative-reachability.ts</code>)</p>
+<p class="field"><span class="flabel">Why</span> <code>resolveInteraction</code> looked NPCs up by display name and fell</p>
+<p class="commits"><code class="commit">`fafc7b4e`</code> <code class="commit">`c4f8d42b`</code></p>
+<p>cross-checks every dialogue <code>interaction</code> node's <code>npcName</code> against its map's roster, and a registry-wide test now asserts the invariant holds across <code>MAP_REGISTRY</code>. Fixed the three live mismatches it found: <code>nf-7</code> named a nonexistent "Forest Hermit" instead of the rostered "Hermit Sage"; <code>nf-14</code>/<code>nf-23</code> named scenery ("Ancient Stone Marker", "Echo Stone") as if they were people.</p>
+<p>back silently when the name didn't match, so a missing tree read as a deliberately minimal encounter rather than a broken one. Eleven of fourteen authored dialogue trees sat unreachable this way, undetected across content passes — the same failure class as the first-map audit's fv-1 finding (map-event content nobody could reach), arriving a second time by a different road. Drains the pending <code>plan/AUDIT.md</code> row filed for that earlier instance.</p>
+<div class="diff" role="img" aria-label="code diff"><div class="dl add">+/**</div><div class="dl add">+ * Narrative reachability audit (Phase 53a).</div><div class="dl add">+ *</div><div class="dl add">+ * `resolveInteraction` (`MapEvents/handlers.ts`) looks an NPC up by display</div><div class="dl add">+ * name against the host map's roster and falls back silently when the name</div><div class="dl add">+ * is absent — a missing tree reads as a deliberately minimal encounter, not</div><div class="dl add">+ * a missing conversation. Eleven of fourteen authored dialogue trees sat</div><div class="dl add">+ * unreachable this way before this phase; nothing failed when it was true.</div><div class="dl add">+ */</div></div></section>
+<section class="card cat-mechanics" id="dialogue-gate-context-wired-into-the-live-path"><div class="card-head"><span class="chip cat-mechanics">mechanics</span><h2>Dialogue gate context wired into the live path</h2></div>
+<p class="field"><span class="flabel">What</span> Mobile's <code>composeNpcDialogue</code> built the engine's</p>
+<p class="field"><span class="flabel">Why</span> Every <code>requiresAlignment</code> (33 choices) and</p>
+<p class="commits"><code class="commit">`75fb5205`</code> <code class="commit">`e3bbcfd0`</code></p>
+<p><code>DialogueContext</code> by hand and only supplied 3 of its 5 fields — <code>alignment</code> and <code>lastSeenAlignmentCellId</code> were missing. Extracted a single <code>buildDialogueContext(tree, state)</code> builder that supplies all five, sourcing alignment from <code>state.philosophicalAlignment</code> and the per-tree last-seen cell from <code>state.lastSeenAlignmentCells</code>.</p>
+<p><code>playerAlignmentCellChangedSince</code> (6 choices) gate evaluated false for every player, forever — 39 of 44 authored gated choices could never render. Wiring the missing fields live also surfaced a latent, pre-existing bug: <code>composeNpcDialogue</code> derived a choice's click-id from its index in the <em>filtered</em> (visible) choice array, while the action layer always indexes into the <em>raw</em> array. Any gate that hid an earlier choice put the two arrays out of step, so a click could silently fire the wrong branch's effects — reachable before this phase via the one pre-existing flag gate, but certain to trigger once 39 more gates went live. Fixed by deriving the id from <code>node.choices.indexOf(choice)</code> instead.</p>
+<div class="diff" role="img" aria-label="code diff"><div class="dl add">+export function buildDialogueContext(tree: DialogueTree, state: AppStoreState): DialogueContext {</div><div class="dl add">+    const activeNames: string[] = state.quests.active.map((q: { name: string }) =&gt; q.name);</div><div class="dl add">+    const alignment = state.philosophicalAlignment ?? defaultAlignment();</div><div class="dl add">+    return {</div><div class="dl add">+        activeQuests: new Set&lt;string&gt;(activeNames),</div><div class="dl add">+        completedQuests: new Set&lt;string&gt;(state.quests.completed as string[]),</div><div class="dl add">+        flags: new Set&lt;string&gt;(state.flags as string[]),</div><div class="dl add">+        alignment,</div><div class="dl add">+        lastSeenAlignmentCellId: tree.id ? state.lastSeenAlignmentCells?.[tree.id] : undefined,</div><div class="dl add">+    };</div><div class="dl add">+}</div></div></section>
+<section class="card cat-balance" id="shilling-economy-calibrated-against-measured-loot-cache-income"><div class="card-head"><span class="chip cat-balance">balance</span><h2>Shilling economy calibrated against measured loot-cache income</h2></div>
+<p class="field"><span class="flabel">What</span> Retired three stacked pricing placeholders — anvil price</p>
+<p class="field"><span class="flabel">Why</span> All three constants shipped as explicitly-marked</p>
+<p class="commits"><code class="commit">`97560058`</code> <code class="commit">`aa5ae351`</code></p>
+<p>(50 → 25), card-removal base/step (15/10 → 5/5), and blacksmith hone/temper/swap (2/3/4 → 3/5/8 shillings) — anchored on the measured, deterministic Act-1 shilling floor from <code>loot-cache</code> map events: 26/act on fishing-village, 18/act on northern-forest.</p>
+<p>placeholders across three separate phases, waiting on a ratification pass that never ran. The only live, deterministic currency source on either authored map is the flat <code>loot-cache</code> MapEvent (combat grants none; Hazard/Gathering economies exist but aren't wired to a node yet), so a hermetic test walking every node now pins that floor and the new prices are set relative to it — the anvil at roughly a full act's income, the fifth card cut at about the same, both real sacrifices without a lockout.</p></section>
+<section class="card cat-infra" id="combat-baseline-re-measured-numbers-hold-unchanged"><div class="card-head"><span class="chip cat-infra">infra</span><h2>Combat baseline re-measured — numbers hold unchanged</h2></div>
+<p class="field"><span class="flabel">What</span> The deck-matrix baseline was stale by 3 mechanics-source</p>
+<p class="field"><span class="flabel">Why</span> None of the three commits that staled it (53a's reachability</p>
+<p>commits at digest open. Re-measured via the reduced-nightly pass (<code>npm run baseline:regen -- --runs=30 --confidence=reduced-nightly</code>); <code>baseline:check</code> now reports fresh at <code>e3bbcfd0</code>.</p>
+<p>guard, 52f's shilling calibration, 52e's rest-minigame retirement) touch combat resolution — the regenerated baseline's cell data is byte-identical to the prior measurement, only the <code>meta</code> stamp moved. Reported as directional confirmation, not a finding: current reduced-nightly read is early avgWinRate 0.545 (avgCQI 0.727), mid 0.083 (avgCQI 0.692), late 0.000 (avgCQI 0.763), impossible 0.000 (avgCQI 0.767) across 144 cells — read against the current transitional library, not the retired ten-preset doctrine curve.</p></section>
+<section class="panel" id="while-you-were-out"><h2>While you were out</h2>
+<div class="tablewrap"><table><thead><tr><th>Tick</th><th>Verb</th><th>Outcome</th></tr></thead><tbody><tr><td>2026-08-17 07:29</td><td>march</td><td>success</td></tr><tr><td>2026-08-17 01:59</td><td>march</td><td>success — <span class="st st-ok">shipped</span> Phase 53b</td></tr><tr><td>2026-08-16 18:52</td><td>march</td><td>success — <span class="st st-ok">shipped</span> Phase 53a</td></tr><tr><td>2026-08-16 13:05</td><td>march</td><td>cancelled</td></tr><tr><td>2026-08-16 12:59</td><td>march</td><td>success</td></tr><tr><td>2026-08-16 07:06</td><td>march</td><td>success — <span class="st st-ok">shipped</span> Phase 52f</td></tr><tr><td>critique</td><td><span class="st st-ok">pass</span> 26</td><td>no new findings — both open <span class="st st-warn">Pending</span> rows (arena backdrop, momentum-chip contrast) reproduced as filed</td></tr></tbody></table></div></section>
+<section class="panel" id="needs-you"><h2>Needs you</h2>
+<ul><li><strong>Night shift skipped 2026-08-16.</strong> The <code>night</code> workflow ran</li></ul>
+<p>2026-08-15, then next appears today (2026-08-17) — no run in between, so no <code>DIGEST_2026-08-16.md</code> exists. This digest does not backfill it; flagging so the gap is visible rather than silently absorbed into today's window.</p>
+<ul><li>No open <code>triage:needs-user</code> or <code>loop:do</code> issues.</li><li>No pending <code>plan/AUDIT.md</code> rows — the queue is drained.</li><li>44 pending <code>plan/CRITIQUE.md</code> rows remain open (unchanged by pass</li></ul>
+<p>26 — both rows it re-checked reproduced as filed); the two most recent are visual/UI (combat arena backdrop, momentum-chip empty-state contrast), both already routed via <code>/expand</code>.</p></section>
+<section class="panel" id="tuning-proposals"><h2>Tuning proposals</h2>
+<p>None filed tonight — the meta-loop pulse (pass cadence, gate health) shows no mistuned gate to propose against.</p></section>
+<section class="panel" id="queues-now"><h2>Queues now</h2>
+<ul><li>Build plan: 30 open phases (1 blocked), 53c next up — placement of</li></ul>
+<p>the quest-giver and a coverage-floor test, depends on 53a + 53b (both shipped today).</p>
+<ul><li><code>plan/PHASE_CANDIDATES.md</code>: 1 pending (lexicon/retired-doctrine</li></ul>
+<p>prose drift, expand pass 8, 2026-08-15).</p>
+<ul><li>Deploy: clean — HEAD <code>e3bbcfd0</code> is a docs/plan-only tick, no gated</li></ul>
+<p>workflow triggered.</p></section>
 <footer class="foot">Axiomancer DevLog &middot; generated by <code>scripts/build-devlog.mjs</code></footer>
 </main>
 </body>
