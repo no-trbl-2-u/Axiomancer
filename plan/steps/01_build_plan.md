@@ -1478,7 +1478,7 @@ changes which lines a player can REACH. Either order works; 53a first grows
       authoring" — drain that row here.** (mechanics) Deps: none.
       Brief: `plan/phases/phase_53a_narrative_reachability_guard.md`.
       Shipped `fafc7b4e`.
-- [ ] Phase 53b — The dialogue gate context, completed in the live path.
+- [x] Phase 53b — The dialogue gate context, completed in the live path.
       44 gated choices are authored across the rosters; 39 of them can
       never render in the app. `composeNpcDialogue` builds its
       `DialogueContext` by hand and supplies three of five fields —
@@ -1495,6 +1495,7 @@ changes which lines a player can REACH. Either order works; 53a first grows
       until it lands, authoring a gated branch ships dead content.
       (mobile) Deps: none (independent of 53a; both must precede 53c).
       Brief: `plan/phases/phase_53b_dialogue_gate_context.md`.
+      Shipped `75fb5205`.
 - [ ] Phase 53c — Placement: the quest-giver on the spine, and a coverage
       floor. `starting-quest` is started from exactly two authored sites,
       both inside Old Marrow's unreachable tree, so the first map's premise
