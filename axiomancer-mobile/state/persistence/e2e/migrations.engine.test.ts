@@ -245,6 +245,28 @@ describe('migrations.engine', () => {
 
             expect(result.version).toBe(GAME_STATE_VERSION);
         });
+
+        // Phase 53b — lastSeenAlignmentCells is a plain optional field on
+        // GameState (no bump needed: absent-after-migration reads as "no
+        // prior observation", the correct first-visit behaviour). Pin the
+        // round-trip so a future envelope change can't silently drop it.
+        test('lastSeenAlignmentCells survives a save/load round-trip when present', () => {
+            const current = createNewGameState();
+            const withObservation = { ...current, lastSeenAlignmentCells: { 'captain-blackwater': 'cell-13' } };
+
+            const result = unwrap({ schemaVersion: CURRENT_SCHEMA_VERSION, state: withObservation });
+
+            expect(result.lastSeenAlignmentCells).toEqual({ 'captain-blackwater': 'cell-13' });
+        });
+
+        test('lastSeenAlignmentCells stays absent (not defaulted to {}) when the save never wrote it', () => {
+            const current = createNewGameState() as unknown as Record<string, unknown>;
+            expect(current.lastSeenAlignmentCells).toBeUndefined();
+
+            const result = unwrap({ schemaVersion: CURRENT_SCHEMA_VERSION, state: current }) as unknown as Record<string, unknown>;
+
+            expect(result.lastSeenAlignmentCells).toBeUndefined();
+        });
     });
 
     describe('migration infrastructure', () => {

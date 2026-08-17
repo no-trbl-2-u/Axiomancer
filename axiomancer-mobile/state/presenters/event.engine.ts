@@ -23,6 +23,7 @@
 import type {
     ActiveEffect,
     DialogueChoice,
+    DialogueContext,
     DialogueNode,
     DialogueTree,
     Encounter,
@@ -31,7 +32,7 @@ import type {
     ResolveMapEventResult,
     ResolvedEvent,
 } from '@mechanics';
-import { getDialogueNode, visibleChoices } from '@mechanics';
+import { defaultAlignment, getDialogueNode, visibleChoices } from '@mechanics';
 
 import { ENCOUNTER_ENEMY_HP_MULTIPLIER, withScaledEnemyHp } from '../actions';
 import type { AppStoreState } from '../store';
@@ -531,28 +532,45 @@ function composeCombatPrelude(encounter: Encounter, isBoss: boolean): Omit<Event
     };
 }
 
+/**
+ * Builds the engine's `DialogueContext` from mobile store state. The single
+ * source of truth for every `visibleChoices` call site — a second hand-built
+ * context is how the phase 53b gap (alignment gates evaluating false for
+ * every player, forever) happened in the first place.
+ */
+export function buildDialogueContext(tree: DialogueTree, state: AppStoreState): DialogueContext {
+    const activeNames: string[] = state.quests.active.map((q: { name: string }) => q.name);
+    const alignment = state.philosophicalAlignment ?? defaultAlignment();
+    return {
+        activeQuests: new Set<string>(activeNames),
+        completedQuests: new Set<string>(state.quests.completed as string[]),
+        flags: new Set<string>(state.flags as string[]),
+        alignment,
+        lastSeenAlignmentCellId: tree.id ? state.lastSeenAlignmentCells?.[tree.id] : undefined,
+    };
+}
+
 function composeNpcDialogue(
     tree: DialogueTree,
     nodeId: string,
     state: AppStoreState,
 ): Omit<EventViewModel, 'preludeChrome' | 'chrome' | 'sourceNodeType'> {
     const node: DialogueNode = getDialogueNode(tree, nodeId);
-    const activeNames: string[] = state.quests.active.map((q: { name: string }) => q.name);
-    const ctx = {
-        activeQuests: new Set<string>(activeNames),
-        completedQuests: new Set<string>(state.quests.completed as string[]),
-        flags: new Set<string>(state.flags as string[]),
-    };
+    const rawChoices = node.choices ?? [];
+    const ctx = buildDialogueContext(tree, state);
     const visible = visibleChoices(node, ctx);
     // Phase 60c — engine's DialogueChoice was flattened: `.id` and
     // `.label` were removed; the canonical user-facing field is
-    // `.text`. Mobile derives a stable VM `id` from the choice's
-    // index in `visibleChoices(node, ctx)` so the
-    // `pickEventChoiceAction` lookup stays deterministic without
-    // depending on a `.id` that no longer exists. The same indexing
-    // shape is consumed by the action below.
-    const choices: EventChoice[] = visible.map((choice, index) => ({
-        id: String(index),
+    // `.text`. Mobile derives a stable VM `id` from the choice's index
+    // in `node.choices` (the RAW list `pickEventChoiceAction` indexes
+    // into), not its index in `visible` — a gate hiding any earlier
+    // choice shifts the filtered array's indices out of step with the
+    // raw one, which silently fires the wrong branch on click. (Phase
+    // 53b: caught while wiring the alignment gates live, since gating
+    // now hides choices far more often than the one pre-existing
+    // `flag`/`questCompleted` gate did.)
+    const choices: EventChoice[] = visible.map((choice) => ({
+        id: String(rawChoices.indexOf(choice)),
         label: choice.text.toUpperCase(),
         description: choice.text,
         consequences: extractDialogueConsequences(choice),

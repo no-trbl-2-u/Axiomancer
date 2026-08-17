@@ -10,6 +10,7 @@
  */
 
 import { afterEach, describe, it, expect, jest } from '@jest/globals';
+import { defaultAlignment, getMapDefinition } from '@mechanics';
 import type { ResolveMapEventResult } from '@mechanics';
 
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
@@ -21,6 +22,7 @@ import {
     selectHasActiveEvent,
     selectHasActivePacedEvent,
     selectHasActiveCombatPrelude,
+    buildDialogueContext,
     type EventViewModel,
 } from '@/state/presenters/event.engine';
 
@@ -824,5 +826,180 @@ describe('selectEventViewModel: invariants', () => {
         selectEventViewModel(store.getState());
 
         expect(saveSpy).not.toHaveBeenCalled();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// composeNpcDialogue's DialogueContext — Phase 53b
+//
+// `visibleChoices` evaluates `requiresAlignment` / `playerAlignmentCellChangedSince`
+// gates against `ctx.alignment` / `ctx.lastSeenAlignmentCellId`. Before Phase
+// 53b the presenter built its DialogueContext by hand and never supplied
+// either field, so every alignment-gated choice authored in the game (39 of
+// 44) silently evaluated to hidden forever. These tests drive the real
+// Captain Blackwater tree (`coastal-continent` / `fishing-village`), the
+// specimen named in the phase brief — a synthetic tree would pass while the
+// shipped content stayed broken.
+// ---------------------------------------------------------------------------
+
+function loadBlackwaterTree() {
+    const fishingVillage = getMapDefinition('coastal-continent', 'fishing-village');
+    const npc = fishingVillage.npcs!.find((n) => n.name === 'Captain Blackwater')!;
+    return npc.dialogueTree!;
+}
+
+function setDialogueCursor(store: AppStore, nodeId: string) {
+    const tree = loadBlackwaterTree();
+    store.setState({
+        event: {
+            ...EMPTY_EVENT_SLICE,
+            pending: makeInteractionResult(),
+            dialogueCursor: { tree, nodeId },
+        },
+    });
+    return tree;
+}
+
+describe('buildDialogueContext: field completeness (Phase 53b regression witness)', () => {
+    it('populates all five DialogueContext keys for a fully-specified state', () => {
+        const store = makeStore();
+        const tree = loadBlackwaterTree();
+        store.setState({
+            philosophicalAlignment: { epistemology: 5, outlook: 5, scope: 25 },
+            lastSeenAlignmentCells: { 'captain-blackwater': 'some-cell' },
+            flags: ['a-flag'],
+        });
+
+        const ctx = buildDialogueContext(tree, store.getState());
+
+        expect(ctx.activeQuests).toBeInstanceOf(Set);
+        expect(ctx.completedQuests).toBeInstanceOf(Set);
+        expect(ctx.flags.has('a-flag')).toBe(true);
+        expect(ctx.alignment).toEqual({ epistemology: 5, outlook: 5, scope: 25 });
+        expect(ctx.lastSeenAlignmentCellId).toBe('some-cell');
+    });
+
+    it('falls back to defaultAlignment() when philosophicalAlignment is unset', () => {
+        const store = makeStore();
+        const tree = loadBlackwaterTree();
+        store.setState({ philosophicalAlignment: undefined as never });
+
+        const ctx = buildDialogueContext(tree, store.getState());
+
+        expect(ctx.alignment).toEqual(defaultAlignment());
+    });
+
+    it('lastSeenAlignmentCellId is undefined for a tree with no cached observation yet', () => {
+        const store = makeStore();
+        const tree = loadBlackwaterTree();
+
+        const ctx = buildDialogueContext(tree, store.getState());
+
+        expect(ctx.lastSeenAlignmentCellId).toBeUndefined();
+    });
+});
+
+describe('selectEventViewModel: NPC dialogue alignment gates (Phase 53b)', () => {
+    it('hides both requiresAlignment branches at neutral (default) alignment', () => {
+        const store = makeStore();
+        setDialogueCursor(store, 'greet');
+
+        const vm = selectEventViewModel(store.getState());
+        const descriptions = vm.choices.map((c) => c.description);
+
+        expect(descriptions).not.toContain('Tell me how you deal fair.');
+        expect(descriptions).not.toContain("What's the quickest coin to be made here?");
+        // Witness from the phase brief: five replies authored, two render.
+        expect(vm.choices).toHaveLength(2);
+    });
+
+    it('surfaces the trade-ethics branch once scope alignment clears the >= 20 gate', () => {
+        const store = makeStore();
+        setDialogueCursor(store, 'greet');
+        store.setState({ philosophicalAlignment: { epistemology: 0, outlook: 0, scope: 20 } });
+
+        const vm = selectEventViewModel(store.getState());
+
+        expect(vm.choices.map((c) => c.description)).toContain('Tell me how you deal fair.');
+    });
+
+    it('surfaces the quick-profit branch once scope alignment clears the <= -10 gate', () => {
+        const store = makeStore();
+        setDialogueCursor(store, 'greet');
+        store.setState({ philosophicalAlignment: { epistemology: 0, outlook: 0, scope: -10 } });
+
+        const vm = selectEventViewModel(store.getState());
+
+        expect(vm.choices.map((c) => c.description)).toContain("What's the quickest coin to be made here?");
+    });
+
+    it('the observer branch is hidden on a first visit — no cached cell to compare against', () => {
+        const store = makeStore();
+        setDialogueCursor(store, 'greet');
+        store.setState({ philosophicalAlignment: { epistemology: 67, outlook: 67, scope: 67 } });
+
+        const vm = selectEventViewModel(store.getState());
+
+        expect(vm.choices.map((c) => c.description)).not.toContain(
+            "(The captain's eyes narrow. He sees how you deal differently now.)",
+        );
+    });
+
+    it('the observer branch surfaces once a prior choice cached a cell and alignment has since shifted', () => {
+        const store = makeStore();
+        const actions = createAppActions(store);
+        setDialogueCursor(store, 'greet');
+
+        // First visit: pick the benign "Just looking." branch (no
+        // alignmentDelta) so applyDialogue caches the current (neutral)
+        // cell without moving it. It renders 3rd among the 2 visible
+        // choices at neutral alignment ("What do you carry?", "Just
+        // looking."), so its VM id is index 3 into node.choices (raw).
+        const vmBefore = selectEventViewModel(store.getState());
+        const justLooking = vmBefore.choices.find((c) => c.description === 'Just looking.')!;
+        actions.pickEventChoice(justLooking.id);
+
+        const cachedCellId = store.getState().lastSeenAlignmentCells?.['captain-blackwater'];
+        expect(cachedCellId).toBeDefined();
+
+        // Re-open the conversation at greet and shift alignment to a
+        // different cell than the one just cached.
+        setDialogueCursor(store, 'greet');
+        store.setState({ philosophicalAlignment: { epistemology: 67, outlook: 67, scope: 67 } });
+
+        const vm = selectEventViewModel(store.getState());
+
+        expect(vm.choices.map((c) => c.description)).toContain(
+            "(The captain's eyes narrow. He sees how you deal differently now.)",
+        );
+    });
+
+    it('clicking a choice rendered after a hidden gate fires the CORRECT branch (raw-index id fix)', () => {
+        // Regression for the id-derivation bug this phase also closed:
+        // composeNpcDialogue used to derive `id` from the choice's index
+        // in the FILTERED (visible) array, while pickEventChoiceAction
+        // always indexed into the RAW node.choices array. Whenever a
+        // gate hid an earlier-authored choice (true for 39 of 44 gated
+        // choices once alignment gates went live), the two arrays fell
+        // out of step and a click fired the wrong branch's effects.
+        const store = makeStore();
+        const actions = createAppActions(store);
+        setDialogueCursor(store, 'greet');
+
+        const vm = selectEventViewModel(store.getState());
+        // At neutral alignment only "What do you carry?" (raw index 0)
+        // and "Just looking." (raw index 3) are visible — two earlier
+        // gated choices (raw indices 1, 2) sit between them.
+        const justLooking = vm.choices.find((c) => c.description === 'Just looking.')!;
+        expect(justLooking.id).toBe('3');
+
+        actions.pickEventChoice(justLooking.id);
+
+        // "Just looking." routes to the 'browsing' leaf node, which sets
+        // no flag and grants no currency — landing on 'fair_trade' or
+        // 'quick_profit' instead (the pre-fix failure mode) would have
+        // set a flag / shifted currency the assertions below would catch
+        // via the cursor's node id.
+        expect(store.getState().event.dialogueCursor?.nodeId).toBe('browsing');
     });
 });
