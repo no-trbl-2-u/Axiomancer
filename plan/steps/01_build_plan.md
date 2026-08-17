@@ -1496,7 +1496,7 @@ changes which lines a player can REACH. Either order works; 53a first grows
       (mobile) Deps: none (independent of 53a; both must precede 53c).
       Brief: `plan/phases/phase_53b_dialogue_gate_context.md`.
       Shipped `75fb5205`.
-- [ ] Phase 53c — Placement: the quest-giver on the spine, and a coverage
+- [x] Phase 53c — Placement: the quest-giver on the spine, and a coverage
       floor. `starting-quest` is started from exactly two authored sites,
       both inside Old Marrow's unreachable tree, so the first map's premise
       quest is **never active in real play** — the kill-objective repair
@@ -1504,15 +1504,16 @@ changes which lines a player can REACH. Either order works; 53a first grows
       a single node (`fv-1 → fv-2` only; `fv-2` opens onto all three
       column-2 nodes) and put Old Marrow there, restoring the placement
       `docs/story.md` and `maps.ts`'s own header comment both still assert.
-      Home the Coastal Beggar before the boss and Captain Blackwater +
-      the Fisherman's Daughter after it, per S-02; move the arrival
-      cutscene's road-pointing line into Marrow's mouth. Grid stays at 25 —
-      encounter nodes change hands, nothing is added, because adding
-      re-opens the strand class the last audit closed. Re-run
-      `auditMapTraversal` and the coverage walk; ship a **coverage floor
-      test** so load-bearing narrative can never silently land on a 29%
-      lane again. (mechanics) Deps: 53a, 53b.
+      Home the Coastal Beggar, Captain Blackwater, and the Fisherman's
+      Daughter post-boss (one per lane, column 6), per the brief's
+      "Decisions made upfront" tie-breaker; move the arrival cutscene's
+      road-pointing line into Marrow's mouth. Grid stays at 25 — encounter
+      nodes change hands, nothing is added. Re-ran `auditMapTraversal` and
+      shipped `auditRouteCoverage` beside it plus a coverage-floor test
+      (fv-1/fv-2/fv-6 at 100%, quest board's 33.3% measured and justified).
+      (mechanics) Deps: 53a, 53b.
       Brief: `plan/phases/phase_53c_narrative_placement.md`.
+      Shipped `44fab3ae`.
 - [ ] Phase 53d — Author S-01's four dilemmas. Designed 2026-07-xx,
       never wired; both of that spec's open questions were answered
       2026-08-09 at planning time (displace encounter nodes, grid stays
