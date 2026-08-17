@@ -486,3 +486,67 @@ export function auditMapTraversal(
     audit.unreachableNodes = def.nodes.map(n => n.id).filter(id => !reached.has(id));
     return audit;
 }
+
+/** The verdict of `auditRouteCoverage`. */
+export interface MapRouteCoverage {
+    mapName: string;
+    /** Total distinct legal single-life routes walked. */
+    totalRoutes: number;
+    /** For each node, how many of those routes pass through it. */
+    routesThrough: Record<NodeId, number>;
+    /** `routesThrough[id] / totalRoutes` — 1 means every legal route. */
+    shareOfRoutes: Record<NodeId, number>;
+}
+
+/**
+ * Exhaustively walks every legal single-life route (same walk as
+ * `auditMapTraversal`) and, for every node, counts how many of those routes
+ * pass through it. This is the measurement behind the first-map audit's
+ * "share of routes" table (2026-08-08) and the Phase 53c coverage-floor
+ * test: a node whose `shareOfRoutes` is below 1 is a coin flip or worse,
+ * and load-bearing narrative (a quest-giver, a boss) cannot silently land
+ * there again without a test catching it.
+ *
+ * Pure and definition-only, same contract as `auditMapTraversal`: labyrinth
+ * maps return an empty verdict rather than walking forever.
+ */
+export function auditRouteCoverage(
+    def: MapDefinition,
+    maxRoutes = 500_000,
+): MapRouteCoverage {
+    const byId = new Map(def.nodes.map(n => [n.id, n]));
+    const routesThrough: Record<NodeId, number> = {};
+    for (const node of def.nodes) routesThrough[node.id] = 0;
+    const coverage: MapRouteCoverage = {
+        mapName: def.name,
+        totalRoutes: 0,
+        routesThrough,
+        shareOfRoutes: {},
+    };
+    if (def.traversal === 'labyrinth') return coverage;
+
+    const walk = (cur: NodeId, completed: Set<NodeId>, route: NodeId[]): void => {
+        if (coverage.totalRoutes >= maxRoutes) return;
+        const options = (byId.get(cur)?.connectedNodes ?? []).filter(id => !completed.has(id));
+        if (options.length === 0) {
+            coverage.totalRoutes += 1;
+            for (const id of route) routesThrough[id] = (routesThrough[id] ?? 0) + 1;
+            return;
+        }
+        for (const next of options) {
+            completed.add(next);
+            route.push(next);
+            walk(next, completed, route);
+            route.pop();
+            completed.delete(next);
+        }
+    };
+    walk(def.startingNode.id, new Set([def.startingNode.id]), [def.startingNode.id]);
+
+    for (const node of def.nodes) {
+        coverage.shareOfRoutes[node.id] = coverage.totalRoutes > 0
+            ? (routesThrough[node.id] ?? 0) / coverage.totalRoutes
+            : 0;
+    }
+    return coverage;
+}

@@ -56,8 +56,10 @@ export {
     teleportToNode, unblockMapRoute,
     // 2026-08-08 first-map audit: traversal queries + the strand audit.
     legalMovesFrom, isStranded, isMapTerminalNode, auditMapTraversal,
+    // Phase 53c — the route-coverage walk, beside the strand audit.
+    auditRouteCoverage,
 } from './world.reducer';
-export type { MapStrand, MapTraversalAudit } from './world.reducer';
+export type { MapStrand, MapTraversalAudit, MapRouteCoverage } from './world.reducer';
 
 // Phase 53a — narrative reachability guard.
 export { auditNarrativeReachability } from './narrative-reachability';

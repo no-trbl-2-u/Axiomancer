@@ -111,7 +111,9 @@ describe('selectExplorationViewModel: engine reads', () => {
 
         const vm = selectExplorationViewModel(store.getState());
 
-        expect(vm.options.map((o) => o.nodeId).sort()).toEqual(['fv-2', 'fv-12', 'fv-13'].sort());
+        // Phase 53c — column 1 narrows to fv-2 alone (Old Marrow, the
+        // quest-giver), so the starting node's only option is him.
+        expect(vm.options.map((o) => o.nodeId).sort()).toEqual(['fv-2']);
         expect(vm.options[0].description.length).toBeGreaterThan(0);
     });
 
@@ -230,11 +232,12 @@ describe('moveTo action: locked / invalid targets', () => {
         const store = createAppStore({ adapter: createMemoryAdapter() });
         const actions = createAppActions(store);
 
-        // fv-12 resolves to an engine `encounter` kind (reached via fv-2), so it
-        // is not completed on entry — it stays reachable and can be re-entered.
+        // fv-16 resolves to an engine `encounter` kind (reached via fv-2), so
+        // it is not completed on entry — it stays reachable and can be
+        // re-entered.
         actions.moveTo('fv-2');
-        actions.moveTo('fv-12');
-        const result = actions.moveTo('fv-12');
+        actions.moveTo('fv-16');
+        const result = actions.moveTo('fv-16');
 
         expect(result.moved).toBe(true);
     });

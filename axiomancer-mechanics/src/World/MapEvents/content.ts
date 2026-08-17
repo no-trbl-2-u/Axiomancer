@@ -476,14 +476,16 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
 // battle" — a flat wall of identical encounters with no recovery was both
 // monotonous and unwinnable in playtests. The map now spreads 25 nodes across
 // a real mix, with encounters kept a slight plurality:
-//   - 7 ENCOUNTER nodes  (6 regular + the fv-6 boss — the spine),
+//   - 6 ENCOUNTER nodes  (5 regular + the fv-6 boss — the spine),
 //   - 4 REST nodes       (recover HP — the rest-choice node), one on the
 //                         spine just before the boss,
-//   - 4 GATHERING nodes  (low-risk materials — "The Gleaning"),
-//   - 3 HAZARD nodes     (light risk — the hazard minigame),
+//   - 3 GATHERING nodes  (low-risk materials — "The Gleaning"),
+//   - 2 HAZARD nodes     (light risk — the hazard minigame),
 //   - 3 LOOT-CACHE nodes (a few coins the tide left behind),
 //   - 1 NARRATION node   (fv-14, the dialogue-backed monologue shell),
-//   - 1 INTERACTION node (fv-19, a coastal NPC),
+//   - 4 INTERACTION nodes (Phase 53c — Old Marrow at fv-2, the Coastal
+//                         Beggar at fv-7, Captain Blackwater at fv-18, the
+//                         Fisherman's Daughter at fv-19),
 //   - 1 QUEST node       (fv-15, the story hook),
 //   - 1 CUTSCENE node    (fv-1, the arrival — see `fvArrival` below), and
 //   - 1 BOSS node        (fv-6, the region climax — an encounter w/ isBoss).
@@ -501,15 +503,20 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
 // assignment explicit and monotonic — column 1 is the softest thing in the
 // village, column 9 the hardest thing short of the breakwater itself.
 const FV_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description: string }> = {
-    // c1 — first blood, the gentlest foe on the roster.
-    'fv-12': { slug: 'grave-larva',      description: 'A grave larva gums its way up from under the dock pilings.' },
+    // c3 — Phase 53c: little-belle moves off fv-7 (now Coastal Beggar's
+    // node) onto fv-13, one of column 1's two displaced nodes. Must stay
+    // ahead of the Beggar's column so `befriended-little-belle` can be set
+    // before her flag-gated branch reads it (the forward-only gauntlet
+    // law — see S-02 "the law a gauntlet imposes"). fv-12, its sibling,
+    // takes fv-2's displaced loot-cache instead (see `FV_LOOT_NODES`) so
+    // the map's guaranteed shilling income is unchanged — grave-larva,
+    // fv-12's prior foe, is dropped (no flag or pricing dependency).
+    'fv-13': { slug: 'little-belle',     description: 'A small orange vesper rings a bell for a service no one held.' },
     // c2
     'fv-16': { slug: 'float-eye',        description: 'A float-eye drifts out of the fog, already watching.' },
     // c3 — last fight before the pre-boss breath.
     'fv-4':  { slug: 'chattering-skull', description: 'A chattering skull rattles its last word among the crates.' },
-    // c6 — the far side of the breakwater.
-    'fv-7':  { slug: 'little-belle',     description: 'A small orange vesper rings a bell for a service no one held.' },
-    // c7
+    // c7 — the far side of the breakwater.
     'fv-21': { slug: 'foot-stealer',     description: 'A foot-stealer scuttles between the shacks, low and grasping.' },
     // c9 — the last thing between the player and the coast road.
     'fv-24': { slug: 'water-holger',     description: 'A drowned deckhand wades up the strand, still standing his watch.' },
@@ -669,8 +676,10 @@ const fvArrival: MapEventPool = {
             lines: [
                 'Salt in the boards, salt in the bread, salt working its slow way into everything that stays.',
                 'The village lies along the water the way a rope lies where it was dropped. Nobody here has hauled a full net since the breakwater went quiet.',
-                'Three ways out of the yard: the wharf road, the middle track, the lane that runs inland past the shuttered houses.',
-                'Whichever you take, the breakwater is at the end of it.',
+                // Phase 53c — the former closing line ("Three ways out of
+                // the yard…") moved into Old Marrow's greeting at fv-2; a
+                // man pointing at roads beats a narrator listing them.
+                'Whichever way you go, the breakwater is at the end of it.',
             ],
             description: 'You step out of the hovel into the grey of it.',
         },
@@ -706,27 +715,42 @@ const FV_REST_NODES: Record<string, string> = {
     'fv-20': 'A dry hollow under an upturned hull. You rest a while.',
     'fv-25': 'A tide-pool grotto, still and warm. You let the quiet mend you.',
 };
-const FV_GATHER_NODES: Record<string, number> = { 'fv-5': 0, 'fv-8': 1, 'fv-13': 2, 'fv-22': 3 };
+const FV_GATHER_NODES: Record<string, number> = { 'fv-5': 0, 'fv-8': 1, 'fv-22': 3 };
 const FV_HAZARD_NODES: Record<string, string> = {
     'fv-10': 'You stumble through a thicket of jagged barnacles.',
-    'fv-18': 'The boards give way over a reeking bilge; you scramble clear.',
     'fv-23': 'A gull-slick ledge crumbles underfoot above the rocks.',
 };
-const FV_LOOT_NODES: Record<string, number> = { 'fv-2': 0, 'fv-11': 1, 'fv-17': 2 };
-// One coastal NPC for texture (the narration node fv-14 is wired separately).
+// Phase 53c — fv-2's loot cache (idx 0) moves to fv-12, one of the two
+// nodes column 1 displaces, so the map's guaranteed shilling income
+// (`card.removal.pricing.ts`'s calibration anchor) is unchanged.
+const FV_LOOT_NODES: Record<string, number> = { 'fv-12': 0, 'fv-11': 1, 'fv-17': 2 };
+
+// ─── Phase 53c (S-02) — the four homed coastal NPCs ───────────────────────────
 //
-// TODO(53c) — 'Weathered Fisher' names nobody in `fishingVillage.npcs`; it's
-// the one narrative-reachability mismatch Phase 53a leaves standing on
-// purpose (see `plan/phases/phase_53a_narrative_reachability_guard.md`).
-// Phase 53c reclaims this node for a rostered NPC (Old Marrow) and removes
-// this exception; until then it's an accepted entry in the registry-wide
-// invariant test (`e2e/narrative-reachability.engine.test.ts`), not a lost
-// NPC — inventing a 'Weathered Fisher' roster entry would satisfy the guard
-// and lose the point.
-const fvShoreInteraction = fvInteractionPool(
+// fv-2 (Old Marrow), fv-7 (Coastal Beggar), and fv-18 (Captain Blackwater)
+// each displace a prior encounter/hazard node; fv-19 (Fisherman's Daughter)
+// reclaims the one node that already carried an `interaction` payload — the
+// 'Weathered Fisher' who named nobody in `fishingVillage.npcs` (Phase 53a's
+// one accepted exception, now resolved).
+const fvOldMarrowInteraction = fvInteractionPool(
+    'fv-2',
+    'Old Marrow',
+    'A weather-worn dockmaster mends a net at the plank crossing.',
+);
+const fvCoastalBeggarInteraction = fvInteractionPool(
+    'fv-7',
+    'Coastal Beggar',
+    'A haggard figure sits against the weathered wall, an empty bowl at their feet.',
+);
+const fvCaptainBlackwaterInteraction = fvInteractionPool(
+    'fv-18',
+    'Captain Blackwater',
+    'A weathered captain checks a ledger against crates stacked on the wharf.',
+);
+const fvFishermansDaughterInteraction = fvInteractionPool(
     'fv-19',
-    'Weathered Fisher',
-    'A weathered fisher mends a net on the quay and eyes you sidelong.',
+    "Fisherman's Daughter",
+    'A young woman mends nets on the quay, watching the water more than her hands.',
 );
 
 const FISHING_VILLAGE_NEW_PLAYER_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> =
@@ -736,14 +760,20 @@ const FISHING_VILLAGE_NEW_PLAYER_POOLS: ReadonlyArray<{ nodeId: string; pool: Ma
             const nodeId = `fv-${i}`;
             if (nodeId === 'fv-1') {
                 out.push({ nodeId, pool: fvArrival });
+            } else if (nodeId === 'fv-2') {
+                out.push({ nodeId, pool: fvOldMarrowInteraction });
             } else if (nodeId === 'fv-6') {
                 out.push({ nodeId, pool: fvGauntletBoss });
+            } else if (nodeId === 'fv-7') {
+                out.push({ nodeId, pool: fvCoastalBeggarInteraction });
             } else if (nodeId === 'fv-15') {
                 out.push({ nodeId, pool: fvBuildTheBoatQuest });
             } else if (nodeId === 'fv-14') {
                 out.push({ nodeId, pool: fvFatherWorryDialogue });
+            } else if (nodeId === 'fv-18') {
+                out.push({ nodeId, pool: fvCaptainBlackwaterInteraction });
             } else if (nodeId === 'fv-19') {
-                out.push({ nodeId, pool: fvShoreInteraction });
+                out.push({ nodeId, pool: fvFishermansDaughterInteraction });
             } else if (FV_REST_NODES[nodeId]) {
                 out.push({ nodeId, pool: fvRestPool(nodeId, FV_REST_NODES[nodeId]!) });
             } else if (nodeId in FV_GATHER_NODES) {

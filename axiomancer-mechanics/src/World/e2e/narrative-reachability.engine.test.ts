@@ -24,11 +24,6 @@ const ALL_MAPS: MapDefinition[] = Object.values(MAP_REGISTRY)
     .flatMap(maps => Object.values(maps))
     .filter((def): def is MapDefinition => def !== undefined);
 
-// Phase 53a — the one accepted exception, carrying a TODO(53c) reason in
-// `MapEvents/content.ts` next to `fvShoreInteraction`. Phase 53c reclaims
-// the node for a rostered NPC and removes this exception.
-const ACCEPTED_UNRESOLVED_NODES = new Set(['fv-19']);
-
 describe('narrative reachability — registry-wide invariant', () => {
     it('registers at least the two coastal maps', () => {
         expect(ALL_MAPS.map(d => d.name)).toEqual(expect.arrayContaining(['fishing-village', 'northern-forest']));
@@ -38,11 +33,12 @@ describe('narrative reachability — registry-wide invariant', () => {
         describe(def.name, () => {
             const audit = auditNarrativeReachability(def);
 
-            it('names only rostered NPCs from interaction nodes (apart from the declared fv-19 exception)', () => {
-                const unexpected = audit.unresolvedInteractions.filter(
-                    u => !ACCEPTED_UNRESOLVED_NODES.has(u.nodeId),
-                );
-                expect(unexpected, JSON.stringify(unexpected)).toEqual([]);
+            it('names only rostered NPCs from interaction nodes', () => {
+                // Phase 53a's one accepted exception (fv-19's 'Weathered
+                // Fisher', naming nobody in the roster) is resolved as of
+                // Phase 53c — fv-19 now names the rostered Fisherman's
+                // Daughter, so there are no exceptions left to declare.
+                expect(audit.unresolvedInteractions, JSON.stringify(audit.unresolvedInteractions)).toEqual([]);
             });
 
             it('homes or declares every tree-carrying NPC', () => {

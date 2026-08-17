@@ -57,21 +57,25 @@ describe('fishing-village content — new-player map', () => {
             state = r.state;
         }
 
-        // 7 encounter-kind nodes (6 regular + the fv-6 boss) — a slight
-        // plurality. fv-16 reverted to a plain encounter when the blacksmith
-        // map node was gated back to dev-only (owner /oversight 2026-07-18).
-        // The eighth was fv-1, the START node: the 2026-08-08 first-map audit
-        // found its pool was dead content (events fire on arrival, and nobody
-        // arrives at the node the map places them on) and re-authored it as
-        // the arrival CUTSCENE, which is safe to fire on map entry.
-        expect(counts.encounter).toBe(7);
+        // 6 encounter-kind nodes (5 regular + the fv-6 boss) — a slight
+        // plurality. Phase 53c converted three regular encounters (fv-2,
+        // fv-7, fv-18) into homed-NPC interactions and dropped fv-12's
+        // grave-larva as it re-homed to carry fv-2's displaced loot-cache
+        // instead (see `content.ts`'s `FV_ENCOUNTER_FOES`/`FV_LOOT_NODES`
+        // comments); little-belle moved fv-7 -> fv-13 to stay reachable
+        // ahead of the Beggar's new column.
+        expect(counts.encounter).toBe(6);
         expect(counts.cutscene).toBe(1);
         expect(counts.rest).toBe(4);
-        expect(counts.gathering).toBe(4);
-        expect(counts.hazard).toBe(3);
+        expect(counts.gathering).toBe(3);
+        expect(counts.hazard).toBe(2);
         expect(counts['loot-cache']).toBe(3);
         expect(counts.narration).toBe(1);
-        expect(counts.interaction).toBe(1);
+        // Phase 53c (S-02) — four homed NPCs: Old Marrow (fv-2), the
+        // Coastal Beggar (fv-7), Captain Blackwater (fv-18), and the
+        // Fisherman's Daughter (fv-19, was the unrostered 'Weathered
+        // Fisher').
+        expect(counts.interaction).toBe(4);
         expect(counts.quest).toBe(1);
         // Encounters remain the single largest kind.
         const maxCount = Math.max(...Object.values(counts));

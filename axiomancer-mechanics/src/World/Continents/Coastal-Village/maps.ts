@@ -38,7 +38,11 @@ const oldDockmasterTree: DialogueTree = {
     nodes: {
         greet: {
             id: 'greet',
-            text: "Old Marrow looks up from a tangle of nets. \"You've a sturdy back, child. Care to earn a coin?\"",
+            // Phase 53c — carries the arrival cutscene's former closing
+            // line ("Three ways out of the yard…") into Marrow's mouth: a
+            // man pointing at roads beats a narrator listing them. Moved,
+            // not retheme'd — 44g owns rewriting the rest of this tree.
+            text: "Old Marrow looks up from a tangle of nets. \"You've a sturdy back, child. Care to earn a coin?\" He tips his head at the yard behind you. \"Three ways out from here — the wharf road, the middle track, the lane past the shuttered houses. Go where you like, once we've talked.\"",
             choices: [
                 {
                     text: "What needs doing?",
@@ -430,36 +434,50 @@ const fishingVillage: MapDefinition = {
     // sequence of choices rather than a committed corridor. Column 5 holds
     // fv-6 alone, so every single run now fights the King of Revenge.
     // Spine ids fv-1..fv-10 stay on y=0 at x=0..9 (Phase 65 D1).
+    //
+    // 2026-08-17 Phase 53c (S-02) — column 1 narrows to fv-2 alone: Old
+    // Marrow, the quest-giver, goes there so the map's premise is
+    // guaranteed on every route (a third 100% node beside fv-1 and fv-6).
+    // The fork isn't removed, it moves one column later — fv-2 still opens
+    // onto all three column-2 nodes. fv-12 and fv-13, displaced from
+    // column 1, re-home into column 3 as a fourth and fifth lane (y=±2),
+    // following that column's existing "opens onto all of c4" pattern so
+    // the pre-boss rest at fv-20 stays reachable from every one of them.
     startingNode: {
         id: 'fv-1',
         location: [0, 0],
-        connectedNodes: ['fv-2', 'fv-12', 'fv-13'],
+        connectedNodes: ['fv-2'],
     },
     nodes: [
         // ── c0 — the shore you wake on ───────────────────────────────
-        { id: 'fv-1',  location: [0, 0], connectedNodes: ['fv-2', 'fv-12', 'fv-13'] },
-        // ── c1 — encounter / loot / gathering ────────────────────────
-        { id: 'fv-12', location: [1, 1], connectedNodes: ['fv-3', 'fv-16'] },
+        { id: 'fv-1',  location: [0, 0], connectedNodes: ['fv-2'] },
+        // ── c1 — Old Marrow, the quest-giver. Narrowed to a single node
+        //        (Phase 53c) so the map's premise is on every route.
         { id: 'fv-2',  location: [1, 0], connectedNodes: ['fv-3', 'fv-16', 'fv-11'] },
-        { id: 'fv-13', location: [1, -1], connectedNodes: ['fv-3', 'fv-11'] },
         // ── c2 — encounter / rest / loot ─────────────────────────────
-        { id: 'fv-16', location: [2, 1], connectedNodes: ['fv-4', 'fv-17'] },
+        { id: 'fv-16', location: [2, 1], connectedNodes: ['fv-4', 'fv-17', 'fv-12'] },
         { id: 'fv-3',  location: [2, 0], connectedNodes: ['fv-4', 'fv-17', 'fv-14'] },
-        { id: 'fv-11', location: [2, -1], connectedNodes: ['fv-4', 'fv-14'] },
-        // ── c3 — loot / encounter / narration. This column alone opens
-        //        onto ALL of c4 (lane drift relaxed) so every route can
-        //        reach the pre-boss rest at fv-20 — the pre-audit map's
-        //        stated "heal before the climax" intent, now guaranteed.
+        { id: 'fv-11', location: [2, -1], connectedNodes: ['fv-4', 'fv-14', 'fv-13'] },
+        // ── c3 — loot / encounter / narration, plus fv-12 and fv-13
+        //        (Phase 53c, displaced from column 1). Every node in this
+        //        column opens onto ALL of c4 (lane drift relaxed) so every
+        //        route can reach the pre-boss rest at fv-20 — the
+        //        pre-audit map's stated "heal before the climax" intent,
+        //        now guaranteed.
         { id: 'fv-17', location: [3, 1], connectedNodes: ['fv-15', 'fv-5', 'fv-20'] },
         { id: 'fv-4',  location: [3, 0], connectedNodes: ['fv-15', 'fv-5', 'fv-20'] },
         { id: 'fv-14', location: [3, -1], connectedNodes: ['fv-15', 'fv-5', 'fv-20'] },
+        { id: 'fv-12', location: [3, 2], connectedNodes: ['fv-15', 'fv-5', 'fv-20'] },
+        { id: 'fv-13', location: [3, -2], connectedNodes: ['fv-15', 'fv-5', 'fv-20'] },
         // ── c4 — the last breath: quest board / gathering / REST ─────
         { id: 'fv-15', location: [4, 1], connectedNodes: ['fv-6'] },
         { id: 'fv-5',  location: [4, 0], connectedNodes: ['fv-6'] },
         { id: 'fv-20', location: [4, -1], connectedNodes: ['fv-6'] },
         // ── c5 — the breakwater. Every route passes through here. ────
         { id: 'fv-6',  location: [5, 0], connectedNodes: ['fv-18', 'fv-7', 'fv-19'] },
-        // ── c6 — hazard / encounter / interaction ────────────────────
+        // ── c6 — the post-boss three, one per lane (Phase 53c, S-02):
+        //        Captain Blackwater (wharf), the Coastal Beggar (spine),
+        //        the Fisherman's Daughter (inland, reacting to fv-14) ──
         { id: 'fv-18', location: [6, 1], connectedNodes: ['fv-8', 'fv-21'] },
         { id: 'fv-7',  location: [6, 0], connectedNodes: ['fv-8', 'fv-21', 'fv-25'] },
         { id: 'fv-19', location: [6, -1], connectedNodes: ['fv-8', 'fv-25'] },
@@ -483,14 +501,11 @@ const fishingVillage: MapDefinition = {
         mapImage: { alt: '', src: '' },
         combatImage: { alt: '', src: '' },
     },
-    // Phase 53a (S-02) — written-not-staged, not lost. Zero of the eight
-    // roster NPCs have a node today; the guard needs every one of them
-    // accounted for, so all eight are declared here until placement lands.
+    // Phase 53a/53c (S-02) — written-not-staged, not lost. Old Marrow, the
+    // Coastal Beggar, Captain Blackwater, and the Fisherman's Daughter are
+    // homed as of Phase 53c; the remaining four stay declared-unstaged with
+    // a per-NPC reason, per S-02's roster-size call (four homed, four not).
     unstagedNpcs: [
-        { name: 'Old Marrow', reason: 'The quest-giver\'s spine placement is Phase 53c\'s column-1 re-layer (S-02) — not yet wired to a node.' },
-        { name: 'Coastal Beggar', reason: 'Post-boss placement (the morality set-piece) lands in Phase 53c (S-02) — not yet wired to a node.' },
-        { name: 'Captain Blackwater', reason: 'Post-boss placement lands in Phase 53c (S-02); also the specimen for Phase 53b\'s dialogue-gate repair — not yet wired to a node.' },
-        { name: "Fisherman's Daughter", reason: 'Post-boss placement lands in Phase 53c (S-02), reacting to fv-14 — not yet wired to a node.' },
         { name: 'Tide-Shopkeeper', reason: 'isShopkeeper: true, and the shop UI has been out of scope since Spec 08 — a shop node that cannot sell is worse than no shop node (S-02).' },
         { name: 'Village Healer', reason: 'Wants the context of a rest node; place her once the rest rebuild (phases 52c/52d) has fully settled (S-02).' },
         { name: "Dockworker's Union Leader", reason: 'A village-politics voice with no village to be political in yet — belongs to whatever map gets a real settlement screen (S-02).' },

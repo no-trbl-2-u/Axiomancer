@@ -28,14 +28,20 @@ describe('World/Continents Engine Tests', () => {
 
     it('has properly connected node network', () => {
       // The 2026-08-08 first-map audit re-layered the village into three
-      // lanes across ten columns; the branch ids below moved with it. The
-      // property under test is the same: the start opens onto every lane,
-      // a mid-map spine node keeps a spine exit plus both flanks, and the
-      // map has an authored end.
+      // lanes across ten columns; Phase 53c (S-02) then narrowed column 1
+      // to fv-2 alone (Old Marrow, the quest-giver) so the map's premise
+      // is guaranteed on every route. fv-12 and fv-13, displaced from
+      // column 1, re-home into column 3. The property under test: the
+      // start opens onto Old Marrow's single node, he opens onto every
+      // column-2 lane, a mid-map spine node keeps a spine exit plus both
+      // flanks, and the map has an authored end.
       const fv1 = fishingVillage.nodes.find(n => n.id === 'fv-1');
-      expect(fv1?.connectedNodes).toContain('fv-2');   // spine
-      expect(fv1?.connectedNodes).toContain('fv-12');  // wharf lane
-      expect(fv1?.connectedNodes).toContain('fv-13');  // inland lane
+      expect(fv1?.connectedNodes).toEqual(['fv-2']);
+
+      const fv2 = fishingVillage.nodes.find(n => n.id === 'fv-2');
+      expect(fv2?.connectedNodes).toContain('fv-16');  // wharf lane
+      expect(fv2?.connectedNodes).toContain('fv-3');   // spine
+      expect(fv2?.connectedNodes).toContain('fv-11');  // inland lane
 
       const fv3 = fishingVillage.nodes.find(n => n.id === 'fv-3');
       expect(fv3?.connectedNodes).toContain('fv-4');

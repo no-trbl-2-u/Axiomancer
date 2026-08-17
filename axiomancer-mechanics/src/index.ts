@@ -443,6 +443,8 @@ export {
     validateMoveToNode, findAlternativePaths, getBlockedRoutesFromNode, getReachableNodes,
     // 2026-08-08 first-map audit: traversal queries + the strand audit.
     legalMovesFrom, isStranded, isMapTerminalNode, auditMapTraversal,
+    // Phase 53c — the route-coverage walk, beside the strand audit.
+    auditRouteCoverage,
     // Phase 148: Minigame Harness
     runMinigameHarness, summarizeHarnessReport,
 } from './World';

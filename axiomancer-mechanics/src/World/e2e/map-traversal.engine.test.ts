@@ -17,7 +17,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { MAP_REGISTRY } from '../map.registry';
-import { auditMapTraversal } from '../world.reducer';
+import { auditMapTraversal, auditRouteCoverage } from '../world.reducer';
 import { fishingVillage, northernForest } from '../Continents/Coastal-Village/maps';
 import type { MapDefinition } from '../types';
 
@@ -91,14 +91,21 @@ describe('gauntlet map traversal invariants', () => {
             });
 
             it('offers a real choice at every branch (no single-file corridors)', () => {
-                // A column of one is a deliberate chokepoint (a boss, the
-                // start); a map made only of them is not a map.
+                // A column of one is a deliberate chokepoint (the start, a
+                // boss, and — as of Phase 53c — fishing-village's
+                // quest-giver spine node) — a map made only of them is not
+                // a map. The tolerance is 3, not 2: Phase 53c intentionally
+                // added a third guaranteed-reachable chokepoint (fv-2, Old
+                // Marrow) so the quest premise is never a coin flip. That's
+                // a deliberate design choice, re-verified explicitly below
+                // for fishing-village rather than left to this generic
+                // headroom alone.
                 const widths = new Map<number, number>();
                 for (const node of def.nodes) {
                     widths.set(node.location[0], (widths.get(node.location[0]) ?? 0) + 1);
                 }
                 const branching = [...widths.values()].filter(w => w > 1).length;
-                expect(branching).toBeGreaterThanOrEqual(widths.size - 2);
+                expect(branching).toBeGreaterThanOrEqual(widths.size - 3);
             });
         });
     }
@@ -150,6 +157,44 @@ describe('fishing-village — the first map the player ever walks', () => {
         // rather than a maze with good and bad exits.
         expect(audit.longestRoute).toBe(10);
         expect(audit.strands).toEqual([]);
+    });
+
+    it('narrows column 1 to Old Marrow alone (Phase 53c)', () => {
+        // fv-2 is now fishing-village's third forced-singleton column
+        // (with fv-1 and fv-6) — deliberately, so the quest-giver is
+        // guaranteed rather than a coin flip. fv-12 and fv-13, displaced
+        // from column 1, must not have quietly become a fourth.
+        const widths = new Map<number, number>();
+        for (const node of fishingVillage.nodes) {
+            widths.set(node.location[0], (widths.get(node.location[0]) ?? 0) + 1);
+        }
+        const singletonColumns = [...widths.entries()].filter(([, w]) => w === 1).map(([x]) => x);
+        expect(singletonColumns.sort((a, b) => a - b)).toEqual([0, 1, 5]);
+    });
+});
+
+describe('fishing-village — narrative coverage floor (Phase 53c)', () => {
+    // The first-map audit's headline finding: before this phase, only
+    // fv-1 (arrival) and fv-6 (boss) sat on 100% of legal routes, and the
+    // quest-giver who starts `starting-quest` had no node at all. This is
+    // the floor that stops load-bearing narrative from silently landing on
+    // a coin-flip lane again — each node named below is asserted, not
+    // assumed.
+    const coverage = auditRouteCoverage(fishingVillage);
+
+    it('guarantees the arrival, the quest-giver, and the boss on every legal route', () => {
+        expect(coverage.shareOfRoutes['fv-1']).toBe(1);
+        expect(coverage.shareOfRoutes['fv-2']).toBe(1);
+        expect(coverage.shareOfRoutes['fv-6']).toBe(1);
+    });
+
+    it('measures the quest board rather than assuming it', () => {
+        // fv-15 ("build the boat") stays off the spine on purpose — see
+        // Phase 53c's brief, Follow-ups: moving it to 100% is a design
+        // question for 46a/46c, which own the early-game. This asserts the
+        // actual number so a future re-layer can't silently change it
+        // without a test noticing.
+        expect(coverage.shareOfRoutes['fv-15']).toBeCloseTo(1 / 3, 2);
     });
 });
 
