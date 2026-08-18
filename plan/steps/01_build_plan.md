@@ -1560,9 +1560,16 @@ changes which lines a player can REACH. Either order works; 53a first grows
 - [ ] Phase 46b — Early-game: canned preset-deck tutorial content.
       Implements 46a's ruling. (mechanics content + mobile) Deps: 46a.
       Brief: to generate.
-- [ ] Phase 46c — Early-game: Quest Board tutorial re-derivation. The
-      dropped first-crossing tutorial, rebuilt to match 46a.
-      (mechanics + mobile) Deps: 46a. Brief: to generate.
+- [ ] Phase 46c — Early-game: Quest Board tutorial re-derivation —
+      REDIRECTED per 46a's ruling (D6, `plan/phases/phase_46a_early_game_
+      rethink.md`): Phase 61 retires the Quest Board minigame this row
+      originally targeted, so re-deriving a tutorial for it is moot.
+      Verify Phase 53c's shipped quest-giver placement already covers
+      new-player quest discovery (it is now "the only way a player ever
+      learns a quest exists" per Phase 61's own text); ship a small
+      explainer/coach beat only if that verification finds a real gap —
+      do not rebuild Quest Board content. (mechanics + mobile) Deps: 46a.
+      Brief: to generate.
 
 **Expo decouple (47a-47e) — decomposed 2026-08-08 at T's request. T's
 "not now" from 2026-07-18 is lifted by the unshackling. Do NOT run this

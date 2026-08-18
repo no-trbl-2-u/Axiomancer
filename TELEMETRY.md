@@ -298,3 +298,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-18T01:57:26Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-18T01:57:28Z | skill | march | unknown | main | - |
 | 2026-08-18T13:16:44Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-18T19:05:54Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-18T19:12:34Z | subagent | general-purpose | claude-sonnet-5 | main | Ship Phase 46a — early-game rethink design session |
