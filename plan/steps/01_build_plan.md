@@ -1514,7 +1514,7 @@ changes which lines a player can REACH. Either order works; 53a first grows
       (mechanics) Deps: 53a, 53b.
       Brief: `plan/phases/phase_53c_narrative_placement.md`.
       Shipped `44fab3ae`.
-- [ ] Phase 53d — Author S-01's four dilemmas. Designed 2026-07-xx,
+- [x] Phase 53d — Author S-01's four dilemmas. Designed 2026-07-xx,
       never wired; both of that spec's open questions were answered
       2026-08-09 at planning time (displace encounter nodes, grid stays
       at 25; flags only, no `moralDelta`) and its intended hosts are
@@ -1522,9 +1522,15 @@ changes which lines a player can REACH. Either order works; 53a first grows
       dilemma displaces one encounter node and must sit in a strictly
       earlier column than whatever reads its flag, because a gauntlet has
       no back-travel. New prose ships in spec 34 §2's ratified register
-      from the first draft, so 44g inherits nothing to redo.
+      from the first draft, so 44g inherits nothing to redo. Shipped: The
+      Borrowed Hook (fv-16) and The Stranger's Net (fv-4) on
+      fishing-village, both 33.3% of routes and strictly ahead of the
+      post-boss column; The Frightened Friend (nf-19) and The Crowning
+      Witnessed (nf-12) on northern-forest. Encounter/interaction/rest
+      now tie for fishing-village's largest kind at 4 apiece.
       (mechanics content) Deps: 53c.
       Brief: `plan/phases/phase_53d_s01_dilemmas.md`.
+      Shipped `7d14acd6`.
 - [ ] Phase 53e — The read-back web: consequences that come back. Across
       every authored map there is exactly **one** `requires.flag` gate in
       the whole game. `fv-14`'s three father flags and `marrow_pressed`
