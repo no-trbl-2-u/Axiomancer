@@ -1531,7 +1531,7 @@ changes which lines a player can REACH. Either order works; 53a first grows
       (mechanics content) Deps: 53c.
       Brief: `plan/phases/phase_53d_s01_dilemmas.md`.
       Shipped `7d14acd6`.
-- [ ] Phase 53e — The read-back web: consequences that come back. Across
+- [x] Phase 53e — The read-back web: consequences that come back. Across
       every authored map there is exactly **one** `requires.flag` gate in
       the whole game. `fv-14`'s three father flags and `marrow_pressed`
       are set correctly and read by nothing but their own tests, so every
@@ -1543,6 +1543,13 @@ changes which lines a player can REACH. Either order works; 53a first grows
       refuse to score themselves, and an NPC who scores them retroactively
       overrules that refusal. (mechanics content) Deps: 53d.
       Brief: `plan/phases/phase_53e_read_back_web.md`.
+      `requires.flag` count moves 1 -> 11 (Beggar +3, Blackwater +1,
+      Daughter +6); Blackwater's read narrows to `marrow_pressed` only
+      (documented in the commit — a second `questCompleted`-gated branch
+      would overlap it, since pressing implies completion). Also fixed
+      pre-existing mobile-verify drift left over from 53d (stale fv-16
+      fixtures; encounter/interaction/rest now tie at 4 apiece).
+      Shipped `ccb8654c`.
 
 - [ ] Phase 46a — Early-game rethink: design session. Decide whether the
       opening is canned preset-deck tutorials with deckbuilding deferred
