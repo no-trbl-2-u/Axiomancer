@@ -1551,12 +1551,21 @@ changes which lines a player can REACH. Either order works; 53a first grows
       fixtures; encounter/interaction/rest now tie at 4 apiece).
       Shipped `ccb8654c`.
 
-- [ ] Phase 46a — Early-game rethink: design session. Decide whether the
+- [x] Phase 46a — Early-game rethink: design session. Decide whether the
       opening is canned preset-deck tutorials with deckbuilding deferred
       to a labyrinth choice, and re-derive the Quest Board tutorial that
       was dropped. Drains the `[MED]` critique row open since 2026-07-08
       and the score-4.0 candidate. Deps: 42 (tutorial copy is
-      theme-bearing). Brief: to generate.
+      theme-bearing). Ruling: rejected canned-battle-per-preset-deck and
+      labyrinth-gated commitment (both premised on the 10-theme preset
+      model the 2026-08-08 Profane Canon rework replaced, and a labyrinth
+      surface still dev-menu-only per spec W-01); scoped 46b to fix the
+      real gap (new players can pick the late-game Apostate snapshot as
+      their starter) and redirected 46c to Phase 61/53c since the Quest
+      Board minigame it targeted is being deleted. Brief:
+      `plan/phases/phase_46a_early_game_rethink.md`
+      — `phases: brief for phase 46a — early-game rethink (design
+      session)` (8decc1c9)
 - [ ] Phase 46b — Early-game: canned preset-deck tutorial content.
       Implements 46a's ruling. (mechanics content + mobile) Deps: 46a.
       Brief: to generate.
