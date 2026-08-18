@@ -29,8 +29,11 @@ describe('Game CLI route walkthrough → Hazard-Pattern combat', () => {
     it('walks Fishing Village to the Market encounter and runs Hazard combat', async () => {
         const logPath = tmpPath('fv-market');
 
+        // fv-16 converted from an `encounter` to a Phase 53d/S-01 narration
+        // dilemma ("The Borrowed Hook"); fv-11 -> fv-13 (little-belle) is
+        // now the nearest surviving column-3 encounter from fv-2.
         await runGameCli([
-            '--route', 'fv-2,fv-16',
+            '--route', 'fv-2,fv-11,fv-13',
             '--auto-combat',
             '--combat-policy', 'status',
             '--combat-seed', '42',
@@ -50,7 +53,7 @@ describe('Game CLI route walkthrough → Hazard-Pattern combat', () => {
             .filter(r => r.action === 'resolveMapEvent')
             .map(r => r.event as { kind?: string; encounter?: { enemies?: Array<{ name?: string }> } })
             .find(event => event.kind === 'encounter');
-        expect(encounterEvent?.encounter?.enemies?.[0]?.name).toBe('Float-Eye');
+        expect(encounterEvent?.encounter?.enemies?.[0]?.name).toBe('Little Belle');
 
         const end = logs.find(r => r.action === 'hazardCombat:end');
         expect((end?.event as { outcome?: string })?.outcome).toMatch(/victory|defeat|mercy|capitulate|concede|retreat/);

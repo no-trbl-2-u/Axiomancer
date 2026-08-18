@@ -189,11 +189,14 @@ describe('resolveMapEvent dispatch', () => {
     it('returns kind=encounter on encounter nodes', () => {
         mockSequentialRng(0.5);
         let state = startingState();
+        // fv-4 converted from an `encounter` to a Phase 53d/S-01 narration
+        // dilemma ("The Stranger's Net"); fv-11 -> fv-13 (little-belle) is
+        // now the nearest surviving column-3 encounter from fv-2.
         state = { ...state, world: moveToNode(state.world, 'fv-2') };
         state = { ...state, world: completeCurrentNode(state.world) };
-        state = { ...state, world: moveToNode(state.world, 'fv-3') };
+        state = { ...state, world: moveToNode(state.world, 'fv-11') };
         state = { ...state, world: completeCurrentNode(state.world) };
-        state = { ...state, world: moveToNode(state.world, 'fv-4') };
+        state = { ...state, world: moveToNode(state.world, 'fv-13') };
         const result = resolveMapEvent(state);
         expect(result.event.kind).toBe('encounter');
         if (result.event.kind === 'encounter') {

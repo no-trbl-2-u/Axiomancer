@@ -46,7 +46,7 @@ describe('fishing-village content — new-player map', () => {
     // recovery + texture, with encounters kept a slight plurality, exactly ONE
     // quest node (fv-15), and ONE boss node (fv-6, an `encounter` with isBoss).
     // See the new-player override block in `content.ts`.
-    it('is a balanced spread with encounters a slight plurality and one quest + one boss', () => {
+    it('is a balanced spread, encounters/interaction/rest tied for largest, one quest + one boss', () => {
         mockSequentialRng(0.5);
         let state = freshWorldAt('fishing-village');
 
@@ -57,29 +57,37 @@ describe('fishing-village content — new-player map', () => {
             state = r.state;
         }
 
-        // 6 encounter-kind nodes (5 regular + the fv-6 boss) — a slight
-        // plurality. Phase 53c converted three regular encounters (fv-2,
-        // fv-7, fv-18) into homed-NPC interactions and dropped fv-12's
-        // grave-larva as it re-homed to carry fv-2's displaced loot-cache
-        // instead (see `content.ts`'s `FV_ENCOUNTER_FOES`/`FV_LOOT_NODES`
-        // comments); little-belle moved fv-7 -> fv-13 to stay reachable
-        // ahead of the Beggar's new column.
-        expect(counts.encounter).toBe(6);
+        // 4 encounter-kind nodes (3 regular + the fv-6 boss). Phase 53c
+        // converted three regular encounters (fv-2, fv-7, fv-18) into
+        // homed-NPC interactions and dropped fv-12's grave-larva as it
+        // re-homed to carry fv-2's displaced loot-cache instead (see
+        // `content.ts`'s `FV_ENCOUNTER_FOES`/`FV_LOOT_NODES` comments);
+        // little-belle moved fv-7 -> fv-13 to stay reachable ahead of the
+        // Beggar's new column. Phase 53d (S-01) then converted two more
+        // (fv-16, fv-4) into narration dilemmas — the map's encounter
+        // surplus was exactly what that phase's node reassignment spent.
+        expect(counts.encounter).toBe(4);
         expect(counts.cutscene).toBe(1);
         expect(counts.rest).toBe(4);
         expect(counts.gathering).toBe(3);
         expect(counts.hazard).toBe(2);
         expect(counts['loot-cache']).toBe(3);
-        expect(counts.narration).toBe(1);
+        // fv-14 "What Do I Tell Father?" (Phase 24), fv-16 "The Borrowed
+        // Hook" and fv-4 "The Stranger's Net" (both Phase 53d/S-01).
+        expect(counts.narration).toBe(3);
         // Phase 53c (S-02) — four homed NPCs: Old Marrow (fv-2), the
         // Coastal Beggar (fv-7), Captain Blackwater (fv-18), and the
         // Fisherman's Daughter (fv-19, was the unrostered 'Weathered
         // Fisher').
         expect(counts.interaction).toBe(4);
         expect(counts.quest).toBe(1);
-        // Encounters remain the single largest kind.
+        // Encounter, interaction and rest now tie for the largest kind at
+        // 4 apiece (Phase 53d spent two of the encounter surplus on
+        // dilemmas) — no single kind dominates the map any longer.
         const maxCount = Math.max(...Object.values(counts));
         expect(counts.encounter).toBe(maxCount);
+        expect(counts.interaction).toBe(maxCount);
+        expect(counts.rest).toBe(maxCount);
         // Every node resolved to a real kind.
         expect(Object.values(counts).reduce((a, b) => a + b, 0)).toBe(25);
     });

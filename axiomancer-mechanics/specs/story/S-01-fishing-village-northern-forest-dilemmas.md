@@ -276,11 +276,17 @@ reassignment or one effect field, and invalidates no phase. See
 ## Acceptance checklist
 
 - [x] Open questions answered (2026-08-09, phase-53 planning — reversible).
-- [ ] Node hosts finalized (re-slotted or explicitly swapped).
-- [ ] All four `DialogueTree`s authored and registered.
-- [ ] Flags documented here match the flags actually set in code.
-- [ ] Hermetic engine tests added per dilemma.
-- [ ] `npm test` and `npm run type-check` clean in
+- [x] Node hosts finalized (Phase 53d, 2026-08-18): The Borrowed Hook →
+      `fv-16` (33.3% of routes), The Frightened Friend → `nf-19`, The
+      Stranger's Net → `fv-4` (33.3% of routes), The Crowning Witnessed →
+      `nf-12` — each displacing a plain `encounter` node, per Open Question
+      1's superseded-hosts table.
+- [x] All four `DialogueTree`s authored and registered.
+- [x] Flags documented here match the flags actually set in code.
+- [x] Hermetic engine tests added per dilemma (`fv-16-borrowed-hook`,
+      `fv-4-strangers-net`, `nf-19-frightened-friend`,
+      `nf-12-crowning-witnessed` — all under `src/World/MapEvents/e2e/`).
+- [x] `npm test` and `npm run type-check` clean in
       `axiomancer-mechanics`.
 
 ## Out of scope

@@ -217,15 +217,63 @@ const nfMossyClearing: MapEventPool = {
     }],
 };
 
-const nfDenseThicket: MapEventPool = {
-    id: 'nf-12.encounter',
+// Phase 53d (S-01) — "The Crowning Witnessed", the third of S-01's four
+// dilemmas. Displaces the `jeweled-tree` encounter that formerly held this
+// node (dropped outright — no flag or pricing dependency, same call as
+// fv-16/fv-4 in `content.ts`'s fishing-village block). Northern-forest is
+// unreachable until inter-map travel exists, so this dilemma has no reader
+// yet; it ships anyway per S-01's answered ruling — splitting the spec
+// across two phases to chase reachability would leave it half-shipped
+// indefinitely, and the four dilemmas are one authored set with one voice.
+// Branch 3 carries the spec's one permitted `alignmentDelta`: "note the
+// spot, mean to tell someone" names a worldview (`scope`), not a virtue —
+// the same distinction fv-14's joke-deflection branch draws.
+const nfCrowningWitnessedDialogue: MapEventPool = {
+    id: 'nf-12.narration',
     entries: [{
-        kind: 'encounter', weight: 1,
+        kind: 'narration', weight: 1,
         payload: {
-            kind: 'encounter',
-            enemySlug: 'jeweled-tree',
-            isBoss: false,
-            description: 'Dense thickets block the way; deep within, gemstone eyes catch the light.',
+            kind: 'narration',
+            description: 'Through the trees, deeper in, a hushed ceremony is underway.',
+            dialogue: {
+                id: 'nf-crowning-witnessed',
+                rootId: 'glimpse',
+                nodes: {
+                    glimpse: {
+                        id: 'glimpse',
+                        text: 'Robed figures kneel around a boy your own age. Something catches the light like a crown. You are not meant to see this.',
+                        choices: [
+                            {
+                                text: 'Creep closer. Look.',
+                                nextNodeId: 'witnessed',
+                                effect: { setFlag: 'boy-witnessed-the-crowning' },
+                            },
+                            {
+                                text: 'Look away. Keep resting. It is none of your business.',
+                                nextNodeId: 'ignored',
+                                effect: { setFlag: 'boy-ignored-the-crowning' },
+                            },
+                            {
+                                text: 'Mark the spot. Leave. Mean to tell someone in the city.',
+                                nextNodeId: 'marked',
+                                effect: { setFlag: 'boy-marked-the-crowning', alignmentDelta: { scope: 1 } },
+                            },
+                        ],
+                    },
+                    witnessed: {
+                        id: 'witnessed',
+                        text: 'You see enough to know it was real. You see too little to know what it means. A twig snaps. You run before anyone turns.',
+                    },
+                    ignored: {
+                        id: 'ignored',
+                        text: 'The murmur of it fades behind you. You feel, oddly, like the correct kind of coward.',
+                    },
+                    marked: {
+                        id: 'marked',
+                        text: 'You fix the bend in the path in memory, already rehearsing how you will describe it.',
+                    },
+                },
+            },
         },
     }],
 };
@@ -325,15 +373,58 @@ const nfHerbTrader: MapEventPool = {
     }],
 };
 
-const nfShadowWolfTerritory: MapEventPool = {
-    id: 'nf-19.encounter',
+// Phase 53d (S-01) — "The Frightened Friend", the second of S-01's four
+// dilemmas. Displaces the `hasshaku-sama` encounter that formerly held this
+// node (dropped outright — `befriended-hasshaku-sama` and the enemy's other
+// tests instantiate it directly, with no dependency on map placement). Same
+// unreachable-until-inter-map-travel status as nf-12 above; ships now per
+// S-01's ruling rather than half-shipping the set.
+const nfFrightenedFriendDialogue: MapEventPool = {
+    id: 'nf-19.narration',
     entries: [{
-        kind: 'encounter', weight: 1,
+        kind: 'narration', weight: 1,
         payload: {
-            kind: 'encounter',
-            enemySlug: 'hasshaku-sama',
-            isBoss: false,
-            description: 'Something far too tall moves between the mist-wreathed trees, and it has noticed you.',
+            kind: 'narration',
+            description: 'A whimper carries from behind a fallen trunk, deeper in the forest.',
+            dialogue: {
+                id: 'nf-frightened-friend',
+                rootId: 'find',
+                nodes: {
+                    find: {
+                        id: 'find',
+                        text: 'A boy your own age is wedged behind a deadfall, scared, not hurt. He chased a runaway goat too far off the path and lost his nerve to climb back down alone.',
+                        choices: [
+                            {
+                                text: 'Climb up. Pull him down. Ask nothing.',
+                                nextNodeId: 'helped',
+                                effect: { setFlag: 'boy-helped-pell' },
+                            },
+                            {
+                                text: 'Call down directions. Let him find his own way.',
+                                nextNodeId: 'coached',
+                                effect: { setFlag: 'boy-coached-pell' },
+                            },
+                            {
+                                text: 'He is not your trouble. Keep walking.',
+                                nextNodeId: 'left',
+                                effect: { setFlag: 'boy-left-pell' },
+                            },
+                        ],
+                    },
+                    helped: {
+                        id: 'helped',
+                        text: 'He scrambles free, red-faced, and mutters a name — Pell — before running for his own village.',
+                    },
+                    coached: {
+                        id: 'coached',
+                        text: 'It takes longer, and colder, but Pell manages it alone in the end. He looks more relieved than resentful.',
+                    },
+                    left: {
+                        id: 'left',
+                        text: 'The whimper fades behind you. You tell yourself the goat finds its own way home. You mostly believe it.',
+                    },
+                },
+            },
         },
     }],
 };
@@ -454,14 +545,14 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
     { nodeId: 'nf-10', pool: nfCaveMouth    },
     // Phase 117 expansion pools
     { nodeId: 'nf-11', pool: nfMossyClearing    },
-    { nodeId: 'nf-12', pool: nfDenseThicket     },
+    { nodeId: 'nf-12', pool: nfCrowningWitnessedDialogue },
     { nodeId: 'nf-13', pool: nfBerryBushes      },
     { nodeId: 'nf-14', pool: nfStoneMarker      },
     { nodeId: 'nf-15', pool: nfBrambleTrap      },
     { nodeId: 'nf-16', pool: nfHuntersCache     },
     { nodeId: 'nf-17', pool: nfBoneCircle       },
     { nodeId: 'nf-18', pool: nfHerbTrader       },
-    { nodeId: 'nf-19', pool: nfShadowWolfTerritory },
+    { nodeId: 'nf-19', pool: nfFrightenedFriendDialogue },
     { nodeId: 'nf-20', pool: nfAxeHead          },
     { nodeId: 'nf-21', pool: nfRangerCairn      },
     { nodeId: 'nf-22', pool: nfMoonbellFlowers  },
@@ -475,24 +566,31 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
 // The first continent's STARTING map is combat-FOCUSED but no longer "all
 // battle" — a flat wall of identical encounters with no recovery was both
 // monotonous and unwinnable in playtests. The map now spreads 25 nodes across
-// a real mix, with encounters kept a slight plurality:
-//   - 6 ENCOUNTER nodes  (5 regular + the fv-6 boss — the spine),
+// a real mix:
+//   - 4 ENCOUNTER nodes  (3 regular + the fv-6 boss — the spine),
 //   - 4 REST nodes       (recover HP — the rest-choice node), one on the
 //                         spine just before the boss,
 //   - 3 GATHERING nodes  (low-risk materials — "The Gleaning"),
 //   - 2 HAZARD nodes     (light risk — the hazard minigame),
 //   - 3 LOOT-CACHE nodes (a few coins the tide left behind),
-//   - 1 NARRATION node   (fv-14, the dialogue-backed monologue shell),
+//   - 3 NARRATION nodes  (Phase 53d/S-01 — fv-14 "What Do I Tell Father?",
+//                         fv-16 "The Borrowed Hook", fv-4 "The Stranger's
+//                         Net"; each a dialogue-backed branching dilemma),
 //   - 4 INTERACTION nodes (Phase 53c — Old Marrow at fv-2, the Coastal
 //                         Beggar at fv-7, Captain Blackwater at fv-18, the
 //                         Fisherman's Daughter at fv-19),
 //   - 1 QUEST node       (fv-15, the story hook),
 //   - 1 CUTSCENE node    (fv-1, the arrival — see `fvArrival` below), and
 //   - 1 BOSS node        (fv-6, the region climax — an encounter w/ isBoss).
-// This block supersedes the legacy authored pools above (kept in source for
-// reference). Foes stay on the gentlest L1–L2 roster; the boss is pinned to a
-// low absolute level so a fresh player can actually win the climax (the shared
-// coastal-tyrant is endgame-tier elsewhere, so we override the level here).
+// Encounter, interaction and rest now tie for the largest kind at 4 apiece —
+// Phase 53d (S-01) spent two of the map's encounter surplus on dilemmas,
+// which is what that surplus was for (see the spec's answered Open Question
+// 1: displacing an `encounter` node is the only reassignment that doesn't
+// grow the grid or merge two payloads onto one node). This block supersedes
+// the legacy authored pools above (kept in source for reference). Foes stay
+// on the gentlest L1–L2 roster; the boss is pinned to a low absolute level
+// so a fresh player can actually win the climax (the shared coastal-tyrant
+// is endgame-tier elsewhere, so we override the level here).
 
 // Foes, assigned per node and ordered ALONG THE MAP rather than by node id.
 //
@@ -512,14 +610,15 @@ const FV_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description: string }
     // the map's guaranteed shilling income is unchanged — grave-larva,
     // fv-12's prior foe, is dropped (no flag or pricing dependency).
     'fv-13': { slug: 'little-belle',     description: 'A small orange vesper rings a bell for a service no one held.' },
-    // c2
-    'fv-16': { slug: 'float-eye',        description: 'A float-eye drifts out of the fog, already watching.' },
-    // c3 — last fight before the pre-boss breath.
-    'fv-4':  { slug: 'chattering-skull', description: 'A chattering skull rattles its last word among the crates.' },
     // c7 — the far side of the breakwater.
     'fv-21': { slug: 'foot-stealer',     description: 'A foot-stealer scuttles between the shacks, low and grasping.' },
     // c9 — the last thing between the player and the coast road.
     'fv-24': { slug: 'water-holger',     description: 'A drowned deckhand wades up the strand, still standing his watch.' },
+    // Phase 53d (S-01) — fv-16 (c2, float-eye) and fv-4 (c3,
+    // chattering-skull) are dropped from this table: both displaced by
+    // "The Borrowed Hook" and "The Stranger's Net" (see the fv-16/fv-4
+    // narration pools above). Neither foe carries a flag or pricing
+    // dependency, so nothing else needs to know they left.
 };
 
 function fvEncounterPool(nodeId: string, foe: { slug: EnemySlug; description: string }): MapEventPool {
@@ -639,6 +738,118 @@ const fvFatherWorryDialogue: MapEventPool = {
                     deflected: {
                         id: 'deflected',
                         text: 'He barks a laugh despite himself, shakes his head, and lets the question go. Whatever he was carrying, he carries it alone a while longer.',
+                    },
+                },
+            },
+        },
+    }],
+};
+
+// ─── Phase 53d (S-01) — "The Borrowed Hook" and "The Stranger's Net" ─────────
+//
+// The other two of S-01's four dilemmas, authored to the same standard as
+// fv-14 above and shipped in spec 34 §2's ratified register from the first
+// draft (terse, present tense, one clause per line, no exclamation marks, no
+// explanatory parentheticals, no thee/thou). Both displace a plain
+// `encounter` node — the only kind either map carries a surplus of, per the
+// spec's answered Open Question 1 — and both sit strictly ahead of the
+// post-boss column (fv-18/fv-7/fv-19, column 6) that will read their flags
+// once Phase 53e lands the read-back web. Flags only; no `moralDelta` on
+// either — the meter stays concentrated in Old Marrow and the Coastal
+// Beggar, where a legible verdict belongs (S-01's answered Open Question 2).
+const fvBorrowedHookDialogue: MapEventPool = {
+    id: 'fv-16.narration',
+    entries: [{
+        kind: 'narration', weight: 1,
+        payload: {
+            kind: 'narration',
+            description: 'A brass hook glints half-buried in the tideline sand.',
+            dialogue: {
+                id: 'fv-borrowed-hook',
+                rootId: 'find',
+                nodes: {
+                    find: {
+                        id: 'find',
+                        text: 'A brass hook lies half-buried in the sand. No footprint near it but your own. It is worth more than anything in your house.',
+                        choices: [
+                            {
+                                text: 'Pocket it. No one will know.',
+                                nextNodeId: 'kept',
+                                effect: { setFlag: 'boy-kept-the-hook' },
+                            },
+                            {
+                                text: 'Leave it exactly where it lies.',
+                                nextNodeId: 'left',
+                                effect: { setFlag: 'boy-left-the-hook' },
+                            },
+                            {
+                                text: 'Carry it to Old Marrow. He will know whose it is.',
+                                nextNodeId: 'reported',
+                                effect: { setFlag: 'boy-reported-the-hook' },
+                            },
+                        ],
+                    },
+                    kept: {
+                        id: 'kept',
+                        text: 'The hook rides warm in your pocket the whole walk home. Every time you use it after, you check over your shoulder first.',
+                    },
+                    left: {
+                        id: 'left',
+                        text: 'You walk on. The sand closes over it behind you. Something in your chest sits a little straighter for the rest of the day.',
+                    },
+                    reported: {
+                        id: 'reported',
+                        text: 'Marrow turns the hook over in his hands, then nods once. He will ask along the docks. You leave with empty palms and a straighter back.',
+                    },
+                },
+            },
+        },
+    }],
+};
+
+const fvStrangersNetDialogue: MapEventPool = {
+    id: 'fv-4.narration',
+    entries: [{
+        kind: 'narration', weight: 1,
+        payload: {
+            kind: 'narration',
+            description: 'A net has snagged on the rocks below the quay, someone else\'s catch still tangled in it.',
+            dialogue: {
+                id: 'fv-strangers-net',
+                rootId: 'find',
+                nodes: {
+                    find: {
+                        id: 'find',
+                        text: 'A net has drifted loose and caught on the rocks. Fish still tangle in the mesh, silver and real. The owner is nowhere in sight.',
+                        choices: [
+                            {
+                                text: 'Free the net. Carry it to whoever is missing it.',
+                                nextNodeId: 'returned',
+                                effect: { setFlag: 'boy-returned-the-net' },
+                            },
+                            {
+                                text: 'Take a few fish. Leave the rest. Say nothing.',
+                                nextNodeId: 'skimmed',
+                                effect: { setFlag: 'boy-skimmed-the-net' },
+                            },
+                            {
+                                text: 'Take the whole catch. Finders keepers.',
+                                nextNodeId: 'took',
+                                effect: { setFlag: 'boy-took-the-net' },
+                            },
+                        ],
+                    },
+                    returned: {
+                        id: 'returned',
+                        text: 'You ask along the quay until a hollow-cheeked woman from upriver claims it. She presses one fish back into your hands before you can refuse it.',
+                    },
+                    skimmed: {
+                        id: 'skimmed',
+                        text: 'Dinner is a little better that night. No one asks where it came from. You do not offer to say.',
+                    },
+                    took: {
+                        id: 'took',
+                        text: 'You eat well and nothing comes of it. Somewhere upriver a stranger returns to an empty net, and you do not think about that part for long.',
                     },
                 },
             },
@@ -770,6 +981,10 @@ const FISHING_VILLAGE_NEW_PLAYER_POOLS: ReadonlyArray<{ nodeId: string; pool: Ma
                 out.push({ nodeId, pool: fvBuildTheBoatQuest });
             } else if (nodeId === 'fv-14') {
                 out.push({ nodeId, pool: fvFatherWorryDialogue });
+            } else if (nodeId === 'fv-16') {
+                out.push({ nodeId, pool: fvBorrowedHookDialogue });
+            } else if (nodeId === 'fv-4') {
+                out.push({ nodeId, pool: fvStrangersNetDialogue });
             } else if (nodeId === 'fv-18') {
                 out.push({ nodeId, pool: fvCaptainBlackwaterInteraction });
             } else if (nodeId === 'fv-19') {

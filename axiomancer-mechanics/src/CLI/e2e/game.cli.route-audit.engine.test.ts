@@ -67,15 +67,20 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         // seed 32); the impossible enemy decouples this classifier test from
         // balance for good.
         //
-        // PROFANE CANON (2026-08-08): the intermediate fv-4 encounter is also
+        // PROFANE CANON (2026-08-08): the intermediate encounter is also
         // decoupled from balance now. `--combat-max-turns 4` is chosen so the
-        // fv-4 fodder fight (Float-Eye) hits the turn cap UNRESOLVED (outcome
+        // fodder fight (Little Belle) hits the turn cap UNRESOLVED (outcome
         // null — not a defeat, so the route continues), while the L110 ceiling
         // at fv-6 still kills within the cap. Only a real `defeat` blocks the
         // route; a capped, undecided combat must not. fv-7 is a route target
         // but must never be reached once fv-6 ends in defeat.
+        //
+        // Phase 53d (S-01) converted fv-4 from an `encounter` into a
+        // narration dilemma ("The Stranger's Net"), so the route now runs
+        // through fv-11 -> fv-13 (little-belle) instead of fv-3 -> fv-4 to
+        // reach the pre-boss fodder fight.
         await runGameCli([
-            '--route', 'fv-2,fv-3,fv-4,fv-5,fv-6,fv-7',
+            '--route', 'fv-2,fv-11,fv-13,fv-5,fv-6,fv-7',
             '--auto-combat',
             '--combat-policy', 'naive',
             '--combat-seed', '32',
@@ -91,9 +96,9 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         expect(summary.blockedAtNodeId).toBe('fv-6');
         expect(summary.blockerReason).toBe('combat defeat');
         expect((summary.combatOutcomes as Record<string, string>)['fv-6']).toBe('defeat');
-        // The capped fv-4 combat resolved to no outcome — it must be recorded
-        // as neither a defeat nor a phantom victory.
-        expect(summary.combatOutcomes as Record<string, string>).not.toHaveProperty('fv-4');
+        // The capped fv-13 combat resolved to no outcome — it must be
+        // recorded as neither a defeat nor a phantom victory.
+        expect(summary.combatOutcomes as Record<string, string>).not.toHaveProperty('fv-13');
         expect(summary.visitedNodeIds).not.toContain('fv-7');
         expect(summary.unvisitedNodeIds).toContain('fv-7');
     });
@@ -142,18 +147,19 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
     it('reports the exact unvisited nodes for a partial legal route', async () => {
         const logPath = tmpPath('partial');
 
-        // PROFANE CANON (2026-08-08): `--combat-max-turns 4` keeps the fv-16
-        // fodder encounter balance-independent — the fight hits the turn cap
+        // PROFANE CANON (2026-08-08): `--combat-max-turns 4` keeps the fodder
+        // encounter balance-independent — the fight hits the turn cap
         // unresolved (not a defeat), so the walk stays survivorship no matter
         // how the untuned decks trade. This test proves the visited/unvisited
         // ACCOUNTING, not combat strength.
         //
-        // Route retargeted fv-12 -> fv-16 by the 2026-08-08 first-map audit:
-        // the village re-layer moved fv-12 into the first column (now a
-        // direct neighbour of the start), so fv-2 -> fv-12 is no longer an
-        // edge. fv-16 is the equivalent second-column fodder encounter.
+        // Route retargeted fv-12 -> fv-16 by the 2026-08-08 first-map audit,
+        // then fv-16 -> fv-11,fv-13 by Phase 53d (S-01): fv-16 converted from
+        // an `encounter` into a narration dilemma ("The Borrowed Hook"), and
+        // fv-13 (little-belle) is the nearest surviving column-3 encounter
+        // reachable from fv-2 via fv-11.
         await runGameCli([
-            '--route', 'fv-2,fv-16',
+            '--route', 'fv-2,fv-11,fv-13',
             '--auto-combat',
             '--combat-policy', 'status',
             '--combat-seed', '42',
@@ -164,9 +170,9 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         const summary = routeEnd(logPath);
         expect(summary.classification).toBe('survivorship');
         expect(summary.survived).toBe(true);
-        expect(summary.visitedNodeIds).toEqual(['fv-1', 'fv-2', 'fv-16']);
+        expect(summary.visitedNodeIds).toEqual(['fv-1', 'fv-2', 'fv-11', 'fv-13']);
         const unvisited = summary.unvisitedNodeIds as string[];
         expect(unvisited).toContain('fv-25');
-        expect(unvisited.length).toBe(22);
+        expect(unvisited.length).toBe(21);
     });
 });
