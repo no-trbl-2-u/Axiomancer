@@ -279,7 +279,50 @@ const beggarTree: DialogueTree = {
                         alignmentDelta: { outlook: 1, scope: 1 },
                     },
                 },
+                // Phase 53e (S-02 "the read-back web") — three mutually
+                // exclusive reads of fv-14's father flags (column 3, strictly
+                // ahead of this node's column 6). Only one of the three flags
+                // is ever set in a single playthrough, so despite being three
+                // `DialogueChoice` entries this reads as ONE acknowledgement,
+                // per the spec's "one branch, three leaf texts" rule. No
+                // `moralDelta` — the beggar notices, the beggar does not
+                // grade; that judgment stays with this NPC's *ordinary*
+                // branches above. Placed LAST per the index-stability
+                // convention.
+                {
+                    text: "(The beggar's head lifts. Word of the boy and his father has reached even here.)",
+                    nextNodeId: 'father_echo_truth',
+                    requires: { flag: 'boy-told-father-truth' },
+                },
+                {
+                    text: "(The beggar's head lifts. Word of the boy and his father has reached even here.)",
+                    nextNodeId: 'father_echo_spared',
+                    requires: { flag: 'boy-spared-father-worry' },
+                },
+                {
+                    text: "(The beggar's head lifts. Word of the boy and his father has reached even here.)",
+                    nextNodeId: 'father_echo_deflected',
+                    requires: { flag: 'boy-deflected-father' },
+                },
             ],
+        },
+        father_echo_truth: {
+            id: 'father_echo_truth',
+            // Phase 53e — terminal node for the read-back on
+            // `boy-told-father-truth`.
+            text: "\"You are the one who told his father the whole sum.\" \"The village heard. It is a small village.\"",
+        },
+        father_echo_spared: {
+            id: 'father_echo_spared',
+            // Phase 53e — terminal node for the read-back on
+            // `boy-spared-father-worry`.
+            text: "\"You are the one who spared him the worst of it.\" \"A kindness worn thin trying not to show. I know that shape.\"",
+        },
+        father_echo_deflected: {
+            id: 'father_echo_deflected',
+            // Phase 53e — terminal node for the read-back on
+            // `boy-deflected-father`.
+            text: "\"You are the one who turned it into a joke at table.\" \"Easier, that. Until the joke stops covering what it's covering.\"",
         },
         grateful_generous: {
             id: 'grateful_generous',

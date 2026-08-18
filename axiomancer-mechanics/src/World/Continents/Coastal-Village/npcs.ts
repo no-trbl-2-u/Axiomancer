@@ -36,7 +36,31 @@ const captainBlackwaterTree: DialogueTree = {
                     requires: { playerAlignmentCellChangedSince: true },
                     effect: { alignmentDelta: { outlook: 1 } },
                 },
+                // Phase 53e (S-02 "the read-back web") — reads `marrow_pressed`
+                // (set at fv-2, column 1, strictly ahead of this node's column
+                // 6). The brief's table also names `starting-quest` completed
+                // as something Blackwater reads, but `marrow_pressed` can only
+                // be set once that quest is already complete (the "thanks"
+                // node it lives on requires `questCompleted: 'starting-quest'`
+                // to even offer the choice) — so a second, independently
+                // `questCompleted`-gated branch would surface ALONGSIDE this
+                // one whenever `marrow_pressed` is set, which is two
+                // acknowledgements for one event, not one. `DialogueChoice.requires`
+                // has no "flag NOT set" predicate to exclude that overlap, so
+                // this narrows to the single sharper read: the businessman
+                // noticing another businessman's hard bargain. No `moralDelta`
+                // — recognition, not judgment. Placed LAST.
+                {
+                    text: "(Blackwater's eyes flick to you a beat too long.)",
+                    nextNodeId: 'marrow_pressed_recognition',
+                    requires: { flag: 'marrow_pressed' },
+                },
             ],
+        },
+        marrow_pressed_recognition: {
+            id: 'marrow_pressed_recognition',
+            // Phase 53e — terminal node for the read-back on `marrow_pressed`.
+            text: "\"Word reached the wharf. You pressed the old dockmaster for the full sum, after the crab near took your legs.\" \"I note it. I do not say whether it was right.\"",
         },
         trading_goods: {
             id: 'trading_goods',
@@ -204,7 +228,88 @@ const fishermansDaughterTree: DialogueTree = {
                     requires: { playerAlignmentCellChangedSince: true },
                     effect: { alignmentDelta: { epistemology: 1 } },
                 },
+                // Phase 53e (S-02 "the read-back web") — the peer who is
+                // further along the same reckoning. Two mutually exclusive
+                // flag groups, each set strictly ahead of this node (column
+                // 6): fv-14's three father flags (column 3) and fv-4's three
+                // Stranger's Net flags (column 3). Within each group only one
+                // flag is ever set in a playthrough, so each group reads as
+                // ONE acknowledgement despite being three `DialogueChoice`
+                // entries, per the spec's "one branch, three leaf texts"
+                // rule. **No `moralDelta` on any of these six** — S-01's
+                // father dilemma pointedly refuses to score itself, and an
+                // NPC who scored it retroactively would overrule that
+                // refusal (the one binding rule the brief singles out for
+                // this NPC). She notices. She does not grade. All placed
+                // LAST.
+                {
+                    text: "(She studies you, then guesses at something between you and your father.)",
+                    nextNodeId: 'daughter_reads_told_truth',
+                    requires: { flag: 'boy-told-father-truth' },
+                },
+                {
+                    text: "(She studies you, then guesses at something between you and your father.)",
+                    nextNodeId: 'daughter_reads_spared_worry',
+                    requires: { flag: 'boy-spared-father-worry' },
+                },
+                {
+                    text: "(She studies you, then guesses at something between you and your father.)",
+                    nextNodeId: 'daughter_reads_deflected',
+                    requires: { flag: 'boy-deflected-father' },
+                },
+                {
+                    text: "(She glances at your hands, then past you toward the quay.)",
+                    nextNodeId: 'daughter_reads_returned_net',
+                    requires: { flag: 'boy-returned-the-net' },
+                },
+                {
+                    text: "(She glances at your hands, then past you toward the quay.)",
+                    nextNodeId: 'daughter_reads_skimmed_net',
+                    requires: { flag: 'boy-skimmed-the-net' },
+                },
+                {
+                    text: "(She glances at your hands, then past you toward the quay.)",
+                    nextNodeId: 'daughter_reads_took_net',
+                    requires: { flag: 'boy-took-the-net' },
+                },
             ],
+        },
+        daughter_reads_told_truth: {
+            id: 'daughter_reads_told_truth',
+            // Phase 53e — terminal node for the read-back on
+            // `boy-told-father-truth`.
+            text: "\"You told him the whole sum, they say.\" \"I have never once managed that. Not when the truth costs him something to hear.\"",
+        },
+        daughter_reads_spared_worry: {
+            id: 'daughter_reads_spared_worry',
+            // Phase 53e — terminal node for the read-back on
+            // `boy-spared-father-worry`. Voice-lock line from
+            // `S-02-fishing-village-voices.md`, shipped verbatim.
+            text: "\"My father asks what a thing will cost. I tell him less than it does.\" \"We are both good at it. That is the part I mind.\"",
+        },
+        daughter_reads_deflected: {
+            id: 'daughter_reads_deflected',
+            // Phase 53e — terminal node for the read-back on
+            // `boy-deflected-father`.
+            text: "\"You made it a joke instead of an answer, they say.\" \"Jokes are lighter to carry. I have carried a few myself, further than they were built to go.\"",
+        },
+        daughter_reads_returned_net: {
+            id: 'daughter_reads_returned_net',
+            // Phase 53e — terminal node for the read-back on
+            // `boy-returned-the-net`.
+            text: "\"You carried a stranger's net back to her, whole.\" \"Most would have called that wasted effort. I would not have.\"",
+        },
+        daughter_reads_skimmed_net: {
+            id: 'daughter_reads_skimmed_net',
+            // Phase 53e — terminal node for the read-back on
+            // `boy-skimmed-the-net`.
+            text: "\"You took a little from a net that was never yours.\" \"A little is still a taking. I have told myself that story too.\"",
+        },
+        daughter_reads_took_net: {
+            id: 'daughter_reads_took_net',
+            // Phase 53e — terminal node for the read-back on
+            // `boy-took-the-net`.
+            text: "\"You took the whole catch and left an empty net for whoever it belonged to.\" \"I am not asking why. I am only saying I noticed.\"",
         },
         story_interest: {
             id: 'story_interest',

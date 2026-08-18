@@ -126,7 +126,7 @@ describe('World/Continents Engine Tests', () => {
       expect(captainBlackwater.dialogueTree!.id).toBe('captain-blackwater');
       
       const greetNode = captainBlackwater.dialogueTree!.nodes['greet'];
-      expect(greetNode.choices!).toHaveLength(5);
+      expect(greetNode.choices!).toHaveLength(6); // +1 Phase 53e marrow_pressed read-back
       
       // Test alignment-gated fair trade choice
       const fairTradeChoice = greetNode.choices!.find(c => c.text.includes('how you deal fair'));
