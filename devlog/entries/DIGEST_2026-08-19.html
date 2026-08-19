@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Axiomancer digest — 2026-08-19</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #0e1116; --fg: #d7dde5; --fg-strong: #f0f3f7; --muted: #6b7480;
+  --accent: #8ab4f8; --panel: #161b22; --card: #12171f; --border: #222833;
+  --row: #141a22; --code-bg: #1b212b; --th: #aeb7c2; --list-head: #9aa4b0;
+  --add: rgba(80,200,120,.16); --del: rgba(230,90,90,.16);
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f7f5ef; --fg: #33302a; --fg-strong: #1a160f; --muted: #6f6656;
+    --accent: #3a5db0; --panel: #efece3; --card: #fbfaf5; --border: #ddd7c9;
+    --row: #efece3; --code-bg: #e9e5d9; --th: #5c5344; --list-head: #6f6656;
+    --add: rgba(35,140,75,.16); --del: rgba(190,55,55,.16);
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+.wrap { max-width: 46rem; margin: 0 auto; padding: 20px 18px 80px; }
+header.top {
+  position: sticky; top: 0; z-index: 5;
+  background: var(--bg); border-bottom: 1px solid var(--border); margin: 0 0 20px;
+}
+header.top .wrap { padding-top: 14px; padding-bottom: 14px; display: flex; align-items: baseline; gap: 14px; }
+header.top a.home, header.top .home { color: var(--accent); text-decoration: none; font-weight: 600; }
+header.top .crumb { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+h1, h2, h3, h4 { line-height: 1.25; color: var(--fg-strong); }
+h1 { font-size: 26px; margin: 0 0 6px; }
+h2 { font-size: 19px; margin: 0; }
+a { color: var(--accent); }
+p { margin: 8px 0; }
+code { background: var(--code-bg); padding: 1px 6px; border-radius: 5px; font-size: 0.86em; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+pre { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+.tablewrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { background: var(--panel); color: var(--th); font-weight: 600; white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+ul, ol { padding-left: 22px; }
+li { margin: 4px 0; }
+.muted { color: var(--muted); }
+
+.st { font-weight: 600; white-space: nowrap; }
+.st::before { content: ""; display: inline-block; width: .5em; height: .5em; border-radius: 50%; margin-right: .38em; background: currentColor; vertical-align: middle; }
+.st-ok { color: #4bb96a; }
+.st-neutral { color: var(--muted); }
+.st-warn { color: #d0a92b; }
+.st-bad { color: #e0574b; }
+
+.headline { font-size: 19px; color: var(--fg-strong); margin: 0 0 12px; }
+.counts { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 22px; }
+
+.chip {
+  display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; padding: 2px 9px; border-radius: 999px;
+  color: #0b0d10; background: var(--cat, var(--accent)); white-space: nowrap;
+}
+.cat-mechanics { --cat: #d0a92b; }
+.cat-ui { --cat: #5aa9e6; }
+.cat-content { --cat: #7fc45a; }
+.cat-infra { --cat: #b08bf0; }
+.cat-balance { --cat: #e6864b; }
+
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-left: 4px solid var(--cat, var(--accent));
+  border-radius: 10px; padding: 14px 18px; margin: 14px 0; scroll-margin-top: 72px;
+}
+.card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.card-head h2 { font-size: 18px; }
+.field { margin: 6px 0; }
+.flabel {
+  display: inline-block; min-width: 3.2em; margin-right: 4px; color: var(--muted);
+  font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .04em;
+}
+.commits { margin: 8px 0 2px; }
+.commit { font-size: 12px; }
+
+.panel { margin: 22px 0; scroll-margin-top: 72px; }
+.panel > h2 { padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+
+.diff {
+  border: 1px solid var(--border); border-radius: 8px; overflow-x: auto; margin: 12px 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.5;
+  background: var(--bg);
+}
+.dl { padding: 0 12px; white-space: pre; }
+.dl.add { background: var(--add); }
+.dl.del { background: var(--del); }
+.dl.hunk { color: var(--accent); }
+.dl.meta { color: var(--muted); }
+
+figure.shotset { margin: 14px 0; }
+figure.shotset > figcaption { font-size: 14px; color: var(--fg); margin-bottom: 8px; }
+.shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.shot { margin: 0; }
+.shot .role { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); text-align: center; margin-bottom: 3px; }
+.shot img { width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; display: block; }
+
+.entry-list { list-style: none; padding: 0; margin: 8px 0 0; }
+.entry-list li { margin: 0; border-bottom: 1px solid var(--border); }
+.entry-list a { display: block; padding: 14px 4px; text-decoration: none; color: var(--fg); }
+.entry-list a:hover { background: var(--row); }
+.entry-list .date { color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
+.entry-list .head { color: var(--list-head); font-size: 14px; margin: 2px 0 6px; }
+footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+
+/* ── Hub (landing page) ──────────────────────────────────────────────── */
+.hub { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 14px; margin: 22px 0 0; }
+.hub a {
+  display: block; text-decoration: none; color: var(--fg);
+  background: var(--card); border: 1px solid var(--border);
+  border-left: 4px solid var(--hue, var(--accent));
+  border-radius: 12px; padding: 18px 20px; transition: background .12s, transform .12s;
+}
+.hub a:hover { background: var(--row); transform: translateY(-1px); }
+.hub .h-title { font-size: 19px; font-weight: 700; color: var(--fg-strong); margin: 0 0 4px; }
+.hub .h-sub { font-size: 14px; color: var(--muted); }
+.hub .h-glyph { font-size: 22px; line-height: 1; margin-bottom: 8px; display: block; }
+.hue-cards { --hue: #5aa9e6; }
+.hue-enemies { --hue: #e0574b; }
+.hue-effects { --hue: #b08bf0; }
+.hue-log { --hue: #d0a92b; }
+.hue-tuning { --hue: #3ec9b0; }
+
+/* ── Catalog: cards grid ─────────────────────────────────────────────── */
+.searchbar { margin: 14px 0 4px; }
+.searchbar input {
+  width: 100%; padding: 10px 14px; border-radius: 10px; font-size: 15px;
+  background: var(--card); color: var(--fg); border: 1px solid var(--border);
+}
+.count-note { color: var(--muted); font-size: 13px; margin: 6px 0 16px; }
+.grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 16px; }
+.gcard {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden; display: flex; flex-direction: column;
+}
+.gcard .art { aspect-ratio: 4 / 3; background: var(--panel); overflow: hidden; }
+.gcard .art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gcard .art.none { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 26px; }
+.gcard .body { padding: 12px 14px 14px; }
+.gcard .name { font-weight: 700; color: var(--fg-strong); margin: 0 0 8px; }
+.gcard .statrow { margin: 0 0 8px; }
+
+/* ── Catalog: enemies ────────────────────────────────────────────────── */
+.grid-enemies { display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); gap: 16px; }
+.ecard { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+/* Enemy paintings are alpha-matted (figures float on a keyed-out black), so a
+   solid black plate behind them reads as intended in both themes. */
+.ecard .portrait { aspect-ratio: 1 / 1; background: #000; overflow: hidden; }
+.ecard .portrait img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.ecard .portrait.none { display: flex; align-items: center; justify-content: center; color: #6b7480; font-size: 34px; }
+.ecard .body { padding: 12px 15px 15px; }
+.ecard .name { font-size: 18px; font-weight: 700; color: var(--fg-strong); margin: 0; }
+.ecard .sub { color: var(--muted); font-size: 13px; margin: 2px 0 10px; text-transform: capitalize; }
+.statrow { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+.stat { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--panel); border: 1px solid var(--border); color: var(--fg); white-space: nowrap; }
+.stat .k { color: var(--muted); font-weight: 600; margin-right: 3px; }
+.stat.hp { --sc: #e0574b; } .stat.body { --sc: #e6864b; } .stat.mind { --sc: #5aa9e6; } .stat.heart { --sc: #7fc45a; }
+.stat.hp, .stat.body, .stat.mind, .stat.heart { border-color: color-mix(in srgb, var(--sc) 55%, var(--border)); }
+.sec-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; margin: 10px 0 5px; }
+.fights { font-size: 14px; margin: 0 0 4px; }
+.hint { font-size: 13px; color: var(--muted); font-style: italic; margin: 4px 0 0; }
+.skill { border-top: 1px solid var(--border); padding: 8px 0 0; margin: 8px 0 0; }
+.skill .sk-name { font-weight: 700; color: var(--fg-strong); font-size: 14px; }
+.skill .sk-text { font-size: 13px; color: var(--fg); margin: 2px 0 0; }
+.no-skills { font-size: 13px; color: var(--muted); }
+
+/* ── Catalog: effects ────────────────────────────────────────────────── */
+.eff-list { display: grid; gap: 10px; margin: 8px 0 0; }
+.eff {
+  display: grid; grid-template-columns: 3rem 1fr; gap: 14px; align-items: start;
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+}
+.eff .glyph {
+  width: 3rem; height: 3rem; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 26px; line-height: 1; color: #0b0d10; font-weight: 700;
+  background: var(--gc, var(--accent)); box-shadow: inset 0 0 0 1px rgba(0,0,0,.15);
+}
+.eff .name { font-weight: 700; color: var(--fg-strong); margin: 0 0 6px; }
+.eff .statrow { margin: 0 0 6px; }
+
+/* ── Raw-stat mechanic lines (cards + effects) ───────────────────────── */
+.mods { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 3px; }
+.mods li {
+  margin: 0; font-size: 13px; line-height: 1.4; color: var(--fg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  padding-left: 12px; position: relative;
+}
+.mods li::before { content: "›"; position: absolute; left: 0; color: var(--muted); }
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="home" href="../log.html">← DevLog</a><span class="crumb">2026-08-19</span></div></header>
+<main class="wrap">
+<h1 id="headline">2026-08-19</h1>
+<p class="headline">Three phases finished the fishing-village narrative spine end to</p>
+<div class="counts"><span class="chip cat-mechanics">3 mechanics</span><span class="chip cat-content">1 content</span><span class="chip cat-infra">1 infra</span></div>
+<section class="card cat-mechanics" id="phase-53c-old-marrow-made-reachable-on-every-route-a-coverage-floor-audit-lands"><div class="card-head"><span class="chip cat-mechanics">mechanics</span><h2>Phase 53c — Old Marrow made reachable on every route, a coverage-floor audit lands</h2></div>
+<p class="field"><span class="flabel">What</span> Narrowed fishing-village column 1 to fv-2 alone, so the</p>
+<p class="field"><span class="flabel">Why</span> The quest-giver placement the docs already asserted was</p>
+<p class="commits"><code class="commit">`44fab3ae`</code> <code class="commit">`bf39b391`</code></p>
+<p>quest-giver (Old Marrow) sits on 100% of legal routes instead of being one of two column-1 options — matching what <code>docs/story.md</code> and the map file's own header comment already claimed. Homed three more S-02 NPCs (Captain Blackwater, the Coastal Beggar, the Fisherman's Daughter) into the post-boss column, one per lane. Added <code>auditRouteCoverage</code> and a coverage-floor test pinning fv-1/fv-2/fv-6 at 100%, plus a witness test that reaches Old Marrow through real navigation and activates <code>starting-quest</code> — the assertion that could not pass before this phase.</p>
+<p>never actually true in the shipped graph — a second column-1 node let a route bypass Old Marrow entirely, so "start a quest" wasn't guaranteed reachable despite reading as guaranteed everywhere it was described.</p></section>
+<section class="card cat-content" id="phase-53d-s-01s-four-dilemmas-authored-and-wired"><div class="card-head"><span class="chip cat-content">content</span><h2>Phase 53d — S-01's four dilemmas authored and wired</h2></div>
+<p class="field"><span class="flabel">What</span> Shipped four narration-kind dilemma nodes with real</p>
+<p class="field"><span class="flabel">Why</span> S-01's four dilemmas existed only as spec prose until this</p>
+<p class="commits"><code class="commit">`7d14acd6`</code> <code class="commit">`87cfbd39`</code></p>
+<p><code>DialogueTree</code>s — three unflagged root choices apiece, each a leaf setting one distinct flag, no <code>moralDelta</code> — two on fishing-village (The Borrowed Hook, The Stranger's Net) and two on northern-forest (The Frightened Friend, The Crowning Witnessed). Each displaces a plain <code>encounter</code> node and sits strictly ahead of the post-boss column Phase 53e reads.</p>
+<p>phase; shipping them as real, flag-setting nodes is what makes the read-back web in Phase 53e possible at all.</p></section>
+<section class="card cat-mechanics" id="phase-53e-the-read-back-web-post-boss-npcs-notice-earlier-choices"><div class="card-head"><span class="chip cat-mechanics">mechanics</span><h2>Phase 53e — the read-back web: post-boss NPCs notice earlier choices</h2></div>
+<p class="field"><span class="flabel">What</span> Gated a reactive, additive branch on each of S-01's four</p>
+<p class="field"><span class="flabel">Why</span> Before this phase, every dilemma resolved into silence — the</p>
+<p class="commits"><code class="commit">`ccb8654c`</code> <code class="commit">`5844a20b`</code></p>
+<p>dilemma flags (plus <code>marrow_pressed</code>) in the three post-boss NPCs — ten new branches total, all appended last, none carrying <code>moralDelta</code> per S-01's "the dilemmas refuse to score themselves" ruling. <code>requires.flag</code> gate count goes from 1 to 11 across every authored map.</p>
+<p>world never mentioned a player's choice again. This is the payoff: a choice made at fv-4 in column 3 gets noticed by the Fisherman's Daughter in column 6.</p></section>
+<section class="card cat-mechanics" id="phase-46a-early-game-rethink-design-ruling-narrows-the-gap-to-one-screen"><div class="card-head"><span class="chip cat-mechanics">mechanics</span><h2>Phase 46a — early-game rethink: design ruling narrows the gap to one screen</h2></div>
+<p class="field"><span class="flabel">What</span> Docs-only design session. Rejected both premises on the</p>
+<p class="field"><span class="flabel">Why</span> Both original framings were premised on mechanics the</p>
+<p class="commits"><code class="commit">`8decc1c9`</code> <code class="commit">`125904d7`</code></p>
+<p>table — a canned battle per preset deck, and a labyrinth-gated starter commitment — since both assume the ten-theme preset model the 2026-08-08 Profane Canon rework already replaced with one evolving deck (threadbare → pilgrim → apostate). Identified the real gap: <code>BundleSelectScreen</code> still offers Pilgrim/Apostate (mid/late campaign snapshots) as peer picks to brand-new players, undercutting the controlled-vacuum intent of the tutorial that follows. Scoped the fix to Phase 46b: new-player picker collapses to Threadbare only.</p>
+<p>codebase had already moved past; shipping either would have built tutorial content for a deck model that no longer exists. No code shipped — docs-only per <code>plan-a-phase.md</code> §9's precedent.</p></section>
+<section class="card cat-infra" id="combat-baseline-re-measured-numbers-hold-unchanged-for-a-second-straight-read"><div class="card-head"><span class="chip cat-infra">infra</span><h2>Combat baseline re-measured — numbers hold unchanged for a second straight read</h2></div>
+<p class="field"><span class="flabel">What</span> The deck-matrix baseline was stale by 3 mechanics-source</p>
+<p class="field"><span class="flabel">Why</span> None of the three staling commits touch combat resolution —</p>
+<p>commits (53c/53d/53e) at digest open. Re-measured via the reduced-nightly pass; <code>baseline:check</code> now reports fresh at <code>05c3ffdf</code>.</p>
+<p>narrative/content wiring only — and the regenerated numbers confirm it: early avgWinRate 0.545 (avgCQI 0.727), mid 0.083 (avgCQI 0.692), late 0.000 (avgCQI 0.767), impossible 0.000 (avgCQI 0.767) across 144 cells, identical to the prior <code>e3bbcfd0</code> read reported in the 2026-08-17 digest. CQI holding flat while win rate collapses across stage is the expected transitional-library shape, not a violation of the retired ten-preset doctrine curve — reported as directional confirmation, not a finding. No tuning work spawned.</p></section>
+<section class="panel" id="while-you-were-out"><h2>While you were out</h2>
+<div class="tablewrap"><table><thead><tr><th>Tick</th><th>Verb</th><th>Outcome</th></tr></thead><tbody><tr><td>2026-08-17 13:12</td><td>march</td><td>success — <span class="st st-ok">shipped</span> Phase 53c</td></tr><tr><td>2026-08-17 19:04</td><td>march</td><td>success — critique <span class="st st-ok">pass</span> 27, no findings</td></tr><tr><td>2026-08-18 01:55</td><td>march</td><td>success — <span class="st st-ok">shipped</span> Phase 53d</td></tr><tr><td>2026-08-18 07:11</td><td>march</td><td>success — <span class="st st-neutral">no-op</span></td></tr><tr><td>2026-08-18 13:15</td><td>march</td><td>success — <span class="st st-ok">shipped</span> Phase 53e</td></tr><tr><td>2026-08-18 19:03</td><td>march</td><td>success — <span class="st st-ok">shipped</span> Phase 46a (design ruling)</td></tr><tr><td>2026-08-19 01:57</td><td>march</td><td>success — critique <span class="st st-ok">pass</span> 28, no findings</td></tr><tr><td>2026-08-19 07:12</td><td>march</td><td><strong>cancelled</strong> — apt-mirror hang, see below</td></tr></tbody></table></div></section>
+<section class="panel" id="needs-you"><h2>Needs you</h2>
+<ul><li><strong>A full <code>march</code> tick was lost to a CI flake, not a code bug.</strong> The</li></ul>
+<p>2026-08-19 07:12 run hung for over an hour inside <code>npx playwright install chromium --with-deps</code>'s <code>apt-get update</code> (retrying an unreachable <code>azure.archive.ubuntu.com</code> mirror with zero progress) before the job's 75-minute ceiling force-cancelled it — no commit, total loss. Filed as a new <code>plan/AUDIT.md</code> row (<code>[gap]</code> category, impact 5 / ease 5) since every skill-driven workflow shares this install step and could hit the same hang. This is a distinct cause from the already-filed "march ticks are creeping toward the job timeout" row (that one is real work outgrowing the ceiling; this one is an idle network hang burning the ceiling on nothing).</p>
+<ul><li><strong>Night shift skipped 2026-08-18</strong> — the <code>night</code> workflow ran</li></ul>
+<p>2026-08-17, then next appears today (2026-08-19); no <code>DIGEST_2026-08-18.md</code> exists and this entry does not backfill it.</p>
+<ul><li><strong>Queue-depth correction.</strong> Recent digests (at least 2026-08-17)</li></ul>
+<p>undercounted <code>plan/AUDIT.md</code>/<code>plan/CRITIQUE.md</code>/ <code>plan/PHASE_CANDIDATES.md</code> pending rows — the prior counting method missed that resolved rows in these files get an inline <code>[x] ... RESOLVED</code> marker rather than being physically moved to a <code>## Done</code> section, so a raw section-heading count (or a literal <code>- [ ]</code> search, which these files don't use at all) reads much higher than what's actually still open. Corrected counts below. This is expected/known behavior, not new breakage — <code>/iterate</code> rarely runs because <code>march</code>'s dispatch order puts a pending build-plan phase ahead of it (§3 of <code>skills/march.md</code>), and T already tried and reversed a forced-drain mode for exactly this reason on 2026-08-15 (see the AUDIT.md banner) — not re-proposing the same call.</p>
+<ul><li>The product-name <code>[needs-user-call]</code> (<code>plan/AUDIT.md</code>, filed</li></ul>
+<p>2026-08-08, ruled "open a naming session" via <code>/oversight</code> 2026-08-10) is still genuinely open pending a second candidate pass.</p></section>
+<section class="panel" id="tuning-proposals"><h2>Tuning proposals</h2>
+<p>None filed tonight. The one operational irregularity this pulse surfaced (the apt-mirror hang) is a CI-reliability finding, not a gate/cadence mistuning — filed to <code>plan/AUDIT.md</code> per the standard breadth-failure rail instead of proposed as a phase candidate.</p></section>
+<section class="panel" id="queues-now"><h2>Queues now</h2>
+<ul><li>Build plan: 27 open phases, 0 blocked. Phase 46a's ruling unblocks</li></ul>
+<p>46b/46c; Phase 54 (route live combat through <code>endCombat</code>) is also open and independent.</p>
+<ul><li><code>plan/AUDIT.md</code>: 44 open rows (82 logged; most closures are</li></ul>
+<p>resolved-in-place rather than moved to <code>## Done</code>). Newest: tonight's apt-mirror-hang row.</p>
+<ul><li><code>plan/CRITIQUE.md</code>: 20 open rows (44 logged). Last pass: 28</li></ul>
+<p>(2026-08-19, no new findings — the standing MED momentum-chain contrast row from pass 21 reconfirmed unchanged, not re-filed).</p>
+<ul><li><code>plan/PHASE_CANDIDATES.md</code>: 37 open rows (45 logged).</li><li>No open <code>triage:needs-user</code> or <code>loop:do</code> issues.</li><li>Deploy: clean — HEAD <code>05c3ffdf</code> (this digest's baseline commit) is</li></ul>
+<p>a critique/docs-only tick; no gated workflow triggered as of open.</p></section>
+<footer class="foot">Axiomancer DevLog &middot; generated by <code>scripts/build-devlog.mjs</code></footer>
+</main>
+</body>
+</html>

@@ -34,6 +34,34 @@
 > RESOLVED note, same convention as every other closed row in this
 > file.
 
+### [gap] `npx playwright install chromium --with-deps` hung on an unreachable apt mirror, killing a full `march` tick
+- category: gap
+- impact: 5
+- ease: 5
+- detail: filed 2026-08-19 (digest pulse). Run `32226765299` (the
+  2026-08-19 07:12 scheduled `march` tick) hung inside the shared
+  `_claude-skill.yml` setup step (`npx playwright install chromium
+  --with-deps`, used by both `march` and `night`) — its underlying
+  `apt-get update` retried `azure.archive.ubuntu.com` for over an hour
+  (07:13:53 -> 08:27:49, zero progress the entire window, log lines
+  `Ign:2..23` repeating) before the job's `timeout_minutes: 75` ceiling
+  force-cancelled it. No commit resulted; the tick is a total loss, not
+  a partial one — distinct from the already-filed "march ticks are
+  creeping toward the job timeout" row above (that one is real work
+  outgrowing the ceiling; this one is an idle apt-mirror hang eating
+  the whole budget while nothing runs). `verify-mechanics.yml` and
+  `verify-mobile.yml` carry their own copy of the same install command,
+  so the exposure isn't march-specific, just unluckiest there because
+  that job runs unattended on the longest cadence.
+- next: /iterate. `--with-deps` re-runs `apt-get update && apt-get
+  install` on every invocation with no cache and no timeout around the
+  network call; caching the installed apt packages (or the Playwright
+  browser + its system deps together, keyed on the pinned Playwright
+  version) removes the network dependency from the common path
+  entirely. A cheaper interim fix: wrap the install step in a short
+  step-level `timeout-minutes` so a mirror hang fails fast and loud
+  instead of silently eating the whole job ceiling.
+
 ### [debt] `telemetry.mjs` writes `TELEMETRY.md` relative to cwd, so a workspace-cd forks the log
 - category: debt
 - impact: 3

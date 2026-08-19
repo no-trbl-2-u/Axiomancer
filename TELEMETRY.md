@@ -302,3 +302,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-18T19:12:34Z | subagent | general-purpose | claude-sonnet-5 | main | Ship Phase 46a — early-game rethink design session |
 | 2026-08-19T02:01:07Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-19T02:01:09Z | skill | march | unknown | main | - |
+| 2026-08-19T09:19:04Z | slash-prompt | /digest | unknown | user/ci | /digest |
+| 2026-08-19T09:19:06Z | skill | digest | unknown | main | - |
