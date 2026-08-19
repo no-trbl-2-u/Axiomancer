@@ -304,3 +304,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-19T02:01:09Z | skill | march | unknown | main | - |
 | 2026-08-19T09:19:04Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-08-19T09:19:06Z | skill | digest | unknown | main | - |
+| 2026-08-19T13:23:55Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-19T13:23:58Z | skill | march | unknown | main | - |
+| 2026-08-19T13:24:46Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
