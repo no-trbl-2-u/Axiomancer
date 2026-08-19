@@ -69,6 +69,10 @@ app-example
 /ios
 /android
 screenshots/hazard-e2e/
+# combat-round-e2e run artefacts — per-seed final/CRASH shots + result.json,
+# rewritten on every invocation. Diagnostics for the run in front of you, not
+# baselines; ~9MB a sweep, so never committed.
+screenshots/combat-round-e2e/
 bun.lock
 
 # visual-audit artifacts

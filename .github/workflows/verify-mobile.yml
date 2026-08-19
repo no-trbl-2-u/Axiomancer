@@ -133,3 +133,27 @@ jobs:
         run: npm run e2e:combat --workspace axiomancer-mobile
         env:
           COMBAT_E2E_REUSE_EXPORT: '1'
+
+      # Keep in step with verify-mechanics.yml — the two workflows carry
+      # parallel copies of this journey list, and a step added to only one of
+      # them silently skips whichever PR shape triggers the other. (Witness:
+      # eb51e84 added this to verify-mechanics only, so a mobile-only PR — the
+      # exact shape that introduced the harness — ran a green build that never
+      # executed it.)
+      #
+      # The step above asserts the board's SHAPE and never commits a card, and
+      # only drives the /combat-encounter dev sandbox (mock foe, demo deck,
+      # persistOutcome={false}). This one plays real rounds — stage, power with
+      # a die, APPLY, END PHASE, to a terminal outcome — on the sandbox AND on
+      # the live map encounter (real deck, real enemy, the persistOutcome
+      # write-back), and fails on an uncaught exception or the <ErrorBoundary>
+      # screen, which no other journey does.
+      # Three seeds x two modes keeps this near four minutes; the local
+      # `e2e:combat-round` default sweeps wider.
+      - name: Combat full rounds (sandbox + live, crash-strict)
+        if: steps.scope.outputs.combat == 'true'
+        run: npm run e2e:combat-round --workspace axiomancer-mobile
+        env:
+          COMBAT_ROUND_E2E_REUSE_EXPORT: '1'
+          MODE: both
+          COMBAT_ROUND_E2E_SEEDS: '16,8,3'

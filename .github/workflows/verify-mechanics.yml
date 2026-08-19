@@ -144,3 +144,20 @@ jobs:
         run: npm run e2e:combat --workspace axiomancer-mobile
         env:
           COMBAT_E2E_REUSE_EXPORT: '1'
+
+      # The step above asserts the board's SHAPE and never commits a card, and
+      # it only ever drives the /combat-encounter dev sandbox (mock foe, demo
+      # deck, persistOutcome={false}). This one plays real rounds — stage,
+      # power with a die, APPLY, END PHASE, to a terminal outcome — on the
+      # sandbox AND on the live map encounter (real deck, real enemy, the
+      # persistOutcome write-back), and fails on an uncaught exception or the
+      # <ErrorBoundary> screen, which no other journey does.
+      # Three seeds x two modes keeps this near four minutes; the local
+      # `e2e:combat-round` default sweeps wider.
+      - name: Combat full rounds (sandbox + live, crash-strict)
+        if: steps.impact.outputs.combat == 'true'
+        run: npm run e2e:combat-round --workspace axiomancer-mobile
+        env:
+          COMBAT_ROUND_E2E_REUSE_EXPORT: '1'
+          MODE: both
+          COMBAT_ROUND_E2E_SEEDS: '16,8,3'

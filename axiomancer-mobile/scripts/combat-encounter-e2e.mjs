@@ -182,8 +182,23 @@ async function main() {
     try {
         const context = await browser.newContext({ viewport: VIEWPORT, hasTouch: false })
         const page = await context.newPage()
-        page.on('pageerror', (err) => console.error('combat-e2e: pageerror', err.message))
+        // CRASH-STRICT: an uncaught exception used to be printed and ignored, so
+        // a mid-combat crash still exited 0 and this harness reported a pass.
+        // Collect them and fail the run instead.
+        const crashes = []
+        page.on('pageerror', (err) => {
+            console.error('combat-e2e: pageerror', err.message)
+            crashes.push(err.message)
+        })
         await playCombat(page, baseUrl)
+        // The app-wide <ErrorBoundary> swallows a render crash into a fallback
+        // screen — the board's testIDs go missing but nothing throws, so only an
+        // explicit check catches it.
+        if (await page.getByTestId('error-boundary-screen').count()) {
+            const code = await page.getByTestId('error-boundary-code').innerText().catch(() => '')
+            crashes.push(`app fell into the <ErrorBoundary> screen (${code.trim()})`)
+        }
+        if (crashes.length) fail(`combat crashed — ${crashes[0]}`)
         await context.close()
         log('ALL PASS — hazard-pattern combat played end-to-end')
     } finally {
