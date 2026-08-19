@@ -1,13 +1,30 @@
 # Critique log
 
-> Last pass: 2026-08-17 at commit bf39b391
-> Pass count: 27
+> Last pass: 2026-08-19 at commit 125904d7
+> Pass count: 28
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 28, 2026-08-19, commit 125904d7] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5,
+> `CRITIQUE_VIEWPORT=both`) against the cold-enterable screen set
+> (title, onboarding/deck-picker, combat-encounter preview, live
+> combat board post-ENTER COMBAT, exploration hub) at both mobile
+> (375×812) and desktop (1280×800). All 10 captures clean: zero
+> console/page errors besides the same benign `navigator.vibrate`
+> autoplay warning seen every prior pass. The open **[MED] momentum
+> chain empty-state contrast** row (pass 21) reconfirmed live and
+> unchanged on both viewports — mobile combat board shows a `no
+> momentum`-class placeholder near-illegible under "NO STANCE" against
+> the arena floor art, desktop shows no visible placeholder text at
+> all in the same spot — no regression, no new evidence, not re-filed.
+> Title tagline, preset-picker copy, Brine Hag threat-sequence preview,
+> and the OMEN cutscene redirect all match prior-pass baselines
+> verbatim. No new findings filed.
 
 > **[critique pass 27, 2026-08-17, commit bf39b391] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
