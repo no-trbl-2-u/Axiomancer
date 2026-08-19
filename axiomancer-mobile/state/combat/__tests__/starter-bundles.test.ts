@@ -3,7 +3,9 @@ import { COMBAT_REWARD_POOL, STARTING_CARD_IDS, getCard } from '@mechanics';
 
 import {
     STARTER_BUNDLES,
+    NEW_PLAYER_STARTER_BUNDLE_ID,
     seedStarterBundleAction,
+    starterBundleById,
     chosenStarterBundle,
     runArchetype,
     BUNDLE_CHOSEN_FLAG,
@@ -87,5 +89,11 @@ describe('Starter bundles — the pre-run deck picker (the campaign snapshots)',
         expect(chosenStarterBundle(store)?.id).toBe('threadbare');
         expect(runArchetype(store)).toBeNull(); // archetype: null → no skew tag
         expect(store.getState().player.knownCards.length).toBeGreaterThan(0);
+    });
+
+    it('the new-player default (phase 46b) resolves to the neutral Threadbare Office', () => {
+        const bundle = starterBundleById(NEW_PLAYER_STARTER_BUNDLE_ID);
+        expect(bundle?.id).toBe('threadbare');
+        expect(bundle?.archetype).toBeNull(); // unmapped-archetype — same shape as the test above
     });
 });

@@ -235,6 +235,10 @@ export function starterBundleById(id: string): StarterBundle | null {
     return STARTER_BUNDLES.find((b) => b.id === id) ?? null;
 }
 
+/** The sole starter offered to a brand-new player (phase 46b, per 46a's D4:
+ *  the neutral, earliest campaign snapshot — no picker among the three). */
+export const NEW_PLAYER_STARTER_BUNDLE_ID: string = 'threadbare';
+
 /** The starter bundle chosen this run (read from flags), or null. */
 export function chosenStarterBundle(store: AppStore): StarterBundle | null {
     const flags = (store.getState() as unknown as GameState).flags ?? [];

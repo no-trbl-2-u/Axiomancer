@@ -79,23 +79,13 @@ jest.mock('@/components/TitleScreen', () => ({
     },
 }));
 
-// Mock BundleSelectScreen — pressing it picks the first bundle.
-jest.mock('@/components/BundleSelectScreen', () => ({
-    BundleSelectScreen: ({ onPick }: { onPick: (id: string) => void }) => {
-        const mockReact = require('react');
-        return mockReact.createElement('view', {
-            testID: 'bundle-select',
-            onPress: () => onPick('bleed'),
-        }, 'Bundle Select');
-    },
-}));
-
 import { mockFixedRng } from '@/test-utils/rng';
 import { AestheticModeProvider } from '@/state/aesthetic-mode';
 import { CombatModeProvider } from '@/state/combat-mode';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
 import { createAppStore, type AppStore } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
+import { chosenStarterBundle } from '@/state/combat/store-actions';
 
 // Import the route components
 import IndexScreen from '@/app/index';
@@ -141,24 +131,21 @@ describe('app/index.tsx: onboarding flow', () => {
         expect(getByTestId('title-screen')).toBeTruthy();
     });
 
-    it('offers a starter bundle after a new player dismisses the title', () => {
+    it('auto-seeds the Threadbare Office and proceeds to the map once a new player dismisses the title', () => {
+        // Phase 46b: a brand-new player is no longer offered a picker among
+        // Threadbare/Pilgrim/Apostate — they are auto-seeded into the
+        // neutral Threadbare Office and sent straight to the map. See
+        // plan/phases/phase_46a_early_game_rethink.md D4.
         const store = makeStore();
         const { getByTestId } = render(withProviders(store, <IndexScreen />));
 
-        // Dismiss the title → new players choose a starter bundle next.
-        fireEvent.press(getByTestId('title-screen'));
-
-        expect(getByTestId('bundle-select')).toBeTruthy();
-    });
-
-    it('proceeds to the map once a starter bundle is chosen', () => {
-        const store = makeStore();
-        const { getByTestId } = render(withProviders(store, <IndexScreen />));
-
-        fireEvent.press(getByTestId('title-screen'));
-        fireEvent.press(getByTestId('bundle-select'));
+        act(() => {
+            fireEvent.press(getByTestId('title-screen'));
+        });
 
         expect(getByTestId('redirect-/exploration')).toBeTruthy();
+        expect(chosenStarterBundle(store)?.id).toBe('threadbare');
+        expect(store.getState().player.knownCards.length).toBeGreaterThan(0);
     });
 
     it('redirects to active tab for returning player (leveled up)', () => {

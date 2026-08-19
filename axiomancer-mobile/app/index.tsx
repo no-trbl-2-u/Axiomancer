@@ -1,11 +1,14 @@
 import { Redirect } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useGameState, useGameStore } from '@/state/GameStoreProvider';
 import { selectActiveTab } from '@/state/presenters/navigation.engine';
 import { selectOnboardingViewModel } from '@/state/presenters/onboarding.engine';
 import { TitleScreen } from '@/components/TitleScreen';
-import { BundleSelectScreen } from '@/components/BundleSelectScreen';
-import { BUNDLE_CHOSEN_FLAG, seedStarterBundleAction } from '@/state/combat/store-actions';
+import {
+  BUNDLE_CHOSEN_FLAG,
+  NEW_PLAYER_STARTER_BUNDLE_ID,
+  seedStarterBundleAction,
+} from '@/state/combat/store-actions';
 
 export default function Index() {
   const activeTab = useGameState(selectActiveTab);
@@ -15,7 +18,24 @@ export default function Index() {
     (s) => ((s as unknown as { flags?: string[] }).flags ?? []).includes(BUNDLE_CHOSEN_FLAG),
   );
   const [titleScreenDismissed, setTitleScreenDismissed] = useState(false);
-  const [bundlePicked, setBundlePicked] = useState(false);
+
+  // Right after a NEW player dismisses the title (and only then): a starter
+  // bundle (deck identity) is required. Returning players have
+  // showTitleScreen false and skip this; anyone who already chose carries
+  // the persisted flag. `ensureStarterCards` is the safety net if this is
+  // ever bypassed.
+  const needsBundleSelection = onboarding.showTitleScreen && titleScreenDismissed && !bundleChosen;
+
+  // Phase 46b: a brand-new player is auto-seeded into the neutral Threadbare
+  // Office rather than choosing among all three campaign snapshots — see
+  // `plan/phases/phase_46a_early_game_rethink.md` D4. Seeding flips
+  // `bundleChosen` in the store, which re-renders this route straight past
+  // `needsBundleSelection` to the `<Redirect>` below.
+  useEffect(() => {
+    if (needsBundleSelection) {
+      seedStarterBundleAction(store, NEW_PLAYER_STARTER_BUNDLE_ID);
+    }
+  }, [needsBundleSelection, store]);
 
   // Show title screen for new players who haven't dismissed it yet
   if (onboarding.showTitleScreen && !titleScreenDismissed) {
@@ -24,21 +44,8 @@ export default function Index() {
     );
   }
 
-  // Right after a NEW player dismisses the title (and only then): choose a
-  // starter bundle (deck identity). Returning players have showTitleScreen
-  // false and skip this; anyone who already chose carries the persisted flag.
-  // `ensureStarterCards` is the safety net if this is ever bypassed.
-  const needsBundleSelection =
-    onboarding.showTitleScreen && titleScreenDismissed && !bundleChosen && !bundlePicked;
   if (needsBundleSelection) {
-    return (
-      <BundleSelectScreen
-        onPick={(bundleId) => {
-          seedStarterBundleAction(store, bundleId);
-          setBundlePicked(true);
-        }}
-      />
-    );
+    return null;
   }
 
   return <Redirect href={`/${activeTab}`} />;
