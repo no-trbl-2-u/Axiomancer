@@ -1566,9 +1566,11 @@ changes which lines a player can REACH. Either order works; 53a first grows
       `plan/phases/phase_46a_early_game_rethink.md`
       — `phases: brief for phase 46a — early-game rethink (design
       session)` (8decc1c9)
-- [ ] Phase 46b — Early-game: canned preset-deck tutorial content.
-      Implements 46a's ruling. (mechanics content + mobile) Deps: 46a.
-      Brief: to generate.
+- [x] Phase 46b — Early-game: canned preset-deck tutorial content.
+      Implements 46a's ruling (D4: new-player picker collapses to
+      Threadbare via auto-seed; D5: primer/coach audit held up, no
+      rewrite needed). (mechanics content + mobile)
+      — `feat(mobile): collapse new-player starter picker to Threadbare — phase 46b` (a5996b62)
 - [ ] Phase 46c — Early-game: Quest Board tutorial re-derivation —
       REDIRECTED per 46a's ruling (D6, `plan/phases/phase_46a_early_game_
       rethink.md`): Phase 61 retires the Quest Board minigame this row
