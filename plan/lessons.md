@@ -21,6 +21,22 @@
    commit there, and push by SHA — never the shared tree. Source: PR
    #120 (color-match rider removal).
 
+2. 2026-08-19 — `verify-mechanics.yml` and `verify-mobile.yml` carry
+   PARALLEL copies of the browser-journey step list under different job
+   names. A journey added to one silently skips whichever PR shape
+   triggers the other, and CI stays green because the step never ran.
+   Also: CI invokes each `e2e:*` script individually — it never runs the
+   `e2e:minigames` chain, so wiring a harness only into that chain wires
+   it into nothing. Edit both workflows together. Source: PR #216.
+
+3. 2026-08-19 — A green check is not evidence a new gate ran. Two greens
+   on PR #216 were hollow. Confirm a newly added CI step by grepping the
+   JOB LOG for its own output line, not by reading the check conclusion.
+   Same rule for GitHub writes: a 200 from `update_pull_request` does not
+   mean the body changed (`updated_at` stayed put; the server strips a
+   model-supplied attribution footer on edit). Verify the effect, not the
+   response. Source: PR #216.
+
 <!-- @domain:data -->
 
 ## Data

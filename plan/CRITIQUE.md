@@ -271,6 +271,34 @@
 
 ## Pending
 
+### [HIGH] combat — user hit a mid-combat crash that 30 seeded UI runs could not reproduce
+- pass: user-jot (commit 24475f48)
+- viewport: unspecified
+- auth_state: anonymous
+- category: functional
+- observation: the user reported the game crashing mid-combat during
+  real play. PR #216 built `axiomancer-mobile/scripts/combat-round-e2e.mjs`
+  to hunt it — a crash-strict full-round harness that plays real cards
+  (stage, power with a die, APPLY, END PHASE) on BOTH the
+  `/combat-encounter` dev sandbox and the live map encounter (real deck,
+  real enemy, `persistOutcome` write-back + aftermath panels). 30 runs
+  across 15 seeds x both modes all reached a terminal outcome clean. The
+  crash was NOT reproduced and remains unexplained; this row exists so
+  that negative result does not read as "fixed".
+- evidence: user-spotted 2026-08-19. Harness merged in PR #216 (main
+  c54bcd1). Contributing cause for why it was never caught: every e2e
+  attached `page.on('pageerror')` and only `console.error`'d it, so an
+  uncaught exception exited 0, and nothing checked `error-boundary-screen`
+  — both fixed in #216, so a recurrence now fails CI loudly.
+- suggested fix: extend `combat-round-e2e.mjs` along the axes it does not
+  yet reach — boss encounters (`debug-trigger-encounter-boss`), the
+  mercy/WITHDRAW branches, decks carrying cards/keywords absent from the
+  4-card starter, and the level-up path out of victory. Run wider seed
+  sweeps (`MODE=both COMBAT_ROUND_E2E_SEEDS=... ROUNDS=20`). If the user
+  supplies repro detail (enemy, last action, blank screen vs. the
+  ErrorBoundary panel + its error code), pin that case first.
+- source: user
+
 ### [MED] combat — every encounter renders the same fixed "ruined city" arena backdrop, regardless of the encounter's own narrative setting
 - pass: 23 (commit c063ac48)
 - viewport: mobile (375×812)
