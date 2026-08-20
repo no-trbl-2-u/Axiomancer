@@ -51,9 +51,15 @@ export interface MobileEventSlice {
  *   the field ~3 seconds after `id` changes. `id` increments per
  *   new toast so listeners can detect fresh dispatches even if
  *   `text` is identical. (Tick B.)
+ * - `questAcknowledged` — has the player visited Memoir since last
+ *   accepting a quest? Mirrors `levelUpAcknowledged` exactly: engine
+ *   `dialogue:applied` (with a `startQuest` effect on the applied
+ *   choice) flips to `false`; Memoir-screen mount flips back to
+ *   `true`. Drives the Memoir tab badge. (Phase 46c.)
  */
 export interface MobileNotificationsSlice {
     levelUpAcknowledged: boolean;
+    questAcknowledged: boolean;
     toast: {
         text: string | null;
         id: number;
@@ -273,12 +279,14 @@ export const EMPTY_BLACKSMITH_SLICE: MobileBlacksmithSlice = Object.freeze({
 export const EMPTY_LABYRINTH_SLICE: MobileLabyrinthSlice = Object.freeze({ session: null });
 
 /**
- * Default notifications slice. `levelUpAcknowledged: true` because a
- * fresh store has no pending level-up; the engine `character:levelup`
- * event flips it to `false`.
+ * Default notifications slice. `levelUpAcknowledged: true` and
+ * `questAcknowledged: true` because a fresh store has no pending
+ * level-up or quest; the engine `character:levelup` / `dialogue:applied`
+ * events flip them to `false`.
  */
 export const DEFAULT_NOTIFICATIONS_SLICE: MobileNotificationsSlice = Object.freeze({
     levelUpAcknowledged: true,
+    questAcknowledged: true,
     toast: Object.freeze({ text: null, id: 0 }),
 });
 
@@ -382,6 +390,25 @@ export function createAppStore(options: CreateAppStoreOptions = {}): AppStore {
         const prev = store.getState().notifications ?? DEFAULT_NOTIFICATIONS_SLICE;
         store.setState({
             notifications: { ...prev, levelUpAcknowledged: false },
+        });
+    });
+
+    // Phase 46c: flip `questAcknowledged` to false when the applied
+    // dialogue choice granted a quest (`effect.startQuest`). Mirrors
+    // the level-up handler above; the Memoir tab badge re-arms and
+    // clears on Memoir-screen mount. Payload shape probed the same
+    // way `app/dialogue/index.tsx`'s confirmation-flash listener
+    // does — `eventForAction` ships `{action: {payload: {choice}}}`
+    // for `dialogue:applied`, untyped at the emitter layer.
+    emitter.on('dialogue:applied', (event) => {
+        const payload = event.payload as unknown as {
+            action?: { payload?: { choice?: { effect?: { startQuest?: unknown } } } };
+        };
+        const startQuest = payload?.action?.payload?.choice?.effect?.startQuest;
+        if (typeof startQuest !== 'string' || startQuest.length === 0) return;
+        const prev = store.getState().notifications ?? DEFAULT_NOTIFICATIONS_SLICE;
+        store.setState({
+            notifications: { ...prev, questAcknowledged: false },
         });
     });
 

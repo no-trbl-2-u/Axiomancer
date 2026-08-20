@@ -34,6 +34,7 @@ export function ToastHost() {
         store.setState({
             notifications: {
                 levelUpAcknowledged: prev?.levelUpAcknowledged ?? true,
+                questAcknowledged: prev?.questAcknowledged ?? true,
                 toast: {
                     text,
                     id: (prev?.toast?.id ?? 0) + 1,
@@ -55,6 +56,7 @@ export function ToastHost() {
                 store.setState({
                     notifications: {
                         levelUpAcknowledged: cur.levelUpAcknowledged,
+                        questAcknowledged: cur.questAcknowledged,
                         toast: { text: null, id: cur.toast.id },
                     },
                 });

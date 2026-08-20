@@ -1,11 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 
 import { ScreenBg } from '@/components/ScreenBg';
 import { AxmIcon } from '@/components/icons';
 import { SectionLabel } from '@/components/SectionLabel';
 import { TooltipTarget } from '@/components/tooltip/TooltipTarget';
-import { useGameState } from '@/state/GameStoreProvider';
+import { useGameState, useGameStore } from '@/state/GameStoreProvider';
 import {
     selectMemoirViewModel,
     type MemoirQuestRow,
@@ -79,9 +79,22 @@ export default function MemoirScreen() {
         if (key === 'parchment') return AXM.parchment;
         return AXM.bone;
     };
+    const store = useGameStore();
     const player = useGameState((s) => s.player);
     const quests = useGameState((s) => s.quests);
     const moralMeter = useGameState((s) => s.moralMeter);
+
+    // Phase 46c: acknowledge any pending quest the moment Memoir
+    // renders. The tab badge clears via `selectTabBadges` (which gates
+    // on `questAcknowledged`). Mirrors the character screen's
+    // level-up acknowledge effect; preserves other notification
+    // fields (toast, levelUpAcknowledged).
+    useEffect(() => {
+        const prev = store.getState().notifications;
+        store.setState({
+            notifications: { ...prev, questAcknowledged: true },
+        });
+    }, [store]);
     // Subscribing to `_recentEvents` here even though Tick A doesn't
     // read it yet — Tick D's chronicle mapper will, and arming the
     // subscription now means the screen rebuilds the chronicle

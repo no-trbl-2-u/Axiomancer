@@ -22,6 +22,7 @@ import { ScreenBg } from '@/components/ScreenBg';
 import { SectionLabel } from '@/components/SectionLabel';
 import { Splatter } from '@/components/Splatter';
 import { useGameActions, useGameState } from '@/state/GameStoreProvider';
+import { consequenceLabel } from '@/state/presenters/consequence-copy';
 import {
     selectEventViewModel,
     selectHasActiveEvent,
@@ -41,22 +42,6 @@ function resolveAccent(key: ChoiceAccentKey, AXM: Palette): string {
     if (key === 'parchment') return AXM.parchment;
     if (key === 'rust') return AXM.rust;
     return AXM.bone;
-}
-
-function consequenceLabel(c: EventConsequence): string {
-    if (c.kind === 'damage') return `-${c.amount ?? 0} HP`;
-    if (c.kind === 'heal') return `+${c.amount ?? 0} HP`;
-    if (c.kind === 'currency') return `+${c.amount ?? 0} ${c.amount === 1 ? 'shilling' : 'shillings'}`;
-    if (c.kind === 'moral') {
-        const delta = c.amount ?? 0;
-        return `${delta > 0 ? '+' : ''}${delta} grace`;
-    }
-    if (c.kind === 'item') return c.label ?? 'item';
-    if (c.kind === 'flag') return c.label ?? 'flag';
-    if (c.kind === 'quest-start') return `quest: ${c.label ?? ''}`;
-    if (c.kind === 'quest-progress') return `progress: ${c.label ?? ''}`;
-    if (c.kind === 'card-learn') return `card: ${c.label ?? ''}`;
-    return '';
 }
 
 function ConsequenceChips({ consequences }: { consequences: readonly EventConsequence[] }) {

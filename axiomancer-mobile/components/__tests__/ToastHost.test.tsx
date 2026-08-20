@@ -47,6 +47,7 @@ function pushToast(store: AppStore, text: string, id = 1) {
     store.setState({
         notifications: {
             levelUpAcknowledged: prev?.levelUpAcknowledged ?? true,
+            questAcknowledged: prev?.questAcknowledged ?? true,
             toast: { text, id },
         },
     });

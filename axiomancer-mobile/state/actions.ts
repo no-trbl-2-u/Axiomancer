@@ -1202,6 +1202,7 @@ function pushToast(store: AppStore, text: string): void {
     store.setState({
         notifications: {
             levelUpAcknowledged: prev?.levelUpAcknowledged ?? true,
+            questAcknowledged: prev?.questAcknowledged ?? true,
             toast: { text, id: (prev?.toast?.id ?? 0) + 1 },
         },
     });
@@ -1845,6 +1846,7 @@ function applyFleeCost(store: AppStore): void {
     store.setState({
         notifications: {
             levelUpAcknowledged: prev?.levelUpAcknowledged ?? true,
+            questAcknowledged: prev?.questAcknowledged ?? true,
             toast: {
                 text: 'you fled the encounter. the path bends away.\n\ngrace -2',
                 id: (prev?.toast?.id ?? 0) + 1,

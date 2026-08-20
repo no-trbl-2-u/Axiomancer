@@ -68,6 +68,7 @@ describe('flee action: narrative feedback', () => {
         store.setState({
             notifications: {
                 levelUpAcknowledged: true,
+                questAcknowledged: true,
                 toast: { text: null, id: 0 },
             },
         });
@@ -103,6 +104,7 @@ describe('flee action: narrative feedback', () => {
         store.setState({
             notifications: {
                 levelUpAcknowledged: true,
+                questAcknowledged: true,
                 toast: { text: null, id: 0 },
             },
         });

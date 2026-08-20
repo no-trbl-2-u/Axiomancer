@@ -91,6 +91,14 @@ const LEVELUP_BADGE: TabBadge = Object.freeze({ text: '↑', kind: 'levelup' });
  * `character:levelup` engine event must have fired since the player
  * last visited the character screen. Avoids nagging after the player
  * has already seen the badge once.
+ *
+ * Phase 46c: the `memoir` tab gets its own badge, independent of the
+ * character-tab pair above — a quest can be pending with no active
+ * event and no level-up ready. Gates on
+ * `notifications.questAcknowledged === false`, set by the engine
+ * `dialogue:applied` handler in `state/store.ts` when the applied
+ * choice granted a quest; Memoir-screen mount clears it. Reuses
+ * `EVENT_BADGE`'s shape rather than adding a third `TabBadge` kind.
  */
 export function selectTabBadges(state: AppStoreState): Record<TabRoute, TabBadge | null> {
     const hasEvent = selectHasActiveEvent(state);
@@ -100,15 +108,17 @@ export function selectTabBadges(state: AppStoreState): Record<TabRoute, TabBadge
     const xpReady = toNext > 0 && experience >= toNext;
     const levelUpAcknowledged = state.notifications?.levelUpAcknowledged ?? true;
     const levelupReady = xpReady && !levelUpAcknowledged;
+    const questAcknowledged = state.notifications?.questAcknowledged ?? true;
+    const questPending = !questAcknowledged;
 
-    if (!hasEvent && !levelupReady) {
+    if (!hasEvent && !levelupReady && !questPending) {
         return EMPTY_BADGES;
     }
 
     return {
         exploration: null,
-        character: levelupReady ? LEVELUP_BADGE : EVENT_BADGE,
-        memoir: null,
+        character: levelupReady ? LEVELUP_BADGE : hasEvent ? EVENT_BADGE : null,
+        memoir: questPending ? EVENT_BADGE : null,
         inventory: null,
     };
 }

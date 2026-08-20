@@ -15,6 +15,7 @@ import { isDialogueAppliedEvent } from '@mechanics';
 
 import { ScreenBg } from '@/components/ScreenBg';
 import { useGameActions, useGameEvents, useGameState } from '@/state/GameStoreProvider';
+import { consequenceLabel } from '@/state/presenters/consequence-copy';
 import {
     selectEventViewModel,
     selectHasActiveEvent,
@@ -26,6 +27,29 @@ import { makeStyles } from '@/theme/runtime';
 /** How long the dialogue-confirmation ✓ stays visible (ported from
  *  the pre-Phase-137 event modal's Tick C). */
 const DIALOGUE_CONFIRM_TTL_MS = 500;
+
+/** Preview chips for `choice.consequences` — ported from the dead
+ *  `/event` fallback shell's `ConsequenceChips` (Phase 46c) so a
+ *  quest-granting reply (e.g. Old Marrow's "Consider it done.") says
+ *  so before the player taps it, not just via the generic ✓ flash. */
+function ReplyConsequences({ choice }: { choice: EventChoice }) {
+    const styles = useStyles();
+    if (choice.consequences.length === 0) return null;
+    const shown = choice.consequences.slice(0, 3);
+    const overflow = choice.consequences.length - shown.length;
+    return (
+        <View style={styles.consequenceRow} testID={`dialogue-choice-${choice.id}-consequences`}>
+            {shown.map((c, i) => (
+                <Text key={i} style={styles.consequenceChip}>
+                    {consequenceLabel(c)}
+                </Text>
+            ))}
+            {overflow > 0 && (
+                <Text style={styles.consequenceChip}>{`+${overflow} more`}</Text>
+            )}
+        </View>
+    );
+}
 
 function ReplyRow({
     choice,
@@ -53,6 +77,7 @@ function ReplyRow({
                 {choice.description.length > 0 && (
                     <Text style={styles.replyDesc}>{choice.description}</Text>
                 )}
+                <ReplyConsequences choice={choice} />
             </View>
             {confirmed && (
                 <Text
@@ -233,4 +258,15 @@ const useStyles = makeStyles((AXM) => ({
     abandon: { alignSelf: 'center', marginTop: 16, padding: 8 },
     abandonText: { fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 2, color: AXM.bone },
     flexOne: { flex: 1 },
+    consequenceRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 4 },
+    consequenceChip: {
+        fontFamily: FONTS.mono,
+        fontSize: 8,
+        letterSpacing: 1,
+        color: AXM.bone,
+        borderWidth: 1,
+        borderColor: AXM.ash,
+        paddingHorizontal: 4,
+        paddingVertical: 1,
+    },
 }));

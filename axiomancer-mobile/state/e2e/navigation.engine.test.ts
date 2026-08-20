@@ -194,6 +194,74 @@ describe('navigation.engine', () => {
         // `state.combat` slice, removed from the engine in mechanics 0.37.0.
         // With no turn-based combat slice, mid-combat event suppression is
         // no longer a concept, so the test was retired.
+
+        // Phase 46c — the Memoir tab's quest-discovery badge.
+        it('surfaces a badge on the memoir tab when a dialogue choice grants a quest', () => {
+            const store: AppStore = createAppStore({ adapter: createMemoryAdapter() });
+            expect(selectTabBadges(store.getState()).memoir).toBeNull();
+
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
+            const { getEmitterForStore } = require('@/state/store');
+            const emitter = getEmitterForStore(store);
+            emitter.emit({
+                type: 'dialogue:applied',
+                payload: {
+                    action: {
+                        type: 'APPLY_DIALOGUE',
+                        payload: { choice: { effect: { startQuest: 'starting-quest' } } },
+                    },
+                    state: store.getState(),
+                },
+            });
+
+            expect(selectTabBadges(store.getState()).memoir).toEqual({ text: '!', kind: 'event' });
+        });
+
+        it('does not surface a memoir badge for a dialogue choice with no quest effect', () => {
+            const store: AppStore = createAppStore({ adapter: createMemoryAdapter() });
+
+            // eslint-disable-next-line @typescript-eslint/no-require-imports
+            const { getEmitterForStore } = require('@/state/store');
+            const emitter = getEmitterForStore(store);
+            emitter.emit({
+                type: 'dialogue:applied',
+                payload: {
+                    action: {
+                        type: 'APPLY_DIALOGUE',
+                        payload: { choice: { effect: { grantCurrency: 5 } } },
+                    },
+                    state: store.getState(),
+                },
+            });
+
+            expect(selectTabBadges(store.getState()).memoir).toBeNull();
+        });
+
+        it('clears the memoir badge once questAcknowledged is set (Memoir-screen mount)', () => {
+            const store: AppStore = createAppStore({ adapter: createMemoryAdapter() });
+            store.setState({
+                notifications: { ...DEFAULT_NOTIFICATIONS_SLICE, questAcknowledged: false },
+            });
+            expect(selectTabBadges(store.getState()).memoir).toEqual({ text: '!', kind: 'event' });
+
+            store.setState({
+                notifications: { ...store.getState().notifications, questAcknowledged: true },
+            });
+
+            expect(selectTabBadges(store.getState()).memoir).toBeNull();
+        });
+
+        it('does not put an event badge on the character tab when only a quest is pending', () => {
+            const store: AppStore = createAppStore({ adapter: createMemoryAdapter() });
+            store.setState({
+                notifications: { ...DEFAULT_NOTIFICATIONS_SLICE, questAcknowledged: false },
+            });
+
+            const result = selectTabBadges(store.getState());
+
+            expect(result.character).toBeNull();
+            expect(result.memoir).toEqual({ text: '!', kind: 'event' });
+        });
     });
 
     describe('selectNavigationViewModel', () => {
