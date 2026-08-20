@@ -1594,14 +1594,16 @@ changes which lines a player can REACH. Either order works; 53a first grows
 "not now" from 2026-07-18 is lifted by the unshackling. Do NOT run this
 batch concurrently with 44* — both churn the whole mobile surface.**
 
-- [ ] Phase 47a — Decouple inventory + shim layer. Freeze an exact
+- [x] Phase 47a — Decouple inventory + shim layer. Freeze an exact
       inventory of every `expo-*` import site, then route each through a
       thin local module (`lib/platform/*`-style) so the app depends on
       OUR interface rather than Expo's directly. Zero behavior change,
       zero dependency change — this is the seam that makes 47b-47e
       mechanical. Bare-RN libraries (Reanimated 4, gesture-handler,
       rn-svg, screens, safe-area-context) are NOT in scope: they carry
-      over unchanged. (mobile) Deps: none. Brief: to generate.
+      over unchanged. (mobile) Deps: none.
+      Brief: `plan/phases/phase_47a_expo_decouple_inventory_shim.md`.
+      Shipped `3473520f`.
 - [ ] Phase 47b — Navigation: `expo-router` → a bare-RN router
       (react-navigation the obvious candidate). The single biggest
       coupling — file-based routes under `app/` become explicit route
