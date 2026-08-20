@@ -309,3 +309,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-19T13:24:46Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
 | 2026-08-20T01:57:38Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-20T02:00:57Z | subagent | Explore | claude-sonnet-5 | main | Investigate Phase 46c quest discovery gap |
+| 2026-08-20T07:15:10Z | slash-prompt | /march | unknown | user/ci | /march |
