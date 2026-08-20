@@ -533,7 +533,7 @@
   repointed at `cqi` / spec 35, or the next tuning pass will optimise the
   dead law the phase exists to retire.
 
-### [needs-user-call] The product name "Axiomancer" under the whole-product pivot — RULED via /oversight 2026-08-10: reconsider, open a naming session
+### [x] [needs-user-call] The product name "Axiomancer" under the whole-product pivot — RESOLVED via /oversight 2026-08-20: renamed to "Miserere Mei, Deus"
 - category: content
 - impact: 6
 - ease: 9
@@ -568,6 +568,31 @@
   format than a third cold list. Nothing in the queue waits on this —
   "Axiomancer" remains the working name and Phases 44a-44i are
   unaffected either way, exactly as the 2026-08-10 ruling said.
+- **RESOLVED via /oversight 2026-08-20:** T did not pick from either
+  candidate pass. Ruling, direct: rename to **"Miserere Mei, Deus"**
+  (Latin, Psalm 51 — "Have mercy on me, God"). This landed alongside a
+  broader decision, not a naming-session pick in isolation — T set
+  *Mörk Borg* as the new tonal North Star for everything except deck/dice
+  mechanics (art, narration, encounter design, content pipelines), and
+  named this title in that same breath. See `new-north-star.prompt.md`
+  (repo root) for the follow-up brainstorm this opens — the name is
+  locked now; the rest of the pivot is not.
+- **Scope of what's actually done here:** the plan-of-record only —
+  this row, `plan/naming-session-2026-08-12.md` closed out, and
+  `plan/bearings.md`'s standing name line updated. The mechanical
+  migration (title screen, `app.json`/store metadata, CLI banner
+  strings, doc mentions across both packages) is queued as build-plan
+  **Phase 67**, not done in this commit — `/oversight` doesn't touch
+  code. Until Phase 67 ships, hardcoded "Axiomancer" strings remain in
+  the live app; that's expected, not a regression.
+- **Naming collision to flag for whoever ships Phase 67:** the bare word
+  "Miserere" is already live in-fiction (per the 2026-08-15 pass's own
+  collision check, which is why it dropped that word from consideration
+  on its own). The chosen title is the full phrase "Miserere Mei, Deus,"
+  not the bare word — distinct, but worth a deliberate check during
+  Phase 67 that in-game UI never places the existing "Miserere" content
+  next to the product title in a way that reads as duplicated or
+  confusing.
 
 ### Phase 52b's shelter retheme raised four rest nodes' heal for an open window
 - category: divergence
