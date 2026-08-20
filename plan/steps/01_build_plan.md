@@ -1983,6 +1983,21 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       rewards" is deliberately left unspecified here**; author them in
       the brief against the counter's tiers rather than guessing now.
       Deps: 62, 63. (mechanics + mobile) Brief: to generate.
+- [ ] Phase 66 — Lexicon lint: catch retired-doctrine prose, not just
+      retired identifiers. Add a `type: "doctrine"` (or similar) row
+      shape to `axiomancer-mechanics/docs/lexicon.json` for retired
+      design-law phrases — starting with the STRIKE-IS-DEAD/status-primacy
+      sentence and the statusEngagement/win-rate-is-the-objective
+      sentence, both with a known-good replacement already written (
+      `VISION.md`'s reconciled §Combat vision language; Phase 43's CQI
+      framing) — extend `scripts/check-lexicon.mjs`'s pattern matching for
+      multi-clause phrases, and fix the two rows it newly flags
+      (`axiomancer-mechanics/CLAUDE.md`, `axiomancer-mechanics/docs/
+      profane-canon.md`) in the same commit. Leave `skills/digest.md` §3b
+      alone — it's still waiting on the CQI-band design ruling; the lint
+      should flag it, not force its rewrite. (docs/tooling; promoted
+      2026-08-20 via `/oversight` from `plan/PHASE_CANDIDATES.md` score
+      7.5) Brief: to generate.
 
 > **Note (issue-triage 2026-07-19):** issue #132 asked for a
 > `devlog-build` GitHub Action; re-triage found it re-classified as
@@ -2314,6 +2329,18 @@ See the status rows above; generate briefs on demand.
   the fold candidate names for retirement but T did not rule on here —
   it stays a live surface and an open candidate. Resulting commit: this
   one; briefs for 58-65 still to generate.
+
+- **2026-08-20** — actor: **T via attended web session** (`/oversight`,
+  not Hermes). Action: **added Phase 66** (lexicon lint — catch
+  retired-doctrine prose, not just retired identifiers), promoted from
+  `plan/PHASE_CANDIDATES.md`'s sole pending candidate (score 7.5,
+  proposed 2026-08-15 by expand pass 8, unpromoted since). Confirmed T's
+  request: yes — T's answer to this oversight's candidate-promotion
+  question was "Promote." T's stated reason: not stated beyond the
+  selection; the candidate's own rationale (three independent incidents
+  of retired-doctrine prose surviving a rename pass in one week) is the
+  evidence it was promoted against. Resulting commit: this one; brief
+  for 66 still to generate.
 
 ## Phase log (commit hashes)
 

@@ -9,7 +9,7 @@
 
 ## Pending
 
-### [score 7.5] Extend `lexicon.json`/`check-lexicon.mjs` to catch retired-doctrine prose, not just retired identifiers
+### ~~[score 7.5] Extend `lexicon.json`/`check-lexicon.mjs` to catch retired-doctrine prose, not just retired identifiers~~ PROMOTED to Phase 66 via /oversight 2026-08-20
 - proposed: 2026-08-15, expand pass 8
 - source signals:
   - `plan/AUDIT.md` "axio-query overview still publishes the retired 'THE
@@ -1037,6 +1037,18 @@
   touched.
 
 ## Promoted
+
+### Lexicon lint: catch retired-doctrine prose, not just retired identifiers (2026-08-20)
+- promoted: 2026-08-20 via `/oversight`, as **Phase 66**.
+- source row (stays in `## Pending` above, struck through): "[score 7.5]
+  Extend `lexicon.json`/`check-lexicon.mjs` to catch retired-doctrine
+  prose, not just retired identifiers" (proposed 2026-08-15, expand pass
+  8). Full rationale and proposed scope live there — carry it into the
+  Phase 66 brief rather than re-deriving.
+- why now: unpromoted since 2026-08-15 despite being cheap and
+  well-bounded; the pattern it guards against (retired design-law prose
+  surviving a rename pass) has bitten three independent times in one
+  week per the source row's own evidence.
 
 ### Post-D8 flag-on curve repair + library theme-symmetry restoration (owner-selected 2026-08-08)
 - promoted: 2026-08-08 via `/oversight`, as **Phase 39** — the first
