@@ -179,12 +179,53 @@ budget decision, no new approval checkpoints are needed.
 
 ---
 
-## §7 — Receipts
+## §7 — Receipts (scout pass, 2026-08-20)
 
-A `scout` pass verifying Mörk Borg's actual design signature (book quotes,
-Calendar of Nechrubel structure, reception including the accessibility and
-style-over-substance critiques) was dispatched at session open; its report
-lands as a follow-up commit to this file when it returns. The rulings in §1
-do not depend on it — R-A/R-B were T's explicit picks with the trade-offs
-stated — but §2's characterization of the register should be checked
-against it and amended if the book disagrees.
+A `scout` pass verified Mörk Borg's actual design signature against the
+book's coverage and community reception. Verdict: **§2's characterizations
+hold**, with two caveats recorded below. Condensed findings, one source per
+claim:
+
+1. **Prose register — verified.** Terse, second-person, evocative rather
+   than explanatory; horror stated flatly ("Your soul and your silver are
+   your own and equally easy to lose"). Won the 2020 ENnie for Best
+   Writing — the register is recognized craft, not accident.
+   (rpgbot.net/mork-borg-a-review; freeleaguepublishing.com/games/mork-borg)
+2. **Humor — verified as deadpan, with a caveat.** Jokes sit inside tables
+   and ability text at the same volume as the horror; the book never breaks
+   register to wink ("666" on the Heretical Priest's equipment chart).
+   *Caveat:* readers do perceive the authors' hand — reception notes
+   "underlying subversive humor." T's Dial-1 ruling (R-B) is therefore
+   deliberately *drier than the book's own median*, and that is the ruling,
+   not an error. (vocal.media "The Unrelenting Cruelty of a Dark and Dying
+   World"; en.wikipedia.org/wiki/Mörk_Borg)
+3. **Doom clock — verified as identity-central, and deliberately NOT
+   imported.** The Calendar of Nechrubel guarantees the apocalypse ("The
+   game and your lives end here. Burn the book."). R-A's refusal of it is
+   a real divergence from the source, made knowingly — the Parish's endless
+   debt is the opposite structure. (enworld.org review "A Doom Metal Album
+   of an OSR RPG"; morkborg.exlibrisrpg.com/tags/miseries)
+4. **Reception — both halves verified.** Praise: "light on rules, heavy
+   everything else," four ENnies. Criticism lands hardest on exactly what
+   R-C excluded: the layout is documented as migraine-inducing and
+   screen-reader-hostile, enough that a free text-only "Bare Bones"
+   edition shipped in response. R-C (prose only, Woodcut Codex stands)
+   therefore adopts MB's most-awarded element and dodges its
+   most-criticized one. The "style over substance / edgelord" critique is
+   also real — MB-5 and MB-6 (brutality must carry stakes) are this
+   doctrine's guard against inheriting it.
+   (diceexploder.substack.com "Accessibility and Graphic Design";
+   watcherdm.com/2023/09/02/mork-borg-review)
+5. **Contrast case — verified.** Blasphemous-style church-gothic kneels
+   (guilt, penance, a meaning-saturated punitive cosmos); Mörk Borg shrugs
+   (an indifferent cosmos, already lost). The Parish sits between: the
+   machinery of faith without the faith. R-A + R-B read as: keep the
+   Parish's furniture, adopt the shrug's *flatness* without its nihilism
+   about meaning — what you owe still matters, which is the product's
+   thesis. (frieze.com "How Video Game Blasphemous Embraces Catholic
+   Gothic Tradition"; therpggazette.wordpress.com Mörk Borg review)
+
+Open item from the scout: verbatim book-intro text could not be pulled
+(reviews quote it second-hand). If the register lint or the re-voice phase
+wants calibration lines straight from the book, they should be transcribed
+from a licensed copy — filed under Q-4's reference question.
