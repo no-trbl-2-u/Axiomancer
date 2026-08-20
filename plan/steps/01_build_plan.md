@@ -1571,16 +1571,24 @@ changes which lines a player can REACH. Either order works; 53a first grows
       Threadbare via auto-seed; D5: primer/coach audit held up, no
       rewrite needed). (mechanics content + mobile)
       — `feat(mobile): collapse new-player starter picker to Threadbare — phase 46b` (a5996b62)
-- [ ] Phase 46c — Early-game: Quest Board tutorial re-derivation —
+- [x] Phase 46c — Early-game: Quest Board tutorial re-derivation —
       REDIRECTED per 46a's ruling (D6, `plan/phases/phase_46a_early_game_
       rethink.md`): Phase 61 retires the Quest Board minigame this row
       originally targeted, so re-deriving a tutorial for it is moot.
-      Verify Phase 53c's shipped quest-giver placement already covers
-      new-player quest discovery (it is now "the only way a player ever
-      learns a quest exists" per Phase 61's own text); ship a small
-      explainer/coach beat only if that verification finds a real gap —
-      do not rebuild Quest Board content. (mechanics + mobile) Deps: 46a.
-      Brief: to generate.
+      Verified Phase 53c's shipped quest-giver placement solves
+      reachability but not noticing: accepting the quest from Old Marrow
+      was silent (only a generic ✓ flash) and nothing pointed at the
+      Memoir tab where the quest log lives. Shipped two small additive
+      mobile fixes: a reply-time consequence preview on `/dialogue`
+      (porting `/event`'s orphaned `consequenceLabel`/`ConsequenceChips`
+      into a shared `consequence-copy.ts`) so accepting visibly says
+      "quest: starting-quest" before the tap, and a first-quest badge on
+      the Memoir tab (`notifications.questAcknowledged`, mirroring
+      `levelUpAcknowledged`) that clears on Memoir-screen mount. No
+      Quest Board content rebuilt, no engine changes, 53c's map
+      placement untouched. (mobile) Deps: 46a.
+      Brief: `plan/phases/phase_46c_quest_discovery_coach.md`.
+      Shipped `3a1b7291`.
 
 **Expo decouple (47a-47e) — decomposed 2026-08-08 at T's request. T's
 "not now" from 2026-07-18 is lifted by the unshackling. Do NOT run this
