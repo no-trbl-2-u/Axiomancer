@@ -1998,6 +1998,24 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       should flag it, not force its rewrite. (docs/tooling; promoted
       2026-08-20 via `/oversight` from `plan/PHASE_CANDIDATES.md` score
       7.5) Brief: to generate.
+- [ ] Phase 67 — Title migration: "Axiomancer" → "Miserere Mei, Deus".
+      Executes the rename ruled `plan/AUDIT.md`'s product-name row
+      (`plan/naming-session-2026-08-12.md` §6). Scope: player/doc-facing
+      title strings only — `axiomancer-mobile/app.json`'s `name`/`title`/
+      `description`/`siteName` fields and `app.config.ts`; the five CLI
+      banner `log(...)` lines in `axiomancer-mechanics/src/CLI/*.cli.ts`
+      that print "Axiomancer — <mini-game> ..."; doc mentions in
+      `plan/bearings.md`, `spec.md`, `AGENTS.md`, and the handful of code
+      comments in `axiomancer-mechanics/src` that name the product.
+      Explicitly OUT of scope: npm package/workspace names (`axiomancer`,
+      `axiomancer-mobile`, `axiomancer-mechanics`), the repo/folder name,
+      and any git-level rename — those are internal identifiers, a
+      separate and much larger structural call nobody has ruled on.
+      Check during shipping: no UI surface places the new title next to
+      the already-live "Miserere" in-fiction content in a way that reads
+      as a duplicate (flagged in the AUDIT row and naming-session §6).
+      (content/docs; queued 2026-08-20 via `/oversight` from the
+      product-name naming-session ruling) Brief: to generate.
 
 > **Note (issue-triage 2026-07-19):** issue #132 asked for a
 > `devlog-build` GitHub Action; re-triage found it re-classified as
@@ -2341,6 +2359,21 @@ See the status rows above; generate briefs on demand.
   of retired-doctrine prose surviving a rename pass in one week) is the
   evidence it was promoted against. Resulting commit: this one; brief
   for 66 still to generate.
+
+- **2026-08-20** — actor: **T via attended web session** (`/oversight`,
+  not Hermes). Action: **added Phase 67** (title migration, "Axiomancer"
+  → "Miserere Mei, Deus"). Confirmed T's request: yes — T ruled the
+  naming session directly mid-`/oversight` conversation, decided alongside
+  setting *Mörk Borg* as the game's new tonal North Star (art/narration/
+  encounters; mechanics unchanged) — see `new-north-star.prompt.md`. T's
+  stated reason: "Miserere Mei, Deus" sounds good, chosen directly rather
+  than from either naming-session pass; T explicitly scoped this
+  `/oversight` tick to the name only, deferring the wider pivot to a
+  future brainstorm session. Resulting commit: this one, plus
+  `plan/AUDIT.md`'s product-name row (`[x]` resolved),
+  `plan/naming-session-2026-08-12.md` §6 (closed), `plan/bearings.md`'s
+  name line, and `new-north-star.prompt.md`; brief for 67 still to
+  generate.
 
 ## Phase log (commit hashes)
 

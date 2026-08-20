@@ -139,3 +139,26 @@ If none of these is right either, the useful next move is probably for T
 to name a *direction* (or a title from another game whose naming feels
 right) rather than react to a third list — two passes of cold candidates
 is roughly where that stops being the efficient format.
+
+## 6. Final ruling (via `/oversight` 2026-08-20)
+
+T closed this the way §5 anticipated — not by picking from either pass,
+but by naming a direction and a title in the same breath: **"Miserere
+Mei, Deus"** (Latin, Psalm 51 — "Have mercy on me, God"), decided
+alongside setting *Mörk Borg* as the game's new tonal North Star across
+art, narration, and encounter design (deck/dice mechanics unchanged). See
+`new-north-star.prompt.md` (repo root) for the brainstorm session that
+opens to work out what that pivot actually requires — this session's
+scope was the name alone, and it's closed.
+
+**Collision note carried forward from §5's own methodology:** the bare
+word "Miserere" is already live in-fiction — §5 dropped it from its own
+candidate list for exactly that reason. The chosen title is the full
+liturgical phrase, not the bare word, but Phase 67 (the code migration,
+queued in `plan/steps/01_build_plan.md`) should confirm no UI surface
+puts the existing "Miserere" content next to the new product title in a
+way a player would read as a duplicate or a mistake.
+
+Per §4's own procedure: `plan/AUDIT.md`'s product-name row is marked
+`[x]` resolved, and the migration is queued as build-plan Phase 67 — this
+session's job is done.

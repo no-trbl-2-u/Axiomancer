@@ -22,7 +22,15 @@ and a local **card-editor** dev tool. Status-effect combat is the
 core fun; morally charged choices carry lasting world
 consequences.
 
-**Name is capitalized: Axiomancer, always.**
+**Product name: "Miserere Mei, Deus"** (renamed from "Axiomancer" via
+`/oversight` 2026-08-20 — see `plan/AUDIT.md`'s product-name row and
+`plan/naming-session-2026-08-12.md` §6). The rename is ruled; the code
+migration (title screen, store metadata, CLI banner strings, doc
+mentions) is queued as build-plan **Phase 67** and not yet shipped, so
+"Axiomancer" still appears live in the app and across this doc set until
+that phase lands — don't read the remaining occurrences as drift. See
+`new-north-star.prompt.md` (repo root) for the broader Mörk-Borg-directed
+tonal pivot this name change was decided alongside.
 
 **No hosted web surface.** The product ships as a mobile app via
 manual EAS builds; `main` does not auto-deploy. See "Verify gate
