@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useRouter } from 'expo-router';
+import { useRouter } from '@/lib/platform/router';
 
 import { useGameState } from '@/state/GameStoreProvider';
 import { selectHasActiveGathering } from '@/state/presenters/gathering.engine';

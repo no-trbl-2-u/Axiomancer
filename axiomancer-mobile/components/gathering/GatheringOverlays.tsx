@@ -8,7 +8,7 @@
 
 import React, { useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import { Haptics } from '@/lib/platform/haptics';
 import Animated, {
     Easing,
     FadeIn,

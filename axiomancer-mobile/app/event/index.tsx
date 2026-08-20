@@ -14,7 +14,7 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { useRouter } from 'expo-router';
+import { useRouter } from '@/lib/platform/router';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
 import { ActionIcon } from '@/components/ActionIcon';

@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { View } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from '@/lib/platform/router';
 
 import { makeStyles } from '@/theme/runtime';
 import { isDevToolsEnabled } from '@/lib/buildProfile';

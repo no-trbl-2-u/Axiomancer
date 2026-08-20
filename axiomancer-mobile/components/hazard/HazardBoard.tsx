@@ -15,7 +15,7 @@
 
 import React, { useCallback, useMemo, useRef } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import { Haptics } from '@/lib/platform/haptics';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
     FadeIn,

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { DimensionValue } from 'react-native';
-import { Image } from 'expo-image';
+import { Image } from '@/lib/platform/image';
 
 import { getPlayerPortrait, portraitIdFromFlags } from '@/assets/images/portraits';
 import { useGameState } from '@/state/GameStoreProvider';

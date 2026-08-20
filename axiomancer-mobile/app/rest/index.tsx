@@ -13,7 +13,7 @@
  */
 
 import React, { useEffect, useMemo, useRef } from 'react';
-import { useRouter } from 'expo-router';
+import { useRouter } from '@/lib/platform/router';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { ScreenBg } from '@/components/ScreenBg';

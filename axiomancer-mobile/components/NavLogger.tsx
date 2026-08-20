@@ -5,7 +5,7 @@
  */
 
 import { useEffect } from 'react';
-import { usePathname } from 'expo-router';
+import { usePathname } from '@/lib/platform/router';
 import { getLogger } from '@mechanics';
 
 export function NavLogger(): null {

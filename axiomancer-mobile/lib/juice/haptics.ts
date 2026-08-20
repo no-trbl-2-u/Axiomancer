@@ -1,4 +1,4 @@
-import * as Haptics from 'expo-haptics';
+import { Haptics } from '@/lib/platform/haptics';
 
 /**
  * The single wrapper every juice/combat call site fires haptics through —

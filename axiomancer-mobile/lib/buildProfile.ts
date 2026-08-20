@@ -1,4 +1,4 @@
-import Constants from 'expo-constants';
+import Constants from '@/lib/platform/constants';
 
 type Extra = { devToolsEnabled?: boolean; buildProfile?: string | null };
 

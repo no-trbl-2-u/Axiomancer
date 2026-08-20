@@ -59,7 +59,7 @@ phase covers:
 
 - `lib/platform/router.ts` — `export { useRouter, useLocalSearchParams, usePathname, Redirect, Stack, Tabs } from 'expo-router';`
 - `lib/platform/image.ts` — `export { Image } from 'expo-image';`
-- `lib/platform/haptics.ts` — `export * from 'expo-haptics';` (preserves the existing `import * as Haptics from '...'` call-site shape)
+- `lib/platform/haptics.ts` — `import * as Haptics from 'expo-haptics'; export { Haptics };` (see "Decisions" — this is the one file that isn't a bare re-export one-liner, for a Jest-interop reason)
 - `lib/platform/font.ts` — `export { useFonts } from 'expo-font';`
 - `lib/platform/splash-screen.ts` — `export * from 'expo-splash-screen';`
 - `lib/platform/navigation-bar.ts` — `export * from 'expo-navigation-bar';`
@@ -69,9 +69,11 @@ phase covers:
 Each file is a pure re-export — no logic, no wrapping. (The existing
 `lib/juice/haptics.ts` wrapper, which already sits between combat
 call sites and `expo-haptics` per the Phase 38 brief, now sources its
-`import * as Haptics` from `@/lib/platform/haptics` instead of
+`Haptics` namespace from `@/lib/platform/haptics` instead of
 `expo-haptics` directly — one link in the chain moves, its own public
-API to `juiceHaptics` consumers is unchanged.)
+API to `juiceHaptics` consumers is unchanged. Its own import changed
+shape too: `import { Haptics } from '@/lib/platform/haptics'`, not
+`import * as Haptics`; see "Decisions" for why.)
 
 Modified: the 49 files in the inventory table — each gets its
 `from 'expo-<pkg>'` specifier swapped to `from '@/lib/platform/<name>'`,
@@ -129,13 +131,29 @@ is byte-identical at runtime; only the import graph moves.
   package nothing calls would be dead code; if a future phase adds a
   direct `Linking` call site, that phase adds `lib/platform/linking.ts`
   then.
-- **`expo-haptics`'s shim uses `export * from` (namespace-preserving),
-  all others use named re-exports.** Every existing haptics call site
-  writes `import * as Haptics from 'expo-haptics'` then reads
-  `Haptics.impactAsync` / `Haptics.ImpactFeedbackStyle` etc. — `export *
-  from` is the only re-export form that lets `import * as Haptics from
-  '@/lib/platform/haptics'` reproduce that exact shape with a pure
-  specifier swap (no per-call-site rewrite of how `Haptics` is used).
+- **`expo-haptics`'s shim is the one file that isn't a bare
+  `export … from` re-export — it's `import * as Haptics from
+  'expo-haptics'; export { Haptics };`, and every call site imports
+  `{ Haptics }` (named) instead of `* as Haptics` (namespace).**
+  Discovered mid-implementation via `lib/juice/__tests__/haptics.test.ts`
+  going red: `jest.setup.ts` mocks `expo-haptics` with a plain object
+  literal (no `__esModule`), so Babel's `import * as X` interop wraps
+  it in a copied namespace object, cached by identity — and that's the
+  object `jest.spyOn(Haptics, 'impactAsync')` mutates in the test file.
+  `export … from` (both the `{ X }` and `*` forms) resolves the source
+  module via a plain `require()` instead, which reads the *original*
+  un-wrapped, un-spied module — so a spy set in the test never became
+  visible to `juiceHaptics.impact()`, and the mock's
+  `Promise.reject(...)` sat with no `.catch()` ever attached to it,
+  crashing the whole Jest process as an unhandled rejection (not a
+  normal assertion failure). Re-doing the shim as a namespace import
+  + named re-export reuses the exact same Babel interop path (and its
+  shared cache) that every pre-shim call site went through, so the
+  spy stays visible end-to-end. Confirmed by reverting to a direct
+  `expo-haptics` import as a baseline (passed), reproducing the
+  failure with `export * from` and `export { X } from` alike, then
+  fixing with this pattern (all three confirmed via `npx jest
+  lib/juice/__tests__/haptics.test.ts`).
 - **`lib/juice/haptics.ts` gets repointed too, not left untouched.**
   It already frames itself as "the Expo-decouple swap point" in its
   own docblock (Phase 38) but it still imported straight from
@@ -145,6 +163,13 @@ is byte-identical at runtime; only the import graph moves.
 - **No new dependency, no removed dependency, no version bump.**
   `package.json` is untouched this phase — 47b-47e are where actual
   package swaps happen.
+- **`lib/platform/__tests__/boundary.test.ts` gets added to
+  `state/e2e/hermeticity.audit.engine.test.ts`'s `FS_ALLOWLIST`,
+  not left to fail that guard.** It reads committed source the same
+  sanctioned way the existing route-tree/hermeticity guards do —
+  the guard's own docstring calls growing the allowlist "a
+  deliberate, reviewed act," and this is that act, done in the same
+  commit as the file it's allowlisting.
 
 ## Mobile reflow / responsive
 

@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useMemo, useRef } from 'react';
-import { useRouter } from 'expo-router';
+import { useRouter } from '@/lib/platform/router';
 import {
     ScrollView,
     Text,
@@ -16,7 +16,7 @@ import {
     useWindowDimensions,
     View,
 } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import { Haptics } from '@/lib/platform/haptics';
 
 import { QuestBoardTrack } from '@/components/quest/QuestBoardTrack';
 import { QuestDie } from '@/components/quest/QuestDie';

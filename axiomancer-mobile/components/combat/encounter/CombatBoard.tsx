@@ -29,9 +29,9 @@
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import type { StyleProp, TextStyle } from 'react-native';
-import { Image } from 'expo-image';
+import { Image } from '@/lib/platform/image';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
-import * as Haptics from 'expo-haptics';
+import { Haptics } from '@/lib/platform/haptics';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
     FadeIn, FadeInDown, LinearTransition, runOnJS,

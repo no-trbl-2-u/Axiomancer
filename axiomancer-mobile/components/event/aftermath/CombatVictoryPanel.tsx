@@ -23,7 +23,7 @@
 
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { Image } from 'expo-image';
+import { Image } from '@/lib/platform/image';
 import Svg, { Circle, Path as SvgPath } from 'react-native-svg';
 
 import { TREASURE_FALLING_COINS } from '@/assets/images/treasure';

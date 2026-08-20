@@ -1,5 +1,5 @@
 import { View, Text, Pressable } from 'react-native';
-import { Image } from 'expo-image';
+import { Image } from '@/lib/platform/image';
 import { FONTS } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
 import { useGameActions } from '@/state/GameStoreProvider';

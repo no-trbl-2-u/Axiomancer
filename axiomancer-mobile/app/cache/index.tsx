@@ -10,10 +10,10 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useRouter } from 'expo-router';
+import { useRouter } from '@/lib/platform/router';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { Image } from 'expo-image';
-import * as Haptics from 'expo-haptics';
+import { Image } from '@/lib/platform/image';
+import { Haptics } from '@/lib/platform/haptics';
 
 import { TREASURE_CHEST_CLOSED, TREASURE_GOLD_HOARD } from '@/assets/images/treasure';
 import { CacheDie } from '@/components/cache/CacheDie';

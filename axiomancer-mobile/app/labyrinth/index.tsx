@@ -14,7 +14,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter } from '@/lib/platform/router';
 
 import { ScreenBg } from '@/components/ScreenBg';
 import { EncounterModalOverlay } from '@/components/event/EncounterModalOverlay';

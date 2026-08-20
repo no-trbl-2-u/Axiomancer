@@ -23,8 +23,8 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Image } from 'expo-image';
-import * as Haptics from 'expo-haptics';
+import { Image } from '@/lib/platform/image';
+import { Haptics } from '@/lib/platform/haptics';
 import Animated, {
     runOnJS, useAnimatedStyle, useSharedValue, withDelay, withSequence, withTiming,
 } from 'react-native-reanimated';

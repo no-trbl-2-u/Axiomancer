@@ -25,7 +25,7 @@ import Animated, {
     withTiming,
 } from 'react-native-reanimated';
 import Svg, { Circle, Line, Path, Rect } from 'react-native-svg';
-import { Image } from 'expo-image';
+import { Image } from '@/lib/platform/image';
 
 import {
     LABYRINTH_DOOR_IMAGES,

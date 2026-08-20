@@ -13,9 +13,9 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { useRouter } from 'expo-router';
+import { useRouter } from '@/lib/platform/router';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import { Haptics } from '@/lib/platform/haptics';
 
 import { ScreenBg } from '@/components/ScreenBg';
 import { AxmIcon } from '@/components/icons';

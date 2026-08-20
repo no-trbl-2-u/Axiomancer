@@ -27,7 +27,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import * as Haptics from 'expo-haptics';
+import { Haptics } from '@/lib/platform/haptics';
 import Animated, {
     Easing, cancelAnimation, runOnJS, useAnimatedStyle, useSharedValue,
     withDelay, withSequence, withSpring, withTiming,

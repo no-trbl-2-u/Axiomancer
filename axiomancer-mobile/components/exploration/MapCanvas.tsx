@@ -6,7 +6,7 @@ import Animated, {
     useSharedValue,
 } from 'react-native-reanimated';
 import Svg, { Path, Circle, G, Defs, RadialGradient, Stop, Rect } from 'react-native-svg';
-import { Image } from 'expo-image';
+import { Image } from '@/lib/platform/image';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import { Splatter } from '@/components/Splatter';
 import type { ExplorationNode, ExplorationEdge } from '@/state/presenters/exploration.engine';

@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter } from '@/lib/platform/router';
 
 import { ApproachSelect } from '@/components/gathering/ApproachSelect';
 import { TutorialCoach } from '@/components/gathering/TutorialCoach';

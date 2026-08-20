@@ -40,7 +40,7 @@
 
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter } from '@/lib/platform/router';
 import {
     EnemiesByMap,
     consumableLibrary,

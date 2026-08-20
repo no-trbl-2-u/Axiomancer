@@ -15,7 +15,7 @@
 
 import React from 'react';
 import { View } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from '@/lib/platform/router';
 
 import { ScreenBg } from '@/components/ScreenBg';
 import { CombatEncounterPanel } from '@/components/combat/encounter/CombatEncounterPanel';

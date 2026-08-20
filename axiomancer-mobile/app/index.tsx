@@ -1,4 +1,4 @@
-import { Redirect } from 'expo-router';
+import { Redirect } from '@/lib/platform/router';
 import { useEffect, useState } from 'react';
 import { useGameState, useGameStore } from '@/state/GameStoreProvider';
 import { selectActiveTab } from '@/state/presenters/navigation.engine';

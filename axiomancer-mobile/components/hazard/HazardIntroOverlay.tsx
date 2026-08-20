@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import * as Haptics from 'expo-haptics';
+import { Haptics } from '@/lib/platform/haptics';
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 
 import { FONTS } from '@/theme/axm';

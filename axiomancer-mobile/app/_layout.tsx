@@ -1,6 +1,6 @@
-import { Stack } from 'expo-router';
+import { Stack } from '@/lib/platform/router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { useFonts } from 'expo-font';
+import { useFonts } from '@/lib/platform/font';
 import { PirataOne_400Regular } from '@expo-google-fonts/pirata-one';
 import {
   IMFellEnglish_400Regular,
@@ -8,11 +8,11 @@ import {
 } from '@expo-google-fonts/im-fell-english';
 import { BebasNeue_400Regular } from '@expo-google-fonts/bebas-neue';
 import { JetBrainsMono_400Regular } from '@expo-google-fonts/jetbrains-mono';
-import * as SplashScreen from 'expo-splash-screen';
-import * as NavigationBar from 'expo-navigation-bar';
+import * as SplashScreen from '@/lib/platform/splash-screen';
+import * as NavigationBar from '@/lib/platform/navigation-bar';
 import { useCallback, useEffect, useState } from 'react';
 import { Platform } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
+import { StatusBar } from '@/lib/platform/status-bar';
 import { TooltipProvider } from '@/components/tooltip/TooltipProvider';
 import { AestheticModeProvider } from '@/state/aesthetic-mode';
 import { CombatModeProvider } from '@/state/combat-mode';

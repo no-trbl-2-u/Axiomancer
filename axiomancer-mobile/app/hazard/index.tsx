@@ -10,7 +10,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter } from '@/lib/platform/router';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
 import { HazardBoard, type DragController, type DragPayload } from '@/components/hazard/HazardBoard';

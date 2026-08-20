@@ -1,4 +1,4 @@
-import { Tabs } from 'expo-router';
+import { Tabs } from '@/lib/platform/router';
 import React, { useMemo } from 'react';
 import { View, Text } from 'react-native';
 import { FONTS } from '@/theme/axm';

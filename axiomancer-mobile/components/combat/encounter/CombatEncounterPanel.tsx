@@ -44,7 +44,7 @@ import { CombatTutorialPrimer } from '@/components/combat/encounter/CombatTutori
 import { EnemyActionCard } from '@/components/combat/encounter/EnemyActionCard';
 import { CombatTutorialCoach } from '@/components/combat/encounter/CombatTutorialCoach';
 import { currentCombatTutorialStep } from '@/components/combat/encounter/combat-tutorial-steps';
-import { Image } from 'expo-image';
+import { Image } from '@/lib/platform/image';
 import { getEncounterEnemyArt } from '@/assets/images/enemies';
 import { INTENT_ICONS, buildCombatViewModel, resolveApplyRouting, rewardCardVMs, selectEnemyActionCard, STANCE_COLORS, type CombatCardVM, type CombatEffectChipVM, type CombatSignatureVM, type EnemyActionCardVM } from '@/state/presenters/combat-encounter.engine';
 import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';

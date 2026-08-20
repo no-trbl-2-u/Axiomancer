@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Image } from 'expo-image';
+import { Image } from '@/lib/platform/image';
 import Animated, { FadeIn, FadeInDown, FadeInUp, ZoomIn } from 'react-native-reanimated';
 
 import { TREASURE_CHEST_PALE } from '@/assets/images/treasure';
