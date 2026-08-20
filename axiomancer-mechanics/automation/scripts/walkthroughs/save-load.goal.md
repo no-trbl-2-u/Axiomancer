@@ -71,7 +71,9 @@ event stream):**
   just `discoveredNodes`. Without that fix, the apprentice would be
   stuck at fv-2 — the legacy state of this walkthrough used to test
   exactly that limitation by saving at fv-1 and moving to fv-2 only.
-- fv-2 (Old Marrow, interaction) and fv-3 (fvShop, village) are
-  both non-encounter, so combat never starts and the rollback
-  semantics stay clean. fv-4 hosts a wet-hound encounter — the
-  walkthrough deliberately stops before that.
+- fv-2 (Old Marrow, interaction) and fv-3 are both non-encounter
+  content, so combat never starts and the rollback semantics stay
+  clean. Phase 53d converted fv-4 to the "Stranger's Net" narration
+  dilemma; the nearest early encounter from fv-2 is now reached via
+  fv-11 → fv-13 (Little Belle). This walkthrough deliberately stops
+  before branching because it tests snapshot rollback, not combat.

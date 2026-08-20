@@ -241,13 +241,21 @@ with three sub-areas; the linear 10-node spine `fv-1` → `fv-10` along
 Phase 43 alignmentDelta authoring + Phase 62 flag-gated dialogue +
 Phase 63 observer wiring all continue to work without modification.
 
-### Spine (`y=0`, pre-Phase-65)
+### Historical static-template spine (`y=0`, pre-Phase-65)
+
+The labels below describe the original static map templates, not the current
+resolved `MapEvent` content. Later pool overrides and Phase 53d narrative work
+changed several live node kinds. In current authored-event truth, `fv-4` is the
+"Stranger's Net" narration dilemma; the nearest early encounter from `fv-2`
+is reached through `fv-11` → `fv-13` (Little Belle). Route witnesses must use
+the live event registry rather than infer encounter kinds from this historical
+diagram.
 
 ```
 fv-1 (start, dock cutscene)
   → fv-2 (interaction: Old Marrow, quest-giver — branching tree)
   → fv-3 (village: Fishing Village Stalls — Tide-Shopkeeper)
-  → fv-4 (encounter: wet-hound)
+  → fv-4 (historical template: encounter; current event: narration)
   → fv-5 (loot-cache, +10 currency)
   → fv-6 (encounter-boss: The Coastal Tyrant)
   → fv-7 (interaction: Coastal Beggar)

@@ -5,11 +5,12 @@
  * `MapState`, built via `createMapState(definition)` and stored under
  * `WorldState.currentMap`.
  *
- * The `fishing-village` chain demos the full Spec 08 exploration loop in
- * post-Phase-23 MapEventKind terms (`npc` and `shop` were folded into
- * `interaction` and `village`):
- *   fv-1 (start) → fv-2 (interaction — quest giver) → fv-3 (village — shop)
- *                → fv-4 (encounter) → fv-5 (loot-cache) → fv-6 (encounter — boss).
+ * The `fishing-village` static chain demos the Spec 08 exploration loop.
+ * Runtime event kinds come from the MapEvent registry and may override these
+ * templates. Phase 53d converted fv-4 into the "Stranger's Net" narration
+ * dilemma; the nearest early encounter from fv-2 is now reached through
+ * fv-11 → fv-13 (Little Belle). Route witnesses must consult resolved event
+ * content rather than infer encounter kinds from this static map definition.
  */
 
 import { MapDefinition, Quest } from '../../types';

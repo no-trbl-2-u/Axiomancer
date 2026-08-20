@@ -31,7 +31,9 @@ event stream):**
   if fv-2's interaction had been an encounter the player would be
   underpowered — but fv-2 is authored as an interaction, so combat
   should NOT trigger.
-- The walkthrough deliberately doesn't progress past fv-2 because
-  beyond that node lies fv-4 (encounter / wet-hound) which has RNG
-  in the damage rolls; including it would make the walkthrough
-  non-deterministic.
+- The walkthrough deliberately stops at fv-2 because its scope is the
+  interaction dispatcher and one-shot consumption, not route combat.
+  Phase 53d converted fv-4 to the "Stranger's Net" narration dilemma;
+  the nearest early encounter from fv-2 is now reached through
+  fv-11 → fv-13 (Little Belle). Combat witnesses belong in the
+  route-Hazard harness, not this deterministic dispatcher walkthrough.
