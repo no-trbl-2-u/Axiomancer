@@ -19,7 +19,7 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import { render } from '@testing-library/react-native';
 import React from 'react';
 
-jest.mock('expo-router', () => ({
+jest.mock('@/lib/platform/router', () => ({
     useRouter: () => ({ back: jest.fn(), push: jest.fn(), canGoBack: () => true }),
 }));
 

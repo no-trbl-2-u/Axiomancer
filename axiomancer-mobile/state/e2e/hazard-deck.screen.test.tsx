@@ -16,7 +16,7 @@ import type { AppStore } from '@/state/store';
 import { appendAcquiredCard, HAZARD_CRACK_CARD } from '@mechanics';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
-jest.mock('expo-router', () => ({
+jest.mock('@/lib/platform/router', () => ({
     useRouter: () => ({ back: jest.fn(), push: jest.fn(), canGoBack: () => true }),
 }));
 

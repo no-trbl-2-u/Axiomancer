@@ -1,4 +1,4 @@
-import { Stack } from '@/lib/platform/router';
+import { NavigationContainer, Stack, linking, navigationRef } from '@/lib/platform/router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useFonts } from '@/lib/platform/font';
 import { PirataOne_400Regular } from '@expo-google-fonts/pirata-one';
@@ -40,6 +40,25 @@ import { ToastHost } from '@/components/ToastHost';
 import { applyCombatFlagsFromEnv } from '@/state/combat/flags';
 import { getLogger } from '@mechanics';
 import { initAppLogging } from '@/state/logging';
+import IndexScreen from './index';
+import TabLayout from './(tabs)/_layout';
+import EventScreen from './event/index';
+import HazardScreen from './hazard/index';
+import CombatEncounterScreen from './combat-encounter/index';
+import HazardDeckScreen from './hazard-deck/index';
+import GatheringScreen from './gathering/index';
+import QuestScreen from './quest/index';
+import RestScreen from './rest/index';
+import CacheScreen from './cache/index';
+import BlacksmithScreen from './blacksmith/index';
+import VillageScreen from './village/index';
+import DialogueScreen from './dialogue/index';
+import CutsceneScreen from './cutscene/index';
+import DevToolsScreen from './dev/index';
+import LabyrinthScreen from './labyrinth/index';
+import DevArtGallery from './devart/index';
+import DevRoomGallery from './devart/rooms';
+import DevAftermathPanel from './devaftermath/index';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -181,78 +200,109 @@ export default function RootLayout() {
           <AestheticModeProvider>
           <CombatModeProvider>
           <TooltipProvider>
-            <StatusBar style="light" />
-            <HardwareBackHandler />
-            <NavLogger />
-            <EventGate />
-            <HazardGate />
-            <GatheringGate />
-            <QuestGate />
-            <RestGate />
-            <CacheGate />
-            <BlacksmithGate />
-            <ToastHost />
-            <DevAutoSeed />
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen
-                name="event/index"
-                options={{ headerShown: false, presentation: 'fullScreenModal' }}
-              />
-              <Stack.Screen
-                name="hazard/index"
-                options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
-              />
-              <Stack.Screen
-                name="combat-encounter/index"
-                options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
-              />
-              <Stack.Screen
-                name="hazard-deck/index"
-                options={{ headerShown: false, presentation: 'fullScreenModal' }}
-              />
-              <Stack.Screen
-                name="gathering/index"
-                options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
-              />
-              <Stack.Screen
-                name="quest/index"
-                options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
-              />
-              <Stack.Screen
-                name="rest/index"
-                options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
-              />
-              <Stack.Screen
-                name="cache/index"
-                options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
-              />
-              <Stack.Screen
-                name="blacksmith/index"
-                options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
-              />
-              <Stack.Screen
-                name="village/index"
-                options={{ headerShown: false, presentation: 'fullScreenModal' }}
-              />
-              <Stack.Screen
-                name="dialogue/index"
-                options={{ headerShown: false, presentation: 'fullScreenModal' }}
-              />
-              <Stack.Screen
-                name="cutscene/index"
-                options={{ headerShown: false, presentation: 'fullScreenModal' }}
-              />
-              <Stack.Screen
-                name="dev/index"
-                options={{ headerShown: false, presentation: 'fullScreenModal' }}
-              />
-              <Stack.Screen
-                name="labyrinth/index"
-                options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
-              />
-            </Stack>
+            <NavigationContainer ref={navigationRef} linking={linking}>
+              <StatusBar style="light" />
+              <HardwareBackHandler />
+              <NavLogger />
+              <EventGate />
+              <HazardGate />
+              <GatheringGate />
+              <QuestGate />
+              <RestGate />
+              <CacheGate />
+              <BlacksmithGate />
+              <ToastHost />
+              <DevAutoSeed />
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="(tabs)" component={TabLayout} options={{ headerShown: false }} />
+                <Stack.Screen name="index" component={IndexScreen} options={{ headerShown: false }} />
+                <Stack.Screen
+                  name="event/index"
+                  component={EventScreen}
+                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
+                />
+                <Stack.Screen
+                  name="hazard/index"
+                  component={HazardScreen}
+                  options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
+                />
+                <Stack.Screen
+                  name="combat-encounter/index"
+                  component={CombatEncounterScreen}
+                  options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
+                />
+                <Stack.Screen
+                  name="hazard-deck/index"
+                  component={HazardDeckScreen}
+                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
+                />
+                <Stack.Screen
+                  name="gathering/index"
+                  component={GatheringScreen}
+                  options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
+                />
+                <Stack.Screen
+                  name="quest/index"
+                  component={QuestScreen}
+                  options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
+                />
+                <Stack.Screen
+                  name="rest/index"
+                  component={RestScreen}
+                  options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
+                />
+                <Stack.Screen
+                  name="cache/index"
+                  component={CacheScreen}
+                  options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
+                />
+                <Stack.Screen
+                  name="blacksmith/index"
+                  component={BlacksmithScreen}
+                  options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
+                />
+                <Stack.Screen
+                  name="village/index"
+                  component={VillageScreen}
+                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
+                />
+                <Stack.Screen
+                  name="dialogue/index"
+                  component={DialogueScreen}
+                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
+                />
+                <Stack.Screen
+                  name="cutscene/index"
+                  component={CutsceneScreen}
+                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
+                />
+                <Stack.Screen
+                  name="dev/index"
+                  component={DevToolsScreen}
+                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
+                />
+                <Stack.Screen
+                  name="labyrinth/index"
+                  component={LabyrinthScreen}
+                  options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
+                />
+                <Stack.Screen
+                  name="devart/index"
+                  component={DevArtGallery}
+                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
+                />
+                <Stack.Screen
+                  name="devart/rooms"
+                  component={DevRoomGallery}
+                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
+                />
+                <Stack.Screen
+                  name="devaftermath/index"
+                  component={DevAftermathPanel}
+                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
+                />
+              </Stack>
+            </NavigationContainer>
           </TooltipProvider>
           </CombatModeProvider>
           </AestheticModeProvider>

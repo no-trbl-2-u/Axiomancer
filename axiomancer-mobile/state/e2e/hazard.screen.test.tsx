@@ -22,7 +22,7 @@ import { HAZARD_CRACK_CARD } from '@mechanics';
 import type { HazardHandEntry } from '@mechanics';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
-jest.mock('expo-router', () => ({
+jest.mock('@/lib/platform/router', () => ({
     useRouter: () => ({
         back: jest.fn(),
         push: jest.fn(),

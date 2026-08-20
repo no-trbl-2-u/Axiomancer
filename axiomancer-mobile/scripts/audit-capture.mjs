@@ -259,6 +259,11 @@ async function main() {
     // reads __AXM_THEME__ first) — used to showcase the theme system.
     const theme = process.env.THEME ?? null
     await injectMinigameSeeds(context, { theme })
+    // A static web export can't surface `extra.devToolsEnabled` at runtime
+    // (phase 47b: `web.output` moved to `"single"`) — the documented opt-in
+    // (lib/buildProfile.ts) the dev-menu-reached screens below need. Inert
+    // in real builds: nothing sets the global there.
+    await context.addInitScript(() => { globalThis.__AXM_FORCE_DEV_TOOLS__ = true })
     const page = await context.newPage()
     const errors = []
     page.on('console', (msg) => { if (msg.type() === 'error') errors.push(msg.text()) })

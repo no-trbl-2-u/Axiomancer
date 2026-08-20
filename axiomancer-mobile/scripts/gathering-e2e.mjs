@@ -229,6 +229,10 @@ async function enterGathering(page, baseUrl, { seed, site }) {
         },
         { s: seed, id: site },
     )
+    // A static web export can't surface `extra.devToolsEnabled` at runtime
+    // (phase 47b: `web.output` moved to `"single"`) — the documented opt-in
+    // (lib/buildProfile.ts). Inert in real builds: nothing sets the global there.
+    await page.addInitScript(() => { globalThis.__AXM_FORCE_DEV_TOOLS__ = true })
     await page.goto(`${baseUrl}/character`, { waitUntil: 'networkidle' })
 
     await openDevTools(page)
@@ -416,6 +420,10 @@ async function playStrip(page, baseUrl) {
 
 async function playTutorial(page, baseUrl) {
     log('=== TUTORIAL (the guided first gleaning) ===')
+    // A static web export can't surface `extra.devToolsEnabled` at runtime
+    // (phase 47b: `web.output` moved to `"single"`) — the documented opt-in
+    // (lib/buildProfile.ts). Inert in real builds: nothing sets the global there.
+    await page.addInitScript(() => { globalThis.__AXM_FORCE_DEV_TOOLS__ = true })
     await page.goto(`${baseUrl}/character`, { waitUntil: 'networkidle' })
     await openDevTools(page)
     await page.getByTestId('debug-gathering-tutorial-button').waitFor({ state: 'visible', timeout: 15000 })

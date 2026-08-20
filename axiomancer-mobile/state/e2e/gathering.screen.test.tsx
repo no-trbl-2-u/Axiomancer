@@ -19,7 +19,7 @@ import { GATHER_WRATH_MAX } from '@mechanics';
 import type { GatherPlotEntry, GatheringSessionState } from '@mechanics';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
-jest.mock('expo-router', () => ({
+jest.mock('@/lib/platform/router', () => ({
     useRouter: () => ({
         back: jest.fn(),
         push: jest.fn(),

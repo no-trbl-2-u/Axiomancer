@@ -23,7 +23,7 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "output": "static",
+      "output": "single",
       "favicon": "./assets/images/favicon.png",
       "title": "Axiomancer Mobile - Gothic TTRPG",
       "description": "The official mobile client for the Axiomancer tabletop RPG. Explore gothic realms, engage in tactical combat, and uncover dark mysteries in this atmospheric role-playing experience.",

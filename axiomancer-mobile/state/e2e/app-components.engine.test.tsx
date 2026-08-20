@@ -17,7 +17,7 @@ import { GameStoreProvider } from '@/state/GameStoreProvider';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 
 // Mock expo-router for all tests
-jest.mock('expo-router', () => ({
+jest.mock('@/lib/platform/router', () => ({
     useRouter: () => ({
         replace: jest.fn(),
         push: jest.fn(),

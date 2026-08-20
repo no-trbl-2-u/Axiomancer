@@ -38,7 +38,7 @@ interface TreeNode {
     children?: ReadonlyArray<TreeNode | string | number | null | undefined>;
 }
 
-jest.mock('expo-router', () => ({
+jest.mock('@/lib/platform/router', () => ({
     useRouter: () => ({
         replace: jest.fn(),
         push: jest.fn(),
