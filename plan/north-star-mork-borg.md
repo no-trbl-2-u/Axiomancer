@@ -2,10 +2,12 @@
 
 > **Status:** RULED — the five forks below were put to T directly in the
 > session `new-north-star.prompt.md` triggered (2026-08-20) and T picked an
-> option for each. The doctrine text derived from those rulings (§2–§5) is
-> DRAFT-FOR-RATIFICATION: it becomes a spec 34 amendment only after T reads
-> this file and says so, the normal way every `plan/` decision becomes a
-> phase. Nothing in the tree was edited by this session except this file.
+> option for each; T then widened the mandate in the same session (R-F,
+> THE LONGER LEASH — verbatim in §1). The doctrine text derived from these
+> rulings (§2–§5) is DRAFT-FOR-RATIFICATION: it becomes a spec 34
+> amendment only after T reads this file and says so, the normal way every
+> `plan/` decision becomes a phase. Nothing in the tree was edited by this
+> session except this file.
 >
 > **Provenance:** T via `/oversight` 2026-08-20 ruled the North Star
 > (Mörk Borg) and the product name (Miserere Mei, Deus — closed, Phase 67);
@@ -34,6 +36,47 @@ doom-clock (a scheduled, certain ending) is its opposite. R-A deliberately
 does **not** import the doom clock. If T ever wants "the debt comes due" as
 a campaign structure, that is a new brainstorm, not an implication of this
 file.
+
+### R-F — THE LONGER LEASH (T direct, later the same session)
+
+After the five forks were ruled, T widened the mandate. Verbatim:
+
+> *"I want the current Nexus loop to take bigger leaps of freedom when it
+> comes to New cards, new effects, new keywords, narration, art, UI,
+> direction, the map, and mechanics (keeping the core deckbuilding,
+> dice-building, signature skills, equipment systems)."*
+
+Standing reading (T's latest explicit decision; outranks the narrower
+postures above where they conflict):
+
+1. **The freedom is about authority, not register.** R-A/R-B still say
+   *how the game speaks*; R-F says the loop may make bold moves without
+   waiting for a T ruling per surface. Both stand.
+2. **Surfaces now under bold loop authority:** new cards, new effects, new
+   keywords (already unshackled — reaffirmed), narration (R-D —
+   reaffirmed), **art, UI, direction, the map, and mechanics** (newly
+   widened). The Woodcut Codex masterplan and this file remain the
+   *current* bearings for art and tone — the loop executes boldly within
+   them and may now also **evolve** them through its own phases, filing
+   residue, rather than parking every direction call for `/oversight`.
+   R-C is amended accordingly: it survives as a register ruling (the Mörk
+   Borg voice does not restyle the visual layer), but its "zero art work /
+   art is T-gated" posture is superseded.
+3. **The keep-list.** T names four systems as the core that stays: **the
+   deckbuilding core, the dice-building system, signature skills, and the
+   equipment system.** Read alongside the standing LOCKED MECHANICS
+   carve-out (Conviction, the Surge meter, the Dice system — T direct,
+   2026-08-08, override only by a T ruling that says so out loud): the
+   carve-out is not voided by R-F. Dice-building and signature skills map
+   onto two of the locked three; the Surge meter goes unnamed, so it
+   **stays locked by default** — see Q-5. Net keep-list until T says
+   otherwise: deckbuilding core, Dice system, Conviction + signatures,
+   Surge meter, equipment.
+4. **What R-F does not touch:** engineering rigour (hermeticity,
+   determinism, verify/deploy gates, `GAME_STATE_VERSION` discipline),
+   the no-destructive-git and no-secrets rules, and the
+   `AskUserQuestion`-only-in-`/oversight` discipline. Bigger leaps, same
+   rails.
 
 ---
 
@@ -128,9 +171,12 @@ The gate that moves: **per-item human approval before authoring** becomes
 |---|---|---|---|
 | NPCs, regions, story beats, encounter copy | Attended Socratic spec session per item (`story-spec` / `world-spec` / `character-spec`), T ratifies in-session | Loop authors and ships via normal phases/ticks; the design skills gain an unattended mode (they still write spec files — the file is the record, not the permission) | Lexicon lint (CI-wired, word lists extended); new register lint (MB-1's mechanical subset: sentence length, semicolons, `!`, caps-in-prose over copy files); playtester spot-check on every shipped content phase; `/digest` tone line; `/oversight` audit |
 | Narration / screen copy | Same as above + copy-location rules | Same as above | Same, plus the existing copy-canon CI rejections |
-| Cards / keywords | Already full authority (THE UNSHACKLING) | Unchanged | Unchanged |
-| Art | Phase V masterplan, T-ruled | **Out of scope** (R-C) | — |
-| This doctrine itself, spec amendments, anything LOCKED | T | T | `[needs-user-call]` as ever |
+| Cards / keywords / effects | Already full authority (THE UNSHACKLING) | Unchanged — reaffirmed by R-F | Unchanged |
+| Art / UI | Phase V masterplan, T-ruled; loop executes rows | Loop takes bold leaps within — and may evolve — the Woodcut Codex via its own phases (R-F) | Verify gate + `verify:visual` / e2e legs; AXM token discipline; `/critique` + playtester passes; residue filed for direction calls |
+| The map / world structure | Authored per specs; structure changes phase-gated | Loop authority (R-F); node-id freeze (spec 34 §5.8) still governs persisted ids | Route-audit tooling; hermetic e2e; `GAME_STATE_VERSION` discipline |
+| Mechanics (non-core) | Engine constants manual; new mechanics phase-gated on T rulings | Loop may design and ship new mechanics around the keep-list (R-F §3) | Verify gate; hermetic tests alongside; keep-list + LOCKED carve-out; `/oversight` audit |
+| The keep-list (deckbuilding core, Dice, Conviction + signatures, Surge, equipment) | LOCKED | **Still LOCKED** (R-F does not void the carve-out) | `[needs-user-call]` as ever |
+| This doctrine itself, spec amendments | T | T | `[needs-user-call]` as ever |
 
 What T still holds: `/oversight` remains the veto venue and the only place
 questions are asked; irreversible or outward-facing actions still stop; and
@@ -150,7 +196,12 @@ budget decision, no new approval checkpoints are needed.
 
 1. **N-1 — Ratify + amend.** Fold §2 into spec 34 as its §2.5; update the
    bearings **Voice** entry to cite it; add the unattended-mode posture
-   note to the three design skills. Small, docs-only.
+   note to the three design skills; and add R-F to bearings §"Decisions
+   standing for the autonomous loop" as **THE LONGER LEASH** — the entry
+   should carry T's verbatim quote, the surface list, the net keep-list
+   from R-F §3, and the not-touched list from R-F §4, so the loop reads
+   the ruling in its standing context, not just in this file. Small,
+   docs-only.
 2. **N-2 — The register lint.** MB-1's mechanical subset wired into the
    existing lexicon-lint path (`scripts/check-lexicon.mjs` or a sibling).
    Ships with or immediately after N-1 — R-D's authority is conditioned on
@@ -176,6 +227,16 @@ budget decision, no new approval checkpoints are needed.
 - **Q-4 — references.** Any prose touchstones beyond the Mörk Borg book
   itself (e.g. Cormac McCarthy, the Bible's ledger books, Best Left
   Buried) the register should be calibrated against?
+- **Q-5 — the Surge meter.** R-F's keep-list (deckbuilding, dice-building,
+  signature skills, equipment) does not name the Surge meter, which the
+  2026-08-08 LOCKED MECHANICS carve-out locks. Default reading until T says
+  otherwise: **still locked** — the carve-out requires an explicit ruling
+  to void. Confirm or release.
+- **Q-6 — how far "direction" reaches.** R-F grants the loop leaps on
+  "direction." Default reading: the loop may evolve the ruled north stars
+  (Woodcut Codex, this register) through its own phases with residue filed,
+  but a *replacement* of a T-ruled north star still surfaces at
+  `/oversight` first. Confirm or widen.
 
 ---
 
