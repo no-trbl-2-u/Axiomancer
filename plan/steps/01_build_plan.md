@@ -1604,12 +1604,13 @@ batch concurrently with 44* — both churn the whole mobile surface.**
       over unchanged. (mobile) Deps: none.
       Brief: `plan/phases/phase_47a_expo_decouple_inventory_shim.md`.
       Shipped `3473520f`.
-- [ ] Phase 47b — Navigation: `expo-router` → a bare-RN router
+- [x] Phase 47b — Navigation: `expo-router` → a bare-RN router
       (react-navigation the obvious candidate). The single biggest
       coupling — file-based routes under `app/` become explicit route
       config, and every route in the locked URL/route contract must
       still resolve. Do this alone; it will touch every screen.
-      (mobile) Deps: 47a. Brief: to generate.
+      (mobile) Deps: 47a. Brief: `plan/phases/phase_47b_navigation_router.md`.
+      Shipped `49b6f55a`.
 - [ ] Phase 47c — Assets: `expo-image`, `expo-font` +
       `@expo-google-fonts/*` → bare-RN equivalents, preserving the
       existing font-bundle splitting. (mobile) Deps: 47a.
