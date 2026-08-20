@@ -21,7 +21,7 @@ import { BUILD_THE_BOAT_BOARD } from '@mechanics';
 import type { QuestBoardSession } from '@mechanics';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
-jest.mock('expo-router', () => ({
+jest.mock('@/lib/platform/router', () => ({
     useRouter: () => ({
         back: jest.fn(),
         push: jest.fn(),

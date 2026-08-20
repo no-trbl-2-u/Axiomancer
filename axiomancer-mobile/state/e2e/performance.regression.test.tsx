@@ -13,7 +13,7 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text } from 'react-native';
 
 // Mock expo-router to avoid navigation dependencies in performance tests
-jest.mock('expo-router', () => ({
+jest.mock('@/lib/platform/router', () => ({
     useRouter: () => ({
         replace: jest.fn(),
         push: jest.fn(),

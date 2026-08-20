@@ -14,7 +14,7 @@ import { render, act, fireEvent } from '@testing-library/react-native';
 import React from 'react';
 
 // Mock expo-router and related navigation modules
-jest.mock('expo-router', () => ({
+jest.mock('@/lib/platform/router', () => ({
     useRouter: () => ({
         replace: jest.fn(),
         push: jest.fn(),

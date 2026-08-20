@@ -8,6 +8,10 @@ import { useCombatMode } from '@/state/combat-mode';
 import { TAB_TITLES } from '@/state/presenters/tabs.engine';
 import { useGameState } from '@/state/GameStoreProvider';
 import { selectTabBadges } from '@/state/presenters/navigation.engine';
+import ExplorationScreen from './exploration/index';
+import CharacterScreen from './character/index';
+import MemoirScreen from './memoir/index';
+import InventoryScreen from './inventory/index';
 
 function TabBadge({ text, kind }: { text: string; kind: 'event' | 'levelup' }) {
   const AXM = usePalette();
@@ -115,6 +119,7 @@ export default function TabLayout() {
     >
       <Tabs.Screen
         name="exploration/index"
+        component={ExplorationScreen}
         options={{
           title: TAB_TITLES.exploration,
           tabBarLabel: TAB_TITLES.exploration,
@@ -128,18 +133,20 @@ export default function TabLayout() {
             />
           ),
           // Phase 63d — exploration is the unconditional leftmost tab.
-          // Its href stays `undefined` even during the encounter modal
-          // so the route remains current and the modal stays mounted.
-          // Other tabs lock via `href: null` (see character / memoir /
-          // satchel below); exploration itself shouldn't lock or
-          // expo-router force-navigates away from the modal-bearing
-          // screen (the failure mode that surfaced after commit
-          // a18ee12).
-          href: undefined,
+          // It never locks even during the encounter modal so the route
+          // remains current and the modal stays mounted. Other tabs lock
+          // via `tabBarButton`/`tabPress` below (phase 47b — expo-router's
+          // `href: null` link-disable has no react-navigation equivalent
+          // property; hiding the tab button plus blocking a residual
+          // `tabPress` reproduces the same "can't navigate here" contract).
+          // Exploration itself shouldn't lock or force-navigates away from
+          // the modal-bearing screen (the failure mode that surfaced after
+          // commit a18ee12).
         }}
       />
       <Tabs.Screen
         name="character/index"
+        component={CharacterScreen}
         options={{
           title: TAB_TITLES.character,
           tabBarLabel: TAB_TITLES.character,
@@ -152,11 +159,17 @@ export default function TabLayout() {
               badge={badges.character}
             />
           ),
-          href: lockOtherTabs ? null : undefined,
+          tabBarButton: lockOtherTabs ? () => null : undefined,
+        }}
+        listeners={{
+          tabPress: (e) => {
+            if (lockOtherTabs) e.preventDefault();
+          },
         }}
       />
       <Tabs.Screen
         name="memoir/index"
+        component={MemoirScreen}
         options={{
           title: TAB_TITLES.memoir,
           tabBarLabel: TAB_TITLES.memoir,
@@ -169,11 +182,17 @@ export default function TabLayout() {
               badge={badges.memoir}
             />
           ),
-          href: lockOtherTabs ? null : undefined,
+          tabBarButton: lockOtherTabs ? () => null : undefined,
+        }}
+        listeners={{
+          tabPress: (e) => {
+            if (lockOtherTabs) e.preventDefault();
+          },
         }}
       />
       <Tabs.Screen
         name="inventory/index"
+        component={InventoryScreen}
         options={{
           title: TAB_TITLES.inventory,
           tabBarLabel: TAB_TITLES.inventory,
@@ -186,7 +205,12 @@ export default function TabLayout() {
               badge={badges.inventory}
             />
           ),
-          href: lockOtherTabs ? null : undefined,
+          tabBarButton: lockOtherTabs ? () => null : undefined,
+        }}
+        listeners={{
+          tabPress: (e) => {
+            if (lockOtherTabs) e.preventDefault();
+          },
         }}
       />
     </Tabs>

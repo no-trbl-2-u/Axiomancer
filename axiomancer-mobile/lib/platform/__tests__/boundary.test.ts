@@ -6,11 +6,14 @@
  * file-scan pattern (a sanctioned exception to the no-disk-I/O rule —
  * the inputs are deterministic, versioned, and self-contained).
  *
- * Test files are exempt: they mock `expo-*` by resolved specifier
- * (`jest.mock('expo-router', ...)`), and Jest's module registry
+ * Test files are exempt: they mock by resolved specifier
+ * (`jest.mock('expo-image', ...)` etc.), and Jest's module registry
  * intercepts that specifier regardless of how many re-export hops sit
  * between the mock and the component under test — see phase 47a's
- * brief for the full reasoning.
+ * brief for the full reasoning. `router.ts` moved off this pattern in
+ * phase 47b (it's `@react-navigation/*`-backed now, not an
+ * `expo-router` re-export) — its own test files mock
+ * `@/lib/platform/router` directly instead.
  */
 
 import { describe, expect, it } from '@jest/globals';
@@ -68,10 +71,20 @@ describe('expo-decouple boundary guard (phase 47a)', () => {
     });
 
     it('every lib/platform/* module re-exports exactly one expo-* package', () => {
+        // router.ts is exempt starting phase 47b: it's no longer a pure
+        // re-export (it stopped importing `expo-router` entirely and is
+        // now `@react-navigation/*`-backed) — the seam it provides is
+        // still "one file owns the swap," just not via this narrower
+        // one-package-re-export shape the other lib/platform/* files use.
         const shims = ALL_FILES.filter(
-            (f) => f.rel.startsWith('lib/platform/') && !f.rel.includes('/__tests__/'),
+            (f) =>
+                f.rel.startsWith('lib/platform/') &&
+                !f.rel.includes('/__tests__/') &&
+                f.rel !== 'lib/platform/router.ts',
         );
-        expect(shims.length).toBeGreaterThanOrEqual(GUARDED_PACKAGES.length);
+        // -1: `expo-router` no longer has a pure-reexport shim (router.ts
+        // is excluded above) — the other 7 guarded packages still do.
+        expect(shims.length).toBeGreaterThanOrEqual(GUARDED_PACKAGES.length - 1);
         for (const shim of shims) {
             const matches = stripComments(shim.text).match(
                 new RegExp(`from\\s+['"](${GUARDED_PACKAGES.join('|')})['"]`, 'g'),

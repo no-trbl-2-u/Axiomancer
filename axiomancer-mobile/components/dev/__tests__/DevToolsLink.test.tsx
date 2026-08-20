@@ -13,7 +13,7 @@ import React from 'react';
 
 const mockPush = jest.fn();
 
-jest.mock('expo-router', () => ({
+jest.mock('@/lib/platform/router', () => ({
     useRouter: () => ({ push: mockPush, back: jest.fn(), canGoBack: () => true }),
 }));
 

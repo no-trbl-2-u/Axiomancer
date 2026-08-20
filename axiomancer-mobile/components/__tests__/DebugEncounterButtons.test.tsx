@@ -17,7 +17,7 @@ import { createAppStore, type AppStore } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 
 const mockPush = jest.fn();
-jest.mock('expo-router', () => ({
+jest.mock('@/lib/platform/router', () => ({
     useRouter: () => ({
         push: mockPush,
         replace: jest.fn(),

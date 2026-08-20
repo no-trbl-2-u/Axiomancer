@@ -29,7 +29,7 @@ const mockRouter = {
     canGoBack: () => true,
 };
 
-jest.mock('expo-router', () => ({
+jest.mock('@/lib/platform/router', () => ({
     // Return a stable reference so the QuestGate useEffect's
     // [hasQuest, router] dep array doesn't fire on every
     // re-render (matches expo-router's production behavior).

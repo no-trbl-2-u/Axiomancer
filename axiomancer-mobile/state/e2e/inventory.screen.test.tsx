@@ -19,7 +19,7 @@ import {
     type Item,
 } from '@mechanics';
 
-jest.mock('expo-router', () => ({
+jest.mock('@/lib/platform/router', () => ({
     useRouter: () => ({
         replace: jest.fn(),
         push: jest.fn(),

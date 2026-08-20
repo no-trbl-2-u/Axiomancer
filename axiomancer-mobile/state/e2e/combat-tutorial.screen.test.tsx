@@ -20,7 +20,7 @@ import { withAllProviders } from '@/test-utils/withAllProviders';
 
 // Mutable per-test route params (must be `mock`-prefixed for jest's factory scope rule).
 let mockParams: Record<string, string> = {};
-jest.mock('expo-router', () => ({
+jest.mock('@/lib/platform/router', () => ({
     useRouter: () => ({ back: jest.fn(), push: jest.fn(), canGoBack: () => true }),
     useLocalSearchParams: () => mockParams,
 }));

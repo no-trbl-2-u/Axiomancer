@@ -217,6 +217,11 @@ async function main() {
         const page = await context.newPage()
         page.on('pageerror', (err) => fail(`page error during loot: ${err.message}`))
 
+        // A static web export can't surface `extra.devToolsEnabled` at
+        // runtime (phase 47b: `web.output` moved to `"single"`) — the
+        // documented opt-in (lib/buildProfile.ts). Inert in real builds:
+        // nothing sets the global there.
+        await page.addInitScript(() => { globalThis.__AXM_FORCE_DEV_TOOLS__ = true })
         await page.goto(`${baseUrl}/character`, { waitUntil: 'networkidle' })
         await openDevTools(page)
         log('opened /dev — LOOT RARITY controls visible')

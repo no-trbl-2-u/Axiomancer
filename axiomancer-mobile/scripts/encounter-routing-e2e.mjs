@@ -170,6 +170,10 @@ async function openDevTools(page) {
 
 async function checkButton(page, baseUrl, c) {
     log(`=== ${c.button.toUpperCase()} → ${c.route} (${c.name}) ===`)
+    // A static web export can't surface `extra.devToolsEnabled` at runtime
+    // (phase 47b: `web.output` moved to `"single"`) — the documented opt-in
+    // (lib/buildProfile.ts). Inert in real builds: nothing sets the global there.
+    await page.addInitScript(() => { globalThis.__AXM_FORCE_DEV_TOOLS__ = true })
     await page.goto(`${baseUrl}/character`, { waitUntil: 'networkidle' })
 
     // Open the dev tools (SELF → DEV TOOLS → the /dev Developer screen)

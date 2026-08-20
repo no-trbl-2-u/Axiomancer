@@ -31,12 +31,12 @@ import React from 'react';
 // to reference identifiers named `mock*` (case-insensitive) — these
 // two are defined inline in the factory rather than imported, so the
 // naming just has to satisfy that check.
-jest.mock('expo-router', () => {
+jest.mock('@/lib/platform/router', () => {
     const ReactLib = require('react');
     const { View } = require('react-native');
 
     const mockTabsScreenComponent = jest.fn(
-        (props: { name: string; options?: { href?: unknown; title?: string } }) =>
+        (props: { name: string; options?: { tabBarButton?: unknown; title?: string } }) =>
             ReactLib.createElement(View, { testID: `mock-tab-screen-${props.name}` }),
     );
     const mockTabsComponent = Object.assign(
@@ -57,7 +57,7 @@ jest.mock('expo-router', () => {
     };
 });
 
-import { Tabs } from 'expo-router';
+import { Tabs } from '@/lib/platform/router';
 import { AestheticModeProvider } from '@/state/aesthetic-mode';
 import { CombatModeProvider } from '@/state/combat-mode';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
@@ -125,7 +125,7 @@ function mountBothScreens(store: AppStore) {
 }
 
 type TabsMockProps = { screenOptions?: { tabBarStyle?: { display?: string } } };
-type TabsScreenMockProps = { name: string; options?: { href?: unknown } };
+type TabsScreenMockProps = { name: string; options?: { tabBarButton?: unknown } };
 
 /** The last `screenOptions` the real `TabLayout` handed the (mocked) `<Tabs>`. */
 function latestTabsScreenOptions(): TabsMockProps['screenOptions'] {
@@ -151,7 +151,7 @@ describe('integration: exploration + tab-bar lock survive the encounter-modal li
 
         expect(tree.queryByTestId('encounter-modal-overlay')).toBeNull();
         expect(latestTabsScreenOptions()?.tabBarStyle?.display).not.toBe('none');
-        expect(latestScreenOptions('character/index')?.href).toBeUndefined();
+        expect(latestScreenOptions('character/index')?.tabBarButton).toBeUndefined();
     });
 
     it('a combat-prelude arms the modal AND locks the tab bar together', () => {
@@ -161,7 +161,7 @@ describe('integration: exploration + tab-bar lock survive the encounter-modal li
 
         expect(tree.queryByTestId('encounter-modal-overlay')).not.toBeNull();
         expect(latestTabsScreenOptions()?.tabBarStyle?.display).toBe('none');
-        expect(latestScreenOptions('character/index')?.href).toBeNull();
+        expect(typeof latestScreenOptions('character/index')?.tabBarButton).toBe('function');
     });
 
     it('regression pin: engaging clears the event slice, but the modal AND the tab lock both survive into combat', () => {
@@ -182,7 +182,7 @@ describe('integration: exploration + tab-bar lock survive the encounter-modal li
         expect(tree.queryByTestId('encounter-modal-overlay')).not.toBeNull();
         expect(tree.queryByTestId('combat-reveal')).not.toBeNull();
         expect(latestTabsScreenOptions()?.tabBarStyle?.display).toBe('none');
-        expect(latestScreenOptions('character/index')?.href).toBeNull();
+        expect(typeof latestScreenOptions('character/index')?.tabBarButton).toBe('function');
     });
 
     it('round-trip: WITHDRAW closes the modal AND unlocks the tab bar together', () => {
@@ -196,7 +196,7 @@ describe('integration: exploration + tab-bar lock survive the encounter-modal li
         expect(tree.queryByTestId('encounter-modal-overlay')).toBeNull();
         expect(tree.queryByTestId('combat-reveal')).toBeNull();
         expect(latestTabsScreenOptions()?.tabBarStyle?.display).not.toBe('none');
-        expect(latestScreenOptions('character/index')?.href).toBeUndefined();
+        expect(latestScreenOptions('character/index')?.tabBarButton).toBeUndefined();
     });
 
     it('WITHDRAW pays the retreat cost (grace −2) even though the event slice is already cleared', () => {

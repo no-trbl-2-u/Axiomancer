@@ -18,7 +18,7 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import { act, render } from '@testing-library/react-native';
 import React from 'react';
 
-jest.mock('expo-router', () => {
+jest.mock('@/lib/platform/router', () => {
     const ReactLib = require('react');
     const { View } = require('react-native');
     const mockTabsScreenComponent = jest.fn((props: { name: string }) =>
