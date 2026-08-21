@@ -1611,10 +1611,19 @@ batch concurrently with 44* — both churn the whole mobile surface.**
       still resolve. Do this alone; it will touch every screen.
       (mobile) Deps: 47a. Brief: `plan/phases/phase_47b_navigation_router.md`.
       Shipped `49b6f55a`.
-- [ ] Phase 47c — Assets: `expo-image`, `expo-font` +
+- [-] Phase 47c — Assets: `expo-image`, `expo-font` +
       `@expo-google-fonts/*` → bare-RN equivalents, preserving the
       existing font-bundle splitting. (mobile) Deps: 47a.
-      Brief: to generate.
+      Brief: `plan/phases/phase_47c_expo_decouple_assets.md`.
+      Shipped `5a69cdb5` — `@expo-google-fonts/*` vendored locally
+      (dropped as a dependency, same .ttf bytes, zero behavior change).
+      `expo-image` swap attempted + reverted: `verify:visual` caught a
+      52.8% pixel-diff regression on the title screen from a custom
+      `contentPosition` positioning wrapper that `npm run verify` alone
+      couldn't see was broken — root cause not fully isolated, reverted
+      rather than shipped guessed-at. `expo-font` itself carried over —
+      no native project exists yet to statically link fonts into (47e's
+      prebuild). See the brief's "Follow-ups" for both residues.
 - [ ] Phase 47d — Device APIs: `expo-haptics` (→
       react-native-haptic-feedback or similar), `expo-constants`,
       `expo-linking`, `expo-splash-screen`, `expo-status-bar`,

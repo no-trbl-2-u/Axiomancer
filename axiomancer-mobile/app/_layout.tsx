@@ -1,13 +1,6 @@
 import { NavigationContainer, Stack, linking, navigationRef } from '@/lib/platform/router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useFonts } from '@/lib/platform/font';
-import { PirataOne_400Regular } from '@expo-google-fonts/pirata-one';
-import {
-  IMFellEnglish_400Regular,
-  IMFellEnglish_400Regular_Italic,
-} from '@expo-google-fonts/im-fell-english';
-import { BebasNeue_400Regular } from '@expo-google-fonts/bebas-neue';
-import { JetBrainsMono_400Regular } from '@expo-google-fonts/jetbrains-mono';
 import * as SplashScreen from '@/lib/platform/splash-screen';
 import * as NavigationBar from '@/lib/platform/navigation-bar';
 import { useCallback, useEffect, useState } from 'react';
@@ -59,6 +52,17 @@ import LabyrinthScreen from './labyrinth/index';
 import DevArtGallery from './devart/index';
 import DevRoomGallery from './devart/rooms';
 import DevAftermathPanel from './devaftermath/index';
+
+// Vendored locally (phase 47c dropped the `@expo-google-fonts/*` npm
+// packages — same OFL-licensed .ttf files, sourced under
+// assets/fonts/LICENSES/). Keys stay the exact fontFamily strings
+// `theme/axm.ts` references; `expo-font`'s loader keys a font by
+// this object's property name, not the file name.
+const PirataOne_400Regular = require('@/assets/fonts/PirataOne_400Regular.ttf');
+const IMFellEnglish_400Regular = require('@/assets/fonts/IMFellEnglish_400Regular.ttf');
+const IMFellEnglish_400Regular_Italic = require('@/assets/fonts/IMFellEnglish_400Regular_Italic.ttf');
+const BebasNeue_400Regular = require('@/assets/fonts/BebasNeue_400Regular.ttf');
+const JetBrainsMono_400Regular = require('@/assets/fonts/JetBrainsMono_400Regular.ttf');
 
 SplashScreen.preventAutoHideAsync();
 
