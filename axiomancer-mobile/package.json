@@ -15,7 +15,7 @@
     "web:container": "./scripts/dev-server-container.sh up",
     "web:container:wait": "./scripts/dev-server-container.sh wait",
     "web:container:down": "./scripts/dev-server-container.sh down",
-    "lint": "expo lint",
+    "lint": "eslint app components",
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",

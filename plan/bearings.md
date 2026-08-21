@@ -76,6 +76,21 @@ one of these — then stop and surface it as `[needs-user-call]`.
 > / gesture-handler / rn-svg / screens / safe-area-context are bare-RN
 > and carry over unchanged. Do not pre-emptively drift off Expo before
 > that phase — the rows below stay authoritative until it lands.
+>
+> **Post-decouple, the RN<->native-lib version matrix becomes manually
+> managed (Phase 47e, 2026-08-21).** Today `expo install` / `expo-doctor`
+> curate compatible version ranges across `react-native-reanimated`,
+> `react-native-svg`, `react-native-screens`,
+> `react-native-gesture-handler`, `react-native-safe-area-context`, and
+> `react-native-worklets` for the pinned Expo SDK (54) — a version bump
+> to any of them, or to `react-native` core itself, is currently a
+> curated `expo install <pkg>` call. Once the native project + build/CI
+> re-platform lands (47e's still-open follow-ups: Jest preset,
+> dev-server, EAS path), that curation goes away — a future upgrade
+> needs a manual peer-dependency cross-check per library (each ships
+> its own `peerDependencies` range against `react-native`) instead of
+> one Expo-curated command. React Native's own upgrade-helper diff tool
+> is the closest bare-RN equivalent once that day comes.
 
 | Layer | Choice | Notes |
 |---|---|---|
