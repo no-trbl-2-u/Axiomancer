@@ -76,15 +76,25 @@ describe('expo-decouple boundary guard (phase 47a)', () => {
         // now `@react-navigation/*`-backed) — the seam it provides is
         // still "one file owns the swap," just not via this narrower
         // one-package-re-export shape the other lib/platform/* files use.
+        // haptics.ts and status-bar.ts are exempt starting phase 47d for
+        // the same reason: haptics.ts is now `react-native-haptic-feedback`
+        // backed, status-bar.ts now re-exports React Native core's own
+        // `StatusBar` — neither imports an `expo-*` package anymore.
+        const EXEMPT = new Set([
+            'lib/platform/router.ts',
+            'lib/platform/haptics.ts',
+            'lib/platform/status-bar.ts',
+        ]);
         const shims = ALL_FILES.filter(
             (f) =>
                 f.rel.startsWith('lib/platform/') &&
                 !f.rel.includes('/__tests__/') &&
-                f.rel !== 'lib/platform/router.ts',
+                !EXEMPT.has(f.rel),
         );
-        // -1: `expo-router` no longer has a pure-reexport shim (router.ts
-        // is excluded above) — the other 7 guarded packages still do.
-        expect(shims.length).toBeGreaterThanOrEqual(GUARDED_PACKAGES.length - 1);
+        // -3: expo-router, expo-haptics, expo-status-bar no longer have a
+        // pure-reexport shim (all three excluded above) — the other 5
+        // guarded packages still do.
+        expect(shims.length).toBeGreaterThanOrEqual(GUARDED_PACKAGES.length - 3);
         for (const shim of shims) {
             const matches = stripComments(shim.text).match(
                 new RegExp(`from\\s+['"](${GUARDED_PACKAGES.join('|')})['"]`, 'g'),

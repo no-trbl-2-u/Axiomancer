@@ -17,14 +17,6 @@ jest.mock('react-native-reanimated', () => {
     return Reanimated;
 });
 
-// Mock expo-haptics (calls are promise-chained with .catch)
-jest.mock('expo-haptics', () => ({
-    impactAsync: jest.fn(() => Promise.resolve()),
-    notificationAsync: jest.fn(() => Promise.resolve()),
-    ImpactFeedbackStyle: { Light: 'light', Medium: 'medium', Heavy: 'heavy' },
-    NotificationFeedbackType: { Success: 'success', Warning: 'warning', Error: 'error' },
-}));
-
 // Mock react-native-gesture-handler with a chainable builder — the real
 // Gesture API returns `this` from every configurator (minDistance,
 // enabled, maxDistance, onStart, …), so a partial object breaks render.

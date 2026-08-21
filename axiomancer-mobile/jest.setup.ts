@@ -11,12 +11,23 @@ jest.mock('expo-splash-screen', () => ({
     setOptions: () => undefined,
 }));
 
-jest.mock('expo-haptics', () => ({
-    impactAsync: () => Promise.resolve(),
-    notificationAsync: () => Promise.resolve(),
-    selectionAsync: () => Promise.resolve(),
-    ImpactFeedbackStyle: { Light: 'light', Medium: 'medium', Heavy: 'heavy' },
-    NotificationFeedbackType: { Success: 'success', Warning: 'warning', Error: 'error' },
+// react-native-haptic-feedback's default (non-.web) entry point calls
+// `TurboModuleRegistry.getEnforcing('RNHapticFeedback')` at import time
+// (codegenSpec/NativeHapticFeedback.js) — throws synchronously under Jest,
+// since no native project is linked yet (phase 47d brief "Decisions").
+jest.mock('react-native-haptic-feedback', () => ({
+    trigger: jest.fn(),
+    HapticFeedbackTypes: {
+        selection: 'selection',
+        impactLight: 'impactLight',
+        impactMedium: 'impactMedium',
+        impactHeavy: 'impactHeavy',
+        rigid: 'rigid',
+        soft: 'soft',
+        notificationSuccess: 'notificationSuccess',
+        notificationWarning: 'notificationWarning',
+        notificationError: 'notificationError',
+    },
 }));
 
 require('react-native-reanimated/mock');

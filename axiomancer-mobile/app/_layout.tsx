@@ -205,7 +205,7 @@ export default function RootLayout() {
           <CombatModeProvider>
           <TooltipProvider>
             <NavigationContainer ref={navigationRef} linking={linking}>
-              <StatusBar style="light" />
+              <StatusBar barStyle="light-content" />
               <HardwareBackHandler />
               <NavLogger />
               <EventGate />

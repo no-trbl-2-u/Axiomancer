@@ -22,15 +22,6 @@ jest.mock('react-native-reanimated', () => {
     return Reanimated;
 });
 
-// Mock expo-haptics (calls are promise-chained with .catch; the
-// outcome overlay also fires notificationAsync)
-jest.mock('expo-haptics', () => ({
-    impactAsync: jest.fn(() => Promise.resolve()),
-    notificationAsync: jest.fn(() => Promise.resolve()),
-    ImpactFeedbackStyle: { Light: 'light', Medium: 'medium', Heavy: 'heavy' },
-    NotificationFeedbackType: { Success: 'success', Warning: 'warning', Error: 'error' },
-}));
-
 const mockCard: HazardCardVM = {
     uid: 'test-card-1',
     cardId: 'test-card',

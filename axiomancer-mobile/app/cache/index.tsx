@@ -13,7 +13,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from '@/lib/platform/router';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { Image } from '@/lib/platform/image';
-import { Haptics } from '@/lib/platform/haptics';
+import { Haptics, ImpactFeedbackStyle, NotificationFeedbackType } from '@/lib/platform/haptics';
 
 import { TREASURE_CHEST_CLOSED, TREASURE_GOLD_HOARD } from '@/assets/images/treasure';
 import { CacheDie } from '@/components/cache/CacheDie';
@@ -35,7 +35,7 @@ import { LOOT_CACHE_TUNING } from '@mechanics';
 /** One slip shy of a jam — the engine's real jam threshold minus one. */
 const JAM_WARNING_SLIPS = LOOT_CACHE_TUNING.jamSlipThreshold - 1;
 
-function hapticImpact(style: Haptics.ImpactFeedbackStyle): void {
+function hapticImpact(style: ImpactFeedbackStyle): void {
     try {
         Haptics.impactAsync(style).catch(() => undefined);
     } catch {
@@ -43,7 +43,7 @@ function hapticImpact(style: Haptics.ImpactFeedbackStyle): void {
     }
 }
 
-function hapticNotification(type: Haptics.NotificationFeedbackType): void {
+function hapticNotification(type: NotificationFeedbackType): void {
     try {
         Haptics.notificationAsync(type).catch(() => undefined);
     } catch {

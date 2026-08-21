@@ -2,6 +2,7 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 
 import { HazardIntroOverlay, type HazardIntroOverlayProps } from '../HazardIntroOverlay';
+import { Haptics } from '@/lib/platform/haptics';
 
 // Mock react-native-reanimated
 jest.mock('react-native-reanimated', () => {
@@ -10,12 +11,6 @@ jest.mock('react-native-reanimated', () => {
     Reanimated.default.call = () => {};
     return Reanimated;
 });
-
-// Mock expo-haptics (fires impactAsync on mount with .catch)
-jest.mock('expo-haptics', () => ({
-    impactAsync: jest.fn(() => Promise.resolve()),
-    ImpactFeedbackStyle: { Light: 'light', Medium: 'medium', Heavy: 'heavy' },
-}));
 
 const mockProps: HazardIntroOverlayProps = {
     hazardId: 'cracked-cliff',
@@ -111,12 +106,12 @@ describe('HazardIntroOverlay', () => {
     });
 
     it('fires haptic feedback on mount', async () => {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const { impactAsync } = require('expo-haptics');
-        
+        const impactAsync = jest.spyOn(Haptics, 'impactAsync');
+
         render(<HazardIntroOverlay {...mockProps} />);
-        
-        expect(impactAsync).toHaveBeenCalledWith('heavy');
+
+        expect(impactAsync).toHaveBeenCalledWith(Haptics.ImpactFeedbackStyle.Heavy);
+        impactAsync.mockRestore();
     });
 
     it('handles empty title gracefully', () => {

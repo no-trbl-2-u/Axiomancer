@@ -15,7 +15,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { useRouter } from '@/lib/platform/router';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { Haptics } from '@/lib/platform/haptics';
+import { Haptics, ImpactFeedbackStyle } from '@/lib/platform/haptics';
 
 import { ScreenBg } from '@/components/ScreenBg';
 import { AxmIcon } from '@/components/icons';
@@ -29,7 +29,7 @@ import {
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
-function hapticImpact(style: Haptics.ImpactFeedbackStyle): void {
+function hapticImpact(style: ImpactFeedbackStyle): void {
     try {
         Haptics.impactAsync(style).catch(() => undefined);
     } catch {
