@@ -1624,13 +1624,20 @@ batch concurrently with 44* — both churn the whole mobile surface.**
       rather than shipped guessed-at. `expo-font` itself carried over —
       no native project exists yet to statically link fonts into (47e's
       prebuild). See the brief's "Follow-ups" for both residues.
-- [ ] Phase 47d — Device APIs: `expo-haptics` (→
+- [-] Phase 47d — Device APIs: `expo-haptics` (→
       react-native-haptic-feedback or similar), `expo-constants`,
       `expo-linking`, `expo-splash-screen`, `expo-status-bar`,
       `expo-navigation-bar`. Note Phase 38's juice layer already
       co-fires haptics through a single wrapper — that wrapper was built
       as the Expo-decouple swap point, so use it. (mobile) Deps: 47a.
-      Brief: to generate.
+      Brief: `plan/phases/phase_47d_expo_decouple_device_apis.md`.
+      Shipped `1dd887b5` — `expo-status-bar` → React Native core
+      `StatusBar` and `expo-haptics` → `react-native-haptic-feedback`
+      swapped clean (web-verified; native path unverified, no native
+      project exists yet). `expo-constants`, `expo-linking`,
+      `expo-splash-screen`, `expo-navigation-bar` carried over — each
+      blocked on 47e's native-project prebuild or `app.config.ts`
+      re-platform. See the brief's "Follow-ups" for all four residues.
 - [ ] Phase 47e — Build + CI re-platform. `jest-expo` → the bare RN
       Jest preset, `expo lint` → direct ESLint, the `expo start` dev/web
       scripts and dev-server container, and the EAS build path
