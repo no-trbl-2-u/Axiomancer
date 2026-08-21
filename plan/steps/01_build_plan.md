@@ -1638,7 +1638,7 @@ batch concurrently with 44* — both churn the whole mobile surface.**
       `expo-splash-screen`, `expo-navigation-bar` carried over — each
       blocked on 47e's native-project prebuild or `app.config.ts`
       re-platform. See the brief's "Follow-ups" for all four residues.
-- [ ] Phase 47e — Build + CI re-platform. `jest-expo` → the bare RN
+- [-] Phase 47e — Build + CI re-platform. `jest-expo` → the bare RN
       Jest preset, `expo lint` → direct ESLint, the `expo start` dev/web
       scripts and dev-server container, and the EAS build path
       (`deploy:preview` / `deploy:production`) → whatever replaces it.
@@ -1649,7 +1649,18 @@ batch concurrently with 44* — both churn the whole mobile surface.**
       (adds a native binary + a CanvasKit-WASM web-loading step that
       should be wired ONCE, into the kept pipeline) — evaluate, do not
       auto-adopt. (mobile + CI) Deps: 47b, 47c, 47d.
-      Brief: to generate.
+      Brief: `plan/phases/phase_47e_build_ci_replatform.md`.
+      Shipped `2c26f89f` — `expo lint` → `eslint app components` swapped
+      clean (verified byte-identical output to `expo lint`'s own default
+      scope: 19 problems, 0 errors, 19 warnings, exit 0); RN↔native-lib
+      version-matrix note appended to `bearings.md`; `@shopify/react-native-skia`
+      re-evaluated against D6f's 2026-07-18 verdict — unchanged, still not
+      adopted. `jest-expo` preset, `expo start` dev/web scripts +
+      dev-server container, and the EAS build path all carried over —
+      each blocked on a native project (`ios`/`android`) that doesn't
+      exist yet and can't be created or verified in this execution
+      environment (no Xcode/Android SDK). See the brief's "Follow-ups"
+      for all three residues.
 
 - [x] Phase 48 — Root-cause the `Closes #N` auto-close, for real. The
       2026-08-03 fix (`0441c554`, issue #166) does not hold: #174 stayed
