@@ -34,6 +34,34 @@
 > RESOLVED note, same convention as every other closed row in this
 > file.
 
+### [docs] Scheduled playtest references name retired Hazard and Fishing Village route identities
+- category: docs
+- impact: 7
+- ease: 8
+- detail: filed 2026-08-21 by the scheduled SomberSoft roundtable from the
+  Kid's current-main playthrough. Two canonical-looking operator references
+  now issue commands against identities the live CLIs/maps reject or no longer
+  traverse. `axiomancer-mechanics/docs/cli.md` still documents and exemplifies
+  `--hazard H01`, but the current Hazard CLI rejects `H01` and accepts named
+  slugs such as `cracked-cliff`. Separately,
+  `axiomancer-mechanics/automation/scripts/walkthroughs/fishing-village-exploration.goal.md`
+  still declares `fv-2 -> fv-12` / Driftwood Husk as the first reliable
+  encounter, while current main's passing route-Hazard witness and direct CLI
+  route use `fv-2 -> fv-11 -> fv-13` / Little Belle. The stale walkthrough is
+  especially dangerous because commit `4c1b9df6` reconciled adjacent world/map
+  truth on 2026-08-20 without updating this executable goal.
+- evidence: `/root/Workspace/reports/axiomancer-playthrough/2026-08-21.md`;
+  `npx vitest run src/CLI/e2e/game.cli.route-hazard.engine.test.ts
+  --reporter=verbose` passed on main and traversed `fv-2 -> fv-11 -> fv-13`;
+  `npm run hazard -- --auto --seed 42 --runs 1 --hazard H01 --route top`
+  rejected the id, while the same command with `--hazard cracked-cliff`
+  passed. Current source paths named above were re-read at `b67a25fb`.
+- next: /iterate. Replace operator-facing examples with current stable slugs and
+  the current authored route, then add a docs/registry parity witness so hazard
+  ids and walkthrough node/enemy identities cannot drift silently again. Do
+  not rewrite historical H01-H15 design doctrine where it is explicitly
+  historical; fix executable command/reference surfaces.
+
 ### [gap] `npx playwright install chromium --with-deps` hung on an unreachable apt mirror, killing a full `march` tick
 - category: gap
 - impact: 5
