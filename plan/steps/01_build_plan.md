@@ -1681,9 +1681,13 @@ batch concurrently with 44* — both churn the whole mobile surface.**
       and has never closed anything. `close-trailers` + its workflow are now
       the authority; 36 hermetic tests, mutation-tested against 5 injected
       regressions.
-- [ ] Phase 49 — GLYPHS follow-up 1: completeness-critic touch-UX pass.
+- [x] Phase 49 — GLYPHS follow-up 1: completeness-critic touch-UX pass.
       The source doc's own pre-mobile-UI gate. (design/mechanics)
-      Deps: none. Brief: to generate.
+      Deps: none. Verdict: GO WITH CONSTRAINTS (merge into existing
+      statusStrip row, reuse the existing centered-modal confirm
+      pattern, rename UI-facing copy to "Seal", enforce >=44pt hitSlop
+      target) — see `plan/phases/phase_49_glyphs_touch_ux_gate.md`.
+      — `phases: brief for phase 49 — GLYPHS touch-UX gate` (f1171746)
 - [ ] Phase 50 — GLYPHS follow-up 2: mobile UI (glyph chip row +
       tap-confirm sheet), once 49 clears. (mobile) Deps: 49.
       Brief: to generate.
