@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Axiomancer digest — 2026-08-21</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #0e1116; --fg: #d7dde5; --fg-strong: #f0f3f7; --muted: #6b7480;
+  --accent: #8ab4f8; --panel: #161b22; --card: #12171f; --border: #222833;
+  --row: #141a22; --code-bg: #1b212b; --th: #aeb7c2; --list-head: #9aa4b0;
+  --add: rgba(80,200,120,.16); --del: rgba(230,90,90,.16);
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f7f5ef; --fg: #33302a; --fg-strong: #1a160f; --muted: #6f6656;
+    --accent: #3a5db0; --panel: #efece3; --card: #fbfaf5; --border: #ddd7c9;
+    --row: #efece3; --code-bg: #e9e5d9; --th: #5c5344; --list-head: #6f6656;
+    --add: rgba(35,140,75,.16); --del: rgba(190,55,55,.16);
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+.wrap { max-width: 46rem; margin: 0 auto; padding: 20px 18px 80px; }
+header.top {
+  position: sticky; top: 0; z-index: 5;
+  background: var(--bg); border-bottom: 1px solid var(--border); margin: 0 0 20px;
+}
+header.top .wrap { padding-top: 14px; padding-bottom: 14px; display: flex; align-items: baseline; gap: 14px; }
+header.top a.home, header.top .home { color: var(--accent); text-decoration: none; font-weight: 600; }
+header.top .crumb { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+h1, h2, h3, h4 { line-height: 1.25; color: var(--fg-strong); }
+h1 { font-size: 26px; margin: 0 0 6px; }
+h2 { font-size: 19px; margin: 0; }
+a { color: var(--accent); }
+p { margin: 8px 0; }
+code { background: var(--code-bg); padding: 1px 6px; border-radius: 5px; font-size: 0.86em; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+pre { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+.tablewrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { background: var(--panel); color: var(--th); font-weight: 600; white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+ul, ol { padding-left: 22px; }
+li { margin: 4px 0; }
+.muted { color: var(--muted); }
+
+.st { font-weight: 600; white-space: nowrap; }
+.st::before { content: ""; display: inline-block; width: .5em; height: .5em; border-radius: 50%; margin-right: .38em; background: currentColor; vertical-align: middle; }
+.st-ok { color: #4bb96a; }
+.st-neutral { color: var(--muted); }
+.st-warn { color: #d0a92b; }
+.st-bad { color: #e0574b; }
+
+.headline { font-size: 19px; color: var(--fg-strong); margin: 0 0 12px; }
+.counts { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 22px; }
+
+.chip {
+  display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; padding: 2px 9px; border-radius: 999px;
+  color: #0b0d10; background: var(--cat, var(--accent)); white-space: nowrap;
+}
+.cat-mechanics { --cat: #d0a92b; }
+.cat-ui { --cat: #5aa9e6; }
+.cat-content { --cat: #7fc45a; }
+.cat-infra { --cat: #b08bf0; }
+.cat-balance { --cat: #e6864b; }
+
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-left: 4px solid var(--cat, var(--accent));
+  border-radius: 10px; padding: 14px 18px; margin: 14px 0; scroll-margin-top: 72px;
+}
+.card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.card-head h2 { font-size: 18px; }
+.field { margin: 6px 0; }
+.flabel {
+  display: inline-block; min-width: 3.2em; margin-right: 4px; color: var(--muted);
+  font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .04em;
+}
+.commits { margin: 8px 0 2px; }
+.commit { font-size: 12px; }
+
+.panel { margin: 22px 0; scroll-margin-top: 72px; }
+.panel > h2 { padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+
+.diff {
+  border: 1px solid var(--border); border-radius: 8px; overflow-x: auto; margin: 12px 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.5;
+  background: var(--bg);
+}
+.dl { padding: 0 12px; white-space: pre; }
+.dl.add { background: var(--add); }
+.dl.del { background: var(--del); }
+.dl.hunk { color: var(--accent); }
+.dl.meta { color: var(--muted); }
+
+figure.shotset { margin: 14px 0; }
+figure.shotset > figcaption { font-size: 14px; color: var(--fg); margin-bottom: 8px; }
+.shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.shot { margin: 0; }
+.shot .role { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); text-align: center; margin-bottom: 3px; }
+.shot img { width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; display: block; }
+
+.entry-list { list-style: none; padding: 0; margin: 8px 0 0; }
+.entry-list li { margin: 0; border-bottom: 1px solid var(--border); }
+.entry-list a { display: block; padding: 14px 4px; text-decoration: none; color: var(--fg); }
+.entry-list a:hover { background: var(--row); }
+.entry-list .date { color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
+.entry-list .head { color: var(--list-head); font-size: 14px; margin: 2px 0 6px; }
+footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+
+/* ── Hub (landing page) ──────────────────────────────────────────────── */
+.hub { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 14px; margin: 22px 0 0; }
+.hub a {
+  display: block; text-decoration: none; color: var(--fg);
+  background: var(--card); border: 1px solid var(--border);
+  border-left: 4px solid var(--hue, var(--accent));
+  border-radius: 12px; padding: 18px 20px; transition: background .12s, transform .12s;
+}
+.hub a:hover { background: var(--row); transform: translateY(-1px); }
+.hub .h-title { font-size: 19px; font-weight: 700; color: var(--fg-strong); margin: 0 0 4px; }
+.hub .h-sub { font-size: 14px; color: var(--muted); }
+.hub .h-glyph { font-size: 22px; line-height: 1; margin-bottom: 8px; display: block; }
+.hue-cards { --hue: #5aa9e6; }
+.hue-enemies { --hue: #e0574b; }
+.hue-effects { --hue: #b08bf0; }
+.hue-log { --hue: #d0a92b; }
+.hue-tuning { --hue: #3ec9b0; }
+
+/* ── Catalog: cards grid ─────────────────────────────────────────────── */
+.searchbar { margin: 14px 0 4px; }
+.searchbar input {
+  width: 100%; padding: 10px 14px; border-radius: 10px; font-size: 15px;
+  background: var(--card); color: var(--fg); border: 1px solid var(--border);
+}
+.count-note { color: var(--muted); font-size: 13px; margin: 6px 0 16px; }
+.grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 16px; }
+.gcard {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden; display: flex; flex-direction: column;
+}
+.gcard .art { aspect-ratio: 4 / 3; background: var(--panel); overflow: hidden; }
+.gcard .art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gcard .art.none { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 26px; }
+.gcard .body { padding: 12px 14px 14px; }
+.gcard .name { font-weight: 700; color: var(--fg-strong); margin: 0 0 8px; }
+.gcard .statrow { margin: 0 0 8px; }
+
+/* ── Catalog: enemies ────────────────────────────────────────────────── */
+.grid-enemies { display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); gap: 16px; }
+.ecard { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+/* Enemy paintings are alpha-matted (figures float on a keyed-out black), so a
+   solid black plate behind them reads as intended in both themes. */
+.ecard .portrait { aspect-ratio: 1 / 1; background: #000; overflow: hidden; }
+.ecard .portrait img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.ecard .portrait.none { display: flex; align-items: center; justify-content: center; color: #6b7480; font-size: 34px; }
+.ecard .body { padding: 12px 15px 15px; }
+.ecard .name { font-size: 18px; font-weight: 700; color: var(--fg-strong); margin: 0; }
+.ecard .sub { color: var(--muted); font-size: 13px; margin: 2px 0 10px; text-transform: capitalize; }
+.statrow { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+.stat { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--panel); border: 1px solid var(--border); color: var(--fg); white-space: nowrap; }
+.stat .k { color: var(--muted); font-weight: 600; margin-right: 3px; }
+.stat.hp { --sc: #e0574b; } .stat.body { --sc: #e6864b; } .stat.mind { --sc: #5aa9e6; } .stat.heart { --sc: #7fc45a; }
+.stat.hp, .stat.body, .stat.mind, .stat.heart { border-color: color-mix(in srgb, var(--sc) 55%, var(--border)); }
+.sec-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; margin: 10px 0 5px; }
+.fights { font-size: 14px; margin: 0 0 4px; }
+.hint { font-size: 13px; color: var(--muted); font-style: italic; margin: 4px 0 0; }
+.skill { border-top: 1px solid var(--border); padding: 8px 0 0; margin: 8px 0 0; }
+.skill .sk-name { font-weight: 700; color: var(--fg-strong); font-size: 14px; }
+.skill .sk-text { font-size: 13px; color: var(--fg); margin: 2px 0 0; }
+.no-skills { font-size: 13px; color: var(--muted); }
+
+/* ── Catalog: effects ────────────────────────────────────────────────── */
+.eff-list { display: grid; gap: 10px; margin: 8px 0 0; }
+.eff {
+  display: grid; grid-template-columns: 3rem 1fr; gap: 14px; align-items: start;
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+}
+.eff .glyph {
+  width: 3rem; height: 3rem; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 26px; line-height: 1; color: #0b0d10; font-weight: 700;
+  background: var(--gc, var(--accent)); box-shadow: inset 0 0 0 1px rgba(0,0,0,.15);
+}
+.eff .name { font-weight: 700; color: var(--fg-strong); margin: 0 0 6px; }
+.eff .statrow { margin: 0 0 6px; }
+
+/* ── Raw-stat mechanic lines (cards + effects) ───────────────────────── */
+.mods { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 3px; }
+.mods li {
+  margin: 0; font-size: 13px; line-height: 1.4; color: var(--fg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  padding-left: 12px; position: relative;
+}
+.mods li::before { content: "›"; position: absolute; left: 0; color: var(--muted); }
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="home" href="../log.html">← DevLog</a><span class="crumb">2026-08-21</span></div></header>
+<main class="wrap">
+<h1 id="headline">2026-08-21</h1>
+<p class="headline">Night shift skipped 2026-08-20 entirely, so this entry covers two days:</p>
+<div class="counts"><span class="chip cat-mechanics">1 mechanics</span><span class="chip cat-ui">1 UI</span><span class="chip cat-content">3 content</span><span class="chip cat-infra">1 infra</span></div>
+<section class="card cat-mechanics" id="pr-216-a-crash-strict-combat-harness-hunts-a-user-reported-crash-and-doesnt-find-it"><div class="card-head"><span class="chip cat-mechanics">mechanics</span><h2>PR #216 — a crash-strict combat harness hunts a user-reported crash, and doesn't find it</h2></div>
+<p class="field"><span class="flabel">What</span> Built <code>axiomancer-mobile/scripts/combat-round-e2e.mjs</code>, a</p>
+<p class="field"><span class="flabel">Why</span> The user hit a real crash mid-combat; before this, nothing in</p>
+<p class="commits"><code class="commit">`7f50494d`</code> <code class="commit">`7b7a8f78`</code> <code class="commit">`eb51e846`</code> <code class="commit">`ee79c0c6`</code> <code class="commit">`c54bcd1e`</code> <code class="commit">`18485daf`</code></p>
+<p>full-round UI harness that plays real cards (stage, power with a die, APPLY, END PHASE) against both the <code>/combat-encounter</code> dev sandbox and a live map encounter, asserting no crash and no <code>error-boundary-screen</code> mount. 30 runs across 15 seeds × both modes all reached a terminal outcome clean — the user-reported mid-combat crash was <strong>not</strong> reproduced. A follow-up commit filed that negative result explicitly as a <code>[HIGH]</code> <code>plan/CRITIQUE.md</code> row (so it doesn't read as "fixed") and banked two CI lessons: the two verify workflows keep parallel journey lists under different job names that must be edited together, and CI runs each e2e script individually rather than the <code>e2e:minigames</code> chain — so wiring a harness into that chain wires it into nothing CI actually runs.</p>
+<p>the test suite played a full round of real UI card-drags, so nothing could have caught it. The harness now exists and runs in both verify workflows, but the crash's actual trigger is still open — boss fights, mercy/WITHDRAW, non-starter decks, and the level-up-out-of-victory path are the named axes it doesn't reach yet.</p></section>
+<section class="card cat-ui" id="phase-46b-new-player-starter-picker-collapses-to-threadbare"><div class="card-head"><span class="chip cat-ui">UI</span><h2>Phase 46b — new-player starter picker collapses to Threadbare</h2></div>
+<p class="field"><span class="flabel">What</span> A brand-new player now auto-seeds the Threadbare Office and</p>
+<p class="field"><span class="flabel">Why</span> Implements Phase 46a's ruling: offering mid/late-campaign deck</p>
+<p class="commits"><code class="commit">`a5996b62`</code> <code class="commit">`24475f48`</code></p>
+<p>skips straight to the map, instead of choosing from all three campaign snapshots (Threadbare / Pilgrim / Apostate). Pilgrim and Apostate stay live as internal balance/lineage data — just unreachable from the new-player flow.</p>
+<p>snapshots as peer picks to a brand-new player undercut the tutorial's controlled-vacuum intent. <code>BundleSelectScreen</code> stays in the codebase for its other callers; only the new-player wiring changes.</p>
+<div class="diff" role="img" aria-label="code diff"><div class="dl del">-  const [bundlePicked, setBundlePicked] = useState(false);</div><div class="dl add">+  const needsBundleSelection = onboarding.showTitleScreen &amp;&amp; titleScreenDismissed &amp;&amp; !bundleChosen;</div><div class="dl add">+</div><div class="dl add">+  // Phase 46b: a brand-new player is auto-seeded into the neutral Threadbare</div><div class="dl add">+  // Office rather than choosing among all three campaign snapshots</div><div class="dl add">+  useEffect(() =&gt; {</div><div class="dl add">+    if (needsBundleSelection) {</div><div class="dl add">+      seedStarterBundleAction(store, NEW_PLAYER_STARTER_BUNDLE_ID);</div><div class="dl add">+    }</div></div></section>
+<section class="card cat-content" id="phase-46c-quest-discovery-coach-beat"><div class="card-head"><span class="chip cat-content">content</span><h2>Phase 46c — quest discovery coach beat</h2></div>
+<p class="field"><span class="flabel">What</span> <code>/dialogue</code>'s reply row now previews a choice's consequence</p>
+<p class="field"><span class="flabel">Why</span> Before this, accepting a quest in dialogue gave no signal</p>
+<p class="commits"><code class="commit">`3a1b7291`</code> <code class="commit">`3ecf0434`</code></p>
+<p>(e.g. "quest: starting-quest") before the tap, closing the silent-accept gap at Old Marrow's "Consider it done." A new <code>questAcknowledged</code> notification badges the Memoir tab while a quest is pending, mirroring the existing level-up badge — and fixed a latent bug the new condition would have exposed (the character-tab badge no longer falls through to the event badge when no event is active).</p>
+<p>about what was accepted and no reminder that a quest existed — a player could tap through and never notice they'd started one.</p></section>
+<section class="card cat-content" id="product-renamed-miserere-mei-deus-m-rk-borg-set-as-the-tonal-north-star"><div class="card-head"><span class="chip cat-content">content</span><h2>Product renamed "Miserere Mei, Deus"; Mörk Borg set as the tonal North Star</h2></div>
+<p class="field"><span class="flabel">What</span> Via <code>/oversight</code>, T closed the standing product-name</p>
+<p class="field"><span class="flabel">Why</span> Two open naming-session passes (<code>plan/naming-session-2026-08-12.md</code>)</p>
+<p class="commits"><code class="commit">`f47db806`</code> <code class="commit">`242e9247`</code></p>
+<p><code>needs-user-call</code> — "Axiomancer" becomes <strong>"Miserere Mei, Deus"</strong> (Latin, Psalm 51: "Have mercy on me, God") — decided in the same breath as setting <em>Mörk Borg</em> as the game's new tonal North Star for art, narration, and encounter design (deck/dice mechanics explicitly unchanged). The name is ruled and closed; the code migration (title screen, store metadata, CLI banners, doc mentions) is queued as build-plan <strong>Phase 67</strong>, not yet shipped — "Axiomancer" still appears live everywhere until that phase lands. The tonal pivot itself is deferred to a fresh session via a written trigger prompt (<code>new-north-star.prompt.md</code>), which opens by asking whether this is a hard pivot away from the shipped liturgical-gothic register or an evolution that keeps its vocabulary but borrows Mörk Borg's brutality and minimalism.</p>
+<p>had already surfaced strong single-word candidates without a clear winner; T broke the tie by naming a direction instead of picking from either list, and used the opening to set a broader creative-freedom mandate at the same time.</p></section>
+<section class="card cat-infra" id="phases-47a-47d-expo-decouple-continues-shim-layer-router-fonts-device-apis"><div class="card-head"><span class="chip cat-infra">infra</span><h2>Phases 47a–47d — Expo decouple continues: shim layer, router, fonts, device APIs</h2></div>
+<p class="field"><span class="flabel">What</span> Four more legs of the Expo-to-bare-RN re-platform:</p>
+<p class="field"><span class="flabel">Why</span> Continues the CI/CD re-platform (<code>plan/PHASE_CANDIDATES.md</code>'s</p>
+<p class="commits"><code class="commit">`3473520f`</code> <code class="commit">`49b6f55a`</code> <code class="commit">`5a69cdb5`</code> <code class="commit">`1dd887b5`</code> <code class="commit">`43d18ccd`</code> <code class="commit">`e25d7deb`</code></p>
+<ul><li><strong>47a</strong> — a <code>lib/platform/*</code> shim layer (8 thin re-export modules) now</li></ul>
+<p>sits between all application source and every <code>expo-*</code> import; 49 call sites repointed, a file-scan guard enforces the boundary.</p>
+<ul><li><strong>47b</strong> — <code>expo-router</code> swapped for <code>react-navigation</code> behind the</li></ul>
+<p>router shim, including the app's entry point; 27 test files and every route registration rewritten.</p>
+<ul><li><strong>47c</strong> (partial) — the 5 fonts behind <code>@expo-google-fonts/*</code> vendored</li></ul>
+<p>locally as <code>.ttf</code> assets; an <code>expo-image</code> swap was attempted, caught a real 52.8% pixel-diff regression in <code>verify:visual</code>, and was reverted rather than shipped guessed-at.</p>
+<ul><li><strong>47d</strong> (partial) — <code>expo-status-bar</code> → RN core <code>StatusBar</code>,</li></ul>
+<p><code>expo-haptics</code> → <code>react-native-haptic-feedback</code>; 4 packages (<code>expo-constants</code>/<code>expo-linking</code>/<code>expo-splash-screen</code>/ <code>expo-navigation-bar</code>) carry over, blocked on the native project that doesn't exist until Phase 47e's prebuild.</p>
+<p>promoted "Expo decouple" line) one verifiable package at a time, each phase scoped to what's provable without a native project yet.</p></section>
+<section class="card cat-content" id="fishing-village-route-truth-reconciled-in-the-docs"><div class="card-head"><span class="chip cat-content">content</span><h2>Fishing-village route truth reconciled in the docs</h2></div>
+<p class="field"><span class="flabel">What</span> <code>docs/world.md</code> and two walkthrough goal files still described</p>
+<p class="field"><span class="flabel">Why</span> Phase 53d changed what fv-4 actually resolves to in the live</p>
+<p class="commits"><code class="commit">`4c1b9df6`</code></p>
+<p>the pre-Phase-53d static template — fv-4 as a "wet-hound encounter," the spine diagram left unlabeled as historical. Relabeled the spine section as the historical static-template diagram, pointed readers at the live event registry instead, and corrected both walkthroughs: fv-4 is now the "Stranger's Net" narration dilemma, and the nearest early encounter from fv-2 runs through fv-11 → fv-13 (Little Belle).</p>
+<p><code>MapEvent</code> data three days ago; the docs and walkthrough comments never caught up, so anyone reading them would infer a combat encounter that no longer exists at that node.</p></section>
+<section class="panel" id="measurement-freshness"><h2>Measurement freshness</h2>
+<p>The deck-matrix baseline was flagged <strong>stale</strong> at session open (one mechanics-source commit past the stamp — the fishing-village docs reconciliation above, which touches no engine code). Re-measured with the reduced-nightly pass (<code>e25d7deb</code>, 30 runs/cell): <strong>CQI 0.796</strong>, early win rate 54.5%, mid 8.3%, late 0%, impossible 0% — all within rounding of the prior reduced-nightly read (<code>05c3ffdf</code>, 2026-08-17: CQI 0.796, identical stage win rates). Two straight stable reads. Per standing doctrine, the retired ten-preset win-rate curve (early ~80 / mid ~50 / late 25-35 / impossible 0) does not apply to the current Profane-Canon-era library, and no tuning work is spawned from a reduced-confidence pass — report only.</p></section>
+<section class="panel" id="while-you-were-out"><h2>While you were out</h2>
+<div class="tablewrap"><table><thead><tr><th>when (UTC)</th><th>verb</th><th>outcome</th></tr></thead><tbody><tr><td>2026-08-19 13:22</td><td>march</td><td>success — <span class="st st-ok">shipped</span> PR #216 (combat crash harness)</td></tr><tr><td>2026-08-19 18:59</td><td>march</td><td><strong>cancelled</strong> — apt-mirror hang, recurrence (see below)</td></tr><tr><td>2026-08-20 01:56</td><td>march</td><td>success — <span class="st st-ok">shipped</span> Phase 46b</td></tr><tr><td>2026-08-20 07:13</td><td>march</td><td>success — <span class="st st-ok">shipped</span> Phase 46c</td></tr><tr><td>2026-08-20 13:24</td><td>march</td><td><strong>cancelled</strong> — hit the job ceiling mid-work, no commit</td></tr><tr><td>2026-08-20 19:07</td><td>march</td><td>success — <span class="st st-ok">shipped</span> Phase 47a</td></tr><tr><td>2026-08-21 02:03</td><td>march</td><td>success — <span class="st st-ok">shipped</span> Phase 47b + oversight (naming/pivot, Phase 66 promotion)</td></tr><tr><td>2026-08-21 07:14</td><td>march</td><td>success — <span class="st st-ok">shipped</span> Phases 47c and 47d</td></tr><tr><td>—</td><td>night</td><td><strong>skipped 2026-08-20</strong> — no <code>night</code> run between 2026-08-19 and today; no <code>DIGEST_2026-08-20.md</code> exists and this entry does not backfill it</td></tr></tbody></table></div></section>
+<section class="panel" id="needs-you"><h2>Needs you</h2>
+<ul><li><strong>Phase 67 (title migration) is queued, not shipped.</strong> "Miserere Mei,</li></ul>
+<p>Deus" is the ruled name, but every player/doc-facing string still reads "Axiomancer" until that phase lands — expected, not drift.</p>
+<ul><li><strong>The Mörk Borg tonal-pivot brainstorm hasn't been opened yet.</strong></li></ul>
+<p><code>new-north-star.prompt.md</code> at the repo root is a trigger prompt waiting to be picked up in a fresh session; nothing in the live build plan depends on it yet.</p>
+<ul><li><strong>The mid-combat crash from the user's report is still unexplained</strong>,</li></ul>
+<p>not fixed — <code>plan/CRITIQUE.md</code>'s <code>[HIGH]</code> row from PR #216 names the untested axes (boss fights, mercy/WITHDRAW, non-starter decks, level-up-out-of-victory) for whoever picks it up next.</p>
+<ul><li><strong>The apt-mirror <code>march</code>-tick hang recurred</strong> (2026-08-19 18:59, same</li></ul>
+<p>signature as the 2026-08-19 07:12 occurrence already filed) — second confirmed total-loss tick in twelve hours, still open, still <code>/iterate</code>-shaped; evidence appended to the existing <code>plan/AUDIT.md</code> row rather than filed as a duplicate.</p>
+<ul><li>A separate <code>march</code> tick (2026-08-20 13:24) was cut off by the job</li></ul>
+<p>ceiling after 74m56s of real work, no commit resulted — reinforces the already-tracked "march ticks creeping toward the timeout" phase candidate; evidence appended, not re-proposed.</p></section>
+<section class="panel" id="tuning-proposals"><h2>Tuning proposals</h2>
+<p>None. The baseline re-measurement above is directional evidence only, per standing doctrine — card/deck work stays with <code>/deck-tuning</code>, engine constants stay manual. No gate/cadence/ceiling mistuning surfaced in tonight's pulse beyond the two already-tracked CI-reliability rows noted above.</p></section>
+<section class="panel" id="queues-now"><h2>Queues now</h2>
+<ul><li>Build plan: 23 open phases (<code>[ ]</code>), 0 blocked, 7 partial-with-carryovers</li></ul>
+<p>(<code>[-]</code>), 3 skipped. Phase 67 (title migration) and Phase 66 (lexicon/doctrine-prose retired-string catch, promoted via oversight this window) both newly queued.</p>
+<ul><li><code>plan/AUDIT.md</code>: 43 genuinely open rows (82 headers logged; the rest</li></ul>
+<p>are resolved-in-place <code>[x]</code> markers, not physically moved). Newest: tonight's two apt-mirror/timeout recurrence notes.</p>
+<ul><li><code>plan/CRITIQUE.md</code>: 21 open rows (45 headers logged). Last pass: 28</li></ul>
+<p>(2026-08-19, no findings). No new pass ran this window.</p>
+<ul><li><code>plan/PHASE_CANDIDATES.md</code>: 33 open rows (45 headers logged, most of</li></ul>
+<p>the rest are <code>~~struck~~</code> promotions or <code>Expand pass</code> retrospectives).</p>
+<ul><li>No open <code>triage:needs-user</code> or <code>loop:do</code> issues.</li><li>Deploy: clean — HEAD <code>e25d7deb</code> has one green <code>verify-mobile</code> run.</li></ul></section>
+<footer class="foot">Axiomancer DevLog &middot; generated by <code>scripts/build-devlog.mjs</code></footer>
+</main>
+</body>
+</html>

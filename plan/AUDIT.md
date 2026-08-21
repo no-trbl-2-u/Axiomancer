@@ -61,6 +61,12 @@
   entirely. A cheaper interim fix: wrap the install step in a short
   step-level `timeout-minutes` so a mirror hang fails fast and loud
   instead of silently eating the whole job ceiling.
+- recurrence (2026-08-21 digest pulse): run `32290461478` (the
+  2026-08-19 18:59 scheduled `march` tick) hit the identical signature —
+  `apt-get update` stuck retrying `azure.archive.ubuntu.com` from
+  18:59:49 with zero progress until the ceiling force-cancelled it at
+  20:14:33, another total loss. Second confirmed occurrence in 12 hours;
+  still unfixed, still `/iterate`-shaped, not re-scored.
 
 ### [debt] `telemetry.mjs` writes `TELEMETRY.md` relative to cwd, so a workspace-cd forks the log
 - category: debt
@@ -296,6 +302,12 @@
   `plan/PHASE_CANDIDATES.md`'s new "march tick timeout" row for the
   proposal. This row is the evidence; the proposal is not this loop's to
   apply directly.
+- recurrence (2026-08-21 digest pulse): run `32374048835` (the
+  2026-08-20 13:24 scheduled `march` tick) ran `1:14:56` before
+  `##[error]The operation was canceled.` — not stuck on the apt-mirror
+  hang this time (real work in flight per the job log), no commit
+  resulted. Reinforces the existing phase-candidate proposal; not a new
+  finding.
 
 ### [docs] `skills/digest.md` §3b still reads baseline health against the win-rate doctrine curve Phase 43 retired
 - category: docs
