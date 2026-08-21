@@ -53,20 +53,10 @@ jest.mock('react-native-gesture-handler', () => ({
     },
 }));
 
-// Mock the font imports
-jest.mock('@expo-google-fonts/pirata-one', () => ({
-    PirataOne_400Regular: 'PirataOne_400Regular',
-}));
-jest.mock('@expo-google-fonts/im-fell-english', () => ({
-    IMFellEnglish_400Regular: 'IMFellEnglish_400Regular',
-    IMFellEnglish_400Regular_Italic: 'IMFellEnglish_400Regular_Italic',
-}));
-jest.mock('@expo-google-fonts/bebas-neue', () => ({
-    BebasNeue_400Regular: 'BebasNeue_400Regular',
-}));
-jest.mock('@expo-google-fonts/jetbrains-mono', () => ({
-    JetBrainsMono_400Regular: 'JetBrainsMono_400Regular',
-}));
+// Font sources are local `.ttf` requires as of phase 47c (no more
+// `@expo-google-fonts/*` packages to mock) — jest-expo's asset
+// transformer already returns a mock value for those, same as any
+// other bundled image/font asset.
 
 // Mock TitleScreen component
 jest.mock('@/components/TitleScreen', () => ({
