@@ -9,7 +9,7 @@ import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 
-import * as Haptics from 'expo-haptics';
+import { Haptics } from '@/lib/platform/haptics';
 
 import CacheScreen from '@/app/cache/index';
 import QuestScreen from '@/app/quest/index';
@@ -27,16 +27,6 @@ jest.mock('@/lib/platform/router', () => ({
         push: jest.fn(),
         canGoBack: () => false,
     }),
-}));
-
-// Override the global haptics mock with spies so the arrival flourish
-// (U2) can be asserted on.
-jest.mock('expo-haptics', () => ({
-    impactAsync: jest.fn(() => Promise.resolve()),
-    notificationAsync: jest.fn(() => Promise.resolve()),
-    selectionAsync: jest.fn(() => Promise.resolve()),
-    ImpactFeedbackStyle: { Light: 'light', Medium: 'medium', Heavy: 'heavy' },
-    NotificationFeedbackType: { Success: 'success', Warning: 'warning', Error: 'error' },
 }));
 
 afterEach(() => {
@@ -168,8 +158,8 @@ describe('quest screen', () => {
     });
 
     it('flags the destination while the piece walks and fires a haptic on arrival (U1/U2)', () => {
-        const impact = jest.mocked(Haptics.impactAsync);
-        const notify = jest.mocked(Haptics.notificationAsync);
+        const impact = jest.spyOn(Haptics, 'impactAsync');
+        const notify = jest.spyOn(Haptics, 'notificationAsync');
         jest.useFakeTimers();
         try {
             const { store, actions } = mount(<QuestScreen />);
@@ -198,6 +188,8 @@ describe('quest screen', () => {
             expect(impact.mock.calls.length + notify.mock.calls.length).toBe(1);
         } finally {
             jest.useRealTimers();
+            impact.mockRestore();
+            notify.mockRestore();
         }
     });
 
