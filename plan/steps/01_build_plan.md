@@ -1692,6 +1692,23 @@ batch concurrently with 44* — both churn the whole mobile surface.**
       tap-confirm sheet), once 49 clears. (mobile) Deps: 49.
       — `plan/phases/phase_50_seal_chip_mobile_ui.md`
       — `feat(mobile): Seal chip row + tap-confirm sheet — phase 50` (7e62a007)
+> ## NEXT UP — the minigame retirements (T direct, 2026-08-22)
+>
+> T: *"I've been trying to retire the quest, gathering, and rest
+> minigames. Rest is retired but the other 2 are not."* Rest went out
+> with Phase 52e (`d83978cb`); the other two had stalled — **Phase 61**
+> was ruled on 2026-08-15 but sat behind eight rows, and **Gathering had
+> never been ruled at all** (deliberately left out of the 58-65 block
+> rather than swept in by implication). T ruled it now and directed that
+> both jump the queue.
+>
+> **The loop takes Phase 61 and Phase 76 FIRST**, ahead of every other
+> unchecked row including Phase 58. Both are deletions against the proven
+> Phase 52e template, so they are low-risk and they stop the project
+> paying attention-tax on systems already decided dead. Normal queue
+> order resumes after them (58 is next, and remains "ship it first"
+> among the rest).
+
 - [ ] Phase 51 — GLYPHS follow-up 3: sim `crackAt` policy heuristic + the
       A/B promotion court, once mobile lets a playtester observe real
       cracking behavior. (mechanics) Deps: 50. Brief: to generate.
@@ -1969,6 +1986,52 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       Phase 53c therefore survives and gets MORE load-bearing, not less:
       with no quest node on any map, its quest-giver becomes the only way
       a player ever learns a quest exists. Note that alongside 53c.
+      (mechanics + mobile; deletion) Brief: to generate.
+
+- [ ] Phase 76 — Retire the Gathering minigame ("The Gleaning"), KEEP
+      the gathering map node. **T direct, 2026-08-22:** T named Gathering
+      among the minigames being retired, then handed the shape of the
+      retirement to the loop verbatim — *"This is the type of freedom I'm
+      trying to provide the loop. You decide everything."* The call, and
+      why it is not a plain deletion:
+      **Two different systems share the name "gathering", exactly as two
+      shared the name "quest".** (a) `World/Gathering/` is The Gleaning
+      minigame — sites, plots, wrath economy, tools, boons, omens, its
+      own sim, CLI and tuning skill. (b) `MapEventKind: 'gathering'` is a
+      plain map node whose entire payload is
+      `{ items: Item[]; description?: string }` — the engine resolver
+      already returns the items directly; it is ALREADY the "here are
+      your options and their effects" shape T asked for in the
+      2026-08-10 candidate. The minigame is a MOBILE-SIDE INTERCEPTION:
+      `axiomancer-mobile/state/actions.ts:1693` sees a resolved
+      `gathering` event and launches The Gleaning instead of granting
+      the items.
+      So this phase retires (a) and keeps (b) — the same narrowing T
+      himself ruled for quest (*"Minigame only and keep it"*), applied to
+      the identically-shaped ambiguity.
+      **Scope (delete):** `World/Gathering/` entire; `gathering` CLI
+      sub-command + the `gathering` npm script; the `gathering-tuning`
+      skill (`.claude/commands/gathering-tuning.md`) and its workflow
+      (`.github/workflows/gathering-tuning.yml`); mobile's
+      `state/gathering/` slice, `app/gathering/` route, `GatheringGate`,
+      `DebugGathering`, and the interception at `actions.ts:1693`; plus a
+      `GAME_STATE_VERSION` hop clearing any live Gleaning session from
+      the save payload. Phase 52e (`d83978c`) is the template.
+      **Scope (KEEP, deliberately):** the `gathering` MapEventKind, its
+      `GatheringPayload`, the resolver's `{ kind: 'gathering', items }`
+      return, and all **8 authored gathering nodes** in
+      `MapEvents/content.ts`. Three reasons: the maps keep their event
+      density (deleting the nodes leaves holes); the resolver feeds
+      `advanceCollectObjectives` from gathered item ids
+      (`resolve-map-event.ts:264`), so removing the node would silently
+      break every collect-type quest objective; and once Phase 58 lands,
+      the node reads as authored prose + the items it grants — precisely
+      the target shape. After this phase the node grants its items
+      inline with no screen detour.
+      **Also update:** the AGENTS.md tuning-skill roster and the
+      `ci-e2e-scope.mjs` gathering suite routing (its mobile journey
+      disappears with the route), and close the retirement candidate in
+      `plan/PHASE_CANDIDATES.md`.
       (mechanics + mobile; deletion) Brief: to generate.
 
 - [ ] Phase 62 — Ally cards. The loot-cache sacrifice chain (Phase 65)
@@ -2532,6 +2595,20 @@ See the status rows above; generate briefs on demand.
   the walkthrough was T's response to the audit's open owner calls.
   Resulting commit: this one (branch
   `claude/content-pipelines-audit-43v3d7`, PR #228).
+
+- **2026-08-22** — actor: **T via remote Claude Code session** (the
+  minigame-retirement walkthrough — not Hermes). Action: **added Phase
+  76** (retire The Gleaning, keep the gathering map node) and
+  **reprioritized Phase 61 + Phase 76 to the front of the queue**, ahead
+  of Phase 58. Confirmed T's request: yes — T opened with *"I've been
+  trying to retire the quest, gathering, and rest minigames. Rest is
+  retired but the other 2 are not,"* answered the priority question with
+  "retire quest + gathering next", and delegated the retirement's shape
+  to the loop (*"You decide everything"*). T's stated reason: the
+  minigames "are just time consuming and seem to add nothing"
+  (2026-08-10 candidate, restated by this session's framing). Resulting
+  commit: this one (branch `claude/content-pipelines-audit-43v3d7`,
+  PR #228).
 
 ## Phase log (commit hashes)
 

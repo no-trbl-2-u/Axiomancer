@@ -99,11 +99,19 @@
   to be the session's real headline (Phase 58 — 59 authored node
   descriptions exist and are dropped at the resolver because
   `ResolvedEvent` has no field to carry them).
-- **what is STILL open on this candidate: the Gathering minigame ("The
-  Gleaning") and its `gathering-tuning` skill/CLI.** This candidate names
-  it for retirement; T did not rule on it in the 2026-08-15 session and
-  was not asked. It was deliberately left out of Phases 58-65 rather than
-  swept in by implication, so the candidate does not close here.
+- **CLOSED 2026-08-22 — the last quarter is now ruled and queued.** T
+  named Gathering among the minigames he has been trying to retire and
+  handed the shape to the loop ("You decide everything"). The loop's
+  call, queued as **build-plan Phase 76**: retire The Gleaning minigame
+  (`World/Gathering/`, its CLI, `gathering-tuning` skill + workflow, the
+  mobile slice/route and the interception at `actions.ts:1693`) but KEEP
+  the `gathering` MapEventKind and its 8 authored nodes — that node's
+  payload is already a plain `items[] + description`, so it is the very
+  "options and their effects" shape this candidate asks for, it keeps map
+  density, and it feeds `advanceCollectObjectives` for collect-type quest
+  objectives. Same narrowing T himself ruled for quest ("Minigame only
+  and keep it"). With Phase 76 queued alongside 58-65, **this candidate
+  is fully promoted and closes.**
 - source: filed 2026-08-10 via `/oversight`, T's own framing verbatim:
   *"I want to discuss folding the treasure, quest, rest, and narration
   events into a single 'encounter' event, taking away the minigames and
