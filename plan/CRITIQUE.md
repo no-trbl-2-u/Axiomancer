@@ -1,13 +1,34 @@
 # Critique log
 
-> Last pass: 2026-08-19 at commit 125904d7
-> Pass count: 28
+> Last pass: 2026-08-22 at commit 0aab723d
+> Pass count: 29
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 29, 2026-08-22, commit 0aab723d] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5), mobile
+> (375×812) and desktop (1280×800) run separately, against the
+> cold-enterable screen set (title, onboarding/deck-picker,
+> combat-encounter preview, live combat board post-ENTER COMBAT,
+> exploration hub). All 10 captures clean: zero console/page errors
+> besides the same benign `navigator.vibrate` autoplay warning seen
+> every prior pass. The open **[MED] momentum chain empty-state
+> contrast** row (pass 21) reconfirmed live and unchanged on both
+> viewports — mobile combat board shows `○ no momentum` barely legible
+> against the arena floor art, desktop shows no visible placeholder
+> text at all in the same spot — no regression, no new evidence, not
+> re-filed. The open **[MED] fixed "ruined city" arena backdrop** row
+> (pass 23) also reconfirmed unchanged — the Brine Hag encounter (a
+> coastal/drowning-themed foe) still renders against the same
+> purple ruined-city skyline on both viewports. Title wordmark (no
+> crop), onboarding tagline/preset-picker copy, Brine Hag
+> threat-sequence preview text, and the OMEN cutscene redirect at the
+> exploration-hub route all match prior-pass baselines verbatim. No
+> new findings filed.
 
 > **[critique pass 28, 2026-08-19, commit 125904d7] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5,

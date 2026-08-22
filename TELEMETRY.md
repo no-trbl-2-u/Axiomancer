@@ -320,3 +320,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-21T13:24:38Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-21T19:05:14Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-21T19:07:47Z | subagent | Explore | claude-sonnet-5 | main | Survey mobile combat screen real estate |
+| 2026-08-22T07:07:45Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-22T07:07:47Z | skill | march | unknown | main | - |
+| 2026-08-22T07:10:23Z | skill | critique | claude-sonnet-5 | main | - |
