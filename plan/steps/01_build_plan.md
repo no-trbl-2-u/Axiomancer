@@ -1688,9 +1688,10 @@ batch concurrently with 44* — both churn the whole mobile surface.**
       pattern, rename UI-facing copy to "Seal", enforce >=44pt hitSlop
       target) — see `plan/phases/phase_49_glyphs_touch_ux_gate.md`.
       — `phases: brief for phase 49 — GLYPHS touch-UX gate` (f1171746)
-- [ ] Phase 50 — GLYPHS follow-up 2: mobile UI (glyph chip row +
+- [x] Phase 50 — GLYPHS follow-up 2: mobile UI (Seal chip row +
       tap-confirm sheet), once 49 clears. (mobile) Deps: 49.
-      Brief: to generate.
+      — `plan/phases/phase_50_seal_chip_mobile_ui.md`
+      — `feat(mobile): Seal chip row + tap-confirm sheet — phase 50` (7e62a007)
 - [ ] Phase 51 — GLYPHS follow-up 3: sim `crackAt` policy heuristic + the
       A/B promotion court, once mobile lets a playtester observe real
       cracking behavior. (mechanics) Deps: 50. Brief: to generate.
