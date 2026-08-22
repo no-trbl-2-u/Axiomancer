@@ -35,7 +35,7 @@ import { getEncounterEnemyArt } from '@/assets/images/enemies';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import type {
-    CombatEnemyPaneVM, CombatPlayerPaneVM, CombatEffectChipVM,
+    CombatEnemyPaneVM, CombatPlayerPaneVM, CombatEffectChipVM, CombatSealVM,
 } from '@/state/presenters/combat-encounter.engine';
 import { getCardById, type CombatEvent } from '@mechanics';
 import { effectGlyph } from '@/components/combat/statusGlyphs';
@@ -207,6 +207,43 @@ export function EffectChips({ effects, onChip, align = 'flex-start' }: {
                             <Text style={styles.chipBadgeText} allowFontScaling={false}>{e.isMax ? '✶' : e.intensity}</Text>
                         </View>
                     ) : null}
+                </Pressable>
+            ))}
+        </View>
+    );
+}
+
+// ── Seal chips (Phase 50 — Phase 33d's `state.glyphs`, renamed "Seal" for
+//    UI-facing copy per Phase 49 decision 3) ───────────────────────────────
+
+/** Same chip shell as `EffectChips` (Phase 49 decision 1 — merge into the
+ *  existing statusStrip row, no new in-flow row) but a charges/cap fraction
+ *  badge instead of the intensity/duration pair (Seals have no duration; a
+ *  Seal is always tappable — `crackGlyph` has no minimum-charge gate — so
+ *  every chip opens the confirm sheet, no locked/ready state to render). */
+export function SealChips({ seals, onSeal }: {
+    seals: CombatSealVM[];
+    onSeal?: (s: CombatSealVM) => void;
+}) {
+    const styles = useStyles();
+    if (seals.length === 0) return null;
+    return (
+        <View style={styles.chipRow} pointerEvents="box-none">
+            {seals.map((s) => (
+                <Pressable
+                    key={s.id}
+                    onPress={() => onSeal?.(s)}
+                    style={[styles.chip, { borderColor: s.color }]}
+                    hitSlop={6}
+                    testID={`combat-seal-${s.id}`}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${s.label}, ${s.charges} of ${s.cap} charges. Tap to crack now for ${s.previewText}.`}
+                >
+                    <View style={[StyleSheet.absoluteFill, { backgroundColor: s.color, opacity: 0.16 }]} />
+                    <Text style={[styles.chipGlyph, { color: s.color, textShadowColor: s.color }]}>{s.glyph}</Text>
+                    <View style={styles.chipBadge}>
+                        <Text style={styles.chipBadgeText} allowFontScaling={false}>{s.charges}/{s.cap}</Text>
+                    </View>
                 </Pressable>
             ))}
         </View>

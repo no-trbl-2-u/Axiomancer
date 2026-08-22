@@ -27,7 +27,7 @@ import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanima
 import Svg, { Circle, Defs, Line, Polygon, RadialGradient, Stop } from 'react-native-svg';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
-    startTurn, endTurn, draftStanceDie, discardCombatCard, playSignatureSkill,
+    startTurn, endTurn, draftStanceDie, discardCombatCard, playSignatureSkill, crackGlyph,
     tapFateDie, getPendingDotTotal, getFloatingDiceColors,
     selectEncounterMercyChoice, selectCapitulationChoice, buildCombatSummary,
     rollLoot, addItem, getLogger, advanceKillObjectives,
@@ -46,7 +46,7 @@ import { CombatTutorialCoach } from '@/components/combat/encounter/CombatTutoria
 import { currentCombatTutorialStep } from '@/components/combat/encounter/combat-tutorial-steps';
 import { Image } from '@/lib/platform/image';
 import { getEncounterEnemyArt } from '@/assets/images/enemies';
-import { INTENT_ICONS, buildCombatViewModel, resolveApplyRouting, rewardCardVMs, selectEnemyActionCard, STANCE_COLORS, type CombatCardVM, type CombatEffectChipVM, type CombatSignatureVM, type EnemyActionCardVM } from '@/state/presenters/combat-encounter.engine';
+import { INTENT_ICONS, buildCombatViewModel, resolveApplyRouting, rewardCardVMs, selectEnemyActionCard, STANCE_COLORS, type CombatCardVM, type CombatEffectChipVM, type CombatSealVM, type CombatSignatureVM, type EnemyActionCardVM } from '@/state/presenters/combat-encounter.engine';
 import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
 import { useGameState, useGameStore } from '@/state/GameStoreProvider';
 import {
@@ -320,6 +320,9 @@ export function CombatEncounterPanel({
     // instantly ("blink"). Ignore backdrop dismiss for a moment after open (the ✕ always works).
     const detailOpenedAt = useRef(0);
     const [tipEffect, setTipEffect] = useState<CombatEffectChipVM | null>(null);
+    // Phase 50 — a tapped Seal chip's CRACK/WAIT confirm sheet (mirrors the
+    // PLEA/mercy modal pattern per Phase 49 decision 2).
+    const [sealConfirm, setSealConfirm] = useState<CombatSealVM | null>(null);
     // Signature-rune info popup (long-press / unaffordable tap) + pilgrim modal.
     const [sigInfo, setSigInfo] = useState<CombatSignatureVM | null>(null);
     const [pilgrimOpen, setPilgrimOpen] = useState(false);
@@ -534,6 +537,14 @@ export function CombatEncounterPanel({
     const onReprisalCancel = useCallback(() => setReprisalPrompt(null), []);
     const onDiscard = useCallback((uid: string) => { apply((s) => discardCombatCard(s, uid).state); unstageUid(uid); }, [apply, unstageUid]);
     const onSignature = useCallback((id: string) => apply((s) => playSignatureSkill(s, id).state), [apply]);
+    // Phase 50 — tap a Seal chip -> open the confirm sheet; CRACK commits
+    // `crackGlyph` (dieless, mirrors onSignature's shape); WAIT just closes.
+    const onSeal = useCallback((s: CombatSealVM) => setSealConfirm(s), []);
+    const onCrackSeal = useCallback(() => {
+        if (!sealConfirm) return;
+        apply((s) => crackGlyph(s, sealConfirm.id).state);
+        setSealConfirm(null);
+    }, [apply, sealConfirm]);
     const onEndPhase = useCallback(() => {
         // WI-3 — the synchronous gate: a second tap in the same frame (touch
         // double-tap) finds the lock already held and is dropped, so exactly one
@@ -670,6 +681,7 @@ export function CombatEncounterPanel({
                     resolving={resolving}
                     onInspect={onInspect}
                     onChip={setTipEffect}
+                    onSeal={onSeal}
                     onSignatureInfo={setSigInfo}
                     onPlayerInspect={onPlayerInspect}
                     momentum={momentum}
@@ -768,6 +780,22 @@ export function CombatEncounterPanel({
                         <View style={styles.modalBtns}>
                             <Pressable onPress={() => onCapitulation('accept')} testID="combat-capitulation-accept" accessibilityRole="button" accessibilityLabel="Accept the yield" style={[styles.modalBtn, { borderColor: '#5bbf6a' }]}><Text style={[styles.modalBtnText, { color: '#5bbf6a' }]}>ACCEPT</Text></Pressable>
                             <Pressable onPress={() => onCapitulation('continue')} testID="combat-capitulation-continue" accessibilityRole="button" accessibilityLabel="Continue fighting" style={[styles.modalBtn, { borderColor: AXM.blood }]}><Text style={[styles.modalBtnText, { color: AXM.blood }]}>CONTINUE</Text></Pressable>
+                        </View>
+                    </View>
+                </View>
+            )}
+
+            {/* Phase 50 — Seal crack confirm sheet: reuses the PLEA/mercy centered-modal
+                shape exactly (Phase 49 decision 2), plain View backdrop (no dismiss-by-tap)
+                so the player's tap is the explicit CRACK/WAIT choice, not a stray dismiss. */}
+            {sealConfirm && (
+                <View style={styles.backdrop} testID="combat-seal-confirm">
+                    <View style={[styles.modal, { borderColor: sealConfirm.color }]}>
+                        <Text style={styles.modalTitle}>Crack the {sealConfirm.label}?</Text>
+                        <Text style={styles.modalSub}>{sealConfirm.previewText} · {sealConfirm.charges}/{sealConfirm.cap} charges</Text>
+                        <View style={styles.modalBtns}>
+                            <Pressable onPress={onCrackSeal} testID="combat-seal-crack" accessibilityRole="button" accessibilityLabel={`Crack for ${sealConfirm.previewText}`} style={[styles.modalBtn, { borderColor: '#5bbf6a' }]}><Text style={[styles.modalBtnText, { color: '#5bbf6a' }]}>CRACK</Text></Pressable>
+                            <Pressable onPress={() => setSealConfirm(null)} testID="combat-seal-wait" accessibilityRole="button" accessibilityLabel="Wait, don't crack yet" style={[styles.modalBtn, { borderColor: AXM.ash }]}><Text style={[styles.modalBtnText, { color: AXM.ash }]}>WAIT</Text></Pressable>
                         </View>
                     </View>
                 </View>

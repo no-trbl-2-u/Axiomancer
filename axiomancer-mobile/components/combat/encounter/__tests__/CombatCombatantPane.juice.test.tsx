@@ -28,7 +28,7 @@ jest.mock('@/lib/juice', () => {
 });
 
 const PLAYER: CombatPlayerPaneVM = {
-    name: 'Pilgrim', hp: 40, maxHp: 50, hpPct: 0.8, guard: 0, effects: [],
+    name: 'Pilgrim', hp: 40, maxHp: 50, hpPct: 0.8, guard: 0, effects: [], seals: [],
 };
 
 const fx = (events: CombatEvent[]): CombatFx => ({ seq: 1, events });

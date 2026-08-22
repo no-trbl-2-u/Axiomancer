@@ -39,6 +39,7 @@ import {
     type Card, type CardCombatEffects, type EnemyDifficulty,
     type UpgradeableDieGear,
     isMomentumDieId, type WheelStance,
+    type GlyphInstance, type GlyphPayload,
 } from '@mechanics';
 import { momentumV2A11y } from '@/state/combat/momentum';
 
@@ -72,6 +73,15 @@ const PAYOFF_COLOR = '#c2a14e';
 const BEFRIEND_COLOR = '#5bbf6a';
 const INERT_COLOR = '#6b6257';
 const ENCHANT_COLOR = '#7fb3a6';
+
+// Phase 50 — Seal chips (Phase 33d's `state.glyphs`, renamed "Seal" for
+// UI-facing copy per Phase 49 decision 3, never "glyph" — that name is
+// already `EFFECT_GLYPHS`'s per-status icon system). A single gold accent
+// (matches `STANCE_COLORS.wild`, the existing "charged token" identity)
+// keeps a Seal from ever reading as a live status effect on the board.
+const SEAL_COLOR = '#d9b44a';
+const SEAL_GLYPHS: Record<GlyphPayload['kind'], string> = { poison: '◈', barrier: '❖' };
+const SEAL_LABELS: Record<GlyphPayload['kind'], string> = { poison: 'Poison Seal', barrier: 'Barrier Seal' };
 
 /** Spec 32 v4 §2.1 — a persistent (enchant/disenchant) card's FREE line is a
  *  TIMED instance of its passive; the engine prints it on `topActionText` as
@@ -326,8 +336,26 @@ export interface CombatEnemyPaneVM {
      *  this presenter only forwards it. */
     pendingDot: number; roundsToKill: number | null; isLethalInFlight: boolean;
 }
+/** Phase 50 — a renderable "Seal" (Phase 33d's `GlyphInstance`, engine name
+ *  unchanged, UI-facing label renamed per Phase 49 decision 3). `crackValue`/
+ *  `previewText` mirror `crackGlyph`'s own payload formula (`baseIntensity`/
+ *  `baseAmount` + `charges`) so the confirm sheet never lies about what a
+ *  tap will actually do (WI-2 acceptance criterion 4 — "the foretold next
+ *  crack value"). */
+export interface CombatSealVM {
+    id: string;
+    kind: GlyphPayload['kind'];
+    glyph: string;
+    color: string;
+    label: string;
+    charges: number;
+    cap: number;
+    crackValue: number;
+    previewText: string;
+}
 export interface CombatPlayerPaneVM {
     name: string; hp: number; maxHp: number; hpPct: number; guard: number; effects: CombatEffectChipVM[];
+    seals: CombatSealVM[];
 }
 export interface CombatDieVM {
     id: string; color: string; colorHex: string; glyph: string; stanceLabel: string;
@@ -976,6 +1004,20 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
     };
 }
 
+/** Phase 50 — maps one engine `GlyphInstance` to its renderable Seal chip. */
+function sealVM(g: GlyphInstance): CombatSealVM {
+    const kind = g.payload.kind;
+    const crackValue = kind === 'poison' ? g.payload.baseIntensity + g.charges : g.payload.baseAmount + g.charges;
+    const previewText = kind === 'poison' ? `Poison ${crackValue}, ${g.payload.duration} rounds` : `Barrier ${crackValue}`;
+    return {
+        id: g.id, kind, glyph: SEAL_GLYPHS[kind], color: SEAL_COLOR, label: SEAL_LABELS[kind],
+        charges: g.charges, cap: g.cap, crackValue, previewText,
+    };
+}
+function sealsVM(glyphs: GlyphInstance[] | undefined): CombatSealVM[] {
+    return (glyphs ?? []).map(sealVM);
+}
+
 function playerPane(state: CombatEncounterState): CombatPlayerPaneVM {
     const p = state.player;
     return {
@@ -987,6 +1029,7 @@ function playerPane(state: CombatEncounterState): CombatPlayerPaneVM {
             ...chips(p.effects),
             ...standingChips(state.persistentZone ?? [], state.tempZone ?? [], 'enchant'),
         ],
+        seals: sealsVM(state.glyphs),
     };
 }
 
