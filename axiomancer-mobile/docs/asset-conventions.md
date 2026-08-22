@@ -44,10 +44,28 @@ only via `scripts/extract-game-icons.mjs` (hand-edited MANIFEST →
 regenerates `components/icons/game-icon-paths.ts` with per-entry
 attribution).
 
-**Do not build on `Potential Assets/MCP-Axiomancer/images/`** (116
-card paintings): no license/provenance is on record — blocked until
-the owner states their origin (filed `[needs-user-call]`,
-2026-08-22 audit).
+**`Potential Assets/MCP-Axiomancer/images/` (116 card paintings) —
+open-source art found online** (owner's answer, 2026-08-22), per-image
+license NOT yet on record. "Open source" spans CC0 (no obligations),
+CC BY (attribution required), and share-alike terms, so the origin
+answer removes the scrape risk but does not settle the terms. Rule:
+do not wire one into the card registry until its source and license
+can be written truthfully into `provenance.json`. Tracing them
+(filename / reverse-image / bundled-manifest search against the usual
+open-art hosts) is fair game, and any image whose license is
+evidenced may ship.
+
+## Generated art (Option A, ruled 2026-08-22)
+
+The art route is hosted **gpt-image-2 behind a swappable adapter**,
+upgradeable to a local FLUX+LoRA setup later
+(`plan/ideas/AI_ART_PIPELINE_OPTIONS.md` §9; build-plan Phase 73).
+A generated asset follows the same ingest contract above, with two
+additions to its `provenance.json` entry: the **model** and the
+**exact prompt**. That record is the Steam AI-disclosure artifact —
+raw AI output is not copyrightable, so the provenance file is what
+evidences human curation. The API key lives in `.env` (gitignored)
+and is never committed.
 
 ## Known gaps (queued work, build plan)
 

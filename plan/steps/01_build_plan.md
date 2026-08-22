@@ -2093,10 +2093,10 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       `axiomancer-mobile/docs/asset-conventions.md`), a
       provenance-completeness + registry-vs-directory drift test under
       `assets/`, and ingest of the two `tmp-images/` stragglers.
-      Public-domain woodcuts only — image GENERATION stays blocked on
-      the AI_ART_PIPELINE_OPTIONS §9 owner call. (content/tooling;
-      queued 2026-08-22 per THE PIPELINE LIBERATION) Brief: to
-      generate.
+      Covers acquisition + post-process + ingest for ANY image source;
+      generation itself is now ruled (Option A) and lands in Phase 73,
+      which reuses these legs. (content/tooling; queued 2026-08-22 per
+      THE PIPELINE LIBERATION) Brief: to generate.
 - [ ] Phase 72 — Harness grants for content work. Apply the allowlist
       additions the 2026-08-22 audit specified to
       `.claude/settings.json` (baseline:check/regen, the minigame
@@ -2113,6 +2113,40 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       `_claude-skill.yml` should pass the kb-query/axio-query MCP
       servers to CI runs. (contract; queued 2026-08-22 from the
       content-pipelines audit) Brief: to generate.
+
+- [ ] Phase 73 — Art generation pipeline (Option A, adapter-shaped).
+      Implements T's 2026-08-22 route ruling
+      (`plan/ideas/AI_ART_PIPELINE_OPTIONS.md` §9, Option 1 A-then-B).
+      Scope: a `generate(spec) -> image` ADAPTER with the hosted
+      gpt-image-2 call as its first implementation (so the future
+      ComfyUI/FLUX+LoRA swap touches nothing else); a prompt compiler
+      that renders the house style bible + per-subject spec into a
+      request; wiring into Phase 71's post-process/ingest legs so a
+      generated image lands as graded WebP + registry entry +
+      `provenance.json` (generator, model, prompt, date — the Steam
+      disclosure record); and a QA pass that reports style drift, the
+      measurement that later triggers the B upgrade. Key from `.env`,
+      never committed; absent the key the generate leg is inert and
+      the rest of the pipeline still runs. Depends on Phase 71.
+      (content/tooling; queued 2026-08-22 from T's route ruling)
+      Brief: to generate.
+- [ ] Phase 74 — N-1: fold the ratified North Star into spec 34.
+      `plan/north-star-mork-borg.md` was ratified as-is by T on
+      2026-08-22; its §2 becomes spec 34's §2.5 (the Mörk Borg
+      delivery register), and the R-C/R-F reconciliation recorded in
+      that file's header (art IS in scope; the Woodcut Codex
+      masterplan remains the current art bearings, evolvable by the
+      loop) is written into the spec rather than living only in a
+      plan/ file. Also update `plan/bearings.md` to cite the ratified
+      doctrine. (docs/design; queued 2026-08-22 per the ratification)
+      Brief: to generate.
+- [ ] Phase 75 — N-3: the re-voice pass. One phase sweeps all shipped
+      player-facing prose into the ratified register (R-E: names stay,
+      sentences shorten and harden, one voice). Runs AFTER Phase 67
+      (title migration) and after the Phase 70 prose lint exists, so
+      the sweep has a machine check behind it and does not re-touch
+      strings the title migration is about to change. (content;
+      queued 2026-08-22 per the ratification) Brief: to generate.
 
 > **Note (issue-triage 2026-07-19):** issue #132 asked for a
 > `devlog-build` GitHub Action; re-triage found it re-classified as
@@ -2486,6 +2520,18 @@ See the status rows above; generate briefs on demand.
   doc/doctrine unblocks shipped in the same PR; these five phases
   carry the engineering remainder. Resulting commit: this one
   (branch `claude/content-pipelines-audit-43v3d7`, PR #228).
+
+- **2026-08-22** — actor: **T via remote Claude Code session** (the
+  content-pipelines walkthrough, PR #228 — not Hermes). Action:
+  **added Phases 73-75** (art generation pipeline; N-1 fold the North
+  Star into spec 34; N-3 re-voice pass) and **rescoped Phase 71**
+  (acquisition legs now feed generation too). Confirmed T's request:
+  yes — T answered a four-question `AskUserQuestion` walkthrough,
+  picking art route "A-then-B" and "Ratify as-is" for the North Star.
+  T's stated reason: not separately stated beyond the option choices;
+  the walkthrough was T's response to the audit's open owner calls.
+  Resulting commit: this one (branch
+  `claude/content-pipelines-audit-43v3d7`, PR #228).
 
 ## Phase log (commit hashes)
 

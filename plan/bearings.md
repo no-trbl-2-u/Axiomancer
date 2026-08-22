@@ -350,16 +350,45 @@ ambiguity.)
      strings through the normal gates without a per-item build-plan
      ruling, honoring the voice constitution
      (`axiomancer-mechanics/docs/narrative/`) and the lexicon lint.
-  6. **Art: acquisition and wiring are open; generation stays gated.**
+  6. **Art: acquisition, wiring, AND generation are open.**
      The loop may extract/curate from the licensed
      `Potential Assets/icons-TBR` trove, ingest and wire
      public-domain acquisitions with full provenance records, re-map
-     existing art to content, and build art QA harnesses. Image
-     GENERATION remains blocked on T's unanswered
-     `plan/ideas/AI_ART_PIPELINE_OPTIONS.md` §9 option pick, and the
-     116 paintings in `Potential Assets/MCP-Axiomancer/images/`
-     remain unusable until T states their provenance — both filed as
-     `[needs-user-call]`.
+     existing art to content, and build art QA harnesses.
+     **Generation is unblocked as of the walkthrough below.**
+- **ART PIPELINE ROUTE: OPTION A-THEN-B (T direct, 2026-08-22
+  walkthrough).** Answering `plan/ideas/AI_ART_PIPELINE_OPTIONS.md`
+  §9's long-open decision, T picked **option 1: A-then-B** — ship the
+  hosted **gpt-image-2 API** route now, written so the generation call
+  is a **swappable adapter**, and upgrade to the local
+  **ComfyUI + FLUX.2 [klein] + style LoRA** route later if style drift
+  across the set becomes the binding problem. Standing consequences:
+  1. The ~80% of pipeline work that is route-independent (style bible,
+     prompt compiler, post-process, registry + `provenance.json`
+     automation, QA loop) is built once and never re-done.
+  2. Generation needs an OpenAI API key in `.env` (gitignored, never
+     committed) — until it is present, the pipeline's acquisition and
+     post-process legs still run; only the generate call is inert.
+  3. Every generated asset records generator + model + prompt + date
+     in its `provenance.json` entry. That record is also the
+     Steam AI-disclosure artifact — raw AI output is not
+     copyrightable (USCO 2025), so provenance rigour is not optional.
+  4. Option D (Midjourney) stays permanently out of the automated
+     pipeline — no public API, automation violates its ToS.
+- **`Potential Assets/MCP-Axiomancer/images/` — OPEN-SOURCE ART FOUND
+  ONLINE (T direct, 2026-08-22 walkthrough), license per image NOT yet
+  on record.** T's answer settles WHERE the 116 card paintings came
+  from and rules out an unlicensed-scrape risk, but "open source" is a
+  family of licenses with different obligations (CC0 asks nothing;
+  CC BY requires attribution; some share-alike terms bind derivatives).
+  Standing rule until the per-image license is recorded: the loop may
+  NOT wire these into the card registry, because it cannot write a
+  truthful `provenance.json` entry without the source and license.
+  What the loop MAY do now: trace them (reverse-image / filename /
+  bundled-manifest search against the usual open-art hosts), and wire
+  any image whose license + source it can evidence. See the audit row
+  in `plan/AUDIT.md`; the remaining ask on T is only the source site
+  or asset-pack name, not a legal review.
   What this ruling does NOT touch: the LOCKED MECHANICS carve-out
   (Conviction / Surge / Dice — still needs a new T ruling), every
   hermeticity/determinism rule, the verify and deploy gates, the

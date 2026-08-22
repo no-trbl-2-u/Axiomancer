@@ -98,10 +98,15 @@
 - **NARROWED 2026-08-22:** THE PIPELINE LIBERATION (bearings) now
   grants the operative content authority directly (cards, keywords,
   content items, narrative, art acquisition), so the loop is no longer
-  blind to it. STILL OPEN for T: formally ratify or trim the
-  north-star draft itself (its R-C/R-F art contradiction, and queueing
-  N-2 register lint + N-3 re-voice — N-2 partially covered by queued
-  Phase 70).
+  blind to it.
+- **RESOLVED 2026-08-22 (walkthrough):** T ratified
+  `plan/north-star-mork-borg.md` **as-is**. The R-C/R-F art
+  contradiction resolves in R-F's favour (it is the later ruling and
+  self-declares precedence): art IS in loop scope, with the Woodcut
+  Codex masterplan surviving as the current art bearings rather than
+  as a bar on the visual layer — reconciliation written into that
+  file's header. Follow-ups queued: N-1 → **Phase 74**, N-2 → Phase 70
+  + Phase 74, N-3 → **Phase 75**.
 
 ### [gap] Art pipeline: two queued owner calls block everything [needs-user-call]
 - category: gap
@@ -121,8 +126,19 @@
 - next: /oversight
 - **PARTIAL 2026-08-22:** the loop-doable half shipped — conventions
   doc at `axiomancer-mobile/docs/asset-conventions.md` (recipe written
-  down), acquisition pipeline queued as build-plan Phase 71. The two
-  owner calls (§9 option pick; MCP-Axiomancer provenance) remain OPEN.
+  down), acquisition pipeline queued as build-plan Phase 71.
+- **RESOLVED 2026-08-22 (walkthrough), both owner calls answered:**
+  (1) §9 route — T picked **Option 1, A-then-B** (hosted gpt-image-2
+  behind a swappable adapter, local LoRA later if style drift binds);
+  filed in `plan/bearings.md` § "ART PIPELINE ROUTE", the options doc
+  §9, and queued as **Phase 73**. Needs an OpenAI key in `.env` before
+  the generate leg runs. (2) The 116 paintings — T: **"Online as open
+  source art."** That rules out an unlicensed-scrape risk but does NOT
+  by itself license them: the per-image license and source are still
+  unrecorded, so no truthful `provenance.json` entry can be written
+  yet. NARROWED follow-up (not blocking any phase): recover the source
+  site / asset-pack name — the loop may trace them itself and wire any
+  image whose license it can evidence. See the bearings row.
 
 ### [contract] Cross-package impact checklist misses the world/enemy surfaces mobile consumes
 - category: contract
