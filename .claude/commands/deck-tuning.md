@@ -27,10 +27,9 @@ description: Card Forge balance loop for Hazard-Pattern Combat — full card aut
 
 > **The Card Forge — tunes the combat CARD POOL and DECK economy for
 > Hazard-Pattern Combat.** Deck presets, draft weights, sandbox card
-> experiments, measurement-seat swap sweeps, and (with A/B evidence) library
-> card numerics. The enemy's SOLE bar is HP and status effects are the
-> EFFICIENT way to drop it — every card change is judged by whether it makes
-> status play more central and more satisfying. Engine constants
+> experiments, measurement-seat swap sweeps, and library card changes.
+> The enemy's SOLE bar is HP; status play, direct damage, and the
+> alt-wins all compete on CQI merit (spec 35). Engine constants
 > (threat/Conviction economy) are tuned manually — the combat-tuning loop was
 > trimmed at the monorepo merge; this skill owns the cards themselves.
 
@@ -44,13 +43,23 @@ description: Card Forge balance loop for Hazard-Pattern Combat — full card aut
 > recommended way to build confidence, not a precondition. Deliver
 > findings and changes on ONE new branch + PR. Nothing auto-lands on
 > `main`.
+>
+> **The transitional-library hold is LIFTED (THE PIPELINE LIBERATION,
+> T direct 2026-08-22 — see `plan/bearings.md`).** The 2026-08-08 "do
+> not tune, a redesign is coming" ruling named the retired 86-card
+> library; the 57-card Profane Canon (`docs/profane-canon.md`) IS the
+> library, CQI (spec 35) is its objective function, and this skill is
+> live against it. New keywords and new `specialMechanics` kinds are
+> also buildable now — through card-expert's FULL wiring checklist
+> with cross-package verifies, never half-wired. Library growth
+> updates the count pins in the same commit, citing the liberation.
 
 ## Disambiguation — three combat loops, one doctrine
 
 | | `/deck-tuning` ← **this file** | engine-constant tuning (manual) | `/combat-playtest` |
 |---|---|---|---|
 | Surface | Card pool + deck economy: presets, draft weights, sandbox cards, swap sweeps, library card numerics | Engine constants: threat damage, dice bag, Conviction/Signature economy (hand-tuned; the combat-tuning loop was trimmed at the monorepo merge) | None — evidence + report only |
-| Files it edits | `src/Cards/cards.sandbox-sets.ts` + `src/Cards/swap-pool/` (free), `src/Combat/combat.starter-deck-presets.ts`, `src/Combat/combat.deck-draft.ts`, `src/Cards/cards.library.ts` (guarded) | `src/Combat/combat.{threat,threat-sequences,engine,cards,dice,signature,deck}.ts` constants | `docs/reports/playtest-<ts>.md` only |
+| Files it edits | `src/Cards/cards.sandbox-sets.ts` (free), `src/Combat/combat.starter-deck-presets.ts`, `src/Combat/combat.deck-draft.ts`, `src/Cards/cards.library.ts` (direct), plus keyword wiring surfaces via the full checklist | `src/Combat/combat.{threat,threat-sequences,engine,cards,dice,signature,deck}.ts` constants | `docs/reports/playtest-<ts>.md` only |
 | Witness | `npm run combat-playtest` matrix + per-card usage (`--cards`) + per-preset rollups (`--deck=preset:all`) | `simulateHazardPatternCombat` / `npm run combat-sim` | matrix + `playtester` agents |
 
 Do not cross-contaminate: if the fix for an off-band cell is a threat
@@ -59,36 +68,35 @@ follow-up — do not compensate by inflating a card. If the finding is
 qualitative ("this stage feels flat"), it likely came FROM
 `/combat-playtest`; answer it here with cards, not prose.
 
-## North star — the pool exists to make status play the efficient path
+## North star — CQI (spec 35), not the retired status-dominance law
 
-Per `VISION.md` / `CLAUDE.md`, **status effects are the MAIN fun of combat.**
-HP is the only win condition (`isDefeated(enemy)`); the card pool is what makes
-status the efficient route there. So the forge's questions are:
+**The objective function is the Combat Quality Index**
+(`specs/35-objective-function-v2.md`, Phase 43). THE UNSHACKLING voided
+status-dominance for combat: direct damage is legal, and status play,
+damage, and the alt-wins compete on CQI merit. HP is the only win
+condition (`isDefeated(enemy)`). The forge's questions:
 
-1. **Does the pool keep status central at every stage?** The tier gates
-   (`maxCardTier` per stage profile) mean the early pool is thin — it must
-   still contain a live DoT line and a live control line, or the early game
-   degenerates into basic-attack trading.
+1. **Does every stage's pool offer real decisions?** The tier gates
+   (`maxCardTier` per stage profile) mean the early pool is thin — it
+   must still contain more than one live line to victory, or the early
+   game degenerates into one-note play.
 2. **Is every card exercisable and none dominant?** `deadCardRate` and the
    card-coverage e2e prove every card can be played; `dom`
    (`dominantCardShare`) and `H` (`usageEntropy`) prove no single card
    carries the deck. Dead cards and dominant cards are both forge failures.
-3. **Do the presets and draft weights produce honest archetypes?** Each of
-   the 10 theme presets must win through its own hallmark keywords (spec 32
-   §8-9) — and through the intended RESOLUTION PATH (the win-path mix
-   exposes a deck winning by concede/capitulate when its fantasy is DoT, or
-   vice versa). A `dot`-focus draft must out-DoT a `balanced` draft, and the
-   `aggro-brute` sim policy must remain the weak baseline (its
-   underperformance IS the design — status play must beat basic-attack
-   trading everywhere it matters).
-4. **Do experiments earn their place?** A sandbox card is promoted only after
-   it proves out across at least 2 stages and 2 policies without breaking the
-   balance-band e2e; a candidate takes a preset SEAT only by beating the
-   incumbent in swap-variant A/Bs (§3).
+3. **Do the presets and draft weights produce honest archetypes?** Each
+   preset on the stage ladder (§8) must win through its own theme
+   packages — and through the intended RESOLUTION PATH (the win-path mix
+   exposes a deck winning by concede/capitulate when its fantasy is DoT,
+   or vice versa).
+4. **Do experiments earn their place?** Sandbox A/Bs across >= 2 stages
+   and >= 2 policies remain the recommended confidence bar for a
+   promotion; obviously-right changes may ship on design judgment
+   (THE UNSHACKLING), with the matrix run after as the witness.
 
-A card change that makes a pure-strike deck keep pace with a status deck,
-collapses `statusEngagement`, or mints a new single-card spam line is a
-balance failure even when win rates look healthy.
+A card change that collapses CQI, mints a single-card spam line, or
+routes every win onto one resolution path is a balance failure even
+when win rates look healthy.
 
 ## 1. Purpose
 
@@ -111,8 +119,8 @@ sim — those are the machinery. The skill is the forge + the delivery layer.
 /deck-tuning --focus="dead cards in the tier-1 pool"  # free text: card/preset/archetype concern
 /deck-tuning --focus="preset archetype honesty"
 /deck-tuning --focus="swap-measure the reward-pool cards"
-/deck-tuning --focus="swap-sweep the erosion seats"
-/deck-tuning --preset=erosion                         # scope to ONE preset (the GitHub Action's dropdown)
+/deck-tuning --focus="swap-sweep the pilgrim seats"
+/deck-tuning --preset=pilgrim                         # scope to ONE preset (the GitHub Action's dropdown)
 /deck-tuning --preset=all --runs=60                   # explicit full sweep (the Action's defaults)
 /deck-tuning --cross-theme-swaps=true                 # owner-authorized out-of-theme measurement arms
 /loop 6h /deck-tuning              # periodic autonomous forging
@@ -123,7 +131,7 @@ sim — those are the machinery. The skill is the forge + the delivery layer.
 - `--preset=<id|all>` scopes the run to one preset: baseline that preset
   across all stages (`--deck=preset:<id>`), work its seats/theme swap pool,
   and report its rollup — plus the shared `--deck=preset:all` control when
-  swap arms need it. `all` (or absent) = the full ten-preset sweep. The
+  swap arms need it. `all` (or absent) = the full preset-ladder sweep. The
   GitHub Action (`.github/workflows/deck-tuning.yml`) surfaces this as a
   dropdown.
 - `--runs=<n>` sets runs-per-cell for every matrix invocation this run
@@ -165,13 +173,13 @@ The tunable surface is TIERED. Work from the freest tier inward:
   `--deck=preset:<id>+swap:<out>/<in>,...` (every copy of `out` replaced by
   `in`; control = the same invocation without the swap, identical seeds).
 
-  **The swap law: swap-ins come from OUTSIDE the shipped recipe but INSIDE
-  the preset's theme.** Two legal sources —
+  **The swap law: swap-ins come from OUTSIDE the shipped recipe.** Two
+  legal sources —
 
   | Swap-in source | `--sandbox` needed? | Typical question |
   |---|---|---|
-  | The theme's library cards not seated in the recipe — incl. the 10 reward-pool-only cards post-5/5/5 | no | "does this unseated/reward card earn a seat?" |
-  | The theme's swap-pool candidate set `swap-<theme>` (`src/Cards/swap-pool/<theme>.swap-pool.ts` — 30 spells each, 10/12/8 common/uncommon/rare; the pool data stays live, its dedicated witness test retired in Phase 41) | yes — `--sandbox=swap-<theme>` | "does this candidate beat the incumbent seat?" |
+  | Library cards not seated in the recipe (incl. reward-only cards) | no | "does this unseated/reward card earn a seat?" |
+  | A candidate set you author in `src/Cards/cards.sandbox-sets.ts` (the registry ships EMPTY — the pre-canon `src/Cards/swap-pool/` directory and its ten `swap-<theme>` sets were DELETED at the 2026-08-08 canon reset; author fresh sets against the Profane Canon as needed) | yes — `--sandbox=<setId>` | "does this candidate beat the incumbent seat?" |
 
   **The recolor-not-repartition rule is VOID (THE UNSHACKLING, T direct
   2026-08-08 — Phase 41).** A cross-theme swap-in is no longer a standing
@@ -227,13 +235,19 @@ The tunable surface is TIERED. Work from the freest tier inward:
   prohibition, it did not restore the old fields.)
   <!-- lexicon-ok: base-power -->
 
-- **Propose-only — structure.** New `specialMechanics` kinds, new verb
-  classes, changes to `toCombatCard` classification, `effectImpact`, or any
-  engine path are propose-only. You MAY prototype a structural idea as a
-  sandbox card, but only by composing EXISTING mechanics kinds and effect
-  ids — a card that needs a new engine capability is a written proposal, not
-  a prototype. (Precedent: enchant/disenchant passives are per-card engine
-  hooks, so those seats have no swappable candidates.)
+- **Buildable — structure, through the full checklist (THE PIPELINE
+  LIBERATION, T direct 2026-08-22 — supersedes the old propose-only
+  wall).** New `specialMechanics` kinds, verb classes, and effect ids
+  may be BUILT in this loop, but only end-to-end: card-expert's full
+  wiring checklist (engine + display + pricing + mobile
+  registry/gloss + editor union + atlas row + retheme-map entry), a
+  hermetic e2e, a library carrier, and the cross-package verifies —
+  all in the same PR. A half-wired kind is silently inert (the engine
+  switches carry `default:` arms), so no carrier-less or
+  display-less kinds, ever. What remains propose-only: changes to
+  `toCombatCard` classification / `effectImpact` semantics, engine
+  resolution control flow, and engine constants — those are
+  architecture, not card content.
 
 - **Sim evidence before edits.** Before any change, run the relevant matrix
   under at least two policies and record the before-state across the §4a
@@ -308,7 +322,7 @@ evidence. Where each metric lives: **cell/stage tables** (every run),
 | win-path mix (`vic/mer/cap/con/def`) | HOW the deck wins — V/M/D/R folds mercy+capitulate+concede; this un-folds it | a curve repair that shifts wins onto an unintended resolution path (e.g. concede carrying 71% of late wins) is a finding win rate alone hides. **Include the decomposition in every swap sweep.** |
 | `statusEngagement` | status play centrality | share of plays landing a status; > 0.2 non-impossible. BLIND SPOT: guard/rapport/SWAY/buff cards land no "status on enemy" — judge defensive/mercy seats by win delta + win-path shift, NOT by engagement or damage share |
 | `dotHpFraction` (dotFrac) | DoT as the primary damage path | > 0.25 under greedy |
-| `strikeFraction` (strike) | THE STRIKE IS DEAD (spec 32 v3) | expected ~0; a materially nonzero value means raw HP damage leaked in — an investigation trigger, not a tuning knob |
+| `strikeFraction` (strike) | direct-damage share (legal since THE UNSHACKLING) | informational: how much enemy HP falls to direct damage vs DoT/payoffs — judge the MIX against CQI, not against the retired zero-law |
 | `dominantCardShare/Id` (dom) | single-card spam | flag any card > 0.70 of attributed enemy-HP damage |
 | `deckUtilization` (util) | deck bloat | distinct-played / distinct-deck; low util on a big deck = seats that never matter |
 | `usageEntropy` (H) | decision spread | 0 = one-note spam, 1 = plays spread evenly; pairs with dom |
@@ -331,9 +345,9 @@ Card-level targets on top of the bands:
 | Single-card spam | no card > 70% of attributed enemy-HP damage (`dom` in the tables; `buildCombatSummary` is the attribution machinery) |
 | Dead cards | every library card shows plays in the card-coverage e2e and non-trivial usage somewhere in the full `--cards` matrix — for cards the preset matrix cannot reach, the witness is a SWAP-VARIANT sweep (§3), not the preset sweep |
 | FREE/PAID line balance | for every common/uncommon in its home preset, NEITHER printed line takes >85% or <15% of the card's plays — both tails mean one line is dead weight. Soft bands: the lint (`src/Combat/e2e/combat-playtest.line-telemetry.sim.test.ts`, thresholds `// PLAYTEST-CALIBRATION`) flags via `console.info`, never fails; cards tagged `intentionallyAsymmetric` (`Card`, `src/Cards/types.ts`) are exempt by design declaration |
-| Pool ratios (v3 — re-derive from the live library before relying on them) | direct damage = 0 by LAW (spec 32: THE STRIKE IS DEAD — a card printing raw HP damage is a spec violation, not a tuning finding); DoT >= 25%; control >= 15%; GUARD >= 1 per theme; Befriend >= 1; state-interactive >= 2 |
+| Pool ratios (historical v3 targets — re-derive from the live Profane Canon before relying on them; the direct-damage-zero law is RETIRED) | DoT >= 25%; control >= 15%; GUARD >= 1 per theme; Befriend >= 1; state-interactive >= 2 — treat as heuristics pending a CQI-derived re-derivation |
 | Per-stage pool health | each stage's eligible pool (`stageEligibleCardIds`) contains at least one live DoT, control, and defend line |
-| Archetype honesty | each of the 10 theme presets wins through its own HALLMARK keywords (spec 32 §8-9) AND its intended win path (win-path mix); `dot`-focus drafts land more DoT than `balanced` drafts; the `aggro-brute` POLICY stays the weak baseline (a sim policy — the v2 `aggro-strike` preset is retired) |
+| Archetype honesty | each stage-ladder preset (§8) wins through its own theme packages AND its intended win path (win-path mix); `dot`-focus drafts land more DoT than `balanced` drafts; the `aggro-brute` POLICY stays the weak baseline (a sim policy — the v2 `aggro-strike` preset is retired) |
 | Per-deck floors & ceiling (balance the VARIANCE, not the mean) | FLOORS are graded on the starter deck's design window only — every theme preset >= 40% early, >= 25% mid (target ratchets). **Late is informational telemetry, NOT a graded floor** (deck-progression model, owner-confirmed 2026-07-08: an un-matured starter losing late is correct, not a dead-on-arrival bug). The DOMINANCE ceiling applies on EVERY stage incl. late: NO preset > 98% anywhere — a 100% cell is a dominance finding regardless of stage. Impossible targets a hard 0% ceiling for starter presets. Live enforcement values are the `PRESET_FLOORS` (early+mid) / `PRESET_CEILING` (all stages) constants in the balance-band e2e (`// PLAYTEST-CALIBRATION`, pinned loose today) — ratchet floors toward these targets as forge items land; stage averages that hit band while presets sit at 0% on a graded stage or 100% anywhere are a FAIL |
 
 Every run's report includes the per-preset spread table (min/median/max
@@ -341,11 +355,13 @@ win rate per stage, one row per preset) — stage averages alone are not
 evidence; the round-2 battle lab showed a 53.7% mid average hiding four
 presets near 100% and four near 0%.
 
-### 4b. The keyword proving gate (the exit criteria for the registry cap)
+### 4b. The keyword quality scoreboard (the cap is retired)
 
-Spec 32 §3 caps the registry as a PROVING GATE: the owner intends to grow
-past the cap once the current keywords are proven correct. "Proven
-correct" is measurable — every run of this skill updates the scoreboard in
+**The registry is open to growth** (THE PIPELINE LIBERATION, T direct
+2026-08-22 — supersedes the spec 32 §3 proving-gate cap): a new keyword
+ships through card-expert's full wiring checklist with its atlas row in
+the same PR, no per-item owner ratification. The gate criteria survive
+as the per-keyword QUALITY scoreboard — every run of this skill updates
 `docs/keyword-atlas.md` (owned by `card-expert`; its row roster is the
 authoritative keyword count) against these criteria, per keyword:
 
@@ -357,10 +373,9 @@ authoritative keyword count) against these criteria, per keyword:
 | Theme-honest (hallmarks only) | the keyword's home preset wins through it (§4 archetype honesty), not around it |
 
 A keyword failing a criterion is a forge target, not a retirement
-candidate by default — fix the cards first, the keyword second. When
-EVERY atlas row is green across a full sweep, report "proving gate:
-satisfied" prominently — that is the owner's signal to consider
-opening the registry (`[needs-user-call]`; spec 32 §3 change).
+candidate by default — fix the cards first, the keyword second. A
+keyword that stays red across multiple full sweeps is a retirement
+candidate to raise in the report (ids die, never rename).
 
 Attribution today is per-CARD; per-KEYWORD engagement is derived by
 summing a keyword's cards. If that proxy proves too coarse, propose a
@@ -379,21 +394,21 @@ do not build it inside this loop).
 - If anything fails before you touch a file, stop and report.
 
 ### Step 1 — Read the forge surface
-- `src/Combat/combat.starter-deck-presets.ts` — the ten theme presets and
-  their card lists (preset id ↔ theme mapping in §8).
+- `src/Combat/combat.starter-deck-presets.ts` — the stage-ladder presets
+  and their card lists (roster in §8).
 - `src/Combat/combat.deck-draft.ts` — focus weights, size/copy defaults,
   guarantees (>= 1 defend, >= 1 status card).
 - `src/Combat/combat.stage-profiles.ts` — tier/level gates that shape each
   stage's eligible pool.
-- `src/Cards/cards.sandbox-sets.ts` + `src/Cards/swap-pool/` — existing
-  experimental sets and the ten swap-pool candidate sets.
+- `src/Cards/cards.sandbox-sets.ts` — the experiment registry (ships
+  empty since the 2026-08-08 canon reset; author sets as needed).
 - `src/Cards/cards.library.ts` — the literals you may eventually promote into
   or (guardedly) nudge.
-- For swap work: the estimates ledger
-  (`docs/reports/swap-pool-estimates-2026-07-18.json`) and the standing
-  verdicts/owner-call queue in the latest measurement residue
-  (`plan/tuning/2026-07-19-swap-pool-measurement-residue.md`) — don't
-  re-measure a settled arm or re-open a filed owner call.
+- Historical swap-program artifacts
+  (`docs/reports/swap-pool-estimates-2026-07-18.json`,
+  `plan/tuning/2026-07-19-swap-pool-measurement-residue.md`) describe
+  the RETIRED pre-canon library — read for method precedent only;
+  their card verdicts do not transfer to the Profane Canon.
 - Tally pool ratios per stage against the §4 targets (count each card class
   in the stage's eligible pool and compute its share).
 
@@ -500,9 +515,10 @@ and the headline status-engagement / band delta.
 - **Cross-theme swap-ins are permitted directly** (THE UNSHACKLING voided
   the recolor-not-repartition rule — Phase 41); tag a cross-theme arm
   `[cross-theme]` in the report and note which theme donated the card.
-- **Never invent new `specialMechanics` kinds, verb classes, or effect ids**
-  — sandbox prototypes compose existing kinds only; new kinds are
-  propose-only.
+- **Never ship a half-wired `specialMechanics` kind, verb class, or effect
+  id** — new kinds are legal (THE PIPELINE LIBERATION) but only through
+  the FULL wiring checklist with a library carrier and cross-package
+  verifies; sandbox-only prototypes still compose existing kinds.
 - **Never ship a sandbox set or swap variant as player-facing content** —
   promotion into `cards.library.ts` is the only shipping path, and a recipe
   seat change additionally needs the color-law arithmetic.
@@ -532,39 +548,36 @@ and the headline status-engagement / band delta.
 
 ## 8. Quick reference
 
-**Preset ↔ theme ↔ swap set (ids do NOT match — this mapping is load-bearing
-for swap sweeps):**
+**The preset roster is the STAGE LADDER (Profane Canon, 2026-08-08 —
+the pre-canon ten per-theme presets and their `swap-<theme>` sets are
+retired):**
 
-| Preset id | Theme | Swap-pool set |
-|---|---|---|
-| `erosion` | affliction | `swap-affliction` |
-| `oratory` | peroration | `swap-peroration` |
-| `foundry` | forge | `swap-forge` |
-| `penitent` | akrasia | `swap-akrasia` |
-| `standstill` | control | `swap-control` |
-| `augury` | oracle | `swap-oracle` |
-| `tithe` | harvest | `swap-harvest` |
-| `grace` | charm | `swap-charm` |
-| `bastion` | bulwark | `swap-bulwark` |
-| `refrain` | echo | `swap-echo` |
+| Preset id | Name | Stage | Focus |
+|---|---|---|---|
+| `threadbare` | The Threadbare Office | early | balanced |
+| `pilgrim` | The Pilgrim's Burden | mid | dot |
+| `apostate` | The Apostate's Canon | late | dot |
+
+Read the live roster from `COMBAT_DECK_PRESETS`
+(`src/Combat/combat.starter-deck-presets.ts`) — this table is a cache.
 
 **Tunable surface (tiered):**
 
 | Tier | File | What |
 |---|---|---|
-| Free (sandbox) | `src/Cards/cards.sandbox-sets.ts` | named sets: new `Card` literals + `{ cardId, patch }` overrides; example set `forge-example` |
-| Free (sandbox) | `src/Cards/swap-pool/<theme>.swap-pool.ts` | the ten swap-pool candidate sets (30 spells each) — seat candidates, never player-facing |
-| Free (composition) | `src/Combat/combat.starter-deck-presets.ts` | the 10 theme preset card lists (color-law arithmetic applies to shipping changes) |
+| Free (sandbox) | `src/Cards/cards.sandbox-sets.ts` | named sets: new `Card` literals + `{ cardId, patch }` overrides (registry ships empty — author sets as needed) |
+| Free (composition) | `src/Combat/combat.starter-deck-presets.ts` | the stage-ladder preset card lists (§8) |
 | Free (composition) | `src/Combat/combat.deck-draft.ts` | focus weights (4x), draft size (10), max copies (2), guarantees |
-| Free (measurement) | `+swap:` variants of preset recipes | temporary in-theme seat swaps (treatment arm only) — evidence device, never ships as-is; cross-theme arms only under `--cross-theme-swaps=true` (§3) |
-| Guarded (A/B first) | `src/Cards/cards.library.ts` | effect intensity/duration, mechanic amounts, rider numerics + the `// pts:` comment (no damage fields exist — spec 32) |
-| Propose-only | — | new mechanics kinds, verb classes, `toCombatCard` / `effectImpact`, engine paths, enchant/disenchant seat growth |
+| Free (measurement) | `+swap:` variants of preset recipes | temporary seat swaps (treatment arm only) — evidence device, never ships as-is |
+| Direct (evidence recommended) | `src/Cards/cards.library.ts` | card literals: numerics, riders, new cards + the `// pts:` comment and count-pin bumps |
+| Buildable (full wiring checklist) | `src/Cards/types.ts` + engine/display/pricing/mobile/editor surfaces | new keywords, `specialMechanics` kinds, effect ids — via card-expert's 12-step checklist + hermetic e2e + cross-package verifies (THE PIPELINE LIBERATION, 2026-08-22) |
+| Hand-tuned (not this loop) | engine constants; LOCKED MECHANICS | threat/Conviction economy; Conviction / Surge / Dice removal or no-op (needs a new T ruling) |
 
 **Deck-selection grammar (shared by `npm run combat-playtest` and
 `npm run combat`):**
 `preset:<id>[+swap:<out>/<in>,...]` — every copy of `out` becomes `in`,
 loud failure on a bad pair; sandbox swap-ins need their set applied via
-`--sandbox` · `preset:all` — sweep all ten presets and print the
+`--sandbox` · `preset:all` — sweep every preset and print the
 per-preset × stage rollups · `draft:<focus>` — the CLI accepts
 `dot|control|utility|damage|balanced` (`rush-execute` exists in the
 `CombatDeckFocus` type for preset metadata but is not CLI-draftable) ·

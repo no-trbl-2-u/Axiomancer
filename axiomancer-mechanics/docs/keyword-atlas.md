@@ -1,8 +1,11 @@
 # Keyword atlas — the registry's scoreboard and prior-art cache
 
 Owned by the `card-expert` agent (`.claude/agents/card-expert.md`).
-One row per registry keyword (spec 32 §3 — 30, amended by phase 29,
-2026-07-11 — see `plan/phases/phase_29_keyword_registry.md`). Two jobs:
+One row per registry keyword. The registry is GROWABLE (THE PIPELINE
+LIBERATION, T direct 2026-08-22 — supersedes the spec 32 §3 30-cap;
+historical amendments: phase 29, 2026-07-11): a new keyword ships
+through card-expert's full wiring checklist with its atlas row +
+receipts in the same PR, no per-item owner ratification. Two jobs:
 
 1. **Prior-art cache.** The `Dawncaster analogues` cell caches KB
    lookups so they aren't re-derived every session. Every analogue
@@ -12,9 +15,10 @@ One row per registry keyword (spec 32 §3 — 30, amended by phase 29,
    from `/deck-tuning`, in order **E**xercised / **P**riced honestly /
    not **D**ominant / **T**heme-honest (T applies to the 19 theme
    hallmarks; utility keywords carry `T:n/a`). Marks: `+` passing,
-   `!` failing (forge target), `?` not yet assessed. When all rows
-   are `+` across a full sweep, the proving gate is satisfied and the
-   owner decides whether to open the registry past its current count.
+   `!` failing (forge target), `?` not yet assessed. The registry is
+   already open to growth (see header); the criteria are the QUALITY
+   scoreboard — a row red across multiple full sweeps is a retirement
+   candidate to raise in the tuning report.
 
 Update discipline: `/deck-tuning` (via card-expert) updates affected
 rows in the same PR as any card/keyword change. Semantics cells are
@@ -34,12 +38,11 @@ one-line summaries — spec 32 §3 stays authoritative.
   cards per keyword — keywords get drilled, not orphaned.
 - **BARRIER/GUARD merge** landed in Phase 29 (BARRIER folded into
   GUARD's semantics — see the row below).
-- **Row-count gate (restated per the detailed plan §0.1 C-5).** Row
-  count changes ONLY via ratified add/retire. TICK was owner-ratified
-  killed 2026-07-10 (spec 32 amendment #2, rides Phase 30): when that
-  retirement lands the count drops again unless the owner ratifies a
-  replacement row — the "exactly 30" framing above yields to earned
-  support.
+- **Row-count gate — RETIRED (THE PIPELINE LIBERATION, 2026-08-22).**
+  Row count grows with earned rows (full wiring + receipts, same PR)
+  and shrinks by deliberate retirement (ids die, never rename); no
+  per-item owner ratification either way. Historical: TICK was
+  owner-ratified killed 2026-07-10 (spec 32 amendment #2, Phase 30).
 
 **Phase 29 changes (2026-07-11):** BARRIER row removed (merged into
 GUARD — see its semantics); CONJURE row removed (retired, zero library

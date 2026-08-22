@@ -74,7 +74,7 @@ test('axio_overview publishes live doctrine, not the retired STRIKE IS DEAD ban'
 
 test('axio_cards finds a known card by keyword substring', async () => {
   const replies = await drive([
-    { jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'axio_cards', arguments: { theme: 'affliction', limit: 3 } } },
+    { jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'axio_cards', arguments: { theme: 'rot', limit: 3 } } },
   ])
   const text = replies.get(1)?.result?.content?.[0]?.text ?? ''
   assert.ok(text.length > 0)
@@ -89,12 +89,14 @@ test('axio_effects finds bleed by name', async () => {
   assert.match(text, /Bleed \[debuff/)
 })
 
-test('axio_keywords returns the full 30-row registry when term is omitted', async () => {
+test('axio_keywords returns the full registry when term is omitted', async () => {
   const replies = await drive([
     { jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'axio_keywords', arguments: {} } },
   ])
   const text = replies.get(1)?.result?.content?.[0]?.text ?? ''
-  assert.equal(text.split('\n').filter(Boolean).length, 30)
+  // The registry is growable (THE PIPELINE LIBERATION, 2026-08-22) — assert
+  // a healthy roster, not a pinned count.
+  assert.ok(text.split('\n').filter(Boolean).length >= 20)
 })
 
 test('unknown tool name errors', async () => {

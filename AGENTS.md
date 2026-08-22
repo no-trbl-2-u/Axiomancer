@@ -55,12 +55,15 @@ be verified against it before a PR lands:
 - `src/Combat/**`
 - `src/Cards/**`
 - `src/Effects/**`
+- `src/Enemy/**` (mobile renders `portraitAsset` in the event + combat
+  presenters and imports `EnemiesByMap`)
+- `src/NPCs/**` (dialogue trees drive mobile's dialogue route)
+- `src/World/**` — ALL of it, including `MapEvents/`, `Continents/`
+  (mobile's `layout-engine-parity` test breaks on any engine map-node
+  change), `Labyrinth/`, `Blacksmith/`, `RestChoice/` (the successor of
+  the retired `Rest/`), and the world core modules (`map.registry.ts`,
+  `map.library.ts`, `encounter.ts`, `quest.*.ts`, `dialogue.runtime.ts`)
 - `src/index.ts`
-- `src/World/LootCache/**`
-- `src/World/Gathering/**`
-- `src/World/Hazard/**`
-- `src/World/Rest/**`
-- `src/World/QuestBoard/**`
 
 If a diff matches any of the above, run
 `npm run verify -w axiomancer-mobile` and block the PR on failure.
@@ -78,8 +81,9 @@ This checklist is also mechanized in CI: the owning job in
 `.github/workflows/verify-mechanics.yml` diffs the pushed range against
 the impact paths above and runs the mobile verify / editor type-check
 in the same installed environment. Browser evidence is routed by subsystem:
-Combat/Cards/Effects → Combat; Hazard → Hazard; Gathering → Gathering;
-LootCache/Rest/QuestBoard → Encounter routing. Shared, lockfile, workflow,
+Combat/Cards/Effects → Combat; Enemy → Combat + Encounter; Hazard →
+Hazard; Gathering → Gathering; every other `World/**` path and
+`NPCs/**` → Encounter routing. Shared, lockfile, workflow,
 classifier, or unknown-history changes fail closed to every journey. Run the
 consumer gates locally anyway — CI catching a break means it already reached
 `main`.
@@ -108,7 +112,9 @@ Live, at the repo root:
 - `.claude/agents/` — `scout`, `reader`, `mechanics-expert`, `playtester`,
   `card-expert` (card/keyword design AND implementation — the working
   agent behind `/deck-tuning`; grounded in the Dawncaster corpus — see
-  "Game knowledge base" below).
+  "Game knowledge base" below), `content-curator` (narrative
+  writer-shipper — dialogue trees, event prose, flavor — `/iterate`'s
+  content-gap worker).
 
 Commands write their reports to `<package>/docs/reports/` (created on
 demand). Each domain command is self-contained — it does not read

@@ -2050,6 +2050,70 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       (content/docs; queued 2026-08-20 via `/oversight` from the
       product-name naming-session ruling) Brief: to generate.
 
+- [ ] Phase 68 — Keyword-drift hardening. Close the silent surfaces the
+      2026-08-22 content-pipelines audit found so the now-open keyword
+      registry (THE PIPELINE LIBERATION) grows safely: derive mobile
+      KW-2's mechanic-kind check from `CardSpecialMechanic['kind']`
+      instead of its hardcoded 17-kind array; add drift tests asserting
+      the three hand-synced glyph tables agree (mobile
+      `glyphShapes.ts`, editor `CardFace.tsx` KwGlyph,
+      `scripts/build-catalog.mjs`) and that the editor's `wx.ts`
+      KEYWORDS vocabulary contains no retired terms; regenerate
+      `axio_keywords` from data instead of hand-parsing
+      `docs/keyword-atlas.md` (or add an atlas-vs-registry parity
+      check) and drop the server's hardcoded "/30" denominators.
+      (tests/contract; queued 2026-08-22 per THE PIPELINE LIBERATION)
+      Brief: to generate.
+- [ ] Phase 69 — Card-editor round-trip fidelity. `CardDraft`
+      (`axiomancer-card-editor/src/types.ts`) omits `theme`,
+      `paidSummary`, `persistentEffect`, `intentionallyAsymmetric`,
+      `glyph`, and codegen drops the `// pts:` arithmetic comment — an
+      editor upsert of an existing card silently destroys data the
+      test suites and pricing doctrine depend on. Carry every Card
+      field through draft + codegen (preserving `// pts:`), and add a
+      round-trip test (library literal → draft → codegen → equal).
+      (contract; queued 2026-08-22 from the content-pipelines audit)
+      Brief: to generate.
+- [ ] Phase 70 — Prose lint for shipped `.ts` content + naming law in
+      CI. `scripts/check-lexicon.mjs` scans `.md` only, so every
+      player-facing string (dialogue trees, `MapEvents/content.ts`,
+      `act*.content.ts`, `*.copy.ts`) ships un-linted; extend it (or a
+      sibling) to the authored `.ts` content surfaces with a
+      voice-rule layer (retired terms, thee/thou ban, exclamation
+      marks), and wire `scripts/check-naming-law.mjs` into an npm
+      script + CI leg. Complements queued Phase 66 (doctrine prose in
+      docs). (content/tests; queued 2026-08-22 per THE PIPELINE
+      LIBERATION — narrative shipping is authorized, so its guardrail
+      should be mechanized) Brief: to generate.
+- [ ] Phase 71 — Art acquisition pipeline (V4 accelerant, no
+      generation). Convert the proven one-off Doré acquisition into a
+      loop-runnable path: the phase case for adding `sharp` (dev-only,
+      root or mobile scripts), an ingest script encoding the recorded
+      recipe (grade → resize <= 640px → WebP + provenance entry, per
+      `axiomancer-mobile/docs/asset-conventions.md`), a
+      provenance-completeness + registry-vs-directory drift test under
+      `assets/`, and ingest of the two `tmp-images/` stragglers.
+      Public-domain woodcuts only — image GENERATION stays blocked on
+      the AI_ART_PIPELINE_OPTIONS §9 owner call. (content/tooling;
+      queued 2026-08-22 per THE PIPELINE LIBERATION) Brief: to
+      generate.
+- [ ] Phase 72 — Harness grants for content work. Apply the allowlist
+      additions the 2026-08-22 audit specified to
+      `.claude/settings.json` (baseline:check/regen, the minigame
+      CLIs, critique:drive, catalog/devlog/site builds, npx
+      vitest/tsx/playwright/expo, check-lexicon/check-naming-law, the
+      root `npm test`, and the PR-delivery verbs `git checkout -b` /
+      `git push -u origin` / `gh pr create|view|merge --auto` /
+      `gh issue close`) — the remote session that shipped the
+      liberation was permission-blocked from editing the settings file
+      itself, so this lands from an attended/local session. Also: give
+      the `reader` agent tools that exist in CI (its
+      `mcp__claude-in-chrome__*` roster is granted nowhere — swap to
+      Playwright tools or grant them), and decide whether
+      `_claude-skill.yml` should pass the kb-query/axio-query MCP
+      servers to CI runs. (contract; queued 2026-08-22 from the
+      content-pipelines audit) Brief: to generate.
+
 > **Note (issue-triage 2026-07-19):** issue #132 asked for a
 > `devlog-build` GitHub Action; re-triage found it re-classified as
 > `enhancement` (was `docs`, stale after the owner corrected the issue
@@ -2407,6 +2471,21 @@ See the status rows above; generate briefs on demand.
   `plan/naming-session-2026-08-12.md` §6 (closed), `plan/bearings.md`'s
   name line, and `new-north-star.prompt.md`; brief for 67 still to
   generate.
+
+- **2026-08-22** — actor: **T via remote Claude Code session** (the
+  content-pipelines-audit session, PR #228 — not Hermes). Action:
+  **added Phases 68-72** (keyword-drift hardening; card-editor
+  round-trip fidelity; `.ts` prose lint + naming law in CI; art
+  acquisition pipeline; harness grants for content work). Confirmed
+  T's request: yes — T reviewed the content-pipelines audit and
+  directed *"what do you need from me to free up ALL these pipelines?
+  Try to do it yourself first, then get back to me"*; the same
+  directive is recorded as THE PIPELINE LIBERATION in
+  `plan/bearings.md`. T's stated reason: ensure the nexus loop has
+  the freedoms and capabilities every content pipeline needs. The
+  doc/doctrine unblocks shipped in the same PR; these five phases
+  carry the engineering remainder. Resulting commit: this one
+  (branch `claude/content-pipelines-audit-43v3d7`, PR #228).
 
 ## Phase log (commit hashes)
 

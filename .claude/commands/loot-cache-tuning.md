@@ -98,10 +98,14 @@ The empirical witnesses, in order of preference:
 - **Numeric only.** The skill may change values in `LOOT_CACHE_TUNING`
   (per-layer `difficulty`, `trapBite`, `pickPoolSize`, `maxPushesPerLayer`,
   `jamSlipThreshold`, `insightBonusDice`, `falseBottomBonus`, `tithesBonus`,
-  `falseBottomFloor`). Structural changes (layer count, a second Insight
-  charge, new resolution branches, engine edits beyond the jam-threshold
-  scaling already shipped) are **propose-only**; layer/keepsake PROSE is
-  narrative surface — never edit copy under this skill.
+  `falseBottomFloor`). **NEW CONTENT ITEMS are in scope** (THE PIPELINE
+  LIBERATION, T direct 2026-08-22 — `plan/bearings.md`): new keepsakes
+  and new layer CONTENT composed of existing resolution branches,
+  shipped with tests and policy-EV evidence. Structural changes (layer
+  count, a second Insight charge, new resolution branches, engine edits
+  beyond the jam-threshold scaling already shipped) stay
+  **propose-only**; layer/keepsake PROSE ships via the narrative path
+  (content-curator / story work), not this numbers loop.
 - **The two contracts are locked.** Anything that hides a layer's
   difficulty, lets Insight reveal/reroll instead of adding a die, or pushes
   the kill floor below 1 vitae is rejected outright.

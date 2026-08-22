@@ -129,10 +129,14 @@ axes in the quick-reference table below.
 
 - **Numeric and content-level only.** The skill may change card top/bottom
   effect values, bottom mana costs, hazard card round thresholds, round counts,
-  and reward/penalty magnitudes in the library files. Structural rules changes
-  (new progress types, new die states, new card verb classes, changes to the
-  state machine or engine functions) are **propose-only** — they are written
-  to the suggestions section but never applied without T approval.
+  and reward/penalty magnitudes in the library files. **NEW CONTENT ITEMS
+  are in scope** (THE PIPELINE LIBERATION, T direct 2026-08-22 —
+  `plan/bearings.md`): new hazard cards composed of existing verb
+  classes, new hazards, and new subquests, shipped with tests and CLI
+  evidence. Structural RULES changes (new progress types, new die
+  states, new card verb classes, state-machine/engine edits) stay
+  **propose-only** — written to the suggestions section, never applied
+  without T approval.
 - **Baseline before delta.** Every proposed change is compared against the
   current shipped values. The report records `old → new` with a one-line
   rationale for each change. No change is applied without a documented reason
