@@ -34,6 +34,177 @@
 > RESOLVED note, same convention as every other closed row in this
 > file.
 
+### [divergence] Transitional-library ruling outlived its subject — card authority is a dead letter [needs-user-call]
+- category: divergence
+- impact: 9
+- ease: 9
+- detail: filed 2026-08-22 by the content-pipelines audit
+  (`docs/reports/content-pipelines-audit-2026-08-22.md`, PR #228).
+  `plan/bearings.md`'s "THE CURRENT CARD LIBRARY IS TRANSITIONAL — do not
+  spend tuning effort on it" ruling (T direct 2026-08-08) names the 86-card
+  library that was replaced by the 57-card Profane Canon the same day, and
+  Phase 43 has since shipped the CQI objective function the ruling was
+  waiting on. No bearing lifts the order; `skills/digest.md:79` still
+  enforces it. Net: `/deck-tuning`'s "full card authority" cannot be
+  exercised — no card content ships autonomously against an expired
+  rationale. Needs one line from T: lift, or restate against the canon.
+- next: /oversight
+
+### [docs] Card-work docs describe a dead world — /deck-tuning is unexecutable as written
+- category: docs
+- impact: 8
+- ease: 7
+- detail: filed 2026-08-22 by the content-pipelines audit.
+  `.claude/agents/card-expert.md` teaches "70 cards / 10 themes / exactly
+  30 keywords / THE STRIKE IS DEAD / sandbox-first is law";
+  `.claude/commands/deck-tuning.md` §8 references the deleted
+  `src/Cards/swap-pool/` and 10 retired preset ids (live: threadbare /
+  pilgrim / apostate); neither file mentions CQI (spec 35) once;
+  `SANDBOX_CARD_SETS` is `{}` yet the skill cites a `forge-example` set;
+  `.github/workflows/deck-tuning.yml` dropdown offers only dead preset
+  ids; `axiomancer-mechanics/CLAUDE.md:22-32` and
+  `docs/profane-canon.md:33` carry the same drift while
+  `cards.library.ts:22` states the opposite. A tick invoking /deck-tuning
+  today fails at its own Step 1. Rewrite the set against the Profane
+  Canon + CQI in one pass.
+- next: /iterate
+
+### [gap] THE LONGER LEASH is unratified and invisible to the loop [needs-user-call]
+- category: gap
+- impact: 9
+- ease: 8
+- detail: filed 2026-08-22 by the content-pipelines audit.
+  `plan/north-star-mork-borg.md` R-D (full authority to ship
+  NPCs/regions/beats/copy) and R-F (bold authority over new cards,
+  effects, keywords, narration, art, UI, the map) are headed
+  DRAFT-FOR-RATIFICATION; its own follow-ups N-1 (fold into bearings /
+  spec 34), N-2 (register lint — R-D is conditioned on it), N-3
+  (re-voice) appear in no build-plan row and no candidates file, and
+  bearings has no longer-leash entry, so a tick reading bearings sees
+  only the narrow 2026-08-08 postures. R-C ("prose only") also
+  contradicts R-F (art in scope) inside the same draft. Needs T:
+  ratify/trim, then N-1 folds it in.
+- next: /oversight
+
+### [gap] Art pipeline: two queued owner calls block everything [needs-user-call]
+- category: gap
+- impact: 8
+- ease: 9
+- detail: filed 2026-08-22 by the content-pipelines audit. (1)
+  `plan/ideas/AI_ART_PIPELINE_OPTIONS.md` §9 "Decision needed"
+  (A gpt-image / B ComfyUI+FLUX / C hosted / Hold) has been unanswered
+  since 2026-07-19 — one line unblocks art-1. (2)
+  `Potential Assets/MCP-Axiomancer/images/` holds 116 painted card-art
+  PNGs keyed by live card names ("V7 fuel" per the masterplan) with no
+  license/provenance line — unusable until origin is stated. Also
+  loop-doable regardless of the calls: write the asset naming/ingest
+  convention doc, add a provenance-completeness + registry-drift test,
+  commit the alpha-matte/WebP post-process recipe (currently tacit
+  knowledge recorded only in provenance.json prose) behind a phase case.
+- next: /oversight
+
+### [contract] Cross-package impact checklist misses the world/enemy surfaces mobile consumes
+- category: contract
+- impact: 8
+- ease: 7
+- detail: filed 2026-08-22 by the content-pipelines audit. AGENTS.md's
+  impact checklist + `scripts/ci-e2e-scope.mjs` omit `src/Enemy/**`,
+  `src/World/MapEvents/**`, `src/World/Continents/**`,
+  `src/World/map.registry.ts` / `map.library.ts`, `src/NPCs/**`,
+  `src/World/Labyrinth/**`, `src/World/Blacksmith/**` — all consumed by
+  mobile (e.g. an engine map-node change breaks mobile's
+  `layout-engine-parity.test.ts` and CI never runs it; `portraitAsset`
+  renders via two presenters). The checklist's `src/World/Rest/**` entry
+  points at a directory that no longer exists (`RestChoice/` is the live
+  successor, unguarded). Extend checklist + classifier, delete the dead
+  entry.
+- next: /iterate
+
+### [gap] Narrative has no shipping verb; authored narration never reaches players until Phase 58
+- category: gap
+- impact: 7
+- ease: 6
+- detail: filed 2026-08-22 by the content-pipelines audit. Story ships
+  only via a hand-written build-plan row into /ship-a-phase; the three
+  design skills are attended-only; `skills/iterate.md` §content still
+  instructs spawning a `content-curator` agent that does not exist in
+  `.claude/agents/`. Meanwhile `MapEventPayload.description` is authored
+  on 59/74 nodes but `ResolvedEvent` never carries it — players get
+  three-word placeholders (queued as Phase 58, "ship it first").
+  Sequence: ship 58, fix or drop the content-curator reference, then a
+  narrative shipping skill (draftable propose-only now; its authority
+  language waits on the longer-leash call).
+- next: /iterate
+
+### [contract] New-keyword wiring drifts silently across seven surfaces
+- category: contract
+- impact: 6
+- ease: 6
+- detail: filed 2026-08-22 by the content-pipelines audit. The two
+  switches that matter (`combat.engine.ts` mech switch,
+  `combat.cards.ts` mechanicText) carry explicit defaults so a new kind
+  type-checks clean while inert; no assertNever exists in mechanics.
+  Untested sync surfaces: glyph tables triplicated across mobile
+  `glyphShapes.ts` / editor `CardFace.tsx` / `scripts/build-catalog.mjs`;
+  the editor's independent `wx.ts` KEYWORDS vocabulary (still lists dead
+  spec-32-v2 words); `axio_keywords` hand-parses `docs/keyword-atlas.md`
+  and hardcodes "/30" (unlike axio_cards/axio_effects which auto-regen);
+  mobile KW-2 iterates a hardcoded 17-kind array, not the union.
+  card-expert's keyword checklist stops at mechanics (omits mobile
+  gloss, CARD_EFFECT_SET, atlas, retheme-map.json, editor surfaces).
+  Derive the lists, add drift tests, extend the checklist.
+- next: /iterate
+
+### [contract] Allowlist omits the commands the skills instruct — attended ticks prompt-wall
+- category: contract
+- impact: 6
+- ease: 8
+- detail: filed 2026-08-22 by the content-pipelines audit. CI is masked
+  by skip-permissions, but local/attended ticks stall on:
+  `npm run baseline:check` / `baseline:regen` (the latter being
+  guard.mjs's own prescribed escape hatch for its baseline write-block),
+  the minigame CLIs (`npm run hazard` / `gathering` / loot-cache /
+  quest-board), `critique:drive`, `devlog:build` / `catalog*`,
+  `npx expo|playwright|tsx|vitest`, `check-lexicon.mjs` invocations, and
+  every tuning skill's PR-delivery verbs (`git checkout -b`,
+  `git push -u origin <branch>`, `gh pr create` — only
+  `git push origin main` is allowlisted). Also: the `reader` agent
+  declares `mcp__claude-in-chrome__*` tools granted nowhere (dead in
+  CI), and CI grants no kb-query/axio-query MCP tools. Extend
+  `.claude/settings.json` + `_claude-skill.yml` grants.
+- next: /iterate
+
+### [tests] No growth doctrine for pinned content counts [needs-user-call]
+- category: tests
+- impact: 6
+- ease: 8
+- detail: filed 2026-08-22 by the content-pipelines audit. Five
+  hardcoded 57-card pins, `new-enemies.engine.test.ts`'s exactly-52
+  roster, glossary pinned at 42, and `curated-library.engine.test.ts`
+  pinning `addedIn === '2026-08-08'` for every card (a card added today
+  fails the suite). Deliberateness gates are good, but nothing documents
+  that bumping them is the expected part of a content add vs. forbidden
+  tampering — the loop must edit the test that guards growth with no
+  doctrine for when that is legitimate. Needs a one-line ruling (e.g. "a
+  content add updates its pins in the same commit, citing this ruling"),
+  then bake it into the add-a-card / add-an-enemy checklists.
+- next: /oversight
+
+### [content] Shipped in-game prose is un-linted; naming law unwired
+- category: content
+- impact: 5
+- ease: 6
+- detail: filed 2026-08-22 by the content-pipelines audit.
+  `scripts/check-lexicon.mjs` scans `.md` only — every dialogue tree,
+  `MapEvents/content.ts`, `act*.content.ts`, and `rest.copy.ts` string
+  is `.ts`, so the prose players actually see has no retired-term or
+  voice lint at write time or in CI (Phase 66 as queued still targets
+  docs). `scripts/check-naming-law.mjs` exists with tests but has no npm
+  script and no CI hook — NL-4/5/8 run only if invoked by hand. Extend
+  the lexicon lint to authored `.ts` content surfaces and wire the
+  naming law into verify.
+- next: /iterate
+
 ### [docs] Scheduled playtest references name retired Hazard and Fishing Village route identities
 - category: docs
 - impact: 7
