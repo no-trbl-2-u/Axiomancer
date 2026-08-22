@@ -313,6 +313,8 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-20T13:25:22Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-20T14:18:48Z | slash-prompt | /oversight | unknown | user/ci | /oversight |
 | 2026-08-20T14:18:52Z | skill | oversight | claude-sonnet-5 | main | - |
+| 2026-08-20T16:39:14Z | subagent | scout | claude-fable-5 | main | Research Mörk Borg design signature |
+| 2026-08-20T20:05:33Z | subagent | scout | claude-fable-5 | main | Research Mörk Borg design signature |
 | 2026-08-21T02:05:08Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-21T07:16:00Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-21T09:20:31Z | slash-prompt | /digest | unknown | user/ci | /digest |
