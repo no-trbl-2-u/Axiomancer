@@ -205,6 +205,7 @@ Defined under `.claude/agents/`. Spawn aggressively.
 | `reader` | Fresh-eyes observation of the local build | Findings array |
 | `playtester` | Play the game via the running expo-web build (Playwright) — the real `/critique` observer for this project | Structured playtest report |
 | `mechanics-expert` | Second opinion on a mechanic design / balance call | Structured analysis (never code) |
+| `content-curator` | Author + ship narrative content (dialogue trees, event prose, flavor) in the house voice — `/iterate`'s content-gap worker | Shipped content through the gates |
 
 For `/critique`, prefer **`playtester`** (it already drives the
 app end-to-end) over the generic `reader`; there is no hosted URL
@@ -271,12 +272,13 @@ ambiguity.)
      Read "looser" as the governing constraint: this is a re-skin plus
      permission, **not** a ground-up redesign — engine mechanics, keyword
      *behavior*, the dice model and the minigame doctrines all survive.
-     **Phase 42** authors the bible (`specs/34-dark-fantasy-campaign.md`)
-     and **Phases 44a-44i** execute it across cards, keywords, themes,
-     enemies, world, story, morality and the product shell. Until 42 is
-     ratified, do NOT rename anything and do NOT improvise dark-fantasy
-     flavor in passing — the retheme runs off a map and a lint
-     (Phase 44a), not opportunistically. Keywords that already read dark
+     **Phase 42** authored the bible (`specs/34-dark-fantasy-campaign.md`)
+     and **Phases 44a-44i** executed it across cards, keywords, themes,
+     enemies, world, story, morality and the product shell — **all
+     shipped as of 2026-08-22, so the "until 42 is ratified, do not
+     improvise flavor" gate is SATISFIED and lifted**. Dark-fantasy
+     flavor is authorable; the retheme map + lexicon lint (Phase 44a)
+     remain the guardrails. Keywords that already read dark
      fantasy (POISON, BLEED, MARK, DOOM, THORNS, GUARD, RIPOSTE) are
      expected to survive unchanged; renaming what already works is churn.
   What does NOT fall (still binding): every hermeticity and determinism
@@ -298,10 +300,108 @@ ambiguity.)
   first); it is simply no longer mandatory. Everything else is unchanged:
   the verify gate still runs pre-commit, the deploy gate still runs
   post-push, and no force-push or destructive git op is permitted.
-- **THE CURRENT CARD LIBRARY IS TRANSITIONAL — do not spend tuning
-  effort on it** (T direct, /oversight 2026-08-08). Asked to rule on
+- **THE PIPELINE LIBERATION (T direct, remote session 2026-08-22) —
+  every content pipeline is open to the loop.** Provenance: T
+  commissioned a full content-pipelines audit
+  (`docs/reports/content-pipelines-audit-2026-08-22.md`, PR #228) with
+  the framing *"New/revamp cards, New keywords/effects, new narration
+  content, New art, new everything. I want to make sure my nexus loop
+  has the freedoms and capabilities it needs"*, then answered the
+  audit's findings with *"what do you need from me to free up ALL
+  these pipelines? Try to do it yourself first"*. Under the
+  source-of-truth hierarchy that is T's latest explicit decision, and
+  it rules the following:
+  1. **The transitional-library ruling is LIFTED.** The 2026-08-08
+     "do not tune" order named the 86-card library; that library was
+     replaced by the 57-card Profane Canon the same day and Phase 43
+     shipped CQI, so the ruling's rationale expired. `/deck-tuning`'s
+     full card authority is live again against the current library:
+     balance findings are work, replacement cards may be authored,
+     tuning passes may open. (The historical ruling text is preserved
+     below, marked superseded.)
+  2. **Keyword and effect growth is open.** The 30-keyword proving
+     gate no longer blocks new keywords: a new keyword or a new
+     `specialMechanics` kind may ship WITHOUT a per-item owner
+     ratification, provided it ships through the FULL wiring
+     checklist (engine + pricing + display + mobile
+     keyword-registry/gloss + card-editor union + keyword-atlas row +
+     `docs/retheme-map.json` naming registry), with a hermetic e2e
+     and the cross-package verifies. Engineering rigour is the gate
+     now, not the count. Keyword retirement stays deliberate
+     (retired ids never renamed or resurrected).
+  3. **New content items are in scope for every content surface** —
+     enemies, maps, continents, MapEvent kinds, hazard cards,
+     gathering sites, loot-cache layers, quest boards, dialogue
+     trees, narration. The tuning commands' "numeric-only /
+     propose-only" walls on NEW CONTENT ITEMS are lifted; their walls
+     on ENGINE STRUCTURE (dispatchers, resolution control flow,
+     engine constants) remain. A new persisted kind or state field
+     still rides `GAME_STATE_VERSION` with a migration hop and a
+     pinned migration test — that discipline is engineering, not
+     design law, and stands.
+  4. **Count pins are growth ledgers, not walls.** The pinned totals
+     (57 cards, 52 enemies, 42 glossary entries, the `addedIn` stamp,
+     and their kin) exist to make growth DELIBERATE: a content add
+     updates its pins in the same commit, citing this ruling in the
+     commit body. Editing a pin without a content change alongside it
+     remains forbidden.
+  5. **Narrative shipping is authorized** — the loop may author and
+     ship dialogue trees, map-event prose, cutscene lines, and flavor
+     strings through the normal gates without a per-item build-plan
+     ruling, honoring the voice constitution
+     (`axiomancer-mechanics/docs/narrative/`) and the lexicon lint.
+  6. **Art: acquisition, wiring, AND generation are open.**
+     The loop may extract/curate from the licensed
+     `Potential Assets/icons-TBR` trove, ingest and wire
+     public-domain acquisitions with full provenance records, re-map
+     existing art to content, and build art QA harnesses.
+     **Generation is unblocked as of the walkthrough below.**
+- **ART PIPELINE ROUTE: OPTION A-THEN-B (T direct, 2026-08-22
+  walkthrough).** Answering `plan/ideas/AI_ART_PIPELINE_OPTIONS.md`
+  §9's long-open decision, T picked **option 1: A-then-B** — ship the
+  hosted **gpt-image-2 API** route now, written so the generation call
+  is a **swappable adapter**, and upgrade to the local
+  **ComfyUI + FLUX.2 [klein] + style LoRA** route later if style drift
+  across the set becomes the binding problem. Standing consequences:
+  1. The ~80% of pipeline work that is route-independent (style bible,
+     prompt compiler, post-process, registry + `provenance.json`
+     automation, QA loop) is built once and never re-done.
+  2. Generation needs an OpenAI API key in `.env` (gitignored, never
+     committed) — until it is present, the pipeline's acquisition and
+     post-process legs still run; only the generate call is inert.
+  3. Every generated asset records generator + model + prompt + date
+     in its `provenance.json` entry. That record is also the
+     Steam AI-disclosure artifact — raw AI output is not
+     copyrightable (USCO 2025), so provenance rigour is not optional.
+  4. Option D (Midjourney) stays permanently out of the automated
+     pipeline — no public API, automation violates its ToS.
+- **`Potential Assets/MCP-Axiomancer/images/` — OPEN-SOURCE ART FOUND
+  ONLINE (T direct, 2026-08-22 walkthrough), license per image NOT yet
+  on record.** T's answer settles WHERE the 116 card paintings came
+  from and rules out an unlicensed-scrape risk, but "open source" is a
+  family of licenses with different obligations (CC0 asks nothing;
+  CC BY requires attribution; some share-alike terms bind derivatives).
+  Standing rule until the per-image license is recorded: the loop may
+  NOT wire these into the card registry, because it cannot write a
+  truthful `provenance.json` entry without the source and license.
+  What the loop MAY do now: trace them (reverse-image / filename /
+  bundled-manifest search against the usual open-art hosts), and wire
+  any image whose license + source it can evidence. See the audit row
+  in `plan/AUDIT.md`; the remaining ask on T is only the source site
+  or asset-pack name, not a legal review.
+  What this ruling does NOT touch: the LOCKED MECHANICS carve-out
+  (Conviction / Surge / Dice — still needs a new T ruling), every
+  hermeticity/determinism rule, the verify and deploy gates, the
+  nexus hard rules, `GAME_STATE_VERSION` discipline, and the
+  no-secrets rule. "Free up the pipelines" is design authority, not
+  engineering licence.
+- ~~**THE CURRENT CARD LIBRARY IS TRANSITIONAL — do not spend tuning
+  effort on it**~~ **— SUPERSEDED by THE PIPELINE LIBERATION above
+  (2026-08-22); preserved for history.** (T direct, /oversight
+  2026-08-08). Asked to rule on
   Phase 39's two open findings, T answered: *"This is fine. We're
-  working on a new card redesign anyway."* Standing consequences:
+  working on a new card redesign anyway."* Standing consequences
+  (all now historical):
   1. **A card redesign is in flight.** Its scope was not specified to the
      loop, and the loop must NOT assume it is the same thing as Phase
      44c (the retheme, which changes names and faces). "Redesign" reads
@@ -356,9 +456,10 @@ ambiguity.)
   `GAME_STATE_VERSION` — the mechanic survives either way.
 - **Balance doctrines (per encounter):** ~~status-effect play is
   the dominant win path (combat)~~ — **VOID for combat via the
-  unshackling above; Phase 43 defines the replacement objective
-  function, and until it lands every doctrine-curve reading measures
-  a dead law.** Still live for the minigames:
+  unshackling above; Phase 43 SHIPPED the replacement objective
+  function (CQI, spec 35) on 2026-08-08 — combat readings now judge
+  against CQI, not the dead status-dominance law.** Still live for the
+  minigames:
   Gathering greed < restraint <
   skill; Loot-cache informed > blind > coward; Quest Board
   naive-finishes / deliberate-finishes-well; ~~Rest

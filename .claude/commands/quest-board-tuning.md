@@ -94,9 +94,13 @@ full sweep of the axes in the targets table.
   `quest-board.content.ts` (parts required, start fish/vigor, gather
   yields/thresholds/bites, duel bonuses/spoils/bribes, snag
   thresholds/slips/detours, market prices, parley deltas, cache tables,
-  omen wind). Structural changes (new space kinds, new charm/vow verbs,
-  board topology, engine/state-machine edits, a second board) are
-  **propose-only**.
+  omen wind). **NEW CONTENT ITEMS are in scope** (THE PIPELINE
+  LIBERATION, T direct 2026-08-22 — `plan/bearings.md`): new quests,
+  charms, and vows composed of existing space kinds and verbs — and a
+  second BOARD as authored content on the existing topology rules —
+  shipped with tests and probe evidence. Structural changes (new space
+  kinds, new charm/vow verbs, board topology rules,
+  engine/state-machine edits) stay **propose-only**.
 - **The three pillars are locked.** Any change that makes the board
   failable, un-sandboxes it, or launches a real encounter is rejected
   outright, not proposed.

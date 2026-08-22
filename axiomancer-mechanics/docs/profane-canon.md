@@ -31,9 +31,12 @@ Aeon's End, Arkham Horror LCG, Gloomhaven, Monster Train, Dawncaster):
 
 Unchanged, by hard constraint: **Conviction, Surge, and the dice system.**
 Cards read, spend, and grant them; the subsystems themselves are untouched.
-THE STRIKE stays DEAD: no card deals raw HP damage — enemy HP falls only to
-DoT ticks, affliction payoffs (RUPTURE / REAP / consumed marks), engine drips
-(BACKFIRE, persistent hooks), and reflect (THORNS / RIPOSTE).
+Direct damage is LEGAL (THE UNSHACKLING, 2026-08-08 — `cards.library.ts`'s
+header is authoritative): the CURRENT canon happens to deal enemy HP only
+via DoT ticks, affliction payoffs (RUPTURE / REAP / consumed marks), engine
+drips (BACKFIRE, persistent hooks), and reflect (THORNS / RIPOSTE), but
+that is a design choice of this library, not a law — a future card may
+carry direct damage through the full wiring checklist.
 
 ## 2. The library at a glance (57 cards)
 

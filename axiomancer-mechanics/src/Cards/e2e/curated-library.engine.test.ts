@@ -185,8 +185,11 @@ describe('profane canon — id hygiene and provenance', () => {
             expect(['spell', 'oath', 'hex']).toContain(card.cardType);
             expect(['self', 'enemy']).toContain(card.targetType);
             expect(['body', 'mind', 'heart']).toContain(card.philosophicalAspect);
-            // 2026-08-08 — the Profane Canon wholesale replacement.
-            expect(card.addedIn).toBe('2026-08-08');
+            // Provenance stamp: an ISO date no earlier than the Profane
+            // Canon wholesale replacement (2026-08-08). New cards stamp
+            // their own add date (THE PIPELINE LIBERATION, 2026-08-22).
+            expect(card.addedIn).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+            expect(card.addedIn !== undefined && card.addedIn >= '2026-08-08').toBe(true);
         }
     });
 

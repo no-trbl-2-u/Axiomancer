@@ -81,6 +81,37 @@ test('mechanics quest/rest/loot changes select encounter routing', () => {
     assert.equal(result.editor, false)
 })
 
+test('mechanics enemy roster changes select combat and encounter routing', () => {
+    const result = classify('mechanics', ['axiomancer-mechanics/src/Enemy/enemy.library.ts'])
+    assert.equal(result.combat, true)
+    assert.equal(result.encounters, true)
+    assert.equal(result.hazard, false)
+    assert.equal(result.editor, false)
+    assert.equal(result.full, false)
+})
+
+test('mechanics NPC dialogue changes select encounter routing', () => {
+    const result = classify('mechanics', ['axiomancer-mechanics/src/NPCs/types.ts'])
+    assert.equal(result.encounters, true)
+    assert.equal(result.combat, false)
+})
+
+test('mechanics world content outside the named minigames selects encounter routing', () => {
+    for (const path of [
+        'axiomancer-mechanics/src/World/MapEvents/content.ts',
+        'axiomancer-mechanics/src/World/Continents/Coastal-Village/maps.ts',
+        'axiomancer-mechanics/src/World/Labyrinth/labyrinth.pools.ts',
+        'axiomancer-mechanics/src/World/RestChoice/restchoice.content.ts',
+        'axiomancer-mechanics/src/World/map.registry.ts',
+        'axiomancer-mechanics/src/World/dialogue.runtime.ts',
+    ]) {
+        const result = classify('mechanics', [path])
+        assert.equal(result.encounters, true, `${path} should route to encounters`)
+        assert.equal(result.mobile, true, `${path} should run the mobile gate`)
+        assert.equal(result.full, false, `${path} should not force the full suite`)
+    }
+})
+
 test('uncoupled mechanics source remains mechanics-only', () => {
     const result = classify('mechanics', ['axiomancer-mechanics/src/Inventory/inventory.ts'])
     assert.equal(result.mobile, false)

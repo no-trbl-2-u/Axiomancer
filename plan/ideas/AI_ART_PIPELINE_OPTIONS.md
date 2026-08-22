@@ -7,8 +7,11 @@
 > already decided **art source = AI-generated + post-processed** — this
 > doc chooses *how* and turns it into a pipeline.
 >
-> Status: **proposal — needs a user call on Option A/B/C/D** (see
-> "Decision" at the end). Nothing here is implemented yet.
+> Status: **DECIDED 2026-08-22 — Option 1 (A-then-B).** T ruled in the
+> content-pipelines walkthrough; see §9. Implementation is queued as
+> build-plan Phase 73 (adapter + prompt compiler + ingest automation).
+> Recorded as a standing decision in `plan/bearings.md` § "ART PIPELINE
+> ROUTE".
 
 ---
 
@@ -459,15 +462,36 @@ necessary but you never want to run ComfyUI.
 - GPU situation: does the dev machine have ≥13 GB VRAM? Determines
   whether Phase art-4 is local or rented.
 
-## 9. Decision needed
+## 9. Decision — RULED 2026-08-22: Option 1 (A-then-B)
 
-Pick one to unblock Phase art-1:
-1. **A-then-B as recommended** (start hosted, keep the LoRA upgrade
-   path). ← default if no strong feelings
-2. **Straight to B** (own GPU, want reproducibility from day one).
-3. **A-then-C1** (never want to run local infra; pay Scenario for
-   trained-style consistency if needed).
-4. **Hold** (art stays manual; revisit after current mechanics phases).
+T's call, given in the content-pipelines walkthrough (attended remote
+session, the same conversation that produced THE PIPELINE LIBERATION):
+
+> **1. A-then-B** — start hosted, keep the LoRA upgrade path.
+
+Binding consequences:
+
+- **Now:** hosted **gpt-image-2 API** generation, with the generate
+  call isolated behind a **swappable adapter** so option B can replace
+  it without touching the rest of the pipeline.
+- **Later, conditionally:** migrate to local **ComfyUI + FLUX.2
+  [klein] 4B + trained style LoRA** when (and only when) style drift
+  across the growing set becomes the binding problem. That trigger is
+  a measurement, not a calendar date — the QA loop reports it.
+- **Never:** option D (Midjourney) inside the automated pipeline —
+  no public API, automation violates ToS. Manual concepting only.
+- **Prerequisite:** an OpenAI API key in `.env` (gitignored). Absent
+  the key, the acquisition and post-process legs still run; only the
+  generate call is inert. The loop must never commit the key.
+- **Provenance is mandatory, not best-effort:** generator, model,
+  prompt and date per asset in `provenance.json`. Raw AI output is
+  not copyrightable (USCO Jan 2025; *Thaler* Mar 2025), so that record
+  is simultaneously the Steam AI-disclosure artifact and the
+  human-curation evidence.
+
+The route-independent ~80% (style bible, prompt compiler,
+post-process, registry/provenance automation, QA loop) is built once
+and carries across a future A→B migration.
 
 ---
 

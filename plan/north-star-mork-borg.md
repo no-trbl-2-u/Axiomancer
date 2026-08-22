@@ -1,13 +1,27 @@
 # North Star — Mörk Borg as the delivery register
 
-> **Status:** RULED — the five forks below were put to T directly in the
-> session `new-north-star.prompt.md` triggered (2026-08-20) and T picked an
-> option for each; T then widened the mandate in the same session (R-F,
-> THE LONGER LEASH — verbatim in §1). The doctrine text derived from these
-> rulings (§2–§5) is DRAFT-FOR-RATIFICATION: it becomes a spec 34
-> amendment only after T reads this file and says so, the normal way every
-> `plan/` decision becomes a phase. Nothing in the tree was edited by this
-> session except this file.
+> **Status: RATIFIED 2026-08-22.** The five forks below were put to T
+> directly in the session `new-north-star.prompt.md` triggered
+> (2026-08-20) and T picked an option for each; T then widened the
+> mandate in the same session (R-F, THE LONGER LEASH — verbatim in §1).
+> T ratified this file **as-is** in the 2026-08-22 content-pipelines
+> walkthrough, so §2–§5 are live doctrine, not a draft.
+>
+> **How R-C and R-F sit together (settled by the same ratification).**
+> R-C ("prose only", art untouched) is the EARLIER ruling; R-F (art, UI,
+> direction, the map now under bold loop authority) is the LATER one and
+> self-declares that it outranks the narrower postures where they
+> conflict. Ratifying as-is therefore means: **art IS in scope for the
+> loop.** R-C survives with its scope narrowed to what it was really
+> protecting — the Phase V Woodcut Codex masterplan stays the current
+> art bearings and is not discarded; the loop executes within it and may
+> evolve it through its own phases, rather than being barred from the
+> visual layer.
+>
+> **Follow-ups now queued** (were unqueued, which the 2026-08-22 audit
+> flagged): **N-1** ratify + amend → build-plan Phase 74; **N-2** the
+> register lint → folded into Phase 70 (the `.ts` prose lint) plus
+> Phase 74's spec work; **N-3** the re-voice pass → Phase 75.
 >
 > **Provenance:** T via `/oversight` 2026-08-20 ruled the North Star
 > (Mörk Borg) and the product name (Miserere Mei, Deus — closed, Phase 67);

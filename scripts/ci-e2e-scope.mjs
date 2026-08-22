@@ -123,6 +123,17 @@ function classifyMechanicsPath(path, result) {
         result.editor = true
         return
     }
+    // Enemy content renders in both the combat presenter (portraits,
+    // decks) and the event/aftermath presenters (encounter payloads).
+    if (/^axiomancer-mechanics\/src\/Enemy\//.test(path)) {
+        markMobileSuite(result, 'combat')
+        markMobileSuite(result, 'encounters')
+        return
+    }
+    if (/^axiomancer-mechanics\/src\/NPCs\//.test(path)) {
+        markMobileSuite(result, 'encounters')
+        return
+    }
     if (/^axiomancer-mechanics\/src\/World\/Hazard\//.test(path)) {
         markMobileSuite(result, 'hazard')
         return
@@ -131,7 +142,11 @@ function classifyMechanicsPath(path, result) {
         markMobileSuite(result, 'gathering')
         return
     }
-    if (/^axiomancer-mechanics\/src\/World\/(?:LootCache|Rest|QuestBoard)\//.test(path)) {
+    // Everything else under World/ is consumed by mobile's exploration,
+    // event, dialogue, labyrinth, blacksmith, and rest surfaces (e.g. a
+    // map-node change breaks mobile's layout-engine-parity test) — route
+    // it all to the encounter suite rather than enumerating subdirs.
+    if (/^axiomancer-mechanics\/src\/World\//.test(path)) {
         markMobileSuite(result, 'encounters')
     }
 }

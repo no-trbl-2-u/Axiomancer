@@ -83,8 +83,12 @@ axes in the quick-reference table below.
   `gathering.tuning.ts` (wrath max/thresholds, dusk turn, approach knobs,
   offering/tool/reprisal/eruption/set/outcome/boon magnitudes) and authored
   numbers in `gathering.content.ts` (plot richness/wrath, site rosters and
-  weights). Structural rules changes (new phases, new traits, new reprisal
-  kinds, new tool verbs, engine/state-machine edits) are **propose-only**.
+  weights). **NEW CONTENT ITEMS are in scope** (THE PIPELINE LIBERATION,
+  T direct 2026-08-22 — `plan/bearings.md`): new sites, plots, and
+  offerings composed of existing traits/verbs, shipped with tests and
+  sim evidence. Structural rules changes (new phases, new traits, new
+  reprisal kinds, new tool verbs, engine/state-machine edits) stay
+  **propose-only**.
 - **Baseline before delta.** Every proposed change records `old → new` with
   a one-line rationale grounded in the targets below.
 - **Evidence before edits.** Run the sim bands and/or the CLI matrix BEFORE

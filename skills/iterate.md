@@ -26,7 +26,8 @@ on already-shipped surfaces.
 
 - **Many findings → one shipped fix per tick.** Multi-fix
   commits are unreviewable.
-- **Content gap → spawn `<content-curator>` (or equivalent).**
+- **Content gap → spawn `content-curator`
+  (`.claude/agents/content-curator.md`).**
   Don't write prose from main agent.
 - **Trivial fix → still ships through verify.**
 
@@ -238,7 +239,7 @@ separately — keep tick churn low.
 ### Step 3 — Delegate or implement
 
 Default delegation:
-- Content gaps → `<content-curator>` sub-agent.
+- Content gaps → the `content-curator` sub-agent.
 - Contract / divergence / debt / docs / a11y / tests → main agent.
 - Performance → main agent; may delegate to `scout` for
   external benchmarking.
@@ -378,7 +379,7 @@ plan/CRITIQUE.md                         # external-critique queue
 plan/bearings.md                         # voice + standing decisions
 
 # Sub-agents
-Agent({ subagent_type: "<content-curator>", prompt: "..." })
+Agent({ subagent_type: "content-curator", prompt: "..." })
 Agent({ subagent_type: "scout", prompt: "..." })
 
 # Verify + commit + push + deploy

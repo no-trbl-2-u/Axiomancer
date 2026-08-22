@@ -75,8 +75,10 @@ its own cadence.
       curve (early ~80 / mid ~50 / late 25-35 / impossible 0)
       is historical after the Profane Canon; do not file current
       three-snapshot results as violations of that retired charter.
-      Report CQI and terminal outcomes separately, and do not spawn
-      tuning work while the current library remains transitional.
+      Report CQI and terminal outcomes separately. The
+      transitional-library hold on tuning work is LIFTED (THE PIPELINE
+      LIBERATION, 2026-08-22 — `plan/bearings.md`): a measured
+      regression MAY be filed as a `/deck-tuning` candidate again.
       **Measure and report only** — card/deck fixes stay with
       `/deck-tuning`, engine constants stay manual (§4.2-4.3
       rails apply). A reduced pass is directionally honest,

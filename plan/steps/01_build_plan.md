@@ -1692,6 +1692,23 @@ batch concurrently with 44* — both churn the whole mobile surface.**
       tap-confirm sheet), once 49 clears. (mobile) Deps: 49.
       — `plan/phases/phase_50_seal_chip_mobile_ui.md`
       — `feat(mobile): Seal chip row + tap-confirm sheet — phase 50` (7e62a007)
+> ## NEXT UP — the minigame retirements (T direct, 2026-08-22)
+>
+> T: *"I've been trying to retire the quest, gathering, and rest
+> minigames. Rest is retired but the other 2 are not."* Rest went out
+> with Phase 52e (`d83978cb`); the other two had stalled — **Phase 61**
+> was ruled on 2026-08-15 but sat behind eight rows, and **Gathering had
+> never been ruled at all** (deliberately left out of the 58-65 block
+> rather than swept in by implication). T ruled it now and directed that
+> both jump the queue.
+>
+> **The loop takes Phase 61 and Phase 76 FIRST**, ahead of every other
+> unchecked row including Phase 58. Both are deletions against the proven
+> Phase 52e template, so they are low-risk and they stop the project
+> paying attention-tax on systems already decided dead. Normal queue
+> order resumes after them (58 is next, and remains "ship it first"
+> among the rest).
+
 - [ ] Phase 51 — GLYPHS follow-up 3: sim `crackAt` policy heuristic + the
       A/B promotion court, once mobile lets a playtester observe real
       cracking behavior. (mechanics) Deps: 50. Brief: to generate.
@@ -1971,6 +1988,52 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       a player ever learns a quest exists. Note that alongside 53c.
       (mechanics + mobile; deletion) Brief: to generate.
 
+- [ ] Phase 76 — Retire the Gathering minigame ("The Gleaning"), KEEP
+      the gathering map node. **T direct, 2026-08-22:** T named Gathering
+      among the minigames being retired, then handed the shape of the
+      retirement to the loop verbatim — *"This is the type of freedom I'm
+      trying to provide the loop. You decide everything."* The call, and
+      why it is not a plain deletion:
+      **Two different systems share the name "gathering", exactly as two
+      shared the name "quest".** (a) `World/Gathering/` is The Gleaning
+      minigame — sites, plots, wrath economy, tools, boons, omens, its
+      own sim, CLI and tuning skill. (b) `MapEventKind: 'gathering'` is a
+      plain map node whose entire payload is
+      `{ items: Item[]; description?: string }` — the engine resolver
+      already returns the items directly; it is ALREADY the "here are
+      your options and their effects" shape T asked for in the
+      2026-08-10 candidate. The minigame is a MOBILE-SIDE INTERCEPTION:
+      `axiomancer-mobile/state/actions.ts:1693` sees a resolved
+      `gathering` event and launches The Gleaning instead of granting
+      the items.
+      So this phase retires (a) and keeps (b) — the same narrowing T
+      himself ruled for quest (*"Minigame only and keep it"*), applied to
+      the identically-shaped ambiguity.
+      **Scope (delete):** `World/Gathering/` entire; `gathering` CLI
+      sub-command + the `gathering` npm script; the `gathering-tuning`
+      skill (`.claude/commands/gathering-tuning.md`) and its workflow
+      (`.github/workflows/gathering-tuning.yml`); mobile's
+      `state/gathering/` slice, `app/gathering/` route, `GatheringGate`,
+      `DebugGathering`, and the interception at `actions.ts:1693`; plus a
+      `GAME_STATE_VERSION` hop clearing any live Gleaning session from
+      the save payload. Phase 52e (`d83978c`) is the template.
+      **Scope (KEEP, deliberately):** the `gathering` MapEventKind, its
+      `GatheringPayload`, the resolver's `{ kind: 'gathering', items }`
+      return, and all **8 authored gathering nodes** in
+      `MapEvents/content.ts`. Three reasons: the maps keep their event
+      density (deleting the nodes leaves holes); the resolver feeds
+      `advanceCollectObjectives` from gathered item ids
+      (`resolve-map-event.ts:264`), so removing the node would silently
+      break every collect-type quest objective; and once Phase 58 lands,
+      the node reads as authored prose + the items it grants — precisely
+      the target shape. After this phase the node grants its items
+      inline with no screen detour.
+      **Also update:** the AGENTS.md tuning-skill roster and the
+      `ci-e2e-scope.mjs` gathering suite routing (its mobile journey
+      disappears with the route), and close the retirement candidate in
+      `plan/PHASE_CANDIDATES.md`.
+      (mechanics + mobile; deletion) Brief: to generate.
+
 - [ ] Phase 62 — Ally cards. The loot-cache sacrifice chain (Phase 65)
       pays out an "ally card reward", and no ally concept exists anywhere
       in the card schema today. T ruled the full chain in scope
@@ -2049,6 +2112,104 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       as a duplicate (flagged in the AUDIT row and naming-session §6).
       (content/docs; queued 2026-08-20 via `/oversight` from the
       product-name naming-session ruling) Brief: to generate.
+
+- [ ] Phase 68 — Keyword-drift hardening. Close the silent surfaces the
+      2026-08-22 content-pipelines audit found so the now-open keyword
+      registry (THE PIPELINE LIBERATION) grows safely: derive mobile
+      KW-2's mechanic-kind check from `CardSpecialMechanic['kind']`
+      instead of its hardcoded 17-kind array; add drift tests asserting
+      the three hand-synced glyph tables agree (mobile
+      `glyphShapes.ts`, editor `CardFace.tsx` KwGlyph,
+      `scripts/build-catalog.mjs`) and that the editor's `wx.ts`
+      KEYWORDS vocabulary contains no retired terms; regenerate
+      `axio_keywords` from data instead of hand-parsing
+      `docs/keyword-atlas.md` (or add an atlas-vs-registry parity
+      check) and drop the server's hardcoded "/30" denominators.
+      (tests/contract; queued 2026-08-22 per THE PIPELINE LIBERATION)
+      Brief: to generate.
+- [ ] Phase 69 — Card-editor round-trip fidelity. `CardDraft`
+      (`axiomancer-card-editor/src/types.ts`) omits `theme`,
+      `paidSummary`, `persistentEffect`, `intentionallyAsymmetric`,
+      `glyph`, and codegen drops the `// pts:` arithmetic comment — an
+      editor upsert of an existing card silently destroys data the
+      test suites and pricing doctrine depend on. Carry every Card
+      field through draft + codegen (preserving `// pts:`), and add a
+      round-trip test (library literal → draft → codegen → equal).
+      (contract; queued 2026-08-22 from the content-pipelines audit)
+      Brief: to generate.
+- [ ] Phase 70 — Prose lint for shipped `.ts` content + naming law in
+      CI. `scripts/check-lexicon.mjs` scans `.md` only, so every
+      player-facing string (dialogue trees, `MapEvents/content.ts`,
+      `act*.content.ts`, `*.copy.ts`) ships un-linted; extend it (or a
+      sibling) to the authored `.ts` content surfaces with a
+      voice-rule layer (retired terms, thee/thou ban, exclamation
+      marks), and wire `scripts/check-naming-law.mjs` into an npm
+      script + CI leg. Complements queued Phase 66 (doctrine prose in
+      docs). (content/tests; queued 2026-08-22 per THE PIPELINE
+      LIBERATION — narrative shipping is authorized, so its guardrail
+      should be mechanized) Brief: to generate.
+- [ ] Phase 71 — Art acquisition pipeline (V4 accelerant, no
+      generation). Convert the proven one-off Doré acquisition into a
+      loop-runnable path: the phase case for adding `sharp` (dev-only,
+      root or mobile scripts), an ingest script encoding the recorded
+      recipe (grade → resize <= 640px → WebP + provenance entry, per
+      `axiomancer-mobile/docs/asset-conventions.md`), a
+      provenance-completeness + registry-vs-directory drift test under
+      `assets/`, and ingest of the two `tmp-images/` stragglers.
+      Covers acquisition + post-process + ingest for ANY image source;
+      generation itself is now ruled (Option A) and lands in Phase 73,
+      which reuses these legs. (content/tooling; queued 2026-08-22 per
+      THE PIPELINE LIBERATION) Brief: to generate.
+- [ ] Phase 72 — Harness grants for content work. Apply the allowlist
+      additions the 2026-08-22 audit specified to
+      `.claude/settings.json` (baseline:check/regen, the minigame
+      CLIs, critique:drive, catalog/devlog/site builds, npx
+      vitest/tsx/playwright/expo, check-lexicon/check-naming-law, the
+      root `npm test`, and the PR-delivery verbs `git checkout -b` /
+      `git push -u origin` / `gh pr create|view|merge --auto` /
+      `gh issue close`) — the remote session that shipped the
+      liberation was permission-blocked from editing the settings file
+      itself, so this lands from an attended/local session. Also: give
+      the `reader` agent tools that exist in CI (its
+      `mcp__claude-in-chrome__*` roster is granted nowhere — swap to
+      Playwright tools or grant them), and decide whether
+      `_claude-skill.yml` should pass the kb-query/axio-query MCP
+      servers to CI runs. (contract; queued 2026-08-22 from the
+      content-pipelines audit) Brief: to generate.
+
+- [ ] Phase 73 — Art generation pipeline (Option A, adapter-shaped).
+      Implements T's 2026-08-22 route ruling
+      (`plan/ideas/AI_ART_PIPELINE_OPTIONS.md` §9, Option 1 A-then-B).
+      Scope: a `generate(spec) -> image` ADAPTER with the hosted
+      gpt-image-2 call as its first implementation (so the future
+      ComfyUI/FLUX+LoRA swap touches nothing else); a prompt compiler
+      that renders the house style bible + per-subject spec into a
+      request; wiring into Phase 71's post-process/ingest legs so a
+      generated image lands as graded WebP + registry entry +
+      `provenance.json` (generator, model, prompt, date — the Steam
+      disclosure record); and a QA pass that reports style drift, the
+      measurement that later triggers the B upgrade. Key from `.env`,
+      never committed; absent the key the generate leg is inert and
+      the rest of the pipeline still runs. Depends on Phase 71.
+      (content/tooling; queued 2026-08-22 from T's route ruling)
+      Brief: to generate.
+- [ ] Phase 74 — N-1: fold the ratified North Star into spec 34.
+      `plan/north-star-mork-borg.md` was ratified as-is by T on
+      2026-08-22; its §2 becomes spec 34's §2.5 (the Mörk Borg
+      delivery register), and the R-C/R-F reconciliation recorded in
+      that file's header (art IS in scope; the Woodcut Codex
+      masterplan remains the current art bearings, evolvable by the
+      loop) is written into the spec rather than living only in a
+      plan/ file. Also update `plan/bearings.md` to cite the ratified
+      doctrine. (docs/design; queued 2026-08-22 per the ratification)
+      Brief: to generate.
+- [ ] Phase 75 — N-3: the re-voice pass. One phase sweeps all shipped
+      player-facing prose into the ratified register (R-E: names stay,
+      sentences shorten and harden, one voice). Runs AFTER Phase 67
+      (title migration) and after the Phase 70 prose lint exists, so
+      the sweep has a machine check behind it and does not re-touch
+      strings the title migration is about to change. (content;
+      queued 2026-08-22 per the ratification) Brief: to generate.
 
 > **Note (issue-triage 2026-07-19):** issue #132 asked for a
 > `devlog-build` GitHub Action; re-triage found it re-classified as
@@ -2407,6 +2568,47 @@ See the status rows above; generate briefs on demand.
   `plan/naming-session-2026-08-12.md` §6 (closed), `plan/bearings.md`'s
   name line, and `new-north-star.prompt.md`; brief for 67 still to
   generate.
+
+- **2026-08-22** — actor: **T via remote Claude Code session** (the
+  content-pipelines-audit session, PR #228 — not Hermes). Action:
+  **added Phases 68-72** (keyword-drift hardening; card-editor
+  round-trip fidelity; `.ts` prose lint + naming law in CI; art
+  acquisition pipeline; harness grants for content work). Confirmed
+  T's request: yes — T reviewed the content-pipelines audit and
+  directed *"what do you need from me to free up ALL these pipelines?
+  Try to do it yourself first, then get back to me"*; the same
+  directive is recorded as THE PIPELINE LIBERATION in
+  `plan/bearings.md`. T's stated reason: ensure the nexus loop has
+  the freedoms and capabilities every content pipeline needs. The
+  doc/doctrine unblocks shipped in the same PR; these five phases
+  carry the engineering remainder. Resulting commit: this one
+  (branch `claude/content-pipelines-audit-43v3d7`, PR #228).
+
+- **2026-08-22** — actor: **T via remote Claude Code session** (the
+  content-pipelines walkthrough, PR #228 — not Hermes). Action:
+  **added Phases 73-75** (art generation pipeline; N-1 fold the North
+  Star into spec 34; N-3 re-voice pass) and **rescoped Phase 71**
+  (acquisition legs now feed generation too). Confirmed T's request:
+  yes — T answered a four-question `AskUserQuestion` walkthrough,
+  picking art route "A-then-B" and "Ratify as-is" for the North Star.
+  T's stated reason: not separately stated beyond the option choices;
+  the walkthrough was T's response to the audit's open owner calls.
+  Resulting commit: this one (branch
+  `claude/content-pipelines-audit-43v3d7`, PR #228).
+
+- **2026-08-22** — actor: **T via remote Claude Code session** (the
+  minigame-retirement walkthrough — not Hermes). Action: **added Phase
+  76** (retire The Gleaning, keep the gathering map node) and
+  **reprioritized Phase 61 + Phase 76 to the front of the queue**, ahead
+  of Phase 58. Confirmed T's request: yes — T opened with *"I've been
+  trying to retire the quest, gathering, and rest minigames. Rest is
+  retired but the other 2 are not,"* answered the priority question with
+  "retire quest + gathering next", and delegated the retirement's shape
+  to the loop (*"You decide everything"*). T's stated reason: the
+  minigames "are just time consuming and seem to add nothing"
+  (2026-08-10 candidate, restated by this session's framing). Resulting
+  commit: this one (branch `claude/content-pipelines-audit-43v3d7`,
+  PR #228).
 
 ## Phase log (commit hashes)
 

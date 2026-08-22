@@ -14,21 +14,14 @@ on:
   workflow_dispatch:
     inputs:
       preset:
-        description: 'Preset to tune (all = full ten-preset sweep)'
+        description: 'Preset to tune (all = full stage-ladder sweep)'
         type: choice
         default: all
         options:
           - all
-          - erosion
-          - oratory
-          - foundry
-          - penitent
-          - standstill
-          - augury
-          - tithe
-          - grace
-          - bastion
-          - refrain
+          - threadbare
+          - pilgrim
+          - apostate
       runs:
         description: 'Playtest runs per matrix cell (60 = baseline-comparable; lower = faster but directional-only)'
         type: number

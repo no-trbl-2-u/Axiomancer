@@ -76,9 +76,14 @@ The empirical witnesses, in order of preference:
 - **Numeric and content-level only.** The skill may change pool entry
   `weight`s, hazard `damage`/`effectIds` magnitudes, rest `healFraction`
   values, gathering item quantities, and encounter `level` pins inside
-  `src/World/MapEvents/content.ts`. Structural changes (new `MapEventKind`
-  values, new pool ids, dispatcher/handler edits, new maps/continents) are
-  **propose-only**.
+  `src/World/MapEvents/content.ts`. **NEW CONTENT ITEMS are in scope**
+  (THE PIPELINE LIBERATION, T direct 2026-08-22 — `plan/bearings.md`):
+  new pool entries, new pools, new authored events, new maps/continents
+  (registered end-to-end: `map.library.ts` union + `map.registry.ts` +
+  a mobile layout with the parity test green), and new `MapEventKind`
+  values — a new KIND or persisted field still rides
+  `GAME_STATE_VERSION` with a migration hop + pinned migration test.
+  Dispatcher/handler CONTROL FLOW stays **propose-only**.
 - **The two contracts are locked.** Anything that lets an authored encounter
   scale below its source enemy's level, or that moves node-lifecycle logic
   out of the dispatcher, is rejected outright.
@@ -140,8 +145,10 @@ full node table so it can't drift from `content.ts`.
 - **Never edit `resolve-map-event.ts` or `handlers.ts` control flow for
   tuning purposes.** The tuning surface is payload NUMBERS in `content.ts`
   only.
-- **Never add new `MapEventKind` values, pools, maps, or continents** —
-  propose-only.
+- **New `MapEventKind` values, pools, maps, and continents are legal
+  content additions** (THE PIPELINE LIBERATION, 2026-08-22) — shipped
+  end-to-end with their registrations, mobile parity, migration
+  discipline for persisted shapes, and tests; never half-registered.
 - **Never invert the encounter-scaling floor** (locked contract #1 above).
 - **No emojis. No `Co-Authored-By:`.**
 
