@@ -1764,48 +1764,39 @@ RESEQUENCED the same day behind the unshackling — see above):**
       mid/late numbers are a defect at all before any follow-up tunes
       toward them.
 
-- [ ] Phase 40 — Card-text grammar + full copy pass. Ruled R4 on
-      2026-07-18, released via /oversight 2026-08-08. Adopt the
-      templating grammar (seven clause templates; one effect one
-      sentence; gate/cost/condition before payoff; colon = trigger label
-      only; em-dash/semicolon banned from faces; parens carry numbers
-      only; bare keywords, panel is the gloss; "the foe" fixed
-      vocabulary; ≤16 words target / 130-char hard cap / lead clause ≤5
-      words) and run the full pass: 12 before→after rewrites, author the
-      4 machine-text faces (straw-mans-jab renders raw "bleed i2 d2"), 6
-      gloss rewrites (Pip, Omen, Riposte, Forge, Doom, Poison), tighten
-      the honesty-guard budget 200 → 130 chars, add an em-dash/semicolon
-      lint. Sub-calls approved in the same ruling: drop PERORATION from
-      the-closing-word's face (SYSTEM_GLOSSARY row stays); reprice
-      the-overtake's `fuelPerPip` 3.5 → integer via A/B so no face
-      carries a decimal. Witnesses:
-      `paid-summary-honesty.engine.test.ts`, the mobile keyword-scanner
-      lints, one screenshot confirming the 130c render cap.
-      (mechanics + mobile) **Deps: 44a-44i (retheme) AND the card
-      redesign T reported in flight 2026-08-08.** Phase 39 has since
-      shipped (`8d50591e`), so the original "after 39" half is satisfied
-      — but a redesign means the card SET this pass writes copy for is
-      itself changing, not just its names. Writing 12 before→after
-      rewrites and 4 machine-text faces against a library about to be
-      redesigned is the clearest possible case of thrown-away work.
-      Confirm the redesign's scope at an `/oversight` before starting.
-      Originally "after 39" so the pass would not
-      rewrite faces the curve repair was about to change; the retheme
-      makes that argument stronger, since Phase 44 may rename every card
-      this pass would otherwise write copy for. Run it last of the batch.
-      Note the grammar itself survives the retheme (clause templates,
-      punctuation bans, the 130-char cap are theme-agnostic), but the
-      "the foe" fixed vocabulary and the six gloss rewrites are
-      theme-bearing and must be re-derived against Phase 42's spec.
-      Brief: to generate.
-      **(added via /oversight 2026-08-10)** Open PR #193 ("strip the
-      prose off the card face", direct T request, un-routed through the
-      loop) removes the authored PAID sentence/type-strip/die-lines from
-      the combat card FACE and moves them to the inspect overlay —
-      adjacent scope to this phase's copy pass. Re-scope this phase's
-      brief against whatever #193 ships (face vs. overlay text split)
-      before generating it; do not write the 12 before→after rewrites
-      against the pre-#193 face.
+- [x] Phase 40 — SHIPPED `0048e3ea` (2026-08-23; brief `36cf0698`). Re-scoped
+      at ship time against PR #193 (the authored sentence moved off the
+      glance FACE onto the inspect overlay; the grammar governs that
+      overlay sentence + the mobile glossary, not a bare-keyword face) and
+      the completed 44a-44i retheme — both blocking deps below are
+      resolved. Full pass: 31 of 57 `cards.library.ts`
+      `paidSummary`/`persistentEffect` strings rewritten (em-dash/
+      semicolon banned, "the foe" fixed vocabulary, colon as trigger
+      label, 130-char `paidSummary` cap) + 17 mobile `KEYWORD_GLOSS`/
+      `SYSTEM_GLOSSARY` entries (a superset of the row's 6 named
+      examples — the lint has to cover every entry or it isn't a lint).
+      Honesty-guard budget tightened 200→130; em-dash/semicolon +
+      "the enemy" lints added on both mechanics and mobile. Both named
+      sub-calls found ALREADY SATISFIED pre-phase (documented, not
+      re-done): PERORATION was already dropped from the face at phase 29
+      (the-closing-word/the-black-cap prints `SENTENCE at N`); the-overtake
+      (now communion-of-the-worm) carries no `fuelPerPip` post-retheme, so
+      no live card ever rendered the 3.5 decimal. The 130c-render-cap
+      screenshot witness is N/A under the re-scope (no fixed-width face
+      render exists for this text any more; the lint enforces the budget
+      instead) — see `plan/phases/phase_40_card_text_grammar.md` and the
+      shipping commit body for full decision detail. Follow-up residue
+      (engine-generated "the enemy" strings in `combat.cards.ts` +
+      mobile's `mechanicHeadline` prose) filed to `plan/AUDIT.md`.
+      Verify: mechanics `npm run verify` green (typecheck/lint/2900
+      tests/build); mobile `npm run verify` green (lint/typecheck/2826
+      tests); card-editor `type-check` green (data/prose-only diff, no
+      type-union change).
+
+      (Original row text — the R4 ruling, the pre-ship dependency
+      analysis, and the 2026-08-10 #193 re-scope note — preserved verbatim
+      in git history: commits prior to `0048e3ea`/`36cf0698`, e.g.
+      `git show b647fc65:plan/steps/01_build_plan.md`.)
 
 - [ ] Phase 54 — Route live combat through `endCombat`. `AUDIT.md`
       "[mobile] The live combat exit path bypasses the engine's
