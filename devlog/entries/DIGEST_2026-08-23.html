@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Axiomancer digest — 2026-08-23</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #0e1116; --fg: #d7dde5; --fg-strong: #f0f3f7; --muted: #6b7480;
+  --accent: #8ab4f8; --panel: #161b22; --card: #12171f; --border: #222833;
+  --row: #141a22; --code-bg: #1b212b; --th: #aeb7c2; --list-head: #9aa4b0;
+  --add: rgba(80,200,120,.16); --del: rgba(230,90,90,.16);
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f7f5ef; --fg: #33302a; --fg-strong: #1a160f; --muted: #6f6656;
+    --accent: #3a5db0; --panel: #efece3; --card: #fbfaf5; --border: #ddd7c9;
+    --row: #efece3; --code-bg: #e9e5d9; --th: #5c5344; --list-head: #6f6656;
+    --add: rgba(35,140,75,.16); --del: rgba(190,55,55,.16);
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+.wrap { max-width: 46rem; margin: 0 auto; padding: 20px 18px 80px; }
+header.top {
+  position: sticky; top: 0; z-index: 5;
+  background: var(--bg); border-bottom: 1px solid var(--border); margin: 0 0 20px;
+}
+header.top .wrap { padding-top: 14px; padding-bottom: 14px; display: flex; align-items: baseline; gap: 14px; }
+header.top a.home, header.top .home { color: var(--accent); text-decoration: none; font-weight: 600; }
+header.top .crumb { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+h1, h2, h3, h4 { line-height: 1.25; color: var(--fg-strong); }
+h1 { font-size: 26px; margin: 0 0 6px; }
+h2 { font-size: 19px; margin: 0; }
+a { color: var(--accent); }
+p { margin: 8px 0; }
+code { background: var(--code-bg); padding: 1px 6px; border-radius: 5px; font-size: 0.86em; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+pre { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; overflow-x: auto; }
+pre code { background: none; padding: 0; }
+.tablewrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { background: var(--panel); color: var(--th); font-weight: 600; white-space: nowrap; }
+tr:last-child td { border-bottom: none; }
+ul, ol { padding-left: 22px; }
+li { margin: 4px 0; }
+.muted { color: var(--muted); }
+
+.st { font-weight: 600; white-space: nowrap; }
+.st::before { content: ""; display: inline-block; width: .5em; height: .5em; border-radius: 50%; margin-right: .38em; background: currentColor; vertical-align: middle; }
+.st-ok { color: #4bb96a; }
+.st-neutral { color: var(--muted); }
+.st-warn { color: #d0a92b; }
+.st-bad { color: #e0574b; }
+
+.headline { font-size: 19px; color: var(--fg-strong); margin: 0 0 12px; }
+.counts { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 22px; }
+
+.chip {
+  display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; padding: 2px 9px; border-radius: 999px;
+  color: #0b0d10; background: var(--cat, var(--accent)); white-space: nowrap;
+}
+.cat-mechanics { --cat: #d0a92b; }
+.cat-ui { --cat: #5aa9e6; }
+.cat-content { --cat: #7fc45a; }
+.cat-infra { --cat: #b08bf0; }
+.cat-balance { --cat: #e6864b; }
+
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-left: 4px solid var(--cat, var(--accent));
+  border-radius: 10px; padding: 14px 18px; margin: 14px 0; scroll-margin-top: 72px;
+}
+.card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.card-head h2 { font-size: 18px; }
+.field { margin: 6px 0; }
+.flabel {
+  display: inline-block; min-width: 3.2em; margin-right: 4px; color: var(--muted);
+  font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .04em;
+}
+.commits { margin: 8px 0 2px; }
+.commit { font-size: 12px; }
+
+.panel { margin: 22px 0; scroll-margin-top: 72px; }
+.panel > h2 { padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+
+.diff {
+  border: 1px solid var(--border); border-radius: 8px; overflow-x: auto; margin: 12px 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; line-height: 1.5;
+  background: var(--bg);
+}
+.dl { padding: 0 12px; white-space: pre; }
+.dl.add { background: var(--add); }
+.dl.del { background: var(--del); }
+.dl.hunk { color: var(--accent); }
+.dl.meta { color: var(--muted); }
+
+figure.shotset { margin: 14px 0; }
+figure.shotset > figcaption { font-size: 14px; color: var(--fg); margin-bottom: 8px; }
+.shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.shot { margin: 0; }
+.shot .role { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); text-align: center; margin-bottom: 3px; }
+.shot img { width: 100%; height: auto; border: 1px solid var(--border); border-radius: 8px; display: block; }
+
+.entry-list { list-style: none; padding: 0; margin: 8px 0 0; }
+.entry-list li { margin: 0; border-bottom: 1px solid var(--border); }
+.entry-list a { display: block; padding: 14px 4px; text-decoration: none; color: var(--fg); }
+.entry-list a:hover { background: var(--row); }
+.entry-list .date { color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
+.entry-list .head { color: var(--list-head); font-size: 14px; margin: 2px 0 6px; }
+footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--muted); font-size: 13px; }
+
+/* ── Hub (landing page) ──────────────────────────────────────────────── */
+.hub { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 14px; margin: 22px 0 0; }
+.hub a {
+  display: block; text-decoration: none; color: var(--fg);
+  background: var(--card); border: 1px solid var(--border);
+  border-left: 4px solid var(--hue, var(--accent));
+  border-radius: 12px; padding: 18px 20px; transition: background .12s, transform .12s;
+}
+.hub a:hover { background: var(--row); transform: translateY(-1px); }
+.hub .h-title { font-size: 19px; font-weight: 700; color: var(--fg-strong); margin: 0 0 4px; }
+.hub .h-sub { font-size: 14px; color: var(--muted); }
+.hub .h-glyph { font-size: 22px; line-height: 1; margin-bottom: 8px; display: block; }
+.hue-cards { --hue: #5aa9e6; }
+.hue-enemies { --hue: #e0574b; }
+.hue-effects { --hue: #b08bf0; }
+.hue-log { --hue: #d0a92b; }
+.hue-tuning { --hue: #3ec9b0; }
+
+/* ── Catalog: cards grid ─────────────────────────────────────────────── */
+.searchbar { margin: 14px 0 4px; }
+.searchbar input {
+  width: 100%; padding: 10px 14px; border-radius: 10px; font-size: 15px;
+  background: var(--card); color: var(--fg); border: 1px solid var(--border);
+}
+.count-note { color: var(--muted); font-size: 13px; margin: 6px 0 16px; }
+.grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: 16px; }
+.gcard {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+  overflow: hidden; display: flex; flex-direction: column;
+}
+.gcard .art { aspect-ratio: 4 / 3; background: var(--panel); overflow: hidden; }
+.gcard .art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gcard .art.none { display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 26px; }
+.gcard .body { padding: 12px 14px 14px; }
+.gcard .name { font-weight: 700; color: var(--fg-strong); margin: 0 0 8px; }
+.gcard .statrow { margin: 0 0 8px; }
+
+/* ── Catalog: enemies ────────────────────────────────────────────────── */
+.grid-enemies { display: grid; grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr)); gap: 16px; }
+.ecard { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+/* Enemy paintings are alpha-matted (figures float on a keyed-out black), so a
+   solid black plate behind them reads as intended in both themes. */
+.ecard .portrait { aspect-ratio: 1 / 1; background: #000; overflow: hidden; }
+.ecard .portrait img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.ecard .portrait.none { display: flex; align-items: center; justify-content: center; color: #6b7480; font-size: 34px; }
+.ecard .body { padding: 12px 15px 15px; }
+.ecard .name { font-size: 18px; font-weight: 700; color: var(--fg-strong); margin: 0; }
+.ecard .sub { color: var(--muted); font-size: 13px; margin: 2px 0 10px; text-transform: capitalize; }
+.statrow { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+.stat { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--panel); border: 1px solid var(--border); color: var(--fg); white-space: nowrap; }
+.stat .k { color: var(--muted); font-weight: 600; margin-right: 3px; }
+.stat.hp { --sc: #e0574b; } .stat.body { --sc: #e6864b; } .stat.mind { --sc: #5aa9e6; } .stat.heart { --sc: #7fc45a; }
+.stat.hp, .stat.body, .stat.mind, .stat.heart { border-color: color-mix(in srgb, var(--sc) 55%, var(--border)); }
+.sec-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 700; margin: 10px 0 5px; }
+.fights { font-size: 14px; margin: 0 0 4px; }
+.hint { font-size: 13px; color: var(--muted); font-style: italic; margin: 4px 0 0; }
+.skill { border-top: 1px solid var(--border); padding: 8px 0 0; margin: 8px 0 0; }
+.skill .sk-name { font-weight: 700; color: var(--fg-strong); font-size: 14px; }
+.skill .sk-text { font-size: 13px; color: var(--fg); margin: 2px 0 0; }
+.no-skills { font-size: 13px; color: var(--muted); }
+
+/* ── Catalog: effects ────────────────────────────────────────────────── */
+.eff-list { display: grid; gap: 10px; margin: 8px 0 0; }
+.eff {
+  display: grid; grid-template-columns: 3rem 1fr; gap: 14px; align-items: start;
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+}
+.eff .glyph {
+  width: 3rem; height: 3rem; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 26px; line-height: 1; color: #0b0d10; font-weight: 700;
+  background: var(--gc, var(--accent)); box-shadow: inset 0 0 0 1px rgba(0,0,0,.15);
+}
+.eff .name { font-weight: 700; color: var(--fg-strong); margin: 0 0 6px; }
+.eff .statrow { margin: 0 0 6px; }
+
+/* ── Raw-stat mechanic lines (cards + effects) ───────────────────────── */
+.mods { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 3px; }
+.mods li {
+  margin: 0; font-size: 13px; line-height: 1.4; color: var(--fg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  padding-left: 12px; position: relative;
+}
+.mods li::before { content: "›"; position: absolute; left: 0; color: var(--muted); }
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="home" href="../log.html">← DevLog</a><span class="crumb">2026-08-23</span></div></header>
+<main class="wrap">
+<h1 id="headline">2026-08-23</h1>
+<p class="headline">Two big-swing days: the deferred Mörk Borg north-star session finally</p>
+<div class="counts"><span class="chip cat-mechanics">1 mechanics</span><span class="chip cat-ui">1 UI</span><span class="chip cat-content">2 content</span><span class="chip cat-infra">2 infra</span></div>
+<section class="card cat-content" id="the-deferred-north-star-session-lands-evolution-not-pivot-plus-the-longer-leash"><div class="card-head"><span class="chip cat-content">content</span><h2>The deferred north-star session lands: evolution not pivot, plus THE LONGER LEASH</h2></div>
+<p class="field"><span class="flabel">What</span> PR #222 merged the brainstorm session <code>new-north-star.prompt.md</code></p>
+<p class="field"><span class="flabel">Why</span> Two open naming-session passes had surfaced candidates without</p>
+<p class="commits"><code class="commit">`19bdc920`</code> <code class="commit">`24d2c164`</code> <code class="commit">`30c33f1e`</code> <code class="commit">(merged</code> <code class="commit">via</code> <code class="commit">PR</code> <code class="commit">#222</code></p>
+<p>had queued since the product rename. T ruled five forks: <em>Mörk Borg is an evolution, not a hard pivot</em> (the Parish and Profane Canon names stay, Mörk Borg is the delivery register); irreverence dialed to 1 globally; the visual layer stays out of scope for now (the Woodcut Codex masterplan stands); full authority for the loop on narrative/world content with lint-and-audit-after guardrails; one re-voice pass over shipped prose. In the same session T then went further with ruling R-F, <strong>THE LONGER LEASH</strong>: the loop takes bigger leaps of freedom on cards, effects, keywords, narration, art, UI, direction, the map, and mechanics — deckbuilding, dice-building, signature skills, and equipment stay the core it doesn't touch, and the Surge meter stays locked by default.</p>
+<p>a clear winner; this session was the deferred follow-up that actually resolved the tonal direction, and T used the same breath to widen the loop's standing creative mandate rather than leave it narrowly scoped to the rename.</p>
+<p><code>05eed176</code>)</p></section>
+<section class="card cat-infra" id="phase-47e-partial-expo-decouple-lint-swap-version-matrix-doc-skia-re-evaluation"><div class="card-head"><span class="chip cat-infra">infra</span><h2>Phase 47e (partial) — Expo decouple: lint swap, version-matrix doc, Skia re-evaluation</h2></div>
+<p class="field"><span class="flabel">What</span> <code>expo lint</code> swapped for direct <code>eslint app components</code> (verified</p>
+<p class="field"><span class="flabel">Why</span> Continues the Expo-to-bare-RN re-platform one verifiable step at</p>
+<p class="commits"><code class="commit">`5f61faad`</code> <code class="commit">`2c26f89f`</code> <code class="commit">`b67a25fb`</code></p>
+<p>byte-identical output: 19 warnings, 0 errors), the post-decouple RN↔ native-lib version matrix documented as now manually managed, and <code>@shopify/react-native-skia</code> re-checked against its 2026-07-18 verdict (unchanged — still gated on the CI migration). Three legs carried over unshipped: the Jest preset, the Expo dev/web scripts, and the EAS build path all still need a native project that doesn't exist yet.</p>
+<p>a time; the carryovers are scoped out per <code>ship-a-phase.md</code>'s rule to brief only what's safe and testable without guessing at an unbuilt native project.</p></section>
+<section class="card cat-ui" id="phase-49-phase-50-glyphs-touch-ux-gate-clears-seal-chips-ship-in-live-combat"><div class="card-head"><span class="chip cat-ui">UI</span><h2>Phase 49 → Phase 50 — GLYPHS touch-UX gate clears, Seal chips ship in live combat</h2></div>
+<p class="field"><span class="flabel">What</span> Phase 49's completeness-critic pass ruled GO WITH CONSTRAINTS</p>
+<p class="field"><span class="flabel">Why</span> <code>state.glyphs</code> has had no mobile-facing UI since Phase 33d shipped</p>
+<p class="commits"><code class="commit">`f1171746`</code> <code class="commit">`0aab723d`</code> <code class="commit">`c1f8952c`</code> <code class="commit">`7e62a007`</code> <code class="commit">`f1aa5095`</code></p>
+<p>on the WI-2 "glyph chip row" design: merge into the existing statusStrip rather than add a new row, reuse the PLEA/mercy centered-modal pattern instead of a new bottom sheet, rename all UI-facing copy to "Seal" (engine symbols unchanged), and enforce a ≥44pt hit target via <code>hitSlop</code> on the 34px visual chip. Phase 50 shipped exactly that: <code>CombatPlayerPaneVM</code> gains <code>seals: CombatSealVM[]</code> mapped from the engine's <code>state.glyphs</code>, rendered as gold ◈/❖ chips distinct from every status-effect colour, and tapping one opens a CRACK/WAIT confirm sheet showing the foretold value.</p>
+<div class="diff" role="img" aria-label="code diff"><div class="dl del">-  const [bundlePicked, setBundlePicked] = useState(false);</div><div class="dl add">+  seals: CombatSealVM[]  // mapped from Phase 33d's state.glyphs</div><div class="dl add">+  // tap -&gt; CRACK/WAIT confirm sheet, reuses the PLEA/mercy modal pattern</div></div>
+<p>the engine plumbing — closing this gate unblocks the whole Seal/GLYPHS system for actual play, which Phase 51 then needed to have anything to crack.</p></section>
+<section class="card cat-infra" id="content-pipelines-audit-the-pipeline-liberation-four-owner-calls-ruled-in-one-walkthrough"><div class="card-head"><span class="chip cat-infra">infra</span><h2>Content pipelines audit → THE PIPELINE LIBERATION → four owner calls ruled in one walkthrough</h2></div>
+<p class="field"><span class="flabel">What</span> A six-pipeline audit (cards, keywords/effects, narrative,</p>
+<p class="field"><span class="flabel">Why</span> The audit found the loop had been running for two weeks against</p>
+<p class="commits"><code class="commit">`90d3ca73`</code> <code class="commit">`d766347a`</code> <code class="commit">`004808f0`</code> <code class="commit">`cf45595a`</code> <code class="commit">(merged</code> <code class="commit">via</code></p>
+<p>enemies/world, art, harness/permissions — PR #228) asked one question per pipeline: can the loop ship this content type end-to-end, and what blocks it. Headline finding: the 2026-08-08 "transitional library, don't tune it" ruling named a card library that was replaced by the Profane Canon the same day, so <code>/deck-tuning</code> had been unexecutable-as-written for two weeks. T's same-day answer, filed as <strong>THE PIPELINE LIBERATION</strong>: lift the expired hold, open keyword/effect/content growth on every surface (engine structure and locked mechanics stay gated), rule that count pins are growth ledgers rather than tamper guards, authorize narrative shipping, and open art acquisition. A follow-up oversight walkthrough then ruled the four calls the audit couldn't answer itself: art goes hosted-gpt-image-2-then-local-LoRA-if-needed (Midjourney permanently out), the 116 found card paintings need per-image license tracing before they can ship (not a blanket block), the north-star draft is ratified as-is with R-F's art-in-scope reading winning a self-declared-precedence contradiction, and the harness-grant expansion (Phase 72) stays queued pending elaboration. Docs rewired end-to-end against the Profane Canon in the same PR: <code>card-expert.md</code>, <code>deck-tuning.md</code>, mechanics <code>CLAUDE.md</code>, <code>profane-canon.md</code>, <code>keyword-atlas.md</code>, <code>deck-tuning.yml</code>, <code>digest.md</code>, <code>iterate.md</code>, a new <code>content-curator</code> agent, and a mobile asset-conventions doc.</p>
+<p>docs and rulings that described a library and a doctrine no longer live — <code>/deck-tuning</code>'s own step 1 would fail against the checked-in card library. Answering it same-day (rather than letting it sit as another open <code>needs-user-call</code>) unblocked five separate stalled pipelines at once.</p>
+<p>PR #228, <code>d5afa4a8</code>)</p></section>
+<section class="card cat-content" id="quest-gathering-minigame-retirements-jump-the-queue"><div class="card-head"><span class="chip cat-content">content</span><h2>Quest + Gathering minigame retirements jump the queue</h2></div>
+<p class="field"><span class="flabel">What</span> T flagged that two of three minigame retirements they'd asked</p>
+<p class="field"><span class="flabel">Why</span> A T-flagged gap between an intended retirement and what actually</p>
+<p class="commits"><code class="commit">`e46f13ab`</code></p>
+<p>for — Quest Board and Gathering — hadn't actually happened, despite Rest going out weeks ago. State check confirmed it: Phase 61 (Quest Board) was ruled 2026-08-15 but sat behind eight other rows, and Gathering had never been ruled at all. Both now sit under a new "NEXT UP" banner ahead of Phase 58. Gathering's shape needed a real investigation, not a plain delete: two systems share the name (the world-map "Gathering" node vs. the mobile-side "Gleaning" minigame interception), so the new Phase 76 retires only the minigame and keeps the map node — narrowing the ballot the same way T's own earlier "minigame only, keep it" ruling narrowed Quest.</p>
+<p>shipped is exactly the kind of drift <code>/oversight</code> exists to catch and reprioritize before it goes stale again.</p></section>
+<section class="card cat-mechanics" id="phase-51-glyphs-gets-a-crack-timing-policy-and-its-first-sandbox-evidence-in-weeks"><div class="card-head"><span class="chip cat-mechanics">mechanics</span><h2>Phase 51 — GLYPHS gets a crack-timing policy and its first sandbox evidence in weeks</h2></div>
+<p class="field"><span class="flabel">What</span> The 33d-era GLYPHS pilot cards were wiped by the Profane Canon</p>
+<p class="field"><span class="flabel">Why</span> Without live sandbox content there was nothing for a crack-timing</p>
+<p class="commits"><code class="commit">`0ffcd593`</code> <code class="commit">`a0e377d8`</code> <code class="commit">`935b7758`</code></p>
+<p>reset, so <code>state.glyphs</code> had been unreachable in real play since — Phase 51 re-authored a lean 2-card sandbox set (a rot-theme poison Seal, a vigil-theme barrier Seal) as a prerequisite, then gave five of eight sim policies a <code>crackAt</code> charge threshold (crack at cap/2, reusing the existing "reasonable timing" assumption rather than re-deriving it). Seeded A/B evidence (200 runs/cell, control vs. treatment) reads late-stage <code>statusEngagement</code> up 2.8pp — short of the brief's illustrative +10pp target, because the pooled metric only counts the poison Seal's crack, not the barrier Seal's real but differently-shaped win-rate/pacing effect. Mean rounds moved as predicted at every <code>crackAt</code> policy.</p>
+<p>heuristic to ever crack; this phase had to build the content and the policy logic together to produce any evidence at all, and files the metric-undercounting gap honestly rather than re-tuning to hit the illustrative number.</p></section>
+<section class="panel" id="measurement-freshness"><h2>Measurement freshness</h2>
+<p>The deck-matrix baseline was flagged <strong>stale</strong> at session open (two mechanics-source commits past the stamp: Phase 51's crackAt heuristic and THE PIPELINE LIBERATION's docs pass). Re-measured with the reduced-nightly pass (<code>935b7758</code>, 30 runs/cell): <strong>CQI unchanged</strong>, early win rate 54.5%, mid 8.3%, late 0%, impossible 0% — every number byte-identical to the prior stamp (<code>e25d7deb</code>, 2026-08-21). Neither source commit touches the <code>combat-playtest</code> matrix path, so this reconfirms rather than moves the picture. Per standing doctrine, the retired ten-preset win-rate curve (early ~80 / mid ~50 / late 25-35 / impossible 0) does not apply to the Profane-Canon-era library — report only, no tuning work spawned from a reduced-confidence pass.</p>
+<p>The standing <code>[HIGH]</code> <strong>late-stage global collapse</strong> row (all-preset 0.00 win rate at late) is likewise unchanged this window. It stays parked per its own repeated rulings: a status-dominance-doctrine violation that the 2026-08-08 unshackling voided as a target, now an open question for a dedicated owner-scoped enemy-scaling phase, not a <code>/deck-tuning</code> candidate. Nothing in this window's evidence changes that call.</p></section>
+<section class="panel" id="while-you-were-out"><h2>While you were out</h2>
+<div class="tablewrap"><table><thead><tr><th>when (UTC)</th><th>verb</th><th>outcome</th></tr></thead><tbody><tr><td>2026-08-21 13:23</td><td>march</td><td>success — <span class="st st-ok">shipped</span> Phase 47e (Expo decouple, partial)</td></tr><tr><td>2026-08-21 19:03</td><td>march</td><td>success — <span class="st st-ok">shipped</span> Phase 49 (GLYPHS touch-UX gate)</td></tr><tr><td>2026-08-22 01:54</td><td>march</td><td>success — <span class="st st-neutral">no-op</span>, short tick</td></tr><tr><td>2026-08-22 07:06</td><td>march</td><td>success — critique <span class="st st-ok">pass</span> 29 (no findings)</td></tr><tr><td>2026-08-22 ~11:50</td><td>attended</td><td>PR #222 <span class="st st-ok">merged</span> — north-star session + THE LONGER LEASH land on main</td></tr><tr><td>2026-08-22 13:06</td><td>march</td><td>success — <span class="st st-ok">shipped</span> Phase 50 (Seal chip mobile UI)</td></tr><tr><td>2026-08-22 18:54</td><td>march</td><td>success — <span class="st st-neutral">no-op</span>, short tick</td></tr><tr><td>2026-08-22 19:16–22:33</td><td>oversight (attended)</td><td>content-pipelines audit → THE PIPELINE LIBERATION → four owner calls ruled → minigame retirements reprioritized</td></tr><tr><td>2026-08-23 02:06</td><td>march</td><td>success — briefed Phase 51</td></tr><tr><td>2026-08-23 07:08</td><td>march</td><td>success — <span class="st st-ok">shipped</span> Phase 51 (crackAt heuristic + GLYPHS A/B evidence)</td></tr></tbody></table></div></section>
+<section class="panel" id="needs-you"><h2>Needs you</h2>
+<ul><li><strong>Phase 72 (harness grants for content work) is queued, not landed.</strong></li></ul>
+<p>The liberation session was itself permission-blocked from editing <code>.claude/settings.json</code> — reasonable self-expansion protection — so attended ticks still prompt-wall on <code>baseline:regen</code>, the minigame CLIs, and every tuning skill's PR-delivery verbs until an attended/local session lands it.</p>
+<ul><li><strong>Art generation is ruled but inert.</strong> The gpt-image-2 route (Phase 73)</li></ul>
+<p>needs an OpenAI key in <code>.env</code> before it can run anything; nothing was committed.</p>
+<ul><li><strong>116 found card paintings still need per-image license/source tracing</strong></li></ul>
+<p>before any can ship — narrowed from a blocking owner call to a tracing task, not currently blocking a phase.</p>
+<ul><li>**Quest Board (Phase 61) and Gathering (Phase 76) retirements now sit</li></ul>
+<p>under NEXT UP, ahead of Phase 58** — the next dispatcher tick should pick these up first per T's explicit priority call.</p></section>
+<section class="panel" id="tuning-proposals"><h2>Tuning proposals</h2>
+<p>None. The baseline re-measurement above reconfirms the prior read byte-for-byte; no new gate/cadence/ceiling mistuning surfaced in this window's pulse. The late-stage collapse row stays exactly where its own standing rulings left it — an owner-scoped call, not a candidate this loop files against itself.</p></section>
+<section class="panel" id="queues-now"><h2>Queues now</h2>
+<ul><li>Build plan: 28 open phases (<code>[ ]</code>), 8 partial-with-carryovers (<code>[-]</code>),</li></ul>
+<p>3 skipped, 91 shipped. Phases 61 and 76 (minigame retirements) newly reprioritized to NEXT UP; Phases 68–76 queued this window by THE PIPELINE LIBERATION and its oversight follow-up.</p>
+<ul><li><code>plan/AUDIT.md</code>: 54 genuinely open rows. All four <code>[needs-user-call]</code></li></ul>
+<p>rows the content-pipelines audit filed this window are already resolved in place by the same-day liberation/oversight walkthrough.</p>
+<ul><li><code>plan/CRITIQUE.md</code>: 21 open rows. Critique pass 29 (2026-08-22)</li></ul>
+<p>reconfirmed both open MED rows unchanged; no new findings.</p>
+<ul><li><code>plan/PHASE_CANDIDATES.md</code>: 34 open rows.</li><li>No open <code>triage:needs-user</code> or <code>loop:do</code> issues.</li><li>Deploy: clean — HEAD <code>935b7758</code> has one green <code>verify-mobile</code> run.</li><li>Nightly breadth (<code>e2e:minigames</code>): <strong>ALL PASS</strong> — both the</li></ul>
+<p>upgradeable-dice flag-on suite and the 10-run sandbox+live combat-round suite completed with no crashes.</p></section>
+<footer class="foot">Axiomancer DevLog &middot; generated by <code>scripts/build-devlog.mjs</code></footer>
+</main>
+</body>
+</html>
