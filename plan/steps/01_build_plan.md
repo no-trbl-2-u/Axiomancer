@@ -1709,9 +1709,18 @@ batch concurrently with 44* — both churn the whole mobile surface.**
 > order resumes after them (58 is next, and remains "ship it first"
 > among the rest).
 
-- [ ] Phase 51 — GLYPHS follow-up 3: sim `crackAt` policy heuristic + the
-      A/B promotion court, once mobile lets a playtester observe real
-      cracking behavior. (mechanics) Deps: 50. Brief: to generate.
+- [x] Phase 51 — GLYPHS follow-up 3: sim `crackAt` policy heuristic + the
+      A/B promotion court (shipped `a0e377d8`). Re-authored a lean 2-card
+      `GLYPHS_51_PILOT` sandbox set (the 33d-era pilot cards were wiped by
+      the Profane Canon reset); `CombatSimPolicy.crackAt?: number` wired
+      into `upgradeablePlayPhase` only (`policyPlayPhase` untouched);
+      `greedy`/`blind`/`dot-weaver`/`turtle`/`control-lock` crack at
+      cap/2 = 2. A/B evidence (early + late stage, 200 runs/cell):
+      late-stage `ALL8` statusEngagement +2.8pp (0.185→0.213), short of
+      WI-2's illustrative +10pp — the pooled metric mixes payload kinds
+      (only the poison Seal's crack lands as an enemy status). Mean rounds
+      moved as anticipated at every crackAt policy. Report:
+      `docs/reports/glyphs-crackat-promotion-2026-08-23.md`.
 
 **Balance doctrine repair (promoted via /oversight 2026-08-08, T direct —
 the queue had fully drained and the red curve had no phase assigned;
