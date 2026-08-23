@@ -71,7 +71,7 @@ const spoiledPoultice: Card = {
         'direction was out. Press it to their wound and count backward from ten.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'Inflict POISON 1 (ticks each card you play; 2 turns).',
+    paidSummary: 'Inflict POISON 1 (ticks each card you play, 2 turns).',
     // pts: poison i1 d2 (card-played clock, lifetime ~7.3 HP, tempo ÷3 ≈ 2.1)
     // + FREE MARK i1 d1 (0.75) ≈ 2.85 → Doxa. Deliberately weak: the 2-turn
     // poison dies before it ramps — teaches the seed verb, begs for removal.
@@ -277,7 +277,7 @@ const ossuaryDrawer: Card = {
         'nothing for storage.',
     tier: 1, rank: 3, cardType: 'spell',
     targetType: 'self',
-    paidSummary: 'Bank the powering die in your Reserve. PIP 1 — every Reserve die ripens. FORETELL 1.',
+    paidSummary: 'Bank the powering die in your Reserve. PIP 1: every Reserve die ripens. FORETELL 1.',
     // pts: bank_spent_die (2) + PIP 1 (1.5) + FORETELL 1 (1) = 4.5 + FREE
     // PIP 1 (1.5) ≈ 6.0 → Thesis. The thrift valve: instead of spending the
     // die you file it, and everything filed ripens.
@@ -302,7 +302,7 @@ const saintsFingerBone: Card = {
         'choir has never once said whose hand it was.',
     tier: 1, rank: 3, cardType: 'spell',
     targetType: 'self',
-    paidSummary: 'KINDLE a wild die — it joins your Reserve for this combat. HEAL 3.',
+    paidSummary: 'KINDLE a wild die (it joins your Reserve for this combat). HEAL 3.',
     // pts: KINDLE (2.5) + wild premium (0.5) + HEAL 3 (1) = 4.0 + FREE 1
     // Conviction (1) + HEAL 3 (1) ≈ 6.0 → Thesis. The abundance valve: a
     // relic that becomes a die, wild so it answers whichever prayer is
@@ -334,7 +334,7 @@ const mouthfulOfBrine: Card = {
         'Spit it out on consecrated ground, or carry it down with you.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'self',
-    paidSummary: 'PURGE this curse — it leaves the fight entirely.',
+    paidSummary: 'PURGE this curse (it leaves the fight entirely).',
     // pts: curse — unpriced by design (exempt from the band lint).
     free: { recoil: 1 },
     specialMechanics: [{ kind: 'purge_self' }],
@@ -355,7 +355,7 @@ const gnawMarks: Card = {
         'read yet.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'self',
-    paidSummary: 'PURGE this curse — it leaves the fight entirely.',
+    paidSummary: 'PURGE this curse (it leaves the fight entirely).',
     // pts: curse — unpriced by design. Its MILL self-harm is mildly kind to a
     // grave deck (the dredge joke is intentional — the pyre eats curses
     // gladly, and so does the congregation).
@@ -377,7 +377,7 @@ const arrears: Card = {
         'Payment is accepted in the only currency you reliably carry.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'self',
-    paidSummary: 'PURGE this curse — it leaves the fight entirely.',
+    paidSummary: 'PURGE this curse (it leaves the fight entirely).',
     // pts: curse — unpriced by design.
     free: { recoil: 1 },
     specialMechanics: [{ kind: 'purge_self' }],
@@ -397,7 +397,7 @@ const overheardName: Card = {
         'Un-hearing it is the expensive part.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'self',
-    paidSummary: 'PURGE this curse — it leaves the fight entirely.',
+    paidSummary: 'PURGE this curse (it leaves the fight entirely).',
     // pts: curse — unpriced by design.
     free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 1, to: 'self' } },
     specialMechanics: [{ kind: 'purge_self' }],
@@ -419,7 +419,7 @@ const unctionOfBoils: Card = {
         'beneath. Be patient: the blessing takes.',
     tier: 2, rank: 1, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'Inflict POISON 1 (ticks each card you play; 4 turns).',
+    paidSummary: 'Inflict POISON 1 (ticks each card you play, 4 turns).',
     // pts: poison i1 d4 (ramp 4,4,6,6; tempo-weighted 12.91 ÷ 3 ≈ 4.30) +
     // FREE MARK i1 d2 (1.5) ≈ 5.8 → Doxa.
     free: { applyEffect: { effectId: 'debuff_mark', intensity: 1, duration: 2 } },
@@ -441,8 +441,7 @@ const theSextonsBell: Card = {
     tier: 2, rank: 2, cardType: 'spell',
     targetType: 'enemy',
     paidSummary:
-        'Afflict with BLEED 2 (ticks each hit they take; 2 turns) and DOOM 1 ' +
-        '(grows +1 each time the foe acts).',
+        'Afflict with BLEED 2 (ticks each hit they take, 2 turns) and DOOM 1 (grows +1 each time the foe acts).',
     // pts: bleed i2 d2 (front-loaded, decays 1/trigger ≈ 3.0) + DOOM i1
     // (no-calendar, 4-round pricing horizon ≈ 2.0) + FREE tickAllDots (1.5)
     // ≈ 6.5 → Lemma.
@@ -466,7 +465,7 @@ const theLongLent: Card = {
         'things up. Your wounds observe the season.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'PROLONG every DoT on the enemy by 1 turn.',
+    paidSummary: 'PROLONG every DoT on the foe by 1 turn.',
     // pts: PROLONG +1 turn across ~3 live DoTs (5.5) + threshold MIND×3:
     // tickAllDots (1.5 × 0.5 = 0.75) + FREE poison i1 d2 (2.1) ≈ 8.35 →
     // Thesis.
@@ -489,8 +488,7 @@ const gangreneGospel: Card = {
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'enemy',
     paidSummary:
-        'Apply DOOM 1 (grows +1 each time the foe acts), then FESTER 1 — ' +
-        'every DoT on the enemy gains +1 intensity.',
+        'Apply DOOM 1 (grows +1 each time the foe acts), then FESTER 1: every DoT on the foe gains +1 intensity.',
     // pts: FESTER +1 across ~3 live DoTs (5.0) + DOOM i1 (2.0) + dieBonus
     // match: tickAllDots (1.5 × 0.6 = 0.9) + FREE MARK i1 d4 (3.0) ≈ 10.9 →
     // Theorem. Engine order (combatEffects before mechanics) means the fresh
@@ -515,8 +513,7 @@ const communionOfTheWorm: Card = {
     tier: 3, rank: 5, cardType: 'spell',
     targetType: 'enemy',
     paidSummary:
-        'RUPTURE ALL — consume every affliction on the enemy and detonate. ' +
-        'SIPHON 50% of the RUPTURE damage.',
+        'RUPTURE ALL: consume every affliction on the foe and detonate. SIPHON 50% of the RUPTURE damage.',
     // pts: RUPTURE (4 + expected fuel 8 = 12) + SIPHON 50% (2.0) + FREE
     // replant poison i1 d4 (4.30) + TICK (0.6) ≈ 18.9 → Axiom, deliberately
     // top-of-band — the theme's single detonation (resonance-detonation
@@ -537,8 +534,7 @@ const theUntendedGarden: Card = {
     name: 'The Untended Garden',
     philosophicalAspect: 'mind',
     persistentEffect:
-        'At the end of each round, FESTER 1 — every DoT on the enemy gains ' +
-        '+1 intensity.',
+        'At the end of each round, FESTER 1: every DoT on the foe gains +1 intensity.',
     description:
         'No shears, no salt, no gardener — only what the ground wanted all ' +
         'along. Each night the roots go one ring deeper. Nothing planted ' +
@@ -557,8 +553,7 @@ const edictOfTheOpenWound: Card = {
     name: 'Edict of the Open Wound',
     philosophicalAspect: 'body',
     persistentEffect:
-        'The enemy\'s wounds refuse to close: its POISON, BLEED and DOOM no ' +
-        'longer lose duration, and its HEAL fails.',
+        'The foe\'s wounds refuse to close: its POISON, BLEED and DOOM no longer lose duration, and its HEAL fails.',
     description:
         'By order of the parish that buried its last surgeon: let nothing ' +
         'close. The scab is annulled, the salve confiscated, the prayer for ' +
@@ -636,8 +631,7 @@ const deadPledge: Card = {
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
     paidSummary:
-        'Afflict with BLEED 2 (ticks each hit they take; 2 turns) and MARK 1 ' +
-        'for 2 turns.',
+        'Afflict with BLEED 2 (ticks each hit they take, 2 turns) and MARK 1 for 2 turns.',
     // pts: bleed i2 d2 (3) + mark d2 (1.5) = 4.5 + fate [DRAW 1 (2) + HEAL 3
     // (1)] × 0.7 (2.1) − fate RECOIL 2 credit (0.5) + FREE [mark d2 (1.5) +
     // TICK (0.6)] ≈ 8.2 → Thesis. The impossible made load-bearing: a dead X
@@ -664,9 +658,7 @@ const distraint: Card = {
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'enemy',
     paidSummary:
-        'IMMOLATE 1 — burn the lowest card in your hand from the fight: ' +
-        'afflict with BLEED 2 (ticks each hit they take; 3 turns) and gain ' +
-        'GUARD 4.',
+        'IMMOLATE 1 (burn the lowest hand card). Afflict BLEED 2 (ticks each hit taken, 3 turns). Gain GUARD 4.',
     // pts: IMMOLATE 1 [bleed i2 d3 (5) + GUARD 4 (1.0)] − 1.0 burn credit =
     // 5.0 + FALLEN [DRAW 1] × 0.5 (1.0) + FREE [DOOM i1 (2.0) + HEAL 4
     // (1.33) − RECOIL 1 (0.25)] ≈ 9.1 → Theorem. The bailiff burns curses
@@ -698,8 +690,7 @@ const blankIndenture: Card = {
     tier: 3, rank: 5, cardType: 'spell',
     targetType: 'enemy',
     paidSummary:
-        'RECOIL X of your choosing (at least 3). Afflict with POISON — 1 ' +
-        'stack per 2 VITAE paid, rounded up (ticks each card you play; 4 turns).',
+        'RECOIL X (at least 3). Afflict POISON 1 per 2 VITAE paid, rounded up, for 4 turns (ticks each card you play).',
     // pts: recoil_x min 3, poisonPerX 0.5 — expected X 6 → POISON i3 d4
     // (~12.9 tempo-weighted) − X credit (1.5) = 11.4 + FREE [DOOM i2 (2.9) +
     // DRAW 1 (2)] ≈ 16.3 → Axiom. THE drawback-is-the-whole-story card: no
@@ -716,8 +707,7 @@ const theRedLedger: Card = {
     name: 'The Red Ledger',
     philosophicalAspect: 'mind',
     persistentEffect:
-        'Whenever you pay RECOIL, afflict the enemy with BLEED 1 (ticks each ' +
-        'hit they take; 2 turns).',
+        'Whenever you pay RECOIL, afflict the foe with BLEED 1 (ticks each hit they take, 2 turns).',
     description:
         'Every drop is entered. The book forgives nothing; it forwards. ' +
         'What you pay at your own vein it bills again, promptly, at theirs.',
@@ -735,8 +725,7 @@ const jointAndSeveral: Card = {
     name: 'Joint and Several',
     philosophicalAspect: 'heart',
     persistentEffect:
-        'Whenever you pay RECOIL, the enemy loses the same amount of VITAE — ' +
-        'they are liable for your debts.',
+        'Whenever you pay RECOIL, the foe loses the same amount of VITAE (liable for your debts).',
     description:
         'The amendment is read aloud in the smallest of the nine courts: ' +
         'liability shall be joint and several. From this clause forward, ' +
@@ -809,9 +798,7 @@ const paupersPyre: Card = {
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
     paidSummary:
-        'IMMOLATE 2 — burn the 2 lowest cards in your hand from the fight: ' +
-        'inflict DOOM 2 (grows +1 each time the foe acts), TICK every DoT on ' +
-        'the foe, and DRAW 2.',
+        'IMMOLATE 2 (burn the 2 lowest hand cards). Inflict DOOM 2 (grows +1 each time the foe acts). TICK every DoT on the foe. DRAW 2.',
     // pts: IMMOLATE-2 rider [DOOM i2 (2.9) + tickAllDots (1.5) + DRAW 2 (4)]
     // = 8.4 − burn credit (2.0) = 6.4 + FREE [MILL 2 (2) + TICK (0.6)]
     // ≈ 9.0 → Thesis. The curse-disposal engine: injected hexes are rank 1
@@ -842,9 +829,7 @@ const dirgeForTheDisinterred: Card = {
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'enemy',
     paidSummary:
-        'Inflict DOOM 1 (grows +1 each time the foe acts). ECHO. REQUIEM 8 — ' +
-        'if your discard pile holds 8 or more cards, TICK every DoT on the ' +
-        'foe and DRAW 1.',
+        'Inflict DOOM 1 (grows +1 each time the foe acts). ECHO. REQUIEM 8: TICK every DoT on the foe and DRAW 1 (8+ cards in discard).',
     // pts: DOOM i1 (2.0) × ECHO (1.8) ≈ 3.6 + REQUIEM-8 rider [tickAllDots
     // (1.5) + DRAW 1 (2)] × 0.5 (1.75) + FREE [MILL 2 (2) + FORETELL 1 (1)]
     // ≈ 8.35 → Theorem. ECHO's double application stacks the DOOM to i2.
@@ -1057,8 +1042,7 @@ const everyStoneAnOath: Card = {
     name: 'Every Stone an Oath',
     philosophicalAspect: 'heart',
     persistentEffect:
-        'At the end of each round in which the enemy dealt you no damage, ' +
-        'gain GUARD 3 that persists.',
+        'At the end of each round in which the foe dealt you no damage, gain GUARD 3 that persists.',
     description:
         'The masons swore as they laid each course — not to any saint, but ' +
         'to the stone beneath it. A promise stacked on a promise, mortared ' +
@@ -1077,8 +1061,7 @@ const caltropsUnderTheSnow: Card = {
     name: 'Caltrops Under the Snow',
     philosophicalAspect: 'body',
     persistentEffect:
-        'Whenever the enemy deals you damage, it gains BLEED 2 (ticks each ' +
-        'hit they take).',
+        'Whenever the foe deals you damage, it gains BLEED 2 (ticks each hit they take).',
     description:
         'Iron teeth sown before the first snowfall, in rows, like a crop. ' +
         'Whatever reaches you has already walked the field to do it. The ' +
@@ -1200,9 +1183,7 @@ const theBlackCap: Card = {
     tier: 2, rank: 5, cardType: 'spell',
     targetType: 'enemy',
     paidSummary:
-        'Inflict DOOM 2 (grows +1 each time the foe acts). SENTENCE at 6 — ' +
-        'consume all MARK: 2 damage per stack, then DRAW 1 (CONDEMN at 8 — ' +
-        'you win; elite 10 · boss 12).',
+        'Inflict DOOM 2 (grows +1 per foe action). SENTENCE 6: RUPTURE MARK for 2 per stack, DRAW 1. CONDEMN 8 wins (elite 10, boss 12).',
     // pts: DOOM i2 (2.9) + SENTENCE-at-6 rider [ruptureMarks 2 (1.33) +
     // draw 1 (2)] + concedeCapstone (3) + FREE [DOOM i1 (2.0) + 1 premise
     // (0.8)] ≈ 12.0 → Axiom. The declaring card carries no condition line —
@@ -1222,8 +1203,7 @@ const theAssizeBell: Card = {
     name: 'The Assize Bell',
     philosophicalAspect: 'mind',
     persistentEffect:
-        'Whenever your STAGGER removes a rung from the enemy\'s telegraph, ' +
-        'gain 1 CHARGE.',
+        'Whenever your STAGGER removes a rung from the foe\'s telegraph, gain 1 CHARGE.',
     description:
         'One bronze syllable above the hall, struck for every objection ' +
         'sustained. The jury stopped hearing words some hours ago. They are ' +
@@ -1242,8 +1222,7 @@ const writOfAttainder: Card = {
     name: 'Writ of Attainder',
     philosophicalAspect: 'body',
     persistentEffect:
-        'At the end of each round, inflict DOOM 1 on the enemy — the ' +
-        'sentence compounds for the rest of the trial.',
+        'At the end of each round, inflict DOOM 1 on the foe (the sentence compounds for the rest of the trial).',
     description:
         'By this writ the blood itself stands condemned: nothing it feeds ' +
         'may inherit, nothing it warms may be spared. Each dawn the seal is ' +
@@ -1316,7 +1295,7 @@ const lastRitesSungEarly: Card = {
         'comes away neat, like a tooth already loose.',
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'RUPTURE 1 affliction — its remaining damage lands now. Gain 2 SOULS.',
+    paidSummary: 'RUPTURE 1 affliction: its remaining damage lands now. Gain 2 SOULS.',
     // pts: consume_affliction (5.5) + 2 souls (1.5) = 7.0 + dieBonus match
     // [soul 1 (0.75)] × 0.6 (0.45) + FREE [sway 2 (1.8) + heal 3 (1.0)]
     // ≈ 10.25 → Thesis.
@@ -1339,7 +1318,7 @@ const theOffertoryPlate: Card = {
         'with your name worked into the descant.',
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'REAP 3 — PLEA 5, apply QUARTER 2 for 2 turns, and KINDLE a heart die.',
+    paidSummary: 'REAP 3: PLEA 5, apply QUARTER 2 for 2 turns, and KINDLE a heart die.',
     // pts: REAP rider [sway 5 (4.5) + rapport i2 d2 (3.0)] + kindle heart
     // (2.5) − soul cost 3 (−3 × 0.75 ≈ −2.25) = 7.75 + threshold HEART×3
     // [souls 2 (1.5)] × 0.5 (0.75) + FREE [souls 2 (1.5) + sway 2 (1.8)]
@@ -1368,7 +1347,7 @@ const miserere: Card = {
         'singers.',
     tier: 3, rank: 5, cardType: 'spell',
     targetType: 'enemy',
-    paidSummary: 'REAP ALL — 3 damage per Soul spent. SIPHON 50% of the harvest.',
+    paidSummary: 'REAP ALL: 3 damage per Soul spent. SIPHON 50% of the harvest.',
     // pts: reap_all (5) + 3/soul × expected 4 souls ÷ 3 (4.0) + siphon 50%
     // (2.0) = 11.0 + fate [souls 2 + sway 2] × 0.7 (2.31) − fate RECOIL 2
     // credit (0.5) + FREE [sway 3 (2.7) + souls 3 (2.25)] ≈ 17.8 → Axiom.
@@ -1388,8 +1367,7 @@ const choirboneReliquary: Card = {
     name: 'Choirbone Reliquary',
     philosophicalAspect: 'body',
     persistentEffect:
-        'Whenever an affliction on the enemy expires or is consumed, gain 1 ' +
-        'SOUL and PLEA 1.',
+        'Whenever an affliction on the foe expires or is consumed, gain 1 SOUL and PLEA 1.',
     description:
         'A box of jaws that remembers every ending it has witnessed. When ' +
         'something in the enemy gutters out — a fever, a wound, a curse run ' +
@@ -1409,8 +1387,7 @@ const theLongAmen: Card = {
     name: 'The Long Amen',
     philosophicalAspect: 'mind',
     persistentEffect:
-        'At the end of each round, the enemy gains PLEA equal to the number ' +
-        'of Souls you hold.',
+        'At the end of each round, the foe gains PLEA equal to the number of Souls you hold.',
     description:
         'The final word of the service, held past the organ, past the ' +
         'candle-stubs, past the congregation\'s patience. It does not ' +

@@ -94,6 +94,44 @@ describe('keyword registry — terse glosses (owner directive 2026-07-12)', () =
     });
 });
 
+describe('keyword registry — card-text grammar (phase 40, 2026-08-23)', () => {
+    // The templating grammar adopted for the card-text copy pass bans the em
+    // dash and the semicolon from every authored player-facing string: a
+    // clause break is a new sentence, a trigger/consequence label is a colon.
+    // Mirrors the mechanics-side lint in
+    // `paid-summary-honesty.engine.test.ts` — this is the mobile half of the
+    // "add an em-dash/semicolon lint" requirement.
+    it('no keyword gloss carries an em dash or a semicolon', () => {
+        const offenders: string[] = [];
+        for (const kw of allRegistryKeywords()) {
+            const gloss = keywordGloss(kw) ?? '';
+            if (gloss.includes('—')) offenders.push(`${kw} → em dash`);
+            if (gloss.includes(';')) offenders.push(`${kw} → semicolon`);
+        }
+        expect(offenders).toEqual([]);
+    });
+
+    it('no systems-glossary def carries an em dash or a semicolon', () => {
+        const offenders: string[] = [];
+        for (const { term, def } of SYSTEM_GLOSSARY) {
+            if (def.includes('—')) offenders.push(`${term} → em dash`);
+            if (def.includes(';')) offenders.push(`${term} → semicolon`);
+        }
+        expect(offenders).toEqual([]);
+    });
+
+    it('no keyword gloss or systems-glossary def says "the enemy" (fixed vocabulary: "the foe")', () => {
+        const offenders: string[] = [];
+        for (const kw of allRegistryKeywords()) {
+            if (/\benemy\b/i.test(keywordGloss(kw) ?? '')) offenders.push(`gloss:${kw}`);
+        }
+        for (const { term, def } of SYSTEM_GLOSSARY) {
+            if (/\benemy\b/i.test(def)) offenders.push(`system:${term}`);
+        }
+        expect(offenders).toEqual([]);
+    });
+});
+
 describe('keyword registry — KW-6 (card-themes.ts family parity)', () => {
     it('every keyword a theme family claims resolves in the mobile glossary', () => {
         const broken: string[] = [];

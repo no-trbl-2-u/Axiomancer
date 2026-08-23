@@ -165,29 +165,29 @@ const KEYWORD_GLOSS: Record<string, string> = {
     // ── Utility (9) ──
     Draw: 'Draw that many cards from your deck, up to your hand limit.',
     Forge:
-        'Forges a GHOST die (or revives a dead X die as WILD) that plays beside your drafted die and is spent for good; '
-        + 'at 3 dice it grants +1 Conviction instead.',
+        'Forges a GHOST die (or revives a dead X die as WILD) that plays beside your drafted die and is spent for good. '
+        + 'At 3 dice, it grants +1 Conviction instead.',
     Guard:
         'Blocks that much incoming attack damage during the next threat phase. '
         + 'Unused Guard is lost unless the card prints "persists".',
-    Tick: 'Your strongest damage-over-time effect on the enemy ticks again, immediately.',
+    Tick: 'Your strongest damage-over-time effect on the foe ticks again, immediately.',
     Mark:
         'Every damage-over-time tick on the bearer deals +1 VITAE per Mark stack. '
         + 'Marks hold until consumed.',
     Cleanse: 'Removes up to that many afflictions from you.',
     Heal: 'Restores that much VITAE, up to your maximum.',
     Rupture:
-        "Consumes the enemy's afflictions and deals their remaining damage all at once — up to 60% of its max VITAE.",
+        "Consumes the foe's afflictions and deals their remaining damage at once, up to 60% of its max VITAE.",
     Siphon: 'Heals you for the printed percentage of the damage this play deals.',
     // ── Affliction (T1) ──
-    Prolong: 'Adds that many turns to every damage-over-time effect you have on the enemy.',
-    Fester: 'Every damage-over-time effect on the enemy gains that much intensity.',
-    Curdle: "Flips the enemy's Bleed into Poison and its Poison into Bleed, each landing that much harder.",
+    Prolong: 'Adds that many turns to every damage-over-time effect you have on the foe.',
+    Fester: 'Every damage-over-time effect on the foe gains that much intensity.',
+    Curdle: "Flips the foe's Bleed into Poison and its Poison into Bleed, each landing that much harder.",
     Poison:
-        'Each time a card is played, the enemy loses 2 VITAE per Poison stack — and the longer it holds, the harder it bites.',
+        'Each time a card is played, the foe loses 2 VITAE per Poison stack. The longer it holds, the harder it bites.',
     Bleed: 'Each hit the bearer takes deals 3 more VITAE per Bleed stack, then removes a stack.',
     Doom:
-        'Deals 1 VITAE per stack at the start of each round and grows a stack every time the enemy acts. '
+        'Deals 1 VITAE per stack at the start of each round and grows a stack every time the foe acts. '
         + 'It ends only when consumed.',
     // ── Sentence (T2) ──
     Charge:
@@ -197,47 +197,49 @@ const KEYWORD_GLOSS: Record<string, string> = {
         'Creates a temporary die of the printed color in your Reserve. '
         + 'If the Reserve is full, it grants +1 Conviction instead.',
     Pip:
-        'Each threat phase a Reserve die survives, it gains one, capped at 2 '
-        + '— some cards can push past that cap and risk a bust. '
+        'Each threat phase a Reserve die survives, it gains one pip, capped at 2 '
+        + '(some cards can push past the cap and risk a bust). '
         + 'Each pip spent adds +1 intensity, or +2 Guard on a defend card.',
     // ── Akrasia (T4) ──
-    Recoil: 'Pay the printed VITAE as a cost when the card is played — no defense can prevent it.',
+    Recoil: 'Pay the printed VITAE as a cost when the card is played. No defense can prevent it.',
     Fallen: "A state: you carry 2 or more different afflictions. A card's FALLEN line fires free while you are Fallen.",
     // ── Control (T5) ──
     // 2026-07-12 (card-wording audit) — the old "2 rungs / 3 on a boss" clause
     // stated how many rungs an action HAS (the RUNGS system term), not how many
     // Stagger removes, and so contradicted every `STAGGER 1` face.
     Stagger:
-        "Removes that many rungs (the steps of the enemy's telegraph) from its next action. "
+        "Removes that many rungs (the steps of the foe's telegraph) from its next action. "
         + 'Strip them all and the action is denied.',
     Backfire:
-        'The enemy takes 1 VITAE per Backfire stack for each rung its telegraphed action loses. '
+        'The foe takes 1 VITAE per Backfire stack for each rung its telegraphed action loses. '
         + 'A denied action counts all of its rungs.',
     // ── Oracle (T6) ──
-    Foretell: "Reveals the enemy's next stance and looks at that many cards of your deck, moving the best to the top.",
+    Foretell: "Reveals the foe's next stance and looks at that many cards of your deck, moving the best to the top.",
     // Phase 32 part 4d — OMEN v2: a stance/window claim staked at cast (not
     // derived from the die), with a Conviction ante paid up front.
-    Omen: 'Stake a stance and how many phases it must land within — a wider claim is safer but pays less, and a hit fires the payoff free; a miss keeps the ante.',
+    Omen:
+        'Stake a stance and a window of phases it must land within, paying a Conviction ante up front '
+        + '(a wider window is safer but pays less). A hit fires the payoff free and a miss keeps the ante.',
     // ── Harvest (T7) ──
-    Soul: 'You gain 1 Soul each time an affliction on the enemy expires or is consumed.',
-    Reap: 'Spends the printed number of Souls to fire the printed effect — with fewer Souls, it fizzles.',
+    Soul: 'You gain 1 Soul each time an affliction on the foe expires or is consumed.',
+    Reap: 'Spends the printed number of Souls to fire the printed effect. With fewer Souls, it fizzles.',
     // ── Charm (T8) ──
     Plea:
-        'Builds on the enemy and decays 1 each round; at their resolve (~35% of max VITAE) they relent.',
-    Quarter: "The enemy's attacks deal 10% less damage per Quarter stack.",
+        'Builds on the foe and decays 1 each round. At their resolve (~35% of max VITAE), they relent.',
+    Quarter: "The foe's attacks deal 10% less damage per Quarter stack.",
     // ── Bulwark (T9) ──
-    Thorns: 'The enemy takes 1 VITAE per Thorns stack each threat phase it attacks you — even through a full block.',
+    Thorns: 'The foe takes 1 VITAE per Thorns stack each threat phase it attacks you, even through a full block.',
     Riposte:
         'Armed for one threat phase: reduces the first attack by its parry (CUT) value. '
-        + 'If Guard fully blocks it, the enemy takes CTR damage — or more if the blow was bigger.',
+        + 'If Guard fully blocks it, the foe takes CTR damage instead, or more if the blow was bigger.',
     // ── Echo / Grave ──
     Echo: "The card's PAID line fires twice. FREE lines never echo.",
-    Recall: 'Returns that many cards from your discard pile to your hand — highest rank first.',
+    Recall: 'Returns that many cards from your discard pile to your hand, highest rank first.',
     Replay: 'Says your last spell again: its PAID payload fires that many more times.',
     Requiem: "A card's REQUIEM line fires free while your discard pile holds that many cards.",
     // ── The pyre verbs (Profane Canon rework, 2026-08-08) ──
-    Immolate: 'Burns the lowest-rank cards in your hand as a cost — they leave the fight entirely. A curse burns as well as anything.',
-    Purge: 'Playing this curse removes it from the fight entirely — a die and a beat buy the deck clean.',
+    Immolate: 'Burns the lowest-rank cards in your hand as a cost, and they leave the fight entirely. A curse burns as well as anything.',
+    Purge: 'Playing this curse removes it from the fight entirely. A die and a beat buy the deck clean.',
     // 2026-07-12 (card-wording audit) — MILL was printed on three echo cards
     // ('mill 1 to discard') with no gloss, no glyph, and no registry row: the
     // only fully unglossed mechanic word in the sweep. Three carriers clears
@@ -246,13 +248,13 @@ const KEYWORD_GLOSS: Record<string, string> = {
     // ── Die gear (spec 33 Upgradeable Dice §6, registered D4 2026-07-17) —
     // BOON is the face payload; HONE/TEMPER are the blacksmith upgrade verbs.
     // (Renamed from SPECIAL — R-8, phase 44b.) ──
-    Boon: "A die's BOON face powers a card of its color and grants Conviction — its equipped gear sets how much (2 by default).",
+    Boon: "A die's BOON face powers a card of its color and grants Conviction. Its equipped gear sets how much (2 by default).",
     Hone: "A blacksmith upgrade: adds a mana face to a die's gear, so more of its rolls power a card.",
-    Temper: "A blacksmith upgrade: turns a mana face into a BOON face. A colored die caps at 2 boon and 1 miss; gold at 1.",
+    Temper: "A blacksmith upgrade: turns a mana face into a BOON face. A colored die caps at 2 boon and 1 miss, gold at 1.",
     // ── Card types (labels, not keywords — never rendered in the inspect
     // keyword panel since 2026-07-12; kept for help surfaces + the KW lints) ──
     Oath: 'A passive on your side: 3 rounds when played free, permanent when paid with a die.',
-    Hex: 'A standing curse on the enemy: 3 rounds when played free, permanent when paid with a die.',
+    Hex: 'A standing curse on the foe: 3 rounds when played free, permanent when paid with a die.',
 };
 
 /**
@@ -362,14 +364,14 @@ export const SYSTEM_GLOSSARY: readonly { term: string; def: string }[] = [
     { term: 'TOLL ⬡', def: 'A running tally, for the whole combat, of dice you spend by color. A ⬡ threshold line fires once you have spent that many dice of its color this combat.' },
     { term: 'RESERVE & PIPS', def: 'Up to 2 dice held between phases instead of played. Each gains +1 pip per phase it survives, spent for extra intensity or Guard.' },
     { term: 'GHOST ✦', def: 'A forged die that plays alongside your drafted die, never rerolls, and is gone forever when spent.' },
-    { term: 'RUNGS', def: "The steps of the enemy's telegraphed action — 2 on a normal action, 3 on a boss. Losing all of them denies the action." },
+    { term: 'RUNGS', def: "The foe's telegraphed action has rungs: 2 on a normal action, 3 on a boss. Losing all of them denies the action." },
     { term: 'WILD / X', def: 'A WILD die counts as any color. A dead X die powers nothing, but can be Forged wild or fate-tapped.' },
     // 2026-07-12 (owner directive: every printed term pops a definition) —
     // the two card-local Sentence-payoff words. SENTENCE was demoted from
     // the keyword registry (phase 29) but still prints on the-closing-word;
     // CONDEMN is the alt-win it can escalate to. Neither had a popup anywhere.
     { term: 'SENTENCE', def: 'A declared conclusion: when your Charge tally reaches the printed count, its payoff fires free and the tally resets.' },
-    { term: 'CONDEMN', def: 'An alternate win — reaching the printed Charge count in one Sentence ends the fight. Elites and bosses demand the higher printed count.' },
+    { term: 'CONDEMN', def: 'An alternate win: reaching the printed Charge count in one Sentence ends the fight. Elites and bosses demand the higher printed count.' },
     // 2026-07-18 (owner playtest) — INTENSITY and FREE are RETIRED from the
     // overlay glossary: both read plainly enough in context, and their rows
     // padded every inspect (they were the 07-12 audit's additions).

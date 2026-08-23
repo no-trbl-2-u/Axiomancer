@@ -19,7 +19,7 @@ import { getDeckPreset, PRESET_DICE_VALVES } from '../combat.starter-deck-preset
 
 const EXPECTED_PAID_LINES: Readonly<Record<string, string>> = {
     'spoiled-poultice':
-        'PAID — Inflict POISON 1 (ticks each card you play; 2 turns). Costs 1 die.',
+        'PAID — Inflict POISON 1 (ticks each card you play, 2 turns). Costs 1 die.',
     'chilblain-watch':
         'PAID — GUARD 6. Gain THORNS 1 for 2 turns. Costs 1 die.',
     'petty-indictment':

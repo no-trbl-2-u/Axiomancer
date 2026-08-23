@@ -185,6 +185,34 @@
   "ship it first") and an optional dedicated narrative loop
   skill/workflow if content-curator-via-/iterate proves insufficient.
 
+### [content] Engine-generated "the enemy" strings survived the phase-40 card-text grammar pass
+- category: content
+- impact: 3
+- ease: 5
+- detail: filed 2026-08-23 by phase 40 (card-text grammar + full copy
+  pass). That phase fixed the FIXED VOCABULARY rule ("the foe", not "the
+  enemy") across every AUTHORED string: `cards.library.ts`
+  `paidSummary`/`persistentEffect` (31 cards) and mobile
+  `state/combat/keywords.ts` `KEYWORD_GLOSS`/`SYSTEM_GLOSSARY` (17
+  entries), each now lint-enforced. Two adjacent surfaces still say "the
+  enemy" and were deliberately left out of that pass (bounded scope, not
+  an oversight): the ENGINE's own generated strings in
+  `axiomancer-mechanics/src/Combat/combat.cards.ts`
+  (`statePredicateText`'s `UNMOVED`/`enemy-drew-blood` clauses, the hex
+  `Attaches to the enemy.` suffix, the `lock_stance` and
+  `boost_all_dots` mechanic-text lines — 7 total sites) and the mobile
+  presenter's per-mechanic `verbLine` prose in
+  `axiomancer-mobile/state/presenters/combat-encounter.engine.ts`
+  (`mechanicHeadline`, ~30 entries, several also carrying stray em
+  dashes/semicolons the phase-40 lint never reached). Neither surface has
+  a lint today. A future pass: rename the 7 mechanics sites (cheap,
+  bounded — plus its `choir-card-wording.engine.test.ts` assertions that
+  pin `UNMOVED (the enemy dealt you no damage last round)` / `the enemy
+  drew blood since your last turn` / `Attaches to the enemy.` literally),
+  then decide whether `mechanicHeadline`'s much larger prose set is worth
+  a dedicated sweep or a standing lint of its own.
+- next: /iterate
+
 ### [contract] New-keyword wiring drifts silently across seven surfaces
 - category: contract
 - impact: 6

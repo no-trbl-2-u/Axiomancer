@@ -72,7 +72,7 @@ describe('Pale Choir card wording', () => {
 
     it('Last Rites, Sung Early states the RUPTURE, the Souls, and the die bonus', () => {
         const text = face('last-rites-sung-early');
-        expect(text).toContain('RUPTURE 1 affliction — its remaining damage lands now');
+        expect(text).toContain('RUPTURE 1 affliction: its remaining damage lands now');
         expect(text).toContain('Gain 2 SOULS');
         expect(text).toContain('BODY/WILD die: +1 Soul');
     });
@@ -88,7 +88,7 @@ describe('Pale Choir card wording', () => {
 
     it('Miserere states the per-Soul burst, the SIPHON, and the fate line with its price', () => {
         const text = face('miserere');
-        expect(text).toContain('REAP ALL — 3 damage per Soul spent');
+        expect(text).toContain('REAP ALL: 3 damage per Soul spent');
         expect(text).toContain('SIPHON 50% of the harvest');
         expect(text).toContain('an X die may power this');
         expect(text).toContain('recoil 2 HP');
@@ -98,14 +98,14 @@ describe('Pale Choir card wording', () => {
         const text = face('choirbone-reliquary');
         expect(text).toContain('FREE (3 rounds)');
         expect(text).toContain('PAID (rest of combat)');
-        expect(text).toContain('Whenever an affliction on the enemy expires or is consumed');
+        expect(text).toContain('Whenever an affliction on the foe expires or is consumed');
         expect(text).toContain('gain 1 SOUL and PLEA 1');
     });
 
-    it('The Long Amen names its clock, its scaling, and that it rides the enemy', () => {
+    it('The Long Amen names its clock, its scaling, and that it rides the foe', () => {
         const text = face('the-long-amen');
         expect(text).toContain('At the end of each round');
-        expect(text).toContain('the enemy gains PLEA equal to the number of Souls you hold');
+        expect(text).toContain('the foe gains PLEA equal to the number of Souls you hold');
         expect(text).toContain('Attaches to the enemy');
     });
 });

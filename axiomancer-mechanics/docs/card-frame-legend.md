@@ -53,3 +53,74 @@ atlas uses (`PLEA 4`, `draw 1`, `+1 intensity · STAGGER 1`).
 `Ash · Tooth · Splinter · Rib · Skull · Saint` (spec 34 R-14; was
 `Doxa · Lemma · Thesis · Theorem · Axiom · Aporia`) is the rarity ladder. It
 shows as a chip, not on the face — it never affects resolution.
+
+## Card-text grammar (phase 40, 2026-08-23)
+
+Ruled R4 (2026-07-18), re-scoped at ship time against PR #193 ("strip the
+prose off the card face", merged 2026-08-10): the authored PAID
+sentence no longer prints on the glance FACE at all — the face is
+`KEYWORD` over its value only (see `docs/keyword-atlas.md`; the projection
+is `paidValueFor`/`CombatCardFace` in mobile). The authored sentence
+(`Card.paidSummary` for spells, `Card.persistentEffect` for oath/hex
+passives) now renders on the **INSPECT OVERLAY**, which already owns the
+keyword definitions per that PR's stated design ("the card details already
+define the keywords"). This grammar governs that overlay sentence — the
+`KEYWORD_GLOSS` / `SYSTEM_GLOSSARY` popup prose in mobile's
+`state/combat/keywords.ts` follows the same bans.
+
+**The rules (hard, linted):**
+
+1. **No em dash (—) and no semicolon (;)** anywhere in an authored string. A
+   clause break is a new sentence (`. `); a trigger or consequence label is
+   a colon (`REQUIEM 8: …`, `SENTENCE 6: …`) — never a scaffold for a whole
+   second clause.
+2. **One effect, one sentence.** Gate / cost / condition comes before the
+   payoff it unlocks (`RECOIL 3, then DRAW 2.` not the reverse).
+3. **Colon = trigger label only.** `LABEL N: payoff.` — never a stand-in for
+   "and" or "which".
+4. **Parens carry the honesty-required trigger/clock note** — an event DoT's
+   real tick (`ticks each card you play`) or a non-decaying clock's growth
+   rule (`grows +1 each time the foe acts`) — plus its duration where one
+   applies, comma-joined (`(ticks each card you play, 2 turns)`), never
+   `KEYWORD N for M turns` immediately adjacent: that exact word order is
+   the WI-2 round-clock lie the honesty guard bans for event-triggered DoTs
+   (see `Combat/e2e/paid-summary-honesty.engine.test.ts` and the mobile
+   `card-face-honesty.guard.test.ts` WI-2 sweep) even when a correcting
+   parenthetical follows.
+5. **Bare keywords.** The overlay IS the gloss; an authored sentence never
+   re-explains what a keyword already means, only its printed numbers.
+6. **"The foe" is the fixed vocabulary.** "The enemy" is retired from every
+   authored `paidSummary` / `persistentEffect` string and from the mobile
+   glossary prose (`KEYWORD_GLOSS`, `SYSTEM_GLOSSARY`).
+7. **Budget:** `paidSummary` (spells) ≤ 130 characters, ends in terminal
+   punctuation, never restates the "PAID —" scaffold. `persistentEffect`
+   (oath/hex passives) carries no fixed cap — a trigger clause plus its
+   payoff legitimately runs longer than a spell's single payoff — but stays
+   a single dense read, not a paragraph.
+
+**Seven clause shapes** the authored corpus resolves into (mix freely; a
+card uses only the shapes its payload needs):
+
+1. **Bare payoff** — `KEYWORD N.` (`PLEA 3.`)
+2. **Sequential payoffs** — `KEYWORD N. KEYWORD M.` (`MILL 2. FORETELL 1.`)
+3. **Gated payoff** — `COST, then PAYOFF.` (`RECOIL 3, then DRAW 2.`)
+4. **Duration-qualified payoff** — `KEYWORD N (trigger note, D turns).`
+   (`Inflict POISON 1 (ticks each card you play, 2 turns).`)
+5. **Trigger-labeled payoff** — `LABEL N: PAYOFF.`
+   (`REQUIEM 8: TICK every DoT on the foe and DRAW 1 (8+ cards in discard).`)
+6. **Multi-clause sequence** — `PAYOFF, then PAYOFF.` / `PAYOFF and PAYOFF.`
+   (`Apply DOOM 1 (grows +1 each time the foe acts), then FESTER 1: …`)
+7. **Passive trigger** (persistentEffect only) — `Whenever X, PAYOFF.` /
+   `At the end of each round, PAYOFF.`
+   (`Whenever you pay RECOIL, afflict the foe with BLEED 1 …`)
+
+**Known residue (filed, not fixed this pass):** the engine's OWN generated
+strings in `Combat/combat.cards.ts` (`statePredicateText`'s `UNMOVED`/
+`enemy-drew-blood` clauses, the hex `Attaches to the enemy.` suffix, and the
+`lock_stance` / `boost_all_dots` mechanic-text lines) and the mobile
+presenter's per-mechanic `verbLine` prose in
+`state/presenters/combat-encounter.engine.ts` (`mechanicHeadline`) still say
+"the enemy" and still carry stray em dashes in places. Both are engine/
+presenter-generated (not authored per-card prose) and are a materially
+larger surface with their own review burden — out of scope for this pass;
+see `plan/AUDIT.md`.
