@@ -147,21 +147,59 @@ describe('sandbox registry — library-card overrides', () => {
 // ── Set registry (post-v3 reset) ─────────────────────────────────────────────
 
 describe('sandbox sets — the registry after the post-v3 reset', () => {
-    it('is EMPTY at the Profane-Canon reset — the spec-32 sets died with the library they measured', () => {
-        // PROFANE CANON (2026-08-08): the wholesale card rework retired the
-        // 86-card themed library, so every experiment set and swap pool that
-        // referenced it was cleared (same clean-reset rule spec 32 v3 applied
-        // to ITS predecessors; the retired sets live in git history).
-        // `/deck-tuning` authors the next generation of canon-era sets here —
-        // when it does, this pin is the ledger it must update.
-        expect(Object.keys(SANDBOX_CARD_SETS)).toEqual([]);
-        expect(listSandboxSets()).toEqual([]);
+    // PROFANE CANON (2026-08-08): the wholesale card rework retired the
+    // 86-card themed library, so every experiment set and swap pool that
+    // referenced it was cleared (same clean-reset rule spec 32 v3 applied
+    // to ITS predecessors; the retired sets live in git history).
+    // Phase 51 authors the first post-reset entry, `GLYPHS_51_PILOT` — the
+    // ledger this suite pins moves from "empty" to "one named set."
+    it('holds exactly GLYPHS_51_PILOT post-reset — the first `/deck-tuning`-authored set', () => {
+        expect(Object.keys(SANDBOX_CARD_SETS)).toEqual(['GLYPHS_51_PILOT']);
+        expect(listSandboxSets().map(s => s.id)).toEqual(['GLYPHS_51_PILOT']);
     });
 
     it('applySandboxSet returns undefined for an unknown id and registers nothing', () => {
         expect(applySandboxSet('forge-example')).toBeUndefined();
         expect(applySandboxSet('no-such-set')).toBeUndefined();
         expect(hasSandboxContent()).toBe(false);
+    });
+});
+
+// ── GLYPHS_51_PILOT (Phase 51) ───────────────────────────────────────────────
+
+describe('GLYPHS_51_PILOT — the re-authored Seal pilot resolves cleanly', () => {
+    it('applying the set registers both cards, no collisions against the library or each other', () => {
+        const set = applySandboxSet('GLYPHS_51_PILOT');
+        expect(set?.cards.map(c => c.id).sort()).toEqual(['the-hoarwatch-sigil', 'the-plague-seal']);
+        expect(hasSandboxContent()).toBe(true);
+        for (const c of set!.cards) {
+            expect(getCardById(c.id)?.name).toBe(c.name);
+        }
+    });
+
+    it('both Seal cards resolve through getCardById/toCombatCard with a live glyph payload', () => {
+        applySandboxSet('GLYPHS_51_PILOT');
+        const poison = getCardById('the-plague-seal');
+        const barrier = getCardById('the-hoarwatch-sigil');
+        expect(poison?.glyph?.payload).toEqual({ kind: 'poison', baseIntensity: 1, duration: 2 });
+        expect(poison?.glyph?.cap).toBe(3);
+        expect(barrier?.glyph?.payload).toEqual({ kind: 'barrier', baseAmount: 2 });
+        expect(barrier?.glyph?.cap).toBe(3);
+
+        const poisonProjected = toCombatCard('the-plague-seal', getCardById, lookupEffect);
+        const barrierProjected = toCombatCard('the-hoarwatch-sigil', getCardById, lookupEffect);
+        expect(poisonProjected).not.toBeNull();
+        expect(barrierProjected).not.toBeNull();
+    });
+
+    it('every effect id on both Seal cards resolves in the Effects library', () => {
+        applySandboxSet('GLYPHS_51_PILOT');
+        for (const id of ['the-plague-seal', 'the-hoarwatch-sigil']) {
+            const c = getCardById(id)!;
+            if (c.free?.applyEffect) {
+                expect(lookupEffect(c.free.applyEffect.effectId), `${id} -> ${c.free.applyEffect.effectId}`).toBeDefined();
+            }
+        }
     });
 });
 

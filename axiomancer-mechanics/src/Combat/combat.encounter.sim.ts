@@ -23,7 +23,7 @@ import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveThreatPhase, startTurn, draftStanceDie, endTurn, chooseDraft, revealedCurrentStance,
     playSignatureSkill, getDraftedDie, handCards, selectMercyChoice, selectCapitulationChoice, getSignatureSkill,
-    tapFateDie, recoilXRange, placeStake,
+    tapFateDie, recoilXRange, placeStake, crackGlyph,
 } from './combat.engine';
 import { RESERVE_MAX } from './combat.dice';
 import { isUpgradeableDiceEnabled, MOMENTUM_CHAIN_ORDER } from './combat.upgradeable-dice';
@@ -352,7 +352,7 @@ function momentumSourceScore(color: string, want: string | null): number {
  * are the Phase 43 decision-width sample (see `countLiveOptions`); everything
  * else predates it and is unchanged.
  */
-interface PlayPhaseResult {
+export interface PlayPhaseResult {
     state: CombatEncounterState;
     plays: number;
     statusPlays: number;
@@ -371,8 +371,14 @@ interface PlayPhaseResult {
  * best unspent die to Reserve. A pure measurement instrument — legible, not an
  * AI: it reuses the policy's `rankCard`/`bestSignature`, adding only the
  * momentum-steer ordering and the whiff-reroll, both spec-mandated levers.
+ *
+ * Phase 51 — also the ONLY driver that reads `policy.crackAt` (GLYPHS): a
+ * witness with the field set cracks its highest-charge eligible Seal once
+ * per loop pass, alongside the existing signature-cast check. The flag-off
+ * legacy `policyPlayPhase` body never reads it — see that function's own
+ * comment for why it stays byte-identical.
  */
-function upgradeablePlayPhase(
+export function upgradeablePlayPhase(
     state: CombatEncounterState,
     policy: CombatSimPolicy,
     rng: () => number,
@@ -424,6 +430,24 @@ function upgradeablePlayPhase(
             if (sigId) {
                 const cast = playSignatureSkill(working, sigId);
                 if (cast.state !== working) { working = cast.state; if (working.finalOutcome) break; continue; }
+            }
+        }
+
+        // Phase 51 (GLYPHS) — crackAt: once a controlled Seal's charges meet
+        // the witness's threshold, crack it (dieless, no source/die
+        // consumed) — never blocks a signature or a die play in the same
+        // iteration, it just takes one guard-counted loop pass when it
+        // fires, same as a signature cast above. Highest-charge eligible
+        // Seal wins; ties resolve to `state.glyphs` array order.
+        if (policy.crackAt !== undefined) {
+            const eligible = (working.glyphs ?? []).filter(g => g.charges >= policy.crackAt!);
+            if (eligible.length > 0) {
+                let target = eligible[0];
+                for (const g of eligible) {
+                    if (g.charges > target.charges) target = g;
+                }
+                const cracked = crackGlyph(working, target.id, rng);
+                if (cracked.state !== working) { working = cracked.state; if (working.finalOutcome) break; continue; }
             }
         }
 

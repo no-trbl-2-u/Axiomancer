@@ -22,12 +22,13 @@ import { lookupEffect } from '../../Effects';
 import { deepClone } from '../../Utils';
 import {
     COMBAT_SIM_POLICIES, COMBAT_SIM_POLICY_ORDER, getSimPolicy, listSimPolicies,
-    type CombatSimPolicyId,
+    type CombatSimPolicyId, type CombatSimPolicy,
 } from '../combat.sim-policies';
-import { runOneEncounter } from '../combat.encounter.sim';
-import { initializeCombatEncounter } from '../combat.engine';
+import { runOneEncounter, upgradeablePlayPhase } from '../combat.encounter.sim';
+import { initializeCombatEncounter, rollEncounterDice } from '../combat.engine';
+import { setUpgradeableDice } from '../combat.upgradeable-dice';
 import { toCombatCard } from '../combat.cards';
-import type { CombatCard, CombatEncounterState } from '../combat.encounter.types';
+import type { CombatCard, CombatEncounterState, GlyphInstance } from '../combat.encounter.types';
 
 // Spec 32 v3: basePower is deleted at the schema level — the "no status game"
 // card is a statusless utility fixture, and the Befriend lever (no library
@@ -59,7 +60,10 @@ registerSandboxCards([
     },
 ]);
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+    vi.restoreAllMocks();
+    setUpgradeableDice(false);
+});
 
 const ALL_POLICY_IDS: readonly CombatSimPolicyId[] = [
     'greedy', 'blind', 'dot-weaver', 'control-lock', 'aggro-brute', 'turtle', 'chaos', 'mercy-seeker',
@@ -327,5 +331,105 @@ describe('per-card telemetry — cardUsage is consistent with the aggregate coun
     it('throws on an unknown policy id (honest failure, no silent fallback)', () => {
         expect(() => runOneEncounter(loadout(MIX), LittleBelle, 1, 'nope' as CombatSimPolicyId))
             .toThrow(/Unknown combat sim policy/);
+    });
+});
+
+// ── Phase 51 — the crackAt policy heuristic (GLYPHS) ─────────────────────────
+// Doctrinal roster assignment: greedy/blind/dot-weaver/turtle/control-lock get
+// crackAt 2 (cap/2, glyphExpectedValue's own "reasonable crack timing"
+// assumption); aggro-brute/chaos/mercy-seeker stay never-cracking (absent).
+describe('crackAt roster assignment (combat.sim-policies)', () => {
+    it('exactly the doctrine-fit five carry crackAt: 2', () => {
+        const withCrackAt = COMBAT_SIM_POLICY_ORDER.filter(id => COMBAT_SIM_POLICIES[id].crackAt !== undefined);
+        expect(withCrackAt.sort()).toEqual(['blind', 'control-lock', 'dot-weaver', 'greedy', 'turtle'].sort());
+        for (const id of withCrackAt) expect(COMBAT_SIM_POLICIES[id].crackAt).toBe(2);
+    });
+
+    it('aggro-brute, chaos, and mercy-seeker are left never-cracking', () => {
+        for (const id of ['aggro-brute', 'chaos', 'mercy-seeker'] as const) {
+            expect(COMBAT_SIM_POLICIES[id].crackAt).toBeUndefined();
+        }
+    });
+});
+
+// ── Phase 51 — the crackAt decision seam (combat.encounter.sim) ─────────────
+// Wired ONLY into `upgradeablePlayPhase` (spec-33 flag-on driver); the
+// flag-off `policyPlayPhase` legacy body never reads `policy.crackAt` — these
+// cases drive `upgradeablePlayPhase` directly with a hand-built glyph and a
+// policy stub, per the phase brief's own test spec.
+describe('crackAt decision seam — upgradeablePlayPhase (combat.encounter.sim)', () => {
+    function stubPolicy(crackAt: number | undefined): CombatSimPolicy {
+        return {
+            id: 'greedy',
+            name: 'crackAt test stub',
+            description: 'test-only witness for the crackAt decision seam',
+            blind: false,
+            preferredFocus: 'balanced',
+            rankCard: () => 0,
+            signatureKinds: [],
+            // Never funds a signature — isolates the crack check from the
+            // existing conviction/signature-cast branch it sits beside.
+            convictionThreshold: 999,
+            mercyChoice: 'spare',
+            crackAt,
+        };
+    }
+
+    /** A four-fixed-dice phase-play state (spec-33 flag-on), the only shape
+     *  `upgradeablePlayPhase` reads. */
+    function upgradeableState(seed = 5): CombatEncounterState {
+        setUpgradeableDice(true);
+        const initial = initializeCombatEncounter(loadout(MIX), deepClone(GraveLarva), undefined, seed);
+        return rollEncounterDice(initial).state;
+    }
+
+    function glyph(id: string, charges: number, kind: 'poison' | 'barrier' = 'poison'): GlyphInstance {
+        return kind === 'poison'
+            ? { id, cardId: 'the-plague-seal', payload: { kind: 'poison', baseIntensity: 1, duration: 2 }, charges, cap: 3 }
+            : { id, cardId: 'the-hoarwatch-sigil', payload: { kind: 'barrier', baseAmount: 2 }, charges, cap: 3 };
+    }
+
+    const crackedIds = (state: CombatEncounterState): string[] =>
+        state.log
+            .filter((e): e is Extract<typeof e, { kind: 'glyph-cracked' }> => e.kind === 'glyph-cracked')
+            .map(e => e.glyphId);
+
+    it('a policy with crackAt set cracks its eligible glyph once charges meet the threshold', () => {
+        const state = { ...upgradeableState(), glyphs: [glyph('g1', 2)] };
+        const result = upgradeablePlayPhase(state, stubPolicy(2), () => 0.5, {}, {});
+        expect(crackedIds(result.state)).toContain('g1');
+        expect(result.state.glyphs).not.toContainEqual(expect.objectContaining({ id: 'g1' }));
+    });
+
+    it('a glyph below the threshold is never cracked', () => {
+        const state = { ...upgradeableState(), glyphs: [glyph('g1', 1)] };
+        const result = upgradeablePlayPhase(state, stubPolicy(2), () => 0.5, {}, {});
+        expect(crackedIds(result.state)).not.toContain('g1');
+        expect(result.state.glyphs).toContainEqual(expect.objectContaining({ id: 'g1' }));
+    });
+
+    it('a policy with crackAt ABSENT never cracks, even with a glyph sitting at cap', () => {
+        const state = { ...upgradeableState(), glyphs: [glyph('g1', 3)] };
+        const result = upgradeablePlayPhase(state, stubPolicy(undefined), () => 0.5, {}, {});
+        expect(crackedIds(result.state)).toEqual([]);
+        expect(result.state.glyphs).toEqual([glyph('g1', 3)]);
+    });
+
+    it('two eligible glyphs at different charges: the higher-charge one cracks FIRST', () => {
+        const state = {
+            ...upgradeableState(),
+            glyphs: [glyph('g1', 2), glyph('g2', 3, 'barrier')],
+        };
+        const result = upgradeablePlayPhase(state, stubPolicy(2), () => 0.5, {}, {});
+        expect(crackedIds(result.state).slice(0, 2)).toEqual(['g2', 'g1']);
+    });
+
+    it('a true tie (equal charges) breaks to state.glyphs array order', () => {
+        const state = {
+            ...upgradeableState(),
+            glyphs: [glyph('g1', 2), glyph('g2', 2, 'barrier')],
+        };
+        const result = upgradeablePlayPhase(state, stubPolicy(2), () => 0.5, {}, {});
+        expect(crackedIds(result.state).slice(0, 2)).toEqual(['g1', 'g2']);
     });
 });

@@ -83,6 +83,20 @@ export interface CombatSimPolicy {
      * witness's win-rate gap is measured against).
      */
     stakesWhenInformed?: boolean;
+    /**
+     * Phase 51 — a charge-count threshold for the GLYPHS `crackAt` heuristic
+     * (mirrors `stakesWhenInformed`'s optional-decision-seam shape): once a
+     * glyph the player controls has `charges >= crackAt`, the witness cracks
+     * it (dieless, no source/die consumed). Absent = never cracks — the
+     * strict default, so every policy without this field is byte-identical
+     * to its pre-Phase-51 behavior. Multiple eligible glyphs: the
+     * highest-charge one wins; ties resolve to `state.glyphs` array order
+     * (mirrors `glyphsOfKind`'s own deterministic, no-RNG doctrine in
+     * `combat.engine.ts`). Wired only into `upgradeablePlayPhase`
+     * (`combat.encounter.sim.ts`) — the flag-off legacy `policyPlayPhase`
+     * body never reads it.
+     */
+    crackAt?: number;
 }
 
 // ─── Score bands ─────────────────────────────────────────────────────────────
@@ -232,6 +246,9 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         // stakes when it actually knows the phase's stance (via the draft
         // reveal or a scout), same as a well-played human would.
         stakesWhenInformed: true,
+        // Phase 51 — payoffs-on-time is literally greedy's description; a
+        // ripened Seal is exactly the kind of timed payoff it already reads.
+        crackAt: 2,
     },
     blind: {
         id: 'blind',
@@ -244,6 +261,8 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         convictionThreshold: 7,
         mercyChoice: 'spare',
         chooseX: (_s, card, range) => greedyChooseX(card, range),
+        // Phase 51 — same payoff-timing doctrine as greedy.
+        crackAt: 2,
     },
     'dot-weaver': {
         id: 'dot-weaver',
@@ -267,6 +286,9 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         signatureKinds: ['dot', 'conclude'],
         convictionThreshold: 7,
         mercyChoice: 'exploit',
+        // Phase 51 — the erosion/poison-first witness; the poison Seal is its
+        // natural line.
+        crackAt: 2,
     },
     'control-lock': {
         id: 'control-lock',
@@ -286,6 +308,9 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         signatureKinds: ['control', 'dot'],
         convictionThreshold: 8,
         mercyChoice: 'spare',
+        // Phase 51 — denial witness; a persistent barrier synergizes with
+        // holding a lock game.
+        crackAt: 2,
     },
     'aggro-brute': {
         id: 'aggro-brute',
@@ -318,6 +343,9 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         mercyChoice: 'spare',
         // The outlast temperament commits the least blood the card allows.
         chooseX: (_s, _card, range) => range.min,
+        // Phase 51 — the outlast/barrier witness; a persistent Seal payoff is
+        // its natural line.
+        crackAt: 2,
     },
     chaos: {
         id: 'chaos',

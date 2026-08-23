@@ -335,3 +335,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-22T19:16:02Z | subagent | Explore | claude-fable-5 | main | Audit loop permissions/enforcement |
 | 2026-08-23T02:08:05Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-23T02:09:37Z | subagent | Explore | claude-sonnet-5 | main | Research context for Phase 51 GLYPHS sim policy |
+| 2026-08-23T07:09:35Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-23T07:11:01Z | subagent | card-expert | claude-sonnet-5 | main | Ship Phase 51 — crackAt policy + GLYPHS evidence |
