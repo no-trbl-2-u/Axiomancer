@@ -339,3 +339,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-23T07:11:01Z | subagent | card-expert | claude-sonnet-5 | main | Ship Phase 51 — crackAt policy + GLYPHS evidence |
 | 2026-08-23T09:04:56Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-08-23T13:08:46Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-23T18:54:59Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-23T18:57:29Z | subagent | card-expert | claude-sonnet-5 | main | Ship Phase 40 card-text grammar pass |
