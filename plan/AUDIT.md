@@ -14,6 +14,14 @@
 
 ## Pending
 
+### [contract] Phase 57 can zero the live axio-query corpus inside an already-running session
+- category: contract
+- observed: during the 2026-08-24 roundtable, the checkout fast-forwarded across Phase 57 (`cb788468`), which deleted the tracked `devlog/data/{cards,enemies,effects}.json` snapshots. The already-running `axio-query` process then returned `0 cards, 0 enemies, 0 effects` instead of regenerating. A manual `npm run catalog:export` restored `57 cards, 56 enemies, 24 effects` immediately.
+- cause seam: `scripts/axio-mcp-server.mjs` caches `freshnessChecked` for the process lifetime, while Phase 57 made the JSON inputs ignored/generated. A server that checked freshness before a checkout mutation can later lose those files without rechecking. `scripts/axio-mcp-server.test.mjs` calls the smoke test "returns non-empty counts" but only matches `\d+`, so zero passes.
+- impact: the MCP advertises live-library truth while silently returning an empty corpus after a legal pull/checkout transition. Card/effect research can then make false absence claims until the export is rebuilt or the MCP process restarts.
+- suggested fix: make freshness sensitive to missing/changed export files on every data-bearing tool call (or invalidate the cache when any snapshot disappears), strengthen the smoke to assert positive card/enemy/effect counts, and add a hermetic delete-after-first-call regression witness.
+- evidence: `scripts/axio-mcp-server.mjs:14-22,51-69,129-151`; `scripts/axio-mcp-server.test.mjs:57-63`; roundtable command sequence and MCP outputs dated 2026-08-24.
+
 > AUDIT-DRAIN MODE LIFTED (via oversight 2026-08-15 — T called it off).
 > The 2026-08-12 banner in `plan/steps/01_build_plan.md` paused
 > `ship-a-phase` dispatch so `/march` would fall through to `/iterate`
