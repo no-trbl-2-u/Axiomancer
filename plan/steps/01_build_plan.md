@@ -1929,25 +1929,13 @@ this pass — the candidate names Gathering for retirement but T did not
 rule on it here, so it stays open rather than being swept in by
 implication. Combat and Hazard-Pattern Combat are untouched.
 
-- [ ] Phase 58 — Carry authored narration to the player. Every
-      `MapEventPayload` already declares `description?: string` and
-      `MapEvents/content.ts` fills it in on **59 of 74 authored nodes**,
-      in the game's voice ("A wall of thorn-brush. You bleed easing
-      through."). None of it ever reaches a player: `ResolvedEvent`
-      (`World/MapEvents/types.ts:213`) declares no description field on
-      any variant, and `resolve-map-event.ts` never reads one, so the
-      text dies at the resolver. Mobile documents the gap in a comment
-      (`state/presenters/event.engine.ts:585`) and routes around it to
-      `DEFAULT_BODY_BY_KIND` — eleven three-word placeholders
-      ("Something stirs.", "A quiet place.", "The air turns."). Scope:
-      thread `description` through `ResolvedEvent` for every kind that
-      can carry one, have the presenter prefer it over the placeholder,
-      and keep the placeholder table only as the empty-string fallback.
-      This is the phase that actually answers T's opening ask, and it
-      needs no design call — the authoring layer and the prose both
-      already exist and are simply not connected. Ship it first.
-      (mechanics + mobile; plumbing, no new content)
-      Brief: to generate.
+- [x] Phase 58 — Carry authored narration to the player (426912a9).
+      `ResolvedEvent` now threads `description` from every
+      `MapEventPayload` kind but `cutscene` (already used `lines`) and
+      `none`; every handler passes it through; mobile's
+      `bodyFromPayload` prefers it over `DEFAULT_BODY_BY_KIND` for the
+      kinds that reach the event modal (interaction, village). Brief:
+      `plan/phases/phase_58_map-event-descriptions.md`.
 
 - [ ] Phase 59 — Rest is two offers: heal 25%, or cut a card. **T
       direct, 2026-08-15:** *"Rest: Heal 25% health or remove a card.
