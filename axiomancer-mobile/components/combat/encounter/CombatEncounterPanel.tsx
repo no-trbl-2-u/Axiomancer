@@ -12,13 +12,17 @@
  * origin (the dev route wraps it in `<ScreenBg>`; the modal renders it as a
  * full-screen layer).
  *
- * Live play (`persistOutcome`) hand-rolls the economy write-back the new
- * engine intentionally omits (it has no economy layer — verified against
- * mechanics 0.28.0): final HP → player.health, `enemy.xpReward` →
- * experience (+ cascade level-ups), `rollLoot(enemy.loot)` → inventory.
- * Mirrors what the legacy `END_COMBAT` reducer did for the old combat. The
- * deckbuilder reward card is written regardless — it's the new system's own
- * reward (Spec 26b §C). Defeat HP / run reset is the host's concern.
+ * Live play (`persistOutcome`) hand-rolls only the write-backs that have no
+ * engine equivalent — floating dice (Spec 32 v3 §5), banked Souls (Phase 32
+ * part 1b), and final HP → player.health — then (Phase 54) routes the
+ * outcome through the engine's real `endCombat` reducer for everything else
+ * (XP, loot, quest kill-objective advancement + completion rewards, and, on
+ * a merciful win, the authored `friendshipReward` payload: flags, codex
+ * unlocks, alignment shift, faction deltas, moral-meter). `beginHazardEncounter`
+ * stages `state.currentEncounter` via `startCombat` so `endCombat` has a real
+ * encounter to resolve against. The deckbuilder reward card is written
+ * regardless — it's the new system's own reward (Spec 26b §C). Defeat HP /
+ * run reset is the host's concern.
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -30,7 +34,7 @@ import {
     startTurn, endTurn, draftStanceDie, discardCombatCard, playSignatureSkill, crackGlyph,
     tapFateDie, getPendingDotTotal, getFloatingDiceColors,
     selectEncounterMercyChoice, selectCapitulationChoice, buildCombatSummary,
-    rollLoot, addItem, getLogger, advanceKillObjectives,
+    getLogger,
     type CombatEncounterState, type CombatOutcome, type Character, type Enemy, type CombatEvent,
 } from '@mechanics';
 
@@ -120,23 +124,41 @@ function isMercifulWin(outcome: CombatOutcome): boolean {
 }
 
 /**
- * Economy write-back for a finished hazard encounter — the bridge the new
- * engine omits. Victory and the merciful wins (mercy / capitulate / concede)
- * grant XP (+ cascade level-ups); victory also rolls item loot. Final HP
- * persists for every outcome except defeat (the host's run-reset full-heals
- * there). The GHOST-die pool (spec 32 v3 §5) writes back to the character
- * on every outcome — forged dice persist across combats until spent. Phase 32
- * part 1b: unspent Harvest Souls write back the same way — `player.bankedSouls`
- * accumulates `finalState.souls`, "the jar travels" regardless of how the
- * fight ended. The deckbuilder card is handled separately (rolled into the
- * store on victory, claimed via `claimCombatRewardAction`).
- *
- * 2026-08-08 first-map audit — a win also advances any active `kill` quest
- * objective naming this foe. The legacy engine `endCombat` did this, but the
- * live hazard combat never calls it, so before this the first map's whole
- * quest chain was dead: killing the King of Revenge left `starting-quest`
- * stuck at 0/1 forever, Old Marrow's reward branches never unlocked, and
- * `get-to-forest` could never be granted.
+ * Phase 54 — translate the hazard-pattern engine's 6-way `CombatOutcome`
+ * into the vocabulary `game.reducer.ts`'s `END_COMBAT` case understands.
+ * The merciful wins (mercy / capitulate / concede — "won without killing")
+ * map onto the legacy engine's `'friendship'` outcome, which is exactly the
+ * "spared the foe" branch already-authored `Enemy.friendshipReward` data
+ * targets. `'retreat'` is dead (`combat.encounter.types.ts` — no in-combat
+ * retreat exists) and maps to `'flee'` only so this function stays total.
+ */
+function mapHazardOutcomeToEndCombat(
+    outcome: CombatOutcome,
+): 'victory' | 'defeat' | 'friendship' | 'flee' {
+    if (outcome === 'victory') return 'victory';
+    if (outcome === 'defeat') return 'defeat';
+    if (isMercifulWin(outcome)) return 'friendship';
+    return 'flee';
+}
+
+/**
+ * Write-back for a finished hazard encounter. Handles only what has no
+ * engine equivalent — the GHOST-die pool (spec 32 v3 §5, forged dice persist
+ * across combats until spent), Phase 32 part 1b's banked Harvest Souls
+ * (`player.bankedSouls` accumulates `finalState.souls`, "the jar travels"
+ * regardless of how the fight ended), and final HP (persists for every
+ * outcome except defeat — the host's run-reset full-heals there) — then
+ * (Phase 54) dispatches the real `game.reducer.ts` `endCombat` for
+ * everything else: XP, loot, quest kill-objective advancement + completion
+ * rewards, and — on a merciful win — the authored `friendshipReward`
+ * payload (flags, codex unlock, alignment shift, faction deltas,
+ * moral-meter). `endCombat` reads its own `Enemy` off the `currentEncounter`
+ * `beginHazardEncounter` staged via `startCombat`, so no `finalPlayer` is
+ * passed here — the write-back below already lands HP/floatingDice/
+ * bankedSouls on `state.player` first, and `endCombat` builds its grant on
+ * top of that already-current root player. The deckbuilder card is handled
+ * separately (rolled into the store on victory, claimed via
+ * `claimCombatRewardAction`).
  */
 export function applyHazardOutcome(
     store: StoreLike,
@@ -161,25 +183,18 @@ export function applyHazardOutcome(
         if (outcome !== 'defeat') {
             player = { ...player, health: Math.max(0, Math.min(finalHp, player.maxHealth)) };
         }
-        if (outcome === 'victory' || isMercifulWin(outcome)) {
-            player = { ...player, experience: player.experience + (enemy.xpReward ?? 0) };
-        }
-        if (outcome === 'victory') {
-            const drop = rollLoot(enemy.loot, Math.random);
-            if (drop) {
-                player = { ...player, inventory: addItem(player.inventory, drop) };
-            }
-        }
-        // Kill objectives match on the foe's DISPLAY name — that is what the
-        // authored quests carry ("The King of Revenge", not the slug).
-        const quests = (outcome === 'victory' || isMercifulWin(outcome)) && s.quests
-            ? advanceKillObjectives(s.quests, enemy.name).log
-            : null;
-        return quests ? { player, quests } : { player };
+        return { player };
     });
+    // Phase 54 — resolve the staged encounter through the engine's real
+    // endCombat reducer: XP, loot, quest kill-objective advancement +
+    // completion rewards, and (on 'friendship') flags/codex/alignment/
+    // faction/moral-meter, all read off Enemy.xpReward / .loot /
+    // .friendshipReward / .journalEntry via state.currentEncounter.
+    store.getState().endCombat(mapHazardOutcomeToEndCombat(outcome));
     // Cascade level-ups through the engine store (applyLevelUps isn't exported,
     // so the LEVEL_UP reducer is the only public path). applyLevelUps already
-    // loops internally; the guarded while-loop is belt-and-braces.
+    // loops internally; the guarded while-loop is belt-and-braces. Runs after
+    // endCombat since that's what actually grants the XP now.
     if (outcome === 'victory' || isMercifulWin(outcome)) {
         const levelUp = (store.getState() as { levelUp?: () => void }).levelUp;
         let guard = 0;

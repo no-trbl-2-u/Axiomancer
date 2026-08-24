@@ -923,9 +923,12 @@ export function createAppActions(store: AppStore): AppActions {
             // (Spec 26b), not the legacy stance engine. Pull the foe out of
             // the pending combat-prelude event, guarantee a real deck via
             // starter cards, clear the event slice, and hand the enemy back
-            // for the in-place panel to bootstrap. Crucially we do NOT call
-            // the legacy `startCombat` — the new engine state is owned by the
-            // panel's local React state, so `state.combat` stays null.
+            // for the in-place panel to bootstrap. The fight itself is still
+            // driven entirely by the panel's local React state — but we DO
+            // stage `state.currentEncounter` via `startCombat` (Phase 54) so
+            // the exit-time `endCombat` call has a real encounter to resolve
+            // rewards, flags, codex unlocks, and faction/alignment deltas
+            // against instead of silently no-op'ing.
             const slice = store.getState().event;
             const pending = slice?.pending ?? null;
             if (!pending || pending.event.kind !== 'encounter') return null;
@@ -935,7 +938,9 @@ export function createAppActions(store: AppStore): AppActions {
             clearEventSlice(store);
             // Testing: fatten every live foe so encounters run longer (more
             // turns to exercise status-effect play). See ENCOUNTER_ENEMY_HP_MULTIPLIER.
-            return withScaledEnemyHp(enemy, ENCOUNTER_ENEMY_HP_MULTIPLIER);
+            const scaledEnemy = withScaledEnemyHp(enemy, ENCOUNTER_ENEMY_HP_MULTIPLIER);
+            store.getState().startCombat(scaledEnemy);
+            return scaledEnemy;
         },
         endCombat: (outcome) => {
             // Cross-combat resource carry is engine-owned now (the reducer's
