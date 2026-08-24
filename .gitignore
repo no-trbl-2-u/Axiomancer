@@ -36,3 +36,16 @@ web-build/
 
 # Game knowledge base (synced clone — see scripts/kb-sync.mjs)
 kb/
+
+# DevLog — generated site output (Cloudflare Pages serves what `main`'s tree
+# contains, and this content was never meant to be public — phase 57,
+# plan/phases/phase_57_devlog_pages_scopedown.md). Rebuild locally with
+# `npm run site:build`; source inputs (entries/*.md, dated screenshots,
+# hand-authored tuning-lab reports, README.md) stay tracked.
+devlog/index.html
+devlog/log.html
+devlog/catalog.html
+devlog/entries/*.html
+devlog/tuning-lab/index.html
+devlog/data/
+devlog/assets/catalog/

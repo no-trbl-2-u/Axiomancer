@@ -1,0 +1,27 @@
+name: check-devlog-served
+
+# Cloudflare Pages serves whatever `main`'s tree contains. The tracked
+# pre-commit hook guards this on every devlog/-touching commit; this
+# weekly/manual sweep is the remote backstop for commits made without the
+# hook (phase 57 — plan/phases/phase_57_devlog_pages_scopedown.md).
+
+on:
+  schedule:
+    - cron: '31 7 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-devlog-served
+  cancel-in-progress: true
+
+jobs:
+  check-devlog-served:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Guard against generated DevLog output re-entering the tree
+        run: node scripts/check-devlog-not-served.mjs

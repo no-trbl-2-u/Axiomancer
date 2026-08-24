@@ -18,3 +18,11 @@ if git diff --cached --name-only --diff-filter=ACMR \
   | grep -Eq '(\.md$|^axiomancer-mechanics/docs/lexicon\.json$|^scripts/check-lexicon\.mjs$)'; then
   node scripts/check-lexicon.mjs
 fi
+
+# Cloudflare Pages serves whatever `main`'s tree contains. The DevLog's
+# generated HTML/data/art must never re-enter the index — check it whenever
+# a staged change touches devlog/ (phase 57).
+if git diff --cached --name-only --diff-filter=ACMR \
+  | grep -q '^devlog/'; then
+  node scripts/check-devlog-not-served.mjs
+fi

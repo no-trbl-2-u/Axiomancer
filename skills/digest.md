@@ -113,9 +113,13 @@ its own cadence.
    refreshes the hub (`devlog/index.html`), AND regenerates the
    Cards / Enemies / Effects catalog from the current engine
    libraries (`npm run catalog` — ts-node export + zero-dep
-   render) so the catalog never drifts from what ships. Commit
-   the entry, the built HTML, `devlog/data/**`, and any
-   `devlog/assets/**` together. Body Markdown: pipe tables,
+   render) so the catalog never drifts from what ships. The
+   built HTML, `devlog/data/**`, and `devlog/assets/catalog/**`
+   are gitignored (phase 57 — Cloudflare Pages serves whatever
+   `main`'s tree contains, so generated output never gets
+   committed); commit the entry, and any new
+   `devlog/assets/<date>/**` screenshots from step 4a. Body
+   Markdown: pipe tables,
    `-`/`1.` lists, fenced code / ```diff, `**bold**`, `_italic_`,
    `` `code` ``, `[links](url)`.
 

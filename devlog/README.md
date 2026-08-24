@@ -19,8 +19,12 @@ nightly `/digest` skill authors a structured markdown entry into
 `entries/DIGEST_<date>.md`; `scripts/build-devlog.mjs` renders it into a
 self-contained styled HTML page at `entries/DIGEST_<date>.html` — markdown
 source and built HTML live side by side in `entries/`.
-Everything served here — markdown source, built HTML, copied art — is committed;
-no build runs on the host.
+Only the markdown source, the dated screenshot captures, and the
+hand-authored tuning-lab reports are committed. The built HTML, the catalog
+JSON/art, and the tuning-lab index are generated output, gitignored, and
+rebuilt locally by `npm run site:build` — Cloudflare Pages serves whatever
+`main`'s tree contains, so nothing generated here is committed to it
+(phase 57).
 
 ## Catalog (`catalog.html`)
 

@@ -515,6 +515,15 @@
   `https://<branch-slug>.axiomancer.pages.dev` previews) still needs a
   human at the dashboard to restrict or disable; that is the remaining
   half and the reason the row does not close on the phase alone.
+- **Phase 57 SHIPPED.** The in-repo half is drained: generated DevLog
+  HTML/data/catalog-art are untracked and gitignored,
+  `build-devlog.yml`'s commit-to-main step is deleted, `/digest` no
+  longer commits generated output, and `scripts/check-devlog-not-served.mjs`
+  guards against regression (pre-commit hook + weekly
+  `check-devlog-served.yml`). Post-deploy, the previously-live DevLog
+  URLs should 404. **Row stays open** — the Cloudflare project itself
+  (production domain, guessable per-branch previews) still needs a
+  human at the dashboard, per the text above.
 
 ### [x] [contract] `exploration-combat-roundtrip-e2e` regression: FLEE leaves the tab bar hidden — RESOLVED via /oversight 2026-08-10: fixed by #194
 - category: contract
