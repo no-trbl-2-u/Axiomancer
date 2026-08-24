@@ -1798,7 +1798,7 @@ RESEQUENCED the same day behind the unshackling — see above):**
       in git history: commits prior to `0048e3ea`/`36cf0698`, e.g.
       `git show b647fc65:plan/steps/01_build_plan.md`.)
 
-- [ ] Phase 54 — Route live combat through `endCombat`. `AUDIT.md`
+- [x] Phase 54 — Route live combat through `endCombat` (556ec152). `AUDIT.md`
       "[mobile] The live combat exit path bypasses the engine's
       end-of-combat reducer entirely" (first-map audit 2026-08-08,
       finding F3): hazard combat (Spec 26b) never calls `endCombat`, so
