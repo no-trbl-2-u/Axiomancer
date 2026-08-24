@@ -1,0 +1,250 @@
+/**
+ * MapEvent `description` passthrough (Phase 58) — hermetic coverage.
+ *
+ * Every `MapEventPayload` kind but 'cutscene' (delivers its authored
+ * prose via `lines`, already reaches the player) and the pool-roll
+ * miss case ('none') threads its optional `description` straight onto
+ * the matching `ResolvedEvent` discriminant. Before this phase the
+ * text died at the resolver: `ResolvedEvent` declared no description
+ * field on any variant, so mobile always fell back to its generic
+ * per-kind placeholder regardless of what a node authored.
+ */
+
+import { describe, expect, it, afterEach, vi } from 'vitest';
+
+import {
+    resolveMapEvent,
+    registerMapEventPool,
+    setDefaultMapEventPool,
+    _clearMapEventPoolRegistry,
+} from '../resolve-map-event';
+import { mockSequentialRng, restoreOriginalRng } from '../../../test-utils/rng';
+import { createStartingWorld } from '../../index';
+import { createNewGameState } from '../../../Game/game.reducer';
+import { resolveNarration, resolveBlacksmith } from '../handlers';
+import type { GameState } from '../../../Game/types';
+import type { MapEventPool, NarrationPayload, BlacksmithPayload } from '../types';
+import type { DialogueTree } from '../../../NPCs/types';
+
+function freshState(): GameState {
+    return { ...createNewGameState(), world: createStartingWorld() };
+}
+
+function withPool(state: GameState, pool: MapEventPool): GameState {
+    _clearMapEventPoolRegistry();
+    registerMapEventPool(pool);
+    setDefaultMapEventPool(state.world.currentMap.continent, state.world.currentMap.name, pool.id);
+    return state;
+}
+
+afterEach(() => {
+    vi.restoreAllMocks();
+    restoreOriginalRng();
+    _clearMapEventPoolRegistry();
+});
+
+describe('resolveMapEvent — description passthrough', () => {
+    it('carries the authored description onto an encounter event', () => {
+        mockSequentialRng(0.5);
+        const state = withPool(freshState(), {
+            id: 'pool.description.encounter',
+            entries: [{
+                kind: 'encounter',
+                weight: 1,
+                payload: { kind: 'encounter', enemySlug: 'grave-larva', description: 'A larva stirs in the cairn-mud.' },
+            }],
+        });
+        const result = resolveMapEvent(state);
+        expect(result.event.kind).toBe('encounter');
+        if (result.event.kind === 'encounter') {
+            expect(result.event.description).toBe('A larva stirs in the cairn-mud.');
+        }
+    });
+
+    it('carries the authored description onto an interaction event', () => {
+        mockSequentialRng(0.5);
+        const state = withPool(freshState(), {
+            id: 'pool.description.interaction',
+            entries: [{
+                kind: 'interaction',
+                weight: 1,
+                payload: { kind: 'interaction', npcName: 'Old Marrow', description: 'Old Marrow leans on a driftwood cane.' },
+            }],
+        });
+        const result = resolveMapEvent(state);
+        expect(result.event.kind).toBe('interaction');
+        if (result.event.kind === 'interaction') {
+            expect(result.event.description).toBe('Old Marrow leans on a driftwood cane.');
+        }
+    });
+
+    it('leaves description undefined when the interaction payload omits one', () => {
+        mockSequentialRng(0.5);
+        const state = withPool(freshState(), {
+            id: 'pool.description.interaction-unauthored',
+            entries: [{
+                kind: 'interaction',
+                weight: 1,
+                payload: { kind: 'interaction', npcName: 'Old Marrow' },
+            }],
+        });
+        const result = resolveMapEvent(state);
+        expect(result.event.kind).toBe('interaction');
+        if (result.event.kind === 'interaction') {
+            expect(result.event.description).toBeUndefined();
+        }
+    });
+
+    it('carries the authored description onto a gathering event', () => {
+        mockSequentialRng(0.5);
+        const state = withPool(freshState(), {
+            id: 'pool.description.gathering',
+            entries: [{
+                kind: 'gathering',
+                weight: 1,
+                payload: {
+                    kind: 'gathering',
+                    description: 'Driftwood, tangled in kelp.',
+                    items: [{
+                        id: 'driftwood', name: 'Driftwood',
+                        description: 'Salt-bleached.', category: 'material',
+                        quantity: 1,
+                    }],
+                },
+            }],
+        });
+        const result = resolveMapEvent(state);
+        expect(result.event.kind).toBe('gathering');
+        if (result.event.kind === 'gathering') {
+            expect(result.event.description).toBe('Driftwood, tangled in kelp.');
+        }
+    });
+
+    it('carries the authored description onto a rest event', () => {
+        mockSequentialRng(0.5);
+        const state = withPool(freshState(), {
+            id: 'pool.description.rest',
+            entries: [{
+                kind: 'rest', weight: 1,
+                payload: { kind: 'rest', shelter: 'inn', description: 'A tended hearth, and a locked door.' },
+            }],
+        });
+        const result = resolveMapEvent(state);
+        expect(result.event.kind).toBe('rest');
+        if (result.event.kind === 'rest') {
+            expect(result.event.description).toBe('A tended hearth, and a locked door.');
+        }
+    });
+
+    it('carries the authored description onto a village event', () => {
+        mockSequentialRng(0.5);
+        const state = withPool(freshState(), {
+            id: 'pool.description.village',
+            entries: [{
+                kind: 'village', weight: 1,
+                payload: {
+                    kind: 'village',
+                    villageName: 'Salt Hollow',
+                    description: 'Nets dry on every railing.',
+                    merchants: [{ name: 'Briny Trader', isShopkeeper: true }],
+                },
+            }],
+        });
+        const result = resolveMapEvent(state);
+        expect(result.event.kind).toBe('village');
+        if (result.event.kind === 'village') {
+            expect(result.event.description).toBe('Nets dry on every railing.');
+        }
+    });
+
+    it('carries the authored description onto a hazard event', () => {
+        mockSequentialRng(0.5);
+        const state = withPool(freshState(), {
+            id: 'pool.description.hazard',
+            entries: [{
+                kind: 'hazard', weight: 1,
+                payload: { kind: 'hazard', damage: 3, description: 'The floor gives way underfoot.' },
+            }],
+        });
+        const result = resolveMapEvent(state);
+        expect(result.event.kind).toBe('hazard');
+        if (result.event.kind === 'hazard') {
+            expect(result.event.description).toBe('The floor gives way underfoot.');
+        }
+    });
+
+    it('carries the authored description onto a loot-cache event', () => {
+        mockSequentialRng(0.5);
+        const state = withPool(freshState(), {
+            id: 'pool.description.loot',
+            entries: [{
+                kind: 'loot-cache', weight: 1,
+                payload: {
+                    kind: 'loot-cache',
+                    description: 'A chest, half-buried in silt.',
+                    items: [{
+                        id: 'sea-pearl', name: 'Sea Pearl',
+                        description: 'A small luminous bead.', category: 'material',
+                        quantity: 1,
+                    }],
+                    currency: 12,
+                },
+            }],
+        });
+        const result = resolveMapEvent(state);
+        expect(result.event.kind).toBe('loot-cache');
+        if (result.event.kind === 'loot-cache') {
+            expect(result.event.description).toBe('A chest, half-buried in silt.');
+        }
+    });
+
+    it('carries the authored description onto a quest event', () => {
+        mockSequentialRng(0.5);
+        const state = withPool(freshState(), {
+            id: 'pool.description.quest',
+            entries: [{
+                kind: 'quest', weight: 1,
+                payload: { kind: 'quest', boardId: 'build-the-boat', description: 'A plan, drawn in the dirt.' },
+            }],
+        });
+        const result = resolveMapEvent(state);
+        expect(result.event.kind).toBe('quest');
+        if (result.event.kind === 'quest') {
+            expect(result.event.description).toBe('A plan, drawn in the dirt.');
+        }
+    });
+});
+
+describe('MapEvents description passthrough — direct handler coverage', () => {
+    const TREE: DialogueTree = {
+        id: 'test-narration',
+        rootId: 'a',
+        nodes: { a: { id: 'a', text: 'A quiet monologue.' } },
+    };
+
+    it('carries the authored description onto a narration event', () => {
+        const payload: NarrationPayload = {
+            kind: 'narration',
+            dialogue: TREE,
+            description: 'A voice, from nowhere in particular.',
+        };
+        const result = resolveNarration(createNewGameState(), payload);
+        expect(result.event.kind).toBe('narration');
+        if (result.event.kind === 'narration') {
+            expect(result.event.description).toBe('A voice, from nowhere in particular.');
+        }
+    });
+
+    it('carries the authored description onto a blacksmith event', () => {
+        const payload: BlacksmithPayload = {
+            kind: 'blacksmith',
+            budget: 12,
+            description: 'An anvil, still warm.',
+        };
+        const result = resolveBlacksmith(createNewGameState(), payload);
+        expect(result.event.kind).toBe('blacksmith');
+        if (result.event.kind === 'blacksmith') {
+            expect(result.event.description).toBe('An anvil, still warm.');
+        }
+    });
+});

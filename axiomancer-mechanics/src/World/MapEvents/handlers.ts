@@ -58,14 +58,14 @@ export function resolveEncounter(
         const targetLevel = payload.level ?? Math.max(source.level, state.player.level);
         const scaled = scaleEnemyToLevel(source, targetLevel);
         const encounter = { enemies: [scaled], origin: `${def.name}:${node.id}` };
-        return { state, event: { kind: 'encounter', encounter, isBoss } };
+        return { state, event: { kind: 'encounter', encounter, isBoss, description: payload.description } };
     }
 
     const encounter = generateEncounter(node, state.player.level, {
         mapName: def.name,
         difficulty: isBoss ? 'boss' : undefined,
     });
-    return { state, event: { kind: 'encounter', encounter, isBoss } };
+    return { state, event: { kind: 'encounter', encounter, isBoss, description: payload.description } };
 }
 
 // ─── interaction ──────────────────────────────────────────────────────────────
@@ -83,6 +83,7 @@ export function resolveInteraction(
             kind: 'interaction',
             npcName: npc?.name ?? payload.npcName,
             dialogue: npc?.dialogueTree,
+            description: payload.description,
         },
     };
 }
@@ -100,7 +101,7 @@ export function resolveGathering(
     };
     return {
         state: withPlayer(state, player),
-        event: { kind: 'gathering', items },
+        event: { kind: 'gathering', items, description: payload.description },
     };
 }
 
@@ -126,7 +127,7 @@ export function resolveRest(
         // `shelter` rides along so hosts that replace the passive heal with
         // their own rest flow keep the authored inn/camp signal — and so the
         // hazard-scar mend has an honest trigger.
-        event: { kind: 'rest', healed, shelter },
+        event: { kind: 'rest', healed, shelter, description: payload.description },
     };
 }
 
@@ -144,6 +145,7 @@ export function resolveVillage(
             villageName: payload.villageName,
             merchants,
             shop: payload.shop,
+            description: payload.description,
         },
     };
 }
@@ -192,7 +194,7 @@ export function resolveHazard(
 
     return {
         state: withPlayer(state, player),
-        event: { kind: 'hazard', effects: applied, damage },
+        event: { kind: 'hazard', effects: applied, damage, description: payload.description },
     };
 }
 
@@ -211,7 +213,7 @@ export function resolveLootCache(
     };
     return {
         state: withPlayer(state, player),
-        event: { kind: 'loot-cache', items, currency },
+        event: { kind: 'loot-cache', items, currency, description: payload.description },
     };
 }
 
@@ -230,7 +232,7 @@ export function resolveQuest(
     getQuestBoardDef(payload.boardId); // throws on unknown board ids
     return {
         state,
-        event: { kind: 'quest', boardId: payload.boardId },
+        event: { kind: 'quest', boardId: payload.boardId, description: payload.description },
     };
 }
 
@@ -249,7 +251,7 @@ export function resolveNarration(
 ): ResolveMapEventResult {
     return {
         state,
-        event: { kind: 'narration', dialogue: payload.dialogue },
+        event: { kind: 'narration', dialogue: payload.dialogue, description: payload.description },
     };
 }
 
@@ -279,6 +281,7 @@ export function resolveBlacksmith(
             kind: 'blacksmith',
             budget: payload.budget ?? 0,
             variants: payload.variants ?? [],
+            description: payload.description,
         },
     };
 }

@@ -111,13 +111,14 @@ function makeLootCacheResult(): ResolveMapEventResult {
     };
 }
 
-function makeVillageResult(): ResolveMapEventResult {
+function makeVillageResult(opts: { description?: string } = {}): ResolveMapEventResult {
     return {
         state: undefined as never,
         event: {
             kind: 'village',
             villageName: 'Hollow Mire',
             merchants: [],
+            description: opts.description,
         },
     };
 }
@@ -136,10 +137,10 @@ function makeHazardResult(damage: number): ResolveMapEventResult {
     };
 }
 
-function makeInteractionResult(): ResolveMapEventResult {
+function makeInteractionResult(opts: { description?: string } = {}): ResolveMapEventResult {
     return {
         state: undefined as never,
-        event: { kind: 'interaction', npcName: 'A Stranger' },
+        event: { kind: 'interaction', npcName: 'A Stranger', description: opts.description },
     };
 }
 
@@ -584,6 +585,20 @@ describe('selectEventViewModel: narrative-choice composition', () => {
         expect(vm.choices[0]?.id).toBe('leave');
     });
 
+    it('village body falls back to the generic placeholder when unauthored', () => {
+        const store = makeStore();
+        setPending(store, makeVillageResult());
+        const vm = selectEventViewModel(store.getState());
+        expect(vm.body).toBe('Roofs and smoke.');
+    });
+
+    it('village body prefers the authored description over the placeholder (Phase 58)', () => {
+        const store = makeStore();
+        setPending(store, makeVillageResult({ description: 'Nets dry on every railing.' }));
+        const vm = selectEventViewModel(store.getState());
+        expect(vm.body).toBe('Nets dry on every railing.');
+    });
+
     it('maps a cutscene event to body=lines.join() and canSkip=true', () => {
         const store = makeStore();
         setPending(store, makeCutsceneResult(['First line.', 'Second line.']));
@@ -616,6 +631,20 @@ describe('selectEventViewModel: narrative-choice composition', () => {
         expect(vm.artSlug).toBe('interaction-generic');
         expect(vm.title).toContain('A STRANGER');
         expect(vm.choices).toHaveLength(1);
+    });
+
+    it('interaction body falls back to the generic placeholder when unauthored', () => {
+        const store = makeStore();
+        setPending(store, makeInteractionResult());
+        const vm = selectEventViewModel(store.getState());
+        expect(vm.body).toBe('A figure waits.');
+    });
+
+    it('interaction body prefers the authored description over the placeholder (Phase 58)', () => {
+        const store = makeStore();
+        setPending(store, makeInteractionResult({ description: 'A Stranger leans on a driftwood cane.' }));
+        const vm = selectEventViewModel(store.getState());
+        expect(vm.body).toBe('A Stranger leans on a driftwood cane.');
     });
 
     it('canSkip is true on rest event with long body (forced by long description)', () => {

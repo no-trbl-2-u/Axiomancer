@@ -210,22 +210,27 @@ export interface MapEventPool {
 
 // ─── Resolved events (the engine's output) ────────────────────────────────────
 
+// Phase 58 — every kind below except 'cutscene' (already delivers its
+// authored prose via `lines`) and 'none' (nothing to say) carries the
+// optional `description` threaded straight from its `MapEventPayload`.
+// Presenters prefer it over their kind-keyed placeholder text; see
+// `axiomancer-mobile/state/presenters/event.engine.ts::bodyFromPayload`.
 export type ResolvedEvent =
-    | { kind: 'encounter';   encounter: Encounter; isBoss: boolean }
-    | { kind: 'interaction'; npcName: string; dialogue?: DialogueTree }
-    | { kind: 'gathering';   items: Item[] }
+    | { kind: 'encounter';   encounter: Encounter; isBoss: boolean; description?: string }
+    | { kind: 'interaction'; npcName: string; dialogue?: DialogueTree; description?: string }
+    | { kind: 'gathering';   items: Item[]; description?: string }
     // Phase 52b — the authored `healFraction` is retired; the resolved rest
     // event carries the SHELTER CLASS so hosts (and 52c's rest-choice
     // engine) decide the heal from an honest marker rather than a number.
     // `healed` remains a computed OUTCOME, not an authoring knob.
-    | { kind: 'rest';        healed: number; shelter: RestShelter }
-    | { kind: 'village';     villageName: string; merchants: NPC[]; shop?: ShopInventory }
+    | { kind: 'rest';        healed: number; shelter: RestShelter; description?: string }
+    | { kind: 'village';     villageName: string; merchants: NPC[]; shop?: ShopInventory; description?: string }
     | { kind: 'cutscene';    lines: readonly string[] }
-    | { kind: 'hazard';      effects: ActiveEffect[]; damage: number }
-    | { kind: 'loot-cache';  items: Item[]; currency: number }
-    | { kind: 'quest';       boardId: string }
-    | { kind: 'narration';   dialogue: DialogueTree }
-    | { kind: 'blacksmith';  budget: number; variants: readonly BlacksmithVariantOffer[] }
+    | { kind: 'hazard';      effects: ActiveEffect[]; damage: number; description?: string }
+    | { kind: 'loot-cache';  items: Item[]; currency: number; description?: string }
+    | { kind: 'quest';       boardId: string; description?: string }
+    | { kind: 'narration';   dialogue: DialogueTree; description?: string }
+    | { kind: 'blacksmith';  budget: number; variants: readonly BlacksmithVariantOffer[]; description?: string }
     | { kind: 'none' };
 
 export interface ResolveMapEventResult {

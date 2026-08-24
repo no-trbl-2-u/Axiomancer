@@ -600,15 +600,18 @@ function composeNpcDialogue(
 }
 
 function bodyFromPayload(event: ResolvedEvent): string {
-    // Each MapEventPayload has an optional description; the
-    // `ResolvedEvent` payload doesn't directly expose it on every
-    // discriminant (kind: 'encounter' has no description; kind:
-    // 'cutscene' has `lines`; others may or may not). The pure
-    // mapper here returns a kind-appropriate string.
+    // Phase 58 — every kind but 'cutscene' (delivers its prose via
+    // `lines` already) and 'none' carries the authored MapEvent
+    // `description` threaded from the engine. Prefer it; fall back to
+    // the kind-keyed placeholder only when the node left it unauthored.
     if (event.kind === 'cutscene') {
         return event.lines.join('\n\n');
     }
-    return defaultBodyForEvent(event);
+    if (event.kind === 'none') {
+        return defaultBodyForEvent(event);
+    }
+    const description = event.description?.trim();
+    return description ? description : defaultBodyForEvent(event);
 }
 
 function composeNarrative(resolved: ResolvedEvent): Omit<EventViewModel, 'preludeChrome' | 'chrome' | 'sourceNodeType'> {
