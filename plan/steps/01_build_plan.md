@@ -1890,7 +1890,7 @@ RESEQUENCED the same day behind the unshackling — see above):**
       full evidence trail — `docs: phase 56 verified — dice valve levers
       already shipped — phase 56`
 
-- [ ] Phase 57 — Stop publishing the private DevLog: the in-repo half of
+- [x] Phase 57 — Stop publishing the private DevLog: the in-repo half of
       the Pages scope-down. `plan/AUDIT.md`'s divergence row (impact 8)
       confirmed on 2026-08-12 that `https://axiomancer.pages.dev` serves
       `/devlog/log.html` — generated HTML whose own header reads "A
@@ -1912,7 +1912,7 @@ RESEQUENCED the same day behind the unshackling — see above):**
       URLs, which stay guessable-from-a-branch-name after this phase
       ships. Do not close the AUDIT row on this phase alone — it drains
       the half that lives in this repo. (infra/CI; small, no engine risk)
-      Brief: to generate.
+      Shipped `cb788468`.
 
 **The encounter reshape (58-65) — T direct, attended web session
 2026-08-15.** T opened the session asking that "every encounter has a
