@@ -344,3 +344,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-24T02:04:36Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-24T02:07:50Z | subagent | Explore | claude-sonnet-5 | main | Research endCombat routing for phase 54 |
 | 2026-08-24T02:12:21Z | subagent | Explore | claude-sonnet-5 | main | Check Enemy/Encounter type compatibility for phase 54 |
+| 2026-08-24T07:35:04Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-24T07:35:46Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
