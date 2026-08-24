@@ -1842,7 +1842,7 @@ RESEQUENCED the same day behind the unshackling — see above):**
 
 **Promoted via `/oversight` 2026-08-15 (T direct, attended web session):**
 
-- [ ] Phase 56 — The dice valves under-sink: add the starter Press Fate
+- [x] Phase 56 — The dice valves under-sink: add the starter Press Fate
       grant alongside them. **This supersedes the 2026-07-18 valves-only
       ruling, on that ruling's own terms.** Phase D8 shipped one dice
       valve into every starter preset and was declared the F3 sink, with
@@ -1874,7 +1874,21 @@ RESEQUENCED the same day behind the unshackling — see above):**
       flip. Entangled and still separate: the signature flag-gated cost
       machinery (D3's 2/3/4 table) and the between-combat souls economy
       pass. (mechanics; balance-critical, matrix evidence required)
-      Brief: to generate.
+      — verified both levers already shipped by earlier commits the row's
+      own evidence chain predates: the starter Press Fate grant landed via
+      Phase 19 + `7f989382` (2026-07-18, Gambler's Knot default-worn — the
+      "no starter loadout" read conflated deck cards with worn-equipment
+      signatures), and the dice-valve preset promotion landed via the
+      Profane Canon rework `84ef85bd` (2026-08-08, `PRESET_DICE_VALVES` +
+      the three Reliquary Dice cards). The in-suite D7 re-test the row
+      asks for is already pinned green (`combat-dice-economy.sim.test.ts`
+      F3 + STAKE-gap canaries). Also noted: Phase 43 (same day as the
+      Profane Canon rework) retired the win-rate doctrine the row's alarm
+      was read against in favor of CQI, which reads flat/healthy
+      (~79-80%) across early/mid/late today. No source changes shipped;
+      see `plan/phases/phase_56_dice_valve_undersink_reverify.md` for the
+      full evidence trail — `docs: phase 56 verified — dice valve levers
+      already shipped — phase 56`
 
 - [ ] Phase 57 — Stop publishing the private DevLog: the in-repo half of
       the Pages scope-down. `plan/AUDIT.md`'s divergence row (impact 8)
