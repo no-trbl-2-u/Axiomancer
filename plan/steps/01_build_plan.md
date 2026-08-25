@@ -1973,23 +1973,26 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       If T meant retire, this row is what gets cut, and 59 absorbs the
       deletion instead. (mechanics + mobile) Brief: to generate.
 
-- [ ] Phase 61 — Retire the Quest Board minigame ("The Boy's Almanac").
+- [x] Phase 61 — Retire the Quest Board minigame ("The Boy's Almanac").
       **T direct, 2026-08-15:** the quest event is *"a little bit harder
       for now, let's just remove it entirely"* — then, asked which of the
       two systems named "quest" that meant, *"Minigame only and keep
-      it."* Scope: delete `World/QuestBoard/` entire, the `quest`
-      MapEventKind and its `beginQuestBoardAction` interceptor
-      (`axiomancer-mobile/state/actions.ts:1710`), `quest-board.cli.ts`,
-      the npm script, the `quest-board-tuning` skill and its workflow,
-      and the `app/quest` route — plus a `GAME_STATE_VERSION` hop
-      clearing any live board session from the save payload. Phase 52e
-      (`d83978c`) is the near-exact template. **Explicitly UNTOUCHED:**
+      it."* Deleted `World/QuestBoard/` entire, the `quest` MapEventKind
+      and its mobile interceptor, `quest-board.cli.ts` + npm script, the
+      `quest-board-tuning` skill/workflow, the `app/quest` route, and
+      the harness's questBoard arm — plus a `GAME_STATE_VERSION` 17→18
+      hop clearing any live board session from the save payload.
+      Scope grew by one honest discovery: the Labyrinth also fired
+      `quest` on its three pre-boss "ledger" rooms with boardIds that
+      were never registered (a latent crash-on-arrival bug); those rooms
+      now narrate instead. fv-15 (fishing-village) rejoins the encounter
+      roster as the orphaned `foot-stealer`. **Explicitly UNTOUCHED:**
       `World/quest.engine.ts` and `quest.library.ts` — the QuestLog
       objective tracker holding `starting-quest` — which T ruled stays.
       Phase 53c therefore survives and gets MORE load-bearing, not less:
-      with no quest node on any map, its quest-giver becomes the only way
-      a player ever learns a quest exists. Note that alongside 53c.
-      (mechanics + mobile; deletion) Brief: to generate.
+      with no quest node on any map, its quest-giver is the only way a
+      player ever learns a quest exists.
+      (mechanics + mobile; deletion) — `feat(world): retire the Quest Board minigame — phase 61` (f674c147)
 
 - [ ] Phase 76 — Retire the Gathering minigame ("The Gleaning"), KEEP
       the gathering map node. **T direct, 2026-08-22:** T named Gathering
