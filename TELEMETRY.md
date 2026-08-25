@@ -359,3 +359,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-25T09:21:05Z | skill | digest | unknown | main | - |
 | 2026-08-25T13:27:21Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-25T13:27:24Z | skill | march | unknown | main | - |
+| 2026-08-25T19:07:38Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-25T19:09:02Z | subagent | Explore | claude-sonnet-5 | main | Map Gathering minigame footprint |
+| 2026-08-25T19:14:48Z | subagent | Explore | claude-sonnet-5 | main | Find inline no-screen-detour precedent for item grants |
