@@ -352,3 +352,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-24T19:09:44Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
 | 2026-08-25T01:58:44Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-25T02:01:37Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
+| 2026-08-25T07:18:05Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-25T07:19:15Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
+| 2026-08-25T07:19:54Z | subagent | Explore | claude-sonnet-5 | main | Research map content placement for Phase 60 brief |
