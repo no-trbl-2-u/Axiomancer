@@ -57,16 +57,16 @@ describe('fishing-village content — new-player map', () => {
             state = r.state;
         }
 
-        // 4 encounter-kind nodes (3 regular + the fv-6 boss). Phase 53c
+        // 3 encounter-kind nodes (2 regular + the fv-6 boss). Phase 53c
         // converted three regular encounters (fv-2, fv-7, fv-18) into
         // homed-NPC interactions and dropped fv-12's grave-larva as it
         // re-homed to carry fv-2's displaced loot-cache instead (see
         // `content.ts`'s `FV_ENCOUNTER_FOES`/`FV_LOOT_NODES` comments);
         // little-belle moved fv-7 -> fv-13 to stay reachable ahead of the
         // Beggar's new column. Phase 53d (S-01) then converted two more
-        // (fv-16, fv-4) into narration dilemmas — the map's encounter
-        // surplus was exactly what that phase's node reassignment spent.
-        expect(counts.encounter).toBe(4);
+        // (fv-16, fv-4) into narration dilemmas, and Phase 60 converted a
+        // third (fv-21) into the re-homed blacksmith node.
+        expect(counts.encounter).toBe(3);
         expect(counts.cutscene).toBe(1);
         expect(counts.rest).toBe(4);
         expect(counts.gathering).toBe(3);
@@ -81,15 +81,33 @@ describe('fishing-village content — new-player map', () => {
         // Fisher').
         expect(counts.interaction).toBe(4);
         expect(counts.quest).toBe(1);
-        // Encounter, interaction and rest now tie for the largest kind at
-        // 4 apiece (Phase 53d spent two of the encounter surplus on
-        // dilemmas) — no single kind dominates the map any longer.
+        // Phase 60 — the re-homed anvil, a single fixed placement at fv-21
+        // (not a cadence — see `content.ts`'s `FV_BLACKSMITH_NODES`).
+        expect(counts.blacksmith).toBe(1);
+        // Interaction and rest now tie for the largest kind at 4 apiece —
+        // Phase 53d spent two of the encounter surplus on dilemmas and
+        // Phase 60 spent a third on the anvil — no single kind dominates
+        // the map any longer.
         const maxCount = Math.max(...Object.values(counts));
-        expect(counts.encounter).toBe(maxCount);
         expect(counts.interaction).toBe(maxCount);
         expect(counts.rest).toBe(maxCount);
+        expect(counts.encounter).toBeLessThan(maxCount);
         // Every node resolved to a real kind.
         expect(Object.values(counts).reduce((a, b) => a + b, 0)).toBe(25);
+    });
+
+    it('fv-21 is the re-homed blacksmith node, offering the witness swap variant', () => {
+        mockSequentialRng(0.5);
+        const state = freshWorldAt('fishing-village');
+        const result = resolveMapEvent({
+            ...state,
+            world: { ...state.world, currentMap: { ...state.world.currentMap, currentNode: 'fv-21', consumedNodes: [] } },
+        });
+        expect(result.event.kind).toBe('blacksmith');
+        if (result.event.kind === 'blacksmith') {
+            expect(result.event.variants.map((v) => v.id)).toContain('die-gear-heart-rich-payload');
+            expect(result.event.budget).toBeGreaterThan(0);
+        }
     });
 
     it('fv-15 is the single quest node (build-the-boat)', () => {
@@ -218,13 +236,13 @@ describe('every MapEventKind is covered by the authored content', () => {
                 state = r.state;
             }
         }
-        // The original eight kinds (covered across both maps) plus the two
+        // The original eight kinds (covered across both maps) plus the three
         // later additions — 'quest' (fv-15) and 'narration' (fv-14), both
-        // authored on fishing-village.
+        // authored on fishing-village, and 'blacksmith' (fv-21, Phase 60).
         const required = [
             'encounter', 'interaction', 'gathering', 'rest',
             'village', 'cutscene', 'hazard', 'loot-cache',
-            'quest', 'narration',
+            'quest', 'narration', 'blacksmith',
         ];
         for (const k of required) {
             expect(kinds, `authored content should fire ${k} at least once`).toContain(k);

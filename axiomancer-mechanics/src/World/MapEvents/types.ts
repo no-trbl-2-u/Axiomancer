@@ -158,10 +158,11 @@ export interface NarrationPayload {
  *
  * RULED (T, attended chat, 2026-08-08; resolved Phase 52c) the anvil was
  * reached THROUGH the rest node, one of `World/RestChoice`'s offers. Phase
- * 59 dropped that offer (T direct, 2026-08-15) and Phase 60 re-homes the
- * anvil to its own placed `blacksmith` node — this MapEvent kind is the
- * landing spot: built and tested, registered below, staged to go from
- * unauthored to placed in map content by that phase.
+ * 59 dropped that offer (T direct, 2026-08-15) and Phase 60 re-homed the
+ * anvil to its own placed `blacksmith` node — a single fixed placement at
+ * fishing-village `fv-21`, mirroring the D6c precedent (one owner-ruled
+ * node, not a repeating cadence). See `MapEvents/content.ts`'s
+ * `FV_BLACKSMITH_NODES`.
  */
 export interface BlacksmithPayload {
     kind: 'blacksmith';

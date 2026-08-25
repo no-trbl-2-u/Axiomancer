@@ -245,11 +245,13 @@ its die:
   2◆"* (§1). Later-game gear changes the payload — **swapping gear IS the
   payload change**, so no forge-service keyword exists for it.
 - **Face upgrades** — HONE and TEMPER upgrade the face table driven by the
-  equipped gear. The shipped blacksmith route exercises this economy as a
-  dev/test surface, but it is **not** the accepted player-facing home. T
-  rejected that placement after D7; rest sites, relics, or events remain
-  unchosen candidates. Hard caps remain **≤2 special and ≥1 miss per colored
-  die; Gold ≤1 special** — whiff is never forgeable away.
+  equipped gear. **Player-facing home settled (T, attended chat, 2026-08-08;
+  Phase 60, 2026-08-25):** the blacksmith is a placed `MapEvent` node
+  (fishing-village `fv-21`), reached directly on the map rather than through
+  rest (rest offered it briefly via Phase 52c; Phase 59 dropped that offer).
+  A single fixed placement, not a repeating cadence. Hard caps remain **≤2
+  special and ≥1 miss per colored die; Gold ≤1 special** — whiff is never
+  forgeable away.
 - **Persistence** — gear items + upgrade state persist via the Game
   module's save/versioning machinery (`GAME_STATE_VERSION` in
   `src/Game/game.migrate.ts`). The pieces themselves are equipment-engine
@@ -359,6 +361,8 @@ Residual opens (tracked; they do not make the shipped model provisional):
 - STAKE retirement gap — measured during the D-series court; any further
   response belongs to tuning evidence, not rollout.
 - "SPECIAL" keyword rename opportunity — deferred.
-- Player-facing upgrade home and cadence — unresolved. The blacksmith is
-  rejected as that home; do not promote rest site, relic, or event without
-  the attended owner design call required by the live candidate.
+- Player-facing upgrade home and cadence — RESOLVED (Phase 60, 2026-08-25):
+  the blacksmith is a placed map node (fv-21 on fishing-village), a single
+  fixed placement rather than a cadence. Northern-forest is currently
+  unreachable via inter-map travel, so it carries no blacksmith node yet;
+  revisit once that surface ships.

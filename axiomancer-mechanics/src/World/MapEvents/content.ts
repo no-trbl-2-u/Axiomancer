@@ -17,6 +17,7 @@ import {
 } from './resolve-map-event';
 import type { MapEventPool } from './types';
 import type { EnemySlug } from '../../Enemy/enemy.library';
+import { BLACKSMITH_WITNESS_VARIANTS } from '../Blacksmith/blacksmith.content';
 
 // ─── northern-forest pools ────────────────────────────────────────────────────
 
@@ -527,9 +528,9 @@ const nfMistPools: MapEventPool = {
 // (overrides are last-write-wins), so they could never fire even via the CLI.
 // They were removed; the new-player block is the authored fishing-village map.
 // northern-forest is unshadowed and remains the live source for its nodes — and
-// carries the only `village` and `cutscene` kinds (fishing-village authors the
-// other kinds, including the new `narration` shell). Together the two maps cover
-// every MapEventKind, preserving the all-kinds invariant.
+// carries the only `village` kind (fishing-village authors the other kinds,
+// including `narration` and, since Phase 60, `blacksmith`). Together the two
+// maps cover every MapEventKind, preserving the all-kinds invariant.
 
 const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> = [
     // Existing pools (preserved)
@@ -567,7 +568,7 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
 // battle" — a flat wall of identical encounters with no recovery was both
 // monotonous and unwinnable in playtests. The map now spreads 25 nodes across
 // a real mix:
-//   - 4 ENCOUNTER nodes  (3 regular + the fv-6 boss — the spine),
+//   - 3 ENCOUNTER nodes  (2 regular + the fv-6 boss — the spine),
 //   - 4 REST nodes       (recover HP — the rest-choice node), one on the
 //                         spine just before the boss,
 //   - 3 GATHERING nodes  (low-risk materials — "The Gleaning"),
@@ -580,11 +581,14 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
 //                         Beggar at fv-7, Captain Blackwater at fv-18, the
 //                         Fisherman's Daughter at fv-19),
 //   - 1 QUEST node       (fv-15, the story hook),
-//   - 1 CUTSCENE node    (fv-1, the arrival — see `fvArrival` below), and
+//   - 1 CUTSCENE node    (fv-1, the arrival — see `fvArrival` below),
+//   - 1 BLACKSMITH node  (fv-21, Phase 60 — the re-homed anvil, post-boss
+//                         and past every loot-cache/quest reward so the
+//                         visit is actually funded), and
 //   - 1 BOSS node        (fv-6, the region climax — an encounter w/ isBoss).
-// Encounter, interaction and rest now tie for the largest kind at 4 apiece —
-// Phase 53d (S-01) spent two of the map's encounter surplus on dilemmas,
-// which is what that surplus was for (see the spec's answered Open Question
+// Interaction and rest now tie for the largest kind at 4 apiece — Phase 53d
+// (S-01) spent two of the map's encounter surplus on dilemmas and Phase 60
+// spent a third (fv-21) on the anvil (see the spec's answered Open Question
 // 1: displacing an `encounter` node is the only reassignment that doesn't
 // grow the grid or merge two payloads onto one node). This block supersedes
 // the legacy authored pools above (kept in source for reference). Foes stay
@@ -610,8 +614,6 @@ const FV_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description: string }
     // the map's guaranteed shilling income is unchanged — grave-larva,
     // fv-12's prior foe, is dropped (no flag or pricing dependency).
     'fv-13': { slug: 'little-belle',     description: 'A small orange vesper rings a bell for a service no one held.' },
-    // c7 — the far side of the breakwater.
-    'fv-21': { slug: 'foot-stealer',     description: 'A foot-stealer scuttles between the shacks, low and grasping.' },
     // c9 — the last thing between the player and the coast road.
     'fv-24': { slug: 'water-holger',     description: 'A drowned deckhand wades up the strand, still standing his watch.' },
     // Phase 53d (S-01) — fv-16 (c2, float-eye) and fv-4 (c3,
@@ -619,6 +621,21 @@ const FV_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description: string }
     // "The Borrowed Hook" and "The Stranger's Net" (see the fv-16/fv-4
     // narration pools above). Neither foe carries a flag or pricing
     // dependency, so nothing else needs to know they left.
+    // Phase 60 — fv-21 (c7, foot-stealer) is dropped: displaced by the
+    // re-homed blacksmith node (see `FV_BLACKSMITH_NODES` below). No flag
+    // or pricing dependency on foot-stealer at this node.
+};
+
+// Phase 60 — the re-homed anvil (see `BlacksmithPayload`'s doc comment in
+// `types.ts`). fv-21 sits post-boss (column 7 of 9, per `maps.ts`'s graph)
+// with real content still ahead of it (fv-24's encounter, two more columns
+// of texture) so an upgraded die gets used, and after every loot-cache /
+// quest-reward node on the map so the "roughly a full act's income" anvil
+// purchase (Phase 52f shilling calibration) is actually affordable by the
+// time the player reaches it. A single fixed placement, not a cadence —
+// mirrors the D6c precedent and the owner ruling recorded in `types.ts`.
+const FV_BLACKSMITH_NODES: Record<string, string> = {
+    'fv-21': 'A lean-to forge, coals still breathing. The smith looks up from the anvil and nods at your dice.',
 };
 
 function fvEncounterPool(nodeId: string, foe: { slug: EnemySlug; description: string }): MapEventPool {
@@ -680,6 +697,20 @@ function fvLootCachePool(nodeId: string, cache: { currency: number; description:
     return {
         id: `${nodeId}.loot-cache`,
         entries: [{ kind: 'loot-cache', weight: 1, payload: { kind: 'loot-cache', currency: cache.currency, description: cache.description } }],
+    };
+}
+
+// Phase 60 — the re-homed anvil. A single fixed placement (owner-ruled, not a
+// cadence — mirrors the D6c precedent). Budget is a placeholder; the mobile
+// interceptor re-derives the real spend cap from the player's wallet
+// (`state/blacksmith/store-actions.ts`) the moment this event fires.
+function fvBlacksmithPool(nodeId: string, description: string): MapEventPool {
+    return {
+        id: `${nodeId}.blacksmith`,
+        entries: [{
+            kind: 'blacksmith', weight: 1,
+            payload: { kind: 'blacksmith', budget: 12, variants: BLACKSMITH_WITNESS_VARIANTS, description },
+        }],
     };
 }
 
@@ -997,6 +1028,8 @@ const FISHING_VILLAGE_NEW_PLAYER_POOLS: ReadonlyArray<{ nodeId: string; pool: Ma
                 out.push({ nodeId, pool: fvHazardPool(nodeId, FV_HAZARD_NODES[nodeId]!) });
             } else if (nodeId in FV_LOOT_NODES) {
                 out.push({ nodeId, pool: fvLootCachePool(nodeId, FV_LOOT_CACHES[FV_LOOT_NODES[nodeId]!]!) });
+            } else if (FV_BLACKSMITH_NODES[nodeId]) {
+                out.push({ nodeId, pool: fvBlacksmithPool(nodeId, FV_BLACKSMITH_NODES[nodeId]!) });
             } else {
                 const foe = FV_ENCOUNTER_FOES[nodeId];
                 if (!foe) throw new Error(`fishing-village: ${nodeId} has no authored event kind or foe.`);

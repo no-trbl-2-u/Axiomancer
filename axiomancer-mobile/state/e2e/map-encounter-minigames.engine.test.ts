@@ -121,14 +121,14 @@ describe('fishing-village gauntlet routing', () => {
             getNodePrimaryEventKind('coastal-continent', 'fishing-village', n.id),
         );
         const count = (k: string) => kinds.filter((x) => x === k).length;
-        // Balanced variety (owner-requested), re-tuned by Phase 53c/53d
+        // Balanced variety (owner-requested), re-tuned by Phase 53c/53d/60
         // (S-02 homed four NPCs onto former encounter/hazard nodes; S-01
-        // spent two more encounters on dilemmas): encounter, interaction
-        // and rest now TIE for the largest kind at 4 apiece — no kind is
-        // dominant — and a real spread of recovery / texture / narration
-        // nodes remains.
+        // spent two more encounters on dilemmas; Phase 60 spent a third on
+        // the re-homed anvil): interaction and rest now TIE for the
+        // largest kind at 4 apiece — no kind is dominant — and a real
+        // spread of recovery / texture / narration nodes remains.
         expect(count('quest')).toBe(1);
-        expect(count('encounter')).toBe(4);
+        expect(count('encounter')).toBe(3);
         expect(count('interaction')).toBe(4);
         expect(count('rest')).toBe(4);
         expect(count('encounter')).toBeLessThan(def.nodes.length / 2); // not dominant
@@ -136,5 +136,8 @@ describe('fishing-village gauntlet routing', () => {
         expect(count('hazard')).toBeGreaterThanOrEqual(1);
         expect(count('loot-cache')).toBeGreaterThanOrEqual(1);
         expect(count('narration')).toBe(3);
+        // Phase 60 — exactly one authored blacksmith node (fv-21,
+        // owner-decided single placement, NOT a cadence).
+        expect(count('blacksmith')).toBe(1);
     });
 });
