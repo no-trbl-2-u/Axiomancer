@@ -1937,7 +1937,7 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       kinds that reach the event modal (interaction, village). Brief:
       `plan/phases/phase_58_map-event-descriptions.md`.
 
-- [ ] Phase 59 — Rest is two offers: heal 25%, or cut a card. **T
+- [x] Phase 59 — Rest is two offers: heal 25%, or cut a card. **T
       direct, 2026-08-15:** *"Rest: Heal 25% health or remove a card.
       One liner narration."* Today `RestChoiceOfferId` is
       `'rest' | 'anvil' | 'cut'` (`World/RestChoice/restchoice.types.ts:21`)
@@ -1951,7 +1951,8 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       making it free would orphan a primitive that shipped 2026-08-06.
       Flip it only on an explicit call. Deps: 60 (land the anvil's new
       door first, or the surface is briefly unreachable).
-      (mechanics + mobile) Brief: to generate.
+      (mechanics + mobile) Brief: `plan/phases/phase_59_rest-two-offers.md`.
+      — `feat(world): rest is two offers — flat 25% heal or cut a card — phase 59` (94b85569)
 
 - [ ] Phase 60 — Re-home the Anvil to its own map node. Phase 59 takes
       the anvil off the rest screen, and rest was its ONLY route: the
