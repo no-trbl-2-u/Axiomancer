@@ -513,7 +513,9 @@ const fishingVillage: MapDefinition = {
         { id: 'fv-14', location: [3, -1], connectedNodes: ['fv-15', 'fv-5', 'fv-20'] },
         { id: 'fv-12', location: [3, 2], connectedNodes: ['fv-15', 'fv-5', 'fv-20'] },
         { id: 'fv-13', location: [3, -2], connectedNodes: ['fv-15', 'fv-5', 'fv-20'] },
-        // ── c4 — the last breath: quest board / gathering / REST ─────
+        // ── c4 — the last breath: encounter / gathering / REST ───────
+        // (fv-15 was the quest-board node pre-Phase-61; retired to an
+        // encounter — see `MapEvents/content.ts`'s `FV_ENCOUNTER_FOES`.)
         { id: 'fv-15', location: [4, 1], connectedNodes: ['fv-6'] },
         { id: 'fv-5',  location: [4, 0], connectedNodes: ['fv-6'] },
         { id: 'fv-20', location: [4, -1], connectedNodes: ['fv-6'] },

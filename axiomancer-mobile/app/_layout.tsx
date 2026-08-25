@@ -26,7 +26,6 @@ import { CacheGate } from '@/components/CacheGate';
 import { EventGate } from '@/components/EventGate';
 import { GatheringGate } from '@/components/GatheringGate';
 import { HazardGate } from '@/components/HazardGate';
-import { QuestGate } from '@/components/QuestGate';
 import { RestGate } from '@/components/RestGate';
 import { NavLogger } from '@/components/NavLogger';
 import { ToastHost } from '@/components/ToastHost';
@@ -40,7 +39,6 @@ import HazardScreen from './hazard/index';
 import CombatEncounterScreen from './combat-encounter/index';
 import HazardDeckScreen from './hazard-deck/index';
 import GatheringScreen from './gathering/index';
-import QuestScreen from './quest/index';
 import RestScreen from './rest/index';
 import CacheScreen from './cache/index';
 import BlacksmithScreen from './blacksmith/index';
@@ -211,7 +209,6 @@ export default function RootLayout() {
               <EventGate />
               <HazardGate />
               <GatheringGate />
-              <QuestGate />
               <RestGate />
               <CacheGate />
               <BlacksmithGate />
@@ -243,11 +240,6 @@ export default function RootLayout() {
                 <Stack.Screen
                   name="gathering/index"
                   component={GatheringScreen}
-                  options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
-                />
-                <Stack.Screen
-                  name="quest/index"
-                  component={QuestScreen}
                   options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
                 />
                 <Stack.Screen

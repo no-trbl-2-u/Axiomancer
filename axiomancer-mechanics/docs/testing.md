@@ -333,16 +333,17 @@ note in the PR description explaining why and what would unblock it.
 
 ## Minigame Harness — Cross-Minigame Balance Testing (Phase 148)
 
-The **minigame harness** provides unified balance testing across all three
-minigames (Hazard, Gathering, Quest Board) in a single invocation. It
+The **minigame harness** provides unified balance testing across both
+minigames (Hazard, Gathering) in a single invocation. It
 orchestrates A/B testing, playstyle divergence measurement, and pass/fail
 evaluation for use as a standard verification gate in balance phases.
+(Phase 61 retired the Quest Board arm along with the minigame itself.)
 
 ```ts
 import { runMinigameHarness } from 'axiomancer-mechanics';
 
 const report = runMinigameHarness({
-  minigames: ['hazard', 'gathering', 'quest-board'],
+  minigames: ['hazard', 'gathering'],
   runs: 300,
   seed: 'balance-test-seed',
   abTestVariants: {

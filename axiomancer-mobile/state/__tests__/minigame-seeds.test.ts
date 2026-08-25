@@ -1,7 +1,7 @@
 /**
  * Hermetic test pin — `state/minigame-seeds.ts`, the shared
- * deterministic seed/string resolver imported by all five minigame
- * Begin actions (`state/{hazard,gathering,rest,cache,quest}/store-actions.ts`).
+ * deterministic seed/string resolver imported by all four minigame
+ * Begin actions (`state/{hazard,gathering,rest,cache}/store-actions.ts`).
  *
  * A silent precedence/guard regression here breaks playtest and smoke
  * reproducibility across every minigame at once, so the pin asserts the
@@ -51,8 +51,8 @@ describe('resolveMinigameSeed', () => {
     });
 
     it('reads the unified entry keyed by the requested minigame', () => {
-        setUnified({ hazard: { seed: 10 }, quest: { seed: 20 } });
-        expect(resolveMinigameSeed('quest', undefined, undefined, 444)).toBe(20);
+        setUnified({ hazard: { seed: 10 }, cache: { seed: 20 } });
+        expect(resolveMinigameSeed('cache', undefined, undefined, 444)).toBe(20);
     });
 
     it('falls through to the legacy seed when no explicit/unified seed exists', () => {
@@ -166,15 +166,15 @@ describe('resolveMinigameString', () => {
 
     it('returns undefined when no fallback is supplied and nothing matches', () => {
         expect(
-            resolveMinigameString('quest', ['boardId', 'board'], undefined, undefined),
+            resolveMinigameString('hazard', ['hazardId', 'id'], undefined, undefined),
         ).toBeUndefined();
     });
 
     it('reads the unified entry keyed by the requested minigame, not another', () => {
-        setUnified({ gathering: { siteId: 'gather-site' }, quest: { boardId: 'quest-board' } });
+        setUnified({ gathering: { siteId: 'gather-site' }, hazard: { hazardId: 'cracked-cliff' } });
         expect(
-            resolveMinigameString('quest', ['boardId', 'board'], undefined, undefined, 'fallback'),
-        ).toBe('quest-board');
+            resolveMinigameString('hazard', ['hazardId', 'id'], undefined, undefined, 'fallback'),
+        ).toBe('cracked-cliff');
     });
 });
 

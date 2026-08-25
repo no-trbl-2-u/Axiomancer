@@ -180,7 +180,6 @@ const KIND_TO_NODE_TYPE: Record<MapEventKind, NodeType> = {
     gathering: 'gather',
     rest: 'rest',
     'loot-cache': 'treasure',
-    quest: 'quest',
     hazard: 'hazard',
     interaction: 'quest',
     // Phase V — village and blacksmith wear their own woodcuts now

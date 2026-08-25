@@ -83,8 +83,13 @@ import { STARTING_CARD_IDS } from '../Combat/combat.rewards';
  *   into the rest-choice screen's presenter). `night-keepsake:*` flags
  *   are untouched — `/memoir`'s REMAINS section still reads them back
  *   (see `game.migrate.ts`).
+ * Phase 61 — bumped 17 → 18: retired the Quest Board minigame ("The
+ *   Boy's Almanac"). Clears any live quest-board session riding along
+ *   in the raw payload's `quest` key (a mobile-only slice, not a
+ *   `GameState` field — the old `QuestBoardSession` shape is gone, so a
+ *   stale one must not survive; see `game.migrate.ts`).
  */
-export const GAME_STATE_VERSION = 17;
+export const GAME_STATE_VERSION = 18;
 
 /** Builds a brand-new GameState with default player and world. */
 export function createNewGameState(): GameState {

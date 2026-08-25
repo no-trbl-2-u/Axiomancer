@@ -14,7 +14,6 @@ import { selectHasActiveBlacksmith } from './blacksmith.engine';
 import { selectHasActiveCache } from './cache.engine';
 import { selectHasActiveGathering } from './gathering.engine';
 import { selectHasActiveHazard } from './hazard.engine';
-import { selectHasActiveQuestBoard } from './quest.engine';
 import { selectHasActiveRest } from './rest.engine';
 import { freezeViewModel } from './freeze';
 
@@ -161,7 +160,6 @@ export function selectHasAnyActiveSession(state: AppStoreState): boolean {
         || selectHasActiveGathering(state)
         || selectHasActiveCache(state)
         || selectHasActiveRest(state)
-        || selectHasActiveQuestBoard(state)
         || selectHasActiveBlacksmith(state)
     );
 }

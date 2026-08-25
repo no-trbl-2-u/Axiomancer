@@ -568,7 +568,8 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
 // battle" — a flat wall of identical encounters with no recovery was both
 // monotonous and unwinnable in playtests. The map now spreads 25 nodes across
 // a real mix:
-//   - 3 ENCOUNTER nodes  (2 regular + the fv-6 boss — the spine),
+//   - 4 ENCOUNTER nodes  (3 regular + the fv-6 boss — the spine; fv-15
+//                         rejoined this count in Phase 61, see below),
 //   - 4 REST nodes       (recover HP — the rest-choice node), one on the
 //                         spine just before the boss,
 //   - 3 GATHERING nodes  (low-risk materials — "The Gleaning"),
@@ -580,18 +581,23 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
 //   - 4 INTERACTION nodes (Phase 53c — Old Marrow at fv-2, the Coastal
 //                         Beggar at fv-7, Captain Blackwater at fv-18, the
 //                         Fisherman's Daughter at fv-19),
-//   - 1 QUEST node       (fv-15, the story hook),
 //   - 1 CUTSCENE node    (fv-1, the arrival — see `fvArrival` below),
 //   - 1 BLACKSMITH node  (fv-21, Phase 60 — the re-homed anvil, post-boss
-//                         and past every loot-cache/quest reward so the
-//                         visit is actually funded), and
+//                         and past every loot-cache reward so the visit is
+//                         actually funded), and
 //   - 1 BOSS node        (fv-6, the region climax — an encounter w/ isBoss).
-// Interaction and rest now tie for the largest kind at 4 apiece — Phase 53d
-// (S-01) spent two of the map's encounter surplus on dilemmas and Phase 60
-// spent a third (fv-21) on the anvil (see the spec's answered Open Question
-// 1: displacing an `encounter` node is the only reassignment that doesn't
-// grow the grid or merge two payloads onto one node). This block supersedes
-// the legacy authored pools above (kept in source for reference). Foes stay
+// Phase 61 retired the Quest Board minigame ("The Boy's Almanac") and with
+// it fv-15's `quest` kind — no map carries that kind any more. fv-15
+// rejoins the encounter roster instead (see `FV_ENCOUNTER_FOES`'s fv-15
+// entry): the cleanest reversal of the very displacement Phase 53c/60
+// documented (an authored non-encounter kind always came FROM an encounter
+// slot; this is the first one going back). Interaction and rest tie for
+// the largest kind at 4 apiece — Phase 53d (S-01) spent two of the map's
+// encounter surplus on dilemmas and Phase 60 spent a third (fv-21) on the
+// anvil (see the spec's answered Open Question 1: displacing an
+// `encounter` node is the only reassignment that doesn't grow the grid or
+// merge two payloads onto one node). This block supersedes the legacy
+// authored pools above (kept in source for reference). Foes stay
 // on the gentlest L1–L2 roster; the boss is pinned to a low absolute level
 // so a fresh player can actually win the climax (the shared coastal-tyrant
 // is endgame-tier elsewhere, so we override the level here).
@@ -614,6 +620,13 @@ const FV_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description: string }
     // the map's guaranteed shilling income is unchanged — grave-larva,
     // fv-12's prior foe, is dropped (no flag or pricing dependency).
     'fv-13': { slug: 'little-belle',     description: 'A small orange vesper rings a bell for a service no one held.' },
+    // c4 — Phase 61: fv-15 (formerly the quest-board node, retired) takes
+    // foot-stealer back from fv-21 — its Phase 60 displacement left the
+    // slug orphaned with no flag or pricing dependency, and level 3 (same
+    // tier as fv-24's water-holger and the boss's own FV_BOSS_LEVEL) is
+    // exactly the pre-boss weight this lane wants, one column ahead of the
+    // breakwater.
+    'fv-15': { slug: 'foot-stealer',     description: 'It collects footing. Yours is next on the list; balance, it maintains, is a possession like any other.' },
     // c9 — the last thing between the player and the coast road.
     'fv-24': { slug: 'water-holger',     description: 'A drowned deckhand wades up the strand, still standing his watch.' },
     // Phase 53d (S-01) — fv-16 (c2, float-eye) and fv-4 (c3,
@@ -621,9 +634,6 @@ const FV_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description: string }
     // "The Borrowed Hook" and "The Stranger's Net" (see the fv-16/fv-4
     // narration pools above). Neither foe carries a flag or pricing
     // dependency, so nothing else needs to know they left.
-    // Phase 60 — fv-21 (c7, foot-stealer) is dropped: displaced by the
-    // re-homed blacksmith node (see `FV_BLACKSMITH_NODES` below). No flag
-    // or pricing dependency on foot-stealer at this node.
 };
 
 // Phase 60 — the re-homed anvil (see `BlacksmithPayload`'s doc comment in
@@ -888,18 +898,6 @@ const fvStrangersNetDialogue: MapEventPool = {
     }],
 };
 
-const fvBuildTheBoatQuest: MapEventPool = {
-    id: 'fv-15.quest',
-    entries: [{
-        kind: 'quest', weight: 1,
-        payload: {
-            kind: 'quest',
-            boardId: 'build-the-boat',
-            description: 'The half-built hull waits on the strand; the village is counting on it.',
-        },
-    }],
-};
-
 // The map's opening beat, on the node the player starts standing on.
 //
 // Pre-2026-08-08 the start node fell through to a regular ENCOUNTER pool that
@@ -1008,8 +1006,6 @@ const FISHING_VILLAGE_NEW_PLAYER_POOLS: ReadonlyArray<{ nodeId: string; pool: Ma
                 out.push({ nodeId, pool: fvGauntletBoss });
             } else if (nodeId === 'fv-7') {
                 out.push({ nodeId, pool: fvCoastalBeggarInteraction });
-            } else if (nodeId === 'fv-15') {
-                out.push({ nodeId, pool: fvBuildTheBoatQuest });
             } else if (nodeId === 'fv-14') {
                 out.push({ nodeId, pool: fvFatherWorryDialogue });
             } else if (nodeId === 'fv-16') {

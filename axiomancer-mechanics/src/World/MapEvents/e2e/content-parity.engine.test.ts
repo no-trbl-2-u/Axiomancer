@@ -44,7 +44,8 @@ describe('Phase 161 — map-event content has one source of truth', () => {
         expect(getNodePrimaryEventKind('coastal-continent', 'fishing-village', 'fv-1')).toBe('cutscene');
         expect(getNodePrimaryEventKind('coastal-continent', 'fishing-village', 'fv-3')).toBe('rest');
         expect(getNodePrimaryEventKind('coastal-continent', 'fishing-village', 'fv-6')).toBe('encounter');
-        expect(getNodePrimaryEventKind('coastal-continent', 'fishing-village', 'fv-15')).toBe('quest');
+        // Phase 61 retired the quest-board node; fv-15 is an encounter now.
+        expect(getNodePrimaryEventKind('coastal-continent', 'fishing-village', 'fv-15')).toBe('encounter');
         // Phase 60 — the re-homed anvil, fv-21.
         expect(getNodePrimaryEventKind('coastal-continent', 'fishing-village', 'fv-21')).toBe('blacksmith');
     });

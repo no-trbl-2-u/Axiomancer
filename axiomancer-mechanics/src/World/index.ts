@@ -88,7 +88,7 @@ export type {
     MapEventKind, MapEventPayload, MapEventPool, MapEventPoolEntry,
     EncounterPayload, InteractionPayload, GatheringPayload, RestPayload,
     VillagePayload, CutscenePayload, HazardPayload, LootCachePayload,
-    QuestEventPayload, NarrationPayload, BlacksmithPayload, ResolvedEvent, ResolveMapEventResult,
+    NarrationPayload, BlacksmithPayload, ResolvedEvent, ResolveMapEventResult,
 } from './MapEvents/types';
 // Phase 52b — rest shelter classification (replaces the healFraction >= 1.0
 // inn heuristic). Mobile gates the hazard-scar mend on `shelter === 'inn'`.
@@ -106,7 +106,6 @@ export type { ApplyDialogueChoiceResult } from './dialogue.runtime';
 export * from './Hazard';
 
 // Quest Board minigame, Loot-cache encounter (Phase 137)
-export * from './QuestBoard';
 export * from './LootCache';
 
 // Gathering Minigame (Phase 142)

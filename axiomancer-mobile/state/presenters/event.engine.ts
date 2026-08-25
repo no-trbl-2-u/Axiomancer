@@ -625,11 +625,11 @@ function composeNarrative(resolved: ResolvedEvent): Omit<EventViewModel, 'prelud
         case 'cutscene':
             return composeCutscene(body, artSlug);
         // Dead-end kinds (Phase 137 cleanup): rest / gathering /
-        // loot-cache / hazard / quest never reach the event slice —
+        // loot-cache / hazard never reach the event slice —
         // `resolveCurrentMapEventAction` intercepts them and starts
         // their minigame/choice sessions instead (the rest-choice
-        // node, "The Gleaning", "The Reliquary", the hazard board,
-        // "The Boy's Almanac"). 'encounter' renders through the combat-prelude
+        // node, "The Gleaning", "The Reliquary", the hazard board).
+        // 'encounter' renders through the combat-prelude
         // path before composeNarrative is reached; 'none' is guarded
         // by selectHasActiveEvent. All fall to the empty VM
         // defensively.
@@ -637,7 +637,6 @@ function composeNarrative(resolved: ResolvedEvent): Omit<EventViewModel, 'prelud
         case 'gathering':
         case 'loot-cache':
         case 'hazard':
-        case 'quest':
         case 'encounter':
         case 'narration':
         // Spec 33 §6 / Phase D5 — 'blacksmith' is a dead-end kind here: its

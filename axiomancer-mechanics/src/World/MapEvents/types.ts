@@ -1,8 +1,9 @@
 /**
  * MapEvents (Spec 23) — type surface.
  *
- * Nine event kinds ('quest' joined the original eight in Phase 137)
- * plus a weighted-pool authoring model. See `specs/23-map-events.md`
+ * Ten event kinds plus a weighted-pool authoring model. ('quest' joined
+ * the original eight in Phase 137 and was retired in Phase 61 — the
+ * Quest Board minigame it launched is gone.) See `specs/23-map-events.md`
  * for the original spec; see
  * `src/World/MapEvents/resolve-map-event.ts` for the dispatcher.
  */
@@ -18,8 +19,9 @@ import type { PhilosophicalAlignment } from '../../Ledger/types';
 import type { BlacksmithVariantOffer } from '../Blacksmith/blacksmith.types';
 
 /**
- * The MapEvent kinds. 'quest' joined the original eight in Phase 137;
- * 'narration' (a dialogue-backed monologue shell) joined them in 2026-06.
+ * The MapEvent kinds. 'narration' (a dialogue-backed monologue shell)
+ * joined the original eight in 2026-06; 'quest' (Phase 137) was retired
+ * in Phase 61.
  */
 export type MapEventKind =
     | 'encounter'
@@ -30,7 +32,6 @@ export type MapEventKind =
     | 'cutscene'
     | 'hazard'
     | 'loot-cache'
-    | 'quest'
     | 'narration'
     | 'blacksmith';
 
@@ -129,13 +130,6 @@ export interface LootCachePayload {
     description?: string;
 }
 
-export interface QuestEventPayload {
-    kind: 'quest';
-    /** Quest-board id from `World/QuestBoard` (e.g. 'build-the-boat'). */
-    boardId: string;
-    description?: string;
-}
-
 export interface NarrationPayload {
     kind: 'narration';
     /**
@@ -153,7 +147,7 @@ export interface NarrationPayload {
  * Blacksmith node ("The Anvil", Spec 33 §6 / Phase D5). Hands the host an
  * authored budget + variant-gear offers; the host launches a
  * `World/Blacksmith` session from them (the sandboxed launch contract the
- * hazard/quest minigames use). The handler touches no state — it only
+ * hazard minigame uses). The handler touches no state — it only
  * validates the offered gear against the die-gear caps.
  *
  * RULED (T, attended chat, 2026-08-08; resolved Phase 52c) the anvil was
@@ -183,7 +177,6 @@ export type MapEventPayload =
     | CutscenePayload
     | HazardPayload
     | LootCachePayload
-    | QuestEventPayload
     | NarrationPayload
     | BlacksmithPayload;
 
@@ -229,7 +222,6 @@ export type ResolvedEvent =
     | { kind: 'cutscene';    lines: readonly string[] }
     | { kind: 'hazard';      effects: ActiveEffect[]; damage: number; description?: string }
     | { kind: 'loot-cache';  items: Item[]; currency: number; description?: string }
-    | { kind: 'quest';       boardId: string; description?: string }
     | { kind: 'narration';   dialogue: DialogueTree; description?: string }
     | { kind: 'blacksmith';  budget: number; variants: readonly BlacksmithVariantOffer[]; description?: string }
     | { kind: 'none' };

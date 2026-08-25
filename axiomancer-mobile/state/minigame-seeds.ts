@@ -9,7 +9,7 @@
  *   explicit begin option > unified global > legacy global > fallback
  */
 
-export type MinigameSeedKey = 'hazard' | 'gathering' | 'rest' | 'cache' | 'quest' | 'blacksmith';
+export type MinigameSeedKey = 'hazard' | 'gathering' | 'rest' | 'cache' | 'blacksmith';
 
 export interface MinigameSeedEntry {
     seed?: number;
@@ -17,8 +17,6 @@ export interface MinigameSeedEntry {
     id?: string;
     siteId?: string;
     site?: string;
-    boardId?: string;
-    board?: string;
 }
 
 export type MinigameSeedConfig = Partial<Record<MinigameSeedKey, MinigameSeedEntry>>;

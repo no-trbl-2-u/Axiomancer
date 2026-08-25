@@ -117,7 +117,7 @@ describe('selectExplorationViewModel: engine reads', () => {
         expect(vm.options[0].description.length).toBeGreaterThan(0);
     });
 
-    it('marks available encounter nodes as triggersCombat; rest/quest nodes do not', () => {
+    it('marks available encounter nodes as triggersCombat; rest nodes do not', () => {
         const store = createAppStore({ adapter: createMemoryAdapter() });
         const actions = createAppActions(store);
 
@@ -133,9 +133,12 @@ describe('selectExplorationViewModel: engine reads', () => {
         expect(fv3.type).toBe('rest');
         expect(fv3.triggersCombat).toBe(false);
 
-        // The single quest node (fv-15) is never a combat trigger.
+        // fv-15 (the retired quest-board node, Phase 61) is a regular
+        // encounter type now, but it's several columns ahead of fv-2 —
+        // still locked, so not yet a combat trigger regardless of type.
         const fv15 = vm.nodes.find((n) => n.id === 'fv-15')!;
-        expect(fv15.type).toBe('quest');
+        expect(fv15.type).toBe('encounter');
+        expect(fv15.kind).not.toBe('available');
         expect(fv15.triggersCombat).toBe(false);
 
         actions.moveTo('fv-11');

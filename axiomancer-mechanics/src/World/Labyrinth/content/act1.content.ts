@@ -16,7 +16,6 @@ export const ACT1: LabyrinthActDef = {
     title: 'Act I — The Colonnade',
     entry: 'ap1-1',
     questRoom: 'ap1-8',
-    questBoardId: 'sophists-first-ledger',
     bossRoom: 'ap1-15',
     bossSlug: 'the-doorwarden',
     descent: 'act2',

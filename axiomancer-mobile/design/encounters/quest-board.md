@@ -1,5 +1,9 @@
 # Quest Board Encounter ("The Boy's Almanac") — Mobile UX Source of Truth
 
+> **Status:** HISTORICAL — the Quest Board minigame at these same route/file
+> paths was retired 2026-08-25 (Phase 61). This document describes the
+> retired UI AS SHIPPED before retirement; it is not rewritten.
+>
 > Derived from `app/quest/index.tsx`, `state/presenters/quest.engine.ts`,
 > `components/quest/`, and `state/quest/store-actions.ts` as of 2026-06-15.
 >

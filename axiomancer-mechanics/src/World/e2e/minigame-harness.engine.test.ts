@@ -2,14 +2,15 @@
  * Minigame Harness — hermetic e2e tests.
  *
  * Tests the composable harness that orchestrates balance testing across
- * all three minigames. Exercises single minigame execution, multi-minigame
- * orchestration, A/B testing scenarios, and pass/fail evaluation logic.
+ * the Hazard and Gathering minigames. Exercises single minigame execution,
+ * multi-minigame orchestration, A/B testing scenarios, and pass/fail
+ * evaluation logic. (Phase 61 — the Quest Board arm retired along with
+ * the minigame itself.)
  */
 
 import { describe, it, expect } from 'vitest';
 import { runMinigameHarness, summarizeHarnessReport } from '../minigame-harness.resolver';
 import { HAZARD_TUNING } from '../Hazard/hazard.tuning';
-import { QUEST_BOARD_TUNING } from '../QuestBoard/quest-board.tuning';
 import type { MinigameHarnessConfig } from '../minigame-harness.types';
 import type { GatheringTuning } from '../Gathering/gathering.sim';
 
@@ -29,7 +30,6 @@ describe('Minigame Harness', () => {
         expect(report.totalMinigames).toBe(1);
         expect(report.results.hazard).toBeDefined();
         expect(report.results.gathering).toBeUndefined();
-        expect(report.results.questBoard).toBeUndefined();
         expect(report.abTests?.hazard).toBeUndefined();
         expect(typeof report.passFail.hazard).toBe('boolean');
         expect(typeof report.passFail.overall).toBe('boolean');
@@ -48,7 +48,6 @@ describe('Minigame Harness', () => {
         expect(report.totalMinigames).toBe(1);
         expect(report.results.gathering).toBeDefined();
         expect(report.results.hazard).toBeUndefined();
-        expect(report.results.questBoard).toBeUndefined();
         expect(report.abTests?.gathering).toBeUndefined();
         expect(typeof report.passFail.gathering).toBe('boolean');
         expect(typeof report.passFail.overall).toBe('boolean');
@@ -60,49 +59,28 @@ describe('Minigame Harness', () => {
         expect(gatheringReport.recommendations).toBeInstanceOf(Array);
     });
 
-    it('runs single minigame harness - quest board', () => {
+    it('orchestrates both minigames', () => {
         const config: MinigameHarnessConfig = {
-            minigames: ['quest-board'],
+            minigames: ['hazard', 'gathering'],
             runs: testRuns,
             seed: testSeed,
         };
 
         const report = runMinigameHarness(config);
 
-        expect(report.totalMinigames).toBe(1);
-        expect(report.results.questBoard).toBeDefined();
-        expect(report.results.hazard).toBeUndefined();
-        expect(report.results.gathering).toBeUndefined();
-        expect(report.abTests?.questBoard).toBeUndefined();
-        expect(typeof report.passFail.questBoard).toBe('boolean');
-        expect(typeof report.passFail.overall).toBe('boolean');
-    });
-
-    it('orchestrates all three minigames', () => {
-        const config: MinigameHarnessConfig = {
-            minigames: ['hazard', 'gathering', 'quest-board'],
-            runs: testRuns,
-            seed: testSeed,
-        };
-
-        const report = runMinigameHarness(config);
-
-        expect(report.totalMinigames).toBe(3);
+        expect(report.totalMinigames).toBe(2);
         expect(report.results.hazard).toBeDefined();
         expect(report.results.gathering).toBeDefined();
-        expect(report.results.questBoard).toBeDefined();
 
         // All minigame pass/fail evaluations should exist
         expect(typeof report.passFail.hazard).toBe('boolean');
         expect(typeof report.passFail.gathering).toBe('boolean');
-        expect(typeof report.passFail.questBoard).toBe('boolean');
         expect(typeof report.passFail.overall).toBe('boolean');
 
         // Overall pass should depend on individual minigame passes
         const individualResults = [
             report.passFail.hazard,
             report.passFail.gathering,
-            report.passFail.questBoard,
         ];
         const expectedOverall = individualResults.every(result => result);
         expect(report.passFail.overall).toBe(expectedOverall);
@@ -126,13 +104,12 @@ describe('Minigame Harness', () => {
         };
 
         const config: MinigameHarnessConfig = {
-            minigames: ['hazard', 'gathering', 'quest-board'],
+            minigames: ['hazard', 'gathering'],
             runs: testRuns,
             seed: testSeed,
             abTestVariants: {
                 hazard: [HAZARD_TUNING, HAZARD_TUNING], // Same config for test
                 gathering: [gatheringConfigA, gatheringConfigB],
-                questBoard: [QUEST_BOARD_TUNING, QUEST_BOARD_TUNING], // Same config for test
             },
         };
 
@@ -141,7 +118,6 @@ describe('Minigame Harness', () => {
         // A/B tests should be present when variants are provided
         expect(report.abTests?.hazard).toBeDefined();
         expect(report.abTests?.gathering).toBeDefined();
-        expect(report.abTests?.questBoard).toBeDefined();
 
         // Validate A/B test structure
         const gatheringAB = report.abTests!.gathering!;
@@ -186,9 +162,6 @@ describe('Minigame Harness', () => {
         expect(typeof report.passFail.hazard).toBe('boolean');
         expect(typeof report.passFail.gathering).toBe('boolean');
 
-        // Quest board should default to true when not run
-        expect(report.passFail.questBoard).toBe(true);
-
         // Overall should be logical AND of enabled minigames
         const expectedOverall = report.passFail.hazard && report.passFail.gathering;
         expect(report.passFail.overall).toBe(expectedOverall);
@@ -196,7 +169,7 @@ describe('Minigame Harness', () => {
 
     it('generates valid summary report', () => {
         const config: MinigameHarnessConfig = {
-            minigames: ['hazard', 'gathering', 'quest-board'],
+            minigames: ['hazard', 'gathering'],
             runs: testRuns,
             seed: testSeed,
         };
@@ -204,8 +177,8 @@ describe('Minigame Harness', () => {
         const fullReport = runMinigameHarness(config);
         const summary = summarizeHarnessReport(fullReport);
 
-        expect(summary.minigamesRun).toHaveLength(3);
-        expect(summary.minigamesRun).toEqual(['hazard', 'gathering', 'questBoard']);
+        expect(summary.minigamesRun).toHaveLength(2);
+        expect(summary.minigamesRun).toEqual(['hazard', 'gathering']);
         expect(typeof summary.totalRuns).toBe('number');
         expect(typeof summary.overallPass).toBe('boolean');
         expect(Array.isArray(summary.recommendations)).toBe(true);
@@ -247,7 +220,6 @@ describe('Minigame Harness', () => {
         // Pass/fail structure
         expect(report.passFail).toHaveProperty('hazard');
         expect(report.passFail).toHaveProperty('gathering');
-        expect(report.passFail).toHaveProperty('questBoard');
         expect(report.passFail).toHaveProperty('overall');
 
         // Timestamp should be valid ISO string

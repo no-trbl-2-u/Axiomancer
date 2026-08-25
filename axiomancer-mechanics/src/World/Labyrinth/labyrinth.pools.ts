@@ -5,9 +5,10 @@
  * (existing `consumedNodes` one-shot semantics = "solved space is
  * solved"). Authored overrides: entrances and set-piece rooms narrate,
  * waystones rest (one-shot, meagre; the Third Waystone generous —
- * the finale resource floor), pre-boss chambers fire the act's quest
- * board, boss rooms fire the act boss. `quest` fires NOWHERE else,
- * per T's rule. Weights per act: DESIGN.md section 4 (plan/labyrinth).
+ * the finale resource floor), the ledger room (`act.questRoom`) narrates
+ * the Sophist's own line (Phase 61 — the Quest Board minigame it used to
+ * launch is retired), boss rooms fire the act boss. Weights per act:
+ * DESIGN.md section 4 (plan/labyrinth).
  *
  * Self-registers on import, mirroring `MapEvents/content.ts`.
  */
@@ -122,11 +123,16 @@ function overridePool(act: LabyrinthActDef, room: LabyrinthRoomDef): MapEventPoo
     const id = `${act.mapName}.${room.nodeId}.override`;
 
     if (room.nodeId === act.questRoom) {
+        // Phase 61 — the Quest Board minigame retired; the ledger room
+        // narrates the Sophist's own scripted line instead of launching a
+        // board (the room keeps its identity — `act.questRoom` still gates
+        // the act3 "settle debt" action in `labyrinth.cli.ts` /
+        // `state/presenters/labyrinth.engine.ts`, an unrelated mechanic).
         return {
             id,
             entries: [{
-                kind: 'quest', weight: 1,
-                payload: { kind: 'quest', boardId: act.questBoardId, description: room.name },
+                kind: 'narration', weight: 1,
+                payload: { kind: 'narration', dialogue: monologue(`${act.mapName}.${room.nodeId}`, room.narration) },
             }],
         };
     }

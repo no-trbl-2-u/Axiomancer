@@ -1,5 +1,9 @@
 # Quest Board Encounter ("The Boy's Almanac") — Mechanics Source of Truth
 
+> **Status:** HISTORICAL — the Quest Board minigame (`src/World/QuestBoard/`)
+> was retired 2026-08-25 (Phase 61). This document describes the retired
+> engine AS SHIPPED before retirement; it is not rewritten.
+>
 > Derived from `src/World/QuestBoard/` as of 2026-06-15.
 > Phase 137 — Live.
 

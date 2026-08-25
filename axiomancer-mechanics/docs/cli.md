@@ -214,32 +214,6 @@ npm run loot-cache -- [flags]        # convenience alias
 | `--json-events` | Emit completion/summary events as JSON on stdout. |
 | `--state-log <path>` | Append a per-decision JSONL trace; illegal actions are logged as `illegalLootCacheAction` with a full state snapshot. |
 
-### `quest-board.cli.ts` - Quest Board Mini-Game Driver
-
-A standalone driver for the quest-board mini-game ("The Boy's Almanac"),
-reachable as a **subcommand** of the game CLI. The quest cannot be failed — it
-resolves to a cosmetic outcome tier.
-
-**Usage:**
-```bash
-npm run game -- quest-board [flags]
-npm run quest-board -- [flags]       # convenience alias
-```
-
-**Flags:**
-
-| Flag | Effect |
-| --- | --- |
-| `--policy safe\|gambler\|economist` | The bot for `--auto` (default `economist`), reusing the `quest-board.sim.ts` per-policy option shapes. |
-| `--auto` | The policy plays the whole board to a claimed outcome. Otherwise the player drives each open space by hand. |
-| `--board <id>` | The board to play (default `build-the-boat`). Validated against `QUEST_BOARDS`. |
-| `--seed <n\|str>` | Seed the engine's embedded RNG so a run is fully reproducible. |
-| `--runs <n>` | Play N boards back-to-back (default **3**). |
-| `--script <path>` | Scripted answers (JSON array), as in `game.cli.ts`. |
-| `--stdin` | Line-buffered stdin answers. |
-| `--json-events` | Emit completion/summary events as JSON on stdout. |
-| `--state-log <path>` | Append a per-decision JSONL trace; illegal actions are logged as `illegalQuestBoardAction` with a full state snapshot. |
-
 ### `dev-tools.ts` - Development Utilities
 
 Development utilities for testing and debugging the game engine.

@@ -15,7 +15,6 @@ export const ACT2: LabyrinthActDef = {
     title: 'Act II — The Archive',
     entry: 'ap2-1',
     questRoom: 'ap2-8',
-    questBoardId: 'sophists-second-ledger',
     bossRoom: 'ap2-9',
     bossSlug: 'the-index',
     descent: 'act3',

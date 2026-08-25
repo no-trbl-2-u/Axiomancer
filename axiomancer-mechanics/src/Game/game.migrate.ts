@@ -9,8 +9,9 @@
  * v12 → v13 (Phase 19, seed the signet relics), v13 → v14 (Phase 21, purge
  * non-relic equipment now that the procedural library is retired), v14 → v15
  * (Phase D5, backfill the die-gear rail), v15 → v16 (Phase 52a, default
- * the per-run card-removal counter), and v16 → v17 (Phase 52e, retire the
- * rest minigame). The hops chain, so a v11 save lands at v17 in one
+ * the per-run card-removal counter), v16 → v17 (Phase 52e, retire the
+ * rest minigame), and v17 → v18 (Phase 61, retire the Quest Board
+ * minigame). The hops chain, so a v11 save lands at v18 in one
  * `migrate` call. Every other version mismatch still rejects.
  */
 
@@ -242,6 +243,24 @@ function migrateV16ToV17(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
+ * v17 → v18 (Phase 61): retire the Quest Board minigame ("The Boy's
+ * Almanac"). Clears a live quest-board session that rode along in the
+ * raw payload's `quest` key — that key is a mobile-only store slice, not
+ * a formal `GameState` field, so it is untyped here; a player mid-board
+ * at update time simply lands with the node consumed and no pending
+ * board, same as `resolveMapEvent` already consuming the node on entry
+ * (fv-15 is an encounter now, so there is no board to return to). Pure
+ * over a raw save payload.
+ */
+function migrateV17ToV18(raw: Record<string, unknown>): Record<string, unknown> {
+    const { quest: _staleQuestBoardSession, ...withoutQuest } = raw;
+    return {
+        ...withoutQuest,
+        version: 18,
+    };
+}
+
+/**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
  * game). The name/signature is kept so the persistence layer's call site is
@@ -268,8 +287,8 @@ export function migrate(
     // Supported hops: v11 → v12 re-slots equipment to the Phase-18 model; v12 →
     // v13 seeds the Phase-19 signet relics; v13 → v14 purges non-relic gear;
     // v14 → v15 backfills the die-gear rail; v15 → v16 defaults the card-removal
-    // counter; v16 → v17 retires the rest minigame. Chained so a v11 save lands
-    // at v17 in one call.
+    // counter; v16 → v17 retires the rest minigame; v17 → v18 retires the
+    // Quest Board minigame. Chained so a v11 save lands at v18 in one call.
     if (version === 11 && toVersion >= 12) {
         working = migrateV11ToV12(working);
         version = 12;
@@ -293,6 +312,10 @@ export function migrate(
     if (version === 16 && toVersion >= 17) {
         working = migrateV16ToV17(working);
         version = 17;
+    }
+    if (version === 17 && toVersion >= 18) {
+        working = migrateV17ToV18(working);
+        version = 18;
     }
 
     if (version !== toVersion) {

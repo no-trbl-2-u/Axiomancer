@@ -10,16 +10,15 @@
  *               current map so the fight is the gentlest available.
  *   - BOSS     → combat-prelude with the lowest-level boss foe on
  *               the current map (KNEEL / STRIKE chrome, no flee).
- *   - HAZARD / REST / GATHER / TREASURE / QUEST → the real minigame
+ *   - HAZARD / REST / GATHER / TREASURE → the real minigame
  *               session, launched through the same `begin*` actions
  *               the live map path uses, so the matching gate
  *               (`<HazardGate>` → `/hazard`, `<RestGate>` → `/rest`,
  *               `<GatheringGate>` → `/gathering`, `<CacheGate>` →
- *               `/cache`, `<QuestGate>` → `/quest`) routes to the
- *               full-screen minigame.
+ *               `/cache`) routes to the full-screen minigame.
  *
  * Mechanism (Phase 137 alignment, 2026-06-14): rest / gather /
- * treasure / quest no longer reach the `/event` slice — the live
+ * treasure no longer reach the `/event` slice — the live
  * `resolveCurrentMapEventAction` intercepts those kinds and starts a
  * minigame session. This panel mirrors that interception by calling
  * the `begin*` actions directly rather than seeding a `ResolvedEvent`
@@ -67,7 +66,6 @@ const ENCOUNTERS: readonly { kind: NodeType; label: string }[] = [
     { kind: 'rest', label: 'REST' },
     { kind: 'gather', label: 'GATHER' },
     { kind: 'treasure', label: 'TREASURE' },
-    { kind: 'quest', label: 'QUEST' },
 ];
 
 /** Paced narrative events that route to their own dedicated screens
@@ -217,12 +215,6 @@ export function DebugTriggerEncounter() {
                 actions.beginLootCache({ items: loot, currency: 25 });
                 return;
             }
-            case 'quest':
-                // "The Boy's Almanac" board — <QuestGate> routes to /quest.
-                // The only authored board today is the story's first main
-                // quest, "build-the-boat" (fishing-village Sea Cave).
-                actions.beginQuestBoard({ boardId: 'build-the-boat' });
-                return;
             default:
                 return;
         }

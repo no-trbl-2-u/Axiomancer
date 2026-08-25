@@ -45,14 +45,13 @@ export function selectEventArtSlug(event: ResolvedEvent): EventArtSlug {
             return 'village';
         case 'cutscene':
             return 'cutscene';
-        // Phase 137 cleanup: rest / gathering / loot-cache / hazard /
-        // quest never reach the event modal — their interceptors start
+        // Phase 137 cleanup: rest / gathering / loot-cache / hazard
+        // never reach the event modal — their interceptors start
         // minigame sessions instead. Generic fallback kept defensively.
         case 'rest':
         case 'gathering':
         case 'loot-cache':
         case 'hazard':
-        case 'quest':
         case 'narration':
         // Spec 33 §6 / Phase D5 — 'blacksmith' is a dead-end kind here: its
         // interceptor starts "The Anvil" die-gear session (D6 owns that
@@ -78,7 +77,6 @@ const DEFAULT_BODY_BY_KIND: Record<ResolvedEvent['kind'], string> = {
     cutscene: '',
     hazard: 'The air turns.',
     'loot-cache': 'Forgotten goods.',
-    quest: 'A plan, drawn as a game.',
     narration: 'A voice speaks, unbidden.',
     // Spec 33 §6 / Phase D5 — 'blacksmith' launches "The Anvil" die-gear
     // session via its interceptor (D6 owns the screen); never renders in the

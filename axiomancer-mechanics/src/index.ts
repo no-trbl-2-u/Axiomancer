@@ -421,7 +421,6 @@ export * from './World/Gathering';
 // each main-story beat plays as an authored tabletop board inside the
 // fiction; fully sandboxed, only the completion record flows back).
 // Seeded-RNG helpers are aliased (`questBoard*`) per the same doctrine.
-export * from './World/QuestBoard';
 
 // Loot-cache encounter ("The Reliquary" — three layers, sealed trap
 // fates, one probe). RNG aliased `lootCache*`.
@@ -462,7 +461,7 @@ export type {
     MapEventKind, MapEventPayload, MapEventPool, MapEventPoolEntry,
     EncounterPayload, InteractionPayload, GatheringPayload, RestPayload,
     VillagePayload, CutscenePayload, HazardPayload, LootCachePayload,
-    QuestEventPayload, NarrationPayload, BlacksmithPayload, ResolvedEvent, ResolveMapEventResult,
+    NarrationPayload, BlacksmithPayload, ResolvedEvent, ResolveMapEventResult,
 } from './World';
 // Phase 52b — rest shelter classification (retires the healFraction >= 1.0
 // inn heuristic). Mobile gates the hazard-scar max-VITAE mend on this.

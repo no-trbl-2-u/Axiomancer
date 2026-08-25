@@ -13,7 +13,6 @@ export const ACT3: LabyrinthActDef = {
     title: 'Act III — The Proof',
     entry: 'ap3-1',
     questRoom: 'ap3-8',
-    questBoardId: 'sophists-third-ledger',
     bossRoom: 'ap3-9',
     bossSlug: 'the-sophist',
     descent: 'exit',

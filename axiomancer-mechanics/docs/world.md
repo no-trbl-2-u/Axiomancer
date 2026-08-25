@@ -112,7 +112,8 @@ The current dispatcher is `resolveMapEvent(state, rng?)` from
 `src/World/MapEvents/resolve-map-event.ts`, shipped in Spec 23 and
 populated with content in Phase 24. It returns `{ state, event }`
 where `event` is a discriminated union over the ten `MapEventKind`
-values ('quest' joined the original eight in Phase 137; 'narration' joined in 2026-06):
+values ('quest' joined the original eight in Phase 137 and was retired
+in Phase 61; 'narration' joined in 2026-06):
 
 | Event kind     | Result shape                                                              |
 |----------------|---------------------------------------------------------------------------|
@@ -124,23 +125,22 @@ values ('quest' joined the original eight in Phase 137; 'narration' joined in 20
 | `cutscene`     | `{ kind: 'cutscene', lines }` — narration only.                           |
 | `hazard`       | `{ kind: 'hazard', effects, damage }` — applies effects + damage.         |
 | `loot-cache`   | `{ kind: 'loot-cache', items, currency }` — fixed grant.                  |
-| `quest`        | `{ kind: 'quest', boardId }` — hands the host a Quest Board id (`World/QuestBoard`); the host starts the board-game minigame. |
 | `narration`    | `{ kind: 'narration', dialogue }` — inline monologue; the `DialogueTree` is authored directly on the node (no map NPC lookup). Barrel: `NarrationPayload`. |
 | `none`         | Consumed node (one-shot) or no pool registered.                            |
 
 Note (Phase 137): the engine handlers above remain the CLI map loop's
 behaviour. The mobile host intercepts `gathering` / `loot-cache` /
-`hazard` / `quest` results and launches the dedicated minigames instead
+`hazard` results and launches the dedicated minigames instead
 (`World/Gathering` "The Gleaning", `World/LootCache` "The Reliquary",
-`World/Hazard`, `World/QuestBoard` "The Boy's Almanac"); `rest` results
-launch the rest-choice screen (`World/RestChoice`, Phase 52c-d), which
-retired the former rest minigame in Phase 52e.
+`World/Hazard`); `rest` results launch the rest-choice screen
+(`World/RestChoice`, Phase 52c-d), which retired the former rest
+minigame in Phase 52e. (`quest` used to route to `World/QuestBoard`
+"The Boy's Almanac"; that kind and the minigame it launched were
+retired in Phase 61.)
 
 Standalone CLI play loops (Phase 160b / 160c): the pure minigame engines are
 also driveable directly from the Node host as game-CLI subcommands —
-`npm run gathering`, `npm run hazard`, `npm run loot-cache` (The Reliquary),
-and `npm run quest-board` (The Boy's Almanac — `--policy safe|gambler|economist`,
-`--board <id>`, charms / vows / bone rolls / nine space kinds / dusk).
+`npm run gathering`, `npm run hazard`, and `npm run loot-cache` (The Reliquary).
 The rest-choice node (Phase 52c-d) has no standalone CLI driver — it is a
 one-shot player choice, not a dealt/replayable session. Each shares the `src/CLI/io.ts` layer
 (`--script` JSON / `--stdin` / `--json-events` / `--state-log`) and an
@@ -381,8 +381,9 @@ only node-event dispatcher.
   `interaction` pools could never fire even via the CLI. Phase 161
   removed the dead legacy fishing-village block — the **new-player
   layout is the canonical fishing-village map** (combat-focused:
-  encounters + rest/gather/hazard + the fv-15 quest hook + the pinned
-  fv-6 boss). `northern-forest` is unshadowed and stays live; it carries
+  encounters + rest/gather/hazard + the pinned fv-6 boss; fv-15 was the
+  quest-board hook until Phase 61 retired it back to an encounter).
+  `northern-forest` is unshadowed and stays live; it carries
   the `village`/`cutscene`/`interaction`/`loot-cache` kinds
   fishing-village no longer authors, so the all-8-`MapEventKind`
   invariant still holds. A no-shadow guard
@@ -447,12 +448,13 @@ Balance bands are verified in `src/World/Gathering/e2e/gathering.balance.sim.tes
 ## Loot-Cache Balance Simulation (Phase 160)
 
 The remaining Phase 137 minigame gained a deterministic policy-bot sim
-(`lootcache.sim.ts`), mirroring the gathering/hazard pattern. Together with
-`quest-board.sim.ts` this gives every minigame a real sim for the
-`loot-cache-tuning` card to drive. The rest minigame's `rest.sim.ts` and the
-`rest-tuning` card it fed were retired in Phase 52e — the rest node is now a
-one-shot, deterministic player choice (`World/RestChoice`), not a
-balance-simulated minigame.
+(`lootcache.sim.ts`), mirroring the gathering/hazard pattern. This gives
+every minigame a real sim for the `loot-cache-tuning` card to drive.
+The rest minigame's `rest.sim.ts` and the `rest-tuning` card it fed
+were retired in Phase 52e — the rest node is now a one-shot,
+deterministic player choice (`World/RestChoice`), not a
+balance-simulated minigame. The Quest Board minigame's `quest-board.sim.ts`
+and the `quest-board-tuning` card it fed were retired in Phase 61.
 
 ### Loot-Cache ("The Reliquary") — `lootcache.sim.ts`
 

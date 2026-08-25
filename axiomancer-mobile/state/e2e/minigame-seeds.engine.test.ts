@@ -29,7 +29,6 @@ type SeedGlobals = typeof globalThis & {
         gathering?: { seed?: number; siteId?: string; site?: string };
         rest?: { seed?: number };
         cache?: { seed?: number };
-        quest?: { seed?: number; boardId?: string; board?: string };
     };
     __AXM_HAZARD_SEED__?: number;
     __AXM_HAZARD_ID__?: string;
@@ -37,8 +36,6 @@ type SeedGlobals = typeof globalThis & {
     __AXM_GATHER_SITE__?: string;
     __AXM_REST_SEED__?: number;
     __AXM_CACHE_SEED__?: number;
-    __AXM_QUEST_SEED__?: number;
-    __AXM_QUEST_BOARD__?: string;
 };
 
 function makeStoreAndActions(): { store: AppStore; actions: AppActions } {
@@ -55,8 +52,6 @@ function clearSeedGlobals(): void {
     delete g.__AXM_GATHER_SITE__;
     delete g.__AXM_REST_SEED__;
     delete g.__AXM_CACHE_SEED__;
-    delete g.__AXM_QUEST_SEED__;
-    delete g.__AXM_QUEST_BOARD__;
 }
 
 afterEach(() => {
@@ -70,13 +65,11 @@ describe('minigame seed resolver precedence', () => {
         g.__AXM_MINIGAME_SEEDS__ = {
             hazard: { seed: 222, hazardId: 'flooded-undercroft' },
             gathering: { seed: 333, siteId: 'weeping-pines' },
-            quest: { seed: 444, boardId: 'build-the-boat' },
         };
         g.__AXM_HAZARD_SEED__ = 111;
         g.__AXM_HAZARD_ID__ = 'flooded-undercroft';
         g.__AXM_GATHER_SEED__ = 112;
         g.__AXM_GATHER_SITE__ = 'bone-orchard';
-        g.__AXM_QUEST_SEED__ = 113;
 
         const { store, actions } = makeStoreAndActions();
 
@@ -87,20 +80,15 @@ describe('minigame seed resolver precedence', () => {
         expect(actions.beginGathering({ seed: 2, siteId: 'mire-mint' })).toBe(true);
         expect(store.getState().gathering.session?.seed).toBe(2);
         expect(store.getState().gathering.session?.siteId).toBe('mire-mint');
-
-        expect(actions.beginQuestBoard({ seed: 3, boardId: 'build-the-boat' })).toBe(true);
-        expect(store.getState().quest.session?.seed).toBe(3);
-        expect(store.getState().quest.session?.boardId).toBe('build-the-boat');
     });
 
-    it('unified globals outrank legacy globals for all five minigames', () => {
+    it('unified globals outrank legacy globals for all four minigames', () => {
         const g = globalThis as SeedGlobals;
         g.__AXM_MINIGAME_SEEDS__ = {
             hazard: { seed: 201, hazardId: 'cracked-cliff' },
             gathering: { seed: 202, siteId: 'mire-mint' },
             rest: { seed: 203 },
             cache: { seed: 204 },
-            quest: { seed: 205, boardId: 'build-the-boat' },
         };
         g.__AXM_HAZARD_SEED__ = 101;
         g.__AXM_HAZARD_ID__ = 'flooded-undercroft';
@@ -108,7 +96,6 @@ describe('minigame seed resolver precedence', () => {
         g.__AXM_GATHER_SITE__ = 'bone-orchard';
         g.__AXM_REST_SEED__ = 103;
         g.__AXM_CACHE_SEED__ = 104;
-        g.__AXM_QUEST_SEED__ = 105;
 
         const { store, actions } = makeStoreAndActions();
 
@@ -125,10 +112,6 @@ describe('minigame seed resolver precedence', () => {
 
         actions.beginLootCache({ items: LOOT, currency: 5 });
         expect(store.getState().cache.session?.seed).toBe(204);
-
-        actions.beginQuestBoard();
-        expect(store.getState().quest.session?.seed).toBe(205);
-        expect(store.getState().quest.session?.boardId).toBe('build-the-boat');
     });
 
     it('legacy globals are still honored when the unified config omits a minigame', () => {

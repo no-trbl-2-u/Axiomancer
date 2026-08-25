@@ -12,7 +12,6 @@ import { createHazardSession } from '../Hazard/hazard.engine';
 import { hazardStarterBag } from '../Hazard/hazard.deck-flags';
 import { createGatheringSession } from '../Gathering/gathering.engine';
 import { createLootCacheSession } from '../LootCache/lootcache.engine';
-import { createQuestBoardSession } from '../QuestBoard/quest-board.engine';
 import { minigameRunSeed, seedInputToUint32, type SeedInput } from '../seed';
 
 function scrubSeed<T>(value: T): unknown {
@@ -61,7 +60,6 @@ describe('minigame engine seed contract', () => {
         expectReplayable('LootCache', seed => createLootCacheSession(seed, [{ uid: 'i1', name: 'Iron Charm' }], 6));
     });
 
-    it('QuestBoard sessions accept string seeds and replay dealt charms/vows', () => {
-        expectReplayable('QuestBoard', seed => createQuestBoardSession(seed, 'build-the-boat'));
-    });
+    // QuestBoard (Phase 61 — the minigame is retired) had an entry here;
+    // removed along with `World/QuestBoard/`.
 });

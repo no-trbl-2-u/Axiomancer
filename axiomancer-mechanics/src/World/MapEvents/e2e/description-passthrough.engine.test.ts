@@ -198,21 +198,6 @@ describe('resolveMapEvent — description passthrough', () => {
         }
     });
 
-    it('carries the authored description onto a quest event', () => {
-        mockSequentialRng(0.5);
-        const state = withPool(freshState(), {
-            id: 'pool.description.quest',
-            entries: [{
-                kind: 'quest', weight: 1,
-                payload: { kind: 'quest', boardId: 'build-the-boat', description: 'A plan, drawn in the dirt.' },
-            }],
-        });
-        const result = resolveMapEvent(state);
-        expect(result.event.kind).toBe('quest');
-        if (result.event.kind === 'quest') {
-            expect(result.event.description).toBe('A plan, drawn in the dirt.');
-        }
-    });
 });
 
 describe('MapEvents description passthrough — direct handler coverage', () => {

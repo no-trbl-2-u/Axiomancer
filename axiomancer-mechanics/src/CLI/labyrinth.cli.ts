@@ -91,7 +91,6 @@ function describeEvent(event: ResolvedEvent): string {
             const root = event.dialogue.nodes[event.dialogue.rootId];
             return root ? `The Sophist: "${root.text}"` : 'The Sophist says nothing, pointedly.';
         }
-        case 'quest':       return `The house requires its paperwork: ${event.boardId}. You sign where the Sophist points.`;
         case 'none':        return 'The room is solved. Nothing stirs.';
         default:            return 'Something happens that the deep house declines to explain.';
     }

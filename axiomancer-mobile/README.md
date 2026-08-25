@@ -191,7 +191,6 @@ app/                       expo-router routes
   gathering/               gathering minigame (The Gleaning)
   rest/                    rest-choice encounter (Phase 52d)
   cache/                   loot-cache encounter (The Reliquary)
-  quest/                   quest-board minigame (The Boy's Almanac)
   dialogue/                NPC dialogue trees
   event/                   paced narrative events
   cutscene/                cutscenes

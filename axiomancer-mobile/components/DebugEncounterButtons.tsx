@@ -1,10 +1,9 @@
 /**
- * Dev-only manual triggers for the Phase 137 encounters: the Quest
- * Board ("The Boy's Almanac"), the rest-choice node, and the Loot
- * Cache ("The Reliquary"). Map events fire these
- * organically; tuning and visual work need immediate entries. Each
- * tap starts a session — the matching Gate routes to the screen.
- * Renders null outside dev builds.
+ * Dev-only manual triggers for the Phase 137 encounters: the
+ * rest-choice node and the Loot Cache ("The Reliquary"). Map events
+ * fire these organically; tuning and visual work need immediate
+ * entries. Each tap starts a session — the matching Gate routes to
+ * the screen. Renders null outside dev builds.
  */
 
 import React from 'react';
@@ -87,13 +86,6 @@ export function DebugEncounterButtons() {
 
     return (
         <>
-            <DebugRow
-                label="DEBUG · QUEST BOARD"
-                sub="start the build-the-boat board"
-                buttonLabel="UNFOLD"
-                onPress={() => actions.beginQuestBoard({ boardId: 'build-the-boat' })}
-                testID="debug-quest-button"
-            />
             <DebugRow
                 label="DEBUG · REST"
                 sub="start the night watch"

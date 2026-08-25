@@ -24,7 +24,6 @@
     "hazard": "ts-node src/CLI/game.cli.ts hazard",
     "gathering": "ts-node src/CLI/game.cli.ts gathering",
     "loot-cache": "ts-node src/CLI/game.cli.ts loot-cache",
-    "quest-board": "ts-node src/CLI/game.cli.ts quest-board",
     "combat": "ts-node src/CLI/game.cli.ts combat",
     "labyrinth": "ts-node src/CLI/game.cli.ts labyrinth",
     "combat-sim": "ts-node src/CLI/combat-sim.cli.ts",

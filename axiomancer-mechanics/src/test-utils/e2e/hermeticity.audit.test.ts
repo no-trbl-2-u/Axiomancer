@@ -115,7 +115,6 @@ describe('hermeticity guard: isolation (no disk / network / subprocess)', () => 
         'CLI/e2e/hazard.cli.engine.test.ts',
         'CLI/e2e/gathering.cli.engine.test.ts',
         'CLI/e2e/lootcache.cli.engine.test.ts',
-        'CLI/e2e/quest-board.cli.engine.test.ts',
         'CLI/e2e/combat.cli.engine.test.ts',
         'CLI/e2e/game.cli.route-hazard.engine.test.ts',
         'CLI/e2e/game.cli.route-audit.engine.test.ts',

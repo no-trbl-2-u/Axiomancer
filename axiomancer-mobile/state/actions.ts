@@ -121,22 +121,7 @@ import {
     type ClaimGatheringSpoilsResult,
 } from './gathering/store-actions';
 import type { GatherApproachKey, GatherToolId } from '@mechanics';
-import {
-    abandonQuestBoardAction,
-    acknowledgeQuestDuskAction,
-    beginQuestBoardAction,
-    chooseQuestSpaceOptionAction,
-    claimQuestBoardCompletionAction,
-    continueQuestSpaceAction,
-    rollQuestBoneAction,
-    castQuestBonesAction,
-    takeQuestStepAction,
-    startQuestBoardPlayAction,
-    useQuestCharmAction,
-    type BeginQuestBoardOptions,
-    type ClaimQuestBoardResult,
-} from './quest/store-actions';
-import type { QuestCharmId, RestChoiceOfferId } from '@mechanics';
+import type { RestChoiceOfferId } from '@mechanics';
 import {
     beginRestAction,
     chooseRestChoiceOfferAction,
@@ -587,35 +572,6 @@ export interface AppActions {
     completeGatheringTutorial: (skipped: boolean) => void;
 
     // -----------------------------------------------------------------
-    // Quest Board minigame ("The Boy's Almanac" — see state/quest/).
-    // Fully sandboxed: only the completion record flows back. Phase
-    // order: intro → idle ⇄ space → dusk → … → outcome → done.
-    // -----------------------------------------------------------------
-
-    /** Start a quest board (first board unless pinned). Returns false if one is on the table. */
-    beginQuestBoard: (options?: BeginQuestBoardOptions) => boolean;
-    /** Board-reveal overlay acknowledged: intro → idle. */
-    startQuestBoardPlay: () => void;
-    /** Cast the bone die: move the piece, fit parts at the slipway, open the space. */
-    rollQuestBone: () => void;
-    /** CAST THE BONES — throw two; the move is `takeQuestStep`. */
-    castQuestBones: () => void;
-    /** Take one of the two cast bones; the other banks as wind. */
-    takeQuestStep: (boneIndex: number) => void;
-    /** Prime a one-use charm (idle only; consumed by its trigger). */
-    useQuestCharm: (charmId: QuestCharmId) => void;
-    /** Pick an option on the open space (market stalls stay open until LEAVE). */
-    chooseQuestSpaceOption: (optionId: string) => void;
-    /** Acknowledge the space's result card; dusk or the bone die follows. */
-    continueQuestSpace: () => void;
-    /** Dusk acknowledged: a new day dawns with supper. */
-    acknowledgeQuestDusk: () => void;
-    /** Confirm the outcome ledger; records the completion flag and persists. */
-    claimQuestBoardCompletion: () => ClaimQuestBoardResult;
-    /** Clear the board without a record (dev / escape hatch). */
-    abandonQuestBoard: () => void;
-
-    // -----------------------------------------------------------------
     // Rest-choice encounter (see state/rest/). One irreversible choice
     // of two: rest (free, flat 25% heal) / cut (paid deck removal).
     // No back-out.
@@ -1048,17 +1004,6 @@ export function createAppActions(store: AppStore): AppActions {
         claimGatheringSpoils: () => claimGatheringSpoilsAction(store),
         abandonGathering: () => abandonGatheringAction(store),
         completeGatheringTutorial: (skipped) => completeGatheringTutorialAction(store, skipped),
-        beginQuestBoard: (options) => beginQuestBoardAction(store, options),
-        startQuestBoardPlay: () => startQuestBoardPlayAction(store),
-        rollQuestBone: () => rollQuestBoneAction(store),
-        castQuestBones: () => castQuestBonesAction(store),
-        takeQuestStep: (boneIndex) => takeQuestStepAction(store, boneIndex),
-        useQuestCharm: (charmId) => useQuestCharmAction(store, charmId),
-        chooseQuestSpaceOption: (optionId) => chooseQuestSpaceOptionAction(store, optionId),
-        continueQuestSpace: () => continueQuestSpaceAction(store),
-        acknowledgeQuestDusk: () => acknowledgeQuestDuskAction(store),
-        claimQuestBoardCompletion: () => claimQuestBoardCompletionAction(store),
-        abandonQuestBoard: () => abandonQuestBoardAction(store),
         // ── The Labyrinth (THE APORIA) ──
         enterLabyrinth: (actId) => {
             enterLabyrinthAction(store, actId);
@@ -1698,19 +1643,6 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
             // completion/skip keeps every later encounter organic.
             const tutorialDone = (gameState.flags ?? []).includes(GATHERING_TUTORIAL_FLAG);
             beginGatheringAction(store, tutorialDone ? {} : { tutorial: true });
-            return true;
-        }
-
-        // Quest events launch the board-game minigame ("The Boy's
-        // Almanac"). The engine handler is a validated pass-through —
-        // nothing to restore. `<QuestGate>` routes to /quest when the
-        // slice fills.
-        if (result.event.kind === 'quest') {
-            store.setState({
-                ...resolvedState,
-                event: EMPTY_EVENT_SLICE,
-            });
-            beginQuestBoardAction(store, { boardId: result.event.boardId });
             return true;
         }
 

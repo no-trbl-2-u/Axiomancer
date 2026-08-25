@@ -24,13 +24,12 @@ import type { ActiveEffect } from '../../Effects/types';
 import { generateEncounter, scaleEnemyToLevel } from '../encounter';
 import { getMapDefinition } from '../map.registry';
 import { ENEMY_REGISTRY, type EnemySlug } from '../../Enemy/enemy.library';
-import { getQuestBoardDef } from '../QuestBoard/quest-board.content';
 import { validateDieGear, type DieGearColor } from '../../Character/dieGear.reducer';
 import { REST_PASSIVE_HEAL_FRACTION, restShelterOf } from './rest-shelter';
 import type {
     EncounterPayload, InteractionPayload, GatheringPayload, RestPayload,
     VillagePayload, CutscenePayload, HazardPayload, LootCachePayload,
-    QuestEventPayload, NarrationPayload, BlacksmithPayload, ResolveMapEventResult,
+    NarrationPayload, BlacksmithPayload, ResolveMapEventResult,
 } from './types';
 
 function withPlayer(state: GameState, next: Character): GameState {
@@ -217,25 +216,6 @@ export function resolveLootCache(
     };
 }
 
-// ─── quest ────────────────────────────────────────────────────────────────────
-
-/**
- * Quest events hand the host a quest-board id; the host starts a
- * `World/QuestBoard` session from it (the same launch contract the
- * hazard and gathering minigames use). The board is fully sandboxed,
- * so the handler touches no state — it only validates the id.
- */
-export function resolveQuest(
-    state: GameState,
-    payload: QuestEventPayload,
-): ResolveMapEventResult {
-    getQuestBoardDef(payload.boardId); // throws on unknown board ids
-    return {
-        state,
-        event: { kind: 'quest', boardId: payload.boardId, description: payload.description },
-    };
-}
-
 // ─── narration ────────────────────────────────────────────────────────────────
 
 /**
@@ -261,9 +241,8 @@ export function resolveNarration(
  * Blacksmith events (Spec 33 §6 / Phase D5) hand the host the authored budget
  * + variant-gear offers; the host launches a `World/Blacksmith` session and
  * applies the upgraded rail to `Character.dieGear` at claim (the same sandboxed
- * launch contract the hazard / quest minigames use). The handler touches no
- * state — it only validates the offered variant gear against the die-gear caps,
- * mirroring `resolveQuest`'s validate-and-pass shape.
+ * launch contract the hazard minigame uses). The handler touches no
+ * state — it only validates the offered variant gear against the die-gear caps.
  */
 export function resolveBlacksmith(
     state: GameState,
@@ -304,7 +283,6 @@ export function applyPayload(
         case 'cutscene':    return resolveCutscene(state, payload);
         case 'hazard':      return resolveHazard(state, payload, rng);
         case 'loot-cache':  return resolveLootCache(state, payload);
-        case 'quest':       return resolveQuest(state, payload);
         case 'narration':   return resolveNarration(state, payload);
         case 'blacksmith':  return resolveBlacksmith(state, payload);
     }

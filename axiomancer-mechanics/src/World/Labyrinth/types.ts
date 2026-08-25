@@ -104,9 +104,13 @@ export interface LabyrinthActDef {
     title: string;
     /** Entrance room (map starting node). */
     entry: NodeId;
-    /** Pre-boss chamber — its quest board fires once on arrival (T's rule). */
+    /**
+     * Pre-boss ledger chamber — narrates the Sophist's line once on
+     * arrival. Also gates the act3 "settle debt" action
+     * (`labyrinth.cli.ts` / `state/presenters/labyrinth.engine.ts`), an
+     * unrelated mechanic that reuses this same room id.
+     */
     questRoom: NodeId;
-    questBoardId: string;
     /**
      * Boss room + enemy slug. Typed as string (not `EnemySlug`) to keep
      * content modules decoupled from the enemy registry; the event-pool

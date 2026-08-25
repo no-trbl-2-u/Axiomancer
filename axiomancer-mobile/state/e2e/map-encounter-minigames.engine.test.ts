@@ -2,19 +2,17 @@
  * Hermetic E2E — map encounter → minigame routing.
  *
  * The gameplay contract the player feels: walking onto a treasure /
- * quest / rest / gather node opens the matching minigame, NOT the
- * "/event" card. `resolveCurrentMapEventAction` intercepts those four
- * kinds (plus hazard) and starts a minigame session instead of
- * dropping a `ResolvedEvent` on the event slice.
+ * rest / gather node opens the matching minigame, NOT the "/event"
+ * card. `resolveCurrentMapEventAction` intercepts those three kinds
+ * (plus hazard) and starts a minigame session instead of dropping a
+ * `ResolvedEvent` on the event slice.
  *
  * This pins that contract end-to-end through the store action layer
  * (the same path `app/(tabs)/exploration` drives on a node tap):
  *   - treasure node → loot-cache session, no paced /event route
- *   - quest board node (fv-15) → quest-board session (build-the-boat)
  *   - rest node → rest session
  *   - gather node → gathering session
- * plus the design invariants:
- *   - exactly ONE quest node per map (the map's single story beat)
+ * plus the design invariant:
  *   - the lone northern-forest quest interaction shows real mobile
  *     dialogue (forgotten-pilgrim), never the empty "A figure waits."
  *
@@ -22,6 +20,9 @@
  * `DebugTriggerEncounter.test.tsx`, which asserted the BROKEN
  * slice-seeding behavior. Nothing pinned the actual minigame launch,
  * so the debug panel silently dead-ended at "NO EVENT".
+ *
+ * (Phase 61 — fv-15's quest-board node retired; the earlier "one
+ * quest node" coverage went with it, see `content.engine.test.ts`.)
  */
 
 import { describe, expect, it } from '@jest/globals';
@@ -40,7 +41,6 @@ import { selectPacedEventRoute, selectHasActiveEvent } from '@/state/presenters/
 import { selectHasActiveCache } from '@/state/presenters/cache.engine';
 import { selectHasActiveRest } from '@/state/presenters/rest.engine';
 import { selectHasActiveGathering } from '@/state/presenters/gathering.engine';
-import { selectHasActiveQuestBoard } from '@/state/presenters/quest.engine';
 
 function makeStoreAndActions() {
     const store = createAppStore({ adapter: createMemoryAdapter() });
@@ -69,7 +69,7 @@ function firstNodeOfKind(mapName: CoastalMap, kind: MapEventKind): string {
 }
 
 // The varied minigame kinds live on northern-forest; fishing-village is the
-// new-player combat gauntlet (encounters + one quest + one boss).
+// new-player combat gauntlet.
 describe('map encounter → minigame routing (northern-forest)', () => {
     it('loot-cache node opens the loot-cache, not a paced /event', () => {
         const { store, actions } = makeStoreAndActions();
@@ -104,34 +104,23 @@ describe('map encounter → minigame routing (northern-forest)', () => {
 });
 
 describe('fishing-village gauntlet routing', () => {
-    it('the lone quest node (fv-15) opens the build-the-boat board', () => {
-        const { store, actions } = makeStoreAndActions();
-        seatAt(store, 'fishing-village', 'fv-15');
-
-        expect(actions.resolveCurrentMapEvent('quest')).toBe(true);
-
-        expect(selectHasActiveQuestBoard(store.getState())).toBe(true);
-        expect(store.getState().quest.session?.boardId).toBe('build-the-boat');
-        expect(selectPacedEventRoute(store.getState())).toBeNull();
-    });
-
-    it('is varied with a balanced node mix: one quest, encounter/interaction/rest tied at the top, plus texture/narration nodes', () => {
+    it('is varied with a balanced node mix: encounter/interaction/rest tied at the top, plus texture/narration nodes', () => {
         const def = getMapDefinition('coastal-continent', 'fishing-village');
         const kinds = def.nodes.map((n) =>
             getNodePrimaryEventKind('coastal-continent', 'fishing-village', n.id),
         );
         const count = (k: string) => kinds.filter((x) => x === k).length;
-        // Balanced variety (owner-requested), re-tuned by Phase 53c/53d/60
+        // Balanced variety (owner-requested), re-tuned by Phase 53c/53d/60/61
         // (S-02 homed four NPCs onto former encounter/hazard nodes; S-01
         // spent two more encounters on dilemmas; Phase 60 spent a third on
-        // the re-homed anvil): interaction and rest now TIE for the
-        // largest kind at 4 apiece — no kind is dominant — and a real
-        // spread of recovery / texture / narration nodes remains.
-        expect(count('quest')).toBe(1);
-        expect(count('encounter')).toBe(3);
+        // the re-homed anvil; Phase 61 gave one back — the retired
+        // quest-board node rejoined the encounter roster): encounter,
+        // interaction, and rest now TIE for the largest kind at 4 apiece —
+        // no kind is dominant — and a real spread of recovery / texture /
+        // narration nodes remains.
+        expect(count('encounter')).toBe(4);
         expect(count('interaction')).toBe(4);
         expect(count('rest')).toBe(4);
-        expect(count('encounter')).toBeLessThan(def.nodes.length / 2); // not dominant
         expect(count('gathering')).toBeGreaterThanOrEqual(1);
         expect(count('hazard')).toBeGreaterThanOrEqual(1);
         expect(count('loot-cache')).toBeGreaterThanOrEqual(1);

@@ -15,7 +15,7 @@ import {
 
 import type { GatheringSessionState } from '@mechanics';
 import type { HazardSessionState } from '@mechanics';
-import type { BlacksmithSession, Item, LootCacheSession, QuestBoardSession, RestChoiceSession } from '@mechanics';
+import type { BlacksmithSession, Item, LootCacheSession, RestChoiceSession } from '@mechanics';
 import type { LabyrinthActId, WorldState } from '@mechanics';
 
 /**
@@ -101,17 +101,6 @@ export interface MobileHazardSlice {
 export interface MobileGatheringSlice {
     session: GatheringSessionState | null;
     tutorial: boolean;
-}
-
-/**
- * Mobile-only Quest Board minigame slice ("The Boy's Almanac").
- * Holds the active board session (engine: `axiomancer-mechanics`
- * World/QuestBoard) — `null` outside a quest. Fully sandboxed by
- * design: only the completion record (board id + tier) flows back to
- * `GameState.flags` at claim.
- */
-export interface MobileQuestSlice {
-    session: QuestBoardSession | null;
 }
 
 /**
@@ -205,7 +194,6 @@ export type AppStoreState = GameStore & {
     combatReward: MobileCombatRewardSlice;
     hazard: MobileHazardSlice;
     gathering: MobileGatheringSlice;
-    quest: MobileQuestSlice;
     rest: MobileRestSlice;
     cache: MobileCacheSlice;
     blacksmith: MobileBlacksmithSlice;
@@ -247,8 +235,6 @@ export const EMPTY_GATHERING_SLICE: MobileGatheringSlice = Object.freeze({
     session: null,
     tutorial: false,
 });
-
-export const EMPTY_QUEST_SLICE: MobileQuestSlice = Object.freeze({ session: null });
 
 export const EMPTY_REST_SLICE: MobileRestSlice = Object.freeze({
     session: null,
@@ -352,7 +338,6 @@ export function createAppStore(options: CreateAppStoreOptions = {}): AppStore {
         combatReward: EMPTY_COMBAT_REWARD_SLICE,
         hazard: EMPTY_HAZARD_SLICE,
         gathering: EMPTY_GATHERING_SLICE,
-        quest: EMPTY_QUEST_SLICE,
         rest: EMPTY_REST_SLICE,
         cache: EMPTY_CACHE_SLICE,
         blacksmith: EMPTY_BLACKSMITH_SLICE,
