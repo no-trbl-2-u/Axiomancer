@@ -323,13 +323,13 @@ Closes #<phase-issue-number>
 
 ## DoD
 
-- [ ] `World/Gathering/` and every wiring point (CLI, harness, mobile
+- [x] `World/Gathering/` and every wiring point (CLI, harness, mobile
       actions/store/presenters/components/routes, CI scope + workflows)
       deleted.
-- [ ] `gathering` node resolution grants items inline with a toast; no
+- [x] `gathering` node resolution grants items inline with a toast; no
       test regression on fishing-village or other maps' kind census.
-- [ ] `GAME_STATE_VERSION` bumped with a hermetic migration test.
-- [ ] `npm run verify` green on both touched workspaces.
+- [x] `GAME_STATE_VERSION` bumped with a hermetic migration test.
+- [x] `npm run verify` green on both touched workspaces.
 
 ## Follow-ups (out of scope)
 

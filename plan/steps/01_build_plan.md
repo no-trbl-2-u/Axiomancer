@@ -1994,7 +1994,7 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       player ever learns a quest exists.
       (mechanics + mobile; deletion) — `feat(world): retire the Quest Board minigame — phase 61` (f674c147)
 
-- [ ] Phase 76 — Retire the Gathering minigame ("The Gleaning"), KEEP
+- [x] Phase 76 — Retire the Gathering minigame ("The Gleaning"), KEEP
       the gathering map node. **T direct, 2026-08-22:** T named Gathering
       among the minigames being retired, then handed the shape of the
       retirement to the loop verbatim — *"This is the type of freedom I'm
@@ -2038,7 +2038,8 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       `ci-e2e-scope.mjs` gathering suite routing (its mobile journey
       disappears with the route), and close the retirement candidate in
       `plan/PHASE_CANDIDATES.md`.
-      (mechanics + mobile; deletion) Brief: to generate.
+      (mechanics + mobile; deletion)
+      — `feat(world): retire the Gathering minigame — phase 76` (f18e6643)
 
 - [ ] Phase 62 — Ally cards. The loot-cache sacrifice chain (Phase 65)
       pays out an "ally card reward", and no ally concept exists anywhere
