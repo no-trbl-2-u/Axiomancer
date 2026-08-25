@@ -17,8 +17,9 @@ import type { ResolvedEvent } from '@mechanics';
 
 // Phase 137 cleanup: rest / gathering / loot-cache / hazard slugs were
 // removed — those kinds never reach the event modal anymore (their
-// resolve interceptors start minigame sessions instead), so only the
-// kinds the modal can actually render keep an art slug.
+// resolve interceptors start minigame sessions instead, except
+// gathering, which grants its items inline since Phase 76), so only
+// the kinds the modal can actually render keep an art slug.
 export const EVENT_ART_SLUGS = [
     'encounter',
     'boss',
@@ -47,7 +48,8 @@ export function selectEventArtSlug(event: ResolvedEvent): EventArtSlug {
             return 'cutscene';
         // Phase 137 cleanup: rest / gathering / loot-cache / hazard
         // never reach the event modal — their interceptors start
-        // minigame sessions instead. Generic fallback kept defensively.
+        // minigame sessions instead (gathering grants its items inline
+        // since Phase 76). Generic fallback kept defensively.
         case 'rest':
         case 'gathering':
         case 'loot-cache':

@@ -13,7 +13,6 @@ import {
     type TypedGameEvent,
 } from '@mechanics';
 
-import type { GatheringSessionState } from '@mechanics';
 import type { HazardSessionState } from '@mechanics';
 import type { BlacksmithSession, Item, LootCacheSession, RestChoiceSession } from '@mechanics';
 import type { LabyrinthActId, WorldState } from '@mechanics';
@@ -89,17 +88,6 @@ export interface DevOverridesSlice {
  */
 export interface MobileHazardSlice {
     session: HazardSessionState | null;
-    tutorial: boolean;
-}
-
-/**
- * Mobile-only Gathering minigame slice ("The Gleaning"). Holds the
- * active session (see `state/gathering/`) — `null` outside a gleaning.
- * Sessions are transient by design: abandoning forfeits the satchel.
- * `tutorial` marks the guided first gleaning (the coach overlay).
- */
-export interface MobileGatheringSlice {
-    session: GatheringSessionState | null;
     tutorial: boolean;
 }
 
@@ -193,7 +181,6 @@ export type AppStoreState = GameStore & {
     event: MobileEventSlice;
     combatReward: MobileCombatRewardSlice;
     hazard: MobileHazardSlice;
-    gathering: MobileGatheringSlice;
     rest: MobileRestSlice;
     cache: MobileCacheSlice;
     blacksmith: MobileBlacksmithSlice;
@@ -230,11 +217,6 @@ export const EMPTY_COMBAT_REWARD_SLICE: MobileCombatRewardSlice = Object.freeze(
 });
 
 export const EMPTY_HAZARD_SLICE: MobileHazardSlice = Object.freeze({ session: null, tutorial: false });
-
-export const EMPTY_GATHERING_SLICE: MobileGatheringSlice = Object.freeze({
-    session: null,
-    tutorial: false,
-});
 
 export const EMPTY_REST_SLICE: MobileRestSlice = Object.freeze({
     session: null,
@@ -337,7 +319,6 @@ export function createAppStore(options: CreateAppStoreOptions = {}): AppStore {
         event: EMPTY_EVENT_SLICE,
         combatReward: EMPTY_COMBAT_REWARD_SLICE,
         hazard: EMPTY_HAZARD_SLICE,
-        gathering: EMPTY_GATHERING_SLICE,
         rest: EMPTY_REST_SLICE,
         cache: EMPTY_CACHE_SLICE,
         blacksmith: EMPTY_BLACKSMITH_SLICE,

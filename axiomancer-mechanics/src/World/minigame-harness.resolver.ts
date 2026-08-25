@@ -2,14 +2,12 @@
  * Minigame Harness — unified cross-minigame testing orchestrator.
  *
  * Orchestrates balance testing, A/B testing, and playstyle divergence
- * measurement across the Hazard and Gathering minigames. Provides a
- * single entry point for comprehensive minigame validation with unified
- * reporting.
+ * measurement across live minigames. Provides a single entry point for
+ * comprehensive minigame validation with unified reporting.
  */
 
 import { branchMinigameSeed } from './seed';
 import { generateHazardBalanceReport, runHazardAB } from './Hazard/hazard.sim';
-import { generateGatheringBalanceReport, runGatheringABTest } from './Gathering/gathering.sim';
 import { HAZARD_TUNING } from './Hazard/hazard.tuning';
 import type {
     MinigameHarnessConfig,
@@ -18,7 +16,6 @@ import type {
     MinigameId,
 } from './minigame-harness.types';
 import type { HazardBalanceReport, HazardABResult, HazardBalanceBands } from './Hazard/hazard.sim';
-import type { GatheringBalanceReport, GatheringABResult, GatheringTuning } from './Gathering/gathering.sim';
 
 /**
  * Execute the complete minigame harness with optional A/B testing.
@@ -37,7 +34,6 @@ export function runMinigameHarness(config: MinigameHarnessConfig): MinigameHarne
         abTests: {},
         passFail: {
             hazard: true,
-            gathering: true,
             overall: true,
         },
     };
@@ -45,7 +41,7 @@ export function runMinigameHarness(config: MinigameHarnessConfig): MinigameHarne
     // Execute each enabled minigame
     for (const minigameId of minigames) {
         // Use numeric salt for each minigame to derive independent seeds
-        const minigameSalts = { 'hazard': 1, 'gathering': 2 };
+        const minigameSalts = { 'hazard': 1 };
         const minigameSeed = branchMinigameSeed(seed, minigameSalts[minigameId]);
 
         switch (minigameId) {
@@ -58,17 +54,6 @@ export function runMinigameHarness(config: MinigameHarnessConfig): MinigameHarne
                 report.results.hazard = hazardReport;
                 if (abTest) report.abTests!.hazard = abTest;
                 report.passFail.hazard = evaluateHazardBalance(hazardReport);
-                break;
-            }
-            case 'gathering': {
-                const { report: gatheringReport, abTest } = runGatheringHarness(
-                    runs,
-                    minigameSeed,
-                    abTestVariants?.gathering
-                );
-                report.results.gathering = gatheringReport;
-                if (abTest) report.abTests!.gathering = abTest;
-                report.passFail.gathering = evaluateGatheringBalance(gatheringReport);
                 break;
             }
         }
@@ -89,9 +74,6 @@ export function summarizeHarnessReport(report: MinigameHarnessReport): MinigameH
 
     // Aggregate recommendations from all minigame reports
     const recommendations: string[] = [];
-    if (report.results.gathering?.recommendations) {
-        recommendations.push(...report.results.gathering.recommendations.map((r: string) => `[Gathering] ${r}`));
-    }
 
     // Hazard reports don't have a recommendations field.
     // Generate generic recommendations based on health status
@@ -112,9 +94,6 @@ export function summarizeHarnessReport(report: MinigameHarnessReport): MinigameH
  */
 function calculateTotalRuns(report: MinigameHarnessReport): number {
     let total = 0;
-    if (report.results.gathering?.totalRuns) {
-        total += report.results.gathering.totalRuns;
-    }
     // Hazard reports don't expose run count directly.
     // Estimate based on number of minigames executed (default is 300 runs each)
     const estimatedRuns = 300;
@@ -144,21 +123,6 @@ function runHazardHarness(
     return { report, abTest };
 }
 
-function runGatheringHarness(
-    runs: number,
-    seed: number,
-    abVariants?: [GatheringTuning, GatheringTuning]
-): { report: GatheringBalanceReport; abTest?: GatheringABResult } {
-    const report = generateGatheringBalanceReport(runs);
-
-    let abTest: GatheringABResult | undefined;
-    if (abVariants) {
-        abTest = runGatheringABTest(abVariants[0], abVariants[1], runs);
-    }
-
-    return { report, abTest };
-}
-
 // ---------------------------------------------------------------------------
 // Balance evaluation functions
 // ---------------------------------------------------------------------------
@@ -168,27 +132,11 @@ function evaluateHazardBalance(report: HazardBalanceReport): boolean {
     return report.bands.every((band: HazardBalanceBands) => band.overallHealth === 'healthy');
 }
 
-function evaluateGatheringBalance(report: GatheringBalanceReport): boolean {
-    // Gathering passes if eruption rate is within bounds and communion rate meets minimum
-    const { eruptionRateMax, communionRateMin } = report.balanceBands;
-
-    // Check if current metrics are within acceptable bounds
-    // Using greedy policy eruption rate as the high-water mark
-    const greedyPolicy = report.policies.greedy;
-    const communionPolicy = report.policies['communion-chaser'];
-
-    if (!greedyPolicy || !communionPolicy) return false;
-
-    return greedyPolicy.eruptionRate <= eruptionRateMax &&
-           communionPolicy.communionRate >= communionRateMin;
-}
-
 function evaluateOverallBalance(report: MinigameHarnessReport, enabledMinigames: MinigameId[]): boolean {
     // Overall passes only if all enabled minigames pass
     return enabledMinigames.every(minigameId => {
         switch (minigameId) {
             case 'hazard': return report.passFail.hazard;
-            case 'gathering': return report.passFail.gathering;
             default: return false;
         }
     });

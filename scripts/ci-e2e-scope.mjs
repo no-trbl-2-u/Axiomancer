@@ -10,7 +10,7 @@
  * weekly/manual backstop.
  */
 
-const SUITES = ['hazard', 'gathering', 'encounters', 'combat']
+const SUITES = ['hazard', 'encounters', 'combat']
 
 function emptyResult() {
     return {
@@ -19,7 +19,6 @@ function emptyResult() {
         run_integration: false,
         full: false,
         hazard: false,
-        gathering: false,
         encounters: false,
         combat: false,
     }
@@ -59,14 +58,6 @@ function classifyMobilePath(path, result) {
         /^axiomancer-mobile\/state\/(?:e2e|presenters)\/.*hazard/i,
         /^axiomancer-mobile\/scripts\/hazard-e2e\.mjs$/,
     ]
-    const gathering = [
-        /^axiomancer-mobile\/app\/gathering\//,
-        /^axiomancer-mobile\/components\/gathering\//,
-        /^axiomancer-mobile\/components\/(?:DebugGathering|GatheringGate)/,
-        /^axiomancer-mobile\/state\/gathering\//,
-        /^axiomancer-mobile\/state\/(?:e2e|presenters)\/.*gather/i,
-        /^axiomancer-mobile\/scripts\/gathering-e2e\.mjs$/,
-    ]
     const combat = [
         /^axiomancer-mobile\/app\/combat-encounter\//,
         /^axiomancer-mobile\/components\/combat\//,
@@ -77,14 +68,14 @@ function classifyMobilePath(path, result) {
         /^axiomancer-mobile\/scripts\/combat-encounter-e2e\.mjs$/,
     ]
     const encounters = [
-        /^axiomancer-mobile\/app\/(?:cache|quest|rest|event|gathering|hazard|combat-encounter|labyrinth)\//,
+        /^axiomancer-mobile\/app\/(?:cache|quest|rest|event|hazard|combat-encounter|labyrinth)\//,
         /^axiomancer-mobile\/app\/\(tabs\)\/exploration\//,
         /^axiomancer-mobile\/components\/(?:DebugEncounter|DebugLoot|DebugQuest|DebugRest|DebugTriggerEncounter)/,
         /^axiomancer-mobile\/scripts\/encounter-routing-e2e\.mjs$/,
     ]
 
     let matched = false
-    for (const [suite, patterns] of Object.entries({ hazard, gathering, encounters, combat })) {
+    for (const [suite, patterns] of Object.entries({ hazard, encounters, combat })) {
         if (patterns.some((pattern) => pattern.test(path))) {
             markMobileSuite(result, suite)
             matched = true
@@ -136,10 +127,6 @@ function classifyMechanicsPath(path, result) {
     }
     if (/^axiomancer-mechanics\/src\/World\/Hazard\//.test(path)) {
         markMobileSuite(result, 'hazard')
-        return
-    }
-    if (/^axiomancer-mechanics\/src\/World\/Gathering\//.test(path)) {
-        markMobileSuite(result, 'gathering')
         return
     }
     // Everything else under World/ is consumed by mobile's exploration,

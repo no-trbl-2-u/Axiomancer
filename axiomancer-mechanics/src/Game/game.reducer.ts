@@ -89,7 +89,7 @@ import { STARTING_CARD_IDS } from '../Combat/combat.rewards';
  *   `GameState` field — the old `QuestBoardSession` shape is gone, so a
  *   stale one must not survive; see `game.migrate.ts`).
  */
-export const GAME_STATE_VERSION = 18;
+export const GAME_STATE_VERSION = 19;
 
 /** Builds a brand-new GameState with default player and world. */
 export function createNewGameState(): GameState {

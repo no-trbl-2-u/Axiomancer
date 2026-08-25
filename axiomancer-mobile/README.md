@@ -188,7 +188,6 @@ app/                       expo-router routes
   combat-encounter/        Spec 25 Hazard-Pattern combat modal (card-and-dice)
   hazard/                  hazard minigame
   hazard-deck/             hazard deck builder
-  gathering/               gathering minigame (The Gleaning)
   rest/                    rest-choice encounter (Phase 52d)
   cache/                   loot-cache encounter (The Reliquary)
   dialogue/                NPC dialogue trees

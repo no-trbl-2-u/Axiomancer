@@ -82,7 +82,7 @@ This checklist is also mechanized in CI: the owning job in
 the impact paths above and runs the mobile verify / editor type-check
 in the same installed environment. Browser evidence is routed by subsystem:
 Combat/Cards/Effects → Combat; Enemy → Combat + Encounter; Hazard →
-Hazard; Gathering → Gathering; every other `World/**` path and
+Hazard; every other `World/**` path and
 `NPCs/**` → Encounter routing. Shared, lockfile, workflow,
 classifier, or unknown-history changes fail closed to every journey. Run the
 consumer gates locally anyway — CI catching a break means it already reached
@@ -90,18 +90,18 @@ consumer gates locally anyway — CI catching a break means it already reached
 
 The
 mechanics-only tuning skills (`combat-playtest`, `deck-tuning`,
-`hazard-tuning`, `gathering-tuning`, `loot-cache-tuning`,
+`hazard-tuning`, `loot-cache-tuning`,
 `world-tuning`) each carry a closing step that
 references this checklist rather than re-deriving it — update it here
 first if the mechanics subsystem list changes. `rest-tuning` was
-retired in Phase 52e and `quest-board-tuning` in Phase 61, each along
-with the minigame it tuned.
+retired in Phase 52e, `quest-board-tuning` in Phase 61, and
+`gathering-tuning` in Phase 76, each along with the minigame it tuned.
 
 ## Root `.claude/`
 
 Live, at the repo root:
 - `.claude/commands/` — domain **slash commands** (tuning + playtest): mechanics
-  `combat-playtest`, `deck-tuning`, `gathering-tuning`, `hazard-tuning`,
+  `combat-playtest`, `deck-tuning`, `hazard-tuning`,
   `loot-cache-tuning`, `world-tuning`; mobile
   `critic-loop`, `deep-playtest`, `combat-ux-tuning`, `hermes-playtest`. Each is
   self-contained and carries a header naming the package it runs against (paths

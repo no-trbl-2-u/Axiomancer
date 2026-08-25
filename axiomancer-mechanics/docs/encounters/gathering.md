@@ -1,5 +1,11 @@
 # Gathering Encounter ("The Gleaning") — Mechanics Source of Truth
 
+> **Status:** HISTORICAL — the Gathering minigame (`src/World/Gathering/`)
+> was retired 2026-08-25 (Phase 76). This document describes the retired
+> engine AS SHIPPED before retirement; it is not rewritten. The `gathering`
+> `MapEventKind` and its authored nodes stay live — they now grant items
+> inline with no minigame.
+>
 > Derived from `src/World/Gathering/` as of 2026-06-15.
 > Phase 142 — Live.
 

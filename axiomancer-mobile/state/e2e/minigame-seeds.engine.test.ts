@@ -26,14 +26,11 @@ const LOOT: Item[] = [
 type SeedGlobals = typeof globalThis & {
     __AXM_MINIGAME_SEEDS__?: {
         hazard?: { seed?: number; hazardId?: string; id?: string };
-        gathering?: { seed?: number; siteId?: string; site?: string };
         rest?: { seed?: number };
         cache?: { seed?: number };
     };
     __AXM_HAZARD_SEED__?: number;
     __AXM_HAZARD_ID__?: string;
-    __AXM_GATHER_SEED__?: number;
-    __AXM_GATHER_SITE__?: string;
     __AXM_REST_SEED__?: number;
     __AXM_CACHE_SEED__?: number;
 };
@@ -48,8 +45,6 @@ function clearSeedGlobals(): void {
     delete g.__AXM_MINIGAME_SEEDS__;
     delete g.__AXM_HAZARD_SEED__;
     delete g.__AXM_HAZARD_ID__;
-    delete g.__AXM_GATHER_SEED__;
-    delete g.__AXM_GATHER_SITE__;
     delete g.__AXM_REST_SEED__;
     delete g.__AXM_CACHE_SEED__;
 }
@@ -64,36 +59,26 @@ describe('minigame seed resolver precedence', () => {
         const g = globalThis as SeedGlobals;
         g.__AXM_MINIGAME_SEEDS__ = {
             hazard: { seed: 222, hazardId: 'flooded-undercroft' },
-            gathering: { seed: 333, siteId: 'weeping-pines' },
         };
         g.__AXM_HAZARD_SEED__ = 111;
         g.__AXM_HAZARD_ID__ = 'flooded-undercroft';
-        g.__AXM_GATHER_SEED__ = 112;
-        g.__AXM_GATHER_SITE__ = 'bone-orchard';
 
         const { store, actions } = makeStoreAndActions();
 
         expect(actions.beginHazard({ seed: 1, hazardId: 'cracked-cliff' })).toBe(true);
         expect(store.getState().hazard.session?.seed).toBe(1);
         expect(store.getState().hazard.session?.hazardId).toBe('cracked-cliff');
-
-        expect(actions.beginGathering({ seed: 2, siteId: 'mire-mint' })).toBe(true);
-        expect(store.getState().gathering.session?.seed).toBe(2);
-        expect(store.getState().gathering.session?.siteId).toBe('mire-mint');
     });
 
-    it('unified globals outrank legacy globals for all four minigames', () => {
+    it('unified globals outrank legacy globals for every minigame', () => {
         const g = globalThis as SeedGlobals;
         g.__AXM_MINIGAME_SEEDS__ = {
             hazard: { seed: 201, hazardId: 'cracked-cliff' },
-            gathering: { seed: 202, siteId: 'mire-mint' },
             rest: { seed: 203 },
             cache: { seed: 204 },
         };
         g.__AXM_HAZARD_SEED__ = 101;
         g.__AXM_HAZARD_ID__ = 'flooded-undercroft';
-        g.__AXM_GATHER_SEED__ = 102;
-        g.__AXM_GATHER_SITE__ = 'bone-orchard';
         g.__AXM_REST_SEED__ = 103;
         g.__AXM_CACHE_SEED__ = 104;
 
@@ -102,10 +87,6 @@ describe('minigame seed resolver precedence', () => {
         actions.beginHazard();
         expect(store.getState().hazard.session?.seed).toBe(201);
         expect(store.getState().hazard.session?.hazardId).toBe('cracked-cliff');
-
-        actions.beginGathering();
-        expect(store.getState().gathering.session?.seed).toBe(202);
-        expect(store.getState().gathering.session?.siteId).toBe('mire-mint');
 
         actions.beginRest();
         expect(store.getState().rest.session?.seed).toBe(203);

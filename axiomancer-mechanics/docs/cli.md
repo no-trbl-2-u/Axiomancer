@@ -161,32 +161,6 @@ npm run hazard -- --auto --seed 42 --runs 1 --hazard H01 --route top \
 npm run hazard -- --runs 1
 ```
 
-### `gathering.cli.ts` - Gathering Mini-Game Driver
-
-A standalone driver for the gathering mini-game ("The Gleaning"), reachable as a
-**subcommand** of the game CLI. Like `hazard.cli.ts` it reuses the same `io.ts`
-layer (tty / `--script` / `--stdin`, plus `--json-events` and `--state-log`).
-
-**Usage:**
-```bash
-npm run game -- gathering [flags]
-npm run gathering -- [flags]         # convenience alias
-```
-
-**Flags:**
-
-| Flag | Effect |
-| --- | --- |
-| `--site <id>` | Pick a gathering site (e.g. `mire-mint`). Prompts from the library when omitted. |
-| `--approach glean\|strip` | The binding stance. Prompts when omitted. |
-| `--auto` | A restrained push-your-luck heuristic (the balance sim's "balanced" bot) plays the site. Otherwise the player drives by hand. |
-| `--seed <n\|str>` | Seed the engine's embedded RNG so a run is fully reproducible. |
-| `--runs <n>` | Play N sites back-to-back (default **5**). |
-| `--script <path>` | Scripted answers (JSON array), as in `game.cli.ts`. |
-| `--stdin` | Line-buffered stdin answers. |
-| `--json-events` | Emit completion/summary events as JSON on stdout. |
-| `--state-log <path>` | Append a per-decision JSONL trace; illegal actions are logged as `illegalGatheringAction` with a full state snapshot. |
-
 ### `lootcache.cli.ts` - Loot Cache Mini-Game Driver
 
 A standalone driver for the loot-cache push-your-luck mini-game ("The

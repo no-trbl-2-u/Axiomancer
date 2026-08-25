@@ -10,26 +10,29 @@
  *               current map so the fight is the gentlest available.
  *   - BOSS     → combat-prelude with the lowest-level boss foe on
  *               the current map (KNEEL / STRIKE chrome, no flee).
- *   - HAZARD / REST / GATHER / TREASURE → the real minigame
- *               session, launched through the same `begin*` actions
- *               the live map path uses, so the matching gate
- *               (`<HazardGate>` → `/hazard`, `<RestGate>` → `/rest`,
- *               `<GatheringGate>` → `/gathering`, `<CacheGate>` →
+ *   - HAZARD / REST / TREASURE → the real minigame session, launched
+ *               through the same `begin*` actions the live map path
+ *               uses, so the matching gate (`<HazardGate>` →
+ *               `/hazard`, `<RestGate>` → `/rest`, `<CacheGate>` →
  *               `/cache`) routes to the full-screen minigame.
+ *   - GATHER   → grants a sample item straight into inventory, no
+ *               gate and no route (Phase 76 retired "The Gleaning"
+ *               minigame; the live `gathering` node does the same).
  *
  * Mechanism (Phase 137 alignment, 2026-06-14): rest / gather /
  * treasure no longer reach the `/event` slice — the live
  * `resolveCurrentMapEventAction` intercepts those kinds and starts a
- * minigame session. This panel mirrors that interception by calling
- * the `begin*` actions directly rather than seeding a `ResolvedEvent`
- * onto the event slice. The old slice-seeding behavior dead-ended at
- * the `/event` "NO EVENT" card because `composeNarrative` returns the
- * empty VM for minigame kinds — the exact bug this rewrite fixes.
- * Combat / boss still construct a combat-prelude `ResolvedEvent` and
- * drop it on the slice (those DO render in-place via
- * `<EncounterModalOverlay>`); village / cutscene still seed their
- * paced events for `<EventGate>` to route. Every button is
- * deterministic regardless of where the player is standing.
+ * minigame session (or, for gather since Phase 76, grants inline).
+ * This panel mirrors that interception by calling the `begin*`
+ * actions (or the inline grant) directly rather than seeding a
+ * `ResolvedEvent` onto the event slice. The old slice-seeding
+ * behavior dead-ended at the `/event` "NO EVENT" card because
+ * `composeNarrative` returns the empty VM for these kinds — the exact
+ * bug this rewrite fixes. Combat / boss still construct a
+ * combat-prelude `ResolvedEvent` and drop it on the slice (those DO
+ * render in-place via `<EncounterModalOverlay>`); village / cutscene
+ * still seed their paced events for `<EventGate>` to route. Every
+ * button is deterministic regardless of where the player is standing.
  *
  * Navigation happens first so the minigame / paced routes stack on
  * top of the WILDS tab rather than the other way round.
@@ -202,12 +205,16 @@ export function DebugTriggerEncounter() {
                 // node that forgot to say is wilderness).
                 actions.beginRest({ shelter: 'camp' });
                 return;
-            case 'gather':
-                // "The Gleaning" — <GatheringGate> routes to /gathering.
-                // Skip the tutorial framing for the dev shortcut so it
-                // drops straight into the organic board.
-                actions.beginGathering({});
+            case 'gather': {
+                // Items grant inline (Phase 76 retired "The Gleaning"
+                // minigame — no gate, no route). Mirrors the live
+                // interceptor's gathering branch: seed a sample item
+                // straight into inventory, same as TREASURE below seeds
+                // its cache items directly.
+                const sample = consumableLibrary[0];
+                if (sample) actions.addItemById(sample.id);
                 return;
+            }
             case 'treasure': {
                 // "The Reliquary" — <CacheGate> routes to /cache. Seed a
                 // sample item + coin so the claim ledger has content.

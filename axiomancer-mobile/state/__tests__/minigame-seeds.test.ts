@@ -1,7 +1,7 @@
 /**
  * Hermetic test pin — `state/minigame-seeds.ts`, the shared
- * deterministic seed/string resolver imported by all four minigame
- * Begin actions (`state/{hazard,gathering,rest,cache}/store-actions.ts`).
+ * deterministic seed/string resolver imported by every minigame Begin
+ * action (`state/{hazard,rest,cache}/store-actions.ts`).
  *
  * A silent precedence/guard regression here breaks playtest and smoke
  * reproducibility across every minigame at once, so the pin asserts the
@@ -46,8 +46,8 @@ describe('resolveMinigameSeed', () => {
     });
 
     it('falls through to the unified global when no explicit seed is given', () => {
-        setUnified({ gathering: { seed: 777 } });
-        expect(resolveMinigameSeed('gathering', undefined, 333, 444)).toBe(777);
+        setUnified({ blacksmith: { seed: 777 } });
+        expect(resolveMinigameSeed('blacksmith', undefined, 333, 444)).toBe(777);
     });
 
     it('reads the unified entry keyed by the requested minigame', () => {
@@ -160,7 +160,7 @@ describe('resolveMinigameString', () => {
 
     it('falls through to the fallback when nothing else matches', () => {
         expect(
-            resolveMinigameString('gathering', ['siteId', 'site'], undefined, undefined, 'fallback'),
+            resolveMinigameString('cache', ['hazardId', 'id'], undefined, undefined, 'fallback'),
         ).toBe('fallback');
     });
 
@@ -171,7 +171,7 @@ describe('resolveMinigameString', () => {
     });
 
     it('reads the unified entry keyed by the requested minigame, not another', () => {
-        setUnified({ gathering: { siteId: 'gather-site' }, hazard: { hazardId: 'cracked-cliff' } });
+        setUnified({ cache: { id: 'other-cache' }, hazard: { hazardId: 'cracked-cliff' } });
         expect(
             resolveMinigameString('hazard', ['hazardId', 'id'], undefined, undefined, 'fallback'),
         ).toBe('cracked-cliff');

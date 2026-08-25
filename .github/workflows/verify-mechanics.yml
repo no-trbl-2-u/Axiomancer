@@ -127,12 +127,6 @@ jobs:
         env:
           HAZARD_E2E_REUSE_EXPORT: '1'
 
-      - name: Gathering playthrough (both stances)
-        if: steps.impact.outputs.gathering == 'true'
-        run: npm run e2e:gathering --workspace axiomancer-mobile
-        env:
-          GATHER_E2E_REUSE_EXPORT: '1'
-
       - name: Encounter routing (every minigame trigger to its screen)
         if: steps.impact.outputs.encounters == 'true'
         run: npm run e2e:encounters --workspace axiomancer-mobile

@@ -409,14 +409,6 @@ export {
 // See `docs/hazard-v2-vs-mechanics-divergence.md`.
 export * from './World/Hazard';
 
-// Gathering Minigame ("The Gleaning" — faithful copy of the mobile living
-// rules source, `../axiomancer-mobile/state/gathering/`). The full public
-// surface (engine transitions, content, tuning, sim, and types) is exported
-// directly from the Gathering module so mobile can delete its local engine
-// and import these instead. Seeded-RNG helpers are aliased (`gathering*`)
-// to avoid ambiguous star-exports with the Hazard module's RNG.
-export * from './World/Gathering';
-
 // Quest Board minigame ("The Boy's Almanac" — the story-quest encounter:
 // each main-story beat plays as an authored tabletop board inside the
 // fiction; fully sandboxed, only the completion record flows back).

@@ -10,7 +10,6 @@ import { describe, expect, it } from 'vitest';
 
 import { createHazardSession } from '../Hazard/hazard.engine';
 import { hazardStarterBag } from '../Hazard/hazard.deck-flags';
-import { createGatheringSession } from '../Gathering/gathering.engine';
 import { createLootCacheSession } from '../LootCache/lootcache.engine';
 import { minigameRunSeed, seedInputToUint32, type SeedInput } from '../seed';
 
@@ -45,10 +44,6 @@ describe('shared minigame seed utility', () => {
 describe('minigame engine seed contract', () => {
     it('Hazard sessions accept string seeds and replay dealt state', () => {
         expectReplayable('Hazard', seed => createHazardSession(seed, hazardStarterBag(), 'cracked-cliff'));
-    });
-
-    it('Gathering sessions accept string seeds and replay dealt state', () => {
-        expectReplayable('Gathering', seed => createGatheringSession(seed, 'mire-mint'));
     });
 
     // Rest-choice (Phase 52c-d, replacing the retired rest minigame — Phase

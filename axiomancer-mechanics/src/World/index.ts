@@ -108,9 +108,6 @@ export * from './Hazard';
 // Quest Board minigame, Loot-cache encounter (Phase 137)
 export * from './LootCache';
 
-// Gathering Minigame (Phase 142)
-export * from './Gathering';
-
 // The Labyrinth — THE APORIA (W-01). The pools module self-registers the
 // three acts' MapEvent pools on import, mirroring the content import above.
 import './Labyrinth/labyrinth.pools';

@@ -16,10 +16,6 @@
       "seed": 424242,
       "hazardId": "cracked-cliff"
     },
-    "gathering": {
-      "seed": 9090,
-      "siteId": "mire-mint"
-    },
     "rest": {
       "seed": 515151
     },

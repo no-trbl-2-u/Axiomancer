@@ -2,16 +2,19 @@
  * Hermetic E2E — map encounter → minigame routing.
  *
  * The gameplay contract the player feels: walking onto a treasure /
- * rest / gather node opens the matching minigame, NOT the "/event"
- * card. `resolveCurrentMapEventAction` intercepts those three kinds
- * (plus hazard) and starts a minigame session instead of dropping a
- * `ResolvedEvent` on the event slice.
+ * rest node opens the matching minigame, NOT the "/event" card.
+ * `resolveCurrentMapEventAction` intercepts those two kinds (plus
+ * hazard) and starts a minigame session instead of dropping a
+ * `ResolvedEvent` on the event slice. A gather node is different since
+ * Phase 76 retired "The Gleaning": it grants its items inline through
+ * the same intercept point, with no session and no screen.
  *
  * This pins that contract end-to-end through the store action layer
  * (the same path `app/(tabs)/exploration` drives on a node tap):
  *   - treasure node → loot-cache session, no paced /event route
  *   - rest node → rest session
- *   - gather node → gathering session
+ *   - gather node → items land in inventory inline, no session, no
+ *     paced /event route
  * plus the design invariant:
  *   - the lone northern-forest quest interaction shows real mobile
  *     dialogue (forgotten-pilgrim), never the empty "A figure waits."
@@ -22,7 +25,10 @@
  * so the debug panel silently dead-ended at "NO EVENT".
  *
  * (Phase 61 — fv-15's quest-board node retired; the earlier "one
- * quest node" coverage went with it, see `content.engine.test.ts`.)
+ * quest node" coverage went with it, see `content.engine.test.ts`.
+ * Phase 76 — the gathering node's minigame session assertion below
+ * was rewritten to an inline-grant assertion; the node itself and its
+ * kind census are untouched.)
  */
 
 import { describe, expect, it } from '@jest/globals';
@@ -40,7 +46,6 @@ import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import { selectPacedEventRoute, selectHasActiveEvent } from '@/state/presenters/event.engine';
 import { selectHasActiveCache } from '@/state/presenters/cache.engine';
 import { selectHasActiveRest } from '@/state/presenters/rest.engine';
-import { selectHasActiveGathering } from '@/state/presenters/gathering.engine';
 
 function makeStoreAndActions() {
     const store = createAppStore({ adapter: createMemoryAdapter() });
@@ -92,13 +97,15 @@ describe('map encounter → minigame routing (northern-forest)', () => {
         expect(selectPacedEventRoute(store.getState())).toBeNull();
     });
 
-    it('gather node opens "The Gleaning", not a paced /event', () => {
+    it('gather node grants its items inline, no session and no paced /event', () => {
         const { store, actions } = makeStoreAndActions();
         seatAt(store, 'northern-forest', firstNodeOfKind('northern-forest', 'gathering'));
+        const before = store.getState().player.inventory.length;
 
         expect(actions.resolveCurrentMapEvent('gather')).toBe(true);
 
-        expect(selectHasActiveGathering(store.getState())).toBe(true);
+        expect(store.getState().player.inventory.length).toBeGreaterThan(before);
+        expect(selectHasActiveEvent(store.getState())).toBe(false);
         expect(selectPacedEventRoute(store.getState())).toBeNull();
     });
 });

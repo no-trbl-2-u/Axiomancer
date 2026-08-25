@@ -12,7 +12,6 @@ import type { AppStoreState } from '../store';
 import { selectHasActiveEvent } from './event.engine';
 import { selectHasActiveBlacksmith } from './blacksmith.engine';
 import { selectHasActiveCache } from './cache.engine';
-import { selectHasActiveGathering } from './gathering.engine';
 import { selectHasActiveHazard } from './hazard.engine';
 import { selectHasActiveRest } from './rest.engine';
 import { freezeViewModel } from './freeze';
@@ -157,7 +156,6 @@ export function selectHasAnyActiveSession(state: AppStoreState): boolean {
     return (
         selectHasActiveEvent(state)
         || selectHasActiveHazard(state)
-        || selectHasActiveGathering(state)
         || selectHasActiveCache(state)
         || selectHasActiveRest(state)
         || selectHasActiveBlacksmith(state)

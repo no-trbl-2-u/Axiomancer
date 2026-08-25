@@ -69,17 +69,16 @@ describe('hermeticity guard: test conventions', () => {
 
 describe('hermeticity guard: engine purity', () => {
     /**
-     * The store-action seams mint wall-clock seeds by design (overridable
-     * in tests via `__AXM_HAZARD_SEED__` / `__AXM_GATHER_SEED__`), and the
-     * dev deck-randomizer is a dev tool. Everything else in the minigame
-     * directories and the presenters must thread seeded RNG state.
+     * The store-action seam mints wall-clock seeds by design (overridable
+     * in tests via `__AXM_HAZARD_SEED__`), and the dev deck-randomizer is
+     * a dev tool. Everything else in the minigame directories and the
+     * presenters must thread seeded RNG state.
      */
     const RANDOM_ALLOWLIST = new Set([
         'state/hazard/store-actions.ts',
-        'state/gathering/store-actions.ts',
     ]);
 
-    const PURE_DIRS = ['state/hazard/', 'state/gathering/', 'state/presenters/'];
+    const PURE_DIRS = ['state/hazard/', 'state/presenters/'];
 
     it('minigame engines and presenters never call Math.random()', () => {
         const offenders = ALL_FILES.filter(

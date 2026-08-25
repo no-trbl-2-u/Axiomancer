@@ -1,5 +1,10 @@
 # Gathering Encounter ("The Gleaning") — Mobile UX Source of Truth
 
+> **Status:** HISTORICAL — the Gathering minigame was retired 2026-08-25
+> (Phase 76). This document describes the retired UX AS SHIPPED before
+> retirement; it is not rewritten. The `gathering` map node stays live —
+> it now grants items inline with no screen.
+>
 > Derived from `app/gathering/index.tsx`, `state/presenters/gathering.engine.ts`,
 > `components/gathering/`, and `state/gathering/store-actions.ts` as of 2026-06-15.
 >

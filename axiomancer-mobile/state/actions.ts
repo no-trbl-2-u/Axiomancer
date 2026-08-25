@@ -102,25 +102,6 @@ import {
     type HazardDeckPresetResult,
 } from './hazard/store-actions';
 import type { HazardProgressKey, HazardRouteKey } from '@mechanics';
-import {
-    abandonGatheringAction,
-    acknowledgeGatheringOutcomeAction,
-    beginGatheringAction,
-    completeGatheringTutorialAction,
-    GATHERING_TUTORIAL_FLAG,
-    claimGatheringSpoilsAction,
-    continueGatheringAfterReprisalAction,
-    descendGatheringAction,
-    readGatheringSiteAction,
-    harvestGatheringPlotAction,
-    payGatheringOfferingAction,
-    selectGatheringApproachAction,
-    useGatheringToolAction,
-    withdrawFromGatheringAction,
-    type BeginGatheringOptions,
-    type ClaimGatheringSpoilsResult,
-} from './gathering/store-actions';
-import type { GatherApproachKey, GatherToolId } from '@mechanics';
 import type { RestChoiceOfferId } from '@mechanics';
 import {
     beginRestAction,
@@ -532,44 +513,6 @@ export interface AppActions {
      * defined combat card (starter + reward pool). Returns the granted ids.
      */
     randomizeCombatDeck: () => string[];
-
-    // -----------------------------------------------------------------
-    // Gathering minigame ("The Gleaning" — see state/gathering/). The
-    // pure engine owns every rule; these wrappers thread the session
-    // through the `gathering` slice. Phase order: approach-select →
-    // foraging ⇄ reprisal → outcome → rewards → done.
-    // -----------------------------------------------------------------
-
-    /** Start a gleaning (random site unless pinned). Returns false if one is active. */
-    beginGathering: (options?: BeginGatheringOptions) => boolean;
-    /** Binding stance: GLEAN (restraint) or STRIP (greed). */
-    selectGatheringApproach: (approach: GatherApproachKey) => void;
-    /** Harvest a plot from the spread (a BREATH plot tends instead). */
-    harvestGatheringPlot: (uid: string) => void;
-    /** Descend one stratum (one-way; richer, angrier). */
-    descendGathering: () => void;
-    /** READ THE SITE — buy the hidden eruption point for the price of a turn. */
-    readGatheringSite: () => void;
-    /** Pay an offering demand (affordability-gated). Returns success. */
-    payGatheringOffering: (offeringId: string) => boolean;
-    /** Use a one-shot field tool. */
-    useGatheringTool: (toolId: GatherToolId) => void;
-    /** Dismiss the current reprisal flash. */
-    continueGatheringAfterReprisal: () => void;
-    /** Walk away with the satchel — restraint is always available. */
-    withdrawFromGathering: () => void;
-    /** Outcome modal acknowledged → spoils ledger. */
-    acknowledgeGatheringOutcome: () => void;
-    /**
-     * Confirm the spoils and apply the outcome to live game state
-     * (inventory materials, VITAE, currency, flags). Clears the
-     * session and persists.
-     */
-    claimGatheringSpoils: () => ClaimGatheringSpoilsResult;
-    /** Clear the session without spoils or penalties (dev / escape hatch). */
-    abandonGathering: () => void;
-    /** Mark the guided first gleaning done (completed or skipped) and persist. */
-    completeGatheringTutorial: (skipped: boolean) => void;
 
     // -----------------------------------------------------------------
     // Rest-choice encounter (see state/rest/). One irreversible choice
@@ -991,19 +934,6 @@ export function createAppActions(store: AppStore): AppActions {
         completeHazardTutorial: (skipped) => completeHazardTutorialAction(store, skipped),
         applyCombatDeckPreset: (presetId) => applyCombatDeckPresetAction(store, presetId),
         randomizeCombatDeck: () => randomizeCombatDeckAction(store),
-        beginGathering: (options) => beginGatheringAction(store, options),
-        selectGatheringApproach: (approach) => selectGatheringApproachAction(store, approach),
-        harvestGatheringPlot: (uid) => harvestGatheringPlotAction(store, uid),
-        descendGathering: () => descendGatheringAction(store),
-        readGatheringSite: () => readGatheringSiteAction(store),
-        payGatheringOffering: (offeringId) => payGatheringOfferingAction(store, offeringId),
-        useGatheringTool: (toolId) => useGatheringToolAction(store, toolId),
-        continueGatheringAfterReprisal: () => continueGatheringAfterReprisalAction(store),
-        withdrawFromGathering: () => withdrawFromGatheringAction(store),
-        acknowledgeGatheringOutcome: () => acknowledgeGatheringOutcomeAction(store),
-        claimGatheringSpoils: () => claimGatheringSpoilsAction(store),
-        abandonGathering: () => abandonGatheringAction(store),
-        completeGatheringTutorial: (skipped) => completeGatheringTutorialAction(store, skipped),
         // ── The Labyrinth (THE APORIA) ──
         enterLabyrinth: (actId) => {
             enterLabyrinthAction(store, actId);
@@ -1626,23 +1556,21 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
             return true;
         }
 
-        // Gathering events launch "The Gleaning" minigame instead of the
-        // legacy passive item grant. The engine's resolveMapEvent already
-        // appended the payload items to the inventory in `result.state`;
-        // restore the pre-event player so the minigame's spoils are the
-        // only thing that touches the satchel, then start a session.
-        // `<GatheringGate>` routes to /gathering when the slice fills.
+        // Gathering events grant their items inline (Phase 76 retired "The
+        // Gleaning" minigame). The engine's resolveMapEvent already
+        // appended the payload items to the inventory in `resolvedState` —
+        // unlike hazard/rest above, that grant stands as-is; there is no
+        // minigame spoils step to defer to. No screen detour: clear the
+        // event slice and surface a toast naming what was gathered.
         if (result.event.kind === 'gathering') {
             store.setState({
                 ...resolvedState,
-                player: gameState.player,
                 event: EMPTY_EVENT_SLICE,
             });
-            // The first-ever gleaning runs as the guided tutorial (pinned
-            // seed + site, coach overlay); the persistent flag set on
-            // completion/skip keeps every later encounter organic.
-            const tutorialDone = (gameState.flags ?? []).includes(GATHERING_TUTORIAL_FLAG);
-            beginGatheringAction(store, tutorialDone ? {} : { tutorial: true });
+            const itemNames = result.event.items.map(i => i.name).join(', ');
+            if (itemNames) {
+                pushToast(store, `Gathered ${itemNames}.`);
+            }
             return true;
         }
 

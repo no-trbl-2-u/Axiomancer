@@ -8,9 +8,11 @@
  *     lowest-level standard foe on the current map (level 1 on
  *     fishing-village) and navigates to the WILDS tab
  *   - BOSS seeds an isBoss encounter with a boss-tier foe
- *   - HAZARD / REST / GATHER / TREASURE launch their REAL
- *     minigame session (and crucially leave NO paced /event route, so
- *     they can never dead-end at the "NO EVENT" card)
+ *   - HAZARD / REST / TREASURE launch their REAL minigame session
+ *     (and crucially leave NO paced /event route, so they can never
+ *     dead-end at the "NO EVENT" card)
+ *   - GATHER grants a sample item straight into inventory — no
+ *     session, no route (Phase 76 retired "The Gleaning" minigame)
  *   - VILLAGE / CUTSCENE seed their paced events for the dedicated
  *     /village + /cutscene routes
  *
@@ -35,7 +37,6 @@ import {
 } from '@/state/presenters/event.engine';
 import { selectHasActiveHazard } from '@/state/presenters/hazard.engine';
 import { selectHasActiveRest } from '@/state/presenters/rest.engine';
-import { selectHasActiveGathering } from '@/state/presenters/gathering.engine';
 import { selectHasActiveCache } from '@/state/presenters/cache.engine';
 import { createAppStore, type AppStore } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
@@ -130,7 +131,6 @@ describe('DebugTriggerEncounter: minigame triggers', () => {
     }[] = [
         { button: 'hazard', hasSession: (s) => selectHasActiveHazard(s) },
         { button: 'rest', hasSession: (s) => selectHasActiveRest(s) },
-        { button: 'gather', hasSession: (s) => selectHasActiveGathering(s) },
         { button: 'treasure', hasSession: (s) => selectHasActiveCache(s) },
     ];
 
@@ -162,6 +162,18 @@ describe('DebugTriggerEncounter: minigame triggers', () => {
         expect(selectHasActiveCache(store.getState())).toBe(true);
         // The cache carries the seeded coin so the claim ledger isn't empty.
         expect(store.getState().cache.session).not.toBeNull();
+    });
+
+    it('GATHER grants a sample item straight into inventory, no session and no /event route', () => {
+        const store = makeStore();
+        const before = store.getState().player.inventory.length;
+        const tree = render(withProvider(store, <DebugTriggerEncounter />));
+        fireEvent.press(tree.getByTestId('debug-trigger-encounter-gather'));
+
+        expect(mockPush).toHaveBeenCalledWith('/(tabs)/exploration');
+        expect(store.getState().player.inventory.length).toBe(before + 1);
+        expect(selectHasActiveEvent(store.getState())).toBe(false);
+        expect(selectPacedEventRoute(store.getState())).toBeNull();
     });
 });
 

@@ -9,17 +9,15 @@ test('mobile hazard screen selects hazard plus its route-entry evidence', () => 
     const result = classify('mobile', ['axiomancer-mobile/app/hazard/index.tsx'])
     assert.equal(result.hazard, true)
     assert.equal(result.encounters, true)
-    assert.equal(result.gathering, false)
     assert.equal(result.combat, false)
     assert.equal(result.full, false)
 })
 
 test('mobile subsystem component selects only its owned journey', () => {
-    const result = classify('mobile', ['axiomancer-mobile/components/gathering/PlotCard.tsx'])
-    assert.equal(result.gathering, true)
+    const result = classify('mobile', ['axiomancer-mobile/components/combat/CombatBoard.tsx'])
+    assert.equal(result.combat, true)
     assert.equal(result.hazard, false)
     assert.equal(result.encounters, false)
-    assert.equal(result.combat, false)
 })
 
 test('mixed mobile subsystems select the union', () => {
@@ -35,8 +33,8 @@ test('mixed mobile subsystems select the union', () => {
 test('shared mobile runtime path fails closed to every journey', () => {
     const result = classify('mobile', ['axiomancer-mobile/store/index.ts'])
     assert.deepEqual(
-        [result.hazard, result.gathering, result.encounters, result.combat],
-        [true, true, true, true],
+        [result.hazard, result.encounters, result.combat],
+        [true, true, true],
     )
     assert.equal(result.full, true)
 })
@@ -63,13 +61,9 @@ test('mechanics Cards changes select combat and the editor contract', () => {
     assert.equal(result.full, false)
 })
 
-test('mechanics Hazard and Gathering changes select their own journeys', () => {
-    const result = classify('mechanics', [
-        'axiomancer-mechanics/src/World/Hazard/hazards.ts',
-        'axiomancer-mechanics/src/World/Gathering/gathering.ts',
-    ])
+test('mechanics Hazard changes select their own journey', () => {
+    const result = classify('mechanics', ['axiomancer-mechanics/src/World/Hazard/hazards.ts'])
     assert.equal(result.hazard, true)
-    assert.equal(result.gathering, true)
     assert.equal(result.encounters, false)
     assert.equal(result.combat, false)
 })
@@ -104,6 +98,10 @@ test('mechanics world content outside the named minigames selects encounter rout
         'axiomancer-mechanics/src/World/RestChoice/restchoice.content.ts',
         'axiomancer-mechanics/src/World/map.registry.ts',
         'axiomancer-mechanics/src/World/dialogue.runtime.ts',
+        // Gathering minigame retired Phase 76 — its former directory is no
+        // longer a dedicated suite; a path there (were it to reappear)
+        // falls through to the generic World/ encounter routing.
+        'axiomancer-mechanics/src/World/Gathering/gathering.ts',
     ]) {
         const result = classify('mechanics', [path])
         assert.equal(result.encounters, true, `${path} should route to encounters`)
@@ -126,8 +124,8 @@ test('mechanics public index and forced backstop run everything', () => {
     ]) {
         assert.equal(result.full, true)
         assert.deepEqual(
-            [result.hazard, result.gathering, result.encounters, result.combat],
-            [true, true, true, true],
+            [result.hazard, result.encounters, result.combat],
+            [true, true, true],
         )
     }
 })

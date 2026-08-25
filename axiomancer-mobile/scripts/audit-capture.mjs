@@ -126,12 +126,14 @@ const SCREENS = [
     },
     // Minigames launched via their dedicated debug buttons (real beginX()
     // actions through the gates — like hazard), not the pending-event path.
-    { id: 'gathering', file: '20-gathering.png', drive: (p) => debugLaunch(p, 'debug-gathering-button', 1800) },
     { id: 'rest', file: '16-rest.png', drive: (p) => debugLaunch(p, 'debug-rest-button', 1800) },
     { id: 'cache', file: '18-cache.png', drive: (p) => debugLaunch(p, 'debug-cache-button', 1800) },
     // Phase 61 retired the Quest Board minigame; its screenshot slot
     // (`25-quest-board.png`, driven via the since-deleted
-    // `debug-quest-button`) goes with it.
+    // `debug-quest-button`) goes with it. Phase 76 retired the Gathering
+    // minigame the same way; its slot (`20-gathering.png`, driven via the
+    // since-deleted `debug-gathering-button`) goes with it too — the
+    // `gathering` node now grants items inline with no screen to capture.
     {
         id: 'dialogue', file: '19-dialogue.png', drive: async (p) => {
             await goto(p, '/character')
