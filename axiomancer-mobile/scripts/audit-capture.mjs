@@ -129,8 +129,17 @@ const SCREENS = [
     { id: 'gathering', file: '20-gathering.png', drive: (p) => debugLaunch(p, 'debug-gathering-button', 1800) },
     { id: 'rest', file: '16-rest.png', drive: (p) => debugLaunch(p, 'debug-rest-button', 1800) },
     { id: 'cache', file: '18-cache.png', drive: (p) => debugLaunch(p, 'debug-cache-button', 1800) },
-    { id: 'quest-board', file: '25-quest-board.png', drive: (p) => debugLaunch(p, 'debug-quest-button', 1800) },
-    { id: 'dialogue', file: '19-dialogue.png', drive: (p) => triggerMinigame(p, 'quest') },
+    // Phase 61 retired the Quest Board minigame; its screenshot slot
+    // (`25-quest-board.png`, driven via the since-deleted
+    // `debug-quest-button`) goes with it.
+    {
+        id: 'dialogue', file: '19-dialogue.png', drive: async (p) => {
+            await goto(p, '/character')
+            await openDevMenu(p)
+            await tap(p, 'debug-dialogue-omen')
+            await settle(p, 1600)
+        },
+    },
     // Paced narrative screens reached via <EventGate> (Phase 137 dedicated
     // routes) — seeded by the village/cutscene dev triggers.
     { id: 'village', file: '28-village.png', drive: (p) => triggerMinigame(p, 'village') },

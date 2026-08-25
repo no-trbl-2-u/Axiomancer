@@ -131,8 +131,8 @@ Add new surfaces via new phases; do not change existing shapes.
 ### Mechanics CLI (`src/CLI/game.cli.ts`)
 
 ```
-npm run game -- <sub>          # sub in combat | hazard | gathering | rest | loot-cache | quest-board
-npm run hazard | gathering | rest | loot-cache | quest-board | combat   # named shortcuts
+npm run game -- <sub>          # sub in combat | hazard | gathering | loot-cache
+npm run hazard | gathering | loot-cache | combat   # named shortcuts
 npm run combat-sim             # Monte-Carlo balance witness
 npm run combat-playtest        # stage x policy matrix
 # agent flags: --script <path> | --stdin | --json-events | --state-log

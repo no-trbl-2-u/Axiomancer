@@ -5,18 +5,20 @@
 //
 // Boots the exported web build, opens the DEV menu, and clicks each
 // "TRIGGER ENCOUNTER" minigame button (HAZARD / REST / GATHER /
-// TREASURE / QUEST). For each, it asserts the app lands on the
+// TREASURE). For each, it asserts the app lands on the
 // matching full-screen minigame route AND that the minigame's screen
 // actually mounted — never the "/event" → "NO EVENT IN PROGRESS" card.
 //
 // Why this exists (2026-06-14): the four non-hazard minigame kinds
-// (rest / gather / treasure / quest) regressed to a dead-end "NO
-// EVENT" card because `<DebugTriggerEncounter>` seeded the event slice
-// instead of launching the minigame session. The only test covering
-// these buttons asserted that broken slice-seeding, so nothing caught
-// it. This script pins the player-facing contract at the browser
-// level: clicking TREASURE opens The Reliquary, clicking QUEST opens
-// the board, etc. It mirrors `scripts/hazard-e2e.mjs`'s boot rig.
+// live at the time (rest / gather / treasure / quest) regressed to a
+// dead-end "NO EVENT" card because `<DebugTriggerEncounter>` seeded
+// the event slice instead of launching the minigame session. The only
+// test covering these buttons asserted that broken slice-seeding, so
+// nothing caught it. This script pins the player-facing contract at
+// the browser level: clicking TREASURE opens The Reliquary, etc. It
+// mirrors `scripts/hazard-e2e.mjs`'s boot rig. (Phase 61 dropped the
+// QUEST case along with the Quest Board minigame and its trigger
+// button.)
 //
 // Usage:
 //   node scripts/encounter-routing-e2e.mjs                  # export + run
@@ -66,7 +68,6 @@ function fail(msg) {
 // to /event instead, so the route is the decisive regression signal.
 const CASES = [
     { button: 'treasure', route: '/cache', landing: 'cache-intro', name: 'The Reliquary' },
-    { button: 'quest', route: '/quest', landing: 'quest-intro', name: "The Boy's Almanac" },
     { button: 'rest', route: '/rest', landing: 'rest-choice-offers', name: 'the rest-choice node' },
     { button: 'gather', route: '/gathering', landing: 'gathering-intro', name: 'The Gleaning' },
     { button: 'hazard', route: '/hazard', landing: 'hazard-intro-overlay', name: 'Hazard' },
