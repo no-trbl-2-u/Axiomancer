@@ -1954,7 +1954,7 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       (mechanics + mobile) Brief: `plan/phases/phase_59_rest-two-offers.md`.
       — `feat(world): rest is two offers — flat 25% heal or cut a card — phase 59` (94b85569)
 
-- [ ] Phase 60 — Re-home the Anvil to its own map node. Phase 59 takes
+- [x] Phase 60 — SHIPPED `68977b93` (2026-08-25; brief `cfc57097`). Re-home the Anvil to its own map node. Phase 59 takes
       the anvil off the rest screen, and rest was its ONLY route: the
       `blacksmith` MapEventKind is built, registered and tested but
       deliberately unplaced in map content (`MapEvents/types.ts:159`
