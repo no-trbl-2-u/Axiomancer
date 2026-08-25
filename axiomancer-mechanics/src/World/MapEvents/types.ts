@@ -156,12 +156,12 @@ export interface NarrationPayload {
  * hazard/quest minigames use). The handler touches no state — it only
  * validates the offered gear against the die-gear caps.
  *
- * RULED (T, attended chat, 2026-08-08; resolved Phase 52c): the anvil is
- * reached THROUGH the rest node, at every rest node, at rest-node cadence —
- * one of the `World/RestChoice` engine's three offers, not a standalone map
- * node. The `blacksmith` MapEvent kind stays registered below (built and
- * tested, and a future dedicated node costs nothing to leave open) but stays
- * unauthored in map content; nothing places a bare `blacksmith` node.
+ * RULED (T, attended chat, 2026-08-08; resolved Phase 52c) the anvil was
+ * reached THROUGH the rest node, one of `World/RestChoice`'s offers. Phase
+ * 59 dropped that offer (T direct, 2026-08-15) and Phase 60 re-homes the
+ * anvil to its own placed `blacksmith` node — this MapEvent kind is the
+ * landing spot: built and tested, registered below, staged to go from
+ * unauthored to placed in map content by that phase.
  */
 export interface BlacksmithPayload {
     kind: 'blacksmith';

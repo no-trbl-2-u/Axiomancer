@@ -64,6 +64,8 @@ export interface RestChoiceVM {
     offers: readonly RestChoiceOfferVM[];
     cut: RestChoiceCutVM | null;
     outcome: RestChoiceOutcomeVM | null;
+    /** Phase 59 — the authored MapEvent one-liner; `null` falls back to the placeholder intro. */
+    description: string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -79,6 +81,7 @@ const EMPTY_VM: RestChoiceVM = Object.freeze({
     offers: Object.freeze([]),
     cut: null,
     outcome: null,
+    description: null,
 });
 
 export function selectHasActiveRest(state: Pick<AppStoreState, 'rest'>): boolean {
@@ -129,5 +132,6 @@ export function selectRestVM(state: Pick<AppStoreState, 'rest'>): RestChoiceVM {
         offers,
         cut,
         outcome,
+        description: s.description,
     };
 }

@@ -164,11 +164,9 @@ import {
 import {
     abandonBlacksmithAction,
     beginBlacksmithAction,
-    beginRestAnvilHandoffAction,
     claimBlacksmithOutcomeAction,
     completeBlacksmithTutorialAction,
     continueBlacksmithCardAction,
-    continueRestAnvilHandoffCardAction,
     honeBlacksmithAction,
     leaveBlacksmithAction,
     startBlacksmithForgingAction,
@@ -619,22 +617,18 @@ export interface AppActions {
 
     // -----------------------------------------------------------------
     // Rest-choice encounter (see state/rest/). One irreversible choice
-    // of three: rest (free heal) / anvil (paid die-gear upgrade,
-    // hands off to /blacksmith) / cut (paid deck removal). No back-out.
+    // of two: rest (free, flat 25% heal) / cut (paid deck removal).
+    // No back-out.
     // -----------------------------------------------------------------
 
     /** Start a rest node. Returns false if one is underway. */
     beginRest: (options?: BeginRestOptions) => boolean;
-    /** Commit one of the three offers. Locks the other two. */
+    /** Commit one of the two offers. Locks the other. */
     chooseRestChoiceOffer: (offer: RestChoiceOfferId) => void;
     /** Pick a card to remove (`cut` sub-step). Must be one of the offered ids. */
     pickRestChoiceCut: (cardId: string) => void;
-    /** Confirm the settled ledger; applies heal/spend/rail/removal and persists. */
+    /** Confirm the settled ledger; applies heal/spend/removal and persists. */
     claimRestOutcome: () => ClaimRestChoiceResult;
-    /** Open the real `/blacksmith` screen for the `anvil` offer's one pick. */
-    beginRestAnvilHandoff: () => boolean;
-    /** Acknowledge the hand-off's open card (accepted pick or refusal retry). */
-    continueRestAnvilHandoffCard: () => void;
 
     // -----------------------------------------------------------------
     // Loot-cache encounter ("The Reliquary" — see state/cache/). Phase
@@ -1103,8 +1097,6 @@ export function createAppActions(store: AppStore): AppActions {
         chooseRestChoiceOffer: (offer) => chooseRestChoiceOfferAction(store, offer),
         pickRestChoiceCut: (cardId) => pickRestChoiceCutAction(store, cardId),
         claimRestOutcome: () => claimRestChoiceOutcomeAction(store),
-        beginRestAnvilHandoff: () => beginRestAnvilHandoffAction(store),
-        continueRestAnvilHandoffCard: () => continueRestAnvilHandoffCardAction(store),
         beginLootCache: (options) => beginLootCacheAction(store, options),
         startLootCacheDelving: () => startLootCacheDelvingAction(store),
         delveLootCache: () => delveLootCacheAction(store),
@@ -1726,8 +1718,8 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
         // the legacy silent heal. The engine's resolveMapEvent already
         // applied the passive heal to `result.state`; restore the
         // pre-event player so the node's settled ledger is the only thing
-        // that touches VITAE/currency/dieGear. `<RestGate>` routes to
-        // /rest when the slice fills.
+        // that touches VITAE/currency. `<RestGate>` routes to /rest when
+        // the slice fills.
         if (result.event.kind === 'rest') {
             store.setState({
                 ...resolvedState,
@@ -1737,6 +1729,9 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
             beginRestAction(store, {
                 // Phase 52b — the authored inn/camp marker, not a heal number.
                 shelter: result.event.shelter,
+                // Phase 59 — the authored one-liner, same passthrough
+                // pattern as the other kinds (event.engine.ts::bodyFromPayload).
+                description: result.event.description,
             });
             return true;
         }

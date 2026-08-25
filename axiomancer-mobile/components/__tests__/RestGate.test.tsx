@@ -64,11 +64,10 @@ function makeActiveRestSession(): RestChoiceSession {
         maxHealth: 20,
         health: 12,
         currency: 5,
-        rail: {} as never,
         deckCardIds: [],
         removals: 0,
         offers: [],
-        pendingRefusal: null,
+        description: null,
         outcome: null,
         seed: 12345,
     };

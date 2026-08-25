@@ -53,9 +53,9 @@ describe('minigame engine seed contract', () => {
     });
 
     // Rest-choice (Phase 52c-d, replacing the retired rest minigame — Phase
-    // 52e) has no entry here: `createRestChoiceSession` and the `hone` /
-    // `temper` anvil verbs are deterministic given their inputs — no dealt
-    // state depends on the seed, so this contract doesn't apply to it.
+    // 52e) has no entry here: `createRestChoiceSession` is deterministic
+    // given its inputs — no dealt state depends on the seed, so this
+    // contract doesn't apply to it.
 
     it('LootCache sessions accept string seeds and replay sealed trap fates', () => {
         expectReplayable('LootCache', seed => createLootCacheSession(seed, [{ uid: 'i1', name: 'Iron Charm' }], 6));

@@ -292,29 +292,27 @@ describe('rest screen (Phase 52d — rest-choice)', () => {
         expect(store.getState().player.health).toBeGreaterThanOrEqual(before);
     });
 
-    it('the `anvil` offer commits to anvil-pick and hands off to the blacksmith slice', () => {
-        const { store, actions } = mount(<RestScreen />);
-        act(() => {
-            store.setState({ player: { ...store.getState().player, currency: 999 } } as never);
-            actions.beginRest({ seed: 7, shelter: 'camp' });
-        });
-        fireEvent.press(screen.getByTestId('rest-choice-offer-anvil'));
-        expect(store.getState().rest.session!.phase).toBe('anvil-pick');
-        expect(store.getState().blacksmith.session).toBeTruthy();
-        expect(store.getState().blacksmith.handoff).toBe('rest-choice');
-    });
-
     it('an unaffordable offer renders disabled with its reason spelled out', () => {
+        // A fixture deck one above the removal floor, so `cut`'s disabled
+        // reason is affordability, not the deck-floor guard.
+        const DECK = [
+            'spoiled-poultice', 'chilblain-watch', 'petty-indictment', 'first-spadeful',
+            'grandmothers-psalter', 'thumbprick-oath', 'thin-hymn', 'threadbare-cope',
+            'unction-of-boils', 'the-sextons-bell', 'the-long-lent', 'promissory-cut', 'the-vig',
+        ];
         const { store, actions } = mount(<RestScreen />);
         act(() => {
-            store.setState({ player: { ...store.getState().player, currency: 0 } } as never);
+            store.setState({
+                player: { ...store.getState().player, currency: 0, knownCards: DECK, combatRewardCards: [] },
+                flags: [],
+            } as never);
             actions.beginRest({ seed: 7, shelter: 'camp' });
         });
         // `rest` is always free — never dead-ended.
         expect(screen.getByTestId('rest-choice-offer-rest').props.accessibilityState.disabled).toBeFalsy();
-        expect(screen.getByTestId('rest-choice-offer-anvil').props.accessibilityState.disabled).toBe(true);
-        expect(screen.getByTestId('rest-choice-offer-anvil-reason')).toBeTruthy();
-        expect(store.getState().rest.session!.offers.find(o => o.id === 'anvil')!.disabledReason)
+        expect(screen.getByTestId('rest-choice-offer-cut').props.accessibilityState.disabled).toBe(true);
+        expect(screen.getByTestId('rest-choice-offer-cut-reason')).toBeTruthy();
+        expect(store.getState().rest.session!.offers.find(o => o.id === 'cut')!.disabledReason)
             .toMatch(/cover/i);
     });
 

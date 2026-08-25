@@ -4,9 +4,7 @@
  * Disables back button during combat per Phase 8 decision A, and during an
  * open rest-choice node (Phase 52d — "no back-out": `resolveMapEvent`
  * consumes the node on entry, before any choice, so a back-out would burn
- * it for nothing). The rest-choice anvil offer hands off to `/blacksmith`
- * mid-node, so its own hardware-back stays locked too while that hand-off
- * is open, not just on `/rest` itself.
+ * it for nothing).
  */
 
 import { useEffect } from 'react';
@@ -18,8 +16,7 @@ import { selectHasActiveRest } from '@/state/presenters/rest.engine';
 export function HardwareBackHandler() {
   const { inCombat } = useCombatMode();
   const hasActiveRest = useGameState(selectHasActiveRest);
-  const inRestAnvilHandoff = useGameState((s) => s.blacksmith?.handoff === 'rest-choice');
-  const locked = inCombat || hasActiveRest || inRestAnvilHandoff;
+  const locked = inCombat || hasActiveRest;
 
   useEffect(() => {
     if (Platform.OS !== 'android') return;

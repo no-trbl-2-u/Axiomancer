@@ -1,12 +1,11 @@
 /**
- * Rest-choice engine ("rest" / "anvil" / "cut") — hermetic unit suite
- * (Phase 52c).
+ * Rest-choice engine ("rest" / "cut") — hermetic unit suite (Phase 52c;
+ * anvil offer dropped Phase 59).
  *
  * No RNG stub needed: every transition here is deterministic by
- * construction (the composed Blacksmith upgrade verbs and the deck-removal
- * primitive are both deterministic themselves — see their own suites).
- * Driven through the PUBLIC BARREL (`../../../index`), the same module path
- * 52d's mobile screen will import.
+ * construction (the deck-removal primitive is deterministic itself — see
+ * its own suite). Driven through the PUBLIC BARREL (`../../../index`), the
+ * same module path 52d's mobile screen imports.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -14,19 +13,16 @@ import { describe, it, expect } from 'vitest';
 import {
     createRestChoiceSession,
     chooseRestChoiceOffer,
-    pickRestChoiceAnvil,
     pickRestChoiceCut,
     claimRestChoiceOutcome,
     RESTCHOICE_TUNING,
-    concreteDefaultRail,
-    dieGearMissFaces,
     MIN_COMBAT_DECK_SIZE,
     cardRemovalPrice,
     removeCardFromCombatDeck,
     createCharacter,
     buildCombatDeck,
 } from '../../../index';
-import type { RestChoiceSession, DieGearRail, Character } from '../../../index';
+import type { RestChoiceSession, Character } from '../../../index';
 
 const DECK = [
     'spoiled-poultice', 'chilblain-watch', 'petty-indictment', 'first-spadeful',
@@ -40,7 +36,6 @@ function offerSession(overrides: Partial<Parameters<typeof createRestChoiceSessi
         maxHealth: 100,
         health: 50,
         currency: 100,
-        rail: concreteDefaultRail(),
         deckCardIds: [...DECK, 'the-vig'], // 13 — one above the floor by default
         removals: 0,
         ...overrides,
@@ -48,19 +43,13 @@ function offerSession(overrides: Partial<Parameters<typeof createRestChoiceSessi
 }
 
 describe('rest-choice — offer phase + lifecycle', () => {
-    it('opens with three offers, `rest` always free and enabled', () => {
+    it('opens with two offers, `rest` always free and enabled', () => {
         const s = offerSession();
         expect(s.phase).toBe('offer');
+        expect(s.offers.map(o => o.id)).toEqual(['rest', 'cut']);
         const rest = s.offers.find(o => o.id === 'rest')!;
         expect(rest.cost).toBe(0);
         expect(rest.disabledReason).toBeUndefined();
-    });
-
-    it('disables `anvil` when the purse cannot cover the flat price', () => {
-        const s = offerSession({ currency: RESTCHOICE_TUNING.anvilPrice - 1 });
-        const anvil = s.offers.find(o => o.id === 'anvil')!;
-        expect(anvil.disabledReason).toMatch(/cover/i);
-        expect(chooseRestChoiceOffer(s, 'anvil')).toBe(s); // disabled offer — invalid call, no-op
     });
 
     it('disables `cut` at the deck floor even with a full purse', () => {
@@ -83,10 +72,10 @@ describe('rest-choice — offer phase + lifecycle', () => {
         expect(chooseRestChoiceOffer(s, 'rest').phase).toBe('outcome');
     });
 
-    it('committing one offer locks the other two; re-committing is a no-op', () => {
+    it('committing one offer locks the other; re-committing is a no-op', () => {
         const committed = chooseRestChoiceOffer(offerSession(), 'rest');
         expect(committed.phase).toBe('outcome');
-        expect(chooseRestChoiceOffer(committed, 'anvil')).toBe(committed);
+        expect(chooseRestChoiceOffer(committed, 'cut')).toBe(committed);
         expect(chooseRestChoiceOffer(committed, 'rest')).toBe(committed);
     });
 
@@ -101,87 +90,28 @@ describe('rest-choice — offer phase + lifecycle', () => {
 });
 
 describe('rest-choice — `rest` offer', () => {
-    it('camp heals exactly 20% of MAX vitae at several max-vitae values', () => {
-        for (const maxHealth of [50, 77, 100, 240]) {
-            const s = offerSession({ maxHealth, health: 1 });
-            const o = chooseRestChoiceOffer(s, 'rest').outcome!;
-            expect(o.healed).toBe(Math.round(maxHealth * RESTCHOICE_TUNING.campHealFraction));
+    it('heals exactly 25% of MAX vitae at several max-vitae values, regardless of shelter', () => {
+        for (const shelter of ['camp', 'inn'] as const) {
+            for (const maxHealth of [50, 77, 100, 240]) {
+                const s = offerSession({ shelter, maxHealth, health: 1 });
+                const o = chooseRestChoiceOffer(s, 'rest').outcome!;
+                expect(o.healed).toBe(Math.round(maxHealth * RESTCHOICE_TUNING.restHealFraction));
+            }
         }
     });
 
-    it('camp heal never overheals past maxHealth', () => {
+    it('never overheals past maxHealth', () => {
         const s = offerSession({ maxHealth: 100, health: 95 });
         const o = chooseRestChoiceOffer(s, 'rest').outcome!;
         expect(o.healed).toBe(5);
     });
 
-    it('an inn night heals to full, regardless of the 20% figure', () => {
-        const s = offerSession({ shelter: 'inn', maxHealth: 100, health: 10 });
-        const o = chooseRestChoiceOffer(s, 'rest').outcome!;
-        expect(o.healed).toBe(90);
-    });
-
-    it('spends nothing and leaves the rail/removals untouched', () => {
+    it('spends nothing and leaves removals untouched', () => {
         const s = offerSession({ removals: 2 });
         const o = chooseRestChoiceOffer(s, 'rest').outcome!;
         expect(o.spent).toBe(0);
-        expect(o.rail).toEqual(s.rail);
         expect(o.removedCardId).toBeNull();
         expect(o.removals).toBe(2);
-    });
-});
-
-describe('rest-choice — `anvil` offer (composes Blacksmith)', () => {
-    it('one HONE adds a mana face and charges the FLAT anvil price, not Blacksmith\'s own tier', () => {
-        const s = chooseRestChoiceOffer(offerSession(), 'anvil');
-        expect(s.phase).toBe('anvil-pick');
-        const picked = pickRestChoiceAnvil(s, 'heart', 'hone');
-        expect(picked.phase).toBe('outcome');
-        const o = picked.outcome!;
-        expect(o.chosen).toBe('anvil');
-        expect(o.spent).toBe(RESTCHOICE_TUNING.anvilPrice);
-        expect(o.rail.heart.manaFaces).toBe(3);
-        expect(dieGearMissFaces(o.rail.heart)).toBe(2);
-    });
-
-    it('one TEMPER upgrades a mana face to a special face', () => {
-        const s = chooseRestChoiceOffer(offerSession(), 'anvil');
-        const picked = pickRestChoiceAnvil(s, 'body', 'temper');
-        const o = picked.outcome!;
-        expect(o.rail.body.specialFaces).toBe(2);
-        expect(o.rail.body.manaFaces).toBe(1);
-        expect(o.spent).toBe(RESTCHOICE_TUNING.anvilPrice);
-    });
-
-    it('refuses LOUDLY at a die already at its face cap, and leaves the session choosable', () => {
-        // Wild already at the 1-miss floor (special 1, mana 4 — the shape three
-        // real hones would reach): the next hone is illegal.
-        const rail: DieGearRail = {
-            ...concreteDefaultRail(),
-            wild: { dieColor: 'wild', specialFaces: 1, manaFaces: 4, specialConviction: 2 },
-        };
-        const s = chooseRestChoiceOffer(offerSession({ rail }), 'anvil');
-        const refused = pickRestChoiceAnvil(s, 'wild', 'hone');
-        expect(refused.phase).toBe('anvil-pick'); // stays live — no lock, no spend
-        expect(refused.pendingRefusal).toMatch(/miss/i);
-        expect(refused.outcome).toBeNull();
-
-        // The player can retry with a different die/verb after a refusal.
-        const retried = pickRestChoiceAnvil(refused, 'heart', 'hone');
-        expect(retried.phase).toBe('outcome');
-        expect(retried.outcome!.spent).toBe(RESTCHOICE_TUNING.anvilPrice);
-    });
-
-    it('refuses to temper the wild die past its 1-special cap', () => {
-        const s = chooseRestChoiceOffer(offerSession(), 'anvil');
-        const refused = pickRestChoiceAnvil(s, 'wild', 'temper');
-        expect(refused.phase).toBe('anvil-pick');
-        expect(refused.pendingRefusal).toMatch(/cap/i);
-    });
-
-    it('picking while not in anvil-pick is an invalid call — silent no-op', () => {
-        const s = offerSession();
-        expect(pickRestChoiceAnvil(s, 'heart', 'hone')).toBe(s);
     });
 });
 
@@ -196,7 +126,6 @@ describe('rest-choice — `cut` offer (names a card; the host removes it)', () =
         expect(o.removedCardId).toBe('thin-hymn');
         expect(o.spent).toBe(cardRemovalPrice(1));
         expect(o.removals).toBe(2); // incremented for the host to write back
-        expect(o.rail).toEqual(s.rail); // the anvil never ran
         expect(o.healed).toBe(0);
     });
 
@@ -217,7 +146,7 @@ describe('rest-choice — `cut` offer (names a card; the host removes it)', () =
         const known = DECK.slice(0, 6);
         const rewards = DECK.slice(6);
         const player: Character = {
-            ...createCharacter({ name: 'Anvil Fixture', level: 1, baseStats: { heart: 5, body: 5, mind: 5 } }),
+            ...createCharacter({ name: 'Rest Fixture', level: 1, baseStats: { heart: 5, body: 5, mind: 5 } }),
             knownCards: [...known],
             combatRewardCards: [...rewards, 'the-vig'],
         };
@@ -233,6 +162,18 @@ describe('rest-choice — `cut` offer (names a card; the host removes it)', () =
         if (!removal.ok) return;
         expect(buildCombatDeck(removal.player)).toHaveLength(deckCardIds.length - 1);
         expect(removal.player.cardRemovals).toBe(outcome.removals);
+    });
+});
+
+describe('rest-choice — description passthrough (Phase 59)', () => {
+    it('trims and carries the authored one-liner', () => {
+        const s = offerSession({ description: '  A cold hearth, but a hearth. ' });
+        expect(s.description).toBe('A cold hearth, but a hearth.');
+    });
+
+    it('falls back to null when unauthored or blank', () => {
+        expect(offerSession().description).toBeNull();
+        expect(offerSession({ description: '   ' }).description).toBeNull();
     });
 });
 

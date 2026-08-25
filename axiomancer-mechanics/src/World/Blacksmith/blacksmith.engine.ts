@@ -17,11 +17,11 @@
  * so a cap-violating upgrade is refused identically here and in the reducer.
  * Refusals are LOUD (a refusal card) and leave the rail + budget untouched.
  *
- * Prices are ratified (Phase 52f) in SHILLINGS, ready for a future map node
- * to author the (currently dormant) `blacksmith` MapEvent kind directly —
- * the live anvil access today is `World/RestChoice`'s single flat
- * `anvilPrice`, which bypasses these per-verb tiers entirely (unlimited
- * verb uses once paid). The mobile host maps `budget` to
+ * Prices are ratified (Phase 52f) in SHILLINGS. The rest-node offer that
+ * used to reach this engine with a single flat bypass price was dropped
+ * Phase 59; Phase 60 re-homes access to a directly-authored `blacksmith`
+ * MapEvent node instead (`MapEvents/types.ts`), so these per-verb tiers are
+ * the live prices again. The mobile host maps `budget` to
  * `Character.currency` by default.
  */
 

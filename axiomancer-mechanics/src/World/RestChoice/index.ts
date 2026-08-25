@@ -1,7 +1,8 @@
 /**
- * Rest-choice encounter ("rest" / "anvil" / "cut") — Public API. Phase 52c.
+ * Rest-choice encounter ("rest" / "cut") — Public API. Phase 52c; anvil
+ * offer dropped Phase 59.
  *
- * A rest node is one irreversible choice of three, replacing the Night
+ * A rest node is one irreversible choice of two, replacing the Night
  * Watch's silent per-node heal (T's ruling, attended chat, 2026-08-08). The
  * engine never reads `GameState`; the host settles the outcome ledger
  * against the real `Character` at claim time — see `restchoice.types.ts`
@@ -11,7 +12,6 @@
 // ── Engine types ───────────────────────────────────────────────────────────
 export type {
     RestChoiceOfferId,
-    RestChoiceAnvilVerb,
     RestChoiceOffer,
     RestChoicePhase,
     RestChoiceOutcome,
@@ -26,7 +26,6 @@ export type { CreateRestChoiceOptions } from './restchoice.engine';
 export {
     createRestChoiceSession,
     chooseRestChoiceOffer,
-    pickRestChoiceAnvil,
     pickRestChoiceCut,
     claimRestChoiceOutcome,
 } from './restchoice.engine';

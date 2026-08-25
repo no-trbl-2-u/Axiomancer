@@ -1,23 +1,13 @@
 /**
  * Rest-choice encounter — store action glue (Phase 52d, replacing the
- * retired rest minigame — see Phase 52e).
+ * retired rest minigame — see Phase 52e; anvil offer dropped Phase 59).
  *
  * The pure engine lives in `axiomancer-mechanics` (World/RestChoice); these
- * wrappers thread a rest node's one irreversible choice — `rest` (free
- * heal) / `anvil` (paid die-gear upgrade) / `cut` (paid deck removal) —
- * through the mobile `rest` slice and, at claim, apply the settled ledger
- * to the real `GameState`: heal, shillings spent, `cardRemovals`
- * incremented, the die-gear rail written to `Character.dieGear`, and the
- * inn scar-mend preserved from the retired rest minigame (Phase 52b).
- *
- * The `anvil` offer hands off to the REAL `/blacksmith` screen (Spec 33 §6)
- * rather than duplicating a picker here — see `beginRestAnvilHandoffAction`
- * / `continueRestAnvilHandoffAction` below and their `blacksmith`-slice
- * counterparts in `state/blacksmith/store-actions.ts`. The engine's own
- * `pickRestChoiceAnvil` is what actually seals the rest session's outcome;
- * the blacksmith screen only supplies the (color, verb) pick and the loud
- * cap-legality refusal card, exactly the "die-gear legality check" the
- * engine module header says is the only thing reused from Blacksmith here.
+ * wrappers thread a rest node's one irreversible choice — `rest` (free,
+ * flat 25% heal) / `cut` (paid deck removal) — through the mobile `rest`
+ * slice and, at claim, apply the settled ledger to the real `GameState`:
+ * heal, shillings spent, `cardRemovals` incremented, and the inn scar-mend
+ * preserved from the retired rest minigame (Phase 52b).
  */
 
 import type { GameState } from '@mechanics';
@@ -27,17 +17,14 @@ import {
     cardRemovalsOf,
     chooseRestChoiceOffer as engineChooseOffer,
     claimRestChoiceOutcome as engineClaim,
-    concreteDefaultRail,
     createRestChoiceSession,
     DEFAULT_REST_SHELTER,
-    DIE_GEAR_COLORS,
     isInnShelter,
     pickRestChoiceCut as engineCut,
     removeCardFromCombatDeck,
 } from '@mechanics';
 import type {
     Character,
-    DieGearRail,
     RestChoiceOfferId,
     RestChoiceSession,
     RestShelter,
@@ -68,19 +55,6 @@ function setSession(store: AppStore, session: RestChoiceSession | null): void {
     store.setState({ rest: { session } });
 }
 
-/** Materialise the player's current die-gear into a full concrete rail. */
-function playerRail(state: GameState): DieGearRail {
-    const rail = concreteDefaultRail();
-    const worn = state.player?.dieGear;
-    if (worn) {
-        for (const color of DIE_GEAR_COLORS) {
-            const gear = worn[color];
-            if (gear) rail[color] = { ...gear };
-        }
-    }
-    return rail;
-}
-
 export interface BeginRestOptions {
     seed?: number;
     /**
@@ -89,6 +63,8 @@ export interface BeginRestOptions {
      * `'inn'` night mends hazard-scarred max-VITAE.
      */
     shelter?: RestShelter;
+    /** Phase 59 — the authored MapEvent one-liner (`ResolvedEvent.description`). */
+    description?: string | null;
 }
 
 /** Start a rest node from the player's current stats. One node at a time. */
@@ -103,14 +79,14 @@ export function beginRestAction(store: AppStore, options: BeginRestOptions = {})
         maxHealth: player.maxHealth,
         health: player.health,
         currency: player.currency,
-        rail: playerRail(state),
         deckCardIds: buildCombatDeck(player, flags),
         removals: cardRemovalsOf(player),
+        description: options.description,
     }));
     return true;
 }
 
-/** offer -> outcome | anvil-pick | cut-pick. */
+/** offer -> outcome | cut-pick. */
 export function chooseRestChoiceOfferAction(store: AppStore, offer: RestChoiceOfferId): void {
     const s = store.getState().rest?.session;
     if (!s) return;
@@ -152,12 +128,12 @@ const NOOP_CLAIM: ClaimRestChoiceResult = Object.freeze({
  * reconciliation it may do, happens here.
  *
  * A night at an INN (`shelter === 'inn'`, authored on the map event's
- * `RestPayload`) mends hazard-scarred max-VITAE regardless of which of the
- * three offers was taken — the shelter is the trigger, not the choice
- * (Phase 52b). The engine computes `rest`'s heal against the PRE-mend
- * maxHealth (it never reads `GameState`), so an inn `rest` pick is topped
- * up here to the post-mend cap rather than under-healing by the mended
- * amount.
+ * `RestPayload`) mends hazard-scarred max-VITAE regardless of which offer
+ * was taken — the shelter is the trigger, not the choice (Phase 52b),
+ * unrelated to the flat 25% `rest` heal fraction (Phase 59). The engine
+ * computes `rest`'s heal against the PRE-mend maxHealth (it never reads
+ * `GameState`), so the clamp below re-caps it against the post-mend max
+ * rather than under-healing by the mended amount.
  */
 export function claimRestChoiceOutcomeAction(store: AppStore): ClaimRestChoiceResult {
     const s = store.getState().rest?.session;
@@ -178,8 +154,7 @@ export function claimRestChoiceOutcomeAction(store: AppStore): ClaimRestChoiceRe
         }
     }
 
-    const isInnRest = isInnShelter(s.shelter);
-    const scarMended = isInnRest ? bankedScarMagnitude(flags) : 0;
+    const scarMended = isInnShelter(s.shelter) ? bankedScarMagnitude(flags) : 0;
     if (scarMended > 0) {
         flags = flags.filter((f) => !f.startsWith(HAZARD_SCAR_FLAG_PREFIX));
     }
@@ -187,16 +162,13 @@ export function claimRestChoiceOutcomeAction(store: AppStore): ClaimRestChoiceRe
 
     const healed = outcome.chosen !== 'rest'
         ? 0
-        : isInnRest
-            ? recoveredMax - player.health
-            : Math.min(outcome.healed, recoveredMax - player.health);
+        : Math.min(outcome.healed, recoveredMax - player.health);
 
     const nextPlayer: Character = {
         ...player,
         maxHealth: recoveredMax,
         health: player.health + healed,
         currency: Math.max(0, player.currency - outcome.spent),
-        dieGear: outcome.rail,
         cardRemovals: outcome.removals,
     };
 

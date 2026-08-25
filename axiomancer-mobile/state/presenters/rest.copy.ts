@@ -7,19 +7,17 @@
 import type { RestChoiceOfferId } from '@mechanics';
 
 export const REST_CHOICE_EYEBROW = 'A MOMENT TO STOP';
-export const REST_CHOICE_TITLE = 'THREE DOORS, ONE STEP THROUGH';
+export const REST_CHOICE_TITLE = 'TWO DOORS, ONE STEP THROUGH';
 export const REST_CHOICE_INTRO =
     'The node is spent the moment you stopped here. Pick one — there is no walking back out.';
 
 export const REST_CHOICE_OFFER_LABEL: Record<RestChoiceOfferId, string> = Object.freeze({
     rest: 'REST',
-    anvil: 'THE ANVIL',
     cut: 'THE CUT',
 });
 
 export const REST_CHOICE_OFFER_DESC: Record<RestChoiceOfferId, string> = Object.freeze({
     rest: 'Sleep where you stand. Free.',
-    anvil: 'One die, honed or tempered.',
     cut: 'Thin the deck by one card.',
 });
 

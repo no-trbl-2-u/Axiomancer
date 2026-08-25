@@ -116,12 +116,12 @@ export interface MobileQuestSlice {
 
 /**
  * Mobile-only Rest-choice slice (Phase 52d, replacing the rest minigame
- * retired in Phase 52e). Holds the active rest node's session (engine:
- * World/RestChoice) — `null` outside a rest. A node is one
- * irreversible choice of `rest` / `anvil` / `cut`; the shelter class
+ * retired in Phase 52e; anvil offer dropped Phase 59). Holds the active
+ * rest node's session (engine: World/RestChoice) — `null` outside a rest.
+ * A node is one irreversible choice of `rest` / `cut`; the shelter class
  * (Phase 52b) rides on the session itself (`session.shelter`), not a
- * sibling slice field. The claim ledger (heal / spend / rail /
- * removed card) applies to the player at claim.
+ * sibling slice field. The claim ledger (heal / spend / removed card)
+ * applies to the player at claim.
  */
 export interface MobileRestSlice {
     session: RestChoiceSession | null;
@@ -152,16 +152,6 @@ export interface MobileCacheSlice {
 export interface MobileBlacksmithSlice {
     session: BlacksmithSession | null;
     tutorial: boolean;
-    /**
-     * Phase 52d — set when this visit was opened as the rest-choice
-     * `anvil` offer's hand-off (see `state/rest/store-actions.ts`).
-     * The screen hides its own leave/abandon escape while set (the
-     * rest node has no back-out; leaving without a pick would strand
-     * the rest session in `anvil-pick`), and the accepted-card
-     * continuation routes back into the rest session instead of this
-     * session's own claim.
-     */
-    handoff: 'rest-choice' | null;
 }
 
 /**
@@ -273,7 +263,6 @@ export const EMPTY_CACHE_SLICE: MobileCacheSlice = Object.freeze({
 export const EMPTY_BLACKSMITH_SLICE: MobileBlacksmithSlice = Object.freeze({
     session: null,
     tutorial: false,
-    handoff: null,
 });
 
 export const EMPTY_LABYRINTH_SLICE: MobileLabyrinthSlice = Object.freeze({ session: null });

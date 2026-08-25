@@ -1,18 +1,17 @@
 /**
  * /rest — the rest-choice screen (Phase 52d, replacing the retired rest
- * minigame — see Phase 52e).
+ * minigame — see Phase 52e; anvil offer dropped Phase 59).
  *
- * One irreversible choice of three: REST (free heal), THE ANVIL (paid
- * die-gear upgrade — hands off to the real `/blacksmith` screen for the
- * one pick), or THE CUT (paid deck removal). `resolveMapEvent` consumes
- * the node on entry, before any choice — there is no back-out: no header
- * back, no swipe-dismiss (`gestureEnabled: false` in the root layout), no
- * Android hardware-back (`<HardwareBackHandler>`). All rules live in
+ * One irreversible choice of two: REST (free, flat 25% heal) or THE CUT
+ * (paid deck removal). `resolveMapEvent` consumes the node on entry,
+ * before any choice — there is no back-out: no header back, no
+ * swipe-dismiss (`gestureEnabled: false` in the root layout), no Android
+ * hardware-back (`<HardwareBackHandler>`). All rules live in
  * `axiomancer-mechanics` (World/RestChoice); this screen renders the
  * presenter VM and dispatches store actions only.
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useRouter } from '@/lib/platform/router';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
@@ -104,19 +103,6 @@ export default function RestScreen() {
         if (!vm.active && router.canGoBack()) router.back();
     }, [vm.active, router]);
 
-    // The `anvil` offer hands off to the real `/blacksmith` screen for its
-    // one pick (see state/blacksmith/store-actions.ts). Fire the hand-off
-    // exactly once per entry into `anvil-pick` — the ref guards re-renders
-    // from re-opening a second blacksmith session.
-    const handoffFired = useRef(false);
-    useEffect(() => {
-        if (vm.phase === 'anvil-pick' && !handoffFired.current) {
-            handoffFired.current = true;
-            actions.beginRestAnvilHandoff();
-        }
-        if (vm.phase !== 'anvil-pick') handoffFired.current = false;
-    }, [vm.phase, actions]);
-
     if (!vm.active) return <ScreenBg><View /></ScreenBg>;
 
     return (
@@ -133,7 +119,9 @@ export default function RestScreen() {
 
                 {vm.phase === 'offer' && (
                     <View testID="rest-choice-offers">
-                        <Text style={styles.body}>{REST_CHOICE_INTRO}</Text>
+                        <Text style={styles.body} testID="rest-choice-intro">
+                            {vm.description ?? REST_CHOICE_INTRO}
+                        </Text>
                         {vm.offers.map((offer) => (
                             <OfferCard
                                 key={offer.id}
@@ -141,12 +129,6 @@ export default function RestScreen() {
                                 onPress={() => actions.chooseRestChoiceOffer(offer.id)}
                             />
                         ))}
-                    </View>
-                )}
-
-                {vm.phase === 'anvil-pick' && (
-                    <View testID="rest-anvil-handoff">
-                        <Text style={styles.body}>Carrying your dice to the anvil.</Text>
                     </View>
                 )}
 

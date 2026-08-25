@@ -1,27 +1,23 @@
 /**
- * Rest-choice encounter (Phase 52c) — engine types.
+ * Rest-choice encounter (Phase 52c; anvil offer dropped Phase 59) — engine
+ * types.
  *
- * A rest node is one irreversible choice of three: `rest` (free, heal),
- * `anvil` (paid, composes `World/Blacksmith` for ONE hone-or-temper), or
- * `cut` (paid, composes `Cards/card.removal` for ONE deck removal).
- * Two-way like every minigame here: the engine never reads `GameState`,
- * and the host settles the outcome ledger against the real `Character` at
- * claim time — including the actual `removeCardFromCombatDeck` call, which
- * needs the full card-base/reward-list accounting this engine does not
- * carry.
+ * A rest node is one irreversible choice of two: `rest` (free, flat-25%
+ * heal) or `cut` (paid, composes `Cards/card.removal` for ONE deck
+ * removal). Two-way like every minigame here: the engine never reads
+ * `GameState`, and the host settles the outcome ledger against the real
+ * `Character` at claim time — including the actual
+ * `removeCardFromCombatDeck` call, which needs the full card-base/reward-list
+ * accounting this engine does not carry.
  */
 
 import type { SeedInput } from '../seed';
 import type { RestShelter } from '../MapEvents/types';
-import type { DieGearColor, DieGearRail } from '../../Character/dieGear.reducer';
 
-export type { DieGearColor, DieGearRail, RestShelter };
+export type { RestShelter };
 
-/** The three offers on the table. Exactly one may be committed. */
-export type RestChoiceOfferId = 'rest' | 'anvil' | 'cut';
-
-/** The two blacksmith verbs the anvil offer exposes (never `swap` — see brief). */
-export type RestChoiceAnvilVerb = 'hone' | 'temper';
+/** The two offers on the table. Exactly one may be committed. */
+export type RestChoiceOfferId = 'rest' | 'cut';
 
 /** One offer's price + loud affordability. */
 export interface RestChoiceOffer {
@@ -31,8 +27,7 @@ export interface RestChoiceOffer {
 }
 
 export type RestChoicePhase =
-    | 'offer'      // three offers on the table
-    | 'anvil-pick' // choosing a die + verb (hone / temper)
+    | 'offer'      // two offers on the table
     | 'cut-pick'   // choosing a card to remove
     | 'outcome'    // the settled ledger
     | 'done';      // host claimed
@@ -44,8 +39,6 @@ export interface RestChoiceOutcome {
     healed: number;
     /** Currency the host should deduct (0 for `rest`). */
     spent: number;
-    /** The rail the host should write to `Character.dieGear` — upgraded iff `chosen === 'anvil'`. */
-    rail: DieGearRail;
     /**
      * The card id the host should pass to `removeCardFromCombatDeck` —
      * non-null iff `chosen === 'cut'`. The engine does not perform the
@@ -58,20 +51,18 @@ export interface RestChoiceOutcome {
 
 export interface RestChoiceSession {
     phase: RestChoicePhase;
-    /** Authored shelter class (Phase 52b) — decides the `rest` offer's heal. */
+    /** Authored shelter class (Phase 52b) — kept for the inn scar-mend (unrelated to the flat rest heal). */
     shelter: RestShelter;
     maxHealth: number;
     health: number;
     currency: number;
-    /** The player's current die-gear rail — the anvil's starting point. */
-    rail: DieGearRail;
     /** `buildCombatDeck(player, flags)` output — the cut picker's choices. */
     deckCardIds: readonly string[];
     /** `Character.cardRemovals` going in — prices the `cut` offer. */
     removals: number;
     offers: readonly RestChoiceOffer[];
-    /** Loud refusal from the last rejected anvil pick (e.g. a die at its cap); cleared on retry or commit. */
-    pendingRefusal: string | null;
+    /** Phase 59 — the authored MapEvent one-liner, preferred over the placeholder intro when present. */
+    description: string | null;
     outcome: RestChoiceOutcome | null;
     seed: SeedInput;
 }

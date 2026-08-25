@@ -1,12 +1,11 @@
 /**
  * Hermetic component tests — HardwareBackHandler (Phase 8 decision A;
- * Phase 52d added the rest-choice node + its anvil hand-off).
+ * Phase 52d added the rest-choice node).
  *
  * Side-effect-only component. Registers an Android hardwareBackPress
- * listener that returns `true` (prevent default) while in combat, an open
- * rest-choice node, or an open rest-choice anvil hand-off; `false` (allow
- * default) otherwise. Renders null. iOS / other platforms: no listener
- * registered.
+ * listener that returns `true` (prevent default) while in combat or an
+ * open rest-choice node; `false` (allow default) otherwise. Renders null.
+ * iOS / other platforms: no listener registered.
  */
 
 import { afterAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
@@ -18,7 +17,7 @@ import type { RestChoiceSession } from '@mechanics';
 import { HardwareBackHandler } from '@/components/HardwareBackHandler';
 import { CombatModeProvider, useCombatMode } from '@/state/combat-mode';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
-import { createAppStore, EMPTY_BLACKSMITH_SLICE, EMPTY_REST_SLICE, type AppStore } from '@/state/store';
+import { createAppStore, EMPTY_REST_SLICE, type AppStore } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 
 type BackAction = () => boolean;
@@ -61,11 +60,10 @@ function fakeRestSession(): RestChoiceSession {
         maxHealth: 20,
         health: 20,
         currency: 0,
-        rail: {} as never,
         deckCardIds: [],
         removals: 0,
         offers: [],
-        pendingRefusal: null,
+        description: null,
         outcome: null,
         seed: 1,
     };
@@ -168,23 +166,6 @@ describe('HardwareBackHandler: rest-choice node branching (Phase 52d)', () => {
 
             act(() => {
                 store.setState({ rest: { session: fakeRestSession() } });
-            });
-            expect(lastBackAction()()).toBe(true);
-        } finally {
-            (Platform as { OS: string }).OS = originalOS;
-        }
-    });
-
-    it('back action returns true while the anvil hand-off is open, even with no rest session', () => {
-        const originalOS = Platform.OS;
-        (Platform as { OS: string }).OS = 'android';
-        try {
-            const store = makeStore();
-            render(withProvider(store, <HardwareBackHandler />));
-            expect(lastBackAction()()).toBe(false);
-
-            act(() => {
-                store.setState({ blacksmith: { ...EMPTY_BLACKSMITH_SLICE, handoff: 'rest-choice' } });
             });
             expect(lastBackAction()()).toBe(true);
         } finally {
