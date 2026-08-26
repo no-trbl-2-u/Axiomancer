@@ -2061,7 +2061,7 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       a 16-case hermetic e2e.
       — `feat(mechanics): ally card schema — phase 62` (0b78483c)
 
-- [ ] Phase 63 — The loot cache becomes a three-way choice. **T direct,
+- [x] Phase 63 — The loot cache becomes a three-way choice. **T direct,
       2026-08-15:** *"Card reward, item reward, or sacrifice reward."*
       Scope: replace The Reliquary's dice-pool delving session with a
       plain three-offer choice on the existing resolver (same shape 52c
@@ -2074,7 +2074,14 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       on `GameState`, not a flag, since it must count rather than latch.
       This also hands Phase 53e's read-back web its first real consumer.
       Retires `loot-cache-tuning` + its CLI/workflow with the minigame.
-      (mechanics + mobile) Brief: to generate.
+      (mechanics + mobile) Brief: `plan/phases/phase_63_loot_cache_three_way_choice.md`.
+      New `World/LootCacheChoice` pure engine (card/item/sacrifice, no
+      sub-picks — candidates are host-rolled at session creation, mirroring
+      `RestChoice`'s `deckCardIds` pattern); old `World/LootCache` dice-pool
+      engine + CLI + skill deleted. `GameState.mapGoodwill: Record<string,
+      number>` ships as a plain slice (no Faction-style module — one writer
+      this phase). `GAME_STATE_VERSION` 19→20.
+      — `feat(world): loot cache becomes a three-way choice — phase 63` (a7032809)
 
 - [ ] Phase 64 — The journal reads the goodwill back. Render Phase 63's
       per-map counter as "Helped <map> N times" on the memoir tab
