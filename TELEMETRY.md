@@ -362,3 +362,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-25T19:07:38Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-25T19:09:02Z | subagent | Explore | claude-sonnet-5 | main | Map Gathering minigame footprint |
 | 2026-08-25T19:14:48Z | subagent | Explore | claude-sonnet-5 | main | Find inline no-screen-detour precedent for item grants |
+| 2026-08-26T02:07:37Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-26T02:10:55Z | subagent | card-expert | claude-sonnet-5 | main | Design and ship Phase 62 — Ally cards |
