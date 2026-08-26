@@ -54,6 +54,7 @@
 import { Card } from './types';
 import { bindSandboxLibraryGuard, getSandboxCard } from './cards.sandbox';
 import { getHauntById } from './cards.haunts';
+import { getAllyById } from './cards.allies';
 
 // ─── THE THREADBARE OFFICE — the 8 starters (weak on purpose) ────────────────
 // Six teach one archetype verb each at whisper volume; the heirloom stays
@@ -1436,10 +1437,11 @@ const registry = new Map<string, Card>(cardLibrary.map(card => [card.id, card]))
 // take precedence over the curated library at lookup time.
 bindSandboxLibraryGuard(id => registry.get(id));
 
-/** O(1) lookup by card id; sandbox-aware. Chain (WS2.1): sandbox first (so
- *  experiments can shadow anything), then the Haunt registry (CONJURE
- *  targets — real cards, deliberately outside the pinned library), then the
- *  curated library. */
+/** O(1) lookup by card id; sandbox-aware. Chain (WS2.1, extended phase 62):
+ *  sandbox first (so experiments can shadow anything), then the Haunt
+ *  registry (CONJURE targets — real cards, deliberately outside the pinned
+ *  library), then the Ally registry (village-goodwill grants — also
+ *  deliberately outside the pinned library), then the curated library. */
 export function getCardById(id: string): Card | undefined {
-    return getSandboxCard(id) ?? getHauntById(id) ?? registry.get(id);
+    return getSandboxCard(id) ?? getHauntById(id) ?? getAllyById(id) ?? registry.get(id);
 }

@@ -4467,6 +4467,27 @@ export function processBetweenPhases(
         // total is its own visible surface on the combat HUD.
         omenState = { ...omenState, barrier: (omenState.barrier ?? 0) + 3 };
     }
+    // `the-sworn-second` (Ally, Phase 62 — cards.allies.ts): a recruited
+    // retainer answers a blow every round, capped at 3 THORNS stacks so a
+    // long fight's standing reflect never runs away (mirrors the
+    // grace-momentum cap's shape, below).
+    if (zoneHas(state, 'the-sworn-second') && !isDefeated(omenState.player) && !isDefeated(omenState.enemy)) {
+        const thornsDef = lookupEffectDef('buff_thorns');
+        if (thornsDef) {
+            const ALLY_THORNS_CAP = 3;
+            const current = omenState.player.effects.find(e => e.effectId === 'buff_thorns');
+            if (!current || current.intensity < ALLY_THORNS_CAP) {
+                const applied = applyEffect(omenState.player.effects, thornsDef, state.round, {
+                    intensityDelta: 1, sourceId: 'the-sworn-second',
+                });
+                omenState = { ...omenState, player: { ...omenState.player, effects: applied.activeEffects } };
+                events.push({
+                    kind: 'effect-landed', cardId: 'the-sworn-second', effectId: 'buff_thorns', target: 'self',
+                    effectKind: 'none', intensity: applied.result.activeEffect?.intensity ?? 1, effect: thornsDef,
+                });
+            }
+        }
+    }
     // `the-long-amen` (D, profane canon): the held word accrues — the enemy
     // gains PLEA equal to the Souls you hold, every round's end. Reads the
     // bank, never spends it (the deliberate hold-or-spend tension).

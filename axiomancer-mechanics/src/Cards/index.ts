@@ -45,12 +45,20 @@ export {
 } from './cards.library';
 
 // WS2.1 — the Haunt registry (spec 34 R-13: renamed from Thoughtform): the
-// cards CONJURE creates. Real `Card` records outside the pinned 70-card
+// cards CONJURE creates. Real `Card` records outside the pinned 57-card
 // library (correction C-11); resolved by `getCardById` via the sandbox →
-// haunt → library chain.
+// haunt → ally → library chain.
 export {
     hauntLibrary, getHauntById,
 } from './cards.haunts';
+
+// Phase 62 — the Ally registry: village-goodwill grants (Phase 65). Real
+// `Card` records outside the pinned 57-card library, same sibling-pool
+// pattern as Haunts; resolved by `getCardById` via the sandbox → haunt →
+// ally → library chain.
+export {
+    allyLibrary, getAllyById, isAllyCard,
+} from './cards.allies';
 
 // Spec 32 v3 — rank ladder + card types (§4) and the pricing table (ledger #2).
 export type { CardRank, CardRarity, CardType, CardRider } from './types';
