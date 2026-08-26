@@ -2041,7 +2041,7 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       (mechanics + mobile; deletion)
       — `feat(world): retire the Gathering minigame — phase 76` (f18e6643)
 
-- [ ] Phase 62 — Ally cards. The loot-cache sacrifice chain (Phase 65)
+- [x] Phase 62 — Ally cards. The loot-cache sacrifice chain (Phase 65)
       pays out an "ally card reward", and no ally concept exists anywhere
       in the card schema today. T ruled the full chain in scope
       2026-08-15 ("everything including Ally"), so this is the schema
@@ -2051,7 +2051,15 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       and whether it lives in the curated 70-card library or outside it.
       Needs a design pass, not just wiring — take it through
       `/brainstorm-mechanics` or `card-expert` before implementing.
-      Blocks 65. (mechanics; design + schema) Brief: to generate.
+      Blocks 65. (mechanics; design + schema)
+      Brief: `plan/phases/phase_62_ally_cards.md`. Decision: an Ally is a
+      `cardType: 'oath'` Card (no new CardType/keyword) living in a new
+      sibling registry (`cards.allies.ts`, mirroring `cards.haunts.ts`)
+      outside the pinned 57-card library (the "70-card" framing above was
+      itself stale — the Profane Canon rework already dropped it to 57);
+      ships one reference Ally wired through the engine + pricing +
+      a 16-case hermetic e2e.
+      — `feat(mechanics): ally card schema — phase 62` (0b78483c)
 
 - [ ] Phase 63 — The loot cache becomes a three-way choice. **T direct,
       2026-08-15:** *"Card reward, item reward, or sacrifice reward."*
