@@ -300,6 +300,26 @@ export default function MemoirScreen() {
                             ))
                         )}
                     </View>
+                    <View style={styles.questGroup}>
+                        <SectionLabel size={9} color={AXM.bone}>
+                            {vm.remainsGoodwillEyebrow}
+                        </SectionLabel>
+                        {vm.remains.goodwill.length === 0 ? (
+                            <Text style={styles.emptyLine} testID="memoir-goodwill-empty">
+                                {vm.emptyGoodwill}
+                            </Text>
+                        ) : (
+                            vm.remains.goodwill.map((label, index) => (
+                                <Text
+                                    key={`${index}-${label}`}
+                                    style={styles.keepsakeLine}
+                                    testID={`memoir-goodwill-${index}`}
+                                >
+                                    {label}
+                                </Text>
+                            ))
+                        )}
+                    </View>
                 </View>
             </ScrollView>
         </ScreenBg>

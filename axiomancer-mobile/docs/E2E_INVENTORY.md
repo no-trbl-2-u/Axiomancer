@@ -60,7 +60,7 @@ assertions.
 | `inventory-feedback.engine.test.ts` | P1 (pure) | `selectInventoryToast` — synthetic `inventory:changed` events produce correct toasts; unrelated event kinds yield `null` (no false toasts) | 1 | 8 |
 | `inventory.modal.engine.test.ts` | P1 | Item-modal VM: USE preview HP delta; EQUIP / EQUIP·REPLACE label branches; null on unknown item id | 4 | 9 |
 | `inventory.screen.test.tsx` | P4 | Inventory screen renders empty + populated; modal confirm routes through action layer | 2 | 3 |
-| `memoir.engine.test.ts` | P1 | Memoir VM shape; quest section composition (active + completed); alignment / chronicle sections (extension-stable shape) | 5 | 26 |
+| `memoir.engine.test.ts` | P1 | Memoir VM shape; quest section composition (active + completed); alignment / chronicle sections (extension-stable shape); REMAINS goodwill read-back (Phase 64) | 7 | 56 |
 | `navigation.engine.test.ts` | P1 | `selectActiveTab` / `selectTabBadges` / full nav VM under varied game states | 4 | 15 |
 | `route-registration.engine.test.ts` | **P5** | `<GestureHandlerRootView>` wraps `app/_layout.tsx`; `<Tabs.Screen name="…">` strings match folder-route IDs (`<dir>/index`) — pins the 2026-05-19 runtime regressions | 2 | 5 |
 | `route-tree.engine.test.ts` | **P5** | No stray `_layout.*` files in `app/` other than `_layout.tsx` (Expo Router's `require.context` would mount them as routes / layouts in production) | 3 | 4 |

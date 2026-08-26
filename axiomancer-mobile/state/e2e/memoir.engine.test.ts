@@ -700,3 +700,78 @@ describe('selectMemoirViewModel: remains (Phase 6)', () => {
         );
     });
 });
+
+// ---------------------------------------------------------------------------
+// Phase 64 — goodwill read-back (state.mapGoodwill, written by Phase 63's
+// loot-cache sacrifice offer)
+// ---------------------------------------------------------------------------
+
+function setMapGoodwill(
+    store: ReturnType<typeof createGameStore>,
+    mapGoodwill: Record<string, number>,
+): void {
+    store.setState({ mapGoodwill } as unknown as Partial<AppStoreState>);
+}
+
+describe('selectMemoirViewModel: goodwill (Phase 64)', () => {
+    it('defaults to no goodwill lines for a fresh game', () => {
+        const store = createGameStore(createMemoryAdapter());
+        const vm = selectMemoirViewModel(store.getState());
+        expect(vm.remainsGoodwillEyebrow).toBe('✠ GOODWILL');
+        expect(vm.remains.goodwill).toEqual([]);
+        expect(vm.emptyGoodwill).toBe('nothing given.');
+    });
+
+    it('formats a single-help map as "once."', () => {
+        const store = createGameStore(createMemoryAdapter());
+        setMapGoodwill(store, { 'northern-forest': 1 });
+        const vm = selectMemoirViewModel(store.getState());
+        expect(vm.remains.goodwill).toEqual(['Helped Northern Forest once.']);
+    });
+
+    it('formats a multi-help map with the numeric count', () => {
+        const store = createGameStore(createMemoryAdapter());
+        setMapGoodwill(store, { 'fishing-village': 3 });
+        const vm = selectMemoirViewModel(store.getState());
+        expect(vm.remains.goodwill).toEqual(['Helped the Drowned Parish 3 times.']);
+    });
+
+    it('sorts multiple maps count-descending, then map-key ascending on ties', () => {
+        const store = createGameStore(createMemoryAdapter());
+        setMapGoodwill(store, {
+            'northern-forest': 2,
+            'fishing-village': 5,
+        });
+        const vm = selectMemoirViewModel(store.getState());
+        expect(vm.remains.goodwill).toEqual([
+            'Helped the Drowned Parish 5 times.',
+            'Helped Northern Forest 2 times.',
+        ]);
+    });
+
+    it('falls back to the raw map key when no layout is authored for it', () => {
+        const store = createGameStore(createMemoryAdapter());
+        setMapGoodwill(store, { 'unmapped-region': 2 });
+        const vm = selectMemoirViewModel(store.getState());
+        expect(vm.remains.goodwill).toEqual(['Helped unmapped-region 2 times.']);
+    });
+
+    it('filters out non-positive or non-numeric entries defensively', () => {
+        const store = createGameStore(createMemoryAdapter());
+        setMapGoodwill(store, {
+            'northern-forest': 0,
+            // Type assertion needed for a defensively-malformed test fixture.
+            'fishing-village': 'oops' as unknown as number,
+        });
+        const vm = selectMemoirViewModel(store.getState());
+        expect(vm.remains.goodwill).toEqual([]);
+    });
+
+    it('includes goodwill in the frozen view model', () => {
+        const store = createGameStore(createMemoryAdapter());
+        setMapGoodwill(store, { 'northern-forest': 1 });
+        const vm = selectMemoirViewModel(store.getState());
+        expect(Object.isFrozen(vm.remains)).toBe(true);
+        expect(Object.isFrozen(vm.remains.goodwill)).toBe(true);
+    });
+});
