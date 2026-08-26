@@ -70,7 +70,7 @@ function fail(msg) {
 // testID proving that minigame's screen mounted. The bug routed these
 // to /event instead, so the route is the decisive regression signal.
 const CASES = [
-    { button: 'treasure', route: '/cache', landing: 'cache-intro', name: 'The Reliquary' },
+    { button: 'treasure', route: '/cache', landing: 'cache-choice-offers', name: 'The Reliquary' },
     { button: 'rest', route: '/rest', landing: 'rest-choice-offers', name: 'the rest-choice node' },
     { button: 'hazard', route: '/hazard', landing: 'hazard-intro-overlay', name: 'Hazard' },
 ]
