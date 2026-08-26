@@ -102,7 +102,7 @@ import {
     type HazardDeckPresetResult,
 } from './hazard/store-actions';
 import type { HazardProgressKey, HazardRouteKey } from '@mechanics';
-import type { RestChoiceOfferId } from '@mechanics';
+import type { LootCacheChoiceOfferId, RestChoiceOfferId } from '@mechanics';
 import {
     beginRestAction,
     chooseRestChoiceOfferAction,
@@ -112,20 +112,11 @@ import {
     type ClaimRestChoiceResult,
 } from './rest/store-actions';
 import {
-    abandonLootCacheAction,
-    beginLootCacheAction,
-    channelLootCacheInsightAction,
-    claimLootCacheOutcomeAction,
-    completeLootCacheTutorialAction,
-    continueLootCacheCardAction,
-    delveLootCacheAction,
-    pushLootCachePickAction,
-    retreatLootCachePickAction,
-    sealLootCacheAction,
-    startLootCacheDelvingAction,
-    CACHE_TUTORIAL_FLAG,
-    type BeginLootCacheOptions,
-    type ClaimLootCacheResult,
+    beginLootCacheChoiceAction,
+    chooseLootCacheChoiceOfferAction,
+    claimLootCacheChoiceOutcomeAction,
+    type BeginLootCacheChoiceOptions,
+    type ClaimLootCacheChoiceResult,
 } from './cache/store-actions';
 import {
     abandonBlacksmithAction,
@@ -530,32 +521,16 @@ export interface AppActions {
     claimRestOutcome: () => ClaimRestChoiceResult;
 
     // -----------------------------------------------------------------
-    // Loot-cache encounter ("The Reliquary" — see state/cache/). Phase
-    // order: intro → delving ⇄ picking ⇄ card → outcome → done.
+    // Loot-cache-choice encounter ("The Reliquary" — see state/cache/,
+    // Phase 63). One irreversible choice of three: card / item / sacrifice.
     // -----------------------------------------------------------------
 
     /** Start a cache from the authored payload. Returns false if one is open. */
-    beginLootCache: (options?: BeginLootCacheOptions) => boolean;
-    /** The find acknowledged: intro → delving. */
-    startLootCacheDelving: () => void;
-    /** Open the next layer: delving → picking (does not roll). */
-    delveLootCache: () => void;
-    /** Roll the pick pool against the active layer's lock: resolves or continues. */
-    pushLootCachePick: () => void;
-    /** Spend the one Insight charge for a bonus die (before the first push on a layer). */
-    channelLootCacheInsight: () => void;
-    /** Abandon the current layer's pick attempt cleanly — no loot, no bite. */
-    retreatLootCachePick: () => void;
-    /** Walk away with everything lifted so far. */
-    sealLootCache: () => void;
-    /** Acknowledge the open card; delving, or the ledger, follows. */
-    continueLootCacheCard: () => void;
-    /** Confirm the ledger; applies items/currency/bite and persists. */
-    claimLootCacheOutcome: () => ClaimLootCacheResult;
-    /** Clear the cache without loot or bites (dev / escape hatch). */
-    abandonLootCache: () => void;
-    /** Mark the guided first delve done (completed or skipped) and persist. */
-    completeLootCacheTutorial: (skipped: boolean) => void;
+    beginLootCacheChoice: (options?: BeginLootCacheChoiceOptions) => boolean;
+    /** Commit one offer — the other two vanish. */
+    chooseLootCacheChoiceOffer: (offer: LootCacheChoiceOfferId) => void;
+    /** Confirm the ledger; applies the grant (or goodwill tick) and persists. */
+    claimLootCacheChoiceOutcome: () => ClaimLootCacheChoiceResult;
 
     // -----------------------------------------------------------------
     // Blacksmith encounter ("The Anvil" — see state/blacksmith/). Phase
@@ -972,17 +947,9 @@ export function createAppActions(store: AppStore): AppActions {
         chooseRestChoiceOffer: (offer) => chooseRestChoiceOfferAction(store, offer),
         pickRestChoiceCut: (cardId) => pickRestChoiceCutAction(store, cardId),
         claimRestOutcome: () => claimRestChoiceOutcomeAction(store),
-        beginLootCache: (options) => beginLootCacheAction(store, options),
-        startLootCacheDelving: () => startLootCacheDelvingAction(store),
-        delveLootCache: () => delveLootCacheAction(store),
-        pushLootCachePick: () => pushLootCachePickAction(store),
-        channelLootCacheInsight: () => channelLootCacheInsightAction(store),
-        retreatLootCachePick: () => retreatLootCachePickAction(store),
-        sealLootCache: () => sealLootCacheAction(store),
-        continueLootCacheCard: () => continueLootCacheCardAction(store),
-        claimLootCacheOutcome: () => claimLootCacheOutcomeAction(store),
-        abandonLootCache: () => abandonLootCacheAction(store),
-        completeLootCacheTutorial: (skipped) => completeLootCacheTutorialAction(store, skipped),
+        beginLootCacheChoice: (options) => beginLootCacheChoiceAction(store, options),
+        chooseLootCacheChoiceOffer: (offer) => chooseLootCacheChoiceOfferAction(store, offer),
+        claimLootCacheChoiceOutcome: () => claimLootCacheChoiceOutcomeAction(store),
         beginBlacksmith: (options) => beginBlacksmithAction(store, options),
         startBlacksmithForging: () => startBlacksmithForgingAction(store),
         honeBlacksmith: (color) => honeBlacksmithAction(store, color),
@@ -1596,38 +1563,32 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
             return true;
         }
 
-        // Loot-cache events launch "The Reliquary" instead of the legacy
-        // passive grant. The engine already appended the payload items +
-        // currency to `result.state`; restore the pre-event player so the
-        // cache's claim is the only thing that touches the inventory.
-        // `<CacheGate>` routes to /cache when the slice fills.
+        // Loot-cache events launch the three-offer choice screen (Phase
+        // 63, replacing the retired Pick Pool minigame) instead of the
+        // legacy passive grant. The engine already appended the payload
+        // items + currency to `result.state`; restore the pre-event
+        // player so the cache's claim is the only thing that touches the
+        // inventory. `<CacheGate>` routes to /cache when the slice fills.
         //
-        // Phase 129 — reward depth: rather than the authored static
-        // roster (`result.event.items`, always base-rarity), roll a real
-        // engine-truth loot/relic table scaled to the player's level.
+        // Reward depth: the `item` offer rolls a real engine-truth
+        // loot/relic table scaled to the player's level (Phase 129).
         // Deeper locales (northern-forest) roll the `rich` tier (more
         // items + a unique-relic chance); the coastal opener rolls
-        // `modest`. Currency from the event payload is preserved.
+        // `modest`. Currency from the event payload is preserved for the
+        // `item` offer.
         if (result.event.kind === 'loot-cache') {
             store.setState({
                 ...resolvedState,
                 player: gameState.player,
                 event: EMPTY_EVENT_SLICE,
             });
-            // The first-ever delve runs as the guided tutorial (pinned
-            // seed + tier + currency, coach overlay); the persistent flag
-            // set on completion/skip keeps every later cache organic.
-            const tutorialDone = (gameState.flags ?? []).includes(CACHE_TUTORIAL_FLAG);
-            if (tutorialDone) {
-                const mapName = resolvedState.world?.currentMap?.name;
-                const tier: CacheLootTier = mapName === 'northern-forest' ? 'rich' : 'modest';
-                beginLootCacheAction(store, {
-                    lootTable: { tier },
-                    currency: result.event.currency,
-                });
-            } else {
-                beginLootCacheAction(store, { tutorial: true });
-            }
+            const mapName = resolvedState.world?.currentMap?.name;
+            const tier: CacheLootTier = mapName === 'northern-forest' ? 'rich' : 'modest';
+            beginLootCacheChoiceAction(store, {
+                tier,
+                currency: result.event.currency,
+                description: result.event.description,
+            });
             return true;
         }
 

@@ -155,4 +155,14 @@ export interface GameState {
      * saves need no migration.
      */
     labyrinth?: LabyrinthProgress;
+    /**
+     * Phase 63 — per-map goodwill tally. Written only by the loot-cache
+     * choice's `sacrifice` offer (`World/LootCacheChoice`) — never a flag,
+     * since it must count rather than latch. Keyed by `MapName`; a map with
+     * no entry has never been helped. Required state slice; defaults to
+     * `{}` on new games and legacy saves via `migrateV19toV20`. Survives
+     * `resetRun()` — village goodwill is player-knowledge-shaped, like
+     * `factionReputations`/`codex`, not run-scoped.
+     */
+    mapGoodwill: Record<string, number>;
 }

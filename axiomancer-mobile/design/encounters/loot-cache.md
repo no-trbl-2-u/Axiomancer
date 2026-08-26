@@ -1,17 +1,12 @@
 # Loot Cache Encounter ("The Reliquary") — Mobile UX Source of Truth
 
 > Derived from `app/cache/index.tsx`, `state/presenters/cache.engine.ts`,
-> `state/cache/store-actions.ts`, and `components/cache/*` as of 2026-07-03
-> (Pick Pool redesign).
+> `state/presenters/cache.copy.ts`, and `state/cache/store-actions.ts` as of
+> 2026-08-26 (Phase 63 — retired the Pick Pool dice-pool redesign).
 >
-> Mechanics rules (engine, layer definitions, dice-pool economy) live in the
-> mechanics repo:
+> Mechanics rules (engine, session machine) live in the mechanics repo:
 > - `docs/encounters/loot-cache.md` — rules source of truth
->
-> Confirmed against the shipped `axiomancer-mechanics/src/World/LootCache/`
-> Pick Pool rewrite (`LOOT_CACHE_TUNING.{pickPoolSize, maxPushesPerLayer,
-> jamSlipThreshold}`, `pushLootCachePick`/`channelLootCacheInsight`/
-> `retreatLootCachePick`) — the mobile package typechecks clean against it.
+> - `axiomancer-mechanics/src/World/LootCacheChoice/` — the engine
 
 ---
 
@@ -22,213 +17,89 @@
 (`selectHasActiveCache`). Navigation fires when a Loot Cache session is created;
 the screen auto-exits when the session clears.
 
-No swipe-back gesture (`gestureEnabled: false`).
+No swipe-back gesture (`gestureEnabled: false`) — same back-out-proof
+contract as `/rest`, since the map node consumes on entry, before any
+choice is made.
 
 ---
 
-## Session phases and layer map
+## Session phases
 
-The presenter (`selectCacheVM`) maps engine phase to a screen layer.
+The presenter (`selectCacheVM`) maps the engine's 3-phase machine straight
+onto the screen — no sub-flows, no picker sheets:
 
-| Engine phase | Screen state | Primary overlay |
-|---|---|---|
-| `intro` | Cache intro card | IntroOverlay (kneel button) |
-| `delving` | Layer stack + delve/seal bar | *(main decision surface)* |
-| `picking` | Layer stack + dice tray | *(the tactile centerpiece)* |
-| `card` | Layer stack | NarrativeCardOverlay |
-| `outcome` | — | OutcomeOverlay |
-| `done` | *(auto-exit)* | — |
-
----
-
-## Public information — no more hidden trap fate
-
-The Pick Pool redesign removed hidden trap fates entirely: every layer's
-`difficulty` (the progress target its lock demands) is shown from the moment
-the cache opens. There is no probe, no "sealed/live/dud" reading, and nothing
-for the presenter to gate — `CacheLayerVM.difficulty` is always populated.
-Risk now lives entirely in the live dice-pool roll (slip odds, jam odds),
-which is genuinely unknown to the player until the dice land.
-
----
-
-## Intro overlay
-
-Shown at the `intro` phase. Flavor text for the cache. Single CTA: "KNEEL AND
-BEGIN" fires `startLootCacheDelving()` (engine: `beginLootCache`).
-
----
-
-## Layer stack (persistent surface)
-
-Three `CacheLayerVM` tiles rendered as a vertical stack. Each tile shows:
-
-- Layer name (THE LID / THE FALSE BOTTOM / THE KEEPER'S TITHE)
-- Flavor text
-- `difficulty` — always visible (`LOCK · N`)
-- `reading` chip:
-  - `locked` — not yet attempted this session
-  - `picking` — the active lock, mid-attempt (dice tray is live)
-  - `cracked` — opened clean, loot visible
-  - `sprung` — the pick jammed; that layer's loot spoiled
-  - `retreated` — closed without opening; no bite, no loot
-- Loot summary (shown only once `opened` and not `spoiled`)
-
-While a layer reads `picking`, its tile also renders an inline
-**`CacheProgressMeter`** — a fill bar showing `progress` / `difficulty` that
-animates its width with `withTiming` on every push that lands.
-
-**Action bar** (visible during `delving` phase, between picks):
-
-| Button | testID | Enabled when | Action |
-|---|---|---|---|
-| DELVE DEEPER | `cache-delve` | `canDelve` | `delveLootCache()` → opens the next lock, enters `picking` (does not roll) |
-| TAKE WHAT'S LIFTED AND GO | `cache-seal` | `canSeal` | `sealLootCache()` |
-
-`canDelve` is false once every layer is opened or closed. `canSeal` is true
-throughout `delving`.
-
----
-
-## Picking phase — the dice tray
-
-The tactile heart of the encounter. While `phase === 'picking'`:
-
-- **Dice tray** (`components/cache/CacheDie.tsx`, `testID="cache-dice-tray"`):
-  renders `LOOT_CACHE_TUNING.pickPoolSize` dice (+1 bonus die once Insight is
-  spent), each a hand-drawn `react-native-svg` pip face (`Circle`/`Rect`
-  primitives, classic 1-6 arrangement). Dice sit idle (face 6, no slip tint)
-  until the first push.
-- **PUSH** (`cache-push`, primary): rolls the pool. On press: `Haptics.
-  impactAsync(Light)`. Every die then plays a staggered tumble — a
-  `withSequence` of rotate/translateY/scale via reanimated — before settling
-  on the values from `lastRoll.dice`. This is the single most important
-  animation in the encounter; each die's tumble is offset by ~60ms per index
-  so the tray doesn't snap in lockstep.
-- **Slip treatment**: any die showing `1` renders its pips blood-tinted and
-  dimmed. When `slips` is one below the jam threshold (best-effort — see the
-  status note above), the roll readout's slip count pulses blood-red
-  (`onEdge`) to build tension before the next push.
-- **Roll readout**: below the tray, `+N PROGRESS` and, if any dice slipped,
-  `N SLIP(S)` (with the "— ONE FROM A JAM" tag when on the edge).
-- **STEADY THE HAND** (`cache-insight`, visible only while
-  `canChannelInsight`): the one-time Insight charge — spends it for a bonus
-  die on the *next* push. Must be tapped before the first push on a layer
-  (`pushes === 0`). Disappears once spent for the session.
-- **PULL THE PICK BACK** (`cache-retreat`, secondary): abandons the current
-  layer's attempt cleanly — no loot, no bite, layer reads `retreated`.
-
-Resolution haptics fire once a push resolves:
-
-| Outcome | Haptic |
+| Engine phase | Screen state |
 |---|---|
-| Layer cracked (progress ≥ difficulty) | `Haptics.notificationAsync(Success)` |
-| Pick jammed | `Haptics.notificationAsync(Error)` + `Haptics.impactAsync(Heavy)` |
-| Progress added, no resolution yet | `Haptics.impactAsync(Medium)` |
+| `offer` | Three offer buttons: TAKE A CARD / TAKE THE GOODS / LEAVE IT FOR THE VILLAGE |
+| `outcome` | Outcome panel with the settled grant (or goodwill tick) + a claim button |
+| `done` | *(auto-exit)* |
 
 ---
 
-## Narrative card overlay
+## Offer buttons
 
-Fires once a layer resolves — cracked, jammed, or (per current engine
-semantics) other card-worthy beats (`card` phase). Shows `CacheCardVM`:
+Shown at the `offer` phase. All three are always enabled — nothing here can
+be unaffordable or capped, unlike `RestChoice`'s `cut`. Tapping one commits
+straight to `outcome` (the card/item candidates were already rolled when the
+session opened).
 
-- `title` and `body` — authored layer narrative, updated for pick-pool
-  resolutions (e.g. "THE TRAP KEEPS ITS PROMISE" for a jam; a clean-crack
-  variant per layer)
-- `deltaChips[]` — compact accounting chips:
-  - `+ ITEM NAME` for each item found
-  - `+N SHILLINGS` for currency
-  - `+ KEEPSAKE` if a keepsake is minted
-  - `−N VITAE` if the pick bit
-- `slammed` flag — if true, the card's dismiss closes the cache (no further
-  delving)
+| Offer | testID | Label | Desc |
+|---|---|---|---|
+| `card` | `cache-choice-offer-card` | TAKE A CARD | One card, straight into the deck. |
+| `item` | `cache-choice-offer-item` | TAKE THE GOODS | Whatever's inside, plus what it's worth. |
+| `sacrifice` | `cache-choice-offer-sacrifice` | LEAVE IT FOR THE VILLAGE | Take nothing. It's noted. |
 
-Dismiss → `continueLootCacheCard()`.
-
----
-
-## Outcome overlay
-
-Shown at `outcome` phase. Renders `CacheOutcomeVM`:
-
-- Tier label: `EMPTIED` / `PRUDENT` / `STUNG`
-- Items kept (names)
-- Currency kept (shillings)
-- VITAE bitten total
-- Keepsakes minted
-- Layers opened count
-
-CTA → `claimLootCacheOutcome()`.
+Copy lives in `state/presenters/cache.copy.ts` (`CACHE_CHOICE_OFFER_LABEL`
+/ `CACHE_CHOICE_OFFER_DESC`), same placeholder-voice doctrine as
+`rest.copy.ts`.
 
 ---
 
-## Outcome tiers (as surfaced by mobile presenter)
+## Outcome panel
 
-| Code | Label | Condition |
-|---|---|---|
-| `emptied` | EMPTIED | All three locks cracked clean |
-| `prudent` | PRUDENT | Sealed or retreated early; never bitten |
-| `stung` | STUNG | Any pick jammed |
+Shown at `outcome` phase (`testID="cache-outcome"`). Renders
+`CacheChoiceOutcomeVM`:
+
+- `label` — the chosen offer's display name
+- `cardName` — set iff `card` was chosen; rendered as a `+ CARD NAME` chip
+- `itemNames` / `currency` — set iff `item` was chosen; one `+ ITEM NAME`
+  chip per item, plus a `+N SHILLINGS` chip if currency > 0
+- `goodwillPreview` — set iff `sacrifice` was chosen; the current map's
+  tally AFTER this claim (`state.mapGoodwill[currentMap] + 1`, computed by
+  the presenter since the pure engine doesn't know the map or the running
+  count), rendered as a `HELPED <MAP> N TIMES` chip
+
+CTA (`cache-claim`) → `claimLootCacheChoiceOutcome()`.
 
 ---
 
-## Presenter — CacheVM
+## Presenter — CacheChoiceVM
 
-Entry: `selectCacheVM({ cache })` in `state/presenters/cache.engine.ts`.
-
-Key VM sub-shapes:
+Entry: `selectCacheVM({ cache, mapGoodwill, world })` in
+`state/presenters/cache.engine.ts` — reads more of the store than
+`selectRestVM` does, specifically to preview the sacrifice offer's goodwill
+tally before claim.
 
 ```typescript
-CacheLayerVM {
-  index                       // 0 | 1 | 2
-  name, flavor
-  difficulty                  // public from the start
-  reading                     // 'locked' | 'picking' | 'cracked' | 'sprung' | 'retreated'
-  opened
-  isNext
-  lootSummary                 // null until opened; "spoiled by the jam" if sprung
+CacheChoiceOfferVM {
+  id                           // 'card' | 'item' | 'sacrifice'
+  label, desc
 }
 
-CachePickVM {
-  layerIndex
-  difficulty
-  progress
-  progressFraction            // 0-1, for the fill bar
-  pushes, maxPushes, pushesRemaining
-  poolSize                    // pickPoolSize (+1 once insight is spent)
-  canPush, canRetreat, canChannelInsight
-  insightUsed, insightPending
-  lastRoll                    // { dice, slips, gained, jammed } | null
+CacheChoiceOutcomeVM {
+  chosen                        // LootCacheChoiceOfferId
+  label
+  cardName                      // string | null — set iff chosen === 'card'
+  itemNames                     // readonly string[] — non-empty iff chosen === 'item'
+  currency                      // >0 iff chosen === 'item'
+  goodwillPreview                // number | null — set iff chosen === 'sacrifice'
 }
 
-CacheCardVM {
-  title, body
-  deltaChips                  // readonly string[]
-  slammed                     // cache will close after dismiss
-}
-
-CacheOutcomeVM {
-  tier                        // LootCacheOutcomeTier
-  tierLabel
-  itemNames                   // readonly string[]
-  currency, bittenVitae
-  keepsakes                   // readonly string[]
-  layersOpened
-}
-```
-
-Top-level `CacheVM`:
-```typescript
-CacheVM {
+CacheChoiceVM {
   active, phase
-  layers                      // readonly CacheLayerVM[]
-  depth                       // current layer index
-  insightUsed
-  canDelve, canSeal
-  pick                        // CachePickVM | null — non-null only during 'picking'
-  card                        // CacheCardVM | null
-  outcome                     // CacheOutcomeVM | null
+  offers                        // readonly CacheChoiceOfferVM[] — always all 3
+  outcome                       // CacheChoiceOutcomeVM | null
+  description                   // the authored MapEvent one-liner, or null
 }
 ```
 
@@ -239,39 +110,49 @@ CacheVM {
 `state/cache/store-actions.ts`:
 
 ```
-beginLootCacheAction(items, currency)        ← called by resolveCurrentMapEvent; seeds session
-startLootCacheDelvingAction()                ← intro → delving
-delveLootCacheAction()                       ← open next layer: delving → picking (no roll)
-pushLootCachePickAction()                    ← roll the pool; resolves or continues picking
-channelLootCacheInsightAction()              ← spend the one Insight charge (before first push)
-retreatLootCachePickAction()                 ← abandon the current pick attempt cleanly
-sealLootCacheAction()                        ← close, keep collected loot
-continueLootCacheCardAction()                ← advance past narrative card
-claimLootCacheOutcomeAction()                ← apply world-state delta, clear session
+beginLootCacheChoiceAction(currency?, description?, tier?, seed?)  ← called by resolveCurrentMapEvent; rolls both candidates, seeds session
+chooseLootCacheChoiceOfferAction(offer)                            ← offer -> outcome
+claimLootCacheChoiceOutcomeAction()                                ← apply the grant (or goodwill tick), clear session, persist
 ```
 
-**State restoration:** the engine's `resolveMapEvent` applies the authored item and
-currency grant to `result.state`. Mobile reverts this pre-event player state and
-re-applies only what the cache outcome authorizes (supporting session abandonment
-without double-granting).
+**State restoration:** the engine's `resolveMapEvent` applies the authored
+item/currency grant to `result.state` as a decoy (same shape `resolveRest`'s
+passive heal has). Mobile reverts this pre-event player state and re-applies
+only what the chosen offer authorizes at claim.
+
+**Card/item candidates are rolled once, at `beginLootCacheChoiceAction`
+time** — not re-rolled per offer tap. The `card` candidate rolls via
+`Math.random` (same as the post-combat card-reward draft); the `item`
+candidates roll via `rollCacheReward` seeded off the resolved cache seed
+(`resolveMinigameSeed('cache', ...)`, `__AXM_CACHE_SEED__` dev override) —
+so hermetic tests can still pin the item roll, even though the card roll is
+not part of the seed-replay contract.
 
 ---
 
-## Removed concepts (Pick Pool redesign, 2026-07)
+## Removed concepts (Phase 63 — Pick Pool retired)
 
 The following no longer exist anywhere in mobile cache code — if you see a
 reference to one, it's stale:
 
-- `probeLootCache` / `probeUsed` / `cache-probe` — no more probe; difficulty
-  is public from the start.
-- `CacheLayerReading` values `sealed` / `live` / `dud` — replaced by
-  `locked` / `picking` / `cracked` / `sprung` / `retreated`.
-- Instant, silent trap resolution on delve — `delveLootCache` now opens the
-  lock into a live `picking` phase instead of resolving immediately.
+- The entire dice-pool session: `intro` / `delving` / `picking` / `card`
+  phases, `CacheLayerVM`, `CachePickVM`, `CacheCardVM`, layer stack,
+  dice tray (`components/cache/CacheDie.tsx`), progress meter
+  (`CacheProgressMeter.tsx`).
+- The guided first-delve tutorial: `CACHE_TUTORIAL_FLAG`,
+  `CACHE_TUTORIAL_SEED/TIER/CURRENCY`, `CacheTutorialCoach`,
+  `tutorial-steps.ts`, the DEBUG · TUTORIAL button. Three labeled offer
+  buttons need no coach.
+- Opaque item refs (`CacheItemRef`, the `stash` lookup table on
+  `MobileCacheSlice`) — the new engine deals in real `Item`s directly.
+- `LootCacheOutcomeTier` (`emptied` / `prudent` / `stung`) and
+  `CACHE_TIER_LABELS` — there is no tiered outcome anymore, only which
+  offer was chosen.
 
 ---
 
 ## ADR references
 
-- **ADR-0001** — engine truth boundary: mobile presenter is mapping only; never recomputes rules. (The presenter is no longer a hidden-information leak boundary post-redesign, since difficulty is public; it remains the sole mapper from engine session → render-ready VM.)
+- **ADR-0001** — engine truth boundary: mobile presenter is mapping only; never recomputes rules.
 - **ADR-0003** — mobile does not invent mechanics; file issue if the engine is missing something.
+- **ADR-0008** (mechanics repo) — now HISTORICAL; documents the retired Pick Pool design this phase replaced.

@@ -58,17 +58,8 @@ function DebugCacheRow() {
                 <Text style={styles.sub}>start the reliquary (10 shillings seeded)</Text>
             </View>
             <Pressable
-                style={[styles.button, styles.tutorialButton]}
-                onPress={() => actions.beginLootCache({ tutorial: true })}
-                accessibilityRole="button"
-                accessibilityLabel="Start the loot-cache tutorial session"
-                testID="debug-cache-tutorial-button"
-            >
-                <Text style={[styles.buttonLabel, styles.tutorialLabel]}>TUTORIAL</Text>
-            </Pressable>
-            <Pressable
                 style={styles.button}
-                onPress={() => actions.beginLootCache({ currency: 10 })}
+                onPress={() => actions.beginLootCacheChoice({ tier: 'modest', currency: 10 })}
                 accessibilityRole="button"
                 accessibilityLabel="Start a debug loot-cache encounter"
                 testID="debug-cache-button"
@@ -119,6 +110,4 @@ const useStyles = makeStyles((AXM) => ({
         backgroundColor: 'rgba(134,168,33,0.08)',
     },
     buttonLabel: { fontFamily: FONTS.gothic, fontSize: 14, letterSpacing: 2, color: '#86a821' },
-    tutorialButton: { borderColor: AXM.sulfur, backgroundColor: AXM.sulfurSubtle, marginRight: 6 },
-    tutorialLabel: { color: AXM.sulfur },
 }));

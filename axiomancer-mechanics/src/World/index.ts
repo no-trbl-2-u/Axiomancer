@@ -105,9 +105,6 @@ export type { ApplyDialogueChoiceResult } from './dialogue.runtime';
 // Hazard Minigame (Phase 131)
 export * from './Hazard';
 
-// Quest Board minigame, Loot-cache encounter (Phase 137)
-export * from './LootCache';
-
 // The Labyrinth — THE APORIA (W-01). The pools module self-registers the
 // three acts' MapEvent pools on import, mirroring the content import above.
 import './Labyrinth/labyrinth.pools';

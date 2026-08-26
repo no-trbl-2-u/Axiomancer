@@ -1,239 +1,148 @@
 /**
- * Loot-cache encounter ("The Reliquary") — store action glue.
+ * Loot-cache-choice encounter ("The Reliquary", Phase 63) — store action
+ * glue, replacing the retired Pick Pool dice-pool minigame.
  *
- * The pure engine lives in `axiomancer-mechanics` (World/LootCache);
- * these wrappers thread the cache through the mobile `cache` slice.
- * The engine deals in item REFS — the slice's `stash` keeps the real
- * `Item`s behind those refs so claim can map kept uids back into the
- * inventory. Trap bites settle at claim and never kill: vitae floors
- * at 1 (the cache maims, it does not kill — same doctrine as the
- * hazard and gathering minigames).
+ * The pure engine lives in `axiomancer-mechanics` (World/LootCacheChoice);
+ * these wrappers thread the cache node's one irreversible choice — `card`
+ * (a rolled reward card) / `item` (a tier-scaled consumable haul + the
+ * node's currency) / `sacrifice` (nothing to the player; increments the
+ * per-map goodwill tally) — through the mobile `cache` slice. The engine
+ * never reads `GameState`; both candidates (the card to offer, the items to
+ * offer) are rolled here, before the session opens, exactly mirroring how
+ * `state/rest/store-actions.ts` rolls `deckCardIds` before creating a
+ * `RestChoiceSession`.
  */
 
-import type { GameState, Item } from '@mechanics';
+import type { Character, GameState, Item } from '@mechanics';
 
 import {
-    beginLootCache as engineBegin,
-    channelLootCacheInsight as engineChannelInsight,
-    claimLootCacheOutcome as engineClaim,
-    continueLootCacheCard as engineContinue,
-    createLootCacheSession,
-    delveLootCache as engineDelve,
-    pushLootCachePick as enginePushPick,
-    retreatLootCachePick as engineRetreatPick,
-    sealLootCache as engineSeal,
+    addRewardCard,
+    chooseLootCacheChoiceOffer as engineChooseOffer,
+    claimLootCacheChoiceOutcome as engineClaim,
+    createLootCacheChoiceSession,
+    rollCacheReward,
+    rollCombatCardRewards,
 } from '@mechanics';
-import type { CacheItemRef, LootCacheOutcomeTier, LootCacheSession } from '@mechanics';
+import type { CacheLootTier, LootCacheChoiceOfferId, LootCacheChoiceOutcome, LootCacheChoiceSession } from '@mechanics';
 import { resolveMinigameSeed } from '../minigame-seeds';
 import { EMPTY_CACHE_SLICE, type AppStore } from '../store';
-import { rollCacheReward, type CacheLootTier } from '@mechanics';
-
-/** Flag prefix banking a keeper's keepsake. */
-export const CACHE_KEEPSAKE_FLAG_PREFIX = 'cache-keepsake:';
-
-/** Flag set once the guided first delve is completed or skipped. */
-export const CACHE_TUTORIAL_FLAG = 'cache-tutorial-done';
 
 /**
- * The tutorial session is pinned so the coach script always matches the
- * board: seed 1's first pick pool on THE LID (difficulty 5) rolls
- * `[6, 1, 2]` — one slip, eight progress — cracking the layer clean on
- * the very first push without ever brushing the jam threshold (2 slips).
+ * Flag prefix banking a keeper's keepsake. Historical only — the retired
+ * Pick Pool engine minted these on its deepest layer; the sacrifice offer
+ * does not mint a new one (the goodwill counter itself is the record).
+ * `/memoir`'s REMAINS section still reads old ones back.
  */
-export const CACHE_TUTORIAL_SEED = 1;
-export const CACHE_TUTORIAL_TIER: CacheLootTier = 'modest';
-export const CACHE_TUTORIAL_CURRENCY = 4;
+export const CACHE_KEEPSAKE_FLAG_PREFIX = 'cache-keepsake:';
 
 /**
  * Dev/test seed override (`globalThis.__AXM_CACHE_SEED__`), mirroring
- * the hazard/gathering/quest hooks.
+ * the hazard/rest/blacksmith hooks. Seeds the `item` offer's
+ * `rollCacheReward` roll; the `card` offer rolls via `Math.random` like
+ * every other card-reward draft (`rollCombatRewardAction`) — card offers
+ * were never part of the minigame seed-replay contract.
  */
 declare global {
     // eslint-disable-next-line no-var
     var __AXM_CACHE_SEED__: number | undefined;
 }
 
-function setSession(store: AppStore, session: LootCacheSession | null): void {
-    const prev = store.getState().cache ?? EMPTY_CACHE_SLICE;
-    store.setState({ cache: { ...prev, session } });
+function setSession(store: AppStore, session: LootCacheChoiceSession | null): void {
+    store.setState({ cache: { session } });
 }
 
-export interface BeginLootCacheOptions {
-    /** The authored payload loot (deep-cloned by the engine handler upstream). */
-    items?: readonly Item[];
+export interface BeginLootCacheChoiceOptions {
+    /** The authored node's currency (offered whole by the `item` branch). */
     currency?: number;
+    /** The authored MapEvent one-liner. */
+    description?: string | null;
+    /** Reward depth for the `item` offer's roll — caller derives from the current map. */
+    tier?: CacheLootTier;
     seed?: number;
-    /**
-     * Phase 129 — roll a real engine-truth loot/relic reward set
-     * scaled to the player's level instead of a static roster. Ignored
-     * when an explicit `items` list is passed (authored set pieces /
-     * dev paths win). The tier scales item count + the unique chance;
-     * the engine owns rarity. See `state/cache/loot-table.ts`.
-     */
-    lootTable?: { tier: CacheLootTier };
-    /** Start the guided first delve (pinned seed + tier/currency unless overridden). */
-    tutorial?: boolean;
 }
 
-export function beginLootCacheAction(store: AppStore, options: BeginLootCacheOptions = {}): boolean {
+/** Start a loot-cache-choice node. One cache at a time. */
+export function beginLootCacheChoiceAction(store: AppStore, options: BeginLootCacheChoiceOptions = {}): boolean {
     const state = store.getState();
-    if (state.cache?.session) return false; // one cache at a time
-    const seed = resolveMinigameSeed(
-        'cache',
-        options.seed,
-        globalThis.__AXM_CACHE_SEED__,
-        options.tutorial ? CACHE_TUTORIAL_SEED : undefined,
-    );
+    if (state.cache?.session) return false;
+    const seed = resolveMinigameSeed('cache', options.seed, globalThis.__AXM_CACHE_SEED__);
 
-    // Explicit authored items win; otherwise roll the level-scaled table
-    // when the caller opts in (organic play) or this is the pinned
-    // tutorial delve (fixed 'modest' tier). Falls back to an empty list
-    // (currency-only cache) when neither applies.
-    let items: readonly Item[] = options.items ?? [];
-    if (options.items === undefined) {
-        const lootTable = options.lootTable ?? (options.tutorial ? { tier: CACHE_TUTORIAL_TIER } : undefined);
-        if (lootTable) {
-            const playerLevel = (state as unknown as GameState).player?.level ?? 1;
-            items = rollCacheReward({ playerLevel, seed, tier: lootTable.tier });
-        }
-    }
-    const currency = options.currency ?? (options.tutorial ? CACHE_TUTORIAL_CURRENCY : 0);
-    const stash: Record<string, Item> = {};
-    const refs: CacheItemRef[] = items.map((item, i) => {
-        const uid = `cache-${i}`;
-        stash[uid] = item;
-        return { uid, name: item.name };
-    });
+    const player = (state as unknown as GameState).player;
+    const tier = options.tier ?? 'modest';
+    const itemCandidates = rollCacheReward({ playerLevel: player?.level ?? 1, seed, tier });
+    const cardCandidate = rollCombatCardRewards(player as Character, Math.random, 1)[0];
 
-    store.setState({
-        cache: {
-            session: createLootCacheSession(seed, refs, currency),
-            stash,
-            tutorial: options.tutorial === true,
-        },
-    });
+    setSession(store, createLootCacheChoiceSession(seed, {
+        cardCandidate,
+        itemCandidates,
+        currencyCandidate: options.currency ?? 0,
+        description: options.description,
+    }));
     return true;
 }
 
-/**
- * Marks the guided first delve as done (completed or skipped): sets the
- * persistent flag so the map trigger never re-runs it, and persists. The
- * session (if any) keeps running as normal play.
- */
-export function completeLootCacheTutorialAction(store: AppStore, skipped: boolean): void {
-    const state = store.getState() as unknown as GameState;
-    if (!(state.flags ?? []).includes(CACHE_TUTORIAL_FLAG)) {
-        store.setState({ flags: [...(state.flags ?? []), CACHE_TUTORIAL_FLAG] } as never);
-        try {
-            store.getState().save();
-        } catch {
-            // Persistence failures must not strand the coach.
-        }
-    }
-    void skipped;
-}
-
-/** The find acknowledged: intro → delving. */
-export function startLootCacheDelvingAction(store: AppStore): void {
+/** offer -> outcome. Commits ONE offer — the other two vanish. */
+export function chooseLootCacheChoiceOfferAction(store: AppStore, offer: LootCacheChoiceOfferId): void {
     const s = store.getState().cache?.session;
     if (!s) return;
-    setSession(store, engineBegin(s));
+    setSession(store, engineChooseOffer(s, offer));
 }
 
-export function delveLootCacheAction(store: AppStore): void {
-    const s = store.getState().cache?.session;
-    if (!s) return;
-    setSession(store, engineDelve(s));
-}
-
-/** Rolls the pick pool against the active layer's lock: resolves or continues picking. */
-export function pushLootCachePickAction(store: AppStore): void {
-    const s = store.getState().cache?.session;
-    if (!s) return;
-    setSession(store, enginePushPick(s));
-}
-
-/** Spends the one per-session Insight charge for a bonus die on the next push. */
-export function channelLootCacheInsightAction(store: AppStore): void {
-    const s = store.getState().cache?.session;
-    if (!s) return;
-    setSession(store, engineChannelInsight(s));
-}
-
-/** Abandons the current layer's pick attempt cleanly — no loot, no bite. */
-export function retreatLootCachePickAction(store: AppStore): void {
-    const s = store.getState().cache?.session;
-    if (!s) return;
-    setSession(store, engineRetreatPick(s));
-}
-
-export function sealLootCacheAction(store: AppStore): void {
-    const s = store.getState().cache?.session;
-    if (!s) return;
-    setSession(store, engineSeal(s));
-}
-
-export function continueLootCacheCardAction(store: AppStore): void {
-    const s = store.getState().cache?.session;
-    if (!s) return;
-    setSession(store, engineContinue(s));
-}
-
-export interface ClaimLootCacheResult {
+export interface ClaimLootCacheChoiceResult {
     applied: boolean;
-    itemsAdded: number;
-    currency: number;
-    bittenVitae: number;
-    tier: LootCacheOutcomeTier | null;
-    keepsakes: readonly string[];
+    outcome: LootCacheChoiceOutcome | null;
+    /** The current map's new goodwill tally — set only when `outcome.sacrificed`. */
+    goodwill: number | null;
 }
 
-const NOOP_CLAIM: ClaimLootCacheResult = Object.freeze({
+const NOOP_CLAIM: ClaimLootCacheChoiceResult = Object.freeze({
     applied: false,
-    itemsAdded: 0,
-    currency: 0,
-    bittenVitae: 0,
-    tier: null,
-    keepsakes: Object.freeze([]),
+    outcome: null,
+    goodwill: null,
 });
 
 /**
- * Confirms the ledger and applies the find to the engine `GameState`:
- * kept refs map back to real items, currency lands, the bite settles
- * (vitae floors at 1), keepsakes bank as flags. Clears the slice and
- * persists.
+ * Confirms the outcome ledger and applies the cache node to the engine
+ * `GameState`: `card` appends the rolled card to the deck, `item` appends
+ * the rolled items + currency to the inventory, `sacrifice` increments the
+ * current map's goodwill tally. Clears the slice and persists.
  */
-export function claimLootCacheOutcomeAction(store: AppStore): ClaimLootCacheResult {
-    const slice = store.getState().cache;
-    const s = slice?.session;
-    if (!slice || !s || !s.outcome) return NOOP_CLAIM;
+export function claimLootCacheChoiceOutcomeAction(store: AppStore): ClaimLootCacheChoiceResult {
+    const s = store.getState().cache?.session;
+    if (!s || s.phase !== 'outcome' || !s.outcome) return NOOP_CLAIM;
     const done = engineClaim(s);
     if (done.phase !== 'done') return NOOP_CLAIM;
 
     const outcome = s.outcome;
     const state = store.getState() as unknown as GameState;
-    const player = state.player;
+    let player: Character = state.player;
+    let goodwill: number | null = null;
 
-    const keptItems = outcome.itemsKept
-        .map(ref => slice.stash[ref.uid])
-        .filter((item): item is Item => item !== undefined);
-
-    let flags = state.flags ?? [];
-    for (const keepsake of outcome.keepsakes) {
-        const flag = `${CACHE_KEEPSAKE_FLAG_PREFIX}${keepsake}`;
-        if (!flags.includes(flag)) flags = [...flags, flag];
+    if (outcome.chosen === 'card' && outcome.rewardCardId) {
+        player = addRewardCard(player, outcome.rewardCardId);
+    } else if (outcome.chosen === 'item') {
+        player = {
+            ...player,
+            inventory: [...player.inventory, ...(outcome.items as Item[])],
+            currency: player.currency + outcome.currency,
+        };
     }
 
-    store.setState({
-        player: {
-            ...player,
-            health: Math.max(1, player.health - outcome.bittenVitae),
-            currency: player.currency + outcome.currencyKept,
-            inventory: [...player.inventory, ...keptItems],
-        },
-        flags,
+    const patch: Record<string, unknown> = {
+        player,
         cache: EMPTY_CACHE_SLICE,
-    } as never);
+    };
+
+    if (outcome.chosen === 'sacrifice') {
+        const mapName = state.world?.currentMap?.name;
+        const prevGoodwill = state.mapGoodwill ?? {};
+        goodwill = mapName ? (prevGoodwill[mapName] ?? 0) + 1 : null;
+        if (mapName) {
+            patch.mapGoodwill = { ...prevGoodwill, [mapName]: goodwill };
+        }
+    }
+
+    store.setState(patch as never);
 
     try {
         store.getState().save();
@@ -241,18 +150,5 @@ export function claimLootCacheOutcomeAction(store: AppStore): ClaimLootCacheResu
         // Persistence failures must not strand the player on the ledger.
     }
 
-    return {
-        applied: true,
-        itemsAdded: keptItems.length,
-        currency: outcome.currencyKept,
-        bittenVitae: outcome.bittenVitae,
-        tier: outcome.tier,
-        keepsakes: outcome.keepsakes,
-    };
-}
-
-/** Clears the cache without loot or bites (dev / navigation escape). */
-export function abandonLootCacheAction(store: AppStore): void {
-    const prev = store.getState().cache ?? EMPTY_CACHE_SLICE;
-    store.setState({ cache: { ...prev, session: null, stash: {} } });
+    return { applied: true, outcome, goodwill };
 }

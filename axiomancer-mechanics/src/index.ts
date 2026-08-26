@@ -414,9 +414,6 @@ export * from './World/Hazard';
 // fiction; fully sandboxed, only the completion record flows back).
 // Seeded-RNG helpers are aliased (`questBoard*`) per the same doctrine.
 
-// Loot-cache encounter ("The Reliquary" — three layers, sealed trap
-// fates, one probe). RNG aliased `lootCache*`.
-export * from './World/LootCache';
 // Blacksmith encounter ("The Anvil" — Spec 33 §6 die-gear upgrades: HONE /
 // TEMPER / gear swap). RNG aliased `blacksmith*`.
 export * from './World/Blacksmith';
@@ -425,6 +422,10 @@ export * from './World/Blacksmith';
 // the Cards/card.removal primitive rather than rebuilding either. Replaced
 // the former rest minigame, retired in Phase 52e.
 export * from './World/RestChoice';
+// Loot-cache-choice encounter ("The Reliquary") — the cache node's one
+// irreversible choice of `card` / `item` / `sacrifice`. Replaced the
+// former Pick Pool dice-pool minigame, retired in Phase 63.
+export * from './World/LootCacheChoice';
 export {
     changeMap, completeMap, unlockMap,
     completeNode, unlockNode, changeContinent, completeUniqueEvent,

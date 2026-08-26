@@ -353,12 +353,12 @@ export function createGameStore(
                 const {
                     currentEncounter: _drop, version, runId, player, world, quests, flags,
                     moralMeter, rngState, philosophicalAlignment,
-                    lastSeenAlignmentCells, codex, regionConsequences, factionReputations,
+                    lastSeenAlignmentCells, codex, regionConsequences, factionReputations, mapGoodwill,
                 } = next;
                 adapter.save({
                     version, runId, player, world, quests, flags,
                     moralMeter, rngState, philosophicalAlignment,
-                    lastSeenAlignmentCells, codex, regionConsequences, factionReputations,
+                    lastSeenAlignmentCells, codex, regionConsequences, factionReputations, mapGoodwill,
                 });
             }
             return next;
@@ -535,12 +535,12 @@ export function createGameStore(
                 const {
                     currentEncounter: _drop, version, runId, player, world, quests, flags,
                     moralMeter, rngState, philosophicalAlignment,
-                    lastSeenAlignmentCells, codex, regionConsequences, factionReputations,
+                    lastSeenAlignmentCells, codex, regionConsequences, factionReputations, mapGoodwill,
                 } = next;
                 adapter.save({
                     version, runId, player, world, quests, flags,
                     moralMeter, rngState, philosophicalAlignment,
-                    lastSeenAlignmentCells, codex, regionConsequences, factionReputations,
+                    lastSeenAlignmentCells, codex, regionConsequences, factionReputations, mapGoodwill,
                 });
                 if (emitter) emitter.emit({ type: 'game:saved', payload: { state: next } });
             },

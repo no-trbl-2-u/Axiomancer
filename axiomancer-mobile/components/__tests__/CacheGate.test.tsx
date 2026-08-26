@@ -10,7 +10,7 @@
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { act, render } from '@testing-library/react-native';
 import React from 'react';
-import type { LootCacheSession } from '@mechanics';
+import type { LootCacheChoiceSession } from '@mechanics';
 
 import { CacheGate } from '@/components/CacheGate';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
@@ -46,16 +46,16 @@ function makeStore(): AppStore {
 
 function setActiveSession(store: AppStore) {
     // Create a minimal mock session to trigger the gate
-    const mockSession: LootCacheSession = {
-        phase: 'delving',
-        depth: 0,
-        insightUsed: false,
-        pick: null,
-        layers: [],
-        card: null,
+    const mockSession: LootCacheChoiceSession = {
+        phase: 'offer',
+        cardCandidate: 'spoiled-poultice',
+        itemCandidates: [],
+        currencyCandidate: 0,
+        description: null,
         outcome: null,
-    } as never;
-    
+        seed: 1,
+    };
+
     store.setState({
         cache: {
             ...EMPTY_CACHE_SLICE,

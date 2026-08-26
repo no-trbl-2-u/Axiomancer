@@ -11,17 +11,6 @@ import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { createAppActions, type AppActions } from '@/state/actions';
 import { createAppStore, type AppStore } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
-import type { Item } from '@mechanics';
-
-const LOOT: Item[] = [
-    {
-        id: 'seed-test-trinket',
-        name: 'Seed Test Trinket',
-        description: 'A deterministic bauble.',
-        category: 'material',
-        quantity: 1,
-    } as Item,
-];
 
 type SeedGlobals = typeof globalThis & {
     __AXM_MINIGAME_SEEDS__?: {
@@ -91,7 +80,7 @@ describe('minigame seed resolver precedence', () => {
         actions.beginRest();
         expect(store.getState().rest.session?.seed).toBe(203);
 
-        actions.beginLootCache({ items: LOOT, currency: 5 });
+        actions.beginLootCacheChoice({ tier: 'modest', currency: 5 });
         expect(store.getState().cache.session?.seed).toBe(204);
     });
 
@@ -103,7 +92,7 @@ describe('minigame seed resolver precedence', () => {
 
         const { store, actions } = makeStoreAndActions();
         actions.beginRest();
-        actions.beginLootCache({ items: LOOT, currency: 5 });
+        actions.beginLootCacheChoice({ tier: 'modest', currency: 5 });
 
         expect(store.getState().rest.session?.seed).toBe(303);
         expect(store.getState().cache.session?.seed).toBe(304);

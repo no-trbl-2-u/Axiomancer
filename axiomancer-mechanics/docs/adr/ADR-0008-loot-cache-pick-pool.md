@@ -1,9 +1,14 @@
 # ADR-0008 — Loot cache uses a public-information Pick Pool, not sealed trap fates
 
-- Status: Accepted; implemented (engine, sim, CLI, mobile cache screen)
+- Status: **HISTORICAL — the Pick Pool minigame this ADR documents was
+  retired in Phase 63 (2026-08-26)**, replaced by a plain three-offer
+  choice (card / item / sacrifice reward). Kept for the record of why the
+  sealed-fate design was rejected in favor of a live pick-pool, which is
+  itself now superseded. See `docs/encounters/loot-cache.md` for the live
+  rules.
 - Date: 2026-07-04
 - Supersedes: the original sealed-fate + free-probe loot-cache rule (never ADR'd)
-- Related: braindump `2026-07-03-lockpicking-treasure-minigame.md` (Option B chosen), `docs/encounters/loot-cache.md` (live rules), `docs/encounters/loot-cache-alt-hybrid-spec.md` (Option E, the unbuilt fallback)
+- Related: braindump `2026-07-03-lockpicking-treasure-minigame.md` (Option B chosen), `docs/encounters/loot-cache.md` (live rules)
 
 ## Context
 

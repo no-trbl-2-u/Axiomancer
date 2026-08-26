@@ -2,7 +2,7 @@
  * Hermetic component tests — DebugEncounterButtons.
  *
  * Pins the DEV gate + the action-routing contract: tapping
- * fires beginRest() and beginLootCache(), flipping the respective
+ * fires beginRest() and beginLootCacheChoice(), flipping the respective
  * session signals. The corresponding Gate components handle router
  * navigation.
  */
@@ -45,7 +45,6 @@ describe('DebugEncounterButtons: DEV gate', () => {
         const tree = render(withProviders(store, <DebugEncounterButtons />));
         expect(tree.queryByTestId('debug-rest-button')).not.toBeNull();
         expect(tree.queryByTestId('debug-cache-button')).not.toBeNull();
-        expect(tree.queryByTestId('debug-cache-tutorial-button')).not.toBeNull();
     });
 
     it('renders null when dev tools are disabled (production build simulation)', () => {
@@ -59,7 +58,6 @@ describe('DebugEncounterButtons: DEV gate', () => {
             const tree = render(withProviders(store, <DebugEncounterButtons />));
             expect(tree.queryByTestId('debug-rest-button')).toBeNull();
             expect(tree.queryByTestId('debug-cache-button')).toBeNull();
-            expect(tree.queryByTestId('debug-cache-tutorial-button')).toBeNull();
         } finally {
             buildProfile.isDevToolsEnabled = original;
         }
@@ -79,42 +77,29 @@ describe('DebugEncounterButtons: press routing', () => {
         expect(store.getState().rest?.session?.phase).toBe('offer');
     });
 
-    it('cache button calls beginLootCache — engine state has an active cache session afterwards', () => {
+    it('cache button calls beginLootCacheChoice — engine state has an active cache session afterwards', () => {
         const store = makeStore();
         expect(store.getState().cache?.session).toBeNull();
 
         const tree = render(withProviders(store, <DebugEncounterButtons />));
         fireEvent.press(tree.getByTestId('debug-cache-button'));
 
-        // After beginLootCache fires, the engine populates the cache slice.
+        // After beginLootCacheChoice fires, the engine populates the cache slice.
         expect(store.getState().cache?.session).not.toBeNull();
-        expect(store.getState().cache?.session?.phase).toBe('intro');
+        expect(store.getState().cache?.session?.phase).toBe('offer');
     });
 
-    it('cache tutorial button calls beginLootCache with tutorial option — session has tutorial flag', () => {
-        const store = makeStore();
-        expect(store.getState().cache?.session).toBeNull();
-
-        const tree = render(withProviders(store, <DebugEncounterButtons />));
-        fireEvent.press(tree.getByTestId('debug-cache-tutorial-button'));
-
-        const cacheState = store.getState().cache;
-        expect(cacheState?.session).not.toBeNull();
-        expect(cacheState?.tutorial).toBe(true);
-    });
-
-    it('cache button with seeded currency — session contains the requested currency', () => {
+    it('cache button with seeded currency — session carries the requested currency candidate', () => {
         const store = makeStore();
         expect(store.getState().cache?.session).toBeNull();
 
         const tree = render(withProviders(store, <DebugEncounterButtons />));
         fireEvent.press(tree.getByTestId('debug-cache-button'));
 
-        // The component hardcodes currency: 10, verify it's distributed to layers.
+        // The component hardcodes currency: 10.
         const cacheState = store.getState().cache;
         expect(cacheState?.session).not.toBeNull();
-        const totalCurrency = cacheState?.session?.layers.reduce((sum, layer) => sum + layer.loot.currency, 0) ?? 0;
-        expect(totalCurrency).toBeGreaterThan(0); // Should have some currency distributed across layers
+        expect(cacheState?.session?.currencyCandidate).toBe(10);
     });
 });
 
@@ -130,9 +115,5 @@ describe('DebugEncounterButtons: accessibility', () => {
         const cacheBtn = tree.getByTestId('debug-cache-button');
         expect(cacheBtn.props.accessibilityRole).toBe('button');
         expect(cacheBtn.props.accessibilityLabel).toMatch(/dig|cache|loot/i);
-
-        const cacheTutorialBtn = tree.getByTestId('debug-cache-tutorial-button');
-        expect(cacheTutorialBtn.props.accessibilityRole).toBe('button');
-        expect(cacheTutorialBtn.props.accessibilityLabel).toMatch(/cache|tutorial/i);
     });
 });

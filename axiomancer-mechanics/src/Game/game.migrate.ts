@@ -278,6 +278,28 @@ function migrateV18ToV19(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
+ * v19 → v20 (Phase 63): retire the loot-cache Pick Pool minigame ("The
+ * Reliquary"), replaced by `World/LootCacheChoice`'s three-offer choice.
+ * Clears a live cache session that rode along in the raw payload's `cache`
+ * key — that key is a mobile-only store slice, not a formal `GameState`
+ * field, so it is untyped here; a player mid-delve at update time simply
+ * lands with the node consumed and no session to return to (same shape the
+ * v18→v19 gathering hop uses). Also defaults the new required
+ * `mapGoodwill: Record<string, number>` slice to `{}` for saves that
+ * predate it. Pure over a raw save payload.
+ */
+function migrateV19ToV20(raw: Record<string, unknown>): Record<string, unknown> {
+    const { cache: _staleLootCacheSession, ...withoutCache } = raw;
+    return {
+        ...withoutCache,
+        mapGoodwill: (withoutCache.mapGoodwill && typeof withoutCache.mapGoodwill === 'object')
+            ? withoutCache.mapGoodwill
+            : {},
+        version: 20,
+    };
+}
+
+/**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
  * game). The name/signature is kept so the persistence layer's call site is
@@ -305,8 +327,9 @@ export function migrate(
     // v13 seeds the Phase-19 signet relics; v13 → v14 purges non-relic gear;
     // v14 → v15 backfills the die-gear rail; v15 → v16 defaults the card-removal
     // counter; v16 → v17 retires the rest minigame; v17 → v18 retires the
-    // Quest Board minigame; v18 → v19 retires the Gathering minigame.
-    // Chained so a v11 save lands at v19 in one call.
+    // Quest Board minigame; v18 → v19 retires the Gathering minigame; v19 →
+    // v20 retires the loot-cache Pick Pool minigame and adds `mapGoodwill`.
+    // Chained so a v11 save lands at v20 in one call.
     if (version === 11 && toVersion >= 12) {
         working = migrateV11ToV12(working);
         version = 12;
@@ -338,6 +361,10 @@ export function migrate(
     if (version === 18 && toVersion >= 19) {
         working = migrateV18ToV19(working);
         version = 19;
+    }
+    if (version === 19 && toVersion >= 20) {
+        working = migrateV19ToV20(working);
+        version = 20;
     }
 
     if (version !== toVersion) {

@@ -113,7 +113,7 @@ describe('start-node arrival: the map resolves the node it puts you on', () => {
         // /cutscene instead of /cache.
         const store = makeStore();
         const actions = createAppActions(store);
-        actions.beginLootCache({ items: [], currency: 25 });
+        actions.beginLootCacheChoice({ tier: 'modest', currency: 25 });
         expect(selectHasAnyActiveSession(store.getState())).toBe(true);
 
         mountExploration(store);
@@ -142,7 +142,7 @@ describe('start-node arrival: the map resolves the node it puts you on', () => {
             </AestheticModeProvider>,
         );
         // Mounted, decision still pending — now the caller opens its session.
-        act(() => { actions.beginLootCache({ items: [], currency: 25 }); });
+        act(() => { actions.beginLootCacheChoice({ tier: 'modest', currency: 25 }); });
         act(() => { jest.advanceTimersByTime(1); });
 
         expect(store.getState().event?.pending ?? null).toBeNull();

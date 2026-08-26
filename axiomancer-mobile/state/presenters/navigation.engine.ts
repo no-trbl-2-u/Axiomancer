@@ -140,7 +140,7 @@ export function selectNavigationViewModel(state: AppStoreState): NavigationViewM
  *
  * Each gate (`<EventGate>`, `<HazardGate>`, `<CacheGate>`, …) watches its own
  * slice and pushes its own route, and those slices are genuinely separate:
- * `beginLootCache` fills the CACHE slice and never touches `state.event`. So
+ * `beginLootCacheChoice` fills the CACHE slice and never touches `state.event`. So
  * "is something already happening?" cannot be answered by looking at the
  * event slice alone, and anything that assumes otherwise will fire into
  * another gate's flow.

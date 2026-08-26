@@ -129,30 +129,31 @@ in Phase 61; 'narration' joined in 2026-06):
 | `none`         | Consumed node (one-shot) or no pool registered.                            |
 
 Note (Phase 137): the engine handlers above remain the CLI map loop's
-behaviour. The mobile host intercepts `loot-cache` / `hazard` results
-and launches the dedicated minigames instead (`World/LootCache` "The
-Reliquary", `World/Hazard`); `rest` results launch the rest-choice
-screen (`World/RestChoice`, Phase 52c-d), which retired the former
-rest minigame in Phase 52e. (`quest` used to route to
+behaviour. The mobile host intercepts `hazard` results and launches the
+dedicated minigame instead (`World/Hazard`); `rest` results launch the
+rest-choice screen (`World/RestChoice`, Phase 52c-d), which retired the
+former rest minigame in Phase 52e; `loot-cache` results launch the
+loot-cache-choice screen (`World/LootCacheChoice`, Phase 63), which
+retired the former Pick Pool dice-pool minigame. (`quest` used to route to
 `World/QuestBoard` "The Boy's Almanac"; that kind and the minigame it
 launched were retired in Phase 61. `gathering` used to route to
 `World/Gathering` "The Gleaning"; the minigame was retired in Phase 76
 — the kind and its authored nodes stay, granting items inline with no
 screen detour.)
 
-Standalone CLI play loops (Phase 160b / 160c): the pure minigame engines are
-also driveable directly from the Node host as game-CLI subcommands —
-`npm run hazard` and `npm run loot-cache` (The Reliquary).
-The rest-choice node (Phase 52c-d) has no standalone CLI driver — it is a
-one-shot player choice, not a dealt/replayable session. Each shares the `src/CLI/io.ts` layer
+Standalone CLI play loops (Phase 160b / 160c): the pure hazard engine is
+also driveable directly from the Node host as a game-CLI subcommand —
+`npm run hazard`.
+The rest-choice and loot-cache-choice nodes (Phase 52c-d, Phase 63) have no
+standalone CLI driver — each is a one-shot player choice, not a
+dealt/replayable session. The hazard driver shares the `src/CLI/io.ts` layer
 (`--script` JSON / `--stdin` / `--json-events` / `--state-log`) and an
-`--auto` policy that reuses the matching `*.sim.ts` bot, so a person, a
-replay file, or an agent all drive them through one surface. The hazard
-harness additionally injects a custom draw bag: `--deck <id,id,…>` appends
+`--auto` policy that reuses `hazard.sim.ts`'s bot, so a person, a
+replay file, or an agent all drive it through one surface. It additionally
+injects a custom draw bag: `--deck <id,id,…>` appends
 acquired cards to the starter bag, while `--bag-file <path>` (a JSON array
 of card ids) replaces the whole bag for deterministic A/B runs; both
-validate ids against `HAZARD_DECK`. With the QuestBoard loop landed
-(Phase 160c), every Phase 137 minigame engine now has a Node play loop.
+validate ids against `HAZARD_DECK`.
 
 Hazard events now have accepted v0 minigame doctrine in
 [`docs/hazard-minigame.md`](./hazard-minigame.md): top/bottom route choice,
@@ -410,39 +411,19 @@ See `specs/23-map-events.md` for the spec and
 `src/World/MapEvents/e2e/map-events.engine.test.ts` for the hermetic
 walkthrough covering all eight kinds.
 
-## Loot-Cache Balance Simulation (Phase 160)
+## Minigame Balance Simulation history (Phase 160)
 
-The remaining Phase 137 minigame gained a deterministic policy-bot sim
-(`lootcache.sim.ts`), mirroring the gathering/hazard pattern. This gives
-every minigame a real sim for the `loot-cache-tuning` card to drive.
-The rest minigame's `rest.sim.ts` and the `rest-tuning` card it fed
-were retired in Phase 52e — the rest node is now a one-shot,
-deterministic player choice (`World/RestChoice`), not a
-balance-simulated minigame. The Quest Board minigame's `quest-board.sim.ts`
-and the `quest-board-tuning` card it fed were retired in Phase 61. The
-Gathering minigame's `gathering.sim.ts` and the `gathering-tuning` card
-it fed were retired in Phase 76 — the `gathering` node now grants its
-items inline with no balance-simulated minigame behind it.
-
-### Loot-Cache ("The Reliquary") — `lootcache.sim.ts`
-
-Push-your-luck on LIVE dice-pool risk, not hidden information: every layer's
-difficulty is public, and the player rolls a d6 "Pick Pool" against it,
-choosing after every roll whether to push, retreat, or (once per session)
-channel Insight for a bonus die. Three bots: **`greedy`** (always delve,
-always push, never retreats or channels Insight — richest raw take but most
-jammed), **`prudent`** (retreats after one push, stops delving once bitten —
-the safer, poorer floor), **`informed`** (plays like greedy but spends its one
-Insight charge on the deepest layer it attempts). The sim surfaced a real
-balance note: naively adding a bonus die while holding the jam-slip threshold
-fixed *raises* jam odds (more dice, same trigger), making Insight a
-net-negative "buy" — fixed by letting a channeled push's jam threshold rise
-with its bonus die. With that fix, the informed matches or beats greedy on RAW
-currency and wins decisively on **risk-adjusted value** (same loot, fewer
-jams). The report exposes both a `currencyGradient` and a `riskAdjusted`
-gradient (`avgCurrency − LOOT_CACHE_BITE_PENALTY × avgBitten`) so the tuning
-card can judge Insight's worth. Bands verified in
-`src/World/LootCache/e2e/lootcache.balance.sim.test.ts`.
+Four Phase 137 minigames once carried deterministic policy-bot sims feeding
+their own tuning skill: `rest.sim.ts` (`rest-tuning`, retired Phase 52e —
+the rest node is now a one-shot, deterministic player choice,
+`World/RestChoice`, not a balance-simulated minigame), `quest-board.sim.ts`
+(`quest-board-tuning`, retired Phase 61), `gathering.sim.ts`
+(`gathering-tuning`, retired Phase 76 — the `gathering` node now grants its
+items inline with no minigame behind it), and `lootcache.sim.ts`
+(`loot-cache-tuning`, retired Phase 63 — the `loot-cache` node is now a
+one-shot, deterministic player choice, `World/LootCacheChoice`, same shape
+as rest). Only the hazard minigame still carries a live balance-sim + tuning
+skill (`hazard.sim.ts`, `/hazard-tuning`).
 
 ## See Also
 

@@ -10,7 +10,6 @@ import { describe, expect, it } from 'vitest';
 
 import { createHazardSession } from '../Hazard/hazard.engine';
 import { hazardStarterBag } from '../Hazard/hazard.deck-flags';
-import { createLootCacheSession } from '../LootCache/lootcache.engine';
 import { minigameRunSeed, seedInputToUint32, type SeedInput } from '../seed';
 
 function scrubSeed<T>(value: T): unknown {
@@ -51,9 +50,10 @@ describe('minigame engine seed contract', () => {
     // given its inputs — no dealt state depends on the seed, so this
     // contract doesn't apply to it.
 
-    it('LootCache sessions accept string seeds and replay sealed trap fates', () => {
-        expectReplayable('LootCache', seed => createLootCacheSession(seed, [{ uid: 'i1', name: 'Iron Charm' }], 6));
-    });
+    // Loot-cache-choice (Phase 63, replacing the retired Pick Pool
+    // dice-pool minigame) has no entry here either, for the same reason as
+    // rest-choice: `createLootCacheChoiceSession` is deterministic given
+    // its host-rolled inputs — no dealt state depends on the seed.
 
     // QuestBoard (Phase 61 — the minigame is retired) had an entry here;
     // removed along with `World/QuestBoard/`.

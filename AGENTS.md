@@ -90,19 +90,20 @@ consumer gates locally anyway — CI catching a break means it already reached
 
 The
 mechanics-only tuning skills (`combat-playtest`, `deck-tuning`,
-`hazard-tuning`, `loot-cache-tuning`,
+`hazard-tuning`,
 `world-tuning`) each carry a closing step that
 references this checklist rather than re-deriving it — update it here
 first if the mechanics subsystem list changes. `rest-tuning` was
-retired in Phase 52e, `quest-board-tuning` in Phase 61, and
-`gathering-tuning` in Phase 76, each along with the minigame it tuned.
+retired in Phase 52e, `quest-board-tuning` in Phase 61,
+`gathering-tuning` in Phase 76, and `loot-cache-tuning` in Phase 63,
+each along with the minigame it tuned.
 
 ## Root `.claude/`
 
 Live, at the repo root:
 - `.claude/commands/` — domain **slash commands** (tuning + playtest): mechanics
   `combat-playtest`, `deck-tuning`, `hazard-tuning`,
-  `loot-cache-tuning`, `world-tuning`; mobile
+  `world-tuning`; mobile
   `critic-loop`, `deep-playtest`, `combat-ux-tuning`, `hermes-playtest`. Each is
   self-contained and carries a header naming the package it runs against (paths
   are package-relative — `cd` there or use `-w`). `combat-tuning`,

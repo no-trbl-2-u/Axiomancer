@@ -14,7 +14,7 @@ import {
 } from '@mechanics';
 
 import type { HazardSessionState } from '@mechanics';
-import type { BlacksmithSession, Item, LootCacheSession, RestChoiceSession } from '@mechanics';
+import type { BlacksmithSession, LootCacheChoiceSession, RestChoiceSession } from '@mechanics';
 import type { LabyrinthActId, WorldState } from '@mechanics';
 
 /**
@@ -105,16 +105,14 @@ export interface MobileRestSlice {
 }
 
 /**
- * Mobile-only Loot-cache encounter slice ("The Reliquary"). Holds the
- * active cache (engine: World/LootCache) — `null` outside one. The
- * engine deals in item REFS; `stash` keeps the real `Item`s behind
- * those refs (keyed by ref uid) so claim can map kept uids back.
- * `tutorial` marks the guided first delve (the coach overlay).
+ * Mobile-only Loot-cache-choice encounter slice ("The Reliquary", Phase
+ * 63). Holds the active three-offer session (engine: World/LootCacheChoice)
+ * — `null` outside one. The engine deals in real `Item`s directly (no
+ * opaque-ref indirection, unlike the retired Pick Pool session), and needs
+ * no tutorial slice — three labeled offers need no guided coach.
  */
 export interface MobileCacheSlice {
-    session: LootCacheSession | null;
-    stash: Readonly<Record<string, Item>>;
-    tutorial: boolean;
+    session: LootCacheChoiceSession | null;
 }
 
 /**
@@ -224,8 +222,6 @@ export const EMPTY_REST_SLICE: MobileRestSlice = Object.freeze({
 
 export const EMPTY_CACHE_SLICE: MobileCacheSlice = Object.freeze({
     session: null,
-    stash: Object.freeze({}),
-    tutorial: false,
 });
 
 export const EMPTY_BLACKSMITH_SLICE: MobileBlacksmithSlice = Object.freeze({

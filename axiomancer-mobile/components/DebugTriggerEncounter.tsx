@@ -47,7 +47,6 @@ import {
     EnemiesByMap,
     consumableLibrary,
     type Enemy,
-    type Item,
 } from '@mechanics';
 
 import { isDevToolsEnabled } from '@/lib/buildProfile';
@@ -215,13 +214,12 @@ export function DebugTriggerEncounter() {
                 if (sample) actions.addItemById(sample.id);
                 return;
             }
-            case 'treasure': {
-                // "The Reliquary" — <CacheGate> routes to /cache. Seed a
-                // sample item + coin so the claim ledger has content.
-                const loot: Item[] = consumableLibrary[0] ? [consumableLibrary[0]] : [];
-                actions.beginLootCache({ items: loot, currency: 25 });
+            case 'treasure':
+                // "The Reliquary" — <CacheGate> routes to /cache. The
+                // choice screen rolls its own card/item candidates; seed
+                // a modest tier + coin so the claim ledger has content.
+                actions.beginLootCacheChoice({ tier: 'modest', currency: 25 });
                 return;
-            }
             default:
                 return;
         }

@@ -88,8 +88,16 @@ import { STARTING_CARD_IDS } from '../Combat/combat.rewards';
  *   in the raw payload's `quest` key (a mobile-only slice, not a
  *   `GameState` field — the old `QuestBoardSession` shape is gone, so a
  *   stale one must not survive; see `game.migrate.ts`).
+ * Phase 76 — bumped 18 → 19: retired the Gathering minigame ("The
+ *   Gleaning"). Clears a stale mobile-only gathering session (see
+ *   `game.migrate.ts`).
+ * Phase 63 — bumped 19 → 20: retired the loot-cache Pick Pool minigame
+ *   ("The Reliquary"), replaced by `World/LootCacheChoice`'s three-offer
+ *   choice. Clears any live cache session riding along in the raw
+ *   payload's `cache` key and adds the required `mapGoodwill: Record<string,
+ *   number>` slice, defaulted to `{}` for legacy saves (see `game.migrate.ts`).
  */
-export const GAME_STATE_VERSION = 19;
+export const GAME_STATE_VERSION = 20;
 
 /** Builds a brand-new GameState with default player and world. */
 export function createNewGameState(): GameState {
@@ -119,6 +127,7 @@ export function createNewGameState(): GameState {
         codex: { unlockedEntries: [] },
         regionConsequences: { exploitedRegions: [], sparedRegions: [] },
         factionReputations: createDefaultFactionReputations(),
+        mapGoodwill: {},
     };
 }
 
@@ -494,6 +503,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 factionReputations: state.factionReputations,
                 codex: state.codex,
                 regionConsequences: state.regionConsequences,
+                // mapGoodwill (Phase 63) carries forward — village goodwill
+                // is player-knowledge-shaped, not run-scoped.
+                mapGoodwill: state.mapGoodwill,
                 // lastSeenAlignmentCells intentionally dropped (Phase 72
                 // D12 — observer cache resets; fresh run, fresh
                 // observation history).

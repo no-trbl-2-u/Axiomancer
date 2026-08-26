@@ -106,6 +106,7 @@ describe('Game loop — full transcript through gameReducer', () => {
             codex:      store.getState().codex,
             regionConsequences: store.getState().regionConsequences,
             factionReputations: store.getState().factionReputations,
+            mapGoodwill: store.getState().mapGoodwill,
         }));
 
         // 7. SAVE_GAME (autosave already fired through the dispatch chain).

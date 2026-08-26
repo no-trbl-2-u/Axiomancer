@@ -11,9 +11,11 @@
  * Determinism: same `seed` + inputs → same rewards (a caller-supplied cache
  * seed drives a self-contained PRNG).
  *
- * Balance note: this is a minimal-correct reward table. Tuning the count/rarity
- * mix against the loot-cache doctrine (informed > blind > coward) is a
- * `loot-cache-tuning` follow-up.
+ * Balance note: this is a minimal-correct reward table. `loot-cache-tuning`
+ * (the sim/CLI-driven harness that would have tuned the count/rarity mix)
+ * retired in Phase 63 along with the Pick Pool minigame this table used to
+ * feed — `LootCacheChoice`'s `item` offer is now this roller's only caller.
+ * Re-tuning the mix, if ever needed, is a manual follow-up.
  */
 
 import { consumableLibrary } from './consumable.library';

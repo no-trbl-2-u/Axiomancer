@@ -892,14 +892,6 @@ export async function runGameCli(rawArgs = process.argv.slice(2)): Promise<void>
         return;
     }
 
-    // Subcommand: `npm run game -- loot-cache [flags]` hands off to the
-    // standalone Reliquary driver, which owns its own flag set.
-    if (rawArgs[0] === 'loot-cache') {
-        const { runLootCacheCli } = await import('./lootcache.cli');
-        await runLootCacheCli(rawArgs.slice(1));
-        return;
-    }
-
     // Subcommand: `npm run game -- labyrinth [flags]` hands off to THE
     // APORIA driver (W-01) — the full labyrinth continent, headless.
     if (rawArgs[0] === 'labyrinth') {

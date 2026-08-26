@@ -161,33 +161,6 @@ npm run hazard -- --auto --seed 42 --runs 1 --hazard H01 --route top \
 npm run hazard -- --runs 1
 ```
 
-### `lootcache.cli.ts` - Loot Cache Mini-Game Driver
-
-A standalone driver for the loot-cache push-your-luck mini-game ("The
-Reliquary"), reachable as a **subcommand** of the game CLI. Each layer is a
-live d6 "Pick Pool" dice check against a public difficulty — push, retreat,
-or channel Insight — not a hidden pre-rolled trap.
-
-**Usage:**
-```bash
-npm run game -- loot-cache [flags]
-npm run loot-cache -- [flags]        # convenience alias
-```
-
-**Flags:**
-
-| Flag | Effect |
-| --- | --- |
-| `--policy greedy\|prudent\|informed` | The bot for `--auto` (default `informed`), reusing `lootcache.sim.ts`'s push-your-luck decision logic. |
-| `--auto` | The policy plays each cache. Otherwise the player decides whether to push, retreat, channel Insight, or seal by hand. |
-| `--currency <n>` | The starting currency stake (default the engine's `DEFAULT_CACHE_CURRENCY`). |
-| `--seed <n\|str>` | Seed the engine's embedded RNG so a run is fully reproducible. |
-| `--runs <n>` | Play N caches back-to-back (default **5**). |
-| `--script <path>` | Scripted answers (JSON array), as in `game.cli.ts`. |
-| `--stdin` | Line-buffered stdin answers. |
-| `--json-events` | Emit completion/summary events as JSON on stdout. |
-| `--state-log <path>` | Append a per-decision JSONL trace; illegal actions are logged as `illegalLootCacheAction` with a full state snapshot. |
-
 ### `dev-tools.ts` - Development Utilities
 
 Development utilities for testing and debugging the game engine.
