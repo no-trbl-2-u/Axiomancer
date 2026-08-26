@@ -2083,13 +2083,13 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       this phase). `GAME_STATE_VERSION` 19→20.
       — `feat(world): loot cache becomes a three-way choice — phase 63` (a7032809)
 
-- [ ] Phase 64 — The journal reads the goodwill back. Render Phase 63's
+- [x] Phase 64 — The journal reads the goodwill back. Render Phase 63's
       per-map counter as "Helped <map> N times" on the memoir tab
       (`axiomancer-mobile/app/(tabs)/memoir/index.tsx`), which already
       exists and already reads keepsake flags. Small, but it is the half
       that makes the sacrifice legible — a counter the player cannot see
       is not a choice, it is a silent tax. Deps: 63.
-      (mobile) Brief: to generate.
+      (mobile) — `feat(mobile): memoir reads the goodwill tally back — phase 64` (405bbab0)
 
 - [ ] Phase 65 — Village goodwill rewards. T's framing: *"When they
       visit a village in that map, they'll receive discounts at the shop,
