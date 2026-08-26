@@ -364,3 +364,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-25T19:14:48Z | subagent | Explore | claude-sonnet-5 | main | Find inline no-screen-detour precedent for item grants |
 | 2026-08-26T02:07:37Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-26T02:10:55Z | subagent | card-expert | claude-sonnet-5 | main | Design and ship Phase 62 — Ally cards |
+| 2026-08-26T13:32:17Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-26T13:35:12Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
+| 2026-08-26T13:35:46Z | subagent | Explore | claude-sonnet-5 | main | Explore Reliquary and rest precedent for phase 63 brief |
