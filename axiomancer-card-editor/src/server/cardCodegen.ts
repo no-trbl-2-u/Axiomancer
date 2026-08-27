@@ -6,7 +6,8 @@
  * `axiomancer-mechanics/src/Cards/cards.library.ts` (4-space indent, single
  * quotes with smart double-quote fallback, wrapped multi-line descriptions,
  * inline single-element `specialMechanics`, multi-line `combatEffects`), and
- * splices that block into the library file text — replacing an existing card
+ * splices that block into the library file text. Replacing an existing card
+ * carries its `// pts:` pricing comment across (phase 69) — replacing an existing card
  * located by `id`, or appending a brand-new one and registering it in the
  * exported `cardLibrary` array.
  *
@@ -129,24 +130,29 @@ function predicateObj(p: NonNullable<NonNullable<CardDraft['synergy']>['predicat
     return `{ ${parts.join(', ')} }`;
 }
 
+/**
+ * `synergy: { … }` — emitted GENERICALLY, one key per line.
+ *
+ * This used to be a hand-written allowlist of seven known keys, so
+ * `statePredicate` and `rider` (the REQUIEM-style condition riders) were
+ * silently dropped from every card that carried them. A per-key emitter drifts
+ * behind the type the moment a field is added; walking the object cannot.
+ */
 function synergyLines(s: NonNullable<CardDraft['synergy']>): string[] {
+    const entries = Object.entries(s as Record<string, unknown>)
+        .filter(([, v]) => v !== undefined);
+    if (entries.length === 0) return [];
     const lines = [`${IND}synergy: {`];
-    if (s.predicate != null) lines.push(`${IND}${IND}predicate: ${predicateObj(s.predicate)},`);
-    if (s.bonusDamage != null) lines.push(`${IND}${IND}bonusDamage: ${num(s.bonusDamage)},`);
-    if (s.durationDamageMul != null) {
-        lines.push(`${IND}${IND}durationDamageMul: ${num(s.durationDamageMul)},`);
-    }
-    if (s.intensityDamageMul != null) {
-        lines.push(`${IND}${IND}intensityDamageMul: ${num(s.intensityDamageMul)},`);
-    }
-    if (s.consumeMatched != null) {
-        lines.push(`${IND}${IND}consumeMatched: ${String(s.consumeMatched)},`);
-    }
-    if (s.clearAllEffectsBothSides != null) {
-        lines.push(`${IND}${IND}clearAllEffectsBothSides: ${String(s.clearAllEffectsBothSides)},`);
-    }
-    if (s.applyEffectOnFire != null) {
-        lines.push(`${IND}${IND}applyEffectOnFire: ${effectObj(s.applyEffectOnFire)},`);
+    for (const [k, v] of entries) {
+        // `applyEffectOnFire` and `predicate` keep their dedicated shapes so the
+        // emitted source still matches the library's hand-authored formatting.
+        if (k === 'applyEffectOnFire' && v != null) {
+            lines.push(`${IND}${IND}${k}: ${effectObj(v as CardDraft['combatEffects'][number])},`);
+        } else if (k === 'predicate' && v != null) {
+            lines.push(`${IND}${IND}${k}: ${predicateObj(v as NonNullable<NonNullable<CardDraft['synergy']>['predicate']>)},`);
+        } else {
+            lines.push(`${IND}${IND}${k}: ${valOf(v)},`);
+        }
     }
     lines.push(`${IND}},`);
     return lines;
@@ -192,7 +198,11 @@ function descriptionLines(desc: string): string[] {
  * like `fromDraft`), in the canonical `Card` field order. Pass `identOverride`
  * to preserve an existing card's const identifier on replace.
  */
-export function serialize(draft: CardDraft, identOverride?: string): string {
+export function serialize(
+    draft: CardDraft,
+    identOverride?: string,
+    preservedComment?: readonly string[],
+): string {
     const ident = identOverride ?? identFromId(draft.id);
     const lines: string[] = [];
     lines.push(`const ${ident}: Card = {`);
@@ -203,6 +213,19 @@ export function serialize(draft: CardDraft, identOverride?: string): string {
     // Spec 32 v3 — tier/rank/cardType share a line, mirroring the library style.
     lines.push(`${IND}tier: ${num(draft.tier)}, rank: ${num(draft.rank)}, cardType: ${str(draft.cardType)},`);
     lines.push(`${IND}targetType: ${str(draft.targetType)},`);
+    if (notBlank(draft.theme)) lines.push(`${IND}theme: ${str(draft.theme as string)},`);
+    if (notBlank(draft.persistentEffect)) {
+        lines.push(`${IND}persistentEffect: ${str(draft.persistentEffect as string)},`);
+    }
+    if (notBlank(draft.paidSummary)) {
+        lines.push(`${IND}paidSummary: ${str(draft.paidSummary as string)},`);
+    }
+    // The pricing arithmetic (`// pts: …`) is source trivia, not a card field:
+    // it is lifted off the block being replaced and re-emitted here, where the
+    // library already puts it in 57 of 58 cases (just before `free:`). Phase 69
+    // — the codegen used to drop it, deleting a reviewer's only record of how
+    // the card's rank was arrived at.
+    if (preservedComment?.length) lines.push(...preservedComment);
     // The authored FREE line + die-interaction lines round-trip verbatim.
     if (draft.free != null) lines.push(`${IND}free: ${objLiteral(draft.free as Record<string, unknown>)},`);
     if (draft.threshold != null) lines.push(`${IND}threshold: ${objLiteral(draft.threshold as Record<string, unknown>)},`);
@@ -220,6 +243,12 @@ export function serialize(draft: CardDraft, identOverride?: string): string {
     if (notBlank(draft.addedIn)) lines.push(`${IND}addedIn: ${str(draft.addedIn!.trim())},`);
     if (draft.tags?.length) {
         lines.push(`${IND}tags: [${draft.tags.map((t) => str(t)).join(', ')}],`);
+    }
+    if (draft.intentionallyAsymmetric != null) {
+        lines.push(`${IND}intentionallyAsymmetric: ${String(draft.intentionallyAsymmetric)},`);
+    }
+    if (draft.glyph != null) {
+        lines.push(`${IND}glyph: ${objLiteral(draft.glyph as unknown as Record<string, unknown>)},`);
     }
     lines.push('};');
     return lines.join('\n');
@@ -273,6 +302,27 @@ function matchDelimiter(text: string, openIdx: number): number {
         }
     }
     return -1;
+}
+
+/**
+ * The `// pts:` pricing-arithmetic comment lines inside a card block, as they
+ * appear in the source (indent included), or `[]`.
+ *
+ * A card's pricing comment is one contiguous run of `//` lines led by `// pts:`
+ * — the arithmetic often wraps over two or three lines. Anything else in the
+ * block that happens to be a comment is left where it is; only the priced run
+ * is carried across a rewrite.
+ */
+export function pricingComment(block: string): string[] {
+    const lines = block.split('\n');
+    const start = lines.findIndex((l) => /^\s*\/\/\s*pts:/.test(l));
+    if (start === -1) return [];
+    const out: string[] = [];
+    for (let i = start; i < lines.length; i++) {
+        if (!/^\s*\/\//.test(lines[i])) break;
+        out.push(lines[i].trimEnd());
+    }
+    return out;
 }
 
 interface CardBlock {
@@ -372,7 +422,8 @@ export function upsertCard(fileText: string, draft: CardDraft): string {
 
     const found = findBlockById(fileText, id);
     if (found) {
-        const block = serialize(draft, found.ident);
+        const previous = fileText.slice(found.start, found.end);
+        const block = serialize(draft, found.ident, pricingComment(previous));
         return fileText.slice(0, found.start) + block + fileText.slice(found.end);
     }
 

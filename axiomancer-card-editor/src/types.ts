@@ -1,10 +1,13 @@
 /**
  * The editor's working-draft card type and the Card ⇄ CardDraft mappers.
  *
- * A `CardDraft` mirrors EVERY editable field of the real `Card` (full
- * fidelity) but normalizes the three "list-ish" optionals (`combatEffects`,
- * `specialMechanics`, `tags`) into always-present arrays so the form code never
- * has to null-check them. `fromDraft` prunes empty arrays / blank optionals
+ * A `CardDraft` mirrors EVERY field of the real `Card` — phase 69 made that
+ * true; it had carried 19 of 24, so an upsert of an existing card silently
+ * deleted `theme`, `persistentEffect`, `paidSummary`,
+ * `intentionallyAsymmetric` and `glyph`. `round-trip.test.ts` now holds the
+ * claim to its word against the whole live library. It normalizes the three
+ * "list-ish" optionals (`combatEffects`, `specialMechanics`, `tags`) into
+ * always-present arrays so the form code never has to null-check them. `fromDraft` prunes empty arrays / blank optionals
  * back out so the value written to cards.library.ts stays minimal and matches
  * the existing hand-authored style.
  *
@@ -23,10 +26,12 @@ import type {
     CardSpecialMechanic,
     CardSynergy,
 } from '@mechanics/Cards/types';
+import type { CardTheme } from '@mechanics/Cards/card-themes';
 
 /**
- * Full-fidelity editable draft of a card (`Card`). Every editable `Card`
- * field is represented. The three array fields are non-optional in the draft
+ * Full-fidelity editable draft of a card (`Card`). Every `Card` field is
+ * represented — `round-trip.test.ts` fails if one is added upstream and not
+ * mirrored here. The three array fields are non-optional in the draft
  * (default `[]`); everything else mirrors `Card` exactly.
  */
 export interface CardDraft {
@@ -40,9 +45,17 @@ export interface CardDraft {
     rank: CardRank;
     /** Spec 32 v3 — spell / oath / hex. */
     cardType: CardType;
+    /** The archetype package this card belongs to. Drives draft weights and
+     *  the theme-parity lints — an upsert that dropped it silently unthemed
+     *  the card (phase 69). */
+    theme?: CardTheme;
     /** Spec 32 v3 — the authored FREE (dieless) line. Round-tripped verbatim;
      *  edited in source (the rider is a real-unit bundle, not a form field). */
     free?: CardRider;
+    /** The oath/hex payload — the whole point of a persistent card. */
+    persistentEffect?: string;
+    /** The paid line the card FACE prints. Round-tripped verbatim. */
+    paidSummary?: string;
     /** Fate Engine P1 die-interaction lines — round-tripped verbatim so an
      *  editor save never silently deletes a card's printed die lines. */
     threshold?: Card['threshold'];
@@ -58,6 +71,11 @@ export interface CardDraft {
     addedIn?: string;
     /** Always an array in the draft (default `[]`). */
     tags: string[];
+    /** Marks a deliberate free/paid asymmetry so the symmetry lint skips it. */
+    intentionallyAsymmetric?: boolean;
+    /** The face's glyph payload + cap. Round-tripped verbatim; it has no form
+     *  control yet, which is exactly why losing it on save went unnoticed. */
+    glyph?: Card['glyph'];
 }
 
 /** A fresh, valid blank card ready for the CREATE tab. */
@@ -71,7 +89,10 @@ export function blankCard(): CardDraft {
         targetType: 'enemy',
         rank: 1,
         cardType: 'spell',
+        theme: undefined,
         free: undefined,
+        persistentEffect: undefined,
+        paidSummary: undefined,
         threshold: undefined,
         dieBonus: undefined,
         fate: undefined,
@@ -82,6 +103,8 @@ export function blankCard(): CardDraft {
         incrementsFriendship: undefined,
         addedIn: undefined,
         tags: [],
+        intentionallyAsymmetric: undefined,
+        glyph: undefined,
     };
 }
 
@@ -96,7 +119,10 @@ export function toDraft(card: Card): CardDraft {
         targetType: card.targetType,
         rank: card.rank,
         cardType: card.cardType,
+        theme: card.theme,
         free: card.free ? { ...card.free } : undefined,
+        persistentEffect: card.persistentEffect,
+        paidSummary: card.paidSummary,
         threshold: card.threshold ? { ...card.threshold } : undefined,
         dieBonus: card.dieBonus ? { ...card.dieBonus } : undefined,
         fate: card.fate ? { ...card.fate } : undefined,
@@ -107,6 +133,8 @@ export function toDraft(card: Card): CardDraft {
         incrementsFriendship: card.incrementsFriendship,
         addedIn: card.addedIn,
         tags: card.tags ? [...card.tags] : [],
+        intentionallyAsymmetric: card.intentionallyAsymmetric,
+        glyph: card.glyph ? { ...card.glyph } : undefined,
     };
 }
 
@@ -125,7 +153,10 @@ export function fromDraft(draft: CardDraft): Card {
         cardType: draft.cardType,
     };
 
+    if (draft.theme != null) card.theme = draft.theme;
     if (draft.free != null) card.free = { ...draft.free };
+    if (!isBlank(draft.persistentEffect)) card.persistentEffect = draft.persistentEffect;
+    if (!isBlank(draft.paidSummary)) card.paidSummary = draft.paidSummary;
     if (draft.threshold != null) card.threshold = { ...draft.threshold };
     if (draft.dieBonus != null) card.dieBonus = { ...draft.dieBonus };
     if (draft.fate != null) card.fate = { ...draft.fate };
@@ -142,6 +173,10 @@ export function fromDraft(draft: CardDraft): Card {
     }
     if (!isBlank(draft.addedIn)) card.addedIn = draft.addedIn!.trim();
     if (draft.tags.length > 0) card.tags = [...draft.tags];
+    if (draft.intentionallyAsymmetric != null) {
+        card.intentionallyAsymmetric = draft.intentionallyAsymmetric;
+    }
+    if (draft.glyph != null) card.glyph = { ...draft.glyph };
 
     return card;
 }

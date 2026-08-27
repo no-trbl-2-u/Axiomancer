@@ -9,8 +9,10 @@
     "build": "tsc && vite build",
     "type-check": "tsc --noEmit",
     "lint": "eslint src",
-    "verify": "npm run type-check && npm run lint && npm run build",
-    "preview": "vite preview"
+    "verify": "npm run type-check && npm run lint && npm run test && npm run build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
     "@types/react": "^19.1.0",
@@ -19,6 +21,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "typescript": "^5.7.2",
-    "vite": "^6.0.5"
+    "vite": "^6.0.5",
+    "vitest": "^3.2.4"
   }
 }
