@@ -2091,16 +2091,13 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       is not a choice, it is a silent tax. Deps: 63.
       (mobile) — `feat(mobile): memoir reads the goodwill tally back — phase 64` (405bbab0)
 
-- [ ] Phase 65 — Village goodwill rewards. T's framing: *"When they
+- [x] Phase 65 — Village goodwill rewards. T's framing: *"When they
       visit a village in that map, they'll receive discounts at the shop,
-      an ally card reward, and other various rewards."* Scope: a price
-      hook on the shop — `ShopInventory` is today just `{ wares }`
-      (`Items/shop.types.ts:20`) with no multiplier anywhere, so the
-      discount is net-new plumbing — plus the ally-card grant from Phase
-      62, both gated on Phase 63's per-map counter. **"Other various
-      rewards" is deliberately left unspecified here**; author them in
-      the brief against the counter's tiers rather than guessing now.
-      Deps: 62, 63. (mechanics + mobile) Brief: to generate.
+      an ally card reward, and other various rewards."* Three tiers off
+      `mapGoodwill`: tally >= 1 a 10% BUY discount, >= 2 grants the-sworn-
+      second into knownCards, >= 3 a one-time +25 currency gift (flag-
+      tracked). Deps: 62, 63. (mechanics + mobile)
+      — `feat(world): village goodwill spends the counter — phase 65` (045e5241)
 - [ ] Phase 66 — Lexicon lint: catch retired-doctrine prose, not just
       retired identifiers. Add a `type: "doctrine"` (or similar) row
       shape to `axiomancer-mechanics/docs/lexicon.json` for retired
