@@ -2,11 +2,16 @@
   "generated_by": "user-supplied",
   "date": "2026-06-18",
   "tool": "external-illustration",
-  "prompt": "Axiomancer key art — a crowned king enthroned beside a horned, red-robed axiomancer in a gothic stained-glass hall, painted 'AxiomanceR' wordmark above",
+  "prompt": "Axiomancer key art \u2014 a crowned king enthroned beside a horned, red-robed axiomancer in a gothic stained-glass hall, painted 'AxiomanceR' wordmark above",
   "spec_section": "title-screen + app-icon",
   "target_dimensions": "1024x1024",
   "used_by": [
     "components/TitleScreen.tsx (full-bleed Embark title art)",
     "assets/images/icon.png and all iOS/Android/web launcher icon derivatives"
+  ],
+  "license": "UNRESOLVED",
+  "license_note": "Owner-supplied external illustration; no source or license was recorded at the time and none has been traced since. These assets already ship; this record states what is known rather than inventing terms. Blocked on the owner, same question as Potential Assets/MCP-Axiomancer/images/.",
+  "covers": [
+    "title-embark.jpg"
   ]
 }

@@ -67,11 +67,45 @@ raw AI output is not copyrightable, so the provenance file is what
 evidences human curation. The API key lives in `.env` (gitignored)
 and is never committed.
 
+## Running the ingest (phase 71)
+
+```bash
+npm run assets:ingest --workspace axiomancer-mobile -- \
+  --in <file-or-dir> --category <dir-under-assets/images> \
+  --source <url> --license <terms> [--dry-run] [--no-grade]
+```
+
+`scripts/ingest-art.mjs` encodes the recipe above: grade -> resize to
+the 640px cap -> WebP -> **provenance entry in the same run**, because
+a script that emitted the image and left the record to a human would
+just reproduce gap §4 exists to close. `--no-grade` skips the
+grayscale/brightness/contrast pass — the grade is for raw acquisitions
+(the Dore plate), not for art that already carries its own styling.
+
+`npm run assets:check --workspace axiomancer-mobile` is the gate: every
+art directory has a provenance record, every record carries date / tool
+/ license / covers, every `require()` resolves, and every file is
+reachable from a registry. It runs inside the mobile verify gate.
+
+## Licensing debt (open, blocked on the owner)
+
+Every raster directory except `maps/` (the Dore plate) now records
+`"license": "UNRESOLVED"` with a note. That is not a formality: the
+card, enemy, portrait, treasure, combat, door and wall art was all
+owner-supplied with no source or license captured, and the terms have
+never been established. The assets already ship, so the records state
+what is known instead of inventing terms. `assets:check` prints the
+count on every run; it does not fail, because only the owner can answer
+the question and a red build would neither answer it nor let anything
+else ship. Same question as `Potential Assets/MCP-Axiomancer/images/`.
+
 ## Known gaps (queued work, build plan)
 
-- No provenance-completeness or registry-vs-directory drift test.
-- No in-repo image post-processing dependency (`sharp` is the
-  candidate; adding it needs its phase case per the V-series rules).
 - No bundle-size budget (spec 11 Q5 was left blank).
 - `assets/images/maps/` has one plate; `combat/` one arena — coverage,
-  not convention, problems.
+  not convention, problems. `combat/` also has no `index.ts`; its one
+  asset is consumed directly, and `asset-provenance.test.mjs` records
+  the directory as registry-less so a second arena has to confront it.
+- `labyrinth/walls/` ships at 720x1280, above the 640px longest-edge
+  cap. They are already WebP, so re-encoding would be lossy-on-lossy
+  for a modest saving; left as a deliberate exception, not an oversight.

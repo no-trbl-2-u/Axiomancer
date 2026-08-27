@@ -39,22 +39,22 @@ const WALLS = {
 } as const;
 
 const DOORS = {
-    'door02-d': require('./doors/door02-d.png'),
-    'door02-e': require('./doors/door02-e.png'),
-    'door02-f': require('./doors/door02-f.png'),
-    'door02-g': require('./doors/door02-g.png'),
-    'door04-b': require('./doors/door04-b.png'),
-    'door04-c': require('./doors/door04-c.png'),
-    'door05-d': require('./doors/door05-d.png'),
-    'door06-b': require('./doors/door06-b.png'),
-    'door07': require('./doors/door07.png'),
-    'door08-a': require('./doors/door08-a.png'),
-    'door08-b': require('./doors/door08-b.png'),
-    'door09-b': require('./doors/door09-b.png'),
-    'door24': require('./doors/door24.png'),
-    'door36': require('./doors/door36.png'),
-    'door42': require('./doors/door42.png'),
-    'egypt-door-open': require('./doors/egypt-door-open.png'),
+    'door02-d': require('./doors/door02-d.webp'),
+    'door02-e': require('./doors/door02-e.webp'),
+    'door02-f': require('./doors/door02-f.webp'),
+    'door02-g': require('./doors/door02-g.webp'),
+    'door04-b': require('./doors/door04-b.webp'),
+    'door04-c': require('./doors/door04-c.webp'),
+    'door05-d': require('./doors/door05-d.webp'),
+    'door06-b': require('./doors/door06-b.webp'),
+    'door07': require('./doors/door07.webp'),
+    'door08-a': require('./doors/door08-a.webp'),
+    'door08-b': require('./doors/door08-b.webp'),
+    'door09-b': require('./doors/door09-b.webp'),
+    'door24': require('./doors/door24.webp'),
+    'door36': require('./doors/door36.webp'),
+    'door42': require('./doors/door42.webp'),
+    'egypt-door-open': require('./doors/egypt-door-open.webp'),
 } as const;
 
 type WallKey = keyof typeof WALLS;
@@ -133,4 +133,4 @@ export const LABYRINTH_DOOR_IMAGES: Readonly<Record<string, number>> = mapRoomAr
 );
 
 /** Riddle-gated doors wear the sealed slab until the house assents. */
-export const LABYRINTH_SEALED_DOOR: number = require('./doors/egypt-door-sealed.png');
+export const LABYRINTH_SEALED_DOOR: number = require('./doors/egypt-door-sealed.webp');

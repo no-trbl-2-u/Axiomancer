@@ -19,7 +19,7 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
-    "verify": "npm run lint && npm run typecheck && npm test",
+    "verify": "npm run lint && npm run typecheck && npm test && npm run assets:check",
     "verify:visual": "node scripts/smoke-screens.mjs",
     "e2e:hazard": "node scripts/hazard-e2e.mjs",
     "e2e:combat": "node scripts/combat-encounter-e2e.mjs",
@@ -38,7 +38,9 @@
     "deploy:check": "node scripts/deploy-check.mjs",
     "deploy": "npm run deploy:preview",
     "deploy:preview": "npm run verify && node scripts/with-env.mjs eas build --platform android --profile preview",
-    "deploy:production": "npm run verify && node scripts/with-env.mjs eas build --platform all --profile production"
+    "deploy:production": "npm run verify && node scripts/with-env.mjs eas build --platform all --profile production",
+    "assets:check": "node --test scripts/asset-provenance.test.mjs",
+    "assets:ingest": "node scripts/ingest-art.mjs"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -80,6 +82,7 @@
     "pixelmatch": "^7.1.0",
     "playwright": "^1.49.1",
     "pngjs": "^7.0.0",
+    "sharp": "^0.35.4",
     "typescript": "~5.9.2"
   },
   "private": true

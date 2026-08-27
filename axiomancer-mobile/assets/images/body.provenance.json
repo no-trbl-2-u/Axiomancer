@@ -3,7 +3,12 @@
   "date": "2026-05-14",
   "tool": "hand-written-svg",
   "prompt": "hand-written SVG",
-  "spec_section": "§1",
+  "spec_section": "\u00a71",
   "target_dimensions": "64x64",
-  "source_file": "components/StanceGlyph.tsx"
+  "source_file": "components/StanceGlyph.tsx",
+  "license": "UNRESOLVED",
+  "license_note": "Owner-supplied external illustration; no source or license was recorded at the time and none has been traced since. These assets already ship; this record states what is known rather than inventing terms. Blocked on the owner, same question as Potential Assets/MCP-Axiomancer/images/.",
+  "covers": [
+    "body.svg"
+  ]
 }
