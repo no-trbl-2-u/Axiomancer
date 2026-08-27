@@ -2195,7 +2195,7 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       covered by `verify-card-editor`. Follow-up left open: the restored
       fields still have no form controls (this phase guarantees they SURVIVE
       an edit, not that they can be edited).
-- [ ] Phase 70 — Prose lint for shipped `.ts` content + naming law in
+- [x] Phase 70 — Prose lint for shipped `.ts` content + naming law in
       CI. `scripts/check-lexicon.mjs` scans `.md` only, so every
       player-facing string (dialogue trees, `MapEvents/content.ts`,
       `act*.content.ts`, `*.copy.ts`) ships un-linted; extend it (or a
@@ -2205,7 +2205,16 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       script + CI leg. Complements queued Phase 66 (doctrine prose in
       docs). (content/tests; queued 2026-08-22 per THE PIPELINE
       LIBERATION — narrative shipping is authorized, so its guardrail
-      should be mechanized) Brief: to generate.
+      should be mechanized) Brief: `plan/phases/phase_70_prose_lint.md`.
+      SHIPPED 2026-08-27 (`b06a4449`, issue #247): `check-prose.mjs` over the
+      string literals of 14 content surfaces (4 voice rules + the retired-term
+      registry), `check-naming-law.mjs --sweep` over 114 shipped names, both
+      on npm scripts, a `verify-prose` CI lane, and the pre-commit hook.
+      Found and fixed: 12 off-voice exclamation lines in one legacy NPC file;
+      1 legitimate retired-term riddle (exempted in place); 1 NL-8 violation
+      ("Blank Indenture", grandfathered with an AUDIT row — a rename is an
+      authorial call). Also fixed the sweep's own parser, which read only
+      single-quoted names and so skipped the 7 card names with apostrophes.
 - [ ] Phase 71 — Art acquisition pipeline (V4 accelerant, no
       generation). Convert the proven one-off Doré acquisition into a
       loop-runnable path: the phase case for adding `sharp` (dev-only,

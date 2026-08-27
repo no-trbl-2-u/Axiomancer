@@ -2619,6 +2619,24 @@
   `intentionallyAsymmetric` a checkbox). `glyph` needs a design call first —
   it is a discriminated payload union with a cap, and no live card uses it.
 
+### [content] "Blank Indenture" violates NL-8 and is grandfathered, not renamed
+- category: content
+- impact: 2
+- ease: 7
+- detail: filed 2026-08-27 by Phase 70. The naming-law sweep that phase wired
+  into CI found exactly one violation across 114 shipped card and enemy names:
+  the card "Blank Indenture" begins with BLANK, a locked die-face word, which
+  NL-8 forbids ("a name may not be or begin with a locked/registry word"). The
+  card shipped before the naming law existed. Phase 70 put it on
+  `GRANDFATHERED_NAMES` in `scripts/check-naming-law.mjs` with its reason, so
+  the gate protects every new name while this one stays visible — the sweep
+  prints the exemption on every run rather than hiding it.
+- next: rule on the rename. It is a small, player-visible content change (the
+  card name plus one reference in `recoil-x.engine.test.ts`), and the name
+  carries real meaning — a blank contract — so a replacement should keep that
+  ("Unwritten Indenture", "Unsigned Indenture") rather than reach for a new
+  image. Removing the entry from GRANDFATHERED_NAMES is what closes this row.
+
 ## Done
 
 ### [x] [3.2] `CardSpecialMechanic` deprecated-name not exported — stale/resolved
