@@ -2292,7 +2292,7 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       The banner comes off in the same commit that records a real run.
       Follow-up left open: running it, the vision-assisted pre-screen, and
       `art.manifest.json` / `npm run art:status`.
-- [ ] Phase 74 — N-1: fold the ratified North Star into spec 34.
+- [x] Phase 74 — N-1: fold the ratified North Star into spec 34.
       `plan/north-star-mork-borg.md` was ratified as-is by T on
       2026-08-22; its §2 becomes spec 34's §2.5 (the Mörk Borg
       delivery register), and the R-C/R-F reconciliation recorded in
@@ -2301,7 +2301,21 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       loop) is written into the spec rather than living only in a
       plan/ file. Also update `plan/bearings.md` to cite the ratified
       doctrine. (docs/design; queued 2026-08-22 per the ratification)
-      Brief: to generate.
+      Brief: `plan/phases/phase_74_north_star_ratification.md`.
+      SHIPPED 2026-08-27 (`8a073370`, issue #252): spec 34 gains §2.5
+      (MB-1..MB-8 verbatim + the R-D pipeline ruling at §2.5.9), Contents/
+      §11/§12 updated to match; bearings' Voice entry cites §2.5 and gains a
+      THE LONGER LEASH (R-F) entry (quote, surface list, keep-list,
+      not-touched list) near PIPELINE LIBERATION/LOCKED MECHANICS;
+      story-spec/world-spec/character-spec each gain an unattended-mode
+      bullet in "When to break the ritual" — the file is the record, not the
+      permission. N-2 (register lint's MB-1 mechanical subset) and N-3
+      (Phase 75, the re-voice pass) left as follow-ups, in scope per the row.
+      Note: this phase raced with a concurrent local `/loop /march` tick that
+      also picked Phase 74; it yielded, deleted its duplicate brief
+      (`phase_74_north_star_into_spec.md`), and filed the AUDIT row +
+      `ship-a-phase` claim-check fix (`4daf100e`) this tick rebased onto
+      cleanly.
 - [ ] Phase 75 — N-3: the re-voice pass. One phase sweeps all shipped
       player-facing prose into the ratified register (R-E: names stay,
       sentences shorten and harden, one voice). Runs AFTER Phase 67
