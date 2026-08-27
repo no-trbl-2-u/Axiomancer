@@ -154,7 +154,11 @@ describe('World/Continents Engine Tests', () => {
       expect(villageHealer.dialogueTree!.id).toBe('village-healer');
       
       const situationNode = villageHealer.dialogueTree!.nodes['talk_situation'];
-      expect(situationNode.text).toContain('fever spreads');
+      // Case-insensitive: this asserts the healer NAMES her constraints, not
+      // where a sentence happens to break. The phase 75 re-voice split the line
+      // and "fever spreads" became sentence-initial — content unchanged, casing
+      // not. A content assertion should not fail on a full stop moving.
+      expect(situationNode.text.toLowerCase()).toContain('fever spreads');
       expect(situationNode.text).toContain('hoarded in the wealthy district');
       
       // Test alignment-gated providence choice

@@ -12,7 +12,8 @@ import test from 'node:test'
 
 import { loadRegistry } from './check-lexicon.mjs'
 import {
-  CONTENT_SURFACES, VOICE_RULES, exemptionsIn, scanSource, stringLiterals,
+  CONTENT_SURFACES, MB1_MAX_WORDS, PROSE_FIELDS, PROSE_RULES, VOICE_RULES,
+  exemptionsIn, fieldFor, scanSource, stringLiterals,
 } from './check-prose.mjs'
 import { GRANDFATHERED_NAMES, namesIn, sweep } from './check-naming-law.mjs'
 
@@ -95,6 +96,54 @@ test('every voice rule carries a fix and a source', () => {
     assert.ok(r.fix && r.fix.length > 10, `${r.id} has no actionable fix`)
     assert.ok(r.since && r.since.length > 5, `${r.id} does not say where the rule comes from`)
   }
+})
+
+// ── MB-1, the knife law (spec 34 §2.5.1) ────────────────────────────────────
+
+test('a literal knows which field it sits under', () => {
+  const src = ["    description:", "        'a long line of prose here',", "    scene: 'inline value',"]
+  assert.equal(fieldFor(src, 2), 'description')
+  assert.equal(fieldFor(src, 3), 'scene')
+})
+
+test('a narration sentence past the ceiling is flagged', () => {
+  const long = `word `.repeat(MB1_MAX_WORDS + 3).trim()
+  const src = `    scene: '${long}.',`
+  assert.deepEqual(rules(scanSource(src, retired)), ['mb1-long-sentence'])
+})
+
+test('the SAME text in rules text is not flagged', () => {
+  // `paidSummary` is governed by §2.3 and the real-units law. Shortening a paid
+  // line to satisfy a narration ceiling trades a mechanical guarantee for a
+  // stylistic one — so MB-1 must not reach it.
+  const long = `word `.repeat(MB1_MAX_WORDS + 3).trim()
+  assert.deepEqual(scanSource(`    paidSummary: '${long}.',`, retired), [])
+  assert.ok(!PROSE_FIELDS.has('paidSummary'))
+})
+
+test('a semicolon in narration is flagged; one in rules text is not', () => {
+  assert.deepEqual(
+    rules(scanSource("    narration: 'The water climbs; the stair does not.',", retired)),
+    ['mb1-semicolon'],
+  )
+  assert.deepEqual(scanSource("    paidSummary: 'REAP ALL: 3 per Soul; SIPHON 50%.',", retired), [])
+})
+
+test('short narration sentences pass', () => {
+  assert.deepEqual(scanSource("    scene: 'A cold porch of pale stone. Three doors ahead.',", retired), [])
+})
+
+test('the register rules carry a fix and cite the spec', () => {
+  for (const r of PROSE_RULES) {
+    assert.ok(r.fix.length > 20, `${r.id} has no actionable fix`)
+    assert.match(r.since, /spec 34/, `${r.id} does not cite its ruling`)
+  }
+})
+
+test('a prose-ok pragma exempts a register rule too', () => {
+  const long = `word `.repeat(MB1_MAX_WORDS + 3).trim()
+  const src = ['// prose-ok: mb1-long-sentence — quoted from a period document', `    scene: '${long}.',`].join('\n')
+  assert.deepEqual(scanSource(src, retired), [])
 })
 
 // ── the naming-law sweep ─────────────────────────────────────────────────────

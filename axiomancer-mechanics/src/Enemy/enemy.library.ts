@@ -109,7 +109,7 @@ export const GraveLarva = createEnemy({
     portraitAsset: 'grave-larva',
     name: 'Grave Larva',
     stanceHint: 'It is all appetite and no argument — it simply chews toward you.',
-    description: 'It hatched from a burial the ground refused. It is still deciding what to become; the options are narrowing to teeth.',
+    description: 'It hatched from a burial the ground refused. It is still deciding what to become. The options are narrowing to teeth.',
     level: 1,
     baseStats: { body: 3, mind: 1, heart: 1 },
     mapName: 'fishing-village',
@@ -182,7 +182,7 @@ export const LittleBelle = createEnemy({
     id: 'enemy-little-belle',
     portraitAsset: 'little-belle',
     name: 'Little Belle',
-    stanceHint: 'A creature of pure mourning; it acts on raw feeling, not calculation.',
+    stanceHint: 'A creature of pure mourning. It acts on feeling, not calculation.',
     description: 'A small vesper in a robe of dawn-orange, ringing a bell for a service no one held. Attendance is mandatory.',
     level: 2,
     baseStats: { body: 2, mind: 2, heart: 4 },
@@ -216,7 +216,7 @@ export const LittleBelle = createEnemy({
     causeLines: {
         brutal: 'The toll lands inside your chest and keeps ringing after the ghost is gone.',
         broken: 'Each peal takes a little more of you to the service. Eventually all of you attends.',
-        quiet:  'You stop to listen. The bell was patient; the listening is what it collects.',
+        quiet:  'You stop to listen. The bell was patient. The listening is what it collects.',
     },
     journalEntry: {
         id: 'codex-little-belle',
@@ -236,7 +236,7 @@ export const FootStealer = createEnemy({
     portraitAsset: 'foot-stealer',
     name: 'Foot-Stealer',
     stanceHint: 'It goes for your footing first — everything it does is leverage.',
-    description: 'It collects footing. Yours is next on the list; balance, it maintains, is a possession like any other.',
+    description: 'It collects footing. Yours is next on the list. Balance, it maintains, is a possession like any other.',
     level: 3,
     baseStats: enemyStatBudget(3, { heart: 1, body: 3, mind: 1 }),
     mapName: 'fishing-village',
@@ -259,7 +259,7 @@ export const WaterHolger = createEnemy({
     portraitAsset: 'water-holger',
     name: 'Water-Holger',
     stanceHint: 'Grief moves it more than hunger — the sea returned the feeling parts.',
-    description: 'A deckhand the sea gave back, mostly. What the salt kept, it kept for good; what it returned still wants its wages.',
+    description: 'A deckhand the sea gave back, mostly. What the salt kept, it kept for good. What it returned still wants its wages.',
     level: 3,
     baseStats: { body: 2, mind: 2, heart: 4 },
     mapName: 'fishing-village',
@@ -333,7 +333,7 @@ export const Ghast = createEnemy({
     portraitAsset: 'ghast',
     name: 'Ghast',
     stanceHint: 'It calculates its hunger — every request is a trap already sprung.',
-    description: 'Hunger given manners. It asks before it takes; it has never once waited for the answer.',
+    description: 'Hunger given manners. It asks before it takes. It has never once waited for the answer.',
     level: 5,
     baseStats: enemyStatBudget(5, { heart: 1, body: 1, mind: 3 }),
     mapName: 'fishing-village',
@@ -453,7 +453,7 @@ export const TheFerryman = createEnemy({
     id: 'enemy-the-ferryman',
     portraitAsset: 'the-ferryman',
     name: 'The Ferryman',
-    stanceHint: 'A cold calculator of crossings; only at the end does the pole swing on feeling.',
+    stanceHint: 'A cold calculator of crossings. Only at the end does the pole swing on feeling.',
     description: 'He poles a crossing no river asked for. The toll is whatever you cannot afford to lose, priced accordingly.',
     level: 8,
     baseStats: enemyStatBudget(8, { heart: 1, body: 2, mind: 4 }),
@@ -524,7 +524,7 @@ export const KingOfRevenge = createEnemy({
     name: 'The King of Revenge',
     stanceHint: 'A grievance with a crown — he answers everything with feeling first, and the feeling is old.',
     description:
-        'A crown outlives its head; a grievance outlives its crown. What remains holds court ' +
+        'A crown outlives its head. A grievance outlives its crown. What remains holds court ' +
         'over the breakwater and rules whatever still kneels.',
     level: 6,
     baseStats: { body: 8, mind: 12, heart: 10 },
@@ -683,7 +683,7 @@ export const BullBegger = createEnemy({
     portraitAsset: 'bull-begger',
     name: 'Bull-Begger',
     stanceHint: 'It begs with a raised fist — the asking and the taking are one motion.',
-    description: 'A bogey of the hollow lanes that begs with a raised fist. Refusal and charity anger it equally; it is the asking it loves.',
+    description: 'A bogey of the hollow lanes that begs with a raised fist. Refusal and charity anger it equally. It is the asking it loves.',
     level: 11,
     baseStats: enemyStatBudget(11, { heart: 1, body: 3, mind: 1 }),
     mapName: 'northern-forest',
@@ -780,7 +780,7 @@ export const TriEyes = createEnemy({
     portraitAsset: 'tri-eyes',
     name: 'Tri-Eyes',
     stanceHint: 'It counts your errors through whichever eye you fail to watch.',
-    description: 'Three sockets, one patient watcher. The third eye does not see more; it sees again, and keeps the tally.',
+    description: 'Three sockets, one patient watcher. The third eye does not see more. It sees again, and keeps the tally.',
     level: 15,
     baseStats: { body: 5, mind: 36, heart: 34 },
     mapName: 'northern-forest',
@@ -892,7 +892,7 @@ export const BoneWizard = createEnemy({
     portraitAsset: 'bone-wizard',
     name: 'Bone Wizard',
     stanceHint: 'Pure study moves it — the flesh was a distraction it graded and discarded.',
-    description: 'It studied its way out of flesh and calls the result wisdom. The peer review is ongoing; you are the peer.',
+    description: 'It studied its way out of flesh and calls the result wisdom. The peer review is ongoing. You are the peer.',
     level: 17,
     baseStats: enemyStatBudget(17, { heart: 1, body: 1, mind: 4 }),
     mapName: 'northern-forest',
@@ -1342,14 +1342,14 @@ export const LadyGabriella = createEnemy({
     pactLines: {
         quiet:   'The table between you stays a table. Nothing on it is a menu.',
         setDown: 'She sets down the glass, and with it the whole apparatus of the invitation.',
-        heavy:   '"Hunger is easy company; it always agrees with you. You disagreed. I had forgotten how filling that is."',
+        heavy:   '"Hunger is easy company. It always agrees with you. You disagreed. I had forgotten how filling that is."',
     },
     journalEntry: {
         id: 'codex-lady-gabriella',
         title: 'Conversation Distance',
         body:
             'The house has hosted eleven generations of the finest families, none of ' +
-            'whom left. Her courtesy is not camouflage; it is the last human habit, ' +
+            'whom left. Her courtesy is not camouflage. It is the last human habit, ' +
             'defended at terrible cost. The chairs are placed at conversation distance ' +
             'because the alternative distance is reach.',
     },
@@ -1509,7 +1509,7 @@ export const GreaterDevil = createEnemy({
     portraitAsset: 'greater-devil',
     name: 'Greater Devil',
     stanceHint: 'It administers rather than rages — the contract is the cage.',
-    description: 'It holds an office older than the sin it administers. The paperwork is flawless; the flaw is you.',
+    description: 'It holds an office older than the sin it administers. The paperwork is flawless. The flaw is you.',
     level: 42,
     baseStats: enemyStatBudget(42, { heart: 2, body: 3, mind: 3 }),
     mapName: 'northern-forest',
@@ -1761,8 +1761,8 @@ export const Beelzebub = createEnemy({
     id: 'enemy-beelzebub',
     portraitAsset: 'beelzebub',
     name: 'Beelzebub',
-    stanceHint: 'Each fly is a small opinion; together they are policy.',
-    description: 'The lord of everything that swarms. Each fly is a small opinion; together, they are policy.',
+    stanceHint: 'Each fly is a small opinion. Together they are policy.',
+    description: 'The lord of everything that swarms. Each fly is a small opinion. Together, they are policy.',
     level: 50,
     baseStats: enemyStatBudget(50, { heart: 2, body: 2, mind: 4 }),
     mapName: 'northern-forest',
@@ -1835,7 +1835,7 @@ export const Death = createEnemy({
         id: 'codex-death',
         title: 'The Ledger of Appointments',
         body:
-            'It keeps no scythe; the scythe is folklore\'s apology for how ordinary the ' +
+            'It keeps no scythe. The scythe is folklore\'s apology for how ordinary the ' +
             'process is. There is a ledger, and a time, and a courtesy so old it reads ' +
             'as coldness. It has never once been early. That is the whole of its mercy, ' +
             'and, it maintains, more than anyone else offers.',
@@ -2127,8 +2127,8 @@ export const Sandbag_01 = createEnemy({
 export const TheIncompleteness = createEnemy({
     id: 'enemy-the-incompleteness',
     name: 'The Unfinished',
-    stanceHint: 'It cannot be read from inside any system you carry; every tell is consistent, and none is complete.',
-    description: 'A proof that cannot be finished, walking. It is true, it cannot be shown, and every axiom sent to contain it becomes the next sentence it is true about.',
+    stanceHint: 'It cannot be read from inside any system you carry. Every tell is consistent. None is complete.',
+    description: 'A proof that cannot be finished, walking. It is true. It cannot be shown. Every axiom sent to contain it becomes the next sentence it is true about.',
     // PLAYTEST-CALIBRATION (P0-truth pass, 2026-07-05): the read rule now lands
     // real +1-intensity statuses and the formerly-inert payload channels bite, so
     // the omniscient greedy witness finished the old L55/1375-HP block 200/200
@@ -2162,7 +2162,7 @@ export const TheIncompleteness = createEnemy({
     journalEntry: {
         id: 'codex-the-incompleteness',
         title: 'The Sentence That Outlived Its System',
-        body: 'Marginalia in an unsigned hand: "Within any house of axioms sound enough to live in, there is a true thing the house cannot prove. We built the house anyway. Something walks the halls now, and it is not wrong." — final page of the Consistency Ledgers, unfinished',
+        body: 'Marginalia in an unsigned hand: "Every sound house of axioms holds a true thing it cannot prove. We built the house anyway. Something walks the halls now, and it is not wrong." — final page of the Consistency Ledgers, unfinished',
     },
     addedIn: '2026-07-02',
     tags: ['impossible', 'playtest-ceiling', 'late-game'],

@@ -89,8 +89,8 @@ const thumbprickOath: Card = {
     philosophicalAspect: 'heart',
     description:
         'Press your thumb to the pin, then to the paper. The Office honors ' +
-        'any signature, provided it is red. What you borrow today is small; ' +
-        'so is a hook.',
+        'any signature, provided it is red. What you borrow today is small. ' +
+        'So is a hook.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'self',
     paidSummary: 'RECOIL 1. DRAW 1 and gain 1 Conviction.',
@@ -136,7 +136,7 @@ const chilblainWatch: Card = {
     description:
         'The wall was here before the parish and will outlast the ' +
         'parishioners keeping it. Stand your hours in boots that froze stiff ' +
-        'on Tuesday. The cold gets into the knuckles; the knuckles learn to ' +
+        'on Tuesday. The cold gets into the knuckles. The knuckles learn to ' +
         'answer back.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'self',
@@ -251,7 +251,7 @@ const knuckleboneRecant: Card = {
     name: 'Knucklebone Recant',
     philosophicalAspect: 'body',
     description:
-        'Testimony may be withdrawn; so may a bad cast. Sweep the bones off ' +
+        'Testimony may be withdrawn. So may a bad cast. Sweep the bones off ' +
         'the table before they finish speaking, breathe your side of it ' +
         'across them, and throw again. They lie less the second time.',
     tier: 1, rank: 2, cardType: 'spell',
@@ -298,7 +298,7 @@ const saintsFingerBone: Card = {
     name: "The Saint's Finger-Bone",
     philosophicalAspect: 'heart',
     description:
-        'The reliquary stands empty; the finger travels. Held loosely, it ' +
+        'The reliquary stands empty. The finger travels. Held loosely, it ' +
         'points — at the next verse, at the mended thing, at the door. The ' +
         'choir has never once said whose hand it was.',
     tier: 1, rank: 3, cardType: 'spell',
@@ -373,7 +373,7 @@ const arrears: Card = {
     name: 'Arrears',
     philosophicalAspect: 'mind',
     description:
-        'You signed nothing; the Office disagrees, and the Office retains ' +
+        'You signed nothing. The Office disagrees, and the Office retains ' +
         'the original. Interest accrues nightly, compounding at dusk. ' +
         'Payment is accepted in the only currency you reliably carry.',
     tier: 1, rank: 1, cardType: 'spell',
@@ -437,7 +437,7 @@ const theSextonsBell: Card = {
     description:
         'The sexton rings once for the dying and twice for the dead, and ' +
         'for you he has not stopped ringing. Every toll lands heavier than ' +
-        'the last. The grave was dug on the first stroke; the rest is ' +
+        'the last. The grave was dug on the first stroke. The rest is ' +
         'paperwork.',
     tier: 2, rank: 2, cardType: 'spell',
     targetType: 'enemy',
@@ -653,7 +653,7 @@ const distraint: Card = {
     name: 'Distraint',
     philosophicalAspect: 'body',
     description:
-        'The bailiff does not knock; he inventories. What cannot be paid in ' +
+        'The bailiff does not knock. He inventories. What cannot be paid in ' +
         'blood is paid in kind — the least thing you carry goes onto the ' +
         'fire, and the ledger, briefly, is warm toward you.',
     tier: 2, rank: 4, cardType: 'spell',
@@ -686,7 +686,7 @@ const blankIndenture: Card = {
     description:
         'The sum is left open, in the oldest courtesy of the trade. You ' +
         'fill the figure in with the only ink the house accepts, and the ' +
-        'house honors every drop. Signed is signed; the amount was always ' +
+        'house honors every drop. Signed is signed. The amount was always ' +
         'yours to regret.',
     tier: 3, rank: 5, cardType: 'spell',
     targetType: 'enemy',
@@ -710,7 +710,7 @@ const theRedLedger: Card = {
     persistentEffect:
         'Whenever you pay RECOIL, afflict the foe with BLEED 1 (ticks each hit they take, 2 turns).',
     description:
-        'Every drop is entered. The book forgives nothing; it forwards. ' +
+        'Every drop is entered. The book forgives nothing. It forwards. ' +
         'What you pay at your own vein it bills again, promptly, at theirs.',
     tier: 2, rank: 5, cardType: 'oath',
     targetType: 'self',
@@ -852,9 +852,9 @@ const openEveryGrave: Card = {
     philosophicalAspect: 'heart',
     description:
         'On the parish\'s last day there is no more waiting, and no more ' +
-        'quiet. Every plot opens on its own hinge; every voice comes up ' +
-        'still arguing; and everything you ever said is said again — ' +
-        'louder, and in company.',
+        'quiet. Every plot opens on its own hinge. Every voice comes up ' +
+        'still arguing. Everything you ever said is said again. ' +
+        'Louder, and in company.',
     tier: 3, rank: 5, cardType: 'spell',
     targetType: 'enemy',
     paidSummary: 'REPLAY your last spell 2 times, then RECALL 1 card from your discard pile.',
@@ -918,7 +918,7 @@ const frostbittenPalisade: Card = {
     description:
         'Stakes cut from the drowned orchard, sharpened in October, blessed ' +
         'with nothing. The frost volunteers the rest — it always does. Let ' +
-        'them climb; the wall keeps what it catches.',
+        'them climb. The wall keeps what it catches.',
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'self',
     paidSummary: 'GUARD 8, then gain THORNS 1 for 2 turns.',
@@ -1392,7 +1392,7 @@ const theLongAmen: Card = {
     description:
         'The final word of the service, held past the organ, past the ' +
         'candle-stubs, past the congregation\'s patience. It does not ' +
-        'resolve; it accrues. Every soul you keep lends it another voice, ' +
+        'resolve. It accrues. Every soul you keep lends it another voice, ' +
         'and the enemy stands in the nave, listening — agreeing.',
     tier: 2, rank: 6, cardType: 'hex',
     targetType: 'enemy',

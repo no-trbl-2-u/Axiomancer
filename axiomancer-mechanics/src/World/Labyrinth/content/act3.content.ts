@@ -61,7 +61,7 @@ export const ACT3: LabyrinthActDef = {
             realm: 'path',
             scene: 'a rough chamber where masonry gives way to living rock. In the center, a milestone of grey granite, waist-high, its top worn into a hollow by centuries of resting hands. The number 49 is carved into the bedrock lintel of each door. Cold air rises from everywhere at once.',
             narration:
-                'Below the shelving, below the memory. The house keeps its foundations where it keeps its doubts, and you are in both. Rest your hand on the stone — the house will remember you stood here, and return you here if you settle. Two warnings, and I give them freely, which should worry you. First: down here, trust only what bears weight. The rest is furniture. Second: the house numbers its bones once. If two rooms argue over a name, the one arguing is lying.',
+                'Below the shelving, below the memory. The house keeps its foundations where it keeps its doubts. You are in both. Rest your hand on the stone. The house will remember you stood here, and return you here if you settle. Two warnings, given freely, which should worry you. First: down here, trust only what bears weight. The rest is furniture. Second: the house numbers its bones once. If two rooms argue over a name, the one arguing is lying.',
             pois: [
                 {
                     id: 'milestone',
@@ -87,7 +87,7 @@ export const ACT3: LabyrinthActDef = {
             display: '51',
             name: 'The Stair of Unsaying',
             realm: 'path',
-            scene: 'a stair descending in half-turns; every other tread is carved with a word that has been struck through — except one tread, mid-flight, whose word stands unstruck. The walls are scraped, as if something wide was dragged up, long ago.',
+            scene: 'a stair descending in half-turns. Every other tread is carved with a word struck through. One tread, mid-flight, stands unstruck. The walls are scraped, as if something wide was dragged up long ago.',
             narration:
                 'The philosophers who came down took things back with every step. Retraction is the only cargo that gets lighter as you carry it. One word on this stair was never taken back. Stand on it.',
             pois: [
@@ -115,9 +115,9 @@ export const ACT3: LabyrinthActDef = {
             display: '53',
             name: 'The Hall of Withdrawn Statues',
             realm: 'path',
-            scene: 'a long hall of empty niches — the statues withdrawn, not stolen; each niche\'s nameplate has been ceremonially folded shut like a closed book. One keystone in the vault overhead is carved with a word; it is visibly holding the ceiling.',
+            scene: 'a long hall of empty niches. The statues were withdrawn, not stolen. Each nameplate has been folded shut like a closed book. One keystone in the vault overhead is carved with a word. It is visibly holding the ceiling.',
             narration:
-                'The Archive above keeps what was said. This hall keeps what was unsaid — every doctrine the house outgrew stood here once, in stone, and was helped down gently. The vault stands regardless. Look up. What the ceiling rests on was never withdrawn.',
+                'The Archive above keeps what was said. This hall keeps what was unsaid. Every doctrine the house outgrew stood here once, in stone. Each was helped down gently. The vault stands regardless. Look up. What the ceiling rests on was never withdrawn.',
             pois: [
                 {
                     id: 'keystone',
@@ -145,7 +145,7 @@ export const ACT3: LabyrinthActDef = {
             realm: 'path',
             scene: 'a granite milestone twin to the first, in a round chamber of undressed rock. Its flank bears a single carved word, worn soft. Bedrock lintels read 55. A ring of old bootprints in the dust, all facing the stone.',
             narration:
-                'The second stone. Rest your hand; the house will hold your place. The travelers who made these prints stood a long time. Deciding, I imagine, whether going back was defeat. The stone has an opinion on that. Read it.',
+                'The second stone. Rest your hand. The house will hold your place. The travellers who made these prints stood a long time. Deciding, I imagine, whether going back was defeat. The stone has an opinion. Read it.',
             pois: [
                 {
                     id: 'milestone-flank',
@@ -172,7 +172,7 @@ export const ACT3: LabyrinthActDef = {
             display: '57',
             name: 'The Gallery of Premises',
             realm: 'path',
-            scene: 'a vaulted gallery hung with framed axioms in gilt lettering — GIVEN THAT, IT FOLLOWS, AS ALL AGREE — their frames bolted to the walls. Three doors wear bedrock numbers (55, 59) and one arch at the gallery\'s end is bare: no number, no plaque, no frame — dressed stone only, older than the gallery around it.',
+            scene: 'a vaulted gallery hung with framed axioms in gilt lettering. GIVEN THAT. IT FOLLOWS. AS ALL AGREE. Their frames are bolted to the walls. Three doors wear bedrock numbers (55, 59). One arch at the gallery\'s end is bare. No number, no plaque, no frame. Dressed stone only, older than the gallery around it.',
             narration:
                 'The gallery of premises. Everything here hangs on the wall, and the wall hangs on nothing anyone framed. They counted three doors out of this room. I have counted four since before there were frames. The fourth had nothing to say for itself, which in this house is the highest recommendation.',
             pois: [
@@ -202,7 +202,7 @@ export const ACT3: LabyrinthActDef = {
             realm: 'path',
             scene: 'the deepest milestone, in a chamber so quiet the lamps burn without flutter. The stone\'s top hollow holds a palmful of clear water that never evaporates. One word is carved on its flank. Bedrock lintels read 59.',
             narration:
-                'The last stone. Past here the house stops offering to remember you. The water in the hollow is the house\'s one extravagance — it keeps it for the hands of people who almost turned back. Read the flank. The stone is blunt, this deep.',
+                'The last stone. Past here the house stops offering to remember you. The water in the hollow is its one extravagance. It keeps it for the hands of people who almost turned back. Read the flank. The stone is blunt, this deep.',
             pois: [
                 {
                     id: 'milestone-flank',
@@ -229,14 +229,14 @@ export const ACT3: LabyrinthActDef = {
             display: '61',
             name: 'The Foundation',
             realm: 'path',
-            scene: 'the oldest room. Deep underground stones carved and fitted before the maze had a shape; passages of natural rock; on every face, primitive signs — wind and water, hills and planets — carved by hands that predate numbers. In the floor\'s center, a threshold stone with a word worn almost to a shine. Facing it: a blank door of undressed rock and THIRTEEN carved sockets in a long arc. Above the door, no inscription at all.',
+            scene: 'the oldest room. Stones carved and fitted before the maze had a shape. Passages of natural rock. On every face, primitive signs. Wind and water, hills and planets, carved by hands that predate numbers. At the floor\'s centre, a threshold stone with a word worn almost to a shine. Facing it, a blank door of undressed rock and THIRTEEN carved sockets in a long arc. Above the door, no inscription at all.',
             narration:
                 'The Foundation. They carved wind and water down here before anyone thought to carve WHY. You have read the house\'s question on every gate: it asks it plainly now, once, in its oldest voice. WHAT ARGUMENT HAS NO FIRST PREMISE? Thirteen beds. Lay what you carried, in walking order. And mind your pocket — my colleague has been generous with you, I am sure.',
             pois: [
                 {
                     id: 'threshold-stone',
                     label: 'Threshold stone',
-                    remark: 'WON, worn nearly away. The masons carved it and then thought better of leaving it legible. Stand on it — it bears weight; it is the last thing here that does.',
+                    remark: 'WON, worn nearly away. The masons carved it, then thought better of leaving it legible. Stand on it. It bears weight. It is the last thing here that does.',
                     fragment: { word: 'WON', kind: 'honest' },
                 },
                 {
@@ -262,9 +262,9 @@ export const ACT3: LabyrinthActDef = {
             display: '65',
             name: 'The Sophist\'s Study',
             realm: 'path',
-            scene: 'a small, warm, terribly ordinary room: a desk, a good chair, a bad chair, and three ledgers laid out with the care of relics — the First, Second, and Third, their signatures visible: "P.", "Pro-", "-tas." A fourth ledger lies open and blank. A ledger stand.',
+            scene: 'a small, warm, terribly ordinary room. A desk, a good chair, a bad chair. Three ledgers laid out with the care of relics: the First, Second, and Third. Their signatures are visible. "P.", "Pro-", "-tas." A fourth ledger lies open and blank. A ledger stand.',
             narration:
-                'My study. Yes — mine. I signed your paperwork in thirds; you carried my name through the house without feeling the weight, which is how names prefer to travel. The house requires one more ledger before the door. The blank one. It is yours; I only witness.',
+                'My study. Yes, mine. I signed your paperwork in thirds. You carried my name through the house without feeling the weight. That is how names prefer to travel. The house requires one more ledger before the door. The blank one. It is yours. I only witness.',
             pois: [
                 {
                     id: 'three-signed-ledgers',
@@ -294,9 +294,9 @@ export const ACT3: LabyrinthActDef = {
             display: '63',
             name: 'The Threshold of the Unfounded',
             realm: 'path',
-            scene: 'a passage of natural rock opening onto a stone jamb with no door in it — the Unfounded Door: an empty doorway full of weather from somewhere else: warm air, salt, a light that is not lamplight. Between the player and the doorway stands the Sophist — visible at last, and the scene shows only his shadow, thrown long and horned by the light of the far country.',
+            scene: 'a passage of natural rock opening onto a stone jamb with no door in it. The Unfounded Door. An empty doorway full of weather from somewhere else. Warm air, salt, a light that is not lamplight. Between the player and the doorway stands the Sophist, visible at last. The scene shows only his shadow, thrown long and horned by the light of the far country.',
             narration:
-                'Here is the shame I mentioned. I came down these same stairs with a mind like a locked archive, and the house asked me its question, and I would not lay a single word down — I had carried my premises too far to admit they were furniture. So I stayed. Warden, narrator, cautionary footnote. You, though. You turned back eleven times. I counted. I always count. Prove the walking one last time — through me, or past me. There is a third way, if you kept your receipts.',
+                'Here is the shame I mentioned. I came down these same stairs with a mind like a locked archive. The house asked me its question. I would not lay a single word down. I had carried my premises too far to admit they were furniture. So I stayed. Warden, narrator, cautionary footnote. You, though. You turned back eleven times. I counted. I always count. Prove the walking one last time. Through me, or past me. There is a third way, if you kept your receipts.',
             pois: [],
             doors: [],
         },
@@ -305,9 +305,9 @@ export const ACT3: LabyrinthActDef = {
             display: '50',
             name: 'The Anteroom of Almost',
             realm: 'loop',
-            scene: 'a comfortable room that resembles the Narthex closely enough to unsettle: a bench (unworn), a brazier (lit), and a gilt side table whose drawer-front is carved with a word.',
+            scene: 'a comfortable room that resembles the Narthex closely enough to unsettle. A bench, unworn. A brazier, lit. A gilt side table whose drawer-front is carved with a word.',
             narration:
-                'The house rebuilt its own front porch down here, from memory, flatteringly. People sit. It is always almost time to decide. The bench is unworn; do the arithmetic on that.',
+                'The house rebuilt its own front porch down here, from memory, flatteringly. People sit. It is always almost time to decide. The bench is unworn. Do the arithmetic on that.',
             pois: [
                 {
                     id: 'gilt-side-table',
@@ -357,14 +357,14 @@ export const ACT3: LabyrinthActDef = {
             display: '54',
             name: 'The Chamber of the Settled',
             realm: 'loop',
-            scene: 'a firelit chamber of deep armchairs, each with a small brass plate naming its last occupant — all first names only. A massive carved chest sits where a hearth should be, its lid bearing a word. Four ways out, one of them under a bedrock 55... and one under an IRON-LOOKING 58 whose mortar is suspiciously fresh; beyond it, glimpsed, a milestone-shaped silhouette.',
+            scene: 'a firelit chamber of deep armchairs. Each has a small brass plate naming its last occupant, first names only. A massive carved chest sits where a hearth should be, its lid bearing a word. Four ways out. One under a bedrock 55. One under an IRON-LOOKING 58 whose mortar is suspiciously fresh. Beyond it, glimpsed, a milestone-shaped silhouette.',
             narration:
                 'The settled. They chose a chair and the chair agreed with them, and that was that. Two doors ahead claim stones. One of them I built no part of. You recall the rule about rooms that argue.',
             pois: [
                 {
                     id: 'carved-chest',
                     label: 'Carved chest',
-                    remark: 'EARNED. On a lid. Lids lift; earnings should not.',
+                    remark: 'EARNED. On a lid. Lids lift. Earnings should not.',
                     fragment: { word: 'EARNED', kind: 'counterfeit' },
                 },
                 {
@@ -386,7 +386,7 @@ export const ACT3: LabyrinthActDef = {
             display: '56',
             name: 'The Doubtless Hall',
             realm: 'loop',
-            scene: 'a proud hall lined with completed proofs under glass, QED after QED, all signed. A display plinth (freestanding, ornate) carries a carved word. At the far end, a service door stands ajar on blackness, a draft pulling inward; its hinges are on the OUTSIDE.',
+            scene: 'a proud hall lined with completed proofs under glass, QED after QED, all signed. A freestanding ornate plinth carries a carved word. At the far end a service door stands ajar on blackness, a draft pulling inward. Its hinges are on the OUTSIDE.',
             narration:
                 'The hall of finished arguments. Glass over all of them, you notice — finished things need protecting from the air in this house. The far door pulls. Doors that pull are hungry. Hinges on the outside, mind. Nothing in that room ever needed to open it from within.',
             pois: [
@@ -415,7 +415,7 @@ export const ACT3: LabyrinthActDef = {
             display: '58',
             name: 'The False Waystone',
             realm: 'trap',
-            scene: 'at first glance, a Waystone chamber: a milestone, lamps, a number 58 in aged iron — but the milestone is an ALTAR: worked, polished, stepped, with cushions before it and a donation bowl. The room\'s inner door (64) stands wide and welcoming. The way back to 54 remains open behind.',
+            scene: 'at first glance, a Waystone chamber. A milestone, lamps, a number 58 in aged iron. But the milestone is an ALTAR. Worked, polished, stepped, with cushions before it and a donation bowl. The room\'s inner door (64) stands wide and welcoming. The way back to 54 remains open behind.',
             narration:
                 'Ah. The house\'s understudy. Study it: a stone with STEPS, cushions for the knees, a bowl for your gratitude. The true stones ask for a hand and give you back your place. This one asks for worship and gives you the door it wants you through. It is furniture pretending to be bone. You may still leave the way you came. I have watched very few do it.',
             pois: [
@@ -443,9 +443,9 @@ export const ACT3: LabyrinthActDef = {
             display: '64',
             name: 'The Still Room',
             realm: 'trap',
-            scene: 'a small round room, felt-lined, lamplit, furnished with one perfect chair facing a lectern on which rests a book titled THE COMPLETE ARGUMENT. The door behind has shut without a sound and has no handle on this side. In the floor, a smooth-lipped oculus breathes cold air (60).',
+            scene: 'a small round room, felt-lined and lamplit. One perfect chair faces a lectern. On it rests a book titled THE COMPLETE ARGUMENT. The door behind has shut without a sound and has no handle on this side. In the floor, a smooth-lipped oculus breathes cold air (60).',
             narration:
-                'The still room. Everything a settled mind requires: one chair, one book, no exits worth the name. The book is blank past page one, but page one is very reassuring. When you tire of it — and the house is patient — the floor is the only door left that will have you.',
+                'The still room. Everything a settled mind requires. One chair, one book, no exits worth the name. The book is blank past page one. Page one is very reassuring. When you tire of it, the floor is the only door left that will have you. The house is patient.',
             pois: [
                 {
                     id: 'the-complete-argument',
@@ -471,9 +471,9 @@ export const ACT3: LabyrinthActDef = {
             display: '60',
             name: 'The Oubliette of the Settled Mind',
             realm: 'trap',
-            scene: 'a smooth stone gullet, utterly dark except for a coin of light far above. No doors at all. The fall is broken by a great drift of things: cushions, chair-legs, gilt frames, altar cloth — a century of confiscated furniture.',
+            scene: 'a smooth stone gullet, utterly dark but for a coin of light far above. No doors at all. The fall is broken by a great drift of things. Cushions, chair-legs, gilt frames, altar cloth. A century of confiscated furniture.',
             narration:
-                'The oubliette. French for the polite version of what the house does here. It does not keep prisoners; it keeps FURNITURE, and it has never once mistaken a walker for a chair. Up you go — the house is returning you to your last stone. It does this exactly as gently as you deserve, which I am told varies.',
+                'The oubliette. French for the polite version of what the house does here. It does not keep prisoners. It keeps FURNITURE, and it has never once mistaken a walker for a chair. Up you go. The house is returning you to your last stone. It does this exactly as gently as you deserve, which I am told varies.',
             pois: [],
             doors: [],
             eject: true,

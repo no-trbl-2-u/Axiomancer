@@ -64,7 +64,7 @@ const shrineKeeperTree: DialogueTree = {
         },
         veil_thin: {
             id: 'veil_thin',
-            text: "\"Yes. The boundary weakens where ancient powers once walked. Here, seeker, take this—a lens to see beyond the mere physical.\" The keeper offers a crystalline fragment that hums with inner light.",
+            text: "\"Yes. The boundary weakens where ancient powers once walked. Take this—a lens to see past the physical.\" The keeper offers a crystalline fragment. It hums with its own light.",
             choices: [
                 {
                     text: "Accept the crystal gratefully.",
@@ -368,7 +368,7 @@ const wanderingPhilosopherTree: DialogueTree = {
         },
         impact_realization: {
             id: 'impact_realization',
-            text: "\"Each conversation plants seeds in both minds. Your questions change my answers; my words reshape your journey. We co-create meaning through encounter.\"",
+            text: "\"Each conversation plants seeds in both minds. Your questions change my answers. My words reshape your road. Meaning is made in the meeting.\"",
         },
         simple_acceptance: {
             id: 'simple_acceptance',
@@ -424,7 +424,7 @@ const forestRangerTree: DialogueTree = {
         ranger_cave_directions: {
             id: 'ranger_cave_directions',
             // Phase 8 — terminal node for the get-to-cave quest grant.
-            text: "\"A cave mouth cuts into the cliff at the forest's far edge. Cold air spills from it even in summer. Follow the deer trail east and don't linger past dusk — I mark the safe path, not what's waiting in it.\"",
+            text: "\"A cave mouth cuts the cliff at the forest's far edge. Cold air spills from it even in summer. Follow the deer trail east. Do not linger past dusk. I mark the safe path, not what waits in it.\"",
         },
         talk_duties: {
             id: 'talk_duties',

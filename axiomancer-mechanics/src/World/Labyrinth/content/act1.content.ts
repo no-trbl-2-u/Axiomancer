@@ -40,7 +40,7 @@ export const ACT1: LabyrinthActDef = {
             display: '1',
             name: 'The Narthex',
             realm: 'path',
-            scene: 'a cold porch of pale stone. Three doors ahead, lintels carved with single words: the left door (4) reads GATE, the middle door (7) reads DOOR, the right door (9) reads ARCH. A brazier, unlit. A stone bench worn smooth in one seat only.',
+            scene: 'a cold porch of pale stone. Three doors ahead, each lintel carved with one word. The left door (4) reads GATE. The middle (7) reads DOOR. The right (9) reads ARCH. A brazier, unlit. A stone bench worn smooth in one seat only.',
             narration: 'So. Another argument walks in on two legs. Hear the terms of the house. Anything here may be a clue. Not every clue is honest. Neither am I. You will want the road out. There is exactly one that cannot mislead you — name it at the gate below, and the gate will assent. The others lead where gates and arches lead: around. I have watched them go around for a very long time.',
             pois: [
                 {
@@ -80,7 +80,7 @@ export const ACT1: LabyrinthActDef = {
             display: '7',
             name: 'The Colonnade Proper',
             realm: 'path',
-            scene: 'a roofless avenue of columns marching into painted dark. Every column bears a carved definite article-sized plaque; one column, mid-row, is wrapped in a leather strap at shoulder height. Doors: back to 1; ahead to 11; a low side door to 6.',
+            scene: 'a roofless avenue of columns marching into painted dark. Every column bears a small carved plaque. One column, mid-row, wears a leather strap at shoulder height. Doors: back to 1, ahead to 11, a low side door to 6.',
             narration: 'The builders raised these columns to hold up nothing. It is the most honest work in the house. Count what cannot be divided, and you will not be misled. The rest is masonry.',
             pois: [
                 {
@@ -92,7 +92,7 @@ export const ACT1: LabyrinthActDef = {
                 {
                     id: 'plaques',
                     label: 'Plaques',
-                    remark: 'Small words hold up large stones. Carved, every one — the maze carves; it does not paint. Should you meet paint, remember whose habit that is.',
+                    remark: 'Small words hold up large stones. Carved, every one. The maze carves. It does not paint. Should you meet paint, remember whose habit that is.',
                 },
                 {
                     id: 'low-side-door-6',
@@ -111,7 +111,7 @@ export const ACT1: LabyrinthActDef = {
             display: '11',
             name: 'The Hall of Plinths',
             realm: 'path',
-            scene: 'a hall of empty pedestals, statues gone. One plinth in the center is intact and bears nothing but a carved word; the rest are cracked, their inscriptions defaced.',
+            scene: 'a hall of empty pedestals, statues gone. One plinth at the center is intact. It bears nothing but a carved word. The rest are cracked, their inscriptions defaced.',
             narration: 'They carried the statues off to the last continent, or so the story runs. Stories run. Stone stays. Of the many that stood here, only one kept its footing — the unbroken one. Its fellows split three ways, four ways, six.',
             pois: [
                 {
@@ -146,7 +146,7 @@ export const ACT1: LabyrinthActDef = {
             display: '13',
             name: 'The Undercroft',
             realm: 'path',
-            scene: 'a low vaulted cellar. FOUR visible doors: back up to 11, and onward to 8, 9, and 6. Along the blank south wall, a row of oil lamps — five lamps, all burning — though the wall beneath the fifth lamp shows no door at all, only a shallow relief of a stair. A floor drain. Barrels gone soft.',
+            scene: 'a low vaulted cellar. FOUR visible doors: back up to 11, and onward to 8, 9, and 6. Along the blank south wall, a row of oil lamps. Five lamps, all burning. The wall beneath the fifth shows no door at all, only a shallow relief of a stair. A floor drain. Barrels gone soft.',
             narration: 'Thirteen, they said, is an unlucky count, and hurried. They counted four ways out of this cellar. I have kept house here longer than they were alive. I count five.',
             pois: [
                 {
@@ -184,8 +184,8 @@ export const ACT1: LabyrinthActDef = {
             display: '17',
             name: 'The Lamplit Stair',
             realm: 'path',
-            scene: 'a narrow stair rising behind the Undercroft wall, lamps at every seventh step. A landing with a lead-glass mirror, clouded. A small door to 23 tucked under the stair; the stair tops out at 19.',
-            narration: 'You found the wall\'s other opinion. Good. Few meet the stair; fewer meet the one climbing it. Look, there — in the glass. The only companion who takes every step you take and forgives none of them.',
+            scene: 'a narrow stair rising behind the Undercroft wall, lamps at every seventh step. A landing with a lead-glass mirror, clouded. A small door to 23 tucked under the stair. The stair tops out at 19.',
+            narration: 'You found the wall\'s other opinion. Good. Few meet the stair. Fewer meet the one climbing it. Look, there — in the glass. The only companion who takes every step you take, and forgives none.',
             pois: [
                 {
                     id: 'clouded-mirror',
@@ -292,7 +292,7 @@ export const ACT1: LabyrinthActDef = {
             display: '31',
             name: 'The Hinge Shrine',
             realm: 'path',
-            scene: 'a round chapel whose walls are doors — dozens, frames mortared shut, and at the center a figure of jointed bronze kneeling in prayer: the Doorwarden. After the fight, one floor hatch stands open where the altar stood: the descent to Act II.',
+            scene: 'a round chapel whose walls are doors. Dozens, frames mortared shut. At the center a figure of jointed bronze kneels in prayer: the Doorwarden. After the fight one floor hatch stands open where the altar stood. The descent to Act II.',
             narration: 'He asked the house to make him useful, and the house, which has a sense of humor, obliged. He is every door you did not choose. He holds it against you.',
             pois: [],
             doors: [],
@@ -334,8 +334,8 @@ export const ACT1: LabyrinthActDef = {
             display: '9',
             name: 'The Mirror Walk',
             realm: 'loop',
-            scene: 'a corridor doubled by facing mirrors; signs hang reversed in the glass. One sign reads correctly only in reflection: a painted word on a card tucked into a frame.',
-            narration: 'Walk it as long as you like; it is generous with itself. The signs read backwards. Some people find that profound. It is glass, doing what glass does.',
+            scene: 'a corridor doubled by facing mirrors. Signs hang reversed in the glass. One reads correctly only in reflection: a painted word on a card tucked into a frame.',
+            narration: 'Walk it as long as you like. It is generous with itself. The signs read backwards. Some people find that profound. It is glass, doing what glass does.',
             pois: [
                 {
                     id: 'reversed-signs',
@@ -360,7 +360,7 @@ export const ACT1: LabyrinthActDef = {
             display: '6',
             name: 'The Long Gallery',
             realm: 'loop',
-            scene: 'portrait frames the length of a tithe barn, all empty but one: a gilt frame holding a painted crown on a cushion, no head beneath it.',
+            scene: 'portrait frames the length of a tithe barn, all empty but one. A gilt frame holds a painted crown on a cushion. No head beneath it.',
             narration: 'The gallery of everyone who mastered the house. Notice the abundance. The one finished portrait is of the prize itself — they never did find anyone to wear it.',
             pois: [
                 {
@@ -386,7 +386,7 @@ export const ACT1: LabyrinthActDef = {
             display: '8',
             name: 'The Cistern Walk',
             realm: 'loop',
-            scene: 'a walkway over black water. Three openings — two honest arches (4, 6) and one low brick chute (22) breathing cold air upward, its lip worn glass-smooth.',
+            scene: 'a walkway over black water. Three openings. Two honest arches (4, 6). One low brick chute (22), breathing cold air upward, its lip worn glass-smooth.',
             narration: 'Mind the fourth opening. It is the house\'s throat, and the house swallows without chewing. I mention this because no one listens, and I enjoy being right.',
             pois: [
                 {

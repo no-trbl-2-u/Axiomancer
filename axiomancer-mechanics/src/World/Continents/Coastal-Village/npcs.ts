@@ -341,7 +341,7 @@ const fishermansDaughterTree: DialogueTree = {
         },
         worldly_wisdom: {
             id: 'worldly_wisdom',
-            text: "\"Then tell me. What's the one lesson the world taught you that I should know, before I decide what life I want to live.\"",
+            text: "\"Then tell me. What is the one lesson the world taught you? Say it before I choose what life to live.\"",
             choices: [
                 {
                     text: "Every soul carries wisdom worth the hearing.",
@@ -410,7 +410,7 @@ const fishermansDaughterTree: DialogueTree = {
         },
         encourage_dreams: {
             id: 'encourage_dreams',
-            text: "\"You believe that. Sometimes I look at the horizon and think I could sail past the edge of the map — not for recklessness. For purpose. Maybe courage isn't the absence of fear. Maybe it's growing past it anyway.\"",
+            text: "\"You believe that. Sometimes I look at the horizon and think I could sail past the map's edge. Not for recklessness. For purpose. Maybe courage is not the absence of fear. Maybe it is growing past it anyway.\"",
         },
         wisdom_everywhere: {
             id: 'wisdom_everywhere',
@@ -418,7 +418,7 @@ const fishermansDaughterTree: DialogueTree = {
         },
         stay_true: {
             id: 'stay_true',
-            text: "\"Aye. Father raised me on strong values. I want to test them — not to cast them off, but to make them mine by choice, not by inheritance.\"",
+            text: "\"Aye. Father raised me on strong values. I want to test them. Not to cast them off. To make them mine by choice, not by inheritance.\"",
         },
         adaptability_lesson: {
             id: 'adaptability_lesson',
@@ -479,7 +479,7 @@ const villageHealerTree: DialogueTree = {
         },
         talk_situation: {
             id: 'talk_situation',
-            text: "\"My thanks, for asking. I've not rested — fever spreads through the poor quarter, and the herbs I need sit hoarded in the wealthy district. I could save more, with the right supplies. Getting them would mean choices I don't like. I ask myself daily how far a healer should go, to get what her patients need.\"",
+            text: "\"My thanks, for asking. I have not rested. Fever spreads through the poor quarter. The herbs I need sit hoarded in the wealthy district. I could save more, with the right supplies. Getting them would mean choices I do not like. I ask myself daily how far a healer should go.\"",
             choices: [
                 {
                     text: "Trust to providence. It provides what's needed.",
@@ -644,7 +644,7 @@ const merchantWidowTree: DialogueTree = {
         },
         talk_troubles: {
             id: 'talk_troubles',
-            text: "\"My husband was murdered three weeks past. Stabbed in an alley for his purse. I know who did it — a desperate man, with starving children of his own. The constables won't act; he's fled the village already. I've the coin to hire bounty hunters. Part of me wonders if justice wants tempering with mercy. His children starve, if he's caught. My husband's blood asks for justice regardless. What's the right path, when the two make war on each other?\"",
+            text: "\"My husband was murdered three weeks past. Stabbed in an alley for his purse. I know who did it. A desperate man, with starving children of his own. The constables will not act. He has fled the village already. I have the coin to hire bounty hunters. Part of me wonders if justice wants tempering with mercy. His children starve, if he is caught. My husband's blood asks for justice regardless. Which is the right path, when the two make war?\"",
             choices: [
                 {
                     text: "Forgiveness is divine. Let heaven judge, and heal your own heart.",
@@ -686,7 +686,7 @@ const merchantWidowTree: DialogueTree = {
         },
         justice_with_mercy: {
             id: 'justice_with_mercy',
-            text: "\"Perhaps there's a way to serve justice without breeding more suffering. With your help, we might find him — see his family cared for, and still make him answer for what he's done.\"",
+            text: "\"Perhaps there is a way to serve justice without breeding more suffering. With your help we might find him. See his family cared for. Make him answer for what he did.\"",
         },
         pursue_vengeance: {
             id: 'pursue_vengeance',

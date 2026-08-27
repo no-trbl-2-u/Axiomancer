@@ -39,8 +39,8 @@ export const ACT2: LabyrinthActDef = {
             display: '33',
             name: 'The Deposit Desk',
             realm: 'path',
-            scene: 'A counter of black oak under a rotunda. Behind it, pigeon holes to the ceiling, each with a brass ring where a tag once hung — every ring empty. Three ways out: iron 35 over a broad arch, iron 34 under a clerestory, iron 36 past the desk. A bell on the counter, its clapper removed.',
-            narration: 'The Archive. Every argument ever surrendered at the door is shelved here, catalogued, and quietly corrected. Mind the shelving; it closes behind readers the way minds do. You will be asked, below, what the true argument stands on. The holdings are extensive. The answer is not on display. Also — my colleague the forger works these halls now. He carves nicely. Ask the catalogue what it owns.',
+            scene: 'A counter of black oak under a rotunda. Behind it, pigeon holes to the ceiling. Each has a brass ring where a tag once hung. Every ring is empty. Three ways out: iron 35 over a broad arch, iron 34 under a clerestory, iron 36 past the desk. A bell on the counter, its clapper removed.',
+            narration: 'The Archive. Every argument surrendered at the door is shelved here, catalogued, and quietly corrected. Mind the shelving. It closes behind readers the way minds do. You will be asked, below, what the true argument stands on. The holdings are extensive. The answer is not on display. Also — my colleague the forger works these halls now. He carves nicely. Ask the catalogue what it owns.',
             pois: [
                 {
                     id: 'empty-pigeon-holes',
@@ -100,7 +100,7 @@ export const ACT2: LabyrinthActDef = {
             display: '39',
             name: 'The Catalogue',
             realm: 'path',
-            scene: 'A vaulted hall filled by one piece of furniture: a card catalogue the size of a granary, drawers labeled in roman numerals I through XVII. A standing ledger chained to a lectern. Iron 41 beyond; an open stair arch under iron 40.',
+            scene: 'A vaulted hall filled by one piece of furniture. A card catalogue the size of a granary, drawers labelled I through XVII. A standing ledger chained to a lectern. Iron 41 beyond. An open stair arch under iron 40.',
             narration: 'The Catalogue. Seventeen stacks, listed and loved. The Archive remembers its own — ask it before you believe anything carved in this wing. I will wait. Reading has always been the fastest way to slow a person down.',
             pois: [
                 {
@@ -135,8 +135,8 @@ export const ACT2: LabyrinthActDef = {
             display: '41',
             name: 'The Misfiled Wing',
             realm: 'path',
-            scene: 'A wing of rolling stacks on floor rails, numbered in iron I through XVI. Sixteen stacks. The rails, though, run PAST stack XVI and under the end wall, where a return slot gapes at knee height (44). A side door under iron 37.',
-            narration: 'Sixteen stacks. The catalogue is rarely wrong and never modest, so do the arithmetic yourself. Mind the slot in the end wall; the Archive takes returns seriously and questions later.',
+            scene: 'A wing of rolling stacks on floor rails, numbered in iron I through XVI. Sixteen stacks. The rails run PAST stack XVI and under the end wall. A return slot gapes there at knee height (44). A side door under iron 37.',
+            narration: 'Sixteen stacks. The catalogue is rarely wrong and never modest. Do the arithmetic yourself. Mind the slot in the end wall. The Archive takes returns seriously and questions later.',
             pois: [
                 {
                     id: 'floor-rails',
@@ -167,7 +167,7 @@ export const ACT2: LabyrinthActDef = {
             display: '37',
             name: 'The Map Room',
             realm: 'path',
-            scene: 'Chart tables, a globe worn bald at the equator by fingers, a wall of maps of places with no coastlines that agree. One map is framed in iron rather than wood.',
+            scene: 'Chart tables. A globe worn bald at the equator by fingers. A wall of maps whose coastlines do not agree. One map is framed in iron rather than wood.',
             narration: 'Cartography, honest and otherwise. Stack fourteen\'s overflow. Maps are arguments drawn badly on purpose — every one of them stands somewhere it cannot show.',
             pois: [
                 {
@@ -192,7 +192,7 @@ export const ACT2: LabyrinthActDef = {
             name: 'The Restorer\'s Bench',
             realm: 'path',
             scene: 'Stack XVII\'s hidden bay, repurposed: a long bench of tools for mending books — knives, paste, gold leaf, a press. On the press, a repaired folio titled ATLASES OF NOWHERE, its shelf-mark XVII.i stamped fresh. Beyond, an honest iron 45.',
-            narration: 'The restorer worked where no one could ask him questions. Sensible man. He mended what the Archive would not admit was broken — every spine in this room was once a lie with a loose cover.',
+            narration: 'The restorer worked where no one could ask him questions. Sensible man. He mended what the Archive would not admit was broken. Every spine in this room was once a lie with a loose cover.',
             pois: [
                 {
                     id: 'repaired-folio',
@@ -217,7 +217,7 @@ export const ACT2: LabyrinthActDef = {
             name: 'The Gate of Assent',
             realm: 'path',
             scene: 'A door of stacked slate, no handle. A lectern with FOUR carved sockets. Above: "SAY THE GROUND."',
-            narration: 'The house asks again. What does the true argument stand on? You have been in its library; you have seen what it keeps and what it will not shelve. Lay the words in walking order. Forgeries will be checked against the catalogue. Everything is, eventually.',
+            narration: 'The house asks again. What does the true argument stand on? You have been in its library. You have seen what it keeps and what it will not shelve. Lay the words in walking order. Forgeries will be checked against the catalogue. Everything is, eventually.',
             pois: [],
             doors: [
                 { to: 'ap2-6' },
@@ -229,7 +229,7 @@ export const ACT2: LabyrinthActDef = {
             display: '46',
             name: 'The Index\'s Antechamber',
             realm: 'path',
-            scene: 'A copying room: one desk, one chair, one lamp, and ten thousand slips of paper pinned to every surface, each bearing a single crossed-out word. A ledger stand (the act quest board). The far door (47) has no number at all — its iron was pried off.',
+            scene: 'A copying room. One desk, one chair, one lamp. Ten thousand slips of paper pinned to every surface, each bearing one crossed-out word. A ledger stand (the act quest board). The far door (47) has no number. Its iron was pried off.',
             narration: 'Beyond that door the Index is compiling. It has been compiling since before I came, and it is nearly up to the letter A. The house requires its paperwork first. It always does.',
             pois: [
                 {
@@ -253,7 +253,7 @@ export const ACT2: LabyrinthActDef = {
             display: '47',
             name: 'The Spine',
             realm: 'path',
-            scene: 'The Archive\'s structural core: a shaft of galleries around a column of clasped ledgers rising out of sight. Coiled around the column, reading, a golem of misfiled truths — the Index — card drawers for ribs, a spine of actual spines.',
+            scene: 'The Archive\'s structural core. A shaft of galleries around a column of clasped ledgers, rising out of sight. Coiled around the column, reading, a golem of misfiled truths. The Index. Card drawers for ribs, a spine of actual spines.',
             narration: 'The Index. Every fact that was filed where it did not belong, given legs and a grudge. It knows where everything is, which is not the same as knowing anything. Do not let it cite you.',
             pois: [],
             doors: [],
@@ -291,7 +291,7 @@ export const ACT2: LabyrinthActDef = {
             display: '36',
             name: 'The Scriptorium',
             realm: 'loop',
-            scene: 'Rows of copy desks, ink dried in the wells to little black mirrors. One desk\'s writing slope is carved with a heavy word and a neat mark; the copyists\' stools all face it as if it were a pulpit.',
+            scene: 'Rows of copy desks, ink dried in the wells to little black mirrors. One desk\'s writing slope is carved with a heavy word and a neat mark. The copyists\' stools all face it like a pulpit.',
             narration: 'Where the Archive made its copies, and its copies made mistakes, and the mistakes were archived. Genealogy in this house is complicated. The desk they all face carved its opinion loudly. Loud is not shelved.',
             pois: [
                 {
@@ -317,8 +317,8 @@ export const ACT2: LabyrinthActDef = {
             display: '40',
             name: 'The Stair of Returns',
             realm: 'loop',
-            scene: 'A switchback stair connecting rotunda level to the Catalogue. Its iron 40 is bolted to the newel — but over the arch somebody has HUNG a painted plaque reading 45, on new rope. On the landing, a lectern carved with a word and a mark.',
-            narration: 'The Stair of Returns, where everything comes back. Someone has hung it a flattering new number. Iron was set by the masons; rope arrives later, like opinions. Climb by the iron.',
+            scene: 'A switchback stair from the rotunda up to the Catalogue. Its iron 40 is bolted to the newel. Over the arch somebody has HUNG a painted plaque reading 45, on new rope. On the landing, a lectern carved with a word and a mark.',
+            narration: 'The Stair of Returns, where everything comes back. Someone has hung it a flattering new number. Iron was set by the masons. Rope arrives later, like opinions. Climb by the iron.',
             pois: [
                 {
                     id: 'hung-plaque',
@@ -354,7 +354,7 @@ export const ACT2: LabyrinthActDef = {
                 {
                     id: 'display-binding',
                     label: 'Display binding',
-                    remark: 'UPON, mark VIII.viii, tooled in gold deep enough to pass for carving. A preposition with delusions of grandeur. Open it. Blank. Bindings are promises; contents are arguments.',
+                    remark: 'UPON, mark VIII.viii, tooled in gold deep enough to pass for carving. A preposition with delusions of grandeur. Open it. Blank. Bindings are promises. Contents are arguments.',
                     fragment: { word: 'UPON', kind: 'counterfeit' },
                 },
                 {
@@ -376,7 +376,7 @@ export const ACT2: LabyrinthActDef = {
             name: 'The Unshelved Corridor',
             realm: 'loop',
             scene: 'A service corridor stacked with unprocessed crates. At the end, a freight hatch (38) propped open by a crate corner — its counterweight rope plainly cut. A crate lid leans against the wall, a word chalked-then-chiseled into it.',
-            narration: 'Backlog. The Archive\'s conscience, in crates. The hatch at the end goes down to the weighing room and has not come back up since the rope was cut. I mention the rope because no one looks up. No one ever looks up.',
+            narration: 'Backlog. The Archive\'s conscience, in crates. The hatch at the end goes down to the weighing room. It has not come back up since the rope was cut. I mention the rope because no one looks up. No one ever looks up.',
             pois: [
                 {
                     id: 'freight-hatch',
@@ -424,7 +424,7 @@ export const ACT2: LabyrinthActDef = {
             display: '44',
             name: 'The Return Slot',
             realm: 'trap',
-            scene: 'The receiving room of the return chute from the Misfiled Wing: a canvas-lined hopper, a sorting table, and a service stair climbing long and dark toward the rotunda (34), its door hinged outward only.',
+            scene: 'The receiving room of the return chute from the Misfiled Wing. A canvas-lined hopper. A sorting table. A service stair climbing long and dark toward the rotunda (34), its door hinged outward only.',
             narration: 'Returns are received, inspected, and released with a warning. The stair is long and minds its own business. Up you go — the rotunda has missed you, the way round things miss everything.',
             pois: [
                 {

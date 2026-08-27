@@ -89,6 +89,47 @@ export const VOICE_RULES = [
   },
 ]
 
+/**
+ * Fields whose value is NARRATION, and so subject to MB-1 (spec 34 §2.5.1).
+ *
+ * `paidSummary` is deliberately absent: it is rules text, governed by §2.3 and
+ * the real-units-or-no-number law. Shortening a paid line to satisfy a
+ * narration ceiling would trade a mechanical guarantee for a stylistic one.
+ * The voice and retired-term rules still apply to every literal — a retired
+ * keyword in rules text is just as wrong.
+ */
+export const PROSE_FIELDS = new Set([
+  'description', 'scene', 'narration', 'text', 'remark', 'flavor', 'intro',
+  'body', 'quiet', 'heavy', 'stanceHint', 'journalEntry', 'blurb', 'summary',
+  'prompt', 'lines', 'line', 'refusal', 'riddle', 'title', 'subtitle',
+])
+
+/**
+ * MB-1, the knife law (spec 34 §2.5.1), mechanically checkable half.
+ * Narration only — see PROSE_FIELDS.
+ */
+export const MB1_MAX_WORDS = 20
+
+export const PROSE_RULES = [
+  {
+    id: 'mb1-long-sentence',
+    fix: `MB-1: narration runs short — target under twelve words, hard ceiling ${MB1_MAX_WORDS}`,
+    since: 'spec 34 §2.5.1',
+    test: (value) => sentencesOf(value).some((s) => wordCount(s) > MB1_MAX_WORDS),
+  },
+  {
+    id: 'mb1-semicolon',
+    fix: 'MB-1: a semicolon in player-facing prose is a defect — full stops are '
+      + 'the register. Split the sentence; do not swap the semicolon for a comma',
+    since: 'spec 34 §2.5.1',
+    test: (value) => value.includes(';'),
+  },
+]
+
+export const wordCount = (s) => s.trim().split(/\s+/).filter(Boolean).length
+export const sentencesOf = (value) =>
+  value.split(/(?<=[.!?])\s+/).map((s) => s.trim()).filter((s) => s.length > 3)
+
 const PRAGMA_RE = /\/\/\s*(lexicon-ok|prose-ok):\s*([^\n]+)/g
 
 /** File-level exemptions, as `{ lexicon: Set, prose: Set }`. */
@@ -111,14 +152,31 @@ export function exemptionsIn(text) {
  */
 export function stringLiterals(text) {
   const out = []
+  const lines = text.split(/\r?\n/)
   const re = /'((?:[^'\\\n]|\\.)*)'|"((?:[^"\\\n]|\\.)*)"|`((?:[^`\\]|\\.)*)`/g
   let m
   while ((m = re.exec(text)) !== null) {
     const value = m[1] ?? m[2] ?? m[3]
     if (value == null) continue
-    out.push({ value, line: text.slice(0, m.index).split(/\r?\n/).length })
+    const line = text.slice(0, m.index).split(/\r?\n/).length
+    out.push({ value, line, field: fieldFor(lines, line) })
   }
   return out
+}
+
+/**
+ * The object key a literal sits under, or null. Walks back a few lines because
+ * a wrapped value puts its key above the text (`description:\n    '…' +`).
+ *
+ * This is what lets MB-1 apply to narration and NOT to rules text — see
+ * PROSE_FIELDS.
+ */
+export function fieldFor(lines, line) {
+  for (let i = line - 1; i >= Math.max(0, line - 4); i--) {
+    const m = /(\w+):\s*$|(\w+):\s*['"`]/.exec(lines[i] ?? '')
+    if (m) return m[1] ?? m[2]
+  }
+  return null
 }
 
 /** Ids, keys, and enum values are not prose. */
@@ -128,8 +186,16 @@ const MIN_PROSE_LENGTH = 12
 export function scanSource(text, retiredRows) {
   const exempt = exemptionsIn(text)
   const findings = []
-  for (const { value, line } of stringLiterals(text)) {
+  for (const { value, line, field } of stringLiterals(text)) {
     if (value.length < MIN_PROSE_LENGTH) continue
+    if (PROSE_FIELDS.has(field)) {
+      for (const rule of PROSE_RULES) {
+        if (exempt.prose.has(rule.id)) continue
+        if (rule.test(value)) {
+          findings.push({ rule: rule.id, line, fix: rule.fix, excerpt: value.slice(0, 80) })
+        }
+      }
+    }
     for (const rule of VOICE_RULES) {
       if (exempt.prose.has(rule.id)) continue
       if (rule.re.test(value)) {
@@ -159,6 +225,7 @@ function main() {
 
   if (process.argv.includes('--list')) {
     for (const r of VOICE_RULES) console.log(`${r.id}: /${r.re.source}/ — ${r.fix} (${r.since})`)
+    for (const r of PROSE_RULES) console.log(`${r.id}: [narration fields only] — ${r.fix} (${r.since})`)
     console.log(`\n${CONTENT_SURFACES.length} content surfaces:`)
     for (const s of CONTENT_SURFACES) console.log(`  ${s}`)
     process.exit(0)
@@ -206,7 +273,8 @@ function main() {
   }
   console.log(
     `check-prose: ${scanned} content surface(s) clean against `
-      + `${VOICE_RULES.length} voice rule(s) + ${retired.length} retired term(s)`,
+      + `${VOICE_RULES.length} voice + ${PROSE_RULES.length} register rule(s) `
+      + `+ ${retired.length} retired term(s)`,
   )
 }
 

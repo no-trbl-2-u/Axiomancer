@@ -749,7 +749,7 @@ const fvFatherWorryDialogue: MapEventPool = {
                 nodes: {
                     overhear: {
                         id: 'overhear',
-                        text: '"Pitch, cloth, nails, a plank—sound enough to trust the lake..." Father\'s voice trails off through the wall, tired in a way you don\'t like. At dinner he asks, too lightly, "So. This boat of yours. What will it take, exactly?"',
+                        text: '"Pitch, cloth, nails, a plank—sound enough to trust the lake..." Father\'s voice trails off through the wall. He is tired in a way you do not like. At dinner he asks, too lightly, "So. This boat of yours. What will it take, exactly?"',
                         choices: [
                             {
                                 text: 'Tell him everything — the whole plan, cost and all.',
