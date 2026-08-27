@@ -134,6 +134,38 @@ regardless of order. Skip rows marked `[skipped]` (set by
 `skills/plan-a-phase.md` §5 to generate (commit separately,
 then proceed).
 
+### Step 2.4 — Claim check: is another tick already on this phase?
+
+`/march` runs from more than one place — this session's `/loop`, the
+scheduled CI cron, an attended session. Two ticks that pick the same
+`[ ]` row build the same phase twice, and their edits collide in the
+files the phase owns.
+
+The mirror issue is the claim. Before starting work, check whether one
+is already open **and recent**:
+
+```bash
+claimed=$(gh issue list --repo "$GH_REPO" --state open \
+  --search "Phase <N> — in:title" --json number,createdAt \
+  --jq '.[0] | select(. != null) | "\(.number) \(.createdAt)"')
+```
+
+- **No open mirror** — proceed; Step 2.5 opens it and the claim is yours.
+- **Open mirror, created within the last ~2 hours, and this tick has
+  not yet pushed a commit for the phase** — another tick is mid-flight.
+  Do NOT build it. Skip to the next unclaimed `[ ]` row and note the
+  skip in your summary. Racing produces two briefs, two mirrors, and a
+  merge conflict in whatever the phase touches.
+- **Open mirror, older than that** — a previous tick started and did not
+  finish. Adopt it: the helper reuses the number, so continue the work.
+
+A brief you already pushed for a phase you are yielding gets removed in
+the same tick — two briefs for one phase is worse than none.
+
+(Observed 2026-08-27: a local `/loop /march` and a CI `/march` both
+picked Phase 74 within 30 seconds. The local tick yielded, deleted its
+duplicate brief, and filed this rule.)
+
 ### Step 2.5 — Mirror the phase to GitHub
 
 Open (or reuse, or reopen) the phase mirror issue. The repo's

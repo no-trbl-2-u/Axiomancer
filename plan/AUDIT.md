@@ -2681,6 +2681,32 @@
   `-m` body already has its own dedicated lint pass, so the general grep can
   exclude it. `backgroundedGate` should match a test COMMAND, not the substring.
 
+### [tooling] Concurrent `/march` ticks race for the same build-plan phase
+- category: tooling
+- impact: 5
+- ease: 6
+- detail: observed 2026-08-27. A local `/loop /march` and the scheduled CI
+  `/march` both picked Phase 74 within ~30 seconds of each other. Both wrote a
+  brief (`phase_74_north_star_ratification.md` and
+  `phase_74_north_star_into_spec.md`); the CI tick also opened mirror #252. The
+  local tick noticed on its push rejection, yielded, and deleted its duplicate
+  brief — but only because the push happened to race. Had both pushed cleanly,
+  two agents would have edited spec 34 §2 concurrently.
+- root cause: `ship-a-phase` picks "the first `[ ]` row" with no notion of a
+  claim. The mirror issue is a perfect claim token — it is opened at start and
+  closed at ship — but it was only ever consulted as find-or-create, never as
+  "is someone else already here?".
+- MITIGATED 2026-08-27: `skills/ship-a-phase.md` gains Step 2.4, a claim check
+  that reads the open mirror before building and dispatches past a phase
+  another tick started in the last ~2 hours. An older open mirror is adopted
+  rather than skipped, so a crashed tick still gets finished.
+- residual: the check is advisory (a skill instruction, not a lock) and has a
+  ~30-second race window of its own — two ticks that check simultaneously both
+  see no mirror. Closing that properly needs an atomic claim, e.g. the mirror
+  opened BEFORE the brief is written and treated as a lock. Left open: the
+  cheap fix covers the observed failure, and a real lock is a bigger change to
+  a flow that is otherwise working.
+
 ## Done
 
 ### [x] [3.2] `CardSpecialMechanic` deprecated-name not exported — stale/resolved
