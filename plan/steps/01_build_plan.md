@@ -2265,7 +2265,7 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       absent from every CI checkout), revisitable only alongside a kb-sync
       step, which is its own cost decision.
 
-- [ ] Phase 73 — Art generation pipeline (Option A, adapter-shaped).
+- [x] Phase 73 — Art generation pipeline (Option A, adapter-shaped).
       Implements T's 2026-08-22 route ruling
       (`plan/ideas/AI_ART_PIPELINE_OPTIONS.md` §9, Option 1 A-then-B).
       Scope: a `generate(spec) -> image` ADAPTER with the hosted
@@ -2280,7 +2280,18 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       never committed; absent the key the generate leg is inert and
       the rest of the pipeline still runs. Depends on Phase 71.
       (content/tooling; queued 2026-08-22 from T's route ruling)
-      Brief: to generate.
+      Brief: `plan/phases/phase_73_art_generation.md`. SHIPPED 2026-08-27
+      (`b31c94a0`, issue #251): versioned style module, deterministic prompt
+      compiler, `generate()` adapter with an inert null default, the same
+      post-process an acquisition gets, provenance carrying backend/model/
+      prompt/style-version/date, and mechanical drift QA (baseline: 127
+      assets, 8 categories). 16 tests against an injected fake backend.
+      **The hosted call is UNEXERCISED and labelled so in its own header** —
+      no key in the checkout, and paid-API spend is not the loop's call. The
+      ruling anticipated it: absent the key only the generate leg is inert.
+      The banner comes off in the same commit that records a real run.
+      Follow-up left open: running it, the vision-assisted pre-screen, and
+      `art.manifest.json` / `npm run art:status`.
 - [ ] Phase 74 — N-1: fold the ratified North Star into spec 34.
       `plan/north-star-mork-borg.md` was ratified as-is by T on
       2026-08-22; its §2 becomes spec 34's §2.5 (the Mörk Borg
