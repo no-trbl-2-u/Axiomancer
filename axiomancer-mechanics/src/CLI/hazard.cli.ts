@@ -477,7 +477,7 @@ export async function runHazardCli(argv: string[]): Promise<void> {
     }
     const bag = composeHazardBag(flags.deck, bagFileIds);
 
-    log('Axiomancer — hazard mini-game (v2).');
+    log('Miserere Mei, Deus — hazard mini-game (v2).');
     log(`Mode: ${flags.auto ? 'auto' : 'manual'}  ·  runs: ${flags.runs}` +
         (flags.seed !== undefined ? `  ·  seed: ${flags.seed}` : '') +
         (flags.bagFile ? `  ·  bag-file (${bag.length} cards)` : flags.deck ? `  ·  +deck [${flags.deck.join(', ')}]` : ''));

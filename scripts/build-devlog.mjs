@@ -381,7 +381,7 @@ function buildHub(entryCount, tuningCount) {
     .join("\n");
 
   return (
-    `<h1>Axiomancer</h1>\n` +
+    `<h1>Miserere Mei, Deus</h1>\n` +
     `<p class="muted">A private index of the game's content and the nightly development log.</p>\n` +
     `<div class="hub">\n${grid}\n</div>`
   );
@@ -419,8 +419,8 @@ function buildTuningLab() {
   writeFileSync(
     join(TUNING_LAB, "index.html"),
     page({
-      title: "Axiomancer Tuning Lab",
-      home: { href: "../index.html", label: "← Axiomancer" },
+      title: "Miserere Mei, Deus — Tuning Lab",
+      home: { href: "../index.html", label: "← Miserere Mei, Deus" },
       crumb: "Tuning Lab",
       body: listBody,
     })
@@ -451,7 +451,7 @@ function build() {
     writeFileSync(
       join(ENTRIES, `DIGEST_${date}.html`),
       page({
-        title: `Axiomancer digest — ${date}`,
+        title: `Miserere Mei, Deus digest — ${date}`,
         home: { href: "../log.html", label: "← DevLog" },
         crumb: date,
         body,
@@ -477,8 +477,8 @@ function build() {
   writeFileSync(
     join(DEVLOG, "log.html"),
     page({
-      title: "Axiomancer DevLog",
-      home: { href: "./index.html", label: "← Axiomancer" },
+      title: "Miserere Mei, Deus — DevLog",
+      home: { href: "./index.html", label: "← Miserere Mei, Deus" },
       crumb: "DevLog",
       body: listBody,
     })
@@ -490,7 +490,7 @@ function build() {
   // Hub → index.html
   writeFileSync(
     join(DEVLOG, "index.html"),
-    page({ title: "Axiomancer", home: null, crumb: "", body: buildHub(meta.length, tuningCount) })
+    page({ title: "Miserere Mei, Deus", home: null, crumb: "", body: buildHub(meta.length, tuningCount) })
   );
 
   console.log(`devlog: built hub + log + ${meta.length} entr${meta.length === 1 ? "y" : "ies"}`);

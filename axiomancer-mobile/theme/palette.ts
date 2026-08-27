@@ -1,7 +1,7 @@
 /**
  * Theme registry + palette factory (visual-audit 2026-06).
  *
- * Axiomancer ships a single dark-gothic identity, but the colour
+ * Miserere Mei, Deus ships a single dark-gothic identity, but the colour
  * *accents* are now theme-driven so the world can shift palette as the
  * pilgrim descends into different regions (future biome worlds) without
  * touching the 150+ components that read `AXM.*`.

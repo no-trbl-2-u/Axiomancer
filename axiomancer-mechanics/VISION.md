@@ -1,10 +1,10 @@
-# Axiomancer Mechanics Vision
+# Miserere Mei, Deus — Mechanics Vision
 
-This file preserves T's fundamental wants for Axiomancer as they affect the mechanics engine. Read it before major mechanics proposals, balance tuning, combat work, skill/status work, mercy/friendship work, or alignment work.
+This file preserves T's fundamental wants for Miserere Mei, Deus as they affect the mechanics engine. Read it before major mechanics proposals, balance tuning, combat work, skill/status work, mercy/friendship work, or alignment work.
 
 ## Game identity
 
-Axiomancer is a dark fantasy deckbuilding RPG campaign where mechanics make what you owe, and to whom, consequential.
+Miserere Mei, Deus is a dark fantasy deckbuilding RPG campaign where mechanics make what you owe, and to whom, consequential.
 
 The engine should support strange, legible, consequential systems over safe RPG imitation.
 

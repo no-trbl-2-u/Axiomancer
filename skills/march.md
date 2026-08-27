@@ -23,7 +23,7 @@ delivery, OR when its rate-limit window opens (every ~20
 commits or ~48h) AND the bearings posture is **bold** or
 **autonomous**.
 
-This means: an overnight run can take Axiomancer from
+This means: an overnight run can take the project from
 "scaffolded" to "shipped, populated, iteratively polished,
 critiqued, addressed, inbox-zero on issues, and growing its
 own plan when reality outpaces the original spec" without a

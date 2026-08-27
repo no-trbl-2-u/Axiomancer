@@ -188,7 +188,7 @@ export const deriveNonCombatStats = ({ body, heart, mind }: BaseStats): NonComba
  * Calculates the maximum health of an entity from all base stats.
  * Equation: (body + heart + mind) × HEALTH_PER_STAT
  *
- * Level is not multiplied again here because Axiomancer's current stat law
+ * Level is not multiplied again here because the game's current stat law
  * already encodes level as total stat budget (for example, level 15 × 5 = 75
  * total base stats). Multiplying by level again double-counts progression.
  * @param level - The level of the entity, retained for API compatibility.

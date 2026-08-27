@@ -237,7 +237,7 @@ footer.foot { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--b
 
 // Build the sticky top nav's home element: a link, or a plain root label.
 function homeEl(home) {
-  if (!home) return `<span class="home">Axiomancer</span>`;
+  if (!home) return `<span class="home">Miserere Mei, Deus</span>`;
   if (home.href) return `<a class="home" href="${home.href}">${escapeHtml(home.label)}</a>`;
   return `<span class="home">${escapeHtml(home.label)}</span>`;
 }
@@ -259,7 +259,7 @@ export function page({ title, home, crumb, body, extraStyle, footerNote }) {
 <header class="top"><div class="wrap">${homeEl(home)}${crumb ? `<span class="crumb">${escapeHtml(crumb)}</span>` : ""}</div></header>
 <main class="wrap">
 ${body}
-<footer class="foot">Axiomancer DevLog &middot; ${note}</footer>
+<footer class="foot">Miserere Mei, Deus DevLog &middot; ${note}</footer>
 </main>
 </body>
 </html>

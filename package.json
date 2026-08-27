@@ -2,7 +2,7 @@
   "name": "axiomancer",
   "private": true,
   "version": "0.0.0",
-  "description": "Axiomancer monorepo — mechanics engine + mobile app + card editor.",
+  "description": "Miserere Mei, Deus monorepo — mechanics engine + mobile app + card editor.",
   "workspaces": [
     "axiomancer-mechanics",
     "axiomancer-mobile",

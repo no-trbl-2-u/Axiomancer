@@ -176,10 +176,10 @@
     {
       "id": "status-primacy-doctrine",
       "type": "doctrine",
-      "pattern": "[Ss]tatus effects are the \\*{0,2}MAIN fun|[Tt]reat low status-effect engagement as a balance failure|[Ss]tatus play (?:is|remains) the (?:governing|dominant) combat objective",
+      "pattern": "[Ss]tatus effects are the \\*{0,2}MAIN fun|[Tt]reat low status-effect engagement as a balance failure|[Ss]tatus play (?:is|remains) the (?:governing|dominant) combat objective|[Ss]tatus[- ]effect combat is the core fun",
       "replacement": "VISION.md §Combat vision — status effects remain a major authored tool and should be satisfying, but T's 2026-08-08 unshackling retired status dominance as the governing combat objective. Judge a change by CQI (spec 35), not by whether it makes status play more central.",
       "since": "2026-08-08 (THE UNSHACKLING, /oversight — plan/bearings.md)",
-      "note": "assertion-scoped, same contract as strike-ban-doctrine"
+      "note": "assertion-scoped, same contract as strike-ban-doctrine; the 'status-effect combat is the core fun' alternative was added by phase 67, which found that exact phrasing still live in plan/bearings.md after phase 66's rows shipped"
     },
     {
       "id": "win-rate-objective-doctrine",

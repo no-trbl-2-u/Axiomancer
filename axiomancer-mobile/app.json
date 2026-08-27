@@ -25,32 +25,32 @@
     "web": {
       "output": "single",
       "favicon": "./assets/images/favicon.png",
-      "title": "Axiomancer Mobile - Gothic TTRPG",
-      "description": "The official mobile client for the Axiomancer tabletop RPG. Explore gothic realms, engage in tactical combat, and uncover dark mysteries in this atmospheric role-playing experience.",
+      "title": "Miserere Mei, Deus — a dark fantasy deckbuilder",
+      "description": "Miserere Mei, Deus is a dark fantasy deckbuilding RPG campaign. Carry cold iron and older knowledge through cursed leagues, fight with cards and dice, and answer for what you owe and to whom.",
       "lang": "en",
       "themeColor": "#0a0a0a",
       "backgroundColor": "#0a0a0a",
-      "keywords": "axiomancer, ttrpg, rpg, gothic, tabletop, role-playing, mobile, game, combat, exploration, dark fantasy",
+      "keywords": "miserere mei deus, deckbuilder, rpg, gothic, role-playing, mobile, game, combat, exploration, dark fantasy",
       "author": "No Trouble To You",
       "viewport": "width=device-width, initial-scale=1.0, viewport-fit=cover",
       "openGraph": {
         "type": "website",
-        "title": "Axiomancer Mobile - Gothic TTRPG",
-        "description": "The official mobile client for the Axiomancer tabletop RPG. Explore gothic realms, engage in tactical combat, and uncover dark mysteries in this atmospheric role-playing experience.",
+        "title": "Miserere Mei, Deus — a dark fantasy deckbuilder",
+        "description": "Miserere Mei, Deus is a dark fantasy deckbuilding RPG campaign. Carry cold iron and older knowledge through cursed leagues, fight with cards and dice, and answer for what you owe and to whom.",
         "image": "./assets/images/icon.png",
-        "siteName": "Axiomancer Mobile"
+        "siteName": "Miserere Mei, Deus"
       },
       "twitter": {
         "card": "summary_large_image",
-        "title": "Axiomancer Mobile - Gothic TTRPG", 
-        "description": "The official mobile client for the Axiomancer tabletop RPG. Explore gothic realms, engage in tactical combat, and uncover dark mysteries in this atmospheric role-playing experience.",
+        "title": "Miserere Mei, Deus — a dark fantasy deckbuilder", 
+        "description": "Miserere Mei, Deus is a dark fantasy deckbuilding RPG campaign. Carry cold iron and older knowledge through cursed leagues, fight with cards and dice, and answer for what you owe and to whom.",
         "image": "./assets/images/icon.png"
       },
       "structuredData": {
         "@context": "https://schema.org",
         "@type": "MobileApplication",
-        "name": "Axiomancer Mobile",
-        "description": "The official mobile client for the Axiomancer tabletop RPG. Explore gothic realms, engage in tactical combat, and uncover dark mysteries in this atmospheric role-playing experience.",
+        "name": "Miserere Mei, Deus",
+        "description": "Miserere Mei, Deus is a dark fantasy deckbuilding RPG campaign. Carry cold iron and older knowledge through cursed leagues, fight with cards and dice, and answer for what you owe and to whom.",
         "applicationCategory": "GameApplication",
         "genre": "Role-Playing Game",
         "operatingSystem": ["iOS", "Android", "Web"],

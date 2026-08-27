@@ -922,7 +922,7 @@ export async function runGameCli(rawArgs = process.argv.slice(2)): Promise<void>
         setStateLogPath(flags.stateLogPath);
     }
 
-    log('Axiomancer — game loop demo.\n');
+    log('Miserere Mei, Deus — game loop demo.\n');
 
     // The Save / Load tabs use a dedicated snapshot adapter pointed at
     // the user-supplied --save-file path. The store itself uses

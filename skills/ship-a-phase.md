@@ -12,7 +12,7 @@
 
 ## 1. Purpose
 
-`plan/steps/01_build_plan.md` carves Axiomancer into ~10–20 phases.
+`plan/steps/01_build_plan.md` carves the build into ~10–20 phases.
 Each phase is one self-contained slice that ships end-to-end:
 code + unit tests + e2e + commit + push (deploy follows).
 
@@ -350,7 +350,10 @@ next in 2–3 lines.
    files over 1 dense file.
 8. **Content stays in mechanics src/* + mobile *.copy.ts.** Data stays in
    `n/a (no data layer)`. No hardcoded copy/records in components.
-9. Axiomancer name capitalized; VITAE/STANCE copy canon; HP is sole win condition (never Pressure Tracks) <!-- lexicon-ok: pressure-tracks -->
+9. Product title is "Miserere Mei, Deus" in player/doc-facing prose (the
+   `axiomancer-*` workspaces, repo and scheme keep the former title as
+   internal identifiers); VITAE/STANCE copy canon; HP is sole win condition
+   (never Pressure Tracks) <!-- lexicon-ok: pressure-tracks -->
 10. **Phase issue mirror is best-effort, not gating.** If
     `loop-issue.mjs phase-open` fails, the phase still ships;
     log the stderr and continue. The mirror is a public timeline,

@@ -156,7 +156,7 @@ its own cadence.
      their own container — the page never scrolls sideways.
    - Light via `prefers-color-scheme` with a dark default; one
      accent per category chip; restrained, no emojis.
-   - `<title>Axiomancer digest — YYYY-MM-DD</title>`; the date
+   - `<title>Miserere Mei, Deus digest — YYYY-MM-DD</title>`; the date
      in the header strip; every entry links back to the index.
    - Boring, diffable DOM: semantic tags, slugged section/card
      ids, styles at the top. Git history is the archive.

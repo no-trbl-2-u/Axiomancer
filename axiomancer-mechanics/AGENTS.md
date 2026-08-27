@@ -2,7 +2,9 @@
 
 ### Project overview
 
-Axiomancer Mechanics is a TypeScript TTRPG game engine (Node.js CLI).
+The mechanics engine (`axiomancer-mechanics`, the workspace name kept from
+the product's former title) is a TypeScript TTRPG game engine (Node.js CLI)
+for Miserere Mei, Deus.
 No databases, servers, or containers required. See `README.md` for
 architecture docs.
 

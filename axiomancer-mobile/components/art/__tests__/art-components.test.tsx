@@ -103,10 +103,10 @@ describe('TitleEmblem — heraldic crest', () => {
     });
 
     it('exposes itself as a labelled image when given a title', () => {
-        const tree = render(<TitleEmblem title="Axiomancer" />);
+        const tree = render(<TitleEmblem title="Miserere Mei, Deus" />);
         const svg = tree.UNSAFE_getByType(Svg);
         expect(svg.props.accessibilityRole).toBe('image');
-        expect(svg.props.accessibilityLabel).toBe('Axiomancer');
+        expect(svg.props.accessibilityLabel).toBe('Miserere Mei, Deus');
         expect(svg.props.accessibilityElementsHidden).toBeUndefined();
     });
 

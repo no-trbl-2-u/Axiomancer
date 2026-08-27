@@ -1,5 +1,5 @@
 /**
- * The Axiomancer icon canon — Phase V1 (the Woodcut Codex).
+ * The Miserere Mei, Deus icon canon — Phase V1 (the Woodcut Codex).
  *
  * Single source of truth for the game's icon/glyph vocabulary. The
  * geometry comes from the owner-provided game-icons.net library

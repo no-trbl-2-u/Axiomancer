@@ -1,4 +1,4 @@
-# Axiomancer — product spec
+# Miserere Mei, Deus — product spec
 
 > Retrospective spec, written at nexus adoption (2026-07-03) from
 > the live design corpus (`axiomancer-mechanics/VISION.md`,
@@ -9,7 +9,7 @@
 
 ## Product
 
-Axiomancer is a turn-based, single-player dark fantasy
+Miserere Mei, Deus is a turn-based, single-player dark fantasy
 deckbuilding RPG campaign for mobile (Expo / React Native),
 backed by a deterministic TypeScript rules engine. Its thesis —
 stated in `axiomancer-mechanics/VISION.md` — is that **what you

@@ -1,6 +1,8 @@
-# Axiomancer
+# Miserere Mei, Deus
 
-Monorepo for **Axiomancer** — a dark fantasy deckbuilding RPG campaign.
+Monorepo for **Miserere Mei, Deus** — a dark fantasy deckbuilding RPG
+campaign. (The repo, its folder, and the npm workspaces keep the
+product's former title, "Axiomancer", as internal identifiers.)
 
 ## Packages
 
@@ -27,7 +29,7 @@ Axiomancer/
 
 ## Architecture boundaries
 
-See [`docs/external-architecture.md`](./docs/external-architecture.md) for the authoritative map of systems outside this monorepo: the game knowledge-base repository, KB and Axiomancer MCP servers, SomberSoft doctrine and decisions, GitHub/Claude automation, Expo EAS, and the private Cloudflare R2 artifact vault. External services may support research, automation, previews, or evidence storage; none owns game-rules truth.
+See [`docs/external-architecture.md`](./docs/external-architecture.md) for the authoritative map of systems outside this monorepo: the game knowledge-base repository, KB and `axio-query` MCP servers, SomberSoft doctrine and decisions, GitHub/Claude automation, Expo EAS, and the private Cloudflare R2 artifact vault. External services may support research, automation, previews, or evidence storage; none owns game-rules truth.
 
 ## History
 

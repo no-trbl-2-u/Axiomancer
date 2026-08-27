@@ -1,4 +1,4 @@
-# Bearings — Axiomancer
+# Bearings — Miserere Mei, Deus
 
 > Standing context for every command invocation. Read this
 > alongside the relevant skill file (`skills/<name>.md`) and the
@@ -8,7 +8,7 @@
 ## What we're building
 
 `spec.md` at the repo root is the product spec — the canonical
-description of Axiomancer. Read once at session start. The TL;DR:
+description of Miserere Mei, Deus. Read once at session start. The TL;DR:
 
 > A turn-based, single-player dark fantasy deckbuilding RPG
 > campaign for mobile, backed by a deterministic TypeScript
@@ -18,17 +18,20 @@ description of Axiomancer. Read once at session start. The TL;DR:
 Three-package npm-workspaces monorepo: a pure rules **engine**
 (`axiomancer-mechanics`), an Expo/React-Native **app**
 (`axiomancer-mobile`) that consumes the engine as local source,
-and a local **card-editor** dev tool. Status-effect combat is the
-core fun; morally charged choices carry lasting world
-consequences.
+and a local **card-editor** dev tool. Status effects remain a major
+authored tool, judged by CQI (spec 35) rather than by dominance;
+morally charged choices carry lasting world consequences.
 
 **Product name: "Miserere Mei, Deus"** (renamed from "Axiomancer" via
 `/oversight` 2026-08-20 — see `plan/AUDIT.md`'s product-name row and
-`plan/naming-session-2026-08-12.md` §6). The rename is ruled; the code
-migration (title screen, store metadata, CLI banner strings, doc
-mentions) is queued as build-plan **Phase 67** and not yet shipped, so
-"Axiomancer" still appears live in the app and across this doc set until
-that phase lands — don't read the remaining occurrences as drift. See
+`plan/naming-session-2026-08-12.md` §6). The migration shipped as
+build-plan **Phase 67** (2026-08-27): store/web metadata, CLI banners,
+the published DevLog/Catalog chrome, and the live doc set all carry the
+new title. What deliberately did NOT change: internal identifiers — the
+npm workspaces (`axiomancer-mechanics`, `axiomancer-mobile`), the repo
+and folder name, `GH_REPO`, the `axiomancer` URL scheme and
+`com.axiomancer.mobile` — and the title-screen wordmark, which is
+painted into `title-embark.jpg` and waits on new art. See
 `new-north-star.prompt.md` (repo root) for the broader Mörk-Borg-directed
 tonal pivot this name change was decided alongside.
 

@@ -17,7 +17,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DEVLOG = join(ROOT, "devlog");
 const DATA = join(DEVLOG, "data");
 
-const BACK = { href: "./index.html", label: "← Axiomancer" };
+const BACK = { href: "./index.html", label: "← Miserere Mei, Deus" };
 
 function load(name) {
   const path = join(DATA, `${name}.json`);
@@ -547,7 +547,7 @@ function buildCatalog() {
   writeFileSync(
     join(DEVLOG, "catalog.html"),
     page({
-      title: "Axiomancer — Catalog",
+      title: "Miserere Mei, Deus — Catalog",
       home: BACK,
       crumb: "Catalog",
       body,

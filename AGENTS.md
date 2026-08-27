@@ -1,8 +1,8 @@
-# Axiomancer monorepo — agent guide
+# Miserere Mei, Deus monorepo — agent guide
 
 <!-- lexicon-ok: pressure-tracks -->
 
-**Axiomancer** is a turn-based, single-player dark fantasy
+**Miserere Mei, Deus** is a turn-based, single-player dark fantasy
 deckbuilding RPG campaign for mobile: a deterministic TypeScript
 rules engine where what the player owes, and to whom, is a mechanical
 input, not flavor. Combat may use direct damage, statuses, Conviction,
@@ -142,7 +142,7 @@ Full protocols (consumption surfaces, wishlist, regen/confidence
 rules): [`docs/truth-sources.md`](docs/truth-sources.md). The complete
 external-system register (ownership, credentials, recovery):
 [`docs/external-architecture.md`](docs/external-architecture.md) —
-update it whenever Axiomancer gains a hosted service, sibling repo,
+update it whenever the product gains a hosted service, sibling repo,
 MCP server, or external datastore.
 
 ## Pull requests

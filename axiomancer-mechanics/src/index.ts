@@ -4,7 +4,7 @@
  * Core game engine exports for React Native and other JavaScript consumers.
  * For Node.js specific adapters, import from 'axiomancer-mechanics/node'.
  *
- * The library is consumed as the non-UI engine for an Axiomancer client.
+ * The library is consumed as the non-UI engine for a Miserere Mei, Deus client.
  * Imports are organised by domain.
  */
 
