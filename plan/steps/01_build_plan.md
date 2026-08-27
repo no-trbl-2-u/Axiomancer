@@ -2239,7 +2239,7 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       treasure, combat, doors and walls are all owner-supplied with no
       source captured. Each now records `license: UNRESOLVED` with a note;
       the gate reports the count every run rather than failing.
-- [ ] Phase 72 — Harness grants for content work. Apply the allowlist
+- [x] Phase 72 — Harness grants for content work. Apply the allowlist
       additions the 2026-08-22 audit specified to
       `.claude/settings.json` (baseline:check/regen, the minigame
       CLIs, critique:drive, catalog/devlog/site builds, npx
@@ -2254,7 +2254,16 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       Playwright tools or grant them), and decide whether
       `_claude-skill.yml` should pass the kb-query/axio-query MCP
       servers to CI runs. (contract; queued 2026-08-22 from the
-      content-pipelines audit) Brief: to generate.
+      content-pipelines audit) Brief:
+      `plan/phases/phase_72_harness_grants.md`. SHIPPED 2026-08-27
+      (`0a3f73f5`, issue #250): allowlist 76 -> 130 entries, the `reader`
+      agent moved off its ungranted chrome roster onto Playwright, and
+      `check-harness-grants.mjs` wired into `verify-drift` so the rosters
+      cannot silently rot again. The MCP question is answered with a reason:
+      `axio-query` IS granted to CI (its server is in the repo);
+      `kb-query` is NOT (its server lives under the gitignored `kb/` corpus,
+      absent from every CI checkout), revisitable only alongside a kb-sync
+      step, which is its own cost decision.
 
 - [ ] Phase 73 — Art generation pipeline (Option A, adapter-shaped).
       Implements T's 2026-08-22 route ruling
