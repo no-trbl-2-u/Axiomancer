@@ -471,13 +471,15 @@ draws and plays is a card.
 Three locked product-owner decisions layered onto Hazard-Pattern Combat (full
 detail in the card/card library files themselves, not duplicated here):
 
-- **No card deals direct damage — THE STRIKE IS DEAD (Spec 32 v3,
-  2026-07-08).** `basePower` / `chipHp` were deleted from the `Card` schema
-  entirely, not merely zeroed — a card carrying either field is now a
-  compile error. <!-- lexicon-ok: base-power, chip-hp --> `calculateSkillDamage` is kept only for call-site
+- **The strike schema was purged (Spec 32 v3, 2026-07-08); direct damage
+  itself is legal again (THE UNSHACKLING, 2026-08-08).** `basePower` /
+  `chipHp` were deleted from the `Card` schema entirely, not merely zeroed —
+  a card carrying either field is still a compile error, and a card wanting
+  raw HP damage authors its own field/verb through the full wiring checklist.
+  <!-- lexicon-ok: base-power, chip-hp --> `calculateSkillDamage` is kept only for call-site
   compatibility (sim policies / projections still call it) and
-  unconditionally returns `0`. Every point of enemy HP now falls to DoT
-  ticks, affliction-payoff bursts (RUPTURE / AMPLIFY / Conclusion), engine-
+  unconditionally returns `0`. Every point of enemy HP in the CURRENT library
+  falls to DoT ticks, affliction-payoff bursts (RUPTURE / AMPLIFY / Conclusion), engine-
   gated drips (BACKFIRE and persistent-card hooks), or reflect (THORNS /
   RIPOSTE) — see [`specs/32-no-strike-card-library.md`](../specs/32-no-strike-card-library.md)
   for the full accounting and the pricing model. The card library was
@@ -533,9 +535,10 @@ the most complete design rationale for the separate Cards system.
 **The only combat engine** (mobile map encounters, the combat CLI, the `/combat-playtest` + `/deck-tuning` loops).
 A card-and-dice system structurally mirrored on the Hazard minigame: every verb is a
 combat card, and the enemy's **sole bar is HP** — dropping it to 0 (`isDefeated(enemy)`)
-is the only win condition. Status effects are the **only** path (Spec 32 v3, 2026-07-08 —
-THE STRIKE IS DEAD, see § above): DoT ticks, affliction-payoff bursts, engine-gated
-drips, and reflect are the sole HP sources; control denies the enemy's telegraphed
+is the only win condition. Status effects are the path the CURRENT library takes
+(see § above — the strike schema is purged, but direct damage became legal again
+with THE UNSHACKLING, 2026-08-08): DoT ticks, affliction-payoff bursts, engine-gated
+drips, and reflect are today's HP sources; control denies the enemy's telegraphed
 threat turn outright rather than merely discouraging a parallel damage track. Full
 design: [`specs/25-hazard-pattern-combat.md`](../specs/25-hazard-pattern-combat.md)
 for the engine loop, [`specs/32-no-strike-card-library.md`](../specs/32-no-strike-card-library.md)

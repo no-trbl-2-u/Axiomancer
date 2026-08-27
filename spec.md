@@ -64,11 +64,12 @@ engine, content library, tuning loop, and hermetic e2e tests, plus
 one pure-choice rest node with no standalone driver:
 
 - **Hazard-Pattern Combat** — the primary combat system (Spec
-  25/26, Spec 32 v3). Card-and-dice; the enemy has ONE bar = HP;
-  status is the **only** path to 0 HP — Spec 32 v3 ("THE STRIKE
-  IS DEAD", 2026-07-08) deleted raw strike damage from the card
-  schema entirely, so no card can chip HP directly any more. HP
-  is the **sole** win condition.
+  25/26, Spec 32 v3). Card-and-dice; the enemy has ONE bar = HP.
+  Spec 32 v3 (2026-07-08) deleted raw strike damage from the card
+  schema, and THE UNSHACKLING (2026-08-08) made direct damage legal
+  again as an authored verb — status, damage and the mercy lines
+  compete on CQI merit (spec 35), with status the path the current
+  library happens to take. HP is the **sole** win condition.
 - **Hazard minigame** ("v2") — environmental hazard card game.
 - **Gathering** — "The Gleaning."
 - **Rest** — the rest-choice node (Phase 52c-d): one irreversible

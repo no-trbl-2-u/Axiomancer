@@ -37,13 +37,16 @@ surface.
 
 ## North star — feel is a balance axis
 
-Per `VISION.md` / `CLAUDE.md`, **status effects are the MAIN fun of combat.**
-HP is the only win condition; status is the efficient path. The tuning loops
-prove the NUMBERS obey the doctrine; this skill proves the EXPERIENCE does:
+Per `VISION.md` / `CLAUDE.md`, **combat must make its interacting systems
+legible and consequential** — status, direct damage and the mercy lines all
+compete on merit since THE UNSHACKLING (2026-08-08). HP is the only win
+condition. The tuning loops prove the NUMBERS obey CQI
+(`specs/35-objective-function-v2.md`); this skill proves the EXPERIENCE does:
 
-1. **At every stage, is applying and exploiting status effects what a player
-   actually spends the fight doing** — and does it feel like the smart move,
-   not homework?
+1. **At every stage, does the deck's own engine run in the player's hands** —
+   does a line assemble across turns, is there more than one live option at
+   each powering die, and does the fight feel like the smart move rather than
+   homework?
 2. **Does the matrix agree with the hands?** A stage can pass its win-rate
    band while a playtester reports "I just spammed one card" — that
    disagreement is the finding.
@@ -52,8 +55,9 @@ prove the NUMBERS obey the doctrine; this skill proves the EXPERIENCE does:
 4. **Is the impossible stage impossible for the right reasons?** Losing to
    The Incompleteness should read as a ceiling, not as noise.
 
-Low status-effect engagement — quantitative OR felt — is a balance failure
-even when win rates look healthy.
+A fight that scores well on CQI but reads as one-note in the hands — or the
+reverse — is the finding. Low status engagement is a diagnosis to explain
+against the library's intent, not a balance failure by itself.
 
 ## 1. Purpose
 

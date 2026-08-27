@@ -1,5 +1,7 @@
 # Spec — axiomancer-mechanics
 
+<!-- lexicon-ok: strike-ban-doctrine — this file is a superseded record; it names the 2026-07-08 revamp to date itself, not to assert the ban. -->
+
 > **Superseded by the repo-root [`spec.md`](../spec.md).** This file
 > predates the npm-workspaces monorepo merge and described the engine as it
 > existed before Hazard-Pattern Combat shipped (Spec 25, 2026-06-21) and

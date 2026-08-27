@@ -5,16 +5,20 @@
 Canonical agent guidance lives in **`AGENTS.md`** and **`VISION.md`** (game
 doctrine). This file exists so the load-bearing doctrine is always in context.
 
-## Load-bearing doctrine (set 2026-06)
+## Load-bearing doctrine (set 2026-06; unshackled 2026-08-08)
 
-**Status effects are the MAIN fun and the most engaging aspect of combat encounters.**
+**Status effects remain a major authored tool — they are no longer the
+governing combat objective.**
 
-Every balance decision, tuning run, content addition, and skill/effect design is
-judged first by: *does this make applying and exploiting status effects more
-central and more satisfying?* If a change makes basic-attack trading more
-attractive than status-effect play, it works against the vision. Treat low
-status-effect engagement as a balance failure even when win/loss rates look
-healthy.
+T's 2026-08-08 unshackling retired status dominance and restored ordinary
+direct damage. Every balance decision, tuning run, content addition, and
+card/effect design is judged first by CQI (`specs/35-objective-function-v2.md`):
+*does the deck's own engine run — assembling across turns (ARC), leaving more
+than one live line at each powering die (WIDTH), with a lead card that carries
+the kill without becoming the whole deck (IDENTITY), all of it flowing through
+Conviction, the Surge meter and the Dice (SPINE)?* Status play should stay
+satisfying and central to what the library offers, but a low status-engagement
+reading is a diagnosis to explain, not a balance failure by itself.
 
 **Hazard-Pattern Combat (the primary combat system):** the enemy's SOLE
 bar is HP. **Updated 2026-08-08 (THE UNSHACKLING + the Profane Canon)

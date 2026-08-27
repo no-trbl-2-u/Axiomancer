@@ -1,8 +1,9 @@
 {
-  "__comment": "SINGLE SOURCE for retired Axiomancer terminology. scripts/check-lexicon.mjs (repo root) enforces this registry against every live prose surface in CI; docs/LEXICON.md is the human-readable mirror with the canonical-terms guide. To retire a concept: add a row here, run the lint, fix what it flags — that IS the cleanup. Patterns are JS regexes (case-sensitive unless the pattern says otherwise). Legitimate mentions of a retired term (e.g. 'basePower no longer exists') stay allowed via a file-level pragma: <!-- lexicon-ok: <id>, <id> -->. Files whose head carries '**Status:** HISTORICAL' are dated records and exempt entirely.",
+  "__comment": "SINGLE SOURCE for retired Axiomancer terminology AND retired design-law prose. scripts/check-lexicon.mjs (repo root) enforces this registry against every live prose surface in CI; docs/LEXICON.md is the human-readable mirror with the canonical-terms guide. To retire a concept: add a row here, run the lint, fix what it flags — that IS the cleanup. Two row shapes: type \"identifier\" (the default when the field is absent) matches a term line-by-line; type \"doctrine\" matches a multi-clause design-law CLAIM against the whole file with whitespace collapsed, so a sentence wrapped across markdown line breaks is still caught. Doctrine patterns are ASSERTION-scoped by construction — a file that names a retired law in order to call it retired must not be a finding, or every reconciliation the lint asks for would create a new one. Patterns are JS regexes (case-sensitive unless the pattern says otherwise); doctrine patterns are authored against single-space prose. Legitimate mentions of a retired term or law (e.g. \"basePower no longer exists\") stay allowed via a file-level pragma: <!-- lexicon-ok: <id>, <id> -->. Files whose head carries \"**Status:** HISTORICAL\" are dated records and exempt entirely.",
   "retired": [
     {
       "id": "src-skills-path",
+      "type": "identifier",
       "pattern": "src/Skills",
       "replacement": "src/Cards/ — the combat-action data layer was renamed off the legacy 'skill' naming; genuine token abilities are the SignatureSkill family (Second Wind, signatures), a separate living concept",
       "since": "2026-07 (PR #48 deleted the dead src/Skills/ ability system; see CHANGELOG 'De-conflation')",
@@ -10,30 +11,35 @@
     },
     {
       "id": "base-power",
+      "type": "identifier",
       "pattern": "\\bbasePower\\b",
       "replacement": "(none — THE STRIKE IS DEAD; enemy HP falls only via DoT ticks, affliction payoffs RUPTURE/REAP, engine-gated drips, or reflect)",
       "since": "2026-07-08 (spec 32 v3 strike purge at schema level)"
     },
     {
       "id": "chip-hp",
+      "type": "identifier",
       "pattern": "\\bchipHp\\b",
       "replacement": "(none — removed with the spec 32 v3 strike purge; no card or rider deals raw HP damage)",
       "since": "2026-07-08 (spec 32 v3)"
     },
     {
       "id": "pressure-tracks",
+      "type": "identifier",
       "pattern": "Pressure Tracks?",
       "replacement": "the HP-only win model — status effects are the only way to drop enemy HP to 0; the two-track (DoT Erosion / Control Saturation) win-condition model was replaced 2026-06-22",
       "since": "2026-06-22 (Hazard-Pattern Combat reconciliation)"
     },
     {
       "id": "premise",
+      "type": "identifier",
       "pattern": "\\bPREMISES?\\b",
       "replacement": "CHARGE (R-1) — the running tally keyword",
       "since": "2026-08-09 (phase 44b, spec 34 §5.2 R-1)"
     },
     {
       "id": "peroration",
+      "type": "identifier",
       "pattern": "\\bPERORATION\\b",
       "replacement": "SENTENCE (R-2) — the declared-conclusion payoff",
       "since": "2026-08-09 (phase 44b, spec 34 §5.2 R-2)",
@@ -41,36 +47,42 @@
     },
     {
       "id": "concede",
+      "type": "identifier",
       "pattern": "\\bCONCEDES?\\b",
       "replacement": "CONDEMN (R-3) — the alt-win the court itself declares",
       "since": "2026-08-09 (phase 44b, spec 34 §5.2 R-3)"
     },
     {
       "id": "sway",
+      "type": "identifier",
       "pattern": "\\bSWAY\\b",
       "replacement": "PLEA (R-4) — the choir's mercy-meter keyword",
       "since": "2026-08-09 (phase 44b, spec 34 §5.2 R-4)"
     },
     {
       "id": "capitulate",
+      "type": "identifier",
       "pattern": "\\bCAPITULATE\\b",
       "replacement": "RELENT (R-5) — the PLEA/CHARGE alt-win resolution",
       "since": "2026-08-09 (phase 44b, spec 34 §5.2 R-5)"
     },
     {
       "id": "rapport",
+      "type": "identifier",
       "pattern": "\\bRAPPORT\\b",
       "replacement": "QUARTER (R-6) — the incoming-damage-reduction keyword",
       "since": "2026-08-09 (phase 44b, spec 34 §5.2 R-6)"
     },
     {
       "id": "reargue",
+      "type": "identifier",
       "pattern": "\\bREARGUE\\b",
       "replacement": "CURDLE (R-7) — the Bleed/Poison conversion keyword",
       "since": "2026-08-09 (phase 44b, spec 34 §5.2 R-7)"
     },
     {
       "id": "special",
+      "type": "identifier",
       "pattern": "\\bSPECIAL face\\b",
       "replacement": "BOON (R-8) — the die-face payload word",
       "since": "2026-08-09 (phase 44b, spec 34 §5.2 R-8)",
@@ -78,6 +90,7 @@
     },
     {
       "id": "resonance",
+      "type": "identifier",
       "pattern": "RESONANCE\\s*⬡",
       "replacement": "TOLL ⬡ (R-11) — the per-colour dice-spend running tally",
       "since": "2026-08-09 (phase 44b, spec 34 §5.2 R-11)",
@@ -85,6 +98,7 @@
     },
     {
       "id": "floating",
+      "type": "identifier",
       "pattern": "FLOATING\\s*✦",
       "replacement": "GHOST ✦ (R-12) — the forged, never-rerolling die",
       "since": "2026-08-09 (phase 44b, spec 34 §5.2 R-12)",
@@ -92,24 +106,28 @@
     },
     {
       "id": "enchantment",
+      "type": "identifier",
       "pattern": "\\bENCHANTMENT\\b",
       "replacement": "OATH (R-9) — the card type; the CardType literal also moved 'enchantment' -> 'oath'",
       "since": "2026-08-09 (phase 44c, spec 34 §5.2 R-9)"
     },
     {
       "id": "disenchant",
+      "type": "identifier",
       "pattern": "\\bDISENCHANT\\b",
       "replacement": "HEX (R-10) — the card type; the CardType literal also moved 'disenchant' -> 'hex'",
       "since": "2026-08-09 (phase 44c, spec 34 §5.2 R-10)"
     },
     {
       "id": "thoughtform",
+      "type": "identifier",
       "pattern": "\\bTHOUGHTFORM\\b",
       "replacement": "HAUNT (R-13) — the CONJURE-only card class; id prefix 'tf-' also moved to 'ht-'",
       "since": "2026-08-09 (phase 44c, spec 34 §5.2 R-13)"
     },
     {
       "id": "doxa",
+      "type": "identifier",
       "pattern": "\\bDoxa\\b",
       "replacement": "Ash (R-14, rank 1)",
       "since": "2026-08-09 (phase 44c, spec 34 §5.2 R-14)",
@@ -117,6 +135,7 @@
     },
     {
       "id": "lemma",
+      "type": "identifier",
       "pattern": "\\bLemma\\b",
       "replacement": "Tooth (R-14, rank 2)",
       "since": "2026-08-09 (phase 44c, spec 34 §5.2 R-14)",
@@ -124,6 +143,7 @@
     },
     {
       "id": "thesis",
+      "type": "identifier",
       "pattern": "Lemma[^\\n]{0,20}Thesis|Thesis[^\\n]{0,20}Theorem",
       "replacement": "Splinter (R-14, rank 3)",
       "since": "2026-08-09 (phase 44c, spec 34 §5.2 R-14)",
@@ -131,6 +151,7 @@
     },
     {
       "id": "theorem",
+      "type": "identifier",
       "pattern": "Thesis[^\\n]{0,20}Theorem|Theorem[^\\n]{0,20}Axiom",
       "replacement": "Rib (R-14, rank 4)",
       "since": "2026-08-09 (phase 44c, spec 34 §5.2 R-14)",
@@ -138,10 +159,35 @@
     },
     {
       "id": "axiom",
+      "type": "identifier",
       "pattern": "Theorem[^\\n]{0,20}Axiom|Axiom[^\\n]{0,20}Aporia",
       "replacement": "Skull (R-14, rank 5)",
       "since": "2026-08-09 (phase 44c, spec 34 §5.2 R-14)",
       "note": "scoped to the rank-ladder enumeration context, not the bare word — 'axiom' is ordinary philosophy/math English (and the product name Axiomancer itself), so an unscoped \\bAxiom\\b would false-positive across the repo's own philosophy-jargon prose. Aporia itself gets no row (NL-9 — 'the Aporia' survives as the labyrinth place name)"
+    },
+    {
+      "id": "strike-ban-doctrine",
+      "type": "doctrine",
+      "pattern": "THE STRIKE (?:IS|stays) DEAD|[Nn]o card deals (?:raw HP|direct|raw strike) damage|[Ss]tatus (?:effects are|is) the \\*{0,2}only\\*{0,2} path",
+      "replacement": "VISION.md §Combat vision — direct damage is LEGAL (THE UNSHACKLING, 2026-08-08); HP remains the SOLE win condition and basePower/chipHp stay deleted at the schema level, but no path is doctrine-mandated as dominant. A card needing raw HP damage authors its own field/verb through the full wiring checklist.",
+      "since": "2026-08-08 (THE UNSHACKLING, /oversight — plan/bearings.md)",
+      "note": "assertion-scoped: matches the BAN stated as current law, not a mention of its retirement. Describing the removal keeps the lexicon-ok pragma (docs/LEXICON.md, axiomancer-mechanics/spec.md both carry it)."
+    },
+    {
+      "id": "status-primacy-doctrine",
+      "type": "doctrine",
+      "pattern": "[Ss]tatus effects are the \\*{0,2}MAIN fun|[Tt]reat low status-effect engagement as a balance failure|[Ss]tatus play (?:is|remains) the (?:governing|dominant) combat objective",
+      "replacement": "VISION.md §Combat vision — status effects remain a major authored tool and should be satisfying, but T's 2026-08-08 unshackling retired status dominance as the governing combat objective. Judge a change by CQI (spec 35), not by whether it makes status play more central.",
+      "since": "2026-08-08 (THE UNSHACKLING, /oversight — plan/bearings.md)",
+      "note": "assertion-scoped, same contract as strike-ban-doctrine"
+    },
+    {
+      "id": "win-rate-objective-doctrine",
+      "type": "doctrine",
+      "pattern": "statusEngagement[^.\\n]{0,80}(?:is|remains) the objective function|objective function[^.\\n]{0,40}statusEngagement|against the locked doctrine curve",
+      "replacement": "spec 35 / Phase 43 — combatQualityIndex (cqi) is the objective function for /deck-tuning and /combat-playtest; win rate is deliberately NOT a term (the doctrine curve grades WHETHER a deck should win, CQI grades HOW the fight played). statusEngagement is kept as a reported reading beside CQI, not as the target.",
+      "since": "2026-08-08 (Phase 43, specs/35-objective-function-v2.md)",
+      "note": "the 'against the locked doctrine curve' alternative guards skills/digest.md §3b, which the 9caf2a26 pass already reconciled to past tense — the row exists so a reversion is caught, not to force a rewrite that is still waiting on a CQI-band ruling"
     }
   ]
 }
