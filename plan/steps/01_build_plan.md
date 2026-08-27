@@ -2215,7 +2215,7 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       ("Blank Indenture", grandfathered with an AUDIT row — a rename is an
       authorial call). Also fixed the sweep's own parser, which read only
       single-quoted names and so skipped the 7 card names with apostrophes.
-- [ ] Phase 71 — Art acquisition pipeline (V4 accelerant, no
+- [x] Phase 71 — Art acquisition pipeline (V4 accelerant, no
       generation). Convert the proven one-off Doré acquisition into a
       loop-runnable path: the phase case for adding `sharp` (dev-only,
       root or mobile scripts), an ingest script encoding the recorded
@@ -2226,7 +2226,19 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       Covers acquisition + post-process + ingest for ANY image source;
       generation itself is now ruled (Option A) and lands in Phase 73,
       which reuses these legs. (content/tooling; queued 2026-08-22 per
-      THE PIPELINE LIBERATION) Brief: to generate.
+      THE PIPELINE LIBERATION) Brief:
+      `plan/phases/phase_71_art_ingest.md`. SHIPPED 2026-08-27
+      (`3ae179b9`, issue #249): `sharp` (dev-only), `ingest-art.mjs`
+      encoding the recipe with the provenance write in the same run, and
+      `asset-provenance.test.mjs` (completeness + two-way registry drift) in
+      the mobile verify gate. The row's premise was stale: 36 stragglers, not
+      two, and 35 already shipping from `labyrinth/` with NO provenance —
+      the doors as unprocessed PNGs, now 1768K -> 162K WebP with alpha
+      intact. BIGGER FINDING, blocked on the owner: no raster directory
+      except `maps/` had a license on record — cards, enemies, portraits,
+      treasure, combat, doors and walls are all owner-supplied with no
+      source captured. Each now records `license: UNRESOLVED` with a note;
+      the gate reports the count every run rather than failing.
 - [ ] Phase 72 — Harness grants for content work. Apply the allowlist
       additions the 2026-08-22 audit specified to
       `.claude/settings.json` (baseline:check/regen, the minigame

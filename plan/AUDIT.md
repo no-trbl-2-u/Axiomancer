@@ -2637,6 +2637,30 @@
   ("Unwritten Indenture", "Unsigned Indenture") rather than reach for a new
   image. Removing the entry from GRANDFATHERED_NAMES is what closes this row.
 
+### [needs-user-call] No shipped art has a license on record
+- category: content
+- impact: 7
+- ease: 9
+- detail: filed 2026-08-27 by Phase 71, whose new provenance-completeness gate
+  found it. Every raster directory under `axiomancer-mobile/assets/images/`
+  EXCEPT `maps/` (the public-domain Dore plate) shipped with no license
+  recorded: `cards/`, `enemies/`, `portraits/`, `treasure/`, `combat/`,
+  `labyrinth/doors/`, `labyrinth/walls/`, plus the two root SVGs and the title
+  art. All owner-supplied ("external-illustration", "Add doors and maze
+  walls"), no source URL captured at the time, terms never established. Phase
+  71 wrote `"license": "UNRESOLVED"` into each record with a note rather than
+  inventing terms, and the gate prints the count on every run.
+- why it matters now: this is the same question already open for `Potential
+  Assets/MCP-Axiomancer/images/` (asset-conventions.md), except that art is
+  merely staged while THIS art ships in the app. "Open source" spans CC0, CC
+  BY, and share-alike; without the terms, attribution obligations cannot be
+  met and a store submission cannot be answered honestly.
+- next: T-level. For each batch, the origin answer (where did it come from) is
+  what unblocks it — a source URL or generator name is usually enough to
+  settle the terms. Anything that cannot be traced is a re-art decision, not a
+  documentation one. Replacing `UNRESOLVED` with real terms in the
+  `provenance.json` records is what closes this row.
+
 ## Done
 
 ### [x] [3.2] `CardSpecialMechanic` deprecated-name not exported — stale/resolved
