@@ -51,6 +51,7 @@
 | §0 | How to use this document | all of 44a-44i |
 | §1 | The setting — The Parish | 44f, 44g, 44i |
 | §2 | Tone and voice register | 44c, 44e, 44g, 44i |
+| §2.5 | The Mörk Borg delivery register (MB-1 … MB-8) + pipeline (R-D) | all narrative/content authoring, `story-spec`/`world-spec`/`character-spec` |
 | §3 | The Naming Law (NL-1 … NL-19) | 44a (lint), all authors |
 | §4 | Housing the LOCKED MECHANICS | 44b, 44g, 44i |
 | §5 | The concept-level rename map | 44a, 44b, 44c, 44d, 44e, 44f |
@@ -214,6 +215,94 @@ defect.
 | **Earth & grave** | spadeful, spadework, grave, pyre, ossuary, sexton, dirge, disinterred |
 | **Cold & siege** | palisade, hoarfrost, caltrops, snow, ice, winter, watch, besieger |
 | **Folk & household** | knucklebone, thumbprick, grandmother, teeth, bell, needle, bridle, gnaw-marks |
+
+---
+
+## §2.5 — The Mörk Borg delivery register (RATIFIED 2026-08-22)
+
+> **Provenance.** `plan/north-star-mork-borg.md` §2, ratified as-is by T in
+> the 2026-08-22 content-pipelines walkthrough (Phase 74, N-1). Folded here
+> so it is citable as `spec 34 §2.5.N` alongside every other ruling in this
+> document, rather than living only in a `plan/` file a tick might not read.
+>
+> **How this sits next to §2.1-§2.4.** Nothing above changes. §2.1's ratified
+> register ("terse, archaic-flavored, cold and old"), §2.2's eight forbidden
+> registers, §2.3's sentence-form rule, and §2.4's six lexicons remain the
+> word-choice and clause-shape law. §2.5 extends that law from card and
+> telegraph text to **every** player-facing surface — event copy, world-map
+> descriptions, enemy descriptions, dialogue, screen copy — and adds a
+> sentence-shape doctrine (the "knife law") that collides with none of the
+> above.
+>
+> **R-C / R-F reconciliation, recorded here.** The north-star session first
+> ruled R-C ("prose only" — the visual layer, i.e. the Phase V Woodcut Codex
+> masterplan, stays untouched by this register) and later, same session,
+> widened the mandate with R-F ("THE LONGER LEASH" — T verbatim: *"I want
+> the current Nexus loop to take bigger leaps of freedom when it comes to
+> New cards, new effects, new keywords, narration, art, UI, direction, the
+> map, and mechanics"*). R-F is the later ruling and self-declares
+> precedence where the two conflict: **art IS in loop scope.** R-C survives
+> narrowed to what it was actually protecting — this register governs
+> *sentences*, and does not restyle the visual layer; the Woodcut Codex
+> masterplan remains the current art bearings, and the loop executes within
+> it and may evolve it through its own phases, rather than being barred from
+> the visual layer outright. See `plan/bearings.md` § "Decisions standing
+> for the autonomous loop" → **THE LONGER LEASH** for the full R-F ruling
+> (surface list, keep-list, not-touched list).
+
+**§2.5.1 [RULING] MB-1 — the knife law** *(lintable: length)*. Narration
+sentences run short — target under twelve words, hard ceiling twenty. One
+subordinate clause per *paragraph*, not per sentence. A semicolon in
+player-facing prose is a defect (extends §2.3 beyond card text). Full stops
+are the register.
+
+**§2.5.2 [RULING] MB-2 — indifference** *[judgement]*. The narrator states
+consequences as facts and never sympathizes, never warns twice, never
+editorializes. "The water climbs," never "beware the water." Danger is
+described the way a ledger describes arrears.
+
+**§2.5.3 [RULING] MB-3 — the Dial-1 humor law** *[judgement]*. Humor arrives
+only by deadpan juxtaposition of the mundane and the terrible, and every
+funny line must also be literally true in-world. No irony markers, no
+self-reference, no fourth wall, no jokes *about* the grimness. If a reader
+can't tell whether the line meant to be funny, it is compliant.
+
+**§2.5.4 [RULING] MB-4 — second person and the imperative are permitted**
+*[judgement]*. "Pick a door." "Wade or don't." V-7 (§2.2) stands untouched:
+second person may instruct and price; it may never flatter ("you are the
+last hope of…" stays dead).
+
+**§2.5.5 [RULING] MB-5 — scenery is priced** *[judgement]*. A descriptive
+beat gets at most one line of pure atmosphere; the next line must carry a
+stake, a price, or an instruction. Scenery that costs the player nothing to
+ignore is cut.
+
+**§2.5.6 [RULING] MB-6 — no adjective without a decision** *[judgement]*. An
+adjective survives only if removing it would change what the player does or
+owes. "Old songs" earns its place if old means *claimable*; otherwise the
+songs are just songs.
+
+**§2.5.7 [RULING] MB-7 — brutality is stated, not performed** *[judgement]*.
+The register never escalates typographically (V-6, §2.2, stands: no
+exclamation marks, no ALL-CAPS inside prose). The most terrible line in the
+game should scan as flatly as a receipt.
+
+**§2.5.8 [RULING] MB-8 — vocabulary discipline is unchanged** *(lintable —
+already wired)*. The six lexicons (§2.4), the V-bans (§2.2), and the Naming
+Law (§3) govern word choice exactly as before. This register is a
+sentence-shape doctrine layered on top of them, and collides with none of
+them.
+
+**§2.5.9 [RULING] The pipeline this register executes under.** Per
+`plan/north-star-mork-borg.md` §4 (R-D): the loop authors and ships NPCs,
+regions, story beats and encounter copy through normal phases/ticks without
+a per-item attended-Socratic-session gate. The guardrail is lint-and-audit
+after authoring, not approval before it — the register lint (Phase 70's
+`check-prose.mjs` plus its queued MB-1 mechanical-subset follow-up),
+playtester spot-checks on shipped content phases, and `/oversight` audit.
+The `story-spec` / `world-spec` / `character-spec` skills still write a
+spec file for every NPC/region/beat when run unattended by the loop — the
+file is the record, not the permission.
 
 ---
 
@@ -869,6 +958,9 @@ Items this spec deliberately did not settle, and where they belong.
       home in the fiction** (§4.2, §4.3, §4.4), all three names kept, no
       `GAME_STATE_VERSION` check owed (§4.1).
 - [x] Every ruling numbered and greppable as `spec 34 §N` (§12).
+- [x] The Mörk Borg delivery register folded in, R-C/R-F art reconciliation
+      recorded, and the R-D pipeline it executes under stated (§2.5, Phase
+      74 / N-1).
 - ~~At least one hermetic e2e test under `src/<Module>/e2e/` covers the
   change.~~ **Struck:** this spec is a design charter and touches no runtime
   code. The tests belong to 44a-44i; 44a's lints (§5.9) are this spec's
@@ -887,6 +979,8 @@ Items this spec deliberately did not settle, and where they belong.
 | Eight forbidden registers (V-1 … V-8) | §2.2 |
 | One clause per line, present tense | §2.3 |
 | The six lexicons | §2.4 |
+| The Mörk Borg delivery register, MB-1 … MB-8 (R-C/R-F reconciled) | §2.5 |
+| The pipeline this register executes under (R-D) | §2.5.9 |
 | The Naming Law, NL-1 … NL-19 | §3 |
 | Locked names all kept; no migration owed | §4.1 |
 | Conviction housed as testimony | §4.2 |

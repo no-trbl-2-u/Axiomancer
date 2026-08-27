@@ -247,7 +247,12 @@ ambiguity.)
   faces.
 - **Voice:** terse, archaic-flavored, "cold and old" — but **no
   thee/thou/thy/thine/ye**. Mercy/exploit language reads as
-  morally charged, never neutral.
+  morally charged, never neutral. Ratified and extended as
+  `spec 34 §2.5` (the Mörk Borg delivery register, MB-1…MB-8, Phase
+  74) — short sentences (the knife law), indifferent narration, Dial-1
+  deadpan humor, priced scenery, brutality stated flatly. Governs every
+  player-facing surface, not just card/telegraph text. See **THE LONGER
+  LEASH** below for the authority this register ships under.
 - **THE UNSHACKLING (T direct, /oversight 2026-08-08) — three locked
   constraints are VOID.** T, verbatim: *"remove constraints across the
   entire application. Normal damage is allowed, deck tuning is allowed to
@@ -421,6 +426,36 @@ ambiguity.)
      redesign lands and **Phase 43** provides a live objective function.
   4. **Not a licence to skip the retheme phases.** 44a-44i still run —
      they are thematic and structural, not balance work.
+- **THE LONGER LEASH (T direct, R-F, `plan/north-star-mork-borg.md`
+  §1, ratified 2026-08-22) — bigger leaps of authority, not a register
+  change.** T, verbatim: *"I want the current Nexus loop to take bigger
+  leaps of freedom when it comes to New cards, new effects, new
+  keywords, narration, art, UI, direction, the map, and mechanics
+  (keeping the core deckbuilding, dice-building, signature skills,
+  equipment systems)."* Ruled after THE PIPELINE LIBERATION, in the
+  same 2026-08-22 session that ratified the north-star file as-is.
+  **Surfaces now under bold loop authority:** new cards, new effects,
+  new keywords (already unshackled — reaffirmed), narration (R-D,
+  spec 34 §2.5.9 — reaffirmed), **art, UI, direction, the map, and
+  mechanics (newly widened)**. The Phase V Woodcut Codex masterplan and
+  the Mörk Borg delivery register (spec 34 §2.5) remain the *current*
+  bearings for art and tone — the loop executes boldly within them and
+  may evolve them through its own phases, filing residue, rather than
+  parking every direction call for `/oversight`.
+  **The net keep-list** (T's four named systems, read alongside the
+  LOCKED MECHANICS carve-out below — the carve-out is not voided by this
+  ruling): **the deckbuilding core, the Dice system, Conviction +
+  signature skills, the Surge meter, and the equipment system.** The
+  Surge meter goes unnamed in T's list but stays locked by default
+  (the carve-out requires an explicit ruling to release it, not silence).
+  **What this ruling does NOT touch:** engineering rigour (hermeticity,
+  determinism, the verify/deploy gates, `GAME_STATE_VERSION`
+  discipline), the no-destructive-git and no-secrets rules, and the
+  `AskUserQuestion`-only-in-`/oversight` discipline. Bigger leaps, same
+  rails. Folded into spec 34 as §2.5.9 (Phase 74 / N-1); full text and
+  the five open questions T has not yet answered (retcon boundary,
+  sequencing, the shell, reference calibration, the Surge meter) live in
+  `plan/north-star-mork-borg.md` §6.
 - **LOCKED MECHANICS — the carve-out from the unshackling (T direct,
   /oversight 2026-08-08).** T, verbatim: *"the Conviction, Surge meter,
   and Dice mechanics system, those are LOCKED into place and will need to

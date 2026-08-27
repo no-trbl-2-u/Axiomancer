@@ -220,6 +220,18 @@ exists outside the moral arc.">
   tools or `brainstorm-mechanics`.
 - User is mid-implementation and asks a quick scoped question about a
   dialogue line → one short answer is fine; skip the ritual entirely.
+- **Unattended (the autonomous loop, e.g. `content-curator` inside
+  `/ship-a-phase` or `/iterate`, no human present)** → skip Phases 2 and
+  4's back-and-forth. Resolve Phase 2's questions and Phase 4's
+  alternatives internally against `story-references.md` prior art and
+  spec 34 §2.5 (the delivery register), pick the strongest option, note
+  the call in one line under a "Decided unattended" heading in the
+  spec's Open Qs section, then go straight to Phase 5 and write the spec
+  file. Authorized by `plan/north-star-mork-borg.md` R-D: the loop has
+  full authority to author and ship NPCs/regions/beats without a per-item
+  attended session. **The file is still written, always** — it is the
+  record the pipeline audits against (`/digest`, `/oversight`), not a
+  request for permission that a human must grant first.
 
 ---
 
