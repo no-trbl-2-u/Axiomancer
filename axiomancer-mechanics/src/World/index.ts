@@ -97,6 +97,14 @@ export {
     DEFAULT_REST_SHELTER, REST_PASSIVE_HEAL_FRACTION, restShelterOf, isInnShelter,
 } from './MapEvents/rest-shelter';
 
+// Phase 65 — village goodwill reward tiers (discount / Ally grant / bonus).
+export {
+    GOODWILL_DISCOUNT_THRESHOLD, GOODWILL_DISCOUNT_RATE,
+    GOODWILL_ALLY_THRESHOLD, GOODWILL_ALLY_CARD_ID,
+    GOODWILL_BONUS_THRESHOLD, GOODWILL_BONUS_CURRENCY, GOODWILL_BONUS_FLAG_PREFIX,
+    applyGoodwillDiscount, goodwillBonusFlag,
+} from './village-goodwill';
+
 export {
     applyDialogueChoice,
 } from './dialogue.runtime';

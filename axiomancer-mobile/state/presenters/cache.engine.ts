@@ -9,7 +9,14 @@
  * shape.
  */
 
-import { getCardById } from '@mechanics';
+import {
+    getCardById,
+    goodwillBonusFlag,
+    GOODWILL_ALLY_CARD_ID,
+    GOODWILL_ALLY_THRESHOLD,
+    GOODWILL_BONUS_CURRENCY,
+    GOODWILL_BONUS_THRESHOLD,
+} from '@mechanics';
 import type { LootCacheChoiceOfferId, LootCacheChoiceSession } from '@mechanics';
 import type { AppStoreState } from '@/state/store';
 import {
@@ -38,6 +45,10 @@ export interface CacheChoiceOutcomeVM {
     currency: number;
     /** Set iff `chosen === 'sacrifice'` — the current map's tally AFTER this claim. */
     goodwillPreview: number | null;
+    /** Phase 65 — the Ally's display name, set iff this claim will grant it. */
+    allyGrantPreview: string | null;
+    /** Phase 65 — the Tier 3 currency amount, set iff this claim will grant it. */
+    bonusPreview: number | null;
 }
 
 export interface CacheChoiceVM {
@@ -74,10 +85,17 @@ export function selectHasActiveCache(state: Pick<AppStoreState, 'cache'>): boole
 }
 
 export function selectCacheVM(
-    state: Pick<AppStoreState, 'cache' | 'mapGoodwill' | 'world'>,
+    state: Pick<AppStoreState, 'cache' | 'mapGoodwill' | 'world' | 'player' | 'flags'>,
 ): CacheChoiceVM {
     const s = state.cache?.session;
     if (!s) return EMPTY_VM;
+
+    const mapName = state.world?.currentMap?.name ?? '';
+    const goodwillPreview = s.outcome?.sacrificed
+        ? (state.mapGoodwill?.[mapName] ?? 0) + 1
+        : null;
+    const knownCards = state.player?.knownCards ?? [];
+    const flags = state.flags ?? [];
 
     const outcome: CacheChoiceOutcomeVM | null = s.outcome === null ? null : {
         chosen: s.outcome.chosen,
@@ -85,8 +103,16 @@ export function selectCacheVM(
         cardName: s.outcome.rewardCardId === null ? null : (getCardById(s.outcome.rewardCardId)?.name ?? s.outcome.rewardCardId),
         itemNames: s.outcome.items.map(i => i.name),
         currency: s.outcome.currency,
-        goodwillPreview: s.outcome.sacrificed
-            ? (state.mapGoodwill?.[state.world?.currentMap?.name ?? ''] ?? 0) + 1
+        goodwillPreview,
+        allyGrantPreview: goodwillPreview !== null
+            && goodwillPreview >= GOODWILL_ALLY_THRESHOLD
+            && !knownCards.includes(GOODWILL_ALLY_CARD_ID)
+            ? (getCardById(GOODWILL_ALLY_CARD_ID)?.name ?? GOODWILL_ALLY_CARD_ID)
+            : null,
+        bonusPreview: goodwillPreview !== null
+            && goodwillPreview >= GOODWILL_BONUS_THRESHOLD
+            && !flags.includes(goodwillBonusFlag(mapName))
+            ? GOODWILL_BONUS_CURRENCY
             : null,
     };
 

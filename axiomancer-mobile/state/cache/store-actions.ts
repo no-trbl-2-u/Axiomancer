@@ -22,6 +22,12 @@ import {
     createLootCacheChoiceSession,
     rollCacheReward,
     rollCombatCardRewards,
+    unlockCardViaDilemma,
+    goodwillBonusFlag,
+    GOODWILL_ALLY_CARD_ID,
+    GOODWILL_ALLY_THRESHOLD,
+    GOODWILL_BONUS_CURRENCY,
+    GOODWILL_BONUS_THRESHOLD,
 } from '@mechanics';
 import type { CacheLootTier, LootCacheChoiceOfferId, LootCacheChoiceOutcome, LootCacheChoiceSession } from '@mechanics';
 import { resolveMinigameSeed } from '../minigame-seeds';
@@ -139,6 +145,23 @@ export function claimLootCacheChoiceOutcomeAction(store: AppStore): ClaimLootCac
         goodwill = mapName ? (prevGoodwill[mapName] ?? 0) + 1 : null;
         if (mapName) {
             patch.mapGoodwill = { ...prevGoodwill, [mapName]: goodwill };
+
+            // Phase 65 — Tier 2/3 village goodwill rewards. `>=` + idempotent
+            // guards (knownCards-includes / flags-includes), not `===`, so a
+            // save that already held a qualifying tally before this shipped
+            // self-heals on its next sacrifice claim.
+            if (goodwill! >= GOODWILL_ALLY_THRESHOLD && !player.knownCards.includes(GOODWILL_ALLY_CARD_ID)) {
+                player = unlockCardViaDilemma(player, GOODWILL_ALLY_CARD_ID);
+            }
+
+            const bonusFlag = goodwillBonusFlag(mapName);
+            const flags = state.flags ?? [];
+            if (goodwill! >= GOODWILL_BONUS_THRESHOLD && !flags.includes(bonusFlag)) {
+                player = { ...player, currency: player.currency + GOODWILL_BONUS_CURRENCY };
+                patch.flags = [...flags, bonusFlag];
+            }
+
+            patch.player = player;
         }
     }
 

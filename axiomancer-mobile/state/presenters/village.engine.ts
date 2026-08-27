@@ -14,6 +14,7 @@
  */
 
 import {
+    applyGoodwillDiscount,
     consumableLibrary,
     defaultSellPrice,
     getRelicById,
@@ -34,7 +35,12 @@ export interface VillageWareVM {
     itemId: string;
     name: string;
     description: string;
+    /** Post-discount price — the actual amount charged. */
     price: number;
+    /** Undiscounted price, for strikethrough display when `discounted`. */
+    basePrice: number;
+    /** True iff Phase 65's goodwill discount lowered `price` below `basePrice`. */
+    discounted: boolean;
     affordable: boolean;
 }
 
@@ -87,12 +93,13 @@ export function resolveWareItem(ware: ShopWare): Item | null {
 }
 
 export function selectVillageVM(
-    state: Pick<AppStoreState, 'event' | 'player'>,
+    state: Pick<AppStoreState, 'event' | 'player' | 'mapGoodwill' | 'world'>,
 ): VillageVM {
     const pending = state.event?.pending;
     if (!pending || pending.event.kind !== 'village') return EMPTY_VM;
     const event = pending.event;
     const currency = state.player?.currency ?? 0;
+    const goodwillCount = state.mapGoodwill?.[state.world?.currentMap?.name ?? ''] ?? 0;
 
     const merchants: VillageMerchantVM[] = event.merchants.map(npc => {
         const tree = npc.dialogueTree;
@@ -110,12 +117,15 @@ export function selectVillageVM(
         .map(ware => {
             const item = resolveWareItem(ware);
             if (!item) return null;
+            const price = applyGoodwillDiscount(ware.price, goodwillCount);
             return {
                 itemId: ware.itemId,
                 name: item.name,
                 description: item.description ?? '',
-                price: ware.price,
-                affordable: currency >= ware.price,
+                price,
+                basePrice: ware.price,
+                discounted: price !== ware.price,
+                affordable: currency >= price,
             };
         })
         .filter((w): w is VillageWareVM => w !== null);

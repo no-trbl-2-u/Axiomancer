@@ -32,7 +32,7 @@ const REAL_CONSUMABLE_ID = consumableLibrary[0]?.id;
 // Phase 21 — equipment wares resolve to signet relics (the only equipment).
 const REAL_TEMPLATE_ID = relicLibrary[0]?.id;
 
-type VillageState = Pick<AppStoreState, 'event' | 'player'>;
+type VillageState = Pick<AppStoreState, 'event' | 'player' | 'mapGoodwill' | 'world'>;
 
 function makeNpc(overrides: Partial<NPC> = {}): NPC {
     return {
@@ -56,6 +56,8 @@ function makeState(opts: {
     noPending?: boolean;
     noShop?: boolean;
     inventory?: readonly Item[];
+    mapName?: string;
+    goodwill?: number;
 }): VillageState {
     const {
         merchants = [],
@@ -66,6 +68,8 @@ function makeState(opts: {
         noPending = false,
         noShop = false,
         inventory = [],
+        mapName = 'northern-forest',
+        goodwill,
     } = opts;
 
     const event = noPending
@@ -84,6 +88,8 @@ function makeState(opts: {
     return {
         event,
         player: { currency, inventory } as unknown as AppStoreState['player'],
+        mapGoodwill: (goodwill === undefined ? {} : { [mapName]: goodwill }) as AppStoreState['mapGoodwill'],
+        world: { currentMap: { name: mapName } } as unknown as AppStoreState['world'],
     };
 }
 
@@ -288,5 +294,60 @@ describe('selectVillageVM', () => {
     it('treats missing inventory as an empty sellable list', () => {
         const vm = selectVillageVM(makeState({}));
         expect(vm.sellables).toEqual([]);
+    });
+
+    it('prices a ware at face value with no goodwill discount', () => {
+        const vm = selectVillageVM(
+            makeState({ currency: 100, wares: [{ itemId: REAL_CONSUMABLE_ID!, price: 12 }] }),
+        );
+        expect(vm.wares[0]).toMatchObject({ price: 12, basePrice: 12, discounted: false });
+    });
+
+    it('applies the Phase 65 goodwill discount to BUY price once the map tally is >= 1', () => {
+        const vm = selectVillageVM(
+            makeState({
+                currency: 100,
+                wares: [{ itemId: REAL_CONSUMABLE_ID!, price: 12 }],
+                mapName: 'northern-forest',
+                goodwill: 1,
+            }),
+        );
+        expect(vm.wares[0]).toMatchObject({ price: 10, basePrice: 12, discounted: true });
+    });
+
+    it('does not discount a shop on a map with no goodwill tally, even if another map has one', () => {
+        const vm = selectVillageVM(
+            makeState({
+                currency: 100,
+                wares: [{ itemId: REAL_CONSUMABLE_ID!, price: 12 }],
+                mapName: 'northern-forest',
+                goodwill: 0,
+            }),
+        );
+        expect(vm.wares[0]).toMatchObject({ price: 12, basePrice: 12, discounted: false });
+    });
+
+    it('bases affordability on the discounted price, not the base price', () => {
+        const vm = selectVillageVM(
+            makeState({
+                currency: 10,
+                wares: [{ itemId: REAL_CONSUMABLE_ID!, price: 12 }],
+                goodwill: 1,
+            }),
+        );
+        expect(vm.wares[0]).toMatchObject({ price: 10, affordable: true });
+    });
+
+    it('leaves sell prices untouched by the goodwill discount', () => {
+        const vm = selectVillageVM(
+            makeState({
+                wares: [{ itemId: REAL_CONSUMABLE_ID!, price: 12 }],
+                inventory: [
+                    { id: REAL_CONSUMABLE_ID!, name: 'Phial', description: '', category: 'consumable', quantity: 1 },
+                ],
+                goodwill: 5,
+            }),
+        );
+        expect(vm.sellables[0]?.sellPrice).toBe(6);
     });
 });

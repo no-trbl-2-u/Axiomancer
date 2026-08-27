@@ -17,6 +17,7 @@ import {
     buyItem as engineBuyItem,
     sellItem as engineSellItem,
     defaultSellPrice as engineDefaultSellPrice,
+    applyGoodwillDiscount,
     buildCharacterFromPreset,
     defaultAlignment,
     getAvailableCards,
@@ -1820,7 +1821,9 @@ function buyVillageWareAction(store: AppStore, itemId: string): boolean {
         const item = resolveWareItem(ware);
         if (!item) return false;
         const player = (state as unknown as GameState).player;
-        const next = engineBuyItem(player, item, ware.price);
+        const goodwillCount = state.mapGoodwill?.[state.world?.currentMap?.name ?? ''] ?? 0;
+        const price = applyGoodwillDiscount(ware.price, goodwillCount);
+        const next = engineBuyItem(player, item, price);
         if (next === player) return false;
         store.setState({ player: next } as never);
         return true;

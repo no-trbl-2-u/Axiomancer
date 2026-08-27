@@ -27,9 +27,11 @@ export default function VillageScreen() {
     const styles = useStyles();
     const event = useGameState((s) => s.event);
     const player = useGameState((s) => s.player);
+    const mapGoodwill = useGameState((s) => s.mapGoodwill);
+    const world = useGameState((s) => s.world);
     const vm = useMemo(
-        () => selectVillageVM({ event, player } as never),
-        [event, player],
+        () => selectVillageVM({ event, player, mapGoodwill, world } as never),
+        [event, player, mapGoodwill, world],
     );
     const actions = useGameActions();
     const router = useRouter();
@@ -114,6 +116,9 @@ export default function VillageScreen() {
                                             <Text style={styles.wareDesc}>{ware.description}</Text>
                                         )}
                                     </View>
+                                    {ware.discounted && (
+                                        <Text style={styles.warePriceStruck} testID={`village-ware-${ware.itemId}-base-price`}>{ware.basePrice}s</Text>
+                                    )}
                                     <Text style={[styles.warePrice, !ware.affordable && styles.warePriceUnaffordable]}>{ware.price}s</Text>
                                 </TouchableOpacity>
                             )) : (
@@ -237,6 +242,14 @@ const useStyles = makeStyles((AXM) => ({
     // is loud enough to survive the unaffordable dim, so mute the colour
     // to bone when the player can't afford it (critic round).
     warePriceUnaffordable: { color: AXM.bone },
+    // Phase 65 — village goodwill discount: the pre-discount price shown
+    // struck through beside the discounted charge.
+    warePriceStruck: {
+        fontFamily: FONTS.gothic,
+        fontSize: 12,
+        color: AXM.bone,
+        textDecorationLine: 'line-through',
+    },
     bigButton: {
         borderWidth: 2,
         borderColor: AXM.parchment,

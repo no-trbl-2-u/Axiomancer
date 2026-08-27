@@ -10,7 +10,7 @@
  */
 
 import { afterEach, describe, it, expect, jest } from '@jest/globals';
-import type { Consumable, Item, Material, QuestItem, ShopWare } from '@mechanics';
+import { consumableLibrary, type Consumable, type Item, type Material, type QuestItem, type ShopWare } from '@mechanics';
 
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import { createAppActions } from '@/state/actions';
@@ -19,6 +19,8 @@ import { createAppStore, EMPTY_EVENT_SLICE, type AppStore } from '@/state/store'
 afterEach(() => {
     jest.restoreAllMocks();
 });
+
+const REAL_CONSUMABLE_ID = consumableLibrary[0]?.id;
 
 function potion(id = 'phial', qty = 1): Consumable {
     return {
@@ -57,12 +59,15 @@ function makeStore(opts: {
     wares?: readonly ShopWare[];
     noShop?: boolean;
     noPending?: boolean;
+    goodwill?: number;
 }): AppStore {
-    const { inventory = [], currency = 0, wares = [], noShop = false, noPending = false } = opts;
+    const { inventory = [], currency = 0, wares = [], noShop = false, noPending = false, goodwill } = opts;
     const store = createAppStore({ adapter: createMemoryAdapter() });
     const state = store.getState();
+    const mapName = state.world.currentMap.name;
     store.setState({
         player: { ...state.player, currency, inventory: [...inventory] },
+        mapGoodwill: goodwill === undefined ? {} : { [mapName]: goodwill },
         event: {
             ...EMPTY_EVENT_SLICE,
             pending: noPending
@@ -80,6 +85,59 @@ function makeStore(opts: {
     });
     return store;
 }
+
+describe('buyVillageWare action', () => {
+    it('charges the ware price at face value with no goodwill', () => {
+        const store = makeStore({
+            currency: 20,
+            wares: [{ itemId: REAL_CONSUMABLE_ID!, price: 12 }],
+        });
+        const actions = createAppActions(store);
+
+        expect(actions.buyVillageWare(REAL_CONSUMABLE_ID!)).toBe(true);
+        expect(store.getState().player.currency).toBe(8);
+        expect(store.getState().player.inventory).toHaveLength(1);
+    });
+
+    it('charges the Phase 65 discounted price once the current map has goodwill >= 1', () => {
+        const store = makeStore({
+            currency: 20,
+            wares: [{ itemId: REAL_CONSUMABLE_ID!, price: 12 }],
+            goodwill: 1,
+        });
+        const actions = createAppActions(store);
+
+        expect(actions.buyVillageWare(REAL_CONSUMABLE_ID!)).toBe(true);
+        // floor(12 * 0.9) = 10
+        expect(store.getState().player.currency).toBe(10);
+    });
+
+    it('lets a discounted purchase succeed even if the base price would be unaffordable', () => {
+        const store = makeStore({
+            currency: 10,
+            wares: [{ itemId: REAL_CONSUMABLE_ID!, price: 12 }],
+            goodwill: 1,
+        });
+        const actions = createAppActions(store);
+
+        expect(actions.buyVillageWare(REAL_CONSUMABLE_ID!)).toBe(true);
+        expect(store.getState().player.currency).toBe(0);
+    });
+
+    it('returns false for an unknown ware id', () => {
+        const store = makeStore({ currency: 100, wares: [] });
+        const actions = createAppActions(store);
+
+        expect(actions.buyVillageWare('__no-such-ware__')).toBe(false);
+    });
+
+    it('returns false when no village event is pending', () => {
+        const store = makeStore({ currency: 100, noPending: true, wares: [{ itemId: REAL_CONSUMABLE_ID!, price: 1 }] });
+        const actions = createAppActions(store);
+
+        expect(actions.buyVillageWare(REAL_CONSUMABLE_ID!)).toBe(false);
+    });
+});
 
 describe('sellVillageItem action', () => {
     it('sells at defaultSellPrice when the item matches a ware on this shop', () => {

@@ -61,9 +61,11 @@ export default function CacheScreen() {
     const slice = useGameState((s) => s.cache);
     const mapGoodwill = useGameState((s) => s.mapGoodwill);
     const world = useGameState((s) => s.world);
+    const player = useGameState((s) => s.player);
+    const flags = useGameState((s) => s.flags);
     const vm = useMemo(
-        () => selectCacheVM({ cache: slice, mapGoodwill, world }),
-        [slice, mapGoodwill, world],
+        () => selectCacheVM({ cache: slice, mapGoodwill, world, player, flags }),
+        [slice, mapGoodwill, world, player, flags],
     );
     const actions = useGameActions();
     const router = useRouter();
@@ -113,6 +115,12 @@ export default function CacheScreen() {
                                 <Text style={styles.chip}>
                                     {cacheOutcomeGoodwillChip(world?.currentMap?.name ?? 'this place', vm.outcome.goodwillPreview)}
                                 </Text>
+                            )}
+                            {vm.outcome.allyGrantPreview !== null && (
+                                <Text style={styles.chip}>{cacheOutcomeCardChip(vm.outcome.allyGrantPreview)}</Text>
+                            )}
+                            {vm.outcome.bonusPreview !== null && (
+                                <Text style={styles.chip}>{cacheOutcomeCurrencyChip(vm.outcome.bonusPreview)}</Text>
                             )}
                         </View>
                         <TouchableOpacity
