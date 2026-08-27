@@ -2176,7 +2176,7 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       build-catalog are identical copies (asserted equal now), while the
       editor's `KwGlyph` is an independently-drawn switch, so it is gated on
       "names something the project has" instead of path equality.
-- [ ] Phase 69 — Card-editor round-trip fidelity. `CardDraft`
+- [x] Phase 69 — Card-editor round-trip fidelity. `CardDraft`
       (`axiomancer-card-editor/src/types.ts`) omits `theme`,
       `paidSummary`, `persistentEffect`, `intentionallyAsymmetric`,
       `glyph`, and codegen drops the `// pts:` arithmetic comment — an
@@ -2185,7 +2185,16 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       field through draft + codegen (preserving `// pts:`), and add a
       round-trip test (library literal → draft → codegen → equal).
       (contract; queued 2026-08-22 from the content-pipelines audit)
-      Brief: to generate.
+      Brief: `plan/phases/phase_69_editor_round_trip.md`. SHIPPED 2026-08-27
+      (`3317e337`, issue #246). All five fields + the `// pts:` comment now
+      round-trip, proved over the whole live library. Beyond the row's list,
+      writing the test found a SIXTH loss: `synergyLines` was a hand-written
+      allowlist of seven keys, so `statePredicate` and `rider` were dropped
+      from the five cards carrying them — now emitted generically. Note the
+      editor had NO test runner before this phase; vitest is now wired in and
+      covered by `verify-card-editor`. Follow-up left open: the restored
+      fields still have no form controls (this phase guarantees they SURVIVE
+      an edit, not that they can be edited).
 - [ ] Phase 70 — Prose lint for shipped `.ts` content + naming law in
       CI. `scripts/check-lexicon.mjs` scans `.md` only, so every
       player-facing string (dialogue trees, `MapEvents/content.ts`,

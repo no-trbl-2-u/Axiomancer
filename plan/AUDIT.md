@@ -2603,6 +2603,22 @@
   keyword checklist still omits the mobile registry, `CARD_EFFECT_SET`, the
   atlas, `retheme-map.json`, and `MECH_HEADLINE_PRIORITY`.
 
+### [tooling] The card editor's restored fields have no form controls
+- category: tooling
+- impact: 3
+- ease: 5
+- detail: filed 2026-08-27 by Phase 69. That phase made `theme`,
+  `persistentEffect`, `paidSummary`, `intentionallyAsymmetric` and `glyph`
+  survive an editor save, and the round-trip test holds them there. What it did
+  NOT do is give them editing UI — they round-trip verbatim from the source
+  literal. So a card's theme or paid line can only be changed by editing
+  `cards.library.ts` by hand, which is a strange seam in a tool whose whole
+  purpose is to avoid that.
+- next: form controls for the four with obvious shapes (`theme` a select over
+  `CARD_THEMES`, `paidSummary` and `persistentEffect` text areas,
+  `intentionallyAsymmetric` a checkbox). `glyph` needs a design call first —
+  it is a discriminated payload union with a cap, and no live card uses it.
+
 ## Done
 
 ### [x] [3.2] `CardSpecialMechanic` deprecated-name not exported — stale/resolved
