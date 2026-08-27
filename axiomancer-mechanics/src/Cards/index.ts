@@ -63,6 +63,10 @@ export {
 // Spec 32 v3 — rank ladder + card types (§4) and the pricing table (ledger #2).
 export type { CardRank, CardRarity, CardType, CardRider } from './types';
 export { rankToRarity, CARD_RANK_NAMES } from './types';
+// Phase 68 — the runtime enumeration of `CardSpecialMechanic['kind']`, bound to
+// the union by compile-time assertions in types.ts. Consumers that need to walk
+// every kind (mobile KW-2, drift lints) read THIS instead of keeping a copy.
+export { CARD_SPECIAL_MECHANIC_KINDS, isCardSpecialMechanicKind } from './types';
 export {
     VERB_POINTS, CONDITION_DISCOUNTS, SELF_COST_CREDIT, DOT_TEMPO_SURVIVAL,
     scoreCard, scoreMechanic, scoreRider, statusPoints,

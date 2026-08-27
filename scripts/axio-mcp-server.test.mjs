@@ -60,7 +60,11 @@ test('axio_overview returns non-empty counts', async () => {
   ])
   const text = replies.get(1)?.result?.content?.[0]?.text ?? ''
   assert.match(text, /# Library — \d+ cards, \d+ enemies, \d+ effects/)
-  assert.match(text, /# Keyword registry — \d+\/30 rows/)
+  // Phase 68: the denominator is gone — the registry is growable (THE PIPELINE
+  // LIBERATION), so a hardcoded "/30" published a cap the project retired and
+  // made a new keyword read as an overflow instead of a row.
+  assert.match(text, /# Keyword registry — \d+ rows/)
+  assert.doesNotMatch(text, /\/30 rows/)
 })
 
 test('axio_overview publishes live doctrine, not the retired STRIKE IS DEAD ban', async () => {

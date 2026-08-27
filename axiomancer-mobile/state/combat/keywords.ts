@@ -333,6 +333,15 @@ export function keywordForMechanic(kind: string | null | undefined): string | nu
     return MECHANIC_KEYWORD[kind] ?? null;
 }
 
+/**
+ * Every mechanic kind that carries a keyword badge (phase 68). Exported so the
+ * KW-2 lint can check the REVERSE drift — a mapping row surviving the engine
+ * kind it described — without keeping its own copy of this table.
+ */
+export function mechanicKeywordKeys(): readonly string[] {
+    return Object.keys(MECHANIC_KEYWORD);
+}
+
 /** The general glossary definition for a keyword, or null. */
 export function keywordGloss(keyword: string | null | undefined): string | null {
     if (!keyword) return null;

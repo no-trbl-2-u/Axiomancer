@@ -278,6 +278,97 @@ export type CardSpecialMechanic =
     | { kind: 'rider'; rider: CardRider };
 
 /**
+ * Every `CardSpecialMechanic` kind, at RUNTIME (phase 68).
+ *
+ * The union above is erased at compile time, so every consumer that needed to
+ * enumerate the kinds kept its own copy — and they drifted. The mobile KW-2
+ * lint iterated 17 of these while `MECHANIC_KEYWORD` already mapped 24
+ * (content-pipelines audit 2026-08-22, "silently-drifting surfaces").
+ *
+ * This array IS the enumeration, and the two assertions below bind it to the
+ * union in BOTH directions:
+ *   - add a kind to the union without listing it here  -> compile error
+ *   - list a kind here that the union does not have    -> compile error
+ * A runtime-only list would drift the way the hardcoded 17 did; a type-only
+ * union stays invisible at runtime. Both, bound together, is what closes it.
+ */
+export const CARD_SPECIAL_MECHANIC_KINDS = [
+    'strip_random_buff',
+    'befriend_attempt',
+    'guard',
+    'rupture',
+    'siphon',
+    'barrier',
+    'riposte',
+    'reroll_spent',
+    'refresh_die',
+    'convert_die_color',
+    'create_temporary_die',
+    'grant_pip',
+    'overheat',
+    'bank_spent_die',
+    'forge_floating_die',
+    'float_x_die',
+    'stagger',
+    'lock_stance',
+    'foretell',
+    'omen',
+    'premise',
+    'peroration',
+    'spend_premises',
+    'spend_all_pips',
+    'recoil',
+    'recoil_x',
+    'extend_dots',
+    'convert_dots',
+    'boost_all_dots',
+    'soul_gain',
+    'consume_affliction',
+    'reap',
+    'reap_all',
+    'turnabout',
+    'sway',
+    'echo',
+    'echo_next_spell',
+    'reprise',
+    'replay_last',
+    'conjure_card',
+    'immolate',
+    'purge_self',
+    'rider',
+] as const;
+
+/** A kind in the union that this array forgot. Resolves to `never` when clean. */
+type MissingFromKindList = Exclude<
+    CardSpecialMechanic['kind'],
+    (typeof CARD_SPECIAL_MECHANIC_KINDS)[number]
+>;
+/** A kind in this array that the union does not have. `never` when clean. */
+type NotAKind = Exclude<
+    (typeof CARD_SPECIAL_MECHANIC_KINDS)[number],
+    CardSpecialMechanic['kind']
+>;
+/**
+ * Both sides must resolve to `never`. `AssertNever` constrains its parameter to
+ * `never`, so a leftover kind fails the constraint and names itself in the
+ * error — unlike an empty-array annotation, which type-checks against ANY
+ * element type and would assert nothing at all.
+ */
+type AssertNever<T extends never> = T;
+type _KindListCoversUnion = AssertNever<MissingFromKindList>;
+type _KindListHasNoStrays = AssertNever<NotAKind>;
+
+/** Narrowing guard for data read from outside the type system (JSON, MCP). */
+export function isCardSpecialMechanicKind(
+    value: unknown,
+): value is CardSpecialMechanic['kind'] {
+    return (
+        typeof value === 'string' &&
+        (CARD_SPECIAL_MECHANIC_KINDS as readonly string[]).includes(value)
+    );
+}
+
+/**
  * Fate Engine P1 — a card RIDER: a bundle of real-unit bonuses fired by a
  * die-interaction line (`threshold` / `dieBonus` / `fate`). Every field is an
  * exact engine unit so generated action text is the applied number (P0-truth

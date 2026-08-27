@@ -1,0 +1,52 @@
+name: verify-drift
+
+# The content-drift gate (phase 68). The tables it compares live in three
+# different workspaces, so no single package's verify job can own it: an
+# editor-only or catalog-only edit would not trigger verify-mobile, and a
+# mobile-only edit would not trigger the editor's. This lane triggers on every
+# path the test reads, which is the whole point of hosting it at the root.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'axiomancer-mobile/components/combat/glyphShapes.ts'
+      - 'axiomancer-mobile/state/combat/keywords.ts'
+      - 'axiomancer-card-editor/src/components/CardFace.tsx'
+      - 'axiomancer-card-editor/src/theme/wx.ts'
+      - 'axiomancer-mechanics/docs/keyword-atlas.md'
+      - 'scripts/build-catalog.mjs'
+      - 'scripts/content-drift.mjs'
+      - 'scripts/content-drift.test.mjs'
+      - '.github/workflows/verify-drift.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'axiomancer-mobile/components/combat/glyphShapes.ts'
+      - 'axiomancer-mobile/state/combat/keywords.ts'
+      - 'axiomancer-card-editor/src/components/CardFace.tsx'
+      - 'axiomancer-card-editor/src/theme/wx.ts'
+      - 'axiomancer-mechanics/docs/keyword-atlas.md'
+      - 'scripts/build-catalog.mjs'
+      - 'scripts/content-drift.mjs'
+      - 'scripts/content-drift.test.mjs'
+      - '.github/workflows/verify-drift.yml'
+  schedule:
+    - cron: '41 7 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-drift-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Content-drift gate
+        run: node --test scripts/content-drift.test.mjs

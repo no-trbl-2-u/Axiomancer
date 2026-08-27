@@ -71,7 +71,6 @@ function applyKeyword(S: DummyState, kwId: string, val: number): LogLine[] {
     const healPlayer = (n: number) => {
         S.player.hp = Math.min(PLAYER_MAX, S.player.hp + n);
     };
-    const distinct = () => new Set([...S.dots.map((d) => d.kw), ...S.controls.map((c) => c.kw)]).size;
     const totalDot = () => S.dots.reduce((a, d) => a + d.stacks, 0);
     const addDot = (kw: string, n: number) => {
         const e = S.dots.find((d) => d.kw === kw);
@@ -89,14 +88,6 @@ function applyKeyword(S: DummyState, kwId: string, val: number): LogLine[] {
             dealDummy(val);
             push(`Dealt ${val} damage.`, 'dmg');
             break;
-        case 'compound': {
-            const d = distinct();
-            const bonus = d * 2;
-            const total = val + bonus;
-            dealDummy(total);
-            push(`Compound: ${val} + ${bonus} (${d} debuff${d !== 1 ? 's' : ''}) = ${total} damage.`, 'dmg');
-            break;
-        }
         case 'bleed':
             addDot('bleed', val);
             push(`Applied Bleed ×${val}.`, 'dmg');
@@ -119,13 +110,6 @@ function applyKeyword(S: DummyState, kwId: string, val: number): LogLine[] {
             S.dots = [];
             dealDummy(burst);
             push(`Ruptured ${s} DoT stack${s !== 1 ? 's' : ''} → ${burst} burst damage.`, 'dmg');
-            break;
-        }
-        case 'execute': {
-            const crit = S.dummyHp <= 30 || totalDot() >= 2;
-            const dmg = val * (crit ? 2 : 1);
-            dealDummy(dmg);
-            push(`Execute${crit ? ' — CRIT' : ''}: ${dmg} damage.`, 'dmg');
             break;
         }
         case 'guard':
@@ -160,9 +144,6 @@ function applyKeyword(S: DummyState, kwId: string, val: number): LogLine[] {
             push('Strip Buff: dummy has no buffs to remove.', 'info');
             break;
         case 'stun':
-        case 'slow':
-        case 'confusion':
-        case 'silence':
         case 'control':
             addControl(kwId, val);
             push(`Applied ${m ? m.label : kwId} (${val} turn${val !== 1 ? 's' : ''}).`, 'ctrl');

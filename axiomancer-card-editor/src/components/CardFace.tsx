@@ -58,10 +58,9 @@ function dotKeyword(effectId: string): KeywordId {
 }
 
 function controlKeyword(effectId: string, skipTurn: boolean): KeywordId {
+    // Phase 68: the slow / confusion / silence arms were spec-32-v2 leftovers —
+    // no live debuff id carries those substrings, so they could never fire.
     if (skipTurn || effectId.includes('stun')) return 'stun';
-    if (effectId.includes('slow')) return 'slow';
-    if (effectId.includes('confus')) return 'confusion';
-    if (effectId.includes('silence')) return 'silence';
     return 'control';
 }
 
@@ -263,7 +262,6 @@ export function KwGlyph({
                 </svg>
             );
         case 'stun':
-        case 'execute':
             return (
                 <svg viewBox="0 0 24 24" style={s} fill={color}>
                     <path d="M12 1 L14 8 L21 7 L15 12 L21 17 L14 16 L12 23 L10 16 L3 17 L9 12 L3 7 L10 8Z" />
@@ -285,9 +283,6 @@ export function KwGlyph({
                     <path d="M12 2 L21 5 V12 C21 17 17 21 12 22 C7 21 3 17 3 12 V5Z" fillOpacity="0.35" />
                 </svg>
             );
-        case 'slow':
-        case 'confusion':
-        case 'silence':
         case 'control':
             return (
                 <svg viewBox="0 0 24 24" style={s} fill="none" stroke={color} strokeWidth="1.7">
@@ -414,7 +409,6 @@ export function KwGlyph({
                     <path d="M12 2 C7.3 2 4 5.4 4 9.4 C4 12.3 5.7 14.5 8 15.6 L8 20 H10.2 L10.2 17.2 H11.2 L11.2 20 H12.8 L12.8 17.2 H13.8 L13.8 20 H16 L16 15.6 C18.3 14.5 20 12.3 20 9.4 C20 5.4 16.7 2 12 2 Z M8.8 8 A2 2 0 1 0 8.8 12 A2 2 0 1 0 8.8 8 Z M15.2 8 A2 2 0 1 0 15.2 12 A2 2 0 1 0 15.2 8 Z" />
                 </svg>
             );
-        case 'compound':
         case 'strip_buff':
             return (
                 <svg viewBox="0 0 24 24" style={s} fill={color}>

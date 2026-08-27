@@ -362,6 +362,9 @@ export {
     checkStatePredicate,
     // Spec 32 §3/§6 — card themes + keyword families (phase 29 parity lint)
     CARD_THEMES, THEME_KEYWORDS, keywordsForTheme, isCardTheme,
+    // Phase 68 — runtime enumeration of the CardSpecialMechanic union, bound to
+    // the type by compile-time assertions. Mobile KW-2 walks this list.
+    CARD_SPECIAL_MECHANIC_KINDS, isCardSpecialMechanicKind,
 } from './Cards';
 export type { CardTheme } from './Cards';
 export type { RewardTheme } from './Combat';

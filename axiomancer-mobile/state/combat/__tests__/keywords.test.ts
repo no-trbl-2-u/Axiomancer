@@ -7,11 +7,11 @@
  * permanent regression gate instead of a one-time fix.
  */
 import { describe, expect, it } from '@jest/globals';
-import { cardLibrary, THEME_KEYWORDS } from '@mechanics';
+import { cardLibrary, CARD_SPECIAL_MECHANIC_KINDS, THEME_KEYWORDS } from '@mechanics';
 
 import {
     allRegistryKeywords, keywordForEffect, keywordForMechanic, keywordGloss,
-    SYSTEM_GLOSSARY,
+    mechanicKeywordKeys, SYSTEM_GLOSSARY,
 } from '@/state/combat/keywords';
 
 describe('keyword registry — KW-1 (no unmapped effect id renders a blank face)', () => {
@@ -41,18 +41,61 @@ describe('keyword registry — KW-2/KW-3 (count pinned, no dead references)', ()
         expect(allRegistryKeywords().length).toBe(42);
     });
 
-    it('every mechanic-kind mapping resolves to a glossed keyword', () => {
-        const kinds = [
-            'stagger', 'lock_stance', 'foretell', 'omen', 'premise', 'spend_premises',
-            'recoil', 'soul_gain', 'consume_affliction', 'siphon', 'sway', 'echo',
-            'echo_next_spell', 'reprise', 'extend_dots', 'convert_dots', 'boost_all_dots',
-        ];
+    /**
+     * Kinds that deliberately carry NO `MECHANIC_KEYWORD` row (phase 68).
+     *
+     * A kind earns a row when the card FACE badges it as a keyword. These
+     * speak through the printed paid/free lines instead, so mapping them
+     * would badge text the face already says. Grouped by why.
+     *
+     * This list is half of the KW-2 gate: the union is walked in full, so a
+     * NEW mechanic kind fails the test until it is either mapped to a glossed
+     * keyword or added here with its reason. That is the drift the
+     * content-pipelines audit (2026-08-22) found open — the old KW-2 walked a
+     * hardcoded 17 while `MECHANIC_KEYWORD` already held 22.
+     */
+    const KINDS_WITHOUT_MECHANIC_KEYWORD: readonly string[] = [
+        // Combat-engine verbs the face prints as their own word in the paid
+        // summary (GUARD 4, RUPTURE, REAP ALL...), so the badge would double it.
+        'guard', 'barrier', 'rupture', 'reap', 'reap_all', 'riposte',
+        // Die-gear verbs: the face prints FORGE / KINDLE / PIP / OVERHEAT and
+        // the SYSTEM_GLOSSARY explains the dice system behind them.
+        'forge_floating_die', 'float_x_die', 'create_temporary_die', 'grant_pip',
+        'overheat', 'reroll_spent', 'refresh_die', 'convert_die_color',
+        'bank_spent_die', 'spend_all_pips',
+        // Card-local one-offs with no repeated vocabulary to register (the
+        // atlas's own "a term earns a row at ~3+ cards" policy).
+        'strip_random_buff', 'befriend_attempt', 'conjure_card', 'peroration',
+        // A carrier, not a mechanic: `rider` executes an ordinary card rider.
+        'rider',
+    ];
+
+    it('every mechanic kind either maps to a glossed keyword or is classified', () => {
         const unresolved: string[] = [];
-        for (const kind of kinds) {
+        const classified = new Set(KINDS_WITHOUT_MECHANIC_KEYWORD);
+        for (const kind of CARD_SPECIAL_MECHANIC_KINDS) {
+            if (classified.has(kind)) continue;
             const kw = keywordForMechanic(kind);
             if (!kw || !keywordGloss(kw)) unresolved.push(`${kind} → ${kw}`);
         }
         expect(unresolved).toEqual([]);
+    });
+
+    it('the classification list holds no kind that left the union', () => {
+        const live = new Set<string>(CARD_SPECIAL_MECHANIC_KINDS);
+        expect(KINDS_WITHOUT_MECHANIC_KEYWORD.filter((k) => !live.has(k))).toEqual([]);
+    });
+
+    it('no mechanic mapping points at a kind the engine does not have', () => {
+        // The reverse drift: a keyword row outliving the kind it described.
+        const live = new Set<string>(CARD_SPECIAL_MECHANIC_KINDS);
+        expect(mechanicKeywordKeys().filter((k) => !live.has(k))).toEqual([]);
+    });
+
+    it('the union is walked, not a copy of it', () => {
+        // Guards the gate itself: an empty or truncated enumeration would make
+        // every assertion above pass vacuously.
+        expect(CARD_SPECIAL_MECHANIC_KINDS.length).toBeGreaterThan(40);
     });
 
     it('retired keywords (BARRIER, CONJURE, SENTENCE, TRANSMUTE, REPRISE) are gone', () => {
