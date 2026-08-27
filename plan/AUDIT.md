@@ -2563,6 +2563,25 @@
   file clean. The row was fixed by some pass between 2026-08-14 and today
   without being ticked here.
 
+### [content] The title screen still shows the painted "AxiomanceR" wordmark after the Phase 67 rename
+- category: content
+- impact: 6
+- ease: 2
+- detail: filed 2026-08-27 by Phase 67. The rename to "Miserere Mei, Deus"
+  shipped everywhere it could reach as a string — store/web metadata, CLI
+  banners, published site chrome, the doc set. The one surface it cannot
+  reach is the one a player actually sees first: the title screen's wordmark
+  is painted into `axiomancer-mobile/assets/images/title-embark.jpg`
+  (1024x1024 key art, wordmark near the top edge), and
+  `components/TitleScreen.tsx` renders that image with `contentFit="contain"`
+  specifically so the painted "A" and "R" are not cropped. There is no text
+  node to rename. Net effect today: the browser tab and store listing say
+  "Miserere Mei, Deus" while the first screen says "AxiomanceR".
+- next: new key art carrying the new wordmark, through the art pipeline
+  (build-plan Phases 71 / 73). A text-overlay stopgap is NOT the fix — it
+  would double the wordmark against the painted one. Until then this is a
+  known, deliberate inconsistency, not drift.
+
 ## Done
 
 ### [x] [3.2] `CardSpecialMechanic` deprecated-name not exported — stale/resolved

@@ -2120,7 +2120,7 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       root `npm test` and the check-lexicon workflow. `skills/digest.md`
       §3b left alone AND unflagged — `9caf2a26` had already reconciled it
       to past tense, so the assertion-scoped row reads it clean.
-- [ ] Phase 67 — Title migration: "Axiomancer" → "Miserere Mei, Deus".
+- [x] Phase 67 — Title migration: "Axiomancer" → "Miserere Mei, Deus".
       Executes the rename ruled `plan/AUDIT.md`'s product-name row
       (`plan/naming-session-2026-08-12.md` §6). Scope: player/doc-facing
       title strings only — `axiomancer-mobile/app.json`'s `name`/`title`/
@@ -2137,7 +2137,19 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       the already-live "Miserere" in-fiction content in a way that reads
       as a duplicate (flagged in the AUDIT row and naming-session §6).
       (content/docs; queued 2026-08-20 via `/oversight` from the
-      product-name naming-session ruling) Brief: to generate.
+      product-name naming-session ruling) Brief:
+      `plan/phases/phase_67_title_migration.md`. SHIPPED 2026-08-27
+      (`fad33688`, issue #244): store/web metadata (rewritten, not
+      find-and-replaced — the old description was false about the product
+      regardless of its name), both CLI banners (two, not five — the other
+      minigame CLIs were retired since the row was written), the published
+      DevLog/Catalog/Tuning-Lab chrome (added to scope: the most
+      public-facing title surface in the repo), six doc surfaces, four code
+      comments, and hard rule 9. Collision check recorded in the commit and
+      the brief: no UI surface renders the product title beside the live
+      "Miserere" card. NOT shipped — the title-screen wordmark is painted
+      into `title-embark.jpg`, so the app screen still reads "AxiomanceR"
+      until new art lands; filed as an AUDIT row for the art pipeline.
 
 - [ ] Phase 68 — Keyword-drift hardening. Close the silent surfaces the
       2026-08-22 content-pipelines audit found so the now-open keyword
