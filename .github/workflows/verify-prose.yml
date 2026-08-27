@@ -1,0 +1,56 @@
+name: verify-prose
+
+# The house-voice gate (phase 70). THE PIPELINE LIBERATION authorized
+# autonomous narrative shipping; this is the guardrail that did not follow it.
+# Triggers on the authored content surfaces and on the rules themselves, so a
+# content edit in any workspace is checked without depending on that
+# workspace's own verify lane.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'axiomancer-mechanics/src/World/**'
+      - 'axiomancer-mechanics/src/Enemy/enemy.library.ts'
+      - 'axiomancer-mechanics/src/Cards/cards.library.ts'
+      - 'axiomancer-mechanics/docs/narrative/**'
+      - 'axiomancer-mobile/state/presenters/*.copy.ts'
+      - 'scripts/check-prose.mjs'
+      - 'scripts/check-prose.test.mjs'
+      - 'scripts/check-naming-law.mjs'
+      - '.github/workflows/verify-prose.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'axiomancer-mechanics/src/World/**'
+      - 'axiomancer-mechanics/src/Enemy/enemy.library.ts'
+      - 'axiomancer-mechanics/src/Cards/cards.library.ts'
+      - 'axiomancer-mechanics/docs/narrative/**'
+      - 'axiomancer-mobile/state/presenters/*.copy.ts'
+      - 'scripts/check-prose.mjs'
+      - 'scripts/check-prose.test.mjs'
+      - 'scripts/check-naming-law.mjs'
+      - '.github/workflows/verify-prose.yml'
+  schedule:
+    - cron: '53 7 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-prose-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  prose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: House-voice lint over shipped content
+        run: node scripts/check-prose.mjs
+      - name: Naming law over shipped names
+        run: node scripts/check-naming-law.mjs --sweep
+      - name: Lint unit tests
+        run: node --test scripts/check-prose.test.mjs

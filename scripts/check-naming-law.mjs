@@ -111,9 +111,90 @@ export function lintName(name, kind = 'other') {
   return [...checkCollision(name, kind), ...checkFormat(name), ...checkRegister(name)]
 }
 
+
+// ── Sweep mode (phase 70) ────────────────────────────────────────────────────
+//
+// The lint had a unit test but had never been run against a SHIPPED name: it
+// only ever graded names someone typed at it, which meant it could not catch
+// what the loop had already authored. `--sweep` walks the live libraries.
+//
+// It parses the `.ts` sources rather than importing them: root scripts stay
+// zero-dependency and TypeScript-free, and the generated catalog JSON is
+// gitignored, so CI would have to run `catalog:export` before it could be read.
+
+/** Where shipped names live, and what kind of name each file holds. */
+export const NAME_SOURCES = [
+  { file: 'axiomancer-mechanics/src/Cards/cards.library.ts', kind: 'card' },
+  { file: 'axiomancer-mechanics/src/Enemy/enemy.library.ts', kind: 'enemy' },
+]
+
+/**
+ * Names shipped BEFORE the rule that flags them, kept as a dated, reasoned
+ * list rather than renamed. Renaming authored, player-visible content to
+ * satisfy a later rule is an authorial call, not a lint's — so the gate
+ * protects every NEW name while these stay a decision someone makes on
+ * purpose. Each entry must name the finding it grandfathers.
+ */
+export const GRANDFATHERED_NAMES = new Map([
+  ['Blank Indenture', 'NL-8 vs the locked die-face word BLANK. Shipped before the '
+    + 'naming law existed; the rename is a content call, filed in plan/AUDIT.md '
+    + '(phase 70, 2026-08-27).'],
+])
+
+/**
+ * Every `name:` string in a source file, single- OR double-quoted.
+ *
+ * Both forms matter: the library switches to double quotes precisely for the
+ * names that carry an apostrophe ("The Sexton's Bell", "Pascal's Wager"), so a
+ * single-quote-only parser would skip 7 of the 57 card names — and possessive
+ * names are exactly the ones most likely to trip the format rules.
+ */
+export function namesIn(text) {
+  return [...text.matchAll(/^\s+name:\s*(?:'((?:[^'\\]|\\.)*)'|"((?:[^"\\]|\\.)*)")/gm)]
+    .map((m) => (m[1] ?? m[2]).replace(/\\(['"])/g, '$1'))
+}
+
+/** Sweep the shipped libraries. Returns `{ findings, checked, skipped }`. */
+export function sweep() {
+  const findings = []
+  const skipped = []
+  let checked = 0
+  for (const { file, kind } of NAME_SOURCES) {
+    const abs = path.resolve(ROOT, file)
+    const names = fs.existsSync(abs) ? namesIn(fs.readFileSync(abs, 'utf-8')) : []
+    if (names.length === 0) {
+      // A source that yields no names is a broken sweep, not a clean one.
+      findings.push(`${file}: no names found — the sweep cannot verify this surface`)
+      continue
+    }
+    for (const name of names) {
+      checked++
+      const hits = lintName(name, kind)
+      if (!hits.length) continue
+      if (GRANDFATHERED_NAMES.has(name)) { skipped.push(name); continue }
+      hits.forEach((h) => findings.push(`${file}: ${h}`))
+    }
+  }
+  return { findings, checked, skipped }
+}
+
 // ── CLI ──
 if (import.meta.url === `file://${process.argv[1]}`) {
   const args = process.argv.slice(2)
+
+  if (args.includes('--sweep')) {
+    const { findings, checked, skipped } = sweep()
+    if (findings.length) {
+      console.error(`check-naming-law: ${findings.length} finding(s) across ${checked} shipped name(s):`)
+      findings.forEach((f) => console.error(`  ${f}`))
+      console.error('\nRename the entity, or — only for a name that shipped before the rule —')
+      console.error('add it to GRANDFATHERED_NAMES with the finding it covers and why.')
+      process.exit(1)
+    }
+    const note = skipped.length ? ` (${skipped.length} grandfathered: ${skipped.join(', ')})` : ''
+    console.log(`check-naming-law: ${checked} shipped name(s) clean${note}.`)
+    process.exit(0)
+  }
 
   if (args.includes('--list')) {
     console.log(`NL-8 registry (${NL8_REGISTRY.length} words):`)

@@ -31,11 +31,20 @@ for content gaps and the working hand for narrative phases.
   renamed for player text (map them in mobile's keyword registry).
 - **Lexicon lint:** `node scripts/check-lexicon.mjs` (retired-term
   registry `axiomancer-mechanics/docs/lexicon.json`) runs on every
-  `.md` write via hook and in CI. It does NOT yet scan `.ts` prose —
-  self-check your `.ts` strings against the registry by hand.
+  `.md` write via hook and in CI.
+- **Prose lint (phase 70):** `npm run lint:prose` scans the STRING
+  LITERALS of every authored `.ts` content surface — retired terms plus
+  the house voice rules (faux-archaic, exclamation marks,
+  scriptural weather, prestige-dark filler). Your `.ts` strings are no
+  longer self-checked by hand; the `verify-prose` lane fails on them.
+  A legitimate exception takes a file-level `// prose-ok: <rule>` or
+  `// lexicon-ok: <id>` pragma, followed by ` — why`.
 - **Naming law:** before coining an NPC/place/keyword name, run
   `node scripts/check-naming-law.mjs --kind=<kind> "<name>"` against
-  `docs/retheme-map.json` (NL-4/5/8 collision rules).
+  `docs/retheme-map.json` (NL-4/5/8 collision rules). `npm run
+  lint:names` sweeps every shipped card and enemy name in CI, so a name
+  that lands in the library is graded whether or not you checked it
+  first.
 
 ## Where narrative content lives (the authoring surfaces)
 

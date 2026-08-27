@@ -64,7 +64,7 @@ const shrineKeeperTree: DialogueTree = {
         },
         veil_thin: {
             id: 'veil_thin',
-            text: "\"Yes! The boundary weakens where ancient powers once walked. Here, seeker, take this—a lens to see beyond the mere physical.\" The keeper offers a crystalline fragment that hums with inner light.",
+            text: "\"Yes. The boundary weakens where ancient powers once walked. Here, seeker, take this—a lens to see beyond the mere physical.\" The keeper offers a crystalline fragment that hums with inner light.",
             choices: [
                 {
                     text: "Accept the crystal gratefully.",
@@ -91,7 +91,7 @@ const shrineKeeperTree: DialogueTree = {
         },
         truth_seeker: {
             id: 'truth_seeker',
-            text: "\"Ah, a kindred spirit! The ancients left wisdom carved in symbol and stone. Study the northern glyphs—they speak of cycles within cycles, of balance made manifest.\"",
+            text: "\"A kindred spirit, then. The ancients left wisdom carved in symbol and stone. Study the northern glyphs—they speak of cycles within cycles, of balance made manifest.\"",
             choices: [
                 {
                     text: "Will you teach me to read them?",
@@ -185,7 +185,7 @@ const chroniclerTree: DialogueTree = {
         },
         share_observations: {
             id: 'share_observations',
-            text: "\"Excellent! Every observation matters. What you call 'strange' might be echoes of the old ways—patterns the ancients left as guideposts for future generations.\"",
+            text: "\"Every observation matters. What you call 'strange' might be echoes of the old ways—patterns the ancients left as guideposts for future generations.\"",
             choices: [
                 {
                     text: "Tell me more about these ancient patterns.",
@@ -232,7 +232,7 @@ const chroniclerTree: DialogueTree = {
         },
         documented_travels: {
             id: 'documented_travels',
-            text: "\"A scholar's approach! Your records could fill gaps in the Chronicle. The systematic documentation of experience serves both personal growth and collective wisdom.\"",
+            text: "\"A scholar's approach. Your records could fill gaps in the Chronicle. The systematic documentation of experience serves both personal growth and collective wisdom.\"",
         },
         scholar_observation: {
             id: 'scholar_observation',
@@ -255,7 +255,7 @@ const wanderingPhilosopherTree: DialogueTree = {
     nodes: {
         greet: {
             id: 'greet',
-            text: "A weathered figure in simple robes sits contemplating the forest canopy. \"Ah, a fellow traveler! I find the northern woods excellent for philosophical contemplation. What brings you to walk these thoughtful paths?\"",
+            text: "A weathered figure in simple robes sits contemplating the forest canopy. \"A fellow traveler. The northern woods suit thinking. What brings you to walk these thoughtful paths?\"",
             choices: [
                 {
                     text: "I'm seeking my place in the world.",
@@ -288,7 +288,7 @@ const wanderingPhilosopherTree: DialogueTree = {
         },
         seeking_place: {
             id: 'seeking_place',
-            text: "\"A noble quest! Tell me—do you believe our place is determined by fate, forged by will, or discovered through relationship with others?\"",
+            text: "\"A noble quest, then. Tell me—do you believe our place is determined by fate, forged by will, or discovered through relationship with others?\"",
             choices: [
                 {
                     text: "Fate guides us toward our destined role.",
@@ -337,7 +337,7 @@ const wanderingPhilosopherTree: DialogueTree = {
         },
         reflective_peace: {
             id: 'reflective_peace',
-            text: "\"Yes! The forest teaches patience—each tree growing in its season, each creature following ancient rhythms. In stillness, we hear what urgency drowns out.\"",
+            text: "\"Yes. The forest teaches patience—each tree growing in its season, each creature following ancient rhythms. In stillness, we hear what urgency drowns out.\"",
             choices: [
                 {
                     text: "What have the trees taught you?",
@@ -352,15 +352,15 @@ const wanderingPhilosopherTree: DialogueTree = {
         },
         fate_perspective: {
             id: 'fate_perspective',
-            text: "\"A transcendent view! Yet consider—if fate writes our story, do we bear responsibility for our choices? Perhaps fate provides the stage while we perform the play.\"",
+            text: "\"A transcendent view. Yet consider—if fate writes our story, do we bear responsibility for our choices? Perhaps fate provides the stage while we perform the play.\"",
         },
         will_perspective: {
             id: 'will_perspective',
-            text: "\"The voice of the self-determined! Yet pure individualism can become isolation. Even the strongest will benefits from wisdom gathered, from hands offered in aid.\"",
+            text: "\"The voice of the self-determined. Yet pure individualism can become isolation. Even the strongest will benefits from wisdom gathered, from hands offered in aid.\"",
         },
         community_perspective: {
             id: 'community_perspective',
-            text: "\"Beautifully spoken! We become ourselves through relationship—yet beware losing the self in the collective. True community honors both unity and individual authenticity.\"",
+            text: "\"Well spoken. We become ourselves through relationship—yet beware losing the self in the collective. True community honors both unity and individual authenticity.\"",
         },
         uncertain_seeker: {
             id: 'uncertain_seeker',
@@ -380,7 +380,7 @@ const wanderingPhilosopherTree: DialogueTree = {
         },
         philosophical_recognition: {
             id: 'philosophical_recognition',
-            text: "\"Remarkable—your philosophical stance has evolved since our last discourse. Growth of mind shows in posture and presence. You embody philosophy in motion!\"",
+            text: "\"Remarkable—your philosophical stance has evolved since our last discourse. Growth of mind shows in posture and presence. You embody philosophy in motion.\"",
         },
     },
 };
@@ -470,7 +470,7 @@ const forestRangerTree: DialogueTree = {
         },
         sustainable_alternatives: {
             id: 'sustainable_alternatives',
-            text: "\"Yes! There are other ways—mushroom cultivation, guided tours for scholars, carefully managed timber harvests. With your support, we can show the loggers a path that feeds families without destroying the forest's heart.\"",
+            text: "\"Yes. There are other ways—mushroom cultivation, guided tours for scholars, carefully managed timber harvests. With your support, we can show the loggers a path that feeds families without destroying the forest's heart.\"",
         },
         pragmatic_exploitation: {
             id: 'pragmatic_exploitation',

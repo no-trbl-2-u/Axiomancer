@@ -19,6 +19,14 @@ if git diff --cached --name-only --diff-filter=ACMR \
   node scripts/check-lexicon.mjs
 fi
 
+# The same argument for authored `.ts` prose (phase 70): the house-voice rules
+# are cheapest to apply while the writer is still holding the sentence.
+if git diff --cached --name-only --diff-filter=ACMR \
+  | grep -Eq '(^axiomancer-mechanics/src/(World|Enemy|Cards)/.*\.ts$|\.copy\.ts$|^scripts/check-prose\.mjs$)'; then
+  node scripts/check-prose.mjs
+  node scripts/check-naming-law.mjs --sweep
+fi
+
 # Cloudflare Pages serves whatever `main`'s tree contains. The DevLog's
 # generated HTML/data/art must never re-enter the index — check it whenever
 # a staged change touches devlog/ (phase 57).
