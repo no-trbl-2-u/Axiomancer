@@ -2098,7 +2098,7 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       second into knownCards, >= 3 a one-time +25 currency gift (flag-
       tracked). Deps: 62, 63. (mechanics + mobile)
       — `feat(world): village goodwill spends the counter — phase 65` (045e5241)
-- [ ] Phase 66 — Lexicon lint: catch retired-doctrine prose, not just
+- [x] Phase 66 — Lexicon lint: catch retired-doctrine prose, not just
       retired identifiers. Add a `type: "doctrine"` (or similar) row
       shape to `axiomancer-mechanics/docs/lexicon.json` for retired
       design-law phrases — starting with the STRIKE-IS-DEAD/status-primacy
@@ -2112,7 +2112,14 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       alone — it's still waiting on the CQI-band design ruling; the lint
       should flag it, not force its rewrite. (docs/tooling; promoted
       2026-08-20 via `/oversight` from `plan/PHASE_CANDIDATES.md` score
-      7.5) Brief: to generate.
+      7.5) Brief: `plan/phases/phase_66_lexicon_doctrine_lint.md`.
+      SHIPPED 2026-08-27 (`d3b46d59`, issue #243): `type: "doctrine"` row
+      shape + whole-file whitespace-normalized matching (catches a claim
+      wrapped across line breaks), three doctrine rows, five live surfaces
+      reconciled, two pragma-exempted, 11-case regression test wired into
+      root `npm test` and the check-lexicon workflow. `skills/digest.md`
+      §3b left alone AND unflagged — `9caf2a26` had already reconciled it
+      to past tense, so the assertion-scoped row reads it clean.
 - [ ] Phase 67 — Title migration: "Axiomancer" → "Miserere Mei, Deus".
       Executes the rename ruled `plan/AUDIT.md`'s product-name row
       (`plan/naming-session-2026-08-12.md` §6). Scope: player/doc-facing

@@ -849,7 +849,7 @@
   **Information, not work** — bearings' "the current card library is
   transitional" rule forbids tuning against it. Re-read after the redesign.
 
-### `/deck-tuning` and `/combat-playtest` still name `statusEngagement` as the objective function
+### `/combat-playtest` still names `statusEngagement` as the objective function — HALF-RESOLVED via Phase 66 (2026-08-27)
 - category: docs
 - impact: 6
 - ease: 9
@@ -857,6 +857,16 @@
   `.claude/commands/` were outside that phase's ownership. They should be
   repointed at `cqi` / spec 35, or the next tuning pass will optimise the
   dead law the phase exists to retire.
+- update 2026-08-27 (Phase 66): `.claude/commands/deck-tuning.md` was
+  already reconciled (its §North star reads "CQI (spec 35), not the
+  retired status-dominance law"). `.claude/commands/combat-playtest.md`
+  was not, and Phase 66's `status-primacy-doctrine` row flagged it: its
+  north-star section is now repointed at CQI and its "low status-effect
+  engagement is a balance failure" closing line replaced. What remains
+  open is the §Purpose comparison table's question cell ("Is status play
+  the FUN path at every stage?") and the skill's own one-line description
+  in the harness registry — same claim, but a rewrite there changes what
+  the skill IS FOR, which wants a design call rather than a lint fix.
 
 ### [x] [needs-user-call] The product name "Axiomancer" under the whole-product pivot — RESOLVED via /oversight 2026-08-20: renamed to "Miserere Mei, Deus"
 - category: content
@@ -2503,7 +2513,7 @@
   instances total (#83, #151, #155, #129, #156, #157, #158, #159, #160,
   #162, #163, #164, #165). No new root-cause signal.
 
-### `axiomancer-mechanics/CLAUDE.md` still asserts the retired STRIKE-IS-DEAD / status-primacy doctrine as current
+### [x] `axiomancer-mechanics/CLAUDE.md` still asserts the retired STRIKE-IS-DEAD / status-primacy doctrine as current — RESOLVED via Phase 66 (2026-08-27, `d3b46d59`)
 - category: docs
 - impact: 4
 - ease: 8
@@ -2523,8 +2533,14 @@
 - next: reword to match the reconciled `VISION.md` §Combat vision language
   (direct damage legal; Conviction/Surge/dice the three locked systems);
   same edit shape as the `9caf2a26` pass.
+- RESOLVED 2026-08-27 by Phase 66. The "Load-bearing doctrine (set 2026-06)"
+  section now reads "status effects remain a major authored tool — they are
+  no longer the governing combat objective" and judges changes by CQI
+  (spec 35). Guarded going forward by the new `status-primacy-doctrine`
+  row in `lexicon.json`, so a reversion goes red in CI rather than waiting
+  for the next audit to notice.
 
-### `axiomancer-mechanics/docs/profane-canon.md` still asserts "THE STRIKE stays DEAD" as current design law
+### [x] `axiomancer-mechanics/docs/profane-canon.md` still asserts "THE STRIKE stays DEAD" as current design law — STALE, drained via Phase 66 (2026-08-27)
 - category: docs
 - impact: 3
 - ease: 8
@@ -2539,6 +2555,13 @@
 - next: reword the paragraph to note the ban was retired same-day by the
   unshackling, or move it under a "design history — since superseded"
   heading rather than "Unchanged, by hard constraint."
+- DRAINED 2026-08-27 by Phase 66 (verified stale; no new code). §1 already
+  reads "Direct damage is LEGAL (THE UNSHACKLING, 2026-08-08 —
+  `cards.library.ts`'s header is authoritative): the CURRENT canon happens
+  to deal enemy HP only via DoT ticks... but that is a design choice of
+  this library, not a law." Phase 66's `strike-ban-doctrine` row scans the
+  file clean. The row was fixed by some pass between 2026-08-14 and today
+  without being ticked here.
 
 ## Done
 
