@@ -381,3 +381,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-27T19:17:17Z | skill | digest | unknown | main | - |
 | 2026-08-27T19:32:09Z | slash-prompt | /march | claude-opus-5 | user/ci | /march |
 | 2026-08-27T20:32:09Z | slash-prompt | /march | claude-opus-5 | user/ci | /march |
+| 2026-08-27T21:32:08Z | slash-prompt | /march | claude-opus-5 | user/ci | /march |
