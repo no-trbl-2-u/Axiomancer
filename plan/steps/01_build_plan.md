@@ -2316,13 +2316,21 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       (`phase_74_north_star_into_spec.md`), and filed the AUDIT row +
       `ship-a-phase` claim-check fix (`4daf100e`) this tick rebased onto
       cleanly.
-- [ ] Phase 75 — N-3: the re-voice pass. One phase sweeps all shipped
+- [x] Phase 75 — N-3: the re-voice pass. One phase sweeps all shipped
       player-facing prose into the ratified register (R-E: names stay,
       sentences shorten and harden, one voice). Runs AFTER Phase 67
       (title migration) and after the Phase 70 prose lint exists, so
       the sweep has a machine check behind it and does not re-touch
       strings the title migration is about to change. (content;
-      queued 2026-08-22 per the ratification) Brief: to generate.
+      queued 2026-08-22 per the ratification) Brief:
+      `plan/phases/phase_75_revoice_pass.md`. SHIPPED 2026-08-27
+      (`33df8c91`, issue #253): MB-1's lintable half wired into
+      `check-prose.mjs` (20-word ceiling + no semicolons), made FIELD-AWARE so
+      it reaches narration and never rules text, and 105 findings swept to
+      zero across 9 files (46 long sentences, 59 semicolons). MB-2…MB-7 stay
+      judgement rules — applied to the 105 lines this pass rewrote, explicitly
+      NOT claimed as swept over prose it did not touch. Follow-up open: a
+      judgement pass over the rest.
 
 > **Note (issue-triage 2026-07-19):** issue #132 asked for a
 > `devlog-build` GitHub Action; re-triage found it re-classified as
