@@ -2582,6 +2582,27 @@
   would double the wordmark against the painted one. Until then this is a
   known, deliberate inconsistency, not drift.
 
+### [x] [tooling] Four keyword surfaces drift with no failing test — RESOLVED via Phase 68 (2026-08-27, `25e3e3cb`)
+- category: tooling
+- impact: 6
+- ease: 4
+- detail: filed by the 2026-08-22 content-pipelines audit (§2, "silently-drifting
+  surfaces"). THE PIPELINE LIBERATION opened the keyword registry to loop growth
+  while the wiring around it stayed ungated: a new keyword or mechanic kind
+  type-checked clean, printed nothing, and drifted four surfaces apart.
+- RESOLVED 2026-08-27 by Phase 68. `CARD_SPECIAL_MECHANIC_KINDS` binds a runtime
+  enumeration to the `CardSpecialMechanic` union in both directions (compile
+  error either way); mobile KW-2 walks it and forces every new kind to be
+  classified; `scripts/content-drift.test.mjs` asserts glyph-table equality,
+  editor-vocabulary liveness, and atlas-vs-registry parity, on its own
+  `verify-drift.yml` lane triggered by every path it reads.
+- residue, deliberately out of scope (both named in the brief's Follow-ups):
+  the two `default:`-armed switches (`combat.engine.ts` mech switch,
+  `combat.cards.ts` mechanicText) still let a new kind no-op silently — closing
+  that means `assertNever`, a behavioural change; and card-expert's 8-step
+  keyword checklist still omits the mobile registry, `CARD_EFFECT_SET`, the
+  atlas, `retheme-map.json`, and `MECH_HEADLINE_PRIORITY`.
+
 ## Done
 
 ### [x] [3.2] `CardSpecialMechanic` deprecated-name not exported — stale/resolved

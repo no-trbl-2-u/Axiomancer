@@ -2151,7 +2151,7 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       into `title-embark.jpg`, so the app screen still reads "AxiomanceR"
       until new art lands; filed as an AUDIT row for the art pipeline.
 
-- [ ] Phase 68 — Keyword-drift hardening. Close the silent surfaces the
+- [x] Phase 68 — Keyword-drift hardening. Close the silent surfaces the
       2026-08-22 content-pipelines audit found so the now-open keyword
       registry (THE PIPELINE LIBERATION) grows safely: derive mobile
       KW-2's mechanic-kind check from `CardSpecialMechanic['kind']`
@@ -2164,7 +2164,18 @@ implication. Combat and Hazard-Pattern Combat are untouched.
       `docs/keyword-atlas.md` (or add an atlas-vs-registry parity
       check) and drop the server's hardcoded "/30" denominators.
       (tests/contract; queued 2026-08-22 per THE PIPELINE LIBERATION)
-      Brief: to generate.
+      Brief: `plan/phases/phase_68_keyword_drift_hardening.md`. SHIPPED
+      2026-08-27 (`25e3e3cb`, issue #245). All four workstreams landed.
+      What the work found beyond the row's own description: KW-2 was
+      checking 17 kinds while the mapping already held 22; the editor
+      carried five dead spec-32-v2 words (COMPOUND / EXECUTE / SLOW /
+      CONFUSION / SILENCE) plus unreachable render arms for them; and the
+      `axio_keywords` atlas parser was reading only two of the atlas's four
+      sections, under-reporting 34 rows as 29. Correction to the row's
+      premise: the three glyph tables are not three copies of one table — mobile and
+      build-catalog are identical copies (asserted equal now), while the
+      editor's `KwGlyph` is an independently-drawn switch, so it is gated on
+      "names something the project has" instead of path equality.
 - [ ] Phase 69 — Card-editor round-trip fidelity. `CardDraft`
       (`axiomancer-card-editor/src/types.ts`) omits `theme`,
       `paidSummary`, `persistentEffect`, `intentionallyAsymmetric`,
