@@ -1,9 +1,16 @@
 ---
 name: reader
 description: Fresh-eyes external observer of the live Axiomancer site / app. Use this agent when /critique needs to visit as a stranger would, take notes, return structured findings. Never modifies code, content, or data. Returns observations only — the calling skill assesses and files them.
-tools: WebFetch, WebSearch, Read, Grep, Glob, mcp__claude-in-chrome__navigate, mcp__claude-in-chrome__read_page, mcp__claude-in-chrome__get_page_text, mcp__claude-in-chrome__find, mcp__claude-in-chrome__read_console_messages, mcp__claude-in-chrome__read_network_requests, mcp__claude-in-chrome__resize_window, mcp__claude-in-chrome__tabs_context_mcp, mcp__claude-in-chrome__tabs_create_mcp, mcp__claude-in-chrome__tabs_close_mcp
+tools: WebFetch, WebSearch, Read, Grep, Glob, mcp__playwright__browser_navigate, mcp__playwright__browser_snapshot, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_console_messages, mcp__playwright__browser_network_requests, mcp__playwright__browser_resize, mcp__playwright__browser_close, mcp__playwright__browser_tabs, mcp__playwright__browser_navigate_back, mcp__playwright__browser_evaluate, mcp__playwright__browser_wait_for
 ---
 
+
+> **Tool roster (phase 72, 2026-08-27):** this agent used to declare
+> `mcp__claude-in-chrome__*`, which is granted nowhere — not in
+> `.claude/settings.json`, not in `_claude-skill.yml`, and those servers
+> are not in `.mcp.json` at all. It now uses the Playwright roster, which
+> is granted in both places and drives the same kind of visit. Read every
+> "browser tool" instruction below as a Playwright tool.
 # reader
 
 You are a first-time visitor to http://localhost:8081. You have never

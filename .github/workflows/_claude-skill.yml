@@ -100,6 +100,18 @@ jobs:
       - name: Self-test nexus enforcement layer (guard hooks + deny walls)
         run: node .claude/hooks/guard.mjs self-test
 
+      # MCP grants in CI (phase 72, 2026-08-27):
+      #
+      #   axio-query  — GRANTED below. Its server is `scripts/axio-mcp-server.mjs`,
+      #                 in the repo, so it starts wherever the checkout does. Without
+      #                 it, card-expert's engine-truth grounding degrades to file
+      #                 reads on every unattended run (content-pipelines audit §6.4).
+      #   kb-query    — deliberately NOT granted. Its server is
+      #                 `kb/scripts/kb-mcp-server.mjs`, and `kb/` is gitignored: the
+      #                 corpus is synced, not committed, so that file does not exist
+      #                 in a CI checkout. Granting it would advertise a tool that
+      #                 cannot start. Revisit only alongside a kb-sync step here —
+      #                 that is a per-run download cost, a separate decision.
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@v1
@@ -111,7 +123,7 @@ jobs:
           claude_args: |
             --model ${{ inputs.model }}
             ${{ inputs.effort != '' && format('--effort {0}', inputs.effort) || '' }}
-            --allowedTools "Bash,Edit,Write,Read,Glob,Grep,Task,TodoWrite,WebFetch,WebSearch${{ inputs.install_playwright && ',mcp__playwright__browser_navigate,mcp__playwright__browser_click,mcp__playwright__browser_snapshot,mcp__playwright__browser_take_screenshot,mcp__playwright__browser_console_messages,mcp__playwright__browser_close,mcp__playwright__browser_resize,mcp__playwright__browser_press_key,mcp__playwright__browser_hover,mcp__playwright__browser_evaluate,mcp__playwright__browser_wait_for,mcp__playwright__browser_tabs,mcp__playwright__browser_network_requests,mcp__playwright__browser_navigate_back' || '' }}"
+            --allowedTools "Bash,Edit,Write,Read,Glob,Grep,Task,TodoWrite,WebFetch,WebSearch,mcp__axio-query__axio_overview,mcp__axio-query__axio_cards,mcp__axio-query__axio_effects,mcp__axio-query__axio_keywords${{ inputs.install_playwright && ',mcp__playwright__browser_navigate,mcp__playwright__browser_click,mcp__playwright__browser_snapshot,mcp__playwright__browser_take_screenshot,mcp__playwright__browser_console_messages,mcp__playwright__browser_close,mcp__playwright__browser_resize,mcp__playwright__browser_press_key,mcp__playwright__browser_hover,mcp__playwright__browser_evaluate,mcp__playwright__browser_wait_for,mcp__playwright__browser_tabs,mcp__playwright__browser_network_requests,mcp__playwright__browser_navigate_back' || '' }}"
             ${{ inputs.extra_claude_args }}
 
       - name: Fail if Claude reported an execution error

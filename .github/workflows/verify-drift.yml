@@ -18,6 +18,10 @@ on:
       - 'scripts/build-catalog.mjs'
       - 'scripts/content-drift.mjs'
       - 'scripts/content-drift.test.mjs'
+      - '.claude/settings.json'
+      - '.claude/agents/**'
+      - '.mcp.json'
+      - 'scripts/check-harness-grants.mjs'
       - '.github/workflows/verify-drift.yml'
   pull_request:
     branches: [main]
@@ -30,6 +34,10 @@ on:
       - 'scripts/build-catalog.mjs'
       - 'scripts/content-drift.mjs'
       - 'scripts/content-drift.test.mjs'
+      - '.claude/settings.json'
+      - '.claude/agents/**'
+      - '.mcp.json'
+      - 'scripts/check-harness-grants.mjs'
       - '.github/workflows/verify-drift.yml'
   schedule:
     - cron: '41 7 * * 0'
@@ -50,3 +58,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: Content-drift gate
         run: node --test scripts/content-drift.test.mjs
+      - name: Harness grant consistency
+        run: node scripts/check-harness-grants.mjs

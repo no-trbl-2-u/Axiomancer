@@ -30,7 +30,8 @@
     "critique:drive": "npm --workspace axiomancer-mobile run critique:drive",
     "lint:prose": "node scripts/check-prose.mjs",
     "lint:names": "node scripts/check-naming-law.mjs --sweep",
-    "lint:content": "npm run lint:prose && npm run lint:names"
+    "lint:content": "npm run lint:prose && npm run lint:names",
+    "lint:grants": "node scripts/check-harness-grants.mjs"
   },
   "overrides": {
     "react": "19.1.0",
