@@ -292,6 +292,23 @@
 
 ## Pending
 
+### [LOW] dialogue — reply cards echo their label as an identical sub-line
+- pass: session-playtest 2026-08-28 (continent playtest, The Delver at
+  caverns nc-2)
+- viewport: 390x844
+- auth_state: anonymous
+- category: visual
+- observation: each reply card renders its label in display type AND
+  the same text again beneath it in caption type ("WHAT DO YOU WANT
+  WITH THE IRON?" twice, "WALK ON." twice). Reads as a data echo, not
+  a design choice; wastes a line per reply on small screens.
+- suggested fix: in the dialogue screen/presenter, render the caption
+  sub-line only when it differs from the label (or drop it — the
+  authored tree likely supplies no distinct sub-caption and the
+  presenter falls back to the label). Check whether every dialogue
+  tree shows this or only trees authored without reply descriptions.
+- source: loop
+
 ### [MED] combat — first-run coach overlay still preaches the retired status-dominance doctrine
 - pass: session-jot 2026-08-28 (THE OPEN GATE session; spotted on the
   refreshed `combat-encounter` smoke baseline)
