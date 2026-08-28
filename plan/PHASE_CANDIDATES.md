@@ -238,6 +238,24 @@
   a sequence of one-way acts or a place you can move around in. The gauntlet
   traversal law implies the former; the `completedMaps` field implies someone
   once meant the latter.
+### Promote the continent-playtest rig into a committed script
+- source: THE OPEN GATE session 2026-08-28 — the live playtest that proved
+  Phases W1/W2 (and caught the missing travel checkpoint) ran as an ad-hoc
+  Playwright script; its final form is archived in the session scratchpad
+  only. The technique matters more than the file: drive the real exported
+  web build, use the save-nudge (stand adjacent to a door, open it) to skip
+  grind, tap organically, assert map/continent/save state between stages.
+- what: a committed `axiomancer-mobile/scripts/continent-e2e.mjs` in the
+  house e2e style (REUSE_EXPORT env, exit codes, pageerror-strict per
+  PR #216) that walks fv-10 → northern-forest → nf-10 → caverns and asserts
+  the checkpoint save at each crossing. Wire into `e2e:minigames` or its own
+  CI slot so every future door/map ships against a live-browser witness,
+  not only store-level jest.
+- why now: every W3–W5 phase adds doors; the class of bug this rig catches
+  (UI-layer persistence, overlay traps, presenter adjacency) is invisible
+  to the engine suites by design.
+- score: 4.0 (cheap — the script exists; the work is house-style adaptation)
+
 ### Author the Parish's coastal settlements if Phase 44f's brief reads thin
 - source: filed 2026-08-08 by Phase 42 (`46b5a5d`), spec 34 §10.
 - what: spec 34 §1 establishes THE PARISH and its seven estates, but the
