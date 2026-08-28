@@ -2382,13 +2382,21 @@ on pickup):**
       landed (anvil/THE ANVIL, huts/SETTLEMENT, tombstone/REMAINS).
       REMAINING: shared ✠-eyebrow header component, panel-furniture
       (TornPanel/rivets/seals) consistency pass.
-- [ ] Phase V4 — Background acquisition pipeline: scout public-domain
+- [x] Phase V4 — Background acquisition pipeline: scout public-domain
       woodcut/engraving + CC0 texture sources; provenance.json + webp
       budget per the labyrinth/cards convention; deliver per-region map
       backdrops, encounter-screen backgrounds, title candidates (assets)
       HEAD START via PR #179: the acquisition pattern is proven
       end-to-end (Wikimedia Commons → Pillow post-process → webp +
       provenance.json) with one plate delivered (forest-dark).
+      SHIPPED 2026-08-28 (`4e93450d`, issue #254): `acquire-art.mjs` reads the
+      licence from the Commons API and REFUSES anything not PD/CC0 — the
+      operator never asserts terms. Four Doré plates delivered for the regions
+      that had none (charon-crossing / the-pit / ludgate-hill /
+      wentworth-street), 26MB of source to 524KB, and `maps/` is now the one
+      category with no UNRESOLVED licence. Title candidates were NOT delivered:
+      the title art is a wordmark problem (the Phase 67 AUDIT row), not a
+      backdrop one, and picking a title plate is an owner call.
 - [ ] Phase V5 — Backgrounds wired: `ScreenBg` keyed art slot with
       dim/vignette; encounter screens + map regions consume V4 art;
       combat arena variety; procedural fallback stays (mobile; after V2+V4)
