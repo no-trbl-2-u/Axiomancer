@@ -122,6 +122,21 @@ describe('the screen art resolver', () => {
         }
     });
 
+    it('carries every wired screen (V5 initial trio + the UI-cleanup batch)', () => {
+        // Pins the key union: removing a key silently un-arts a screen.
+        expect([...SCREEN_ART_KEYS].sort()).toEqual([
+            'blacksmith',
+            'cache',
+            'combat',
+            'cutscene',
+            'dialogue',
+            'event',
+            'labyrinth',
+            'rest',
+            'village',
+        ]);
+    });
+
     it('an absent key is null, not a throw', () => {
         expect(screenBackdropFor(undefined)).toBeNull();
         expect(screenBackdropFor(null)).toBeNull();

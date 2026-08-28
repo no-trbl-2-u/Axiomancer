@@ -18,7 +18,13 @@
 export type ScreenArtKey =
     | 'event'
     | 'labyrinth'
-    | 'combat';
+    | 'combat'
+    | 'village'
+    | 'rest'
+    | 'cache'
+    | 'blacksmith'
+    | 'dialogue'
+    | 'cutscene';
 
 const PLATES: Record<ScreenArtKey, number> = {
     // Map events happen on the road between places: the crossing plate.
@@ -28,6 +34,18 @@ const PLATES: Record<ScreenArtKey, number> = {
     // The one arena we have. Combat variety is a coverage problem, not a
     // wiring one — see the phase V5 brief's follow-ups.
     combat: require('../combat/arena-ruined-city.jpg'),
+    // A settlement is a street: Doré's Wentworth Street crowd.
+    village: require('../maps/wentworth-street.webp'),
+    // Rest happens off the road, under the trees.
+    rest: require('../maps/forest-dark.webp'),
+    // A cache is stumbled on in the built-up dark: Ludgate Hill.
+    cache: require('../maps/ludgate-hill.webp'),
+    // The Anvil shares the same worked-stone street as the cache — plates
+    // are reused, never re-acquired (see the header note).
+    blacksmith: require('../maps/ludgate-hill.webp'),
+    // Dialogue and cutscenes are meetings on the road, like map events.
+    dialogue: require('../maps/charon-crossing.webp'),
+    cutscene: require('../maps/charon-crossing.webp'),
 };
 
 /**

@@ -26,7 +26,7 @@ import {
     type BlacksmithOfferVM,
     type BlacksmithSwapVM,
 } from '@/state/presenters/blacksmith.engine';
-import { FONTS } from '@/theme/axm';
+import { FONTS, TYPE } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
 function hapticImpact(style: ImpactFeedbackStyle): void {
@@ -128,10 +128,20 @@ export default function BlacksmithScreen() {
         if (!vm.active && router.canGoBack()) router.back();
     }, [vm.active, router]);
 
-    if (!vm.active) return <ScreenBg><View /></ScreenBg>;
+    // Inactive shell — visible for a frame while the router unwinds; never a
+    // blank screen (UI-cleanup pass, CRITIQUE).
+    if (!vm.active) {
+        return (
+            <ScreenBg scrollable={false} art="blacksmith">
+                <View style={styles.inactiveWrap} testID="blacksmith-inactive">
+                    <Text style={styles.inactiveText}>The forge is cold. Nothing keeps you here.</Text>
+                </View>
+            </ScreenBg>
+        );
+    }
 
     return (
-        <ScreenBg scrollable={false}>
+        <ScreenBg scrollable={false} art="blacksmith">
             <ScrollView style={styles.scrollOuter} contentContainerStyle={styles.scroll}>
                 <View style={styles.eyebrowRow}>
                     <AxmIcon name="action-anvil" size={18} />
@@ -389,4 +399,6 @@ const useStyles = makeStyles((AXM) => ({
     bigButtonText: { fontFamily: FONTS.gothic, fontSize: 18, letterSpacing: 2, color: AXM.sulfur },
     abandon: { alignSelf: 'center', marginTop: 18, padding: 6 },
     abandonText: { fontFamily: FONTS.mono, fontSize: 12, letterSpacing: 2, color: AXM.bone },
+    inactiveWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+    inactiveText: { ...TYPE.body, color: AXM.parchment, opacity: 0.55, textAlign: 'center' },
 }));

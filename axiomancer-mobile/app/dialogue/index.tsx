@@ -21,7 +21,7 @@ import {
     selectHasActiveEvent,
     type EventChoice,
 } from '@/state/presenters/event.engine';
-import { FONTS } from '@/theme/axm';
+import { FONTS, TYPE } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
 
 /** How long the dialogue-confirmation ✓ stays visible (ported from
@@ -152,10 +152,20 @@ export default function DialogueScreen() {
         if (!hasEvent && router.canGoBack()) router.back();
     }, [hasEvent, router]);
 
-    if (!hasEvent) return <ScreenBg><View /></ScreenBg>;
+    // Inactive shell — visible for a frame while the router unwinds; never a
+    // blank screen (UI-cleanup pass, CRITIQUE).
+    if (!hasEvent) {
+        return (
+            <ScreenBg scrollable={false} art="dialogue">
+                <View style={styles.inactiveWrap} testID="dialogue-inactive">
+                    <Text style={styles.inactiveText}>No one is waiting. The parley is done.</Text>
+                </View>
+            </ScreenBg>
+        );
+    }
 
     return (
-        <ScreenBg scrollable={false}>
+        <ScreenBg scrollable={false} art="dialogue">
             <ScrollView style={styles.scrollOuter} contentContainerStyle={styles.scroll}>
                 <Text style={styles.eyebrow}>◉ PARLEY</Text>
                 <View style={styles.nameplate} testID="dialogue-nameplate">
@@ -269,4 +279,6 @@ const useStyles = makeStyles((AXM) => ({
         paddingHorizontal: 4,
         paddingVertical: 1,
     },
+    inactiveWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+    inactiveText: { ...TYPE.body, color: AXM.parchment, opacity: 0.55, textAlign: 'center' },
 }));

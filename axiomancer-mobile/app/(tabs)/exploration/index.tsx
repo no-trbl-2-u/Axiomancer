@@ -258,8 +258,9 @@ export default function ExplorationScreen() {
             </View>
 
             {/* Node Graph */}
-            <MapCanvas nodes={vm.nodes} edges={vm.edges} backdrop={mapBackdropFor(vm.region)}>
-                <MapOverlays legend={vm.legend} />
+            {/* Legend/compass copy ride the `overlays` slot (viewport-fixed),
+                not `children` (the pannable canvas) — CRITIQUE pass 20. */}
+            <MapCanvas nodes={vm.nodes} edges={vm.edges} backdrop={mapBackdropFor(vm.region)} overlays={<MapOverlays legend={vm.legend} />}>
                 <NodeGrid
                     nodes={vm.nodes}
                     onNodePress={onNodePress}

@@ -1825,7 +1825,16 @@ const useStyles = makeStyles((AXM) => ({
     // ── Spec 33 §3 — momentum-V2 chain chip ──
     chainNode: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
     chainNext: { fontFamily: FONTS.sans, fontSize: 13, marginLeft: 4 },
-    chainEmpty: { fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 0.5 },
+    // CRITIQUE pass 21 — bare "○ no momentum" text vanished against the arena
+    // floor art (fully invisible on desktop). Give the empty state the same
+    // contrast-guaranteeing container the filled chain nodes get: dark alpha
+    // fill + ash border. `overflow: 'hidden'` keeps the radius on Android
+    // (the guardChip treatment).
+    chainEmpty: {
+        fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 0.5,
+        backgroundColor: 'rgba(0,0,0,0.55)', borderWidth: 1, borderColor: AXM.ash,
+        borderRadius: 5, paddingHorizontal: 7, paddingVertical: 2, overflow: 'hidden',
+    },
     chainBroke: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.4, textShadowRadius: 6, textShadowOffset: { width: 0, height: 0 } },
     // ── Spec 33 §2 — player current-stance chip ──
     stanceChip: {

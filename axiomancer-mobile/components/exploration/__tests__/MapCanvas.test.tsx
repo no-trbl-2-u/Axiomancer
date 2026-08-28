@@ -168,6 +168,29 @@ describe('MapCanvas', () => {
         expect(expectedCanvasH).toBe(1040);
     });
 
+    it('mounts overlays in the viewport-fixed furniture layer (CRITIQUE pass 20)', () => {
+        const { getByTestId } = render(
+            <MapCanvas nodes={mockNodes} edges={mockEdges} overlays={<MockChildren />}>
+                <MockChildren />
+            </MapCanvas>
+        );
+
+        // The fixed layer exists and never swallows pan gestures.
+        const fixed = getByTestId('map-overlays-fixed');
+        expect(fixed).toBeDefined();
+        expect(fixed.props.pointerEvents).toBe('none');
+    });
+
+    it('omits the fixed overlay layer when no overlays are passed', () => {
+        const { queryByTestId } = render(
+            <MapCanvas nodes={mockNodes} edges={mockEdges}>
+                <MockChildren />
+            </MapCanvas>
+        );
+
+        expect(queryByTestId('map-overlays-fixed')).toBeNull();
+    });
+
     it('handles nodes with mixed availability states', () => {
         const mixedNodes: ExplorationNode[] = [
             {

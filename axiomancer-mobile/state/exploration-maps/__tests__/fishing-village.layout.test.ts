@@ -27,7 +27,10 @@ describe('fishingVillageLayout: structure validation', () => {
         expect(fishingVillageLayout.mapId).toBe('fishing-village');
         expect(fishingVillageLayout.continent).toBe('CONTINENT · COASTAL');
         expect(fishingVillageLayout.region).toBe('the Drowned Parish');
-        expect(fishingVillageLayout.regionProgress).toBe('Map i of ii · 24 paths open');
+        // Ordinal only — the live node count is the legend's job (CRITIQUE
+        // pass 19: a static count here disagreed with the computed legend).
+        expect(fishingVillageLayout.regionProgress).toBe('Map i of ii');
+        expect(fishingVillageLayout.regionProgress).not.toMatch(/\d+ (paths|nodes)/);
     });
 
     it('all nodes have required presentation properties on-canvas', () => {

@@ -4,7 +4,10 @@ export const fishingVillageLayout: MapLayout = {
     mapId: 'fishing-village',
     continent: 'CONTINENT · COASTAL',
     region: 'the Drowned Parish',
-    regionProgress: 'Map i of ii · 24 paths open',
+    // Ordinal only — no node/path count. The live count belongs to the map
+    // legend, computed from MapDefinition (CRITIQUE pass 19: a static count
+    // here disagreed with the legend's "N nodes · M sealed" on screen).
+    regionProgress: 'Map i of ii',
     nodes: [
         // Spine nodes (fv-1..fv-10) — visual positions only; the node graph
         // (ids + edges) is the engine's MapDefinition. See ./types.ts.
