@@ -87,4 +87,18 @@ describe('inter-map travel doors (Phase W1)', () => {
         expect(after.notifications?.toast?.text).toBe('You cross into The Caverns.');
         expect(selectPacedEventRoute(after)).toBeNull();
     });
+
+    it('nc-26 climbs out of the caverns into the northern city (Phase W3)', () => {
+        const { store, actions } = makeStoreAndActions();
+        seatAt(store, 'northern-continent', 'caverns', 'nc-26');
+
+        expect(actions.resolveCurrentMapEvent('travel')).toBe(true);
+
+        const after = store.getState();
+        expect(after.world.currentMap.name).toBe('northern-city');
+        expect(after.world.currentContinent.name).toBe('northern-continent');
+        expect(after.world.currentMap.currentNode).toBe('ncy-1');
+        expect(after.notifications?.toast?.text).toBe('You cross into The Northern City.');
+        expect(selectPacedEventRoute(after)).toBeNull();
+    });
 });

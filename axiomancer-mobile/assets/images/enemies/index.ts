@@ -1,10 +1,12 @@
 /**
- * Enemy art registry — 1:1 per-enemy paintings (2026-07-06 roster).
+ * Enemy art registry — 1:1 per-enemy portraits.
  *
- * 52 alpha-matted paintings (black backgrounds keyed out so figures float over
- * the arena backdrop), one per enemy in the engine's art-driven roster. The
- * registry key is the enemy's `portraitAsset` (kebab-case, Spec 26 §3.1) —
- * slug→asset routing stays mobile-local per Spec 08 Q3 = B.
+ * 52 alpha-matted paintings (2026-07-06 roster: black backgrounds keyed out
+ * so figures float over the arena backdrop) plus, from Phase W3 (2026-08-28),
+ * licensed game-icons.net silhouettes for the northern-continent batch —
+ * one asset per enemy either way (the 1:1 art law). The registry key is the
+ * enemy's `portraitAsset` (kebab-case, Spec 26 §3.1) — slug→asset routing
+ * stays mobile-local per Spec 08 Q3 = B.
  *
  * `getEncounterEnemyArt(artKey, nonce)` resolves the key directly; unknown /
  * missing keys fall back to a stable hash pick over the whole pool (so an
@@ -69,6 +71,18 @@ const ENEMY_ART_BY_KEY: Record<string, number> = {
     'beelzebub':         require('./beelzebub.webp'),
     'death':             require('./death-f.webp'),
     'the-abortive':      require('./abortive.webp'),
+    // Northern continent — Phase W3 batch (2026-08-28). Licensed
+    // game-icons.net silhouettes (CC BY 3.0 — lorc / delapouite), white
+    // glyph on transparent, rasterized 512px WebP; see provenance.json.
+    'seam-tick':         require('./seam-tick.webp'),
+    'prop-wight':        require('./prop-wight.webp'),
+    'unpaid-delver':     require('./unpaid-delver.webp'),
+    'sump-maren':        require('./sump-maren.webp'),
+    'toll-sergeant':     require('./toll-sergeant.webp'),
+    'guild-knife':       require('./guild-knife.webp'),
+    'the-factor':        require('./the-factor.webp'),
+    'wharf-shrike':      require('./wharf-shrike.webp'),
+    'the-harbormaster':  require('./the-harbormaster.webp'),
 };
 
 const ENEMY_ART_POOL: number[] = Object.values(ENEMY_ART_BY_KEY);
