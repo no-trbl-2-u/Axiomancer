@@ -1065,12 +1065,14 @@ const FISHING_VILLAGE_NEW_PLAYER_POOLS: ReadonlyArray<{ nodeId: string; pool: Ma
 
 // ─── The caverns (northern continent, 2026-08-28 inter-map travel) ───────────
 //
-// First map past the nf-10 door. Kind spread, over 25 nodes: 8 encounter
-// (7 wandering + the nc-25 Under-Gate boss), 3 gathering (the iron the map
-// exists for — `gather-iron` collects it), 3 rest (all CAMPS: nothing down
-// here is tended), 3 hazard, 3 loot-cache, 3 cutscene (arrival, the old
-// delve, the sealed stair), 1 interaction (the Delver, quest-giver), and
-// 1 village (the Ledger Camp, the continent's first shop). Wandering
+// First map past the nf-10 door. Kind spread, over 26 nodes (25 + the
+// Phase W3 door): 8 encounter (7 wandering + the nc-25 Under-Gate boss),
+// 3 gathering (the iron the map exists for — `gather-iron` collects it),
+// 3 rest (all CAMPS: nothing down here is tended), 3 hazard, 3 loot-cache,
+// 3 cutscene (arrival, the old delve, the sealed stair), 1 interaction
+// (the Delver, quest-giver), 1 village (the Ledger Camp, the continent's
+// first shop), and — Phase W3 — 1 travel (nc-26, the door up to the
+// city, one column past the boss). Wandering
 // encounters carry no pinned slug — `generateEncounter` draws from
 // `EnemiesByMap['caverns']` (the harder forest-tier mix) and scales to the
 // player via the adaptive bands; only the boss is pinned, and to a low
@@ -1237,6 +1239,25 @@ const ncUnderGateBoss: MapEventPool = {
     }],
 };
 
+// Phase W3 — the Under-Gate stands open. The DOOR to northern-city, one
+// column past the boss (the fv-10 pattern: the exit opens only after the
+// climax). The sealed stair at nc-16 stays sealed — its own prose said the
+// way through was "the gate below", and this is the gate below.
+const ncGateStandsOpen: MapEventPool = {
+    id: 'nc-26.travel',
+    entries: [{
+        kind: 'travel', weight: 1,
+        payload: {
+            kind: 'travel',
+            destinationContinent: 'northern-continent',
+            destinationMap: 'northern-city',
+            description: 'Past the gate, a stair climbs toward lamplight and the sound of a city. You climb.',
+        },
+        // Out of the dark, upward: the outlook lifts, the world gets bigger.
+        alignmentDelta: { outlook: 1, scope: 1 },
+    }],
+};
+
 const CAVERNS_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> = [
     { nodeId: 'nc-1',  pool: ncArrival },
     { nodeId: 'nc-2',  pool: ncDelver },
@@ -1263,6 +1284,321 @@ const CAVERNS_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> = [
     { nodeId: 'nc-23', pool: ncLootPool('nc-23', 10, 'Coin scattered where a purse hit rock. Nobody came back down for it.') },
     { nodeId: 'nc-24', pool: ncOldDelve },
     { nodeId: 'nc-25', pool: ncUnderGateBoss },
+    { nodeId: 'nc-26', pool: ncGateStandsOpen },
+];
+
+// ─── The northern city (Phase W3) ─────────────────────────────────────────────
+//
+// Map 2 of the northern continent, behind the Under-Gate. Kind spread,
+// over 25 nodes — deliberately URBAN against the caverns' wilderness mix:
+// 6 encounter (5 wandering city predators + the ncy-25 Harbormaster),
+// 2 village (the Iron Market and the Chandlery — a city trades), 3 rest
+// (all INNS: tended, paid, the continent's first scar-mending beds),
+// 2 interaction (the Gate-Clerk and the Shipwright, both rostered),
+// 1 narration (the advisor rumor — the campaign seam, spec 34 §7),
+// 4 cutscene (arrival, the assize bell, the sealed river-gate, the
+// drowned slip), 2 gathering (ship-timber and pitch — the build-boat
+// materials), 2 hazard (a city hurts you with weight and tide, not
+// thorns), and 3 loot-cache (city coin runs richer than cavern coin).
+// Wandering encounters carry no pinned slug — `generateEncounter` draws
+// from `EnemiesByMap['northern-city']` via the ncy- prefix; only the
+// Harbormaster is pinned, low (the fv-6 precedent), so the climax is
+// winnable on arrival.
+
+const ncyArrival: MapEventPool = {
+    id: 'ncy-1.cutscene',
+    entries: [{
+        kind: 'cutscene', weight: 1,
+        payload: {
+            kind: 'cutscene',
+            lines: [
+                'The stair ends in lamplight. The city starts before your eyes adjust.',
+                'Stone streets, guild marks over every door, iron in every price.',
+            ],
+            description: 'The northern city takes you in.',
+        },
+        // Up out of the dark and into a working city: the world widens.
+        alignmentDelta: { outlook: 1, scope: 1 },
+    }],
+};
+
+const ncyGateClerk: MapEventPool = {
+    id: 'ncy-2.interaction',
+    entries: [{
+        kind: 'interaction', weight: 1,
+        payload: {
+            kind: 'interaction',
+            npcName: 'The Gate-Clerk',
+            description: 'A desk at the top of the stair. The pen is already moving.',
+        },
+    }],
+};
+
+const ncyShipwright: MapEventPool = {
+    id: 'ncy-21.interaction',
+    entries: [{
+        kind: 'interaction', weight: 1,
+        payload: {
+            kind: 'interaction',
+            npcName: 'The Shipwright',
+            description: 'Half a hull stands over the yard. A woman works under it, unhurried.',
+        },
+    }],
+};
+
+// The campaign seam (spec 34 §7, map.library.ts's own narrative note):
+// the first rumor of the dead advisor and the King's search. Flags only —
+// a later map's content reads them back, the S-01 pattern.
+const ncyAdvisorRumor: MapEventPool = {
+    id: 'ncy-5.narration',
+    entries: [{
+        kind: 'narration', weight: 1,
+        payload: {
+            kind: 'narration',
+            description: 'Talk runs down the high street faster than the carts do.',
+            dialogue: {
+                id: 'ncy-advisor-rumor',
+                rootId: 'overhear',
+                nodes: {
+                    overhear: {
+                        id: 'overhear',
+                        text: 'Two carters argue over one piece of news. The King\'s advisor is dead. The King wants another, and the provinces have been told to send their best.',
+                        choices: [
+                            {
+                                text: 'Stop. Ask what a province sends.',
+                                nextNodeId: 'asked',
+                                effect: { setFlag: 'boy-chased-the-rumor', alignmentDelta: { scope: 1 } },
+                            },
+                            {
+                                text: 'Note it, and keep walking.',
+                                nextNodeId: 'noted',
+                                effect: { setFlag: 'boy-noted-the-rumor' },
+                            },
+                            {
+                                text: 'Kings bury their own. Not your street.',
+                                nextNodeId: 'shrugged',
+                                effect: { setFlag: 'boy-shrugged-the-rumor', alignmentDelta: { scope: -1 } },
+                            },
+                        ],
+                    },
+                    asked: {
+                        id: 'asked',
+                        text: '"Children," the older carter says. "Clever ones. They send children, and one comes back an advisor." He spits. "The rest come back."',
+                    },
+                    noted: {
+                        id: 'noted',
+                        text: 'You file it where you keep the things too big to use yet. The street moves on around you.',
+                    },
+                    shrugged: {
+                        id: 'shrugged',
+                        text: 'The argument fades behind you. It keeps its own pace after that, the way news does. It will find you again.',
+                    },
+                },
+            },
+        },
+    }],
+};
+
+const ncyIronMarket: MapEventPool = {
+    id: 'ncy-6.village',
+    entries: [{
+        kind: 'village', weight: 1,
+        payload: {
+            kind: 'village',
+            villageName: 'The Iron Market',
+            merchants: [{ name: 'Iron Factor', isShopkeeper: true }],
+            shop: {
+                wares: [
+                    { itemId: 'minor-healing-potion', price: 12 },
+                    { itemId: 'healing-potion',       price: 30 },
+                    { itemId: 'antidote',             price: 14 },
+                    { itemId: 'clarity-serum',        price: 26 },
+                    { itemId: 'philosopher-tea',      price: 34 },
+                ],
+            },
+            description: 'Every stall weighs true. The scales are checked by men who are not kind about it.',
+        },
+    }],
+};
+
+const ncyChandlery: MapEventPool = {
+    id: 'ncy-19.village',
+    entries: [{
+        kind: 'village', weight: 1,
+        payload: {
+            kind: 'village',
+            villageName: 'The Chandlery',
+            merchants: [{ name: 'Harbor Chandler', isShopkeeper: true }],
+            shop: {
+                wares: [
+                    { itemId: 'minor-healing-potion', price: 11 },
+                    { itemId: 'body-elixir',          price: 22 },
+                    { itemId: 'focus-vial',           price: 18 },
+                    { itemId: 'void-essence',         price: 38 },
+                ],
+            },
+            description: 'Rope, tallow, salt, and remedies. Everything a crew buys the day before it regrets something.',
+        },
+    }],
+};
+
+/** City rests are INNS (Phase 52b): tended, paid, and scar-mending. */
+function ncyInnPool(nodeId: string, description: string): MapEventPool {
+    return {
+        id: `${nodeId}.rest`,
+        entries: [{
+            kind: 'rest', weight: 1,
+            payload: { kind: 'rest', shelter: 'inn', description },
+        }],
+    };
+}
+
+function ncyGatherPool(
+    nodeId: string,
+    item: { id: string; name: string; description: string },
+    description: string,
+): MapEventPool {
+    return {
+        id: `${nodeId}.gathering`,
+        entries: [{
+            kind: 'gathering', weight: 1,
+            payload: {
+                kind: 'gathering',
+                items: [{ ...item, category: 'material', quantity: 1 }],
+                description,
+            },
+        }],
+    };
+}
+
+function ncyHazardPool(nodeId: string, damage: number, description: string): MapEventPool {
+    return {
+        id: `${nodeId}.hazard`,
+        entries: [{
+            kind: 'hazard', weight: 1,
+            payload: { kind: 'hazard', damage, description },
+        }],
+    };
+}
+
+function ncyLootPool(nodeId: string, currency: number, description: string): MapEventPool {
+    return {
+        id: `${nodeId}.loot-cache`,
+        entries: [{
+            kind: 'loot-cache', weight: 1,
+            payload: { kind: 'loot-cache', currency, description },
+        }],
+    };
+}
+
+function ncyEncounterPool(nodeId: string, description: string): MapEventPool {
+    return {
+        id: `${nodeId}.encounter`,
+        entries: [{
+            kind: 'encounter', weight: 1,
+            payload: { kind: 'encounter', isBoss: false, description },
+        }],
+    };
+}
+
+// The assize bell — the city's one public instrument of judgement.
+const ncyAssizeBell: MapEventPool = {
+    id: 'ncy-15.cutscene',
+    entries: [{
+        kind: 'cutscene', weight: 1,
+        payload: {
+            kind: 'cutscene',
+            lines: [
+                'A bell hangs over the assize yard, big as a boat\'s stern.',
+                'It rings for verdicts. The rope is frayed from use.',
+            ],
+            description: 'The assize bell.',
+        },
+        alignmentDelta: { epistemology: 1, outlook: -1 },
+    }],
+};
+
+// The sealed river-gate — the seam toward connecting-river (W4's door).
+const ncySealedRiverGate: MapEventPool = {
+    id: 'ncy-23.cutscene',
+    entries: [{
+        kind: 'cutscene', weight: 1,
+        payload: {
+            kind: 'cutscene',
+            // The NEXT map, not shipped. Sealed scenery, the nc-16 pattern:
+            // the map ends at its boss, not at a stub door.
+            lines: [
+                'A water-gate closes the river mouth, chained below the waterline.',
+                'Boats queue on the far side and do not complain twice.',
+            ],
+            description: 'The sealed river-gate.',
+        },
+    }],
+};
+
+// The drowned slip — the hang-off vignette (the nc-24 pattern), and the
+// build-boat seam made visible: this is where a boat could be built.
+const ncyDrownedSlip: MapEventPool = {
+    id: 'ncy-24.cutscene',
+    entries: [{
+        kind: 'cutscene', weight: 1,
+        payload: {
+            kind: 'cutscene',
+            lines: [
+                'An old slipway runs into black water. The last launch left its rollers to rot.',
+                'The angle is still true. It would take a hull tomorrow.',
+            ],
+            description: 'The drowned slip.',
+        },
+        alignmentDelta: { scope: 1 },
+    }],
+};
+
+const NCY_BOSS_LEVEL = 9;
+const ncyHarbormasterBoss: MapEventPool = {
+    id: 'ncy-25.encounter-boss',
+    entries: [{
+        kind: 'encounter', weight: 1,
+        payload: {
+            kind: 'encounter',
+            enemySlug: 'the-harbormaster',
+            isBoss: true,
+            level: NCY_BOSS_LEVEL,
+            description: 'Nothing leaves this city by water unweighed. The one who does the weighing is waiting for you.',
+        },
+    }],
+};
+
+const NORTHERN_CITY_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> = [
+    { nodeId: 'ncy-1',  pool: ncyArrival },
+    { nodeId: 'ncy-2',  pool: ncyGateClerk },
+    { nodeId: 'ncy-3',  pool: ncyEncounterPool('ncy-3',  'The high street narrows between guild halls. Someone is collecting a toll nobody posted.') },
+    { nodeId: 'ncy-4',  pool: ncyInnPool('ncy-4',  'The Scales, an inn. The beds are honest and so is the bill.') },
+    { nodeId: 'ncy-5',  pool: ncyAdvisorRumor },
+    { nodeId: 'ncy-6',  pool: ncyIronMarket },
+    { nodeId: 'ncy-7',  pool: ncyEncounterPool('ncy-7',  'A doorway watches you pass. Then it stops being a doorway.') },
+    { nodeId: 'ncy-8',  pool: ncyEncounterPool('ncy-8',  'The last street before the harbor gate. Somebody is paid to mind it.') },
+    { nodeId: 'ncy-9',  pool: ncyInnPool('ncy-9',  'The Ferry Bell, an inn at the harbor gate. Quiet, close, and used to last nights.') },
+    { nodeId: 'ncy-10', pool: ncyGatherPool('ncy-10',
+        { id: 'ship-timber', name: 'Ship Timber', description: 'Straight-grained and seasoned. A hull is mostly promises like this.' },
+        'The timber yard stacks its seconds by the wall. You take what the tally will not miss.') },
+    { nodeId: 'ncy-11', pool: ncyHazardPool('ncy-11', 2, 'A crane swings its load short. The wall takes most of it. You take the rest.') },
+    { nodeId: 'ncy-12', pool: ncyLootPool('ncy-12', 16, 'A rent-box behind a loose rampart stone. The collector stopped collecting.') },
+    { nodeId: 'ncy-13', pool: ncyLootPool('ncy-13', 12, 'A watchman\'s purse, dropped where the wall walk turns. Nobody reported the loss.') },
+    { nodeId: 'ncy-14', pool: ncyEncounterPool('ncy-14', 'Wings on the rampart, too heavy for a gull. It has hung its larder on the hooks.') },
+    { nodeId: 'ncy-15', pool: ncyAssizeBell },
+    { nodeId: 'ncy-16', pool: ncyInnPool('ncy-16', 'The Long Watch, an inn built into the wall itself. The garrison drinks somewhere cheaper.') },
+    { nodeId: 'ncy-17', pool: ncyLootPool('ncy-17', 14, 'A skiff swings at its painter, half-swamped. The lockbox under the thwart kept dry.') },
+    { nodeId: 'ncy-18', pool: ncyGatherPool('ncy-18',
+        { id: 'caulkers-pitch', name: 'Caulker\'s Pitch', description: 'Black, patient, and watertight. Boats are arguments pitch settles.' },
+        'The ropewalk boils pitch at its far end. The drippings cool where you can pry them loose.') },
+    { nodeId: 'ncy-19', pool: ncyChandlery },
+    { nodeId: 'ncy-20', pool: ncyHazardPool('ncy-20', 3, 'The quay stones are green below the tide line. The harbor lets you find that out yourself.') },
+    { nodeId: 'ncy-21', pool: ncyShipwright },
+    { nodeId: 'ncy-22', pool: ncyEncounterPool('ncy-22', 'Between two warehouses, out of the lamplight, something prices your coat.') },
+    { nodeId: 'ncy-23', pool: ncySealedRiverGate },
+    { nodeId: 'ncy-24', pool: ncyDrownedSlip },
+    { nodeId: 'ncy-25', pool: ncyHarbormasterBoss },
 ];
 
 // ─── single registration entry point ─────────────────────────────────────────
@@ -1291,6 +1627,10 @@ export function registerMapEventContent(): void {
     for (const { nodeId, pool } of CAVERNS_POOLS) {
         registerMapEventPool(pool);
         setNodeEventPoolOverride('northern-continent', 'caverns', nodeId, pool.id);
+    }
+    for (const { nodeId, pool } of NORTHERN_CITY_POOLS) {
+        registerMapEventPool(pool);
+        setNodeEventPoolOverride('northern-continent', 'northern-city', nodeId, pool.id);
     }
 }
 

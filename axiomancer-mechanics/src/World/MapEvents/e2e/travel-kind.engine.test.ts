@@ -167,3 +167,67 @@ describe('the nf-10 door — forest → caverns (cross-continent)', () => {
         );
     });
 });
+
+describe('the nc-26 door — caverns → northern-city (Phase W3)', () => {
+    /** Walk the real arc through both earlier doors, then seat on nc-26. */
+    function atUnderGate(): GameState {
+        const throughVillage = resolveMapEvent(atCoastRoad()).state;
+        const throughForest = resolveMapEvent(seatAt(throughVillage, 'nf-10')).state;
+        return seatAt(throughForest, 'nc-26');
+    }
+
+    it('stays on the northern continent, unlocks the city, and lands on ncy-1', () => {
+        const { state, event } = resolveMapEvent(atUnderGate());
+
+        expect(event.kind).toBe('travel');
+        expect(state.world.currentContinent.name).toBe('northern-continent');
+        expect(state.world.currentMap.name).toBe('northern-city');
+        expect(state.world.currentMap.currentNode).toBe('ncy-1');
+        expect(state.world.currentContinent.availableMaps).toContain('northern-city');
+        expect(state.world.currentContinent.lockedMaps).not.toContain('northern-city');
+        expect(state.world.currentContinent.completedMaps).toContain('caverns');
+        // The departed caverns ride along, preserved on the door node.
+        expect(state.world.mapStates?.['caverns']?.currentNode).toBe('nc-26');
+    });
+
+    it("completes get-to-northern-city: The Delver's grant ticks on the city arrival", () => {
+        const under = atUnderGate();
+        const quest = getMapDefinition('northern-continent', 'caverns')
+            .quests!.find(q => q.name === 'get-to-northern-city')!;
+        const questing: GameState = { ...under, quests: startQuest(under.quests, quest) };
+
+        const travelled = resolveMapEvent(questing).state;
+        expect(travelled.quests.completed).not.toContain('get-to-northern-city');
+
+        // Arriving on ncy-1 (unconsumed on the fresh city) resolves the
+        // arrival cutscene; the reach objective ticks before the pool roll.
+        const arrived = resolveMapEvent(travelled);
+        expect(arrived.state.quests.completed).toContain('get-to-northern-city');
+    });
+
+    it('a v21 save with the PRE-W3 two-map catalogue can still cross — no migration hop needed', () => {
+        // Yesterday's save: version 21, northern catalogue listing ONLY the
+        // caverns (northern-city did not exist when v20→v21 seeded it).
+        // The design call, documented: the locked-map ledger is
+        // informational — `unlockMap` (the travel handler's step 3) admits
+        // any REGISTERED destination into `availableMaps` whether or not
+        // the catalogue ever listed it as locked, so old v21 saves need no
+        // v21→v22 hop to reach the new map.
+        const under = atUnderGate();
+        const raw = JSON.parse(JSON.stringify(under));
+        for (const continent of [raw.world.currentContinent, ...raw.world.world]) {
+            if (continent.name !== 'northern-continent') continue;
+            continent.lockedMaps = continent.lockedMaps.filter((m: string) => m !== 'northern-city');
+            continent.availableMaps = continent.availableMaps.filter((m: string) => m !== 'northern-city');
+        }
+        expect(raw.world.currentContinent.lockedMaps).not.toContain('northern-city');
+
+        const loaded = migrate(raw, raw.version, GAME_STATE_VERSION);
+        expect(loaded.version).toBe(GAME_STATE_VERSION);
+
+        const { state } = resolveMapEvent(loaded);
+        expect(state.world.currentMap.name).toBe('northern-city');
+        expect(state.world.currentMap.currentNode).toBe('ncy-1');
+        expect(state.world.currentContinent.availableMaps).toContain('northern-city');
+    });
+});

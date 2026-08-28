@@ -60,7 +60,7 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         expect(actions).not.toContain('hazardCombat:start');
     });
 
-    it('--route-audit reports all 25 caverns nodes (2026-08-28 — the northern continent)', async () => {
+    it('--route-audit reports all 26 caverns nodes (2026-08-28 — the northern continent)', async () => {
         const logPath = tmpPath('caverns-coverage');
 
         await runGameCli(['--route-audit', 'caverns', '--state-log', logPath]);
@@ -69,15 +69,41 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         expect(summary.classification).toBe('coverage-audit');
         expect(summary.survived).toBe(true);
         expect(summary.unvisitedNodeIds).toEqual([]);
-        expect((summary.visitedNodeIds as string[]).length).toBe(25);
-        expect((summary.resolvedNodeIds as string[]).length).toBe(25);
+        // 25 + nc-26, the Phase W3 door column past the Under-Gate.
+        expect((summary.visitedNodeIds as string[]).length).toBe(26);
+        expect((summary.resolvedNodeIds as string[]).length).toBe(26);
 
         // nc-1 is the arrival; nc-2 the Delver (the quest-giver singleton);
-        // nc-25 the Under-Gate boss; nf-10's door lands on this map.
+        // nc-25 the Under-Gate boss; nf-10's door lands on this map, and
+        // nc-26 — the gate standing open — is the door to northern-city
+        // (the read-only audit sees its kind without walking through it).
         const eventKinds = summary.eventKinds as Record<string, string>;
         expect(eventKinds['nc-1']).toBe('cutscene');
         expect(eventKinds['nc-2']).toBe('interaction');
         expect(eventKinds['nc-25']).toBe('encounter');
+        expect(eventKinds['nc-26']).toBe('travel');
+    });
+
+    it('--route-audit reports all 25 northern-city nodes (Phase W3)', async () => {
+        const logPath = tmpPath('northern-city-coverage');
+
+        await runGameCli(['--route-audit', 'northern-city', '--state-log', logPath]);
+
+        const summary = routeEnd(logPath);
+        expect(summary.classification).toBe('coverage-audit');
+        expect(summary.survived).toBe(true);
+        expect(summary.unvisitedNodeIds).toEqual([]);
+        expect((summary.visitedNodeIds as string[]).length).toBe(25);
+        expect((summary.resolvedNodeIds as string[]).length).toBe(25);
+
+        // ncy-1 is the arrival; ncy-2 the Gate-Clerk (the city's first
+        // face); ncy-25 the Harbormaster; ncy-23 the sealed river-gate
+        // seam toward W4's connecting-river.
+        const eventKinds = summary.eventKinds as Record<string, string>;
+        expect(eventKinds['ncy-1']).toBe('cutscene');
+        expect(eventKinds['ncy-2']).toBe('interaction');
+        expect(eventKinds['ncy-25']).toBe('encounter');
+        expect(eventKinds['ncy-23']).toBe('cutscene');
     });
 
     it('a scripted route stops at a combat defeat and downgrades to "blocked" — never reports post-defeat traversal as survivorship', async () => {

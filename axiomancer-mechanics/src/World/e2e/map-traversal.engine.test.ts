@@ -19,7 +19,7 @@ import { describe, expect, it } from 'vitest';
 import { MAP_REGISTRY } from '../map.registry';
 import { auditMapTraversal, auditRouteCoverage } from '../world.reducer';
 import { fishingVillage, northernForest } from '../Continents/Coastal-Village/maps';
-import { caverns } from '../Continents/Northern-Continent/maps';
+import { caverns, northernCity } from '../Continents/Northern-Continent/maps';
 import type { MapDefinition } from '../types';
 
 /** Every registered gauntlet map, flattened. Labyrinth maps are exempt. */
@@ -28,8 +28,8 @@ const GAUNTLET_MAPS: MapDefinition[] = Object.values(MAP_REGISTRY)
     .filter((def): def is MapDefinition => def !== undefined && def.traversal !== 'labyrinth');
 
 describe('gauntlet map traversal invariants', () => {
-    it('registers the two coastal maps plus the caverns as gauntlets', () => {
-        expect(GAUNTLET_MAPS.map(d => d.name).sort()).toEqual(['caverns', 'fishing-village', 'northern-forest']);
+    it('registers the two coastal maps plus the two northern maps as gauntlets', () => {
+        expect(GAUNTLET_MAPS.map(d => d.name).sort()).toEqual(['caverns', 'fishing-village', 'northern-city', 'northern-forest']);
     });
 
     for (const def of GAUNTLET_MAPS) {
@@ -106,7 +106,12 @@ describe('gauntlet map traversal invariants', () => {
                     widths.set(node.location[0], (widths.get(node.location[0]) ?? 0) + 1);
                 }
                 const branching = [...widths.values()].filter(w => w > 1).length;
-                expect(branching).toBeGreaterThanOrEqual(widths.size - 3);
+                // Phase W3 — the caverns alone tolerate a FOURTH singleton:
+                // arrival, quest-giver, boss, and the nc-26 door column the
+                // travel phase appended past the Under-Gate (the door is a
+                // chokepoint by design, exactly like the boss it follows).
+                const singletonTolerance = def.name === 'caverns' ? 4 : 3;
+                expect(branching).toBeGreaterThanOrEqual(widths.size - singletonTolerance);
             });
         });
     }
@@ -212,13 +217,45 @@ describe('caverns — first map of the northern continent (2026-08-28)', () => {
     const audit = auditMapTraversal(caverns);
     const coverage = auditRouteCoverage(caverns);
 
-    it('guarantees the arrival, the Delver, and the Under-Gate boss on every route', () => {
-        // The three deliberate singleton columns — the same shape the
-        // village settled on: the premise (nc-2, the quest-giver) and the
-        // climax (nc-25) are structural, never a coin flip.
+    it('guarantees the arrival, the Delver, the Under-Gate boss, and the door on every route', () => {
+        // The deliberate singleton columns — the same shape the village
+        // settled on: the premise (nc-2, the quest-giver), the climax
+        // (nc-25), and — Phase W3 — the door up to the city (nc-26) are
+        // structural, never a coin flip.
         expect(coverage.shareOfRoutes['nc-1']).toBe(1);
         expect(coverage.shareOfRoutes['nc-2']).toBe(1);
         expect(coverage.shareOfRoutes['nc-25']).toBe(1);
+        expect(coverage.shareOfRoutes['nc-26']).toBe(1);
+    });
+
+    it('walks a full eleven-beat run every time, strand-free', () => {
+        // Phase W3 added the door column: 10 → 11 beats.
+        expect(audit.longestRoute).toBe(11);
+        expect(audit.strands).toEqual([]);
+        expect(audit.unreachableNodes).toEqual([]);
+    });
+
+    it('ends at the door alone — every run leaves through the Under-Gate (Phase W3)', () => {
+        // The boss is no longer terminal: nc-26, one column past it, is
+        // the travel door to northern-city (the fv-10 pattern — the way
+        // out opens only after the climax).
+        expect(audit.terminalNodes).toEqual(['nc-26']);
+        const boss = caverns.nodes.find(n => n.id === 'nc-25')!;
+        expect(boss.connectedNodes).toEqual(['nc-26']);
+    });
+});
+
+describe('northern-city — map 2 of the northern continent (Phase W3)', () => {
+    const audit = auditMapTraversal(northernCity);
+    const coverage = auditRouteCoverage(northernCity);
+
+    it('guarantees the arrival, the Gate-Clerk, and the Harbormaster on every route', () => {
+        // The three deliberate singleton columns, the settled shape: the
+        // city's first face (ncy-2) and the climax (ncy-25) are
+        // structural, never a coin flip.
+        expect(coverage.shareOfRoutes['ncy-1']).toBe(1);
+        expect(coverage.shareOfRoutes['ncy-2']).toBe(1);
+        expect(coverage.shareOfRoutes['ncy-25']).toBe(1);
     });
 
     it('walks a full ten-beat run every time, strand-free', () => {
@@ -227,7 +264,13 @@ describe('caverns — first map of the northern continent (2026-08-28)', () => {
         expect(audit.unreachableNodes).toEqual([]);
     });
 
-    it('ends at the Under-Gate alone — the boss is the only terminal node', () => {
-        expect(audit.terminalNodes).toEqual(['nc-25']);
+    it('ends at the Harbormaster alone — the sealed river-gate is scenery, not an exit', () => {
+        // The W2 pattern: the seam toward the unshipped connecting-river
+        // (ncy-23, c8) is a cutscene beside the last inns, and the map
+        // ends at its boss. W4 ships the real door.
+        expect(audit.terminalNodes).toEqual(['ncy-25']);
+        const seam = northernCity.nodes.find(n => n.id === 'ncy-23')!;
+        expect(seam.location[0]).toBe(8);
+        expect(seam.connectedNodes).toEqual(['ncy-25']);
     });
 });

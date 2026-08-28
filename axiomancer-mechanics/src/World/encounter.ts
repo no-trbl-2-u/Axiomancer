@@ -40,7 +40,11 @@ export const DIFFICULTY_LEVEL_BANDS: Record<EnemyDifficulty, { min: number; max:
 function nodeIdToMapName(nodeId: string): MapName | undefined {
     if (nodeId.startsWith('fv-')) return 'fishing-village';
     if (nodeId.startsWith('nf-')) return 'northern-forest';
-    // Northern continent (2026-08-28 inter-map travel) — the iron caverns.
+    // Northern continent (2026-08-28 inter-map travel) — the iron caverns
+    // and (Phase W3) the city above them. `ncy-` is checked before `nc-`
+    // for clarity; the prefixes cannot actually collide ('nc-' requires
+    // the dash as its third character).
+    if (nodeId.startsWith('ncy-')) return 'northern-city';
     if (nodeId.startsWith('nc-')) return 'caverns';
     // W-01 — The Aporia's three acts.
     if (nodeId.startsWith('ap1-')) return 'aporia-colonnade';

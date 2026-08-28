@@ -163,7 +163,11 @@ describe('Phase 52b — the shelter classification of every authored rest pool',
         expect(new Set(labyrinthShelters)).toEqual(new Set<RestShelter>(['camp']));
     });
 
-    it('the ONLY inns in the game are the fishing-village rest nodes', () => {
+    it('the ONLY inns in the game are inside settlements: fishing-village and the northern city', () => {
+        // Phase W3 — the northern city is the second SETTLEMENT with
+        // tended, paid beds: its three rests are inns by the same 52b law
+        // that made the village's four inns and every wilderness rest a
+        // camp. Everything between the two settlements still only camps.
         const census = censusOfAuthoredRestPools();
         const innKeys = Object.entries(census)
             .filter(([, shelters]) => shelters.includes('inn'))
@@ -174,6 +178,9 @@ describe('Phase 52b — the shelter classification of every authored rest pool',
             'coastal-continent:fishing-village:fv-25',
             'coastal-continent:fishing-village:fv-3',
             'coastal-continent:fishing-village:fv-9',
+            'northern-continent:northern-city:ncy-16',
+            'northern-continent:northern-city:ncy-4',
+            'northern-continent:northern-city:ncy-9',
         ].sort());
     });
 });

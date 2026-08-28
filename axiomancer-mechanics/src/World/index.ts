@@ -23,7 +23,13 @@ export function createStartingWorld(): WorldState {
         name: 'northern-continent',
         description: 'The northern continent begins underground. Iron caverns climb toward the first city; a river runs on from there. Nobody arrives by daylight.',
         availableMaps: [],
-        lockedMaps: ['caverns'],
+        // Phase W3 — 'northern-city' joins the ledger of locked maps. Note
+        // for old saves: a v21 save seeded before W3 lists only 'caverns'
+        // here, and that is FINE — `unlockMap` (the travel handler's step 3)
+        // moves any registered destination into `availableMaps` whether or
+        // not the catalogue ever listed it as locked, so no migration hop
+        // is needed for the door to work (pinned in travel-kind e2e).
+        lockedMaps: ['caverns', 'northern-city'],
         completedMaps: [],
     };
     return {

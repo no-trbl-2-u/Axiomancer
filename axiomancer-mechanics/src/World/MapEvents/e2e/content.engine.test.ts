@@ -21,12 +21,13 @@ import type { ContinentName } from '../../map.library';
 // Import for side effect — registers the pools when the test loads.
 import '../content';
 
-type AuthoredMap = 'fishing-village' | 'northern-forest' | 'caverns';
+type AuthoredMap = 'fishing-village' | 'northern-forest' | 'caverns' | 'northern-city';
 
 const CONTINENT_OF: Record<AuthoredMap, ContinentName> = {
     'fishing-village': 'coastal-continent',
     'northern-forest': 'coastal-continent',
     'caverns': 'northern-continent',
+    'northern-city': 'northern-continent',
 };
 
 function freshWorldAt(mapName: AuthoredMap): GameState {
@@ -276,6 +277,7 @@ describe('caverns content (2026-08-28 — inter-map travel)', () => {
             ['nc-23', 'loot-cache'],
             ['nc-24', 'cutscene'],    // the bones of an older delve
             ['nc-25', 'encounter'],   // the Under-Gate boss
+            ['nc-26', 'travel'],      // Phase W3 — the door up to the city
         ];
         for (const [node, kind] of expected) {
             const r = visit(freshWorldAt('caverns'), node);
@@ -319,11 +321,121 @@ describe('caverns content (2026-08-28 — inter-map travel)', () => {
     });
 });
 
+describe('northern-city content (Phase W3)', () => {
+    it('each authored node resolves to its declared MapEventKind — the urban spread', () => {
+        mockSequentialRng(0.5);
+        const expected: Array<[string, string]> = [
+            ['ncy-1',  'cutscene'],    // the arrival — up into lamplight
+            ['ncy-2',  'interaction'], // the Gate-Clerk, the city's first face
+            ['ncy-3',  'encounter'],
+            ['ncy-4',  'rest'],        // The Scales — an INN
+            ['ncy-5',  'narration'],   // the advisor rumor, the campaign seam
+            ['ncy-6',  'village'],     // the Iron Market
+            ['ncy-7',  'encounter'],
+            ['ncy-8',  'encounter'],
+            ['ncy-9',  'rest'],        // the Ferry Bell — pre-boss inn
+            ['ncy-10', 'gathering'],   // ship-timber (the build-boat seam)
+            ['ncy-11', 'hazard'],
+            ['ncy-12', 'loot-cache'],
+            ['ncy-13', 'loot-cache'],
+            ['ncy-14', 'encounter'],
+            ['ncy-15', 'cutscene'],    // the assize bell
+            ['ncy-16', 'rest'],        // the Long Watch — an INN
+            ['ncy-17', 'loot-cache'],
+            ['ncy-18', 'gathering'],   // caulker's pitch
+            ['ncy-19', 'village'],     // the Chandlery
+            ['ncy-20', 'hazard'],
+            ['ncy-21', 'interaction'], // the Shipwright
+            ['ncy-22', 'encounter'],
+            ['ncy-23', 'cutscene'],    // the sealed river-gate (W4's seam)
+            ['ncy-24', 'cutscene'],    // the drowned slip
+            ['ncy-25', 'encounter'],   // the Harbormaster boss
+        ];
+        for (const [node, kind] of expected) {
+            const r = visit(freshWorldAt('northern-city'), node);
+            expect(r.kind, `node ${node} should resolve to ${kind}`).toBe(kind);
+        }
+    });
+
+    it('every city rest is an INN — tended, paid, scar-mending (Phase 52b law)', () => {
+        mockSequentialRng(0.5);
+        for (const node of ['ncy-4', 'ncy-9', 'ncy-16'] as const) {
+            const result = resolveMapEvent({
+                ...freshWorldAt('northern-city'),
+                world: {
+                    ...freshWorldAt('northern-city').world,
+                    currentMap: { ...freshWorldAt('northern-city').world.currentMap, currentNode: node, consumedNodes: [] },
+                },
+            });
+            expect(result.event.kind).toBe('rest');
+            if (result.event.kind === 'rest') {
+                expect(result.event.shelter, `${node} should be an inn`).toBe('inn');
+            }
+        }
+    });
+
+    it('the Harbormaster is pinned to a winnable level (he is L18 in the library)', () => {
+        mockSequentialRng(0.5);
+        const result = resolveMapEvent({
+            ...freshWorldAt('northern-city'),
+            world: {
+                ...freshWorldAt('northern-city').world,
+                currentMap: { ...freshWorldAt('northern-city').world.currentMap, currentNode: 'ncy-25', consumedNodes: [] },
+            },
+        });
+        expect(result.event.kind).toBe('encounter');
+        if (result.event.kind === 'encounter') {
+            expect(result.event.isBoss).toBe(true);
+            const boss = result.event.encounter.enemies[0];
+            expect(boss.name).toBe('The Harbormaster');
+            expect(boss.level).toBe(9);
+        }
+    });
+
+    it('a wandering encounter draws from the northern-city pool via the ncy- prefix', () => {
+        mockSequentialRng(0.5);
+        const result = resolveMapEvent({
+            ...freshWorldAt('northern-city'),
+            world: {
+                ...freshWorldAt('northern-city').world,
+                currentMap: { ...freshWorldAt('northern-city').world.currentMap, currentNode: 'ncy-3', consumedNodes: [] },
+            },
+        });
+        expect(result.event.kind).toBe('encounter');
+        if (result.event.kind === 'encounter') {
+            expect(result.event.isBoss).toBe(false);
+            expect(result.event.encounter.origin).toBe('northern-city:ncy-3');
+            expect(result.event.encounter.enemies).toHaveLength(1);
+        }
+    });
+
+    it('the advisor rumor is a real three-way dilemma (the campaign seam)', () => {
+        mockSequentialRng(0.5);
+        const result = resolveMapEvent({
+            ...freshWorldAt('northern-city'),
+            world: {
+                ...freshWorldAt('northern-city').world,
+                currentMap: { ...freshWorldAt('northern-city').world.currentMap, currentNode: 'ncy-5', consumedNodes: [] },
+            },
+        });
+        expect(result.event.kind).toBe('narration');
+        if (result.event.kind === 'narration') {
+            const tree = result.event.dialogue;
+            expect(tree.id).toBe('ncy-advisor-rumor');
+            const root = tree.nodes[tree.rootId];
+            expect(root!.choices).toHaveLength(3);
+            for (const choice of root!.choices!) {
+                expect(choice.effect?.setFlag).toBeTruthy();
+            }
+        }
+    });
+});
+
 describe('every MapEventKind is covered by the authored content', () => {
-    it('each kind appears at least once across the three maps', () => {
+    it('each kind appears at least once across the four maps', () => {
         mockSequentialRng(0.5);
         const kinds = new Set<string>();
-        for (const map of ['fishing-village', 'northern-forest', 'caverns'] as const) {
+        for (const map of ['fishing-village', 'northern-forest', 'caverns', 'northern-city'] as const) {
             const def = getMapDefinition(CONTINENT_OF[map], map);
             for (const node of def.nodes) {
                 // Fresh state per node — a threaded walk would cross a
@@ -366,6 +478,8 @@ describe('Phase 52f — guaranteed per-act shilling income (the calibration inpu
         ['fishing-village', 26],
         ['northern-forest', 18],
         ['caverns', 35],
+        // Phase W3 — city coin runs richer than cavern coin (16+12+14).
+        ['northern-city', 42],
     ] as const)('%s grants exactly %d guaranteed shillings on a full walk', (map, expectedCurrency) => {
         mockSequentialRng(0.5);
         let state = freshWorldAt(map);

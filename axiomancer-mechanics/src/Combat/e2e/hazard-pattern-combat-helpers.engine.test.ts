@@ -399,8 +399,10 @@ describe('Spec 25 — constants', () => {
 // ── AUTHORED_THREAT_ENEMY_IDS ─────────────────────────────────────────────────
 
 describe('Spec 25 — AUTHORED_THREAT_ENEMY_IDS', () => {
-    it('contains exactly 56 authored-threat enemy slugs (52 roster + the ceiling + 3 Aporia bosses)', () => {
-        expect(AUTHORED_THREAT_ENEMY_IDS.length).toBe(56);
+    it('contains exactly 65 authored-threat enemy slugs (61 roster + the ceiling + 3 Aporia bosses)', () => {
+        // Growth ledger (THE PIPELINE LIBERATION ¶4): 56 → 65 with Phase
+        // W3's nine northern-continent decks, same commit as the enemies.
+        expect(AUTHORED_THREAT_ENEMY_IDS.length).toBe(65);
     });
 
     it('every entry follows the "enemy-<slug>" naming convention', () => {
