@@ -16,6 +16,15 @@ interface MapCanvasProps {
     edges: readonly ExplorationEdge[];
     /** Engraving plate rendered dimmed under the chart (see assets/images/maps). */
     backdrop?: number | null;
+    /**
+     * Viewport-fixed chart furniture (legend, compass copy, sheet label) —
+     * rendered as a sibling of the vignette/compass SVGs, NOT inside the
+     * pannable canvas, so absolute positions resolve against the visible
+     * viewport instead of the 936×1040 spread canvas (CRITIQUE pass 20:
+     * the legend clipped to a bare "25" on desktop when it panned with
+     * the map).
+     */
+    overlays?: React.ReactNode;
     children: React.ReactNode;
 }
 
@@ -60,7 +69,7 @@ const CONTOUR_GROUPS: readonly string[][] = [
     ],
 ];
 
-export function MapCanvas({ nodes, edges, backdrop, children }: MapCanvasProps) {
+export function MapCanvas({ nodes, edges, backdrop, overlays, children }: MapCanvasProps) {
     const styles = useStyles();
     const AXM = usePalette();
     const nodeById = React.useMemo(() => {
@@ -250,6 +259,13 @@ export function MapCanvas({ nodes, edges, backdrop, children }: MapCanvasProps) 
                 <Path d="M26 46 L29 26 L23 26 Z" fill={AXM.bone} opacity={0.5} />
                 <Circle cx={26} cy={26} r={2} fill={AXM.parchment} opacity={0.7} />
             </Svg>
+            {/* Viewport-fixed overlays (legend etc.) — pointerEvents none so
+                they never swallow a pan that starts over them. */}
+            {overlays != null && (
+                <View style={StyleSheet.absoluteFillObject} pointerEvents="none" testID="map-overlays-fixed">
+                    {overlays}
+                </View>
+            )}
         </View>
     );
 }

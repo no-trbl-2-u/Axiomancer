@@ -14,7 +14,7 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { ScreenBg } from '@/components/ScreenBg';
 import { useGameActions, useGameState } from '@/state/GameStoreProvider';
-import { FONTS } from '@/theme/axm';
+import { FONTS, TYPE } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
 
 export default function CutsceneScreen() {
@@ -37,7 +37,17 @@ export default function CutsceneScreen() {
         if (!active && router.canGoBack()) router.back();
     }, [active, router]);
 
-    if (!active) return <ScreenBg><View /></ScreenBg>;
+    // Inactive shell — visible for a frame while the router unwinds; never a
+    // blank screen (UI-cleanup pass, CRITIQUE).
+    if (!active) {
+        return (
+            <ScreenBg scrollable={false} art="cutscene">
+                <View style={styles.inactiveWrap} testID="cutscene-inactive">
+                    <Text style={styles.inactiveText}>Nothing here. The road went on.</Text>
+                </View>
+            </ScreenBg>
+        );
+    }
 
     const onAdvance = () => {
         if (!allRevealed) {
@@ -48,7 +58,7 @@ export default function CutsceneScreen() {
     };
 
     return (
-        <ScreenBg>
+        <ScreenBg art="cutscene">
             <TouchableOpacity
                 accessibilityRole="button"
                 accessibilityLabel={allRevealed ? 'End the scene' : 'Reveal the next line'}
@@ -116,4 +126,6 @@ const useStyles = makeStyles((AXM) => ({
     skip: { position: 'absolute', top: 14, right: 14, padding: 8 },
     skipText: { fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 2, color: AXM.bone },
     flexOne: { flex: 1 },
+    inactiveWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+    inactiveText: { ...TYPE.body, color: AXM.parchment, opacity: 0.55, textAlign: 'center' },
 }));

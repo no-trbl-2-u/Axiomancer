@@ -4,7 +4,9 @@ export const northernForestLayout: MapLayout = {
     mapId: 'northern-forest',
     continent: 'CONTINENT · COASTAL',
     region: 'Northern Forest',
-    regionProgress: 'Map ii of ii · 9 paths remain',
+    // Ordinal only — no node/path count. The live count belongs to the map
+    // legend, computed from MapDefinition (CRITIQUE pass 19).
+    regionProgress: 'Map ii of ii',
     nodes: [
         {
             id: 'nf-1',

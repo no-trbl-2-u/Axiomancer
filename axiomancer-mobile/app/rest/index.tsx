@@ -38,7 +38,7 @@ import {
     restOutcomeRemovedChip,
     restOutcomeSpendChip,
 } from '@/state/presenters/rest.copy';
-import { FONTS } from '@/theme/axm';
+import { FONTS, TYPE } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
 function OfferCard({ offer, onPress }: { offer: RestChoiceOfferVM; onPress: () => void }) {
@@ -103,10 +103,20 @@ export default function RestScreen() {
         if (!vm.active && router.canGoBack()) router.back();
     }, [vm.active, router]);
 
-    if (!vm.active) return <ScreenBg><View /></ScreenBg>;
+    // Inactive shell — visible for a frame while the router unwinds; never a
+    // blank screen (UI-cleanup pass, CRITIQUE).
+    if (!vm.active) {
+        return (
+            <ScreenBg scrollable={false} art="rest">
+                <View style={styles.inactiveWrap} testID="rest-inactive">
+                    <Text style={styles.inactiveText}>No fire here. The night moved on.</Text>
+                </View>
+            </ScreenBg>
+        );
+    }
 
     return (
-        <ScreenBg scrollable={false}>
+        <ScreenBg scrollable={false} art="rest">
             <ScrollView style={styles.scrollOuter} contentContainerStyle={styles.scroll}>
                 <Text style={styles.eyebrow}>{REST_CHOICE_EYEBROW}</Text>
                 <Text style={styles.title}>{REST_CHOICE_TITLE}</Text>
@@ -294,4 +304,6 @@ const useStyles = makeStyles((AXM) => ({
         backgroundColor: AXM.bg,
     },
     bigButtonText: { fontFamily: FONTS.gothic, fontSize: 18, letterSpacing: 2, color: AXM.sulfur },
+    inactiveWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+    inactiveText: { ...TYPE.body, color: AXM.parchment, opacity: 0.55, textAlign: 'center' },
 }));

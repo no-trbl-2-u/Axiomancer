@@ -10,7 +10,8 @@
     "spec_section": "phase V (Woodcut Codex) - map backdrops",
     "covers": "forest-dark.webp",
     "used_by": [
-      "assets/images/maps/index.ts (map backdrop registry)"
+      "assets/images/maps/index.ts (map backdrop registry)",
+      "assets/images/screens/index.ts (ScreenBg art=\"rest\")"
     ]
   },
   {
@@ -27,7 +28,7 @@
     ],
     "used_by": [
       "assets/images/maps/index.ts",
-      "assets/images/screens/index.ts (ScreenBg art=\"event\")"
+      "assets/images/screens/index.ts (ScreenBg art=\"event\" | \"dialogue\" | \"cutscene\")"
     ]
   },
   {
@@ -60,7 +61,8 @@
       "ludgate-hill.webp"
     ],
     "used_by": [
-      "assets/images/maps/index.ts"
+      "assets/images/maps/index.ts",
+      "assets/images/screens/index.ts (ScreenBg art=\"cache\" | \"blacksmith\")"
     ]
   },
   {
@@ -76,7 +78,8 @@
       "wentworth-street.webp"
     ],
     "used_by": [
-      "assets/images/maps/index.ts"
+      "assets/images/maps/index.ts",
+      "assets/images/screens/index.ts (ScreenBg art=\"village\")"
     ]
   }
 ]

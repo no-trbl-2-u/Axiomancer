@@ -20,7 +20,7 @@ import { ScreenBg } from '@/components/ScreenBg';
 import { AxmIcon } from '@/components/icons';
 import { useGameActions, useGameState } from '@/state/GameStoreProvider';
 import { selectVillageVM } from '@/state/presenters/village.engine';
-import { FONTS } from '@/theme/axm';
+import { FONTS, TYPE } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
 
 export default function VillageScreen() {
@@ -41,10 +41,20 @@ export default function VillageScreen() {
         if (!vm.active && router.canGoBack()) router.back();
     }, [vm.active, router]);
 
-    if (!vm.active) return <ScreenBg><View /></ScreenBg>;
+    // Inactive shell — visible for a frame while the router unwinds; never a
+    // blank screen (UI-cleanup pass, CRITIQUE).
+    if (!vm.active) {
+        return (
+            <ScreenBg scrollable={false} art="village">
+                <View style={styles.inactiveWrap} testID="village-inactive">
+                    <Text style={styles.inactiveText}>No settlement here. Only the road.</Text>
+                </View>
+            </ScreenBg>
+        );
+    }
 
     return (
-        <ScreenBg>
+        <ScreenBg art="village">
             <ScrollView contentContainerStyle={styles.scroll}>
                 <View style={styles.eyebrowRow}>
                     <AxmIcon name="action-village" size={18} />
@@ -260,4 +270,6 @@ const useStyles = makeStyles((AXM) => ({
     },
     bigButtonText: { fontFamily: FONTS.gothic, fontSize: 18, letterSpacing: 2, color: AXM.parchment },
     flexOne: { flex: 1 },
+    inactiveWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+    inactiveText: { ...TYPE.body, color: AXM.parchment, opacity: 0.55, textAlign: 'center' },
 }));

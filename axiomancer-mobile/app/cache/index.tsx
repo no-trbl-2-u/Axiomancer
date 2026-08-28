@@ -34,7 +34,7 @@ import {
     cacheOutcomeGoodwillChip,
     cacheOutcomeItemChip,
 } from '@/state/presenters/cache.copy';
-import { FONTS } from '@/theme/axm';
+import { FONTS, TYPE } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
 function OfferCard({ offer, onPress }: { offer: CacheChoiceOfferVM; onPress: () => void }) {
@@ -74,10 +74,20 @@ export default function CacheScreen() {
         if (!vm.active && router.canGoBack()) router.back();
     }, [vm.active, router]);
 
-    if (!vm.active) return <ScreenBg><View /></ScreenBg>;
+    // Inactive shell — visible for a frame while the router unwinds; never a
+    // blank screen (UI-cleanup pass, CRITIQUE).
+    if (!vm.active) {
+        return (
+            <ScreenBg scrollable={false} art="cache">
+                <View style={styles.inactiveWrap} testID="cache-inactive">
+                    <Text style={styles.inactiveText}>The hollow is empty. Whatever lay here is gone.</Text>
+                </View>
+            </ScreenBg>
+        );
+    }
 
     return (
-        <ScreenBg scrollable={false}>
+        <ScreenBg scrollable={false} art="cache">
             <ScrollView style={styles.scrollOuter} contentContainerStyle={styles.scroll}>
                 <Text style={styles.eyebrow}>{CACHE_CHOICE_EYEBROW}</Text>
                 <Text style={styles.title}>{CACHE_CHOICE_TITLE}</Text>
@@ -211,4 +221,6 @@ const useStyles = makeStyles((AXM) => ({
         backgroundColor: AXM.bg,
     },
     bigButtonText: { fontFamily: FONTS.gothic, fontSize: 18, letterSpacing: 2, color: AXM.sulfur },
+    inactiveWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+    inactiveText: { ...TYPE.body, color: AXM.parchment, opacity: 0.55, textAlign: 'center' },
 }));

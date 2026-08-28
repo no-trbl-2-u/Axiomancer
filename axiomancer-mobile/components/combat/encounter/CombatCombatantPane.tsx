@@ -353,7 +353,11 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
     const arcOn = ARC_C * Math.max(0, Math.min(1, player.hpPct));
 
     return (
-        <View style={[styles.playerDock, { bottom: bottomInset + 34 }]} pointerEvents="box-none">
+        // bottom 34→26 (CRITIQUE: fan-end occlusion) — flush with the rail
+        // top, so the medallion's touch box tops out BELOW the leftmost hand
+        // card's bounding-box centre and a drag started there hits the card,
+        // not this chrome. Pairs with the corner-facing hitSlop below.
+        <View style={[styles.playerDock, { bottom: bottomInset + 26 }]} pointerEvents="box-none">
             {/* status-proc pulse nests OUTSIDE the hit-reaction `anim` transform —
                 a style array can't merge two `transform` arrays, so each juice
                 primitive gets its own Animated.View and they compose via nesting. */}
@@ -365,7 +369,12 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
                     testID="combat-player-medallion"
                     accessibilityRole="button"
                     accessibilityLabel={`${player.name}, VITAE ${player.hp} of ${player.maxHp}. Inspect your pilgrim — stats, status effects and cards.`}
-                    hitSlop={6}
+                    // Slop only toward the screen corner: the top/right edges are
+                    // where the leftmost hand card fans under this medallion, and
+                    // slopping into them stole the card's touch centre (CRITIQUE:
+                    // "combat corner medallions occlude fan-end hand-card touch
+                    // centers", PR #135 probe).
+                    hitSlop={{ left: 6, bottom: 6 }}
                 >
                     <View style={styles.medallionClip}>
                         <PlayerPortraitImage width={72} height={86} fit="cover" />

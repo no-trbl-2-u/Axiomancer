@@ -70,18 +70,21 @@ Everything routes through the existing audit tooling:
   - Tabs by route: `/`, `/exploration`, `/character`, `/inventory`, `/memoir`.
   - Combat sub-phases: drive the round via testIDs `combat-stance-*`,
     `combat-action-*`, `combat-resolve-continue`.
-  - Minigames: their **dedicated** dev-menu buttons — `debug-gathering-button`,
-    `debug-hazard-button`, `debug-quest-button`, `debug-rest-button`,
-    `debug-cache-button` — **not** the `debug-trigger-encounter-*` buttons
-    (those set a pending event and land on an empty `NO EVENT` fallback).
-    Seed minigames for determinism: `__AXM_HAZARD_SEED__`/`__AXM_HAZARD_ID__`,
-    `__AXM_GATHER_SEED__`/`__AXM_GATHER_SITE__` (see `scripts/*-e2e.mjs`).
+  - Minigames: their **dedicated** dev-menu buttons — `debug-hazard-button`,
+    `debug-rest-button`, `debug-cache-button` — **not** the
+    `debug-trigger-encounter-*` buttons (those set a pending event and land on
+    an empty `NO EVENT` fallback). The Gathering (Phase 76) and Quest (Phase
+    61) minigames are **retired** — their `debug-gathering-button` /
+    `debug-quest-button` hooks are gone; don't chase them.
+    Seed minigames for determinism: `__AXM_HAZARD_SEED__`/`__AXM_HAZARD_ID__`
+    (see `scripts/*-e2e.mjs`).
   - Prelude/boss: `debug-trigger-encounter-encounter` / `-boss` then wait for
     `encounter-modal-overlay`. The encounter auto-engages onto the combat
     REVEAL (the ENGAGE/FLEE prelude popup was retired 2026-08-10); click
     `combat-enter` to reach the board, or `combat-withdraw` to back out.
-  - **Known gaps:** `village` and `cutscene` have no dev launch hook — note
-    them as un-capturable rather than faking coverage.
+  - `village` and `cutscene` are captured by `scripts/audit-capture.mjs`
+    (`28-village.png` / `29-cutscene.png`, seeded via their dev triggers) —
+    no longer capture gaps.
 
 If a new screen has no capture path, add it to `SCREENS` in
 `scripts/audit-capture.mjs` (and a dev launch hook if needed) rather than
@@ -201,8 +204,8 @@ npx jest
 #   → returns prioritized [screen] severity — problem — fix
 
 # Minigame launch testIDs (dedicated, real beginX() — NOT trigger-encounter):
-#   debug-gathering-button  debug-hazard-button  debug-quest-button
-#   debug-rest-button       debug-cache-button
+#   debug-hazard-button  debug-rest-button  debug-cache-button
+#   (gathering + quest minigames retired — Phases 76 / 61; no hooks exist)
 # Combat drive testIDs: combat-stance-*  combat-action-*  combat-resolve-continue
-# Known capture gaps: village, cutscene (no dev hook)
+# village + cutscene: captured by audit-capture.mjs (28-village / 29-cutscene)
 ```

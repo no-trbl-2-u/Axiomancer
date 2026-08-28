@@ -33,7 +33,12 @@ export interface MapLayout {
     mapId: string;
     continent: string;
     region: string;
-    /** Display copy for the header (e.g. "Map ii of vii · 4 paths remain"). */
+    /**
+     * Display copy for the header — the map ordinal only (e.g. "Map ii of
+     * vii"). Never a node/path count: counts are computed live for the map
+     * legend, and a static one here inevitably drifts out of agreement
+     * (CRITIQUE pass 19).
+     */
     regionProgress: string;
     nodes: readonly NodeLayout[];
 }
