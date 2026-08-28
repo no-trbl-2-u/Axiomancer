@@ -386,3 +386,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-27T22:30:52Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
 | 2026-08-27T22:32:08Z | slash-prompt | /march | claude-opus-5 | user/ci | /march |
 | 2026-08-27T23:32:08Z | slash-prompt | /march | claude-opus-5 | user/ci | /march |
+| 2026-08-28T00:32:08Z | slash-prompt | /march | claude-opus-5 | user/ci | /march |
