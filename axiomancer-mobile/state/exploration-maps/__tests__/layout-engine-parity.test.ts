@@ -24,6 +24,7 @@ const MAPS = [
     { mapId: 'fishing-village', continent: 'coastal-continent' },
     { mapId: 'northern-forest', continent: 'coastal-continent' },
     { mapId: 'caverns', continent: 'northern-continent' },
+    { mapId: 'northern-city', continent: 'northern-continent' },
 ] as const;
 
 describe('exploration map: engine ↔ layout node-id parity', () => {
