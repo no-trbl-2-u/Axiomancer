@@ -203,7 +203,15 @@
   (rather than the ~6 idle minutes this one wasted after its last push)
   would be a worse outcome than either fix costs.
 
-### Inter-map travel — the first map has no exit
+### [x] Inter-map travel — the first map has no exit — PROMOTED to build-plan Phase W1 (THE OPEN GATE session, 2026-08-28)
+- **promotion note:** T direct 2026-08-28 ("NEW CONTINENTS, NEW MAPS!.
+  Why do I still only see the first continent?") — promoted and
+  implemented in the same session as Phase W1, with Phase W2 (the
+  caverns) opening the northern continent behind it. The open design
+  question below is ANSWERED as a `[loop-call]`: arriving on a new map
+  PRESERVES the old map's `MapState` — the world is a place you can
+  move around in, the reading `completedMaps` always implied; the
+  gauntlet law governs traversal WITHIN a map, not between maps.
 - source: first-map audit 2026-08-08 (`axiomancer-mechanics/docs/reports/FIRST-MAP-AUDIT.md`,
   finding F4). Filed as a candidate rather than shipped in that pass: it is a
   missing FEATURE, not a broken one, and building it under an audit banner

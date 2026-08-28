@@ -271,11 +271,12 @@ oversight will review and promote.
 
 1. **Never modify code.** Plan adjustments only.
 2. **Cap at 3 filed candidates per pass.** Boldness != flooding.
-3. **Don't promote spec non-goals.** If spec.md says "no
-   comments thread," don't propose a comments phase even if
-   external signals demand it. Surface it as `[needs-user-call]`
-   in the candidate's `conflicts` field; user resolves via
-   `/oversight` or by editing spec.
+3. **Don't promote spec non-goals silently.** If spec.md says "no
+   comments thread" and external signals demand one anyway, the
+   loop DECIDES (THE OPEN GATE, `plan/bearings.md`, 2026-08-28):
+   either uphold the spec (default) or amend the spec in the same
+   pass with the evidence, filing the call as `[loop-call]` in the
+   candidate's `conflicts` field for after-the-fact review.
 4. **Cite the signals.** Every candidate must list ≥1 concrete
    signal source (audit row, critique finding, issue number,
    spec diff line, design file).
@@ -294,8 +295,8 @@ oversight will review and promote.
 3. **No signals to expand on** (very early in the project,
    nothing has moved). Update metadata, commit "no candidates,"
    exit 0.
-4. **All candidates conflict with spec.** Surface as
-   `[needs-user-call]` rows; oversight resolves.
+4. **All candidates conflict with spec.** Decide per hard rule 3
+   (THE OPEN GATE): uphold or amend, file `[loop-call]` rows.
 5. **Autonomous posture but the phase number conflicts** with a
    recently-shipped phase (race condition with concurrent
    ship-a-phase). Stop and report.

@@ -2419,6 +2419,53 @@ on pickup):**
 - [ ] Phase V8 — Closure: `/critic-loop` screenshot pass, contrast/a11y
       audit, placeholder teardown, `SVG_ASSET_SPEC.md` reconciled,
       `docs/VISUAL_LANGUAGE.md` (mobile; after V1–V7)
+- [x] Phase W1 — The Door (inter-map travel): `travel` MapEventKind +
+      handler (unlock + complete + changeContinent + changeMap, old map
+      state PRESERVED — the world is a place, not a corridor), a real
+      `createStartingWorld()` world catalogue (empty-array no-op
+      retired), `GAME_STATE_VERSION` 20→21 + pinned migration, doors
+      fishing-village→northern-forest (un-bricks `get-to-forest`) and
+      northern-forest→caverns, mobile travel beat + presenter
+      (mechanics + mobile; THE OPEN GATE session)
+      SHIPPED 2026-08-28 (this session): doors at fv-10 (post-boss
+      spine, displacing the barnacle hazard) and nf-10 (the cave
+      mouth); departed maps preserved under `WorldState.mapStates`;
+      doors repeatable, never consumed (engine dispatcher AND the
+      mobile consume mirror both short-circuit); mobile beat is
+      detour-less — event slice cleared + arrival toast ("You cross
+      into <region>."); brief at
+      `plan/phases/phase_travel_inter_map_doors.md`; hermetic e2e both
+      sides (travel-kind engine suite, v20→v21 migration suite, mobile
+      `travel-door.engine.test.ts`).
+- [x] Phase W2 — The Caverns (the northern continent opens): first
+      northern map authored end-to-end — ~25 nodes on the column law,
+      `nc-` prefix registered, event + enemy pools (existing roster,
+      harder mix), mobile layout fixture + parity, backdrop plate
+      (mechanics + mobile; after W1)
+      SHIPPED 2026-08-28 (this session, with W1): 25 nodes / 10
+      columns (SEAM/GALLERY/SUMP lanes), The Delver NPC stages the
+      previously-dangling `gather-iron` quest, terminal boss The
+      Under-Gate (rawhead-rex @ L6), full per-node event pools incl. a
+      village-with-shop, backdrop resolves to the-pit via the existing
+      cavern regex; sealed stair toward `northern-city` is scenery
+      (nc-16 cutscene) awaiting W3.
+- [ ] Phase W3 — Northern City: map 2 of the northern continent per the
+      `map.library.ts` narrative seam (build a boat, meet the city);
+      new enemies with unique portraits via the licensed trove /
+      generation pipeline (`/forge`; after W2)
+- [ ] Phase W4 — The Connecting River + Town Across the River: maps
+      3–4 of the northern continent; the advisor-selection ritual beat
+      (`/forge`; after W3)
+- [ ] Phase W5 — New blood: per-map enemy roster growth so no two maps
+      share >70% of a pool; every new enemy through the ~10-edit
+      checklist with unique portrait + provenance (`/forge`; after W2,
+      parallel to W3/W4)
+- [ ] Phase G1 — `.claude/**` OPEN GATE doc sync: lift the superseded
+      wall text in `.claude/commands/{deck-tuning,combat-playtest,
+      world-tuning,hazard-tuning}.md`, add the `/forge` doorway pointer
+      — needs an attended session or an `Edit(.claude/**)` grant (the
+      permission classifier blocks loop edits there; see the AUDIT
+      `[loop-call]` row of 2026-08-28)
 
 > **After the queue drains:** `/march` transitions to `/iterate`
 > — draining `plan/AUDIT.md` + `plan/CRITIQUE.md`, doc-drift,
@@ -2745,6 +2792,19 @@ See the status rows above; generate briefs on demand.
   (2026-08-10 candidate, restated by this session's framing). Resulting
   commit: this one (branch `claude/content-pipelines-audit-43v3d7`,
   PR #228).
+
+- **2026-08-28** — actor: **T direct** (attended local session — THE
+  OPEN GATE, see `plan/bearings.md`). Action: **added Phases W1–W5**
+  (inter-map travel; the caverns; northern city; connecting river +
+  town across the river; per-map enemy roster growth) **and Phase G1**
+  (`.claude/**` doc sync), and **wired the new `/forge` content-foundry
+  verb into `/march` step 3b**. Confirmed T's request: yes — verbatim:
+  *"setup the pipeline in order to allow for the nexus loop to create
+  new enemies, new cards, new everything ... Furthermore, NEW
+  CONTINENTS, NEW MAPS!. Why do I still only see the first
+  continent?"* T's stated reason: content growth has been requested
+  repeatedly and the world still shows one reachable continent.
+  Resulting commit: this one (W1+W2 implemented in the same session).
 
 ## Phase log (commit hashes)
 

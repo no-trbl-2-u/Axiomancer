@@ -58,13 +58,17 @@ In parallel where independent:
 8. `axiomancer-mechanics/specs/` + `axiomancer-mechanics/braindump/`
    — has a new design input landed since the last sibling
    commit?
-9. **The needs-user-call sweep (standing).** Grep
-   `\[needs-user-call\]` across `plan/` (AUDIT, CRITIQUE,
-   PHASE_CANDIDATES, `plan/tuning/`). An item is **open** unless
-   its line/heading is marked resolved (`[x]`, "RESOLVED", or
-   moved to a resolved/rejected section). These are the decisions
-   the autonomous loop deliberately routed around — they only
-   drain here.
+9. **The loop-call sweep (standing).** Grep `\[loop-call\]` and
+   the legacy `\[needs-user-call\]` across `plan/` (AUDIT,
+   CRITIQUE, PHASE_CANDIDATES, `plan/tuning/`). Since THE OPEN
+   GATE (2026-08-28) the loop no longer parks decisions — it
+   decides, ships, and files `[loop-call]` rows. This sweep is
+   AFTER-THE-FACT REVIEW: present the calls the loop made since
+   the last oversight so T can ratify or reverse them. A row is
+   **open** (unreviewed) unless marked reviewed/resolved (`[x]`,
+   "RESOLVED"/"RATIFIED", or moved to a resolved section). Any
+   legacy `[needs-user-call]` still open is presented the same
+   way — with the loop's recommended answer attached.
 
 ## 4. The briefing (~25 lines max)
 
@@ -102,9 +106,10 @@ Generate 1–4 questions via `AskUserQuestion`, shaped per
 defer paths named, answers filed as policy, never re-ask). Rules:
 
 - **Standing question 0 (mandatory):** if the §3 sweep found any
-  open `[needs-user-call]` items, the FIRST question presents
-  them for decision — on top of (not counted against) the 1–4
-  computed questions. Skipped only when the sweep is clean.
+  unreviewed `[loop-call]` (or legacy `[needs-user-call]`) rows,
+  the FIRST question presents them for ratify-or-reverse review —
+  on top of (not counted against) the 1–4 computed questions.
+  Skipped only when the sweep is clean.
 - **Computed from observed flags**, not pre-canned.
 - **Each question targets a specific observable.**
 - **Multiple choice with recommended option marked first.**

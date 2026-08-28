@@ -42,6 +42,30 @@
 > RESOLVED note, same convention as every other closed row in this
 > file.
 
+### [debt] `.claude/**` doc sync for THE OPEN GATE — classifier-blocked from this session [loop-call]
+- category: debt
+- impact: 6
+- ease: 8
+- detail: filed 2026-08-28 by the attended OPEN GATE session. The harness's
+  permission classifier blocks editing `.claude/commands/*.md` (and,
+  precedent, `.claude/settings.json` — see the Phase 72 row) even in an
+  attended session, so the command files still carry wall text that
+  `plan/bearings.md` § THE OPEN GATE has superseded:
+  `.claude/commands/deck-tuning.md` ("Engine constants are tuned manually,
+  not here" — desc, §Disambiguation, §walls table, §related-loops),
+  `combat-playtest.md` ("Report only" + engine-constants-manual handoff),
+  `world-tuning.md` ("Dispatcher/handler CONTROL FLOW stays propose-only"),
+  `hazard-tuning.md` (propose-only structural findings). Also blocked: a
+  `.claude/commands/forge.md` doorway pointer for the new `skills/forge.md`
+  loop verb (march reads the skill file directly, so the loop itself works;
+  only the human-typed `/forge` slash entry is missing). Until the sync
+  lands, bearings outranks the command files per the source-of-truth
+  hierarchy — a tuning tick reading a wall should check bearings before
+  obeying it.
+- next: land the edits from a session with the grant (add
+  `Edit(.claude/commands/*)` permission, or T runs an attended pass and
+  approves the prompts). Exact edit list mirrors THE OPEN GATE ¶4–¶5.
+
 ### [divergence] Transitional-library ruling outlived its subject — card authority is a dead letter [needs-user-call]
 - category: divergence
 - impact: 9
@@ -2637,7 +2661,17 @@
   ("Unwritten Indenture", "Unsigned Indenture") rather than reach for a new
   image. Removing the entry from GRANDFATHERED_NAMES is what closes this row.
 
-### [needs-user-call] No shipped art has a license on record
+### [x] [needs-user-call] No shipped art has a license on record — CONVERTED to loop policy via THE OPEN GATE ¶6 (2026-08-28)
+- **resolution:** THE OPEN GATE (T direct, 2026-08-28 — `plan/bearings.md`)
+  withdrew the owner-input dependency: art origin questions are the loop's
+  to settle. Standing policy, effective now: for each `UNRESOLVED` batch
+  the loop (1) traces the source itself (reverse-image / filename /
+  asset-pack search) and records real terms when evidenced; (2) anything
+  untraceable within reasonable effort is a RE-ART decision the loop
+  makes — replace via the licensed trove or the generation pipeline and
+  retire the untraceable asset. Truthful provenance stays mandatory (law
+  + store policy). Drains through `/forge` art ticks; the
+  provenance-completeness gate keeps printing the count until zero.
 - category: content
 - impact: 7
 - ease: 9
