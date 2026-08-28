@@ -2449,10 +2449,34 @@ on pickup):**
       village-with-shop, backdrop resolves to the-pit via the existing
       cavern regex; sealed stair toward `northern-city` is scenery
       (nc-16 cutscene) awaiting W3.
-- [ ] Phase W3 — Northern City: map 2 of the northern continent per the
+- [x] Phase W3 — Northern City: map 2 of the northern continent per the
       `map.library.ts` narrative seam (build a boat, meet the city);
       new enemies with unique portraits via the licensed trove /
       generation pipeline (`/forge`; after W2)
+      SHIPPED 2026-08-28 (branch claude/w3-northern-city): the caverns'
+      sealed seam became a real door — nc-26 (new column past the
+      Under-Gate boss, the fv-10 post-climax pattern) travels to
+      THE NORTHERN CITY: 25 nodes / 10 columns (WALL / HIGH STREET /
+      HARBOR lanes + the drowned-slip hang-off), urban kind spread
+      (3 INN rests, 2 shops — the Iron Market + the Chandlery, 2 staged
+      NPCs — the Gate-Clerk + the Shipwright, the advisor-rumor
+      narration dilemma = the campaign seam, 2 gatherings = the
+      build-boat materials), sealed river-gate scenery at ncy-23
+      awaiting W4, boss The Harbormaster pinned L9 (fv-6=3 → nc-25=6 →
+      ncy-25=9 ladder). `get-to-northern-city` authored (Delver grant,
+      reach ncy-1). NO migration hop needed — v21 saves reach the city
+      via unlockMap's registered-destination admit; regression pinned.
+      W5 PARTIALLY DRAINED in the same phase: 9 new enemies (seam-tick,
+      prop-wight, unpaid-delver, sump-maren / toll-sergeant,
+      guild-knife, the-factor, wharf-shrike, the-harbormaster), each
+      with deck (shared canon), aftermath prose, and a UNIQUE
+      game-icons.net silhouette portrait (CC BY 3.0, truthful
+      provenance — lorc + delapouite); roster pins 52→61, threat ids
+      56→65, boss/unique stakes 18→19. Mobile: northern-city layout
+      fixture + parity, caverns layout re-spaced for the door column,
+      backdrop resolves to LUDGATE_HILL via the existing /city/ regex
+      (no new mapping line needed). Design residue filed to
+      plan/AUDIT.md ([loop-call] Phase W3 row).
 - [ ] Phase W4 — The Connecting River + Town Across the River: maps
       3–4 of the northern continent; the advisor-selection ritual beat
       (`/forge`; after W3)
@@ -2460,6 +2484,11 @@ on pickup):**
       share >70% of a pool; every new enemy through the ~10-edit
       checklist with unique portrait + provenance (`/forge`; after W2,
       parallel to W3/W4)
+      PARTIALLY DRAINED by W3 (2026-08-28): 9 northern enemies shipped
+      through the full checklist (see the W3 row). northern-city meets
+      the <70% bar (3/8 vs any sibling); caverns∩northern-forest still
+      sits at 10/14 — the remaining drain is coastal/forest pool
+      differentiation and any W4-map blood.
 - [ ] Phase G1 — `.claude/**` OPEN GATE doc sync: lift the superseded
       wall text in `.claude/commands/{deck-tuning,combat-playtest,
       world-tuning,hazard-tuning}.md`, add the `/forge` doorway pointer
