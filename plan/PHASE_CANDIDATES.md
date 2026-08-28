@@ -238,6 +238,19 @@
   a sequence of one-way acts or a place you can move around in. The gauntlet
   traversal law implies the former; the `completedMaps` field implies someone
   once meant the latter.
+### Card-face parity: bring the card-editor + devlog catalog onto THE PRINTED PLATE
+- source: THE OPEN GATE session 2026-08-28 — T dumped the #5 side-rail card
+  face ("looks dumb", full freedom granted); the loop shipped THE PRINTED
+  PLATE on the mobile combat surface (CombatCardFace: horizontal blackletter
+  name band + rarity pip, framed art plate behind a hairline rule, solid-ink
+  ledger with FREE cell | rule | die cube + KEYWORD + value).
+- what: the card-editor preview and the devlog Cards catalog still render
+  rail-era faces. Port the plate grammar to both so the three surfaces stop
+  drifting (the old #5 rule was exactly that parity). Keep the no-prose law.
+- why now: every /deck-tuning tick and catalog rebuild shows the dead design
+  to the owner; parity is how the reset sticks.
+- score: 3.8
+
 ### Promote the continent-playtest rig into a committed script
 - source: THE OPEN GATE session 2026-08-28 — the live playtest that proved
   Phases W1/W2 (and caught the missing travel checkpoint) ran as an ad-hoc

@@ -38,7 +38,7 @@ import Animated, {
     useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming,
     type SharedValue,
 } from 'react-native-reanimated';
-import Svg, { Circle, Defs, LinearGradient as SvgLinearGradient, Path, RadialGradient, Rect as SvgRect, Stop } from 'react-native-svg';
+import Svg, { Circle, Defs, Path, RadialGradient, Stop } from 'react-native-svg';
 
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
@@ -1463,16 +1463,6 @@ function compactFree(v: string | null): string {
     return v.length <= 3 ? v : v.slice(0, 3);
 }
 
-// Lighten a #rrggbb toward white by t (0..1) — the FREE glyph's pop tint
-// (owner call 2026-07-19: the category colours read muddy over the art).
-function lightenHex(hex: string, t: number): string {
-    const m = /^#?([0-9a-f]{6})$/i.exec(hex);
-    if (!m) return hex;
-    const n = parseInt(m[1], 16);
-    const ch = (v: number) => Math.round(v + (255 - v) * t);
-    return `rgb(${ch((n >> 16) & 255)},${ch((n >> 8) & 255)},${ch(n & 255)})`;
-}
-
 // Darken a #rrggbb by a factor (0..1) — the stance cube's shaded faces.
 function darkenHex(hex: string, f: number): string {
     const m = /^#?([0-9a-f]{6})$/i.exec(hex);
@@ -1496,26 +1486,6 @@ function StanceCube({ color, size }: { color: string; size: number }) {
     );
 }
 
-// The bottom scrim — a vertical gradient (deep→transparent) that keeps the
-// bottom-anchored name + paid sentence legible over the full-bleed art. A
-// per-card gradient id avoids react-native-svg's cross-instance id collisions.
-function FaceScrim({ w, h, uid, tint }: { w: number; h: number; uid: string; tint: string }) {
-    const id = `sc_${uid}`;
-    return (
-        <Svg width={w} height={h} style={StyleSheet.absoluteFill} pointerEvents="none">
-            <Defs>
-                <SvgLinearGradient id={id} x1="0" y1="1" x2="0" y2="0">
-                    <Stop offset="0" stopColor="#06050a" stopOpacity="1" />
-                    <Stop offset="0.30" stopColor={darkenHex(tint, 0.35)} stopOpacity="0.86" />
-                    <Stop offset="0.58" stopColor="#06050a" stopOpacity="0.42" />
-                    <Stop offset="0.82" stopColor="#06050a" stopOpacity="0" />
-                </SvgLinearGradient>
-            </Defs>
-            <SvgRect x="0" y="0" width={w} height={h} fill={`url(#${id})`} />
-        </Svg>
-    );
-}
-
 // The PAID value beside the face's keyword — the presenter's honest number
 // (`heroText`), or its qualitative word (`heroSub`) for the kinds that have no
 // number. A leading repeat of the keyword is stripped so the two slots never
@@ -1528,22 +1498,27 @@ function paidValueFor(f: CombatCardVM['face'], override?: string): string {
 }
 
 /**
- * The shared card FACE — Option A layout (owner-picked 2026-07-09, declutter
- * pass 2026-07-19) — instanced small in the hand and LARGE in the inspect
- * modal so the two can never drift.
- *   · per-card ART (temp pool, keyword-matched) fills the face behind a
- *     stance-tint gradient wash;
- *   · the LEFT RAIL (stance colour) carries the card NAME, centred vertically;
- *   · the giant FREE glyph (+ intensity) top-left; rarity tag top-right;
- *   · the bottom block: the die cube + the PAID line as `KEYWORD` over its
- *     value — two words, never a sentence.
+ * The shared card FACE — THE PRINTED PLATE (owner reset 2026-08-28: "dump the
+ * card design … full freedom" — the #5 side-rail face is retired). Cards read
+ * as pages of the codex, in line with the ratified Woodcut Codex direction:
+ *   · ① NAME BAND, top, HORIZONTAL, blackletter on solid ink — the fan shows
+ *     each card's left edge, so the name now reads without turning your head;
+ *     rarity is a small wax pip at the band's head, not a text tag;
+ *   · ② ART PLATE — a framed print with a hairline rule and dark margins, not
+ *     a full-bleed background. No stance wash, no scrim: the plate is clean
+ *     and the text never fights the art for contrast;
+ *   · ③ LEDGER, bottom, solid ink ground — FREE cell (glyph + intensity,
+ *     category colour) | hairline rule | PAID cell (stance die cube +
+ *     KEYWORD + value). In the fan the visible sliver is name-start + FREE
+ *     effect: the two fastest reads.
+ * Stance colours the frame + die cube; category colours the glyph + keyword.
+ * Instanced small in the hand and LARGE in the inspect modal so the two can
+ * never drift.
  *
- * Owner directive 2026-08-10 ("not so much verbage on the cards — the card
- * details already define the keywords"): the face carries NO prose. The
- * authored PAID sentence, the type strip, and the printed die lines all moved
- * to the inspect overlay, which already owns the keyword definitions. The face
- * is the glance read (name · free glyph · keyword · value); the overlay is the
- * explanation. Identical wording at both sizes.
+ * Owner directive 2026-08-10 still governs: the face carries NO prose. The
+ * authored PAID sentence, the type strip, and the printed die lines live in
+ * the inspect overlay. The face is the glance read (name · free glyph ·
+ * keyword · value); the overlay is the explanation.
  */
 export const CombatCardFace = React.memo(function CombatCardFace({
     card, width, height, large = false, accent = null, readPip = null, heroOverride, children,
@@ -1563,129 +1538,76 @@ export const CombatCardFace = React.memo(function CombatCardFace({
     const AXM = usePalette();
     const styles = useStyles();
     const f = card.face;
-    // #5 SIDE RAIL: STANCE colours the rail + the die cube + the art wash;
-    // CATEGORY colours the frame (border) + the bolded keyword in the paid line.
+    // PRINTED PLATE: STANCE colours the frame + the die cube; CATEGORY colours
+    // the FREE glyph + the keyword. Inert cards grey both honestly.
     const band = f.stanceColor;
     const baseKw = f.inert ? AXM.ash : f.categoryColor;
     const kwColor = accent ?? baseKw;
-    const borderColor = accent ?? f.categoryColor;
-    // ② PAID effect = KEYWORD over its value, the die cube its "costs a die"
-    // mark. ① FREE effect = the giant glyph + its intensity.
     const paidValue = paidValueFor(f, heroOverride);
     const freeInner = compactFree(f.freeValue ?? (f.freeHeroText || null));
     const hasFree = !!f.freeGlyph;
     // Effect-shaped silhouette for the FREE glyph (owner directive 2026-07-16);
     // keywords without a shape keep the text rune.
     const freeShape = glyphShapeFor(f.freeGlyphKey);
-    const railW = large ? 24 : 17;
-    // Owner directive 2026-07-16 part 2: the FREE glyph reads BIGGER (~30%) —
-    // it is the fastest read of "what does this card do".
-    const glyphSize = large ? 80 : 52;
+    const bandH = large ? 36 : 26;
+    const ledgerH = large ? 60 : 42;
+    const glyphSize = large ? 38 : 24;
     const rarity = card.rarity ?? 'common';
     const rarColor = rarity === 'rare' ? '#9a6ad6' : rarity === 'uncommon' ? '#6b8eb0' : '#8a8273';
     return (
         <View style={[styles.faceOuter, { width, height }]}>
-            <View style={[styles.faceCard, { borderColor }]}>
-                {/* ① FULL-BLEED ART — fills the whole face, anchored to the top */}
-                <View style={styles.faceArtFull} pointerEvents="none">
-                    <Image
-                        source={getCardArt(card.cardId)}
-                        style={[StyleSheet.absoluteFill, artMirrored(card.cardId) && { transform: [{ scaleX: -1 }] }]}
-                        contentFit="cover"
-                        transition={0}
-                    />
-                    <View style={[styles.faceArtTint, { backgroundColor: f.stanceColor }]} />
-                </View>
-                {/* SCRIM — deep→transparent so the bottom text stays legible */}
-                <FaceScrim w={width} h={height} uid={card.uid} tint={band} />
-                {/* LEFT RAIL — ONE stance-coloured container (the two-tone bottom
-                    shade is gone, owner call 2026-07-19) carrying the card NAME
-                    rotated -90° and centred. The label sits in an explicitly-sized
-                    rotated box (width = card height): rotating the bare Text let
-                    the layout clamp it to the rail's width and ellipsize the name
-                    after two letters (owner report, same day). */}
-                <View style={[styles.faceRail, { width: railW, backgroundColor: band }]} pointerEvents="none">
-                    <View
-                        style={[styles.faceRailRotor, {
-                            left: (railW - height) / 2,
-                            top: (height - railW) / 2,
-                            width: height,
-                            height: railW,
-                        }]}
+            <View style={[styles.faceCard, { borderColor: accent ?? band }]}>
+                {/* ① NAME BAND — horizontal blackletter on solid ink; the wax
+                    pip carries rarity. The fan's visible sliver starts here. */}
+                <View style={[styles.plateBand, { height: bandH }]} pointerEvents="none">
+                    <View style={[styles.plateRarityPip, large && styles.plateRarityPipLarge, { backgroundColor: rarColor }]} />
+                    <Text
+                        style={[styles.plateName, large && styles.plateNameLarge]}
+                        numberOfLines={1}
+                        adjustsFontSizeToFit
+                        minimumFontScale={0.6}
+                        allowFontScaling={false}
                     >
-                        <Text
-                            style={[styles.faceRailLabel, large && styles.faceRailLabelLarge]}
-                            numberOfLines={1}
-                            adjustsFontSizeToFit
-                            minimumFontScale={0.6}
-                            allowFontScaling={false}
-                        >
-                            {card.name.toUpperCase()}
-                        </Text>
+                        {card.name.toUpperCase()}
+                    </Text>
+                </View>
+                {/* ② ART PLATE — a framed print behind a hairline rule; dark
+                    margins, no wash, no scrim. Inert cards grey the plate. */}
+                <View style={styles.plateArtWrap} pointerEvents="none">
+                    <View style={styles.plateArtFrame}>
+                        <Image
+                            source={getCardArt(card.cardId)}
+                            style={[StyleSheet.absoluteFill, artMirrored(card.cardId) && { transform: [{ scaleX: -1 }] }]}
+                            contentFit="cover"
+                            transition={0}
+                        />
+                        {f.inert ? <View style={styles.plateInertWash} /> : null}
                     </View>
                 </View>
-                {/* ① FREE effect — the giant glyph (what the card does for free) +
-                    its intensity, top-left just past the rail. */}
-                {hasFree ? (
-                    <View style={[styles.freeBadge, { left: large ? 5 : 3, top: large ? 5 : 3, width: glyphSize, height: glyphSize, zIndex: 3 }]} pointerEvents="none">
-                        <Svg width={glyphSize} height={glyphSize} style={StyleSheet.absoluteFill}>
-                            <Defs>
-                                <RadialGradient id={`fh_${card.uid}`} cx="48%" cy="46%" r="54%">
-                                    <Stop offset="0" stopColor="#06050a" stopOpacity="0.94" />
-                                    <Stop offset="0.6" stopColor="#06050a" stopOpacity="0.62" />
-                                    <Stop offset="1" stopColor="#06050a" stopOpacity="0" />
-                                </RadialGradient>
-                            </Defs>
-                            <SvgRect x="0" y="0" width={glyphSize} height={glyphSize} fill={`url(#fh_${card.uid})`} />
-                        </Svg>
-                        {/* POP tint (owner call 2026-07-19): the raw category colour
-                            read muddy over the art — the glyph brightens toward
-                            white and takes a light edge, on a harder backdrop.
-                            Inert stays honestly grey (engine doesn't read it).
-                            zIndex is EXPLICIT on every layer: on web the
-                            absolutely-positioned backdrop painted ABOVE the
-                            normal-flow glyph (positioned beats static regardless
-                            of child order), greying the glyph out — the owner's
-                            "backdrop is on top of the glyph" report, same day. */}
-                        {freeShape ? (
-                            /* View wrapper: RN-web guarantees position:relative on
-                               Views (zIndex applies); a bare <Svg> may stay static. */
-                            <View style={{ zIndex: 1 }}>
-                                <Svg width={glyphSize * 0.86} height={glyphSize * 0.86} viewBox="0 0 24 24">
-                                    {/* Lighten 0.3 → 0.12 (owner pass 4, same day): with the
-                                        z-order fixed the full 0.3 washed the hue out — keep
-                                        just a touch of lift over the raw category colour. */}
+                {/* ③ LEDGER — solid ink ground: FREE cell | rule | PAID cell.
+                    No prose (owner 2026-08-10); the overlay explains. */}
+                <View style={[styles.plateLedger, { height: ledgerH }]} pointerEvents="none">
+                    {hasFree ? (
+                        <View style={styles.plateFreeCell}>
+                            {freeShape ? (
+                                <Svg width={glyphSize} height={glyphSize} viewBox="0 0 24 24">
                                     <Path
                                         d={freeShape.d}
-                                        fill={f.inert ? baseKw : lightenHex(baseKw, 0.12)}
-                                        stroke={f.inert ? 'none' : 'rgba(255,255,255,0.3)'}
-                                        strokeWidth={0.6}
+                                        fill={f.inert ? AXM.ash : kwColor}
                                         fillRule={freeShape.evenodd ? 'evenodd' : 'nonzero'}
                                     />
                                 </Svg>
-                            </View>
-                        ) : (
-                            <Text style={[styles.freeGlyph, { fontSize: glyphSize, lineHeight: glyphSize, color: f.inert ? baseKw : lightenHex(baseKw, 0.12), zIndex: 1 }]} allowFontScaling={false}>{f.freeGlyph}</Text>
-                        )}
-                        {freeInner ? (
-                            <View style={[StyleSheet.absoluteFill, { alignItems: 'center', justifyContent: 'center', zIndex: 2 }]} pointerEvents="none">
-                                <Text style={[styles.freeInner, large && styles.freeInnerLarge]} allowFontScaling={false}>{freeInner}</Text>
-                            </View>
-                        ) : null}
-                    </View>
-                ) : null}
-                {/* ④ rarity tag, top-right corner (kept per owner call) */}
-                <View style={[styles.faceRarity, { borderColor: rarColor + '88' }]} pointerEvents="none">
-                    <Text style={[styles.faceRarityText, large && styles.faceRarityTextLarge, { color: rarColor }]} allowFontScaling={false}>
-                        {rarity.toUpperCase()}
-                    </Text>
-                </View>
-                {/* ② BOTTOM — the die cube + the PAID line: KEYWORD over its
-                    value. No type strip, no sentence, no die-line triplet —
-                    those live in the inspect overlay (owner 2026-08-10). */}
-                <View style={[styles.faceBtm, { left: railW + (large ? 12 : 8) }]}>
-                    <View style={styles.paidRow}>
-                        <StanceCube color={band} size={large ? 22 : 15} />
+                            ) : (
+                                <Text style={[styles.plateFreeGlyph, { fontSize: glyphSize * 0.85, lineHeight: glyphSize, color: f.inert ? AXM.ash : kwColor }]} allowFontScaling={false}>{f.freeGlyph}</Text>
+                            )}
+                            {freeInner ? (
+                                <Text style={[styles.plateFreeValue, large && styles.plateFreeValueLarge]} allowFontScaling={false}>{freeInner}</Text>
+                            ) : null}
+                        </View>
+                    ) : null}
+                    {hasFree ? <View style={styles.plateRule} /> : null}
+                    <View style={styles.platePaidCell}>
+                        <StanceCube color={band} size={large ? 20 : 14} />
                         {readPip ? <Text style={[styles.paidRead, { color: kwColor }]} allowFontScaling={false}>{readPip}</Text> : null}
                         <View style={styles.paidTextWrap}>
                             {f.keyword ? (
@@ -1908,59 +1830,49 @@ const useStyles = makeStyles((AXM) => ({
         textShadowColor: 'rgba(0,0,0,0.95)', textShadowRadius: 3,
     },
 
-    // ── Shared card FACE (hand · staged · inspect modal) ──────────────────────
-    // Outer/inner double frame: 2pt near-black outside a category-coloured border.
+    // ── Shared card FACE — THE PRINTED PLATE (owner reset 2026-08-28) ────────
+    // A page of the codex: name band on ink, framed art plate behind a
+    // hairline rule, solid-ground ledger. Stance colours the frame; category
+    // colours glyph + keyword. AXM tokens throughout — no scrim, no washes.
     faceOuter: {
-        borderRadius: 8, borderWidth: 2, borderColor: 'rgba(0,0,0,0.9)', backgroundColor: '#14110e',
-        shadowColor: '#000', shadowOpacity: 0.5, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: 6,
+        borderRadius: 6, borderWidth: 2, borderColor: AXM.pixelShadow, backgroundColor: AXM.deepBg,
+        shadowColor: AXM.pixelShadow, shadowOpacity: 0.5, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: 6,
     },
-    faceCard: { flex: 1, borderWidth: 1.5, borderRadius: 6, backgroundColor: '#14110e', overflow: 'hidden' },
-    // #5 SIDE RAIL — art is full-bleed behind everything; rail, glyph, name, and
-    // paid sentence are absolutely placed over it.
-    faceArtFull: { ...StyleSheet.absoluteFillObject, backgroundColor: '#0c0a08' },
-    faceArtTint: { ...StyleSheet.absoluteFillObject, opacity: 0.17 },
-    // Left stance spine + a bottom darken so the vertical label stays legible.
-    faceRail: {
-        position: 'absolute', left: 0, top: 0, bottom: 0,
-        borderRightWidth: 1, borderRightColor: 'rgba(0,0,0,0.5)',
+    faceCard: { flex: 1, borderWidth: 1.5, borderRadius: 4, backgroundColor: AXM.deepBg, overflow: 'hidden' },
+    // ① The name band — horizontal blackletter; the wax pip is the rarity.
+    plateBand: {
+        flexDirection: 'row', alignItems: 'center', paddingHorizontal: 6, gap: 5,
+        backgroundColor: AXM.deepBg,
+        borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: AXM.divider,
     },
-    // The rotated label box: sized (card height × rail width) and spun -90° in
-    // place, so the name lays out at full card-height width — never clamped to
-    // the rail's own width — and centres along the rail.
-    faceRailRotor: { position: 'absolute', transform: [{ rotate: '-90deg' }], alignItems: 'center', justifyContent: 'center' },
-    faceRailLabel: {
-        textAlign: 'center', maxWidth: '96%',
-        fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 1.6, color: 'rgba(255,255,255,0.95)',
-        textShadowColor: 'rgba(0,0,0,0.7)', textShadowRadius: 2,
+    plateRarityPip: { width: 5, height: 5, borderRadius: 3 },
+    plateRarityPipLarge: { width: 7, height: 7, borderRadius: 4 },
+    plateName: { flex: 1, fontFamily: FONTS.gothic, fontSize: 13, letterSpacing: 0.4, color: AXM.parchment },
+    plateNameLarge: { fontSize: 20, letterSpacing: 0.8 },
+    // ② The framed art plate — dark margins, hairline rule.
+    plateArtWrap: { flex: 1, padding: 4, backgroundColor: AXM.panelBg },
+    plateArtFrame: {
+        flex: 1, borderWidth: StyleSheet.hairlineWidth, borderColor: AXM.ash,
+        overflow: 'hidden', backgroundColor: AXM.deepBg,
     },
-    faceRailLabelLarge: { fontSize: 12, letterSpacing: 2.4 },
-    // ① the giant FREE-effect glyph with its intensity centred INSIDE it.
-    freeBadge: { position: 'absolute', alignItems: 'center', justifyContent: 'center' },
-    freeGlyph: { textAlign: 'center', textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 } },
-    freeInner: {
-        fontFamily: FONTS.mono, fontSize: 13, fontWeight: '700', color: '#fff',
-        textShadowColor: 'rgba(0,0,0,0.95)', textShadowRadius: 3, textShadowOffset: { width: 0, height: 1 },
+    plateInertWash: { ...StyleSheet.absoluteFillObject, backgroundColor: AXM.backdrop },
+    // ③ The ledger — FREE cell | hairline rule | PAID cell, solid ground.
+    plateLedger: {
+        flexDirection: 'row', alignItems: 'center', paddingHorizontal: 6, gap: 6,
+        backgroundColor: AXM.deepBg,
+        borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: AXM.divider,
     },
-    freeInnerLarge: { fontSize: 20 },
-    // ④ rarity tag, top-right.
-    faceRarity: { position: 'absolute', top: 6, right: 6, backgroundColor: 'rgba(8,7,6,0.7)', borderWidth: 1, paddingHorizontal: 5, paddingVertical: 1 },
-    faceRarityText: { fontFamily: FONTS.sans, fontSize: 8, letterSpacing: 1 },
-    faceRarityTextLarge: { fontSize: 10, letterSpacing: 1.4 },
-    // ② bottom-anchored PAID line — KEYWORD over its value (the name is on the
-    // rail; the sentence, type strip and die lines live in the overlay).
-    faceBtm: { position: 'absolute', right: 10, bottom: 10 },
-    paidRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 6 },
+    plateFreeCell: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+    plateFreeGlyph: { textAlign: 'center' },
+    plateFreeValue: { fontFamily: FONTS.mono, fontSize: 12, fontWeight: '700', color: AXM.parchment },
+    plateFreeValueLarge: { fontSize: 17 },
+    plateRule: { width: StyleSheet.hairlineWidth, alignSelf: 'stretch', marginVertical: 6, backgroundColor: AXM.divider },
+    platePaidCell: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 5 },
     paidRead: { fontFamily: FONTS.mono, fontSize: 11, marginTop: 1 },
     paidTextWrap: { flex: 1 },
     // The keyword is the loudest word on the face — it is the whole read now.
-    paidKeyword: {
-        fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 0.8,
-        textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 4,
-    },
+    paidKeyword: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 0.8 },
     paidKeywordLarge: { fontSize: 17, letterSpacing: 1.2 },
-    paidValue: {
-        fontFamily: FONTS.mono, fontSize: 11, lineHeight: 15, color: AXM.parchment,
-        textShadowColor: 'rgba(0,0,0,0.85)', textShadowRadius: 3,
-    },
+    paidValue: { fontFamily: FONTS.mono, fontSize: 11, lineHeight: 15, color: AXM.parchment },
     paidValueLarge: { fontSize: 15, lineHeight: 20 },
 }));
