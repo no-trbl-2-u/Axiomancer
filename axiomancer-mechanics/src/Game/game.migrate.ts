@@ -300,6 +300,65 @@ function migrateV19ToV20(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
+ * v20 → v21 (2026-08-28): inter-map travel. Old saves carry `world: []` —
+ * the continent catalogue was never populated, so `changeContinent` could
+ * only no-op. Seed the new two-continent catalogue (coastal + northern,
+ * matching `createStartingWorld`), REPLACING the seeded entry that matches
+ * `currentContinent.name` with the save's own continent so any completed /
+ * available map state it accumulated is preserved. `currentContinent` and
+ * `currentMap` pass through untouched; `mapStates` (the record of departed
+ * maps) defaults to `{}`. A save whose catalogue is somehow already
+ * populated keeps it. Pure over a raw save payload.
+ */
+function migrateV20ToV21(raw: Record<string, unknown>): Record<string, unknown> {
+    const world = raw.world as {
+        world?: unknown[];
+        currentContinent?: { name?: string };
+        mapStates?: unknown;
+    } | undefined;
+    if (!world || typeof world !== 'object') {
+        return { ...raw, version: 21 };
+    }
+
+    const seeded = [
+        {
+            name: 'coastal-continent',
+            description: 'The coastal continent is a landmass bordered by the sea to the east and west. It is home to a variety of biomes, including forests, mountains, and plains.',
+            availableMaps: ['fishing-village'],
+            lockedMaps: ['northern-forest'],
+            completedMaps: [],
+        },
+        {
+            name: 'northern-continent',
+            description: 'The northern continent begins underground. Iron caverns climb toward the first city; a river runs on from there. Nobody arrives by daylight.',
+            availableMaps: [],
+            lockedMaps: ['caverns'],
+            completedMaps: [],
+        },
+    ];
+
+    const catalogue = Array.isArray(world.world) && world.world.length > 0
+        ? world.world
+        : seeded.map(c =>
+            world.currentContinent && world.currentContinent.name === c.name
+                ? world.currentContinent
+                : c,
+        );
+
+    return {
+        ...raw,
+        world: {
+            ...world,
+            world: catalogue,
+            mapStates: (world.mapStates && typeof world.mapStates === 'object')
+                ? world.mapStates
+                : {},
+        },
+        version: 21,
+    };
+}
+
+/**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
  * game). The name/signature is kept so the persistence layer's call site is
@@ -328,8 +387,9 @@ export function migrate(
     // v14 → v15 backfills the die-gear rail; v15 → v16 defaults the card-removal
     // counter; v16 → v17 retires the rest minigame; v17 → v18 retires the
     // Quest Board minigame; v18 → v19 retires the Gathering minigame; v19 →
-    // v20 retires the loot-cache Pick Pool minigame and adds `mapGoodwill`.
-    // Chained so a v11 save lands at v20 in one call.
+    // v20 retires the loot-cache Pick Pool minigame and adds `mapGoodwill`;
+    // v20 → v21 seeds the continent catalogue for inter-map travel.
+    // Chained so a v11 save lands at v21 in one call.
     if (version === 11 && toVersion >= 12) {
         working = migrateV11ToV12(working);
         version = 12;
@@ -365,6 +425,10 @@ export function migrate(
     if (version === 19 && toVersion >= 20) {
         working = migrateV19ToV20(working);
         version = 20;
+    }
+    if (version === 20 && toVersion >= 21) {
+        working = migrateV20ToV21(working);
+        version = 21;
     }
 
     if (version !== toVersion) {

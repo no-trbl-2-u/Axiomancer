@@ -1,20 +1,36 @@
-import { WorldState } from './types';
-import { MapName } from './map.library';
+import { WorldState, Continent } from './types';
 import { createMapState, getMapDefinition } from './map.registry';
 
-/** Builds the initial WorldState for a new save. */
+/**
+ * Builds the initial WorldState for a new save.
+ *
+ * The `world` catalogue is REAL as of 2026-08-28 (inter-map travel): it
+ * carries the two campaign continents, and `changeContinent` / `unlockMap`
+ * keep it in sync with `currentContinent`. The labyrinth-continent (THE
+ * APORIA, W-01) stays deliberately uncatalogued — dev-menu + CLI access
+ * only until the last continent exists.
+ */
 export function createStartingWorld(): WorldState {
     const fishingVillage = getMapDefinition('coastal-continent', 'fishing-village');
+    const coastal: Continent = {
+        name: 'coastal-continent',
+        description: 'The coastal continent is a landmass bordered by the sea to the east and west. It is home to a variety of biomes, including forests, mountains, and plains.',
+        availableMaps: ['fishing-village'],
+        lockedMaps: ['northern-forest'],
+        completedMaps: [],
+    };
+    const northern: Continent = {
+        name: 'northern-continent',
+        description: 'The northern continent begins underground. Iron caverns climb toward the first city; a river runs on from there. Nobody arrives by daylight.',
+        availableMaps: [],
+        lockedMaps: ['caverns'],
+        completedMaps: [],
+    };
     return {
-        world: [],
-        currentContinent: {
-            name: 'coastal-continent',
-            description: 'The coastal continent is a landmass bordered by the sea to the east and west. It is home to a variety of biomes, including forests, mountains, and plains.',
-            availableMaps: ['fishing-village' as MapName],
-            lockedMaps: ['northern-forest' as MapName],
-            completedMaps: [],
-        },
+        world: [coastal, northern],
+        currentContinent: coastal,
         currentMap: createMapState(fishingVillage),
+        mapStates: {},
     };
 }
 
@@ -88,7 +104,7 @@ export type {
     MapEventKind, MapEventPayload, MapEventPool, MapEventPoolEntry,
     EncounterPayload, InteractionPayload, GatheringPayload, RestPayload,
     VillagePayload, CutscenePayload, HazardPayload, LootCachePayload,
-    NarrationPayload, BlacksmithPayload, ResolvedEvent, ResolveMapEventResult,
+    NarrationPayload, BlacksmithPayload, TravelPayload, ResolvedEvent, ResolveMapEventResult,
 } from './MapEvents/types';
 // Phase 52b — rest shelter classification (replaces the healFraction >= 1.0
 // inn heuristic). Mobile gates the hazard-scar mend on `shelter === 'inn'`.

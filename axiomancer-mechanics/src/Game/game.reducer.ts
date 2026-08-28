@@ -96,8 +96,14 @@ import { STARTING_CARD_IDS } from '../Combat/combat.rewards';
  *   choice. Clears any live cache session riding along in the raw
  *   payload's `cache` key and adds the required `mapGoodwill: Record<string,
  *   number>` slice, defaulted to `{}` for legacy saves (see `game.migrate.ts`).
+ * 2026-08-28 — bumped 20 → 21: inter-map travel. `createStartingWorld` now
+ *   populates the `world` continent catalogue (coastal + northern) instead
+ *   of `[]`, and `WorldState` gains the optional `mapStates` record of
+ *   departed maps. The migration seeds the catalogue onto old saves,
+ *   preserving `currentContinent` / `currentMap` and any completed /
+ *   available state they carried (see `game.migrate.ts`).
  */
-export const GAME_STATE_VERSION = 20;
+export const GAME_STATE_VERSION = 21;
 
 /** Builds a brand-new GameState with default player and world. */
 export function createNewGameState(): GameState {

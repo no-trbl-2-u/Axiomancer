@@ -48,13 +48,36 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
 
         // fv-6 is the authored boss node; fv-1 is the arrival cutscene
         // (2026-08-08 first-map audit) — the audit inspects wiring, it never
-        // fights anyone.
+        // fights anyone. fv-10, the terminal-column coast road, is the
+        // northern-forest DOOR as of 2026-08-28 — the read-only audit sees
+        // its kind without walking through it.
         const eventKinds = summary.eventKinds as Record<string, string>;
         expect(eventKinds['fv-1']).toBe('cutscene');
         expect(eventKinds['fv-6']).toBe('encounter');
+        expect(eventKinds['fv-10']).toBe('travel');
 
         const actions = readLog(logPath).map(r => r.action);
         expect(actions).not.toContain('hazardCombat:start');
+    });
+
+    it('--route-audit reports all 25 caverns nodes (2026-08-28 — the northern continent)', async () => {
+        const logPath = tmpPath('caverns-coverage');
+
+        await runGameCli(['--route-audit', 'caverns', '--state-log', logPath]);
+
+        const summary = routeEnd(logPath);
+        expect(summary.classification).toBe('coverage-audit');
+        expect(summary.survived).toBe(true);
+        expect(summary.unvisitedNodeIds).toEqual([]);
+        expect((summary.visitedNodeIds as string[]).length).toBe(25);
+        expect((summary.resolvedNodeIds as string[]).length).toBe(25);
+
+        // nc-1 is the arrival; nc-2 the Delver (the quest-giver singleton);
+        // nc-25 the Under-Gate boss; nf-10's door lands on this map.
+        const eventKinds = summary.eventKinds as Record<string, string>;
+        expect(eventKinds['nc-1']).toBe('cutscene');
+        expect(eventKinds['nc-2']).toBe('interaction');
+        expect(eventKinds['nc-25']).toBe('encounter');
     });
 
     it('a scripted route stops at a combat defeat and downgrades to "blocked" — never reports post-defeat traversal as survivorship', async () => {

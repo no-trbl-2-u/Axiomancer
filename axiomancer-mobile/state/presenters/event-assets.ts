@@ -60,6 +60,9 @@ export function selectEventArtSlug(event: ResolvedEvent): EventArtSlug {
         // screen). Never reaches the event modal; generic fallback kept
         // defensively, mirroring the other minigame kinds.
         case 'blacksmith':
+        // 2026-08-28 — 'travel' resolves engine-side (the world has already
+        // crossed); the travel-UI wave owns its presentation.
+        case 'travel':
         case 'none':
             return 'interaction-generic';
     }
@@ -84,6 +87,9 @@ const DEFAULT_BODY_BY_KIND: Record<ResolvedEvent['kind'], string> = {
     // session via its interceptor (D6 owns the screen); never renders in the
     // modal, but the exhaustive record needs the entry.
     blacksmith: 'An anvil, and a waiting hammer.',
+    // 2026-08-28 — travel doors resolve engine-side; the travel-UI wave
+    // owns the real presentation. Exhaustive record needs the entry.
+    travel: 'The road goes on. So do you.',
     none: '',
 };
 

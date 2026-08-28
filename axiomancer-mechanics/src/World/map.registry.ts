@@ -10,6 +10,7 @@
 import { MapDefinition, MapState, NodeId, UniqueEvent } from './types';
 import { ContinentName, MapName } from './map.library';
 import { fishingVillage, northernForest } from './Continents/Coastal-Village/maps';
+import { caverns } from './Continents/Northern-Continent/maps';
 import { aporiaColonnade, aporiaArchive, aporiaProof } from './Labyrinth/maps';
 
 /** Thrown when navigating to a map that isn't registered. */
@@ -29,7 +30,12 @@ export const MAP_REGISTRY: Record<ContinentName, Partial<Record<MapName, MapDefi
         'fishing-village': fishingVillage,
         'northern-forest': northernForest,
     },
-    'northern-continent': {},
+    // 2026-08-28 — inter-map travel: the iron caverns, first map of the
+    // second continent. northern-city / connecting-river / town-across-river
+    // remain unshipped.
+    'northern-continent': {
+        'caverns': caverns,
+    },
     // W-01 — The Aporia (dev-menu + CLI access only until the last
     // continent exists; see specs/world/W-01).
     'labyrinth-continent': {

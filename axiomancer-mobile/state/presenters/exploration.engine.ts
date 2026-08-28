@@ -188,6 +188,9 @@ const KIND_TO_NODE_TYPE: Record<MapEventKind, NodeType> = {
     cutscene: 'quest',
     narration: 'quest',
     blacksmith: 'blacksmith',
+    // 2026-08-28 — inter-map travel doors. No bespoke door glyph yet; the
+    // follow-up travel-UI wave owns one. Borrows the narrative icon.
+    travel: 'quest',
 };
 
 /** Node display type, sourced from the engine's authored event pools. */

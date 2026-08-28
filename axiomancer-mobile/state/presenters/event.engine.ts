@@ -646,6 +646,10 @@ function composeNarrative(resolved: ResolvedEvent): Omit<EventViewModel, 'prelud
         // composeNarrative; falls to the empty VM defensively like the other
         // minigame kinds.
         case 'blacksmith':
+        // 2026-08-28 — 'travel' is engine-resolved (the world has already
+        // crossed when the event surfaces); the follow-up travel-UI wave
+        // owns its presentation. Falls to the empty VM defensively.
+        case 'travel':
         case 'none':
             return EMPTY_VM;
     }

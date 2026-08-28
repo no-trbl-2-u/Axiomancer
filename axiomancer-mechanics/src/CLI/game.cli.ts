@@ -395,6 +395,7 @@ function describeResolvedEvent(event: ResolvedEvent): string {
             return root ? root.text : 'A moment of narration passes.';
         }
         case 'blacksmith':  return `The anvil (budget ${event.budget}${event.variants.length > 0 ? `, ${event.variants.length} variant${event.variants.length === 1 ? '' : 's'} on offer` : ''}).`;
+        case 'travel':      return `${event.description ?? 'You walk on.'} (→ ${event.destinationContinent} / ${event.destinationMap})`;
         case 'none':        return 'Nothing of note happens.';
     }
 }

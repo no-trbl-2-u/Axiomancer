@@ -170,6 +170,7 @@ import {
 import { getAporiaAct } from '@mechanics';
 import type { LabyrinthActId, LabyrinthBossOutcome } from '@mechanics';
 import { wrapActionsWithLogging } from './logging';
+import { getMapLayout } from './exploration-maps';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -1489,8 +1490,12 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
         // `moveToAction`'s `worldCompleteNode` call). Screen still reads
         // legacy fields; Phase 30+ TBD migrates the read side.
         let resolvedState: GameState = result.state;
-        const shouldConsumeNode = result.event.kind !== 'none' && 
-            !['encounter'].includes(result.event.kind);
+        // 'travel' must never consume: post-travel, `currentMap` is the
+        // DESTINATION, so consuming here would mark the arrival map's
+        // start node — mirroring the engine dispatcher's own travel
+        // short-circuit. Doors stay repeatable.
+        const shouldConsumeNode = result.event.kind !== 'none' &&
+            !['encounter', 'travel'].includes(result.event.kind);
         if (shouldConsumeNode) {
             const currentNodeId = resolvedState.world?.currentMap?.currentNode;
             if (currentNodeId) {
@@ -1615,6 +1620,22 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
                 variants: result.event.variants,
                 tutorial: !tutorialDone,
             });
+            return true;
+        }
+
+        // Travel events are already fully applied engine-side: the world
+        // on `result.state` has crossed maps (and continents when the door
+        // spans one). No screen detour and no pending card — clear the
+        // event slice so the exploration canvas re-renders the arrival
+        // map, and narrate the crossing as a toast.
+        if (result.event.kind === 'travel') {
+            store.setState({
+                ...resolvedState,
+                event: EMPTY_EVENT_SLICE,
+            });
+            const region = getMapLayout(result.event.destinationMap)?.region
+                ?? result.event.destinationMap;
+            pushToast(store, `You cross into ${region}.`);
             return true;
         }
 

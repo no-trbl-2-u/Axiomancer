@@ -19,6 +19,7 @@ import { describe, expect, it } from 'vitest';
 import { MAP_REGISTRY } from '../map.registry';
 import { auditMapTraversal, auditRouteCoverage } from '../world.reducer';
 import { fishingVillage, northernForest } from '../Continents/Coastal-Village/maps';
+import { caverns } from '../Continents/Northern-Continent/maps';
 import type { MapDefinition } from '../types';
 
 /** Every registered gauntlet map, flattened. Labyrinth maps are exempt. */
@@ -27,8 +28,8 @@ const GAUNTLET_MAPS: MapDefinition[] = Object.values(MAP_REGISTRY)
     .filter((def): def is MapDefinition => def !== undefined && def.traversal !== 'labyrinth');
 
 describe('gauntlet map traversal invariants', () => {
-    it('registers at least the two coastal maps as gauntlets', () => {
-        expect(GAUNTLET_MAPS.map(d => d.name).sort()).toEqual(['fishing-village', 'northern-forest']);
+    it('registers the two coastal maps plus the caverns as gauntlets', () => {
+        expect(GAUNTLET_MAPS.map(d => d.name).sort()).toEqual(['caverns', 'fishing-village', 'northern-forest']);
     });
 
     for (const def of GAUNTLET_MAPS) {
@@ -204,5 +205,29 @@ describe('northern-forest', () => {
         expect(nf10.connectedNodes).toEqual([]);
         const maxX = Math.max(...northernForest.nodes.map(n => n.location[0]));
         expect(nf10.location[0]).toBe(maxX);
+    });
+});
+
+describe('caverns — first map of the northern continent (2026-08-28)', () => {
+    const audit = auditMapTraversal(caverns);
+    const coverage = auditRouteCoverage(caverns);
+
+    it('guarantees the arrival, the Delver, and the Under-Gate boss on every route', () => {
+        // The three deliberate singleton columns — the same shape the
+        // village settled on: the premise (nc-2, the quest-giver) and the
+        // climax (nc-25) are structural, never a coin flip.
+        expect(coverage.shareOfRoutes['nc-1']).toBe(1);
+        expect(coverage.shareOfRoutes['nc-2']).toBe(1);
+        expect(coverage.shareOfRoutes['nc-25']).toBe(1);
+    });
+
+    it('walks a full ten-beat run every time, strand-free', () => {
+        expect(audit.longestRoute).toBe(10);
+        expect(audit.strands).toEqual([]);
+        expect(audit.unreachableNodes).toEqual([]);
+    });
+
+    it('ends at the Under-Gate alone — the boss is the only terminal node', () => {
+        expect(audit.terminalNodes).toEqual(['nc-25']);
     });
 });

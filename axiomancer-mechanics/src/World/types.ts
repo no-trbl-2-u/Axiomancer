@@ -239,9 +239,17 @@ export interface Continent {
 /**
  * Aggregate world state — the catalogue of continents plus the current
  * navigation context.
+ *
+ * @property mapStates - Preserved runtime `MapState` of every map the player
+ *   departed through a `travel` door (2026-08-28). The world is a PLACE the
+ *   player moves around in: leaving a map never resets it, and a door that
+ *   later leads back restores the preserved state instead of a fresh one.
+ *   Optional so pre-travel saves and hand-built test worlds stay valid; an
+ *   absent record reads as "nothing departed yet".
  */
 export interface WorldState {
     world: Continent[];
     currentContinent: Continent;
     currentMap: MapState;
+    mapStates?: Partial<Record<MapName, MapState>>;
 }
