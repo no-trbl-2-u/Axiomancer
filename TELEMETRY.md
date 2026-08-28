@@ -389,3 +389,9 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-28T00:32:08Z | slash-prompt | /march | claude-opus-5 | user/ci | /march |
 | 2026-08-28T01:32:08Z | slash-prompt | /march | claude-opus-5 | user/ci | /march |
 | 2026-08-28T02:32:09Z | slash-prompt | /march | claude-opus-5 | user/ci | /march |
+| 2026-08-28T06:00:00Z | subagent | Explore | claude-fable-5 | main | Inventory all owner-gate restrictions |
+| 2026-08-28T06:00:12Z | subagent | Explore | claude-fable-5 | main | Map world/continents architecture |
+| 2026-08-28T06:00:21Z | subagent | Explore | claude-fable-5 | main | Survey mobile UI screens + issues |
+| 2026-08-28T06:01:16Z | subagent | Explore | claude-fable-5 | main | Audit decision-gate documentation |
+| 2026-08-28T06:06:23Z | subagent | general-purpose | claude-fable-5 | main | Fix traced UI defects mobile |
+| 2026-08-28T06:13:04Z | subagent | general-purpose | claude-fable-5 | main | Build travel system + caverns map |

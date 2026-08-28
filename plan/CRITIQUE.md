@@ -292,6 +292,25 @@
 
 ## Pending
 
+### [MED] combat — first-run coach overlay still preaches the retired status-dominance doctrine
+- pass: session-jot 2026-08-28 (THE OPEN GATE session; spotted on the
+  refreshed `combat-encounter` smoke baseline)
+- viewport: 390x844 (smoke rig)
+- auth_state: anonymous
+- category: copy
+- observation: the "A NEW KIND OF FIGHT / STATUS DOES THE WORK" coach
+  card tells the player "basic blows are weak. Status effects do the
+  real damage" — the exact balance law THE UNSHACKLING voided
+  (2026-08-08) and CQI replaced (spec 35). Direct damage is a
+  first-class win path now; the tutorial teaches the dead doctrine as
+  gospel to every new player.
+- suggested fix: rewrite the coach sequence's copy to teach the real
+  doctrine (one bar: VITAE; statuses, strikes, Conviction, Surge and
+  Dice all compete on merit; a clever read still turns the fight).
+  Component: search for the coach/tutorial overlay strings under
+  components/combat/. House voice, knife-law sentences.
+- source: loop
+
 ### [HIGH] combat — user hit a mid-combat crash that 30 seeded UI runs could not reproduce
 - pass: user-jot (commit 24475f48)
 - viewport: unspecified
@@ -349,8 +368,13 @@
   `/expand` if picked up.
 - source: critique pass 23 (unattended, critique:drive artifacts)
 
-### [MED] combat — the momentum chain chip's empty state ("no momentum") has no contrast against the arena floor art
+### [x] [MED] combat — the momentum chain chip's empty state ("no momentum") has no contrast against the arena floor art — RESOLVED 2026-08-28 (ui-cleanup pass)
 - pass: 21 (commit 75ba5a34)
+- resolution: `chainEmpty` (CombatBoard.tsx) now gets the same
+  contrast-guaranteeing container the filled chain nodes use — dark alpha
+  fill (`rgba(0,0,0,0.55)`) + 1pt `AXM.ash` border + radius/padding
+  (`overflow: 'hidden'` for the Android radius), matching the guardChip
+  treatment. Text color unchanged (`AXM.ash` reads fine on the dark box).
 - viewport: mobile (375×812) barely legible; desktop (1280×800) fully invisible — same underlying bug, worse at the wider viewport
 - category: visual
 - observation: at the start of every fight (T1, no stance played yet
@@ -383,8 +407,16 @@
   `textShadowColor` matching the other chip states.
 - source: critique pass 21 (unattended, critique:drive artifacts)
 
-### [MED] exploration hub — node-legend's "N nodes · M sealed" count is clipped to a bare number on the desktop viewport
+### [x] [MED] exploration hub — node-legend's "N nodes · M sealed" count is clipped to a bare number on the desktop viewport — RESOLVED 2026-08-28 (ui-cleanup pass)
 - pass: 20 (commit dc1270ca)
+- resolution: `MapCanvas` grew a viewport-fixed `overlays` slot rendered as a
+  sibling of the vignette/compass chart furniture (after the
+  `GestureDetector`, inside `graphWrap`, wrapped `pointerEvents="none"`), and
+  the exploration hub now passes `<MapOverlays legend=... />` through it
+  instead of through `children` — so the legend's absolute positions resolve
+  against the visible viewport, not the 936×1040 pannable canvas. Mobile
+  placement unchanged (same `bottom/left/right` insets, now against the same
+  box the vignette uses). Tests added in `MapCanvas.test.tsx`.
 - viewport: desktop (1280×800) only — mobile (375×812) unaffected
 - category: visual
 - observation: on the exploration-hub map, the legend's right-hand
@@ -420,8 +452,14 @@
   of the "chart furniture" instead of the pannable canvas.
 - source: critique pass 20 (unattended, critique:drive artifacts)
 
-### [MED] exploration hub — static `regionProgress` header count doesn't reconcile with the dynamic node-legend on the same screen
+### [x] [MED] exploration hub — static `regionProgress` header count doesn't reconcile with the dynamic node-legend on the same screen — RESOLVED 2026-08-28 (ui-cleanup pass)
 - pass: 19 (commit 18eb0ddb)
+- resolution: dropped the stale static counts from both layouts — the header
+  now reads the ordinal only ("Map i of ii" / "Map ii of ii") and the single
+  live-computed legend (`${def.nodes.length} nodes · ${locked.length} sealed`)
+  is the one count on screen. `MapLayout.regionProgress`'s doc comment now
+  forbids counts; pinned test updated + a regression guard added
+  (`fishing-village.layout.test.ts`).
 - viewport: mobile + desktop (both)
 - category: comprehension
 - observation: the Fishing Village exploration screen shows "Map i of
@@ -515,8 +553,16 @@
   subtitle now reads "LVL {n} · PILGRIM" once. Updated the pinned test
   string in `StatusCard.test.tsx` to match + added a regression guard.
 
-### [LOW] mobile — combat corner medallions occlude the fan-end hand cards' touch centers
+### [x] [LOW] mobile — combat corner medallions occlude the fan-end hand cards' touch centers — RESOLVED 2026-08-28 (ui-cleanup pass)
 - pass: combat declutter residue (PR #135, 2026-07-19)
+- resolution: the player medallion's touch box no longer reaches the leftmost
+  hand card's bounding-box centre: its dock dropped flush with the rail top
+  (`bottom: bottomInset + 26`, was `+34` — touch box tops out at ~118pt vs
+  card centres at ~120–126pt across hand sizes) and its `hitSlop` now slops
+  only toward the screen corner (`{ left: 6, bottom: 6 }`, was uniform 6 —
+  the top/right edges are where the fan runs under it). END medallion checked
+  and already clears (top ≈112pt, no hitSlop). Re-run the PR #135
+  elementFromPoint probe on the next capture pass to confirm.
 - viewport: 375×812
 - auth_state: n/a
 - category: ux

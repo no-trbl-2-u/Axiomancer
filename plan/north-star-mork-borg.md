@@ -228,29 +228,38 @@ budget decision, no new approval checkpoints are needed.
 
 ---
 
-## §6 — Open questions for T
+## §6 — Open questions — ANSWERED under THE OPEN GATE (2026-08-28)
 
-- **Q-1 — retcon boundary.** Does R-D's full authority extend to rewriting
-  the *identity* of canon the loop already shipped (who an NPC is, what a
-  region means), or only to adding canon and re-voicing sentences? Default
-  until answered: additive + re-voice only; retcons go to `/oversight`.
-- **Q-2 — sequencing.** N-3 is proposed to run after 44f/44g and Phase 67
-  (§5). Object if the re-voice should jump the queue instead.
-- **Q-3 — the shell.** Does the register govern store metadata, the title
-  screen, and other product-shell copy (Phase 67's surfaces)? Default: yes.
-- **Q-4 — references.** Any prose touchstones beyond the Mörk Borg book
-  itself (e.g. Cormac McCarthy, the Bible's ledger books, Best Left
-  Buried) the register should be calibrated against?
-- **Q-5 — the Surge meter.** R-F's keep-list (deckbuilding, dice-building,
-  signature skills, equipment) does not name the Surge meter, which the
-  2026-08-08 LOCKED MECHANICS carve-out locks. Default reading until T says
-  otherwise: **still locked** — the carve-out requires an explicit ruling
-  to void. Confirm or release.
-- **Q-6 — how far "direction" reaches.** R-F grants the loop leaps on
-  "direction." Default reading: the loop may evolve the ruled north stars
-  (Woodcut Codex, this register) through its own phases with residue filed,
-  but a *replacement* of a T-ruled north star still surfaces at
-  `/oversight` first. Confirm or widen.
+> THE OPEN GATE (T direct, 2026-08-28 — `plan/bearings.md`) directed the
+> loop to answer every open question itself, any way it judges best. The
+> answers below are the loop's rulings, filed as `[loop-call]` residue;
+> none waits on T.
+
+- **Q-1 — retcon boundary. ANSWERED: full authority, retcons included.**
+  R-D's authority extends to rewriting the identity of shipped canon when
+  the story is better for it. A retcon must be coherent (sweep every
+  surface that references the old identity in the same phase) and filed
+  as `[loop-call]` residue naming what changed and why. Cheap
+  shock-value retcons fail the register, not the rules.
+- **Q-2 — sequencing. ANSWERED: the loop sequences per tick.** N-3 after
+  44f/44g/67 was correct and has since shipped (Phase 75); sequencing
+  calls of this kind are ordinary phase-planning, not owner territory.
+- **Q-3 — the shell. ANSWERED: yes.** The register governs every
+  player-visible product surface, store metadata and title screen
+  included. (This was already the live default; now ruled.)
+- **Q-4 — references. ANSWERED: calibrate freely, quote never.** The
+  loop may calibrate against any touchstone it judges fits (McCarthy's
+  flat brutality, the ledger books, Best Left Buried's dread economy) —
+  as *register calibration only*. No verbatim copyrighted text ships,
+  ever; that is law, not a style call.
+- **Q-5 — the Surge meter. ANSWERED: kept.** The Surge meter joins the
+  keep-list explicitly under loop stewardship (THE OPEN GATE ¶2
+  converted the carve-out from owner-gate to loop judgment). Standing
+  judgment: Conviction, Surge, and Dice all stay.
+- **Q-6 — how far "direction" reaches. ANSWERED: all the way.** The loop
+  may evolve OR replace a ruled north star through its own phases,
+  filing the replacement rationale as `[loop-call]` residue. The bar
+  for replacement is evidence and coherence, not permission.
 
 ---
 

@@ -338,8 +338,11 @@ Return cleanly. Loop's next tick re-audits.
 3. **`GH_TOKEN` missing.**
 4. **Finding requires schema migration > 20 records.** Push to
    `/plan-a-phase`.
-5. **Finding requires user judgment.** Surface to AUDIT.md as
-   `[needs-user-call]`, skip, ship next.
+5. **Finding requires owner-flavored judgment.** Decide it (THE
+   OPEN GATE, `plan/bearings.md`, 2026-08-28), file the call to
+   AUDIT.md as `[loop-call]` with reasoning, and ship — or, if the
+   evidence genuinely cannot support a call this tick, file the
+   `[loop-call]` with the leading option named and ship next.
 6. **No actionable iterate work** (top score < 3.0). Read
    `plan/bearings.md` "Plan expansion posture":
    - **bold** or **autonomous** posture → dispatch to

@@ -13,6 +13,7 @@ right-thing-to-do every tick:
 unlabeled issues exist          →  /triage
 ELSE critique due (rate-lim)    →  /critique
 ELSE pending phase              →  /ship-a-phase
+ELSE content growth due         →  /forge
 ELSE expand due + bold posture  →  /expand
 ELSE                            →  /iterate
 ```
@@ -123,10 +124,32 @@ tick):
 - Execute its procedure end-to-end.
 - Return.
 
-#### 3b. Expand due (rate-limited, posture-gated)?
+#### 3b. Content growth due (THE OPEN GATE ¶8)?
+
+Growth is a standing mandate, not opportunistic work. Check
+whether any content surface shipped growth recently:
+
+```bash
+git log --since="48 hours ago" --oneline -- \
+  axiomancer-mechanics/src/World \
+  axiomancer-mechanics/src/Enemy \
+  axiomancer-mechanics/src/Cards \
+  axiomancer-mechanics/src/NPCs | head -5
+```
+
+If that log is EMPTY (no content-surface commit in 48h) and no
+phase work matched in 3a:
+
+- Read `skills/forge.md`.
+- Execute its procedure end-to-end.
+- Return.
+
+Otherwise fall through to 3c.
+
+#### 3c. Expand due (rate-limited, posture-gated)?
 
 Read `plan/bearings.md` "Plan expansion posture" section. If
-posture is **strict**, skip to 3c.
+posture is **strict**, skip to 3d.
 
 Read metadata header at top of `plan/PHASE_CANDIDATES.md`:
 
@@ -155,9 +178,9 @@ If all four hold:
 - Execute its procedure end-to-end.
 - Return.
 
-If any condition fails, fall through to 3c.
+If any condition fails, fall through to 3d.
 
-#### 3c. Else — iterate.
+#### 3d. Else — iterate.
 
 - Read `skills/iterate.md`.
 - Execute its procedure end-to-end.
@@ -206,6 +229,7 @@ npm run deploy:check                    # green-deploy condition
 skills/triage.md                     # Step 1 (cheapest)
 skills/critique.md                   # Step 2 (rate-limited)
 skills/ship-a-phase.md               # Step 3a
-skills/expand.md                     # Step 3b (posture-gated)
-skills/iterate.md                    # Step 3c
+skills/forge.md                      # Step 3b (growth mandate)
+skills/expand.md                     # Step 3c (posture-gated)
+skills/iterate.md                    # Step 3d
 ```

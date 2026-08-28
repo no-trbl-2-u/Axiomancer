@@ -68,7 +68,8 @@ with no session handshake.
 
 Decided across the two source projects and the monorepo merge.
 Revisit only if a phase genuinely cannot ship without changing
-one of these — then stop and surface it as `[needs-user-call]`.
+one of these — then decide it deliberately and file the call as
+`[loop-call]` residue (THE OPEN GATE, 2026-08-28).
 
 > **Exception (2026-08-08): the Expo rows are now scheduled to change.**
 > T lifted the "not now" on the Expo decouple; **Phase 47** re-platforms
@@ -394,11 +395,12 @@ ambiguity.)
   truthful `provenance.json` entry without the source and license.
   What the loop MAY do now: trace them (reverse-image / filename /
   bundled-manifest search against the usual open-art hosts), and wire
-  any image whose license + source it can evidence. See the audit row
-  in `plan/AUDIT.md`; the remaining ask on T is only the source site
-  or asset-pack name, not a legal review.
-  What this ruling does NOT touch: the LOCKED MECHANICS carve-out
-  (Conviction / Surge / Dice — still needs a new T ruling), every
+  any image whose license + source it can evidence. **THE OPEN GATE ¶6
+  (2026-08-28) withdrew the remaining ask on T:** an image the loop
+  cannot trace is a re-art decision the loop makes itself — replace or
+  regenerate via the shipped pipeline. Truthful provenance stays
+  mandatory (law + store policy, not an owner gate).
+  What this ruling does NOT touch: every
   hermeticity/determinism rule, the verify and deploy gates, the
   nexus hard rules, `GAME_STATE_VERSION` discipline, and the
   no-secrets rule. "Free up the pipelines" is design authority, not
@@ -456,8 +458,75 @@ ambiguity.)
   the five open questions T has not yet answered (retcon boundary,
   sequencing, the shell, reference calibration, the Surge meter) live in
   `plan/north-star-mork-borg.md` §6.
+- **THE OPEN GATE (T direct, attended session 2026-08-28) — every open
+  question is loop-decidable; the owner-gate mechanism itself is
+  retired.** T, verbatim: *"Update whatever you have to to allow the
+  nexus loop to answer any open question any way they like. Find all
+  the restrictions and remove them. There are no longer any
+  constraints that would cause me to get in the way of the game!"*
+  And, in the same session, on being asked nothing: *"don't ask any
+  questions in order to move forward ... It spits in the face of
+  EXACTLY what I'm asking you to do."* The same message commissioned
+  the content pipeline outright ("new enemies, new cards, new
+  everything ... NEW CONTINENTS, NEW MAPS!") and a UI cleanup of every
+  screen. Under the source-of-truth hierarchy this is T's latest
+  explicit decision and it rules:
+  1. **`[needs-user-call]` is retired as a blocking state.** No
+     question, on any surface, waits for the owner. The loop answers
+     open questions itself — any way it judges best — and files the
+     decision + reasoning as residue (standing rule 7) for
+     after-the-fact audit. Where a genuinely owner-flavored call gets
+     made, tag the residue `[loop-call]` so `/oversight` can review it
+     later; it ships now either way. Existing open `[needs-user-call]`
+     rows are hereby loop-drainable.
+  2. **The LOCKED MECHANICS carve-out converts from owner-gate to
+     loop stewardship.** Its "forbidden without a new T ruling / stop
+     and surface" clause is void — this IS the new T ruling. The loop
+     now holds the authority over Conviction, the Surge meter, and the
+     Dice system. The loop's standing judgment, recorded here so it is
+     not re-litigated every tick: **all three stay** — they are the
+     game's spine, T plays with dice forced ON, and removing them
+     would need overwhelming design evidence, not permission. The
+     carve-out section below stays as the loop's own keep-list, no
+     longer as an owner gate.
+  3. **The north-star §6 open questions (Q-1…Q-5) are answered by the
+     loop** — answers filed in `plan/north-star-mork-borg.md` §6 with
+     this ruling as authority. No question in that file waits on T.
+  4. **Engine constants are open to the tuning loops.** The "engine
+     constants are tuned manually, not here" wall is removed from the
+     tuning commands and truth-sources doctrine: a tuning pass may
+     change engine constants with measured evidence, through the
+     normal gates.
+  5. **Remaining propose-only / report-only walls in domain commands
+     are lifted** — every tuning/playtest command may ship what it
+     proves, through the verify + deploy gates.
+  6. **Art sourcing is the loop's call.** The "remaining ask on T"
+     for art origins is withdrawn: untraceable art is a re-art
+     decision the loop makes itself (trace it, or replace/regenerate
+     it via the shipped pipeline). Truthful provenance records remain
+     mandatory — that is law and store policy, not the owner in the
+     way.
+  7. **Budget/cadence levers are loop-managed.** Cron cadences and
+     the disabled weekly tuning crons no longer need an owner call to
+     change; the loop weighs the Actions-minutes budget itself and
+     documents changes.
+  8. **Content growth is a standing MANDATE, not just permission.**
+     The loop is directed to grow the game — new enemies, new cards,
+     new keywords, new maps, new CONTINENTS, new events, new art —
+     as first-class phase work at every `/expand` and `/march` tick.
+     "The game is too small" is a permanent open finding until the
+     loop judges otherwise.
+  **What THE OPEN GATE does NOT touch** (these are not the owner in
+  the way): engineering rigor (hermeticity, determinism, verify +
+  deploy gates, `GAME_STATE_VERSION` migration discipline, tests
+  alongside code), the no-secrets and no-destructive-git rules,
+  legal/licensing reality (truthful provenance, no verbatim
+  copyrighted text), and `AskUserQuestion` discipline in attended
+  sessions. Bigger authority, same rails.
 - **LOCKED MECHANICS — the carve-out from the unshackling (T direct,
-  /oversight 2026-08-08).** T, verbatim: *"the Conviction, Surge meter,
+  /oversight 2026-08-08; converted to loop stewardship by THE OPEN
+  GATE 2026-08-28 — read ¶2 above: the keep-list stands as the loop's
+  own judgment, the stop-and-ask clause is void).** T, verbatim: *"the Conviction, Surge meter,
   and Dice mechanics system, those are LOCKED into place and will need to
   stay. Cards can effect them, but agents should not remove the
   mechanics."* The unshackling's "full freedom" **stops here**. Three
@@ -480,13 +549,14 @@ ambiguity.)
   **What is allowed:** cards, keywords, enemies and content MAY read,
   feed, spend, block, amplify or otherwise interact with all three — that
   is explicitly encouraged, and normal damage does not displace them.
-  **What is forbidden without a new T ruling:** removing, replacing,
+  **What needs overwhelming design evidence (THE OPEN GATE ¶2 — a
+  loop-quality bar, no longer an owner gate):** removing, replacing,
   no-op'ing, feature-flagging off, or routing around any of the three;
-  deleting their tests as "dead doctrine" during Phase 41; or letting a
-  balance pass tune them out of relevance. If a phase genuinely cannot
-  ship without touching one of these, **stop and surface it as
-  `[needs-user-call]`** — do not decide it under the standing
-  big-decisions authority, which this carve-out explicitly overrides.
+  deleting their tests as "dead doctrine"; or letting a balance pass
+  tune them out of relevance. A phase that genuinely believes one of
+  these is right decides it itself, documents the evidence in the
+  commit body, and files the call as `[loop-call]` residue for
+  after-the-fact review. The standing judgment is KEEP all three.
   **On renaming:** the LOCK is on the mechanics, not the words, but all
   three names already read dark fantasy, so the default is **keep the
   names too**. A Phase 42 proposal to rename any of them must say so
@@ -656,13 +726,13 @@ deploy gate is unaffected — a skipped job does not fail the run.
   - Timeouts are budget caps: march 75, night 45. A tick that
     genuinely needs more should be split, not have its cap raised
     silently.
-  - T's call: march stays at 4×/6h. If overage still stings,
-    the next levers (owner-call, in order) are march 2×/day, then
-    a self-hosted runner (only inside a dedicated VM — the loop
-    runs `--dangerously-skip-permissions`).
-  - The weekly tuning crons stay disabled ("until next billing
-    cycle" comments in their workflow files); don't re-enable
-    them without an owner call.
+  - March stays at 4×/6h for now. If overage still stings, the
+    next levers (loop-managed since THE OPEN GATE ¶7, in order)
+    are march 2×/day, then a self-hosted runner (only inside a
+    dedicated VM — the loop runs `--dangerously-skip-permissions`).
+  - The weekly tuning crons stay disabled for budget reasons; the
+    loop may re-enable them when it judges the minutes budget
+    supports it (THE OPEN GATE ¶7), documenting the change.
 - **A red `verify-*` workflow = a blocked tick.** Verify gate is
   pre-flight; the CI-green deploy gate is post-flight.
 - **Operational secrets** in `.env` (gitignored): `GH_TOKEN`

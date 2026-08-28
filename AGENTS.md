@@ -137,7 +137,8 @@ accelerators, never dependencies: the Grep/Read path always works.
 | **Measured baselines** (`deck-matrix-baseline.json`) | Win-rate curves, status engagement, preset spreads | Only as fresh as the last sim — run `npm run baseline:check` and NAME the stamp before citing numbers |
 
 Measuring is not tuning: regenerating a baseline is briefing; acting
-on it belongs to `/deck-tuning`, and engine constants stay manual.
+on it belongs to `/deck-tuning`. Engine constants are open to the
+tuning loops with measured evidence (THE OPEN GATE ¶4, 2026-08-28).
 Full protocols (consumption surfaces, wishlist, regen/confidence
 rules): [`docs/truth-sources.md`](docs/truth-sources.md). The complete
 external-system register (ownership, credentials, recovery):
@@ -181,8 +182,10 @@ The unified **nexus** harness was re-onboarded onto the monorepo on
 2026-07-03 (`chore: adopt nexus methodology`). It is now live at the repo root:
 
 - `skills/` — the loop verbs: `ship-a-phase`, `plan-a-phase`, `iterate`,
-  `critique`, `triage`, `expand`, `march`, `oversight`, `jot`, `digest`,
-  `consolidate`.
+  `critique`, `triage`, `expand`, `forge` (the content foundry — ships
+  new enemies/cards/keywords/maps/continents/events/dialogue/art every
+  growth tick; THE OPEN GATE ¶8's engine), `march`, `oversight`, `jot`,
+  `digest`, `consolidate`.
   (Heavyweight source-of-truth files; the `.claude/commands/<verb>.md`
   pointers are the doorways.)
 - `plan/` — the loop's durable memory: `bearings.md` (standing context —
@@ -243,9 +246,12 @@ them; update here first.
    is a blocked tick: read the log, patch, push again (≤3
    same-root-cause iterations, then stop cleanly).
 6. **`AskUserQuestion` only in `/oversight`.** Every other skill
-   decides, documents the call in the commit body, and ships. Genuine
-   user decisions get logged to `plan/AUDIT.md` as `[needs-user-call]`
-   and the loop continues with the most-defensible default.
+   decides, documents the call in the commit body, and ships. Since
+   THE OPEN GATE (T direct, 2026-08-28 — see `plan/bearings.md`)
+   there are no owner-blocked decisions: the loop answers every open
+   question itself and files owner-flavored calls to `plan/AUDIT.md`
+   as `[loop-call]` residue for after-the-fact review. The retired
+   `[needs-user-call]` tag survives only in historical rows.
 7. **File the residue.** Any session or tick tasked with substantial
    work that produces direction beyond what it ships — decisions made,
    work discovered, design conclusions, side-findings — files that
