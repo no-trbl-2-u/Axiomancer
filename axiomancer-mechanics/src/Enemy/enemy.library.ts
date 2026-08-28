@@ -14,6 +14,10 @@
  *   - MID (northern-forest, L19-31): 13 foes.
  *   - LATE (northern-forest, L34-50): 13 foes incl. the Death and The Abortive
  *     uniques.
+ *   - NORTHERN CONTINENT (Phase W3, 2026-08-28): 9 foes — 4 cavern natives,
+ *     4 city predators, and the Harbormaster boss. Portraits come from the
+ *     licensed game-icons.net trove (CC BY 3.0), not the painting drop; the
+ *     1:1 portraitAsset law holds unchanged.
  *
  * Difficulty model (how a fight gets HARD):
  *   1. Tier — `simple → normal → elite → boss → unique` drives the threat-damage
@@ -1895,6 +1899,292 @@ export const TheAbortive = createEnemy({
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// THE NORTHERN CONTINENT — Phase W3 batch (2026-08-28): the continent's own
+// blood. Deep-cavern vermin for the caverns pool, iron-trade muscle and city
+// predators for the northern-city pool, and the Harbormaster — the city's
+// authored boss. Nine enemies, each with a UNIQUE portraitAsset sourced from
+// the licensed game-icons.net trove (CC BY 3.0 — see the mobile enemy
+// provenance.json), a deck in `combat.enemy-decks.ts`, and aftermath prose.
+// Count-pin bumps ride this same commit per THE PIPELINE LIBERATION ¶4.
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/** Provenance stamp for the Phase W3 northern-continent batch. */
+const W3_ADDED = '2026-08-28';
+
+export const SeamTick = createEnemy({
+    id: 'enemy-seam-tick',
+    portraitAsset: 'seam-tick',
+    name: 'Seam Tick',
+    stanceHint: 'It wants a grip, then a vein — deny it the first and it never reaches the second.',
+    description: 'A fist-sized tick that drinks iron out of blood. The delvers wear leather at the neck and count each other after every shift.',
+    level: 13,
+    baseStats: enemyStatBudget(13, { heart: 1, body: 3, mind: 1 }),
+    mapName: 'caverns',
+    difficulty: 'normal',
+    logic: 'aggressive',
+    tier1Overrides: T1_DEFAULT,
+    loot: [none(60), drop('body-elixir', 20), drop('healing-potion', 20)],
+    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
+    finalBlowLines: {
+        brutal: 'It bursts like a purse. What it saved was never its own.',
+        quiet:  'It lets go at last. The seam keeps the rest of its appetite.',
+        ironic: 'It finally struck iron. The iron struck back.',
+    },
+    causeLines: {
+        brutal: 'The grip finds the neck. The vein does the bookkeeping.',
+        broken: 'It drinks by inches. You run out before it does.',
+        quiet:  'A small weight settles at your collar. Then a smaller pulse.',
+    },
+    addedIn: W3_ADDED,
+    tags: ['mid-game', 'enemy'],
+});
+
+export const PropWight = createEnemy({
+    id: 'enemy-prop-wight',
+    portraitAsset: 'prop-wight',
+    name: 'Prop-Wight',
+    stanceHint: 'It holds the roof the way it holds a grudge — let it write the third line and the gallery closes.',
+    description: 'It lives in the rotten props and keeps the roof up out of spite. Delvers leave it bread. It leaves the crusts in the shape of names.',
+    level: 15,
+    baseStats: enemyStatBudget(15, { heart: 1, body: 1, mind: 3 }),
+    mapName: 'caverns',
+    difficulty: 'normal',
+    logic: 'defensive',
+    tier1Overrides: T1_DEFAULT,
+    loot: [none(55), drop('clarity-serum', 25), drop('focus-vial', 20)],
+    philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
+    finalBlowLines: {
+        brutal: 'The prop splits. Whatever held it together stops holding.',
+        quiet:  'It sighs out of the timber. The roof, to its credit, stays.',
+        ironic: 'It spent a century holding the roof up. You were the one thing it dropped.',
+    },
+    causeLines: {
+        brutal: 'The roof was a promise it kept for everyone but you.',
+        broken: 'Timber by timber, the gallery narrows to a verdict.',
+        quiet:  'You hear the third knock from inside the prop. There is no fourth.',
+    },
+    addedIn: W3_ADDED,
+    tags: ['mid-game', 'enemy'],
+});
+
+export const UnpaidDelver = createEnemy({
+    id: 'enemy-unpaid-delver',
+    portraitAsset: 'unpaid-delver',
+    name: 'The Unpaid Delver',
+    stanceHint: 'He works to a wage-clock only he can hear — interrupt the shift and the pick answers.',
+    description: 'He died owed a season\'s wages and did not stop cutting. The seam he works is not iron any more. He has not noticed, or does not care.',
+    level: 16,
+    baseStats: enemyStatBudget(16, { heart: 1, body: 3, mind: 2 }),
+    mapName: 'caverns',
+    difficulty: 'elite',
+    logic: 'strategic',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        body: { attack: 2, defend: 2 },
+    },
+    loot: [none(40), drop('whetstone-oil', 25), drop('iron-skin-draught', 20), drop('healing-potion', 15)],
+    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
+    finalBlowLines: {
+        brutal: 'The pick falls mid-stroke. The shift ends the only way it could.',
+        quiet:  'He sets the pick down, squares it to the wall, and stops.',
+        ironic: 'You paid him the one thing the Parish never did: an ending.',
+    },
+    causeLines: {
+        brutal: 'The pick counts you like footage. The seam takes delivery.',
+        broken: 'He works you the way he works rock: patiently, and to the floor.',
+        quiet:  'Somewhere a tally-board gains a stroke. It is not his.',
+    },
+    addedIn: W3_ADDED,
+    tags: ['mid-game', 'elite', 'enemy'],
+});
+
+export const SumpMaren = createEnemy({
+    id: 'enemy-sump-maren',
+    portraitAsset: 'sump-maren',
+    name: 'Sump Maren',
+    stanceHint: 'She grieves at you until the water agrees — pity is the current she pulls with.',
+    description: 'She waits under the sump\'s skin with her hair spread like weed. She asks the drowning to stay. They stay. The asking is the drowning.',
+    level: 14,
+    baseStats: enemyStatBudget(14, { heart: 3, body: 1, mind: 1 }),
+    mapName: 'caverns',
+    difficulty: 'normal',
+    logic: 'defensive',
+    tier1Overrides: T1_DEFAULT,
+    loot: [none(55), drop('heart-draught', 30), drop('healing-potion', 15)],
+    philosophicalAlignment: { epistemology: -67, outlook: -67, scope: -67 },
+    finalBlowLines: {
+        brutal: 'The water lets go of her shape. The sump forgets on the spot.',
+        quiet:  'She sinks without complaint. The surface settles first.',
+        ironic: 'She asked you to stay. You declined on her behalf.',
+    },
+    causeLines: {
+        brutal: 'The water closes like a ledger. Your column was short.',
+        broken: 'She grieves you down by inches, and the sump keeps every one.',
+        quiet:  'Cold hands, a kind voice, and no particular hurry.',
+    },
+    addedIn: W3_ADDED,
+    tags: ['mid-game', 'enemy'],
+});
+
+export const TollSergeant = createEnemy({
+    id: 'enemy-toll-sergeant',
+    portraitAsset: 'toll-sergeant',
+    name: 'Toll-Sergeant',
+    stanceHint: 'The fee comes first and the fist explains it — pay attention to the hand that is not open.',
+    description: 'The gate pays him to stand in it. The toll is posted nowhere and changes by the coat you wear. Refusal is billed in bruises.',
+    level: 15,
+    baseStats: enemyStatBudget(15, { heart: 1, body: 3, mind: 1 }),
+    mapName: 'northern-city',
+    difficulty: 'normal',
+    logic: 'aggressive',
+    tier1Overrides: T1_DEFAULT,
+    loot: [none(50), drop('body-elixir', 25), drop('healing-potion', 25)],
+    philosophicalAlignment: { epistemology: 0, outlook: 0, scope: -67 },
+    finalBlowLines: {
+        brutal: 'The gate stands unminded. Traffic resumes at the old free price.',
+        quiet:  'He sits down in his own gate at last, off duty.',
+        ironic: 'He finally met a toll he could not collect.',
+    },
+    causeLines: {
+        brutal: 'The fist explains the fee. You are billed in full.',
+        broken: 'Refusal compounds. He collects the arrears by hand.',
+        quiet:  'You pay at the gate the way everyone pays, eventually.',
+    },
+    addedIn: W3_ADDED,
+    tags: ['mid-game', 'enemy'],
+});
+
+export const GuildKnife = createEnemy({
+    id: 'enemy-guild-knife',
+    portraitAsset: 'guild-knife',
+    name: 'Guild Knife',
+    stanceHint: 'The contract is already signed — the knife is only the delivery, and it is punctual.',
+    description: 'The ironmongers\' guild settles some disputes in court. For the rest there is a dues-paying member with clean boots and a short blade.',
+    level: 17,
+    baseStats: enemyStatBudget(17, { heart: 1, body: 3, mind: 2 }),
+    mapName: 'northern-city',
+    difficulty: 'elite',
+    logic: 'strategic',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        body: { attack: 2, defend: 2 },
+    },
+    loot: [none(40), drop('quicksilver-vial', 25), drop('whetstone-oil', 20), drop('healing-potion', 15)],
+    philosophicalAlignment: { epistemology: 67, outlook: 0, scope: -67 },
+    finalBlowLines: {
+        brutal: 'The contract voids in the usual way. The guild will invoice someone.',
+        quiet:  'He checks his boots are still clean. They are. He is done anyway.',
+        ironic: 'Somewhere a clause names his replacement. He always knew it would.',
+    },
+    causeLines: {
+        brutal: 'Delivery is made per the agreement. You sign in the usual place.',
+        broken: 'Clause by clause, the blade finds where you initialed.',
+        quiet:  'Clean boots, short blade, no hard feelings on record.',
+    },
+    addedIn: W3_ADDED,
+    tags: ['mid-game', 'elite', 'enemy'],
+});
+
+export const TheFactor = createEnemy({
+    id: 'enemy-the-factor',
+    portraitAsset: 'the-factor',
+    name: 'The Factor',
+    stanceHint: 'He buys positions, not fights — every round you spend is a debt he is already reselling.',
+    description: 'He buys debts nobody expects to collect and collects them. His office is wherever you are standing when the interest comes due.',
+    level: 16,
+    baseStats: enemyStatBudget(16, { heart: 1, body: 1, mind: 4 }),
+    mapName: 'northern-city',
+    difficulty: 'normal',
+    logic: 'strategic',
+    tier1Overrides: T1_DEFAULT,
+    loot: [none(50), drop('clarity-serum', 25), drop('philosopher-tea', 15), drop('focus-vial', 10)],
+    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 },
+    finalBlowLines: {
+        brutal: 'His book opens on the fall. Half the city breathes easier by nightfall.',
+        quiet:  'He totals you, finds the column closed, and closes with it.',
+        ironic: 'He held your debt to the end. It matured into this.',
+    },
+    causeLines: {
+        brutal: 'The interest comes due all at once, in person.',
+        broken: 'He resells your position twice before you notice it is gone.',
+        quiet:  'A dry signature somewhere, and your account changes hands.',
+    },
+    addedIn: W3_ADDED,
+    tags: ['mid-game', 'enemy'],
+});
+
+export const WharfShrike = createEnemy({
+    id: 'enemy-wharf-shrike',
+    portraitAsset: 'wharf-shrike',
+    name: 'Wharf Shrike',
+    stanceHint: 'It strikes, hangs, and waits — the hooks are its pantry and its patience is stocked.',
+    description: 'A harbor bird grown wrong on tithe-scraps. It hangs what it catches on the mooring hooks and comes back when the struggling stops.',
+    level: 16,
+    baseStats: enemyStatBudget(16, { heart: 2, body: 3, mind: 1 }),
+    mapName: 'northern-city',
+    difficulty: 'normal',
+    logic: 'random',
+    tier1Overrides: T1_DEFAULT,
+    loot: [none(60), drop('quicksilver-vial', 20), drop('healing-potion', 20)],
+    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
+    finalBlowLines: {
+        brutal: 'It comes off the sky in pieces. The hooks stand empty tonight.',
+        quiet:  'It settles on its own hook, folds, and does not start again.',
+        ironic: 'Its larder outlived it. The harbor calls that an estate.',
+    },
+    causeLines: {
+        brutal: 'The strike is brief. The hook is not.',
+        broken: 'It waits you out the way it waits out everything on the hooks.',
+        quiet:  'Wings, then iron, then the patient part.',
+    },
+    addedIn: W3_ADDED,
+    tags: ['mid-game', 'enemy'],
+});
+
+/**
+ * The northern city's authored boss — the Harbormaster, pinned per-node in
+ * `MapEvents/content.ts` at a winnable level (the fv-6/nc-25 precedent).
+ * Nothing leaves the city by water unweighed. W4's river door opens past him.
+ */
+export const TheHarbormaster = createEnemy({
+    id: 'enemy-the-harbormaster',
+    portraitAsset: 'the-harbormaster',
+    name: 'The Harbormaster',
+    stanceHint: 'He weighs before he rules — every stance you take goes on the scale, and the scale is his.',
+    description: 'He has kept the water-gate since before the guilds had names. Everything that leaves by water is weighed. Nothing he has weighed has left without paying.',
+    level: 18,
+    baseStats: enemyStatBudget(18, { heart: 2, body: 1, mind: 3 }),
+    mapName: 'northern-city',
+    difficulty: 'boss',
+    logic: 'boss',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        body: { attack: 3, defend: 3 },
+        mind: { attack: 3, defend: 3 },
+        heart: { attack: 2, defend: 2 },
+    },
+    loot: [
+        drop('philosopher-tea', 40),
+        drop('void-essence', 30),
+        drop('revive-crystal', 20),
+        drop('resonance-crystal', 10),
+    ],
+    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 },
+    finalBlowLines: {
+        brutal: 'The scale tips past reading and stays there. The river runs unweighed.',
+        quiet:  'He notes the final weight, initials it, and lets the office stand vacant.',
+        ironic: 'He weighed everything that ever left this city. He never once weighed himself.',
+    },
+    causeLines: {
+        brutal: 'The weighing concludes. The balance is paid out of you.',
+        broken: 'Measure by measure, he finds what you are short.',
+        quiet:  'The needle settles. The gate does not open for the underweight.',
+    },
+    addedIn: W3_ADDED,
+    tags: ['mid-game', 'boss', 'enemy'],
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // THE APORIA — labyrinth continent (W-01), act bosses (L8 / L12 / L16)
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -2186,6 +2476,10 @@ export const EnemyLibrary = [
     TriEyesHollowed, BlackDeath, TheUnnameable, FireGiant, GreaterDevil, Rangda,
     ZomaAscendant, ElderFireGiant, Tezcatlipoca, ArchDemon, Beelzebub, Death,
     TheAbortive,
+    // Northern continent — Phase W3 batch (2026-08-28): caverns vermin +
+    // northern-city predators + the Harbormaster boss.
+    SeamTick, PropWight, UnpaidDelver, SumpMaren,
+    TollSergeant, GuildKnife, TheFactor, WharfShrike, TheHarbormaster,
     // The Aporia — labyrinth act bosses (W-01; not part of the 52-painting roster).
     TheDoorwarden, TheIndex, TheSophist,
     // Impossible playtest ceiling — deliberately absent from EnemiesByMap.
@@ -2216,14 +2510,26 @@ export const EnemiesByMap = {
         TheAbortive,
     ],
     // The caverns (northern continent, 2026-08-28 inter-map travel) — the
-    // map after northern-forest, so the pool reuses the existing roster
-    // skewed to the forest's harder mid tier (wandering foes scale to the
-    // player via the adaptive level bands). Rawhead Rex — the cellar-thing,
-    // up from under the stairs — is the authored Under-Gate boss, pinned
-    // per-node in `MapEvents/content.ts`.
+    // map after northern-forest. The pool mixes the forest's harder mid
+    // tier (wandering foes scale to the player via the adaptive level
+    // bands) with the continent's own blood (Phase W3: the four cavern
+    // natives). Rawhead Rex — the cellar-thing, up from under the stairs —
+    // is the authored Under-Gate boss, pinned per-node in
+    // `MapEvents/content.ts`.
     'caverns': [
         Wichtlein, PaleBrood, TriEyes, VampireThrall, Mabadi, FrayedOne,
         BoneTotem, BoneWizard, CursedPaladin, RawheadRex,
+        SeamTick, PropWight, UnpaidDelver, SumpMaren,
+    ],
+    // The northern city (Phase W3) — mostly the continent's own: the four
+    // city predators plus the Harbormaster, with three forest re-treads
+    // that read as city creatures (a duelist, an unraveling figure, a
+    // servant on an errand). Overlap with any sibling pool stays under the
+    // W5 70% ceiling. The Harbormaster is the authored boss, pinned
+    // per-node in `MapEvents/content.ts`.
+    'northern-city': [
+        TollSergeant, GuildKnife, TheFactor, WharfShrike,
+        Mabadi, FrayedOne, VampireThrall, TheHarbormaster,
     ],
     // The Aporia (W-01) — three acts of rising difficulty. Pools reuse the
     // shared roster (wandering foes scale to the player via the adaptive
@@ -2307,6 +2613,16 @@ export const ENEMY_REGISTRY = {
     'beelzebub':         Beelzebub,
     'death':             Death,
     'the-abortive':      TheAbortive,
+    // Northern continent — Phase W3 batch (2026-08-28).
+    'seam-tick':         SeamTick,
+    'prop-wight':        PropWight,
+    'unpaid-delver':     UnpaidDelver,
+    'sump-maren':        SumpMaren,
+    'toll-sergeant':     TollSergeant,
+    'guild-knife':       GuildKnife,
+    'the-factor':        TheFactor,
+    'wharf-shrike':      WharfShrike,
+    'the-harbormaster':  TheHarbormaster,
     // The Aporia — labyrinth act bosses (W-01).
     'the-doorwarden':    TheDoorwarden,
     'the-index':         TheIndex,

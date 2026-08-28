@@ -21,8 +21,10 @@ import type { Enemy } from '../types';
 const APORIA_BOSS_SLUGS = ['the-doorwarden', 'the-index', 'the-sophist'] as const;
 
 /**
- * The 52 art-roster slugs (excludes the sandbag + incompleteness fixtures and
- * the W-01 labyrinth act bosses, which are not part of the painting roster).
+ * The art-roster slugs (excludes the sandbag + incompleteness fixtures and
+ * the W-01 labyrinth act bosses, which are not part of the painting roster):
+ * the 52 paintings (2026-07-06) plus the 9-strong Phase W3 northern batch
+ * (2026-08-28, game-icons.net trove portraits).
  */
 const ROSTER_SLUGS = (Object.keys(ENEMY_REGISTRY) as Array<keyof typeof ENEMY_REGISTRY>)
     .filter(slug =>
@@ -30,9 +32,15 @@ const ROSTER_SLUGS = (Object.keys(ENEMY_REGISTRY) as Array<keyof typeof ENEMY_RE
         slug !== 'the-incompleteness' &&
         !(APORIA_BOSS_SLUGS as readonly string[]).includes(slug));
 
+/** Provenance stamps the roster has accrued, batch by batch. */
+const ROSTER_ADDED_STAMPS = ['2026-07-06', '2026-08-28'];
+
 describe('2026-07-06: the art-driven base roster', () => {
-    it('carries exactly 52 roster enemies (one per painting)', () => {
-        expect(ROSTER_SLUGS.length).toBe(52);
+    it('carries exactly 61 roster enemies (52 paintings + the 9 W3 northerners)', () => {
+        // Growth ledger, not a wall (THE PIPELINE LIBERATION ¶4): 52 → 61
+        // with Phase W3's northern-continent batch, bumped in the same
+        // commit that adds the enemies.
+        expect(ROSTER_SLUGS.length).toBe(61);
     });
 
     it('registers every roster enemy in EnemyLibrary', () => {
@@ -89,10 +97,11 @@ describe('2026-07-06: the art-driven base roster', () => {
             expect(tagged('late-game').length).toBeGreaterThanOrEqual(12);
         });
 
-        it('stamps every roster enemy with addedIn provenance', () => {
+        it('stamps every roster enemy with a known batch addedIn provenance', () => {
             for (const slug of ROSTER_SLUGS) {
                 const enemy = ENEMY_REGISTRY[slug] as Enemy;
-                expect(enemy.addedIn).toBe('2026-07-06');
+                expect(ROSTER_ADDED_STAMPS, `slug ${slug} addedIn ${enemy.addedIn}`)
+                    .toContain(enemy.addedIn);
             }
         });
     });
@@ -114,6 +123,43 @@ describe('2026-07-06: the art-driven base roster', () => {
         it('keeps the Sandbag and The Unfinished registered but excluded from the count', () => {
             expect(ENEMY_REGISTRY['sandbag']).toBe(Sandbag_01);
             expect(ENEMY_REGISTRY['the-incompleteness']).toBe(TheIncompleteness);
+        });
+    });
+
+    describe('the Phase W3 northern batch (2026-08-28)', () => {
+        const W3_SLUGS = [
+            'seam-tick', 'prop-wight', 'unpaid-delver', 'sump-maren',
+            'toll-sergeant', 'guild-knife', 'the-factor', 'wharf-shrike',
+            'the-harbormaster',
+        ] as const;
+
+        it('registers all nine, stamped 2026-08-28, on the two northern maps', () => {
+            for (const slug of W3_SLUGS) {
+                const enemy = ENEMY_REGISTRY[slug] as Enemy;
+                expect(enemy, `slug ${slug} missing from ENEMY_REGISTRY`).toBeDefined();
+                expect(enemy.addedIn).toBe('2026-08-28');
+                expect(['caverns', 'northern-city']).toContain(enemy.mapName);
+                expect(EnemyLibrary).toContain(enemy);
+            }
+        });
+
+        it('the Harbormaster is the batch\'s one boss; the rest never wager the coveted die', () => {
+            for (const slug of W3_SLUGS) {
+                const enemy = ENEMY_REGISTRY[slug] as Enemy;
+                if (slug === 'the-harbormaster') {
+                    expect(enemy.difficulty).toBe('boss');
+                } else {
+                    expect(['normal', 'elite']).toContain(enemy.difficulty);
+                }
+            }
+        });
+
+        it('every W3 enemy carries aftermath prose (finalBlowLines + causeLines)', () => {
+            for (const slug of W3_SLUGS) {
+                const enemy = ENEMY_REGISTRY[slug] as Enemy;
+                expect(enemy.finalBlowLines, `${slug} finalBlowLines`).toBeDefined();
+                expect(enemy.causeLines, `${slug} causeLines`).toBeDefined();
+            }
         });
     });
 

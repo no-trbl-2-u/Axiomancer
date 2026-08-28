@@ -332,7 +332,12 @@ function migrateV20ToV21(raw: Record<string, unknown>): Record<string, unknown> 
             name: 'northern-continent',
             description: 'The northern continent begins underground. Iron caverns climb toward the first city; a river runs on from there. Nobody arrives by daylight.',
             availableMaps: [],
-            lockedMaps: ['caverns'],
+            // Phase W3 — kept in sync with `createStartingWorld`. A v21 save
+            // seeded before W3 carries only 'caverns' here and needs NO new
+            // migration hop: the locked-map ledger is informational, and
+            // `unlockMap` admits any registered destination at travel time
+            // (see the travel-kind e2e's v21-catalogue regression).
+            lockedMaps: ['caverns', 'northern-city'],
             completedMaps: [],
         },
     ];

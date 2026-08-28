@@ -82,6 +82,21 @@ export const ENEMY_DECKS: Record<string, readonly string[]> = {
     // rangda — the widow-queen (4 phases; her swayCleanse identity on the
     // staked second card, the studied grief as the spike).
     'enemy-rangda': ['the-widows-keening', 'syllabus-of-accusation', 'bc-plague-versicle', 'the-mask-comes-away'],
+    // ── Phase W3 (2026-08-28) — the northern continent's own blood. Nine
+    // decks composed from the shared canon (no new cards needed): cavern
+    // vermin lean drowned-parish/omen-choir, the city leans debt-office and
+    // gnawing-court. Escalation law holds on each (final card is the spike);
+    // only the Harbormaster wagers the coveted die (boss — stake lands on
+    // his second card automatically via `wagersCovetedDie`).
+    'enemy-seam-tick': ['dp-undertow-grip', 'gc-the-patient-inch', 'gc-the-alms-you-owed'], // 0.95 → 1.1 → 1.35: the grip, the tightening inch, the full withdrawal. A tick is a small collector.
+    'enemy-prop-wight': ['first-knock', 'the-written-line', 'the-count-completes'], // 0.8 → 1.0 → 1.35: knock, writ, the roof's arithmetic finished. The wichtlein's cousin with a colder ending.
+    'enemy-unpaid-delver': ['the-tally-mark', 'collection-rounds', 'the-downbeat', 'foreclosure-in-person'], // 0.85 → 1.0 → 0.95 → 1.35 (elite, 4 cards, no stake): the shift is tallied, collected, beaten to rhythm, and foreclosed.
+    'enemy-sump-maren': ['dp-salt-rescue', 'dp-wet-congregation', 'dp-grief-swell'], // 0.8 → 0.9 → 1.3: the bad rescue, the chorus, the water that grieves you under.
+    'enemy-toll-sergeant': ['first-notice', 'gc-the-begging-fist', 'the-toll-entire'], // 0.85 → 0.95 → 1.3: the fee posted nowhere, the fist that explains it, the toll entire.
+    'enemy-guild-knife': ['first-notice', 'clause-of-objections', 'collection-rounds', 'execution-of-the-agreement'], // 0.85 → 0.9 → 1.0 → 1.4 (elite, 4 cards, no stake): served, objected, collected, executed. Punctually.
+    'enemy-the-factor': ['small-god-on-credit', 'compound-interest', 'foreclosure-in-person'], // 0.8 → 1.15 → 1.35: he lends you the opening on credit and forecloses in person.
+    'enemy-wharf-shrike': ['gc-where-the-reach-begins', 'dp-ninth-bell', 'gc-the-alms-you-owed'], // 0.9 → 1.2 → 1.35: the strike, the patient hook (the Ninth Bell's held round IS the larder wait), the collection.
+    'enemy-the-harbormaster': ['adjusters-visit', 'the-weighing', 'the-toll-entire', 'execution-of-the-agreement'], // BOSS, 4 cards: the appeal denied (0.95), THE WEIGHING staked in exactly the second slot (0.9 — the scale is his), the toll entire (1.3), the agreement executed (1.4 spike).
 };
 
 /** Projects one enemy-card face onto an authored-phase fragment. */
