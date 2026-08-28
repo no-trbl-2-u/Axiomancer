@@ -159,7 +159,7 @@ const nfCaveMouth: MapEventPool = {
             kind: 'travel',
             destinationContinent: 'northern-continent',
             destinationMap: 'caverns',
-            description: 'A cave mouth yawns in the cliff face. Cold air spills out; something deeper is breathing. You go in anyway.',
+            description: 'A cave mouth yawns in the cliff face. Cold air spills out. Something deeper is breathing. You go in anyway.',
         },
         // Phase 43 — cosmic dread at the dark gate: Lovecraft / Cioran
         // territory (Agnostic-Pessimistic-Transcendent). Carried over from
