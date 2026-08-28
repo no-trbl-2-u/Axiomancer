@@ -2397,12 +2397,19 @@ on pickup):**
       category with no UNRESOLVED licence. Title candidates were NOT delivered:
       the title art is a wordmark problem (the Phase 67 AUDIT row), not a
       backdrop one, and picking a title plate is an owner call.
-- [ ] Phase V5 — Backgrounds wired: `ScreenBg` keyed art slot with
+- [x] Phase V5 — Backgrounds wired: `ScreenBg` keyed art slot with
       dim/vignette; encounter screens + map regions consume V4 art;
       combat arena variety; procedural fallback stays (mobile; after V2+V4)
       HEAD START via PR #179: the WILDS map already consumes its plate
       through `mapBackdropFor` + the `MapCanvas` backdrop prop with the
       dim-never-blur treatment; V5 generalizes this to `ScreenBg`.
+      SHIPPED 2026-08-28 (`15ef285f`, issue #255): `assets/images/screens/`
+      resolver + an opt-in `art` prop on `ScreenBg`, dim numbers lifted
+      verbatim from `MapCanvas` (a test pins opacity <= 0.25 and no blur), a
+      vignette as a separate knob, and three screens wired (event, labyrinth,
+      combat). Every other screen is byte-identical — screens opt IN. Combat
+      arena variety shipped as the SLOT only: there is one arena, and
+      acquiring more is V4's pipeline plus a per-plate curation call.
 - [ ] Phase V6 — Combat & minigame glyph unification: shared subset of
       hazard/gathering/cache/combat glyph kits folds into the registry;
       keyword-mark canon audit (mobile; after V1)
