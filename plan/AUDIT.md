@@ -14,6 +14,48 @@
 
 ## Pending
 
+### [loop-call] Phase W3 design decisions — the northern city ships (2026-08-28)
+- category: design residue (THE OPEN GATE standing rule 7 — decisions filed
+  for after-the-fact review, shipped either way; no action needed unless
+  /oversight disagrees)
+- detail: five calls made while shipping W3 + the W5 partial drain:
+  1. **Door placement — nc-26, a NEW column past the Under-Gate boss**,
+     not a re-pool of the nc-16 sealed-stair cutscene. Rationale: nc-16
+     sits at [8,1], off the terminal column, and its own prose ("through
+     the gate below") already names the Under-Gate as the way through —
+     so the stair stays sealed scenery and the door follows the boss (the
+     fv-10 post-climax pattern). Cost: the caverns tolerate a FOURTH
+     singleton column (arrival/quest-giver/boss/door); the map-traversal
+     branch-width law carries a caverns-only tolerance of 4 with a comment.
+  2. **No v21→v22 migration hop.** The catalogue's `lockedMaps` ledger is
+     informational; `unlockMap` admits any REGISTERED destination into
+     `availableMaps` at travel time whether or not the save's catalogue
+     listed it. A pre-W3 v21 save (2-map catalogue) provably reaches
+     northern-city — regression pinned in `travel-kind.engine.test.ts`
+     ("a v21 save with the PRE-W3 two-map catalogue can still cross").
+     `createStartingWorld` + the v20→v21 seeding constant both gained
+     'northern-city' so NEW saves and v20 migrations carry the full ledger.
+  3. **`get-to-northern-city` grantor = The Delver, ungated.** She is the
+     caverns' guaranteed singleton (every route meets her); the grant is
+     not gated on `gather-iron` or the boss because the door itself sits
+     past the Under-Gate — the graph does the gating Old Marrow's
+     quest-completed requirement did on the coast.
+  4. **W5 partially drained: 9 new enemies** (4 cavern natives, 4 city
+     predators, the Harbormaster boss), decks composed from the shared
+     enemy-card canon (no new cards), portraits from the licensed
+     game-icons.net trove as white-on-transparent silhouettes — a
+     deliberate style departure from the 52 paintings (the paintings'
+     license is UNRESOLVED; the silhouettes are the first fully-licensed
+     portraits in the roster). Pool overlaps: caverns∩forest 10/14,
+     city∩caverns 3/8, city∩forest 3/8 — the city meets the W5 <70% bar;
+     the caverns still lean on the forest roster (full W5 pass remains
+     queued to finish the drain).
+  5. **Boss ladder — the Harbormaster pinned at L9** on ncy-25 (fv-6=3,
+     nc-25=6, ncy-25=9: a clean 3-step act ladder). Library level L18
+     boss-tier for late-game wandering scale.
+- evidence: `plan/steps/01_build_plan.md` Phase W3 row; commits on
+  `claude/w3-northern-city`.
+
 ### [contract] Phase 57 can zero the live axio-query corpus inside an already-running session
 - category: contract
 - observed: during the 2026-08-24 roundtable, the checkout fast-forwarded across Phase 57 (`cb788468`), which deleted the tracked `devlog/data/{cards,enemies,effects}.json` snapshots. The already-running `axio-query` process then returned `0 cards, 0 enemies, 0 effects` instead of regenerating. A manual `npm run catalog:export` restored `57 cards, 56 enemies, 24 effects` immediately.
