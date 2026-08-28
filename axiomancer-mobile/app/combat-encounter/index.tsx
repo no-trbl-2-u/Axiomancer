@@ -70,7 +70,7 @@ export default function CombatEncounterScreen() {
         // scrollable={false}: the combat board is a full-bleed game surface —
         // inside the default ScrollView its flex regions collapse to intrinsic
         // height and the battlefield squashes into the top half of the screen.
-        <ScreenBg scrollable={false}>
+        <ScreenBg scrollable={false} art="combat">
             <View style={styles.root}>
                 <CombatEncounterPanel
                     enemy={createMockEncounterEnemy()}

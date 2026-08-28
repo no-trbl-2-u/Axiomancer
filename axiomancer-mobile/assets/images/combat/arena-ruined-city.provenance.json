@@ -6,7 +6,8 @@
   "spec_section": "combat-battlefield",
   "target_dimensions": "1024x923",
   "used_by": [
-    "components/combat/encounter/CombatCombatantPane.tsx (full-bleed combat battlefield backdrop, behind the enemy figure)"
+    "components/combat/encounter/CombatCombatantPane.tsx (full-bleed combat battlefield backdrop, behind the enemy figure)",
+    "assets/images/screens/index.ts (ScreenBg art=\"combat\")"
   ],
   "license": "UNRESOLVED",
   "license_note": "Owner-supplied external illustration; no source or license was recorded at the time and none has been traced since. These assets already ship; this record states what is known rather than inventing terms. Blocked on the owner, same question as Potential Assets/MCP-Axiomancer/images/.",

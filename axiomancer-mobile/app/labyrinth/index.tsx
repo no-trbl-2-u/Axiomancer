@@ -152,7 +152,7 @@ export default function LabyrinthScreen() {
     // ── Act select ──
     if (vm.kind === 'act-select') {
         return (
-            <ScreenBg scrollable={false}>
+            <ScreenBg scrollable={false} art="labyrinth">
                 <View style={styles.selectRoot} testID="labyrinth-act-select">
                     <Text style={styles.title}>{vm.title}</Text>
                     <Text style={styles.sub}>{vm.sub}</Text>
@@ -182,7 +182,7 @@ export default function LabyrinthScreen() {
     // ── The Unfounded Door walked ──
     if (vm.kind === 'complete') {
         return (
-            <ScreenBg scrollable={false}>
+            <ScreenBg scrollable={false} art="labyrinth">
                 <View style={styles.selectRoot} testID="labyrinth-complete">
                     <Text style={styles.title}>{vm.title}</Text>
                     <Text style={styles.sub}>{vm.body}</Text>
@@ -211,7 +211,7 @@ export default function LabyrinthScreen() {
     };
 
     return (
-        <ScreenBg scrollable={false}>
+        <ScreenBg scrollable={false} art="labyrinth">
             <View style={styles.root} testID="labyrinth-room">
                 {/* ── Header strip ── */}
                 <View style={styles.header}>

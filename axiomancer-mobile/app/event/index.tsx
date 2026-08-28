@@ -151,7 +151,7 @@ export default function EventScreen() {
 
     if (!hasEvent) {
         return (
-            <ScreenBg>
+            <ScreenBg art="event">
                 <View style={styles.emptyArea} testID="event-empty">
                     <Text style={styles.eventTitle}>{vm.title}</Text>
                     <Text style={styles.bodyText}>{vm.body}</Text>
@@ -175,7 +175,7 @@ export default function EventScreen() {
     }
 
     return (
-        <ScreenBg>
+        <ScreenBg art="event">
             {preludeChrome !== null && (
                 <View style={styles.preludeHeader} testID="event-prelude-header">
                     <Text style={styles.preludeHeaderText}>▲ {preludeChrome.eyebrow}</Text>
