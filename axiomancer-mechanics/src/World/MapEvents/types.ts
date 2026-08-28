@@ -14,6 +14,7 @@ import type { Item } from '../../Items/types';
 import type { ShopInventory } from '../../Items/shop.types';
 import type { NPC, DialogueTree } from '../../NPCs/types';
 import type { EnemySlug } from '../../Enemy/enemy.library';
+import type { ContinentName, MapName } from '../map.library';
 import type { Encounter, NodeId } from '../types';
 import type { PhilosophicalAlignment } from '../../Ledger/types';
 import type { BlacksmithVariantOffer } from '../Blacksmith/blacksmith.types';
@@ -21,7 +22,7 @@ import type { BlacksmithVariantOffer } from '../Blacksmith/blacksmith.types';
 /**
  * The MapEvent kinds. 'narration' (a dialogue-backed monologue shell)
  * joined the original eight in 2026-06; 'quest' (Phase 137) was retired
- * in Phase 61.
+ * in Phase 61; 'travel' (inter-map doors) joined 2026-08-28.
  */
 export type MapEventKind =
     | 'encounter'
@@ -33,7 +34,8 @@ export type MapEventKind =
     | 'hazard'
     | 'loot-cache'
     | 'narration'
-    | 'blacksmith';
+    | 'blacksmith'
+    | 'travel';
 
 // ─── Per-kind authoring payloads ──────────────────────────────────────────────
 
@@ -167,6 +169,24 @@ export interface BlacksmithPayload {
     description?: string;
 }
 
+/**
+ * Travel node — an inter-map DOOR (2026-08-28). Resolving it walks the
+ * player out of the current map: the departed map's runtime `MapState` is
+ * preserved under `WorldState.mapStates` and the map is marked in
+ * `completedMaps` (the world is a place, not a checklist — completing a
+ * map means "walked through", never "reset"); the destination map is
+ * unlocked if locked, the continent switches when it differs, and the
+ * destination becomes `currentMap` (restored if previously departed,
+ * fresh otherwise). One-way per door, repeatable: the dispatcher never
+ * consumes a travel node, so re-resolving it travels again.
+ */
+export interface TravelPayload {
+    kind: 'travel';
+    destinationContinent: ContinentName;
+    destinationMap: MapName;
+    description?: string;
+}
+
 /** Discriminated union of all authoring payloads. */
 export type MapEventPayload =
     | EncounterPayload
@@ -178,7 +198,8 @@ export type MapEventPayload =
     | HazardPayload
     | LootCachePayload
     | NarrationPayload
-    | BlacksmithPayload;
+    | BlacksmithPayload
+    | TravelPayload;
 
 // ─── Pools ────────────────────────────────────────────────────────────────────
 
@@ -224,6 +245,9 @@ export type ResolvedEvent =
     | { kind: 'loot-cache';  items: Item[]; currency: number; description?: string }
     | { kind: 'narration';   dialogue: DialogueTree; description?: string }
     | { kind: 'blacksmith';  budget: number; variants: readonly BlacksmithVariantOffer[]; description?: string }
+    // The world state on the result has already crossed; the resolved event
+    // names where the door led so hosts can narrate the departure.
+    | { kind: 'travel';      destinationContinent: ContinentName; destinationMap: MapName; description?: string }
     | { kind: 'none' };
 
 export interface ResolveMapEventResult {

@@ -1,10 +1,11 @@
 /**
- * MapEvent pool content for fishing-village + northern-forest (Spec 24).
+ * MapEvent pool content for fishing-village + northern-forest (Spec 24)
+ * and, since 2026-08-28 (inter-map travel), the caverns.
  *
- * Each existing fv-N / nf-N node gets a single-entry pool override so
- * the new dispatcher reproduces (and extends) the authored events
+ * Each authored fv-N / nf-N / nc-N node gets a single-entry pool override
+ * so the dispatcher reproduces (and extends) the authored events
  * `processNode` used to fire. Every `MapEventKind` value is covered
- * at least once across the two maps.
+ * at least once across the shipped maps.
  *
  * This file side-effects on import: `src/World/index.ts` imports it
  * for that side effect, so consumers of the package get the pools
@@ -145,20 +146,24 @@ const nfForestMarket: MapEventPool = {
     }],
 };
 
+// 2026-08-28 — inter-map travel: the cave mouth IS the door. Formerly a
+// cutscene describing a cave nobody could enter; the `get-to-cave` quest
+// still completes on arrival (reach objectives tick before the pool roll),
+// and resolving the node now walks the player onto the northern continent.
+// The old cutscene's cold-air line survives as the door's prose.
 const nfCaveMouth: MapEventPool = {
-    id: 'nf-10.cutscene',
+    id: 'nf-10.travel',
     entries: [{
-        kind: 'cutscene', weight: 1,
+        kind: 'travel', weight: 1,
         payload: {
-            kind: 'cutscene',
-            lines: [
-                'A cave mouth yawns in the cliff face.',
-                'Cold air spills out; something deeper is breathing.',
-            ],
-            description: 'The cave at the forest\'s edge.',
+            kind: 'travel',
+            destinationContinent: 'northern-continent',
+            destinationMap: 'caverns',
+            description: 'A cave mouth yawns in the cliff face. Cold air spills out; something deeper is breathing. You go in anyway.',
         },
         // Phase 43 — cosmic dread at the dark gate: Lovecraft / Cioran
-        // territory (Agnostic-Pessimistic-Transcendent).
+        // territory (Agnostic-Pessimistic-Transcendent). Carried over from
+        // the cutscene this door replaced.
         alignmentDelta: { outlook: -2, scope: 3 },
     }],
 };
@@ -956,9 +961,30 @@ const FV_REST_NODES: Record<string, string> = {
     'fv-25': 'A tide-pool grotto, still and warm. You let the quiet mend you.',
 };
 const FV_GATHER_NODES: Record<string, number> = { 'fv-5': 0, 'fv-8': 1, 'fv-22': 3 };
+// 2026-08-28 — fv-10, the spine's terminal "coast road out", was a hazard
+// (jagged barnacles); it is now the map's DOOR. fv-23 keeps the map's one
+// remaining hazard node.
 const FV_HAZARD_NODES: Record<string, string> = {
-    'fv-10': 'You stumble through a thicket of jagged barnacles.',
     'fv-23': 'A gull-slick ledge crumbles underfoot above the rocks.',
+};
+
+// 2026-08-28 — inter-map travel. The door sits in the terminal column
+// (column 9), four columns past the fv-6 breakwater boss, so it opens only
+// after the King of Revenge is dealt with — the same beat where Old Marrow
+// grants `get-to-forest`. Resolving it walks the player onto
+// northern-forest, whose start node nf-1 completes the quest's reach
+// objective on its own resolution.
+const fvCoastRoadNorth: MapEventPool = {
+    id: 'fv-10.travel',
+    entries: [{
+        kind: 'travel', weight: 1,
+        payload: {
+            kind: 'travel',
+            destinationContinent: 'coastal-continent',
+            destinationMap: 'northern-forest',
+            description: 'The coast road runs out of village to run out of. North, past the last shacks, the pines take it. You follow.',
+        },
+    }],
 };
 // Phase 53c — fv-2's loot cache (idx 0) moves to fv-12, one of the two
 // nodes column 1 displaces, so the map's guaranteed shilling income
@@ -1016,6 +1042,8 @@ const FISHING_VILLAGE_NEW_PLAYER_POOLS: ReadonlyArray<{ nodeId: string; pool: Ma
                 out.push({ nodeId, pool: fvCaptainBlackwaterInteraction });
             } else if (nodeId === 'fv-19') {
                 out.push({ nodeId, pool: fvFishermansDaughterInteraction });
+            } else if (nodeId === 'fv-10') {
+                out.push({ nodeId, pool: fvCoastRoadNorth });
             } else if (FV_REST_NODES[nodeId]) {
                 out.push({ nodeId, pool: fvRestPool(nodeId, FV_REST_NODES[nodeId]!) });
             } else if (nodeId in FV_GATHER_NODES) {
@@ -1034,6 +1062,208 @@ const FISHING_VILLAGE_NEW_PLAYER_POOLS: ReadonlyArray<{ nodeId: string; pool: Ma
         }
         return out;
     })();
+
+// ─── The caverns (northern continent, 2026-08-28 inter-map travel) ───────────
+//
+// First map past the nf-10 door. Kind spread, over 25 nodes: 8 encounter
+// (7 wandering + the nc-25 Under-Gate boss), 3 gathering (the iron the map
+// exists for — `gather-iron` collects it), 3 rest (all CAMPS: nothing down
+// here is tended), 3 hazard, 3 loot-cache, 3 cutscene (arrival, the old
+// delve, the sealed stair), 1 interaction (the Delver, quest-giver), and
+// 1 village (the Ledger Camp, the continent's first shop). Wandering
+// encounters carry no pinned slug — `generateEncounter` draws from
+// `EnemiesByMap['caverns']` (the harder forest-tier mix) and scales to the
+// player via the adaptive bands; only the boss is pinned, and to a low
+// absolute level (the fv-6 precedent) so the climax is winnable at arrival.
+
+const ncArrival: MapEventPool = {
+    id: 'nc-1.cutscene',
+    entries: [{
+        kind: 'cutscene', weight: 1,
+        payload: {
+            kind: 'cutscene',
+            lines: [
+                'The daylight gives up a few steps in. It does not argue.',
+                'Iron in the air, iron in the water. Somewhere ahead, a hammer — or something imitating one.',
+            ],
+            description: 'The caverns take you in.',
+        },
+        // The dark under the world: the scope widens, the outlook does not.
+        alignmentDelta: { outlook: -1, scope: 2 },
+    }],
+};
+
+const ncDelver: MapEventPool = {
+    id: 'nc-2.interaction',
+    entries: [{
+        kind: 'interaction', weight: 1,
+        payload: {
+            kind: 'interaction',
+            npcName: 'The Delver',
+            description: 'A lamp on a crooked post. A woman sorts ore from stone beneath it.',
+        },
+    }],
+};
+
+function ncIronVeinPool(nodeId: string, description: string): MapEventPool {
+    return {
+        id: `${nodeId}.gathering`,
+        entries: [{
+            kind: 'gathering', weight: 1,
+            payload: {
+                kind: 'gathering',
+                items: [{
+                    id: 'iron-ore', name: 'Iron Ore',
+                    description: 'Heavy, honest, worth carrying.',
+                    category: 'material', quantity: 1,
+                }],
+                description,
+            },
+        }],
+    };
+}
+
+function ncCampPool(nodeId: string, description: string): MapEventPool {
+    return {
+        id: `${nodeId}.rest`,
+        entries: [{
+            // A cavern camp is never an inn — nothing down here mends scars.
+            kind: 'rest', weight: 1,
+            payload: { kind: 'rest', shelter: 'camp', description },
+        }],
+    };
+}
+
+function ncHazardPool(nodeId: string, damage: number, description: string): MapEventPool {
+    return {
+        id: `${nodeId}.hazard`,
+        entries: [{
+            kind: 'hazard', weight: 1,
+            payload: { kind: 'hazard', damage, description },
+        }],
+    };
+}
+
+function ncLootPool(nodeId: string, currency: number, description: string): MapEventPool {
+    return {
+        id: `${nodeId}.loot-cache`,
+        entries: [{
+            kind: 'loot-cache', weight: 1,
+            payload: { kind: 'loot-cache', currency, description },
+        }],
+    };
+}
+
+function ncEncounterPool(nodeId: string, description: string): MapEventPool {
+    return {
+        id: `${nodeId}.encounter`,
+        entries: [{
+            kind: 'encounter', weight: 1,
+            payload: { kind: 'encounter', isBoss: false, description },
+        }],
+    };
+}
+
+const ncLedgerCamp: MapEventPool = {
+    id: 'nc-6.village',
+    entries: [{
+        kind: 'village', weight: 1,
+        payload: {
+            kind: 'village',
+            villageName: 'The Ledger Camp',
+            merchants: [{ name: 'Camp Ledgerman', isShopkeeper: true }],
+            shop: {
+                wares: [
+                    { itemId: 'minor-healing-potion', price: 14 },
+                    { itemId: 'antidote',             price: 16 },
+                    { itemId: 'clarity-serum',        price: 30 },
+                    { itemId: 'philosopher-tea',      price: 38 },
+                ],
+            },
+            description: 'Delvers trade around a shared lamp. Prices are underground prices.',
+        },
+    }],
+};
+
+const ncOldDelve: MapEventPool = {
+    id: 'nc-24.cutscene',
+    entries: [{
+        kind: 'cutscene', weight: 1,
+        payload: {
+            kind: 'cutscene',
+            lines: [
+                'An earlier delve ended here. The props gave. The tally-board did not.',
+                'Nine names, chalked. Somebody crossed out eight and stopped.',
+            ],
+            description: 'The bones of an older delve.',
+        },
+        alignmentDelta: { outlook: -1, epistemology: 1 },
+    }],
+};
+
+const ncSealedStair: MapEventPool = {
+    id: 'nc-16.cutscene',
+    entries: [{
+        kind: 'cutscene', weight: 1,
+        payload: {
+            kind: 'cutscene',
+            // The way toward northern-city — the NEXT map, not shipped.
+            // Authored as sealed scenery, not a door; the map ends at the
+            // Under-Gate boss instead.
+            lines: [
+                'A stair climbs toward the city. Climbs, then stops: rockfall, packed tight, older than the tally-boards.',
+                'Whoever opens it will do it from the other side, or through the gate below.',
+            ],
+            description: 'The sealed stair.',
+        },
+    }],
+};
+
+// The Under-Gate — rawhead-rex, the cellar-thing "up from under the stairs",
+// pinned to a low absolute level (the shared enemy is L25 elsewhere) so the
+// continent's first climax is winnable on arrival. Every route ends here.
+const NC_BOSS_LEVEL = 6;
+const ncUnderGateBoss: MapEventPool = {
+    id: 'nc-25.encounter-boss',
+    entries: [{
+        kind: 'encounter', weight: 1,
+        payload: {
+            kind: 'encounter',
+            enemySlug: 'rawhead-rex',
+            isBoss: true,
+            level: NC_BOSS_LEVEL,
+            description: 'Something has kept this gate longer than the city above remembers. It stands up to keep it now.',
+        },
+    }],
+};
+
+const CAVERNS_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> = [
+    { nodeId: 'nc-1',  pool: ncArrival },
+    { nodeId: 'nc-2',  pool: ncDelver },
+    { nodeId: 'nc-3',  pool: ncEncounterPool('nc-3',  'Three knocks from inside the wall. The third is for you.') },
+    { nodeId: 'nc-4',  pool: ncCampPool('nc-4',  'A delver\'s firepit, cold but sheltered. You rest where they rested.') },
+    { nodeId: 'nc-5',  pool: ncEncounterPool('nc-5',  'The gallery narrows. Something in it has been waiting for the lamp.') },
+    { nodeId: 'nc-6',  pool: ncLedgerCamp },
+    { nodeId: 'nc-7',  pool: ncEncounterPool('nc-7',  'Bones in the rubble, arranged. The arranger is still here.') },
+    { nodeId: 'nc-8',  pool: ncEncounterPool('nc-8',  'The last gallery before the gate. It is defended.') },
+    { nodeId: 'nc-9',  pool: ncCampPool('nc-9',  'A hollow behind a fallen slab. The last quiet before the gate.') },
+    { nodeId: 'nc-10', pool: ncIronVeinPool('nc-10', 'The seam runs high along the wall, dark and clean. You cut what you can carry.') },
+    { nodeId: 'nc-11', pool: ncIronVeinPool('nc-11', 'The seam again, thicker. The pick-marks of earlier hands stop halfway.') },
+    { nodeId: 'nc-12', pool: ncLootPool('nc-12', 14, 'A dead delver\'s satchel, wedged under slate. The coin kept better than the delver.') },
+    { nodeId: 'nc-13', pool: ncEncounterPool('nc-13', 'The lamp catches eyes at the seam\'s edge. More than two.') },
+    { nodeId: 'nc-14', pool: ncLootPool('nc-14', 11, 'A toll-box bolted to the rock, pried open long ago. Not emptied.') },
+    { nodeId: 'nc-15', pool: ncEncounterPool('nc-15', 'The seam ends at a face of raw rock. Something is mining it from the other side.') },
+    { nodeId: 'nc-16', pool: ncSealedStair },
+    { nodeId: 'nc-17', pool: ncHazardPool('nc-17', 2, 'The air goes bad without announcing it. You climb out slower than you went in.') },
+    { nodeId: 'nc-18', pool: ncEncounterPool('nc-18', 'The sump water moves against the current.') },
+    { nodeId: 'nc-19', pool: ncIronVeinPool('nc-19', 'Ore in the sump wall, half-drowned. Cold work. It pays the same.') },
+    { nodeId: 'nc-20', pool: ncHazardPool('nc-20', 3, 'The props above you decide, quietly, that they are done. Not all of the roof misses.') },
+    { nodeId: 'nc-21', pool: ncCampPool('nc-21', 'A dry shelf above the waterline. You wring out what you can and breathe.') },
+    { nodeId: 'nc-22', pool: ncHazardPool('nc-22', 2, 'The lamp gutters. For eleven steps the dark owns you. It takes its toll on the way through.') },
+    { nodeId: 'nc-23', pool: ncLootPool('nc-23', 10, 'Coin scattered where a purse hit rock. Nobody came back down for it.') },
+    { nodeId: 'nc-24', pool: ncOldDelve },
+    { nodeId: 'nc-25', pool: ncUnderGateBoss },
+];
 
 // ─── single registration entry point ─────────────────────────────────────────
 //
@@ -1057,6 +1287,10 @@ export function registerMapEventContent(): void {
     for (const { nodeId, pool } of FISHING_VILLAGE_NEW_PLAYER_POOLS) {
         registerMapEventPool(pool);
         setNodeEventPoolOverride('coastal-continent', 'fishing-village', nodeId, pool.id);
+    }
+    for (const { nodeId, pool } of CAVERNS_POOLS) {
+        registerMapEventPool(pool);
+        setNodeEventPoolOverride('northern-continent', 'caverns', nodeId, pool.id);
     }
 }
 

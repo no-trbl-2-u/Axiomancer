@@ -3,9 +3,24 @@
  * makes sense (locking/unlocking, completing).
  */
 
-import { WorldState, MapState, MapDefinition, MapNode, NodeId, HazardNodeOutcome } from './types';
+import { WorldState, MapState, MapDefinition, MapNode, NodeId, HazardNodeOutcome, Continent } from './types';
 import { MapName, ContinentName } from './map.library';
 import { getMapDefinition } from './map.registry';
+
+/**
+ * Writes an updated continent into BOTH `currentContinent` and its slot in
+ * the `world` catalogue (2026-08-28 travel). Before the world array was
+ * populated, continent mutations only touched `currentContinent` and the
+ * empty catalogue could not drift; with a real catalogue the two must stay
+ * in sync or a continent switch would resurrect stale map lists.
+ */
+function withCurrentContinent(state: WorldState, continent: Continent): WorldState {
+    return {
+        ...state,
+        currentContinent: continent,
+        world: state.world.map(c => (c.name === continent.name ? continent : c)),
+    };
+}
 
 // ── Map navigation ──────────────────────────────────────────────────────────
 
@@ -114,27 +129,21 @@ export function completeCurrentNode(state: WorldState): WorldState {
 export function completeMap(state: WorldState, mapName: MapName): WorldState {
     const continent = state.currentContinent;
     if (continent.completedMaps.includes(mapName)) return state;
-    return {
-        ...state,
-        currentContinent: {
-            ...continent,
-            completedMaps: [...continent.completedMaps, mapName],
-        },
-    };
+    return withCurrentContinent(state, {
+        ...continent,
+        completedMaps: [...continent.completedMaps, mapName],
+    });
 }
 
 /** Moves a map from `lockedMaps` to `availableMaps`. Idempotent. */
 export function unlockMap(state: WorldState, mapName: MapName): WorldState {
     const continent = state.currentContinent;
     if (continent.availableMaps.includes(mapName)) return state;
-    return {
-        ...state,
-        currentContinent: {
-            ...continent,
-            lockedMaps: continent.lockedMaps.filter(m => m !== mapName),
-            availableMaps: [...continent.availableMaps, mapName],
-        },
-    };
+    return withCurrentContinent(state, {
+        ...continent,
+        lockedMaps: continent.lockedMaps.filter(m => m !== mapName),
+        availableMaps: [...continent.availableMaps, mapName],
+    });
 }
 
 // ── Node progression ────────────────────────────────────────────────────────
@@ -168,11 +177,20 @@ export function unlockNode(state: WorldState, nodeId: string): WorldState {
 
 // ── Continent navigation ────────────────────────────────────────────────────
 
-/** Switches to the named continent. No-op when the name is not in `state.world`. */
+/**
+ * Switches to the named continent. No-op when the name is not in
+ * `state.world` (the catalogue is the authority — labyrinth-continent is
+ * deliberately uncatalogued, dev-menu + CLI only, and stays unreachable
+ * here). The outgoing `currentContinent` is written back into the catalogue
+ * first, so nothing accumulated on it is lost by the switch (2026-08-28
+ * travel — before the catalogue was populated this function could only
+ * no-op, and `world.reducer.test.ts` pinned that).
+ */
 export function changeContinent(state: WorldState, continentName: ContinentName): WorldState {
-    const continent = state.world.find(c => c.name === continentName);
+    const synced = withCurrentContinent(state, state.currentContinent);
+    const continent = synced.world.find(c => c.name === continentName);
     if (!continent) return state;
-    return { ...state, currentContinent: continent };
+    return { ...synced, currentContinent: continent };
 }
 
 // ── Event management ────────────────────────────────────────────────────────

@@ -268,6 +268,26 @@ export function resolveMapEvent(
         }
         : result.state;
 
+    // 4a-travel (2026-08-28). A resolved travel event has already crossed —
+    // `result.state.world.currentMap` IS the destination map. Return here:
+    // the reveal/unlock/consume step below operates on the current map and
+    // would scribble the departed node's id onto the destination's books.
+    // Deliberately NOT consumed — a door is repeatable (one-way per door):
+    // re-resolving the departed node, should the player ever stand on it
+    // again, travels again.
+    if (result.event.kind === 'travel') {
+        const stateWithTravelAlignment: GameState = entry.alignmentDelta
+            ? {
+                ...result.state,
+                philosophicalAlignment: applyAlignmentDelta(
+                    result.state.philosophicalAlignment,
+                    entry.alignmentDelta,
+                ),
+            }
+            : result.state;
+        return { state: stateWithTravelAlignment, event: result.event };
+    }
+
     // 4b. Apply the pool entry's authored alignment delta, if any (Phase 43).
     // Mirrors the dialogue-runtime moralDelta path — the handler computes its
     // event delta on the pre-shift state; the alignment shift applies on top.

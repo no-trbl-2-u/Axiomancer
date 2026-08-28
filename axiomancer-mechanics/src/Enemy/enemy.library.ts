@@ -2215,6 +2215,16 @@ export const EnemiesByMap = {
         ZomaAscendant, ElderFireGiant, Tezcatlipoca, ArchDemon, Beelzebub, Death,
         TheAbortive,
     ],
+    // The caverns (northern continent, 2026-08-28 inter-map travel) — the
+    // map after northern-forest, so the pool reuses the existing roster
+    // skewed to the forest's harder mid tier (wandering foes scale to the
+    // player via the adaptive level bands). Rawhead Rex — the cellar-thing,
+    // up from under the stairs — is the authored Under-Gate boss, pinned
+    // per-node in `MapEvents/content.ts`.
+    'caverns': [
+        Wichtlein, PaleBrood, TriEyes, VampireThrall, Mabadi, FrayedOne,
+        BoneTotem, BoneWizard, CursedPaladin, RawheadRex,
+    ],
     // The Aporia (W-01) — three acts of rising difficulty. Pools reuse the
     // shared roster (wandering foes scale to the player via the adaptive
     // level bands); each act adds its authored boss.

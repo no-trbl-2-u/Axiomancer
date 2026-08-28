@@ -22,14 +22,16 @@ import { applyEffect } from '../../Effects';
 import { lookupEffect } from '../../Effects/effects.library';
 import type { ActiveEffect } from '../../Effects/types';
 import { generateEncounter, scaleEnemyToLevel } from '../encounter';
-import { getMapDefinition } from '../map.registry';
+import { getMapDefinition, createMapState } from '../map.registry';
+import { completeMap, changeContinent, unlockMap, changeMap } from '../world.reducer';
+import type { WorldState } from '../types';
 import { ENEMY_REGISTRY, type EnemySlug } from '../../Enemy/enemy.library';
 import { validateDieGear, type DieGearColor } from '../../Character/dieGear.reducer';
 import { REST_PASSIVE_HEAL_FRACTION, restShelterOf } from './rest-shelter';
 import type {
     EncounterPayload, InteractionPayload, GatheringPayload, RestPayload,
     VillagePayload, CutscenePayload, HazardPayload, LootCachePayload,
-    NarrationPayload, BlacksmithPayload, ResolveMapEventResult,
+    NarrationPayload, BlacksmithPayload, TravelPayload, ResolveMapEventResult,
 } from './types';
 
 function withPlayer(state: GameState, next: Character): GameState {
@@ -265,6 +267,59 @@ export function resolveBlacksmith(
     };
 }
 
+// ─── travel ───────────────────────────────────────────────────────────────────
+
+/**
+ * Travel events (2026-08-28) walk the player through an inter-map door.
+ *
+ * The departed map's runtime `MapState` is PRESERVED under
+ * `WorldState.mapStates` — the design call, decided: the world is a place
+ * you can move around in, and `completedMaps` means "walked through", never
+ * "reset". Steps, in order:
+ *
+ *   1. Mark the departed map in its continent's `completedMaps`.
+ *   2. Switch continent when the destination continent differs.
+ *   3. Move the destination out of `lockedMaps` if it is still locked.
+ *   4. Make the destination the current map — restoring its preserved
+ *      state when the player has departed it before, fresh otherwise.
+ *
+ * The dispatcher never consumes a travel node, so a door is repeatable:
+ * re-resolving it travels again. Throws (via `getMapDefinition`) when the
+ * destination is not registered — an authored door to an unshipped map is
+ * a programming error, not a runtime fallback.
+ */
+export function resolveTravel(
+    state: GameState,
+    payload: TravelPayload,
+): ResolveMapEventResult {
+    const destinationDef = getMapDefinition(payload.destinationContinent, payload.destinationMap);
+    const departed = state.world.currentMap;
+
+    let world: WorldState = completeMap(state.world, departed.name);
+    world = changeContinent(world, payload.destinationContinent);
+    world = unlockMap(world, payload.destinationMap);
+
+    const preserved = { ...(world.mapStates ?? {}), [departed.name]: departed };
+    const restored = preserved[payload.destinationMap];
+    // The restored copy becomes live again; drop its preserved duplicate so
+    // `currentMap` is the single writable copy.
+    if (restored) delete preserved[payload.destinationMap];
+    world = {
+        ...changeMap(world, restored ?? createMapState(destinationDef)),
+        mapStates: preserved,
+    };
+
+    return {
+        state: { ...state, world },
+        event: {
+            kind: 'travel',
+            destinationContinent: payload.destinationContinent,
+            destinationMap: payload.destinationMap,
+            description: payload.description,
+        },
+    };
+}
+
 // ─── dispatch table ───────────────────────────────────────────────────────────
 
 import type { MapEventPayload } from './types';
@@ -285,5 +340,6 @@ export function applyPayload(
         case 'loot-cache':  return resolveLootCache(state, payload);
         case 'narration':   return resolveNarration(state, payload);
         case 'blacksmith':  return resolveBlacksmith(state, payload);
+        case 'travel':      return resolveTravel(state, payload);
     }
 }

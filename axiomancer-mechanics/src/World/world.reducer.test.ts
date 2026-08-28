@@ -14,6 +14,18 @@ describe('createStartingWorld', () => {
             expect(currentContinent.lockedMaps).not.toContain(name);
         }
     });
+
+    it('catalogues the two campaign continents, coastal current (2026-08-28 travel)', () => {
+        const w = world();
+        expect(w.world.map(c => c.name)).toEqual(['coastal-continent', 'northern-continent']);
+        expect(w.currentContinent.name).toBe('coastal-continent');
+        // The labyrinth-continent (W-01) is deliberately uncatalogued —
+        // dev-menu + CLI only.
+        expect(w.world.map(c => c.name)).not.toContain('labyrinth-continent');
+        const northern = w.world.find(c => c.name === 'northern-continent')!;
+        expect(northern.lockedMaps).toContain('caverns');
+        expect(northern.availableMaps).toEqual([]);
+    });
 });
 
 describe('completeMap', () => {
@@ -57,9 +69,24 @@ describe('unlockNode', () => {
 });
 
 describe('changeContinent', () => {
-    it('no-ops for unknown continent', () => {
+    // Pre-travel (2026-08-28) the catalogue was `[]`, so this function could
+    // ONLY no-op and the test pinned that. The catalogue is real now.
+    it('switches to a catalogued continent', () => {
+        const w = changeContinent(world(), 'northern-continent');
+        expect(w.currentContinent.name).toBe('northern-continent');
+        expect(w.currentContinent.lockedMaps).toContain('caverns');
+    });
+
+    it('writes the outgoing continent back into the catalogue before switching', () => {
+        const w1 = completeMap(world(), 'fishing-village');
+        const w2 = changeContinent(w1, 'northern-continent');
+        const coastal = w2.world.find(c => c.name === 'coastal-continent')!;
+        expect(coastal.completedMaps).toContain('fishing-village');
+    });
+
+    it('still no-ops for an uncatalogued continent (the labyrinth stays dev-only)', () => {
         const w = world();
-        expect(changeContinent(w, 'northern-continent')).toBe(w);
+        expect(changeContinent(w, 'labyrinth-continent')).toBe(w);
     });
 });
 

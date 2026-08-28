@@ -624,13 +624,13 @@ const northernForest: MapDefinition = {
         mapImage: { alt: '', src: '' },
         combatImage: { alt: '', src: '' },
     },
-    // Phase 53a (S-02) — placement beyond repairing the mismatched
-    // `npcName`s is out of scope: northern-forest is unreachable in play
-    // until inter-map travel exists (first-map audit F4, a standing phase
-    // candidate). Staging content there now would be premature.
+    // Phase 53a (S-02) — declared-unstaged with reasons. 2026-08-28:
+    // inter-map travel exists now (the fv-10 door reaches this map), so
+    // "unreachable" no longer holds — homing these two is a content
+    // follow-up, not a travel blocker.
     unstagedNpcs: [
-        { name: 'Forest Ranger', reason: 'Northern-forest placement is out of scope beyond the npcName mismatches — the map is unreachable until inter-map travel exists (first-map audit F4; S-02).' },
-        { name: 'Lost Trader', reason: 'Same as the Forest Ranger — unreachable until inter-map travel exists (first-map audit F4; S-02).' },
+        { name: 'Forest Ranger', reason: 'No node assigned yet. The map is reachable as of 2026-08-28 (inter-map travel); homing the Ranger is a content follow-up (S-02).' },
+        { name: 'Lost Trader', reason: 'Same as the Forest Ranger — awaiting a node, a content follow-up now that the map is reachable (S-02).' },
     ],
 };
 
