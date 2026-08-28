@@ -45,9 +45,12 @@ function seatAt(store: AppStore, continent: ContinentName, mapName: Parameters<t
 }
 
 describe('inter-map travel doors (Phase W1)', () => {
-    it('fv-10 walks the run onto northern-forest with a toast and no event card', () => {
-        const { store, actions } = makeStoreAndActions();
+    it('fv-10 walks the run onto northern-forest with a toast, no event card, and a checkpoint save', () => {
+        const adapter = createMemoryAdapter();
+        const store = createAppStore({ adapter });
+        const actions = createAppActions(store);
         seatAt(store, 'coastal-continent', 'fishing-village', 'fv-10');
+        const savesBefore = adapter.saveCount;
 
         expect(actions.resolveCurrentMapEvent('travel')).toBe(true);
 
@@ -56,6 +59,9 @@ describe('inter-map travel doors (Phase W1)', () => {
         expect(selectHasActiveEvent(after)).toBe(false);
         expect(selectPacedEventRoute(after)).toBeNull();
         expect(after.notifications?.toast?.text).toMatch(/You cross into/);
+        // Crossing checkpoints the run — saves are explicit on mobile
+        // (Spec 09); without this, an app close after the door loses it.
+        expect(adapter.saveCount).toBe(savesBefore + 1);
     });
 
     it('the arrival map start node is not consumed by the crossing', () => {

@@ -1636,6 +1636,11 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
             const region = getMapLayout(result.event.destinationMap)?.region
                 ?? result.event.destinationMap;
             pushToast(store, `You cross into ${region}.`);
+            // Crossing a map is a checkpoint, same as a combat or rest
+            // outcome — saves are explicit on mobile (Spec 09), and a
+            // crossing lost to an app close would strand the run on the
+            // wrong map.
+            try { store.getState().save(); } catch { /* persistence must not block the road */ }
             return true;
         }
 
