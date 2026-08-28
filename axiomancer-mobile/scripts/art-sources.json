@@ -1,0 +1,37 @@
+{
+  "__comment": "Curated acquisition manifest for scripts/acquire-art.mjs (phase V4). One entry per plate, each a deliberate choice with its reason recorded — no crawling, no category sweeps. The licence is NOT stated here: acquire-art.mjs reads it from the Commons API at acquisition and refuses anything it cannot prove is public domain or CC0. A title in this file is a proposal, not a permission.",
+  "acquisitions": [
+    {
+      "key": "charon-crossing",
+      "category": "maps",
+      "title": "File:Gustave Doré - Dante Alighieri - Inferno - Plate 9 (Canto III - Charon).jpg",
+      "region": "connecting-river / river crossings",
+      "why": "A ferryman poling a crowded boat across black water under a low sky. The region is a crossing, and the plate is about the toll for one — the chart's nodes read as landings.",
+      "maxEdge": 1120
+    },
+    {
+      "key": "the-pit",
+      "category": "maps",
+      "title": "File:Gustave Doré - Dante Alighieri - Inferno - Plate 65 (Canto XXXI - The Titans).jpg",
+      "region": "caverns",
+      "why": "A shaft walled by vast half-seen figures, light falling from far above. Reads as depth rather than as a cave mouth, which is what the caverns map actually is.",
+      "maxEdge": 1120
+    },
+    {
+      "key": "ludgate-hill",
+      "category": "maps",
+      "title": "File:Gustave Doré - Ludgate Hill.jpg",
+      "region": "northern-city",
+      "why": "Doré's London: A Pilgrimage (1872). A choked street under a railway bridge, all soot and traffic. A city that is grim by ordinary congestion, not by monsters — the register the house wants.",
+      "maxEdge": 1120
+    },
+    {
+      "key": "wentworth-street",
+      "category": "maps",
+      "title": "File:Gustave Doré - Wentworth Street Whitechapel - London, a Pilgrimage.jpg",
+      "region": "town-across-river / fishing-village",
+      "why": "A packed slum street from the same series. Domestic, crowded, poor — the right backdrop for a village chart, and it pairs with Ludgate Hill so the two settled regions share a hand.",
+      "maxEdge": 1120
+    }
+  ]
+}

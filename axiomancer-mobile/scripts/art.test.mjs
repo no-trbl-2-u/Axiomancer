@@ -17,6 +17,7 @@ import { compile, validateSpec } from './art/prompt.mjs'
 import { PALETTE, PREAMBLE, STYLE_VERSION, CATEGORIES } from './art/style.mjs'
 import { paletteDistance, summarize } from './art/qa.mjs'
 import { postProcess } from './generate-art.mjs'
+import { ACCEPTED_LICENCES, loadSources, verifyLicence } from './acquire-art.mjs'
 
 const spec = {
   slug: 'tallow-bailiff',
@@ -163,4 +164,71 @@ test('the summary rolls per-asset rows up per category', () => {
   assert.equal(enemies.meanLuminance, 50)
   assert.equal(enemies.overSized, 1)
   assert.equal(enemies.alphaCutouts, 2)
+})
+
+// ── the acquisition licence gate (phase V4) ──────────────────────────────────
+//
+// Tested against CAPTURED metadata shapes, never the network: this must pass in
+// CI, which has no reason to call Commons, and a gate that only works online is
+// a gate that silently stops working.
+
+const em = (fields) => Object.fromEntries(
+  Object.entries(fields).map(([k, v]) => [k, { value: v }]),
+)
+
+test('a public-domain blob is accepted, with artist carried through', () => {
+  // The exact shape returned for the shipped Doré plate.
+  const verdict = verifyLicence(em({
+    LicenseShortName: 'Public domain', License: 'pd',
+    UsageTerms: 'Public domain', Artist: '<a href="/wiki/x">Gustave Doré</a>',
+  }))
+  assert.equal(verdict.ok, true)
+  assert.equal(verdict.licence, 'Public domain')
+  // HTML is stripped — Commons returns the artist as markup.
+  assert.equal(verdict.artist, 'Gustave Doré')
+})
+
+test('CC0 is accepted', () => {
+  assert.equal(verifyLicence(em({ LicenseShortName: 'CC0', License: 'cc0' })).ok, true)
+})
+
+test('an attribution licence is REFUSED, and the refusal names it', () => {
+  // CC BY-SA is usable in principle, but carries obligations this build has no
+  // attribution surface for. "We could comply" is not "we do".
+  const verdict = verifyLicence(em({
+    LicenseShortName: 'CC BY-SA 4.0', License: 'cc-by-sa-4.0',
+    UsageTerms: 'Creative Commons Attribution-Share Alike 4.0',
+  }))
+  assert.equal(verdict.ok, false)
+  assert.match(verdict.why, /CC BY-SA 4\.0/)
+  assert.match(verdict.why, /attribution surface/)
+})
+
+test('a blob with no licence at all is REFUSED', () => {
+  const verdict = verifyLicence(em({ Artist: 'Anon' }))
+  assert.equal(verdict.ok, false)
+  assert.match(verdict.why, /no licence at all/)
+})
+
+test('an empty or missing extmetadata is REFUSED, not defaulted', () => {
+  assert.equal(verifyLicence(undefined).ok, false)
+  assert.equal(verifyLicence({}).ok, false)
+})
+
+test('the accepted list stays short and explicit', () => {
+  // If this grows, someone widened what the pipeline will ingest. That should
+  // be a deliberate diff, not a drift.
+  assert.equal(ACCEPTED_LICENCES.length, 4)
+})
+
+test('every manifest entry is a proposal with a reason, not a licence claim', () => {
+  const sources = loadSources()
+  assert.ok(sources.acquisitions.length > 0)
+  for (const a of sources.acquisitions) {
+    assert.match(a.title, /^File:/, `${a.key} is not a Commons file title`)
+    assert.ok(a.category && a.why && a.why.length > 30, `${a.key} has no recorded reason`)
+    // The manifest must never assert terms — the API decides.
+    assert.equal(a.license, undefined, `${a.key} asserts a licence; only the source may`)
+    assert.equal(a.licence, undefined, `${a.key} asserts a licence; only the source may`)
+  }
 })

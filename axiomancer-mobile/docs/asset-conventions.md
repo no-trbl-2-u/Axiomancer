@@ -109,3 +109,31 @@ else ship. Same question as `Potential Assets/MCP-Axiomancer/images/`.
 - `labyrinth/walls/` ships at 720x1280, above the 640px longest-edge
   cap. They are already WebP, so re-encoding would be lossy-on-lossy
   for a modest saving; left as a deliberate exception, not an oversight.
+- `maps/` is a **standing exception to the 640px cap**: map backdrops are
+  full-bleed under a chart layer, so they are acquired at 1120px (the
+  recorded `forest-dark` recipe). `art:qa` counts them in its `over`
+  column by design — the column reports the cap, and this category is
+  known to sit outside it.
+
+## Acquiring public-domain art (phase V4)
+
+```bash
+npm run assets:acquire --workspace axiomancer-mobile -- --key <key>
+npm run assets:acquire --workspace axiomancer-mobile -- --all --dry-run
+```
+
+`scripts/acquire-art.mjs` reads the licence from the Wikimedia Commons
+`imageinfo` API and **refuses to write anything it cannot prove is
+public domain or CC0** — non-zero exit, no file, no provenance record.
+The operator picks the file and the destination; the operator never
+asserts the licence, because a `--licence` flag would reproduce exactly
+the failure the licensing-debt AUDIT row describes.
+
+Attribution licences (CC BY, CC BY-SA) are refused too. They are usable
+in principle, but the build has no attribution surface, and "we could
+comply" is not "we do". Widening `ACCEPTED_LICENCES` should be a
+deliberate diff — a test pins its length.
+
+Candidate files live in `scripts/art-sources.json`, one entry per plate
+with its reason recorded. A title in that file is a proposal, not a
+permission.

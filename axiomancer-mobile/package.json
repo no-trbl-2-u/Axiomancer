@@ -43,7 +43,8 @@
     "assets:ingest": "node scripts/ingest-art.mjs",
     "art:gen": "node scripts/generate-art.mjs",
     "art:qa": "node scripts/art/qa.mjs",
-    "art:test": "node --test scripts/art.test.mjs"
+    "art:test": "node --test scripts/art.test.mjs",
+    "assets:acquire": "node scripts/acquire-art.mjs"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",

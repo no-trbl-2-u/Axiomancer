@@ -1,12 +1,80 @@
-{
-  "generated_by": "public-domain-acquisition",
-  "date": "2026-08-08",
-  "tool": "Wikimedia Commons download + Pillow post-process",
-  "source": "https://commons.wikimedia.org/wiki/File:Gustave_Dor%C3%A9_-_Dante_Alighieri_-_Inferno_-_Plate_1_(I_found_myself_within_a_forest_dark...).jpg",
-  "artist": "Gustave Doré (1832-1883), engraving for Dante's Inferno, Canto I",
-  "license": "Public domain (author died 1883)",
-  "post_process": "plate margins + caption band cropped, grayscale, resized to 1120px tall, brightness 0.62 / contrast 1.08 toward the void, WebP q44",
-  "spec_section": "phase V (Woodcut Codex) - map backdrops",
-  "covers": "forest-dark.webp",
-  "used_by": ["assets/images/maps/index.ts (map backdrop registry)"]
-}
+[
+  {
+    "generated_by": "public-domain-acquisition",
+    "date": "2026-08-08",
+    "tool": "Wikimedia Commons download + Pillow post-process",
+    "source": "https://commons.wikimedia.org/wiki/File:Gustave_Dor%C3%A9_-_Dante_Alighieri_-_Inferno_-_Plate_1_(I_found_myself_within_a_forest_dark...).jpg",
+    "artist": "Gustave Doré (1832-1883), engraving for Dante's Inferno, Canto I",
+    "license": "Public domain (author died 1883)",
+    "post_process": "plate margins + caption band cropped, grayscale, resized to 1120px tall, brightness 0.62 / contrast 1.08 toward the void, WebP q44",
+    "spec_section": "phase V (Woodcut Codex) - map backdrops",
+    "covers": "forest-dark.webp",
+    "used_by": [
+      "assets/images/maps/index.ts (map backdrop registry)"
+    ]
+  },
+  {
+    "generated_by": "public-domain-acquisition",
+    "date": "2026-08-28",
+    "tool": "scripts/acquire-art.mjs (Commons API + sharp)",
+    "source": "https://commons.wikimedia.org/wiki/File:Gustave_Dor%C3%A9_-_Dante_Alighieri_-_Inferno_-_Plate_9_(Canto_III_-_Charon).jpg",
+    "artist": "Gustave Doré",
+    "license": "Public domain",
+    "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
+    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44",
+    "covers": [
+      "charon-crossing.webp"
+    ],
+    "used_by": [
+      "assets/images/maps/index.ts"
+    ]
+  },
+  {
+    "generated_by": "public-domain-acquisition",
+    "date": "2026-08-28",
+    "tool": "scripts/acquire-art.mjs (Commons API + sharp)",
+    "source": "https://commons.wikimedia.org/wiki/File:Gustave_Dor%C3%A9_-_Dante_Alighieri_-_Inferno_-_Plate_65_(Canto_XXXI_-_The_Titans).jpg",
+    "artist": "Gustave Doré (1832 – 1883)",
+    "license": "Public domain",
+    "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
+    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44",
+    "covers": [
+      "the-pit.webp"
+    ],
+    "used_by": [
+      "assets/images/maps/index.ts"
+    ]
+  },
+  {
+    "generated_by": "public-domain-acquisition",
+    "date": "2026-08-28",
+    "tool": "scripts/acquire-art.mjs (Commons API + sharp)",
+    "source": "https://commons.wikimedia.org/wiki/File:Gustave_Dor%C3%A9_-_Ludgate_Hill.jpg",
+    "artist": "Gustave Doré (1832-1883)",
+    "license": "Public domain",
+    "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
+    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44",
+    "covers": [
+      "ludgate-hill.webp"
+    ],
+    "used_by": [
+      "assets/images/maps/index.ts"
+    ]
+  },
+  {
+    "generated_by": "public-domain-acquisition",
+    "date": "2026-08-28",
+    "tool": "scripts/acquire-art.mjs (Commons API + sharp)",
+    "source": "https://commons.wikimedia.org/wiki/File:Gustave_Dor%C3%A9_-_Wentworth_Street_Whitechapel_-_London,_a_Pilgrimage.jpg",
+    "artist": "Gustave Doré",
+    "license": "Public domain",
+    "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
+    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44",
+    "covers": [
+      "wentworth-street.webp"
+    ],
+    "used_by": [
+      "assets/images/maps/index.ts"
+    ]
+  }
+]
