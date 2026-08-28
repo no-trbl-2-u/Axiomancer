@@ -1943,7 +1943,7 @@ export const PropWight = createEnemy({
     id: 'enemy-prop-wight',
     portraitAsset: 'prop-wight',
     name: 'Prop-Wight',
-    stanceHint: 'It holds the roof the way it holds a grudge — let it write the third line and the gallery closes.',
+    stanceHint: 'It holds the roof the way it holds a grudge. Deny it the third line, or the gallery closes.',
     description: 'It lives in the rotten props and keeps the roof up out of spite. Delvers leave it bread. It leaves the crusts in the shape of names.',
     level: 15,
     baseStats: enemyStatBudget(15, { heart: 1, body: 1, mind: 3 }),
