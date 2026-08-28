@@ -8,6 +8,16 @@
 > brief on pickup per `skills/plan-a-phase.md`; this file is the shared
 > north star so the sub-briefs never drift apart.
 
+> **RATIFIED BY PLAY, 2026-08-28 (T direct, attended):** shown the live
+> continent-playtest captures — the Dore-plate omen cutscenes, the
+> parley sheet, the map hub — T's verbatim reaction: *"OMG! This art
+> direction is amazing!"* The Woodcut Codex is no longer a bet; it is
+> confirmed against the owner's eye on real screens. Standing
+> consequence for V6–V8 and every `/forge` art tick: this direction is
+> the bar to CLEAR, not a draft to second-guess — invest in completing
+> it (plate coverage, glyph unification, placeholder teardown), not in
+> exploring alternatives.
+
 ## The chosen direction
 
 **The Woodcut Codex** — double down on the identity the game already
