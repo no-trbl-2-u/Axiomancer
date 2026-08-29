@@ -355,6 +355,45 @@
   components/combat/. House voice, knife-law sentences.
 - source: loop
 
+### [MED] world — the Ash Mire boss sits three natural steps from a fresh spawn and flattens a level-1 pilgrim
+- pass: user-session playthrough 2026-08-29 (commit 0b39b120)
+- viewport: 420x900 (web export)
+- auth_state: fresh save, level 1
+- category: functional
+- observation: a brand-new run walked its most obvious open path —
+  Crossing (quest) → Drowned Shrine (quest) → Black Cairn (gather) —
+  and the next open node was Ash Mire, labelled "boss" on the map:
+  The King of Revenge, 150 VITAE, 4 phases. It killed the level-1
+  pilgrim (80 VITAE, starter deck) in four rounds. The node IS
+  signposted as a boss, but it sat on the natural forward path with
+  ordinary encounter/rest nodes still sealed around it, so the
+  first real fight of the run can be an unwinnable one.
+- suggested fix: audit the fishing-village unlock graph so at least
+  one ordinary encounter/rest node opens before (or beside) the Ash
+  Mire edge, or gate the boss edge behind more trodden nodes. Check
+  the per-map doctrine in world-tuning for the intended first-fight
+  difficulty curve.
+- source: user (session playthrough)
+
+### [MED] exploration — open map nodes just off-screen no-op silently on tap; the map recenters against manual panning
+- pass: user-session playthrough 2026-08-29 (commit 0b39b120)
+- viewport: 420x900 (web export)
+- auth_state: fresh save
+- category: functional / UX
+- observation: open (glowing) nodes that sit outside the viewport
+  (e.g. Sea Cave at x=-46 on a 420-wide screen) accept the tap event
+  but open no travel sheet — a silent dead tap with no feedback.
+  Manually panning the map to bring the node into view fights an
+  auto-recenter that pulls the camera back, so reaching an edge node
+  takes several attempts. The node legend advertises "tap a glowing
+  node to travel", which reads as a lie the first time it happens.
+- suggested fix: either auto-pan the camera to a tapped off-screen
+  node (then open its sheet), or clamp the initial camera so every
+  currently-open node is in view; at minimum give the dead tap
+  feedback (toast or camera nudge). Check the recenter behavior in
+  the map canvas component for why manual pans are overridden.
+- source: user (session playthrough)
+
 ### [HIGH] combat — user crash on ACCEPTING the post-combat card reward (second unreproduced crash report)
 - pass: user-jot 2026-08-29 (session: card-design check-in)
 - viewport: unspecified (user's own device/build — platform not yet known)
