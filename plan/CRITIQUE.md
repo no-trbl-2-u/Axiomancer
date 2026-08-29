@@ -355,6 +355,42 @@
   components/combat/. House voice, knife-law sentences.
 - source: loop
 
+### [HIGH] combat — user crash on ACCEPTING the post-combat card reward (second unreproduced crash report)
+- pass: user-jot 2026-08-29 (session: card-design check-in)
+- viewport: unspecified (user's own device/build — platform not yet known)
+- auth_state: real progression save
+- category: functional
+- observation: the user reports "the game crashes after a successful
+  combat and I accept the card reward". A dedicated web-build repro
+  session could NOT reproduce it on latest main (0b39b120): the accept
+  path (tap offer tile → CHOOSE THIS → TAKE CARD) was driven end-to-end
+  in the LIVE encounter flow with the endgame preset (max level), the
+  sage preset with a pending level-up (XP granted pre-fight, cascaded
+  post-victory), then walked out through the summary — zero pageerrors,
+  no error-boundary mount, next combat mounts clean with the accepted
+  card in deck. A fresh-save organic run (village → Drowned Shrine →
+  Black Cairn → Ash Mire boss) produced only defeats, so the organic
+  low-level victory→accept case is still unwitnessed.
+- evidence: root-caused a REAL harness hole while hunting: every prior
+  `combat-round-e2e.mjs` run silently SKIPPED the reward draft —
+  `combat-reward-confirm` is disabled until a tile is picked, and the
+  aftermath walk never tapped a tile, so the accept path (the code path
+  the user crashes on: `claimCombatRewardAction` mutates the player and
+  re-renders the panel) had zero e2e coverage. Fixed this session: the
+  walk now taps the first offer tile before the preview-select/confirm
+  clicks, so every live victory run drives the ACCEPT path crash-strict.
+- suggested fix: get the crash's identity from the user's device — the
+  persisted log survives restarts: /dev (SELF → dev tools) → DIAGNOSTICS
+  → PREV SESSION with domain ERROR (or PERSISTENCE) shows the last
+  session's captured error; also whether it was the ErrorBoundary panel
+  (+ its code) or a hard app close, and whether it is the native EAS
+  build (react-native-svg / expo-image behave differently there than on
+  web — the new PRINTED PLATE face and the reward preview both render
+  Svg paths). Pin that case in `combat-round-e2e.mjs` once known.
+  Related: the 2026-08-19 row below — same signature (user crash the
+  harness cannot see), possibly the same underlying cause.
+- source: user
+
 ### [HIGH] combat — user hit a mid-combat crash that 30 seeded UI runs could not reproduce
 - pass: user-jot (commit 24475f48)
 - viewport: unspecified

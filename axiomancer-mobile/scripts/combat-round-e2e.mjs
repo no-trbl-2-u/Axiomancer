@@ -239,6 +239,10 @@ async function readDice(page) {
 
 const terminal = async (page) =>
     (await has(page.getByTestId('combat-summary'))) || (await has(page.getByTestId('combat-mercy')))
+    // A won fight shows the reward draft BEFORE the summary (the summary is
+    // gated on the claim), so without this arm a victory read as "still live"
+    // and the play loop burned its remaining rounds no-oping under the overlay.
+    || (await has(page.getByTestId('combat-rewards')))
 
 /** Skip the dice-roll ritual so the round does not burn wall clock on it. */
 async function skipRoll(page) {
@@ -410,6 +414,19 @@ async function enterLive(page, baseUrl, seed) {
     await page.getByTestId('self-dev-tools-link').waitFor({ state: 'visible', timeout: 25000 })
     await page.getByTestId('self-dev-tools-link').click()
     await page.waitForURL((url) => url.pathname.endsWith('/dev'), { timeout: 15000 })
+    // Optional player preset (PRESET=endgame|sage|wanderer|apprentice|fresh):
+    // a fresh e2e save is a level-1 pilgrim who usually LOSES, so the victory
+    // aftermath — the reward draft and its ACCEPT path — went unexercised on
+    // every default run. PRESET=endgame (or sage) makes the win, and therefore
+    // the take-a-card walk below, actually reachable in CI.
+    const preset = (process.env.PRESET ?? '').toLowerCase()
+    if (preset) {
+        const btn = page.getByTestId(`debug-preset-${preset}`)
+        await btn.waitFor({ state: 'visible', timeout: 15000 })
+        await btn.click()
+        await page.waitForTimeout(800)
+        log(`live: applied player preset "${preset}"`)
+    }
     const trigger = page.getByTestId('debug-trigger-encounter-encounter')
     await trigger.waitFor({ state: 'visible', timeout: 15000 })
     await trigger.click({ force: true })
@@ -482,6 +499,31 @@ async function playSeed(browser, baseUrl, seed, mode) {
         const resolved = (await terminal(page)) || (await has(page.getByTestId('combat-summary')))
 
         if (mode === 'live') {
+            // TAKE CARD, not skip. The reward draft's ACCEPT path (tap an offer
+            // tile → CHOOSE THIS → TAKE CARD) is a different code path from
+            // SKIP — `claimCombatRewardAction` mutates the player and the panel
+            // re-renders off the new state — and the old walk below never
+            // reached it: `combat-reward-confirm` is disabled until a tile is
+            // picked, so every prior run silently skipped. That hole shipped a
+            // real crash-on-accept. Tap the first offer tile first, so the
+            // walk's preview-select/confirm clicks land on a real pick.
+            const outcomeLine = (await page.getByTestId('combat-summary').innerText().catch(() => ''))
+                .split('\n')[0] || '(no summary yet)'
+            log(`${tag} — outcome read: ${outcomeLine}`)
+            const rewards = page.getByTestId('combat-rewards')
+            if (await has(rewards)) {
+                const tile = rewards.locator(
+                    '[data-testid^="combat-reward-"]'
+                    + ':not([data-testid="combat-reward-skip"])'
+                    + ':not([data-testid="combat-reward-confirm"])'
+                    + ':not([data-testid^="combat-reward-preview"])',
+                ).first()
+                if (await has(tile)) {
+                    await tile.click({ force: true, timeout: 3000 }).catch(() => {})
+                    await page.waitForTimeout(350)
+                    await assertAlive(page, sink, `${tag}, opening a reward offer`)
+                }
+            }
             // Walk whichever aftermath panel the outcome produced, in the order
             // they stack: summary → victory/defeat/friendship → reward pick.
             // These are the REAL testIDs (CombatSummaryModal / CombatRewardsOverlay
@@ -497,6 +539,7 @@ async function playSeed(browser, baseUrl, seed, mode) {
                 'combat-reward-skip',
             ]
             let walked = 0
+            const walkedIds = []
             for (let pass = 0; pass < 2; pass++) {
                 for (const id of AFTERMATH) {
                     const btn = page.getByTestId(id)
@@ -505,10 +548,11 @@ async function playSeed(browser, baseUrl, seed, mode) {
                     await page.waitForTimeout(450)
                     await assertAlive(page, sink, `${tag}, the aftermath (${id})`)
                     walked++
+                    walkedIds.push(id)
                 }
             }
             log(`${tag} — walked ${walked} aftermath panel${walked === 1 ? '' : 's'} `
-                + '(the persistOutcome write-back)')
+                + `(the persistOutcome write-back)${walkedIds.length ? `: ${walkedIds.join(' → ')}` : ''}`)
         }
 
         const applied = rounds.reduce((n, r) => n + r.applied, 0)
