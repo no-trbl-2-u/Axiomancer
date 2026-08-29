@@ -1,13 +1,40 @@
 # Critique log
 
-> Last pass: 2026-08-22 at commit 0aab723d
-> Pass count: 29
+> Last pass: 2026-08-29 at commit 32ba438b
+> Pass count: 30
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 30, 2026-08-29, commit 32ba438b] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5), mobile
+> (375×812) and desktop (1280×800) run separately, against the
+> cold-enterable screen set (title, onboarding/deck-picker,
+> combat-encounter preview, live combat board post-ENTER COMBAT,
+> exploration hub). All 10 captures clean: zero console/page errors
+> besides the same benign `navigator.vibrate` autoplay warning seen
+> every prior pass. The **[MED] momentum chain empty-state contrast**
+> row (pass 21) now reads fixed on both viewports — `○ no momentum`
+> is legible against the arena floor art on mobile and now visibly
+> renders on desktop too, consistent with the 2026-08-28 ui-cleanup
+> pass RESOLVED entry in Done; no regression. The open **[MED] fixed
+> "ruined city" arena backdrop** row (pass 23) reconfirmed unchanged —
+> the Brine Hag encounter (a coastal/drowning-themed foe) still
+> renders against the same purple ruined-city skyline on both
+> viewports. Title wordmark (no crop on mobile; the pass-14
+> art-overlays-CTA desktop quirk still holds, still not filed per
+> that pass's dev-only-surface reasoning), onboarding tagline, Brine
+> Hag threat-sequence preview text, and the OMEN cutscene redirect at
+> the exploration-hub route all match prior-pass baselines verbatim.
+> Also re-examined the mobile title screen's vertical gap between the
+> square hero art and the CTA panel (flex-end layout, `TitleScreen.tsx`)
+> — reproduces identically to every prior capture; pass 14 already
+> characterized this exact layout as the clean baseline (in contrast
+> to the desktop overlay defect), so not re-litigated as a new finding.
+> No new findings filed — nothing observed outside the existing rows.
 
 > **[critique pass 29, 2026-08-22, commit 0aab723d] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5), mobile

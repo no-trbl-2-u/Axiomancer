@@ -396,3 +396,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-28T06:06:23Z | subagent | general-purpose | claude-fable-5 | main | Fix traced UI defects mobile |
 | 2026-08-28T06:13:04Z | subagent | general-purpose | claude-fable-5 | main | Build travel system + caverns map |
 | 2026-08-28T22:40:00Z | subagent | general-purpose | claude-fable-5 | main | Build Northern City + new enemies |
+| 2026-08-29T01:47:47Z | slash-prompt | /march | unknown | user/ci | /march |
