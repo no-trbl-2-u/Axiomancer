@@ -2427,9 +2427,23 @@ on pickup):**
       multi-component blast radius, deliberately left to a follow-up brief
       (see `plan/phases/phase_v6_glyph_unification.md` Follow-ups) rather than
       guessed at autonomously.
-- [ ] Phase V7 — Illustration upgrades: replace remaining procedural
+- [-] Phase V7 — Illustration upgrades: replace remaining procedural
       illustration SVGs with acquired art per `SVG_ASSET_SPEC.md` §5–8;
       PixelEmblem carve-out preserved (assets + mobile; after V4)
+      PARTIAL 2026-08-30 (6f731252): surveyed every §5–8 target before
+      acquiring anything — `<Splatter>` (§5) is the only one with a live,
+      high-frequency production audience (combat victory, level-up, the
+      exploration map), so it got real art: four acquired Rorschach-plate
+      ink silhouettes (public domain), a new `acquire-art.mjs` "silhouette"
+      alpha-matte recipe, rendered via `tintColor`. The event/boss
+      illustration family (§6–7) and the body diagram (§8) turned out to be
+      dead or near-dead code — reachable only through `app/event/index.tsx`,
+      a defensive fallback shell nothing routes to in production, or (body
+      diagram) zero call sites at all — so no art was acquired for them;
+      REMAINING is V8's keep-or-delete call on that code, plus a 47-plate
+      labyrinth room-scene backdrop acquisition, both out of scope for one
+      phase tick (see `plan/phases/phase_v7_illustration_upgrades.md`
+      Follow-ups).
 - [ ] Phase V8 — Closure: `/critic-loop` screenshot pass, contrast/a11y
       audit, placeholder teardown, `SVG_ASSET_SPEC.md` reconciled,
       `docs/VISUAL_LANGUAGE.md` (mobile; after V1–V7)
