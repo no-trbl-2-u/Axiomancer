@@ -32,6 +32,38 @@
       "region": "town-across-river / fishing-village",
       "why": "A packed slum street from the same series. Domestic, crowded, poor — the right backdrop for a village chart, and it pairs with Ludgate Hill so the two settled regions share a hand.",
       "maxEdge": 1120
+    },
+    {
+      "key": "splatter-1",
+      "category": "splatter",
+      "title": "File:Rorschach_blot_01.jpg",
+      "recipe": "silhouette",
+      "why": "Real ink on paper, not a drawn approximation of ink — the honest source for a splatter motif. Plate I, the test's own opener, symmetric and dense enough to read at 48px.",
+      "maxEdge": 480
+    },
+    {
+      "key": "splatter-2",
+      "category": "splatter",
+      "title": "File:Rorschach_blot_03.jpg",
+      "recipe": "silhouette",
+      "why": "Plate III's figure has a looser, more scattered silhouette than plate I — the variety `<Splatter seed>` picks between, same family of source so the set reads as one kit.",
+      "maxEdge": 480
+    },
+    {
+      "key": "splatter-3",
+      "category": "splatter",
+      "title": "File:Rorschach_blot_04.jpg",
+      "recipe": "silhouette",
+      "why": "Plate IV, dense and clawed at the edges — the heaviest-looking blot of the set, good for the larger renders (combat victory panel, map canvas).",
+      "maxEdge": 480
+    },
+    {
+      "key": "splatter-4",
+      "category": "splatter",
+      "title": "File:Rorschach_blot_06.jpg",
+      "recipe": "silhouette",
+      "why": "Plate VI's long drip trail at the base reads as spatter rather than a blob, rounding out the set with the one shape that actually looks flung rather than pooled.",
+      "maxEdge": 480
     }
   ]
 }

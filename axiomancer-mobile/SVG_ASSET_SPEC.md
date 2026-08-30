@@ -264,12 +264,31 @@ the `color` prop without needing separate colored variants.
 - [ ] Effect glyph set (8 icons)
 - [ ] Action icon set (9 icons)
 - [ ] Map node markers (4 states)
-- [ ] Ink splatter PNGs (3–4 variants)
-- [ ] Enemy: Carrion Hierophant (180×200)
-- [ ] Event: Encounter illustration (full-width × 320)
-- [ ] Event: Boss illustration (full-width × 360)
-- [ ] Character body diagram (88×220)
+- [x] Ink splatter PNGs (3–4 variants) — RESOLVED 2026-08-30 (Phase V7): four
+      acquired plates (`assets/images/splatter/`, public domain — Rorschach
+      test plates), `<Splatter>` now renders one via `tintColor` instead of
+      procedural circles.
+- [ ] Enemy: Carrion Hierophant (180×200) — this row predates the archetype
+      system (`components/event/enemy-art/`); the live combat surface uses
+      acquired portraits (`assets/images/enemies/`, `assets/images/portraits/`)
+      instead. See Phase V7 brief for the orphan-code finding on this whole
+      section.
+- [ ] Event: Encounter illustration (full-width × 320) — DEFERRED, Phase V7:
+      unreachable in production (see brief's "What's actually live" — the
+      `/event` route this renders under is a defensive fallback shell, per
+      its own header comment, not a route the game routes to). Acquiring
+      bespoke art for it now would be wasted effort ahead of a real
+      keep-or-delete call; flagged for V8.
+- [ ] Event: Boss illustration (full-width × 360) — DEFERRED, same finding as
+      the row above.
+- [ ] Character body diagram (88×220) — DEFERRED, Phase V7: `BodyDiagram` has
+      zero call sites in the live tree (confirmed by grep; an orphan
+      since at least the V1 ground-truth survey). Flagged for V8.
 - [ ] Tab bar icon set (5 icons)
 - [ ] Labyrinth room-scene backdrops (47 rooms, 3:2, ink-on-parchment —
       contract in `assets/images/labyrinth/index.ts`; procedural SVG
-      placeholder in `components/labyrinth/RoomScene.tsx` until then)
+      placeholder in `components/labyrinth/RoomScene.tsx` until then) —
+      OUT OF SCOPE for Phase V7: this is live art (the labyrinth IS the
+      Aporia acts, not a fallback), but a 47-plate curated acquisition is
+      its own phase-sized effort, not a slice of V7. Left for a dedicated
+      follow-up.

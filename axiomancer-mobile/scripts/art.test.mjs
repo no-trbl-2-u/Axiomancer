@@ -17,7 +17,7 @@ import { compile, validateSpec } from './art/prompt.mjs'
 import { PALETTE, PREAMBLE, STYLE_VERSION, CATEGORIES } from './art/style.mjs'
 import { paletteDistance, summarize } from './art/qa.mjs'
 import { postProcess } from './generate-art.mjs'
-import { ACCEPTED_LICENCES, loadSources, verifyLicence } from './acquire-art.mjs'
+import { ACCEPTED_LICENCES, buildSilhouette, loadSources, verifyLicence } from './acquire-art.mjs'
 
 const spec = {
   slug: 'tallow-bailiff',
@@ -219,6 +219,40 @@ test('the accepted list stays short and explicit', () => {
   // If this grows, someone widened what the pipeline will ingest. That should
   // be a deliberate diff, not a drift.
   assert.equal(ACCEPTED_LICENCES.length, 4)
+})
+
+// ── the silhouette recipe (phase V7 — ink-splatter alpha mattes) ────────────
+
+test('buildSilhouette turns a dark mark on a light field into an alpha matte', async () => {
+  const { default: sharp } = await import('sharp')
+  // A radial luminance gradient — dark centre fading smoothly to a light
+  // field — stands in for a scanned ink wash. A hard-edged synthetic shape
+  // trims to a uniformly-opaque rect and sharp's WebP encoder then drops the
+  // (constant) alpha channel entirely, which a real acquisition's
+  // continuously-graded edges never trigger.
+  const size = 100
+  const gray = Buffer.alloc(size * size * 3)
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const d = Math.hypot(x - size / 2, y - size / 2) / (size / 2)
+      const lum = Math.round(20 + Math.min(1, d) * 216) // 20 (centre) -> 236 (field)
+      const i = (y * size + x) * 3
+      gray[i] = gray[i + 1] = gray[i + 2] = lum
+    }
+  }
+  const source = await sharp(gray, { raw: { width: size, height: size, channels: 3 } }).png().toBuffer()
+
+  const webp = await buildSilhouette(sharp, source, 200)
+  const meta = await sharp(webp).metadata()
+  assert.equal(meta.hasAlpha, true, 'the matte must carry an alpha channel')
+
+  const { data } = await sharp(webp).ensureAlpha().raw().toBuffer({ resolveWithObject: true })
+  const alphas = []
+  for (let i = 3; i < data.length; i += 4) alphas.push(data[i])
+  const max = Math.max(...alphas)
+  const min = Math.min(...alphas)
+  assert.ok(max > 200, `the mark's centre should read near-opaque, max was ${max}`)
+  assert.ok(min < 60, `the field's edge should read near-transparent, min was ${min}`)
 })
 
 test('every manifest entry is a proposal with a reason, not a licence claim', () => {

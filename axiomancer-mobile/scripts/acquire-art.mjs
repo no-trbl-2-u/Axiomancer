@@ -122,6 +122,38 @@ function parseArgs(argv) {
   return out
 }
 
+/**
+ * The silhouette recipe (phase V7). Unlike the Doré dim-plate recipe, this
+ * produces a TRANSPARENT cutout: the source's ink/dark marks become an alpha
+ * matte over solid black, everything else (the paper) becomes transparent, so
+ * the caller can `tintColor` the shape to any palette colour at render time —
+ * the same contract the procedural `<Splatter>` it replaces already had
+ * (`color` prop). Built for scanned ink-on-paper sources (high paper/ink
+ * luminance separation); not a general background remover.
+ */
+export async function buildSilhouette(sharp, raw, maxEdge) {
+  const trimmed = sharp(raw).grayscale().trim({ threshold: 15 })
+  const { data, info } = await trimmed
+    .resize({ width: maxEdge, withoutEnlargement: true })
+    .raw()
+    .toBuffer({ resolveWithObject: true })
+
+  const rgba = Buffer.alloc(info.width * info.height * 4)
+  for (let i = 0; i < info.width * info.height; i++) {
+    // Paper reads ~190-235 luminance on these plates; ink reads well below
+    // that. Alpha rises as luminance falls below the paper floor, scaled so
+    // mid-tone ink washes still read instead of vanishing at low opacity.
+    const alpha = Math.max(0, Math.min(255, Math.round((190 - data[i]) * 2.2)))
+    rgba[i * 4] = 0
+    rgba[i * 4 + 1] = 0
+    rgba[i * 4 + 2] = 0
+    rgba[i * 4 + 3] = alpha
+  }
+  return sharp(rgba, { raw: { width: info.width, height: info.height, channels: 4 } })
+    .webp({ quality: 90 })
+    .toBuffer()
+}
+
 async function acquireOne(sharp, entry, opts) {
   console.log(`\n── ${entry.key} (${entry.category})`)
   console.log(`   ${entry.title}`)
@@ -140,26 +172,38 @@ async function acquireOne(sharp, entry, opts) {
   if (!res.ok) throw new Error(`download: HTTP ${res.status} for ${entry.key}`)
   const raw = Buffer.from(await res.arrayBuffer())
 
-  // The recorded Doré recipe. These are raw scanned plates, so the grade is
-  // exactly what it is for: the backdrop must sit dim enough that the chart
-  // layer drawn over it stays legible.
   const maxEdge = entry.maxEdge ?? RECIPE.maxEdge
-  const image = sharp(raw)
-  const m = await image.metadata()
-  let pipeline = image
-  if (Math.max(m.width ?? 0, m.height ?? 0) > maxEdge) {
-    pipeline = pipeline.resize({
-      width: (m.width ?? 0) >= (m.height ?? 0) ? maxEdge : undefined,
-      height: (m.height ?? 0) > (m.width ?? 0) ? maxEdge : undefined,
-      withoutEnlargement: true,
-    })
+  const silhouette = entry.recipe === 'silhouette'
+
+  let webp
+  let postProcessNote
+  if (silhouette) {
+    webp = await buildSilhouette(sharp, raw, maxEdge)
+    postProcessNote = `grayscale, trimmed to content, alpha matte from inverted luminance `
+      + `(paper -> transparent, ink -> opaque black for tintColor), longest edge <= ${maxEdge}px, WebP q90`
+  } else {
+    // The recorded Doré recipe. These are raw scanned plates, so the grade is
+    // exactly what it is for: the backdrop must sit dim enough that the chart
+    // layer drawn over it stays legible.
+    const image = sharp(raw)
+    const m = await image.metadata()
+    let pipeline = image
+    if (Math.max(m.width ?? 0, m.height ?? 0) > maxEdge) {
+      pipeline = pipeline.resize({
+        width: (m.width ?? 0) >= (m.height ?? 0) ? maxEdge : undefined,
+        height: (m.height ?? 0) > (m.width ?? 0) ? maxEdge : undefined,
+        withoutEnlargement: true,
+      })
+    }
+    webp = await pipeline
+      .grayscale()
+      .modulate({ brightness: RECIPE.brightness })
+      .linear(RECIPE.contrast, -(128 * RECIPE.contrast) + 128)
+      .webp({ quality: RECIPE.quality })
+      .toBuffer()
+    postProcessNote = `grayscale, brightness ${RECIPE.brightness} / contrast ${RECIPE.contrast} `
+      + `toward the void, longest edge <= ${maxEdge}px, WebP q${RECIPE.quality}`
   }
-  const webp = await pipeline
-    .grayscale()
-    .modulate({ brightness: RECIPE.brightness })
-    .linear(RECIPE.contrast, -(128 * RECIPE.contrast) + 128)
-    .webp({ quality: RECIPE.quality })
-    .toBuffer()
 
   const dest = path.join(IMAGES, entry.category, `${entry.key}.webp`)
   console.log(`   ${opts.dryRun ? 'would write' : 'wrote'} ${path.relative(MOBILE, dest)}`
@@ -174,8 +218,7 @@ async function acquireOne(sharp, entry, opts) {
     license: verdict.licence,
     license_verified: `read from the Commons imageinfo extmetadata at acquisition, `
       + `not asserted by the operator`,
-    post_process: `grayscale, brightness ${RECIPE.brightness} / contrast ${RECIPE.contrast} `
-      + `toward the void, longest edge <= ${maxEdge}px, WebP q${RECIPE.quality}`,
+    post_process: postProcessNote,
     covers: [`${entry.key}.webp`],
     used_by: [`assets/images/${entry.category}/index.ts`],
   }

@@ -1,0 +1,66 @@
+[
+  {
+    "generated_by": "public-domain-acquisition",
+    "date": "2026-08-30",
+    "tool": "scripts/acquire-art.mjs (Commons API + sharp)",
+    "source": "https://commons.wikimedia.org/wiki/File:Rorschach_blot_01.jpg",
+    "artist": "Hermann Rorschach (died 1922)",
+    "license": "Public domain",
+    "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
+    "post_process": "grayscale, trimmed to content, alpha matte from inverted luminance (paper -> transparent, ink -> opaque black for tintColor), longest edge <= 480px, WebP q90",
+    "covers": [
+      "splatter-1.webp"
+    ],
+    "used_by": [
+      "assets/images/splatter/index.ts"
+    ]
+  },
+  {
+    "generated_by": "public-domain-acquisition",
+    "date": "2026-08-30",
+    "tool": "scripts/acquire-art.mjs (Commons API + sharp)",
+    "source": "https://commons.wikimedia.org/wiki/File:Rorschach_blot_03.jpg",
+    "artist": "Hermann Rorschach (died 1922)",
+    "license": "Public domain",
+    "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
+    "post_process": "grayscale, trimmed to content, alpha matte from inverted luminance (paper -> transparent, ink -> opaque black for tintColor), longest edge <= 480px, WebP q90",
+    "covers": [
+      "splatter-2.webp"
+    ],
+    "used_by": [
+      "assets/images/splatter/index.ts"
+    ]
+  },
+  {
+    "generated_by": "public-domain-acquisition",
+    "date": "2026-08-30",
+    "tool": "scripts/acquire-art.mjs (Commons API + sharp)",
+    "source": "https://commons.wikimedia.org/wiki/File:Rorschach_blot_04.jpg",
+    "artist": "Hermann Rorschach (died 1922)",
+    "license": "Public domain",
+    "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
+    "post_process": "grayscale, trimmed to content, alpha matte from inverted luminance (paper -> transparent, ink -> opaque black for tintColor), longest edge <= 480px, WebP q90",
+    "covers": [
+      "splatter-3.webp"
+    ],
+    "used_by": [
+      "assets/images/splatter/index.ts"
+    ]
+  },
+  {
+    "generated_by": "public-domain-acquisition",
+    "date": "2026-08-30",
+    "tool": "scripts/acquire-art.mjs (Commons API + sharp)",
+    "source": "https://commons.wikimedia.org/wiki/File:Rorschach_blot_06.jpg",
+    "artist": "Hermann Rorschach (died 1922)",
+    "license": "Public domain",
+    "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
+    "post_process": "grayscale, trimmed to content, alpha matte from inverted luminance (paper -> transparent, ink -> opaque black for tintColor), longest edge <= 480px, WebP q90",
+    "covers": [
+      "splatter-4.webp"
+    ],
+    "used_by": [
+      "assets/images/splatter/index.ts"
+    ]
+  }
+]
