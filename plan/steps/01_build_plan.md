@@ -2410,9 +2410,23 @@ on pickup):**
       combat). Every other screen is byte-identical — screens opt IN. Combat
       arena variety shipped as the SLOT only: there is one arena, and
       acquiring more is V4's pipeline plus a per-plate curation call.
-- [ ] Phase V6 — Combat & minigame glyph unification: shared subset of
+- [-] Phase V6 — Combat & minigame glyph unification: shared subset of
       hazard/gathering/cache/combat glyph kits folds into the registry;
       keyword-mark canon audit (mobile; after V1)
+      PARTIAL 2026-08-30: gathering/cache dropped from scope (both retired to
+      no glyph kit — see the brief's "What exists, measured"). Hazard/combat's
+      one real duplicate (`BoonIcon('chest')`) now renders the registry's
+      `action-chest`. The dead V1-era orphan `EffectChip.tsx` (built, tested,
+      never wired into the live board) deleted. `glyphShapes.ts` gets its
+      first dedicated test plus a keyword-canon audit, which caught and
+      removed one stale entry (`BARRIER`, merged into `GUARD` at Phase 29,
+      confirmed unreachable). REMAINING: the row's full ask — combat draws
+      the same ~7 status concepts three ways (registry SVG / `statusGlyphs.ts`
+      emoji / `glyphShapes.ts` card-face SVG) and collapsing them into one
+      canonical mark per keyword is a real design call with pinned-test +
+      multi-component blast radius, deliberately left to a follow-up brief
+      (see `plan/phases/phase_v6_glyph_unification.md` Follow-ups) rather than
+      guessed at autonomously.
 - [ ] Phase V7 — Illustration upgrades: replace remaining procedural
       illustration SVGs with acquired art per `SVG_ASSET_SPEC.md` §5–8;
       PixelEmblem carve-out preserved (assets + mobile; after V4)

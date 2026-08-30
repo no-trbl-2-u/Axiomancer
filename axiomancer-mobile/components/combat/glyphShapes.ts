@@ -56,7 +56,7 @@ const STONE: GlyphShape = { d: 'M8 2.5 H16 L21.5 9 L18.5 21.5 H5.5 L2.5 9 Z M12.
 const CHEVRONS_RIGHT: GlyphShape = { d: 'M5 3 L14 12 L5 21 L2.8 18.8 L9.6 12 L2.8 5.2 Z M12 3 L21 12 L12 21 L9.8 18.8 L16.6 12 L9.8 5.2 Z' };
 
 /** UPPERCASE face keyword → silhouette. Aliases share one shape on purpose
- *  (GUARD/BARRIER are one mechanic family; HEAL/REGEN both read as the heart). */
+ *  (HEAL/REGEN both read as the heart). */
 export const GLYPH_SHAPES: Record<string, GlyphShape> = {
     // ── afflictions ──
     BLEED: DROPS,
@@ -72,7 +72,10 @@ export const GLYPH_SHAPES: Record<string, GlyphShape> = {
     QUARTER: SPEECH,
     STUN: BURST, RUPTURE: BURST, THORNS: BURST,
     // ── currencies / verbs ──
-    GUARD: SHIELD, BARRIER: SHIELD,
+    // BARRIER was retired into GUARD by the Phase 29 keyword-registry pass
+    // (`state/combat/keywords.ts` — the free-glyph path never produces the
+    // key 'BARRIER' anymore: `r.barrier` riders resolve straight to GUARD).
+    GUARD: SHIELD,
     HEAL: HEART, REGEN: HEART,
     DRAW: CARD_SHEET,
     TICK: HOURGLASS, DURATION: HOURGLASS, PROLONG: HOURGLASS,

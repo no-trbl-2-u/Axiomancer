@@ -9,6 +9,7 @@ import React from 'react';
 import Svg, { Circle, Ellipse, G, Path, Rect } from 'react-native-svg';
 
 import { usePalette } from '@/theme/runtime';
+import { AxmIcon } from '@/components/icons';
 
 // ---------------------------------------------------------------------------
 // Die-face glyphs (blade / eye / crescent / sun / cross)
@@ -167,13 +168,9 @@ export function BoonIcon({
     );
     switch (icon) {
         case 'chest':
-            return wrap(
-                <>
-                    <Path d="M3 9 L12 5 L21 9 L21 19 L3 19 Z" {...s} />
-                    <Path d="M3 9 H21 M12 5 V19" {...s} />
-                    <Rect x={10.5} y={11} width={3} height={4} fill={color} />
-                </>,
-            );
+            // V6 glyph unification — the registry already curates this exact
+            // mark (Phase V1); draw it instead of a second hand-authored chest.
+            return <AxmIcon name="action-chest" size={size} color={color} />;
         case 'relic':
             return wrap(<Path d="M12 2 L15 8 L21 9 L16 14 L17 21 L12 17 L7 21 L8 14 L3 9 L9 8 Z" {...s} />);
         case 'heart':

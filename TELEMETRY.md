@@ -399,3 +399,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-29T01:47:47Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-29T14:01:48Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-08-29T14:01:51Z | skill | digest | unknown | main | - |
+| 2026-08-30T05:30:56Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-30T05:30:57Z | skill | march | unknown | main | - |
+| 2026-08-30T05:33:10Z | subagent | Explore | claude-sonnet-5 | main | Map glyph/icon systems for Phase V6 |
