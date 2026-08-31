@@ -2517,18 +2517,46 @@ on pickup):**
       backdrop resolves to LUDGATE_HILL via the existing /city/ regex
       (no new mapping line needed). Design residue filed to
       plan/AUDIT.md ([loop-call] Phase W3 row).
-- [ ] Phase W4 — The Connecting River + Town Across the River: maps
+- [x] Phase W4 — The Connecting River + Town Across the River: maps
       3–4 of the northern continent; the advisor-selection ritual beat
-      (`/forge`; after W3)
-- [ ] Phase W5 — New blood: per-map enemy roster growth so no two maps
+      (shipped `b8546a59`/`41272f9f`, 2026-08-31). Two new maps on the
+      northern continent, SMALLER than the W1–W3 25-node precedent (a
+      documented scope-down): connecting-river (7 columns / 13 nodes)
+      and town-across-river (4 columns / 6 nodes, the coda location —
+      "Home of sweetheart" per map.library.ts). northern-city's
+      Harbormaster is no longer terminal: `ncy-26`, one column past
+      him, is the real door (the nc-26 pattern); `ncy-23` stays sealed
+      scenery. connecting-river's Waterreeve boss gates a second door
+      (`cr-13`) onto town-across-river, whose Portreeve boss stays
+      terminal (no W5+ map yet). The advisor-selection ritual ships as
+      two narration nodes (`cr-9`, `tar-4`) reading back the S-01
+      "crowning ceremony" flags (northern-forest) and the `ncy-5`
+      "advisor rumor" flags — the payoff those nodes' own comments
+      flagged as this phase's job. Two new NPCs (The Boatwoman, The
+      Sweetheart); the previously-dangling `ConnectingRiverQuests`
+      union authored (find-islanders, join-islanders-for-ritual,
+      get-to-town-across-river) plus `get-to-connecting-river` on the
+      Gate-Clerk. Seven new enemies, two bosses (the Waterreeve, the
+      Portreeve) — see the W5 row below. Mobile: two layout fixtures +
+      northern-city's gains the door column; both new region strings
+      free-ride existing backdrop plates (no new art needed). Decision
+      to ship via `/ship-a-phase` rather than literally dispatching to
+      `/forge` despite the row's tag, documented in
+      `plan/phases/phase_W4_connecting_river.md`.
+- [-] Phase W5 — New blood: per-map enemy roster growth so no two maps
       share >70% of a pool; every new enemy through the ~10-edit
       checklist with unique portrait + provenance (`/forge`; after W2,
       parallel to W3/W4)
       PARTIALLY DRAINED by W3 (2026-08-28): 9 northern enemies shipped
       through the full checklist (see the W3 row). northern-city meets
       the <70% bar (3/8 vs any sibling); caverns∩northern-forest still
-      sits at 10/14 — the remaining drain is coastal/forest pool
-      differentiation and any W4-map blood.
+      sits at 10/14.
+      FURTHER DRAINED by W4 (2026-08-31): 7 more enemies (Reed Ambusher,
+      Toll-Skiff, Weir-Widow, the Waterreeve, Dowry Collector, the Kept
+      Suitor, the Portreeve) through the full checklist — connecting-river
+      and town-across-river are BRAND-NEW pools with zero overlap against
+      every sibling map. The remaining drain is coastal/forest pool
+      differentiation (caverns∩northern-forest still at 10/14).
 - [ ] Phase G1 — `.claude/**` OPEN GATE doc sync: lift the superseded
       wall text in `.claude/commands/{deck-tuning,combat-playtest,
       world-tuning,hazard-tuning}.md`, add the `/forge` doorway pointer
