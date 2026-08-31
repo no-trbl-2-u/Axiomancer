@@ -191,7 +191,19 @@ For each signal cluster, draft a candidate:
 - proposed scope: <1-phase | N-phase mini-plan>
 - estimated phases: <N>
 - conflicts: <with spec / contract / existing plan; or "none">
+- prior art: <kb:<game>/<doc> (src-NNN) receipts, or "none checked">
 ```
+
+For any candidate proposing a **game surface** (mechanic, content
+family, keyword space, progression structure), spend one `kb-query`
+pass before scoring: `kb_find_games` on the nearest mechanics slug,
+or `kb_search` for the complaint the candidate answers. A published
+game already solving it (or players punishing it in `better-if`
+docs) is signal-multiplicity evidence; corpus silence is worth a
+wishlist line (`node scripts/kb-sync.mjs wish "…"`). Keep the
+receipts on the `prior art:` line — `/oversight` promotes with more
+confidence when the candidate cites something other than the
+model's imagination. Infra/refactor candidates skip this.
 
 Score per §5. Sort. Take top 3.
 

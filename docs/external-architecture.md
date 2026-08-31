@@ -7,6 +7,7 @@ flowchart LR
   A[Axiomancer monorepo]
   KB[game-knowledge-base repo]
   KBL[kb/ shallow materialization]
+  KBH[kb-mcp-host on Vercel]
   MCP[kb-query MCP]
   AX[axio-query MCP]
   SS[SomberSoft-Memory doctrine]
@@ -17,7 +18,9 @@ flowchart LR
   R2[Private Cloudflare R2 vault]
 
   KB -->|kb-sync| KBL
+  KB -->|build-time snapshot| KBH
   KBL -->|grep/read or stdio| MCP
+  KBH -->|streamable HTTP| MCP
   MCP -->|cited prior art| A
   A -->|live generated catalog| AX
   SS -->|company law and CDRs| A
@@ -36,14 +39,25 @@ flowchart LR
 - **Purpose:** source-backed board-game rules, reception research, reusable patterns, and the Dawncaster card/keyword corpus. It supplies external prior art; it does not own Axiomancer rules.
 - **Materialization:** `node scripts/kb-sync.mjs` shallow-clones or hard-refreshes `origin/main` into this repo's gitignored `kb/` directory. `KB_REPO` and `KB_DIR` may override the defaults.
 - **Direct data flow:** agents grep generated indexes/frontmatter first, read only selected documents, and preserve `kb:<game>/<document> (src-NNN)` evidence receipts.
-- **MCP data flow:** `.mcp.json` launches `node kb/scripts/kb-mcp-server.mjs --root kb` as the `kb-query` stdio server. It exposes overview, search, document, game, card, and keyword lookups over the materialized corpus.
+- **MCP data flow:** `.mcp.json` launches `node scripts/kb-query-launcher.mjs` as the `kb-query` stdio server. The committed launcher exposes overview, search, document, game, card, and keyword lookups and picks its backend at start: the hosted `kb-mcp-host` endpoint when `KB_MCP_URL` is set, the canonical `kb/scripts/kb-mcp-server.mjs` when `kb/` is synced, or a recovery-message stub so the server always connects.
 - **Availability:** development/research integration and optional accelerator. It is **not** a product-runtime dependency. If MCP is unavailable, use direct grep/read. If `kb/` is absent or stale, run `node scripts/kb-sync.mjs`.
 - **Write path:** `node scripts/kb-sync.mjs wish "<coverage request>"` appends and best-effort pushes the KB wishlist. This requires write-capable ambient Git credentials or `GH_TOKEN`; a push failure must be reported but does not sink the design session.
 - **Secrets:** `GH_TOKEN` may be loaded from the environment or an ignored `.env`. The sync script passes it as a per-command HTTP header and does not persist it in `kb/.git/config`.
 
+### Hosted kb-query server (kb-mcp-host on Vercel)
+
+- **Owner / location:** source in this repo at `kb-mcp-host/`; deployed as a Vercel project (team "TJ's projects") git-linked to this repo with root directory `kb-mcp-host`. The MCP endpoint is `POST /mcp` on the project domain.
+- **Purpose:** makes `kb-query` a live server for sessions that have no synced `kb/` — remote interactive sessions and CI loop ticks — so prior-art lookups work at session start with zero materialization cost. Serves a build-time text snapshot of the corpus (`kb_overview` names the snapshot's commit and build time); it is read-only and owns no rules truth.
+- **Data flow:** Vercel build runs `kb-mcp-host/build.mjs`, which shallow-clones the private KB repo and bundles ~8MB of corpus text into the function. Consumers reach it through `scripts/kb-query-launcher.mjs` when `KB_MCP_URL` is set (GitHub repo variable for CI, `.env` locally, environment config for remote sessions).
+- **Freshness:** pushes to `kb-mcp-host/` redeploy automatically; `.github/workflows/kb-host-redeploy.yml` pokes the project's deploy hook nightly (secret `KB_HOST_DEPLOY_HOOK_URL`) so corpus-only KB pushes also land within a day.
+- **Credentials:** Vercel project env `GH_TOKEN` (or `KB_GH_TOKEN`) with read access to the KB repo — required, the repo is private. `KB_MCP_TOKEN` (project env + consumer side) enables bearer auth on the endpoint; without it the snapshot is readable by anyone with the URL, so set it. Values live only in Vercel/GitHub settings and ignored `.env` files.
+- **Availability / fallback:** optional accelerator under the failure law — if the host is down or unconfigured, the launcher falls back to the synced `kb/` stdio server, and grep/read on `kb/` always works.
+- **Usage law:** stays within the Vercel free (hobby) tier; paid usage requires T's explicit approval.
+- **Recovery:** `node --test kb-mcp-host/server.test.mjs` for the server logic; `node kb-mcp-host/serve.mjs` to run it locally against `corpus/` or `../kb`; a failed deploy leaves the previous deployment serving.
+
 ### MCP servers and tool boundaries
 
-- **`kb-query`:** repo-configured stdio adapter over the **external** KB materialized in `kb/`. Optional accelerator; direct files remain the fallback.
+- **`kb-query`:** repo-configured stdio launcher (`scripts/kb-query-launcher.mjs`) over the **external** KB — hosted snapshot (`kb-mcp-host`) when `KB_MCP_URL` is set, else the corpus materialized in `kb/`. Optional accelerator; direct files remain the fallback.
 - **`axio-query`:** repo-local stdio server at `scripts/axio-mcp-server.mjs`. It exposes current Axiomancer cards, enemies, effects, and keywords from `devlog/data/` plus `axiomancer-mechanics/docs/keyword-atlas.md`. It regenerates stale catalog data through `npm run catalog:export` when possible. It is not external data and never outranks mechanics source files.
 - **`playwright`:** `.mcp.json` invokes `npx -y @playwright/mcp@latest` with isolated headless Chromium. This is development/test tooling, not runtime architecture. Native Playwright scripts remain available when MCP permissions or transport fail.
 - **Failure law:** MCP improves retrieval and browser control but may not become the only route to evidence. Every MCP surface must retain a file, script, or CLI fallback.

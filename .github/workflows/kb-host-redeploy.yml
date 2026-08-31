@@ -1,0 +1,31 @@
+name: kb-host-redeploy
+
+# Keep the hosted kb-query corpus fresh. The Vercel deployment
+# (kb-mcp-host/) bundles a build-time snapshot of the game-knowledge-base
+# corpus; pushes to kb-mcp-host/ redeploy it, but corpus-only changes land
+# in the KB repo and would otherwise go stale. This nightly job pokes the
+# project's Vercel deploy hook so the build re-clones the corpus.
+#
+# Requires the KB_HOST_DEPLOY_HOOK_URL secret (Vercel project → Settings →
+# Git → Deploy Hooks). Until it is set, the job is a quiet no-op — the
+# hosted snapshot then only refreshes when kb-mcp-host/ itself changes.
+
+on:
+  schedule:
+    - cron: '17 6 * * *' # nightly, after the KB repo's daily scout typically lands
+  workflow_dispatch: {}
+
+jobs:
+  redeploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger Vercel deploy hook
+        env:
+          HOOK: ${{ secrets.KB_HOST_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "KB_HOST_DEPLOY_HOOK_URL not set — skipping (hosted corpus refreshes only on kb-mcp-host/ pushes)"
+            exit 0
+          fi
+          curl -sS -X POST "$HOOK" -o /dev/null -w 'deploy hook: HTTP %{http_code}\n'

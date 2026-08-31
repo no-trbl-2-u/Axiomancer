@@ -110,6 +110,14 @@ If a spec and `bearings.md` disagree, the spec wins.
 Update `bearings.md` in a separate prior commit
 (`bearings: align with design`).
 
+**Prior art for design decisions.** When a Decision invents or
+tunes a game mechanic (not plumbing), ground it: one `kb-query`
+pass (`kb_find_games` / `kb_search` / `kb_cards`) and cite
+`kb:<game>/<doc> (src-NNN)` next to the decision. A brief whose
+design calls carry receipts survives `/ship-a-phase` without
+re-litigating them mid-implementation. Corpus gaps go to the
+wishlist (`node scripts/kb-sync.mjs wish "…"`).
+
 ### Step 4 — Reality-check against codebase
 
 Open the canonical sibling. Confirm every primitive your brief

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "node build.mjs",
+  "functions": {
+    "api/mcp.mjs": {
+      "includeFiles": "corpus/**",
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    { "source": "/mcp", "destination": "/api/mcp" }
+  ]
+}

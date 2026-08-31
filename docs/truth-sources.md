@@ -25,15 +25,18 @@ skill in `.claude/skills/kb-query/`):
 
 - **Direct**: Grep/Read `kb/` frontmatter + generated indexes (the
   metadata firewall), then only the docs they point at.
-- **MCP**: the `kb-query` stdio server (`.mcp.json` →
-  `kb/scripts/kb-mcp-server.mjs`, spawned per session) exposes
+- **MCP**: the `kb-query` server (`.mcp.json` →
+  `scripts/kb-query-launcher.mjs`, spawned per session) exposes
   `kb_overview` / `kb_find_games` / `kb_search` / `kb_read_doc` /
-  `kb_cards` / `kb_keyword`. It is an accelerator, never a dependency —
-  if `kb/` is unsynced its tools answer with the recovery command and
-  the grep path still works. The `mechanics-expert` and `card-expert`
-  sub-agents carry these tools in their frontmatter and prefer them
-  when present; CI runs don't sync `kb/`, so cloud ticks stay on the
-  sync-then-grep path.
+  `kb_cards` / `kb_keyword`. The committed launcher always starts and
+  picks its backend: the hosted corpus snapshot when `KB_MCP_URL` is
+  configured (`kb-mcp-host/` on Vercel — `kb_overview` names the
+  snapshot's commit), the synced `kb/` stdio server otherwise, and
+  recovery guidance when neither exists. Still an accelerator, never a
+  dependency — the grep path always works. The `mechanics-expert` and
+  `card-expert` sub-agents carry these tools in their frontmatter and
+  prefer them when present; CI ticks sync `kb/` when no hosted URL is
+  configured (`_claude-skill.yml`).
 
 ## Live engine data (`axio-query`) — the repo's own facts
 

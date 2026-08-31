@@ -16,9 +16,7 @@
       "type": "stdio",
       "command": "node",
       "args": [
-        "kb/scripts/kb-mcp-server.mjs",
-        "--root",
-        "kb"
+        "scripts/kb-query-launcher.mjs"
       ]
     },
     "axio-query": {

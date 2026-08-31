@@ -37,6 +37,10 @@ web-build/
 # Game knowledge base (synced clone — see scripts/kb-sync.mjs)
 kb/
 
+# Hosted kb-query server — build-time corpus snapshot + clone scratch
+kb-mcp-host/corpus/
+kb-mcp-host/.kb-src-*/
+
 # DevLog — generated site output (Cloudflare Pages serves what `main`'s tree
 # contains, and this content was never meant to be public — phase 57,
 # plan/phases/phase_57_devlog_pages_scopedown.md). Rebuild locally with

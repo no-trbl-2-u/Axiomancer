@@ -8,14 +8,21 @@ description: Answer game-design prior-art questions from the SomberSoft game-kno
 Answer design questions from the synced OKF corpus in `kb/`, never from
 model memory alone. Every claim you relay keeps its citation.
 
-## 0. Ensure the corpus is present
+## 0. Ensure a corpus route is live
+
+The `kb-query` MCP server always starts (`scripts/kb-query-launcher.mjs`):
+it serves from the hosted corpus when `KB_MCP_URL` is configured, from the
+synced `kb/` otherwise, and answers with recovery guidance when neither
+exists. So: try the MCP tools first. If they answer with "corpus not
+synced" guidance, or you need the raw files for grep:
 
 ```bash
 ls kb/KnowledgeBase || node scripts/kb-sync.mjs
 ```
 
-If sync fails (offline), say so and clearly mark anything you answer from
-memory as UNGROUNDED — do not dress memory up as corpus fact.
+If both routes fail (host down AND sync offline), say so and clearly mark
+anything you answer from memory as UNGROUNDED — do not dress memory up as
+corpus fact.
 
 ## 1. Resolve from metadata first (the firewall)
 

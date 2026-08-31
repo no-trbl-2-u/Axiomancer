@@ -246,6 +246,15 @@ Default delegation:
 
 For research-heavy fixes, spawn `scout` in parallel.
 
+For **design-shaped** fixes the main agent keeps (a mechanic
+tweak, a keyword rewording, a balance-adjacent gap), one
+`kb-query` lookup first — `kb_keyword` / `kb_cards` for wording
+and pricing precedent, `kb_search` for how published games handle
+the pattern — and carry the `src-NNN` receipt into the commit
+message. The sub-agents (`card-expert`, `content-curator`,
+`mechanics-expert`) already do this by charter; this rule is for
+work that stays with the main agent.
+
 ### Step 4 — Verify
 
 ```bash

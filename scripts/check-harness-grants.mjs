@@ -98,14 +98,15 @@ export function check() {
     if (def.external) continue
     if (!def.target) findings.push(`.mcp.json server "${name}" has no script argument`)
     else if (!exists(def.target)) {
-      // A missing target is not automatically a failure. `kb-query` points into
-      // `kb/`, a gitignored corpus that `scripts/kb-sync.mjs` fetches — legitimately
-      // absent from a fresh clone and present on a synced workstation, which is
-      // what the LOCAL grant is for.
+      // A missing target is not automatically a failure: a server may point at
+      // a gitignored, synced, or generated script that is legitimately absent
+      // from a fresh clone and present where the local grant is used. (This was
+      // `kb-query` before its committed launcher, scripts/kb-query-launcher.mjs,
+      // replaced the gitignored `kb/scripts/…` path.)
       //
-      // CI is the case that cannot recover: the workflow never syncs `kb/`, so a
-      // CI grant for a server whose script is not in the checkout promises a run
-      // a tool that can never start. That is the failure.
+      // CI is the case that cannot recover: a CI grant for a server whose script
+      // is not in the checkout promises a run a tool that can never start. That
+      // is the failure.
       const ciTools = [...ci].filter((t) => t.startsWith(`mcp__${name}__`))
       if (ciTools.length) {
         findings.push(
