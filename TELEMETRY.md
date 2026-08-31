@@ -404,3 +404,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-30T05:33:10Z | subagent | Explore | claude-sonnet-5 | main | Map glyph/icon systems for Phase V6 |
 | 2026-08-30T12:00:21Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-30T12:01:03Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
+| 2026-08-31T05:44:27Z | slash-prompt | /march | unknown | user/ci | /march |
