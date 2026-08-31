@@ -1,0 +1,29 @@
+name: kb-live-probe
+
+# End-to-end witness for the hosted kb-live MCP endpoint
+# (services/kb-live/ on Vercel): initialize -> tools/list -> real corpus
+# calls with this repo's GH_PAT. Manual dispatch only — run it after a
+# kb-live (re)deploy, or when kb-query bridge answers in CI look wrong.
+# GH_PAT is required: the default GITHUB_TOKEN cannot read the private
+# game-knowledge-base repo, and the probe exits 3 without a token.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Probe the hosted kb-live MCP endpoint
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: node scripts/kb-live-probe.mjs

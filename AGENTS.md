@@ -133,7 +133,7 @@ accelerators, never dependencies: the Grep/Read path always works.
 | Source | Answers | Freshness |
 |---|---|---|
 | **`axio-query` MCP** (`axio_overview` / `axio_cards` / `axio_effects` / `axio_keywords`) | The engine's OWN card/enemy/effect/keyword facts, generated from the live libraries | As current as the working tree — never stale |
-| **`kb-query` MCP** (`kb_overview` / `kb_find_games` / `kb_search` / `kb_read_doc` / `kb_cards` / `kb_keyword`) | External prior art: board-game rules + reception, Dawncaster corpus (1,692 cards / 141 keywords) — cite `kb:<game-slug>/<doc> (src-NNN)` | `node scripts/kb-sync.mjs` refreshes `kb/` (gitignored); CI ticks sync-then-grep |
+| **`kb-query` MCP** (`kb_overview` / `kb_find_games` / `kb_search` / `kb_read_doc` / `kb_cards` / `kb_keyword`) | External prior art: board-game rules + reception, Dawncaster corpus (1,692 cards / 141 keywords) — cite `kb:<game-slug>/<doc> (src-NNN)` | Live everywhere: `scripts/kb-mcp-launcher.mjs` serves a synced `kb/` when present, else bridges to the hosted **kb-live** endpoint (`services/kb-live/`, always at KB HEAD). `node scripts/kb-sync.mjs` still refreshes `kb/` for the grep fallback |
 | **Measured baselines** (`deck-matrix-baseline.json`) | Win-rate curves, status engagement, preset spreads | Only as fresh as the last sim — run `npm run baseline:check` and NAME the stamp before citing numbers |
 
 Measuring is not tuning: regenerating a baseline is briefing; acting

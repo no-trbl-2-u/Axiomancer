@@ -60,7 +60,9 @@ Pick the ONE highest-scoring surface (or honor the argument).
 
 For cards/keywords spawn `card-expert`; for narrative spawn
 `content-curator`; for maps/enemies/events design directly,
-consulting `kb-query` (Dawncaster corpus, board-game reception)
+consulting `kb-query` (Dawncaster corpus, board-game reception —
+live in every environment: synced kb/ locally, the hosted kb-live
+bridge on CI ticks)
 and the specs (`spec.md`, spec 34, `specs/world/`,
 `docs/profane-canon.md`). House voice per spec 34 §2.5 — terse,
 cold, priced scenery, no thee/thou/thy/thine/ye.

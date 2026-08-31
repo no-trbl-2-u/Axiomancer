@@ -1,0 +1,9 @@
+{
+  "name": "kb-live",
+  "private": true,
+  "type": "module",
+  "description": "Hosted kb-query MCP endpoint over the SomberSoft game-knowledge-base corpus (stateless GitHub-token corpus proxy).",
+  "engines": {
+    "node": "22.x"
+  }
+}

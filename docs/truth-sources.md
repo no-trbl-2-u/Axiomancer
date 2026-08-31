@@ -26,14 +26,22 @@ skill in `.claude/skills/kb-query/`):
 - **Direct**: Grep/Read `kb/` frontmatter + generated indexes (the
   metadata firewall), then only the docs they point at.
 - **MCP**: the `kb-query` stdio server (`.mcp.json` →
-  `kb/scripts/kb-mcp-server.mjs`, spawned per session) exposes
+  `scripts/kb-mcp-launcher.mjs`, spawned per session) exposes
   `kb_overview` / `kb_find_games` / `kb_search` / `kb_read_doc` /
-  `kb_cards` / `kb_keyword`. It is an accelerator, never a dependency —
-  if `kb/` is unsynced its tools answer with the recovery command and
-  the grep path still works. The `mechanics-expert` and `card-expert`
-  sub-agents carry these tools in their frontmatter and prefer them
-  when present; CI runs don't sync `kb/`, so cloud ticks stay on the
-  sync-then-grep path.
+  `kb_cards` / `kb_keyword`. The launcher picks the freshest working
+  route: a synced `kb/` clone serves locally
+  (`kb/scripts/kb-mcp-server.mjs`); with no clone it bridges to the
+  hosted **kb-live** endpoint (`services/kb-live/` on Vercel, corpus
+  fetched at KB HEAD with the caller's own GH_TOKEN) — so the same six
+  tools connect in fresh checkouts, CI ticks, and remote sessions with
+  no per-tick corpus download. Still an accelerator, never a
+  dependency — when neither route works the tools answer with the
+  recovery command and the grep path on a synced `kb/` still works.
+  The `mechanics-expert` and `card-expert` sub-agents carry these
+  tools in their frontmatter and prefer them when present; the CI
+  runner (`_claude-skill.yml`) grants them to every unattended tick.
+  End-to-end witness for the hosted route: `scripts/kb-live-probe.mjs`
+  (`kb-live-probe.yml`, manual dispatch).
 
 ## Live engine data (`axio-query`) — the repo's own facts
 

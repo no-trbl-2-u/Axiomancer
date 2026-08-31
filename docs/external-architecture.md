@@ -16,8 +16,12 @@ flowchart LR
   EAS[Expo EAS]
   R2[Private Cloudflare R2 vault]
 
+  KBLIVE[kb-live hosted MCP - Vercel]
+
   KB -->|kb-sync| KBL
   KBL -->|grep/read or stdio| MCP
+  KB -->|tarball at HEAD, caller GH token| KBLIVE
+  KBLIVE -->|stdio-HTTP bridge when kb/ absent| MCP
   MCP -->|cited prior art| A
   A -->|live generated catalog| AX
   SS -->|company law and CDRs| A
@@ -41,9 +45,19 @@ flowchart LR
 - **Write path:** `node scripts/kb-sync.mjs wish "<coverage request>"` appends and best-effort pushes the KB wishlist. This requires write-capable ambient Git credentials or `GH_TOKEN`; a push failure must be reported but does not sink the design session.
 - **Secrets:** `GH_TOKEN` may be loaded from the environment or an ignored `.env`. The sync script passes it as a per-command HTTP header and does not persist it in `kb/.git/config`.
 
+### kb-live hosted MCP endpoint
+
+- **Owner / location:** Vercel project `axiomancer-kb-live` (team `tj-braindump`, hobby/free tier), git-linked to this repo with root directory `services/kb-live/`; source of truth is `services/kb-live/` here. Endpoint: `https://axiomancer-kb-live.vercel.app/api/mcp`. (Until the first deploy lands — see the kb-live row in `plan/AUDIT.md` — the bridge degrades to recovery answers.)
+- **Purpose:** the always-on route to the KB corpus for sessions with no synced `kb/` clone — CI loop ticks, fresh checkouts, remote sessions. Same six `kb_*` tools as the stdio server; an accelerator for prior-art retrieval, never a product-runtime dependency and never rules authority.
+- **Design:** stateless GitHub-token corpus proxy. It stores **no secrets and no data**: each `tools/call` authenticates with the caller-supplied `x-github-token` header (the caller's own `GH_TOKEN`/`GH_PAT`), fetches the private KB repo's tarball at HEAD (cached in instance memory by sha, ~5-min freshness re-check), and answers from memory. `initialize`/`tools/list` need no token. Tokens are used for the GitHub fetch only — never stored, logged, or proxied elsewhere; the fetch target is pinned to the KB repo.
+- **Data flow:** `scripts/kb-mcp-launcher.mjs` (the `.mcp.json` `kb-query` entry) serves a synced `kb/` locally and otherwise bridges stdio↔HTTP to this endpoint. `vercel.json`'s `ignoreCommand` skips builds for pushes that do not touch `services/kb-live/`.
+- **Credentials:** none held by the service. Callers supply their own GitHub token; Vercel deployment rides the repo link. Keep the project on the free tier (same usage law as the R2 vault: paid usage needs T's explicit approval).
+- **Availability / failure:** optional accelerator. If the endpoint is down or the token is missing/rejected, the tools answer with the kb-sync recovery command; sync-then-grep on `kb/` remains the evidence path of record.
+- **Verification / recovery:** `node scripts/kb-live-probe.mjs` (locally with `GH_TOKEN`, or dispatch `kb-live-probe.yml`) witnesses initialize → tools/list → real corpus calls. Hermetic logic tests: `scripts/kb-live-server.test.mjs`. Redeploy = push to `main` touching `services/kb-live/`, or re-import the repo in the Vercel dashboard (root directory `services/kb-live`).
+
 ### MCP servers and tool boundaries
 
-- **`kb-query`:** repo-configured stdio adapter over the **external** KB materialized in `kb/`. Optional accelerator; direct files remain the fallback.
+- **`kb-query`:** repo-configured stdio adapter over the **external** KB. `.mcp.json` launches `scripts/kb-mcp-launcher.mjs`: a synced `kb/` serves locally; otherwise it bridges to the kb-live endpoint above. Optional accelerator; direct files remain the fallback.
 - **`axio-query`:** repo-local stdio server at `scripts/axio-mcp-server.mjs`. It exposes current Axiomancer cards, enemies, effects, and keywords from `devlog/data/` plus `axiomancer-mechanics/docs/keyword-atlas.md`. It regenerates stale catalog data through `npm run catalog:export` when possible. It is not external data and never outranks mechanics source files.
 - **`playwright`:** `.mcp.json` invokes `npx -y @playwright/mcp@latest` with isolated headless Chromium. This is development/test tooling, not runtime architecture. Native Playwright scripts remain available when MCP permissions or transport fail.
 - **Failure law:** MCP improves retrieval and browser control but may not become the only route to evidence. Every MCP surface must retain a file, script, or CLI fallback.

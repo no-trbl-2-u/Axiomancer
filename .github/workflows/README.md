@@ -47,6 +47,7 @@ Two layers live here:
 | `combat-playtest.yml` | `/combat-playtest` | monthly (1st) + manual | Report-only doctrine verdict, branch + PR. |
 | `critic-loop.yml`, `deep-playtest.yml`, `combat-ux-tuning.yml`, `hermes-playtest.yml` | same-named | manual only | Mobile expo-web loops; install Playwright, long-running. |
 | `claude.yml` | — | `@claude` mention in issues/PRs | Interactive responder. |
+| `kb-live-probe.yml` | deterministic `scripts/kb-live-probe.mjs` | manual | End-to-end witness for the hosted kb-live MCP endpoint (`services/kb-live/`): initialize → tools/list → real corpus calls with `GH_PAT`. Dispatch after a kb-live (re)deploy or when CI kb-query bridge answers look wrong. No Claude invocation. |
 
 Skills that need a human in the loop (`/oversight`, `/jot`, the
 `.claude/skills/` design partners) deliberately have no workflow.

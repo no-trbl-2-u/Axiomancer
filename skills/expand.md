@@ -195,6 +195,16 @@ For each signal cluster, draft a candidate:
 
 Score per §5. Sort. Take top 3.
 
+**Ground content/mechanic candidates in prior art.** For any
+candidate proposing new mechanics, keywords, content families, or
+game surfaces, consult the `kb-query` tools (`kb_find_games` /
+`kb_search` / `kb_cards`) and record what published games did —
+one line in the rationale with a `kb:<game>/<doc> (src-NNN)`
+receipt, or "no prior art found" (then file the gap via
+`node scripts/kb-sync.mjs wish "..."`). The tools are live in
+every environment (synced kb/ locally; the hosted kb-live bridge
+in CI); when they error, sync-then-grep per the kb-query skill.
+
 ### Step 3 — Self-assess
 
 For each top candidate, ask:

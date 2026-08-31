@@ -14,6 +14,24 @@
 
 ## Pending
 
+### kb-live first deploy is credential-blocked — one user action to go live (2026-08-31)
+- category: gap
+- score: 8x8/10 = 6.4
+- detail: the knowledge-base nexus hookup (branch
+  `claude/knowledge-base-nexus-loop-q5zo9j`) shipped the hosted kb-live MCP
+  server (`services/kb-live/`), the kb-query launcher bridge, CI tool
+  grants, and the probe — but the Vercel project itself could not be
+  created from the session: the Vercel MCP connector returned 403 on
+  project creation and the direct file-deploy was permission-blocked.
+  Everything degrades gracefully until then (kb-query answers with the
+  kb-sync recovery path). To go live, EITHER: (a) T imports the repo in
+  the Vercel dashboard — Add New Project → `no-trbl-2-u/Axiomancer` →
+  root directory `services/kb-live` → project name `axiomancer-kb-live`
+  (the URL baked into the launcher) — or (b) a session with deploy
+  permission re-runs the deploy. Then dispatch `kb-live-probe.yml` as the
+  end-to-end witness and drain this row. Register:
+  `docs/external-architecture.md` § "kb-live hosted MCP endpoint".
+
 ### [loop-call] Phase W3 design decisions — the northern city ships (2026-08-28)
 - category: design residue (THE OPEN GATE standing rule 7 — decisions filed
   for after-the-fact review, shipped either way; no action needed unless
