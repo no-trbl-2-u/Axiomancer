@@ -405,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-30T12:00:21Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-30T12:01:03Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
 | 2026-08-31T05:44:27Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-31T14:01:06Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-31T14:03:35Z | subagent | Explore | claude-sonnet-5 | main | Map Northern-Continent phase W1-W3 conventions |
