@@ -29,14 +29,14 @@ skill in `.claude/skills/kb-query/`):
   `scripts/kb-query-launcher.mjs`, spawned per session) exposes
   `kb_overview` / `kb_find_games` / `kb_search` / `kb_read_doc` /
   `kb_cards` / `kb_keyword`. The committed launcher always starts and
-  picks its backend: the hosted corpus snapshot when `KB_MCP_URL` is
-  configured (`kb-mcp-host/` on Vercel — `kb_overview` names the
-  snapshot's commit), the synced `kb/` stdio server otherwise, and
+  picks its backend: the hosted corpus when `KB_MCP_TOKEN` is set (the
+  game-knowledge-base repo's `kb-mcp` Cloudflare Worker, which redeploys
+  itself on corpus merges), the synced `kb/` stdio server otherwise, and
   recovery guidance when neither exists. Still an accelerator, never a
   dependency — the grep path always works. The `mechanics-expert` and
   `card-expert` sub-agents carry these tools in their frontmatter and
-  prefer them when present; CI ticks sync `kb/` when no hosted URL is
-  configured (`_claude-skill.yml`).
+  prefer them when present; CI ticks sync `kb/` when the token secret is
+  absent (`_claude-skill.yml`).
 
 ## Live engine data (`axio-query`) — the repo's own facts
 

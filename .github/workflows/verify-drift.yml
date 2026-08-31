@@ -5,6 +5,10 @@ name: verify-drift
 # editor-only or catalog-only edit would not trigger verify-mobile, and a
 # mobile-only edit would not trigger the editor's. This lane triggers on every
 # path the test reads, which is the whole point of hosting it at the root.
+#
+# It has since become the harness lane too: the grant-consistency check and the
+# kb-query launcher live here for the same reason — they span `.mcp.json`,
+# `.claude/`, and `scripts/`, so no workspace verify job would catch them.
 
 on:
   push:
@@ -22,6 +26,8 @@ on:
       - '.claude/agents/**'
       - '.mcp.json'
       - 'scripts/check-harness-grants.mjs'
+      - 'scripts/kb-query-launcher.mjs'
+      - 'scripts/kb-query-launcher.test.mjs'
       - '.github/workflows/verify-drift.yml'
   pull_request:
     branches: [main]
@@ -38,6 +44,8 @@ on:
       - '.claude/agents/**'
       - '.mcp.json'
       - 'scripts/check-harness-grants.mjs'
+      - 'scripts/kb-query-launcher.mjs'
+      - 'scripts/kb-query-launcher.test.mjs'
       - '.github/workflows/verify-drift.yml'
   schedule:
     - cron: '41 7 * * 0'
@@ -60,3 +68,9 @@ jobs:
         run: node --test scripts/content-drift.test.mjs
       - name: Harness grant consistency
         run: node scripts/check-harness-grants.mjs
+
+      # The kb-query entrypoint every grant above points at. Hermetic: it
+      # drives the launcher against local stubs and never touches the hosted
+      # Worker, so it needs no token and no network.
+      - name: kb-query launcher
+        run: node --test scripts/kb-query-launcher.test.mjs

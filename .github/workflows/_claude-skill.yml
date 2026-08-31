@@ -73,12 +73,14 @@ jobs:
       GH_REPO: ${{ github.repository }}
       NOTIFY_NTFY_TOPIC: ${{ secrets.NOTIFY_NTFY_TOPIC }}
       NOTIFY_WEBHOOK_URL: ${{ secrets.NOTIFY_WEBHOOK_URL }}
-      # Hosted kb-query (kb-mcp-host/): when the KB_MCP_URL repo variable is
-      # set, scripts/kb-query-launcher.mjs bridges the kb-query MCP server to
-      # that URL and no corpus sync is needed. KB_MCP_TOKEN is only required
-      # when the hosted endpoint has bearer auth enabled.
-      KB_MCP_URL: ${{ vars.KB_MCP_URL }}
+      # Hosted kb-query: the prior-art corpus is served by the
+      # game-knowledge-base repo's Cloudflare Worker, which is fail-closed.
+      # With the KB_MCP_TOKEN secret set, scripts/kb-query-launcher.mjs
+      # bridges to it and the run needs no corpus sync; without it the run
+      # syncs kb/ (step below) and serves the same tools locally. KB_MCP_URL
+      # only overrides the default endpoint.
       KB_MCP_TOKEN: ${{ secrets.KB_MCP_TOKEN }}
+      KB_MCP_URL: ${{ vars.KB_MCP_URL }}
     steps:
       - name: Checkout (full history)
         uses: actions/checkout@v4
@@ -106,13 +108,13 @@ jobs:
       - name: Self-test nexus enforcement layer (guard hooks + deny walls)
         run: node .claude/hooks/guard.mjs self-test
 
-      # Prior-art corpus for kb-query. With KB_MCP_URL set (hosted server
-      # live) the launcher needs no local corpus and this step is skipped.
+      # Prior-art corpus for kb-query. With the token set, the launcher reads
+      # the hosted corpus and needs nothing local, so this is skipped.
       # Without it, sync kb/ so the canonical stdio server serves the run.
       # Non-fatal on purpose: if the sync fails, kb-query still starts and
       # every call answers with recovery guidance instead of dying.
       - name: Sync prior-art corpus (kb/)
-        if: ${{ env.KB_MCP_URL == '' }}
+        if: ${{ env.KB_MCP_TOKEN == '' }}
         continue-on-error: true
         run: node scripts/kb-sync.mjs
 
@@ -125,10 +127,11 @@ jobs:
       #                 reads on every unattended run (content-pipelines audit §6.4).
       #   kb-query    — GRANTED below. Its entrypoint is the committed
       #                 `scripts/kb-query-launcher.mjs`, which always starts: it
-      #                 bridges to the hosted server (KB_MCP_URL), execs the synced
-      #                 `kb/` stdio server (the step above), or degrades to recovery
-      #                 messages. The phase-72 objection (a grant advertising a tool
-      #                 whose gitignored server cannot start in CI) no longer holds.
+      #                 bridges to the hosted Worker (KB_MCP_TOKEN), execs the
+      #                 synced `kb/` stdio server (the step above), or degrades to
+      #                 recovery messages. The phase-72 objection (a grant
+      #                 advertising a tool whose gitignored server cannot start in
+      #                 CI) no longer holds.
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@v1

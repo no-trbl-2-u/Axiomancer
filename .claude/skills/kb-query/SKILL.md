@@ -11,10 +11,10 @@ model memory alone. Every claim you relay keeps its citation.
 ## 0. Ensure a corpus route is live
 
 The `kb-query` MCP server always starts (`scripts/kb-query-launcher.mjs`):
-it serves from the hosted corpus when `KB_MCP_URL` is configured, from the
+it serves from the hosted corpus when `KB_MCP_TOKEN` is set, from the
 synced `kb/` otherwise, and answers with recovery guidance when neither
-exists. So: try the MCP tools first. If they answer with "corpus not
-synced" guidance, or you need the raw files for grep:
+exists. So: try the MCP tools first. If they answer with that guidance,
+or you need the raw files for grep:
 
 ```bash
 ls kb/KnowledgeBase || node scripts/kb-sync.mjs

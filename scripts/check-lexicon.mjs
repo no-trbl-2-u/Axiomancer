@@ -50,7 +50,7 @@ export function loadRegistry(registryPath = REGISTRY_PATH) {
 
 // Dated-record zones — path fragments (forward-slash, repo-relative).
 const ZONE_DIRS = [
-  'node_modules/', '.git/', 'kb/', 'kb-mcp-host/corpus/', 'tmp-images/', '.claude/worktrees/',
+  'node_modules/', '.git/', 'kb/', 'tmp-images/', '.claude/worktrees/',
   'devlog/', 'braindump/', 'docs/reports/', 'docs/adr/', 'automation/', 'specs/',
 ]
 const ZONE_BASENAMES = ['CHANGELOG.md', 'RELEASES.md', 'lexicon.json', 'TELEMETRY.md']
@@ -147,9 +147,6 @@ function* mdFiles(dir) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     if (entry.name === 'node_modules' || entry.name === '.git' || entry.name === 'kb') continue
     const p = path.join(dir, entry.name)
-    // kb-mcp-host/corpus/ is the built snapshot of the external KB corpus
-    // (gitignored, like kb/) — external prose, not a live surface.
-    if (entry.isDirectory() && entry.name === 'corpus' && dir.endsWith('kb-mcp-host')) continue
     if (entry.isDirectory()) yield* mdFiles(p)
     else if (entry.name.endsWith('.md')) yield p
   }
