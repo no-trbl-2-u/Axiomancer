@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-17T08:32:42Z | slash-prompt | /march | unknown | user/ci | /march |
-| 2026-07-17T10:26:38Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-07-17T14:09:58Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-17T14:10:37Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
 | 2026-07-17T14:11:32Z | subagent | Explore | claude-sonnet-5 | main | Explore enemy archetype + rung telegraph plumbing |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-31T05:44:27Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-31T14:01:06Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-31T14:03:35Z | subagent | Explore | claude-sonnet-5 | main | Map Northern-Continent phase W1-W3 conventions |
+| 2026-08-31T16:24:40Z | slash-prompt | /digest | unknown | user/ci | /digest |
+| 2026-08-31T16:24:42Z | skill | digest | unknown | main | - |
