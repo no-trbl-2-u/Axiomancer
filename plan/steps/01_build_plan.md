@@ -2444,9 +2444,21 @@ on pickup):**
       labyrinth room-scene backdrop acquisition, both out of scope for one
       phase tick (see `plan/phases/phase_v7_illustration_upgrades.md`
       Follow-ups).
-- [ ] Phase V8 — Closure: `/critic-loop` screenshot pass, contrast/a11y
+- [x] Phase V8 — Closure: `/critic-loop` screenshot pass, contrast/a11y
       audit, placeholder teardown, `SVG_ASSET_SPEC.md` reconciled,
       `docs/VISUAL_LANGUAGE.md` (mobile; after V1–V7)
+      SHIPPED 2026-08-31 (04fe2f46, b70303bb): deleted the pre-archetype
+      placeholder scenes V7 flagged (EncounterIllustration/
+      BossIllustration/BodyDiagram — zero live call sites), re-platformed
+      `EnemyIllustration` onto the same archetype figure set
+      `EnemyPortrait` already used; SVG_ASSET_SPEC.md checklist
+      reconciled to ground truth (3 rows closed, 4 stale-unchecked rows
+      V1 had already resolved corrected, 2 genuine gaps — GlyphMind,
+      NodeMark — documented honestly); one-round `/critic-loop`
+      screenshot pass (25 screens) + sub-agent critic review, one
+      confirmed contrast fix shipped (cutscene hint text), 5 further
+      findings logged to `plan/CRITIQUE.md` Pending; new
+      `docs/VISUAL_LANGUAGE.md`. The V-sequence (V1–V8) is complete.
 - [x] Phase W1 — The Door (inter-map travel): `travel` MapEventKind +
       handler (unlock + complete + changeContinent + changeMap, old map
       state PRESERVED — the world is a place, not a corridor), a real
