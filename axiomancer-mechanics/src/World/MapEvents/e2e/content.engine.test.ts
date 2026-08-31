@@ -21,13 +21,15 @@ import type { ContinentName } from '../../map.library';
 // Import for side effect — registers the pools when the test loads.
 import '../content';
 
-type AuthoredMap = 'fishing-village' | 'northern-forest' | 'caverns' | 'northern-city';
+type AuthoredMap = 'fishing-village' | 'northern-forest' | 'caverns' | 'northern-city' | 'connecting-river' | 'town-across-river';
 
 const CONTINENT_OF: Record<AuthoredMap, ContinentName> = {
     'fishing-village': 'coastal-continent',
     'northern-forest': 'coastal-continent',
     'caverns': 'northern-continent',
     'northern-city': 'northern-continent',
+    'connecting-river': 'northern-continent',
+    'town-across-river': 'northern-continent',
 };
 
 function freshWorldAt(mapName: AuthoredMap): GameState {
@@ -347,9 +349,10 @@ describe('northern-city content (Phase W3)', () => {
             ['ncy-20', 'hazard'],
             ['ncy-21', 'interaction'], // the Shipwright
             ['ncy-22', 'encounter'],
-            ['ncy-23', 'cutscene'],    // the sealed river-gate (W4's seam)
+            ['ncy-23', 'cutscene'],    // the sealed river-gate (still scenery)
             ['ncy-24', 'cutscene'],    // the drowned slip
             ['ncy-25', 'encounter'],   // the Harbormaster boss
+            ['ncy-26', 'travel'],      // Phase W4 — the door to connecting-river
         ];
         for (const [node, kind] of expected) {
             const r = visit(freshWorldAt('northern-city'), node);
@@ -431,11 +434,149 @@ describe('northern-city content (Phase W3)', () => {
     });
 });
 
+describe('connecting-river content (Phase W4)', () => {
+    it('each authored node resolves to its declared MapEventKind', () => {
+        mockSequentialRng(0.5);
+        const expected: Array<[string, string]> = [
+            ['cr-1',  'cutscene'],     // the current takes the boat
+            ['cr-2',  'interaction'],  // The Boatwoman, the crossing's premise
+            ['cr-3',  'encounter'],
+            ['cr-4',  'rest'],
+            ['cr-5',  'gathering'],    // river reed
+            ['cr-6',  'hazard'],
+            ['cr-7',  'loot-cache'],
+            ['cr-8',  'encounter'],
+            ['cr-9',  'narration'],    // the river court — the ritual
+            ['cr-10', 'village'],      // The Landing
+            ['cr-11', 'encounter'],
+            ['cr-12', 'encounter'],    // the Waterreeve boss
+            ['cr-13', 'travel'],       // the door to town-across-river
+        ];
+        for (const [node, kind] of expected) {
+            const r = visit(freshWorldAt('connecting-river'), node);
+            expect(r.kind, `node ${node} should resolve to ${kind}`).toBe(kind);
+        }
+    });
+
+    it('the Waterreeve is pinned to a winnable level', () => {
+        mockSequentialRng(0.5);
+        const result = resolveMapEvent({
+            ...freshWorldAt('connecting-river'),
+            world: {
+                ...freshWorldAt('connecting-river').world,
+                currentMap: { ...freshWorldAt('connecting-river').world.currentMap, currentNode: 'cr-12', consumedNodes: [] },
+            },
+        });
+        expect(result.event.kind).toBe('encounter');
+        if (result.event.kind === 'encounter') {
+            expect(result.event.isBoss).toBe(true);
+            const boss = result.event.encounter.enemies[0];
+            expect(boss.name).toBe('The Waterreeve');
+            expect(boss.level).toBe(10);
+        }
+    });
+
+    it('a wandering encounter draws from the connecting-river pool via the cr- prefix', () => {
+        mockSequentialRng(0.5);
+        const result = resolveMapEvent({
+            ...freshWorldAt('connecting-river'),
+            world: {
+                ...freshWorldAt('connecting-river').world,
+                currentMap: { ...freshWorldAt('connecting-river').world.currentMap, currentNode: 'cr-3', consumedNodes: [] },
+            },
+        });
+        expect(result.event.kind).toBe('encounter');
+        if (result.event.kind === 'encounter') {
+            expect(result.event.isBoss).toBe(false);
+            expect(result.event.encounter.origin).toBe('connecting-river:cr-3');
+            expect(result.event.encounter.enemies).toHaveLength(1);
+        }
+    });
+
+    it('the river court reads the S-01 / ncy-5 flags for reactive branches and grants join-islanders-for-ritual', () => {
+        mockSequentialRng(0.5);
+        const result = resolveMapEvent({
+            ...freshWorldAt('connecting-river'),
+            world: {
+                ...freshWorldAt('connecting-river').world,
+                currentMap: { ...freshWorldAt('connecting-river').world.currentMap, currentNode: 'cr-9', consumedNodes: [] },
+            },
+        });
+        expect(result.event.kind).toBe('narration');
+        if (result.event.kind === 'narration') {
+            const tree = result.event.dialogue;
+            expect(tree.id).toBe('cr-river-court');
+            const root = tree.nodes[tree.rootId];
+            const reactive = root!.choices!.filter(c => c.requires?.flag);
+            expect(reactive.map(c => c.requires!.flag).sort()).toEqual(
+                ['boy-chased-the-rumor', 'boy-witnessed-the-crowning'].sort(),
+            );
+            const watch = root!.choices!.find(c => c.text === 'Watch.')!;
+            expect(watch.effect?.startQuest).toBe('join-islanders-for-ritual');
+        }
+    });
+});
+
+describe('town-across-river content (Phase W4)', () => {
+    it('each authored node resolves to its declared MapEventKind', () => {
+        mockSequentialRng(0.5);
+        const expected: Array<[string, string]> = [
+            ['tar-1', 'cutscene'],    // arrival on the far bank
+            ['tar-2', 'interaction'], // The Sweetheart
+            ['tar-3', 'rest'],        // The Miller's Rest — an INN
+            ['tar-4', 'narration'],   // the village court — the ritual, mirrored
+            ['tar-5', 'encounter'],
+            ['tar-6', 'encounter'],   // the Portreeve boss
+        ];
+        for (const [node, kind] of expected) {
+            const r = visit(freshWorldAt('town-across-river'), node);
+            expect(r.kind, `node ${node} should resolve to ${kind}`).toBe(kind);
+        }
+    });
+
+    it('the Portreeve is pinned to a winnable level', () => {
+        mockSequentialRng(0.5);
+        const result = resolveMapEvent({
+            ...freshWorldAt('town-across-river'),
+            world: {
+                ...freshWorldAt('town-across-river').world,
+                currentMap: { ...freshWorldAt('town-across-river').world.currentMap, currentNode: 'tar-6', consumedNodes: [] },
+            },
+        });
+        expect(result.event.kind).toBe('encounter');
+        if (result.event.kind === 'encounter') {
+            expect(result.event.isBoss).toBe(true);
+            const boss = result.event.encounter.enemies[0];
+            expect(boss.name).toBe('The Portreeve');
+            expect(boss.level).toBe(12);
+        }
+    });
+
+    it('the village court mirrors the river court and reads its planted flag', () => {
+        mockSequentialRng(0.5);
+        const result = resolveMapEvent({
+            ...freshWorldAt('town-across-river'),
+            world: {
+                ...freshWorldAt('town-across-river').world,
+                currentMap: { ...freshWorldAt('town-across-river').world.currentMap, currentNode: 'tar-4', consumedNodes: [] },
+            },
+        });
+        expect(result.event.kind).toBe('narration');
+        if (result.event.kind === 'narration') {
+            const tree = result.event.dialogue;
+            expect(tree.id).toBe('tar-village-court');
+            const root = tree.nodes[tree.rootId];
+            const reactive = root!.choices!.find(c => c.requires?.flag === 'boy-witnessed-the-river-ritual');
+            expect(reactive).toBeDefined();
+        }
+    });
+});
+
 describe('every MapEventKind is covered by the authored content', () => {
-    it('each kind appears at least once across the four maps', () => {
+    it('each kind appears at least once across the six maps', () => {
         mockSequentialRng(0.5);
         const kinds = new Set<string>();
-        for (const map of ['fishing-village', 'northern-forest', 'caverns', 'northern-city'] as const) {
+        for (const map of ['fishing-village', 'northern-forest', 'caverns', 'northern-city', 'connecting-river', 'town-across-river'] as const) {
             const def = getMapDefinition(CONTINENT_OF[map], map);
             for (const node of def.nodes) {
                 // Fresh state per node — a threaded walk would cross a

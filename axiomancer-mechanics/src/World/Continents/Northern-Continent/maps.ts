@@ -14,9 +14,24 @@
  * Map 2: THE NORTHERN CITY — the continent's first city. Stone, guilds,
  * the iron trade, a harbor where a boat could be built (`map.library.ts`
  * narrative; spec 34 §1's Parish register). Lean urban: inns instead of
- * camps, two shops, priced scenery, fewer wilderness hazards. The way
- * onward to `connecting-river` is not shipped (W4) — the river-gate at
- * `ncy-23` is sealed scenery, and the map ends at the Harbormaster.
+ * camps, two shops, priced scenery, fewer wilderness hazards. As of Phase
+ * W4 the map no longer ends at the Harbormaster: `ncy-26`, one column past
+ * him, is the DOOR to `connecting-river` — the water-gate he was keeping.
+ * `ncy-23` stays sealed scenery (flavor beside the last inns, the nc-16
+ * pattern); the real door sits past the boss.
+ *
+ * Map 3: THE CONNECTING RIVER — a boat trip downriver to the islanders'
+ * territory, where a child is chosen each generation to be put forward as
+ * the King's next advisor. Wild again after the city: camps instead of
+ * inns, one trading post instead of a market. The advisor-rumor flags
+ * planted at `ncy-5` (and the "crowning ceremony" flags from S-01's
+ * northern-forest dilemma) get their payoff at `cr-9`.
+ *
+ * Map 4: TOWN ACROSS THE RIVER — the coda. Home of the sweetheart the boy
+ * left behind; her own village puts her forward the same way the
+ * islanders did. Deliberately small (`map.library.ts`'s own narrative
+ * frames it as a homecoming, not a new front) — four columns, no door
+ * onward yet.
  *
  * Same column-layering law as the coastal maps (2026-08-08 first-map
  * audit; enforced by `src/World/e2e/map-traversal.engine.test.ts`):
@@ -253,6 +268,14 @@ const gateClerkTree: DialogueTree = {
                     text: "Walk past.",
                     nextNodeId: 'walked',
                 },
+                {
+                    // Phase W4 — the way to the river. Placed last (index-
+                    // stability convention); see the `the_water_gate` node
+                    // comment.
+                    text: "Is there a way to the river from here?",
+                    nextNodeId: 'the_water_gate',
+                    effect: { startQuest: 'get-to-connecting-river' },
+                },
             ],
         },
         named: {
@@ -266,6 +289,14 @@ const gateClerkTree: DialogueTree = {
         walked: {
             id: 'walked',
             text: "The pen does not pause. \"They all walk past,\" he says, to the book. \"The book stays open on principle.\"",
+        },
+        // Phase W4 — the way to the river. Ungated, like The Delver's
+        // the_stair grant: the Gate-Clerk will tell anyone the way to the
+        // water-gate — the map's own graph still gates the crossing on the
+        // Harbormaster, one column before the door.
+        the_water_gate: {
+            id: 'the_water_gate',
+            text: "\"Water goes right, I said.\" He taps the desk once. \"Follow it to the harbor and past the weighing-house. What the Harbormaster lets by, the river takes from there.\"",
         },
     },
 };
@@ -325,6 +356,29 @@ const shipwrightTree: DialogueTree = {
     },
 };
 
+// Phase W4 — `get-to-connecting-river` (a previously dangling
+// NorthernCityQuests union member) is authored: granted by the Gate-Clerk
+// (the map's guaranteed singleton, the fv-2/nc-2 precedent), completed by
+// reaching `cr-1` (the river arrival ticks the reach objective on its own
+// resolution, the get-to-forest/get-to-northern-city pattern).
+const getToConnectingRiverQuest: Quest = {
+    name: 'get-to-connecting-river',
+    description: "Fight past the Harbormaster and take the water-gate to the river.",
+    mapName: 'northern-city',
+    status: 'available',
+    objectives: [
+        {
+            id: 'reach-connecting-river',
+            type: 'reach',
+            target: 'cr-1',
+            description: "Reach the connecting river.",
+            requiredCount: 1,
+            currentCount: 0,
+        },
+    ],
+    reward: { kind: 'experience', amount: 60 },
+};
+
 const theGateClerk: NPC = {
     name: 'The Gate-Clerk',
     description: 'The man who keeps a dead office\'s ledger at the top of the Under-Gate stair.',
@@ -342,13 +396,13 @@ const theShipwright: NPC = {
 // Ten columns, three lanes: the WALL (y=+1 — ramparts, yards, the assize
 // bell), the HIGH STREET (y=0, the spine — inns, the market, the rumor),
 // and the HARBOR (y=-1 — pitch, shops, the shipwright, the river-gate).
-// Three singleton columns, the tolerated maximum: c0 (the arrival at the
-// gatehouse), c1 (the Gate-Clerk — the city's first face on every route),
-// and c9 (the Harbormaster — every run ends at the water). ncy-24 hangs
+// Four singleton columns (Phase W4 — the nc-26 pattern): c0 (the arrival
+// at the gatehouse), c1 (the Gate-Clerk — the city's first face on every
+// route), c9 (the Harbormaster), and c10 (the water-gate standing open —
+// the door to connecting-river, one column past the boss). ncy-24 hangs
 // off the harbor at [3,-2] (the drowned slip); its whole column opens
-// onto all of c4 so it can never strand a run. The seam toward
-// `connecting-river` is sealed scenery at ncy-23 (c8, the W2 nc-16
-// pattern) — W4 ships that door.
+// onto all of c4 so it can never strand a run. ncy-23 (c8) stays sealed
+// scenery — flavor beside the last inns, never the real exit.
 
 const northernCity: MapDefinition = {
     name: 'northern-city',
@@ -400,16 +454,297 @@ const northernCity: MapDefinition = {
         { id: 'ncy-16', location: [8, 1], connectedNodes: ['ncy-25'] },
         { id: 'ncy-9',  location: [8, 0], connectedNodes: ['ncy-25'] },
         { id: 'ncy-23', location: [8, -1], connectedNodes: ['ncy-25'] },
-        // ── c9 — the Harbormaster. Every run ends at the water. ──────
-        { id: 'ncy-25', location: [9, 0], connectedNodes: [] },
+        // ── c9 — the Harbormaster. Every run goes through here. ──────
+        { id: 'ncy-25', location: [9, 0], connectedNodes: ['ncy-26'] },
+        // ── c10 — the water-gate stands open (Phase W4). The DOOR to
+        //        connecting-river, one column past the boss — the
+        //        nc-26/fv-10 pattern: the way out opens only after the
+        //        climax. ncy-23 stays sealed scenery; this is the real gate.
+        { id: 'ncy-26', location: [10, 0], connectedNodes: [] },
     ],
     npcs: [theGateClerk, theShipwright],
     enemies: [],
     uniqueEvents: [],
-    // The city's own declared quests ('find-blacksmith', 'build-boat',
-    // 'kill-some-time', 'get-to-connecting-river') stay dangling — their
-    // phases (W4+) author them. `get-to-northern-city` lives on the
-    // caverns, its granting map, per the get-to-forest precedent.
+    // The city's own remaining declared quests ('find-blacksmith',
+    // 'build-boat', 'kill-some-time') stay dangling — a future phase
+    // authors them. `get-to-connecting-river` is authored this phase (W4).
+    // `get-to-northern-city` lives on the caverns, its granting map, per
+    // the get-to-forest precedent.
+    quests: [getToConnectingRiverQuest],
+    images: {
+        mapImage: { alt: '', src: '' },
+        combatImage: { alt: '', src: '' },
+    },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// THE CONNECTING RIVER (Phase W4) — map 3 of the northern continent.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ─── NPC content ──────────────────────────────────────────────────────────────
+
+// The Boatwoman keeps the only boat that goes downriver. Wild again after
+// the city: she doesn't collect a toll, she IS the crossing.
+const boatwomanTree: DialogueTree = {
+    id: 'the-boatwoman',
+    rootId: 'greet',
+    nodes: {
+        greet: {
+            id: 'greet',
+            text: "A flat-bottomed boat rides low against the bank, tied to a post retied more than replaced. A woman coils rope without looking up. \"Down the water or up the bank. I only go one direction, and it isn't up.\"",
+            choices: [
+                {
+                    text: "Take me down the river.",
+                    nextNodeId: 'the_offer',
+                    effect: { startQuest: 'find-islanders' },
+                },
+                {
+                    text: "What's downriver?",
+                    nextNodeId: 'lore',
+                },
+                {
+                    text: "Not today.",
+                    nextNodeId: undefined,
+                },
+            ],
+        },
+        the_offer: {
+            id: 'the_offer',
+            text: "\"Islanders, mostly. Once a year they hold a court on the water and I ferry every hopeful mother's favorite.\" She nods at the current. \"Sit low. The river doesn't care whose boat it takes.\"",
+            choices: [
+                {
+                    text: "I'm headed across, eventually.",
+                    nextNodeId: 'far_bank',
+                    effect: { startQuest: 'get-to-town-across-river' },
+                },
+                {
+                    text: "One trip at a time.",
+                    nextNodeId: undefined,
+                },
+            ],
+        },
+        far_bank: {
+            id: 'far_bank',
+            text: "\"Eventually gets you there same as urgent does, on this river.\" She finishes the coil and sets it in the bow. \"Get in when you're ready.\"",
+        },
+        lore: {
+            id: 'lore',
+            text: "\"A river, then a town, then whatever's past the town.\" She shrugs. \"I've only ever gone as far as the ritual and back. Some things you don't follow to the end.\"",
+        },
+    },
+};
+
+const theBoatwoman: NPC = {
+    name: 'The Boatwoman',
+    description: 'She keeps the only boat that goes downriver, and goes only one direction.',
+    dialogueTree: boatwomanTree,
+};
+
+// ─── Quest content ────────────────────────────────────────────────────────────
+
+// `find-islanders`, `join-islanders-for-ritual` and `get-to-town-across-river`
+// are declared ConnectingRiverQuests union members (quest.library.ts) with no
+// authored Quest object until now. Granted from The Boatwoman (the
+// guaranteed singleton, cr-2) and from the river-court narration (cr-9) —
+// both sit on THIS map, so both Quest objects live in this map's own
+// `quests` array (the lookup in `dialogue.runtime.ts` resolves against
+// `gameState.world.currentMap`, never a different map's declared quests).
+const findIslandersQuest: Quest = {
+    name: 'find-islanders',
+    description: "Follow the river down to the islanders' court.",
+    mapName: 'connecting-river',
+    status: 'available',
+    objectives: [
+        {
+            id: 'reach-river-court',
+            type: 'reach',
+            target: 'cr-9',
+            description: "Reach the river court.",
+            requiredCount: 1,
+            currentCount: 0,
+        },
+    ],
+    reward: { kind: 'experience', amount: 40 },
+};
+
+const joinIslandersForRitualQuest: Quest = {
+    name: 'join-islanders-for-ritual',
+    description: "Having watched the ritual, follow it to the far bank.",
+    mapName: 'connecting-river',
+    status: 'available',
+    objectives: [
+        {
+            id: 'reach-water-gate',
+            type: 'reach',
+            target: 'cr-13',
+            description: "Reach the water-gate.",
+            requiredCount: 1,
+            currentCount: 0,
+        },
+    ],
+    reward: { kind: 'experience', amount: 55 },
+};
+
+const getToTownAcrossRiverQuest: Quest = {
+    name: 'get-to-town-across-river',
+    description: "Cross the water-gate to the town on the far bank.",
+    mapName: 'connecting-river',
+    status: 'available',
+    objectives: [
+        {
+            id: 'reach-town-across-river',
+            type: 'reach',
+            target: 'tar-1',
+            description: "Reach the town across the river.",
+            requiredCount: 1,
+            currentCount: 0,
+        },
+    ],
+    reward: { kind: 'experience', amount: 60 },
+};
+
+// ─── Map definition ───────────────────────────────────────────────────────────
+//
+// Seven columns, three lanes: no named lane structure — the river is wild,
+// not surveyed. Four singleton columns (the caverns/nc-26 pattern, tolerance
+// bumped to 4 for this map): c0 (the arrival), c1 (The Boatwoman — the
+// crossing's premise on every route), c5 (the Waterreeve, the climax), and
+// c6 (the water-gate to town-across-river, one column past the boss). The
+// advisor-selection ritual (`cr-9`) sits in an ordinary 3-lane column — the
+// `ncy-5` precedent: campaign-seam content doesn't need a scarce singleton
+// slot when it doesn't gate progression.
+
+const connectingRiver: MapDefinition = {
+    name: 'connecting-river',
+    continent: 'northern-continent',
+    description: 'A river wide enough to lose the banks in fog. The islanders hold their court on it once a year, and the current takes whoever argues with it.',
+    startingNode: {
+        id: 'cr-1',
+        location: [0, 0],
+        connectedNodes: ['cr-2'],
+    },
+    nodes: [
+        // ── c0 — the current takes the boat. The ncy-26 door lands here. ─
+        { id: 'cr-1',  location: [0, 0], connectedNodes: ['cr-2'] },
+        // ── c1 — The Boatwoman. A singleton column so the crossing's
+        //        premise is on every route (the fv-2/nc-2 precedent).
+        { id: 'cr-2',  location: [1, 0], connectedNodes: ['cr-3', 'cr-4', 'cr-5'] },
+        // ── c2 — encounter / rest / gathering ─────────────────────────
+        { id: 'cr-3',  location: [2, 1], connectedNodes: ['cr-6', 'cr-7', 'cr-8'] },
+        { id: 'cr-4',  location: [2, 0], connectedNodes: ['cr-6', 'cr-7', 'cr-8'] },
+        { id: 'cr-5',  location: [2, -1], connectedNodes: ['cr-6', 'cr-7', 'cr-8'] },
+        // ── c3 — hazard / loot / encounter ────────────────────────────
+        { id: 'cr-6',  location: [3, 1], connectedNodes: ['cr-9', 'cr-10', 'cr-11'] },
+        { id: 'cr-7',  location: [3, 0], connectedNodes: ['cr-9', 'cr-10', 'cr-11'] },
+        { id: 'cr-8',  location: [3, -1], connectedNodes: ['cr-9', 'cr-10', 'cr-11'] },
+        // ── c4 — THE RIVER COURT (the ritual) / THE LANDING (shop) /
+        //        encounter ────────────────────────────────────────────
+        { id: 'cr-9',  location: [4, 1], connectedNodes: ['cr-12'] },
+        { id: 'cr-10', location: [4, 0], connectedNodes: ['cr-12'] },
+        { id: 'cr-11', location: [4, -1], connectedNodes: ['cr-12'] },
+        // ── c5 — the Waterreeve. Every run goes through here. ─────────
+        { id: 'cr-12', location: [5, 0], connectedNodes: ['cr-13'] },
+        // ── c6 — the water-gate stands open. The DOOR to
+        //        town-across-river, one column past the boss. ─────────
+        { id: 'cr-13', location: [6, 0], connectedNodes: [] },
+    ],
+    npcs: [theBoatwoman],
+    enemies: [],
+    uniqueEvents: [],
+    quests: [findIslandersQuest, joinIslandersForRitualQuest, getToTownAcrossRiverQuest],
+    images: {
+        mapImage: { alt: '', src: '' },
+        combatImage: { alt: '', src: '' },
+    },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TOWN ACROSS THE RIVER (Phase W4) — map 4 of the northern continent.
+// ═══════════════════════════════════════════════════════════════════════════
+
+// ─── NPC content ──────────────────────────────────────────────────────────────
+
+// The Sweetheart — home of the boy the player left behind (`map.library.ts`'s
+// own narrative note). No quest here; the beat is emotional, not mechanical.
+const sweetheartTree: DialogueTree = {
+    id: 'the-sweetheart',
+    rootId: 'greet',
+    nodes: {
+        greet: {
+            id: 'greet',
+            text: "She's at the well before you've decided how to say her name. She decides for you. \"You came back.\" Not a question. She sets the bucket down like it might listen too.",
+            choices: [
+                {
+                    text: "I came back.",
+                    nextNodeId: 'stayed',
+                    effect: { alignmentDelta: { outlook: 1 } },
+                },
+                {
+                    text: "I'm only passing through.",
+                    nextNodeId: 'passing',
+                    effect: { alignmentDelta: { outlook: -1 } },
+                },
+                {
+                    text: "Tell me what's happened here.",
+                    nextNodeId: 'news',
+                },
+            ],
+        },
+        stayed: {
+            id: 'stayed',
+            text: "\"Good,\" she says, like the word costs her something and she's paying it anyway. \"Walk with me. There's somewhere I have to be today, and I'd rather you saw it than heard about it after.\"",
+        },
+        passing: {
+            id: 'passing',
+            text: "\"Passing through.\" She picks the bucket back up. \"That's an answer too. I'll remember which one you gave.\"",
+        },
+        news: {
+            id: 'news',
+            text: "\"The town elected a new ribbon-color this spring.\" She doesn't explain further. \"You'll see what that means, if you stay long enough.\"",
+        },
+    },
+};
+
+const theSweetheart: NPC = {
+    name: 'The Sweetheart',
+    description: 'The girl the boy left behind, keeping the well the way she kept everything else — exactly.',
+    dialogueTree: sweetheartTree,
+};
+
+// ─── Map definition ───────────────────────────────────────────────────────────
+//
+// Four columns, three lanes across the middle: the coda location
+// (`map.library.ts`: "Home of sweetheart"), deliberately small — a
+// homecoming, not a new front. Three singleton columns, the default
+// tolerance: c0 (the arrival), c1 (The Sweetheart), and c3 (the Portreeve,
+// the climax). No door onward — no W5+ map is shipped yet.
+
+const townAcrossRiver: MapDefinition = {
+    name: 'town-across-river',
+    continent: 'northern-continent',
+    description: 'Smaller than the city, kinder than the caverns. Woodsmoke over rooftops, and a well that remembers your face.',
+    startingNode: {
+        id: 'tar-1',
+        location: [0, 0],
+        connectedNodes: ['tar-2'],
+    },
+    nodes: [
+        // ── c0 — the far bank rises into a town. ──────────────────────
+        { id: 'tar-1', location: [0, 0], connectedNodes: ['tar-2'] },
+        // ── c1 — The Sweetheart. A singleton column so she is on every
+        //        route (the fv-2/nc-2 precedent).
+        { id: 'tar-2', location: [1, 0], connectedNodes: ['tar-3', 'tar-4', 'tar-5'] },
+        // ── c2 — rest (inn) / THE VILLAGE COURT (the ritual, mirrored) /
+        //        encounter ─────────────────────────────────────────────
+        { id: 'tar-3', location: [2, 1], connectedNodes: ['tar-6'] },
+        { id: 'tar-4', location: [2, 0], connectedNodes: ['tar-6'] },
+        { id: 'tar-5', location: [2, -1], connectedNodes: ['tar-6'] },
+        // ── c3 — the Portreeve. Every run ends here — no door yet. ────
+        { id: 'tar-6', location: [3, 0], connectedNodes: [] },
+    ],
+    npcs: [theSweetheart],
+    enemies: [],
+    uniqueEvents: [],
     quests: [],
     images: {
         mapImage: { alt: '', src: '' },
@@ -417,4 +752,4 @@ const northernCity: MapDefinition = {
     },
 };
 
-export { caverns, northernCity };
+export { caverns, northernCity, connectingRiver, townAcrossRiver };

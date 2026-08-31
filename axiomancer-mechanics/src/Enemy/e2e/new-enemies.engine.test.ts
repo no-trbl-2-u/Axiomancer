@@ -23,8 +23,9 @@ const APORIA_BOSS_SLUGS = ['the-doorwarden', 'the-index', 'the-sophist'] as cons
 /**
  * The art-roster slugs (excludes the sandbag + incompleteness fixtures and
  * the W-01 labyrinth act bosses, which are not part of the painting roster):
- * the 52 paintings (2026-07-06) plus the 9-strong Phase W3 northern batch
- * (2026-08-28, game-icons.net trove portraits).
+ * the 52 paintings (2026-07-06), the 9-strong Phase W3 northern batch
+ * (2026-08-28), and the 7-strong Phase W4 river-crossing batch
+ * (2026-08-31, game-icons.net trove portraits).
  */
 const ROSTER_SLUGS = (Object.keys(ENEMY_REGISTRY) as Array<keyof typeof ENEMY_REGISTRY>)
     .filter(slug =>
@@ -33,14 +34,15 @@ const ROSTER_SLUGS = (Object.keys(ENEMY_REGISTRY) as Array<keyof typeof ENEMY_RE
         !(APORIA_BOSS_SLUGS as readonly string[]).includes(slug));
 
 /** Provenance stamps the roster has accrued, batch by batch. */
-const ROSTER_ADDED_STAMPS = ['2026-07-06', '2026-08-28'];
+const ROSTER_ADDED_STAMPS = ['2026-07-06', '2026-08-28', '2026-08-31'];
 
 describe('2026-07-06: the art-driven base roster', () => {
-    it('carries exactly 61 roster enemies (52 paintings + the 9 W3 northerners)', () => {
+    it('carries exactly 68 roster enemies (52 paintings + 9 W3 + 7 W4)', () => {
         // Growth ledger, not a wall (THE PIPELINE LIBERATION ¶4): 52 → 61
-        // with Phase W3's northern-continent batch, bumped in the same
-        // commit that adds the enemies.
-        expect(ROSTER_SLUGS.length).toBe(61);
+        // with Phase W3's northern-continent batch, 61 → 68 with Phase W4's
+        // river-crossing batch, bumped in the same commit that adds the
+        // enemies.
+        expect(ROSTER_SLUGS.length).toBe(68);
     });
 
     it('registers every roster enemy in EnemyLibrary', () => {
@@ -156,6 +158,42 @@ describe('2026-07-06: the art-driven base roster', () => {
 
         it('every W3 enemy carries aftermath prose (finalBlowLines + causeLines)', () => {
             for (const slug of W3_SLUGS) {
+                const enemy = ENEMY_REGISTRY[slug] as Enemy;
+                expect(enemy.finalBlowLines, `${slug} finalBlowLines`).toBeDefined();
+                expect(enemy.causeLines, `${slug} causeLines`).toBeDefined();
+            }
+        });
+    });
+
+    describe('the Phase W4 river-crossing batch (2026-08-31)', () => {
+        const W4_SLUGS = [
+            'reed-ambusher', 'toll-skiff', 'weir-widow', 'the-waterreeve',
+            'dowry-collector', 'the-kept-suitor', 'the-portreeve',
+        ] as const;
+
+        it('registers all seven, stamped 2026-08-31, on the two river-crossing maps', () => {
+            for (const slug of W4_SLUGS) {
+                const enemy = ENEMY_REGISTRY[slug] as Enemy;
+                expect(enemy, `slug ${slug} missing from ENEMY_REGISTRY`).toBeDefined();
+                expect(enemy.addedIn).toBe('2026-08-31');
+                expect(['connecting-river', 'town-across-river']).toContain(enemy.mapName);
+                expect(EnemyLibrary).toContain(enemy);
+            }
+        });
+
+        it('the Waterreeve and the Portreeve are the batch\'s two bosses; the rest never wager the coveted die', () => {
+            for (const slug of W4_SLUGS) {
+                const enemy = ENEMY_REGISTRY[slug] as Enemy;
+                if (slug === 'the-waterreeve' || slug === 'the-portreeve') {
+                    expect(enemy.difficulty).toBe('boss');
+                } else {
+                    expect(['normal', 'elite']).toContain(enemy.difficulty);
+                }
+            }
+        });
+
+        it('every W4 enemy carries aftermath prose (finalBlowLines + causeLines)', () => {
+            for (const slug of W4_SLUGS) {
                 const enemy = ENEMY_REGISTRY[slug] as Enemy;
                 expect(enemy.finalBlowLines, `${slug} finalBlowLines`).toBeDefined();
                 expect(enemy.causeLines, `${slug} causeLines`).toBeDefined();

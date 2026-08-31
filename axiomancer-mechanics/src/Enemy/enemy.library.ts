@@ -2185,6 +2185,249 @@ export const TheHarbormaster = createEnemy({
 });
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// Phase W4 batch (2026-08-31): the river crossing and the town beyond it.
+// Seven enemies, two of them bosses, each with a UNIQUE portraitAsset sourced
+// from the licensed game-icons.net trove (CC BY 3.0 — see the mobile enemy
+// provenance.json), a deck in `combat.enemy-decks.ts`, and aftermath prose.
+// Count-pin bumps ride this same commit per THE PIPELINE LIBERATION ¶4.
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/** Provenance stamp for the Phase W4 river-crossing batch. */
+const W4_ADDED = '2026-08-31';
+
+export const ReedAmbusher = createEnemy({
+    id: 'enemy-reed-ambusher',
+    portraitAsset: 'reed-ambusher',
+    name: 'Reed Ambusher',
+    stanceHint: 'It strikes once and trusts the current to cover the second — deny the current its cover.',
+    description: 'It lies flush with the reed-line until the water forgets it is there. Then it doesn\'t.',
+    level: 17,
+    baseStats: enemyStatBudget(17, { heart: 1, body: 3, mind: 1 }),
+    mapName: 'connecting-river',
+    difficulty: 'normal',
+    logic: 'aggressive',
+    tier1Overrides: T1_DEFAULT,
+    loot: [none(55), drop('healing-potion', 25), drop('body-elixir', 20)],
+    philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
+    finalBlowLines: {
+        brutal: 'It lets go of the reed-line and the current takes what is left.',
+        quiet:  'It sinks without a ripple to mark the spot.',
+        ironic: 'The water it trusted finally counted against it.',
+    },
+    causeLines: {
+        brutal: 'The reeds don\'t move until they do, and by then it\'s too late.',
+        broken: 'It strikes, submerges, resurfaces somewhere you weren\'t watching.',
+        quiet:  'A cold hand at the ankle, and the bank gets further away.',
+    },
+    addedIn: W4_ADDED,
+    tags: ['mid-game', 'enemy'],
+});
+
+export const TollSkiff = createEnemy({
+    id: 'enemy-toll-skiff',
+    portraitAsset: 'toll-skiff',
+    name: 'Toll-Skiff',
+    stanceHint: 'It reads your stroke before you finish it — change the rhythm or match its price.',
+    description: 'A low boat, three rowers, no flag. It doesn\'t ask for the toll. It just doesn\'t let you past until you\'ve paid it.',
+    level: 18,
+    baseStats: enemyStatBudget(18, { heart: 1, body: 1, mind: 3 }),
+    mapName: 'connecting-river',
+    difficulty: 'normal',
+    logic: 'strategic',
+    tier1Overrides: T1_DEFAULT,
+    loot: [none(50), drop('quicksilver-vial', 25), drop('clarity-serum', 25)],
+    philosophicalAlignment: { epistemology: 67, outlook: 0, scope: -67 },
+    finalBlowLines: {
+        brutal: 'The boat capsizes. The current collects the fare instead.',
+        quiet:  'The rowers ship oars and let the current take the rest of the conversation.',
+        ironic: 'They never once said what the toll was. Now they never will.',
+    },
+    causeLines: {
+        brutal: 'Three oars, one rhythm, and no discount for arguing.',
+        broken: 'They row you down by inches, patient as a debt.',
+        quiet:  'The toll gets collected the way a river collects silt — slowly, without asking.',
+    },
+    addedIn: W4_ADDED,
+    tags: ['mid-game', 'enemy'],
+});
+
+export const WeirWidow = createEnemy({
+    id: 'enemy-weir-widow',
+    portraitAsset: 'weir-widow',
+    name: 'Weir-Widow',
+    stanceHint: 'She mourns you before you\'ve earned it — refuse the grief before it becomes a current.',
+    description: 'She stands waist-deep at the weir and grieves for whoever crosses next. The grief is not for them. It never was.',
+    level: 20,
+    baseStats: enemyStatBudget(20, { heart: 3, body: 1, mind: 2 }),
+    mapName: 'connecting-river',
+    difficulty: 'elite',
+    logic: 'defensive',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        heart: { attack: 2, defend: 2 },
+    },
+    loot: [none(45), drop('heart-draught', 30), drop('healing-potion', 25)],
+    philosophicalAlignment: { epistemology: -67, outlook: -67, scope: -67 },
+    finalBlowLines: {
+        brutal: 'The weir holds. She doesn\'t.',
+        quiet:  'She stops grieving. It is the first quiet thing she has done all day.',
+        ironic: 'She will grieve you properly now. It is the only honest work left to her.',
+    },
+    causeLines: {
+        brutal: 'Her grief has a current, and the current has you.',
+        broken: 'Mourned by inches, until the mourning is the only thing holding you up.',
+        quiet:  'Cold water, a kind voice, and a weir that doesn\'t care which.',
+    },
+    addedIn: W4_ADDED,
+    tags: ['mid-game', 'elite', 'enemy'],
+});
+
+/**
+ * Connecting River's authored boss — the Waterreeve, pinned per-node in
+ * `MapEvents/content.ts` at a winnable level (the ncy-25/fv-6 precedent).
+ * He has kept the crossing since the last reeve stopped keeping anything.
+ */
+export const TheWaterreeve = createEnemy({
+    id: 'enemy-the-waterreeve',
+    portraitAsset: 'the-waterreeve',
+    name: 'The Waterreeve',
+    stanceHint: 'He reads the crossing like a ledger — every stance you take is an entry, and entries get audited.',
+    description: 'He has kept the crossing since the last reeve stopped keeping anything. Every boat that passes goes in his book. Every book balances, eventually.',
+    level: 22,
+    baseStats: enemyStatBudget(22, { heart: 2, body: 2, mind: 3 }),
+    mapName: 'connecting-river',
+    difficulty: 'boss',
+    logic: 'boss',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        body: { attack: 2, defend: 2 },
+        mind: { attack: 3, defend: 3 },
+        heart: { attack: 2, defend: 2 },
+    },
+    loot: [
+        drop('philosopher-tea', 35),
+        drop('void-essence', 25),
+        drop('revive-crystal', 25),
+        drop('resonance-crystal', 15),
+    ],
+    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 },
+    finalBlowLines: {
+        brutal: 'The ledger closes on an unfinished line. Nobody finishes it for him.',
+        quiet:  'He sets the book down, open, and doesn\'t reach for it again.',
+        ironic: 'He audited every crossing on this river. His own account was never his to check.',
+    },
+    causeLines: {
+        brutal: 'The audit concludes. You are found short, in the usual currency.',
+        broken: 'Line by line, he finds what the crossing is owed.',
+        quiet:  'The ink dries. The account closes. The river keeps the rest.',
+    },
+    addedIn: W4_ADDED,
+    tags: ['mid-game', 'boss', 'enemy'],
+});
+
+export const DowryCollector = createEnemy({
+    id: 'enemy-dowry-collector',
+    portraitAsset: 'dowry-collector',
+    name: 'Dowry Collector',
+    stanceHint: 'He prices the match before you\'ve made it — refuse the appraisal, not just the fee.',
+    description: 'He totals what a marriage is worth before the marriage has agreed to happen. Villages pay him to be right about it.',
+    level: 19,
+    baseStats: enemyStatBudget(19, { heart: 2, body: 1, mind: 3 }),
+    mapName: 'town-across-river',
+    difficulty: 'normal',
+    logic: 'strategic',
+    tier1Overrides: T1_DEFAULT,
+    loot: [none(50), drop('clarity-serum', 25), drop('focus-vial', 25)],
+    philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
+    finalBlowLines: {
+        brutal: 'The books close on an appraisal nobody asked for.',
+        quiet:  'He puts the ledger away for once, and doesn\'t reach for it again.',
+        ironic: 'He priced every match in the village. His own math finally came due.',
+    },
+    causeLines: {
+        brutal: 'He totals the difference and collects it in the usual coin.',
+        broken: 'Line by line, the appraisal finds what you\'re short.',
+        quiet:  'A dry figure, entered neatly, and the account is settled.',
+    },
+    addedIn: W4_ADDED,
+    tags: ['mid-game', 'enemy'],
+});
+
+export const TheKeptSuitor = createEnemy({
+    id: 'enemy-the-kept-suitor',
+    portraitAsset: 'the-kept-suitor',
+    name: 'The Kept Suitor',
+    stanceHint: 'He fights like a promise that\'s owed, not earned — refuse the debt, not just the blow.',
+    description: 'Promised to someone who never agreed. He has been waiting so long the waiting became the whole of him.',
+    level: 21,
+    baseStats: enemyStatBudget(21, { heart: 3, body: 2, mind: 1 }),
+    mapName: 'town-across-river',
+    difficulty: 'elite',
+    logic: 'aggressive',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        heart: { attack: 2, defend: 2 },
+    },
+    loot: [none(40), drop('heart-draught', 30), drop('whetstone-oil', 20), drop('healing-potion', 10)],
+    philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
+    finalBlowLines: {
+        brutal: 'The promise breaks. Nobody is left to keep it anyway.',
+        quiet:  'He stops waiting. It is the only thing he hasn\'t already tried.',
+        ironic: 'He waited his whole death for an answer. You gave him one.',
+    },
+    causeLines: {
+        brutal: 'He collects on a promise you never made him.',
+        broken: 'He wears you down the way waiting wears down a doorstep.',
+        quiet:  'A patient hand, an old grievance, and no interest in explaining either.',
+    },
+    addedIn: W4_ADDED,
+    tags: ['mid-game', 'elite', 'enemy'],
+});
+
+/**
+ * Town Across the River's authored boss — the Portreeve, pinned per-node in
+ * `MapEvents/content.ts` at a winnable level. The town's chief officer,
+ * self-appointed by outliving every rival claim.
+ */
+export const ThePortreeve = createEnemy({
+    id: 'enemy-the-portreeve',
+    portraitAsset: 'the-portreeve',
+    name: 'The Portreeve',
+    stanceHint: 'He rules before he fights — every stance you take is a motion he has already denied.',
+    description: 'The town\'s chief officer, self-appointed by outliving every rival claim. Every ribbon, every ledger, every nomination crosses his desk first.',
+    level: 24,
+    baseStats: enemyStatBudget(24, { heart: 2, body: 3, mind: 2 }),
+    mapName: 'town-across-river',
+    difficulty: 'boss',
+    logic: 'boss',
+    tier1Overrides: T1_DEFAULT,
+    procUnlocks: {
+        body: { attack: 3, defend: 3 },
+        mind: { attack: 2, defend: 2 },
+        heart: { attack: 2, defend: 2 },
+    },
+    loot: [
+        drop('quicksilver-vial', 30),
+        drop('void-essence', 30),
+        drop('revive-crystal', 25),
+        drop('resonance-crystal', 15),
+    ],
+    philosophicalAlignment: { epistemology: 67, outlook: 0, scope: -67 },
+    finalBlowLines: {
+        brutal: 'The gavel falls and stays fallen. Nobody in the room moves to pick it up.',
+        quiet:  'He sets the gavel down, unstruck, and lets the town rule itself for once.',
+        ironic: 'He ruled on every dispute this town ever had. This one, he lost.',
+    },
+    causeLines: {
+        brutal: 'The ruling is final, and the fine is paid in full, immediately.',
+        broken: 'Motion by motion, he finds where your case falls apart.',
+        quiet:  'A gavel taps once. The room, and you, go quiet with it.',
+    },
+    addedIn: W4_ADDED,
+    tags: ['mid-game', 'boss', 'enemy'],
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // THE APORIA — labyrinth continent (W-01), act bosses (L8 / L12 / L16)
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -2480,6 +2723,10 @@ export const EnemyLibrary = [
     // northern-city predators + the Harbormaster boss.
     SeamTick, PropWight, UnpaidDelver, SumpMaren,
     TollSergeant, GuildKnife, TheFactor, WharfShrike, TheHarbormaster,
+    // Northern continent — Phase W4 batch (2026-08-31): the river crossing
+    // and the town beyond it.
+    ReedAmbusher, TollSkiff, WeirWidow, TheWaterreeve,
+    DowryCollector, TheKeptSuitor, ThePortreeve,
     // The Aporia — labyrinth act bosses (W-01; not part of the 52-painting roster).
     TheDoorwarden, TheIndex, TheSophist,
     // Impossible playtest ceiling — deliberately absent from EnemiesByMap.
@@ -2530,6 +2777,17 @@ export const EnemiesByMap = {
     'northern-city': [
         TollSergeant, GuildKnife, TheFactor, WharfShrike,
         Mabadi, FrayedOne, VampireThrall, TheHarbormaster,
+    ],
+    // Connecting River (Phase W4) — river vermin plus its own toll-keeper
+    // boss. The Waterreeve is the authored boss, pinned per-node in
+    // `MapEvents/content.ts`.
+    'connecting-river': [
+        ReedAmbusher, TollSkiff, WeirWidow, TheWaterreeve,
+    ],
+    // Town Across the River (Phase W4) — the coda map. The Portreeve is the
+    // authored boss, pinned per-node in `MapEvents/content.ts`.
+    'town-across-river': [
+        DowryCollector, TheKeptSuitor, ThePortreeve,
     ],
     // The Aporia (W-01) — three acts of rising difficulty. Pools reuse the
     // shared roster (wandering foes scale to the player via the adaptive
@@ -2623,6 +2881,14 @@ export const ENEMY_REGISTRY = {
     'the-factor':        TheFactor,
     'wharf-shrike':      WharfShrike,
     'the-harbormaster':  TheHarbormaster,
+    // Northern continent — Phase W4 batch (2026-08-31).
+    'reed-ambusher':     ReedAmbusher,
+    'toll-skiff':        TollSkiff,
+    'weir-widow':        WeirWidow,
+    'the-waterreeve':    TheWaterreeve,
+    'dowry-collector':   DowryCollector,
+    'the-kept-suitor':   TheKeptSuitor,
+    'the-portreeve':     ThePortreeve,
     // The Aporia — labyrinth act bosses (W-01).
     'the-doorwarden':    TheDoorwarden,
     'the-index':         TheIndex,

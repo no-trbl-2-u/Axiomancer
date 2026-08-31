@@ -250,7 +250,8 @@ describe('Phase 33c — authoring law (stake on exactly one boss/unique phase)',
         }
 
         // 15 boss + 4 unique: the phase brief's 14+4, plus Phase W3's
-        // Harbormaster (growth ledger, THE PIPELINE LIBERATION ¶4).
-        expect(bossUniqueSeen).toBe(19);
+        // Harbormaster and Phase W4's Waterreeve + Portreeve (growth
+        // ledger, THE PIPELINE LIBERATION ¶4).
+        expect(bossUniqueSeen).toBe(21);
     });
 });

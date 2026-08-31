@@ -163,11 +163,13 @@ describe('Phase 52b — the shelter classification of every authored rest pool',
         expect(new Set(labyrinthShelters)).toEqual(new Set<RestShelter>(['camp']));
     });
 
-    it('the ONLY inns in the game are inside settlements: fishing-village and the northern city', () => {
+    it('the ONLY inns in the game are inside settlements: fishing-village, the northern city, and town-across-river', () => {
         // Phase W3 — the northern city is the second SETTLEMENT with
         // tended, paid beds: its three rests are inns by the same 52b law
         // that made the village's four inns and every wilderness rest a
-        // camp. Everything between the two settlements still only camps.
+        // camp. Phase W4 — town-across-river is the third: a proper town,
+        // one inn (The Miller's Rest). Everything else — including
+        // connecting-river, wild again after the city — still only camps.
         const census = censusOfAuthoredRestPools();
         const innKeys = Object.entries(census)
             .filter(([, shelters]) => shelters.includes('inn'))
@@ -181,6 +183,7 @@ describe('Phase 52b — the shelter classification of every authored rest pool',
             'northern-continent:northern-city:ncy-16',
             'northern-continent:northern-city:ncy-4',
             'northern-continent:northern-city:ncy-9',
+            'northern-continent:town-across-river:tar-3',
         ].sort());
     });
 });

@@ -231,3 +231,75 @@ describe('the nc-26 door — caverns → northern-city (Phase W3)', () => {
         expect(state.world.currentContinent.availableMaps).toContain('northern-city');
     });
 });
+
+describe('the ncy-26 door — northern-city → connecting-river (Phase W4)', () => {
+    /** Walk the real arc through every earlier door, then seat on ncy-26. */
+    function atWaterGate(): GameState {
+        const throughVillage = resolveMapEvent(atCoastRoad()).state;
+        const throughForest = resolveMapEvent(seatAt(throughVillage, 'nf-10')).state;
+        const throughCaverns = resolveMapEvent(seatAt(throughForest, 'nc-26')).state;
+        return seatAt(throughCaverns, 'ncy-26');
+    }
+
+    it('stays on the northern continent, unlocks connecting-river, and lands on cr-1', () => {
+        const { state, event } = resolveMapEvent(atWaterGate());
+
+        expect(event.kind).toBe('travel');
+        expect(state.world.currentContinent.name).toBe('northern-continent');
+        expect(state.world.currentMap.name).toBe('connecting-river');
+        expect(state.world.currentMap.currentNode).toBe('cr-1');
+        expect(state.world.currentContinent.availableMaps).toContain('connecting-river');
+        expect(state.world.currentContinent.lockedMaps).not.toContain('connecting-river');
+        expect(state.world.currentContinent.completedMaps).toContain('northern-city');
+        expect(state.world.mapStates?.['northern-city']?.currentNode).toBe('ncy-26');
+    });
+
+    it("completes get-to-connecting-river: the Gate-Clerk's grant ticks on the river arrival", () => {
+        const gated = atWaterGate();
+        const quest = getMapDefinition('northern-continent', 'northern-city')
+            .quests!.find(q => q.name === 'get-to-connecting-river')!;
+        const questing: GameState = { ...gated, quests: startQuest(gated.quests, quest) };
+
+        const travelled = resolveMapEvent(questing).state;
+        expect(travelled.quests.completed).not.toContain('get-to-connecting-river');
+
+        const arrived = resolveMapEvent(travelled);
+        expect(arrived.state.quests.completed).toContain('get-to-connecting-river');
+    });
+});
+
+describe('the cr-13 door — connecting-river → town-across-river (Phase W4)', () => {
+    function atFarBankGate(): GameState {
+        const throughVillage = resolveMapEvent(atCoastRoad()).state;
+        const throughForest = resolveMapEvent(seatAt(throughVillage, 'nf-10')).state;
+        const throughCaverns = resolveMapEvent(seatAt(throughForest, 'nc-26')).state;
+        const throughCity = resolveMapEvent(seatAt(throughCaverns, 'ncy-26')).state;
+        return seatAt(throughCity, 'cr-13');
+    }
+
+    it('stays on the northern continent, unlocks town-across-river, and lands on tar-1', () => {
+        const { state, event } = resolveMapEvent(atFarBankGate());
+
+        expect(event.kind).toBe('travel');
+        expect(state.world.currentContinent.name).toBe('northern-continent');
+        expect(state.world.currentMap.name).toBe('town-across-river');
+        expect(state.world.currentMap.currentNode).toBe('tar-1');
+        expect(state.world.currentContinent.availableMaps).toContain('town-across-river');
+        expect(state.world.currentContinent.lockedMaps).not.toContain('town-across-river');
+        expect(state.world.currentContinent.completedMaps).toContain('connecting-river');
+        expect(state.world.mapStates?.['connecting-river']?.currentNode).toBe('cr-13');
+    });
+
+    it('completes get-to-town-across-river: The Boatwoman\'s grant ticks on arrival', () => {
+        const gated = atFarBankGate();
+        const quest = getMapDefinition('northern-continent', 'connecting-river')
+            .quests!.find(q => q.name === 'get-to-town-across-river')!;
+        const questing: GameState = { ...gated, quests: startQuest(gated.quests, quest) };
+
+        const travelled = resolveMapEvent(questing).state;
+        expect(travelled.quests.completed).not.toContain('get-to-town-across-river');
+
+        const arrived = resolveMapEvent(travelled);
+        expect(arrived.state.quests.completed).toContain('get-to-town-across-river');
+    });
+});

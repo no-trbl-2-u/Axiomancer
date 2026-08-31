@@ -97,6 +97,19 @@ export const ENEMY_DECKS: Record<string, readonly string[]> = {
     'enemy-the-factor': ['small-god-on-credit', 'compound-interest', 'foreclosure-in-person'], // 0.8 → 1.15 → 1.35: he lends you the opening on credit and forecloses in person.
     'enemy-wharf-shrike': ['gc-where-the-reach-begins', 'dp-ninth-bell', 'gc-the-alms-you-owed'], // 0.9 → 1.2 → 1.35: the strike, the patient hook (the Ninth Bell's held round IS the larder wait), the collection.
     'enemy-the-harbormaster': ['adjusters-visit', 'the-weighing', 'the-toll-entire', 'execution-of-the-agreement'], // BOSS, 4 cards: the appeal denied (0.95), THE WEIGHING staked in exactly the second slot (0.9 — the scale is his), the toll entire (1.3), the agreement executed (1.4 spike).
+    // ── Phase W4 (2026-08-31) — the river crossing and the town beyond it.
+    // Seven decks composed from the shared canon (no new cards needed): the
+    // river leans drowned-parish/gnawing-court, the town leans debt-office
+    // and gnawing-court. Escalation law holds on each (final card is the
+    // spike); only the two bosses wager the coveted die, staked on their
+    // second card automatically via `wagersCovetedDie`.
+    'enemy-reed-ambusher': ['dp-undertow-grip', 'gc-where-the-reach-begins', 'gc-the-alms-you-owed'], // 0.95 → 0.9 → 1.35: the grip from the reeds, closing the reach, the full taking.
+    'enemy-toll-skiff': ['first-notice', 'compound-interest', 'the-toll-entire'], // 0.85 → 1.15 → 1.3: the fee posted at the bow, the interest compounding mid-river, the toll entire.
+    'enemy-weir-widow': ['dp-salt-rescue', 'dp-wet-congregation', 'dp-drowning-drill', 'dp-grief-swell'], // 0.8 → 0.9 → 1.15 → 1.3 (elite, 4 cards, no stake): the bad rescue, the chorus at the weir, the drill, the grief that drowns you.
+    'enemy-the-waterreeve': ['first-notice', 'the-weighing', 'collection-rounds', 'execution-of-the-agreement'], // BOSS, 4 cards: notice posted at the crossing (0.85), THE WEIGHING staked in exactly the second slot (0.9 — every boat goes in his book), collection in person (1.0), the account executed (1.4 spike).
+    'enemy-dowry-collector': ['first-notice', 'collection-rounds', 'the-toll-entire'], // 0.85 → 1.0 → 1.3: the appraisal posted, collected in person, the toll entire.
+    'enemy-the-kept-suitor': ['gc-the-standing-invitation', 'gc-the-howl-at-being-answered', 'gc-the-patient-inch', 'gc-the-alms-you-owed'], // 0.9 → 0.9 → 1.1 → 1.35 (elite, 4 cards, no stake): the invitation nobody accepted, the howl at being answered anyway, the patient inch, the full taking.
+    'enemy-the-portreeve': ['adjusters-visit', 'clause-of-objections', 'the-toll-entire', 'execution-of-the-agreement'], // BOSS, 4 cards: the appeal denied (0.95), the objection clause staked in exactly the second slot (0.9 — every ruling crosses his desk first), the toll entire (1.3), the ruling executed (1.4 spike).
 };
 
 /** Projects one enemy-card face onto an authored-phase fragment. */

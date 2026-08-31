@@ -46,6 +46,9 @@ function nodeIdToMapName(nodeId: string): MapName | undefined {
     // the dash as its third character).
     if (nodeId.startsWith('ncy-')) return 'northern-city';
     if (nodeId.startsWith('nc-')) return 'caverns';
+    // Phase W4 (2026-08-31) — the river crossing and the town beyond it.
+    if (nodeId.startsWith('cr-')) return 'connecting-river';
+    if (nodeId.startsWith('tar-')) return 'town-across-river';
     // W-01 — The Aporia's three acts.
     if (nodeId.startsWith('ap1-')) return 'aporia-colonnade';
     if (nodeId.startsWith('ap2-')) return 'aporia-archive';

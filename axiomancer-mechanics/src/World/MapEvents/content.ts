@@ -1569,6 +1569,24 @@ const ncyHarbormasterBoss: MapEventPool = {
     }],
 };
 
+// Phase W4 — the water-gate stands open. The DOOR to connecting-river, one
+// column past the boss (the nc-26/fv-10 pattern: the exit opens only after
+// the climax). ncy-23 stays sealed — it was always scenery, not the exit.
+const ncyWaterGateStandsOpen: MapEventPool = {
+    id: 'ncy-26.travel',
+    entries: [{
+        kind: 'travel', weight: 1,
+        payload: {
+            kind: 'travel',
+            destinationContinent: 'northern-continent',
+            destinationMap: 'connecting-river',
+            description: 'Past the weighing-house, the harbor opens onto open water. A current takes you before you decide to follow it.',
+        },
+        // Out past the last wall, onto open water: the world widens again.
+        alignmentDelta: { outlook: 1, scope: 1 },
+    }],
+};
+
 const NORTHERN_CITY_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> = [
     { nodeId: 'ncy-1',  pool: ncyArrival },
     { nodeId: 'ncy-2',  pool: ncyGateClerk },
@@ -1599,6 +1617,367 @@ const NORTHERN_CITY_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }>
     { nodeId: 'ncy-23', pool: ncySealedRiverGate },
     { nodeId: 'ncy-24', pool: ncyDrownedSlip },
     { nodeId: 'ncy-25', pool: ncyHarbormasterBoss },
+    { nodeId: 'ncy-26', pool: ncyWaterGateStandsOpen },
+];
+
+// ─── The connecting river (Phase W4) ──────────────────────────────────────────
+//
+// Map 3 of the northern continent, behind the water-gate. Wild again after
+// the city: 13 nodes — 3 encounter, 1 rest (camp), 1 gathering, 1 hazard,
+// 1 loot-cache, 1 interaction (The Boatwoman), 1 village (The Landing), 1
+// narration (the river court — the advisor-selection ritual's first half),
+// 1 cutscene (arrival), 1 encounter-boss (the Waterreeve), 1 travel (the
+// door to town-across-river). Wandering encounters carry no pinned slug —
+// `generateEncounter` draws from `EnemiesByMap['connecting-river']` via the
+// cr- prefix; only the Waterreeve is pinned, low (the fv-6/ncy-25
+// precedent), so the climax is winnable on arrival.
+
+const crArrival: MapEventPool = {
+    id: 'cr-1.cutscene',
+    entries: [{
+        kind: 'cutscene', weight: 1,
+        payload: {
+            kind: 'cutscene',
+            lines: [
+                'The current takes the boat before the bank lets go of it.',
+                'The river has its own idea of a road. It does not ask where you meant to go.',
+            ],
+            description: 'Downriver.',
+        },
+        alignmentDelta: { scope: 1 },
+    }],
+};
+
+const crBoatwoman: MapEventPool = {
+    id: 'cr-2.interaction',
+    entries: [{
+        kind: 'interaction', weight: 1,
+        payload: {
+            kind: 'interaction',
+            npcName: 'The Boatwoman',
+            description: 'A flat-bottomed boat rides low against the bank, tied to a post retied more than replaced.',
+        },
+    }],
+};
+
+function crEncounterPool(nodeId: string, description: string): MapEventPool {
+    return {
+        id: `${nodeId}.encounter`,
+        entries: [{
+            kind: 'encounter', weight: 1,
+            payload: { kind: 'encounter', isBoss: false, description },
+        }],
+    };
+}
+
+function crCampPool(nodeId: string, description: string): MapEventPool {
+    return {
+        id: `${nodeId}.rest`,
+        entries: [{
+            kind: 'rest', weight: 1,
+            payload: { kind: 'rest', shelter: 'camp', description },
+        }],
+    };
+}
+
+function crGatherPool(
+    nodeId: string,
+    item: { id: string; name: string; description: string },
+    description: string,
+): MapEventPool {
+    return {
+        id: `${nodeId}.gathering`,
+        entries: [{
+            kind: 'gathering', weight: 1,
+            payload: {
+                kind: 'gathering',
+                items: [{ ...item, category: 'material', quantity: 1 }],
+                description,
+            },
+        }],
+    };
+}
+
+function crHazardPool(nodeId: string, damage: number, description: string): MapEventPool {
+    return {
+        id: `${nodeId}.hazard`,
+        entries: [{
+            kind: 'hazard', weight: 1,
+            payload: { kind: 'hazard', damage, description },
+        }],
+    };
+}
+
+function crLootPool(nodeId: string, currency: number, description: string): MapEventPool {
+    return {
+        id: `${nodeId}.loot-cache`,
+        entries: [{
+            kind: 'loot-cache', weight: 1,
+            payload: { kind: 'loot-cache', currency, description },
+        }],
+    };
+}
+
+// The river court — the advisor-selection ritual's first half. Reads back
+// the S-01 "crowning ceremony" flags (northern-forest) and the ncy-5
+// "advisor rumor" flags (northern-city) for reactive branches — both were
+// planted as connective tissue for exactly this payoff (spec 34 §7's S-01
+// pattern). Grants `join-islanders-for-ritual` on watching it through.
+const crRiverCourt: MapEventPool = {
+    id: 'cr-9.narration',
+    entries: [{
+        kind: 'narration', weight: 1,
+        payload: {
+            kind: 'narration',
+            description: 'The reeds open onto a wide, shallow pool ringed with unlit lantern-poles.',
+            dialogue: {
+                id: 'cr-river-court',
+                rootId: 'overhear',
+                nodes: {
+                    overhear: {
+                        id: 'overhear',
+                        text: 'Islanders sit in a rough circle around a raised plank stage. A boy about your own age stands on it, alone. An old woman in a fish-bone circlet reads him like a ledger line that won\'t balance.',
+                        choices: [
+                            {
+                                text: 'You\'ve stood where he\'s standing. In the forest, under different trees.',
+                                nextNodeId: 'recognized_witnessed',
+                                requires: { flag: 'boy-witnessed-the-crowning' },
+                            },
+                            {
+                                text: 'This is what the carters meant. The provinces send children.',
+                                nextNodeId: 'recognized_rumor',
+                                requires: { flag: 'boy-chased-the-rumor' },
+                            },
+                            {
+                                text: 'Watch.',
+                                nextNodeId: 'watched',
+                                effect: { startQuest: 'join-islanders-for-ritual', setFlag: 'boy-witnessed-the-river-ritual' },
+                            },
+                            {
+                                text: 'Walk on. This isn\'t yours to watch.',
+                                nextNodeId: undefined,
+                                effect: { alignmentDelta: { scope: -1 } },
+                            },
+                        ],
+                    },
+                    recognized_witnessed: {
+                        id: 'recognized_witnessed',
+                        text: 'The old woman weighs him. The northern forest weighed the other boy the same way. You saw him, and didn\'t stay.',
+                        choices: [{
+                            text: 'Watch.',
+                            nextNodeId: 'watched',
+                            effect: { startQuest: 'join-islanders-for-ritual', setFlag: 'boy-witnessed-the-river-ritual' },
+                        }],
+                    },
+                    recognized_rumor: {
+                        id: 'recognized_rumor',
+                        text: 'The carters said children, and one comes back an advisor. This is where the sending starts.',
+                        choices: [{
+                            text: 'Watch.',
+                            nextNodeId: 'watched',
+                            effect: { startQuest: 'join-islanders-for-ritual', setFlag: 'boy-witnessed-the-river-ritual' },
+                        }],
+                    },
+                    watched: {
+                        id: 'watched',
+                        text: 'The old woman ties a fish-bone circlet around the boy\'s wrist. "Carried, not chosen," she says, to the crowd, to the river, to no one. "He goes to the capital in the spring boat. If he comes back, he comes back different. If he doesn\'t, the tally still balances — we send another next year."',
+                    },
+                },
+            },
+        },
+    }],
+};
+
+const crTheLanding: MapEventPool = {
+    id: 'cr-10.village',
+    entries: [{
+        kind: 'village', weight: 1,
+        payload: {
+            kind: 'village',
+            villageName: 'The Landing',
+            merchants: [{ name: 'Islander Trader', isShopkeeper: true }],
+            shop: {
+                wares: [
+                    { itemId: 'minor-healing-potion', price: 11 },
+                    { itemId: 'healing-potion',       price: 28 },
+                    { itemId: 'antidote',             price: 13 },
+                    { itemId: 'body-elixir',          price: 20 },
+                ],
+            },
+            description: 'A trading post on stilts, built to outlast the flood line. The islanders sell what the river won\'t take back.',
+        },
+    }],
+};
+
+const CR_BOSS_LEVEL = 10;
+const crWaterreeveBoss: MapEventPool = {
+    id: 'cr-12.encounter-boss',
+    entries: [{
+        kind: 'encounter', weight: 1,
+        payload: {
+            kind: 'encounter',
+            enemySlug: 'the-waterreeve',
+            isBoss: true,
+            level: CR_BOSS_LEVEL,
+            description: 'The crossing has a keeper, and the keeper has a ledger. Nothing crosses unweighed.',
+        },
+    }],
+};
+
+// The water-gate stands open. The DOOR to town-across-river, one column
+// past the boss (the nc-26/ncy-26 pattern).
+const crWaterGateStandsOpen: MapEventPool = {
+    id: 'cr-13.travel',
+    entries: [{
+        kind: 'travel', weight: 1,
+        payload: {
+            kind: 'travel',
+            destinationContinent: 'northern-continent',
+            destinationMap: 'town-across-river',
+            description: 'Past the reeve\'s post, the river opens onto the far bank. A town waits where the current slows.',
+        },
+        alignmentDelta: { outlook: 1, scope: 1 },
+    }],
+};
+
+const CONNECTING_RIVER_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> = [
+    { nodeId: 'cr-1',  pool: crArrival },
+    { nodeId: 'cr-2',  pool: crBoatwoman },
+    { nodeId: 'cr-3',  pool: crEncounterPool('cr-3', 'Something surfaces just long enough to count you, then doesn\'t.') },
+    { nodeId: 'cr-4',  pool: crCampPool('cr-4', 'A dry spit of gravel above the waterline. Driftwood enough for a fire that won\'t be seen from the water.') },
+    { nodeId: 'cr-5',  pool: crGatherPool('cr-5',
+        { id: 'river-reed', name: 'River Reed', description: 'Green and springy, cut at the waterline. Weavers pay for the good kind.' },
+        'The reeds grow thick where the current slows. You cut what bundles easily.') },
+    { nodeId: 'cr-6',  pool: crHazardPool('cr-6', 3, 'The current takes an opinion about your footing. It wins.') },
+    { nodeId: 'cr-7',  pool: crLootPool('cr-7', 15, 'A capsized skiff, gear still lashed in. Whoever owned it isn\'t diving for it now.') },
+    { nodeId: 'cr-8',  pool: crEncounterPool('cr-8', 'The reeds part wrong, in a shape that isn\'t wind.') },
+    { nodeId: 'cr-9',  pool: crRiverCourt },
+    { nodeId: 'cr-10', pool: crTheLanding },
+    { nodeId: 'cr-11', pool: crEncounterPool('cr-11', 'The bank narrows. Something has been waiting for it to.') },
+    { nodeId: 'cr-12', pool: crWaterreeveBoss },
+    { nodeId: 'cr-13', pool: crWaterGateStandsOpen },
+];
+
+// ─── Town across the river (Phase W4) ─────────────────────────────────────────
+//
+// Map 4 of the northern continent — the coda (`map.library.ts`: "Home of
+// sweetheart"). Deliberately small: 6 nodes — 1 cutscene (arrival), 1
+// interaction (The Sweetheart), 1 rest (inn — a proper town, tended beds),
+// 1 narration (the village court — the ritual's second half), 1 encounter,
+// 1 encounter-boss (the Portreeve). No door onward yet.
+
+const tarArrival: MapEventPool = {
+    id: 'tar-1.cutscene',
+    entries: [{
+        kind: 'cutscene', weight: 1,
+        payload: {
+            kind: 'cutscene',
+            lines: [
+                'The far bank rises into a town smaller than the city, kinder than the caverns.',
+                'Woodsmoke over rooftops. Somewhere in it, a fire that used to be yours.',
+            ],
+            description: 'The town across the river.',
+        },
+        alignmentDelta: { outlook: 1 },
+    }],
+};
+
+const tarSweetheart: MapEventPool = {
+    id: 'tar-2.interaction',
+    entries: [{
+        kind: 'interaction', weight: 1,
+        payload: {
+            kind: 'interaction',
+            npcName: 'The Sweetheart',
+            description: 'She\'s at the well before you\'ve decided how to say her name.',
+        },
+    }],
+};
+
+const tarMillersRest: MapEventPool = {
+    id: 'tar-3.rest',
+    entries: [{
+        kind: 'rest', weight: 1,
+        payload: { kind: 'rest', shelter: 'inn', description: 'The Miller\'s Rest, a room above the flour store. Paid, and warm.' },
+    }],
+};
+
+// The village court — the advisor-selection ritual's second half. Reads
+// back the flag `cr-9` planted (`boy-witnessed-the-river-ritual`) for a
+// continuity callback: the same rite, closer to home.
+const tarVillageCourt: MapEventPool = {
+    id: 'tar-4.narration',
+    entries: [{
+        kind: 'narration', weight: 1,
+        payload: {
+            kind: 'narration',
+            description: 'The green stands full for once. Her mother has combed her hair flat, formal, wrong on her.',
+            dialogue: {
+                id: 'tar-village-court',
+                rootId: 'gathered',
+                nodes: {
+                    gathered: {
+                        id: 'gathered',
+                        text: 'An elder reads a ribbon-color instead of a fish-bone circlet, but the shape is the same rite you watched downriver. She is standing where that boy stood.',
+                        choices: [
+                            {
+                                text: 'You know exactly what this is.',
+                                nextNodeId: 'recognized',
+                                requires: { flag: 'boy-witnessed-the-river-ritual' },
+                            },
+                            {
+                                text: 'Watch.',
+                                nextNodeId: 'watched',
+                                effect: { setFlag: 'sweetheart-was-nominated' },
+                            },
+                            {
+                                text: 'Look away.',
+                                nextNodeId: undefined,
+                                effect: { alignmentDelta: { outlook: -1 } },
+                            },
+                        ],
+                    },
+                    recognized: {
+                        id: 'recognized',
+                        text: 'You know exactly what this is, and exactly how it ends for the one it names.',
+                        choices: [{
+                            text: 'Watch.',
+                            nextNodeId: 'watched',
+                            effect: { setFlag: 'sweetheart-was-nominated' },
+                        }],
+                    },
+                    watched: {
+                        id: 'watched',
+                        text: 'The elder ties the ribbon at her wrist. She finds you in the crowd before she finds her mother. Whatever this costs her, she pays it looking at you.',
+                    },
+                },
+            },
+        },
+    }],
+};
+
+const TAR_BOSS_LEVEL = 12;
+const tarPortreeveBoss: MapEventPool = {
+    id: 'tar-6.encounter-boss',
+    entries: [{
+        kind: 'encounter', weight: 1,
+        payload: {
+            kind: 'encounter',
+            enemySlug: 'the-portreeve',
+            isBoss: true,
+            level: TAR_BOSS_LEVEL,
+            description: 'The town\'s chief officer rules on every dispute it has. Yours is next.',
+        },
+    }],
+};
+
+const TOWN_ACROSS_RIVER_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> = [
+    { nodeId: 'tar-1', pool: tarArrival },
+    { nodeId: 'tar-2', pool: tarSweetheart },
+    { nodeId: 'tar-3', pool: tarMillersRest },
+    { nodeId: 'tar-4', pool: tarVillageCourt },
+    { nodeId: 'tar-5', pool: crEncounterPool('tar-5', 'A dog that isn\'t anyone\'s barks at you like it remembers a different face.') },
+    { nodeId: 'tar-6', pool: tarPortreeveBoss },
 ];
 
 // ─── single registration entry point ─────────────────────────────────────────
@@ -1631,6 +2010,14 @@ export function registerMapEventContent(): void {
     for (const { nodeId, pool } of NORTHERN_CITY_POOLS) {
         registerMapEventPool(pool);
         setNodeEventPoolOverride('northern-continent', 'northern-city', nodeId, pool.id);
+    }
+    for (const { nodeId, pool } of CONNECTING_RIVER_POOLS) {
+        registerMapEventPool(pool);
+        setNodeEventPoolOverride('northern-continent', 'connecting-river', nodeId, pool.id);
+    }
+    for (const { nodeId, pool } of TOWN_ACROSS_RIVER_POOLS) {
+        registerMapEventPool(pool);
+        setNodeEventPoolOverride('northern-continent', 'town-across-river', nodeId, pool.id);
     }
 }
 

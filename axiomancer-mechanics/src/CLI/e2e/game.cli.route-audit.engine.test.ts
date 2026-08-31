@@ -84,7 +84,7 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         expect(eventKinds['nc-26']).toBe('travel');
     });
 
-    it('--route-audit reports all 25 northern-city nodes (Phase W3)', async () => {
+    it('--route-audit reports all 26 northern-city nodes (Phase W4 — the water-gate door)', async () => {
         const logPath = tmpPath('northern-city-coverage');
 
         await runGameCli(['--route-audit', 'northern-city', '--state-log', logPath]);
@@ -93,17 +93,56 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         expect(summary.classification).toBe('coverage-audit');
         expect(summary.survived).toBe(true);
         expect(summary.unvisitedNodeIds).toEqual([]);
-        expect((summary.visitedNodeIds as string[]).length).toBe(25);
-        expect((summary.resolvedNodeIds as string[]).length).toBe(25);
+        // 25 + ncy-26, the Phase W4 door column past the Harbormaster.
+        expect((summary.visitedNodeIds as string[]).length).toBe(26);
+        expect((summary.resolvedNodeIds as string[]).length).toBe(26);
 
         // ncy-1 is the arrival; ncy-2 the Gate-Clerk (the city's first
         // face); ncy-25 the Harbormaster; ncy-23 the sealed river-gate
-        // seam toward W4's connecting-river.
+        // (still scenery); ncy-26 the real door to connecting-river.
         const eventKinds = summary.eventKinds as Record<string, string>;
         expect(eventKinds['ncy-1']).toBe('cutscene');
         expect(eventKinds['ncy-2']).toBe('interaction');
         expect(eventKinds['ncy-25']).toBe('encounter');
         expect(eventKinds['ncy-23']).toBe('cutscene');
+        expect(eventKinds['ncy-26']).toBe('travel');
+    });
+
+    it('--route-audit reports all 13 connecting-river nodes (Phase W4)', async () => {
+        const logPath = tmpPath('connecting-river-coverage');
+
+        await runGameCli(['--route-audit', 'connecting-river', '--state-log', logPath]);
+
+        const summary = routeEnd(logPath);
+        expect(summary.classification).toBe('coverage-audit');
+        expect(summary.survived).toBe(true);
+        expect(summary.unvisitedNodeIds).toEqual([]);
+        expect((summary.visitedNodeIds as string[]).length).toBe(13);
+        expect((summary.resolvedNodeIds as string[]).length).toBe(13);
+
+        const eventKinds = summary.eventKinds as Record<string, string>;
+        expect(eventKinds['cr-1']).toBe('cutscene');
+        expect(eventKinds['cr-2']).toBe('interaction');
+        expect(eventKinds['cr-12']).toBe('encounter');
+        expect(eventKinds['cr-13']).toBe('travel');
+    });
+
+    it('--route-audit reports all 6 town-across-river nodes (Phase W4)', async () => {
+        const logPath = tmpPath('town-across-river-coverage');
+
+        await runGameCli(['--route-audit', 'town-across-river', '--state-log', logPath]);
+
+        const summary = routeEnd(logPath);
+        expect(summary.classification).toBe('coverage-audit');
+        expect(summary.survived).toBe(true);
+        expect(summary.unvisitedNodeIds).toEqual([]);
+        expect((summary.visitedNodeIds as string[]).length).toBe(6);
+        expect((summary.resolvedNodeIds as string[]).length).toBe(6);
+
+        const eventKinds = summary.eventKinds as Record<string, string>;
+        expect(eventKinds['tar-1']).toBe('cutscene');
+        expect(eventKinds['tar-2']).toBe('interaction');
+        expect(eventKinds['tar-6']).toBe('encounter');
     });
 
     it('a scripted route stops at a combat defeat and downgrades to "blocked" — never reports post-defeat traversal as survivorship', async () => {
