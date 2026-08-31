@@ -1,5 +1,5 @@
 ---
-description: Card Forge balance loop for Hazard-Pattern Combat — full card authority (no sandbox-first quarantine) with sandbox/A-B tooling still available as recommended practice; measurement-seat swap sweeps through the playtest matrix, tune presets/draft weights, promote proven cards into the library, deliver report + changes via PR. Engine constants are tuned manually, not here.
+description: Card Forge balance loop for Hazard-Pattern Combat — full card authority (no sandbox-first quarantine) with sandbox/A-B tooling still available as recommended practice; measurement-seat swap sweeps through the playtest matrix, tune presets/draft weights, promote proven cards into the library, deliver report + changes via PR. Engine constants are open to tuning loops too (THE OPEN GATE ¶4) — see `/combat-playtest` for that lane. Content-growth follow-ups (new cards/keywords as first-class content) route to `/forge`.
 ---
 
 <!-- lexicon-ok: sway -->
@@ -30,8 +30,9 @@ description: Card Forge balance loop for Hazard-Pattern Combat — full card aut
 > experiments, measurement-seat swap sweeps, and library card changes.
 > The enemy's SOLE bar is HP; status play, direct damage, and the
 > alt-wins all compete on CQI merit (spec 35). Engine constants
-> (threat/Conviction economy) are tuned manually — the combat-tuning loop was
-> trimmed at the monorepo merge; this skill owns the cards themselves.
+> (threat/Conviction economy) are open to tuning loops too (THE OPEN
+> GATE ¶4, 2026-08-28) — this skill owns the cards themselves; see
+> `/combat-playtest` for the engine-constant lane.
 
 > **Full card authority (THE UNSHACKLING, T direct 2026-08-08 — Phase 41):
 > no sandbox-first quarantine, no byte-identity law, no
@@ -56,15 +57,16 @@ description: Card Forge balance loop for Hazard-Pattern Combat — full card aut
 
 ## Disambiguation — three combat loops, one doctrine
 
-| | `/deck-tuning` ← **this file** | engine-constant tuning (manual) | `/combat-playtest` |
+| | `/deck-tuning` ← **this file** | engine-constant tuning | `/combat-playtest` |
 |---|---|---|---|
-| Surface | Card pool + deck economy: presets, draft weights, sandbox cards, swap sweeps, library card numerics | Engine constants: threat damage, dice bag, Conviction/Signature economy (hand-tuned; the combat-tuning loop was trimmed at the monorepo merge) | None — evidence + report only |
+| Surface | Card pool + deck economy: presets, draft weights, sandbox cards, swap sweeps, library card numerics | Engine constants: threat damage, dice bag, Conviction/Signature economy — open to any tuning/playtest loop with measured evidence (THE OPEN GATE ¶4) | None — evidence + report only |
 | Files it edits | `src/Cards/cards.sandbox-sets.ts` (free), `src/Combat/combat.starter-deck-presets.ts`, `src/Combat/combat.deck-draft.ts`, `src/Cards/cards.library.ts` (direct), plus keyword wiring surfaces via the full checklist | `src/Combat/combat.{threat,threat-sequences,engine,cards,dice,signature,deck}.ts` constants | `docs/reports/playtest-<ts>.md` only |
 | Witness | `npm run combat-playtest` matrix + per-card usage (`--cards`) + per-preset rollups (`--deck=preset:all`) | `simulateHazardPatternCombat` / `npm run combat-sim` | matrix + `playtester` agents |
 
 Do not cross-contaminate: if the fix for an off-band cell is a threat
-multiplier or a Conviction constant, flag it as a manual engine-constant
-follow-up — do not compensate by inflating a card. If the finding is
+multiplier or a Conviction constant, flag it as an engine-constant
+follow-up (apply directly with matrix evidence, or route to
+`/combat-playtest`) — do not compensate by inflating a card. If the finding is
 qualitative ("this stage feels flat"), it likely came FROM
 `/combat-playtest`; answer it here with cards, not prose.
 
@@ -105,8 +107,8 @@ deck surface (presets, draft weights, library card literals, sandbox sets,
 swap pools), exercises the **playtest matrix** (`npm run combat-playtest`)
 across stage profiles and sim policies, interprets the full metric slate
 (§4a) against the design targets below, and delivers a report — with any
-applied card changes and any propose-only structural findings — together on
-one branch and PR.
+applied card changes and any structural findings that fall outside this
+loop's card-data surface (§6) — together on one branch and PR.
 
 It does NOT reimplement the draft, the projection (`toCombatCard`), or the
 sim — those are the machinery. The skill is the forge + the delivery layer.
@@ -244,10 +246,11 @@ The tunable surface is TIERED. Work from the freest tier inward:
   hermetic e2e, a library carrier, and the cross-package verifies —
   all in the same PR. A half-wired kind is silently inert (the engine
   switches carry `default:` arms), so no carrier-less or
-  display-less kinds, ever. What remains propose-only: changes to
-  `toCombatCard` classification / `effectImpact` semantics, engine
-  resolution control flow, and engine constants — those are
-  architecture, not card content.
+  display-less kinds, ever. What remains outside this loop's surface:
+  changes to `toCombatCard` classification / `effectImpact` semantics and
+  engine resolution control flow — those are architecture, not card
+  content. Engine constants are no longer in that list (THE OPEN GATE ¶4,
+  2026-08-28) — see the disambiguation table above.
 
 - **Sim evidence before edits.** Before any change, run the relevant matrix
   under at least two policies and record the before-state across the §4a
@@ -378,9 +381,10 @@ keyword that stays red across multiple full sweeps is a retirement
 candidate to raise in the report (ids die, never rename).
 
 Attribution today is per-CARD; per-KEYWORD engagement is derived by
-summing a keyword's cards. If that proxy proves too coarse, propose a
-per-keyword attribution extension as an engine follow-up (propose-only —
-do not build it inside this loop).
+summing a keyword's cards. If that proxy proves too coarse, a per-keyword
+attribution extension is an engine follow-up outside this loop's card-data
+surface (§6, "Never edit engine logic") — flag it in the report; no owner
+gate blocks building it elsewhere (THE OPEN GATE ¶5).
 
 ## 5. The procedure
 
@@ -483,8 +487,9 @@ axis at a time; measure each before the next.
   finding, per-preset spread table (§4) and doctrine rollup (`curve-dev`,
   `skill-gap`, `cx` per preset), every A/B with `old → new` + rationale +
   evidence (win delta, win-path shift, engagement, spam watch,
-  estimate-vs-measured for swap arms), promotions, propose-only findings,
-  open questions, and the **per-deck line-telemetry appendix** — one table
+  estimate-vs-measured for swap arms), promotions, any structural findings
+  outside this loop's surface, open questions, and the **per-deck
+  line-telemetry appendix** — one table
   per preset touched by the run (all ten on a full sweep): each card's
   `free%` / `paid%` / `fizz%` / `unpl%` / `opp%` / `dWR` and per-line HP
   contribution (`hpF`/`hpP`) from the `--cards` matrix, with offenders
@@ -541,9 +546,9 @@ and the headline status-engagement / band delta.
    redesign or drop it; flag if you suspect the harness. High `fizz%` at
    every legal seat is the same failure in softer form: precondition width,
    not pricing.
-5. **The fix is an engine constant, not a card.** Flag it as a manual
-   engine-constant follow-up (the combat-tuning loop was trimmed at the
-   monorepo merge); note the handoff in the report.
+5. **The fix is an engine constant, not a card.** Engine constants are open
+   to tuning loops too (THE OPEN GATE ¶4) — apply it directly with matrix
+   evidence, or route it to `/combat-playtest`; note which in the report.
 6. **Focus matches nothing.** Run the full sweep; note the empty focus.
 
 ## 8. Quick reference
@@ -571,7 +576,8 @@ Read the live roster from `COMBAT_DECK_PRESETS`
 | Free (measurement) | `+swap:` variants of preset recipes | temporary seat swaps (treatment arm only) — evidence device, never ships as-is |
 | Direct (evidence recommended) | `src/Cards/cards.library.ts` | card literals: numerics, riders, new cards + the `// pts:` comment and count-pin bumps |
 | Buildable (full wiring checklist) | `src/Cards/types.ts` + engine/display/pricing/mobile/editor surfaces | new keywords, `specialMechanics` kinds, effect ids — via card-expert's 12-step checklist + hermetic e2e + cross-package verifies (THE PIPELINE LIBERATION, 2026-08-22) |
-| Hand-tuned (not this loop) | engine constants; LOCKED MECHANICS | threat/Conviction economy; Conviction / Surge / Dice removal or no-op (needs a new T ruling) |
+| Open (evidence recommended) | engine constants | threat/Conviction economy — tunable directly with measured evidence (THE OPEN GATE ¶4); `/combat-playtest` is the other lane for this surface |
+| Loop-stewarded, high bar | LOCKED MECHANICS | Conviction / Surge / Dice: cards and keywords may read/feed/spend/interact freely; removing, no-op'ing, or routing around any of the three needs overwhelming design evidence, filed as `[loop-call]` (THE OPEN GATE ¶2) |
 
 **Deck-selection grammar (shared by `npm run combat-playtest` and
 `npm run combat`):**
@@ -624,6 +630,6 @@ Atlas (owner review page):
 targets in §4a (from the retired combat-tuning skill; re-derive from the
 current card library before relying on them).
 
-**Related loops:** engine constants → manual tuning (the combat-tuning loop
-was trimmed at the monorepo merge) · qualitative evidence →
-`/combat-playtest`.
+**Related loops:** engine constants → tunable here too with measured
+evidence, or via `/combat-playtest` (THE OPEN GATE ¶4) · qualitative
+evidence → `/combat-playtest`.

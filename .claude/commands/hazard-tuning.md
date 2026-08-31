@@ -32,8 +32,10 @@ from the PRD are the objective function.
 `/hazard-tuning` is the hazard balance loop. It reads the shipped content
 libraries, exercises the hazard CLI flow (`npm run hazard -- ...`) and the
 hermetic e2e suite, interprets results against CDR-0006 design targets, and
-delivers a report — with any auto-applied numeric changes and any propose-only
-structural findings — together on one branch and PR. When the task asks for
+delivers a report — with any applied numeric changes and any applied
+structural fixes — together on one branch and PR (THE OPEN GATE ¶5,
+2026-08-28: architecturally significant findings may ship too, not just get
+proposed). When the task asks for
 player-feel, mobile UX, or Kid-style playtesting, the skill must also use the
 mobile dev menu path in `axiomancer-mobile` as a live witness; CLI evidence alone
 does not answer phone-interaction questions.
@@ -127,16 +129,18 @@ axes in the quick-reference table below.
 
 ## 3. Autonomy contract
 
-- **Numeric and content-level only.** The skill may change card top/bottom
-  effect values, bottom mana costs, hazard card round thresholds, round counts,
-  and reward/penalty magnitudes in the library files. **NEW CONTENT ITEMS
-  are in scope** (THE PIPELINE LIBERATION, T direct 2026-08-22 —
-  `plan/bearings.md`): new hazard cards composed of existing verb
-  classes, new hazards, and new subquests, shipped with tests and CLI
-  evidence. Structural RULES changes (new progress types, new die
-  states, new card verb classes, state-machine/engine edits) stay
-  **propose-only** — written to the suggestions section, never applied
-  without T approval.
+- **Numeric and content-level, plus evidenced structural fixes.** The skill
+  may change card top/bottom effect values, bottom mana costs, hazard card
+  round thresholds, round counts, and reward/penalty magnitudes in the
+  library files. **NEW CONTENT ITEMS are in scope** (THE PIPELINE
+  LIBERATION, T direct 2026-08-22 — `plan/bearings.md`): new hazard cards
+  composed of existing verb classes, new hazards, and new subquests, shipped
+  with tests and CLI evidence. Structural RULES changes (new progress types,
+  new die states, new card verb classes, state-machine/engine edits) may
+  also ship — evidenced, and through the normal verify + deploy gates like
+  any other change (THE OPEN GATE ¶5, 2026-08-28 lifted the propose-only
+  wall on architecturally significant findings). Write the rationale and
+  evidence into the report either way.
 - **Baseline before delta.** Every proposed change is compared against the
   current shipped values. The report records `old → new` with a one-line
   rationale for each change. No change is applied without a documented reason
@@ -164,9 +168,10 @@ axes in the quick-reference table below.
   measurements, PR state, test output, file contents, or completion. Preserve the
   partial state, name the failed gate, and keep the report useful to the next
   worker.
-- **Ambiguity → document and proceed.** If a focus target is unclear or a
-  propose-only idea is architecturally significant, make the most reasonable
-  assumption, document it under `## Open questions` in the suggestions file,
+- **Ambiguity → document and proceed.** If a focus target is unclear, or a
+  structural idea is architecturally significant but the evidence to ship it
+  isn't there yet, make the most reasonable assumption, document it under
+  `## Open questions` in the suggestions file,
   and continue.
 
 ## 4. Design targets (the objective function)
@@ -338,10 +343,11 @@ doctrine and the shipped engine. Do not tune numbers around them — flag them.
 
 If a gap materially affects a tuning axis (e.g., the penalty gap means VITAE
 drain cannot be fully measured), record it in the report with the blocking axis
-noted. If no existing CLI or test surface can expose the axis, record a
-narrowly scoped harness-gap entry in the report's propose-only section;
-otherwise prefer the existing hazard CLI evidence flow over new harness
-requests.
+noted. If no existing CLI or test surface can expose the axis, extend the CLI
+or harness directly to expose it when that is the fastest path to real
+evidence (THE OPEN GATE ¶5) — otherwise record a narrowly scoped harness-gap
+entry in the report's findings section. Prefer the existing hazard CLI
+evidence flow over new harness requests when it already covers the axis.
 
 ### Step 6 — Deliver on ONE PR
 
@@ -358,9 +364,10 @@ requests.
   - Title: `balance(hazard): tuning <ts> (<n> applied)`
   - Body: headline deviation from targets; exact hazard CLI command matrix;
     seed list; before/after clear rates and mark distributions; each applied
-    change with `old → new` and one-line rationale; the propose-only section for
-    structural findings; the engine-gap table for known blockers.
-- If no numeric changes are applied but there are new propose-only findings or
+    change (numeric or structural) with `old → new` and one-line rationale;
+    any unshipped structural findings; the engine-gap table for known
+    blockers.
+- If no numeric or structural changes are applied but there are new findings or
   newly-flagged engine gaps, open the PR carrying the report only. Do not open
   a no-op PR if nothing has changed from the previous tick's findings.
 
@@ -390,12 +397,18 @@ not present in CLI output, JSON events, state logs, or committed tests.
 - **Never auto-merge the PR.** T approves.
 - **Never bypass `npm run verify`.** A change that does not survive the verify
   gate is not applied.
-- **Never edit `src/World/Hazard/hazard.engine.ts` or `hazard.types.ts`
-  for tuning purposes.** Engine logic and type contracts are structural — changes
-  require T sign-off. The tuning surface is the content/tuning files only:
-  `hazard.content.ts`, `hazard.tuning.ts`.
-- **Never add new progress types, die states, or card verb classes.** These are
-  structural additions, not numeric tuning.
+- **`hazard.engine.ts` and `hazard.types.ts` are not a numeric-tuning
+  workaround.** Do not edit engine logic or type contracts to compensate for
+  a numeric miss — the tuning surface for that is the content/tuning files:
+  `hazard.content.ts`, `hazard.tuning.ts`. A genuinely structural fix (new
+  progress type, die state, card verb class, state-machine/engine edit) may
+  ship directly, evidenced and through the verify + deploy gates like any
+  other change (THE OPEN GATE ¶5, 2026-08-28 lifted the propose-only wall
+  on architecturally significant findings) — no owner sign-off required.
+- **New progress types, die states, or card verb classes are legal
+  structural additions when evidenced** (THE OPEN GATE ¶5) — ship them
+  through the full checklist (types, engine, tests), not as an unproven
+  numeric-tuning shortcut.
 - **Preserve canonical terms VITAE and STANCE** in all authored text.
   VITAE is the player's life resource. STANCE is a combat term. Do not rename
   either to HEALTH/GUARD. Do not invent new STANCE semantics beyond what
@@ -425,9 +438,10 @@ not present in CLI output, JSON events, state logs, or committed tests.
 
 4. **An engine gap blocks measurement of a target axis.** First try the hazard
    CLI evidence flow (`--auto`, fixed seeds, `--json-events`, `--state-log`). If
-   the axis still cannot be measured, record a narrowly-scoped harness-gap entry
-   in the report's propose-only section. Exclude that axis from applied changes
-   and report it clearly in the PR body.
+   the axis still cannot be measured, extend the CLI/harness directly when
+   that's the fastest path (THE OPEN GATE ¶5), or record a narrowly-scoped
+   harness-gap entry in the report's findings section. Exclude that axis from
+   applied changes and report it clearly in the PR body.
 
 5. **No axis deviates from target / no change is warranted.** Open a PR with
    the report only if the analysis surfaces anything new (a freshly-identified

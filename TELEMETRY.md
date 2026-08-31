@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-17T14:09:58Z | slash-prompt | /march | unknown | user/ci | /march |
-| 2026-07-17T14:10:37Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
 | 2026-07-17T14:11:32Z | subagent | Explore | claude-sonnet-5 | main | Explore enemy archetype + rung telegraph plumbing |
 | 2026-07-17T15:38:17Z | slash-prompt | /march | unknown | user/ci | /march Implement phase 36a |
 | 2026-07-17T15:44:22Z | subagent | mechanics-expert | claude-opus-4-8 | main | Design opinion on alt-win-aware pricing |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-31T14:03:35Z | subagent | Explore | claude-sonnet-5 | main | Map Northern-Continent phase W1-W3 conventions |
 | 2026-08-31T16:24:40Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-08-31T16:24:42Z | skill | digest | unknown | main | - |
+| 2026-08-31T22:55:18Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-08-31T22:58:08Z | subagent | general-purpose | claude-sonnet-5 | main | Lift superseded OPEN GATE wall text |

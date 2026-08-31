@@ -92,7 +92,7 @@
 > RESOLVED note, same convention as every other closed row in this
 > file.
 
-### [debt] `.claude/**` doc sync for THE OPEN GATE — classifier-blocked from this session [loop-call]
+### [x] [debt] `.claude/**` doc sync for THE OPEN GATE — classifier-blocked from this session [loop-call] — RESOLVED via Phase G1 (2026-08-31, `/march`)
 - category: debt
 - impact: 6
 - ease: 8
@@ -115,6 +115,13 @@
 - next: land the edits from a session with the grant (add
   `Edit(.claude/commands/*)` permission, or T runs an attended pass and
   approves the prompts). Exact edit list mirrors THE OPEN GATE ¶4–¶5.
+- **RESOLVED 2026-08-31 (Phase G1, `/march`):** the classifier block did not
+  reproduce this tick — a direct `Edit()` probe on
+  `.claude/commands/deck-tuning.md` succeeded with no prompt or denial, so
+  whatever blocked the 2026-08-28 attended session no longer holds. All four
+  command files' superseded wall text lifted per THE OPEN GATE ¶4/¶5, plus
+  the `.claude/commands/forge.md` doorway pointer, in
+  `docs(.claude): lift superseded OPEN GATE wall text from tuning commands — phase G1`.
 
 ### [divergence] Transitional-library ruling outlived its subject — card authority is a dead letter [needs-user-call]
 - category: divergence

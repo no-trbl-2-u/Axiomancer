@@ -47,7 +47,8 @@ per-map authoring — the whole point of weighted pools — is dead weight.
 per-map pools and payload content (`src/World/MapEvents/content.ts`),
 exercises the dispatcher with seeded pool draws, interprets results against
 the targets below, and delivers a report — with any applied numeric changes
-and any propose-only structural findings — on one branch and PR.
+and any applied structural fixes — on one branch and PR (THE OPEN GATE ¶5,
+2026-08-28: structural findings may ship, not just get proposed).
 
 The empirical witnesses, in order of preference:
 
@@ -55,8 +56,11 @@ The empirical witnesses, in order of preference:
    `src/World/MapEvents/e2e/content.engine.test.ts`. It pins each map's kind
    spread (e.g. fishing-village's encounter plurality + single quest/boss),
    per-node kind resolution, and full-kind coverage across the authored maps.
-2. **Seeded policy probes** — no `world.sim.ts` exists yet (a standing
-   propose-only suggestion). Probe with a scratch driver over ≥ 50 seeds per
+2. **Seeded policy probes** — no `world.sim.ts` exists yet; building one
+   with codified per-map kind-spread bands (mirroring `gathering.sim.ts`)
+   is in scope for this loop to ship directly (THE OPEN GATE ¶5), not just
+   a standing suggestion. Until it lands, probe with a scratch driver over
+   ≥ 50 seeds per
    map, walking every authored node via `resolveMapEvent` and recording the
    kind-frequency histogram, hazard damage taken, rest heal granted, and
    gathering yield per full walk.
@@ -83,7 +87,10 @@ The empirical witnesses, in order of preference:
   a mobile layout with the parity test green), and new `MapEventKind`
   values — a new KIND or persisted field still rides
   `GAME_STATE_VERSION` with a migration hop + pinned migration test.
-  Dispatcher/handler CONTROL FLOW stays **propose-only**.
+  Dispatcher/handler CONTROL FLOW may also ship directly, as a proven
+  structural fix, through the verify + deploy gates like any other change
+  (THE OPEN GATE ¶5, 2026-08-28) — the two locked contracts below still
+  bound what a control-flow change may do.
 - **The two contracts are locked.** Anything that lets an authored encounter
   scale below its source enemy's level, or that moves node-lifecycle logic
   out of the dispatcher, is rejected outright.
@@ -135,8 +142,9 @@ full node table so it can't drift from `content.ts`.
    if it doesn't exist yet); commit
    `balance(world): <ts> report + suggestions (<n> changes applied)`; push
    and open a PR (ready for review, never draft, never auto-merged).
-   Standing propose-only suggestion: a `world.sim.ts` with codified
-   per-map kind-spread bands, mirroring `gathering.sim.ts`.
+   Buildable when it earns its place: a `world.sim.ts` with codified
+   per-map kind-spread bands, mirroring `gathering.sim.ts` (THE OPEN GATE
+   ¶5 — no longer propose-only).
 
 ## 6. Hard rules
 

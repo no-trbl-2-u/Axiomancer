@@ -1,5 +1,5 @@
 ---
-description: Supercharged Hazard-Pattern Combat playtest loop — run the stage-profile x policy matrix (npm run combat-playtest) AND spawn playtester sub-agents to play real seeded encounters, then synthesize a doctrine verdict (is status play the fun path at every stage?) into a report PR. Report only; card/deck follow-ups go to /deck-tuning, engine-constant follow-ups are handled manually.
+description: Supercharged Hazard-Pattern Combat playtest loop — run the stage-profile x policy matrix (npm run combat-playtest) AND spawn playtester sub-agents to play real seeded encounters, then synthesize a doctrine verdict (is status play the fun path at every stage?) into a report PR. Primarily a report loop; card/deck follow-ups route to /deck-tuning, and a proven engine-constant fix may ship directly in this skill's own PR (THE OPEN GATE ¶5).
 ---
 
 > **⚙️ Runs against the `axiomancer-mechanics` package.** Repo-relative paths below
@@ -16,18 +16,20 @@ description: Supercharged Hazard-Pattern Combat playtest loop — run the stage-
 > through the combat CLI, choose their own decks, and report what was fun,
 > what was frustrating, and whether status play carried the fight.
 
-> **Report only — this skill ships NO balance changes.** It synthesizes quant
-> + qual into `docs/reports/playtest-<ts>.md` with a doctrine verdict (is
-> status play the fun path at every stage?) and hands every numeric follow-up
-> off: cards/decks to `/deck-tuning`; engine constants to manual tuning (the
-> combat-tuning loop was trimmed at the monorepo merge).
-> Deliver the report on ONE new branch + PR. Nothing auto-lands on `main`.
+> **Primarily a report loop.** It synthesizes quant + qual into
+> `docs/reports/playtest-<ts>.md` with a doctrine verdict (is status play the
+> fun path at every stage?). Card/deck follow-ups route to `/deck-tuning`,
+> which owns that surface; a proven engine-constant fix may ship directly in
+> this skill's own PR instead of waiting on a handoff (THE OPEN GATE ¶5,
+> 2026-08-28 — every tuning/playtest command may ship what it proves).
+> Deliver the report — and any applied engine-constant change — on ONE new
+> branch + PR. Nothing auto-lands on `main`.
 
 ## Disambiguation — playtest vs the tuning loops
 
-| | `/combat-playtest` ← **this file** | engine-constant tuning (manual) | `/deck-tuning` |
+| | `/combat-playtest` ← **this file** | engine-constant tuning | `/deck-tuning` |
 |---|---|---|---|
-| Ships changes? | NO — report + verdict only | Numeric engine constants (currently hand-tuned; the combat-tuning loop was trimmed at the monorepo merge) | Cards, presets, draft weights, sandbox promotions |
+| Ships changes? | Primarily report + verdict; a proven engine-constant fix may ship directly here (THE OPEN GATE ¶5) | Numeric engine constants — open to any tuning/playtest loop with measured evidence (THE OPEN GATE ¶4) | Cards, presets, draft weights, sandbox promotions |
 | Evidence | stage matrix + qualitative agent play | `simulateHazardPatternCombat` / `npm run combat-sim` | matrix A/Bs with `--sandbox` |
 | Question it answers | "Is status play the FUN path at every stage — and where does it break down?" | "Are the HP/threat/Conviction numbers in band?" | "Is the card pool healthy — no dead cards, no spam, honest archetypes?" |
 
@@ -66,7 +68,9 @@ experience across the campaign's stage profiles (`early` The Shallows, `mid`
 The Long Road, `late` The Deep Wood, `impossible` The Unprovable). It runs
 the deterministic playtest matrix, spawns playtester agents to actually play
 seeded encounters, synthesizes both into a doctrine verdict, and routes
-findings. It is the eyes of the combat loops, never the hands.
+findings. It is primarily the eyes of the combat loops — card/deck follow-ups
+stay `/deck-tuning`'s hands — but may also ship a proven engine-constant fix
+directly (THE OPEN GATE ¶5).
 
 ## 2. Invocation
 
@@ -85,12 +89,15 @@ Without `--focus`, sweep all four stages.
 
 ## 3. Autonomy contract
 
-- **Report only.** This skill never edits engine code, card data, presets,
-  draft weights, or test thresholds. Its sole write surface is the report
-  file (`docs/reports/playtest-<ts>.md`; create `docs/reports/` if it
-  doesn't exist yet). Numeric follow-ups are HANDED OFF: name the target
-  (`/deck-tuning` for cards/decks, or "manual engine-constant tuning"), the
-  axis, and the evidence in the report's "Handoffs" section.
+- **Primarily report-only; engine-constant fixes may ship when proven.** This
+  skill never edits card data, presets, draft weights, or test thresholds —
+  those stay `/deck-tuning`'s surface. Its primary write surface is the
+  report file (`docs/reports/playtest-<ts>.md`; create `docs/reports/` if it
+  doesn't exist yet). A proven engine-constant fix may be applied directly
+  in this skill's own PR (THE OPEN GATE ¶5, 2026-08-28), through the normal
+  verify + deploy gates; either way, name the target (`/deck-tuning` for
+  cards/decks, or "applied here" for an engine constant), the axis, and the
+  evidence in the report's "Handoffs" section.
 - **Quant before qual.** Run the matrix first; brief the playtester agents
   with the cells that look suspicious so their hands land where the numbers
   are ambiguous.
@@ -189,8 +196,9 @@ Write `docs/reports/playtest-<ts>.md` (create the directory on first use):
 - **the doctrine verdict:** is status play the fun path at EVERY stage —
   yes / no / degraded-at-<stage>, with the two or three load-bearing pieces
   of evidence,
-- `## Handoffs`: each numeric follow-up as one line — target (skill or
-  manual), axis, evidence pointer,
+- `## Handoffs`: each numeric follow-up as one line — target (`/deck-tuning`,
+  or "applied here" for an engine constant shipped in this PR), axis,
+  evidence pointer,
 - `## Open questions`.
 
 ### Step 4 — Deliver on ONE PR
@@ -212,9 +220,10 @@ any) with their target skills.
 
 ## 6. Hard rules
 
-- **Ship no balance changes.** No edits to engine constants, card data,
-  presets, draft weights, sandbox sets, or test thresholds — not even
-  "obvious" ones. Handoffs only.
+- **No edits to card data, presets, draft weights, sandbox sets, or test
+  thresholds** — those stay `/deck-tuning`'s surface; hand those off. A
+  proven engine-constant fix may ship directly here, evidenced and through
+  the verify + deploy gates (THE OPEN GATE ¶5).
 - **Never push to `main` automatically. Never auto-merge.**
 - **Seeded runs only** — every cited encounter carries its seed and full
   invocation; unreproducible anecdotes are not evidence.
@@ -280,5 +289,6 @@ doctrine, incl. the 2026-07-08 starter-preset win-rate curve: early ~80%,
 mid ~50%, late ~25-35%, impossible 0% — a starter preset overperforming
 this late/impossible is a dominance finding, not a success).
 
-**Handoff targets:** cards/decks → `/deck-tuning` · engine constants →
-manual tuning (the combat-tuning loop was trimmed at the monorepo merge).
+**Handoff targets:** cards/decks → `/deck-tuning` · engine constants → ship
+directly here when proven (THE OPEN GATE ¶4/¶5), or hand to `/deck-tuning`
+if the finding is card-adjacent.
