@@ -218,7 +218,10 @@ const GLYPH_SHAPES = {
   BACKFIRE: SHAPE_RETURN_ARROW,
   QUARTER: SHAPE_SPEECH,
   STUN: SHAPE_BURST, RUPTURE: SHAPE_BURST, THORNS: SHAPE_BURST,
-  GUARD: SHAPE_SHIELD, BARRIER: SHAPE_SHIELD,
+  // BARRIER dropped 2026-08-31: retired into GUARD by the Phase 29
+  // keyword-registry pass; mobile's glyphShapes.ts removed its key in phase
+  // V6 and the verify-drift gate holds the two tables to the same key set.
+  GUARD: SHAPE_SHIELD,
   HEAL: SHAPE_HEART, REGEN: SHAPE_HEART,
   DRAW: SHAPE_CARD,
   TICK: SHAPE_HOURGLASS, DURATION: SHAPE_HOURGLASS, PROLONG: SHAPE_HOURGLASS,
