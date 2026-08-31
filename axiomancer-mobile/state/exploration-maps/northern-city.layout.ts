@@ -1,9 +1,10 @@
 import type { MapLayout } from './types';
 
 /**
- * The northern city (northern continent) — Phase W3.
+ * The northern city (northern continent) — Phase W3, plus the Phase W4
+ * water-gate door (ncy-26).
  * Positions only; kind + edges come from the engine (`@mechanics`).
- * Ten engine columns run bottom → top; lanes map y=+1/0/-1/-2 to
+ * Eleven engine columns run bottom → top; lanes map y=+1/0/-1/-2 to
  * x=90/180/270/330 on the 360×400 viewBox: the WALL (x=90), the HIGH
  * STREET (x=180, the spine), the HARBOR (x=270), and the drowned slip
  * hanging off at x=330.
@@ -50,5 +51,7 @@ export const northernCityLayout: MapLayout = {
         { id: 'ncy-23', x: 270, y: 71,  label: 'The River-Gate', description: 'Chained below the waterline. Boats queue and wait.' },
         // ── c9 — the Harbormaster ──
         { id: 'ncy-25', x: 180, y: 33,  label: 'The Weighing House', description: 'Nothing leaves by water unweighed. He is waiting.' },
+        // ── c10 — the water-gate stands open (Phase W4) ──
+        { id: 'ncy-26', x: 180, y: 5,   label: 'The Water-Gate', description: 'Past the weighing-house, the harbor opens onto open water.' },
     ],
 };

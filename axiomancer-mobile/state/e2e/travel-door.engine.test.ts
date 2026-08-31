@@ -101,4 +101,32 @@ describe('inter-map travel doors (Phase W1)', () => {
         expect(after.notifications?.toast?.text).toBe('You cross into The Northern City.');
         expect(selectPacedEventRoute(after)).toBeNull();
     });
+
+    it('ncy-26 crosses the water-gate into connecting-river (Phase W4)', () => {
+        const { store, actions } = makeStoreAndActions();
+        seatAt(store, 'northern-continent', 'northern-city', 'ncy-26');
+
+        expect(actions.resolveCurrentMapEvent('travel')).toBe(true);
+
+        const after = store.getState();
+        expect(after.world.currentMap.name).toBe('connecting-river');
+        expect(after.world.currentContinent.name).toBe('northern-continent');
+        expect(after.world.currentMap.currentNode).toBe('cr-1');
+        expect(after.notifications?.toast?.text).toBe('You cross into The Connecting River.');
+        expect(selectPacedEventRoute(after)).toBeNull();
+    });
+
+    it('cr-13 crosses the river into town-across-river (Phase W4)', () => {
+        const { store, actions } = makeStoreAndActions();
+        seatAt(store, 'northern-continent', 'connecting-river', 'cr-13');
+
+        expect(actions.resolveCurrentMapEvent('travel')).toBe(true);
+
+        const after = store.getState();
+        expect(after.world.currentMap.name).toBe('town-across-river');
+        expect(after.world.currentContinent.name).toBe('northern-continent');
+        expect(after.world.currentMap.currentNode).toBe('tar-1');
+        expect(after.notifications?.toast?.text).toBe('You cross into The Sweetheart\'s Village.');
+        expect(selectPacedEventRoute(after)).toBeNull();
+    });
 });

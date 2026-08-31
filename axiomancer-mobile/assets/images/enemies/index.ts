@@ -83,6 +83,17 @@ const ENEMY_ART_BY_KEY: Record<string, number> = {
     'the-factor':        require('./the-factor.webp'),
     'wharf-shrike':      require('./wharf-shrike.webp'),
     'the-harbormaster':  require('./the-harbormaster.webp'),
+    // Northern continent — Phase W4 batch (2026-08-31). Licensed
+    // game-icons.net silhouettes (CC BY 3.0 — lorc / delapouite /
+    // darkzaitzev), white glyph on transparent, rasterized 512px WebP;
+    // see provenance.json.
+    'reed-ambusher':     require('./reed-ambusher.webp'),
+    'toll-skiff':        require('./toll-skiff.webp'),
+    'weir-widow':        require('./weir-widow.webp'),
+    'the-waterreeve':    require('./the-waterreeve.webp'),
+    'dowry-collector':   require('./dowry-collector.webp'),
+    'the-kept-suitor':   require('./the-kept-suitor.webp'),
+    'the-portreeve':     require('./the-portreeve.webp'),
 };
 
 const ENEMY_ART_POOL: number[] = Object.values(ENEMY_ART_BY_KEY);
