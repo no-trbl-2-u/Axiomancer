@@ -90,7 +90,7 @@ describe('PlaceholderIllustration: accessibility labels', () => {
 });
 
 describe('PlaceholderIllustration: encounter / boss slugs render only the background', () => {
-    it('renders only the background grid for the encounter slug (real art ships via EncounterIllustration)', () => {
+    it('renders only the background grid for the encounter slug (real art ships via EnemyIllustration)', () => {
         // The dispatcher in EventArt routes encounter/boss away from
         // this placeholder. If a slug ever falls through here for an
         // illustration that has its own component, we want to know

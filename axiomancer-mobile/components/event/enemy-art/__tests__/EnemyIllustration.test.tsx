@@ -3,13 +3,13 @@
  * dispatcher rendered on every combat encounter).
  *
  * EnemyIllustration is pure wiring: it resolves an enemy id to a drawing
- * archetype (`resolveEnemyArchetype`) and routes to the right scene —
- * the generic `EncounterIllustration` for unmatched foes, a `CreatureScene`
- * carrying a per-archetype accessibility label + shadow for each bespoke
- * archetype, and a boss-gated branch for `tyrant` (crowned CreatureScene
- * when `isBoss`, the throne `BossIllustration` otherwise). The sibling
- * scenes and the resolver presenter carry their own tests; this pins the
- * dispatcher that wires them together.
+ * archetype (`resolveEnemyArchetype`) and routes every archetype — including
+ * `generic` and non-boss `tyrant` — through the same `CreatureScene` +
+ * archetype-figure set `EnemyPortrait` uses for the in-combat HUD avatar
+ * (Phase V8; the pre-archetype `EncounterIllustration`/`BossIllustration`
+ * placeholder scenes are retired). The sibling scenes and the resolver
+ * presenter carry their own tests; this pins the dispatcher that wires
+ * them together.
  *
  * Labels and resolver truth are read at test time so the suite survives
  * roster / copy churn rather than hard-coding archetype-keyword pairs.
@@ -26,9 +26,7 @@ import {
 } from '@/state/presenters/enemy-art';
 
 const GENERIC_LABEL =
-    'Combat encounter illustration showing a horned creature crouched in a moonlit clearing among twisted trees';
-const BOSS_LABEL =
-    'Boss encounter illustration showing a crowned figure with glowing eyes and ornate robes on a throne';
+    'Combat encounter illustration showing a horned creature in a moonlit clearing';
 
 /** A representative enemy id per bespoke (non-generic, non-tyrant) archetype. */
 const BESPOKE_SAMPLES: ReadonlyArray<readonly [string, EnemyArchetype]> = [
@@ -84,22 +82,25 @@ describe('EnemyIllustration', () => {
         expect(new Set(labels).size).toBe(labels.length);
     });
 
-    it('routes a tyrant boss to the crowned CreatureScene (not the throne scene)', () => {
+    it('routes a tyrant boss to the crowned CreatureScene', () => {
         const key = 'king-of-revenge';
         expect(resolveEnemyArchetype(key, true)).toBe('tyrant');
         const tree = render(<EnemyIllustration enemyArtKey={key} isBoss />);
         const scene = tree.getByLabelText(/Combat encounter illustration showing /);
         expect(scene).toBeTruthy();
         expect(scene.props.accessibilityRole).toBe('image');
-        // The crowned CreatureScene, not the throne BossIllustration.
-        expect(tree.queryByLabelText(BOSS_LABEL)).toBeNull();
     });
 
-    it('routes a tyrant non-boss to the throne BossIllustration', () => {
+    it('routes a tyrant non-boss to the same crowned CreatureScene as a boss', () => {
         const key = 'king-of-revenge';
         expect(resolveEnemyArchetype(key, false)).toBe('tyrant');
-        const tree = render(<EnemyIllustration enemyArtKey={key} isBoss={false} />);
-        expect(tree.getByLabelText(BOSS_LABEL)).toBeTruthy();
+        const bossTree = render(<EnemyIllustration enemyArtKey={key} isBoss />);
+        const nonBossTree = render(<EnemyIllustration enemyArtKey={key} isBoss={false} />);
+        const bossLabel = bossTree.getByLabelText(/Combat encounter illustration showing /)
+            .props.accessibilityLabel;
+        const nonBossLabel = nonBossTree.getByLabelText(/Combat encounter illustration showing /)
+            .props.accessibilityLabel;
+        expect(nonBossLabel).toBe(bossLabel);
     });
 
     it('defaults a keyless boss to the crowned tyrant CreatureScene', () => {
@@ -108,6 +109,5 @@ describe('EnemyIllustration', () => {
         const scene = tree.getByLabelText(/Combat encounter illustration showing /);
         expect(scene).toBeTruthy();
         expect(scene.props.accessibilityRole).toBe('image');
-        expect(tree.queryByLabelText(BOSS_LABEL)).toBeNull();
     });
 });

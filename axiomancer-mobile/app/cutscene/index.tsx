@@ -119,7 +119,7 @@ const useStyles = makeStyles((AXM) => ({
         fontFamily: FONTS.mono,
         fontSize: 9,
         letterSpacing: 2,
-        color: AXM.ash,
+        color: AXM.bone,
         textAlign: 'center',
         marginTop: 16,
     },

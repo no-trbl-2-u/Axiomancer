@@ -1,16 +1,17 @@
 /**
- * EnemyIllustration (visual-audit 2026-06) — resolves an enemy id to a
- * bespoke archetype illustration drawn in the shared CreatureScene. Falls
- * back to the generic moonlit creature (or the boss throne) when an enemy
- * doesn't match any archetype, so coverage is total even before every
- * foe has hand-tuned art.
+ * EnemyIllustration (visual-audit 2026-06; re-platformed on the archetype
+ * figure set — Phase V8) — resolves an enemy id to a bespoke archetype
+ * illustration drawn in the shared CreatureScene. Every archetype (including
+ * `generic` and non-boss `tyrant`) now renders through the same figure set
+ * `EnemyPortrait` uses for the in-combat HUD avatar, so the prelude/gallery
+ * scene and the fight HUD always agree on what a foe looks like — the
+ * pre-archetype placeholder scenes (`EncounterIllustration`/
+ * `BossIllustration`) are retired.
  */
 
 import React from 'react';
 
 import { resolveEnemyArchetype, type EnemyArchetype } from '@/state/presenters/enemy-art';
-import { EncounterIllustration } from '../EncounterIllustration';
-import { BossIllustration } from '../BossIllustration';
 import { CreatureScene } from './CreatureScene';
 import {
     AvianFigure,
@@ -18,6 +19,7 @@ import {
     CrustaceanFigure,
     EldritchFigure,
     FloraFigure,
+    GenericFigure,
     SpiritFigure,
     TyrantFigure,
     VerminFigure,
@@ -43,36 +45,39 @@ const LABELS: Record<EnemyArchetype, string> = {
     generic: 'a horned creature in a moonlit clearing',
 };
 
+const SHADOW_WIDTHS: Record<EnemyArchetype, number> = {
+    vermin: 54,
+    crustacean: 62,
+    spirit: 40,
+    beast: 58,
+    avian: 34,
+    flora: 40,
+    zealot: 44,
+    eldritch: 30,
+    tyrant: 58,
+    generic: 64,
+};
+
+const FIGURES: Record<EnemyArchetype, React.ComponentType> = {
+    vermin: VerminFigure,
+    crustacean: CrustaceanFigure,
+    spirit: SpiritFigure,
+    beast: BeastFigure,
+    avian: AvianFigure,
+    flora: FloraFigure,
+    zealot: ZealotFigure,
+    eldritch: EldritchFigure,
+    tyrant: TyrantFigure,
+    generic: GenericFigure,
+};
+
 export function EnemyIllustration({ enemyArtKey, isBoss = false }: EnemyIllustrationProps) {
     const archetype = resolveEnemyArchetype(enemyArtKey, isBoss);
-
-    // Generic fall-throughs keep the original scenes (and their tests).
-    if (archetype === 'generic') return <EncounterIllustration />;
-
+    const Figure = FIGURES[archetype];
     const label = `Combat encounter illustration showing ${LABELS[archetype]}`;
-
-    switch (archetype) {
-        case 'vermin':
-            return <CreatureScene label={label} shadowWidth={54}><VerminFigure /></CreatureScene>;
-        case 'crustacean':
-            return <CreatureScene label={label} shadowWidth={62}><CrustaceanFigure /></CreatureScene>;
-        case 'spirit':
-            return <CreatureScene label={label} shadowWidth={40}><SpiritFigure /></CreatureScene>;
-        case 'beast':
-            return <CreatureScene label={label} shadowWidth={58}><BeastFigure /></CreatureScene>;
-        case 'avian':
-            return <CreatureScene label={label} shadowWidth={34}><AvianFigure /></CreatureScene>;
-        case 'flora':
-            return <CreatureScene label={label} shadowWidth={40}><FloraFigure /></CreatureScene>;
-        case 'zealot':
-            return <CreatureScene label={label} shadowWidth={44}><ZealotFigure /></CreatureScene>;
-        case 'eldritch':
-            return <CreatureScene label={label} shadowWidth={30}><EldritchFigure /></CreatureScene>;
-        case 'tyrant':
-            // A named/crowned boss without bespoke art still gets the throne
-            // illustration; the crowned-figure scene reads as a boss beat.
-            return isBoss
-                ? <CreatureScene label={label} shadowWidth={58}><TyrantFigure /></CreatureScene>
-                : <BossIllustration />;
-    }
+    return (
+        <CreatureScene label={label} shadowWidth={SHADOW_WIDTHS[archetype]}>
+            <Figure />
+        </CreatureScene>
+    );
 }

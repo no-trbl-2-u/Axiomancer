@@ -13,9 +13,16 @@ For initial development and contributing to game logic, start with [README.md](.
 
 ---
 
-Every SVG in this codebase is a coded placeholder. This document maps each
-placeholder to the real asset that should replace it, specifies its exact
-dimensions/contract, and explains how to do the swap.
+Originally, every SVG in this codebase was a coded placeholder; this document
+mapped each one to the real asset that should replace it. As of Phase V8
+(closure of the Woodcut Codex visual redesign, 2026-08-31) most rows are
+resolved — either swapped for acquired art/registry icons, or torn down as
+dead code. See the **Asset checklist** at the bottom for the current,
+reconciled state of every row; the numbered sections above it are kept for
+swap-procedure history and still apply verbatim to the few genuinely
+outstanding rows (`GlyphMind`, map node markers, XP chain, labyrinth
+backdrops). `docs/VISUAL_LANGUAGE.md` documents the finished system this
+spec was building toward.
 
 ---
 
@@ -68,6 +75,10 @@ export function GlyphHeart({ size = 40, color = AXM.parchment }: GlyphProps) {
 
 ---
 
+**Note (Phase V8, 2026-08-31):** the `heart`/`body` rows are RESOLVED (real
+acquired SVGs, see checklist). `mind` is the one genuinely outstanding row in
+this section — the procedure above still applies to it.
+
 ## 2 · Effect Glyphs
 
 **File:** `components/EffectGlyph.tsx`
@@ -86,6 +97,10 @@ export function GlyphHeart({ size = 40, color = AXM.parchment }: GlyphProps) {
 
 All glyphs must work as **monochrome silhouettes** — they receive a `color`
 prop and should render in that single color.
+
+**Note (Phase V8, 2026-08-31):** RESOLVED — see checklist. All 8 kinds now
+route through the `AxmIcon` registry (Phase V1); the "current placeholder"
+column above describes retired procedural shapes, kept for history.
 
 ---
 
@@ -109,6 +124,10 @@ prop and should render in that single color.
 
 Same monochrome contract as Effect Glyphs.
 
+**Note (Phase V8, 2026-08-31):** RESOLVED — see checklist. All 9 kinds now
+route through the `AxmIcon` registry (Phase V1); the "current placeholder"
+column above describes retired procedural shapes, kept for history.
+
 ---
 
 ## 4 · Map Node Markers
@@ -124,6 +143,9 @@ Same monochrome contract as Effect Glyphs.
 | `available`  | Hollow circle with fill | 28–36 px |
 
 These are small, must read clearly at 28 px. Keep them simple silhouettes.
+
+**Note (Phase V8, 2026-08-31):** genuinely outstanding — `NodeMark.tsx` is
+still the procedural `<Svg>` described above; not on the icon registry.
 
 ---
 
@@ -147,7 +169,10 @@ Provide at least 3–4 splatter PNGs with transparent backgrounds. Vary by
 
 ## 6 · Enemy Illustration — Carrion Hierophant
 
-**File:** `app/(tabs)/combat.tsx` — inline `<Svg>` inside `CombatScreen`
+**CLOSED (Phase V8, 2026-08-31):** `app/(tabs)/combat.tsx` no longer exists.
+The section below is kept for history only — do not act on it.
+
+**File (historical):** `app/(tabs)/combat.tsx` — inline `<Svg>` inside `CombatScreen`
 **Current:** Hooded silhouette with glowing red eyes
 **Target:** High-contrast woodcut/ink illustration of the Carrion Hierophant
 **Dimensions:** 180 × 200 px rendered on screen (actual asset: 360 × 400 or 2×)
@@ -167,7 +192,11 @@ Swap code:
 
 ## 7 · Event Screen Illustrations
 
-**File:** `app/(tabs)/event.tsx`
+**CLOSED (Phase V8, 2026-08-31):** `EncounterIllustration`/`BossIllustration`
+were deleted (dead code — see checklist). `EnemyIllustration` now covers
+this ground through the archetype figure set. Section kept for history only.
+
+**File (historical):** `app/(tabs)/event.tsx`
 
 ### 7a · Encounter Illustration (`EncounterIllustration`)
 **Current:** Procedural SVG — hanged trees, insectoid creature on cairn, slit moon
@@ -191,7 +220,10 @@ Swap code:
 
 ## 8 · Character Body Diagram
 
-**File:** `components/BodyDiagram.tsx`
+**CLOSED (Phase V8, 2026-08-31):** `BodyDiagram.tsx` was deleted — zero live
+call sites (see checklist). Section kept for history only.
+
+**File (historical):** `components/BodyDiagram.tsx`
 **Usage:** Character sheet — equipment slot map.
 **Current:** Simple stick-figure SVG outline with yellow dots for slots.
 **Target:** Hand-drawn ink figure outline with slot circles.
@@ -227,6 +259,9 @@ custom hand-drawn chain image if desired.
 **File:** `app/(tabs)/_layout.tsx` — `TabIcon` component
 **Current:** Inline SVGs (eye, sword, crown, bag, scroll).
 **Target:** Woodcut icon set matching the game aesthetic.
+
+**Note (Phase V8, 2026-08-31):** RESOLVED — see checklist. `TabIcon` reads
+`AxmIcon` directly now; the inline-SVG procedure below is historical.
 **Size contract:** `size` prop (default ~24 px from React Navigation), active
 color = `AXM.sulfur`, inactive = `AXM.bone`.
 
@@ -260,31 +295,60 @@ the `color` prop without needing separate colored variants.
 
 - [x] `GlyphHeart` — woodcut heart
 - [x] `GlyphBody` — woodcut fist
-- [ ] `GlyphMind` — woodcut skull
-- [ ] Effect glyph set (8 icons)
-- [ ] Action icon set (9 icons)
-- [ ] Map node markers (4 states)
+- [ ] `GlyphMind` — woodcut skull — still the hand-coded procedural `<Svg>` in
+      `components/StanceGlyph.tsx`; genuinely outstanding (no `mind` entry in
+      the icon registry to fall back to). Real gap, left for a future tick —
+      not acquired in V8 (closure, not an acquisition phase).
+- [x] Effect glyph set (8 icons) — RESOLVED (Phase V1): `EffectGlyph` is a
+      thin adapter (`components/EffectGlyph.tsx`) over `AxmIcon`; all 8 kinds
+      (`effect-poison/bleed/stun/regen/burn/buff/debuff/shield`) are
+      registered curated game-icons.net marks in
+      `components/icons/icon-registry.ts`. Checklist was stale — this row
+      was never ticked after V1 shipped it.
+- [x] Action icon set (9 icons) — RESOLVED (Phase V1): `ActionIcon` is a thin
+      adapter (`components/ActionIcon.tsx`) over `AxmIcon`; all 9 kinds
+      (`action-sword/shield/arcane/bag/flee/eye/crown/chest/scroll`, plus
+      `flame` delegating to `effect-burn`) are registered. Same stale-row
+      correction as above.
+- [ ] Map node markers (4 states) — still hand-coded procedural `<Svg>` in
+      `components/NodeMark.tsx` (completed/locked/current/available); not on
+      the icon registry. Real gap, left for a future tick.
 - [x] Ink splatter PNGs (3–4 variants) — RESOLVED 2026-08-30 (Phase V7): four
       acquired plates (`assets/images/splatter/`, public domain — Rorschach
       test plates), `<Splatter>` now renders one via `tintColor` instead of
       procedural circles.
-- [ ] Enemy: Carrion Hierophant (180×200) — this row predates the archetype
-      system (`components/event/enemy-art/`); the live combat surface uses
-      acquired portraits (`assets/images/enemies/`, `assets/images/portraits/`)
-      instead. See Phase V7 brief for the orphan-code finding on this whole
-      section.
-- [ ] Event: Encounter illustration (full-width × 320) — DEFERRED, Phase V7:
-      unreachable in production (see brief's "What's actually live" — the
-      `/event` route this renders under is a defensive fallback shell, per
-      its own header comment, not a route the game routes to). Acquiring
-      bespoke art for it now would be wasted effort ahead of a real
-      keep-or-delete call; flagged for V8.
-- [ ] Event: Boss illustration (full-width × 360) — DEFERRED, same finding as
-      the row above.
-- [ ] Character body diagram (88×220) — DEFERRED, Phase V7: `BodyDiagram` has
-      zero call sites in the live tree (confirmed by grep; an orphan
-      since at least the V1 ground-truth survey). Flagged for V8.
-- [ ] Tab bar icon set (5 icons)
+- [x] Enemy: Carrion Hierophant (180×200) — RESOLVED 2026-08-31 (Phase V8,
+      no-op): `app/(tabs)/combat.tsx` (the file this row named) no longer
+      exists. The live combat surface has used acquired portraits
+      (`assets/images/enemies/`, `assets/images/portraits/`) since the
+      archetype system (`components/event/enemy-art/`) landed; row closed,
+      nothing to swap.
+- [x] Event: Encounter illustration (full-width × 320) — DELETED 2026-08-31
+      (Phase V8): `components/event/EncounterIllustration.tsx` was reachable
+      only through `app/event/index.tsx` (a defensive fallback shell nothing
+      routes to in production) and, via `EnemyIllustration`'s `generic`-
+      archetype fallback, the dev-only `/devart` gallery. `EnemyIllustration`
+      now renders `generic` through the same `CreatureScene` + `GenericFigure`
+      the live in-combat `EnemyPortrait` HUD avatar already used — one figure
+      set for both surfaces instead of two. The pre-archetype placeholder
+      scene and its test are torn down.
+- [x] Event: Boss illustration (full-width × 360) — DELETED 2026-08-31 (Phase
+      V8): `components/event/BossIllustration.tsx` was `EnemyIllustration`'s
+      throne fallback for a `tyrant`-archetype foe with `isBoss={false}` —
+      reachable only via the same two dead/dev-only paths as the row above,
+      and inconsistent with `EnemyPortrait`, which already rendered
+      `TyrantFigure` for `tyrant` regardless of `isBoss`. `EnemyIllustration`
+      now matches `EnemyPortrait`'s behavior; the throne placeholder scene
+      and its test are torn down.
+- [x] Character body diagram (88×220) — DELETED 2026-08-31 (Phase V8):
+      `BodyDiagram` had zero call sites in the live tree (confirmed by grep;
+      an orphan since at least the V1 ground-truth survey, surviving only in
+      its own test and the archived `design/handoff-*` mockups). Component
+      and test removed.
+- [x] Tab bar icon set (5 icons) — RESOLVED (Phase V1): `TabIcon` in
+      `app/(tabs)/_layout.tsx` reads `AxmIcon` directly (the verbatim inline
+      duplicate V1's brief called out by name is gone). Same stale-row
+      correction as above.
 - [ ] Labyrinth room-scene backdrops (47 rooms, 3:2, ink-on-parchment —
       contract in `assets/images/labyrinth/index.ts`; procedural SVG
       placeholder in `components/labyrinth/RoomScene.tsx` until then) —

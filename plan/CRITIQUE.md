@@ -1604,6 +1604,69 @@ one level down, in the routing helper `onApply` calls next).
   files/4085 tests green; `axiomancer-mobile` 268 files/2716 tests
   green.
 
+### [MED] hazard — the fanned route-choice hand truncates card names illegibly
+- pass: session-critic 2026-08-31 (Phase V8 closure `/critic-loop`
+  screenshot pass, `axiomancer-mobile/screenshots/audit-2026-06/after/14-hazard-board.png`)
+- viewport: 390x844 (audit-capture rig)
+- auth_state: dev-seeded hazard node
+- category: visual / legibility
+- observation: the five route-choice cards fan out so tightly overlapped
+  that most names truncate before the player can read the choice
+  ("FAITH LE…", "BALANCE P…", "SCRAMB…"), so the hand preview doesn't
+  actually let a player scan their options before committing to a route.
+- suggested fix: widen card spacing in the fan, or reveal the full name
+  on tap/hold before the route is chosen. Component likely under
+  `components/hazard/`.
+- source: loop
+
+### [MED] combat — the defeat screen has a large dead black gap mid-page
+- pass: session-critic 2026-08-31 (Phase V8 closure `/critic-loop`
+  screenshot pass, `axiomancer-mobile/screenshots/audit-2026-06/after/26-aftermath-defeat.png`)
+- viewport: 390x844 (audit-capture rig)
+- auth_state: dev-seeded defeat aftermath
+- category: visual
+- observation: roughly the bottom half of the screen between the
+  flavor-text epitaph and the Ledger stats block is empty near-black
+  space, making the death beat read as unfinished rather than weighty —
+  other aftermath screens (parley, victory) fill that space with art or
+  content.
+- suggested fix: tighten the vertical layout, or fill the gap with a
+  felled-pilgrim illustration / epitaph flourish consistent with the
+  Woodcut Codex direction. Component: `components/event/aftermath/CombatDefeatPanel.tsx`.
+- source: loop
+
+### [LOW] aftermath — the parley "Heart Opens" reward panel is a pixel-art heart, style outlier
+- pass: session-critic 2026-08-31 (Phase V8 closure `/critic-loop`
+  screenshot pass, `axiomancer-mobile/screenshots/audit-2026-06/after/27-aftermath-parley.png`)
+- viewport: 390x844 (audit-capture rig)
+- category: visual / aesthetic cohesion
+- observation: the "an accord" heart art is a chunky 16-bit pixel-art
+  sprite, sharply out of style against the ink-woodcut/engraving art
+  every other screen uses — reads as a placeholder that never got
+  swapped when the Woodcut Codex direction landed.
+- suggested fix: replace with a woodcut-style bleeding/sacred-heart
+  illustration matching the engraving direction (candidate for a
+  `/forge` art tick or the V-sequence's PixelEmblem carve-out review —
+  confirm whether this is the intentional PixelEmblem exception before
+  swapping).
+- source: loop
+
+### [LOW] village — dimmed unaffordable stall items dim the item name along with the price
+- pass: session-critic 2026-08-31 (Phase V8 closure `/critic-loop`
+  screenshot pass, `axiomancer-mobile/screenshots/audit-2026-06/after/28-village.png`)
+- viewport: 390x844 (audit-capture rig)
+- auth_state: 0 shillings
+- category: visual / legibility
+- observation: stall rows for items the player can't afford (Minor
+  Healing Potion, Antidote at 0 shillings) dim the item name and
+  description text along with the price/CTA, making the description
+  borderline hard to read. Combat's disabled-item pattern keeps the
+  name bright and dims only the price/CTA.
+- suggested fix: align the village stall row's disabled treatment with
+  the combat pattern — keep item name bone/parchment-bright, dim only
+  price/affordability cue.
+- source: loop
+
 ## Done
 
 ### [x] [HIGH] title screen — tagline said "modern steel", contradicting the shipped anti-modern-word doctrine — RESOLVED 2026-08-14 (commit 0f408571, issue #204)
