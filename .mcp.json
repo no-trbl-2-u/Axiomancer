@@ -13,13 +13,11 @@
       ]
     },
     "kb-query": {
-      "type": "stdio",
-      "command": "node",
-      "args": [
-        "kb/scripts/kb-mcp-server.mjs",
-        "--root",
-        "kb"
-      ]
+      "type": "http",
+      "url": "https://kb-mcp.no-trbl-2-u.workers.dev/mcp",
+      "headers": {
+        "Authorization": "Bearer ${KB_MCP_TOKEN}"
+      }
     },
     "axio-query": {
       "type": "stdio",
