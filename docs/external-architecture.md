@@ -73,7 +73,7 @@ flowchart LR
 
 ### Claude and browser automation
 
-- **Claude Code action:** the reusable `.github/workflows/_claude-skill.yml` provisions Node 22, workspace dependencies, optional Playwright Chromium, ignored `.env` GitHub context, and Nexus guard self-tests before invoking Claude. These workers operate on repository state but their self-reports are not proof; commits, CI, tests, and artifacts are proof.
+- **Claude Code action:** the reusable `.github/workflows/_claude-skill.yml` provisions Node 22, workspace dependencies, optional Playwright Chromium, ignored `.env` GitHub context, Nexus guard self-tests, and a warn-only probe of the remote `kb-query` endpoint (passing `KB_MCP_TOKEN` through as step env) before invoking Claude. These workers operate on repository state but their self-reports are not proof; commits, CI, tests, and artifacts are proof.
 - **Local Judge/Sol work:** direct implementation is permitted. Delegation is optional and should be used only when parallelism or independent review adds value.
 - **Playwright:** browser automation may run through MCP or package scripts. It provides visual/runtime evidence, never mechanics authority.
 

@@ -87,8 +87,25 @@ follow-ups are fine for "what does this feel like" questions.
 
 ## Phase 3 — Prior art (cite 2–4 games)
 
-Read `world-references.md` for the catalog. Pick 2–4 games that
-solved a similar *placeness* problem. For each, name:
+**Consult the knowledge base first.** Region state, environmental
+hazards, and pacing (pass-through vs. settle-in vs. unravel-slowly) are
+mechanic shapes the board-game corpus tracks directly — campaign-game,
+modular-board, tile-placement, area-movement, push-your-luck. When the
+`mcp__kb-query__*` tools are available, use `kb_find_games` (filter by
+mechanics slug or better-if label) and `kb_search` / `kb_read_doc` to
+pull reception evidence for the shape under discussion; otherwise run
+`node scripts/kb-sync.mjs` and grep `kb/KnowledgeBase/BoardGames/`
+directly. Cite hits as `kb:<game-slug>/<doc> (src-NNN)`; the
+`reception/better-if.okf.md` docs (onboarding friction, setup-teardown
+cost, rules-ambiguity) are the highest-value pulls for a *place* — they
+tell you what real players found tedious or confusing about inhabiting
+a space, not just what worked narratively. If the KB has nothing for a
+shape you wanted, file it: `node scripts/kb-sync.mjs wish "<shape> —
+<why this session wanted it>"`.
+
+Then read `world-references.md` for the video-game catalog. Pick 2–4
+games total (kb corpus + references.md combined) that solved a similar
+*placeness* problem. For each, name:
 
 - The pattern (one phrase).
 - What about it worked, with the player-reception note.

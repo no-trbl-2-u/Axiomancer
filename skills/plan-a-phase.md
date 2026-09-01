@@ -39,6 +39,17 @@ Use when:
    sibling for code patterns.
 7. `spec.md` — only if brief touches a surface bearings doesn't
    describe.
+8. **Truth-source MCPs** — when the brief locks card / keyword /
+   mechanic / balance decisions: `axio-query`
+   (`axio_cards` / `axio_effects` / `axio_keywords` — the
+   engine's current facts, never stale) and `kb-query`
+   (`kb_find_games` / `kb_search` / `kb_cards` — external prior
+   art and player-reception evidence, cited
+   `kb:<game-slug>/<doc> (src-NNN)`). A "Decisions made upfront"
+   row backed by a reception receipt or an engine-fact query is
+   the brief doing its job; one argued from model memory is a
+   guess wearing a lock. Accelerator, not dependency — grep
+   `kb/` and the libraries when the tools are absent.
 
 ## 4. The brief format (`plan/phases/phase_<N>_<topic>.md`)
 

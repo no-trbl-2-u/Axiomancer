@@ -145,6 +145,20 @@ Game content vs. when the plan was written:
 - Cross-cutting phases (polish, perf) sitting at the end with
   many sub-tasks accumulated — may warrant a split.
 
+### I. Knowledge-base reception evidence
+
+The KB corpus, via the `kb-query` MCP tools (`kb_find_games`
+filtered by better-if label, `kb_search`) or grep on a
+kb-sync'd `kb/` snapshot — see AGENTS.md § Truth sources. Shape:
+- A reception complaint recurring across 3+ corpus games (e.g.
+  runaway-leader, onboarding friction, dead turns) that
+  Axiomancer's shipped systems plausibly share → propose a phase
+  that addresses it before players file it themselves. Cite the
+  `kb:<game-slug>/<doc> (src-NNN)` receipts as the signal.
+- A `kb/WISHLIST.md` gap the loop filed that the KB's scout has
+  since answered with coverage → the design work it was filed
+  for may now be unblocked; re-propose it.
+
 ## 5. Scoring candidates
 
 Each candidate gets `expand_score` 0–10:
@@ -279,7 +293,8 @@ oversight will review and promote.
    candidate's `conflicts` field for after-the-fact review.
 4. **Cite the signals.** Every candidate must list ≥1 concrete
    signal source (audit row, critique finding, issue number,
-   spec diff line, design file).
+   spec diff line, design file, kb reception doc with its
+   src-NNN).
 5. **Honest scope.** A 3-phase candidate is not a 1-phase
    candidate just because that fits more comfortably.
 6. **One commit per pass.**

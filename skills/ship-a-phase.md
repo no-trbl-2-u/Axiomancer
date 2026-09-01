@@ -63,6 +63,17 @@ Spawn sub-agents aggressively. They protect main-agent context
 and parallelize independent work.
 
 - **`scout`** — every external research need.
+- **Design specialists** — a phase that ships cards/keywords
+  spawns `card-expert`; a contested mechanic-design call gets a
+  `mechanics-expert` consult; narrative content spawns
+  `content-curator`. All three carry the `kb-query` (external
+  prior art, cited `kb:<game-slug>/<doc> (src-NNN)`) and
+  `axio-query` (live engine card/effect/keyword facts) MCP
+  tools — and the main agent holds the same grants. A design or
+  balance decision made inline instead of via a specialist still
+  consults those tools first (AGENTS.md § Truth sources): a
+  Decisions bullet with a reception receipt beats one argued
+  from model memory.
 - **Domain specialists** — for prose drafting, schema work,
   observation. See `.claude/agents/`.
 - **Parallel calls** when work is independent.
@@ -230,6 +241,15 @@ ls <repo-root>/<your-app-path>/<canonical-family>/
 If no spec or braindump covers this family, proceed using
 the brief + canonical sibling + bearings. Note in commit-body
 Decisions.
+
+When the phase ships game content (cards, keywords, enemies,
+maps, events, dialogue) or moves balance numbers, also pull the
+truth sources before designing: `axio_overview` / `axio_cards` /
+`axio_effects` / `axio_keywords` for the engine's own current
+facts, and `kb_search` / `kb_find_games` / `kb_cards` /
+`kb_keyword` for external prior art worth citing in the brief or
+commit body. Accelerator, not dependency — grep `kb/` and the
+libraries directly when the tools are absent or erroring.
 
 ### Step 4 — Build
 
@@ -485,7 +505,14 @@ spec.md                                      # product spec
 
 # Sub-agents
 Agent({ subagent_type: "scout", prompt: "..." })
+Agent({ subagent_type: "card-expert", prompt: "..." })      # cards/keywords (kb-query + axio-query grounded)
+Agent({ subagent_type: "mechanics-expert", prompt: "..." }) # design second opinion
+Agent({ subagent_type: "content-curator", prompt: "..." })  # narrative content
 # + your domain specialists
+
+# Truth-source MCPs (main agent holds the grants too)
+# axio-query: axio_overview / axio_cards / axio_effects / axio_keywords
+# kb-query:   kb_overview / kb_find_games / kb_search / kb_read_doc / kb_cards / kb_keyword
 
 # Verify + commit + push + deploy
 npm run verify

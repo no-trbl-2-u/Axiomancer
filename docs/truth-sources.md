@@ -13,12 +13,16 @@ and reception research (source-backed claims, per-claim confidence). It
 deploys itself as a live MCP server, which is how this repo reads it;
 `node scripts/kb-sync.mjs` shallow-clones/refreshes a fallback snapshot
 into `kb/` (gitignored — never committed here). Consumers: the
-`brainstorm-mechanics` skill and the `mechanics-expert` and
-`card-expert` agents grep it for prior art and cite
-`kb:<game-slug>/<doc> (src-NNN)` instead of citing reception from
+`brainstorm-mechanics`, `world-spec`, and `story-spec` skills and the
+`mechanics-expert` and `card-expert` agents pull it for prior art and
+cite `kb:<game-slug>/<doc> (src-NNN)` instead of citing reception from
 memory (`card-expert` leans on the `DigitalCardGames/dawncaster`
-corpus — 1,692 card records, 141 keywords). Coverage misses are filed
-with `node scripts/kb-sync.mjs wish "..."` — the live server is
+corpus — 1,692 card records, 141 keywords; `world-spec` and
+`story-spec` lean on the board-game mechanics/better-if taxonomy for
+region-hazard and campaign/unlock-structure shapes respectively —
+`character-spec` is deliberately not a consumer, since personhood/voice
+has no board-game-mechanic analog in the corpus). Coverage misses are
+filed with `node scripts/kb-sync.mjs wish "..."` — the live server is
 read-only, so this stays a local-clone operation, and the KB's daily
 scout consumes that wishlist.
 

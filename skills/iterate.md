@@ -240,6 +240,12 @@ separately — keep tick churn low.
 
 Default delegation:
 - Content gaps → the `content-curator` sub-agent.
+- Card / keyword / balance findings → the `card-expert`
+  sub-agent (consult mode for analysis, implement mode for the
+  fix); a contested mechanic-design call → a `mechanics-expert`
+  consult. Both carry the `kb-query` + `axio-query` MCP tools,
+  so their verdicts arrive with prior-art and engine-fact
+  receipts instead of model memory.
 - Contract / divergence / debt / docs / a11y / tests → main agent.
 - Performance → main agent; may delegate to `scout` for
   external benchmarking.
@@ -383,6 +389,8 @@ plan/bearings.md                         # voice + standing decisions
 
 # Sub-agents
 Agent({ subagent_type: "content-curator", prompt: "..." })
+Agent({ subagent_type: "card-expert", prompt: "..." })      # card/keyword/balance findings
+Agent({ subagent_type: "mechanics-expert", prompt: "..." }) # mechanic-design second opinion
 Agent({ subagent_type: "scout", prompt: "..." })
 
 # Verify + commit + push + deploy

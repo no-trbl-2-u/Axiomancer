@@ -91,7 +91,21 @@ Stop asking when the user signals enough; don't grind.
 
 ## Phase 3 — Prior art
 
-Pull from [story-references.md](story-references.md). Always cite
+**Consult the knowledge base first for unlock/campaign structure.**
+When the question is about gating, quest-arc pacing, or what a
+relationship/campaign unlocks over multiple sessions, that shape
+overlaps board-game corpus mechanics (`campaign-game`, `legacy-game`)
+and better-if labels (`campaign-progression`, `onboarding`). When the
+`mcp__kb-query__*` tools are available, use `kb_find_games` /
+`kb_search` / `kb_read_doc` to pull reception evidence; otherwise run
+`node scripts/kb-sync.mjs` and grep `kb/KnowledgeBase/BoardGames/`
+directly. Cite hits as `kb:<game-slug>/<doc> (src-NNN)`. This is a
+structural accelerator only — it has nothing to say about voice or
+dialogue craft; skip straight to references.md for those questions.
+File a gap with `node scripts/kb-sync.mjs wish "..."` if the corpus
+misses a shape you wanted.
+
+Then pull from [story-references.md](story-references.md). Always cite
 **game name + specific mechanic or design pattern**, not "Undertale does
 something like this". One or two sentences per reference. Include what
 players actually liked or hated where you know it; if you don't, say so —

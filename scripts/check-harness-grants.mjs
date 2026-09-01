@@ -22,11 +22,26 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { execFileSync } from 'node:child_process'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf-8')
 const exists = (rel) => fs.existsSync(path.join(ROOT, rel))
+
+/** True when the path is tracked by git — i.e. present in any fresh checkout
+ *  (CI included). A synced-but-gitignored path exists locally yet is absent
+ *  from a CI checkout, which is exactly the distinction check 2 needs. */
+export function isTracked(rel) {
+  try {
+    execFileSync('git', ['ls-files', '--error-unmatch', rel], {
+      cwd: ROOT, stdio: 'ignore',
+    })
+    return true
+  } catch {
+    return false
+  }
+}
 
 /** Every `mcp__…` tool named in the local settings allowlist. */
 export function grantedLocally() {
@@ -96,29 +111,33 @@ export function check() {
   // 2 — a configured server must have something to run.
   for (const [name, def] of servers) {
     if (def.external) continue
-    if (!def.target) findings.push(`.mcp.json server "${name}" has no script argument`)
-    else if (!exists(def.target)) {
-      // A missing target is not automatically a failure. `kb-query` points into
-      // `kb/`, a gitignored corpus that `scripts/kb-sync.mjs` fetches — legitimately
-      // absent from a fresh clone and present on a synced workstation, which is
-      // what the LOCAL grant is for.
-      //
-      // CI is the case that cannot recover: the workflow never syncs `kb/`, so a
-      // CI grant for a server whose script is not in the checkout promises a run
-      // a tool that can never start. That is the failure.
-      const ciTools = [...ci].filter((t) => t.startsWith(`mcp__${name}__`))
-      if (ciTools.length) {
-        findings.push(
-          `_claude-skill.yml grants ${ciTools.length} "${name}" tool(s), but its server `
-            + `${def.target} is not in the checkout (gitignored or unbuilt) — a CI run `
-            + `cannot start it`,
-        )
-      } else {
-        notes.push(
-          `"${name}" -> ${def.target} absent from this checkout; granted locally only `
-            + `(synced corpus — run scripts/kb-sync.mjs)`,
-        )
-      }
+    if (!def.target) {
+      findings.push(`.mcp.json server "${name}" has no script argument`)
+      continue
+    }
+    // Local surface: a missing target is not automatically a failure.
+    // `kb-query` points into `kb/`, a gitignored corpus that
+    // `scripts/kb-sync.mjs` fetches — legitimately absent from a fresh clone
+    // and present on a synced workstation, which is what the LOCAL grant is for.
+    if (!exists(def.target)) {
+      notes.push(
+        `"${name}" -> ${def.target} absent from this checkout; run scripts/kb-sync.mjs `
+          + `to materialize it (synced corpus)`,
+      )
+    }
+    // CI surface: a checkout contains only TRACKED files, so local presence
+    // proves nothing about CI — a synced workstation hid this check entirely
+    // until 2026-09-01, when the main-guard fix below made it actually run on
+    // Windows and the blind spot surfaced. A CI grant for a stdio server whose
+    // target is untracked promises the run a tool that can never start; that
+    // is the failure this check exists for. (Remote HTTP servers — kb-query
+    // since 2026-08-31 — have no local target and are skipped as external.)
+    const ciTools = [...ci].filter((t) => t.startsWith(`mcp__${name}__`))
+    if (ciTools.length && !isTracked(def.target)) {
+      findings.push(
+        `_claude-skill.yml grants ${ciTools.length} "${name}" tool(s), but its server `
+          + `${def.target} is untracked (gitignored or unbuilt) — a CI run cannot start it`,
+      )
     }
   }
 
@@ -148,4 +167,7 @@ function main() {
   )
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main()
+// pathToFileURL, not string concat: `file://${argv[1]}` never matches on
+// Windows (backslashes, drive letter), which made this script a silent no-op
+// there — the same isMain bug the KB repo's generators had until 2026-07-17.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main()

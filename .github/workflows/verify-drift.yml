@@ -23,6 +23,7 @@ on:
       - '.mcp.json'
       - 'scripts/check-harness-grants.mjs'
       - '.github/workflows/verify-drift.yml'
+      - '.github/workflows/_claude-skill.yml'
   pull_request:
     branches: [main]
     paths:
@@ -39,6 +40,7 @@ on:
       - '.mcp.json'
       - 'scripts/check-harness-grants.mjs'
       - '.github/workflows/verify-drift.yml'
+      - '.github/workflows/_claude-skill.yml'
   schedule:
     - cron: '41 7 * * 0'
   workflow_dispatch:
