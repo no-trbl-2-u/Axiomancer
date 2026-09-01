@@ -39,9 +39,11 @@ design skill in `.claude/skills/kb-query/`):
   the live corpus by weeks — say so when citing from it.
 
 The `mechanics-expert` and `card-expert` sub-agents carry the MCP tools
-in their frontmatter and prefer them. Cloud ticks do not grant
-`kb-query` yet: that now needs a `KB_MCP_TOKEN` repo secret, not a sync
-step (see `.github/workflows/_claude-skill.yml`).
+in their frontmatter and prefer them. Cloud ticks now grant the `kb_*`
+tools too (`.github/workflows/_claude-skill.yml`, 2026-08-31), passing
+`KB_MCP_TOKEN` through as step env — unattended runs cite receipts
+instead of memory. A preflight step probes the endpoint and warns
+without failing: a dead or rotated KB must not sink an unrelated tick.
 
 ## Live engine data (`axio-query`) — the repo's own facts
 

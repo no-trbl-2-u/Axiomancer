@@ -20,7 +20,9 @@ name: _claude-skill
 #      force-push / --no-verify / destructive resets). CI runs are
 #      unattended (intervention level 3+), so a broken guard must fail
 #      the job before Claude starts.
-#   6. Run anthropics/claude-code-action with the given prompt.
+#   6. Probe the remote kb-query MCP endpoint (warning only — a dead KB
+#      must not sink an unrelated tick).
+#   7. Run anthropics/claude-code-action with the given prompt.
 #
 # Secrets (via `secrets: inherit` from callers):
 #   CLAUDE_CODE_OAUTH_TOKEN  required — Claude subscription OAuth token.
@@ -33,6 +35,10 @@ name: _claude-skill
 #                            then FAILS CLOSED on any code tick (zero
 #                            verify runs for a code diff = exit 1, not a
 #                            vacuous pass).
+#   KB_MCP_TOKEN             recommended — bearer token for the remote
+#                            kb-query MCP server. Without it the kb_* tools
+#                            are granted but answer 401, and prior-art
+#                            grounding degrades to model memory.
 #   NOTIFY_NTFY_TOPIC        optional — scripts/notify.mjs pager channel.
 #   NOTIFY_WEBHOOK_URL       optional — scripts/notify.mjs webhook channel.
 
@@ -106,17 +112,41 @@ jobs:
       #                 in the repo, so it starts wherever the checkout does. Without
       #                 it, card-expert's engine-truth grounding degrades to file
       #                 reads on every unattended run (content-pipelines audit §6.4).
-      #   kb-query    — still NOT granted, but for a new reason. The server moved
-      #                 to a remote HTTP endpoint the KB repo deploys, so the old
-      #                 blocker (its stdio script lived under the gitignored `kb/`
-      #                 and could not exist in a CI checkout) is void — no sync step
-      #                 and no per-run download is needed any more. What blocks it
-      #                 now is auth: the endpoint is fail-closed and there is no
-      #                 `KB_MCP_TOKEN` repo secret, so granting it today would
-      #                 advertise tools that answer 401. Add the secret, pass it
-      #                 through to the action's env, and this becomes a grant.
+      #   kb-query    — GRANTED below (2026-08-31). Its server is now a remote
+      #                 HTTP endpoint the KB repo deploys, so the old blocker (the
+      #                 stdio script lived under gitignored `kb/` and could not
+      #                 exist in a CI checkout) is void: no sync step, no per-run
+      #                 download. Auth is a bearer token out of the environment —
+      #                 `.mcp.json` references ${KB_MCP_TOKEN} and Claude Code
+      #                 expands it from the process env, NOT from the .env written
+      #                 above, which is why the secret is set as step env below.
+      #                 Cloud ticks previously cited prior art from model memory;
+      #                 they can now cite kb:<game>/<doc> (src-NNN) receipts.
+      # Warning, never fatal: an unreachable KB degrades prior-art grounding
+      # but has nothing to do with whether this tick's actual work can run.
+      # Fail-closed on a 401 here would sink every loop on a token rotation.
+      - name: Probe the kb-query MCP endpoint
+        continue-on-error: true
+        env:
+          KB_MCP_TOKEN: ${{ secrets.KB_MCP_TOKEN }}
+        run: |
+          health=$(curl -sS -m 15 https://kb-mcp.no-trbl-2-u.workers.dev/health || echo '{}')
+          echo "kb-query /health: $health"
+          if [ -z "$KB_MCP_TOKEN" ]; then
+            echo "::warning::KB_MCP_TOKEN is unset — kb_* tools are granted but will answer 401. Prior art degrades to model memory."
+            exit 0
+          fi
+          code=$(curl -sS -m 20 -o /dev/null -w '%{http_code}'             https://kb-mcp.no-trbl-2-u.workers.dev/mcp             -H "Authorization: Bearer $KB_MCP_TOKEN"             -H 'Content-Type: application/json'             -H 'Accept: application/json, text/event-stream'             -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' || echo 000)
+          if [ "$code" = "200" ]; then
+            echo "kb-query tools/list: 200 — prior-art grounding available"
+          else
+            echo "::warning::kb-query tools/list returned $code (401 = bad/rotated token, 503 = Worker secret missing). Tools are granted but unusable this run."
+          fi
+
       - name: Run Claude Code
         id: claude
+        env:
+          KB_MCP_TOKEN: ${{ secrets.KB_MCP_TOKEN }}
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -126,7 +156,7 @@ jobs:
           claude_args: |
             --model ${{ inputs.model }}
             ${{ inputs.effort != '' && format('--effort {0}', inputs.effort) || '' }}
-            --allowedTools "Bash,Edit,Write,Read,Glob,Grep,Task,TodoWrite,WebFetch,WebSearch,mcp__axio-query__axio_overview,mcp__axio-query__axio_cards,mcp__axio-query__axio_effects,mcp__axio-query__axio_keywords${{ inputs.install_playwright && ',mcp__playwright__browser_navigate,mcp__playwright__browser_click,mcp__playwright__browser_snapshot,mcp__playwright__browser_take_screenshot,mcp__playwright__browser_console_messages,mcp__playwright__browser_close,mcp__playwright__browser_resize,mcp__playwright__browser_press_key,mcp__playwright__browser_hover,mcp__playwright__browser_evaluate,mcp__playwright__browser_wait_for,mcp__playwright__browser_tabs,mcp__playwright__browser_network_requests,mcp__playwright__browser_navigate_back' || '' }}"
+            --allowedTools "Bash,Edit,Write,Read,Glob,Grep,Task,TodoWrite,WebFetch,WebSearch,mcp__axio-query__axio_overview,mcp__axio-query__axio_cards,mcp__axio-query__axio_effects,mcp__axio-query__axio_keywords,mcp__kb-query__kb_overview,mcp__kb-query__kb_find_games,mcp__kb-query__kb_search,mcp__kb-query__kb_read_doc,mcp__kb-query__kb_cards,mcp__kb-query__kb_keyword${{ inputs.install_playwright && ',mcp__playwright__browser_navigate,mcp__playwright__browser_click,mcp__playwright__browser_snapshot,mcp__playwright__browser_take_screenshot,mcp__playwright__browser_console_messages,mcp__playwright__browser_close,mcp__playwright__browser_resize,mcp__playwright__browser_press_key,mcp__playwright__browser_hover,mcp__playwright__browser_evaluate,mcp__playwright__browser_wait_for,mcp__playwright__browser_tabs,mcp__playwright__browser_network_requests,mcp__playwright__browser_navigate_back' || '' }}"
             ${{ inputs.extra_claude_args }}
 
       - name: Fail if Claude reported an execution error
