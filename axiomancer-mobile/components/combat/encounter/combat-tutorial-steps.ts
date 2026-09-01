@@ -74,11 +74,11 @@ export const COMBAT_TUTORIAL_STEPS: CombatTutorialStep[] = [
     },
     {
         id: 'tracks',
-        title: 'STATUS DOES THE WORK',
+        title: 'ONE BAR, MANY BLADES',
         body:
-            'Wear their VITAE down to nothing — it is the only bar. Status does ALL the work: ' +
-            'a DoT bleeds them every turn, and STAGGER strips their telegraphed action rung by ' +
-            'rung. There is no strike — lead with status, always.',
+            'Wear their VITAE down to nothing — it is the only bar. A strike takes it straight ' +
+            'off the top; a DoT bleeds them every turn; STAGGER strips their telegraphed action ' +
+            'rung by rung. Strikes, statuses, Conviction, Surge and your dice all compete on merit.',
         lookFor: 'the enemy VITAE bar',
         done: (s) => pressured(s) || advanced(s),
     },

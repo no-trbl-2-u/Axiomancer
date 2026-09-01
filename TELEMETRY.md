@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-17T17:37:13Z | subagent | mechanics-expert | claude-fable-5 | main | Design stance alternatives sans RPS |
-| 2026-07-17T19:25:17Z | subagent | mechanics-expert | claude-fable-5 | main | D1 mechanics-expert spec 33 review |
 | 2026-07-17T21:14:27Z | skill | ship-a-phase | claude-fable-5 | main | - |
 | 2026-07-17T21:40:09Z | slash-prompt | /fix-ci | unknown | user/ci | /fix-ci 29615233695 |
 | 2026-07-17T22:07:21Z | slash-prompt | /loop | unknown | user/ci | /loop 1h /march |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-01T05:20:42Z | skill | expand | claude-sonnet-5 | main | - |
 | 2026-09-01T13:43:54Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-09-01T13:43:57Z | skill | digest | unknown | main | - |
+| 2026-09-01T21:07:37Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-01T21:08:26Z | skill | iterate | claude-sonnet-5 | main | - |

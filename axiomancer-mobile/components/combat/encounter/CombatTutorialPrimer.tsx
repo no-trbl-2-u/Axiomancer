@@ -28,18 +28,18 @@ interface PrimerPanel {
 const PANELS: PrimerPanel[] = [
     {
         eyebrow: '⚔ A NEW KIND OF FIGHT',
-        title: 'STATUS DOES THE WORK',
+        title: 'ONE BAR, MANY BLADES',
         body:
-            'The enemy has ONE bar: VITAE. Wear it to nothing — but basic blows are weak. ' +
-            'Status effects do the real damage, and a clever read turns the fight.',
+            'The enemy has ONE bar: VITAE. Wear it to nothing — strikes, statuses, Conviction, ' +
+            'the Surge meter and your dice all compete on merit. A clever read turns the fight.',
     },
     {
         eyebrow: 'BLEED & BIND',
-        title: 'POISON, THEN STEAL THEIR TURN',
+        title: 'POISON, STEAL THEIR TURN, OR JUST HIT HARD',
         body:
-            'A DoT (POISON, BLEED) drains their VITAE every turn — your damage. ' +
-            'STAGGER strips rungs from their telegraphed action: at zero it is denied outright. ' +
-            'There is no strike — status is the only blade. Befriend a low-VITAE foe to spare it.',
+            'A DoT (POISON, BLEED) drains their VITAE every turn. STAGGER strips rungs from ' +
+            'their telegraphed action: at zero it is denied outright. A strike takes VITAE ' +
+            'straight off the top — no wrong answer. Befriend a low-VITAE foe to spare it.',
     },
     {
         eyebrow: 'DICE & CARDS',
