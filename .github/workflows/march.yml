@@ -2,16 +2,16 @@ name: march
 
 # The autonomous-beast tick: /march dispatches triage → critique →
 # ship-a-phase → iterate and executes one tick end-to-end (see
-# skills/march.md). Scheduled every 6 hours (throttled from hourly to cut
-# Actions minutes — see 2026-07-08 usage review); adjust or delete the
-# cron to retune, or run it by hand from the Actions tab. Ticks share
+# skills/march.md). Scheduled every 2 hours (raised from every 6 hours at
+# T's request on 2026-09-01; reason not stated); adjust or delete the cron
+# to retune, or run it by hand from the Actions tab. Ticks share
 # the nexus-loop concurrency group, so a long tick makes the next one
 # queue (and GitHub keeps only the newest queued run) — the loop
 # self-throttles instead of stacking.
 
 on:
   schedule:
-    - cron: '23 */6 * * *'
+    - cron: '23 */2 * * *'
   workflow_dispatch:
     inputs:
       focus_phase:
