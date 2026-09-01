@@ -336,24 +336,6 @@
   tree shows this or only trees authored without reply descriptions.
 - source: loop
 
-### [MED] combat — first-run coach overlay still preaches the retired status-dominance doctrine
-- pass: session-jot 2026-08-28 (THE OPEN GATE session; spotted on the
-  refreshed `combat-encounter` smoke baseline)
-- viewport: 390x844 (smoke rig)
-- auth_state: anonymous
-- category: copy
-- observation: the "A NEW KIND OF FIGHT / STATUS DOES THE WORK" coach
-  card tells the player "basic blows are weak. Status effects do the
-  real damage" — the exact balance law THE UNSHACKLING voided
-  (2026-08-08) and CQI replaced (spec 35). Direct damage is a
-  first-class win path now; the tutorial teaches the dead doctrine as
-  gospel to every new player.
-- suggested fix: rewrite the coach sequence's copy to teach the real
-  doctrine (one bar: VITAE; statuses, strikes, Conviction, Surge and
-  Dice all compete on merit; a clever read still turns the fight).
-  Component: search for the coach/tutorial overlay strings under
-  components/combat/. House voice, knife-law sentences.
-- source: loop
 
 ### [MED] world — the Ash Mire boss sits three natural steps from a fresh spawn and flattens a level-1 pilgrim
 - pass: user-session playthrough 2026-08-29 (commit 0b39b120)
@@ -1668,6 +1650,25 @@ one level down, in the routing helper `onApply` calls next).
 - source: loop
 
 ## Done
+
+### [x] [MED] combat — first-run coach overlay still preaches the retired status-dominance doctrine — RESOLVED 2026-09-01 (commit 596e0a19, issue #269)
+- pass: session-jot 2026-08-28 (THE OPEN GATE session; spotted on the
+  refreshed `combat-encounter` smoke baseline)
+- viewport: 390x844 (smoke rig)
+- auth_state: anonymous
+- category: copy
+- observation: the "A NEW KIND OF FIGHT / STATUS DOES THE WORK" coach
+  card tells the player "basic blows are weak. Status effects do the
+  real damage" — the exact balance law THE UNSHACKLING voided
+  (2026-08-08) and CQI replaced (spec 35). Direct damage is a
+  first-class win path now; the tutorial teaches the dead doctrine as
+  gospel to every new player.
+- resolution: rewrote both `CombatTutorialPrimer.tsx`'s first two
+  panels and `combat-tutorial-steps.ts`'s 'tracks' step off "there is
+  no strike — status is the only blade" onto the real doctrine: one
+  bar, VITAE; strikes, statuses, Conviction, Surge and dice all
+  compete on merit. Mobile `npm run verify` green (0 fail).
+- source: loop
 
 ### [x] [HIGH] title screen — tagline said "modern steel", contradicting the shipped anti-modern-word doctrine — RESOLVED 2026-08-14 (commit 0f408571, issue #204)
 - pass: 23 (commit c063ac48)
