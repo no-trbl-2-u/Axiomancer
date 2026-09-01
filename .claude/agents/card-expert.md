@@ -219,7 +219,10 @@ for lookups: `kb_keyword` replaces the `keywords.csv` grep (exact or
 substring, returns type + description), `kb_cards` replaces the
 `cards.csv` grep (searches name / rules text / observed terms, returns
 cost + rarity + the okf record path to cite), `kb_search` locates
-claims across either corpus, `kb_read_doc` reads a record. Two things
+claims across either corpus, `kb_read_doc` reads a record. They resolve
+over HTTP against the KB's deployed Worker, so they always serve the
+corpus as of the KB repo's last deploy — no local sync involved, and a
+grep of `kb/` can legitimately disagree with them by being older. Two things
 stay manual regardless: distribution queries (cost curves, "how many
 cards carry X") still go through `node` one-liners against
 `cards.json`, and the `functions`-column idea-mining sweep still reads
@@ -228,8 +231,10 @@ found", or are permission-blocked (known gap: MCP grants don't always
 propagate into sub-agent contexts), fall back to the manual path
 below — it is always sufficient.
 
-1. `node scripts/kb-sync.mjs` (repo root — clones/refreshes `kb/`,
-   gitignored). If the sync fails (offline / no auth), check for a
+1. Materialize a local corpus for grepping: `node scripts/kb-sync.mjs`
+   (repo root — clones/refreshes `kb/`, gitignored). This is the
+   FALLBACK path only; the `kb_*` tools above serve the live corpus and
+   need no sync. If the sync fails (offline / no auth), check for a
    sibling checkout at `../game-knowledge-base/` (present on the
    owner's machine) and read from its `KnowledgeBase/` directly —
    fall back to `(memory)`-labeled analysis only when NEITHER source

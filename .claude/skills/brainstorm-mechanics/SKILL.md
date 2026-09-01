@@ -97,10 +97,10 @@ Stop asking when the user signals enough; don't grind.
 
 ## Phase 3 — Prior art
 
-**Consult the knowledge base first.** Fast path: when the
-`mcp__kb-query__*` tools are available, use `kb_find_games` (filter by
-mechanics slug / better-if label) and `kb_search` / `kb_read_doc` —
-they read the same corpus and produce the same citations. Otherwise:
+**Consult the knowledge base first.** Fast path: the `mcp__kb-query__*`
+tools — `kb_find_games` (filter by mechanics slug / better-if label) and
+`kb_search` / `kb_read_doc`. They serve the live corpus over HTTP and
+produce the same citations as a grep, minus the staleness. Otherwise:
 run `node scripts/kb-sync.mjs`
 (clones/refreshes the OKF corpus into `kb/`, gitignored), then grep
 `kb/KnowledgeBase/BoardGames/` for the mechanic or problem shape under
@@ -245,7 +245,8 @@ half-ideas, tangents worth remembering. Omit section if empty.>
   organized by problem shape (RPS triangles, stance-switching, effect
   stacking, type conversion, morality difficulty, fallacy-as-flavor,
   decisive combat).
-- `kb/` — the OKF game knowledge base (synced via
+- The OKF game knowledge base — live via the `mcp__kb-query__*` tools,
+  or as a local snapshot in `kb/` (synced via
   `node scripts/kb-sync.mjs`; gitignored). Source-backed rules and
   reception docs per game under `kb/KnowledgeBase/BoardGames/games/`;
   cite as `kb:<game-slug>/<doc> (src-NNN)`. Misses go to the wishlist

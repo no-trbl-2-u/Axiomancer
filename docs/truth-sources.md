@@ -6,34 +6,42 @@
 > external-system register (ownership, credentials, recovery) is
 > [`external-architecture.md`](./external-architecture.md).
 
-## Game knowledge base (`kb/`) — external prior art
+## Game knowledge base — external prior art
 
 `no-trbl-2-u/game-knowledge-base` is the OKF corpus of board-game rules
-and reception research (source-backed claims, per-claim confidence).
-`node scripts/kb-sync.mjs` shallow-clones/refreshes it into `kb/`
-(gitignored — never committed here). Consumers: the
+and reception research (source-backed claims, per-claim confidence). It
+deploys itself as a live MCP server, which is how this repo reads it;
+`node scripts/kb-sync.mjs` shallow-clones/refreshes a fallback snapshot
+into `kb/` (gitignored — never committed here). Consumers: the
 `brainstorm-mechanics` skill and the `mechanics-expert` and
 `card-expert` agents grep it for prior art and cite
 `kb:<game-slug>/<doc> (src-NNN)` instead of citing reception from
 memory (`card-expert` leans on the `DigitalCardGames/dawncaster`
 corpus — 1,692 card records, 141 keywords). Coverage misses are filed
-with `node scripts/kb-sync.mjs wish "..."` — the KB's daily scout
-consumes that wishlist.
+with `node scripts/kb-sync.mjs wish "..."` — the live server is
+read-only, so this stays a local-clone operation, and the KB's daily
+scout consumes that wishlist.
 
-Two consumption surfaces (both grep-first; see the `kb-query` design
-skill in `.claude/skills/kb-query/`):
+Two consumption surfaces (both metadata-first; see the `kb-query`
+design skill in `.claude/skills/kb-query/`):
 
-- **Direct**: Grep/Read `kb/` frontmatter + generated indexes (the
-  metadata firewall), then only the docs they point at.
-- **MCP**: the `kb-query` stdio server (`.mcp.json` →
-  `kb/scripts/kb-mcp-server.mjs`, spawned per session) exposes
-  `kb_overview` / `kb_find_games` / `kb_search` / `kb_read_doc` /
-  `kb_cards` / `kb_keyword`. It is an accelerator, never a dependency —
-  if `kb/` is unsynced its tools answer with the recovery command and
-  the grep path still works. The `mechanics-expert` and `card-expert`
-  sub-agents carry these tools in their frontmatter and prefer them
-  when present; CI runs don't sync `kb/`, so cloud ticks stay on the
-  sync-then-grep path.
+- **MCP (primary)**: `kb-query` resolves over HTTP against the Worker
+  the KB repo deploys (`.mcp.json` → `kb-mcp.no-trbl-2-u.workers.dev`),
+  exposing `kb_overview` / `kb_find_games` / `kb_search` /
+  `kb_read_doc` / `kb_cards` / `kb_keyword`. No sync involved: the
+  corpus is whatever that repo last shipped. Auth is
+  `Bearer ${KB_MCP_TOKEN}` out of the process environment — Claude Code
+  does not read `.env` — and the server is fail-closed, so a missing
+  token means `401` on every call rather than a silent stale answer.
+- **Direct (fallback)**: Grep/Read `kb/` frontmatter + generated
+  indexes (the metadata firewall), then only the docs they point at.
+  Requires `node scripts/kb-sync.mjs` first, and the snapshot can lag
+  the live corpus by weeks — say so when citing from it.
+
+The `mechanics-expert` and `card-expert` sub-agents carry the MCP tools
+in their frontmatter and prefer them. Cloud ticks do not grant
+`kb-query` yet: that now needs a `KB_MCP_TOKEN` repo secret, not a sync
+step (see `.github/workflows/_claude-skill.yml`).
 
 ## Live engine data (`axio-query`) — the repo's own facts
 

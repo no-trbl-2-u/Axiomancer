@@ -106,12 +106,15 @@ jobs:
       #                 in the repo, so it starts wherever the checkout does. Without
       #                 it, card-expert's engine-truth grounding degrades to file
       #                 reads on every unattended run (content-pipelines audit §6.4).
-      #   kb-query    — deliberately NOT granted. Its server is
-      #                 `kb/scripts/kb-mcp-server.mjs`, and `kb/` is gitignored: the
-      #                 corpus is synced, not committed, so that file does not exist
-      #                 in a CI checkout. Granting it would advertise a tool that
-      #                 cannot start. Revisit only alongside a kb-sync step here —
-      #                 that is a per-run download cost, a separate decision.
+      #   kb-query    — still NOT granted, but for a new reason. The server moved
+      #                 to a remote HTTP endpoint the KB repo deploys, so the old
+      #                 blocker (its stdio script lived under the gitignored `kb/`
+      #                 and could not exist in a CI checkout) is void — no sync step
+      #                 and no per-run download is needed any more. What blocks it
+      #                 now is auth: the endpoint is fail-closed and there is no
+      #                 `KB_MCP_TOKEN` repo secret, so granting it today would
+      #                 advertise tools that answer 401. Add the secret, pass it
+      #                 through to the action's env, and this becomes a grant.
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@v1

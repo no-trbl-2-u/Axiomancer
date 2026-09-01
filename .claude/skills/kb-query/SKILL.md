@@ -5,17 +5,34 @@ description: Answer game-design prior-art questions from the SomberSoft game-kno
 
 # kb-query — grounded prior-art lookups
 
-Answer design questions from the synced OKF corpus in `kb/`, never from
-model memory alone. Every claim you relay keeps its citation.
+Answer design questions from the OKF corpus, never from model memory
+alone. Every claim you relay keeps its citation.
 
-## 0. Ensure the corpus is present
+## 0. Reach the corpus
+
+The `kb-query` MCP tools are the primary path. They resolve over HTTP
+against the KB's deployed Worker, so the corpus is whatever the KB repo
+last shipped and nothing needs syncing:
+
+```bash
+curl -s https://kb-mcp.no-trbl-2-u.workers.dev/health
+```
+
+`configured:true` with a `build.commit` means the server is live. A
+`401` from the tools means `KB_MCP_TOKEN` is missing from the
+environment — Claude Code expands it from the process env and does not
+read `.env`.
+
+If the tools are unreachable, materialize a local copy to grep:
 
 ```bash
 ls kb/KnowledgeBase || node scripts/kb-sync.mjs
 ```
 
-If sync fails (offline), say so and clearly mark anything you answer from
-memory as UNGROUNDED — do not dress memory up as corpus fact.
+That copy is a snapshot and may be well behind the live corpus — say so
+when you cite from it. If neither path works, say that too and clearly
+mark anything you answer from memory as UNGROUNDED — do not dress memory
+up as corpus fact.
 
 ## 1. Resolve from metadata first (the firewall)
 
@@ -28,9 +45,9 @@ indexes without opening bodies:
   carry `better_if_labels`.
 - Dawncaster: `cards.csv` / `cards.json` / `keywords.json` sidecars.
 
-If the `kb-query` MCP tools are available (`kb_overview`,
-`kb_find_games`, `kb_search`, `kb_read_doc`, `kb_cards`, `kb_keyword`),
-prefer them — they are exactly this procedure, faster. They are an
+The `kb-query` MCP tools (`kb_overview`, `kb_find_games`, `kb_search`,
+`kb_read_doc`, `kb_cards`, `kb_keyword`) are exactly this procedure,
+faster and against the live corpus — prefer them. They are an
 accelerator, not a dependency: when absent or erroring, Grep/Read on
 `kb/` files directly.
 
@@ -56,7 +73,8 @@ inference — both are welcome, labeled.
 ## 4. Feed the demand loop
 
 If the question needed a game or angle the corpus lacks, append it to the
-wishlist (one line per gap, at most a few per session):
+wishlist (one line per gap, at most a few per session). The live server
+is read-only, so this stays a local-clone operation:
 
 ```bash
 node scripts/kb-sync.mjs wish "<Game or topic> — <why it would help>"
