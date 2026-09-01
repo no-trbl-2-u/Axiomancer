@@ -7,9 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-17T14:11:32Z | subagent | Explore | claude-sonnet-5 | main | Explore enemy archetype + rung telegraph plumbing |
-| 2026-07-17T15:38:17Z | slash-prompt | /march | unknown | user/ci | /march Implement phase 36a |
-| 2026-07-17T15:44:22Z | subagent | mechanics-expert | claude-opus-4-8 | main | Design opinion on alt-win-aware pricing |
 | 2026-07-17T17:19:56Z | subagent | Explore | unknown | main | Map current combat dice system |
 | 2026-07-17T17:22:15Z | subagent | mechanics-expert | claude-fable-5 | main | Analyze upgradeable-dice combat proposal |
 | 2026-07-17T17:37:13Z | subagent | mechanics-expert | claude-fable-5 | main | Design stance alternatives sans RPS |
@@ -407,3 +404,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-31T16:24:42Z | skill | digest | unknown | main | - |
 | 2026-08-31T22:55:18Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-31T22:58:08Z | subagent | general-purpose | claude-sonnet-5 | main | Lift superseded OPEN GATE wall text |
+| 2026-09-01T05:17:37Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-01T05:17:40Z | skill | march | unknown | main | - |
+| 2026-09-01T05:20:42Z | skill | expand | claude-sonnet-5 | main | - |
