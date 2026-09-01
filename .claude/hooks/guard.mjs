@@ -231,18 +231,6 @@ function sessionStart() {
   } catch {
     /* best-effort */
   }
-  try {
-    const meta = JSON.parse(fs.readFileSync('kb/.sync-meta.json', 'utf-8'))
-    const ageDays = (Date.now() - Date.parse(meta.syncedAt)) / 86_400_000
-    lines.push(
-      `kb-sync: kb/ corpus at ${meta.head ?? '?'}, synced ${meta.syncedAt} ` +
-      `(${ageDays.toFixed(1)}d ago)${ageDays > 14 ? ' — STALE, run: node scripts/kb-sync.mjs' : ''}`,
-    )
-  } catch {
-    if (fs.existsSync('kb')) {
-      lines.push('kb-sync: kb/ exists but has no sync stamp — age unknown; node scripts/kb-sync.mjs refreshes it.')
-    }
-  }
   if (lines.length) process.stdout.write(lines.join('\n') + '\n')
   return 0
 }

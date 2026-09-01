@@ -16,8 +16,9 @@ flowchart LR
   EAS[Expo EAS]
   R2[Private Cloudflare R2 vault]
 
-  KB -->|kb-sync| KBL
-  KBL -->|grep/read or stdio| MCP
+  KB -->|deploy| MCP
+  KB -->|kb-sync fallback| KBL
+  KBL -->|grep/read| A
   MCP -->|cited prior art| A
   A -->|live generated catalog| AX
   SS -->|company law and CDRs| A
@@ -34,20 +35,21 @@ flowchart LR
 
 - **Owner / location:** `no-trbl-2-u/game-knowledge-base`; canonical local sibling checkout: `/root/Workspace/SomberSoft/game-knowledge-base`.
 - **Purpose:** source-backed board-game rules, reception research, reusable patterns, and the Dawncaster card/keyword corpus. It supplies external prior art; it does not own Axiomancer rules.
-- **Materialization:** `node scripts/kb-sync.mjs` shallow-clones or hard-refreshes `origin/main` into this repo's gitignored `kb/` directory. `KB_REPO` and `KB_DIR` may override the defaults.
+- **Materialization:** not required for reads — the `kb-query` MCP server is remote (below). `node scripts/kb-sync.mjs` shallow-clones or hard-refreshes `origin/main` into this repo's gitignored `kb/` directory for the grep fallback and for the wishlist write path. `KB_REPO` and `KB_DIR` may override the defaults.
 - **Direct data flow:** agents grep generated indexes/frontmatter first, read only selected documents, and preserve `kb:<game>/<document> (src-NNN)` evidence receipts.
-- **MCP data flow:** `.mcp.json` launches `node kb/scripts/kb-mcp-server.mjs --root kb` as the `kb-query` stdio server. It exposes overview, search, document, game, card, and keyword lookups over the materialized corpus.
-- **Availability:** development/research integration and optional accelerator. It is **not** a product-runtime dependency. If MCP is unavailable, use direct grep/read. If `kb/` is absent or stale, run `node scripts/kb-sync.mjs`.
+- **MCP data flow:** `.mcp.json` points `kb-query` at `https://kb-mcp.no-trbl-2-u.workers.dev/mcp` over MCP Streamable HTTP. The KB repo deploys that Worker from its own `mcp-server/` on merge to `main`; the corpus ships as static assets, so tool answers are current as of that deploy, not as of any local sync. Six tools: overview, find-games, search, read-doc, cards, keyword.
+- **Auth:** bearer token. `.mcp.json` carries `Authorization: Bearer ${KB_MCP_TOKEN}` — the reference, never the value. Claude Code expands it from the process environment and does **not** read `.env`, so the token belongs in the machine environment; that is also the only place worktrees and scheduled runs can see it. The server is fail-closed: no token yields `401`, an unconfigured Worker yields `503`. Liveness: `curl -s https://kb-mcp.no-trbl-2-u.workers.dev/health` (unauthenticated; reports build commit and doc count). Configuration and rotation are documented in the KB repo's `mcp-server/how-to-configure.md`.
+- **Availability:** development/research integration and optional accelerator. It is **not** a product-runtime dependency. If MCP is unavailable — network, expired token, Worker down — run `node scripts/kb-sync.mjs` and use direct grep/read, noting that the snapshot may lag the live corpus.
 - **Write path:** `node scripts/kb-sync.mjs wish "<coverage request>"` appends and best-effort pushes the KB wishlist. This requires write-capable ambient Git credentials or `GH_TOKEN`; a push failure must be reported but does not sink the design session.
 - **Secrets:** `GH_TOKEN` may be loaded from the environment or an ignored `.env`. The sync script passes it as a per-command HTTP header and does not persist it in `kb/.git/config`.
 
 ### MCP servers and tool boundaries
 
-- **`kb-query`:** repo-configured stdio adapter over the **external** KB materialized in `kb/`. Optional accelerator; direct files remain the fallback.
+- **`kb-query`:** remote HTTP server owned and deployed by the **external** KB repo. Optional accelerator; a `kb-sync`'d `kb/` and direct file reads remain the fallback.
 - **`axio-query`:** repo-local stdio server at `scripts/axio-mcp-server.mjs`. It exposes current Axiomancer cards, enemies, effects, and keywords from `devlog/data/` plus `axiomancer-mechanics/docs/keyword-atlas.md`. It regenerates stale catalog data through `npm run catalog:export` when possible. It is not external data and never outranks mechanics source files.
 - **`playwright`:** `.mcp.json` invokes `npx -y @playwright/mcp@latest` with isolated headless Chromium. This is development/test tooling, not runtime architecture. Native Playwright scripts remain available when MCP permissions or transport fail.
 - **Failure law:** MCP improves retrieval and browser control but may not become the only route to evidence. Every MCP surface must retain a file, script, or CLI fallback.
-- **Verification:** run `node scripts/axio-mcp-server.test.mjs` for the repo-local server. For KB recovery, sync first and then invoke the server through the configured MCP client.
+- **Verification:** run `node scripts/axio-mcp-server.test.mjs` for the repo-local server. For the KB server, check `/health` for `configured:true` and a `build.commit`, then call `kb_overview` through the configured MCP client; a `401` is a client-side token problem, a `503` is a missing Worker secret.
 
 ### SomberSoft company doctrine and decisions
 

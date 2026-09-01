@@ -84,8 +84,8 @@ rules/state/RNG in a presenter.
 
 ## Prior art
 
-Consult the KB (`mcp__kb-query__*` or `kb/` via
-`node scripts/kb-sync.mjs`) for narrative prior art — Disco Elysium,
+Consult the KB (`mcp__kb-query__*`, served live over HTTP; or a local
+`kb/` grep via `node scripts/kb-sync.mjs` as fallback) for narrative prior art — Disco Elysium,
 Pathologic 2, Undertale, Hades patterns live in the board-game and
 reception corpora; cite `kb:<slug>/<doc> (src-NNN)`, label memory as
 `(memory)`. The specs pipeline (`axiomancer-mechanics/specs/story/`,

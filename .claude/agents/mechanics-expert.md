@@ -70,14 +70,17 @@ knowledge base before answering from memory.
 `mcp__kb-query__*` tools are available in your session, use them
 instead of manual sync+grep: `kb_overview` for the corpus map,
 `kb_find_games` to filter by mechanics slug or better-if label,
-`kb_search` to locate claims, `kb_read_doc` to read a doc. They read
-the same `kb/` files, so citations come out identical. If the tools
+`kb_search` to locate claims, `kb_read_doc` to read a doc. They resolve
+over HTTP against the KB's deployed Worker — same docs, same `src-NNN`
+ids, so citations come out identical to a grep of `kb/`, except the
+tools are current and a local `kb/` may be months old. If the tools
 are absent, error with "corpus not found", or are permission-blocked
 (known gap: MCP grants don't always propagate into sub-agent
 contexts), fall back to the manual path below — it is always
 sufficient.
 
-1. `node scripts/kb-sync.mjs` (clones/refreshes `kb/`, gitignored).
+1. `node scripts/kb-sync.mjs` (clones/refreshes `kb/`, gitignored) —
+   needed only for this grep fallback, never for the `kb_*` tools.
 2. Grep `kb/KnowledgeBase/BoardGames/` for the mechanic / problem shape.
    Frontmatter first (`type:`, `confidence:`, `status:`), then the
    matching doc bodies — they are small; read the two best, not all.
