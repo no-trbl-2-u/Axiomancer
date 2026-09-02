@@ -281,8 +281,9 @@ const escalationHeavy = () => makeEnemy(300, [
     phase(3, 'heart', [{ damage: 22, enemyHeal: 10 }], true),
 ]);
 
-/** The control-lock policy's preferred candidate against this threat. */
-function preferredControlCard(enemy: Enemy): string {
+/** The control-lock policy's ranking of the candidates against this threat,
+ *  best first (ties break to CONTROL_CANDIDATES order, like the sim's argmax). */
+function controlRanking(enemy: Enemy): string[] {
     clearSandboxCards();
     registerSandboxCards([...SURFACE_CARDS]);
     const state = rollEncounterDice(
@@ -290,15 +291,14 @@ function preferredControlCard(enemy: Enemy): string {
     ).state;
     const policy = COMBAT_SIM_POLICIES['control-lock'];
     const rng = () => 0.5; // control-lock never consumes rng; fixed for hygiene
-    let best: CombatCard | null = null;
-    let bestScore = -Infinity;
-    for (const id of CONTROL_CANDIDATES) {
-        const card = toCombatCard(id, getCardById, lookupEffect);
+    const scored = CONTROL_CANDIDATES.map((id, i) => {
+        const card: CombatCard | null = toCombatCard(id, getCardById, lookupEffect);
         expect(card, `${id} must project`).not.toBeNull();
-        const score = policy.rankCard(state, card!, rng);
-        if (score > bestScore) { bestScore = score; best = card; }
-    }
-    return best!.id;
+        return { id, i, score: policy.rankCard(state, card!, rng) };
+    });
+    return scored
+        .sort((a, b) => (b.score - a.score) || (a.i - b.i))
+        .map(e => e.id);
 }
 
 describe('WS8.4 — control choice should be a matchup read (falsifiable)', () => {
@@ -315,12 +315,32 @@ describe('WS8.4 — control choice should be a matchup read (falsifiable)', () =
     // "documents the kill signal" until `plan/CRITIQUE.md` [MED]
     // "control-lock sim policy is threat-blind — WS8 surface variety
     // unexploited" (session-closeout 2026-07-12) was addressed.
-    it('preferred control card differs by threat (damage / rider / escalation)', () => {
-        const picks = new Set([
-            preferredControlCard(damageHeavy()),
-            preferredControlCard(riderHeavy()),
-            preferredControlCard(escalationHeavy()),
-        ]);
-        expect(picks.size).toBeGreaterThan(1);
+    //
+    // THE BIG NUMBERS REWRITE (2026-09-02): `scold's-bridle` — the canon's own
+    // control card, and the only non-fixture candidate — was rewritten to
+    // "Deal 11. STAGGER 1. Apply BACKFIRE 4 for 3 turns", which makes it the
+    // argmax on BOTH branches of `controlSurfaceBonus`. The single-argmax form
+    // of this probe therefore collapsed to one pick. The claim it was actually
+    // making — control choice is a matchup READ, not a fixed favourite — is
+    // tested here on the whole RANKING instead of just its head, which is the
+    // stronger statement and does not depend on which synthetic fixture
+    // happens to out-stat the live card this month.
+    it('control-lock re-ranks the control candidates by threat (rider vs clean)', () => {
+        const rider = controlRanking(riderHeavy());
+        const damage = controlRanking(damageHeavy());
+        const escalation = controlRanking(escalationHeavy());
+
+        // A rider on the telegraph flips the policy onto its BACKFIRE branch,
+        // so the ordering is not the one a clean big-hit threat produces.
+        expect(rider).not.toEqual(damage);
+        expect(rider).not.toEqual(escalation);
+        // Every candidate is ranked (no silent drop).
+        expect(rider.slice().sort()).toEqual(CONTROL_CANDIDATES.slice().sort());
+        // The inversion IS the read: against a rider the policy values the
+        // deny-punish drip (pure BACKFIRE) above the stance pin; against a
+        // clean big-hit threat the stance pin's rung + certainty wins instead.
+        expect(rider.indexOf('fx-punish-drip')).toBeLessThan(rider.indexOf('fx-stance-pin'));
+        expect(damage.indexOf('fx-stance-pin')).toBeLessThan(damage.indexOf('fx-punish-drip'));
+        expect(escalation.indexOf('fx-stance-pin')).toBeLessThan(escalation.indexOf('fx-punish-drip'));
     });
 });

@@ -124,7 +124,9 @@ describe('projectCombatOutcome — the consolidated status kill-path readout', (
         expect(reap.ready).toBe(true);
         expect(reap.ready).toBe(expectedReap.ready);
         expect(reap.amount).toBe(expectedReap.amount);
-        expect(reap.amount).toBe(9); // 3 per Soul × 3 Souls, neutral read (Profane Canon)
+        // BIG NUMBERS (2026-09-02): miserere prints `reap_all` at burstPerSoul
+        // 14 (was 3). 14 × 3 Souls on a neutral read.
+        expect(reap.amount).toBe(42);
     });
 
     it('an empty Soul bank leaves the reap finisher present but NOT ready', () => {

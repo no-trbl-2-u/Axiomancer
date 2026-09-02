@@ -13,6 +13,11 @@
  * never be referenced by a combat card. Every OTHER old id is gone, and the
  * retired CARD-vocabulary ids below are banned from `cards.library.ts`
  * forever (ids die; they are never renamed).
+ *
+ * THE BIG NUMBERS REWRITE (2026-09-02, §3 L20 / §10) repealed the CLOSED
+ * vocabulary: a card may now name any live effect id. What is still enforced
+ * is the bug-detector half — a card's effect ids must RESOLVE, and the retired
+ * ids stay dead forever.
  */
 
 import { describe, it, expect } from 'vitest';

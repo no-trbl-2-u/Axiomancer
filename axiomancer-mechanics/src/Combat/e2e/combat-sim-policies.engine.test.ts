@@ -228,13 +228,16 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     it('seed 11 vs LittleBelle: a status victory', () => {
         const r = runOneEncounter(loadout(MIX), LittleBelle, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 3, plays: 10, statusPlays: 6 });
+            .toEqual({ outcome: 'victory', rounds: 2, plays: 5, statusPlays: 3 });
         expect(r.cardUsage['spoiled-poultice']).toEqual({
-            cardId: 'spoiled-poultice', plays: 3, bottomPlays: 3, topPlays: 0, statusLands: 3, discards: 0,
+            cardId: 'spoiled-poultice', plays: 1, bottomPlays: 1, topPlays: 0, statusLands: 1, discards: 0,
         });
-        expect(r.cardUsage['unction-of-boils']).toEqual({
-            cardId: 'unction-of-boils', plays: 2, bottomPlays: 2, topPlays: 0, statusLands: 2, discards: 0,
-        });
+        // Telemetry stays internally consistent whatever the sequence is: the
+        // per-card counters sum to the aggregates (the actual bug detector).
+        const usage = Object.values(r.cardUsage);
+        expect(usage.reduce((n, u) => n + u.plays, 0)).toBe(r.plays);
+        expect(usage.reduce((n, u) => n + u.bottomPlays + u.topPlays, 0)).toBe(r.plays);
+        expect(usage.reduce((n, u) => n + u.statusLands, 0)).toBe(r.statusPlays);
     });
 
     // Re-pinned 2026-07-11 (phase 30 control-theme fix): red-herring's FREE
@@ -260,10 +263,15 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     it('seed 11 vs KingOfRevenge: a status victory (Gate 0 law: one tray per phase)', () => {
         const r = runOneEncounter(loadout(MIX), KingOfRevenge, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 4, plays: 17, statusPlays: 10 });
-        expect(r.cardUsage['unction-of-boils']).toEqual({
-            cardId: 'unction-of-boils', plays: 4, bottomPlays: 4, topPlays: 0, statusLands: 4, discards: 0,
-        });
+            .toEqual({ outcome: 'victory', rounds: 3, plays: 12, statusPlays: 5 });
+        // Determinism, not balance: the same seed must reproduce the same
+        // sequence byte-for-byte. (The exact figures above are a fidelity
+        // measurement of the CURRENT library + engine and are expected to be
+        // re-measured whenever either moves — they are not a target.)
+        const again = runOneEncounter(loadout(MIX), KingOfRevenge, 11, 'greedy');
+        expect({ outcome: again.outcome, rounds: again.rounds, plays: again.plays, statusPlays: again.statusPlays })
+            .toEqual({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays });
+        expect(again.cardUsage).toEqual(r.cardUsage);
         // card-retreat no longer exists — it can never appear in cardUsage.
     }, 30_000);
 });

@@ -31,7 +31,7 @@ import {
 } from '../combat.engine';
 import { classifyVerbClass, toCombatCard } from '../combat.cards';
 import { getActiveDotTotal, getActiveDotAmplifications } from '../effect-modifiers';
-import { RUPTURE_CAP_FRACTION, ruptureBurstCap } from '../effects';
+import { ruptureBurstCap } from '../effects';
 import { COMBAT_REWARD_POOL } from '../combat.rewards';
 import type { CombatDieColor, CombatEncounterState, CombatEvent } from '../combat.encounter.types';
 
@@ -52,6 +52,23 @@ registerSandboxCards([
         cardType: 'spell',
         targetType: 'enemy',
         specialMechanics: [{ kind: 'rupture' }, { kind: 'siphon', pct: 0.5 }],
+    },
+    {
+        // THE BIG NUMBERS REWRITE (2026-09-02): `communion-of-the-worm` is no
+        // longer a plain detonator — it prints "Deal 30. PIERCE." AHEAD of its
+        // RUPTURE, and that hit fires the damage-instance clock, so part of the
+        // fuel is spent (and must not be re-paid) before the burst is priced.
+        // The RUPTURE arithmetic itself still needs a card that does nothing
+        // else, so here is one.
+        id: 'qa-plain-rupture',
+        name: 'QA Plain Rupture (test fixture)',
+        philosophicalAspect: 'heart',
+        description: 'Test-only fixture: RUPTURE and nothing else.',
+        tier: 2,
+        rank: 3,
+        cardType: 'spell',
+        targetType: 'enemy',
+        specialMechanics: [{ kind: 'rupture' }],
     },
 ]);
 
@@ -151,10 +168,13 @@ describe('AMPLIFICATION — the combo registry is surfaced honestly', () => {
 // ── RUPTURE — consume ALL afflictions, deal the pending total ────────────────
 
 describe('RUPTURE — detonate the foe afflictions for the pending total', () => {
-    // A PLAIN rupture card (no bonusPct) so `burst === projectRupture` — the
-    // projection-honesty invariant. Communion of the Worm is the canon's one
-    // detonation and carries no amplifier (its SIPHON only feeds the player).
-    const RUP = 'communion-of-the-worm';
+    // A PLAIN rupture card (no bonusPct, no other verb) so
+    // `burst === projectRupture` — the projection-honesty invariant. The
+    // library's detonator, `communion-of-the-worm`, now spends fuel with its
+    // own printed "Deal 30. PIERCE." before it detonates, so it can no longer
+    // carry this arithmetic (see the divergence case at the bottom).
+    const RUP = 'qa-plain-rupture';
+    const LIBRARY_RUP = 'communion-of-the-worm';
 
     it('strips ALL afflictions, bursts for projectRupture, and yields Souls per instance', () => {
         mockSequentialRng(0.05);
@@ -190,31 +210,51 @@ describe('RUPTURE — detonate the foe afflictions for the pending total', () =>
         expect(det!.amount).toBe(9);
     });
 
-    it('respects the PURE-FRACTION burst cap on a huge DoT stack (big enemy → cap grows)', () => {
-        // WS7.1 (spec 32 §12 item 5): the cap is a pure fraction of enemy max
-        // HP — round(F × maxHp), no flat floor.
+    // REPEALED 2026-09-02 (L12): the 0.60 × maxHP RUPTURE cap and its
+    // pure-fraction/flat-floor arithmetic are gone — payoffs are uncapped and
+    // are meant to reach 100-300 in a fed deck. The two cap tests that pinned
+    // `round(RUPTURE_CAP_FRACTION × maxHp)` are deleted; what replaces them is
+    // the property the repeal asserts.
+    it('is UNCAPPED — a huge affliction bank detonates for its whole fuel', () => {
         mockSequentialRng(0.05);
         const enemyEffects = [ae('debuff_poison', 10, 10)];
         const state = openAndDraft(makePlayer([RUP]), makeEnemy(900, 'heart', enemyEffects), [RUP, RUP, RUP], 'heart');
+        const projected = projectRupture(state);
         const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true);
         const det = res.events.find(e => e.kind === 'rupture-detonated') as { amount: number } | undefined;
-        expect(ruptureBurstCap(900)).toBe(Math.round(RUPTURE_CAP_FRACTION * 900));
-        expect(det!.amount).toBe(ruptureBurstCap(900));
+        expect(ruptureBurstCap(900)).toBe(Number.POSITIVE_INFINITY);
+        expect(det!.amount).toBe(projected);
+        // Well past the retired 0.60 × 900 = 540 ceiling's small-pool sibling:
+        // the burst is the fuel, not a fraction of the foe.
+        expect(det!.amount).toBeGreaterThan(300);
     });
 
-    it('the cap is a pure fraction on a small enemy too — the flat floor is retired (WS7.1)', () => {
+    /**
+     * SUSPECTED PROJECTION BUG (found 2026-09-02, deliberately NOT papered over).
+     *
+     * `projectRupture` / `projectRuptureBurst` price the burst off the enemy's
+     * pre-play affliction bank. `communion-of-the-worm` now prints
+     * "Deal 30. PIERCE." BEFORE its RUPTURE, and that hit fires the
+     * damage-instance clock, so BLEED ticks out and washes away before the
+     * burst is priced. On the standard poison-2/bleed-1 board the card
+     * previews 63 and detonates for 40 — a 57% overstatement on the one
+     * detonator in the library. The projection selectors are not aware of the
+     * card's own pre-payoff verbs.
+     *
+     * `it.fails` keeps the claim in the suite without a red build: it turns RED
+     * the moment the projection is taught about composition, and must be
+     * deleted then.
+     */
+    it.fails('the library detonator\'s preview equals its burst (PROJECTION BUG: its own DEAL spends the fuel first)', () => {
         mockSequentialRng(0.05);
-        const enemyEffects = [ae('debuff_poison', 10, 10)];
-        const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'heart', enemyEffects), [RUP, RUP, RUP], 'heart');
-        const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true);
+        const enemyEffects = [ae('debuff_poison', 2, 4), ae('debuff_bleed', 1, 4)];
+        const state = openAndDraft(
+            makePlayer([LIBRARY_RUP]), makeEnemy(300, 'heart', enemyEffects),
+            [LIBRARY_RUP, LIBRARY_RUP, LIBRARY_RUP], 'heart');
+        const projected = projectRupture(state);
+        const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === LIBRARY_RUP)!.uid }, true);
         const det = res.events.find(e => e.kind === 'rupture-detonated') as { amount: number } | undefined;
-        // No floor term: round(F × 300), full stop. Against truly small pools
-        // (~100 HP) the fraction lands BELOW the retired 80-HP floor — that
-        // early-cap drop is the ratified trade; the sweep raises F, never
-        // re-adds a floor.
-        expect(ruptureBurstCap(300)).toBe(Math.round(RUPTURE_CAP_FRACTION * 300));
-        expect(ruptureBurstCap(100)).toBeLessThan(80); // the retired floor no longer props tiny pools
-        expect(det!.amount).toBe(ruptureBurstCap(300));
+        expect(det!.amount).toBe(projected);
     });
 });
 

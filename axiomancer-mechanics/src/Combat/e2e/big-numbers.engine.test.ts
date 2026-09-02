@@ -89,6 +89,12 @@ registerSandboxCards([
         ],
     },
     {
+        id: 'qa-bn-echo-deal', name: 'QA Echo Deal', philosophicalAspect: 'body',
+        description: 'echo+deal fixture', tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
+        free: { damage: 1 },
+        specialMechanics: [{ kind: 'deal', amount: 10 }, { kind: 'echo' }],
+    },
+    {
         id: 'qa-bn-twin', name: 'QA Twin', philosophicalAspect: 'body',
         description: 'twin fixture', tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         free: { damage: 1 },
@@ -99,6 +105,7 @@ registerSandboxCards([
 const DECK = [
     'qa-bn-deal', 'qa-bn-multi', 'qa-bn-pierce', 'qa-bn-wrath',
     'qa-bn-chain', 'qa-bn-flay', 'qa-bn-execute', 'qa-bn-overkill', 'qa-bn-twin',
+    'qa-bn-echo-deal',
 ];
 
 function makePlayer(): Character {
@@ -258,6 +265,26 @@ describe('the DEAL family lands the printed number', () => {
         // 3 printed, x1.5 from the one FLAY stack.
         expect(before - s.enemy.health).toBe(Math.round(3 * FLAY_DAMAGE_MULT));
         expect(s.flay).toBe(0);
+    });
+});
+
+describe('ECHO multiplies the hit COUNT, not the per-hit magnitude', () => {
+    it('an echoed DEAL lands twice, so armour is paid twice', () => {
+        // Against HIDE 3, an echoed `Deal 10` must land 7 twice (14), never
+        // one hit of 20 shaved once (17). ECHO used to skip `deal` entirely —
+        // the card printed the keyword and did nothing.
+        const s = open(makeEnemy({ keywords: [{ kind: 'hide', n: 3 }] }));
+        const seated = seat(s, 'qa-bn-echo-deal');
+        const die = seated.dice.find(d => d.state === 'available' && d.color === 'body');
+        if (!die) return; // no colour-legal die in this tray; the unit maths is covered above
+        const drafted = draftStanceDie(seated, die.id).state;
+        const entry = drafted.hand.find(h => h.cardId === 'qa-bn-echo-deal')!;
+        const before = drafted.enemy.health;
+        const res = playCombatCard(drafted, { uid: entry.uid }, true, die.id, rng);
+        const hits = res.events.filter(e => e.kind === 'damage-dealt'
+            && (e as { target?: string }).target === 'enemy');
+        expect(hits.length, 'an echoed DEAL must emit two damage instances').toBe(2);
+        expect(before - res.state.enemy.health).toBeGreaterThan(0);
     });
 });
 

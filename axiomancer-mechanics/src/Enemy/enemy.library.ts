@@ -537,7 +537,7 @@ export const KingOfRevenge = createEnemy({
     logic: 'boss',
     // Injury is the most durable architecture — the village climax is a wall,
     // above the L6 boss curve, and it does not learn to flinch until it must.
-    vitae: 380,
+    vitae: 160,
     keywords: [
         { kind: 'hide', n: 3 },
         { kind: 'wounding', n: 18 },
@@ -674,7 +674,7 @@ export const Kudan = createEnemy({
     // On the L10 unique curve exactly: it is not a wall, it is an appointment
     // with a sentence. UNSHAKEN because it already knows how this ends —
     // right up until the moment it is interrupted.
-    vitae: 670,
+    vitae: 260,
     keywords: [
         { kind: 'hide', n: 4 },
         { kind: 'unshaken' },
@@ -987,7 +987,7 @@ export const Mirac = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'boss',
     logic: 'boss',
-    vitae: 900,
+    vitae: 330,
     keywords: [
         { kind: 'hide', n: 6 },
         { kind: 'unshaken' },
@@ -1227,7 +1227,7 @@ export const RawheadRex = createEnemy({
     logic: 'boss',
     // A slab of cellar meat: well above the curve, but low HIDE — nothing about
     // rawhead is armoured. It just does not stop.
-    vitae: 1400,
+    vitae: 500,
     keywords: [
         { kind: 'hide', n: 5 },
         { kind: 'brutal' },
@@ -1291,7 +1291,7 @@ export const FateSpinner = createEnemy({
     logic: 'boss',
     // An old man in a web. Under the curve — the web is the durability, and the
     // web is ELUSIVE until you land a rung on him.
-    vitae: 1000,
+    vitae: 360,
     keywords: [
         { kind: 'hide', n: 8 },
         { kind: 'elusive' },
@@ -1414,10 +1414,10 @@ export const RaAminKa = createEnemy({
     difficulty: 'boss',
     logic: 'boss',
     // Layer on layer of signed linen: high HIDE, and the wrappings re-wrap.
-    vitae: 1500,
+    vitae: 540,
     keywords: [
-        { kind: 'hide', n: 9 },
-        { kind: 'regrow', n: 14 },
+        { kind: 'hide', n: 8 },
+        { kind: 'regrow', n: 5 },
         { kind: 'wounding', n: 45 },
     ],
     stages: [
@@ -1701,11 +1701,11 @@ export const Rangda = createEnemy({
     logic: 'boss',
     // Under the curve — a widow, not a wall. The pressure is REGROW: grief has
     // been in training longer than your certainty.
-    vitae: 1900,
+    vitae: 670,
     keywords: [
-        { kind: 'hide', n: 9 },
+        { kind: 'hide', n: 8 },
         { kind: 'venom', n: 14 },
-        { kind: 'regrow', n: 20 },
+        { kind: 'regrow', n: 7 },
     ],
     stages: [
         {
@@ -1802,9 +1802,9 @@ export const ZomaAscendant = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'boss',
     logic: 'boss',
-    vitae: 2000,
+    vitae: 700,
     keywords: [
-        { kind: 'hide', n: 10 },
+        { kind: 'hide', n: 8 },
         { kind: 'swift' },
         { kind: 'wounding', n: 60 },
     ],
@@ -1865,9 +1865,9 @@ export const ElderFireGiant = createEnemy({
     logic: 'boss',
     // The roster's wall. Top of the +25% band, the highest HIDE outside the
     // uniques, and nothing you do makes it hurry.
-    vitae: 2680,
+    vitae: 950,
     keywords: [
-        { kind: 'hide', n: 15 },
+        { kind: 'hide', n: 8 },
         { kind: 'unshaken' },
         { kind: 'brutal' },
     ],
@@ -1928,7 +1928,7 @@ export const Tezcatlipoca = createEnemy({
     logic: 'boss',
     // Smoke, so a small printed HIDE — but ELUSIVE doubles it to 16 until you
     // stagger the mirror. The whole fight is the control check.
-    vitae: 1800,
+    vitae: 630,
     keywords: [
         { kind: 'hide', n: 8 },
         { kind: 'elusive' },
@@ -1989,9 +1989,9 @@ export const ArchDemon = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'boss',
     logic: 'boss',
-    vitae: 2450,
+    vitae: 860,
     keywords: [
-        { kind: 'hide', n: 11 },
+        { kind: 'hide', n: 8 },
         { kind: 'brutal' },
         { kind: 'ravenous' },
     ],
@@ -2053,11 +2053,11 @@ export const Beelzebub = createEnemy({
     logic: 'boss',
     // A swarm has no armour worth the name; it has replacements. Low HIDE, the
     // roster's heaviest REGROW — kill it faster than it recruits.
-    vitae: 2500,
+    vitae: 880,
     keywords: [
         { kind: 'hide', n: 8 },
         { kind: 'venom', n: 18 },
-        { kind: 'regrow', n: 40 },
+        { kind: 'regrow', n: 13 },
     ],
     stages: [
         {
@@ -2117,9 +2117,9 @@ export const Death = createEnemy({
     logic: 'strategic',
     // Just under the L49 unique curve, and HIDE below the band: Death is not
     // armoured. It is punctual, and it does not flinch, ever.
-    vitae: 2900,
+    vitae: 1010,
     keywords: [
-        { kind: 'hide', n: 12 },
+        { kind: 'hide', n: 8 },
         { kind: 'unshaken' },
         { kind: 'wounding', n: 70 },
     ],
@@ -2200,11 +2200,11 @@ export const TheAbortive = createEnemy({
     logic: 'boss',
     // Well above the curve: a strength that was never spent on living has all
     // of it left. REGROW because nothing has ever been drawn down.
-    vitae: 3400,
+    vitae: 1200,
     keywords: [
-        { kind: 'hide', n: 14 },
+        { kind: 'hide', n: 8 },
         { kind: 'brutal' },
-        { kind: 'regrow', n: 45 },
+        { kind: 'regrow', n: 15 },
     ],
     stages: [
         {
@@ -2529,7 +2529,7 @@ export const TheHarbormaster = createEnemy({
     logic: 'boss',
     // Above the L18 boss curve: he is the gate, and gates are the wall part of
     // a wall. UNSHAKEN because a scale does not tremble for anyone's argument.
-    vitae: 950,
+    vitae: 350,
     keywords: [
         { kind: 'hide', n: 6 },
         { kind: 'unshaken' },
@@ -2696,7 +2696,7 @@ export const TheWaterreeve = createEnemy({
     logic: 'boss',
     // A man with a book, slightly under the curve. SWIFT because he has already
     // audited your guard; VENOM because that is what interest looks like.
-    vitae: 980,
+    vitae: 350,
     keywords: [
         { kind: 'hide', n: 4 },
         { kind: 'swift' },
@@ -2824,7 +2824,7 @@ export const ThePortreeve = createEnemy({
     logic: 'boss',
     // He outlived every rival claim; the durability is the character. UNSHAKEN
     // is a ruling that will not be overturned by anything you do to him.
-    vitae: 1330,
+    vitae: 490,
     keywords: [
         { kind: 'hide', n: 8 },
         { kind: 'unshaken' },
@@ -2902,7 +2902,7 @@ export const TheDoorwarden = createEnemy({
     logic: 'boss',
     // Act I's lesson is HIDE, so it is printed hard for the level: jointed
     // bronze, and every hit you land is a knock he does not answer.
-    vitae: 540,
+    vitae: 220,
     keywords: [
         { kind: 'hide', n: 6 },
         { kind: 'unshaken' },
@@ -2980,7 +2980,7 @@ export const TheIndex = createEnemy({
     logic: 'boss',
     // Under the curve — it is drawers and paper. It bleeds ink (VENOM) and it
     // files you (WOUNDING), which is the act's whole joke.
-    vitae: 550,
+    vitae: 220,
     keywords: [
         { kind: 'hide', n: 4 },
         { kind: 'venom', n: 7 },
@@ -3063,7 +3063,7 @@ export const TheSophist = createEnemy({
     // Well under the curve: he is not a wall, he is an angle. SWIFT because he
     // is holding your own guard at a more flattering slant, ELUSIVE because he
     // is never standing where the argument is until you stagger him into it.
-    vitae: 700,
+    vitae: 270,
     keywords: [
         { kind: 'hide', n: 5 },
         { kind: 'swift' },
@@ -3202,11 +3202,11 @@ export const TheIncompleteness = createEnemy({
     // digit. UNSHAKEN because it was never going to flinch; REGROW because it
     // cannot be finished; four stages because it gets a new premise every time
     // you land a true thing on it. There is no mercy out and there never was.
-    vitae: 6430,
+    vitae: 2210,
     keywords: [
-        { kind: 'hide', n: 40 },
+        { kind: 'hide', n: 8 },
         { kind: 'unshaken' },
-        { kind: 'regrow', n: 55 },
+        { kind: 'regrow', n: 18 },
     ],
     stages: [
         {

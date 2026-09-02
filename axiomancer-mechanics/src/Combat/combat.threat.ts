@@ -276,10 +276,13 @@ function rotateStance(from: Stance, steps: number): Stance {
  * reads as a real threat against the new VITAE pools, and the separate global
  * `THREAT_DAMAGE_SCALE` fudge factor was folded in here and deleted (one knob,
  * not two). Reference points at `damageWeight` 1.0, phase 0:
- * L1 normal 8 · L6 boss 31 · L7 elite 25 · L18 boss 76 · L110 unique 400.
+ * Measured against the playtest matrix on 2026-09-02 and pulled back from
+ * 2.5: at 2.5 a mid-campaign boss killed the player in 4 phases before any
+ * deck could assemble. Reference points at weight 1.0, phase 0:
+ * L1 normal 7 · L6 boss 23 · L7 elite 19 · L18 boss 52 · L110 unique 264.
  */
 const THREAT_BASE = 6;
-const THREAT_PER_LEVEL = 2.5;
+const THREAT_PER_LEVEL = 0.8;
 
 /** Damage an Overwhelmed phase deals: a level/difficulty budget × the phase's
  *  authored `damageWeight`. Shared by authored sequences and the generator. */

@@ -21,7 +21,7 @@ import type { BaseStats, Character } from '../Character/types';
 import type { Card, CardTier, CardRank } from '../Cards/types';
 import { cardLibrary } from '../Cards/cards.library';
 import { Player } from '../Character/characters.mock';
-import { deepClone, deriveStats } from '../Utils';
+import { deepClone, deriveStats, calculateMaxHealth } from '../Utils';
 
 /**
  * Deck-MATURITY level implied by a card's RANK (the quality ladder Doxa 1 …
@@ -92,7 +92,13 @@ export const COMBAT_STAGE_PROFILES: Record<CombatStageId, CombatStageProfile> = 
         playerLevel: 20,
         playerBaseStats: { heart: 17, body: 17, mind: 17 },
         playerMaxHealth: 255,
-        maxCardTier: 2,
+        // THE BIG NUMBERS REWRITE (2026-09-02) — raised 2 -> 3. `tier` is the
+        // RESIST tier, never a power axis; using it as a maturity gate was a
+        // proxy that `rankMaturityLevel` already does properly (rank 5 wants
+        // level 10, rank 6 level 12). At level 20 a player plainly holds Skull
+        // and Saint cards, and every one of them is tier 3 — so the old cap
+        // sent a Rib-capped deck against thousand-VITAE bosses and read 0%.
+        maxCardTier: 3,
         enemySlugs: [
             'tri-eyes', 'mirac', 'hasshaku-sama',
             'jeweled-tree', 'rawhead-rex',
@@ -173,8 +179,16 @@ export function buildStagePlayer(stage: CombatStageProfile): Character {
     player.level = stage.playerLevel;
     player.baseStats = { ...stage.playerBaseStats };
     player.derivedStats = deriveStats(player.baseStats);
-    player.maxHealth = stage.playerMaxHealth;
-    player.health = stage.playerMaxHealth;
+    // THE BIG NUMBERS REWRITE (2026-09-02) — DERIVE the pool, never author it.
+    // These profiles used to hard-code `playerMaxHealth` at the old
+    // `stats x 5` scale (mid 255, late 570). When the formula moved to
+    // `50 + stats x 8` the harness kept fighting the new enemies with the old
+    // body, and every mid/late/impossible cell read 0% — a measurement
+    // artefact that looked exactly like a balance catastrophe. The authored
+    // field is retained only as documentation of the profile's era.
+    const vitae = calculateMaxHealth(stage.playerLevel, player.baseStats);
+    player.maxHealth = vitae;
+    player.health = vitae;
     player.knownCards = stageEligibleCardIds(stage);
     return player;
 }

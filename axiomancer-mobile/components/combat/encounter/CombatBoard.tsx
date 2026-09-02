@@ -1323,9 +1323,30 @@ export const CombatBoard = React.memo(function CombatBoard({
                     hand's gesture area swallowed the taps) so every tile stays tappable.
                     RIGHT-aligned (owner playtest 2026-07-18): the left edge belongs to
                     the signature-rune column, which was hiding these tiles. */}
-                {(vm.player.effects.length > 0 || vm.player.guard > 0 || vm.player.seals.length > 0) && (
+                {(vm.player.effects.length > 0 || vm.player.guard > 0 || vm.player.seals.length > 0
+                    || vm.player.wrathVisible || vm.player.chainVisible || vm.player.twinArmed) && (
                     <View style={styles.statusStrip} pointerEvents="box-none">
                         {vm.player.guard > 0 ? <Text style={styles.guardChip} testID="combat-guard">🛡 {vm.player.guard}</Text> : null}
+                        {/* THE BIG NUMBERS REWRITE — the damage-scaler ledgers. They
+                            rode invisibly before: WRATH is combat-long, CHAIN dies at
+                            the end of a turn that fed it nothing, and neither was on
+                            the board. Same rail as GUARD, same visibility law as the
+                            alt-win meters (a value, or a deck that feeds one). */}
+                        {vm.player.wrathVisible ? (
+                            <Text style={[styles.ledgerChip, { color: AXM.blood, borderColor: AXM.bloodMed }]} testID="combat-wrath">
+                                ⚔ WRATH {vm.player.wrath}
+                            </Text>
+                        ) : null}
+                        {vm.player.chainVisible ? (
+                            <Text style={[styles.ledgerChip, { color: AXM.sulfur, borderColor: AXM.sulfurMed }]} testID="combat-chain">
+                                ⛓ CHAIN {vm.player.chain}
+                            </Text>
+                        ) : null}
+                        {vm.player.twinArmed ? (
+                            <Text style={[styles.ledgerChip, { color: AXM.parchment, borderColor: AXM.divider }]} testID="combat-twin">
+                                ‡ TWIN
+                            </Text>
+                        ) : null}
                         <EffectChips effects={vm.player.effects} onChip={onChip} align="flex-end" />
                         {/* Phase 50 — Seal chips (Phase 33d's state.glyphs, renamed "Seal" per
                             Phase 49 decision 3), merged into this row per Phase 49 decision 1. */}
@@ -1796,6 +1817,13 @@ const useStyles = makeStyles((AXM) => ({
     guardChip: {
         fontFamily: FONTS.mono, fontSize: 11, color: '#6fb3e0', letterSpacing: 0.5,
         backgroundColor: 'rgba(0,0,0,0.7)', borderWidth: 1, borderColor: '#6fb3e055', borderRadius: 4,
+        paddingHorizontal: 5, paddingVertical: 2, overflow: 'hidden',
+    },
+    // THE BIG NUMBERS REWRITE — WRATH / CHAIN / TWIN, cut to GUARD's chip so
+    // the whole rail reads as one ledger row. Colour comes from the call site.
+    ledgerChip: {
+        fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 0.5,
+        backgroundColor: AXM.backdrop, borderWidth: 1, borderRadius: 4,
         paddingHorizontal: 5, paddingVertical: 2, overflow: 'hidden',
     },
 

@@ -37,6 +37,7 @@ import { makeStyles, usePalette } from '@/theme/runtime';
 import type {
     CombatEnemyPaneVM, CombatPlayerPaneVM, CombatEffectChipVM, CombatSealVM,
 } from '@/state/presenters/combat-encounter.engine';
+import { selectCombatLogLines } from '@/state/presenters/combat-encounter.engine';
 import { getCardById, type CombatEvent } from '@mechanics';
 import { effectGlyph } from '@/components/combat/statusGlyphs';
 import { keywordForEffect } from '@/state/combat/keywords';
@@ -498,6 +499,14 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                 pushEnemy(`FORETOLD: ${name.toUpperCase()}`, '#4f7fd6', 0);
             }
         }
+        // THE BIG NUMBERS REWRITE — the new ledgers and the two enemy beats
+        // (STAGE, a foe keyword firing) were landing silently: the numbers
+        // moved and nothing on the board said which word moved them. The
+        // wording lives ONCE, in the presenter's `selectCombatLogLines`, so
+        // this float and the log line can never drift apart.
+        selectCombatLogLines(fx.events).forEach((line, k) => {
+            if (line.float) pushEnemy(line.float, line.color, (k % 2 === 0 ? 1 : -1) * 24);
+        });
         // (a) the player took damage → enemy ANTICIPATION (pull back) → scale-led
         //     lunge; a damage-scaled board shake + red vignette at the impact apex
         //     (100ms — the shared delay baked into the shake/flash hook calls
@@ -647,6 +656,12 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                 {enemy.premiseVisible ? (
                     <AltWinMeter glyph="☞" label="CHARGE" value={enemy.premises} target={enemy.premiseAt} color={AXM.sulfur} testID="combat-premise-meter" />
                 ) : null}
+                {/* THE BIG NUMBERS REWRITE — FLAY rides the FOE: how open it is
+                    to the next few hits. No target to fill toward, so the tally
+                    renders bare (the AltWinMeter's target-0 shape). */}
+                {enemy.flayVisible ? (
+                    <AltWinMeter glyph="✂" label="FLAY" value={enemy.flay} target={0} color={AXM.rust} testID="combat-flay-meter" />
+                ) : null}
                 {/* Phase 2 (spec 30) — the status kill-path foresight. Makes the
                     DoT win path foreseeable instead of invisible accumulation:
                     a plain pending tally once stacks land, a "LETHAL IN N" call
@@ -673,6 +688,11 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                     </Text>
                     <View style={styles.hudRight} pointerEvents="box-none">
                         <IntentIcon intent={enemy.intent} />
+                        {/* THE BIG NUMBERS REWRITE — the foe's OWN keywords (HIDE 6,
+                            BRUTAL, VENOM 4). They change the arithmetic before a card
+                            is played, so they print on their own row above the
+                            statuses, and tap the same plaque a status chip does. */}
+                        <EffectChips effects={enemy.keywords} onChip={onChip} align="flex-end" />
                         <EffectChips effects={enemy.effects} onChip={onChip} align="flex-end" />
                     </View>
                 </View>

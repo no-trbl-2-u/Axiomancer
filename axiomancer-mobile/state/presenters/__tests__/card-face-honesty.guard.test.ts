@@ -152,40 +152,17 @@ describe('card-face honesty guard', () => {
         expect(offenders).toEqual([]);
     });
 
-    it('WI-2 extension (2026-08-05) — no authored PAID sentence claims a round-clock lifetime for an event-triggered DoT it carries', () => {
-        // The WI-2 sweep above only reads `faceStats`'s own 'dot' classification,
-        // which reflects a card's single PRIMARY effect (`resolvePrimary`) — a
-        // card whose primary effect is something else (e.g. Opening Statement's
-        // MARK, Exordium's CHARGE) skips that sweep entirely even though its
-        // printed PAID sentence — the authored `paidSummary`, rendered verbatim
-        // as `bottomActionText` via `cleanPaidSentence` on the hand card — still
-        // carries a secondary event-triggered DoT (critique pass 16, 2026-08-05:
-        // "Slippery Slope" printed "Inflict POISON 1 for 4 turns" though POISON
-        // ticks per card played, never per round). This sweep reads every
-        // combatEffect on every card, independent of the primary-effect
-        // classification, and fails any printed PAID sentence still shaped like
-        // the round-clock lie ("KEYWORD n for m turns") for a DoT that actually
-        // ticks per event.
-        const offenders: string[] = [];
-        for (const { id } of cardLibrary) {
-            const card = getCard(id);
-            const src = getCardById(id);
-            if (!card || !src) continue;
-            for (const ce of src.combatEffects ?? []) {
-                const def = lookupEffect(ce.effectId);
-                const trigger = (def?.payload as { damageOverTime?: { trigger?: string } } | undefined)?.damageOverTime?.trigger;
-                const isEvent = trigger === 'card-played' || trigger === 'damage-instance' || trigger === 'payoff';
-                if (!isEvent) continue;
-                const keyword = keywordForEffect(ce.effectId)?.toUpperCase();
-                if (!keyword) continue;
-                const lie = new RegExp(`\\b${keyword}\\s+\\d+\\s+for\\s+\\d+\\s*turns?\\b`, 'i');
-                if (lie.test(card.bottomActionText)) {
-                    offenders.push(`${id} → PAID sentence still says '${keyword} n for m turns' for an event-triggered DoT (trigger=${trigger})`);
-                }
-            }
-        }
-        expect(offenders).toEqual([]);
-    });
+    // REPEALED 2026-09-02 — "WI-2 extension (2026-08-05): no authored PAID
+    // sentence claims a round-clock lifetime for an event-triggered DoT it
+    // carries" is deleted here. It was pure enforcement of L7 (the per-family
+    // DoT clock law: POISON = card-played, BLEED = damage-instance, event
+    // clocks never round-tick), which THE BIG NUMBERS REWRITE voids by name.
+    // See `plan/2026-09-02-big-numbers-overhaul.prompt.md` §3, row L7, which
+    // cites this very file at :110 and :155 as enforcement to delete. The
+    // `DotTriggerClock` MECHANISM survives; WHICH family gets which clock is
+    // now a design choice, so a card printing "POISON 4 for 3 turns" is no
+    // longer categorically a lie. What survives is the NUMBER-parity half of
+    // the honesty doctrine (L22) — the sweeps above and below still hold it.
 
     it('P2 HP→VITAE sweep — no card face or detail string says "HP" (player-facing term is VITAE)', () => {
         const offenders: string[] = [];

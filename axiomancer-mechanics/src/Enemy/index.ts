@@ -244,7 +244,7 @@ export function defaultEnemyStages(
             text: 'It stops fighting like something that expects to win easily.',
             gain: [{ kind: 'swift' }],
             heal: { pct: 0.1 },
-            threatBonus: 0.25,
+            threatBonus: 0.15,
         },
         {
             at: { vitaePct: 0.25 },
@@ -252,7 +252,7 @@ export function defaultEnemyStages(
             text: 'Whatever it was holding back, it is not holding back now.',
             gain: [{ kind: 'brutal' }],
             heal: Math.round(vitae * 0.05),
-            threatBonus: 0.5,
+            threatBonus: 0.25,
         },
     ];
 }

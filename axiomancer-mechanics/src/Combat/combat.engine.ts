@@ -267,6 +267,14 @@ export const FATE_TAP_CONVICTION = 1;
  */
 export const WOUND_CARD_ID = 'the-wound';
 
+/** BRUTAL — the multiplier on whatever a foe's threat gets past your soak. */
+export const BRUTAL_DAMAGE_MULT = 1.5;
+
+/** The most every STAGE a foe has entered can add to its later phases,
+ *  combined. Stage bonuses stack on top of the escalation clock, so this is
+ *  what keeps a staged boss escalating instead of detonating. */
+export const STAGE_THREAT_BONUS_CAP = 0.5;
+
 /** FLAY — the multiplier one spent stack applies to a single hit. */
 export const FLAY_DAMAGE_MULT = 1.5;
 /** EXECUTE — the multiplier while the foe sits at or below the card's
@@ -2553,7 +2561,15 @@ function playBottomAction(
                 // Each hit is its own damage instance: BLEED-class DoTs fire
                 // once per hit and HIDE is subtracted from each, which is the
                 // whole reason `7 x 4` and `28 x 1` play differently.
-                const hits = Math.max(1, mech.hits ?? 1);
+                //
+                // ECHO/TWIN multiply the HIT COUNT, not the per-hit magnitude:
+                // an echoed `7 x 4` is eight instances of 7, so HIDE is paid
+                // eight times and a BLEED clock fires eight times. Doubling the
+                // amount instead would have made ECHO strictly better against
+                // armour than the card says. (The second `executeCard` pass
+                // only re-applies `combatEffects`, so without this DEAL was a
+                // printed keyword with zero effect — caught 2026-09-02.)
+                const hits = Math.max(1, mech.hits ?? 1) * echoFactor;
                 for (let i = 0; i < hits; i++) {
                     if (isDefeated(enemy)) break;
                     overkillExcess += landHit(mech.amount, mech.pierce === true, card.id);
@@ -2561,17 +2577,17 @@ function playBottomAction(
                 break;
             }
             case 'wrath': {
-                wrath += mech.amount;
+                wrath += mech.amount * echoFactor;
                 events.push({ kind: 'wrath-gained', cardId: card.id, amount: mech.amount, total: wrath });
                 break;
             }
             case 'flay': {
-                flayStacks += mech.stacks;
+                flayStacks += mech.stacks * echoFactor;
                 events.push({ kind: 'flay-applied', cardId: card.id, amount: mech.stacks, total: flayStacks });
                 break;
             }
             case 'chain': {
-                chain += mech.amount;
+                chain += mech.amount * echoFactor;
                 chainFedThisTurn = true;
                 events.push({ kind: 'chain-gained', cardId: card.id, amount: mech.amount, total: chain });
                 break;
@@ -4068,8 +4084,13 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                     eff.damage * THREAT_DAMAGE_SCALE * weakenMult * escalation
                     * enemyOutgoingMult * enemyThreatMult
                     // THE BIG NUMBERS REWRITE — every STAGE this foe has
-                    // entered adds its printed weight to every later phase.
-                    * (1 + (state.stageThreatBonus ?? 0))
+                    // entered adds its printed weight to every later phase,
+                    // CLAMPED: stage bonuses multiply on top of the escalation
+                    // clock (itself up to x2, x1.6 for a boss), and unbounded
+                    // they turned a four-stage unique into a one-shot by round
+                    // six. A stage should change the shape of a fight, not end
+                    // it before the deck can answer.
+                    * (1 + Math.min(STAGE_THREAT_BONUS_CAP, state.stageThreatBonus ?? 0))
                     * (overextendedId ? 0.5 : 1) * playerTakenMult
                     // Spec 33 §2 — the open stance check's rail (1 when flag-off,
                     // no check authored, or the player is stance-less).
@@ -4106,9 +4127,13 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                 if (foeSwift && guardAbsorbed + barrierAbsorbed > 0) {
                     events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'SWIFT' });
                 }
-                // BRUTAL: block it fully or take it twice.
+                // BRUTAL: whatever gets past the wall hits harder. Mage Knight's
+                // reading is "take it TWICE", which is right at Mage Knight's
+                // numbers — doubling a 6 is a lesson. Doubling a late-campaign
+                // 150 against walls that top out near 60 is a one-shot the
+                // player has no legal answer to, so it lands at +50% here.
                 if (foeBrutal && dmg > 0) {
-                    dmg *= 2;
+                    dmg = Math.round(dmg * BRUTAL_DAMAGE_MULT);
                     events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'BRUTAL', amount: dmg });
                 }
                 if (dmg > 0) {

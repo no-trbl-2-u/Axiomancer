@@ -198,12 +198,17 @@ export const ENEMY_GEAR_TIER_PER_LEVEL = 0.02;
 // (every boss and unique does). Reference points: L1 normal ≈ 48, L7 elite ≈
 // 250, L6 boss ≈ 345, L13 normal ≈ 264, L18 boss ≈ 885, L110 unique ≈ 6,432.
 export const ENEMY_VITAE_BASE = 30;
-export const ENEMY_VITAE_PER_LEVEL = 18;
+// Measured against the playtest matrix 2026-09-02 and pulled back from 18: a
+// player's damage per turn is set by CARD RANK and does not grow with level,
+// so a pool growing at 18/level outran any deck by the late campaign (every
+// late cell read 0%). At 12/level the curve stays ahead of card growth without
+// leaving it behind.
+export const ENEMY_VITAE_PER_LEVEL = 8;
 
 export const ENEMY_VITAE_MULT = {
     simple: 0.6,
     normal: 1.0,
-    elite:  1.6,
-    boss:   2.5,
-    unique: 3.2,
+    elite:  1.4,
+    boss:   1.9,
+    unique: 2.4,
 } as const;

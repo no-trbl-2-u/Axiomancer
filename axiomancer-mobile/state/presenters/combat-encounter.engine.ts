@@ -41,12 +41,17 @@ import {
     isMomentumDieId, type WheelStance,
     type GlyphInstance, type GlyphPayload,
 } from '@mechanics';
+// THE BIG NUMBERS REWRITE — the enemy-keyword module is NOT re-exported through
+// the top-level `@mechanics` barrel, so its type comes in on the subpath alias
+// (same workaround as `CardSpecialMechanic` below). The player-facing LABEL and
+// GLOSS are adapted in `state/combat/keywords.ts`, never read raw here.
+import type { EnemyKeyword } from '@mechanics/Enemy';
 import { momentumV2A11y } from '@/state/combat/momentum';
 
 /** The barrel doesn't re-export the union, so derive it from Card. */
 type CardSpecialMechanic = NonNullable<Card['specialMechanics']>[number];
 import { effectGlyph, GLYPH_COLORS, type StatusGlyph } from '@/components/combat/statusGlyphs';
-import { keywordForEffect, keywordForVerb, keywordForMechanic, keywordGloss, keywordsInPersistentText, persistentVerbKeyword, systemTermsForCard } from '@/state/combat/keywords';
+import { enemyKeywordChip, enemyKeywordGlossForToken, keywordForEffect, keywordForVerb, keywordForMechanic, keywordGloss, keywordsInPersistentText, persistentVerbKeyword, systemTermsForCard } from '@/state/combat/keywords';
 
 // ── Stance palette (Heart/Body/Mind/Wild/X) ──────────────────────────────────
 
@@ -82,6 +87,36 @@ const ENCHANT_COLOR = '#7fb3a6';
 const SEAL_COLOR = '#d9b44a';
 const SEAL_GLYPHS: Record<GlyphPayload['kind'], string> = { poison: '◈', barrier: '❖' };
 const SEAL_LABELS: Record<GlyphPayload['kind'], string> = { poison: 'Poison Seal', barrier: 'Barrier Seal' };
+
+/** THE BIG NUMBERS REWRITE — a silhouette per ENEMY keyword, so the foe's
+ *  pane reads as a shape before it reads as a word (the same doctrine the card
+ *  glyphs follow). Iron grey throughout: these are properties of the thing you
+ *  are hitting, not statuses anyone applied. */
+const ENEMY_KEYWORD_GLYPHS: Record<EnemyKeyword['kind'], string> = Object.freeze({
+    hide: '⛨',       // a hide of plate — the armour floor
+    swift: '↯',      // it moves before your wall does
+    brutal: '⚒',     // whatever gets through lands twice
+    venom: '☣',      // the wound goes bad
+    unshaken: '⛰',   // it does not flinch
+    elusive: '≈',    // the armour doubles until you pin it
+    regrow: '❦',     // it closes at every phase boundary
+    ravenous: '☾',   // it feeds on what it lands
+    wounding: '✚',   // a big hit puts a WOUND in your deck
+});
+const ENEMY_KEYWORD_COLOR = GLYPH_COLORS.thorns;
+
+/**
+ * Canon combat copy is VITAE (mobile CLAUDE.md — "copy regressions to the
+ * generic terms are rejected on sight"). The engine composes some printed card
+ * lines itself (`fate.recoilHp` prints "(recoil 4 HP)"), and rules text is
+ * engine-owned truth — but the WORD a player reads is presentation, and this
+ * is the layer that owns it. One narrow substitution at the boundary where
+ * engine text becomes a face string, so a single stale noun in the engine can
+ * never put "HP" on a card again.
+ */
+function vitaeCopy(text: string): string {
+    return text.replace(/\bHP\b/g, 'VITAE');
+}
 
 /** Spec 32 v4 §2.1 — a persistent (enchant/disenchant) card's FREE line is a
  *  TIMED instance of its passive; the engine prints it on `topActionText` as
@@ -329,6 +364,19 @@ export interface CombatEnemyPaneVM {
      *  (so a whole-plan-is-PLEA preset like GRACE sees the track from turn 1). */
     sway: number; swayTarget: number; swayVisible: boolean;
     premises: number; premiseAt: number; premiseVisible: boolean;
+    /** THE BIG NUMBERS REWRITE — the foe's printed keywords (HIDE 6, BRUTAL …)
+     *  as tappable chips. Same VM as a status chip, so the existing plaque
+     *  explains them; empty when the foe carries none. */
+    keywords: CombatEffectChipVM[];
+    /** THE BIG NUMBERS REWRITE — FLAY stacks riding the FOE (each spends on one
+     *  of your next hits, landing it half again as hard). Same visibility rule
+     *  as the alt-win meters: shown once it has a value, or once the deck holds
+     *  a card that feeds it. */
+    flay: number; flayVisible: boolean;
+    /** The count of STAGE thresholds this foe has already crossed (0 for
+     *  anything that does not escalate). The loud announcement is the combat
+     *  log's `stage-entered` line — this is the standing "it has changed" mark. */
+    stagesEntered: number;
     /** Phase 2 (spec 30) — the status kill-path foresight. `pendingDot` is the
      *  damage the foe's CURRENT stacks will deal if nothing else happens;
      *  `roundsToKill` is null unless that alone clears remaining HP, in which
@@ -356,6 +404,15 @@ export interface CombatSealVM {
 export interface CombatPlayerPaneVM {
     name: string; hp: number; maxHp: number; hpPct: number; guard: number; effects: CombatEffectChipVM[];
     seals: CombatSealVM[];
+    /** THE BIG NUMBERS REWRITE — the damage-scaler ledgers, surfaced on the
+     *  same terms as the alt-win meters (a value, or a deck that feeds one).
+     *  WRATH is combat-long and never fades; CHAIN loads the NEXT hit and
+     *  slackens at the end of any turn that fed it nothing; TWIN is armed for
+     *  the next spell of this turn only. Invisible accumulation is the bug
+     *  these exist to close. */
+    wrath: number; wrathVisible: boolean;
+    chain: number; chainVisible: boolean;
+    twinArmed: boolean;
 }
 export interface CombatDieVM {
     id: string; color: string; colorHex: string; glyph: string; stanceLabel: string;
@@ -767,6 +824,36 @@ function standingChips(
     });
 }
 
+/**
+ * THE BIG NUMBERS REWRITE (2026-09-02) — the foe's own keywords, as chips.
+ *
+ * HIDE / SWIFT / BRUTAL / VENOM / UNSHAKEN / ELUSIVE / REGROW / RAVENOUS /
+ * WOUNDING change the arithmetic of the fight before a single card is played,
+ * and a player who cannot see them is doing sums with a hidden term. They ride
+ * the SAME chip VM as a status (and so the same tap-to-explain plaque): the
+ * label is the engine's printed token, the gloss its reminder text with this
+ * foe's own number already in it.
+ *
+ * `standing` is set for the valueless words (BRUTAL, SWIFT) so no meaningless
+ * "1" badge renders; a numbered keyword (HIDE 6) carries its number as the
+ * badge, exactly as an intensity would.
+ */
+function enemyKeywordChips(enemy: { keywords?: readonly EnemyKeyword[] }): CombatEffectChipVM[] {
+    return (enemy.keywords ?? []).map((k) => {
+        const { label, gloss } = enemyKeywordChip(k);
+        const n = 'n' in k ? k.n : null;
+        return {
+            effectId: `enemy-keyword-${k.kind}`,
+            intensity: n ?? 1,
+            duration: 0,
+            isMax: false,
+            standing: n === null,
+            glyph: { glyph: ENEMY_KEYWORD_GLYPHS[k.kind], color: ENEMY_KEYWORD_COLOR, kind: 'statdown' as const, label },
+            gloss,
+        };
+    });
+}
+
 /** WS9 — maps a phase's branch payload to the fork telegraph (null if linear). */
 function branchVM(phase: CombatThreatPhase | undefined): CombatIntentBranchVM | null {
     const b = phase?.branch;
@@ -915,6 +1002,114 @@ export function selectEnemyActionCard(
     };
 }
 
+/**
+ * THE BIG NUMBERS REWRITE (2026-09-02) — the combat log's narration of the
+ * rewrite's own events.
+ *
+ * Everything the engine emits should be legible, and the seven new ledgers
+ * (WRATH / CHAIN / FLAY / TWIN / OVERKILL) plus the two ENEMY beats (a foe
+ * changing STAGE, a foe's keyword changing the arithmetic) were landing
+ * silently: the numbers moved and the player was never told which word moved
+ * them. This is the mapping, and the only place the words live.
+ *
+ * `text` is the log sentence; `float` is the short token the battlefield rises
+ * over the combatant (null = log only), so the two surfaces can never drift
+ * apart. Events with no line here are handled elsewhere (damage, DoT ticks,
+ * status applications) and are deliberately absent rather than duplicated.
+ */
+export interface CombatLogLineVM {
+    kind: CombatEvent['kind'];
+    text: string;
+    float: string | null;
+    color: string;
+    /** The pane the beat belongs to — the foe's, or yours. */
+    side: 'enemy' | 'player';
+}
+
+const LOG_STAGE_COLOR = '#d9b44a';
+
+export function selectCombatLogLines(events: readonly CombatEvent[]): CombatLogLineVM[] {
+    const out: CombatLogLineVM[] = [];
+    for (const e of events) {
+        switch (e.kind) {
+            // The loud one. A foe crossing a stage threshold is a different
+            // fight from the one you started, and it is announced as such.
+            case 'stage-entered':
+                out.push({
+                    kind: e.kind, side: 'enemy', color: LOG_STAGE_COLOR,
+                    text: `‡ ${e.name.toUpperCase()} ‡ ${e.text}`,
+                    float: `‡ ${e.name.toUpperCase()} ‡`,
+                });
+                break;
+            // The foe's own vocabulary, firing. `keyword` is the printed token
+            // ('SWIFT', 'HIDE 6'); its reminder text rides along so the log
+            // teaches the word the first time it bites.
+            case 'enemy-keyword-fired': {
+                const gloss = enemyKeywordGlossForToken(e.keyword);
+                const bite = e.amount === undefined ? '' : ` for ${e.amount}`;
+                out.push({
+                    kind: e.kind, side: 'enemy', color: ENEMY_KEYWORD_COLOR,
+                    text: `${e.keyword} answers${bite}.${gloss ? ` ${gloss}` : ''}`,
+                    float: `${e.keyword}${bite}`,
+                });
+                break;
+            }
+            case 'wrath-gained':
+                out.push({
+                    kind: e.kind, side: 'player', color: GLYPH_COLORS.dot,
+                    text: `WRATH +${e.amount}. Every blow you land now carries ${e.total} more, and it will not fade.`,
+                    float: `WRATH +${e.amount}`,
+                });
+                break;
+            case 'flay-applied':
+                out.push({
+                    kind: e.kind, side: 'enemy', color: GLYPH_COLORS.statdown,
+                    text: `FLAY +${e.amount}. The foe is open to your next ${e.total} hit${e.total === 1 ? '' : 's'}.`,
+                    float: `FLAY +${e.amount}`,
+                });
+                break;
+            case 'chain-gained':
+                out.push({
+                    kind: e.kind, side: 'player', color: GLYPH_COLORS.advantage,
+                    text: `CHAIN +${e.amount}. Your next hit lands ${e.total} heavier.`,
+                    float: `CHAIN +${e.amount}`,
+                });
+                break;
+            case 'chain-faded':
+                out.push({
+                    kind: e.kind, side: 'player', color: GLYPH_COLORS.thorns,
+                    text: `The chain slackens. ${e.from} went unspent and is gone.`,
+                    float: 'CHAIN LOST',
+                });
+                break;
+            case 'twin-armed':
+                out.push({
+                    kind: e.kind, side: 'player', color: GLYPH_COLORS.control,
+                    text: 'TWIN. The next word you say this turn is said twice.',
+                    float: 'TWIN',
+                });
+                break;
+            case 'twin-fired':
+                out.push({
+                    kind: e.kind, side: 'enemy', color: GLYPH_COLORS.control,
+                    text: 'The word is said twice.',
+                    float: 'TWINNED',
+                });
+                break;
+            case 'overkill-cashed':
+                out.push({
+                    kind: e.kind, side: 'player', color: PAYOFF_COLOR,
+                    text: `OVERKILL. ${e.excess} past the killing blow, and none of it wasted.`,
+                    float: `OVERKILL ${e.excess}`,
+                });
+                break;
+            default:
+                break;
+        }
+    }
+    return out;
+}
+
 function intentVM(state: CombatEncounterState): CombatIntentVM {
     const cur = currentPhase(state);
     const curIdx = Math.min(state.currentPhaseIndex, state.threatPhases.length - 1);
@@ -969,6 +1164,9 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
     // is declared). Each meter shows when it has a value OR the deck feeds it.
     const sway = state.sway ?? 0;
     const premises = state.premises ?? 0;
+    // THE BIG NUMBERS REWRITE — FLAY sits on the FOE (it is how open the thing
+    // is, not something you carry), so it reads on this pane beside its VITAE.
+    const flay = state.flay ?? 0;
     // Phase 2 (spec 30) — pure selector, no state mutation; safe to call once
     // per render off the same encounter state the rest of the pane reads.
     const lethality = projectCombatOutcome(state);
@@ -998,6 +1196,9 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
         // peroration track (combat-peroration) owns the premises/at readout.
         premiseVisible: !state.peroration
             && (premises > 0 || deckFeedsMechanic(state, ['premise', 'peroration', 'spend_premises'])),
+        keywords: enemyKeywordChips(e),
+        flay, flayVisible: flay > 0 || deckFeedsMechanic(state, ['flay']),
+        stagesEntered: (state.stagesEntered ?? []).length,
         pendingDot: lethality.pendingDot,
         roundsToKill: lethality.roundsToKill,
         isLethalInFlight: lethality.isLethalInFlight,
@@ -1020,6 +1221,11 @@ function sealsVM(glyphs: GlyphInstance[] | undefined): CombatSealVM[] {
 
 function playerPane(state: CombatEncounterState): CombatPlayerPaneVM {
     const p = state.player;
+    // THE BIG NUMBERS REWRITE — the two ledgers you carry. Same visibility law
+    // as the alt-win meters (WI-5): a live value, or a deck that can feed one,
+    // so a WRATH deck sees its track from turn 1 instead of after the fact.
+    const wrath = state.wrath ?? 0;
+    const chain = state.chain ?? 0;
     return {
         name: p.name ?? 'You', hp: Math.max(0, p.health), maxHp: p.maxHealth,
         hpPct: p.maxHealth > 0 ? Math.max(0, p.health) / p.maxHealth : 0,
@@ -1030,6 +1236,9 @@ function playerPane(state: CombatEncounterState): CombatPlayerPaneVM {
             ...standingChips(state.persistentZone ?? [], state.tempZone ?? [], 'enchant'),
         ],
         seals: sealsVM(state.glyphs),
+        wrath, wrathVisible: wrath > 0 || deckFeedsMechanic(state, ['wrath']),
+        chain, chainVisible: chain > 0 || deckFeedsMechanic(state, ['chain']),
+        twinArmed: state.twinArmed === true,
     };
 }
 
@@ -1720,6 +1929,78 @@ function mechanicHeadline(mech: CardSpecialMechanic | null, enemyDifficulty?: En
                 heroSub: 'exile this curse',
                 verbLine: 'this curse leaves the fight entirely — hand, discard and deck',
             };
+        // ── THE BIG NUMBERS REWRITE (2026-09-02) — direct damage and its
+        //    family. Every face below prints the AUTHORED number, never a
+        //    live-scaled one: WRATH, CHAIN, FLAY, EXECUTE and the read all land
+        //    on top of it inside `scalePlayerHit`, and a face that guessed at
+        //    the sum would be a lie the moment a ledger moved.
+        case 'deal': {
+            // DEAL carries NO keyword badge on purpose (`MECHANIC_KEYWORD` has
+            // no `deal` row): "Deal 24" is plain English, and shouting it would
+            // spend the face's one keyword slot on the verb that needs no
+            // explaining. The hero slot says the whole thing instead.
+            const hits = Math.max(1, mech.hits ?? 1);
+            const each = hits > 1 ? ` × ${hits}` : '';
+            return {
+                keyword: kw ?? null,
+                heroText: `Deal ${mech.amount}${each}`,
+                heroSub: mech.pierce
+                    ? (hits > 1 ? 'VITAE a hit · PIERCE' : 'VITAE · PIERCE')
+                    : (hits > 1 ? 'VITAE a hit' : 'VITAE'),
+                verbLine: hits > 1
+                    ? `strike ${hits} times for ${mech.amount} VITAE each${mech.pierce ? ', past hide and every shield' : ''}`
+                    : `strike for ${mech.amount} VITAE${mech.pierce ? ', past hide and every shield' : ''}`,
+            };
+        }
+        case 'wrath':
+            return {
+                keyword: kw ?? 'Wrath',
+                heroText: `+${mech.amount}`,
+                heroSub: 'every hit · rest of combat',
+                verbLine: 'every hit you land from here deals more, and it never fades',
+            };
+        case 'flay':
+            return {
+                keyword: kw ?? 'Flay',
+                heroText: `${mech.stacks}`,
+                heroSub: `stack${mech.stacks === 1 ? '' : 's'} · half again a hit`,
+                verbLine: `flay the foe open — your next ${mech.stacks} hit${mech.stacks === 1 ? '' : 's'} land half again as hard`,
+            };
+        case 'twin':
+            return {
+                keyword: kw ?? 'Twin',
+                heroText: '',
+                heroSub: 'next spell fires twice',
+                verbLine: 'the next spell you play this turn says its paid line twice',
+            };
+        case 'chain':
+            return {
+                keyword: kw ?? 'Chain',
+                heroText: `+${mech.amount}`,
+                heroSub: 'to your next hit',
+                verbLine: 'load the next hit — the chain slackens on a turn that feeds it nothing',
+            };
+        case 'execute':
+            return {
+                keyword: kw ?? 'Execute',
+                heroText: `≤ ${Math.round(mech.atPct * 100)}%`,
+                heroSub: 'VITAE · damage doubled',
+                verbLine: `while the foe sits at or under ${Math.round(mech.atPct * 100)}% VITAE, this card's damage doubles`,
+            };
+        case 'overkill': {
+            const cash = mech.conviction ? `+${mech.conviction} ◆`
+                : mech.souls ? `+${mech.souls} Soul${mech.souls === 1 ? '' : 's'}`
+                    : mech.healPct ? `heal ${Math.round(mech.healPct * 100)}%`
+                        : 'converts';
+            return {
+                keyword: kw ?? 'Overkill',
+                heroText: cash,
+                heroSub: mech.healPct && !mech.conviction && !mech.souls
+                    ? 'of the excess'
+                    : `per ${mech.per} past lethal`,
+                verbLine: 'damage driven past the killing blow is not wasted — it converts at the printed rate',
+            };
+        }
         default:
             return null;
     }
@@ -1731,6 +2012,12 @@ function mechanicHeadline(mech: CardSpecialMechanic | null, enemyDifficulty?: En
 const MECH_HEADLINE_PRIORITY: readonly string[] = [
     'peroration', 'sway', 'turnabout', 'stagger', 'lock_stance', 'reprise', 'replay_last',
     'omen', 'consume_affliction', 'soul_gain', 'spend_premises', 'premise',
+    // THE BIG NUMBERS REWRITE — a card that DEALS leads with the number it
+    // deals: that is the whole point of the rescale, and burying 45 damage
+    // behind a `WRATH +2` badge would be the old lie in a new coat. The
+    // scalers rank next, so a pure-scaler card (no `deal`) still headlines its
+    // own verb; every one of them also renders as a keyword chip regardless.
+    'deal', 'execute', 'wrath', 'flay', 'chain', 'twin', 'overkill',
     // (`conjure_card` stays: cloud phase 29 retired CONJURE off zero library
     // carriers, but this session's WS2.1 Haunt work ships live sandbox
     // conjure cards — the mechanic is card-local vocabulary, not a ghost.)
@@ -1879,7 +2166,10 @@ export function faceStats(card: CombatCard, sourceCard?: Card, enemyDifficulty?:
         // type strip (OATH / HEX) and the type chip.
         case 'oath': return { ...base, kind: 'oath', keyword: kw ?? 'OATH', heroText: '', heroSub: 'rest of combat', freeHeroText: free, freeHeroSub: null, verbLine: 'a persistent passive on your side', powerRail: c.keyword ?? 'Oath', readDependent: false, inert: false, guardBase: null };
         case 'hex': return { ...base, kind: 'hex', keyword: kw ?? 'HEX', heroText: '', heroSub: 'curse · rest of combat', freeHeroText: free, freeHeroSub: null, verbLine: 'a standing curse attached to the enemy', powerRail: c.keyword ?? 'Hex', readDependent: false, inert: false, guardBase: null };
-        case 'mechanic': { const h = mechanicHeadline(c.mech, enemyDifficulty); return { ...base, kind: 'mechanic', keyword: kw, heroText: h?.heroText ?? '', heroSub: h?.heroSub ?? null, freeHeroText: free, freeHeroSub: null, verbLine: h?.verbLine ?? '', powerRail: c.keyword ?? '—', readDependent: false, inert: false, guardBase: null }; }
+        // A keyword-less headline (DEAL — "Deal 24" needs no badge) leaves the
+        // verb slot empty on purpose; the power rail then carries the hero
+        // number rather than the em-dash placeholder, so the card still reads.
+        case 'mechanic': { const h = mechanicHeadline(c.mech, enemyDifficulty); return { ...base, kind: 'mechanic', keyword: kw, heroText: h?.heroText ?? '', heroSub: h?.heroSub ?? null, freeHeroText: free, freeHeroSub: null, verbLine: h?.verbLine ?? '', powerRail: c.keyword ?? h?.heroText ?? '—', readDependent: false, inert: false, guardBase: null }; }
         case 'inert':
         default: return { ...base, kind: 'inert', keyword: kw ?? 'DEBUFF', heroText: '', heroSub: card.verbClass === 'buff-self' ? 'buff yourself' : 'weakens the foe', freeHeroText: free, freeHeroSub: null, verbLine: card.verbClass === 'buff-self' ? 'buff yourself' : 'weakens the foe', powerRail: c.keyword ?? '—', readDependent: false, inert: true, guardBase: null };
     }
@@ -1954,16 +2244,19 @@ function detailCore(card: CombatCard, sourceCard?: Card, enemyDifficulty?: Enemy
         case 'siphon': return { subtitle: 'Siphon — heal for part of the harm you cash in.', metaChip, outcomeLine: `${Title} ${c.siphonPct}%.`, outcomeStats: [{ label: 'LIFESTEAL', value: `${c.siphonPct}%` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: heal ${c.siphonPct}% of the VITAE this card's payoff erodes.`, readNote: `The burst is live; the ${c.siphonPct}% rate is exact.`, mathLine: `Heal = ${c.siphonPct}% × (the payoff burst) — the burst is live, so no fixed heal number.`, keywords };
         case 'rupture': { const capPct = Math.round(RUPTURE_CAP_FRACTION * 100); return { subtitle: "Rupture — consume the foe's afflictions and detonate them.", metaChip, outcomeLine: `${Title} · max ${capPct}% of the foe's max VITAE.`, outcomeStats: [{ label: 'BURST', value: 'live total' }, { label: 'CAP', value: `${capPct}% max VITAE` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: consume ALL the foe's afflictions — burst = their remaining harm (up to ${capPct}% of the foe's max VITAE).`, readNote: 'Stack afflictions first — the burst equals what they still owed, so it has no fixed number until you fire it.', mathLine: `Burst = remaining affliction fuel (capped at ${capPct}% of the foe's max VITAE) — live, so no fixed number (real-units-or-no-number).`, keywords }; }
         case 'reap': return { subtitle: 'Reap — spend Souls for the printed payoff.', metaChip, outcomeLine: c.reapCost > 0 ? `${Title} ${c.reapCost} Souls.` : `${Title} ALL Souls${c.reapPerSoul > 0 ? ` — ${c.reapPerSoul} per Soul` : ''}.`, outcomeStats: c.reapPerSoul > 0 ? [{ label: 'PER SOUL', value: `${c.reapPerSoul}` }, { label: 'CAP', value: 'none' }] : [{ label: 'COST', value: `${c.reapCost} Souls` }], stacksText: null, freeLine, powerLine: c.reapPerSoul > 0 ? `◆ WITH A DIE: spend EVERY Soul — burst ${c.reapPerSoul} per Soul spent, uncapped.` : `◆ WITH A DIE: spend ${c.reapCost} Souls to fire the printed effect (fizzles when underfunded).`, readNote: 'Souls come from expiring or consumed enemy afflictions — fill the bank first.', mathLine: c.reapPerSoul > 0 ? `Burst = ${c.reapPerSoul} × Souls spent (live, UNCAPPED — the emptied bank is the price).` : `Costs ${c.reapCost} Souls — the payoff is the printed line, in real units.`, keywords };
-        case 'forge': { const clause = forgeClause(c.mech) ?? 'shape your dice'; return { subtitle: `${Title} — dice are the resource.`, metaChip, outcomeLine: `${clause.charAt(0).toUpperCase()}${clause.slice(1)}.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: 'Die-forging takes no read — the printed line is exact.', mathLine: 'A die-economy verb — the printed line is the applied effect.', keywords };
+        case 'forge': { const clause = forgeClause(c.mech) ?? 'shape your dice'; return { subtitle: `${Title} — dice are the resource.`, metaChip, outcomeLine: `${clause.charAt(0).toUpperCase()}${clause.slice(1)}.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${vitaeCopy(card.bottomActionText)}`, readNote: 'Die-forging takes no read — the printed line is exact.', mathLine: 'A die-economy verb — the printed line is the applied effect.', keywords };
         }
         // Spec 32 v4 — persistent cards carry BOTH lines: the FREE play is a
         // timed instance of the passive; the PAID play makes it permanent,
         // unique in play, and pulls the card out of the deck cycle.
-        case 'oath': return { subtitle: 'Oath — a persistent passive on your side.', metaChip, outcomeLine: `FREE: yours for ${persistentFreeRounds(card)}. PAID: rest of combat.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: `Played FREE it runs ${persistentFreeRounds(card)} and ticks out; paid with a die it is permanent — unique in play, and it leaves the deck cycle.`, mathLine: 'A standing rule, not a number — its text is the engine text.', keywords };
-        case 'hex': return { subtitle: 'Hex — a standing curse on the enemy.', metaChip, outcomeLine: `FREE: on the enemy for ${persistentFreeRounds(card)}. PAID: rest of combat.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: `Played FREE it holds ${persistentFreeRounds(card)} and ticks out; paid with a die it is permanent — unique in play, and it leaves the deck cycle.`, mathLine: 'A standing rule, not a number — its text is the engine text.', keywords };
-        case 'mechanic': { const h = mechanicHeadline(c.mech, enemyDifficulty); const val = [h?.heroText, h?.heroSub].filter(Boolean).join(' '); return { subtitle: `${Title} — ${h?.verbLine ?? 'a special mechanic'}.`, metaChip, outcomeLine: val ? `${Title} ${val}.` : `${Title}.`, outcomeStats: h?.heroText ? [{ label: Title.toUpperCase(), value: h.heroText }] : [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: `${Title} takes no read — the printed line is the applied effect.`, mathLine: `${Title}: ${h?.verbLine ?? card.bottomActionText}.`, keywords }; }
+        case 'oath': return { subtitle: 'Oath — a persistent passive on your side.', metaChip, outcomeLine: `FREE: yours for ${persistentFreeRounds(card)}. PAID: rest of combat.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${vitaeCopy(card.bottomActionText)}`, readNote: `Played FREE it runs ${persistentFreeRounds(card)} and ticks out; paid with a die it is permanent — unique in play, and it leaves the deck cycle.`, mathLine: 'A standing rule, not a number — its text is the engine text.', keywords };
+        case 'hex': return { subtitle: 'Hex — a standing curse on the enemy.', metaChip, outcomeLine: `FREE: on the enemy for ${persistentFreeRounds(card)}. PAID: rest of combat.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${vitaeCopy(card.bottomActionText)}`, readNote: `Played FREE it holds ${persistentFreeRounds(card)} and ticks out; paid with a die it is permanent — unique in play, and it leaves the deck cycle.`, mathLine: 'A standing rule, not a number — its text is the engine text.', keywords };
+        // A keyword-less mechanic headline (DEAL) has no Title to lead with —
+        // every line below falls back to the headline's own words rather than
+        // opening with a dangling dash or an empty stat label.
+        case 'mechanic': { const h = mechanicHeadline(c.mech, enemyDifficulty); const verb = h?.verbLine ?? 'a special mechanic'; const val = [h?.heroText, h?.heroSub].filter(Boolean).join(' '); const lead = Title || h?.heroText || 'This card'; const statLabel = (Title || 'PAID').toUpperCase(); return { subtitle: Title ? `${Title} — ${verb}.` : `${verb.charAt(0).toUpperCase()}${verb.slice(1)}.`, metaChip, outcomeLine: Title ? (val ? `${Title} ${val}.` : `${Title}.`) : `${val || verb}.`, outcomeStats: h?.heroText ? [{ label: statLabel, value: h.heroText }] : [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${vitaeCopy(card.bottomActionText)}`, readNote: `${lead} takes no read — the printed line is the applied effect.`, mathLine: `${lead}: ${vitaeCopy(h?.verbLine ?? card.bottomActionText)}.`, keywords }; }
         case 'inert':
-        default: return { subtitle: `${Title || 'Effect'} — minor right now.`, metaChip, outcomeLine: `${Title || 'This effect'} — minor for now.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${card.bottomActionText}`, readNote: 'The engine text above is the whole truth for this card.', mathLine: `${Title || 'This effect'} carries no headline number — the printed line is the applied effect.`, keywords };
+        default: return { subtitle: `${Title || 'Effect'} — minor right now.`, metaChip, outcomeLine: `${Title || 'This effect'} — minor for now.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: ${vitaeCopy(card.bottomActionText)}`, readNote: 'The engine text above is the whole truth for this card.', mathLine: `${Title || 'This effect'} carries no headline number — the printed line is the applied effect.`, keywords };
     }
 }
 
@@ -1984,6 +2277,10 @@ function mechPaidPart(m: CardSpecialMechanic, enemyDifficulty?: EnemyDifficulty)
         case 'create_temporary_die': return { kw: 'Kindle', val: m.color };
         case 'grant_pip': return { kw: 'Pip', val: `+${m.count}` };
         case 'spend_all_pips': return { kw: 'Pip', val: 'spend all' };
+        // THE BIG NUMBERS REWRITE — DEAL has no keyword row (its headline is
+        // the number, not a badge), so the generic path below would drop it
+        // from a multi-effect paid line entirely. Spell it out here.
+        case 'deal': return { kw: 'Deal', val: `${m.amount}${m.hits && m.hits > 1 ? ` × ${m.hits}` : ''}${m.pierce ? ' (pierce)' : ''}` };
         // Pure die plumbing — never a player-facing paid-line row.
         case 'refresh_die': case 'convert_die_color': case 'bank_spent_die': case 'reroll_spent':
             return null;
@@ -2181,9 +2478,9 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
             rankName: card.rank ? RANK_NAMES[card.rank] : null,
             cardType: card.cardType,
             tier: card.tier,
-            topActionText: card.topActionText, bottomActionText: card.bottomActionText,
+            topActionText: vitaeCopy(card.topActionText), bottomActionText: vitaeCopy(card.bottomActionText),
             bottomDamagePreview: card.bottomDamagePreview,
-            dieLines: card.dieLines,
+            dieLines: card.dieLines?.map(vitaeCopy),
             face,
             detail: detailStats(card, sourceCard, state.enemy.difficulty),
             read: preview?.read ?? null, colorMatch: preview?.colorMatch ?? false,
@@ -2286,9 +2583,9 @@ export function rewardCardVMs(ids: readonly string[]): CombatCardVM[] {
             rankName: card.rank ? RANK_NAMES[card.rank] : null,
             cardType: card.cardType,
             tier: card.tier,
-            topActionText: card.topActionText, bottomActionText: card.bottomActionText,
+            topActionText: vitaeCopy(card.topActionText), bottomActionText: vitaeCopy(card.bottomActionText),
             bottomDamagePreview: card.bottomDamagePreview,
-            dieLines: card.dieLines,
+            dieLines: card.dieLines?.map(vitaeCopy),
             face: faceStats(card, sourceCard),
             detail: detailStats(card, sourceCard),
             // No die is drafted at the reward screen — there is no read to show.

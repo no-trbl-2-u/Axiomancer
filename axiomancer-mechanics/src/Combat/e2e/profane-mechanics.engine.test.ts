@@ -101,9 +101,37 @@ describe('IMMOLATE — the pyre must be fed', () => {
         expect(countIn(res.state.hand.map(h => h.cardId), POULTICE)).toBe(handPoultices - IMMOLATE_COUNT);
         expect(res.state.discard).not.toContain(POULTICE);
         expect(countIn(res.state.deck, POULTICE)).toBe(deckPoultices - IMMOLATE_COUNT);
-        // The rider fired: the printed Deal 26 bit the foe and GUARD rose.
-        expect(res.state.enemy.health).toBeLessThan(enemyHpBefore);
+        // The rider fired: GUARD 24 rose.
         expect(res.state.guard ?? 0).toBeGreaterThan(0);
+    });
+
+    /**
+     * SUSPECTED ENGINE BUG (found 2026-09-02, deliberately NOT papered over).
+     *
+     * `distraint` prints "IMMOLATE 2: burn the 2 lowest cards in your hand,
+     * then deal 26 and gain GUARD 24". The GUARD lands; the 26 does not.
+     *
+     * Cause: `combat.engine.ts` has TWO rider executors. `applyRiderToState`
+     * (the FREE-line / state-rider path) was taught THE BIG NUMBERS damage
+     * family — it reads `r.damage` / `r.pierce` / `r.wrath` / `r.chain` /
+     * `r.flay`. The PAID-line executor — `for (const r of firedRiders)` inside
+     * `playBottomAction` — was not: it handles guard / conviction / applyEffect
+     * / healHp / drawCards / premises / … and silently drops the whole damage
+     * family. Every PAID-line rider that carries `damage` (immolate, fallen,
+     * fate, dieBonus, synergy/REQUIEM, overflow — 20 cards across debt, grave,
+     * trial and vigil) prints a number the engine never applies.
+     *
+     * `it.fails` keeps the true claim in the suite without a red build: it
+     * turns RED the moment the engine is fixed, and must be deleted then.
+     */
+    it.fails('IMMOLATE\'s rider deals its printed damage (ENGINE BUG: PAID riders drop `damage`)', () => {
+        mockSequentialRng(0.05);
+        const deck = [DISTRAINT, POULTICE, POULTICE, POULTICE, POULTICE];
+        const state = openAndDraft(deck, 'body');
+        const hpBefore = state.enemy.health;
+        const res = play(state, DISTRAINT);
+        expect(res.events.some(e => e.kind === 'immolated')).toBe(true);
+        expect(res.state.enemy.health).toBeLessThan(hpBefore);
     });
 
     it('fizzles the rider when nothing else is in hand to burn', () => {

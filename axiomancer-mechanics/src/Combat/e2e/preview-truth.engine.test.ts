@@ -117,7 +117,13 @@ describe('P0-truth — the card preview is the applied number', () => {
                 const def = lookupEffect(ce.effectId);
                 const dot = def?.payload.damageOverTime;
                 if (!def || !dot) continue;
-                const intensity = ce.intensity ?? 1;
+                // `applyEffect` (src/Effects/index.ts) clamps every landed
+                // intensity to MAX_EFFECT_INTENSITY, so the APPLIED intensity —
+                // the thing the preview must equal — is the clamped one. (A
+                // card that AUTHORS above the cap prints a number the engine
+                // will not honour; that is a card-data bug, caught by the
+                // face-honesty guards, not a preview bug.)
+                const intensity = Math.min(ce.intensity ?? 1, MAX_EFFECT_INTENSITY);
                 const duration = Math.max(1, ce.duration ?? def.duration);
                 const ramp = def.payload.dotModifiers?.escalatesPerTurn ? (def.payload.dotModifiers.rampFactor ?? 0) : 0;
                 for (let k = 0; k < duration; k++) {
@@ -145,7 +151,9 @@ describe('P0-truth — the card preview is the applied number', () => {
                 const def = lookupEffect(ce.effectId);
                 const dot = def?.payload.damageOverTime;
                 if (!def || !dot) continue;
-                const intensity = ce.intensity ?? 1;
+                // Clamped for the same reason as above: the engine never lands
+                // more than MAX_EFFECT_INTENSITY.
+                const intensity = Math.min(ce.intensity ?? 1, MAX_EFFECT_INTENSITY);
                 const duration = Math.max(1, ce.duration ?? def.duration);
                 const ramp = def.payload.dotModifiers?.escalatesPerTurn ? (def.payload.dotModifiers.rampFactor ?? 0) : 0;
                 for (let k = 0; k < duration; k++) {

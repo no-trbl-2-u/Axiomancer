@@ -58,6 +58,13 @@ describe('keyword registry — KW-3 (no dead references)', () => {
         'strip_random_buff', 'befriend_attempt', 'conjure_card', 'peroration',
         // A carrier, not a mechanic: `rider` executes an ordinary card rider.
         'rider',
+        // THE BIG NUMBERS REWRITE (2026-09-02) — DEAL is the one verb that
+        // needs no explaining: "Deal 24" is plain English, and the face prints
+        // the number in its hero slot rather than badging the word (see
+        // `MECHANIC_KEYWORD`'s own note, and `mechanicHeadline`'s `deal` case,
+        // which returns a keyword-less headline on purpose). Its FAMILY —
+        // WRATH, FLAY, TWIN, CHAIN, EXECUTE, OVERKILL — all carry real rows.
+        'deal',
     ];
 
     it('every mechanic kind either maps to a glossed keyword or is classified', () => {

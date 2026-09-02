@@ -97,12 +97,14 @@ function redraft(state: CombatEncounterState): CombatEncounterState {
 }
 
 describe('A no-status play never overwrites lastSpellCardId', () => {
-    it('the-vig (lands DOOM + MARK) sets lastSpellCardId; a following qa-turnabout (no combatEffects) leaves it unchanged', () => {
+    // BIG NUMBERS (2026-09-02): the-vig was rewritten to "RECOIL 3. Deal 9.
+    // Afflict DOOM 5" — the MARK it used to carry is gone. It is still the
+    // status-landing play this suite needs; only the status list moved.
+    it('the-vig (lands DOOM) sets lastSpellCardId; a following qa-turnabout (no combatEffects) leaves it unchanged', () => {
         const first = stateFor('the-vig');
         const firstResult = playPaid(first);
         expect(firstResult.after.lastSpellCardId).toBe('the-vig');
         expect(firstResult.after.enemy.effects.some(e => e.effectId === 'debuff_creeping_doom')).toBe(true);
-        expect(firstResult.after.enemy.effects.some(e => e.effectId === 'debuff_mark')).toBe(true);
 
         const second: CombatEncounterState = {
             ...firstResult.after,
@@ -161,7 +163,6 @@ describe('End-to-end: open-every-grave replays the last STATUS-landing spell acr
         // produce none of these).
         const landed = findEvents(thirdResult.events, 'effect-landed').filter(e => e.cardId === 'open-every-grave' && e.target === 'enemy');
         expect(landed.some(e => e.effectId === 'debuff_creeping_doom')).toBe(true);
-        expect(landed.some(e => e.effectId === 'debuff_mark')).toBe(true);
     });
 });
 

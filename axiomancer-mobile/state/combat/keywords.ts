@@ -65,6 +65,13 @@ const EFFECT_KEYWORD: Record<string, string> = {
     // across rot/debt/grave/trial/choir (was the card-local 'doom-species'
     // sandbox row). ──
     debuff_creeping_doom: 'Doom',
+    // ── KW-1 (2026-09-02, THE BIG NUMBERS REWRITE): `buff_grace_momentum` was
+    // engine-granted only (irresistible-grace's turn-boundary stack), so it
+    // never needed a card-vocabulary row. The rewritten choir pool now AUTHORS
+    // it on a card, and an authored effect with no keyword renders the blank
+    // face KW-1 exists to catch. It multiplies every PLEA gain, so PLEA is the
+    // word it belongs to — no new registry row earned by one carrier. ──
+    buff_grace_momentum: 'Plea',
 };
 
 /**
