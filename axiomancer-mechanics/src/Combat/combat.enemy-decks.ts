@@ -9,13 +9,17 @@
  * consumed — the resolution machinery is untouched; the deck is the new
  * authoring layer.
  *
- * DECK LAWS (pinned by the roster-validation e2es):
- *   - 2-5 cards per enemy (bosses 4-5); every id resolves in the library.
- *   - escalation doctrine: the final card is the spike (its damageWeight is
- *     the deck's maximum among damage-bearing cards).
- *   - THE COVETED DIE: boss/unique decks stake exactly their SECOND card;
- *     no normal/elite/simple deck stakes any.
- *   - exactly one curse-injector card per ARCHETYPE (not per deck).
+ * DECK SHAPE (THE BIG NUMBERS REWRITE, 2026-09-02 — these are conventions
+ * now, not laws; the tests that pinned them were repealed):
+ *   - a deck is an ordered, non-reshuffling sequence, so escalation is
+ *     STRUCTURAL rather than legislated: card 1 opens, the back half spikes.
+ *     Aeon's End's tiered nemesis deck is the model — tier 1 on top, tier 3 on
+ *     the bottom, and the fight gets worse because of how it was built.
+ *   - every card id must resolve in the library (still enforced, still a bug).
+ *   - THE STAKE is a free authoring tool: any deck may wager on any card via
+ *     `DECK_STAKES`. The old "boss/unique stake exactly their second card"
+ *     law is repealed; `wagersCovetedDie` remains only as the DEFAULT for a
+ *     deck that authors no stake of its own.
  */
 
 import type { AuthoredThreatStep, AuthoredThreatPhase } from './combat.threat';
@@ -162,11 +166,14 @@ export const DECK_STANCE_CHECKS: Record<string, Record<number, { punishes?: 'hea
 };
 
 /**
- * THE COVETED DIE is a DECK property, not a card property: only a boss or a
- * unique wagers it, and only on its second card. Signature cards are shared
- * across decks (the same Devoured Lexicon serves an elite and a boss), so the
- * law is enforced here — at the one place that knows which enemy is playing —
- * rather than trusted to every card literal.
+ * THE STAKE is a DECK property, not a card property: signature cards are
+ * shared across decks (the same Devoured Lexicon serves an elite and a boss),
+ * so which seat wagers is decided here — at the one place that knows which
+ * enemy is playing — rather than trusted to every card literal.
+ *
+ * THE BIG NUMBERS REWRITE (2026-09-02): this is now only the DEFAULT, used
+ * when a deck authors no `DECK_STAKES` entry of its own. Any deck may stake
+ * any seat; the boss/unique-second-card law is repealed.
  */
 function wagersCovetedDie(enemyId: string): boolean {
     const registry = ENEMY_REGISTRY as Record<string, { difficulty?: string } | undefined>;
@@ -213,13 +220,25 @@ function cardToStep(
  * resolver consumes. Unknown card ids are dropped LOUDLY (a deck referencing
  * a missing card is an authoring bug, not a runtime condition).
  */
+export const DECK_STAKES: Readonly<Record<string, readonly number[]>> = Object.freeze({
+    // THE BIG NUMBERS REWRITE — per-deck stake seats (0-based card index).
+    // Empty by design: every deck currently takes the default. Author an entry
+    // here to make a foe wager somewhere else, or to make an elite wager at
+    // all. An empty array means "this deck never stakes".
+});
+
 export function compileEnemyDeck(enemyId: string): AuthoredThreatStep[] {
     const deck = ENEMY_DECKS[enemyId];
     if (!deck) return [];
     return deck.map((cardId, i) => {
         const card = ENEMY_CARD_LIBRARY[cardId];
         if (!card) throw new Error(`Enemy deck '${enemyId}' names unknown card '${cardId}'.`);
-        const stake = i === 1 && wagersCovetedDie(enemyId);
+        // An authored stake list wins; otherwise fall back to the default
+        // (a boss/unique wagers on its second card).
+        const authoredStakes = DECK_STAKES[enemyId];
+        const stake = authoredStakes
+            ? authoredStakes.includes(i)
+            : i === 1 && wagersCovetedDie(enemyId);
         return cardToStep(cardId, card, i === deck.length - 1, stake, DECK_STANCE_CHECKS[enemyId]?.[i]);
     });
 }

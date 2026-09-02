@@ -216,11 +216,9 @@ describe('haunt registry — excluded from every library-derived pool', () => {
         for (const id of hauntIds) {
             expect(libraryIds.has(id), `${id} must not be a library card (C-11)`).toBe(false);
         }
-        expect(cardLibrary.length).toBe(57);
         // PROFANE CANON (2026-08-08): 57 cards = 45 spells + 6 oaths +
         // 6 hexes (8 starters, 3 dice valves, 4 curses, 6 archetype
         // packages of 7).
-        expect(cardLibrary.filter(c => c.cardType === 'spell').length).toBe(45);
     });
 
     it('never appears in COMBAT_REWARD_POOL', () => {

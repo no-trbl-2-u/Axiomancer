@@ -181,6 +181,83 @@ export function enemyStatBudget(
 }
 
 /**
+ * THE BIG NUMBERS REWRITE (2026-09-02) — the keyword floor.
+ *
+ * Every foe should change the arithmetic of a fight somehow, but hand-authoring
+ * nine keywords across seventy-two enemies would mostly produce noise. So the
+ * roster gets a DERIVED baseline by difficulty and level, and the enemies worth
+ * a character note author their own list (which wins outright — this is a
+ * default, not an addition).
+ *
+ * The curve is deliberately gentle at the bottom: a level-1 Float-Eye carries
+ * nothing, because the first fight of the game should teach the dice, not the
+ * exceptions. HIDE arrives first (it is the keyword that makes card choice
+ * matter), then the band-specific character.
+ */
+export function defaultEnemyKeywords(
+    level: number,
+    difficulty: EnemyDifficulty | undefined,
+): EnemyKeyword[] {
+    const lv = Math.max(1, level);
+    switch (difficulty) {
+        case 'simple':
+            return [];
+        case 'elite':
+            return [
+                { kind: 'hide', n: Math.max(2, Math.ceil(lv / 5)) },
+                ...(lv >= 10 ? [{ kind: 'swift' } as EnemyKeyword] : []),
+            ];
+        case 'boss':
+            return [
+                { kind: 'hide', n: Math.max(3, Math.ceil(lv / 4)) },
+                { kind: 'brutal' },
+            ];
+        case 'unique':
+            return [
+                { kind: 'hide', n: Math.max(4, Math.ceil(lv / 3)) },
+                { kind: 'unshaken' },
+                { kind: 'regrow', n: Math.max(2, Math.round(lv / 2)) },
+            ];
+        case 'normal':
+        default:
+            return lv >= 8 ? [{ kind: 'hide', n: Math.ceil(lv / 8) }] : [];
+    }
+}
+
+/**
+ * THE BIG NUMBERS REWRITE (2026-09-02) — the stage floor.
+ *
+ * Every boss and unique gets at least one moment where the fight becomes a
+ * different fight. Marquee foes author their own stages (which win outright);
+ * the rest inherit this pair — a second wind at 60% and a last stand at 25% —
+ * so no boss is simply a larger pile of VITAE.
+ */
+export function defaultEnemyStages(
+    difficulty: EnemyDifficulty | undefined,
+    vitae: number,
+): EnemyStage[] {
+    if (difficulty !== 'boss' && difficulty !== 'unique') return [];
+    return [
+        {
+            at: { vitaePct: 0.6 },
+            name: 'SECOND WIND',
+            text: 'It stops fighting like something that expects to win easily.',
+            gain: [{ kind: 'swift' }],
+            heal: { pct: 0.1 },
+            threatBonus: 0.25,
+        },
+        {
+            at: { vitaePct: 0.25 },
+            name: 'LAST STAND',
+            text: 'Whatever it was holding back, it is not holding back now.',
+            gain: [{ kind: 'brutal' }],
+            heal: Math.round(vitae * 0.05),
+            threatBonus: 0.5,
+        },
+    ];
+}
+
+/**
  * Builds a fully-initialised Enemy. Derived stats and resources are
  * computed automatically from `baseStats` and `level`. `xpReward` defaults
  * to `level × DEFAULT_XP_BY_DIFFICULTY[difficulty]` when not supplied.
@@ -224,8 +301,11 @@ export function createEnemy(options: CreateEnemyOptions): Enemy {
         tags,
         portraitAsset,
         stanceHint,
-        keywords,
-        stages,
+        // THE BIG NUMBERS REWRITE — an authored list wins outright; otherwise
+        // the foe inherits the difficulty-derived floor so every fight has some
+        // arithmetic of its own.
+        keywords: keywords ?? defaultEnemyKeywords(level, difficulty),
+        stages: stages ?? defaultEnemyStages(difficulty, maxHealth),
     };
 }
 

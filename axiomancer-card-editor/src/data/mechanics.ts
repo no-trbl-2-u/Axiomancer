@@ -178,6 +178,15 @@ export const SPECIAL_MECHANIC_KINDS = [
     // Profane-canon rework — the pyre verbs
     'immolate',
     'purge_self',
+    // THE BIG NUMBERS REWRITE (2026-09-02) — direct damage and its family.
+    // The strike-ban doctrine was repealed: DEAL is a real mechanic again.
+    'deal',
+    'wrath',
+    'flay',
+    'twin',
+    'chain',
+    'execute',
+    'overkill',
 ] as const;
 export type SpecialMechanicKind = (typeof SPECIAL_MECHANIC_KINDS)[number];
 

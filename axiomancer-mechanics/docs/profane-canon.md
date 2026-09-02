@@ -1,5 +1,12 @@
 # The Profane Canon — the dark-fantasy PvE card rework (2026-08-08)
 
+**Status:** HISTORICAL — superseded by THE BIG NUMBERS REWRITE (2026-09-02,
+`plan/2026-09-02-big-numbers-overhaul.prompt.md`), which repealed the 57-card
+catalogue, the 7-card archetype package shape and the deck-size laws below.
+The *tonal* brief (§1) survives as voice guidance — the names and the register
+are still the North Star — but every number, count and structural rule here is
+a period record.
+
 <!-- lexicon-ok: premise, concede, sway, capitulate, rapport, reargue -->
 
 *Magic: The Gathering, if it were a solo, dark-fantasy, PvE campaign.* This

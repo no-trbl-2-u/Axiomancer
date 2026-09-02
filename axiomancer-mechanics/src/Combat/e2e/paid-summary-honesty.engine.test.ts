@@ -35,6 +35,10 @@ const KNOWN_UPPER = new Set([
     'QUARTER', 'THORNS', 'RIPOSTE', 'ECHO', 'RECALL', 'MILL',
     // profane canon (2026-08-08) — the rework's new vocabulary
     'REPLAY', 'REQUIEM', 'FESTER', 'IMMOLATE', 'PURGE',
+    // THE BIG NUMBERS REWRITE (2026-09-02) — direct damage and its family,
+    // plus the turn-shape conditions promoted to face terms.
+    'DEAL', 'PIERCE', 'WRATH', 'FLAY', 'TWIN', 'CHAIN', 'EXECUTE', 'OVERKILL',
+    'AMBUSH', 'FLOW', 'BARRIER', 'TOLL',
     // structural / system words the faces already print in caps
     'FREE', 'ALL', 'WILD', 'VITAE', 'CONDEMN', 'SENTENCE', 'OPENING',
     'DOT', 'DOTS', 'HP',
@@ -54,7 +58,12 @@ describe('authored paidSummary honesty', () => {
     it('every number the engine applies appears verbatim in the authored text', () => {
         const offenders: string[] = [];
         for (const card of summaried) {
-            const generated = paidText(card, lookupEffect);
+            // DOOM's generated text carries an explanatory parenthetical
+            // ("grows +1 each time the foe acts") whose 1 is a RULE, not a
+            // number this card applies — strip it before extracting, or every
+            // DOOM carrier is forced to print a meaningless 1 on its face.
+            const generated = paidText(card, lookupEffect)
+                .replace(/\(grows \+1 each time the foe acts\)/g, '');
             const applied = [...new Set(generated.match(/\d+(?:\.\d+)?/g) ?? [])];
             const missing = applied.filter(n => !(card.paidSummary as string).includes(n));
             if (missing.length) {
