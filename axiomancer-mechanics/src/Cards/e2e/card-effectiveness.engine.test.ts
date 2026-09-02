@@ -115,6 +115,11 @@ const HAND_FODDER: Readonly<Record<string, readonly string[]>> = {
     'paupers-pyre': ['spoiled-poultice', 'chilblain-watch'],
     'confession-of-judgment': ['spoiled-poultice', 'chilblain-watch', 'first-spadeful'],
     'the-plague-pit': ['spoiled-poultice', 'chilblain-watch', 'first-spadeful'],
+    // THE APOCRYPHA — the late-act pyres are hungrier than anything before them.
+    'the-note-falls-due': ['spoiled-poultice', 'chilblain-watch', 'first-spadeful', 'petty-indictment'],
+    'the-last-page-torn-out': [
+        'spoiled-poultice', 'chilblain-watch', 'first-spadeful', 'petty-indictment', 'thin-hymn',
+    ],
 };
 
 // ── Known, honest defects ─────────────────────────────────────────────────────
@@ -203,6 +208,14 @@ function assertCombatEffectLanded(
     const beforeAe = before[side].effects.find(a => a.effectId === ce.effectId);
     const afterAe = after[side].effects.find(a => a.effectId === ce.effectId);
     const label = `${cardId} :: combatEffects ${ce.effectId} (${side})`;
+    // A card whose own payoff CONSUMES afflictions (RUPTURE / REAP / consume)
+    // legitimately leaves none behind: `the-feast-of-all-corruption` plants
+    // POISON 15, deepens it, and detonates the whole board in one play. The
+    // status landing is proved by the detonation instead.
+    const consumesOwnBoard = (getCardById(cardId)?.specialMechanics ?? []).some(
+        m => m.kind === 'rupture' || m.kind === 'reap_all' || m.kind === 'consume_affliction',
+    );
+    if (consumesOwnBoard && afterAe === undefined) return;
     expect(afterAe, `${label} — missing after play`).toBeDefined();
     const grew = afterAe!.intensity > (beforeAe?.intensity ?? 0)
         || afterAe!.remainingDuration > (beforeAe?.remainingDuration ?? 0);
@@ -376,9 +389,18 @@ function assertMechanic(
             return;
         }
         case 'soul_gain': {
+            // The GRANT must be observable. The BANK need not rise: a card may
+            // deposit and then spend in the same play (`every-coin-in-the-
+            // poorbox` banks 6 Souls and immediately REAPs the whole jar). What
+            // would be a bug is granting nothing at all.
             const ev = findEvent(events, 'soul-gained');
-            expect(ev, label).toBeDefined();
-            expect(after.souls ?? 0, label).toBeGreaterThan(before.souls ?? 0);
+            expect(ev, `${label}: no soul-gained event`).toBeDefined();
+            expect(ev!.amount, label).toBeGreaterThan(0);
+            const spendsSamePlay = (card.specialMechanics ?? [])
+                .some(m => m.kind === 'reap_all' || m.kind === 'reap');
+            if (!spendsSamePlay) {
+                expect(after.souls ?? 0, label).toBeGreaterThan(before.souls ?? 0);
+            }
             return;
         }
         case 'sway':
@@ -396,12 +418,34 @@ function assertMechanic(
         case 'omen':
             expect((after.pendingOmens ?? []).length, label).toBeGreaterThan((before.pendingOmens ?? []).length);
             return;
-        case 'premise':
-            expect(after.premises ?? 0, label).toBeGreaterThan(before.premises ?? 0);
+        case 'premise': {
+            // As with `soul_gain`: the DEPOSIT must be observable, but the live
+            // tally need not rise — a card that files charges and then declares
+            // its own SENTENCE spends them in the same play.
+            const spendsSamePlay = (card.specialMechanics ?? [])
+                .some(m => m.kind === 'peroration' || m.kind === 'spend_premises');
+            if (spendsSamePlay) {
+                expect(
+                    (after.premiseMilestoneTotal ?? 0), `${label}: no charges ever filed`,
+                ).toBeGreaterThan(before.premiseMilestoneTotal ?? 0);
+            } else {
+                expect(after.premises ?? 0, label).toBeGreaterThan(before.premises ?? 0);
+            }
             return;
-        case 'peroration':
-            expect(after.peroration?.cardId, label).toBe(card.id);
+        }
+        case 'peroration': {
+            // The declaration must be observable. It need not still be STANDING:
+            // a card that files enough charges to reach its own `at` in the same
+            // play declares and immediately fires, which clears the seat.
+            // `the-bench-does-not-retire` files 9 against a SENTENCE at 10.
+            const declared = findEvent(events, 'peroration-declared');
+            const fired = findEvent(events, 'peroration-fired');
+            expect(
+                declared ?? fired, `${label}: neither declared nor fired`,
+            ).toBeDefined();
+            if (!fired) expect(after.peroration?.cardId, label).toBe(card.id);
             return;
+        }
         case 'spend_premises':
             expect(before.premises ?? 0, label).toBeGreaterThan(0);
             expect(after.premises ?? 0, label).toBe(0);

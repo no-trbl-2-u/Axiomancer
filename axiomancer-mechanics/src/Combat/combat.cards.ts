@@ -11,7 +11,9 @@
  */
 
 import { MAX_EFFECT_INTENSITY, FREE_ENCHANT_ROUNDS } from '../Game/game-mechanics.constants';
-import { CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS } from './effects';
+import {
+    CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS, CONCEDE_PREMISES_UNIQUE,
+} from './effects';
 import type { Effect, ActiveEffect } from '../Effects/types';
 import type { Card, CardCombatEffects, CardRider, CardSpecialMechanic, SynergyStatePredicate } from '../Cards/types';
 import { rankToRarity, CARD_RANK_NAMES } from '../Cards/types';
@@ -328,7 +330,10 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         // The declared conclusion prints its full payload — the rider used to
         // be dropped — and the CONDEMN bar names the elite/boss floors
         // (`concedeFloorFor` raises the authored value against them).
-        case 'peroration': return `SENTENCE at ${m.at} — ${riderText(m.rider)}${m.concedeAt ? ` (CONDEMN at ${m.concedeAt} — you win; elite ${CONCEDE_PREMISES_ELITE} · boss ${CONCEDE_PREMISES_BOSS})` : ''}`;
+        // The CONDEMN bar names EVERY floor `concedeFloorFor` can raise the
+        // authored value to, so a face can never advertise a bar the live fight
+        // does not honour. Unique joined the ladder in the 2026-09-02 rescale.
+        case 'peroration': return `SENTENCE at ${m.at} — ${riderText(m.rider)}${m.concedeAt ? ` (CONDEMN at ${m.concedeAt} — you win; elite ${CONCEDE_PREMISES_ELITE} · boss ${CONCEDE_PREMISES_BOSS} · unique ${CONCEDE_PREMISES_UNIQUE})` : ''}`;
         case 'spend_premises': return `spend ALL Charges — +1 mark per ${m.markPer}, draw 1 per ${m.drawPer}`;
         case 'spend_all_pips': return `spend ALL pips${m.guardPerPip ? ` (+${m.guardPerPip} Guard per pip)` : ''}${m.markPer ? ` (+1 MARK per ${m.markPer} spent, uncapped)` : ''}`;
         case 'recoil': return `RECOIL ${m.hp}`;

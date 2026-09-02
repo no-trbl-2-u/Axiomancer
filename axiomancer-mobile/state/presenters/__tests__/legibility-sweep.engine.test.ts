@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect } from '@jest/globals';
-import { createCharacter, initializeCombatEncounter, rollEncounterDice, capitulateThreshold } from '@mechanics';
+import { createCharacter, initializeCombatEncounter, rollEncounterDice, capitulateThreshold, concedeFloorFor } from '@mechanics';
 import type { CombatEncounterState } from '@mechanics';
 
 import { buildCombatViewModel } from '@/state/presenters/combat-encounter.engine';
@@ -32,14 +32,18 @@ describe('CombatViewModel.peroration — the Premise track + CONDEMN beat (phase
 
     it('surfaces the declared card, tally, and tier-floored CONDEMN threshold', () => {
         let s = openState();
-        // createMockEncounterEnemy is difficulty 'elite' -> CONCEDE_PREMISES_ELITE (10)
-        // floors The Black Cap's authored concedeAt (8).
+        // createMockEncounterEnemy is difficulty 'elite', so the elite floor
+        // raises The Black Cap's authored concedeAt. Derived from the engine's
+        // own ladder rather than pinned: it rescaled to 12/24/40/60 on
+        // 2026-09-02 and the point of this case is that the FLOOR wins, not
+        // what the floor currently is.
         s = { ...s, premises: 3, peroration: { cardId: 'the-black-cap', at: 6, concedeAt: 8 } };
         const vm = buildCombatViewModel(s);
         expect(vm.peroration.active).toBe(true);
         expect(vm.peroration.premises).toBe(3);
         expect(vm.peroration.at).toBe(6);
-        expect(vm.peroration.concedeAt).toBe(10); // tier-floored, not the raw 8
+        expect(vm.peroration.concedeAt).toBe(concedeFloorFor('elite'));
+        expect(vm.peroration.concedeAt).toBeGreaterThan(8); // the raw authored value loses
         expect(vm.peroration.cardName).toBe('The Black Cap');
     });
 });

@@ -172,19 +172,35 @@ export function premiseMilestonesCrossed(before: number, after: number): number 
  *  plan): normal/simple enemies keep the card-authored 8; elite enemies need
  *  10; boss/unique enemies (which dominate the late/impossible rosters) need
  *  12. Tunable. */
-export const CONCEDE_PREMISES_BASE = 8;
-export const CONCEDE_PREMISES_ELITE = 10;
-export const CONCEDE_PREMISES_BOSS = 12;
+/**
+ * THE CONDEMN LADDER — rescaled 2026-09-02 (THE BIG NUMBERS REWRITE, measured).
+ *
+ * CONDEMN is an ALT-WIN: reaching the tally ends the fight outright, whatever
+ * the foe's VITAE. That makes its cost the only thing standing between a
+ * Charge deck and a free kill on anything. At the old 8/10/12 — set when a
+ * card filed one or two Charges — a single late-act card filing NINE beat the
+ * deliberately-unwinnable Unfinished 87% of the time in the playtest matrix.
+ *
+ * The floors now scale with what the fight is worth, mirroring RELENT's shape:
+ * a trash mob still concedes to a token argument, a unique demands a case built
+ * over most of the fight. Every one of these numbers is printed on the card
+ * face (`mechanicText`'s `peroration` case), so raising them is honest.
+ */
+export const CONCEDE_PREMISES_BASE = 12;
+export const CONCEDE_PREMISES_ELITE = 24;
+export const CONCEDE_PREMISES_BOSS = 40;
+export const CONCEDE_PREMISES_UNIQUE = 60;
 /** The Premise-tally FLOOR a CONDEMN Peroration must clear against an enemy of
  *  this difficulty — the SINGLE source the engine's concede resolution AND every
  *  presenter/catalog surface read, so a card face can never advertise the base 8
  *  while the live fight demands 10 (elite) or 12 (boss/unique). WI-6. */
 export function concedeFloorFor(difficulty: EnemyDifficulty | undefined): number {
-    return difficulty === 'boss' || difficulty === 'unique'
-        ? CONCEDE_PREMISES_BOSS
-        : difficulty === 'elite'
-            ? CONCEDE_PREMISES_ELITE
-            : CONCEDE_PREMISES_BASE;
+    switch (difficulty) {
+        case 'unique': return CONCEDE_PREMISES_UNIQUE;
+        case 'boss': return CONCEDE_PREMISES_BOSS;
+        case 'elite': return CONCEDE_PREMISES_ELITE;
+        default: return CONCEDE_PREMISES_BASE;
+    }
 }
 /** RELENT resolve threshold (Dawncaster Charmed-style rework, plan/
  *  tuning/2026-07-08-win-path-scaling.md item 1a): the old check (PLEA ≥

@@ -202,6 +202,67 @@ curves (they had been sized against the pre-tuning ones).
 5. **The card-editor write-back** still scanned `cards.library.ts` (D1), so
    every save would have missed. It follows the library directory now.
 
+## THE PATH — the progression axes (owner ruling, later the same day)
+
+The owner ruled the campaign's real power curve, which the harness had never
+modelled. Recorded in full in the durable memory `axiomancer-progression-model`;
+in short, a player grows along SIX axes, not one:
+
+1. staged decks (early / mid / late snapshots of one evolving deck)
+2. card REMOVAL — the late deck is not diluted by starters
+3. card UPGRADES — Slay the Spire's model, a strictly better version per card
+4. die UPGRADES — more mana faces, expensive
+5. ACT REWARD DICE — a base die of the player's choice after each act
+6. better items → stronger SIGNATURE skills
+
+Plus: **enemy decks increase in TIER as the rounds increase.**
+
+**D30 — the harness now carries the campaign, not just the level.**
+`CombatStageProfile` gained `bonusBaseDice`, `dieUpgradeLevel` and
+`upgradedCardShare`, monotone across the four stages; `Character` gained
+`bonusTurnDice` and `dieUpgradeLevel`; `dieFacesForUpgrade(0..2)` trades dead X
+faces for live ones. Guarded by `progression-axes.engine.test.ts`.
+
+**D31 — MEASURED: act-reward dice are a WEAK axis as the game currently
+works.** Raising a late player from 2 bonus dice to 8 moved the matrix by
+exactly zero. Under the dice law you ROLL N and DRAFT ONE, so extra dice buy
+colour selection and Conviction — not extra PAID plays. Making "more dice"
+mean "more actions" requires drafting `1 + bonus` per turn, which is a real
+mechanic change to the engine and the combat UI. **Left for the owner; the
+wiring is correct and ready either way.**
+
+## The pilot was not smart enough — it was broken
+
+The owner asked whether the playtest pilot was smart enough. Two bugs, both
+mine, both from this overhaul:
+
+**D32 — `bottomDamagePreview` summed DoT ONLY.** Its own comment read "0 for
+everything else (no strike preview exists any more)" — true under the strike
+ban, badly wrong once DEAL returned. The greedy pilot RANKS CANDIDATE PLAYS by
+that number, so it was blind to the library's primary verb: every damage card
+scored 0, the bot fell through to its signature nearly every turn, and 75% of
+the library never got played. Fixing it alone moved mid 56 → 66% and late
+4 → 9%.
+
+**D33 — DEAL damage was never recorded in the attribution ledger.** Every
+report credited it to whatever last attributed — the signature skill. That is
+the entire explanation for the `dom=100%(signature)` reading previously
+reported as "the sim grades the signature economy more than the library". It
+was an accounting error, not a finding.
+
+**D34 — THE APOCRYPHA.** A twelve-card, Saint-rank late-act pool
+(`library/apocrypha.cards.ts`), two per theme, each carrying its theme's axis
+to its extreme — a flat 90 for RECOIL 30, `16 x 6` under EXECUTE, REAP ALL at
+26 per Soul, BACKFIRE ALL at 16 per denied rung, PLEA 70.
+
+**D35 — the CONDEMN ladder rescaled 12 / 24 / 40 / 60** (base / elite / boss /
+unique; `unique` is a new tier). CONDEMN is an alt-win: reaching the tally ends
+the fight whatever the foe's VITAE, so its cost is the only thing between a
+Charge deck and a free kill. At the old 8/10/12 — set when a card filed one or
+two Charges — a single apocryphal card filing NINE beat the deliberately
+unwinnable Unfinished **87% of the time**. Every floor is printed on the card
+face, so raising them stays honest.
+
 ## Known gaps and follow-ups
 
 Raised by the authoring agents, all real, none blocking:

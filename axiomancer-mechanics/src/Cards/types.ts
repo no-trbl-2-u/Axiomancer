@@ -504,6 +504,120 @@ export interface CardRider {
     flay?: number;
 }
 
+// ── CARD UPGRADES (2026-09-02) — the Slay the Spire axis ────────────────────
+// One of the six progression axes: a card you own can be upgraded once, into
+// `<id>+` / `<name>+`. The upgraded copy is a PATCH of the original, never a
+// second hand-authored card, so a rework of the base card carries forward.
+// Runtime lives in `src/Cards/card-upgrades.ts` (`upgradeCard`), which applies
+// an authored {@link Card.upgrade} patch if present and otherwise falls back
+// to the documented DEFAULT rule. Every field below is a NON-NEGATIVE ADDITIVE
+// DELTA (a `+` never subtracts): the applier clamps negatives to 0.
+
+/**
+ * The numeric {@link CardRider} fields an upgrade may raise. Deliberately
+ * excludes `recoil` — that is a printed COST, and raising a cost is a
+ * downgrade wearing a `+`. Booleans (`pierce`, `refreshDie`, `tickOne`, …) are
+ * excluded too: they are already on, or belong in an authored rework.
+ */
+export type UpgradableRiderField =
+    | 'damage' | 'guard' | 'barrier' | 'healHp' | 'sway'
+    | 'drawCards' | 'cleanse' | 'souls' | 'premises' | 'foretell' | 'millCards'
+    | 'stagger' | 'pips' | 'conviction' | 'flay' | 'glyphCharge'
+    | 'bonusIntensity' | 'bonusDuration'
+    | 'wrath' | 'chain' | 'ruptureMarks' | 'intensityPerPip';
+
+/**
+ * An additive patch over a {@link CardRider} — the FREE line, a condition-line
+ * rider (`threshold` / `dieBonus` / `fate` / `fallen` / `synergy`), or a rider
+ * carried inside a mechanic (`rider`, `omen`, `peroration`, `reap`,
+ * `immolate`, `grant_pip.overflow`).
+ */
+export interface CardRiderUpgrade extends Partial<Record<UpgradableRiderField, number>> {
+    /** Deltas on the rider's `applyEffect` payload. `intensity` is clamped to
+     *  `MAX_EFFECT_INTENSITY` by the applier. */
+    applyEffect?: { intensity?: number; duration?: number };
+    /** Deltas on the glyph fallback rider (phase 33d). */
+    glyphChargeFallback?: CardRiderUpgrade;
+}
+
+/**
+ * The numeric {@link CardSpecialMechanic} fields an upgrade may raise.
+ * Excluded on purpose, because raising them makes the card WORSE: `recoil.hp`,
+ * `recoil_x.min`, `omen.anteConviction` (printed prices), `reap.cost`,
+ * `immolate.count` (cards burned as a cost), `peroration.at` / `concedeAt`,
+ * `threshold.count` (gates you must reach), and the "per N spent" DIVISORS
+ * `spend_premises.markPer` / `drawPer` and `overkill.per`.
+ */
+export type UpgradableMechanicField =
+    | 'amount'          // deal / guard / barrier / sway / wrath / chain
+    | 'hits'            // deal — a second hit is an authored upgrade, never a default
+    | 'pierce'          // deal — 0/1 flag flip (any delta ≥ 1 turns it on)
+    | 'count'           // premise / soul_gain / foretell / reprise / grant_pip
+    | 'rungs' | 'stacks' | 'pips' | 'turns' | 'times' | 'intensity'
+    | 'bonusIntensity' | 'damage' | 'reduce' | 'souls' | 'conviction'
+    | 'burstPerSoul' | 'burstPerRung' | 'guardPerPip'
+    | 'fuelPerPip' | 'fuelPerOmenHit' | 'poisonPerX'
+    | 'pct' | 'healPct' | 'atPct' | 'bonusPct';
+
+/** An additive patch over ONE entry of `Card.specialMechanics`. */
+export interface CardMechanicUpgrade {
+    /** Which mechanic to patch, by its `kind`. */
+    kind: CardSpecialMechanic['kind'];
+    /** Which occurrence of that kind (0-based). Omit to patch every one. */
+    index?: number;
+    /** Additive deltas on the mechanic's own numeric fields. */
+    fields?: Partial<Record<UpgradableMechanicField, number>>;
+    /** Additive deltas on the rider this mechanic carries, if any. */
+    rider?: CardRiderUpgrade;
+}
+
+/** An additive patch over the matching entries of `Card.combatEffects`. */
+export interface CardEffectUpgrade {
+    /** Only patch entries with this `effectId`. Omit to patch every entry. */
+    effectId?: string;
+    /** +N intensity (clamped to `MAX_EFFECT_INTENSITY`). */
+    intensity?: number;
+    /** +N turns of duration. */
+    duration?: number;
+}
+
+/**
+ * The authored upgrade PATCH for a card: the fields an upgraded copy
+ * overrides. Present on a card, it wins over the default rule ENTIRELY (the
+ * default is not layered underneath — an author who writes a patch owns the
+ * whole upgrade). Data only; see `src/Cards/card-upgrades.ts`.
+ */
+export interface CardUpgrade {
+    /** Display name of the upgraded copy. Default: `${name}+`. */
+    name?: string;
+    /** Replacement fiction. Default: the base card's `description`. */
+    description?: string;
+    /**
+     * Replacement PAID sentence. Omit it and `upgradeCard` CLEARS
+     * `paidSummary` whenever the patch changed a printed number, so the face
+     * falls back to generated text rather than printing a stale one (the
+     * P0-truth law — `src/Combat/e2e/paid-summary-honesty.engine.test.ts`).
+     */
+    paidSummary?: string;
+    /** Replacement passive summary for an `oath` / `hex`. */
+    persistentEffect?: string;
+    /** Deltas on `specialMechanics`. */
+    mechanics?: CardMechanicUpgrade[];
+    /** Deltas on `combatEffects`. */
+    effects?: CardEffectUpgrade[];
+    /** Deltas on the FREE line. Applies even when the base card has no
+     *  `free` rider (the deltas become the rider). */
+    free?: CardRiderUpgrade;
+    /** Deltas on the condition-line riders. The GATES themselves
+     *  (`threshold.count`, `fate.recoilHp`, the state predicates) are not
+     *  patchable: relaxing a gate is a rework, not a `+`. */
+    threshold?: CardRiderUpgrade;
+    dieBonus?: CardRiderUpgrade;
+    fate?: CardRiderUpgrade;
+    fallen?: CardRiderUpgrade;
+    synergy?: CardRiderUpgrade;
+}
+
 /**
  * Phase 66 — synergy predicate. The matched ActiveEffect on `on`
  * satisfies the predicate when its `effectId` matches AND its
@@ -772,4 +886,14 @@ export interface Card {
      * owned; the card engine no-ops it.
      */
     glyph?: { payload: GlyphPayload; cap: number };
+    /**
+     * CARD UPGRADES (2026-09-02) — the authored patch used when this card is
+     * upgraded to `<id>+`. Optional by design: a card WITHOUT one still
+     * upgrades, through the documented default rule in
+     * `src/Cards/card-upgrades.ts`. Author one only when the default reads
+     * badly on this card (a cost-shaped number, a payoff that wants a second
+     * hit rather than a bigger one, a face whose prose must be rewritten).
+     * Data only — the card engine ignores it; `upgradeCard` reads it.
+     */
+    upgrade?: CardUpgrade;
 }

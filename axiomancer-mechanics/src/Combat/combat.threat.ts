@@ -73,8 +73,17 @@ export interface AuthoredThreatPhase {
     /** Spec 26b §2 — thematic tell implying this phase's hidden stance. */
     stanceHint?: string;
     /** Phase 3 — "rage mode": locks this phase until the resolving round
-     *  reaches it (see `CombatThreatPhase.unlockAfterRound`). Undefined on
-     *  every authored sequence today — none is gated yet. */
+     *  reaches it (see `CombatThreatPhase.unlockAfterRound`).
+     *
+     *  ROUND-KEYED DECK TIERS (owner ruling, 2026-09-02) — this field is now
+     *  also the mechanism behind tiered enemy decks: `compileEnemyDeck`
+     *  (`combat.enemy-decks.ts`) stamps a tier's round onto every card in it,
+     *  so tier 2 is unreachable before round 3 and tier 3 before round 6 by
+     *  default. The gates a deck compiles to are NON-DECREASING down the
+     *  sequence (a tier never reverts) and phase index 0 is never gated, so
+     *  the fight always has a legal action: `processBetweenPhases` responds to
+     *  a gated candidate by HOLDING the pointer at the last reachable phase
+     *  rather than advancing past it. */
     unlockAfterRound?: number;
     /** Phase 33b — variable-rung telegraph: this phase's authored STAGGER-rung
      *  count (1-4). Undefined = the enemy's natural (difficulty-derived) flat
@@ -518,5 +527,16 @@ export function getThreatSequence(enemy: Enemy): CombatThreatPhase[] {
     // default generator alike — the sim's witness enemies carry short explicit
     // sequences the generator never touched). A hand-authored check is
     // preserved; only absent ones are filled. Inert while the flag is off.
-    return seq.map(p => (p.stanceCheck ? p : { ...p, stanceCheck: defaultStanceCheck(p.enemyStance) }));
+    //
+    // ROUND-KEYED DECK TIERS (2026-09-02) — the ANTI-STALL guarantee, applied
+    // at the same choke point: the OPENING phase is never round-gated,
+    // whatever the source authored. Every later phase can only hold the
+    // pointer where it is (`processBetweenPhases`), and the phase it holds on
+    // always has an action — so no combination of tier gates can leave a
+    // fight without a legal enemy action.
+    return seq.map((p, i) => {
+        const withCheck = p.stanceCheck ? p : { ...p, stanceCheck: defaultStanceCheck(p.enemyStance) };
+        if (i > 0 || withCheck.unlockAfterRound === undefined) return withCheck;
+        return { ...withCheck, unlockAfterRound: undefined };
+    });
 }

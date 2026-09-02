@@ -31,6 +31,7 @@ import {
 } from '../combat.engine';
 import {
     CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
+    CONCEDE_PREMISES_UNIQUE, concedeFloorFor,
     CAPITULATE_RESOLVE_FRACTION, CAPITULATE_MIN, capitulateThreshold,
     THREAT_RUNGS, THREAT_RUNGS_BOSS, BOSS_RUNG_REGROWTH, bossRungGrowthCap,
 } from '../effects';
@@ -137,44 +138,44 @@ describe('CONDEMN Premises scale with enemy difficulty (item 1a)', () => {
         expect(res.state.finalOutcome).not.toBe('concede');
     });
 
-    it('normal/simple enemy concedes at the card-printed number (CONCEDE_PREMISES_BASE floor)', () => {
-        expect(CONCEDE_PREMISES_BASE).toBe(8);
-        let state = declaredAt(makeEnemy(300, 'heart'), 8);
-        state = { ...state, premises: 6 };
-        const res = playFromHand(state, OPENER, false); // +2 -> 8
-        expect(res.state.finalOutcome).toBe('concede');
+    // ── The concede ladder, asserted as a LADDER ────────────────────────────
+    // Rescaled 2026-09-02 to 12/24/40/60 (base/elite/boss/unique). CONDEMN is
+    // an alt-win: reaching the tally ends the fight whatever the foe's VITAE,
+    // so the floor is the only cost. These cases derive their fixtures from
+    // `concedeFloorFor` so a future rescale moves them with it — what is being
+    // tested is that each tier's floor BINDS and the tier below it does not.
+    const CONDEMN_TIERS: readonly { difficulty: 'simple' | 'elite' | 'boss' | 'unique'; below?: number }[] = [
+        { difficulty: 'simple' },
+        { difficulty: 'elite', below: CONCEDE_PREMISES_BASE },
+        { difficulty: 'boss', below: CONCEDE_PREMISES_ELITE },
+        { difficulty: 'unique', below: CONCEDE_PREMISES_BOSS },
+    ];
+
+    it('the ladder is strictly increasing across the difficulty bands', () => {
+        expect(CONCEDE_PREMISES_ELITE).toBeGreaterThan(CONCEDE_PREMISES_BASE);
+        expect(CONCEDE_PREMISES_BOSS).toBeGreaterThan(CONCEDE_PREMISES_ELITE);
+        expect(CONCEDE_PREMISES_UNIQUE).toBeGreaterThan(CONCEDE_PREMISES_BOSS);
     });
 
-    it('elite enemy: 8 Premises no longer concedes (needs CONCEDE_PREMISES_ELITE)', () => {
-        expect(CONCEDE_PREMISES_ELITE).toBe(10);
-        let state = declaredAt(makeEnemy(300, 'heart', 'elite'), 8);
-        state = { ...state, premises: 6 };
-        const res = playFromHand(state, OPENER, false); // +2 -> 8, still under 10
-        expect(res.state.finalOutcome).not.toBe('concede');
-        expect(res.state.peroration).not.toBeNull(); // the argument is still live
-    });
+    for (const { difficulty, below } of CONDEMN_TIERS) {
+        it(`${difficulty} enemy: reaching its own floor concedes`, () => {
+            const floor = concedeFloorFor(difficulty);
+            let state = declaredAt(makeEnemy(300, 'heart', difficulty), 8);
+            state = { ...state, premises: floor - 2 };
+            const res = playFromHand(state, OPENER, false); // +2 -> the floor
+            expect(res.state.finalOutcome).toBe('concede');
+        });
 
-    it('elite enemy: reaching CONCEDE_PREMISES_ELITE (10) concedes', () => {
-        let state = declaredAt(makeEnemy(300, 'heart', 'elite'), 8);
-        state = { ...state, premises: 8 };
-        const res = playFromHand(state, OPENER, false); // +2 -> 10
-        expect(res.state.finalOutcome).toBe('concede');
-    });
-
-    it('boss enemy: 10 Premises no longer concedes (needs CONCEDE_PREMISES_BOSS)', () => {
-        expect(CONCEDE_PREMISES_BOSS).toBe(12);
-        let state = declaredAt(makeEnemy(300, 'heart', 'boss'), 8);
-        state = { ...state, premises: 8 };
-        const res = playFromHand(state, OPENER, false); // +2 -> 10, still under 12
-        expect(res.state.finalOutcome).not.toBe('concede');
-    });
-
-    it('unique enemy: reaching CONCEDE_PREMISES_BOSS (12) concedes', () => {
-        let state = declaredAt(makeEnemy(300, 'heart', 'unique'), 8);
-        state = { ...state, premises: 10 };
-        const res = playFromHand(state, OPENER, false); // +2 -> 12
-        expect(res.state.finalOutcome).toBe('concede');
-    });
+        if (below !== undefined) {
+            it(`${difficulty} enemy: the tier BELOW its floor does not concede`, () => {
+                let state = declaredAt(makeEnemy(300, 'heart', difficulty), 8);
+                state = { ...state, premises: below - 2 };
+                const res = playFromHand(state, OPENER, false); // +2 -> the lower tier's floor
+                expect(res.state.finalOutcome).not.toBe('concede');
+                expect(res.state.peroration).not.toBeNull(); // the argument is still live
+            });
+        }
+    }
 });
 
 // ── (B) RELENT resolve threshold (Dawncaster Charmed-style) ─────────────

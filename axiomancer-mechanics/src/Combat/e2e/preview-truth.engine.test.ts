@@ -22,6 +22,7 @@ import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
 import { GraveLarva } from '../../Enemy/enemy.library';
 import { cardLibrary } from '../../Cards/cards.library';
+import type { Card } from '../../Cards/types';
 import { deepClone } from '../../Utils';
 import { lookupEffect, effectsLibrary } from '../../Effects/effects.library';
 import type { ActiveEffect, Effect } from '../../Effects/types';

@@ -16,8 +16,11 @@
  *     lock_stance and OMEN: this deck wants to know what the foe will do, and
  *     then not let them do it.
  *
- * CONDEMN RESCALE (2026-09-02): the old flat 8-Charge concession is repealed.
- * `the-black-cap` now declares SENTENCE at 12 and CONDEMN at 14 — a two-Charge
+ * CONDEMN RESCALE (2026-09-02, twice): the old flat 8-Charge concession is
+ * repealed, and the difficulty ladder that replaced it was itself rescaled to
+ * 12 / 24 / 40 / 60 after an apocryphal card filing nine Charges beat the
+ * deliberately unwinnable Unfinished 87% of the time.
+ * `the-black-cap` declares SENTENCE at 12 and CONDEMN at 14 — a two-Charge
  * overshoot off a full docket, above both the elite floor of 10 and the boss
  * floor of 12, so the alt-win must be *built* rather than stumbled into.
  * Exactly one card in this file carries a `peroration` with `concedeAt`.
@@ -404,7 +407,7 @@ const theBlackCap: Card = {
     tier: 3, rank: 6, cardType: 'spell',
     targetType: 'enemy',
     paidSummary:
-        'Inflict DOOM 12. Gain 5 CHARGES. SENTENCE at 12 — RUPTURE every MARK for 8 apiece, STAGGER 2, draw 2. CONDEMN at 14 wins outright, clearing the elite floor of 10 and the boss floor of 12.',
+        'Inflict DOOM 12. Gain 5 CHARGES. SENTENCE at 12 — RUPTURE every MARK for 8 apiece, STAGGER 2, draw 2. CONDEMN at 14 wins outright against a lesser foe. An elite demands 24, a boss 40, a unique 60.',
     // pts: DOOM i12 + 5 charges + SENTENCE-at-12 [ruptureMarks 8, stagger 2,
     // draw 2] + CONDEMN 14; FREE DOOM i4 / 3 charges. The one alt-win card in
     // the theme. CONDEMN is a two-Charge overshoot off a full docket, so it

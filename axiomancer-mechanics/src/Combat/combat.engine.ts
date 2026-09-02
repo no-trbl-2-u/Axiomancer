@@ -31,6 +31,7 @@ import type { Character } from '../Character/types';
 import type { Enemy } from '../Enemy/types';
 import { findEnemyKeyword, hasEnemyKeyword, enemyKeywordText } from '../Enemy/enemy-keywords';
 import { getCardById } from '../Cards/cards.library';
+import { baseCardId } from '../Cards/card-upgrades';
 import { executeCard } from '../Cards/card.engine';
 import { checkStatePredicate } from '../Cards/synergy-predicates';
 import type { Card, CardRider, CardSpecialMechanic } from '../Cards/types';
@@ -1282,11 +1283,18 @@ function removePlayedEntry(state: CombatEncounterState, uid: string): CombatEnco
  *  lights up the exact same hook while its `roundsLeft` holds, so the weak and the
  *  permanent versions differ only in duration, never in effect. */
 function zoneHas(state: CombatEncounterState, cardId: string): boolean {
-    return state.persistentZone.includes(cardId)
-        || (state.enemyAttachments ?? []).includes(cardId)
-        || (state.enemyEnchantments ?? []).includes(cardId)
-        || (state.tempZone ?? []).some(t => t.cardId === cardId)
-        || (state.enemyTempAttachments ?? []).some(t => t.cardId === cardId);
+    // THE PATH — card upgrades. An oath/hex passive is hooked by LITERAL card
+    // id (`zoneHas(state, 'every-stone-an-oath')`), so an upgraded copy sitting
+    // in the zone as `every-stone-an-oath+` would match nothing and the card
+    // would silently lose the only thing it does — a strict DOWNGRADE wearing a
+    // `+`. Compare on the BASE id so `x` and `x+` are the same oath.
+    const want = baseCardId(cardId);
+    const sameCard = (id: string): boolean => baseCardId(id) === want;
+    return state.persistentZone.some(sameCard)
+        || (state.enemyAttachments ?? []).some(sameCard)
+        || (state.enemyEnchantments ?? []).some(sameCard)
+        || (state.tempZone ?? []).some(t => sameCard(t.cardId))
+        || (state.enemyTempAttachments ?? []).some(t => sameCard(t.cardId));
 }
 
 /** Phase 33d (GLYPHS pilot) — the live glyphs of a given payload kind, array

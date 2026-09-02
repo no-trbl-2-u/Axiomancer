@@ -47,6 +47,7 @@ import { Card } from './types';
 import { bindSandboxLibraryGuard, getSandboxCard } from './cards.sandbox';
 import { getHauntById } from './cards.haunts';
 import { getAllyById } from './cards.allies';
+import { getUpgradedCardById, isUpgradedCardId } from './card-upgrades';
 import { STARTER_CARDS, CURSE_CARDS } from './library/starters.cards';
 import { RELIC_CARDS } from './library/relics.cards';
 import { ROT_CARDS } from './library/rot.cards';
@@ -55,6 +56,7 @@ import { GRAVE_CARDS } from './library/grave.cards';
 import { VIGIL_CARDS } from './library/vigil.cards';
 import { TRIAL_CARDS } from './library/trial.cards';
 import { CHOIR_CARDS } from './library/choir.cards';
+import { APOCRYPHA_CARDS } from './library/apocrypha.cards';
 
 export const cardLibrary: Card[] = [
     ...STARTER_CARDS,
@@ -66,6 +68,7 @@ export const cardLibrary: Card[] = [
     ...VIGIL_CARDS,
     ...TRIAL_CARDS,
     ...CHOIR_CARDS,
+    ...APOCRYPHA_CARDS,
 ];
 
 const registry = new Map<string, Card>(cardLibrary.map(card => [card.id, card]));
@@ -80,5 +83,13 @@ bindSandboxLibraryGuard(id => registry.get(id));
  *  library), then the Ally registry (village-goodwill grants — also
  *  deliberately outside the pinned library), then the curated library. */
 export function getCardById(id: string): Card | undefined {
-    return getSandboxCard(id) ?? getHauntById(id) ?? getAllyById(id) ?? registry.get(id);
+    const direct = getSandboxCard(id) ?? getHauntById(id) ?? getAllyById(id) ?? registry.get(id);
+    if (direct) return direct;
+    // THE PATH — card upgrades (Slay the Spire's model). An upgraded copy sits
+    // in a deck as a plain id string, `some-card+`, and resolves here by
+    // upgrading its base on demand. Last in the chain so nothing else changes
+    // and a literal `+` card in any registry above still wins.
+    // Guarded on the suffix: without it an unknown `foo` would bounce between
+    // this function and the resolver forever (baseCardId('foo') === 'foo').
+    return isUpgradedCardId(id) ? getUpgradedCardById(id) : undefined;
 }

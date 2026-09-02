@@ -17,6 +17,7 @@ import {
 } from '../combat.stage-profiles';
 import { ENEMY_REGISTRY } from '../../Enemy/enemy.library';
 import { getCardById, cardLibrary } from '../../Cards/cards.library';
+import { baseCardId } from '../../Cards/card-upgrades';
 import { Player } from '../../Character/characters.mock';
 import type { Card } from '../../Cards/types';
 
@@ -85,12 +86,17 @@ describe('stage-eligible card pools', () => {
     it('the pool excludes nothing else — every library card passing the gates is in', () => {
         for (const id of COMBAT_STAGE_ORDER) {
             const stage = COMBAT_STAGE_PROFILES[id];
-            const pool = new Set(stageEligibleCardIds(stage));
+            // THE PATH — a stage pool may hand back UPGRADED ids (`x+`) for the
+            // share of the deck the player has spent rest-site beats on. The
+            // pool is still one entry per eligible card, so compare on BASE ids.
+            const pool = new Set(stageEligibleCardIds(stage).map(baseCardId));
             const expected = cardLibrary.filter(c =>
                 c.tier <= stage.maxCardTier
                 && rankMaturityLevel(c.rank) <= stage.playerLevel);
-            expect(pool.size).toBe(expected.length);
-            for (const card of expected) expect(pool.has(card.id)).toBe(true);
+            expect(pool.size, `${id} pool size`).toBe(expected.length);
+            for (const card of expected) {
+                expect(pool.has(card.id), `${id} pool is missing ${card.id}`).toBe(true);
+            }
         }
     });
 
