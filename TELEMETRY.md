@@ -7,10 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-17T22:08:20Z | skill | march | claude-opus-4-8 | main | - |
-| 2026-07-17T22:13:28Z | subagent | Explore | claude-opus-4-8 | main | Map dice sim/autoplay infra |
-| 2026-07-17T23:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
-| 2026-07-17T23:14:34Z | subagent | card-expert | claude-opus-4-8 | main | Implement Phase D4 card/pricing re-authoring |
 | 2026-07-18T00:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
 | 2026-07-18T00:11:40Z | subagent | Explore | claude-opus-4-8 | main | Map D5 gear/migration/encounter surface |
 | 2026-07-18T00:16:00Z | subagent | general-purpose | claude-opus-4-8 | main | Implement Phase D5 die gear + blacksmith |
@@ -407,3 +403,7 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-02T00:20:03Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-02T00:20:05Z | skill | march | unknown | main | - |
 | 2026-09-02T00:23:03Z | skill | iterate | claude-sonnet-5 | main | - |
+| 2026-09-02T04:44:28Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-02T04:44:30Z | skill | march | unknown | main | - |
+| 2026-09-02T04:45:36Z | skill | iterate | claude-sonnet-5 | main | - |
+| 2026-09-02T04:46:38Z | subagent | Explore | claude-sonnet-5 | main | Investigate top iterate candidates' fix feasibility |
