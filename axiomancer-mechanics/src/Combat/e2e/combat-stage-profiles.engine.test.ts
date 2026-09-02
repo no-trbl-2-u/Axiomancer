@@ -7,6 +7,7 @@
  * Character, and the pool grows with the campaign (early < late).
  */
 
+import { calculateMaxHealth } from '../../Utils';
 import { describe, it, expect, afterEach, vi } from 'vitest';
 
 import {
@@ -133,8 +134,11 @@ describe('buildStagePlayer', () => {
             const player = buildStagePlayer(stage);
             expect(player.level).toBe(stage.playerLevel);
             expect(player.baseStats).toEqual(stage.playerBaseStats);
-            expect(player.health).toBe(stage.playerMaxHealth);
-            expect(player.maxHealth).toBe(stage.playerMaxHealth);
+            // Derived from the live formula, not read off the profile — see
+            // the note on the buildStagePlayer case above.
+            const derived = calculateMaxHealth(stage.playerLevel, stage.playerBaseStats);
+            expect(player.health).toBe(derived);
+            expect(player.maxHealth).toBe(derived);
             // Derived stats track the stage's base stats, not the mock's level-1 spread.
             expect(player.derivedStats).not.toEqual(Player.derivedStats);
         }

@@ -89,6 +89,9 @@ describe('IMMOLATE — the pyre must be fed', () => {
         const enemyHpBefore = state.enemy.health;
 
         const res = play(state, DISTRAINT);
+        // The rider's damage half lands here too (see the regression guard
+        // below for why that is worth stating twice).
+        expect(res.state.enemy.health).toBeLessThan(enemyHpBefore);
         const burned = res.events.find(e => e.kind === 'immolated');
         expect(burned).toBeDefined();
         // BIG NUMBERS (2026-09-02): distraint prints IMMOLATE 2, so the pyre
@@ -106,10 +109,10 @@ describe('IMMOLATE — the pyre must be fed', () => {
     });
 
     /**
-     * SUSPECTED ENGINE BUG (found 2026-09-02, deliberately NOT papered over).
+     * REGRESSION GUARD — the two-rider-executor bug (found and fixed 2026-09-02).
      *
      * `distraint` prints "IMMOLATE 2: burn the 2 lowest cards in your hand,
-     * then deal 26 and gain GUARD 24". The GUARD lands; the 26 does not.
+     * then deal 26 and gain GUARD 24". The GUARD landed; the 26 did not.
      *
      * Cause: `combat.engine.ts` has TWO rider executors. `applyRiderToState`
      * (the FREE-line / state-rider path) was taught THE BIG NUMBERS damage
@@ -121,10 +124,11 @@ describe('IMMOLATE — the pyre must be fed', () => {
      * fate, dieBonus, synergy/REQUIEM, overflow — 20 cards across debt, grave,
      * trial and vigil) prints a number the engine never applies.
      *
-     * `it.fails` keeps the true claim in the suite without a red build: it
-     * turns RED the moment the engine is fixed, and must be deleted then.
+     * FIXED 2026-09-02 — the PAID executor now reads the damage family too.
+     * This stands as the regression guard: any new rider verb must be added to
+     * BOTH executors, and this is what catches forgetting the second one.
      */
-    it.fails('IMMOLATE\'s rider deals its printed damage (ENGINE BUG: PAID riders drop `damage`)', () => {
+    it('IMMOLATE\'s rider deals its printed damage on the PAID line too', () => {
         mockSequentialRng(0.05);
         const deck = [DISTRAINT, POULTICE, POULTICE, POULTICE, POULTICE];
         const state = openAndDraft(deck, 'body');

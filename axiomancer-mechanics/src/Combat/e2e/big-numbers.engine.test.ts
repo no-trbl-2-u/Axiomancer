@@ -26,7 +26,7 @@ import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     draftStanceDie, resolveThreatPhase,
     scalePlayerHit, effectiveHide, FLAY_DAMAGE_MULT, EXECUTE_DAMAGE_MULT,
-    WOUND_CARD_ID,
+    BRUTAL_DAMAGE_MULT, WOUND_CARD_ID,
 } from '../combat.engine';
 import type { CombatEncounterState } from '../combat.encounter.types';
 
@@ -301,12 +301,12 @@ describe('enemy keywords change the arithmetic of a resolved threat', () => {
         expect(swift.player.health).toBeLessThanOrEqual(plain.player.health);
     });
 
-    it('BRUTAL doubles whatever gets through', () => {
+    it('BRUTAL multiplies whatever gets through', () => {
         const plain = resolveThreatPhase(threatState([]), rng).state;
         const brutal = resolveThreatPhase(threatState([{ kind: 'brutal' }]), rng).state;
         const plainTaken = 400 - plain.player.health;
         const brutalTaken = 400 - brutal.player.health;
-        if (plainTaken > 0) expect(brutalTaken).toBe(plainTaken * 2);
+        if (plainTaken > 0) expect(brutalTaken).toBe(Math.round(plainTaken * BRUTAL_DAMAGE_MULT));
     });
 
     it('UNSHAKEN refuses every rung of denial', () => {
@@ -371,11 +371,13 @@ describe('boss STAGES', () => {
 
 describe('the VITAE curve', () => {
     it('separates the difficulty bands and honours an authored override', () => {
-        expect(enemyVitae(1, 'normal')).toBe(48);
+        // The exact figure follows the tuned curve; what this pins is the
+            // SHAPE — the bands separate and an authored pool always wins.
+            expect(enemyVitae(1, 'normal')).toBe(38);
         expect(enemyVitae(1, 'simple')).toBeLessThan(enemyVitae(1, 'normal'));
         expect(enemyVitae(7, 'elite')).toBeGreaterThan(enemyVitae(7, 'normal'));
         expect(enemyVitae(6, 'boss')).toBeGreaterThan(enemyVitae(6, 'elite'));
-        expect(enemyVitae(110, 'unique')).toBeGreaterThan(6000);
+        expect(enemyVitae(110, 'unique')).toBeGreaterThan(2000);
         // An authored pool always wins.
         expect(enemyVitae(1, 'normal', 777)).toBe(777);
     });

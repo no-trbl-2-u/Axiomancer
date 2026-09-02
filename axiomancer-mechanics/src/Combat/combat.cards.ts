@@ -479,7 +479,7 @@ export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffec
         dieLines.push(`⬢ ${on}: ${riderText(card.dieBonus.rider, riderOpts)}`);
     }
     if (card.fate) {
-        const recoil = card.fate.recoilHp ? ` (recoil ${card.fate.recoilHp} HP)` : '';
+        const recoil = card.fate.recoilHp ? ` (recoil ${card.fate.recoilHp} VITAE)` : '';
         dieLines.push(`✕ an X die may power this: +${riderText(card.fate.rider, riderOpts)}${recoil}`);
     }
     // WS4.2 — combat-state synergy condition (dieless, ledger-read): printed

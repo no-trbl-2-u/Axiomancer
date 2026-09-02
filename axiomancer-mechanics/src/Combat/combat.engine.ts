@@ -3360,6 +3360,48 @@ function playBottomAction(
     let riderGuard = 0;
     let riderRefresh = false;
     for (const r of firedRiders) {
+        // ── THE BIG NUMBERS REWRITE — the damage family on a PAID-line rider.
+        // There are TWO rider executors: `applyRiderToState` (the FREE line and
+        // the state path) and this one (the PAID line's `firedRiders`). Teaching
+        // only the first meant every condition payoff that printed a number —
+        // IMMOLATE's rider, a FALLEN clause, a FATE line, a dieBonus, a synergy,
+        // a pip overflow, 20 cards in all — showed the player a figure the
+        // engine never applied. Caught 2026-09-02 by the effectiveness pass.
+        if (r.damage) {
+            const dmg = scalePlayerHit({
+                base: r.damage,
+                readMult: mult,
+                colorMatch,
+                wrath, chain,
+                flay: flayStacks > 0,
+                execute: executeArmed,
+                hide: effectiveHide(enemy, staggeredThisRound),
+                pierce: r.pierce === true,
+            });
+            if (chain > 0) chain = 0;
+            if (flayStacks > 0) flayStacks -= 1;
+            if (dmg > 0) {
+                const hit = applyEnemyDamage(enemy, dmg, state.round, events);
+                enemy = hit.enemy;
+                mechanicDamage += dmg;
+                directDamage += dmg + hit.clockDamage;
+                gainSoulsLocal(soulWorthyWashouts(hit.washedOut), 'expiry');
+                events.push({ kind: 'damage-dealt', cardId: card.id, target: 'enemy', amount: dmg });
+            }
+        }
+        if (r.wrath) {
+            wrath += r.wrath;
+            events.push({ kind: 'wrath-gained', cardId: card.id, amount: r.wrath, total: wrath });
+        }
+        if (r.chain) {
+            chain += r.chain;
+            chainFedThisTurn = true;
+            events.push({ kind: 'chain-gained', cardId: card.id, amount: r.chain, total: chain });
+        }
+        if (r.flay) {
+            flayStacks += r.flay;
+            events.push({ kind: 'flay-applied', cardId: card.id, amount: r.flay, total: flayStacks });
+        }
         if (r.guard) riderGuard += r.guard;
         if (r.conviction) conviction = Math.min(CONVICTION_CAP, conviction + r.conviction);
         if (r.refreshDie) riderRefresh = true;

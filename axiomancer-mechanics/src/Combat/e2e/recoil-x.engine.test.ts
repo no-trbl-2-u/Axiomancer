@@ -146,10 +146,15 @@ describe('RECOIL X — the engine clamps X and scales the POISON payoff', () => 
         mockSequentialRng(0.05);
         const state = openAndDraft(makePlayer([VEIN]), makeEnemy(400));
         const hpBefore = state.player.health;
-        const res = playVein(state, 20);
+        // Chosen above the ceiling on purpose, so this exercises the clamp
+        // rather than a value that happens to sit under it. (It was 20 when
+        // MAX_EFFECT_INTENSITY was 10; the cap rose to 30 in THE BIG NUMBERS
+        // REWRITE so that six cards printing THORNS 12-20 stopped lying.)
+        const paid = MAX_EFFECT_INTENSITY + 10;
+        const res = playVein(state, paid);
         // The blood price is NOT capped — you pay every point you chose …
-        expect(recoilPaid(res)).toBe(20);
-        expect(hpBefore - res.state.player.health).toBe(20);
+        expect(recoilPaid(res)).toBe(paid);
+        expect(hpBefore - res.state.player.health).toBe(paid);
         // … but a single affliction never stacks past MAX_EFFECT_INTENSITY.
         expect(poisonIntensity(res)).toBe(MAX_EFFECT_INTENSITY);
     });

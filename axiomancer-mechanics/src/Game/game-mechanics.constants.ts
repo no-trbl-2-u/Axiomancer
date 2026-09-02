@@ -77,7 +77,13 @@ export const PASSIVE_DEFENSE_MULTIPLIER = 1;
 // Hard ceiling on how high any single effect's intensity or remaining duration
 // can grow, regardless of stacking mode or repeated applications.
 
-export const MAX_EFFECT_INTENSITY = 10;
+// THE BIG NUMBERS REWRITE (2026-09-02) — the intensity ceiling was 10, set
+// when POISON 1-4 was a big number. At the new scale six cards print THORNS
+// 12-20 and DOOM 12 and every one of them silently landed 10 — a printed
+// number the engine did not apply, which is the one text law the repeal kept.
+// The DURATION cap is untouched: a 10-turn calendar is still a long time, and
+// stretching it is a different design question.
+export const MAX_EFFECT_INTENSITY = 30;
 export const MAX_EFFECT_DURATION  = 10;
 
 // Spec 32 v4 §2.1 — the FREE (dieless) enchant/disenchant line grants a TIMED

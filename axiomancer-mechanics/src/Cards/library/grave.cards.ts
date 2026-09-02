@@ -403,7 +403,7 @@ const theCongregationBelow: Card = {
     name: 'The Congregation Below',
     philosophicalAspect: 'mind',
     persistentEffect:
-        'At the end of each round, the foe loses 1 VITAE for every 2 cards in your discard pile.',
+        'REQUIEM: at the end of each round, the foe loses 1 VITAE for every 2 cards in your discard pile.',
     description:
         'Every burial is a deposition. Below the frost line the parish keeps ' +
         'perfect minutes, and at the close of each round the dead read them ' +
