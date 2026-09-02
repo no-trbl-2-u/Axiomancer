@@ -21,7 +21,10 @@
  * count is exactly 30" — a mechanic without a keyword here is the bug (see
  * the card-face-honesty guard test). The engine keeps its thematic effect
  * names as lore; this module is the PRESENTATION-layer mapping the board,
- * card faces, glossary, and combat log read instead. Pure + dependency-free.
+ * card faces, glossary, and combat log read instead. Pure; its only dependency
+ * is the engine's ENEMY keyword table (see the ENEMY VOCABULARY block at the
+ * foot of this file — those words and their reminder text are content the foe
+ * ships with, not copy mobile is free to invent).
  *
  * Why mobile-side: a player-facing label is presentation (ADR-0001/0003 — the
  * engine owns truth, mobile owns how it reads). Never rename engine effect ids
@@ -30,6 +33,15 @@
  * Keywords are stored Title-Case; display sites uppercase where they want the
  * pop (card face, glossary header). The combat log uses Title-Case directly.
  */
+
+import {
+    ENEMY_KEYWORD_GLOSS, ENEMY_KEYWORD_KINDS, ENEMY_KEYWORD_LABEL,
+    enemyKeywordGloss, enemyKeywordText,
+    type EnemyKeyword,
+// Relative, NOT the `@mechanics` alias: `axiomancer-mechanics/scripts/export-catalog.ts`
+// imports this module directly under ts-node, where mobile's tsconfig paths do
+// not apply. The alias would resolve for the app and break the catalog build.
+} from '../../../axiomancer-mechanics/src/Enemy/enemy-keywords';
 
 /** Effect id → keyword (Title-Case). The CARD vocabulary (spec 32 v3 §3). */
 const EFFECT_KEYWORD: Record<string, string> = {
@@ -456,4 +468,43 @@ export function systemTermsForCard(
 export function keywordInArchetype(keyword: string | null | undefined, archetype: string | null | undefined): boolean {
     if (!keyword || !archetype) return false;
     return (ARCHETYPE_KEYWORDS[archetype] ?? []).includes(keyword);
+}
+
+// ── THE ENEMY VOCABULARY (THE BIG NUMBERS REWRITE, 2026-09-02) ──────────────
+//
+// HIDE / SWIFT / BRUTAL / VENOM / UNSHAKEN / ELUSIVE / REGROW / RAVENOUS /
+// WOUNDING change the ARITHMETIC of a fight, so the foe's pane must print them
+// and every printed word must pop a definition — the same law the card side has
+// obeyed since 2026-07-12. Unlike card keywords, the word AND its reminder text
+// are ENGINE content (they ship with the foe, with the foe's own number in
+// them), so this file does not restate them: it adapts `ENEMY_KEYWORD_GLOSS`
+// into the `{ label, gloss }` shape a chip renders, and nothing more.
+//
+// They deliberately stay OUT of `KEYWORD_GLOSS`: that map is the CARD registry
+// the KW lints and the inspect overlay walk, and a foe's armour rating is not a
+// card keyword.
+
+/**
+ * The chip a foe's keyword renders as: the printed token (`HIDE 6`, `BRUTAL`)
+ * and its reminder text with THIS instance's number already substituted in, so
+ * the popup can never quote a number the engine is not applying.
+ */
+export function enemyKeywordChip(keyword: EnemyKeyword): { label: string; gloss: string } {
+    return { label: enemyKeywordText(keyword), gloss: enemyKeywordGloss(keyword) };
+}
+
+/**
+ * The gloss for an enemy keyword named by its printed TOKEN — the read path for
+ * the combat log, whose `enemy-keyword-fired` event carries the word (`'SWIFT'`,
+ * `'HIDE 6'`) rather than the keyword instance. Returns the un-substituted
+ * reminder text (its `{n}` slot intact) when the token carries no number, and
+ * null for a word that is not an enemy keyword at all.
+ */
+export function enemyKeywordGlossForToken(token: string | null | undefined): string | null {
+    if (!token) return null;
+    const [word, value] = token.trim().split(/\s+/);
+    const kind = ENEMY_KEYWORD_KINDS.find(k => ENEMY_KEYWORD_LABEL[k] === word.toUpperCase());
+    if (!kind) return null;
+    const gloss = ENEMY_KEYWORD_GLOSS[kind];
+    return value ? gloss.replace('{n}', value) : gloss;
 }

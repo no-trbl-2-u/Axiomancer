@@ -3,7 +3,7 @@
  *
  * One describe per new mechanic:
  *   GHOST DICE (forge → tray now → next turn → spent forever → cap 3 →
- *   reroll/draft-exempt → save-back), PREMISES / SENTENCE (+ CONDEMN at 8),
+ *   reroll/draft-exempt → save-back), PREMISES / SENTENCE (+ CONDEMN),
  *   STAGGER rungs (deny + partial weaken) + BACKFIRE drip, OMEN
  *   declare/hit/miss, SOULS (expiry + REAP fizzle/spend + REAP-all cap),
  *   PLEA (gain / decay / capitulate / irresistible-grace), ECHO (doubles
@@ -213,8 +213,10 @@ describe('GHOST DICE — forge, spend-forever, cap, exemptions', () => {
 // ── PREMISES + SENTENCE (T2) ───────────────────────────────────────────────
 
 describe('PREMISES / SENTENCE — the declared conclusion and the CONDEMN alt-win', () => {
-    const CLOSER = 'the-black-cap';      // SENTENCE at 6 (CONDEMN at 8); rider: marks×2, draw 1
-    const OPENER = 'petty-indictment';   // FREE: +1 Premise
+    // THE BIG NUMBERS REWRITE rescaled both: SENTENCE at 12 / CONDEMN at 14,
+    // rider RUPTURE-every-MARK for 8 apiece; the opener's FREE line banks 2.
+    const CLOSER = 'the-black-cap';      // SENTENCE at 12 (CONDEMN at 14); rider: marks×8, stagger 2, draw 2
+    const OPENER = 'petty-indictment';   // FREE: +2 Charges
 
     function declared(enemyEffects: ActiveEffect[] = []): CombatEncounterState {
         mockSequentialRng(0.05);
@@ -223,30 +225,30 @@ describe('PREMISES / SENTENCE — the declared conclusion and the CONDEMN alt-wi
             [CLOSER, OPENER, OPENER, OPENER, OPENER], 'heart');
         const res = playFromHand(state, CLOSER);
         expect(res.events.some(e => e.kind === 'peroration-declared')).toBe(true);
-        expect(res.state.peroration).toMatchObject({ cardId: CLOSER, at: 6, concedeAt: 8 });
+        expect(res.state.peroration).toMatchObject({ cardId: CLOSER, at: 12, concedeAt: 14 });
         return res.state;
     }
 
     it('reaching the printed count fires the conclusion FREE and resets the tally', () => {
         let state = declared([ae('debuff_mark', 2, 3)]);
-        state = { ...state, premises: 5 };
+        state = { ...state, premises: 10 };
         const hpBefore = state.enemy.health;
         const convBefore = state.conviction;
-        const res = playFromHand(state, OPENER, false); // FREE: +1 Premise → 6
+        const res = playFromHand(state, OPENER, false); // FREE: +2 Charges → 12
         expect(res.events.some(e => e.kind === 'peroration-fired')).toBe(true);
         expect(res.state.premises).toBe(0);                       // tally resets
         expect(res.state.peroration).toMatchObject({ cardId: CLOSER }); // stays declared
-        // ruptureMarks 2 × 2 consumed stacks = 4 burst; the rider draws 1.
-        expect(hpBefore - res.state.enemy.health).toBe(4);
+        // ruptureMarks 8 × 2 consumed stacks = 16 burst; the rider draws 2.
+        expect(hpBefore - res.state.enemy.health).toBe(16);
         expect(res.state.enemy.effects.some(e => e.effectId === 'debuff_mark')).toBe(false);
         expect(res.state.conviction).toBe(convBefore); // the canon rider antes no Conviction
         expect(res.events.some(e => e.kind === 'hand-drawn')).toBe(true);
     });
 
-    it('reaching 8 Premises first wins the argument outright — CONDEMN (spec §9)', () => {
+    it('reaching the printed CONDEMN count first wins the argument outright', () => {
         let state = declared();
-        state = { ...state, premises: 7 };
-        const res = playFromHand(state, OPENER, false); // +1 → 8 ≥ concedeAt
+        state = { ...state, premises: 12 };
+        const res = playFromHand(state, OPENER, false); // +2 → 14 ≥ concedeAt
         expect(res.state.finalOutcome).toBe('concede');
         expect(res.state.phase).toBe('complete');
         expect(res.events.some(e => e.kind === 'combat-ended' && e.outcome === 'concede')).toBe(true);
@@ -413,7 +415,7 @@ describe('SOULS — expiry yields, REAP spends, REAP-all bursts uncapped', () =>
 
     it('REAP fizzles underfunded; funded, it spends the Souls and fires (PLEA + QUARTER + KINDLE)', () => {
         mockSequentialRng(0.05);
-        const PLATE = 'the-offertory-plate'; // REAP cost 3: PLEA 5 + QUARTER 2 + KINDLE(heart)
+        const PLATE = 'the-offertory-plate'; // REAP cost 3: PLEA 18 + QUARTER 3 + KINDLE(heart)
         const DOT = 'spoiled-poultice';
         const deck = [PLATE, PLATE, PLATE, PLATE, PLATE, DOT, DOT, DOT, DOT];
         const broke = openAndDraft(makePlayer([PLATE, DOT]), makeEnemy(300, 'heart'), deck, 'heart');
@@ -429,7 +431,7 @@ describe('SOULS — expiry yields, REAP spends, REAP-all bursts uncapped', () =>
         expect(res.events.some(e => e.kind === 'reaped')).toBe(true);
         expect(res.events.some(e => e.kind === 'die-forged')).toBe(true); // KINDLE joins the Reserve
         expect(res.state.reserve?.some(d => d.color === 'heart' && d.temporary)).toBe(true);
-        expect(res.state.sway ?? 0).toBe(5);
+        expect(res.state.sway ?? 0).toBe(18); // the card's printed PLEA 18
         expect(res.state.enemy.effects.some(e => e.effectId === 'debuff_quarter')).toBe(true);
     });
 
@@ -441,7 +443,9 @@ describe('SOULS — expiry yields, REAP spends, REAP-all bursts uncapped', () =>
         // large fraction of the foe's max VITAE, not a pinned flat ceiling.
         mockSequentialRng(0.05);
         const REAP = 'miserere'; // REAP all (profane canon)
-        let state = openAndDraft(makePlayer([REAP]), makeEnemy(600, 'heart'), [REAP, REAP, REAP], 'heart');
+        // The foe is deliberately far larger than the burst so the whole
+        // payoff is observable in VITAE rather than clipped at 0.
+        let state = openAndDraft(makePlayer([REAP]), makeEnemy(2000, 'heart'), [REAP, REAP, REAP], 'heart');
         state = { ...state, souls: 60 };
         const hpBefore = state.enemy.health;
         const maxHealth = state.enemy.maxHealth;
@@ -459,15 +463,15 @@ describe('SOULS — expiry yields, REAP spends, REAP-all bursts uncapped', () =>
 // ── PLEA (T8) ────────────────────────────────────────────────────────────────
 
 describe('PLEA — gain, per-turn decay, RELENT, irresistible-grace', () => {
-    const SOFT = 'thin-hymn'; // PLEA 3
+    const SOFT = 'thin-hymn'; // PAID: PLEA 8 (FREE: PLEA 3)
 
     it('gains stack and decays 1 at the turn boundary', () => {
         mockSequentialRng(0.05);
         const state = openAndDraft(makePlayer([SOFT]), makeEnemy(300, 'heart'), [SOFT, SOFT, SOFT, SOFT, SOFT], 'heart');
         const res = playFromHand(state, SOFT);
-        expect(res.state.sway).toBe(3); // PLEA 3
+        expect(res.state.sway).toBe(8); // the PAID line's printed PLEA 8
         const after = resolveThreatPhase(res.state);
-        expect(after.state.sway).toBe(2); // decayed 1 (ratified A2)
+        expect(after.state.sway).toBe(7); // decayed 1
         expect(after.events.some(e => e.kind === 'sway-decayed')).toBe(true);
     });
 
@@ -523,20 +527,23 @@ describe('PLEA — gain, per-turn decay, RELENT, irresistible-grace', () => {
 // ── ECHO + REPRISE (T10) ─────────────────────────────────────────────────────
 
 describe('ECHO — the PAID payload fires twice; stuck-in-their-head drips per echo', () => {
-    const REFRAIN = 'dirge-for-the-disinterred'; // DOOM i1, ECHO (mind)
+    // THE BIG NUMBERS REWRITE rewrote the ECHO carriers. `the-keening` is the
+    // one that still lands a STATUS (DOOM 3 for 3) alongside its hit, so it is
+    // the witness for "the PAID status payload fires twice".
+    const REFRAIN = 'the-keening'; // Deal 8 + DOOM i3 d3, ECHO (heart)
 
     it('an ECHO card lands its status twice (intensity stacks)', () => {
         mockSequentialRng(0.05);
-        const state = openAndDraft(makePlayer([REFRAIN]), makeEnemy(300, 'mind'), [REFRAIN, REFRAIN, REFRAIN], 'mind');
+        const state = openAndDraft(makePlayer([REFRAIN]), makeEnemy(300, 'heart'), [REFRAIN, REFRAIN, REFRAIN], 'heart');
         const res = playFromHand(state, REFRAIN);
         expect(res.events.some(e => e.kind === 'echoed')).toBe(true);
         const doom = res.state.enemy.effects.find(e => e.effectId === 'debuff_creeping_doom');
-        expect(doom?.intensity).toBe(2); // applied twice
+        expect(doom?.intensity).toBe(6); // authored i3, applied twice
     });
 
     it('stuck-in-their-head (D) drips 2 on every echo', () => {
         mockSequentialRng(0.05);
-        let state = openAndDraft(makePlayer([REFRAIN]), makeEnemy(300, 'mind'), [REFRAIN, REFRAIN, REFRAIN], 'mind');
+        let state = openAndDraft(makePlayer([REFRAIN]), makeEnemy(300, 'heart'), [REFRAIN, REFRAIN, REFRAIN], 'heart');
         state = { ...state, enemyAttachments: ['stuck-in-their-head'] };
         const hpBefore = state.enemy.health;
         const res = playFromHand(state, REFRAIN);
@@ -544,22 +551,29 @@ describe('ECHO — the PAID payload fires twice; stuck-in-their-head drips per e
             { amount: number } | undefined;
         expect(drip).toBeDefined();
         expect(drip!.amount).toBe(2);
-        expect(hpBefore - res.state.enemy.health).toBe(2); // marks deal nothing directly
+        // The attachment's drip is a real, evented damage instance on top of
+        // the card's own hit — every point of VITAE lost is accounted for by
+        // an emitted `damage-dealt`, and the drip is one of them.
+        const dealt = res.events
+            .filter(e => e.kind === 'damage-dealt' && (e as { target: string }).target === 'enemy')
+            .reduce((sum, e) => sum + (e as { amount: number }).amount, 0);
+        expect(hpBefore - res.state.enemy.health).toBe(dealt);
+        expect(dealt).toBeGreaterThan(drip!.amount);
     });
 
     it('a pending echo_next_spell charge echoes the NEXT spell, then is consumed', () => {
         mockSequentialRng(0.05);
         // The library has carried no echo_next_spell CARRIER since D8; the
         // engine mechanic itself is still live, so the charge is seeded
-        // directly on the state and a canon bleeder witnesses the doubled
-        // payload + charge consumption.
-        const BLEEDER = 'the-sextons-bell'; // BLEED i2 d2 + DOOM i1 (heart)
-        // Enemy stance HEART: the wild die re-reads as the bleeder's heart
+        // directly on the state and a canon DOOM carrier witnesses the
+        // doubled payload + charge consumption.
+        const TOLLER = 'the-sextons-bell'; // Deal 10 + DOOM i4 (heart)
+        // Enemy stance HEART: the wild die re-reads as the card's heart
         // stance, so the read stays NEUTRAL and no read-intensity bonus
         // muddies the echo.
         let state = openAndDraft(
-            makePlayer([BLEEDER]), makeEnemy(300, 'heart'),
-            [BLEEDER, BLEEDER, BLEEDER, BLEEDER], 'mind');
+            makePlayer([TOLLER]), makeEnemy(300, 'heart'),
+            [TOLLER, TOLLER, TOLLER, TOLLER], 'mind');
         // A banked Reserve die powers the spell (WILD — the color law demands
         // a matching die for the heart spell, and wild is the exception).
         state = {
@@ -567,10 +581,10 @@ describe('ECHO — the PAID payload fires twice; stuck-in-their-head drips per e
             reserve: [{ id: 'bank-echo', color: 'wild', state: 'available', temporary: false, pips: 0 }],
             echoNextSpell: true, // the pending charge under test
         };
-        const res = playFromHand(state, BLEEDER, true, 'bank-echo');
+        const res = playFromHand(state, TOLLER, true, 'bank-echo');
         expect(res.events.some(e => e.kind === 'echoed')).toBe(true);
-        const bleed = res.state.enemy.effects.find(e => e.effectId === 'debuff_bleed');
-        expect(bleed?.intensity).toBe(4); // authored i2, applied twice
+        const doom = res.state.enemy.effects.find(e => e.effectId === 'debuff_creeping_doom');
+        expect(doom?.intensity).toBe(8); // authored i4, applied twice
         expect(res.state.echoNextSpell).toBe(false); // the charge is consumed
     });
 });
@@ -612,10 +626,10 @@ describe('REPRISE — returns the highest-rank discard; fireFree fires its FREE 
         };
         registerSandboxCards([CIRC]);
         let state = openAndDraft(makePlayer([CIRC.id]), makeEnemy(300, 'mind'), [CIRC.id, CIRC.id, CIRC.id], 'mind');
-        state = { ...state, discard: ['petty-indictment'] }; // FREE: +1 Premise
+        state = { ...state, discard: ['petty-indictment'] }; // FREE: +2 Charges
         const res = playFromHand(state, CIRC.id);
         expect(res.state.hand.some(h => h.cardId === 'petty-indictment')).toBe(true);
-        expect(res.state.premises).toBe(1); // the reprised FREE line fired
+        expect(res.state.premises).toBe(2); // the reprised FREE line fired
     });
 });
 

@@ -12,10 +12,10 @@
  * fires — a milestone already paid stays paid.
  *
  * Profane-canon refit (2026-08-08): the CHARGE depositor under test is now
- * `petty-indictment` (trial theme: FREE +1 Premise; PAID `premise` count 1 —
- * the retired `exordium`/`videtur-quod` seat), and the declared
- * Peroration carrier is `the-black-cap` (at 6, concedeAt 8). The milestone
- * engine itself is unchanged.
+ * `petty-indictment` (trial theme, the retired `exordium`/`videtur-quod`
+ * seat). THE BIG NUMBERS REWRITE (2026-09-02) rescaled its deposits, so the
+ * fixtures read the card's FREE/PAID Charge grants off the live library
+ * rather than pinning them — the milestone engine itself is unchanged.
  *
  * Covers:
  *   1. Pure tier-crossing arithmetic (`premiseMilestonesCrossed`).
@@ -50,6 +50,7 @@ import { GraveLarva } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { mockSequentialRng } from '../../test-utils/rng';
 import { buildFixtureState } from '../../test-utils/card-fixture';
+import { getCardById } from '../../Cards/cards.library';
 import { playCombatCard } from '../combat.engine';
 import { runOneEncounter } from '../combat.encounter.sim';
 import { COMBAT_SIM_POLICY_ORDER } from '../combat.sim-policies';
@@ -58,6 +59,18 @@ import { PREMISE_MILESTONE_EVERY, PREMISE_MILESTONE_RUNGS, premiseMilestonesCros
 import type { CombatEncounterState, CombatEvent } from '../combat.encounter.types';
 
 afterEach(() => vi.restoreAllMocks());
+
+/** The depositor's live numbers, read off the library so a rescale of the
+ *  card never falsifies the milestone engine's test. */
+const DEPOSITOR = 'petty-indictment';
+const DEPOSITOR_CARD = getCardById(DEPOSITOR)!;
+const FREE_CHARGES = DEPOSITOR_CARD.free?.premises ?? 0;
+const PAID_CHARGES = (DEPOSITOR_CARD.specialMechanics ?? [])
+    .reduce((sum, m) => sum + (m.kind === 'premise' ? m.count : 0), 0);
+/** The PAID line also prints its own STAGGER, which lands on top of the
+ *  milestone dividend. */
+const PAID_PRINTED_RUNGS = (DEPOSITOR_CARD.specialMechanics ?? [])
+    .reduce((sum, m) => sum + (m.kind === 'stagger' ? m.rungs : 0), 0);
 
 function findEvents<K extends CombatEvent['kind']>(events: CombatEvent[], kind: K): Extract<CombatEvent, { kind: K }>[] {
     return events.filter((e): e is Extract<CombatEvent, { kind: K }> => e.kind === kind);
@@ -117,19 +130,21 @@ describe('Phase 32 part 4b — pure tier-crossing arithmetic', () => {
 
 describe("petty-indictment — FREE-line milestone accrual", () => {
     it('a grant below the first tier accrues the lifetime counter but pays no dividend', () => {
-        const before = stateFor('petty-indictment', 0);
+        // Only meaningful while one FREE deposit cannot itself clear a tier.
+        expect(FREE_CHARGES).toBeLessThan(PREMISE_MILESTONE_EVERY);
+        const before = stateFor(DEPOSITOR, 0);
         const { events, after } = playFree(before);
 
         const [gained] = findEvents(events, 'premise-gained');
         expect(gained).toBeDefined();
-        expect(gained!.amount).toBe(1);
-        expect(after.premiseMilestoneTotal).toBe(1);
+        expect(gained!.amount).toBe(FREE_CHARGES);
+        expect(after.premiseMilestoneTotal).toBe(FREE_CHARGES);
         expect(findEvents(events, 'premise-milestone')).toHaveLength(0);
         expect(after.staggerRungs ?? 0).toBe(before.staggerRungs ?? 0);
     });
 
     it('crossing the first tier grants the printed STAGGER rungs', () => {
-        const before = stateFor('petty-indictment', PREMISE_MILESTONE_EVERY - 1, { staggerRungs: 0 });
+        const before = stateFor(DEPOSITOR, PREMISE_MILESTONE_EVERY - FREE_CHARGES, { staggerRungs: 0 });
         const { events, after } = playFree(before);
 
         const [milestone] = findEvents(events, 'premise-milestone');
@@ -144,14 +159,15 @@ describe("petty-indictment — FREE-line milestone accrual", () => {
 
 describe("petty-indictment — PAID-line milestone accrual (same funnel)", () => {
     it('the PAID `premise` specialMechanics path posts to the SAME lifetime counter', () => {
-        const before = stateFor('petty-indictment', PREMISE_MILESTONE_EVERY - 1, { staggerRungs: 0 });
+        const before = stateFor(DEPOSITOR, PREMISE_MILESTONE_EVERY - PAID_CHARGES, { staggerRungs: 0 });
         const { events, after } = playPaid(before);
 
         const [milestone] = findEvents(events, 'premise-milestone');
         expect(milestone).toBeDefined();
         expect(milestone!.tiersCrossed).toBe(1);
         expect(after.premiseMilestoneTotal).toBe(PREMISE_MILESTONE_EVERY);
-        expect(after.staggerRungs).toBe(PREMISE_MILESTONE_RUNGS);
+        // The dividend rides ON TOP of the PAID line's own printed STAGGER.
+        expect(after.staggerRungs).toBe(PREMISE_MILESTONE_RUNGS + PAID_PRINTED_RUNGS);
     });
 });
 

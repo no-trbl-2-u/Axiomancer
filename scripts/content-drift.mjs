@@ -132,7 +132,10 @@ export function atlasKeywords() {
     // Hallmark rows lead with the theme; every other table leads with the keyword.
     const raw = cells.length >= 6 ? cells[1] : cells[0]
     if (/^(keyword|theme)$/i.test(raw)) continue
-    const name = raw.replace(/`/g, '').trim().split(/\s+/)[0].toUpperCase()
+    // Strip inline code AND bold markers: the atlas prints `**DEAL N**`, and
+    // a parser that only ate backticks read that as `**DEAL`, which matched
+    // nothing and made every registry keyword look row-less.
+    const name = raw.replace(/[`*_]/g, '').trim().split(/\s+/)[0].toUpperCase()
     if (name) names.add(name)
   }
   return nonEmpty(Object.fromEntries([...names].map((n) => [n, true])), 'keyword atlas rows')

@@ -96,7 +96,9 @@ describe('Phase 33b — Premise-shed archetype, directly authored', () => {
         const seq = getThreatSequence(deepClone(TheSophist));
         const phase = seq[2];
         expect(phase.threatAction.effects.some(e => (e.premiseShed ?? 0) > 0)).toBe(true);
-        expect(phase.threatAction.description).toContain('unravels 3 premises');
+        // BIG NUMBERS (2026-09-02): the shed was rescaled 3 -> 5 with the rest
+        // of the ladder; the face must still print the number the engine applies.
+        expect(phase.threatAction.description).toContain('unravels 5 premises');
     });
 
     it('Zoma carries premiseShed on its "deemed redundant" phase', () => {
@@ -106,9 +108,9 @@ describe('Phase 33b — Premise-shed archetype, directly authored', () => {
     });
 
     it('firing The Sophist\'s premise-shed phase reduces the live spendable premises tally', () => {
-        const s = stateAtPhase(TheSophist, 2, { premises: 5 });
+        const s = stateAtPhase(TheSophist, 2, { premises: 8 });
         const res = resolveThreatPhase(s);
-        expect(res.state.premises).toBe(2); // 5 - 3 authored
+        expect(res.state.premises).toBe(3); // 8 - 5 authored (rescaled from 3)
         expect(res.state.log.some(e => e.kind === 'threat-premise-shed')).toBe(true);
     });
 });
@@ -129,11 +131,26 @@ describe('Phase 33b — PLEA-cleanse archetype, directly authored', () => {
     it('firing Lady Gabriella\'s sway-cleanse phase reduces the live sway value', () => {
         const s = stateAtPhase(LadyGabriella, 1, { sway: 10 });
         const res = resolveThreatPhase(s);
-        // 10 - 2 (authored swayCleanse) - 1 (unconditional turn-boundary decay).
-        expect(res.state.sway).toBe(7);
+        // 10 - 4 (authored swayCleanse, rescaled from 2) - 1 (unconditional
+        // turn-boundary decay).
+        expect(res.state.sway).toBe(5);
         expect(res.state.log.some(e => e.kind === 'threat-sway-cleansed')).toBe(true);
     });
 });
+
+/**
+ * THE BIG NUMBERS REWRITE (2026-09-02) gave Elder Fire Giant the UNSHAKEN
+ * keyword, which short-circuits rung denial entirely (`combat.engine.ts`:
+ * `rungsLost = unshaken ? 0 : …`, `rungDenied = !unshaken && …`). That is a
+ * different mechanic from the per-phase `rungs` override these cases exist to
+ * prove, so the fixture strips it and the UNSHAKEN behaviour gets its own case
+ * below.
+ */
+function shakeable<T extends { keywords?: readonly { kind: string }[] }>(enemy: T): T {
+    const clone = deepClone(enemy) as T & { keywords?: { kind: string }[] };
+    clone.keywords = (clone.keywords ?? []).filter(k => k.kind !== 'unshaken');
+    return clone;
+}
 
 // ── Variable-rung telegraphs ─────────────────────────────────────────────────
 
@@ -144,21 +161,35 @@ describe('Phase 33b — variable-rung telegraphs authored in both directions', (
         expect(THREAT_RUNGS_BOSS).toBe(3); // the boss flat default this phase undercuts
     });
 
-    it('Elder Fire Giant (boss) hardens its finale to the 1-4 ceiling above the flat boss default', () => {
+    it('Elder Fire Giant (boss) hardens a phase to the 1-4 ceiling above the flat boss default', () => {
+        // Deck composition is authored freely now (the enemy-deck laws are
+        // repealed), so find the hardened phase rather than pinning its slot.
         const seq = getThreatSequence(deepClone(ElderFireGiant));
-        expect(seq[3].rungs).toBe(4);
+        expect(seq.some(p => p.rungs === 4), 'no phase authors the 4-rung ceiling').toBe(true);
+        expect(4).toBeGreaterThan(THREAT_RUNGS_BOSS);
     });
 
     it('unauthored phases on the same enemies still carry no override (byte-identical fallback)', () => {
         const seq = getThreatSequence(deepClone(Zoma));
-        expect(seq[2].rungs).toBeUndefined();
+        expect(seq.some(p => p.rungs === undefined)).toBe(true);
     });
 
+    /** Slot of the first phase whose `rungs` matches the predicate. */
+    function phaseIndexWhere(
+        enemy: Parameters<typeof deepClone>[0],
+        pred: (rungs: number | undefined) => boolean,
+    ): number {
+        const i = getThreatSequence(deepClone(enemy) as never).findIndex(p => pred(p.rungs));
+        expect(i, 'fixture needs a phase matching the predicate').toBeGreaterThanOrEqual(0);
+        return i;
+    }
+
     it('an authored LOW rung count denies with fewer stagger rungs than the flat default would require', () => {
-        // The Sophist phase 1: authored rungs:2 on a BOSS. Two stagger rungs
+        // The Sophist's opener: authored rungs:2 on a BOSS. Two stagger rungs
         // deny it — the flat boss default (3) would leave it merely weakened,
         // and the elite flat default (2) is the floor it descends to.
-        const s = stateAtPhase(TheSophist, 0, { staggerRungs: 2 });
+        const at = phaseIndexWhere(TheSophist, r => r === 2);
+        const s = stateAtPhase(TheSophist, at, { staggerRungs: 2 });
         const projection = projectIncomingThreat(s);
         expect(projection.rungsTotal).toBe(2);
         expect(projection.rungsTotal).toBeLessThan(THREAT_RUNGS_BOSS);
@@ -166,9 +197,10 @@ describe('Phase 33b — variable-rung telegraphs authored in both directions', (
     });
 
     it('an authored HIGH rung count survives more stagger than the flat boss default would', () => {
-        // Elder Fire Giant phase 4 (index 3): authored rungs:4. 3 stagger rungs
+        // Elder Fire Giant's hardened phase: authored rungs:4. 3 stagger rungs
         // (which would fully deny the flat boss default of 3) only weakens it.
-        const s = stateAtPhase(ElderFireGiant, 3, { staggerRungs: 3 });
+        const at = phaseIndexWhere(ElderFireGiant, r => r === 4);
+        const s = stateAtPhase(shakeable(ElderFireGiant), at, { staggerRungs: 3 });
         const projection = projectIncomingThreat(s);
         expect(projection.rungsTotal).toBe(4);
         expect(projection.rungsLost).toBe(3);
@@ -176,11 +208,23 @@ describe('Phase 33b — variable-rung telegraphs authored in both directions', (
     });
 
     it('an unauthored phase on the same boss still denies at its flat default (regression)', () => {
-        // Elder Fire Giant phase 1 (index 0) carries no authored rungs — the
+        // An Elder Fire Giant phase that carries no authored rungs — the
         // untouched flat boss default (3) must still deny at 3 stagger rungs.
-        const s = stateAtPhase(ElderFireGiant, 0, { staggerRungs: 3 });
+        const at = phaseIndexWhere(ElderFireGiant, r => r === undefined);
+        const s = stateAtPhase(shakeable(ElderFireGiant), at, { staggerRungs: 3 });
         const projection = projectIncomingThreat(s);
         expect(projection.rungsTotal).toBe(3);
         expect(projection.willDeny).toBe(true);
+    });
+
+    it('UNSHAKEN overrides the rung ladder entirely — no rung ever falls (2026-09-02)', () => {
+        // The same phase on the SHIPPED Elder Fire Giant, which is UNSHAKEN:
+        // the rung count is still telegraphed, but no amount of STAGGER moves it.
+        const at = phaseIndexWhere(ElderFireGiant, r => r === undefined);
+        const s = stateAtPhase(ElderFireGiant, at, { staggerRungs: 99 });
+        const projection = projectIncomingThreat(s);
+        expect(projection.rungsTotal).toBe(3);
+        expect(projection.rungsLost).toBe(0);
+        expect(projection.willDeny).toBe(false);
     });
 });

@@ -3072,7 +3072,7 @@ export const TheSophist = createEnemy({
     stages: [
         {
             at: { vitaePct: 0.6 },
-            name: 'HE BORROWS YOUR PREMISE',
+            name: 'HE BORROWS YOUR ARGUMENT',
             text: 'He takes the argument out of your mouth, holds it at a kinder angle, and hands it back heavier.',
             gain: [{ kind: 'brutal' }],
             cleanse: true,

@@ -130,7 +130,12 @@ function extractDoctrine() {
     .split(/\n\s*\*\s*\n/)
     .map((p) => p.split('\n').map((l) => l.replace(/^\s*\*\/?\s?/, '')).join(' ').replace(/\s+/g, ' ').trim())
     .filter(Boolean)
-  return paragraphs.filter((p) => /Direct damage is legal|Rank ladder/.test(p))
+  // THE BIG NUMBERS REWRITE (2026-09-02) — the library header states the three
+  // surviving constraints, the absence of any governing objective function, and
+  // that DEAL is a first-class verb. Those are the paragraphs agents must read
+  // as current law; everything older was repealed.
+  return paragraphs.filter((p) =>
+    /THREE SURVIVING CONSTRAINTS|no rank band|Direct damage is a first-class verb/.test(p))
 }
 
 // --- tools ------------------------------------------------------------------

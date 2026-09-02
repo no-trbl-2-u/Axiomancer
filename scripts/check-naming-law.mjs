@@ -18,13 +18,23 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 
 /** Where shipped ids live. */
 export const ID_SOURCES = [
-  { file: 'axiomancer-mechanics/src/Cards/cards.library.ts' },
+  // THE BIG NUMBERS REWRITE (2026-09-02): the card library is a directory of
+  // per-theme modules now; `cards.library.ts` is only the aggregator and holds
+  // no `id:` of its own.
+  { file: 'axiomancer-mechanics/src/Cards/library/starters.cards.ts' },
+  { file: 'axiomancer-mechanics/src/Cards/library/relics.cards.ts' },
+  { file: 'axiomancer-mechanics/src/Cards/library/rot.cards.ts' },
+  { file: 'axiomancer-mechanics/src/Cards/library/debt.cards.ts' },
+  { file: 'axiomancer-mechanics/src/Cards/library/grave.cards.ts' },
+  { file: 'axiomancer-mechanics/src/Cards/library/vigil.cards.ts' },
+  { file: 'axiomancer-mechanics/src/Cards/library/trial.cards.ts' },
+  { file: 'axiomancer-mechanics/src/Cards/library/choir.cards.ts' },
   { file: 'axiomancer-mechanics/src/Enemy/enemy.library.ts' },
 ]
 
@@ -70,7 +80,22 @@ export function sweep() {
 }
 
 // ── CLI ──
-if (import.meta.url === `file://${process.argv[1]}`) {
+/**
+ * True when this module is the process entry point.
+ *
+ * The old guard compared `import.meta.url` to `file://${process.argv[1]}`.
+ * On Windows `process.argv[1]` is a backslash path (`C:\Users\...`) while
+ * `import.meta.url` is `file:///C:/Users/...`, so the comparison was ALWAYS
+ * false: every one of these CLIs exited 0 with no output on Windows, and the
+ * `PostToolUse` lexicon hook was a silent no-op there. Normalising both sides
+ * through `pathToFileURL` fixes it on every platform.
+ */
+function isDirectRun(moduleUrl) {
+    if (!process.argv[1]) return false
+    return moduleUrl === pathToFileURL(process.argv[1]).href
+}
+
+if (isDirectRun(import.meta.url)) {
   const args = process.argv.slice(2)
 
   if (args.includes('--sweep')) {

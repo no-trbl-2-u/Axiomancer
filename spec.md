@@ -39,15 +39,24 @@ systems.
 
 - **Mechanics make what you owe consequential.** Strange, legible,
   consequential systems over safe RPG imitation.
-- **Status effects are the main fun.** (Load-bearing balance
-  doctrine, set 2026-06.) The intended path to a kill is status
-  play, not brute-force basic attacks. Low status-effect
-  engagement is a balance *failure* even when win/loss looks
-  healthy.
+- **Bigger numbers.** (THE BIG NUMBERS REWRITE, 2026-09-02 —
+  `plan/2026-09-02-big-numbers-overhaul.prompt.md`.) A starter hit
+  is 6–9, a Saint-rank finisher 45–70 flat or past 100 when fed;
+  bosses carry hundreds of VITAE. Payoffs are uncapped. Every
+  play should visibly move something.
+- **Richer verbs, competing lines.** Direct damage, damage-over-
+  time, walls-and-reprisal, control, harvest and mercy are all
+  first-class and compete on merit. No line is the doctrinal path
+  and none is protected; no objective function grades combat from
+  above.
 - **Mastery path, not brute force.** Read the enemy → generate
-  and manage resources → use skills → apply and exploit status →
-  resolve via victory, mercy, or consequence. Attacking or
-  turtling should stay viable-but-worse.
+  and manage resources → use skills → commit to a line and make it
+  land big → resolve via victory, mercy, or consequence. A fight
+  should reward the read, not reward bunkering.
+- **Enemies that escalate and telegraph big.** Enemies carry
+  keywords, their own VITAE pool, tiered decks that never
+  reshuffle backwards, and — for bosses — stages that change the
+  fight mid-fight. A telegraph prints a digit, not an adjective.
 - **Difficult, consequential mercy.** Befriend is HP-gated, costs
   heart tokens, and forks into spare-vs-exploit with lasting
   world consequences (`docs/adr/ADR-0007`).
@@ -64,12 +73,13 @@ engine, content library, tuning loop, and hermetic e2e tests, plus
 one pure-choice rest node with no standalone driver:
 
 - **Hazard-Pattern Combat** — the primary combat system (Spec
-  25/26, Spec 32 v3). Card-and-dice; the enemy has ONE bar = HP.
-  Spec 32 v3 (2026-07-08) deleted raw strike damage from the card
-  schema, and THE UNSHACKLING (2026-08-08) made direct damage legal
-  again as an authored verb — status, damage and the mercy lines
-  compete on CQI merit (spec 35), with status the path the current
-  library happens to take. HP is the **sole** win condition.
+  25/26). Card-and-dice; the enemy has ONE bar = VITAE. THE BIG
+  NUMBERS REWRITE (2026-09-02) reset the scale, made DEAL a
+  first-class card verb again, gave enemies keywords and stages,
+  and repealed the laws that had accumulated around the old
+  library (spec 32, spec 34 §3/§8 and spec 35 are historical).
+  Dropping VITAE to 0 is the main win condition, with Befriend,
+  RELENT and CONDEMN as authored alternatives.
 - **Hazard minigame** ("v2") — environmental hazard card game.
 - **Gathering** — "The Gleaning."
 - **Rest** — the rest-choice node (Phase 52c-d): one irreversible
@@ -120,7 +130,13 @@ theme; four period display fonts; SVG placeholder art system.
 - **No auto-deploy from `main`** — the mobile app ships via
   manual EAS builds; `main` is not push-to-production.
 - **Do not reintroduce the two-Pressure-Track combat win model** —
-  it was deliberately removed; HP is the sole win condition.
+  it was deliberately removed. VITAE is the main bar; the authored
+  alt-wins (Befriend, RELENT, CONDEMN) resolve fights beside it and
+  are ordinary design tools, not exceptions to a law.
+- **Do not reintroduce a governing objective function** — the
+  win-rate curve, the Combat Quality Index and the rank bands were
+  repealed 2026-09-02. Balance keeps bug detectors and a wide
+  sanity envelope; it does not grade the game against a shape.
 - New continents are deferred until the first continent is clean
   (`docs/adr/ADR-0005`).
 

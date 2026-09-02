@@ -17,25 +17,29 @@ import { lookupEffect } from '../../Effects';
 import { toCombatCard } from '../combat.cards';
 import { getDeckPreset, PRESET_DICE_VALVES } from '../combat.starter-deck-presets';
 
+// Re-derived 2026-09-02 (THE BIG NUMBERS REWRITE): every starter card was
+// rewritten, so every line below moved. The intent of the pin is unchanged —
+// the production projection is the wording the player reads, and it must not
+// drift silently.
 const EXPECTED_PAID_LINES: Readonly<Record<string, string>> = {
     'spoiled-poultice':
-        'PAID — Inflict POISON 1 (ticks each card you play, 2 turns). Costs 1 die.',
+        'PAID — Deal 7. Inflict POISON 4 for 3 turns. Costs 1 die.',
     'chilblain-watch':
-        'PAID — GUARD 6. Gain THORNS 1 for 2 turns. Costs 1 die.',
+        'PAID — GUARD 12. THORNS 4. Costs 1 die.',
     'petty-indictment':
-        'PAID — Apply MARK 1 for 2 turns. Gain 1 CHARGE. Costs 1 die.',
+        'PAID — Deal 6. Gain 3 Charges. STAGGER 1. Costs 1 die.',
     'first-spadeful':
-        'PAID — MILL 2. FORETELL 1. Costs 1 die.',
+        'PAID — Deal 6. RECALL 1. Costs 1 die.',
     'grandmothers-psalter':
-        'PAID — DRAW 2. CLEANSE 1. Costs 1 die.',
+        'PAID — Heal 8. Draw 2. CLEANSE 1. Costs 1 die.',
     'thumbprick-oath':
-        'PAID — RECOIL 1. DRAW 1 and gain 1 Conviction. Costs 1 die.',
+        'PAID — Deal 14. RECOIL 5. Costs 1 die.',
     'thin-hymn':
-        'PAID — PLEA 3. Costs 1 die.',
+        'PAID — PLEA 8. Heal 5. Costs 1 die.',
     'threadbare-cope':
-        'PAID — GUARD 4. DRAW 1. Costs 1 die.',
+        'PAID — GUARD 8 (persists). FORETELL 2. Costs 1 die.',
     'knucklebone-recant':
-        'PAID — Reroll every spent die in your tray. Gain 1 Conviction. Costs 1 die.',
+        'PAID — Reroll every spent die in your tray. Gain 2 Conviction. Deal 6. Costs 1 die.',
 };
 
 describe('Threadbare paid-effect wording', () => {
