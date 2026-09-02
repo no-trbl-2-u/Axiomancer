@@ -64,13 +64,14 @@
 - suggested fix: make freshness sensitive to missing/changed export files on every data-bearing tool call (or invalidate the cache when any snapshot disappears), strengthen the smoke to assert positive card/enemy/effect counts, and add a hermetic delete-after-first-call regression witness.
 - evidence: `scripts/axio-mcp-server.mjs:14-22,51-69,129-151`; `scripts/axio-mcp-server.test.mjs:57-63`; roundtable command sequence and MCP outputs dated 2026-08-24.
 
-### [docs] Combat playtest reference still names the retired ten-preset campaign
+### [x] [docs] Combat playtest reference still names the retired ten-preset campaign — RESOLVED 2026-09-02 (commit dfa03ebb, issue #270)
 - category: docs
 - impact: 8
 - ease: 9
 - detail: filed 2026-08-28 from the scheduled Kid/roundtable witness. `axiomancer-mechanics/docs/playtest.md` still declares `erosion`, `oratory`, `foundry`, `penitent`, `standstill`, `augury`, `tithe`, `grace`, `bastion`, and `refrain` as the preset grammar, and its cookbook invokes `preset:dot-erosion` / `preset:erosion`. The live CLI rejects those ids and exposes only `threadbare`, `pilgrim`, and `apostate`; the same document still teaches the retired starter-curve doctrine at its close. The Kid's direct `npm run combat -- ... --deck preset:erosion` probe failed before combat on current main.
-- suggested fix: rewrite the preset grammar and examples against the three Profane Canon snapshots and current CQI/viability law; add or extend the CLI docs-parity witness so every documented preset id must resolve through `COMBAT_DECK_PRESETS`.
+- resolution: rewrote the grammar table and all three cookbook examples against the live threadbare/pilgrim/apostate presets; added a docs-parity witness (`cli.docs-examples.engine.test.ts`) asserting every `preset:<id>` in `docs/playtest.md` resolves in `COMBAT_DECK_PRESETS`, so a future preset rename/removal fails CI instead of leaving stale docs. The starter-preset win-rate curve section (lines 156-164) was verified current against `CLAUDE.md`'s load-bearing doctrine, not retired — left unchanged.
 - evidence: `axiomancer-mechanics/docs/playtest.md:53-64,98-124,156-164`; `axiomancer-mechanics/src/Combat/combat.starter-deck-presets.ts`; `/root/Workspace/reports/axiomancer-playthrough/2026-08-28.md`.
+- issue: #270
 
 > AUDIT-DRAIN MODE LIFTED (via oversight 2026-08-15 — T called it off).
 > The 2026-08-12 banner in `plan/steps/01_build_plan.md` paused
