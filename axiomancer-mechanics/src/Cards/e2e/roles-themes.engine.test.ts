@@ -59,8 +59,6 @@ import {
     applyFixtureCards,
 } from '../../test-utils/retired-verb-cards';
 import { clearSandboxCards } from '../cards.sandbox';
-import { scoreCard } from '../cards.pricing';
-import { rankToRarity } from '../types';
 import { checkStatePredicate } from '../synergy-predicates';
 
 afterEach(() => {
@@ -80,14 +78,6 @@ const ROLE_CARD_IDS = [
     'slag-runoff', 'ingot-of-ruin', 'grit-between-stones', 'the-unmoved-mover',
     'a-sweeter-poison', 'the-long-ledger', 'seedcorn-sacrifice',
 ] as const;
-
-/** The pricing lint's rank bands (pricing.engine.test.ts) — sandbox cards are
- *  not in the library sweep, so the promotion contract is pinned here. */
-const RANK_BANDS: Record<'common' | 'uncommon' | 'rare', [number, number]> = {
-    common: [1.5, 7.5],
-    uncommon: [4.5, 13],
-    rare: [7, 19],
-};
 
 // ─── Shared helpers (kind-aware convention of the main effectiveness lint) ───
 
@@ -177,31 +167,6 @@ describe('roles-* theme sets — registry shape and rank-band honesty', () => {
                 expect(m.kind, `${card.id}: the REAP capstone is Phase 32's item`).not.toBe('reap_all');
             }
         }
-    });
-
-    it.each(ALL_ROLE_SETS.flatMap(s => s.cards).map(c => [c.id, c] as const))(
-        '%s prices inside its printed rank band',
-        (_id, card) => {
-            const [lo, hi] = RANK_BANDS[rankToRarity(card.rank)];
-            const pts = scoreCard(card);
-            expect(pts, `${card.id} (rank ${card.rank}) scored ${pts.toFixed(2)} — below ${lo}`)
-                .toBeGreaterThanOrEqual(lo);
-            expect(pts, `${card.id} (rank ${card.rank}) scored ${pts.toFixed(2)} — above ${hi}`)
-                .toBeLessThanOrEqual(hi);
-        },
-    );
-
-    it('the authored // pts arithmetic matches scoreCard (regression anchors)', () => {
-        const byId = (id: string) =>
-            ALL_ROLE_SETS.flatMap(s => s.cards).find(c => c.id === id)!;
-        expect(scoreCard(byId('slag-runoff'))).toBeCloseTo(5.2708, 2); // phase 36b: overflow-ember tempo-discounted
-        expect(scoreCard(byId('ingot-of-ruin'))).toBeCloseTo(7.5, 2);
-        expect(scoreCard(byId('grit-between-stones'))).toBeCloseTo(6.5833, 2); // phase 36b: nettle-sting tempo-discounted
-        expect(scoreCard(byId('the-unmoved-mover'))).toBeCloseTo(5.33, 2); // post-Phase-30: FREE barrier 2
-        expect(scoreCard(byId('a-sweeter-poison'))).toBeCloseTo(9.5, 2); // phase 36a: PLEA 5 total × 0.9
-
-        expect(scoreCard(byId('the-long-ledger'))).toBeCloseTo(12.75, 2);
-        expect(scoreCard(byId('seedcorn-sacrifice'))).toBeCloseTo(8.625, 2);
     });
 
     it('applying a set makes its cards resolvable through getCardById', () => {

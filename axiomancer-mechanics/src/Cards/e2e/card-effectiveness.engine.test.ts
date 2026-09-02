@@ -531,7 +531,36 @@ function assertMechanic(
             expect(events.some(e => e.kind === 'purged'), label).toBe(true);
             expect(after.discard, label).not.toContain(card.id);
             return;
+        // ── THE BIG NUMBERS REWRITE — direct damage and its family ───────────
+        case 'deal': {
+            // DEAL must actually move the foe's VITAE and say so in the log.
+            const hits = events.filter(e => e.kind === 'damage-dealt'
+                && (e as { target?: string }).target === 'enemy');
+            expect(hits.length, `${label}: no damage-dealt event`).toBeGreaterThan(0);
+            expect(after.enemy.health, label).toBeLessThan(before.enemy.health);
+            return;
+        }
+        case 'wrath':
+            // WRATH banks a combat-long bonus; it never spends on the same play.
+            expect(after.wrath ?? 0, label).toBeGreaterThan(before.wrath ?? 0);
+            return;
+        case 'flay':
+            expect(events.some(e => e.kind === 'flay-applied'), label).toBe(true);
+            return;
+        case 'chain':
+            expect(events.some(e => e.kind === 'chain-gained'), label).toBe(true);
+            return;
+        case 'twin':
+            expect(events.some(e => e.kind === 'twin-armed'), label).toBe(true);
+            expect(after.twinArmed, label).toBe(true);
+            return;
         // ── Kinds with no current library exerciser — generic fallback ────────
+        // EXECUTE and OVERKILL are CLAUSES on another verb: EXECUTE only reads
+        // at the top of a play that also deals damage, and OVERKILL only pays
+        // when a hit overshoots the foe's last VITAE. Neither lands anything of
+        // its own, so neither has a standalone witness to assert here.
+        case 'execute':
+        case 'overkill':
         case 'strip_random_buff':
         case 'befriend_attempt':
         case 'convert_die_color':

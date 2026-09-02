@@ -147,6 +147,16 @@ const MECHANIC_KEYWORD: Record<string, string> = {
     purge_self: 'Purge',
     // REPLAY earns its row with the rework (open-every-grave headlines it).
     replay_last: 'Replay',
+    // ── THE BIG NUMBERS REWRITE (2026-09-02) — direct damage and its family.
+    //    `deal` deliberately has NO keyword row: "Deal 24" is plain English
+    //    and shouting it would spend the face-term budget on the one verb
+    //    that needs no explanation (MTG's rule: keyword what compresses). ──
+    wrath: 'Wrath',
+    flay: 'Flay',
+    twin: 'Twin',
+    chain: 'Chain',
+    execute: 'Execute',
+    overkill: 'Overkill',
 };
 
 /**
@@ -253,6 +263,17 @@ const KEYWORD_GLOSS: Record<string, string> = {
     Temper: "A blacksmith upgrade: turns a mana face into a BOON face. A colored die caps at 2 boon and 1 miss, gold at 1.",
     // ── Card types (labels, not keywords — never rendered in the inspect
     // keyword panel since 2026-07-12; kept for help surfaces + the KW lints) ──
+    // ── THE BIG NUMBERS REWRITE (2026-09-02) — the damage family (7) ──
+    Pierce: 'This damage ignores the foe's HIDE and every effect that would reduce it.',
+    Wrath: 'Every hit you land deals that much more, for the rest of the fight. It stacks and never fades.',
+    Flay: 'Each of your next hits deals half again as much, spending one stack per hit.',
+    Twin: 'Your next spell this turn resolves its PAID line twice.',
+    Chain: 'Your next hit deals that much more. Chain fades at the end of a turn that added none.',
+    Execute: 'While the foe is at or below the printed share of its VITAE, this card's damage doubles.',
+    Overkill: 'Damage past the killing blow is not wasted: it converts at the printed rate.',
+    // ── Turn shape (2) — the conditions a card's line waits on ──
+    Ambush: 'This line fires only when the card is your first spell of the turn.',
+    Flow: 'This line fires once you have already played that many spells this turn.',
     Oath: 'A passive on your side: 3 rounds when played free, permanent when paid with a die.',
     Hex: 'A standing curse on the foe: 3 rounds when played free, permanent when paid with a die.',
 };

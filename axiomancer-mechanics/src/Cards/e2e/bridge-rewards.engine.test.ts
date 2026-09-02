@@ -47,8 +47,6 @@ import type {
 import { getCardById } from '../cards.library';
 import { BRIDGE_REWARD_CARDS, applyFixtureCards } from '../../test-utils/retired-verb-cards';
 import { clearSandboxCards } from '../cards.sandbox';
-import { scoreCard } from '../cards.pricing';
-import { rankToRarity } from '../types';
 
 afterEach(() => {
     vi.restoreAllMocks();
@@ -63,14 +61,6 @@ const BRIDGE_CARD_IDS = [
     'barbed-compliment', 'the-poured-rampart', 'interest-on-the-flesh',
     'entered-into-evidence', 'stolen-cadence', 'unbroken-countenance',
 ] as const;
-
-/** The pricing lint's rank bands (pricing.engine.test.ts) — sandbox cards are
- *  not in the library sweep, so the promotion contract is pinned here. */
-const RANK_BANDS: Record<'common' | 'uncommon' | 'rare', [number, number]> = {
-    common: [1.5, 7.5],
-    uncommon: [4.5, 13],
-    rare: [7, 19],
-};
 
 // ─── Shared helpers (kind-aware convention of the main effectiveness lint) ───
 
@@ -141,31 +131,6 @@ describe('bridge-rewards — registry shape and rank-band honesty', () => {
             expect(card.theme, `${card.id}: theme`).toBeDefined();
             expect(COMBAT_REWARD_POOL, `${card.id} leaked into the pinned 70`).not.toContain(card.id);
         }
-    });
-
-    it.each(BRIDGE_CARDS.map(c => [c.id, c] as const))(
-        '%s prices inside its printed rank band',
-        (_id, card) => {
-            const [lo, hi] = RANK_BANDS[rankToRarity(card.rank)];
-            const pts = scoreCard(card);
-            expect(pts, `${card.id} (rank ${card.rank}) scored ${pts.toFixed(2)} — below ${lo}`)
-                .toBeGreaterThanOrEqual(lo);
-            expect(pts, `${card.id} (rank ${card.rank}) scored ${pts.toFixed(2)} — above ${hi}`)
-                .toBeLessThanOrEqual(hi);
-        },
-    );
-
-    it('the authored // pts arithmetic matches scoreCard (regression anchors)', () => {
-        const byId = (id: string) => BRIDGE_CARDS.find(c => c.id === id)!;
-        expect(scoreCard(byId('barbed-compliment'))).toBeCloseTo(6.45, 2); // phase 36a: PLEA 3 total × 0.9
-        expect(scoreCard(byId('the-poured-rampart'))).toBeCloseTo(6.0, 2);
-        expect(scoreCard(byId('interest-on-the-flesh'))).toBeCloseTo(6.25, 2);
-        // phase 32 part 4d (OMEN v2): anteConviction 1 credits at −0.75×
-        // (−0.75) against the pre-v2 5.76 baseline — see the card's own
-        // // pts comment in cards.sandbox-sets.ts.
-        expect(scoreCard(byId('entered-into-evidence'))).toBeCloseTo(5.01, 2);
-        expect(scoreCard(byId('stolen-cadence'))).toBeCloseTo(5.75, 2);
-        expect(scoreCard(byId('unbroken-countenance'))).toBeCloseTo(8.23, 2); // phase 36a: PLEA (2+2 flat, 4 synergy×0.5) × 0.9
     });
 
     it('no TICK vocabulary anywhere in the set (TICK is ratified dead)', () => {

@@ -2,30 +2,29 @@
  * Hermetic sim e2e — card coverage: EVERY playable card in the library is
  * exercisable.
  *
- * The dead-card detector. For each Profane Canon library id (57 cards,
- * 2026-08-08 rework), one seeded `runOneEncounter` against a weak enemy
- * carries a deck stacked with three copies of the card plus a tiny known-good
- * support kit, and `focusCardIds` boosts the card to the front of every
- * ranking band — so if the card can be played AT ALL, it will be. A card that
- * registers zero plays under all three fallback seeds FAILS the suite: that
- * is the point (doctrine: status effects are the MAIN fun, and a card nobody
- * can fire is dead weight in the status toolbox).
+ * The dead-card detector. For each live library card id, one seeded
+ * `runOneEncounter` against a weak enemy carries a deck stacked with three
+ * copies of the card plus a tiny known-good support kit, and `focusCardIds`
+ * boosts the card to the front of every ranking band — so if the card can be
+ * played AT ALL, it will be. A card that registers zero plays under all
+ * three fallback seeds FAILS the suite: that is the point (a card nobody can
+ * fire is dead weight).
  *
  * Coverage counts fizzle-drains honestly: the sim drains a token-gated or
  * resource-starved bottom via the card's free top action (a real play).
- * Spec 32 v4 — enchant/disenchant carry a FREE line too (a timed 3-round
- * instance of the passive), so their top action is a real play; the PAID line
- * is permanent + unique-in-play, so a second PAID copy drains as a fizzle.
+ * Enchant/disenchant carry a FREE line too (a timed instance of the
+ * passive), so their top action is a real play; the PAID line is permanent +
+ * unique-in-play, so a second PAID copy drains as a fizzle.
  *
- * COVERAGE UNIVERSE: the 57-card library MINUS the theme-'curse' class.
- * Curses (mouthful-of-brine, gnaw-marks, arrears, overheard-name) are
- * enemy-INJECTED junk — no deck, preset, or reward screen ever hands one to
- * the player voluntarily, so a sim that never receives one legitimately never
- * plays it. They are excluded from the dead-card universe by design, not
- * because they are dead.
+ * COVERAGE UNIVERSE: the live library MINUS the theme-'curse' class. Curses
+ * are enemy-INJECTED junk — no deck, preset, or reward screen ever hands one
+ * to the player voluntarily, so a sim that never receives one legitimately
+ * never plays it. They are excluded from the dead-card universe by design,
+ * not because they are dead. There is no synthetic retreat card (no
+ * in-combat retreat exists).
  *
- * There is no synthetic retreat card (no in-combat retreat exists), so the
- * coverage universe is exactly the 53 non-curse library cards.
+ * The exact library size is NOT pinned here (repealed 2026-09-02, big-numbers
+ * overhaul §3 L18/§10) — the universe is derived live from `cardLibrary`.
  */
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
@@ -88,13 +87,6 @@ function coveragePlays(cardId: string): { plays: number; seedsTried: number[] } 
 }
 
 describe('card coverage — every playable library card is exercisable', () => {
-    it('the coverage universe is the 57-card Profane Canon minus the 4 enemy-injected curses', () => {
-        // 8 starters + 3 dice-valve relics + 4 curses + 6 archetype packages × 7.
-        expect(cardLibrary.length).toBe(57);
-        expect(new Set(cardLibrary.map(c => c.id)).size).toBe(57);
-        expect(cardLibrary.length - PLAYABLE_LIBRARY.length).toBe(4); // the curse class
-    });
-
     it.each(PLAYABLE_LIBRARY.map(c => [c.id] as const))(
         "'%s' registers at least one play in a focused seeded encounter",
         (cardId) => {

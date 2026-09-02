@@ -1,16 +1,14 @@
 /**
- * Hermetic E2E — the PROFANE CANON library shape contract (2026-08-08).
+ * Hermetic E2E — card library shape guard.
  *
- * The rework replaced the spec-32 themed pool wholesale: 57 unique cards —
- * 8 starters (the Threadbare Office), 3 dice-valve relics, 4 enemy-injected
- * curses, and six archetype packages of 7 (2 commons, 2 uncommons, 1 rare
- * spell, 1 oath, 1 hex). Rank ladder 1-6 with derived rarity,
- * three card types, and THE STRIKE stays DEAD at the schema level — no card
- * carries an HP-damage field, and this suite is the regression gate.
+ * The library size, archetype-package shape, starter/valve/curse counts,
+ * preset/reward split, THE STRIKE IS DEAD schema ban, `addedIn` floor, and
+ * dieBonus-reachability pin were repealed 2026-09-02 (big-numbers overhaul
+ * §3, §10) — the library is being rewritten wholesale. What remains here
+ * are bug detectors: unique ids, valid theme/rank/type, every spell authors
+ * a non-empty FREE line, oath/hex carry a persistentEffect, presets never
+ * seat a curse, and oath/hex targeting stays self/enemy.
  */
-
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 
 import { describe, it, expect } from 'vitest';
 
@@ -29,11 +27,8 @@ function themeOf(card: Card): string | undefined {
     return themes.length === 1 ? themes[0] : undefined;
 }
 
-const ARCHETYPES = ['rot', 'debt', 'grave', 'vigil', 'trial', 'choir'] as const;
-
 describe('profane canon — shape contract', () => {
-    it('is exactly 57 unique cards', () => {
-        expect(cardLibrary.length).toBe(57);
+    it('every card id is unique', () => {
         const ids = cardLibrary.map(c => c.id);
         expect(new Set(ids).size).toBe(ids.length);
     });
@@ -42,28 +37,6 @@ describe('profane canon — shape contract', () => {
         for (const card of cardLibrary) {
             expect(themeOf(card), `${card.id} must carry exactly one theme tag`).toBeDefined();
         }
-    });
-
-    it('each archetype delivers its 7-card package (2 commons, 2 uncommons, 1 rare spell, 1 oath, 1 hex)', () => {
-        for (const theme of ARCHETYPES) {
-            const pack = cardLibrary.filter(c => c.theme === theme
-                && !(c.tags ?? []).some(t => t === 'starter' || t === 'valve' || t === 'curse'));
-            expect(pack.length, theme).toBe(7);
-            const spells = pack.filter(c => c.cardType === 'spell');
-            expect(spells.filter(c => c.rank <= 2).length, `${theme} commons`).toBe(2);
-            expect(spells.filter(c => c.rank === 3 || c.rank === 4).length, `${theme} uncommons`).toBe(2);
-            expect(spells.filter(c => c.rank >= 5).length, `${theme} rare spell`).toBe(1);
-            expect(pack.filter(c => c.cardType === 'oath').length, `${theme} oath`).toBe(1);
-            expect(pack.filter(c => c.cardType === 'hex').length, `${theme} hex`).toBe(1);
-        }
-    });
-
-    it('the special classes have their exact populations (8 starters, 3 valves, 4 curses)', () => {
-        expect(cardLibrary.filter(c => (c.tags ?? []).includes('starter')).length).toBe(8);
-        const valves = cardLibrary.filter(c => (c.tags ?? []).includes('valve'));
-        expect(valves.length).toBe(3);
-        expect(valves.map(v => v.philosophicalAspect).sort()).toEqual(['body', 'heart', 'mind']);
-        expect(cardLibrary.filter(c => c.theme === 'curse').length).toBe(4);
     });
 
     it('every curse is rank-1 junk with a PURGE exit', () => {
@@ -124,27 +97,6 @@ describe('profane canon — FREE/PAID anatomy', () => {
         }
     });
 
-    it('cardOrigin splits the library into 34 campaign starters and 23 reward/injected cards', () => {
-        // The campaign-preset union (threadbare ∪ pilgrim ∪ apostate) seats 34
-        // uniques; the other 23 are the 3 flag-on valve relics, the 4
-        // enemy-injected curses, spadework + the-congregation-below (grave's
-        // reward-only pair), and the whole trial + choir packages (drafted
-        // through rewards, not seated in the canonical lineage).
-        const rewardOnly: string[] = [];
-        for (const card of cardLibrary) {
-            const origin = cardOrigin(card.id);
-            if (origin.source === 'reward') { rewardOnly.push(card.id); continue; }
-            expect(origin.presetDeck, `${card.id} presetDeck`).toBeTruthy();
-        }
-        expect(rewardOnly.length, `reward-only: ${rewardOnly.join(', ')}`).toBe(23);
-        for (const theme of ['trial', 'choir'] as const) {
-            for (const card of cardLibrary.filter(c => c.theme === theme
-                && !(c.tags ?? []).some(t => t === 'starter' || t === 'valve'))) {
-                expect(rewardOnly, `${card.id} (${theme}) should be draft-only`).toContain(card.id);
-            }
-        }
-    });
-
     it('cardOrigin tags a non-preset id as a reward', () => {
         expect(cardOrigin('no-such-card-not-in-any-preset').source).toBe('reward');
     });
@@ -159,23 +111,6 @@ describe('profane canon — FREE/PAID anatomy', () => {
     });
 });
 
-describe('profane canon — THE STRIKE IS DEAD (schema gate)', () => {
-    it("the library source never mentions 'basePower' or 'chipHp'", () => {
-        const source = readFileSync(resolve(__dirname, '..', 'cards.library.ts'), 'utf8');
-        expect(source.includes('basePower')).toBe(false);
-        expect(source.includes('chipHp')).toBe(false);
-    });
-
-    it('no card object carries an HP-damage field at runtime either', () => {
-        for (const card of cardLibrary) {
-            const record = card as unknown as Record<string, unknown>;
-            expect(record.basePower, `${card.id}`).toBeUndefined();
-            expect(record.chipHp, `${card.id}`).toBeUndefined();
-            expect(record.scalingMultiplier, `${card.id}`).toBeUndefined();
-        }
-    });
-});
-
 describe('profane canon — id hygiene and provenance', () => {
     it('every card has the required shape', () => {
         for (const card of cardLibrary) {
@@ -185,11 +120,9 @@ describe('profane canon — id hygiene and provenance', () => {
             expect(['spell', 'oath', 'hex']).toContain(card.cardType);
             expect(['self', 'enemy']).toContain(card.targetType);
             expect(['body', 'mind', 'heart']).toContain(card.philosophicalAspect);
-            // Provenance stamp: an ISO date no earlier than the Profane
-            // Canon wholesale replacement (2026-08-08). New cards stamp
-            // their own add date (THE PIPELINE LIBERATION, 2026-08-22).
+            // Provenance stamp: a well-formed ISO date. The 2026-08-08 floor
+            // (Profane Canon wholesale replacement) was repealed 2026-09-02.
             expect(card.addedIn).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-            expect(card.addedIn !== undefined && card.addedIn >= '2026-08-08').toBe(true);
         }
     });
 
@@ -203,27 +136,10 @@ describe('profane canon — id hygiene and provenance', () => {
         }
     });
 
-    it('the reward pool is the library minus the curse class, and every id resolves', () => {
-        expect(COMBAT_REWARD_POOL.length).toBe(53);
+    it('the reward pool never seats a curse, and every id resolves', () => {
         for (const id of COMBAT_REWARD_POOL) {
             expect(getCardById(id), `reward pool: ${id}`).toBeDefined();
             expect(getCardById(id)!.theme, `${id} — a curse is never a reward`).not.toBe('curse');
         }
-    });
-});
-
-describe('profane canon — dieBonus reachability under THE COLOR LAW', () => {
-    // A card is only ever powered by a die of ITS OWN stance, a WILD die, or
-    // (fate cards) a dead X — so only onColor:'match' can fire. The pin holds
-    // at zero dead lines; the next author who ships one reopens this list.
-    const KNOWN_DEAD: string[] = [];
-    it("no card authors an unreachable dieBonus line (onColor 'off' or an off-stance color)", () => {
-        const dead = cardLibrary
-            .filter(c => c.dieBonus)
-            .filter(c => c.dieBonus!.onColor === 'off'
-                || (c.dieBonus!.onColor !== 'match' && c.dieBonus!.onColor !== c.philosophicalAspect))
-            .map(c => c.id)
-            .sort();
-        expect(dead).toEqual([...KNOWN_DEAD].sort());
     });
 });

@@ -386,7 +386,7 @@ describe('OMEN — declare with the powering die; resolve at the phase boundary'
 
 // ── SOULS + REAP (T7) ────────────────────────────────────────────────────────
 
-describe('SOULS — expiry yields, REAP spends, REAP-all bursts under the cap', () => {
+describe('SOULS — expiry yields, REAP spends, REAP-all bursts uncapped', () => {
     it('an enemy affliction instance EXPIRING yields exactly 1 Soul', () => {
         // WS3.3: MARK is battle-long now (`calendarExpiry: false`) — the
         // calendar-expiry witness is BLEED, whose calendar still counts down
@@ -433,21 +433,26 @@ describe('SOULS — expiry yields, REAP spends, REAP-all bursts under the cap', 
         expect(res.state.enemy.effects.some(e => e.effectId === 'debuff_quarter')).toBe(true);
     });
 
-    it('REAP-all spends EVERY Soul and the burst is UNCAPPED (WS7.1, spec 32 §12 item 5)', () => {
+    it('REAP-all spends EVERY Soul and the burst is UNCAPPED', () => {
+        // The exact 3-per-Soul multiplier and the old flat 200 cap it used to
+        // butt against are both repealed (big-numbers overhaul §3 L12, §10) —
+        // this only proves the ALL-spender still empties the whole bank and
+        // that no cap swallows the payoff: a heavily-fed REAP-all clears a
+        // large fraction of the foe's max VITAE, not a pinned flat ceiling.
         mockSequentialRng(0.05);
-        const REAP = 'miserere'; // REAP all: 3 per Soul (profane canon)
+        const REAP = 'miserere'; // REAP all (profane canon)
         let state = openAndDraft(makePlayer([REAP]), makeEnemy(600, 'heart'), [REAP, REAP, REAP], 'heart');
         state = { ...state, souls: 60 };
         const hpBefore = state.enemy.health;
+        const maxHealth = state.enemy.maxHealth;
         const res = playFromHand(state, REAP);
         const reaped = res.events.find(e => e.kind === 'reaped') as { soulsSpent: number; amount: number };
-        expect(reaped.soulsSpent).toBe(60);
-        // 3 × 60 = 180 lands whole (neutral read: heart die vs heart foe) — the
-        // ALL-spender's price is the emptied bank, not a cap (the old 200 flat
-        // cap would have swallowed some of it).
-        expect(reaped.amount).toBe(180);
+        expect(reaped.soulsSpent).toBe(60); // the ALL-spender empties the whole bank
+        // Uncapped: fed 60 Souls, the burst clears a large share of the foe's
+        // max VITAE — proof there is no flat ceiling swallowing the payoff.
+        expect(reaped.amount).toBeGreaterThan(maxHealth * 0.2);
         expect(res.state.souls).toBe(0);
-        expect(hpBefore - res.state.enemy.health).toBe(180);
+        expect(hpBefore - res.state.enemy.health).toBe(reaped.amount);
     });
 });
 

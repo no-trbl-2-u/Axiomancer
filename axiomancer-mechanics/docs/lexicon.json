@@ -10,27 +10,6 @@
       "note": "'signature skill' remains canonical and is NOT retired; the AI-harness skills/ directory (loop verbs) is out of scope for this registry"
     },
     {
-      "id": "base-power",
-      "type": "identifier",
-      "pattern": "\\bbasePower\\b",
-      "replacement": "(none — THE STRIKE IS DEAD; enemy HP falls only via DoT ticks, affliction payoffs RUPTURE/REAP, engine-gated drips, or reflect)",
-      "since": "2026-07-08 (spec 32 v3 strike purge at schema level)"
-    },
-    {
-      "id": "chip-hp",
-      "type": "identifier",
-      "pattern": "\\bchipHp\\b",
-      "replacement": "(none — removed with the spec 32 v3 strike purge; no card or rider deals raw HP damage)",
-      "since": "2026-07-08 (spec 32 v3)"
-    },
-    {
-      "id": "pressure-tracks",
-      "type": "identifier",
-      "pattern": "Pressure Tracks?",
-      "replacement": "the HP-only win model — status effects are the only way to drop enemy HP to 0; the two-track (DoT Erosion / Control Saturation) win-condition model was replaced 2026-06-22",
-      "since": "2026-06-22 (Hazard-Pattern Combat reconciliation)"
-    },
-    {
       "id": "premise",
       "type": "identifier",
       "pattern": "\\bPREMISES?\\b",
@@ -164,30 +143,6 @@
       "replacement": "Skull (R-14, rank 5)",
       "since": "2026-08-09 (phase 44c, spec 34 §5.2 R-14)",
       "note": "scoped to the rank-ladder enumeration context, not the bare word — 'axiom' is ordinary philosophy/math English (and the product name Axiomancer itself), so an unscoped \\bAxiom\\b would false-positive across the repo's own philosophy-jargon prose. Aporia itself gets no row (NL-9 — 'the Aporia' survives as the labyrinth place name)"
-    },
-    {
-      "id": "strike-ban-doctrine",
-      "type": "doctrine",
-      "pattern": "THE STRIKE (?:IS|stays) DEAD|[Nn]o card deals (?:raw HP|direct|raw strike) damage|[Ss]tatus (?:effects are|is) the \\*{0,2}only\\*{0,2} path",
-      "replacement": "VISION.md §Combat vision — direct damage is LEGAL (THE UNSHACKLING, 2026-08-08); HP remains the SOLE win condition and basePower/chipHp stay deleted at the schema level, but no path is doctrine-mandated as dominant. A card needing raw HP damage authors its own field/verb through the full wiring checklist.",
-      "since": "2026-08-08 (THE UNSHACKLING, /oversight — plan/bearings.md)",
-      "note": "assertion-scoped: matches the BAN stated as current law, not a mention of its retirement. Describing the removal keeps the lexicon-ok pragma (docs/LEXICON.md, axiomancer-mechanics/spec.md both carry it)."
-    },
-    {
-      "id": "status-primacy-doctrine",
-      "type": "doctrine",
-      "pattern": "[Ss]tatus effects are the \\*{0,2}MAIN fun|[Tt]reat low status-effect engagement as a balance failure|[Ss]tatus play (?:is|remains) the (?:governing|dominant) combat objective|[Ss]tatus[- ]effect combat is the core fun",
-      "replacement": "VISION.md §Combat vision — status effects remain a major authored tool and should be satisfying, but T's 2026-08-08 unshackling retired status dominance as the governing combat objective. Judge a change by CQI (spec 35), not by whether it makes status play more central.",
-      "since": "2026-08-08 (THE UNSHACKLING, /oversight — plan/bearings.md)",
-      "note": "assertion-scoped, same contract as strike-ban-doctrine; the 'status-effect combat is the core fun' alternative was added by phase 67, which found that exact phrasing still live in plan/bearings.md after phase 66's rows shipped"
-    },
-    {
-      "id": "win-rate-objective-doctrine",
-      "type": "doctrine",
-      "pattern": "statusEngagement[^.\\n]{0,80}(?:is|remains) the objective function|objective function[^.\\n]{0,40}statusEngagement|against the locked doctrine curve",
-      "replacement": "spec 35 / Phase 43 — combatQualityIndex (cqi) is the objective function for /deck-tuning and /combat-playtest; win rate is deliberately NOT a term (the doctrine curve grades WHETHER a deck should win, CQI grades HOW the fight played). statusEngagement is kept as a reported reading beside CQI, not as the target.",
-      "since": "2026-08-08 (Phase 43, specs/35-objective-function-v2.md)",
-      "note": "the 'against the locked doctrine curve' alternative guards skills/digest.md §3b, which the 9caf2a26 pass already reconciled to past tense — the row exists so a reversion is caught, not to force a rewrite that is still waiting on a CQI-band ruling"
     }
   ]
 }

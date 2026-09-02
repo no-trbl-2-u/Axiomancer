@@ -83,12 +83,8 @@ describe('authored card rotations (art-driven roster)', () => {
 });
 
 describe('stat law compliance for playtest balance anchors', () => {
-    it('The King of Revenge level 6 has exactly 30 total stats (5 × level)', () => {
-        const { body, mind, heart } = KingOfRevenge.baseStats;
-        const total = body + mind + heart;
-        expect(total).toBe(30);
-    });
-
+    // The 5×level total-stat law was repealed 2026-09-02 (big-numbers
+    // overhaul §3 L15, §10) — enemy stats no longer drive a pinned formula.
     it('The King of Revenge has cards for Easy anchor testing', () => {
         expect(KingOfRevenge.cards).toBeDefined();
         expect(KingOfRevenge.cards?.length).toBeGreaterThanOrEqual(3);
@@ -96,25 +92,11 @@ describe('stat law compliance for playtest balance anchors', () => {
         expect(cardIds).toContain('scolds-bridle');
     });
 
-    it('Tri-Eyes level 15 has exactly 75 total stats (5 × level)', () => {
-        const TriEyes = ENEMY_REGISTRY['tri-eyes'];
-        const { body, mind, heart } = TriEyes.baseStats;
-        const total = body + mind + heart;
-        expect(total).toBe(75);
-    });
-
     it('Tri-Eyes has 1-2 low-tier cards for Normal anchor', () => {
         const TriEyes = ENEMY_REGISTRY['tri-eyes'];
         expect(TriEyes.cards).toBeDefined();
         expect(TriEyes.cards?.length).toBeGreaterThanOrEqual(1);
         expect(TriEyes.cards?.length).toBeLessThanOrEqual(2);
-    });
-
-    it('Mirac level 18 has exactly 90 total stats (5 × level)', () => {
-        const Mirac = ENEMY_REGISTRY['mirac'];
-        const { body, mind, heart } = Mirac.baseStats;
-        const total = body + mind + heart;
-        expect(total).toBe(90);
     });
 
     it('Mirac has several devastating cards for Difficult anchor', () => {
