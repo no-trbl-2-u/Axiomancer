@@ -55,6 +55,13 @@
      boss-tier for late-game wandering scale.
 - evidence: `plan/steps/01_build_plan.md` Phase W3 row; commits on
   `claude/w3-northern-city`.
+- **RATIFIED via /oversight 2026-09-02:** all 5 calls ratified as filed,
+  walked through individually. Call 4 (W5 silhouette portraits) drew a
+  follow-up ruling, not a reversal: T wants a standing sourcing process
+  going forward rather than ad hoc per-enemy picks — filed as new
+  **Phase 78** below (agent-researched open-source art, 2 candidates
+  presented per next `/oversight`, the picked source becomes the
+  standing pipeline until in-house generation is ready).
 
 ### [contract] Phase 57 can zero the live axio-query corpus inside an already-running session
 - category: contract
