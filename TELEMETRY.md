@@ -407,3 +407,7 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-02T00:20:05Z | skill | march | unknown | main | - |
 | 2026-09-02T00:23:03Z | skill | iterate | claude-sonnet-5 | main | - |
 | 2026-09-02T04:22:03Z | slash-prompt | /oversight | unknown | user/ci | /oversight |
+| 2026-09-02T04:44:28Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-02T04:44:30Z | skill | march | unknown | main | - |
+| 2026-09-02T04:45:36Z | skill | iterate | claude-sonnet-5 | main | - |
+| 2026-09-02T04:46:38Z | subagent | Explore | claude-sonnet-5 | main | Investigate top iterate candidates' fix feasibility |

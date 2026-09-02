@@ -25,8 +25,9 @@
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
 
+import { FiligreeRule } from '@/components/art/Filigree';
 import { FONTS } from '@/theme/axm';
-import { makeStyles } from '@/theme/runtime';
+import { makeStyles, usePalette } from '@/theme/runtime';
 import type { AftermathDefeatViewModel } from '@/state/presenters/aftermath.engine';
 import { toRomanLower } from '@/state/presenters/roman';
 
@@ -42,6 +43,7 @@ export interface CombatDefeatPanelProps {
 // the call sites.
 
 export function CombatDefeatPanel({ vm, onBeginAgain, onLetClose }: CombatDefeatPanelProps) {
+    const AXM = usePalette();
     const styles = useStyles();
     const deepest = vm.runSummary.deepestNodeId ?? '·';
     return (
@@ -89,7 +91,9 @@ export function CombatDefeatPanel({ vm, onBeginAgain, onLetClose }: CombatDefeat
                     {vm.causePhrase}
                 </Text>
 
-                <View style={styles.ledgerSpacer} />
+                <View style={styles.ledgerSpacer}>
+                    <FiligreeRule width="40%" color={AXM.ash} />
+                </View>
 
                 <View style={styles.ledger} testID="combat-defeat-panel-ledger">
                     <Text style={styles.ledgerHeader}>· LEDGER ·</Text>
@@ -236,7 +240,7 @@ const useStyles = makeStyles((AXM) => ({
         marginTop: 22,
         textAlign: 'left',
     },
-    ledgerSpacer: { flex: 1, minHeight: 8 },
+    ledgerSpacer: { flex: 1, minHeight: 32, alignItems: 'center', justifyContent: 'center' },
     ledger: {
         marginBottom: 16,
         paddingVertical: 6,

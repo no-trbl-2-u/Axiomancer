@@ -1601,22 +1601,6 @@ one level down, in the routing helper `onApply` calls next).
   `components/hazard/`.
 - source: loop
 
-### [MED] combat — the defeat screen has a large dead black gap mid-page
-- pass: session-critic 2026-08-31 (Phase V8 closure `/critic-loop`
-  screenshot pass, `axiomancer-mobile/screenshots/audit-2026-06/after/26-aftermath-defeat.png`)
-- viewport: 390x844 (audit-capture rig)
-- auth_state: dev-seeded defeat aftermath
-- category: visual
-- observation: roughly the bottom half of the screen between the
-  flavor-text epitaph and the Ledger stats block is empty near-black
-  space, making the death beat read as unfinished rather than weighty —
-  other aftermath screens (parley, victory) fill that space with art or
-  content.
-- suggested fix: tighten the vertical layout, or fill the gap with a
-  felled-pilgrim illustration / epitaph flourish consistent with the
-  Woodcut Codex direction. Component: `components/event/aftermath/CombatDefeatPanel.tsx`.
-- source: loop
-
 ### [LOW] aftermath — the parley "Heart Opens" reward panel is a pixel-art heart, style outlier
 - pass: session-critic 2026-08-31 (Phase V8 closure `/critic-loop`
   screenshot pass, `axiomancer-mobile/screenshots/audit-2026-06/after/27-aftermath-parley.png`)
@@ -1650,6 +1634,25 @@ one level down, in the routing helper `onApply` calls next).
 - source: loop
 
 ## Done
+
+### [x] [MED] combat — the defeat screen has a large dead black gap mid-page — RESOLVED 2026-09-02 (commit f6e4745e, issue #271)
+- pass: session-critic 2026-08-31 (Phase V8 closure `/critic-loop`
+  screenshot pass, `axiomancer-mobile/screenshots/audit-2026-06/after/26-aftermath-defeat.png`)
+- viewport: 390x844 (audit-capture rig)
+- auth_state: dev-seeded defeat aftermath
+- category: visual
+- observation: roughly the bottom half of the screen between the
+  flavor-text epitaph and the Ledger stats block is empty near-black
+  space, making the death beat read as unfinished rather than weighty —
+  other aftermath screens (parley, victory) fill that space with art or
+  content.
+- resolution: centered a dim `FiligreeRule` (existing decorative
+  divider primitive) inside `ledgerSpacer`, and gave the spacer a
+  `minHeight` floor instead of pure empty flex space. No new art
+  assets — keeps the panel's own "no splatter, no celebration" doctrine
+  for a defeat beat intact. `CombatDefeatPanel.test.tsx` 13/13 green,
+  `axiomancer-mobile` `npm run verify` green.
+- source: loop
 
 ### [x] [MED] combat — first-run coach overlay still preaches the retired status-dominance doctrine — RESOLVED 2026-09-01 (commit 596e0a19, issue #269)
 - pass: session-jot 2026-08-28 (THE OPEN GATE session; spotted on the
