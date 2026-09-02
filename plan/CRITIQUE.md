@@ -1758,6 +1758,20 @@ one level down, in the routing helper `onApply` calls next).
 - source: user (ratified via owner Q&A, 2026-07-10)
 
 ### [x] [needs-user-call] Playwright MCP tools unavailable to sub-agents — RESOLVED via /oversight 2026-07-10 (switch transport)
+- history: pass 1-4 hit the identical visible symptom via a different
+  root cause — two allowlist gaps, not a Playwright bug: (1)
+  `.github/workflows/_claude-skill.yml`'s `--allowedTools` CLI flag
+  never included any `mcp__playwright__*` tool even when
+  `install_playwright: true` installed the browser; (2)
+  `.claude/settings.json.example` (activated as `.claude/settings.json`
+  for every unattended CI run) had no `mcp__playwright__*` entries in
+  `permissions.allow` either. Fixed at commit 525cd25d (2026-07-07):
+  `--allowedTools` now appends the 14 `mcp__playwright__browser_*`
+  tools whenever `install_playwright` is true, and
+  `.claude/settings.json.example` grants the same 14 tools — also
+  unblocking `deep-playtest`, `combat-ux-tuning`, `critic-loop`, and
+  `hermes-playtest`, which share the same runner. Applied on explicit
+  user request, not a self-grant.
 - 8 consecutive occurrences (of 11 total passes, pass 5 through pass
   11) of the identical failure: `playtester`'s first
   `mcp__playwright__browser_*` tool call is rejected with "you
@@ -1779,23 +1793,4 @@ one level down, in the routing helper `onApply` calls next).
   this only covers the unattended-loop path. Tracked as build-plan
   **Phase 34**; `skills/critique.md` gets a matching note once
   Phase 34 lands.
-- source: `/oversight` 2026-07-10, synthesizing critique passes 5-11
-
-### [x] [needs-user-call] Playwright MCP tools unavailable to sub-agents (pass 1-4; addressed at 525cd25 follow-up)
-- Root cause: two allowlist gaps, not a Playwright bug. (1)
-  `.github/workflows/_claude-skill.yml`'s `--allowedTools` CLI flag
-  was a fixed list that never included any `mcp__playwright__*` tool,
-  even when `install_playwright: true` installed the browser. (2)
-  `.claude/settings.json.example` (activated as `.claude/settings.json`
-  for every unattended CI run) had no `mcp__playwright__*` entries in
-  `permissions.allow` either. Unattended runs auto-reject tools outside
-  both allowlists instead of prompting, so every `playtester`
-  `browser_*` call failed instantly.
-- Fix: `--allowedTools` in `_claude-skill.yml` now appends the 14
-  `mcp__playwright__browser_*` tools whenever `install_playwright` is
-  true; `.claude/settings.json.example` grants the same 14 tools in
-  `permissions.allow`. Also unblocks `deep-playtest`, `combat-ux-tuning`,
-  `critic-loop`, and `hermes-playtest`, which share the same runner and
-  had the identical gap.
-- User-owned decision, applied on explicit user request (not a
-  self-grant by `/critique` or `/march`).
+- source: `/oversight` 2026-07-10, synthesizing critique passes 1-11
