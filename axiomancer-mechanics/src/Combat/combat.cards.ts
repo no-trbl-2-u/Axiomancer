@@ -236,6 +236,12 @@ export function riderText(r: CardRider, opts?: { selfTargetCard?: boolean }): st
     if (r.barrier) parts.push(`GUARD ${r.barrier} (persists)`);
     if (r.recoil) parts.push(`RECOIL ${r.recoil}`);
     if (r.millCards) parts.push(`mill ${r.millCards} to discard`);
+    // THE BIG NUMBERS REWRITE — damage leads the rider when it carries any, so
+    // a FREE line reads "Deal 4 · POISON 3", not "POISON 3 · Deal 4".
+    if (r.damage) parts.unshift(`Deal ${r.damage}${r.pierce ? ' (PIERCE)' : ''}`);
+    if (r.wrath) parts.push(`WRATH ${r.wrath}`);
+    if (r.chain) parts.push(`CHAIN ${r.chain}`);
+    if (r.flay) parts.push(`FLAY ${r.flay}`);
     return parts.join(' · ');
 }
 
@@ -263,6 +269,11 @@ export function statePredicateText(p: SynergyStatePredicate): string {
             return 'the enemy drew blood since your last turn';
         case 'requiem':
             return `REQUIEM ${p.n} (${p.n}+ cards in your discard pile)`;
+        // THE BIG NUMBERS REWRITE — the mirror of OPENING: the turn that keeps
+        // going. FLOW is registry vocabulary (Dawncaster's Flow), so it prints
+        // as a face term with its threshold spelled out.
+        case 'flow':
+            return `FLOW ${p.minPriorSpells} (${p.minPriorSpells}+ spells already played this turn)`;
     }
 }
 
@@ -342,6 +353,24 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         // Profane-canon rework — the pyre verbs.
         case 'immolate': return `IMMOLATE ${m.count} — burn the lowest card${m.count === 1 ? '' : 's'} in hand from the fight: ${riderText(m.rider)}`;
         case 'purge_self': return 'PURGE — this card leaves the fight entirely';
+        // ── THE BIG NUMBERS REWRITE — direct damage and its family ───────────
+        case 'deal': {
+            const hits = m.hits ?? 1;
+            const body = hits > 1 ? `Deal ${m.amount} x ${hits}` : `Deal ${m.amount}`;
+            return m.pierce ? `${body}. PIERCE` : body;
+        }
+        case 'wrath': return `WRATH ${m.amount}`;
+        case 'flay': return `FLAY ${m.stacks}`;
+        case 'twin': return 'TWIN';
+        case 'chain': return `CHAIN ${m.amount}`;
+        case 'execute': return `EXECUTE ${Math.round(m.atPct * 100)}%`;
+        case 'overkill': {
+            const parts: string[] = [];
+            if (m.conviction) parts.push(`+${m.conviction} Conviction per ${m.per} excess`);
+            if (m.healPct) parts.push(`heal ${Math.round(m.healPct * 100)}% of the excess`);
+            if (m.souls) parts.push(`+${m.souls} Soul per ${m.per} excess`);
+            return `OVERKILL — ${parts.join(', ')}`;
+        }
         default: return null;
     }
 }

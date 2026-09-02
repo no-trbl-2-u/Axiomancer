@@ -3,7 +3,7 @@
  */
 
 import { Advantage } from "../Combat/types";
-import { STAT_MULTIPLIERS, RESOURCE_MULTIPLIERS } from "../Game/game-mechanics.constants";
+import { STAT_MULTIPLIERS, RESOURCE_MULTIPLIERS, PLAYER_VITAE_BASE } from "../Game/game-mechanics.constants";
 import { BaseStats, DerivedStats, NonCombatStats } from "../Character/types";
 import { getRng, Rng } from './rng';
 
@@ -185,18 +185,26 @@ export const deriveNonCombatStats = ({ body, heart, mind }: BaseStats): NonComba
 });
 
 /**
- * Calculates the maximum health of an entity from all base stats.
- * Equation: (body + heart + mind) × HEALTH_PER_STAT
+ * Calculates the maximum VITAE of a PLAYER-side entity from all base stats.
+ * Equation: PLAYER_VITAE_BASE + (body + heart + mind) × HEALTH_PER_STAT
  *
- * Level is not multiplied again here because the game's current stat law
- * already encodes level as total stat budget (for example, level 15 × 5 = 75
- * total base stats). Multiplying by level again double-counts progression.
+ * THE BIG NUMBERS REWRITE (2026-09-02): the flat base is what keeps a level-1
+ * pilgrim standing through the opening telegraphs now that threats are printed
+ * in real numbers. Enemies do NOT use this function any more — they carry
+ * their own pool (`enemyVitae`, `src/Enemy/index.ts`).
+ *
+ * Level is not multiplied again here because the game's stat law already
+ * encodes level as total stat budget; multiplying by level again double-counts
+ * progression.
  * @param level - The level of the entity, retained for API compatibility.
- * @param healthStats - The stats that contribute to max health (body, heart, and mind)
- * @returns The maximum health value
+ * @param healthStats - The stats that contribute to max VITAE (body, heart, and mind)
+ * @returns The maximum VITAE value
  */
 export function calculateMaxHealth(level: number, healthStats: BaseStats): number {
   void level;
-  return sum([healthStats.body, healthStats.heart, healthStats.mind]) * RESOURCE_MULTIPLIERS.HEALTH_PER_STAT;
+  return (
+    PLAYER_VITAE_BASE +
+    sum([healthStats.body, healthStats.heart, healthStats.mind]) * RESOURCE_MULTIPLIERS.HEALTH_PER_STAT
+  );
 }
 

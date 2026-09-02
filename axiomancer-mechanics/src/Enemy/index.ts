@@ -2,16 +2,20 @@ import { Card } from '../Cards/types';
 import { MapName } from '../World/map.library';
 import { ActiveEffect } from '../Effects/types';
 import { BaseStats } from '../Character/types';
-import { deriveStats, calculateMaxHealth } from '../Utils';
+import { deriveStats } from '../Utils';
 import { ProcOverrides, ProcUnlocks } from '../Combat/combat-effects';
 import { PhilosophicalAlignment } from '../Ledger/types';
-import { ENEMY_STAT_PER_LEVEL, ENEMY_GEAR_TIER_PER_LEVEL } from '../Game/game-mechanics.constants';
+import {
+    ENEMY_STAT_PER_LEVEL, ENEMY_GEAR_TIER_PER_LEVEL,
+    ENEMY_VITAE_BASE, ENEMY_VITAE_PER_LEVEL, ENEMY_VITAE_MULT,
+} from '../Game/game-mechanics.constants';
 import {
     Enemy, EnemyLogic, EnemyDifficulty, Tier1EffectOverrides, LootTableEntry,
     FriendshipReward, BefriendabilityConfig,
     FinalBlowLines, PactLines, CauseLines,
     CodexEntry,
 } from './types';
+import type { EnemyKeyword, EnemyStage } from './enemy-keywords';
 
 /**
  * Inputs required to create a new Enemy.
@@ -56,6 +60,44 @@ export interface CreateEnemyOptions {
     portraitAsset?: string;
     /** Spec 26b §2 — enemy-level thematic stance tell surfaced in the combat reveal. */
     stanceHint?: string;
+    /**
+     * THE BIG NUMBERS REWRITE — authored VITAE pool. Overrides the difficulty
+     * curve in {@link enemyVitae}. Every boss and unique authors this; ordinary
+     * foes let the curve decide.
+     */
+    vitae?: number;
+    /** THE BIG NUMBERS REWRITE — combat keywords (HIDE, BRUTAL, VENOM, …). */
+    keywords?: EnemyKeyword[];
+    /** THE BIG NUMBERS REWRITE — boss/unique stage thresholds. */
+    stages?: EnemyStage[];
+}
+
+/**
+ * The VITAE pool a player has to chew through, THE BIG NUMBERS REWRITE
+ * (2026-09-02).
+ *
+ * Enemies no longer borrow the player's per-stat health formula: `baseStats`
+ * still drives stance procs, derived combat stats and befriend logic, but the
+ * pool is its own number so the difficulty bands separate cleanly and a boss
+ * can be a wall without a grotesque stat budget.
+ *
+ *   vitae = round((ENEMY_VITAE_BASE + ENEMY_VITAE_PER_LEVEL × level)
+ *                 × ENEMY_VITAE_MULT[difficulty])
+ *
+ * An authored `vitae` always wins (every boss and unique authors one).
+ *
+ * @param level      - Enemy level.
+ * @param difficulty - Difficulty band; absent is treated as `normal`.
+ * @param authored   - An authored override, used verbatim when > 0.
+ */
+export function enemyVitae(
+    level: number,
+    difficulty: EnemyDifficulty | undefined,
+    authored?: number,
+): number {
+    if (authored !== undefined && authored > 0) return Math.round(authored);
+    const mult = ENEMY_VITAE_MULT[difficulty ?? 'normal'];
+    return Math.round((ENEMY_VITAE_BASE + ENEMY_VITAE_PER_LEVEL * Math.max(0, level)) * mult);
 }
 
 /**
@@ -152,9 +194,10 @@ export function createEnemy(options: CreateEnemyOptions): Enemy {
         finalBlowLines, pactLines, causeLines,
         journalEntry, addedIn, tags,
         portraitAsset, stanceHint,
+        vitae, keywords, stages,
     } = options;
 
-    const maxHealth = calculateMaxHealth(level, baseStats);
+    const maxHealth = enemyVitae(level, difficulty, vitae);
     const resolvedXp =
         xpReward ?? (difficulty ? level * DEFAULT_XP_BY_DIFFICULTY[difficulty] : level * DEFAULT_XP_BY_DIFFICULTY.normal);
 
@@ -181,9 +224,16 @@ export function createEnemy(options: CreateEnemyOptions): Enemy {
         tags,
         portraitAsset,
         stanceHint,
+        keywords,
+        stages,
     };
 }
 
+export {
+    ENEMY_KEYWORD_KINDS, ENEMY_KEYWORD_LABEL, ENEMY_KEYWORD_GLOSS,
+    enemyKeywordText, enemyKeywordGloss, findEnemyKeyword, hasEnemyKeyword,
+} from './enemy-keywords';
+export type { EnemyKeyword, EnemyStage } from './enemy-keywords';
 export { rollLoot, rollLootMany } from './loot';
 export type { LootRng } from './loot';
 export type {

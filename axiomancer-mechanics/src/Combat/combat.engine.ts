@@ -29,6 +29,7 @@ import { lookupEffect, applyEffect } from '../Effects';
 import type { Effect, ActiveEffect } from '../Effects/types';
 import type { Character } from '../Character/types';
 import type { Enemy } from '../Enemy/types';
+import { findEnemyKeyword, hasEnemyKeyword, enemyKeywordText } from '../Enemy/enemy-keywords';
 import { getCardById } from '../Cards/cards.library';
 import { executeCard } from '../Cards/card.engine';
 import { checkStatePredicate } from '../Cards/synergy-predicates';
@@ -108,12 +109,39 @@ export const CONVICTION_PER_UNPICKED_DIE = 1;
 export const CONVICTION_PER_UNPICKED_WILD = 2;
 /** Bonus Conviction for winning the stance read (§1 — reading fuels power). */
 export const CONVICTION_READ_WIN_BONUS = 1;
-/** Flat bonus HP damage when the drafted die color matches the card's stance (§3). */
+/**
+ * THE BIG NUMBERS REWRITE (2026-09-02) — the colour-match reward is now a
+ * PERCENTAGE, not a flat +3. A flat bonus that mattered on a GUARD 6 card is
+ * noise on a GUARD 40 one; a percentage keeps "power the card with its own
+ * colour" worth doing at every rank. The floor keeps it felt on the smallest
+ * Ash lines. Use {@link colorMatchBonus} — never the raw constants.
+ */
+export const COLOR_MATCH_BONUS_PCT = 0.25;
+export const COLOR_MATCH_BONUS_MIN = 2;
+
+/**
+ * The bonus a colour-matched (or Wild) die adds to a printed damage / guard /
+ * barrier magnitude: 25% of the base, at least +2, rounded. Returns 0 for a
+ * non-positive base so a zero-magnitude line never invents power.
+ */
+export function colorMatchBonus(base: number): number {
+    if (base <= 0) return 0;
+    return Math.max(COLOR_MATCH_BONUS_MIN, Math.round(base * COLOR_MATCH_BONUS_PCT));
+}
+
+/**
+ * Legacy alias, retained so the flat-bonus call sites keep compiling while the
+ * library migrates to {@link colorMatchBonus}. Deprecated: prefer the function.
+ */
 export const COLOR_MATCH_DAMAGE_BONUS = 3;
-/** An enemy threat action's damage is scaled by this so a fight stays threatening
- *  over its full length (the enemy attacks every phase in the HP model). HARD:
- *  bosses/elites can drop a careless player. */
-export const THREAT_DAMAGE_SCALE = 1.7;
+/**
+ * THE BIG NUMBERS REWRITE (2026-09-02) — RETIRED. The global threat fudge
+ * factor was folded into `threatDamageBudget` (`combat.threat.ts`), so a
+ * telegraph's printed number IS the number the engine applies. Kept at 1 and
+ * exported only so external callers that still import it stay honest; delete
+ * once nothing references it.
+ */
+export const THREAT_DAMAGE_SCALE = 1;
 /**
  * Soft control "weakens" the enemy's telegraphed attack. Each point of NEGATIVE
  * roll modifier on the enemy — the universal marker of the soft-control /
@@ -219,14 +247,32 @@ export const READ_DISADVANTAGE_DURATION_PENALTY = 1;
 
 /** R2 — each pip on a spent Reserve die adds this much intensity to the status
  *  the play lands (the ripened die hits harder). Tuned by /combat-tuning. */
-export const PIP_INTENSITY_BONUS = 1;
-/** R2 — each pip on a spent Reserve die adds this much Guard on a defend card. */
-export const PIP_GUARD_BONUS = 2;
+export const PIP_INTENSITY_BONUS = 2;
+/** R2 — each pip on a spent Reserve die adds this much Guard on a defend card.
+ *  THE BIG NUMBERS REWRITE — raised 2 → 5 so a ripened die is worth banking
+ *  against GUARD lines that now open at 8 and reach 60. */
+export const PIP_GUARD_BONUS = 5;
 /** R7 — a color-matched (or Wild) die on a STATUS card extends the landed
  *  status by this many turns. Strike/defend keep the flat +3 damage bonus. */
 export const COLOR_MATCH_STATUS_DURATION_BONUS = 1;
 /** R4 — the universal once-per-turn FATE TAP's Conviction payout. */
 export const FATE_TAP_CONVICTION = 1;
+
+// ── THE BIG NUMBERS REWRITE (2026-09-02) — the damage-scaler constants ───────
+
+/**
+ * WOUNDING's payload — the curse card a hard unguarded blow shoves into the
+ * player's deck. Authored in the curse pool of `cards.library.ts`; an absent
+ * id makes the keyword a silent no-op (the resolve-filter law).
+ */
+export const WOUND_CARD_ID = 'the-wound';
+
+/** FLAY — the multiplier one spent stack applies to a single hit. */
+export const FLAY_DAMAGE_MULT = 1.5;
+/** EXECUTE — the multiplier while the foe sits at or below the card's
+ *  printed threshold. A double, not an instant kill: a boss's STAGE
+ *  thresholds stay the dramatic beats rather than being skipped over. */
+export const EXECUTE_DAMAGE_MULT = 2;
 
 // ── Phase 31 (EA-6) — the combat MOMENTUM wheel ──────────────────────────────
 
@@ -607,6 +653,7 @@ export function startTurn(
             events.push({ kind: 'die-overflowed', source: 'materialize', total: conviction });
             events.push({ kind: 'conviction-gained', amount: 1, total: conviction, reason: 'effect' });
         }
+        const chainCarry = settleChainAtTurnBoundary(state, events);
         const next: CombatEncounterState = {
             ...state, dice, reserve, floatingDice, conviction,
             draftedDieId: null, turn, lastRead: 'none', carriedDie: null,
@@ -614,6 +661,9 @@ export function startTurn(
             spellsPlayedThisTurn: 0, echoNextSpell: false,
             recoilPaidThisTurn: 0, enemyDotDamageThisRound: 0, scrapsThisTurn: 0,
             turnTakenThisPhase: true,
+            // THE BIG NUMBERS REWRITE — CHAIN fades unless the closing turn fed
+            // it; TWIN never survives the turn that armed it.
+            ...chainCarry,
         };
         events.push({ kind: 'turn-dice-rolled', turn, dice });
         events.push({ kind: 'dice-rolled', dice });
@@ -651,8 +701,17 @@ export function startTurn(
     if ((state.floatingDice ?? []).length > 0) {
         dice = [...dice, ...(state.floatingDice ?? []).map(d => ({ ...d, state: 'available' as const }))];
     }
+    const events: CombatEvent[] = [
+        { kind: 'turn-dice-rolled', turn, dice },
+        // Mirror the legacy event so existing presenters keep working.
+        { kind: 'dice-rolled', dice },
+    ];
+    const chainCarry = settleChainAtTurnBoundary(state, events);
     const next: CombatEncounterState = {
         ...state, player, dice, draftedDieId: null, turn, lastRead: 'none', carriedDie,
+        // THE BIG NUMBERS REWRITE — CHAIN fades unless the closing turn fed it;
+        // TWIN never survives the turn that armed it.
+        ...chainCarry,
         spellsPlayedThisTurn: 0, echoNextSpell: false,
         // Spec 32 §12 #4 — the per-turn RECOIL ledger resets with the turn.
         recoilPaidThisTurn: 0,
@@ -664,11 +723,6 @@ export function startTurn(
         // Gate 0 — this phase's one legal tray roll is now taken.
         turnTakenThisPhase: true,
     };
-    const events: CombatEvent[] = [
-        { kind: 'turn-dice-rolled', turn, dice },
-        // Mirror the legacy event so existing presenters keep working.
-        { kind: 'dice-rolled', dice },
-    ];
     return { state: withLog(next, events), events };
 }
 
@@ -1256,6 +1310,84 @@ function applyEnemyDamage(
     return { enemy: next, clockDamage: clock.damage, washedOut: clock.washedOut };
 }
 
+/**
+ * THE BIG NUMBERS REWRITE (2026-09-02) — the foe's effective HIDE.
+ *
+ * HIDE N subtracts N from every hit, to a floor of 1 (Mage Knight's armour
+ * floor: a hit always scratches). ELUSIVE doubles it until the player has
+ * landed a rung of STAGGER on the foe this round — the control answer to the
+ * armour answer. PIERCE skips this call entirely.
+ */
+export function effectiveHide(enemy: Enemy, staggeredThisRound: boolean): number {
+    const hide = findEnemyKeyword(enemy.keywords, 'hide')?.n ?? 0;
+    if (hide <= 0) return 0;
+    const elusive = hasEnemyKeyword(enemy.keywords, 'elusive') && !staggeredThisRound;
+    return elusive ? hide * 2 : hide;
+}
+
+/**
+ * THE BIG NUMBERS REWRITE (2026-09-02) — the scalers a single player hit picks
+ * up on its way to the foe, folded in one place so every damage source (the
+ * `deal` mechanic, a rider's `damage`, a payoff burst) reads the same rules.
+ *
+ * Order matters and is authored, not incidental:
+ *   1. the READ multiplier (winning the read makes the hit bite)
+ *   2. the colour-match bonus, as a percentage of what the read left
+ *   3. WRATH — flat, every hit, all combat
+ *   4. CHAIN — flat, the next hit only (the caller spends it)
+ *   5. FLAY — +50%, consuming one stack (the caller spends it)
+ *   6. EXECUTE — doubled while the foe is at or below the printed threshold
+ *   7. HIDE — subtracted last, floor 1, unless the hit PIERCEs
+ *
+ * Multiplicative steps run before the flat armour subtraction so HIDE is a
+ * genuine floor on small hits rather than a percentage tax on big ones.
+ */
+export function scalePlayerHit(params: {
+    base: number;
+    readMult: number;
+    colorMatch: boolean;
+    wrath: number;
+    chain: number;
+    flay: boolean;
+    execute: boolean;
+    hide: number;
+    pierce: boolean;
+}): number {
+    if (params.base <= 0) return 0;
+    let dmg = Math.round(params.base * params.readMult);
+    if (params.colorMatch) dmg += colorMatchBonus(dmg);
+    dmg += params.wrath;
+    dmg += params.chain;
+    if (params.flay) dmg = Math.round(dmg * FLAY_DAMAGE_MULT);
+    if (params.execute) dmg = Math.round(dmg * EXECUTE_DAMAGE_MULT);
+    if (!params.pierce && params.hide > 0) dmg = Math.max(1, dmg - params.hide);
+    return Math.max(0, dmg);
+}
+
+/**
+ * THE BIG NUMBERS REWRITE (2026-09-02) — settle the per-turn damage-scaler
+ * ledgers at a turn boundary.
+ *
+ * CHAIN fades to nothing unless a play in the turn just ended fed it — the
+ * Dawncaster rule that makes CHAIN belong to the deck that keeps swinging
+ * rather than to the deck that banked one stack and sat on it. TWIN never
+ * outlives the turn that armed it. WRATH and FLAY are untouched: WRATH is
+ * combat-long by design, and FLAY sits on the foe until the hits spend it.
+ */
+function settleChainAtTurnBoundary(
+    state: CombatEncounterState,
+    events: CombatEvent[],
+): Pick<CombatEncounterState, 'chain' | 'chainFedThisTurn' | 'twinArmed'> {
+    const held = state.chain ?? 0;
+    const fed = state.chainFedThisTurn === true;
+    if (held > 0 && !fed) events.push({ kind: 'chain-faded', from: held });
+    return {
+        chain: fed ? held : 0,
+        chainFedThisTurn: false,
+        twinArmed: false,
+    };
+}
+
 /** WS3.2 Soul economy — decay-consumed instances of NO-CALENDAR debuffs
  *  (`calendarExpiry === false`) expire BY decay: they owe the same Soul a
  *  calendar expiry would (Harvest must not starve when calendars disappear).
@@ -1545,6 +1677,51 @@ function applyRiderToState(
     if (r.guard) guard += r.guard;
     let barrier = next.barrier ?? 0;
     if (r.barrier) barrier += r.barrier;
+    // ── THE BIG NUMBERS REWRITE — the damage family on a rider ───────────────
+    // A rider fires on the FREE line and from condition payoffs, both OUTSIDE
+    // the PAID line's read/colour-match scaling, so a rider hit takes WRATH,
+    // CHAIN, FLAY, HIDE and PIERCE but no read multiplier: `readMult: 1`,
+    // `colorMatch: false`. The printed number is the number, plus the scalers
+    // the player has visibly banked.
+    let wrath = next.wrath ?? 0;
+    let chain = next.chain ?? 0;
+    let chainFedThisTurn = next.chainFedThisTurn ?? false;
+    let flayStacks = next.flay ?? 0;
+    if (r.damage) {
+        const dmg = scalePlayerHit({
+            base: r.damage,
+            readMult: 1,
+            colorMatch: false,
+            wrath,
+            chain,
+            flay: flayStacks > 0,
+            execute: false,
+            hide: effectiveHide(enemy, (next.staggerRungs ?? 0) > 0),
+            pierce: r.pierce === true,
+        });
+        if (chain > 0) chain = 0;
+        if (flayStacks > 0) flayStacks -= 1;
+        if (dmg > 0) {
+            const hit = applyEnemyDamage(enemy, dmg, next.round, events);
+            enemy = hit.enemy;
+            directDamage += dmg + hit.clockDamage;
+            washedOutHere.push(...hit.washedOut);
+            events.push({ kind: 'damage-dealt', cardId, target: 'enemy', amount: dmg });
+        }
+    }
+    if (r.wrath) {
+        wrath += r.wrath;
+        events.push({ kind: 'wrath-gained', cardId, amount: r.wrath, total: wrath });
+    }
+    if (r.chain) {
+        chain += r.chain;
+        chainFedThisTurn = true;
+        events.push({ kind: 'chain-gained', cardId, amount: r.chain, total: chain });
+    }
+    if (r.flay) {
+        flayStacks += r.flay;
+        events.push({ kind: 'flay-applied', cardId, amount: r.flay, total: flayStacks });
+    }
     if (r.conviction) conviction = Math.min(CONVICTION_CAP, conviction + r.conviction);
     if (r.healHp) {
         const healAmt = Math.round(r.healHp * getHealingReceivedMult(player));
@@ -1684,7 +1861,12 @@ function applyRiderToState(
         souls += washSouls;
         events.push({ kind: 'soul-gained', amount: washSouls, total: souls, reason: 'expiry' });
     }
-    next = { ...next, player, enemy, directDamageDealt: directDamage, conviction, guard, barrier, souls, akrasiaDebt };
+    next = {
+        ...next, player, enemy, directDamageDealt: directDamage, conviction, guard, barrier, souls, akrasiaDebt,
+        // THE BIG NUMBERS REWRITE — the damage-scaler ledgers this rider fed
+        // or spent (a FREE line can both land a hit and bank WRATH).
+        wrath, chain, chainFedThisTurn, flay: flayStacks,
+    };
 
     if (r.foretell) next = applyForetell(next, r.foretell, events);
     if (r.drawCards) {
@@ -2031,7 +2213,13 @@ function playBottomAction(
     const mechsAll = sourceCard.specialMechanics ?? [];
     const echoCharge = state.echoNextSpell === true;
     const chamberEcho = zoneHas(state, 'resonant-chamber') && (state.spellsPlayedThisTurn ?? 0) === 0;
-    const echoed = mechsAll.some(m => m.kind === 'echo') || echoCharge || chamberEcho;
+    // THE BIG NUMBERS REWRITE — TWIN is the armed sibling of ECHO: a prior
+    // play in this turn armed it, and THIS spell resolves twice. It is consumed
+    // here (the local `twinArmed` is reset below), so a twinned spell that
+    // itself arms TWIN cannot re-arm from its own second resolution.
+    const twinCharge = state.twinArmed === true;
+    const echoed = mechsAll.some(m => m.kind === 'echo') || echoCharge || chamberEcho || twinCharge;
+    if (twinCharge) events.push({ kind: 'twin-fired', cardId: sourceCard.id });
 
     const before = intensityMap(state.enemy.effects);
     let shimState: CombatState = cardShim(state);
@@ -2201,6 +2389,25 @@ function playBottomAction(
     const mechs = sourceCard.specialMechanics ?? [];
     const echoFactor = echoed ? 2 : 1;
     let mechanicDamage = 0;
+    // ── THE BIG NUMBERS REWRITE — the damage-scaler ledgers, read here so this
+    //    play both CONSUMES (chain/flay/twin) and FEEDS (wrath/chain) them. ──
+    let wrath = state.wrath ?? 0;
+    let chain = state.chain ?? 0;
+    let chainFedThisTurn = state.chainFedThisTurn ?? false;
+    let flayStacks = state.flay ?? 0;
+    // A pending TWIN charge is consumed by THIS play (mirrors `echoNextSpell`);
+    // a `twin` mechanic below re-arms it for the NEXT one.
+    let twinArmed = false;
+    /** VITAE this play drove past the foe's last point, for an OVERKILL clause. */
+    let overkillExcess = 0;
+    /** EXECUTE is evaluated ONCE, before this card's hits land, so a multi-hit
+     *  card cannot flip its own threshold partway through the swing. */
+    const executeArmed = (sourceCard.specialMechanics ?? []).some(
+        m => m.kind === 'execute' && enemy.maxHealth > 0
+            && enemy.health <= m.atPct * enemy.maxHealth,
+    );
+    /** ELUSIVE lifts once the foe has been staggered this round. */
+    const staggeredThisRound = (state.staggerRungs ?? 0) > 0;
     let reserve = reserveIn;
     let floatingDice = (state.floatingDice ?? []).slice();
     let souls = state.souls ?? 0;
@@ -2308,8 +2515,94 @@ function playBottomAction(
     };
     if (echoed) stuckDrip();
 
+    /**
+     * THE BIG NUMBERS REWRITE — land one player hit on the foe, folding every
+     * scaler through `scalePlayerHit` and spending the one-shot ledgers (CHAIN
+     * on the first hit, one FLAY stack per hit). Returns the excess damage
+     * beyond lethal so an OVERKILL clause can convert it.
+     */
+    const landHit = (base: number, pierce: boolean, label: string): number => {
+        const healthBefore = enemy.health;
+        const dmg = scalePlayerHit({
+            base,
+            readMult: mult,
+            colorMatch,
+            wrath,
+            chain,
+            flay: flayStacks > 0,
+            execute: executeArmed,
+            hide: effectiveHide(enemy, staggeredThisRound),
+            pierce,
+        });
+        if (chain > 0) { chain = 0; }
+        if (flayStacks > 0) { flayStacks -= 1; }
+        if (dmg <= 0) return 0;
+        const hit = applyEnemyDamage(enemy, dmg, state.round, events);
+        enemy = hit.enemy;
+        mechanicDamage += dmg;
+        directDamage += dmg + hit.clockDamage;
+        gainSoulsLocal(soulWorthyWashouts(hit.washedOut), 'expiry');
+        events.push({ kind: 'damage-dealt', cardId: label, target: 'enemy', amount: dmg });
+        return Math.max(0, dmg - healthBefore);
+    };
+
     for (const mech of mechs) {
         switch (mech.kind) {
+            // ── THE BIG NUMBERS REWRITE — direct damage and its family ──────
+            case 'deal': {
+                // Each hit is its own damage instance: BLEED-class DoTs fire
+                // once per hit and HIDE is subtracted from each, which is the
+                // whole reason `7 x 4` and `28 x 1` play differently.
+                const hits = Math.max(1, mech.hits ?? 1);
+                for (let i = 0; i < hits; i++) {
+                    if (isDefeated(enemy)) break;
+                    overkillExcess += landHit(mech.amount, mech.pierce === true, card.id);
+                }
+                break;
+            }
+            case 'wrath': {
+                wrath += mech.amount;
+                events.push({ kind: 'wrath-gained', cardId: card.id, amount: mech.amount, total: wrath });
+                break;
+            }
+            case 'flay': {
+                flayStacks += mech.stacks;
+                events.push({ kind: 'flay-applied', cardId: card.id, amount: mech.stacks, total: flayStacks });
+                break;
+            }
+            case 'chain': {
+                chain += mech.amount;
+                chainFedThisTurn = true;
+                events.push({ kind: 'chain-gained', cardId: card.id, amount: mech.amount, total: chain });
+                break;
+            }
+            case 'twin': {
+                twinArmed = true;
+                events.push({ kind: 'twin-armed', cardId: card.id });
+                break;
+            }
+
+            case 'execute':
+                // Read at the top of this play into `executeArmed`; the clause
+                // itself lands no effect of its own.
+                break;
+            case 'overkill': {
+                // Conversion of damage that was going to be wasted anyway. The
+                // excess is whatever THIS card's hits drove past 0 VITAE.
+                if (overkillExcess > 0 && mech.per > 0) {
+                    const units = Math.floor(overkillExcess / mech.per);
+                    if (mech.conviction && units > 0) {
+                        conviction = Math.min(CONVICTION_CAP, conviction + units * mech.conviction);
+                    }
+                    if (mech.souls && units > 0) gainSoulsLocal(units * mech.souls, 'granted');
+                    if (mech.healPct) {
+                        const healed = Math.round(overkillExcess * mech.healPct);
+                        if (healed > 0) player = heal(player, healed);
+                    }
+                    events.push({ kind: 'overkill-cashed', cardId: card.id, excess: overkillExcess });
+                }
+                break;
+            }
             case 'rider': {
                 // The generic unconditional PAID verb carrier (draw/heal/…).
                 firedRiders.push(mech.rider);
@@ -3286,12 +3579,12 @@ function playBottomAction(
         events.push({ kind: 'pips-cashed', cardId: card.id, pips: poweringPips, bonus: 'guard', amount: pipGuard });
     }
     const guardGain = (guardMech
-        ? Math.max(1, Math.round(guardMech.amount * mult)) + (colorMatch ? COLOR_MATCH_DAMAGE_BONUS : 0)
+        ? (() => { const b = Math.max(1, Math.round(guardMech.amount * mult)); return b + (colorMatch ? colorMatchBonus(b) : 0); })()
         : 0) + riderGuard + pipGuard + pipGuardExtra;
     // BARRIER — a STACKING, persistent soak (distinct from one-shot guard); read-scaled.
     const barrierMech = mechs.find(m => m.kind === 'barrier') as { kind: 'barrier'; amount: number } | undefined;
     const barrierGain = barrierMech
-        ? Math.max(1, Math.round(barrierMech.amount * mult)) + (colorMatch ? COLOR_MATCH_DAMAGE_BONUS : 0)
+        ? (() => { const b = Math.max(1, Math.round(barrierMech.amount * mult)); return b + (colorMatch ? colorMatchBonus(b) : 0); })()
         : 0;
     // RIPOSTE — arm the counter-stance (spec 32 v3: fires only on a FULL block —
     // see `resolveThreatPhase`); a prior arming this phase survives.
@@ -3386,6 +3679,12 @@ function playBottomAction(
         peroration: perorationDecl,
         echoNextSpell,
         conjuredUids,
+        // THE BIG NUMBERS REWRITE — the damage-scaler ledgers.
+        wrath,
+        chain,
+        chainFedThisTurn,
+        flay: flayStacks,
+        twinArmed,
         spellsPlayedThisTurn: (state.spellsPlayedThisTurn ?? 0) + 1,
         // Phase 32 part 4f — only a spell that actually landed/deepened a
         // status on the enemy (`landedOnEnemy`, computed above from the
@@ -3519,8 +3818,13 @@ function computeRungDenial(state: CombatEncounterState): {
     const rungGrowth = isBossTier ? Math.min(state.bossRungGrowth ?? 0, bossRungGrowthCap(naturalRungsTotal)) : 0;
     const rungsTotal = naturalRungsTotal + rungGrowth;
     const quagmire = zoneHas(state, 'quagmire-of-doubt') ? 1 : 0;
-    const rungsLost = Math.min(rungsTotal, (state.staggerRungs ?? 0) + quagmire);
-    const rungDenied = rungsLost >= rungsTotal;
+    // UNSHAKEN (THE BIG NUMBERS REWRITE) — some things were never going to
+    // flinch: no rung of this foe's telegraph can be denied, whatever STAGGER
+    // and BACKFIRE have banked. The ledger still accrues (TURNABOUT can cash
+    // it); it simply buys nothing against THIS foe's ladder.
+    const unshaken = hasEnemyKeyword(state.enemy.keywords, 'unshaken');
+    const rungsLost = unshaken ? 0 : Math.min(rungsTotal, (state.staggerRungs ?? 0) + quagmire);
+    const rungDenied = !unshaken && rungsLost >= rungsTotal;
     return { rungsTotal, rungsLost, rungDenied, naturalRungsTotal, rungGrowth };
 }
 
@@ -3743,6 +4047,16 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     // A lethal BACKFIRE drip (above) can drop the enemy to 0 before it swings —
     // guard the telegraph so an already-defeated enemy does not still hit the
     // player this phase (the victory check runs after this block).
+    // ── THE BIG NUMBERS REWRITE — the foe's keywords change this phase's maths ──
+    // SWIFT halves what a wall is worth, BRUTAL doubles what gets through,
+    // VENOM poisons on contact, RAVENOUS feeds on what it lands, and WOUNDING
+    // shoves a curse into the deck when a single blow lands hard enough.
+    const foeSwift = hasEnemyKeyword(enemy.keywords, 'swift');
+    const foeBrutal = hasEnemyKeyword(enemy.keywords, 'brutal');
+    const foeVenom = findEnemyKeyword(enemy.keywords, 'venom')?.n ?? 0;
+    const foeRavenous = hasEnemyKeyword(enemy.keywords, 'ravenous');
+    const foeWounding = findEnemyKeyword(enemy.keywords, 'wounding')?.n ?? 0;
+
     if (!hindered && !isDefeated(enemy)) {
         // The enemy attacks: its telegraphed threat action fires on the player.
         const playerTakenMult = getDamageTakenMultiplier(state.player);
@@ -3753,6 +4067,9 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                 let dmg = Math.round(
                     eff.damage * THREAT_DAMAGE_SCALE * weakenMult * escalation
                     * enemyOutgoingMult * enemyThreatMult
+                    // THE BIG NUMBERS REWRITE — every STAGE this foe has
+                    // entered adds its printed weight to every later phase.
+                    * (1 + (state.stageThreatBonus ?? 0))
                     * (overextendedId ? 0.5 : 1) * playerTakenMult
                     // Spec 33 §2 — the open stance check's rail (1 when flag-off,
                     // no check authored, or the player is stance-less).
@@ -3770,20 +4087,60 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                     riposteFired = true;
                 }
                 // GUARD soaks first (one-shot, clamped), then BARRIER (persistent).
-                const guardAbsorbed = Math.min(guard, dmg);
-                guard -= guardAbsorbed;
+                // SWIFT (THE BIG NUMBERS REWRITE): a wall counts for HALF against
+                // this foe — it absorbs half its face value and is consumed at
+                // the full rate, so the wall still helps but stops being the
+                // whole answer.
+                const soakDivisor = foeSwift ? 2 : 1;
+                const guardAbsorbed = Math.min(Math.floor(guard / soakDivisor), dmg);
+                guard -= guardAbsorbed * soakDivisor;
                 dmg -= guardAbsorbed;
                 damagePrevented += guardAbsorbed;
-                const barrierAbsorbed = Math.min(barrier, dmg);
+                const barrierAbsorbed = Math.min(Math.floor(barrier / soakDivisor), dmg);
                 if (barrierAbsorbed > 0) {
-                    barrier -= barrierAbsorbed;
+                    barrier -= barrierAbsorbed * soakDivisor;
                     dmg -= barrierAbsorbed;
                     damagePrevented += barrierAbsorbed;
                     events.push({ kind: 'barrier-absorbed', amount: barrierAbsorbed });
                 }
+                if (foeSwift && guardAbsorbed + barrierAbsorbed > 0) {
+                    events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'SWIFT' });
+                }
+                // BRUTAL: block it fully or take it twice.
+                if (foeBrutal && dmg > 0) {
+                    dmg *= 2;
+                    events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'BRUTAL', amount: dmg });
+                }
                 if (dmg > 0) {
                     player = applyDamage(player, dmg);
                     enemyDamageDealt += dmg;
+                    // RAVENOUS: it heals for what it lands on you.
+                    if (foeRavenous) {
+                        enemy = heal(enemy, dmg);
+                        events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'RAVENOUS', amount: dmg });
+                    }
+                    // VENOM: contact poisons. Routed through the same
+                    // `applyEffect` path as an authored threat rider, so the
+                    // stacking and duration rules are identical.
+                    if (foeVenom > 0) {
+                        const venomDef = lookupEffectDef('debuff_poison');
+                        if (venomDef) {
+                            const res = applyEffect(player.effects, venomDef, state.round, {
+                                intensityDelta: foeVenom, sourceId: enemy.id,
+                            });
+                            player = { ...player, effects: res.activeEffects };
+                            events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'VENOM', amount: foeVenom });
+                        }
+                    }
+                    // WOUNDING: a single blow of N or more puts a WOUND in the
+                    // deck (Mage Knight's wounds). Reuses the curse-injection
+                    // channel — an unknown id is a silent no-op, per the
+                    // resolve-filter law.
+                    if (foeWounding > 0 && dmg >= foeWounding && getCard(WOUND_CARD_ID)) {
+                        injectedCurses.push(WOUND_CARD_ID);
+                        events.push({ kind: 'curse-injected', phaseIndex: phase.index, cardId: WOUND_CARD_ID });
+                        events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'WOUNDING', amount: dmg });
+                    }
                     // WS3.3 'damage-instance' clock, player bearer — a threat
                     // hit that LANDS advances every damage-instance-clocked
                     // DoT the player carries (enemy threat riders land
@@ -4151,6 +4508,9 @@ export function processBetweenPhases(
     bonusDraw: number = 0,
 ): CombatTransition {
     const events: CombatEvent[] = [];
+    /** Curses a STAGE shoves into the deck as it opens (THE BIG NUMBERS
+     *  REWRITE); shuffled into the draw pile with the rest at assembly. */
+    const injectedCursesFromStage: string[] = [];
 
     // 1. Per-effect DoT ticks (labeled, §7.5) — computed before processing.
     //    Round-threaded so escalating DoTs (POISON ramp) tick their real value.
@@ -4318,6 +4678,60 @@ export function processBetweenPhases(
                 });
                 player = { ...player, effects: applied.activeEffects };
                 events.push({ kind: 'threat-clock-enchant', target: 'player', effectId: 'debuff_curse', round: resolvedRound });
+            }
+        }
+    }
+
+    // ── THE BIG NUMBERS REWRITE — REGROW and STAGES resolve at the boundary ──
+    // REGROW: a printed healing floor the player has to out-pace. Applied
+    // before the stage check so a stage's own threshold reads the post-heal
+    // pool (a foe that heals back over the line does not trip its stage).
+    const regrow = findEnemyKeyword(enemy.keywords, 'regrow')?.n ?? 0;
+    if (regrow > 0 && !isDefeated(enemy)) {
+        enemy = heal(enemy, regrow);
+        events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'REGROW', amount: regrow });
+    }
+    // STAGES: the moment a fight becomes a different fight. Each stage fires at
+    // most once; `stagesEntered` is the per-combat ledger. Authored order wins
+    // ties, so a boss that crosses two thresholds in one blow enters the first
+    // it authored and the second at the next boundary — the beats stay
+    // legible instead of collapsing into one line of log.
+    const stagesEntered = [...(state.stagesEntered ?? [])];
+    let stageThreatBonus = state.stageThreatBonus ?? 0;
+    if (!isDefeated(enemy)) {
+        const pending = (enemy.stages ?? []).find((stage, i) => {
+            if (stagesEntered.includes(i)) return false;
+            const byVitae = stage.at.vitaePct !== undefined
+                && enemy.maxHealth > 0
+                && enemy.health <= stage.at.vitaePct * enemy.maxHealth;
+            const byRound = stage.at.round !== undefined && resolvedRound >= stage.at.round;
+            return byVitae || byRound;
+        });
+        if (pending) {
+            stagesEntered.push((enemy.stages ?? []).indexOf(pending));
+            events.push({ kind: 'stage-entered', enemyId: enemy.id, name: pending.name, text: pending.text });
+            if (pending.gain?.length) {
+                enemy = { ...enemy, keywords: [...(enemy.keywords ?? []), ...pending.gain] };
+                for (const k of pending.gain) {
+                    events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: enemyKeywordText(k) });
+                }
+            }
+            if (pending.cleanse) {
+                // Everything the player invested in afflicting it is gone. The
+                // cruellest stage effect, and the reason a DoT deck needs a
+                // payoff before the threshold rather than after it.
+                enemy = { ...enemy, effects: [] };
+            }
+            if (pending.heal !== undefined) {
+                const amount = typeof pending.heal === 'number'
+                    ? pending.heal
+                    : Math.round(pending.heal.pct * enemy.maxHealth);
+                if (amount > 0) enemy = heal(enemy, amount);
+            }
+            if (pending.threatBonus) stageThreatBonus += pending.threatBonus;
+            if (pending.curseCardId && getCard(pending.curseCardId)) {
+                injectedCursesFromStage.push(pending.curseCardId);
+                events.push({ kind: 'curse-injected', phaseIndex: state.currentPhaseIndex, cardId: pending.curseCardId });
             }
         }
     }
@@ -4623,6 +5037,13 @@ export function processBetweenPhases(
         // Gate 0 (round-turn law) — the phase boundary re-arms the one legal
         // tray roll for the incoming phase.
         turnTakenThisPhase: false,
+        // THE BIG NUMBERS REWRITE — the STAGE ledgers, and any curse a stage
+        // opened with (shuffled into the draw pile alongside the threat's own).
+        stagesEntered,
+        stageThreatBonus,
+        ...(injectedCursesFromStage.length > 0
+            ? { drawPile: [...draw.drawPile, ...injectedCursesFromStage] }
+            : {}),
     };
     next = withLog(next, events);
     // WI-1 — the round is closed: zero the enemy-DoT accumulator AFTER logging

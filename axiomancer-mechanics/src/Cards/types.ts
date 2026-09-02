@@ -275,7 +275,46 @@ export type CardSpecialMechanic =
     | { kind: 'purge_self' }
     /** RIDER — an UNCONDITIONAL rider fired by the PAID line (the generic
      *  draw/heal/cleanse/guard verb carrier; same executor as condition riders). */
-    | { kind: 'rider'; rider: CardRider };
+    | { kind: 'rider'; rider: CardRider }
+    // ── THE BIG NUMBERS REWRITE (2026-09-02) — direct damage and its family ────
+    /** DEAL — direct VITAE damage, the card library's primary verb again. The
+     *  strike-ban doctrine that deleted `basePower` was repealed 2026-09-02;
+     *  this is its authored replacement, and unlike `basePower` it is a real
+     *  mechanic that scales with the read, the colour match and WRATH/CHAIN
+     *  like everything else.
+     *  - `amount` is the per-hit magnitude BEFORE read/colour/scaler bonuses.
+     *  - `hits` (default 1) makes it a multi-hit: each hit is a separate damage
+     *    instance, so damage-instance DoTs (BLEED) fire once per hit and HIDE
+     *    is subtracted from each — the reason `7 × 4` and `28 × 1` play
+     *    differently against an armoured foe.
+     *  - `pierce` ignores the foe's HIDE and every damage-reduction effect. */
+    | { kind: 'deal'; amount: number; hits?: number; pierce?: boolean }
+    /** WRATH N — combat-long: every hit you land deals +N. Stacks additively
+     *  (Slay the Spire's Strength, Dawncaster's Anger). The scaler that turns a
+     *  multi-hit card into a finisher. */
+    | { kind: 'wrath'; amount: number }
+    /** FLAY N — the foe takes +50% damage from each of your next N hits, then
+     *  the stack is spent (Dawncaster's Vulnerable, front-loaded). Consumed one
+     *  stack per damage instance, so a multi-hit card eats several. */
+    | { kind: 'flay'; stacks: number }
+    /** TWIN — the NEXT spell you play this turn resolves its PAID payload twice
+     *  (Dawncaster's Echo, armed rather than innate). Never chains: a twinned
+     *  spell that itself arms TWIN does not re-arm from the second resolution. */
+    | { kind: 'twin' }
+    /** CHAIN N — +N damage to your next hit per stack held. CHAIN fades to 0 at
+     *  the end of any turn in which no play added to it (Dawncaster's Chain),
+     *  so the payoff belongs to the deck that keeps swinging. */
+    | { kind: 'chain'; amount: number }
+    /** EXECUTE — while the foe sits at or below `atPct` of its maximum VITAE,
+     *  this card's DEAL damage is DOUBLED. The finisher clause; chosen over
+     *  Dawncaster's instant-slay reading so a boss's stage thresholds stay the
+     *  dramatic beats rather than being skipped. */
+    | { kind: 'execute'; atPct: number }
+    /** OVERKILL — damage dealt in EXCESS of what was needed to fell the foe is
+     *  not wasted: it converts at the printed rates (Dawncaster's Overkill).
+     *  `conviction` is ◆ per `per` excess VITAE; `healPct` heals that fraction
+     *  of the excess; `souls` is Souls per `per` excess. */
+    | { kind: 'overkill'; per: number; conviction?: number; healPct?: number; souls?: number };
 
 /**
  * Every `CardSpecialMechanic` kind, at RUNTIME (phase 68).
@@ -336,6 +375,13 @@ export const CARD_SPECIAL_MECHANIC_KINDS = [
     'immolate',
     'purge_self',
     'rider',
+    'deal',
+    'wrath',
+    'flay',
+    'twin',
+    'chain',
+    'execute',
+    'overkill',
 ] as const;
 
 /** A kind in the union that this array forgot. Resolves to `never` when clean. */
@@ -444,6 +490,18 @@ export interface CardRider {
      *  it can carry any FREE-line verb), resolved through the same executor.
      *  Phase 33d (GLYPHS pilot, sandbox-only). */
     glyphChargeFallback?: CardRider;
+    // ── THE BIG NUMBERS REWRITE (2026-09-02) — damage on the FREE line ────────
+    /** Deal N direct VITAE damage. The verb that lets a FREE line be worth
+     *  playing without a die; scales with WRATH/CHAIN/FLAY like any hit. */
+    damage?: number;
+    /** This rider's `damage` ignores HIDE and all damage reduction. */
+    pierce?: boolean;
+    /** +N WRATH (combat-long damage bonus per hit). */
+    wrath?: number;
+    /** +N CHAIN (bonus to the next hit; fades on a turn that adds none). */
+    chain?: number;
+    /** +N FLAY stacks on the foe (+50% damage from each of your next N hits). */
+    flay?: number;
 }
 
 /**
@@ -502,7 +560,13 @@ export type SynergyStatePredicate =
     /** REQUIEM N (profane-canon rework) — true when the player's discard pile
      *  holds ≥ `n` cards at play time (the delirium/threshold read: the dead
      *  remember). Prices at the threshold ×0.5 condition discount. */
-    | { kind: 'requiem'; n: number };
+    | { kind: 'requiem'; n: number }
+    /** FLOW N (THE BIG NUMBERS REWRITE, from Dawncaster's Flow) — true when at
+     *  least `minPriorSpells` PAID spells have already resolved this turn. The
+     *  mirror of `opening`: the reward for a turn that keeps going, where
+     *  `opening` (`maxPriorSpells: 0`) is AMBUSH, the reward for leading with
+     *  it. */
+    | { kind: 'flow'; minPriorSpells: number };
 
 /**
  * Phase 66 — Tier 2 synergy clause. Optional payload on `Card` that

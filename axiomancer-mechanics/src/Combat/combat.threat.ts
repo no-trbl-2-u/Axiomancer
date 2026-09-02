@@ -271,13 +271,20 @@ function rotateStance(from: Stance, steps: number): Stance {
  * player-HP punish it keeps a missed clear meaningful at every level. Authored
  * sequences set their own damage; this only backs the generator fallback.
  */
-const THREAT_BASE = 4;
-const THREAT_PER_LEVEL = 0.95;
+/**
+ * THE BIG NUMBERS REWRITE (2026-09-02) — the budget was raised so a telegraph
+ * reads as a real threat against the new VITAE pools, and the separate global
+ * `THREAT_DAMAGE_SCALE` fudge factor was folded in here and deleted (one knob,
+ * not two). Reference points at `damageWeight` 1.0, phase 0:
+ * L1 normal 8 · L6 boss 31 · L7 elite 25 · L18 boss 76 · L110 unique 400.
+ */
+const THREAT_BASE = 6;
+const THREAT_PER_LEVEL = 2.5;
 
 /** Damage an Overwhelmed phase deals: a level/difficulty budget × the phase's
  *  authored `damageWeight`. Shared by authored sequences and the generator. */
 function threatDamageBudget(level: number, dMult: number, phaseIndex: number, weight = 1): number {
-    return Math.max(3, Math.round(
+    return Math.max(4, Math.round(
         (THREAT_BASE + THREAT_PER_LEVEL * Math.max(1, level)) * dMult * (1 + 0.2 * phaseIndex) * weight,
     ));
 }

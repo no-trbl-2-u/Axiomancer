@@ -567,6 +567,25 @@ export type CombatEvent =
     // stays in `pendingOmens`.
     | { kind: 'omen-missed'; cardId: string; phaseIndex: number; expired: boolean }
     | { kind: 'soul-gained'; amount: number; total: number; reason: 'expiry' | 'consumed' | 'granted' }
+    // ── THE BIG NUMBERS REWRITE (2026-09-02) — the damage-scaler ledgers ─────
+    /** WRATH gained: a combat-long flat bonus to every hit the player lands. */
+    | { kind: 'wrath-gained'; cardId: string; amount: number; total: number }
+    /** FLAY stacks applied to the foe (each spends on one of the next hits). */
+    | { kind: 'flay-applied'; cardId: string; amount: number; total: number }
+    /** CHAIN gained: a bonus to the player's NEXT hit, spent on landing. */
+    | { kind: 'chain-gained'; cardId: string; amount: number; total: number }
+    /** CHAIN faded at the turn boundary: no play fed it this turn. */
+    | { kind: 'chain-faded'; from: number }
+    /** TWIN armed: the next PAID spell this turn resolves twice. */
+    | { kind: 'twin-armed'; cardId: string }
+    /** TWIN fired: this spell's PAID payload resolved a second time. */
+    | { kind: 'twin-fired'; cardId: string }
+    /** OVERKILL converted the damage that overshot the foe's last VITAE. */
+    | { kind: 'overkill-cashed'; cardId: string; excess: number }
+    /** A foe crossed one of its STAGE thresholds and became another fight. */
+    | { kind: 'stage-entered'; enemyId: string; name: string; text: string }
+    /** An enemy keyword changed the arithmetic of a resolved threat. */
+    | { kind: 'enemy-keyword-fired'; enemyId: string; keyword: string; amount?: number }
     | { kind: 'reaped'; cardId: string; soulsSpent: number; amount: number }
     // Phase 32 part 1 (Harvest — REAP attacks MAXIMUM HP): fires alongside
     // 'reaped' whenever a REAP verb (single or ALL) permanently lowers the
@@ -915,6 +934,30 @@ export interface CombatEncounterState {
     capitulationDeclined?: boolean;
     /** Spec 32 v3 T10 — the next spell played this turn gains ECHO. */
     echoNextSpell?: boolean;
+    // ── THE BIG NUMBERS REWRITE (2026-09-02) — the damage-scaler ledgers ──────
+    /** WRATH — a combat-long flat bonus added to EVERY hit the player lands
+     *  (Slay the Spire's Strength). Never decays; only grows. Absent = 0. */
+    wrath?: number;
+    /** CHAIN — a bonus added to the player's NEXT hit, then spent. Fades to 0
+     *  at the end of any turn in which no play added to it, so the payoff
+     *  belongs to a deck that keeps swinging (Dawncaster's Chain). Absent = 0. */
+    chain?: number;
+    /** CHAIN bookkeeping — set when a play added CHAIN this turn; read and
+     *  cleared at the turn boundary to decide whether CHAIN fades. */
+    chainFedThisTurn?: boolean;
+    /** FLAY — stacks on the FOE: each of the player's next N damage instances
+     *  deals +50%, consuming one stack (Dawncaster's Vulnerable, front-loaded
+     *  rather than percentage-per-stack). Absent = 0. */
+    flay?: number;
+    /** TWIN — armed: the next PAID spell this turn resolves twice. Cleared when
+     *  it fires, so it never chains into the copy it created. */
+    twinArmed?: boolean;
+    /** STAGES already entered this combat, by index into `enemy.stages`. Each
+     *  stage fires at most once; this is the ledger that guarantees it. */
+    stagesEntered?: number[];
+    /** Cumulative `threatBonus` contributed by every STAGE entered so far,
+     *  added to each subsequent phase's damage weight. */
+    stageThreatBonus?: number;
     /** Spec 32 v3 T10 — spells played this turn (resonant-chamber's gate). */
     spellsPlayedThisTurn?: number;
     /** Spec 32 v3 T10 — the last PAID spell that LANDED A STATUS this combat

@@ -15,6 +15,8 @@ import { FactionReputationDelta } from '../Faction/types';
 // reasoning trail.
 import type { CodexEntry } from '../Game/types';
 export type { CodexEntry };
+import type { EnemyKeyword, EnemyStage } from './enemy-keywords';
+export type { EnemyKeyword, EnemyStage };
 
 /**
  * Phase 68 — per-enemy override on the Phase 36 friendship-eligibility
@@ -323,4 +325,18 @@ export interface Enemy {
      * combat reveal so reading the foe's character pays off in the hidden read.
      */
     stanceHint?: string;
+    /**
+     * THE BIG NUMBERS REWRITE (2026-09-02) — the foe's combat keywords. These
+     * change the arithmetic of the fight (HIDE, SWIFT, BRUTAL, …) rather than
+     * its size, and are printed with reminder text on the enemy pane. See
+     * {@link EnemyKeyword}. Budget: 0-1 at simple/normal, 1-2 at elite, 2-3 at
+     * boss/unique.
+     */
+    keywords?: EnemyKeyword[];
+    /**
+     * THE BIG NUMBERS REWRITE (2026-09-02) — boss/unique STAGES: the VITAE (or
+     * round) thresholds at which this foe becomes a different fight. Checked at
+     * phase boundaries; each fires at most once. See {@link EnemyStage}.
+     */
+    stages?: EnemyStage[];
 }
