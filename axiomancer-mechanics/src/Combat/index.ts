@@ -183,6 +183,12 @@ export {
     cardReadPreview, projectCardImpact, getSignatureSkill, SIGNATURE_SKILLS, SIGNATURE_SKILL_LIST,
     READ_DAMAGE_MULT, CONVICTION_PER_UNPICKED_DIE, CONVICTION_PER_UNPICKED_WILD, CONVICTION_READ_WIN_BONUS,
     COLOR_MATCH_DAMAGE_BONUS,
+    // THE BIG NUMBERS REWRITE — the LIVE colour-match rule. Mobile's presenter
+    // must consume this, not the deprecated flat constant above, or the card
+    // face prints a bonus the engine does not apply.
+    colorMatchBonus,
+    COLOR_MATCH_BONUS_PCT,
+    COLOR_MATCH_BONUS_MIN,
     THREAT_WEAKEN_PER_ROLL, THREAT_DENY_AT, THREAT_WEAKEN_FLOOR,
     // depth epic — the read bites status in REAL units (P0-truth); the clock escalates threat
     READ_ADVANTAGE_INTENSITY_BONUS, READ_DISADVANTAGE_DURATION_PENALTY,
