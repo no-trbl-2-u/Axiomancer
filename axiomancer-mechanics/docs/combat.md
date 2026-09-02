@@ -4,9 +4,12 @@
 
 **Hazard-Pattern Combat (Spec 25) is the ONLY combat engine** — consumed by the mobile
 app, driven by the combat CLI (`npm run combat`), and exercised by the `/combat-playtest`
-and `/deck-tuning` loops. It is a card-and-dice system
-where the enemy's sole bar is HP; status effects are the efficient path to 0.
-See [§Hazard-Pattern Combat](#hazard-pattern-combat-spec-25) below for the full API surface.
+and `/deck-tuning` loops. It is a card-and-dice system where the enemy's sole bar is
+VITAE. Direct damage, damage-over-time, walls-and-reprisal, control, harvest and the
+mercy lines are all first-class ways to empty it — none is the doctrinal path (THE BIG
+NUMBERS REWRITE, 2026-09-02).
+See [§Hazard-Pattern Combat](#hazard-pattern-combat-spec-25) below for the full API surface,
+and [§Scale](#scale--the-numbers-the-big-numbers-rewrite-2026-09-02) for the live formulas.
 
 > **Removed:** the legacy turn-based resolver (`resolveCombatRound` and its companions
 > `determineEnemyAction` / `isCombatOngoing` / `determineCombatEnd` /
@@ -348,10 +351,13 @@ predicates directly. In Hazard-Pattern Combat the mercy choice is opened via
 
 ## Combat End Conditions
 
-In Hazard-Pattern Combat the enemy's sole bar is HP: `isDefeated(enemy)` is the
-win condition, player HP ≤ 0 is the loss, and the `friendship` outcome requires
-the explicit Befriend + `spare` authorization above. (The legacy
-`determineCombatEnd(state)` predicate was removed with the legacy driver.)
+In Hazard-Pattern Combat the enemy's sole bar is VITAE: `isDefeated(enemy)` is
+the main win condition, player VITAE ≤ 0 is the loss, and the `friendship`
+outcome requires the explicit Befriend + `spare` authorization above. The
+authored alt-wins (RELENT via PLEA, CONDEMN via CHARGE) end fights beside it —
+since 2026-09-02 they are ordinary design tools, not exceptions to a
+one-win-condition law. (The legacy `determineCombatEnd(state)` predicate was
+removed with the legacy driver.)
 
 ### Effects-Driven Resolution (Phase 125 — removed)
 
@@ -423,7 +429,7 @@ with the legacy driver.)
 | `getActiveRollModifier(target)` | Sums all `rollModifier` + `rollModifierPerIntensity × intensity` across active effects — flat roll-mod total consumed by the combat engine |
 | `canAct(effects, requestedStance?)` | Action-restriction gate — returns `{ canAct, resolvedStance, reason }` reflecting forced/blocked-stance and skipTurn constraints |
 | `isAlive(combatant)` | True if `health > 0` |
-| `isDefeated(combatant)` | True if `health <= 0` — the sole win condition for Hazard-Pattern Combat |
+| `isDefeated(combatant)` | True if `health <= 0` — the main win condition for Hazard-Pattern Combat |
 | `getHealthPercentage(combatant)` | `health / maxHealth` as a 0–1 fraction |
 | `updateEffectDuration(target, effectId)` | Decrements one effect's duration by 1 and removes it when it reaches 0 |
 | `getActiveEffectModifiers(effects)` | Aggregates all `ActiveEffect` modifiers into an `AggregatedEffectModifiers` object |
@@ -466,33 +472,28 @@ draws and plays is a card.
 > section. The two are NOT the same concept; when reading "card" in this
 > codebase, check which module it's coming from.
 
-## Status-Focused Card Doctrine, the Cards/Token System, and Wild-Die Growth
+## Card Doctrine, the Cards/Token System, and Wild-Die Growth
 
-Three locked product-owner decisions layered onto Hazard-Pattern Combat (full
-detail in the card/card library files themselves, not duplicated here):
+Product-owner decisions layered onto Hazard-Pattern Combat (full detail in the
+card library files themselves, not duplicated here):
 
-- **The strike schema was purged (Spec 32 v3, 2026-07-08); direct damage
-  itself is legal again (THE UNSHACKLING, 2026-08-08).** `basePower` /
-  `chipHp` were deleted from the `Card` schema entirely, not merely zeroed —
-  a card carrying either field is still a compile error, and a card wanting
-  raw HP damage authors its own field/verb through the full wiring checklist.
-  <!-- lexicon-ok: base-power, chip-hp --> `calculateSkillDamage` is kept only for call-site
-  compatibility (sim policies / projections still call it) and
-  unconditionally returns `0`. Every point of enemy HP in the CURRENT library
-  falls to DoT ticks, affliction-payoff bursts (RUPTURE / AMPLIFY / Conclusion), engine-
-  gated drips (BACKFIRE and persistent-card hooks), or reflect (THORNS /
-  RIPOSTE) — see [`specs/32-no-strike-card-library.md`](../specs/32-no-strike-card-library.md)
-  for the full accounting and the pricing model. The card library was
-  rewritten wholesale alongside the purge: **70 cards across 10
-  self-contained themes** (`erosion` / `oratory` / `foundry` / `penitent` /
-  `standstill` / `augury` / `tithe` / `grace` / `bastion` / `refrain` — see
-  `combat.starter-deck-presets.ts`), **exactly 30 keywords**, each card pricing
-  itself against a printed rank band (`cards.pricing.ts` + a hermetic
-  pricing-lint test). The pre-v3 library (49 cards, 126 effect ids, ~80
-  keywords — including the old execute/finisher set `pyrrhic-victory` /
-  `the-final-word` / `unmoved-mover` / `achilles-overtake`, all now retired)
-  was deleted with no rescues (owner rule); unknown ids drop gracefully from
-  any deck that still references them.
+- **Direct damage is a first-class verb (THE BIG NUMBERS REWRITE,
+  2026-09-02).** `DEAL` is a real `CardSpecialMechanic`
+  (`{ kind: 'deal'; amount; hits?; pierce? }`) that scales with the read, the
+  colour match and the combat-long scalers like every other verb; `hits`
+  makes it a multi-hit whose instances each trigger damage-instance DoTs and
+  each eat the foe's HIDE. The historical `basePower` / `chipHp` fields stay
+  deleted <!-- lexicon-ok: base-power, chip-hp --> — `DEAL` replaces them, it
+  does not restore them. `calculateSkillDamage` is kept only for call-site
+  compatibility (sim policies / projections still call it) and unconditionally
+  returns `0`. DoT ticks, affliction-payoff bursts (RUPTURE / REAP),
+  engine-gated drips (BACKFIRE, persistent-card hooks) and reflect (THORNS /
+  RIPOSTE) are all still live VITAE sources; they now compete with `DEAL`
+  rather than substituting for it. The prior no-strike accounting in
+  [`specs/32-no-strike-card-library.md`](../specs/32-no-strike-card-library.md)
+  is historical, as are its 70-card / 10-theme / "exactly 30 keywords" /
+  rank-band pricing rules. `cards.pricing.ts` survives as an **advisory**
+  scorer, not a gate.
 - **Rank / rarity / card-type axes (Spec 32 v3; spec 34 R-9/R-10/R-14).**
   Every card carries a `rank: CardRank` (1 Ash · 2 Tooth · 3 Splinter ·
   4 Rib · 5 Skull · 6 Saint — quality axis, orthogonal to `tier` which
@@ -518,33 +519,32 @@ detail in the card/card library files themselves, not duplicated here):
   Wild die to `CombatEncounterState.permanentWildDice` for the **rest of the
   encounter** — every subsequent turn's dice pool includes it (see
   `combat.engine.ts`'s `rollPermanentBonusDice` / `MAX_PERMANENT_WILD_DICE`).
-  The engine hook is still live; no card in the current 70-card library
-  authors it (the ten spec 32 v3 themes each carry their own build-around
-  instead) — a future card can pick it back up without engine work.
+  The engine hook is still live; no card in the current library authors it —
+  a future card can pick it back up without engine work.
 
-Full design intent for the 2026-07 status-stacking pass lived in an
-external "Master Spec" handed to the implementing agents and was never
-checked into `specs/`; `specs/32-no-strike-card-library.md` supersedes it
-as the canonical mechanical-structure doc for the current (spec 32 v3)
-library, alongside `specs/25-hazard-pattern-combat.md` for the underlying
-engine loop. `src/Cards/cards.types.ts` / `card-trigger.engine.ts` carry
-the most complete design rationale for the separate Cards system.
+The canonical design record for the current library is
+`plan/2026-09-02-big-numbers-overhaul.prompt.md` (the scale ladder, the keyword
+language, the enemy model) alongside
+[`specs/25-hazard-pattern-combat.md`](../specs/25-hazard-pattern-combat.md) for
+the underlying engine loop. `specs/32-no-strike-card-library.md` is HISTORICAL.
+`src/Cards/cards.types.ts` / `card-trigger.engine.ts` carry the most complete
+design rationale for the separate Cards system.
 
 ## Hazard-Pattern Combat (Spec 25)
 
 **The only combat engine** (mobile map encounters, the combat CLI, the `/combat-playtest` + `/deck-tuning` loops).
 A card-and-dice system structurally mirrored on the Hazard minigame: every verb is a
-combat card, and the enemy's **sole bar is HP** — dropping it to 0 (`isDefeated(enemy)`)
-is the only win condition. Status effects are the path the CURRENT library takes
-(see § above — the strike schema is purged, but direct damage became legal again
-with THE UNSHACKLING, 2026-08-08): DoT ticks, affliction-payoff bursts, engine-gated
-drips, and reflect are today's HP sources; control denies the enemy's telegraphed
-threat turn outright rather than merely discouraging a parallel damage track. Full
-design: [`specs/25-hazard-pattern-combat.md`](../specs/25-hazard-pattern-combat.md)
-for the engine loop, [`specs/32-no-strike-card-library.md`](../specs/32-no-strike-card-library.md)
-for the current card library (note: spec 25's two-pressure-track narrative was
-superseded by the HP-only model 2026-06-22, then the strike itself was removed
-2026-07-08 — `VISION.md` → Combat vision is canonical).
+combat card, and the enemy's **sole bar is VITAE** — dropping it to 0 (`isDefeated(enemy)`)
+is the main win condition, beside the authored alt-wins (Befriend, RELENT, CONDEMN).
+Direct damage (`DEAL`), DoT ticks, affliction-payoff bursts, engine-gated drips and
+reflect are all live VITAE sources and compete on merit; control denies the enemy's
+telegraphed threat turn outright rather than merely discouraging a parallel damage
+track. Full design:
+[`specs/25-hazard-pattern-combat.md`](../specs/25-hazard-pattern-combat.md) for the
+engine loop and `plan/2026-09-02-big-numbers-overhaul.prompt.md` for the current card
+and enemy model (note: spec 25's two-pressure-track narrative was superseded by the
+one-bar model 2026-06-22, and its status-primacy successor was repealed 2026-09-02 —
+`VISION.md` → Combat vision is canonical).
 
 The engine lives in `src/Combat/`:
 
@@ -579,14 +579,14 @@ The engine lives in `src/Combat/`:
 | `buildCombatSummary(state)` | End-of-fight `CombatSummary` with per-effect attribution rows. |
 | `simulateHazardPatternCombat(...)` | Monte-Carlo greedy bot returning `CombatSimStats` for balance runs. |
 | `CardEffectKind` | `'dot' \| 'control' \| 'none'` — the status-payload classification tag on every `CombatCard` (set by `classifyVerbClass`); drives the mobile card frame and deck-preset focus logic. The baseline GUARD defense card (`'brace-for-impact'`) is included in `STARTING_SKILL_IDS`. **`GOLD_CARD_IDS` / `isGoldCard` were deleted in Spec 32 v3** (2026-07-08) along with the three rare card ids they named — rarity is now derived from `rank` via `rankToRarity` (`rare` = rank 5-6), and the wild-die-auto-advantage-on-gold behavior was removed with them (a wild/x die is always neutral advantage now — see `resolveCardDieCost`). |
-| `CombatEncounterState`, `CombatCard`, `CombatThreatPhase`, `CombatOutcome`, `CombatSummary` | The core encounter type family. (`CombatPressureTracks` was REMOVED 2026-06-22 — HP is the sole win condition.) `CombatCard.skillId` is the canonical field for the backing learned-card id (`string \| null`; `null` for synthetic cards, if any are ever added again). `CombatOutcome`/`CombatVerbClass` still list `'retreat'` as a union member for now (no live code path can produce it — no escape card exists) rather than risk an unverified type-cascade removal. Use `skillId` to trace a projected card back to its source card. |
+| `CombatEncounterState`, `CombatCard`, `CombatThreatPhase`, `CombatOutcome`, `CombatSummary` | The core encounter type family. (`CombatPressureTracks` was REMOVED 2026-06-22 — VITAE is the one bar.) `CombatCard.skillId` is the canonical field for the backing learned-card id (`string \| null`; `null` for synthetic cards, if any are ever added again). `CombatOutcome`/`CombatVerbClass` still list `'retreat'` as a union member for now (no live code path can produce it — no escape card exists) rather than risk an unverified type-cascade removal. Use `skillId` to trace a projected card back to its source card. |
 | `CombatAttributionRow`, `LandedEffect` | Attribution sub-types for `buildCombatSummary`. `CombatAttributionRow` is a per-card row (`cardId`, `name`, `dotDamage`, `damageDealt`, `phases`); `LandedEffect` is a snapshot of one live effect used internally during attribution (`effectId`, `effect`, `active`, `target`). |
 
 ### Spec 26 / 26b — stance draft, the read, Conviction, Signature Skills, deckbuilding
 
 A depth layer built **on top of** the Spec 25 Hazard engine (it does not replace
 it). It turns each turn into a small read-and-commit decision and adds two
-progression levers, keeping status effects the win path.
+progression levers.
 
 > "Spec 26b" (stance draft / Conviction / Signature Skills / deckbuilder) is
 > in-flight scaffolding carried in via PR #184; it has no spec file of its own
@@ -595,19 +595,33 @@ progression levers, keeping status effects the win path.
 
 - **Stance draft + the read (dice-law rework 2026-07-09).** Each turn rolls
   `TURN_DICE_COUNT` (**3**) dice — an honest roll, no stance-die guarantee; the
-  player **drafts** one as their stance. **THE COLOR LAW:** a die can only power
-  a card of ITS color — WILD (rendered gold) is the sole exception and matches
-  every card; an off-color play hard-fizzles in `playBottomAction`. Every
-  unpicked die converts to Conviction tokens: colored `+CONVICTION_PER_UNPICKED_DIE`
-  (1), wild `+CONVICTION_PER_UNPICKED_WILD` (2), dead X `+0` (a card effect —
-  `float_x_die`, TRANSMUTE — can turn a tray X into a wild FLOATING die instead).
+  player **drafts** one as their stance. Every unpicked die converts to
+  Conviction tokens: colored `+CONVICTION_PER_UNPICKED_DIE` (1), wild
+  `+CONVICTION_PER_UNPICKED_WILD` (2), dead X `+0` (a card effect —
+  `float_x_die`, the FORGE X→WILD sense — can turn a tray X into a wild
+  floating die instead).
   The enemy's phase stance is hidden behind a thematic hint; the drafted die's
   color is the player's **read** of it. A winning read (`resolveRead` →
-  `advantage`) multiplies the HP damage of cards played that turn, and a color
-  match earns a flat `COLOR_MATCH_DAMAGE_BONUS` (now near-unconditional under
-  the color law — a fold-in candidate). Floating dice (spec 32 v3 §5) bypass the
-  one-die draft entirely: all of them may be spent in one round, each is
-  consumed forever, and they never bank tokens.
+  `advantage`) multiplies the damage of cards played that turn
+  (`READ_DAMAGE_MULT` 1.5 / 1.0 / 0.5). Floating dice bypass the one-die draft
+  entirely: all of them may be spent in one round, each is consumed forever, and
+  they never bank tokens.
+- **The colour match is a MECHANIC, not a law.** A die powers a card of ITS
+  colour — WILD (rendered gold) matches every card; an off-colour play fizzles
+  in `playBottomAction` (`combat.engine.ts`). This is the default *rule of the
+  dice economy*, not a design law: it was demoted from "THE COLOR LAW" by THE
+  BIG NUMBERS REWRITE (2026-09-02), which kept the mechanic because it is what
+  makes a preset's exact aspect thirds mean anything, while releasing the ban on
+  exceptions. A keyworded off-colour play — an "ANY" card, an
+  off-colour-at-half line — is legal to author if a design wants one.
+  **Reward, rescaled 2026-09-02:** a colour-matched (or Wild) die now adds
+  `colorMatchBonus(base)` = **+25% of the printed magnitude, minimum +2,
+  rounded** (`COLOR_MATCH_BONUS_PCT = 0.25`, `COLOR_MATCH_BONUS_MIN = 2`) to a
+  damage / guard / barrier number, replacing the old flat +3. A percentage
+  keeps the match worth making on a GUARD 40 card as well as a GUARD 8 one.
+  `COLOR_MATCH_DAMAGE_BONUS = 3` survives only as a deprecated alias for
+  unmigrated call sites — call `colorMatchBonus()`. On a status card the match
+  still adds `COLOR_MATCH_STATUS_DURATION_BONUS` (1) turn of duration instead.
 - **Conviction (◆).** The generic token pool that accrues per unused rolled die
   (see the color law above) and from winning the read
   (`CONVICTION_READ_WIN_BONUS`). It funds Signature Skills.
@@ -633,14 +647,14 @@ progression levers, keeping status effects the win path.
 | `SIGNATURE_SKILLS` / `SIGNATURE_SKILL_LIST` / `SIGNATURE_KITS` / `signaturesForArchetype` / `playerArchetype` | The signature kit catalogue + per-archetype selection. |
 | `rollCombatCardRewards` / `addRewardCard` / `COMBAT_REWARD_POOL` | Post-combat deckbuilder draft + persist. |
 | `unlockSkillViaDilemma` / `STARTING_SKILL_ID` / `STARTING_SKILL_IDS` | Forward hook for ethical-dilemma card unlocks; the new-player starting card (`STARTING_SKILL_ID = 'slippery-slope'`). `STARTING_SKILL_IDS` is the preferred array (`['slippery-slope', 'brace-for-impact']`) that also grants the baseline GUARD defense card — use this to seed `knownSkills` for a new character. |
-| `READ_DAMAGE_MULT`, `CONVICTION_PER_UNPICKED_DIE`, `CONVICTION_PER_UNPICKED_WILD`, `CONVICTION_READ_WIN_BONUS`, `COLOR_MATCH_DAMAGE_BONUS`, `TURN_DICE_COUNT` | Tuning constants for the read / Conviction / draft economy. `TURN_DICE_COUNT` = 3 and wild banks double since the dice-law rework (2026-07-09). (`READ_PRESSURE_MULT` / `COLOR_MATCH_PRESSURE_BONUS` were renamed 2026-06-22 on HP-model landing.) |
+| `READ_DAMAGE_MULT`, `CONVICTION_PER_UNPICKED_DIE`, `CONVICTION_PER_UNPICKED_WILD`, `CONVICTION_READ_WIN_BONUS`, `colorMatchBonus` / `COLOR_MATCH_BONUS_PCT` / `COLOR_MATCH_BONUS_MIN`, `TURN_DICE_COUNT`, `CONVICTION_CAP` | Tuning constants for the read / Conviction / draft economy. `READ_DAMAGE_MULT` = 1.5 / 1.0 / 0.5 (advantage / neutral / disadvantage), `TURN_DICE_COUNT` = 3, wild banks double, `CONVICTION_CAP` = 12. The colour-match reward is `colorMatchBonus(base)` = +25%, minimum +2 (2026-09-02); `COLOR_MATCH_DAMAGE_BONUS = 3` is a deprecated flat alias. |
 | `rollTurnDice` / `dieHasStance` / `deriveIntentType` | Draft-pool roll + stance helpers. |
-| `AUTHORED_THREAT_ENEMY_IDS` | Read-only array of every enemy slug that has a deterministic authored threat sequence (i.e. keys of `combat.threat-sequences.ts`). Length = 61 at `v0.32.0`. |
+| `AUTHORED_THREAT_ENEMY_IDS` | Read-only array of every enemy slug with a deterministic authored threat sequence — the keys of `AUTHORED_THREAT_SEQUENCES`, which is now compiled from `ENEMY_DECKS` (`combat.enemy-decks.ts`) rather than hand-authored, so it is exactly "every enemy that has a deck". Read the array; do not pin its length. |
 | `getThreatSequence(enemy)` | Returns the threat phase sequence for an enemy: explicit `enemy.threatSequence` wins; otherwise an authored sequence keyed by enemy id; otherwise the generated default. |
 | `generateDefaultThreatSequence(enemy)` | Generates a 3-phase fallback threat sequence from the enemy's dominant stance, rotating through Heart / Body / Mind. Used automatically by `getThreatSequence` when no authored sequence exists. |
 | `rerollSpentDice(state, rng?)` / `hasRerollableDice(state)` / `dieIsRerollable(die)` | PR #190 — partial Press Fate re-roll: re-rolls only spent/exhausted + dead `x`-face dice, leaving usable dice in play. A no-op (refunds Conviction) when nothing is rerollable. |
 | `THREAT_WEAKEN_PER_ROLL` / `THREAT_DENY_AT` / `THREAT_WEAKEN_FLOOR` | Soft-control and stat-debuff threat tunables (0.33.0). Each point of enemy roll penalty (from confusion, fear, blind, slow, accuracy/attack-down etc.) reduces the incoming hit by `THREAT_WEAKEN_PER_ROLL` (default 0.06). When the cumulative roll penalty reaches `THREAT_DENY_AT` (default 8), the turn is fully denied (same as hard control). `THREAT_WEAKEN_FLOOR` (default 0.4) clamps the minimum damage multiplier for a weakened-but-not-denied enemy. Read these to display soft-control thresholds in the UI. |
-| `COMBAT_DECK_PRESETS` / `COMBAT_DECK_PRESET_ORDER` / `listDeckPresets()` / `getDeckPreset(id)` / `buildPresetDeck(id)` | The ten spec 32 v3 themed preset decks (`src/Combat/combat.starter-deck-presets.ts`): Erosion, Oratory, Foundry, Penitent, Standstill, Augury, Tithe, Grace, Bastion, Refrain — each a fixed 15-card recipe (4/4/2/2/1/1/1: two commons ×4, two uncommons ×2, the theme's rare spell + oath + hex ×1), strictly self-contained with zero cross-theme card overlap. Originally a PR #190 five-preset lineup (Erosion, Saturation, Bulwark, Onslaught, Generalist); the names/functions were kept but the content and count were fully replaced. `buildPresetDeck` appends no escape card — there is no in-combat retreat — and is ready to feed `initializeCombatEncounter`. |
+| `COMBAT_DECK_PRESETS` / `COMBAT_DECK_PRESET_ORDER` / `listDeckPresets()` / `getDeckPreset(id)` / `buildPresetDeck(id)` | The three campaign-stage preset decks (`src/Combat/combat.starter-deck-presets.ts`): `threadbare` ("The Threadbare Office", early), `pilgrim` ("The Pilgrim's Burden", mid), `apostate` ("The Apostate's Canon", late), plus `PRESET_LINEAGE` describing the removals/additions that walk one rung to the next. **The one surviving deck law is exact aspect thirds** — every preset splits evenly across body/mind/heart by `philosophicalAspect`. Deck sizes, copy limits and the lineage multiset are no longer laws (2026-09-02). `buildPresetDeck` appends no escape card — there is no in-combat retreat — and is ready to feed `initializeCombatEncounter`. |
 | `CombatDeckPreset`, `CombatDeckFocus` | `CombatDeckPreset` describes a single named preset deck entry (id, name, theme, focus, description, cardIds). `CombatDeckFocus` is the discriminated string union of the (now six) coarse design-lever tags used by draft/sim-policy consumers — `'dot' \| 'control' \| 'utility' \| 'damage' \| 'rush-execute' \| 'balanced'` (not the old per-preset name union). Both are importable as `import type { CombatDeckPreset, CombatDeckFocus } from 'axiomancer-mechanics'`. |
 | `CardDieCost` | Die-cost helper type — `{ cost: number; advantage: boolean }` returned by `resolveCardDieCost` and `cardDieCostPreview`. Importable as `import type { CardDieCost } from 'axiomancer-mechanics'`. |
 | `CombatIntentType`, `CombatReadResult`, `SignatureSkill`, `SignatureSkillId`, `SignatureSkillKind`, `PlayerArchetype` | The depth-layer type family. |
@@ -671,12 +685,77 @@ side predicates return `false` here and are resolved at execution time inside `e
 | `buildCombatDeck(player, flags?)` | Extended signature (Phase 169). When `flags` contains loadout entries the curated list is used; otherwise falls back to `player.knownSkills`. Reward cards and the synthetic baseline are always appended. |
 | `isCombatSynergySatisfied(card, enemyEffects)` | Pure read-only combo-live helper. Returns `true` when the card's `CardSynergy.predicate` (target-side) is satisfied by the enemy's current `ActiveEffect[]`. Use this to decide whether to render a combo glow on a card in hand. |
 
-The whole roster is now authored for this system: `combat.threat-sequences.ts`
-ships a deterministic, fully-telegraphed threat pattern for all 61 library
-enemies (each phase declares a hidden stance, a damage weight, and optional
-threat debuffs). `combat.threat.ts` scales threat damage by level + difficulty
-(`DIFFICULTY_MULT`), and status DoT erodes the enemy's sole HP bar far faster
-than the weak basic strike — status is the efficient win path.
+The whole roster is authored for this system: `combat.threat-sequences.ts` ships
+a deterministic, fully-telegraphed threat pattern for the library enemies (each
+phase declares a hidden stance, a damage weight, and optional threat debuffs),
+and `combat.threat.ts` sizes each telegraph from level, difficulty, phase index
+and the phase's own weight — see §Scale below for the formula.
+
+### Scale — the numbers (THE BIG NUMBERS REWRITE, 2026-09-02)
+
+The scale reset landed 2026-09-02. Design intent and the per-rank card ladder
+live in `plan/2026-09-02-big-numbers-overhaul.prompt.md` §5; the live formulas
+are here.
+
+**Player VITAE** (`src/Utils/index.ts` `calculateMaxHealth`,
+`src/Game/game-mechanics.constants.ts`):
+
+```
+PLAYER_VITAE = PLAYER_VITAE_BASE + (body + heart + mind) × HEALTH_PER_STAT
+             = 50 + stats × 8
+```
+
+The flat base keeps a level-1 pilgrim alive long enough to see a second
+telegraph; the per-stat term is what progression buys. Level influences VITAE
+through the authored stat budget, not a second multiplicative factor.
+Reference points: level 1 ≈ 100, level 3 ≈ 120, level 18 ≈ 350.
+
+**Enemy VITAE** (`src/Enemy/index.ts`). An enemy may author `vitae` directly —
+every boss and unique does. When absent it derives:
+
+```
+vitae = round((ENEMY_VITAE_BASE + ENEMY_VITAE_PER_LEVEL × level) × ENEMY_VITAE_MULT[difficulty])
+      = round((30 + 18 × level) × mult)
+```
+
+| difficulty | `ENEMY_VITAE_MULT` |
+|---|---|
+| simple | 0.6 |
+| normal | 1.0 |
+| elite | 1.6 |
+| boss | 2.5 |
+| unique | 3.2 |
+
+Reference points: L1 normal ≈ 48, L7 elite ≈ 250, L6 boss ≈ 345, L13 normal ≈
+264, L18 boss ≈ 885, L110 unique ≈ 6,432. `baseStats` still drives stance procs,
+derived combat stats and befriend logic, but no longer drives VITAE — so the
+difficulty bands separate cleanly and a boss can be a wall without a grotesque
+stat budget.
+
+**Threat damage budget** (`src/Combat/combat.threat.ts` `threatDamageBudget`):
+
+```
+damage = max(4, round((THREAT_BASE + THREAT_PER_LEVEL × max(1, level))
+                      × DIFFICULTY_MULT × (1 + 0.2 × phaseIndex) × damageWeight))
+       = max(4, round((6 + 2.5 × level) × dMult × (1 + 0.2 × phaseIndex) × weight))
+```
+
+`DIFFICULTY_MULT`: simple 0.7 · normal 0.92 · elite 1.08 · boss 1.5 · unique
+1.45. Authored `damageWeight` now ranges roughly 0.8–1.6. **`THREAT_DAMAGE_SCALE`
+is RETIRED** — the old global 1.7 fudge factor was folded into the budget so a
+telegraph's printed number IS the number the engine applies. The constant is
+pinned at `1` and exported only so unmigrated callers stay honest; delete it
+once nothing references it. The escalation clock
+(`THREAT_ESCALATION_*`, below) still multiplies on top.
+
+**Pip cashing.** `PIP_INTENSITY_BONUS` = **2** intensity per pip spent (was 1);
+`PIP_GUARD_BONUS` = **5** Guard per pip on a defend card (was 2) — a ripened
+die has to be worth banking against GUARD lines that now open at 8 and reach 60.
+
+**Uncapped payoffs.** RUPTURE's 0.60 × maxVITAE cap and the ALL-spender caps
+were repealed; a fed REAP-ALL or RUPTURE-ALL is expected to reach the 100–300
+band. (`RUPTURE_CAP_FRACTION` is still present in `src/Combat/effects.ts` — see
+`docs/keyword-atlas.md` § "Known drift".)
 
 ### 0.34.0 — Status-depth epic: HP-model selectors + tunable scalars
 
@@ -692,7 +771,7 @@ EXECUTE, VULNERABLE, SIPHON) and by mobile for hit-preview rendering.
 | `getDistinctDebuffCount(target)` | Counts the number of distinct active debuff effect types on the target. Drives COMPOUND damage scaling (capped at `COMPOUND_COUNT_CAP`). |
 | `getDistinctControlCount(target)` | Counts the number of distinct active control effects. Drives DISRUPT — when ≥ `DISRUPT_DENY_AT` the target's next action is denied. |
 | `VULNERABLE_MAX_MULT` | Maximum incoming-damage multiplier cap when Vulnerable is active. |
-| `RUPTURE_CAP_FRACTION` / `ruptureBurstCap(maxHp)` | RUPTURE burst cap: `round(fraction × enemy max HP)` — a pure fraction, no flat floor (spec 32 §12 item 5). ALL-spenders (REAP-ALL, spend-all-pips payoffs) are uncapped. |
+| `RUPTURE_CAP_FRACTION` / `ruptureBurstCap(maxHp)` | RUPTURE burst cap: `round(fraction × enemy max VITAE)`. **The cap is repealed** (2026-09-02) — payoffs are uncapped by design; the constant is still 0.60 in `src/Combat/effects.ts` and is drift, not doctrine. |
 | `COMPOUND_COUNT_CAP` | Maximum distinct debuff count credited by COMPOUND. |
 | `DISRUPT_DENY_AT` | Distinct-control-effect threshold at which DISRUPT denies the next enemy action. |
 | `EXECUTE_DAMAGE_FRACTION` | Fraction of enemy max HP dealt by EXECUTE when the threshold is met. |
@@ -730,24 +809,26 @@ consumers read them to render the escalation clock UI (e.g. showing current
 multiplier vs. cap, surfacing the boss-tier escalation warning, and flagging
 the next enchant/curse round).
 
-### Phase 167/168 — Sim status-engagement metrics + AMPLIFY mechanic + Conclusion sig
+### Phase 167/168 — Sim damage-source metrics + AMPLIFY mechanic + Conclusion sig
 
 Phase 167 extends `CombatSimStats` (returned by `simulateHazardPatternCombat`)
-with five doctrine-critical fields that make "low status-engagement = balance
-failure" mechanically enforceable by the balance loops. Phase 168 adds the AMPLIFY
-burst mechanic (reads pending DoT × multiplier without consuming effects). The
-Conclusion sig-card redesign adds `CONCLUDE_DMG_PER_STACK` for the BODY
-archetype's stack-based finisher.
+with five damage-source fields. They were authored as doctrine witnesses for the
+status-primacy doctrine; **that doctrine was repealed 2026-09-02** and none of
+them is a pass/fail target any more. They survive as *descriptive* telemetry —
+"where did the VITAE go" — for reading a playtest, not for grading one. Phase 168
+adds the AMPLIFY burst mechanic (reads pending DoT × multiplier without consuming
+effects). The Conclusion sig-card redesign adds `CONCLUDE_DMG_PER_STACK` for the
+BODY archetype's stack-based finisher.
 
 #### CombatSimStats extensions (Phase 167)
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `dotHpFraction` | `number` | Fraction of total enemy HP loss delivered by DoT ticks (0–1). Doctrine witness: DoT should be the primary damage source in status builds. |
-| `strikeFraction` | `number` | Fraction of total enemy HP loss from direct strikes (excluding mechanic bursts) (0–1). |
-| `mechanicBurstFraction` | `number` | Fraction of total enemy HP loss from mechanic bursts (rupture/execute/compound/conclude) (0–1). |
-| `guardMitigatedFraction` | `number` | Guard availability ratio: guard present when enemy threat fired / (guard + player HP damage taken). Proxy for how often GUARD was relevant. |
-| `avgActiveEffectsPerPhase` | `number` | Mean count of active effects on the enemy at the start of each threat phase. Doctrine witness: a loaded status board = the engine working as intended. |
+| `dotHpFraction` | `number` | Fraction of total enemy VITAE loss delivered by DoT ticks (0–1). Descriptive only since 2026-09-02. |
+| `strikeFraction` | `number` | Fraction of total enemy VITAE loss from direct damage (excluding mechanic bursts) (0–1). |
+| `mechanicBurstFraction` | `number` | Fraction of total enemy VITAE loss from mechanic bursts (rupture/execute/compound/conclude) (0–1). |
+| `guardMitigatedFraction` | `number` | Guard availability ratio: guard present when enemy threat fired / (guard + player VITAE damage taken). Proxy for how often GUARD was relevant. |
+| `avgActiveEffectsPerPhase` | `number` | Mean count of active effects on the enemy at the start of each threat phase. |
 
 `CombatSimPolicyId` (`'greedy' | 'blind'`) is the policy discriminator passed to
 `simulateHazardPatternCombat`; export it as a named type when you need to annotate

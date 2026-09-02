@@ -39,17 +39,17 @@ describe('deriveStats', () => {
 });
 
 describe('calculateMaxHealth', () => {
-  it('body 3 heart 4 mind 2 → (3 + 4 + 2) × 5 = 45', () => {
-    expect(calculateMaxHealth(1, { body: 3, heart: 4, mind: 2 })).toBe(45);
+  it('body 3 heart 4 mind 2 → 50 + (3 + 4 + 2) × 8 = 122', () => {
+    expect(calculateMaxHealth(1, { body: 3, heart: 4, mind: 2 })).toBe(122);
   });
 
   it('includes every base stat in max health', () => {
-    expect(calculateMaxHealth(15, { body: 1, heart: 34, mind: 40 })).toBe(375);
+    expect(calculateMaxHealth(15, { body: 1, heart: 34, mind: 40 })).toBe(650);
   });
 
   it('does not multiply health by level because stat totals already encode level budget', () => {
-    expect(calculateMaxHealth(2, { body: 2, heart: 2, mind: 2 })).toBe(30);
-    expect(calculateMaxHealth(20, { body: 2, heart: 2, mind: 2 })).toBe(30);
+    expect(calculateMaxHealth(2, { body: 2, heart: 2, mind: 2 })).toBe(98);
+    expect(calculateMaxHealth(20, { body: 2, heart: 2, mind: 2 })).toBe(98);
   });
 });
 

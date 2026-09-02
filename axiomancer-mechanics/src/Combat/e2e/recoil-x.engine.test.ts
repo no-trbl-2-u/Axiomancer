@@ -1,10 +1,12 @@
 /**
  * Hermetic E2E — RECOIL X, the first chosen X-cost (WS7.2, spec 32 §12
  * item 5), LIVE through the HP-model combat engine via `blank-indenture`
- * (Blank Indenture: RECOIL X of your choosing, min 3 → POISON at half of X,
- * rounded up). Profane-canon rework (2026-08-08): the mechanic's carrier
- * moved from the `chooseX-vein` sandbox set (the-open-vein) into the LIBRARY
- * itself — same engine clamp, poisonPerX now 0.5.
+ * (Blank Indenture: RECOIL X of your choosing, min 6 → POISON 1 per VITAE
+ * paid). Profane-canon rework (2026-08-08): the mechanic's carrier moved from
+ * the `chooseX-vein` sandbox set (the-open-vein) into the LIBRARY itself.
+ * THE BIG NUMBERS REWRITE (2026-09-02) rescaled the card: min 3 → 6 and
+ * poisonPerX 0.5 → 1. The landed stack is still subject to the engine-global
+ * `MAX_EFFECT_INTENSITY` ceiling, which bites above X = 10.
  *
  * Pins the engine clamp (X ∈ [min, affordable], affordable = live HP − 1,
  * floored at min), the POISON payoff scaling with the paid X, and the WS7.2
@@ -27,13 +29,14 @@ import {
     handCards, recoilXRange,
 } from '../combat.engine';
 import { COMBAT_SIM_POLICIES } from '../combat.sim-policies';
+import { MAX_EFFECT_INTENSITY } from '../../Game/game-mechanics.constants';
 import type { CombatDieColor, CombatEncounterState, CombatTransition } from '../combat.encounter.types';
 
 afterEach(() => { vi.restoreAllMocks(); });
 
 const VEIN = 'blank-indenture';
-const MIN_X = 3;          // the card's printed minimum
-const POISON_PER_X = 0.5; // the card's printed payoff rate (half of X, rounded up)
+const MIN_X = 6;        // the card's printed minimum (`recoil_x.min`)
+const POISON_PER_X = 1; // the card's printed payoff rate (`recoil_x.poisonPerX`)
 
 function makePlayer(cards: string[], effects: ActiveEffect[] = []): Character {
     const p = deepClone(Player);
@@ -98,14 +101,14 @@ function lcg(seed: number): () => number {
 // ── Engine clamp + payoff scaling ────────────────────────────────────────────
 
 describe('RECOIL X — the engine clamps X and scales the POISON payoff', () => {
-    it('absent chosenX plays the printed minimum (RECOIL 3 → POISON i2)', () => {
+    it('absent chosenX plays the printed minimum (RECOIL 6 → POISON i6)', () => {
         mockSequentialRng(0.05);
         const state = openAndDraft(makePlayer([VEIN]), makeEnemy(400));
         const hpBefore = state.player.health;
         const res = playVein(state);
         expect(recoilPaid(res)).toBe(MIN_X);
         expect(hpBefore - res.state.player.health).toBe(MIN_X);
-        expect(poisonIntensity(res)).toBe(Math.ceil(MIN_X * POISON_PER_X)); // 2
+        expect(poisonIntensity(res)).toBe(Math.ceil(MIN_X * POISON_PER_X)); // 6
     });
 
     it('clamps a chosenX below the printed minimum up to it', () => {
@@ -113,7 +116,7 @@ describe('RECOIL X — the engine clamps X and scales the POISON payoff', () => 
         const state = openAndDraft(makePlayer([VEIN]), makeEnemy(400));
         const res = playVein(state, 1);
         expect(recoilPaid(res)).toBe(MIN_X);
-        expect(poisonIntensity(res)).toBe(Math.ceil(MIN_X * POISON_PER_X)); // 2
+        expect(poisonIntensity(res)).toBe(Math.ceil(MIN_X * POISON_PER_X)); // 6
     });
 
     it('clamps a greedy chosenX to affordability (live HP − 1) — the play never self-kills', () => {
@@ -124,19 +127,31 @@ describe('RECOIL X — the engine clamps X and scales the POISON payoff', () => 
         const res = playVein(state, 50);
         expect(recoilPaid(res)).toBe(9);
         expect(res.state.player.health).toBe(1);
-        expect(poisonIntensity(res)).toBe(Math.ceil(9 * POISON_PER_X)); // 5
+        expect(poisonIntensity(res)).toBe(Math.ceil(9 * POISON_PER_X)); // 9
     });
 
-    it('POISON scales with the paid X: ceil(X × 0.5) intensity', () => {
+    it('POISON scales with the paid X: ceil(X × poisonPerX) intensity', () => {
         mockSequentialRng(0.05);
         const state = openAndDraft(makePlayer([VEIN]), makeEnemy(400));
         const hpBefore = state.player.health;
-        const res = playVein(state, 12);
-        expect(recoilPaid(res)).toBe(12);
-        expect(hpBefore - res.state.player.health).toBe(12);
-        expect(poisonIntensity(res)).toBe(6);
+        const res = playVein(state, 9);
+        expect(recoilPaid(res)).toBe(9);
+        expect(hpBefore - res.state.player.health).toBe(9);
+        expect(poisonIntensity(res)).toBe(Math.ceil(9 * POISON_PER_X));
         // The blood price feeds the spec 32 §12 #4 RECOIL ledger too.
-        expect(res.state.recoilPaidThisTurn).toBe(12);
+        expect(res.state.recoilPaidThisTurn).toBe(9);
+    });
+
+    it('the landed stack still obeys the engine-global intensity ceiling', () => {
+        mockSequentialRng(0.05);
+        const state = openAndDraft(makePlayer([VEIN]), makeEnemy(400));
+        const hpBefore = state.player.health;
+        const res = playVein(state, 20);
+        // The blood price is NOT capped — you pay every point you chose …
+        expect(recoilPaid(res)).toBe(20);
+        expect(hpBefore - res.state.player.health).toBe(20);
+        // … but a single affliction never stacks past MAX_EFFECT_INTENSITY.
+        expect(poisonIntensity(res)).toBe(MAX_EFFECT_INTENSITY);
     });
 });
 

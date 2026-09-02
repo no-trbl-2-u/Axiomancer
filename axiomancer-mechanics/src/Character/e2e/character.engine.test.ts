@@ -33,6 +33,7 @@ import {
 import {
     STAT_MULTIPLIERS,
     RESOURCE_MULTIPLIERS,
+    PLAYER_VITAE_BASE,
     EXPERIENCE_PER_LEVEL,
 } from '../../Game/game-mechanics.constants';
 import type { Equipment } from '../../Items/types';
@@ -114,10 +115,10 @@ describe('createCharacter — derivation contracts', () => {
         expect(ch.nonCombatStats.mentalTest).toBe(2 * STAT_MULTIPLIERS.TEST);
     });
 
-    it('sets maxHealth = sum(body, heart, mind) × HEALTH_PER_STAT and seeds health to full', () => {
+    it('sets VITAE = PLAYER_VITAE_BASE + sum(body, heart, mind) × HEALTH_PER_STAT and seeds it full', () => {
         mockSequentialRng(0.5);
         const ch = buildPlayer({ level: 3 });
-        const expected = (3 + 4 + 2) * RESOURCE_MULTIPLIERS.HEALTH_PER_STAT;
+        const expected = PLAYER_VITAE_BASE + (3 + 4 + 2) * RESOURCE_MULTIPLIERS.HEALTH_PER_STAT;
         expect(ch.maxHealth).toBe(expected);
         expect(ch.health).toBe(expected);
     });
