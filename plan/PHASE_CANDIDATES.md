@@ -49,7 +49,7 @@
 
 ## Pending
 
-### [score 8.5] In-house crash capture — global error/promise-rejection handlers + next-launch crash prompt (mobile)
+### ~~[score 8.5] In-house crash capture — global error/promise-rejection handlers + next-launch crash prompt (mobile)~~ PROMOTED to Phase 77 via /oversight 2026-09-02
 - proposed: 2026-09-01, expand pass 10
 - source signals:
   - `plan/PHASE_CANDIDATES.md`'s own "In-house crash capture" row (below,
@@ -1220,6 +1220,43 @@
   touched.
 
 ## Promoted
+
+### Art-pass: open-source art sourcing research for W5 portraits (2026-09-02)
+- promoted: 2026-09-02 via `/oversight`, as **Phase 78**. Direct T
+  instruction, not an `/expand`-filed candidate — no source row to
+  strike.
+- origin: raised during the W3 loop-call walkthrough on the W5
+  silhouette-portrait call (game-icons.net silhouettes, a deliberate
+  departure from the 52-painting style since that license is
+  UNRESOLVED). T ratified the silhouette call as filed but wants a
+  standing sourcing process going forward instead of ad hoc per-enemy
+  picks.
+- scope, T's own words: "create an 'art-pass' phase where an agent
+  researches online for some open source art that fits the theme.
+  Gather two candidates from a few sources, and then present them
+  during the next oversight. Once I decide, that'll be our new art
+  source until we end up generating our own."
+- shape: RESEARCH-AND-PRESENT, not auto-ship. The phase's deliverable
+  is a short report (candidate sources + license/provenance for each,
+  2 candidates minimum, sourced from a few different sites) surfaced as
+  a `[loop-call]`-style row in `plan/AUDIT.md` awaiting the next
+  `/oversight`'s pick — no art gets wired into the game or committed as
+  the standing source until T selects one. Supersedes the ad hoc
+  silhouette sourcing from the W3/W5 drain until T picks a source, and
+  stands as the source going forward until in-house art generation
+  (Phase 73's pipeline) is ready to take over.
+
+### In-house crash capture — global handlers + next-launch crash prompt (2026-09-02)
+- promoted: 2026-09-02 via `/oversight`, as **Phase 77**.
+- source row (stays in `## Pending` above, struck through): "[score 8.5]
+  In-house crash capture — global error/promise-rejection handlers +
+  next-launch crash prompt (mobile)" (proposed 2026-09-01, expand pass
+  10). Full rationale and proposed scope live there — carry it into the
+  Phase 77 brief rather than re-deriving.
+- why now: the owner ruled the scope on 2026-07-20 and it sat unpromoted
+  six weeks while two independent user crash reports (both [HIGH] in
+  `plan/CRITIQUE.md`) went unreproduced by e2e hunting; T confirmed via
+  `/oversight` questionnaire ("Promote top candidate").
 
 ### Lexicon lint: catch retired-doctrine prose, not just retired identifiers (2026-08-20)
 - promoted: 2026-08-20 via `/oversight`, as **Phase 66**.

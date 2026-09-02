@@ -2563,6 +2563,26 @@ on pickup):**
       pointer. The classifier block from the 2026-08-28 AUDIT row did
       not reproduce this tick — `Edit()` on `.claude/commands/*.md`
       succeeded directly — `docs(.claude): lift superseded OPEN GATE wall text from tuning commands — phase G1`
+- [ ] Phase 77 — In-house crash capture (mobile): global
+      `ErrorUtils.setGlobalHandler` (native) / `window.onerror` (web)
+      feeding the existing `error` log domain + `flushLogTail()`; an
+      unhandled-promise-rejection hook, same sink; a next-launch check
+      of the persisted crash tail offering "previous session crashed —
+      view/copy report", reusing `ErrorBoundary`'s report rendering
+      (not the dev-only diagnostics panel). No third-party SDK. Per the
+      2026-07-20 owner ruling, promoted via `/oversight` 2026-09-02 —
+      see `plan/PHASE_CANDIDATES.md` § Promoted for full scope/rationale.
+- [ ] Phase 78 — Art-pass: open-source art sourcing research for W5
+      portraits. Agent researches the open web for CC/open-source art
+      fitting each remaining W5 enemy's theme, gathers >=2 candidates
+      from a few different sources with license/provenance recorded per
+      candidate, files the findings as a `[loop-call]`-style row in
+      `plan/AUDIT.md`. RESEARCH-AND-PRESENT only — no art wired or
+      committed as the standing source until T picks one at the next
+      `/oversight`; the pick then stands as the art source until Phase
+      73's in-house generation pipeline is ready. Direct T instruction
+      via `/oversight` 2026-09-02 — see `plan/PHASE_CANDIDATES.md` §
+      Promoted for full scope.
 
 > **After the queue drains:** `/march` transitions to `/iterate`
 > — draining `plan/AUDIT.md` + `plan/CRITIQUE.md`, doc-drift,
@@ -2902,6 +2922,25 @@ See the status rows above; generate briefs on demand.
   continent?"* T's stated reason: content growth has been requested
   repeatedly and the world still shows one reachable continent.
   Resulting commit: this one (W1+W2 implemented in the same session).
+
+- **2026-09-02** — actor: **T via `/oversight`** (Claude Code on the
+  web, branch `claude/oversight-yz12cc`). Action: **added Phase 77**
+  (in-house crash capture, promoted from the `[score 8.5]` candidate
+  filed by `/expand` pass 10) and **added Phase 78** (art-pass:
+  open-source art sourcing research for W5 portraits, a fresh row with
+  no prior candidate). Confirmed T's request: yes — Phase 77 via the
+  questionnaire's "Promote top candidate" answer; Phase 78 via T's own
+  instruction during the W3 loop-call walkthrough, near-verbatim:
+  *"create an 'art-pass' phase where an agent researches online for
+  some open source art that fits the theme. Gather two candidates from
+  a few sources, and then present them during the next oversight. Once
+  I decide, that'll be our new art source until we end up generating
+  our own."* T's stated reason: Phase 77 closes a six-week-old
+  unpromoted owner ruling that two independent [HIGH] user crash
+  reports have since made urgent; Phase 78 replaces ad hoc per-enemy
+  art sourcing (the W3/W5 silhouette call) with a standing
+  research-and-present process. Resulting commit: this one; briefs
+  generate on demand per the Status block scope lines.
 
 ## Phase log (commit hashes)
 
