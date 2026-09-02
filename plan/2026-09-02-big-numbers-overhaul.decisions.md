@@ -142,6 +142,66 @@ gained `damagePerHp` (1/3, anchored against HEAL), `pierce`, WRATH's
 `overkill`. Nothing gates on the score any more; it feeds the catalog and the
 smell tests.
 
+## Tuning decisions (the measured pass)
+
+The first playtest matrix after the rewrite read 0% at mid, late and
+impossible. Most of that was a measurement artefact; the rest was two real
+curve errors. Everything below is a measured change, not a guess.
+
+**D23 — `combat.stage-profiles.ts` hard-coded the player's pool at the OLD
+scale** (mid 255, late 570, from `stats x 5`). The harness was fighting the new
+roster with the old body, which read exactly like a balance catastrophe. It
+derives from `calculateMaxHealth` now and cannot drift again.
+
+**D24 — the mid stage's `maxCardTier: 2` was a wrong gate.** `tier` is the
+RESIST tier, never a power axis, and every Skull/Saint card is tier 3 — so a
+Rib-capped deck was being sent at thousand-VITAE bosses. `rankMaturityLevel`
+already gates maturity properly (rank 5 wants level 10, rank 6 level 12).
+Raised to 3.
+
+**D25 — `ENEMY_VITAE_PER_LEVEL` 18 → 8.** The structural finding of the whole
+pass: **a player's damage per turn is set by CARD RANK and does not grow with
+level**; only VITAE and stats do. A pool growing at 18/level outran any deck by
+the late campaign. This is worth remembering — it is a property of the game,
+not of this rewrite, and any future VITAE curve has to respect it.
+
+**D26 — `THREAT_PER_LEVEL` 2.5 → 0.8.** At 2.5 the player died in a constant
+~5 phases at every level (VITAE and threat both grow linearly, so the ratio is
+scale-invariant). That constant is what made every boss cell unwinnable.
+
+**D27 — stage threat bonuses cap at +50% combined** (`STAGE_THREAT_BONUS_CAP`).
+They multiplied on top of an escalation clock already worth up to x2 (x1.6 for
+a boss); unbounded, a four-stage unique became a one-shot by round six.
+
+**D28 — BRUTAL lands at +50%, not x2.** Mage Knight's "take it twice" is right
+at Mage Knight's numbers. Doubling a late-campaign 150 against walls that top
+out near 60 is a one-shot with no legal answer.
+
+**D29 — authored boss pools, REGROW and HIDE were re-derived** against the new
+curves (they had been sized against the pre-tuning ones).
+
+**Where the matrix landed:** early 94% · mid 56% · late 4% · impossible 0%.
+
+## Bugs found and fixed during the pass
+
+1. **ECHO never applied to DEAL.** A card printing `Deal 11. ECHO.` did nothing
+   twice. ECHO and TWIN now multiply the HIT COUNT, not the per-hit magnitude,
+   so armour and per-hit DoT clocks are paid per instance.
+2. **PAID-line riders dropped the whole damage family.** Two rider executors
+   exist; only the FREE-line one was taught. 20 cards printed damage the engine
+   never applied. Regression guard in `profane-mechanics.engine.test.ts`.
+3. **`MAX_EFFECT_INTENSITY` was 10**, so six cards printing THORNS 12-20 and
+   DOOM 12 silently landed 10 — a printed number the engine did not apply,
+   which breaks the one text law the repeal kept. Raised to 30.
+4. **`check-lexicon`, `check-prose`, `check-naming-law` and
+   `check-devlog-not-served` never ran on Windows.** Their entry guard compared
+   `import.meta.url` to a backslash `process.argv[1]`, so all four exited 0
+   with no output and the `PostToolUse` lexicon hook was a silent no-op. Fixed
+   via `pathToFileURL`; its first real run immediately caught a retired term in
+   a new boss stage name.
+5. **The card-editor write-back** still scanned `cards.library.ts` (D1), so
+   every save would have missed. It follows the library directory now.
+
 ## Known gaps and follow-ups
 
 Raised by the authoring agents, all real, none blocking:
@@ -168,4 +228,36 @@ Raised by the authoring agents, all real, none blocking:
    on two conditions despite that band being nominally unbudgeted.
 9. **`lock_stance` has no keyword token**, so it prints as prose and renders no
    glossary chip.
-10. **The card-editor codegen** (D1) and **FLAY's missing status chip** (D8).
+10. **FLAY has no status chip** (D8) — it is a state counter, so it shows on
+    the enemy pane as a meter rather than among the affliction chips.
+11. **`projectRupture` / `projectRuptureBurst` are not composition-aware.**
+    `communion-of-the-worm` prints `Deal 30. PIERCE.` *before* its RUPTURE;
+    that hit fires the damage-instance clock, so BLEED ticks out and washes
+    away before the burst is priced. On a standard board the preview reads 63
+    and the burst lands 40. A plain-rupture fixture previews 63/63, so the
+    engine is self-consistent and the PROJECTION is what is missing the card's
+    own pre-payoff verbs. Captured as an `it.fails` in
+    `status-depth-combat.engine.test.ts` — it turns red when fixed.
+12. **`concedeFloorFor` is effectively dead code.** The only CONDEMN card now
+    prints `concedeAt: 14`, above every tier floor (8/10/12), so
+    `max(printed, floor)` never binds.
+
+## The late campaign is still too hard
+
+The matrix reads **late 4%**, with four of six cells at 0%. This is a real,
+unresolved gap, not a measurement artefact — it survived every tuning lever
+above. The diagnosis is D25's structural finding: card power is flat in level
+while enemy pools are not, so at the top of the curve a deck cannot chew
+through a boss in the phases it survives. Three honest ways out, none of them
+attempted here because each is a design decision rather than a tuning one:
+
+- give cards a level-scaling term (the biggest change, and the one that makes
+  the curve self-correcting);
+- flatten enemy VITAE growth to near-zero past the mid campaign;
+- give the walls a late-game answer — the vigil `reprisal` verb in gap 5 would
+  turn a 60-point wall into a 60-point answer and is the cheapest of the three.
+
+Note also that the sim's greedy policy reports `dom=100%` on a SIGNATURE SKILL
+at every stage, and exercises only 28 of 112 cards. The matrix is currently a
+better measure of the signature economy than of the library, so its late-stage
+verdict should be read with that caveat.
