@@ -51,9 +51,26 @@ const SUPPORT_KIT = ['chilblain-watch', 'spoiled-poultice', 'the-long-lent'] as 
  *  hold. Theme-'curse' cards are enemy-injected junk — see the header. */
 const PLAYABLE_LIBRARY = cardLibrary.filter(c => c.theme !== 'curse');
 
-const WEAK_ENEMY: Enemy = deepClone(
-    (ENEMY_REGISTRY as Record<string, Enemy>)['grave-larva'],
-);
+/**
+ * The coverage dummy. Deliberately a SPONGE, not a weakling: this suite asks
+ * "can this card ever be fired", and a foe that dies on turn one answers "no"
+ * for every card the deck had not drawn yet.
+ *
+ * THE BIG NUMBERS REWRITE (2026-09-02): grave-larva at its own ~23 VITAE was
+ * fine when a late-stage play chipped a few points; against the rewritten
+ * library a focused deck one-shot it, and two Saint-rank cards reported as
+ * DEAD purely because the fight ended before they were drawn. The pool is
+ * pinned high here so the probe measures reachability and nothing else.
+ */
+const WEAK_ENEMY: Enemy = (() => {
+    const e = deepClone((ENEMY_REGISTRY as Record<string, Enemy>)['grave-larva']);
+    e.health = 20_000;
+    e.maxHealth = 20_000;
+    // No armour and no stage escalation: reachability, not arithmetic.
+    e.keywords = [];
+    e.stages = [];
+    return e;
+})();
 
 /** Late-stage player who additionally knows EVERY library card — the engine's
  *  `executeCard` throws on unknown cards, and coverage must reach cards the

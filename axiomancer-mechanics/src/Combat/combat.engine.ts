@@ -576,6 +576,11 @@ export function initializeCombatEncounter(
         // color. This is the SOLE engine wiring point for the rail; every roll
         // and every fired special reads it via `activeDieGear`.
         dieGear: clonedPlayer.dieGear,
+        // THE PATH (owner ruling 2026-09-02) — the two dice progression axes:
+        // act-reward dice grow the tray, die upgrades grow the share of live
+        // faces in it. Both seeded once, here, from the character.
+        bonusTurnDice: clonedPlayer.bonusTurnDice ?? 0,
+        dieUpgradeLevel: clonedPlayer.dieUpgradeLevel ?? 0,
         seed,
         // Phase 33c (spec 33 §1) — no coveted die claimed yet this combat.
         covetedDiceClaimed: [],
@@ -678,7 +683,14 @@ export function startTurn(
         return { state: withLog(next, events), events };
     }
     const turn = state.turn + 1;
-    let dice = rollTurnDice(turn, TURN_DICE_COUNT, rng);
+    // THE PATH — the tray is TURN_DICE_COUNT plus every act-reward die the
+    // player has banked, each rolled from their upgraded face bag.
+    let dice = rollTurnDice(
+        turn,
+        TURN_DICE_COUNT + Math.max(0, state.bonusTurnDice ?? 0),
+        rng,
+        state.dieUpgradeLevel ?? 0,
+    );
     // CLARITY (P0-truth `forceWildOnNextDie` wiring): the bearer's next roll
     // guarantees one WILD die, then the clarity is consumed (`consumedOnUse`).
     let player = state.player;
@@ -2549,6 +2561,12 @@ function playBottomAction(
         enemy = hit.enemy;
         mechanicDamage += dmg;
         directDamage += dmg + hit.clockDamage;
+        // Credit the CARD. Without this the DEAL verb was invisible to the
+        // attribution ledger, so every report — the per-card telemetry, the
+        // dominance reading, the deck-tuning tables — credited the damage to
+        // whatever last attributed, which was the player's signature skill.
+        // Every stage read `dom=100%(signature)` while the library did the work.
+        attribution = recordAttribution(attribution, card.id, card.name, null, dmg, healthBefore);
         gainSoulsLocal(soulWorthyWashouts(hit.washedOut), 'expiry');
         events.push({ kind: 'damage-dealt', cardId: label, target: 'enemy', amount: dmg });
         return Math.max(0, dmg - healthBefore);
@@ -3381,10 +3399,12 @@ function playBottomAction(
             if (chain > 0) chain = 0;
             if (flayStacks > 0) flayStacks -= 1;
             if (dmg > 0) {
+                const hpBeforeRider = enemy.health;
                 const hit = applyEnemyDamage(enemy, dmg, state.round, events);
                 enemy = hit.enemy;
                 mechanicDamage += dmg;
                 directDamage += dmg + hit.clockDamage;
+                attribution = recordAttribution(attribution, card.id, card.name, null, dmg, hpBeforeRider);
                 gainSoulsLocal(soulWorthyWashouts(hit.washedOut), 'expiry');
                 events.push({ kind: 'damage-dealt', cardId: card.id, target: 'enemy', amount: dmg });
             }

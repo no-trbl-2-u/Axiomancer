@@ -132,12 +132,37 @@ export function classifyVerbClass(
 }
 
 /**
- * DoT lifetime preview (P0-truth): the LIFETIME HP the card's statuses deal on
- * a neutral read — Σ floor(damagePerRound × intensity) × duration, ramp-aware.
- * 0 for everything else (no strike preview exists any more).
+ * VITAE preview (P0-truth): what this card's PAID line takes off the foe on a
+ * neutral read — direct damage PLUS the lifetime of the statuses it lands
+ * (Σ floor(damagePerRound × intensity) × duration, ramp-aware).
+ *
+ * THE BIG NUMBERS REWRITE (2026-09-02): this used to sum DoT ONLY, with the
+ * comment "0 for everything else (no strike preview exists any more)" — true
+ * under the strike ban, and badly wrong once DEAL came back. The sim's greedy
+ * pilot ranks candidate plays by exactly this number, so while it ignored
+ * direct damage the pilot was blind to the library's primary verb: every
+ * damage card scored 0, the bot fell through to its signature skill on almost
+ * every turn (dominance 100% on a signature at every stage), 75% of the
+ * library never got played, and the late-stage cells read unwinnable. The
+ * preview is what makes the pilot able to see; it has to count the whole hit.
  */
 export function bottomDamagePreview(card: Card, lookupEffect: EffectLookup): number {
     let total = 0;
+    // Direct damage — the `deal` mechanic (multi-hit aware) and any rider that
+    // carries `damage`, on the PAID line and on the condition lines that fire
+    // free with it. Unconditional first.
+    for (const m of card.specialMechanics ?? []) {
+        if (m.kind === 'deal') total += m.amount * Math.max(1, m.hits ?? 1);
+        else if (m.kind === 'rider') total += m.rider.damage ?? 0;
+        else if (m.kind === 'immolate') total += m.rider.damage ?? 0;
+    }
+    // Condition riders are counted at face value: the pilot should WANT the
+    // card whose FALLEN/threshold/fate clause pays in damage, and the engine
+    // decides at play time whether it fires.
+    for (const r of [card.threshold?.rider, card.dieBonus?.rider, card.fate?.rider,
+        card.fallen?.rider, card.synergy?.rider]) {
+        total += r?.damage ?? 0;
+    }
     for (const ce of enemyEffects(card)) {
         const def = lookupEffect(ce.effectId);
         const dot = def?.payload.damageOverTime;

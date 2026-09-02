@@ -952,6 +952,12 @@ export interface CombatEncounterState {
     /** TWIN — armed: the next PAID spell this turn resolves twice. Cleared when
      *  it fires, so it never chains into the copy it created. */
     twinArmed?: boolean;
+    /** THE PATH — extra dice added to every turn's tray (act-reward dice),
+     *  seeded from `Character.bonusTurnDice`. Absent = 0. */
+    bonusTurnDice?: number;
+    /** THE PATH — die-upgrade level (0-2) driving the roll bag's share of live
+     *  faces, seeded from `Character.dieUpgradeLevel`. Absent = 0. */
+    dieUpgradeLevel?: number;
     /** STAGES already entered this combat, by index into `enemy.stages`. Each
      *  stage fires at most once; this is the ledger that guarantees it. */
     stagesEntered?: number[];
