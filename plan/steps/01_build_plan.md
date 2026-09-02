@@ -2563,7 +2563,7 @@ on pickup):**
       pointer. The classifier block from the 2026-08-28 AUDIT row did
       not reproduce this tick — `Edit()` on `.claude/commands/*.md`
       succeeded directly — `docs(.claude): lift superseded OPEN GATE wall text from tuning commands — phase G1`
-- [ ] Phase 77 — In-house crash capture (mobile): global
+- [x] Phase 77 — In-house crash capture (mobile): global
       `ErrorUtils.setGlobalHandler` (native) / `window.onerror` (web)
       feeding the existing `error` log domain + `flushLogTail()`; an
       unhandled-promise-rejection hook, same sink; a next-launch check
@@ -2572,6 +2572,10 @@ on pickup):**
       (not the dev-only diagnostics panel). No third-party SDK. Per the
       2026-07-20 owner ruling, promoted via `/oversight` 2026-09-02 —
       see `plan/PHASE_CANDIDATES.md` § Promoted for full scope/rationale.
+      Shipped `6249b19b` — `CrashReportPanel` extracted from
+      `ErrorBoundary` so `PrevSessionCrashPrompt` reuses the live-crash
+      report chrome; Hermes promise-rejection tracker installs
+      production-only (dev keeps RN core's own LogBox tracker).
 - [ ] Phase 78 — Art-pass: open-source art sourcing research for W5
       portraits. Agent researches the open web for CC/open-source art
       fitting each remaining W5 enemy's theme, gathers >=2 candidates
