@@ -41,7 +41,7 @@
  * diagnostics section.
  */
 
-import React, { Component, type ErrorInfo, type ReactNode, useState } from 'react';
+import React, { Component, type ErrorInfo, type ReactNode } from 'react';
 import {
     Pressable,
     ScrollView,
@@ -51,6 +51,7 @@ import {
 
 import { getLogger, type AxmLogEntry } from '@mechanics';
 
+import { CrashReportPanel } from '@/components/CrashReportPanel';
 import { FONTS } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
 import { useGameState } from '@/state/GameStoreProvider';
@@ -88,7 +89,7 @@ export class ErrorBoundary extends Component<
                 stack: error.stack,
                 componentStack: info.componentStack ?? null,
             });
-            void flushLogTail();
+            void flushLogTail({ kind: 'react-boundary', message: error.message });
         } catch { /* the boundary must never crash itself */ }
         this.setState({ componentStack: info.componentStack ?? null });
     }
@@ -140,7 +141,6 @@ function deriveErrorCode(error: Error): string {
 
 function ErrorScreen({ error, componentStack, onReset }: ErrorScreenProps) {
     const styles = useStyles();
-    const [copyPressed, setCopyPressed] = useState<boolean>(false);
     const errorCode = deriveErrorCode(error);
     const technical = `${error.message || '(no message)'}${error.stack ? `\n${error.stack}` : ''}${componentStack !== null ? `\n\n— component stack —${componentStack}` : ''}`;
 
@@ -151,21 +151,6 @@ function ErrorScreen({ error, componentStack, onReset }: ErrorScreenProps) {
     try {
         logTail = getLogger().tail(30, { minLevel: 'info' });
     } catch { /* render without the tail */ }
-    const logTailText = logTail.length
-        ? logTail
-              .map((e) => `${e.seq} ${e.level} ${e.domain}/${e.kind}${e.data !== undefined ? ` ${safeJson(e.data)}` : ''}`)
-              .join('\n')
-        : '(no recent log entries)';
-
-    const onCopy = () => {
-        setCopyPressed(true);
-        // Best-effort clipboard write — available on web; silently
-        // absent on native (the selectable text stands in there).
-        try {
-            const clip = (globalThis as GlobalWithClipboard).navigator?.clipboard;
-            void clip?.writeText?.(`${technical}\n\n— recent log —\n${logTailText}`);
-        } catch { /* pressed-state feedback only */ }
-    };
 
     // Read engine state for the debug snapshot. Guard against the
     // store throwing too (the provider may itself be where the
@@ -199,37 +184,9 @@ function ErrorScreen({ error, componentStack, onReset }: ErrorScreenProps) {
                     “a brittle binding came apart in the press; the scribe is rebinding.”
                 </Text>
 
-                {/* Torn-edge inset panel for the technical stack */}
-                <View style={styles.technicalPanel}>
-                    <Text style={styles.technicalCaption}>— scribe&apos;s transcription —</Text>
-                    <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel="Copy"
-                        testID="error-boundary-copy"
-                        onPress={onCopy}
-                        style={[
-                            styles.copyButton,
-                            copyPressed && styles.copyButtonPressed,
-                        ]}
-                    >
-                        <Text
-                            style={[
-                                styles.copyButtonLabel,
-                                copyPressed && styles.copyButtonLabelPressed,
-                            ]}
-                        >
-                            {copyPressed ? '✎ COPIED' : '✎ COPY'}
-                        </Text>
-                    </Pressable>
-                    <Text
-                        style={styles.technicalText}
-                        numberOfLines={12}
-                        testID="error-boundary-technical"
-                        selectable
-                    >
-                        {technical}
-                    </Text>
-                </View>
+                {/* Torn-edge technical panel + COPY + RECENT LOG —
+                    shared with the next-launch prompt (CrashReportPanel). */}
+                <CrashReportPanel technical={technical} logTail={logTail} />
 
                 {/* Diagnostics — kept for crash-report eyeballing */}
                 <Section label="STATE SNAPSHOT">
@@ -238,12 +195,6 @@ function ErrorScreen({ error, componentStack, onReset }: ErrorScreenProps) {
 
                 <Section label="BUILD CONTEXT">
                     <Text style={styles.codeBlock}>{buildContext()}</Text>
-                </Section>
-
-                <Section label="RECENT LOG">
-                    <Text style={styles.codeBlock} selectable testID="error-boundary-log-tail">
-                        {logTailText}
-                    </Text>
                 </Section>
 
                 {/* Primary + ghost actions */}
@@ -332,22 +283,6 @@ function useStateSnapshot(): string {
  * pulling DOM-lib typings into a file that ships on both platforms.
  */
 type GlobalWithNavigator = { readonly navigator?: { readonly userAgent?: unknown } };
-
-/** Web-only clipboard narrow — same single-cast pattern as above. */
-type GlobalWithClipboard = {
-    readonly navigator?: {
-        readonly clipboard?: { readonly writeText?: (text: string) => Promise<void> };
-    };
-};
-
-function safeJson(data: unknown): string {
-    try {
-        const s = JSON.stringify(data);
-        return s === undefined ? '' : s.length > 160 ? `${s.slice(0, 160)}…` : s;
-    } catch {
-        return '(unserializable)';
-    }
-}
 
 function buildContext(): string {
     // Module-time captured at first render; effectively constant
@@ -450,51 +385,6 @@ const useStyles = makeStyles((AXM) => ({
         textAlign: 'center',
         marginTop: 22,
         paddingHorizontal: 14,
-    },
-    technicalPanel: {
-        marginTop: 22,
-        backgroundColor: AXM.deepBg,
-        borderWidth: 1,
-        borderColor: AXM.ash,
-        position: 'relative',
-        padding: 12,
-        paddingTop: 28,
-    },
-    technicalCaption: {
-        position: 'absolute',
-        top: 8,
-        left: 12,
-        fontFamily: FONTS.mono,
-        fontSize: 8,
-        letterSpacing: 1.4,
-        color: AXM.ash,
-    },
-    copyButton: {
-        position: 'absolute',
-        top: 6,
-        right: 8,
-        paddingHorizontal: 8,
-        paddingVertical: 3,
-        borderWidth: 1,
-        borderColor: AXM.ash,
-        backgroundColor: AXM.backdrop,
-    },
-    copyButtonPressed: {
-        borderColor: AXM.sulfur,
-        backgroundColor: AXM.sulfurSubtle,
-    },
-    copyButtonLabel: {
-        fontFamily: FONTS.sans,
-        fontSize: 9,
-        letterSpacing: 2,
-        color: AXM.bone,
-    },
-    copyButtonLabelPressed: { color: AXM.sulfur },
-    technicalText: {
-        fontFamily: FONTS.mono,
-        fontSize: 10.5,
-        lineHeight: 14,
-        color: AXM.parchmentDim,
     },
     section: { marginTop: 14 },
     sectionLabel: {

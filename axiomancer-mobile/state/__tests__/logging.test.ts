@@ -6,6 +6,8 @@
  * crash-tail sink (bounded write, debounce, previous-session read).
  */
 
+import { Platform } from 'react-native';
+
 import {
     getLogger,
     resetLoggingForTests,
@@ -14,6 +16,7 @@ import {
 import {
     __resetAppLoggingForTests,
     flushLogTail,
+    getPrevSessionCrash,
     getPrevSessionLogTail,
     initAppLogging,
     LOG_TAIL_DEBOUNCE_MS,
@@ -43,6 +46,9 @@ afterEach(() => {
     resetLoggingForTests();
     delete (globalThis as Record<string, unknown>).__AXM_LOG__;
     delete (globalThis as Record<string, unknown>).__AXM_LOG_LEVEL__;
+    delete (globalThis as Record<string, unknown>).ErrorUtils;
+    delete (globalThis as Record<string, unknown>).HermesInternal;
+    (Platform as { OS: string }).OS = 'ios';
 });
 
 describe('wrapActionsWithLogging', () => {
@@ -194,5 +200,206 @@ describe('crash tail', () => {
         const tail = getPrevSessionLogTail();
         expect(tail).not.toBeNull();
         expect(tail![0].kind).toBe('old-crash');
+    });
+
+    it('reads a previous session crash marker (Phase 77)', async () => {
+        const prev = {
+            savedAt: '2026-07-19T00:00:00.000Z',
+            entries: [],
+            crash: { kind: 'global-error', message: 'boom from last session' },
+        };
+        const storage = makeStorage({ [LOG_TAIL_KEY]: JSON.stringify(prev) });
+        initAppLogging({ storage });
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(getPrevSessionCrash()).toEqual({
+            kind: 'global-error',
+            message: 'boom from last session',
+        });
+    });
+
+    it('returns null when the previous envelope predates the crash field', async () => {
+        const prev = {
+            savedAt: '2026-07-19T00:00:00.000Z',
+            entries: [{ seq: 1, t: 1, level: 'info', domain: 'ui', kind: 'old' }],
+        };
+        const storage = makeStorage({ [LOG_TAIL_KEY]: JSON.stringify(prev) });
+        initAppLogging({ storage });
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(getPrevSessionCrash()).toBeNull();
+    });
+});
+
+describe('crash marker (Phase 77)', () => {
+    it('getPrevSessionCrash is null before any crash is flushed', () => {
+        initAppLogging({ storage: makeStorage() });
+        expect(getPrevSessionCrash()).toBeNull();
+    });
+
+    it('flushLogTail(crash) persists the marker on the written envelope', async () => {
+        const storage = makeStorage();
+        initAppLogging({ storage });
+        getLogger().clear();
+        storage.setItem.mockClear();
+
+        await flushLogTail({ kind: 'global-error', message: 'kaboom' });
+
+        const [, payload] = storage.setItem.mock.calls.at(-1) as [string, string];
+        const envelope = JSON.parse(payload) as { crash: { kind: string; message: string } | null };
+        expect(envelope.crash).toEqual({ kind: 'global-error', message: 'kaboom' });
+    });
+
+    it('a later routine write keeps carrying the crash marker forward', async () => {
+        jest.useFakeTimers();
+        const storage = makeStorage();
+        initAppLogging({ storage });
+        getLogger().clear();
+
+        await flushLogTail({ kind: 'unhandled-rejection', message: 'first' });
+        storage.setItem.mockClear();
+
+        // A subsequent quiet log triggers the debounced writer with no
+        // explicit `crash` argument — the marker must still be present,
+        // or a crash could self-erase before the app actually restarts.
+        getLogger().info('ui', 'after-crash-still-running');
+        jest.advanceTimersByTime(LOG_TAIL_DEBOUNCE_MS + 10);
+        await Promise.resolve();
+
+        const [, payload] = storage.setItem.mock.calls.at(-1) as [string, string];
+        const envelope = JSON.parse(payload) as { crash: { kind: string; message: string } | null };
+        expect(envelope.crash).toEqual({ kind: 'unhandled-rejection', message: 'first' });
+    });
+});
+
+describe('global error handlers — native (Phase 77)', () => {
+    it('chains ErrorUtils.setGlobalHandler: logs, flushes a crash marker, then calls the previous handler', async () => {
+        const prevHandler = jest.fn();
+        let installedHandler: ((error: unknown, isFatal?: boolean) => void) | undefined;
+        (globalThis as Record<string, unknown>).ErrorUtils = {
+            getGlobalHandler: () => prevHandler,
+            setGlobalHandler: (h: (error: unknown, isFatal?: boolean) => void) => {
+                installedHandler = h;
+            },
+        };
+
+        const storage = makeStorage();
+        initAppLogging({ storage });
+        getLogger().clear();
+        storage.setItem.mockClear();
+
+        expect(installedHandler).toBeDefined();
+        const err = new Error('native crash');
+        installedHandler!(err, true);
+        await Promise.resolve();
+
+        const errors = getLogger().entries({ domains: ['error'], kind: 'global-error' });
+        expect(errors).toHaveLength(1);
+        expect((errors[0].data as { message: string; isFatal: boolean }).message).toBe(
+            'native crash',
+        );
+        expect((errors[0].data as { message: string; isFatal: boolean }).isFatal).toBe(true);
+        expect(prevHandler).toHaveBeenCalledWith(err, true);
+
+        const [, payload] = storage.setItem.mock.calls.at(-1) as [string, string];
+        const envelope = JSON.parse(payload) as { crash: { kind: string } | null };
+        expect(envelope.crash?.kind).toBe('global-error');
+    });
+
+    it('installs the HermesInternal promise-rejection tracker only outside __DEV__', () => {
+        const g = globalThis as Record<string, unknown>;
+        const originalDev = g.__DEV__;
+
+        let trackerOptions: { onUnhandled?: (id: number, r: unknown) => void } | undefined;
+        g.HermesInternal = {
+            enablePromiseRejectionTracker: (opts: typeof trackerOptions) => {
+                trackerOptions = opts;
+            },
+        };
+
+        try {
+            g.__DEV__ = true;
+            initAppLogging({ storage: makeStorage() });
+            expect(trackerOptions).toBeUndefined();
+            __resetAppLoggingForTests();
+
+            g.__DEV__ = false;
+            initAppLogging({ storage: makeStorage() });
+            expect(trackerOptions).toBeDefined();
+        } finally {
+            g.__DEV__ = originalDev;
+        }
+    });
+
+    it('the production HermesInternal tracker logs + flushes on an unhandled rejection', async () => {
+        const g = globalThis as Record<string, unknown>;
+        const originalDev = g.__DEV__;
+        let trackerOptions: { onUnhandled?: (id: number, r: unknown) => void } | undefined;
+        g.HermesInternal = {
+            enablePromiseRejectionTracker: (opts: typeof trackerOptions) => {
+                trackerOptions = opts;
+            },
+        };
+
+        const storage = makeStorage();
+        try {
+            g.__DEV__ = false;
+            initAppLogging({ storage });
+            getLogger().clear();
+
+            expect(trackerOptions?.onUnhandled).toBeDefined();
+            trackerOptions!.onUnhandled!(1, new Error('dangling promise'));
+            await Promise.resolve();
+
+            const errors = getLogger().entries({ domains: ['error'], kind: 'unhandled-rejection' });
+            expect(errors).toHaveLength(1);
+            expect(getPrevSessionCrash()).toBeNull(); // this-session marker, not prev-session
+        } finally {
+            g.__DEV__ = originalDev;
+        }
+    });
+});
+
+describe('global error handlers — web (Phase 77)', () => {
+    it('window "error" and "unhandledrejection" listeners log + flush a crash marker', async () => {
+        // The jest-expo test environment is Node, not jsdom — there is no
+        // real `window`. Install a minimal fake so `Platform.OS === 'web'`
+        // exercises the same branch a browser build would take.
+        (Platform as { OS: string }).OS = 'web';
+        const listeners: Record<string, (event: unknown) => void> = {};
+        const g = globalThis as Record<string, unknown>;
+        const hadWindow = 'window' in g;
+        const originalWindow = g.window;
+        g.window = {
+            addEventListener: jest.fn((type: string, handler: unknown) => {
+                listeners[type] = handler as (event: unknown) => void;
+            }),
+        };
+
+        try {
+            const storage = makeStorage();
+            initAppLogging({ storage });
+            getLogger().clear();
+            storage.setItem.mockClear();
+
+            expect(listeners.error).toBeDefined();
+            expect(listeners.unhandledrejection).toBeDefined();
+
+            listeners.error({ error: new Error('web crash'), filename: 'app.js', lineno: 12 });
+            await Promise.resolve();
+            let errors = getLogger().entries({ domains: ['error'], kind: 'global-error' });
+            expect(errors).toHaveLength(1);
+
+            listeners.unhandledrejection({ reason: new Error('web rejection') });
+            await Promise.resolve();
+            errors = getLogger().entries({ domains: ['error'], kind: 'unhandled-rejection' });
+            expect(errors).toHaveLength(1);
+        } finally {
+            if (hadWindow) {
+                g.window = originalWindow;
+            } else {
+                delete g.window;
+            }
+        }
     });
 });

@@ -14,6 +14,14 @@
  *       3. crash tail — the last ~200 info+ entries persisted to a
  *          dedicated AsyncStorage key so a crash/restart on an APK leaves
  *          a structured trace (`prevSession()` / the /dev log viewer).
+ *     It also installs global crash capture (Phase 77): a JS error handler
+ *     (`ErrorUtils` on native, `window.onerror`-equivalent on web) and an
+ *     unhandled-promise-rejection hook, both force-flushing the crash tail
+ *     with a `crash` marker so `getPrevSessionCrash()` can offer a
+ *     next-launch "previous session crashed" prompt
+ *     (`components/PrevSessionCrashPrompt.tsx`). This covers errors thrown
+ *     outside React's render phase (event handlers, async callbacks) that
+ *     `ErrorBoundary` cannot see.
  *   - `wrapActionsWithLogging()` instruments the `createAppActions`
  *     dispatch chokepoint (name, duration, error capture-and-rethrow).
  *
@@ -22,6 +30,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 import {
     AXM_LOG_LEVEL_RANK,
     configureLogging,
@@ -53,14 +62,30 @@ export interface AppLoggingOptions {
     storage?: StorageLike;
 }
 
+/** A crash marker attached to the persisted tail (Phase 77). */
+export interface CrashInfo {
+    /** `'global-error' | 'unhandled-rejection' | 'react-boundary'`. */
+    kind: string;
+    message: string;
+}
+
 interface LogTailEnvelope {
     savedAt: string;
     entries: AxmLogEntry[];
+    crash: CrashInfo | null;
 }
 
 let initialized = false;
 let storage: StorageLike = AsyncStorage;
 let prevSessionTail: AxmLogEntry[] | null = null;
+let prevSessionCrash: CrashInfo | null = null;
+/**
+ * Once a crash fires this session, every subsequent tail write (even a
+ * routine debounced one from later logging) keeps carrying the marker —
+ * otherwise a quiet post-crash write would erase it before the app
+ * actually restarts, and the next-launch prompt would never see it.
+ */
+let sessionCrash: CrashInfo | null = null;
 let pendingTimer: ReturnType<typeof setTimeout> | null = null;
 
 declare const __DEV__: boolean | undefined;
@@ -123,6 +148,7 @@ async function writeTailNow(): Promise<void> {
         let payload = JSON.stringify({
             savedAt: new Date().toISOString(),
             entries,
+            crash: sessionCrash,
         } satisfies LogTailEnvelope);
         // Bounded slot: halve until under the size guard.
         while (payload.length > LOG_TAIL_MAX_CHARS && entries.length > 1) {
@@ -130,6 +156,7 @@ async function writeTailNow(): Promise<void> {
             payload = JSON.stringify({
                 savedAt: new Date().toISOString(),
                 entries,
+                crash: sessionCrash,
             } satisfies LogTailEnvelope);
         }
         await storage.setItem(LOG_TAIL_KEY, payload);
@@ -137,10 +164,13 @@ async function writeTailNow(): Promise<void> {
 }
 
 /**
- * Force the crash-tail write (ErrorBoundary calls this fire-and-forget
- * right after logging the boundary error).
+ * Force the crash-tail write. `ErrorBoundary` and the global crash
+ * handlers below call this fire-and-forget right after logging the
+ * error, passing `crash` so the persisted tail carries a marker the
+ * next-launch prompt can read via `getPrevSessionCrash()`.
  */
-export async function flushLogTail(): Promise<void> {
+export async function flushLogTail(crash?: CrashInfo): Promise<void> {
+    if (crash) sessionCrash = crash;
     if (pendingTimer !== null) {
         clearTimeout(pendingTimer);
         pendingTimer = null;
@@ -151,6 +181,11 @@ export async function flushLogTail(): Promise<void> {
 /** The previous session's persisted tail (null until loaded / none saved). */
 export function getPrevSessionLogTail(): AxmLogEntry[] | null {
     return prevSessionTail;
+}
+
+/** The previous session's crash marker, if it force-flushed one (Phase 77). */
+export function getPrevSessionCrash(): CrashInfo | null {
+    return prevSessionCrash;
 }
 
 /** Read-only surface agents reach via `globalThis.__AXM_LOG__`. */
@@ -215,8 +250,12 @@ export function initAppLogging(options: AppLoggingOptions = {}): void {
                 if (Array.isArray(envelope.entries)) {
                     prevSessionTail = envelope.entries;
                 }
+                if (envelope.crash && typeof envelope.crash === 'object') {
+                    prevSessionCrash = envelope.crash;
+                }
             })
             .catch(() => undefined);
+        installGlobalErrorHandlers();
         logger.info('ui', 'app-logging-initialized', { dev: isDev() });
     } catch { /* never break play */ }
 }
@@ -226,10 +265,102 @@ export function __resetAppLoggingForTests(): void {
     initialized = false;
     storage = AsyncStorage;
     prevSessionTail = null;
+    prevSessionCrash = null;
+    sessionCrash = null;
     if (pendingTimer !== null) {
         clearTimeout(pendingTimer);
         pendingTimer = null;
     }
+}
+
+// ---------------------------------------------------------------------------
+// Global crash capture (Phase 77)
+// ---------------------------------------------------------------------------
+
+/** Minimal local narrow — RN's `global.ErrorUtils`, not exported by `@types`. */
+interface ErrorUtilsGlobal {
+    getGlobalHandler?: () => ((error: unknown, isFatal?: boolean) => void) | undefined;
+    setGlobalHandler?: (handler: (error: unknown, isFatal?: boolean) => void) => void;
+}
+
+/** Minimal local narrow — Hermes' native promise-rejection tracker hook. */
+interface HermesInternalGlobal {
+    enablePromiseRejectionTracker?: (options: {
+        allRejections?: boolean;
+        onUnhandled?: (id: number, rejection: unknown) => void;
+    }) => void;
+}
+
+type GlobalWithNativeErrorHooks = typeof globalThis & {
+    ErrorUtils?: ErrorUtilsGlobal;
+    HermesInternal?: HermesInternalGlobal;
+};
+
+function messageOf(err: unknown): string {
+    return err instanceof Error ? err.message : String(err);
+}
+
+function stackOf(err: unknown): string | undefined {
+    return err instanceof Error ? err.stack : undefined;
+}
+
+function reportCrash(kind: string, err: unknown, extra?: Record<string, unknown>): void {
+    try {
+        const message = messageOf(err);
+        getLogger().error('error', kind, { message, stack: stackOf(err), ...extra });
+        void flushLogTail({ kind, message });
+    } catch { /* the crash reporter must never crash itself */ }
+}
+
+function installNativeErrorHandlers(): void {
+    const g = globalThis as GlobalWithNativeErrorHooks;
+    try {
+        const errorUtils = g.ErrorUtils;
+        const prevHandler = errorUtils?.getGlobalHandler?.();
+        errorUtils?.setGlobalHandler?.((error, isFatal) => {
+            reportCrash('global-error', error, { isFatal: Boolean(isFatal) });
+            prevHandler?.(error, isFatal);
+        });
+    } catch { /* never break play */ }
+
+    // Dev builds already get RN core's own LogBox-integrated tracker
+    // (`setUpErrorHandling.js` / `polyfillPromise.js` gate it behind
+    // `__DEV__`); re-enabling it here would swap out that dev UX for
+    // ours. Preview/production Hermes builds get NO tracker otherwise —
+    // this fills exactly that gap (the owner's stated field-crash blind
+    // spot on daily-driven EAS preview APKs).
+    if (isDev()) return;
+    try {
+        g.HermesInternal?.enablePromiseRejectionTracker?.({
+            allRejections: true,
+            onUnhandled: (_id, rejection) => reportCrash('unhandled-rejection', rejection),
+        });
+    } catch { /* never break play */ }
+}
+
+function installWebErrorHandlers(): void {
+    if (typeof window === 'undefined' || typeof window.addEventListener !== 'function') return;
+    try {
+        window.addEventListener('error', (event: ErrorEvent) => {
+            reportCrash('global-error', event?.error ?? event?.message, {
+                filename: event?.filename,
+                lineno: event?.lineno,
+            });
+        });
+        window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
+            reportCrash('unhandled-rejection', event?.reason);
+        });
+    } catch { /* never break play */ }
+}
+
+function installGlobalErrorHandlers(): void {
+    try {
+        if (Platform.OS === 'web') {
+            installWebErrorHandlers();
+        } else {
+            installNativeErrorHandlers();
+        }
+    } catch { /* never break play */ }
 }
 
 // ---------------------------------------------------------------------------

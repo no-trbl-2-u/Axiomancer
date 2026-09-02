@@ -20,6 +20,7 @@ import { createAsyncStorageAdapter } from '@/state/persistence/asyncStorageAdapt
 import { CorruptSaveModal } from '@/components/CorruptSaveModal';
 import { DevAutoSeed } from '@/components/DevAutoSeed';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { PrevSessionCrashPrompt } from '@/components/PrevSessionCrashPrompt';
 import { HardwareBackHandler } from '@/components/HardwareBackHandler';
 import { BlacksmithGate } from '@/components/BlacksmithGate';
 import { CacheGate } from '@/components/CacheGate';
@@ -190,6 +191,7 @@ export default function RootLayout() {
         onConfirm={onCorruptConfirm}
         onCancel={onCorruptCancel}
       />
+      <PrevSessionCrashPrompt />
       <GameStoreProvider adapter={persistenceAdapter}>
         {/* ErrorBoundary mounts INSIDE the GameStoreProvider so
             the fallback ErrorScreen can read engine state via
