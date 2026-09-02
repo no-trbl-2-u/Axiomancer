@@ -411,3 +411,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-02T04:44:30Z | skill | march | unknown | main | - |
 | 2026-09-02T04:45:36Z | skill | iterate | claude-sonnet-5 | main | - |
 | 2026-09-02T04:46:38Z | subagent | Explore | claude-sonnet-5 | main | Investigate top iterate candidates' fix feasibility |
+| 2026-09-02T12:09:57Z | slash-prompt | /consolidate | unknown | user/ci | /consolidate |
+| 2026-09-02T12:09:59Z | skill | consolidate | unknown | main | - |

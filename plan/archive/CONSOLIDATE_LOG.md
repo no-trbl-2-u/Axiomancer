@@ -16,3 +16,30 @@
   reminder (reflexes.md 30→34 lines). Left reflex #2 (atomic
   commit+push) in place — its Stop-hook enforcement only warns
   post-hoc, so the proactive reminder still pulls weight.
+- 2026-09-02: bearings 752→752 lines, CRITIQUE 1801→1796, lessons
+  64→64; 0 rows archived, 1 merged; terminology sweep clean (0
+  lexicon rows added, 0 files banked/flagged). Collapsed the two
+  `## Done` "Playwright MCP tools unavailable to sub-agents" rows
+  (pass 1-4 and pass 5-11, 11 passes total on the same defect)
+  into one row with a `- history:` line, per the skill's own
+  worked example. Still nothing in `## Done` past the 60-day
+  archive threshold — oldest RESOLVED date is 2026-07-10 (54
+  days). Left `## Pending`'s many inline `[x] ... RESOLVED`
+  rows untouched per hard rule 3 (Pending is untouchable) even
+  though `skills/critique.md`/`iterate.md` document a Pending→Done
+  move on fix — that reorganization is a documentation-vs-practice
+  question for `/oversight`, not a consolidate-pass call. bearings.md
+  read in full: no safe merge/prune/tighten found this pass — the
+  file's growth (356→752 lines since the last pass) is almost
+  entirely new dated entries under "Decisions standing for the
+  autonomous loop" (THE LONGER LEASH, THE OPEN GATE, etc.), which is
+  locked/immutable-in-meaning content, not compactable prose.
+  reflexes.md/lessons.md unchanged — both under cap, no dupes, no
+  weekly-cadence promotion candidates observed. Terminology sweep:
+  `check-lexicon.mjs` clean; skimmed the ~120 `.md` files touched
+  since the last pass for "ten-preset campaign" / anti-modern-word
+  claims posing as current law — all live hits are already-dated
+  devlog entries or specs already carrying a SUPERSEDED/HISTORICAL
+  banner; the one doc that did pose as current law
+  (`axiomancer-mechanics/docs/playtest.md`) was already fixed this
+  week (commit dfa03ebb, tracked in `plan/AUDIT.md`).
