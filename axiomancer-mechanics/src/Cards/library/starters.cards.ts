@@ -229,6 +229,10 @@ function curse(
         // the PAID line is the receipt for removing it.
         free,
         specialMechanics: [{ kind: 'purge_self' }],
+        // A curse's two lines are asymmetric BY DESIGN: the FREE line is the
+        // whole card (a cost you eat to cycle it) and the PAID line only buys
+        // it out of the deck. Nothing about that split is a balance defect.
+        intentionallyAsymmetric: true,
         addedIn: ADDED,
         tags: ['curse'],
     };

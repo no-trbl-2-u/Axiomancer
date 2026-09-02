@@ -34,6 +34,7 @@ import {
     getDamageTakenMultiplier, getHealingReceivedMult, getOutgoingDamageMult,
 } from '../effects';
 import { getActiveDotTotal } from '../effect-modifiers';
+import { MAX_EFFECT_INTENSITY } from '../../Game/game-mechanics.constants';
 import type { CombatDieColor, CombatEncounterState, CombatThreatPhase } from '../combat.encounter.types';
 
 function makePlayer(cards: string[]): Character {

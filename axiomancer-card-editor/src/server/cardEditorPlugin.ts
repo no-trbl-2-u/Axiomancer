@@ -26,14 +26,49 @@ import type { CardDraft } from '../types';
 /** Module specifier (via the `@mechanics` alias) of the live library. */
 const LIBRARY_MODULE = '@mechanics/Cards/cards.library';
 
-function resolveLibraryPath(server: ViteDevServer): string {
+/**
+ * THE BIG NUMBERS REWRITE (2026-09-02) — the card library is a DIRECTORY now.
+ *
+ * `cards.library.ts` is only the aggregator; the card literals live in
+ * `src/Cards/library/*.cards.ts`, one module per theme. Write-back therefore
+ * has to find the module that actually holds the card, rather than assuming
+ * one file. `resolveLibraryDir` gives the directory; `findCardModule` picks
+ * the file whose text declares the id.
+ */
+function resolveLibraryDir(server: ViteDevServer): string {
     // server.config.root is the axiomancer-card-editor directory; the mechanics
     // package src sits in the sibling axiomancer-mechanics package (mirrors the
     // `@mechanics` -> `../axiomancer-mechanics/src` alias).
-    return path.resolve(
-        server.config.root,
-        '../axiomancer-mechanics/src/Cards/cards.library.ts',
-    );
+    return path.resolve(server.config.root, '../axiomancer-mechanics/src/Cards/library');
+}
+
+/** Every authored card module, newest-listed first (deterministic order). */
+async function libraryModules(dir: string): Promise<string[]> {
+    const entries = await fs.readdir(dir);
+    return entries
+        .filter((f) => f.endsWith('.cards.ts'))
+        .sort()
+        .map((f) => path.join(dir, f));
+}
+
+/**
+ * The module declaring `cardId`, or — for a brand-new card — the module its
+ * theme belongs to, falling back to the first module on disk. Returning a
+ * target for an unknown id is what lets CREATE work at all.
+ */
+async function findCardModule(
+    dir: string, cardId: string, theme?: string,
+): Promise<string> {
+    const files = await libraryModules(dir);
+    for (const file of files) {
+        const text = await fs.readFile(file, 'utf-8');
+        if (text.includes(`id: '${cardId}'`) || text.includes(`id: "${cardId}"`)) return file;
+    }
+    if (theme) {
+        const themed = files.find((f) => path.basename(f) === `${theme}.cards.ts`);
+        if (themed) return themed;
+    }
+    return files[0];
 }
 
 function sendJson(res: ServerResponse, status: number, body: unknown): void {
@@ -74,7 +109,7 @@ export function cardEditorPlugin(): Plugin {
         name: 'axiomancer-card-editor',
         apply: 'serve',
         configureServer(server: ViteDevServer) {
-            const libPath = resolveLibraryPath(server);
+            const libDir = resolveLibraryDir(server);
 
             server.middlewares.use(async (req, res, next) => {
                 const url = (req.url ?? '').split('?')[0];
@@ -97,9 +132,10 @@ export function cardEditorPlugin(): Plugin {
                                 error: 'Body must be a CardDraft with a non-empty id.',
                             });
                         }
-                        const before = await fs.readFile(libPath, 'utf-8');
+                        const target = await findCardModule(libDir, draft.id, draft.theme);
+                        const before = await fs.readFile(target, 'utf-8');
                         const after = upsertCard(before, draft);
-                        if (after !== before) await fs.writeFile(libPath, after, 'utf-8');
+                        if (after !== before) await fs.writeFile(target, after, 'utf-8');
                         await invalidateLibrary(server);
                         return sendJson(res, 200, { ok: true, id: draft.id.trim() });
                     }
@@ -110,9 +146,10 @@ export function cardEditorPlugin(): Plugin {
                         if (id.trim() === '') {
                             return sendJson(res, 400, { ok: false, error: 'Missing card id.' });
                         }
-                        const before = await fs.readFile(libPath, 'utf-8');
+                        const target = await findCardModule(libDir, id);
+                        const before = await fs.readFile(target, 'utf-8');
                         const after = removeCard(before, id);
-                        if (after !== before) await fs.writeFile(libPath, after, 'utf-8');
+                        if (after !== before) await fs.writeFile(target, after, 'utf-8');
                         await invalidateLibrary(server);
                         return sendJson(res, 200, { ok: true, id: id.trim() });
                     }
@@ -135,7 +172,7 @@ export function cardEditorPlugin(): Plugin {
             server.config.logger.info(
                 `  ➜  Card editor API: GET/POST /api/cards, DELETE /api/cards/:id`,
             );
-            server.config.logger.info(`     write-back target: ${libPath}`);
+            server.config.logger.info(`     write-back target: ${libDir}/*.cards.ts`);
         },
     };
 }

@@ -82,10 +82,23 @@ export const RESOLUTE_MIN_MULT = 0.5;
  *  //  old 80-HP floor LOWERED early caps (the floor WAS early behavior), so F
  *  //  rose as the floor fell: 0.60 × ~100-HP early enemies = 60, still under
  *  //  the retired floor — a mild early nerf, honest to the thesis. */
-export const RUPTURE_CAP_FRACTION = 0.60;
-/** RUPTURE cap for a given enemy: round(fraction × enemy max HP) — no floor. */
+/**
+ * THE BIG NUMBERS REWRITE (2026-09-02) — THE CAP IS REPEALED.
+ *
+ * RUPTURE used to clamp at 0.60 x the foe's maximum VITAE. That ceiling was
+ * the whole reason the affliction theme could never cash what it built: a deck
+ * that spent five turns stacking poison hit the same wall as one that spent
+ * two. Payoffs are uncapped now — RUPTURE, REAP ALL, BACKFIRE ALL and the
+ * mark-detonators all pay what the player actually banked, and a fed rot deck
+ * reaching 200-300 is the intended top of the curve, not an exploit.
+ *
+ * The function survives so the call sites keep reading as "the cap", and so a
+ * future ceiling has one place to live. It currently imposes none.
+ */
+export const RUPTURE_CAP_FRACTION = Number.POSITIVE_INFINITY;
 export function ruptureBurstCap(enemyMaxHealth: number): number {
-    return Math.round(RUPTURE_CAP_FRACTION * enemyMaxHealth);
+    void enemyMaxHealth;
+    return Number.POSITIVE_INFINITY;
 }
 /** REAP (single, `the-gleaners-due`) maxHealth erosion rate — phase 32 part 1
  *  (Harvest — REAP attacks MAXIMUM HP, plan/phases/phase_32_theme_deep_work.md

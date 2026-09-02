@@ -71,6 +71,10 @@ const PAID_CHARGES = (DEPOSITOR_CARD.specialMechanics ?? [])
  *  milestone dividend. */
 const PAID_PRINTED_RUNGS = (DEPOSITOR_CARD.specialMechanics ?? [])
     .reduce((sum, m) => sum + (m.kind === 'stagger' ? m.rungs : 0), 0);
+/** The declared-conclusion carrier's own rider STAGGER, which the payoff
+ *  lands alongside the milestone dividend. */
+const CLOSER_RIDER_RUNGS = (getCardById('the-black-cap')?.specialMechanics ?? [])
+    .reduce((sum, m) => sum + (m.kind === 'peroration' ? (m.rider.stagger ?? 0) : 0), 0);
 
 function findEvents<K extends CombatEvent['kind']>(events: CombatEvent[], kind: K): Extract<CombatEvent, { kind: K }>[] {
     return events.filter((e): e is Extract<CombatEvent, { kind: K }> => e.kind === kind);
@@ -173,14 +177,14 @@ describe("petty-indictment — PAID-line milestone accrual (same funnel)", () =>
 
 describe('the lifetime counter survives a Peroration payoff resetting `premises`', () => {
     it('a milestone banked before the payoff stays banked, and new grants keep crossing tiers from there', () => {
-        // `the-black-cap` declares a Peroration at 6 Premises (`peroration.at`);
-        // reaching it fires the rider and zeroes the spendable `premises` tally.
-        // (`concedeAt` deliberately unstaged: this pins the payoff-reset path,
-        // not the CONDEMN alt-win.) Stage the lifetime counter one grant short
-        // of its SECOND tier so the very card play that pays off the
-        // Peroration also crosses it.
-        const before = stateFor('petty-indictment', 2 * PREMISE_MILESTONE_EVERY - 1, {
-            premises: 5,
+        // A SYNTHETIC Peroration (`at: 6`, `concedeAt` deliberately unstaged:
+        // this pins the payoff-reset path, not the CONDEMN alt-win, and it is
+        // not the live `the-black-cap` threshold). Reaching it fires the rider
+        // and zeroes the spendable `premises` tally. Stage the lifetime counter
+        // one FREE grant short of its SECOND tier so the very card play that
+        // pays off the Peroration also crosses it.
+        const before = stateFor(DEPOSITOR, 2 * PREMISE_MILESTONE_EVERY - FREE_CHARGES, {
+            premises: 6 - FREE_CHARGES,
             peroration: { cardId: 'the-black-cap', at: 6 },
             staggerRungs: 0,
         });
@@ -193,7 +197,8 @@ describe('the lifetime counter survives a Peroration payoff resetting `premises`
         expect(milestone).toBeDefined(); // ...but the lifetime counter kept climbing
         expect(milestone!.tiersCrossed).toBe(1);
         expect(after.premiseMilestoneTotal).toBe(2 * PREMISE_MILESTONE_EVERY);
-        expect(after.staggerRungs).toBe(PREMISE_MILESTONE_RUNGS);
+        // Milestone dividend + the fired conclusion's own rider STAGGER.
+        expect(after.staggerRungs).toBe(PREMISE_MILESTONE_RUNGS + CLOSER_RIDER_RUNGS);
     });
 });
 

@@ -113,6 +113,16 @@ function findEvents<K extends CombatEvent['kind']>(events: CombatEvent[], kind: 
     return events.filter((e): e is Extract<CombatEvent, { kind: K }> => e.kind === kind);
 }
 
+/** The played card's OWN direct damage on the foe. THE BIG NUMBERS REWRITE
+ *  brought direct damage back as a first-class verb, so an enemy-HP delta is
+ *  no longer "the clock tick and nothing else" — subtract the card's own hit
+ *  to isolate what the DoT clock contributed. */
+function directDamageToEnemy(events: CombatEvent[]): number {
+    return findEvents(events, 'damage-dealt')
+        .filter(e => e.target === 'enemy')
+        .reduce((sum, e) => sum + e.amount, 0);
+}
+
 // ── 1. fireDotTrigger unit semantics ─────────────────────────────────────────
 
 describe('fireDotTrigger — per-clock tick semantics', () => {
@@ -225,10 +235,10 @@ describe("engine call site — 'card-played' (player-side plays only, ratified)"
         );
         const { state: after, events } = playCombatCard(before, { uid: 't1' }, true);
 
-        // The whole enemy-HP delta IS the clock tick: spoiled-poultice only
-        // applies a status (the strike is dead — doctrine witness), and its
-        // own fresh POISON stack is clock-capped out (WS3.3 eligibility).
-        expect(before.enemy.health - after.enemy.health).toBe(6);
+        // Everything the foe lost beyond the card's own hit IS the clock tick:
+        // spoiled-poultice's fresh POISON stack is clock-capped out of this
+        // same play (WS3.3 eligibility), so only the staged instance ticks.
+        expect(before.enemy.health - after.enemy.health).toBe(directDamageToEnemy(events) + 6);
         const ticks = findEvents(events, 'dot-tick').filter(e => e.effectId === 'ws3x_card_played');
         expect(ticks).toEqual([{ kind: 'dot-tick', effectId: 'ws3x_card_played', label: 'ws3x_card_played', amount: 6, target: 'enemy' }]);
         // The play itself never ticks calendars — duration untouched.
@@ -244,7 +254,7 @@ describe("engine call site — 'card-played' (player-side plays only, ratified)"
         );
         const { state: after, events } = playCombatCard(before, { uid: 't1' }, true);
 
-        expect(before.enemy.health - after.enemy.health).toBe(5);
+        expect(before.enemy.health - after.enemy.health).toBe(directDamageToEnemy(events) + 5);
         expect(after.enemy.effects.some(e => e.effectId === 'ws3x_cp_decay')).toBe(false);
         expect(after.souls).toBe(1);
         expect(findEvents(events, 'soul-gained')).toEqual([
@@ -272,7 +282,8 @@ describe("engine call site — 'payoff' (rupture / consume_affliction / reap_all
         const [detonated] = findEvents(events, 'rupture-detonated');
         expect(detonated.consumed).toEqual(['ws3x_payoff']);
         expect(after.enemy.effects).toEqual([]);
-        expect(before.enemy.health - after.enemy.health).toBe(4 + detonated.amount);
+        expect(before.enemy.health - after.enemy.health)
+            .toBe(directDamageToEnemy(events) + 4 + detonated.amount);
         expect(detonated.amount).toBeGreaterThan(0);
     });
 });
@@ -442,7 +453,8 @@ describe('legacy parity — an untagged DoT keeps exactly the old behavior', () 
             [{ uid: 't1', cardId: 'spoiled-poultice' }],
         );
         const { state: after, events } = playCombatCard(before, { uid: 't1' }, true);
-        expect(before.enemy.health - after.enemy.health).toBe(0);
+        // The card's own hit lands; the untagged DoT contributes NOTHING.
+        expect(before.enemy.health - after.enemy.health).toBe(directDamageToEnemy(events));
         expect(findEvents(events, 'dot-tick')).toEqual([]);
         expect(after.enemy.effects.find(e => e.effectId === 'ws3x_legacy')).toMatchObject({
             intensity: 2, remainingDuration: 4,

@@ -30,10 +30,12 @@ import type {
 
 afterEach(() => { vi.restoreAllMocks(); });
 
-const DISTRAINT = 'distraint';            // IMMOLATE 1 → BLEED 2 (3t) + GUARD 4 (body)
+const DISTRAINT = 'distraint';            // IMMOLATE 2 → Deal 26 + GUARD 24 (body)
+const IMMOLATE_COUNT = 2;                 // distraint's printed pyre size
 const POULTICE = 'spoiled-poultice';      // rank 1 — the expected pyre fuel
 const CURSE = 'mouthful-of-brine';        // PURGE carrier (body)
-const DIRGE = 'dirge-for-the-disinterred'; // REQUIEM 8 carrier (mind)
+const DIRGE = 'dirge-for-the-disinterred'; // REQUIEM 14 carrier (mind)
+const REQUIEM_GATE = 14;                  // dirge's printed discard gate
 
 function makePlayer(cards: string[]): Character {
     const p = deepClone(Player);
@@ -77,25 +79,30 @@ const countIn = (ids: readonly string[], id: string): number =>
     ids.filter(x => x === id).length;
 
 describe('IMMOLATE — the pyre must be fed', () => {
-    it('burns the lowest-rank other card from hand and the deck cycle, then fires the rider', () => {
+    it('burns the lowest-rank other cards from hand and the deck cycle, then fires the rider', () => {
         mockSequentialRng(0.05);
         const deck = [DISTRAINT, POULTICE, POULTICE, POULTICE, POULTICE];
         const state = openAndDraft(deck, 'body');
         const handPoultices = countIn(state.hand.map(h => h.cardId), POULTICE);
-        expect(handPoultices).toBeGreaterThan(0);
+        expect(handPoultices).toBeGreaterThanOrEqual(IMMOLATE_COUNT);
+        const deckPoultices = countIn(state.deck, POULTICE);
+        const enemyHpBefore = state.enemy.health;
 
         const res = play(state, DISTRAINT);
         const burned = res.events.find(e => e.kind === 'immolated');
         expect(burned).toBeDefined();
-        expect((burned as { burned: string[] }).burned).toEqual([POULTICE]);
-        // The burned card left the combat entirely: one fewer in hand than a
-        // plain discard would leave, never in the discard pile, and its deck-
-        // cycle instance is struck (no reshuffle resurrection).
-        expect(countIn(res.state.hand.map(h => h.cardId), POULTICE)).toBe(handPoultices - 1);
+        // BIG NUMBERS (2026-09-02): distraint prints IMMOLATE 2, so the pyre
+        // takes two — the printed count is the applied count.
+        expect((burned as { burned: string[] }).burned)
+            .toEqual(Array.from({ length: IMMOLATE_COUNT }, () => POULTICE));
+        // The burned cards left the combat entirely: fewer in hand than a plain
+        // discard would leave, never in the discard pile, and their deck-cycle
+        // instances are struck (no reshuffle resurrection).
+        expect(countIn(res.state.hand.map(h => h.cardId), POULTICE)).toBe(handPoultices - IMMOLATE_COUNT);
         expect(res.state.discard).not.toContain(POULTICE);
-        expect(countIn(res.state.deck, POULTICE)).toBe(3);
-        // The rider fired: BLEED 2 landed on the foe and GUARD rose.
-        expect(res.state.enemy.effects.some(e => e.effectId === 'debuff_bleed')).toBe(true);
+        expect(countIn(res.state.deck, POULTICE)).toBe(deckPoultices - IMMOLATE_COUNT);
+        // The rider fired: the printed Deal 26 bit the foe and GUARD rose.
+        expect(res.state.enemy.health).toBeLessThan(enemyHpBefore);
         expect(res.state.guard ?? 0).toBeGreaterThan(0);
     });
 
@@ -106,12 +113,14 @@ describe('IMMOLATE — the pyre must be fed', () => {
         // The engine pads a short deck with copies — strip the hand down to
         // the single played card so the pyre genuinely has no fuel.
         state = { ...state, hand: [state.hand.find(h => h.cardId === DISTRAINT)!] };
+        const hpBefore = state.enemy.health;
         const res = play(state, DISTRAINT);
         expect(res.events.some(e => e.kind === 'immolated')).toBe(false);
         expect(res.events.some(e => e.kind === 'effect-fizzled'
             && (e as { message?: string }).message === 'nothing in hand to burn')).toBe(true);
-        // No rider: the pyre was never fed.
-        expect(res.state.enemy.effects.some(e => e.effectId === 'debuff_bleed')).toBe(false);
+        // No rider: the pyre was never fed, so neither the damage nor the guard lands.
+        expect(res.state.enemy.health).toBe(hpBefore);
+        expect(res.state.guard ?? 0).toBe(0);
     });
 });
 
@@ -138,9 +147,9 @@ describe('REQUIEM — the dead remember', () => {
         expect(cold.events.some(e => e.kind === 'die-bonus-fired'
             && (e as { riderText?: string }).riderText?.includes('REQUIEM'))).toBe(false);
 
-        // At the gate (8 in the discard): the rider fires free.
+        // At the gate (REQUIEM_GATE in the discard): the rider fires free.
         let state = openAndDraft(deck, 'mind');
-        state = { ...state, discard: Array.from({ length: 8 }, () => POULTICE) };
+        state = { ...state, discard: Array.from({ length: REQUIEM_GATE }, () => POULTICE) };
         const warm = play(state, DIRGE);
         expect(warm.events.some(e => e.kind === 'die-bonus-fired'
             && (e as { riderText?: string }).riderText?.includes('REQUIEM'))).toBe(true);

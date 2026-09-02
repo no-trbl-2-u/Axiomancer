@@ -98,8 +98,8 @@ function customPhases(stances: ('heart' | 'body' | 'mind')[], damage = 6): Comba
 // ── (A) CONDEMN scales with enemy difficulty ─────────────────────────────────
 
 describe('CONDEMN Premises scale with enemy difficulty (item 1a)', () => {
-    const CLOSER = 'the-black-cap';    // SENTENCE at 6; concedeAt (printed) 8
-    const OPENER = 'petty-indictment'; // FREE: +1 Premise
+    const CLOSER = 'the-black-cap';    // SENTENCE at 12; concedeAt (printed) 14
+    const OPENER = 'petty-indictment'; // FREE: +2 Premises
 
     function declared(enemy: Enemy): CombatEncounterState {
         mockSequentialRng(0.05);
@@ -111,42 +111,68 @@ describe('CONDEMN Premises scale with enemy difficulty (item 1a)', () => {
         return res.state;
     }
 
-    it('normal/simple enemy still concedes at the printed 8 (CONCEDE_PREMISES_BASE)', () => {
-        expect(CONCEDE_PREMISES_BASE).toBe(8);
+    /**
+     * THE BIG NUMBERS REWRITE (2026-09-02) moved The Black Cap's printed
+     * `concedeAt` from 8 to 14, i.e. ABOVE every difficulty floor, so the live
+     * card can no longer exercise `concedeFloorFor`. These cases re-declare
+     * the peroration with a printed number BELOW the floors so the floor rule
+     * is what is actually under test; `at: 99` keeps the SENTENCE rider from
+     * firing and resetting the tally before the concede check.
+     */
+    function declaredAt(enemy: Enemy, concedeAt: number): CombatEncounterState {
+        return { ...declared(enemy), peroration: { cardId: CLOSER, at: 99, concedeAt } };
+    }
+
+    it('the printed CONDEMN number is the number the engine applies (14 on a simple foe)', () => {
         let state = declared(makeEnemy(300, 'heart')); // GraveLarva difficulty: 'simple'
-        state = { ...state, premises: 7 };
-        const res = playFromHand(state, OPENER, false); // +1 -> 8
+        state = { ...state, premises: 12 };
+        const res = playFromHand(state, OPENER, false); // +2 -> 14 == printed concedeAt
+        expect(res.state.finalOutcome).toBe('concede');
+    });
+
+    it('one Premise short of the printed CONDEMN number does not win', () => {
+        let state = declared(makeEnemy(300, 'heart'));
+        state = { ...state, premises: 11 };
+        const res = playFromHand(state, OPENER, false); // +2 -> 13, under 14
+        expect(res.state.finalOutcome).not.toBe('concede');
+    });
+
+    it('normal/simple enemy concedes at the card-printed number (CONCEDE_PREMISES_BASE floor)', () => {
+        expect(CONCEDE_PREMISES_BASE).toBe(8);
+        let state = declaredAt(makeEnemy(300, 'heart'), 8);
+        state = { ...state, premises: 6 };
+        const res = playFromHand(state, OPENER, false); // +2 -> 8
         expect(res.state.finalOutcome).toBe('concede');
     });
 
     it('elite enemy: 8 Premises no longer concedes (needs CONCEDE_PREMISES_ELITE)', () => {
         expect(CONCEDE_PREMISES_ELITE).toBe(10);
-        let state = declared(makeEnemy(300, 'heart', 'elite'));
-        state = { ...state, premises: 7 };
-        const res = playFromHand(state, OPENER, false); // +1 -> 8, still under 10
+        let state = declaredAt(makeEnemy(300, 'heart', 'elite'), 8);
+        state = { ...state, premises: 6 };
+        const res = playFromHand(state, OPENER, false); // +2 -> 8, still under 10
         expect(res.state.finalOutcome).not.toBe('concede');
         expect(res.state.peroration).not.toBeNull(); // the argument is still live
     });
 
     it('elite enemy: reaching CONCEDE_PREMISES_ELITE (10) concedes', () => {
-        let state = declared(makeEnemy(300, 'heart', 'elite'));
-        state = { ...state, premises: 9 };
-        const res = playFromHand(state, OPENER, false); // +1 -> 10
+        let state = declaredAt(makeEnemy(300, 'heart', 'elite'), 8);
+        state = { ...state, premises: 8 };
+        const res = playFromHand(state, OPENER, false); // +2 -> 10
         expect(res.state.finalOutcome).toBe('concede');
     });
 
     it('boss enemy: 10 Premises no longer concedes (needs CONCEDE_PREMISES_BOSS)', () => {
         expect(CONCEDE_PREMISES_BOSS).toBe(12);
-        let state = declared(makeEnemy(300, 'heart', 'boss'));
-        state = { ...state, premises: 9 };
-        const res = playFromHand(state, OPENER, false); // +1 -> 10, still under 12
+        let state = declaredAt(makeEnemy(300, 'heart', 'boss'), 8);
+        state = { ...state, premises: 8 };
+        const res = playFromHand(state, OPENER, false); // +2 -> 10, still under 12
         expect(res.state.finalOutcome).not.toBe('concede');
     });
 
     it('unique enemy: reaching CONCEDE_PREMISES_BOSS (12) concedes', () => {
-        let state = declared(makeEnemy(300, 'heart', 'unique'));
-        state = { ...state, premises: 11 };
-        const res = playFromHand(state, OPENER, false); // +1 -> 12
+        let state = declaredAt(makeEnemy(300, 'heart', 'unique'), 8);
+        state = { ...state, premises: 10 };
+        const res = playFromHand(state, OPENER, false); // +2 -> 12
         expect(res.state.finalOutcome).toBe('concede');
     });
 });
