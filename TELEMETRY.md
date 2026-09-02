@@ -7,9 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-17T21:14:27Z | skill | ship-a-phase | claude-fable-5 | main | - |
-| 2026-07-17T21:40:09Z | slash-prompt | /fix-ci | unknown | user/ci | /fix-ci 29615233695 |
-| 2026-07-17T22:07:21Z | slash-prompt | /loop | unknown | user/ci | /loop 1h /march |
 | 2026-07-17T22:08:20Z | skill | march | claude-opus-4-8 | main | - |
 | 2026-07-17T22:13:28Z | subagent | Explore | claude-opus-4-8 | main | Map dice sim/autoplay infra |
 | 2026-07-17T23:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
@@ -407,3 +404,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-01T13:43:57Z | skill | digest | unknown | main | - |
 | 2026-09-01T21:07:37Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-01T21:08:26Z | skill | iterate | claude-sonnet-5 | main | - |
+| 2026-09-02T00:20:03Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-02T00:20:05Z | skill | march | unknown | main | - |
+| 2026-09-02T00:23:03Z | skill | iterate | claude-sonnet-5 | main | - |

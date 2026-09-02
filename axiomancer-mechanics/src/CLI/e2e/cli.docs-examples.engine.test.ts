@@ -12,11 +12,17 @@ import path from 'path';
 
 import { ENEMY_REGISTRY } from '../../Enemy/enemy.library';
 import { ENEMIES as COMBAT_SIM_ENEMIES } from '../combat-sim.cli';
+import { COMBAT_DECK_PRESETS } from '../../Combat/combat.starter-deck-presets';
 
 const DOCS_PATH = path.resolve(__dirname, '../../../docs/cli.md');
+const PLAYTEST_DOCS_PATH = path.resolve(__dirname, '../../../docs/playtest.md');
 
 function readDocs(): string {
     return fs.readFileSync(DOCS_PATH, 'utf-8');
+}
+
+function readPlaytestDocs(): string {
+    return fs.readFileSync(PLAYTEST_DOCS_PATH, 'utf-8');
 }
 
 describe('docs/cli.md — --enemy examples stay in sync with the registries', () => {
@@ -59,6 +65,25 @@ describe('docs/cli.md — --enemy examples stay in sync with the registries', ()
         expect(found.size).toBeGreaterThan(0);
         for (const name of found) {
             expect(simNames.has(name), `docs/cli.md references unknown combat-sim enemy "${name}"`).toBe(true);
+        }
+    });
+});
+
+describe('docs/playtest.md — preset:<id> examples stay in sync with COMBAT_DECK_PRESETS', () => {
+    it('every documented preset:<id> resolves in COMBAT_DECK_PRESETS', () => {
+        const docs = readPlaytestDocs();
+        const presetIds = new Set(Object.keys(COMBAT_DECK_PRESETS));
+
+        const presetPattern = /preset:([a-z][a-z0-9-]*)/g;
+        const found = new Set<string>();
+        let match: RegExpExecArray | null;
+        while ((match = presetPattern.exec(docs)) !== null) {
+            found.add(match[1]);
+        }
+
+        expect(found.size).toBeGreaterThan(0);
+        for (const id of found) {
+            expect(presetIds.has(id), `docs/playtest.md references unknown preset id "${id}"`).toBe(true);
         }
     });
 });
