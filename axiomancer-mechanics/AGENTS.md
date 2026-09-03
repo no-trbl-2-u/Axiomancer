@@ -12,17 +12,16 @@ architecture docs.
 in this package's `CLAUDE.md` — read both before any mechanics, combat,
 balance, content, mercy, or alignment work. The former status-dominance
 law and ten-starter-preset curve are historical after T's 2026-08-08
-unshackling and the Profane Canon. Current combat evidence uses CQI for
-fight texture while terminal outcomes and the three campaign snapshots
-await an explicit viability/calibration charter. It is deliberately NOT
-restated here.
+unshackling and the Profane Canon. THE BIG NUMBERS REWRITE (2026-09-02)
+also repealed CQI and the idea of a governing objective function. Simulations
+retain bug detectors and a wide sanity envelope; terminal outcomes and the
+three campaign snapshots await an explicit viability/calibration charter.
 
 **Evidence doctrine (condensed):**
 
-- Command-green playtests can still be design-red. CQI grades how a fight
-  played, not whether its terminal outcome makes the campaign viable; a
-  high CQI beside universal defeat or capitulation requires separate
-  judgment. Low-run/single-seed matrices are pressure evidence, not tuning
+- Command-green playtests can still be design-red. No summary score makes a
+  terminal outcome viable; universal defeat, certainty, or capitulation
+  requires separate judgment. Low-run/single-seed matrices are pressure evidence, not tuning
   authority. Capture generated playtest metrics in the dated report, then
   revert generated tracked reports unless the task explicitly updates those
   fixtures.

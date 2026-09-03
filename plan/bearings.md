@@ -19,8 +19,10 @@ Three-package npm-workspaces monorepo: a pure rules **engine**
 (`axiomancer-mechanics`), an Expo/React-Native **app**
 (`axiomancer-mobile`) that consumes the engine as local source,
 and a local **card-editor** dev tool. Status effects remain a major
-authored tool, judged by CQI (spec 35) rather than by dominance;
-morally charged choices carry lasting world consequences.
+authored tool but no route is protected. THE BIG NUMBERS REWRITE repealed
+all governing combat objective functions, including CQI; simulations retain
+bug detectors and a wide sanity envelope. Morally charged choices carry
+lasting world consequences.
 
 **Product name: "Miserere Mei, Deus"** (renamed from "Axiomancer" via
 `/oversight` 2026-08-20 — see `plan/AUDIT.md`'s product-name row and
