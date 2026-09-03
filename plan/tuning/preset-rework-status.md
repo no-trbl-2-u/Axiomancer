@@ -12,10 +12,11 @@
 
 **Law:** One deck receives one preset-specific plan at a time. A cheap
 cross-preset screen does not promote a deck out of `untouched`; it only helps
-select the next deck. Phase 44d has settled the snapshot names/themes; do not
-open a current preset plan while the card redesign remains explicitly
-transitional or before a current viability/calibration charter defines the
-preset-specific gates.
+select the next deck. Phase 44d settled the snapshot names/themes, THE PIPELINE
+LIBERATION lifted the transitional-library hold, and THE BIG NUMBERS REWRITE +
+THE PATH have since replaced the combat/card baseline. Do not open a current
+preset plan before a current viability/calibration charter defines executable
+preset-specific gates under that live law.
 
 ## Category definitions
 
@@ -53,8 +54,9 @@ None.
 
 There is no active preset-specific plan. Do not revive Grace or create a second
 legacy-theme plan. Phase 44d has already settled the current snapshot names and
-themes; current preset planning now waits on the explicitly transitional card
-redesign and a viability/calibration charter that names executable gates.
+themes. The former transitional-card-redesign hold is superseded; current
+preset planning waits only on a viability/calibration charter that names
+executable gates against THE BIG NUMBERS REWRITE + THE PATH baseline.
 
 ## Historical campaign — retired presets
 
