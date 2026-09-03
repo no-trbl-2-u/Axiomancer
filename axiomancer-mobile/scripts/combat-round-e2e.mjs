@@ -234,8 +234,42 @@ async function dragTo(page, fromLocator, to) {
     return true
 }
 
+// Both readers scope to the BOARD. The drag ghost lives in the panel OUTSIDE
+// it and used to render a clone of the last-dragged die under that die's own
+// testID (fixed in CombatDie/CombatEncounterPanel, kept scoped here as belt and
+// braces): a prefix match over the whole page then returned a die from a
+// PREVIOUS turn, and the drag started from wherever the ghost was parked.
+/**
+ * Is the die actually TOUCHABLE, or is some other control sitting on it?
+ *
+ * Board chrome is absolutely positioned and z-indexed over the tray, and it
+ * grows with progression — the signature rune column is anchored off the tray
+ * for exactly this reason (see `sigTop` in CombatBoard). When it (or anything
+ * else) covers a die, the die cannot be dragged at all and a tap aimed at it
+ * activates the occluder instead. That shipped undetected because every drag
+ * here failed SILENTLY: nothing threw, the round just played FREE. Returns the
+ * occluding element's description, or null when the die is clear.
+ */
+async function occluderOver(page, dieId) {
+    const box = await page.getByTestId(`combat-die-${dieId}`).first().boundingBox().catch(() => null)
+    if (!box) return null
+    return page.evaluate(([b, id]) => {
+        const el = document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2)
+        if (!el) return null
+        for (let n = el; n; n = n.parentElement) {
+            if (n.getAttribute?.('data-testid') === `combat-die-${id}`) return null   // the die itself
+        }
+        const chain = []
+        for (let n = el, i = 0; n && i < 5; n = n.parentElement, i++) {
+            const tid = n.getAttribute?.('data-testid')
+            if (tid) chain.push(tid)
+        }
+        return chain.join(' < ') || el.tagName
+    }, [box, dieId]).catch(() => null)
+}
+
 async function readHand(page) {
-    return page.locator('[data-testid^="combat-hand-"]').evaluateAll((ns) => ns.map((n) => {
+    return page.getByTestId('combat-board').locator('[data-testid^="combat-hand-"]').evaluateAll((ns) => ns.map((n) => {
         const uid = (n.getAttribute('data-testid') ?? '').replace('combat-hand-', '')
         const label = n.getAttribute('aria-label') ?? ''
         const m = label.match(/,\s*(heart|body|mind)\s+card/i)
@@ -244,7 +278,7 @@ async function readHand(page) {
 }
 
 async function readDice(page) {
-    return page.locator('[data-testid^="combat-die-"]').evaluateAll((ns) => ns.map((n) => {
+    return page.getByTestId('combat-board').locator('[data-testid^="combat-die-"]').evaluateAll((ns) => ns.map((n) => {
         const id = (n.getAttribute('data-testid') ?? '').replace('combat-die-', '')
         const label = n.getAttribute('aria-label') ?? ''
         const color = (label.match(/^(\w+)\s+stance die/i)?.[1] ?? '').toLowerCase()
@@ -288,7 +322,7 @@ async function killPrimer(page) {
  */
 async function playRound(page, sink, seed, round) {
     const at = (step) => `seed ${seed}, round ${round}, ${step}`
-    const acted = { staged: 0, powered: 0, applied: 0, signature: 0, ledger: null }
+    const acted = { staged: 0, powered: 0, powerMissed: 0, applied: 0, signature: 0, ledger: null }
 
     // The board's own counter ("PHASE 2/4 · R2 · T2") plus the hand size, so a
     // round that does nothing is legible as "the hand ran dry" or "the phase
@@ -331,6 +365,15 @@ async function playRound(page, sink, seed, round) {
 
         // Power it, if the tray can.
         if (die) {
+            const occluder = await occluderOver(page, die.id)
+            if (occluder) {
+                throw new CombatCrash(
+                    `${at(`reaching for the ${die.color} die`)} — die ${die.id} is UNTOUCHABLE: `
+                    + `"${occluder}" sits on top of it, so it can never be dragged and a tap there `
+                    + 'fires that control instead',
+                    { kind: 'die-occluded', message: `${die.id} covered by ${occluder}` },
+                )
+            }
             for (let a = 0; a < 3 && !(await has(page.getByTestId('combat-staged-die'))); a++) {
                 await page.waitForTimeout(120)
                 await dragTo(
@@ -341,6 +384,11 @@ async function playRound(page, sink, seed, round) {
                 await assertAlive(page, sink, at(`powering "${card.name}" with a ${die.color} die`))
             }
             if (await has(page.getByTestId('combat-staged-die'))) acted.powered++
+            // A legal die was on the table and the drop still did not arm the
+            // card. Counted, not shrugged off: this is exactly how the harness
+            // rotted into a FREE-plays-only run that still reported PASS while
+            // the powered-play path went uncovered for weeks (2026-09-03).
+            else acted.powerMissed++
         }
 
         // Nudge a RECOIL X picker so the X path is exercised too.
@@ -593,11 +641,24 @@ async function playSeed(browser, baseUrl, seed, mode) {
 
         const applied = rounds.reduce((n, r) => n + r.applied, 0)
         const powered = rounds.reduce((n, r) => n + r.powered, 0)
+        const powerMissed = rounds.reduce((n, r) => n + r.powerMissed, 0)
         if (applied === 0) {
             throw new CombatCrash(
                 `${tag} — played ${rounds.length} rounds but never committed a single card; `
                 + 'this harness proves nothing about the play path when it cannot play',
                 { kind: 'inert-run', message: 'no card ever applied' },
+            )
+        }
+
+        // Coverage assertion, sibling to the inert-run one above: FREE plays
+        // alone do not exercise the die economy (drop targeting, spend, the
+        // Reserve). One miss is drag flake; a run that keeps offering a legal
+        // die and never lands one is the harness lying about its coverage.
+        if (powerMissed >= 2 && powered <= 1) {
+            throw new CombatCrash(
+                `${tag} — a legal die was on the table in ${powerMissed} rounds but powered a card in only `
+                + `${powered}; the run played FREE and proves nothing about the die path`,
+                { kind: 'inert-power', message: `powerMissed=${powerMissed} powered=${powered}` },
             )
         }
 

@@ -319,6 +319,36 @@
 
 ## Pending
 
+### [HIGH] combat — the signature rune column sat ON the dice tray (fixed 2026-09-03)
+- pass: crash hunt 2026-09-03 (live e2e probe, `elementFromPoint`)
+- viewport: 390x844
+- auth_state: real progression save (endgame + sage presets, boss and standard)
+- category: functional
+- observation: `sigColumn` is absolutely positioned at `top: '34%'`, `zIndex:
+  30`, and grows DOWNWARD with the signature count. With a full loadout it
+  reached into the dice row: probing `elementFromPoint` at the leftmost die's
+  centre mid-fight returned `combat-signature-sig-press-the-point`, not the
+  die. That die could not be dragged at all, and a tap aimed at it CAST a
+  signature and spent Conviction. Same class as the 2026-07-18 fix that
+  right-aligned the player status strip off this column.
+- evidence: the drag failed SILENTLY — `resolveDrop` never ran, so no loud
+  rejection fired and nothing reached the log. It also rotted the e2e:
+  `combat-round-e2e.mjs` reported PASS while powering a die only in round 1
+  and playing FREE every round after (boss+sage: 1 powered in 10 rounds).
+  Second, compounding defect: the drag ghost and the staged card's die socket
+  both rendered a `CombatDie`, so up to three nodes answered to one
+  `combat-die-<id>` — the harness's prefix match picked the parked ghost,
+  holding a PREVIOUS turn's die, and dragged from wherever it sat.
+- fix: the column now anchors off the MEASURED tray top (`sigTop`), so its
+  last rune always clears the tray whatever the loadout grants and however
+  many rows the tray wraps to; the ghost and socket dice carry their own
+  testIDs. `combat-round-e2e.mjs` gained an occlusion guard that fails the
+  run naming the occluder, plus a coverage assertion that fails a run which
+  keeps being offered a legal die and never lands one. Self-tested by
+  restoring the bug: the guard fired. Powered plays went 1 -> 3-4 per fight
+  (boss+sage 1 -> 9).
+- source: crash hunt (owner report)
+
 ### [HIGH] general — no mid/late equipment or signature skills exist for THE PATH's sixth axis
 - pass: user-jot (commit 343d7e98)
 - viewport: unspecified
@@ -423,6 +453,19 @@
 - source: user
 
 ### [HIGH] combat — user hit a mid-combat crash that 30 seeded UI runs could not reproduce
+- **Platform pinned 2026-09-03 (third report, this time on END TURN).** The
+  owner confirmed both unknowns the rows above kept guessing at: it is the
+  **EAS preview APK (native)** and the app **closes to the home screen** — a
+  process death, not a caught JS throw, so the in-app ErrorBoundary can never
+  see it and neither can any web harness. Ruled out on web the same session:
+  the live map encounter played to a terminal outcome on 5 seeds, plus a
+  pure END-TURN-only sweep (no card played, 5 seeds x up to 20 rounds) —
+  zero pageerrors, zero boundary mounts. **Next step is a native stack**:
+  `adb logcat -c && adb logcat *:E AndroidRuntime:V libc:V` while
+  reproducing on the device. Until that lands, treat `react-native-svg` /
+  `expo-image` / Reanimated (all divergent on native) as the suspect set.
+  The hunt did surface two real defects on the way, both fixed — see the
+  rune-column row.
 - **Partial coverage extension shipped 2026-09-03 (commit 6529212a,
   issue #277).** `combat-round-e2e.mjs` gained `ENCOUNTER_KIND=boss` (arms
   the lowest boss foe instead of a standard encounter) and `WITHDRAW=1`

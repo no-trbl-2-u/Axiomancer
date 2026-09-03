@@ -155,16 +155,26 @@ export function OutcomeText({ text, names, base, bold, numberOfLines }: { text: 
 
 // ── Signature rune column (left edge) ────────────────────────────────────────
 
-function SignatureColumn({ conviction, signatures, onCast, onInfo }: {
+function SignatureColumn({ conviction, signatures, onCast, onInfo, top, onMeasureHeight }: {
     conviction: number;
     signatures: CombatSignatureVM[];
     onCast: (id: string) => void;
     onInfo?: (s: CombatSignatureVM) => void;
+    /** Measured anchor that keeps the column clear of the dice tray (see
+     *  `sigTop` in `CombatBoard`). Undefined until the first layout pass, when
+     *  the stylesheet's proportional `top` stands in. */
+    top?: number;
+    onMeasureHeight?: (h: number) => void;
 }) {
     const AXM = usePalette();
     const styles = useStyles();
     return (
-        <View style={styles.sigColumn} testID="combat-signature-bar" pointerEvents="box-none">
+        <View
+            style={[styles.sigColumn, top !== undefined ? { top } : null]}
+            testID="combat-signature-bar"
+            pointerEvents="box-none"
+            onLayout={(e) => onMeasureHeight?.(e.nativeEvent.layout.height)}
+        >
             <View
                 style={styles.convictionChip}
                 testID="combat-conviction"
@@ -206,6 +216,12 @@ function SignatureColumn({ conviction, signatures, onCast, onInfo }: {
 
 // Owner declutter pass 2026-07-19: the 54pt cube crowded the board — shave ~1/8.
 const TRAY_DIE_SIZE = 47;
+
+// The rune column's resting anchor, and the gap it keeps above the dice tray
+// when a long signature list would otherwise push it onto the dice.
+const SIG_COLUMN_TOP_RATIO = 0.34;
+const SIG_COLUMN_TOP = `${SIG_COLUMN_TOP_RATIO * 100}%` as const;
+const SIG_TRAY_CLEARANCE = 10;
 
 function DiceRow({
     vm, dieGesture, draggingDieId, assignedDieIds, onFateTap,
@@ -473,7 +489,11 @@ export const StagedCard = React.memo(function StagedCard({
                     <View style={[styles.dieSocket, socketPulse && !assignedDie ? { transform: [{ scale: 1.12 }] } : null]} testID={assignedDie ? undefined : `combat-socket-${card.uid}`}>
                         {assignedDie ? (
                             <View testID="combat-staged-die">
-                                <CombatDie die={assignedDie} size={compact ? 26 : 32} />
+                                {/* The socket's copy answers to its OWN id — the prefix
+                                    warning above applies to the die face too, not just
+                                    this wrapper: an armed card otherwise put a second
+                                    `combat-die-<id>` node on the board. */}
+                                <CombatDie die={assignedDie} size={compact ? 26 : 32} testID="combat-staged-die-face" />
                             </View>
                         ) : (
                             <View style={[styles.dieSocketEmpty, socketPulse ? { borderColor: AXM.sulfur, backgroundColor: 'rgba(212,192,38,0.18)' } : null]}>
@@ -1123,6 +1143,23 @@ export const CombatBoard = React.memo(function CombatBoard({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [draggingDieId, badRectsSV]);
 
+    // ── the rune column must never sit on the tray ──────────────────────────
+    // `sigColumn` is absolutely positioned and grows DOWNWARD with the
+    // signature count. Measured 2026-09-03 (live e2e probe): with a full
+    // loadout it reached into the dice row, and `elementFromPoint` at the
+    // leftmost die's centre returned the rune button, not the die — so that
+    // die could not be dragged at all, and a tap aimed at it cast a signature
+    // and spent Conviction instead. Anchor the column off the MEASURED tray
+    // top so its last rune always clears the tray, however many signatures the
+    // loadout grants and however many rows the tray wraps to. Falls back to the
+    // stylesheet's proportional `top` until the first layout pass lands.
+    const [contentH, setContentH] = useState(0);
+    const [trayTop, setTrayTop] = useState(0);
+    const [sigH, setSigH] = useState(0);
+    const sigTop = contentH > 0 && trayTop > 0 && sigH > 0
+        ? Math.max(0, Math.min(contentH * SIG_COLUMN_TOP_RATIO, trayTop - sigH - SIG_TRAY_CLEARANCE))
+        : undefined;
+
     // NO-SOFTLOCK telegraph (owner directive 2026-07-12) — the DEAD TRAY: at
     // least one die is still playable but NONE of them can power ANY card in
     // hand (no matching color, no wild). The outs get lit instead of leaving
@@ -1241,7 +1278,11 @@ export const CombatBoard = React.memo(function CombatBoard({
             />
 
             {/* interactive column */}
-            <View style={styles.content} pointerEvents="box-none">
+            <View
+                style={styles.content}
+                pointerEvents="box-none"
+                onLayout={(e) => setContentH(e.nativeEvent.layout.height)}
+            >
                 {/* clearance under the floating top HUD */}
                 <View style={{ height: topInset + COMBAT_HUD_HEIGHT }} pointerEvents="none" />
 
@@ -1366,7 +1407,9 @@ export const CombatBoard = React.memo(function CombatBoard({
                     call 2026-07-19): it is a signature, cast from the rune column
                     like every other. The presenter reshapes its rune flag-on
                     (1◆ cost + the full firing gate + refusal reason). */}
-                <DiceRow vm={vm} dieGesture={dieGesture} draggingDieId={draggingDieId} assignedDieIds={assignedDieIds} onFateTap={onFateTap} />
+                <View onLayout={(e) => setTrayTop(e.nativeEvent.layout.y)} pointerEvents="box-none">
+                    <DiceRow vm={vm} dieGesture={dieGesture} draggingDieId={draggingDieId} assignedDieIds={assignedDieIds} onFateTap={onFateTap} />
+                </View>
 
                 {/* the hand dock — edge-to-edge fan, bottoms cropped off-screen */}
                 <View style={styles.dock}>
@@ -1435,6 +1478,7 @@ export const CombatBoard = React.memo(function CombatBoard({
             {/* signature rune column — left edge */}
             <SignatureColumn
                 conviction={vm.conviction} signatures={vm.signatures} onCast={onSignature} onInfo={onSignatureInfo}
+                top={sigTop} onMeasureHeight={setSigH}
             />
 
             {/* SCRAP — only present while a card is being dragged (no permanent
@@ -1724,7 +1768,7 @@ const useStyles = makeStyles((AXM) => ({
     xValue: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 1, color: AXM.sulfur, minWidth: 34, textAlign: 'center' },
 
     // ── signature rune column ──
-    sigColumn: { position: 'absolute', left: 6, top: '34%', alignItems: 'center', gap: 8, zIndex: 30 },
+    sigColumn: { position: 'absolute', left: 6, top: SIG_COLUMN_TOP, alignItems: 'center', gap: 8, zIndex: 30 },
     convictionChip: {
         borderWidth: 1, borderColor: AXM.sulfur, borderRadius: 6, backgroundColor: 'rgba(0,0,0,0.6)',
         paddingHorizontal: 7, paddingVertical: 3,
