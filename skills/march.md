@@ -13,6 +13,7 @@ right-thing-to-do every tick:
 unlabeled issues exist          →  /triage
 ELSE critique due (rate-lim)    →  /critique
 ELSE pending phase              →  /ship-a-phase
+ELSE content lifecycle due      →  /adjust-<cards|equipment|enemies|keywords|npcs>
 ELSE content growth due         →  /forge
 ELSE expand due + bold posture  →  /expand
 ELSE                            →  /iterate
@@ -24,16 +25,23 @@ delivery, OR when its rate-limit window opens (every ~20
 commits or ~48h) AND the bearings posture is **bold** or
 **autonomous**.
 
+Per-item content (cards, equipment, enemies, keywords, NPCs) has its
+own standing stewards — the `adjust-*` family — on their own
+rate-limited cadence, independent of the growth-due signal that still
+drives `/forge` for maps/continents/events/art. See §3b.
+
 This means: an overnight run can take the project from
 "scaffolded" to "shipped, populated, iteratively polished,
-critiqued, addressed, inbox-zero on issues, and growing its
-own plan when reality outpaces the original spec" without a
-mode switch from the user.
+critiqued, addressed, inbox-zero on issues, growing and pruning its
+own content, and growing its own plan when reality outpaces the
+original spec" without a mode switch from the user.
 
 The triage check is **cheap when idle** (one API call to count
 unlabeled issues). The critique check is **rate-limited**
-(≥12 commits + ≥24h spacing, green-deploy required). The
-expand check is **rate-limited + posture-gated** (≥20 commits
+(≥12 commits + ≥24h spacing, green-deploy required). The content
+lifecycle check is **rate-limited per category** (≥15 commits or
+≥36h since that category's own last pass, green-deploy required).
+The expand check is **rate-limited + posture-gated** (≥20 commits
 + ≥48h, posture ≠ strict).
 
 ## 2. Invocation
@@ -124,32 +132,72 @@ tick):
 - Execute its procedure end-to-end.
 - Return.
 
-#### 3b. Content growth due (THE OPEN GATE ¶8)?
+#### 3b. Content lifecycle due (rate-limited, per category)?
 
-Growth is a standing mandate, not opportunistic work. Check
-whether any content surface shipped growth recently:
+The five per-item content surfaces (cards, equipment, enemies,
+keywords, NPCs) each have a standing steward — the `adjust-*`
+family — that creates, updates, AND retires that surface's content.
+This is independent of 3c's growth-due signal: it fires on its own
+cadence regardless of whether `/forge` shipped recently.
 
-```bash
-git log --since="48 hours ago" --oneline -- \
-  axiomancer-mechanics/src/World \
-  axiomancer-mechanics/src/Enemy \
-  axiomancer-mechanics/src/Cards \
-  axiomancer-mechanics/src/NPCs | head -5
+Read `plan/CONTENT_LEDGER.md`'s category table:
+
+```
+| category  | last pass | commit | pass count |
+| cards     | ...       | ...    | ...        |
+| equipment | ...       | ...    | ...        |
+| enemies   | ...       | ...    | ...        |
+| keywords  | ...       | ...    | ...        |
+| npcs      | ...       | ...    | ...        |
 ```
 
-If that log is EMPTY (no content-surface commit in 48h) and no
-phase work matched in 3a:
+Dispatch if **all three** hold:
 
-- Read `skills/forge.md`.
+1. At least one category qualifies: its `last pass` is at least
+   **15 commits after** the row's commit, OR **more than 36 hours
+   ago**, OR "never" AND at least **2 phases have shipped touching
+   that category's surface**.
+2. `npm run deploy:check` shows a green deploy.
+3. No phase work is pending (Step 3a would have matched first if
+   there were).
+
+If multiple categories qualify, pick the **stalest** one (oldest
+`last pass`; "never" counts as oldest). Break remaining ties by fixed
+rotation order: cards → equipment → enemies → keywords → npcs.
+
+If all three hold:
+
+- Read `skills/adjust-<category>.md` for the picked category.
 - Execute its procedure end-to-end.
 - Return.
 
 Otherwise fall through to 3c.
 
-#### 3c. Expand due (rate-limited, posture-gated)?
+#### 3c. Content growth due (THE OPEN GATE ¶8)?
+
+Growth is a standing mandate, not opportunistic work. This gate now
+covers only `/forge`'s remaining surfaces (maps/continents, events,
+art) — per-item content is 3b's job. Check whether any of those
+surfaces shipped growth recently:
+
+```bash
+git log --since="48 hours ago" --oneline -- \
+  axiomancer-mechanics/src/World | head -5
+```
+
+If that log is EMPTY (no world-surface commit in 48h) and no
+phase work matched in 3a and no dispatch happened in 3b:
+
+- Read `skills/forge.md`.
+- Execute its procedure end-to-end.
+- Return.
+
+Otherwise fall through to 3d.
+
+#### 3d. Expand due (rate-limited, posture-gated)?
 
 Read `plan/bearings.md` "Plan expansion posture" section. If
-posture is **strict**, skip to 3d.
+posture is **strict**, skip to 3e.
 
 Read metadata header at top of `plan/PHASE_CANDIDATES.md`:
 
@@ -178,9 +226,9 @@ If all four hold:
 - Execute its procedure end-to-end.
 - Return.
 
-If any condition fails, fall through to 3d.
+If any condition fails, fall through to 3e.
 
-#### 3d. Else — iterate.
+#### 3e. Else — iterate.
 
 - Read `skills/iterate.md`.
 - Execute its procedure end-to-end.
@@ -209,8 +257,8 @@ A march tick succeeds iff the child tick succeeds.
 
 1. **`git pull` divergence.**
 2. **State files corrupted or missing** (build plan, AUDIT,
-   CRITIQUE). Stop and report — don't reconstruct
-   silently.
+   CRITIQUE, CONTENT_LEDGER). Stop and report — don't
+   reconstruct silently.
 
 Otherwise inherited from the dispatched skill.
 
@@ -220,6 +268,7 @@ Otherwise inherited from the dispatched skill.
 # State files
 plan/steps/01_build_plan.md          # pending phases
 plan/CRITIQUE.md                     # critique queue + last-pass metadata
+plan/CONTENT_LEDGER.md               # per-category adjust-* last-pass metadata
 
 # External signals
 gh issue list ...                    # unlabeled count
@@ -229,7 +278,12 @@ npm run deploy:check                    # green-deploy condition
 skills/triage.md                     # Step 1 (cheapest)
 skills/critique.md                   # Step 2 (rate-limited)
 skills/ship-a-phase.md               # Step 3a
-skills/forge.md                      # Step 3b (growth mandate)
-skills/expand.md                     # Step 3c (posture-gated)
-skills/iterate.md                    # Step 3d
+skills/adjust-cards.md               # Step 3b (content lifecycle)
+skills/adjust-equipment.md           # Step 3b (content lifecycle)
+skills/adjust-enemies.md             # Step 3b (content lifecycle)
+skills/adjust-keywords.md            # Step 3b (content lifecycle)
+skills/adjust-npcs.md                # Step 3b (content lifecycle)
+skills/forge.md                      # Step 3c (growth mandate — maps/events/art)
+skills/expand.md                     # Step 3d (posture-gated)
+skills/iterate.md                    # Step 3e
 ```

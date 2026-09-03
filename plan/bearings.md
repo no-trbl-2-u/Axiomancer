@@ -256,6 +256,24 @@ ambiguity.)
   keywords, VITAE pools, tiered decks and stages. Specs 32, 34 §3/§8
   and 35 and `docs/profane-canon.md` are marked HISTORICAL; there is no
   governing objective function any more.
+- **THE CONTENT LIFECYCLE SPLIT (T direct, 2026-09-02/03).** Per-item
+  content (cards, equipment, enemies, keywords, NPCs/dialogue) split
+  out of `/forge` into the five `adjust-*` loop verbs
+  (`skills/adjust-<category>.md` + `.claude/commands/` doorways), each
+  a standing steward that creates, updates, AND retires its surface's
+  content — no cap per tick; whatever its structural audit finds.
+  `/forge` keeps only maps/continents/events/art. `/march` dispatches
+  via a new rate-limited content-lifecycle gate (§3b: ≥15 commits or
+  ≥36h per category, green deploy, stalest category first) reading
+  `plan/CONTENT_LEDGER.md`. Three standing laws of the family:
+  (1) every CREATE and UPDATE runs a `kb-query` MCP research pass
+  BEFORE anything is written (receipts or a documented miss; REMOVE is
+  exempt); (2) removal is retire-and-archive (ban list for
+  cards/keywords, retired sections elsewhere), never silent deletion;
+  (3) "earning its keep" is judged on structural signals only
+  (reachability, duplication, domination, wiring honesty) — never the
+  repealed CQI/win-rate machinery, and there is no runtime telemetry
+  to consult.
 - **Copy canon:** VITAE, STANCE, GRACE (né MORALE, spec 34 §5.6 / Phase
   44h). Never HEALTH / GUARD / MORALE.
 - **Content location:** engine content in mechanics `src/*`

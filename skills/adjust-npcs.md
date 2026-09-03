@@ -1,0 +1,174 @@
+# Skill: adjust-npcs
+
+> **The NPC/dialogue steward.** Audits `src/NPCs/**` — NPC entities,
+> dialogue trees, and their staging into maps — for structural
+> health, then creates, updates, or retires NPCs and dialogue
+> content. Absorbs `/forge`'s former Dialogue/NPCs surface entirely.
+
+## 1. Purpose
+
+An NPC is thin content until it's staged: reachable in a map, with a
+dialogue tree that goes somewhere and reacts to what the player's
+done. `/forge` used to track this as a spatial side-effect of map
+work; `/adjust-npcs` owns it directly — the backlog of authored-but-
+unstaged NPCs, dead-end dialogue nodes, and trees that never got the
+alignment/quest gating spec 42/spec 10 call for.
+
+## 2. Invocation
+
+```
+/adjust-npcs
+/adjust-npcs create | update | remove   # optional bias
+/loop /march                            # routed via content-lifecycle gate
+```
+
+## 3. Procedure
+
+### Step 0 — Sync + doctrine
+
+```bash
+git pull --ff-only
+```
+
+Read `axiomancer-mechanics/CLAUDE.md`, `plan/bearings.md`, any settled
+`axiomancer-mechanics/specs/story/` and `specs/characters/` specs for
+the NPCs in scope (character-spec/story-spec skills own the
+*personhood* design session; this skill ships the *content* once a
+spec exists, or authors minor NPCs directly when no spec is needed —
+see Step 2).
+
+### Step 1 — Audit (structural signals)
+
+| Signal | Action |
+|---|---|
+| An authored NPC not staged into any map node/event (`unstagedNpcs` backlog) | UPDATE (stage it) — treat as the highest-priority finding; authored-but-invisible content is worse than absent |
+| A map with fewer than 2 staged NPCs | CREATE |
+| A `DialogueTree` node with no `choices` that isn't an intentional terminator (a dead-end that reads as a bug, not an ending) | UPDATE |
+| A `DialogueChoice.effect` referencing a retired card (`teachCard`) or removed quest (`startQuest`/`progressQuest`) | UPDATE |
+| An NPC using the legacy flat `DialogueMap` where a `DialogueTree` would let spec 42/spec 10 alignment or quest gating apply | UPDATE (migrate to tree) — only when the NPC's spec calls for branching; a genuinely flavor-only NPC keeps the flat map |
+| An NPC with a spec in `specs/characters/` or `specs/story/` that was never implemented in `src/NPCs/**` | CREATE |
+| An NPC absent from every map (orphaned entity, no spec references it either) | REMOVE candidate |
+
+### Step 2 — KB research, then design
+
+**A KB research run is a GATE for every CREATE and UPDATE — nothing
+gets written before it.** Query the `kb-query` MCP server first:
+`kb_search` / `kb_find_games` against the board-game reception
+corpus for NPC/dialogue prior art (what players say about flavor
+NPCs vs reactive ones, quest-gating complaints, dead-end dialogue
+findings). The corpus is card- and board-game-centric, so dialogue
+coverage may genuinely miss — a miss is acceptable: file a wish
+(`node scripts/kb-sync.mjs wish "<topic> — <why>"`) and state the
+miss in the commit body rather than skipping the run. If the MCP
+tools are absent or failing, fall back to the documented manual path
+(`node scripts/kb-sync.mjs`, then the sibling
+`../game-knowledge-base/` checkout). REMOVE needs no KB run — an
+orphaned NPC is retirable on Step 1's structural evidence alone.
+Pass whatever receipts the run produced to `content-curator` with
+the authoring brief.
+
+Then: narrative authoring is `content-curator`'s job, not the main
+agent's
+(the standing rule `/iterate` already follows: "content gap → spawn
+`content-curator`, don't write prose from main agent"). Spawn it for
+every CREATE/UPDATE that involves writing dialogue text. When a
+finding implies a full new named character (not just a staging fix or
+a minor NPC), that's `character-spec`/`story-spec` territory — those
+are interactive Socratic sessions with the user, not something this
+autonomous tick can complete alone; file it to `plan/AUDIT.md` as
+`[needs-user-call]` rather than improvising a personhood.
+
+### Step 3 — Ship
+
+**CREATE** — new `NPC` entry with a `dialogueTree` (preferred over
+the legacy flat map for new authoring) + staged at a real map
+node/event + wired triggers (`teachCard`/`startQuest`/quest-objective
+effects only reference live content) + `GAME_STATE_VERSION` migration
+if the tree introduces a new persisted flag/id shape.
+
+**UPDATE** — stage an unstaged NPC, patch a dead-end node, repoint a
+stale `effect` reference, or migrate a flat map to a tree. Same NPC
+identity (`name` key); no re-creation.
+
+**REMOVE (retire, never delete silently)** — archive discipline, same
+as enemies/equipment:
+1. Remove the NPC from every map node/event that references it.
+2. Move its entry to a clearly marked retired section rather than
+   deleting the record outright.
+3. Log the retirement with reasoning (§4 ledger).
+
+### Step 4 — Gates, ledger, commit
+
+```bash
+npm run verify --workspace axiomancer-mechanics
+npm run verify --workspace axiomancer-mobile   # NPCs/** drives mobile's dialogue route
+```
+
+Update `plan/CONTENT_LEDGER.md`: bump the `npcs` row, append a log
+entry.
+
+```bash
+git add <explicit files> plan/CONTENT_LEDGER.md
+git commit -m "$(cat <<'EOF'
+content: adjust-npcs pass <N> — <one-line: created X, updated Y, retired Z>
+
+- <finding> -> <action>, per <signal from §1>.
+- Verify: green (mechanics + mobile).
+EOF
+)"
+git push origin main
+npm run deploy:check
+```
+
+### Step 5 — File the residue
+
+A finding needing a full personhood design session →
+`plan/AUDIT.md` as `[needs-user-call]` (route to `character-spec` /
+`story-spec` next time the user is present). Other follow-ons →
+`plan/PHASE_CANDIDATES.md`.
+
+## 4. Hard rules
+
+1. Nexus standing rules 1–7 apply in full.
+2. **Don't write dialogue prose from the main agent** — delegate to
+   `content-curator`.
+3. **Don't invent a named character's personhood autonomously** —
+   that's `character-spec`/`story-spec`'s interactive job; file it,
+   don't improvise it.
+4. **Ship content, not stubs.** An NPC staged nowhere doesn't count
+   as shipped — the unstaged backlog is the #1 audit priority for a
+   reason.
+5. **Never delete shipped content silently** — archive + update
+   routing.
+6. **New persisted dialogue state rides `GAME_STATE_VERSION`** with a
+   migration + pinned test.
+7. **No CREATE or UPDATE without the KB research run** (§3 Step 2)
+   — receipts cited, or the wish-filed miss documented in the
+   commit body. REMOVE is exempt.
+
+## 5. Failure modes
+
+1. **Verify/deploy gate fails ≥3 times on one root cause** — stop,
+   file to `plan/AUDIT.md`.
+2. **Finding needs a full character-spec session** — file as
+   `[needs-user-call]`, don't decide it solo.
+3. **Audit finds nothing actionable** — commit only the ledger bump.
+
+## 6. Quick reference
+
+```bash
+# Reads
+axiomancer-mechanics/src/NPCs/types.ts
+axiomancer-mechanics/src/NPCs/dialogue.ts
+axiomancer-mechanics/specs/story/
+axiomancer-mechanics/specs/characters/
+plan/CONTENT_LEDGER.md
+
+# Sub-agent
+Agent({ subagent_type: "content-curator", prompt: "..." })
+
+# Gates
+npm run verify --workspace axiomancer-mechanics
+npm run verify --workspace axiomancer-mobile
+npm run deploy:check
+```

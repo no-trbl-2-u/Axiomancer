@@ -183,14 +183,20 @@ The unified **nexus** harness was re-onboarded onto the monorepo on
 
 - `skills/` — the loop verbs: `ship-a-phase`, `plan-a-phase`, `iterate`,
   `critique`, `triage`, `expand`, `forge` (the content foundry — ships
-  new enemies/cards/keywords/maps/continents/events/dialogue/art every
-  growth tick; THE OPEN GATE ¶8's engine), `march`, `oversight`, `jot`,
-  `digest`, `consolidate`.
+  new maps/continents/events/art every growth tick; THE OPEN GATE
+  ¶8's world/spatial engine), the `adjust-*` family (`adjust-cards`,
+  `adjust-equipment`, `adjust-enemies`, `adjust-keywords`,
+  `adjust-npcs` — per-item content lifecycle stewards, split out of
+  forge 2026-09-02: each audits its surface on a rate-limited cadence
+  and creates/updates/retires whatever the audit finds, with a
+  mandatory `kb-query` research run before any create/update is
+  written), `march`, `oversight`, `jot`, `digest`, `consolidate`.
   (Heavyweight source-of-truth files; the `.claude/commands/<verb>.md`
   pointers are the doorways.)
 - `plan/` — the loop's durable memory: `bearings.md` (standing context —
   **read this first**), `steps/01_build_plan.md` (the phase queue),
   `AUDIT.md` + `CRITIQUE.md` (the drain queues), `PHASE_CANDIDATES.md`,
+  `CONTENT_LEDGER.md` (per-category `adjust-*` last-pass metadata),
   `CURRENT-STATE.md`, `reflexes.md`, `lessons.md`, `phases/`.
 - `scripts/` — `deploy-check.mjs` (CI-green deploy gate),
   `notify.mjs` (pager), `loop-issue.mjs` (GitHub issue mirror).
