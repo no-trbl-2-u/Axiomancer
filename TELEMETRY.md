@@ -7,9 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-18T03:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
-| 2026-07-18T04:09:51Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
-| 2026-07-18T05:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
 | 2026-07-18T05:13:52Z | subagent | general-purpose | claude-opus-4-8 | main | Implement Phase D6a flag-on render core |
 | 2026-07-18T06:09:51Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
 | 2026-07-18T06:12:16Z | subagent | general-purpose | claude-opus-4-8 | main | Implement Phase D6b chips/telegraph/rail |
@@ -407,3 +404,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-03T00:22:02Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-03T00:22:03Z | skill | march | unknown | main | - |
 | 2026-09-03T00:25:04Z | subagent | Explore | claude-sonnet-5 | main | Find W5 enemy roster and current portrait assets |
+| 2026-09-03T00:27:01Z | subagent | scout | claude-sonnet-5 | main | Source CC art candidates: Seam Tick, Prop-Wight, Unpaid Delver |
+| 2026-09-03T00:27:06Z | subagent | scout | claude-sonnet-5 | main | Source CC art candidates: Sump Maren, Toll-Sergeant, Guild Knife |
+| 2026-09-03T00:27:12Z | subagent | scout | claude-sonnet-5 | main | Source CC art candidates: The Factor, Wharf Shrike, Harbormaster |
