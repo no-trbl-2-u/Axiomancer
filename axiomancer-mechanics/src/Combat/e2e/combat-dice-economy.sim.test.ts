@@ -98,9 +98,40 @@ describe('spec 33 D3 — realized-play invariants (flag-on matrix)', () => {
         expect(p.momentumBreakPerRound).toBeGreaterThan(0);
     });
 
+    /**
+     * F1 HAS TO BE MEASURED LIKE-FOR-LIKE (2026-09-03). `diceMath` is a
+     * STOCK-gear roll stream — `measureDiceMath` calls `rollUpgradeableDice`
+     * with an EMPTY state, so no die upgrades and no act-reward dice. It can
+     * therefore only be compared against a stage that carries neither.
+     *
+     * Once THE PATH's die-upgrade axis was wired into the shipped spec-33 roll
+     * (it previously reached only the legacy model), `mid` began rolling HONED
+     * gear and legitimately whiffed LESS than stock — so the old pooled
+     * early+mid comparison was scoring an upgraded campaign against an act-one
+     * baseline and failing. `early` is the stock-gear stage; the skew this test
+     * exists to watch is measured there.
+     */
+    const stockRun = simulateUpgradeableEconomy({
+        presets: ['threadbare', 'pilgrim', 'apostate'],
+        stages: ['early'],
+        seeds: [1, 2, 3, 4, 5],
+    });
+
     it('realized roll skews miss-heavier than the dice-math baseline (report F1)', () => {
-        expect(p.whiffRate).toBeGreaterThanOrEqual(result.diceMath.whiffRate - 0.005);
-        expect(p.usablePerRound).toBeLessThanOrEqual(result.diceMath.usablePerRound + 0.01);
+        expect(stockRun.pooled.whiffRate)
+            .toBeGreaterThanOrEqual(stockRun.diceMath.whiffRate - 0.005);
+        expect(stockRun.pooled.usablePerRound)
+            .toBeLessThanOrEqual(stockRun.diceMath.usablePerRound + 0.01);
+    });
+
+    it('THE PATH: honed stages roll strictly more usable dice than stock gear', () => {
+        // The whole point of the die-upgrade axis, and the guard that would
+        // have caught its absence: as first shipped (2026-09-02) the axis
+        // reached only the LEGACY model — the spec-33 `startTurn` branch never
+        // read `dieUpgradeLevel`, so honing changed nothing in the dice model
+        // the playtest and the app actually run. If this regresses to parity,
+        // the axis has stopped reaching the roll again.
+        expect(p.usablePerRound).toBeGreaterThan(stockRun.pooled.usablePerRound);
     });
 
     // Phase D6e drained F2: enemy threat phases now carry open stance-check
@@ -155,12 +186,27 @@ describe('spec 33 D7 — ratified economy envelope + flag-not-ready canaries', (
         expect(p.pressFatePerRound).toBeGreaterThan(0);
     });
 
-    it('STAKE-gap: flag-on fights still run longer than flag-off (sink active but small)', () => {
-        // STAKE retired its sink + clock. Press Fate now spends (F3 drained) but
-        // at 0.060 casts/round it does not yet close the clock gap — re-measured
-        // 5.38 vs 4.83 (+11.5%, was +13.6% with the sink inactive). Flips when a
-        // real escalation-pressure replacement lands.
-        expect(result.stakeGap.flagOnAvgRounds).toBeGreaterThan(result.stakeGap.flagOffAvgRounds);
+    it('STAKE-gap: the clock gap INVERTED once THE PATH reached the shipped roll', () => {
+        // HISTORY. This assertion used to read `flagOn > flagOff` — flag-on
+        // fights ran LONGER (5.38 vs 4.83, +11.5%) because STAKE retired its
+        // sink and clock and Press Fate at 0.060 casts/round could not close
+        // the gap. Its comment predicted a flip "when a real escalation-
+        // pressure replacement lands."
+        //
+        // It flipped for a different reason (2026-09-03). Wiring THE PATH's
+        // two dice axes into the spec-33 roll is worth far more under the flag
+        // than off it, because spec 33 RETIRED THE DRAFT (`draftStanceDie`
+        // no-ops) — every usable die powers a card. So a honed die and an
+        // act-reward die each buy a PAID PLAY flag-on, while flag-off they only
+        // buy colour selection and banked ◆ under roll-N-draft-one. Flag-on
+        // fights got shorter: re-measured 3.17 vs 3.75 (-15%).
+        //
+        // Pinned in the NEW direction because a re-flip is now a real bug
+        // signal: it would mean the axes stopped reaching the shipped roll.
+        expect(result.stakeGap.flagOnAvgRounds).toBeLessThan(result.stakeGap.flagOffAvgRounds);
+        // Structural floor — both models must still fight real rounds.
+        expect(result.stakeGap.flagOnAvgRounds).toBeGreaterThan(1);
+        expect(result.stakeGap.flagOffAvgRounds).toBeGreaterThan(1);
     });
 
     it('leaves the flag OFF (no leak; the flag is not flipped by D7)', () => {
