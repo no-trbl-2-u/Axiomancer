@@ -14,6 +14,126 @@
 
 ## Pending
 
+### [loop-call] Phase 78 — W5 art-pass candidates (2026-09-03)
+- category: design residue (art sourcing — awaiting `/oversight` pick;
+  RESEARCH-AND-PRESENT per `plan/phases/phase_78_art_pass_w5_sourcing.md`,
+  no art wired or committed this phase)
+- detail: >=2 CC/open-source candidates per W3/W5 enemy (9 total),
+  sourced from a few different sites, each with license + provenance +
+  a one-line fit rationale. All URLs verified live via WebFetch at
+  research time (2026-09-03). Current interim source for all 9 remains
+  the game-icons.net silhouette placeholders (CC BY 3.0, Lorc/
+  Delapouite) filed in the W3 loop-call row below — this row is
+  candidates for a *replacement* pick, not a report that the
+  placeholders are broken.
+
+  **enemy-seam-tick** ("Seam Tick" — blood-drinking cave tick)
+  1. [Tick icon](https://game-icons.net/1x1/lorc/tick.html) — Lorc —
+     CC BY 3.0 — direct blood-drinking-tick match, distinct SVG from
+     the current `maggot.svg` placeholder.
+  2. [Tick (PSF).png](https://commons.wikimedia.org/wiki/File:Tick_(PSF).png)
+     — Pearson Scott Foresman — Public Domain — clean line-art tick,
+     different source/style than game-icons.net.
+
+  **enemy-prop-wight** ("Prop-Wight" — vengeful mine-timber spirit)
+  1. [Ghost icon](https://game-icons.net/lorc/originals/ghost.html) —
+     Lorc — CC BY 3.0 — "floating soul back from dead to haunt the
+     livings"; distinct file from the current `haunting.svg`.
+  2. [Ghost monster](https://opengameart.org/content/ghost-monster) —
+     ImogiaGames — CC0 — 6-frame animated ghost sprite, 11 color
+     variants; full remix freedom to pose as timber-bound.
+
+  **enemy-unpaid-delver** ("The Unpaid Delver" — undead miner)
+  1. [Mining icon](https://game-icons.net/1x1/lorc/mining.html) — Lorc
+     — CC BY 3.0 — pick-wielding digger motif, different artist than
+     the placeholder `miner.svg` (Delapouite).
+  2. [Skeleton Sprite](https://opengameart.org/content/skeleton-sprite)
+     — r0ar — CC0 — base undead figure (idle/walk/throw-bone/die); weak
+     standalone fit — has no pickaxe built in, would need compositing
+     with a tool asset (flagged by the scout as the weakest match of
+     the 9; an itch.io CC0 mining-character-pack trawl might do better).
+
+  **enemy-sump-maren** ("Sump Maren" — drowned water spirit)
+  1. [Mermaid icon](https://game-icons.net/1x1/delapouite/mermaid.html)
+     — Delapouite — CC BY 3.0 — gentler/more lure-like than the
+     placeholder `drowning.svg`.
+  2. [Ophelia (Rusalka) by Konstantin Makovsky](https://commons.wikimedia.org/wiki/File:Ophelia_(Rusalka)_by_Konstantin_Makovsky.jpg)
+     — Konstantin Makovsky (1839-1915) — Public Domain — painted
+     drowned-woman/water-spirit figure, portrait-quality, on-theme.
+     (Also surfaced, not deeply vetted: other Commons
+     Category:Rusalka works — Bilibin 1934, Kramskoi "The Mermaids".)
+
+  **enemy-toll-sergeant** ("Toll-Sergeant" — corrupt extortionist guard)
+  1. [Sergeant icon](https://game-icons.net/1x1/delapouite/sergeant.html)
+     — Delapouite — CC BY 3.0 — rank stripes, distinct from `guards.svg`.
+  2. [Brass knuckles icon](https://game-icons.net/1x1/delapouite/brass-knuckles.html)
+     — Delapouite — CC BY 3.0 — "fists backing the shakedown" angle.
+  3. [The Tax Collector (1542) by Marinus van Reymerswaele](https://commons.wikimedia.org/wiki/File:Marinus_van_Reymerswale_-_The_Tax_Collector_-_WGA19329.jpg)
+     — Marinus van Reymerswaele — Public Domain — period portrait of a
+     venal fee-collector; medium confidence on fit (tax collector, not
+     literally a gate guard, but same extortion archetype). No
+     medieval-toll-specific asset found on OpenGameArt/Kenney.nl.
+
+  **enemy-guild-knife** ("Guild Knife" — clean-boots contract killer)
+  1. [Dagger & Rose icon](https://game-icons.net/1x1/delapouite/dagger-rose.html)
+     — Delapouite — CC BY 3.0 — page names it "symbol of the Mafia",
+     matches the guild-contract-killer motif.
+  2. [Poison bottle icon](https://game-icons.net/1x1/lorc/poison-bottle.html)
+     — Lorc — CC BY 3.0 — alt weapon-of-choice for a killer who avoids
+     messy blade work.
+  3. [Dark Elf Assassin sprite set](https://opengameart.org/content/dark-elf-assassin)
+     — Spring Spring — CC0 — suited professional-assassin framing,
+     tonally more playful than intended but maximally permissive.
+
+  **enemy-the-factor** ("The Factor" — predatory debt-broker)
+  1. [Scales icon](https://game-icons.net/1x1/lorc/scales.html) — Lorc
+     — CC BY 3.0 — weighing imagery, different artist than the
+     placeholder `abacus.svg` (Delapouite).
+  2. ["The Moneylender and his Wife" (1514)](https://commons.wikimedia.org/wiki/File:Quinten_Massijs_(I)_-_The_Moneylender_and_his_Wife_-_WGA14281.jpg)
+     — Quinten Metsys — Public Domain — period painting of a
+     predatory financial dealer, strong tonal match.
+
+  **enemy-wharf-shrike** ("Wharf Shrike" — impaling harbor bird)
+  1. [Raven 16x18 sprite](https://opengameart.org/content/raven-16x18)
+     — Redshrike (concept: KrizEvil) — CC0 — pixel corvid, easy to
+     reskin with a hooked/impaling motif; distinct from `raven.svg`.
+  2. [Shrike clipart](https://openclipart.org/detail/123931/shrike) —
+     Pearson Scott Foresman (via Wikimedia) — Public Domain — the
+     literal namesake bird.
+  3. [Loggerhead shrike photo](https://commons.wikimedia.org/wiki/File:Shrike_Loggerhead_JG.jpg)
+     — JeffreyGammon — CC BY 4.0 — photoreal option if wanted instead
+     of line art.
+
+  **enemy-the-harbormaster** ("The Harbormaster" — boss, water-gate
+  keeper)
+  1. [Kraken tentacle icon](https://game-icons.net/1x1/delapouite/kraken-tentacle.html)
+     — Delapouite — CC BY 3.0 — more imposing/threatening than the
+     current `pirate-captain.svg` silhouette; scale and menace fit
+     the boss slot.
+  2. [Sailors & Pirates sprite pack (captain sprite)](https://opengameart.org/content/sailors-pirates)
+     — Svetlana Kushnariova (Cabbit) and Jordan Irwin (AntumDeluge) —
+     OGA-BY 3.0+ / CC BY 3.0+ (dual) — captain sprite re-skinnable as
+     an ancient gatekeeper.
+     Neither candidate is portrait-format; if a single strong "face"
+     image is wanted for the boss specifically, a further search for
+     CC-licensed "ancient sea god" / "customs officer" portrait packs
+     is the suggested next step.
+
+- open questions carried from the research (not blocking a pick, but
+  worth knowing before `/oversight`): OpenGameArt/itch.io yielded thin
+  results for toll-sergeant, the-factor, and wharf-shrike specifically
+  (search-engine indexing of those sites is sparse) — Wikimedia
+  fine-art/clipart filled the gap instead of a purpose-built game
+  asset for those three. unpaid-delver's best CC0 candidate needs
+  compositing (skeleton + pick prop), not a single drop-in.
+- evidence: `plan/phases/phase_78_art_pass_w5_sourcing.md`; the W3
+  loop-call row below (current placeholder sourcing); `enemy.library.ts`
+  (`W3_ADDED = '2026-08-28'`) for the enemy roster/theme lines; three
+  `scout` sub-agent research passes, 2026-09-03, all candidate URLs
+  confirmed live via WebFetch at research time.
+- status: awaiting `/oversight` pick — no art wired into the game or
+  `provenance.json`/`index.ts` this phase.
+
 ### [loop-call] Phase W3 design decisions — the northern city ships (2026-08-28)
 - category: design residue (THE OPEN GATE standing rule 7 — decisions filed
   for after-the-fact review, shipped either way; no action needed unless
