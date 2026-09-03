@@ -319,6 +319,16 @@
 
 ## Pending
 
+### [HIGH] general — no mid/late equipment or signature skills exist for THE PATH's sixth axis
+- pass: user-jot (commit 343d7e98)
+- viewport: unspecified
+- auth_state: anonymous
+- category: content
+- observation: we need to create a series of equipment/sig-skills and items for mid game and late game
+- evidence: user-spotted at 2026-09-03T11:20:00Z
+- suggested fix: [user has not specified — iterate to determine]
+- source: user
+
 ### [LOW] dialogue — reply cards echo their label as an identical sub-line
 - pass: session-playtest 2026-08-28 (continent playtest, The Delver at
   caverns nc-2)
