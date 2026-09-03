@@ -413,6 +413,18 @@
 - source: user
 
 ### [HIGH] combat — user hit a mid-combat crash that 30 seeded UI runs could not reproduce
+- **Partial coverage extension shipped 2026-09-03 (commit 6529212a,
+  issue #277).** `combat-round-e2e.mjs` gained `ENCOUNTER_KIND=boss` (arms
+  the lowest boss foe instead of a standard encounter) and `WITHDRAW=1`
+  (takes the reveal screen's retreat instead of entering combat), and CI
+  now runs a boss+`PRESET=sage` (non-starter deck) pass plus a withdraw
+  pass in both `verify-mechanics.yml` and `verify-mobile.yml`. Verified
+  locally clean on seed 16 for both new axes. **Still open:** the
+  level-up-out-of-victory path is untested, and the crash itself remains
+  UNREPRODUCED — this only closes 3 of the 4 axes the suggested fix named.
+  Do not mark this row Done until either the crash reproduces (so it can
+  be pinned) or the remaining axis ships too.
+- issue: #277
 - pass: user-jot (commit 24475f48)
 - viewport: unspecified
 - auth_state: anonymous
