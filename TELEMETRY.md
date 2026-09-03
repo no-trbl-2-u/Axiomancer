@@ -7,9 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-18T01:12:31Z | subagent | Explore | claude-opus-4-8 | main | Scope D6 mobile combat UI surface |
-| 2026-07-18T01:38:10Z | slash-prompt | /oversight | unknown | user/ci | /oversight |
-| 2026-07-18T02:09:51Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
 | 2026-07-18T03:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
 | 2026-07-18T04:09:51Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
 | 2026-07-18T05:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
@@ -407,3 +404,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-02T12:09:57Z | slash-prompt | /consolidate | unknown | user/ci | /consolidate |
 | 2026-09-02T12:09:59Z | skill | consolidate | unknown | main | - |
 | 2026-09-02T16:41:14Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-03T00:22:02Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-03T00:22:03Z | skill | march | unknown | main | - |
+| 2026-09-03T00:25:04Z | subagent | Explore | claude-sonnet-5 | main | Find W5 enemy roster and current portrait assets |
