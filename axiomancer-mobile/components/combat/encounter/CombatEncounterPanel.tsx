@@ -1229,9 +1229,9 @@ export function CombatEncounterPanel({
                         <CombatCardFace card={ghostPayload.card} width={HAND_CARD_W} height={HAND_CARD_H} />
                     ) : (
                         <>
-                            <CombatDie die={ghostPayload.die} size={DIE_GHOST_SIZE} />
+                            <CombatDie die={ghostPayload.die} size={DIE_GHOST_SIZE} testID="combat-drag-ghost-die" />
                             {/* ✕ ineligible cue — lights while hovering an illegal target */}
-                            <Animated.View style={[styles.ghostXBadge, dieGhostXStyle]} testID="combat-die-ghost-x">
+                            <Animated.View style={[styles.ghostXBadge, dieGhostXStyle]} testID="combat-drag-ghost-x">
                                 <Text style={styles.ghostXGlyph} allowFontScaling={false}>✕</Text>
                             </Animated.View>
                         </>

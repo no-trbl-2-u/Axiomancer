@@ -68,7 +68,17 @@ export function combatDieFootprint(size: number): { width: number; height: numbe
     return { width: size + o, height: size + o + size * 0.18 };
 }
 
-export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed = false }: { die: CombatDieVM; size?: number; dimmed?: boolean }) {
+export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed = false, testID }: {
+    die: CombatDieVM;
+    size?: number;
+    dimmed?: boolean;
+    /** Overrides the default `combat-die-<id>`. The drag ghost renders a CLONE
+     *  of a tray die and must not answer to the original's testID — two nodes
+     *  under one id made the tray unreadable to the e2e harness (it picked the
+     *  parked ghost, which holds a PREVIOUS turn's die, and dragged from the
+     *  wrong place). Same reason the ghost is hidden from accessibility. */
+    testID?: string;
+}) {
     const accent = die.colorHex;
     const special = die.face === 'special';
     const cracked = die.cracked === true;
@@ -111,7 +121,7 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
                                         : ', available to draft';
     return (
         <View
-            testID={`combat-die-${die.id}`}
+            testID={testID ?? `combat-die-${die.id}`}
             accessible
             accessibilityRole="button"
             accessibilityLabel={`${die.stanceLabel} stance die${statePhrase}`}
