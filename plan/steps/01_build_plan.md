@@ -2576,7 +2576,7 @@ on pickup):**
       `ErrorBoundary` so `PrevSessionCrashPrompt` reuses the live-crash
       report chrome; Hermes promise-rejection tracker installs
       production-only (dev keeps RN core's own LogBox tracker).
-- [ ] Phase 78 — Art-pass: open-source art sourcing research for W5
+- [x] Phase 78 — Art-pass: open-source art sourcing research for W5
       portraits. Agent researches the open web for CC/open-source art
       fitting each remaining W5 enemy's theme, gathers >=2 candidates
       from a few different sources with license/provenance recorded per
@@ -2587,6 +2587,10 @@ on pickup):**
       73's in-house generation pipeline is ready. Direct T instruction
       via `/oversight` 2026-09-02 — see `plan/PHASE_CANDIDATES.md` §
       Promoted for full scope.
+      Shipped `67be65e0` — 9 enemies x >=2 candidates each (game-icons.net
+      alt icons, Wikimedia Commons public-domain art, OpenGameArt.org,
+      OpenClipArt), all URLs WebFetch-verified live, filed in
+      `plan/AUDIT.md` awaiting the `/oversight` pick.
 
 > **After the queue drains:** `/march` transitions to `/iterate`
 > — draining `plan/AUDIT.md` + `plan/CRITIQUE.md`, doc-drift,
