@@ -15,6 +15,7 @@ import test from 'node:test'
 
 import {
   atlasKeywords, catalogGlyphTable, editorGlyphCases, editorVocabulary,
+  enemyRegistryKeywords, systemGlossaryTerms,
   mobileGlyphTable, mobileRegistryKeywords, PATHS,
 } from './content-drift.mjs'
 
@@ -125,13 +126,39 @@ const REGISTRY_WITHOUT_ATLAS_ROW = new Set([
   'IMMOLATE', 'PURGE',                             // same — curse-local verbs
 ])
 
-test('every keyword the atlas registers has a gloss in the live registry', () => {
+/**
+ * Atlas rows that deliberately gloss NOWHERE, and why. Each is a word the atlas
+ * documents but the game does not treat as a keyword.
+ */
+const ATLAS_WITHOUT_REGISTRY_ROW = new Set([
+  // THE BIG NUMBERS REWRITE decision D6: "Deal 24" is plain English. Keywording
+  // it would spend the face-term budget on the one verb needing no explanation
+  // (MTG's rule: keyword what COMPRESSES). The atlas documents it as the
+  // library's primary verb; it has no gloss because it needs none.
+  'DEAL',
+])
+
+test('every keyword the atlas registers has a gloss in a live registry', () => {
   // The direction that matters: the atlas feeds `axio_keywords`, which agents
   // read as current law. A row for a word the game no longer glosses publishes
   // a keyword that does not exist.
-  const registry = mobileRegistryKeywords()
-  const orphans = keys(atlasKeywords()).filter((k) => !registry[k])
+  //
+  // TWO registries count. Card keywords live in mobile's `KEYWORD_GLOSS`; the
+  // nine ENEMY keywords live in mechanics' `ENEMY_KEYWORD_GLOSS`, kept separate
+  // on purpose so the mobile KW lints stay card-only.
+  const registry = {
+    ...mobileRegistryKeywords(), ...enemyRegistryKeywords(), ...systemGlossaryTerms(),
+  }
+  const orphans = keys(atlasKeywords())
+    .filter((k) => !registry[k] && !ATLAS_WITHOUT_REGISTRY_ROW.has(k))
   assert.deepEqual(orphans, [], `atlas rows with no registry gloss (${PATHS.keywordAtlas})`)
+})
+
+test('the atlas exemption list holds no word the registries actually gloss', () => {
+  const registry = {
+    ...mobileRegistryKeywords(), ...enemyRegistryKeywords(), ...systemGlossaryTerms(),
+  }
+  assert.deepEqual([...ATLAS_WITHOUT_REGISTRY_ROW].filter((k) => registry[k]), [])
 })
 
 test('registry keywords missing an atlas row are all accounted for', () => {

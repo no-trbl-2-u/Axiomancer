@@ -27,6 +27,7 @@ export const PATHS = {
   editorVocab: 'axiomancer-card-editor/src/theme/wx.ts',
   mobileKeywords: 'axiomancer-mobile/state/combat/keywords.ts',
   keywordAtlas: 'axiomancer-mechanics/docs/keyword-atlas.md',
+  enemyKeywords: 'axiomancer-mechanics/src/Enemy/enemy-keywords.ts',
 }
 
 export const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf-8')
@@ -121,6 +122,42 @@ export function mobileRegistryKeywords() {
   return nonEmpty(Object.fromEntries([...names].map((n) => [n, true])), 'mobile keyword registry')
 }
 
+/**
+ * ENEMY keyword names from `ENEMY_KEYWORD_GLOSS`, upper-cased.
+ *
+ * THE BIG NUMBERS REWRITE (2026-09-02): the atlas covers TWO vocabularies now
+ * — the card keywords a player's own cards print (mobile `KEYWORD_GLOSS`) and
+ * the nine keywords a FOE carries. The enemy set is deliberately kept out of
+ * `KEYWORD_GLOSS` so the mobile KW lints, which iterate card keywords, stay
+ * untouched; it lives in mechanics beside the union it glosses. Both are real
+ * registries, so both count when asking "does this atlas row gloss anywhere".
+ */
+export function enemyRegistryKeywords() {
+  const text = read(PATHS.enemyKeywords)
+  const body = braceBlock(text, text.indexOf('ENEMY_KEYWORD_GLOSS'))
+  const names = new Set()
+  for (const m of body.matchAll(/^ {4}([a-z_]+):/gm)) names.add(m[1].toUpperCase())
+  return nonEmpty(Object.fromEntries([...names].map((n) => [n, true])), 'enemy keyword registry')
+}
+
+/**
+ * SYSTEM terms from mobile's `SYSTEM_GLOSSARY` — the words the atlas documents
+ * that are systems rather than card keywords (CONVICTION, TOLL, RESERVE,
+ * GHOST, RUNGS, WILD/X). Glossed in their own table, not `KEYWORD_GLOSS`, so
+ * the third registry counts too.
+ */
+export function systemGlossaryTerms() {
+  const text = read(PATHS.mobileKeywords)
+  const names = new Set()
+  for (const m of text.matchAll(/\{\s*term:\s*'([^']+)'/g)) {
+    // `RESERVE & PIPS` / `WILD / X` / `CONVICTION ◆` — the atlas row leads with
+    // the first bare word, so index on that.
+    const first = m[1].split(/[^A-Za-z]+/).filter(Boolean)[0]
+    if (first) names.add(first.toUpperCase())
+  }
+  return nonEmpty(Object.fromEntries([...names].map((n) => [n, true])), 'system glossary')
+}
+
 /** Keyword names from the atlas's tables, normalized (`DRAW N` → `DRAW`). */
 export function atlasKeywords() {
   const text = read(PATHS.keywordAtlas)
@@ -131,7 +168,7 @@ export function atlasKeywords() {
     if (!cells.length || /^:?-+:?$/.test(cells[0])) continue
     // Hallmark rows lead with the theme; every other table leads with the keyword.
     const raw = cells.length >= 6 ? cells[1] : cells[0]
-    if (/^(keyword|theme)$/i.test(raw)) continue
+    if (/^(keyword|theme|term)$/i.test(raw)) continue
     // Strip inline code AND bold markers: the atlas prints `**DEAL N**`, and
     // a parser that only ate backticks read that as `**DEAL`, which matched
     // nothing and made every registry keyword look row-less.

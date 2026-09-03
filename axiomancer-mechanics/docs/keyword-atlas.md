@@ -66,7 +66,6 @@ mid-flight. Run `npm run catalog` for the current binding.
 | keyword | reminder text | carried by |
 |---|---|---|
 | **GUARD N** | Blocks that much incoming damage during the next threat phase. Unused Guard is lost unless the card prints "persists". | (see the catalog) |
-| **BARRIER N** | The persisting sense of GUARD: it does not fade at round end, only when consumed. Shares GUARD's popup. | (see the catalog) |
 | **THORNS iN dM** | The foe takes VITAE per Thorns stack each threat phase it attacks you, even through a full block. | (see the catalog) |
 | **RIPOSTE iN dM** | Armed for one threat phase: reduces the first attack by its parry value, and if the blow is fully blocked the foe takes the counter instead. | (see the catalog) |
 

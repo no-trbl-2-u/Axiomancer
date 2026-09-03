@@ -288,6 +288,13 @@ const KEYWORD_GLOSS: Record<string, string> = {
     Chain: 'Your next hit deals that much more. Chain fades at the end of a turn that added none.',
     Execute: "While the foe is at or below the printed share of its VITAE, this card's damage doubles.",
     Overkill: 'Damage past the killing blow is not wasted: it converts at the printed rate.',
+    // ── Words the atlas documented but nothing glossed (added 2026-09-02
+    //    when the content-drift gate finally compared all three registries).
+    //    BARRIER is deliberately NOT here: phase 29 merged it into GUARD, which
+    //    prints "GUARD N (persists)". Re-adding it would resurrect a retired
+    //    keyword, which KW-3 correctly refuses. ──
+    Finale: 'This line fires only when playing the card leaves that few cards in your hand.',
+    Relent: "When PLEA breaks the foe's resolve it offers to yield, and you choose whether to accept.",
     // ── Turn shape (2) — the conditions a card's line waits on ──
     Ambush: 'This line fires only when the card is your first spell of the turn.',
     Flow: 'This line fires once you have already played that many spells this turn.',
