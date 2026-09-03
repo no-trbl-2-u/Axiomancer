@@ -26,20 +26,10 @@ describe('keyword registry — KW-1 (no unmapped effect id renders a blank face)
     });
 });
 
-describe('keyword registry — KW-2/KW-3 (count pinned, no dead references)', () => {
-    it('the glossary holds exactly 42 entries (37 + the five profane-canon words)', () => {
-        // Pins the count so a future add/retire is a deliberate, visible diff —
-        // see the module doc in keywords.ts for the phase-29 ledger. The 33rd
-        // entry is DOOM (WS3.4): a ratified CARD-LOCAL species gloss, not a
-        // registry row — it still needs a glossary definition for its face.
-        // The 34th is MILL (card-wording audit 2026-07-12): printed on three
-        // echo cards with no gloss anywhere — three carriers clears the bar.
-        // 35-37 are BOON / HONE / TEMPER (spec 33 §6, D4 2026-07-17): the
-        // die-gear face payload + the two blacksmith upgrade verbs.
-        // 38-42 are the Profane Canon's rework vocabulary (2026-08-08):
-        // FESTER, REPLAY, REQUIEM, IMMOLATE, PURGE.
-        expect(allRegistryKeywords().length).toBe(42);
-    });
+describe('keyword registry — KW-3 (no dead references)', () => {
+    // KW-2 (the pinned exact registry count) was repealed 2026-09-02
+    // (big-numbers overhaul §3 L21, §10) — no count pin survives; the
+    // keyword vocabulary is growable.
 
     /**
      * Kinds that deliberately carry NO `MECHANIC_KEYWORD` row (phase 68).
@@ -68,6 +58,13 @@ describe('keyword registry — KW-2/KW-3 (count pinned, no dead references)', ()
         'strip_random_buff', 'befriend_attempt', 'conjure_card', 'peroration',
         // A carrier, not a mechanic: `rider` executes an ordinary card rider.
         'rider',
+        // THE BIG NUMBERS REWRITE (2026-09-02) — DEAL is the one verb that
+        // needs no explaining: "Deal 24" is plain English, and the face prints
+        // the number in its hero slot rather than badging the word (see
+        // `MECHANIC_KEYWORD`'s own note, and `mechanicHeadline`'s `deal` case,
+        // which returns a keyword-less headline on purpose). Its FAMILY —
+        // WRATH, FLAY, TWIN, CHAIN, EXECUTE, OVERKILL — all carry real rows.
+        'deal',
     ];
 
     it('every mechanic kind either maps to a glossed keyword or is classified', () => {

@@ -13,6 +13,11 @@
  * never be referenced by a combat card. Every OTHER old id is gone, and the
  * retired CARD-vocabulary ids below are banned from `cards.library.ts`
  * forever (ids die; they are never renamed).
+ *
+ * THE BIG NUMBERS REWRITE (2026-09-02, §3 L20 / §10) repealed the CLOSED
+ * vocabulary: a card may now name any live effect id. What is still enforced
+ * is the bug-detector half — a card's effect ids must RESOLVE, and the retired
+ * ids stay dead forever.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -148,13 +153,18 @@ describe('effect deprecation contract (spec 32 v3 §3) — the ban list', () => 
         }
     });
 
-    it('every card references ONLY the six-keyword card set (no support, no retired ids)', () => {
+    // REPEALED (THE BIG NUMBERS REWRITE §3 L20, §10): the "every card
+    // references ONLY the six-keyword card set" clause was a closed-vocabulary
+    // law — it failed when the game was DIFFERENT, not when it was wrong. What
+    // survives is the bug detector underneath it: a card must never name an
+    // effect id that does not resolve (a typo, a deleted id, a rename).
+    it('every effect id a card references RESOLVES in the effects library', () => {
         for (const card of cardLibrary) {
             for (const id of effectIdsReferencedBy(card)) {
                 expect(
-                    CARD_EFFECT_SET.has(id),
-                    `${card.id} references '${id}', which is outside the v3 card vocabulary`,
-                ).toBe(true);
+                    lookupEffect(id),
+                    `${card.id} references '${id}', which resolves to nothing`,
+                ).toBeDefined();
             }
         }
     });

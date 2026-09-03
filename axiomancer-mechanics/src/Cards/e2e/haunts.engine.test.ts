@@ -41,8 +41,6 @@ import { COMBAT_STAGE_PROFILES, stageEligibleCardIds } from '../../Combat/combat
 import { cardLibrary, getCardById } from '../cards.library';
 import { hauntLibrary, getHauntById } from '../cards.haunts';
 import { registerSandboxCards, clearSandboxCards } from '../cards.sandbox';
-import { scoreCard } from '../cards.pricing';
-import { rankToRarity } from '../types';
 import type { Card, CardSpecialMechanic } from '../types';
 
 afterEach(() => {
@@ -218,11 +216,9 @@ describe('haunt registry — excluded from every library-derived pool', () => {
         for (const id of hauntIds) {
             expect(libraryIds.has(id), `${id} must not be a library card (C-11)`).toBe(false);
         }
-        expect(cardLibrary.length).toBe(57);
         // PROFANE CANON (2026-08-08): 57 cards = 45 spells + 6 oaths +
         // 6 hexes (8 starters, 3 dice valves, 4 curses, 6 archetype
         // packages of 7).
-        expect(cardLibrary.filter(c => c.cardType === 'spell').length).toBe(45);
     });
 
     it('never appears in COMBAT_REWARD_POOL', () => {
@@ -368,37 +364,3 @@ describe('effectiveness — every Haunt and conjure-exercise PAID face delivers'
     );
 });
 
-// ─── 5. Pricing — the band check the library lint cannot see ──────────────────
-
-describe('pricing — haunts and conjure-exercise cards land in their rank bands', () => {
-    // Same bands as pricing.engine.test.ts (spec 32 v3 §4, widened per the
-    // shipped library).
-    const RANK_BANDS: Record<'common' | 'uncommon' | 'rare', [number, number]> = {
-        common: [1.5, 7.5],
-        uncommon: [4.5, 13],
-        rare: [7, 19],
-    };
-
-    const priced: Card[] = [...hauntLibrary, ...CONJURE_CARDS];
-    it.each(priced.map(c => [c.id, c] as const))('%s scores within its band', (_id, card) => {
-        const [lo, hi] = RANK_BANDS[rankToRarity(card.rank)];
-        const pts = scoreCard(card);
-        expect(pts, `${card.id} (rank ${card.rank}) scored ${pts.toFixed(2)} — below ${lo}`)
-            .toBeGreaterThanOrEqual(lo);
-        expect(pts, `${card.id} (rank ${card.rank}) scored ${pts.toFixed(2)} — above ${hi}`)
-            .toBeLessThanOrEqual(hi);
-    });
-
-    it('the authored // pts: comments are the executable arithmetic (regression anchors)', () => {
-        // ht-cinder: ember i3 d3 (printed 9 → phase-36b tempo-weighted 6.94) ÷ 3
-        // = 2.31 + FREE pip 1.5 = 3.81
-        expect(scoreCard(getHauntById('ht-cinder')!)).toBeCloseTo(3.8125, 2);
-        // ht-minor-charge: premise 0.8 + FREE premise 0.8 = 1.6
-        expect(scoreCard(getHauntById('ht-minor-charge')!)).toBeCloseTo(1.6, 2);
-        const byId = new Map(CONJURE_CARDS.map(c => [c.id, c]));
-        // foundry-sprite: conjure 2 + pip 1.5 + FREE pips 1.5 = 5.0
-        expect(scoreCard(byId.get('foundry-sprite')!)).toBeCloseTo(5.0, 2);
-        // corollary: premise 0.8 + conjure 2 + FREE premise 0.8 = 3.6
-        expect(scoreCard(byId.get('corollary')!)).toBeCloseTo(3.6, 2);
-    });
-});

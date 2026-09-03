@@ -1,141 +1,203 @@
-# Keyword atlas — the registry's scoreboard and prior-art cache
+# Keyword atlas — the live combat vocabulary
 
-Owned by the `card-expert` agent (`.claude/agents/card-expert.md`).
-One row per registry keyword. The registry is GROWABLE (THE PIPELINE
-LIBERATION, T direct 2026-08-22 — supersedes the spec 32 §3 30-cap;
-historical amendments: phase 29, 2026-07-11): a new keyword ships
-through card-expert's full wiring checklist with its atlas row +
-receipts in the same PR, no per-item owner ratification. Two jobs:
+One row per LIVE keyword: the word, the reminder text a player reads the first
+time they meet it, and what carries it. Rewritten 2026-09-02 for THE BIG
+NUMBERS REWRITE (`plan/2026-09-02-big-numbers-overhaul.prompt.md`), which
+repealed the atlas's old apparatus — the prior-art-receipt rule, the row-count
+gate, the proving-gate scoreboard and the "3+ cards earns a row" bar are all
+gone. A `kb:` receipt is welcome in the notes; it is not required.
 
-1. **Prior-art cache.** The `Dawncaster analogues` cell caches KB
-   lookups so they aren't re-derived every session. Every analogue
-   carries its `kb:` receipt — **no receipt, no entry**. The atlas is
-   a cache, not a source: verify against `kb/` when a row smells stale.
-2. **Proving-gate scoreboard.** The `gate` cell tracks the §4b criteria
-   from `/deck-tuning`, in order **E**xercised / **P**riced honestly /
-   not **D**ominant / **T**heme-honest (T applies to the 19 theme
-   hallmarks; utility keywords carry `T:n/a`). Marks: `+` passing,
-   `!` failing (forge target), `?` not yet assessed. The registry is
-   already open to growth (see header); the criteria are the QUALITY
-   scoreboard — a row red across multiple full sweeps is a retirement
-   candidate to raise in the tuning report.
+**Discipline** (overhaul §6.1, replacing the old row policy):
 
-Update discipline: `/deck-tuning` (via card-expert) updates affected
-rows in the same PR as any card/keyword change. Semantics cells are
-one-line summaries — spec 32 §3 stays authoritative.
+- A keyword exists when **≥2 cards or ≥2 enemies** use it *and* it passes
+  Vilain's three tests — it has **flavor** (the word evokes the effect), it
+  **compresses** (the reminder text is longer than the word), and it has
+  **class** (it groups cards into a family a player recognises). A one-card
+  mechanic stays as plain rules text on that card.
+- Every keyword prints with reminder text on first sight (the mobile popup,
+  `KEYWORD_GLOSS`), and every printed number is the number the engine applies.
+- Complexity budget by rank: **Ash/Tooth** carry ≤1 keyword beyond a damage or
+  guard verb and never a trigger condition; **Splinter/Rib** carry ≤2 and may
+  carry one condition; **Skull/Saint** are unbudgeted.
 
-## Row policy (2026-07-11, WS10.2)
+**Sources of truth.** Player reminder text lives in
+`axiomancer-mobile/state/combat/keywords.ts` (`KEYWORD_GLOSS`); enemy reminder
+text lives in `axiomancer-mechanics/src/Enemy/enemy-keywords.ts`
+(`ENEMY_KEYWORD_GLOSS`). This file is the index, not the source — when a row
+disagrees with the code, the code wins and the row is the bug.
 
-- **One-card mechanics stay card-local.** Per the 2026-07-10
-  card-keyword doctrine (FESTER and TRANSMUTE are the precedents),
-  a mechanic that lives on a single card reads as a face keyword —
-  KEYWORD·value + gloss on the card face, with the guard test
-  (`axiomancer-mobile/state/presenters/__tests__/card-face-honesty.guard.test.ts`)
-  blocking the ambiguous fallback — and gets NO atlas row.
-- **A term earns a row at ~3+ cards.** Only vocabulary the library
-  actually repeats belongs in the registry.
-- **Drill target.** As the library grows, keep the median at ~4-6
-  cards per keyword — keywords get drilled, not orphaned.
-- **BARRIER/GUARD merge** landed in Phase 29 (BARRIER folded into
-  GUARD's semantics — see the row below).
-- **Row-count gate — RETIRED (THE PIPELINE LIBERATION, 2026-08-22).**
-  Row count grows with earned rows (full wiring + receipts, same PR)
-  and shrinks by deliberate retirement (ids die, never rename); no
-  per-item owner ratification either way. Historical: TICK was
-  owner-ratified killed 2026-07-10 (spec 32 amendment #2, Phase 30).
+**Carriers.** The card library and the enemy roster are being rewritten in
+parallel with this pass, so the carrier column says `(see the catalog)` for
+cards and `(see the roster)` for enemies rather than naming ids that are
+mid-flight. Run `npm run catalog` for the current binding.
 
-**Phase 29 changes (2026-07-11):** BARRIER row removed (merged into
-GUARD — see its semantics); CONJURE row removed (retired, zero library
-cards); SENTENCE row removed (demoted — its gate history folds into
-CHARGE below); REPRISE renamed to RECALL (same gate history); PROLONG,
-CURDLE, and SIPHON rows added (renamed/promoted from unglossed mobile
-additions, never previously atlas-tracked). Eight prior-art receipts
-backfilled from citations already surfaced in
-`plan/tuning/2026-07-10-audit-evidence/cross-prior-art.md` (KW-8) — the
-remaining ungreceipted rows keep `—` rather than an invented analogue;
-a full Dawncaster pass per keyword is a follow-up, not fabricated here.
+---
 
-**CONJURE gate credit (2026-07-11, banked for the row's return):** the
-row stays retired (its carriers — foundry-sprite, corollary, the
-ht-* Haunts (spec 34 R-13; id prefix `tf-`→`ht-`, was "Thoughtforms")
-— are sandbox-only; the row-count gate holds), but
-the WS2.1 evidence pass EXERCISED it clean: all 3 clauses PASS
-(ht-cinder, under its pre-rename id at the time, 411/411 and 304/304 bottom-line conversions, token fizzle
-0–2%, no dominance in 288 cells). Receipt:
-`plan/tuning/2026-07-11-honest-rebaseline-and-evidence.md` §2 WS2.1.
-If promotion ever restores the row, it starts at `+???`, not `????`.
+## Player keywords — the damage family
 
-## Utility (10)
+| keyword | reminder text | carried by |
+|---|---|---|
+| **DEAL N** | Direct VITAE damage. Not a keyword — plain English on the face; a multi-hit prints `N × k` and each hit is its own damage instance. | (see the catalog) |
+| **PIERCE** | This damage ignores the foe's HIDE and every effect that would reduce it. | (see the catalog) |
+| **WRATH N** | Every hit you land deals that much more, for the rest of the fight. It stacks and never fades. | (see the catalog) |
+| **FLAY N** | Each of your next hits deals half again as much, spending one stack per hit. | (see the catalog) |
+| **CHAIN N** | Your next hit deals that much more. Chain fades at the end of a turn that added none. | (see the catalog) |
+| **EXECUTE N%** | While the foe is at or below the printed share of its VITAE, this card's damage doubles. | (see the catalog) |
+| **OVERKILL** | Damage past the killing blow is not wasted: it converts at the printed rate (Conviction, healing, or Souls). | (see the catalog) |
+| **TWIN** | Your next spell this turn resolves its PAID line twice. Never chains — a twinned spell that arms TWIN does not re-arm. | (see the catalog) |
 
-| keyword | semantics | Dawncaster analogues (receipts) | gate (E/P/D/T) | notes |
-|---|---|---|---|---|
-| DRAW N | draw N cards | — | `????` T:n/a | |
-| FORGE | permanent ghost die; cap 3, at cap converts to +1 Conviction | — | `????` T:n/a | |
-| GUARD N | block next N damage; fades at round end — unless the card prints "persists" (the merged BARRIER sense, which fades only when consumed) | — | `????` T:n/a | phase 29: absorbs the former BARRIER row (one carrier, the-adamant-wall; no gate data was recorded against it) |
-| TICK | one enemy DoT ticks now (duration unchanged) | — | `????` T:n/a | retirement rides phase 30's FREE-line rework (KW-4, owner-ratified 2026-07-10) |
-| MARK iN dM | +1 per stack to each DoT tick / payoff hit; counts as affliction; BATTLE-LONG (WS3.3 `calendarExpiry: false` — bounded by payoff consumption, not a calendar) | — | `????` T:n/a | WS3.3 (2026-07-11): printed durations on MARK applications are nominal; absorbed half of the foretold_wound fold (KW-1). 2026-07-19 (docs/reports/deck-tuning-2026-07-19-promotions.md): three more seated MARK depositors ride the promotions (pebble-in-the-boot paid line; the-burden-of-repetition and half-spoken-prophecy FREE/rider lines) |
-| CLEANSE N | remove N of your own afflictions | — | `????` T:n/a | |
-| HEAL N | restore N VITAE | — | `????` T:n/a | |
-| RUPTURE N | consume up to N enemy afflictions (ALL on a finisher); burst damage = 1.5x their remaining DoT damage + 3 per non-DoT stack | — | `!???` T:n/a | WS7.1 (2026-07-11): cap is now a pure fraction — round(0.60x enemy maxHP), flat floor retired (`RUPTURE_CAP_FRACTION`; supersedes plan #2's max(80, 0.25x)); erosion late 0.03->0.08 — decay wall (plan #3) is the remaining brake. phase 29: now also absorbs `consume_affliction` (was presented as a Soul-flavored verb; the Soul gain stays a printed rider). 2026-07-19 (docs/reports/deck-tuning-2026-07-19-promotions.md): half-spoken-prophecy seats a no-Soul consume_affliction (souls: 0) in the augury recipe — the first preset-seated single-affliction RUPTURE since delphic left penitent's borrow pool unchanged |
-| SIPHON N% | heal for N% of the HP this play deals to the enemy | — | `????` T:n/a | phase 29: promoted from raw unglossed card text (resonance-detonation, the-reaping) |
-| MILL N | send the top N cards of your deck to your discard pile | — | `????` T:n/a | promoted 2026-07-12 in the mobile registry (card-wording audit — 3 echo carriers clear the ~3-card bar); atlas row backfilled 2026-07-13 to end the registry drift |
+## Player keywords — afflictions and their payoffs
 
-## Theme hallmarks (19 — Sentence keeps one, not two)
+| keyword | reminder text | carried by |
+|---|---|---|
+| **POISON iN dM** | Each time a card is played, the foe loses VITAE per Poison stack. The longer it holds, the harder it bites. | (see the catalog) |
+| **BLEED iN dM** | Each hit the bearer takes deals extra VITAE per Bleed stack, then removes a stack. | (see the catalog) |
+| **DOOM iN** | Deals VITAE per stack at the start of each round and grows a stack every time the foe acts. It ends only when consumed. | (see the catalog) |
+| **MARK iN dM** | Every damage-over-time tick on the bearer deals +1 VITAE per Mark stack. Marks hold until consumed, not until a calendar expires. | (see the catalog) |
+| **RUPTURE N** | Consumes the foe's afflictions and deals their remaining damage at once. ALL-spenders are uncapped. | (see the catalog) |
+| **FESTER N** | Every damage-over-time effect on the foe gains that much intensity. | (see the catalog) |
+| **PROLONG N** | Adds that many turns to every damage-over-time effect you have on the foe. | (see the catalog) |
+| **CURDLE iN** | Flips the foe's Bleed into Poison and its Poison into Bleed, each landing that much harder. | (see the catalog) |
+| **TICK** | Your strongest damage-over-time effect on the foe ticks again, immediately. | (see the catalog) |
+| **SIPHON N%** | Heals you for the printed percentage of the damage this play deals. | (see the catalog) |
 
-| theme | keyword | semantics | Dawncaster analogues (receipts) | gate (E/P/D/T) | notes |
-|---|---|---|---|---|---|
-| Affliction | POISON iN dM | ramping DoT on the CARD-PLAYED clock (WS3.3: ticks per player card play, ~2 expected/round; per-round ramp held) | Poison — kb:dawncaster/keywords/poison.okf.md: cited alongside BLEED in the status-centric receipt list (`cross-prior-art.md` §2 Axis B); direct analogue, magnitudes not verified | `+??!` | WS3.3 sweep (2026-07-11): lifetime pricing walks the clock (2 ticks/round → i1 d4 = 20 HP); absorbed the argument_wound + echo_sting folds and half of foretold_wound (KW-1); WS3.6 matrix re-read pending. 2026-07-19 promotions (docs/reports/deck-tuning-2026-07-19-promotions.md): two new seated carriers — poisoned-well (erosion x4; front-loaded i2d2, mid blind 0.370→0.503 in the A/B) and videtur-quod (oratory x4; d3 fuse, the run's cleanest commons sE gain) |
-| Affliction | BLEED iN dM | front-loaded DoT on the DAMAGE-INSTANCE clock (WS3.3: ticks per enemy damage instance), decays 1 intensity per trigger | Bleeding — kb:dawncaster/keywords/bleeding.okf.md (src-001, community, medium): reactive ("when dealt damage, +1 per stack, then stacks −1") — WS3.3 moved ours onto that reactive shape, so their stack ECONOMY now transfers directly; their magnitudes still do not | `+??!` | WS3.3: decay-limited lifetime is clock-invariant (i2 d2 = 9 HP on any clock) — the clock changes tempo, not total; WS3.6 matrix re-read pending |
-| Sentence | CHARGE | persistent tally (argument under construction); the declared conclusion fires FREE at the printed Charge count (formerly its own SENTENCE row — see below) | — | `++!?` | round 2: Oratory 100/100/100 — flat 8-Charge CONDEMN ignores the stage curve (plan #1 scaled thresholds + boss Charge-shed). phase 29: SENTENCE's own gate history folds in here — it was "the dominance carrier of the CONDEMN path (plan #1); NERF target, not buff", now read as a property of the-closing-word's Charge payoff rather than a separate keyword. Phase 32 part 4b: milestone drip — every 3rd Charge EVER gained this combat (a new lifetime `premiseMilestoneTotal` counter, tracked separately from the spendable tally above so a Sentence payoff/CONDEMN resetting the tally does not un-cross a milestone already paid) grants 1 STAGGER rung, engine-side and universal across every Charge source (own-card or borrowed FREE rider) — "the build pays small dividends DURING construction." No new keyword row (one-card/engine-wide-drip mechanics stay card-local per row policy); rides Control's STAGGER pool as a cross-theme note only. 2026-07-19 (docs/reports/deck-tuning-2026-07-19-promotions.md): quod-erat-demonstrandum promoted into oratory's rare seat — declares at 5 / CONDEMNs at 8; A/B took late INTO band (0.12→0.28) with CONDEMN ≈71% of late wins, owner-accepted; condemn-centrality stays a watch item (hold confirmatio per the atlas instruction) |
-| Forge | KINDLE | temporary die, this combat only | — | `!???` | round 2: Foundry mid/late 0% — pip engine has no uncapped spender (plan #2 cap, plan #5 boss-tech rare) |
-| Forge | PIP | +1 pip to a held die; spendable by payoff verbs | — | `!???` | round 2: as KINDLE — banked pips cannot cash past the 80-HP cap (plan #2). Phase 32 part 4c: OVERHEAT (`half-step`'s new third `specialMechanics` entry, `{ kind: 'overheat'; pips: number }`) — a die already at the safe `RESERVE_PIP_CAP` can be pushed further, up to `OVERHEAT_PIP_CEILING`, at a per-pip `OVERHEAT_BUST_CHANCE` (35%) risk; a bust HALVES (floors) the die's pips rather than zeroing them. The press-your-luck knob 2026-07-10-theme-identity.md §2 asked for. Prior art (non-Dawncaster — board-game corpus): kb:boardgames/the-quacks-of-quedlinburg/rules/overview.okf.md (src-003, secondary, high) — white chips accumulate toward a bust threshold (sum > 7) and exploding costs a real but PARTIAL penalty ("choose points or coins, not both," never a total wipe); OVERHEAT's halve-not-zero bust mirrors that partial-loss shape, not Dawncaster vocabulary. Display badge "PIP N past the cap" on the card face — no new keyword row (one-card mechanic rides this existing row, TURNABOUT/BACKFIRE precedent). 2026-07-19 (docs/reports/deck-tuning-2026-07-19-promotions.md): tempered-edge promoted (foundry x4 body seat) — a FREE-pip depositor carrying foundry's first in-theme enemy-facing DoT (kindling ember); early landed ON band (0.60→0.80) in the A/B, mid/late remain the structural breach |
-| Akrasia | RECOIL N | pay N VITAE (unpreventable) as printed cost | Blood — kb:dawncaster/keywords/blood.okf.md: cited as a Dawncaster HP-as-cost resource (`cross-prior-art.md` §2 Axis A); frame transfers ("your own HP is a spendable currency"), no magnitude comparison done | `+?!?` | plan #2 LANDED (8d853dcb): scaling caps erased the regression — penitent mid 0.92, late 0.40 (spread telemetry, seed 1) |
-| Akrasia | FALLEN | state: >=2 self-afflictions; gates riders | Corrupted — kb:dawncaster/keywords/corruption.okf.md: cited as the direct threshold-state analogue (`cross-prior-art.md` differentiation matrix, akrasia row) | `+?!?` | plan #2 landed: bursts scale to 0.25x boss maxHP — penitent late 0.02->0.40 |
-| Control | STAGGER N | remove N rungs from telegraphed action; 0 rungs = denied | Stagger — kb:dawncaster/keywords/stagger.okf.md: cited alongside POISON/BLEED in the status-centric receipt list (`cross-prior-art.md` §2 Axis B); name match, mechanical comparison not done | `++!?` | round 2: Standstill 100/100/100 — flat rung denial ignores the stage curve (plan #1: boss rung-regrowth). Phase 32 part 4b: Oratory's CHARGE milestone drip (see that row) also feeds this same `staggerRungs` pool as a small cross-theme dividend — a borrowed-preset synergy, not a new STAGGER source authored on any Control card |
-| Control | BACKFIRE iN dM | enemy takes N per rung its actions lose | Momentum — kb:dawncaster/keywords/momentum.okf.md (src-001, community, medium): "whenever you have 5+ Momentum, remove all stacks and draw a card" — the closest banked-counter-cashes-at-a-point analogue to TURNABOUT's `rungsDeniedTotal` ledger, though theirs auto-fires at a threshold and pays a card-draw dividend (not a player-spent HP burst); the "a passive tally becomes a real payoff" shape transfers, magnitudes do not | `++!?` | round 2: rides the Standstill lock (plan #1); ~11-round late grinds but never lost. Phase 32 part 4a: `turnabout` (control's rank-6 rare spell, replacing paralysis-of-analysis's old slot) is a NEW one-card mechanic (`kind: 'turnabout'`) that CONSUMES the whole `rungsDeniedTotal` ledger — every rung STAGGER/BACKFIRE have denied this combat, banked separately from BACKFIRE's own per-phase drip — for a `burstPerRung`-per-rung burst, then zeroes it. Badged "BACKFIRE ALL" on the card face (REAP ALL / RUPTURE ALL precedent) — row-policy "one-card mechanics stay card-local" applies, so this does NOT earn its own atlas row; it rides BACKFIRE's here as a finisher note only |
-| Oracle | FORETELL N | see/reorder top N of deck + glimpse next telegraph | — | `+???` | round 2: Augury early 69→91 once omens landed as described |
-| Oracle | OMEN | player-STAKED stance + window claim (phase 32 part 4d — OMEN v2): rider fires free at 1/window scale if the claimed stance lands within the claimed window; the Conviction ante is paid up front and forfeited (never refunded) on a miss | Foretell — kb:dawncaster/keywords/foretell.okf.md (community, medium): "look at the top X cards of your deck, put 1 on top, the rest to the bottom" — a pure LOOKUP, no player-chosen stakes/range at all; confirms the genre's closest analogue does not already solve "a bet, not a lookup," so OMEN v2's stakes shape has no Dawncaster template to borrow magnitudes from. The actual structural template is domestic: `placeStake`/`settleStake` (phase 31 EA-7, "THE STAKE") — a pre-play Conviction wager on a phase's hidden stance, bigger stakes (2/4/6◆) pay bigger (colored/colored-pip/wild ghost die), a loss burns the wager — OMEN v2 generalizes that SAME shape from "bet on the CURRENT phase" to "bet on a claimed WINDOW of upcoming phases," reusing its cost/payoff-scales-with-stake idiom rather than inventing a new one | `+??!` | round 2 (pre-v2): mid only 8%, late 0% — prophecy payoffs do not out-scale boss HP (plan #2). Phase 32 part 4d: the prediction is now a genuine CAST-TIME CHOICE (`play.omenClaim: { stance, window }`) instead of silently derived from the powering die's color (the "always predicts HEART" complaint, 2026-07-10-theme-identity.md §"Oracle / augury") — `pendingOmens` is now a countdown (`windowRemaining`, `claimScale`) re-checked at EVERY phase boundary while a wider claim stays alive, not a one-shot absolute-phase-index check. Absent `omenClaim` (no mobile picker yet — deferred, see Follow-ups) falls back to `window: 1` and the pre-v2 die-derived stance, so every existing caller/test is byte-compatible by default. `signs-and-portents`/`cassandras-burden` `// pts:` comments carry the new anteConviction credit arithmetic. Augury (seed 1, `greedy`, `preset:augury`): early win 69%→68%, mid/late unchanged at 1%/0% — the sim never exercises `omenClaim` (scope cut, see the phase 32 part 4d brief), so the only drift is the new ante's small EV tax at the pre-v2 default claim. 2026-07-19 (docs/reports/deck-tuning-2026-07-19-promotions.md): half-spoken-prophecy promoted (augury body u-seat, recolored mind→body) — a second live OMEN carrier (ante 1, foretell-2 rider); its consume_affliction precondition fizzled 344×/mid in the A/B (known caveat, owner-ratified anyway) |
-| Harvest | SOUL | gain 1 Soul when an enemy affliction expires or is consumed | Souls — kb:dawncaster/keywords/souls.okf.md: cited as a Dawncaster unique-resource-with-bank-rules analogue (`cross-prior-art.md` §2 Axis A); bank-rule frame transfers, resurrection-clause specifics do not | `+??!` | round 2: Tithe mid 15→23 with REAP cap lifted to 200 — full harvest needs more rebuild cycles than a fight lasts (plan #2, #3) |
-| Harvest | REAP N | spend N Souls to fire printed effect | Reaping — kb:dawncaster/keywords/reaping.okf.md: cited as the direct payoff-verb analogue (`cross-prior-art.md` §4.1); Dawncaster's Reaping keys off Souls the same way | `!???` | WS7.1 (2026-07-11): the REAP-ALL cap was removed entirely — ALL-spenders are uncapped (`themed-decks.engine.test.ts` pins the 240-damage uncapped burst; supersedes plan #2's max(200, 0.25x maxHP)); tithe late still 0 — rebuild-cycle wall (plan #3) |
-| Charm | PLEA N | enemy stacks, decays 1/turn; reaching resolve (35% of max HP, never below 10, or current HP if lower) opens an explicit ACCEPT / CONTINUE relenting choice | Charmed — kb:dawncaster/keywords/charmed.okf.md: cited as the direct analogue (`cross-prior-art.md` §2 Axis B, "equal amount of Charmed"); their built-in decay/hold tension matches ours | `+??!` | round 2: Grace late 0% — matching a boss FULL HP bar is unreachable; needed the Charmed-style resolve threshold, landed 2026-07-08 (this atlas row's semantics corrected by phase 29 to match — it had drifted stale). Phase 32 part 4e ("Resolve milestones," 2026-07-10-theme-identity.md §"Charm / grace" — "the track gets rungs and a face"): every `gainSway` call (the theme's single insertion point, `soft-word`'s FREE/PAID sway, `mirror-of-longing`'s damage-prevented conversion, all of it) now also checks PLEA against two named fractional waypoints of the LIVE `capitulateThreshold` — Wavering (45% of resolve) lands one QUARTER stack on the enemy (see that row), Faltering (80% of resolve) grants a small +2 bonus PLEA, unscaled by `buff_grace_momentum`. Each fires AT MOST ONCE per combat (`swayMilestoneWaveringFired`/`swayMilestoneFalteringFired`) and never un-fires if the live resolve later shrinks — an un-authored ledger dividend riding every PLEA source, same "no VERB_POINTS entry" precedent as part 4b's CHARGE milestone drip. 2026-07-19 (docs/reports/deck-tuning-2026-07-19-promotions.md): grace-under-fire promoted (grace body u-seat) — drew-blood composure→PLEA conversion, early 0.689→0.811 (ON band) in the A/B |
-| Charm | QUARTER iN dM | enemy deals N less damage while active | — | `+???` | round 2: fine where PLEA is live; inherits the threshold fix (plan #1). Phase 32 part 4e: the Wavering resolve-milestone (see PLEA's row) lands 1 extra QUARTER stack, engine-side, the first time PLEA crosses 45% of the live resolve — a small cross-verb dividend, not a new authored card |
-| Bulwark | THORNS iN dM | attacker takes N when it damages you | — | `+??!` | round 2: Bastion early 77→98, mid 14 — cannot kill non-attackers; boss 1.6x threat near-certain loss (plan #5 boss-tech). 2026-07-19 (docs/reports/deck-tuning-2026-07-19-promotions.md): pebble-in-the-boot (x4) + the-anvil-speaks (rare) promoted — bastion's answer to never-swings enemies now rides the nettle-sting DoT beside the reflect pair (A/B mid 0.070→0.133). Phase 62 (`plan/phases/phase_62_ally_cards.md`): a new cross-theme carrier — `the-sworn-second` (the Ally registry's reference card, `src/Cards/cards.allies.ts`, outside the pinned library) hooks a capped (3-stack) round-end THORNS grant onto the player, reusing this row's existing vocabulary rather than minting an Ally-specific keyword; not a Bulwark package card, so it does not change this row's own gate history |
-| Bulwark | RIPOSTE iN dM | armed one threat phase: the printed parry blunts the first hit by that much; an attack fully blocked = enemy takes N | — | `+??!` | round 2: as THORNS — wall holds, kill-path missing late (plan #5). 2026-07-13 card-clarity audit: semantics cell now defines the parry half ("parry 2" printed on measured-answer / the-adamant-wall had no definition anywhere in the atlas) |
-| Echo | ECHO | the printed line fires twice | Rebound — kb:dawncaster/keywords/rebound.okf.md: cited as the "fires again a number of times" analogue (`cross-prior-art.md` §4.2); their counter-based repeat vs our flat double, mechanism differs | `++??` | round 2 PROVEN: Ouroboros paid-face fix took Refrain late 3→37% — biggest real gain of the cohort (plan #6 lint guards the class). 2026-07-19 (docs/reports/deck-tuning-2026-07-19-promotions.md): the-burden-of-repetition promoted (refrain body u-seat, recolored heart→body) — the measurement run's strongest arm (mid blind 0.420→0.583, sE +0.068); winnowing dominance-share watch item carried in the promotion report |
-| Echo | RECALL N | return N cards from discard to hand | — | `++??` | round 2 PROVEN: mid 90→99 with ECHO (Refrain). phase 29: renamed from REPRISE — same gate history, no mechanic change |
+## Player keywords — walls and reprisal
 
-## Affliction glue (2 — beyond the hallmark pair)
+| keyword | reminder text | carried by |
+|---|---|---|
+| **GUARD N** | Blocks that much incoming damage during the next threat phase. Unused Guard is lost unless the card prints "persists". | (see the catalog) |
+| **THORNS iN dM** | The foe takes VITAE per Thorns stack each threat phase it attacks you, even through a full block. | (see the catalog) |
+| **RIPOSTE iN dM** | Armed for one threat phase: reduces the first attack by its parry value, and if the blow is fully blocked the foe takes the counter instead. | (see the catalog) |
 
-| keyword | semantics | Dawncaster analogues (receipts) | gate (E/P/D/T) | notes |
-|---|---|---|---|---|
-| PROLONG N | add N turns of duration to ALL your DoTs on the enemy | — | `????` T:n/a | phase 29: renamed from FESTER (name collided with "an infected wound" — read as another DoT species, not a duration extender); sole carrier festering-argument, orphan-tier support (1 card). 2026-07-18 swap-pool measurement pass: deposit-matched single-variable A/B (chronic-condition at the festering-argument x2 seat, `docs/reports/deck-tuning-2026-07-18.md` §1 e2) — exercised clean (3.2 plays/run mid, 5 fizzles/~2,070 plays), priced neutral (mid Δwin +0.007/+0.010 blind/greedy, sE +0.003/+0.005): playable but not differentiating at this seat |
-| CURDLE iN | convert the enemy's Bleed↔Poison, +N intensity as it flips | — | `????` T:n/a | phase 29: renamed from TRANSMUTE (the word was double-booked with the unrelated X→WILD die-conversion sense, which stays inside FORGE's gloss); sole carrier currys-conversion, orphan-tier support (1 card). 2026-07-19 swap-pool measurement pass: first receipt banked — `currys-conversion→reopen-the-question` A/B (`docs/reports/deck-tuning-2026-07-19.md` §3 H2, 100 runs/seed 1): exercised at the mind uncommon x2 seat, 6% fizz (bleed+poison-both-present precondition occasionally unmet), opp% 98%, mid win +2.4/+2.6pts blind/greedy, statusEngagement up at every stage — real engagement gain, small mid/ALL8 cost (−4.1pts); not seat-legal as measured (mind→body color break, needs a re-partition) and blocked on the pool→library promotion gate (R1/C1) regardless |
+## Player keywords — tempo and control
 
-## Die gear (spec 33 §6 — 3, registered D4 2026-07-17)
+| keyword | reminder text | carried by |
+|---|---|---|
+| **STAGGER N** | Removes that many rungs (the steps of the foe's telegraph) from its next action. Strip them all and the action is denied. | (see the catalog) |
+| **BACKFIRE iN dM** | The foe takes VITAE per Backfire stack for each rung its telegraphed action loses; a denied action counts all of its rungs. | (see the catalog) |
+| **CHARGE** | A running tally. When it reaches the count printed on the card that spends it, that payoff fires free and the tally resets. | (see the catalog) |
+| **FORETELL N** | Reveals the foe's next stance and looks at that many cards of your deck, moving the best to the top. | (see the catalog) |
+| **OMEN** | Stake a stance and a window of phases it must land within, paying a Conviction ante up front. A hit fires the payoff free; a miss keeps the ante. | (see the catalog) |
+| **QUARTER iN dM** | The foe's attacks deal less damage per Quarter stack. | (see the catalog) |
 
-The Upgradeable-Dice progression vocabulary: the die-face payload and the
-two blacksmith upgrade verbs. Registered ahead of their carriers — the die
-gear + blacksmith surfaces land in D5, so all three are UNEXERCISED today
-(gate `????`; the mobile guard test pins their glosses so the first gear
-card face never falls through). Payload CHANGES are gear swaps, not
-keyworded services (owner-lock D1). Prior art: the corpus still lacks the
-five dice-builder games (Dice Forge / Dice Throne / etc. — wishes filed
-2026-07-17, D1 §9.5); face-upgrade analogues remain remembered-and-labeled
-`(memory)` until synced.
+## Player keywords — turn shape (the conditions a line waits on)
 
-| keyword | semantics | Dawncaster analogues (receipts) | gate (E/P/D/T) | notes |
-|---|---|---|---|---|
-| BOON | a die's boon face powers a card of its color AND grants Conviction; the equipped gear sets how much (default 2◆) | — (dice-builder resource faces — `(memory)`, wish-filed) | `????` T:n/a | spec 33 §1/§6. Owner-ratified at D7: fires on USE, not on roll. "BOON" is the most generic name in the registry — rename opportunity noted D1, deferred. FORGE boon-amplifier enchants (`dice-valves-33` sandbox) increase the fired payload, they do NOT change what a boon does |
-| HONE | blacksmith upgrade: add a mana face to a die's gear | Quacks upgrade economy — kb:boardgames/the-quacks-of-quedlinburg/rules/overview.okf.md (src-003, secondary, high): buying better chips to improve your randomizer over runs is the closest "upgrade the bag/pool, not the play" analogue; face-swap specifics are dice-builder territory `(memory)` | `????` T:n/a | spec 33 §6. Cap unchanged: ≥1 miss per colored die — whiff is never HONE-able away |
-| TEMPER | blacksmith upgrade: turn a mana face into a boon face | Quacks upgrade economy — same receipt as HONE (the "spend to strengthen the randomizer" frame); the boon-face target has no Dawncaster template | `????` T:n/a | spec 33 §6. Caps: ≤2 boon / ≥1 miss per colored die; Gold ≤1 boon |
+| keyword | reminder text | carried by |
+|---|---|---|
+| **AMBUSH** | This line fires only when the card is your first spell of the turn. (Engine: the `opening` predicate at `maxPriorSpells: 0`.) | (see the catalog) |
+| **FLOW N** | This line fires once you have already played that many spells this turn. | (see the catalog) |
+| **FINALE** | This line fires when playing the card leaves at most the printed number of cards in hand. | (see the catalog) |
+| **REQUIEM N** | A card's REQUIEM line fires free while your discard pile holds that many cards. | (see the catalog) |
+| **FALLEN** | A state: you carry 2 or more different afflictions. A card's FALLEN line fires free while you are Fallen. | (see the catalog) |
 
-## Spec 33 reinterpretations (D4 2026-07-17 — no new rows)
+## Player keywords — the deck as a resource
 
-- **FORGE / KINDLE** semantics ported but reframed: the GHOST grant is now
-  a TEMPORARY GOLD die (surge-class, combat-only — spec 33 §6), so the die
-  verbs dropped the cross-combat `forgePersistence` credit (`cards.pricing.ts`);
-  the utility FORGE row's gloss re-word (ghost→temp gold) is a D6 render task.
-- **revealStance** (the read rider on the oracle FREE lines) is REINTERPRETED,
-  not retired: the hidden `enemyStance` read is gone (§2), so it now reveals the
-  next phase's stance CHECK + reactive branch early. Same 1.5-pt info value —
-  no reprice, no card re-author.
+| keyword | reminder text | carried by |
+|---|---|---|
+| **DRAW N** | Draw that many cards from your deck, up to your hand limit. | (see the catalog) |
+| **MILL N** | Sends that many cards from your deck to your discard pile. | (see the catalog) |
+| **RECALL N** | Returns that many cards from your discard pile to your hand, highest rank first. | (see the catalog) |
+| **ECHO** | The card's PAID line fires twice. FREE lines never echo. | (see the catalog) |
+| **REPLAY N** | Says your last spell again: its PAID payload fires that many more times. | (see the catalog) |
+| **IMMOLATE** | Burns the lowest-rank cards in your hand as a cost, and they leave the fight entirely. A curse burns as well as anything. | (see the catalog) |
+| **PURGE** | Playing this curse removes it from the fight entirely. A die and a beat buy the deck clean. | (see the catalog) |
+
+## Player keywords — resolve, harvest and mercy
+
+| keyword | reminder text | carried by |
+|---|---|---|
+| **SOUL** | You gain 1 Soul each time an affliction on the foe expires or is consumed. | (see the catalog) |
+| **REAP N** | Spends the printed number of Souls to fire the printed effect. With fewer Souls, it fizzles. REAP ALL is uncapped. | (see the catalog) |
+| **PLEA N** | Builds on the foe and decays each round. At their resolve, they relent. | (see the catalog) |
+| **HEAL N** | Restores that much VITAE, up to your maximum. | (see the catalog) |
+| **CLEANSE N** | Removes up to that many afflictions from you. | (see the catalog) |
+| **RECOIL N** | Pay the printed VITAE as a cost when the card is played. No defense can prevent it. | (see the catalog) |
+
+## Player keywords — the dice
+
+| keyword | reminder text | carried by |
+|---|---|---|
+| **FORGE** | Forges a GHOST die (or revives a dead X die as WILD) that plays beside your drafted die and is spent for good. At the cap it grants Conviction instead. | (see the catalog) |
+| **KINDLE** | Creates a temporary die of the printed color in your Reserve. If the Reserve is full, it grants Conviction instead. | (see the catalog) |
+| **PIP** | Each threat phase a Reserve die survives it gains a pip; each pip spent adds `PIP_INTENSITY_BONUS` intensity, or `PIP_GUARD_BONUS` Guard on a defend card. | (see the catalog) |
+| **BOON** | A die's BOON face powers a card of its color and grants Conviction; its equipped gear sets how much. | die gear (`spec 33 §6`) |
+| **HONE** | A blacksmith upgrade: adds a mana face to a die's gear, so more of its rolls power a card. | blacksmith service |
+| **TEMPER** | A blacksmith upgrade: turns a mana face into a BOON face. | blacksmith service |
+
+---
+
+## Enemy keywords (9)
+
+New with THE BIG NUMBERS REWRITE. An enemy carries 0–1 at simple/normal, 1–2
+at elite, 2–3 plus a STAGE at boss/unique. They print on the enemy pane with
+popups. Glosses below are copied from `src/Enemy/enemy-keywords.ts`
+(`ENEMY_KEYWORD_GLOSS`); `{n}` is substituted with the instance's own number,
+so one foe can carry HIDE 3 and another HIDE 12.
+
+| keyword | reminder text | applied in | carried by |
+|---|---|---|---|
+| **HIDE N** | Every hit against this foe is reduced by N, never below 1. PIERCE ignores it. | `applyEnemyDamage` | (see the roster) |
+| **SWIFT** | Your GUARD and BARRIER count for half against this foe. | `resolveThreatPhase` | (see the roster) |
+| **BRUTAL** | Damage this foe gets past your defenses is doubled. | `resolveThreatPhase` | (see the roster) |
+| **VENOM N** | Damage this foe lands also poisons you for N. | `resolveThreatPhase` | (see the roster) |
+| **UNSHAKEN** | This foe cannot be staggered. Its rungs never fall. | `computeRungDenial` | (see the roster) |
+| **ELUSIVE** | This foe's HIDE counts double until you stagger it this round. | `applyEnemyDamage` | (see the roster) |
+| **REGROW N** | This foe heals N at the end of each of its phases. | `processBetweenPhases` | (see the roster) |
+| **RAVENOUS** | This foe heals for the damage it lands on you. | `resolveThreatPhase` | (see the roster) |
+| **WOUNDING N** | An unguarded hit of N or more puts a WOUND in your deck. | `resolveThreatPhase` | (see the roster) |
+
+HIDE is the reason one big hit beats many small ones: it is subtracted from
+each damage instance, so `7 × 4` and `28 × 1` play differently against armour.
+
+### STAGE (boss/unique only)
+
+Not a keyword — a boss/unique data structure (`EnemyStage`). At a printed VITAE
+fraction or round the foe changes shape: a name shouted into the log, a
+telegraphed line, keywords gained, an optional cleanse, heal, threat bonus or
+curse injection. Every boss authors ≥2 stages; every unique ≥3. The numbers on
+the pane must visibly jump when one fires.
+
+---
+
+## System terms (printed, glossed, not keywords)
+
+These get popups but are engine systems rather than card vocabulary; they live
+in `SYSTEM_GLOSSARY` (mobile).
+
+| term | what it is |
+|---|---|
+| CONVICTION ◆ | A spend-anytime resource banked from unspent dice and overflow. It never decays. |
+| TOLL ⬡ | A whole-combat running tally of dice you spend by color; a ⬡ threshold line fires at its count. |
+| RESERVE & PIPS | Dice held between phases instead of played, ripening a pip per phase. |
+| GHOST ✦ | A forged die that plays alongside your drafted die, never rerolls, and is gone when spent. |
+| RUNGS | The steps of the foe's telegraphed action. Losing all of them denies the action. |
+| WILD / X | A WILD die counts as any color; a dead X die powers nothing until forged or fate-tapped. |
+| SENTENCE | A declared conclusion: at the printed CHARGE count its payoff fires free and the tally resets. |
+| CONDEMN | An alternate win: reaching the printed CHARGE count in one SENTENCE ends the fight. |
+| RELENT | An alternate win: PLEA reaching the foe's resolve opens an explicit accept-or-continue choice. |
+
+**OATH** and **HEX** are card *types*, not keywords: a passive on your side and
+a standing curse on the foe respectively, three rounds when played free and
+permanent when paid with a die. They carry glossary rows for the help surfaces
+but never render in the inspect keyword panel.
+
+---
+
+## Known drift (2026-09-02)
+
+Rows whose reminder text in `KEYWORD_GLOSS` still carries a pre-rewrite number,
+pending the effects/library rescale (overhaul §5.2):
+
+- **RUPTURE** — the mobile gloss still says "up to 60% of its max VITAE" and
+  `RUPTURE_CAP_FRACTION = 0.60` is still live in `src/Combat/effects.ts`. The
+  cap is repealed (law L12); the number above it is the code's, not the
+  design's.
+- **POISON / BLEED / DOOM** — `debuffs.library.json` still carries
+  `damagePerRound` 2 / 3 / 1. §5.2 asks for roughly ×3–4.
+- **PLEA** — the gloss's "~35% of max VITAE" resolve threshold is scheduled to
+  become "35% of VITAE, minimum 20" (§5.4).
+- **FINALE** — live as a `SynergyStatePredicate` and used on card faces, but it
+  has no `KEYWORD_GLOSS` row yet, so its popup falls through. Either give it a
+  row or stop printing the word.
+
+These are the numbers to re-read before quoting this file.

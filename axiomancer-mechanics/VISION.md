@@ -10,64 +10,54 @@ The engine should support strange, legible, consequential systems over safe RPG 
 
 ## Combat vision
 
-Combat must make its interacting systems legible and consequential. Status
-effects remain a major authored tool, but T's 2026-08-08 unshackling retired
-status dominance as the governing combat objective and restored ordinary direct
-damage. Cards may use direct damage, statuses, Conviction, Surge, and Dice in any
-combination that preserves the three locked systems rather than making them
-ornamental.
+Combat must make its interacting systems legible and consequential, and it must
+do it **loudly**. THE BIG NUMBERS REWRITE (2026-09-02,
+`plan/2026-09-02-big-numbers-overhaul.prompt.md`) is the current charter; it
+repealed the accumulated design laws and left three pillars.
 
-**Hazard-Pattern Combat win model (updated 2026-06-22):** the enemy has ONE bar —
-HP — and dropping it to 0 is the only win condition. Status is the EFFICIENT path
-there: damage-over-time erodes the enemy's HP far faster than the deliberately
-weak immediate "basic" strike, and control status genuinely HINDERS the enemy (a
-stun/skip robs it of its telegraphed turn) instead of filling a separate meter.
-Befriend at low HP opens the spare/exploit mercy choice. This REPLACES the earlier
-two-Pressure-Track model (DoT Erosion + Control Saturation as the only win
-conditions), which has been removed. Status effects remain available and should be satisfying,
-but they are not required to dominate direct-damage paths.
+**Bigger numbers are the point.** A starter hit is 6–9, a mid-rank hit 20–30, a
+Saint-rank finisher 45–70 flat or past 100 when a scaler is fed; bosses carry
+hundreds of VITAE and the impossible fight carries thousands. Payoffs are
+uncapped. Every card play should visibly *move* something. The scale ladder in
+§5 of the overhaul prompt is the reference for any new number.
+
+**Hazard-Pattern Combat win model:** the enemy has ONE bar — VITAE — and
+dropping it to 0 is the main win condition, alongside the authored alt-wins
+(Befriend, RELENT, CONDEMN). Direct damage is a first-class verb: DEAL scales
+with the read, the colour match, and the combat-long scalers exactly as the
+status verbs do. Damage-over-time, walls-and-reprisal, control, harvest, and
+mercy are **competing** lines, not a hierarchy — none of them is the intended
+path and none is protected. This model REPLACES the two-Pressure-Track design
+(removed 2026-06-22) and the status-primacy doctrine that followed it
+(repealed 2026-09-02).
 
 The intended mastery path is:
 
 1. read the enemy;
 2. generate and manage resources;
 3. use skills;
-4. apply and exploit status effects;
+4. commit to a line and make it land big;
 5. resolve through victory, mercy, or other consequence.
 
-The player may win through direct damage, statuses, mercy, or another authored
-consequence. No one path is doctrine-mandated as the dominant combat route.
+**Every card has a FREE line.** A card must be playable without a die. That is
+the whole rule: the earlier sub-rules about currency deposits, budget shares,
+and which verbs a FREE line was allowed to use are repealed. A FREE line
+nobody would ever choose is still a design failure — dead cards are bugs — but
+it is a failure to be fixed by making the line better, not by a lint.
 
-**Doctrine (load-bearing, set 2026-07-09; refined 2026-07-10): the FREE line
-builds the engine.** A card's free (dieless) line must never be a dead play or
-a weaker copy of the paid line. Refined by owner ratification 2026-07-10
-(engagement-audit session): the FREE line must deposit THEME currency
-(Premises, Souls, pips, DoT seeds, rapport, loop advancement) — a
-weak-enough deposit may additionally carry a `DRAW 1`-class utility kicker,
-but generic utility ALONE no longer qualifies, and FREE damage (incl. TICK,
-now retired registry-wide) never does. Small is fine; filler is not.
-Test: after a free play, is the player closer to their deck's win condition?
-(Owner directives 2026-07-09 + 2026-07-10; enforcement = the EA-5 library
-pass + FREE-currency lint, `plan/tuning/2026-07-10-turn-texture.md` §1.)
+**Enemies escalate and telegraph big.** An enemy is a creature with keywords
+(HIDE, SWIFT, BRUTAL, VENOM, UNSHAKEN, ELUSIVE, REGROW, RAVENOUS, WOUNDING),
+its own VITAE pool, a tiered deck that never reshuffles backwards, and — for
+bosses and uniques — stages that change the fight mid-fight. A telegraph prints
+a digit, not an adjective.
 
-Balance should prove AGGRESSIVE, DEFENSIVE, MIXED, and STRATEGIST play styles. STRATEGIST — skill/status/resource planning — is the witness for the intended mastery path.
-
-**Historical calibration charter (2026-07-08; superseded 2026-08-08):** the
-former ten theme presets used this blind-policy-pick target curve:
-
-| Stage | Target win rate |
-|---|---|
-| Early | ~80% |
-| Mid | ~50% |
-| Late | ~25-35% |
-| Impossible | 0% (a hard wall, not a rare fluke win) |
-
-The Profane Canon retired those ten presets and replaced them with three campaign
-snapshots. Preserve this curve as historical evidence only; do not grade the
-current snapshots against it. Spec 35's Combat Quality Index grades how a fight
-played, not campaign viability. A replacement viability/calibration charter for
-the three snapshots remains an explicit design decision rather than something
-workers may infer from the old bands.
+**Nothing grades combat from above.** There is no win-rate curve, no Combat
+Quality Index, no rank band, no status-engagement floor, and no count pin.
+Balance work keeps bug detectors (printed number ≠ applied number; a keyword
+with no popup; a card that can never be played) and a wide sanity envelope, and
+answers a dominance finding by buffing the neighbours rather than shrinking the
+card. Balance should still prove AGGRESSIVE, DEFENSIVE, MIXED, and STRATEGIST
+play styles — that is a coverage question, not a target curve.
 
 ## Defend vision
 

@@ -22,6 +22,7 @@ import type { Character } from '../../Character/types';
 import type { Enemy } from '../../Enemy/types';
 import { GraveLarva } from '../../Enemy/enemy.library';
 import { cardLibrary } from '../../Cards/cards.library';
+import type { Card } from '../../Cards/types';
 import { deepClone } from '../../Utils';
 import { lookupEffect, effectsLibrary } from '../../Effects/effects.library';
 import type { ActiveEffect, Effect } from '../../Effects/types';
@@ -34,6 +35,7 @@ import {
     getDamageTakenMultiplier, getHealingReceivedMult, getOutgoingDamageMult,
 } from '../effects';
 import { getActiveDotTotal } from '../effect-modifiers';
+import { MAX_EFFECT_INTENSITY } from '../../Game/game-mechanics.constants';
 import type { CombatDieColor, CombatEncounterState, CombatThreatPhase } from '../combat.encounter.types';
 
 function makePlayer(cards: string[]): Character {
@@ -95,6 +97,27 @@ function threatState(
 
 const BASE_HIT = Math.round(10 * THREAT_DAMAGE_SCALE); // round 1 = grace → escalation 1, no weaken
 
+/**
+ * THE BIG NUMBERS REWRITE (2026-09-02) — the direct-damage half of the
+ * preview. `bottomDamagePreview` counts what the PAID line takes off the foe:
+ * the `deal` mechanic (multi-hit aware), a rider that carries `damage`, and
+ * the condition riders at face value. Re-derived here from the card data so
+ * the test computes the same truth independently of the implementation.
+ */
+function directDamageOf(entry: Card): number {
+    let total = 0;
+    for (const m of entry.specialMechanics ?? []) {
+        if (m.kind === 'deal') total += m.amount * Math.max(1, m.hits ?? 1);
+        else if (m.kind === 'rider') total += m.rider.damage ?? 0;
+        else if (m.kind === 'immolate') total += m.rider.damage ?? 0;
+    }
+    for (const r of [entry.threshold?.rider, entry.dieBonus?.rider, entry.fate?.rider,
+        entry.fallen?.rider, entry.synergy?.rider]) {
+        total += r?.damage ?? 0;
+    }
+    return total;
+}
+
 describe('P0-truth — the card preview is the applied number', () => {
     it('every DoT card previews its statuses\' REAL lifetime HP (neutral read)', () => {
         const dotCards = cardLibrary.filter(c => {
@@ -116,18 +139,27 @@ describe('P0-truth — the card preview is the applied number', () => {
                 const def = lookupEffect(ce.effectId);
                 const dot = def?.payload.damageOverTime;
                 if (!def || !dot) continue;
-                const intensity = ce.intensity ?? 1;
+                // `applyEffect` (src/Effects/index.ts) clamps every landed
+                // intensity to MAX_EFFECT_INTENSITY, so the APPLIED intensity —
+                // the thing the preview must equal — is the clamped one. (A
+                // card that AUTHORS above the cap prints a number the engine
+                // will not honour; that is a card-data bug, caught by the
+                // face-honesty guards, not a preview bug.)
+                const intensity = Math.min(ce.intensity ?? 1, MAX_EFFECT_INTENSITY);
                 const duration = Math.max(1, ce.duration ?? def.duration);
                 const ramp = def.payload.dotModifiers?.escalatesPerTurn ? (def.payload.dotModifiers.rampFactor ?? 0) : 0;
                 for (let k = 0; k < duration; k++) {
                     expected += Math.floor((dot.damagePerRound + Math.floor(ramp * k)) * intensity);
                 }
             }
-            expect(card.bottomDamagePreview, `${card.id} preview must be its real lifetime HP`).toBe(expected);
+            expect(
+                card.bottomDamagePreview,
+                `${card.id} preview must be its real direct damage + lifetime VITAE`,
+            ).toBe(expected + directDamageOf(entry));
         }
     });
 
-    it('every card previews exactly its REAL enemy-DoT lifetime HP — 0 when it carries none (real-units-or-no-number; the strike is dead)', () => {
+    it('every card previews exactly its REAL direct damage + enemy-DoT lifetime VITAE (real-units-or-no-number)', () => {
         // Pin change 2026-07-19: pre-promotion, "verbClass !== direct-dot ⇒
         // preview 0" held because no defend-class card carried an enemy DoT.
         // The promoted hybrids (tempered-edge, the-anvil-speaks: GUARD mech ⇒
@@ -144,14 +176,19 @@ describe('P0-truth — the card preview is the applied number', () => {
                 const def = lookupEffect(ce.effectId);
                 const dot = def?.payload.damageOverTime;
                 if (!def || !dot) continue;
-                const intensity = ce.intensity ?? 1;
+                // Clamped for the same reason as above: the engine never lands
+                // more than MAX_EFFECT_INTENSITY.
+                const intensity = Math.min(ce.intensity ?? 1, MAX_EFFECT_INTENSITY);
                 const duration = Math.max(1, ce.duration ?? def.duration);
                 const ramp = def.payload.dotModifiers?.escalatesPerTurn ? (def.payload.dotModifiers.rampFactor ?? 0) : 0;
                 for (let k = 0; k < duration; k++) {
                     realLifetime += Math.floor((dot.damagePerRound + Math.floor(ramp * k)) * intensity);
                 }
             }
-            expect(card.bottomDamagePreview, `${card.id} preview must be its real DoT lifetime (or 0)`).toBe(realLifetime);
+            expect(
+                card.bottomDamagePreview,
+                `${card.id} preview must be its real direct damage + DoT lifetime (or 0)`,
+            ).toBe(realLifetime + directDamageOf(entry));
             expect(card.bottomActionText).not.toContain('impact ~');
         }
     });

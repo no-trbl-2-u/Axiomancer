@@ -1,60 +1,63 @@
 # CLAUDE.md
 
-<!-- lexicon-ok: base-power, chip-hp, concede, sway, capitulate -->
-
 Canonical agent guidance lives in **`AGENTS.md`** and **`VISION.md`** (game
 doctrine). This file exists so the load-bearing doctrine is always in context.
 
-## Load-bearing doctrine (set 2026-06; unshackled 2026-08-08)
+## Load-bearing doctrine (THE BIG NUMBERS REWRITE, 2026-09-02)
 
-**Status effects remain a major authored tool — they are no longer the
-governing combat objective.**
+Source of truth: `plan/2026-09-02-big-numbers-overhaul.prompt.md`. It repealed
+roughly thirty-five accumulated design laws and replaced them with three
+pillars and three constraints. Nothing older than 2026-09-02 governs combat.
 
-T's 2026-08-08 unshackling retired status dominance and restored ordinary
-direct damage. Every balance decision, tuning run, content addition, and
-card/effect design is judged first by CQI (`specs/35-objective-function-v2.md`):
-*does the deck's own engine run — assembling across turns (ARC), leaving more
-than one live line at each powering die (WIDTH), with a lead card that carries
-the kill without becoming the whole deck (IDENTITY), all of it flowing through
-Conviction, the Surge meter and the Dice (SPINE)?* Status play should stay
-satisfying and central to what the library offers, but a low status-engagement
-reading is a diagnosis to explain, not a balance failure by itself.
+**1. Bigger numbers are a design pillar, not a drift.** T's direction: *"I want
+to see bigger numbers."* A starter hit is 6–9; a mid-rank hit is 20–30; a
+Saint-rank finisher is 45–70 flat, or past 100 when a scaler is fed; a boss has
+hundreds of VITAE and the impossible fight has thousands. Payoffs (RUPTURE,
+REAP, CONDEMN, ◆-dumps, Soul-dumps) are uncapped and should reach 100–300 in a
+fed deck. The full ladder — per-rank damage/GUARD/BARRIER/DoT/HEAL bands, the
+VITAE formulas, the threat budget — is §5 of the overhaul prompt and is the
+reference for every new number. This is not about difficulty. It is about every
+play visibly moving something. When a tuning run says the numbers are too big,
+the answer is to buff the neighbours, not to shrink the card.
 
-**Hazard-Pattern Combat (the primary combat system):** the enemy's SOLE
-bar is HP. **Updated 2026-08-08 (THE UNSHACKLING + the Profane Canon)
-and 2026-08-22 (THE PIPELINE LIBERATION):** direct damage is LEGAL —
-status play, damage, and the alt-wins (Befriend, CAPITULATE via SWAY,
-CONCEDE) compete on CQI merit (`specs/35-objective-function-v2.md`).
-The historical `basePower`/`chipHp` fields stay deleted; a card needing
-raw HP damage authors its own field/verb through the full wiring
-checklist. The library is the 57-card Profane Canon
-(`docs/profane-canon.md`: 8 starters, 3 relics, 4 curses, six 7-card
-archetype packages) with a GROWABLE keyword registry (atlas row + full
-wiring per addition); presets are the threadbare/pilgrim/apostate stage
-ladder. HP remains the main win condition (`isDefeated(enemy)`);
-Hazard-Pattern Combat is the ONLY combat engine (witness:
-`simulateHazardPatternCombat`), LIVE in mobile map encounters. Engine
-constants are tuned manually; **`/deck-tuning`** forges the card pool
-(full card authority; sandbox A/Bs recommended) and
-**`/combat-playtest`** runs the stage matrix plus qualitative
-`playtester` agents (report only; see `docs/playtest.md`).
+**2. Only three constraints survive.**
+
+- **The 5/5/5 aspect thirds.** Every preset deck splits into exact thirds by
+  `philosophicalAspect` (body/mind/heart). Deck sizes are open; the thirds are
+  not. Enforced at `src/Combat/combat.starter-deck-presets.ts` and
+  `src/Combat/e2e/deck-presets.engine.test.ts`.
+- **Every card has a FREE line.** A card must be playable without a die
+  (`Card.free`, `playTopAction`). Existence only — the old sub-rules (budget
+  percentage, theme-currency deposit, the draw-kicker clause, the generic-draw
+  ban) are released. A FREE line nobody would choose is a design failure, not
+  a law violation.
+- **One tray roll per threat phase.** `turnTakenThisPhase` closes the
+  endTurn→startTurn Conviction farm. It is a bug fix, not a design law, and it
+  keeps its test (`src/Combat/e2e/turn-law.engine.test.ts`).
+
+Everything else is open design space.
+
+**3. Direct damage is a first-class verb; nothing governs balance from above.**
+DEAL is a real `CardSpecialMechanic` that scales with the read, the colour
+match, WRATH and CHAIN like every other verb. Status play, direct damage, the
+walls, and the alt-wins (Befriend, RELENT via PLEA, CONDEMN via CHARGE) compete
+on merit — none of them is the intended path and none is protected. There is
+**no governing objective function any more**: no win-rate curve, no CQI, no
+rank bands, no count pins, no status-engagement floor. The sims keep bug
+detectors (a printed number that isn't the applied number, a keyword with no
+popup, a card that can never be played) and a wide sanity envelope; they do not
+grade the game against a shape. A test that fails when the game is *wrong* is
+a guard; a test that fails when the game is *different* is a repealed law.
+
+Hazard-Pattern Combat remains the ONLY combat engine (witness:
+`simulateHazardPatternCombat`), LIVE in mobile map encounters, with the enemy's
+sole bar VITAE and `isDefeated(enemy)` the main win condition. Engine constants
+are tuned manually; **`/deck-tuning`** forges the card pool and
+**`/combat-playtest`** runs the stage matrix plus qualitative `playtester`
+agents (report only; see `docs/playtest.md`).
 
 Canonical: `VISION.md` → Combat vision. Echoed in `AGENTS.md` and the
 `combat-playtest` + `deck-tuning` skills.
-
-## Load-bearing doctrine (set 2026-07-08)
-
-**Starter preset decks must adhere to this win-rate curve** (blind
-policy-pick): early ~80%, mid ~50%, late ~25-35%, impossible 0%. Authored
-for the retired ten-theme presets; it maps onto the Profane Canon's
-stage ladder (threadbare early / pilgrim mid / apostate late) as each
-rung hitting its own stage's band — a rung overperforming far above its
-stage is a dominance finding, not a success. CQI (spec 35) is the
-overall objective function; this curve is the win-rate leg of
-`/deck-tuning`'s balance-band work on the starter library.
-
-Canonical: `VISION.md` → Combat vision. Correction history:
-`plan/tuning/2026-07-08-win-path-scaling.md`.
 
 ## Pointers
 

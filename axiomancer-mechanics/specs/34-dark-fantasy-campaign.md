@@ -306,7 +306,20 @@ file is the record, not the permission.
 
 ---
 
-## §3 — The Naming Law
+## §3 — The Naming Law — REPEALED (2026-09-02)
+
+> **REPEALED by THE BIG NUMBERS REWRITE** (2026-09-02,
+> `plan/2026-09-02-big-numbers-overhaul.prompt.md` §3, law L28). NL-1..NL-19
+> are no longer binding on any card, enemy or keyword, and NL-7's import of the
+> §2.2 V-1..V-6 ban list as a *naming* rule goes with them (§2.2 itself survives
+> as voice guidance, which is all it ever was). Their enforcer
+> (`scripts/check-naming-law.mjs`, root `npm run lint:names`) is gutted to
+> "ids are kebab-case and unique". The
+> §5.2 rename map is a different section and is STILL LIVE — the words PLEA,
+> CHARGE, CONDEMN, RELENT, QUARTER, TOLL, OATH, HEX, Ash..Saint remain canonical
+> and the lexicon lint still enforces them. What follows is retained as taste
+> advice, which is what it was always best at: names like *The Black Cap* are
+> the register, not a rule you can fail.
 
 > Inducted from the 57 shipped player cards, the 100+ shipped enemy cards,
 > the six archetype display names and the three preset names. Every rule
@@ -842,7 +855,19 @@ campaign* and points the word at the arc in §1.4. No engine work.
 
 ---
 
-## §8 — What does NOT change
+## §8 — What does NOT change — REPEALED (2026-09-02)
+
+> **VOID.** THE BIG NUMBERS REWRITE (2026-09-02,
+> `plan/2026-09-02-big-numbers-overhaul.prompt.md` §3, law L30) repealed this
+> whole section. It was a promise that spec 34 changed only words, and that
+> promise expired the moment a later pass was authorised to change the numbers:
+> the VITAE formulas, the threat budget, the colour-match bonus, the pip
+> bonuses, the RUPTURE cap, the concede ladder, the enemy stat law, the deck
+> laws and the balance bands all moved on 2026-09-02. §8.5's engineering
+> rigour (hermetic tests, the verify gate, the nexus hard rules, the lexicon
+> lint) still holds — but it holds because those are engineering rules, not
+> because this section says so. Read the rulings below as a record of what the
+> 44-series itself declined to touch.
 
 **§8.1 [RULING] Mechanics.** Nothing in this spec changes a payload, a
 constant, a probability, a resolver, an event, or an AI rule. Specifically

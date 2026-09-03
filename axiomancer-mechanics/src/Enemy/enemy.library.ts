@@ -535,6 +535,31 @@ export const KingOfRevenge = createEnemy({
     mapName: 'fishing-village',
     difficulty: 'boss',
     logic: 'boss',
+    // Injury is the most durable architecture — the village climax is a wall,
+    // above the L6 boss curve, and it does not learn to flinch until it must.
+    vitae: 160,
+    keywords: [
+        { kind: 'hide', n: 3 },
+        { kind: 'wounding', n: 18 },
+    ],
+    stages: [
+        {
+            at: { vitaePct: 0.6 },
+            name: 'THE CHARGES ARE READ',
+            text: 'The crown straightens. It begins the list, and every name on the list is yours.',
+            gain: [{ kind: 'unshaken' }],
+            threatBonus: 0.3,
+        },
+        {
+            at: { vitaePct: 0.25 },
+            name: 'SENTENCE WITHOUT TRIAL',
+            text: 'He stops arguing the old wrong and starts collecting it.',
+            gain: [{ kind: 'brutal' }],
+            heal: { pct: 0.1 },
+            threatBonus: 0.5,
+            curseCardId: 'arrears',
+        },
+    ],
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
         body:  { attack: 3, defend: 3 },
@@ -646,6 +671,39 @@ export const Kudan = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'unique',
     logic: 'strategic',
+    // On the L10 unique curve exactly: it is not a wall, it is an appointment
+    // with a sentence. UNSHAKEN because it already knows how this ends —
+    // right up until the moment it is interrupted.
+    vitae: 260,
+    keywords: [
+        { kind: 'hide', n: 4 },
+        { kind: 'unshaken' },
+        { kind: 'wounding', n: 20 },
+    ],
+    stages: [
+        {
+            at: { vitaePct: 0.7 },
+            name: 'IT BEGINS TO SPEAK',
+            text: 'The man\'s face opens on the calf\'s neck and the first clause of the calamity gets out.',
+            gain: [{ kind: 'venom', n: 6 }],
+            threatBonus: 0.25,
+        },
+        {
+            at: { vitaePct: 0.4 },
+            name: 'IT NAMES THE YEAR',
+            text: 'It tells you when. You did not want the when.',
+            gain: [{ kind: 'brutal' }],
+            threatBonus: 0.4,
+        },
+        {
+            at: { vitaePct: 0.15 },
+            name: 'THE TELLING KILLS IT',
+            text: 'It dies of finishing the sentence. It has decided to be finished before you are.',
+            gain: [{ kind: 'swift' }],
+            cleanse: true,
+            threatBonus: 0.6,
+        },
+    ],
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
         body:  { attack: 3, defend: 3 },
@@ -929,6 +987,30 @@ export const Mirac = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'boss',
     logic: 'boss',
+    vitae: 330,
+    keywords: [
+        { kind: 'hide', n: 6 },
+        { kind: 'unshaken' },
+        { kind: 'wounding', n: 30 },
+    ],
+    stages: [
+        {
+            at: { vitaePct: 0.6 },
+            name: 'THE VERDICT IS BACKDATED',
+            text: 'It stops working backward toward the crime. The crime will be supplied.',
+            gain: [{ kind: 'brutal' }],
+            threatBonus: 0.3,
+        },
+        {
+            at: { vitaePct: 0.25 },
+            name: 'THE RED ORB OPENS',
+            text: 'Everything it lights has already been found guilty of standing there.',
+            gain: [{ kind: 'swift' }],
+            heal: { pct: 0.08 },
+            threatBonus: 0.55,
+            curseCardId: 'overheard-name',
+        },
+    ],
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
         body: { attack: 3, defend: 3 },
@@ -1143,6 +1225,32 @@ export const RawheadRex = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'boss',
     logic: 'boss',
+    // A slab of cellar meat: well above the curve, but low HIDE — nothing about
+    // rawhead is armoured. It just does not stop.
+    vitae: 500,
+    keywords: [
+        { kind: 'hide', n: 5 },
+        { kind: 'brutal' },
+        { kind: 'ravenous' },
+    ],
+    stages: [
+        {
+            at: { vitaePct: 0.6 },
+            name: 'UP FROM UNDER THE STAIRS',
+            text: 'It stops waiting to be come for.',
+            gain: [{ kind: 'swift' }],
+            threatBonus: 0.35,
+        },
+        {
+            at: { vitaePct: 0.25 },
+            name: 'BLOODY BONES',
+            text: 'It sheds the rawhead. The bones underneath were always the sharp part.',
+            gain: [{ kind: 'wounding', n: 40 }],
+            heal: 70,
+            threatBonus: 0.5,
+            curseCardId: 'gnaw-marks',
+        },
+    ],
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
         body:  { attack: 3, defend: 3 },
@@ -1181,6 +1289,31 @@ export const FateSpinner = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'boss',
     logic: 'boss',
+    // An old man in a web. Under the curve — the web is the durability, and the
+    // web is ELUSIVE until you land a rung on him.
+    vitae: 360,
+    keywords: [
+        { kind: 'hide', n: 8 },
+        { kind: 'elusive' },
+        { kind: 'venom', n: 6 },
+    ],
+    stages: [
+        {
+            at: { vitaePct: 0.6 },
+            name: 'THE PATTERN CLOSES',
+            text: 'He stops spinning your next mistake and spins your last one a second time.',
+            gain: [{ kind: 'swift' }],
+            cleanse: true,
+            threatBonus: 0.3,
+        },
+        {
+            at: { vitaePct: 0.25 },
+            name: 'THE DRAWER OF LOOSE THREAD',
+            text: 'He opens the little drawer he has been saving and pulls the one strand he never spun.',
+            gain: [{ kind: 'brutal' }],
+            threatBonus: 0.5,
+        },
+    ],
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
         mind:  { attack: 3, defend: 3 },
@@ -1280,6 +1413,30 @@ export const RaAminKa = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'boss',
     logic: 'boss',
+    // Layer on layer of signed linen: high HIDE, and the wrappings re-wrap.
+    vitae: 540,
+    keywords: [
+        { kind: 'hide', n: 8 },
+        { kind: 'regrow', n: 5 },
+        { kind: 'wounding', n: 45 },
+    ],
+    stages: [
+        {
+            at: { vitaePct: 0.6 },
+            name: 'THE DECREE IS COUNTERSIGNED',
+            text: 'A second signature works its way up through the linen. It was always going to.',
+            gain: [{ kind: 'brutal' }],
+            threatBonus: 0.3,
+        },
+        {
+            at: { vitaePct: 0.25 },
+            name: 'THE KINGDOM IS PRESUMED LOYAL',
+            text: 'He calls up an army four thousand years dead. Something in the dust answers roll.',
+            gain: [{ kind: 'swift' }],
+            heal: { pct: 0.12 },
+            threatBonus: 0.5,
+        },
+    ],
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
         mind: { attack: 3, defend: 3 },
@@ -1542,6 +1699,31 @@ export const Rangda = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'boss',
     logic: 'boss',
+    // Under the curve — a widow, not a wall. The pressure is REGROW: grief has
+    // been in training longer than your certainty.
+    vitae: 670,
+    keywords: [
+        { kind: 'hide', n: 8 },
+        { kind: 'venom', n: 14 },
+        { kind: 'regrow', n: 7 },
+    ],
+    stages: [
+        {
+            at: { vitaePct: 0.6 },
+            name: 'THE MASK COMES AWAY',
+            text: 'Under the monster there is a widow, mid-sentence, four centuries in. She finishes the sentence.',
+            cleanse: true,
+            threatBonus: 0.35,
+        },
+        {
+            at: { vitaePct: 0.25 },
+            name: 'THE COURSEWORK CONCLUDES',
+            text: 'She sets down four hundred years of study and applies every page of it at once.',
+            gain: [{ kind: 'brutal' }],
+            heal: { pct: 0.1 },
+            threatBonus: 0.55,
+        },
+    ],
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
         heart: { attack: 3, defend: 3 },
@@ -1620,6 +1802,29 @@ export const ZomaAscendant = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'boss',
     logic: 'boss',
+    vitae: 700,
+    keywords: [
+        { kind: 'hide', n: 8 },
+        { kind: 'swift' },
+        { kind: 'wounding', n: 60 },
+    ],
+    stages: [
+        {
+            at: { vitaePct: 0.6 },
+            name: 'THE MOTION CARRIES',
+            text: 'Both mouths say the same word. The word is your name, and it is not a question.',
+            gain: [{ kind: 'brutal' }],
+            threatBonus: 0.35,
+        },
+        {
+            at: { vitaePct: 0.25 },
+            name: 'UNANIMOUS',
+            text: 'Nothing left in it disagrees with anything else in it. The arguing was the leash.',
+            gain: [{ kind: 'unshaken' }],
+            cleanse: true,
+            threatBonus: 0.55,
+        },
+    ],
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
         mind:  { attack: 3, defend: 3 },
@@ -1658,6 +1863,31 @@ export const ElderFireGiant = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'boss',
     logic: 'boss',
+    // The roster's wall. Top of the +25% band, the highest HIDE outside the
+    // uniques, and nothing you do makes it hurry.
+    vitae: 950,
+    keywords: [
+        { kind: 'hide', n: 8 },
+        { kind: 'unshaken' },
+        { kind: 'brutal' },
+    ],
+    stages: [
+        {
+            at: { vitaePct: 0.6 },
+            name: 'THE COALS ARE BANKED',
+            text: 'It stops burning outward and starts burning down. Everything near it gets older.',
+            heal: { pct: 0.12 },
+            threatBonus: 0.3,
+        },
+        {
+            at: { vitaePct: 0.25 },
+            name: 'WHITE',
+            text: 'The colour goes out of the fire. What is left is the part that does not need fuel.',
+            gain: [{ kind: 'swift' }],
+            cleanse: true,
+            threatBonus: 0.6,
+        },
+    ],
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
         body: { attack: 3, defend: 3 },
@@ -1696,6 +1926,31 @@ export const Tezcatlipoca = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'boss',
     logic: 'boss',
+    // Smoke, so a small printed HIDE — but ELUSIVE doubles it to 16 until you
+    // stagger the mirror. The whole fight is the control check.
+    vitae: 630,
+    keywords: [
+        { kind: 'hide', n: 8 },
+        { kind: 'elusive' },
+        { kind: 'wounding', n: 65 },
+    ],
+    stages: [
+        {
+            at: { vitaePct: 0.6 },
+            name: 'THE MIRROR TURNS',
+            text: 'It stops showing you the one who lost and starts showing the one who is losing.',
+            gain: [{ kind: 'swift' }],
+            threatBonus: 0.35,
+        },
+        {
+            at: { vitaePct: 0.25 },
+            name: 'IT DECLINES TO REVIEW ITSELF',
+            text: 'The god steps out of the reflection and leaves the reflection fighting on without him.',
+            gain: [{ kind: 'brutal' }],
+            cleanse: true,
+            threatBonus: 0.5,
+        },
+    ],
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
         mind:  { attack: 3, defend: 3 },
@@ -1734,6 +1989,30 @@ export const ArchDemon = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'boss',
     logic: 'boss',
+    vitae: 860,
+    keywords: [
+        { kind: 'hide', n: 8 },
+        { kind: 'brutal' },
+        { kind: 'ravenous' },
+    ],
+    stages: [
+        {
+            at: { vitaePct: 0.6 },
+            name: 'THE PAPERWORK IS APPROVED',
+            text: 'Far below, a lesser devil stamps something. Up here the appetite stops being polite.',
+            gain: [{ kind: 'swift' }],
+            threatBonus: 0.4,
+        },
+        {
+            at: { vitaePct: 0.25 },
+            name: 'IT EATS THE CLAUSES',
+            text: 'It stops administering the hunger and goes back to simply being it.',
+            gain: [{ kind: 'wounding', n: 80 }],
+            heal: { pct: 0.15 },
+            threatBonus: 0.55,
+            curseCardId: 'gnaw-marks',
+        },
+    ],
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
         body: { attack: 3, defend: 3 },
@@ -1772,6 +2051,31 @@ export const Beelzebub = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'boss',
     logic: 'boss',
+    // A swarm has no armour worth the name; it has replacements. Low HIDE, the
+    // roster's heaviest REGROW — kill it faster than it recruits.
+    vitae: 880,
+    keywords: [
+        { kind: 'hide', n: 8 },
+        { kind: 'venom', n: 18 },
+        { kind: 'regrow', n: 13 },
+    ],
+    stages: [
+        {
+            at: { vitaePct: 0.6 },
+            name: 'QUORUM',
+            text: 'Enough of it has died to make the rest a majority. The majority votes.',
+            gain: [{ kind: 'swift' }],
+            threatBonus: 0.35,
+        },
+        {
+            at: { vitaePct: 0.25 },
+            name: 'POLICY',
+            text: 'The swarm stops arguing and becomes one opinion with a mouth.',
+            gain: [{ kind: 'brutal' }],
+            cleanse: true,
+            threatBonus: 0.55,
+        },
+    ],
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
         body:  { attack: 3, defend: 3 },
@@ -1811,6 +2115,39 @@ export const Death = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'unique',
     logic: 'strategic',
+    // Just under the L49 unique curve, and HIDE below the band: Death is not
+    // armoured. It is punctual, and it does not flinch, ever.
+    vitae: 1010,
+    keywords: [
+        { kind: 'hide', n: 8 },
+        { kind: 'unshaken' },
+        { kind: 'wounding', n: 70 },
+    ],
+    stages: [
+        {
+            at: { vitaePct: 0.7 },
+            name: 'THE LEDGER OPENS',
+            text: 'It finds your line without looking. Part of the entry is already dry.',
+            gain: [{ kind: 'venom', n: 20 }],
+            threatBonus: 0.25,
+        },
+        {
+            at: { vitaePct: 0.4 },
+            name: 'YOU ARE RUNNING LATE',
+            text: 'It stops being punctual and starts being early, which it has never been for anyone.',
+            gain: [{ kind: 'swift' }],
+            threatBonus: 0.45,
+        },
+        {
+            at: { vitaePct: 0.15 },
+            name: 'THE APPOINTMENT IS KEPT',
+            text: 'It closes the book on its own finger and comes to collect the way it does for the difficult ones.',
+            gain: [{ kind: 'brutal' }],
+            cleanse: true,
+            threatBonus: 0.6,
+            curseCardId: 'arrears',
+        },
+    ],
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
         body:  { attack: 3, defend: 3 },
@@ -1861,6 +2198,39 @@ export const TheAbortive = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'unique',
     logic: 'boss',
+    // Well above the curve: a strength that was never spent on living has all
+    // of it left. REGROW because nothing has ever been drawn down.
+    vitae: 1200,
+    keywords: [
+        { kind: 'hide', n: 8 },
+        { kind: 'brutal' },
+        { kind: 'regrow', n: 15 },
+    ],
+    stages: [
+        {
+            at: { vitaePct: 0.7 },
+            name: 'IT TRIES TO BEGIN',
+            text: 'Something that has never happened starts happening, badly, in the wrong direction.',
+            gain: [{ kind: 'swift' }],
+            threatBonus: 0.3,
+        },
+        {
+            at: { vitaePct: 0.4 },
+            name: 'THE WORLD IT WAS FOR',
+            text: 'For one moment the trees are a different shape and you are a kinder person standing in them. Then it takes that back.',
+            gain: [{ kind: 'venom', n: 22 }],
+            cleanse: true,
+            threatBonus: 0.4,
+        },
+        {
+            at: { vitaePct: 0.15 },
+            name: 'ALMOST',
+            text: 'It gives up on being born and settles for being ended by someone who showed up.',
+            gain: [{ kind: 'unshaken' }],
+            heal: { pct: 0.15 },
+            threatBonus: 0.6,
+        },
+    ],
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
         body:  { attack: 3, defend: 3 },
@@ -2157,6 +2527,32 @@ export const TheHarbormaster = createEnemy({
     mapName: 'northern-city',
     difficulty: 'boss',
     logic: 'boss',
+    // Above the L18 boss curve: he is the gate, and gates are the wall part of
+    // a wall. UNSHAKEN because a scale does not tremble for anyone's argument.
+    vitae: 350,
+    keywords: [
+        { kind: 'hide', n: 6 },
+        { kind: 'unshaken' },
+        { kind: 'wounding', n: 32 },
+    ],
+    stages: [
+        {
+            at: { vitaePct: 0.6 },
+            name: 'THE TIDE COMES IN',
+            text: 'He stops weighing you himself and lets the water do it. The water has never once been generous.',
+            gain: [{ kind: 'swift' }],
+            threatBonus: 0.35,
+        },
+        {
+            at: { vitaePct: 0.25 },
+            name: 'NOTHING LEAVES UNWEIGHED',
+            text: 'He steps onto his own scale. The gate shuts on the far side of the beam and stays shut.',
+            gain: [{ kind: 'brutal' }],
+            heal: { pct: 0.1 },
+            threatBonus: 0.55,
+            curseCardId: 'mouthful-of-brine',
+        },
+    ],
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
         body: { attack: 3, defend: 3 },
@@ -2298,6 +2694,32 @@ export const TheWaterreeve = createEnemy({
     mapName: 'connecting-river',
     difficulty: 'boss',
     logic: 'boss',
+    // A man with a book, slightly under the curve. SWIFT because he has already
+    // audited your guard; VENOM because that is what interest looks like.
+    vitae: 350,
+    keywords: [
+        { kind: 'hide', n: 4 },
+        { kind: 'swift' },
+        { kind: 'venom', n: 8 },
+    ],
+    stages: [
+        {
+            at: { vitaePct: 0.6 },
+            name: 'THE ACCOUNT IS REOPENED',
+            text: 'He turns back to a page you were sure had been closed, and adds to it.',
+            gain: [{ kind: 'brutal' }],
+            threatBonus: 0.3,
+        },
+        {
+            at: { vitaePct: 0.25 },
+            name: 'THE BOOK BALANCES',
+            text: 'He writes what the crossing took and what the river is owed. The two figures are the same figure.',
+            gain: [{ kind: 'unshaken' }],
+            heal: { pct: 0.1 },
+            threatBonus: 0.5,
+            curseCardId: 'arrears',
+        },
+    ],
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
         body: { attack: 2, defend: 2 },
@@ -2400,6 +2822,32 @@ export const ThePortreeve = createEnemy({
     mapName: 'town-across-river',
     difficulty: 'boss',
     logic: 'boss',
+    // He outlived every rival claim; the durability is the character. UNSHAKEN
+    // is a ruling that will not be overturned by anything you do to him.
+    vitae: 490,
+    keywords: [
+        { kind: 'hide', n: 8 },
+        { kind: 'unshaken' },
+        { kind: 'brutal' },
+    ],
+    stages: [
+        {
+            at: { vitaePct: 0.6 },
+            name: 'THE MOTION IS DENIED',
+            text: 'He rules against the way you are standing. You are still standing. The ruling is simply on record now.',
+            cleanse: true,
+            threatBonus: 0.35,
+        },
+        {
+            at: { vitaePct: 0.25 },
+            name: 'THE GAVEL DOES NOT COME BACK UP',
+            text: 'He stops presiding over the fine and starts collecting it himself.',
+            gain: [{ kind: 'swift' }],
+            heal: { pct: 0.08 },
+            threatBonus: 0.55,
+            curseCardId: 'arrears',
+        },
+    ],
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
         body: { attack: 3, defend: 3 },
@@ -2452,6 +2900,30 @@ export const TheDoorwarden = createEnemy({
     mapName: 'aporia-colonnade',
     difficulty: 'boss',
     logic: 'boss',
+    // Act I's lesson is HIDE, so it is printed hard for the level: jointed
+    // bronze, and every hit you land is a knock he does not answer.
+    vitae: 220,
+    keywords: [
+        { kind: 'hide', n: 6 },
+        { kind: 'unshaken' },
+    ],
+    stages: [
+        {
+            at: { vitaePct: 0.6 },
+            name: 'EVERY DOOR HE REMEMBERS',
+            text: 'He shuts one more. You did not know it was open until you heard it.',
+            gain: [{ kind: 'brutal' }],
+            threatBonus: 0.3,
+        },
+        {
+            at: { vitaePct: 0.25 },
+            name: 'WHAT SHUTS, STAYS SHUT',
+            text: 'He kneels lower. Bronze finds the seam of the room and the room stops having a far side.',
+            gain: [{ kind: 'swift' }],
+            heal: { pct: 0.15 },
+            threatBonus: 0.5,
+        },
+    ],
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
         body: { attack: 3, defend: 3 },
@@ -2506,6 +2978,32 @@ export const TheIndex = createEnemy({
     mapName: 'aporia-archive',
     difficulty: 'boss',
     logic: 'boss',
+    // Under the curve — it is drawers and paper. It bleeds ink (VENOM) and it
+    // files you (WOUNDING), which is the act's whole joke.
+    vitae: 220,
+    keywords: [
+        { kind: 'hide', n: 4 },
+        { kind: 'venom', n: 7 },
+        { kind: 'wounding', n: 22 },
+    ],
+    stages: [
+        {
+            at: { vitaePct: 0.6 },
+            name: 'SEE ALSO',
+            text: 'It cross-references you against something that should never have been given a call number.',
+            gain: [{ kind: 'swift' }],
+            threatBonus: 0.3,
+        },
+        {
+            at: { vitaePct: 0.25 },
+            name: 'THE DRAWERS OPEN IN ORDER',
+            text: 'A through the end of knowing. Everything it ever shelved wrongly comes out at once, filed under you.',
+            gain: [{ kind: 'brutal' }],
+            cleanse: true,
+            threatBonus: 0.55,
+            curseCardId: 'overheard-name',
+        },
+    ],
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
         mind: { attack: 3, defend: 3 },
@@ -2562,6 +3060,34 @@ export const TheSophist = createEnemy({
     mapName: 'aporia-proof',
     difficulty: 'boss',
     logic: 'boss',
+    // Well under the curve: he is not a wall, he is an angle. SWIFT because he
+    // is holding your own guard at a more flattering slant, ELUSIVE because he
+    // is never standing where the argument is until you stagger him into it.
+    vitae: 270,
+    keywords: [
+        { kind: 'hide', n: 5 },
+        { kind: 'swift' },
+        { kind: 'elusive' },
+    ],
+    stages: [
+        {
+            at: { vitaePct: 0.6 },
+            name: 'HE BORROWS YOUR ARGUMENT',
+            text: 'He takes the argument out of your mouth, holds it at a kinder angle, and hands it back heavier.',
+            gain: [{ kind: 'brutal' }],
+            cleanse: true,
+            threatBonus: 0.3,
+        },
+        {
+            at: { vitaePct: 0.25 },
+            name: 'THE FOURTH LEDGER',
+            text: 'He signs a whole name for the first time in centuries. The room stops being a room and becomes a claim about one.',
+            gain: [{ kind: 'wounding', n: 35 }],
+            heal: { pct: 0.1 },
+            threatBonus: 0.55,
+            curseCardId: 'overheard-name',
+        },
+    ],
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
         mind:  { attack: 3, defend: 3 },
@@ -2672,6 +3198,51 @@ export const TheIncompleteness = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'unique',
     logic: 'boss',
+    // THE BIG NUMBERS REWRITE — the ceiling, on the L110 unique curve to the
+    // digit. UNSHAKEN because it was never going to flinch; REGROW because it
+    // cannot be finished; four stages because it gets a new premise every time
+    // you land a true thing on it. There is no mercy out and there never was.
+    vitae: 2210,
+    keywords: [
+        { kind: 'hide', n: 8 },
+        { kind: 'unshaken' },
+        { kind: 'regrow', n: 18 },
+    ],
+    stages: [
+        {
+            at: { vitaePct: 0.8 },
+            name: 'IT ADMITS THE AXIOM',
+            text: 'You land something true. It writes the true thing into itself and stands up larger.',
+            gain: [{ kind: 'brutal' }],
+            heal: { pct: 0.05 },
+            threatBonus: 0.3,
+        },
+        {
+            at: { vitaePct: 0.55 },
+            name: 'THE PROOF GROWS A NEW LINE',
+            text: 'Every argument you have made is now a premise it holds. It thanks you in a grammar you cannot read.',
+            gain: [{ kind: 'swift' }],
+            cleanse: true,
+            threatBonus: 0.4,
+        },
+        {
+            at: { vitaePct: 0.3 },
+            name: 'YOU ARE ONE OF ITS EXAMPLES',
+            text: 'It stops being about itself. It has been about you for some time. You are the part it uses to show the thing it cannot say.',
+            gain: [{ kind: 'venom', n: 60 }, { kind: 'ravenous' }],
+            threatBonus: 0.5,
+        },
+        {
+            at: { vitaePct: 0.1 },
+            name: 'IT CANNOT BE FINISHED',
+            text: 'The wound you opened closes into a sentence. The sentence is true. You cannot show that it is. It gets up.',
+            gain: [{ kind: 'wounding', n: 120 }],
+            heal: { pct: 0.3 },
+            cleanse: true,
+            threatBonus: 0.6,
+            curseCardId: 'overheard-name',
+        },
+    ],
     tier1Overrides: T1_DEFAULT,
     procUnlocks: {
         body: { attack: 3, defend: 3 },

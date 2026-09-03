@@ -38,7 +38,7 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const REGISTRY_PATH = path.join(ROOT, 'axiomancer-mechanics', 'docs', 'lexicon.json')
@@ -193,4 +193,19 @@ function main() {
   console.log(`check-lexicon: ${scanned} live file(s) clean against ${RETIRED.length} retired term(s)`)
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main()
+/**
+ * True when this module is the process entry point.
+ *
+ * The old guard compared `import.meta.url` to `file://${process.argv[1]}`.
+ * On Windows `process.argv[1]` is a backslash path (`C:\Users\...`) while
+ * `import.meta.url` is `file:///C:/Users/...`, so the comparison was ALWAYS
+ * false: every one of these CLIs exited 0 with no output on Windows, and the
+ * `PostToolUse` lexicon hook was a silent no-op there. Normalising both sides
+ * through `pathToFileURL` fixes it on every platform.
+ */
+function isDirectRun(moduleUrl) {
+    if (!process.argv[1]) return false
+    return moduleUrl === pathToFileURL(process.argv[1]).href
+}
+
+if (isDirectRun(import.meta.url)) main()

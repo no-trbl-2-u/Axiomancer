@@ -205,6 +205,34 @@ export const VERB_POINTS = Object.freeze({
      *  unscored here, matching the "one line fires" convention every other
      *  fallback verb follows). */
     glyphChargePerCharge: 0.4,
+    // ── THE BIG NUMBERS REWRITE (2026-09-02) — direct damage and its family ──
+    // Anchored against HEAL (1/3 per HP): removing an HP from the foe is worth
+    // roughly what restoring one to yourself is, and both are cheaper per point
+    // than GUARD is per HP blocked. With the rank bands repealed this table is
+    // ADVISORY — it feeds the catalog's per-card score and the smell tests, and
+    // no longer gates what may ship.
+    /** DEAL, per HP of direct damage. */
+    damagePerHp: 1 / 3,
+    /** PIERCE, flat: ignoring HIDE is worth about one Ash hit against the
+     *  armoured foes it is printed for. */
+    pierce: 1.5,
+    /** WRATH, per point: applies to every remaining hit. `expectedHitsLeft`
+     *  hits at 1 HP each, priced through `damagePerHp`. */
+    expectedHitsLeft: 6,
+    /** FLAY, per stack: +50% on one hit ≈ half a typical hit of that rank.
+     *  Priced coarsely — the real value rides the hit it modifies. */
+    flayPerStack: 1.2,
+    /** TWIN: doubling the next spell's PAID line, at the expected PAID value
+     *  of a card one rank below the TWIN carrier. */
+    twin: 4,
+    /** CHAIN, per point: one hit's worth, discounted for the fade risk. */
+    chainPerPoint: 0.5,
+    /** EXECUTE: a conditional damage double, priced as the `dieBonus`-class
+     *  conditional it is (the foe must already be low). */
+    execute: 2.5,
+    /** OVERKILL: opportunistic conversion of damage that was going to be
+     *  wasted anyway — real, but never the reason to play the card. */
+    overkill: 1.5,
     /** IMMOLATE (profane-canon rework) — the per-card-burned cost credit.
      *  Softer than a full draw (2) because the burn also thins junk/curses
      *  out of the cycle, which is value the player keeps. */
@@ -452,6 +480,13 @@ export function scoreRider(rider: CardRider | undefined): number {
     // (exactly one of glyphCharge-succeeds / glyphChargeFallback fires per
     // play; `glyphChargePerCharge` already represents the FREE line's value).
     pts += (rider.glyphCharge ?? 0) * VERB_POINTS.glyphChargePerCharge;
+    // THE BIG NUMBERS REWRITE — the damage family on a rider (FREE lines and
+    // condition payoffs), priced identically to the mechanic form.
+    pts += (rider.damage ?? 0) * VERB_POINTS.damagePerHp;
+    if (rider.pierce && rider.damage) pts += VERB_POINTS.pierce;
+    pts += (rider.wrath ?? 0) * VERB_POINTS.expectedHitsLeft * VERB_POINTS.damagePerHp;
+    pts += (rider.chain ?? 0) * VERB_POINTS.chainPerPoint;
+    pts += (rider.flay ?? 0) * VERB_POINTS.flayPerStack;
     return pts;
 }
 
@@ -575,6 +610,17 @@ export function scoreMechanic(mechanic: CardSpecialMechanic): number {
         // PURGE — curse self-exile: deliberately unpriced (curse cards are
         // worthless by design and exempt from the band lint).
         case 'purge_self': return 0;
+        // ── THE BIG NUMBERS REWRITE — direct damage and its family ──────────
+        case 'deal':
+            return mechanic.amount * (mechanic.hits ?? 1) * V.damagePerHp
+                + (mechanic.pierce ? V.pierce : 0);
+        case 'wrath':
+            return mechanic.amount * V.expectedHitsLeft * V.damagePerHp;
+        case 'flay': return mechanic.stacks * V.flayPerStack;
+        case 'twin': return V.twin;
+        case 'chain': return mechanic.amount * V.chainPerPoint;
+        case 'execute': return V.execute;
+        case 'overkill': return V.overkill;
     }
 }
 

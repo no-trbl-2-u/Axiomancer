@@ -104,10 +104,10 @@ describe('Phase 32 part 4e — pure resolve-milestone threshold arithmetic', () 
 describe('Crossing Wavering only', () => {
     it('a gain that clears Wavering but not Faltering lands one QUARTER stack and fires exactly one milestone event', () => {
         // thin-hymn (the Profane Canon's choir PLEA starter) pays a flat
-        // PLEA 3 ({ kind: 'sway', amount: 3 }, no self-echo). resolve = 35
-        // (maxHealth 100) -> wavering 16 / faltering 28. Pre-seeded sway 14
-        // + the 3-point gain = 17: clears wavering (16), stays under
-        // faltering (28).
+        // PLEA 8 on its PAID line ({ kind: 'sway', amount: 8 }, no self-echo).
+        // resolve = 35 (maxHealth 100) -> wavering 16 / faltering 28.
+        // Pre-seeded sway 14 + the 8-point gain = 22: clears wavering (16),
+        // stays under faltering (28).
         const before = stateFor('thin-hymn', 14, {
             enemy: { ...buildFixtureState({ clean: true }).enemy, maxHealth: 100, health: 100, effects: [] },
         });
@@ -120,11 +120,11 @@ describe('Crossing Wavering only', () => {
         const { events, after } = playPaid(before);
 
         const [gained] = findEvents(events, 'sway-gained');
-        expect(gained.amount).toBe(3); // printed PLEA 3, no echo
+        expect(gained.amount).toBe(8); // printed PLEA 8, no echo
         const milestones = findEvents(events, 'sway-milestone');
         expect(milestones).toHaveLength(1);
         expect(milestones[0]).toMatchObject({ milestone: 'wavering', threshold: wavering, effectId: 'debuff_quarter', intensity: 1 });
-        expect(after.sway).toBe(17); // 14 + 3, no Faltering bonus yet
+        expect(after.sway).toBe(22); // 14 + 8, no Faltering bonus yet
         expect(after.swayMilestoneWaveringFired).toBe(true);
         expect(after.swayMilestoneFalteringFired).toBeFalsy();
 
@@ -136,17 +136,21 @@ describe('Crossing Wavering only', () => {
 
 describe('Crossing BOTH Wavering and Faltering in one gain', () => {
     it('a single played card that jumps the running total past both waypoints fires both milestone events in one gainSway call', () => {
-        // resolve = 14 (the fixture's default maxHealth 40) -> wavering 6 /
-        // faltering 11. thin-hymn's flat PLEA 3 is echoed to 6 by a
-        // PENDING ECHO CHARGE (state.echoNextSpell, consumed by this play):
-        // pre-seeded sway 5 (below wavering) + the 6-point gain = 11: clears
-        // BOTH waypoints in this one gainSway call.
-        const before = stateFor('thin-hymn', 5, { echoNextSpell: true });
+        // resolve = 35 (maxHealth 100) -> wavering 16 / faltering 28.
+        // thin-hymn's flat PLEA 8 is echoed to 16 by a PENDING ECHO CHARGE
+        // (state.echoNextSpell, consumed by this play): pre-seeded sway 12
+        // (below wavering) + the 16-point gain = 28: clears BOTH waypoints in
+        // this one gainSway call. The foe is sized so the doubled gain still
+        // lands short of the resolve (see below).
+        const before = stateFor('thin-hymn', 12, {
+            echoNextSpell: true,
+            enemy: { ...buildFixtureState({ clean: true }).enemy, maxHealth: 100, health: 100, effects: [] },
+        });
         const resolve = capitulateThreshold(before.enemy);
-        expect(resolve).toBe(14);
+        expect(resolve).toBe(35);
         const { wavering, faltering } = swayResolveMilestoneThresholds(resolve);
-        expect(wavering).toBe(6);
-        expect(faltering).toBe(11);
+        expect(wavering).toBe(16);
+        expect(faltering).toBe(28);
 
         const { events, after } = playPaid(before);
 
@@ -155,16 +159,16 @@ describe('Crossing BOTH Wavering and Faltering in one gain', () => {
         expect(milestones.map(m => m.milestone).sort()).toEqual(['faltering', 'wavering']);
 
         const waveringEvt = milestones.find(m => m.milestone === 'wavering')!;
-        expect(waveringEvt).toMatchObject({ threshold: 6, effectId: 'debuff_quarter', intensity: 1 });
+        expect(waveringEvt).toMatchObject({ threshold: 16, effectId: 'debuff_quarter', intensity: 1 });
 
         const falteringEvt = milestones.find(m => m.milestone === 'faltering')!;
-        expect(falteringEvt).toMatchObject({ threshold: 11, bonus: SWAY_FALTERING_BONUS });
+        expect(falteringEvt).toMatchObject({ threshold: 28, bonus: SWAY_FALTERING_BONUS });
 
-        // 5 (pre-seed) + 6 (echoed card) + 2 (Faltering bonus) = 13;
-        // still below the resolve (14), so this does NOT also trip the
+        // 12 (pre-seed) + 16 (echoed card) + 2 (Faltering bonus) = 30;
+        // still below the resolve (35), so this does NOT also trip the
         // capitulation offer — keeps the milestone assertions isolated from
         // that separate (pre-existing) check.
-        expect(after.sway).toBe(13);
+        expect(after.sway).toBe(12 + 16 + SWAY_FALTERING_BONUS);
         expect(after.swayMilestoneWaveringFired).toBe(true);
         expect(after.swayMilestoneFalteringFired).toBe(true);
         expect(after.phase).not.toBe('mercy-choice');

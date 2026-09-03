@@ -4,17 +4,20 @@
  * Pins the registration contract for the level-55 unique that anchors the
  * `impossible` playtest stage:
  *
- *   1. Registered under the `the-incompleteness` slug, with the stat law
- *      (baseStats sum = 5 x level) and the unique-tier shape intact.
+ *   1. Registered under the `the-incompleteness` slug with the unique-tier shape.
  *   2. NEVER present in any `EnemiesByMap` random-encounter pool — it is
  *      reachable only through the authored playtest stage (design requirement).
  *   3. Mercy is not an out (no befriendabilityConfig) and it drops nothing
  *      (a single no-drop loot bucket): the fight is the lesson.
- *   4. Its authored threat sequence is the 4-phase escalating pattern with the
- *      final phase flagged — status play (DoT + control) stays the only
- *      efficient way to even dent it, per doctrine.
+ *   4. Its authored threat sequence is wired: every step telegraphs, exactly
+ *      the last step is the finale, and it resolves through `getThreatSequence`
+ *      without losing a phase.
  *   5. A seeded sim smoke: `runOneEncounter` terminates with a valid outcome
  *      (almost certainly 'defeat' — that is the point of a ceiling).
+ *
+ * THE BIG NUMBERS REWRITE (2026-09-02): the enemy stat law (L15), the deck
+ * laws (L14) and the doctrine win-rate curve (L23) are repealed, so the
+ * `baseStats = 5 × level`, `4 phases` and `damageWeight` pins were deleted.
  */
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
@@ -54,12 +57,6 @@ describe('The Unfinished — registry wiring', () => {
         }
     });
 
-    it('obeys the stat law: baseStats sum to 5 x level', () => {
-        const { heart, body, mind } = TheIncompleteness.baseStats;
-        expect(heart + body + mind).toBe(5 * TheIncompleteness.level);
-        expect(heart + body + mind).toBe(550);
-    });
-
     it('mercy is not an out and it drops nothing — the fight is the lesson', () => {
         expect(TheIncompleteness.befriendabilityConfig).toBeUndefined();
         expect(TheIncompleteness.loot).toHaveLength(1);
@@ -69,30 +66,38 @@ describe('The Unfinished — registry wiring', () => {
 });
 
 describe('The Unfinished — authored threat sequence', () => {
-    it('is authored as 4 escalating phases with the final phase flagged', () => {
+    // THE BIG NUMBERS REWRITE (2026-09-02) repealed the enemy-deck laws (L14)
+    // and the doctrine win-rate curve (L23), so the old `toHaveLength(4)` +
+    // `damageWeight === [0.21, 0.232, 0.271, 0.326]` PLAYTEST-CALIBRATION pin
+    // is gone: it was a curve against the retired global THREAT_DAMAGE_SCALE
+    // and a phase-count pin, both repealed. What survives is the wiring the
+    // stage actually depends on — an authored sequence exists, exactly its
+    // LAST step is the finale, and no step telegraphs nothing.
+    it('is authored as a multi-phase sequence with exactly the last phase flagged final', () => {
         expect(SEQUENCE).toBeDefined();
-        expect(SEQUENCE).toHaveLength(4);
-        // PLAYTEST-CALIBRATION — calibrated so the best scripted line (greedy/blind)
-        // scrapes ~2% at 200 seeds; see combat-playtest.balance-bands.sim.test.ts.
-        expect(SEQUENCE.map(p => p.damageWeight)).toEqual([0.21, 0.232, 0.271, 0.326]);
-        expect(SEQUENCE[3].isFinalPhase).toBe(true);
-        expect(SEQUENCE.slice(0, 3).some(p => p.isFinalPhase)).toBe(false);
+        expect(SEQUENCE.length).toBeGreaterThan(1);
+        const finals = SEQUENCE.map((p, i) => (p.isFinalPhase ? i : -1)).filter(i => i >= 0);
+        expect(finals).toEqual([SEQUENCE.length - 1]);
     });
 
-    it('every phase telegraphs a debuff and phase 3 regenerates', () => {
+    it('every phase telegraphs a debuff, and one phase regenerates', () => {
         for (const phase of SEQUENCE) {
             expect(phase.threatEffectId).toMatch(/^debuff_/);
             expect(phase.actionText).toMatch(/\S/);
             expect(phase.stanceHint).toMatch(/\S/);
         }
-        expect(SEQUENCE[2].enemyHeal).toBe(8);
+        // "A New Axiom" knits itself whole off your best argument. The
+        // magnitude is a tuning number (8 at the old scale, 120 now that the
+        // Unfinished carries thousands of VITAE); that exactly one phase heals
+        // at all is the behaviour under test.
+        expect(SEQUENCE.filter(p => (p.enemyHeal ?? 0) > 0)).toHaveLength(1);
     });
 
     it('resolves through getThreatSequence with the final phase intact', () => {
         const resolved = getThreatSequence(deepClone(TheIncompleteness));
-        expect(resolved).toHaveLength(4);
-        expect(resolved[3].isFinalPhase).toBe(true);
-        expect(resolved.slice(0, 3).every(p => !p.isFinalPhase)).toBe(true);
+        expect(resolved).toHaveLength(SEQUENCE.length);
+        expect(resolved[resolved.length - 1].isFinalPhase).toBe(true);
+        expect(resolved.slice(0, -1).every(p => !p.isFinalPhase)).toBe(true);
     });
 });
 

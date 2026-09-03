@@ -118,7 +118,7 @@ describe('sandbox registry — library-card overrides', () => {
     //  to slippery-slope, a surviving library card with a combatEffects payload.)
     it('a shallow patch is merged over the library card and visible via getCardById', () => {
         const base = getCardById('spoiled-poultice');
-        expect(base?.combatEffects?.[0]?.intensity).toBe(1); // library literal (profane canon)
+        expect(base?.combatEffects?.[0]?.intensity).toBe(4); // library literal (profane canon)
 
         registerSandboxOverride('spoiled-poultice', {
             combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 3, duration: 2 }],

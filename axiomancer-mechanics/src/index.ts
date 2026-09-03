@@ -128,7 +128,8 @@ export {
     isStanceReadoutBlurred,
     cardReadPreview, projectCardImpact, getSignatureSkill, SIGNATURE_SKILLS, SIGNATURE_SKILL_LIST,
     READ_DAMAGE_MULT, CONVICTION_PER_UNPICKED_DIE, CONVICTION_PER_UNPICKED_WILD, CONVICTION_READ_WIN_BONUS,
-    COLOR_MATCH_DAMAGE_BONUS, deriveIntentType,
+    COLOR_MATCH_DAMAGE_BONUS, colorMatchBonus, COLOR_MATCH_BONUS_PCT, COLOR_MATCH_BONUS_MIN,
+    deriveIntentType,
     // 0.34.0 status-depth epic — honesty selectors + deny-threshold consts
     getEnemyIncomingDamageMultiplier, getDisruptMeter,
     projectRupture, projectRuptureBurst, projectSiphonHeal, projectReapAll,

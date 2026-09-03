@@ -1,5 +1,11 @@
 # Spec 32 — The Themed Deck Library: 10 themes, 70 cards, 30 keywords
 
+> **Status:** HISTORICAL — superseded in full by THE BIG NUMBERS REWRITE
+> (2026-09-02, `plan/2026-09-02-big-numbers-overhaul.prompt.md`). This spec's
+> card anatomy, keyword registry, rank bands, package shape, reshuffle rule and
+> conditionality rule are all repealed. Read it as a period record of the
+> 2026-07 library, not as current law.
+
 > **SUPERSEDED IN PART (T direct, /oversight 2026-08-08 — "THE
 > UNSHACKLING," commit `ad934542`; executed by Phase 41,
 > `plan/phases/phase_41_constraint_demolition.md`):** §1's no-strike

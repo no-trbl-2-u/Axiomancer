@@ -127,18 +127,9 @@ describe('spec 33 D7 — ratified economy envelope + flag-not-ready canaries', (
     const result = simulateUpgradeableEconomy({ seeds: [1, 2, 3, 4, 5, 6, 7, 8] });
     const p = result.pooled;
 
-    // PROFANE-CANON SUSPENSION (2026-08-08): balance bands deliberately
-    // suspended for the rework — "no need to worry about balance yet" (owner).
-    // /deck-tuning re-baselines and re-arms these against the new canon.
-    // (The canon's decks read 1.18◆ against a 1.2 floor authored for the
-    // retired ten-preset library; the sim itself still runs, and the
-    // structural assertions below stay ARMED.)
-    // SKIP-ISSUE: #183
-    it.skip('RATIFIED: realized ◆ income sits in the design band 1.2-1.6 at converged seeds', () => {
-        expect(p.totalIncomePerRound).toBeGreaterThanOrEqual(1.2);
-        expect(p.totalIncomePerRound).toBeLessThanOrEqual(1.6);
-    });
-
+    // The ratified 1.2-1.6 design-band assertion (formerly `it.skip`) was
+    // repealed outright 2026-09-02 (big-numbers overhaul §3/§10) rather than
+    // left as a skipped tombstone — no old economy band survives.
     it('the ◆ economy still produces real income (structural floor, band-independent)', () => {
         expect(p.totalIncomePerRound).toBeGreaterThan(0);
     });

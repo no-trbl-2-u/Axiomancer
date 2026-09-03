@@ -169,6 +169,24 @@ export interface Character {
      */
     dieGear?: Partial<Record<'heart' | 'body' | 'mind' | 'wild', UpgradeableDieGear>>;
     /**
+     * THE PATH (owner ruling 2026-09-02) — ACT REWARD DICE. "After each act is
+     * completed, the players are rewarded a red/blue/purple base die of their
+     * choice." Extra dice rolled into EVERY turn's tray on top of
+     * `TURN_DICE_COUNT`. This is the axis that keeps damage-per-turn growing
+     * when card rank does not: one more die is one more PAID play, every turn,
+     * for the rest of the campaign. Optional + sparse — absent means none.
+     */
+    bonusTurnDice?: number;
+    /**
+     * THE PATH (owner ruling 2026-09-02) — DIE UPGRADES. How many mana-face
+     * upgrades this character's dice carry (0-2); raises the share of LIVE
+     * faces in the roll bag (`dieFacesForUpgrade`). Expensive in the fiction,
+     * compounding in play. Optional + sparse — absent means 0. The shipping
+     * expression is the flag-gated `dieGear` rail above; this is the plain
+     * engine knob the same idea reduces to.
+     */
+    dieUpgradeLevel?: number;
+    /**
      * Phase 52a — how many cards this character has REMOVED from their combat
      * deck THIS RUN. Not per node, not lifetime-across-runs: T's "every time
      * the player does this across the game" reads as the campaign the player

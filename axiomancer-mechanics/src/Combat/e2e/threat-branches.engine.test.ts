@@ -8,11 +8,15 @@
  * branch each:
  *
  *   - Tri-Eyes (mid normal) — `bearer-afflictions-gte 3`: stacked with 3+
- *     afflictions it sheds one (the spec-29 reactive cleanse; a fraction,
- *     never the last) and swaps stance (heart → mind).
+ *     afflictions it sheds an authored fraction of them (never the last) and
+ *     swaps stance (heart → mind).
  *   - Tezcatlipoca (late boss) — `prior-threat-fully-blocked`: a fully
- *     blocked prior threat turns the next action rider-heavy (POISON ×3,
- *     0.5 weight) instead of damage-heavy (1.2 weight).
+ *     blocked prior threat turns the next action rider-heavy (POISON, the
+ *     lighter damage weight) instead of damage-heavy (the heavier weight).
+ *
+ * The authored fork NUMBERS live in `combat.enemy-cards.ts` and are rescaled
+ * freely (THE BIG NUMBERS REWRITE) — what is pinned here is the branch
+ * CONTRACT, read off the live data rather than a remembered constant.
  *
  * Evidence here: (a) DETERMINISM — a fixed seed + a scripted player line
  * produces an identical encounter tree across runs; (b) DIVERGENCE — the
@@ -125,8 +129,11 @@ describe('threat branches — pending telegraph shows condition + BOTH outcomes'
         expect(branch.taken).toBeUndefined();
         expect(branch.conditionText).toBe('if it carries 3+ afflictions');
         // Both outcomes fully resolved for the telegraph…
-        expect(branch.then.threatAction.description).toContain('sheds 1 affliction');
-        expect(branch.then.threatAction.effects.some(e => (e.enemyCleanse ?? 0) > 0)).toBe(true);
+        // Face honesty: the printed shed count IS the applied `enemyCleanse`.
+        const cleanse = branch.then.threatAction.effects.find(e => (e.enemyCleanse ?? 0) > 0)?.enemyCleanse ?? 0;
+        expect(cleanse).toBeGreaterThan(0);
+        expect(branch.then.threatAction.description)
+            .toContain(`sheds ${cleanse} affliction${cleanse === 1 ? '' : 's'}`);
         expect(branch.then.enemyStance).toBe('mind');
         expect(branch.else.enemyStance).toBe('heart');
         // …and the pending face is the ELSE (baseline) fork.
@@ -142,7 +149,10 @@ describe('threat branches — pending telegraph shows condition + BOTH outcomes'
         const thenDamage = branch!.then.threatAction.effects.find(e => e.damage)?.damage ?? 0;
         const elseDamage = branch!.else.threatAction.effects.find(e => e.damage)?.damage ?? 0;
         expect(thenDamage).toBeLessThan(elseDamage);
-        expect(branch!.then.threatAction.effects.some(e => e.effectId === 'debuff_poison' && e.intensity === 3)).toBe(true);
+        // Rider-heavy THEN: the lighter blow carries the POISON payload.
+        expect(branch!.then.threatAction.effects.some(
+            e => e.effectId === 'debuff_poison' && (e.intensity ?? 0) > 0,
+        )).toBe(true);
     });
 });
 
@@ -187,14 +197,21 @@ describe('threat branches — divergence (affliction-stacking vs full-block)', (
         expect(clean.threatPhases[1].enemyStance).toBe('heart');
     });
 
-    it('the taken THEN fork cleanses exactly one affliction when it fires (spec 29: never the last)', () => {
+    it('the taken THEN fork cleanses exactly its printed count — and never the last', () => {
         let s = afflictionLine(11, true);
         const before = s.enemy.effects.length;
         expect(before).toBeGreaterThanOrEqual(3);
+        // The printed shed count on the committed face is what must be applied.
+        const printed = s.threatPhases[1].threatAction.effects
+            .find(e => (e.enemyCleanse ?? 0) > 0)?.enemyCleanse ?? 0;
+        expect(printed).toBeGreaterThan(0);
         s = resolveThreatPhase(s, rng).state; // the committed branch phase fires
         const cleansed = s.log.find(e => e.kind === 'threat-cleansed');
         expect(cleansed).toBeDefined();
-        expect((cleansed as { effectIds: string[] }).effectIds).toHaveLength(1);
+        expect((cleansed as { effectIds: string[] }).effectIds).toHaveLength(printed);
+        // A fraction, never a wipe: something is always left standing.
+        expect(s.enemy.effects.length).toBeGreaterThanOrEqual(1);
+        expect(s.enemy.effects.length).toBe(before - printed);
     });
 
     it('Tezcatlipoca goes rider-heavy after a full block, damage-heavy otherwise', () => {
@@ -207,7 +224,7 @@ describe('threat branches — divergence (affliction-stacking vs full-block)', (
         expect(landed.threatPhases[2].branch?.taken).toBe('else');
         // Rider-heavy face vs damage-heavy face.
         expect(blocked.threatPhases[2].threatAction.effects.some(
-            e => e.effectId === 'debuff_poison' && e.intensity === 3,
+            e => e.effectId === 'debuff_poison' && (e.intensity ?? 0) > 0,
         )).toBe(true);
         expect(landed.threatPhases[2].threatAction.effects.some(
             e => e.effectId === 'debuff_mark',

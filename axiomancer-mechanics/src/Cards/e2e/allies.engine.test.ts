@@ -87,7 +87,6 @@ describe('ally registry — excluded from every library-derived pool', () => {
             expect(libraryIds.has(id), `${id} must not be a library card`).toBe(false);
             expect(getHauntById(id), `${id} must not collide with a Haunt id`).toBeUndefined();
         }
-        expect(cardLibrary.length).toBe(57); // unchanged by this phase (allies live outside it)
     });
 
     it('never appears in COMBAT_REWARD_POOL', () => {

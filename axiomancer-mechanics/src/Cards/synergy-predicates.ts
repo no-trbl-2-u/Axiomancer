@@ -85,6 +85,11 @@ export function checkStatePredicate(
     ledgers: SynergyLedgerView,
 ): boolean {
     switch (predicate.kind) {
+        // FLOW N — the turn has already carried `minPriorSpells` PAID spells.
+        // Vacuously FALSE on a bare view (0 prior spells), mirroring the
+        // cost-on-the-ledger predicates: FLOW must be EARNED within the turn.
+        case 'flow':
+            return (ledgers.spellsPlayedThisTurn ?? 0) >= predicate.minPriorSpells;
         case 'enemy-dealt-no-damage-last-round':
             return (ledgers.enemyDamageLastRound ?? 0) === 0;
         case 'opening':

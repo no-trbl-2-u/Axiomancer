@@ -35,12 +35,50 @@ export const COMBAT_DIE_FACES: readonly CombatDieColor[] = Object.freeze([
     'heart', 'body', 'mind', 'wild', 'x', 'x',
 ]);
 
+/**
+ * THE PATH (owner ruling 2026-09-02) — DIE UPGRADES, one of the six axes a
+ * player's power actually grows along. "Players will have the ability to
+ * upgrade the dice (so it shows more mana faces but will be expensive)."
+ *
+ * An upgraded die trades dead X faces for live ones. That is a real power
+ * increase and a compounding one: more live faces means more PAID plays per
+ * turn, which means more damage per turn — the axis that keeps a deck of
+ * fixed-rank cards relevant as enemy pools grow.
+ *
+ *   level 0 — 4 live of 6 (the base die)
+ *   level 1 — 5 live of 6
+ *   level 2 — 6 live of 6 (fully honed; never rolls dead)
+ *
+ * The product's full die-gear rail (`UpgradeableDieGear`, HONE / TEMPER, spec
+ * 33) is the shipping expression of this and is flag-gated. This bag is the
+ * ENGINE-LEVEL knob the same idea reduces to, so the balance harness can model
+ * the progression without flipping an unrelated product flag.
+ */
+export const COMBAT_DIE_FACES_BY_UPGRADE: readonly (readonly CombatDieColor[])[] = Object.freeze([
+    Object.freeze(['heart', 'body', 'mind', 'wild', 'x', 'x'] as CombatDieColor[]),
+    Object.freeze(['heart', 'body', 'mind', 'wild', 'wild', 'x'] as CombatDieColor[]),
+    Object.freeze(['heart', 'body', 'mind', 'wild', 'wild', 'wild'] as CombatDieColor[]),
+]);
+
+/** The highest authored die-upgrade level. */
+export const MAX_DIE_UPGRADE_LEVEL = COMBAT_DIE_FACES_BY_UPGRADE.length - 1;
+
+/** The face bag for a given upgrade level (clamped to what is authored). */
+export function dieFacesForUpgrade(level = 0): readonly CombatDieColor[] {
+    const i = Math.max(0, Math.min(MAX_DIE_UPGRADE_LEVEL, Math.floor(level)));
+    return COMBAT_DIE_FACES_BY_UPGRADE[i];
+}
+
 const defaultRng = (): number => getRng().random();
 
-/** Rolls a single die face from the bag. */
-export function rollCombatDieColor(rng: () => number = defaultRng): CombatDieColor {
-    const idx = Math.min(COMBAT_DIE_FACES.length - 1, Math.floor(rng() * COMBAT_DIE_FACES.length));
-    return COMBAT_DIE_FACES[idx];
+/** Rolls a single die face from the bag for `upgradeLevel` (default: base). */
+export function rollCombatDieColor(
+    rng: () => number = defaultRng,
+    upgradeLevel = 0,
+): CombatDieColor {
+    const faces = dieFacesForUpgrade(upgradeLevel);
+    const idx = Math.min(faces.length - 1, Math.floor(rng() * faces.length));
+    return faces[idx];
 }
 
 /** Rolls the opening pool of `count` stance dice. */
@@ -77,10 +115,12 @@ export function rollTurnDice(
     turn: number,
     count: number = TURN_DICE_COUNT,
     rng: () => number = defaultRng,
+    /** THE PATH — die-upgrade level; raises the share of live faces. */
+    upgradeLevel = 0,
 ): CombatManaDie[] {
     const dice: CombatManaDie[] = [];
     for (let i = 0; i < count; i++) {
-        const color = rollCombatDieColor(rng);
+        const color = rollCombatDieColor(rng, upgradeLevel);
         dice.push({
             id: `t${turn}-d${i}`,
             color,

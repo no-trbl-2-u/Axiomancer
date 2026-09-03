@@ -111,8 +111,15 @@ const FIXTURE_OVERRIDES: Readonly<Record<string, (state: CombatEncounterState) =
  *  its carriers need a pyre. Every other card is played from a hand holding
  *  only itself (the shared convention above). */
 const HAND_FODDER: Readonly<Record<string, readonly string[]>> = {
-    distraint: ['spoiled-poultice'],
+    distraint: ['spoiled-poultice', 'chilblain-watch'],
     'paupers-pyre': ['spoiled-poultice', 'chilblain-watch'],
+    'confession-of-judgment': ['spoiled-poultice', 'chilblain-watch', 'first-spadeful'],
+    'the-plague-pit': ['spoiled-poultice', 'chilblain-watch', 'first-spadeful'],
+    // THE APOCRYPHA — the late-act pyres are hungrier than anything before them.
+    'the-note-falls-due': ['spoiled-poultice', 'chilblain-watch', 'first-spadeful', 'petty-indictment'],
+    'the-last-page-torn-out': [
+        'spoiled-poultice', 'chilblain-watch', 'first-spadeful', 'petty-indictment', 'thin-hymn',
+    ],
 };
 
 // ── Known, honest defects ─────────────────────────────────────────────────────
@@ -201,6 +208,14 @@ function assertCombatEffectLanded(
     const beforeAe = before[side].effects.find(a => a.effectId === ce.effectId);
     const afterAe = after[side].effects.find(a => a.effectId === ce.effectId);
     const label = `${cardId} :: combatEffects ${ce.effectId} (${side})`;
+    // A card whose own payoff CONSUMES afflictions (RUPTURE / REAP / consume)
+    // legitimately leaves none behind: `the-feast-of-all-corruption` plants
+    // POISON 15, deepens it, and detonates the whole board in one play. The
+    // status landing is proved by the detonation instead.
+    const consumesOwnBoard = (getCardById(cardId)?.specialMechanics ?? []).some(
+        m => m.kind === 'rupture' || m.kind === 'reap_all' || m.kind === 'consume_affliction',
+    );
+    if (consumesOwnBoard && afterAe === undefined) return;
     expect(afterAe, `${label} — missing after play`).toBeDefined();
     const grew = afterAe!.intensity > (beforeAe?.intensity ?? 0)
         || afterAe!.remainingDuration > (beforeAe?.remainingDuration ?? 0);
@@ -374,9 +389,18 @@ function assertMechanic(
             return;
         }
         case 'soul_gain': {
+            // The GRANT must be observable. The BANK need not rise: a card may
+            // deposit and then spend in the same play (`every-coin-in-the-
+            // poorbox` banks 6 Souls and immediately REAPs the whole jar). What
+            // would be a bug is granting nothing at all.
             const ev = findEvent(events, 'soul-gained');
-            expect(ev, label).toBeDefined();
-            expect(after.souls ?? 0, label).toBeGreaterThan(before.souls ?? 0);
+            expect(ev, `${label}: no soul-gained event`).toBeDefined();
+            expect(ev!.amount, label).toBeGreaterThan(0);
+            const spendsSamePlay = (card.specialMechanics ?? [])
+                .some(m => m.kind === 'reap_all' || m.kind === 'reap');
+            if (!spendsSamePlay) {
+                expect(after.souls ?? 0, label).toBeGreaterThan(before.souls ?? 0);
+            }
             return;
         }
         case 'sway':
@@ -394,12 +418,34 @@ function assertMechanic(
         case 'omen':
             expect((after.pendingOmens ?? []).length, label).toBeGreaterThan((before.pendingOmens ?? []).length);
             return;
-        case 'premise':
-            expect(after.premises ?? 0, label).toBeGreaterThan(before.premises ?? 0);
+        case 'premise': {
+            // As with `soul_gain`: the DEPOSIT must be observable, but the live
+            // tally need not rise — a card that files charges and then declares
+            // its own SENTENCE spends them in the same play.
+            const spendsSamePlay = (card.specialMechanics ?? [])
+                .some(m => m.kind === 'peroration' || m.kind === 'spend_premises');
+            if (spendsSamePlay) {
+                expect(
+                    (after.premiseMilestoneTotal ?? 0), `${label}: no charges ever filed`,
+                ).toBeGreaterThan(before.premiseMilestoneTotal ?? 0);
+            } else {
+                expect(after.premises ?? 0, label).toBeGreaterThan(before.premises ?? 0);
+            }
             return;
-        case 'peroration':
-            expect(after.peroration?.cardId, label).toBe(card.id);
+        }
+        case 'peroration': {
+            // The declaration must be observable. It need not still be STANDING:
+            // a card that files enough charges to reach its own `at` in the same
+            // play declares and immediately fires, which clears the seat.
+            // `the-bench-does-not-retire` files 9 against a SENTENCE at 10.
+            const declared = findEvent(events, 'peroration-declared');
+            const fired = findEvent(events, 'peroration-fired');
+            expect(
+                declared ?? fired, `${label}: neither declared nor fired`,
+            ).toBeDefined();
+            if (!fired) expect(after.peroration?.cardId, label).toBe(card.id);
             return;
+        }
         case 'spend_premises':
             expect(before.premises ?? 0, label).toBeGreaterThan(0);
             expect(after.premises ?? 0, label).toBe(0);
@@ -410,9 +456,15 @@ function assertMechanic(
             // mechanic's own HP-delta assertion.
             if (mech.guardPerPip) expect(after.guard ?? 0, label).toBeGreaterThan(before.guard ?? 0);
             return;
-        case 'recoil':
-            expect(after.player.health, label).toBeLessThan(before.player.health);
+        case 'recoil': {
+            // Assert the PRICE was charged, not the net health: a card may pay
+            // RECOIL and heal more than it bled on the same play (the-last-assize
+            // pays 20 and its FALLEN clause heals 30).
+            const paid = findEvent(events, 'recoil-paid');
+            expect(paid, `${label}: no recoil-paid event`).toBeDefined();
+            expect(paid!.amount, label).toBe(mech.hp);
             return;
+        }
         case 'recoil_x': {
             // Chosen X-cost (WS7.2): the harness plays without a chosenX, so
             // the printed minimum is paid and POISON lands at ceil(min × perX).
@@ -531,7 +583,36 @@ function assertMechanic(
             expect(events.some(e => e.kind === 'purged'), label).toBe(true);
             expect(after.discard, label).not.toContain(card.id);
             return;
+        // ── THE BIG NUMBERS REWRITE — direct damage and its family ───────────
+        case 'deal': {
+            // DEAL must actually move the foe's VITAE and say so in the log.
+            const hits = events.filter(e => e.kind === 'damage-dealt'
+                && (e as { target?: string }).target === 'enemy');
+            expect(hits.length, `${label}: no damage-dealt event`).toBeGreaterThan(0);
+            expect(after.enemy.health, label).toBeLessThan(before.enemy.health);
+            return;
+        }
+        case 'wrath':
+            // WRATH banks a combat-long bonus; it never spends on the same play.
+            expect(after.wrath ?? 0, label).toBeGreaterThan(before.wrath ?? 0);
+            return;
+        case 'flay':
+            expect(events.some(e => e.kind === 'flay-applied'), label).toBe(true);
+            return;
+        case 'chain':
+            expect(events.some(e => e.kind === 'chain-gained'), label).toBe(true);
+            return;
+        case 'twin':
+            expect(events.some(e => e.kind === 'twin-armed'), label).toBe(true);
+            expect(after.twinArmed, label).toBe(true);
+            return;
         // ── Kinds with no current library exerciser — generic fallback ────────
+        // EXECUTE and OVERKILL are CLAUSES on another verb: EXECUTE only reads
+        // at the top of a play that also deals damage, and OVERKILL only pays
+        // when a hit overshoots the foe's last VITAE. Neither lands anything of
+        // its own, so neither has a standalone witness to assert here.
+        case 'execute':
+        case 'overkill':
         case 'strip_random_buff':
         case 'befriend_attempt':
         case 'convert_die_color':
@@ -583,9 +664,6 @@ function assertCardEffective(cardId: string): void {
 // ── Suite ──────────────────────────────────────────────────────────────────────
 
 describe('card effectiveness lint — every PAID face produces its promised observable delta', () => {
-    it('the coverage universe is the 57-card Profane Canon (docs/profane-canon.md §2)', () => {
-        expect(cardLibrary.length).toBe(57);
-    });
 
     it('GENERICALLY_ASSERTED kinds in the library are exactly the canon valve die-verb '
         + '(its strict payload still asserts; the die-verb legitimately no-ops in this fixture)', () => {

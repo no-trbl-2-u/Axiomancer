@@ -13,7 +13,8 @@
  * so the test parses the emitted literal back to an object and compares data.
  * That is the property that matters — no field is lost or altered.
  */
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
@@ -111,10 +112,18 @@ describe('CardDraft carries every Card field', () => {
 
 describe('the pricing comment survives a rewrite', () => {
     // The real source text — the same bytes the editor's write-back splices.
-    const libraryText = readFileSync(
-        fileURLToPath(new URL('../../../../axiomancer-mechanics/src/Cards/cards.library.ts', import.meta.url)),
-        'utf-8',
+    // THE BIG NUMBERS REWRITE (2026-09-02): the library is a directory of
+    // per-theme modules; `cards.library.ts` is only the aggregator and holds no
+    // card literals. The write-back splices these bytes, so this is what the
+    // pricing-comment guard has to read.
+    const libraryDir = fileURLToPath(
+        new URL('../../../../axiomancer-mechanics/src/Cards/library/', import.meta.url),
     );
+    const libraryText = readdirSync(libraryDir)
+        .filter(f => f.endsWith('.cards.ts'))
+        .sort()
+        .map(f => readFileSync(join(libraryDir, f), 'utf-8'))
+        .join('\n');
 
     it('the library source was actually loaded', () => {
         expect(libraryText.length).toBeGreaterThan(1000);

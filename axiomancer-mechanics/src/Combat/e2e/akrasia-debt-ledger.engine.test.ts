@@ -45,6 +45,7 @@ import { GraveLarva } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { mockSequentialRng } from '../../test-utils/rng';
 import { buildFixtureState } from '../../test-utils/card-fixture';
+import { getCardById } from '../../Cards/cards.library';
 import { playCombatCard } from '../combat.engine';
 import { runOneEncounter } from '../combat.encounter.sim';
 import { COMBAT_SIM_POLICY_ORDER } from '../combat.sim-policies';
@@ -54,9 +55,14 @@ import type { CombatEncounterState, CombatEvent } from '../combat.encounter.type
 
 afterEach(() => vi.restoreAllMocks());
 
-const CUT = 'promissory-cut'; // PAID: RECOIL 3 + draw 2. FREE: RECOIL 1 + draw 1.
-const CUT_PAID_RECOIL = 3;
-const CUT_FREE_RECOIL = 1;
+// The RECOIL carrier under test. Its printed blood prices are read off the
+// live library rather than pinned — THE BIG NUMBERS REWRITE rescales cards
+// freely, and what this suite guards is the LEDGER, not the card's numbers.
+const CUT = 'promissory-cut'; // PAID: RECOIL + draw 2 / conviction 2. FREE: RECOIL + draw 1.
+const CUT_CARD = getCardById(CUT)!;
+const CUT_PAID_RECOIL = (CUT_CARD.specialMechanics ?? [])
+    .reduce((sum, m) => sum + (m.kind === 'recoil' ? m.hp : 0), 0);
+const CUT_FREE_RECOIL = CUT_CARD.free?.recoil ?? 0;
 
 function findEvents<K extends CombatEvent['kind']>(events: CombatEvent[], kind: K): Extract<CombatEvent, { kind: K }>[] {
     return events.filter((e): e is Extract<CombatEvent, { kind: K }> => e.kind === kind);
@@ -118,39 +124,42 @@ describe("RECOIL mechanic play ('promissory-cut' PAID) posts to the ledger", () 
 
         const [paid] = findEvents(events, 'debt-paid');
         expect(paid).toBeDefined();
-        expect(paid!.amount).toBe(CUT_PAID_RECOIL); // promissory-cut's printed RECOIL 3
+        expect(paid!.amount).toBe(CUT_PAID_RECOIL); // the card's printed RECOIL
         expect(paid!.total).toBe(CUT_PAID_RECOIL);
         expect(after.akrasiaDebt).toBe(CUT_PAID_RECOIL);
 
-        // 3 < AKRASIA_DEBT_TIER_HP (6) — no tier crossed yet.
+        // One PAID play cannot itself clear a tier — no payoff yet.
+        expect(CUT_PAID_RECOIL).toBeLessThan(AKRASIA_DEBT_TIER_HP);
         expect(findEvents(events, 'debt-tier-payoff')).toHaveLength(0);
     });
 
     it('crossing a tier WHILE FALLEN grants the printed GUARD payoff', () => {
-        const before = stateFor(CUT, 5, true); // 5 -> 8 crosses the 6-HP tier
+        const before = stateFor(CUT, AKRASIA_DEBT_TIER_HP - 1, true); // one short of the tier
         const guardBefore = before.guard ?? 0;
         const { events, after } = playPaid(before);
 
+        const expected = AKRASIA_DEBT_TIER_HP - 1 + CUT_PAID_RECOIL;
         const [paid] = findEvents(events, 'debt-paid');
-        expect(paid!.total).toBe(5 + CUT_PAID_RECOIL);
-        expect(after.akrasiaDebt).toBe(5 + CUT_PAID_RECOIL);
+        expect(paid!.total).toBe(expected);
+        expect(after.akrasiaDebt).toBe(expected);
 
         const [payoff] = findEvents(events, 'debt-tier-payoff');
         expect(payoff).toBeDefined();
         expect(payoff!.tiersCrossed).toBe(1);
         expect(payoff!.guard).toBe(1 * AKRASIA_DEBT_TIER_GUARD);
-        expect(payoff!.total).toBe(5 + CUT_PAID_RECOIL);
+        expect(payoff!.total).toBe(expected);
         expect(after.guard).toBe(guardBefore + AKRASIA_DEBT_TIER_GUARD);
     });
 
     it('crossing a tier while NOT FALLEN still accrues the ledger but grants no GUARD', () => {
-        const before = stateFor(CUT, 5, false); // same crossing, no FALLEN
+        const before = stateFor(CUT, AKRASIA_DEBT_TIER_HP - 1, false); // same crossing, no FALLEN
         const guardBefore = before.guard ?? 0;
         const { events, after } = playPaid(before);
 
+        const expected = AKRASIA_DEBT_TIER_HP - 1 + CUT_PAID_RECOIL;
         const [paid] = findEvents(events, 'debt-paid');
-        expect(paid!.total).toBe(5 + CUT_PAID_RECOIL);
-        expect(after.akrasiaDebt).toBe(5 + CUT_PAID_RECOIL); // the ledger itself is unconditional
+        expect(paid!.total).toBe(expected);
+        expect(after.akrasiaDebt).toBe(expected); // the ledger itself is unconditional
 
         expect(findEvents(events, 'debt-tier-payoff')).toHaveLength(0);
         expect(after.guard).toBe(guardBefore); // the PAYOFF is FALLEN-gated

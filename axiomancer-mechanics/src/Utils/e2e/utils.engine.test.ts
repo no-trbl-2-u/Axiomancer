@@ -204,8 +204,8 @@ describe('Utils engine', () => {
       const baseStats = { body: 10, heart: 8, mind: 12 };
       const level = 5; // Should be ignored per function documentation
       
-      // Health = (10 + 8 + 12) * HEALTH_PER_STAT (5) = 30 * 5 = 150
-      expect(calculateMaxHealth(level, baseStats)).toBe(150);
+      // VITAE = PLAYER_VITAE_BASE (50) + (10 + 8 + 12) * HEALTH_PER_STAT (8) = 50 + 240 = 290
+      expect(calculateMaxHealth(level, baseStats)).toBe(290);
     });
 
     it('calculates max health ignoring level parameter', () => {
@@ -216,7 +216,7 @@ describe('Utils engine', () => {
       const health10 = calculateMaxHealth(10, baseStats);
       
       expect(health1).toBe(health10);
-      expect(health1).toBe(75); // (5 + 5 + 5) * 5 = 75
+      expect(health1).toBe(170); // 50 + (5 + 5 + 5) * 8 = 170
     });
   });
 });

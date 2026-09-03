@@ -40,9 +40,9 @@ afterEach(() => {
     vi.restoreAllMocks();
 });
 
-const BRACE = 'frostbitten-palisade';  // BODY defense (GUARD 8) — vigil common
-const HALF_STEP = 'chilblain-watch';   // BODY defense (GUARD 6) — vigil starter
-const ANSWER = 'hoarfrost-teeth';      // BODY defense (GUARD 4 + THORNS) — vigil uncommon
+const BRACE = 'frostbitten-palisade';  // BODY defense (GUARD 10 + RIPOSTE) — vigil Ash
+const HALF_STEP = 'chilblain-watch';   // BODY defense (GUARD 12 + THORNS) — vigil starter
+const ANSWER = 'hoarfrost-teeth';      // BODY defense (GUARD 14 + THORNS) — vigil Tooth
 const DOT_BODY = 'spoiled-poultice';   // body, DoT — the offensive control case
 const DEFENSE_IDS = [BRACE, HALF_STEP, ANSWER] as const;
 
@@ -108,8 +108,9 @@ describe('Spec 26b — defense cards classify as `defend`', () => {
 describe('Spec 26b — playing a defense card grants GUARD', () => {
     it('a POWERED brace scales the shield by the stance read + color match', () => {
         mockSequentialRng(0.05);
-        // BODY die vs a MIND-stance enemy = advantage read (1.5×) + color match (+3).
-        // GUARD 8 (frostbitten-palisade) → round(8 × 1.5) + 3 = 15.
+        // BODY die vs a MIND-stance enemy = advantage read (1.5×), then the
+        // colour match pays +25% of the read-scaled figure (min +2).
+        // GUARD 10 (frostbitten-palisade) → round(10 × 1.5) = 15, +round(15 × 0.25) = +4 → 19.
         let state = initializeCombatEncounter(makePlayer([BRACE]), makeEnemy(80, 'mind'), [BRACE, BRACE, BRACE, BRACE, BRACE], 7);
         state = rollEncounterDice(state).state;   // open phase-play (draw hand + roll pool)
         state = setDice(state, ['body', 'mind']);
@@ -119,7 +120,7 @@ describe('Spec 26b — playing a defense card grants GUARD', () => {
         expect(entry, 'brace should be in hand').toBeDefined();
         const res = playCombatCard(state, { uid: entry!.uid }, true);
 
-        expect(res.state.guard).toBe(15);
+        expect(res.state.guard).toBe(19);
         // Defense deals no HP to the enemy (status stays the win path).
         expect(res.state.enemy.health).toBe(80);
     });

@@ -1,12 +1,12 @@
 /**
  * 2026-07-06 art-driven roster — hermetic coverage for the base enemy library.
  *
- * Asserts:
+ * The roster-count pin, the 1:1 art law, the escalation law (deck laws,
+ * §3 L14/L16), and the coveted-die stake law were repealed 2026-09-02
+ * (big-numbers overhaul §3/§10). What survives are bug detectors:
  *   - every roster slug resolves in ENEMY_REGISTRY and EnemyLibrary,
- *   - every roster enemy carries a UNIQUE portraitAsset (the 1:1 art law),
  *   - every roster enemy has an AUTHORED threat sequence (no generator
- *     fallbacks in the shipped roster) whose damage weights ESCALATE
- *     (max weight in the back half >= max weight of the opening phase),
+ *     fallbacks in the shipped roster),
  *   - tier tags cover early/mid/late with >=12 enemies each,
  *   - derivedStats and maxHealth are positive across the roster.
  */
@@ -14,7 +14,6 @@
 import { describe, it, expect } from 'vitest';
 import { ENEMY_REGISTRY, EnemyLibrary, TheIncompleteness, Sandbag_01 } from '../enemy.library';
 import { AUTHORED_THREAT_SEQUENCES } from '../../Combat/combat.threat-sequences';
-import { flattenAuthoredSteps } from '../../Combat/combat.threat';
 import type { Enemy } from '../types';
 
 /** The Aporia act bosses (W-01) — authored labyrinth content, not paintings. */
@@ -37,27 +36,9 @@ const ROSTER_SLUGS = (Object.keys(ENEMY_REGISTRY) as Array<keyof typeof ENEMY_RE
 const ROSTER_ADDED_STAMPS = ['2026-07-06', '2026-08-28', '2026-08-31'];
 
 describe('2026-07-06: the art-driven base roster', () => {
-    it('carries exactly 68 roster enemies (52 paintings + 9 W3 + 7 W4)', () => {
-        // Growth ledger, not a wall (THE PIPELINE LIBERATION ¶4): 52 → 61
-        // with Phase W3's northern-continent batch, 61 → 68 with Phase W4's
-        // river-crossing batch, bumped in the same commit that adds the
-        // enemies.
-        expect(ROSTER_SLUGS.length).toBe(68);
-    });
-
     it('registers every roster enemy in EnemyLibrary', () => {
         for (const slug of ROSTER_SLUGS) {
             expect(EnemyLibrary).toContain(ENEMY_REGISTRY[slug]);
-        }
-    });
-
-    it('gives every roster enemy a unique portraitAsset (the 1:1 art law)', () => {
-        const seen = new Set<string>();
-        for (const slug of ROSTER_SLUGS) {
-            const enemy = ENEMY_REGISTRY[slug] as Enemy;
-            expect(enemy.portraitAsset, `slug ${slug} missing portraitAsset`).toBeTruthy();
-            expect(seen.has(enemy.portraitAsset!), `duplicate portraitAsset ${enemy.portraitAsset}`).toBe(false);
-            seen.add(enemy.portraitAsset!);
         }
     });
 
@@ -67,17 +48,6 @@ describe('2026-07-06: the art-driven base roster', () => {
             const seq = AUTHORED_THREAT_SEQUENCES[enemy.id];
             expect(seq, `enemy ${enemy.id} has no authored threat sequence`).toBeDefined();
             expect(seq!.length).toBeGreaterThanOrEqual(2);
-        }
-    });
-
-    it('escalates every authored sequence (Aeon\'s-End pressure: the back half outweighs the opener)', () => {
-        for (const slug of ROSTER_SLUGS) {
-            const enemy = ENEMY_REGISTRY[slug] as Enemy;
-            // WS9 — flattened: a branch step contributes both forks.
-            const seq = flattenAuthoredSteps(AUTHORED_THREAT_SEQUENCES[enemy.id]!);
-            const opener = seq[0].damageWeight ?? 1;
-            const peak = Math.max(...seq.map(p => p.damageWeight ?? 1));
-            expect(peak, `enemy ${enemy.id} never escalates past its opener`).toBeGreaterThan(opener);
         }
     });
 
@@ -145,7 +115,7 @@ describe('2026-07-06: the art-driven base roster', () => {
             }
         });
 
-        it('the Harbormaster is the batch\'s one boss; the rest never wager the coveted die', () => {
+        it('the Harbormaster is the batch\'s one boss', () => {
             for (const slug of W3_SLUGS) {
                 const enemy = ENEMY_REGISTRY[slug] as Enemy;
                 if (slug === 'the-harbormaster') {
@@ -181,7 +151,7 @@ describe('2026-07-06: the art-driven base roster', () => {
             }
         });
 
-        it('the Waterreeve and the Portreeve are the batch\'s two bosses; the rest never wager the coveted die', () => {
+        it('the Waterreeve and the Portreeve are the batch\'s two bosses', () => {
             for (const slug of W4_SLUGS) {
                 const enemy = ENEMY_REGISTRY[slug] as Enemy;
                 if (slug === 'the-waterreeve' || slug === 'the-portreeve') {
@@ -217,16 +187,12 @@ describe('2026-07-06: the art-driven base roster', () => {
             }
         });
 
-        it('authors an escalating threat sequence for every labyrinth boss', () => {
+        it('authors a threat sequence for every labyrinth boss', () => {
             for (const slug of APORIA_BOSS_SLUGS) {
                 const enemy = ENEMY_REGISTRY[slug] as Enemy;
                 const seq = AUTHORED_THREAT_SEQUENCES[enemy.id];
                 expect(seq, `enemy ${enemy.id} has no authored threat sequence`).toBeDefined();
                 expect(seq!.length).toBeGreaterThanOrEqual(2);
-                const phases = flattenAuthoredSteps(seq!);
-                const opener = phases[0].damageWeight ?? 1;
-                const peak = Math.max(...phases.map(p => p.damageWeight ?? 1));
-                expect(peak, `enemy ${enemy.id} never escalates past its opener`).toBeGreaterThan(opener);
             }
         });
 

@@ -275,7 +275,46 @@ export type CardSpecialMechanic =
     | { kind: 'purge_self' }
     /** RIDER — an UNCONDITIONAL rider fired by the PAID line (the generic
      *  draw/heal/cleanse/guard verb carrier; same executor as condition riders). */
-    | { kind: 'rider'; rider: CardRider };
+    | { kind: 'rider'; rider: CardRider }
+    // ── THE BIG NUMBERS REWRITE (2026-09-02) — direct damage and its family ────
+    /** DEAL — direct VITAE damage, the card library's primary verb again. The
+     *  strike-ban doctrine that deleted `basePower` was repealed 2026-09-02;
+     *  this is its authored replacement, and unlike `basePower` it is a real
+     *  mechanic that scales with the read, the colour match and WRATH/CHAIN
+     *  like everything else.
+     *  - `amount` is the per-hit magnitude BEFORE read/colour/scaler bonuses.
+     *  - `hits` (default 1) makes it a multi-hit: each hit is a separate damage
+     *    instance, so damage-instance DoTs (BLEED) fire once per hit and HIDE
+     *    is subtracted from each — the reason `7 × 4` and `28 × 1` play
+     *    differently against an armoured foe.
+     *  - `pierce` ignores the foe's HIDE and every damage-reduction effect. */
+    | { kind: 'deal'; amount: number; hits?: number; pierce?: boolean }
+    /** WRATH N — combat-long: every hit you land deals +N. Stacks additively
+     *  (Slay the Spire's Strength, Dawncaster's Anger). The scaler that turns a
+     *  multi-hit card into a finisher. */
+    | { kind: 'wrath'; amount: number }
+    /** FLAY N — the foe takes +50% damage from each of your next N hits, then
+     *  the stack is spent (Dawncaster's Vulnerable, front-loaded). Consumed one
+     *  stack per damage instance, so a multi-hit card eats several. */
+    | { kind: 'flay'; stacks: number }
+    /** TWIN — the NEXT spell you play this turn resolves its PAID payload twice
+     *  (Dawncaster's Echo, armed rather than innate). Never chains: a twinned
+     *  spell that itself arms TWIN does not re-arm from the second resolution. */
+    | { kind: 'twin' }
+    /** CHAIN N — +N damage to your next hit per stack held. CHAIN fades to 0 at
+     *  the end of any turn in which no play added to it (Dawncaster's Chain),
+     *  so the payoff belongs to the deck that keeps swinging. */
+    | { kind: 'chain'; amount: number }
+    /** EXECUTE — while the foe sits at or below `atPct` of its maximum VITAE,
+     *  this card's DEAL damage is DOUBLED. The finisher clause; chosen over
+     *  Dawncaster's instant-slay reading so a boss's stage thresholds stay the
+     *  dramatic beats rather than being skipped. */
+    | { kind: 'execute'; atPct: number }
+    /** OVERKILL — damage dealt in EXCESS of what was needed to fell the foe is
+     *  not wasted: it converts at the printed rates (Dawncaster's Overkill).
+     *  `conviction` is ◆ per `per` excess VITAE; `healPct` heals that fraction
+     *  of the excess; `souls` is Souls per `per` excess. */
+    | { kind: 'overkill'; per: number; conviction?: number; healPct?: number; souls?: number };
 
 /**
  * Every `CardSpecialMechanic` kind, at RUNTIME (phase 68).
@@ -336,6 +375,13 @@ export const CARD_SPECIAL_MECHANIC_KINDS = [
     'immolate',
     'purge_self',
     'rider',
+    'deal',
+    'wrath',
+    'flay',
+    'twin',
+    'chain',
+    'execute',
+    'overkill',
 ] as const;
 
 /** A kind in the union that this array forgot. Resolves to `never` when clean. */
@@ -444,6 +490,132 @@ export interface CardRider {
      *  it can carry any FREE-line verb), resolved through the same executor.
      *  Phase 33d (GLYPHS pilot, sandbox-only). */
     glyphChargeFallback?: CardRider;
+    // ── THE BIG NUMBERS REWRITE (2026-09-02) — damage on the FREE line ────────
+    /** Deal N direct VITAE damage. The verb that lets a FREE line be worth
+     *  playing without a die; scales with WRATH/CHAIN/FLAY like any hit. */
+    damage?: number;
+    /** This rider's `damage` ignores HIDE and all damage reduction. */
+    pierce?: boolean;
+    /** +N WRATH (combat-long damage bonus per hit). */
+    wrath?: number;
+    /** +N CHAIN (bonus to the next hit; fades on a turn that adds none). */
+    chain?: number;
+    /** +N FLAY stacks on the foe (+50% damage from each of your next N hits). */
+    flay?: number;
+}
+
+// ── CARD UPGRADES (2026-09-02) — the Slay the Spire axis ────────────────────
+// One of the six progression axes: a card you own can be upgraded once, into
+// `<id>+` / `<name>+`. The upgraded copy is a PATCH of the original, never a
+// second hand-authored card, so a rework of the base card carries forward.
+// Runtime lives in `src/Cards/card-upgrades.ts` (`upgradeCard`), which applies
+// an authored {@link Card.upgrade} patch if present and otherwise falls back
+// to the documented DEFAULT rule. Every field below is a NON-NEGATIVE ADDITIVE
+// DELTA (a `+` never subtracts): the applier clamps negatives to 0.
+
+/**
+ * The numeric {@link CardRider} fields an upgrade may raise. Deliberately
+ * excludes `recoil` — that is a printed COST, and raising a cost is a
+ * downgrade wearing a `+`. Booleans (`pierce`, `refreshDie`, `tickOne`, …) are
+ * excluded too: they are already on, or belong in an authored rework.
+ */
+export type UpgradableRiderField =
+    | 'damage' | 'guard' | 'barrier' | 'healHp' | 'sway'
+    | 'drawCards' | 'cleanse' | 'souls' | 'premises' | 'foretell' | 'millCards'
+    | 'stagger' | 'pips' | 'conviction' | 'flay' | 'glyphCharge'
+    | 'bonusIntensity' | 'bonusDuration'
+    | 'wrath' | 'chain' | 'ruptureMarks' | 'intensityPerPip';
+
+/**
+ * An additive patch over a {@link CardRider} — the FREE line, a condition-line
+ * rider (`threshold` / `dieBonus` / `fate` / `fallen` / `synergy`), or a rider
+ * carried inside a mechanic (`rider`, `omen`, `peroration`, `reap`,
+ * `immolate`, `grant_pip.overflow`).
+ */
+export interface CardRiderUpgrade extends Partial<Record<UpgradableRiderField, number>> {
+    /** Deltas on the rider's `applyEffect` payload. `intensity` is clamped to
+     *  `MAX_EFFECT_INTENSITY` by the applier. */
+    applyEffect?: { intensity?: number; duration?: number };
+    /** Deltas on the glyph fallback rider (phase 33d). */
+    glyphChargeFallback?: CardRiderUpgrade;
+}
+
+/**
+ * The numeric {@link CardSpecialMechanic} fields an upgrade may raise.
+ * Excluded on purpose, because raising them makes the card WORSE: `recoil.hp`,
+ * `recoil_x.min`, `omen.anteConviction` (printed prices), `reap.cost`,
+ * `immolate.count` (cards burned as a cost), `peroration.at` / `concedeAt`,
+ * `threshold.count` (gates you must reach), and the "per N spent" DIVISORS
+ * `spend_premises.markPer` / `drawPer` and `overkill.per`.
+ */
+export type UpgradableMechanicField =
+    | 'amount'          // deal / guard / barrier / sway / wrath / chain
+    | 'hits'            // deal — a second hit is an authored upgrade, never a default
+    | 'pierce'          // deal — 0/1 flag flip (any delta ≥ 1 turns it on)
+    | 'count'           // premise / soul_gain / foretell / reprise / grant_pip
+    | 'rungs' | 'stacks' | 'pips' | 'turns' | 'times' | 'intensity'
+    | 'bonusIntensity' | 'damage' | 'reduce' | 'souls' | 'conviction'
+    | 'burstPerSoul' | 'burstPerRung' | 'guardPerPip'
+    | 'fuelPerPip' | 'fuelPerOmenHit' | 'poisonPerX'
+    | 'pct' | 'healPct' | 'atPct' | 'bonusPct';
+
+/** An additive patch over ONE entry of `Card.specialMechanics`. */
+export interface CardMechanicUpgrade {
+    /** Which mechanic to patch, by its `kind`. */
+    kind: CardSpecialMechanic['kind'];
+    /** Which occurrence of that kind (0-based). Omit to patch every one. */
+    index?: number;
+    /** Additive deltas on the mechanic's own numeric fields. */
+    fields?: Partial<Record<UpgradableMechanicField, number>>;
+    /** Additive deltas on the rider this mechanic carries, if any. */
+    rider?: CardRiderUpgrade;
+}
+
+/** An additive patch over the matching entries of `Card.combatEffects`. */
+export interface CardEffectUpgrade {
+    /** Only patch entries with this `effectId`. Omit to patch every entry. */
+    effectId?: string;
+    /** +N intensity (clamped to `MAX_EFFECT_INTENSITY`). */
+    intensity?: number;
+    /** +N turns of duration. */
+    duration?: number;
+}
+
+/**
+ * The authored upgrade PATCH for a card: the fields an upgraded copy
+ * overrides. Present on a card, it wins over the default rule ENTIRELY (the
+ * default is not layered underneath — an author who writes a patch owns the
+ * whole upgrade). Data only; see `src/Cards/card-upgrades.ts`.
+ */
+export interface CardUpgrade {
+    /** Display name of the upgraded copy. Default: `${name}+`. */
+    name?: string;
+    /** Replacement fiction. Default: the base card's `description`. */
+    description?: string;
+    /**
+     * Replacement PAID sentence. Omit it and `upgradeCard` CLEARS
+     * `paidSummary` whenever the patch changed a printed number, so the face
+     * falls back to generated text rather than printing a stale one (the
+     * P0-truth law — `src/Combat/e2e/paid-summary-honesty.engine.test.ts`).
+     */
+    paidSummary?: string;
+    /** Replacement passive summary for an `oath` / `hex`. */
+    persistentEffect?: string;
+    /** Deltas on `specialMechanics`. */
+    mechanics?: CardMechanicUpgrade[];
+    /** Deltas on `combatEffects`. */
+    effects?: CardEffectUpgrade[];
+    /** Deltas on the FREE line. Applies even when the base card has no
+     *  `free` rider (the deltas become the rider). */
+    free?: CardRiderUpgrade;
+    /** Deltas on the condition-line riders. The GATES themselves
+     *  (`threshold.count`, `fate.recoilHp`, the state predicates) are not
+     *  patchable: relaxing a gate is a rework, not a `+`. */
+    threshold?: CardRiderUpgrade;
+    dieBonus?: CardRiderUpgrade;
+    fate?: CardRiderUpgrade;
+    fallen?: CardRiderUpgrade;
+    synergy?: CardRiderUpgrade;
 }
 
 /**
@@ -502,7 +674,13 @@ export type SynergyStatePredicate =
     /** REQUIEM N (profane-canon rework) — true when the player's discard pile
      *  holds ≥ `n` cards at play time (the delirium/threshold read: the dead
      *  remember). Prices at the threshold ×0.5 condition discount. */
-    | { kind: 'requiem'; n: number };
+    | { kind: 'requiem'; n: number }
+    /** FLOW N (THE BIG NUMBERS REWRITE, from Dawncaster's Flow) — true when at
+     *  least `minPriorSpells` PAID spells have already resolved this turn. The
+     *  mirror of `opening`: the reward for a turn that keeps going, where
+     *  `opening` (`maxPriorSpells: 0`) is AMBUSH, the reward for leading with
+     *  it. */
+    | { kind: 'flow'; minPriorSpells: number };
 
 /**
  * Phase 66 — Tier 2 synergy clause. Optional payload on `Card` that
@@ -708,4 +886,14 @@ export interface Card {
      * owned; the card engine no-ops it.
      */
     glyph?: { payload: GlyphPayload; cap: number };
+    /**
+     * CARD UPGRADES (2026-09-02) — the authored patch used when this card is
+     * upgraded to `<id>+`. Optional by design: a card WITHOUT one still
+     * upgrades, through the documented default rule in
+     * `src/Cards/card-upgrades.ts`. Author one only when the default reads
+     * badly on this card (a cost-shaped number, a payoff that wants a second
+     * hit rather than a bigger one, a face whose prose must be rewritten).
+     * Data only — the card engine ignores it; `upgradeCard` reads it.
+     */
+    upgrade?: CardUpgrade;
 }

@@ -162,11 +162,20 @@ describe('objective v2 — reported BESIDE statusEngagement, never instead of it
         // Explicitly pinned so nobody "fixes" the metric into a second win-rate
         // witness: the doctrine bands already grade whether a deck should win.
         const cells = report().cells;
-        const perfect = cells.filter(c => c.stats.winRate >= 0.99);
-        const hopeless = cells.filter(c => c.stats.winRate <= 0.01);
-        expect(hopeless.length, 'no unwinnable cells in the matrix').toBeGreaterThan(0);
-        for (const cell of [...perfect, ...hopeless]) {
-            // A fight that cannot be won can still be a good fight.
+        // The claim is DECOUPLING, not the presence of an extreme: CQI must be
+        // positive at every win rate, including the extremes when the matrix
+        // happens to contain them. Requiring an unwinnable cell to exist was
+        // itself a balance law — it made a well-tuned matrix fail this test.
+        for (const cell of cells) {
+            expect(
+                cell.stats.combatQuality.index,
+                `CQI collapsed on ${cell.spec.stage}/${cell.spec.enemySlug} at winRate ${cell.stats.winRate}`,
+            ).toBeGreaterThan(0);
+        }
+        const extremes = cells.filter(c => c.stats.winRate >= 0.99 || c.stats.winRate <= 0.01);
+        for (const cell of extremes) {
+            // A fight that cannot be won can still be a good fight, and one
+            // that cannot be lost can still be a bad one.
             expect(cell.stats.combatQuality.index).toBeGreaterThan(0);
         }
     }, 120_000);

@@ -11,7 +11,9 @@
  */
 
 import { MAX_EFFECT_INTENSITY, FREE_ENCHANT_ROUNDS } from '../Game/game-mechanics.constants';
-import { CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS } from './effects';
+import {
+    CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS, CONCEDE_PREMISES_UNIQUE,
+} from './effects';
 import type { Effect, ActiveEffect } from '../Effects/types';
 import type { Card, CardCombatEffects, CardRider, CardSpecialMechanic, SynergyStatePredicate } from '../Cards/types';
 import { rankToRarity, CARD_RANK_NAMES } from '../Cards/types';
@@ -132,12 +134,37 @@ export function classifyVerbClass(
 }
 
 /**
- * DoT lifetime preview (P0-truth): the LIFETIME HP the card's statuses deal on
- * a neutral read — Σ floor(damagePerRound × intensity) × duration, ramp-aware.
- * 0 for everything else (no strike preview exists any more).
+ * VITAE preview (P0-truth): what this card's PAID line takes off the foe on a
+ * neutral read — direct damage PLUS the lifetime of the statuses it lands
+ * (Σ floor(damagePerRound × intensity) × duration, ramp-aware).
+ *
+ * THE BIG NUMBERS REWRITE (2026-09-02): this used to sum DoT ONLY, with the
+ * comment "0 for everything else (no strike preview exists any more)" — true
+ * under the strike ban, and badly wrong once DEAL came back. The sim's greedy
+ * pilot ranks candidate plays by exactly this number, so while it ignored
+ * direct damage the pilot was blind to the library's primary verb: every
+ * damage card scored 0, the bot fell through to its signature skill on almost
+ * every turn (dominance 100% on a signature at every stage), 75% of the
+ * library never got played, and the late-stage cells read unwinnable. The
+ * preview is what makes the pilot able to see; it has to count the whole hit.
  */
 export function bottomDamagePreview(card: Card, lookupEffect: EffectLookup): number {
     let total = 0;
+    // Direct damage — the `deal` mechanic (multi-hit aware) and any rider that
+    // carries `damage`, on the PAID line and on the condition lines that fire
+    // free with it. Unconditional first.
+    for (const m of card.specialMechanics ?? []) {
+        if (m.kind === 'deal') total += m.amount * Math.max(1, m.hits ?? 1);
+        else if (m.kind === 'rider') total += m.rider.damage ?? 0;
+        else if (m.kind === 'immolate') total += m.rider.damage ?? 0;
+    }
+    // Condition riders are counted at face value: the pilot should WANT the
+    // card whose FALLEN/threshold/fate clause pays in damage, and the engine
+    // decides at play time whether it fires.
+    for (const r of [card.threshold?.rider, card.dieBonus?.rider, card.fate?.rider,
+        card.fallen?.rider, card.synergy?.rider]) {
+        total += r?.damage ?? 0;
+    }
     for (const ce of enemyEffects(card)) {
         const def = lookupEffect(ce.effectId);
         const dot = def?.payload.damageOverTime;
@@ -236,6 +263,12 @@ export function riderText(r: CardRider, opts?: { selfTargetCard?: boolean }): st
     if (r.barrier) parts.push(`GUARD ${r.barrier} (persists)`);
     if (r.recoil) parts.push(`RECOIL ${r.recoil}`);
     if (r.millCards) parts.push(`mill ${r.millCards} to discard`);
+    // THE BIG NUMBERS REWRITE — damage leads the rider when it carries any, so
+    // a FREE line reads "Deal 4 · POISON 3", not "POISON 3 · Deal 4".
+    if (r.damage) parts.unshift(`Deal ${r.damage}${r.pierce ? ' (PIERCE)' : ''}`);
+    if (r.wrath) parts.push(`WRATH ${r.wrath}`);
+    if (r.chain) parts.push(`CHAIN ${r.chain}`);
+    if (r.flay) parts.push(`FLAY ${r.flay}`);
     return parts.join(' · ');
 }
 
@@ -263,6 +296,11 @@ export function statePredicateText(p: SynergyStatePredicate): string {
             return 'the enemy drew blood since your last turn';
         case 'requiem':
             return `REQUIEM ${p.n} (${p.n}+ cards in your discard pile)`;
+        // THE BIG NUMBERS REWRITE — the mirror of OPENING: the turn that keeps
+        // going. FLOW is registry vocabulary (Dawncaster's Flow), so it prints
+        // as a face term with its threshold spelled out.
+        case 'flow':
+            return `FLOW ${p.minPriorSpells} (${p.minPriorSpells}+ spells already played this turn)`;
     }
 }
 
@@ -292,7 +330,10 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         // The declared conclusion prints its full payload — the rider used to
         // be dropped — and the CONDEMN bar names the elite/boss floors
         // (`concedeFloorFor` raises the authored value against them).
-        case 'peroration': return `SENTENCE at ${m.at} — ${riderText(m.rider)}${m.concedeAt ? ` (CONDEMN at ${m.concedeAt} — you win; elite ${CONCEDE_PREMISES_ELITE} · boss ${CONCEDE_PREMISES_BOSS})` : ''}`;
+        // The CONDEMN bar names EVERY floor `concedeFloorFor` can raise the
+        // authored value to, so a face can never advertise a bar the live fight
+        // does not honour. Unique joined the ladder in the 2026-09-02 rescale.
+        case 'peroration': return `SENTENCE at ${m.at} — ${riderText(m.rider)}${m.concedeAt ? ` (CONDEMN at ${m.concedeAt} — you win; elite ${CONCEDE_PREMISES_ELITE} · boss ${CONCEDE_PREMISES_BOSS} · unique ${CONCEDE_PREMISES_UNIQUE})` : ''}`;
         case 'spend_premises': return `spend ALL Charges — +1 mark per ${m.markPer}, draw 1 per ${m.drawPer}`;
         case 'spend_all_pips': return `spend ALL pips${m.guardPerPip ? ` (+${m.guardPerPip} Guard per pip)` : ''}${m.markPer ? ` (+1 MARK per ${m.markPer} spent, uncapped)` : ''}`;
         case 'recoil': return `RECOIL ${m.hp}`;
@@ -342,6 +383,24 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         // Profane-canon rework — the pyre verbs.
         case 'immolate': return `IMMOLATE ${m.count} — burn the lowest card${m.count === 1 ? '' : 's'} in hand from the fight: ${riderText(m.rider)}`;
         case 'purge_self': return 'PURGE — this card leaves the fight entirely';
+        // ── THE BIG NUMBERS REWRITE — direct damage and its family ───────────
+        case 'deal': {
+            const hits = m.hits ?? 1;
+            const body = hits > 1 ? `Deal ${m.amount} x ${hits}` : `Deal ${m.amount}`;
+            return m.pierce ? `${body}. PIERCE` : body;
+        }
+        case 'wrath': return `WRATH ${m.amount}`;
+        case 'flay': return `FLAY ${m.stacks}`;
+        case 'twin': return 'TWIN';
+        case 'chain': return `CHAIN ${m.amount}`;
+        case 'execute': return `EXECUTE ${Math.round(m.atPct * 100)}%`;
+        case 'overkill': {
+            const parts: string[] = [];
+            if (m.conviction) parts.push(`+${m.conviction} Conviction per ${m.per} excess`);
+            if (m.healPct) parts.push(`heal ${Math.round(m.healPct * 100)}% of the excess`);
+            if (m.souls) parts.push(`+${m.souls} Soul per ${m.per} excess`);
+            return `OVERKILL — ${parts.join(', ')}`;
+        }
         default: return null;
     }
 }
@@ -450,7 +509,7 @@ export function toCombatCard(cardId: string, lookupCard: CardLookup, lookupEffec
         dieLines.push(`⬢ ${on}: ${riderText(card.dieBonus.rider, riderOpts)}`);
     }
     if (card.fate) {
-        const recoil = card.fate.recoilHp ? ` (recoil ${card.fate.recoilHp} HP)` : '';
+        const recoil = card.fate.recoilHp ? ` (recoil ${card.fate.recoilHp} VITAE)` : '';
         dieLines.push(`✕ an X die may power this: +${riderText(card.fate.rider, riderOpts)}${recoil}`);
     }
     // WS4.2 — combat-state synergy condition (dieless, ledger-read): printed

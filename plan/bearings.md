@@ -233,9 +233,29 @@ ambiguity.)
   The legacy `resolveCombatRound` driver was fully removed from
   the engine (2026-06) — never resurrect it for a combat gate or
   playtest.
-- **Win condition:** HP is the sole win condition. Never
-  reintroduce Pressure Tracks / `CombatPressureTracks`.
+- **Win condition:** VITAE is the one bar and emptying it is the main
+  win; the authored alt-wins (Befriend, RELENT, CONDEMN) sit beside it
+  as ordinary design tools. Never reintroduce Pressure Tracks /
+  `CombatPressureTracks`.
   <!-- lexicon-ok: pressure-tracks -->
+- **THE BIG NUMBERS REWRITE (T direct, 2026-09-02) — the scale reset
+  and the great repeal.** Shipped on `feat/big-numbers-overhaul` from
+  the handoff brief at
+  `plan/2026-09-02-big-numbers-overhaul.prompt.md`, which is now the
+  source of truth for combat design. It repealed roughly thirty-five
+  accumulated decisions-of-record — the no-strike doctrine, status
+  primacy, the doctrine win-rate curve, the Combat Quality Index, rank
+  bands and pricing lint, the naming law, deck-size and package-shape
+  laws, the enemy stat and art laws, registry count pins, the RUPTURE
+  cap and the alt-win ladders — and deleted or gutted their enforcing
+  tests so `verify` stops defending them. Exactly three constraints
+  survive: presets split into exact aspect thirds, every card has a
+  FREE line, and one tray roll per threat phase. In their place: bigger
+  numbers as a design pillar (the §5 scale ladder), a richer keyword
+  language with direct damage as a first-class verb, and enemies with
+  keywords, VITAE pools, tiered decks and stages. Specs 32, 34 §3/§8
+  and 35 and `docs/profane-canon.md` are marked HISTORICAL; there is no
+  governing objective function any more.
 - **Copy canon:** VITAE, STANCE, GRACE (né MORALE, spec 34 §5.6 / Phase
   44h). Never HEALTH / GUARD / MORALE.
 - **Content location:** engine content in mechanics `src/*`

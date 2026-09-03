@@ -20,8 +20,9 @@
 import type { BaseStats, Character } from '../Character/types';
 import type { Card, CardTier, CardRank } from '../Cards/types';
 import { cardLibrary } from '../Cards/cards.library';
+import { UPGRADE_SUFFIX } from '../Cards/card-upgrades';
 import { Player } from '../Character/characters.mock';
-import { deepClone, deriveStats } from '../Utils';
+import { deepClone, deriveStats, calculateMaxHealth } from '../Utils';
 
 /**
  * Deck-MATURITY level implied by a card's RANK (the quality ladder Doxa 1 …
@@ -55,6 +56,20 @@ export interface CombatStageProfile {
     playerMaxHealth: number;
     /** Deck maturity gate — only cards with `tier <= maxCardTier` are eligible. */
     maxCardTier: CardTier;
+    // ── THE PATH (owner ruling 2026-09-02) — the progression axes ────────────
+    // A player's power does NOT grow through card rank alone. Modelling only
+    // rank + stats is what made every late cell read unwinnable: the harness
+    // was sending an act-1 body at act-4 content. These fields carry the rest
+    // of the campaign's growth into the measurement.
+    /** ACT REWARD DICE banked by this stage — extra dice in every turn's tray.
+     *  One per completed act ("a red/blue/purple base die of their choice"). */
+    bonusBaseDice: number;
+    /** DIE UPGRADES bought by this stage (0-2) — the share of LIVE faces in the
+     *  roll bag. Expensive in the fiction, compounding in play. */
+    dieUpgradeLevel: number;
+    /** CARD UPGRADES: the fraction of this stage's deck that has been upgraded
+     *  (Slay the Spire's rest-site upgrade). 0 = none, 1 = the whole deck. */
+    upgradedCardShare: number;
     /** Slugs (keys of `ENEMY_REGISTRY`) this stage is measured against. */
     enemySlugs: readonly string[];
 }
@@ -78,6 +93,10 @@ export const COMBAT_STAGE_PROFILES: Record<CombatStageId, CombatStageProfile> = 
         playerBaseStats: { heart: 5, body: 5, mind: 5 },
         playerMaxHealth: 90,
         maxCardTier: 1,
+        // Act 1: nothing banked yet. This is the body the game starts you in.
+        bonusBaseDice: 0,
+        dieUpgradeLevel: 0,
+        upgradedCardShare: 0,
         enemySlugs: [
             'grave-larva', 'foot-stealer', 'little-belle',
             'water-holger', 'the-butcher', 'king-of-revenge',
@@ -92,7 +111,18 @@ export const COMBAT_STAGE_PROFILES: Record<CombatStageId, CombatStageProfile> = 
         playerLevel: 20,
         playerBaseStats: { heart: 17, body: 17, mind: 17 },
         playerMaxHealth: 255,
-        maxCardTier: 2,
+        // THE BIG NUMBERS REWRITE (2026-09-02) — raised 2 -> 3. `tier` is the
+        // RESIST tier, never a power axis; using it as a maturity gate was a
+        // proxy that `rankMaturityLevel` already does properly (rank 5 wants
+        // level 10, rank 6 level 12). At level 20 a player plainly holds Skull
+        // and Saint cards, and every one of them is tier 3 — so the old cap
+        // sent a Rib-capped deck against thousand-VITAE bosses and read 0%.
+        maxCardTier: 3,
+        // One act cleared: a fourth die, the first hone, a third of the deck
+        // upgraded at rest sites.
+        bonusBaseDice: 1,
+        dieUpgradeLevel: 1,
+        upgradedCardShare: 0.33,
         enemySlugs: [
             'tri-eyes', 'mirac', 'hasshaku-sama',
             'jeweled-tree', 'rawhead-rex',
@@ -108,6 +138,10 @@ export const COMBAT_STAGE_PROFILES: Record<CombatStageId, CombatStageProfile> = 
         playerBaseStats: { heart: 37, body: 39, mind: 38 },
         playerMaxHealth: 570,
         maxCardTier: 3,
+        // Two acts cleared: five dice, fully honed, most of the deck upgraded.
+        bonusBaseDice: 2,
+        dieUpgradeLevel: 2,
+        upgradedCardShare: 0.66,
         enemySlugs: [
             'fire-giant', 'rangda', 'tezcatlipoca',
             'arch-demon', 'death', 'the-abortive',
@@ -123,6 +157,11 @@ export const COMBAT_STAGE_PROFILES: Record<CombatStageId, CombatStageProfile> = 
         playerBaseStats: { heart: 40, body: 44, mind: 42 },
         playerMaxHealth: 630,
         maxCardTier: 3,
+        // Everything the campaign can give. If The Unfinished is still out of
+        // reach HERE, it is out of reach by design.
+        bonusBaseDice: 3,
+        dieUpgradeLevel: 2,
+        upgradedCardShare: 1,
         enemySlugs: ['the-incompleteness'],
     },
 };
@@ -159,7 +198,23 @@ export function stageEligibleCardIds(
         if (rankMaturityLevel(card.rank) > stage.playerLevel) continue;
         ids.push(card.id);
     }
-    return ids;
+    // THE PATH — CARD UPGRADES (axis 3). By this stage the player has spent
+    // `upgradedCardShare` of their rest-site beats on `+` copies. Applied
+    // DETERMINISTICALLY (every Nth id in a stable order), never by rng, so a
+    // seeded cell stays reproducible. Oath and hex are skipped: their passives
+    // are engine hooks with nothing numeric to raise, and curses are prices —
+    // both are no-ops under `upgradeCard` anyway, so upgrading them would only
+    // make the ids noisier.
+    const share = Math.max(0, Math.min(1, stage.upgradedCardShare));
+    if (share <= 0) return ids;
+    ids.sort();
+    const step = share >= 1 ? 1 : Math.max(2, Math.round(1 / share));
+    return ids.map((id, i) => {
+        if (i % step !== 0) return id;
+        const card = pool.get(id);
+        if (!card || card.cardType !== 'spell' || card.theme === 'curse') return id;
+        return `${id}${UPGRADE_SUFFIX}`;
+    });
 }
 
 /**
@@ -173,8 +228,20 @@ export function buildStagePlayer(stage: CombatStageProfile): Character {
     player.level = stage.playerLevel;
     player.baseStats = { ...stage.playerBaseStats };
     player.derivedStats = deriveStats(player.baseStats);
-    player.maxHealth = stage.playerMaxHealth;
-    player.health = stage.playerMaxHealth;
+    // THE BIG NUMBERS REWRITE (2026-09-02) — DERIVE the pool, never author it.
+    // These profiles used to hard-code `playerMaxHealth` at the old
+    // `stats x 5` scale (mid 255, late 570). When the formula moved to
+    // `50 + stats x 8` the harness kept fighting the new enemies with the old
+    // body, and every mid/late/impossible cell read 0% — a measurement
+    // artefact that looked exactly like a balance catastrophe. The authored
+    // field is retained only as documentation of the profile's era.
+    const vitae = calculateMaxHealth(stage.playerLevel, player.baseStats);
+    player.maxHealth = vitae;
+    player.health = vitae;
     player.knownCards = stageEligibleCardIds(stage);
+    // THE PATH — carry the dice axes into the encounter. `upgradedCardShare` is
+    // consumed at deck-build time (see `stageDeckCardIds`), not here.
+    player.bonusTurnDice = stage.bonusBaseDice;
+    player.dieUpgradeLevel = stage.dieUpgradeLevel;
     return player;
 }

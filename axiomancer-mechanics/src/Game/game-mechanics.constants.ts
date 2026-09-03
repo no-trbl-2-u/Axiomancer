@@ -20,14 +20,20 @@ export const STAT_MULTIPLIERS = {
 // ============================================================================
 // CHARACTER — RESOURCE CALCULATIONS
 // ============================================================================
-// Scaling factor applied to the base-stat sum when computing max health.
-// Formula: maxHealth = (body + heart + mind) × HEALTH_PER_STAT.
-// Level influences health through the authored stat budget, not by a second
-// multiplicative level factor.
+// THE BIG NUMBERS REWRITE (2026-09-02) — the player's VITAE pool.
+// Formula: VITAE = PLAYER_VITAE_BASE + (body + heart + mind) × HEALTH_PER_STAT.
+// The flat base keeps a level-1 pilgrim alive long enough to see a second
+// telegraph now that enemy threats open in the high single digits; the
+// per-stat term is what progression buys. Level influences VITAE through the
+// authored stat budget, not by a second multiplicative level factor.
+// Reference points: level 1 ≈ 100, level 3 ≈ 120, level 18 ≈ 350.
 
 export const RESOURCE_MULTIPLIERS = {
-    HEALTH_PER_STAT: 5,
+    HEALTH_PER_STAT: 8,
 } as const;
+
+/** Flat floor added to every player VITAE pool before the per-stat term. */
+export const PLAYER_VITAE_BASE = 50;
 
 // ============================================================================
 // PROGRESSION — EXPERIENCE & LEVELING
@@ -71,7 +77,13 @@ export const PASSIVE_DEFENSE_MULTIPLIER = 1;
 // Hard ceiling on how high any single effect's intensity or remaining duration
 // can grow, regardless of stacking mode or repeated applications.
 
-export const MAX_EFFECT_INTENSITY = 10;
+// THE BIG NUMBERS REWRITE (2026-09-02) — the intensity ceiling was 10, set
+// when POISON 1-4 was a big number. At the new scale six cards print THORNS
+// 12-20 and DOOM 12 and every one of them silently landed 10 — a printed
+// number the engine did not apply, which is the one text law the repeal kept.
+// The DURATION cap is untouched: a 10-turn calendar is still a long time, and
+// stretching it is a different design question.
+export const MAX_EFFECT_INTENSITY = 30;
 export const MAX_EFFECT_DURATION  = 10;
 
 // Spec 32 v4 §2.1 — the FREE (dieless) enchant/disenchant line grants a TIMED
@@ -175,3 +187,34 @@ export const ENEMY_STAT_PER_LEVEL = 3;
 // grows with level to balance late-game trivialization. Magnitude is tuned by
 // the mechanics loop via the tunable registry.
 export const ENEMY_GEAR_TIER_PER_LEVEL = 0.02;
+
+// ============================================================================
+// ENEMY — VITAE (THE BIG NUMBERS REWRITE, 2026-09-02)
+// ============================================================================
+// Enemy VITAE no longer rides the player's per-stat formula. `baseStats` still
+// drives stance procs, derived combat stats and befriend logic; the pool a
+// player has to chew through is its own authored/derived number, so difficulty
+// bands separate cleanly and a boss can be a wall without a grotesque stat
+// budget.
+//
+//   vitae = round((ENEMY_VITAE_BASE + ENEMY_VITAE_PER_LEVEL × level)
+//                 × ENEMY_VITAE_MULT[difficulty])
+//
+// An enemy may author `vitae` directly on `createEnemy` to override the curve
+// (every boss and unique does). Reference points: L1 normal ≈ 48, L7 elite ≈
+// 250, L6 boss ≈ 345, L13 normal ≈ 264, L18 boss ≈ 885, L110 unique ≈ 6,432.
+export const ENEMY_VITAE_BASE = 30;
+// Measured against the playtest matrix 2026-09-02 and pulled back from 18: a
+// player's damage per turn is set by CARD RANK and does not grow with level,
+// so a pool growing at 18/level outran any deck by the late campaign (every
+// late cell read 0%). At 12/level the curve stays ahead of card growth without
+// leaving it behind.
+export const ENEMY_VITAE_PER_LEVEL = 8;
+
+export const ENEMY_VITAE_MULT = {
+    simple: 0.6,
+    normal: 1.0,
+    elite:  1.4,
+    boss:   1.9,
+    unique: 2.4,
+} as const;

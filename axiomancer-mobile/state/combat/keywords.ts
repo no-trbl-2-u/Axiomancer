@@ -21,7 +21,10 @@
  * count is exactly 30" — a mechanic without a keyword here is the bug (see
  * the card-face-honesty guard test). The engine keeps its thematic effect
  * names as lore; this module is the PRESENTATION-layer mapping the board,
- * card faces, glossary, and combat log read instead. Pure + dependency-free.
+ * card faces, glossary, and combat log read instead. Pure; its only dependency
+ * is the engine's ENEMY keyword table (see the ENEMY VOCABULARY block at the
+ * foot of this file — those words and their reminder text are content the foe
+ * ships with, not copy mobile is free to invent).
  *
  * Why mobile-side: a player-facing label is presentation (ADR-0001/0003 — the
  * engine owns truth, mobile owns how it reads). Never rename engine effect ids
@@ -30,6 +33,15 @@
  * Keywords are stored Title-Case; display sites uppercase where they want the
  * pop (card face, glossary header). The combat log uses Title-Case directly.
  */
+
+import {
+    ENEMY_KEYWORD_GLOSS, ENEMY_KEYWORD_KINDS, ENEMY_KEYWORD_LABEL,
+    enemyKeywordGloss, enemyKeywordText,
+    type EnemyKeyword,
+// Relative, NOT the `@mechanics` alias: `axiomancer-mechanics/scripts/export-catalog.ts`
+// imports this module directly under ts-node, where mobile's tsconfig paths do
+// not apply. The alias would resolve for the app and break the catalog build.
+} from '../../../axiomancer-mechanics/src/Enemy/enemy-keywords';
 
 /** Effect id → keyword (Title-Case). The CARD vocabulary (spec 32 v3 §3). */
 const EFFECT_KEYWORD: Record<string, string> = {
@@ -53,6 +65,13 @@ const EFFECT_KEYWORD: Record<string, string> = {
     // across rot/debt/grave/trial/choir (was the card-local 'doom-species'
     // sandbox row). ──
     debuff_creeping_doom: 'Doom',
+    // ── KW-1 (2026-09-02, THE BIG NUMBERS REWRITE): `buff_grace_momentum` was
+    // engine-granted only (irresistible-grace's turn-boundary stack), so it
+    // never needed a card-vocabulary row. The rewritten choir pool now AUTHORS
+    // it on a card, and an authored effect with no keyword renders the blank
+    // face KW-1 exists to catch. It multiplies every PLEA gain, so PLEA is the
+    // word it belongs to — no new registry row earned by one carrier. ──
+    buff_grace_momentum: 'Plea',
 };
 
 /**
@@ -147,6 +166,16 @@ const MECHANIC_KEYWORD: Record<string, string> = {
     purge_self: 'Purge',
     // REPLAY earns its row with the rework (open-every-grave headlines it).
     replay_last: 'Replay',
+    // ── THE BIG NUMBERS REWRITE (2026-09-02) — direct damage and its family.
+    //    `deal` deliberately has NO keyword row: "Deal 24" is plain English
+    //    and shouting it would spend the face-term budget on the one verb
+    //    that needs no explanation (MTG's rule: keyword what compresses). ──
+    wrath: 'Wrath',
+    flay: 'Flay',
+    twin: 'Twin',
+    chain: 'Chain',
+    execute: 'Execute',
+    overkill: 'Overkill',
 };
 
 /**
@@ -251,6 +280,24 @@ const KEYWORD_GLOSS: Record<string, string> = {
     Boon: "A die's BOON face powers a card of its color and grants Conviction. Its equipped gear sets how much (2 by default).",
     Hone: "A blacksmith upgrade: adds a mana face to a die's gear, so more of its rolls power a card.",
     Temper: "A blacksmith upgrade: turns a mana face into a BOON face. A colored die caps at 2 boon and 1 miss, gold at 1.",
+    // ── THE BIG NUMBERS REWRITE (2026-09-02) — the damage family (7) ──
+    Pierce: "This damage ignores the foe's HIDE and every effect that would reduce it.",
+    Wrath: 'Every hit you land deals that much more, for the rest of the fight. It stacks and never fades.',
+    Flay: 'Each of your next hits deals half again as much, spending one stack per hit.',
+    Twin: 'Your next spell this turn resolves its PAID line twice.',
+    Chain: 'Your next hit deals that much more. Chain fades at the end of a turn that added none.',
+    Execute: "While the foe is at or below the printed share of its VITAE, this card's damage doubles.",
+    Overkill: 'Damage past the killing blow is not wasted: it converts at the printed rate.',
+    // ── Words the atlas documented but nothing glossed (added 2026-09-02
+    //    when the content-drift gate finally compared all three registries).
+    //    BARRIER is deliberately NOT here: phase 29 merged it into GUARD, which
+    //    prints "GUARD N (persists)". Re-adding it would resurrect a retired
+    //    keyword, which KW-3 correctly refuses. ──
+    Finale: 'This line fires only when playing the card leaves that few cards in your hand.',
+    Relent: "When PLEA breaks the foe's resolve it offers to yield, and you choose whether to accept.",
+    // ── Turn shape (2) — the conditions a card's line waits on ──
+    Ambush: 'This line fires only when the card is your first spell of the turn.',
+    Flow: 'This line fires once you have already played that many spells this turn.',
     // ── Card types (labels, not keywords — never rendered in the inspect
     // keyword panel since 2026-07-12; kept for help surfaces + the KW lints) ──
     Oath: 'A passive on your side: 3 rounds when played free, permanent when paid with a die.',
@@ -435,4 +482,43 @@ export function systemTermsForCard(
 export function keywordInArchetype(keyword: string | null | undefined, archetype: string | null | undefined): boolean {
     if (!keyword || !archetype) return false;
     return (ARCHETYPE_KEYWORDS[archetype] ?? []).includes(keyword);
+}
+
+// ── THE ENEMY VOCABULARY (THE BIG NUMBERS REWRITE, 2026-09-02) ──────────────
+//
+// HIDE / SWIFT / BRUTAL / VENOM / UNSHAKEN / ELUSIVE / REGROW / RAVENOUS /
+// WOUNDING change the ARITHMETIC of a fight, so the foe's pane must print them
+// and every printed word must pop a definition — the same law the card side has
+// obeyed since 2026-07-12. Unlike card keywords, the word AND its reminder text
+// are ENGINE content (they ship with the foe, with the foe's own number in
+// them), so this file does not restate them: it adapts `ENEMY_KEYWORD_GLOSS`
+// into the `{ label, gloss }` shape a chip renders, and nothing more.
+//
+// They deliberately stay OUT of `KEYWORD_GLOSS`: that map is the CARD registry
+// the KW lints and the inspect overlay walk, and a foe's armour rating is not a
+// card keyword.
+
+/**
+ * The chip a foe's keyword renders as: the printed token (`HIDE 6`, `BRUTAL`)
+ * and its reminder text with THIS instance's number already substituted in, so
+ * the popup can never quote a number the engine is not applying.
+ */
+export function enemyKeywordChip(keyword: EnemyKeyword): { label: string; gloss: string } {
+    return { label: enemyKeywordText(keyword), gloss: enemyKeywordGloss(keyword) };
+}
+
+/**
+ * The gloss for an enemy keyword named by its printed TOKEN — the read path for
+ * the combat log, whose `enemy-keyword-fired` event carries the word (`'SWIFT'`,
+ * `'HIDE 6'`) rather than the keyword instance. Returns the un-substituted
+ * reminder text (its `{n}` slot intact) when the token carries no number, and
+ * null for a word that is not an enemy keyword at all.
+ */
+export function enemyKeywordGlossForToken(token: string | null | undefined): string | null {
+    if (!token) return null;
+    const [word, value] = token.trim().split(/\s+/);
+    const kind = ENEMY_KEYWORD_KINDS.find(k => ENEMY_KEYWORD_LABEL[k] === word.toUpperCase());
+    if (!kind) return null;
+    const gloss = ENEMY_KEYWORD_GLOSS[kind];
+    return value ? gloss.replace('{n}', value) : gloss;
 }

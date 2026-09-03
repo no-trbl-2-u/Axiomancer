@@ -82,10 +82,23 @@ export const RESOLUTE_MIN_MULT = 0.5;
  *  //  old 80-HP floor LOWERED early caps (the floor WAS early behavior), so F
  *  //  rose as the floor fell: 0.60 × ~100-HP early enemies = 60, still under
  *  //  the retired floor — a mild early nerf, honest to the thesis. */
-export const RUPTURE_CAP_FRACTION = 0.60;
-/** RUPTURE cap for a given enemy: round(fraction × enemy max HP) — no floor. */
+/**
+ * THE BIG NUMBERS REWRITE (2026-09-02) — THE CAP IS REPEALED.
+ *
+ * RUPTURE used to clamp at 0.60 x the foe's maximum VITAE. That ceiling was
+ * the whole reason the affliction theme could never cash what it built: a deck
+ * that spent five turns stacking poison hit the same wall as one that spent
+ * two. Payoffs are uncapped now — RUPTURE, REAP ALL, BACKFIRE ALL and the
+ * mark-detonators all pay what the player actually banked, and a fed rot deck
+ * reaching 200-300 is the intended top of the curve, not an exploit.
+ *
+ * The function survives so the call sites keep reading as "the cap", and so a
+ * future ceiling has one place to live. It currently imposes none.
+ */
+export const RUPTURE_CAP_FRACTION = Number.POSITIVE_INFINITY;
 export function ruptureBurstCap(enemyMaxHealth: number): number {
-    return Math.round(RUPTURE_CAP_FRACTION * enemyMaxHealth);
+    void enemyMaxHealth;
+    return Number.POSITIVE_INFINITY;
 }
 /** REAP (single, `the-gleaners-due`) maxHealth erosion rate — phase 32 part 1
  *  (Harvest — REAP attacks MAXIMUM HP, plan/phases/phase_32_theme_deep_work.md
@@ -159,19 +172,35 @@ export function premiseMilestonesCrossed(before: number, after: number): number 
  *  plan): normal/simple enemies keep the card-authored 8; elite enemies need
  *  10; boss/unique enemies (which dominate the late/impossible rosters) need
  *  12. Tunable. */
-export const CONCEDE_PREMISES_BASE = 8;
-export const CONCEDE_PREMISES_ELITE = 10;
-export const CONCEDE_PREMISES_BOSS = 12;
+/**
+ * THE CONDEMN LADDER — rescaled 2026-09-02 (THE BIG NUMBERS REWRITE, measured).
+ *
+ * CONDEMN is an ALT-WIN: reaching the tally ends the fight outright, whatever
+ * the foe's VITAE. That makes its cost the only thing standing between a
+ * Charge deck and a free kill on anything. At the old 8/10/12 — set when a
+ * card filed one or two Charges — a single late-act card filing NINE beat the
+ * deliberately-unwinnable Unfinished 87% of the time in the playtest matrix.
+ *
+ * The floors now scale with what the fight is worth, mirroring RELENT's shape:
+ * a trash mob still concedes to a token argument, a unique demands a case built
+ * over most of the fight. Every one of these numbers is printed on the card
+ * face (`mechanicText`'s `peroration` case), so raising them is honest.
+ */
+export const CONCEDE_PREMISES_BASE = 12;
+export const CONCEDE_PREMISES_ELITE = 24;
+export const CONCEDE_PREMISES_BOSS = 40;
+export const CONCEDE_PREMISES_UNIQUE = 60;
 /** The Premise-tally FLOOR a CONDEMN Peroration must clear against an enemy of
  *  this difficulty — the SINGLE source the engine's concede resolution AND every
  *  presenter/catalog surface read, so a card face can never advertise the base 8
  *  while the live fight demands 10 (elite) or 12 (boss/unique). WI-6. */
 export function concedeFloorFor(difficulty: EnemyDifficulty | undefined): number {
-    return difficulty === 'boss' || difficulty === 'unique'
-        ? CONCEDE_PREMISES_BOSS
-        : difficulty === 'elite'
-            ? CONCEDE_PREMISES_ELITE
-            : CONCEDE_PREMISES_BASE;
+    switch (difficulty) {
+        case 'unique': return CONCEDE_PREMISES_UNIQUE;
+        case 'boss': return CONCEDE_PREMISES_BOSS;
+        case 'elite': return CONCEDE_PREMISES_ELITE;
+        default: return CONCEDE_PREMISES_BASE;
+    }
 }
 /** RELENT resolve threshold (Dawncaster Charmed-style rework, plan/
  *  tuning/2026-07-08-win-path-scaling.md item 1a): the old check (PLEA ≥

@@ -131,11 +131,12 @@ export const APOSTATE_ADDED: Record<string, number> = {
     // vigil package
     'hoarfrost-teeth': 2,
     'nothing-crossed-the-ice': 2,
-    'the-reprisal-bell': 2,
+    'the-reprisal-bell': 1,
     'the-besiegers-winter': 1,
     'every-stone-an-oath': 1,
     'caltrops-under-the-snow': 1,
     // grave recursion
+    'the-charnel-ledger': 1,
     'dirge-for-the-disinterred': 2,
     'open-every-grave': 1,
     'the-sextons-count': 1,

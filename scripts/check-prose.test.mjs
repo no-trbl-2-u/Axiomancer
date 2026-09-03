@@ -15,7 +15,7 @@ import {
   CONTENT_SURFACES, MB1_MAX_WORDS, PROSE_FIELDS, PROSE_RULES, VOICE_RULES,
   exemptionsIn, fieldFor, scanSource, stringLiterals,
 } from './check-prose.mjs'
-import { GRANDFATHERED_NAMES, namesIn, sweep } from './check-naming-law.mjs'
+import { idsIn, sweep } from './check-naming-law.mjs'
 
 const retired = loadRegistry().filter((r) => r.type === 'identifier')
 const rules = (findings) => findings.map((f) => f.rule)
@@ -146,29 +146,21 @@ test('a prose-ok pragma exempts a register rule too', () => {
   assert.deepEqual(scanSource(src, retired), [])
 })
 
-// ── the naming-law sweep ─────────────────────────────────────────────────────
+// ── the id-hygiene sweep (naming-law repeal, 2026-09-02) ────────────────────
+// The NL-8/NL-4/NL-5/V-1 display-name lint (collision, format, philosophy
+// register) was repealed with the rest of the content laws (big-numbers
+// overhaul §3 L28, §10). What survives is a bug detector over machine ids.
 
-test('names are parsed out of a library source, both quote styles', () => {
-  // The library switches to double quotes for names carrying an apostrophe, so
-  // a single-quote-only parser silently skipped 7 of the 57 card names.
+test('ids are parsed out of a library source, both quote styles', () => {
   const src = [
-    "    name: 'First Spadeful',",
-    '    name: "The Sexton\'s Bell",',
+    "    id: 'first-spadeful',",
+    '    id: "the-sextons-bell",',
   ].join('\n')
-  assert.deepEqual(namesIn(src), ['First Spadeful', "The Sexton's Bell"])
+  assert.deepEqual(idsIn(src), ['first-spadeful', 'the-sextons-bell'])
 })
 
-test('the sweep reads real shipped names and finds them clean', () => {
-  const { findings, checked, skipped } = sweep()
-  assert.ok(checked > 50, 'the sweep found almost no names — the parser has drifted')
+test('the sweep reads real shipped ids and finds them clean', () => {
+  const { findings, checked } = sweep()
+  assert.ok(checked > 50, 'the sweep found almost no ids — the parser has drifted')
   assert.deepEqual(findings, [])
-  // Grandfathered names are reported, never silently dropped.
-  assert.deepEqual(skipped, [...GRANDFATHERED_NAMES.keys()].filter((n) => skipped.includes(n)))
-})
-
-test('every grandfathered name says which finding it covers and why', () => {
-  for (const [name, reason] of GRANDFATHERED_NAMES) {
-    assert.match(reason, /NL-\d/, `${name}'s exemption does not name a rule`)
-    assert.ok(reason.length > 40, `${name}'s exemption does not explain itself`)
-  }
 })

@@ -1,6 +1,12 @@
 # Spec 35 — Objective function v2: the Combat Quality Index
 
-> **Status:** IMPLEMENTED (build-plan **Phase 43**, 2026-08-08). Replaces the
+> **Status:** HISTORICAL — superseded by THE BIG NUMBERS REWRITE (2026-09-02,
+> `plan/2026-09-02-big-numbers-overhaul.prompt.md`), which repealed the whole
+> idea of a governing objective function. There is no CQI, no win-rate curve
+> and no rank band grading combat any more; the sims keep bug detectors and a
+> wide sanity envelope instead. Read this as a period record.
+
+> Formerly: **IMPLEMENTED** (build-plan **Phase 43**, 2026-08-08). Replaces the
 > parked "metric v2" design session in `plan/AUDIT.md`.
 >
 > **Provenance:** THE UNSHACKLING (T direct, `/oversight` 2026-08-08 — see

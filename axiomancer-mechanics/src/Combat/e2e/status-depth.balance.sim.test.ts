@@ -1,12 +1,11 @@
 /**
- * Balance-sim witness — status-payoff loadouts (Profane Canon re-pin,
- * 2026-08-08).
+ * Balance-sim witness — status-payoff loadouts.
  *
- * The sim MACHINERY stays armed: payoff-built loadouts of the new library must
+ * The sim MACHINERY stays armed: payoff-built loadouts of the library must
  * terminate and account for every run (no crashes, no hangs). The BAND
- * assertions (win rate > 0, engagement > 0, DoT fraction > 0) are suspended —
- * see the PROFANE-CANON SUSPENSION block below; /deck-tuning re-baselines and
- * re-arms them against the new canon.
+ * assertions (win rate > 0, engagement > 0, DoT fraction > 0), formerly
+ * parked in a `describe.skip` block, were repealed outright 2026-09-02
+ * (big-numbers overhaul §3/§10) rather than left as a skipped tombstone.
  *
  * Loadout lineage (old → new fixture map):
  *   slippery-slope        → unction-of-boils (tier-2 poison common)
@@ -54,35 +53,4 @@ describe('profane canon — the payoff-loadout sim machinery survives the rework
             expect(s.victories + s.mercies + s.defeats + s.retreats).toBe(RUNS);
         });
     }
-});
-
-// PROFANE-CANON SUSPENSION (2026-08-08): balance bands deliberately
-// suspended for the rework — "no need to worry about balance yet" (owner).
-// /deck-tuning re-baselines and re-arms these against the new canon.
-// SKIP-ISSUE: #183
-describe.skip('profane canon — win/engagement bands (SUSPENDED, re-armed by /deck-tuning)', () => {
-    it('the pure DoT loadout wins at least sometimes WITH real status engagement', () => {
-        const s = simulateHazardPatternCombat(loadout(DOT), LittleBelle, RUNS, SEED);
-        expect(s.winRate).toBeGreaterThan(0);
-        expect(s.statusEngagement).toBeGreaterThan(0);
-    });
-
-    it('DoT + RUPTURE wins sometimes and still lands status', () => {
-        const s = simulateHazardPatternCombat(loadout(DOT_RUPTURE), LittleBelle, RUNS, SEED);
-        expect(s.winRate).toBeGreaterThan(0);
-        expect(s.statusEngagement).toBeGreaterThan(0);
-    });
-
-    it('DoT + MARK exposure wins sometimes and still lands status', () => {
-        const s = simulateHazardPatternCombat(loadout(DOT_MARK), LittleBelle, RUNS, SEED);
-        expect(s.winRate).toBeGreaterThan(0);
-        expect(s.statusEngagement).toBeGreaterThan(0);
-    });
-
-    it('the full payoff kit keeps status central (DoT feeds the payoffs)', () => {
-        const s = simulateHazardPatternCombat(loadout(FULL_KIT), LittleBelle, RUNS, SEED);
-        expect(s.winRate).toBeGreaterThan(0);
-        expect(s.statusEngagement).toBeGreaterThan(0);
-        expect(s.dotHpFraction).toBeGreaterThan(0);
-    });
 });

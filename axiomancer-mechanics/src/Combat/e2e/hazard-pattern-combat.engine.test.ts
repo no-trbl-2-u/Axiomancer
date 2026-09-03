@@ -325,9 +325,10 @@ describe('Spec 26b §1 — status-combo loop', () => {
         const disPoison = dis.state.enemy.effects.find(e => e.effectId === 'debuff_poison')!;
         expect(advPoison.intensity).toBeGreaterThan(disPoison.intensity);
         expect(advPoison.remainingDuration).toBeGreaterThan(disPoison.remainingDuration);
-        // And nobody struck: no direct HP moved on either play.
-        expect(adv.state.directDamageDealt).toBe(0);
-        expect(dis.state.directDamageDealt).toBe(0);
+        // REPEALED 2026-09-02 (L4, "THE STRIKE IS DEAD"): this used to assert
+        // `directDamageDealt === 0` on both plays. Direct damage is a
+        // first-class verb again and spoiled-poultice prints "Deal 7" beside
+        // its POISON, so a status play moving HP is correct, not a bug.
     });
 
     it('an OFF-COLOR die cannot power a card at all — the play fizzles (the color law)', () => {
@@ -800,7 +801,11 @@ describe('Spec 25 §11 — victory by HP depletion via status play, card-sourced
         expect(summary.headline).toMatch(/Victory/);
         expect(summary.rows.length).toBeGreaterThan(0);
         expect(summary.bestCard.length).toBeGreaterThan(0);
-        expect(summary.totalDotDamage).toBeGreaterThan(0);
+        // REPEALED 2026-09-02 (L5, status-primacy): this used to require
+        // `totalDotDamage > 0`, i.e. that HP fell to DoT specifically. The
+        // status/damage/wall/alt-win paths compete on merit now, and this
+        // 24-VITAE foe dies to spoiled-poultice's printed "Deal 7" before its
+        // POISON ever ticks. The win is the assertion; the route is not.
     });
 });
 

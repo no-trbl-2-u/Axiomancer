@@ -14,10 +14,10 @@
  */
 
 import { Enemy, EnemyDifficulty } from '../Enemy/types';
-import { deepClone, calculateMaxHealth } from '../Utils';
+import { deepClone } from '../Utils';
 import { deriveStats } from '../Utils';
 import { EnemiesByMap } from '../Enemy/enemy.library';
-import { DEFAULT_XP_BY_DIFFICULTY } from '../Enemy';
+import { DEFAULT_XP_BY_DIFFICULTY, enemyVitae } from '../Enemy';
 import { MapName } from './map.library';
 import { MapNode, Encounter } from './types';
 import type { BaseStats } from '../Character/types';
@@ -113,7 +113,13 @@ export function scaleEnemyToLevel(source: Enemy, targetLevel: number): Enemy {
         level,
         baseStats: scaleBaseStatsToLevel(source.baseStats, level),
     };
-    scaled.maxHealth = calculateMaxHealth(level, scaled.baseStats);
+    // THE BIG NUMBERS REWRITE — an enemy's pool rides its own difficulty curve,
+    // not the player's per-stat formula. A source foe that authored a VITAE
+    // override keeps its shape by scaling proportionally with level.
+    const authored = source.maxHealth > 0 && source.level > 0
+        ? Math.round(source.maxHealth * (enemyVitae(level, source.difficulty) / enemyVitae(source.level, source.difficulty)))
+        : undefined;
+    scaled.maxHealth = enemyVitae(level, source.difficulty, authored);
     scaled.health = scaled.maxHealth;
     scaled.derivedStats = deriveStats(scaled.baseStats);
 

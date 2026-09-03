@@ -73,7 +73,13 @@ test('axio_overview publishes live doctrine, not the retired STRIKE IS DEAD ban'
   ])
   const text = replies.get(1)?.result?.content?.[0]?.text ?? ''
   assert.doesNotMatch(text, /STRIKE IS DEAD/)
-  assert.match(text, /# Doctrine — Direct damage is legal/)
+  // The live doctrine, not one pinned sentence: the three surviving
+  // constraints, the absence of a governing objective function, and DEAL as a
+  // first-class verb. Reword the library header freely; this still holds.
+  assert.match(text, /# Doctrine — /)
+  assert.match(text, /THREE SURVIVING CONSTRAINTS/)
+  assert.match(text, /no rank band/)
+  assert.match(text, /Direct damage is a first-class verb/)
 })
 
 test('axio_cards finds a known card by keyword substring', async () => {
