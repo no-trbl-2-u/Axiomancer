@@ -23,6 +23,7 @@ import { cardLibrary } from '../Cards/cards.library';
 import { UPGRADE_SUFFIX } from '../Cards/card-upgrades';
 import { Player } from '../Character/characters.mock';
 import { deepClone, deriveStats, calculateMaxHealth } from '../Utils';
+import { MAX_DIE_UPGRADE_LEVEL } from './combat.dice';
 
 /**
  * Deck-MATURITY level implied by a card's RANK (the quality ladder Doxa 1 …
@@ -62,10 +63,19 @@ export interface CombatStageProfile {
     // was sending an act-1 body at act-4 content. These fields carry the rest
     // of the campaign's growth into the measurement.
     /** ACT REWARD DICE banked by this stage — extra dice in every turn's tray.
-     *  One per completed act ("a red/blue/purple base die of their choice"). */
+     *  One per completed act ("a red/blue/purple base die of their choice").
+     *
+     *  NOT A SHIPPED FEATURE YET (owner note 2026-09-03): the game is still in
+     *  act one, so no player has ever been handed an act-reward die. This field
+     *  is the harness PROJECTING the campaign the design intends, so a mid/late
+     *  cell is measured with the body that stage of the game will actually
+     *  have. Do not read it as evidence the reward exists in the product. */
     bonusBaseDice: number;
-    /** DIE UPGRADES bought by this stage (0-2) — the share of LIVE faces in the
-     *  roll bag. Expensive in the fiction, compounding in play. */
+    /** DIE UPGRADES bought by this stage (0-`MAX_DIE_UPGRADE_LEVEL`) — the share
+     *  of LIVE and WILD faces in the roll bag. Expensive in the fiction.
+     *
+     *  Owner-set bands (2026-09-03): early = the base die, mid = 1-2 upgrades,
+     *  late = 3-4. Pinned in `progression-axes.engine.test.ts`. */
     dieUpgradeLevel: number;
     /** CARD UPGRADES: the fraction of this stage's deck that has been upgraded
      *  (Slay the Spire's rest-site upgrade). 0 = none, 1 = the whole deck. */
@@ -118,10 +128,10 @@ export const COMBAT_STAGE_PROFILES: Record<CombatStageId, CombatStageProfile> = 
         // and Saint cards, and every one of them is tier 3 — so the old cap
         // sent a Rib-capped deck against thousand-VITAE bosses and read 0%.
         maxCardTier: 3,
-        // One act cleared: a fourth die, the first hone, a third of the deck
-        // upgraded at rest sites.
+        // One act cleared: a fourth die, two hones (top of the owner's "1 or 2"
+        // band), a third of the deck upgraded at rest sites.
         bonusBaseDice: 1,
-        dieUpgradeLevel: 1,
+        dieUpgradeLevel: 2,
         upgradedCardShare: 0.33,
         enemySlugs: [
             'tri-eyes', 'mirac', 'hasshaku-sama',
@@ -138,9 +148,10 @@ export const COMBAT_STAGE_PROFILES: Record<CombatStageId, CombatStageProfile> = 
         playerBaseStats: { heart: 37, body: 39, mind: 38 },
         playerMaxHealth: 570,
         maxCardTier: 3,
-        // Two acts cleared: five dice, fully honed, most of the deck upgraded.
+        // Two acts cleared: five dice, three hones (the owner's "3 or 4" band),
+        // most of the deck upgraded.
         bonusBaseDice: 2,
-        dieUpgradeLevel: 2,
+        dieUpgradeLevel: 3,
         upgradedCardShare: 0.66,
         enemySlugs: [
             'fire-giant', 'rangda', 'tezcatlipoca',
@@ -157,10 +168,11 @@ export const COMBAT_STAGE_PROFILES: Record<CombatStageId, CombatStageProfile> = 
         playerBaseStats: { heart: 40, body: 44, mind: 42 },
         playerMaxHealth: 630,
         maxCardTier: 3,
-        // Everything the campaign can give. If The Unfinished is still out of
-        // reach HERE, it is out of reach by design.
+        // Everything the campaign can give — six dice, the honed ceiling, every
+        // card upgraded. If The Unfinished is still out of reach HERE, it is
+        // out of reach by design.
         bonusBaseDice: 3,
-        dieUpgradeLevel: 2,
+        dieUpgradeLevel: MAX_DIE_UPGRADE_LEVEL,
         upgradedCardShare: 1,
         enemySlugs: ['the-incompleteness'],
     },

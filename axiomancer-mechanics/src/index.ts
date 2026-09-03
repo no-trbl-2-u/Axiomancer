@@ -178,7 +178,7 @@ export {
     setUpgradeableDice, isUpgradeableDiceEnabled, overheatSpentDie,
     UPGRADEABLE_DIE_COLORS, UPGRADEABLE_TABLE_CEILING, PRESS_FATE_COST,
     SPECIAL_CONVICTION_DEFAULT, MOMENTUM_CHAIN_ORDER, MOMENTUM_SURGE_LENGTH,
-    SURGE_DIE_PREFIX, DEFAULT_DIE_GEAR, activeDieGear,
+    SURGE_DIE_PREFIX, DEFAULT_DIE_GEAR, activeDieGear, honedDieGear,
 } from './Combat';
 export type { MomentumV2, UpgradeableDieFace, UpgradeableDieGear } from './Combat';
 /**

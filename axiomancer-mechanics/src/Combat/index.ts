@@ -220,7 +220,7 @@ export {
     UPGRADEABLE_DIE_COLORS, UPGRADEABLE_TABLE_CEILING, KINDLE_CONCURRENT_CAP,
     PRESS_FATE_COST, OVERHEAT_CRACK_CHANCE, SPECIAL_FIRES_ON_USE,
     SPECIAL_CONVICTION_DEFAULT, MOMENTUM_CHAIN_ORDER, MOMENTUM_SURGE_LENGTH,
-    SURGE_DIE_PREFIX, DEFAULT_DIE_GEAR, activeDieGear,
+    SURGE_DIE_PREFIX, DEFAULT_DIE_GEAR, activeDieGear, honedDieGear,
     rollUpgradeableFace, rollUpgradeableDice, rollGoldLeadPair,
     advanceMomentumV2, rerollMissFacesHonest, resolveStanceCheck,
     tableDieObjectCount, tableHasRoom, isChainStance,

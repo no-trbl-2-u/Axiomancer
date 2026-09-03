@@ -220,16 +220,64 @@ Plus: **enemy decks increase in TIER as the rounds increase.**
 **D30 — the harness now carries the campaign, not just the level.**
 `CombatStageProfile` gained `bonusBaseDice`, `dieUpgradeLevel` and
 `upgradedCardShare`, monotone across the four stages; `Character` gained
-`bonusTurnDice` and `dieUpgradeLevel`; `dieFacesForUpgrade(0..2)` trades dead X
-faces for live ones. Guarded by `progression-axes.engine.test.ts`.
+`bonusTurnDice` and `dieUpgradeLevel`; `dieFacesForUpgrade(0..4)` trades dead X
+faces for live ones, then grows the bag to 7 and 8 faces. Guarded by
+`progression-axes.engine.test.ts`. (Extended 0..2 → 0..4 on 2026-09-03 so the
+owner's "3 or 4 upgrades" band is expressible; see D31a.)
 
-**D31 — MEASURED: act-reward dice are a WEAK axis as the game currently
-works.** Raising a late player from 2 bonus dice to 8 moved the matrix by
-exactly zero. Under the dice law you ROLL N and DRAFT ONE, so extra dice buy
-colour selection and Conviction — not extra PAID plays. Making "more dice"
-mean "more actions" requires drafting `1 + bonus` per turn, which is a real
-mechanic change to the engine and the combat UI. **Left for the owner; the
-wiring is correct and ready either way.**
+**D31 — WITHDRAWN 2026-09-03. It was a wiring bug, not a design finding.**
+
+The original D31 read: *"MEASURED: act-reward dice are a WEAK axis. Raising a
+late player from 2 bonus dice to 8 moved the matrix by exactly zero. Under the
+dice law you ROLL N and DRAFT ONE, so extra dice buy colour selection and
+Conviction — not extra PAID plays."*
+
+The reasoning about roll-N-draft-one is true **of the legacy dice model**. It
+is not why the measurement came back flat. `startTurn` has an early return for
+the spec-33 UPGRADEABLE model (`combat.engine.ts`, `isUpgradeableDiceEnabled()`
+branch) which read **neither** `bonusTurnDice` **nor** `dieUpgradeLevel`. The
+playtest CLI and the app both default to that model, so **both dice axes were
+inert in every playtest that has ever been run.** Eight bonus dice moved
+nothing because eight bonus dice were never rolled.
+
+Worse, the inference was backwards. Spec 33 **retired the draft** —
+`draftStanceDie` no-ops under the flag and *every usable die powers a card*
+(`combat.engine.ts:790`). So in the shipped model an extra die IS an extra PAID
+play, and a honed mana face IS one fewer dead die. These are the two STRONGEST
+axes on THE PATH, not the weakest.
+
+**D31a — the axes now reach the shipped roll.** `honedDieGear(color, level)`
+converts MISS faces to MANA faces (colour dice 2→5 mana across four hones,
+gold 1→5); `activeDieGear` falls back to it when no gear rail is authored;
+`rollUpgradeableDice` appends one duplicate-colour die per banked act reward in
+R/B/P order. Owner-set harness bands (2026-09-03): early = base tray, mid = +1
+die and 1-2 hones, late = +2 dice and 3-4 hones. Pinned by
+`progression-axes.engine.test.ts` ("THE PATH under the SHIPPED dice model").
+
+**D31b — what it was worth, measured on the same matrix.**
+
+| stage | axes inert | axes live |
+|---|---|---|
+| early | 94% | 94% (correctly unchanged — no dice banked yet) |
+| mid | 89% | 98% |
+| late | 44% | 84% |
+| impossible | 0% | 0% (still out of reach by design) |
+
+Biggest single cells: rangda 48→98, tezcatlipoca 55→100, death 35→93,
+arch-demon 22→78, the-abortive 7→35. **Every late-campaign win rate quoted
+before 2026-09-03 was measured with an act-one tray and is void.** Mid at 98%
+and late at 84% may now be too generous; no law is broken (the win-rate curve
+was repealed) but it is the owner's call.
+
+Two spec-33 economy assertions moved with it, both restated rather than
+silenced: the F1 whiff-skew comparison now measures the `early` stage, because
+`measureDiceMath` is a stock-gear stream and mid/late no longer are; and the
+STAKE clock gap inverted (flag-on 5.38→3.17 rounds vs flag-off 3.75) because
+the axes are worth more with the draft retired.
+
+**Still genuinely open for the owner:** under the LEGACY model extra dice
+remain selection-only. If the legacy tray ever ships, "more dice" needs
+`1 + bonus` drafts per turn — an engine + combat-UI change.
 
 ## The pilot was not smart enough — it was broken
 

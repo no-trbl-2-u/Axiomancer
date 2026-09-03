@@ -108,12 +108,53 @@ export const DEFAULT_DIE_GEAR: Readonly<Record<'heart' | 'body' | 'mind' | 'wild
         wild: { dieColor: 'wild', specialFaces: 1, manaFaces: 1, specialConviction: SPECIAL_CONVICTION_DEFAULT },
     });
 
-/** The active gear for one die: the state's rail (D5) or the stock default. */
+/** Faces on a spec-33 die. `specialFaces + manaFaces` may never exceed it —
+ *  a die with no miss face left is fully honed and cannot be honed further. */
+const UPGRADEABLE_DIE_FACE_COUNT = 6;
+
+/**
+ * THE PATH (owner ruling 2026-09-02) — DIE UPGRADES, expressed in the SHIPPED
+ * dice model. "Players will have the ability to upgrade the dice (so it shows
+ * more mana faces but will be expensive)."
+ *
+ * Under spec 33 that sentence is literal: a HONE turns one MISS face into a
+ * MANA face. This is the potent form of the axis, because spec 33 retired the
+ * draft (`draftStanceDie` is a no-op under the flag) — every usable die powers
+ * a card, so a mana face the player didn't have before is a PAID play they
+ * didn't have before.
+ *
+ *   level 0 — colours 1 special / 2 mana / 3 miss   gold 1 / 1 / 4  (stock)
+ *   level 1 — colours 1 / 3 / 2                     gold 1 / 2 / 3
+ *   level 2 — colours 1 / 4 / 1                     gold 1 / 3 / 2
+ *   level 3 — colours 1 / 5 / 0  (never misses)     gold 1 / 4 / 1
+ *   level 4 — colours 1 / 5 / 0  (capped)           gold 1 / 5 / 0
+ *
+ * Monotone but SATURATING: colour dice run out of miss faces at level 3, so
+ * level 4 only pays the gold die. That is the honest shape of the ladder — do
+ * not read the levels as equal steps.
+ */
+export function honedDieGear(
+    color: 'heart' | 'body' | 'mind' | 'wild',
+    level = 0,
+): UpgradeableDieGear {
+    const stock = DEFAULT_DIE_GEAR[color];
+    const hones = Math.max(0, Math.floor(level));
+    if (hones === 0) return stock;
+    const room = UPGRADEABLE_DIE_FACE_COUNT - stock.specialFaces - stock.manaFaces;
+    return { ...stock, manaFaces: stock.manaFaces + Math.min(room, hones) };
+}
+
+/**
+ * The active gear for one die: the state's rail (D5), else the stock default
+ * HONED by `dieUpgradeLevel`. An explicit rail always wins — it is the
+ * player's actual gear; the honed default is what the balance harness uses to
+ * model a stage of the campaign it has no authored loadout for.
+ */
 export function activeDieGear(
-    state: Pick<CombatEncounterState, 'dieGear'>,
+    state: Pick<CombatEncounterState, 'dieGear' | 'dieUpgradeLevel'>,
     color: 'heart' | 'body' | 'mind' | 'wild',
 ): UpgradeableDieGear {
-    return state.dieGear?.[color] ?? DEFAULT_DIE_GEAR[color];
+    return state.dieGear?.[color] ?? honedDieGear(color, state.dieUpgradeLevel ?? 0);
 }
 
 export type UpgradeableDieFace = 'special' | 'mana' | 'miss';
@@ -146,22 +187,49 @@ function faceToDie(
 }
 
 /**
+ * THE PATH (owner ruling 2026-09-02) — ACT REWARD DICE. "After each act is
+ * completed, the players are rewarded a red/blue/purple base die of their
+ * choice." Under spec 33 the tray is a fixed one-die-per-colour set, so an act
+ * reward is a DUPLICATE colour die: a second body die, a second mind die, and
+ * so on. Since the harness cannot model the player's choice, the colours are
+ * handed out deterministically in the spec's own R/B/P order.
+ *
+ * NOT SHIPPED YET (owner note 2026-09-03): the game is still in act one, so no
+ * player has been given one. This exists so a mid/late playtest cell measures
+ * the body that stage of the campaign will have.
+ *
+ * These dice honour the colour-keyed OVERHEAT crack like any other die of
+ * their colour — a body crack silences every body die that round. That is the
+ * spec's own law, not an oversight, and it makes OVERHEAT costlier the more
+ * duplicates you own.
+ */
+function actRewardDieColors(count: number): ('heart' | 'body' | 'mind')[] {
+    const order: ('heart' | 'body' | 'mind')[] = ['body', 'mind', 'heart'];
+    return Array.from({ length: Math.max(0, Math.floor(count)) }, (_, i) => order[i % order.length]);
+}
+
+/**
  * §1 — rolls the round's four dice (one per color, fixed order R/B/P/G by
- * stance name body/mind/heart/wild). A color listed in `cracked` (an OVERHEAT
- * crack biting this round) comes up all-miss WITHOUT consuming rng — the crack
- * is a stated consequence, not a rigged roll.
+ * stance name body/mind/heart/wild), plus one duplicate colour die per banked
+ * ACT REWARD (`bonusTurnDice`). A color listed in `cracked` (an OVERHEAT crack
+ * biting this round) comes up all-miss WITHOUT consuming rng — the crack is a
+ * stated consequence, not a rigged roll.
  */
 export function rollUpgradeableDice(
     turn: number,
-    state: Pick<CombatEncounterState, 'dieGear'>,
+    state: Pick<CombatEncounterState, 'dieGear' | 'dieUpgradeLevel' | 'bonusTurnDice'>,
     crackedColors: ReadonlySet<string>,
     rng: () => number = defaultRng,
 ): CombatManaDie[] {
-    return UPGRADEABLE_DIE_COLORS.map(color => {
-        const id = `t${turn}-u-${color}`;
+    const roll = (id: string, color: 'heart' | 'body' | 'mind' | 'wild'): CombatManaDie => {
         if (crackedColors.has(color)) return faceToDie(id, color, 'miss');
         return faceToDie(id, color, rollUpgradeableFace(activeDieGear(state, color), rng));
-    });
+    };
+    return [
+        ...UPGRADEABLE_DIE_COLORS.map(color => roll(`t${turn}-u-${color}`, color)),
+        ...actRewardDieColors(state.bonusTurnDice ?? 0)
+            .map((color, i) => roll(`t${turn}-u-act${i}-${color}`, color)),
+    ];
 }
 
 /** §6 — the rare permanent gold+lead pair (cap 1 pair, flag-on reading of
@@ -169,7 +237,7 @@ export function rollUpgradeableDice(
  *  LEADEN die — 5 miss / 1 gold-colored mana. Fate pushes back. */
 export function rollGoldLeadPair(
     turn: number,
-    state: Pick<CombatEncounterState, 'dieGear'>,
+    state: Pick<CombatEncounterState, 'dieGear' | 'dieUpgradeLevel'>,
     rng: () => number = defaultRng,
 ): CombatManaDie[] {
     const gold = faceToDie(`t${turn}-u-gold2`, 'wild', rollUpgradeableFace(activeDieGear(state, 'wild'), rng));
@@ -222,7 +290,7 @@ export function advanceMomentumV2(
  */
 export function rerollMissFacesHonest(
     dice: readonly CombatManaDie[],
-    state: Pick<CombatEncounterState, 'dieGear'>,
+    state: Pick<CombatEncounterState, 'dieGear' | 'dieUpgradeLevel'>,
     crackedColors: ReadonlySet<string>,
     rng: () => number = defaultRng,
 ): { dice: CombatManaDie[]; rerolledIds: string[] } {

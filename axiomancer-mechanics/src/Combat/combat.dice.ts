@@ -40,14 +40,23 @@ export const COMBAT_DIE_FACES: readonly CombatDieColor[] = Object.freeze([
  * player's power actually grows along. "Players will have the ability to
  * upgrade the dice (so it shows more mana faces but will be expensive)."
  *
- * An upgraded die trades dead X faces for live ones. That is a real power
- * increase and a compounding one: more live faces means more PAID plays per
- * turn, which means more damage per turn — the axis that keeps a deck of
- * fixed-rank cards relevant as enemy pools grow.
+ * An upgraded die trades dead X faces for live ones, then GROWS faces. The
+ * ladder is deliberately in two halves because the fiction is:
  *
- *   level 0 — 4 live of 6 (the base die)
- *   level 1 — 5 live of 6
- *   level 2 — 6 live of 6 (fully honed; never rolls dead)
+ *   level 0 — 6 faces: 3 stance, 1 wild, 2 dead  (the base die)
+ *   level 1 — 6 faces: 3 stance, 2 wild, 1 dead
+ *   level 2 — 6 faces: 3 stance, 3 wild, 0 dead  (never rolls dead again)
+ *   level 3 — 7 faces: 3 stance, 4 wild
+ *   level 4 — 8 faces: 3 stance, 5 wild          (the honed ceiling)
+ *
+ * BE HONEST ABOUT THE CURVE. Levels 0-2 are the big ones: they delete the dead
+ * face, which is what stops a turn from having no PAID play at all. Levels 3-4
+ * buy FLEXIBILITY, not reads — a wild face powers any colour but carries no
+ * stance, so it never wins the RPS read (`dieHasStance`, `resolveRead`). Per-
+ * face powering strength (wild 2, stance 1, dead 0) still rises at every step
+ * — 0.83 / 1.17 / 1.50 / 1.57 / 1.63 — but the last two steps are small, and
+ * under the roll-N-draft-ONE law they buy selection rather than extra plays.
+ * The ladder is monotone; it is not linear, and no test should pretend it is.
  *
  * The product's full die-gear rail (`UpgradeableDieGear`, HONE / TEMPER, spec
  * 33) is the shipping expression of this and is flag-gated. This bag is the
@@ -58,6 +67,8 @@ export const COMBAT_DIE_FACES_BY_UPGRADE: readonly (readonly CombatDieColor[])[]
     Object.freeze(['heart', 'body', 'mind', 'wild', 'x', 'x'] as CombatDieColor[]),
     Object.freeze(['heart', 'body', 'mind', 'wild', 'wild', 'x'] as CombatDieColor[]),
     Object.freeze(['heart', 'body', 'mind', 'wild', 'wild', 'wild'] as CombatDieColor[]),
+    Object.freeze(['heart', 'body', 'mind', 'wild', 'wild', 'wild', 'wild'] as CombatDieColor[]),
+    Object.freeze(['heart', 'body', 'mind', 'wild', 'wild', 'wild', 'wild', 'wild'] as CombatDieColor[]),
 ]);
 
 /** The highest authored die-upgrade level. */

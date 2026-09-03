@@ -172,18 +172,24 @@ export interface Character {
      * THE PATH (owner ruling 2026-09-02) — ACT REWARD DICE. "After each act is
      * completed, the players are rewarded a red/blue/purple base die of their
      * choice." Extra dice rolled into EVERY turn's tray on top of
-     * `TURN_DICE_COUNT`. This is the axis that keeps damage-per-turn growing
-     * when card rank does not: one more die is one more PAID play, every turn,
-     * for the rest of the campaign. Optional + sparse — absent means none.
+     * `TURN_DICE_COUNT`. Optional + sparse — absent means none.
+     *
+     * MEASURED, NOT ASSUMED (2026-09-02): this is a real axis but a WEAK one.
+     * Under the roll-N-draft-ONE law an extra die buys better colour selection
+     * and more banked Conviction — it does NOT buy an extra PAID play. Raising
+     * a late-stage player from 2 bonus dice to 8 moved the playtest matrix by
+     * exactly zero. Making "more dice" mean "more actions" needs the draft
+     * model to hand out `1 + bonus` drafts per turn, which is an open design
+     * call, not a wiring gap.
      */
     bonusTurnDice?: number;
     /**
      * THE PATH (owner ruling 2026-09-02) — DIE UPGRADES. How many mana-face
-     * upgrades this character's dice carry (0-2); raises the share of LIVE
-     * faces in the roll bag (`dieFacesForUpgrade`). Expensive in the fiction,
-     * compounding in play. Optional + sparse — absent means 0. The shipping
-     * expression is the flag-gated `dieGear` rail above; this is the plain
-     * engine knob the same idea reduces to.
+     * upgrades this character's dice carry (0-`MAX_DIE_UPGRADE_LEVEL`); raises
+     * the share of LIVE then WILD faces in the roll bag (`dieFacesForUpgrade`).
+     * Expensive in the fiction. Optional + sparse — absent means 0. The
+     * shipping expression is the flag-gated `dieGear` rail above; this is the
+     * plain engine knob the same idea reduces to.
      */
     dieUpgradeLevel?: number;
     /**
