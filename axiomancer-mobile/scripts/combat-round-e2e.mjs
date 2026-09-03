@@ -46,6 +46,21 @@
 //   COMBAT_ROUND_E2E_REUSE_EXPORT=1 node scripts/combat-round-e2e.mjs
 //   COMBAT_ROUND_E2E_CHROME=/path/to/chrome ...
 //
+// LIVE-only knobs, both added to close the "untested axes" gap CRITIQUE.md
+// flagged against the 2026-08-19 unreproduced mid-combat crash report (30
+// prior runs only ever drove the standard-foe encounter, spare-mercy, and
+// the fresh 4-card starter deck):
+//   PRESET=sage|wanderer|apprentice|endgame — a non-starter deck (already
+//     supported, see enterLive; wire it explicitly, the default runs never did).
+//   ENCOUNTER_KIND=boss node scripts/combat-round-e2e.mjs   — arm the lowest
+//     boss foe on the map instead of a standard encounter (`debug-trigger-
+//     encounter-boss`). Bosses seal retreat, so WITHDRAW never renders here.
+//   WITHDRAW=1 MODE=live node scripts/combat-round-e2e.mjs  — take the
+//     reveal screen's WITHDRAW control instead of entering combat, so the
+//     retreat path (`combat-withdraw` → the encounter modal tearing down
+//     with no summary/mercy/reward panel) is crash-watched too. Absent
+//     control (e.g. paired with ENCOUNTER_KIND=boss) falls back to playing.
+//
 // Exit codes: 0 = every seed played clean · 1 = crash/assertion · 3 = boot failure.
 
 import { spawnSync } from 'node:child_process'
@@ -68,6 +83,8 @@ const PLAYS_PER_ROUND = Number(process.env.PLAYS_PER_ROUND ?? 1)
 const FIRE_SIGNATURES = process.env.FIRE_SIGNATURES !== '0'
 const MODE = (process.env.MODE ?? 'sandbox').toLowerCase()
 const MODES = MODE === 'both' ? ['sandbox', 'live'] : [MODE]
+const ENCOUNTER_KIND = (process.env.ENCOUNTER_KIND ?? 'encounter').toLowerCase()
+const WITHDRAW = process.env.WITHDRAW === '1'
 
 const MIME = {
     '.html': 'text/html; charset=utf-8',
@@ -427,7 +444,7 @@ async function enterLive(page, baseUrl, seed) {
         await page.waitForTimeout(800)
         log(`live: applied player preset "${preset}"`)
     }
-    const trigger = page.getByTestId('debug-trigger-encounter-encounter')
+    const trigger = page.getByTestId(`debug-trigger-encounter-${ENCOUNTER_KIND}`)
     await trigger.waitFor({ state: 'visible', timeout: 15000 })
     await trigger.click({ force: true })
     await page.waitForURL((url) => url.pathname.endsWith('/exploration'), { timeout: 15000 })
@@ -461,6 +478,25 @@ async function playSeed(browser, baseUrl, seed, mode) {
 
         await page.getByTestId('combat-reveal').waitFor({ state: 'visible', timeout: 25000 }).catch(() => {})
         await assertAlive(page, sink, `${tag}, the reveal`)
+
+        // Retreat path: WITHDRAW lives only on the reveal, before ENTER
+        // COMBAT is ever clicked (bosses seal it — the control simply won't
+        // be there). Take it here and skip the round loop entirely; the
+        // encounter modal tears down with no summary/mercy/reward panel,
+        // which the round loop's "silent unmount" check would otherwise
+        // mistake for a crash.
+        if (mode === 'live' && WITHDRAW) {
+            const withdrawBtn = page.getByTestId('combat-withdraw')
+            if (await has(withdrawBtn)) {
+                await withdrawBtn.click({ force: true, timeout: 3000 }).catch(() => {})
+                await page.waitForTimeout(400)
+                await assertAlive(page, sink, `${tag}, withdrawing from the reveal`)
+                await shot(page, `${mode}-seed-${seed}-withdraw`)
+                return { seed, mode, ok: true, rounds: 0, applied: 0, powered: 0, resolved: true, withdrew: true, soft: sink.soft }
+            }
+            note(`${tag} — WITHDRAW requested but no combat-withdraw control (retreat sealed); playing normally`)
+        }
+
         await killPrimer(page)
         await page.getByTestId('combat-enter').click({ timeout: 8000, force: true }).catch(() => {})
         await killPrimer(page)
@@ -613,8 +649,8 @@ async function main() {
     const failed = results.filter((r) => !r.ok)
     for (const r of results) {
         if (r.ok) {
-            log(`PASS ${r.mode} seed ${r.seed} — ${r.rounds} rounds, ${r.applied} cards committed `
-                + `(${r.powered} powered)${r.resolved ? ', combat resolved' : ', still live at the round cap'}`)
+            log(`PASS ${r.mode} seed ${r.seed} — ${r.withdrew ? 'withdrew from the reveal' : `${r.rounds} rounds, `
+                + `${r.applied} cards committed (${r.powered} powered)${r.resolved ? ', combat resolved' : ', still live at the round cap'}`}`)
         } else {
             console.error(`combat-round-e2e: FAIL ${r.mode} seed ${r.seed} — ${r.error.message}`)
             if (r.error.detail?.stack) console.error(String(r.error.detail.stack).split('\n').slice(0, 12).join('\n'))

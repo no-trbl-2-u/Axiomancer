@@ -7,9 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-18T06:12:16Z | subagent | general-purpose | claude-opus-4-8 | main | Implement Phase D6b chips/telegraph/rail |
-| 2026-07-18T07:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
-| 2026-07-18T07:12:29Z | subagent | general-purpose | claude-opus-4-8 | main | Implement Phase D6c blacksmith screen |
 | 2026-07-18T08:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
 | 2026-07-18T08:12:19Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-18T08:12:33Z | subagent | general-purpose | claude-opus-4-8 | main | Implement Phase D6d flag-on combat e2e |
@@ -407,3 +404,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-03T00:27:12Z | subagent | scout | claude-sonnet-5 | main | Source CC art candidates: The Factor, Wharf Shrike, Harbormaster |
 | 2026-09-03T04:41:44Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-03T04:41:46Z | skill | march | unknown | main | - |
+| 2026-09-03T11:23:45Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-03T11:23:47Z | skill | march | unknown | main | - |
+| 2026-09-03T11:26:40Z | skill | iterate | claude-sonnet-5 | main | - |

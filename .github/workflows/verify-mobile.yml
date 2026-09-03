@@ -151,3 +151,22 @@ jobs:
           COMBAT_ROUND_E2E_REUSE_EXPORT: '1'
           MODE: both
           COMBAT_ROUND_E2E_SEEDS: '16,8,3'
+
+      # CRITIQUE.md [HIGH] 2026-08-19: 30 prior runs of the step above never
+      # reproduced the reported mid-combat crash because they only ever drove
+      # a standard foe, the spare-mercy branch, and the fresh 4-card starter
+      # deck. These two cover the axes that were missing: a boss fight with a
+      # non-starter (sage) deck, and the reveal screen's WITHDRAW retreat.
+      - name: Combat full rounds — boss + non-starter deck (crash-strict)
+        if: steps.scope.outputs.combat == 'true'
+        run: npm run e2e:combat-round:boss --workspace axiomancer-mobile
+        env:
+          COMBAT_ROUND_E2E_REUSE_EXPORT: '1'
+          COMBAT_ROUND_E2E_SEEDS: '16,8'
+
+      - name: Combat reveal withdraw (crash-strict)
+        if: steps.scope.outputs.combat == 'true'
+        run: npm run e2e:combat-round:withdraw --workspace axiomancer-mobile
+        env:
+          COMBAT_ROUND_E2E_REUSE_EXPORT: '1'
+          COMBAT_ROUND_E2E_SEEDS: '16'
