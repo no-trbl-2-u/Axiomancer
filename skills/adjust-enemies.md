@@ -1,0 +1,174 @@
+# Skill: adjust-enemies
+
+> **The enemy roster steward.** Audits `enemy.library.ts` /
+> `EnemiesByMap` / `ENEMY_REGISTRY` for roster health, then creates,
+> updates, or retires enemies. Absorbs `/forge`'s former Enemies
+> surface entirely.
+
+## 1. Purpose
+
+Two failure shapes indict a roster: **thin** (a map with too small a
+pool, so runs repeat the same three fights) and **stale** (an enemy
+with a deck or loot table that no longer obeys current combat law, or
+one that's fallen out of every map's pool and just sits dead in the
+library). `/adjust-enemies` runs the roster audit and ships fixes for
+whichever shape it finds — in the same tick if both are present.
+
+## 2. Invocation
+
+```
+/adjust-enemies
+/adjust-enemies create | update | remove   # optional bias
+/loop /march                               # routed via content-lifecycle gate
+```
+
+## 3. Procedure
+
+### Step 0 — Sync + doctrine
+
+```bash
+git pull --ff-only
+```
+
+Read `axiomancer-mechanics/CLAUDE.md` (THE BIG NUMBERS REWRITE — VITAE
+and damage bands per its §5 ladder; no win-rate grading; the old enemy
+stat and art laws are repealed), `plan/bearings.md`, `spec.md` /
+`axiomancer-mechanics/specs/world/` for any settled enemy-design
+decisions.
+
+### Step 1 — Audit (structural signals)
+
+| Signal | Action |
+|---|---|
+| A map's `EnemiesByMap` pool below the roster-size floor, or >70% pool overlap with a sibling map | CREATE |
+| An enemy absent from every `EnemiesByMap` pool (orphaned in the library) | REMOVE candidate |
+| An enemy's deck violates current deck laws (e.g. references a retired card-side mechanic, or a keyword that `/adjust-keywords` retired) | UPDATE |
+| An enemy's `portraitAsset` collides with another enemy's, or is a placeholder with a licensed/generated replacement now available (the 1:1 art *law* was repealed 2026-09-02, but don't orphan existing bindings, and unique art remains the quality bar) | UPDATE |
+| An enemy's VITAE / damage numbers fall outside the current CLAUDE.md §5 band for its intended stage (leftover from a pre-2026-09-02 pass) | UPDATE |
+| Aftermath prose missing, or in a voice that violates spec 34 §2.5 (no thee/thou/thy/thine/ye; terse, cold, priced) | UPDATE |
+| Loot table (`loot.ts`) referencing a retired item/card | UPDATE |
+
+Read `enemy.library.ts`, `EnemiesByMap`, `loot.ts`, `enemy-keywords.ts`
+directly, or query `axio-query` when available. Consult `kb-query`
+(Dawncaster corpus + board-game reception) for roster-shape prior art
+(repeat-rate tolerances, "trash mob" complaints) when scoring
+thinness.
+
+### Step 2 — KB research, then design
+
+**A KB research run is a GATE for every CREATE and UPDATE — nothing
+gets written before it.** Query the `kb-query` MCP server first:
+`kb_search` / `kb_find_games` against the board-game reception
+corpus for roster-shape prior art (repeat-rate tolerances, trash-mob
+and same-three-fights complaints), `kb_cards` / `kb_keyword` for any
+card-side mechanic the enemy's deck carries. Carry the receipts
+(`kb:<game-slug>/<doc> (src-NNN)`) into the design. If the MCP tools
+are absent or failing, fall back to the documented manual path
+(`node scripts/kb-sync.mjs`, then the sibling
+`../game-knowledge-base/` checkout); only when neither is reachable
+may the tick proceed with `(memory)`-labeled design, saying so in
+the commit body. REMOVE needs no KB run — an orphaned enemy is
+retirable on Step 1's structural evidence alone.
+
+Then design directly (no dedicated enemy sub-agent exists) — same
+process `/forge` used: house voice per spec 34 §2.5. For any deck
+the new/updated enemy carries, run it past `card-expert` (consult
+mode) if it leans on card-side keywords, to confirm the wiring is
+honest.
+
+### Step 3 — Ship
+
+**CREATE** (~10 coupled edits, per the former `/forge` checklist):
+`enemy.library.ts` entry + `ENEMY_REGISTRY` slug + `EnemiesByMap` pool
+key + a deck where every card id resolves + aftermath prose + mobile
+art key with a `portraitAsset` (unique preferred — the 1:1 law is
+repealed but shared art is a thinness smell; source from the licensed
+trove or the generation pipeline, provenance recorded). Count pins
+were repealed 2026-09-02 — no pin bump.
+
+**UPDATE** — edit the enemy in place: deck contents, VITAE/damage
+numbers, portrait, aftermath prose, loot table. Same `id`/slug; no
+re-creation.
+
+**REMOVE (retire, never delete silently)** — enemies don't have a
+ban-list convention like cards/keywords; follow `/iterate`'s standing
+rule instead — **archive, don't silently delete**:
+1. Remove the enemy from every `EnemiesByMap` pool it's in.
+2. Move its `enemy.library.ts` entry to a clearly marked retired
+   section (or `docs/retired-content.md` if one exists — check
+   before inventing a new convention) rather than deleting the
+   record outright, so its slug/history stays inspectable.
+3. Log the retirement with reasoning (§4 ledger). (Count pins were
+   repealed 2026-09-02; there is no pin to decrement.)
+
+### Step 4 — Gates, ledger, commit
+
+```bash
+npm run verify --workspace axiomancer-mechanics
+npm run verify --workspace axiomancer-mobile   # Enemy/** renders portraitAsset + EnemiesByMap
+```
+
+Update `plan/CONTENT_LEDGER.md`: bump the `enemies` row, append a log
+entry.
+
+```bash
+git add <explicit files> plan/CONTENT_LEDGER.md
+git commit -m "$(cat <<'EOF'
+content: adjust-enemies pass <N> — <one-line: created X, updated Y, retired Z>
+
+- <finding> -> <action>, per <signal from §1>.
+- Verify: green (mechanics + mobile).
+EOF
+)"
+git push origin main
+npm run deploy:check
+```
+
+### Step 5 — File the residue
+
+Roster ideas needing a new continent/map to land in → `plan/PHASE_CANDIDATES.md`.
+Owner-flavored calls → `plan/AUDIT.md` as `[loop-call]`.
+
+## 4. Hard rules
+
+1. Nexus standing rules 1–7 apply in full.
+2. **Ship content, not stubs.** An enemy in no pool doesn't count as
+   shipped, whichever direction the action runs.
+3. **Provenance is truthful or the art doesn't ship.**
+4. **Never delete shipped content silently** — archive + update
+   routing (iterate.md's standing rule, inherited here).
+5. **Count pins are repealed (2026-09-02)** — don't reintroduce pin
+   bookkeeping from stale checklists.
+6. **New persisted fields ride `GAME_STATE_VERSION`** with a
+   migration + pinned test, same as any other content surface.
+7. **No CREATE or UPDATE without the KB research run** (§3 Step 2)
+   — receipts cited, or the fallback miss documented in the commit
+   body. REMOVE is exempt.
+
+## 5. Failure modes
+
+1. **Verify/deploy gate fails ≥3 times on one root cause** — stop,
+   file to `plan/AUDIT.md`.
+2. **A finding needs an engine constant change** (threat damage,
+   global VITAE curve) — file it, don't fake it with one enemy's
+   numbers.
+3. **Art generation key/licensed asset missing** — ship the largest
+   real subset, file the gap (same as `/forge`'s failure mode 2).
+4. **Audit finds nothing actionable** — commit only the ledger bump.
+
+## 6. Quick reference
+
+```bash
+# Reads
+axiomancer-mechanics/CLAUDE.md
+axiomancer-mechanics/src/Enemy/enemy.library.ts
+axiomancer-mechanics/src/Enemy/loot.ts
+axiomancer-mechanics/src/Enemy/enemy-keywords.ts
+plan/CONTENT_LEDGER.md
+
+# Gates
+npm run verify --workspace axiomancer-mechanics
+npm run verify --workspace axiomancer-mobile
+npm run deploy:check
+node scripts/kb-sync.mjs
+```

@@ -1,5 +1,5 @@
 ---
-description: The always-do-the-right-thing entry — triage → critique → phase → iterate. The loop's outer orchestrator.
+description: The always-do-the-right-thing entry — triage → critique → phase → content lifecycle → forge → expand → iterate. The loop's outer orchestrator.
 ---
 
 You are invoked under the `march` skill — the unified outer
@@ -11,8 +11,16 @@ Procedure (§3 of the skill):
    `/triage`.
 2. Critique gate (rate-limited). If due + green deploy →
    `/critique`.
-3. Pending phase → `/ship-a-phase`.
-4. Else → `/iterate`.
+3. Dispatch, first match wins:
+   a. Pending phase → `/ship-a-phase`.
+   b. Content lifecycle due (rate-limited per category, from
+      `plan/CONTENT_LEDGER.md`) → the stalest of
+      `/adjust-cards | adjust-equipment | adjust-enemies |
+      adjust-keywords | adjust-npcs`.
+   c. World growth due (no `src/World` commit in 48h) → `/forge`.
+   d. Expand due (rate-limited + bold/autonomous posture) →
+      `/expand`.
+   e. Else → `/iterate`.
 
 You delegate by reading the relevant skill file and following
 its procedure end-to-end. The march skill itself is the
