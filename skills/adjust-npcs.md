@@ -57,12 +57,13 @@ gets written before it.** Query the `kb-query` MCP server first:
 corpus for NPC/dialogue prior art (what players say about flavor
 NPCs vs reactive ones, quest-gating complaints, dead-end dialogue
 findings). The corpus is card- and board-game-centric, so dialogue
-coverage may genuinely miss — a miss is acceptable: file a wish
-(`node scripts/kb-sync.mjs wish "<topic> — <why>"`) and state the
-miss in the commit body rather than skipping the run. If the MCP
-tools are absent or failing, fall back to the documented manual path
-(`node scripts/kb-sync.mjs`, then the sibling
-`../game-knowledge-base/` checkout). REMOVE needs no KB run — an
+coverage may genuinely miss — a miss is acceptable: file a wishlist
+issue (`gh issue create --repo no-trbl-2-u/game-knowledge-base --label
+wishlist --title "<topic>" --body "<why>"`) and state the miss in the
+commit body rather than skipping the run. If the MCP tools are absent
+or failing there is no local snapshot to fall back to: say the corpus
+was unreachable and label the grounding UNGROUNDED. REMOVE needs no
+KB run — an
 orphaned NPC is retirable on Step 1's structural evidence alone.
 Pass whatever receipts the run produced to `content-curator` with
 the authoring brief.

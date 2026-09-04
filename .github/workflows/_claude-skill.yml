@@ -112,16 +112,16 @@ jobs:
       #                 in the repo, so it starts wherever the checkout does. Without
       #                 it, card-expert's engine-truth grounding degrades to file
       #                 reads on every unattended run (content-pipelines audit §6.4).
-      #   kb-query    — GRANTED below (2026-08-31). Its server is now a remote
-      #                 HTTP endpoint the KB repo deploys, so the old blocker (the
-      #                 stdio script lived under gitignored `kb/` and could not
-      #                 exist in a CI checkout) is void: no sync step, no per-run
-      #                 download. Auth is a bearer token out of the environment —
-      #                 `.mcp.json` references ${KB_MCP_TOKEN} and Claude Code
-      #                 expands it from the process env, NOT from the .env written
-      #                 above, which is why the secret is set as step env below.
-      #                 Cloud ticks previously cited prior art from model memory;
-      #                 they can now cite kb:<game>/<doc> (src-NNN) receipts.
+      #   kb-query    — GRANTED below (2026-08-31). Its server is a remote HTTP
+      #                 endpoint the KB repo deploys: nothing to check out, no
+      #                 sync step, no per-run download. Auth is a bearer token
+      #                 out of the environment — `.mcp.json` references
+      #                 ${KB_MCP_TOKEN} and Claude Code expands it from the
+      #                 process env, NOT from the .env written above, which is
+      #                 why the secret is set as step env below. It is also the
+      #                 ONLY route to the corpus (no local fallback), so a tick
+      #                 that cannot reach it cites nothing rather than citing
+      #                 model memory as if it were a receipt.
       # Warning, never fatal: an unreachable KB degrades prior-art grounding
       # but has nothing to do with whether this tick's actual work can run.
       # Fail-closed on a 401 here would sink every loop on a token rotation.
@@ -133,7 +133,7 @@ jobs:
           health=$(curl -sS -m 15 https://kb-mcp.no-trbl-2-u.workers.dev/health || echo '{}')
           echo "kb-query /health: $health"
           if [ -z "$KB_MCP_TOKEN" ]; then
-            echo "::warning::KB_MCP_TOKEN is unset — kb_* tools are granted but will answer 401. Prior art degrades to model memory."
+            echo "::warning::KB_MCP_TOKEN is unset — kb_* tools are granted but will answer 401. Prior-art grounding is unavailable this run; claims from model memory must be marked UNGROUNDED."
             exit 0
           fi
           code=$(curl -sS -m 20 -o /dev/null -w '%{http_code}'             https://kb-mcp.no-trbl-2-u.workers.dev/mcp             -H "Authorization: Bearer $KB_MCP_TOKEN"             -H 'Content-Type: application/json'             -H 'Accept: application/json, text/event-stream'             -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' || echo 000)

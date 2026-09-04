@@ -79,12 +79,11 @@ for reception evidence) and carry the receipts
 (`kb:<game-slug>/<doc> (src-NNN)`) into the design. Delegating the
 research to `card-expert` counts — its consult answers already cite
 kb receipts — but a CREATE/UPDATE authored with neither a receipt
-nor a documented corpus miss doesn't ship. If the MCP tools are
-absent or failing, fall back to the documented manual path
-(`node scripts/kb-sync.mjs`, then the sibling
-`../game-knowledge-base/` checkout); only when neither is reachable
-may the tick proceed with `(memory)`-labeled design, saying so in
-the commit body. REMOVE needs no KB run — Step 1's structural
+nor a documented corpus miss doesn't ship. The MCP tools are the only
+route to the corpus — there is no local snapshot to fall back to — so
+if they are absent or failing, the tick may proceed with
+`(memory)`-labeled design only by saying plainly in the commit body
+that the corpus was unreachable and the grounding is UNGROUNDED. REMOVE needs no KB run — Step 1's structural
 signals are sufficient grounds to retire.
 
 Then spawn `card-expert` (consult mode) for every finding that needs

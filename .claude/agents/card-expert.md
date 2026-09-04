@@ -232,61 +232,57 @@ extends a type union MUST run both verifications before it ships
 The Dawncaster corpus is your home turf; consult it before answering
 from memory.
 
-**Fast path — the `kb-query` MCP tools.** When the
-`mcp__kb-query__*` tools are available in your session, prefer them
-for lookups: `kb_keyword` replaces the `keywords.csv` grep (exact or
-substring, returns type + description), `kb_cards` replaces the
-`cards.csv` grep (searches name / rules text / observed terms, returns
-cost + rarity + the okf record path to cite), `kb_search` locates
-claims across either corpus, `kb_read_doc` reads a record. They resolve
-over HTTP against the KB's deployed Worker, so they always serve the
-corpus as of the KB repo's last deploy — no local sync involved, and a
-grep of `kb/` can legitimately disagree with them by being older. Two things
-stay manual regardless: distribution queries (cost curves, "how many
-cards carry X") still go through `node` one-liners against
-`cards.json`, and the `functions`-column idea-mining sweep still reads
-`keywords.csv`. If the tools are absent, error with "corpus not
-found", or are permission-blocked (known gap: MCP grants don't always
-propagate into sub-agent contexts), fall back to the manual path
-below — it is always sufficient.
+**The only path — the `kb-query` MCP tools.** `kb_keyword` for the
+glossary (exact or substring, returns type + description), `kb_cards`
+for card lookup (searches name / rules text / observed terms, returns
+cost + rarity + the okf record path to cite), `kb_search` to locate
+claims across either corpus, `kb_read_doc` to read a record or a
+generated sidecar. They resolve over HTTP against the KB's deployed
+Worker, so they serve the corpus as of the KB repo's last deploy. There
+is no local copy of the corpus in this repo and no grep fallback.
 
-1. Materialize a local corpus for grepping: `node scripts/kb-sync.mjs`
-   (repo root — clones/refreshes `kb/`, gitignored). This is the
-   FALLBACK path only; the `kb_*` tools above serve the live corpus and
-   need no sync. If the sync fails (offline / no auth), check for a
-   sibling checkout at `../game-knowledge-base/` (present on the
-   owner's machine) and read from its `KnowledgeBase/` directly —
-   fall back to `(memory)`-labeled analysis only when NEITHER source
-   is reachable. Source repo:
-   `github.com/no-trbl-2-u/game-knowledge-base` (override: `KB_REPO`).
-2. Look up efficiently — don't read 1,692 files:
-   - Keyword semantics: grep `kb/KnowledgeBase/DigitalCardGames/dawncaster/keywords.csv`
-     (141 rows: keyword, slug, type, description, functions) → open
-     `keywords/<slug>.okf.md` for the full record and open questions.
-   - Card by name or keyword: grep `dawncaster/cards.csv` (1,692 rows;
-     `observed_terms` column) → follow its `okf_path` to the full
-     `cards/NNNN-*.okf.md` (rules text + raw HTML + keyword leads).
-   - Distributions (how many cards carry X, cost curves): query
-     `dawncaster/cards.json` with `node` one-liners, not by hand.
-   - Idea mining (no specific card in mind): sweep `keywords.csv` by
-     its `functions` column — the corpus tags each keyword by design
-     job (Deck Management 65, Offense 28, Defense 15, Energy
-     Management 11, Blood Ritual 7, Healing 7, Debuff 6, …). "Show me
-     the genre's whole toolbox for X" is a functions-column filter,
-     then read the 3-4 most alien entries, not the familiar ones.
-3. Board-game reception corpus: `kb/KnowledgeBase/BoardGames/games/`
-   (8 games — slay-the-spire-the-board-game is the closest cousin);
-   `reception/better-if.okf.md` and `scout-report.okf.md` carry
+1. Look up efficiently — don't pull 1,692 records:
+   - Keyword semantics: `kb_keyword "<term>"` → `kb_read_doc` on
+     `DigitalCardGames/dawncaster/keywords/<slug>.okf.md` for the full
+     record and open questions.
+   - Card by name or keyword: `kb_cards` (raise `limit` past the
+     default 15 when you need the full match set) → `kb_read_doc` on
+     the returned `okf_path` for rules text + keyword leads.
+   - Idea mining (no specific card in mind): `kb_read_doc` on
+     `DigitalCardGames/dawncaster/keywords.csv` — all 141 rows fit in
+     one read, and the `functions` column tags each keyword by design
+     job (Deck Management, Offense, Defense, Energy Management, Blood
+     Ritual, Healing, Debuff, …). "Show me the genre's whole toolbox
+     for X" is a functions-column filter over that read, then the 3-4
+     most alien entries, not the familiar ones.
+   - Distributions (cost curves, "how many cards carry X"): there is no
+     longer a local `cards.json` to run `node` one-liners against, and
+     `kb_read_doc` on `DigitalCardGames/dawncaster/cards.json` returns
+     ~64KB — the server's per-doc cap — so a full-corpus aggregate may
+     come back truncated. Prefer a bounded `kb_cards` sweep and report
+     the count as "≥ N matches in the corpus", or state plainly that
+     the exact distribution was not computed. Never present an
+     eyeballed or remembered count as a corpus figure.
+2. Board-game reception corpus (46 games; `slay-the-spire-the-board-game`
+   is the closest cousin, and there is a 360-record `slay-the-spire`
+   card corpus reachable via `kb_cards game="slay-the-spire"`): start at
+   `kb_overview` / `kb_find_games`, then `kb_read_doc` on a game's
+   `reception/better-if.okf.md` and `scout-report.okf.md` — they carry
    design-implication-tagged complaints worth citing in tuning calls.
-4. Cite hits as `kb:dawncaster/<doc> (src-NNN)` with the claim's stated
+3. Cite hits as `kb:dawncaster/<doc> (src-NNN)` with the claim's stated
    confidence. KB receipts outrank your memory; remembered
    Dawncaster/MtG/Slay-the-Spire facts must be labeled `(memory)`.
-5. Caveat every Dawncaster quote correctly: the corpus is community-
+4. Caveat every Dawncaster quote correctly: the corpus is community-
    sourced (`status: draft`, `confidence: medium`) — treat wording as
    leads, not canon.
-6. On a coverage miss you wish existed:
-   `node scripts/kb-sync.mjs wish "<game/mechanic> — <why>"`
-   (best-effort; never block the analysis on it).
+5. If the tools are absent, error, or are permission-blocked (known gap:
+   MCP grants don't always propagate into sub-agent contexts), say so
+   plainly — corpus grounding is unavailable for this analysis, and
+   anything you then answer from memory is labeled UNGROUNDED. Do not
+   imply a local corpus exists.
+6. On a coverage miss you wish existed, file it (best-effort; never
+   block the analysis on it):
+   `gh issue create --repo no-trbl-2-u/game-knowledge-base --label wishlist --title "<game/mechanic>" --body "<why>"`
 
 ## The keyword atlas (yours to keep)
 
@@ -414,11 +410,11 @@ and what does / does not transfer.
 
 ## Failure modes
 
-- **`kb/` missing and sync fails** (offline/no-auth run): try the
-  sibling checkout `../game-knowledge-base/KnowledgeBase/` first; only
-  if that is also absent proceed with `(memory)`-labeled analysis,
-  state prominently that receipts are missing, and list the lookups to
-  redo once synced.
+- **The KB corpus is unreachable** (Worker down, missing/rotated
+  `KB_MCP_TOKEN`, tools not granted): there is no local copy and no
+  fallback. Proceed with `(memory)`-labeled analysis, state prominently
+  that receipts are missing and the grounding is UNGROUNDED, and list
+  the lookups to redo once the server is reachable.
 - **Asked about a card/keyword that doesn't exist in the library:**
   check the retired list (spec 32 §3) and the deprecated-ids ban list
   before declaring it unknown — "retired, do not resurrect" is a

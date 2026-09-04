@@ -127,13 +127,16 @@ below).
 
 Three kinds of truth answer game questions. For any non-deterministic
 question or open-ended task, reach for the two MCP servers below —
-any agent may use them, not just the design sub-agents. Both are
-accelerators, never dependencies: the Grep/Read path always works.
+any agent may use them, not just the design sub-agents. `axio-query`
+is an accelerator, never a dependency — it reads this repo's own files,
+so the Grep/Read path always works. `kb-query` is the ONLY route to the
+external corpus: if it is down, prior-art grounding is unavailable that
+run and any claim from memory is marked UNGROUNDED.
 
 | Source | Answers | Freshness |
 |---|---|---|
 | **`axio-query` MCP** (`axio_overview` / `axio_cards` / `axio_effects` / `axio_keywords`) | The engine's OWN card/enemy/effect/keyword facts, generated from the live libraries | As current as the working tree — never stale |
-| **`kb-query` MCP** (`kb_overview` / `kb_find_games` / `kb_search` / `kb_read_doc` / `kb_cards` / `kb_keyword`) | External prior art: board-game rules + reception, Dawncaster corpus (1,692 cards / 141 keywords) — cite `kb:<game-slug>/<doc> (src-NNN)` | Live — served over HTTP by the KB's deployed Worker, current as of that repo's last deploy. Fallback only: `node scripts/kb-sync.mjs` materializes a `kb/` snapshot to grep |
+| **`kb-query` MCP** (`kb_overview` / `kb_find_games` / `kb_search` / `kb_read_doc` / `kb_cards` / `kb_keyword`) | External prior art: board-game rules + reception, Dawncaster corpus (1,692 cards / 141 keywords) — cite `kb:<game-slug>/<doc> (src-NNN)` | Live — served over HTTP by the KB's deployed Worker, current as of that repo's last deploy |
 | **Measured baselines** (`deck-matrix-baseline.json`) | Win-rate curves, status engagement, preset spreads | Only as fresh as the last sim — run `npm run baseline:check` and NAME the stamp before citing numbers |
 
 Measuring is not tuning: regenerating a baseline is briefing; acting

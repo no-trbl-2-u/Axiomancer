@@ -10,7 +10,7 @@ Answering a **balance/measurement** question (win rates, engagement, preset
 spreads)? Run `npm run baseline:check` first and cite the baseline's stamp —
 see AGENTS.md → "Measured truth (baselines)". Source-of-rules questions
 (cards, pricing, keywords) read the current tree and need no such check.
-(A SessionStart hook prints baseline freshness and kb/ sync age at open.)
+(A SessionStart hook prints baseline freshness at open.)
 
 `TELEMETRY.md` is an append-only invocation log written by
 `.claude/hooks/telemetry.mjs` (skills, slash commands, subagent spawns) —

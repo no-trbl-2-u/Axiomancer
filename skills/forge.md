@@ -72,9 +72,10 @@ for its next rate-limited pass; don't ship them from `/forge`).
 reception, Dawncaster corpus) on the surface in play, then read the
 specs (`spec.md`, spec 34, `specs/world/`; `docs/profane-canon.md`
 is HISTORICAL — voice guidance only).
-Fall back to `node scripts/kb-sync.mjs` / the sibling
-`../game-knowledge-base/` checkout when the MCP tools are down, and
-document a genuine miss in the commit body. Narrative beats that ride
+The MCP tools are the only route to the corpus — when they are down
+there is no fallback, so say the corpus was unreachable and label the
+grounding UNGROUNDED. Document a genuine coverage miss in the commit
+body. Narrative beats that ride
 along with a map/event (not full NPC authoring — that's
 `adjust-npcs`'s job) still route to `content-curator`. House voice
 per spec 34 §2.5 — terse, cold, priced scenery, no
@@ -161,6 +162,5 @@ the way to `plan/AUDIT.md` as `[loop-call]` with reasoning.
 npm run verify --workspace axiomancer-mechanics
 npm run verify --workspace axiomancer-mobile
 npm run game -- combat            # play what you shipped
-node scripts/kb-sync.mjs          # prior-art corpus refresh
 npm run baseline:check            # before citing balance numbers
 ```

@@ -34,9 +34,6 @@ web-build/
 # Personal settings overrides (shared enforcement lives in .claude/settings.json)
 .claude/settings.local.json
 
-# Game knowledge base (synced clone — see scripts/kb-sync.mjs)
-kb/
-
 # DevLog — generated site output (Cloudflare Pages serves what `main`'s tree
 # contains, and this content was never meant to be public — phase 57,
 # plan/phases/phase_57_devlog_pages_scopedown.md). Rebuild locally with

@@ -97,23 +97,22 @@ Stop asking when the user signals enough; don't grind.
 
 ## Phase 3 — Prior art
 
-**Consult the knowledge base first.** Fast path: the `mcp__kb-query__*`
-tools — `kb_find_games` (filter by mechanics slug / better-if label) and
-`kb_search` / `kb_read_doc`. They serve the live corpus over HTTP and
-produce the same citations as a grep, minus the staleness. Otherwise:
-run `node scripts/kb-sync.mjs`
-(clones/refreshes the OKF corpus into `kb/`, gitignored), then grep
-`kb/KnowledgeBase/BoardGames/` for the mechanic or problem shape under
-discussion. KB documents carry source-backed claims with per-claim
-confidence — when one is relevant, cite it as
+**Consult the knowledge base first.** The `mcp__kb-query__*` tools are
+the only route to it — `kb_find_games` (filter by mechanics slug /
+better-if label) and `kb_search` / `kb_read_doc`. They serve the live
+corpus over HTTP; there is no local copy to grep. If they are
+unreachable, say the corpus is unavailable and mark any prior art you
+offer from memory as UNGROUNDED. KB documents carry source-backed claims
+with per-claim confidence — when one is relevant, cite it as
 `kb:<game-slug>/<doc> (src-NNN)` and prefer its reception evidence over
 memory. The `reception/better-if.okf.md` docs (what real players wanted
 fixed) and `Design implications for SomberSoft` sections are the
 highest-value pulls.
 
 If the KB has nothing on a game or mechanic you wanted to cite, file it:
-`node scripts/kb-sync.mjs wish "<game or mechanic> — <why the session
-wanted it>"`. Best-effort; never block the session on it.
+`gh issue create --repo no-trbl-2-u/game-knowledge-base --label wishlist
+--title "<game or mechanic>" --body "<why the session wanted it>"`.
+Best-effort; never block the session on it.
 
 Then pull from the catalog in [references.md](references.md). Always cite
 **game name + specific mechanic name**, not "MTG does something like
@@ -245,9 +244,10 @@ half-ideas, tangents worth remembering. Omit section if empty.>
   organized by problem shape (RPS triangles, stance-switching, effect
   stacking, type conversion, morality difficulty, fallacy-as-flavor,
   decisive combat).
-- The OKF game knowledge base — live via the `mcp__kb-query__*` tools,
-  or as a local snapshot in `kb/` (synced via
-  `node scripts/kb-sync.mjs`; gitignored). Source-backed rules and
-  reception docs per game under `kb/KnowledgeBase/BoardGames/games/`;
-  cite as `kb:<game-slug>/<doc> (src-NNN)`. Misses go to the wishlist
-  via `node scripts/kb-sync.mjs wish "..."`.
+- The OKF game knowledge base — reachable only via the
+  `mcp__kb-query__*` tools (live over HTTP; no local snapshot).
+  Source-backed rules and reception docs per game under
+  `KnowledgeBase/BoardGames/games/` inside the corpus; cite as
+  `kb:<game-slug>/<doc> (src-NNN)`. Misses go to the wishlist as a
+  GitHub issue on `no-trbl-2-u/game-knowledge-base` with the
+  `wishlist` label.

@@ -248,8 +248,10 @@ truth sources before designing: `axio_overview` / `axio_cards` /
 `axio_effects` / `axio_keywords` for the engine's own current
 facts, and `kb_search` / `kb_find_games` / `kb_cards` /
 `kb_keyword` for external prior art worth citing in the brief or
-commit body. Accelerator, not dependency — grep `kb/` and the
-libraries directly when the tools are absent or erroring.
+commit body. `axio-query` is an accelerator, not a dependency —
+grep the libraries directly when it is absent or erroring.
+`kb-query` is the only route to the external corpus: when it is
+absent, the prior art is UNGROUNDED and must be labeled so.
 
 ### Step 4 — Build
 

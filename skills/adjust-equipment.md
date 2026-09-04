@@ -64,11 +64,11 @@ corpus for equipment/loot prior art (dominated-item complaints,
 reward-pool staleness, "every run takes the same relic" findings),
 `kb_cards` for how the Dawncaster corpus handles item-granted
 abilities. Carry the receipts (`kb:<game-slug>/<doc> (src-NNN)`)
-into the design. If the MCP tools are absent or failing, fall back
-to the documented manual path (`node scripts/kb-sync.mjs`, then the
-sibling `../game-knowledge-base/` checkout); only when neither is
-reachable may the tick proceed with `(memory)`-labeled design,
-saying so in the commit body. REMOVE needs no KB run — a dominated
+into the design. The MCP tools are the only route to the corpus —
+there is no local snapshot to fall back to — so if they are absent or
+failing, the tick may proceed with `(memory)`-labeled design only by
+saying plainly in the commit body that the corpus was unreachable and
+the grounding is UNGROUNDED. REMOVE needs no KB run — a dominated
 or unacquirable item is retirable on Step 1's structural evidence
 alone.
 

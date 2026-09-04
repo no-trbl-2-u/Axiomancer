@@ -90,18 +90,20 @@ follow-ups are fine for "what does this feel like" questions.
 **Consult the knowledge base first.** Region state, environmental
 hazards, and pacing (pass-through vs. settle-in vs. unravel-slowly) are
 mechanic shapes the board-game corpus tracks directly — campaign-game,
-modular-board, tile-placement, area-movement, push-your-luck. When the
-`mcp__kb-query__*` tools are available, use `kb_find_games` (filter by
-mechanics slug or better-if label) and `kb_search` / `kb_read_doc` to
-pull reception evidence for the shape under discussion; otherwise run
-`node scripts/kb-sync.mjs` and grep `kb/KnowledgeBase/BoardGames/`
-directly. Cite hits as `kb:<game-slug>/<doc> (src-NNN)`; the
+modular-board, tile-placement, area-movement, push-your-luck. Use
+`kb_find_games` (filter by mechanics slug or better-if label) and
+`kb_search` / `kb_read_doc` to pull reception evidence for the shape
+under discussion — the `mcp__kb-query__*` tools are the only route to
+the corpus; there is no local copy to grep, so if they are unreachable,
+say so and mark anything offered from memory as UNGROUNDED. Cite hits
+as `kb:<game-slug>/<doc> (src-NNN)`; the
 `reception/better-if.okf.md` docs (onboarding friction, setup-teardown
 cost, rules-ambiguity) are the highest-value pulls for a *place* — they
 tell you what real players found tedious or confusing about inhabiting
 a space, not just what worked narratively. If the KB has nothing for a
-shape you wanted, file it: `node scripts/kb-sync.mjs wish "<shape> —
-<why this session wanted it>"`.
+shape you wanted, file it: `gh issue create --repo
+no-trbl-2-u/game-knowledge-base --label wishlist --title "<shape>"
+--body "<why this session wanted it>"`.
 
 Then read `world-references.md` for the video-game catalog. Pick 2–4
 games total (kb corpus + references.md combined) that solved a similar

@@ -62,12 +62,11 @@ gets written before it.** Query the `kb-query` MCP server first:
 corpus for roster-shape prior art (repeat-rate tolerances, trash-mob
 and same-three-fights complaints), `kb_cards` / `kb_keyword` for any
 card-side mechanic the enemy's deck carries. Carry the receipts
-(`kb:<game-slug>/<doc> (src-NNN)`) into the design. If the MCP tools
-are absent or failing, fall back to the documented manual path
-(`node scripts/kb-sync.mjs`, then the sibling
-`../game-knowledge-base/` checkout); only when neither is reachable
-may the tick proceed with `(memory)`-labeled design, saying so in
-the commit body. REMOVE needs no KB run — an orphaned enemy is
+(`kb:<game-slug>/<doc> (src-NNN)`) into the design. The MCP tools are
+the only route to the corpus — there is no local snapshot to fall back
+to — so if they are absent or failing, the tick may proceed with
+`(memory)`-labeled design only by saying plainly in the commit body
+that the corpus was unreachable and the grounding is UNGROUNDED. REMOVE needs no KB run — an orphaned enemy is
 retirable on Step 1's structural evidence alone.
 
 Then design directly (no dedicated enemy sub-agent exists) — same
@@ -170,5 +169,4 @@ plan/CONTENT_LEDGER.md
 npm run verify --workspace axiomancer-mechanics
 npm run verify --workspace axiomancer-mobile
 npm run deploy:check
-node scripts/kb-sync.mjs
 ```

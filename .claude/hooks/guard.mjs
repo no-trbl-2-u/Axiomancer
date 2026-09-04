@@ -19,13 +19,12 @@
 //
 // Modes:
 //   pre-bash      check a Bash tool call against the forbidden list
-//   pre-write     block hand-edits to kb/ (gitignored sync of the
-//                 game-knowledge-base repo) and to measured baselines
+//   pre-write     block hand-edits to measured baselines
 //   post-write    run the retired-terminology lint (check-lexicon) on
 //                 the .md file just written; findings feed back as
 //                 exit 2 so the agent fixes them before CI does
-//   session-start print measurement context (baseline freshness, kb/
-//                 sync age) to stdout for injection into the session
+//   session-start print measurement context (baseline freshness) to
+//                 stdout for injection into the session
 //   stop          warn (or block, with NEXUS_STRICT_STOP=1) when a
 //                 turn ends with a dirty tree / unpushed commits
 //   self-test     run canned commands through the matcher; exit 1
@@ -158,16 +157,6 @@ function normalizeRel(p) {
 // GENERATED map: block + say where the truth actually lives.
 const WRITE_BLOCKS = [
   {
-    name: 'kb-sync-dir',
-    test: (rel) => rel === 'kb' || rel.startsWith('kb/'),
-    message:
-      'guard: kb/ is a gitignored SYNC of the game-knowledge-base repo — ' +
-      'edits here are destroyed by the next `node scripts/kb-sync.mjs` run ' +
-      'and never reach the corpus. Make the change in the ' +
-      'game-knowledge-base repo itself, or file the need as a wishlist ' +
-      'entry: node scripts/kb-sync.mjs wish "<what you wanted>".',
-  },
-  {
     name: 'measured-baseline',
     test: (rel) => /\bdocs\/reports\/baselines\/[^/]+\.json$/.test(rel),
     message:
@@ -217,8 +206,8 @@ function postWrite() {
 // --- session-start context ------------------------------------------------
 
 // stdout from a SessionStart hook is injected as context, so every session
-// opens knowing whether the combat baseline is fresh and how old the kb/
-// sync is — mechanizes the "cite the baseline's stamp" rule in CLAUDE.md.
+// opens knowing whether the combat baseline is fresh — mechanizes the
+// "cite the baseline's stamp" rule in CLAUDE.md.
 function sessionStart() {
   const lines = []
   try {
@@ -356,12 +345,9 @@ function selfTest() {
     )
   }
   const writeCases = [
-    ['kb/KnowledgeBase/BoardGames/games/root/index.okf.md', 'kb-sync-dir'],
-    ['kb\\WISHLIST.md', 'kb-sync-dir'],
     ['axiomancer-mechanics/docs/reports/baselines/deck-matrix-baseline.json', 'measured-baseline'],
     ['axiomancer-mechanics/docs/reports/2026-07-10-combat-audit.md', null],
     ['plan/AUDIT.md', null],
-    ['kbfoo/notes.md', null],
   ]
   for (const [p, expected] of writeCases) {
     const rel = normalizeRel(p)
