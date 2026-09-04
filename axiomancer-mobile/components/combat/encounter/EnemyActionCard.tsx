@@ -63,8 +63,22 @@ export function EnemyActionCard({
         return () => { clearTimeout(fade); clearTimeout(done); };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [revealKey]);
+    // THE END-TURN CRASH (Sentry `CppException: Object is not a function`,
+    // pinned 2026-09-04 after three unreproduced owner reports). This read
+    // used to live INSIDE the worklet below. `shouldInstantSettleJuice` is a
+    // plain JS function, so Reanimated serialized it into the UI runtime as
+    // an OBJECT; calling it there threw a C++ exception on the UI thread that
+    // no JS handler could catch, and Android killed the process — the app
+    // "minimized" the instant the enemy's action card mounted, which is every
+    // END PHASE. Web never reproduced it because Reanimated has no separate
+    // UI runtime there and the call just works.
+    //
+    // Read it on the JS thread and let the worklet capture the BOOLEAN, which
+    // serializes cleanly. This also reads the RIGHT global: the value lives on
+    // the JS-thread `globalThis`, and the UI runtime has its own.
+    const instantSettle = shouldInstantSettleJuice();
     const anim = useAnimatedStyle(() => ({
-        opacity: shouldInstantSettleJuice() ? 1 : opacity.value,
+        opacity: instantSettle ? 1 : opacity.value,
         transform: [{ translateY: lift.value }],
     }));
 
