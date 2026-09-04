@@ -68,7 +68,8 @@ const tsNodeArgs = [
     '--save-file', saveFilePath,
 ];
 
-const child = spawn('npx', tsNodeArgs, { stdio: ['ignore', 'pipe', 'pipe'] });
+// On Windows npx is npx.cmd, which Node refuses to spawn without a shell.
+const child = spawn('npx', tsNodeArgs, { stdio: ['ignore', 'pipe', 'pipe'], shell: process.platform === 'win32' });
 
 let stdoutBuf = '';
 let stderrBuf = '';

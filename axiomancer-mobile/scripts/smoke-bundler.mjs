@@ -125,6 +125,8 @@ async function runExport(outputDir, timeoutMs) {
     return new Promise((resolve) => {
         const child = spawn('npx', buildExportArgs(outputDir), {
             stdio: ['ignore', 'inherit', 'inherit'],
+            // On Windows npx is npx.cmd, which Node refuses to spawn without a shell.
+            shell: process.platform === 'win32',
             env: process.env,
         })
 

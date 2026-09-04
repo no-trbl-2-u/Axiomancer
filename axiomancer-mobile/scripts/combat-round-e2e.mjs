@@ -112,6 +112,8 @@ function runExpoExport() {
     log('running `expo export --platform web` → .smoke-dist ...')
     const result = spawnSync('npx', ['expo', 'export', '--platform', 'web', '--output-dir', EXPORT_DIR], {
         cwd: REPO_ROOT, stdio: 'inherit',
+        // On Windows npx is npx.cmd, which Node refuses to spawn without a shell.
+        shell: process.platform === 'win32',
         env: { ...process.env, BUILD_PROFILE: 'preview' },
     })
     if (result.status !== 0) { console.error('combat-round-e2e: expo export failed'); process.exit(3) }

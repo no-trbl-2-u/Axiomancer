@@ -56,6 +56,8 @@ function runExpoExport() {
     log('running `expo export --platform web` → .smoke-dist ...')
     const result = spawnSync('npx', ['expo', 'export', '--platform', 'web', '--output-dir', EXPORT_DIR], {
         cwd: REPO_ROOT, stdio: 'inherit',
+        // On Windows npx is npx.cmd, which Node refuses to spawn without a shell.
+        shell: process.platform === 'win32',
         // Dev tools (SELF → self-dev-tools-link → /dev → Debug* buttons) only
         // mount when isDevToolsEnabled(); bake it via a non-production profile.
         env: { ...process.env, BUILD_PROFILE: 'preview' },
