@@ -417,6 +417,14 @@
 - source: user (session playthrough)
 
 ### [HIGH] combat — user crash on ACCEPTING the post-combat card reward (second unreproduced crash report)
+- **LIKELY THE SAME BUG — RESOLVED 2026-09-04 (verify before closing).** The
+  row below was root-caused to a Reanimated worklet calling a plain JS
+  function (`EnemyActionCard.tsx`, fixed). Its signature matches this one
+  exactly: native-only, unreproducible on web, a hard process close rather
+  than an ErrorBoundary. The reward overlay mounts animated views on the
+  same post-combat beat. Keep this row open only until the owner plays the
+  fixed build through a victory + ACCEPT without a close; Sentry now reports
+  it automatically if anything remains.
 - pass: user-jot 2026-08-29 (session: card-design check-in)
 - viewport: unspecified (user's own device/build — platform not yet known)
 - auth_state: real progression save
@@ -453,6 +461,34 @@
 - source: user
 
 ### [HIGH] combat — user hit a mid-combat crash that 30 seeded UI runs could not reproduce
+- **RESOLVED 2026-09-04 — REPRODUCED, ROOT-CAUSED, FIXED.** Sentry landed
+  the crash within minutes of the first instrumented build:
+  `CppException: Object is not a function`, fatal/unhandled, at
+  `com.swmansion.worklets.AndroidUIScheduler.triggerUI` — a **Reanimated
+  worklet**, in `EnemyActionCardTsx1` inside `useAnimatedStyle`.
+  `EnemyActionCard.tsx` called `shouldInstantSettleJuice()` FROM INSIDE the
+  worklet. Reanimated serializes a worklet's closure into a separate
+  UI-thread runtime, where a plain JS function arrives as an OBJECT, not a
+  callable; invoking it threw a C++ exception on the UI thread that no JS
+  handler can catch, and Android killed the process. The card mounts on
+  every END PHASE, which is why "it minimizes when I end my turn" was
+  exactly reproducible for the owner.
+- **Why 30+ seeded UI runs never saw it:** react-native-web's Reanimated has
+  NO separate UI runtime, so the identical call just works on web. This was
+  never a harness gap — it was a platform the harness cannot reach. The
+  lesson is filed as a standing one below.
+- **Fix:** read the flag on the JS thread and let the worklet capture the
+  boolean (`EnemyActionCard.tsx`). Doubly correct — the helper reads a
+  JS-thread global the UI runtime does not share.
+- **Guard:** `scripts/check-worklets.mjs` + `check-worklets.test.mjs` (in
+  root `npm test`) statically reject any plain-JS call inside a worklet
+  body across mobile `components/`, `app/`, `lib/`, `hooks/`. Self-tested:
+  it catches the original line, passes the fix, and does not fire on the
+  comment prose that fooled its first draft.
+- **Standing lesson:** a green web e2e is NOT evidence about native. Any
+  crash report that the web harness cannot reproduce should go straight to
+  device telemetry rather than another seed sweep — three reports and ~30
+  runs were spent before Sentry answered it in one build.
 - **Platform pinned 2026-09-03 (third report, this time on END TURN).** The
   owner confirmed both unknowns the rows above kept guessing at: it is the
   **EAS preview APK (native)** and the app **closes to the home screen** — a
