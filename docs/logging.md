@@ -153,3 +153,42 @@ directly only for warn/error paths or genuinely new surfaces, always
 behind `if (isLoggingEnabled())` on hot paths. Tests that enable logging
 must call `resetLoggingForTests()` (`__resetAppLoggingForTests()` too in
 mobile) in `afterEach`.
+
+## Crash reporting (Sentry)
+
+The three sinks above (console mirror, crash tail, Sentry breadcrumbs) all
+hang off the same logger, so **anything already logged is already a
+breadcrumb** — new diagnostic surfaces need no Sentry-specific call.
+
+### Why it exists
+
+The owner reported the same combat crash three times ("the app closes when I
+end my turn") and no harness ever reproduced it. `combat-round-e2e.mjs` is
+crash-strict and plays the same path clean across seeds; the reason it sees
+nothing is that the crash is a **native process death on the EAS preview
+APK**. The JS VM is gone before `ErrorBoundary`, the crash tail's 250ms
+flush, or any `console.error` a Playwright run listens to. Only a native
+handler reporting on the next launch can catch that class of bug.
+
+### Shape
+
+| Piece | Where | Notes |
+| --- | --- | --- |
+| `initCrashReporting()` | `lib/monitoring.ts` | `Sentry.init`. Native-only, DSN-gated, idempotent. Runs **before** `initAppLogging` so boot crashes report. |
+| `attachCrashBreadcrumbs()` | `lib/monitoring.ts` | Third logger sink. Runs **after** `initAppLogging` (which replaces the logger). `info`/`warn`/`error` only — `debug`/`trace` would flush the 100-crumb window. |
+| `withCrashReporting()` | `lib/monitoring.ts` | Wraps the root export in `app/_layout.tsx`. Passthrough when reporting never started. |
+| DSN | `app.config.ts` → `extra.sentryDsn` | **Public by design** — embedded in every client, ingest-only. Override with `EXPO_PUBLIC_SENTRY_DSN`; set empty to disable. |
+| Auth token | `SENTRY_AUTH_TOKEN` (EAS secret) | **Secret.** Build-time sourcemap upload only. Never committed. |
+
+**Web is deliberately excluded** (`Platform.OS === 'web'` returns early). The
+web build is already covered crash-strict by the e2e harness, so including it
+would spend quota and fill the issue list with harness noise.
+
+### End-turn breadcrumbs
+
+`CombatEncounterPanel`'s `onEndPhase` logs four ordered steps —
+`end-phase:begin` → `:turn-closed` → `:threat-resolved` → `:tray-rolled`.
+When the process dies mid-sequence, the **last one recorded names the step
+that died**, which localizes a native crash without a symbolicated stack.
+Keep them ordered and keep them cheap; they are the reason this path is
+diagnosable at all.

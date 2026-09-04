@@ -86,6 +86,13 @@
           "visibility": "hidden",
           "behavior": "inset-swipe"
         }
+      ],
+      [
+        "@sentry/react-native",
+        {
+          "organization": "sombersoft",
+          "project": "axiomancer-mobile"
+        }
       ]
     ],
     "experiments": {
