@@ -1,13 +1,31 @@
 # Critique log
 
-> Last pass: 2026-08-29 at commit 32ba438b
-> Pass count: 30
+> Last pass: 2026-09-04 at commit 7f6b4312
+> Pass count: 31
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 31, 2026-09-04, commit 7f6b4312] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5,
+> `CRITIQUE_VIEWPORT=both`), mobile (375×812) and desktop (1280×800),
+> against the cold-enterable screen set (title, onboarding/deck-picker,
+> combat-encounter preview, live combat board post-ENTER COMBAT,
+> exploration hub). All 10 captures clean: zero page errors, console
+> errors limited to the same benign `navigator.vibrate` autoplay warning
+> seen every prior pass. The exploration-hub OMEN cutscene redirect and
+> Brine Hag threat-sequence preview text match prior-pass baselines
+> verbatim; the open **[MED] first-fight elite-tier pacing** row
+> (2026-09-04) reconfirmed live — same Brine Hag opener. One new finding:
+> the same-day stance-check telegraph (commit 636f3040) collides with the
+> same-day persistent LOG toggle on the live combat board — both
+> right-aligned, the toggle's fixed `COMBAT_HUD_HEIGHT` anchor wasn't
+> re-measured against the telegraph's added height, so the LOG pill
+> visually clips the "Yields to..." line on desktop when a PLEA meter and
+> full stance check both render (see Pending). Filed [MED], one row.
 
 > **[critique pass 30, 2026-08-29, commit 32ba438b] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5), mobile
@@ -318,6 +336,41 @@
 > pass "ENTER COMBAT".
 
 ## Pending
+
+### [MED] combat — the LOG toggle button overlaps the new stance-check telegraph text
+- pass: critique pass 31, 2026-09-04 (commit 7f6b4312)
+- viewport: desktop 1280x800 (reproduces on mobile 375x812 too, tighter)
+- auth_state: fresh save, first map encounter (Brine Hag)
+- category: visual
+- observation: commit 636f3040 (same-day) added the open "Punishes X /
+  Yields to Y" stance-check telegraph under the enemy's intent icon, plus
+  a persistent-log toggle pinned at a fixed `topInset + COMBAT_HUD_HEIGHT
+  + 8` offset (`COMBAT_HUD_HEIGHT = 148`, a constant). Both are
+  right-aligned to the same screen edge. `COMBAT_HUD_HEIGHT` was not
+  re-measured against the combined height of an active alt-win meter
+  (PLEA, visible here) plus a full two-line stance-check telegraph — with
+  both present, the HUD's actual right column runs long enough that the
+  LOG button's near-opaque pill (`zIndex: 20`, `rgba(10,8,6,0.82)`
+  background, `CombatEncounterPanel.tsx` `logToggle` style) paints over
+  the tail of the "Yields to BODY ×0.5 +1◆" line. Same bug class as the
+  already-fixed "signature rune column sat ON the dice tray" HIGH (pass
+  2026-09-03): a fixed-offset sibling anchored off an unmeasured height
+  constant, colliding with newly added dynamic content on the same edge.
+- evidence: `axiomancer-mobile/.critique-artifacts/desktop/04-combat-board.png`
+  (this pass) — the "L0G" pill sits directly over the second telegraph
+  line at the Brine Hag encounter; `CombatCombatantPane.tsx` `hud` is
+  `position: absolute, top: 0` with no fixed height, `hudRight`
+  (`alignItems: 'flex-end'`) now grows by up to 2 extra 10pt lines via
+  `IntentIcon`'s `stanceCheck` block; `CombatEncounterPanel.tsx`
+  `logToggle` anchors off the `COMBAT_HUD_HEIGHT` constant, not a
+  measured HUD height.
+- suggested fix: same fix pattern as the dice-tray row — anchor the LOG
+  toggle off a measured HUD bottom (e.g. `onLayout` on the `hud` View, as
+  the signature-column fix did with `sigTop`) instead of the fixed
+  `COMBAT_HUD_HEIGHT` constant, or raise the constant and audit all its
+  consumers (`CombatTutorialCoach` shares the same anchor and may have
+  the same exposure).
+- source: critique (unattended /march tick)
 
 ### [MED] combat — the arena's art registers are incoherent (painted foe, flat-vector dice, mono chrome)
 - pass: expo playthrough 2026-09-04 (owner-requested full-combat playtest, web export at 390x844)

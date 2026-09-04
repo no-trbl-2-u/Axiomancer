@@ -7,9 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-18T10:09:51Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
-| 2026-07-18T10:12:09Z | subagent | general-purpose | claude-opus-4-8 | main | Implement Phase D6f roll ritual |
-| 2026-07-18T11:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
 | 2026-07-18T11:14:12Z | subagent | general-purpose | claude-opus-4-8 | main | Run Phase D7 ratification + report |
 | 2026-07-18T12:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
 | 2026-07-18T13:09:52Z | slash-prompt | /march | claude-opus-4-8 | user/ci | /march |
@@ -407,3 +404,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-04T04:46:43Z | subagent | card-expert | claude-sonnet-5 | main | Audit and adjust card pool |
 | 2026-09-04T16:28:19Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-04T16:28:21Z | skill | march | unknown | main | - |
+| 2026-09-04T20:50:17Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-04T20:50:18Z | skill | march | unknown | main | - |
+| 2026-09-04T20:50:48Z | skill | critique | claude-sonnet-5 | main | - |
