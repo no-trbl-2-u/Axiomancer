@@ -373,16 +373,19 @@ const everyStoneAnOath: Card = {
     philosophicalAspect: 'heart',
     persistentEffect:
         'At the end of each round in which the foe dealt you no damage, gain ' +
-        'GUARD 12 that persists and THORNS 4 for 2 turns.',
+        'BARRIER 12 and THORNS 4 for 2 turns.',
     description:
         'The masons swore as they laid each course — not to any saint, but ' +
         'to the stone beneath it. A promise stacked on a promise, mortared ' +
         'with breath. Every bloodless night, the congregation grows by one.',
     tier: 2, rank: 5, cardType: 'oath',
     targetType: 'self',
-    // pts: engine text — 12 persistent GUARD and 4 THORNS per engineered quiet
-    // round. The theme's compounding engine: the wall it builds is what makes
-    // the next round quiet, and the THORNS is what makes the wall bite.
+    // pts: engine text — 12 BARRIER (the persisting wall — GUARD resets every
+    // phase by definition, so "GUARD that persists" was a contradiction in
+    // the game's own vocabulary; renamed to BARRIER, the actually-persisting
+    // pool) and 4 THORNS per engineered quiet round. The theme's compounding
+    // engine: the wall it builds is what makes the next round quiet, and the
+    // THORNS is what makes the wall bite.
     addedIn: ADDED,
     tags: ['vigil', 'oath', 'engine'],
 };

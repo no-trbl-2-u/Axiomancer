@@ -669,9 +669,10 @@ describe('ENCHANT / DISENCHANT — FREE timed line, PAID permanent, unique-in-pl
         let state = openAndDraft(makePlayer([DEBT]), makeEnemy(300, 'mind'), [DEBT, DEBT, DEBT], 'mind');
         state = { ...state, tempZone: [{ cardId: ENCH, roundsLeft: 3 }] };
         const res = playFromHand(state, DEBT);
-        // The billed BLEED comes from the TIMED instance, not a permanent one.
-        expect(res.state.enemy.effects.some(e => e.effectId === 'debuff_bleed')).toBe(true);
-        expect(res.events.some(e => e.kind === 'effect-landed'
+        // The billed WRATH+damage comes from the TIMED instance, not a permanent one.
+        expect(res.events.some(e => e.kind === 'wrath-gained'
+            && (e as { cardId?: string }).cardId === ENCH)).toBe(true);
+        expect(res.events.some(e => e.kind === 'damage-dealt'
             && (e as { cardId?: string }).cardId === ENCH)).toBe(true);
     });
 
@@ -739,15 +740,21 @@ describe('ENCHANT / DISENCHANT — FREE timed line, PAID permanent, unique-in-pl
 });
 
 describe('persistent hooks — the-red-ledger, mirror-of-guilt, crumbling-resolve', () => {
-    it('the-red-ledger (E): every RECOIL paid is billed again as BLEED at the enemy vein', () => {
+    it('the-red-ledger (E): every RECOIL paid is billed again — WRATH 1 and 6 to the foe', () => {
+        // Card face (THE BIG NUMBERS REWRITE, 2026-09-02): "Whenever you pay
+        // RECOIL, gain WRATH 1 and deal 6 to the foe." Pinned to the printed
+        // numbers as of the 2026-09-04 /adjust-cards card-face-honesty fix
+        // (this test used to pin the pre-rewrite BLEED-billing hook, which
+        // no longer matched the card's own text).
         mockSequentialRng(0.05);
         const DEBT = 'the-vig'; // mind spell, RECOIL 2 — color law needs a mind die
         let state = openAndDraft(makePlayer([DEBT]), makeEnemy(300, 'mind'), [DEBT, DEBT, DEBT], 'mind');
         state = { ...state, persistentZone: ['the-red-ledger'] };
         const res = playFromHand(state, DEBT);
-        const bleed = res.state.enemy.effects.find(e => e.effectId === 'debuff_bleed');
-        expect(bleed, 'the ledger must bill the recoil').toBeDefined();
-        expect(bleed!.intensity).toBe(1);
+        expect(res.state.wrath).toBe(1);
+        const dealt = res.events.find(e => e.kind === 'damage-dealt'
+            && (e as { cardId?: string }).cardId === 'the-red-ledger') as { amount: number } | undefined;
+        expect(dealt?.amount).toBe(6);
     });
 
     // (The self-debuff reflection witness was retired with the Profane Canon:
@@ -784,6 +791,99 @@ describe('persistent hooks — the-red-ledger, mirror-of-guilt, crumbling-resolv
         expect(res.state.player.health).toBe(200);       // the wall held
         expect(res.state.staggerRungs).toBe(1);          // the next telegraph starts a rung down
     });
+
+    it('caltrops-under-the-snow (D): an unguarded enemy hit seeds BLEED 8', () => {
+        // Card face (THE BIG NUMBERS REWRITE, 2026-09-02): "Whenever the foe
+        // deals you damage it gains BLEED 8." Added 2026-09-04 /adjust-cards —
+        // this hook had no e2e coverage before the pass fixed its magnitude
+        // (BLEED 2 -> 8).
+        mockSequentialRng(0.05);
+        let state = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
+        state = rollEncounterDice(state).state;
+        state = {
+            ...state,
+            guard: 0,
+            enemyAttachments: ['caltrops-under-the-snow'],
+            threatPhases: [{
+                index: 1, enemyStance: 'mind' as const, isFinalPhase: true,
+                threatAction: { description: 'a cold blow', effects: [{ damage: 10 }] },
+            }],
+        };
+        const res = resolveThreatPhase(state);
+        const bleed = res.state.enemy.effects.find(e => e.effectId === 'debuff_bleed');
+        expect(bleed?.intensity).toBe(8);
+    });
+
+    it('caltrops-under-the-snow (D): a fully blocked enemy hit costs it 15', () => {
+        // Card face: "Whenever your GUARD fully blocks its attack it takes
+        // 15 damage." Added 2026-09-04 /adjust-cards — this clause had NO
+        // engine hook at all before the pass.
+        mockSequentialRng(0.05);
+        let state = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
+        state = rollEncounterDice(state).state;
+        state = {
+            ...state,
+            guard: 100,
+            enemyAttachments: ['caltrops-under-the-snow'],
+            threatPhases: [{
+                index: 1, enemyStance: 'mind' as const, isFinalPhase: true,
+                threatAction: { description: 'a cold blow', effects: [{ damage: 10 }] },
+            }],
+        };
+        const res = resolveThreatPhase(state);
+        expect(300 - res.state.enemy.health).toBe(15);
+    });
+
+    it('the-assize-bell (E): every rung STAGGER/BACKFIRE denies grants 2 CHARGES and 4 direct damage', () => {
+        // Card face: "Whenever STAGGER or BACKFIRE denies the foe a rung of
+        // its telegraph, gain 2 CHARGES and deal 4 to the foe." Added
+        // 2026-09-04 /adjust-cards — this hook had no e2e coverage before
+        // the pass fixed its magnitude (1 CHARGE, no damage -> 2 CHARGES + 4
+        // damage).
+        mockSequentialRng(0.05);
+        let state = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
+        state = rollEncounterDice(state).state;
+        state = {
+            ...state,
+            staggerRungs: 1,
+            enemyAttachments: ['the-assize-bell'],
+            threatPhases: [{
+                index: 1, enemyStance: 'mind' as const, isFinalPhase: true,
+                threatAction: { description: 'an objection', effects: [{ damage: 10 }] },
+            }],
+        };
+        const res = resolveThreatPhase(state);
+        expect(res.state.premises).toBe(2);
+        expect(300 - res.state.enemy.health).toBe(4);
+    });
+
+    it('writ-of-attainder (D): a fresh DOOM 3 and 2 CHARGES land at each round\'s end', () => {
+        // Card face: "inflict DOOM 3 on the foe and gain 2 CHARGES." Added
+        // 2026-09-04 /adjust-cards — this hook had no e2e coverage before
+        // the pass fixed the DOOM magnitude (1 -> 3) and added the missing
+        // CHARGES grant.
+        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
+        const seeded: CombatEncounterState = { ...base, enemyAttachments: ['writ-of-attainder'] };
+        const res = processBetweenPhases(seeded);
+        const doom = res.state.enemy.effects.find(e => e.effectId === 'debuff_creeping_doom');
+        expect(doom?.intensity).toBe(3);
+        expect(res.state.premises).toBe(2);
+    });
+
+    it('every-stone-an-oath (E): a bloodless round grants BARRIER 12 and THORNS 4', () => {
+        // Card face: "gain BARRIER 12 and THORNS 4 for 2 turns." Added
+        // 2026-09-04 /adjust-cards — this hook had no e2e coverage before the
+        // pass fixed the BARRIER magnitude (3 -> 12) and added the missing
+        // THORNS grant.
+        const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
+        const seeded: CombatEncounterState = {
+            ...base, persistentZone: ['every-stone-an-oath'], enemyDamageThisTurn: 0,
+        };
+        const res = processBetweenPhases(seeded);
+        expect(res.state.barrier).toBe(12);
+        const thorns = res.state.player.effects.find(e => e.effectId === 'buff_thorns');
+        expect(thorns?.intensity).toBe(4);
+    });
 });
 
 // ── The round-end persistent battery — the canon disenchant clock ───────────
@@ -791,29 +891,31 @@ describe('persistent hooks — the-red-ledger, mirror-of-guilt, crumbling-resolv
 describe('the-congregation-below (D) — the discard pile IS the kill clock', () => {
     const CURSE = 'the-congregation-below';
 
-    it('drips 1 HP per 3 cards in the discard pile at the close of the round', () => {
-        // PROFANE CANON (2026-08-08): the old suppurating-curse hook (double
-        // the round's real DoT total) died with its carrier; the grave's
-        // disenchant replaces it with a clock the deck's own MILL engine feeds.
+    it('drips 1 VITAE per 2 cards in the discard pile at the close of the round', () => {
+        // Card face (THE BIG NUMBERS REWRITE, 2026-09-02): "the foe loses 1
+        // VITAE for every 2 cards in your discard pile." Pinned to the
+        // printed divisor as of the 2026-09-04 /adjust-cards card-face-honesty
+        // fix (this test used to pin the pre-rewrite divisor of 3, which no
+        // longer matched the card's own text).
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
         const seeded: CombatEncounterState = {
             ...base,
             enemyAttachments: [CURSE],
-            discard: Array.from({ length: 10 }, () => 'spoiled-poultice'), // floor(10 / 3) = 3
+            discard: Array.from({ length: 10 }, () => 'spoiled-poultice'), // floor(10 / 2) = 5
         };
         const res = processBetweenPhases(seeded);
         const drip = res.events.find(e => e.kind === 'dot-tick'
             && (e as { effectId: string }).effectId === CURSE) as { amount: number } | undefined;
-        expect(drip?.amount).toBe(3);
-        expect(300 - res.state.enemy.health).toBe(3); // only the testimony hit HP
+        expect(drip?.amount).toBe(5);
+        expect(300 - res.state.enemy.health).toBe(5); // only the testimony hit HP
     });
 
-    it('is inert below the first rung (a two-card pile reads out nothing)', () => {
+    it('is inert below the first rung (a one-card pile reads out nothing)', () => {
         const base = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
         const seeded: CombatEncounterState = {
             ...base,
             enemyAttachments: [CURSE],
-            discard: ['spoiled-poultice', 'spoiled-poultice'],
+            discard: ['spoiled-poultice'],
         };
         const res = processBetweenPhases(seeded);
         expect(res.events.some(e => e.kind === 'dot-tick'
@@ -832,7 +934,7 @@ describe('the-congregation-below (D) — the discard pile IS the kill clock', ()
             discard: Array.from({ length: 5 }, () => 'spoiled-poultice'),
         };
         const afterPlay = playFromHand(state, OPENER).state;
-        const expected = Math.floor(afterPlay.discard.length / 3);
+        const expected = Math.floor(afterPlay.discard.length / 2);
         expect(expected).toBeGreaterThan(0); // the played card joined the pile
 
         const btw = processBetweenPhases(afterPlay);

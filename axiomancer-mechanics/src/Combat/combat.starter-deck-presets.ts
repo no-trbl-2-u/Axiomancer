@@ -18,14 +18,16 @@
  *     further rewarded. Of the original Office only the heirloom psalter,
  *     one spadeful, and the thumbprick oaths survive.
  *
- * DECK LAWS (pinned by `deck-presets.engine.test.ts`):
- *   - sizes 18 / 30 / 45; HARD CAP 50 cards in any deck.
- *   - exact aspect thirds (6/6/6 · 10/10/10 · 15/15/15) — every die color is
- *     always live for card play (the color law, generalized).
- *   - ≤ 4 copies of any card in any deck (the MTG copy law).
- *   - LINEAGE LAW: each later preset equals its predecessor minus the
- *     documented removals plus the documented additions (multiset equality —
- *     see {@link PRESET_LINEAGE}). The evolution is machine-checked, not lore.
+ * DECK LAW — ONLY ONE SURVIVES THE BIG NUMBERS REWRITE (2026-09-02,
+ * `plan/2026-09-02-big-numbers-overhaul.prompt.md` §2/§3 L19): exact aspect
+ * thirds per preset (pinned by `deck-presets.engine.test.ts`) — every die
+ * color is always live for card play (the color law, generalized). The
+ * 18/30/45 size pins, the 50-card hard cap, the ≤4-copies MTG rule, and the
+ * LINEAGE multiset-equality law are REPEALED; today's presets happen to still
+ * sit at 18/30/45 and still read as a lineage because nobody has had reason
+ * to change them, not because anything enforces it any more. `DECK_SIZE_HARD_CAP`
+ * below is now advisory (read only by the Upgradeable Dice valve builder's own
+ * self-check, not by the preset law).
  *
  * Pure data + pure helpers — card ids are validated against the library at
  * call time (an id that no longer resolves is dropped).
@@ -61,7 +63,9 @@ function copies(counts: Record<string, number>): string[] {
     return Object.entries(counts).flatMap(([id, n]) => Array.from({ length: n }, () => id));
 }
 
-/** The hard ceiling on any deck's size (the rework's one numeric law). */
+/** A sanity ceiling on a derived deck's size, checked only by
+ *  {@link buildUpgradeableDicePresetDeck}'s own self-audit (the deck-size LAW
+ *  it used to enforce was repealed 2026-09-02 — see the file header). */
 export const DECK_SIZE_HARD_CAP = 50;
 
 // ── THREADBARE — the early office (18 = 6 body / 6 mind / 6 heart) ───────────

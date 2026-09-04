@@ -14,6 +14,54 @@
 
 ## Pending
 
+### [loop-call] Dead engine hooks — 19 orphaned `zoneHas` sites in combat.engine.ts (2026-09-04)
+- category: mechanics residue (found during `/adjust-cards` pass 1, filed
+  rather than actioned — cleanup is a mechanics-expert-owned sweep, not a
+  card-content change)
+- detail: `combat.engine.ts` carries 19 `zoneHas(state, '<card-id>')` hook
+  sites keyed to card ids that resolve nowhere — not in `cardLibrary`, not
+  in Haunts, not in Allies (pre-THE-BIG-NUMBERS-REWRITE "profane canon"
+  era leftovers): `forge-masters-stamp`, `crown-of-thorns`,
+  `venom-and-vein`, `bone-orchard`, `stuck-in-their-head`,
+  `anvil-of-form`, `practiced-cadence`, `mirror-of-guilt`, `entropy-tax`,
+  `quagmire-of-doubt`, `hedgehogs-dilemma`, `mirror-of-longing`,
+  `crumbling-resolve`, `achilles-and-the-tortoise`, `fated-course`,
+  `the-oracles-eye`, `irresistible-grace`, `captive-audience`,
+  `resonant-chamber`. Each has its own test pinning the dead behavior in
+  `src/Combat/e2e/themed-decks.engine.test.ts` (one test file's own
+  comment already half-acknowledges this as "scheduled for the dead-hook
+  cleanup sweep"). Needs a dedicated pass to delete the hooks and
+  retire/repurpose their tests.
+
+### [loop-call] the-sextons-count is missing its TWIN trigger (2026-09-04)
+- category: mechanics residue (found + deliberately not fixed during
+  `/adjust-cards` pass 1's card-face-honesty sweep)
+- detail: the card's printed text named a TWIN clause (RECALL/REPLAY/TWIN
+  → 8 VITAE + MILL 1) but no engine hook ever fired it. The RECALL/REPLAY
+  fix shipped this pass (engine now matches the printed 8-VITAE/MILL-1
+  effect for those two triggers), but TWIN's real "a card resolved twice"
+  moment (`twinCharge`/`echoed` resolution, `combat.engine.ts` ~line
+  2257) sits in a different variable scope than the RECALL/REPLAY sites —
+  before `directDamage`/`drawPile`/`discard` locals are declared — and
+  wiring it risked double-counting when a twinned card itself carries
+  `reprise`. Trimmed the TWIN clause from the card's printed text rather
+  than ship a rushed/wrong wire; re-adding it is a small dedicated
+  mechanics-expert task.
+
+### [loop-call] Keyword-atlas carrier audit — several CardSpecialMechanic kinds show only 1 direct carrier (2026-09-04)
+- category: content residue (found during `/adjust-cards` pass 1, routed
+  to `/adjust-keywords` rather than actioned here)
+- detail: `chain`, `omen`, `recoil_x`, `conjure_card`, `spend_premises`,
+  `consume_affliction`, `reap`, `convert_dots`, `grant_pip`,
+  `bank_spent_die`, `reroll_spent` each show exactly one direct
+  `specialMechanics` carrier in the live library, below the keyword
+  atlas's own ">=2 cards or enemies" bar for a keyword row — though CHAIN
+  and OMEN both already have atlas rows despite single-card
+  `specialMechanics` carriage, so a raw kind-count undercounts (it misses
+  rider-only grants, e.g. a condition payoff's `rider.chain`). Needs a
+  rider-inclusive carrier audit, not just a `specialMechanics`-kind count,
+  before deciding retire-the-row vs. add-a-second-carrier for each.
+
 ### [loop-call] Phase 78 — W5 art-pass candidates (2026-09-03)
 - category: design residue (art sourcing — awaiting `/oversight` pick;
   RESEARCH-AND-PRESENT per `plan/phases/phase_78_art_pass_w5_sourcing.md`,
