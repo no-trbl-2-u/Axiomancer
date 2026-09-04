@@ -27,6 +27,9 @@ import {
     // phase 2 — projected-lethality readout (spec 30): the status kill-path
     // foresight, wired into the board's HUD by this pass.
     projectCombatOutcome,
+    // Playtest fix 2026-09-04 — the turn-boundary PLEA decay is narrated in
+    // the combat log with the engine's own constant, never a copied literal.
+    SWAY_DECAY_PER_TURN,
     // Spec 33 (Phase D6a) — flag-on combat render core: the die-face axis, the
     // OVERHEAT-crack read, and the Press Fate reroll price. Inert flag-off.
     isUpgradeableDiceEnabled, PRESS_FATE_COST,
@@ -277,7 +280,9 @@ export const INTENT_ICONS: Record<CombatIntentType, { icon: string; label: strin
 // ── View-model types ─────────────────────────────────────────────────────────
 
 export interface CombatEffectChipVM {
-    effectId: string; glyph: StatusGlyph; intensity: number; duration: number; isMax: boolean;
+    // No `isMax`: the engine has no intensity cap, so the old "✶ at 10" badge
+    // was a presenter invention that hid the real stack count (2026-09-04).
+    effectId: string; glyph: StatusGlyph; intensity: number; duration: number;
     /** General keyword definition for the on-board status tooltip (null if unmapped). */
     gloss: string | null;
     /** 2026-07-12 (card-wording audit) — a STANDING oath/hex chip
@@ -381,8 +386,11 @@ export interface CombatEnemyPaneVM {
      *  damage the foe's CURRENT stacks will deal if nothing else happens;
      *  `roundsToKill` is null unless that alone clears remaining HP, in which
      *  case `isLethalInFlight` is true. Engine truth (`projectCombatOutcome`),
-     *  this presenter only forwards it. */
-    pendingDot: number; roundsToKill: number | null; isLethalInFlight: boolean;
+     *  this presenter only forwards it. `healPerRound` (playtest fix
+     *  2026-09-04) is the foe's projected REGROW/RAVENOUS recovery the
+     *  kill-round walk already nets out — surfaced so the meter can say WHY a
+     *  fat pending stack is not yet a kill. */
+    pendingDot: number; roundsToKill: number | null; isLethalInFlight: boolean; healPerRound: number;
 }
 /** Phase 50 — a renderable "Seal" (Phase 33d's `GlyphInstance`, engine name
  *  unchanged, UI-facing label renamed per Phase 49 decision 3). `crackValue`/
@@ -787,7 +795,6 @@ function chips(effects: { effectId: string; intensity: number; remainingDuration
         const kw = keywordForEffect(ae.effectId);
         return {
             effectId: ae.effectId, intensity: ae.intensity, duration: ae.remainingDuration,
-            isMax: ae.intensity >= 10,
             // Show the keyword on the chip's label (a11y/tooltip) instead of the thematic name.
             glyph: kw ? { ...glyph, label: kw } : glyph,
             gloss: keywordGloss(kw),
@@ -815,7 +822,7 @@ function standingChips(
         const src = getCardById(id);
         if (!src) return [];
         return [{
-            effectId: id, intensity: 1, duration: rounds, isMax: false, standing: true,
+            effectId: id, intensity: 1, duration: rounds, standing: true,
             glyph: kind === 'enchant'
                 ? { glyph: '❖', color: ENCHANT_COLOR, kind: 'statup' as const, label: src.name }
                 : { glyph: '☒', color: GLYPH_COLORS.control, kind: 'statdown' as const, label: src.name },
@@ -846,7 +853,6 @@ function enemyKeywordChips(enemy: { keywords?: readonly EnemyKeyword[] }): Comba
             effectId: `enemy-keyword-${k.kind}`,
             intensity: n ?? 1,
             duration: 0,
-            isMax: false,
             standing: n === null,
             glyph: { glyph: ENEMY_KEYWORD_GLYPHS[k.kind], color: ENEMY_KEYWORD_COLOR, kind: 'statdown' as const, label },
             gloss,
@@ -895,11 +901,16 @@ function stanceCheckVM(
     for (let i = state.log.length - 1; i >= 0; i--) {
         const ev = state.log[i];
         if (ev.kind === 'stance-check-resolved' && ev.phaseIndex === phaseIndex) {
+            // Playtest 2026-09-04 — the NONE outcome used to print "No stance
+            // check" directly under the "Punishes X / Yields to Y" telegraph,
+            // which read as a contradiction (the check exists; the player's
+            // stance simply matched neither side). Say what happened.
             resolution = {
                 outcome: ev.outcome, stance: ev.stance,
                 text: ev.outcome === 'punished' ? `Punished ×${adv}`
                     : ev.outcome === 'yielded' ? `Yielded ×${dis} +1◆`
-                        : 'No stance check',
+                        : ev.stance ? `${STANCE_LABELS[ev.stance] ?? ev.stance} — neither, ×1`
+                            : 'No stance — neither, ×1',
             };
             break;
         }
@@ -1103,11 +1114,181 @@ export function selectCombatLogLines(events: readonly CombatEvent[]): CombatLogL
                     float: `OVERKILL ${e.excess}`,
                 });
                 break;
+            // Playtest fix 2026-09-04 — three silent ledgers. The foe's bar
+            // climbed with no line saying WHY, and the PLEA tally fell twice a
+            // round (a THREAT cleanse, then the turn-boundary decay) with no
+            // narration of either. Zero-amount heals (RAVENOUS at full VITAE)
+            // never emit, so no guard is needed here.
+            case 'enemy-healed': {
+                const why = e.source === 'RAVENOUS' ? 'RAVENOUS. It drinks what it dealt'
+                    : e.source === 'REGROW' ? 'REGROW. It knits'
+                    : e.source === 'STAGE' ? 'The new STAGE restores'
+                    : 'Its threat restores';
+                out.push({
+                    kind: e.kind, side: 'enemy', color: GLYPH_COLORS.regen,
+                    text: `${why} — VITAE +${e.amount}.`,
+                    float: `+${e.amount}`,
+                });
+                break;
+            }
+            case 'threat-sway-cleansed':
+                out.push({
+                    kind: e.kind, side: 'enemy', color: GLYPH_COLORS.statdown,
+                    text: `The foe shakes off your plea. PLEA −${e.amount}.`,
+                    float: `PLEA −${e.amount}`,
+                });
+                break;
+            case 'sway-decayed':
+                out.push({
+                    kind: e.kind, side: 'enemy', color: GLYPH_COLORS.thorns,
+                    text: `Your plea fades between turns. PLEA −${SWAY_DECAY_PER_TURN} (${e.total} holds).`,
+                    float: null,
+                });
+                break;
             default:
                 break;
         }
     }
     return out;
+}
+
+// ── Playtest fix 2026-09-04 — the persistent combat log ─────────────────────
+//
+// The playtest found combat has no persistent log: every beat is a floating
+// token that dies in ~1s, so the player cannot reconstruct what just
+// happened. `selectCombatLogHistory` walks the FULL event stream
+// (`state.log`) and produces an ordered, human-readable line per beat,
+// grouped by turn.
+//
+// It reuses `selectCombatLogLines` for every event kind that already has a
+// ledger sentence (stage-entered, enemy-keyword-fired, the WRATH/FLAY/CHAIN/
+// TWIN/OVERKILL ledgers, enemy-healed, the PLEA lines, ...) and adds the
+// kinds that function deliberately omits — the raw damage/DoT/card/threat/
+// stance-check beats a FLOAT already carries but the log never wrote down.
+
+export interface CombatLogHistoryEntryVM {
+    id: string;
+    /** The pane the line reads over — 'system' for turn dividers and the
+     *  dice-tray summary, which belong to neither combatant. */
+    side: 'enemy' | 'player' | 'system';
+    color: string;
+    text: string;
+}
+
+/** The log toggle's copy — never hardcoded in the component (house style:
+ *  no player-facing copy lives in a component). */
+export const COMBAT_LOG_TOGGLE_TEXT = 'LOG';
+export const COMBAT_LOG_TOGGLE_A11Y = 'Open the combat log';
+export const COMBAT_LOG_CLOSE_A11Y = 'Close the combat log';
+
+/** Long fights scroll early turns off rather than growing the sheet forever. */
+const LOG_HISTORY_CAP = 200;
+
+export function selectCombatLogHistory(state: CombatEncounterState): CombatLogHistoryEntryVM[] {
+    const events = state.log ?? [];
+    const out: CombatLogHistoryEntryVM[] = [];
+    let seq = 0;
+    let lastTurn: number | null = null;
+    const push = (side: CombatLogHistoryEntryVM['side'], color: string, text: string) => {
+        seq += 1;
+        out.push({ id: `log-${seq}`, side, color, text });
+    };
+    for (const e of events) {
+        switch (e.kind) {
+            // A turn boundary — the divider, then the tray's own dice summary.
+            // Derived off the same event: `startTurn` emits exactly one of
+            // these per turn, so a changed `turn` field IS the turn changing.
+            case 'turn-dice-rolled': {
+                if (e.turn !== lastTurn) {
+                    lastTurn = e.turn;
+                    push('system', LOG_STAGE_COLOR, `TURN ${e.turn}`);
+                }
+                const dice = e.dice
+                    .map((d) => `${STANCE_LABELS[d.color] ?? d.color.toUpperCase()}${d.face ? ` ${d.face}` : ''}`)
+                    .join(', ');
+                push('system', GUARD_COLOR, `Turn ${e.turn}. Dice: ${dice}.`);
+                break;
+            }
+            case 'damage-dealt': {
+                const named = getCardById(e.cardId)?.name;
+                const suffix = named ? ` (${named})` : '';
+                if (e.target === 'enemy') push('enemy', INTENT_ICONS.damage.color, `You deal ${e.amount}${suffix}.`);
+                else push('player', INTENT_ICONS.damage.color, `It deals ${e.amount} to you${suffix}.`);
+                break;
+            }
+            case 'dot-tick': {
+                const side = e.target === 'enemy' ? 'enemy' as const : 'player' as const;
+                const who = e.target === 'enemy' ? 'the foe' : 'you';
+                push(side, GLYPH_COLORS.dot, `${e.label} ticks for ${e.amount} on ${who}.`);
+                break;
+            }
+            case 'effect-landed': {
+                const side = e.target === 'enemy' ? 'enemy' as const : 'player' as const;
+                const who = e.target === 'enemy' ? 'the foe' : 'you';
+                const glyph = effectGlyph(e.effect);
+                const name = e.effect.name ?? glyph.label;
+                push(side, glyph.color, `${name}${e.intensity > 1 ? ` ×${e.intensity}` : ''} lands on ${who}.`);
+                break;
+            }
+            case 'card-played': {
+                const card = getCardById(e.cardId);
+                const name = card?.name ?? e.cardId;
+                const color = (card && STANCE_COLORS[card.philosophicalAspect]) ?? GUARD_COLOR;
+                push('player', color, `${name} — ${e.dieId === null ? 'FREE' : 'die-powered'}.`);
+                break;
+            }
+            case 'threat-fired':
+                push('enemy', GLYPH_COLORS.control, stripThreatPayload(e.description));
+                break;
+            // 'overwhelmed' phases already read through 'threat-fired'; the
+            // DENIED half of the story (mark === 'clear') is otherwise silent.
+            case 'phase-resolved':
+                if (e.mark === 'clear') push('player', GLYPH_COLORS.statup, `PHASE ${e.phaseIndex} — DENIED.`);
+                break;
+            // Same wording the open stance-check telegraph resolves to
+            // (`stanceCheckVM` above) — one vocabulary, never two.
+            case 'stance-check-resolved': {
+                const adv = READ_DAMAGE_MULT.advantage;
+                const dis = READ_DAMAGE_MULT.disadvantage;
+                const text = e.outcome === 'punished' ? `Punished ×${adv}`
+                    : e.outcome === 'yielded' ? `Yielded ×${dis} +1◆`
+                        : e.stance ? `${STANCE_LABELS[e.stance] ?? e.stance} — neither, ×1`
+                            : 'No stance — neither, ×1';
+                const color = e.outcome === 'punished' ? INTENT_ICONS.damage.color
+                    : e.outcome === 'yielded' ? GLYPH_COLORS.statup
+                        : GLYPH_COLORS.thorns;
+                push('player', color, text);
+                break;
+            }
+            case 'signature-cast':
+                push('player', SEAL_COLOR, `${e.name} — Signature, ◆${e.cost}.`);
+                break;
+            case 'barrier-absorbed':
+                push('player', GUARD_COLOR, `Barrier absorbs ${e.amount}.`);
+                break;
+            case 'thorns-reflected':
+                push('enemy', GLYPH_COLORS.thorns, `Thorns reflect ${e.amount} back.`);
+                break;
+            case 'rupture-detonated':
+                push('enemy', PAYOFF_COLOR, `RUPTURE detonates for ${e.amount}.`);
+                break;
+            case 'amplify-detonated':
+                push('enemy', PAYOFF_COLOR, `AMPLIFY detonates for ${e.amount}${e.pendingDot > 0 ? ` (+${e.pendingDot} DoT queued)` : ''}.`);
+                break;
+            case 'compound-hit':
+                push('enemy', PAYOFF_COLOR, `COMPOUND hits for ${e.amount}${e.debuffs > 0 ? ` (×${e.debuffs} debuffs)` : ''}.`);
+                break;
+            default: {
+                // Every kind `selectCombatLogLines` already narrates (stage
+                // entries, enemy keywords, the ledgers, the PLEA lines, ...)
+                // — one source of copy, never a forked duplicate.
+                const [line] = selectCombatLogLines([e]);
+                if (line) push(line.side, line.color, line.text);
+                break;
+            }
+        }
+    }
+    return out.length > LOG_HISTORY_CAP ? out.slice(out.length - LOG_HISTORY_CAP) : out;
 }
 
 function intentVM(state: CombatEncounterState): CombatIntentVM {
@@ -1202,6 +1383,7 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
         pendingDot: lethality.pendingDot,
         roundsToKill: lethality.roundsToKill,
         isLethalInFlight: lethality.isLethalInFlight,
+        healPerRound: lethality.healPerRound,
     };
 }
 

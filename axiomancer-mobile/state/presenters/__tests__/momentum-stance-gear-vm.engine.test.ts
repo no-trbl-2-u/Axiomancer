@@ -207,7 +207,18 @@ describe('stance-check telegraph (flag-on)', () => {
         s.log = [...s.log, { kind: 'stance-check-resolved', phaseIndex: idx, outcome: 'none', stance: null }];
         const res = buildCombatViewModel(s).enemy.intent.stanceCheck!.resolution!;
         expect(res.outcome).toBe('none');
-        expect(res.text).toMatch(/No stance check/);
+        // Playtest 2026-09-04 — never "No stance check": the check exists and
+        // both branches are printed right above this line. State the result.
+        expect(res.text).not.toMatch(/No stance check/);
+        expect(res.text).toMatch(/neither, ×1/);
+    });
+
+    it('names the stance that matched neither branch in the NONE resolution', () => {
+        const s = stateWithCheck();
+        const idx = Math.min(s.currentPhaseIndex, s.threatPhases.length - 1);
+        s.log = [...s.log, { kind: 'stance-check-resolved', phaseIndex: idx, outcome: 'none', stance: 'body' }];
+        const res = buildCombatViewModel(s).enemy.intent.stanceCheck!.resolution!;
+        expect(res.text).toBe('BODY — neither, ×1');
     });
 
     it('is null when the phase carries no check', () => {

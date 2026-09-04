@@ -138,7 +138,7 @@ export {
     // WS7.2 — chosen X-cost clamp range (`recoil_x`), engine-owned
     recoilXRange,
     // Phase 2 — projected-lethality readout (spec 30)
-    computeRoundsToKill, projectCombatOutcome,
+    computeRoundsToKill, projectCombatOutcome, projectEnemyHealPerRound,
     // Spec 32 v3 — floating dice save-back + sway decay knob
     getFloatingDiceColors, SWAY_DECAY_PER_TURN,
     // RELENT (PLEA) resolve threshold — the sway meter's target (WI-5)

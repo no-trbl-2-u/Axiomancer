@@ -146,3 +146,46 @@ describe('projectCombatOutcome — the consolidated status kill-path readout', (
         expect(projection.finishers).toEqual([]);
     });
 });
+
+// Playtest fix 2026-09-04 — the projection was blind to healing: a RAVENOUS
+// foe read "LETHAL IN 3" every round while its bar climbed.
+describe('projectCombatOutcome — heal-aware lethality', () => {
+    it('REGROW nets against each round of ticks before the lethal check', () => {
+        // The exact walk is pinned on synthetic numbers in
+        // dot-trigger-clocks.engine.test.ts; here the live POISON curve only
+        // has to move the SAME way: a small REGROW pushes the kill later.
+        const enemy = makeEnemy(25, [ae('debuff_poison', 2, 4)]);
+        const plain = initializeCombatEncounter(makePlayer([]), enemy, undefined, 7);
+        const plainProjection = projectCombatOutcome(plain);
+        expect(plainProjection.healPerRound).toBe(0);
+        expect(plainProjection.roundsToKill).not.toBeNull();
+        const regrowing = { ...plain, enemy: { ...plain.enemy, keywords: [{ kind: 'regrow' as const, n: 4 }] } };
+        const projection = projectCombatOutcome(regrowing);
+        expect(projection.healPerRound).toBe(4);
+        expect(projection.roundsToKill === null || projection.roundsToKill > plainProjection.roundsToKill!).toBe(true);
+        // The lump-sum pending figure is heal-blind by design (it is RUPTURE's
+        // fuel, not a forecast) and must not move.
+        expect(projection.pendingDot).toBe(plainProjection.pendingDot);
+    });
+
+    it('a heal that outpaces the stack is not lethal at all', () => {
+        const enemy = makeEnemy(25, [ae('debuff_poison', 2, 4)]);
+        const base = initializeCombatEncounter(makePlayer([]), enemy, undefined, 7);
+        const state = { ...base, enemy: { ...base.enemy, keywords: [{ kind: 'regrow' as const, n: 20 }] } };
+        const projection = projectCombatOutcome(state);
+        expect(projection.pendingDot).toBeGreaterThan(25); // the lump sum still says "enough fuel"
+        expect(projection.roundsToKill).toBeNull();
+        expect(projection.isLethalInFlight).toBe(false);
+    });
+
+    it('RAVENOUS is estimated as the current telegraph netted through GUARD', () => {
+        const enemy = makeEnemy(300, [ae('debuff_poison', 2, 4)]);
+        const base = initializeCombatEncounter(makePlayer([]), enemy, undefined, 7);
+        const ravenous = { ...base, enemy: { ...base.enemy, keywords: [{ kind: 'ravenous' as const }] } };
+        const open = projectCombatOutcome(ravenous);
+        expect(open.healPerRound).toBeGreaterThan(0);
+        // Enough GUARD to blank the telegraph blanks the projected drain too.
+        const walled = { ...ravenous, guard: 10_000 };
+        expect(projectCombatOutcome(walled).healPerRound).toBe(0);
+    });
+});

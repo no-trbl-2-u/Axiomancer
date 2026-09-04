@@ -15,7 +15,8 @@
  *   1. `fireDotTrigger` unit semantics — trigger matching, exact no-op,
  *      POISON ramp, MARK flat amplification, BLEED `decaysPerTick` washout.
  *   2. The two round-clock aliases ('round-start'/'round-end' ≡ `tickPhase`).
- *   3. Engine call sites: 'card-played' fires on a PLAYER bottom play;
+ *   3. Engine call sites: 'card-played' fires on a PLAYER spell play (PAID
+ *      bottom or FREE top — the FREE site was missing until 2026-09-04);
  *      'payoff' fires inside the rupture verb BEFORE consumption;
  *      'damage-instance' fires on the shared enemy-damage funnel (THORNS).
  *   4. `calendarExpiry: false` persistence (no round-end countdown) and the
@@ -41,6 +42,7 @@ import { effectsLibrary, lookupEffect } from '../../Effects/effects.library';
 import { mockSequentialRng } from '../../test-utils/rng';
 import { buildFixtureState } from '../../test-utils/card-fixture';
 import { playCombatCard, resolveThreatPhase } from '../combat.engine';
+import { buildCombatSummary } from '../combat.attribution';
 import type { CombatEncounterState, CombatEvent } from '../combat.encounter.types';
 import {
     fireDotTrigger, growPerEnemyActionDots, EXPECTED_TRIGGERS_PER_ROUND,
@@ -261,6 +263,61 @@ describe("engine call site — 'card-played' (player-side plays only, ratified)"
             { kind: 'soul-gained', amount: 1, total: 1, reason: 'expiry' },
         ]);
     });
+
+    // Playtest fix 2026-09-04: the FREE line is a player-side spell play and
+    // advances the same clock. Before this, a free-line-heavy deck watched
+    // POISON sit inert all fight while the projection billed two ticks a round.
+    it('a player FREE (top) spell play advances the card-played clock on the enemy', () => {
+        mockSequentialRng(0.5);
+        const before = stateWithEnemyEffects(
+            [ae('ws3x_card_played', 2, 4)],
+            [{ uid: 't1', cardId: 'spoiled-poultice' }],
+        );
+        const { state: after, events } = playCombatCard(before, { uid: 't1' }, false);
+
+        expect(before.enemy.health - after.enemy.health).toBe(6);
+        const ticks = findEvents(events, 'dot-tick').filter(e => e.effectId === 'ws3x_card_played');
+        expect(ticks).toEqual([{ kind: 'dot-tick', effectId: 'ws3x_card_played', label: 'ws3x_card_played', amount: 6, target: 'enemy' }]);
+        expect(after.directDamageDealt - before.directDamageDealt).toBe(6);
+        // The play's OWN fresh POISON stack is clock-capped out (WS3.3).
+        expect(findEvents(events, 'dot-tick').filter(e => e.effectId === 'debuff_poison')).toEqual([]);
+        const inst = after.enemy.effects.find(e => e.effectId === 'ws3x_card_played');
+        expect(inst).toMatchObject({ intensity: 2, remainingDuration: 4 });
+    });
+
+    it('a FREE play never ticks the stacks it just landed (fresh-stack gate)', () => {
+        mockSequentialRng(0.5);
+        const before = stateWithEnemyEffects([], [{ uid: 't1', cardId: 'spoiled-poultice' }]);
+        const { state: after, events } = playCombatCard(before, { uid: 't1' }, false);
+        expect(findEvents(events, 'dot-tick')).toEqual([]);
+        expect(after.enemy.health).toBe(before.enemy.health);
+        // ...but the NEXT free play does tick them.
+        const again = { ...after, hand: [{ uid: 't2', cardId: 'spoiled-poultice' }] };
+        const second = playCombatCard(again, { uid: 't2' }, false);
+        const ticks = findEvents(second.events, 'dot-tick').filter(e => e.effectId === 'debuff_poison' && e.target === 'enemy');
+        expect(ticks).toHaveLength(1);
+        expect(ticks[0].amount).toBeGreaterThan(0);
+        expect(again.enemy.health - second.state.enemy.health).toBe(ticks[0].amount);
+        // Playtest fix 2026-09-04: the FREE line records provenance, so the
+        // tick is credited to Spoiled Poultice — not "Lingering afflictions".
+        const summary = buildCombatSummary(second.state);
+        expect(summary.rows.find(r => r.cardId === 'spoiled-poultice')).toMatchObject({ dotDamage: ticks[0].amount });
+        expect(summary.rows.some(r => r.name === 'Lingering afflictions')).toBe(false);
+        expect(summary.bestCard).toBe('Spoiled Poultice');
+    });
+
+    it('a FREE play advances card-played DoTs the PLAYER bears (pre-existing stacks only)', () => {
+        mockSequentialRng(0.5);
+        const base = stateWithEnemyEffects([], [{ uid: 't1', cardId: 'spoiled-poultice' }]);
+        const before: CombatEncounterState = {
+            ...base,
+            player: { ...base.player, effects: [ae('ws3x_card_played', 1, 4)] },
+        };
+        const { state: after, events } = playCombatCard(before, { uid: 't1' }, false);
+        const selfTicks = findEvents(events, 'dot-tick').filter(e => e.target === 'self');
+        expect(selfTicks).toEqual([{ kind: 'dot-tick', effectId: 'ws3x_card_played', label: 'ws3x_card_played', amount: 3, target: 'self' }]);
+        expect(before.player.health - after.player.health).toBe(3);
+    });
 });
 
 describe("engine call site — 'payoff' (rupture / consume_affliction / reap_all)", () => {
@@ -404,6 +461,16 @@ describe('fuel math — expected-trigger counts per clock', () => {
         expect(computeRoundsToKill(clocked)).toBe(2);  // 12 HP expected per round
         const legacy = { ...base, health: 24, effects: [ae('ws3x_legacy', 2, 4)] };
         expect(computeRoundsToKill(legacy)).toBe(4);   // 6 HP per round — old walk
+    });
+
+    // Playtest fix 2026-09-04 — the walk nets a per-round heal.
+    it('computeRoundsToKill nets healPerRound off each round, never banking below zero', () => {
+        const base = stateWithEnemyEffects([]).enemy;
+        const foe = { ...base, health: 20, effects: [ae('ws3x_card_played', 1, 6)] }; // 6 HP/round
+        expect(computeRoundsToKill(foe)).toBe(4);           // 6, 12, 18, 24
+        expect(computeRoundsToKill(foe, undefined, 3)).toBe(6); // 3, 6, 9, 12, 15, 21
+        expect(computeRoundsToKill(foe, undefined, 6)).toBeNull(); // treads water
+        expect(computeRoundsToKill(foe, undefined, 99)).toBeNull(); // never negative-banks
     });
 });
 

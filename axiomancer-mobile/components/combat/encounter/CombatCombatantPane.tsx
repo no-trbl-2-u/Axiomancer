@@ -174,7 +174,6 @@ export function EffectChips({ effects, onChip, align = 'flex-start' }: {
     onChip?: (e: CombatEffectChipVM) => void;
     align?: 'flex-start' | 'flex-end' | 'center';
 }) {
-    const AXM = usePalette();
     const styles = useStyles();
     if (effects.length === 0) return null;
     return (
@@ -183,12 +182,12 @@ export function EffectChips({ effects, onChip, align = 'flex-start' }: {
                 <Pressable
                     key={e.effectId}
                     onPress={() => onChip?.(e)}
-                    style={[styles.chip, { borderColor: e.isMax ? AXM.sulfur : e.glyph.color }]}
+                    style={[styles.chip, { borderColor: e.glyph.color }]}
                     testID={`combat-effect-${e.effectId}`}
                     accessibilityRole="button"
                     accessibilityLabel={e.standing
                         ? `${e.glyph.label}, ${e.duration > 0 ? `${e.duration} rounds left` : 'rest of combat'}`
-                        : `${e.glyph.label}, intensity ${e.intensity}, ${e.duration} turns left${e.isMax ? ', maxed' : ''}`}
+                        : `${e.glyph.label}, intensity ${e.intensity}, ${e.duration} turns left`}
                 >
                     <View style={[StyleSheet.absoluteFill, { backgroundColor: e.glyph.color, opacity: 0.16 }]} />
                     <Text style={[styles.chipGlyph, { color: e.glyph.color, textShadowColor: e.glyph.color }]}>{e.glyph.glyph}</Text>
@@ -205,7 +204,7 @@ export function EffectChips({ effects, onChip, align = 'flex-start' }: {
                         has no stack count — no badge. */}
                     {!e.standing ? (
                         <View style={styles.chipBadge}>
-                            <Text style={styles.chipBadgeText} allowFontScaling={false}>{e.isMax ? '✶' : e.intensity}</Text>
+                            <Text style={styles.chipBadgeText} allowFontScaling={false}>{e.intensity}</Text>
                         </View>
                     ) : null}
                 </Pressable>
@@ -665,12 +664,18 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                 {/* Phase 2 (spec 30) — the status kill-path foresight. Makes the
                     DoT win path foreseeable instead of invisible accumulation:
                     a plain pending tally once stacks land, a "LETHAL IN N" call
-                    once they alone clear remaining HP. */}
+                    once they alone clear remaining HP. Playtest fix 2026-09-04:
+                    the tally prints the REAL pending figure (the fill bar clamps
+                    on its own — "45/45" while 240 was queued hid the surplus),
+                    and a foe whose REGROW/RAVENOUS keeps the stack from ever
+                    crossing says so instead of a bare, misleading DOT PENDING. */}
                 {enemy.pendingDot > 0 ? (
                     <AltWinMeter
                         glyph="☠"
-                        label={enemy.isLethalInFlight ? `LETHAL IN ${enemy.roundsToKill}` : 'DOT PENDING'}
-                        value={Math.min(enemy.pendingDot, enemy.hp)}
+                        label={enemy.isLethalInFlight
+                            ? `LETHAL IN ${enemy.roundsToKill}`
+                            : enemy.healPerRound > 0 ? `DOT PENDING · HEALS ${enemy.healPerRound}/RD` : 'DOT PENDING'}
+                        value={enemy.pendingDot}
                         target={enemy.hp}
                         color={AXM.blood}
                         testID="combat-lethality-meter"

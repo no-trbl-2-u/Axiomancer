@@ -14,6 +14,22 @@
 
 ## Pending
 
+### [debt] Die a11y copy drift — `RollingDie` and `upgradeable-dice-e2e.mjs` still speak the draft-era wording (2026-09-04)
+- category: mobile evidence residue (found while fixing the playtest
+  2026-09-04 die a11y finding; `CombatDie.tsx` now derives its label from
+  the pure `combatDieA11yLabel(die, { assigned, specialConviction })`)
+- detail: two surfaces were out of scope for that fix and still drift.
+  (a) `components/combat/encounter/RollingDie.tsx` forwards only
+  `die/size/dimmed` to `CombatDie`, so the flag-on tumbling tray die speaks
+  the stock `SPECIAL_CONVICTION_DEFAULT` payload and never the assigned
+  state — a screen-reader user hears "2 Conviction" on a die whose gear
+  slot pays more. (b) `scripts/upgradeable-dice-e2e.mjs` lines ~249,
+  ~338-340, ~401-403 still regex the old `stance die` / `BOON face` /
+  `available` wording; `combat-round-e2e.mjs` was migrated to the new
+  `^(\w+)(?:\s+\(gold\))?\s+die` + `drag onto` shape and the other script
+  should follow or its usable-die detection goes silently blind.
+- score: impact 5 x ease 8 / 10 = 4.0
+
 ### [loop-call] No mid/late equipment progression — 8 relics are 1:1-locked to 8 signatures, 3 accessory kinds have zero live relics (2026-09-04)
 - category: design residue (found during `/adjust-equipment` pass 1's
   structural audit; directly answers the pending `[HIGH] general — no

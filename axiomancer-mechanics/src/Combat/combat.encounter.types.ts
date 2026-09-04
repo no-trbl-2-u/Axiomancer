@@ -586,6 +586,15 @@ export type CombatEvent =
     | { kind: 'stage-entered'; enemyId: string; name: string; text: string }
     /** An enemy keyword changed the arithmetic of a resolved threat. */
     | { kind: 'enemy-keyword-fired'; enemyId: string; keyword: string; amount?: number }
+    /**
+     * The foe's VITAE went UP (playtest fix 2026-09-04). `amount` is the HP
+     * ACTUALLY restored after the max-VITAE clamp — never the printed figure —
+     * so the attribution ledger can reconcile "HP lost" against damage dealt.
+     * Every enemy-heal site (RAVENOUS, REGROW, a STAGE's `heal`, a threat's
+     * `enemyHeal`) emits one; `enemy-keyword-fired` stays the popup, this is
+     * the ledger row.
+     */
+    | { kind: 'enemy-healed'; enemyId: string; source: 'RAVENOUS' | 'REGROW' | 'STAGE' | 'THREAT'; amount: number }
     | { kind: 'reaped'; cardId: string; soulsSpent: number; amount: number }
     // Phase 32 part 1 (Harvest — REAP attacks MAXIMUM HP): fires alongside
     // 'reaped' whenever a REAP verb (single or ALL) permanently lowers the

@@ -204,8 +204,8 @@ export {
     projectIncomingThreat,
     // WS7.2 — chosen X-cost clamp range (`recoil_x`), engine-owned
     recoilXRange,
-    // Phase 2 — projected-lethality readout (spec 30)
-    projectCombatOutcome,
+    // Phase 2 — projected-lethality readout (spec 30); heal-aware since 2026-09-04
+    projectCombatOutcome, projectEnemyHealPerRound,
     // Spec 32 v3 — floating dice save-back + sway decay knob
     getFloatingDiceColors, SWAY_DECAY_PER_TURN,
     // Phase 31 — the engine-native momentum wheel + THE STAKE

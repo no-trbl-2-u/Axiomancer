@@ -118,7 +118,7 @@ export function IntentIcon({ intent, onPress }: { intent: CombatIntentVM; onPres
     );
 }
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((AXM) => ({
     wrap: { alignItems: 'center' },
     disc: {
         width: 36, height: 36, borderRadius: 18, borderWidth: 2,
@@ -138,10 +138,12 @@ const useStyles = makeStyles(() => ({
     rungFilled: { fontFamily: FONTS.mono, fontSize: 6, color: '#d9b44a' },
     rungHollow: { fontFamily: FONTS.mono, fontSize: 6, color: '#8a8273' },
     // Spec 33 §5 — the open stance-check telegraph, terse and always visible.
+    // Playtest 2026-09-04 — 8pt ash-on-dark was unreadable on a 390pt phone;
+    // 10pt with a bone neutral for the "neither" line.
     stanceCheck: { alignItems: 'flex-end', marginTop: 2, gap: 1 },
-    scPunish: { fontFamily: FONTS.mono, fontSize: 8, color: '#e2543b', letterSpacing: 0.2 },
-    scYield: { fontFamily: FONTS.mono, fontSize: 8, color: '#5bbf6a', letterSpacing: 0.2 },
-    scNone: { fontFamily: FONTS.mono, fontSize: 8, color: '#8a8273', letterSpacing: 0.2 },
-    scResolved: { fontFamily: FONTS.mono, fontSize: 8, letterSpacing: 0.3 },
+    scPunish: { fontFamily: FONTS.mono, fontSize: 10, color: '#e2543b', letterSpacing: 0.2 },
+    scYield: { fontFamily: FONTS.mono, fontSize: 10, color: '#5bbf6a', letterSpacing: 0.2 },
+    scNone: { fontFamily: FONTS.mono, fontSize: 10, color: AXM.bone, letterSpacing: 0.2 },
+    scResolved: { fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 0.3 },
     scLive: { textDecorationLine: 'underline' },
 }));

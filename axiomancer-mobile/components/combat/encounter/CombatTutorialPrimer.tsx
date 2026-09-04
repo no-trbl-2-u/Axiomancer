@@ -4,8 +4,8 @@
  * A short, swipe-through stack of full-screen panels shown ONCE before the
  * player's first hazard-pattern fight (and on demand from the dev menu). It sets
  * the core concepts and tone — pressure over health, the two win conditions, the
- * draft-then-power loop — then hands off to the live board, where the
- * `CombatTutorialCoach` guides turn one by doing.
+ * four-dice stage-then-power loop (spec 33) — then hands off to the live board,
+ * where the `CombatTutorialCoach` guides turn one by doing.
  *
  * Styled after `HazardIntroOverlay`, extended to paging. The parent owns the
  * completion dispatch: BEGIN fires `onBegin`, SKIP fires `onSkip`.
@@ -43,13 +43,13 @@ const PANELS: PrimerPanel[] = [
     },
     {
         eyebrow: 'DICE & CARDS',
-        title: 'DRAFT, THEN POWER',
+        title: 'STAGE, THEN POWER',
         body:
-            'Each turn you roll three dice — keep one; every unused die banks as ◆ tokens ' +
-            '(gold banks 2, a dead ✕ banks none). A die only powers cards of ITS color — gold ' +
-            'powers anything. Land a NEW status and your die REFRESHES — so you can chain ' +
-            'another. Drag a card up into the PLAY AREA to play it; tap one first to read its ' +
-            'keywords and full effect.',
+            'Each turn you roll FOUR dice — Red (BODY), Blue (MIND), Purple (HEART) and Gold ' +
+            '(WILD). A MANA face powers one card of its colour; Gold powers any colour; a ' +
+            'SPECIAL face powers a card AND grants 2◆ Conviction; a MISS is dead. Drag a card up ' +
+            'into the PLAY AREA, drop a matching die on it and APPLY — or APPLY with no die for ' +
+            'its weaker FREE line. Every usable die can power a card, so play several in one turn.',
     },
 ];
 

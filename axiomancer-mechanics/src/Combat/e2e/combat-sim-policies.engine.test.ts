@@ -232,10 +232,15 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // measurements of the current tree — a "the sim is reproducible" detector,
     // never a balance target. Nothing here grades the game against a shape;
     // re-measure them, do not tune the game to them.
+    //
+    // Re-measured 2026-09-04 (playtest fix): FREE-line plays now advance the
+    // card-played DoT clock like PAID plays always did, so the poison the
+    // greedy line stacks ticks on every play and the same seed closes in ONE
+    // round (plays/statusPlays unchanged).
     it('seed 11 vs LittleBelle: a status victory', () => {
         const r = runOneEncounter(loadout(MIX), LittleBelle, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 2, plays: 5, statusPlays: 3 });
+            .toEqual({ outcome: 'victory', rounds: 1, plays: 5, statusPlays: 3 });
         expect(r.cardUsage['spoiled-poultice']).toEqual({
             cardId: 'spoiled-poultice', plays: 1, bottomPlays: 1, topPlays: 0, statusLands: 1, discards: 0,
         });
@@ -272,10 +277,13 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // office deals real damage. These figures are a FIDELITY MEASUREMENT of a
     // deterministic sequence, never a target — re-measure them after any
     // tuning change rather than treating a move as a regression.
+    // Re-measured 2026-09-04 (free-line card-played clock, see the LittleBelle
+    // pin above): one fewer play (8→7, statusPlays 6→5) for the same
+    // two-round status victory.
     it('seed 11 vs KingOfRevenge: a status victory (Gate 0 law: one tray per phase)', () => {
         const r = runOneEncounter(loadout(MIX), KingOfRevenge, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 2, plays: 8, statusPlays: 6 });
+            .toEqual({ outcome: 'victory', rounds: 2, plays: 7, statusPlays: 5 });
         // Determinism, not balance: the same seed must reproduce the same
         // sequence byte-for-byte. (The exact figures above are a fidelity
         // measurement of the CURRENT library + engine and are expected to be

@@ -25,10 +25,11 @@
  * run reset is the host's concern.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import Svg, { Circle, Defs, Line, Polygon, RadialGradient, Stop } from 'react-native-svg';
+import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
     startTurn, endTurn, draftStanceDie, discardCombatCard, playSignatureSkill, crackGlyph,
@@ -40,7 +41,7 @@ import {
 
 import { CombatBoard, CombatCardFace, OutcomeText, HAND_CARD_W, HAND_CARD_H, type DragController, type DragPayload, type Rect } from '@/components/combat/encounter/CombatBoard';
 import { useDragInterruptRecovery } from '@/components/combat/encounter/useDragInterruptRecovery';
-import { type CombatFx } from '@/components/combat/encounter/CombatCombatantPane';
+import { COMBAT_HUD_HEIGHT, type CombatFx } from '@/components/combat/encounter/CombatCombatantPane';
 import { CombatDie, combatDieFootprint } from '@/components/combat/encounter/CombatDie';
 import { CombatSummaryModal } from '@/components/combat/encounter/CombatSummaryModal';
 import { CombatRewardsOverlay } from '@/components/combat/encounter/CombatRewardsOverlay';
@@ -50,7 +51,11 @@ import { CombatTutorialCoach } from '@/components/combat/encounter/CombatTutoria
 import { currentCombatTutorialStep } from '@/components/combat/encounter/combat-tutorial-steps';
 import { Image } from '@/lib/platform/image';
 import { getEncounterEnemyArt } from '@/assets/images/enemies';
-import { INTENT_ICONS, buildCombatViewModel, resolveApplyRouting, rewardCardVMs, selectEnemyActionCard, STANCE_COLORS, type CombatCardVM, type CombatEffectChipVM, type CombatSealVM, type CombatSignatureVM, type EnemyActionCardVM } from '@/state/presenters/combat-encounter.engine';
+import {
+    INTENT_ICONS, buildCombatViewModel, resolveApplyRouting, rewardCardVMs, selectEnemyActionCard, STANCE_COLORS,
+    selectCombatLogHistory, COMBAT_LOG_TOGGLE_TEXT, COMBAT_LOG_TOGGLE_A11Y, COMBAT_LOG_CLOSE_A11Y,
+    type CombatCardVM, type CombatEffectChipVM, type CombatSealVM, type CombatSignatureVM, type EnemyActionCardVM,
+} from '@/state/presenters/combat-encounter.engine';
 import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
 import { useGameState, useGameStore } from '@/state/GameStoreProvider';
 import {
@@ -401,6 +406,17 @@ export function CombatEncounterPanel({
     // state, no panel-owned wheel state or grant logic left here. ──
     const [momentumInfoOpen, setMomentumInfoOpen] = useState(false);
 
+    // Playtest fix 2026-09-04 — the persistent combat log. `topInset` mirrors
+    // CombatBoard's own null-safe read of the same context (no SafeAreaProvider
+    // in tests) so the toggle sits directly under the HUD without threading a
+    // prop through the board. The history is cheap (capped at 200 lines) and
+    // only walked off `live`, so recomputing every render is fine.
+    const insets = useContext(SafeAreaInsetsContext);
+    const topInset = insets?.top ?? 0;
+    const [logOpen, setLogOpen] = useState(false);
+    const logHistory = useMemo(() => selectCombatLogHistory(live), [live]);
+    const logScrollRef = useRef<ScrollView | null>(null);
+
     // ── screen-level drag controller (cards + dice) ──
     // dragX/dragY are written straight from the board's gesture worklets every
     // frame (see DragController.x/y) — the JS thread only sees begin and end.
@@ -662,10 +678,10 @@ export function CombatEncounterPanel({
     // Tutorial completes itself once the turn-one coach script is exhausted.
     useEffect(() => {
         if (tutorialActive && primerDone && vm && live.phase !== 'reveal'
-            && currentCombatTutorialStep(live, vm) === -1) {
+            && currentCombatTutorialStep(live, vm, { stagedCount: stagedUids.length }) === -1) {
             finishTutorial(false);
         }
-    }, [tutorialActive, primerDone, live, vm, finishTutorial]);
+    }, [tutorialActive, primerDone, live, vm, stagedUids.length, finishTutorial]);
 
     // Claim (or skip) — the action appends the card AND persists, so the pick
     // no longer waits on some unrelated save() to happen along.
@@ -696,6 +712,10 @@ export function CombatEncounterPanel({
     const capitulation = live.phase === 'mercy-choice' && !!live.capitulationChoiceActive && !live.finalOutcome;
     const mercy = live.phase === 'mercy-choice' && !live.capitulationChoiceActive && !live.finalOutcome;
     const showReveal = live.phase === 'reveal';
+    // Playtest fix 2026-09-04 — the log toggle/sheet never shows over the
+    // reveal (nothing has happened yet) or once the fight is over (the
+    // summary owns that screen).
+    const logAvailable = !showReveal && !live.finalOutcome;
 
     return (
         <View style={styles.root}>
@@ -742,6 +762,10 @@ export function CombatEncounterPanel({
                         <Text style={styles.revealHp}>♥ {vm.enemy.hp} / {vm.enemy.maxHp}</Text>
                         {vm.enemy.stanceHint ? <Text style={styles.revealTell}>“{vm.enemy.stanceHint}”</Text> : null}
                         <Text style={styles.revealSection}>THREAT SEQUENCE — they telegraph WHAT, not their stance</Text>
+                        {/* Playtest fix 2026-09-04 — no line clamp on the threat
+                            text: a multi-clause phase ("Deals 12. Applies BLEED 2.
+                            Gains HIDE 4.") was ellipsised mid-sentence on the one
+                            screen whose whole job is to telegraph it. */}
                         {live.threatPhases.map((p, i) => {
                             const meta = INTENT_ICONS[p.intentType ?? 'pass'];
                             return (
@@ -754,15 +778,15 @@ export function CombatEncounterPanel({
                                                outcomes before commit; the taken fork is marked after. */
                                             <View>
                                                 <Text style={styles.revealBranchCond}>⑂ {p.branch.conditionText}</Text>
-                                                <Text style={[styles.revealPhaseText, p.branch.taken === 'then' ? styles.revealBranchTaken : null]} numberOfLines={2}>
+                                                <Text style={[styles.revealPhaseText, p.branch.taken === 'then' ? styles.revealBranchTaken : null]}>
                                                     {p.branch.taken === 'then' ? '▶ ' : ''}then: {p.branch.then.threatAction.description}
                                                 </Text>
-                                                <Text style={[styles.revealPhaseText, p.branch.taken === 'else' ? styles.revealBranchTaken : null]} numberOfLines={2}>
+                                                <Text style={[styles.revealPhaseText, p.branch.taken === 'else' ? styles.revealBranchTaken : null]}>
                                                     {p.branch.taken === 'else' ? '▶ ' : ''}otherwise: {p.branch.else.threatAction.description}
                                                 </Text>
                                             </View>
                                         ) : (
-                                            <Text style={styles.revealPhaseText} numberOfLines={2}>{p.threatAction.description}</Text>
+                                            <Text style={styles.revealPhaseText}>{p.threatAction.description}</Text>
                                         )}
                                         {p.stanceHint ? <Text style={styles.revealPhaseTell}>🜲 stance hidden — {p.stanceHint}</Text> : null}
                                     </View>
@@ -788,6 +812,48 @@ export function CombatEncounterPanel({
                             </Pressable>
                         )}
                     </ScrollView>
+                </View>
+            )}
+
+            {/* Playtest fix 2026-09-04 — the persistent combat log. Every beat
+                used to be a floating token that vanished in ~1s; this toggle
+                opens a scrollable, newest-at-the-bottom history of the whole
+                fight. Pinned top-right, directly under the HUD (mirrors
+                CombatTutorialCoach's own `topInset + COMBAT_HUD_HEIGHT`
+                placement below the same HUD). */}
+            {logAvailable && (
+                <Pressable
+                    onPress={() => setLogOpen(true)}
+                    testID="combat-log-toggle"
+                    accessibilityRole="button"
+                    accessibilityLabel={COMBAT_LOG_TOGGLE_A11Y}
+                    style={[styles.logToggle, { top: topInset + COMBAT_HUD_HEIGHT + 8 }]}
+                >
+                    <Text style={styles.logToggleText}>{COMBAT_LOG_TOGGLE_TEXT}</Text>
+                </Pressable>
+            )}
+            {logAvailable && logOpen && (
+                <View style={styles.logSheet} testID="combat-log">
+                    <ScrollView
+                        ref={logScrollRef}
+                        style={styles.logScroll}
+                        contentContainerStyle={styles.logScrollContent}
+                        onContentSizeChange={() => logScrollRef.current?.scrollToEnd({ animated: false })}
+                    >
+                        {logHistory.map((entry) => (
+                            <Text key={entry.id} style={[styles.logLine, { color: entry.color }]}>{entry.text}</Text>
+                        ))}
+                    </ScrollView>
+                    <Pressable
+                        onPress={() => setLogOpen(false)}
+                        testID="combat-log-close"
+                        accessibilityRole="button"
+                        accessibilityLabel={COMBAT_LOG_CLOSE_A11Y}
+                        hitSlop={10}
+                        style={styles.logClose}
+                    >
+                        <Text style={styles.logCloseText}>✕</Text>
+                    </Pressable>
                 </View>
             )}
 
@@ -1000,7 +1066,7 @@ export function CombatEncounterPanel({
                             <Text style={styles.tipMeta}>
                                 {tipEffect.standing
                                     ? (tipEffect.duration > 0 ? `${tipEffect.duration} rounds left` : 'rest of combat')
-                                    : `intensity ${tipEffect.intensity}${tipEffect.isMax ? ' (MAX)' : ''} · ${tipEffect.duration} turns left`}
+                                    : `intensity ${tipEffect.intensity} · ${tipEffect.duration} turns left`}
                             </Text>
                             <View style={styles.tipBadgeWrap} pointerEvents="none">
                                 <Svg width={128} height={30} viewBox="0 0 128 30">
@@ -1221,7 +1287,7 @@ export function CombatEncounterPanel({
                 <CombatTutorialPrimer onBegin={() => setPrimerDone(true)} onSkip={() => finishTutorial(true)} />
             )}
             {tutorialActive && primerDone && !showReveal && !summary && !mercy && (
-                <CombatTutorialCoach state={live} vm={vm} onSkip={() => finishTutorial(true)} />
+                <CombatTutorialCoach state={live} vm={vm} stagedCount={stagedUids.length} onSkip={() => finishTutorial(true)} />
             )}
 
             {/* drag ghost — persistently mounted after the first drag; dragShown
@@ -1261,6 +1327,26 @@ export function CombatEncounterPanel({
 
 const useStyles = makeStyles((AXM) => ({
     root: { flex: 1, width: '100%', height: '100%' },
+    // Playtest fix 2026-09-04 — the persistent combat log toggle + sheet.
+    logToggle: {
+        position: 'absolute', right: 10, zIndex: 20,
+        borderWidth: 1.5, borderColor: AXM.sulfur, backgroundColor: 'rgba(10,8,6,0.82)',
+        paddingHorizontal: 12, paddingVertical: 6, borderRadius: 4,
+    },
+    logToggleText: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.6, color: AXM.sulfur },
+    logSheet: {
+        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 30,
+        backgroundColor: 'rgba(4,3,6,0.93)', paddingTop: 60, paddingHorizontal: 16, paddingBottom: 24,
+    },
+    logScroll: { flex: 1, borderWidth: 1, borderColor: AXM.ash, backgroundColor: AXM.panelBg },
+    logScrollContent: { padding: 12, gap: 4 },
+    logLine: { fontFamily: FONTS.mono, fontSize: 12, lineHeight: 17 },
+    logClose: {
+        alignSelf: 'center', marginTop: 14, width: 44, height: 44, borderRadius: 22,
+        borderWidth: 2, borderColor: AXM.sulfur, backgroundColor: AXM.panelBg,
+        alignItems: 'center', justifyContent: 'center',
+    },
+    logCloseText: { fontFamily: FONTS.sans, fontSize: 15, color: AXM.sulfur },
     backdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(4,3,6,0.93)', alignItems: 'center', justifyContent: 'center', padding: 20, zIndex: 50 },
     modal: { width: '100%', maxWidth: 380, borderWidth: 2, backgroundColor: AXM.panelBg, padding: 18, alignItems: 'center' },
     modalTitle: { fontFamily: FONTS.gothic, fontSize: 18, color: AXM.parchment, textAlign: 'center' },

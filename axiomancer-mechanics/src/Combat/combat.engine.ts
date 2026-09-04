@@ -1370,7 +1370,7 @@ export function effectiveHide(enemy: Enemy, staggeredThisRound: boolean): number
  * Multiplicative steps run before the flat armour subtraction so HIDE is a
  * genuine floor on small hits rather than a percentage tax on big ones.
  */
-export function scalePlayerHit(params: {
+export interface PlayerHitParams {
     base: number;
     readMult: number;
     colorMatch: boolean;
@@ -1380,16 +1380,34 @@ export function scalePlayerHit(params: {
     execute: boolean;
     hide: number;
     pierce: boolean;
-}): number {
-    if (params.base <= 0) return 0;
+}
+
+export function scalePlayerHit(params: PlayerHitParams): number {
+    return scalePlayerHitDetailed(params).dmg;
+}
+
+/**
+ * `scalePlayerHit` plus the receipt: how much of the hit HIDE actually soaked
+ * (bounded by the floor-1 rule, so it can be less than the printed N on a
+ * small hit). Callers emit it as an `enemy-keyword-fired` HIDE popup — the
+ * only enemy keyword that changed the arithmetic silently until the
+ * 2026-09-04 playtest (a 5-VITAE swing per hit with no on-screen witness).
+ */
+export function scalePlayerHitDetailed(params: PlayerHitParams): { dmg: number; hideSoaked: number } {
+    if (params.base <= 0) return { dmg: 0, hideSoaked: 0 };
     let dmg = Math.round(params.base * params.readMult);
     if (params.colorMatch) dmg += colorMatchBonus(dmg);
     dmg += params.wrath;
     dmg += params.chain;
     if (params.flay) dmg = Math.round(dmg * FLAY_DAMAGE_MULT);
     if (params.execute) dmg = Math.round(dmg * EXECUTE_DAMAGE_MULT);
-    if (!params.pierce && params.hide > 0) dmg = Math.max(1, dmg - params.hide);
-    return Math.max(0, dmg);
+    let hideSoaked = 0;
+    if (!params.pierce && params.hide > 0) {
+        const armoured = Math.max(1, dmg - params.hide);
+        hideSoaked = Math.max(0, dmg - armoured);
+        dmg = armoured;
+    }
+    return { dmg: Math.max(0, dmg), hideSoaked };
 }
 
 /**
@@ -1719,8 +1737,15 @@ function applyRiderToState(
     let chain = next.chain ?? 0;
     let chainFedThisTurn = next.chainFedThisTurn ?? false;
     let flayStacks = next.flay ?? 0;
+    // Attribution ledger (playtest fix 2026-09-04): the FREE line never
+    // recorded provenance, so every free-line DoT tick and free-line hit fell
+    // into the "Lingering afflictions" bucket and the defeat screen named the
+    // bucket as the best card. Same `recordAttribution` calls as the PAID path.
+    let attribution = next.attribution;
+    const cardName = lookupCard(cardId)?.name ?? cardId;
     if (r.damage) {
-        const dmg = scalePlayerHit({
+        const hideBefore = effectiveHide(enemy, (next.staggerRungs ?? 0) > 0);
+        const hit0 = scalePlayerHitDetailed({
             base: r.damage,
             readMult: 1,
             colorMatch: false,
@@ -1728,16 +1753,22 @@ function applyRiderToState(
             chain,
             flay: flayStacks > 0,
             execute: false,
-            hide: effectiveHide(enemy, (next.staggerRungs ?? 0) > 0),
+            hide: hideBefore,
             pierce: r.pierce === true,
         });
+        const dmg = hit0.dmg;
+        if (hit0.hideSoaked > 0) {
+            events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'HIDE', amount: hit0.hideSoaked });
+        }
         if (chain > 0) chain = 0;
         if (flayStacks > 0) flayStacks -= 1;
         if (dmg > 0) {
+            const hpBefore = enemy.health;
             const hit = applyEnemyDamage(enemy, dmg, next.round, events);
             enemy = hit.enemy;
             directDamage += dmg + hit.clockDamage;
             washedOutHere.push(...hit.washedOut);
+            attribution = recordAttribution(attribution, cardId, cardName, null, dmg, hpBefore);
             events.push({ kind: 'damage-dealt', cardId, target: 'enemy', amount: dmg });
         }
     }
@@ -1855,9 +1886,11 @@ function applyRiderToState(
         if (consumed.stacks > 0) {
             enemy = consumed.combatant;
             const burst = Math.min(ruptureBurstCap(enemy.maxHealth), r.ruptureMarks * consumed.stacks);
+            const hpBefore = enemy.health;
             const hit = applyEnemyDamage(enemy, burst, next.round, events);
             enemy = hit.enemy;
             directDamage += burst + hit.clockDamage;
+            attribution = recordAttribution(attribution, cardId, cardName, null, burst, hpBefore);
             events.push({ kind: 'damage-dealt', cardId, target: 'enemy', amount: burst });
         }
     }
@@ -1875,12 +1908,17 @@ function applyRiderToState(
             });
             if (toSelf) player = { ...player, effects: applied.activeEffects };
             else enemy = { ...enemy, effects: applied.activeEffects };
-            if (applied.result.activeEffect) {
+            const active = applied.result.activeEffect;
+            if (active) {
                 events.push({
                     kind: 'effect-landed', cardId, effectId: def.id, target: toSelf ? 'self' : 'enemy',
                     effectKind: def.payload.damageOverTime ? 'dot' : 'control',
-                    intensity: applied.result.activeEffect.intensity, effect: def,
+                    intensity: active.intensity, effect: def,
                 });
+                if (!toSelf) {
+                    const landed: LandedEffect = { effectId: def.id, effect: def, active, target: 'enemy' };
+                    attribution = recordAttribution(attribution, cardId, cardName, landed, 0, enemy.health);
+                }
             }
         }
     }
@@ -1898,7 +1936,7 @@ function applyRiderToState(
         events.push({ kind: 'soul-gained', amount: washSouls, total: souls, reason: 'expiry' });
     }
     next = {
-        ...next, player, enemy, directDamageDealt: directDamage, conviction, guard, barrier, souls, akrasiaDebt,
+        ...next, player, enemy, directDamageDealt: directDamage, conviction, guard, barrier, souls, akrasiaDebt, attribution,
         // THE BIG NUMBERS REWRITE — the damage-scaler ledgers this rider fed
         // or spent (a FREE line can both land a hit and bank WRATH).
         wrath, chain, chainFedThisTurn, flay: flayStacks,
@@ -2023,6 +2061,45 @@ function playFreeEnchant(
 }
 
 /**
+ * WS3.2 'card-played' clock on the FREE line (playtest fix 2026-09-04).
+ *
+ * The clock is "once per PLAYER-side spell play", but only `playBottomAction`
+ * ever fired it — a deck that leaned on FREE lines (the doctrine's own
+ * "every card has a FREE line") watched POISON sit at 3 stacks for a whole
+ * fight while the projection billed `EXPECTED_TRIGGERS_PER_ROUND` ticks for
+ * it. Same rules as the PAID site: the pre-play intensity map caps
+ * eligibility (fresh stacks never self-tick), enemy-borne washouts earn
+ * expiry Souls, player-borne ones do not. Enchant/disenchant plays (either
+ * face) stay off the clock, matching their PAID route.
+ */
+function fireFreePlayClock(
+    state: CombatEncounterState,
+    enemyPrePlay: Record<string, number>,
+    playerPrePlay: Record<string, number>,
+    events: CombatEvent[],
+): CombatEncounterState {
+    let next = state;
+    const clock = fireDotTrigger(next.enemy, 'card-played', next.round,
+        ae => Math.min(ae.intensity ?? 1, enemyPrePlay[ae.effectId] ?? 0));
+    if (clock.damage > 0) {
+        for (const t of clock.perEffect) {
+            events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'enemy' });
+        }
+        next = { ...next, enemy: clock.target, directDamageDealt: next.directDamageDealt + clock.damage };
+    }
+    next = gainSouls(next, soulWorthyWashouts(clock.washedOut), 'expiry', events);
+    const selfClock = fireDotTrigger(next.player, 'card-played', next.round,
+        ae => Math.min(ae.intensity ?? 1, playerPrePlay[ae.effectId] ?? 0));
+    if (selfClock.damage > 0) {
+        for (const t of selfClock.perEffect) {
+            events.push({ kind: 'dot-tick', effectId: t.effectId, label: t.label, amount: t.amount, target: 'self' });
+        }
+        next = { ...next, player: selfClock.target };
+    }
+    return next;
+}
+
+/**
  * Spec 32 v3 §2.2 — the FREE (top) action executes the card's AUTHORED free
  * rider: dieless, small, always available. There is no chip, no auto-derived
  * weak effect — what is printed is what fires.
@@ -2052,9 +2129,16 @@ function playTopAction(
     // WS2.1: a conjured Haunt is one-use on EITHER face — a FREE play
     // removes it from the combat instead of feeding the discard cycle.
     let next = removePlayedEntry(state, uid);
+    // WS3.3 pre-play stack snapshot: only stacks that existed BEFORE this
+    // play are on the 'card-played' clock (a FREE line's own fresh POISON
+    // never ticks itself). Taken before the rider so a free-line apply is
+    // "fresh" exactly as a PAID apply is.
+    const enemyPrePlay = intensityMap(state.enemy.effects);
+    const playerPrePlay = intensityMap(state.player.effects);
     if (sourceCard?.free) {
         next = applyRiderToState(next, card.id, sourceCard.free, events, rng);
     }
+    next = fireFreePlayClock(next, enemyPrePlay, playerPrePlay, events);
     if (next.finalOutcome === 'concede') {
         return endCombat({ ...withLog(next, events), phase: 'phase-play', finalOutcome: null }, 'concede', events);
     }
@@ -2559,7 +2643,7 @@ function playBottomAction(
      */
     const landHit = (base: number, pierce: boolean, label: string): number => {
         const healthBefore = enemy.health;
-        const dmg = scalePlayerHit({
+        const scaled = scalePlayerHitDetailed({
             base,
             readMult: mult,
             colorMatch,
@@ -2570,6 +2654,10 @@ function playBottomAction(
             hide: effectiveHide(enemy, staggeredThisRound),
             pierce,
         });
+        const dmg = scaled.dmg;
+        if (scaled.hideSoaked > 0) {
+            events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'HIDE', amount: scaled.hideSoaked });
+        }
         if (chain > 0) { chain = 0; }
         if (flayStacks > 0) { flayStacks -= 1; }
         if (dmg <= 0) return 0;
@@ -3401,7 +3489,7 @@ function playBottomAction(
         // a pip overflow, 20 cards in all — showed the player a figure the
         // engine never applied. Caught 2026-09-02 by the effectiveness pass.
         if (r.damage) {
-            const dmg = scalePlayerHit({
+            const scaled = scalePlayerHitDetailed({
                 base: r.damage,
                 readMult: mult,
                 colorMatch,
@@ -3411,6 +3499,10 @@ function playBottomAction(
                 hide: effectiveHide(enemy, staggeredThisRound),
                 pierce: r.pierce === true,
             });
+            const dmg = scaled.dmg;
+            if (scaled.hideSoaked > 0) {
+                events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'HIDE', amount: scaled.hideSoaked });
+            }
             if (chain > 0) chain = 0;
             if (flayStacks > 0) flayStacks -= 1;
             if (dmg > 0) {
@@ -4230,8 +4322,11 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                     enemyDamageDealt += dmg;
                     // RAVENOUS: it heals for what it lands on you.
                     if (foeRavenous) {
+                        const hpBefore = enemy.health;
                         enemy = heal(enemy, dmg);
-                        events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'RAVENOUS', amount: dmg });
+                        const healed = enemy.health - hpBefore;
+                        events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'RAVENOUS', amount: healed });
+                        if (healed > 0) events.push({ kind: 'enemy-healed', enemyId: enemy.id, source: 'RAVENOUS', amount: healed });
                     }
                     // VENOM: contact poisons. Routed through the same
                     // `applyEffect` path as an authored threat rider, so the
@@ -4343,7 +4438,10 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                     });
                 }
                 if (healAmt > 0) {
+                    const hpBefore = enemy.health;
                     enemy = decayDotsOnHeal(heal(enemy, healAmt)).combatant;
+                    const healed = enemy.health - hpBefore;
+                    if (healed > 0) events.push({ kind: 'enemy-healed', enemyId: enemy.id, source: 'THREAT', amount: healed });
                 }
             }
             if (eff.enemyCleanse && eff.enemyCleanse > 0 && !doubtId) {
@@ -4829,8 +4927,11 @@ export function processBetweenPhases(
     // pool (a foe that heals back over the line does not trip its stage).
     const regrow = findEnemyKeyword(enemy.keywords, 'regrow')?.n ?? 0;
     if (regrow > 0 && !isDefeated(enemy)) {
+        const hpBefore = enemy.health;
         enemy = heal(enemy, regrow);
-        events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'REGROW', amount: regrow });
+        const healed = enemy.health - hpBefore;
+        events.push({ kind: 'enemy-keyword-fired', enemyId: enemy.id, keyword: 'REGROW', amount: healed });
+        if (healed > 0) events.push({ kind: 'enemy-healed', enemyId: enemy.id, source: 'REGROW', amount: healed });
     }
     // STAGES: the moment a fight becomes a different fight. Each stage fires at
     // most once; `stagesEntered` is the per-combat ledger. Authored order wins
@@ -4867,7 +4968,14 @@ export function processBetweenPhases(
                 const amount = typeof pending.heal === 'number'
                     ? pending.heal
                     : Math.round(pending.heal.pct * enemy.maxHealth);
-                if (amount > 0) enemy = heal(enemy, amount);
+                if (amount > 0) {
+                    const hpBefore = enemy.health;
+                    enemy = heal(enemy, amount);
+                    const healed = enemy.health - hpBefore;
+                    // The stage's heal was invisible: no event, so the bar
+                    // jumped and the ledger's "HP lost" silently understated.
+                    if (healed > 0) events.push({ kind: 'enemy-healed', enemyId: enemy.id, source: 'STAGE', amount: healed });
+                }
             }
             if (pending.threatBonus) stageThreatBonus += pending.threatBonus;
             if (pending.curseCardId && getCard(pending.curseCardId)) {
@@ -5851,11 +5959,33 @@ export interface CombatOutcomeProjection {
     roundsToKill: number | null;
     isLethalInFlight: boolean;
     finishers: FinisherProjection[];
+    /** The VITAE the foe is expected to recover per round boundary (REGROW's
+     *  printed floor plus a RAVENOUS foe's projected drain off the current
+     *  telegraph). `roundsToKill` is already netted against it; surfaced so
+     *  the meter can say WHY the stack is not lethal. */
+    healPerRound: number;
+}
+
+/**
+ * Playtest fix 2026-09-04 — the projection used to be blind to healing: a
+ * RAVENOUS Brine Hag read "LETHAL IN 3" every round while its bar climbed.
+ * REGROW is the printed number; RAVENOUS is estimated as what the CURRENT
+ * telegraph would net through the player's live GUARD/BARRIER (the same
+ * figure the intent icon shows), which is exactly what it will heal for if
+ * nothing changes. A projection, not a promise: guarding harder shrinks it.
+ */
+export function projectEnemyHealPerRound(state: CombatEncounterState): number {
+    const regrow = findEnemyKeyword(state.enemy.keywords, 'regrow')?.n ?? 0;
+    const ravenous = hasEnemyKeyword(state.enemy.keywords, 'ravenous')
+        ? projectIncomingThreat(state).netDamage
+        : 0;
+    return regrow + ravenous;
 }
 
 export function projectCombatOutcome(state: CombatEncounterState): CombatOutcomeProjection {
     const pendingDot = getPendingDotTotal(state.enemy, state.round).total;
-    const roundsToKill = computeRoundsToKill(state.enemy, state.round);
+    const healPerRound = projectEnemyHealPerRound(state);
+    const roundsToKill = computeRoundsToKill(state.enemy, state.round, healPerRound);
     const finishers: FinisherProjection[] = [];
     for (const { uid, card } of handCards(state)) {
         const sourceCard = lookupCard(card.id);
@@ -5871,7 +6001,7 @@ export function projectCombatOutcome(state: CombatEncounterState): CombatOutcome
             finishers.push({ uid, cardId: card.id, mechanic: 'reap', ready, amount });
         }
     }
-    return { pendingDot, roundsToKill, isLethalInFlight: roundsToKill !== null, finishers };
+    return { pendingDot, roundsToKill, isLethalInFlight: roundsToKill !== null, finishers, healPerRound };
 }
 
 /** Re-export for presenters that need to check die affordability directly. */
