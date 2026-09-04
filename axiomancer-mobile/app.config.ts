@@ -17,6 +17,14 @@ import appJson from './app.json';
 const buildProfile = process.env.EAS_BUILD_PROFILE ?? process.env.BUILD_PROFILE;
 const devToolsEnabled = buildProfile != null ? buildProfile !== 'production' : undefined;
 
+// Sentry's DSN is PUBLIC by design — it ships inside every client binary and
+// only permits event ingest, so it is committed rather than injected. The
+// build-time SENTRY_AUTH_TOKEN (sourcemap upload) is the secret, and lives in
+// EAS secrets. `EXPO_PUBLIC_SENTRY_DSN` overrides for a fork or a throwaway
+// project; setting it empty disables reporting outright.
+const SENTRY_DSN = process.env.EXPO_PUBLIC_SENTRY_DSN
+  ?? 'https://4abbfcd3e2a87c1798c13bacdf2f7a05@o4512025187123200.ingest.us.sentry.io/4512025202458624';
+
 const expo = appJson.expo as ExpoConfig;
 
 export default (): ExpoConfig => ({
@@ -29,5 +37,6 @@ export default (): ExpoConfig => ({
     // in `isDevToolsEnabled()`.
     ...(devToolsEnabled !== undefined ? { devToolsEnabled } : {}),
     ...(buildProfile ? { buildProfile } : {}),
+    ...(SENTRY_DSN ? { sentryDsn: SENTRY_DSN } : {}),
   },
 });

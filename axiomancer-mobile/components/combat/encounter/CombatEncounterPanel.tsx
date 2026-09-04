@@ -575,11 +575,28 @@ export function CombatEncounterPanel({
             // `resolveThreatPhase`, whose boundary just WIPES the tray — the
             // sim path (`ensureDraftForCard`) always ran `endTurn`, so mobile
             // silently lost the banked die the engine's R2 promises.
+            // END-TURN BREADCRUMBS. The owner's repeat crash report is "the
+            // app closes when I end my turn", and it is a NATIVE process
+            // death (EAS preview APK) that no web harness reproduces — so
+            // nothing survives it except what was already logged. These four
+            // lines ride into Sentry as breadcrumbs (lib/monitoring.ts) and
+            // into the on-device crash tail, so the LAST one recorded names
+            // the step that died. Cheap: four entries per turn, not a hot loop.
+            const log = getLogger();
+            log.info('combat', 'end-phase:begin', {
+                turn: s.turn, round: s.round, phaseIndex: s.currentPhaseIndex,
+                dice: s.dice.length, reserve: (s.reserve ?? []).length, hand: s.hand.length,
+            });
             const ended = endTurn(s);
+            log.info('combat', 'end-phase:turn-closed', { banked: (ended.state.reserve ?? []).length });
             const t = resolveThreatPhase(ended.state);
+            log.info('combat', 'end-phase:threat-resolved', {
+                phase: t.state.phase, outcome: t.state.finalOutcome ?? null, events: t.events.length,
+            });
             fxRef.current = [...ended.events, ...t.events];
             let ns = t.state;
             if (ns.phase === 'phase-play' && ns.dice.length === 0) ns = startTurn(ns).state;
+            log.info('combat', 'end-phase:tray-rolled', { turn: ns.turn, dice: ns.dice.length });
             return ns;
         });
         setFxSeq((n) => n + 1);

@@ -32,6 +32,7 @@ import { ToastHost } from '@/components/ToastHost';
 import { applyCombatFlagsFromEnv } from '@/state/combat/flags';
 import { getLogger } from '@mechanics';
 import { initAppLogging } from '@/state/logging';
+import { attachCrashBreadcrumbs, initCrashReporting, withCrashReporting } from '@/lib/monitoring';
 import IndexScreen from './index';
 import TabLayout from './(tabs)/_layout';
 import EventScreen from './event/index';
@@ -67,9 +68,18 @@ SplashScreen.preventAutoHideAsync();
 // Applied at module load, before any store/provider touches the engine.
 applyCombatFlagsFromEnv();
 
+// Crash reporting (lib/monitoring.ts) — FIRST, so a crash during the boot
+// below is still reported. Native-only and DSN-gated; a no-op on web.
+initCrashReporting();
+
 // AXM Log (docs/logging.md) — enable the structured logger before any
 // store/provider touches the engine so boot-time events are captured.
 initAppLogging();
+
+// …then hang Sentry's breadcrumb sink off the logger `initAppLogging` just
+// configured (it replaces the logger, so this cannot run any earlier). Every
+// structured line from here on becomes a breadcrumb attached to a crash.
+attachCrashBreadcrumbs();
 
 // Single app-wide persistence adapter. Created once at module load; the
 // `preload()` call below populates its in-memory cache from AsyncStorage
@@ -77,7 +87,7 @@ initAppLogging();
 // the provider's `adapter` / `store` props.
 const persistenceAdapter = createAsyncStorageAdapter();
 
-export default function RootLayout() {
+function RootLayout() {
   // Load core fonts only - reduces initial font bundle by ~40%
   const [fontsLoaded] = useFonts({
     PirataOne_400Regular,
@@ -302,3 +312,7 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+// Wrapped so Sentry sees render errors and the native lifecycle. A plain
+// passthrough when reporting never started (web, or no DSN configured).
+export default withCrashReporting(RootLayout);

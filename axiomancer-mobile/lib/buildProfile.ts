@@ -1,6 +1,6 @@
 import Constants from '@/lib/platform/constants';
 
-type Extra = { devToolsEnabled?: boolean; buildProfile?: string | null };
+type Extra = { devToolsEnabled?: boolean; buildProfile?: string | null; sentryDsn?: string | null };
 
 // `extra.devToolsEnabled` is set by `app.config.ts` from
 // `EAS_BUILD_PROFILE` (or `BUILD_PROFILE` for non-EAS web deploys):
@@ -29,4 +29,15 @@ export function isDevToolsEnabled(): boolean {
 export function getBuildProfile(): string | null {
   const extra = Constants.expoConfig?.extra as Extra | undefined;
   return extra?.buildProfile ?? null;
+}
+
+// The Sentry DSN, baked into `extra` by `app.config.ts`. Public by design —
+// a DSN is embedded in every shipped client and only permits event ingest —
+// so it is committed, unlike the build-time SENTRY_AUTH_TOKEN. Null in a
+// static web export (see the note above: `extra` is not resolvable there),
+// which is correct: crash reporting is native-only (`lib/monitoring.ts`).
+export function getSentryDsn(): string | null {
+  const extra = Constants.expoConfig?.extra as Extra | undefined;
+  const dsn = extra?.sentryDsn;
+  return typeof dsn === 'string' && dsn.length > 0 ? dsn : null;
 }
