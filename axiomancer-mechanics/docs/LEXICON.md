@@ -61,7 +61,7 @@
 - **Exempt by zone** (dated records, allowed to speak in period terms):
   `CHANGELOG.md`, `RELEASES.md`, `braindump/`, `devlog/`, `plan/`
   (except `bearings.md`), `docs/reports/`, `docs/adr/`, `automation/`,
-  `specs/`, and the synced `kb/`.
+  and `specs/`.
 - **Exempt by banner:** a file whose head carries
   `**Status:** HISTORICAL` is a point-in-time record — stamp dated
   audits/handoffs with it instead of rewriting them.

@@ -66,30 +66,27 @@ When the question involves genre prior art or player reception — "do
 players actually like mechanics shaped like this?" — consult the OKF
 knowledge base before answering from memory.
 
-**Fast path — the `kb-query` MCP tools.** When the
-`mcp__kb-query__*` tools are available in your session, use them
-instead of manual sync+grep: `kb_overview` for the corpus map,
-`kb_find_games` to filter by mechanics slug or better-if label,
-`kb_search` to locate claims, `kb_read_doc` to read a doc. They resolve
-over HTTP against the KB's deployed Worker — same docs, same `src-NNN`
-ids, so citations come out identical to a grep of `kb/`, except the
-tools are current and a local `kb/` may be months old. If the tools
-are absent, error with "corpus not found", or are permission-blocked
-(known gap: MCP grants don't always propagate into sub-agent
-contexts), fall back to the manual path below — it is always
-sufficient.
+**The only path — the `kb-query` MCP tools.** `kb_overview` for the
+corpus map, `kb_find_games` to filter by mechanics slug or better-if
+label, `kb_search` to locate claims, `kb_read_doc` to read a doc. They
+resolve over HTTP against the KB's deployed Worker, so they serve the
+corpus as of the KB repo's last deploy. There is no local copy of the
+corpus in this repo and no grep fallback.
 
-1. `node scripts/kb-sync.mjs` (clones/refreshes `kb/`, gitignored) —
-   needed only for this grep fallback, never for the `kb_*` tools.
-2. Grep `kb/KnowledgeBase/BoardGames/` for the mechanic / problem shape.
-   Frontmatter first (`type:`, `confidence:`, `status:`), then the
-   matching doc bodies — they are small; read the two best, not all.
-3. Cite hits as `kb:<game-slug>/<doc> (src-NNN)` in your analysis, with
+1. Work metadata-first: `kb_find_games` / `kb_search` over frontmatter
+   (`type:`, `confidence:`, `status:`) and generated indexes, then
+   `kb_read_doc` on the two best hits — not all of them.
+2. Cite hits as `kb:<game-slug>/<doc> (src-NNN)` in your analysis, with
    the claim's stated confidence. KB reception evidence outranks your
    remembered reception; remembered reception must be labeled as such.
-4. On a miss you wish existed:
-   `node scripts/kb-sync.mjs wish "<game/mechanic> — <why>"`
-   (best-effort; never block the analysis on it).
+3. If the tools are absent, error, or are permission-blocked (known gap:
+   MCP grants don't always propagate into sub-agent contexts), say so
+   plainly — prior-art grounding is unavailable for this analysis, and
+   anything you then answer from memory is labeled UNGROUNDED. Do not
+   imply a local corpus exists.
+4. On a miss you wish existed, file it (best-effort; never block the
+   analysis on it):
+   `gh issue create --repo no-trbl-2-u/game-knowledge-base --label wishlist --title "<game/mechanic>" --body "<why>"`
 
 ## Hard rules
 

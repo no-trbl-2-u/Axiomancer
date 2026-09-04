@@ -50,7 +50,7 @@ export function loadRegistry(registryPath = REGISTRY_PATH) {
 
 // Dated-record zones — path fragments (forward-slash, repo-relative).
 const ZONE_DIRS = [
-  'node_modules/', '.git/', 'kb/', 'tmp-images/', '.claude/worktrees/',
+  'node_modules/', '.git/', 'tmp-images/', '.claude/worktrees/',
   'devlog/', 'braindump/', 'docs/reports/', 'docs/adr/', 'automation/', 'specs/',
 ]
 const ZONE_BASENAMES = ['CHANGELOG.md', 'RELEASES.md', 'lexicon.json', 'TELEMETRY.md']

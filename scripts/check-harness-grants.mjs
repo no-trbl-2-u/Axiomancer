@@ -115,23 +115,21 @@ export function check() {
       findings.push(`.mcp.json server "${name}" has no script argument`)
       continue
     }
-    // Local surface: a missing target is not automatically a failure.
-    // `kb-query` points into `kb/`, a gitignored corpus that
-    // `scripts/kb-sync.mjs` fetches — legitimately absent from a fresh clone
-    // and present on a synced workstation, which is what the LOCAL grant is for.
+    // Local surface: a missing target is a note, not a failure — a stdio
+    // server's script can legitimately be generated or unbuilt in this
+    // checkout while the LOCAL grant still makes sense on a workstation
+    // where it is present.
     if (!exists(def.target)) {
-      notes.push(
-        `"${name}" -> ${def.target} absent from this checkout; run scripts/kb-sync.mjs `
-          + `to materialize it (synced corpus)`,
-      )
+      notes.push(`"${name}" -> ${def.target} absent from this checkout`)
     }
     // CI surface: a checkout contains only TRACKED files, so local presence
-    // proves nothing about CI — a synced workstation hid this check entirely
-    // until 2026-09-01, when the main-guard fix below made it actually run on
-    // Windows and the blind spot surfaced. A CI grant for a stdio server whose
-    // target is untracked promises the run a tool that can never start; that
-    // is the failure this check exists for. (Remote HTTP servers — kb-query
-    // since 2026-08-31 — have no local target and are skipped as external.)
+    // proves nothing about CI — a workstation with untracked local files hid
+    // this check entirely until 2026-09-01, when the main-guard fix below made
+    // it actually run on Windows and the blind spot surfaced. A CI grant for a
+    // stdio server whose target is untracked promises the run a tool that can
+    // never start; that is the failure this check exists for. (Remote HTTP
+    // servers — kb-query since 2026-08-31 — have no local target at all and
+    // are skipped above as external.)
     const ciTools = [...ci].filter((t) => t.startsWith(`mcp__${name}__`))
     if (ciTools.length && !isTracked(def.target)) {
       findings.push(

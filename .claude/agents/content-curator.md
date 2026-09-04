@@ -84,11 +84,12 @@ rules/state/RNG in a presenter.
 
 ## Prior art
 
-Consult the KB (`mcp__kb-query__*`, served live over HTTP; or a local
-`kb/` grep via `node scripts/kb-sync.mjs` as fallback) for narrative prior art — Disco Elysium,
-Pathologic 2, Undertale, Hades patterns live in the board-game and
-reception corpora; cite `kb:<slug>/<doc> (src-NNN)`, label memory as
-`(memory)`. The specs pipeline (`axiomancer-mechanics/specs/story/`,
+Consult the KB (`mcp__kb-query__*`, served live over HTTP — the only
+route to the corpus; there is no local copy to grep) for narrative prior
+art — Disco Elysium, Pathologic 2, Undertale, Hades patterns live in the
+board-game and reception corpora; cite `kb:<slug>/<doc> (src-NNN)`,
+label memory as `(memory)`. If the tools are unreachable, say the corpus
+is unavailable rather than substituting recollection for a receipt. The specs pipeline (`axiomancer-mechanics/specs/story/`,
 `characters/`, `world/` + their templates) is upstream of you: when a
 spec exists for the entity you're writing, it outranks your invention;
 when none exists and the work is spec-sized, draft one in the template

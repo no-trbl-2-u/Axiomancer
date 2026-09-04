@@ -48,8 +48,11 @@ Use when:
    `kb:<game-slug>/<doc> (src-NNN)`). A "Decisions made upfront"
    row backed by a reception receipt or an engine-fact query is
    the brief doing its job; one argued from model memory is a
-   guess wearing a lock. Accelerator, not dependency — grep
-   `kb/` and the libraries when the tools are absent.
+   guess wearing a lock. `axio-query` is an accelerator, not a
+   dependency — grep the libraries when it is absent. `kb-query`
+   is the only route to the external corpus: when it is absent,
+   say the prior art is UNGROUNDED rather than sourcing it from
+   memory unlabeled.
 
 ## 4. The brief format (`plan/phases/phase_<N>_<topic>.md`)
 

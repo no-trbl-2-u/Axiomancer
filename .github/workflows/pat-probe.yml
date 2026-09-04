@@ -1,10 +1,10 @@
 name: pat-probe
 
 # Dispatchable diagnostic: verifies the GH_PAT secret can read/write both
-# Axiomancer and game-knowledge-base (the KB that scripts/kb-sync.mjs
-# pushes wishlist entries to from CI). Non-destructive: pushes a probe
-# ref to the KB repo and deletes it. Run it from the Actions tab whenever
-# the token is rotated or a workflow hits a 403.
+# Axiomancer and game-knowledge-base (the KB repo that wishlist issues are
+# filed against from CI). Non-destructive: pushes a probe ref to the KB
+# repo and deletes it. Run it from the Actions tab whenever the token is
+# rotated or a workflow hits a 403.
 
 on:
   workflow_dispatch:

@@ -95,15 +95,17 @@ Stop asking when the user signals enough; don't grind.
 When the question is about gating, quest-arc pacing, or what a
 relationship/campaign unlocks over multiple sessions, that shape
 overlaps board-game corpus mechanics (`campaign-game`, `legacy-game`)
-and better-if labels (`campaign-progression`, `onboarding`). When the
-`mcp__kb-query__*` tools are available, use `kb_find_games` /
-`kb_search` / `kb_read_doc` to pull reception evidence; otherwise run
-`node scripts/kb-sync.mjs` and grep `kb/KnowledgeBase/BoardGames/`
-directly. Cite hits as `kb:<game-slug>/<doc> (src-NNN)`. This is a
-structural accelerator only — it has nothing to say about voice or
-dialogue craft; skip straight to references.md for those questions.
-File a gap with `node scripts/kb-sync.mjs wish "..."` if the corpus
-misses a shape you wanted.
+and better-if labels (`campaign-progression`, `onboarding`). Use
+`kb_find_games` / `kb_search` / `kb_read_doc` to pull reception
+evidence — the `mcp__kb-query__*` tools are the only route to the
+corpus; there is no local copy to grep, so if they are unreachable, say
+so and mark anything offered from memory as UNGROUNDED. Cite hits as
+`kb:<game-slug>/<doc> (src-NNN)`. This is a structural accelerator
+only — it has nothing to say about voice or dialogue craft; skip
+straight to references.md for those questions. File a gap with
+`gh issue create --repo no-trbl-2-u/game-knowledge-base --label wishlist
+--title "<shape>" --body "<why>"` if the corpus misses a shape you
+wanted.
 
 Then pull from [story-references.md](story-references.md). Always cite
 **game name + specific mechanic or design pattern**, not "Undertale does

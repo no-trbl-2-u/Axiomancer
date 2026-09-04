@@ -148,16 +148,17 @@ Game content vs. when the plan was written:
 ### I. Knowledge-base reception evidence
 
 The KB corpus, via the `kb-query` MCP tools (`kb_find_games`
-filtered by better-if label, `kb_search`) or grep on a
-kb-sync'd `kb/` snapshot — see AGENTS.md § Truth sources. Shape:
+filtered by better-if label, `kb_search`) — the only route to it; no
+local snapshot exists. See AGENTS.md § Truth sources. Shape:
 - A reception complaint recurring across 3+ corpus games (e.g.
   runaway-leader, onboarding friction, dead turns) that
   Axiomancer's shipped systems plausibly share → propose a phase
   that addresses it before players file it themselves. Cite the
   `kb:<game-slug>/<doc> (src-NNN)` receipts as the signal.
-- A `kb/WISHLIST.md` gap the loop filed that the KB's scout has
-  since answered with coverage → the design work it was filed
-  for may now be unblocked; re-propose it.
+- A wishlist gap the loop filed (a `wishlist`-labeled issue on
+  `no-trbl-2-u/game-knowledge-base`) that the KB's scout has since
+  answered with coverage → the design work it was filed for may now
+  be unblocked; re-propose it.
 
 ## 5. Scoring candidates
 

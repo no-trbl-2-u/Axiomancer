@@ -6,7 +6,6 @@ Axiomancer's game runtime and source live in this monorepo. The systems below si
 flowchart LR
   A[Axiomancer monorepo]
   KB[game-knowledge-base repo]
-  KBL[kb/ shallow materialization]
   MCP[kb-query MCP]
   AX[axio-query MCP]
   SS[SomberSoft-Memory doctrine]
@@ -17,8 +16,6 @@ flowchart LR
   R2[Private Cloudflare R2 vault]
 
   KB -->|deploy| MCP
-  KB -->|kb-sync fallback| KBL
-  KBL -->|grep/read| A
   MCP -->|cited prior art| A
   A -->|live generated catalog| AX
   SS -->|company law and CDRs| A
@@ -33,22 +30,22 @@ flowchart LR
 
 ### Game knowledge base
 
-- **Owner / location:** `no-trbl-2-u/game-knowledge-base`; canonical local sibling checkout: `/root/Workspace/SomberSoft/game-knowledge-base`.
+- **Owner / location:** `no-trbl-2-u/game-knowledge-base`. That repo has its own canonical sibling checkout at `/root/Workspace/SomberSoft/game-knowledge-base` — that is where the corpus is *authored and maintained*, not a read path for Axiomancer. Axiomancer never reads the corpus off local disk.
 - **Purpose:** source-backed board-game rules, reception research, reusable patterns, and the Dawncaster card/keyword corpus. It supplies external prior art; it does not own Axiomancer rules.
-- **Materialization:** not required for reads — the `kb-query` MCP server is remote (below). `node scripts/kb-sync.mjs` shallow-clones or hard-refreshes `origin/main` into this repo's gitignored `kb/` directory for the grep fallback and for the wishlist write path. `KB_REPO` and `KB_DIR` may override the defaults.
-- **Direct data flow:** agents grep generated indexes/frontmatter first, read only selected documents, and preserve `kb:<game>/<document> (src-NNN)` evidence receipts.
+- **Materialization:** none. Axiomancer keeps no local copy of the corpus; the remote `kb-query` MCP server (below) is the single read path. The old gitignored snapshot and the sync script that fetched it were retired on 2026-09-04.
+- **Retrieval discipline:** metadata-first through the tools — `kb_overview` / `kb_find_games` / `kb_search` resolve from generated indexes and frontmatter, `kb_read_doc` opens only the selected documents, and answers preserve `kb:<game>/<document> (src-NNN)` evidence receipts.
 - **MCP data flow:** `.mcp.json` points `kb-query` at `https://kb-mcp.no-trbl-2-u.workers.dev/mcp` over MCP Streamable HTTP. The KB repo deploys that Worker from its own `mcp-server/` on merge to `main`; the corpus ships as static assets, so tool answers are current as of that deploy, not as of any local sync. Six tools: overview, find-games, search, read-doc, cards, keyword.
 - **Auth:** bearer token. `.mcp.json` carries `Authorization: Bearer ${KB_MCP_TOKEN}` — the reference, never the value. Claude Code expands it from the process environment and does **not** read `.env`, so the token belongs in the machine environment; that is also the only place worktrees and scheduled runs can see it. The server is fail-closed: no token yields `401`, an unconfigured Worker yields `503`. Liveness: `curl -s https://kb-mcp.no-trbl-2-u.workers.dev/health` (unauthenticated; reports build commit and doc count). Configuration and rotation are documented in the KB repo's `mcp-server/how-to-configure.md`.
-- **Availability:** development/research integration and optional accelerator. It is **not** a product-runtime dependency. If MCP is unavailable — network, expired token, Worker down — run `node scripts/kb-sync.mjs` and use direct grep/read, noting that the snapshot may lag the live corpus.
-- **Write path:** `node scripts/kb-sync.mjs wish "<coverage request>"` appends and best-effort pushes the KB wishlist. This requires write-capable ambient Git credentials or `GH_TOKEN`; a push failure must be reported but does not sink the design session.
-- **Secrets:** `GH_TOKEN` may be loaded from the environment or an ignored `.env`. The sync script passes it as a per-command HTTP header and does not persist it in `kb/.git/config`.
+- **Availability:** development/research integration. It is **not** a product-runtime dependency — no build, test, or gameplay path touches it. But within research work it is now a hard dependency rather than an accelerator: if MCP is unavailable — network, expired token, Worker down — there is no local fallback, so prior-art grounding is simply unavailable for that run. The correct behavior is to say the corpus is unreachable and mark any claim answered from model memory as UNGROUNDED. Never imply a local corpus exists.
+- **Write path:** `gh issue create --repo no-trbl-2-u/game-knowledge-base --label wishlist --title "<game or topic>" --body "<why it would help>"`. The MCP server is read-only, so coverage requests go through GitHub issues, which the KB's daily scout consumes. This needs `gh` authenticated (or `GH_TOKEN`); a failure to file must be reported but does not sink the design session.
+- **Secrets:** `KB_MCP_TOKEN` (above) is the relevant secret and lives in the process environment only. Filing a wishlist issue additionally needs `gh` credentials or `GH_TOKEN`. No KB credential is written into this repo.
 
 ### MCP servers and tool boundaries
 
-- **`kb-query`:** remote HTTP server owned and deployed by the **external** KB repo. Optional accelerator; a `kb-sync`'d `kb/` and direct file reads remain the fallback.
+- **`kb-query`:** remote HTTP server owned and deployed by the **external** KB repo. It is the sole route from this repo to the corpus — there is no local file fallback. Its unavailability removes prior-art grounding for that run; it never removes an Axiomancer capability, because the corpus is not rules authority.
 - **`axio-query`:** repo-local stdio server at `scripts/axio-mcp-server.mjs`. It exposes current Axiomancer cards, enemies, effects, and keywords from `devlog/data/` plus `axiomancer-mechanics/docs/keyword-atlas.md`. It regenerates stale catalog data through `npm run catalog:export` when possible. It is not external data and never outranks mechanics source files.
 - **`playwright`:** `.mcp.json` invokes `npx -y @playwright/mcp@latest` with isolated headless Chromium. This is development/test tooling, not runtime architecture. Native Playwright scripts remain available when MCP permissions or transport fail.
-- **Failure law:** MCP improves retrieval and browser control but may not become the only route to evidence. Every MCP surface must retain a file, script, or CLI fallback.
+- **Failure law:** MCP may not become the only route to evidence *this repo owns*. Every MCP surface over repo-local data must retain a file, script, or CLI fallback — `axio-query` and `playwright` both do. `kb-query` is the deliberate exception (2026-09-04): the data is external and not ours to mirror, so its outage is reported as missing grounding, never routed around by a stale copy or by memory presented as fact.
 - **Verification:** run `node scripts/axio-mcp-server.test.mjs` for the repo-local server. For the KB server, check `/health` for `configured:true` and a `build.commit`, then call `kb_overview` through the configured MCP client; a `401` is a client-side token problem, a `503` is a missing Worker secret.
 
 ### SomberSoft company doctrine and decisions
@@ -99,7 +96,7 @@ flowchart LR
 ## Architecture rules
 
 1. **No external service owns game rules.** `axiomancer-mechanics` source and tests remain executable authority.
-2. **Accelerators require fallbacks.** MCP and hosted agents may accelerate work but cannot become the sole evidence path.
+2. **Accelerators over repo-owned data require fallbacks.** MCP and hosted agents may accelerate work over this repo's own files but cannot become the sole path to them. Externally owned evidence (the KB corpus) may legitimately have a single route; when that route is down, the answer is "unavailable, ungrounded", not a substitute source.
 3. **External writes are explicit.** KB wishlist pushes, GitHub mutations, EAS builds, and R2 uploads must identify their destination and verification evidence.
 4. **Secrets never cross into Git.** Commit variable names and recovery procedures, never values.
 5. **Artifacts are not source truth.** R2 preserves evidence; Git preserves source and durable repository decisions.

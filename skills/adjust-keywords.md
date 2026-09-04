@@ -48,9 +48,10 @@ and `docs/retheme-map.json` (NL-8 collision law).
 | A keyword face word (`combat.cards.ts` `mechanicText`, mobile `KEYWORD_GLOSS`) prints but has no popup/glyph wired (a silent `default:` arm) | UPDATE — this is a bug, ship it regardless of audit priority |
 
 Use `kb-query` (`kb_keyword`, `kb_search`) for prior art and
-`axio-query` (`axio_keywords`) for the engine's current facts when
-available; fall back to grepping `kb/` and the libraries per
-`card-expert`'s documented fallback path.
+`axio-query` (`axio_keywords`) for the engine's current facts. Only
+`axio-query` has a fallback (grep the libraries directly) — `kb-query`
+is the sole route to the external corpus, per `card-expert`'s
+documented path.
 
 ### Step 2 — KB research, then design
 
@@ -61,11 +62,12 @@ reception evidence, the `functions`-column sweep for the design-job
 landscape. The atlas's own no-receipt-no-row law makes this
 non-negotiable for keywords anyway — a new or updated row without a
 `kb:` receipt is invalid on its face. Delegating to `card-expert`
-counts (its answers cite kb receipts). If the MCP tools are absent
-or failing, fall back per its documented path (`node
-scripts/kb-sync.mjs`, then the sibling `../game-knowledge-base/`
-checkout); a genuine corpus miss files a wish (`node
-scripts/kb-sync.mjs wish "..."`) and is stated in the commit body.
+counts (its answers cite kb receipts). If the MCP tools are absent or
+failing there is no local snapshot to fall back to: say the corpus was
+unreachable in the commit body and label the grounding UNGROUNDED. A
+genuine corpus miss files a wishlist issue (`gh issue create --repo
+no-trbl-2-u/game-knowledge-base --label wishlist ...`) and is stated in
+the commit body.
 REMOVE needs no KB run — carrier count and duplication from Step 1
 are sufficient grounds to retire.
 
@@ -157,9 +159,9 @@ criteria → `plan/AUDIT.md` as `[loop-call]`.
 2. **A keyword needs a new payload shape the effects engine can't
    express** — that's an engine-design call (mechanics-expert
    consult), not a keyword-content edit; file it.
-3. **`kb/` unreachable** — fall back per `card-expert`'s documented
-   path (sibling checkout, then memory-labeled); don't block the
-   whole tick on it.
+3. **The KB corpus is unreachable** — there is no fallback path;
+   proceed with memory-labeled (UNGROUNDED) design, say so in the
+   commit body, and don't block the whole tick on it.
 4. **Audit finds nothing actionable** — commit only the ledger bump.
 
 ## 6. Quick reference

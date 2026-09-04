@@ -24,7 +24,6 @@
       "Bash(npm run combat-playtest:*)",
       "Bash(npm ci)",
       "Bash(node scripts/deploy-check.mjs:*)",
-      "Bash(node scripts/kb-sync.mjs:*)",
       "mcp__kb-query__kb_overview",
       "mcp__kb-query__kb_find_games",
       "mcp__kb-query__kb_search",
