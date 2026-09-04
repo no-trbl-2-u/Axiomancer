@@ -319,6 +319,41 @@
 
 ## Pending
 
+### [MED] combat — the arena's art registers are incoherent (painted foe, flat-vector dice, mono chrome)
+- pass: expo playthrough 2026-09-04 (owner-requested full-combat playtest, web export at 390x844)
+- viewport: 390x844
+- auth_state: fresh save, first map encounter (Brine Hag)
+- category: visual
+- observation: three unrelated art vocabularies share one screen — a painterly
+  enemy portrait, flat-vector dice with saturated primaries, JetBrains-mono
+  HUD chrome, plus a purple ruined-city backdrop behind a coastal foe (the
+  pass-23 backdrop row, still open). None is wrong alone; together the board
+  reads as a prototype. Not a code fix: it needs an art-direction decision
+  (one register, then re-key the dice/HUD to it) before any asset work.
+- evidence: `screenshots/playtest/` captures from the 2026-09-04 run
+- suggested fix: art-direction pass — pick the painted register (the portraits
+  are the most finished asset) and restyle the dice faces + chip chrome
+  toward it; fold the pass-23 backdrop row into the same pass.
+- source: owner playtest
+
+### [MED] combat — the first map fight is an elite-tier foe with a 3-phase threat sequence
+- pass: expo playthrough 2026-09-04
+- viewport: 390x844
+- auth_state: fresh save, first map encounter
+- category: pacing
+- observation: the very first fight (Brine Hag) opened with HIDE + RAVENOUS and
+  a three-phase telegraph, before the tutorial had taught staging or the
+  stance check. A new player reads two foe keywords, a fork glyph and a
+  stance check on their first turn. The fight was won in the playtest, so
+  the ask is cognitive, not mechanical.
+- evidence: `screenshots/playtest/` 2026-09-04; `combat.mock.ts` deliberately
+  mirrors this foe so the UI evidence tests see the same load.
+- suggested fix: gate the first encounter of a fresh save to a one-phase,
+  zero-keyword foe (or strip keywords from the first roll of the encounter
+  table) and let Brine Hag be fight two. Engine-side: encounter table /
+  first-encounter policy, not the UI.
+- source: owner playtest
+
 ### [HIGH] combat — the signature rune column sat ON the dice tray (fixed 2026-09-03)
 - pass: crash hunt 2026-09-03 (live e2e probe, `elementFromPoint`)
 - viewport: 390x844

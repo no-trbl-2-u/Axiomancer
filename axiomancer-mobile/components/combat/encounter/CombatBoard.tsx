@@ -223,6 +223,10 @@ const SIG_COLUMN_TOP_RATIO = 0.34;
 const SIG_COLUMN_TOP = `${SIG_COLUMN_TOP_RATIO * 100}%` as const;
 const SIG_TRAY_CLEARANCE = 10;
 
+// One line of the bottom rail (VITAE · ledger · piles) before the safe-area
+// inset. Exported for the rail test — the readout must sit inside this.
+export const RAIL_LINE_H = 26;
+
 function DiceRow({
     vm, dieGesture, draggingDieId, assignedDieIds, onFateTap,
 }: {
@@ -302,6 +306,9 @@ function DiceRow({
                     );
                 }
                 const dieDimmed = (!die.reserve && !die.floating && vm.hasDraft && !die.drafted) || draggingDieId === die.id;
+                // The SPECIAL face's real payload (gear may raise it above the
+                // stock 2) — spoken in the die's a11y label.
+                const specialConviction = vm.dieGear?.slots.find((s) => s.color === die.color)?.specialConviction;
                 const node = (
                     <View style={isAssigned ? styles.dieAssigned : undefined}>
                         {ritual && plansById[die.id] ? (
@@ -315,7 +322,7 @@ function DiceRow({
                                 onTumbleChange={onTumbleChange}
                             />
                         ) : (
-                            <CombatDie die={die} size={TRAY_DIE_SIZE} dimmed={dieDimmed} />
+                            <CombatDie die={die} size={TRAY_DIE_SIZE} dimmed={dieDimmed} assigned={isAssigned} specialConviction={specialConviction} />
                         )}
                         {die.reserve ? (
                             <Text style={[styles.dieConv, { color: AXM.sulfur }]} testID={`combat-reserve-${die.id}`}>
@@ -493,7 +500,7 @@ export const StagedCard = React.memo(function StagedCard({
                                     warning above applies to the die face too, not just
                                     this wrapper: an armed card otherwise put a second
                                     `combat-die-<id>` node on the board. */}
-                                <CombatDie die={assignedDie} size={compact ? 26 : 32} testID="combat-staged-die-face" />
+                                <CombatDie die={assignedDie} size={compact ? 26 : 32} testID="combat-staged-die-face" assigned />
                             </View>
                         ) : (
                             <View style={[styles.dieSocketEmpty, socketPulse ? { borderColor: AXM.sulfur, backgroundColor: 'rgba(212,192,38,0.18)' } : null]}>
@@ -1050,6 +1057,24 @@ export const CombatBoard = React.memo(function CombatBoard({
         if (card) onInspectRef.current(card);
     }, []);
     const unstageJS = useCallback((uid: string) => { onUnstageRef.current(uid); }, []);
+    // Tap-to-power (playtest 2026-09-04: a tap on a die did nothing). With
+    // exactly ONE card staged, a tap routes the die to it exactly as a drop
+    // would — through the same `resolveDieDropTarget` gate (THE COLOR LAW +
+    // one-die-per-card), so an illegal pairing is refused silently, the way a
+    // tap has no card to shake. Any other staging count keeps drag-only: the
+    // player must say WHICH card. Latest-closure ref, stable JS bridge.
+    const dieTapRef = useRef<(dieId: string) => void>(() => undefined);
+    dieTapRef.current = (dieId: string) => {
+        if (stagedUids.length !== 1) return;
+        const die = diceMapRef.current.get(dieId);
+        if (!die || !die.draggable) return;
+        const target = resolveDieDropTarget(die, stagedUids[0], true, stagedUids, stanceOfUid, pendingDieByUid);
+        if (!target) return;
+        juiceHaptics.impact(Haptics.ImpactFeedbackStyle.Rigid);
+        setPendingDieByUid((prev) => ({ ...prev, [target]: dieId }));
+        setDropPop((prev) => ({ uid: target, n: prev.n + 1 }));
+    };
+    const tapDieJS = useCallback((dieId: string) => { dieTapRef.current(dieId); }, []);
 
     const gestureCacheRef = useRef(new Map<string, ReturnType<typeof Gesture.Exclusive>>());
     // drag.x/drag.y are the SAME SharedValue objects across renders (created once
@@ -1084,7 +1109,8 @@ export const CombatBoard = React.memo(function CombatBoard({
                 .onUpdate((e) => { gx.value = e.absoluteX; gy.value = e.absoluteY; })
                 .onEnd((e) => { runOnJS(endJS)(e.absoluteX, e.absoluteY); })
                 .onFinalize((e, ok) => { if (!ok) runOnJS(endJS)(-1, -1); });
-            g = Gesture.Exclusive(pan);
+            const tap = Gesture.Tap().maxDistance(9).onEnd(() => { runOnJS(tapDieJS)(die.id); });
+            g = Gesture.Exclusive(pan, tap);
             gestureCacheRef.current.set(key, g);
         }
         return g;
@@ -1263,7 +1289,15 @@ export const CombatBoard = React.memo(function CombatBoard({
 
     const metaLine = `${vm.phaseBadge} · ${vm.roundLabel} · ${vm.turnLabel}`
         .replace('ROUND ', 'R').replace('TURN ', 'T');
-    const railH = 26 + bottomInset;
+    // The rail is at least one 26pt line plus the home-indicator inset, and it
+    // GROWS if its row wraps (a long phase ledger on a narrow phone) — it never
+    // clips. Playtest 2026-09-04 at 390x844: the row overflowed its width, the
+    // VITAE text wrapped to a second line under a fixed 26pt height, and the
+    // number fell off the bottom of the screen. The floating chrome (SCRAP,
+    // END) keys off the MEASURED height so it always sits above the rail.
+    const [railMeasuredH, setRailMeasuredH] = useState(0);
+    const railMinH = RAIL_LINE_H + bottomInset;
+    const railH = Math.max(railMinH, railMeasuredH);
 
     return (
         <View style={styles.root} testID="combat-board">
@@ -1431,7 +1465,6 @@ export const CombatBoard = React.memo(function CombatBoard({
                                     style={{
                                         marginLeft: i === 0 ? 0 : -overlap,
                                         zIndex: draggingCardUid === card.uid ? 30 : i,
-                                        opacity: draggingCardUid === card.uid ? 0.3 : 1,
                                         transform: [{ translateY: 2 + Math.abs(i - mid) * 3 }, { rotate: `${(i - mid) * 3}deg` }],
                                     }}
                                     testID={`combat-hand-${card.uid}`}
@@ -1439,7 +1472,14 @@ export const CombatBoard = React.memo(function CombatBoard({
                                     accessibilityLabel={`${card.name}, ${card.stance} card. ${card.face.verbLine}.`}
                                     accessibilityHint="Drag up to stage, or tap to read"
                                 >
-                                    <HandCard card={card} />
+                                    {/* The in-flight dim lives on a plain inner view: FadeIn
+                                        drives `opacity` on the animated wrapper, and an
+                                        `opacity` style on that same node is what Reanimated
+                                        warns "may be overwritten by a layout animation" —
+                                        once per hand card, every draw (playtest 2026-09-04). */}
+                                    <View style={draggingCardUid === card.uid ? styles.handCardLifted : null}>
+                                        <HandCard card={card} />
+                                    </View>
                                 </Animated.View>
                             </GestureDetector>
                         ))}
@@ -1447,10 +1487,22 @@ export const CombatBoard = React.memo(function CombatBoard({
                 </View>
 
                 {/* bottom rail — ♥ HP · phase ledger · deck/discard */}
-                <View style={[styles.rail, { height: railH, paddingBottom: bottomInset }]}>
-                    <Text style={styles.railHp} allowFontScaling={false}>♥ {vm.player.hp}</Text>
+                <View
+                    style={[styles.rail, { minHeight: railMinH, paddingBottom: bottomInset }]}
+                    testID="combat-rail"
+                    onLayout={(e) => setRailMeasuredH(e.nativeEvent.layout.height)}
+                >
+                    <Text
+                        style={styles.railHp}
+                        numberOfLines={1}
+                        allowFontScaling={false}
+                        testID="combat-rail-vitae"
+                        accessibilityLabel={`VITAE ${vm.player.hp}`}
+                    >
+                        ♥ {vm.player.hp}
+                    </Text>
                     <View style={styles.railLedger} testID="combat-ledger">
-                        {vm.ledger.map((m, i) => <LedgerMark key={i} kind={m === 'clear' ? 'O' : m === 'overwhelmed' ? 'X' : 'pending'} size={15} />)}
+                        {vm.ledger.map((m, i) => <LedgerMark key={i} kind={m === 'clear' ? 'O' : m === 'overwhelmed' ? 'X' : 'pending'} size={14} />)}
                     </View>
                     <View
                         style={styles.railPiles}
@@ -1585,6 +1637,11 @@ function paidValueFor(f: CombatCardVM['face'], override?: string): string {
  * the inspect overlay. The face is the glance read (name · free glyph ·
  * keyword · value); the overlay is the explanation.
  */
+/** Below this face width the ledger stacks (see `narrow` in `CombatCardFace`).
+ *  The hand card (120) sits above it; the reward offer (100) and the compact
+ *  staged card (92) below. Exported for the face test. */
+export const NARROW_FACE_W = 112;
+
 export const CombatCardFace = React.memo(function CombatCardFace({
     card, width, height, large = false, accent = null, readPip = null, heroOverride, children,
 }: {
@@ -1614,24 +1671,34 @@ export const CombatCardFace = React.memo(function CombatCardFace({
     // Effect-shaped silhouette for the FREE glyph (owner directive 2026-07-16);
     // keywords without a shape keep the text rune.
     const freeShape = glyphShapeFor(f.freeGlyphKey);
+    // A NARROW face (the reward-draft offer at 100pt, a compact staged card at
+    // 92pt) cannot seat FREE | PAID side by side: the fixed FREE cell and the
+    // stance cube left the keyword and value ~8pt, which react-native-web
+    // ellipsized to "B..", "D." (playtest 2026-09-04 — the player could not
+    // read the card they were adding to the deck for the rest of the run).
+    // `adjustsFontSizeToFit` is a silent no-op on web, so the fix is layout:
+    // the ledger STACKS (FREE row over PAID row, full width each) and the
+    // text wraps under an explicit lineHeight instead of clipping.
+    const narrow = !large && width < NARROW_FACE_W;
     const bandH = large ? 36 : 26;
     const ledgerH = large ? 60 : 42;
-    const glyphSize = large ? 38 : 24;
+    const glyphSize = large ? 38 : narrow ? 18 : 24;
     const rarity = card.rarity ?? 'common';
     const rarColor = rarity === 'rare' ? '#9a6ad6' : rarity === 'uncommon' ? '#6b8eb0' : '#8a8273';
     return (
         <View style={[styles.faceOuter, { width, height }]}>
             <View style={[styles.faceCard, { borderColor: accent ?? band }]}>
                 {/* ① NAME BAND — horizontal blackletter on solid ink; the wax
-                    pip carries rarity. The fan's visible sliver starts here. */}
-                <View style={[styles.plateBand, { height: bandH }]} pointerEvents="none">
+                    pip carries rarity. The fan's visible sliver starts here.
+                    A long name wraps to a second line (the band grows, the art
+                    plate gives) rather than truncating to a stub. */}
+                <View style={[styles.plateBand, { minHeight: bandH }]} pointerEvents="none">
                     <View style={[styles.plateRarityPip, large && styles.plateRarityPipLarge, { backgroundColor: rarColor }]} />
                     <Text
                         style={[styles.plateName, large && styles.plateNameLarge]}
-                        numberOfLines={1}
-                        adjustsFontSizeToFit
-                        minimumFontScale={0.6}
+                        numberOfLines={2}
                         allowFontScaling={false}
+                        testID="combat-card-face-name"
                     >
                         {card.name.toUpperCase()}
                     </Text>
@@ -1651,7 +1718,11 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                 </View>
                 {/* ③ LEDGER — solid ink ground: FREE cell | rule | PAID cell.
                     No prose (owner 2026-08-10); the overlay explains. */}
-                <View style={[styles.plateLedger, { height: ledgerH }]} pointerEvents="none">
+                <View
+                    style={[styles.plateLedger, narrow ? styles.plateLedgerStacked : { minHeight: ledgerH }]}
+                    pointerEvents="none"
+                    testID={narrow ? 'combat-card-face-ledger-stacked' : 'combat-card-face-ledger'}
+                >
                     {hasFree ? (
                         <View style={styles.plateFreeCell}>
                             {freeShape ? (
@@ -1670,17 +1741,17 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                             ) : null}
                         </View>
                     ) : null}
-                    {hasFree ? <View style={styles.plateRule} /> : null}
+                    {hasFree ? <View style={narrow ? styles.plateRuleAcross : styles.plateRule} /> : null}
                     <View style={styles.platePaidCell}>
-                        <StanceCube color={band} size={large ? 20 : 14} />
+                        <StanceCube color={band} size={large ? 20 : narrow ? 12 : 14} />
                         {readPip ? <Text style={[styles.paidRead, { color: kwColor }]} allowFontScaling={false}>{readPip}</Text> : null}
                         <View style={styles.paidTextWrap}>
                             {f.keyword ? (
                                 <Text
                                     style={[styles.paidKeyword, large && styles.paidKeywordLarge, { color: kwColor }]}
-                                    numberOfLines={1}
-                                    adjustsFontSizeToFit
-                                    minimumFontScale={0.7}
+                                    numberOfLines={large ? 1 : 2}
+                                    allowFontScaling={false}
+                                    testID="combat-card-face-keyword"
                                 >
                                     {f.keyword.toUpperCase()}
                                 </Text>
@@ -1688,9 +1759,9 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                             {paidValue ? (
                                 <Text
                                     style={[styles.paidValue, large && styles.paidValueLarge]}
-                                    numberOfLines={1}
-                                    adjustsFontSizeToFit
-                                    minimumFontScale={0.6}
+                                    numberOfLines={large ? 1 : 2}
+                                    allowFontScaling={false}
+                                    testID="combat-card-face-value"
                                 >
                                     {paidValue}
                                 </Text>
@@ -1833,19 +1904,25 @@ const useStyles = makeStyles((AXM) => ({
     stanceChipLabel: { fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 1 },
     fanGlow: { position: 'absolute', bottom: 0, left: 0 },
     fan: { ...StyleSheet.absoluteFillObject, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center', paddingHorizontal: 12, paddingBottom: 20 },
+    // The hand card whose drag ghost is in flight — dimmed in place.
+    handCardLifted: { opacity: 0.3 },
 
-    // ── bottom rail ──
+    // ── bottom rail ── The row sits between the player medallion (left 10,
+    //    92 wide) and the END medallion (right 10, 80 wide); the side paddings
+    //    are those footprints, not spare room. The VITAE readout never wraps
+    //    or shrinks; the ledger is the one flexible cell (it wraps to a second
+    //    row on a narrow phone and the rail grows with it).
     rail: {
-        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-        paddingLeft: 112, paddingRight: 104, backgroundColor: 'rgba(7,5,9,0.9)',
+        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 6,
+        paddingLeft: 104, paddingRight: 92, backgroundColor: 'rgba(7,5,9,0.9)',
         borderTopWidth: 1, borderTopColor: AXM.divider,
     },
-    railHp: { fontFamily: FONTS.mono, fontSize: 13, color: AXM.parchment, letterSpacing: 0.5 },
-    railLedger: { flexDirection: 'row', gap: 4, alignItems: 'center' },
-    railPiles: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+    railHp: { fontFamily: FONTS.mono, fontSize: 13, lineHeight: 17, color: AXM.parchment, letterSpacing: 0.5, flexShrink: 0 },
+    railLedger: { flexDirection: 'row', flexWrap: 'wrap', flexShrink: 1, gap: 3, alignItems: 'center', justifyContent: 'center' },
+    railPiles: { flexDirection: 'row', alignItems: 'center', gap: 3, flexShrink: 0 },
     pileGlyph: { width: 13, height: 17, borderRadius: 2, borderWidth: 1, borderColor: AXM.ash, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center' },
     pileGlyphText: { fontFamily: FONTS.mono, fontSize: 7, color: AXM.ash, lineHeight: 9 },
-    pileCount: { fontFamily: FONTS.mono, fontSize: 11, color: AXM.bone, marginRight: 5 },
+    pileCount: { fontFamily: FONTS.mono, fontSize: 11, color: AXM.bone, marginRight: 4 },
 
     // ── SCRAP medallion (drag-time only) ──
     trashBin: {
@@ -1919,8 +1996,10 @@ const useStyles = makeStyles((AXM) => ({
     },
     plateRarityPip: { width: 5, height: 5, borderRadius: 3 },
     plateRarityPipLarge: { width: 7, height: 7, borderRadius: 4 },
-    plateName: { flex: 1, fontFamily: FONTS.gothic, fontSize: 13, letterSpacing: 0.4, color: AXM.parchment },
-    plateNameLarge: { fontSize: 20, letterSpacing: 0.8 },
+    // Explicit lineHeights: the name / keyword / value may WRAP (never clip)
+    // on a small face, so their two-line height is a known quantity.
+    plateName: { flex: 1, fontFamily: FONTS.gothic, fontSize: 13, lineHeight: 15, letterSpacing: 0.4, color: AXM.parchment, paddingVertical: 2 },
+    plateNameLarge: { fontSize: 20, lineHeight: 24, letterSpacing: 0.8 },
     // ② The framed art plate — dark margins, hairline rule.
     plateArtWrap: { flex: 1, padding: 4, backgroundColor: AXM.panelBg },
     plateArtFrame: {
@@ -1934,17 +2013,20 @@ const useStyles = makeStyles((AXM) => ({
         backgroundColor: AXM.deepBg,
         borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: AXM.divider,
     },
+    // Narrow face: FREE row over PAID row, each the full ledger width.
+    plateLedgerStacked: { flexDirection: 'column', alignItems: 'stretch', paddingVertical: 4, gap: 3 },
     plateFreeCell: { flexDirection: 'row', alignItems: 'center', gap: 3 },
     plateFreeGlyph: { textAlign: 'center' },
     plateFreeValue: { fontFamily: FONTS.mono, fontSize: 12, fontWeight: '700', color: AXM.parchment },
     plateFreeValueLarge: { fontSize: 17 },
     plateRule: { width: StyleSheet.hairlineWidth, alignSelf: 'stretch', marginVertical: 6, backgroundColor: AXM.divider },
+    plateRuleAcross: { height: StyleSheet.hairlineWidth, alignSelf: 'stretch', backgroundColor: AXM.divider },
     platePaidCell: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 5 },
     paidRead: { fontFamily: FONTS.mono, fontSize: 11, marginTop: 1 },
     paidTextWrap: { flex: 1 },
     // The keyword is the loudest word on the face — it is the whole read now.
-    paidKeyword: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 0.8 },
-    paidKeywordLarge: { fontSize: 17, letterSpacing: 1.2 },
+    paidKeyword: { fontFamily: FONTS.sans, fontSize: 12, lineHeight: 14, letterSpacing: 0.8 },
+    paidKeywordLarge: { fontSize: 17, lineHeight: 20, letterSpacing: 1.2 },
     paidValue: { fontFamily: FONTS.mono, fontSize: 11, lineHeight: 15, color: AXM.parchment },
     paidValueLarge: { fontSize: 15, lineHeight: 20 },
 }));

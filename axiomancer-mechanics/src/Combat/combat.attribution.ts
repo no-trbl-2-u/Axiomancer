@@ -78,6 +78,23 @@ const HEADLINES: Record<CombatOutcome, string> = {
 const LINGERING_ROW_ID = '__lingering_afflictions__';
 
 /**
+ * Every point of VITAE the enemy lost across the fight: the bar's net drop
+ * PLUS everything it healed back. Heals show as negative `damage-dealt` (card
+ * mechanics) or as `enemy-healed` (RAVENOUS / REGROW / STAGE / threat
+ * `enemyHeal`, playtest fix 2026-09-04 — before that event existed those
+ * heals were invisible here, so a RAVENOUS fight reported "Direct damage: 0"
+ * and tripped the WI-9 reconciliation warning).
+ */
+function enemyHpLost(state: CombatEncounterState): number {
+    let enemyHealed = 0;
+    for (const ev of state.log) {
+        if (ev.kind === 'damage-dealt' && ev.target === 'enemy' && ev.amount < 0) enemyHealed += -ev.amount;
+        else if (ev.kind === 'enemy-healed') enemyHealed += ev.amount;
+    }
+    return Math.max(0, state.enemy.maxHealth - state.enemy.health) + enemyHealed;
+}
+
+/**
  * Builds the post-combat summary (§7.7): names the card that dealt the enemy the
  * most HP. WI-9 — DoT is summed from the enemy's ACTUAL emitted `dot-tick`
  * events (attributed to the card that applied each effect), never projected, so
@@ -108,15 +125,16 @@ export function buildCombatSummary(state: CombatEncounterState): CombatSummary {
 
     reconcileAttribution(state, totalDotDamage);
 
-    let enemyHealed = 0;
-    for (const ev of state.log) {
-        if (ev.kind === 'damage-dealt' && ev.target === 'enemy' && ev.amount < 0) enemyHealed += -ev.amount;
-    }
-    const hpLost = Math.max(0, state.enemy.maxHealth - state.enemy.health) + enemyHealed;
+    const hpLost = enemyHpLost(state);
     const directDamage = Math.max(0, hpLost - totalDotDamage);
 
     const sorted = rows.slice().sort((a, b) => b.damageDealt - a.damageDealt);
-    const best = rows.slice().sort((a, b) => (b.dotDamage + b.damageDealt) - (a.dotDamage + a.damageDealt))[0];
+    // "Best card" names a CARD — the lingering bucket is bookkeeping, not a
+    // play the player made, so it never wins the headline (it won a playtest
+    // defeat screen on 2026-09-04 while the real deck did the work).
+    const best = rows
+        .filter(r => r.cardId !== LINGERING_ROW_ID)
+        .sort((a, b) => (b.dotDamage + b.damageDealt) - (a.dotDamage + a.damageDealt))[0];
     return {
         outcome,
         headline: HEADLINES[outcome],
@@ -140,13 +158,7 @@ function reconcileAttribution(
     totalDotDamage: number,
 ): void {
     if (typeof process !== 'undefined' && process.env?.NODE_ENV === 'production') return;
-    // Enemy heals show as negative `damage-dealt` to the enemy; fold them in so
-    // a healed-then-re-damaged bar still reconciles.
-    let enemyHealed = 0;
-    for (const ev of state.log) {
-        if (ev.kind === 'damage-dealt' && ev.target === 'enemy' && ev.amount < 0) enemyHealed += -ev.amount;
-    }
-    const hpLostCeiling = Math.max(0, state.enemy.maxHealth - state.enemy.health) + enemyHealed;
+    const hpLostCeiling = enemyHpLost(state);
     if (totalDotDamage > hpLostCeiling + 0.5) {
         console.warn(
             `[attribution] DoT total ${totalDotDamage} exceeds enemy HP lost ${hpLostCeiling} — ledger over-counting (WI-9 regression).`,

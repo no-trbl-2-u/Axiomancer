@@ -163,6 +163,11 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         // route; a capped, undecided combat must not. fv-7 is a route target
         // but must never be reached once fv-6 ends in defeat.
         //
+        // Playtest fix 2026-09-04: FREE-line plays now advance the card-played
+        // DoT clock, so the naive policy closes Little Belle (capitulate) by
+        // turn 3 — the cap drops to 2 to keep fv-13 UNRESOLVED. The L110
+        // ceiling still kills inside two turns.
+        //
         // Phase 53d (S-01) converted fv-4 from an `encounter` into a
         // narration dilemma ("The Stranger's Net"), so the route now runs
         // through fv-11 -> fv-13 (little-belle) instead of fv-3 -> fv-4 to
@@ -172,7 +177,7 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
             '--auto-combat',
             '--combat-policy', 'naive',
             '--combat-seed', '32',
-            '--combat-max-turns', '4',
+            '--combat-max-turns', '2',
             '--combat-enemy', 'the-incompleteness',
             '--combat-enemy-node', 'fv-6',
             '--state-log', logPath,

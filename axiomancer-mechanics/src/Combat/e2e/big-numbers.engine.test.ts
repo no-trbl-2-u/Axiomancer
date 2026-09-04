@@ -25,9 +25,10 @@ import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     draftStanceDie, resolveThreatPhase,
-    scalePlayerHit, effectiveHide, FLAY_DAMAGE_MULT, EXECUTE_DAMAGE_MULT,
+    scalePlayerHit, scalePlayerHitDetailed, effectiveHide, FLAY_DAMAGE_MULT, EXECUTE_DAMAGE_MULT,
     BRUTAL_DAMAGE_MULT, WOUND_CARD_ID,
 } from '../combat.engine';
+import { buildCombatSummary } from '../combat.attribution';
 import type { CombatEncounterState } from '../combat.encounter.types';
 
 afterEach(() => vi.restoreAllMocks());
@@ -194,6 +195,31 @@ describe('scalePlayerHit — the scaler pipeline is exactly as printed', () => {
             flay: true, execute: true, hide: 0, pierce: false,
         })).toBe(0);
     });
+
+    // Playtest fix 2026-09-04 — HIDE was the one keyword with no witness.
+    it('reports how much HIDE actually soaked, bounded by the floor-1 rule', () => {
+        const base = { readMult: 1, colorMatch: false, wrath: 0, chain: 0, flay: false, execute: false };
+        expect(scalePlayerHitDetailed({ ...base, base: 10, hide: 4, pierce: false })).toEqual({ dmg: 6, hideSoaked: 4 });
+        expect(scalePlayerHitDetailed({ ...base, base: 3, hide: 99, pierce: false })).toEqual({ dmg: 1, hideSoaked: 2 });
+        expect(scalePlayerHitDetailed({ ...base, base: 10, hide: 99, pierce: true })).toEqual({ dmg: 10, hideSoaked: 0 });
+        expect(scalePlayerHitDetailed({ ...base, base: 10, hide: 0, pierce: false })).toEqual({ dmg: 10, hideSoaked: 0 });
+    });
+
+    it('a FREE-line hit against HIDE emits the soaked amount as a keyword popup', () => {
+        const s = open(makeEnemy({ keywords: [{ kind: 'hide', n: 2 }] }));
+        const seated = seat(s, 'qa-bn-deal');
+        const entry = seated.hand.find(h => h.cardId === 'qa-bn-deal')!;
+        const res = playCombatCard(seated, { uid: entry.uid }, false, undefined, rng);
+        const hide = res.events.filter(e => e.kind === 'enemy-keyword-fired' && e.keyword === 'HIDE');
+        expect(hide).toEqual([{ kind: 'enemy-keyword-fired', enemyId: s.enemy.id, keyword: 'HIDE', amount: 2 }]);
+        expect(s.enemy.health - res.state.enemy.health).toBe(1); // printed 3, HIDE 2
+    });
+
+    it('a FREE-line hit is credited to its card in the attribution ledger', () => {
+        const s = open();
+        const after = playFree(seat(s, 'qa-bn-deal'), 'qa-bn-deal');
+        expect(after.attribution['qa-bn-deal']).toMatchObject({ cardId: 'qa-bn-deal', name: 'QA Deal', damageDealt: 3 });
+    });
 });
 
 describe('effectiveHide — ELUSIVE doubles until the foe is staggered', () => {
@@ -320,9 +346,42 @@ describe('enemy keywords change the arithmetic of a resolved threat', () => {
     it('RAVENOUS heals the foe for what it lands', () => {
         const wounded = makeEnemy({ keywords: [{ kind: 'ravenous' }] });
         wounded.health = 500;
-        const res = resolveThreatPhase(open(wounded), rng).state;
-        const taken = 400 - res.player.health;
-        if (taken > 0) expect(res.enemy.health).toBe(Math.min(1000, 500 + taken));
+        const res = resolveThreatPhase(open(wounded), rng);
+        const taken = 400 - res.state.player.health;
+        if (taken > 0) {
+            expect(res.state.enemy.health).toBe(Math.min(1000, 500 + taken));
+            // Playtest fix 2026-09-04: the heal is a ledger row, not just a popup.
+            const healed = res.events.filter(e => e.kind === 'enemy-healed');
+            expect(healed).toEqual([{ kind: 'enemy-healed', enemyId: wounded.id, source: 'RAVENOUS', amount: taken }]);
+        }
+    });
+
+    it('RAVENOUS reports the CLAMPED heal, never the printed drain, at full VITAE', () => {
+        const full = makeEnemy({ keywords: [{ kind: 'ravenous' }] }); // 1000/1000
+        const res = resolveThreatPhase(open(full), rng);
+        const taken = 400 - res.state.player.health;
+        if (taken > 0) {
+            expect(res.events.filter(e => e.kind === 'enemy-healed')).toEqual([]);
+            const popup = res.events.find(e => e.kind === 'enemy-keyword-fired' && e.keyword === 'RAVENOUS');
+            expect(popup).toMatchObject({ amount: 0 });
+        }
+    });
+
+    it('REGROW emits its actual heal and the summary reconciles HP lost against it', () => {
+        const foe = makeEnemy({ keywords: [{ kind: 'regrow', n: 30 }] });
+        foe.health = 990; // 10 short of the bar: REGROW 30 can only give back 10
+        let s = open(foe);
+        // Chip it first so the ledger has a card row and a real HP delta.
+        s = playFree(seat(s, 'qa-bn-deal'), 'qa-bn-deal'); // 987
+        const res = resolveThreatPhase(s, rng);
+        const healed = res.events.filter(e => e.kind === 'enemy-healed' && e.source === 'REGROW');
+        expect(healed).toEqual([{ kind: 'enemy-healed', enemyId: foe.id, source: 'REGROW', amount: 13 }]);
+        const summary = buildCombatSummary(res.state);
+        // Bar reads 1000/1000 again, but 13 VITAE were healed back, so the
+        // ledger's "HP lost" is 13 (the 10-deep opening deficit plus the 3
+        // the FREE line chipped) — never "Direct damage: 0".
+        expect(summary.directDamage).toBe(13);
+        expect(summary.bestCard).toBe('QA Deal');
     });
 
     it('VENOM poisons on contact', () => {
@@ -358,10 +417,14 @@ describe('boss STAGES', () => {
         const foe = makeEnemy({ stages, difficulty: 'boss' });
         foe.health = 900; // already under the 99% threshold
         let s = open(foe);
-        s = resolveThreatPhase(s, rng).state;
+        const res = resolveThreatPhase(s, rng);
+        s = res.state;
         expect(s.stagesEntered).toEqual([0]);
         expect(s.stageThreatBonus).toBe(0.5);
         expect(s.enemy.keywords?.some(k => k.kind === 'brutal')).toBe(true);
+        // Playtest fix 2026-09-04: the stage's heal is witnessed, not silent.
+        expect(res.events.filter(e => e.kind === 'enemy-healed' && e.source === 'STAGE'))
+            .toEqual([{ kind: 'enemy-healed', enemyId: foe.id, source: 'STAGE', amount: 50 }]);
 
         // A second boundary must not re-enter the same stage.
         const again = resolveThreatPhase(s, rng).state;

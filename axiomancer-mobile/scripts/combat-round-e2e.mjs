@@ -283,9 +283,12 @@ async function readDice(page) {
     return page.getByTestId('combat-board').locator('[data-testid^="combat-die-"]').evaluateAll((ns) => ns.map((n) => {
         const id = (n.getAttribute('data-testid') ?? '').replace('combat-die-', '')
         const label = n.getAttribute('aria-label') ?? ''
-        const color = (label.match(/^(\w+)\s+stance die/i)?.[1] ?? '').toLowerCase()
-        const usable = /available to draft|drafted as your stance|ghost|Reserve|BOON face/i.test(label)
-            && !/a miss|blocked|spent|cracked/i.test(label)
+        // Spec-33 label (CombatDie `combatDieA11yLabel`): "<COLOUR> die, <FACE>
+        // face: drag onto … to power …". A usable die always says "drag onto";
+        // a dead / used one names its state instead.
+        const color = (label.match(/^(\w+)(?:\s+\(gold\))?\s+die\b/i)?.[1] ?? '').toLowerCase()
+        const usable = /drag onto/i.test(label)
+            && !/MISS face|blocked|spent|cracked|assigned|not usable/i.test(label)
         return { id, color, usable }
     }))
 }

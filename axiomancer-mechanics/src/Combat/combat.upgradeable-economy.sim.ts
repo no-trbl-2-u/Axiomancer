@@ -40,13 +40,25 @@ import type {
 } from './combat.encounter.types';
 
 const FIXED_DIE_ID = /-u-(body|mind|heart|wild)$/;
+/** The stock four PLUS the act-reward duplicates (`t1-u-act0-body`, THE PATH
+ *  2026-09-02). ◆ conservation has to count every die that can fire a special:
+ *  an act die's `special-fired` was landing in REALIZED but never in GROSS, so
+ *  the spend-rate could read >100% on a short fight (surfaced 2026-09-04 when
+ *  the free-line card-played clock shortened the matrix's fights). */
+const ROLLED_DIE_ID = /-u-(act\d+-)?(body|mind|heart|wild)$/;
 const CHAIN_COLORS = ['body', 'mind', 'heart'] as const;
 type ChainColor = (typeof CHAIN_COLORS)[number];
 
-/** The stock four-die roll from a `turn-dice-rolled` event (drops surge floats
- *  and the gold+lead pair — the gates are for stock gear). */
+/** The stock four-die roll from a `turn-dice-rolled` event (drops surge floats,
+ *  act-reward dice and the gold+lead pair — the FACE gates are for stock gear). */
 function stockFixedDice(dice: readonly CombatManaDie[]): CombatManaDie[] {
     return dice.filter(d => !d.floating && FIXED_DIE_ID.test(d.id));
+}
+
+/** Every rolled die that can fire a special into the ◆ ledger (stock + act
+ *  reward; still no floats / gold+lead) — the CONSERVATION side. */
+function rolledDice(dice: readonly CombatManaDie[]): CombatManaDie[] {
+    return dice.filter(d => !d.floating && ROLLED_DIE_ID.test(d.id));
 }
 
 /** The authoritative dice-math witness: a single long stream of stock four-die
@@ -180,7 +192,7 @@ function foldEvents(acc: EconomyAccumulator, events: readonly CombatEncounterSta
         const usable = fixed.filter(d => d.face === 'special' || d.face === 'mana');
         acc.rounds++;
         acc.usable += usable.length;
-        acc.grossSpecials += fixed.filter(d => d.face === 'special').length;
+        acc.grossSpecials += rolledDice(roll.dice).filter(d => d.face === 'special').length;
         if (usable.length === 0) {
             acc.whiff++;
             if (convBefore < 1) acc.deadRounds++;
@@ -202,12 +214,14 @@ function foldEvents(acc: EconomyAccumulator, events: readonly CombatEncounterSta
         const after = [...events].reverse().find(e => e.kind === 'turn-dice-rolled');
         if (after && after.kind === 'turn-dice-rolled' && after !== roll) {
             const rerolled = new Set(pressed.dieIds);
-            acc.grossSpecials += stockFixedDice(after.dice)
+            acc.grossSpecials += rolledDice(after.dice)
                 .filter(d => rerolled.has(d.id) && d.face === 'special').length;
         }
     }
     for (const ev of events) {
-        if (ev.kind === 'special-fired') acc.specialIncome += ev.conviction;
+        // Same filter as the gross (see ROLLED_DIE_ID): a special fired off a
+        // die the gross never counted would break conservation by definition.
+        if (ev.kind === 'special-fired') { if (ROLLED_DIE_ID.test(ev.dieId)) acc.specialIncome += ev.conviction; }
         else if (ev.kind === 'momentum-surged') acc.surges++;
         else if (ev.kind === 'momentum-broken') acc.breaks++;
         else if (ev.kind === 'die-overflowed') acc.overflowIncome += 1;

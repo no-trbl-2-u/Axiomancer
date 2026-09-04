@@ -46,7 +46,7 @@ describe('CombatDie — spent-state greying', () => {
         render(<CombatDie die={deadDie} />);
         const el = screen.getByTestId(`combat-die-${deadDie.id}`);
         expect(el.props.style.opacity).toBe(1);
-        expect(el.props.accessibilityLabel).toContain('a miss');
+        expect(el.props.accessibilityLabel).toContain('MISS face');
     });
 
     it('the a11y label calls out the spent state in words', () => {

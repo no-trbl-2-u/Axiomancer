@@ -31,8 +31,57 @@ import React from 'react';
 import { View } from 'react-native';
 import Svg, { Circle, Defs, G, LinearGradient as SvgLinearGradient, Path, Polygon, RadialGradient, Rect, Stop } from 'react-native-svg';
 
+import { SPECIAL_CONVICTION_DEFAULT } from '@mechanics';
 import type { CombatDieVM } from '@/state/presenters/combat-encounter.engine';
 import { spentDieTreatment } from '@/lib/juice';
+
+/**
+ * The die's spoken state (playtest 2026-09-04: the label still announced the
+ * retired 2-die draft — "available to draft"). Spec 33, the shipped model:
+ * four dice, each showing a FACE — SPECIAL powers a card of its colour AND
+ * grants Conviction (the gear payload, 2 by default); MANA powers one paid
+ * line of its colour (the gold WILD die powers any colour); MISS is dead.
+ * The label names the colour, the face, and what the die can do right now,
+ * with a spent / assigned state — colour is never the only a11y channel.
+ *
+ * Every draggable state says "drag onto"; every dead or used state says why,
+ * so the e2e harness can tell a usable die from a dead one by wording alone.
+ *
+ * Flag-off (the legacy draft pool, `EXPO_PUBLIC_UPGRADEABLE_DICE=0`) dice
+ * carry no `face`; that branch keeps its own draft-model phrases.
+ */
+export function combatDieA11yLabel(
+    die: CombatDieVM,
+    opts: { assigned?: boolean; specialConviction?: number } = {},
+): string {
+    const colour = die.stanceLabel;
+    const wild = die.color === 'wild';
+    const noun = wild ? `${colour} (gold) die` : `${colour} die`;
+    if (die.isX) return `${noun}: blocked, powers nothing`;
+    if (!die.face) {
+        // Legacy draft pool (flag-off) — one draft, faceless dice.
+        const state = die.drafted
+            ? (die.spent ? 'spent as your stance' : 'drafted as your stance')
+            : die.reserve ? 'banked in the Reserve, drag onto a staged card to power it'
+                : die.floating ? 'ghost, a second power source, drag onto a staged card to power it'
+                    : die.draggable === false ? 'spent, burned for Conviction'
+                        : 'drag onto a staged card to draft it as your stance';
+        return `${noun}: ${state}`;
+    }
+    if (die.cracked) return `${noun}, CRACKED face: dead this round, powers nothing`;
+    if (die.face === 'miss') return `${noun}, MISS face: dead, powers nothing`;
+    const face = die.face === 'special' ? 'SPECIAL' : 'MANA';
+    const target = wild ? 'a staged card of any colour' : `a staged ${colour} card`;
+    const payload = opts.specialConviction ?? SPECIAL_CONVICTION_DEFAULT;
+    const power = die.face === 'special'
+        ? `power it and gain ${payload} Conviction`
+        : 'power its paid line';
+    if (die.spent) return `${noun}, ${face} face: spent, it already powered a card this turn`;
+    if (opts.assigned) return `${noun}, ${face} face: assigned to a staged card, APPLY to ${power}`;
+    if (die.draggable === false) return `${noun}, ${face} face: not usable right now`;
+    const where = die.reserve ? ', banked in the Reserve' : die.floating ? ', a ghost' : die.refreshed ? ', refreshed' : '';
+    return `${noun}, ${face} face${where}: drag onto ${target} to ${power}`;
+}
 
 /** A 4-point sparkle star path centred on (cx, cy) with radius r. */
 function sparklePath(cx: number, cy: number, r: number): string {
@@ -68,10 +117,16 @@ export function combatDieFootprint(size: number): { width: number; height: numbe
     return { width: size + o, height: size + o + size * 0.18 };
 }
 
-export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed = false, testID }: {
+export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed = false, testID, assigned = false, specialConviction }: {
     die: CombatDieVM;
     size?: number;
     dimmed?: boolean;
+    /** Board-local state the VM cannot know: this die has been dropped on a
+     *  staged card and waits for APPLY. Spoken in the a11y label. */
+    assigned?: boolean;
+    /** The die's gear payload for its SPECIAL face (`vm.dieGear`); the stock
+     *  default when the caller has no gear rail. */
+    specialConviction?: number;
     /** Overrides the default `combat-die-<id>`. The drag ghost renders a CLONE
      *  of a tray die and must not answer to the original's testID — two nodes
      *  under one id made the tray unreadable to the e2e harness (it picked the
@@ -106,25 +161,15 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
     const gradId = `axmDieGlow-${die.color}`;
     const bodyId = `axmDieBody-${die.color}-${greyed ? 'grey' : die.drafted ? 'drafted' : 'live'}`;
     const gemId = `axmDieGem-${die.color}`;
-    // P2 — the a11y state must not lie. A spare die once a draft exists is no
-    // longer draggable: it was already burned for Conviction at draft. Spec 33 —
-    // the flag-on face states lead (they decide whether the die can power at all).
-    const statePhrase =
-        cracked ? ', cracked — dead this round'
-            : die.face === 'miss' ? ', a miss — dead, powers nothing'
-                : die.face === 'special' ? ', a BOON face — powers a card and grants Conviction'
-                    : die.drafted ? (die.spent ? ', spent as your stance' : ', drafted as your stance')
-                        : die.isX ? ', blocked'
-                            : die.reserve ? ', banked in the Reserve'
-                                : die.floating ? ', ghost — a second power source'
-                                    : die.draggable === false ? ', spent — burned for Conviction'
-                                        : ', available to draft';
+    // The a11y state must not lie — see `combatDieA11yLabel` (spec 33 wording:
+    // colour, face, what the die can do, spent / assigned).
+    const a11yLabel = combatDieA11yLabel(die, { assigned, specialConviction });
     return (
         <View
             testID={testID ?? `combat-die-${die.id}`}
             accessible
             accessibilityRole="button"
-            accessibilityLabel={`${die.stanceLabel} stance die${statePhrase}`}
+            accessibilityLabel={a11yLabel}
             style={{ width: W, height: H + size * 0.18, opacity: dimmed && !die.drafted ? 0.45 : spentTreatment.opacity }}
         >
             {glow && (
