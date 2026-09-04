@@ -14,6 +14,32 @@
 
 ## Pending
 
+### [loop-call] No mid/late equipment progression — 8 relics are 1:1-locked to 8 signatures, 3 accessory kinds have zero live relics (2026-09-04)
+- category: design residue (found during `/adjust-equipment` pass 1's
+  structural audit; directly answers the pending `[HIGH] general — no
+  mid/late equipment or signature skills exist for THE PATH's sixth axis`
+  row in `plan/CRITIQUE.md`, filed rather than actioned solo — it implies a
+  new-mechanics decision, not a routine content edit)
+- detail: the lean signet-relic shape (`docs/equipment.md`, phases 18-23)
+  is deliberately closed: exactly 8 relics, each granting exactly one of the
+  8 `SignatureSkillId`s, and `relic.library.ts`'s own header calls that
+  id-to-signature mapping "1:1 and load-bearing." Three `AccessoryKind`
+  values (`head`, `hands`, `feet`) have zero live relics — the Step-1 CREATE
+  signal for that gap fires clean — but there is no 9th signature skill to
+  grant, and inventing one means designing new signature-cast combat
+  behavior (WRATH/CHAIN interaction, cost, cast conditions), not writing an
+  item record. The alternative — a relic with only `statModifiers`, no
+  `grantsSignature` — contradicts `relic.library.ts`'s own stated relic
+  identity rule ("Relic identity = `grantsSignature !== undefined`").
+  Needs an owner call: (a) design N new signature skills first (a
+  mechanics-expert task, THE BIG NUMBERS REWRITE-era numbers), then relics
+  to carry them into the empty accessory kinds, or (b) deliberately break
+  the 1:1 rule and ship stat-only accessories for those 3 kinds, or (c)
+  something else entirely for "THE PATH's sixth axis" that the original
+  user-jot didn't specify. `/adjust-equipment` pass 1 shipped its other,
+  in-scope finding (5 dead consumables, see `CONTENT_LEDGER.md`) instead of
+  guessing at this one.
+
 ### [loop-call] Dead engine hooks — 19 orphaned `zoneHas` sites in combat.engine.ts (2026-09-04)
 - category: mechanics residue (found during `/adjust-cards` pass 1, filed
   rather than actioned — cleanup is a mechanics-expert-owned sweep, not a

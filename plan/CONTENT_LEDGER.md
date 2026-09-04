@@ -12,7 +12,7 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-04 | 24978555 | 1 |
-| equipment | `skills/adjust-equipment.md` | never | - | 0 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-04 | 934160bb | 1 |
 | enemies | `skills/adjust-enemies.md` | never | - | 0 |
 | keywords | `skills/adjust-keywords.md` | never | - | 0 |
 | npcs | `skills/adjust-npcs.md` | never | - | 0 |
@@ -27,6 +27,34 @@ Newest first. One entry per `/adjust-*` tick:
 > (never drafted, superseded by <card>), updated 1 (pricing drift
 > after VERB_POINTS change)".>
 ```
+
+> **[adjust-equipment pass 1, 2026-09-04, commit 934160bb]** Zero-CREATE,
+> zero-REMOVE pass — updated 5 consumables (`focus-vial`, `heart-draught`,
+> `body-elixir`, `resonance-crystal`, `greater-resonance-crystal`) that
+> shipped with none of `healAmount`/`effectId`/`inlineEffect` set, so
+> `useConsumableEffect` silently applied nothing on use (23% of the
+> 22-consumable library was flavor text with no mechanical payload). Wired
+> each to the closest existing library effect (`buff_accuracy_up`,
+> `buff_status_chance_up`, `buff_damage_reduction`, `buff_all_stats_up` ×2,
+> the "greater" one at `intensityOverride: 2` so it's a felt difference per
+> THE BIG NUMBERS REWRITE). KB search (`kb-query`) returned no on-point
+> prior art — this is an implementation-completeness bug, not a design
+> question — so the grounding is the repo's own established
+> closest-analogue precedent (`revive-crystal`/`phoenix-tear`, already in
+> this file) plus `component-clarity.okf.md` (an item's promised effect
+> must be legible/real). Added `dead-consumable-payload.engine.test.ts`
+> (50 tests) — a library-wide guard against future dead consumables, not
+> just the 5 fixed instances. The 8 signet relics audited clean (no
+> dominated pairs; `grantsSignature` differentiates every same-slot pair).
+> Real structural finding, NOT actioned: 3 `AccessoryKind`s (head/hands/
+> feet) have zero live relics, but the 8 relics are 1:1-locked to the 8
+> existing signature skills (load-bearing per `relic.library.ts`), so
+> filling that gap means designing new signature-skill combat behavior
+> first — a mechanics decision, not a content edit. Filed as `[loop-call]`
+> to `plan/AUDIT.md`; this is also the structural diagnosis of the pending
+> `[HIGH]` mid/late-equipment row in `plan/CRITIQUE.md` (cross-referenced
+> there, left open). Verify: green (mechanics 209/209 files · 3321 tests,
+> mobile 24/24).
 
 > **[adjust-cards pass 1, 2026-09-04, commit 24978555]** Zero-CREATE,
 > zero-REMOVE pass — full-library reachability, duplicate, aspect-thirds,

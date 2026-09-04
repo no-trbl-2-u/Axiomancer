@@ -55,6 +55,12 @@ export const consumableLibrary: Consumable[] = [
         name: 'Focus Vial',
         description: 'A vial of crystalline thought. Sharpens reasoning for a moment.',
         category: 'consumable',
+        // adjust-equipment pass 1 (2026-09-04): shipped with none of
+        // effectId/inlineEffect/healAmount set — useConsumableEffect applied
+        // nothing on use. No per-stat "mind" buff exists in the library, so
+        // this maps to the closest generic analogue (precision), same
+        // closest-analogue pattern as revive-crystal/phoenix-tear below.
+        effectId: 'buff_accuracy_up',
         quantity: 1,
     },
     {
@@ -62,6 +68,9 @@ export const consumableLibrary: Consumable[] = [
         name: "Heart's Draught",
         description: 'A warm draught that quickens the wearer\'s convictions.',
         category: 'consumable',
+        // adjust-equipment pass 1 (2026-09-04): same dead-payload bug as
+        // focus-vial. Closest generic analogue for "quickens convictions".
+        effectId: 'buff_status_chance_up',
         quantity: 1,
     },
     {
@@ -69,6 +78,9 @@ export const consumableLibrary: Consumable[] = [
         name: 'Body Elixir',
         description: 'A heavy elixir that locks the muscles into purpose.',
         category: 'consumable',
+        // adjust-equipment pass 1 (2026-09-04): same dead-payload bug as
+        // focus-vial. Closest generic analogue for "locks the muscles".
+        effectId: 'buff_damage_reduction',
         quantity: 1,
     },
     {
@@ -96,6 +108,10 @@ export const consumableLibrary: Consumable[] = [
         name: 'Resonance Crystal',
         description: 'A three-faced crystal that resonates with body, mind, and heart in equal measure.',
         category: 'consumable',
+        // adjust-equipment pass 1 (2026-09-04): same dead-payload bug as
+        // focus-vial. buff_all_stats_up (Sorites Ascension: +body/mind/heart)
+        // is a direct flavor match, not just a closest analogue.
+        effectId: 'buff_all_stats_up',
         quantity: 1,
     },
     {
@@ -221,6 +237,12 @@ export const consumableLibrary: Consumable[] = [
         name: 'Greater Resonance Crystal',
         description: 'A radiant crystal that floods body, mind, and heart at once.',
         category: 'consumable',
+        // adjust-equipment pass 1 (2026-09-04): same dead-payload bug as
+        // resonance-crystal. Same effect at intensityOverride 2 (doubles the
+        // flat statModifiers, see effect-modifiers.test.ts Q2) so "Greater"
+        // is a felt difference, not just a name, per THE BIG NUMBERS REWRITE.
+        effectId: 'buff_all_stats_up',
+        intensityOverride: 2,
         quantity: 1,
         addedIn: '2026-06-07',
         tags: ['consumable', 'resource', 'late-game'],

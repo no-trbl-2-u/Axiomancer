@@ -358,6 +358,12 @@
 - evidence: user-spotted at 2026-09-03T11:20:00Z
 - suggested fix: [user has not specified — iterate to determine]
 - source: user
+- update (adjust-equipment pass 1, 2026-09-04): audited — the 8 relics are
+  1:1-locked to the 8 existing signature skills, load-bearing per
+  `relic.library.ts`'s own header; the 3 empty accessory kinds
+  (head/hands/feet) can't be filled without designing new signature skills
+  first. Filed as `[loop-call]` in `plan/AUDIT.md` (owner call needed on
+  approach) rather than guessed at solo. Still open here.
 
 ### [LOW] dialogue — reply cards echo their label as an identical sub-line
 - pass: session-playtest 2026-08-28 (continent playtest, The Delver at
