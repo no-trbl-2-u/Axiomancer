@@ -8,17 +8,22 @@ import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, extname } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 
-const DIST = new URL('../.smoke-dist', import.meta.url).pathname;
+// fileURLToPath, not URL.pathname: the latter yields /C:/… on Windows,
+// which Node path APIs and spawn cwd reject.
+const DIST = fileURLToPath(new URL('../.smoke-dist', import.meta.url));
 
 // Build the web export if it isn't already present (reuse otherwise, so
 // running back-to-back with the visual smoke gate is cheap).
 if (!existsSync(join(DIST, 'index.html'))) {
     console.log('theme-e2e: exporting web build → .smoke-dist ...');
     const r = spawnSync('npx', ['expo', 'export', '--platform', 'web', '--output-dir', DIST], {
-        cwd: new URL('..', import.meta.url).pathname,
+        cwd: fileURLToPath(new URL('..', import.meta.url)),
         stdio: 'inherit',
+        // On Windows npx is npx.cmd, which Node refuses to spawn without a shell.
+        shell: process.platform === 'win32',
     });
     if (r.status !== 0) { console.error('theme-e2e: expo export failed'); process.exit(3); }
 }
