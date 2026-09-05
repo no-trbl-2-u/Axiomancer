@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-18T19:11:03Z | skill | dataviz | claude-fable-5 | main | - |
-| 2026-07-18T19:32:59Z | skill | ship-a-phase | claude-fable-5 | main | args: Phase D8 — preset dice valves (plan/phases/phase_D8_preset_dice_valves.md). Owner-st |
 | 2026-07-18T19:39:39Z | subagent | mechanics-expert | claude-fable-5 | main | Metrics lessons analysis |
 | 2026-07-18T19:39:55Z | subagent | card-expert | claude-fable-5 | main | Library triage application plan |
 | 2026-07-18T19:40:12Z | subagent | card-expert | claude-fable-5 | main | Real-deckbuilder gap analysis |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-05T10:43:14Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-05T10:44:07Z | skill | adjust-keywords | claude-sonnet-5 | main | - |
 | 2026-09-05T10:46:37Z | subagent | card-expert | claude-sonnet-5 | main | Adjust-keywords audit and ship pass |
+| 2026-09-05T12:07:13Z | slash-prompt | /digest | unknown | user/ci | /digest |
+| 2026-09-05T12:07:17Z | skill | digest | unknown | main | - |

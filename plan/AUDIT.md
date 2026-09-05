@@ -56,6 +56,26 @@
   `^(\w+)(?:\s+\(gold\))?\s+die` + `drag onto` shape and the other script
   should follow or its usable-die detection goes silently blind.
 - score: impact 5 x ease 8 / 10 = 4.0
+- update (digest 2026-09-05): (b) stopped being silent and started being
+  loud — the nightly breadth check (`npm --workspace axiomancer-mobile run
+  e2e:minigames`) now fails red at `upgradeable-dice-e2e.mjs`'s
+  `assertSwayCommit` step: `SWAY-commit guard: no usable heart/wild die in
+  the opening tray this seed`. Live seed-8 die labels read
+  `"HEART die, SPECIAL face: drag onto a staged HEART card to power it and
+  gain 2 Conviction"` / `"WILD (gold) die, MISS face: dead, powers
+  nothing"` — the script's `color` regex (`^(\w+)\s+stance die`) and
+  `usable` regex (`available|drafted|ghost|banked|BOON face`) match none
+  of that, so every tray die parses to `color: ''`, `usable: false` and
+  the guard's `.find` always comes back empty regardless of what the tray
+  actually deals. This is the predicted "usable-die detection goes
+  silently blind" outcome from the same row, now confirmed as a hard CI
+  failure rather than a hypothetical — raising this from a copy-polish
+  debt item to the breadth check's current red gate. Fix is still the
+  same shape already scoped above: port `combat-round-e2e.mjs`'s
+  `^(\w+)(?:\s+\(gold\))?\s+die` + a presence-of-"drag onto" (rather than
+  "BOON face") usability check into `upgradeable-dice-e2e.mjs` lines
+  ~338-340 (and the sibling sites at ~249, ~401-403 the original row
+  already named).
 
 ### [loop-call] No mid/late equipment progression — 8 relics are 1:1-locked to 8 signatures, 3 accessory kinds have zero live relics (2026-09-04)
 - category: design residue (found during `/adjust-equipment` pass 1's
