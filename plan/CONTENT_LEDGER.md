@@ -13,7 +13,7 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-04 | 24978555 | 1 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-04 | 934160bb | 1 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-05 | PENDING | 1 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-05 | 04d2bf0d | 1 |
 | keywords | `skills/adjust-keywords.md` | never | - | 0 |
 | npcs | `skills/adjust-npcs.md` | never | - | 0 |
 
@@ -28,7 +28,7 @@ Newest first. One entry per `/adjust-*` tick:
 > after VERB_POINTS change)".>
 ```
 
-> **[adjust-enemies pass 1, 2026-09-05, commit PENDING]** Created 2 cavern-
+> **[adjust-enemies pass 1, 2026-09-05, commit 04d2bf0d]** Created 2 cavern-
 > native enemies (The Ninth-Rung Spider, The Spore-Warden) — the `caverns`
 > `EnemiesByMap` pool was 10/14 (71%) direct re-treads from `northern-forest`,
 > over the skill's >70% sibling-overlap ceiling; now 10/16 (62.5%). Updated 3
