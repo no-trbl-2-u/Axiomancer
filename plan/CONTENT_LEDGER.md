@@ -14,7 +14,7 @@
 | cards | `skills/adjust-cards.md` | 2026-09-04 | 24978555 | 1 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-04 | 934160bb | 1 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-05 | 04d2bf0d | 1 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-05 | PENDING | 1 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-05 | bf6223f1 | 1 |
 | npcs | `skills/adjust-npcs.md` | never | - | 0 |
 
 ## Log
@@ -28,7 +28,7 @@ Newest first. One entry per `/adjust-*` tick:
 > after VERB_POINTS change)".>
 ```
 
-> **[adjust-keywords pass 1, 2026-09-05, commit PENDING]** Zero-CREATE pass —
+> **[adjust-keywords pass 1, 2026-09-05, commit bf6223f1]** Zero-CREATE pass —
 > one retire, one stale-doc correction, one tooling fix. Retired CURDLE
 > (`convert_dots`): exactly one live carrier (The Lazar's Kiss, rot rank 4),
 > below the atlas's own "≥2 cards or ≥2 enemies" discipline, confirmed via a
