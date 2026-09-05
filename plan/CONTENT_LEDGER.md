@@ -15,7 +15,7 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-04 | 934160bb | 1 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-05 | 04d2bf0d | 1 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-05 | bf6223f1 | 1 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-05 | PENDING | 1 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-05 | f0a2891f | 1 |
 
 ## Log
 
@@ -28,7 +28,7 @@ Newest first. One entry per `/adjust-*` tick:
 > after VERB_POINTS change)".>
 ```
 
-> **[adjust-npcs pass 1, 2026-09-05, commit PENDING]** Zero-CREATE,
+> **[adjust-npcs pass 1, 2026-09-05, commit f0a2891f]** Zero-CREATE,
 > zero-REMOVE pass — updated 2 (staged the Forest Ranger and the Lost
 > Trader). Both were authored in full (Phase 117 — complete `DialogueTree`s,
 > alignment-gated branches, moral/currency effects) but sat in northern-
