@@ -113,11 +113,12 @@ describe('Phase 52a — removeCardFromCombatDeck: source ordering', () => {
         expect(result.deckSizeAfter).toBe(result.deckSizeBefore - 1);
     });
 
-    it('a duplicated knownCards entry leaves ENTIRELY — the deck only ever held one copy', () => {
+    it('a duplicated knownCards entry gives up ONE copy — a 3-of stays a 2-of', () => {
         // The mobile starter-bundle path writes the preset recipe verbatim,
-        // duplicates and all, into `knownCards`; `buildCombatDeck` de-dupes it.
-        // Stripping one entry would leave the deck unchanged — an invisible
-        // removal, the exact failure this phase exists to avoid.
+        // duplicates and all, into `knownCards`, and `buildCombatDeck` KEEPS
+        // those copies (the de-dup was repealed 2026-09-05). Entries and deck
+        // copies are one-for-one now, so one removal must take exactly one
+        // entry — draining the list would delete a 3-of for a single price.
         const player = fixture(
             ['spoiled-poultice', 'spoiled-poultice', 'spoiled-poultice', ...OFFICE.slice(1)],
             EARNED,
@@ -126,9 +127,8 @@ describe('Phase 52a — removeCardFromCombatDeck: source ordering', () => {
 
         expect(result.ok).toBe(true);
         if (!result.ok) return;
-        expect(result.player.knownCards).not.toContain('spoiled-poultice');
-        expect(buildCombatDeck(result.player)).not.toContain('spoiled-poultice');
-        // One DECK copy left, though three list entries did.
+        expect(result.player.knownCards.filter(id => id === 'spoiled-poultice')).toHaveLength(2);
+        expect(buildCombatDeck(result.player).filter(id => id === 'spoiled-poultice')).toHaveLength(2);
         expect(result.deckSizeAfter).toBe(result.deckSizeBefore - 1);
     });
 
@@ -191,24 +191,28 @@ describe('Phase 52a — loadout reconciliation', () => {
         expect(buildCombatDeck(result.player, result.flags)).not.toContain('grandmothers-psalter');
     });
 
-    it('a multi-slot loadout entry is evicted WHOLE — the base is de-duped before it is dealt', () => {
-        // `buildCombatDeck` de-dupes whichever card base is in force, loadout
-        // included: three `combat-loadout-card:thin-hymn:*` slots deal ONE copy.
-        // Dropping a single slot would therefore shrink nothing.
+    it('a multi-slot loadout entry gives up ONE slot — and knownCards is left alone', () => {
+        // `buildCombatDeck` keeps the copies of whichever base is in force,
+        // loadout included: three `combat-loadout-card:thin-hymn:*` slots deal
+        // THREE copies. One removal un-seats one slot. `knownCards` is the
+        // unlock set while a loadout is in force, so it must not be touched —
+        // un-seating a copy is not un-learning the card.
         const seated = [...OFFICE, 'thin-hymn', 'thin-hymn', ...EARNED.slice(0, 5)];
         const flags = loadoutFlags(seated);
         expect(getCombatLoadout(flags).filter(id => id === 'thin-hymn')).toHaveLength(3);
         const player = fixture(OFFICE, EARNED.slice(0, 5));
-        expect(buildCombatDeck(player, flags).filter(id => id === 'thin-hymn')).toHaveLength(1);
+        expect(buildCombatDeck(player, flags).filter(id => id === 'thin-hymn')).toHaveLength(3);
 
         const result = removeCardFromCombatDeck(player, 'thin-hymn', flags);
         expect(result.ok).toBe(true);
         if (!result.ok) return;
         expect(result.removedFrom).toBe('known');
         expect(result.loadoutReconciled).toBe(true);
-        expect(getCombatLoadout(result.flags)).not.toContain('thin-hymn');
-        expect(result.player.knownCards).not.toContain('thin-hymn');
-        // Three slots left, but exactly ONE deck copy did.
+        expect(getCombatLoadout(result.flags).filter(id => id === 'thin-hymn')).toHaveLength(2);
+        expect(result.player.knownCards).toContain('thin-hymn');
+        // Exactly ONE deck copy left.
+        expect(buildCombatDeck(result.player, result.flags).filter(id => id === 'thin-hymn'))
+            .toHaveLength(2);
         expect(buildCombatDeck(result.player, result.flags).length)
             .toBe(result.deckSizeBefore - 1);
     });
@@ -220,8 +224,13 @@ describe('Phase 52a — loadout reconciliation', () => {
 
         expect(result.ok).toBe(true);
         if (!result.ok) return;
+        // The seated list names `thin-hymn` twice (once inside OFFICE, once
+        // appended). Exactly ONE slot is dropped — the FIRST — and every other
+        // slot, this card's second copy included, keeps its place and order.
         const survivors = getCombatLoadout(result.flags);
-        expect(survivors).toEqual([...OFFICE, ...EARNED.slice(0, 5)].filter(id => id !== 'thin-hymn'));
+        const seated = [...OFFICE, 'thin-hymn', ...EARNED.slice(0, 5)];
+        const firstHymn = seated.indexOf('thin-hymn');
+        expect(survivors).toEqual(seated.filter((_, i) => i !== firstHymn));
         // Non-loadout flags in the array are preserved verbatim.
         const withNoise = ['starter-bundle-chosen', ...flags, 'bundle:threadbare'];
         const noisy = removeCardFromCombatDeck(player, 'thin-hymn', withNoise);

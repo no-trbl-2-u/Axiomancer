@@ -171,9 +171,13 @@ describe('Spec 25 §4.3 — buildCombatDeck', () => {
         expect(deck).not.toContain('card-retreat'); // no in-combat retreat exists
     });
 
-    it('de-dups known cards and preserves learn order', () => {
+    it('KEEPS duplicate known cards and preserves learn order', () => {
+        // The de-dup was repealed 2026-09-05: it silently collapsed every
+        // authored copy count in the shipped presets (the 18-card Threadbare
+        // Office was dealt as 8 cards). Copies are load-bearing in a
+        // deckbuilder, so the card base keeps them — same as the reward list.
         const deck = buildCombatDeck(makePlayer([DOT_BODY, DOT_BODY, CONTROL_HEART]));
-        expect(deck.filter(id => id === DOT_BODY)).toHaveLength(1);
+        expect(deck.filter(id => id === DOT_BODY)).toHaveLength(2);
         expect(deck.indexOf(DOT_BODY)).toBeLessThan(deck.indexOf(CONTROL_HEART));
     });
 
