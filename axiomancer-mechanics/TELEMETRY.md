@@ -10,3 +10,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-08-12T08:09:15Z | subagent | general-purpose | claude-sonnet-5 | main | Retheme alignment cells 1-9 to dark fantasy |
 | 2026-08-12T08:10:01Z | subagent | general-purpose | claude-sonnet-5 | main | Retheme alignment cells 10-18 to dark fantasy |
 | 2026-08-12T08:10:49Z | subagent | general-purpose | claude-sonnet-5 | main | Retheme alignment cells 19-27 to dark fantasy |
+| 2026-09-05T15:22:42Z | subagent | content-curator | claude-sonnet-5 | main | Ship adjust-npcs pass 1 |

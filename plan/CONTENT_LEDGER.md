@@ -15,7 +15,7 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-04 | 934160bb | 1 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-05 | 04d2bf0d | 1 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-05 | bf6223f1 | 1 |
-| npcs | `skills/adjust-npcs.md` | never | - | 0 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-05 | PENDING | 1 |
 
 ## Log
 
@@ -27,6 +27,69 @@ Newest first. One entry per `/adjust-*` tick:
 > (never drafted, superseded by <card>), updated 1 (pricing drift
 > after VERB_POINTS change)".>
 ```
+
+> **[adjust-npcs pass 1, 2026-09-05, commit PENDING]** Zero-CREATE,
+> zero-REMOVE pass — updated 2 (staged the Forest Ranger and the Lost
+> Trader). Both were authored in full (Phase 117 — complete `DialogueTree`s,
+> alignment-gated branches, moral/currency effects) but sat in northern-
+> forest's `unstagedNpcs` with a "content follow-up" reason (S-02, dated
+> 2026-08-28) that was never picked up — Signal 1's highest-priority finding
+> ("authored-but-invisible content is worse than absent"). Worse than a
+> generic staging gap: the Forest Ranger's tree carries the ONLY authored
+> path to `startQuest('get-to-cave')` (Phase 8) — with him unstaged,
+> `get-to-cave` (an authored `Quest` object with a real reward, declared in
+> `northernForest.quests`) had a 0% chance of ever starting in live play.
+> `auditNarrativeReachability` only checks that an unstaged NPC is
+> *declared*, not that the declaration is still current, so nothing failed.
+> Staged both by displacing a `cutscene`-kind scenery pool each (nf-21
+> "Ranger Cairn", nf-14 "Ancient Stone Marker" — both already scenery
+> conversions from Phase 53a with no flag/quest dependency, confirmed via
+> grep before touching them); new interaction descriptions written in the
+> ratified register (spec 34 §2), each keeping a concrete thread from the
+> original scenery text (the cairn's dead colleague now ties to the
+> Ranger's own logging-line conflict; the stone marker's runes now sit
+> beside the ambushed cart) rather than discarding it. Existing dialogue-
+> tree prose for both NPCs (pre-Phase-44g, wordier than the house register)
+> was left untouched — same division of labor S-02 drew for the coastal
+> eight: staging is this skill's job, full retheme is a separate content
+> pass; filed to `plan/PHASE_CANDIDATES.md`. Audited but NOT actioned: (1)
+> three of four Northern-Continent maps (caverns, connecting-river,
+> town-across-river) carry exactly 1 staged NPC each, under Signal 2's
+> "<2 staged NPCs → CREATE" threshold — but each is already a deliberately
+> minimal, freshly-authored singleton (Phase W3/W4's own in-file commentary:
+> "the guaranteed quest-giver is on every route," "a homecoming, not a new
+> front") with no `specs/characters/` or `specs/story/` spec asking for more
+> voices; inventing a new named character's full personhood here is
+> explicitly out of scope for this skill (hard rule 3) — filed to
+> `plan/AUDIT.md` as `[needs-user-call]`. (2) The four coastal NPCs S-02
+> deliberately left unhomed (Tide-Shopkeeper, Village Healer, Union Leader,
+> Merchant's Widow) were re-checked against their stated reasons: Tide-
+> Shopkeeper's `isShopkeeper: true` flag still has zero mobile consumers
+> (confirmed by grep — the live shop UI mobile ships today is the unrelated
+> `village`-kind `shop.wares` path, already used at nf-8/nf-18); no rest-node
+> rebuild or settlement screen has landed since 52c/52d or S-02 was written.
+> All four reasons still hold; no action. `teachCard` and legacy flat
+> `DialogueMap` signals came back empty (zero live `teachCard` references
+> to audit; no authored NPC uses `DialogueMap`). KB (kb-query): searched
+> `boardgames` scope for NPC/dialogue/quest-reachability prior art; no doc
+> addresses "unreachable content" by that name, but heroes-of-terrinoth's
+> reception doc (src-007) grounds the general principle this pass acts on —
+> "the abstraction of quest progress weakens the game's narrative payoff,"
+> quest content that doesn't legibly reach the player reads as a real
+> defect, not a neutral omission — cited as the closest on-point prior art
+> rather than a miss requiring a wishlist filing. Added
+> `nf-21-nf-14-npc-staging.engine.test.ts` (4 tests: both nodes resolve as
+> `interaction` carrying the right `DialogueTree`; the Ranger's `get-to-cave`
+> grant actually starts the quest through the real `applyDialogueChoice`
+> orchestrator; the unstaged backlog is empty) and updated the pinned
+> `narrative-reachability.engine.test.ts` assertions (was "4 of 6 NPCs
+> reached, 2 declared-unstaged," now "6 of 6," plus a dedicated nf-21/nf-14
+> reachability check) and one stale `nf-14 resolves as cutscene` assertion
+> that this pass's fix falsified. No new persisted state shape — staging
+> reuses the existing `interaction`/`DialogueTree` machinery, so no
+> `GAME_STATE_VERSION` migration was needed. Verify: green (mechanics
+> 210/210 files · 3343 tests + build; mobile lint + typecheck + jest
+> 252/252 suites · 2604/2604 tests + assets:check + art:test).
 
 > **[adjust-keywords pass 1, 2026-09-05, commit bf6223f1]** Zero-CREATE pass —
 > one retire, one stale-doc correction, one tooling fix. Retired CURDLE

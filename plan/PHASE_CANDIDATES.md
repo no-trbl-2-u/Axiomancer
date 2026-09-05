@@ -77,6 +77,38 @@
 
 ## Pending
 
+### [score 5.0] Retheme the six Northern-Forest dialogue trees to the ratified register (spec 34 §2) — all now reachable
+- proposed: 2026-09-05, adjust-npcs pass 1
+- source signals:
+  - `/adjust-npcs` pass 1 staged the last two of `Northern-Forest/npcs.ts`'s
+    six NPCs (Forest Ranger, Lost Trader) — all six trees (Shrine Keeper,
+    the Chronicler, the Wandering Philosopher, Forest Ranger, Hermit Sage,
+    Lost Trader) are now reachable in live play for the first time.
+  - Every one of the six was authored pre-44g (Phase 115/117-era) and reads
+    noticeably off the house register: wordier interiority ("I feel called
+    past them," "touches my heart deeply"), no thee/thou/exclamation
+    violations found on inspection, but sustained above the "one clause per
+    line, terse, cold and old" bar spec 34 §2 sets and Phase 44g already
+    proved out on the eight coastal trees.
+  - Direct precedent: S-02 drew exactly this line for the coastal eight
+    ("This spec deliberately does not retheme a single existing line...
+    Phase 44g owns rewriting them") and 44g executed it as its own
+    dedicated pass rather than folding it into the staging phase (53c).
+    This candidate is the same split, one tier over: staging (this pass)
+    is done; retheme is real, sized, and not this skill's job to rush.
+  - Grounding: the two newly-staged trees are the ones with immediate
+    reader traffic (the Ranger's `get-to-cave` grant is now the sole live
+    path to a real quest); a mismatch between the Ranger's own voice
+    ("How do we balance the forest's future against people's immediate
+    needs?") and the terse register the interaction description around him
+    was just written in (this pass's own nf-21 prose) is a visible seam a
+    player can notice in one conversation.
+- rationale: sized like 44g (six trees, no mechanical changes, pure prose)
+  and low-risk (no schema/effect changes) — a clean `content-curator` job,
+  not a design decision. Not actioned this pass to avoid diluting the
+  staging fix with a six-tree rewrite in the same diff, and because 44g's
+  own precedent treats staging and retheme as sequential, separable work.
+
 ### [score 8.0] Register the 2026-09-02 status-primacy doctrine retirement in `lexicon.json`'s doctrine mechanism — two live surfaces still assert it as current
 - proposed: 2026-09-03, expand pass 11
 - source signals:

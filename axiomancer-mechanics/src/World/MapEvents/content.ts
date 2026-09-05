@@ -300,19 +300,19 @@ const nfBerryBushes: MapEventPool = {
     }],
 };
 
-// Phase 53a — was authored `interaction`, naming an 'Ancient Stone Marker'
-// that no roster will ever carry: it's scenery, not a person. Re-authored
-// as `cutscene`; the original description survives as the first line.
+// adjust-npcs pass 1 (2026-09-05) — was `cutscene` scenery (Phase 53a
+// re-authored it off an 'Ancient Stone Marker' naming nobody). The Lost
+// Trader carried a full dialogue tree since Phase 117 and sat in
+// `unstagedNpcs` with no node ever assigned. Staged here: the same trail
+// marker, now the site of the ambush.
 const nfStoneMarker: MapEventPool = {
-    id: 'nf-14.cutscene',
+    id: 'nf-14.interaction',
     entries: [{
-        kind: 'cutscene', weight: 1,
+        kind: 'interaction', weight: 1,
         payload: {
-            kind: 'cutscene',
-            lines: [
-                'An old stone marker left by previous travelers. Carved runes mark the way forward.',
-            ],
-            description: 'An ancient stone marker beside the trail.',
+            kind: 'interaction',
+            npcName: 'Lost Trader',
+            description: "An old marker stone leans at the trail's edge. Runes worn shallow by rain. Beside it a cart lies overturned. Wheels up, goods scattered across the path. A trader picks through what the bandits left him.",
         },
     }],
 };
@@ -447,17 +447,20 @@ const nfAxeHead: MapEventPool = {
     }],
 };
 
+// adjust-npcs pass 1 (2026-09-05) — was `cutscene` scenery (a cairn for an
+// unnamed ranger). The Forest Ranger carried a full dialogue tree since
+// Phase 117 — including the ONLY path to `startQuest('get-to-cave')`
+// (Phase 8) — and sat in `unstagedNpcs` with no node ever assigned, which
+// meant `get-to-cave` could never be started in live play. Staged here: the
+// cairn becomes his, not a stranger's.
 const nfRangerCairn: MapEventPool = {
-    id: 'nf-21.cutscene',
+    id: 'nf-21.interaction',
     entries: [{
-        kind: 'cutscene', weight: 1,
+        kind: 'interaction', weight: 1,
         payload: {
-            kind: 'cutscene',
-            lines: [
-                'A careful stack of stones marks this quiet spot.',
-                'Someone is buried here — a ranger who never came home.'
-            ],
-            description: 'A memorial cairn for a lost ranger.',
+            kind: 'interaction',
+            npcName: 'Forest Ranger',
+            description: "A cairn of fitted stones marks the trail's edge. The Forest Ranger kneels beside it. One hand rests flat on the topmost stone. A colleague, lost to the same logging line he still watches.",
         },
         alignmentDelta: { outlook: -1, epistemology: 1 },
     }],

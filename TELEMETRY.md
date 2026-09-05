@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-18T19:39:39Z | subagent | mechanics-expert | claude-fable-5 | main | Metrics lessons analysis |
-| 2026-07-18T19:39:55Z | subagent | card-expert | claude-fable-5 | main | Library triage application plan |
 | 2026-07-18T19:40:12Z | subagent | card-expert | claude-fable-5 | main | Real-deckbuilder gap analysis |
 | 2026-07-18T19:40:28Z | subagent | card-expert | claude-fable-5 | main | Card wording clarity audit |
 | 2026-07-18T20:10:59Z | slash-prompt | /plan-a-phase | unknown | user/ci | /plan-a-phase In the card-editor I see something from the legacy combat a card type focuse |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-05T10:46:37Z | subagent | card-expert | claude-sonnet-5 | main | Adjust-keywords audit and ship pass |
 | 2026-09-05T12:07:13Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-09-05T12:07:17Z | skill | digest | unknown | main | - |
+| 2026-09-05T15:20:22Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-05T15:21:22Z | skill | adjust-npcs | claude-sonnet-5 | main | - |

@@ -14,6 +14,34 @@
 
 ## Pending
 
+### [content] Three of four Northern-Continent maps carry only 1 staged NPC [needs-user-call] (2026-09-05)
+- category: content (found during `/adjust-npcs` pass 1's structural audit —
+  Step 1's "map with fewer than 2 staged NPCs → CREATE" signal)
+- detail: `caverns` (`theDelver` only), `connecting-river` (`theBoatwoman`
+  only), and `town-across-river` (`theSweetheart` only) each carry exactly
+  one rostered NPC; only `northern-city` (`theGateClerk`, `theShipwright`)
+  clears the skill's own ≥2 threshold. Read against the maps' own in-file
+  design commentary (Phase W3/W4, `Northern-Continent/maps.ts`'s header
+  block), this reads as deliberate rather than an oversight: each singleton
+  is explicitly the "guaranteed quest-giver on every route" pattern
+  (the fv-2/Old Marrow precedent, scaled to a sparser map), and
+  town-across-river is named in-file as "a homecoming, not a new front" —
+  deliberately small. No `specs/characters/` or `specs/story/` document
+  asks for additional voices on any of the three maps. Per this skill's
+  hard rule 3 ("don't invent a named character's personhood autonomously")
+  and Step 2's carve-out, filling this gap — even partially — means
+  designing 1-3 new named characters' full personhood (voice, motive,
+  history, at minimum a dialogue tree), which is `character-spec`/
+  `story-spec`'s interactive job, not something this autonomous tick can
+  responsibly improvise. Filed rather than actioned or silently dropped:
+  a future `/adjust-npcs` pass re-reads this row before treating the
+  signal as "already handled."
+- score: n/a — routing item, not a scored fix. Needs a user call on
+  whether Northern-Continent's minimalism is intentional (in which case
+  this row should be closed as "by design" and the skill's threshold
+  signal caveated) or whether one or more of the three maps should get a
+  `character-spec`/`story-spec` session for a second voice.
+
 ### [content] 30 of 73 roster enemies (41%) carry no aftermath prose (`finalBlowLines`/`causeLines`) (2026-09-05)
 - category: content (found during `/adjust-enemies` pass 1's structural
   audit — Step 1's "aftermath prose missing" signal)

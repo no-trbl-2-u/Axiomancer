@@ -624,14 +624,10 @@ const northernForest: MapDefinition = {
         mapImage: { alt: '', src: '' },
         combatImage: { alt: '', src: '' },
     },
-    // Phase 53a (S-02) — declared-unstaged with reasons. 2026-08-28:
-    // inter-map travel exists now (the fv-10 door reaches this map), so
-    // "unreachable" no longer holds — homing these two is a content
-    // follow-up, not a travel blocker.
-    unstagedNpcs: [
-        { name: 'Forest Ranger', reason: 'No node assigned yet. The map is reachable as of 2026-08-28 (inter-map travel); homing the Ranger is a content follow-up (S-02).' },
-        { name: 'Lost Trader', reason: 'Same as the Forest Ranger — awaiting a node, a content follow-up now that the map is reachable (S-02).' },
-    ],
+    // adjust-npcs pass 1 (2026-09-05) — the Forest Ranger and Lost Trader
+    // are homed at nf-21 and nf-14 respectively (see `MapEvents/content.ts`);
+    // northern-forest now reaches all 6 rostered NPCs and no longer declares
+    // any unstaged. See `plan/CONTENT_LEDGER.md`'s npcs row for the finding.
 };
 
 export { fishingVillage, northernForest };
