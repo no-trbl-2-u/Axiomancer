@@ -14,7 +14,7 @@
 | cards | `skills/adjust-cards.md` | 2026-09-04 | 24978555 | 1 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-04 | 934160bb | 1 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-05 | 04d2bf0d | 1 |
-| keywords | `skills/adjust-keywords.md` | never | - | 0 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-05 | PENDING | 1 |
 | npcs | `skills/adjust-npcs.md` | never | - | 0 |
 
 ## Log
@@ -27,6 +27,49 @@ Newest first. One entry per `/adjust-*` tick:
 > (never drafted, superseded by <card>), updated 1 (pricing drift
 > after VERB_POINTS change)".>
 ```
+
+> **[adjust-keywords pass 1, 2026-09-05, commit PENDING]** Zero-CREATE pass —
+> one retire, one stale-doc correction, one tooling fix. Retired CURDLE
+> (`convert_dots`): exactly one live carrier (The Lazar's Kiss, rot rank 4),
+> below the atlas's own "≥2 cards or ≥2 enemies" discipline, confirmed via a
+> rider-inclusive grep (no `CardRider.chain`-style grant hides a second
+> carrier anywhere in `library/*.cards.ts`). The mechanic still functions —
+> the card still flips Bleed↔Poison — only the badge/gloss/atlas row died,
+> per the atlas's own escape hatch ("a one-card mechanic stays as plain
+> rules text"); touched `rot.cards.ts` (paidSummary), `combat.cards.ts`
+> (mechanicText case), mobile `keywords.ts` (MECHANIC_KEYWORD +
+> KEYWORD_GLOSS), `keywords.test.ts` (KINDS_WITHOUT_MECHANIC_KEYWORD),
+> `keyword-atlas.md` (row removed, retirement logged), and
+> `scripts/build-catalog.mjs` (dead bold-word cleanup). Corrected a stale
+> "Known drift" bullet claiming FINALE has no `KEYWORD_GLOSS` row — it's had
+> one since 2026-09-02 (the same day the drift note was written), verified
+> via `node --test scripts/content-drift.test.mjs` (11/11 green, confirms no
+> orphaned atlas row and no unglossed registry keyword) — exempt from the KB
+> gate as a pure doc-accuracy fix, per the skill's REMOVE carve-out. Fixed a
+> real parser bug in `scripts/axio-mcp-server.mjs`'s `parseKeywordAtlas`: the
+> "System terms" table's 2-column header (`term | what it is`) wasn't
+> recognized as a header row (only the label "keyword" was), so `axio_
+> overview`/`axio_keywords` counted it as a bogus 70th registry entry — this
+> is what caused the "70 rows vs ~45-50 visible rows" reconciliation ask;
+> true count after the fix + CURDLE retirement is 68 (confirmed by a direct
+> reparse of the file; the live MCP tool session hadn't restarted to pick up
+> the script edit as of this writing). Ran the rider-inclusive carrier sweep
+> the 2026-09-04 `/adjust-cards` loop-call asked for across all 11 flagged
+> kinds: 9 were false alarms (share a well-carried umbrella keyword, e.g.
+> recoil_x→Recoil, or are legitimately badge-exempt, e.g. reap/grant_pip/
+> bank_spent_die/reroll_spent/conjure_card); CURDLE was genuine and is fixed;
+> CHAIN and OMEN are ALSO genuinely single-carrier (Hue and Cry / The
+> Summing Up, both trial) but were deliberately left alone — both anchor a
+> load-bearing atlas family (the damage octet / tempo-and-control) rather
+> than reading as accidental cruft, so retiring them is a card-authoring
+> call for `/adjust-cards`, not a keyword-registry call; re-filed narrower
+> to `plan/AUDIT.md` as `[loop-call]`. KB (kb-query): not queried — every
+> action this pass was REMOVE (exempt from the KB gate) or a doc/tooling
+> accuracy fix, per the skill's own gate rule (§3 Step 2). Verify: green
+> (mechanics 209/209 files · 3337 tests + build; mobile lint + typecheck +
+> jest incl. `keywords.test.ts` 13/13; card-editor type-check; root
+> `npm test` 122/122 incl. `content-drift.test.mjs` 11/11 and
+> `axio-mcp-server.test.mjs`).
 
 > **[adjust-enemies pass 1, 2026-09-05, commit 04d2bf0d]** Created 2 cavern-
 > native enemies (The Ninth-Rung Spider, The Spore-Warden) — the `caverns`

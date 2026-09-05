@@ -289,7 +289,7 @@ const theLazarsKiss: Card = {
     tier: 2, rank: 4, cardType: 'spell',
     targetType: 'enemy',
     paidSummary:
-        'Deal 20. CURDLE 3: every BLEED on the foe turns to POISON and every POISON to BLEED, each 3 harder. Heal 16.',
+        'Deal 20. Flips every BLEED on the foe to POISON and every POISON to BLEED, each 3 harder. Heal 16.',
     // pts: deal 20 + curdle +3 both ways + heal 16 + HEART×3 threshold
     // tick-all + FREE heal 6 and bleed i5 d2. The clock-launderer: a board of
     // fast BLEED becomes a slow POISON bank for the detonator, or the other

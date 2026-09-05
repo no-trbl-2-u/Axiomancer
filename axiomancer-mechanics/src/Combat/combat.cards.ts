@@ -340,7 +340,11 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         case 'recoil_x': return `RECOIL X (min ${m.min}): POISON per ${Math.round(1 / m.poisonPerX)}`;
         // KW-3 (phase 29): FESTER→PROLONG, TRANSMUTE→CURDLE (renames).
         case 'extend_dots': return `PROLONG +${m.turns} duration to ALL your DoTs`;
-        case 'convert_dots': return `CURDLE — convert bleed↔poison, +${m.bonusIntensity} intensity`;
+        // CURDLE retired as a badge (2026-09-05 /adjust-keywords pass 1): its
+        // sole carrier (The Lazar's Kiss) fell below the atlas's own ≥2-carrier
+        // discipline. Plain rules text now, per the atlas's own escape hatch
+        // ("a one-card mechanic stays as plain rules text on that card").
+        case 'convert_dots': return `flips the foe's BLEED into POISON and POISON into BLEED, each landing ${m.bonusIntensity} harder`;
         // Profane canon (2026-08-08): FESTER earns its own registry row — the
         // intensity half of the old PROLONG double-duty splits out.
         case 'boost_all_dots': return `FESTER ${m.intensity} — every DoT on the enemy gains +${m.intensity} intensity`;

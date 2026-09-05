@@ -106,7 +106,12 @@ function parseKeywordAtlas() {
     // group leads with the keyword (5 cells).
     const hallmark = cells.length >= 6
     const [keyword, semantics, , gate, notes] = hallmark ? cells.slice(1) : cells
-    if (!keyword || keyword.toLowerCase() === 'keyword') continue // header row
+    // Most tables header their first column "keyword"; the System terms table
+    // (2 columns: `term | what it is`) headers it "term" instead — without
+    // this second label that header row parsed as a bogus "TERM" registry
+    // entry (found in the 2026-09-05 adjust-keywords audit, which reconciled
+    // axio_overview's reported row count against the atlas's actual rows).
+    if (!keyword || ['keyword', 'term'].includes(keyword.toLowerCase())) continue // header row
     rows.push({
       keyword,
       type: hallmark ? 'hallmark' : 'utility',

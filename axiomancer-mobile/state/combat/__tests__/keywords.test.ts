@@ -54,8 +54,14 @@ describe('keyword registry — KW-3 (no dead references)', () => {
         'overheat', 'reroll_spent', 'refresh_die', 'convert_die_color',
         'bank_spent_die', 'spend_all_pips',
         // Card-local one-offs with no repeated vocabulary to register (the
-        // atlas's own "a term earns a row at ~3+ cards" policy).
+        // atlas's own "≥2 cards or ≥2 enemies" discipline).
         'strip_random_buff', 'befriend_attempt', 'conjure_card', 'peroration',
+        // CURDLE demoted 2026-09-05 (/adjust-keywords pass 1): its sole
+        // carrier (The Lazar's Kiss) never earned a second, so the badge
+        // retires per the atlas's own "one-card mechanic stays as plain
+        // rules text" escape hatch. `convert_dots` still functions; it just
+        // no longer prints a keyword word.
+        'convert_dots',
         // A carrier, not a mechanic: `rider` executes an ordinary card rider.
         'rider',
         // THE BIG NUMBERS REWRITE (2026-09-02) — DEAL is the one verb that

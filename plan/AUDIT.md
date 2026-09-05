@@ -117,19 +117,46 @@
   than ship a rushed/wrong wire; re-adding it is a small dedicated
   mechanics-expert task.
 
-### [loop-call] Keyword-atlas carrier audit — several CardSpecialMechanic kinds show only 1 direct carrier (2026-09-04)
-- category: content residue (found during `/adjust-cards` pass 1, routed
-  to `/adjust-keywords` rather than actioned here)
-- detail: `chain`, `omen`, `recoil_x`, `conjure_card`, `spend_premises`,
-  `consume_affliction`, `reap`, `convert_dots`, `grant_pip`,
-  `bank_spent_die`, `reroll_spent` each show exactly one direct
-  `specialMechanics` carrier in the live library, below the keyword
-  atlas's own ">=2 cards or enemies" bar for a keyword row — though CHAIN
-  and OMEN both already have atlas rows despite single-card
-  `specialMechanics` carriage, so a raw kind-count undercounts (it misses
-  rider-only grants, e.g. a condition payoff's `rider.chain`). Needs a
-  rider-inclusive carrier audit, not just a `specialMechanics`-kind count,
-  before deciding retire-the-row vs. add-a-second-carrier for each.
+### [loop-call] CHAIN and OMEN each show exactly 1 card carrier after a rider-inclusive audit (2026-09-05)
+- category: content residue (rider-inclusive follow-up to the 2026-09-04
+  `/adjust-cards` pass-1 loop-call below, run during `/adjust-keywords`
+  pass 1)
+- resolved for 9 of the original 11 kinds: `/adjust-keywords` pass 1 ran
+  the rider-inclusive sweep this note asked for (grepped every
+  `library/*.cards.ts` for both the `kind: '<x>'` form and every bare
+  `CardRider` field of the same name, not just top-level
+  `specialMechanics`). `recoil_x`→Recoil, `consume_affliction`→Rupture,
+  `spend_premises`→Charge all share a well-carried umbrella keyword with
+  other kinds (Recoil/Rupture/Charge each have several independent card
+  carriers beyond the thin kind itself), so they were never really
+  single-carrier keywords, just single-carrier *kinds* sharing a healthy
+  badge. `reap`/`reap_all`, `grant_pip`, `bank_spent_die`, `reroll_spent`,
+  `conjure_card` carry no `MECHANIC_KEYWORD` row at all by design (own
+  face kind / die-gear / card-local — see `KINDS_WITHOUT_MECHANIC_KEYWORD`
+  in `axiomancer-mobile/state/combat/__tests__/keywords.test.ts`), so they
+  were never atlas rows to begin with. `convert_dots` (CURDLE) WAS a
+  genuine single-card violation (The Lazar's Kiss, rot rank 4, no rider
+  grants it anywhere else) and this pass retired the badge — see the
+  keyword atlas's "Retired" section and the commit for the full wiring.
+- residue, NOT actioned: **CHAIN** (`trial.cards.ts`, "Hue and Cry" —
+  both its FREE `chain: 2` rider grant and its PAID `kind: 'chain'`
+  mechanic sit on the SAME single card; no other theme file mentions
+  `chain` in any form) and **OMEN** (`trial.cards.ts`, "The Summing Up" —
+  same story, one card, no rider grants elsewhere) are each exactly as
+  thin as CURDLE was. Left unactioned on purpose: unlike CURDLE (a
+  card-local "glue" verb whose description already reads as
+  self-contained flavor text), CHAIN anchors the atlas's primary "damage
+  family" octet (DEAL/PIERCE/WRATH/FLAY/CHAIN/EXECUTE/OVERKILL/TWIN) and
+  OMEN anchors "tempo and control" alongside STAGGER/BACKFIRE/CHARGE/
+  FORETELL/QUARTER — both read as deliberate, load-bearing family members
+  the player is meant to meet more than once, not accidental cruft. That
+  makes this a card-authoring call (does trial earn a second CHAIN/OMEN
+  carrier?) more than a keyword-registry call, and card authoring is
+  `/adjust-cards` territory per this skill's own REMOVE-routing rule
+  ("routes through `/adjust-cards` if the card itself also needs a
+  content change"). Next `/adjust-cards` pass: author a second trial (or
+  cross-theme) carrier for each, or make the owner call to retire them
+  the same way CURDLE went if a second carrier never lands.
 
 ### [loop-call] Phase 78 — W5 art-pass candidates (2026-09-03)
 - category: design residue (art sourcing — awaiting `/oversight` pick;

@@ -121,12 +121,15 @@ const VERB_KEYWORD: Record<string, string> = {
  * carrier, the-closing-word, prints "SENTENCE at N" via `mechanicText`
  * directly; the CHARGE gloss below explains the trigger). `consume_affliction`
  * re-mapped Soul→Rupture (extends RUPTURE's printed sense instead of minting
- * CONSUME). `reprise`→Recall, `extend_dots`/`boost_all_dots`→Prolong,
- * `convert_dots`→Curdle (renames). `replay_last`→Echo mapping DELETED
- * (ouroboros is a 1-of rare; `mechanicText`'s own case already gives it full
- * descriptive text — no keyword badge needed). `conjure_card` DELETED
- * (CONJURE retired — zero library cards). `siphon` PROMOTED to a real
- * keyword (was raw lowercase text with no gloss).
+ * CONSUME). `reprise`→Recall, `extend_dots`/`boost_all_dots`→Prolong
+ * (renames). `replay_last`→Echo mapping DELETED (ouroboros is a 1-of rare;
+ * `mechanicText`'s own case already gives it full descriptive text — no
+ * keyword badge needed). `conjure_card` DELETED (CONJURE retired — zero
+ * library cards). `siphon` PROMOTED to a real keyword (was raw lowercase
+ * text with no gloss). `convert_dots`→Curdle mapping DELETED (2026-09-05
+ * `/adjust-keywords` pass 1: CURDLE's sole carrier fell below the atlas's
+ * own ≥2-carrier discipline; demoted to plain rules text, same shape as
+ * `peroration` above).
  */
 const MECHANIC_KEYWORD: Record<string, string> = {
     // ── Control ──
@@ -159,7 +162,9 @@ const MECHANIC_KEYWORD: Record<string, string> = {
     reprise: 'Recall',
     // ── Affliction glue ──
     extend_dots: 'Prolong',
-    convert_dots: 'Curdle',
+    // convert_dots (CURDLE) retired as a badge 2026-09-05 (/adjust-keywords
+    // pass 1): one carrier, below the atlas's own ≥2 discipline. Prints as
+    // plain rules text now — see KINDS_WITHOUT_MECHANIC_KEYWORD.
     boost_all_dots: 'Fester',
     // ── The pyre verbs (Profane Canon rework, 2026-08-08) ──
     immolate: 'Immolate',
@@ -211,7 +216,6 @@ const KEYWORD_GLOSS: Record<string, string> = {
     // ── Affliction (T1) ──
     Prolong: 'Adds that many turns to every damage-over-time effect you have on the foe.',
     Fester: 'Every damage-over-time effect on the foe gains that much intensity.',
-    Curdle: "Flips the foe's Bleed into Poison and its Poison into Bleed, each landing that much harder.",
     Poison:
         'Each time a card is played, the foe loses 2 VITAE per Poison stack. The longer it holds, the harder it bites.',
     Bleed: 'Each hit the bearer takes deals 3 more VITAE per Bleed stack, then removes a stack.',

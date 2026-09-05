@@ -7,9 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-18T15:10:33Z | subagent | Explore | claude-fable-5 | main | Survey existing sim metrics |
-| 2026-07-18T15:17:02Z | skill | jot | claude-fable-5 | main | args: Owner directive (2026-07-18, combat UI polish session): color-match die riders must  |
-| 2026-07-18T17:47:28Z | slash-prompt | /oversight | unknown | user/ci | /oversight |
 | 2026-07-18T19:11:03Z | skill | dataviz | claude-fable-5 | main | - |
 | 2026-07-18T19:32:59Z | skill | ship-a-phase | claude-fable-5 | main | args: Phase D8 — preset dice valves (plan/phases/phase_D8_preset_dice_valves.md). Owner-st |
 | 2026-07-18T19:39:39Z | subagent | mechanics-expert | claude-fable-5 | main | Metrics lessons analysis |
@@ -407,3 +404,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-05T00:10:44Z | skill | march | unknown | main | - |
 | 2026-09-05T00:14:33Z | subagent | general-purpose | claude-sonnet-5 | main | Run adjust-enemies content lifecycle pass |
 | 2026-09-05T00:14:36Z | skill | adjust-enemies | claude-sonnet-5 | main | - |
+| 2026-09-05T10:43:14Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-05T10:44:07Z | skill | adjust-keywords | claude-sonnet-5 | main | - |
+| 2026-09-05T10:46:37Z | subagent | card-expert | claude-sonnet-5 | main | Adjust-keywords audit and ship pass |

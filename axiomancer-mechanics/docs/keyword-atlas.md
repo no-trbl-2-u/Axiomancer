@@ -57,7 +57,6 @@ mid-flight. Run `npm run catalog` for the current binding.
 | **RUPTURE N** | Consumes the foe's afflictions and deals their remaining damage at once. ALL-spenders are uncapped. | (see the catalog) |
 | **FESTER N** | Every damage-over-time effect on the foe gains that much intensity. | (see the catalog) |
 | **PROLONG N** | Adds that many turns to every damage-over-time effect you have on the foe. | (see the catalog) |
-| **CURDLE iN** | Flips the foe's Bleed into Poison and its Poison into Bleed, each landing that much harder. | (see the catalog) |
 | **TICK** | Your strongest damage-over-time effect on the foe ticks again, immediately. | (see the catalog) |
 | **SIPHON N%** | Heals you for the printed percentage of the damage this play deals. | (see the catalog) |
 
@@ -196,8 +195,29 @@ pending the effects/library rescale (overhaul §5.2):
   `damagePerRound` 2 / 3 / 1. §5.2 asks for roughly ×3–4.
 - **PLEA** — the gloss's "~35% of max VITAE" resolve threshold is scheduled to
   become "35% of VITAE, minimum 20" (§5.4).
-- **FINALE** — live as a `SynergyStatePredicate` and used on card faces, but it
-  has no `KEYWORD_GLOSS` row yet, so its popup falls through. Either give it a
-  row or stop printing the word.
 
 These are the numbers to re-read before quoting this file.
+
+(2026-09-05 `/adjust-keywords` pass 1: the FINALE bullet formerly here was
+stale. `KEYWORD_GLOSS` has carried a `Finale:` row since 2026-09-02 — the same
+day this section was written — and the row above in "Player keywords — turn
+shape" already matches it. `node --test scripts/content-drift.test.mjs`
+confirms no orphaned atlas row and no unglossed registry keyword. Verified,
+not reasoned from memory.)
+
+## Retired
+
+- **CURDLE** (2026-09-05, `/adjust-keywords` pass 1) — the "afflictions and
+  their payoffs" row above is gone. Audit found exactly one live carrier
+  (The Lazar's Kiss, rot rank 4, `convert_dots`), below this file's own
+  discipline bar (≥2 cards or ≥2 enemies). The mechanic still functions —
+  the card still flips Bleed↔Poison — it just prints as plain rules text now
+  instead of a badged keyword (the discipline's own escape hatch: "a
+  one-card mechanic stays as plain rules text on that card"). The R-7 rename
+  record in `docs/retheme-map.json` is historical and is untouched — this is
+  a presentation retirement, not an un-rename. No ban-list
+  entry: `convert_dots` isn't an effect id, and it keeps working; only the
+  keyword badge/gloss/atlas row died. If a second CURDLE-shaped card is ever
+  authored, un-retiring means re-adding the `MECHANIC_KEYWORD` mapping, the
+  `KEYWORD_GLOSS` row, and this table's row — not resurrecting an id, since
+  none was banned.

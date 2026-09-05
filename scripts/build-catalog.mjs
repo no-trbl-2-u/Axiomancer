@@ -140,7 +140,11 @@ const KEYWORD_WORDS = [
   "PROLONG", "RECALL", "SENTENCE", "CONDEMN", "RELENT", "THORNS",
   "TICK", "DOT", "CLEANSE", "PERORATE", "PIP", "PIPS",
   // 2026-07-16 (authored paid summaries) — registry words the list was missing.
-  "KINDLE", "RECOIL", "FALLEN", "OMEN", "QUARTER", "MILL", "HEAL", "CURDLE", "CHARGES",
+  "KINDLE", "RECOIL", "FALLEN", "OMEN", "QUARTER", "MILL", "HEAL", "CHARGES",
+  // CURDLE removed 2026-09-05 (/adjust-keywords pass 1): the badge retired
+  // when its sole carrier fell below the atlas's ≥2-carrier discipline; the
+  // card now prints plain rules text, so bolding the word would highlight
+  // text that no longer exists on any face.
   // 2026-08-06 (iterate — retired-vocabulary sweep) — DAMAGE, STUN, SLOW, BURN,
   // CONFUSION, SILENCE, REGEN, EXECUTE, COMPOUND, VULNERABLE, BARRIER, REPRISE
   // dropped: spec 32 v3 retired or never had these; bolding them implied a
