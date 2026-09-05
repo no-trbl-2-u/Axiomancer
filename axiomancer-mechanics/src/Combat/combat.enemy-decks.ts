@@ -296,6 +296,10 @@ export const ENEMY_DECKS: Record<string, EnemyDeckSpec> = {
     'enemy-prop-wight': ['first-knock', 'the-written-line', 'the-count-completes'], // 0.8 → 1.0 → 1.35: knock, writ, the roof's arithmetic finished. The wichtlein's cousin with a colder ending.
     'enemy-unpaid-delver': ['the-tally-mark', 'collection-rounds', 'the-downbeat', 'foreclosure-in-person'], // 0.85 → 1.0 → 0.95 → 1.35 (elite, 4 cards, no stake): the shift is tallied, collected, beaten to rhythm, and foreclosed.
     'enemy-sump-maren': ['dp-salt-rescue', 'dp-wet-congregation', 'dp-grief-swell'], // 0.8 → 0.9 → 1.3: the bad rescue, the chorus, the water that grieves you under.
+    // adjust-enemies pass 1 (2026-09-05) — caverns backfill, composed from
+    // the shared canon (no new cards needed).
+    'enemy-ninth-rung-spider': ['first-knock', 'the-downbeat', 'the-count-completes'], // 0.85 → 0.95 → 1.35: the warning vibration, the counted bite, the count completing in venom.
+    'enemy-spore-warden': ['small-god-on-credit', 'collection-rounds', 'compound-interest', 'the-calamity-spoken'], // 0.85 → 0.95 → 1.15 → 1.3 (elite, 4 cards, no stake): the first spore on credit, the collection in person, the cloud compounding round over round, the calamity finally spoken as rot.
     'enemy-toll-sergeant': ['first-notice', 'gc-the-begging-fist', 'the-toll-entire'], // 0.85 → 0.95 → 1.3: the fee posted nowhere, the fist that explains it, the toll entire.
     'enemy-guild-knife': ['first-notice', 'clause-of-objections', 'collection-rounds', 'execution-of-the-agreement'], // 0.85 → 0.9 → 1.0 → 1.4 (elite, 4 cards, no stake): served, objected, collected, executed. Punctually.
     'enemy-the-factor': ['small-god-on-credit', 'compound-interest', 'foreclosure-in-person'], // 0.8 → 1.15 → 1.35: he lends you the opening on credit and forecloses in person.

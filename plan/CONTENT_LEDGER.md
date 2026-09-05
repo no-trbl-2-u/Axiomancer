@@ -13,7 +13,7 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-04 | 24978555 | 1 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-04 | 934160bb | 1 |
-| enemies | `skills/adjust-enemies.md` | never | - | 0 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-05 | PENDING | 1 |
 | keywords | `skills/adjust-keywords.md` | never | - | 0 |
 | npcs | `skills/adjust-npcs.md` | never | - | 0 |
 
@@ -27,6 +27,38 @@ Newest first. One entry per `/adjust-*` tick:
 > (never drafted, superseded by <card>), updated 1 (pricing drift
 > after VERB_POINTS change)".>
 ```
+
+> **[adjust-enemies pass 1, 2026-09-05, commit PENDING]** Created 2 cavern-
+> native enemies (The Ninth-Rung Spider, The Spore-Warden) — the `caverns`
+> `EnemiesByMap` pool was 10/14 (71%) direct re-treads from `northern-forest`,
+> over the skill's >70% sibling-overlap ceiling; now 10/16 (62.5%). Updated 3
+> enemies (TheDoorwarden, TheIndex, TheSophist — the three Aporia act bosses,
+> W-01) that shipped with NO `portraitAsset` at all since launch (rendering
+> the hash-fallback silhouette, not even a shared painting) — backfilled with
+> licensed game-icons.net silhouettes (CC BY 3.0 — Delapouite/Lorc), same
+> recipe as the W3/W4 batches, truthful provenance recorded. Zero-REMOVE:
+> the orphan sweep found none (all 71 production enemies resolve into a
+> pool; `TheIncompleteness`/`Sandbag_01` are deliberately-excluded fixtures).
+> VITAE-band sweep came back clean (every boss/unique authored `vitae` is
+> within ~±26% of the live `ENEMY_VITAE_BASE`/`PER_LEVEL`/`MULT` formula in
+> `game-mechanics.constants.ts` — the formula was already rebaselined
+> 2026-09-02 past the original overhaul prompt's §5.1 table, so a naive
+> comparison against that table would have false-alarmed). Aftermath-prose
+> and voice sweeps came back clean/mixed: no thee/thou/thy/thine/ye
+> anywhere, but 30/73 roster enemies (41%, mostly the original 2026-07-06
+> painting batch) carry no `finalBlowLines`/`causeLines` — real, sized past
+> this pass's scope (a `content-curator` job), filed to `plan/AUDIT.md` as
+> `[content]` rather than actioned partially. KB research (kb-query):
+> `kb_find_games`/`kb_search`/`kb_overview` returned no on-point doctrine for
+> a numeric sibling-pool overlap ceiling specifically (not a gap in this
+> tick's search — the corpus genuinely has no roster-shape doc that granular);
+> grounded the caverns CREATE in the repo's own established precedent for
+> this exact fix (the W3/W4 backfills) plus Mage Knight's per-site-type
+> monster-deck model (KB: `mage-knight`, already `/adjust-enemies` §3's own
+> citation for enemy design) — a site earns its own bestiary rather than
+> reusing a neighbour's wholesale. Verify: green (mechanics 209/209 files ·
+> 3337 tests + build; mobile lint + typecheck + jest + assets:check +
+> art:test).
 
 > **[adjust-equipment pass 1, 2026-09-04, commit 934160bb]** Zero-CREATE,
 > zero-REMOVE pass — updated 5 consumables (`focus-vial`, `heart-draught`,

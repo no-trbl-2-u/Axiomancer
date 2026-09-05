@@ -2396,6 +2396,79 @@ export const SumpMaren = createEnemy({
     tags: ['mid-game', 'enemy'],
 });
 
+/**
+ * adjust-enemies pass 1 (2026-09-05) — caverns backfill. The pool was 10 of
+ * 14 (71%) direct re-treads from northern-forest, over the >70% sibling-pool
+ * overlap ceiling (skill §1). These two are cavern-native, dropping the
+ * overlap to 10/16 = 62.5%. KB search (kb-query) returned no on-point prior
+ * art for a numeric sibling-overlap ceiling specifically; grounded instead in
+ * the repo's own established precedent for this exact fix (the W3/W4
+ * batches, which back-filled the caverns/northern-city/river pools the same
+ * way) and Mage Knight's per-site-type monster decks (KB: `mage-knight`,
+ * §6.4's own model for enemy design) — a site earns its own bestiary rather
+ * than reusing a neighbour's wholesale.
+ */
+const CAVERNS_BACKFILL_ADDED = '2026-09-05';
+
+export const NinthRungSpider = createEnemy({
+    id: 'enemy-ninth-rung-spider',
+    portraitAsset: 'ninth-rung-spider',
+    name: 'The Ninth-Rung Spider',
+    stanceHint: 'It counts the rungs before it counts your ribs. The ninth always gives.',
+    description: 'It hangs at the ladder\'s ninth rung. It knows the sound of a reach that finds nothing. It does not chase. It waits where you have to pass.',
+    level: 15,
+    baseStats: enemyStatBudget(15, { heart: 1, body: 2, mind: 2 }),
+    mapName: 'caverns',
+    difficulty: 'normal',
+    logic: 'strategic',
+    tier1Overrides: T1_DEFAULT,
+    loot: [none(55), drop('focus-vial', 25), drop('healing-potion', 20)],
+    philosophicalAlignment: { epistemology: 33, outlook: -67, scope: -33 },
+    finalBlowLines: {
+        brutal: 'The ninth rung finally gives for both of you at once.',
+        quiet:  'It curls off the ladder without a sound, one leg at a time.',
+        ironic: 'It counted every rung but the one you skipped.',
+    },
+    causeLines: {
+        brutal: 'You reach for the rung that was never there. It was counting on that.',
+        broken: 'It bites, and lets go, and waits for the venom to do the climbing for it.',
+        quiet:  'A thread gives. Then your grip does.',
+    },
+    addedIn: CAVERNS_BACKFILL_ADDED,
+    tags: ['mid-game', 'enemy'],
+});
+
+export const SporeWarden = createEnemy({
+    id: 'enemy-spore-warden',
+    portraitAsset: 'spore-warden',
+    name: 'The Spore-Warden',
+    stanceHint: 'It breathes a warning before it breathes worse. The cloud says stop, then says nothing at all.',
+    description: 'A trunk of fused fungus, grown fat on trespassers. It has guarded this spore-bed for a century. Delvers were told once: never touch it. It is patient. Mold always is.',
+    level: 17,
+    baseStats: enemyStatBudget(17, { heart: 2, body: 2, mind: 1 }),
+    mapName: 'caverns',
+    difficulty: 'elite',
+    logic: 'defensive',
+    procUnlocks: {
+        body: { attack: 2, defend: 2 },
+    },
+    tier1Overrides: T1_DEFAULT,
+    loot: [none(40), drop('iron-skin-draught', 25), drop('clarity-serum', 20), drop('greater-healing-potion', 15)],
+    philosophicalAlignment: { epistemology: -33, outlook: -33, scope: 33 },
+    finalBlowLines: {
+        brutal: 'It comes apart in one soft collapse, and the spore-bed goes quiet at last.',
+        quiet:  'It settles into the floor it was already mostly made of.',
+        ironic: 'It spent a century guarding a bed no one else ever wanted.',
+    },
+    causeLines: {
+        brutal: 'The cloud gets into everything the leather doesn\'t cover.',
+        broken: 'It does not hurry. Spores never have to.',
+        quiet:  'You stop coughing before you notice you have stopped breathing.',
+    },
+    addedIn: CAVERNS_BACKFILL_ADDED,
+    tags: ['mid-game', 'elite', 'enemy'],
+});
+
 export const TollSergeant = createEnemy({
     id: 'enemy-toll-sergeant',
     portraitAsset: 'toll-sergeant',
@@ -2889,6 +2962,7 @@ const APORIA_ADDED = '2026-07-07';
  */
 export const TheDoorwarden = createEnemy({
     id: 'enemy-the-doorwarden',
+    portraitAsset: 'the-doorwarden',
     name: 'The Doorwarden',
     stanceHint: 'He answers every motion with a jamb — where you would step, a threshold has already been installed.',
     description:
@@ -2967,6 +3041,7 @@ export const TheDoorwarden = createEnemy({
  */
 export const TheIndex = createEnemy({
     id: 'enemy-the-index',
+    portraitAsset: 'the-index',
     name: 'The Index',
     stanceHint: 'It files before it strikes — by the time the blow lands, your counter is already catalogued under errata.',
     description:
@@ -3048,6 +3123,7 @@ export const TheIndex = createEnemy({
  */
 export const TheSophist = createEnemy({
     id: 'enemy-the-sophist',
+    portraitAsset: 'the-sophist',
     name: 'The Sophist',
     stanceHint: 'He argues in your grammar — every stance you take, he has already taken it better, and returned it used.',
     description:
@@ -3293,6 +3369,7 @@ export const EnemyLibrary = [
     // Northern continent — Phase W3 batch (2026-08-28): caverns vermin +
     // northern-city predators + the Harbormaster boss.
     SeamTick, PropWight, UnpaidDelver, SumpMaren,
+    NinthRungSpider, SporeWarden,
     TollSergeant, GuildKnife, TheFactor, WharfShrike, TheHarbormaster,
     // Northern continent — Phase W4 batch (2026-08-31): the river crossing
     // and the town beyond it.
@@ -3338,6 +3415,10 @@ export const EnemiesByMap = {
         Wichtlein, PaleBrood, TriEyes, VampireThrall, Mabadi, FrayedOne,
         BoneTotem, BoneWizard, CursedPaladin, RawheadRex,
         SeamTick, PropWight, UnpaidDelver, SumpMaren,
+        // adjust-enemies pass 1 (2026-09-05): two cavern-native additions —
+        // the pool was 10/14 (71%) forest re-treads, over the >70% sibling
+        // overlap ceiling. Now 10/16 = 62.5%.
+        NinthRungSpider, SporeWarden,
     ],
     // The northern city (Phase W3) — mostly the continent's own: the four
     // city predators plus the Harbormaster, with three forest re-treads
@@ -3447,6 +3528,9 @@ export const ENEMY_REGISTRY = {
     'prop-wight':        PropWight,
     'unpaid-delver':     UnpaidDelver,
     'sump-maren':        SumpMaren,
+    // adjust-enemies pass 1 (2026-09-05) — caverns backfill.
+    'ninth-rung-spider': NinthRungSpider,
+    'spore-warden':      SporeWarden,
     'toll-sergeant':     TollSergeant,
     'guild-knife':       GuildKnife,
     'the-factor':        TheFactor,

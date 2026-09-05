@@ -14,6 +14,33 @@
 
 ## Pending
 
+### [content] 30 of 73 roster enemies (41%) carry no aftermath prose (`finalBlowLines`/`causeLines`) (2026-09-05)
+- category: content (found during `/adjust-enemies` pass 1's structural
+  audit — Step 1's "aftermath prose missing" signal)
+- detail: Phase 71 (GH#65 ask 1) added `finalBlowLines`/`causeLines`/
+  `pactLines` to the `Enemy` schema and authored them for most of the
+  roster, but 30 of the original 2026-07-06 52-painting batch never got a
+  pass (GraveLarva, ChatteringSkull, FootStealer, CursedHead, Ghast,
+  DoomEgg, TheButcher, Wichtlein, BullBegger, WeepingHead, GoblinShaman,
+  Sugata, PaleBrood, Mabadi, FrayedOne, BoneTotem, BoneWizard, CursedPaladin,
+  VampireThrall, JeweledTree, OgreNaga, Sidelle, AshenBoneDrake, Zoma,
+  MabadiUndrowned, TriEyesHollowed, BlackDeath, TheUnnameable, FireGiant,
+  GreaterDevil — grep `finalBlowLines:`/`causeLines:` absence in
+  `enemy.library.ts` to reproduce). Not a crash or a broken invariant —
+  `types.ts` documents the field as optional with a consumer-side fallback
+  (mobile presenter's `derive*Phrase` helpers render a generic line) — so
+  verify stays green and nothing is silently wrong in play. It is a real
+  flavor-completeness gap spanning nearly half the roster, including
+  several elites/mid-roster names (Sugata, CursedPaladin, VampireThrall,
+  FireGiant, GreaterDevil) that deserve a unique kill/death line as much as
+  their siblings that already have one. Sized at ~30 enemies x 6 lines
+  (brutal/quiet/ironic x2) in house voice (spec 34 §2.5) — a `content-curator`
+  job, not a routine single-enemy edit, and too large to fold into this
+  pass alongside its other two findings (the caverns CREATE and the Aporia
+  portrait backfill) without diluting quality. No owner decision needed —
+  purely executional — so filed here as `[content]`, not `[loop-call]`.
+- score: impact 4 x ease 5 / 10 = 2.0
+
 ### [debt] Die a11y copy drift — `RollingDie` and `upgradeable-dice-e2e.mjs` still speak the draft-era wording (2026-09-04)
 - category: mobile evidence residue (found while fixing the playtest
   2026-09-04 die a11y finding; `CombatDie.tsx` now derives its label from

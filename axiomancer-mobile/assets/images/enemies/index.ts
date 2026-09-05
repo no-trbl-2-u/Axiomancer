@@ -94,6 +94,21 @@ const ENEMY_ART_BY_KEY: Record<string, number> = {
     'dowry-collector':   require('./dowry-collector.webp'),
     'the-kept-suitor':   require('./the-kept-suitor.webp'),
     'the-portreeve':     require('./the-portreeve.webp'),
+    // The Aporia — labyrinth act bosses (W-01, adjust-enemies pass 1,
+    // 2026-09-05). Licensed game-icons.net silhouettes (CC BY 3.0 — Lorc /
+    // Delapouite), white glyph on transparent, rasterized 512px WebP; see
+    // provenance.json. Shipped without art at W-01 launch; backfilled here
+    // (structural audit: three boss enemies rendering the fallback
+    // silhouette is a roster-health finding, not just a nice-to-have).
+    'the-doorwarden':    require('./the-doorwarden.webp'),
+    'the-index':         require('./the-index.webp'),
+    'the-sophist':       require('./the-sophist.webp'),
+    // Caverns backfill (adjust-enemies pass 1, 2026-09-05) — the pool was
+    // 71% forest re-treads (>70% sibling-overlap ceiling); two cavern-native
+    // foes bring it back under. Licensed game-icons.net silhouettes (CC BY
+    // 3.0 — Lorc), same recipe as the W3/W4 batches; see provenance.json.
+    'ninth-rung-spider': require('./ninth-rung-spider.webp'),
+    'spore-warden':      require('./spore-warden.webp'),
 };
 
 const ENEMY_ART_POOL: number[] = Object.values(ENEMY_ART_BY_KEY);

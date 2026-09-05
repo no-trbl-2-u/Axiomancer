@@ -33,7 +33,7 @@ const ROSTER_SLUGS = (Object.keys(ENEMY_REGISTRY) as Array<keyof typeof ENEMY_RE
         !(APORIA_BOSS_SLUGS as readonly string[]).includes(slug));
 
 /** Provenance stamps the roster has accrued, batch by batch. */
-const ROSTER_ADDED_STAMPS = ['2026-07-06', '2026-08-28', '2026-08-31'];
+const ROSTER_ADDED_STAMPS = ['2026-07-06', '2026-08-28', '2026-08-31', '2026-09-05'];
 
 describe('2026-07-06: the art-driven base roster', () => {
     it('registers every roster enemy in EnemyLibrary', () => {
@@ -171,6 +171,35 @@ describe('2026-07-06: the art-driven base roster', () => {
         });
     });
 
+    describe('the adjust-enemies pass 1 caverns backfill (2026-09-05)', () => {
+        const BACKFILL_SLUGS = ['ninth-rung-spider', 'spore-warden'] as const;
+
+        it('registers both, stamped 2026-09-05, on the caverns map', () => {
+            for (const slug of BACKFILL_SLUGS) {
+                const enemy = ENEMY_REGISTRY[slug] as Enemy;
+                expect(enemy, `slug ${slug} missing from ENEMY_REGISTRY`).toBeDefined();
+                expect(enemy.addedIn).toBe('2026-09-05');
+                expect(enemy.mapName).toBe('caverns');
+                expect(EnemyLibrary).toContain(enemy);
+            }
+        });
+
+        it('every backfill enemy carries aftermath prose (finalBlowLines + causeLines)', () => {
+            for (const slug of BACKFILL_SLUGS) {
+                const enemy = ENEMY_REGISTRY[slug] as Enemy;
+                expect(enemy.finalBlowLines, `${slug} finalBlowLines`).toBeDefined();
+                expect(enemy.causeLines, `${slug} causeLines`).toBeDefined();
+            }
+        });
+
+        it('every backfill enemy has a unique portraitAsset', () => {
+            for (const slug of BACKFILL_SLUGS) {
+                const enemy = ENEMY_REGISTRY[slug] as Enemy;
+                expect(enemy.portraitAsset).toBe(slug);
+            }
+        });
+    });
+
     describe('the Aporia act bosses (W-01)', () => {
         it('registers all three labyrinth bosses at boss difficulty on their act maps', () => {
             const expected: Record<(typeof APORIA_BOSS_SLUGS)[number], string> = {
@@ -203,6 +232,13 @@ describe('2026-07-06: the art-driven base roster', () => {
                 for (const [key, value] of Object.entries(enemy.derivedStats)) {
                     expect(value, `slug ${slug} derivedStats.${key}`).toBeGreaterThan(0);
                 }
+            }
+        });
+
+        it('has a unique portraitAsset each (adjust-enemies pass 1, 2026-09-05 backfill — shipped with none at W-01 launch)', () => {
+            for (const slug of APORIA_BOSS_SLUGS) {
+                const enemy = ENEMY_REGISTRY[slug] as Enemy;
+                expect(enemy.portraitAsset, `slug ${slug} portraitAsset`).toBe(slug);
             }
         });
     });
