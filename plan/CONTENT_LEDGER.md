@@ -12,7 +12,7 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-06 | 8c346ac7 | 2 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-06 | (pending — see log) | 2 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-06 | 721adac9 | 2 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-05 | 04d2bf0d | 1 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-05 | bf6223f1 | 1 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-05 | f0a2891f | 1 |
@@ -28,7 +28,7 @@ Newest first. One entry per `/adjust-*` tick:
 > after VERB_POINTS change)".>
 ```
 
-> **[adjust-equipment pass 2, 2026-09-06, commit (pending — see log)]**
+> **[adjust-equipment pass 2, 2026-09-06, commit 721adac9]**
 > Zero-CREATE, zero-UPDATE, zero-REMOVE pass — full re-audit reconfirms
 > pass 1's clean state. Nothing in `src/Items/**`, the 6 live village
 > `shop.wares` blocks in `src/World/MapEvents/content.ts`, `src/Effects/
