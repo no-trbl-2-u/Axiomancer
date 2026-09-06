@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-18T19:40:12Z | subagent | card-expert | claude-fable-5 | main | Real-deckbuilder gap analysis |
-| 2026-07-18T19:40:28Z | subagent | card-expert | claude-fable-5 | main | Card wording clarity audit |
 | 2026-07-18T20:10:59Z | slash-prompt | /plan-a-phase | unknown | user/ci | /plan-a-phase In the card-editor I see something from the legacy combat a card type focuse |
 | 2026-07-18T20:12:10Z | subagent | Explore | claude-opus-4-8 | main | Map category/fallacy/paradox consumers |
 | 2026-07-19T03:24:46Z | slash-prompt | /deck-tuning | unknown | user/ci | /deck-tuning |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-05T12:07:17Z | skill | digest | unknown | main | - |
 | 2026-09-05T15:20:22Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-05T15:21:22Z | skill | adjust-npcs | claude-sonnet-5 | main | - |
+| 2026-09-06T01:09:11Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-06T01:09:36Z | skill | critique | claude-sonnet-5 | main | - |

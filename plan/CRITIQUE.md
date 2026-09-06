@@ -1,13 +1,38 @@
 # Critique log
 
-> Last pass: 2026-09-04 at commit 7f6b4312
-> Pass count: 31
+> Last pass: 2026-09-06 at commit a6d6679d
+> Pass count: 32
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 32, 2026-09-06, commit a6d6679d] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5,
+> `CRITIQUE_VIEWPORT=both`), mobile (375×812) and desktop (1280×800),
+> against the cold-enterable screen set (title, onboarding/deck-picker,
+> combat-encounter preview, live combat board post-ENTER COMBAT,
+> exploration hub). All 10 captures clean: zero page errors, console
+> errors limited to the same benign `navigator.vibrate` autoplay
+> warning seen every prior pass. No content commits touched the
+> screens in this window (only adjust-npcs + keywords content and
+> ledger bookkeeping since pass 31), so every row was expected to
+> reproduce identically — and did: the elite-tier first-fight pacing
+> row (same Brine Hag 5-phase opener, both viewports), the art-register
+> incoherence row, and the fixed "ruined city" backdrop row all
+> reconfirmed unchanged. Zoomed pixel-crop re-verification of the
+> **[MED] LOG-toggle/stance-check-telegraph overlap** row: still
+> reproduces on both viewports, but the clipped line shifted — pass 31
+> evidenced the pill's border cutting the tail of "Yields to BODY
+> ×0.5 +1◆" (line 2); this pass shows the same pill border instead
+> clipping the "5" in "Punishes HEART ×1.5" (line 1), one line up.
+> Same root cause (`COMBAT_HUD_HEIGHT` fixed anchor vs. unmeasured
+> telegraph height) and same suggested fix — not re-filed as new, but
+> worth flagging for whoever ships the fix: the collision line isn't
+> stable, so an `onLayout` measurement fix (not a one-line offset bump)
+> is the only durable one. No new findings filed.
 
 > **[critique pass 31, 2026-09-04, commit 7f6b4312] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5,
