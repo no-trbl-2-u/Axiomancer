@@ -12,7 +12,7 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-06 | 8c346ac7 | 2 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-04 | 934160bb | 1 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-06 | (pending — see log) | 2 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-05 | 04d2bf0d | 1 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-05 | bf6223f1 | 1 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-05 | f0a2891f | 1 |
@@ -27,6 +27,47 @@ Newest first. One entry per `/adjust-*` tick:
 > (never drafted, superseded by <card>), updated 1 (pricing drift
 > after VERB_POINTS change)".>
 ```
+
+> **[adjust-equipment pass 2, 2026-09-06, commit (pending — see log)]**
+> Zero-CREATE, zero-UPDATE, zero-REMOVE pass — full re-audit reconfirms
+> pass 1's clean state. Nothing in `src/Items/**`, the 6 live village
+> `shop.wares` blocks in `src/World/MapEvents/content.ts`, `src/Effects/
+> *.library.json`, or `SignatureSkillId` (`combat.encounter.types.ts`)
+> changed in the commits since pass 1, so each Step-1 signal was
+> re-verified against the current tree rather than assumed: (1) dominated
+> relics — all 8 re-checked, same-slot pairs share identical stat
+> magnitude and differ only by `grantsSignature`, no strictly-dominated
+> pair; (2) `grantsSignature` drift — all 8 relic values still resolve
+> 1:1 against the live `SignatureSkillId` union, no rename/removal;
+> (3) dead consumable `effectId`s — all 11 non-heal-only ids (incl. the
+> 5 pass 1 fixed) resolve in `buffs.library.json`, correctly tagged
+> `support`/`non-card`, so `/adjust-keywords`'s card-vocabulary ban list
+> (which forbids CARD references to retired ids) doesn't touch them —
+> consumables are the exempt non-card channel by design; (4) shop-pool /
+> reward-table coverage — enumerated all 6 shops (Glen Market, Hidden
+> Camp, The Ledger Camp, The Iron Market, The Chandlery, The Landing):
+> 8/22 consumables are shop-stocked, but the other 14 are still reachable
+> via `rollCacheReward`'s uniform draw over the full `consumableLibrary`
+> (The Reliquary and sibling cache surfaces), so none is acquirable-
+> nowhere and none trips the REMOVE signal; (5) `AccessoryKind` gap —
+> head/hands/feet remain at zero live relics, same standing `[loop-call]`
+> filed 2026-09-04 (`plan/AUDIT.md`) — still an owner/mechanics-expert
+> call (a 9th signature skill would need designing first), not actioned
+> here, no new development against it. Ledger hygiene: corrected this
+> row's tracked commit — it cited `934160bb`, the merge sha of an
+> unrelated PR (#285, kb-sync retirement) that isn't even an ancestor of
+> the real pass-1 commit, rather than the actual `/adjust-equipment`
+> pass 1 shipping commit `a22673e3` (same class of mistake the cards
+> ledger corrected 2026-09-06). Recomputed staleness off the right
+> parent: 19 commits / ~45.5h since `a22673e3`, not the ~20/~48h `/march`
+> estimated off the wrong sha — still comfortably past both rate-limit
+> thresholds, so this doesn't change today's dispatch, only future
+> measurement accuracy. KB research: not run — every consideration this
+> pass was either audit-confirmed-clean (no CREATE/UPDATE) or the
+> standing loop-call (already KB-grounded in pass 1's filing); REMOVE/
+> no-op is exempt from the gate per §3 Step 2. Verify: not re-run — no
+> source file changed; HEAD's existing CI (verify-mobile, verify-
+> mechanics) is already green per `npm run deploy:check`.
 
 > **[adjust-cards pass 2, 2026-09-06, commit 8c346ac7]** Created 2
 > (trial theme), zero-UPDATE, zero-REMOVE pass. Audit: since pass 1

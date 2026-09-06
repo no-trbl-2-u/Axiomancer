@@ -7,9 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-19T06:16:46Z | slash-prompt | /triage | unknown | user/ci | /triage 132 |
-| 2026-07-19T06:24:25Z | slash-prompt | /digest | unknown | user/ci | /digest |
-| 2026-07-19T06:24:27Z | skill | digest | unknown | main | - |
 | 2026-07-19T06:27:05Z | slash-prompt | /deck-tuning | unknown | user/ci | /deck-tuning --preset=erosion --runs=100 --cross-theme-swaps=false |
 | 2026-07-19T06:27:07Z | skill | deck-tuning | unknown | main | args: --preset=erosion --runs=100 --cross-theme-swaps=false |
 | 2026-07-19T10:15:29Z | slash-prompt | /digest | unknown | user/ci | /digest |
@@ -407,3 +404,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-06T10:27:51Z | skill | march | unknown | main | - |
 | 2026-09-06T10:28:37Z | skill | adjust-cards | claude-sonnet-5 | main | - |
 | 2026-09-06T10:29:39Z | subagent | card-expert | claude-sonnet-5 | main | Adjust-cards lifecycle pass |
+| 2026-09-06T14:27:07Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-06T14:27:10Z | skill | march | unknown | main | - |
+| 2026-09-06T14:27:59Z | skill | adjust-equipment | claude-sonnet-5 | main | - |
