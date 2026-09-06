@@ -11,7 +11,7 @@
 
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
-| cards | `skills/adjust-cards.md` | 2026-09-04 | 24978555 | 1 |
+| cards | `skills/adjust-cards.md` | 2026-09-06 | (pending — see log) | 2 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-04 | 934160bb | 1 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-05 | 04d2bf0d | 1 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-05 | bf6223f1 | 1 |
@@ -27,6 +27,61 @@ Newest first. One entry per `/adjust-*` tick:
 > (never drafted, superseded by <card>), updated 1 (pricing drift
 > after VERB_POINTS change)".>
 ```
+
+> **[adjust-cards pass 2, 2026-09-06, commit (pending — see below)]** Created 2
+> (trial theme), zero-UPDATE, zero-REMOVE pass. Audit: since pass 1
+> (f29cea5c — the ledger's prior row cited its parent commit 24978555 by
+> mistake; noted here so the next pass measures staleness off the right
+> sha), the only Cards-adjacent change on `main` was `3fb4963b` (starter-deck
+> tri-colour + de-dup fix) — no card content moved, so pass 1's clean
+> reachability/duplicate/aspect-thirds/FREE-line sweeps still hold verbatim
+> and were not re-derived from scratch. The one open finding this pass
+> answers is a standing `[loop-call]` (`plan/AUDIT.md`, filed by
+> `/adjust-keywords` pass 1's rider-inclusive carrier audit, 2026-09-05):
+> CHAIN and OMEN each had exactly ONE card carrier (Hue and Cry;
+> The Summing Up, both `trial`), below the keyword atlas's own "≥2 cards"
+> discipline, but both anchor a load-bearing atlas family (the damage octet;
+> tempo-and-control) rather than reading as accidental cruft — the prior
+> pass explicitly deferred the create-vs-retire call to `/adjust-cards`.
+> Judged CREATE for both: "The Village Comes Over the Hill" (id
+> `the-village-comes-over-the-hill`, rank 4/Rib, heart aspect) — deal 20 +
+> CHAIN 8, with a FLOW-gated rider adding CHAIN 6 more — a direct narrative
+> escalation of Hue and Cry's own flavor text ("the village comes over the
+> hill..."); and "The Ducking Stool" (id `the-ducking-stool`, rank 3/Splinter,
+> body aspect) — deal 14 + a second OMEN at the SAME window/ante parameters
+> (maxWindow 2, anteConviction 2) as The Summing Up's proven carrier, staking
+> a claim on the foe's stance via the ducking-test ordeal. Both mechanics
+> (`chain`/`omen` `CardSpecialMechanic` kinds) are already fully generic in
+> the engine — any card carrying them works with zero new wiring — so this
+> was a pure card-authoring add: no engine, pricing-table, display, or atlas
+> changes needed (the atlas's carrier column already reads "(see the
+> catalog)" for every keyword, not a hardcoded id list). KB (kb-query): CHAIN
+> has strong Dawncaster prior art (`kb:dawncaster/keywords/chain.okf.md` —
+> "Increase the damage of the next action by 1 per stack... plays a key role
+> in raising the Tide," and a `kb_search` sweep turned up 5+ Dawncaster cards
+> carrying it) — the genre's own convention is to spread a Chain-family
+> keyword across many cards, which directly grounds "author a second
+> carrier" over "retire." OMEN has NO on-point Dawncaster analogue — the
+> closest, Foretell (`kb:dawncaster/keywords/foretell.okf.md`, "look at the
+> top X cards... put 1 on top"), is a deck-peek/reorder verb, a different job
+> from a Conviction-anted stance wager — that miss is stated plainly rather
+> than papered over; the second OMEN carrier is grounded instead in the
+> repo's own already-proven shape (copying The Summing Up's exact
+> window/ante numbers rather than inventing new ones). Both new cards were
+> priced by hand against `VERB_POINTS` in their `// pts:` comments (~13.4 and
+> ~11.3 respectively — no rank-band lint to satisfy, sized by eye against
+> their rank peers: contemptOfCourt/pressedForAPlea/theSummingUp at rank 4,
+> thePrickingNeedle/struckFromTheRecord/thePerjurersTongue at rank 3) and
+> pass the card-effectiveness lint (`chain-gained`/`pendingOmens`-growth
+> assertions fire because both mechanics mirror already-exercised shapes)
+> and the paid-summary-honesty guard (every number `paidText()` generates
+> from `specialMechanics` appears verbatim in the authored `paidSummary`;
+> the FLOW synergy's own numbers print via the card's auto-generated die
+> line regardless, so they were not required in the prose but were included
+> anyway for readability, matching house style on this card's siblings).
+> Verify: green (mechanics 210/210 files · 3353 tests + build; mobile lint +
+> typecheck + jest 259/259 suites · 2620/2620 tests + assets:check +
+> art:test; card-editor type-check).
 
 > **[adjust-npcs pass 1, 2026-09-05, commit f0a2891f]** Zero-CREATE,
 > zero-REMOVE pass — updated 2 (staged the Forest Ranger and the Lost

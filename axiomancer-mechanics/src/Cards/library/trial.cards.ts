@@ -32,6 +32,13 @@
 import type { Card } from '../types';
 
 const ADDED = '2026-09-02';
+/** /adjust-cards pass 2 (2026-09-06) — the two cards below answer the
+ *  standing loop-call ("CHAIN and OMEN each show exactly 1 card carrier",
+ *  `plan/AUDIT.md`, filed by `/adjust-keywords` pass 1's rider-inclusive
+ *  carrier audit): both keywords anchor a named atlas family (the damage
+ *  octet; tempo-and-control) and read as deliberate, so the fix is a second
+ *  carrier, not a retirement. See the two cards' own `// pts:` comments. */
+const ADDED_P2 = '2026-09-06';
 
 // ─── ASH — the arraignment ───────────────────────────────────────────────────
 
@@ -447,7 +454,69 @@ const writOfAttainder: Card = {
     tags: ['trial', 'hex', 'doom'],
 };
 
-/** The Indictment — 16 cards, rank-ascending. */
+// ─── pass 2 — a second carrier for CHAIN and for OMEN (2026-09-06) ──────────
+
+const theVillageComesOverTheHill: Card = {
+    id: 'the-village-comes-over-the-hill',
+    theme: 'trial',
+    name: 'The Village Comes Over the Hill',
+    philosophicalAspect: 'heart',
+    description:
+        'Hue and Cry only starts it. By the second field the miller has ' +
+        'joined, and the smith, and every idle hand between here and the ' +
+        'church. Nobody agrees what the felon did. Everybody agrees to catch them.',
+    tier: 2, rank: 4, cardType: 'spell',
+    targetType: 'enemy',
+    paidSummary:
+        'Deal 20. CHAIN 8 — your next hit lands for 8 more. FLOW — with a spell already resolved this turn, CHAIN 6 more and gain 3 CHARGES.',
+    // pts: deal 20 (6.67) + chain 8 (4) + flow[chain 6, 3 charges] rider
+    // (5.4 * 0.5 threshold discount = 2.7); FREE deal 8 / chain 3. Trial's
+    // second CHAIN carrier (the atlas's own "≥2 cards" discipline) — Hue and
+    // Cry starts the pursuit at Ash, this is the mob arriving in force once
+    // the turn is already moving.
+    free: { damage: 8, chain: 3 },
+    specialMechanics: [
+        { kind: 'deal', amount: 20 },
+        { kind: 'chain', amount: 8 },
+    ],
+    synergy: {
+        statePredicate: { kind: 'flow', minPriorSpells: 1 },
+        rider: { chain: 6, premises: 3 },
+    },
+    addedIn: ADDED_P2,
+    tags: ['trial', 'chain', 'tempo', 'flow'],
+};
+
+const theDuckingStool: Card = {
+    id: 'the-ducking-stool',
+    theme: 'trial',
+    name: 'The Ducking Stool',
+    philosophicalAspect: 'body',
+    description:
+        'They tie the rope and lower her once, to see which way the river ' +
+        'rules. The court has already guessed the verdict. The water is ' +
+        'only asked to make it official.',
+    tier: 2, rank: 3, cardType: 'spell',
+    targetType: 'enemy',
+    paidSummary:
+        'Deal 14. OMEN — stake 2 Conviction on the foe stance up to 2 phases out; on a hit, deal 12 more and STAGGER 1.',
+    // pts: deal 14 (4.67) + omen w2 ante 2 [deal 12, stagger 1] (rider 6 *
+    // 0.6 dieBonus discount + 1 omenInfo - 2*0.75 ante credit = 3.1); FREE
+    // deal 6 / reveal (2 + 1.5). Trial's second OMEN carrier (the atlas's
+    // own "≥2 cards" discipline) — where the Summing Up cashes a full
+    // docket's prediction, this stakes the ordeal itself: guilty either way,
+    // the water only confirms which.
+    free: { damage: 6, revealStance: true },
+    specialMechanics: [
+        { kind: 'deal', amount: 14 },
+        { kind: 'omen', maxWindow: 2, anteConviction: 2, rider: { damage: 12, stagger: 1 } },
+    ],
+    addedIn: ADDED_P2,
+    tags: ['trial', 'omen', 'ordeal'],
+};
+
+/** The Indictment — 18 cards, rank-ascending (pass 2 added a second CHAIN
+ *  carrier and a second OMEN carrier; see `plan/CONTENT_LEDGER.md`). */
 export const TRIAL_CARDS: Card[] = [
     readingOfTheCharges, hueAndCry, benefitOfClergy,
     scoldsBridle, billOfParticulars, theGalleryMurmurs,
@@ -455,4 +524,5 @@ export const TRIAL_CARDS: Card[] = [
     contemptOfCourt, pressedForAPlea, theSummingUp,
     theAssizeBell, judgmentEnteredAgainstThem,
     theBlackCap, writOfAttainder,
+    theVillageComesOverTheHill, theDuckingStool,
 ];

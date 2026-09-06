@@ -7,12 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-18T20:10:59Z | slash-prompt | /plan-a-phase | unknown | user/ci | /plan-a-phase In the card-editor I see something from the legacy combat a card type focuse |
-| 2026-07-18T20:12:10Z | subagent | Explore | claude-opus-4-8 | main | Map category/fallacy/paradox consumers |
-| 2026-07-19T03:24:46Z | slash-prompt | /deck-tuning | unknown | user/ci | /deck-tuning |
-| 2026-07-19T03:28:30Z | subagent | card-expert | claude-fable-5 | main | Run deck-tuning swap-pool measurement pass |
-| 2026-07-19T06:12:19Z | slash-prompt | /triage | unknown | user/ci | /triage 132 |
-| 2026-07-19T06:12:21Z | skill | triage | unknown | main | args: 132 |
 | 2026-07-19T06:16:46Z | slash-prompt | /triage | unknown | user/ci | /triage 132 |
 | 2026-07-19T06:24:25Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-07-19T06:24:27Z | skill | digest | unknown | main | - |
@@ -409,3 +403,7 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-06T01:09:36Z | skill | critique | claude-sonnet-5 | main | - |
 | 2026-09-06T05:46:10Z | subagent | Explore | claude-fable-5-1 | main | Audit remaining Debug components |
 | 2026-09-06T05:46:27Z | subagent | Explore | claude-fable-5-1 | main | Map current game surface |
+| 2026-09-06T10:27:49Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-06T10:27:51Z | skill | march | unknown | main | - |
+| 2026-09-06T10:28:37Z | skill | adjust-cards | claude-sonnet-5 | main | - |
+| 2026-09-06T10:29:39Z | subagent | card-expert | claude-sonnet-5 | main | Adjust-cards lifecycle pass |

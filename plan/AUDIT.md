@@ -165,7 +165,7 @@
   than ship a rushed/wrong wire; re-adding it is a small dedicated
   mechanics-expert task.
 
-### [loop-call] CHAIN and OMEN each show exactly 1 card carrier after a rider-inclusive audit (2026-09-05)
+### [x] [loop-call] CHAIN and OMEN each show exactly 1 card carrier after a rider-inclusive audit (2026-09-05) — RESOLVED via `/adjust-cards` pass 2 (2026-09-06)
 - category: content residue (rider-inclusive follow-up to the 2026-09-04
   `/adjust-cards` pass-1 loop-call below, run during `/adjust-keywords`
   pass 1)
@@ -205,6 +205,29 @@
   content change"). Next `/adjust-cards` pass: author a second trial (or
   cross-theme) carrier for each, or make the owner call to retire them
   the same way CURDLE went if a second carrier never lands.
+- **resolution (2026-09-06):** authored a second carrier for each rather than
+  retiring — both mechanics were judged deliberate family anchors, not
+  accidental cruft, and both are generic engine mechanics (`chain`/`omen`
+  `specialMechanics` kinds already handle any card that carries them, so no
+  engine wiring was needed, only new cards). Added to
+  `axiomancer-mechanics/src/Cards/library/trial.cards.ts`: "The Village Comes
+  Over the Hill" (rank 4/Rib, heart) — deal 20 + CHAIN 8, with a FLOW rider
+  that adds CHAIN 6 more, explicitly a narrative escalation of Hue and Cry's
+  own flavor text ("the village comes over the hill..."); and "The Ducking
+  Stool" (rank 3/Splinter, body) — deal 14 + a second OMEN (window 2, ante 2,
+  same parameters as The Summing Up's proven carrier) staking a claim on the
+  foe's stance. KB research (kb-query): CHAIN has strong Dawncaster prior art
+  (`kb:dawncaster/keywords/chain.okf.md`, src-general — "Increase the damage
+  of the next action by 1 per stack... plays a key role in raising the
+  Tide" — a keyword the genre deliberately spreads across many cards, not a
+  singleton); OMEN has NO on-point Dawncaster analogue (the closest,
+  Foretell, is deck-peek/reorder, a different job from a Conviction-anted
+  stance wager) — that miss is stated plainly, not papered over; the second
+  OMEN carrier is grounded instead in the repo's own already-proven shape
+  (The Summing Up's identical window/ante parameters). Both cards pass the
+  card-effectiveness lint, the paid-summary-honesty guard, and the pricing
+  sanity guard unchanged. See `plan/CONTENT_LEDGER.md`'s adjust-cards pass 2
+  entry for the full arithmetic and verify result.
 
 ### [loop-call] Phase 78 — W5 art-pass candidates (2026-09-03)
 - category: design residue (art sourcing — awaiting `/oversight` pick;
