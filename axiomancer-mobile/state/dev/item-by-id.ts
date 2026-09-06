@@ -4,10 +4,11 @@
  * T asked for a dev control that drops a specific engine item into
  * the player's inventory by its id, for evidence runs where the Kid
  * needs a known item present (e.g. a particular consumable or a
- * given equipment rarity). We resolve the id against engine truth in
- * priority order — equipment template → unique template → consumable
- * — so no fake local items are minted. Unknown ids return a graceful
- * failure the UI surfaces rather than a silent no-op.
+ * given relic). We resolve the id against engine truth in priority
+ * order — signet relic (`getRelicById`) → consumable
+ * (`getConsumableById`) — so no fake local items are minted. Unknown
+ * ids return a graceful failure the UI surfaces rather than a silent
+ * no-op. Surfaced on `/dev` by `DebugItemPicker` (one chip per id).
  *
  * Component mount is `isDevToolsEnabled()`-guarded; production never
  * reaches this.
@@ -35,12 +36,9 @@ export interface AddItemByIdResult {
 }
 
 /**
- * Resolve `id` against the engine's central item registries (in
- * priority order) and push the matching item into the player's
- * inventory. Equipment / unique templates are materialised via
- * `templateToEquipment` (uniques are tagged `rarity: 'unique'` to
- * match the populate-all path); consumables are spread to a fresh
- * object so the engine's stack-merge can run.
+ * Resolve `id` against the engine's item registries (relics first,
+ * then consumables) and push a fresh copy of the match into the
+ * player's inventory so the engine's stack-merge can run.
  */
 export function addItemByIdAction(
     store: AppStore,

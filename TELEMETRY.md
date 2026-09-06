@@ -407,3 +407,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-05T15:21:22Z | skill | adjust-npcs | claude-sonnet-5 | main | - |
 | 2026-09-06T01:09:11Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-06T01:09:36Z | skill | critique | claude-sonnet-5 | main | - |
+| 2026-09-06T05:46:10Z | subagent | Explore | claude-fable-5-1 | main | Audit remaining Debug components |
+| 2026-09-06T05:46:27Z | subagent | Explore | claude-fable-5-1 | main | Map current game surface |

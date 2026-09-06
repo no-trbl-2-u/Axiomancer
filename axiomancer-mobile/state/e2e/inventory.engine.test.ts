@@ -343,19 +343,18 @@ describe('selectInventoryViewModel: stacking', () => {
         expect(vm.items[0].quantity).toBe(3);
     });
 
-    it('surfaces a dev-loot relic drop after POPULATE has already added the base registry item', () => {
+    it('surfaces a second relic instance added by id after POPULATE has already added the base registry item', () => {
         const store = createAppStore({ adapter: createMemoryAdapter() });
         const actions = createAppActions(store);
 
         actions.populateAllItems();
-        // Phase 21 — the "loot rare" dev button now grants a signet relic (its own
-        // instance id), so it surfaces as a distinct row from the populated base.
-        const result = actions.lootRareItem();
+        // The dev item picker grants a fresh relic instance (its own instance
+        // id), so it surfaces as a distinct row from the populated base.
+        const result = actions.addItemById('relic-overwhelming');
 
         expect(result.added).toBe(true);
         expect(result.name).not.toBeNull();
         const vm = selectInventoryViewModel(store.getState());
-        // The granted relic surfaces as an inventory row (its own instance id).
         expect(vm.items.some((i) => i.name === result.name)).toBe(true);
     });
 });

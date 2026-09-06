@@ -7,10 +7,9 @@
  * exposing it broadly. Until that decision settles, the toggle lives
  * here as a dev-only affordance.
  *
- * Mounts at the bottom of the SELF tab so dev builds can flip the
- * mode and observe its effect on later ticks (combat / event /
- * exploration codex variants). Tick A wires this entry point; later
- * ticks read `useAesthetic()` to branch chrome.
+ * Mounted on the `/dev` route (UI section) and at the bottom of the
+ * SELF tab; the codex chrome branches on `useAesthetic()` in the
+ * combat / event / exploration presenters.
  */
 
 import React from 'react';
@@ -40,6 +39,7 @@ export function AestheticDevToggle() {
                 onPress={toggle}
                 accessibilityRole="button"
                 accessibilityLabel={`Toggle aesthetic mode, currently ${mode}`}
+                testID="debug-aesthetic-toggle"
             >
                 <Text style={styles.buttonLabel}>FLIP</Text>
             </Pressable>

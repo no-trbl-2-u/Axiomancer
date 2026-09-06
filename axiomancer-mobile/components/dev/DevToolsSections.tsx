@@ -1,22 +1,25 @@
 /**
- * Grouped dev-tools surface (Phase 132 — dev menu tab extraction).
+ * Grouped dev-tools surface — the body of the `/dev` route.
  *
- * Before Phase 132 every Debug* affordance lived flat inside
- * `DebugComponentsLazy`, rendered through the collapsible `DevMenu`
- * dropdown at the bottom of the SELF tab. That made the SELF screen a
- * debug junk drawer and — with the Phase 131 evidence presets — too
- * noisy to scan.
+ * Rebuilt in the 2026-09 dev-tools audit. The Phase 132 extraction kept
+ * every legacy control "for a later audit"; this is that audit. Retired
+ * (stale or duplicated): the rarity-loot buttons (rarity model retired
+ * in Phase 21), the second rest/cache row, the FRESH/ENDGAME raw-state
+ * presets (superseded by the L1–L50 ladder), the composite SEED button,
+ * the dead HIDE MANA / HIDE STANCE toggles, the free-text add-item
+ * input, and the synthetic OMEN/FRIEND dialogue + two-quest fixtures.
+ * Added: a live STATE inspector, world travel to any map / node with
+ * its authored event, the labyrinth acts, an any-foe enemy picker, every
+ * reward channel, flag toggles, real NPC trees + real quests, effect and
+ * item pickers, and run controls.
  *
- * This component keeps the lazy-load / bundle-split contract
- * (`DebugComponentsLazy`'s reason for existing — production never
- * imports the Debug* modules) but reorganizes the same controls into
- * audit-friendly sections for the dedicated `/dev` route. No controls
- * are pruned: every component `DebugComponentsLazy` rendered is
- * rendered here, just grouped and ordered. T's later visual audit
- * decides what to remove (Phase 132 follow-up).
+ * Sections read top-down in the order a tester thinks: see state →
+ * shape the player → shape the deck → stand somewhere → fight / play a
+ * minigame → collect rewards → drive the story → tweak the UI → manage
+ * the run and read the log. `testID`s: `dev-section-<key>`.
  *
- * Production gate: returns `null` outside dev builds. The children also
- * self-gate, but the container gate keeps the whole surface inert.
+ * Every leaf is `React.lazy` so production bundles never import the
+ * Debug* modules; the container also self-gates on `isDevToolsEnabled`.
  */
 
 import React, { Suspense, lazy } from 'react';
@@ -26,69 +29,70 @@ import { isDevToolsEnabled } from '@/lib/buildProfile';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
-const DebugCombatEncounterButton = lazy(() => import('@/components/DebugCombatEncounterButton').then(m => ({ default: m.DebugCombatEncounterButton })));
-const DebugCombatTutorialButton = lazy(() => import('@/components/DebugCombatTutorialButton').then(m => ({ default: m.DebugCombatTutorialButton })));
-const DebugHazardButton = lazy(() => import('@/components/DebugHazardButton').then(m => ({ default: m.DebugHazardButton })));
-const DebugHazardDeckRandomize = lazy(() => import('@/components/DebugHazardDeckRandomize').then(m => ({ default: m.DebugHazardDeckRandomize })));
-const DebugRestButton = lazy(() => import('@/components/DebugRestButton').then(m => ({ default: m.DebugRestButton })));
-const DebugBlacksmithButton = lazy(() => import('@/components/DebugBlacksmithButton').then(m => ({ default: m.DebugBlacksmithButton })));
-const DebugEncounterButtons = lazy(() => import('@/components/DebugEncounterButtons').then(m => ({ default: m.DebugEncounterButtons })));
-const DebugAlignmentShift = lazy(() => import('@/components/DebugAlignmentShift').then(m => ({ default: m.DebugAlignmentShift })));
-const DebugCurrencyControl = lazy(() => import('@/components/DebugCurrencyControl').then(m => ({ default: m.DebugCurrencyControl })));
-const DebugDialogueJump = lazy(() => import('@/components/DebugDialogueJump').then(m => ({ default: m.DebugDialogueJump })));
-const DebugCombatDeck = lazy(() => import('@/components/DebugCombatDeck').then(m => ({ default: m.DebugCombatDeck })));
-const DebugEffectApply = lazy(() => import('@/components/DebugEffectApply').then(m => ({ default: m.DebugEffectApply })));
-const DebugQuestState = lazy(() => import('@/components/DebugQuestState').then(m => ({ default: m.DebugQuestState })));
-const DebugTriggerEncounter = lazy(() => import('@/components/DebugTriggerEncounter').then(m => ({ default: m.DebugTriggerEncounter })));
-const DebugHudOverrides = lazy(() => import('@/components/DebugHudOverrides').then(m => ({ default: m.DebugHudOverrides })));
-const DebugMapResetButton = lazy(() => import('@/components/DebugMapResetButton').then(m => ({ default: m.DebugMapResetButton })));
-const DebugAporiaButton = lazy(() => import('@/components/DebugAporiaButton').then(m => ({ default: m.DebugAporiaButton })));
-const DebugPlaythroughPresets = lazy(() => import('@/components/DebugPlaythroughPresets').then(m => ({ default: m.DebugPlaythroughPresets })));
-const DebugPresetPicker = lazy(() => import('@/components/DebugPresetPicker').then(m => ({ default: m.DebugPresetPicker })));
-const DebugPopulateAllItems = lazy(() => import('@/components/DebugPopulateAllItems').then(m => ({ default: m.DebugPopulateAllItems })));
-const DebugAddItemById = lazy(() => import('@/components/DebugAddItemById').then(m => ({ default: m.DebugAddItemById })));
-const DebugLootRarityButtons = lazy(() => import('@/components/DebugLootRarityButtons').then(m => ({ default: m.DebugLootRarityButtons })));
-const DebugPlayerTierPresets = lazy(() => import('@/components/DebugPlayerTierPresets').then(m => ({ default: m.DebugPlayerTierPresets })));
-const DebugSeedButton = lazy(() => import('@/components/DebugSeedButton').then(m => ({ default: m.DebugSeedButton })));
-const DebugXpGrant = lazy(() => import('@/components/DebugXpGrant').then(m => ({ default: m.DebugXpGrant })));
-const AestheticDevToggle = lazy(() => import('@/components/AestheticDevToggle').then(m => ({ default: m.AestheticDevToggle })));
-const DebugLogViewer = lazy(() => import('@/components/DebugLogViewer').then(m => ({ default: m.DebugLogViewer })));
+/** Lazy-load a named export from a Debug* module (keeps prod bundles clean). */
+const lazyNamed = <T extends React.ComponentType>(load: () => Promise<Record<string, unknown>>, name: string) =>
+    lazy(() => load().then((m) => ({ default: m[name] as T })));
+
+// ── STATE ──
+const DebugStateInspector = lazyNamed(() => import('@/components/DebugStateInspector'), 'DebugStateInspector');
+// ── PLAYER ──
+const DebugPresetPicker = lazyNamed(() => import('@/components/DebugPresetPicker'), 'DebugPresetPicker');
+const DebugPlayerTierPresets = lazyNamed(() => import('@/components/DebugPlayerTierPresets'), 'DebugPlayerTierPresets');
+const DebugXpGrant = lazyNamed(() => import('@/components/DebugXpGrant'), 'DebugXpGrant');
+const DebugCurrencyControl = lazyNamed(() => import('@/components/DebugCurrencyControl'), 'DebugCurrencyControl');
+const DebugAlignmentShift = lazyNamed(() => import('@/components/DebugAlignmentShift'), 'DebugAlignmentShift');
+const DebugEffectApply = lazyNamed(() => import('@/components/DebugEffectApply'), 'DebugEffectApply');
+// ── DECKS & ITEMS ──
+const DebugCombatDeck = lazyNamed(() => import('@/components/DebugCombatDeck'), 'DebugCombatDeck');
+const DebugHazardDeckRandomize = lazyNamed(() => import('@/components/DebugHazardDeckRandomize'), 'DebugHazardDeckRandomize');
+const DebugPopulateAllItems = lazyNamed(() => import('@/components/DebugPopulateAllItems'), 'DebugPopulateAllItems');
+const DebugItemPicker = lazyNamed(() => import('@/components/DebugItemPicker'), 'DebugItemPicker');
+// ── WORLD ──
+const DebugWorldTravel = lazyNamed(() => import('@/components/DebugWorldTravel'), 'DebugWorldTravel');
+const DebugFlags = lazyNamed(() => import('@/components/DebugFlags'), 'DebugFlags');
+// ── ENCOUNTERS ──
+const DebugTriggerEncounter = lazyNamed(() => import('@/components/DebugTriggerEncounter'), 'DebugTriggerEncounter');
+const DebugEnemyPicker = lazyNamed(() => import('@/components/DebugEnemyPicker'), 'DebugEnemyPicker');
+const DebugCombatSandbox = lazyNamed(() => import('@/components/DebugCombatSandbox'), 'DebugCombatSandbox');
+// ── MINIGAMES & REWARDS ──
+const DebugHazardButton = lazyNamed(() => import('@/components/DebugHazardButton'), 'DebugHazardButton');
+const DebugRestButton = lazyNamed(() => import('@/components/DebugRestButton'), 'DebugRestButton');
+const DebugBlacksmithButton = lazyNamed(() => import('@/components/DebugBlacksmithButton'), 'DebugBlacksmithButton');
+const DebugRewardTriggers = lazyNamed(() => import('@/components/DebugRewardTriggers'), 'DebugRewardTriggers');
+// ── STORY ──
+const DebugDialogueJump = lazyNamed(() => import('@/components/DebugDialogueJump'), 'DebugDialogueJump');
+const DebugQuestState = lazyNamed(() => import('@/components/DebugQuestState'), 'DebugQuestState');
+// ── UI ──
+const AestheticDevToggle = lazyNamed(() => import('@/components/AestheticDevToggle'), 'AestheticDevToggle');
+const DebugHudOverrides = lazyNamed(() => import('@/components/DebugHudOverrides'), 'DebugHudOverrides');
+// ── RUN & DIAGNOSTICS ──
+const DebugRunControls = lazyNamed(() => import('@/components/DebugRunControls'), 'DebugRunControls');
+const DebugLogViewer = lazyNamed(() => import('@/components/DebugLogViewer'), 'DebugLogViewer');
 
 function LoadingFallback() {
     const AXM = usePalette();
     return (
         <View style={{ padding: 8 }} testID="dev-tools-loading">
-            <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: AXM.bone }}>
-                Loading debug tools...
-            </Text>
+            <Text style={{ fontFamily: FONTS.mono, fontSize: 10, color: AXM.bone }}>Loading debug tools...</Text>
         </View>
     );
 }
 
-function DevSection({
-    label,
-    testID,
-    children,
-}: {
-    label: string;
-    testID: string;
-    children: React.ReactNode;
-}) {
+/** One titled, dashed-border group of leaves. */
+function DevSection({ label, hint, testID, children }: { label: string; hint: string; testID: string; children: React.ReactNode }) {
     const styles = useStyles();
     return (
         <View style={styles.section} testID={testID}>
-            <Text style={styles.sectionLabel}>{label}</Text>
+            <View style={styles.sectionHeader}>
+                <Text style={styles.sectionLabel}>{label}</Text>
+                <Text style={styles.sectionHint}>{hint}</Text>
+            </View>
             <View style={styles.sectionBody}>{children}</View>
         </View>
     );
 }
 
-/**
- * Grouped dev controls. Mounted by the `/dev` route. Sections mirror
- * the Phase 132 brief's audit groupings; component order within a
- * section preserves the prior flat order so existing automation and
- * muscle memory stay close to stable.
- */
+/** The grouped dev controls. Mounted by the `/dev` route. */
 export function DevToolsSections() {
     const styles = useStyles();
     if (!isDevToolsEnabled()) return null;
@@ -96,60 +100,56 @@ export function DevToolsSections() {
     return (
         <View style={styles.root} testID="dev-tools-sections">
             <Suspense fallback={<LoadingFallback />}>
-                <DevSection label="PLAYTHROUGH PRESETS" testID="dev-section-presets">
+                <DevSection label="STATE" hint="see everything" testID="dev-section-state">
+                    <DebugStateInspector />
+                </DevSection>
+
+                <DevSection label="PLAYER" hint="archetype · level · wallet · ledger · effects" testID="dev-section-player">
                     <DebugPresetPicker />
-                    <DebugPlaythroughPresets />
                     <DebugPlayerTierPresets />
-                    <DebugSeedButton />
-                </DevSection>
-
-                <DevSection label="ENCOUNTER TRIGGERS" testID="dev-section-encounters">
-                    <DebugTriggerEncounter />
-                    <DebugEncounterButtons />
-                    <DebugCombatEncounterButton />
-                    <DebugCombatTutorialButton />
-                </DevSection>
-
-                <DevSection label="HAZARD SETUP" testID="dev-section-hazard">
-                    <DebugHazardButton />
-                    <DebugHazardDeckRandomize />
-                </DevSection>
-
-                <DevSection label="REST SETUP" testID="dev-section-rest">
-                    <DebugRestButton />
-                </DevSection>
-
-                <DevSection label="BLACKSMITH SETUP" testID="dev-section-blacksmith">
-                    <DebugBlacksmithButton />
-                </DevSection>
-
-                <DevSection label="COMBAT SETUP" testID="dev-section-combat">
-                    <DebugCombatDeck />
+                    <DebugXpGrant />
+                    <DebugCurrencyControl />
+                    <DebugAlignmentShift />
                     <DebugEffectApply />
                 </DevSection>
 
-                <DevSection label="INVENTORY & ITEM TOOLS" testID="dev-section-inventory">
+                <DevSection label="DECKS & ITEMS" hint="combat deck · hazard deck · satchel" testID="dev-section-decks">
+                    <DebugCombatDeck />
+                    <DebugHazardDeckRandomize />
                     <DebugPopulateAllItems />
-                    <DebugLootRarityButtons />
-                    <DebugAddItemById />
-                    <DebugCurrencyControl />
-                    <DebugXpGrant />
+                    <DebugItemPicker />
                 </DevSection>
 
-                <DevSection label="WORLD & STORY TOOLS" testID="dev-section-world">
-                    <DebugMapResetButton />
-                    <DebugAporiaButton />
-                    <DebugAlignmentShift />
+                <DevSection label="WORLD" hint="any map · any node · the labyrinth · flags" testID="dev-section-world">
+                    <DebugWorldTravel />
+                    <DebugFlags />
+                </DevSection>
+
+                <DevSection label="ENCOUNTERS" hint="quick triggers · any foe · sandbox" testID="dev-section-encounters">
+                    <DebugTriggerEncounter />
+                    <DebugEnemyPicker />
+                    <DebugCombatSandbox />
+                </DevSection>
+
+                <DevSection label="MINIGAMES & REWARDS" hint="hazard · rest · anvil · reliquary · journal · cards" testID="dev-section-rewards">
+                    <DebugHazardButton />
+                    <DebugRestButton />
+                    <DebugBlacksmithButton />
+                    <DebugRewardTriggers />
+                </DevSection>
+
+                <DevSection label="STORY" hint="real NPC trees · real quests" testID="dev-section-story">
                     <DebugDialogueJump />
                     <DebugQuestState />
                 </DevSection>
 
-                <DevSection label="MISC & SYSTEM" testID="dev-section-system">
+                <DevSection label="UI" hint="aesthetic · HUD overrides" testID="dev-section-ui">
                     <AestheticDevToggle />
                     <DebugHudOverrides />
                 </DevSection>
 
-                <DevSection label="DIAGNOSTICS" testID="dev-section-diagnostics">
+                <DevSection label="RUN & DIAGNOSTICS" hint="save · reset · galleries · log" testID="dev-section-run">
+                    <DebugRunControls />
                     <DebugLogViewer />
                 </DevSection>
             </Suspense>
@@ -158,9 +158,7 @@ export function DevToolsSections() {
 }
 
 const useStyles = makeStyles((AXM) => ({
-    root: {
-        gap: 12,
-    },
+    root: { gap: 12 },
     section: {
         borderWidth: 1,
         borderColor: AXM.ash,
@@ -168,18 +166,18 @@ const useStyles = makeStyles((AXM) => ({
         backgroundColor: AXM.panelBg,
         paddingBottom: 6,
     },
-    sectionLabel: {
-        fontFamily: FONTS.mono,
-        fontSize: 11,
-        letterSpacing: 2,
-        color: AXM.sulfur,
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'baseline',
+        justifyContent: 'space-between',
         paddingVertical: 8,
         paddingHorizontal: 10,
         borderBottomWidth: 1,
         borderBottomColor: AXM.ash,
         borderStyle: 'dashed',
+        gap: 8,
     },
-    sectionBody: {
-        paddingTop: 4,
-    },
+    sectionLabel: { fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 2, color: AXM.sulfur },
+    sectionHint: { fontFamily: FONTS.mono, fontSize: 9, color: AXM.bone, flexShrink: 1, textAlign: 'right' },
+    sectionBody: { paddingTop: 4 },
 }));

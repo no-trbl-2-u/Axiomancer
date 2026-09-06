@@ -138,7 +138,7 @@ const SCREENS = [
         id: 'dialogue', file: '19-dialogue.png', drive: async (p) => {
             await goto(p, '/character')
             await openDevMenu(p)
-            await tap(p, 'debug-dialogue-omen')
+            await tap(p, 'debug-dialogue-fishing-village-captain-blackwater')
             await settle(p, 1600)
         },
     },

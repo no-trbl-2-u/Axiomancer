@@ -1,9 +1,8 @@
 /**
  * Dev-only combat deck controls. The named presets swap the player's combat
- * deck for a curated selection (starter baseline plus the ten themed preset
- * decks — Erosion, Oratory, Foundry, Penitent, Standstill, Augury, Tithe,
- * Grace, Bastion, Refrain); the randomizer deals a chaos hand from the full
- * card pool. Each preset replaces `player.knownCards` and clears earned
+ * deck for a curated selection (`COMBAT_DECK_PRESETS`: the starter baseline
+ * plus the engine's authored starter bundles — Threadbare, Pilgrim,
+ * Apostate); the randomizer deals a chaos hand from the full card pool. Each preset replaces `player.knownCards` and clears earned
  * reward cards, so the next encounter deals exactly that deck. Renders null
  * outside dev builds.
  */

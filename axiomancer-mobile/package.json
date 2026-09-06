@@ -25,7 +25,6 @@
     "e2e:combat": "node scripts/combat-encounter-e2e.mjs",
     "e2e:encounters": "node scripts/encounter-routing-e2e.mjs",
     "e2e:theme": "node scripts/theme-switch-e2e.mjs",
-    "e2e:loot": "node scripts/loot-rarity-e2e.mjs",
     "e2e:exploration-roundtrip": "node scripts/exploration-combat-roundtrip-e2e.mjs",
     "e2e:combat-round": "node scripts/combat-round-e2e.mjs",
     "e2e:combat-round:live": "MODE=live node scripts/combat-round-e2e.mjs",

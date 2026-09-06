@@ -37,7 +37,8 @@
  * Navigation happens first so the minigame / paced routes stack on
  * top of the WILDS tab rather than the other way round.
  *
- * Renders null outside dev builds. Mounts inside the DevMenu.
+ * Renders null outside dev builds. Mounted in the `/dev` ENCOUNTERS
+ * section beside `DebugEnemyPicker` (any foe) and `DebugCombatSandbox`.
  */
 
 import React from 'react';
@@ -51,6 +52,7 @@ import {
 
 import { isDevToolsEnabled } from '@/lib/buildProfile';
 import { useGameActions, useGameStore } from '@/state/GameStoreProvider';
+import { stageEncounter } from '@/state/dev/enemy-picker';
 import { EMPTY_EVENT_SLICE } from '@/state/store';
 import type { NodeType } from '@/state/presenters/exploration.engine';
 import { FONTS } from '@/theme/axm';
@@ -167,14 +169,7 @@ export function DebugTriggerEncounter() {
                     (e) => e.difficulty !== 'boss' && e.difficulty !== 'unique',
                 );
                 if (!enemy) return;
-                setPending(
-                    {
-                        kind: 'encounter',
-                        encounter: { enemies: [enemy], origin: 'dev:trigger-encounter' },
-                        isBoss: false,
-                    },
-                    'encounter',
-                );
+                stageEncounter(store, enemy, 'dev:trigger-encounter', false);
                 return;
             }
             case 'boss': {
@@ -183,14 +178,7 @@ export function DebugTriggerEncounter() {
                 const enemy =
                     lowestFoe((e) => e.difficulty === 'boss') ?? lowestFoe(() => true);
                 if (!enemy) return;
-                setPending(
-                    {
-                        kind: 'encounter',
-                        encounter: { enemies: [enemy], origin: 'dev:trigger-boss' },
-                        isBoss: true,
-                    },
-                    'boss',
-                );
+                stageEncounter(store, enemy, 'dev:trigger-boss', true);
                 return;
             }
             case 'hazard':
