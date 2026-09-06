@@ -70,7 +70,8 @@ function classifyMobilePath(path, result) {
     const encounters = [
         /^axiomancer-mobile\/app\/(?:cache|quest|rest|event|hazard|combat-encounter|labyrinth)\//,
         /^axiomancer-mobile\/app\/\(tabs\)\/exploration\//,
-        /^axiomancer-mobile\/components\/(?:DebugEncounter|DebugLoot|DebugQuest|DebugRest|DebugTriggerEncounter)/,
+        /^axiomancer-mobile\/components\/(?:DebugEnemy|DebugQuest|DebugRest|DebugReward|DebugTriggerEncounter|DebugWorld)/,
+        /^axiomancer-mobile\/state\/dev\/(?:enemy-picker|rewards|world-travel)\.ts$/,
         /^axiomancer-mobile\/scripts\/encounter-routing-e2e\.mjs$/,
     ]
 

@@ -20,6 +20,18 @@ test('mobile subsystem component selects only its owned journey', () => {
     assert.equal(result.encounters, false)
 })
 
+test('dev-tools leaves and helpers select the journeys they can launch', () => {
+    const enemy = classify('mobile', ['axiomancer-mobile/components/DebugEnemyPicker.tsx'])
+    assert.equal(enemy.encounters, true)
+    assert.equal(enemy.full, false)
+    const travel = classify('mobile', ['axiomancer-mobile/state/dev/world-travel.ts'])
+    assert.equal(travel.encounters, true)
+    assert.equal(travel.full, false)
+    const rewards = classify('mobile', ['axiomancer-mobile/components/DebugRewardTriggers.tsx'])
+    assert.equal(rewards.encounters, true)
+    assert.equal(rewards.hazard, false)
+})
+
 test('mixed mobile subsystems select the union', () => {
     const result = classify('mobile', [
         'axiomancer-mobile/components/hazard/HazardCard.tsx',

@@ -52,9 +52,9 @@ export interface ApplyPlayerTierPresetResult {
  */
 const TIER_DISPLAY: Record<PlayerTierPresetId, { label: string; summary: string }> = {
     'kid-l1': { label: 'L1', summary: 'fresh start — tier-1 fallacies, no gear' },
-    'kid-l15': { label: 'L15', summary: 'mid kit — tier-1/2 cards, steel + chain' },
-    'kid-l30': { label: 'L30', summary: 'late kit — every tier, mithril + plate' },
-    'kid-l50': { label: 'L50', summary: 'endgame — all cards, top-tier affixed gear' },
+    'kid-l15': { label: 'L15', summary: 'mid kit — tier-1/2 cards, mid-ladder relics' },
+    'kid-l30': { label: 'L30', summary: 'late kit — every tier, full relic loadout' },
+    'kid-l50': { label: 'L50', summary: 'endgame — all cards, full relic loadout' },
 };
 
 export const PLAYER_TIER_PRESETS: readonly PlayerTierPreset[] = Object.freeze(

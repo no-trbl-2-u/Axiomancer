@@ -1,88 +1,68 @@
 /**
- * Hermetic component tests — DebugEffectApply (Phase 61e).
+ * Hermetic component tests — DebugEffectApply (effect picker).
  *
  * Pins:
  *   - DEV gate (true / simulated-false)
- *   - BUFF · ME applies buff_regeneration to player.effects
- *
- * The legacy `BLEED · FOE` button targeted the removed turn-based
- * `state.combat.enemy` slice (mechanics 0.37.0) and was dropped along
- * with its coverage.
+ *   - One chip per buff and per debuff in the engine library
+ *   - A chip runs the engine's applyEffect onto player.effects
+ *   - CLEAR empties player.effects
  */
 
-import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { fireEvent, render } from '@testing-library/react-native';
 import React from 'react';
+import { effectsLibrary } from '@mechanics';
 
 import { DebugEffectApply } from '@/components/DebugEffectApply';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
 import { createAppStore, type AppStore } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 
-beforeEach(() => {
-    jest.spyOn(console, 'warn').mockImplementation(() => undefined);
-});
-
 afterEach(() => {
     jest.restoreAllMocks();
 });
 
-function makeStore(): AppStore {
-    return createAppStore({ adapter: createMemoryAdapter() });
-}
-
-function withProvider(store: AppStore, child: React.ReactNode) {
-    return <GameStoreProvider store={store}>{child}</GameStoreProvider>;
-}
+const makeStore = (): AppStore => createAppStore({ adapter: createMemoryAdapter() });
+const withProvider = (store: AppStore, child: React.ReactNode) => <GameStoreProvider store={store}>{child}</GameStoreProvider>;
+const BUFF = effectsLibrary.buffs[0];
+const DEBUFF = effectsLibrary.debuffs[0];
 
 describe('DebugEffectApply: DEV gate', () => {
-    it('renders the buff button when __DEV__ is true (jest default)', () => {
-        const store = makeStore();
-        const tree = render(withProvider(store, <DebugEffectApply />));
-        expect(tree.queryByTestId('debug-effect-buff-player')).not.toBeNull();
+    it('renders a chip per library effect plus CLEAR', () => {
+        const tree = render(withProvider(makeStore(), <DebugEffectApply />));
+        for (const e of [...effectsLibrary.buffs, ...effectsLibrary.debuffs]) {
+            expect(tree.queryByTestId(`debug-effect-${e.id}`)).not.toBeNull();
+        }
+        expect(tree.queryByTestId('debug-effect-clear')).not.toBeNull();
     });
 
     it('renders null when __DEV__ is false (production build simulation)', () => {
-         
-        const g = global as any;
+        const g = global as unknown as { __DEV__: boolean };
         const original = g.__DEV__;
         g.__DEV__ = false;
         try {
-            const store = makeStore();
-            const tree = render(withProvider(store, <DebugEffectApply />));
-            expect(tree.queryByTestId('debug-effect-buff-player')).toBeNull();
+            const tree = render(withProvider(makeStore(), <DebugEffectApply />));
+            expect(tree.queryByTestId('debug-effect-clear')).toBeNull();
         } finally {
             g.__DEV__ = original;
         }
     });
 });
 
-describe('DebugEffectApply: buff routing', () => {
-    it('BUFF · ME adds an effect to player.effects', () => {
+describe('DebugEffectApply: apply + clear', () => {
+    it('a buff chip adds that effect to player.effects', () => {
         const store = makeStore();
-        const before = store.getState().player.effects?.length ?? 0;
-
         const tree = render(withProvider(store, <DebugEffectApply />));
-        fireEvent.press(tree.getByTestId('debug-effect-buff-player'));
-
-        const after = store.getState().player.effects ?? [];
-        expect(after.length).toBeGreaterThan(before);
-        // The effect's effectId on the ActiveEffect points back to the registry entry.
-        expect(after.some((e) => e.effectId === 'buff_regeneration')).toBe(true);
+        fireEvent.press(tree.getByTestId(`debug-effect-${BUFF.id}`));
+        expect(store.getState().player.effects.map((e) => e.effectId)).toContain(BUFF.id);
     });
-});
 
-// The legacy `BLEED · FOE` button (which mutated `state.combat.enemy`,
-// removed from the engine in mechanics 0.37.0) was dropped; its coverage
-// retired with it.
-
-describe('DebugEffectApply: accessibility', () => {
-    it('exposes accessibilityRole=button and descriptive label', () => {
+    it('a debuff chip adds that effect too, and CLEAR wipes the list', () => {
         const store = makeStore();
         const tree = render(withProvider(store, <DebugEffectApply />));
-
-        const buff = tree.getByTestId('debug-effect-buff-player');
-        expect(buff.props.accessibilityRole).toBe('button');
-        expect(buff.props.accessibilityLabel).toMatch(/buff/i);
+        fireEvent.press(tree.getByTestId(`debug-effect-${DEBUFF.id}`));
+        expect(store.getState().player.effects.map((e) => e.effectId)).toContain(DEBUFF.id);
+        fireEvent.press(tree.getByTestId('debug-effect-clear'));
+        expect(store.getState().player.effects).toHaveLength(0);
     });
 });

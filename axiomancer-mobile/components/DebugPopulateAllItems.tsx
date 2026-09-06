@@ -1,29 +1,14 @@
 /**
  * Dev-only "populate registry items" button.
  *
- * Press to fire `actions.populateAllItems()` — walks the engine's
- * three central item registries (`equipmentTemplates`,
- * `uniqueTemplates`, `consumableLibrary`) and pushes one of each
- * to the player's inventory. Useful for surface-testing inventory
- * rendering, equip dock peer ordering, and per-rarity / per-slot
- * chrome under a maximal load.
+ * Press to fire `actions.populateAllItems()` — walks the engine's two
+ * item registries (`relicLibrary`: the 8 signet relics, the only
+ * equipment in the game; `consumableLibrary`) and pushes one of each to
+ * the player's inventory. Useful for surface-testing inventory
+ * rendering, the equip dock, and per-slot chrome under a maximal load.
+ * For a single item use `DebugItemPicker`.
  *
- * Rarity truth (Phase 136): POPULATE provides only the items that
- * actually exist as static registry rows — common / base equipment,
- * unique relics, and consumables. Uncommon and rare equipment are
- * NOT registry rows; the engine rolls them at drop time. Use the
- * LOOT UNCOMMON / LOOT RARE buttons (DebugLootRarityButtons) to add
- * those real generated drops.
- *
- * User-direct request 2026-05-22 (mid-`/march` interjection): "let's
- * add a button that 'populates' items and gives the player every
- * item in the game". Sibling to `DebugSeedButton` (which seeds a
- * representative sample — head/body/weapon + one potion + a few
- * cards + map reset); this one is the full registry dump for
- * targeted UI testing.
- *
- * Renders null in production builds (`__DEV__` is false). Mount
- * inside `<DevMenu>` on the SELF tab.
+ * Renders null outside dev builds.
  */
 
 import React, { useState } from 'react';

@@ -7,9 +7,8 @@
  * surface (SELF tab, inventory dock, combat cards, alignment
  * cube) re-renders against a freshly-built archetype.
  *
- * Fourth manual-testing knob alongside `DebugSeedButton`,
- * `DebugCombatButton`, `DebugMapResetButton`, `DebugChaosToggle`.
- * Renders null in production builds (`__DEV__` false).
+ * Sits beside the finer `DebugPlayerTierPresets` ladder in the `/dev`
+ * PLAYER section. Renders null in production builds.
  *
  * Promoted via `/oversight` 2026-05-20 (14th call) from
  * PHASE_CANDIDATES pass 5 [score 4.5].
