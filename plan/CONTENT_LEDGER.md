@@ -11,7 +11,7 @@
 
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
-| cards | `skills/adjust-cards.md` | 2026-09-06 | (pending — see log) | 2 |
+| cards | `skills/adjust-cards.md` | 2026-09-06 | 8c346ac7 | 2 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-04 | 934160bb | 1 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-05 | 04d2bf0d | 1 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-05 | bf6223f1 | 1 |
@@ -28,7 +28,7 @@ Newest first. One entry per `/adjust-*` tick:
 > after VERB_POINTS change)".>
 ```
 
-> **[adjust-cards pass 2, 2026-09-06, commit (pending — see below)]** Created 2
+> **[adjust-cards pass 2, 2026-09-06, commit 8c346ac7]** Created 2
 > (trial theme), zero-UPDATE, zero-REMOVE pass. Audit: since pass 1
 > (f29cea5c — the ledger's prior row cited its parent commit 24978555 by
 > mistake; noted here so the next pass measures staleness off the right
