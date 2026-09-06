@@ -35,13 +35,34 @@ export const COMBAT_REWARD_POOL: readonly string[] = Object.freeze(
 export const REWARD_RARITY_WEIGHTS: Readonly<Record<'common' | 'uncommon' | 'rare', number>> =
     Object.freeze({ common: 1, uncommon: 0.5, rare: 0.2 });
 
-/** The cards a brand-new player starts with: an opening offensive card PLUS a
- *  basic defense card, so every player can GUARD from turn one. The rest unlock
- *  through ethical-dilemma events via `unlockCardViaDilemma`. The mobile
- *  bootstrap seeds a new character's `knownCards` from this list. */
+/**
+ * The cards a brand-new player starts with — an opening offensive card PLUS a
+ * basic defense card, so every player can GUARD from turn one, and one card in
+ * EACH of the three stance colours. The rest unlock through ethical-dilemma
+ * events via `unlockCardViaDilemma`. The mobile bootstrap seeds a new
+ * character's `knownCards` from this list.
+ *
+ * THE COLOUR LAW APPLIES TO THE STARTER DECK TOO (playthrough report
+ * 2026-09-05). This list used to be `spoiled-poultice` + `chilblain-watch`,
+ * and BOTH are `philosophicalAspect: 'body'` — so any player who reached
+ * combat down this path (the `ensureStarterCards` fallback in mobile, taken
+ * whenever the Threadbare starter-bundle seeding in `app/index.tsx` did not
+ * fire) opened every fight with a hand that was 100% BODY. Since the mobile
+ * palette paints body RED, the reported symptom was "every card in my deck
+ * was red / the deck was never shuffled". The deck WAS shuffled — a shuffle of
+ * two body cards is still two body cards. The fix is the deck, not the
+ * shuffle: one starter per colour, so a heart or mind die always has something
+ * legal to power.
+ *
+ * All four are drawn from the Threadbare Office (the neutral early-campaign
+ * snapshot the starter bundle seeds), so this fallback deck is a strict SUBSET
+ * of the canonical starting deck rather than a second, divergent one.
+ */
 export const STARTING_CARD_IDS: readonly string[] = Object.freeze([
-    'spoiled-poultice',     // opening offense (the rot seed)
-    'chilblain-watch',      // basic defense (GUARD) — guard from turn one
+    'spoiled-poultice',     // BODY  — opening offense (the rot seed)
+    'chilblain-watch',      // BODY  — basic defense (GUARD) — guard from turn one
+    'first-spadeful',       // MIND  — plain offense + RECALL; the mind die's turn-one play
+    'thin-hymn',            // HEART — PLEA + heal; the heart die's turn-one play
 ]);
 
 /** The single OFFENSIVE card a brand-new player starts with. Kept for

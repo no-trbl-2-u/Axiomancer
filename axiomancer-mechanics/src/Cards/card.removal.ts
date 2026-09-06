@@ -13,12 +13,13 @@
  * lists with different semantics:
  *
  *   - the CARD BASE — the curated loadout (`combat-loadout-card:` flags) when
- *     any loadout flag exists, otherwise `player.knownCards` — and whichever
- *     of the two is in force is **de-duplicated**, so the base contributes at
- *     most ONE deck copy per id however many times it lists that id;
+ *     any loadout flag exists, otherwise `player.knownCards`. Whichever of the
+ *     two is in force contributes ONE deck copy PER ENTRY: a base that lists
+ *     an id three times deals three copies. (It used to be de-duplicated to a
+ *     single copy; that silently destroyed every authored copy count in the
+ *     shipped presets and was repealed 2026-09-05 — see `buildCombatDeck`.)
  *   - the REWARDS — `player.combatRewardCards`, duplicates KEPT (extra copies
- *     are the whole point of a deckbuilder pickup). This is the ONLY list whose
- *     duplicates reach the deck.
+ *     are the whole point of a deckbuilder pickup).
  *
  * Removal therefore has to answer to whichever list actually owns the copy, or
  * it is invisible: strip a card from `knownCards` while a loadout flag still
@@ -36,16 +37,15 @@
  *      copy, never all of them: a player who removed a 4-of would otherwise
  *      nuke a quarter of their deck for one price. The loadout is NOT touched
  *      on this branch — the reward copy is the copy that left.
- *   4. Otherwise the CARD BASE gives it up, and there the id leaves ENTIRELY:
- *      every loadout slot naming it AND every `knownCards` entry. That looks
- *      like more than "one copy" until you read `buildCombatDeck` — the base is
- *      de-duplicated before it is dealt, so however many times it lists the id
- *      it contributes exactly ONE deck copy, and stripping all of its entries
- *      removes exactly ONE deck copy. Anything less is invisible: drop one of
- *      three `combat-loadout-card:thin-hymn:*` slots and the deck is unchanged.
- *      (Both lists really do carry duplicates in shipped data — the mobile
- *      starter-bundle path writes the preset recipe into `knownCards` verbatim,
- *      3× copies and all.)
+ *   4. Otherwise the CARD BASE gives up ONE entry — one deck copy, now that
+ *      the base keeps its copies. It leaves from whichever list is in force:
+ *      one `combat-loadout-card:<id>:*` slot when loadout flags exist (and
+ *      `knownCards` is left alone there — un-seating a copy is not
+ *      un-learning the card), otherwise one `knownCards` entry. A 3-of loses
+ *      one copy and stays a 2-of, which is what one removal is supposed to
+ *      buy. (Both lists really do carry duplicates in shipped data — the
+ *      mobile starter-bundle path writes the preset recipe into `knownCards`
+ *      verbatim, 3× copies and all.)
  *
  * Every accepted removal increments `Character.cardRemovals`, the per-run
  * counter the escalating price reads (`card.removal.pricing.ts`).
@@ -188,17 +188,27 @@ export function removeCardFromCombatDeck(
         nextRewards = dropOneCopy(rewards, cardId);
         removedFrom = 'rewards';
     } else {
-        // Rule 4 — the card base gives it up, and it goes completely: the base
-        // is de-duplicated before it is dealt, so every entry has to go for one
-        // deck copy to leave. `removeFromLoadout` drops one slot per call, so
-        // drain it (reusing the codec rather than re-deriving the flag format).
+        // Rule 4 — the card base gives up exactly ONE copy.
+        //
+        // This used to drain EVERY entry naming the id, from the loadout and
+        // from `knownCards` both, because `buildCombatDeck` de-duplicated the
+        // base: however many entries it held, the base dealt one copy, so one
+        // copy could only leave by taking all of them. The base keeps its
+        // copies now (see `buildCombatDeck`), which makes entries and deck
+        // copies one-for-one — so draining the list would delete a 3-of for
+        // the price of a single removal. One entry leaves, and it leaves from
+        // whichever list is actually IN FORCE: the loadout when loadout flags
+        // exist (`knownCards` is the unlock set then, not the deck, and
+        // un-seating a copy must not un-learn the card), otherwise
+        // `knownCards`.
         removedFrom = 'known';
-        while (decodeCombatLoadout(nextFlags).includes(cardId)) {
+        if (decodeCombatLoadout(nextFlags).includes(cardId)) {
             nextFlags = removeFromLoadout(nextFlags, cardId);
             loadoutReconciled = true;
+        } else {
+            const kept = dropOneCopy(known, cardId);
+            if (kept.length !== known.length) nextKnown = kept;
         }
-        const kept = known.filter(id => id !== cardId);
-        if (kept.length !== known.length) nextKnown = kept;
     }
 
     // Only write the lists that actually changed, so a sparse-optional

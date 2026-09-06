@@ -126,14 +126,22 @@ describe('profane canon — id hygiene and provenance', () => {
         }
     });
 
-    it('the starting pair resolves and teaches a mechanic each', () => {
-        expect(STARTING_CARD_IDS).toEqual(['spoiled-poultice', 'chilblain-watch']);
+    it('the starting set resolves, teaches a mechanic each, and spans all three colours', () => {
+        expect(STARTING_CARD_IDS).toEqual([
+            'spoiled-poultice', 'chilblain-watch', 'first-spadeful', 'thin-hymn',
+        ]);
         for (const id of STARTING_CARD_IDS) {
             const card = getCardById(id);
             expect(card, id).toBeDefined();
             expect(card!.rank).toBe(1); // starters are Ash
             expect(card!.tags).toContain('starter');
         }
+        // THE COLOUR LAW AT THE STARTER GATE (playthrough report 2026-09-05):
+        // the fallback starter deck used to be two BODY cards, so a new
+        // player's every hand was mono-red and a heart or mind die had nothing
+        // legal to power. Every stance must be represented.
+        const aspects = new Set(STARTING_CARD_IDS.map(id => getCardById(id)!.philosophicalAspect));
+        expect([...aspects].sort()).toEqual(['body', 'heart', 'mind']);
     });
 
     it('the reward pool never seats a curse, and every id resolves', () => {

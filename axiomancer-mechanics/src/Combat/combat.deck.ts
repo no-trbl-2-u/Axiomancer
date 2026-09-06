@@ -49,19 +49,30 @@ export function shuffleCombatDeck<T>(items: readonly T[], rng: () => number = de
  * Card ids are card ids (kebab-case). Reward cards stack on top of the card
  * base. No escape card is appended — see the file header.
  *
+ * COPIES ARE REAL, IN BOTH LISTS (playthrough report 2026-09-05). This
+ * function used to DE-DUPLICATE the card base, so however many times the base
+ * named an id it contributed exactly one deck copy. That silently destroyed
+ * every authored copy count in the shipped data: the mobile starter-bundle
+ * path writes a campaign preset's recipe into `knownCards` verbatim, 3x copies
+ * and all, so the 18-card Threadbare Office was dealt as an 8-card deck (and
+ * the 45-card Apostate Canon as 30). An 8-card deck reshuffles inside a single
+ * round — which is what made every fight deal the same few cards — and it sat
+ * BELOW `MIN_COMBAT_DECK_SIZE` (12), so deck removal refused every request
+ * with `deck-at-floor`. A deckbuilder's copy counts are load-bearing; the base
+ * now keeps them, exactly as the reward list always has.
+ *
+ * Order is preserved from both lists, so opening hands still deal from an
+ * authored order before the shuffle touches them.
+ *
  * @param player - Character whose `knownCards` / `combatRewardCards` supply the base.
  * @param flags  - `GameState.flags` — when non-empty loadout flags are present
  *                 the curated list is used instead of all `knownCards`.
  */
 export function buildCombatDeck(player: Character, flags?: readonly string[]): string[] {
     const loadout = flags && flags.length > 0 ? getCombatLoadout(flags) : [];
-    const known = loadout.length > 0 ? loadout : (player.knownCards ?? []);
-    // De-dup the card base; preserve order so opening hands feel authored.
-    const seen = new Set<string>();
-    const deck: string[] = [];
-    for (const id of known) {
-        if (!seen.has(id)) { seen.add(id); deck.push(id); }
-    }
+    const base = loadout.length > 0 ? loadout : (player.knownCards ?? []);
+    // The card base keeps its copies (see the note above) and its order.
+    const deck: string[] = [...base];
     // Spec 26b deckbuilder — reward cards stack on top (DUPLICATES kept: extra
     // copies are the whole point of a deckbuilder pickup).
     for (const id of player.combatRewardCards ?? []) deck.push(id);

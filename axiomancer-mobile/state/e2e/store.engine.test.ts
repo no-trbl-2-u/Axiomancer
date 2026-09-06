@@ -95,11 +95,13 @@ describe('createAppActions: dispatch', () => {
         expect(store.getState().currentEncounter?.enemies[0]?.name).toBe('Test Lich');
     });
 
-    // Spec 32 v3 §7 — the authored starting deck: slippery-slope (poison
-    // erosion) + brace-for-impact (Guard); no synthetic Retreat is appended
-    // (no in-combat retreat exists). Both starters must be level-1 learnable
-    // (none silently dropped by an unmet learning requirement) and each
-    // teaches a mechanic in fight one.
+    // Spec 32 v3 §7 — the authored starting deck: rot erosion + Guard, plus
+    // one card in EACH stance colour (playthrough report 2026-09-05 — the old
+    // two-card set was mono-BODY, so every opening hand read solid red and a
+    // heart or mind die had nothing legal to power). No synthetic Retreat is
+    // appended (no in-combat retreat exists). Every starter must be level-1
+    // learnable (none silently dropped by an unmet learning requirement) and
+    // each teaches a mechanic in fight one.
     it('seeds the authored v3 starter deck for a fresh level-1 player', () => {
         const store = createAppStore({ adapter });
         const actions = createAppActions(store);
@@ -110,24 +112,35 @@ describe('createAppActions: dispatch', () => {
 
         // Every seeded starter card must actually have been learned (none
         // silently dropped by an unmet learning requirement).
-        expect(player.knownCards).toEqual(['spoiled-poultice', 'chilblain-watch']);
+        expect(player.knownCards).toEqual([
+            'spoiled-poultice', 'chilblain-watch', 'first-spadeful', 'thin-hymn',
+        ]);
         for (const id of player.knownCards) {
             expect(getCardById(id)).toBeTruthy();
         }
 
-        // The card deck is built from those known cards; the player must
-        // draw both action cards, distinct.
+        // THE COLOUR LAW at the starter gate: the seeded deck spans all three
+        // stances, so no die colour is dead on turn one.
+        const aspects = new Set(
+            player.knownCards.map((id) => getCardById(id)!.philosophicalAspect),
+        );
+        expect([...aspects].sort()).toEqual(['body', 'heart', 'mind']);
+
+        // The card deck is built from those known cards; the player must draw
+        // real action cards from it.
         const deck = buildCombatDeck(player);
         const encounter = initializeCombatEncounter(player, makeEnemy(), undefined, 7);
         const visible = handCards(encounter).filter(
             ({ card }) => card.id !== 'card-retreat' && card.verbClass !== 'retreat',
         );
-        expect(deck.length).toBeGreaterThanOrEqual(2);
-        expect(visible.length).toBeGreaterThanOrEqual(2);
-        // A 2-card deck draws a padded hand — both starters must be present
-        // (duplicates are the reshuffle law at work, not a bug).
+        expect(deck.length).toBeGreaterThanOrEqual(4);
+        expect(visible.length).toBeGreaterThanOrEqual(4);
+        // A 4-card deck still draws a padded 5-card hand — every starter must
+        // be present (duplicates are the reshuffle law at work, not a bug).
         const distinct = new Set(visible.map(({ card }) => card.id));
-        expect(distinct).toEqual(new Set(['spoiled-poultice', 'chilblain-watch']));
+        expect(distinct).toEqual(new Set([
+            'spoiled-poultice', 'chilblain-watch', 'first-spadeful', 'thin-hymn',
+        ]));
         // One card erodes (DoT) and one defends — the strike is dead, so the
         // opening hand teaches poison + Guard rather than a raw hit.
         const verbs = visible.map(({ card }) => card.verbClass);
