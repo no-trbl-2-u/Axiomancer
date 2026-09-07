@@ -45,6 +45,7 @@ All commands are in `package.json`:
 | Lint | `npm run lint` |
 | Lint + type-check | `npm run check` |
 | Demo CLI | `npm run game` (tabbed map / combat / journal / skills / inventory / debug loop) |
+| Boot at a known state | `npm run game -- --fixture <id\|path.json\|list>` — declarative state fixtures shared with mobile (`docs/state-fixtures.md` at the root) |
 | Verify gate | `npm run verify` (type-check + type-check:tests + type-check:cli + lint + test + build) |
 | Deploy gate | `npm run deploy:check` — lives at the monorepo ROOT, not in this package; run `npm run deploy:check` from the repo root |
 
