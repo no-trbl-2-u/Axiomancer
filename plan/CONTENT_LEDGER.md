@@ -15,14 +15,14 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-06 | 721adac9 | 2 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-07 | 76d44ef2 | 2 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-07 | 9016a99f | 2 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-07 | PENDING | 2 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-07 | 570cc566 | 2 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-npcs pass 2, 2026-09-07, commit PENDING]** Zero-CREATE,
+> **[adjust-npcs pass 2, 2026-09-07, commit 570cc566]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — full re-audit reconfirms pass 1's clean
 > state, no new actionable structural findings. Every Step-1 signal
 > re-swept against the current tree (15 commits / ~53h since pass 1's
