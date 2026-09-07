@@ -7,7 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-20T00:55:03Z | subagent | card-expert | claude-fable-5 | main | Promote 8 swap-pool cards into presets |
 | 2026-07-20T03:29:54Z | skill | schedule | claude-fable-5 | main | args: list my scheduled routines |
 | 2026-07-20T03:46:56Z | subagent | Explore | claude-fable-5 | main | Map monorepo + existing logging |
 | 2026-07-20T03:47:02Z | subagent | Explore | claude-fable-5 | main | Explore mobile app logging surface |
@@ -407,3 +406,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-07T18:36:32Z | skill | adjust-keywords | claude-sonnet-5 | main | - |
 | 2026-09-07T18:37:15Z | subagent | card-expert | claude-sonnet-5 | main | Run adjust-keywords lifecycle pass |
 | 2026-09-07T20:30:04Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-07T22:28:06Z | slash-prompt | /march | unknown | user/ci | /march |
