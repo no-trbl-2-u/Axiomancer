@@ -15,6 +15,10 @@ export function isDevToolsEnabled(): boolean {
   // in by setting `globalThis.__AXM_FORCE_DEV_TOOLS__ = true` via an init
   // script before boot. Inert in real builds: nothing sets the global there,
   // and `production` still hard-disables below via the `=== false` check.
+  // (2026-09-07 evidence, scripts/fixture-e2e.mjs: a BUILD_PROFILE=preview
+  // `expo export` DOES bake `extra.devToolsEnabled: true` into the web
+  // bundle, so the escape hatch is belt-and-braces for that profile; it
+  // still matters for exports made without a BUILD_PROFILE.)
   if ((globalThis as { __AXM_FORCE_DEV_TOOLS__?: boolean }).__AXM_FORCE_DEV_TOOLS__ === true) {
     const extra = Constants.expoConfig?.extra as Extra | undefined;
     if (extra?.devToolsEnabled === false) return false;

@@ -1,0 +1,128 @@
+/**
+ * Hermetic E2E — mobile state-fixture boot (`state/fixtures.ts`,
+ * `state/persistence/fixtureBootAdapter.ts`, `<FixtureBoot>`).
+ *
+ * Drives the same registry fixtures the CLI boots from through the
+ * mobile store: request channels (global vs URL), the dev-tools gate,
+ * invalid-request fallback, ephemeral persistence, `arrive` firing the
+ * current node's event so `<EventGate>` has a route, and the shared
+ * `placeOnNode` path behind `/dev` JUMP.
+ *
+ * Hermetic = self-contained + deterministic (every fixture is seeded) +
+ * isolated (globals + memo reset in afterEach).
+ */
+
+import { afterEach, describe, expect, it, jest } from '@jest/globals';
+
+import { GAME_STATE_VERSION, getStateFixtureById } from '@mechanics';
+
+import { createAppActions } from '@/state/actions';
+import { createAppStore } from '@/state/store';
+import {
+    FIXTURE_QUERY_PARAM,
+    readFixtureRequest,
+    resetBootFixtureForTests,
+    resolveBootFixture,
+    resolveFixtureRequest,
+    getBootFixture,
+} from '@/state/fixtures';
+import { createFixtureBootAdapter } from '@/state/persistence/fixtureBootAdapter';
+import { selectPacedEventRoute } from '@/state/presenters/event.engine';
+
+afterEach(() => {
+    delete globalThis.__AXM_FIXTURE__;
+    resetBootFixtureForTests();
+    jest.restoreAllMocks();
+});
+
+describe('readFixtureRequest: channels + precedence', () => {
+    it('reads the URL query when no global is set', () => {
+        expect(readFixtureRequest(`?${FIXTURE_QUERY_PARAM}=fresh-start&x=1`)).toEqual({ source: 'url', ref: 'fresh-start' });
+        expect(readFixtureRequest('?x=1')).toBeNull();
+        expect(readFixtureRequest('')).toBeNull();
+    });
+
+    it('the global outranks the URL and may be an inline object', () => {
+        globalThis.__AXM_FIXTURE__ = 'sage-fv-boss-gate';
+        expect(readFixtureRequest('?fixture=fresh-start')).toEqual({ source: 'global', ref: 'sage-fv-boss-gate' });
+        const inline = { id: 'inline', seed: 1 };
+        globalThis.__AXM_FIXTURE__ = inline;
+        expect(readFixtureRequest('')).toEqual({ source: 'global', ref: inline });
+    });
+});
+
+describe('resolveFixtureRequest', () => {
+    it('resolves registry ids and validates inline objects', () => {
+        expect(resolveFixtureRequest({ source: 'url', ref: 'fresh-start' }).id).toBe('fresh-start');
+        expect(resolveFixtureRequest({ source: 'global', ref: { id: 'ok', seed: 2 } }).id).toBe('ok');
+        expect(() => resolveFixtureRequest({ source: 'url', ref: 'nope' })).toThrow(/Known ids/);
+        expect(() => resolveFixtureRequest({ source: 'global', ref: { id: 'Bad Id' } })).toThrow(/Invalid state fixture/);
+    });
+});
+
+describe('resolveBootFixture: gate + fallback', () => {
+    it('returns null with nothing requested', () => {
+        expect(resolveBootFixture({ request: null, devToolsEnabled: true })).toBeNull();
+        expect(getBootFixture()).toBeNull();
+    });
+
+    it('ignores the request when dev tools are disabled (production)', () => {
+        expect(resolveBootFixture({ request: { source: 'url', ref: 'sage-fv-boss-gate' }, devToolsEnabled: false })).toBeNull();
+        expect(getBootFixture()).toBeNull();
+    });
+
+    it('falls back to a normal boot on an unknown or invalid fixture', () => {
+        expect(resolveBootFixture({ request: { source: 'url', ref: 'nope' }, devToolsEnabled: true })).toBeNull();
+        expect(resolveBootFixture({ request: { source: 'global', ref: { id: 'x', world: { continent: 'coastal-continent', map: 'fishing-village', node: 'zz' } } }, devToolsEnabled: true })).toBeNull();
+    });
+
+    it('compiles a registry fixture and memoises it for the boot', () => {
+        const boot = resolveBootFixture({ request: { source: 'url', ref: 'l30-caverns-hazard' }, devToolsEnabled: true });
+        expect(boot?.fixture.id).toBe('l30-caverns-hazard');
+        expect(boot?.state.player.level).toBe(30);
+        expect(boot?.state.world.currentMap.currentNode).toBe('nc-17');
+        expect(getBootFixture()).toBe(boot);
+    });
+});
+
+describe('store boot through the fixture adapter', () => {
+    it('boots the app store from the fixture state and keeps saves in memory', () => {
+        const boot = resolveBootFixture({ request: { source: 'global', ref: 'sage-fv-boss-gate' }, devToolsEnabled: true })!;
+        const adapter = createFixtureBootAdapter(boot.state);
+        const store = createAppStore({ adapter });
+        const s = store.getState();
+        expect(s.version).toBe(GAME_STATE_VERSION);
+        expect(s.player.level).toBe(15);
+        expect(s.world.currentMap.name).toBe('fishing-village');
+        expect(s.world.currentMap.currentNode).toBe('fv-9');
+        expect(s.moralMeter).toBe(20);
+        // Mobile-only slices are still layered on.
+        expect(s.event.pending).toBeNull();
+
+        expect(adapter.saveCount).toBe(0);
+        store.getState().save();
+        expect(adapter.saveCount).toBe(1);
+        expect(adapter.load()?.runId).toBe(s.runId);
+    });
+
+    it('`arrive` fixtures resolve the current node so <EventGate> has a paced route', () => {
+        const fixture = getStateFixtureById('apprentice-fv-interaction')!;
+        expect(fixture.arrive).toBe(true);
+        const boot = resolveBootFixture({ request: { source: 'url', ref: fixture.id }, devToolsEnabled: true })!;
+        const store = createAppStore({ adapter: createFixtureBootAdapter(boot.state) });
+        const actions = createAppActions(store);
+        expect(selectPacedEventRoute(store.getState())).toBeNull();
+
+        // What <FixtureBoot> does once navigation is ready.
+        expect(actions.resolveCurrentMapEvent()).toBe(true);
+        expect(selectPacedEventRoute(store.getState())).toBe('/dialogue');
+    });
+
+    it('`wanderer-nf-village` arrives on the village screen', () => {
+        const boot = resolveBootFixture({ request: { source: 'url', ref: 'wanderer-nf-village' }, devToolsEnabled: true })!;
+        const store = createAppStore({ adapter: createFixtureBootAdapter(boot.state) });
+        createAppActions(store).resolveCurrentMapEvent();
+        expect(selectPacedEventRoute(store.getState())).toBe('/village');
+        expect(store.getState().player.currency).toBe(240);
+    });
+});

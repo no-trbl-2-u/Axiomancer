@@ -17,6 +17,9 @@ import { FontProvider } from '@/hooks/useFontFallbacks';
 // Side-effect: skin the web scrollbar to match the gothic chrome.
 import '@/theme/web-scrollbar';
 import { createAsyncStorageAdapter } from '@/state/persistence/asyncStorageAdapter';
+import { createFixtureBootAdapter } from '@/state/persistence/fixtureBootAdapter';
+import { resolveBootFixture } from '@/state/fixtures';
+import { FixtureBoot } from '@/components/FixtureBoot';
 import { CorruptSaveModal } from '@/components/CorruptSaveModal';
 import { DevAutoSeed } from '@/components/DevAutoSeed';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -86,6 +89,15 @@ attachCrashBreadcrumbs();
 // before `<GameStoreProvider>` mounts. Tests bypass this entirely via
 // the provider's `adapter` / `store` props.
 const persistenceAdapter = createAsyncStorageAdapter();
+
+// State-fixture boot (2026-09-07, `state/fixtures.ts`): when a dev build
+// is asked for a fixture (`?fixture=<id>` or `__AXM_FIXTURE__`), the
+// store boots from that compiled state through an in-memory adapter —
+// the AsyncStorage slot is neither read into the store nor written to.
+// `null` on every normal launch, so production is byte-for-byte the
+// old path.
+const bootFixture = resolveBootFixture();
+const storeAdapter = bootFixture ? createFixtureBootAdapter(bootFixture.state) : persistenceAdapter;
 
 function RootLayout() {
   // Load core fonts only - reduces initial font bundle by ~40%
@@ -202,7 +214,7 @@ function RootLayout() {
         onCancel={onCorruptCancel}
       />
       <PrevSessionCrashPrompt />
-      <GameStoreProvider adapter={persistenceAdapter}>
+      <GameStoreProvider adapter={storeAdapter}>
         {/* ErrorBoundary mounts INSIDE the GameStoreProvider so
             the fallback ErrorScreen can read engine state via
             useGameState for the debug snapshot (filed via
@@ -223,6 +235,7 @@ function RootLayout() {
               <BlacksmithGate />
               <ToastHost />
               <DevAutoSeed />
+              <FixtureBoot />
               <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="(tabs)" component={TabLayout} options={{ headerShown: false }} />
                 <Stack.Screen name="index" component={IndexScreen} options={{ headerShown: false }} />

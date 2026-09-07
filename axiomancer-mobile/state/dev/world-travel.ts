@@ -28,6 +28,7 @@ import {
     createMapState,
     getMapDefinition,
     getNodePrimaryEventKind,
+    placeOnNode,
     unlockMap,
 } from '@mechanics';
 import type { ContinentName, GameState, MapEventKind, MapName, WorldState } from '@mechanics';
@@ -94,32 +95,20 @@ export function travelToMap(store: AppStore, continent: ContinentName, map: MapN
 /**
  * Put the cursor on `nodeId` without firing its event. Dev bypass: the
  * engine's `moveToNode` forbids back-travel and only allows adjacent
- * moves; testers need neither rule. The node is also marked discovered
- * + available so the exploration map renders it as reachable.
+ * moves; testers need neither rule. Delegates to the engine's
+ * `placeOnNode` (shared with state fixtures, 2026-09-07), which marks the
+ * node discovered + available and unlocks its neighbours so the walk can
+ * continue. Returns `false` on an unknown node.
  */
 export function jumpToNode(store: AppStore, nodeId: string): boolean {
     const world = worldOf(store);
     if (!world) return false;
-    const map = world.currentMap;
-    const def = getMapDefinition(map.continent, map.name);
-    if (!def.nodes.some((n) => n.id === nodeId)) return false;
-    const without = (xs: readonly string[]) => xs.filter((x) => x !== nodeId);
-    const withOnce = (xs: readonly string[]) => (xs.includes(nodeId) ? [...xs] : [...xs, nodeId]);
-    store.setState({
-        world: {
-            ...world,
-            currentMap: {
-                ...map,
-                currentNode: nodeId,
-                lockedNodes: without(map.lockedNodes),
-                completedNodes: without(map.completedNodes),
-                consumedNodes: without(map.consumedNodes),
-                availableNodes: withOnce(map.availableNodes),
-                discoveredNodes: withOnce(map.discoveredNodes),
-            },
-        },
-    });
-    return true;
+    try {
+        store.setState({ world: placeOnNode(world, nodeId) });
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 /** Re-seed the current map at its starting node (clears node progress). */
