@@ -14,7 +14,7 @@
 | cards | `skills/adjust-cards.md` | 2026-09-06 | 8c346ac7 | 2 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-06 | 721adac9 | 2 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-07 | 76d44ef2 | 2 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-07 | PENDING | 2 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-07 | 9016a99f | 2 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-05 | f0a2891f | 1 |
 
 ## Log
@@ -22,7 +22,7 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-keywords pass 2, 2026-09-07, commit PENDING]** Zero-CREATE,
+> **[adjust-keywords pass 2, 2026-09-07, commit 9016a99f]** Zero-CREATE,
 > zero-REMOVE pass — updated 2 (RUPTURE's stale cap gloss; AMBUSH/FINALE's
 > unwired face-print). Full audit per skill §3 Step 1, no bias: Step 0 doctrine
 > re-read (`CLAUDE.md`, `keyword-atlas.md`, `retheme-map.json`); `axio_keywords`
