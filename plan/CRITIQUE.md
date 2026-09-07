@@ -1,13 +1,35 @@
 # Critique log
 
-> Last pass: 2026-09-06 at commit a6d6679d
-> Pass count: 32
+> Last pass: 2026-09-07 at commit f7c7aa50
+> Pass count: 33
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 33, 2026-09-07, commit f7c7aa50] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5,
+> `CRITIQUE_VIEWPORT=both`), mobile (375×812) and desktop (1280×800),
+> against the cold-enterable screen set (title, onboarding/deck-picker,
+> combat-encounter preview, live combat board post-ENTER COMBAT,
+> exploration hub). All 10 captures clean: zero page errors, console
+> errors limited to the same benign `navigator.vibrate` autoplay
+> warning seen every prior pass. Since pass 32 the tree only moved
+> through content-lifecycle ticks (cards/equipment/enemies/keywords/npcs
+> pass 2, a digest, and a dev-tools surface rebuild) plus one combat
+> starter-deck fix — none touching the screens in this set — so every
+> row was expected to reproduce identically, and did: the elite-tier
+> first-fight pacing row (same 5-phase Brine Hag opener, both
+> viewports), the art-register incoherence row, and the fixed "ruined
+> city" backdrop row all reconfirmed unchanged. The open **[MED]
+> LOG-toggle/stance-check-telegraph overlap** row also reconfirmed —
+> mobile viewport this pass, the pill visibly sits over the "Punishes
+> HEART ×1.5" line exactly as pass-32 last observed it (one line up
+> from the pass-31 original clip point); still the same root cause
+> (`COMBAT_HUD_HEIGHT` fixed anchor vs. unmeasured telegraph height).
+> Not re-filed as new. No new findings filed.
 
 > **[critique pass 32, 2026-09-06, commit a6d6679d] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5,
