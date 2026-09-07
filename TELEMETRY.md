@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-19T06:27:05Z | slash-prompt | /deck-tuning | unknown | user/ci | /deck-tuning --preset=erosion --runs=100 --cross-theme-swaps=false |
-| 2026-07-19T06:27:07Z | skill | deck-tuning | unknown | main | args: --preset=erosion --runs=100 --cross-theme-swaps=false |
 | 2026-07-19T10:15:29Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-07-19T10:15:32Z | skill | digest | unknown | main | - |
 | 2026-07-19T13:57:32Z | slash-prompt | /march | unknown | user/ci | /march |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-06T14:27:07Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-06T14:27:10Z | skill | march | unknown | main | - |
 | 2026-09-06T14:27:59Z | skill | adjust-equipment | claude-sonnet-5 | main | - |
+| 2026-09-07T14:29:04Z | slash-prompt | /digest | unknown | user/ci | /digest |
+| 2026-09-07T14:29:07Z | skill | digest | unknown | main | - |
