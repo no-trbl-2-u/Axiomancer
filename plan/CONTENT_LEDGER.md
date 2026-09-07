@@ -13,7 +13,7 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-06 | 8c346ac7 | 2 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-06 | 721adac9 | 2 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-07 | <pending> | 2 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-07 | 76d44ef2 | 2 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-05 | bf6223f1 | 1 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-05 | f0a2891f | 1 |
 
@@ -28,7 +28,7 @@ Newest first. One entry per `/adjust-*` tick:
 > after VERB_POINTS change)".>
 ```
 
-> **[adjust-enemies pass 2, 2026-09-07, commit <pending>]** Created 2,
+> **[adjust-enemies pass 2, 2026-09-07, commit 76d44ef2]** Created 2,
 > zero-UPDATE, zero-REMOVE pass. Audit (Step 1, all seven EnemiesByMap
 > pools re-enumerated against the current tree, no source change since
 > pass 1's 04d2bf0d): orphan sweep clean (all 73 production slugs resolve
