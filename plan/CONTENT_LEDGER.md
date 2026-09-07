@@ -15,11 +15,67 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-06 | 721adac9 | 2 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-07 | 76d44ef2 | 2 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-07 | 9016a99f | 2 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-05 | f0a2891f | 1 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-07 | PENDING | 2 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-npcs pass 2, 2026-09-07, commit PENDING]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — full re-audit reconfirms pass 1's clean
+> state, no new actionable structural findings. Every Step-1 signal
+> re-swept against the current tree (15 commits / ~53h since pass 1's
+> f0a2891f, all outside `src/NPCs/**`/`src/World/Continents/**` except
+> `/adjust-enemies` pass 2's two new roster CREATEs on connecting-river and
+> town-across-river, which added enemies, not NPCs): (1) unstaged-NPC
+> backlog — northern-forest's pass-1 fix holds (6/6 rostered NPCs
+> reachable; the dedicated `nf-21-nf-14-npc-staging.engine.test.ts` plus
+> `narrative-reachability.engine.test.ts`, `dialogue.engine.test.ts`, and
+> `story-npcs.engine.test.ts` all still green, 82/82 tests); fishing-
+> village's 4 declared-`unstagedNpcs` (Tide-Shopkeeper, Village Healer,
+> Dockworker's Union Leader, Merchant's Widow) re-checked against S-02's
+> stated reasons — all four still hold: `isShopkeeper` still has zero
+> mobile consumers (re-grepped `axiomancer-mobile/`), no commit touched
+> `RestChoice`/`rest-shelter.ts` or any settlement-screen surface since
+> pass 1. (2) map-with-<2-staged-NPCs signal — direct enumeration of
+> `Northern-Continent/maps.ts` reconfirms `caverns` (theDelver only),
+> `connecting-river` (theBoatwoman only), and `town-across-river`
+> (theSweetheart only) each still carry exactly 1 rostered NPC; the
+> standing `plan/AUDIT.md` `[needs-user-call]` row (filed pass 1,
+> 2026-09-05) is unchanged and left open as filed — no new evidence to
+> re-litigate a personhood-design call this autonomous tick can't make
+> (hard rule 3). (3) dead-end dialogue nodes — wrote a throwaway script
+> cross-checking every `DialogueTree` in `Coastal-Village/npcs.ts`,
+> `Northern-Forest/npcs.ts`, and `Northern-Continent/maps.ts` (19 authored
+> NPCs total) against its own `rootId` + every `nextNodeId` reference in
+> both directions: zero unreachable (orphan) nodes, zero broken links (a
+> `nextNodeId` pointing at a nonexistent node id). Every leaf node (no
+> `choices`) read manually is an intentional flavor-terminator in house
+> voice (a merchant's parting line, a sage's blessing), not a bug-shaped
+> dead end. (4) stale `effect` references — zero `teachCard` references
+> anywhere in the NPC-authoring tree (matches pass 1's finding, still
+> true); all 9 `startQuest` call sites' quest names resolve against the
+> live `QuestName` union (`quest.library.ts`). (5) legacy flat
+> `DialogueMap` — zero live usage; all 19 authored NPCs already use
+> `dialogueTree`. (6) orphaned NPC — zero; every one of the 19 NPC consts
+> is imported into exactly one map's `npcs` or `unstagedNpcs` array (no
+> dead exports). (7) spec-to-NPC gap — `specs/characters/C-01-the-
+> sophist.md` (Protas, the Aporia's speaking cast) is fully implemented,
+> but as the Aporia's act-boss enemy + Labyrinth room narration
+> (`Enemy/enemy.library.ts`, `World/Labyrinth/**`), not an `NPCs`-module
+> dialogue entity — correctly out of this skill's scope, not a gap. KB
+> (kb-query): not run — every consideration this pass was either
+> audit-confirmed-clean (no CREATE/UPDATE) or a re-check of a standing
+> filed row, exempt from the gate per the skill's own rule (§3 Step 2 /
+> hard rule 7, REMOVE-adjacent no-op carve-out). Verify: not re-run — no
+> source file changed; ran the 4 existing NPC/reachability suites directly
+> as a confirmation (82/82 green: `narrative-reachability.engine.test.ts`,
+> `dialogue.engine.test.ts`, `story-npcs.engine.test.ts`,
+> `nf-21-nf-14-npc-staging.engine.test.ts`); HEAD's existing CI
+> (verify-mobile, verify-mechanics) is already green per
+> `npm run deploy:check`.
+```
 
 ```
 > **[adjust-keywords pass 2, 2026-09-07, commit 9016a99f]** Zero-CREATE,
