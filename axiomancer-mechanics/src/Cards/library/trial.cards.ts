@@ -12,7 +12,7 @@
  *   - OBJECTION — STAGGER rungs and BACKFIRE, every denied motion turned inward.
  *   - THE DOCKET — the CHARGE tally, and the two ways to spend it (the Summing
  *     Up cashes it for MARK and cards; the Black Cap rides it to the verdict).
- *   - THE SHAPE OF THE TURN — OPENING/AMBUSH, FLOW and the finale, plus
+ *   - THE SHAPE OF THE TURN — AMBUSH, FLOW and FINALE, plus
  *     lock_stance and OMEN: this deck wants to know what the foe will do, and
  *     then not let them do it.
  *
@@ -220,7 +220,7 @@ const struckFromTheRecord: Card = {
     tier: 2, rank: 3, cardType: 'spell',
     targetType: 'enemy',
     paidSummary:
-        "Deal 16. The foe's next stance locks and stands revealed. OPENING — as your turn's first spell, STAGGER 1 and gain 4 CHARGES.",
+        "Deal 16. The foe's next stance locks and stands revealed. AMBUSH — as your turn's first spell, STAGGER 1 and gain 4 CHARGES.",
     // pts: deal 16 + lock_stance + opening[stagger 1, 4 charges]; FREE deal 6
     // / reveal. AMBUSH shape: lead with it and you own the whole phase.
     free: { damage: 6, revealStance: true },
@@ -382,7 +382,7 @@ const judgmentEnteredAgainstThem: Card = {
     tier: 3, rank: 5, cardType: 'spell',
     targetType: 'enemy',
     paidSummary:
-        'Deal 30. BACKFIRE ALL — burst 9 for every rung you have denied this fight, then the ledger is cleared. With at most 1 card left in hand, deal 20 more and gain 4 CHARGES.',
+        'Deal 30. BACKFIRE ALL — burst 9 for every rung you have denied this fight, then the ledger is cleared. FINALE 1 — with at most 1 card left in hand, deal 20 more and gain 4 CHARGES.',
     // pts: deal 30 + turnabout 9/rung (uncapped — 12-20 banked rungs is
     // 108-180) + finale[deal 20, 4 charges]; FREE deal 12 / stagger 2. The
     // theme's damage capstone: everything you refused them, returned.

@@ -7,9 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-19T17:06:53Z | subagent | Explore | unknown | main | Survey Axiomancer art surface |
-| 2026-07-19T17:07:03Z | subagent | scout | claude-fable-5 | main | Research AI art pipeline options |
-| 2026-07-19T19:36:03Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-19T05:28:08Z | skill | artifact-design | claude-fable-5 | main | - |
 | 2026-07-20T00:55:03Z | subagent | card-expert | claude-fable-5 | main | Promote 8 swap-pool cards into presets |
 | 2026-07-20T03:29:54Z | skill | schedule | claude-fable-5 | main | args: list my scheduled routines |
@@ -407,3 +404,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-07T14:57:12Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-07T15:01:09Z | subagent | general-purpose | claude-sonnet-5 | main | Run adjust-enemies lifecycle pass |
 | 2026-09-07T15:01:11Z | skill | adjust-enemies | claude-sonnet-5 | main | - |
+| 2026-09-07T18:34:50Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-07T18:36:32Z | skill | adjust-keywords | claude-sonnet-5 | main | - |
+| 2026-09-07T18:37:15Z | subagent | card-expert | claude-sonnet-5 | main | Run adjust-keywords lifecycle pass |

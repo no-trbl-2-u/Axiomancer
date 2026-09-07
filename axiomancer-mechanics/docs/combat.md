@@ -754,8 +754,10 @@ die has to be worth banking against GUARD lines that now open at 8 and reach 60.
 
 **Uncapped payoffs.** RUPTURE's 0.60 × maxVITAE cap and the ALL-spender caps
 were repealed; a fed REAP-ALL or RUPTURE-ALL is expected to reach the 100–300
-band. (`RUPTURE_CAP_FRACTION` is still present in `src/Combat/effects.ts` — see
-`docs/keyword-atlas.md` § "Known drift".)
+band. `RUPTURE_CAP_FRACTION` in `src/Combat/effects.ts` is now
+`Number.POSITIVE_INFINITY` (fixed 2026-09-07, `/adjust-keywords` pass 2) —
+the constant itself is honest; only the mobile `KEYWORD_GLOSS.Rupture` popup
+text still claimed the old 60% cap, and that was corrected in the same pass.
 
 ### 0.34.0 — Status-depth epic: HP-model selectors + tunable scalars
 
@@ -771,7 +773,7 @@ EXECUTE, VULNERABLE, SIPHON) and by mobile for hit-preview rendering.
 | `getDistinctDebuffCount(target)` | Counts the number of distinct active debuff effect types on the target. Drives COMPOUND damage scaling (capped at `COMPOUND_COUNT_CAP`). |
 | `getDistinctControlCount(target)` | Counts the number of distinct active control effects. Drives DISRUPT — when ≥ `DISRUPT_DENY_AT` the target's next action is denied. |
 | `VULNERABLE_MAX_MULT` | Maximum incoming-damage multiplier cap when Vulnerable is active. |
-| `RUPTURE_CAP_FRACTION` / `ruptureBurstCap(maxHp)` | RUPTURE burst cap: `round(fraction × enemy max VITAE)`. **The cap is repealed** (2026-09-02) — payoffs are uncapped by design; the constant is still 0.60 in `src/Combat/effects.ts` and is drift, not doctrine. |
+| `RUPTURE_CAP_FRACTION` / `ruptureBurstCap(maxHp)` | RUPTURE burst cap: `round(fraction × enemy max VITAE)`. **The cap is repealed** (2026-09-02) — payoffs are uncapped by design; the constant is `Number.POSITIVE_INFINITY` in `src/Combat/effects.ts`, matching doctrine. |
 | `COMPOUND_COUNT_CAP` | Maximum distinct debuff count credited by COMPOUND. |
 | `DISRUPT_DENY_AT` | Distinct-control-effect threshold at which DISRUPT denies the next enemy action. |
 | `EXECUTE_DAMAGE_FRACTION` | Fraction of enemy max HP dealt by EXECUTE when the threshold is met. |

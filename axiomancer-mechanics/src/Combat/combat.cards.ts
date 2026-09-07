@@ -275,10 +275,20 @@ export function riderText(r: CardRider, opts?: { selfTargetCard?: boolean }): st
 /**
  * WS4.2 / WS5.2 — human text for a combat-state synergy predicate (the
  * printed condition line; P0-truth: the text IS the evaluated condition).
- * Face-term budget (card-keyword doctrine): OPENING is the microset's ONE
- * shared face term — card-local, registered nowhere; the other turn-shape
- * conditions print as plain lowercase glosses (RECOIL is existing registry
- * vocabulary, not a new term).
+ *
+ * Face-term budget (card-keyword doctrine, WS5.2-era): originally OPENING was
+ * the microset's one shared face term, deliberately card-local and
+ * "registered nowhere" — the sequencing-microset fixture cards
+ * (`src/test-utils/retired-verb-cards.ts`) still exercise that historical
+ * shape. THE BIG NUMBERS REWRITE (2026-09-02) promoted `opening`/`finale` to
+ * real turn-shape registry keywords alongside FLOW/REQUIEM (see
+ * `docs/keyword-atlas.md` § "Player keywords — turn shape": AMBUSH, FLOW,
+ * FINALE, REQUIEM, FALLEN) — `paid-summary-honesty.engine.test.ts` already
+ * allowlisted AMBUSH as one of "the turn-shape conditions promoted to face
+ * terms" — but the print text here was never updated to match, so AMBUSH
+ * never actually appeared on a card face and FINALE never printed its own
+ * name at all. Fixed 2026-09-07 (`/adjust-keywords` pass 2): both now print
+ * their registry name, matching FLOW/REQUIEM's shape.
  */
 export function statePredicateText(p: SynergyStatePredicate): string {
     switch (p.kind) {
@@ -286,10 +296,10 @@ export function statePredicateText(p: SynergyStatePredicate): string {
             return 'UNMOVED (the enemy dealt you no damage last round)';
         case 'opening':
             return p.maxPriorSpells === 0
-                ? 'OPENING (your first spell this turn)'
-                : `OPENING (within your first ${p.maxPriorSpells + 1} spells this turn)`;
+                ? 'AMBUSH (your first spell this turn)'
+                : `AMBUSH (within your first ${p.maxPriorSpells + 1} spells this turn)`;
         case 'finale':
-            return `your closing play (${p.cardsLeftAtMost} or fewer cards left in hand after this)`;
+            return `FINALE ${p.cardsLeftAtMost} (${p.cardsLeftAtMost} or fewer cards left in hand after this)`;
         case 'recoil-paid-this-turn':
             return 'blood already paid (you paid RECOIL earlier this turn)';
         case 'enemy-drew-blood':

@@ -187,10 +187,6 @@ but never render in the inspect keyword panel.
 Rows whose reminder text in `KEYWORD_GLOSS` still carries a pre-rewrite number,
 pending the effects/library rescale (overhaul §5.2):
 
-- **RUPTURE** — the mobile gloss still says "up to 60% of its max VITAE" and
-  `RUPTURE_CAP_FRACTION = 0.60` is still live in `src/Combat/effects.ts`. The
-  cap is repealed (law L12); the number above it is the code's, not the
-  design's.
 - **POISON / BLEED / DOOM** — `debuffs.library.json` still carries
   `damagePerRound` 2 / 3 / 1. §5.2 asks for roughly ×3–4.
 - **PLEA** — the gloss's "~35% of max VITAE" resolve threshold is scheduled to
@@ -204,6 +200,18 @@ day this section was written — and the row above in "Player keywords — turn
 shape" already matches it. `node --test scripts/content-drift.test.mjs`
 confirms no orphaned atlas row and no unglossed registry keyword. Verified,
 not reasoned from memory.)
+
+(2026-09-07 `/adjust-keywords` pass 2: the RUPTURE bullet formerly here was
+also stale, in the other direction — `src/Combat/effects.ts` had ALREADY moved
+`RUPTURE_CAP_FRACTION` to `Number.POSITIVE_INFINITY` (the cap function returns
+`Infinity` unconditionally); only the mobile `KEYWORD_GLOSS.Rupture` string
+still hardcoded "up to 60% of its max VITAE" — a printed number that was no
+longer the applied number. The live mobile PRESENTER
+(`combat-encounter.engine.ts`'s `case 'rupture':`) was already honest — it
+branches on `Number.isFinite(RUPTURE_CAP_FRACTION)` and renders "uncapped"
+today — so only the static first-sight popup lied. Fixed the gloss to match
+the row above (no cap claim); `docs/combat.md`'s matching claim was also
+stale and corrected in the same pass.)
 
 ## Retired
 

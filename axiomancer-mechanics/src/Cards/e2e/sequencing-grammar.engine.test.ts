@@ -6,10 +6,17 @@
  * Pinned here:
  *   1. REGISTRY — `sequencing-microset` carries exactly the six condition
  *      cards, spread 2×3 across peroration / echo / akrasia, two per
- *      condition family (OPENING / closing-play / after-cost), every spell
- *      priced inside its printed rank band, and the face-term budget holds:
- *      OPENING is the ONE new shared face term (card-local, registered
- *      nowhere); the other conditions print as lowercase glosses.
+ *      condition family (opening / closing-play / after-cost), every spell
+ *      priced inside its printed rank band. Face-term note (historical,
+ *      WS5.2-era): at authoring time OPENING was the microset's one shared
+ *      face term, deliberately card-local and unregistered; THE BIG NUMBERS
+ *      REWRITE (2026-09-02) later promoted `opening`/`finale` to real
+ *      registry keywords (AMBUSH/FINALE, `docs/keyword-atlas.md` § "turn
+ *      shape") alongside FLOW/REQUIEM, and `combat.cards.ts`'s
+ *      `statePredicateText` was fixed 2026-09-07 (`/adjust-keywords` pass 2)
+ *      to actually print those names — this fixture set's own cards still
+ *      never shipped to the live library, so only the assertions below
+ *      (which pin the live function's output) needed updating.
  *   2. PREDICATES — the four new `SynergyStatePredicate` kinds read the
  *      spec-32-§12-item-4 ledgers exactly (pre-this-play state: the counter
  *      not yet incremented, the played card still in hand, this play's own
@@ -174,15 +181,19 @@ describe('sequencing-microset — registry shape and rank-band honesty', () => {
         expect(scoreCard(byId('answered-in-kind'))).toBeCloseTo(6.25, 2); // post-Phase-30: FREE self-mark seed + heal kicker
     });
 
-    it('face-term budget: OPENING is the one shared term; the rest are lowercase glosses', () => {
+    it('face terms: AMBUSH and FINALE print as registry keywords; RECOIL/BLOOD conditions stay lowercase glosses', () => {
+        // Fixed 2026-09-07 (/adjust-keywords pass 2): `opening`/`finale` are
+        // registry keywords (AMBUSH/FINALE) since THE BIG NUMBERS REWRITE
+        // (2026-09-02); the print text now matches FLOW/REQUIEM's shape.
         expect(statePredicateText({ kind: 'opening', maxPriorSpells: 0 }))
-            .toBe('OPENING (your first spell this turn)');
+            .toBe('AMBUSH (your first spell this turn)');
         expect(statePredicateText({ kind: 'opening', maxPriorSpells: 1 }))
-            .toBe('OPENING (within your first 2 spells this turn)');
-        // No SECOND new face term: the other three conditions open lowercase
-        // (RECOIL inside a gloss is existing registry vocabulary, not new).
+            .toBe('AMBUSH (within your first 2 spells this turn)');
+        expect(statePredicateText({ kind: 'finale', cardsLeftAtMost: 2 }))
+            .toBe('FINALE 2 (2 or fewer cards left in hand after this)');
+        // The remaining two conditions have no registry keyword and still
+        // open lowercase (RECOIL inside a gloss is existing vocabulary, not new).
         for (const text of [
-            statePredicateText({ kind: 'finale', cardsLeftAtMost: 2 }),
             statePredicateText({ kind: 'recoil-paid-this-turn' }),
             statePredicateText({ kind: 'enemy-drew-blood' }),
         ]) {
@@ -255,7 +266,7 @@ describe('checkStatePredicate — the WS5 turn-shape predicates', () => {
 describe('sequencing-microset — condition gates', () => {
     beforeEach(() => { applyFixtureCards(SEQ_CARDS); });
 
-    it('captatio-benevolentiae: OPENING fires as the FIRST spell (+5 Guard, +1 Premise), silent afterwards', () => {
+    it('captatio-benevolentiae: AMBUSH fires as the FIRST spell (+5 Guard, +1 Premise), silent afterwards', () => {
         // Fixture default: spellsPlayedThisTurn 0 → this IS the opening.
         const firedFrom = fixtureWith('captatio-benevolentiae', { clean: true });
         const fired = play(firedFrom, true);
@@ -268,11 +279,11 @@ describe('sequencing-microset — condition gates', () => {
         expect((fired.after.premises ?? 0) - (firedFrom.premises ?? 0)).toBe(2);
         expect((silent.after.premises ?? 0) - (silentFrom.premises ?? 0)).toBe(1);
         expect((fired.after.guard ?? 0) - (silent.after.guard ?? 0)).toBe(5);
-        expect(conditionEvent(fired.events, 'OPENING'), 'the printed condition must be evented').toBeDefined();
-        expect(conditionEvent(silent.events, 'OPENING')).toBeUndefined();
+        expect(conditionEvent(fired.events, 'AMBUSH'), 'the printed condition must be evented').toBeDefined();
+        expect(conditionEvent(silent.events, 'AMBUSH')).toBeUndefined();
     });
 
-    it('in-medias-res: OPENING (≤1 prior spell) deepens its own poison and draws; silent at 2', () => {
+    it('in-medias-res: AMBUSH (≤1 prior spell) deepens its own poison and draws; silent at 2', () => {
         const asSecond = play(fixtureWith('in-medias-res', { clean: true },
             s => ({ ...s, spellsPlayedThisTurn: 1 })), true);
         const asThird = play(fixtureWith('in-medias-res', { clean: true },
@@ -288,7 +299,7 @@ describe('sequencing-microset — condition gates', () => {
     it('coda: the closing play (≤2 left after) refills — REPRISE 1 + draw 2; silent in a full hand', () => {
         // fixtureWith puts ONLY coda in hand → 0 cards left after → fires.
         const fired = play(fixtureWith('coda', { clean: true }), true);
-        expect(conditionEvent(fired.events, 'your closing play')).toBeDefined();
+        expect(conditionEvent(fired.events, 'FINALE 2')).toBeDefined();
         const drawn = findEvent(fired.events, 'hand-drawn');
         expect(drawn, 'the finale draw must fire').toBeDefined();
         expect(drawn!.cards).toHaveLength(2);
@@ -303,7 +314,7 @@ describe('sequencing-microset — condition gates', () => {
                 { uid: 'f3', cardId: 'unction-of-boils' },
             ],
         })), true);
-        expect(conditionEvent(silent.events, 'your closing play')).toBeUndefined();
+        expect(conditionEvent(silent.events, 'FINALE 2')).toBeUndefined();
         expect(findEvent(silent.events, 'hand-drawn')).toBeUndefined();
     });
 
@@ -324,8 +335,8 @@ describe('sequencing-microset — condition gates', () => {
         expect(loud.intensity).toBe(3);  // i1 + bonusIntensity 2
         expect(quiet.intensity).toBe(1);
         expect(loud.remainingDuration - quiet.remainingDuration).toBe(1); // bonusDuration 1
-        expect(conditionEvent(fired.events, 'your closing play')).toBeDefined();
-        expect(conditionEvent(silent.events, 'your closing play')).toBeUndefined();
+        expect(conditionEvent(fired.events, 'FINALE 2')).toBeDefined();
+        expect(conditionEvent(silent.events, 'FINALE 2')).toBeUndefined();
     });
 
     it('wages-of-weakness: fires only when a PRIOR play paid RECOIL — second bleed + 3 HP back', () => {

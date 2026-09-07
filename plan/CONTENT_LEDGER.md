@@ -14,12 +14,103 @@
 | cards | `skills/adjust-cards.md` | 2026-09-06 | 8c346ac7 | 2 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-06 | 721adac9 | 2 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-07 | 76d44ef2 | 2 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-05 | bf6223f1 | 1 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-07 | PENDING | 2 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-05 | f0a2891f | 1 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-keywords pass 2, 2026-09-07, commit PENDING]** Zero-CREATE,
+> zero-REMOVE pass — updated 2 (RUPTURE's stale cap gloss; AMBUSH/FINALE's
+> unwired face-print). Full audit per skill §3 Step 1, no bias: Step 0 doctrine
+> re-read (`CLAUDE.md`, `keyword-atlas.md`, `retheme-map.json`); `axio_keywords`
+> confirms 68 live rows (unchanged — pass 1's CURDLE retirement + parser fix
+> already landed); a rider-and-statePredicate-inclusive carrier grep across
+> every `CardSpecialMechanic`/`SynergyStatePredicate` kind in `src/Cards/
+> library/*.cards.ts` re-ran pass 1's sweep and additionally covered the
+> `SynergyStatePredicate` union pass 1 didn't touch (opening/finale/flow/
+> requiem — the "turn shape" family). Findings, in signal order:
+> (1) [signal: CHAIN/OMEN loop-call follow-up] confirmed CLOSED — both now
+> show 2 live carriers (Hue and Cry + The Village Comes Over the Hill; The
+> Summing Up + The Ducking Stool, per `/adjust-cards` pass 2, 2026-09-06); no
+> further action, the standing `[x]`-marked `plan/AUDIT.md` row already
+> records the resolution.
+> (2) [signal: keyword face word prints but pops nothing / a printed number
+> that isn't the applied number — "ship regardless of priority"] RUPTURE:
+> `docs/keyword-atlas.md`'s own "Known drift" section (written 2026-09-02)
+> claimed `RUPTURE_CAP_FRACTION = 0.60` was "still live in
+> `src/Combat/effects.ts`" — false as of this pass's re-check: the constant is
+> already `Number.POSITIVE_INFINITY` (the cap function returns `Infinity`
+> unconditionally), and the mobile PRESENTER (`combat-encounter.engine.ts`'s
+> `case 'rupture':`) already branches on `Number.isFinite(...)` and renders
+> "uncapped" honestly. Only the STATIC first-sight popup
+> (`axiomancer-mobile/state/combat/keywords.ts` `KEYWORD_GLOSS.Rupture`) still
+> hardcoded "up to 60% of its max VITAE" — a printed number that was no longer
+> the applied number, on a genre-load-bearing keyword. Fixed the gloss to
+> match the atlas row above it (no cap claim); corrected the matching stale
+> claims in `docs/combat.md` (two call sites); removed the now-resolved bullet
+> from the atlas's "Known drift" section with a dated correction note. Exempt
+> from the KB gate as a pure doc/gloss-accuracy fix (no semantics changed),
+> per the skill's REMOVE-adjacent carve-out pass 1 already used for a stale
+> doc note.
+> (3) [signal: `CardSpecialMechanic`/`SynergyStatePredicate` kind with no
+> honest face print + carrier-count sub-finding] AMBUSH and FINALE: the
+> "turn shape" family (AMBUSH, FLOW, FINALE, REQUIEM, FALLEN) was written
+> whole into the atlas during THE BIG NUMBERS REWRITE (2026-09-02), and
+> `paid-summary-honesty.engine.test.ts`'s own KNOWN_UPPER comment already
+> grouped AMBUSH with "the turn-shape conditions promoted to face terms" —
+> but the promotion was left half-wired. `combat.cards.ts`'s
+> `statePredicateText` still printed the WS5.2-era (2026-07-11) "OPENING"
+> face term — a deliberately card-local, unregistered word by a doc comment
+> predating the rewrite by two months — instead of "AMBUSH", so the keyword
+> never actually appeared on its one live carrier (Struck from the Record,
+> trial). `finale`'s case printed a plain lowercase gloss with no keyword
+> word at all, so FINALE never printed anywhere either (its one carrier,
+> Judgment Entered Against Them, trial, described the effect in plain
+> English). Fixed both cases to print their registry name, matching how
+> FLOW/REQUIEM already do (`FLOW N (...)`, `REQUIEM N (...)`); updated the
+> two carrying cards' authored `paidSummary` text to match ("OPENING —" →
+> "AMBUSH —"; inserted "FINALE 1 —" ahead of the existing clause); updated
+> the historical WS5.2 sequencing-grammar fixture test's pinned literals
+> (`sequencing-grammar.engine.test.ts` — 4 `conditionEvent` prefixes, 3
+> `statePredicateText` assertions, plus its own doc comments, which
+> documented the now-superseded "registered nowhere" design as historical
+> rather than deleting the record); added `FINALE` to
+> `paid-summary-honesty.engine.test.ts`'s `KNOWN_UPPER` allowlist (AMBUSH was
+> already present). KB (kb-query): `kb_keyword` returned exact, strong
+> Dawncaster prior art for BOTH — "Ambush [Effect] — Triggers if this card is
+> the first card played of the round" and "Finale [Effect] — Triggers when
+> played with 2 or fewer cards remaining in hand" (`kb:dawncaster/
+> keywords.csv`), corroborated by live carriers in the corpus
+> (`kb:dawncaster/cards/0021-advance-932954.okf.md`,
+> `kb:dawncaster/cards/0020-adrenaline-rush-256754.okf.md`) — this is near-
+> identical semantics to our own AMBUSH/FINALE, confirming the Sept-2 atlas's
+> naming choice was genre-aligned and that finishing the wire (not reverting
+> to "OPENING" or retiring the badges) was the right direction. Residue, NOT
+> actioned: both keywords are STILL exactly 1 live carrier each even after
+> the print-text fix — below the atlas's own "≥2 cards or ≥2 enemies"
+> discipline, the same shape pass 1 found for CHAIN/OMEN. Per this skill's
+> REMOVE-routing rule, authoring a second carrier (or retiring to plain rules
+> text) is a card-authoring/owner call, not a keyword-registry one — filed to
+> `plan/AUDIT.md` as `[loop-call]` for `/adjust-cards`, same shape as pass 1's
+> CHAIN/OMEN filing (which `/adjust-cards` pass 2 has since resolved by
+> authoring a second carrier for each).
+> Other Step-1 signals swept clean: every atlas row still carries a `kb:`
+> receipt or is exempt per the atlas's own doctrine; every live
+> `CardSpecialMechanic` kind either maps to a glossed keyword or is on the
+> `KINDS_WITHOUT_MECHANIC_KEYWORD` exemption list (9 zero-carrier die-gear/
+> card-local kinds — `befriend_attempt`, `convert_die_color`,
+> `echo_next_spell`, `float_x_die`, `forge_floating_die`, `overheat`,
+> `refresh_die`, `spend_all_pips`, `strip_random_buff` — checked and
+> confirmed already exempt-by-design, not a registry gap: none of them ever
+> carried a keyword badge, so a card never authoring one is not drift; a
+> `/adjust-cards`-scoped question, not raised further here). Verify: green
+> (mechanics 210/210 files · 3356 tests + build; mobile lint + typecheck +
+> jest + assets:check 7/7 + art:test 24/24; card-editor type-check; root
+> `npm test` 123/123 incl. `content-drift.test.mjs`).
+```
 
 ```
 > **[adjust-<category> pass N, <ISO-date>, commit <sha>]** <one-line:

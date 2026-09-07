@@ -211,7 +211,7 @@ const KEYWORD_GLOSS: Record<string, string> = {
     Cleanse: 'Removes up to that many afflictions from you.',
     Heal: 'Restores that much VITAE, up to your maximum.',
     Rupture:
-        "Consumes the foe's afflictions and deals their remaining damage at once, up to 60% of its max VITAE.",
+        "Consumes the foe's afflictions and deals their remaining damage at once. ALL-spenders are uncapped.",
     Siphon: 'Heals you for the printed percentage of the damage this play deals.',
     // ── Affliction (T1) ──
     Prolong: 'Adds that many turns to every damage-over-time effect you have on the foe.',

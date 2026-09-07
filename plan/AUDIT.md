@@ -14,6 +14,36 @@
 
 ## Pending
 
+### [loop-call] AMBUSH and FINALE now print correctly but still show exactly 1 card carrier each (2026-09-07)
+- category: content residue (found during `/adjust-keywords` pass 2's full
+  structural audit — Step 1's carrier-count signal, same shape as pass 1's
+  CHAIN/OMEN finding, which `/adjust-cards` pass 2 already resolved by
+  authoring a second carrier for each)
+- detail: `docs/keyword-atlas.md`'s "turn shape" family (AMBUSH, FLOW,
+  FINALE, REQUIEM, FALLEN) was written whole during THE BIG NUMBERS REWRITE
+  (2026-09-02), and `paid-summary-honesty.engine.test.ts`'s own comment
+  already grouped AMBUSH with "the turn-shape conditions promoted to face
+  terms" — but the promotion was left half-wired: `combat.cards.ts`'s
+  `statePredicateText` still printed the WS5.2-era "OPENING" face term
+  (a deliberately card-local, unregistered word predating the rewrite —
+  see the historical doc comment this pass left in place, now corrected)
+  instead of "AMBUSH", and the `finale` case printed a plain lowercase gloss
+  with no keyword word at all. This pass fixed the WIRING bug (both cases
+  now print their registry name, matching FLOW/REQUIEM's shape) — see
+  `plan/CONTENT_LEDGER.md`'s adjust-keywords pass 2 entry for the full file
+  list — but did NOT author new cards, so the underlying carrier count is
+  unchanged: **AMBUSH** (`kind: 'opening'`, trial.cards.ts, "Struck from the
+  Record") and **FINALE** (`kind: 'finale'`, trial.cards.ts, "Judgment
+  Entered Against Them") are each still exactly 1 live carrier, below the
+  atlas's own "≥2 cards or ≥2 enemies" discipline. Per this skill's own
+  REMOVE-routing rule, authoring a second carrier is a card-authoring
+  decision, not a keyword-registry one — left to `/adjust-cards` (or an
+  owner call weighing "author a second AMBUSH/FINALE carrier, mirroring
+  CHAIN/OMEN's resolution" against "retire the badge to plain rules text,
+  mirroring CURDLE's resolution," now that the print-text bug that would
+  have complicated either choice is already fixed).
+- score: n/a — routing item; carrier-count judgment belongs to `/adjust-cards`.
+
 ### [content] Three of four Northern-Continent maps carry only 1 staged NPC [needs-user-call] (2026-09-05)
 - category: content (found during `/adjust-npcs` pass 1's structural audit —
   Step 1's "map with fewer than 2 staged NPCs → CREATE" signal)

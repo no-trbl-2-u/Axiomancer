@@ -38,7 +38,7 @@ const KNOWN_UPPER = new Set([
     // THE BIG NUMBERS REWRITE (2026-09-02) — direct damage and its family,
     // plus the turn-shape conditions promoted to face terms.
     'DEAL', 'PIERCE', 'WRATH', 'FLAY', 'TWIN', 'CHAIN', 'EXECUTE', 'OVERKILL',
-    'AMBUSH', 'FLOW', 'BARRIER', 'TOLL',
+    'AMBUSH', 'FLOW', 'FINALE', 'BARRIER', 'TOLL',
     // structural / system words the faces already print in caps
     'FREE', 'ALL', 'WILD', 'VITAE', 'CONDEMN', 'SENTENCE', 'OPENING',
     'DOT', 'DOTS', 'HP',
