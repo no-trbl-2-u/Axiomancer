@@ -322,6 +322,9 @@ export const ENEMY_DECKS: Record<string, EnemyDeckSpec> = {
     'enemy-reed-ambusher': ['dp-undertow-grip', 'gc-where-the-reach-begins', 'gc-the-alms-you-owed'], // 0.95 → 0.9 → 1.35: the grip from the reeds, closing the reach, the full taking.
     'enemy-toll-skiff': ['first-notice', 'compound-interest', 'the-toll-entire'], // 0.85 → 1.15 → 1.3: the fee posted at the bow, the interest compounding mid-river, the toll entire.
     'enemy-weir-widow': ['dp-salt-rescue', 'dp-wet-congregation', 'dp-drowning-drill', 'dp-grief-swell', 'dp-your-name-on-the-bell'], // 0.8 → 0.9 → 1.15 → 1.3 (elite, 4 cards, no stake): the bad rescue, the chorus at the weir, the drill, the grief that drowns you.
+    // adjust-enemies pass 2 (2026-09-07) — connecting-river thinness backfill,
+    // composed from the shared drowned-parish canon (no new cards needed).
+    'enemy-drift-anchor': ['dp-wet-congregation', 'dp-undertow-grip', 'dp-drowning-drill'], // 0.9 → 0.95 → 1.15: the cold hail, the grip taking hold, the drill that finishes it.
     // BOSS — TIERED (5 cards → tier 3 at round 5). Notice posted and weighed
     // (0.85/1.30), collection in person (0.95), then the agreement executed
     // and the bailiff of hours (1.55/1.55).
@@ -333,6 +336,9 @@ export const ENEMY_DECKS: Record<string, EnemyDeckSpec> = {
     }, // BOSS, 4 cards: notice posted at the crossing (0.85), THE WEIGHING staked in exactly the second slot (0.9 — every boat goes in his book), collection in person (1.0), the account executed (1.4 spike).
     'enemy-dowry-collector': ['first-notice', 'collection-rounds', 'the-toll-entire'], // 0.85 → 1.0 → 1.3: the appraisal posted, collected in person, the toll entire.
     'enemy-the-kept-suitor': ['gc-the-standing-invitation', 'gc-the-howl-at-being-answered', 'gc-the-patient-inch', 'gc-the-alms-you-owed'], // 0.9 → 0.9 → 1.1 → 1.35 (elite, 4 cards, no stake): the invitation nobody accepted, the howl at being answered anyway, the patient inch, the full taking.
+    // adjust-enemies pass 2 (2026-09-07) — town-across-river thinness backfill,
+    // composed from the shared debt-office canon (no new cards needed).
+    'enemy-the-adjuster': ['small-god-on-credit', 'adjusters-visit', 'foreclosure-in-person'], // 0.85 → 1.0 → 1.3: the claim opened on credit, the visit that prices it, the foreclosure in person.
     // BOSS — TIERED (5 cards → tier 3 at round 5). Appeal denied and the
     // objection clause wagered (1.00/1.30), the toll entire (1.25), then the
     // ruling executed and the interest made flesh (1.55/1.60).

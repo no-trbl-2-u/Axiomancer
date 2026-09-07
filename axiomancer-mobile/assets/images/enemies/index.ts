@@ -109,6 +109,13 @@ const ENEMY_ART_BY_KEY: Record<string, number> = {
     // 3.0 — Lorc), same recipe as the W3/W4 batches; see provenance.json.
     'ninth-rung-spider': require('./ninth-rung-spider.webp'),
     'spore-warden':      require('./spore-warden.webp'),
+    // Connecting-river / town-across-river backfill (adjust-enemies pass 2,
+    // 2026-09-07) — the roster's two thinnest EnemiesByMap pools (4 and 3
+    // entries respectively, against 8-39 everywhere else); one native foe
+    // added to each. Licensed game-icons.net silhouettes (CC BY 3.0 — Lorc),
+    // same recipe as the prior batches; see provenance.json.
+    'drift-anchor':      require('./drift-anchor.webp'),
+    'the-adjuster':      require('./the-adjuster.webp'),
 };
 
 const ENEMY_ART_POOL: number[] = Object.values(ENEMY_ART_BY_KEY);

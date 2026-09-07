@@ -2664,6 +2664,12 @@ export const TheHarbormaster = createEnemy({
 /** Provenance stamp for the Phase W4 river-crossing batch. */
 const W4_ADDED = '2026-08-31';
 
+/**
+ * Provenance stamp for adjust-enemies pass 2's connecting-river / town-
+ * across-river thinness fix (see the DriftAnchor / TheAdjuster doc comments).
+ */
+const W_ADJUST_ENEMIES_P2_ADDED = '2026-09-07';
+
 export const ReedAmbusher = createEnemy({
     id: 'enemy-reed-ambusher',
     portraitAsset: 'reed-ambusher',
@@ -2749,6 +2755,42 @@ export const WeirWidow = createEnemy({
     },
     addedIn: W4_ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
+});
+
+/**
+ * adjust-enemies pass 2 (2026-09-07) — connecting-river thinness fix. The
+ * map's random-encounter pool was 4 entries total (3 non-boss + the pinned
+ * boss drawing into the same pool via `EnemiesByMap`), the thinnest pool in
+ * the roster by a wide margin against every sibling (8-39 elsewhere). This
+ * is a river-native fourth: not another toll-taker like the Skiff or the
+ * Waterreeve, but the drowned weight the current keeps for company.
+ */
+export const DriftAnchor = createEnemy({
+    id: 'enemy-drift-anchor',
+    portraitAsset: 'drift-anchor',
+    name: 'The Drift-Anchor',
+    stanceHint: 'It does not chase — it waits at the bottom for the current to bring you to it. Break the pull before it seats.',
+    description: 'A mooring-stone gone loose from its dock, with a chain still fastened round something that used to swim. It settles wherever the current tires of carrying it, and waits there, patient as ballast.',
+    level: 19,
+    baseStats: enemyStatBudget(19, { heart: 1, body: 3, mind: 1 }),
+    mapName: 'connecting-river',
+    difficulty: 'normal',
+    logic: 'aggressive',
+    tier1Overrides: T1_DEFAULT,
+    loot: [none(50), drop('body-elixir', 30), drop('healing-potion', 20)],
+    philosophicalAlignment: { epistemology: -33, outlook: -67, scope: -33 },
+    finalBlowLines: {
+        brutal: 'The chain finally lets go, and so does everything on the other end of it.',
+        quiet:  'It settles back onto the riverbed, one stone among the rest of them now.',
+        ironic: 'It waited so long to be someone\'s ballast. You obliged it.',
+    },
+    causeLines: {
+        brutal: 'The chain finds an ankle and the river does the rest of the arithmetic.',
+        broken: 'It does not pull hard. It pulls patiently, which is worse.',
+        quiet:  'Cold iron, a colder current, and a bottom that keeps what it\'s given.',
+    },
+    addedIn: W_ADJUST_ENEMIES_P2_ADDED,
+    tags: ['mid-game', 'enemy'],
 });
 
 /**
@@ -2877,6 +2919,41 @@ export const TheKeptSuitor = createEnemy({
     },
     addedIn: W4_ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
+});
+
+/**
+ * adjust-enemies pass 2 (2026-09-07) — town-across-river thinness fix. The
+ * map's random-encounter pool was 3 entries total (2 non-boss + the pinned
+ * boss drawing into the same pool), the second-thinnest in the roster after
+ * connecting-river. A third non-boss voice: the town's paperwork made flesh,
+ * distinct from the Collector's appraisal and the Suitor's grievance.
+ */
+export const TheAdjuster = createEnemy({
+    id: 'enemy-the-adjuster',
+    portraitAsset: 'the-adjuster',
+    name: 'The Adjuster',
+    stanceHint: 'It reads every angle of the claim before it reads you — refuse the file, not just the figure.',
+    description: 'It settles claims the town would rather not itemize twice. Every wound gets a value. Every value gets a wax seal. Every seal is final. It has never once been asked to reconsider.',
+    level: 20,
+    baseStats: enemyStatBudget(20, { heart: 1, body: 1, mind: 3 }),
+    mapName: 'town-across-river',
+    difficulty: 'normal',
+    logic: 'strategic',
+    tier1Overrides: T1_DEFAULT,
+    loot: [none(50), drop('clarity-serum', 25), drop('quicksilver-vial', 25)],
+    philosophicalAlignment: { epistemology: 67, outlook: -33, scope: -33 },
+    finalBlowLines: {
+        brutal: 'The claim closes itself, in the adjuster\'s own hand, on the adjuster\'s own line.',
+        quiet:  'It sets the wax down unmelted and doesn\'t reach for it again.',
+        ironic: 'It itemized every wound in this town but its own.',
+    },
+    causeLines: {
+        brutal: 'It finds the figure, seals it, and files you under paid in full.',
+        broken: 'Claim by claim, it prices what you can still afford to lose.',
+        quiet:  'A wax seal presses down, warm and then not, and the matter is settled.',
+    },
+    addedIn: W_ADJUST_ENEMIES_P2_ADDED,
+    tags: ['mid-game', 'enemy'],
 });
 
 /**
@@ -3375,6 +3452,9 @@ export const EnemyLibrary = [
     // and the town beyond it.
     ReedAmbusher, TollSkiff, WeirWidow, TheWaterreeve,
     DowryCollector, TheKeptSuitor, ThePortreeve,
+    // adjust-enemies pass 2 (2026-09-07) — connecting-river / town-across-
+    // river thinness backfill.
+    DriftAnchor, TheAdjuster,
     // The Aporia — labyrinth act bosses (W-01; not part of the 52-painting roster).
     TheDoorwarden, TheIndex, TheSophist,
     // Impossible playtest ceiling — deliberately absent from EnemiesByMap.
@@ -3435,11 +3515,17 @@ export const EnemiesByMap = {
     // `MapEvents/content.ts`.
     'connecting-river': [
         ReedAmbusher, TollSkiff, WeirWidow, TheWaterreeve,
+        // adjust-enemies pass 2 (2026-09-07): the pool was 4 total (3 non-
+        // boss), the thinnest in the roster. One river-native addition.
+        DriftAnchor,
     ],
     // Town Across the River (Phase W4) — the coda map. The Portreeve is the
     // authored boss, pinned per-node in `MapEvents/content.ts`.
     'town-across-river': [
         DowryCollector, TheKeptSuitor, ThePortreeve,
+        // adjust-enemies pass 2 (2026-09-07): the pool was 3 total (2 non-
+        // boss), the roster's second-thinnest. One town-native addition.
+        TheAdjuster,
     ],
     // The Aporia (W-01) — three acts of rising difficulty. Pools reuse the
     // shared roster (wandering foes scale to the player via the adaptive
@@ -3544,6 +3630,10 @@ export const ENEMY_REGISTRY = {
     'dowry-collector':   DowryCollector,
     'the-kept-suitor':   TheKeptSuitor,
     'the-portreeve':     ThePortreeve,
+    // adjust-enemies pass 2 (2026-09-07) — connecting-river / town-across-
+    // river thinness backfill.
+    'drift-anchor':      DriftAnchor,
+    'the-adjuster':      TheAdjuster,
     // The Aporia — labyrinth act bosses (W-01).
     'the-doorwarden':    TheDoorwarden,
     'the-index':         TheIndex,

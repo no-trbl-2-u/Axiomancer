@@ -33,7 +33,7 @@ const ROSTER_SLUGS = (Object.keys(ENEMY_REGISTRY) as Array<keyof typeof ENEMY_RE
         !(APORIA_BOSS_SLUGS as readonly string[]).includes(slug));
 
 /** Provenance stamps the roster has accrued, batch by batch. */
-const ROSTER_ADDED_STAMPS = ['2026-07-06', '2026-08-28', '2026-08-31', '2026-09-05'];
+const ROSTER_ADDED_STAMPS = ['2026-07-06', '2026-08-28', '2026-08-31', '2026-09-05', '2026-09-07'];
 
 describe('2026-07-06: the art-driven base roster', () => {
     it('registers every roster enemy in EnemyLibrary', () => {
@@ -180,6 +180,39 @@ describe('2026-07-06: the art-driven base roster', () => {
                 expect(enemy, `slug ${slug} missing from ENEMY_REGISTRY`).toBeDefined();
                 expect(enemy.addedIn).toBe('2026-09-05');
                 expect(enemy.mapName).toBe('caverns');
+                expect(EnemyLibrary).toContain(enemy);
+            }
+        });
+
+        it('every backfill enemy carries aftermath prose (finalBlowLines + causeLines)', () => {
+            for (const slug of BACKFILL_SLUGS) {
+                const enemy = ENEMY_REGISTRY[slug] as Enemy;
+                expect(enemy.finalBlowLines, `${slug} finalBlowLines`).toBeDefined();
+                expect(enemy.causeLines, `${slug} causeLines`).toBeDefined();
+            }
+        });
+
+        it('every backfill enemy has a unique portraitAsset', () => {
+            for (const slug of BACKFILL_SLUGS) {
+                const enemy = ENEMY_REGISTRY[slug] as Enemy;
+                expect(enemy.portraitAsset).toBe(slug);
+            }
+        });
+    });
+
+    describe('the adjust-enemies pass 2 river/town backfill (2026-09-07)', () => {
+        const BACKFILL_SLUGS = ['drift-anchor', 'the-adjuster'] as const;
+
+        it('registers both, stamped 2026-09-07, one per thinnest pool', () => {
+            const expected: Record<(typeof BACKFILL_SLUGS)[number], string> = {
+                'drift-anchor': 'connecting-river',
+                'the-adjuster': 'town-across-river',
+            };
+            for (const slug of BACKFILL_SLUGS) {
+                const enemy = ENEMY_REGISTRY[slug] as Enemy;
+                expect(enemy, `slug ${slug} missing from ENEMY_REGISTRY`).toBeDefined();
+                expect(enemy.addedIn).toBe('2026-09-07');
+                expect(enemy.mapName).toBe(expected[slug]);
                 expect(EnemyLibrary).toContain(enemy);
             }
         });

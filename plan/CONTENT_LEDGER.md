@@ -13,7 +13,7 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-06 | 8c346ac7 | 2 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-06 | 721adac9 | 2 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-05 | 04d2bf0d | 1 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-07 | <pending> | 2 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-05 | bf6223f1 | 1 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-05 | f0a2891f | 1 |
 
@@ -27,6 +27,58 @@ Newest first. One entry per `/adjust-*` tick:
 > (never drafted, superseded by <card>), updated 1 (pricing drift
 > after VERB_POINTS change)".>
 ```
+
+> **[adjust-enemies pass 2, 2026-09-07, commit <pending>]** Created 2,
+> zero-UPDATE, zero-REMOVE pass. Audit (Step 1, all seven EnemiesByMap
+> pools re-enumerated against the current tree, no source change since
+> pass 1's 04d2bf0d): orphan sweep clean (all 73 production slugs resolve
+> into a pool; `sandbag`/`the-incompleteness` remain the deliberate
+> fixtures); VITAE-band sweep clean (every authored boss/unique still
+> within the live `ENEMY_VITAE_BASE`/`PER_LEVEL`/`MULT` band); voice sweep
+> clean (no thee/thou/thy/thine/ye); loot-table sweep clean (every
+> `loot.ts` drop id resolves in the current item/consumable libraries);
+> deck sweep clean (every `ENEMY_DECKS` card id resolves in
+> `ENEMY_CARD_LIBRARY`, no retired-keyword references). The one live
+> finding was pool thinness: `connecting-river` (4 entries: 3 non-boss +
+> the pinned Waterreeve, which the uniform draw in `generateEncounter`
+> can still return) and `town-across-river` (3 entries: 2 non-boss + the
+> pinned Portreeve) are the roster's two thinnest pools by a wide margin
+> against every sibling (8-39 elsewhere) — both are brand-new (Phase W4,
+> 2026-08-31), so the thinness is real, not a stale artifact. CREATE one
+> river-native and one town-native enemy per skill §1's roster-size-floor
+> signal: **The Drift-Anchor** (connecting-river, normal, a drowned
+> mooring-stone the current keeps for ballast) and **The Adjuster**
+> (town-across-river, normal, the town's claims-settler). Both wired
+> full-depth: `enemy.library.ts` (`createEnemy` + `EnemyLibrary` +
+> `EnemiesByMap` + `ENEMY_REGISTRY`), a 3-card deck each in
+> `combat.enemy-decks.ts` composed from the shared drowned-parish
+> (Drift-Anchor) and debt-office (Adjuster) canon — no new cards needed,
+> matching the map's existing decks — aftermath prose (finalBlowLines +
+> causeLines), and a licensed game-icons.net portrait each (Lorc,
+> `anchor.svg` / `wax-seal.svg`, CC BY 3.0, rasterized 512px WebP per the
+> W3/W4/pass-1 recipe; provenance recorded). This is a partial fix, same
+> shape as pass 1's caverns backfill (71%→62.5%, not to parity) — the
+> pools go from 4→5 and 3→4, still the roster's thinnest two, and further
+> growth on these newest maps remains open (not filed as new residue;
+> the existing thinness signal is self-evidently still live and the next
+> pass's own audit will re-find it if warranted). KB research (kb-query):
+> `kb_overview`/`kb_find_games`/`kb_search` returned no on-point doctrine
+> for a numeric roster-thinness floor (same miss pass 1 hit for the
+> sibling-overlap ceiling) — grounded the CREATE in the repo's own
+> established precedent (the W3/W4 backfills, and pass 1's caverns fix)
+> plus Mage Knight's per-site monster-deck model (`kb:mage-knight`,
+> reception/better-if.okf.md's site/enemy variety framing — the same
+> citation pass 1 used), consistent with `/adjust-enemies` §3's own
+> citation for enemy design. Also reviewed but not actioned: the standing
+> `plan/AUDIT.md` `[content]` row (30/73 enemies missing aftermath prose,
+> filed 2026-09-05) is unchanged and still correctly scoped to
+> `content-curator`, not this skill; the `[loop-call]` Phase 78 W5
+> art-pass-candidates row (9 W3/W5 enemies with sourced replacement-art
+> candidates awaiting a pick) is a `/forge`-shaped art-wiring job, not a
+> roster-health structural finding, so left un-actioned this pass rather
+> than force-fit. Verify: green (mechanics 210/210 files · 3356 tests +
+> build; mobile lint 0 errors/15 pre-existing warnings + typecheck + 259
+> suites/2620 jest tests + assets:check 7/7 + art:test 24/24).
 
 > **[adjust-equipment pass 2, 2026-09-06, commit 721adac9]**
 > Zero-CREATE, zero-UPDATE, zero-REMOVE pass — full re-audit reconfirms
