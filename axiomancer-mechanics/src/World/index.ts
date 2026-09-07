@@ -77,7 +77,7 @@ export {
     completeNode, unlockNode, changeContinent, completeUniqueEvent,
     revealAdjacent, markNodeConsumed, unlockAdjacent,
     recordHazardOutcome, blockMapRoute, getHazardOutcomesForNode, isRouteBlocked,
-    teleportToNode, unblockMapRoute,
+    teleportToNode, placeOnNode, unblockMapRoute,
     // 2026-08-08 first-map audit: traversal queries + the strand audit.
     legalMovesFrom, isStranded, isMapTerminalNode, auditMapTraversal,
     // Phase 53c — the route-coverage walk, beside the strand audit.

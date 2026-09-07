@@ -384,8 +384,13 @@ export {
     RESOURCE_CARRY,
     generateRunId, STARTING_REGION,
     LEGACY_SLOT_MAP, reslotLegacyEquipment, reslotLegacyLoadout,
+    // State fixtures (2026-09-07) — one declarative state for CLI / Jest / web.
+    buildStateFromFixture,
+    StateFixtureError, problemsFor, validateStateFixture, parseStateFixture,
+    STATE_FIXTURES, getStateFixtureById, listStateFixtureIds,
 } from './Game';
 export type {
+    StateFixture, StateFixturePlayer, StateFixtureWorld,
     GameState, GameStore, GameActions, PersistenceAdapter, StoreApi,
     GameAction, GameActionOf,
     GameEvent, GameEventEmitter, GameEventHandler, GameEventType,
@@ -398,7 +403,7 @@ export {
     createStartingWorld, MapNotFoundError,
     MAP_REGISTRY, getMapDefinition, createMapState,
     moveToNode, completeCurrentNode, IllegalMoveError,
-    teleportToNode, unblockMapRoute,
+    teleportToNode, placeOnNode, unblockMapRoute,
     applyDialogueChoice,
     emptyQuestLog, isQuestComplete, findActiveQuest, findQuest,
     startQuest, progressQuest, completeQuest, discoverQuest,
