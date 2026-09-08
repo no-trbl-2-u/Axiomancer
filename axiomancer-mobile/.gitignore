@@ -78,3 +78,6 @@ bun.lock
 # visual-audit artifacts
 .audit-dist/
 .playwright-mcp/
+
+# scripts/fixture-gallery.mjs — fixture-booted state gallery (browsing surface, not a diff gate)
+screenshots/gallery/
