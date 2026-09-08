@@ -12,7 +12,7 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-08 | df4036fc | 3 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-06 | 721adac9 | 2 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-08 | a3681576 | 3 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-07 | 76d44ef2 | 2 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-07 | 9016a99f | 2 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-07 | 570cc566 | 2 |
@@ -20,6 +20,41 @@
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-equipment pass 3, 2026-09-08, commit a3681576]**
+> Zero-CREATE, zero-UPDATE, zero-REMOVE pass — full re-audit reconfirms pass
+> 2's clean state. `git log 721adac9..HEAD -- src/Items src/World/MapEvents/
+> content.ts src/Combat/combat.encounter.types.ts` is empty: nothing in the
+> equipment/consumable/shop/signature surface moved in the 17 commits since
+> pass 2, so every Step-1 signal was re-verified against the current tree
+> rather than assumed stale-clean: (1) dominated relics — all 8 re-checked
+> (2 weapons/body+2, 2 armor/maxHp+5, 4 accessories split mind+2/heart+2),
+> same-slot pairs share identical stat magnitude and differ only by
+> `grantsSignature`, no strictly-dominated pair; (2) `grantsSignature` drift
+> — all 8 relic values (`sig-overwhelming-argument`, `sig-rallying-blow`,
+> `sig-read-opponent`, `sig-second-wind`, `sig-conviction-strike`,
+> `sig-clever-gambit`, `sig-disarming-plea`, `sig-press-the-point`) still
+> resolve 1:1 against the live `SignatureSkillId` union in
+> `combat.encounter.types.ts`; (3) dead consumable `effectId`s — all 11
+> non-heal-only ids re-checked against `buffs.library.json`/
+> `debuffs.library.json`, all resolve; (4) shop-pool / reward-table coverage
+> — re-enumerated all 6 `shop.wares` blocks in `World/MapEvents/content.ts`:
+> still exactly 8/22 consumables shop-stocked (`minor-healing-potion`,
+> `healing-potion`, `antidote`, `clarity-serum`, `philosopher-tea`,
+> `void-essence`, `body-elixir`, `focus-vial`), the other 14 still reachable
+> via `rollCacheReward`'s uniform draw over the full `consumableLibrary`, so
+> none is acquirable-nowhere; (5) `AccessoryKind` gap — head/hands/feet
+> remain at zero live relics, same standing `[loop-call]` filed 2026-09-04
+> (`plan/AUDIT.md`) — still an owner/mechanics-expert call (a 9th signature
+> skill needs designing first, and the lean relic shape's own identity rule
+> — `grantsSignature !== undefined` — rules out a stat-only accessory as a
+> workaround), no new development against it this pass. KB research: not
+> run — every consideration this pass was audit-confirmed-clean (no
+> CREATE/UPDATE), exempt from the gate per §3 Step 2 (REMOVE/no-op
+> carve-out). Verify: not re-run — no source file changed; HEAD's existing
+> CI (verify-mechanics) is already green per `npm run deploy:check`.
+```
 
 ```
 > **[adjust-cards pass 3, 2026-09-08, commit df4036fc]** Created 2 (trial
