@@ -14,7 +14,7 @@
 
 ## Pending
 
-### [loop-call] AMBUSH and FINALE now print correctly but still show exactly 1 card carrier each (2026-09-07)
+### [x] [loop-call] AMBUSH and FINALE now print correctly but still show exactly 1 card carrier each (2026-09-07) — RESOLVED via `/adjust-cards` pass 3 (2026-09-08)
 - category: content residue (found during `/adjust-keywords` pass 2's full
   structural audit — Step 1's carrier-count signal, same shape as pass 1's
   CHAIN/OMEN finding, which `/adjust-cards` pass 2 already resolved by
@@ -43,6 +43,19 @@
   mirroring CURDLE's resolution," now that the print-text bug that would
   have complicated either choice is already fixed).
 - score: n/a — routing item; carrier-count judgment belongs to `/adjust-cards`.
+- **resolution (2026-09-08):** authored a second carrier for each, same call
+  as CHAIN/OMEN — `kb_keyword`/`kb_cards` (`kb:dawncaster/keywords.csv`,
+  `kb:dawncaster/cards/0021-advance-932954.okf.md` and siblings) showed both
+  Ambush and Finale spread across many Dawncaster cards, the opposite shape
+  from CURDLE's single-card-only miss, so retiring the badge would have been
+  the wrong read. Added **The Door Comes Down First** (`the-door-comes-down-
+  first`, trial rank 5/Skull, mind aspect) — deal 34 + AMBUSH[STAGGER 2, +8
+  CHARGES], one rank above Struck from the Record's Splinter carrier — and
+  **Nothing Further, Your Honour** (`nothing-further-your-honour`, trial rank
+  4/Rib, heart aspect) — deal 24 + BACKFIRE 6/3 + FINALE 1[deal 16, STAGGER
+  2], one rank below Judgment Entered Against Them's Skull carrier. See
+  `plan/CONTENT_LEDGER.md`'s adjust-cards pass 3 entry for the full file list
+  and verify results.
 
 ### [content] Three of four Northern-Continent maps carry only 1 staged NPC [needs-user-call] (2026-09-05)
 - category: content (found during `/adjust-npcs` pass 1's structural audit —
