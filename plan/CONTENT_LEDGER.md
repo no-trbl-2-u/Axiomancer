@@ -13,7 +13,7 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-08 | df4036fc | 3 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-08 | a3681576 | 3 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-08 | (pending — see log) | 3 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-08 | 5693d6db | 3 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-07 | 9016a99f | 2 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-07 | 570cc566 | 2 |
 
@@ -22,7 +22,7 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-enemies pass 3, 2026-09-08, commit (pending — see log)]**
+> **[adjust-enemies pass 3, 2026-09-08, commit 5693d6db]**
 > Zero-CREATE, zero-UPDATE, zero-REMOVE pass — full re-audit, not a rubber
 > stamp of pass 2's findings. `git log 76d44ef2..HEAD -- src/Enemy
 > axiomancer-mobile/assets/images/enemies` is empty (the 16 commits since
