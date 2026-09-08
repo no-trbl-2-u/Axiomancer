@@ -12,7 +12,7 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-08 | df4036fc | 3 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-08 | (pending — see log) | 3 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-08 | a3681576 | 3 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-07 | 76d44ef2 | 2 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-07 | 9016a99f | 2 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-07 | 570cc566 | 2 |
@@ -22,7 +22,7 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-equipment pass 3, 2026-09-08, commit (pending — see log)]**
+> **[adjust-equipment pass 3, 2026-09-08, commit a3681576]**
 > Zero-CREATE, zero-UPDATE, zero-REMOVE pass — full re-audit reconfirms pass
 > 2's clean state. `git log 721adac9..HEAD -- src/Items src/World/MapEvents/
 > content.ts src/Combat/combat.encounter.types.ts` is empty: nothing in the
