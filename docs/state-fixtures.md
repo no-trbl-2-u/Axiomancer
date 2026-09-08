@@ -90,6 +90,22 @@ await injectStateFixture(context, { id: 'x', seed: 1, preset: 'sage', arrive: tr
 await page.goto(`${baseUrl}/`)
 ```
 
+## Who consumes fixtures today (2026-09-08)
+
+| Consumer | How |
+|---|---|
+| `/critique` unattended (`npm run critique:drive`) | `SCREENS` entries with a `fixture` key + `waitForPath` — dialogue, village, cutscene, rest, hazard, late-game hub |
+| `/critique` attended (`playtester`) | URLs of the form `/exploration?fixture=<id>` (skill §3, agent "Entering at a known state") |
+| `verify:visual` (`smoke-screens.mjs`) | `ROUTES` entries with `fixture` + `waitForPath` (dialogue, village, cutscene) in a forced-dev-tools context |
+| Mobile Jest | `test-utils/fixtureStore.ts` → `createFixtureStore(ref)` / `arriveFromFixture(h)`; exemplar `state/e2e/travel-door.engine.test.ts` |
+| Mechanics Vitest | `src/test-utils/fixture-store.ts` → `createFixtureGameStore(ref)` |
+| CLI | `--fixture <id|path.json|list>` |
+| Playwright drivers | `scripts/fixture-injector.mjs` → `injectStateFixture` / `forceDevTools`; proof `npm run e2e:fixture` |
+
+Arrival fixtures (one per state-gated screen) live in the registry
+under the "Arrival fixtures" banner; `arrive` is what makes a gated
+screen open cold.
+
 ## Guarantees and limits
 
 - **Gate.** Mobile honours a request only when `isDevToolsEnabled()` is

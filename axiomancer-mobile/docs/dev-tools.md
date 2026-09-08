@@ -28,6 +28,7 @@ channels (`persistence/fixture-boot-ignored`); an unknown id or invalid
 document falls back to a normal boot (`persistence/fixture-boot-failed`
 carries the field-path problems). Code: `state/fixtures.ts`,
 `state/persistence/fixtureBootAdapter.ts`; proof: `npm run e2e:fixture`.
+In Jest, `test-utils/fixtureStore.ts` boots the same documents.
 Guide: `docs/state-fixtures.md` at the monorepo root.
 
 ## Layout

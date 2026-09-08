@@ -106,6 +106,27 @@ Visit each tab and spend 30 seconds as a new player:
 - Navigate back and forth rapidly.
 - Look for dead-end states (nowhere to go, nothing to do).
 
+## Entering at a known state (state fixtures)
+
+The caller may hand you URLs of the form
+`http://localhost:8081/exploration?fixture=<id>` (2026-09-08,
+`docs/state-fixtures.md`). Opening one boots the game at an authored
+state — a named preset standing on a named node, sometimes with the
+node's event already fired so a gated screen (`/dialogue`, `/village`,
+`/cutscene`, `/rest`, `/hazard`, `/blacksmith`, `/cache`) is on screen
+when the page settles. Rules of engagement:
+
+- Treat the state as **where the caller dropped you**, not something
+  you played to. "How did I get here?" is not a finding; "I cannot tell
+  what this screen wants from me" is.
+- Play forward from it exactly as you would from a fresh start: read
+  everything, expect feedback, note jargon, note delight.
+- The run is ephemeral (nothing is saved to the app's real slot), so
+  reloading the same URL restarts the same state — useful for a second
+  look at a friction point.
+- Never edit the query yourself to invent states; report a wanted
+  state as a note in **Paths Walked** so the caller can add a fixture.
+
 ## The structured log bridge (AXM Log)
 
 The app exposes its structured log at `globalThis.__AXM_LOG__` in every

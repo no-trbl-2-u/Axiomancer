@@ -18,38 +18,29 @@
  */
 
 import { describe, expect, it } from '@jest/globals';
-import {
-    createMapState,
-    getMapDefinition,
-    type ContinentName,
-    type GameState,
-} from '@mechanics';
+import type { ContinentName, MapName } from '@mechanics';
 
-import { createAppActions } from '@/state/actions';
-import { createAppStore, type AppStore } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
+import { createFixtureStore } from '@/test-utils/fixtureStore';
 import { selectPacedEventRoute, selectHasActiveEvent } from '@/state/presenters/event.engine';
 
-function makeStoreAndActions() {
-    const store = createAppStore({ adapter: createMemoryAdapter() });
-    return { store, actions: createAppActions(store) };
-}
-
-/** Seat the player on `nodeId` of `mapName`, mirroring a reachable tap. */
-function seatAt(store: AppStore, continent: ContinentName, mapName: Parameters<typeof getMapDefinition>[1], nodeId: string) {
-    const base = store.getState() as unknown as GameState;
-    const map = createMapState(getMapDefinition(continent, mapName));
-    store.setState({
-        world: { ...base.world, currentMap: { ...map, currentNode: nodeId } },
-    } as never);
+/**
+ * Seat the player on a door node through a state fixture (2026-09-08 —
+ * the exemplar conversion from hand-built `createMapState` seating; see
+ * docs/testing.md "Seeding state with fixtures"). The same document
+ * shape boots the CLI (`--fixture`) and the web build (`?fixture=`).
+ */
+function seatAt(continent: ContinentName, map: MapName, node: string, adapter = createMemoryAdapter()) {
+    return createFixtureStore(
+        { id: `travel-door-${node}`, seed: `travel-door-${node}`, world: { continent, map, node } },
+        { adapter },
+    );
 }
 
 describe('inter-map travel doors (Phase W1)', () => {
     it('fv-10 walks the run onto northern-forest with a toast, no event card, and a checkpoint save', () => {
         const adapter = createMemoryAdapter();
-        const store = createAppStore({ adapter });
-        const actions = createAppActions(store);
-        seatAt(store, 'coastal-continent', 'fishing-village', 'fv-10');
+        const { store, actions } = seatAt('coastal-continent', 'fishing-village', 'fv-10', adapter);
         const savesBefore = adapter.saveCount;
 
         expect(actions.resolveCurrentMapEvent('travel')).toBe(true);
@@ -65,8 +56,7 @@ describe('inter-map travel doors (Phase W1)', () => {
     });
 
     it('the arrival map start node is not consumed by the crossing', () => {
-        const { store, actions } = makeStoreAndActions();
-        seatAt(store, 'coastal-continent', 'fishing-village', 'fv-10');
+        const { store, actions } = seatAt('coastal-continent', 'fishing-village', 'fv-10');
 
         actions.resolveCurrentMapEvent('travel');
 
@@ -76,8 +66,7 @@ describe('inter-map travel doors (Phase W1)', () => {
     });
 
     it('nf-10 crosses the continent into the caverns', () => {
-        const { store, actions } = makeStoreAndActions();
-        seatAt(store, 'coastal-continent', 'northern-forest', 'nf-10');
+        const { store, actions } = seatAt('coastal-continent', 'northern-forest', 'nf-10');
 
         expect(actions.resolveCurrentMapEvent('travel')).toBe(true);
 
@@ -89,8 +78,7 @@ describe('inter-map travel doors (Phase W1)', () => {
     });
 
     it('nc-26 climbs out of the caverns into the northern city (Phase W3)', () => {
-        const { store, actions } = makeStoreAndActions();
-        seatAt(store, 'northern-continent', 'caverns', 'nc-26');
+        const { store, actions } = seatAt('northern-continent', 'caverns', 'nc-26');
 
         expect(actions.resolveCurrentMapEvent('travel')).toBe(true);
 
@@ -103,8 +91,7 @@ describe('inter-map travel doors (Phase W1)', () => {
     });
 
     it('ncy-26 crosses the water-gate into connecting-river (Phase W4)', () => {
-        const { store, actions } = makeStoreAndActions();
-        seatAt(store, 'northern-continent', 'northern-city', 'ncy-26');
+        const { store, actions } = seatAt('northern-continent', 'northern-city', 'ncy-26');
 
         expect(actions.resolveCurrentMapEvent('travel')).toBe(true);
 
@@ -117,8 +104,7 @@ describe('inter-map travel doors (Phase W1)', () => {
     });
 
     it('cr-13 crosses the river into town-across-river (Phase W4)', () => {
-        const { store, actions } = makeStoreAndActions();
-        seatAt(store, 'northern-continent', 'connecting-river', 'cr-13');
+        const { store, actions } = seatAt('northern-continent', 'connecting-river', 'cr-13');
 
         expect(actions.resolveCurrentMapEvent('travel')).toBe(true);
 

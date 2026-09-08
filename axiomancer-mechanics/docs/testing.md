@@ -269,6 +269,25 @@ above. Copy the structure.
 
 ---
 
+## Seeding state with fixtures (2026-09-08)
+
+A `Game/` or `World/` suite that needs a whole `GameState` in a known
+shape boots it from a **state fixture** (`src/Game/fixtures`, guide at
+`../docs/state-fixtures.md`) instead of composing `createGameStore(
+nullAdapter, { player, world })` by hand:
+
+```ts
+import { createFixtureGameStore } from '../../test-utils/fixture-store';
+
+const { store, state, emitter } = createFixtureGameStore('sage-fv-boss-gate');
+// inline works too — seed it: createFixtureGameStore({ id: 'x', seed: 1, preset: 'wanderer', world: {...} })
+```
+
+Hermetic by construction (`nullAdapter`, seeded RNG) and shared with
+mobile's Jest helper and the CLI's `--fixture` flag, so one document
+proves a feature on every surface. Every registry entry is built by
+`src/Game/e2e/state-fixture.engine.test.ts`.
+
 ## Copy-pasteable scaffold
 
 ```ts

@@ -37,7 +37,10 @@ RNG is replaced by `test-utils/rng.ts` (`mockFixedRng`, `mockSequentialRng`,
 AsyncStorage uses the official jest mock for persistence tests, and
 elsewhere `test-utils/memoryAdapter.ts` provides an in-memory
 `PersistenceAdapter` that tracks `saveCount` for explicit-save-gate
-assertions.
+assertions. Suites that need the player seated somewhere boot from a
+**state fixture** via `test-utils/fixtureStore.ts` (`createFixtureStore`,
+2026-09-08) — the same document the CLI and the web deep link boot from;
+`travel-door.engine.test.ts` is the exemplar conversion.
 
 ## 3. Inventory — `state/e2e/`
 
@@ -46,6 +49,7 @@ assertions.
 
 | File | Pattern | Pins | desc | it |
 |---|---|---|---:|---:|
+| `state-fixture.engine.test.ts` | P2 | State-fixture boot (2026-09-08): request channels (`__AXM_FIXTURE__` vs `?fixture=`), the dev-tools gate, invalid-request fallback, ephemeral `fixtureBootAdapter`, and one row per arrival fixture pinning that `arrive` lands the state its gate routes on (`/dialogue`, `/village`, `/cutscene`, rest / cache / blacksmith / hazard sessions); `test-utils/fixtureStore.ts` helper | 5 | 20 |
 | `character.engine.test.ts` | P1 | Character VM shape + stat-row composition + saves/tests block + 7 equipment slots in display order; alignment slice (cell name, three-axis bucketing, low/mid/high boundaries, a11y sentence) per Phase 52 | 9 | 34 |
 | `combat-hud.engine.test.ts` | P1 | HUD percent clamping (HP/mana → 0..1); effect-array composition; degenerate-character invariants | 5 | 18 |
 | `combat-mode.engine.test.tsx` | P3 | `useCombatMode` context: `lastOutcome` one-shot signal, `exitCombatWith` (with optional aftermath snapshot payload), `clearLastOutcome`, `inEncounterModal` session flag (Phase 63c), `aftermathData` + `dismissAftermath` (Phase 70 Tick A), run-stats counters `encountersFaced` / `deepestNodeId` / `recordDeepestNode` / `resetRunStats` (Phase 70 Tick C) | 4 | 21 |

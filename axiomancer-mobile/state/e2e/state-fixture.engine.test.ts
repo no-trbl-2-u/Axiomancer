@@ -17,7 +17,8 @@ import { afterEach, describe, expect, it, jest } from '@jest/globals';
 import { GAME_STATE_VERSION, getStateFixtureById } from '@mechanics';
 
 import { createAppActions } from '@/state/actions';
-import { createAppStore } from '@/state/store';
+import { createAppStore, type AppStore } from '@/state/store';
+import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import {
     FIXTURE_QUERY_PARAM,
     readFixtureRequest,
@@ -28,6 +29,7 @@ import {
 } from '@/state/fixtures';
 import { createFixtureBootAdapter } from '@/state/persistence/fixtureBootAdapter';
 import { selectPacedEventRoute } from '@/state/presenters/event.engine';
+import { arriveFromFixture, createFixtureStore } from '@/test-utils/fixtureStore';
 
 afterEach(() => {
     delete globalThis.__AXM_FIXTURE__;
@@ -124,5 +126,49 @@ describe('store boot through the fixture adapter', () => {
         createAppActions(store).resolveCurrentMapEvent();
         expect(selectPacedEventRoute(store.getState())).toBe('/village');
         expect(store.getState().player.currency).toBe(240);
+    });
+});
+
+describe('createFixtureStore + arriveFromFixture (test-utils/fixtureStore.ts)', () => {
+    it('boots from a registry id with a zero-save memory adapter', () => {
+        const h = createFixtureStore('sage-fv-boss-gate');
+        expect(h.fixture.id).toBe('sage-fv-boss-gate');
+        expect(h.store.getState().world.currentMap.currentNode).toBe('fv-9');
+        expect(h.adapter.saveCount).toBe(0);
+        expect(h.state.runId).toBe(h.store.getState().runId);
+    });
+
+    it('accepts an inline fixture and a caller-supplied adapter', () => {
+        const adapter = createMemoryAdapter();
+        const h = createFixtureStore(
+            { id: 'inline-seat', seed: 11, world: { continent: 'coastal-continent', map: 'fishing-village', node: 'fv-10' } },
+            { adapter },
+        );
+        expect(h.adapter).toBe(adapter);
+        expect(adapter.saveCount).toBe(1);
+        expect(h.store.getState().world.currentMap.currentNode).toBe('fv-10');
+    });
+
+    it('rejects unknown ids and invalid inline documents', () => {
+        expect(() => createFixtureStore('nope')).toThrow(/Known ids/);
+        expect(() => createFixtureStore({ id: 'Bad Id' })).toThrow(/Invalid state fixture/);
+    });
+
+    // One row per state-gated screen: the arrival fixtures exist so the
+    // browser harnesses can open these cold; pin here that each `arrive`
+    // lands the store in the state its gate routes on.
+    it.each([
+        ['apprentice-fv-interaction', (s: ReturnType<AppStore['getState']>) => selectPacedEventRoute(s) === '/dialogue'],
+        ['wanderer-nf-village', (s: ReturnType<AppStore['getState']>) => selectPacedEventRoute(s) === '/village'],
+        ['wanderer-nf-cutscene', (s: ReturnType<AppStore['getState']>) => selectPacedEventRoute(s) === '/cutscene'],
+        ['apprentice-fv-rest', (s: ReturnType<AppStore['getState']>) => s.rest.session !== null],
+        ['apprentice-fv-cache', (s: ReturnType<AppStore['getState']>) => s.cache.session !== null],
+        ['wanderer-fv-blacksmith', (s: ReturnType<AppStore['getState']>) => s.blacksmith.session !== null],
+        ['l30-caverns-hazard-arrive', (s: ReturnType<AppStore['getState']>) => s.hazard.session !== null],
+    ])('"%s": arrive lands the state its gate routes on', (id, landed) => {
+        const h = createFixtureStore(id);
+        expect(h.fixture.arrive).toBe(true);
+        expect(arriveFromFixture(h)).toBe(true);
+        expect(landed(h.store.getState())).toBe(true);
     });
 });

@@ -403,6 +403,7 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-07T22:28:06Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-08T02:37:28Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-08T02:38:08Z | skill | adjust-cards | claude-sonnet-5 | main | - |
+| 2026-09-08T04:20:11Z | skill | artifact-design | claude-fable-5-1 | main | - |
 | 2026-09-08T04:34:16Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-08T06:45:28Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-08T06:48:22Z | skill | adjust-enemies | claude-sonnet-5 | main | - |

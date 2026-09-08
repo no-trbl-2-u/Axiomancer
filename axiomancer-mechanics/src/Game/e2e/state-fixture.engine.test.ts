@@ -23,6 +23,7 @@ import {
     parseStateFixture, problemsFor, validateStateFixture, StateFixtureError,
 } from '../fixtures';
 import type { StateFixture } from '../fixtures';
+import { createFixtureGameStore, resolveFixture } from '../../test-utils/fixture-store';
 
 beforeEach(() => setSeed('state-fixture-suite'));
 afterEach(() => vi.restoreAllMocks());
@@ -180,5 +181,30 @@ describe('validateStateFixture', () => {
         const doc: StateFixture = { id: 'from-json', seed: 'j', preset: 'wanderer' };
         expect(parseStateFixture(JSON.stringify(doc))).toEqual(doc);
         expect(() => parseStateFixture('{not json')).toThrow(StateFixtureError);
+    });
+});
+
+describe('createFixtureGameStore (src/test-utils/fixture-store.ts)', () => {
+    it('boots a hermetic store from a registry id', () => {
+        const { store, state, fixture } = createFixtureGameStore('sage-fv-boss-gate');
+        expect(fixture.id).toBe('sage-fv-boss-gate');
+        expect(store.getState().runId).toBe(state.runId);
+        expect(store.getState().world.currentMap.currentNode).toBe('fv-9');
+    });
+
+    it('accepts an inline fixture and rejects bad refs', () => {
+        const { store } = createFixtureGameStore({ id: 'inline', seed: 5, preset: 'wanderer' });
+        expect(store.getState().player.level).toBe(8);
+        expect(() => resolveFixture('nope')).toThrow(/Known ids/);
+        expect(() => resolveFixture({ id: 'Bad Id' })).toThrow(/Invalid state fixture/);
+    });
+
+    it('every arrival fixture stands on a node whose primary kind matches its description', () => {
+        const arrivals = STATE_FIXTURES.filter(f => f.arrive);
+        expect(arrivals.length).toBeGreaterThanOrEqual(7);
+        for (const f of arrivals) {
+            const { state } = createFixtureGameStore(f.id);
+            expect(state.world.currentMap.currentNode).toBe(f.world?.node);
+        }
     });
 });

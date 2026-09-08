@@ -54,18 +54,26 @@ const VIEWPORTS = {
 // what renders. `prepare` is a best-effort interaction to reach a downstream
 // state; if it throws, we capture whatever is on screen and move on.
 //
-// IMPORTANT — only COLD-ENTERABLE routes belong here. Many expo-router routes
-// in this app are STATE-GATED: `/village`, `/cutscene`, `/dialogue`, `/event`
-// are pushed by `<EventGate>` in response to a seeded game event, and their
-// screens `router.back()` out when there is no active event (e.g. `/village`
-// bounces on `!vm.active`). Navigating to them by URL just captures a blank
-// bounce — that is a TRANSPORT artifact, not a product finding, so they are
-// excluded. Reaching them faithfully needs game-flow seeding (a debug event
-// trigger); that is playthrough territory (interactive `/critique` + the
-// playtester), not this lightweight direct-nav capture. Entry points below are
-// all confirmed cold-enterable: `/` (title→onboarding), `/combat-encounter`
-// (self-bootstraps a demo deck), `/(tabs)/exploration` (the default landing
-// tab). If you add a route, verify it renders real content cold before adding.
+// Two ways a screen gets reached:
+//
+//   1. COLD-ENTERABLE routes — `/` (title→onboarding), `/combat-encounter`
+//      (self-bootstraps a demo deck), `/(tabs)/exploration` (the default
+//      landing tab). Navigating to them by URL renders real content.
+//
+//   2. FIXTURE-BOOTED screens (2026-09-08, docs/state-fixtures.md) — many
+//      routes are STATE-GATED: `/village`, `/cutscene`, `/dialogue`, `/rest`,
+//      `/hazard`, `/blacksmith`, `/cache` are pushed by the gates
+//      (`<EventGate>`, `<RestGate>`, …) in response to game state, and bounce
+//      out when there is none. A screen entry with a `fixture` key boots the
+//      app from that registry fixture (`__AXM_FIXTURE__` + forced dev tools
+//      via scripts/fixture-injector.mjs); a fixture with `arrive` fires the
+//      node's event so the gate pushes the real screen, and `waitForPath`
+//      waits for that route before capturing. Registry:
+//      axiomancer-mechanics/src/Game/fixtures/state-fixture.registry.ts
+//      (`npm run game -w axiomancer-mechanics -- --fixture list`).
+//
+// Add a route only through one of those two doors — a bare state-gated URL
+// captures a blank bounce, which is a transport artifact, not a finding.
 const SCREENS = [
     {
         name: 'title',
@@ -107,6 +115,48 @@ const SCREENS = [
         name: 'exploration-hub',
         path: '/(tabs)/exploration',
         why: 'Town / exploration hub — navigation, voice, orientation, and the early-progression state a cold player lands on.',
+    },
+    // ── Fixture-booted screens (state-gated routes, opened cold) ──────────
+    {
+        name: 'dialogue',
+        path: '/(tabs)/exploration',
+        fixture: 'apprentice-fv-interaction',
+        waitForPath: '/dialogue',
+        why: 'The NPC dialogue shell — voice, choice legibility, and how a conversation reads to a first-time player.',
+    },
+    {
+        name: 'village',
+        path: '/(tabs)/exploration',
+        fixture: 'wanderer-nf-village',
+        waitForPath: '/village',
+        why: 'The settlement + shop screen — merchant voice, ware pricing, and whether buying/selling explains itself.',
+    },
+    {
+        name: 'cutscene',
+        path: '/(tabs)/exploration',
+        fixture: 'wanderer-nf-cutscene',
+        waitForPath: '/cutscene',
+        why: 'A mid-forest omen — cutscene pacing, type, and whether the player knows how to continue.',
+    },
+    {
+        name: 'rest',
+        path: '/(tabs)/exploration',
+        fixture: 'apprentice-fv-rest',
+        waitForPath: '/rest',
+        why: 'The night-watch rest choice — a hurt player deciding how to spend the night.',
+    },
+    {
+        name: 'hazard',
+        path: '/(tabs)/exploration',
+        fixture: 'l30-caverns-hazard-arrive',
+        waitForPath: '/hazard',
+        why: 'The hazard minigame entry with a late-game kit — does the danger read before the first card is dragged?',
+    },
+    {
+        name: 'late-game-hub',
+        path: '/(tabs)/exploration',
+        fixture: 'sage-fv-boss-gate',
+        why: 'The exploration hub as a mid-campaign player sees it — a walked map, the boss node and the door one step away.',
     },
 ]
 
@@ -201,6 +251,7 @@ async function captureScreen(context, baseUrl, screen, viewport, outDir, index) 
     const base = `${idx}-${screen.name}`
     const entry = {
         name: screen.name, path: screen.path, why: screen.why, viewport,
+        fixture: screen.fixture ?? null,
         screenshot: `${base}.png`, domText: `${base}.txt`,
         finalUrl: null, navError: null, consoleErrors, pageErrors,
     }
@@ -208,7 +259,20 @@ async function captureScreen(context, baseUrl, screen, viewport, outDir, index) 
         if (screen.seed != null) {
             await page.addInitScript((s) => { globalThis.__AXM_COMBAT_SEED__ = s }, screen.seed)
         }
+        if (screen.fixture != null) {
+            // Boot from a state fixture: the id is read by state/fixtures.ts
+            // before the store mounts; dev tools must be forced because the
+            // export has `__DEV__ === false` (docs/state-fixtures.md, "Gate").
+            await page.addInitScript((id) => {
+                globalThis.__AXM_FIXTURE__ = id
+                globalThis.__AXM_FORCE_DEV_TOOLS__ = true
+            }, screen.fixture)
+        }
         await page.goto(`${baseUrl}${screen.path}`, { waitUntil: 'networkidle', timeout: 20000 })
+        if (screen.waitForPath) {
+            await page.waitForURL((u) => u.pathname.endsWith(screen.waitForPath), { timeout: 15000 })
+                .catch(() => { entry.navError = `fixture '${screen.fixture}' never reached ${screen.waitForPath} (at ${page.url()})` })
+        }
         if (screen.prepare) await screen.prepare(page).catch((e) => { entry.navError = `prepare: ${e.message}` })
         await page.waitForTimeout(700)
         entry.finalUrl = page.url()
