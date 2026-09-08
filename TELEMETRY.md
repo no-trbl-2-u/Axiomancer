@@ -7,9 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-20T03:29:54Z | skill | schedule | claude-fable-5 | main | args: list my scheduled routines |
-| 2026-07-20T03:46:56Z | subagent | Explore | claude-fable-5 | main | Map monorepo + existing logging |
-| 2026-07-20T03:47:02Z | subagent | Explore | claude-fable-5 | main | Explore mobile app logging surface |
 | 2026-07-20T03:47:09Z | subagent | Explore | claude-fable-5 | main | Explore agent tooling + conventions |
 | 2026-07-20T03:52:25Z | subagent | Plan | claude-fable-5 | main | Design repo-wide logging plan |
 | 2026-07-20T09:41:15Z | slash-prompt | /march | unknown | user/ci | /march |
@@ -408,4 +405,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-07T20:30:04Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-07T21:55:35Z | subagent | Explore | claude-fable-5-1 | main | Survey state-fixture tooling |
 | 2026-09-07T22:28:06Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-08T02:37:28Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-08T02:38:08Z | skill | adjust-cards | claude-sonnet-5 | main | - |
 | 2026-09-08T04:20:11Z | skill | artifact-design | claude-fable-5-1 | main | - |

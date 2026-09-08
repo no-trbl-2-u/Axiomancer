@@ -11,7 +11,7 @@
 
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
-| cards | `skills/adjust-cards.md` | 2026-09-06 | 8c346ac7 | 2 |
+| cards | `skills/adjust-cards.md` | 2026-09-08 | df4036fc | 3 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-06 | 721adac9 | 2 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-07 | 76d44ef2 | 2 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-07 | 9016a99f | 2 |
@@ -20,6 +20,68 @@
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-cards pass 3, 2026-09-08, commit df4036fc]** Created 2 (trial
+> theme), zero-UPDATE, zero-REMOVE pass. Audit: since pass 2 (8c346ac7),
+> re-swept all six theme modules for the Step-1 signals — reachability (the
+> 121-card `combat-playtest.card-coverage.sim.test.ts` dead-card detector,
+> now 123/123 with the two new cards folded in), near-duplicates (extracted
+> every card's id/rank/aspect across debt/grave/vigil/choir and cross-
+> checked every same-rank-same-aspect pair's `specialMechanics` shape by
+> hand — three same-(rank,aspect) collisions found (debt: distraint/
+> a-pound-of-flesh at rank4/body; debt: blank-indenture/confession-of-
+> judgment at rank5/heart; choir: miserere/te-deum-for-a-dying-thing at
+> rank6/heart) but all three read as deliberate verb-family reuse across
+> different mechanics (immolate+guard vs recoil+wrath+synergy; recoil_x vs
+> immolate+fallen; reap_all+siphon vs sway+quarter+grace-momentum), not
+> accidental duplication — none actioned), pricing sanity + paid-summary
+> honesty (green, no drift), aspect thirds (green, unaffected — presets
+> don't draw from trial's new cards). Only real finding was the standing
+> `[loop-call]` (`plan/AUDIT.md`, filed by `/adjust-keywords` pass 2 after
+> fixing AMBUSH/FINALE's print-text bug): both keywords still had exactly 1
+> card carrier each, below the atlas's "≥2 cards" discipline, same shape as
+> pass 2's CHAIN/OMEN finding. Judged CREATE for both, mirroring pass 2's
+> resolution: **The Door Comes Down First** (id `the-door-comes-down-first`,
+> rank 5/Skull, mind aspect) — deal 34 + AMBUSH (as your turn's first spell:
+> STAGGER 2, +8 CHARGES), one rank above Struck from the Record's Splinter
+> carrier; and **Nothing Further, Your Honour** (id
+> `nothing-further-your-honour`, rank 4/Rib, heart aspect) — deal 24 +
+> BACKFIRE 6 for 3 turns + FINALE 1 (deal 16 more, STAGGER 2), one rank
+> below Judgment Entered Against Them's Skull carrier. Both mechanics
+> (`opening`/`finale` `SynergyStatePredicate` kinds) are already fully
+> generic in the engine — the fix that made them print correctly landed in
+> `/adjust-keywords` pass 2 — so this was a pure card-authoring add, no
+> engine/pricing-table/display/atlas changes needed (the atlas's carrier
+> column already reads "(see the catalog)" for every keyword, same as the
+> CHAIN/OMEN precedent). Also placed AUDIT.md's routing row `[x]`-resolved
+> with the file list, per the CHAIN/OMEN row's own precedent. KB (kb-query):
+> `kb_keyword` confirmed both definitions verbatim ("Ambush... triggers if
+> this card is the first card played of the round"; "Finale... triggers
+> when played with 2 or fewer cards remaining in hand") and `kb_cards`
+> turned up 8+ Dawncaster carriers for each (Ambush: Advance, Aimed Shot,
+> Boarding Party, Clever Maneuver, Come get me!, Crossbow, Cutlass, Daggers,
+> Dash; Finale: Adrenaline Rush, Cranium Blow, Crossbow, Daring Dash,
+> Flourishing Bow, Last Laugh, Scattershot, Trickshot) — the genre spreads
+> both keywords across many cards, the opposite shape from CURDLE's
+> single-card-only miss, directly grounding "author a second carrier" over
+> "retire." Both new cards were priced by hand against `VERB_POINTS` in
+> their `// pts:` comments (~22.1 and ~31.8 respectively — no rank-band lint
+> to satisfy) and pass the pricing sanity guard, the card-coverage dead-card
+> detector, and the paid-summary-honesty guard (every number `paidText()`
+> generates from `specialMechanics`/`combatEffects` appears verbatim in the
+> authored `paidSummary`; the synergy rider's numbers — not checked by that
+> guard, since it only validates the base PAID line — were included in the
+> prose anyway for player clarity, matching house style on
+> Struck from the Record / Judgment Entered Against Them). Also corrected
+> `cards.library.ts`'s aggregator header comment, stale since before pass 1
+> ("112 cards... six theme modules of 16" — the live count is 128 across
+> six 16-20-card theme modules plus the 12-card apocrypha pool it didn't
+> mention at all). Verify: green (mechanics 212/212 files · 3392 tests +
+> build; mobile lint 0 errors/15 pre-existing warnings + typecheck + jest
+> 260/260 suites · 2630/2630 tests + assets:check 7/7 + art:test 24/24;
+> card-editor type-check).
+```
 
 ```
 > **[adjust-npcs pass 2, 2026-09-07, commit 570cc566]** Zero-CREATE,

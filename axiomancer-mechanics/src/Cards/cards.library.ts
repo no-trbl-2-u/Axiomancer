@@ -1,11 +1,15 @@
 /**
  * THE CARD LIBRARY — the aggregator (THE BIG NUMBERS REWRITE, 2026-09-02).
  *
- * Solo, dark-fantasy, PvE. 112 cards: 8 starters (the deliberately weak
- * Threadbare Office), 3 dice-valve relics, 5 enemy-injected curses, and six theme modules of 16.
- * The cards themselves live in `./library/*.cards.ts` — one module per theme,
- * so a theme can be reworked without touching the other five, and so the six
- * decks read as six decks. This file only assembles and indexes them.
+ * Solo, dark-fantasy, PvE. 128 cards (count pins repealed 2026-09-02 — this
+ * total drifts as `/adjust-cards` ships CREATEs; read `cardLibrary.length`
+ * for the live figure, never trust this comment as a source of truth): 8
+ * starters (the deliberately weak Threadbare Office), 3 dice-valve relics, 5
+ * enemy-injected curses, twelve Saint-rank apocrypha (two per theme), and six
+ * theme modules (16-20 cards each). The cards themselves live in
+ * `./library/*.cards.ts` — one module per theme, so a theme can be reworked
+ * without touching the other five, and so the six decks read as six decks.
+ * This file only assembles and indexes them.
  *
  *   rot   — the Blight: plant POISON/BLEED, PROLONG and FESTER them, FLAY the
  *           foe open, then detonate with RUPTURE and drink it back with SIPHON.

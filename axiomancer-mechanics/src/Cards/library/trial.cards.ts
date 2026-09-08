@@ -39,6 +39,21 @@ const ADDED = '2026-09-02';
  *  octet; tempo-and-control) and read as deliberate, so the fix is a second
  *  carrier, not a retirement. See the two cards' own `// pts:` comments. */
 const ADDED_P2 = '2026-09-06';
+/** /adjust-cards pass 3 (2026-09-08) — the two cards below answer the
+ *  standing loop-call ("AMBUSH and FINALE now print correctly but still show
+ *  exactly 1 card carrier each", `plan/AUDIT.md`, filed by `/adjust-keywords`
+ *  pass 2's structural audit after fixing the print-text bug): same shape as
+ *  pass 2's CHAIN/OMEN answer — both are the "turn shape" family's own
+ *  registry keywords (`docs/keyword-atlas.md`), the print bug that would
+ *  have complicated the call is already fixed, and `kb:dawncaster/
+ *  keywords.csv` shows both spread across many cards in the genre (Ambush:
+ *  Advance, Aimed Shot, Boarding Party, Daggers…; Finale: Adrenaline Rush,
+ *  Cranium Blow, Daring Dash…) — so the fix is a second carrier per keyword,
+ *  not a retirement (mirrors CURDLE's opposite resolution, where the KB gave
+ *  no such spread). Placed one rank above each's existing carrier (Splinter
+ *  → Skull for AMBUSH, Skull → Rib for FINALE) so the family reads across
+ *  two power levels, same as pass 2's CHAIN/OMEN spread. */
+const ADDED_P3 = '2026-09-08';
 
 // ─── ASH — the arraignment ───────────────────────────────────────────────────
 
@@ -515,14 +530,75 @@ const theDuckingStool: Card = {
     tags: ['trial', 'omen', 'ordeal'],
 };
 
-/** The Indictment — 18 cards, rank-ascending (pass 2 added a second CHAIN
- *  carrier and a second OMEN carrier; see `plan/CONTENT_LEDGER.md`). */
+// ─── pass 3 — a second carrier for AMBUSH and for FINALE (2026-09-08) ───────
+
+const theDoorComesDownFirst: Card = {
+    id: 'the-door-comes-down-first',
+    theme: 'trial',
+    name: 'The Door Comes Down First',
+    philosophicalAspect: 'mind',
+    description:
+        'The warrant is read afterward, to whoever is left standing to hear ' +
+        'it. Everything about this arrest happens in the wrong order on ' +
+        'purpose — the knowing comes last, if it comes at all.',
+    tier: 3, rank: 5, cardType: 'spell',
+    targetType: 'enemy',
+    paidSummary:
+        'Deal 34. AMBUSH — as your turn\'s first spell, STAGGER 2 and gain 8 CHARGES.',
+    // pts: deal 34 (11.33) + opening[stagger 2, 8 charges] rider (10.4 * 0.5
+    // threshold discount = 5.2) + FREE deal 12 / 2 charges. Trial's second
+    // AMBUSH carrier (the atlas's own "≥2 cards" discipline) — a Skull-rank
+    // raid, not the Splinter-rank arraignment Struck from the Record already
+    // owns: the door is already down before the foe finishes its stance.
+    free: { damage: 12, premises: 2 },
+    specialMechanics: [{ kind: 'deal', amount: 34 }],
+    synergy: {
+        statePredicate: { kind: 'opening', maxPriorSpells: 0 },
+        rider: { stagger: 2, premises: 8 },
+    },
+    addedIn: ADDED_P3,
+    tags: ['trial', 'ambush', 'charge'],
+};
+
+const nothingFurtherYourHonour: Card = {
+    id: 'nothing-further-your-honour',
+    theme: 'trial',
+    name: 'Nothing Further, Your Honour',
+    philosophicalAspect: 'heart',
+    description:
+        'The advocate sits down. There is nothing left in the folder and ' +
+        'she has said so plainly, which is its own kind of weapon — a case ' +
+        'that ends on a clean sentence lands harder than one that trails off.',
+    tier: 2, rank: 4, cardType: 'spell',
+    targetType: 'enemy',
+    paidSummary:
+        'Deal 24. Apply BACKFIRE 6 for 3 turns. FINALE 1 — with at most 1 card left in hand, deal 16 more and STAGGER 2.',
+    // pts: deal 24 (8) + backfire i6 d3 (13.5) + finale[deal 16, stagger 2]
+    // rider (9.33 * 0.5 threshold discount = 4.67) + FREE deal 8 / backfire
+    // i2 d2. Trial's second FINALE carrier (the atlas's own "≥2 cards"
+    // discipline) — a Rib-rank closing argument, not the Skull-rank verdict
+    // Judgment Entered Against Them already owns: the hand runs empty and the
+    // last word lands anyway.
+    free: { damage: 8, applyEffect: { effectId: 'debuff_backfire', intensity: 2, duration: 2 } },
+    specialMechanics: [{ kind: 'deal', amount: 24 }],
+    combatEffects: [{ effectId: 'debuff_backfire', appliedTo: 'opponent', intensity: 6, duration: 3 }],
+    synergy: {
+        statePredicate: { kind: 'finale', cardsLeftAtMost: 1 },
+        rider: { damage: 16, stagger: 2 },
+    },
+    addedIn: ADDED_P3,
+    tags: ['trial', 'finale', 'backfire'],
+};
+
+/** The Indictment — 20 cards, rank-ascending (pass 2 added a second CHAIN
+ *  carrier and a second OMEN carrier; pass 3 added a second AMBUSH carrier
+ *  and a second FINALE carrier; see `plan/CONTENT_LEDGER.md`). */
 export const TRIAL_CARDS: Card[] = [
     readingOfTheCharges, hueAndCry, benefitOfClergy,
     scoldsBridle, billOfParticulars, theGalleryMurmurs,
     thePrickingNeedle, struckFromTheRecord, thePerjurersTongue,
-    contemptOfCourt, pressedForAPlea, theSummingUp,
-    theAssizeBell, judgmentEnteredAgainstThem,
+    contemptOfCourt, pressedForAPlea, theSummingUp, nothingFurtherYourHonour,
+    theAssizeBell, judgmentEnteredAgainstThem, theDoorComesDownFirst,
     theBlackCap, writOfAttainder,
     theVillageComesOverTheHill, theDuckingStool,
 ];
