@@ -7,7 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-20T03:47:09Z | subagent | Explore | claude-fable-5 | main | Explore agent tooling + conventions |
 | 2026-07-20T03:52:25Z | subagent | Plan | claude-fable-5 | main | Design repo-wide logging plan |
 | 2026-07-20T09:41:15Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-20T11:29:52Z | slash-prompt | /digest | unknown | user/ci | /digest |
@@ -407,3 +406,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-07T22:28:06Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-08T02:37:28Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-08T02:38:08Z | skill | adjust-cards | claude-sonnet-5 | main | - |
+| 2026-09-08T04:34:16Z | slash-prompt | /march | unknown | user/ci | /march |
