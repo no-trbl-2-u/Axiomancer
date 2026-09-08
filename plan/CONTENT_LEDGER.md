@@ -14,12 +14,111 @@
 | cards | `skills/adjust-cards.md` | 2026-09-08 | df4036fc | 3 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-08 | a3681576 | 3 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-08 | 5693d6db | 3 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-07 | 9016a99f | 2 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-08 | TBD | 3 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-07 | 570cc566 | 2 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-keywords pass 3, 2026-09-08, commit TBD]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — full re-audit, not a rubber stamp of pass
+> 2's findings. `git log 9016a99f..HEAD -- axiomancer-mechanics/src/Cards
+> axiomancer-mechanics/src/Effects axiomancer-mechanics/src/Combat
+> axiomancer-mechanics/docs/keyword-atlas.md docs/retheme-map.json
+> axiomancer-mobile/state/combat/keywords.ts
+> axiomancer-card-editor/src/data/mechanics.ts` returns exactly one commit
+> (`df4036fc`, `/adjust-cards` pass 3) out of the 25 landed since pass 2, so
+> every Step-1 signal was re-derived by direct enumeration against the
+> current tree rather than assumed stale-clean, same discipline as the
+> cards/equipment/enemies pass-3 re-audits: (1) standing loop-call closure —
+> confirmed, not assumed, that `/adjust-cards` pass 3 (`df4036fc`) actually
+> closed the AMBUSH/FINALE `[loop-call]` pass 2 filed: direct grep of
+> `src/Cards/library/trial.cards.ts` shows `kind: 'opening'` at lines 247 and
+> 556 (2 carriers) and `kind: 'finale'` at lines 410 and 586 (2 carriers) —
+> both now meet the atlas's "≥2 cards" bar; marked `[x]` in `plan/AUDIT.md`
+> already reads RESOLVED, left as-is (no further action needed). (2) full
+> carrier-count sweep — wrote a throwaway script counting every top-level
+> `kind: '<x>'` literal across all 9 `src/Cards/library/*.cards.ts` modules
+> for all 49 `CardSpecialMechanic` kinds in `types.ts`: the only zero-count
+> kinds (`strip_random_buff`, `befriend_attempt`, `refresh_die`,
+> `convert_die_color`, `overheat`, `forge_floating_die`, `float_x_die`,
+> `spend_all_pips`, `echo_next_spell`) are exactly the 9 die-gear/card-local
+> kinds `KINDS_WITHOUT_MECHANIC_KEYWORD`
+> (`axiomancer-mobile/state/combat/__tests__/keywords.test.ts`) already
+> classifies as badge-exempt by design (confirmed pass 2's finding still
+> holds, not re-litigated from a stale cache); every other kind clears 1+
+> carriers, and the two previously-thinnest (`rupture`=2, `chain`=2 via
+> Hue and Cry + The Village Comes Over the Hill, `omen`=2 via The Summing Up
+> + The Ducking Stool) still sit exactly at the ≥2 floor with no new drift
+> below it. (3) `SynergyStatePredicate`/`Card.fallen` family — re-verified
+> `checkStatePredicate`'s switch (`src/Cards/synergy-predicates.ts`) is
+> exhaustive over its 7 live kinds with no `default:` fallthrough (a new
+> predicate kind fails compilation, not silent no-op); FALLEN is a distinct
+> first-class `Card.fallen?: { rider: CardRider }` field (not a
+> `SynergyStatePredicate` member — confirmed this is by design, not a gap:
+> the atlas groups it with the "turn shape" family by fantasy, not by
+> implementation type) with 4 live carriers in `debt.cards.ts` alone. (4)
+> mobile wiring honesty for the turn-shape family — traced how AMBUSH/FLOW/
+> FINALE/REQUIEM actually reach a player-visible popup despite
+> `combat-encounter.engine.ts` carrying zero `mechanicHeadline`/
+> `MECH_HEADLINE_PRIORITY` cases for `opening`/`finale`/`flow`/`requiem`:
+> confirmed this is NOT a gap — those four are a `card.synergy.statePredicate`
+> field, a different shape from the `CardSpecialMechanic[]` array
+> `mechanicHeadline` walks, and the actual popup path is the generic
+> `keywordsInPersistentText()` sweep (`axiomancer-mobile/state/combat/
+> keywords.ts`) over the card's rendered face text (`topActionText` /
+> `bottomActionText` / `dieLines` / free-line text), which regex-matches any
+> `[A-Z]{2,}` run against `KEYWORD_GLOSS` — so pass 2's fix to
+> `combat.cards.ts`'s `statePredicateText` (making it print the literal words
+> "AMBUSH"/"FINALE" instead of the stale "OPENING"/plain prose) is what
+> actually wires the popup, not a per-kind headline case; verified
+> `Ambush`/`Flow`/`Finale`/`Requiem` are all present as `KEYWORD_GLOSS` keys
+> (lines 260-304) so the sweep resolves cleanly. Also checked whether the
+> turn-shape family needs a glyph in the three hand-synced glyph tables
+> (`statusGlyphs.ts`, `glyphShapes.ts`, editor `CardFace.tsx`) — confirmed NO:
+> those tables glyph `ActiveEffect`-backed statuses shown on a combatant's
+> portrait (Poison, Bleed, Mark…), and non-effect-backed play-time gating
+> conditions (Stagger, Charge, Omen — checked as the existing precedent) also
+> carry no glyph, so Ambush/Flow/Finale/Requiem/Fallen correctly having none
+> is consistent with the established pattern, not an omission. (5) near-
+> synonym / duplicate sweep — zero new keyword rows since pass 2 (68 rows,
+> confirmed via `axio_keywords`), so no new duplication surface exists;
+> pass 1/2's exhaustive pairwise pass still holds verbatim. (6) "Known drift"
+> section re-checked against current source, not assumed accurate: POISON/
+> BLEED/DOOM `damagePerRound` in `debuffs.library.json` are still 2/3/1 (the
+> overhaul's §5.2 ×3-4 rescale has not landed) and RELENT's resolve threshold
+> (`CAPITULATE_RESOLVE_FRACTION = 0.35`, `CAPITULATE_MIN = 10` in
+> `src/Combat/effects.ts`) still floors at 10, not the `min 20` the overhaul's
+> §5.4 explicitly asks for ("RELENT threshold = 35% of VITAE (min 20)") — both
+> notes are STILL accurate (not stale), and both are engine-constant/effects-
+> data rescales, not keyword-registry structural work (per this skill's own
+> handoff boundary — "engine constants... are hand-tuned, not card-shaped");
+> left untouched, matching pass 1/2's own judgment on the same two bullets,
+> and NOT re-filed as a fresh `[loop-call]` since the atlas's own "Known
+> drift" section already serves as the standing record and nothing new was
+> learned about it this pass. (7) atlas-row / `CardSpecialMechanic`-kind
+> parity — re-ran `content-drift.test.mjs`'s own check (11/11 green) that
+> every registry keyword has a gloss and no `KEYWORD_GLOSS` row is orphaned;
+> zero new mechanic kinds exist in `types.ts` since pass 2 (git log confirms
+> no commit touched the file). KB research (kb-query): not run — every
+> consideration this pass was audit-confirmed-clean (no CREATE/UPDATE) or a
+> re-verification of a structural/wiring fact already KB-grounded by pass 1/2
+> (AMBUSH/FINALE's Dawncaster prior art, CHAIN's Dawncaster prior art, OMEN's
+> stated no-analogue miss) — exempt from the gate per skill §3 Step 2 (REMOVE/
+> no-op carve-out); no new CREATE/UPDATE means no new receipt was needed.
+> Verify: not re-run in full — no source file changed (`git status` clean on
+> `axiomancer-mechanics/src`, `axiomancer-mobile/`, `axiomancer-card-editor/`,
+> `docs/`); ran the direct confirmation set instead
+> (`npm test` 123/123 incl. `content-drift.test.mjs`;
+> `axiomancer-mobile` jest `keywords.test.ts` + `card-face-honesty.guard.test.ts`
+> 22/22; `axiomancer-mechanics` vitest `deprecated-effects.engine.test.ts` +
+> `paid-summary-honesty.engine.test.ts` + `pricing.engine.test.ts` +
+> `sequencing-grammar.engine.test.ts` 285/285) and confirmed HEAD's existing
+> CI is green via `npm run deploy:check` (`verify-mechanics` and
+> `verify-mobile` both `success` for `72f5c34`).
+```
 
 ```
 > **[adjust-enemies pass 3, 2026-09-08, commit 5693d6db]**
