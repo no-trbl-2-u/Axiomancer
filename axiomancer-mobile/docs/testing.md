@@ -215,6 +215,35 @@ and asserting on observable state the presenter contract requires.
 
 ---
 
+## Seeding state with fixtures (2026-09-08)
+
+When a suite needs the player *somewhere* — a preset on a node, a map
+already unlocked, a flag set — seat it through a **state fixture**
+rather than `createMapState` + `setState` surgery. The fixture is the
+same declarative document the CLI boots (`--fixture`) and the web build
+deep-links (`?fixture=`), so the test cannot drift from what the app
+would actually boot (`docs/state-fixtures.md` at the monorepo root).
+
+```ts
+import { createFixtureStore, arriveFromFixture } from '@/test-utils/fixtureStore';
+
+// A committed registry fixture …
+const { store, actions } = createFixtureStore('wanderer-nf-village');
+
+// … or an inline one (give it a seed — determinism is the point).
+const h = createFixtureStore({
+    id: 'my-suite-door', seed: 'my-suite-door',
+    world: { continent: 'coastal-continent', map: 'fishing-village', node: 'fv-10' },
+});
+expect(arriveFromFixture(h)).toBe(true); // what <FixtureBoot> does for `arrive`
+```
+
+`createFixtureStore` returns `{ store, actions, adapter, state, fixture }`
+over a `createMemoryAdapter` (pass your own to assert `saveCount`).
+Exemplar conversion: `state/e2e/travel-door.engine.test.ts`. Pin any
+new fixture field in `state/e2e/state-fixture.engine.test.ts` alongside
+the gate it routes on.
+
 ## Copy-pasteable scaffold
 
 ```ts

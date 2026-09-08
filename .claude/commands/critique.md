@@ -11,7 +11,10 @@ its audit sources. Together: **critique → iterate → fix**.
 
 Argument handling:
 - No argument → full pass (~6 representative screens).
-- `<url>` → focused pass on a single screen / route.
+- `<url>` → focused pass on a single screen / route. State-gated
+  routes take a fixture query: `/exploration?fixture=<id>` (ids from
+  `npm run game -w axiomancer-mechanics -- --fixture list`; contract in
+  `docs/state-fixtures.md`).
 - `mobile` → 375×800 viewport only.
 - `desktop` → 1280×800 only.
 

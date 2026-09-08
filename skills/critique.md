@@ -60,6 +60,35 @@ already covers every screen; critique is for *quality*.
 | Town / exploration hub | Navigation, voice, and orientation. |
 | An empty or early-progression state | Often where the experience breaks down. |
 
+### Fixture-booted screens (state-gated routes, 2026-09-08)
+
+Several screens are pushed by the app's gates off game state and
+bounce when there is none — they cannot be reached by URL alone. The
+**state-fixture** mechanism (`docs/state-fixtures.md`) boots the app
+at a known state instead; each registry id below is shared with the
+CLI (`--fixture <id>`) and the Jest suites:
+
+| Screen | Fixture id | Lands on |
+|---|---|---|
+| NPC dialogue | `apprentice-fv-interaction` | `/dialogue` |
+| Settlement + shop | `wanderer-nf-village` | `/village` |
+| Forest omen (cutscene) | `wanderer-nf-cutscene` | `/cutscene` |
+| Night-watch rest | `apprentice-fv-rest` | `/rest` |
+| Hazard minigame (late kit) | `l30-caverns-hazard-arrive` | `/hazard` |
+| Mid-campaign exploration hub | `sage-fv-boss-gate` | `/exploration` |
+
+- **Unattended transport** (`critique:drive`, §3.5) already carries
+  these as `SCREENS` entries with a `fixture` key — nothing to do.
+- **Attended pass** (`playtester`, §4): hand the sub-agent URLs of the
+  form `http://localhost:8081/exploration?fixture=<id>`. The dev
+  server has dev tools on, so the query is honoured; a fixture with
+  `arrive` opens the gated screen on its own. Tell the playtester the
+  state is a *starting point*, not a save it earned — first-time-player
+  confusion about how it got there is not a finding.
+- Need a state nobody has authored? Add a registry entry (kebab-case
+  id, `seed`, `description`) — the engine suite builds every entry —
+  rather than scripting a click path.
+
 Skip screens that don't exist yet. Note in pass log.
 
 ## 3.5 Unattended ticks — use the non-MCP transport (Phase 34)
@@ -162,7 +191,8 @@ non-existent screens), recent shipping focus.
 Agent({
   subagent_type: "playtester",
   prompt: "Play the local expo-web build at http://localhost:8081
-           as a first-time player. Cover these screens: [list].
+           as a first-time player. Cover these screens: [list —
+           state-gated ones as /exploration?fixture=<id> URLs, §3].
            Voice cue from plan/bearings.md: <quote>.
            Already-addressed (skip): <Done section>.
            Focus: <from arg or 'general'>.
@@ -306,6 +336,11 @@ plan/bearings.md                     # voice, URL contract, Auth: field
 
 # Sub-agent
 .claude/agents/playtester.md         # the fresh-eyes observer persona
+
+# Known-state entry (state-gated screens)
+docs/state-fixtures.md               # the fixture contract
+npm run game -w axiomancer-mechanics -- --fixture list   # registry ids
+http://localhost:8081/exploration?fixture=<id>           # attended URL form
 
 # Commands
 git pull --ff-only                   # Step 0
