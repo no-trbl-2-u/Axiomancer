@@ -33,6 +33,12 @@ export interface CliFlags {
      * tabs durable across sessions.
      */
     saveFile?: string;
+    /**
+     * State fixture to BOOT from (2026-09-07): a registry id or a path to a
+     * JSON fixture document (see `src/Game/fixtures`). `list` prints the
+     * registry and exits. Replaces the blank L1 5/5/5 boot character.
+     */
+    fixture?: string;
     /** Comma-separated explicit node ids to walk without prompts. */
     route?: string[];
     /**
@@ -107,6 +113,16 @@ export function parseArgv(args: string[]): CliFlags {
                 throw new Error('--save-file requires a file path argument.');
             }
             flags.saveFile = next;
+            i += 2;
+        } else if (arg.startsWith('--fixture=')) {
+            flags.fixture = arg.slice('--fixture='.length);
+            i++;
+        } else if (arg === '--fixture') {
+            const next = args[i + 1];
+            if (!next || next.startsWith('--')) {
+                throw new Error('--fixture requires a fixture id, a .json path, or `list`.');
+            }
+            flags.fixture = next;
             i += 2;
         } else if (arg.startsWith('--route=')) {
             flags.route = arg.slice('--route='.length).split(',').map(s => s.trim()).filter(Boolean);
@@ -193,7 +209,7 @@ export function parseArgv(args: string[]): CliFlags {
         } else {
             throw new Error(
                 `Unknown CLI flag: '${arg}'.\n` +
-                `Usage: npm run game -- [--script <path>] [--stdin] [--json-events] [--state-log <path>] [--save-file <path>] [--route <nodes>] [--resolve-start] [--route-audit <mapName>] [--auto-combat] [--combat-policy <policy>] [--combat-max-turns <n>] [--combat-seed <n>] [--combat-enemy <slug> --combat-enemy-node <id>] [--log-level <trace|debug|info|warn|error>] [--log-file <path>]`,
+                `Usage: npm run game -- [--script <path>] [--stdin] [--json-events] [--state-log <path>] [--save-file <path>] [--fixture <id|path.json|list>] [--route <nodes>] [--resolve-start] [--route-audit <mapName>] [--auto-combat] [--combat-policy <policy>] [--combat-max-turns <n>] [--combat-seed <n>] [--combat-enemy <slug> --combat-enemy-node <id>] [--log-level <trace|debug|info|warn|error>] [--log-file <path>]`,
             );
         }
     }

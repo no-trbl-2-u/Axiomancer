@@ -139,6 +139,16 @@ jobs:
         env:
           COMBAT_E2E_REUSE_EXPORT: '1'
 
+      # State-fixture boot (docs/state-fixtures.md): `?fixture=<id>` deep link,
+      # `__AXM_FIXTURE__` inline fixture with `arrive`, unknown-id fallback.
+      # Cheap (three cold boots, no playthrough) and touches app/_layout.tsx,
+      # so it rides every integration run rather than one subsystem journey.
+      - name: State-fixture boot (deep link + inline + fallback)
+        if: steps.impact.outputs.run_integration == 'true'
+        run: npm run e2e:fixture --workspace axiomancer-mobile
+        env:
+          FIXTURE_E2E_REUSE_EXPORT: '1'
+
       # The step above asserts the board's SHAPE and never commits a card, and
       # it only ever drives the /combat-encounter dev sandbox (mock foe, demo
       # deck, persistOutcome={false}). This one plays real rounds — stage,

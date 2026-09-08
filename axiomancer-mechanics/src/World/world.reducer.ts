@@ -568,3 +568,36 @@ export function auditRouteCoverage(
     }
     return coverage;
 }
+
+/**
+ * Stand the player on `nodeId` with no adjacency or back-travel rule and
+ * no event fired — the state-fixture / dev-tools placement primitive
+ * (2026-09-07). Unlike `teleportToNode` it works on every map kind; unlike
+ * `moveToNode` it never throws for a legal-but-unwalked node. The node is
+ * also marked discovered + available (and cleared from locked / completed /
+ * consumed) so an exploration renderer shows it as the live position, and
+ * its neighbours are revealed + unlocked so the walk can continue from
+ * there (`legalMovesFrom` filters on `lockedNodes`).
+ * Throws `IllegalMoveError` only when `nodeId` is not on the current map.
+ *
+ * Mobile's `/dev` WORLD → JUMP row delegates here.
+ */
+export function placeOnNode(state: WorldState, nodeId: NodeId): WorldState {
+    const map = state.currentMap;
+    const def = getMapDefinition(map.continent, map.name);
+    if (!def.nodes.some(n => n.id === nodeId)) {
+        throw new IllegalMoveError(`placeOnNode: '${nodeId}' is unknown on map '${map.name}'.`);
+    }
+    const without = (xs: readonly NodeId[]) => xs.filter(x => x !== nodeId);
+    const withOnce = (xs: readonly NodeId[]) => (xs.includes(nodeId) ? [...xs] : [...xs, nodeId]);
+    const placed: MapState = {
+        ...map,
+        currentNode: nodeId,
+        lockedNodes: without(map.lockedNodes),
+        completedNodes: without(map.completedNodes),
+        consumedNodes: without(map.consumedNodes),
+        availableNodes: withOnce(map.availableNodes),
+        discoveredNodes: withOnce(map.discoveredNodes),
+    };
+    return { ...state, currentMap: unlockAdjacent(revealAdjacent(placed, nodeId), nodeId) };
+}

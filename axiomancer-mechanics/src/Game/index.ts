@@ -40,3 +40,11 @@ export {
 
 export type { PersistenceAdapter } from './persistence/types';
 export { nullAdapter } from './persistence/null.adapter';
+
+// State fixtures (2026-09-07) — declarative test states for CLI / Jest / web.
+export type { StateFixture, StateFixturePlayer, StateFixtureWorld } from './fixtures';
+export {
+    buildStateFromFixture,
+    StateFixtureError, problemsFor, validateStateFixture, parseStateFixture,
+    STATE_FIXTURES, getStateFixtureById, listStateFixtureIds,
+} from './fixtures';

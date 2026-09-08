@@ -123,6 +123,7 @@ human at the keyboard:
 | `--stdin` | Reads one JSON object per line from stdin and uses each as the next answer. EOF before all prompts complete throws. |
 | `--json-events` | Replaces the human event log with one `JSON.stringify(event)` line per emitted GameEvent on stdout. Human prose is routed to stderr so stdout stays machine-clean. A final `{"type":"cli:exit",...}` line marks the end. |
 | `--state-log <path>` | Appends one JSON-line record per state mutation (`{ tick, action, before, after, event? }`). Used by the agent-graded harness below. (Phase 26) |
+| `--fixture <id\|path.json\|list>` | Boots the store from a declarative **state fixture** instead of the blank L1 character — a registry id (`--fixture list` prints them) or a path to a JSON fixture document. A fixture's `arrive` sets `--resolve-start`. See `docs/state-fixtures.md` at the monorepo root. (2026-09-07) |
 
 Examples:
 
@@ -133,6 +134,21 @@ npm run game -- --script walkthrough.json --json-events --state-log run.jsonl
 ```
 
 `--script` and `--stdin` are mutually exclusive; if both are passed, `--script` wins.
+
+### State fixtures (2026-09-07)
+
+`src/Game/fixtures` compiles a small declarative document (preset, map,
+node, flags, seed, …) into a current-version `GameState` through the
+engine's own builders. The committed registry (`STATE_FIXTURES`) is shared
+with the mobile app (`?fixture=<id>` / `__AXM_FIXTURE__`) and its Jest +
+Playwright harnesses, so one fixture proves a feature on every surface.
+
+```bash
+npm run game -- --fixture sage-fv-boss-gate --route fv-24 --auto-combat --json-events
+npm run game -- --fixture ./my-fixture.json --route-audit fishing-village
+```
+
+Full guide: [`../docs/state-fixtures.md`](../docs/state-fixtures.md).
 
 ### Agent-graded e2e (Phase 26)
 

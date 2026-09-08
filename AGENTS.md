@@ -165,6 +165,13 @@ Each package keeps its own `AGENTS.md` / `CLAUDE.md` with domain specifics
 (engine doctrine, mobile presenter boundaries). Read the relevant one before
 working in a package.
 
+## Testing at a known state
+
+`docs/state-fixtures.md` — one declarative **state fixture** (preset, map,
+node, flags, seed) boots the mechanics CLI (`--fixture <id>`), seeds a Jest
+store, and deep-links the web build (`?fixture=<id>` /
+`__AXM_FIXTURE__`). Registry: `axiomancer-mechanics/src/Game/fixtures`.
+
 ## Verify
 
 - `npm run verify --workspace axiomancer-mechanics` — type-check + tests + build

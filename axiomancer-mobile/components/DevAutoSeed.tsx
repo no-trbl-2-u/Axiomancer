@@ -23,6 +23,7 @@
 import { useEffect, useRef } from 'react';
 
 import { isDevToolsEnabled } from '@/lib/buildProfile';
+import { getBootFixture } from '@/state/fixtures';
 import { useGameActions, useGameState } from '@/state/GameStoreProvider';
 
 declare const __DEV__: boolean | undefined;
@@ -45,6 +46,9 @@ export function DevAutoSeed() {
         // devToolsEnabled=true from the config's buildProfile logic).
         if (typeof __DEV__ !== 'undefined' && !__DEV__) return;
         if (!isDevToolsEnabled()) return;
+        // A fixture boot IS the intended state — never layer the sample
+        // inventory over it (a fixture author who wants items names them).
+        if (getBootFixture() !== null) return;
         if (seeded.current) return;
         if (nonRelicCount > 0) {
             // Either the prior session already seeded, or the player has a real

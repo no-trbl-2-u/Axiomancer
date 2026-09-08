@@ -128,6 +128,16 @@ jobs:
         env:
           COMBAT_E2E_REUSE_EXPORT: '1'
 
+      # State-fixture boot (docs/state-fixtures.md): `?fixture=<id>` deep link,
+      # `__AXM_FIXTURE__` inline fixture with `arrive`, unknown-id fallback.
+      # Cheap (three cold boots, no playthrough) and touches app/_layout.tsx,
+      # so it rides every integration run rather than one subsystem journey.
+      - name: State-fixture boot (deep link + inline + fallback)
+        if: steps.scope.outputs.run_integration == 'true'
+        run: npm run e2e:fixture --workspace axiomancer-mobile
+        env:
+          FIXTURE_E2E_REUSE_EXPORT: '1'
+
       # Keep in step with verify-mechanics.yml — the two workflows carry
       # parallel copies of this journey list, and a step added to only one of
       # them silently skips whichever PR shape triggers the other. (Witness:

@@ -6,6 +6,30 @@
 > placeholder. Gate: `isDevToolsEnabled()` in `lib/buildProfile.ts`
 > (browser harnesses opt in with `globalThis.__AXM_FORCE_DEV_TOOLS__`).
 
+## Boot from a state fixture (2026-09-07)
+
+A dev build (or a `BUILD_PROFILE=preview` export, or any export with
+`globalThis.__AXM_FORCE_DEV_TOOLS__ = true`) can boot straight into a
+known game state instead of the persisted save:
+
+| Channel | Example | Notes |
+|---|---|---|
+| URL deep link (web) | `/exploration?fixture=sage-fv-boss-gate` | Hand-typable; any route works, the fixture applies before the store mounts |
+| Init-script global | `globalThis.__AXM_FIXTURE__ = 'wanderer-nf-village'` or an inline fixture object | `scripts/fixture-injector.mjs` → `injectStateFixture(context, …)` |
+
+Ids come from the engine registry (`STATE_FIXTURES`;
+`npm run game -w axiomancer-mechanics -- --fixture list`). The run is
+**ephemeral** — the AsyncStorage save slot is never read into the store
+nor written — and a fixture with `arrive: true` fires the current node's
+event once navigation is ready (`components/FixtureBoot.tsx`), so
+`/dialogue`, `/village`, `/cutscene`, `/event` open cold.
+`DevAutoSeed` stands down on a fixture boot. Production ignores both
+channels (`persistence/fixture-boot-ignored`); an unknown id or invalid
+document falls back to a normal boot (`persistence/fixture-boot-failed`
+carries the field-path problems). Code: `state/fixtures.ts`,
+`state/persistence/fixtureBootAdapter.ts`; proof: `npm run e2e:fixture`.
+Guide: `docs/state-fixtures.md` at the monorepo root.
+
 ## Layout
 
 | File | Role |

@@ -40,6 +40,11 @@ import {
 } from './dev-tools';
 import type { CodexEntry } from '../Game/types';
 import { createGameStore } from '../Game/store';
+import { GAME_STATE_VERSION } from '../Game/game.reducer';
+import { migrate } from '../Game/game.migrate';
+import { buildStateFromFixture } from '../Game/fixtures';
+import type { GameState } from '../Game/types';
+import { describeFixtures, FIXTURE_LIST_REF, resolveStateFixture } from './fixture-boot';
 import { createEventEmitter } from '../Game/events';
 import { nullAdapter } from '../Game/persistence/null.adapter';
 import { createNodeAdapter } from '../Game/persistence/node.adapter';
@@ -76,7 +81,12 @@ const codexLookup: Map<string, CodexEntry> = (() => {
     return map;
 })();
 
-async function bootstrapStore(adapter: PersistenceAdapter): Promise<GameStoreHandle> {
+/**
+ * Build the CLI store. With `initial` (a compiled state fixture) the store
+ * boots exactly that state; without it, the historical blank L1 5/5/5
+ * character (configure via the DEV menu).
+ */
+async function bootstrapStore(adapter: PersistenceAdapter, initial?: GameState): Promise<GameStoreHandle> {
     const events = createEventEmitter();
     events.onAny(emit);
     // Phase 30 unit 2 — surface newly-eligible cards after a level-up.
@@ -88,6 +98,16 @@ async function bootstrapStore(adapter: PersistenceAdapter): Promise<GameStoreHan
             log(`You can now learn ${unlocked.length} new card${unlocked.length === 1 ? '' : 's'}: ${unlocked.join(', ')}`);
         }
     });
+
+    if (initial) {
+        // A full GameState as `overrides` replaces every slice of the
+        // adapter's load / new-game base. The RNG was seeded by
+        // `buildStateFromFixture` when the fixture carries a seed.
+        const store = createGameStore(adapter, initial, events);
+        log(`\nBooted from state fixture — ${initial.player.name} L${initial.player.level} on ${initial.world.currentMap.name}/${initial.world.currentMap.currentNode}.\n`);
+        logState('bootstrap', null, store.getState(), { boot: 'fixture' });
+        return store;
+    }
 
     const player = createCharacter({
         name: 'Player',
@@ -726,15 +746,13 @@ function loadTab(store: GameStoreHandle, snapshotAdapter: PersistenceAdapter | n
         return;
     }
     const before = store.getState();
-    store.setState({
-        version:    saved.version,
-        player:     saved.player,
-        world:      saved.world,
-        quests:     saved.quests,
-        flags:      saved.flags,
-        moralMeter: saved.moralMeter,
-        rngState:   saved.rngState,
-    });
+    // Restore EVERY persisted slice (2026-09-07 — the old seven-field
+    // pick dropped codex / alignment / factions / labyrinth / consequences
+    // on load) and bring an older save up to date through `migrate` first;
+    // `currentEncounter` is transient and never saved.
+    const current = saved.version < GAME_STATE_VERSION ? migrate(saved, saved.version) : saved;
+    const { currentEncounter: _transient, ...restored } = current;
+    store.setState(restored);
     logState('load', before, store.getState());
     emit({ type: 'game:loaded', payload: { state: store.getState() } });
     log('\nGame loaded.');
@@ -934,7 +952,23 @@ export async function runGameCli(rawArgs = process.argv.slice(2)): Promise<void>
         ? createNodeAdapter(flags.saveFile)
         : null;
 
-    const store = await bootstrapStore(nullAdapter);
+    // --fixture: boot from a declarative state fixture (registry id or JSON
+    // path). `list` prints the registry and exits. A fixture's `arrive`
+    // intent maps onto `--resolve-start` so a `--route` run fires the
+    // current node's event before walking, same as the mobile boot hook.
+    let initial: GameState | undefined;
+    if (flags.fixture === FIXTURE_LIST_REF) {
+        log(`State fixtures:\n${describeFixtures()}`);
+        emit({ type: 'cli:exit', payload: { reason: 'fixture-list' } });
+        return;
+    }
+    if (flags.fixture !== undefined) {
+        const fixture = resolveStateFixture(flags.fixture);
+        if (fixture.arrive) flags.resolveStart = true;
+        initial = buildStateFromFixture(fixture);
+    }
+
+    const store = await bootstrapStore(nullAdapter, initial);
 
     if (flags.route && flags.route.length > 0) {
         await runScriptedRoute(store, flags);
