@@ -15,14 +15,14 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-08 | a3681576 | 3 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-08 | 5693d6db | 3 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-08 | fe49681e | 3 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-08 | PENDING | 3 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-08 | ba524879 | 3 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-npcs pass 3, 2026-09-08, commit PENDING]** Zero-CREATE,
+> **[adjust-npcs pass 3, 2026-09-08, commit ba524879]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — full re-audit, not a rubber stamp of pass
 > 2's findings. `git log 570cc566..HEAD -- axiomancer-mechanics/src/NPCs
 > axiomancer-mechanics/src/World/Continents` is empty (25 commits since pass
