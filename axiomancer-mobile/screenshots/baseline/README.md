@@ -15,6 +15,19 @@ One PNG per route, named after the route's stable `name` in
 | `inventory.png` | `/inventory` | `app/(tabs)/inventory/index.tsx` |
 | `exploration.png` | `/exploration` | `app/(tabs)/exploration/index.tsx` |
 | `combat-encounter.png` | `/combat-encounter` | `app/combat-encounter/index.tsx` |
+| `memoir.png` | `/memoir` | `app/(tabs)/memoir/index.tsx` |
+| `labyrinth.png` | `/labyrinth` | `app/labyrinth/index.tsx` |
+| `dialogue.png` | `/exploration` + fixture `apprentice-fv-interaction` → `/dialogue` | `app/dialogue/index.tsx` |
+| `village.png` | `/exploration` + fixture `wanderer-nf-village` → `/village` | `app/village/index.tsx` |
+| `cutscene.png` | `/exploration` + fixture `wanderer-nf-cutscene` → `/cutscene` | `app/cutscene/index.tsx` |
+
+The three fixture rows (2026-09-08) boot the app from a state fixture
+(`docs/state-fixtures.md` at the monorepo root) in a second browser
+context with dev tools forced, then wait for the gate to push the
+route; the plain rows stay unforced. Their baselines were rendered in
+the container Chromium 1194 (`SMOKE_CHROME`); the seven pre-existing
+baselines (2026-09-02) already differ under that renderer by 0.9–10%,
+so a differing run needs eyeballing, not a blind re-approve.
 
 `/combat` is intentionally not a visual-smoke baseline route while it renders
 the unseeded placeholder `THE FIELD STIRS.`. The canonical combat screenshot is

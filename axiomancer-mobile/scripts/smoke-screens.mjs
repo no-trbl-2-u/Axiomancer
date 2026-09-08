@@ -11,6 +11,7 @@
 //   exit 1  →  one or more routes differ; review + maybe approve
 //   exit 2  →  baseline missing for one or more routes (first-run / new route)
 //   exit 3  →  config / boot failure (expo export / browser / server)
+//   SMOKE_CHROME=/path/to/chrome  custom browser binary · SMOKE_REUSE_EXPORT=1  skip the export
 //
 // When a diff is real and expected, run:
 //   npm run baseline:approve
@@ -24,6 +25,7 @@ import { existsSync } from 'node:fs'
 import { resolve, dirname, join, extname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { injectMinigameSeeds } from './minigame-seed-injector.mjs'
+import { forceDevTools } from './fixture-injector.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..')
@@ -41,8 +43,17 @@ export const ROUTES = [
     { name: 'memoir', path: '/memoir' },
     // THE APORIA act select (no session on a fresh boot).
     { name: 'labyrinth', path: '/labyrinth' },
-    // `/event` is gated by `selectHasActiveEvent`; smoke skips it until
-    // a state-seed hook lands. Add it back here once the seed exists.
+    // State-gated screens (2026-09-08, docs/state-fixtures.md). These
+    // routes are pushed by `<EventGate>` off game state and bounce when
+    // there is none, so each boots from a registry fixture whose `arrive`
+    // fires the node event; `waitForPath` is the route the gate pushes.
+    // (The generic `/event` shell this comment used to wait on is
+    // unreachable today — every paced kind has a dedicated screen.)
+    // Fixture routes run in a second browser context with dev tools
+    // forced, so the plain routes above keep their unforced baselines.
+    { name: 'dialogue', path: '/exploration', fixture: 'apprentice-fv-interaction', waitForPath: '/dialogue' },
+    { name: 'village', path: '/exploration', fixture: 'wanderer-nf-village', waitForPath: '/village' },
+    { name: 'cutscene', path: '/exploration', fixture: 'wanderer-nf-cutscene', waitForPath: '/cutscene' },
 ]
 
 // 0.5% of pixels may differ before a route is flagged. Bumps catch
@@ -230,22 +241,48 @@ async function captureAndDiff({ playwright, PNG, pixelmatch }, baseUrl) {
     await mkdir(CURRENT_DIR, { recursive: true })
     await mkdir(DIFF_DIR, { recursive: true })
 
-    const browser = await playwright.chromium.launch({ headless: true })
-    const context = await browser.newContext({
+    // SMOKE_CHROME=/path/to/chrome overrides the browser binary (the other
+    // scripts/*-e2e.mjs drivers expose the same escape hatch).
+    const launchOptions = { headless: true }
+    if (process.env.SMOKE_CHROME) launchOptions.executablePath = process.env.SMOKE_CHROME
+    const browser = await playwright.chromium.launch(launchOptions)
+    const contextOptions = {
         viewport: VIEWPORT,
         deviceScaleFactor: 1,
         reducedMotion: 'reduce',
-    })
+    }
+    const context = await browser.newContext(contextOptions)
     await injectMinigameSeeds(context)
     const page = await context.newPage()
 
     const consoleErrors = []
-    page.on('console', (msg) => {
-        if (msg.type() === 'error') consoleErrors.push({ url: page.url(), text: msg.text() })
-    })
-    page.on('pageerror', (err) => {
-        consoleErrors.push({ url: page.url(), text: err.message })
-    })
+    const trackErrors = (p) => {
+        p.on('console', (msg) => {
+            if (msg.type() === 'error') consoleErrors.push({ url: p.url(), text: msg.text() })
+        })
+        p.on('pageerror', (err) => {
+            consoleErrors.push({ url: p.url(), text: err.message })
+        })
+    }
+    trackErrors(page)
+
+    // Fixture routes get their own context: dev tools must be forced for
+    // the fixture to be honoured (export builds have `__DEV__ === false`),
+    // and forcing them on the shared context would put the dev-tools row
+    // into the SELF baseline. One page per fixture route, since the id is
+    // read once at boot from an init script.
+    let fixtureContext = null
+    async function fixturePage(fixtureId) {
+        if (fixtureContext === null) {
+            fixtureContext = await browser.newContext(contextOptions)
+            await injectMinigameSeeds(fixtureContext)
+            await forceDevTools(fixtureContext)
+        }
+        const p = await fixtureContext.newPage()
+        await p.addInitScript((id) => { globalThis.__AXM_FIXTURE__ = id }, fixtureId)
+        trackErrors(p)
+        return p
+    }
 
     const matched = []
     const differing = []
@@ -253,21 +290,27 @@ async function captureAndDiff({ playwright, PNG, pixelmatch }, baseUrl) {
 
     for (const route of ROUTES) {
         const url = `${baseUrl}${route.path}`
+        const target = route.fixture ? await fixturePage(route.fixture) : page
         try {
-            await page.goto(url, { waitUntil: 'networkidle', timeout: 30_000 })
+            await target.goto(url, { waitUntil: 'networkidle', timeout: 30_000 })
+            if (route.waitForPath) {
+                await target.waitForURL((u) => u.pathname.endsWith(route.waitForPath), { timeout: 15_000 })
+            }
             // Settle fonts + any deferred layout. The 600ms is empirical:
             // long enough for the @expo-google-fonts loaders to resolve,
             // short enough to keep the suite under a minute.
-            await page.evaluate(() => document.fonts.ready)
-            await page.waitForTimeout(600)
+            await target.evaluate(() => document.fonts.ready)
+            await target.waitForTimeout(600)
         } catch (err) {
             console.error(`smoke-screens: failed to load ${route.path}: ${err.message}`)
             differing.push({ route: route.name, reason: 'load-failed', message: err.message })
+            if (target !== page) await target.close().catch(() => {})
             continue
         }
 
         const currentPath = join(CURRENT_DIR, `${route.name}.png`)
-        await page.screenshot({ path: currentPath, fullPage: false })
+        await target.screenshot({ path: currentPath, fullPage: false })
+        if (target !== page) await target.close().catch(() => {})
 
         const baselinePath = join(BASELINE_DIR, `${route.name}.png`)
         if (!existsSync(baselinePath)) {
