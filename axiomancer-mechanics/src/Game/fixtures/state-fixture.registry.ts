@@ -80,6 +80,57 @@ export const STATE_FIXTURES: readonly StateFixture[] = Object.freeze([
         world: { continent: 'coastal-continent', map: 'fishing-village', node: 'fv-3' },
         player: { currency: 0, health: 1 },
     },
+    // ── Arrival fixtures (2026-09-08) — one per state-gated screen ────────
+    // Each stands the player on a node of the named kind with `arrive`, so
+    // `/critique`'s drive, `verify:visual`, and the Playwright harnesses
+    // open the gated screen cold. Kinds per `getNodePrimaryEventKind`.
+    {
+        id: 'wanderer-nf-cutscene',
+        description: 'Wanderer (L8) on a mid-forest omen node (nf-17, cutscene); `arrive` pushes /cutscene. (Not the map start node: the exploration screen fires a start node\'s own arrival on landing, and a second resolve would bounce the screen.)',
+        seed: 'fixture-wanderer-nf-cutscene',
+        preset: 'wanderer',
+        world: { continent: 'coastal-continent', map: 'northern-forest', node: 'nf-17', completedMaps: ['fishing-village'] },
+        flags: ['combat-tutorial-done'],
+        arrive: true,
+    },
+    {
+        id: 'apprentice-fv-rest',
+        description: 'Apprentice on the first fishing-village rest node (fv-3), hurt; `arrive` starts the night-watch session → /rest.',
+        seed: 'fixture-apprentice-fv-rest',
+        preset: 'apprentice',
+        world: { continent: 'coastal-continent', map: 'fishing-village', node: 'fv-3' },
+        player: { health: 20 },
+        flags: ['combat-tutorial-done'],
+        arrive: true,
+    },
+    {
+        id: 'apprentice-fv-cache',
+        description: 'Apprentice on the first fishing-village loot-cache node (fv-11); `arrive` starts the cache session → /cache.',
+        seed: 'fixture-apprentice-fv-cache',
+        preset: 'apprentice',
+        world: { continent: 'coastal-continent', map: 'fishing-village', node: 'fv-11' },
+        flags: ['combat-tutorial-done'],
+        arrive: true,
+    },
+    {
+        id: 'wanderer-fv-blacksmith',
+        description: 'Wanderer (L8) with shillings on the fishing-village blacksmith node (fv-21); `arrive` starts the forge session → /blacksmith.',
+        seed: 'fixture-wanderer-fv-blacksmith',
+        preset: 'wanderer',
+        world: { continent: 'coastal-continent', map: 'fishing-village', node: 'fv-21' },
+        player: { currency: 180 },
+        flags: ['combat-tutorial-done', 'blacksmith-tutorial-done'],
+        arrive: true,
+    },
+    {
+        id: 'l30-caverns-hazard-arrive',
+        description: 'L30 ladder kit on the first caverns hazard node (nc-17); `arrive` starts the hazard minigame → /hazard.',
+        seed: 'fixture-l30-caverns-hazard-arrive',
+        preset: 'kid-l30',
+        world: { continent: 'northern-continent', map: 'caverns', node: 'nc-17' },
+        flags: ['combat-tutorial-done', 'hazard-tutorial-done'],
+        arrive: true,
+    },
 ]);
 
 /** Lookup by id; `undefined` when unknown. */

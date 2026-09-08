@@ -7,3 +7,5 @@
  */
 
 export { mockAlternatingRng, mockFixedRng, mockSequentialRng } from './rng';
+export { createFixtureGameStore, resolveFixture } from './fixture-store';
+export type { FixtureRef, FixtureGameStoreOptions } from './fixture-store';
