@@ -13,13 +13,115 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-08 | df4036fc | 3 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-08 | a3681576 | 3 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-07 | 76d44ef2 | 2 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-08 | 5693d6db | 3 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-07 | 9016a99f | 2 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-07 | 570cc566 | 2 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-enemies pass 3, 2026-09-08, commit 5693d6db]**
+> Zero-CREATE, zero-UPDATE, zero-REMOVE pass — full re-audit, not a rubber
+> stamp of pass 2's findings. `git log 76d44ef2..HEAD -- src/Enemy
+> axiomancer-mobile/assets/images/enemies` is empty (the 16 commits since
+> pass 2 were the cards/equipment pass-3 ticks and the state-fixtures
+> feature; nothing touched the enemy surface), so every Step-1 signal was
+> re-derived from the current tree by direct enumeration/script rather than
+> assumed stale-clean, same discipline as `/adjust-equipment` pass 3:
+> (1) orphan sweep — all 77 exported `enemy.library.ts` consts resolve into
+> `ENEMY_REGISTRY` (77/77) and all but 2 resolve into an `EnemiesByMap` pool;
+> the 2 (`Sandbag_01`, `TheIncompleteness`) are the same deliberate
+> test-fixture/impossible-ceiling exclusions pass 1/2 already found — no
+> drift; (2) deck sweep — wrote a throwaway script cross-checking every
+> `ENEMY_DECKS` entry (90 keys covering all 77 registry slugs, both flat and
+> tiered `EnemyDeckSpec` shapes) against `ENEMY_CARD_LIBRARY`'s 157 ids (all
+> resolve), the 4 distinct `effectId`s used (`debuff_mark`, `debuff_bleed`,
+> `debuff_poison`, `debuff_creeping_doom`, all present in
+> `debuffs.library.json`), and the 4 distinct `curseCardId`s (`arrears`,
+> `overheard-name`, `mouthful-of-brine`, `gnaw-marks`, all present in
+> `Cards/library/starters.cards.ts`'s curse set) — zero dead references;
+> (3) portrait sweep — 75/77 enemies carry a `portraitAsset` (same 2
+> fixtures excluded), zero collisions among the 75 values, all 75 resolve
+> 1:1 into `axiomancer-mobile/assets/images/enemies/index.ts`'s registry,
+> and all 75 required `.webp` files exist on disk — clean; (4) VITAE-band
+> sweep — recomputed the live formula (`ENEMY_VITAE_BASE=30`,
+> `ENEMY_VITAE_PER_LEVEL=8`, `ENEMY_VITAE_MULT` per difficulty) against all
+> 21 enemies that author an explicit `vitae` override: worst deviation is
+> ElderFireGiant at +25.7% (boss, L46), inside pass 1's already-established
+> ~±26% tolerance band — no new outlier; (5) aftermath-prose/voice sweep —
+> zero `thee|thou|thy|thine|ye` matches anywhere in `enemy.library.ts`
+> (case-insensitive); 45/77 enemies carry `finalBlowLines`, 32 do not — the
+> known backlog (filed pass 1, `plan/AUDIT.md` `[content]`, out of this
+> skill's scope) rather than a new instance, and the 4 enemies pass 1/2
+> created (NinthRungSpider, SporeWarden, DriftAnchor, TheAdjuster) all still
+> carry their authored prose, confirmed individually; (6) loot-table
+> sweep — all 22 distinct `drop()` ids in `enemy.library.ts` resolve in
+> `Items/consumable.library.ts`; `loot.ts` itself carries no hardcoded item
+> ids (pure weighted-roll logic) — clean.
+> Signal 1 (roster-size floor / >70% sibling overlap) is the one signal
+> that needed real re-litigation rather than a clean/dirty check, and it
+> resolved differently than a naive re-run of pass 2's own framing would
+> have: (a) **connecting-river (5) / town-across-river (4) are still the
+> two smallest raw pools**, but `plan/phases/phase_W4_connecting_river.md`
+> (the phase brief that shipped both maps) documents this as an *authored*
+> decision, not drift — decision #2: "Both maps ship smaller than the
+> W1-W3 precedent... Town Across the River is explicitly a coda location
+> (`map.library.ts`: 'Home of sweetheart'), so its smaller footprint also
+> reads as an intentional pacing choice, not a truncation"; decision #6:
+> "Enemy count: 7 new (4 connecting-river, 3 town-across-river)...
+> proportional to the smaller map footprint." Normalizing pool size against
+> each map's own node count (a check neither pass 1 nor pass 2 ran)
+> confirms the proportionality holds even after both backfills: connecting-
+> river is 5 enemies / 14 nodes (0.36 enemies/node), town-across-river is
+> 4/7 (0.57), fishing-village is 13/26 (0.50), caverns is 16/27 (0.59), and
+> northern-city — never flagged as thin by any prior pass — is actually the
+> *lowest*-density pool in the roster at 8/27 (0.30). Raw pool count without
+> a node-count denominator was the wrong comparison basis (it read cr/tar's
+> small NUMERATOR as thinness without checking whether the DENOMINATOR
+> shrank to match); by the density metric that actually predicts fight
+> repetition, cr/tar are mid-pack, not outliers. Judged: no CREATE this
+> pass — pass 1/2's two backfills already did the real work of giving both
+> maps native blood instead of pure forest re-treads (cr was 0 natives pre-
+> pass-2, now 1 of 5; tar was 0, now 1 of 4), and the remaining size gap is
+> the phase brief's own documented pacing choice. This closes the
+> standing-open item from pass 2's log ("further growth... remains open...
+> the next pass's own audit will re-find it if warranted") with a reasoned
+> NO rather than silence. (b) **A signal pass 1/2 never checked: full
+> pairwise sibling overlap across all 9 pools**, not just the two pairs
+> those passes happened to compare. It turned up four >70% pairs, all
+> involving the Aporia's three act-pools: aporia-colonnade vs
+> northern-forest 7/8 (87.5%), aporia-archive vs northern-forest 7/8
+> (87.5%), aporia-proof vs northern-forest 10/11 (90.9%), aporia-archive vs
+> caverns 6/8 (75.0%). Judged: not a CREATE-worthy finding — `enemy.
+> library.ts`'s own `EnemiesByMap` comment block states the reuse is
+> deliberate design, not an unaudited gap: "The Aporia (W-01) — three acts
+> of rising difficulty. Pools reuse the shared roster (wandering foes scale
+> to the player via the adaptive level bands); each act adds its authored
+> boss." The Aporia is a labyrinth built from the world the player has
+> already walked (Aporia = a philosophical impasse/maze of doubt, per its
+> own naming), not a new region competing for distinct native fauna the way
+> caverns/northern-city/connecting-river/town-across-river do — recycling
+> the roster at harder scaling, with one authored boss anchoring each act,
+> reads as the intended shape of a "the same halls, made worse" dungeon
+> rather than the "same three fights" staleness the signal exists to catch.
+> This has been true and stable since the Aporia shipped (W-01, predates
+> all three `/adjust-enemies` passes) without being flagged before; noting
+> and closing it here rather than leaving it undiscovered residue.
+> KB research (kb-query): not run — every consideration this pass was
+> either audit-confirmed-clean (no CREATE/UPDATE/REMOVE) or a re-litigation
+> of a structural signal resolved by in-repo documentary evidence (the W4
+> phase brief, the Aporia's own code comment) rather than new design
+> content needing genre grounding; exempt from the gate per §3 Step 2 /
+> hard rule 7 (REMOVE/no-op carve-out — no new or changed content shipped).
+> Verify: not re-run — no source file changed (`git status` clean on
+> `src/`, `axiomancer-mobile/`); HEAD's existing CI (verify-mechanics,
+> verify-mobile) is already green per the most recent runs on `main`
+> (verify-mechanics green at `df4036fc`, verify-mobile green at the last
+> commit that touched mobile source, `4cdfa6e7`) and confirmed again via
+> `npm run deploy:check` after this ledger commit lands.
+```
 
 ```
 > **[adjust-equipment pass 3, 2026-09-08, commit a3681576]**
