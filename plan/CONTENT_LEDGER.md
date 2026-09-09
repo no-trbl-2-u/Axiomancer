@@ -11,7 +11,7 @@
 
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
-| cards | `skills/adjust-cards.md` | 2026-09-09 | PENDING | 4 |
+| cards | `skills/adjust-cards.md` | 2026-09-09 | 3b092183 | 4 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-08 | a3681576 | 3 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-08 | 5693d6db | 3 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-08 | fe49681e | 3 |
@@ -22,7 +22,7 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-cards pass 4, 2026-09-09, commit PENDING]** Zero-CREATE,
+> **[adjust-cards pass 4, 2026-09-09, commit 3b092183]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — full re-audit, not a rubber stamp of pass
 > 3's findings. `git log df4036fc..HEAD -- axiomancer-mechanics/src/Cards
 > axiomancer-mechanics/src/Effects axiomancer-mechanics/src/Combat` is empty
