@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-23T09:05:51Z | slash-prompt | /march | unknown | user/ci | /march |
-| 2026-07-23T10:53:21Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-07-23T10:53:23Z | skill | digest | unknown | main | - |
 | 2026-07-23T14:39:42Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-23T14:39:44Z | skill | march | unknown | main | - |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-09T12:42:43Z | skill | iterate | claude-sonnet-5 | main | - |
 | 2026-09-09T14:32:01Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-09T14:34:01Z | subagent | general-purpose | claude-sonnet-5 | main | Score open CRITIQUE/AUDIT findings |
+| 2026-09-09T16:33:18Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-09T16:36:30Z | skill | critique | claude-sonnet-5 | main | - |

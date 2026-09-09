@@ -1,13 +1,32 @@
 # Critique log
 
-> Last pass: 2026-09-09 at commit 457d5d16
-> Pass count: 34
+> Last pass: 2026-09-09 at commit b9b5da55
+> Pass count: 35
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 35, 2026-09-09, commit b9b5da55] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5,
+> `CRITIQUE_VIEWPORT=both`), mobile (375×812) and desktop (1280×800),
+> against the full fixture-boosted screen set (title, onboarding,
+> combat-encounter preview, live combat board, exploration hub, plus
+> the six fixture-booted screens: dialogue, village, cutscene, rest,
+> hazard, late-game hub — 11 screens × 2 viewports = 22 captures, all
+> clean). Zero page errors; console errors limited to the same benign
+> `navigator.vibrate` autoplay warning seen every prior pass.
+> Zoomed-eyes check on the **LOG-toggle/stance-check-telegraph overlap**
+> row (the running MED from passes 31-34): the LOG pill now sits clear
+> of both telegraph lines ("Punishes HEART ×1.5" / "Yields to BODY
+> ×0.5 +1◆") on both viewports — the `onLayout`-measured HUD anchor
+> from commit 161bfcf3 holds; row already closed to Done above this
+> entry. The open **[LOW] dialogue — reply cards echo their label**
+> row reconfirmed unchanged at the `apprentice-fv-interaction` fixture
+> ("WHAT NEEDS DOING?" and "LEAVE HIM BE." each still doubled). No new
+> findings filed.
 
 > **[critique pass 34, 2026-09-09, commit 457d5d16] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5,
