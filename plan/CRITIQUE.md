@@ -408,41 +408,6 @@
 
 ## Pending
 
-### [MED] combat — the LOG toggle button overlaps the new stance-check telegraph text
-- pass: critique pass 31, 2026-09-04 (commit 7f6b4312)
-- viewport: desktop 1280x800 (reproduces on mobile 375x812 too, tighter)
-- auth_state: fresh save, first map encounter (Brine Hag)
-- category: visual
-- observation: commit 636f3040 (same-day) added the open "Punishes X /
-  Yields to Y" stance-check telegraph under the enemy's intent icon, plus
-  a persistent-log toggle pinned at a fixed `topInset + COMBAT_HUD_HEIGHT
-  + 8` offset (`COMBAT_HUD_HEIGHT = 148`, a constant). Both are
-  right-aligned to the same screen edge. `COMBAT_HUD_HEIGHT` was not
-  re-measured against the combined height of an active alt-win meter
-  (PLEA, visible here) plus a full two-line stance-check telegraph — with
-  both present, the HUD's actual right column runs long enough that the
-  LOG button's near-opaque pill (`zIndex: 20`, `rgba(10,8,6,0.82)`
-  background, `CombatEncounterPanel.tsx` `logToggle` style) paints over
-  the tail of the "Yields to BODY ×0.5 +1◆" line. Same bug class as the
-  already-fixed "signature rune column sat ON the dice tray" HIGH (pass
-  2026-09-03): a fixed-offset sibling anchored off an unmeasured height
-  constant, colliding with newly added dynamic content on the same edge.
-- evidence: `axiomancer-mobile/.critique-artifacts/desktop/04-combat-board.png`
-  (this pass) — the "L0G" pill sits directly over the second telegraph
-  line at the Brine Hag encounter; `CombatCombatantPane.tsx` `hud` is
-  `position: absolute, top: 0` with no fixed height, `hudRight`
-  (`alignItems: 'flex-end'`) now grows by up to 2 extra 10pt lines via
-  `IntentIcon`'s `stanceCheck` block; `CombatEncounterPanel.tsx`
-  `logToggle` anchors off the `COMBAT_HUD_HEIGHT` constant, not a
-  measured HUD height.
-- suggested fix: same fix pattern as the dice-tray row — anchor the LOG
-  toggle off a measured HUD bottom (e.g. `onLayout` on the `hud` View, as
-  the signature-column fix did with `sigTop`) instead of the fixed
-  `COMBAT_HUD_HEIGHT` constant, or raise the constant and audit all its
-  consumers (`CombatTutorialCoach` shares the same anchor and may have
-  the same exposure).
-- source: critique (unattended /march tick)
-
 ### [MED] combat — the arena's art registers are incoherent (painted foe, flat-vector dice, mono chrome)
 - pass: expo playthrough 2026-09-04 (owner-requested full-combat playtest, web export at 390x844)
 - viewport: 390x844
@@ -1900,6 +1865,52 @@ one level down, in the routing helper `onApply` calls next).
 - source: loop
 
 ## Done
+
+### [x] [MED] combat — the LOG toggle button overlaps the new stance-check telegraph text — RESOLVED 2026-09-09 (issue #292)
+- pass: critique pass 31, 2026-09-04 (commit 7f6b4312)
+- viewport: desktop 1280x800 (reproduces on mobile 375x812 too, tighter)
+- auth_state: fresh save, first map encounter (Brine Hag)
+- category: visual
+- observation: commit 636f3040 (same-day) added the open "Punishes X /
+  Yields to Y" stance-check telegraph under the enemy's intent icon, plus
+  a persistent-log toggle pinned at a fixed `topInset + COMBAT_HUD_HEIGHT
+  + 8` offset (`COMBAT_HUD_HEIGHT = 148`, a constant). Both are
+  right-aligned to the same screen edge. `COMBAT_HUD_HEIGHT` was not
+  re-measured against the combined height of an active alt-win meter
+  (PLEA, visible here) plus a full two-line stance-check telegraph — with
+  both present, the HUD's actual right column runs long enough that the
+  LOG button's near-opaque pill (`zIndex: 20`, `rgba(10,8,6,0.82)`
+  background, `CombatEncounterPanel.tsx` `logToggle` style) paints over
+  the tail of the "Yields to BODY ×0.5 +1◆" line. Same bug class as the
+  already-fixed "signature rune column sat ON the dice tray" HIGH (pass
+  2026-09-03): a fixed-offset sibling anchored off an unmeasured height
+  constant, colliding with newly added dynamic content on the same edge.
+- evidence: `axiomancer-mobile/.critique-artifacts/desktop/04-combat-board.png`
+  (this pass) — the "L0G" pill sits directly over the second telegraph
+  line at the Brine Hag encounter; `CombatCombatantPane.tsx` `hud` is
+  `position: absolute, top: 0` with no fixed height, `hudRight`
+  (`alignItems: 'flex-end'`) now grows by up to 2 extra 10pt lines via
+  `IntentIcon`'s `stanceCheck` block; `CombatEncounterPanel.tsx`
+  `logToggle` anchors off the `COMBAT_HUD_HEIGHT` constant, not a
+  measured HUD height.
+- suggested fix: same fix pattern as the dice-tray row — anchor the LOG
+  toggle off a measured HUD bottom (e.g. `onLayout` on the `hud` View, as
+  the signature-column fix did with `sigTop`) instead of the fixed
+  `COMBAT_HUD_HEIGHT` constant, or raise the constant and audit all its
+  consumers (`CombatTutorialCoach` shares the same anchor and may have
+  the same exposure).
+- resolution: `CombatCombatantPane`'s `hud` View now reports its own
+  measured height via a new `onHudLayout` callback on every layout pass.
+  `CombatBoard` threads it through (using the measurement for its own
+  HUD-clearance spacer too) and forwards it up to `CombatEncounterPanel`,
+  which now anchors both the LOG toggle and `CombatTutorialCoach` off the
+  measured value (`hudBottom ?? topInset + COMBAT_HUD_HEIGHT` fallback
+  until the first layout pass lands) instead of the static
+  `COMBAT_HUD_HEIGHT` constant — the exact fix pattern the dice-tray row
+  set. New regression test in `CombatEncounterPanel.log.test.tsx` fires a
+  220pt HUD layout event and asserts the toggle's `top` tracks it exactly
+  (not the static estimate). `axiomancer-mobile` `npm run verify` green.
+- source: critique (unattended /march tick)
 
 ### [x] [MED] combat — the defeat screen has a large dead black gap mid-page — RESOLVED 2026-09-02 (commit f6e4745e, issue #271)
 - pass: session-critic 2026-08-31 (Phase V8 closure `/critic-loop`
