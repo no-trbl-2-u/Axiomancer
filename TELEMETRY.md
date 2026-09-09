@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-23T14:39:44Z | skill | march | unknown | main | - |
-| 2026-07-23T14:42:38Z | subagent | Explore | claude-sonnet-5 | main | Locate reward-pool spell definitions |
 | 2026-07-23T14:45:05Z | subagent | Explore | claude-sonnet-5 | main | Investigate blacksmith MapEvent node gating |
 | 2026-07-23T19:54:22Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-23T19:56:35Z | subagent | general-purpose | claude-sonnet-5 | main | Score pending audit/critique findings |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-09T16:36:30Z | skill | critique | claude-sonnet-5 | main | - |
 | 2026-09-09T20:30:13Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-09T20:33:59Z | subagent | card-expert | claude-sonnet-5 | main | Run full adjust-keywords lifecycle tick |
+| 2026-09-09T22:28:08Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-09T22:28:55Z | skill | adjust-npcs | claude-sonnet-5 | main | - |

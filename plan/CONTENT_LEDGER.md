@@ -15,11 +15,77 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-09 | 9a2bc248 | 4 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-09 | 84be1db4 | 4 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-09 | 9e423a34 | 4 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-08 | ba524879 | 3 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-09 | PENDING | 4 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-npcs pass 4, 2026-09-09, commit PENDING]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — full re-audit, not a rubber stamp of pass
+> 3's findings. `git log ba524879..HEAD -- axiomancer-mechanics/src/NPCs
+> axiomancer-mechanics/src/World/Continents` is empty (the 17 commits since
+> pass 3 were entirely the cards/equipment/enemies/keywords pass-4 ticks, a
+> critique pass, two audit-fix ticks, an `/expand` pass, and a digest —
+> nothing touched the NPC/dialogue surface), so every Step-1 signal was
+> re-derived by direct enumeration against the current tree rather than
+> assumed stale-clean, same discipline as the sibling categories' own
+> pass-4 re-audits: (1) unstaged-NPC backlog — re-read `Coastal-Village/
+> maps.ts`'s `unstagedNpcs` block directly: still exactly the same 4
+> (Tide-Shopkeeper, Village Healer, Dockworker's Union Leader, Merchant's
+> Widow); re-verified each reason against current source rather than
+> trusting the prior pass's note — `isShopkeeper` still has zero mobile
+> consumers (fresh grep of `axiomancer-mobile/`, zero hits), no commit
+> since pass 3 touched `axiomancer-mobile/app/rest/`, `state/rest/`, or
+> `state/presenters/rest.engine.ts` (empty git log), and no
+> settlement-screen surface exists anywhere in `axiomancer-mobile` — all
+> four reasons still hold verbatim. (2) map-with-<2-staged-NPCs signal —
+> direct enumeration of `Northern-Continent/maps.ts`'s four `npcs:` arrays
+> reconfirms `caverns` (theDelver only), `connecting-river` (theBoatwoman
+> only), and `town-across-river` (theSweetheart only) each still carry
+> exactly 1 rostered NPC (northern-city carries 2: theGateClerk +
+> theShipwright, clearing the bar); the standing `plan/AUDIT.md`
+> `[needs-user-call]` row (filed pass 1, 2026-09-05) is unchanged and left
+> open as filed — no new evidence to re-litigate a personhood-design call
+> this autonomous tick can't make (hard rule 3). (3) dead-end dialogue
+> nodes / stale `effect` references — no source file changed since pass 3,
+> so pass 3's cross-check still holds verbatim; re-ran a fresh throwaway
+> script cross-referencing every `id:` node and `nextNodeId:` reference
+> across `Coastal-Village/npcs.ts`, `Northern-Forest/npcs.ts`, and
+> `Northern-Continent/maps.ts` (224 ids, 111 `nextNodeId` refs) — zero
+> broken links; all 9 distinct `startQuest` targets still type-check clean
+> against the live `QuestName` union (a stale target fails compilation, not
+> a silent no-op); zero `teachCard` call sites anywhere in the authored
+> NPC/map tree (only the type declaration itself). (4) legacy flat
+> `DialogueMap` — zero live usage confirmed again (`DialogueMap` only
+> appears in `src/index.ts`/`src/NPCs/index.ts`'s type re-exports, not on
+> any authored NPC). (5) spec-to-NPC gap — `specs/characters/C-01-the-
+> sophist.md` (Protas) remains correctly implemented as the Aporia's
+> act-boss enemy + Labyrinth narration, not an `NPCs`-module dialogue
+> entity — still out of this skill's scope by design; no spec file under
+> `specs/story/` or `specs/characters/` changed since pass 3 (confirmed via
+> the same empty git log range). (6) orphaned NPC — zero; re-verified all
+> 19 authored NPC consts (5 in `Northern-Continent/maps.ts`, 6 in
+> `Northern-Forest/npcs.ts`, 3 flavor NPCs in `Coastal-Village/maps.ts`, 5
+> in `Coastal-Village/npcs.ts` including the 4 unstaged ones) each still
+> resolve into exactly one map's `npcs`/`unstagedNpcs` array. KB
+> (kb-query): not run — every consideration this pass was either
+> audit-confirmed-clean (no CREATE/UPDATE) or a re-check of a standing
+> filed row, exempt from the gate per the skill's own rule (§3 Step 2 /
+> hard rule 7, REMOVE-adjacent no-op carve-out). Verify: not re-run in
+> full — no source file changed (`git status` clean on
+> `axiomancer-mechanics/src`, `axiomancer-mobile/`); ran the direct
+> confirmation set instead (`vitest run` on
+> `src/NPCs/e2e/story-npcs.engine.test.ts` 36/36,
+> `src/NPCs/e2e/dialogue.engine.test.ts` 18/18,
+> `src/World/Continents/e2e/continents.engine.test.ts` 28/28,
+> `src/World/e2e/narrative-reachability.engine.test.ts` 24/24,
+> `src/World/narrative-reachability.test.ts` 5/5,
+> `src/World/MapEvents/e2e/nf-21-nf-14-npc-staging.engine.test.ts` 4/4 —
+> 115/115 green) and confirmed HEAD's existing CI is green via
+> `npm run deploy:check`.
+```
 
 ```
 > **[adjust-keywords pass 4, 2026-09-09, commit 9e423a34]** Updated 1
