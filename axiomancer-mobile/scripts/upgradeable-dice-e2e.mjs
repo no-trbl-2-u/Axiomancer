@@ -246,7 +246,7 @@ async function assertFlagOnBoard(page, { capture }) {
     // Face states surface through a11y — at least a special or a miss face
     // should be readable somewhere on the four rolled dice.
     const dieLabels = await trayDice(page).evaluateAll((ns) => ns.map((n) => n.getAttribute('aria-label') ?? ''))
-    const faceyLabels = dieLabels.filter((l) => /BOON face|a miss|drafted|ghost|banked|cracked/i.test(l))
+    const faceyLabels = dieLabels.filter((l) => /SPECIAL face|MANA face|MISS face|CRACKED face|drafted|ghost|banked/i.test(l))
     if (faceyLabels.length === 0) note('no die a11y label named a face state this roll (labels: ' + dieLabels.join(' | ') + ')')
     else log(`step 1: ${faceyLabels.length}/${dieCount} dice name a face state in a11y`)
 
@@ -335,9 +335,12 @@ async function assertSwayCommit(page) {
     const dice = await trayDice(page).evaluateAll((ns) => ns.map((n) => {
         const id = (n.getAttribute('data-testid') ?? '').replace('combat-die-', '')
         const label = (n.getAttribute('aria-label') ?? '')
-        const color = (label.match(/^(\w+)\s+stance die/i)?.[1] ?? '').toLowerCase()
-        const usable = /available|drafted|ghost|banked|BOON face/i.test(label)
-            && !/a miss|blocked|spent|cracked/i.test(label)
+        // Spec-33 label (CombatDie `combatDieA11yLabel`): "<COLOUR> die, <FACE>
+        // face: drag onto … to power …". A usable die always says "drag onto";
+        // a dead / used one names its state instead.
+        const color = (label.match(/^(\w+)(?:\s+\(gold\))?\s+die\b/i)?.[1] ?? '').toLowerCase()
+        const usable = /drag onto/i.test(label)
+            && !/MISS face|blocked|spent|cracked|assigned|not usable/i.test(label)
         return { id, color, usable }
     }))
     const die = dice.find((d) => d.usable && d.color === 'heart') ?? dice.find((d) => d.usable && d.color === 'wild')
@@ -398,9 +401,12 @@ async function drivePowerAndMomentum(page, { capture }) {
     const readDice = async () => trayDice(page).evaluateAll((ns) => ns.map((n) => {
         const id = (n.getAttribute('data-testid') ?? '').replace('combat-die-', '')
         const label = (n.getAttribute('aria-label') ?? '')
-        const color = (label.match(/^(\w+)\s+stance die/i)?.[1] ?? '').toLowerCase()
-        const usable = /available|drafted|ghost|banked|BOON face/i.test(label)
-            && !/a miss|blocked|spent|cracked/i.test(label)
+        // Spec-33 label (CombatDie `combatDieA11yLabel`): "<COLOUR> die, <FACE>
+        // face: drag onto … to power …". A usable die always says "drag onto";
+        // a dead / used one names its state instead.
+        const color = (label.match(/^(\w+)(?:\s+\(gold\))?\s+die\b/i)?.[1] ?? '').toLowerCase()
+        const usable = /drag onto/i.test(label)
+            && !/MISS face|blocked|spent|cracked|assigned|not usable/i.test(label)
         return { id, color, usable }
     }))
     const dice = await readDice()
