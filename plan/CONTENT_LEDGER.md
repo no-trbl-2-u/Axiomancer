@@ -12,7 +12,7 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-09 | 3b092183 | 4 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-09 | PENDING | 4 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-09 | 9a2bc248 | 4 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-08 | 5693d6db | 3 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-08 | fe49681e | 3 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-08 | ba524879 | 3 |
@@ -22,7 +22,7 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-equipment pass 4, 2026-09-09, commit PENDING]** Zero-CREATE,
+> **[adjust-equipment pass 4, 2026-09-09, commit 9a2bc248]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — full re-audit, not a rubber stamp of pass
 > 3's findings. `git log a3681576..HEAD -- axiomancer-mechanics/src/Items
 > axiomancer-mechanics/src/World/MapEvents/content.ts
