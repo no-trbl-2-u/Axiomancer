@@ -842,11 +842,16 @@ export interface CombatBoardProps {
      *  exact pre-APPLY staging. Not consulted from the END PHASE auto-apply
      *  batch (never pop a picker mid-batch — that path always auto-picks). */
     onReprisalNeeded?: (uid: string, dieId: string | null, power: boolean, chosenX?: number) => void;
+    /** Reports the enemy HUD's measured bottom edge (screen-top-relative) on
+     *  every layout pass, so panel-level siblings anchored under the same HUD
+     *  (the LOG toggle, the tutorial coach) can track its real height instead
+     *  of the static `COMBAT_HUD_HEIGHT` estimate. */
+    onHudLayout?: (height: number) => void;
 }
 
 export const CombatBoard = React.memo(function CombatBoard({
     vm, drag, stagedUids, onApply, onStage, onUnstage, onDiscard, onSignature, onEndPhase, resolving = false, onInspect, onChip, onSeal, onSignatureInfo, onPlayerInspect, momentum, onMomentumInfo, fx,
-    onFateTap, onReprisalNeeded,
+    onFateTap, onReprisalNeeded, onHudLayout,
 }: CombatBoardProps) {
     const AXM = usePalette();
     const styles = useStyles();
@@ -854,6 +859,15 @@ export const CombatBoard = React.memo(function CombatBoard({
     const insets = useContext(SafeAreaInsetsContext);
     const topInset = insets?.top ?? 0;
     const bottomInset = insets?.bottom ?? 0;
+    // Measured HUD bottom (see `onHudLayout` doc above) — falls back to the
+    // static estimate until the first layout pass lands, same pattern as
+    // `sigTop` below.
+    const [hudMeasuredH, setHudMeasuredH] = useState(0);
+    const hudBottom = hudMeasuredH > 0 ? hudMeasuredH : topInset + COMBAT_HUD_HEIGHT;
+    const handleHudLayout = useCallback((h: number) => {
+        setHudMeasuredH(h);
+        onHudLayout?.(h);
+    }, [onHudLayout]);
     const { width: screenW } = useWindowDimensions();
     const playAreaRef = useRef<View | null>(null);
     const trashRef = useRef<View | null>(null);
@@ -1309,6 +1323,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                 fx={fx}
                 topInset={topInset}
                 metaLine={metaLine}
+                onHudLayout={handleHudLayout}
             />
 
             {/* interactive column */}
@@ -1317,8 +1332,10 @@ export const CombatBoard = React.memo(function CombatBoard({
                 pointerEvents="box-none"
                 onLayout={(e) => setContentH(e.nativeEvent.layout.height)}
             >
-                {/* clearance under the floating top HUD */}
-                <View style={{ height: topInset + COMBAT_HUD_HEIGHT }} pointerEvents="none" />
+                {/* clearance under the floating top HUD — the measured height
+                    once it lands, so a tall HUD (stance-check telegraph, alt-win
+                    meters) never overlaps the play region below it */}
+                <View style={{ height: hudBottom }} pointerEvents="none" />
 
                 {/* play region — an invisible drop target over the battlefield. The
                     dashed affordance appears ONLY while a card drag is live; staged

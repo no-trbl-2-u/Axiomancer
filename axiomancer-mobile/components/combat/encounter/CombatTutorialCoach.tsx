@@ -39,17 +39,23 @@ export function CombatTutorialCoach({
     vm,
     stagedCount,
     onSkip,
+    hudBottom,
 }: {
     state: CombatEncounterState;
     vm: CombatViewModel;
     /** Cards currently in the PLAY AREA — the board owns this, not the engine. */
     stagedCount: number;
     onSkip: () => void;
+    /** The enemy HUD's measured bottom edge (from `CombatBoard`'s `onHudLayout`),
+     *  screen-top-relative. Falls back to `topInset + COMBAT_HUD_HEIGHT` until
+     *  the first layout pass lands or when the caller doesn't track it. */
+    hudBottom?: number;
 }) {
     const styles = useStyles();
     // Null-safe insets (the context is null with no SafeAreaProvider, e.g. in tests).
     const insets = useContext(SafeAreaInsetsContext);
     const topInset = insets?.top ?? 0;
+    const anchor = hudBottom ?? (topInset + COMBAT_HUD_HEIGHT);
     const index = currentCombatTutorialStep(state, vm, { stagedCount });
     if (index < 0) return null;
     const step = COMBAT_TUTORIAL_STEPS[index];
@@ -58,7 +64,7 @@ export function CombatTutorialCoach({
         <Animated.View
             key={step.id}
             entering={FadeInDown.duration(240)}
-            style={[styles.root, { top: topInset + COMBAT_HUD_HEIGHT + HUD_GAP }]}
+            style={[styles.root, { top: anchor + HUD_GAP }]}
             pointerEvents="box-none"
             testID="combat-tutorial"
         >

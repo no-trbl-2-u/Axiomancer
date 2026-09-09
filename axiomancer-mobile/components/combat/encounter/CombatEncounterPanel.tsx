@@ -408,11 +408,20 @@ export function CombatEncounterPanel({
 
     // Playtest fix 2026-09-04 — the persistent combat log. `topInset` mirrors
     // CombatBoard's own null-safe read of the same context (no SafeAreaProvider
-    // in tests) so the toggle sits directly under the HUD without threading a
-    // prop through the board. The history is cheap (capped at 200 lines) and
-    // only walked off `live`, so recomputing every render is fine.
+    // in tests) so the toggle sits directly under the HUD. The history is
+    // cheap (capped at 200 lines) and only walked off `live`, so recomputing
+    // every render is fine.
     const insets = useContext(SafeAreaInsetsContext);
     const topInset = insets?.top ?? 0;
+    // Bug fix 2026-09-09 — the LOG toggle and the tutorial coach both used to
+    // anchor off the static `COMBAT_HUD_HEIGHT` estimate; a full stance-check
+    // telegraph plus an active alt-win meter grows the real HUD past it, and
+    // the LOG toggle's near-opaque pill painted over the telegraph's tail
+    // line. `CombatBoard`'s `onHudLayout` reports the HUD's real measured
+    // height on every layout pass; both siblings now anchor off that once it
+    // lands, falling back to the estimate until then.
+    const [hudBottom, setHudBottom] = useState(0);
+    const hudAnchor = hudBottom > 0 ? hudBottom : topInset + COMBAT_HUD_HEIGHT;
     const [logOpen, setLogOpen] = useState(false);
     const logHistory = useMemo(() => selectCombatLogHistory(live), [live]);
     const logScrollRef = useRef<ScrollView | null>(null);
@@ -741,6 +750,7 @@ export function CombatEncounterPanel({
                     fx={fx}
                     onFateTap={onFateTap}
                     onReprisalNeeded={onReprisalNeeded}
+                    onHudLayout={setHudBottom}
                 />
             )}
 
@@ -819,15 +829,15 @@ export function CombatEncounterPanel({
                 used to be a floating token that vanished in ~1s; this toggle
                 opens a scrollable, newest-at-the-bottom history of the whole
                 fight. Pinned top-right, directly under the HUD (mirrors
-                CombatTutorialCoach's own `topInset + COMBAT_HUD_HEIGHT`
-                placement below the same HUD). */}
+                CombatTutorialCoach's own placement below the same HUD — both
+                anchor off the measured `hudAnchor`, see above). */}
             {logAvailable && (
                 <Pressable
                     onPress={() => setLogOpen(true)}
                     testID="combat-log-toggle"
                     accessibilityRole="button"
                     accessibilityLabel={COMBAT_LOG_TOGGLE_A11Y}
-                    style={[styles.logToggle, { top: topInset + COMBAT_HUD_HEIGHT + 8 }]}
+                    style={[styles.logToggle, { top: hudAnchor + 8 }]}
                 >
                     <Text style={styles.logToggleText}>{COMBAT_LOG_TOGGLE_TEXT}</Text>
                 </Pressable>
@@ -1287,7 +1297,7 @@ export function CombatEncounterPanel({
                 <CombatTutorialPrimer onBegin={() => setPrimerDone(true)} onSkip={() => finishTutorial(true)} />
             )}
             {tutorialActive && primerDone && !showReveal && !summary && !mercy && (
-                <CombatTutorialCoach state={live} vm={vm} stagedCount={stagedUids.length} onSkip={() => finishTutorial(true)} />
+                <CombatTutorialCoach state={live} vm={vm} stagedCount={stagedUids.length} onSkip={() => finishTutorial(true)} hudBottom={hudAnchor} />
             )}
 
             {/* drag ghost — persistently mounted after the first drag; dragShown

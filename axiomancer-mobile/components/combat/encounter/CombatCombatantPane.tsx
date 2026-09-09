@@ -410,7 +410,7 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
 // ── The overlay ──────────────────────────────────────────────────────────────
 
 export const CombatCombatantPane = React.memo(function CombatCombatantPane({
-    enemy, player, onChip, fx, topInset = 0, metaLine,
+    enemy, player, onChip, fx, topInset = 0, metaLine, onHudLayout,
 }: {
     enemy: CombatEnemyPaneVM;
     player: CombatPlayerPaneVM;
@@ -420,6 +420,13 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
     topInset?: number;
     /** Micro phase/round/turn meta rendered beside the enemy name (a11y keeps the words). */
     metaLine?: string;
+    /** Reports the HUD's real rendered height (top of screen to its bottom
+     *  edge, `topInset` already included via the HUD's own padding) on every
+     *  layout pass. The stance-check telegraph + alt-win meters make this
+     *  height variable; siblings anchored off the static `COMBAT_HUD_HEIGHT`
+     *  estimate (the LOG toggle, the tutorial coach) should prefer this
+     *  measured value once it lands. */
+    onHudLayout?: (height: number) => void;
 }) {
     const AXM = usePalette();
     const styles = useStyles();
@@ -642,7 +649,12 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
             <Animated.View pointerEvents="none" style={[styles.vignette, flashStyle]} />
 
             {/* ── layer 2: top HUD ── */}
-            <View style={[styles.hud, { paddingTop: topInset + 8 }]} pointerEvents="box-none">
+            <View
+                style={[styles.hud, { paddingTop: topInset + 8 }]}
+                pointerEvents="box-none"
+                onLayout={(e) => onHudLayout?.(e.nativeEvent.layout.height)}
+                testID="combat-hud"
+            >
                 <View style={styles.hudNameRow} pointerEvents="box-none">
                     <Text style={styles.enemyName} numberOfLines={1}>{enemy.name}</Text>
                     {metaLine ? <Text style={styles.hudMeta} allowFontScaling={false}>{metaLine}</Text> : null}

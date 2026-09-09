@@ -12,9 +12,11 @@
 
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 import { describe, expect, it, jest } from '@jest/globals';
 
 import { CombatEncounterPanel } from '@/components/combat/encounter/CombatEncounterPanel';
+import { COMBAT_HUD_HEIGHT } from '@/components/combat/encounter/CombatCombatantPane';
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
@@ -66,5 +68,26 @@ describe('CombatEncounterPanel — combat log toggle', () => {
         expect(screen.queryByTestId('combat-log')).toBeNull();
         // The toggle itself survives closing the sheet — it can be reopened.
         expect(screen.getByTestId('combat-log-toggle')).toBeTruthy();
+    });
+
+    it('tracks the HUD\'s real measured height instead of the static estimate (bug fix 2026-09-09)', () => {
+        mount();
+        enter();
+
+        // No SafeAreaProvider in tests → topInset 0 → falls back to the estimate.
+        const initial = StyleSheet.flatten(screen.getByTestId('combat-log-toggle').props.style) as Record<string, unknown>;
+        expect(initial.top).toBe(COMBAT_HUD_HEIGHT + 8);
+
+        // A stance-check telegraph + an active alt-win meter can grow the HUD
+        // well past the static estimate — simulate that layout pass.
+        act(() => {
+            fireEvent(screen.getByTestId('combat-hud'), 'layout', {
+                nativeEvent: { layout: { x: 0, y: 0, width: 400, height: 220 } },
+            });
+        });
+
+        const grown = StyleSheet.flatten(screen.getByTestId('combat-log-toggle').props.style) as Record<string, unknown>;
+        expect(grown.top).toBe(228);
+        expect(grown.top).not.toBe(initial.top);
     });
 });
