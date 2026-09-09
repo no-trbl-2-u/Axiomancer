@@ -161,6 +161,16 @@
   still unshipped. Raising impact to 6 (a second consecutive red night
   on the same known-broken guard; ease unchanged at 8 — still a
   same-file regex port). Revised score: impact 6 x ease 8 / 10 = 4.8.
+- update (digest 2026-09-09): still red, same `SWAY-commit guard: no
+  usable heart/wild die in the opening tray this seed` failure at the
+  same step; every other leg (hazard, combat-encounter, encounter-
+  routing, exploration/combat round-trip) still passes clean and the
+  pipeline still aborts before `combat-round-e2e` (MODE=both) runs. No
+  commit touched `scripts/upgradeable-dice-e2e.mjs` in `5ff070d7..HEAD`
+  (confirmed via `git log`), so this is the same unshipped fix, not a
+  third regression — three consecutive dated digests now (09-05, 09-07,
+  09-09) with no `/march` tick picking up an unowned `[debt]` row. Score
+  unchanged at impact 6 x ease 8 / 10 = 4.8.
 
 ### [loop-call] No mid/late equipment progression — 8 relics are 1:1-locked to 8 signatures, 3 accessory kinds have zero live relics (2026-09-04)
 - category: design residue (found during `/adjust-equipment` pass 1's
