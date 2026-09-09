@@ -14,12 +14,89 @@
 | cards | `skills/adjust-cards.md` | 2026-09-09 | 3b092183 | 4 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-09 | 9a2bc248 | 4 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-09 | 84be1db4 | 4 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-08 | fe49681e | 3 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-09 | PENDING | 4 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-08 | ba524879 | 3 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-keywords pass 4, 2026-09-09, commit PENDING]** Updated 1
+> (stale comment), zero-CREATE, zero-REMOVE pass — full re-audit, not a
+> rubber stamp of pass 3's findings. `git log fe49681e..HEAD --
+> axiomancer-mechanics/src/Cards axiomancer-mechanics/src/Effects
+> axiomancer-mechanics/src/Combat axiomancer-mechanics/docs/keyword-atlas.md
+> docs/retheme-map.json axiomancer-mobile/state/combat/keywords.ts
+> axiomancer-card-editor/src/data/mechanics.ts` is empty (the 17 commits
+> since pass 3 were entirely the cards/equipment/enemies pass-4 ticks, the
+> npcs pass-3 ledger tick, two unrelated `/critique`+`/audit` fixes, and an
+> `/expand` digest — nothing touched the keyword-registry surface), so every
+> Step-1 signal was re-derived by direct enumeration against the current
+> tree rather than assumed stale-clean, same discipline as the sibling
+> categories' own pass-4 re-audits: (1) row-count parity — `axio_keywords`
+> still returns exactly 68 rows (unchanged from pass 3, confirmed via a
+> fresh call, not a cached number) and `axio_overview` confirms the same
+> 128-card library pass-4 `/adjust-cards` counted; (2) carrier-count sweep —
+> re-ran a fresh `grep -o "kind: '[a-z_]*'"` across all 9
+> `src/Cards/library/*.cards.ts` modules for every live `kind:` literal (not
+> trusting pass 3's cached counts): CHAIN/OMEN/opening(AMBUSH)/finale
+> (FINALE)/rupture/turnabout all still sit at exactly 2 carriers each, no
+> regression below the atlas's own "≥2 cards or ≥2 enemies" floor; `reap`,
+> `bank_spent_die`, `grant_pip`, `reroll_spent`, `consume_affliction`,
+> `convert_dots`, `spend_premises` each still sit at 1 (all already
+> classified in `KINDS_WITHOUT_MECHANIC_KEYWORD` as sharing a healthy
+> umbrella keyword or exempt card-local one-offs — no new drift); the 9
+> die-gear/card-local zero-count kinds from pass 3 remain zero-count and
+> exempt. (3) loop-call closure re-check — `plan/AUDIT.md`'s AMBUSH/FINALE
+> row is `[x]`-RESOLVED via `/adjust-cards` pass 3 (`df4036fc`) and stays
+> resolved (2 carriers each, confirmed under signal 2 above); no other open
+> `[loop-call]`/`[needs-user-call]` row is filed against this category. (4)
+> "Known drift" section re-checked against current source, not assumed
+> accurate: POISON/BLEED/DOOM `damagePerRound` in `debuffs.library.json`
+> are still 2/3/1 (the overhaul's §5.2 x3-4 rescale has not landed) and
+> RELENT's resolve threshold (`CAPITULATE_RESOLVE_FRACTION = 0.35`,
+> `CAPITULATE_MIN = 10` in `src/Combat/effects.ts`) still floors at 10, not
+> the overhaul's §5.4 "min 20" — both re-confirmed still accurate and still
+> engine-constant/effects-data rescales out of this skill's card-shaped
+> scope (per its own handoff boundary), left untouched matching pass 1-3's
+> judgment, not re-filed. (5) a genuine new finding, NOT flagged by any
+> prior pass — a stale keyword-mapping comment: `axiomancer-mobile/
+> state/combat/keywords.ts`'s `MECHANIC_KEYWORD` module doc (written
+> 2026-07-11, phase 29) claimed `conjure_card` was "DELETED (CONJURE
+> retired — zero library cards)". That was true when written, but THE BIG
+> NUMBERS REWRITE (2026-09-02, commit `ed6b1be3`) authored Grave Goods
+> (`grave.cards.ts`) carrying `{ kind: 'conjure_card', cardId: 'ht-cinder' }`
+> — a real, live, shipped library card — without the comment ever being
+> updated, and three prior `/adjust-keywords` passes (1, 2, 3) missed it.
+> Verified this is NOT a player-facing bug: `combat.cards.ts`'s
+> `mechanicText` has no `case 'conjure_card':` (falls to `default: return
+> null`), but the card's authored `paidSummary` already describes the
+> effect in plain prose ("Conjure a Cinder into your hand.", no ALL-CAPS
+> word), so nothing prints an undefined badge and
+> `paid-summary-honesty.engine.test.ts` stays green (no generated numbers
+> to reconcile). `conjure_card` is also already correctly listed in
+> `axiomancer-mobile/state/combat/__tests__/keywords.test.ts`'s
+> `KINDS_WITHOUT_MECHANIC_KEYWORD` under the accurate "atlas's own ≥2-cards
+> discipline" reasoning (that file was never wrong) — only the JSDoc prose
+> in `keywords.ts` itself carried the stale "zero library cards" claim.
+> Fixed the comment to state the current, accurate carrier count (1) and
+> the current, accurate reason it stays unbadged (below the ≥2 floor, not
+> "zero cards"), dated and attributed to this pass. No semantics, no test,
+> no atlas-row change — CONJURE was never a registered keyword before or
+> after this fix (phase 29 retired it as a badge before the atlas's current
+> structure existed, so there is no atlas "Retired" entry to add). Exempt
+> from the KB research gate as a pure comment-accuracy fix, no semantics
+> changed — same carve-out pass 2 used for the RUPTURE gloss fix. KB
+> research (kb-query): not otherwise run this pass — every other
+> consideration was audit-confirmed-clean (no CREATE/UPDATE beyond the
+> exempt comment fix), exempt per skill §3 Step 2 (REMOVE/no-op carve-out).
+> Verify: green — `npm run verify --workspace axiomancer-mechanics`
+> (212/212 files, 3400 tests + build), `npm run verify --workspace
+> axiomancer-mobile` (lint/typecheck/jest all green), `npm run type-check
+> --workspace axiomancer-card-editor` (clean), root `npm test` 123/123 incl.
+> `content-drift.test.mjs`.
+```
 
 ```
 > **[adjust-enemies pass 4, 2026-09-09, commit 84be1db4]** Zero-CREATE,

@@ -124,8 +124,15 @@ const VERB_KEYWORD: Record<string, string> = {
  * CONSUME). `reprise`→Recall, `extend_dots`/`boost_all_dots`→Prolong
  * (renames). `replay_last`→Echo mapping DELETED (ouroboros is a 1-of rare;
  * `mechanicText`'s own case already gives it full descriptive text — no
- * keyword badge needed). `conjure_card` DELETED (CONJURE retired — zero
- * library cards). `siphon` PROMOTED to a real keyword (was raw lowercase
+ * keyword badge needed). `conjure_card` has no mapping — CONJURE was never
+ * re-registered as a badge, and THE BIG NUMBERS REWRITE (2026-09-02) gave it
+ * a second life via Grave Goods (`grave.cards.ts`) without reviving the
+ * word: 1 live library carrier as of 2026-09-09 (`/adjust-keywords` pass 4
+ * re-audit corrected this comment's stale "zero library cards" claim, dated
+ * to phase 29 and never updated when Grave Goods shipped), still below the
+ * atlas's own ≥2-carrier discipline, so it stays plain rules text (the face
+ * prints "Conjure a Cinder into your hand.", no ALL-CAPS word to badge).
+ * `siphon` PROMOTED to a real keyword (was raw lowercase
  * text with no gloss). `convert_dots`→Curdle mapping DELETED (2026-09-05
  * `/adjust-keywords` pass 1: CURDLE's sole carrier fell below the atlas's
  * own ≥2-carrier discipline; demoted to plain rules text, same shape as
