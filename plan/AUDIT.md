@@ -171,6 +171,33 @@
   third regression — three consecutive dated digests now (09-05, 09-07,
   09-09) with no `/march` tick picking up an unowned `[debt]` row. Score
   unchanged at impact 6 x ease 8 / 10 = 4.8.
+- **resolution, part (b) only (2026-09-09, commit `bfa80bae`, `/iterate`
+  via `/march`):** ported `combat-round-e2e.mjs`'s migrated
+  `^(\w+)(?:\s+\(gold\))?\s+die\b` color regex + `drag onto`-presence
+  usability check into all three named sites in
+  `scripts/upgradeable-dice-e2e.mjs` (~249's face-state presence check,
+  ~338-340's `assertSwayCommit`, ~401-403's `readDice`). Verified locally:
+  `npm run e2e:upgradeable-dice` now runs ALL PASS end to end
+  (`assertSwayCommit` commits SWAY 0 → 8 as expected); `npm run verify
+  --workspace axiomancer-mobile` green. The nightly `e2e:minigames` red
+  gate this row caused should clear on the next digest. **Part (a) —
+  `RollingDie.tsx` forwarding only `die/size/dimmed` to `CombatDie`, so
+  the flag-on tumbling tray die still speaks the stock
+  `SPECIAL_CONVICTION_DEFAULT` payload instead of the assigned
+  gear-scaled value — is untouched and still open.** Retitling/rescoring
+  below to reflect (a) as the sole remaining scope.
+
+### [debt] Flag-on tumbling tray die (`RollingDie`) speaks the stock Conviction payload, not the assigned gear-scaled value
+- category: mobile evidence residue (remaining half of the row above,
+  split 2026-09-09 after (b) shipped)
+- detail: `components/combat/encounter/RollingDie.tsx` forwards only
+  `die/size/dimmed` to `CombatDie`, so a screen-reader user hears "2
+  Conviction" on a die whose gear slot actually pays more — the a11y
+  label never carries the real `specialConviction` value on this
+  surface, unlike the (now-fixed) static tray die.
+- score: impact 3 x ease 6 / 10 = 1.8 (narrow surface — one screen-reader
+  wording gap on the flag-on tumble animation, not a functional or CI
+  break; straightforward prop-forwarding fix once picked up)
 
 ### [loop-call] No mid/late equipment progression — 8 relics are 1:1-locked to 8 signatures, 3 accessory kinds have zero live relics (2026-09-04)
 - category: design residue (found during `/adjust-equipment` pass 1's
