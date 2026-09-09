@@ -7,7 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-21T09:08:25Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-21T09:09:22Z | skill | expand | claude-sonnet-5 | main | - |
 | 2026-07-21T10:51:11Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-07-21T10:51:13Z | skill | digest | unknown | main | - |
@@ -407,3 +406,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-09T01:07:06Z | skill | critique | claude-sonnet-5 | main | - |
 | 2026-09-09T04:34:43Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-09T04:38:31Z | subagent | card-expert | claude-sonnet-5 | main | Run adjust-cards pass 4 end-to-end |
+| 2026-09-09T06:46:15Z | slash-prompt | /march | unknown | user/ci | /march |

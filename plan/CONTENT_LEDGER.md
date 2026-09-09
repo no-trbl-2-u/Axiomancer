@@ -12,7 +12,7 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-09 | 3b092183 | 4 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-08 | a3681576 | 3 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-09 | PENDING | 4 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-08 | 5693d6db | 3 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-08 | fe49681e | 3 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-08 | ba524879 | 3 |
@@ -22,6 +22,44 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
+> **[adjust-equipment pass 4, 2026-09-09, commit PENDING]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — full re-audit, not a rubber stamp of pass
+> 3's findings. `git log a3681576..HEAD -- axiomancer-mechanics/src/Items
+> axiomancer-mechanics/src/World/MapEvents/content.ts
+> axiomancer-mechanics/src/Combat/combat.encounter.types.ts
+> axiomancer-mechanics/src/Effects` is empty (the 19 commits since pass 3
+> were entirely the cards/enemies/keywords/npcs pass-3 ticks, a
+> fixture-gallery feature, and unrelated merges — nothing touched the
+> equipment/consumable/shop/signature surface), so every Step-1 signal was
+> re-derived against the current tree rather than assumed stale-clean, same
+> discipline as the sibling categories' own re-audits: (1) dominated relics
+> — all 8 re-checked directly off `relic.library.ts` (2 weapons/body+2, 2
+> armor/maxHp+5, 4 accessories split mind+2/heart+2), same-slot pairs share
+> identical stat magnitude and differ only by `grantsSignature`, no
+> strictly-dominated pair; (2) `grantsSignature` drift — all 8 relic values
+> diffed against the live `SignatureSkillId` union in
+> `combat.encounter.types.ts` (8 members, 1:1 match, no rename/removal);
+> (3) dead consumable `effectId`s — re-extracted all 11 non-heal-only ids
+> from `consumable.library.ts` and checked each against
+> `buffs.library.json`/`debuffs.library.json` by id, all 11 resolve; (4)
+> shop-pool / reward-table coverage — re-enumerated all 6 `shop.wares`
+> blocks in `World/MapEvents/content.ts`: still exactly 8/22 consumables
+> shop-stocked (`minor-healing-potion`, `healing-potion`, `antidote`,
+> `clarity-serum`, `philosopher-tea`, `void-essence`, `body-elixir`,
+> `focus-vial`), the other 14 still reachable via `rollCacheReward`'s
+> uniform draw over the full `consumableLibrary` (confirmed the roller
+> still imports the whole library, no allow-list), so none is
+> acquirable-nowhere; (5) `AccessoryKind` gap — head/hands/feet remain at
+> zero live relics, same standing `[loop-call]` filed 2026-09-04
+> (`plan/AUDIT.md`) — still an owner/mechanics-expert call (a 9th
+> signature skill needs designing first, and the lean relic shape's own
+> identity rule — `grantsSignature !== undefined` — rules out a stat-only
+> accessory as a workaround), no new development against it this pass. KB
+> research: not run — every consideration this pass was audit-confirmed-
+> clean (no CREATE/UPDATE), exempt from the gate per §3 Step 2 (REMOVE/
+> no-op carve-out). Verify: not re-run — no source file changed; HEAD's
+> existing green (mechanics + mobile) stands.
+
 > **[adjust-cards pass 4, 2026-09-09, commit 3b092183]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — full re-audit, not a rubber stamp of pass
 > 3's findings. `git log df4036fc..HEAD -- axiomancer-mechanics/src/Cards
