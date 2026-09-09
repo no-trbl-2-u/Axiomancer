@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-20T20:05:03Z | subagent | Explore | claude-sonnet-5 | main | Survey juice/animation call sites and precedents |
-| 2026-07-21T03:54:07Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-21T03:55:12Z | subagent | Explore | claude-sonnet-5 | main | Research GLYPHS pilot phase 33d design context |
 | 2026-07-21T04:04:40Z | subagent | card-expert | claude-sonnet-5 | main | Implement GLYPHS pilot phase 33d |
 | 2026-07-21T09:08:25Z | slash-prompt | /march | unknown | user/ci | /march |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-08T12:44:23Z | subagent | card-expert | claude-sonnet-5 | main | Run adjust-keywords pass 3 end-to-end |
 | 2026-09-08T20:29:45Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-08T20:33:08Z | skill | adjust-npcs | claude-sonnet-5 | main | - |
+| 2026-09-09T01:03:49Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-09T01:07:06Z | skill | critique | claude-sonnet-5 | main | - |

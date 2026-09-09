@@ -1,13 +1,37 @@
 # Critique log
 
-> Last pass: 2026-09-07 at commit f7c7aa50
-> Pass count: 33
+> Last pass: 2026-09-09 at commit 457d5d16
+> Pass count: 34
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 34, 2026-09-09, commit 457d5d16] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5,
+> `CRITIQUE_VIEWPORT=both`), mobile (375×812) and desktop (1280×800),
+> against the full fixture-boosted screen set (title, onboarding,
+> combat-encounter preview, live combat board, exploration hub, plus
+> the six fixture-booted screens: dialogue, village, cutscene, rest,
+> hazard, late-game hub — 11 screens × 2 viewports = 22 captures, all
+> clean). Zero page errors; console errors limited to the same benign
+> `navigator.vibrate` autoplay warning seen every prior pass. The open
+> **[MED] LOG-toggle/stance-check-telegraph overlap** row reconfirmed
+> on mobile exactly as before (LOG pill over the "Punishes HEART ×1.5"
+> line, same `COMBAT_HUD_HEIGHT` fixed-anchor cause); desktop at 1280
+> did not clip this pass. The open **[LOW] dialogue — reply cards echo
+> their label** row reconfirmed at the new `apprentice-fv-interaction`
+> fixture, both viewports ("WHAT NEEDS DOING?" and "LEAVE HIM BE." each
+> doubled). Also newly checked this pass: the hazard danger-card
+> (`l30-caverns-hazard-arrive` fixture) — small centered panel on a
+> dark scrim with a minimalist SVG silhouette vignette. Read
+> `HazardIntroOverlay.tsx`/`danger-art.tsx` before flagging: both the
+> modal framing and the silhouette art style are deliberate, documented
+> choices (a "sealed, non-dismissible panel" over "pure silhouette work
+> in the AXM palette"), not a placeholder or layout defect — no finding
+> filed for it. No new findings filed.
 
 > **[critique pass 33, 2026-09-07, commit f7c7aa50] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5,
