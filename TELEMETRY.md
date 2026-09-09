@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-21T03:55:12Z | subagent | Explore | claude-sonnet-5 | main | Research GLYPHS pilot phase 33d design context |
-| 2026-07-21T04:04:40Z | subagent | card-expert | claude-sonnet-5 | main | Implement GLYPHS pilot phase 33d |
 | 2026-07-21T09:08:25Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-21T09:09:22Z | skill | expand | claude-sonnet-5 | main | - |
 | 2026-07-21T10:51:11Z | slash-prompt | /digest | unknown | user/ci | /digest |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-08T20:33:08Z | skill | adjust-npcs | claude-sonnet-5 | main | - |
 | 2026-09-09T01:03:49Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-09T01:07:06Z | skill | critique | claude-sonnet-5 | main | - |
+| 2026-09-09T04:34:43Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-09T04:38:31Z | subagent | card-expert | claude-sonnet-5 | main | Run adjust-cards pass 4 end-to-end |

@@ -11,7 +11,7 @@
 
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
-| cards | `skills/adjust-cards.md` | 2026-09-08 | df4036fc | 3 |
+| cards | `skills/adjust-cards.md` | 2026-09-09 | PENDING | 4 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-08 | a3681576 | 3 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-08 | 5693d6db | 3 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-08 | fe49681e | 3 |
@@ -20,6 +20,67 @@
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-cards pass 4, 2026-09-09, commit PENDING]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — full re-audit, not a rubber stamp of pass
+> 3's findings. `git log df4036fc..HEAD -- axiomancer-mechanics/src/Cards
+> axiomancer-mechanics/src/Effects axiomancer-mechanics/src/Combat` is empty
+> (19 commits since pass 3 were entirely the equipment/enemies/keywords/npcs
+> pass-3 ticks, a fixture-gallery feature, and unrelated merges — nothing
+> touched the card/effect/combat surface), so every Step-1 signal was
+> re-derived against the current tree rather than assumed stale-clean, same
+> discipline as the sibling categories' pass-3 re-audits: (1) reachability —
+> ran `combat-playtest.card-coverage.sim.test.ts` directly: 123/123 playable
+> cards (the 128-card `cardLibrary` minus the 5 enemy-injected curses) still
+> fire in at least one of the three fallback seeds, so no dead-card candidate;
+> (2) near-duplicates — wrote a fresh same-(theme,rank,philosophicalAspect)
+> collision scan over the whole live library via `getCardById`'s own
+> `cardLibrary` export (not just the 4 modules pass 3 hand-checked), grouping
+> every non-starter/relic/curse card and diffing `specialMechanics` kind sets
+> per group: ~30 same-key groups found, all but two differed in kind
+> composition (deliberate verb-family reuse, same shape pass 3 already
+> judged non-actionable); the two identical-kind-set collisions both resolve
+> to DOCUMENTED design, not accidental duplication — `thin-hymn` (Threadbare
+> Office starter, `starters.cards.ts`) vs `alms-of-breath` (choir's live
+> Ash-rank card) share `sway`+`rider` because `starters.cards.ts`'s own
+> header names itself "the AUTHORING TEMPLATE for the six theme modules" that
+> deliberately echoes each theme's rank-1 verb at whisper volume; and
+> `the-last-assize` (debt's rank-6 capstone) vs `the-vein-called-in` (debt's
+> apocrypha entry) share `recoil`+`deal`+`wrath`+`overkill` because
+> `apocrypha.cards.ts`'s header states its twelve cards are explicitly "not
+> the theme capstones... each one takes its theme's axis one turn past the
+> point where the axis was still safe to carry" (20/70/5/per-5 vs
+> 30/90/8/per-3+healPct — the escalation is the point); (3) pricing sanity +
+> paid-summary/preview-truth honesty — `pricing.engine.test.ts` (251),
+> `paid-summary-honesty.engine.test.ts` (4), `preview-truth.engine.test.ts`
+> (10), `curated-library.engine.test.ts` (14, the FREE-line law) all green,
+> no drift; (4) scale-ladder drift — summed every card's `deal` amount×hits
+> per rank and spot-checked every below-band outlier by hand: all resolve to
+> the documented "uncapped payoff prints its floor only" pattern already
+> called out in `rot.cards.ts`'s and `apocrypha.cards.ts`'s own headers
+> (`communion-of-the-worm`'s printed 30 is a RUPTURE ALL/SIPHON detonator
+> documented at 150-250 fed; `the-feast-of-all-corruption`'s printed 20 is a
+> self-fed POISON/FESTER/PROLONG/RUPTURE ALL chain documented at 200-400
+> fed) — no card is quietly small, every low print is a fed payoff by
+> design; (5) aspect-thirds — re-counted `philosophicalAspect` per theme
+> module directly (rot 6/5/5, debt 5/6/5, grave 6/5/5, vigil 5/6/5, trial
+> 7/7/6, choir 5/6/5 body/heart/mind) — all within 1 card of exact thirds,
+> `deck-presets.engine.test.ts`'s pinned 5/5/5 preset law still green, no
+> theme starved of raw material. Standing loop-calls re-checked, not
+> re-litigated: AMBUSH/FINALE now both show 2 card carriers
+> (`the-door-comes-down-first`, `nothing-further-your-honour` from pass 3
+> confirmed still present) — the routing row stays `[x]`-resolved; the
+> 19-orphaned-`zoneHas`-hooks and `the-sextons-count` TWIN loop-calls
+> (`plan/AUDIT.md`, filed pass 1, 2026-09-04) remain open and
+> mechanics-expert-owned — no new development against either this pass. KB
+> research: not run — every consideration this pass was audit-confirmed-clean
+> (no CREATE/UPDATE), exempt from the gate per §3 Step 2 (REMOVE/no-op
+> carve-out). Verify: green (mechanics 212/212 files · 3400 tests + build;
+> mobile lint/typecheck/jest all green including the new fixture-gallery
+> suites; card-editor type-check clean); `npm run deploy:check` confirms
+> HEAD's CI green after the ledger commit lands.
+```
 
 ```
 > **[adjust-npcs pass 3, 2026-09-08, commit ba524879]** Zero-CREATE,
