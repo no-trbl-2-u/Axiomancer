@@ -859,14 +859,76 @@ const theHerald: NPC = {
     dialogueTree: heraldTree,
 };
 
+// The Ribbon-Picker works the wall where the gate's refused petitions pile
+// up — the underside of The Herald's ledger. Where the Herald checks a
+// ribbon IN, she is what happens to one after it's cut loose: she doesn't
+// gate anything, she salvages what the gate already spent. Homed at cap-5
+// (the gathering node, "Refused petitions pile up against the wall") as a
+// second weighted `MapEventPoolEntry` alongside the existing gathering
+// payload (`MapEvents/content.ts`'s `capRibbonScraps`) rather than a new
+// node — a minor, occasional voice, not a second guaranteed singleton.
+const ribbonPickerTree: DialogueTree = {
+    id: 'the-ribbon-picker',
+    rootId: 'greet',
+    nodes: {
+        greet: {
+            id: 'greet',
+            text: "A woman sits at the base of the wall, sorting ribbons from a heap nobody claims twice. She doesn't look up. \"Every color gets cut loose eventually. I keep what's left of it.\"",
+            choices: [
+                {
+                    text: "What do you do with them?",
+                    nextNodeId: 'the_unmaking',
+                },
+                {
+                    text: "Sell me one.",
+                    nextNodeId: 'the_trade',
+                },
+                {
+                    text: "Walk on.",
+                    nextNodeId: undefined,
+                },
+                {
+                    // Reads tar-4's `sweetheart-was-nominated` flag, set in
+                    // town-across-river before this map — chronologically
+                    // earlier, the same flag capCourtConvenes reads at cap-8.
+                    // Placed LAST per the index-stability convention.
+                    text: "(One color in the pile stops you.)",
+                    nextNodeId: 'recognized',
+                    requires: { flag: 'sweetheart-was-nominated' },
+                },
+            ],
+        },
+        the_unmaking: {
+            id: 'the_unmaking',
+            text: "\"Unpick the thread, sell it plain. A ribbon only means something tied on. Loose, it's just string — and string sells the same regardless of what color lost.\"",
+        },
+        the_trade: {
+            id: 'the_trade',
+            text: "\"Not for sale. Not this pile.\" She doesn't look up from the sorting. \"You want a ribbon, earn one at the gate. Mine are the ones the gate already spent.\"",
+        },
+        recognized: {
+            id: 'recognized',
+            text: "She lifts a ribbon the same color as the one you're thinking of, turns it once in the light, and sets it back on the pile without a word. Some colors she doesn't need to ask about.",
+        },
+    },
+};
+
+const theRibbonPicker: NPC = {
+    name: 'The Ribbon-Picker',
+    description: 'Sorts the gate\'s refused ribbons into thread. Not a gatekeeper — what a gatekeeper leaves behind.',
+    dialogueTree: ribbonPickerTree,
+};
+
 // ─── Map definition ───────────────────────────────────────────────────────────
 //
 // Six columns: the arrival, The Herald (a singleton so the capital's first
 // face is on every route — the fv-2/nc-2/cr-2/ncy-2 precedent), a 3-lane
-// column (hazard / rest / gathering), a 2-lane column (market / loot-cache),
-// the court narration (singleton — the payoff reads flags planted at cr-9
-// and tar-4), and The Factor (singleton — the climax). No door onward yet
-// (the tar-6/nc-25-pre-W3 pattern): the next continent is not shipped.
+// column (hazard / rest / gathering — The Ribbon-Picker rides the
+// gathering lane as an occasional second voice, Phase adjust-npcs pass 5),
+// a 2-lane column (market / loot-cache), the court narration (singleton —
+// the payoff reads flags planted at cr-9 and tar-4), and The Factor
+// (singleton — the climax). No door onward yet (the tar-6/nc-25-pre-W3
+// pattern): the next continent is not shipped.
 
 const theCapital: MapDefinition = {
     name: 'the-capital',
@@ -895,7 +957,7 @@ const theCapital: MapDefinition = {
         // ── c5 — The Factor. The climax — no door onward yet. ──────────
         { id: 'cap-9', location: [5, 0], connectedNodes: [] },
     ],
-    npcs: [theHerald],
+    npcs: [theHerald, theRibbonPicker],
     enemies: [],
     uniqueEvents: [],
     quests: [],

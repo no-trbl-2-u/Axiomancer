@@ -15,11 +15,130 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-10 | 2b02ff60 | 5 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-10 | ce6e6a60 | 5 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-10 | 17b38058 | 5 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-09 | 6b365d01 | 4 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-10 | PENDING | 5 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-npcs pass 5, 2026-09-10, commit PENDING]** One CREATE (The
+> Ribbon-Picker, staged on The Capital), zero-UPDATE, zero-REMOVE. Unlike
+> the sibling categories' zero-action pass-5 re-audits, this was NOT a
+> stale-clean surface: `git log 6b365d01..HEAD --
+> axiomancer-mechanics/src/NPCs axiomancer-mechanics/src/World/Continents`
+> returns exactly one commit, `f56fa198` ("ship The Capital, map 5 of the
+> northern continent — Phase W5") — real new territory, not the
+> cards/equipment/enemies/keywords pass-5 ticks/audit-fixes/`/expand` pass
+> that filled the other 14 of the 15 intervening commits. Re-audited every
+> Step-1 signal directly against current source before deciding what was
+> new vs. standing: (1) **the live finding** — The Capital
+> (`Northern-Continent/maps.ts`'s `theCapital`) staged only `theHerald`
+> despite being a 9-node, 6-column map (arrival / Herald singleton / a
+> 3-lane hazard-rest-gathering column / a 2-lane market-loot-cache column /
+> court-convenes singleton / The Factor climax singleton) — the Step-1
+> "map with fewer than 2 staged NPCs → CREATE" signal, confirmed by direct
+> read of the `npcs: [theHerald]` array, not inferred from the phase
+> brief. Confirmed "The Factor" at `cap-9` is `capTheFactorBoss`, an
+> `encounter`-kind enemy pool reusing `northern-city`'s boss (per the
+> map's own header comment and a direct grep of `MapEvents/content.ts`),
+> not a dialogue NPC — correctly out of this signal's scope. (2) standing
+> `unstagedNpcs` backlog (`Coastal-Village/maps.ts`) — re-verified, not
+> assumed: still exactly the same 4 (Tide-Shopkeeper, Village Healer,
+> Dockworker's Union Leader, Merchant's Widow); confirmed each is present
+> in the map's `npcs:` array (so `resolveInteraction` could find them by
+> name) but that NONE of the four has a `MapEvents/content.ts` `interaction`
+> payload naming them anywhere (fresh grep across the module) — the
+> `unstagedNpcs` list exists precisely to suppress
+> `auditNarrativeReachability`'s false-positive on that gap, and the gap
+> itself is unchanged from pass 3/4's finding. `isShopkeeper` still has
+> zero mobile consumers (fresh grep of `axiomancer-mobile/`), and while
+> `axiomancer-mobile/app/rest/` and `state/presenters/rest.copy.ts` now
+> exist (phases 47a/52d/52e/59/UI-cleanup landed since pass 1), a fresh
+> `git log 6b365d01..HEAD` scoped to those exact rest paths is empty — no
+> commit since pass 4 touched them, so the Village Healer's stated
+> precondition ("place her once the rest rebuild has fully settled") is
+> unchanged and re-confirmed, not stale-cited. (3) the standing
+> `plan/AUDIT.md` `[needs-user-call]` row (filed pass 1, 2026-09-05) on
+> `caverns`/`connecting-river`/`town-across-river`'s single-NPC maps —
+> re-read directly: still open, still accurate (each singleton reads as
+> the deliberate "guaranteed quest-giver" pattern per the maps' own header
+> comments, no spec asks for a second voice), not re-litigated — this
+> pass's CREATE went to The Capital's genuinely-new gap instead, which
+> needed no personhood-design call (a minor reactive NPC, the Herald/
+> Sweetheart precedent, not a new named protagonist). (4) dead-end
+> dialogue / stale reference sweep — fresh script (not cached counts)
+> across all 4 NPC-authoring files: 289 total `id:` node ids (up from
+> pass 4's count, since The Capital's Herald tree + this pass's new
+> Ribbon-Picker tree both landed since), 131 `nextNodeId` references, ZERO
+> broken links; 10 distinct `startQuest` targets (9 pass-4 targets plus
+> `get-to-the-capital`, added by the W5 commit, not this pass) all
+> type-check clean against the live `QuestName` union; zero `teachCard`
+> call sites (only the type declaration). (5) legacy flat `DialogueMap` —
+> zero live usage confirmed again (only the type re-exports). (6) orphaned
+> NPC sweep — 20 NPC consts now (19 at pass 4 + `theHerald`, shipped by
+> W5, not orphaned — staged into `theCapital.npcs` from day one); every
+> one resolves into exactly one map's `npcs`/`unstagedNpcs` array,
+> confirmed by a fresh occurrence-count script, not carried over. (7)
+> spec-to-NPC gap — no `specs/characters/` or `specs/story/` file changed
+> since pass 4 (same empty git log range); `C-01-the-sophist.md` (Protas)
+> remains correctly an enemy/Labyrinth entity, not an `NPCs`-module gap.
+> **CREATE, shipped**: The Ribbon-Picker, a minor reactive NPC (not a
+> named protagonist — within this skill's own Herald/Sweetheart
+> precedent, no `character-spec` session needed) staged on `the-capital`
+> at `cap-5` (the gathering node, "Refused petitions pile up against the
+> wall, ribbons still tied to the corners") — she is the underside of The
+> Herald's gatekeeper function: where the Herald checks a ribbon IN, she
+> is what happens to one after the gate has already spent it, avoiding a
+> duplicate-function NPC. Wired as a SECOND weighted `MapEventPoolEntry`
+> on `cap-5`'s existing `capRibbonScraps` pool (gathering weight 3,
+> interaction weight 1) rather than a new node or column — she is an
+> occasional voice, not a second guaranteed singleton, and the gathering
+> payload keeps its weight-3 majority so `getNodePrimaryEventKind`/the
+> node's icon is unchanged. Her 4-node `DialogueTree`
+> (`the-ribbon-picker`) carries a reactive branch gated on
+> `sweetheart-was-nominated` (set at `tar-4` in town-across-river, strictly
+> earlier in the campaign's own map order — the same flag `capCourtConvenes`
+> already reads at `cap-8`), so she independently echoes the map's
+> selection/ribbons theme from a different functional angle rather than
+> repeating the Herald's own read of it. No new persisted flag, no
+> `GAME_STATE_VERSION` migration — the flag she reads already exists. KB
+> research (kb-query, the CREATE gate): run, missed. Searched
+> `kb_search`/`kb_overview` across the full corpus (scope `all` and
+> `boardgames`) for NPC/dialogue prior art — flavor vs. reactive minor-NPC
+> design, market-town color, tribute/selection-ritual thematic treatment —
+> with three query passes ("market|shop|vendor|flavor NPC",
+> "NPC|non-player character|flavor text|narrative color",
+> "bureaucra|clerk|tribute|selection ritual|lottery"); every hit was rules/
+> mechanics (Arydia's NPC-interaction combat rule, Dominion/Ark Nova's card-
+> market mechanic), nothing on dialogue-authoring craft or player reception
+> of minor/reactive NPCs. A genuine miss, not skipped: filed
+> https://github.com/no-trbl-2-u/game-knowledge-base/issues/79 (wishlist,
+> requesting reception-corpus coverage of narrative-heavy digital RPGs —
+> Disco Elysium/Pathologic 2/Hades/Undertale, the precedents this repo's
+> own `content-curator.md` already names). Naming: `theRibbonPicker`/
+> `ribbonPickerTree`/"The Ribbon-Picker" checked for collision (zero hits
+> in a repo-wide grep) before writing; `node scripts/check-naming-law.mjs
+> --sweep` stayed clean (204 shipped ids) both before and after — the
+> `--kind=` flag form this skill's own doc describes was repealed
+> 2026-09-02 (display names are no longer linted, per the script's own
+> header), so the sweep form is what actually runs today. `npm run
+> lint:prose` (14 content surfaces) and `npm run lint:names` (204 ids)
+> both clean on the new tree. Test: added a hermetic e2e
+> (`MapEvents/e2e/content.engine.test.ts`, 4 new cases inside a scoped
+> "the capital — cap-5, The Ribbon-Picker" describe block; extended that
+> file's `AuthoredMap`/`CONTINENT_OF` to include `the-capital`, previously
+> absent from that suite's coverage entirely — a pre-existing W5 gap, left
+> otherwise unbackfilled as out of this pass's scope) asserting: gathering
+> keeps its weight-3 primary kind at rng=0.5; a high roll (rng=0.9) draws
+> the weight-1 interaction entry and resolves her name + dialogue tree id;
+> she's rostered alongside The Herald (clearing the ≥2-staged-NPCs floor);
+> and her `sweetheart-was-nominated`-gated choice is present and points at
+> `recognized`. Verify: green — `npm run verify --workspace
+> axiomancer-mechanics` (212/212 files, 3418 tests + build), `npm run
+> verify --workspace axiomancer-mobile` (lint/typecheck/jest all green,
+> exit 0). `npm run deploy:check` confirmed green after push.
+```
 
 ```
 > **[adjust-keywords pass 5, 2026-09-10, commit 17b38058]** One UPDATE (a

@@ -2055,10 +2055,18 @@ const capWaitingRoom: MapEventPool = {
     }],
 };
 
+// adjust-npcs pass 5 (2026-09-10) — The Capital staged only one NPC
+// (The Herald); cap-5's own gathering flavor ("Refused petitions pile up
+// against the wall") is the natural home for The Ribbon-Picker, who sorts
+// exactly that pile. A second weighted entry, not a new node: the
+// gathering payload keeps its weight-3 majority (still the node's
+// `getNodePrimaryEventKind`/icon), her interaction surfaces on the
+// remaining weight-1 draw — an occasional voice, not a guaranteed one,
+// matching her role as a minor color NPC rather than a second singleton.
 const capRibbonScraps: MapEventPool = {
     id: 'cap-5.gathering',
     entries: [{
-        kind: 'gathering', weight: 1,
+        kind: 'gathering', weight: 3,
         payload: {
             kind: 'gathering',
             items: [{
@@ -2066,6 +2074,13 @@ const capRibbonScraps: MapEventPool = {
                 category: 'material', quantity: 1,
             }],
             description: 'Refused petitions pile up against the wall, ribbons still tied to the corners.',
+        },
+    }, {
+        kind: 'interaction', weight: 1,
+        payload: {
+            kind: 'interaction',
+            npcName: 'The Ribbon-Picker',
+            description: 'A woman sorts the discarded ribbons from the same pile, unhurried.',
         },
     }],
 };

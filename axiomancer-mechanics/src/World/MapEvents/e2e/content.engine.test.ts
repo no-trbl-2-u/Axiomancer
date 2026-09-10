@@ -21,7 +21,7 @@ import type { ContinentName } from '../../map.library';
 // Import for side effect — registers the pools when the test loads.
 import '../content';
 
-type AuthoredMap = 'fishing-village' | 'northern-forest' | 'caverns' | 'northern-city' | 'connecting-river' | 'town-across-river';
+type AuthoredMap = 'fishing-village' | 'northern-forest' | 'caverns' | 'northern-city' | 'connecting-river' | 'town-across-river' | 'the-capital';
 
 const CONTINENT_OF: Record<AuthoredMap, ContinentName> = {
     'fishing-village': 'coastal-continent',
@@ -30,6 +30,7 @@ const CONTINENT_OF: Record<AuthoredMap, ContinentName> = {
     'northern-city': 'northern-continent',
     'connecting-river': 'northern-continent',
     'town-across-river': 'northern-continent',
+    'the-capital': 'northern-continent',
 };
 
 function freshWorldAt(mapName: AuthoredMap): GameState {
@@ -569,6 +570,51 @@ describe('town-across-river content (Phase W4)', () => {
             const reactive = root!.choices!.find(c => c.requires?.flag === 'boy-witnessed-the-river-ritual');
             expect(reactive).toBeDefined();
         }
+    });
+});
+
+describe('the capital — cap-5, The Ribbon-Picker (adjust-npcs pass 5)', () => {
+    // The Capital (Phase W5) staged only The Herald; this pass adds The
+    // Ribbon-Picker as a SECOND weighted `MapEventPoolEntry` on cap-5's
+    // existing gathering pool rather than a new node. Only this node's own
+    // behaviour is asserted here — a full per-node kind-tally for the rest
+    // of the-capital's nine nodes is Phase W5's own untouched scope, not
+    // this pass's.
+    it('gathering keeps its weight-3 majority — the node\'s primary/icon kind', () => {
+        mockSequentialRng(0.5);
+        const r = visit(freshWorldAt('the-capital'), 'cap-5');
+        expect(r.kind).toBe('gathering');
+    });
+
+    it('a high roll draws the weight-1 interaction entry and resolves The Ribbon-Picker\'s dialogue', () => {
+        mockSequentialRng(0.9);
+        const result = resolveMapEvent({
+            ...freshWorldAt('the-capital'),
+            world: {
+                ...freshWorldAt('the-capital').world,
+                currentMap: { ...freshWorldAt('the-capital').world.currentMap, currentNode: 'cap-5', consumedNodes: [] },
+            },
+        });
+        expect(result.event.kind).toBe('interaction');
+        if (result.event.kind === 'interaction') {
+            expect(result.event.npcName).toBe('The Ribbon-Picker');
+            expect(result.event.dialogue?.id).toBe('the-ribbon-picker');
+        }
+    });
+
+    it('is rostered on the-capital alongside The Herald (clears the ≥2-staged-NPCs floor)', () => {
+        const def = getMapDefinition('northern-continent', 'the-capital');
+        expect(def.npcs?.map(n => n.name).sort()).toEqual(['The Herald', 'The Ribbon-Picker']);
+    });
+
+    it('the recognition branch is gated on the earlier sweetheart-was-nominated flag, hidden without it', () => {
+        const def = getMapDefinition('northern-continent', 'the-capital');
+        const picker = def.npcs!.find(n => n.name === 'The Ribbon-Picker')!;
+        const tree = picker.dialogueTree!;
+        const root = tree.nodes[tree.rootId]!;
+        const reactive = root.choices!.find(c => c.requires?.flag === 'sweetheart-was-nominated');
+        expect(reactive).toBeDefined();
+        expect(reactive!.nextNodeId).toBe('recognized');
     });
 });
 
