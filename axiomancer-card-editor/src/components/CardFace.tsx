@@ -119,6 +119,33 @@ function primaryKeyword(card: CardDraft): { kw: KeywordId; val: number } {
                 return { kw: 'dot', val: 0 };
             case 'strip_random_buff':
                 return { kw: 'strip_buff', val: 0 };
+            // ── THE BIG NUMBERS REWRITE (2026-09-02) + long-standing profane-
+            // canon verbs that were never given a projection case (found by
+            // `/adjust-keywords` pass 5, 2026-09-10): all four already have a
+            // `KEYWORDS` entry below, so this is a pure mapping backfill, not a
+            // new keyword. DEAL alone is `specialMechanics[0]` on 50/128 live
+            // cards (39% of the library) — every one of those previously fell
+            // through to the generic CONTROL clock glyph with no value shown. ──
+            case 'deal':
+                return { kw: 'damage', val: sm.amount };
+            case 'recoil':
+                return { kw: 'recoil', val: sm.hp };
+            case 'recoil_x':
+                return { kw: 'recoil', val: sm.min };
+            case 'immolate':
+                return { kw: 'immolate', val: sm.count };
+            case 'purge_self':
+                return { kw: 'purge', val: 0 };
+            // Still falling to the generic CONTROL default below, deliberately
+            // left unfixed this pass: `rider` (5 live cards) wraps an arbitrary
+            // `CardRider` and needs the same field-by-field dispatch
+            // `freeKeyword()` already does for the FREE line, not a one-line
+            // mapping — a real refactor, not a backfill. `reroll_spent` /
+            // `bank_spent_die` (1 card each) are die-gear/card-local kinds with
+            // no `KEYWORDS` entry of their own, matching the same exemption
+            // `KINDS_WITHOUT_MECHANIC_KEYWORD` already grants them on the
+            // mobile badge surface (`axiomancer-mobile/state/combat/
+            // __tests__/keywords.test.ts`) — consistent, not a regression.
             default:
                 break;
         }

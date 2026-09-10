@@ -14,12 +14,132 @@
 | cards | `skills/adjust-cards.md` | 2026-09-10 | 35c4c56c | 5 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-10 | 2b02ff60 | 5 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-10 | ce6e6a60 | 5 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-09 | 9e423a34 | 4 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-10 | PENDING | 5 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-09 | 6b365d01 | 4 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-keywords pass 5, 2026-09-10, commit PENDING]** One UPDATE (a
+> real wiring backfill, not a comment fix), zero-CREATE, zero-REMOVE — full
+> re-audit, not a rubber stamp of pass 4's findings. `git log
+> 9e423a34..HEAD -- axiomancer-mechanics/src/Cards axiomancer-mechanics/
+> src/Effects axiomancer-mechanics/src/Combat
+> axiomancer-mechanics/docs/keyword-atlas.md docs/retheme-map.json
+> axiomancer-mobile/state/combat/keywords.ts
+> axiomancer-card-editor/src/data/mechanics.ts` is empty (the 15 commits
+> since pass 4 were entirely the cards/equipment/enemies pass-5 ticks, a
+> World ship, two `/audit`-fix ticks, a `combat-round-e2e` test extension,
+> and an `/expand` pass — nothing touched the keyword-registry surface),
+> so every Step-1 signal was re-derived by direct enumeration/script
+> against the current tree rather than assumed stale-clean, same
+> discipline as the sibling categories' own pass-5 re-audits: (1) registry
+> row-count parity — `axio_keywords` still returns exactly 68 rows
+> (unchanged from pass 4, confirmed via a fresh call) and `axio_overview`
+> confirms the same 128-card / 76-enemy / 24-effect counts the sibling
+> passes counted today; (2) full carrier-count sweep — re-ran a fresh
+> `grep -oE "kind: '[a-zA-Z_]+'"` across all 9 `src/Cards/library/
+> *.cards.ts` modules for every literal `kind:` occurrence (not trusting
+> pass 3/4's cached numbers; the pattern also picks up the turn-shape
+> `SynergyStatePredicate` family, which shares the same JSON key — expected,
+> not a bug, since `opening`/`finale`/`flow`/`requiem` are their own
+> registry keywords carried on a different card field): the same 9
+> zero-carrier `CardSpecialMechanic` kinds pass 3/4 found
+> (`strip_random_buff`, `befriend_attempt`, `refresh_die`,
+> `convert_die_color`, `overheat`, `forge_floating_die`, `float_x_die`,
+> `spend_all_pips`, `echo_next_spell`) remain at zero and stay
+> `KINDS_WITHOUT_MECHANIC_KEYWORD`-exempt in
+> `axiomancer-mobile/state/combat/__tests__/keywords.test.ts`; no new
+> carrier-count regression below the atlas's own "≥2 cards or ≥2 enemies"
+> floor for any badged keyword (`chain`/`omen`/`opening`/`finale`/
+> `rupture`/`turnabout` all still exactly 2); (3) `CardSpecialMechanic`
+> kind ↔ card-editor `SPECIAL_MECHANIC_KINDS` parity — wrote a throwaway
+> script extracting both 50-member sets programmatically (not eyeballing)
+> and diffing sorted arrays: IDENTICAL, no drift since pass 3's manual
+> count (which had mis-stated the total as 49; the real, freshly-counted
+> figure is 50 on both sides — a counting-note fix, not a registry fix).
+> (4) "Known drift" section re-checked against current source: POISON/
+> BLEED/DOOM `damagePerRound` in `debuffs.library.json` are still 2/3/1
+> (overhaul §5.2's ×3-4 rescale has not landed) and `CAPITULATE_MIN` in
+> `src/Combat/effects.ts` still floors RELENT at 10, not overhaul §5.4's
+> "min 20" — both re-confirmed still accurate and still an engine-
+> constant/effects-data rescale out of this skill's card-shaped scope, left
+> untouched matching pass 1-4's own judgment, not re-filed. (5) **a
+> genuine new finding, not flagged by any of passes 1-4** — traced the
+> keyword-glyph wiring checklist's own claim that "the glyph table is
+> hand-synced in THREE places (mobile glyphShapes, editor CardFace.tsx,
+> scripts/build-catalog.mjs)" all the way through the card-editor leg,
+> which no prior pass had actually exercised (they only checked the
+> `SPECIAL_MECHANIC_KINDS` *contract* file, never the editor's own face-
+> preview *projection*): `axiomancer-card-editor/src/components/
+> CardFace.tsx`'s `primaryKeyword()` switches on
+> `card.specialMechanics[0].kind` to pick the glyph + PAID badge, and its
+> switch had NO case for `deal`, `recoil`, `recoil_x`, `immolate`, or
+> `purge_self` — all four (`damage`/`recoil`/`immolate`/`purge`) already
+> have a `KEYWORDS` entry in `axiomancer-card-editor/src/theme/wx.ts`, so
+> this was a pure mapping omission, not a missing keyword. Quantified
+> real impact with a throwaway ts-node script over the live `cardLibrary`
+> (not a guess): `deal` is `specialMechanics[0]` on **50 of 128 cards
+> (39% of the whole library)** — every DEAL-led card (the entire "strike
+> is alive" damage family, THE BIG NUMBERS REWRITE's headline verb) fell
+> through the switch's `default:` arm to the generic CONTROL clock glyph
+> with no value shown, in the editor's own CREATE/EDIT authoring preview
+> (`CardFace` is mounted live in both `EditTab.tsx` and `CreateTab.tsx`,
+> not dead code); `recoil` (8), `immolate` (6), `purge_self` (5), and
+> `recoil_x` (1) added another 20 mis-glyphed cards (77/128, 60% of the
+> library, mis-glyphed total). Confirmed this was glyph-only, never a
+> wrong-NUMBER bug: `paidSentence()` always composes the printed prose
+> through the real engine (`toCombatCard`), never through
+> `primaryKeyword()`'s heuristic — so `paid-summary-honesty.engine.test.ts`
+> (mechanics) had no visibility into this, and no player-facing surface was
+> ever affected (mobile's `combat.cards.ts` already has correct `case`
+> arms for all five kinds, confirmed by direct grep — this was purely an
+> editor-tool preview regression). Checked DEAL specifically against
+> mobile's own `KINDS_WITHOUT_MECHANIC_KEYWORD` list before fixing it —
+> `deal` IS deliberately exempt there too, by design ("DEAL is the one verb
+> that needs no explaining... the face prints the number in its hero slot
+> rather than badging the word"), so this is NOT reopening a closed design
+> call: mobile's exemption is about not printing the WORD "DEAL" as a
+> badge, and the editor's `wx.ts` `damage` entry serves a different job —
+> the top-left CATEGORY GLYPH icon (direct/dot/control/defense/recovery/
+> special) that classifies the card at a glance while browsing/authoring,
+> which every other verb family already gets. SHIPPED as an UPDATE
+> (backfill, not a new keyword): added the five missing cases in
+> `CardFace.tsx`'s `primaryKeyword()`, each mapping to its EXISTING
+> `wx.ts` `KEYWORDS` entry (no new vocabulary row). Left two smaller,
+> deliberately-scoped gaps documented in a code comment rather than
+> force-fixed this pass: `rider` (5 cards) wraps an arbitrary `CardRider`
+> and needs the same field-by-field dispatch `freeKeyword()` already does
+> for the FREE line — a real refactor, not a one-line backfill, and
+> mobile's own list independently exempts `rider` too ("a carrier, not a
+> mechanic"), so leaving it generic in the editor matches the established
+> cross-surface stance rather than contradicting it; `reroll_spent` /
+> `bank_spent_die` (1 card each) are die-gear/card-local kinds with no
+> `KEYWORDS` entry of their own, consistent with the same exemption
+> `KINDS_WITHOUT_MECHANIC_KEYWORD` already grants them on the mobile badge
+> surface, not a regression. Added a hermetic regression test
+> (`axiomancer-card-editor/src/components/__tests__/CardFace.test.ts`, 6
+> cases) asserting the five fixed projections AND asserting the `rider`
+> residual still falls through to `control` (so a future fix updates the
+> test instead of silently drifting). KB research (kb-query): not run —
+> this finding is pure internal wiring-parity (an existing atlas keyword's
+> editor-side glyph mapping), not a new or reinterpreted keyword semantic,
+> so it carries no design content requiring Dawncaster prior art; exempt
+> per skill §3 Step 2 in the same spirit as the REMOVE/no-op carve-out
+> (no CREATE, no semantic UPDATE to an atlas row — the atlas rows for
+> DEAL/RECOIL/IMMOLATE/PURGE are unchanged and accurate already). Atlas:
+> no row edit needed (the atlas already correctly lists all four as live
+> keywords with accurate reminder text; the bug was purely in a downstream
+> consumer, not the registry itself). Verify: green —
+> `npm run verify --workspace axiomancer-mechanics` (212/212 files, 3414
+> tests + build), `npm run verify --workspace axiomancer-mobile` (260/260
+> suites, 2646 tests, lint/typecheck clean), `npm run type-check --workspace
+> axiomancer-card-editor` (clean) plus `npx vitest run` in that package
+> (18/18, including the new `CardFace.test.ts`), root `npm test` (123/123
+> incl. `content-drift.test.mjs`).
+```
 
 ```
 > **[adjust-enemies pass 5, 2026-09-10, commit ce6e6a60]** Zero-CREATE,

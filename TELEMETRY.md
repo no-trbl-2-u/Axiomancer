@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-31T09:23:13Z | slash-prompt | /march | unknown | user/ci | /march |
-| 2026-07-31T11:13:32Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-07-31T11:13:34Z | skill | digest | unknown | main | - |
 | 2026-07-31T14:45:40Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-31T14:45:42Z | skill | march | unknown | main | - |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-10T14:32:37Z | subagent | Explore | claude-sonnet-5 | main | Score CRITIQUE.md pending findings |
 | 2026-09-10T16:30:39Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-10T16:33:07Z | subagent | general-purpose | claude-sonnet-5 | main | Gather expand-pass signals for Axiomancer |
+| 2026-09-10T18:33:32Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-10T18:37:02Z | subagent | card-expert | claude-sonnet-5 | main | Run adjust-keywords tick end-to-end |
