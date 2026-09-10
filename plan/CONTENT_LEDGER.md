@@ -13,13 +13,80 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-10 | 35c4c56c | 5 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-10 | 2b02ff60 | 5 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-09 | 84be1db4 | 4 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-10 | PENDING | 5 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-09 | 9e423a34 | 4 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-09 | 6b365d01 | 4 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-enemies pass 5, 2026-09-10, commit PENDING]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — full re-audit, not a rubber stamp of pass
+> 4's findings. `git log 84be1db4..HEAD -- axiomancer-mechanics/src/Enemy
+> axiomancer-mechanics/src/Combat/combat.enemy-decks.ts
+> axiomancer-mechanics/src/Combat/combat.enemy-cards.ts
+> axiomancer-mobile/assets/images/enemies axiomancer-mechanics/src/World`
+> is empty (the 16 commits since pass 4 were entirely the cards/equipment
+> pass-5 ticks, the npcs/keywords pass-4 ticks, two audit-fix ticks, an
+> `/expand` pass, and a digest — nothing touched the enemy/enemy-deck/
+> enemy-art/world surface), so every Step-1 signal was re-derived directly
+> against the current tree by fresh script/enumeration rather than assumed
+> stale-clean, same discipline as the sibling categories' own pass-5
+> re-audits: (1) orphan sweep — re-extracted all 77 `enemy.library.ts`
+> consts programmatically: 77/77 resolve into `ENEMY_REGISTRY`, 75/77 into
+> some `EnemiesByMap` pool, the same 2 deliberate exclusions
+> (`Sandbag_01` test fixture, `TheIncompleteness` playtest ceiling) as
+> every prior pass — no new orphan; (2) roster-size floor / sibling-overlap
+> sweep — recomputed all 9 pool sizes and every pairwise overlap fresh
+> (fishing-village 13, northern-forest 39, caverns 16, northern-city 8,
+> connecting-river 5, town-across-river 4, aporia-colonnade/archive 8 each,
+> aporia-proof 11): the same four >70% pairs recur, all Aporia-vs-forest
+> (87.5%/87.5%/90.9%) or Aporia-vs-caverns (75.0%) — re-confirmed as the
+> labyrinth's own documented deliberate-reuse design (`enemy.library.ts`'s
+> `EnemiesByMap` comment block), not new drift; connecting-river/
+> town-across-river remain the two smallest raw pools but no `World` file
+> changed since pass 3 (empty git log, re-confirmed), so the W4 phase
+> brief's density-normalized pacing-choice conclusion (pass 3) stands
+> unchallenged, not re-litigated without new evidence; (3) deck sweep — a
+> fresh script cross-checked all 90 `ENEMY_DECKS` keys (both flat and
+> `TieredEnemyDeck` shapes) against the 77 `ENEMY_REGISTRY` slugs (0 keys
+> unmatched) and all 157 distinct card-id references against
+> `ENEMY_CARD_LIBRARY`'s 157 ids (0 missing); the 4 distinct `effectId`s
+> (`debuff_mark`, `debuff_bleed`, `debuff_poison`, `debuff_creeping_doom`)
+> and 4 distinct `curseCardId`s (`overheard-name`, `arrears`,
+> `mouthful-of-brine`, `gnaw-marks`) all re-verified present in
+> `debuffs.library.json` / `starters.cards.ts`'s curse set — same 4/4 and
+> 4/4 as pass 4, no dead reference; (4) portrait sweep — 75 `portraitAsset`
+> values re-extracted, zero duplicates, all 75 resolve 1:1 into
+> `axiomancer-mobile/assets/images/enemies/index.ts`'s registry, and every
+> required `.webp` file confirmed present on disk — clean; (5) VITAE-band
+> sweep — 21 explicit `vitae:` overrides, same count as pass 4, and
+> `enemy.library.ts` is byte-identical since `84be1db4` so the
+> worst-deviation figure (ElderFireGiant +25.7%, inside the ~±26%
+> tolerance band) stands unchanged; (6) aftermath-prose/voice sweep — zero
+> `\b(thee|thou|thy|thine|ye)\b` matches (case-insensitive) anywhere in
+> `enemy.library.ts`, 45 `finalBlowLines` carriers, matching pass 4 exactly
+> (32 enemies still lack one — the known backlog filed pass 1,
+> `plan/AUDIT.md` `[content]`, out of this skill's scope, re-cited not
+> re-filed); (7) loot-table sweep — re-extracted all 22 distinct `drop()`
+> ids from `enemy.library.ts` and diffed against all 22 ids in
+> `Items/consumable.library.ts` — empty diff, exact 1:1 resolve;
+> `loot.ts` itself still carries no hardcoded item ids (pure weighted-roll
+> logic). No keyword was retired by `/adjust-keywords` pass 4 (its only
+> change was a stale-comment fix, confirmed by reading its own ledger
+> entry), so no enemy deck references a dead keyword either. KB research:
+> not run — every consideration this pass was audit-confirmed-clean (no
+> CREATE/UPDATE), exempt from the gate per §3 Step 2 (REMOVE/no-op
+> carve-out). Verify: not re-run — no source file changed
+> (`git status` clean on `axiomancer-mechanics/src`,
+> `axiomancer-mobile/`); the last mechanics-source-path commit
+> (`2028bb64`) shows `verify-mechanics` green and `verify-mobile` green
+> via `gh run list`, and no mechanics/mobile source commit has landed
+> since — confirmed current via `npm run deploy:check` immediately before
+> this tick began.
+```
 
 ```
 > **[adjust-equipment pass 5, 2026-09-10, commit 2b02ff60]** Zero-CREATE,

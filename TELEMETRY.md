@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-29T14:38:49Z | slash-prompt | /march | unknown | user/ci | /march |
-| 2026-07-29T16:41:20Z | slash-prompt | /triage | unknown | user/ci | /triage 153 |
 | 2026-07-29T19:51:31Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-29T20:03:03Z | subagent | Explore | claude-sonnet-5 | main | Locate draft-scorer starvation code |
 | 2026-07-30T09:11:09Z | slash-prompt | /march | unknown | user/ci | /march |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-10T01:06:27Z | subagent | card-expert | claude-sonnet-5 | main | Adjust-cards pass 5 audit and ship |
 | 2026-09-10T02:38:11Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-10T02:40:49Z | skill | adjust-equipment | claude-sonnet-5 | main | - |
+| 2026-09-10T06:45:32Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-10T06:48:36Z | skill | adjust-enemies | claude-sonnet-5 | main | - |
