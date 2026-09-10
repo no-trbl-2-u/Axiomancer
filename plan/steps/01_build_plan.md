@@ -2591,6 +2591,50 @@ on pickup):**
       alt icons, Wikimedia Commons public-domain art, OpenGameArt.org,
       OpenClipArt), all URLs WebFetch-verified live, filed in
       `plan/AUDIT.md` awaiting the `/oversight` pick.
+- [x] Phase W6 — The Capital: map 5 of the northern continent, the
+      ribbon-roads' destination (`/forge`, 2026-09-10; the map-sequence
+      continues here rather than at "W5" because that number was
+      already claimed by the enemy-roster-growth phase above — see the
+      `[loop-call]` row in `plan/AUDIT.md` for the naming note).
+      SHIPPED `f56fa198`: town-across-river's own code comment ("no
+      door onward yet") was the sharpest thinness signal from the
+      Step 1 growth audit across the three `/forge`-owned surfaces
+      (maps/events/art) — a boss-terminated map with an explicitly
+      flagged missing exit. tar-6 (the Portreeve) is no longer
+      terminal: tar-7, one column past the boss (the nc-26/ncy-26/
+      cr-13 pattern), opens onto THE CAPITAL — 9 nodes / 6 columns,
+      full MapEvent kind coverage (cutscene/interaction/hazard/rest/
+      gathering/village/loot-cache/narration/encounter, all kinds
+      already shipped elsewhere, none new). Narrative payoff: cap-8's
+      court-convenes narration reads back tar-4's
+      `sweetheart-was-nominated` flag, the third and final beat of the
+      advisor-selection thread planted at ncy-5/cr-9/tar-4 — the
+      river-court's own "he goes to the capital in the spring boat"
+      line made concrete. No new enemies authored (`/forge`'s map/
+      event/art lane, not `adjust-enemies`'s per-item lane): the
+      `the-capital` `EnemiesByMap` pool reuses northern-city's roster
+      (TollSergeant, GuildKnife, WharfShrike) plus two forest
+      re-treads (CursedPaladin, VampireThrall) — the northern-city
+      precedent for reuse over invention — and The Factor (already a
+      northern-city normal enemy) is reused as the boss at an elevated
+      payload level, the RawheadRex-in-caverns precedent. No new
+      MapEventKind, no new persisted field — `GAME_STATE_VERSION`
+      untouched, no migration needed. Mobile: new
+      `the-capital.layout.ts`, `layout-engine-parity` MAPS list
+      updated, the other four northern-continent layouts' "Map N of
+      iv" ordinals bumped to "of v", a `travel-door.engine.test.ts`
+      case pins the tar-7 crossing. Gates green: mechanics (212 test
+      files / 3414 tests + build), mobile (260 suites / 2646 tests),
+      card-editor type-check (precautionary). KB research: `kb-query`
+      queried (kb_overview, kb_search for capital/court/advisor/
+      nomination themes) before writing — no matches, the corpus is
+      board-game mechanics/reception plus card corpora, not narrative/
+      map-design prior art; grounding came from the "read the specs"
+      leg instead (the in-repo canon already planted at
+      `map.library.ts`'s doc comment and the cr-9/tar-4 flags). No
+      further door shipped — the-capital is the new frontier, the same
+      shape town-across-river had before this phase; a future
+      `/forge` tick continues the chain.
 
 > **After the queue drains:** `/march` transitions to `/iterate`
 > — draining `plan/AUDIT.md` + `plan/CRITIQUE.md`, doc-drift,

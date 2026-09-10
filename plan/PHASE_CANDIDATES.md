@@ -109,6 +109,54 @@
 
 ## Pending
 
+### [score 5.5] The Capital is the new frontier — no door onward yet, same as town-across-river before it
+- proposed: 2026-09-10, /forge (Phase W6, commit f56fa198)
+- source signals:
+  - THE CAPITAL (map 5 of the northern continent) ships terminal at
+    cap-9 (The Factor), deliberately — the next continent isn't
+    authored. This is the exact shape town-across-river had before
+    this same tick gave it a door; the pattern will repeat every time
+    `/forge` closes one frontier.
+  - The advisor-selection narrative thread (ncy-5 → cr-9 → tar-4 →
+    cap-8) is now fully paid off at the capital. A genuine next beat
+    (what happens to the chosen nominee? does the player's own arc
+    continue past the selection, or does the thread simply end here?)
+    is open — a story-spec question, not just a map-graph one.
+  - `labyrinth-continent` (THE APORIA, W-01) stays deliberately
+    dev-menu/CLI-only until "the last continent" exists (T's binding
+    2026-07-07 ruling, `specs/world/W-01-aporia-labyrinth-continent.md`
+    §Access) — the-capital does NOT change that gate; no door was (or
+    should be) wired from the-capital into the labyrinth by this pass.
+- rationale: `/forge`'s own standing weakness (one reachable
+  continent's worth of linear content) narrows every tick it runs, but
+  each map it ships just moves the frontier one map further out rather
+  than closing the gap outright — worth tracking explicitly so the
+  next `/forge` tick (or a `/world-spec` session) picks a deliberate
+  next beat instead of mechanically bolting on "map 6" with no new
+  narrative arc.
+- proposed scope: either (a) a `/forge` tick ships map 6 continuing
+  the ribbon-road literally (what's past the capital's gate — open
+  question), or (b) a `/world-spec`/`story-spec` session first decides
+  what the capital's selection actually SETS UP for the player
+  character before more geography ships on top of it.
+- estimated phases: 1 (map growth) or 1-2 (design session + map, if
+  (b) is picked).
+- conflicts: none. Does not touch the labyrinth-continent gate.
+
+### [score 4.5] The combat arena backdrop gap (score-6.0 row below) now also covers the-capital and its own settlement flavor
+- proposed: 2026-09-10, /forge (Phase W6)
+- source signals: the-capital ships with no dedicated backdrop plate —
+  it free-rides whatever the existing region-string regex resolves to
+  (the northern-city/LUDGATE_HILL pattern), same as every prior
+  northern-continent map. This is not a new gap, just one more data
+  point for the already-filed backdrop candidate below (score 6.0) —
+  filed here as a cross-reference rather than a duplicate entry.
+- rationale: no new phase needed; the existing candidate's scope
+  already covers this.
+- proposed scope: n/a — see the score-6.0 backdrop candidate.
+- estimated phases: 0 (folded into the existing candidate).
+- conflicts: none.
+
 ### [score 5.0] Retheme the six Northern-Forest dialogue trees to the ratified register (spec 34 §2) — all now reachable
 - proposed: 2026-09-05, adjust-npcs pass 1
 - source signals:

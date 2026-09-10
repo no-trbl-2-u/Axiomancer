@@ -14,6 +14,52 @@
 
 ## Pending
 
+### [loop-call] Phase W6 (The Capital) reused "W5" as a map-sequence label collision, resolved by numbering the map "W6" instead (2026-09-10)
+- category: docs/naming residue (found while filing `/forge`'s Step-6
+  residue for shipping The Capital, map 5 of the northern continent)
+- detail: the map-growth sequence in `plan/steps/01_build_plan.md` runs
+  Phase W1 (travel) → W2 (caverns) → W3 (northern city) → W4 (connecting
+  river + town-across-river) → the next map. But "Phase W5" was already
+  claimed by a DIFFERENT phase — "New blood: per-map enemy roster
+  growth" — filed the same day as W1-W4 and still `[-]` partially
+  drained (per-item enemy work now lives with `/adjust-enemies` under
+  THE CONTENT LIFECYCLE SPLIT, 2026-09-02, so that row's remaining
+  scope is that steward's job, not a map-growth row at all). Rather than
+  either colliding with the existing W5 label or renumbering the
+  already-shipped W1-W4 history, this tick's map ships as "Phase W6" —
+  logged as its own row in the build plan, distinct from the enemy-roster
+  W5 row above it. No code depends on the phase label; this is purely a
+  plan-file bookkeeping call, filed so a future steward doesn't read
+  "W5" twice and assume a duplicate/conflicting entry.
+- resolution: no action needed — the build-plan row already uses "W6".
+  Filed as `[loop-call]` per standing rule 7 for after-the-fact review,
+  not because the call was ambiguous enough to block on.
+
+### [loop-call] The Capital's enemy pool reuses existing roster entries rather than authoring capital-native enemies — a legitimate future `/adjust-enemies` backfill (2026-09-10)
+- category: content residue (found while shipping The Capital via
+  `/forge`; `/forge` owns maps/events/art, not per-item enemies — see
+  `skills/forge.md` §1's 2026-09-02 scope split)
+- detail: `the-capital`'s `EnemiesByMap` pool
+  (`axiomancer-mechanics/src/Enemy/enemy.library.ts`) reuses
+  northern-city's roster (TollSergeant, GuildKnife, WharfShrike) plus
+  two northern-forest re-treads (CursedPaladin, VampireThrall) —
+  100%/83% overlap with northern-city and northern-forest respectively.
+  This mirrors the northern-city launch pattern (which also opened with
+  partial forest reuse, later backfilled twice by `/adjust-enemies`
+  passes 1 and 2 per `plan/CONTENT_LEDGER.md`), so it's a known,
+  precedented shape — not a defect — but it is real thinness by the
+  same >70%-sibling-overlap signal `/adjust-enemies` already uses
+  elsewhere. The Factor (already a northern-city normal enemy, not
+  previously a boss anywhere) is reused as the-capital's boss at an
+  elevated payload level (22) — the RawheadRex-in-caverns precedent for
+  reusing a defined enemy as a new map's climax rather than inventing
+  one.
+- action: none taken by this tick (out of `/forge`'s lane by design).
+  Flagged for `/adjust-enemies`'s next structural pass to pick up on its
+  own rate-limited cadence, the same way caverns/connecting-river/
+  town-across-river's thin pools were each backfilled after their own
+  `/forge` launches.
+
 ### [x] [loop-call] AMBUSH and FINALE now print correctly but still show exactly 1 card carrier each (2026-09-07) — RESOLVED via `/adjust-cards` pass 3 (2026-09-08)
 - category: content residue (found during `/adjust-keywords` pass 2's full
   structural audit — Step 1's carrier-count signal, same shape as pass 1's
