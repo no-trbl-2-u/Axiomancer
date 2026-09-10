@@ -36,6 +36,49 @@ const SPREAD = 2.6;
 const CANVAS_W = 360 * SPREAD;
 const CANVAS_H = 400 * SPREAD;
 
+const MIN_SCALE = 0.6;
+const MAX_SCALE = 3;
+
+// CRITIQUE.md [MED] "open map nodes just off-screen no-op silently on tap"
+// (pass, 2026-08-29): the prior initial-camera effect centred on the focus
+// nodes' centroid at a fixed scale of 1, so a wide branch (several
+// simultaneously-open nodes spread further apart than the viewport) still
+// left the outermost ones off-screen the moment the map opened. This fits
+// the whole focus bounding box in frame instead, zooming out (never in —
+// a lone node shouldn't get punched in past 1x) just enough that every
+// currently-open node starts visible.
+const FIT_PADDING = 40;
+
+interface FocusTransform { scale: number; tx: number; ty: number; }
+
+/** Exported for unit coverage — the pure math behind the initial camera fit. */
+export function computeFocusTransform(
+    nodes: readonly ExplorationNode[],
+    viewport: { w: number; h: number },
+): FocusTransform {
+    const focus = nodes.filter((n) => n.kind === 'available' || n.kind === 'current');
+    if (focus.length === 0) {
+        return { scale: 1, tx: (viewport.w - CANVAS_W) / 2, ty: (viewport.h - CANVAS_H) / 2 };
+    }
+
+    const xs = focus.map((n) => n.x * SPREAD);
+    const ys = focus.map((n) => n.y * SPREAD);
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    const minY = Math.min(...ys);
+    const maxY = Math.max(...ys);
+    const bboxW = maxX - minX;
+    const bboxH = maxY - minY;
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+
+    const fitScaleX = bboxW > 0 ? (viewport.w - FIT_PADDING * 2) / bboxW : MAX_SCALE;
+    const fitScaleY = bboxH > 0 ? (viewport.h - FIT_PADDING * 2) / bboxH : MAX_SCALE;
+    const scale = Math.max(MIN_SCALE, Math.min(1, fitScaleX, fitScaleY));
+
+    return { scale, tx: viewport.w / 2 - cx * scale, ty: viewport.h / 2 - cy * scale };
+}
+
 // Phase V1/V2 (the Woodcut Codex) — the map reads as a chart, not a
 // void: a faint diagonal hatch over the whole sheet (the handoff's
 // `.axm-hatch` texture, redrawn as strokes so no Pattern support is
@@ -107,34 +150,22 @@ export function MapCanvas({ nodes, edges, backdrop, overlays, children }: MapCan
     React.useEffect(() => {
         if (initialized.current || !viewport || nodes.length === 0) return;
         // The choosable nodes: where the player stands + the steps they
-        // can take from here. Fall back to the canvas centre if (somehow)
-        // none are flagged.
-        const focus = nodes.filter((n) => n.kind === 'available' || n.kind === 'current');
-        let cx: number;
-        let cy: number;
-        if (focus.length > 0) {
-            const ax = focus.reduce((s, n) => s + n.x, 0) / focus.length;
-            const ay = focus.reduce((s, n) => s + n.y, 0) / focus.length;
-            // Node canvas coords = engine coords × SPREAD; initial scale
-            // is 1, so placing the centroid at the viewport centre is a
-            // straight translate.
-            cx = viewport.w / 2 - ax * SPREAD;
-            cy = viewport.h / 2 - ay * SPREAD;
-        } else {
-            cx = (viewport.w - CANVAS_W) / 2;
-            cy = (viewport.h - CANVAS_H) / 2;
-        }
-        tx.value = cx;
-        ty.value = cy;
-        savedTx.value = cx;
-        savedTy.value = cy;
+        // can take from here, fit whole into frame (zoomed out if a wide
+        // branch demands it) rather than just centred at 1x.
+        const fit = computeFocusTransform(nodes, viewport);
+        scale.value = fit.scale;
+        savedScale.value = fit.scale;
+        tx.value = fit.tx;
+        ty.value = fit.ty;
+        savedTx.value = fit.tx;
+        savedTy.value = fit.ty;
         initialized.current = true;
-    }, [viewport, nodes, tx, ty, savedTx, savedTy]);
+    }, [viewport, nodes, tx, ty, savedTx, savedTy, scale, savedScale]);
 
     const pinch = Gesture.Pinch()
         .onUpdate((e) => {
             const next = savedScale.value * e.scale;
-            scale.value = Math.min(3, Math.max(0.6, next));
+            scale.value = Math.min(MAX_SCALE, Math.max(MIN_SCALE, next));
         })
         .onEnd(() => {
             savedScale.value = scale.value;

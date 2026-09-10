@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import { MapCanvas } from '../MapCanvas';
+import { MapCanvas, computeFocusTransform } from '../MapCanvas';
 import type { ExplorationNode, ExplorationEdge } from '@/state/presenters/exploration.engine';
 
 const mockNodes: ExplorationNode[] = [
@@ -353,5 +353,72 @@ describe('MapCanvas', () => {
         });
 
         expect(wrapper).toBeDefined();
+    });
+});
+
+describe('computeFocusTransform', () => {
+    const SPREAD = 2.6;
+
+    it('centres a single focus node at 1x — no zoom-out needed', () => {
+        const nodes: ExplorationNode[] = [
+            { id: 'a', label: 'A', kind: 'current', type: 'encounter', x: 100, y: 100, triggersCombat: false },
+        ];
+        const fit = computeFocusTransform(nodes, { w: 400, h: 800 });
+        expect(fit.scale).toBe(1);
+        expect(fit.tx).toBeCloseTo(400 / 2 - 100 * SPREAD);
+        expect(fit.ty).toBeCloseTo(800 / 2 - 100 * SPREAD);
+    });
+
+    it('falls back to canvas centre at 1x when no focus nodes exist', () => {
+        const nodes: ExplorationNode[] = [
+            { id: 'a', label: 'A', kind: 'locked', type: 'encounter', x: 100, y: 100, triggersCombat: false },
+        ];
+        const fit = computeFocusTransform(nodes, { w: 400, h: 800 });
+        const CANVAS_W = 360 * SPREAD;
+        const CANVAS_H = 400 * SPREAD;
+        expect(fit).toEqual({ scale: 1, tx: (400 - CANVAS_W) / 2, ty: (800 - CANVAS_H) / 2 });
+    });
+
+    // CRITIQUE.md [MED] "open map nodes just off-screen no-op silently on
+    // tap" — a wide branch of simultaneously-open nodes must all land
+    // inside the viewport on the initial fit, not just their centroid.
+    it('zooms out to fit a wide branch of open nodes fully in the viewport', () => {
+        const nodes: ExplorationNode[] = [
+            { id: 'left',  label: 'Left',  kind: 'available', type: 'encounter', x: 0,   y: 200, triggersCombat: false },
+            { id: 'right', label: 'Right', kind: 'available', type: 'encounter', x: 180, y: 200, triggersCombat: false },
+        ];
+        const viewport = { w: 420, h: 900 };
+        const fit = computeFocusTransform(nodes, viewport);
+
+        expect(fit.scale).toBeLessThan(1);
+
+        // Every focus node's projected screen position must land within
+        // [0, viewport] on both axes — the exact defect this fit prevents.
+        for (const n of nodes) {
+            const screenX = n.x * SPREAD * fit.scale + fit.tx;
+            const screenY = n.y * SPREAD * fit.scale + fit.ty;
+            expect(screenX).toBeGreaterThanOrEqual(0);
+            expect(screenX).toBeLessThanOrEqual(viewport.w);
+            expect(screenY).toBeGreaterThanOrEqual(0);
+            expect(screenY).toBeLessThanOrEqual(viewport.h);
+        }
+    });
+
+    it('never zooms in past 1x even when focus nodes sit close together', () => {
+        const nodes: ExplorationNode[] = [
+            { id: 'a', label: 'A', kind: 'current',   type: 'encounter', x: 100, y: 100, triggersCombat: false },
+            { id: 'b', label: 'B', kind: 'available', type: 'encounter', x: 102, y: 100, triggersCombat: false },
+        ];
+        const fit = computeFocusTransform(nodes, { w: 400, h: 800 });
+        expect(fit.scale).toBe(1);
+    });
+
+    it('clamps to the minimum scale rather than shrinking without bound', () => {
+        const nodes: ExplorationNode[] = [
+            { id: 'left',  label: 'Left',  kind: 'available', type: 'encounter', x: 0,   y: 0,   triggersCombat: false },
+            { id: 'right', label: 'Right', kind: 'available', type: 'encounter', x: 1000, y: 1000, triggersCombat: false },
+        ];
+        const fit = computeFocusTransform(nodes, { w: 400, h: 800 });
+        expect(fit.scale).toBe(0.6);
     });
 });
