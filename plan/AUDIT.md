@@ -31,6 +31,29 @@
 > closing the row's own stated "ship the remaining axis" condition. The
 > crash itself is still UNREPRODUCED on web. Top 5 below is refreshed
 > for the next pass.
+>
+> **Third pass, same date.** Top score [5.9] stays parked — it names its
+> own blocker (owner device log) and can't be shipped blind this tick,
+> same as the explicitly-parked late-collapse row below. Before picking
+> the next two, actually did the staleness check both of their own
+> `next` fields already flagged rather than deferring it again: read
+> `Coastal-Village/maps.ts` + `MapEvents/content.ts` directly. Both
+> [4.7] and [4.2] turned out fully stale — the fishing-village redesign
+> (Phase 53c/53d/60/61) pinned every node's foe explicitly, dropped
+> Brine Hag from the map entirely, and put a guaranteed pre-boss rest +
+> a deliberately-low-leveled boss ahead of the climax. Closed both
+> RESOLVED-STALE in `plan/CRITIQUE.md` (Pending → Done) with the
+> supporting reads on each row — no code shipped for either, nothing to
+> tick here beyond the Top 5 refresh. That left [3.5] exploration as the
+> actual top actionable score; shipped it (commit `6fe4e47c`, issue
+> #294): `MapCanvas.tsx`'s one-time initial-camera effect now fits the
+> whole focus-node bounding box into the viewport instead of just
+> centring the centroid at 1x, so a wide open branch can't leave its
+> outermost node off-screen at mount. Top 5 below is refreshed again for
+> the next pass — only two rows (crash, hazard-fan) are freshly
+> confirmed live; the rest of the list needs the same direct-read
+> discipline before its next pick, not assumed accurate from an older
+> pass.
 
 ## Top 5 findings (scored)
 
@@ -43,31 +66,6 @@
   get the owner's device log (SELF -> dev tools -> DIAGNOSTICS -> PREV
   SESSION, domain ERROR) to confirm before closing; can't be shipped
   blind on web alone.
-
-### [4.7] world — Ash Mire boss sits three natural steps from a fresh spawn
-- category: external-critique
-- impact: 7
-- ease: 6
-- next: the fishing-village map has since been re-layered into a
-  column-layered gauntlet with a guaranteed pre-boss REST (Phase 65 D1 +
-  53c) — check whether this finding is now stale-by-redesign before
-  editing the unlock graph again; if still live, it's a balance question
-  (can a fresh level-1 win the guaranteed boss encounter), not a graph
-  question, so scope to `/world-tuning`.
-
-### [4.2] combat — the first map fight is an elite-tier foe (Brine Hag) with a 3-phase telegraph
-- category: external-critique
-- impact: 6
-- ease: 7
-- next: gate the first encounter of a fresh save to a 1-phase,
-  zero-keyword foe (encounter-table / first-encounter policy, not UI).
-
-### [3.5] exploration — off-screen open map nodes no-op silently on tap
-- category: external-critique
-- impact: 6
-- ease: 5
-- next: camera auto-pan or initial-camera clamp in the exploration-hub map
-  presenter; main-agent UI fix.
 
 ### [3.5] hazard — the fanned route-choice hand truncates card names illegibly
 - category: external-critique

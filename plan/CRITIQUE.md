@@ -444,24 +444,6 @@
   toward it; fold the pass-23 backdrop row into the same pass.
 - source: owner playtest
 
-### [MED] combat — the first map fight is an elite-tier foe with a 3-phase threat sequence
-- pass: expo playthrough 2026-09-04
-- viewport: 390x844
-- auth_state: fresh save, first map encounter
-- category: pacing
-- observation: the very first fight (Brine Hag) opened with HIDE + RAVENOUS and
-  a three-phase telegraph, before the tutorial had taught staging or the
-  stance check. A new player reads two foe keywords, a fork glyph and a
-  stance check on their first turn. The fight was won in the playtest, so
-  the ask is cognitive, not mechanical.
-- evidence: `screenshots/playtest/` 2026-09-04; `combat.mock.ts` deliberately
-  mirrors this foe so the UI evidence tests see the same load.
-- suggested fix: gate the first encounter of a fresh save to a one-phase,
-  zero-keyword foe (or strip keywords from the first roll of the encounter
-  table) and let Brine Hag be fight two. Engine-side: encounter table /
-  first-encounter policy, not the UI.
-- source: owner playtest
-
 ### [HIGH] general — no mid/late equipment or signature skills exist for THE PATH's sixth axis
 - pass: user-jot (commit 343d7e98)
 - viewport: unspecified
@@ -495,45 +477,6 @@
   tree shows this or only trees authored without reply descriptions.
 - source: loop
 
-
-### [MED] world — the Ash Mire boss sits three natural steps from a fresh spawn and flattens a level-1 pilgrim
-- pass: user-session playthrough 2026-08-29 (commit 0b39b120)
-- viewport: 420x900 (web export)
-- auth_state: fresh save, level 1
-- category: functional
-- observation: a brand-new run walked its most obvious open path —
-  Crossing (quest) → Drowned Shrine (quest) → Black Cairn (gather) —
-  and the next open node was Ash Mire, labelled "boss" on the map:
-  The King of Revenge, 150 VITAE, 4 phases. It killed the level-1
-  pilgrim (80 VITAE, starter deck) in four rounds. The node IS
-  signposted as a boss, but it sat on the natural forward path with
-  ordinary encounter/rest nodes still sealed around it, so the
-  first real fight of the run can be an unwinnable one.
-- suggested fix: audit the fishing-village unlock graph so at least
-  one ordinary encounter/rest node opens before (or beside) the Ash
-  Mire edge, or gate the boss edge behind more trodden nodes. Check
-  the per-map doctrine in world-tuning for the intended first-fight
-  difficulty curve.
-- source: user (session playthrough)
-
-### [MED] exploration — open map nodes just off-screen no-op silently on tap; the map recenters against manual panning
-- pass: user-session playthrough 2026-08-29 (commit 0b39b120)
-- viewport: 420x900 (web export)
-- auth_state: fresh save
-- category: functional / UX
-- observation: open (glowing) nodes that sit outside the viewport
-  (e.g. Sea Cave at x=-46 on a 420-wide screen) accept the tap event
-  but open no travel sheet — a silent dead tap with no feedback.
-  Manually panning the map to bring the node into view fights an
-  auto-recenter that pulls the camera back, so reaching an edge node
-  takes several attempts. The node legend advertises "tap a glowing
-  node to travel", which reads as a lie the first time it happens.
-- suggested fix: either auto-pan the camera to a tapped off-screen
-  node (then open its sheet), or clamp the initial camera so every
-  currently-open node is in view; at minimum give the dead tap
-  feedback (toast or camera nudge). Check the recenter behavior in
-  the map canvas component for why manual pans are overridden.
-- source: user (session playthrough)
 
 ### [HIGH] combat — user crash on ACCEPTING the post-combat card reward (second unreproduced crash report)
 - **LIKELY THE SAME BUG — RESOLVED 2026-09-04 (verify before closing).** The
@@ -1773,6 +1716,115 @@ one level down, in the routing helper `onApply` calls next).
 - source: loop
 
 ## Done
+
+### [x] [MED] exploration — open map nodes just off-screen no-op silently on tap; the map recenters against manual panning — RESOLVED 2026-09-10 (commit 6fe4e47c, issue #294)
+- pass: user-session playthrough 2026-08-29 (commit 0b39b120)
+- viewport: 420x900 (web export)
+- auth_state: fresh save
+- category: functional / UX
+- observation: open (glowing) nodes that sit outside the viewport
+  (e.g. Sea Cave at x=-46 on a 420-wide screen) accept the tap event
+  but open no travel sheet — a silent dead tap with no feedback.
+  Manually panning the map to bring the node into view fights an
+  auto-recenter that pulls the camera back, so reaching an edge node
+  takes several attempts. The node legend advertises "tap a glowing
+  node to travel", which reads as a lie the first time it happens.
+- suggested fix: either auto-pan the camera to a tapped off-screen
+  node (then open its sheet), or clamp the initial camera so every
+  currently-open node is in view; at minimum give the dead tap
+  feedback (toast or camera nudge). Check the recenter behavior in
+  the map canvas component for why manual pans are overridden.
+- source: user (session playthrough)
+- resolution: root cause was `MapCanvas.tsx`'s one-time initial-camera
+  effect, unchanged since the finding's own pass date — it centred the
+  focus (available + current) nodes' centroid at a fixed 1x scale, so a
+  wide branch of simultaneously-open nodes could still leave the
+  outermost one off-screen the instant the map opened (no code path in
+  `onNodePress` actually drops an 'available' tap — the described "dead
+  tap" was this off-screen unreachability, not a handler bug). Took the
+  suggested fix's second option: `computeFocusTransform` now fits the
+  whole focus bounding box into the viewport, zooming out (never in,
+  and never past the pinch gesture's own 0.6 floor) just enough that
+  every currently-open node starts on-screen. Auto-pan-on-tap (option
+  one) was left undone — the initial-fit gap was the reproducible
+  defect; a tap-to-pan affordance is separable follow-up if a future
+  pass still finds nodes going out of frame after a move.
+
+### [x] [MED] world — the Ash Mire boss sits three natural steps from a fresh spawn and flattens a level-1 pilgrim — RESOLVED-STALE 2026-09-10 (superseded by redesign, no commit — pre-existing since Phase 53c/65)
+- pass: user-session playthrough 2026-08-29 (commit 0b39b120)
+- viewport: 420x900 (web export)
+- auth_state: fresh save, level 1
+- category: functional
+- observation: a brand-new run walked its most obvious open path —
+  Crossing (quest) → Drowned Shrine (quest) → Black Cairn (gather) —
+  and the next open node was Ash Mire, labelled "boss" on the map:
+  The King of Revenge, 150 VITAE, 4 phases. It killed the level-1
+  pilgrim (80 VITAE, starter deck) in four rounds. The node IS
+  signposted as a boss, but it sat on the natural forward path with
+  ordinary encounter/rest nodes still sealed around it, so the
+  first real fight of the run can be an unwinnable one.
+- suggested fix: audit the fishing-village unlock graph so at least
+  one ordinary encounter/rest node opens before (or beside) the Ash
+  Mire edge, or gate the boss edge behind more trodden nodes. Check
+  the per-map doctrine in world-tuning for the intended first-fight
+  difficulty curve.
+- source: user (session playthrough)
+- resolution: re-verified directly against current source (`Coastal-
+  Village/maps.ts`, `MapEvents/content.ts`) before picking this row —
+  the fishing-village unlock graph this finding describes no longer
+  exists. Phase 53c/53d/60/61 rebuilt the map into a column-layered
+  gauntlet where every node's kind/foe is now an explicit, pinned
+  assignment (an unassigned node throws on import — no random rotation
+  survives); the boss (fv-6, still `king-of-revenge`) sits four columns
+  past spawn behind two branching columns of ordinary normal-difficulty
+  encounters (Little Belle, Foot-Stealer, Water-Holger — none elite)
+  and a GUARANTEED pre-boss rest node (fv-20, reachable from every one
+  of the branch's five terminal nodes per the map's own routing
+  comment) — exactly the suggested fix's "ordinary encounter/rest node
+  before the boss edge" condition, already met. The boss is also pinned
+  to `FV_BOSS_LEVEL = 3`, a deliberately low absolute level, with the
+  map's own comment stating the reason verbatim: "so a fresh player can
+  actually win the climax." The specific complaint (an unwinnable
+  first-real-fight sprung on a fresh level-1 run) no longer describes
+  the current map; not re-filed.
+
+### [x] [MED] combat — the first map fight is an elite-tier foe with a 3-phase threat sequence — RESOLVED-STALE 2026-09-10 (superseded by redesign, no commit — pre-existing since Phase 53c/53d/61)
+- pass: expo playthrough 2026-09-04
+- viewport: 390x844
+- auth_state: fresh save, first map encounter
+- category: pacing
+- observation: the very first fight (Brine Hag) opened with HIDE + RAVENOUS and
+  a three-phase telegraph, before the tutorial had taught staging or the
+  stance check. A new player reads two foe keywords, a fork glyph and a
+  stance check on their first turn. The fight was won in the playtest, so
+  the ask is cognitive, not mechanical.
+- evidence: `screenshots/playtest/` 2026-09-04; `combat.mock.ts` deliberately
+  mirrors this foe so the UI evidence tests see the same load.
+- suggested fix: gate the first encounter of a fresh save to a one-phase,
+  zero-keyword foe (or strip keywords from the first roll of the encounter
+  table) and let Brine Hag be fight two. Engine-side: encounter table /
+  first-encounter policy, not the UI.
+- source: owner playtest
+- resolution: re-verified directly against current source before picking
+  this row (same investigation as the Ash Mire row above, both closed
+  together — the fishing-village redesign resolved both at once). Brine
+  Hag (still `difficulty: 'elite'`, still a 4-phase enemy deck in
+  `combat.enemy-decks.ts`) has NO authored node assignment anywhere on
+  the current fishing-village map (`grep` across `World/MapEvents/
+  content.ts` for the slug: zero hits) — Phase 53c/53d/61 replaced the
+  map's old random-rotation encounter draw with per-node pinned foes,
+  and Brine Hag was never one of the ones re-pinned. The actual first
+  three combat foes a fresh save meets are Little Belle (`difficulty:
+  'normal'`, fv-13), Foot-Stealer (`normal`, fv-15), and Water-Holger
+  (`normal`, fv-24) — none elite, none multi-phase-telegraph before the
+  first ordinary fight. The specific complaint no longer describes the
+  current map; not re-filed. Noted in passing, not chased here (out of
+  scope for a pacing row): Brine Hag still sits in `EnemiesByMap
+  ['fishing-village']`, but every fishing-village node's event pool now
+  carries an explicit pinned `enemySlug`, so `generateEncounter`'s
+  random-draw branch (the only path that would ever pick her from that
+  array) looks unreachable for this map — a `/adjust-enemies` sweep may
+  want to check whether her `mapName` field should move.
 
 ### [x] [HIGH] combat — user hit a mid-combat crash that 30 seeded UI runs could not reproduce — COVERAGE-COMPLETE 2026-09-10 (commit c51547ae, issue #277); crash itself still UNREPRODUCED on web
 - **RESOLVED 2026-09-04 — REPRODUCED, ROOT-CAUSED, FIXED.** Sentry landed
