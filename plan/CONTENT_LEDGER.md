@@ -15,14 +15,14 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-10 | 2b02ff60 | 5 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-10 | ce6e6a60 | 5 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-10 | 17b38058 | 5 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-10 | PENDING | 5 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-10 | 47bcda82 | 5 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-npcs pass 5, 2026-09-10, commit PENDING]** One CREATE (The
+> **[adjust-npcs pass 5, 2026-09-10, commit 47bcda82]** One CREATE (The
 > Ribbon-Picker, staged on The Capital), zero-UPDATE, zero-REMOVE. Unlike
 > the sibling categories' zero-action pass-5 re-audits, this was NOT a
 > stale-clean surface: `git log 6b365d01..HEAD --
