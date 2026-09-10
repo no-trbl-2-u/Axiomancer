@@ -13,7 +13,7 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-10 | 35c4c56c | 5 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-10 | 2b02ff60 | 5 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-10 | PENDING | 5 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-10 | ce6e6a60 | 5 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-09 | 9e423a34 | 4 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-09 | 6b365d01 | 4 |
 
@@ -22,7 +22,7 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-enemies pass 5, 2026-09-10, commit PENDING]** Zero-CREATE,
+> **[adjust-enemies pass 5, 2026-09-10, commit ce6e6a60]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — full re-audit, not a rubber stamp of pass
 > 4's findings. `git log 84be1db4..HEAD -- axiomancer-mechanics/src/Enemy
 > axiomancer-mechanics/src/Combat/combat.enemy-decks.ts
