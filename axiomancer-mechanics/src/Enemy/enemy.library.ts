@@ -3527,6 +3527,20 @@ export const EnemiesByMap = {
         // boss), the roster's second-thinnest. One town-native addition.
         TheAdjuster,
     ],
+    // The Capital (Phase W5, 2026-09-10) — map 5 of the northern continent,
+    // where every ribbon-road ends. No new enemies authored (/forge owns
+    // maps/events/art, not per-item content) — reuses northern-city's own
+    // roster (a grander sibling city, same class of enforcer) plus two
+    // forest re-treads for variety, the northern-city precedent. The Factor
+    // is the authored boss (already defined above), pinned per-node in
+    // `MapEvents/content.ts`. Filed to `plan/AUDIT.md` as a residue note for
+    // adjust-enemies: capital-native enemies are a legitimate future
+    // backfill, same as the caverns/connecting-river/town-across-river
+    // passes did for their own maps.
+    'the-capital': [
+        TollSergeant, GuildKnife, WharfShrike, TheFactor,
+        CursedPaladin, VampireThrall,
+    ],
     // The Aporia (W-01) — three acts of rising difficulty. Pools reuse the
     // shared roster (wandering foes scale to the player via the adaptive
     // level bands); each act adds its authored boss.

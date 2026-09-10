@@ -127,7 +127,7 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         expect(eventKinds['cr-13']).toBe('travel');
     });
 
-    it('--route-audit reports all 6 town-across-river nodes (Phase W4)', async () => {
+    it('--route-audit reports all 7 town-across-river nodes (Phase W5)', async () => {
         const logPath = tmpPath('town-across-river-coverage');
 
         await runGameCli(['--route-audit', 'town-across-river', '--state-log', logPath]);
@@ -136,13 +136,33 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         expect(summary.classification).toBe('coverage-audit');
         expect(summary.survived).toBe(true);
         expect(summary.unvisitedNodeIds).toEqual([]);
-        expect((summary.visitedNodeIds as string[]).length).toBe(6);
-        expect((summary.resolvedNodeIds as string[]).length).toBe(6);
+        expect((summary.visitedNodeIds as string[]).length).toBe(7);
+        expect((summary.resolvedNodeIds as string[]).length).toBe(7);
 
         const eventKinds = summary.eventKinds as Record<string, string>;
         expect(eventKinds['tar-1']).toBe('cutscene');
         expect(eventKinds['tar-2']).toBe('interaction');
         expect(eventKinds['tar-6']).toBe('encounter');
+        expect(eventKinds['tar-7']).toBe('travel');
+    });
+
+    it('--route-audit reports all 9 the-capital nodes (Phase W5)', async () => {
+        const logPath = tmpPath('the-capital-coverage');
+
+        await runGameCli(['--route-audit', 'the-capital', '--state-log', logPath]);
+
+        const summary = routeEnd(logPath);
+        expect(summary.classification).toBe('coverage-audit');
+        expect(summary.survived).toBe(true);
+        expect(summary.unvisitedNodeIds).toEqual([]);
+        expect((summary.visitedNodeIds as string[]).length).toBe(9);
+        expect((summary.resolvedNodeIds as string[]).length).toBe(9);
+
+        const eventKinds = summary.eventKinds as Record<string, string>;
+        expect(eventKinds['cap-1']).toBe('cutscene');
+        expect(eventKinds['cap-2']).toBe('interaction');
+        expect(eventKinds['cap-8']).toBe('narration');
+        expect(eventKinds['cap-9']).toBe('encounter');
     });
 
     it('a scripted route stops at a combat defeat and downgrades to "blocked" — never reports post-defeat traversal as survivorship', async () => {

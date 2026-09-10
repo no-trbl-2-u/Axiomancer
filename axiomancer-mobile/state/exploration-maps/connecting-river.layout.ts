@@ -12,7 +12,7 @@ export const connectingRiverLayout: MapLayout = {
     continent: 'CONTINENT · NORTHERN',
     region: 'The Connecting River',
     // Ordinal only — no node/path count (CRITIQUE pass 19).
-    regionProgress: 'Map iii of iv',
+    regionProgress: 'Map iii of v',
     nodes: [
         // ── c0 — the current takes the boat ──
         { id: 'cr-1',  x: 180, y: 375, label: 'The Launch', description: 'The current takes the boat before the bank lets go of it.' },

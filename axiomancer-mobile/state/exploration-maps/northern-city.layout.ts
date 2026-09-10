@@ -14,7 +14,7 @@ export const northernCityLayout: MapLayout = {
     continent: 'CONTINENT · NORTHERN',
     region: 'The Northern City',
     // Ordinal only — no node/path count (CRITIQUE pass 19).
-    regionProgress: 'Map ii of iv',
+    regionProgress: 'Map ii of v',
     nodes: [
         // ── c0 — the gatehouse ──
         { id: 'ncy-1',  x: 180, y: 375, label: 'The Gatehouse', description: 'The stair ends in lamplight. The city starts at once.' },

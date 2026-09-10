@@ -1974,6 +1974,22 @@ const tarPortreeveBoss: MapEventPool = {
     }],
 };
 
+// The ribbon-road stands open (Phase W5). The DOOR to the-capital, one
+// column past the boss (the nc-26/ncy-26/cr-13 pattern).
+const tarRibbonRoadOpen: MapEventPool = {
+    id: 'tar-7.travel',
+    entries: [{
+        kind: 'travel', weight: 1,
+        payload: {
+            kind: 'travel',
+            destinationContinent: 'northern-continent',
+            destinationMap: 'the-capital',
+            description: 'Past the Portreeve\'s desk, the ribbon-road runs straight to the capital. Every nominee walks it eventually.',
+        },
+        alignmentDelta: { outlook: 1, scope: 1 },
+    }],
+};
+
 const TOWN_ACROSS_RIVER_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> = [
     { nodeId: 'tar-1', pool: tarArrival },
     { nodeId: 'tar-2', pool: tarSweetheart },
@@ -1981,6 +1997,186 @@ const TOWN_ACROSS_RIVER_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPoo
     { nodeId: 'tar-4', pool: tarVillageCourt },
     { nodeId: 'tar-5', pool: crEncounterPool('tar-5', 'A dog that isn\'t anyone\'s barks at you like it remembers a different face.') },
     { nodeId: 'tar-6', pool: tarPortreeveBoss },
+    { nodeId: 'tar-7', pool: tarRibbonRoadOpen },
+];
+
+// ─── the capital pools (Phase W5) ──────────────────────────────────────────────
+//
+// Map 5 of the northern continent — where the ribbon-roads converge. See
+// `Continents/Northern-Continent/maps.ts` for the map's own header comment
+// (the full narrative rationale). Every `MapEventKind` this map uses was
+// already shipped elsewhere; no new kind is introduced.
+
+const capArrival: MapEventPool = {
+    id: 'cap-1.cutscene',
+    entries: [{
+        kind: 'cutscene', weight: 1,
+        payload: {
+            kind: 'cutscene',
+            lines: [
+                'The ribbon-road ends at a wall tall enough to lose the sky behind.',
+                'Every gate in the north has a line. This one has the longest.',
+            ],
+            description: 'The capital.',
+        },
+        alignmentDelta: { scope: 1 },
+    }],
+};
+
+const capHerald: MapEventPool = {
+    id: 'cap-2.interaction',
+    entries: [{
+        kind: 'interaction', weight: 1,
+        payload: {
+            kind: 'interaction',
+            npcName: 'The Herald',
+            description: 'She checks ribbons against a ledger before she checks faces at all.',
+        },
+    }],
+};
+
+const capPetitionLine: MapEventPool = {
+    id: 'cap-3.hazard',
+    entries: [{
+        kind: 'hazard', weight: 1,
+        payload: {
+            kind: 'hazard',
+            damage: 4,
+            description: 'The petition line does not move and does not forgive being pushed. An elbow finds a rib — not necessarily yours.',
+        },
+    }],
+};
+
+const capWaitingRoom: MapEventPool = {
+    id: 'cap-4.rest',
+    entries: [{
+        kind: 'rest', weight: 1,
+        payload: { kind: 'rest', shelter: 'inn', description: 'The Waiting Room, paid by the hour. Petitioners sleep here the way they queue — in shifts.' },
+    }],
+};
+
+const capRibbonScraps: MapEventPool = {
+    id: 'cap-5.gathering',
+    entries: [{
+        kind: 'gathering', weight: 1,
+        payload: {
+            kind: 'gathering',
+            items: [{
+                id: 'frayed-ribbon', name: 'Frayed Ribbon', description: 'Cut from a petition the gate refused. The color still means something to somebody.',
+                category: 'material', quantity: 1,
+            }],
+            description: 'Refused petitions pile up against the wall, ribbons still tied to the corners.',
+        },
+    }],
+};
+
+const capMarket: MapEventPool = {
+    id: 'cap-6.village',
+    entries: [{
+        kind: 'village', weight: 1,
+        payload: {
+            kind: 'village',
+            villageName: 'The Petitioners\' Row',
+            merchants: [{ name: 'Capital Provisioner', isShopkeeper: true }],
+            shop: {
+                wares: [
+                    { itemId: 'greater-healing-potion', price: 45 },
+                    { itemId: 'supreme-healing-potion',  price: 80 },
+                    { itemId: 'resonance-crystal',       price: 55 },
+                    { itemId: 'phoenix-tear',             price: 65 },
+                ],
+            },
+            description: 'Everything the provinces don\'t stock, priced for people with nothing left to lose but coin.',
+        },
+    }],
+};
+
+const capDroppedPurse: MapEventPool = {
+    id: 'cap-7.loot-cache',
+    entries: [{
+        kind: 'loot-cache', weight: 1,
+        payload: {
+            kind: 'loot-cache',
+            currency: 22,
+            description: 'A purse, dropped and not missed — or missed and not worth the line to reclaim.',
+        },
+    }],
+};
+
+// The court convenes — the advisor-selection ritual's third and final
+// payoff. Reads back tar-4's `sweetheart-was-nominated` flag (the closest,
+// most personal callback) for a reactive branch; both threads converge on
+// the same dais either way.
+const capCourtConvenes: MapEventPool = {
+    id: 'cap-8.narration',
+    entries: [{
+        kind: 'narration', weight: 1,
+        payload: {
+            kind: 'narration',
+            description: 'The court hall swallows the line whole. A dais, a bell, and a Factor with a ledger heavier than every ribbon-road that fed it.',
+            dialogue: {
+                id: 'cap-court-convenes',
+                rootId: 'gathered',
+                nodes: {
+                    gathered: {
+                        id: 'gathered',
+                        text: 'The bell rings once. The Factor reads ribbons, not faces. The river-court\'s old woman read a boy the same way. A ledger line. It has to balance by the hour\'s end.',
+                        choices: [
+                            {
+                                text: 'Find her in the line.',
+                                nextNodeId: 'found_her',
+                                requires: { flag: 'sweetheart-was-nominated' },
+                                effect: { setFlag: 'capital-selection-witnessed' },
+                            },
+                            {
+                                text: 'Watch the proceedings.',
+                                nextNodeId: 'watched_anyway',
+                                effect: { setFlag: 'capital-selection-witnessed' },
+                            },
+                        ],
+                    },
+                    found_her: {
+                        id: 'found_her',
+                        text: 'She stands where the boy stood, downriver. Where she stood at her own green, too. The same rite. Worn smoother each time. The Factor doesn\'t call her name. He calls her color, and marks the ledger.',
+                    },
+                    watched_anyway: {
+                        id: 'watched_anyway',
+                        text: 'Ribbon by ribbon, the Factor clears the line. Nobody argues with the ledger. Nobody has yet.',
+                    },
+                },
+            },
+        },
+    }],
+};
+
+// The Factor's ledger closes the map. Already met as a northern-city
+// debt-broker (`EnemiesByMap['northern-city']`); reused here at an elevated
+// level — the capital is where his office was always going to end up.
+const CAP_BOSS_LEVEL = 22;
+const capTheFactorBoss: MapEventPool = {
+    id: 'cap-9.encounter-boss',
+    entries: [{
+        kind: 'encounter', weight: 1,
+        payload: {
+            kind: 'encounter',
+            enemySlug: 'the-factor',
+            isBoss: true,
+            level: CAP_BOSS_LEVEL,
+            description: 'He buys positions, not fights. Yours is the last one on today\'s ledger.',
+        },
+    }],
+};
+
+const THE_CAPITAL_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> = [
+    { nodeId: 'cap-1', pool: capArrival },
+    { nodeId: 'cap-2', pool: capHerald },
+    { nodeId: 'cap-3', pool: capPetitionLine },
+    { nodeId: 'cap-4', pool: capWaitingRoom },
+    { nodeId: 'cap-5', pool: capRibbonScraps },
+    { nodeId: 'cap-6', pool: capMarket },
+    { nodeId: 'cap-7', pool: capDroppedPurse },
+    { nodeId: 'cap-8', pool: capCourtConvenes },
+    { nodeId: 'cap-9', pool: capTheFactorBoss },
 ];
 
 // ─── single registration entry point ─────────────────────────────────────────
@@ -2021,6 +2217,10 @@ export function registerMapEventContent(): void {
     for (const { nodeId, pool } of TOWN_ACROSS_RIVER_POOLS) {
         registerMapEventPool(pool);
         setNodeEventPoolOverride('northern-continent', 'town-across-river', nodeId, pool.id);
+    }
+    for (const { nodeId, pool } of THE_CAPITAL_POOLS) {
+        registerMapEventPool(pool);
+        setNodeEventPoolOverride('northern-continent', 'the-capital', nodeId, pool.id);
     }
 }
 

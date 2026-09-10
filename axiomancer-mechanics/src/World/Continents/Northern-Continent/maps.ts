@@ -688,6 +688,13 @@ const sweetheartTree: DialogueTree = {
                     text: "Tell me what's happened here.",
                     nextNodeId: 'news',
                 },
+                {
+                    // Phase W5 — the way to the capital. Placed last (the
+                    // Gate-Clerk/the_water_gate index-stability convention).
+                    text: "Where does the road go from here?",
+                    nextNodeId: 'the_capital_road',
+                    effect: { startQuest: 'get-to-the-capital' },
+                },
             ],
         },
         stayed: {
@@ -702,6 +709,14 @@ const sweetheartTree: DialogueTree = {
             id: 'news',
             text: "\"The town elected a new ribbon-color this spring.\" She doesn't explain further. \"You'll see what that means, if you stay long enough.\"",
         },
+        // Phase W5 — the way to the capital. Ungated, like the Gate-Clerk's
+        // the_water_gate grant: she'll tell anyone the road; the map's own
+        // graph still gates the crossing on the Portreeve, one column
+        // before the door.
+        the_capital_road: {
+            id: 'the_capital_road',
+            text: "\"Same road the ribbon walks.\" She nods past the rooftops, toward where the smoke thins. \"Every color the provinces sent goes to the capital this season. Mine included.\" A beat. \"If you're walking, walk with me that far.\"",
+        },
     },
 };
 
@@ -711,13 +726,40 @@ const theSweetheart: NPC = {
     dialogueTree: sweetheartTree,
 };
 
+// ─── Quest content ────────────────────────────────────────────────────────────
+
+// `get-to-the-capital` is a declared TownAcrossRiverQuests union member
+// (quest.library.ts) with no authored Quest object until now. Granted from
+// The Sweetheart (the guaranteed singleton, tar-2) — the getToConnectingRiverQuest
+// / getToTownAcrossRiverQuest precedent: the Quest object lives on the SAME
+// map as the NPC who grants it.
+const getToTheCapitalQuest: Quest = {
+    name: 'get-to-the-capital',
+    description: "Follow the ribbon-road to the capital.",
+    mapName: 'town-across-river',
+    status: 'available',
+    objectives: [
+        {
+            id: 'reach-the-capital',
+            type: 'reach',
+            target: 'cap-1',
+            description: "Reach the capital.",
+            requiredCount: 1,
+            currentCount: 0,
+        },
+    ],
+    reward: { kind: 'experience', amount: 65 },
+};
+
 // ─── Map definition ───────────────────────────────────────────────────────────
 //
 // Four columns, three lanes across the middle: the coda location
 // (`map.library.ts`: "Home of sweetheart"), deliberately small — a
 // homecoming, not a new front. Three singleton columns, the default
 // tolerance: c0 (the arrival), c1 (The Sweetheart), and c3 (the Portreeve,
-// the climax). No door onward — no W5+ map is shipped yet.
+// the climax). Phase W5 (2026-09-10) — tar-7, one column past the boss, is
+// the DOOR to the-capital (the nc-26/ncy-26/cr-13 pattern: the way out opens
+// only after the climax).
 
 const townAcrossRiver: MapDefinition = {
     name: 'town-across-river',
@@ -739,10 +781,121 @@ const townAcrossRiver: MapDefinition = {
         { id: 'tar-3', location: [2, 1], connectedNodes: ['tar-6'] },
         { id: 'tar-4', location: [2, 0], connectedNodes: ['tar-6'] },
         { id: 'tar-5', location: [2, -1], connectedNodes: ['tar-6'] },
-        // ── c3 — the Portreeve. Every run ends here — no door yet. ────
-        { id: 'tar-6', location: [3, 0], connectedNodes: [] },
+        // ── c3 — the Portreeve. Every run goes through here. ──────────
+        { id: 'tar-6', location: [3, 0], connectedNodes: ['tar-7'] },
+        // ── c4 — the ribbon-road stands open (Phase W5). The DOOR to
+        //        the-capital, one column past the boss. ────────────────
+        { id: 'tar-7', location: [4, 0], connectedNodes: [] },
     ],
     npcs: [theSweetheart],
+    enemies: [],
+    uniqueEvents: [],
+    quests: [getToTheCapitalQuest],
+    images: {
+        mapImage: { alt: '', src: '' },
+        combatImage: { alt: '', src: '' },
+    },
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// THE CAPITAL (Phase W5, 2026-09-10) — map 5 of the northern continent.
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Where the ribbon-roads end. `cr-9`'s river-court boy went "to the capital
+// in the spring boat"; `tar-4`'s sweetheart went the same way overland. This
+// is that destination — the selection made concrete instead of rumored.
+// The Factor, already met as a northern-city debt-broker, presides: he
+// "buys positions... his office is wherever you are standing when the
+// interest comes due," which is exactly what the capital's court is for.
+// No new enemies authored — the pool reuses northern-city's own roster
+// (a grander sibling city, same class of enforcer) plus two forest
+// re-treads for variety, the northern-city precedent (`EnemiesByMap`).
+
+// ─── NPC content ──────────────────────────────────────────────────────────────
+
+// The Herald keeps the gate ledger — the capital's first face, reading
+// ribbons instead of names (mirrors the Gate-Clerk's book, colder).
+const heraldTree: DialogueTree = {
+    id: 'the-herald',
+    rootId: 'greet',
+    nodes: {
+        greet: {
+            id: 'greet',
+            text: "A woman checks ribbons against a ledger, not faces. \"State your business or state your color.\"",
+            choices: [
+                {
+                    text: "I'm here for the selection.",
+                    nextNodeId: 'nominee',
+                    requires: { flag: 'sweetheart-was-nominated' },
+                },
+                {
+                    text: "I'm no one's nominee. Just watching.",
+                    nextNodeId: 'watcher',
+                },
+                {
+                    text: "What happens to the ones who lose?",
+                    nextNodeId: 'the_losers',
+                },
+            ],
+        },
+        nominee: {
+            id: 'nominee',
+            text: "\"Ribbon color, then. I don't need the name — the ribbon already has one.\" She marks the ledger without looking up. \"Court convenes at the bell. Don't be late on her behalf.\"",
+        },
+        watcher: {
+            id: 'watcher',
+            text: "\"Watching is a business too, here.\" She waves you past. \"Mind the line doesn't move for you either.\"",
+        },
+        the_losers: {
+            id: 'the_losers',
+            text: "\"Go home,\" she says, like it's obvious, because to her it is. \"The tally balances either way. That's the whole of the mercy in it.\"",
+        },
+    },
+};
+
+const theHerald: NPC = {
+    name: 'The Herald',
+    description: 'Keeps the gate ledger, reading ribbons instead of faces. The capital\'s first word on every nominee.',
+    dialogueTree: heraldTree,
+};
+
+// ─── Map definition ───────────────────────────────────────────────────────────
+//
+// Six columns: the arrival, The Herald (a singleton so the capital's first
+// face is on every route — the fv-2/nc-2/cr-2/ncy-2 precedent), a 3-lane
+// column (hazard / rest / gathering), a 2-lane column (market / loot-cache),
+// the court narration (singleton — the payoff reads flags planted at cr-9
+// and tar-4), and The Factor (singleton — the climax). No door onward yet
+// (the tar-6/nc-25-pre-W3 pattern): the next continent is not shipped.
+
+const theCapital: MapDefinition = {
+    name: 'the-capital',
+    continent: 'northern-continent',
+    description: 'A wall tall enough to lose the sky behind. Every gate has a line; this one has the longest.',
+    startingNode: {
+        id: 'cap-1',
+        location: [0, 0],
+        connectedNodes: ['cap-2'],
+    },
+    nodes: [
+        // ── c0 — the ribbon-road ends at the wall. ────────────────────
+        { id: 'cap-1', location: [0, 0], connectedNodes: ['cap-2'] },
+        // ── c1 — The Herald. A singleton column so the capital's first
+        //        face is on every route (the fv-2/nc-2 precedent).
+        { id: 'cap-2', location: [1, 0], connectedNodes: ['cap-3', 'cap-4', 'cap-5'] },
+        // ── c2 — hazard / rest (inn) / gathering ───────────────────────
+        { id: 'cap-3', location: [2, 1], connectedNodes: ['cap-6', 'cap-7'] },
+        { id: 'cap-4', location: [2, 0], connectedNodes: ['cap-6', 'cap-7'] },
+        { id: 'cap-5', location: [2, -1], connectedNodes: ['cap-6', 'cap-7'] },
+        // ── c3 — the market / loot-cache ───────────────────────────────
+        { id: 'cap-6', location: [3, 1], connectedNodes: ['cap-8'] },
+        { id: 'cap-7', location: [3, -1], connectedNodes: ['cap-8'] },
+        // ── c4 — the court convenes. Every run goes through here. ──────
+        { id: 'cap-8', location: [4, 0], connectedNodes: ['cap-9'] },
+        // ── c5 — The Factor. The climax — no door onward yet. ──────────
+        { id: 'cap-9', location: [5, 0], connectedNodes: [] },
+    ],
+    npcs: [theHerald],
     enemies: [],
     uniqueEvents: [],
     quests: [],
@@ -752,4 +905,4 @@ const townAcrossRiver: MapDefinition = {
     },
 };
 
-export { caverns, northernCity, connectingRiver, townAcrossRiver };
+export { caverns, northernCity, connectingRiver, townAcrossRiver, theCapital };

@@ -25,13 +25,14 @@ export function createStartingWorld(): WorldState {
         availableMaps: [],
         // Phase W3 — 'northern-city' joins the ledger of locked maps.
         // Phase W4 — 'connecting-river' and 'town-across-river' join it too.
-        // Note for old saves: a v21 save seeded before W3/W4 lists fewer
+        // Phase W5 — 'the-capital' joins it too.
+        // Note for old saves: a v21 save seeded before W3/W4/W5 lists fewer
         // entries here, and that is FINE — `unlockMap` (the travel handler's
         // step 3) moves any registered destination into `availableMaps`
         // whether or not the catalogue ever listed it as locked, so no
         // migration hop is needed for the door to work (pinned in
         // travel-kind e2e).
-        lockedMaps: ['caverns', 'northern-city', 'connecting-river', 'town-across-river'],
+        lockedMaps: ['caverns', 'northern-city', 'connecting-river', 'town-across-river', 'the-capital'],
         completedMaps: [],
     };
     return {

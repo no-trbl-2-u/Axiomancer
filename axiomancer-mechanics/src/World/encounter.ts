@@ -49,6 +49,8 @@ function nodeIdToMapName(nodeId: string): MapName | undefined {
     // Phase W4 (2026-08-31) — the river crossing and the town beyond it.
     if (nodeId.startsWith('cr-')) return 'connecting-river';
     if (nodeId.startsWith('tar-')) return 'town-across-river';
+    // Phase W5 (2026-09-10) — the capital, where every ribbon-road ends.
+    if (nodeId.startsWith('cap-')) return 'the-capital';
     // W-01 — The Aporia's three acts.
     if (nodeId.startsWith('ap1-')) return 'aporia-colonnade';
     if (nodeId.startsWith('ap2-')) return 'aporia-archive';

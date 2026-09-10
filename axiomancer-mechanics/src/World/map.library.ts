@@ -40,12 +40,15 @@ export type MapName =
 /**
  * NorthernContinentMaps are all the maps in the Northern Continent
  * - 'caverns': Caverns. Gather Iron ore
- * - 'northern-city': Northern City. Give artisans materials to build boat. 
+ * - 'northern-city': Northern City. Give artisans materials to build boat.
  *                    First hear rumors of the death of the advisor and     King seeking a new one.
  * - 'connecting-river': Connecting River. Use boat to sail down river. Meet islanders.
  *                       See ritual of selection of child to be nominated as the island's representitive for potential new advisor.
  * - 'town-across-river': Town across the river. Home of sweetheart. See sweetheart be nominatedas her village's
  *                       representitive for potential new advisor.
+ * - 'the-capital': The Capital (map 5, 2026-09-10). Where every nominee's ribbon-road
+ *                  ends — the river court's boy, the sweetheart, and whoever else the
+ *                  provinces sent this cycle. The Factor holds court over who is chosen.
  * @todo: Add more maps
  * @todo: Come up with better names
  */
@@ -53,4 +56,5 @@ export type NorthernContinentMapNames =
     'caverns' |
     'northern-city' |
     'connecting-river' |
-    'town-across-river';
+    'town-across-river' |
+    'the-capital';

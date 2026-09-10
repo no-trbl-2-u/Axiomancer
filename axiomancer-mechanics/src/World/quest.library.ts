@@ -21,6 +21,9 @@ type ConnectingRiverQuests =
     'join-islanders-for-ritual' |
     'get-to-town-across-river';
 
+type TownAcrossRiverQuests =
+    'get-to-the-capital';
+
 /**
  * QuestName is the union of all quest-LOG names in the game — the
  * objective-tracking quests consumed by `quest.engine.ts`, dialogue
@@ -39,4 +42,5 @@ export type QuestName =
     NorthernForestQuests |
     CavernsQuests |
     NorthernCityQuests |
-    ConnectingRiverQuests;
+    ConnectingRiverQuests |
+    TownAcrossRiverQuests;

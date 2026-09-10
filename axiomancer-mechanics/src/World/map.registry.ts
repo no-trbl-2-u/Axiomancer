@@ -10,7 +10,7 @@
 import { MapDefinition, MapState, NodeId, UniqueEvent } from './types';
 import { ContinentName, MapName } from './map.library';
 import { fishingVillage, northernForest } from './Continents/Coastal-Village/maps';
-import { caverns, northernCity, connectingRiver, townAcrossRiver } from './Continents/Northern-Continent/maps';
+import { caverns, northernCity, connectingRiver, townAcrossRiver, theCapital } from './Continents/Northern-Continent/maps';
 import { aporiaColonnade, aporiaArchive, aporiaProof } from './Labyrinth/maps';
 
 /** Thrown when navigating to a map that isn't registered. */
@@ -39,6 +39,8 @@ export const MAP_REGISTRY: Record<ContinentName, Partial<Record<MapName, MapDefi
         'northern-city': northernCity,
         'connecting-river': connectingRiver,
         'town-across-river': townAcrossRiver,
+        // W5 (2026-09-10) — the capital, where every ribbon-road ends.
+        'the-capital': theCapital,
     },
     // W-01 — The Aporia (dev-menu + CLI access only until the last
     // continent exists; see specs/world/W-01).

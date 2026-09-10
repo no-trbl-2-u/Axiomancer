@@ -115,4 +115,17 @@ describe('inter-map travel doors (Phase W1)', () => {
         expect(after.notifications?.toast?.text).toBe('You cross into The Sweetheart\'s Village.');
         expect(selectPacedEventRoute(after)).toBeNull();
     });
+
+    it('tar-7 crosses the ribbon-road into the-capital (Phase W5)', () => {
+        const { store, actions } = seatAt('northern-continent', 'town-across-river', 'tar-7');
+
+        expect(actions.resolveCurrentMapEvent('travel')).toBe(true);
+
+        const after = store.getState();
+        expect(after.world.currentMap.name).toBe('the-capital');
+        expect(after.world.currentContinent.name).toBe('northern-continent');
+        expect(after.world.currentMap.currentNode).toBe('cap-1');
+        expect(after.notifications?.toast?.text).toBe('You cross into The Capital.');
+        expect(selectPacedEventRoute(after)).toBeNull();
+    });
 });

@@ -13,7 +13,7 @@ export const cavernsLayout: MapLayout = {
     continent: 'CONTINENT · NORTHERN',
     region: 'The Caverns',
     // Ordinal only — no node/path count (CRITIQUE pass 19).
-    regionProgress: 'Map i of iv',
+    regionProgress: 'Map i of v',
     nodes: [
         // ── c0 — the mouth of the dark ──
         { id: 'nc-1',  x: 180, y: 375, label: 'The Cave Mouth', description: 'Daylight ends a few steps in. It does not argue.' },

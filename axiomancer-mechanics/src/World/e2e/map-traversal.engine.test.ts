@@ -19,7 +19,7 @@ import { describe, expect, it } from 'vitest';
 import { MAP_REGISTRY } from '../map.registry';
 import { auditMapTraversal, auditRouteCoverage } from '../world.reducer';
 import { fishingVillage, northernForest } from '../Continents/Coastal-Village/maps';
-import { caverns, northernCity, connectingRiver, townAcrossRiver } from '../Continents/Northern-Continent/maps';
+import { caverns, northernCity, connectingRiver, townAcrossRiver, theCapital } from '../Continents/Northern-Continent/maps';
 import type { MapDefinition } from '../types';
 
 /** Every registered gauntlet map, flattened. Labyrinth maps are exempt. */
@@ -28,10 +28,10 @@ const GAUNTLET_MAPS: MapDefinition[] = Object.values(MAP_REGISTRY)
     .filter((def): def is MapDefinition => def !== undefined && def.traversal !== 'labyrinth');
 
 describe('gauntlet map traversal invariants', () => {
-    it('registers the two coastal maps plus the four northern maps as gauntlets', () => {
+    it('registers the two coastal maps plus the five northern maps as gauntlets', () => {
         expect(GAUNTLET_MAPS.map(d => d.name).sort()).toEqual([
             'caverns', 'connecting-river', 'fishing-village', 'northern-city',
-            'northern-forest', 'town-across-river',
+            'northern-forest', 'the-capital', 'town-across-river',
         ]);
     });
 
@@ -109,12 +109,19 @@ describe('gauntlet map traversal invariants', () => {
                     widths.set(node.location[0], (widths.get(node.location[0]) ?? 0) + 1);
                 }
                 const branching = [...widths.values()].filter(w => w > 1).length;
-                // Phase W3/W4 — caverns, northern-city, and connecting-river
-                // all tolerate a FOURTH singleton: arrival, quest-giver,
-                // boss, and the door column the travel phase appended past
-                // the boss (the door is a chokepoint by design, exactly
-                // like the boss it follows).
-                const FOUR_SINGLETON_MAPS = ['caverns', 'northern-city', 'connecting-river'];
+                // Phase W3/W4/W5 — caverns, northern-city, connecting-river,
+                // town-across-river, and the-capital all tolerate a FOURTH
+                // singleton: arrival, quest-giver/npc, boss/pre-boss
+                // convergence, and the door column the travel phase
+                // appended past the boss (the door is a chokepoint by
+                // design, exactly like the boss it follows). the-capital
+                // additionally narrows a pre-boss convergence column
+                // (cap-8) to a singleton on purpose — the court-convenes
+                // narration is the guaranteed final beat before the climax.
+                const FOUR_SINGLETON_MAPS = [
+                    'caverns', 'northern-city', 'connecting-river',
+                    'town-across-river', 'the-capital',
+                ];
                 const singletonTolerance = FOUR_SINGLETON_MAPS.includes(def.name) ? 4 : 3;
                 expect(branching).toBeGreaterThanOrEqual(widths.size - singletonTolerance);
             });
@@ -312,19 +319,50 @@ describe('town-across-river — map 4 of the northern continent (Phase W4)', () 
     const audit = auditMapTraversal(townAcrossRiver);
     const coverage = auditRouteCoverage(townAcrossRiver);
 
-    it('guarantees the arrival, the Sweetheart, and the Portreeve on every route', () => {
+    it('guarantees the arrival, the Sweetheart, the Portreeve, and the door on every route', () => {
         expect(coverage.shareOfRoutes['tar-1']).toBe(1);
         expect(coverage.shareOfRoutes['tar-2']).toBe(1);
         expect(coverage.shareOfRoutes['tar-6']).toBe(1);
+        expect(coverage.shareOfRoutes['tar-7']).toBe(1);
     });
 
-    it('walks a full four-beat run every time, strand-free', () => {
-        expect(audit.longestRoute).toBe(4);
+    it('walks a full five-beat run every time, strand-free', () => {
+        // Phase W5 added the door column: 4 → 5 beats.
+        expect(audit.longestRoute).toBe(5);
         expect(audit.strands).toEqual([]);
         expect(audit.unreachableNodes).toEqual([]);
     });
 
-    it('ends at the Portreeve alone — no door onward yet', () => {
-        expect(audit.terminalNodes).toEqual(['tar-6']);
+    it('ends at the door alone — every run leaves through the ribbon-road (Phase W5)', () => {
+        // The boss is no longer terminal: tar-7, one column past it, is
+        // the travel door to the-capital (the nc-26 pattern — the way out
+        // opens only after the climax).
+        expect(audit.terminalNodes).toEqual(['tar-7']);
+        const boss = townAcrossRiver.nodes.find(n => n.id === 'tar-6')!;
+        expect(boss.connectedNodes).toEqual(['tar-7']);
+    });
+});
+
+describe('the-capital — map 5 of the northern continent (Phase W5)', () => {
+    const audit = auditMapTraversal(theCapital);
+    const coverage = auditRouteCoverage(theCapital);
+
+    it('guarantees the arrival, the Herald, the court, and the Factor on every route', () => {
+        expect(coverage.shareOfRoutes['cap-1']).toBe(1);
+        expect(coverage.shareOfRoutes['cap-2']).toBe(1);
+        expect(coverage.shareOfRoutes['cap-8']).toBe(1);
+        expect(coverage.shareOfRoutes['cap-9']).toBe(1);
+    });
+
+    it('walks a full six-beat run every time, strand-free', () => {
+        expect(audit.longestRoute).toBe(6);
+        expect(audit.strands).toEqual([]);
+        expect(audit.unreachableNodes).toEqual([]);
+    });
+
+    it('ends at the Factor alone — no door onward yet', () => {
+        // The next continent is not shipped; the-capital is the current
+        // frontier, same shape town-across-river had before Phase W5.
+        expect(audit.terminalNodes).toEqual(['cap-9']);
     });
 });

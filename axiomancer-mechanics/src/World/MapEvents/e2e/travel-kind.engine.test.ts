@@ -303,3 +303,40 @@ describe('the cr-13 door — connecting-river → town-across-river (Phase W4)',
         expect(arrived.state.quests.completed).toContain('get-to-town-across-river');
     });
 });
+
+describe('the tar-7 door — town-across-river → the-capital (Phase W5)', () => {
+    function atRibbonRoad(): GameState {
+        const throughVillage = resolveMapEvent(atCoastRoad()).state;
+        const throughForest = resolveMapEvent(seatAt(throughVillage, 'nf-10')).state;
+        const throughCaverns = resolveMapEvent(seatAt(throughForest, 'nc-26')).state;
+        const throughCity = resolveMapEvent(seatAt(throughCaverns, 'ncy-26')).state;
+        const throughRiver = resolveMapEvent(seatAt(throughCity, 'cr-13')).state;
+        return seatAt(throughRiver, 'tar-7');
+    }
+
+    it('stays on the northern continent, unlocks the-capital, and lands on cap-1', () => {
+        const { state, event } = resolveMapEvent(atRibbonRoad());
+
+        expect(event.kind).toBe('travel');
+        expect(state.world.currentContinent.name).toBe('northern-continent');
+        expect(state.world.currentMap.name).toBe('the-capital');
+        expect(state.world.currentMap.currentNode).toBe('cap-1');
+        expect(state.world.currentContinent.availableMaps).toContain('the-capital');
+        expect(state.world.currentContinent.lockedMaps).not.toContain('the-capital');
+        expect(state.world.currentContinent.completedMaps).toContain('town-across-river');
+        expect(state.world.mapStates?.['town-across-river']?.currentNode).toBe('tar-7');
+    });
+
+    it('completes get-to-the-capital: The Sweetheart\'s grant ticks on arrival', () => {
+        const gated = atRibbonRoad();
+        const quest = getMapDefinition('northern-continent', 'town-across-river')
+            .quests!.find(q => q.name === 'get-to-the-capital')!;
+        const questing: GameState = { ...gated, quests: startQuest(gated.quests, quest) };
+
+        const travelled = resolveMapEvent(questing).state;
+        expect(travelled.quests.completed).not.toContain('get-to-the-capital');
+
+        const arrived = resolveMapEvent(travelled);
+        expect(arrived.state.quests.completed).toContain('get-to-the-capital');
+    });
+});
