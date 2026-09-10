@@ -14,7 +14,7 @@
 | cards | `skills/adjust-cards.md` | 2026-09-10 | 35c4c56c | 5 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-10 | 2b02ff60 | 5 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-10 | ce6e6a60 | 5 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-10 | PENDING | 5 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-10 | 17b38058 | 5 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-09 | 6b365d01 | 4 |
 
 ## Log
@@ -22,7 +22,7 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-keywords pass 5, 2026-09-10, commit PENDING]** One UPDATE (a
+> **[adjust-keywords pass 5, 2026-09-10, commit 17b38058]** One UPDATE (a
 > real wiring backfill, not a comment fix), zero-CREATE, zero-REMOVE — full
 > re-audit, not a rubber stamp of pass 4's findings. `git log
 > 9e423a34..HEAD -- axiomancer-mechanics/src/Cards axiomancer-mechanics/
