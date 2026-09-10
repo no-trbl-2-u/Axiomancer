@@ -579,87 +579,6 @@
   harness cannot see), possibly the same underlying cause.
 - source: user
 
-### [HIGH] combat — user hit a mid-combat crash that 30 seeded UI runs could not reproduce
-- **RESOLVED 2026-09-04 — REPRODUCED, ROOT-CAUSED, FIXED.** Sentry landed
-  the crash within minutes of the first instrumented build:
-  `CppException: Object is not a function`, fatal/unhandled, at
-  `com.swmansion.worklets.AndroidUIScheduler.triggerUI` — a **Reanimated
-  worklet**, in `EnemyActionCardTsx1` inside `useAnimatedStyle`.
-  `EnemyActionCard.tsx` called `shouldInstantSettleJuice()` FROM INSIDE the
-  worklet. Reanimated serializes a worklet's closure into a separate
-  UI-thread runtime, where a plain JS function arrives as an OBJECT, not a
-  callable; invoking it threw a C++ exception on the UI thread that no JS
-  handler can catch, and Android killed the process. The card mounts on
-  every END PHASE, which is why "it minimizes when I end my turn" was
-  exactly reproducible for the owner.
-- **Why 30+ seeded UI runs never saw it:** react-native-web's Reanimated has
-  NO separate UI runtime, so the identical call just works on web. This was
-  never a harness gap — it was a platform the harness cannot reach. The
-  lesson is filed as a standing one below.
-- **Fix:** read the flag on the JS thread and let the worklet capture the
-  boolean (`EnemyActionCard.tsx`). Doubly correct — the helper reads a
-  JS-thread global the UI runtime does not share.
-- **Guard:** `scripts/check-worklets.mjs` + `check-worklets.test.mjs` (in
-  root `npm test`) statically reject any plain-JS call inside a worklet
-  body across mobile `components/`, `app/`, `lib/`, `hooks/`. Self-tested:
-  it catches the original line, passes the fix, and does not fire on the
-  comment prose that fooled its first draft.
-- **Standing lesson:** a green web e2e is NOT evidence about native. Any
-  crash report that the web harness cannot reproduce should go straight to
-  device telemetry rather than another seed sweep — three reports and ~30
-  runs were spent before Sentry answered it in one build.
-- **Platform pinned 2026-09-03 (third report, this time on END TURN).** The
-  owner confirmed both unknowns the rows above kept guessing at: it is the
-  **EAS preview APK (native)** and the app **closes to the home screen** — a
-  process death, not a caught JS throw, so the in-app ErrorBoundary can never
-  see it and neither can any web harness. Ruled out on web the same session:
-  the live map encounter played to a terminal outcome on 5 seeds, plus a
-  pure END-TURN-only sweep (no card played, 5 seeds x up to 20 rounds) —
-  zero pageerrors, zero boundary mounts. **Next step is a native stack**:
-  `adb logcat -c && adb logcat *:E AndroidRuntime:V libc:V` while
-  reproducing on the device. Until that lands, treat `react-native-svg` /
-  `expo-image` / Reanimated (all divergent on native) as the suspect set.
-  The hunt did surface two real defects on the way, both fixed — see the
-  rune-column row.
-- **Partial coverage extension shipped 2026-09-03 (commit 6529212a,
-  issue #277).** `combat-round-e2e.mjs` gained `ENCOUNTER_KIND=boss` (arms
-  the lowest boss foe instead of a standard encounter) and `WITHDRAW=1`
-  (takes the reveal screen's retreat instead of entering combat), and CI
-  now runs a boss+`PRESET=sage` (non-starter deck) pass plus a withdraw
-  pass in both `verify-mechanics.yml` and `verify-mobile.yml`. Verified
-  locally clean on seed 16 for both new axes. **Still open:** the
-  level-up-out-of-victory path is untested, and the crash itself remains
-  UNREPRODUCED — this only closes 3 of the 4 axes the suggested fix named.
-  Do not mark this row Done until either the crash reproduces (so it can
-  be pinned) or the remaining axis ships too.
-- issue: #277
-- pass: user-jot (commit 24475f48)
-- viewport: unspecified
-- auth_state: anonymous
-- category: functional
-- observation: the user reported the game crashing mid-combat during
-  real play. PR #216 built `axiomancer-mobile/scripts/combat-round-e2e.mjs`
-  to hunt it — a crash-strict full-round harness that plays real cards
-  (stage, power with a die, APPLY, END PHASE) on BOTH the
-  `/combat-encounter` dev sandbox and the live map encounter (real deck,
-  real enemy, `persistOutcome` write-back + aftermath panels). 30 runs
-  across 15 seeds x both modes all reached a terminal outcome clean. The
-  crash was NOT reproduced and remains unexplained; this row exists so
-  that negative result does not read as "fixed".
-- evidence: user-spotted 2026-08-19. Harness merged in PR #216 (main
-  c54bcd1). Contributing cause for why it was never caught: every e2e
-  attached `page.on('pageerror')` and only `console.error`'d it, so an
-  uncaught exception exited 0, and nothing checked `error-boundary-screen`
-  — both fixed in #216, so a recurrence now fails CI loudly.
-- suggested fix: extend `combat-round-e2e.mjs` along the axes it does not
-  yet reach — boss encounters (`debug-trigger-encounter-boss`), the
-  mercy/WITHDRAW branches, decks carrying cards/keywords absent from the
-  4-card starter, and the level-up path out of victory. Run wider seed
-  sweeps (`MODE=both COMBAT_ROUND_E2E_SEEDS=... ROUNDS=20`). If the user
-  supplies repro detail (enemy, last action, blank screen vs. the
-  ErrorBoundary panel + its error code), pin that case first.
-- source: user
-
 ### [MED] combat — every encounter renders the same fixed "ruined city" arena backdrop, regardless of the encounter's own narrative setting
 - pass: 23 (commit c063ac48)
 - viewport: mobile (375×812)
@@ -1854,6 +1773,109 @@ one level down, in the routing helper `onApply` calls next).
 - source: loop
 
 ## Done
+
+### [x] [HIGH] combat — user hit a mid-combat crash that 30 seeded UI runs could not reproduce — COVERAGE-COMPLETE 2026-09-10 (commit c51547ae, issue #277); crash itself still UNREPRODUCED on web
+- **RESOLVED 2026-09-04 — REPRODUCED, ROOT-CAUSED, FIXED.** Sentry landed
+  the crash within minutes of the first instrumented build:
+  `CppException: Object is not a function`, fatal/unhandled, at
+  `com.swmansion.worklets.AndroidUIScheduler.triggerUI` — a **Reanimated
+  worklet**, in `EnemyActionCardTsx1` inside `useAnimatedStyle`.
+  `EnemyActionCard.tsx` called `shouldInstantSettleJuice()` FROM INSIDE the
+  worklet. Reanimated serializes a worklet's closure into a separate
+  UI-thread runtime, where a plain JS function arrives as an OBJECT, not a
+  callable; invoking it threw a C++ exception on the UI thread that no JS
+  handler can catch, and Android killed the process. The card mounts on
+  every END PHASE, which is why "it minimizes when I end my turn" was
+  exactly reproducible for the owner.
+- **Why 30+ seeded UI runs never saw it:** react-native-web's Reanimated has
+  NO separate UI runtime, so the identical call just works on web. This was
+  never a harness gap — it was a platform the harness cannot reach. The
+  lesson is filed as a standing one below.
+- **Fix:** read the flag on the JS thread and let the worklet capture the
+  boolean (`EnemyActionCard.tsx`). Doubly correct — the helper reads a
+  JS-thread global the UI runtime does not share.
+- **Guard:** `scripts/check-worklets.mjs` + `check-worklets.test.mjs` (in
+  root `npm test`) statically reject any plain-JS call inside a worklet
+  body across mobile `components/`, `app/`, `lib/`, `hooks/`. Self-tested:
+  it catches the original line, passes the fix, and does not fire on the
+  comment prose that fooled its first draft.
+- **Standing lesson:** a green web e2e is NOT evidence about native. Any
+  crash report that the web harness cannot reproduce should go straight to
+  device telemetry rather than another seed sweep — three reports and ~30
+  runs were spent before Sentry answered it in one build.
+- **Platform pinned 2026-09-03 (third report, this time on END TURN).** The
+  owner confirmed both unknowns the rows above kept guessing at: it is the
+  **EAS preview APK (native)** and the app **closes to the home screen** — a
+  process death, not a caught JS throw, so the in-app ErrorBoundary can never
+  see it and neither can any web harness. Ruled out on web the same session:
+  the live map encounter played to a terminal outcome on 5 seeds, plus a
+  pure END-TURN-only sweep (no card played, 5 seeds x up to 20 rounds) —
+  zero pageerrors, zero boundary mounts. **Next step is a native stack**:
+  `adb logcat -c && adb logcat *:E AndroidRuntime:V libc:V` while
+  reproducing on the device. Until that lands, treat `react-native-svg` /
+  `expo-image` / Reanimated (all divergent on native) as the suspect set.
+  The hunt did surface two real defects on the way, both fixed — see the
+  rune-column row.
+- **Partial coverage extension shipped 2026-09-03 (commit 6529212a,
+  issue #277).** `combat-round-e2e.mjs` gained `ENCOUNTER_KIND=boss` (arms
+  the lowest boss foe instead of a standard encounter) and `WITHDRAW=1`
+  (takes the reveal screen's retreat instead of entering combat), and CI
+  now runs a boss+`PRESET=sage` (non-starter deck) pass plus a withdraw
+  pass in both `verify-mechanics.yml` and `verify-mobile.yml`. Verified
+  locally clean on seed 16 for both new axes. **Still open:** the
+  level-up-out-of-victory path is untested, and the crash itself remains
+  UNREPRODUCED — this only closes 3 of the 4 axes the suggested fix named.
+  Do not mark this row Done until either the crash reproduces (so it can
+  be pinned) or the remaining axis ships too.
+- **Last axis shipped 2026-09-10 (commit c51547ae, `/iterate` dispatched by
+  `/march`).** `combat-round-e2e.mjs` gained `LEVEL_UP=1`: before the
+  encounter triggers, it clicks the real `/dev` XP-grant control 9 times
+  (900 XP) so the player sits exactly 100 XP short of the next level —
+  `buildCharacterFromPreset` always seeds `experience = (level-1)*1000`
+  against `experienceToNextLevel = level*1000`, so that 1000-XP gap is
+  preset-independent, not a guess. A won fight's own XP reward then crosses
+  the threshold and `applyHazardOutcome`'s level-up cascade
+  (`CombatEncounterPanel.tsx`) runs mid-aftermath — the exact "sage preset
+  with a pending level-up, XP granted pre-fight, cascaded post-victory"
+  shape the sibling ACCEPT-crash row below reports. Wired as
+  `e2e:combat-round:levelup` (`MODE=live LEVEL_UP=1 PRESET=sage`), added as
+  a fourth CI step beside boss/withdraw in both workflow files. Verified
+  locally: seed 16 won cleanly and walked the reward-accept path with no
+  crash; seed 8 stalled at the round cap (ran out of playable cards) the
+  same way the existing boss axis does on some seeds — a clean PASS under
+  the harness's own exit criteria, not a new failure mode. This closes all
+  4 axes the original suggested fix named. Marking Done per this row's own
+  stated condition ("the remaining axis ships too") — **the crash itself is
+  still UNREPRODUCED on web**; only a native device stack trace can pin it,
+  per the lesson above. If it resurfaces, re-file fresh rather than
+  reopening this one.
+- issue: #277
+- pass: user-jot (commit 24475f48)
+- viewport: unspecified
+- auth_state: anonymous
+- category: functional
+- observation: the user reported the game crashing mid-combat during
+  real play. PR #216 built `axiomancer-mobile/scripts/combat-round-e2e.mjs`
+  to hunt it — a crash-strict full-round harness that plays real cards
+  (stage, power with a die, APPLY, END PHASE) on BOTH the
+  `/combat-encounter` dev sandbox and the live map encounter (real deck,
+  real enemy, `persistOutcome` write-back + aftermath panels). 30 runs
+  across 15 seeds x both modes all reached a terminal outcome clean. The
+  crash was NOT reproduced and remains unexplained; this row exists so
+  that negative result does not read as "fixed".
+- evidence: user-spotted 2026-08-19. Harness merged in PR #216 (main
+  c54bcd1). Contributing cause for why it was never caught: every e2e
+  attached `page.on('pageerror')` and only `console.error`'d it, so an
+  uncaught exception exited 0, and nothing checked `error-boundary-screen`
+  — both fixed in #216, so a recurrence now fails CI loudly.
+- suggested fix: extend `combat-round-e2e.mjs` along the axes it does not
+  yet reach — boss encounters (`debug-trigger-encounter-boss`), the
+  mercy/WITHDRAW branches, decks carrying cards/keywords absent from the
+  4-card starter, and the level-up path out of victory. Run wider seed
+  sweeps (`MODE=both COMBAT_ROUND_E2E_SEEDS=... ROUNDS=20`). If the user
+  supplies repro detail (enemy, last action, blank screen vs. the
+  ErrorBoundary panel + its error code), pin that case first.
+- source: user
 
 ### [x] [HIGH] combat — the signature rune column sat ON the dice tray — RESOLVED 2026-09-03 (commit 1464fae9, issue #293)
 - pass: crash hunt 2026-09-03 (live e2e probe, `elementFromPoint`)

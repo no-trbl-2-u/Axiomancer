@@ -20,49 +20,66 @@
 > applied: `plan/CRITIQUE.md` has 20+ open Pending rows, so this pass scored
 > those (category Z, external-critique) rather than running a fresh
 > site audit.
+>
+> **Second pass, same date.** The block below is a full re-score (a
+> sub-agent read all ~50 Pending rows end to end, not a skim) after the
+> first pass's [9.0] shipped. It found the "mid-combat crash, 30 seeded
+> runs could not reproduce" row (2026-08-19, issue #277) scoring higher
+> than this morning's quick pass had it (ease was undercounted — the row
+> named one precise, cheap remaining axis), picked it, and shipped it
+> (commit `c51547ae`): `combat-round-e2e.mjs` gained `LEVEL_UP=1`,
+> closing the row's own stated "ship the remaining axis" condition. The
+> crash itself is still UNREPRODUCED on web. Top 5 below is refreshed
+> for the next pass.
 
 ## Top 5 findings (scored)
 
-### [9.0] combat — CRITIQUE.md's signature-rune-column row is stale-fixed, never moved to Done
+### [5.9] combat — user crash on ACCEPTING post-combat card reward (unreproduced, issue #216)
 - category: external-critique
 - impact: 9
-- ease: 10
-- next: the row (`plan/CRITIQUE.md`, filed HIGH, "fixed 2026-09-03") already
-  describes a shipped fix; `sigTop` measurement is live in
-  `CombatBoard.tsx` and the occlusion guard is live in
-  `combat-round-e2e.mjs`, both landed in commit `1464fae9`
-  (`fix(combat): the rune column sat on the dice tray`, #280). Move
-  Pending -> Done with `[x]` + the commit hash; no code change needed.
-- issue: #293
-
-### [3.6] world — Ash Mire boss sits three natural steps from a fresh spawn
-- category: external-critique
-- impact: 6
 - ease: 6
-- next: fishing-village unlock-graph edit (gate the boss edge behind more
-  trodden nodes) or a per-map first-fight-difficulty policy change; scoped
-  to `/world-tuning` or a dedicated fix tick, not this one.
+- next: body says "LIKELY THE SAME BUG — RESOLVED 2026-09-04 (verify
+  before closing)" (the rune-column/worklet fix may already cover it) —
+  get the owner's device log (SELF -> dev tools -> DIAGNOSTICS -> PREV
+  SESSION, domain ERROR) to confirm before closing; can't be shipped
+  blind on web alone.
 
-### [2.7] mechanics — late-stage global collapse, all 10 presets 0.00 late
+### [4.7] world — Ash Mire boss sits three natural steps from a fresh spawn
 - category: external-critique
-- impact: 9
-- ease: 3
-- next: deep balance investigation via `/deck-tuning` or `/hazard-tuning`
-  measurement-seat sweep; too large for a single iterate tick.
+- impact: 7
+- ease: 6
+- next: the fishing-village map has since been re-layered into a
+  column-layered gauntlet with a guaranteed pre-boss REST (Phase 65 D1 +
+  53c) — check whether this finding is now stale-by-redesign before
+  editing the unlock graph again; if still live, it's a balance question
+  (can a fresh level-1 win the guaranteed boss encounter), not a graph
+  question, so scope to `/world-tuning`.
 
-### [1.8] exploration — off-screen open map nodes no-op silently on tap
+### [4.2] combat — the first map fight is an elite-tier foe (Brine Hag) with a 3-phase telegraph
 - category: external-critique
 - impact: 6
-- ease: 3
-- next: camera auto-pan or initial-camera clamp in the exploration-hub map
-  presenter; main-agent UI fix, larger scope than one tick.
+- ease: 7
+- next: gate the first encounter of a fresh save to a 1-phase,
+  zero-keyword foe (encounter-table / first-encounter policy, not UI).
 
-### [1.6] combat — user crash on ACCEPTING post-combat card reward (unreproduced)
+### [3.5] exploration — off-screen open map nodes no-op silently on tap
 - category: external-critique
-- impact: 8
-- ease: 2
-- next: needs a reliable repro harness before a fix can be attempted;
-  can't be shipped blind.
+- impact: 6
+- ease: 5
+- next: camera auto-pan or initial-camera clamp in the exploration-hub map
+  presenter; main-agent UI fix.
+
+### [3.5] hazard — the fanned route-choice hand truncates card names illegibly
+- category: external-critique
+- impact: 5
+- ease: 7
+- next: widen fan spacing or reveal the full name on tap/hold.
+
+> **Parked, do not pick:** `[HIGH] late-stage global collapse — all 10
+> presets 0.00 late` carries an explicit `/oversight 2026-08-08` ruling
+> ("PARKED... do not pick this row, do not promote a phase off it") —
+> excluded from ranking above despite a high raw score. Re-check that
+> ruling before ever touching this row again.
 
 ## Pending
 
