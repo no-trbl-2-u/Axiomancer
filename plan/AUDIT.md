@@ -12,6 +12,58 @@
 > plausibly live. Verify each against current code before
 > shipping; re-file or drain as reality dictates.
 
+# Site audit — 2026-09-10
+
+> `/march` dispatched to `/iterate` (no pending phase, no content-lifecycle
+> category due, `/forge`'s 48h world-growth window still open via
+> `f56fa198`, `/expand`'s 20-commit/48h window not yet open). Hard rule §7.5
+> applied: `plan/CRITIQUE.md` has 20+ open Pending rows, so this pass scored
+> those (category Z, external-critique) rather than running a fresh
+> site audit.
+
+## Top 5 findings (scored)
+
+### [9.0] combat — CRITIQUE.md's signature-rune-column row is stale-fixed, never moved to Done
+- category: external-critique
+- impact: 9
+- ease: 10
+- next: the row (`plan/CRITIQUE.md`, filed HIGH, "fixed 2026-09-03") already
+  describes a shipped fix; `sigTop` measurement is live in
+  `CombatBoard.tsx` and the occlusion guard is live in
+  `combat-round-e2e.mjs`, both landed in commit `1464fae9`
+  (`fix(combat): the rune column sat on the dice tray`, #280). Move
+  Pending -> Done with `[x]` + the commit hash; no code change needed.
+- issue: #293
+
+### [3.6] world — Ash Mire boss sits three natural steps from a fresh spawn
+- category: external-critique
+- impact: 6
+- ease: 6
+- next: fishing-village unlock-graph edit (gate the boss edge behind more
+  trodden nodes) or a per-map first-fight-difficulty policy change; scoped
+  to `/world-tuning` or a dedicated fix tick, not this one.
+
+### [2.7] mechanics — late-stage global collapse, all 10 presets 0.00 late
+- category: external-critique
+- impact: 9
+- ease: 3
+- next: deep balance investigation via `/deck-tuning` or `/hazard-tuning`
+  measurement-seat sweep; too large for a single iterate tick.
+
+### [1.8] exploration — off-screen open map nodes no-op silently on tap
+- category: external-critique
+- impact: 6
+- ease: 3
+- next: camera auto-pan or initial-camera clamp in the exploration-hub map
+  presenter; main-agent UI fix, larger scope than one tick.
+
+### [1.6] combat — user crash on ACCEPTING post-combat card reward (unreproduced)
+- category: external-critique
+- impact: 8
+- ease: 2
+- next: needs a reliable repro harness before a fix can be attempted;
+  can't be shipped blind.
+
 ## Pending
 
 ### [loop-call] Phase W6 (The Capital) reused "W5" as a map-sequence label collision, resolved by numbering the map "W6" instead (2026-09-10)

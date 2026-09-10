@@ -462,36 +462,6 @@
   first-encounter policy, not the UI.
 - source: owner playtest
 
-### [HIGH] combat — the signature rune column sat ON the dice tray (fixed 2026-09-03)
-- pass: crash hunt 2026-09-03 (live e2e probe, `elementFromPoint`)
-- viewport: 390x844
-- auth_state: real progression save (endgame + sage presets, boss and standard)
-- category: functional
-- observation: `sigColumn` is absolutely positioned at `top: '34%'`, `zIndex:
-  30`, and grows DOWNWARD with the signature count. With a full loadout it
-  reached into the dice row: probing `elementFromPoint` at the leftmost die's
-  centre mid-fight returned `combat-signature-sig-press-the-point`, not the
-  die. That die could not be dragged at all, and a tap aimed at it CAST a
-  signature and spent Conviction. Same class as the 2026-07-18 fix that
-  right-aligned the player status strip off this column.
-- evidence: the drag failed SILENTLY — `resolveDrop` never ran, so no loud
-  rejection fired and nothing reached the log. It also rotted the e2e:
-  `combat-round-e2e.mjs` reported PASS while powering a die only in round 1
-  and playing FREE every round after (boss+sage: 1 powered in 10 rounds).
-  Second, compounding defect: the drag ghost and the staged card's die socket
-  both rendered a `CombatDie`, so up to three nodes answered to one
-  `combat-die-<id>` — the harness's prefix match picked the parked ghost,
-  holding a PREVIOUS turn's die, and dragged from wherever it sat.
-- fix: the column now anchors off the MEASURED tray top (`sigTop`), so its
-  last rune always clears the tray whatever the loadout grants and however
-  many rows the tray wraps to; the ghost and socket dice carry their own
-  testIDs. `combat-round-e2e.mjs` gained an occlusion guard that fails the
-  run naming the occluder, plus a coverage assertion that fails a run which
-  keeps being offered a legal die and never lands one. Self-tested by
-  restoring the bug: the guard fired. Powered plays went 1 -> 3-4 per fight
-  (boss+sage 1 -> 9).
-- source: crash hunt (owner report)
-
 ### [HIGH] general — no mid/late equipment or signature skills exist for THE PATH's sixth axis
 - pass: user-jot (commit 343d7e98)
 - viewport: unspecified
@@ -1884,6 +1854,45 @@ one level down, in the routing helper `onApply` calls next).
 - source: loop
 
 ## Done
+
+### [x] [HIGH] combat — the signature rune column sat ON the dice tray — RESOLVED 2026-09-03 (commit 1464fae9, issue #293)
+- pass: crash hunt 2026-09-03 (live e2e probe, `elementFromPoint`)
+- viewport: 390x844
+- auth_state: real progression save (endgame + sage presets, boss and standard)
+- category: functional
+- observation: `sigColumn` is absolutely positioned at `top: '34%'`, `zIndex:
+  30`, and grows DOWNWARD with the signature count. With a full loadout it
+  reached into the dice row: probing `elementFromPoint` at the leftmost die's
+  centre mid-fight returned `combat-signature-sig-press-the-point`, not the
+  die. That die could not be dragged at all, and a tap aimed at it CAST a
+  signature and spent Conviction. Same class as the 2026-07-18 fix that
+  right-aligned the player status strip off this column.
+- evidence: the drag failed SILENTLY — `resolveDrop` never ran, so no loud
+  rejection fired and nothing reached the log. It also rotted the e2e:
+  `combat-round-e2e.mjs` reported PASS while powering a die only in round 1
+  and playing FREE every round after (boss+sage: 1 powered in 10 rounds).
+  Second, compounding defect: the drag ghost and the staged card's die socket
+  both rendered a `CombatDie`, so up to three nodes answered to one
+  `combat-die-<id>` — the harness's prefix match picked the parked ghost,
+  holding a PREVIOUS turn's die, and dragged from wherever it sat.
+- fix: the column now anchors off the MEASURED tray top (`sigTop`), so its
+  last rune always clears the tray whatever the loadout grants and however
+  many rows the tray wraps to; the ghost and socket dice carry their own
+  testIDs. `combat-round-e2e.mjs` gained an occlusion guard that fails the
+  run naming the occluder, plus a coverage assertion that fails a run which
+  keeps being offered a legal die and never lands one. Self-tested by
+  restoring the bug: the guard fired. Powered plays went 1 -> 3-4 per fight
+  (boss+sage 1 -> 9).
+- source: crash hunt (owner report)
+- resolution (2026-09-10, `/iterate`): this row's own `fix:` field already
+  described a shipped fix, but it was never moved from Pending to Done.
+  Confirmed both artifacts are still live in the tree — `sigTop`
+  measurement in `axiomancer-mobile/components/combat/encounter/
+  CombatBoard.tsx` and the occlusion guard in
+  `axiomancer-mobile/scripts/combat-round-e2e.mjs` — both landed in commit
+  `1464fae9` (`fix(combat): the rune column sat on the dice tray — dice
+  you could not touch (#280)`). Ledger correction only; no code changed
+  this tick.
 
 ### [x] [MED] combat — the LOG toggle button overlaps the new stance-check telegraph text — RESOLVED 2026-09-09 (issue #292)
 - pass: critique pass 31, 2026-09-04 (commit 7f6b4312)

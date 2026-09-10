@@ -7,7 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-30T10:52:41Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-07-30T10:52:43Z | skill | digest | unknown | main | - |
 | 2026-07-30T20:00:00Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-30T20:00:47Z | skill | iterate | claude-sonnet-5 | main | - |
@@ -407,3 +406,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-10T08:38:25Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-10T08:39:03Z | skill | forge | claude-sonnet-5 | main | - |
 | 2026-09-10T08:39:59Z | subagent | general-purpose | claude-sonnet-5 | main | Ship one forge content tick |
+| 2026-09-10T10:31:15Z | slash-prompt | /march | unknown | user/ci | /march |
