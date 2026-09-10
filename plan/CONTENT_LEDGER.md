@@ -11,7 +11,7 @@
 
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
-| cards | `skills/adjust-cards.md` | 2026-09-09 | 3b092183 | 4 |
+| cards | `skills/adjust-cards.md` | 2026-09-10 | PENDING | 5 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-09 | 9a2bc248 | 4 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-09 | 84be1db4 | 4 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-09 | 9e423a34 | 4 |
@@ -20,6 +20,58 @@
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-cards pass 5, 2026-09-10, commit PENDING]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — full re-audit via `card-expert` (consult+
+> implement mode), not a rubber stamp of pass 4's findings. `git log
+> 3b092183..HEAD -- axiomancer-mechanics/src/Cards axiomancer-mechanics/
+> src/Effects axiomancer-mechanics/src/Combat` is empty (the 19 commits
+> since pass 4 were entirely the equipment/enemies/keywords/npcs pass-4
+> ticks, a fixture-gallery feature, and unrelated merges — nothing touched
+> the card/effect/combat surface), so every Step-1 signal was re-derived
+> against the current tree: (1) reachability —
+> `combat-playtest.card-coverage.sim.test.ts` run directly: 123/123
+> playable cards (the 128-card `cardLibrary` minus 5 enemy-injected curses)
+> still fire in at least one fallback seed, no dead-card candidate; (2)
+> near-duplicates — full same-(theme,rank,`philosophicalAspect`) collision
+> scan over the live `cardLibrary` export: the two identical-kind-set
+> collisions already documented by pass 4 (`thin-hymn`/`alms-of-breath` —
+> the starters-as-authoring-template echo; `the-last-assize`/
+> `the-vein-called-in` — debt capstone vs. its apocrypha escalation) still
+> stand as deliberate design, no new accidental duplicate found; (3)
+> pricing sanity + face-honesty — `pricing.engine.test.ts` (251),
+> `paid-summary-honesty.engine.test.ts` (4), `preview-truth.engine.test.ts`
+> (10), `curated-library.engine.test.ts` (14, the FREE-line law) all green,
+> plus a fresh one-off script cross-checking every card's `deal` amount sum
+> against its `paidSummary` prose across all 9 `library/*.cards.ts` files —
+> zero real mismatches (a few regex false-positives from phrasing
+> variance, same number either way); (4) scale-ladder drift — manual read
+> of `rot.cards.ts`, `relics.cards.ts`, `apocrypha.cards.ts`,
+> `starters.cards.ts` in full plus every debt/grave/vigil/trial/choir card
+> via `axio_cards`: numbers sit inside the CLAUDE.md §5 ladder for their
+> apparent rank, no card quietly small; (5) aspect-thirds — re-counted
+> `philosophicalAspect` per theme module directly (rot 6/5/5, debt 5/6/5,
+> grave 6/5/5, vigil 5/6/5, trial 7/7/6, choir 5/6/5, apocrypha 4/4/4,
+> starters 2/3/3 body/heart/mind) — no theme starved of raw material
+> relative to its other two, the pinned preset 5/5/5 thirds draw cleanly.
+> Standing loop-calls re-checked, not re-litigated: the AMBUSH/FINALE and
+> CHAIN/OMEN routing rows stay `[x]`-resolved (passes 2-3); the one
+> still-open card-adjacent row (`the-sextons-count` missing its TWIN
+> trigger, `plan/AUDIT.md`, filed 2026-09-04) is explicitly mechanics-expert
+> territory (an engine-side variable-scope fix inside
+> `combat.engine.ts`'s twin/echo resolution, not card data) — left
+> untouched and re-flagged, not actioned, matching prior passes' own
+> boundary call. KB research: not run — every consideration this pass was
+> audit-confirmed-clean (no CREATE/UPDATE), exempt from the gate per §3
+> Step 2 (REMOVE/no-op carve-out). Verify: not re-run in full — no source
+> file changed (`git status` clean on `axiomancer-mechanics/src`); ran the
+> direct confirmation set instead (the four suites above, all green) and
+> confirmed HEAD's existing CI green via `npm run deploy:check`
+> (`715351d4`'s tick had no gated workflow triggered — a docs/plan-only
+> commit — so the prior verify-mechanics/verify-mobile runs on the last
+> source-touching commit stand as the live green).
+```
 
 ```
 > **[adjust-npcs pass 4, 2026-09-09, commit 6b365d01]** Zero-CREATE,

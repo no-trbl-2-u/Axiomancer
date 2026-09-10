@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-23T14:45:05Z | subagent | Explore | claude-sonnet-5 | main | Investigate blacksmith MapEvent node gating |
-| 2026-07-23T19:54:22Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-23T19:56:35Z | subagent | general-purpose | claude-sonnet-5 | main | Score pending audit/critique findings |
 | 2026-07-23T20:20:29Z | subagent | Explore | claude-opus-4-8 | main | Map Upgradeable Dice flag architecture |
 | 2026-07-29T14:38:49Z | slash-prompt | /march | unknown | user/ci | /march |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-09T20:33:59Z | subagent | card-expert | claude-sonnet-5 | main | Run full adjust-keywords lifecycle tick |
 | 2026-09-09T22:28:08Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-09T22:28:55Z | skill | adjust-npcs | claude-sonnet-5 | main | - |
+| 2026-09-10T01:02:35Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-10T01:06:27Z | subagent | card-expert | claude-sonnet-5 | main | Adjust-cards pass 5 audit and ship |
