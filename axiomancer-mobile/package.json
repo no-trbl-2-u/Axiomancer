@@ -31,6 +31,7 @@
     "e2e:combat-round:both": "MODE=both node scripts/combat-round-e2e.mjs",
     "e2e:combat-round:boss": "MODE=live ENCOUNTER_KIND=boss PRESET=sage node scripts/combat-round-e2e.mjs",
     "e2e:combat-round:withdraw": "MODE=live WITHDRAW=1 node scripts/combat-round-e2e.mjs",
+    "e2e:combat-round:levelup": "MODE=live LEVEL_UP=1 PRESET=sage node scripts/combat-round-e2e.mjs",
     "e2e:upgradeable-dice": "node scripts/upgradeable-dice-e2e.mjs",
     "e2e:fixture": "node scripts/fixture-e2e.mjs",
     "critique:drive": "node scripts/critique-drive.mjs",

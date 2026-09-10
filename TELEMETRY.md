@@ -7,9 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-07-30T10:52:43Z | skill | digest | unknown | main | - |
-| 2026-07-30T20:00:00Z | slash-prompt | /march | unknown | user/ci | /march |
-| 2026-07-30T20:00:47Z | skill | iterate | claude-sonnet-5 | main | - |
 | 2026-07-31T03:59:16Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-07-31T04:03:56Z | skill | critique | claude-sonnet-5 | main | - |
 | 2026-07-31T09:23:13Z | slash-prompt | /march | unknown | user/ci | /march |
@@ -407,3 +404,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-10T08:39:03Z | skill | forge | claude-sonnet-5 | main | - |
 | 2026-09-10T08:39:59Z | subagent | general-purpose | claude-sonnet-5 | main | Ship one forge content tick |
 | 2026-09-10T10:31:15Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-10T14:30:32Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-10T14:31:35Z | skill | iterate | claude-sonnet-5 | main | - |
+| 2026-09-10T14:32:37Z | subagent | Explore | claude-sonnet-5 | main | Score CRITIQUE.md pending findings |

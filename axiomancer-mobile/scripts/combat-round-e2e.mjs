@@ -60,6 +60,17 @@
 //     retreat path (`combat-withdraw` → the encounter modal tearing down
 //     with no summary/mercy/reward panel) is crash-watched too. Absent
 //     control (e.g. paired with ENCOUNTER_KIND=boss) falls back to playing.
+//   LEVEL_UP=1 MODE=live PRESET=sage node scripts/combat-round-e2e.mjs  —
+//     the fourth and last axis CRITIQUE.md named ("XP granted pre-fight,
+//     cascaded post-victory"): grants XP (via the /dev XP controls) up to
+//     exactly `EXPERIENCE_PER_LEVEL` (1000) short of the freshly-built
+//     preset's next-level threshold — `buildCharacterFromPreset` always
+//     seeds `experience = (level-1)*1000` against `experienceToNextLevel =
+//     level*1000`, so that gap is a preset-independent constant — before
+//     the encounter triggers, so a won fight's own XP reward crosses the
+//     threshold and the `applyHazardOutcome` level-up cascade
+//     (`CombatEncounterPanel.tsx`) runs mid-aftermath, the exact code path
+//     the crash report implicated.
 //
 // Exit codes: 0 = every seed played clean · 1 = crash/assertion · 3 = boot failure.
 
@@ -85,6 +96,13 @@ const MODE = (process.env.MODE ?? 'sandbox').toLowerCase()
 const MODES = MODE === 'both' ? ['sandbox', 'live'] : [MODE]
 const ENCOUNTER_KIND = (process.env.ENCOUNTER_KIND ?? 'encounter').toLowerCase()
 const WITHDRAW = process.env.WITHDRAW === '1'
+const LEVEL_UP = process.env.LEVEL_UP === '1'
+// `Character/index.ts`'s `buildCharacterFromPreset`: experience = (level-1) *
+// EXPERIENCE_PER_LEVEL, experienceToNextLevel = level * EXPERIENCE_PER_LEVEL.
+// The gap is always exactly EXPERIENCE_PER_LEVEL, regardless of preset level.
+const XP_GRANT_STEP = 100
+const XP_GAP_TO_LEVEL = 1000
+const XP_GRANT_CLICKS = XP_GAP_TO_LEVEL / XP_GRANT_STEP - 1 // leaves exactly one grant short
 
 const MIME = {
     '.html': 'text/html; charset=utf-8',
@@ -496,6 +514,17 @@ async function enterLive(page, baseUrl, seed) {
         await btn.click()
         await page.waitForTimeout(800)
         log(`live: applied player preset "${preset}"`)
+    }
+    if (LEVEL_UP) {
+        const grant = page.getByTestId('debug-xp-grant-button')
+        await grant.waitFor({ state: 'visible', timeout: 15000 })
+        for (let i = 0; i < XP_GRANT_CLICKS; i++) {
+            await grant.click({ force: true, timeout: 2000 }).catch(() => {})
+            await page.waitForTimeout(60)
+        }
+        log(`live: granted ${XP_GRANT_CLICKS * XP_GRANT_STEP} XP (LEVEL_UP=1) — experience now sits `
+            + `${XP_GAP_TO_LEVEL - XP_GRANT_CLICKS * XP_GRANT_STEP} short of the next-level threshold, `
+            + 'so a won fight\'s own XP reward crosses it mid-aftermath')
     }
     const trigger = page.getByTestId(`debug-trigger-encounter-${ENCOUNTER_KIND}`)
     await trigger.waitFor({ state: 'visible', timeout: 15000 })
