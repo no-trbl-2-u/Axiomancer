@@ -12,7 +12,7 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-10 | 35c4c56c | 5 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-09 | 9a2bc248 | 4 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-10 | PENDING | 5 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-09 | 84be1db4 | 4 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-09 | 9e423a34 | 4 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-09 | 6b365d01 | 4 |
@@ -22,6 +22,38 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
+> **[adjust-equipment pass 5, 2026-09-10, commit PENDING]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — full re-audit, not a rubber stamp of pass
+> 4's findings. `git log 9a2bc248..HEAD -- axiomancer-mechanics/src/Items
+> axiomancer-mechanics/src/World/MapEvents/content.ts
+> axiomancer-mechanics/src/Combat/combat.encounter.types.ts
+> axiomancer-mechanics/src/Effects` is empty (the 16 commits since pass 4
+> were entirely the cards-pass-5 tick and unrelated merges — nothing
+> touched the equipment/consumable/shop/signature surface), so every
+> Step-1 signal was re-derived directly against the current tree: (1)
+> dominated relics — re-read all 8 off `relic.library.ts`: 2 weapons tie at
+> body+2, 2 armor tie at maxHp+5, 4 accessories split mind+2/mind+2/
+> heart+2/heart+2, every same-slot pair differs only by `grantsSignature`,
+> no strictly-dominated pair; (2) `grantsSignature` drift — all 8 relic
+> values diffed against the live `SignatureSkillId` union in
+> `combat.encounter.types.ts` (still 8 members, 1:1 match, no
+> rename/removal); (3) dead consumable `effectId`s — re-extracted all 11
+> non-heal-only ids from `consumable.library.ts` and checked each against
+> `buffs.library.json`/`debuffs.library.json` by id, all 11 resolve; (4)
+> shop-pool / reward-table coverage — re-enumerated all 6 `shop.wares`
+> blocks in `World/MapEvents/content.ts` (unchanged count) and confirmed
+> `rollCacheReward` still draws uniformly from the full 22-entry
+> `consumableLibrary` with no allow-list, so no consumable is
+> acquirable-nowhere; (5) `AccessoryKind` gap — head/hands/feet remain at
+> zero live relics, same standing `[loop-call]` (`plan/AUDIT.md`,
+> 2026-09-04) re-read and reconfirmed still accurate and still an
+> owner/mechanics-expert call, no new development against it this pass. KB
+> research: not run — every consideration this pass was audit-confirmed-
+> clean (no CREATE/UPDATE), exempt from the gate per §3 Step 2 (REMOVE/
+> no-op carve-out). Verify: not re-run — no source file changed; HEAD's
+> existing green (mechanics + mobile) stands, confirmed by `npm run
+> deploy:check` moments before this tick began.
+
 > **[adjust-cards pass 5, 2026-09-10, commit 35c4c56c]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — full re-audit via `card-expert` (consult+
 > implement mode), not a rubber stamp of pass 4's findings. `git log
