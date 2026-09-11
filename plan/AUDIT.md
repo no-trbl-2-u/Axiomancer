@@ -74,6 +74,24 @@
 > on a 390px screen. No rows in this pass turned out stale — all ~20 were
 > re-confirmed live against current source. Top 5 below is refreshed with
 > the sub-agent's scored findings for the next pass.
+>
+> **Fifth pass, 2026-09-11 (`/march` tick).** Same dispatch chain landed
+> on `/iterate` again (triage clean, both open CRITIQUE.md HIGHs still
+> block the critique gate, no pending phase, no content-lifecycle
+> category past its 15-commit/36h threshold, `/forge`'s 48h world-growth
+> window still open via `f56fa198`, `/expand`'s 20-commit/48h window not
+> yet open). [5.9] (crash) re-confirmed still blocked on the owner's
+> device log — not picked. [3.2] (dialogue reply-card echo) was the top
+> actionable score — re-verified live by direct read of
+> `event.engine.ts:572-576` (label/description still the same source
+> string) and both render sites before shipping. Shipped it (commit
+> `393354c6`, issue #296): guarded `app/dialogue/index.tsx`'s reply row
+> and `app/event/index.tsx`'s choice row so the sub-line only renders
+> when it differs from the label (case-insensitively) — combat-prelude
+> and the interaction "SO BE IT"/"Continue" choice already differ, so
+> they render unaffected. Added regression coverage for both screens in
+> `event.screen.test.tsx`. Moved the row Pending → Done in
+> `plan/CRITIQUE.md`. Top 5 below is refreshed for the next pass.
 
 ## Top 5 findings (scored)
 
@@ -86,20 +104,6 @@
   get the owner's device log (SELF -> dev tools -> DIAGNOSTICS -> PREV
   SESSION, domain ERROR) to confirm before closing; can't be shipped
   blind on web alone.
-
-### [3.2] dialogue — reply cards echo their label as an identical sub-line
-- category: external-critique
-- impact: 4
-- ease: 8
-- next: `event.engine.ts:572-576` sets narrative-choice `label:
-  choice.text.toUpperCase()` and `description: choice.text` — the same
-  source string every time, so the reply card always shows an identical
-  sub-line under its label. Combat-prelude choices (same file, ~486-498)
-  already keep label/description distinct — mirror that shape (don't
-  populate `description` for narrative choices, or guard the two render
-  sites — `app/dialogue/index.tsx:77` has a length guard but not a
-  differs-from-label one; `app/event/index.tsx:97-98` has no guard at
-  all) so the sub-line only renders when it actually adds information.
 
 ### [2.4] village — dimmed unaffordable stall items dim the item name along with the price
 - category: external-critique

@@ -460,24 +460,6 @@
   first. Filed as `[loop-call]` in `plan/AUDIT.md` (owner call needed on
   approach) rather than guessed at solo. Still open here.
 
-### [LOW] dialogue — reply cards echo their label as an identical sub-line
-- pass: session-playtest 2026-08-28 (continent playtest, The Delver at
-  caverns nc-2)
-- viewport: 390x844
-- auth_state: anonymous
-- category: visual
-- observation: each reply card renders its label in display type AND
-  the same text again beneath it in caption type ("WHAT DO YOU WANT
-  WITH THE IRON?" twice, "WALK ON." twice). Reads as a data echo, not
-  a design choice; wastes a line per reply on small screens.
-- suggested fix: in the dialogue screen/presenter, render the caption
-  sub-line only when it differs from the label (or drop it — the
-  authored tree likely supplies no distinct sub-caption and the
-  presenter falls back to the label). Check whether every dialogue
-  tree shows this or only trees authored without reply descriptions.
-- source: loop
-
-
 ### [HIGH] combat — user crash on ACCEPTING the post-combat card reward (second unreproduced crash report)
 - **LIKELY THE SAME BUG — RESOLVED 2026-09-04 (verify before closing).** The
   row below was root-caused to a Reanimated worklet calling a plain JS
@@ -1701,6 +1683,31 @@ one level down, in the routing helper `onApply` calls next).
 - source: loop
 
 ## Done
+
+### [x] [LOW] dialogue — reply cards echo their label as an identical sub-line — RESOLVED 2026-09-11 (commit 393354c6, issue #296)
+- pass: session-playtest 2026-08-28 (continent playtest, The Delver at
+  caverns nc-2)
+- viewport: 390x844
+- auth_state: anonymous
+- category: visual
+- observation: each reply card renders its label in display type AND
+  the same text again beneath it in caption type ("WHAT DO YOU WANT
+  WITH THE IRON?" twice, "WALK ON." twice). Reads as a data echo, not
+  a design choice; wastes a line per reply on small screens.
+- suggested fix: in the dialogue screen/presenter, render the caption
+  sub-line only when it differs from the label (or drop it — the
+  authored tree likely supplies no distinct sub-caption and the
+  presenter falls back to the label). Check whether every dialogue
+  tree shows this or only trees authored without reply descriptions.
+- source: loop
+- resolution: `composeNpcDialogue` (event.engine.ts) sets narrative-
+  choice `label`/`description` to the same source string re-cased, by
+  design (combat-prelude choices already differ). Guarded both render
+  sites (`app/dialogue/index.tsx`, `app/event/index.tsx`) so the
+  sub-line only shows when it differs from the label, rather than
+  touching the shared `EventChoice` type. Regression coverage added in
+  `event.screen.test.tsx` for both screens. Verify green (mobile
+  260/260 suites, 2655 tests).
 
 ### [x] [MED] hazard — the fanned route-choice hand truncates card names illegibly — RESOLVED 2026-09-11 (commit 8f3acef7, issue #295)
 - pass: session-critic 2026-08-31 (Phase V8 closure `/critic-loop`
