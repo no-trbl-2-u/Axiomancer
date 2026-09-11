@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-02T08:42:41Z | slash-prompt | /march | unknown | user/ci | /march |
-| 2026-08-02T08:42:43Z | skill | march | unknown | main | - |
 | 2026-08-02T08:43:55Z | skill | expand | claude-sonnet-5 | main | - |
 | 2026-08-02T09:26:08Z | slash-prompt | /consolidate | unknown | user/ci | /consolidate |
 | 2026-08-02T10:21:44Z | slash-prompt | /digest | unknown | user/ci | /digest |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-11T06:49:29Z | skill | adjust-enemies | claude-sonnet-5 | main | - |
 | 2026-09-11T08:37:43Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-11T08:37:45Z | skill | march | unknown | main | - |
+| 2026-09-11T08:59:27Z | slash-prompt | /digest | unknown | user/ci | /digest |
+| 2026-09-11T08:59:29Z | skill | digest | unknown | main | - |
