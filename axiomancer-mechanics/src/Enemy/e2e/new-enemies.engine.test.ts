@@ -12,7 +12,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { ENEMY_REGISTRY, EnemyLibrary, TheIncompleteness, Sandbag_01 } from '../enemy.library';
+import { ENEMY_REGISTRY, EnemyLibrary, EnemiesByMap, TheIncompleteness, Sandbag_01 } from '../enemy.library';
 import { AUTHORED_THREAT_SEQUENCES } from '../../Combat/combat.threat-sequences';
 import type { Enemy } from '../types';
 
@@ -33,7 +33,7 @@ const ROSTER_SLUGS = (Object.keys(ENEMY_REGISTRY) as Array<keyof typeof ENEMY_RE
         !(APORIA_BOSS_SLUGS as readonly string[]).includes(slug));
 
 /** Provenance stamps the roster has accrued, batch by batch. */
-const ROSTER_ADDED_STAMPS = ['2026-07-06', '2026-08-28', '2026-08-31', '2026-09-05', '2026-09-07'];
+const ROSTER_ADDED_STAMPS = ['2026-07-06', '2026-08-28', '2026-08-31', '2026-09-05', '2026-09-07', '2026-09-11'];
 
 describe('2026-07-06: the art-driven base roster', () => {
     it('registers every roster enemy in EnemyLibrary', () => {
@@ -230,6 +230,42 @@ describe('2026-07-06: the art-driven base roster', () => {
                 const enemy = ENEMY_REGISTRY[slug] as Enemy;
                 expect(enemy.portraitAsset).toBe(slug);
             }
+        });
+    });
+
+    describe('the adjust-enemies pass 6 the-capital backfill (2026-09-11)', () => {
+        const BACKFILL_SLUGS = ['the-stamper', 'the-underclerk'] as const;
+
+        it('registers both, stamped 2026-09-11, on the-capital', () => {
+            for (const slug of BACKFILL_SLUGS) {
+                const enemy = ENEMY_REGISTRY[slug] as Enemy;
+                expect(enemy, `slug ${slug} missing from ENEMY_REGISTRY`).toBeDefined();
+                expect(enemy.addedIn).toBe('2026-09-11');
+                expect(enemy.mapName).toBe('the-capital');
+                expect(EnemyLibrary).toContain(enemy);
+            }
+        });
+
+        it('every backfill enemy carries aftermath prose (finalBlowLines + causeLines)', () => {
+            for (const slug of BACKFILL_SLUGS) {
+                const enemy = ENEMY_REGISTRY[slug] as Enemy;
+                expect(enemy.finalBlowLines, `${slug} finalBlowLines`).toBeDefined();
+                expect(enemy.causeLines, `${slug} causeLines`).toBeDefined();
+            }
+        });
+
+        it('every backfill enemy has a unique portraitAsset', () => {
+            for (const slug of BACKFILL_SLUGS) {
+                const enemy = ENEMY_REGISTRY[slug] as Enemy;
+                expect(enemy.portraitAsset).toBe(slug);
+            }
+        });
+
+        it('the-capital pool drops under the 70% overlap ceiling against northern-city', () => {
+            const capital = EnemiesByMap['the-capital'] as readonly Enemy[];
+            const northernCity = EnemiesByMap['northern-city'] as readonly Enemy[];
+            const overlap = capital.filter(e => (northernCity as readonly Enemy[]).includes(e)).length;
+            expect(overlap / capital.length).toBeLessThanOrEqual(0.7);
         });
     });
 

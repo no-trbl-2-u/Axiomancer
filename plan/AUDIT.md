@@ -163,7 +163,7 @@
   Filed as `[loop-call]` per standing rule 7 for after-the-fact review,
   not because the call was ambiguous enough to block on.
 
-### [loop-call] The Capital's enemy pool reuses existing roster entries rather than authoring capital-native enemies — a legitimate future `/adjust-enemies` backfill (2026-09-10)
+### [x] [loop-call] The Capital's enemy pool reuses existing roster entries rather than authoring capital-native enemies — a legitimate future `/adjust-enemies` backfill (2026-09-10) — RESOLVED via `/adjust-enemies` pass 6 (2026-09-11)
 - category: content residue (found while shipping The Capital via
   `/forge`; `/forge` owns maps/events/art, not per-item enemies — see
   `skills/forge.md` §1's 2026-09-02 scope split)
@@ -187,6 +187,18 @@
   own rate-limited cadence, the same way caverns/connecting-river/
   town-across-river's thin pools were each backfilled after their own
   `/forge` launches.
+- resolution (2026-09-11): `/adjust-enemies` pass 6's fresh structural
+  audit re-derived the overlap directly (5 of the-capital's 6 members —
+  every member but CursedPaladin — also sit in northern-city's own pool,
+  83.3%, over the skill §1 >70% ceiling) and backfilled two capital-native
+  enemies, The Stamper and The Underclerk (both `debt-office` archetype,
+  reusing the existing card canon — no new cards needed, the capital being
+  that archetype's home city), dropping the reading to 5/8 = 62.5%. Full
+  wiring: `enemy.library.ts` (createEnemy + EnemyLibrary + EnemiesByMap +
+  ENEMY_REGISTRY), a 3-card deck each in `combat.enemy-decks.ts`, aftermath
+  prose, licensed game-icons.net portraits (Delapouite/Lorc, CC BY 3.0,
+  provenance recorded). See `plan/CONTENT_LEDGER.md`'s adjust-enemies pass
+  6 entry for the full audit and verify status.
 
 ### [x] [loop-call] AMBUSH and FINALE now print correctly but still show exactly 1 card carrier each (2026-09-07) — RESOLVED via `/adjust-cards` pass 3 (2026-09-08)
 - category: content residue (found during `/adjust-keywords` pass 2's full

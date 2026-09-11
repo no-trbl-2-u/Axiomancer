@@ -116,6 +116,13 @@ const ENEMY_ART_BY_KEY: Record<string, number> = {
     // same recipe as the prior batches; see provenance.json.
     'drift-anchor':      require('./drift-anchor.webp'),
     'the-adjuster':      require('./the-adjuster.webp'),
+    // The Capital backfill (adjust-enemies pass 6, 2026-09-11) — the map
+    // shipped at 83.3% pool overlap with northern-city (over the >70%
+    // sibling-overlap ceiling); two capital-native foes bring it to 62.5%.
+    // Licensed game-icons.net silhouettes (CC BY 3.0 — Delapouite / Lorc),
+    // same recipe as the prior batches; see provenance.json.
+    'the-stamper':       require('./the-stamper.webp'),
+    'the-underclerk':    require('./the-underclerk.webp'),
 };
 
 const ENEMY_ART_POOL: number[] = Object.values(ENEMY_ART_BY_KEY);

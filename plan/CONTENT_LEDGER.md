@@ -13,13 +13,98 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-11 | 01629acf | 6 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-11 | da51e629 | 6 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-10 | ce6e6a60 | 5 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-11 | PENDING | 6 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-10 | 17b38058 | 5 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-10 | 47bcda82 | 5 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-enemies pass 6, 2026-09-11, commit PENDING]** CREATE 2
+> (the-capital thinness/overlap backfill) — dispatched autonomously by
+> `/march`'s content-lifecycle gate (enemies' pass-5 commit ce6e6a60 was the
+> stalest of the two qualifying categories at dispatch time, 19 commits
+> since). Full fresh Step-1 re-audit, not a rubber stamp of pass 5's
+> findings: `git log ce6e6a60..HEAD -- axiomancer-mechanics/src/Enemy
+> axiomancer-mechanics/src/Combat/combat.enemy-decks.ts
+> axiomancer-mechanics/src/Combat/combat.enemy-cards.ts
+> axiomancer-mobile/assets/images/enemies axiomancer-mechanics/src/World` is
+> NOT empty this pass (unlike enemies' own recent zero-diff re-audits):
+> `f56fa198` ("ship The Capital, map 5 of the northern continent — Phase
+> W5/W6") added a 9th `EnemiesByMap` pool key pass 5 never saw, and its own
+> commit body plus a `plan/AUDIT.md` residue row it filed
+> ("The Capital's enemy pool reuses existing roster entries...a legitimate
+> future `/adjust-enemies` backfill") flagged it for this exact pass. (1)
+> **roster-size floor / sibling-overlap sweep** — recomputed all 10 pool
+> sizes and every pairwise overlap fresh (fishing-village 13,
+> northern-forest 39, caverns 16, northern-city 8, connecting-river 5,
+> town-across-river 4, the-capital 6 pre-fix, aporia-colonnade/archive 8
+> each, aporia-proof 11): the-capital's pre-fix 6-member pool had 5 members
+> (every one but CursedPaladin) also in northern-city's own 8-member pool —
+> 83.3%, over the skill §1 >70% sibling-overlap ceiling, confirming the
+> filed residue's reading exactly. The 4 pre-existing >70% Aporia-vs-forest/
+> caverns pairs re-confirmed as the labyrinth's own documented
+> deliberate-reuse design, unchanged, not re-litigated. CREATE: The Stamper
+> (`enemy-the-stamper`, level 18, normal) and The Underclerk
+> (`enemy-the-underclerk`, level 19, normal), both capital-native,
+> `debt-office` archetype (the capital being that archetype's own home
+> city per its existing flavor canon — The Factor's "his office was always
+> going to end up" there). Drops the reading to 5/8 = 62.5%, freshly
+> re-verified post-fix (also 25.0% against northern-forest and caverns,
+> both already well under ceiling). (2) **orphan sweep** — re-extracted all
+> 79 `enemy.library.ts` consts programmatically (77 prior + 2 new): 79/79
+> resolve into `ENEMY_REGISTRY`, 77/79 into some `EnemiesByMap` pool, same 2
+> deliberate exclusions (`Sandbag_01`, `TheIncompleteness`) as every prior
+> pass — no new orphan. (3) **deck sweep** — a fresh script cross-checked
+> every `ENEMY_DECKS` entry (92 source-literal declarations, 78 unique keys
+> after JS object-literal dedup — the 14 duplicate-key overrides are
+> pre-existing, unchanged by this pass) against the 79 `ENEMY_REGISTRY`
+> slugs: 0 unmatched. All 157 distinct card-id references (unchanged from
+> pass 5 — both new decks reuse existing `debt-office` cards, no new cards
+> authored) resolve against `ENEMY_CARD_LIBRARY`, 0 missing. (4) **portrait
+> sweep** — 77 `portraitAsset` values re-extracted (75 prior + 2 new), zero
+> duplicates, all 77 resolve 1:1 into
+> `axiomancer-mobile/assets/images/enemies/index.ts`'s registry, every
+> required `.webp` present on disk including the two new ones
+> (`the-stamper.webp`, `the-underclerk.webp`, 512×512 WebP, alpha,
+> Delapouite/Lorc CC BY 3.0 via the licensed game-icons.net trove,
+> provenance recorded). (5) **VITAE-band sweep** — 21 explicit `vitae:`
+> overrides, unchanged from pass 5 (neither new enemy sets one, both use
+> the derived band for their level); `enemy.library.ts`'s pre-existing
+> content is otherwise byte-identical to pass 5 except the additive capital
+> backfill, so the worst-deviation figure (ElderFireGiant +25.7%) stands.
+> (6) **aftermath-prose/voice sweep** — zero `\b(thee|thou|thy|thine|ye)\b`
+> matches (case-insensitive) anywhere in `enemy.library.ts`; 47
+> `finalBlowLines` carriers of 79 (up from 45/77 — both new enemies ship
+> full aftermath prose, so the standing backlog stays at exactly 32,
+> unworsened; filed pass 1, `plan/AUDIT.md` `[content]`, re-cited not
+> re-filed). (7) **loot-table sweep** — both new enemies' `drop()` ids
+> (`body-elixir`, `healing-potion`, `clarity-serum`, `focus-vial`) are
+> already-verified members of the standing 22-id set against
+> `Items/consumable.library.ts` — no new id introduced, diff stays empty.
+> KB research (kb-query gate, §3 Step 2): `kb_search` across
+> `court|bureaucra|clerk|noble|steward|petition` (scope `all`) returned no
+> on-point numeric doctrine for a sibling-pool-overlap ceiling — the same
+> miss passes 1 and 2 hit on this identical signal shape — so the grounding
+> is this repo's own established precedent (the caverns/connecting-river/
+> town-across-river backfills, all the same fix) plus Mage Knight's
+> per-site monster-deck model (`kb:mage-knight` — a site earns its own
+> bestiary rather than reusing a neighbour's wholesale), the same citation
+> passes 1/2 used for this exact finding shape. Full wiring: `createEnemy`
+> + `EnemyLibrary` + `EnemiesByMap['the-capital']` + `ENEMY_REGISTRY` in
+> `enemy.library.ts`; a 3-card deck each in `combat.enemy-decks.ts`
+> (`first-notice`→`collection-rounds`→`do-the-second-notice`, 0.85→0.95→
+> 1.15; `condolences-itemized`→`compound-interest`→`do-the-garnishment`,
+> 0.9→1.15→1.25); aftermath prose (finalBlowLines + causeLines); licensed
+> portraits + `provenance.json`; a new hermetic e2e block in
+> `new-enemies.engine.test.ts` (4 cases, including a pinned
+> overlap-under-ceiling assertion) plus the `ROSTER_ADDED_STAMPS` bump.
+> `plan/AUDIT.md`'s residue row marked `[x]` RESOLVED. Verify: green
+> (mechanics 212/212 files, 3422 tests + build; mobile lint/typecheck/jest +
+> assets:check 7/7 + art:test 24/24).
+```
 
 ```
 > **[adjust-equipment pass 6, 2026-09-11, commit da51e629]** Zero-CREATE,

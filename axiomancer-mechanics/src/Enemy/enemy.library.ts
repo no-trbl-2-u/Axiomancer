@@ -2653,6 +2653,89 @@ export const TheHarbormaster = createEnemy({
     tags: ['mid-game', 'boss', 'enemy'],
 });
 
+/**
+ * adjust-enemies pass 6 (2026-09-11) — the-capital thinness/overlap fix. The
+ * map shipped (Phase W5/W6, commit f56fa198) with an `EnemiesByMap` pool of
+ * 6 wholesale re-treads (TollSergeant, GuildKnife, WharfShrike, TheFactor
+ * from northern-city; CursedPaladin, VampireThrall from northern-forest) and
+ * zero capital-native enemies — flagged as a residue row in `plan/AUDIT.md`
+ * ("The Capital's enemy pool reuses existing roster entries...a legitimate
+ * future `/adjust-enemies` backfill") at the time it shipped. Sharpest single
+ * pairwise reading: 5 of the-capital's 6 members (all but CursedPaladin) also
+ * sit in northern-city's own pool — 83.3%, over the skill §1 >70%
+ * sibling-overlap ceiling. These two are capital-native, dropping that
+ * reading to 5/8 = 62.5% (the same target band the caverns pass-1 backfill
+ * landed at for an analogous fix). KB search (kb-query, kb_search across
+ * `court|bureaucra|clerk|noble|steward|petition`) returned no on-point
+ * numeric doctrine for a sibling-pool-overlap ceiling — the same miss passes
+ * 1 and 2 hit on this exact signal — so the grounding is this repo's own
+ * established precedent for the fix (the caverns/connecting-river/
+ * town-across-river backfills) plus Mage Knight's per-site monster-deck
+ * model (kb:mage-knight — a site earns its own bestiary rather than reusing
+ * a neighbour's wholesale), the same citation passes 1 and 2 used for the
+ * identical finding shape. Decks reuse the existing `debt-office` archetype
+ * (`combat.enemy-cards.ts`) wholesale — no new cards needed, matching the
+ * pass-2 precedent; the capital IS the debt-office's home city, so the
+ * shared archetype is flavor-correct, not corner-cutting.
+ */
+const W_ADJUST_ENEMIES_P6_ADDED = '2026-09-11';
+
+export const TheStamper = createEnemy({
+    id: 'enemy-the-stamper',
+    portraitAsset: 'the-stamper',
+    name: 'The Stamper',
+    stanceHint: 'It closes the case before you finish reading it — object to the stamp, not just the blow.',
+    description: 'It has stamped more petitions shut than the capital has floors. DENIED is the only word it has ever needed to know, in every hand it has practiced.',
+    level: 18,
+    baseStats: enemyStatBudget(18, { heart: 1, body: 3, mind: 2 }),
+    mapName: 'the-capital',
+    difficulty: 'normal',
+    logic: 'aggressive',
+    tier1Overrides: T1_DEFAULT,
+    loot: [none(50), drop('body-elixir', 25), drop('healing-potion', 25)],
+    philosophicalAlignment: { epistemology: 33, outlook: -67, scope: -67 },
+    finalBlowLines: {
+        brutal: 'The stamp comes down on nothing at all, and the ink dries anyway.',
+        quiet:  'It sets the seal aside, unused, and does not reach for it again.',
+        ironic: 'It closed every case that ever crossed its desk. Its own stays open.',
+    },
+    causeLines: {
+        brutal: 'The stamp lands, and the matter is DENIED, in full, with feeling.',
+        broken: 'Case by case, it finds a reason the appeal cannot proceed.',
+        quiet:  'Ink meets paper. The seal is final. It always was.',
+    },
+    addedIn: W_ADJUST_ENEMIES_P6_ADDED,
+    tags: ['mid-game', 'enemy'],
+});
+
+export const TheUnderclerk = createEnemy({
+    id: 'enemy-the-underclerk',
+    portraitAsset: 'the-underclerk',
+    name: 'The Underclerk',
+    stanceHint: 'It copies your every motion into triplicate before it answers — refuse the form, not just the blow.',
+    description: 'It has filed the same complaint under nine names, and none of them are yours. The capital keeps it on because it never once asks for a raise.',
+    level: 19,
+    baseStats: enemyStatBudget(19, { heart: 2, body: 1, mind: 3 }),
+    mapName: 'the-capital',
+    difficulty: 'normal',
+    logic: 'strategic',
+    tier1Overrides: T1_DEFAULT,
+    loot: [none(50), drop('clarity-serum', 25), drop('focus-vial', 25)],
+    philosophicalAlignment: { epistemology: 67, outlook: -33, scope: -67 },
+    finalBlowLines: {
+        brutal: 'The ninth copy goes unfiled. Nobody upstairs will ever notice.',
+        quiet:  'It sets the quill down mid-word and does not pick it back up.',
+        ironic: 'It filed every grievance this city ever had. It never once filed its own.',
+    },
+    causeLines: {
+        brutal: 'It copies the wound into triplicate before the wound has finished happening.',
+        broken: 'Form by form, it finds a version of you it can process.',
+        quiet:  'The quill scratches once, twice, and the file closes on its own.',
+    },
+    addedIn: W_ADJUST_ENEMIES_P6_ADDED,
+    tags: ['mid-game', 'enemy'],
+});
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // Phase W4 batch (2026-08-31): the river crossing and the town beyond it.
 // Seven enemies, two of them bosses, each with a UNIQUE portraitAsset sourced
@@ -3455,6 +3538,8 @@ export const EnemyLibrary = [
     // adjust-enemies pass 2 (2026-09-07) — connecting-river / town-across-
     // river thinness backfill.
     DriftAnchor, TheAdjuster,
+    // adjust-enemies pass 6 (2026-09-11) — the-capital thinness/overlap backfill.
+    TheStamper, TheUnderclerk,
     // The Aporia — labyrinth act bosses (W-01; not part of the 52-painting roster).
     TheDoorwarden, TheIndex, TheSophist,
     // Impossible playtest ceiling — deliberately absent from EnemiesByMap.
@@ -3528,18 +3613,20 @@ export const EnemiesByMap = {
         TheAdjuster,
     ],
     // The Capital (Phase W5, 2026-09-10) — map 5 of the northern continent,
-    // where every ribbon-road ends. No new enemies authored (/forge owns
-    // maps/events/art, not per-item content) — reuses northern-city's own
+    // where every ribbon-road ends. Shipped reusing northern-city's own
     // roster (a grander sibling city, same class of enforcer) plus two
-    // forest re-treads for variety, the northern-city precedent. The Factor
-    // is the authored boss (already defined above), pinned per-node in
-    // `MapEvents/content.ts`. Filed to `plan/AUDIT.md` as a residue note for
-    // adjust-enemies: capital-native enemies are a legitimate future
-    // backfill, same as the caverns/connecting-river/town-across-river
-    // passes did for their own maps.
+    // forest re-treads for variety, the northern-city precedent — but that
+    // left the pool at 5/6 (83.3%) overlap with northern-city alone, over
+    // the skill §1 sibling-overlap ceiling, per the `plan/AUDIT.md` residue
+    // row filed at launch. adjust-enemies pass 6 (2026-09-11) backfilled two
+    // capital-native enemies (The Stamper, The Underclerk — both debt-office
+    // archetype, the capital being that archetype's own home city), dropping
+    // the reading to 5/8 = 62.5%. The Factor is the authored boss (already
+    // defined above), pinned per-node in `MapEvents/content.ts`.
     'the-capital': [
         TollSergeant, GuildKnife, WharfShrike, TheFactor,
         CursedPaladin, VampireThrall,
+        TheStamper, TheUnderclerk,
     ],
     // The Aporia (W-01) — three acts of rising difficulty. Pools reuse the
     // shared roster (wandering foes scale to the player via the adaptive
@@ -3648,6 +3735,9 @@ export const ENEMY_REGISTRY = {
     // river thinness backfill.
     'drift-anchor':      DriftAnchor,
     'the-adjuster':      TheAdjuster,
+    // adjust-enemies pass 6 (2026-09-11) — the-capital thinness/overlap backfill.
+    'the-stamper':       TheStamper,
+    'the-underclerk':    TheUnderclerk,
     // The Aporia — labyrinth act bosses (W-01).
     'the-doorwarden':    TheDoorwarden,
     'the-index':         TheIndex,

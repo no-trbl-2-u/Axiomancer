@@ -339,6 +339,11 @@ export const ENEMY_DECKS: Record<string, EnemyDeckSpec> = {
     // adjust-enemies pass 2 (2026-09-07) — town-across-river thinness backfill,
     // composed from the shared debt-office canon (no new cards needed).
     'enemy-the-adjuster': ['small-god-on-credit', 'adjusters-visit', 'foreclosure-in-person'], // 0.85 → 1.0 → 1.3: the claim opened on credit, the visit that prices it, the foreclosure in person.
+    // adjust-enemies pass 6 (2026-09-11) — the-capital thinness/overlap
+    // backfill, composed from the shared debt-office canon (no new cards
+    // needed — the capital is that archetype's own home city).
+    'enemy-the-stamper': ['first-notice', 'collection-rounds', 'do-the-second-notice'], // 0.85 → 0.95 → 1.15: the docket opened, the queue processed by hand, the second and harsher notice stamped shut.
+    'enemy-the-underclerk': ['condolences-itemized', 'compound-interest', 'do-the-garnishment'], // 0.9 → 1.15 → 1.25: the itemized condolences, the interest compounding on the file, the appeal garnished at source.
     // BOSS — TIERED (5 cards → tier 3 at round 5). Appeal denied and the
     // objection clause wagered (1.00/1.30), the toll entire (1.25), then the
     // ruling executed and the interest made flesh (1.55/1.60).
