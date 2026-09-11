@@ -134,7 +134,11 @@ export default function HazardScreen() {
             )}
 
             {vm.phase === 'route-select' && !showIntro && (
-                <RouteSelect vm={vm} onPick={(route) => actions.selectHazardRoute(route)} />
+                <RouteSelect
+                    vm={vm}
+                    onPick={(route) => actions.selectHazardRoute(route)}
+                    onInspect={setDetailCard}
+                />
             )}
 
             {showIntro && (

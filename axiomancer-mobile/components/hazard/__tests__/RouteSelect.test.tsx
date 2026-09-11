@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
+import { fireEvent, render } from '@testing-library/react-native';
 
 import { RouteSelect } from '../RouteSelect';
 import type { HazardViewModel } from '@/state/presenters/hazard.engine';
@@ -127,5 +127,17 @@ describe('RouteSelect', () => {
     it('renders without error', () => {
         const { root } = render(<RouteSelect {...mockProps} />);
         expect(root).toBeTruthy();
+    });
+
+    it('tapping a hand card calls onInspect with that card', () => {
+        const onInspect = jest.fn();
+        const { getByLabelText } = render(<RouteSelect {...mockProps} onInspect={onInspect} />);
+        fireEvent.press(getByLabelText(/Strike, red card in hand/));
+        expect(onInspect).toHaveBeenCalledWith(mockViewModel.hand[0]);
+    });
+
+    it('tapping a hand card without an onInspect handler does not throw', () => {
+        const { getByLabelText } = render(<RouteSelect {...mockProps} />);
+        expect(() => fireEvent.press(getByLabelText(/Strike, red card in hand/))).not.toThrow();
     });
 });

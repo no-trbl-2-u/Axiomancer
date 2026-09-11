@@ -10,7 +10,7 @@ import React from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
 
-import type { HazardRouteChoiceVM, HazardViewModel } from '@/state/presenters/hazard.engine';
+import type { HazardCardVM, HazardRouteChoiceVM, HazardViewModel } from '@/state/presenters/hazard.engine';
 import type { HazardRouteKey } from '@mechanics';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
@@ -145,9 +145,11 @@ function RoutePanel({
 export function RouteSelect({
     vm,
     onPick,
+    onInspect,
 }: {
     vm: HazardViewModel;
     onPick: (key: HazardRouteKey) => void;
+    onInspect?: (card: HazardCardVM) => void;
 }) {
     const styles = useStyles();
     return (
@@ -166,7 +168,7 @@ export function RouteSelect({
 
                 {/* opening hand preview — fanned, non-interactive */}
                 <Animated.View entering={FadeInUp.delay(160).duration(320)}>
-                    <Text style={styles.handLabel}>YOUR HAND — CHOOSE YOUR ROUTE WITH THESE</Text>
+                    <Text style={styles.handLabel}>YOUR HAND — TAP A CARD TO READ IT, OR CHOOSE YOUR ROUTE BELOW</Text>
                     <View style={styles.handPreview} testID="hazard-opening-hand">
                         {vm.hand.map((card, i) => {
                             const n = vm.hand.length;
@@ -176,7 +178,7 @@ export function RouteSelect({
                                     key={card.uid}
                                     entering={FadeInUp.delay(220 + i * 70).duration(280)}
                                     style={{
-                                        marginLeft: i === 0 ? 0 : -32,
+                                        marginLeft: i === 0 ? 0 : -22,
                                         zIndex: i,
                                         transform: [
                                             { translateY: Math.abs(i - mid) * 6 },
@@ -184,7 +186,13 @@ export function RouteSelect({
                                         ],
                                     }}
                                 >
-                                    <HazardCard card={card} mode="hand" />
+                                    <Pressable
+                                        accessibilityRole="button"
+                                        accessibilityLabel={`${card.name}, ${card.kind} card in hand. Tap to read its full effect.`}
+                                        onPress={() => onInspect?.(card)}
+                                    >
+                                        <HazardCard card={card} mode="hand" />
+                                    </Pressable>
                                 </Animated.View>
                             );
                         })}
