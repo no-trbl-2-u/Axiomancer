@@ -12,7 +12,7 @@
 > plausibly live. Verify each against current code before
 > shipping; re-file or drain as reality dictates.
 
-# Site audit — 2026-09-10
+# Site audit — 2026-09-11
 
 > `/march` dispatched to `/iterate` (no pending phase, no content-lifecycle
 > category due, `/forge`'s 48h world-growth window still open via
@@ -54,6 +54,26 @@
 > confirmed live; the rest of the list needs the same direct-read
 > discipline before its next pick, not assumed accurate from an older
 > pass.
+>
+> **Fourth pass, 2026-09-11 (`/march` tick).** Hard rule §7.5 applied
+> again — `/march`'s dispatch chain (triage clean, no HIGH-critique-free
+> critique window, no pending phase, no content-lifecycle category due,
+> `/forge`'s 48h world-growth window still open via `f56fa198`,
+> `/expand`'s 20-commit/48h window not yet open) landed on `/iterate`,
+> and Pending still had ~20 open rows, so a sub-agent re-read all of them
+> end to end against current source rather than trusting older framing.
+> Confirmed [5.9] (crash) still blocked on the owner's device log and
+> [HIGH late-collapse] still PARKED (both untouched, re-verify before
+> ever picking). [3.5] (hazard-fan) was the top actionable score — shipped
+> it (commit `8f3acef7`, issue #295): `RouteSelect.tsx`'s opening-hand
+> overlap widened `-32`→`-22`, AND the existing `CardDetailOverlay`/
+> `onInspect` pattern (already used by the live in-round hand) was wired
+> onto the preview so any name still covered is one tap away — did both
+> of the row's suggested-fix options rather than picking one, since
+> neither alone gets every name legible in a fixed-5-card 90px-wide fan
+> on a 390px screen. No rows in this pass turned out stale — all ~20 were
+> re-confirmed live against current source. Top 5 below is refreshed with
+> the sub-agent's scored findings for the next pass.
 
 ## Top 5 findings (scored)
 
@@ -67,11 +87,52 @@
   SESSION, domain ERROR) to confirm before closing; can't be shipped
   blind on web alone.
 
-### [3.5] hazard — the fanned route-choice hand truncates card names illegibly
+### [3.2] dialogue — reply cards echo their label as an identical sub-line
 - category: external-critique
-- impact: 5
-- ease: 7
-- next: widen fan spacing or reveal the full name on tap/hold.
+- impact: 4
+- ease: 8
+- next: `event.engine.ts:572-576` sets narrative-choice `label:
+  choice.text.toUpperCase()` and `description: choice.text` — the same
+  source string every time, so the reply card always shows an identical
+  sub-line under its label. Combat-prelude choices (same file, ~486-498)
+  already keep label/description distinct — mirror that shape (don't
+  populate `description` for narrative choices, or guard the two render
+  sites — `app/dialogue/index.tsx:77` has a length guard but not a
+  differs-from-label one; `app/event/index.tsx:97-98` has no guard at
+  all) so the sub-line only renders when it actually adds information.
+
+### [2.4] village — dimmed unaffordable stall items dim the item name along with the price
+- category: external-critique
+- impact: 3
+- ease: 8
+- next: `app/village/index.tsx:120` applies `opacity: ware.affordable ?
+  1 : 0.4` to the whole row (name + desc + price); the sell tab (~146)
+  and combat's own disabled pattern only dim price/CTA. Drop the
+  row-level opacity, keep `wareName`/`wareDesc` full-bright, dim only
+  `warePrice`/CTA (there's already a `warePriceUnaffordable` color
+  treatment to lean on).
+
+### [1.6] `web:container` dev-server script is broken
+- category: external-critique
+- impact: 2
+- ease: 8
+- next: `axiomancer-mobile/scripts/dev-server-container.sh` still runs
+  `npx --yes expo start` inside the container, resolving a mismatched
+  Expo CLI — point it at the mounted repo's `node_modules/.bin/expo`
+  instead. Low impact (documented host workaround already exists) kept
+  this off the pick this tick despite trivial ease.
+
+### [1.5] card-editor cannot edit the three new mechanic fields
+- category: external-critique
+- impact: 3
+- ease: 5
+- next: `grant_pip.overflow`, `spend_all_pips.markPer`, and
+  `synergy.statePredicate` (`axiomancer-mechanics/src/Cards/types.ts`)
+  are still absent from `CardForm.tsx`'s `grant_pip`/`spend_all_pips`
+  cases (no `synergy` case exists at all). `markPer` is a cheap mirror
+  of the existing `spend_premises` stepper (~line 637); the other two
+  need real rider/closed-union form work — heavier scope than its
+  siblings above, hence the lower ease.
 
 > **Parked, do not pick:** `[HIGH] late-stage global collapse — all 10
 > presets 0.00 late` carries an explicit `/oversight 2026-08-08` ruling

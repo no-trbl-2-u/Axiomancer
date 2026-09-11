@@ -1668,21 +1668,6 @@ one level down, in the routing helper `onApply` calls next).
   files/4085 tests green; `axiomancer-mobile` 268 files/2716 tests
   green.
 
-### [MED] hazard — the fanned route-choice hand truncates card names illegibly
-- pass: session-critic 2026-08-31 (Phase V8 closure `/critic-loop`
-  screenshot pass, `axiomancer-mobile/screenshots/audit-2026-06/after/14-hazard-board.png`)
-- viewport: 390x844 (audit-capture rig)
-- auth_state: dev-seeded hazard node
-- category: visual / legibility
-- observation: the five route-choice cards fan out so tightly overlapped
-  that most names truncate before the player can read the choice
-  ("FAITH LE…", "BALANCE P…", "SCRAMB…"), so the hand preview doesn't
-  actually let a player scan their options before committing to a route.
-- suggested fix: widen card spacing in the fan, or reveal the full name
-  on tap/hold before the route is chosen. Component likely under
-  `components/hazard/`.
-- source: loop
-
 ### [LOW] aftermath — the parley "Heart Opens" reward panel is a pixel-art heart, style outlier
 - pass: session-critic 2026-08-31 (Phase V8 closure `/critic-loop`
   screenshot pass, `axiomancer-mobile/screenshots/audit-2026-06/after/27-aftermath-parley.png`)
@@ -1716,6 +1701,36 @@ one level down, in the routing helper `onApply` calls next).
 - source: loop
 
 ## Done
+
+### [x] [MED] hazard — the fanned route-choice hand truncates card names illegibly — RESOLVED 2026-09-11 (commit 8f3acef7, issue #295)
+- pass: session-critic 2026-08-31 (Phase V8 closure `/critic-loop`
+  screenshot pass, `axiomancer-mobile/screenshots/audit-2026-06/after/14-hazard-board.png`)
+- viewport: 390x844 (audit-capture rig)
+- auth_state: dev-seeded hazard node
+- category: visual / legibility
+- observation: the five route-choice cards fan out so tightly overlapped
+  that most names truncate before the player can read the choice
+  ("FAITH LE…", "BALANCE P…", "SCRAMB…"), so the hand preview doesn't
+  actually let a player scan their options before committing to a route.
+- suggested fix: widen card spacing in the fan, or reveal the full name
+  on tap/hold before the route is chosen. Component likely under
+  `components/hazard/`.
+- source: loop
+- resolution (2026-09-11, commit 8f3acef7, `/iterate` via `/march`): did
+  both named options rather than picking one. `RouteSelect.tsx`'s
+  opening-hand fan overlap went from a flat `-32` to `-22` (68px visible
+  per card instead of 58, confirmed against the actual card names in
+  `hazard.content.ts` — "BALANCE POLE"/"UNBROKEN OATH" etc. wrap fully
+  within a card's 2-line name box at full width, so the old truncation
+  was the physical overlap covering the text, not a text-wrap limit).
+  Also wired the already-existing `CardDetailOverlay`/`onInspect`
+  pattern (used by the live in-round hand in `HazardBoard.tsx`) onto the
+  preview: each fanned card is now a `Pressable` that opens the same
+  full-size detail card on tap, wired through `app/hazard/index.tsx`'s
+  existing `detailCard` state — no new component, reused the live-hand's
+  own inspect mechanism. Verify: `axiomancer-mobile` full gate
+  (lint/typecheck/jest/assets/art) green, including two new
+  `RouteSelect.test.tsx` cases pinning the tap → onInspect wiring.
 
 ### [x] [MED] exploration — open map nodes just off-screen no-op silently on tap; the map recenters against manual panning — RESOLVED 2026-09-10 (commit 6fe4e47c, issue #294)
 - pass: user-session playthrough 2026-08-29 (commit 0b39b120)
