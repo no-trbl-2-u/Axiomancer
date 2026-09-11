@@ -117,7 +117,7 @@ export default function VillageScreen() {
                                     accessibilityState={{ disabled: !ware.affordable }}
                                     disabled={!ware.affordable}
                                     onPress={() => actions.buyVillageWare(ware.itemId)}
-                                    style={[styles.wareRow, { opacity: ware.affordable ? 1 : 0.4 }]}
+                                    style={[styles.wareRow, !ware.affordable && styles.wareRowUnaffordable]}
                                     testID={`village-ware-${ware.itemId}`}
                                 >
                                     <View style={styles.flexOne}>
@@ -127,9 +127,9 @@ export default function VillageScreen() {
                                         )}
                                     </View>
                                     {ware.discounted && (
-                                        <Text style={styles.warePriceStruck} testID={`village-ware-${ware.itemId}-base-price`}>{ware.basePrice}s</Text>
+                                        <Text style={[styles.warePriceStruck, !ware.affordable && styles.wareCtaDimmed]} testID={`village-ware-${ware.itemId}-base-price`}>{ware.basePrice}s</Text>
                                     )}
-                                    <Text style={[styles.warePrice, !ware.affordable && styles.warePriceUnaffordable]}>{ware.price}s</Text>
+                                    <Text style={[styles.warePrice, !ware.affordable && [styles.warePriceUnaffordable, styles.wareCtaDimmed]]}>{ware.price}s</Text>
                                 </TouchableOpacity>
                             )) : (
                                 <Text style={styles.emptyNote} testID="village-buy-empty">Nothing for sale.</Text>
@@ -245,6 +245,10 @@ const useStyles = makeStyles((AXM) => ({
         padding: 10,
         marginBottom: 6,
     },
+    // Unaffordable rows dim only the price/CTA (below) — the border alone
+    // signals disabled so the name/description stay bone/parchment-bright
+    // and legible, matching combat's disabled-item treatment (critic round).
+    wareRowUnaffordable: { borderColor: AXM.ash },
     wareName: { fontFamily: FONTS.gothic, fontSize: 16, color: AXM.parchment, letterSpacing: 1 },
     wareDesc: { fontFamily: FONTS.mono, fontSize: 8, color: AXM.bone, marginTop: 2, textTransform: 'uppercase' },
     warePrice: { fontFamily: FONTS.gothic, fontSize: 18, color: AXM.sulfur },
@@ -252,6 +256,7 @@ const useStyles = makeStyles((AXM) => ({
     // is loud enough to survive the unaffordable dim, so mute the colour
     // to bone when the player can't afford it (critic round).
     warePriceUnaffordable: { color: AXM.bone },
+    wareCtaDimmed: { opacity: 0.6 },
     // Phase 65 — village goodwill discount: the pre-discount price shown
     // struck through beside the discounted charge.
     warePriceStruck: {

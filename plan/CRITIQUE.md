@@ -1666,12 +1666,15 @@ one level down, in the routing helper `onApply` calls next).
   swapping).
 - source: loop
 
-### [LOW] village — dimmed unaffordable stall items dim the item name along with the price
+## Done
+
+### [x] [LOW] village — dimmed unaffordable stall items dim the item name along with the price — RESOLVED 2026-09-11 (issue #297)
 - pass: session-critic 2026-08-31 (Phase V8 closure `/critic-loop`
   screenshot pass, `axiomancer-mobile/screenshots/audit-2026-06/after/28-village.png`)
 - viewport: 390x844 (audit-capture rig)
 - auth_state: 0 shillings
 - category: visual / legibility
+- issue: #297
 - observation: stall rows for items the player can't afford (Minor
   Healing Potion, Antidote at 0 shillings) dim the item name and
   description text along with the price/CTA, making the description
@@ -1681,8 +1684,14 @@ one level down, in the routing helper `onApply` calls next).
   the combat pattern — keep item name bone/parchment-bright, dim only
   price/affordability cue.
 - source: loop
-
-## Done
+- resolution: `app/village/index.tsx`'s `wareRow` no longer applies
+  `opacity` across the whole row when unaffordable — a new
+  `wareRowUnaffordable` style dims only the border color (`AXM.ash`),
+  and a new `wareCtaDimmed` (`opacity: 0.6`) applies only to the price
+  and struck-through base-price text. Item name/description stay full
+  bone/parchment brightness. `disabled`/`accessibilityState` unchanged.
+  Mobile verify green (260/260 suites, 2655/2655 tests, lint 0 errors,
+  typecheck clean).
 
 ### [x] [LOW] dialogue — reply cards echo their label as an identical sub-line — RESOLVED 2026-09-11 (commit 393354c6, issue #296)
 - pass: session-playtest 2026-08-28 (continent playtest, The Delver at

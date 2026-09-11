@@ -7,9 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-03T12:03:06Z | slash-prompt | /digest | unknown | user/ci | /digest |
-| 2026-08-03T12:03:09Z | skill | digest | unknown | main | - |
-| 2026-08-03T15:23:57Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-03T15:25:16Z | skill | iterate | claude-sonnet-5 | main | - |
 | 2026-08-03T20:07:50Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-03T20:10:58Z | skill | iterate | claude-sonnet-5 | main | - |
@@ -407,3 +404,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-11T14:32:03Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-11T14:36:01Z | subagent | content-curator | claude-sonnet-5 | main | Run adjust-npcs pass 6 |
 | 2026-09-11T16:32:10Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-11T18:34:51Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-11T18:34:53Z | skill | march | unknown | main | - |
+| 2026-09-11T18:35:59Z | skill | iterate | claude-sonnet-5 | main | - |
