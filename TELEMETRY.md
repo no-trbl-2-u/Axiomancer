@@ -7,7 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-01T08:38:36Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-01T10:23:04Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-08-01T19:41:30Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-01T19:43:42Z | subagent | Explore | claude-sonnet-5 | main | Investigate VITAE preview mismatch bug |
@@ -407,3 +406,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-11T01:04:09Z | subagent | Explore | claude-sonnet-5 | main | Fresh-read audit of CRITIQUE.md pending rows |
 | 2026-09-11T02:38:42Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-11T02:42:39Z | subagent | card-expert | claude-sonnet-5 | main | Run adjust-cards pass 6 end-to-end |
+| 2026-09-11T04:34:48Z | slash-prompt | /march | unknown | user/ci | /march |

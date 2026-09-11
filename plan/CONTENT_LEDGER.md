@@ -12,7 +12,7 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-11 | 01629acf | 6 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-10 | 2b02ff60 | 5 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-11 | PENDING | 6 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-10 | ce6e6a60 | 5 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-10 | 17b38058 | 5 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-10 | 47bcda82 | 5 |
@@ -20,6 +20,62 @@
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-equipment pass 6, 2026-09-11, commit PENDING]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
+> content-lifecycle gate (19 commits since pass 5, past the 15-commit
+> threshold, and the stalest of the two qualifying categories — equipment's
+> pass-5 commit predates enemies' by ~4 hours) — full re-audit, not a
+> rubber stamp of pass 5's findings. `git log 2b02ff60..HEAD --
+> axiomancer-mechanics/src/Items axiomancer-mechanics/src/World/MapEvents/
+> content.ts axiomancer-mechanics/src/Combat/combat.encounter.types.ts
+> axiomancer-mechanics/src/Effects` is NOT empty this pass (unlike the
+> sibling categories' recent zero-diff re-audits): `f56fa198` ("ship The
+> Capital, map 5 of the northern continent — Phase W5") added a 7th
+> `shop.wares` block — genuine new equipment-adjacent territory pass 5
+> never saw. Re-derived every Step-1 signal directly against the current
+> tree: (1) dominated relics — re-read all 8 off `relic.library.ts`
+> (byte-identical since pass 5): 2 weapons tie at body+2, 2 armor tie at
+> maxHp+5, 4 accessories split mind+2/mind+2/heart+2/heart+2, every
+> same-slot pair differs only by `grantsSignature`, no strictly-dominated
+> pair; (2) `grantsSignature` drift — all 8 relic values still 1:1 against
+> the live 8-member `SignatureSkillId` union in `combat.encounter.types.ts`,
+> no rename/removal; (3) dead consumable `effectId`s — re-extracted all 11
+> non-heal-only ids from `consumable.library.ts` (unchanged, still 22
+> entries) and checked each against `buffs.library.json`/
+> `debuffs.library.json` by id, all 11 resolve; (4) shop-pool / reward-table
+> coverage — **the genuine new finding**: re-enumerated `shop.wares` blocks
+> across `World/MapEvents/content.ts` by fresh grep and found 7, not pass
+> 5's 6 — `capMarket` (The Capital, `cap-6.village`, "The Petitioners' Row")
+> stocks `greater-healing-potion`/`supreme-healing-potion`/
+> `resonance-crystal`/`phoenix-tear`, four late-game consumables previously
+> reachable only via `rollCacheReward`'s uniform draw. Distinct shop-stocked
+> consumables rise from pass 5's 8/22 to 12/22; the other 10 (incl.
+> `revive-crystal`, `berserker-brew`, `regeneration-tonic`) remain
+> cache-only, confirmed still reachable (not acquirable-nowhere) since
+> `rollCacheReward` still draws uniformly over the full, unfiltered
+> `consumableLibrary` (re-read `cache-reward.ts`, byte-identical since pass
+> 1). No dead itemId: all 4 of `capMarket`'s wares resolve in
+> `consumableLibrary` by a fresh cross-check. Not a CREATE/UPDATE trigger —
+> new shop placement is a `/forge`/W5 map-content concern, already shipped;
+> this pass's job was confirming it didn't orphan or duplicate anything,
+> which it didn't. (5) `AccessoryKind` gap — head/hands/feet remain at zero
+> live relics, same standing `[loop-call]` (`plan/AUDIT.md`, 2026-09-04,
+> answers the open `[HIGH]` in `plan/CRITIQUE.md`) re-read and reconfirmed
+> still accurate: still needs an owner/mechanics-expert call between (a)
+> designing a 9th+ signature skill first or (b) breaking the relic's own
+> stated 1:1 identity rule for stat-only accessories — no new evidence this
+> pass to decide it solo, left filed, not re-litigated. KB research: not
+> run — every consideration this pass was audit-confirmed-clean (no
+> CREATE/UPDATE), exempt from the gate per skill §3 Step 2 (REMOVE/no-op
+> carve-out). Verify: not re-run in full — no `axiomancer-mechanics`/
+> `axiomancer-mobile` source file changed (`git status` clean on both), and
+> `npm run deploy:check` confirmed green immediately before this tick began
+> (HEAD `f898deaf`, no gated workflow triggered for the docs/plan-only tip
+> commit) — the direct signal checks above (grep/read-based, not
+> test-suite-based) are what's new this pass.
+```
 
 ```
 > **[adjust-cards pass 6, 2026-09-11, commit 01629acf]** Zero-CREATE,
