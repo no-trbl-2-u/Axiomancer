@@ -13,7 +13,7 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-11 | 01629acf | 6 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-11 | da51e629 | 6 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-11 | PENDING | 6 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-11 | e57f9f63 | 6 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-10 | 17b38058 | 5 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-10 | 47bcda82 | 5 |
 
@@ -22,7 +22,7 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-enemies pass 6, 2026-09-11, commit PENDING]** CREATE 2
+> **[adjust-enemies pass 6, 2026-09-11, commit e57f9f63]** CREATE 2
 > (the-capital thinness/overlap backfill) — dispatched autonomously by
 > `/march`'s content-lifecycle gate (enemies' pass-5 commit ce6e6a60 was the
 > stalest of the two qualifying categories at dispatch time, 19 commits
