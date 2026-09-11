@@ -93,6 +93,50 @@
 > `event.screen.test.tsx`. Moved the row Pending → Done in
 > `plan/CRITIQUE.md`. Top 5 below is refreshed for the next pass.
 
+> **Sixth pass, 2026-09-11 (`/march` tick).** Same dispatch chain landed on
+> `/iterate` again (hard rule §7.5: `plan/CRITIQUE.md` still had ~20 open
+> Pending rows, so this pass scored those plus a full `grep '^### \['`
+> sweep of `plan/AUDIT.md`'s own non-CRITIQUE rows, rather than a fresh
+> site audit). Found this Top 5 block stale on arrival: its own [2.4]
+> village-stall row had already shipped in the immediately-preceding commit
+> (`2836d821`, issue #297), with its `plan/CRITIQUE.md` row already moved
+> Pending → Done — not re-picked, just dropped from the refresh below.
+> Re-verified every open `plan/CRITIQUE.md` Pending row against current
+> source: the two art-register rows (incoherent art vocab, fixed "ruined
+> city" backdrop) both name their own fix as out of scope for `/iterate` —
+> an art-direction decision / dedicated art phase, not a code change, so
+> near-zero ease; the two `[HIGH]` rows (sixth-axis equipment, post-combat
+> reward crash) stay excluded per their standing loop-call/blocked status;
+> every remaining LOW/MED row (color-hex debt, akrasia swap-pool tension,
+> fated-course dead test hook, stale Card Ledger metrics, AccessoryKind
+> closed union, hand-card 3-line clip, pixel-art-heart style outlier, two
+> missing engine hooks, UI-communication testing gap) scored below the
+> survivors already in this block. `plan/AUDIT.md`'s own non-CRITIQUE
+> Pending rows were mostly `[loop-call]`/`[needs-user-call]` or now belong
+> to an `adjust-*` steward's lane per THE CONTENT LIFECYCLE SPLIT; the real
+> competition was the open AUDIT-native scored rows ([2.1] two dead
+> agent-e2e walkthroughs, [2.0] mobile `as any` clusters, [1.8] flag-on
+> tray-die a11y gap, [1.6] a11y gaps, [1.5] keepsake/death-flag growth,
+> [1.5] `HazardBoard.tsx` length). [2.1] scored highest on paper but its
+> true ease is far lower than filed once actually investigated — confirmed
+> genuinely dead via `docs/lexicon.json`'s own retired-vocabulary registry,
+> but the row's "two automation files" framing undersells the real scope
+> (README.md's feature table + 4 specs + 2 docs also describe the same
+> retired system as current) — not shipped blind; see the row's own new
+> update note in Pending. **[1.8] (flag-on tumbling tray die drops
+> `assigned`/`specialConviction` a11y opts) was the top genuinely-actionable
+> score** — verified live by direct read (`RollingDie.tsx:141` forwarded
+> only `die/size/dimmed` to the real `CombatDie`; `CombatBoard.tsx` already
+> computed both `isAssigned`/`specialConviction` values but only threaded
+> them to the static, non-ritual `<CombatDie>` branch). Shipped it (commit
+> `f9f2be28`, issue #298): added the two props to `RollingDie`, forwarded
+> them to its inner `CombatDie`, wired `CombatBoard`'s existing computation
+> through at the `<RollingDie>` call site, and added
+> `RollingDie.a11y.test.tsx` (mirrors `CombatDie.a11y.test.tsx`'s coverage
+> shape) proving both opts reach the rendered label. `npm run verify
+> --workspace axiomancer-mobile`: 261 suites / 2657 tests green. Top 5
+> below is refreshed for the next pass.
+
 ## Top 5 findings (scored)
 
 ### [5.9] combat — user crash on ACCEPTING post-combat card reward (unreproduced, issue #216)
@@ -105,16 +149,16 @@
   SESSION, domain ERROR) to confirm before closing; can't be shipped
   blind on web alone.
 
-### [2.4] village — dimmed unaffordable stall items dim the item name along with the price
-- category: external-critique
-- impact: 3
-- ease: 8
-- next: `app/village/index.tsx:120` applies `opacity: ware.affordable ?
-  1 : 0.4` to the whole row (name + desc + price); the sell tab (~146)
-  and combat's own disabled pattern only dim price/CTA. Drop the
-  row-level opacity, keep `wareName`/`wareDesc` full-bright, dim only
-  `warePrice`/CTA (there's already a `warePriceUnaffordable` color
-  treatment to lean on).
+### [2.0] mobile — `as any` clusters at the state boundary
+- category: debt
+- impact: 4
+- ease: 5
+- next: recurring drain bucket, not a single fix — but one concrete,
+  cheap instance remains live: `axiomancer-mobile/state/persistence/
+  migrations.ts:50` (`const gameState = state as any;` inside
+  `migrateV1ToV2`). Narrow it to a typed unknown-shape guard (mirroring
+  how the now-clean `state/actions.ts` engine-store bridge was fixed)
+  rather than chasing the whole recurring bucket in one tick.
 
 ### [1.6] `web:container` dev-server script is broken
 - category: external-critique
@@ -377,7 +421,7 @@
   gear-scaled value — is untouched and still open.** Retitling/rescoring
   below to reflect (a) as the sole remaining scope.
 
-### [debt] Flag-on tumbling tray die (`RollingDie`) speaks the stock Conviction payload, not the assigned gear-scaled value
+### [x] [1.8] Flag-on tumbling tray die (`RollingDie`) speaks the stock Conviction payload, not the assigned gear-scaled value — RESOLVED 2026-09-11 (commit `f9f2be28`, issue #298)
 - category: mobile evidence residue (remaining half of the row above,
   split 2026-09-09 after (b) shipped)
 - detail: `components/combat/encounter/RollingDie.tsx` forwards only
@@ -388,6 +432,17 @@
 - score: impact 3 x ease 6 / 10 = 1.8 (narrow surface — one screen-reader
   wording gap on the flag-on tumble animation, not a functional or CI
   break; straightforward prop-forwarding fix once picked up)
+- resolution: also missed `assigned` (never spoke "assigned to a staged
+  card" for a socketed tray die mid-cast), not just `specialConviction` —
+  both were absent, not just the one named in the title. Added
+  `assigned`/`specialConviction` props to `RollingDie`, forwarded to its
+  inner `CombatDie`, and wired `CombatBoard.tsx`'s existing
+  `isAssigned`/`specialConviction` computation through at the
+  `<RollingDie>` call site (previously only threaded to the static,
+  non-ritual `<CombatDie>` branch). New `RollingDie.a11y.test.tsx` proves
+  both opts reach the rendered label, mirroring `CombatDie.a11y.test.tsx`'s
+  existing coverage shape. `npm run verify --workspace axiomancer-mobile`:
+  261 suites / 2657 tests green.
 
 ### [loop-call] No mid/late equipment progression — 8 relics are 1:1-locked to 8 signatures, 3 accessory kinds have zero live relics (2026-09-04)
 - category: design residue (found during `/adjust-equipment` pass 1's
@@ -3062,6 +3117,26 @@
   table and the harness owner should confirm dead-vs-superseded
   before removal.
 - next: /iterate
+- update (`/iterate` investigation, 2026-09-11, no code shipped — this
+  tick's one fix went to the [1.8] tray-die a11y row instead): confirmed
+  dead, not superseded — `axiomancer-mechanics/docs/lexicon.json`'s own
+  `retired` registry (`src-skills-path`, since "2026-07 (PR #48 deleted
+  the dead src/Skills/ ability system; see CHANGELOG 'De-conflation')")
+  already rules this: the whole `src/Skills/` tier-ability system
+  (`learnSkill`, `executeSkill`, `SkillLookup`, `skillLibrary`) is gone
+  from `src/`, replaced by the SignatureSkill family (a separate living
+  concept). Both goal.md/json walkthrough pairs are safe to delete next
+  pick, per the row's own scoped ask. **Wider scope found while
+  checking:** `learnSkill`/`executeSkill` are NOT confined to these two
+  automation files — `README.md`'s Skills feature-table row,
+  `docs/testing.md`, `docs/oaths.md`, and specs 06/14/25/31 all still
+  describe the retired system in detail, several citing Phase
+  30-66-numbered work as if current. That is a much larger, higher-risk
+  doc-rewrite than this row's "two automation files" framing (touches
+  the canonical feature-table, not a lexicon-exempt dated-record zone)
+  — filed here rather than attempted blind; a future pick should treat
+  the automation-file deletion and the README/specs rewrite as two
+  separate scoped fixes, not one.
 
 ### [x] [2.4] Phase-mirror issue close is unreliable — 9 shipped phases still show open, and even a present trailer once failed — RESOLVED 2026-08-03 (commit 0441c554, issue #166)
 - resolution: `loop-issue.mjs close-comment` (the `/iterate` finding-mirror
