@@ -320,6 +320,8 @@ function DiceRow({
                                 plan={plansById[die.id]}
                                 skipNonce={skipNonce}
                                 onTumbleChange={onTumbleChange}
+                                assigned={isAssigned}
+                                specialConviction={specialConviction}
                             />
                         ) : (
                             <CombatDie die={die} size={TRAY_DIE_SIZE} dimmed={dieDimmed} assigned={isAssigned} specialConviction={specialConviction} />
