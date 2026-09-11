@@ -14,12 +14,102 @@
 | cards | `skills/adjust-cards.md` | 2026-09-11 | 01629acf | 6 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-11 | da51e629 | 6 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-11 | e57f9f63 | 6 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-10 | 17b38058 | 5 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-11 | PENDING | 6 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-10 | 47bcda82 | 5 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-keywords pass 6, 2026-09-11, commit PENDING]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
+> content-lifecycle gate (keywords' pass-5 commit 17b38058 was the stalest
+> qualifying category, 16 commits since, past the 15-commit threshold) —
+> full re-audit, not a rubber stamp of pass 5's findings. `git log
+> 17b38058..HEAD -- axiomancer-mechanics/src/Cards axiomancer-mechanics/
+> src/Effects axiomancer-mechanics/src/Combat
+> axiomancer-mechanics/docs/keyword-atlas.md docs/retheme-map.json
+> axiomancer-mobile/state/combat/keywords.ts
+> axiomancer-card-editor/src/data/mechanics.ts` returns exactly one commit
+> (`e57f9f63`, `/adjust-enemies` pass 6) out of the 16 landed since pass 5;
+> read its full diff directly rather than trusting its own commit-message
+> summary — it only added 5 lines to `combat.enemy-decks.ts` wiring two new
+> capital-native enemies' decks entirely from the pre-existing `debt-office`
+> card canon (`first-notice`/`collection-rounds`/`do-the-second-notice`,
+> `condolences-itemized`/`compound-interest`/`do-the-garnishment` — all six
+> already-shipped card ids, confirmed by the commit's own "no new cards
+> needed" note), so no new `CardSpecialMechanic` kind, effect id, or card
+> literal entered the keyword surface. Every Step-1 signal was re-derived by
+> direct enumeration/script against the current tree rather than assumed
+> stale-clean, same discipline as the sibling categories' own pass-6
+> re-audits: (1) registry row-count parity — `axio_keywords` and
+> `axio_overview` both still return exactly 68 rows (unchanged from pass 5,
+> confirmed via fresh calls, not a cached number), alongside the same
+> 128-card/78-enemy/24-effect counts the sibling passes counted today
+> (78 enemies is pass 6 enemies' own +2, correctly outside this skill's
+> remit); (2) full carrier-count sweep — a fresh `grep -oE "kind:
+> '[a-zA-Z_]+'"` across all 9 `src/Cards/library/*.cards.ts` modules
+> reconfirms CHAIN/ECHO/EXECUTE/OMEN/opening(AMBUSH)/FINALE/RUPTURE/
+> TURNABOUT all still sit at exactly 2 carriers apiece, no regression below
+> the atlas's own "≥2 cards or ≥2 enemies" floor; a fresh extraction of all
+> 54 literal `kind:` members off `src/Cards/types.ts`
+> (`CardSpecialMechanic`/`CardRider` union) against the same grep confirms
+> the same 9 zero-carrier die-gear/card-local kinds
+> (`strip_random_buff`, `befriend_attempt`, `refresh_die`,
+> `convert_die_color`, `overheat`, `forge_floating_die`, `float_x_die`,
+> `spend_all_pips`, `echo_next_spell`) remain at zero and stay
+> `KINDS_WITHOUT_MECHANIC_KEYWORD`-exempt; ran the mobile KW-1/KW-3 jest
+> suite directly (`state/combat/__tests__/keywords.test.ts`, 13/13 green)
+> rather than eyeballing the union walk by hand — it mechanically re-proves
+> "every mechanic kind either maps to a glossed keyword or is classified"
+> and "no mapping points at a kind the engine does not have", so a silent
+> `default:`-arm regression (the skill's own "ship regardless of priority"
+> bug signal) would have failed this run; none did. (3) atlas "Known drift"
+> section re-checked against current source, not assumed accurate:
+> `debuffs.library.json`'s `debuff_poison`/`debuff_bleed`/
+> `debuff_creeping_doom` (DOOM) `damagePerRound` values are still 2/3/1
+> exactly as the atlas's own note states (the overhaul's §5.2 ×3-4 rescale
+> has not landed; Mark itself carries no `damagePerRound` field — it's a
+> per-tick multiplier on other DoTs, not a direct-damage entry) and
+> `src/Combat/effects.ts`'s
+> `CAPITULATE_RESOLVE_FRACTION`/`CAPITULATE_MIN` still floor RELENT at 10,
+> not the overhaul's §5.4 "min 20" — both re-confirmed still accurate via a
+> direct grep of the live values (not carried over from pass 5's prose) and
+> still engine-constant/effects-data rescales out of this skill's
+> card-shaped scope, left untouched matching every prior pass's own
+> boundary call, not re-filed. (4) idea-mining sweep (Step-1's
+> functions-column CREATE-candidate signal) — read the full 141-row
+> `DigitalCardGames/dawncaster/keywords.csv` via `kb_read_doc` (not a
+> `kb_cards` sample) and swept its `functions` column against our own
+> keyword families: the one plausible gap is Dawncaster's "Immunity"
+> function (Evasion/Impervious/Insight/Ward — prevent-the-next-hit-entirely
+> effects), which our registry has no direct analogue for (GUARD/THORNS/
+> RIPOSTE/QUARTER are all damage-*reduction*, not damage-*prevention*) —
+> judged NOT a "real design gap" this signal's own bar requires — no
+> current card or theme package is starved for it, and every prior
+> `/adjust-keywords` pass's own CREATE bar has been a concrete carrier-count
+> or sibling-overlap problem, not a genre-parity wishlist item; noting it
+> here rather than minting a keyword with no driving card need, consistent
+> with hard rule 3 (drill before minting) read in its more conservative
+> direction (don't mint speculatively either). No `plan/AUDIT.md` residue
+> row filed for it — this is a documented non-finding, not an open call
+> only an owner can make. KB research (kb-query): run for the idea-mining
+> sweep above (the CREATE-candidate signal specifically); not otherwise run
+> for the rest of this pass — every other consideration was
+> audit-confirmed-clean (no CREATE/UPDATE), exempt from the gate per skill
+> §3 Step 2 (REMOVE/no-op carve-out). Verify: not re-run in full — no
+> `axiomancer-mechanics`/`axiomancer-mobile`/`axiomancer-card-editor` source
+> file changed (`git status` clean on all three before this tick); ran the
+> direct confirmation set instead — root `npm test` 123/123 (incl.
+> `content-drift.test.mjs`), `axiomancer-mobile` jest
+> `state/combat/__tests__/keywords.test.ts` 13/13,
+> `axiomancer-mechanics` vitest `src/Effects/e2e/deprecated-effects.engine.
+> test.ts` (6) + `src/Cards/e2e/pricing.engine.test.ts` (251) — 257/257, all
+> matching pass 5's counts exactly — and confirmed HEAD's existing CI green
+> via `npm run deploy:check` (`4ef8f727`, `verify-mobile` + `verify-mechanics`
+> both `success`) immediately before this tick began.
+```
 
 ```
 > **[adjust-enemies pass 6, 2026-09-11, commit e57f9f63]** CREATE 2
