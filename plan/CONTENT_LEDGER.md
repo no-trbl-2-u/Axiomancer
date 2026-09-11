@@ -11,7 +11,7 @@
 
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
-| cards | `skills/adjust-cards.md` | 2026-09-10 | 35c4c56c | 5 |
+| cards | `skills/adjust-cards.md` | 2026-09-11 | PENDING | 6 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-10 | 2b02ff60 | 5 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-10 | ce6e6a60 | 5 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-10 | 17b38058 | 5 |
@@ -20,6 +20,84 @@
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-cards pass 6, 2026-09-11, commit PENDING]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
+> content-lifecycle gate (19 commits since pass 5, past the 15-commit
+> threshold) — full re-audit, not a rubber stamp of pass 5's findings.
+> `git log 35c4c56c..HEAD -- axiomancer-mechanics/src/Cards
+> axiomancer-mechanics/src/Effects axiomancer-mechanics/src/Combat` is
+> empty (all 19 intervening commits were the equipment/enemies/keywords/npcs
+> pass-5 ticks, The Capital's Phase W5 ship, two `/audit`-fix ticks, a
+> combat-round-e2e test extension, and an `/expand` no-op — nothing touched
+> the card/effect/combat surface), so every Step-1 signal was re-derived
+> directly against the current tree rather than assumed stale-clean, same
+> discipline as pass 4/5's own re-audits: (1) reachability — ran
+> `combat-playtest.card-coverage.sim.test.ts` directly: 123/123 playable
+> cards (the 128-card `cardLibrary` minus the 5 enemy-injected curses) still
+> fire in at least one fallback seed, no dead-card candidate; (2)
+> near-duplicates — wrote a fresh same-(theme,rank,`philosophicalAspect`)
+> collision scan over the live `cardLibrary` export, and refined the
+> methodology this pass: a raw kind-set match over-fires on any two
+> same-(theme,rank,aspect) cards that both carry only `deal` (DEAL alone is
+> 50/128 cards per `/adjust-keywords` pass 5's own carrier count, so a
+> single-verb match is noise, not a duplicate) — found exactly one such
+> false positive (`spoiled-poultice` vs `unction-of-boils`, both rank-1 body
+> rot cards) and confirmed by reading both in full that they differ in every
+> number that matters (7 dmg/POISON 4 for 3/FREE POISON 3 for 2 vs 6
+> dmg/POISON 3 for 4/FREE MARK 2 for 2) — not a duplicate, a coincidence of
+> both using the theme's single most common verb. Restricting the collision
+> signal to kind sets of size ≥2 (the discriminating case) reproduces
+> exactly pass 4/5's own two hits and no others: `thin-hymn`/`alms-of-breath`
+> (`rider,sway`) and `the-last-assize`/`the-vein-called-in`
+> (`deal,overkill,recoil,wrath`) — both still the documented starter-echo/
+> apocrypha-escalation design, re-confirmed not re-litigated; (3) pricing
+> sanity + honesty — `pricing.engine.test.ts` (251), `curated-library.
+> engine.test.ts` (14, the FREE-line law), `src/Combat/e2e/preview-truth.
+> engine.test.ts` (10), `src/Combat/e2e/paid-summary-honesty.engine.test.ts`
+> (4) all green, matching pass 5's counts exactly — noting for the record
+> that the latter two live under `src/Combat/e2e/`, not `src/Cards/e2e/` (a
+> path detail pass 4/5's prose didn't spell out; no drift, just a precise
+> re-location for the next pass); (4) scale-ladder drift — spot-checked
+> `axio_cards` samples at Rib and Saint rank against the CLAUDE.md §5 ladder
+> (Rib single-hit 20-30/multi 7×4, Saint single-hit 45-70/multi 12×6): every
+> sample landed in-band or above (`A Pound of Flesh` 30, `Pressed for a
+> Plea` 7×4=28, `Every Wound Accounted` 12×6=72) except one deliberate case
+> examined by hand — `Nothing to Report` (vigil, Saint) prints Deal 24
+> alongside GUARD 40 (persists); its primary axis is GUARD, which sits
+> correctly in Saint's 40-60 GUARD band, and Deal is a secondary rider on a
+> card whose own theme module states its identity as "GUARD/BARRIER walls...
+> payoffs for bloodless nights" — judged thematically honest, not a quietly-
+> small bug, same "no governing objective function, competing verbs" reading
+> pass 4/5 applied to rot's fed-payoff cards; (5) aspect-thirds — re-counted
+> `philosophicalAspect` per theme module directly via fresh grep (rot 6/5/5,
+> debt 5/6/5, grave 6/5/5, vigil 5/6/5, trial 7/7/6, choir 5/6/5
+> body/heart/mind), byte-identical to pass 5's count — `deck-presets.
+> engine.test.ts`'s pinned 5/5/5 preset law stays green, no theme starved of
+> raw material. `axio_overview` reconfirmed the same 128-card/76-enemy/
+> 24-effect/68-keyword-row counts pass 5 cited. Standing loop-calls
+> re-checked against current source, not re-litigated: the 19 orphaned
+> `zoneHas(state, '<card-id>')` hooks in `combat.engine.ts`
+> (`plan/AUDIT.md`, filed pass 1, 2026-09-04) — re-verified all 19 named ids
+> individually, each still hooked in the engine and still absent from
+> `cardLibrary`/Haunts/Allies (fresh per-id grep, not a cached count); and
+> `the-sextons-count`'s missing TWIN trigger (`plan/AUDIT.md`, filed pass 1,
+> 2026-09-04) — `grave.cards.ts`'s `persistentEffect` text is byte-identical
+> to the filed description, still correctly scoped as an engine-side
+> variable-scope fix (`combat.engine.ts`'s twin/echo resolution) belonging
+> to mechanics-expert, not card data. KB research: not run — every
+> consideration this pass was audit-confirmed-clean (no CREATE/UPDATE),
+> exempt from the gate per skill §3 Step 2 (REMOVE/no-op carve-out). Verify:
+> ran all three gates in full this pass (not skipped, despite zero source
+> diff) — `npm run verify --workspace axiomancer-mechanics` (212/212 files,
+> 3418 tests + build, matching pass 5's count exactly), `npm run verify
+> --workspace axiomancer-mobile` (lint/typecheck/jest all green, exit 0),
+> `npm run type-check --workspace axiomancer-card-editor` (clean, exit 0);
+> `npm run deploy:check` confirmed green pre-tick (HEAD `34e1d8d8`, no gated
+> workflow triggered for the docs/plan-only tip commit) and will be
+> re-confirmed after the ledger commit lands.
+```
 
 ```
 > **[adjust-npcs pass 5, 2026-09-10, commit 47bcda82]** One CREATE (The
