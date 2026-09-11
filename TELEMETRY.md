@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-02T14:06:15Z | slash-prompt | /march | unknown | user/ci | /march |
-| 2026-08-02T14:07:10Z | skill | iterate | claude-sonnet-5 | main | - |
 | 2026-08-03T10:11:56Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-03T12:03:06Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-08-03T12:03:09Z | skill | digest | unknown | main | - |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-11T10:31:00Z | skill | march | unknown | main | - |
 | 2026-09-11T10:31:40Z | skill | adjust-keywords | claude-sonnet-5 | main | - |
 | 2026-09-11T10:32:24Z | subagent | card-expert | claude-sonnet-5 | main | Run adjust-keywords lifecycle tick |
+| 2026-09-11T14:32:03Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-11T14:36:01Z | subagent | content-curator | claude-sonnet-5 | main | Run adjust-npcs pass 6 |
