@@ -114,6 +114,26 @@ function interaction(npcName: string): ResolveMapEventResult {
     };
 }
 
+function setDialogueCursor(store: AppStore, choiceText: string) {
+    const tree = {
+        rootId: 'root',
+        nodes: {
+            root: {
+                id: 'root',
+                text: 'A voice speaks.',
+                choices: [{ text: choiceText }],
+            },
+        },
+    } as never;
+    store.setState({
+        event: {
+            ...EMPTY_EVENT_SLICE,
+            pending: interaction('A Voice'),
+            dialogueCursor: { tree, nodeId: 'root' },
+        },
+    });
+}
+
 describe('EventScreen render', () => {
     it('renders combat-prelude with FIGHT and FLEE choices for a non-boss encounter', () => {
         const store = makeStore();
@@ -242,6 +262,21 @@ describe('EventScreen render', () => {
         expect(getByText(/First line\./)).toBeTruthy();
         expect(getByText(/Second line\./)).toBeTruthy();
     });
+
+    // AUDIT [3.2] — narrative-choice reply description is the same
+    // string as its label (just re-cased), so it must not also render
+    // as an identical sub-line under the button.
+    it('does not render a duplicate sub-line for a narrative-choice reply', () => {
+        const store = makeStore();
+        setDialogueCursor(store, 'Walk on.');
+
+        const { getByText, queryByText } = render(
+            withProvider(store, <EventScreen />),
+        );
+
+        expect(getByText('WALK ON.')).toBeTruthy();
+        expect(queryByText('Walk on.')).toBeNull();
+    });
 });
 
 describe('EventScreen choice dispatch', () => {
@@ -324,5 +359,19 @@ describe('DialogueScreen dialogue confirmation flash (ported Phase 29 Tick C)', 
         expect(queryByTestId('dialogue-choice-acknowledge-confirmed')).toBeNull();
 
         jest.useRealTimers();
+    });
+
+    // AUDIT [3.2] — same guard on the dedicated /dialogue screen's
+    // reply rows.
+    it('does not render a duplicate sub-line for a reply row', () => {
+        const store = makeStore();
+        setDialogueCursor(store, 'Walk on.');
+
+        const { getByText, queryByText } = render(
+            withProvider(store, <DialogueScreen />),
+        );
+
+        expect(getByText('WALK ON.')).toBeTruthy();
+        expect(queryByText('Walk on.')).toBeNull();
     });
 });

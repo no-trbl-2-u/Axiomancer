@@ -95,7 +95,10 @@ function ChoiceRow({
             <ActionIcon kind={choice.iconKey} size={24} color={accent} />
             <View style={styles.flexOne}>
                 <Text style={styles.choiceLabel}>{choice.label}</Text>
-                <Text style={styles.choiceSub}>{choice.description}</Text>
+                {choice.description.length > 0 &&
+                    choice.description.toUpperCase() !== choice.label && (
+                        <Text style={styles.choiceSub}>{choice.description}</Text>
+                    )}
                 <ConsequenceChips consequences={choice.consequences} />
             </View>
             <Text style={[styles.choiceArrow, { color: accent }]}>›</Text>

@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-02T04:07:51Z | skill | iterate | claude-sonnet-5 | main | - |
-| 2026-08-02T04:11:49Z | subagent | card-expert | claude-sonnet-5 | main | Fix draft scorer starving new/sandbox cards |
 | 2026-08-02T08:42:41Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-02T08:42:43Z | skill | march | unknown | main | - |
 | 2026-08-02T08:43:55Z | skill | expand | claude-sonnet-5 | main | - |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-11T06:45:03Z | skill | march | unknown | main | - |
 | 2026-09-11T06:49:26Z | subagent | general-purpose | claude-sonnet-5 | main | Run /adjust-enemies pass 6 |
 | 2026-09-11T06:49:29Z | skill | adjust-enemies | claude-sonnet-5 | main | - |
+| 2026-09-11T08:37:43Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-11T08:37:45Z | skill | march | unknown | main | - |

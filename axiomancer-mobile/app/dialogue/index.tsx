@@ -74,9 +74,10 @@ function ReplyRow({
             <Text style={styles.replyMark}>—</Text>
             <View style={styles.flexOne}>
                 <Text style={styles.replyLabel}>{choice.label}</Text>
-                {choice.description.length > 0 && (
-                    <Text style={styles.replyDesc}>{choice.description}</Text>
-                )}
+                {choice.description.length > 0 &&
+                    choice.description.toUpperCase() !== choice.label && (
+                        <Text style={styles.replyDesc}>{choice.description}</Text>
+                    )}
                 <ReplyConsequences choice={choice} />
             </View>
             {confirmed && (
