@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-04T09:24:19Z | skill | critique | claude-sonnet-5 | main | - |
-| 2026-08-04T11:11:07Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-08-04T11:11:09Z | skill | digest | unknown | main | - |
 | 2026-08-04T14:58:13Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-04T14:58:16Z | skill | march | unknown | main | - |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-11T20:30:32Z | skill | march | unknown | main | - |
 | 2026-09-11T20:31:33Z | skill | iterate | claude-sonnet-5 | main | - |
 | 2026-09-11T20:32:49Z | subagent | general-purpose | claude-sonnet-5 | main | Execute one /iterate tick end-to-end |
+| 2026-09-11T22:28:30Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-11T22:33:00Z | subagent | card-expert | claude-sonnet-5 | main | Run adjust-cards pass 7 end-to-end |
