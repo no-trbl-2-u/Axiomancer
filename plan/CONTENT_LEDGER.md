@@ -11,7 +11,7 @@
 
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
-| cards | `skills/adjust-cards.md` | 2026-09-11 | PENDING | 6 |
+| cards | `skills/adjust-cards.md` | 2026-09-11 | 01629acf | 6 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-10 | 2b02ff60 | 5 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-10 | ce6e6a60 | 5 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-10 | 17b38058 | 5 |
@@ -22,7 +22,7 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-cards pass 6, 2026-09-11, commit PENDING]** Zero-CREATE,
+> **[adjust-cards pass 6, 2026-09-11, commit 01629acf]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
 > content-lifecycle gate (19 commits since pass 5, past the 15-commit
 > threshold) — full re-audit, not a rubber stamp of pass 5's findings.
