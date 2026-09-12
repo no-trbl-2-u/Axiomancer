@@ -258,7 +258,12 @@ const TAB_LABELS: Record<InventoryTab, string> = {
 const SLOT_LABELS: Record<Equipment['slot'], string> = {
     weapon: 'Weapon',
     armor: 'Armor',
-    accessory: 'Accessory',
+    // FE-009: 'Trinket', not 'Accessory'. The worn-gear dock above the grid
+    // labels these three positions TRINKET I/II/III, and the SELF sheet was
+    // already aligned to Trinket by an earlier drift fix — the item grid was
+    // the last surface naming the same slot a second way, on the same
+    // unscrolled screen as the dock.
+    accessory: 'Trinket',
 };
 
 const BURDEN_MAX = 50;
