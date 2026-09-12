@@ -8,7 +8,7 @@ const shrineKeeperTree: DialogueTree = {
     nodes: {
         greet: {
             id: 'greet',
-            text: "The Shrine Keeper turns from tending ancient carved stones, eyes bright with otherworldly knowing. \"Seeker, the patterns speak of your approach. The veil grows thin here—do you feel it?\"",
+            text: "The Shrine Keeper turns from tending ancient carved stones, eyes bright with otherworldly knowing. “Seeker, the patterns speak of your approach. The veil grows thin here—do you feel it?”",
             choices: [
                 {
                     text: "What patterns do you see?",
@@ -40,7 +40,7 @@ const shrineKeeperTree: DialogueTree = {
         },
         patterns: {
             id: 'patterns',
-            text: "\"The stones remember all who pass. Your spirit-trail weaves through probability and purpose—a seeker's path, but toward what?\"",
+            text: "“The stones remember all who pass. Your spirit-trail weaves through probability and purpose—a seeker's path, but toward what?”",
             choices: [
                 {
                     text: "I seek understanding of the deeper truths.",
@@ -64,7 +64,7 @@ const shrineKeeperTree: DialogueTree = {
         },
         veil_thin: {
             id: 'veil_thin',
-            text: "\"Yes. The boundary weakens where ancient powers once walked. Take this—a lens to see past the physical.\" The keeper offers a crystalline fragment. It hums with its own light.",
+            text: "“Yes. The boundary weakens where ancient powers once walked. Take this—a lens to see past the physical.” The keeper offers a crystalline fragment. It hums with its own light.",
             choices: [
                 {
                     text: "Accept the crystal gratefully.",
@@ -87,11 +87,11 @@ const shrineKeeperTree: DialogueTree = {
         },
         skeptic_response: {
             id: 'skeptic_response',
-            text: "The keeper's expression grows sad but understanding. \"The material world weighs heavy on some shoulders. When you're ready to see beyond stone and sinew, the shrine will remain.\"",
+            text: "The keeper's expression grows sad but understanding. “The material world weighs heavy on some shoulders. When you're ready to see beyond stone and sinew, the shrine will remain.”",
         },
         truth_seeker: {
             id: 'truth_seeker',
-            text: "\"A kindred spirit, then. The ancients left wisdom carved in symbol and stone. Study the northern glyphs—they speak of cycles within cycles, of balance made manifest.\"",
+            text: "“A kindred spirit, then. The ancients left wisdom carved in symbol and stone. Study the northern glyphs—they speak of cycles within cycles, of balance made manifest.”",
             choices: [
                 {
                     text: "Will you teach me to read them?",
@@ -105,15 +105,15 @@ const shrineKeeperTree: DialogueTree = {
         },
         practical_seeker: {
             id: 'practical_seeker',
-            text: "\"Even practical paths may lead to transcendence, seeker. The ancient builders understood both stone and spirit—perhaps their techniques might serve you.\"",
+            text: "“Even practical paths may lead to transcendence, seeker. The ancient builders understood both stone and spirit—perhaps their techniques might serve you.”",
         },
         dismiss_mysticism: {
             id: 'dismiss_mysticism',
-            text: "\"Even skeptics serve the pattern, though they know it not. The stones care little for belief—they simply are.\"",
+            text: "“Even skeptics serve the pattern, though they know it not. The stones care little for belief—they simply are.”",
         },
         observer_transformation: {
             id: 'observer_transformation',
-            text: "\"The constellation of your spirit has shifted since our last meeting. Change is the only constant—but this change carries purpose. The shrine blesses your new becoming.\"",
+            text: "“The constellation of your spirit has shifted since our last meeting. Change is the only constant—but this change carries purpose. The shrine blesses your new becoming.”",
         },
     },
 };
@@ -132,7 +132,7 @@ const chroniclerTree: DialogueTree = {
     nodes: {
         greet: {
             id: 'greet',
-            text: "The Chronicler looks up from leather-bound tomes and scattered parchments. \"A fellow seeker of knowledge? These northern lands hold secrets that predate the coastal settlements. Care to contribute to the Chronicle?\"",
+            text: "The Chronicler looks up from leather-bound tomes and scattered parchments. “A fellow seeker of knowledge? These northern lands hold secrets that predate the coastal settlements. Care to contribute to the Chronicle?”",
             choices: [
                 {
                     text: "What are you chronicling here?",
@@ -165,7 +165,7 @@ const chroniclerTree: DialogueTree = {
         },
         chronicling_purpose: {
             id: 'chronicling_purpose',
-            text: "\"I document the forgotten histories—the pre-coastal civilizations, ancient migration patterns, the old alliances between folk and forest. Each traveler adds another thread to the tapestry.\"",
+            text: "“I document the forgotten histories—the pre-coastal civilizations, ancient migration patterns, the old alliances between folk and forest. Each traveler adds another thread to the tapestry.”",
             choices: [
                 {
                     text: "How can I contribute to this work?",
@@ -185,7 +185,7 @@ const chroniclerTree: DialogueTree = {
         },
         share_observations: {
             id: 'share_observations',
-            text: "\"Every observation matters. What you call 'strange' might be echoes of the old ways—patterns the ancients left as guideposts for future generations.\"",
+            text: "“Every observation matters. What you call 'strange' might be echoes of the old ways—patterns the ancients left as guideposts for future generations.”",
             choices: [
                 {
                     text: "Tell me more about these ancient patterns.",
@@ -206,11 +206,11 @@ const chroniclerTree: DialogueTree = {
         },
         no_time: {
             id: 'no_time',
-            text: "\"I understand—the present demands attention. But remember: today's actions become tomorrow's history. Perhaps our paths will cross when urgency gives way to reflection.\"",
+            text: "“I understand—the present demands attention. But remember: today's actions become tomorrow's history. Perhaps our paths will cross when urgency gives way to reflection.”",
         },
         contribution_offer: {
             id: 'contribution_offer',
-            text: "\"Document what you witness in the northern reaches—unusual flora, remnant structures, local folklore. Each detail helps complete the Chronicle's tapestry.\"",
+            text: "“Document what you witness in the northern reaches—unusual flora, remnant structures, local folklore. Each detail helps complete the Chronicle's tapestry.”",
             choices: [
                 {
                     text: "I accept this scholarly responsibility.",
@@ -224,19 +224,19 @@ const chroniclerTree: DialogueTree = {
         },
         present_focus: {
             id: 'present_focus',
-            text: "\"A pragmatic view—yet even pragmatists benefit from understanding historical patterns. The past informs present choices, whether we acknowledge it or not.\"",
+            text: "“A pragmatic view—yet even pragmatists benefit from understanding historical patterns. The past informs present choices, whether we acknowledge it or not.”",
         },
         ancient_patterns: {
             id: 'ancient_patterns',
-            text: "\"The ancients understood cycles—seasonal, generational, spiritual. They built with this knowledge, aligning settlements and sacred sites to greater rhythms. The northern forest bears their mark still.\"",
+            text: "“The ancients understood cycles—seasonal, generational, spiritual. They built with this knowledge, aligning settlements and sacred sites to greater rhythms. The northern forest bears their mark still.”",
         },
         documented_travels: {
             id: 'documented_travels',
-            text: "\"A scholar's approach. Your records could fill gaps in the Chronicle. The systematic documentation of experience serves both personal growth and collective wisdom.\"",
+            text: "“A scholar's approach. Your records could fill gaps in the Chronicle. The systematic documentation of experience serves both personal growth and collective wisdom.”",
         },
         scholar_observation: {
             id: 'scholar_observation',
-            text: "\"Fascinating—your intellectual posture has evolved since our last discussion. Experience truly is the greatest teacher. Your journey itself becomes worthy of chronicle.\"",
+            text: "“Fascinating—your intellectual posture has evolved since our last discussion. Experience truly is the greatest teacher. Your journey itself becomes worthy of chronicle.”",
         },
     },
 };
@@ -255,7 +255,7 @@ const wanderingPhilosopherTree: DialogueTree = {
     nodes: {
         greet: {
             id: 'greet',
-            text: "A weathered figure in simple robes sits contemplating the forest canopy. \"A fellow traveler. The northern woods suit thinking. What brings you to walk these thoughtful paths?\"",
+            text: "A weathered figure in simple robes sits contemplating the forest canopy. “A fellow traveler. The northern woods suit thinking. What brings you to walk these thoughtful paths?”",
             choices: [
                 {
                     text: "I'm seeking my place in the world.",
@@ -288,7 +288,7 @@ const wanderingPhilosopherTree: DialogueTree = {
         },
         seeking_place: {
             id: 'seeking_place',
-            text: "\"A noble quest, then. Tell me—do you believe our place is determined by fate, forged by will, or discovered through relationship with others?\"",
+            text: "“A noble quest, then. Tell me—do you believe our place is determined by fate, forged by will, or discovered through relationship with others?”",
             choices: [
                 {
                     text: "Fate guides us toward our destined role.",
@@ -321,7 +321,7 @@ const wanderingPhilosopherTree: DialogueTree = {
         },
         passing_through: {
             id: 'passing_through',
-            text: "\"Ah, but are any of us truly 'just passing through'? Every step changes both traveler and terrain. Your presence here ripples outward in ways you may never know.\"",
+            text: "“Ah, but are any of us truly 'just passing through'? Every step changes both traveler and terrain. Your presence here ripples outward in ways you may never know.”",
             choices: [
                 {
                     text: "I hadn't considered the impact of my journey.",
@@ -337,7 +337,7 @@ const wanderingPhilosopherTree: DialogueTree = {
         },
         reflective_peace: {
             id: 'reflective_peace',
-            text: "\"Yes. The forest teaches patience—each tree growing in its season, each creature following ancient rhythms. In stillness, we hear what urgency drowns out.\"",
+            text: "“Yes. The forest teaches patience—each tree growing in its season, each creature following ancient rhythms. In stillness, we hear what urgency drowns out.”",
             choices: [
                 {
                     text: "What have the trees taught you?",
@@ -348,39 +348,39 @@ const wanderingPhilosopherTree: DialogueTree = {
         },
         impatient_response: {
             id: 'impatient_response',
-            text: "\"I understand—action calls louder than contemplation for some souls. Yet even the most practical pursuits rest on philosophical foundations. Safe travels, friend.\"",
+            text: "“I understand—action calls louder than contemplation for some souls. Yet even the most practical pursuits rest on philosophical foundations. Safe travels, friend.”",
         },
         fate_perspective: {
             id: 'fate_perspective',
-            text: "\"A transcendent view. Yet consider—if fate writes our story, do we bear responsibility for our choices? Perhaps fate provides the stage while we perform the play.\"",
+            text: "“A transcendent view. Yet consider—if fate writes our story, do we bear responsibility for our choices? Perhaps fate provides the stage while we perform the play.”",
         },
         will_perspective: {
             id: 'will_perspective',
-            text: "\"The voice of the self-determined. Yet pure individualism can become isolation. Even the strongest will benefits from wisdom gathered, from hands offered in aid.\"",
+            text: "“The voice of the self-determined. Yet pure individualism can become isolation. Even the strongest will benefits from wisdom gathered, from hands offered in aid.”",
         },
         community_perspective: {
             id: 'community_perspective',
-            text: "\"Well spoken. We become ourselves through relationship—yet beware losing the self in the collective. True community honors both unity and individual authenticity.\"",
+            text: "“Well spoken. We become ourselves through relationship—yet beware losing the self in the collective. True community honors both unity and individual authenticity.”",
         },
         uncertain_seeker: {
             id: 'uncertain_seeker',
-            text: "\"Honest uncertainty opens more doors than false certainty closes. Your willingness to seek—to question—already marks you as a philosopher at heart.\"",
+            text: "“Honest uncertainty opens more doors than false certainty closes. Your willingness to seek—to question—already marks you as a philosopher at heart.”",
         },
         impact_realization: {
             id: 'impact_realization',
-            text: "\"Each conversation plants seeds in both minds. Your questions change my answers. My words reshape your road. Meaning is made in the meeting.\"",
+            text: "“Each conversation plants seeds in both minds. Your questions change my answers. My words reshape your road. Meaning is made in the meeting.”",
         },
         simple_acceptance: {
             id: 'simple_acceptance',
-            text: "\"Perhaps you're right—sometimes simplicity contains its own wisdom. Not every moment requires deep analysis to hold deep value.\"",
+            text: "“Perhaps you're right—sometimes simplicity contains its own wisdom. Not every moment requires deep analysis to hold deep value.”",
         },
         tree_wisdom: {
             id: 'tree_wisdom',
-            text: "\"Trees teach patience, interconnection through root-networks, the wisdom of seasons—knowing when to grow, when to rest, when to let go. They model existence without anxiety.\"",
+            text: "“Trees teach patience, interconnection through root-networks, the wisdom of seasons—knowing when to grow, when to rest, when to let go. They model existence without anxiety.”",
         },
         philosophical_recognition: {
             id: 'philosophical_recognition',
-            text: "\"Remarkable—your philosophical stance has evolved since our last discourse. Growth of mind shows in posture and presence. You embody philosophy in motion.\"",
+            text: "“Remarkable—your philosophical stance has evolved since our last discourse. Growth of mind shows in posture and presence. You embody philosophy in motion.”",
         },
     },
 };
@@ -424,11 +424,11 @@ const forestRangerTree: DialogueTree = {
         ranger_cave_directions: {
             id: 'ranger_cave_directions',
             // Phase 8 — terminal node for the get-to-cave quest grant.
-            text: "\"A cave mouth cuts the cliff at the forest's far edge. Cold air spills from it even in summer. Follow the deer trail east. Do not linger past dusk. I mark the safe path, not what waits in it.\"",
+            text: "“A cave mouth cuts the cliff at the forest's far edge. Cold air spills from it even in summer. Follow the deer trail east. Do not linger past dusk. I mark the safe path, not what waits in it.”",
         },
         talk_duties: {
             id: 'talk_duties',
-            text: "\"I guard these ancient groves from those who would strip them bare for profit. There's a logging operation pushing north—they want the heartwood of the eldest trees, worth a fortune in the southern markets. I could stop them, but their families depend on the wages, and the village needs the trade income. How do we balance the forest's future against people's immediate needs? Sometimes I wonder if one person can make a difference against such forces.\"",
+            text: "“I guard these ancient groves from those who would strip them bare for profit. There's a logging operation pushing north—they want the heartwood of the eldest trees, worth a fortune in the southern markets. I could stop them, but their families depend on the wages, and the village needs the trade income. How do we balance the forest's future against people's immediate needs? Sometimes I wonder if one person can make a difference against such forces.”",
             choices: [
                 {
                     text: "Trust that nature's wisdom will prevail—the forest will endure as it always has.",
@@ -462,19 +462,19 @@ const forestRangerTree: DialogueTree = {
         },
         request_guidance: {
             id: 'request_guidance',
-            text: "\"These woods can be treacherous for the unwary. I know the safe paths—it would be my honor to guide a respectful traveler.\"",
+            text: "“These woods can be treacherous for the unwary. I know the safe paths—it would be my honor to guide a respectful traveler.”",
         },
         nature_wisdom_endures: {
             id: 'nature_wisdom_endures',
-            text: "\"You speak truth that goes deeper than immediate concerns. These trees have weathered ice ages and droughts. Perhaps my role is to trust in larger cycles while doing what I can in this moment.\"",
+            text: "“You speak truth that goes deeper than immediate concerns. These trees have weathered ice ages and droughts. Perhaps my role is to trust in larger cycles while doing what I can in this moment.”",
         },
         sustainable_alternatives: {
             id: 'sustainable_alternatives',
-            text: "\"Yes. There are other ways—mushroom cultivation, guided tours for scholars, carefully managed timber harvests. With your support, we can show the loggers a path that feeds families without destroying the forest's heart.\"",
+            text: "“Yes. There are other ways—mushroom cultivation, guided tours for scholars, carefully managed timber harvests. With your support, we can show the loggers a path that feeds families without destroying the forest's heart.”",
         },
         pragmatic_exploitation: {
             id: 'pragmatic_exploitation',
-            text: "\"I... I cannot agree with that, but I understand your reasoning. Perhaps you're right that immediate human needs must outweigh distant environmental concerns. The forest will have to fend for itself.\"",
+            text: "“I... I cannot agree with that, but I understand your reasoning. Perhaps you're right that immediate human needs must outweigh distant environmental concerns. The forest will have to fend for itself.”",
         },
     },
 };
@@ -518,11 +518,11 @@ const hermitSageTree: DialogueTree = {
         hermit_firewood: {
             id: 'hermit_firewood',
             // Phase 8 — terminal node for the gather-wood quest grant.
-            text: "The Sage's eyes crinkle. \"The hearth runs cold faster than these old bones warm it. Three bundles of oak, if you'd spare the walk — I ask little else of the world.\"",
+            text: "The Sage's eyes crinkle. “The hearth runs cold faster than these old bones warm it. Three bundles of oak, if you'd spare the walk — I ask little else of the world.”",
         },
         talk_solitude_choice: {
             id: 'talk_solitude_choice',
-            text: "\"I retreated here decades ago to pursue understanding beyond the noise of daily concerns. In solitude, I've found clarity about existence, suffering, and transcendence. But lately, I question whether wisdom earned in isolation serves anyone but myself. The villages below struggle with moral crises that my knowledge might help resolve. Is enlightenment selfish if it's not shared? Yet sharing it means abandoning the very isolation that made it possible. Can you see the paradox that troubles my final years?\"",
+            text: "“I retreated here decades ago to pursue understanding beyond the noise of daily concerns. In solitude, I've found clarity about existence, suffering, and transcendence. But lately, I question whether wisdom earned in isolation serves anyone but myself. The villages below struggle with moral crises that my knowledge might help resolve. Is enlightenment selfish if it's not shared? Yet sharing it means abandoning the very isolation that made it possible. Can you see the paradox that troubles my final years?”",
             choices: [
                 {
                     text: "Wisdom flows from the divine source—trust that it reaches those who need it.",
@@ -555,19 +555,19 @@ const hermitSageTree: DialogueTree = {
         },
         seek_wisdom: {
             id: 'seek_wisdom',
-            text: "\"Wisdom cannot be given, only discovered. But I can share what the silence has taught me, if you have ears to hear.\"",
+            text: "“Wisdom cannot be given, only discovered. But I can share what the silence has taught me, if you have ears to hear.”",
         },
         divine_wisdom_flows: {
             id: 'divine_wisdom_flows',
-            text: "\"Perhaps you're right. True wisdom transcends the vessel that contains it. If my understanding matters, it will find its way to those who need it through means I cannot foresee.\"",
+            text: "“Perhaps you're right. True wisdom transcends the vessel that contains it. If my understanding matters, it will find its way to those who need it through means I cannot foresee.”",
         },
         balanced_sharing: {
             id: 'balanced_sharing',
-            text: "\"A thoughtful solution. Perhaps I can mentor a few seekers while preserving the solitude necessary for continued insight. Your offer of assistance in creating that balance touches my heart deeply.\"",
+            text: "“A thoughtful solution. Perhaps I can mentor a few seekers while preserving the solitude necessary for continued insight. Your offer of assistance in creating that balance touches my heart deeply.”",
         },
         wisdom_through_example: {
             id: 'wisdom_through_example',
-            text: "\"An interesting perspective. Perhaps the sight of someone choosing contemplation over accumulation teaches more than any words could. There is wisdom in your counsel to trust the power of witness.\"",
+            text: "“An interesting perspective. Perhaps the sight of someone choosing contemplation over accumulation teaches more than any words could. There is wisdom in your counsel to trust the power of witness.”",
         },
     },
 };
@@ -604,7 +604,7 @@ const lostTraderTree: DialogueTree = {
         },
         talk_what_happened: {
             id: 'talk_what_happened',
-            text: "\"Bandits took everything—my horses, most of my cargo, even my coin purse. Left me here to die, they did. But here's the thing... I have one valuable item hidden that they missed. Worth enough to rebuild my trade, feed my family for a year. Problem is, I need someone to help me carry it to the next village, but... well, trusting a stranger with something that valuable after being robbed? Yet I can't move it alone, and staying here means slow death. Would you trust a desperate man in my position? And more importantly, should I trust you?\"",
+            text: "“Bandits took everything—my horses, most of my cargo, even my coin purse. Left me here to die, they did. But here's the thing... I have one valuable item hidden that they missed. Worth enough to rebuild my trade, feed my family for a year. Problem is, I need someone to help me carry it to the next village, but... well, trusting a stranger with something that valuable after being robbed? Yet I can't move it alone, and staying here means slow death. Would you trust a desperate man in my position? And more importantly, should I trust you?”",
             choices: [
                 {
                     text: "Providence brought us together—trust is a sacred bond between strangers.",
@@ -637,19 +637,19 @@ const lostTraderTree: DialogueTree = {
         },
         offer_assistance: {
             id: 'offer_assistance',
-            text: "\"You'd help a stranger? That's... that's kind. Though I warn you, kindness in these woods can be dangerous for both giver and receiver.\"",
+            text: "“You'd help a stranger? That's... that's kind. Though I warn you, kindness in these woods can be dangerous for both giver and receiver.”",
         },
         sacred_trust_bond: {
             id: 'sacred_trust_bond',
-            text: "\"You speak of sacred bonds... yes, perhaps that's what separates civilization from wilderness. I choose to trust you, stranger, and hope you'll honor that faith.\"",
+            text: "“You speak of sacred bonds... yes, perhaps that's what separates civilization from wilderness. I choose to trust you, stranger, and hope you'll honor that faith.”",
         },
         honest_mutual_aid: {
             id: 'honest_mutual_aid',
-            text: "\"Honest action builds trust—I like that. You help me reach town, I'll share fair portion of the profits. We both benefit, we both take risks, we both prove ourselves worthy of trust.\"",
+            text: "“Honest action builds trust—I like that. You help me reach town, I'll share fair portion of the profits. We both benefit, we both take risks, we both prove ourselves worthy of trust.”",
         },
         pragmatic_verification: {
             id: 'pragmatic_verification',
-            text: "\"Clever—verify before you commit. Can't fault a person for being practical after what I've been through. Here's the item... now, shall we discuss our mutually beneficial arrangement?\"",
+            text: "“Clever—verify before you commit. Can't fault a person for being practical after what I've been through. Here's the item... now, shall we discuss our mutually beneficial arrangement?”",
         },
     },
 };

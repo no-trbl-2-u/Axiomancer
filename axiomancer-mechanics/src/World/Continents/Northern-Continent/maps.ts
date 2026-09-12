@@ -59,7 +59,7 @@ const delverTree: DialogueTree = {
     nodes: {
         greet: {
             id: 'greet',
-            text: "A lamp hangs from a crooked post. Under it, a woman sorts ore from stone by touch. \"Down from the wood, then. Most come down faster, and in pieces.\" She does not look up. \"The seam runs high along the left wall. Iron pays. The dark does not.\"",
+            text: "A lamp hangs from a crooked post. Under it, a woman sorts ore from stone by touch. “Down from the wood, then. Most come down faster, and in pieces.” She does not look up. “The seam runs high along the left wall. Iron pays. The dark does not.”",
             choices: [
                 {
                     text: "What do you want with the iron?",
@@ -80,7 +80,7 @@ const delverTree: DialogueTree = {
         },
         offer: {
             id: 'offer',
-            text: "\"The city up the stair buys every fist of it. The stair is shut. I stockpile and I wait.\" She weighs a lump of ore and sets it down. \"Cut me two fists from the seam and I will pay in coin you can spend somewhere with a roof.\"",
+            text: "“The city up the stair buys every fist of it. The stair is shut. I stockpile and I wait.” She weighs a lump of ore and sets it down. “Cut me two fists from the seam and I will pay in coin you can spend somewhere with a roof.”",
             choices: [
                 {
                     text: "Agreed. (Accept the quest.)",
@@ -98,11 +98,11 @@ const delverTree: DialogueTree = {
         },
         accepted: {
             id: 'accepted',
-            text: "\"Mind the props. Where the wood is new, the fall is old.\" She goes back to sorting. The lamp does not flicker. Nothing down here moves the air enough.",
+            text: "“Mind the props. Where the wood is new, the fall is old.” She goes back to sorting. The lamp does not flicker. Nothing down here moves the air enough.",
         },
         refused: {
             id: 'refused',
-            text: "\"So does everyone. That is why the stockpile is small.\" She says nothing else. The sorting resumes.",
+            text: "“So does everyone. That is why the stockpile is small.” She says nothing else. The sorting resumes.",
         },
         // Phase W3 — the get-to-northern-city grant. Appended LAST per the
         // index-stability convention (Coastal-Village maps.ts, Phase 46/62/63).
@@ -112,7 +112,7 @@ const delverTree: DialogueTree = {
         // gated on the boss quest; here the map's own graph does that work.)
         the_stair: {
             id: 'the_stair',
-            text: "\"One stair, and it is shut. The Under-Gate is not.\" She points her chin down the gallery. \"What keeps that gate has kept it a hundred years. Go armed, or go home.\"",
+            text: "“One stair, and it is shut. The Under-Gate is not.” She points her chin down the gallery. “What keeps that gate has kept it a hundred years. Go armed, or go home.”",
         },
     },
 };
@@ -252,7 +252,7 @@ const gateClerkTree: DialogueTree = {
     nodes: {
         greet: {
             id: 'greet',
-            text: "A desk at the top of the stair. A man behind it, pen wet. \"Up from under. That is a column I have not used in years.\" He rules a line without looking down. \"Name goes in the book. The book stays here. You go where you like.\"",
+            text: "A desk at the top of the stair. A man behind it, pen wet. “Up from under. That is a column I have not used in years.” He rules a line without looking down. “Name goes in the book. The book stays here. You go where you like.”",
             choices: [
                 {
                     text: "Give your name.",
@@ -280,15 +280,15 @@ const gateClerkTree: DialogueTree = {
         },
         named: {
             id: 'named',
-            text: "He writes it smaller than you said it. \"There. The city knows you now, as much as it wants to.\" He points the pen at the street. \"Iron goes left. Water goes right. Trouble finds its own way.\"",
+            text: "He writes it smaller than you said it. “There. The city knows you now, as much as it wants to.” He points the pen at the street. “Iron goes left. Water goes right. Trouble finds its own way.”",
         },
         the_book: {
             id: 'the_book',
-            text: "\"Nothing, any more. The office that read it burned in my father's time.\" He squares the ledger's corners. \"I keep it because the desk is dry and the wage is real. Ask a better question up the street.\"",
+            text: "“Nothing, any more. The office that read it burned in my father's time.” He squares the ledger's corners. “I keep it because the desk is dry and the wage is real. Ask a better question up the street.”",
         },
         walked: {
             id: 'walked',
-            text: "The pen does not pause. \"They all walk past,\" he says, to the book. \"The book stays open on principle.\"",
+            text: "The pen does not pause. “They all walk past,” he says, to the book. “The book stays open on principle.”",
         },
         // Phase W4 — the way to the river. Ungated, like The Delver's
         // the_stair grant: the Gate-Clerk will tell anyone the way to the
@@ -296,7 +296,7 @@ const gateClerkTree: DialogueTree = {
         // Harbormaster, one column before the door.
         the_water_gate: {
             id: 'the_water_gate',
-            text: "\"Water goes right, I said.\" He taps the desk once. \"Follow it to the harbor and past the weighing-house. What the Harbormaster lets by, the river takes from there.\"",
+            text: "“Water goes right, I said.” He taps the desk once. “Follow it to the harbor and past the weighing-house. What the Harbormaster lets by, the river takes from there.”",
         },
     },
 };
@@ -310,7 +310,7 @@ const shipwrightTree: DialogueTree = {
     nodes: {
         greet: {
             id: 'greet',
-            text: "A woman planes a rib of pale timber and does not stop for you. Half a hull stands over her like a carcass. \"Looking is free. Everything else is timber, pitch, and iron.\" The shavings curl and drop. \"Say what you want or take the free thing.\"",
+            text: "A woman planes a rib of pale timber and does not stop for you. Half a hull stands over her like a carcass. “Looking is free. Everything else is timber, pitch, and iron.” The shavings curl and drop. “Say what you want or take the free thing.”",
             choices: [
                 {
                     text: "Could you build me a boat?",
@@ -328,11 +328,11 @@ const shipwrightTree: DialogueTree = {
         },
         the_price: {
             id: 'the_price',
-            text: "She sights down the plank. \"I could build a king a navy, given the materials. You are not a king.\" The plane resumes. \"Timber from the yard. Pitch from the walk. Iron from under the hill. Bring those and we will talk about boats.\"",
+            text: "She sights down the plank. “I could build a king a navy, given the materials. You are not a king.” The plane resumes. “Timber from the yard. Pitch from the walk. Iron from under the hill. Bring those and we will talk about boats.”",
         },
         the_hull: {
             id: 'the_hull',
-            text: "\"A trader's. He paid a third and drowned on other business.\" She knocks the rib once, listening to it. \"The river takes payment in more than one office. It is patient about collecting the rest.\"",
+            text: "“A trader's. He paid a third and drowned on other business.” She knocks the rib once, listening to it. “The river takes payment in more than one office. It is patient about collecting the rest.”",
             choices: [
                 {
                     text: "What happens to the hull now?",
@@ -347,7 +347,7 @@ const shipwrightTree: DialogueTree = {
         the_lien: {
             id: 'the_lien',
             // The Parish register: everything is obligation, even salvage.
-            text: "\"It waits. A hull half-paid belongs to nobody, and nobody is a careful owner.\" She sets the plane down at last and looks at you. \"If you ever pay for a whole one, pay for the whole thing at once.\"",
+            text: "“It waits. A hull half-paid belongs to nobody, and nobody is a careful owner.” She sets the plane down at last and looks at you. “If you ever pay for a whole one, pay for the whole thing at once.”",
         },
         looked: {
             id: 'looked',
@@ -491,7 +491,7 @@ const boatwomanTree: DialogueTree = {
     nodes: {
         greet: {
             id: 'greet',
-            text: "A flat-bottomed boat rides low against the bank, tied to a post retied more than replaced. A woman coils rope without looking up. \"Down the water or up the bank. I only go one direction, and it isn't up.\"",
+            text: "A flat-bottomed boat rides low against the bank, tied to a post retied more than replaced. A woman coils rope without looking up. “Down the water or up the bank. I only go one direction, and it isn't up.”",
             choices: [
                 {
                     text: "Take me down the river.",
@@ -510,7 +510,7 @@ const boatwomanTree: DialogueTree = {
         },
         the_offer: {
             id: 'the_offer',
-            text: "\"Islanders, mostly. Once a year they hold a court on the water and I ferry every hopeful mother's favorite.\" She nods at the current. \"Sit low. The river doesn't care whose boat it takes.\"",
+            text: "“Islanders, mostly. Once a year they hold a court on the water and I ferry every hopeful mother's favorite.” She nods at the current. “Sit low. The river doesn't care whose boat it takes.”",
             choices: [
                 {
                     text: "I'm headed across, eventually.",
@@ -525,11 +525,11 @@ const boatwomanTree: DialogueTree = {
         },
         far_bank: {
             id: 'far_bank',
-            text: "\"Eventually gets you there same as urgent does, on this river.\" She finishes the coil and sets it in the bow. \"Get in when you're ready.\"",
+            text: "“Eventually gets you there same as urgent does, on this river.” She finishes the coil and sets it in the bow. “Get in when you're ready.”",
         },
         lore: {
             id: 'lore',
-            text: "\"A river, then a town, then whatever's past the town.\" She shrugs. \"I've only ever gone as far as the ritual and back. Some things you don't follow to the end.\"",
+            text: "“A river, then a town, then whatever's past the town.” She shrugs. “I've only ever gone as far as the ritual and back. Some things you don't follow to the end.”",
         },
     },
 };
@@ -672,7 +672,7 @@ const sweetheartTree: DialogueTree = {
     nodes: {
         greet: {
             id: 'greet',
-            text: "She's at the well before you've decided how to say her name. She decides for you. \"You came back.\" Not a question. She sets the bucket down like it might listen too.",
+            text: "She's at the well before you've decided how to say her name. She decides for you. “You came back.” Not a question. She sets the bucket down like it might listen too.",
             choices: [
                 {
                     text: "I came back.",
@@ -699,15 +699,15 @@ const sweetheartTree: DialogueTree = {
         },
         stayed: {
             id: 'stayed',
-            text: "\"Good,\" she says, like the word costs her something and she's paying it anyway. \"Walk with me. There's somewhere I have to be today, and I'd rather you saw it than heard about it after.\"",
+            text: "“Good,” she says, like the word costs her something and she's paying it anyway. “Walk with me. There's somewhere I have to be today, and I'd rather you saw it than heard about it after.”",
         },
         passing: {
             id: 'passing',
-            text: "\"Passing through.\" She picks the bucket back up. \"That's an answer too. I'll remember which one you gave.\"",
+            text: "“Passing through.” She picks the bucket back up. “That's an answer too. I'll remember which one you gave.”",
         },
         news: {
             id: 'news',
-            text: "\"The town elected a new ribbon-color this spring.\" She doesn't explain further. \"You'll see what that means, if you stay long enough.\"",
+            text: "“The town elected a new ribbon-color this spring.” She doesn't explain further. “You'll see what that means, if you stay long enough.”",
         },
         // Phase W5 — the way to the capital. Ungated, like the Gate-Clerk's
         // the_water_gate grant: she'll tell anyone the road; the map's own
@@ -715,7 +715,7 @@ const sweetheartTree: DialogueTree = {
         // before the door.
         the_capital_road: {
             id: 'the_capital_road',
-            text: "\"Same road the ribbon walks.\" She nods past the rooftops, toward where the smoke thins. \"Every color the provinces sent goes to the capital this season. Mine included.\" A beat. \"If you're walking, walk with me that far.\"",
+            text: "“Same road the ribbon walks.” She nods past the rooftops, toward where the smoke thins. “Every color the provinces sent goes to the capital this season. Mine included.” A beat. “If you're walking, walk with me that far.”",
         },
     },
 };
@@ -821,7 +821,7 @@ const heraldTree: DialogueTree = {
     nodes: {
         greet: {
             id: 'greet',
-            text: "A woman checks ribbons against a ledger, not faces. \"State your business or state your color.\"",
+            text: "A woman checks ribbons against a ledger, not faces. “State your business or state your color.”",
             choices: [
                 {
                     text: "I'm here for the selection.",
@@ -840,15 +840,15 @@ const heraldTree: DialogueTree = {
         },
         nominee: {
             id: 'nominee',
-            text: "\"Ribbon color, then. I don't need the name — the ribbon already has one.\" She marks the ledger without looking up. \"Court convenes at the bell. Don't be late on her behalf.\"",
+            text: "“Ribbon color, then. I don't need the name — the ribbon already has one.” She marks the ledger without looking up. “Court convenes at the bell. Don't be late on her behalf.”",
         },
         watcher: {
             id: 'watcher',
-            text: "\"Watching is a business too, here.\" She waves you past. \"Mind the line doesn't move for you either.\"",
+            text: "“Watching is a business too, here.” She waves you past. “Mind the line doesn't move for you either.”",
         },
         the_losers: {
             id: 'the_losers',
-            text: "\"Go home,\" she says, like it's obvious, because to her it is. \"The tally balances either way. That's the whole of the mercy in it.\"",
+            text: "“Go home,” she says, like it's obvious, because to her it is. “The tally balances either way. That's the whole of the mercy in it.”",
         },
     },
 };
@@ -873,7 +873,7 @@ const ribbonPickerTree: DialogueTree = {
     nodes: {
         greet: {
             id: 'greet',
-            text: "A woman sits at the base of the wall, sorting ribbons from a heap nobody claims twice. She doesn't look up. \"Every color gets cut loose eventually. I keep what's left of it.\"",
+            text: "A woman sits at the base of the wall, sorting ribbons from a heap nobody claims twice. She doesn't look up. “Every color gets cut loose eventually. I keep what's left of it.”",
             choices: [
                 {
                     text: "What do you do with them?",
@@ -900,11 +900,11 @@ const ribbonPickerTree: DialogueTree = {
         },
         the_unmaking: {
             id: 'the_unmaking',
-            text: "\"Unpick the thread, sell it plain. A ribbon only means something tied on. Loose, it's just string — and string sells the same regardless of what color lost.\"",
+            text: "“Unpick the thread, sell it plain. A ribbon only means something tied on. Loose, it's just string — and string sells the same regardless of what color lost.”",
         },
         the_trade: {
             id: 'the_trade',
-            text: "\"Not for sale. Not this pile.\" She doesn't look up from the sorting. \"You want a ribbon, earn one at the gate. Mine are the ones the gate already spent.\"",
+            text: "“Not for sale. Not this pile.” She doesn't look up from the sorting. “You want a ribbon, earn one at the gate. Mine are the ones the gate already spent.”",
         },
         recognized: {
             id: 'recognized',

@@ -8,7 +8,7 @@ const captainBlackwaterTree: DialogueTree = {
     nodes: {
         greet: {
             id: 'greet',
-            text: "Captain Blackwater looks up from a stack of manifests, hands steady despite the wind. \"Another one at the docks. Coin for good goods, and we'll deal. Nothing for you here otherwise.\"",
+            text: "Captain Blackwater looks up from a stack of manifests, hands steady despite the wind. “Another one at the docks. Coin for good goods, and we'll deal. Nothing for you here otherwise.”",
             choices: [
                 {
                     text: "What do you carry?",
@@ -60,11 +60,11 @@ const captainBlackwaterTree: DialogueTree = {
         marrow_pressed_recognition: {
             id: 'marrow_pressed_recognition',
             // Phase 53e — terminal node for the read-back on `marrow_pressed`.
-            text: "\"Word reached the wharf. You pressed the old dockmaster for the full sum, after the crab near took your legs.\" \"I note it. I do not say whether it was right.\"",
+            text: "“Word reached the wharf. You pressed the old dockmaster for the full sum, after the crab near took your legs.” “I note it. I do not say whether it was right.”",
         },
         trading_goods: {
             id: 'trading_goods',
-            text: "\"Northern timber. Coastal salt. Tools from the inland towns. I deal in what holds — nothing that breaks in a fortnight. A name outlasts quick silver.\"",
+            text: "“Northern timber. Coastal salt. Tools from the inland towns. I deal in what holds — nothing that breaks in a fortnight. A name outlasts quick silver.”",
             choices: [
                 {
                     text: "That is a rare way to deal.",
@@ -87,7 +87,7 @@ const captainBlackwaterTree: DialogueTree = {
         },
         fair_trade: {
             id: 'fair_trade',
-            text: "\"Someone who understands, then. Fair dealing builds what lasts. I pay the artisans what they're owed, price honest, and treat the dockhands like men. Costs more up front. Pays more in trust.\"",
+            text: "“Someone who understands, then. Fair dealing builds what lasts. I pay the artisans what they're owed, price honest, and treat the dockhands like men. Costs more up front. Pays more in trust.”",
             choices: [
                 {
                     text: "How do you hold to that, with every merchant undercutting you?",
@@ -109,7 +109,7 @@ const captainBlackwaterTree: DialogueTree = {
         },
         quick_profit: {
             id: 'quick_profit',
-            text: "\"Quick coin. Cut corners, sell cheap, work desperate men past bearing — aye, the silver comes fast. So does the ruin behind you. I've watched those merchants. None of them last.\"",
+            text: "“Quick coin. Cut corners, sell cheap, work desperate men past bearing — aye, the silver comes fast. So does the ruin behind you. I've watched those merchants. None of them last.”",
             choices: [
                 {
                     text: "Sometimes survival demands harsh choices.",
@@ -131,19 +131,19 @@ const captainBlackwaterTree: DialogueTree = {
         },
         browsing: {
             id: 'browsing',
-            text: "\"Fair enough. The docks teach their own lessons, to those who watch. A port is made or broken by the men who trade in it.\"",
+            text: "“Fair enough. The docks teach their own lessons, to those who watch. A port is made or broken by the men who trade in it.”",
         },
         admire_philosophy: {
             id: 'admire_philosophy',
-            text: "\"Aye, learned it from my father and his father before him. 'Build reputation like a seawall,' he'd say. 'Storm by storm, stone by stone. When the tempest comes, you'll need every block placed true.'\"",
+            text: "“Aye, learned it from my father and his father before him. 'Build reputation like a seawall,' he'd say. 'Storm by storm, stone by stone. When the tempest comes, you'll need every block placed true.'”",
         },
         temptation_question: {
             id: 'temptation_question',
-            text: "\"Of course they do. Every merchant faces it — quick silver, or trust that lasts. The sea taught me patience. A tide that seems distant still comes back. So does a debt owed.\"",
+            text: "“Of course they do. Every merchant faces it — quick silver, or trust that lasts. The sea taught me patience. A tide that seems distant still comes back. So does a debt owed.”",
         },
         show_wares: {
             id: 'show_wares',
-            text: "\"Now we're dealing. Fine northern pine. Sea salt from the southern reaches. These tools — see the make on them? Built to outlast the hand that forged them.\"",
+            text: "“Now we're dealing. Fine northern pine. Sea salt from the southern reaches. These tools — see the make on them? Built to outlast the hand that forged them.”",
             choices: [
                 {
                     text: "Your goods speak for you.",
@@ -158,23 +158,23 @@ const captainBlackwaterTree: DialogueTree = {
         },
         competitive_ethics: {
             id: 'competitive_ethics',
-            text: "\"Simple. I hold to quality, not the lowest price. A buyer pays for what he can trust. An artisan works for respect he's owed. Everyone gains when the footing is solid.\"",
+            text: "“Simple. I hold to quality, not the lowest price. A buyer pays for what he can trust. An artisan works for respect he's owed. Everyone gains when the footing is solid.”",
         },
         guild_proposal: {
             id: 'guild_proposal',
-            text: "\"A guild of honest merchants. It would need teeth — standards, enforcement, a price for breaking faith. But aye. I'd stand behind it.\"",
+            text: "“A guild of honest merchants. It would need teeth — standards, enforcement, a price for breaking faith. But aye. I'd stand behind it.”",
         },
         harsh_necessity: {
             id: 'harsh_necessity',
-            text: "\"Harsh choices, aye. But working a man past bearing isn't survival — it's choosing which soul you keep. I'd rather be poor and whole than rich and ashamed.\"",
+            text: "“Harsh choices, aye. But working a man past bearing isn't survival — it's choosing which soul you keep. I'd rather be poor and whole than rich and ashamed.”",
         },
         long_term_wisdom: {
             id: 'long_term_wisdom',
-            text: "\"Good, to hear wisdom recognized. Short thinking sinks more ships than storms do. The merchant who looks past the next tide weathers any tempest.\"",
+            text: "“Good, to hear wisdom recognized. Short thinking sinks more ships than storms do. The merchant who looks past the next tide weathers any tempest.”",
         },
         merchant_recognition: {
             id: 'merchant_recognition',
-            text: "\"Your manner of dealing has shifted, since we last spoke. Experience changes what a man weighs — coin, or conscience. The wise merchant bends without breaking.\"",
+            text: "“Your manner of dealing has shifted, since we last spoke. Experience changes what a man weighs — coin, or conscience. The wise merchant bends without breaking.”",
         },
     },
 };
@@ -193,7 +193,7 @@ const fishermansDaughterTree: DialogueTree = {
     nodes: {
         greet: {
             id: 'greet',
-            text: "A young woman mends nets near the harbor, her hands quick. She looks up. \"You're no one from the village. I know every face here. A traveler, then. Have you stories from beyond the coast?\"",
+            text: "A young woman mends nets near the harbor, her hands quick. She looks up. “You're no one from the village. I know every face here. A traveler, then. Have you stories from beyond the coast?”",
             choices: [
                 {
                     text: "What would you hear?",
@@ -278,42 +278,42 @@ const fishermansDaughterTree: DialogueTree = {
             id: 'daughter_reads_told_truth',
             // Phase 53e — terminal node for the read-back on
             // `boy-told-father-truth`.
-            text: "\"You told him the whole sum, they say.\" \"I have never once managed that. Not when the truth costs him something to hear.\"",
+            text: "“You told him the whole sum, they say.” “I have never once managed that. Not when the truth costs him something to hear.”",
         },
         daughter_reads_spared_worry: {
             id: 'daughter_reads_spared_worry',
             // Phase 53e — terminal node for the read-back on
             // `boy-spared-father-worry`. Voice-lock line from
             // `S-02-fishing-village-voices.md`, shipped verbatim.
-            text: "\"My father asks what a thing will cost. I tell him less than it does.\" \"We are both good at it. That is the part I mind.\"",
+            text: "“My father asks what a thing will cost. I tell him less than it does.” “We are both good at it. That is the part I mind.”",
         },
         daughter_reads_deflected: {
             id: 'daughter_reads_deflected',
             // Phase 53e — terminal node for the read-back on
             // `boy-deflected-father`.
-            text: "\"You made it a joke instead of an answer, they say.\" \"Jokes are lighter to carry. I have carried a few myself, further than they were built to go.\"",
+            text: "“You made it a joke instead of an answer, they say.” “Jokes are lighter to carry. I have carried a few myself, further than they were built to go.”",
         },
         daughter_reads_returned_net: {
             id: 'daughter_reads_returned_net',
             // Phase 53e — terminal node for the read-back on
             // `boy-returned-the-net`.
-            text: "\"You carried a stranger's net back to her, whole.\" \"Most would have called that wasted effort. I would not have.\"",
+            text: "“You carried a stranger's net back to her, whole.” “Most would have called that wasted effort. I would not have.”",
         },
         daughter_reads_skimmed_net: {
             id: 'daughter_reads_skimmed_net',
             // Phase 53e — terminal node for the read-back on
             // `boy-skimmed-the-net`.
-            text: "\"You took a little from a net that was never yours.\" \"A little is still a taking. I have told myself that story too.\"",
+            text: "“You took a little from a net that was never yours.” “A little is still a taking. I have told myself that story too.”",
         },
         daughter_reads_took_net: {
             id: 'daughter_reads_took_net',
             // Phase 53e — terminal node for the read-back on
             // `boy-took-the-net`.
-            text: "\"You took the whole catch and left an empty net for whoever it belonged to.\" \"I am not asking why. I am only saying I noticed.\"",
+            text: "“You took the whole catch and left an empty net for whoever it belonged to.” “I am not asking why. I am only saying I noticed.”",
         },
         story_interest: {
             id: 'story_interest',
-            text: "\"Stories of far places. Other ways to live. Father says the world past this harbor is dangerous. I think it must be wondrous too. How do they live, in the great cities? In the mountain towns?\"",
+            text: "“Stories of far places. Other ways to live. Father says the world past this harbor is dangerous. I think it must be wondrous too. How do they live, in the great cities? In the mountain towns?”",
             choices: [
                 {
                     text: "The world holds both — wonder, and danger.",
@@ -341,7 +341,7 @@ const fishermansDaughterTree: DialogueTree = {
         },
         worldly_wisdom: {
             id: 'worldly_wisdom',
-            text: "\"Then tell me. What is the one lesson the world taught you? Say it before I choose what life to live.\"",
+            text: "“Then tell me. What is the one lesson the world taught you? Say it before I choose what life to live.”",
             choices: [
                 {
                     text: "Every soul carries wisdom worth the hearing.",
@@ -373,7 +373,7 @@ const fishermansDaughterTree: DialogueTree = {
         },
         bright_observation: {
             id: 'bright_observation',
-            text: "\"You notice things. Aye — I want to learn. People. How things work. The patterns in the tide and the weather. Father thinks I should be content with the nets. I feel called past them.\"",
+            text: "“You notice things. Aye — I want to learn. People. How things work. The patterns in the tide and the weather. Father thinks I should be content with the nets. I feel called past them.”",
             choices: [
                 {
                     text: "What calls you past them?",
@@ -398,51 +398,51 @@ const fishermansDaughterTree: DialogueTree = {
         },
         dismissive_response: {
             id: 'dismissive_response',
-            text: "Her expression dims. She returns to the nets. \"Of course. Forgive the bother.\"",
+            text: "Her expression dims. She returns to the nets. “Of course. Forgive the bother.”",
         },
         balanced_view: {
             id: 'balanced_view',
-            text: "\"Honest. I'll take that over a pretty lie. If I'm to choose my own life, I ought to know what I'm choosing between.\"",
+            text: "“Honest. I'll take that over a pretty lie. If I'm to choose my own life, I ought to know what I'm choosing between.”",
         },
         protective_warning: {
             id: 'protective_warning',
-            text: "\"I know he means well. But protection becomes a cage, given time. How does a body tell wisdom from fear?\"",
+            text: "“I know he means well. But protection becomes a cage, given time. How does a body tell wisdom from fear?”",
         },
         encourage_dreams: {
             id: 'encourage_dreams',
-            text: "\"You believe that. Sometimes I look at the horizon and think I could sail past the map's edge. Not for recklessness. For purpose. Maybe courage is not the absence of fear. Maybe it is growing past it anyway.\"",
+            text: "“You believe that. Sometimes I look at the horizon and think I could sail past the map's edge. Not for recklessness. For purpose. Maybe courage is not the absence of fear. Maybe it is growing past it anyway.”",
         },
         wisdom_everywhere: {
             id: 'wisdom_everywhere',
-            text: "\"Even the youngest villager. Even the oldest salt. Then no conversation is wasted, and no one is without worth. I'll keep that.\"",
+            text: "“Even the youngest villager. Even the oldest salt. Then no conversation is wasted, and no one is without worth. I'll keep that.”",
         },
         stay_true: {
             id: 'stay_true',
-            text: "\"Aye. Father raised me on strong values. I want to test them. Not to cast them off. To make them mine by choice, not by inheritance.\"",
+            text: "“Aye. Father raised me on strong values. I want to test them. Not to cast them off. To make them mine by choice, not by inheritance.”",
         },
         adaptability_lesson: {
             id: 'adaptability_lesson',
-            text: "\"Like the fisherman who reads the weather and turns the sail. I understand. Strength in bending, not in standing stubborn.\"",
+            text: "“Like the fisherman who reads the weather and turns the sail. I understand. Strength in bending, not in standing stubborn.”",
         },
         critical_thinking: {
             id: 'critical_thinking',
-            text: "\"Trust, but test. I like that. Staying open without being a fool. Questioning without turning bitter.\"",
+            text: "“Trust, but test. I like that. Staying open without being a fool. Questioning without turning bitter.”",
         },
         calling_exploration: {
             id: 'calling_exploration',
-            text: "\"Maybe a scholar. Maybe a trader who ties distant places together. Something that lets me learn the world while giving something back to it.\"",
+            text: "“Maybe a scholar. Maybe a trader who ties distant places together. Something that lets me learn the world while giving something back to it.”",
         },
         knowledge_validation: {
             id: 'knowledge_validation',
-            text: "\"My thanks, for saying that. Sometimes I wonder if wanting to learn makes me selfish. You're right, though. Knowledge can serve more than my own curiosity.\"",
+            text: "“My thanks, for saying that. Sometimes I wonder if wanting to learn makes me selfish. You're right, though. Knowledge can serve more than my own curiosity.”",
         },
         balanced_path: {
             id: 'balanced_path',
-            text: "\"A path that honors both duty and my own growth. That would be the whole of it — if I can find the way.\"",
+            text: "“A path that honors both duty and my own growth. That would be the whole of it — if I can find the way.”",
         },
         growth_recognition: {
             id: 'growth_recognition',
-            text: "\"Something's different in you, since we last spoke. How you carry yourself. How you listen. Experience does change a person. I hope I grow with such purpose, when my time comes.\"",
+            text: "“Something's different in you, since we last spoke. How you carry yourself. How you listen. Experience does change a person. I hope I grow with such purpose, when my time comes.”",
         },
     },
 };
@@ -479,7 +479,7 @@ const villageHealerTree: DialogueTree = {
         },
         talk_situation: {
             id: 'talk_situation',
-            text: "\"My thanks, for asking. I have not rested. Fever spreads through the poor quarter. The herbs I need sit hoarded in the wealthy district. I could save more, with the right supplies. Getting them would mean choices I do not like. I ask myself daily how far a healer should go.\"",
+            text: "“My thanks, for asking. I have not rested. Fever spreads through the poor quarter. The herbs I need sit hoarded in the wealthy district. I could save more, with the right supplies. Getting them would mean choices I do not like. I ask myself daily how far a healer should go.”",
             choices: [
                 {
                     text: "Trust to providence. It provides what's needed.",
@@ -512,19 +512,19 @@ const villageHealerTree: DialogueTree = {
         },
         healing_services: {
             id: 'healing_services',
-            text: "\"Healing is my calling. Though I warn you — my supplies run thin, for the reasons I gave.\"",
+            text: "“Healing is my calling. Though I warn you — my supplies run thin, for the reasons I gave.”",
         },
         divine_providence: {
             id: 'divine_providence',
-            text: "\"You speak of faith. Perhaps I've tried too hard to hold the outcome in my own two hands. Sometimes the greatest healing comes from trusting what's greater than us.\"",
+            text: "“You speak of faith. Perhaps I've tried too hard to hold the outcome in my own two hands. Sometimes the greatest healing comes from trusting what's greater than us.”",
         },
         offer_help: {
             id: 'offer_help',
-            text: "\"Your generosity moves me. With your help, I can get the herbs the honest way. It costs more. It leaves the conscience clean.\"",
+            text: "“Your generosity moves me. With your help, I can get the herbs the honest way. It costs more. It leaves the conscience clean.”",
         },
         take_what_needed: {
             id: 'take_what_needed',
-            text: "\"I cannot ask you to steal. But I understand the reasoning. Lives hang in it. If you'll get those herbs by whatever means, I'll not ask questions.\"",
+            text: "“I cannot ask you to steal. But I understand the reasoning. Lives hang in it. If you'll get those herbs by whatever means, I'll not ask questions.”",
         },
     },
 };
@@ -561,7 +561,7 @@ const unionLeaderTree: DialogueTree = {
         },
         talk_workers_situation: {
             id: 'talk_workers_situation',
-            text: "\"Appreciate you asking. The owners cut wages again, third time this year, while their coin piles higher. My people can't feed their own. We're calling a strike. Some are too frightened to join — they'd rather take scraps than risk losing all of it. I don't blame the fear. But a man's own survival sits against what's owed to all of them. What would you do, in their place?\"",
+            text: "“Appreciate you asking. The owners cut wages again, third time this year, while their coin piles higher. My people can't feed their own. We're calling a strike. Some are too frightened to join — they'd rather take scraps than risk losing all of it. I don't blame the fear. But a man's own survival sits against what's owed to all of them. What would you do, in their place?”",
             choices: [
                 {
                     text: "The divine order teaches us to accept our lot, and trust to a higher justice.",
@@ -595,19 +595,19 @@ const unionLeaderTree: DialogueTree = {
         },
         seeking_work: {
             id: 'seeking_work',
-            text: "\"Honest work's always welcome. Though I warn you — the terms aren't fair right now. That's what we're fighting to change.\"",
+            text: "“Honest work's always welcome. Though I warn you — the terms aren't fair right now. That's what we're fighting to change.”",
         },
         accept_divine_order: {
             id: 'accept_divine_order',
-            text: "\"I respect your faith. Divine justice moves slow, though, with children going hungry. Perhaps there's a patience in it I haven't grasped.\"",
+            text: "“I respect your faith. Divine justice moves slow, though, with children going hungry. Perhaps there's a patience in it I haven't grasped.”",
         },
         solidarity_support: {
             id: 'solidarity_support',
-            text: "\"That's the spirit of it. Your support means more than coin — it tells the workers they aren't alone. Together, we outlast any owner's greed.\"",
+            text: "“That's the spirit of it. Your support means more than coin — it tells the workers they aren't alone. Together, we outlast any owner's greed.”",
         },
         undermine_strike: {
             id: 'undermine_strike',
-            text: "The leader's eyes go hard. \"So that's how it is. Thirty pieces of silver, to break honest men. You'll find your strikebreakers. You'll find the weight of it too, later, in your own conscience.\"",
+            text: "The leader's eyes go hard. “So that's how it is. Thirty pieces of silver, to break honest men. You'll find your strikebreakers. You'll find the weight of it too, later, in your own conscience.”",
         },
     },
 };
@@ -644,7 +644,7 @@ const merchantWidowTree: DialogueTree = {
         },
         talk_troubles: {
             id: 'talk_troubles',
-            text: "\"My husband was murdered three weeks past. Stabbed in an alley for his purse. I know who did it. A desperate man, with starving children of his own. The constables will not act. He has fled the village already. I have the coin to hire bounty hunters. Part of me wonders if justice wants tempering with mercy. His children starve, if he is caught. My husband's blood asks for justice regardless. Which is the right path, when the two make war?\"",
+            text: "“My husband was murdered three weeks past. Stabbed in an alley for his purse. I know who did it. A desperate man, with starving children of his own. The constables will not act. He has fled the village already. I have the coin to hire bounty hunters. Part of me wonders if justice wants tempering with mercy. His children starve, if he is caught. My husband's blood asks for justice regardless. Which is the right path, when the two make war?”",
             choices: [
                 {
                     text: "Forgiveness is divine. Let heaven judge, and heal your own heart.",
@@ -678,19 +678,19 @@ const merchantWidowTree: DialogueTree = {
         },
         condolences: {
             id: 'condolences',
-            text: "\"My thanks, for the kindness. These days, plain decency is rarer than gold.\"",
+            text: "“My thanks, for the kindness. These days, plain decency is rarer than gold.”",
         },
         divine_forgiveness: {
             id: 'divine_forgiveness',
-            text: "\"You speak a wisdom my heart struggles to hold. Perhaps the truest victory over evil is refusing to let it remake you. My husband was a kind man. He'd have wanted mercy.\"",
+            text: "“You speak a wisdom my heart struggles to hold. Perhaps the truest victory over evil is refusing to let it remake you. My husband was a kind man. He'd have wanted mercy.”",
         },
         justice_with_mercy: {
             id: 'justice_with_mercy',
-            text: "\"Perhaps there is a way to serve justice without breeding more suffering. With your help we might find him. See his family cared for. Make him answer for what he did.\"",
+            text: "“Perhaps there is a way to serve justice without breeding more suffering. With your help we might find him. See his family cared for. Make him answer for what he did.”",
         },
         pursue_vengeance: {
             id: 'pursue_vengeance',
-            text: "\"You understand what justice means. My husband is owed that much. The hunters will find him. And his children can learn what comes of spilling innocent blood.\"",
+            text: "“You understand what justice means. My husband is owed that much. The hunters will find him. And his children can learn what comes of spilling innocent blood.”",
         },
     },
 };
