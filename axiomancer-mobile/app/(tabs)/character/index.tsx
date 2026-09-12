@@ -29,9 +29,19 @@ export default function CharacterScreen() {
   // selector. Pull the underlying slice and memoize the VM downstream
   // (mirrors the pattern fixed in event screen, Phase 6 Tick A).
   const player = useGameState((s) => s.player);
+  // FE-017: `selectCharacterViewModel` reads three slices — player,
+  // moralMeter and philosophicalAlignment — but the screen only ever handed
+  // it `{ player }`. The other two arrived undefined on every render, so the
+  // sheet's GRACE was pinned to the value for a zero balance and the
+  // alignment line to the default cell, no matter what the run had done. The
+  // exploration HUD reads moralMeter directly and showed 6/10 on the same
+  // save where this screen showed 5/10. Both slices are stable references, so
+  // subscribing to them keeps the getSnapshot identity contract intact.
+  const moralMeter = useGameState((s) => s.moralMeter);
+  const philosophicalAlignment = useGameState((s) => s.philosophicalAlignment);
   const vm = useMemo(
-    () => selectCharacterViewModel({ player } as never),
-    [player],
+    () => selectCharacterViewModel({ player, moralMeter, philosophicalAlignment } as never),
+    [player, moralMeter, philosophicalAlignment],
   );
   const store = useGameStore();
   const actions = useGameActions();
