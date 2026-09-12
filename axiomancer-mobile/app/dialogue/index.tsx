@@ -183,7 +183,13 @@ export default function DialogueScreen() {
                     <Text style={styles.speechText}>{vm.body}</Text>
                 </View>
 
-                <Text style={styles.sectionLabel}>{vm.chrome.reckoningEyebrow}</Text>
+                {/* FE-011: the eyebrow heads the reply list, so it only renders
+                  * when there are replies. On a tree's closing node the list is
+                  * empty and 'A RECKONING' sat over nothing but the exit, which
+                  * reads as choices that failed to load. */}
+                {vm.choices.length > 0 && (
+                    <Text style={styles.sectionLabel}>{vm.chrome.reckoningEyebrow}</Text>
+                )}
                 {vm.choices.map(choice => (
                     <ReplyRow
                         key={choice.id}

@@ -134,6 +134,30 @@ function setDialogueCursor(store: AppStore, choiceText: string) {
     });
 }
 
+/**
+ * FE-011 — a dialogue tree's closing node has no replies. The reply-list
+ * eyebrow must not render over an empty list.
+ */
+function setDialogueCursorWithNoChoices(store: AppStore) {
+    const tree = {
+        rootId: 'root',
+        nodes: {
+            root: {
+                id: 'root',
+                text: 'Old Marrow nods slowly. Mind the tide.',
+                choices: [],
+            },
+        },
+    } as never;
+    store.setState({
+        event: {
+            ...EMPTY_EVENT_SLICE,
+            pending: interaction('A Voice'),
+            dialogueCursor: { tree, nodeId: 'root' },
+        },
+    });
+}
+
 describe('EventScreen render', () => {
     it('renders combat-prelude with FIGHT and FLEE choices for a non-boss encounter', () => {
         const store = makeStore();
@@ -373,5 +397,28 @@ describe('DialogueScreen dialogue confirmation flash (ported Phase 29 Tick C)', 
 
         expect(getByText('WALK ON.')).toBeTruthy();
         expect(queryByText('Walk on.')).toBeNull();
+    });
+});
+
+describe('FE-011: the reckoning eyebrow heads a reply list, or nothing', () => {
+    it('renders the eyebrow when there are replies', () => {
+        const store = makeStore();
+        setDialogueCursor(store, 'Walk on.');
+
+        const { getByText } = render(withProvider(store, <DialogueScreen />));
+
+        expect(getByText('WALK ON.')).toBeTruthy();
+        expect(getByText(/RECKONING/)).toBeTruthy();
+    });
+
+    it('drops the eyebrow on a closing node with no replies', () => {
+        const store = makeStore();
+        setDialogueCursorWithNoChoices(store);
+
+        const { queryByText, getByTestId } = render(withProvider(store, <DialogueScreen />));
+
+        expect(queryByText(/RECKONING/)).toBeNull();
+        // The way out is still there.
+        expect(getByTestId('dialogue-leave')).toBeTruthy();
     });
 });
