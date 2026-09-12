@@ -137,6 +137,32 @@
 > --workspace axiomancer-mobile`: 261 suites / 2657 tests green. Top 5
 > below is refreshed for the next pass.
 
+> **Seventh pass, 2026-09-12 (`/march` tick).** Dispatch chain landed on
+> `/iterate` again (triage clean; critique not yet due at 5 commits/~8h
+> since pass 36; no pending phase; no content-lifecycle category past its
+> 15-commit/36h threshold — cards/equipment/enemies/keywords/npcs all sit
+> at 1-12 commits since their own pass-7 ticks; `/forge`'s 48h world-growth
+> window still open via `47bcda82`, ~43.7h old at dispatch; `/expand`'s
+> 20-commit/48h window not yet open at 17 commits/~25.7h since pass 14).
+> Read latest rather than re-running a full site audit (hard rule §7.5:
+> `plan/CRITIQUE.md` still carries ~19 open Pending rows). [2.0] (mobile
+> `as any` clusters) is now `[x]` RESOLVED (issue #299, commit `2dc459b4`,
+> landed by the immediately-preceding `/iterate` tick) — confirmed via
+> `git log`, not re-picked. Of the remaining Top 5 rows: [5.9] (post-combat
+> reward crash) stays excluded, still blocked on the owner's device log;
+> the `[HIGH] late-stage global collapse` row stays PARKED per the standing
+> `/oversight 2026-08-08` ruling. That leaves [1.6] (`web:container`
+> dev-server script) and [1.5] (card-editor missing three mechanic-field
+> form controls) as the only actionable, unblocked rows — both re-verified
+> still live and unshipped by direct read of `axiomancer-mobile/scripts/
+> dev-server-container.sh` and `CardForm.tsx`'s `grant_pip`/`spend_all_pips`
+> cases (no `synergy` case exists). Top score is 1.6, under this skill's
+> §6 failure-mode-6 threshold of 3.0 — **no actionable iterate work this
+> tick**. `plan/bearings.md` "Plan expansion posture" reads **bold** —
+> handing off to `/expand` per §6 rather than shipping a low-value pick or
+> stopping. No row shipped, no commit from this pass; Top 5 below is
+> otherwise unchanged (only the resolved [2.0] row is now `[x]`).
+
 ## Top 5 findings (scored)
 
 ### [5.9] combat — user crash on ACCEPTING post-combat card reward (unreproduced, issue #216)
