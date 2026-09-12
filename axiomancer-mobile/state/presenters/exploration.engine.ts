@@ -337,7 +337,7 @@ const FALLBACK_VM: ExplorationViewModel = {
     options: [],
     drawerCopy: DRAWER_COPY,
     eventCallout: null,
-    legend: { left: '● TRODDEN  ◌ OPEN  ✕ SHUT', right: '' },
+    legend: { left: '● TRODDEN  ◌ OPEN  ✕ SEALED', right: '' },
 };
 
 // Referential-stability memo (1-entry, keyed by the `world` slice this
@@ -469,7 +469,12 @@ function computeExplorationViewModel(state: GameStore): ExplorationViewModel {
         drawerCopy: DRAWER_COPY,
         eventCallout: null,
         legend: {
-            left: '● TRODDEN  ◌ OPEN  ✕ SHUT',
+            // FE-008: SEALED, not SHUT. The counter at the other end of this
+            // same strip says 'N sealed', the node tap-tip says 'This path is
+            // sealed.', and every locked node's accessible name ends 'sealed'
+            // — the legend was the only surface using a fourth word for the
+            // state it exists to define.
+            left: '● TRODDEN  ◌ OPEN  ✕ SEALED',
             right: `${def.nodes.length} nodes · ${locked.length} sealed`,
         },
     });
