@@ -15,11 +15,85 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-12 | faba6c82 | 7 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-12 | 0a95396b | 7 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-12 | 3c39acb9 | 7 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-11 | c4f97f69 | 6 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-12 | PENDING | 7 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-npcs pass 7, 2026-09-12, commit PENDING]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
+> content-lifecycle gate (npcs' pass-6 commit `c4f97f69` was the only
+> stale-qualifying category at dispatch time, 16 commits since, past the
+> 15-commit threshold; cards/equipment/enemies/keywords all passed within
+> the last day). `git log c4f97f69..HEAD -- axiomancer-mechanics/src/NPCs
+> axiomancer-mechanics/src/World axiomancer-mechanics/specs/story
+> axiomancer-mechanics/specs/characters` is empty — the 16 intervening
+> commits were the cards/equipment/enemies pass-7 ticks, the keywords
+> pass-7 tick, a digest, two `/audit`-fix ticks (mobile a11y + village-stall
+> pricing), and an `/expand` no-op — nothing touched the NPC/dialogue
+> surface. Re-derived every Step-1 signal fresh anyway rather than trusting
+> the empty path-scoped log alone, same discipline as the sibling
+> categories' own pass-7 re-audits: (1) **orphaned/unstaged NPC sweep** — a
+> fresh extraction of all `NPC` consts across the 4 authoring files
+> (`Coastal-Village/npcs.ts` 5, `Coastal-Village/maps.ts` 3,
+> `Northern-Forest/npcs.ts` 6, `Northern-Continent/maps.ts` 7 — unchanged
+> from pass 6, 21 total) reconfirms all 21 resolve into some map's `npcs:`
+> roster by direct cross-check, no new orphan. The standing `unstagedNpcs`
+> backlog (`Coastal-Village/maps.ts`) is still exactly the same 4
+> (Tide-Shopkeeper, Village Healer, Dockworker's Union Leader, Merchant's
+> Widow) with the same per-NPC reasons, byte-identical block since pass 3;
+> confirmed fresh (not assumed) that none of the four has a
+> `MapEvents/content.ts` interaction payload naming them (a direct grep for
+> all four display-name strings against that module returns zero hits) and
+> that Village Healer's stated precondition ("place her once the rest
+> rebuild has fully settled") is re-confirmed still unmet — `git log
+> c4f97f69..HEAD -- axiomancer-mechanics/src/World/RestChoice
+> axiomancer-mobile/app/rest axiomancer-mobile/state/presenters/rest.copy.ts`
+> is empty, no commit since pass 6 touched any of those paths. (2) **map
+> with <2 staged NPCs signal** — recomputed all 7 maps' `npcs:` array
+> lengths fresh (fishing-village 8, northern-forest 6, caverns 1,
+> northern-city 2, connecting-river 1, town-across-river 1, the-capital 2 —
+> unchanged from pass 6, no new map landed since); the standing
+> `plan/AUDIT.md` `[needs-user-call]` row (filed pass 1, 2026-09-05) on
+> caverns/connecting-river/town-across-river's single-NPC maps re-read
+> directly at its current text: still un-`[x]`-marked, still describes each
+> singleton as the deliberate "guaranteed quest-giver" pattern, not
+> re-litigated. (3) **dead-end / stale-reference sweep** — ran the live
+> audits directly rather than eyeballing the union walk by hand:
+> `narrative-reachability.test.ts` (5/5), `World/e2e/
+> narrative-reachability.engine.test.ts` (26/26), `MapEvents/e2e/
+> nf-21-nf-14-npc-staging.engine.test.ts` (4/4), `NPCs/e2e/
+> dialogue.engine.test.ts` (18/18), and `NPCs/e2e/story-npcs.engine.test.ts`
+> (36/36) — all green, no orphaned tree, unresolved interaction ref, or
+> scenery-as-people flagged. A fresh grep confirms `teachCard` has zero live
+> call sites (only the `NPCs/types.ts` field declaration) and all 10
+> distinct `startQuest` targets (unchanged from pass 6, including
+> `get-to-the-capital`) still resolve type-check-clean against the live
+> `QuestName` union. (4) **legacy flat `DialogueMap` sweep** — zero live
+> usage confirmed again (`grep -rln DialogueMap src/` outside `e2e/` returns
+> only the type declaration in `NPCs/types.ts` and its re-exports in
+> `NPCs/index.ts`/`src/index.ts`). (5) **spec-to-NPC gap** — `git log
+> c4f97f69..HEAD -- axiomancer-mechanics/specs/` is empty, no
+> `specs/characters/` or `specs/story/` file changed since pass 6; no new
+> spec-implies-NPC gap. Also re-checked `plan/PHASE_CANDIDATES.md`'s
+> standing "retheme the six Northern-Forest dialogue trees" candidate
+> (filed pass 1, score 5.0) — still open, still correctly sized as its own
+> phase rather than a routine structural finding, not actioned this pass.
+> KB research (kb-query): not run — every consideration this pass was
+> audit-confirmed-clean (no CREATE/UPDATE), exempt from the gate per skill
+> §3 Step 2 (REMOVE/no-op carve-out). Verify: ran both gates in full this
+> pass (not skipped, despite zero source diff) — `npm run verify
+> --workspace axiomancer-mechanics` (212/212 files, 3422 tests + build,
+> matching pass 6 exactly) and `npm run verify --workspace
+> axiomancer-mobile` (261/261 suites, 2657 tests, lint 0 errors/15
+> pre-existing warnings, typecheck clean, assets:check 7/7, art:test
+> 24/24 — all matching pass 6 exactly). `npm run deploy:check` confirmed
+> green pre-tick (HEAD `a9320ef0`, `verify-mobile` success) and will be
+> re-confirmed after the ledger commit lands. No `plan/PHASE_CANDIDATES.md`
+> or new `plan/AUDIT.md` residue filed this pass.
+```
 
 ```
 > **[adjust-keywords pass 7, 2026-09-12, commit 3c39acb9]** Zero-CREATE,
