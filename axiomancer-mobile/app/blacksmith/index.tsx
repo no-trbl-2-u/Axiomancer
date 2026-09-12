@@ -63,8 +63,9 @@ function OfferButton({ offer, onPress }: { offer: BlacksmithOfferVM; onPress: ()
                 <Text style={[styles.offerLabel, !offer.enabled && { color: AXM.bone }]}>
                     {offer.label}
                 </Text>
+                {/* FE-023: shillings, not ◆ — that glyph is combat's CONVICTION. */}
                 <Text style={[styles.offerPrice, !offer.enabled && { color: AXM.bone }]}>
-                    {offer.price} ◆
+                    {offer.price}s
                 </Text>
             </TouchableOpacity>
             {!offer.enabled && (
@@ -175,7 +176,7 @@ export default function BlacksmithScreen() {
                         <View style={styles.budgetRow}>
                             <Text style={styles.budgetLabel}>PURSE</Text>
                             <Text style={styles.budgetValue} testID="blacksmith-budget">
-                                {vm.budget} ◆
+                                {vm.budget}s
                             </Text>
                         </View>
 
@@ -225,7 +226,7 @@ export default function BlacksmithScreen() {
                         <Text style={styles.body}>{vm.card.body}</Text>
                         {!vm.card.refused && vm.card.cost > 0 && (
                             <View style={styles.chipRow}>
-                                <Text style={styles.chip}>−{vm.card.cost} ◆</Text>
+                                <Text style={styles.chip}>−{vm.card.cost}s</Text>
                                 <Text style={styles.chip}>{vm.card.verb.toUpperCase()} · {vm.card.color.toUpperCase()}</Text>
                             </View>
                         )}
