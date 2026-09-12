@@ -5,6 +5,7 @@ import { makeStyles, usePalette } from '@/theme/runtime';
 import { StatBar } from './StatBar';
 import { SectionLabel } from './SectionLabel';
 import { useGameState } from '@/state/GameStoreProvider';
+import { graceBreakLegend } from '@/state/presenters/character.engine';
 
 interface StatusCardProps {
   /**
@@ -47,7 +48,8 @@ export function StatusCard(props: StatusCardProps = {}) {
   const moraleDisplay = Math.max(1, Math.min(10, Math.round((moralMeter + 100) / 20)));
   const moraleMax = 10;
   const moraleFillPercent = (moraleDisplay / moraleMax) * 100;
-  const moraleBreakPercent = (2 / moraleMax) * 100; // Break threshold at 2/10
+  const moraleBreakAt = 2; // Break threshold at 2/10
+  const moraleBreakPercent = (moraleBreakAt / moraleMax) * 100;
 
   return (
     <View style={styles.card}>
@@ -81,6 +83,11 @@ export function StatusCard(props: StatusCardProps = {}) {
             <View style={[styles.moraleFill, { width: `${moraleFillPercent}%` }]} />
             <View style={[styles.moraleBreakTic, { left: `${moraleBreakPercent}%` }]} />
           </View>
+          {/* S3-sheet-C12: the red tic sat in the GRACE track unlabelled and
+            * read as a notch in the bar. Its key, worded by the presenter. */}
+          <Text style={styles.moraleBreakLegend} testID="status-grace-break-legend">
+            {graceBreakLegend(moraleBreakAt)}
+          </Text>
           {moraleDisplay <= 2 && (
             <Text style={styles.moraleWarning}>the ledger runs to arrears.</Text>
           )}
@@ -182,6 +189,15 @@ const useStyles = makeStyles((AXM) => ({
     bottom: -2,
     width: 1,
     backgroundColor: AXM.blood,
+  },
+  // S3-sheet-C12 — the tic's key: blood-coloured so the line and the mark read
+  // as one thing.
+  moraleBreakLegend: {
+    fontFamily: FONTS.mono,
+    fontSize: 7,
+    color: AXM.blood,
+    letterSpacing: 0.6,
+    marginTop: 2,
   },
   levelSubtitle: {
     color: AXM.bone,

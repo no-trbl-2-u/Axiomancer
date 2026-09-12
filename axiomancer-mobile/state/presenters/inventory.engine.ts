@@ -249,7 +249,12 @@ const CATEGORY_HEADERS: Record<InventoryCategory, string> = {
 
 const TAB_LABELS: Record<InventoryTab, string> = {
     all: 'ALL',
-    equipment: 'WORN',
+    // S3-sheet-C22: every tab's badge counts the rows that tab shows, and this
+    // tab shows all equipment carried — so the badge read "8" while five things
+    // were worn. The count is right; the word was the liar. GEAR names the
+    // filter (equipment) instead of a state (equipped) the filter does not
+    // apply; the per-row WORN badge still marks what is actually on the body.
+    equipment: 'GEAR',
     consumable: 'PHIALS',
     material: 'STUFF',
     quest: 'SEALED',

@@ -18,7 +18,7 @@ import { XpChain } from '@/components/XpChain';
 import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
 import { nextPlayerPortrait, portraitIdFromFlags, PORTRAIT_FLAG_PREFIX } from '@/assets/images/portraits';
 import { useGameActions, useGameState, useGameStore } from '@/state/GameStoreProvider';
-import { selectCharacterViewModel } from '@/state/presenters/character.engine';
+import { graceBreakLegend, selectCharacterViewModel } from '@/state/presenters/character.engine';
 
 export default function CharacterScreen() {
   const AXM = usePalette();
@@ -159,7 +159,12 @@ export default function CharacterScreen() {
           <View style={styles.identityCol}>
             <SectionLabel size={9} color={AXM.bone}>{vm.subtitle}</SectionLabel>
             <Text style={styles.characterName} numberOfLines={1}>{vm.displayName}</Text>
-            <Text style={styles.identityAlignment} numberOfLines={1}>{vm.alignment.cellName}</Text>
+            {/* S3-sheet-C17: the cell names run to 33 characters
+              * ('Agnostic-Pessimistic-Transcendent') and this column is ~106pt
+              * wide, so a one-line clamp cut every long alignment to
+              * 'Agnostic-Neutral-…' with no second surface carrying the rest.
+              * Unclamped it wraps on its own hyphens and is readable in full. */}
+            <Text style={styles.identityAlignment} testID="self-identity-alignment">{vm.alignment.cellName}</Text>
             <View style={styles.xpRow}>
               {/* FE-004: value first, then the caption naming what it counts
                 * TOWARD. Side-by-side, the label and value each wrapped inside
@@ -297,6 +302,14 @@ export default function CharacterScreen() {
                   <View style={[styles.poolBreakTic, { left: `${(pool.breakAt / pool.max) * 100}%` }]} />
                 )}
               </View>
+              {/* S3-sheet-C12: the tic was the only mark on the track and
+                * carried no key, so it read as a notch in the bar. Copy comes
+                * from the presenter; the threshold stays where it was. */}
+              {'breakAt' in pool && pool.breakAt != null && (
+                <Text style={styles.poolBreakLegend} testID="self-grace-break-legend">
+                  {graceBreakLegend(pool.breakAt)}
+                </Text>
+              )}
             </View>
           ))}
         </View>
@@ -604,6 +617,8 @@ const useStyles = makeStyles((AXM) => ({
   poolTrack: { position: 'relative' as const, height: 10, backgroundColor: AXM.deepBg, borderWidth: 1, borderColor: AXM.ash },
   poolFill: { position: 'absolute' as const, top: 1, bottom: 1, left: 1 },
   poolBreakTic: { position: 'absolute' as const, top: -2, bottom: -2, width: 1, backgroundColor: AXM.blood },
+  // S3-sheet-C12 — the tic's key: blood-coloured so the line and the mark read as one thing.
+  poolBreakLegend: { fontFamily: FONTS.mono, fontSize: 8, color: AXM.blood, letterSpacing: 0.6, marginTop: 2 },
   moraleLedger: { marginTop: 5, backgroundColor: AXM.deepBg, borderWidth: 1, borderColor: AXM.ash, paddingVertical: 7, paddingHorizontal: 12 },
   ledgerGrid: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 8, rowGap: 2, marginTop: 4 },
   ledgerRow: { flexDirection: 'row', alignItems: 'baseline', gap: 6, width: '48%' },

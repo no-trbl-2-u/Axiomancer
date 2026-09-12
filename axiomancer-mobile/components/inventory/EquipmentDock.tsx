@@ -48,10 +48,10 @@ export function EquipmentDock({ vm, selectedSlot, onSelectSlot }: EquipmentDockP
             {/* Portrait on the left, all 5 worn slots stacked in a single column
                 on the right. */}
             <View style={styles.dockGrid}>
-                <View style={styles.dockPortrait}>
-                    <PlayerPortraitImage width="100%" height={300} fit="contain" contentPosition="center" />
+                <View style={styles.dockPortrait} testID="equipment-dock-portrait">
+                    <PlayerPortraitImage width="100%" height={260} fit="contain" contentPosition="center" />
                 </View>
-                <View style={styles.dockCol}>
+                <View style={styles.dockCol} testID="equipment-dock-slots">
                     {vm.slots.map((slot) => (
                         <EquipmentSlot
                             key={dockSlotKey(slot)}
@@ -102,15 +102,18 @@ const useStyles = makeStyles((AXM) => ({
         gap: 12,
     },
     dockCol: {
-        // The slot stack takes half the dock; its rows fill that half so
-        // equipment names have room instead of truncating.
+        // S3-sheet-C11: the gear list is the information in this dock, so it
+        // takes every point the portrait does not claim. Under the old 50/50
+        // split each row had ~110pt for its text and the grants sub-label broke
+        // mid-word ('GRANTS READ THE ENTRA…').
         flex: 1,
         alignItems: 'stretch',
     },
     dockPortrait: {
-        // The portrait takes the other half; the image fills it (width '100%')
-        // so it reads large without floating in empty space.
-        flex: 1,
+        // S3-sheet-C11: a fixed narrow gutter instead of flex:1 — the bust is
+        // decoration beside five named slots, not half the panel.
+        width: 96,
+        flexShrink: 0,
         alignItems: 'center',
         justifyContent: 'center',
     },
