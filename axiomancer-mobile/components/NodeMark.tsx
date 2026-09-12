@@ -13,6 +13,14 @@ interface NodeMarkProps {
  * over the connecting paths drawn behind it, with bolder strokes and a
  * defining outer rim. Bigger default size; the parent scales it up
  * further on the exploration map.
+ *
+ * S4-world-C06: the accent belongs to `available`, not `current`. The
+ * sulfur beacon used to mark the square the player was ALREADY standing
+ * on — the brightest thing on the chart was the one node that does
+ * nothing when tapped — while the nodes you can actually walk to sat in
+ * plain parchment. Reversed: `available` wears the lit sulfur lamp (and
+ * the parent's pulse), `current` wears a muted bone pin that reads "you
+ * are here" rather than "go here".
  */
 export function NodeMark({ kind = 'available', size = 28 }: NodeMarkProps) {
   const AXM = usePalette();
@@ -38,18 +46,18 @@ export function NodeMark({ kind = 'available', size = 28 }: NodeMarkProps) {
   if (kind === 'current') {
     return (
       <Svg viewBox="0 0 32 32" width={size} height={size} accessibilityRole="image" accessibilityLabel="Current map node">
-        <Circle cx={16} cy={16} r={15.5} fill={AXM.deepBg} stroke={AXM.sulfur} strokeWidth={1} opacity={0.5} />
-        <Circle cx={16} cy={16} r={13} fill="none" stroke={AXM.sulfur} strokeWidth={2.5} />
-        <Circle cx={16} cy={16} r={6} fill={AXM.sulfur} />
-        <Circle cx={16} cy={16} r={2.5} fill={AXM.bg} />
+        <Circle cx={16} cy={16} r={15} fill={AXM.deepBg} stroke={AXM.ash} strokeWidth={1} />
+        <Circle cx={16} cy={16} r={11.5} fill="none" stroke={AXM.bone} strokeWidth={1.5} strokeDasharray="2 3" />
+        <Circle cx={16} cy={16} r={5} fill={AXM.bone} />
+        <Circle cx={16} cy={16} r={2} fill={AXM.bg} />
       </Svg>
     );
   }
   return (
     <Svg viewBox="0 0 32 32" width={size} height={size} accessibilityRole="image" accessibilityLabel="Available map node">
-      <Circle cx={16} cy={16} r={15} fill={AXM.deepBg} stroke={AXM.parchment} strokeWidth={1} opacity={0.6} />
-      <Circle cx={16} cy={16} r={12} fill={AXM.bg} stroke={AXM.parchment} strokeWidth={2.5} />
-      <Circle cx={16} cy={16} r={5} fill={AXM.parchment} />
+      <Circle cx={16} cy={16} r={15.5} fill={AXM.deepBg} stroke={AXM.sulfur} strokeWidth={1} opacity={0.5} />
+      <Circle cx={16} cy={16} r={13} fill={AXM.bg} stroke={AXM.sulfur} strokeWidth={2.5} />
+      <Circle cx={16} cy={16} r={6} fill={AXM.sulfur} />
     </Svg>
   );
 }

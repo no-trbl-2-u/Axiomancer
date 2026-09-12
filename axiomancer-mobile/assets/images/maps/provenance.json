@@ -22,7 +22,7 @@
     "artist": "Gustave Dor\u00e9",
     "license": "Public domain",
     "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
-    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44",
+    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44; 2026-09-12 UI pass (S4-world-C21): plate margins + printed caption band cropped away (815x1120 -> 784x994) so the engraving carries no other book's caption",
     "covers": [
       "charon-crossing.webp"
     ],

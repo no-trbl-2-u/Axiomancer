@@ -90,7 +90,12 @@ export function ExplorationNode({ node: n, onNodePress, isSelected }: Exploratio
                             : `open, ${n.type}`
             }`}
             accessibilityHint="hold to read node type description"
-            accessibilityState={{ disabled: n.kind !== 'available', selected: isSelected }}
+            // S4-world-C06: every kind answers a tap now — a sealed node says
+            // it is sealed, a walked one says it is walked, the node you stand
+            // on says so. `disabled` announced the opposite (and had a screen
+            // reader skip the mark entirely); the label already carries the
+            // state, so the control is honestly enabled.
+            accessibilityState={{ selected: isSelected }}
             onPress={() => onNodePress(n)}
             onLongPress={() => tooltip.show({ kind: 'map-node', id: n.type, anchorRef: ref })}
             activeOpacity={n.kind === 'available' ? 0.7 : 1}

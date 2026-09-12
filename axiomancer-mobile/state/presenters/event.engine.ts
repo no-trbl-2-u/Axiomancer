@@ -550,6 +550,29 @@ export function buildDialogueContext(tree: DialogueTree, state: AppStoreState): 
     };
 }
 
+/**
+ * Nameplate for a dialogue card.
+ *
+ * Input: the active event slice's resolved event (may be absent).
+ * Output: the uppercase name of whoever is speaking, or the canonical
+ * 'A FIGURE' chrome when the event names nobody — a `narration` monologue
+ * has no speaker by design, and that is the only case the fallback is
+ * honest for.
+ *
+ * Resolves S4-world-C11: every NPC's nameplate read 'A FIGURE' while the
+ * prose directly beneath it called the character by name. The engine's
+ * `DialogueNode` has carried no `.speaker` since Phase 60c, but the
+ * `interaction` event that OPENED the tree carries `npcName` — the same
+ * name `composeInteraction` already puts on the no-tree card.
+ */
+function dialogueSpeakerTitle(resolved: ResolvedEvent | undefined): string {
+    if (resolved?.kind === 'interaction') {
+        const name = resolved.npcName.trim();
+        if (name.length > 0) return name.toUpperCase();
+    }
+    return 'A FIGURE';
+}
+
 function composeNpcDialogue(
     tree: DialogueTree,
     nodeId: string,
@@ -587,10 +610,11 @@ function composeNpcDialogue(
         artSlug: 'interaction-generic',
         badge: 'A VOICE',
         badgeAccentKey: 'parchment',
-        // Phase 60c — engine's DialogueNode dropped `.speaker`;
-        // mobile falls back to the canonical 'A FIGURE' chrome
-        // (already the fallback when speaker was undefined).
-        title: 'A FIGURE',
+        // Phase 60c — engine's DialogueNode dropped `.speaker`; the
+        // opening `interaction` event is where the name lives now
+        // (S4-world-C11). 'A FIGURE' survives only for a speakerless
+        // narration.
+        title: dialogueSpeakerTitle(state.event.pending?.event),
         subtitle: '',
         body: text,
         choices,

@@ -19,9 +19,12 @@ describe('MapOverlays', () => {
         expect(root).toBeTruthy();
     });
 
-    it('renders the fixed compass chrome', () => {
+    it('renders the fixed compass chrome, naming the pan/pinch gesture', () => {
         render(<MapOverlays legend={legend} />);
-        expect(screen.getByText('N ↑ · scale: leagues')).toBeTruthy();
+        // S4-world-C07: the chart pans and zooms behind a much smaller
+        // window, so the always-on furniture has to say so — the first-visit
+        // hint chip fades and cannot be the only place it is told.
+        expect(screen.getByText('N ↑ · leagues · drag · pinch')).toBeTruthy();
     });
 
     it('renders the NODE GRAPH label', () => {

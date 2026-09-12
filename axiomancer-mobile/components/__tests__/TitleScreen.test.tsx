@@ -49,6 +49,24 @@ describe('TitleScreen', () => {
     expect(getByText('EMBARK…')).toBeTruthy();
   });
 
+  /**
+   * S4-world-C01 — the only button on the title screen used to be captioned
+   * 'tap a glowing node on the map to begin', on a screen with no map, for a
+   * press that opens an omen. The sub-line has to describe what EMBARK does.
+   */
+  it('sub-labels EMBARK with what EMBARK does, not with map instructions', () => {
+    const mockOnContinue = jest.fn();
+    const { getByText, queryByText } = render(
+      <TestWrapper>
+        <TitleScreen onContinue={mockOnContinue} />
+      </TestWrapper>
+    );
+
+    expect(getByText('begin the pilgrimage')).toBeTruthy();
+    expect(queryByText(/glowing node/i)).toBeNull();
+    expect(queryByText(/map/i)).toBeNull();
+  });
+
   it('calls onContinue when embark button is pressed', () => {
     const mockOnContinue = jest.fn();
     const { getByRole } = render(

@@ -36,8 +36,12 @@ export function MapOverlays({ legend, hint = null }: MapOverlaysProps) {
     const styles = useStyles();
     return (
         <>
-            {/* Compass */}
-            <Text style={styles.compass}>N ↑ · scale: leagues</Text>
+            {/* Compass. S4-world-C07: the travel hint is a first-visit chip
+                that fades; the chart's own furniture is where a player who
+                missed it looks. Naming the gesture here keeps "the sheet
+                moves" on screen for the whole run, beside the legend's node
+                count that provoked the question. */}
+            <Text style={styles.compass}>N ↑ · leagues · drag · pinch</Text>
             <Text style={styles.nodeGraphLabel}>NODE GRAPH</Text>
 
             {/* Travel hint — stacked directly above the legend strip. */}
