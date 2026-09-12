@@ -1,13 +1,47 @@
 # Critique log
 
-> Last pass: 2026-09-09 at commit b9b5da55
-> Pass count: 35
+> Last pass: 2026-09-12 at commit 894cad12
+> Pass count: 36
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 36, 2026-09-12, commit 894cad12] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5,
+> `CRITIQUE_VIEWPORT=both`), mobile (375×812) and desktop (1280×800),
+> against the full fixture-boosted screen set (title, onboarding,
+> combat-encounter preview, live combat board, exploration hub, plus
+> the six fixture-booted screens: dialogue, village, cutscene, rest,
+> hazard, late-game hub — 11 screens × 2 viewports = 22 captures, all
+> clean). Zero page errors; console errors limited to the same benign
+> `navigator.vibrate` autoplay warning seen every prior pass. Read
+> every screenshot + domText directly (not just the manifest's
+> error/nav fields). Both standing closed rows reconfirmed holding at
+> current source: the dialogue reply-card echo fix (RESOLVED
+> commit 393354c6) — `apprentice-fv-interaction`'s domText shows
+> "WHAT NEEDS DOING?"/"LEAVE HIM BE." each exactly once, not doubled —
+> and the LOG-toggle/stance-check-telegraph overlap fix — the LOG pill
+> sits clear of both "Punishes HEART ×1.5"/"Yields to BODY ×0.5 +1◆"
+> lines on both viewports. Two candidates considered and dropped before
+> filing: (1) the hazard danger-card's small centered panel on desktop
+> (`l30-caverns-hazard-arrive`) reads sparse against the full-width
+> layouts every other desktop screen uses (title/combat/dialogue/
+> village/rest all expand to use the 1280px viewport) — but this is the
+> exact panel pass 34 already read `HazardIntroOverlay.tsx`/
+> `danger-art.tsx` for and confirmed deliberate (a "sealed,
+> non-dismissible panel" over "pure silhouette work in the AXM
+> palette"), not a layout defect; re-filing it would be re-litigating a
+> closed call, not a new finding. (2) a faint unlabeled oval mark in the
+> late-game-hub world map's open fog area (desktop, `sage-fv-boss-gate`)
+> that doesn't match the map's own legend (trodden dot / open circle /
+> shut X) — too low-confidence to file without a source check (most
+> likely two of the map's own diagonal dashed grid-lines crossing at a
+> shallow angle, an anti-aliasing read rather than a distinct element);
+> noted here for whichever future pass has reason to look at the map
+> component, not filed as Pending. No new findings filed.
 
 > **[critique pass 35, 2026-09-09, commit b9b5da55] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5,
