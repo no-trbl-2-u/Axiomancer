@@ -63,7 +63,10 @@ export function StatusCard(props: StatusCardProps = {}) {
         </View>
       </View>
       <View style={styles.barsCol}>
-        <StatBar value={hp} max={hpMax} color={AXM.blood} label="VITAE" height={8} />
+        {/* FE-019: a quarter or less of my VITAE turns the readout and the
+          * track's edge blood, so a nearly-empty bar reads as danger rather
+          * than as a bar that failed to fill. */}
+        <StatBar value={hp} max={hpMax} color={AXM.blood} label="VITAE" height={8} alarmAt={0.25} />
         <View style={styles.moraleRow}>
           <View style={styles.moraleHeader}>
             <View style={styles.moraleLabelRow}>
