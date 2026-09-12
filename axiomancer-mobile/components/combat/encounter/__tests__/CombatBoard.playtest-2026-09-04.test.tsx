@@ -95,7 +95,9 @@ describe('CombatBoard rail — player VITAE is fully visible at 390x844', () => 
         const vm = renderBoard();
         const hp = screen.getByTestId('combat-rail-vitae');
         expect(hp.props.numberOfLines).toBe(1);
-        expect(hp.props.accessibilityLabel).toBe(`VITAE ${vm.player.hp}`);
+        // FE-016 — the readout now prints the maximum too, so the accessible
+        // name names both. The canon word and the one-line rule are unchanged.
+        expect(hp.props.accessibilityLabel).toBe(`VITAE ${vm.player.hp} of ${vm.player.maxHp}`);
         const style = StyleSheet.flatten(hp.props.style) as Record<string, unknown>;
         // A flex-shrinking Text is what wrapped "♥ 129" onto two lines.
         expect(style.flexShrink).toBe(0);
