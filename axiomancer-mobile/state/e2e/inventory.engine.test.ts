@@ -752,7 +752,9 @@ describe('selectInventoryViewModel: equipmentDock', () => {
         const vm: InventoryViewModel = selectInventoryViewModel(store.getState());
 
         expect(vm.equipmentDock.headerLabel).toBe('✠ WORN UPON THE BODY');
-        expect(vm.equipmentDock.hintLabel).toBe('WORN VS. UNWORN AT A GLANCE');
+        // FE-027: the hint used to promise a worn-vs-unworn comparison that is
+        // not on screen until a slot is tapped. It now names the tap.
+        expect(vm.equipmentDock.hintLabel).toBe('TAP A SLOT TO SEE WHAT ELSE FITS');
         expect(vm.equipmentDock.bareLabel).toBe('— bare —');
         expect(vm.equipmentDock.slots).toHaveLength(5);
         vm.equipmentDock.slots.forEach((slot, i) => {
