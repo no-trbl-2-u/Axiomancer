@@ -255,9 +255,15 @@ export default function MemoirScreen() {
                                         {vm.philosophicalAlignment.rationale}
                                     </Text>
                                 )}
+                                {/* S8-memoir-C02: the untested chip used to
+                                    print `vm.emptyPhilosophical` ('untested.')
+                                    directly under the UNTESTED label — the same
+                                    word twice. The presenter's `hint` says what
+                                    the untested state means and what resolves
+                                    it instead. */}
                                 {vm.philosophicalAlignment.rationale.length === 0 && (
                                     <Text style={styles.measureEmpty} testID="memoir-philosophical-empty">
-                                        {vm.emptyPhilosophical}
+                                        {vm.philosophicalAlignment.hint}
                                     </Text>
                                 )}
                             </View>
