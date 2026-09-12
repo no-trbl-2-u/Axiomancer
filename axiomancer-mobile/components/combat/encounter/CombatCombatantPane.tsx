@@ -57,6 +57,12 @@ export interface CombatFx { seq: number; events: CombatEvent[]; }
  *  content column leaves this much clearance before the play region. */
 export const COMBAT_HUD_HEIGHT = 148;
 
+/** Screen-left footprint of the player medallion's dock: its 10pt left offset
+ *  plus the 92pt medallion. The board reserves this much of the bottom band so
+ *  the hand fan lays out BESIDE the medallion instead of under it
+ *  (cluster S1-board-C11). Keep in step with `playerDock` / `medallion`. */
+export const PLAYER_DOCK_FOOTPRINT_W = 102;
+
 type Float = { id: number; text: string; color: string; dx: number };
 
 // ── Enemy HP bar + crest ─────────────────────────────────────────────────────

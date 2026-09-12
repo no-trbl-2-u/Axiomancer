@@ -53,7 +53,7 @@ import type { CombatReadResult } from '@mechanics';
 import { isUpgradeableDiceEnabled } from '@mechanics';
 import { TrashGlyph, LedgerMark } from '@/components/hazard/glyphs';
 import { glyphShapeFor } from '@/components/combat/glyphShapes';
-import { CombatCombatantPane, EffectChips, SealChips, PlayerMedallion, COMBAT_HUD_HEIGHT, type CombatFx } from './CombatCombatantPane';
+import { CombatCombatantPane, EffectChips, SealChips, PlayerMedallion, COMBAT_HUD_HEIGHT, PLAYER_DOCK_FOOTPRINT_W, type CombatFx } from './CombatCombatantPane';
 import { CombatDie } from './CombatDie';
 import { RollingDie } from './RollingDie';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
@@ -232,6 +232,39 @@ const SIG_TRAY_CLEARANCE = 10;
 // One line of the bottom rail (VITAE · ledger · piles) before the safe-area
 // inset. Exported for the rail test — the readout must sit inside this.
 export const RAIL_LINE_H = 26;
+
+// ── The hand fan's chrome-free band (cluster S1-board-C11) ───────────────────
+// The two bottom corners are chrome, not board: the player medallion sits at
+// left 10 and is PLAYER_DOCK_FOOTPRINT_W wide, the END stack at right 10 with
+// an 80pt disc. The fan used to run edge-to-edge (12pt insets) UNDER both at a
+// lower zIndex, so the first and last cards — the sliver you drag from and the
+// one fully-readable face — were parked beneath the medallions. The fan now
+// lays out BESIDE them.
+export const END_CORNER_FOOTPRINT_W = 90;
+export const HAND_FAN_LEFT = PLAYER_DOCK_FOOTPRINT_W;
+export const HAND_FAN_RIGHT = END_CORNER_FOOTPRINT_W;
+// Never tighter than a readable sliver, however large the hand.
+export const HAND_FAN_MIN_STEP = 28;
+
+/**
+ * Lay the hand fan out inside the chrome-free band between the two corner
+ * medallions (cluster S1-board-C11).
+ *
+ * Inputs: `screenW` (viewport width) and `n` (number of fanned cards).
+ * Outputs: `band` — the width the fan lays out in; `step` — the visible width
+ * of each non-last card; `overlap` — the negative margin that produces it.
+ *
+ * Pure: the board calls it once per render. A hand too large for the band
+ * still overflows it (the sliver floor wins), but symmetrically and by a few
+ * points, instead of burying whole cards under the chrome.
+ */
+export function handFanLayout(screenW: number, n: number): { band: number; step: number; overlap: number } {
+    const band = Math.max(HAND_CARD_W, screenW - HAND_FAN_LEFT - HAND_FAN_RIGHT);
+    const step = n > 1
+        ? Math.min(HAND_CARD_W - 16, Math.max(HAND_FAN_MIN_STEP, (band - HAND_CARD_W) / (n - 1)))
+        : HAND_CARD_W;
+    return { band, step, overlap: HAND_CARD_W - step };
+}
 
 function DiceRow({
     vm, dieGesture, draggingDieId, assignedDieIds, onFateTap,
@@ -636,7 +669,12 @@ const CHAIN_GLYPHS: Record<string, string> = { heart: '♥', body: '⚡', mind: 
 
 /** The spec-33 momentum chain: a single color + length (heart→body→mind),
  *  NOT the three-node wheel. A BREAK collapses it to null and reads LOUD
- *  (owner-locked strict rule — the chip teaches it); a SURGE flashes gold. */
+ *  (owner-locked strict rule — the chip teaches it); a SURGE flashes gold.
+ *
+ *  Inputs: the momentum-V2 VM and the "how momentum works" opener. Output: the
+ *  chip row. Cluster S1-board-C19 — this chip OPENS something and the stance
+ *  chip directly below it does not, so it now carries a visible ⓘ mark: the
+ *  tappable one of the pair is the one that says it is tappable. */
 function MomentumChainChip({ vm, onPress }: { vm: CombatMomentumV2VM; onPress?: () => void }) {
     const AXM = usePalette();
     const styles = useStyles();
@@ -690,12 +728,24 @@ function MomentumChainChip({ vm, onPress }: { vm: CombatMomentumV2VM; onPress?: 
                     ) : null}
                 </>
             )}
+            {/* S1-board-C19 — the tap mark. Always drawn, in every chain state,
+                so the chip never reads as the inert stance chip below it. */}
+            <Text style={styles.chipInfoMark} allowFontScaling={false} testID="combat-momentum-info-mark">ⓘ</Text>
         </Pressable>
     );
 }
 
 // ── Spec 33 §2 (Phase D6b, flag-on) — player current-stance chip ─────────────
 
+/** The player's current stance, as an INERT readout.
+ *
+ *  Input: the stance-chip VM. Output: the chip row. Cluster S1-board-C19 — it
+ *  sat directly under the momentum chip, in the same pill, reading a bare
+ *  'NO STANCE'; the two looked like one control each, but only the momentum
+ *  one opened anything. The momentum chip now carries a ⓘ tap mark and this
+ *  one names itself — STANCE ♥ HEART — so it reads as a labelled value, never
+ *  a button that refuses to answer. ('NO STANCE' already carries the word, so
+ *  the caption is dropped there rather than stuttering it twice.) */
 function StanceChip({ vm }: { vm: CombatStanceChipVM }) {
     const AXM = usePalette();
     const styles = useStyles();
@@ -708,6 +758,9 @@ function StanceChip({ vm }: { vm: CombatStanceChipVM }) {
             accessibilityRole="text"
             accessibilityLabel={vm.a11y}
         >
+            {active ? (
+                <Text style={styles.stanceChipCaption} allowFontScaling={false} testID="combat-player-stance-caption">STANCE</Text>
+            ) : null}
             <Text style={[styles.stanceChipGlyph, { color: active ? vm.colorHex : AXM.ash }]} allowFontScaling={false}>{vm.glyph}</Text>
             <Text style={[styles.stanceChipLabel, { color: active ? vm.colorHex : AXM.bone }]} allowFontScaling={false}>{vm.label}</Text>
         </View>
@@ -790,7 +843,7 @@ function EndPhaseMedallion({ onPress, consequence = null, disabled = false }: {
                 <Text style={[styles.endLabel, { color: AXM.sulfur }]} allowFontScaling={false}>END</Text>
             </Pressable>
             {consequence ? (
-                <View style={styles.endConsequenceWrap} pointerEvents="none">
+                <View style={styles.endConsequenceWrap} pointerEvents="none" testID="combat-end-consequence-wrap">
                     <Text style={styles.endConsequence} testID="combat-end-consequence" numberOfLines={2}>
                         {consequence}
                     </Text>
@@ -1146,16 +1199,11 @@ export const CombatBoard = React.memo(function CombatBoard({
     const fan = vm.hand.filter((c) => !stagedSet.has(c.uid));
     const n = fan.length;
     const mid = (n - 1) / 2;
-    // Width is the binding constraint. The fan spans edge-to-edge (12pt insets) —
-    // the corner medallions float ABOVE the fan ends at higher zIndex, reference
-    // style. `step` = the visible width of each non-last card: clamped so small
-    // hands keep a roomy peek (≤ HAND_CARD_W-16) and large hands tighten to fit,
-    // never below a readable 28pt sliver.
-    const band = screenW - 24;
-    const step = n > 1
-        ? Math.min(HAND_CARD_W - 16, Math.max(28, (band - HAND_CARD_W) / (n - 1)))
-        : HAND_CARD_W;
-    const overlap = HAND_CARD_W - step;
+    // Width is the binding constraint. S1-board-C11: the fan lays out in the
+    // chrome-free band BETWEEN the corner medallions (see `handFanLayout`) —
+    // it used to run edge-to-edge underneath them, which parked the player
+    // portrait on the first card and the END disc on the last.
+    const { overlap } = handFanLayout(screenW, n);
     const draggingDieId = drag.active?.type === 'die' ? drag.active.dieId : null;
     // The full VM of the die in flight — the COLOR LAW dimming keys off its color.
     const draggingDie = drag.active?.type === 'die' ? drag.active.die : null;
@@ -1597,17 +1645,36 @@ function artMirrored(cardId: string): boolean {
     return (h & 1) === 1;
 }
 
-// Compact the FREE value to what sits INSIDE the glyph — its intensity (the
-// effect owns the duration): "i1 d1" → "+1", "3 rounds" → "3r", "2" → "+2".
-function compactFree(v: string | null): string {
+/**
+ * Compact the FREE value to what sits INSIDE the glyph — its intensity (the
+ * effect owns the duration): "i1 d1" → "+1", "3 rounds" → "3r", "2" → "+2",
+ * "×4 · 3t" → "×4".
+ *
+ * Input: the face's raw FREE value (or its hero line), or null.
+ * Output: a WHOLE value, never a fragment — '' when nothing whole fits.
+ *
+ * Resolves cluster S1-board-C32: the old fallback was `v.slice(0, 3)`, which
+ * cut any unmatched string mid-word — the '×4 · 3t' the presenter prints for
+ * an applyEffect rider reached the card face as the three characters "×4 "
+ * (trailing space included), which reads as a chopped sentence, not a value.
+ * The ×N intensity now has its own branch, and the last resort keeps a whole
+ * short token or prints nothing (the glyph still carries the read; the
+ * inspect overlay carries the full truth).
+ */
+export function compactFree(v: string | null): string {
     if (!v) return '';
-    const im = v.match(/i(\d+)/i);
+    const s = v.trim();
+    const im = s.match(/i(\d+)/i);
     if (im) return `+${im[1]}`;
-    const rm = v.match(/^(\d+)\s*rounds?$/i);
+    const rm = s.match(/^(\d+)\s*rounds?$/i);
     if (rm) return `${rm[1]}r`;
-    const nm = v.match(/^\+?(\d+)/);
+    // The presenter's applyEffect rail: '×4 · 3t', '×1 (enemy)', '×4 · 3t +'.
+    const xm = s.match(/×\s*(\d+)/);
+    if (xm) return `×${xm[1]}`;
+    const nm = s.match(/^\+?(\d+)/);
     if (nm) return `+${nm[1]}`;
-    return v.length <= 3 ? v : v.slice(0, 3);
+    const head = s.split(/\s+/)[0];
+    return head.length <= 3 ? head : '';
 }
 
 // Darken a #rrggbb by a factor (0..1) — the stance cube's shaded faces.
@@ -1817,7 +1884,11 @@ function HandCard({ card }: { card: CombatCardVM }) {
 }
 
 const useStyles = makeStyles((AXM) => ({
-    root: { flex: 1, backgroundColor: AXM.bg },
+    // S1-board-C12 — the fight fits the phone. The board is the viewport: any
+    // floating chrome that bleeds past its edge (the END disc's backing glow,
+    // an over-wide consequence line) is clipped here instead of widening the
+    // page into a sideways scroll with unpainted ground beyond the board.
+    root: { flex: 1, backgroundColor: AXM.bg, overflow: 'hidden' },
     content: { flex: 1 },
 
     // ── play region (invisible drop target; dashed only while dragging) ──
@@ -1934,8 +2005,19 @@ const useStyles = makeStyles((AXM) => ({
     },
     stanceChipGlyph: { fontFamily: FONTS.sans, fontSize: 13, textShadowRadius: 5, textShadowOffset: { width: 0, height: 0 } },
     stanceChipLabel: { fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 1 },
+    // S1-board-C19 — the readout's own name, in the convictionCaption idiom:
+    // chrome-quiet, still legible.
+    stanceChipCaption: { fontFamily: FONTS.mono, fontSize: 7, letterSpacing: 0.8, color: AXM.bone },
+    // S1-board-C19 — the tap mark on the momentum chip (the tappable half of
+    // the pair). Quiet chrome; the chip's own colours stay the loud part.
+    chipInfoMark: { fontFamily: FONTS.sans, fontSize: 10, color: AXM.bone, marginLeft: 5 },
     fanGlow: { position: 'absolute', bottom: 0, left: 0 },
-    fan: { ...StyleSheet.absoluteFillObject, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center', paddingHorizontal: 12, paddingBottom: 20 },
+    // S1-board-C11 — the side paddings are the corner-medallion footprints,
+    // not decoration: the fan is centred in what is left between them.
+    fan: {
+        ...StyleSheet.absoluteFillObject, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center',
+        paddingLeft: HAND_FAN_LEFT, paddingRight: HAND_FAN_RIGHT, paddingBottom: 20,
+    },
     // The hand card whose drag ghost is in flight — dimmed in place.
     handCardLifted: { opacity: 0.3 },
 
@@ -1968,7 +2050,9 @@ const useStyles = makeStyles((AXM) => ({
 
     // ── player status strip (in-flow, above the dice; RIGHT-aligned so the
     //    left signature-rune column never covers it) ──
-    statusStrip: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 8, paddingHorizontal: 12, paddingBottom: 6 },
+    // S1-board-C12 — wraps: a long ledger row (GUARD · WRATH · CHAIN · chips)
+    // otherwise ran past the viewport, and the board now clips at its edge.
+    statusStrip: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'flex-end', gap: 8, paddingHorizontal: 12, paddingBottom: 6 },
     guardChip: {
         fontFamily: FONTS.mono, fontSize: 11, color: '#6fb3e0', letterSpacing: 0.5,
         backgroundColor: 'rgba(0,0,0,0.7)', borderWidth: 1, borderColor: '#6fb3e055', borderRadius: 4,
@@ -2006,7 +2090,11 @@ const useStyles = makeStyles((AXM) => ({
     endLabel: { fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 2, marginTop: -1 },
     // The honest one-line END consequence (R2 telegraph, 2026-07-12) —
     // floats ABOVE the medallion (below would collide with the bottom rail).
-    endConsequenceWrap: { position: 'absolute', top: -34, left: -30, width: 140, alignItems: 'center' },
+    // S1-board-C12 — anchored to the medallion's RIGHT edge, so the 140pt line
+    // runs inward across the board. Anchored left (-30) it ran 20pt past the
+    // screen's right edge, which is horizontal overflow the viewport can scroll
+    // to; clipping it at `root` would have eaten the words instead.
+    endConsequenceWrap: { position: 'absolute', top: -34, right: 0, width: 140, alignItems: 'center' },
     endConsequence: {
         fontFamily: FONTS.mono, fontSize: 8.5,
         letterSpacing: 0.4, color: AXM.sulfur, textAlign: 'center',
