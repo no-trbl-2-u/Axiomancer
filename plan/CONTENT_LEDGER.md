@@ -12,7 +12,7 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-11 | e2b08057 | 7 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-11 | da51e629 | 6 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-12 | PENDING | 7 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-11 | e57f9f63 | 6 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-11 | ef883fc9 | 6 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-11 | c4f97f69 | 6 |
@@ -20,6 +20,68 @@
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-equipment pass 7, 2026-09-12, commit PENDING]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
+> content-lifecycle gate (16 commits since pass 6's `da51e629`, past the
+> 15-commit threshold, and this tick's only stale-qualifying category —
+> cards/enemies/keywords/npcs all passed more recently or haven't crossed
+> their own threshold yet) — a genuine fresh re-audit against current
+> source, not a rubber stamp of pass 6's findings. `git log
+> da51e629..HEAD -- axiomancer-mechanics/src/Items
+> axiomancer-mechanics/src/World/MapEvents/content.ts
+> axiomancer-mechanics/src/Combat/combat.encounter.types.ts
+> axiomancer-mechanics/src/Effects` is empty (the 16 intervening commits were
+> the enemies/keywords/npcs pass-6 ticks, a digest, two `/audit`-fix ticks
+> against mobile dialogue/reply-card rendering and the village-stall pricing
+> dim treatment, an `/expand` no-op, and the cards pass-7 zero-diff re-audit
+> — nothing touched the item/shop/signature surface), so every Step-1 signal
+> was re-derived directly against the current tree rather than assumed
+> stale-clean, same discipline as the sibling categories' own re-audits: (1)
+> **dominated relics** — re-read all 8 off `relic.library.ts`
+> (byte-identical since pass 6): 2 weapons tie at body+2, 2 armor tie at
+> maxHp+5, 4 accessories split mind+2/mind+2/heart+2/heart+2 — every
+> same-slot pair still differs only by `grantsSignature` (re-confirmed
+> non-`undefined` and distinct on all 8), no strictly-dominated pair; (2)
+> **shop/reward-pool coverage** — re-enumerated all 7 `shop.wares` blocks in
+> `World/MapEvents/content.ts` by fresh grep (unchanged from pass 6, no 8th
+> village landed since): 12 distinct consumables shop-stocked
+> (minor/greater/supreme-healing-potion, healing-potion, antidote,
+> clarity-serum, philosopher-tea, void-essence, body-elixir, focus-vial,
+> resonance-crystal, phoenix-tear), the other 10 confirmed still reachable
+> (not acquirable-nowhere) via `rollCacheReward`'s uniform draw over the
+> full, unfiltered 22-entry `consumableLibrary` (re-read `cache-reward.ts`,
+> byte-identical since pass 1) — no orphaned item; (3) **`grantsSignature`
+> drift** — all 8 relic values re-checked against the live 8-member
+> `SignatureSkillId` union in `combat.encounter.types.ts`: identical, no
+> rename/removal; (4) **dead consumable `effectId`s** — re-extracted all 11
+> non-heal-only ids from `consumable.library.ts` (unchanged, still 22
+> entries) and confirmed each resolves by id against
+> `buffs.library.json`/`debuffs.library.json` via a fresh grep, all 11
+> found, 0 dead references; (5) **`AccessoryKind` gap** — head/hands/feet
+> remain at zero live relics, same standing `[loop-call]`
+> (`plan/AUDIT.md`, 2026-09-04, answers the open `[HIGH]` in
+> `plan/CRITIQUE.md`) re-read at its current text: still open, still
+> accurate, no new evidence this pass to decide it solo between (a)
+> designing a 9th+ signature skill first or (b) breaking the relic's 1:1
+> identity rule for stat-only accessories — left filed, not re-litigated.
+> Also spot-checked the one item-adjacent commit in range,
+> `2836d821` ("village stall rows dim only price when unaffordable") — a
+> pure `axiomancer-mobile/app/village/index.tsx` styling fix (CRITIQUE [LOW]
+> closure) with no `wares`/pricing/data change, confirmed by reading its
+> full diff, not an equipment-content finding. KB research: not run — every
+> consideration this pass was audit-confirmed-clean (no CREATE/UPDATE),
+> exempt from the gate per skill §3 Step 2 (REMOVE/no-op carve-out). Verify:
+> ran both gates in full this pass (not skipped, despite zero source diff)
+> — `npm run verify --workspace axiomancer-mechanics` (212/212 files, 3422
+> tests + build, matching pass 6's count exactly), `npm run verify
+> --workspace axiomancer-mobile` (261/261 suites, 2657 tests, lint 0 errors/
+> 15 pre-existing warnings, typecheck clean, assets:check 7/7, art:test
+> 24/24); `npm run deploy:check` confirmed green pre-tick (HEAD `ed87c83c`,
+> no gated workflow triggered for the docs/plan-only tip commit) and will be
+> re-confirmed after the ledger commit lands.
+```
 
 ```
 > **[adjust-cards pass 7, 2026-09-11, commit e2b08057]** Zero-CREATE,

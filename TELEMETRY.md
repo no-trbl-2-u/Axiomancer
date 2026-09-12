@@ -7,9 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-04T11:11:09Z | skill | digest | unknown | main | - |
-| 2026-08-04T14:58:13Z | slash-prompt | /march | unknown | user/ci | /march |
-| 2026-08-04T14:58:16Z | skill | march | unknown | main | - |
 | 2026-08-04T20:07:16Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-04T20:08:12Z | skill | iterate | claude-sonnet-5 | main | - |
 | 2026-08-04T20:09:02Z | subagent | general-purpose | claude-sonnet-5 | main | Check DoT card face text against critique claim |
@@ -407,3 +404,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-11T20:32:49Z | subagent | general-purpose | claude-sonnet-5 | main | Execute one /iterate tick end-to-end |
 | 2026-09-11T22:28:30Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-11T22:33:00Z | subagent | card-expert | claude-sonnet-5 | main | Run adjust-cards pass 7 end-to-end |
+| 2026-09-12T02:37:53Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-12T02:37:54Z | skill | march | unknown | main | - |
+| 2026-09-12T02:41:01Z | skill | adjust-equipment | claude-sonnet-5 | main | - |
