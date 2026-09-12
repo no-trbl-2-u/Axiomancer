@@ -94,7 +94,19 @@ screen element that produced it.
 23. **`/rest` — "I cannot afford it."** `THE CUT — 5 SHILLINGS` greyed with a
     purse of 0, and the small print underneath blaming the deck floor instead.
     *(Filed, not fixed — §4.)*
-24. **`/hazard-deck` — "this is a different game."** Pastel cards on light
+24. **`/rest`, `/cache` — "I can back out of this."** Neither screen has a
+    back control and neither said so: the authored node line replaced the
+    warning that says the node is already spent. **FE-026, fixed.**
+25. **`/rest` — "how much does resting give me?"** `SLEEP WHERE YOU STAND.
+    FREE.` beside a bar reading 20/175 — three statements of the price, none
+    of the payoff. **FE-024, fixed.**
+26. **`/blacksmith` — "the smith charges Conviction."** Every forge price and
+    the purse printed with `◆`, the glyph the combat board spends on
+    CONVICTION; the prices are shillings. **FE-023, fixed.**
+27. **`/combat-encounter` reveal — "what am I taking this fight with?"** The
+    commit gate priced the fight entirely in the foe's numbers. **FE-025,
+    fixed.**
+28. **`/hazard-deck` — "this is a different game."** Pastel cards on light
     chrome inside an otherwise black gothic app. *(Filed, not fixed — §4.)*
 
 ## 3. Fixed
@@ -125,9 +137,14 @@ preview export at both viewports.
 | FE-020 | major | misunderstanding | `/combat-encounter` | the enemy's outgoing damage wore a heart glyph | `62b3198` |
 | FE-021 | major | misunderstanding | `/combat-encounter` | the board's whole economy (`◆`) was never named | `969c523` |
 | FE-022 | major | misunderstanding | `/combat-encounter` | alt-win meters never said what filling them does | `7782e90` |
+| FE-023 | major | misunderstanding | `/blacksmith` | the forge priced shillings with the combat board's conviction glyph | `ff95b12` |
+| FE-024 | major | issue | `/rest` | REST never said how much VITAE it restores | `856ffaa` |
+| FE-025 | major | issue | `/combat-encounter` | the pre-fight commit gate showed the foe's VITAE and none of mine | `4bd389a` |
+| FE-026 | major | issue | `/rest`, `/cache` | the one-way warning was dropped on every authored node | `de762de` |
+| FE-027 | minor | misunderstanding | `/inventory` | the dock hint promised a comparison that is behind a tap | `1485dca` |
 
-**Totals (fixed):** 21 rows — 12 major, 8 minor, 1 polish; 5 misunderstandings,
-16 issues. Before/after captures: `.critique-artifacts-fresh-eyes/{before,after}/<viewport>/NN-<screen>.png`.
+**Totals (fixed):** 26 rows — 16 major, 9 minor, 1 polish; 7 misunderstandings,
+19 issues. Before/after captures: `.critique-artifacts-fresh-eyes/{before,after}/<viewport>/NN-<screen>.png`.
 
 ## 4. Deferred and refuted
 
@@ -141,6 +158,7 @@ nothing verified nothing
 | "hand-card titles are clipped" (my own walk note) | source | The fan deliberately shows "name-start + FREE effect" per the card-face doctrine in `CombatBoard.tsx` (owner directive 2026-08-10). Changing it would re-litigate an owner decision, not fix a defect. Recorded as a deferred design question below. |
 | "`NUMBER ]]` on the hazard deck" (raised at confidence 90) | evidence | The DOM says `NUMBER` / `11`, and 11 + 11 = the 22 cards the same screen counts. A display-font numeral read, not a broken string. |
 | "the memoir shows no errand after accepting one" (my own walk note) | evidence | Reproduced only when navigating by URL, which reloads the fixture and discards the accepted quest. In-app tab navigation shows the errand correctly. Driver artifact. |
+| "the smith takes payment before naming a price" (raised at confidence 90) | source | `SET THEM ON THE ANVIL` is a free doorway — it opens the forge, where the purse and every price are shown before anything is bought. The weaker true statement (the intro says "Costs, of course." and shows no purse) is an enhancement, not a defect. The real defect on that screen was the currency glyph — refiled and fixed as FE-023. |
 
 ### Deferred `[needs-user-call]`
 
@@ -209,6 +227,10 @@ Per-finding pairs, both viewports:
 | FE-011 | `before/<vp>/13-dialogue.png` | `after/<vp>/13-dialogue.png` |
 | FE-012, FE-014, FE-016, FE-020, FE-021, FE-022 | `before/<vp>/12-combat-board.png` | `after/<vp>/12-combat-board.png` |
 | FE-019 | `before/<vp>/17-rest-broke.png` | `after/<vp>/17-rest-broke.png` |
+| FE-023 | `before/<vp>/19-blacksmith.png` | `after/<vp>/19-blacksmith.png` |
+| FE-024, FE-026 | `before/<vp>/16-rest.png`, `before/<vp>/18-cache.png` | `after/<vp>/16-rest.png`, `after/<vp>/18-cache.png` |
+| FE-025 | `before/<vp>/11-combat-preview.png` | `after/<vp>/11-combat-preview.png` |
+| FE-027 | `before/<vp>/07-inventory-fresh.png` | `after/<vp>/07-inventory-fresh.png` |
 
 Root: `axiomancer-mobile/.critique-artifacts-fresh-eyes/` (gitignored).
 `before/` was regenerated from the walked commit `7d7565c` after the original
@@ -262,7 +284,7 @@ Run in the foreground at the final commit:
 
 | check | result |
 |---|---|
-| `npm run verify` (all three packages) | green — mechanics 212 test files, mobile 265 suites / 2706 tests, card-editor build |
+| `npm run verify` (all three packages) | green — mechanics 212 test files, mobile 268 suites / 2718 tests, card-editor build |
 | `npm run e2e:fixture` | green — all three cold-boot cases |
 | `npm run lint:content` | green — 14 content surfaces, 206 shipped ids |
 | `CRITIQUE_VIEWPORT=both npm run critique:drive` | green — 22 captures, **0 page errors, 0 console errors** |
