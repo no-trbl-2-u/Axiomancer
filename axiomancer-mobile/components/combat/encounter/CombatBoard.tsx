@@ -745,7 +745,11 @@ function MomentumChainChip({ vm, onPress }: { vm: CombatMomentumV2VM; onPress?: 
  *  one opened anything. The momentum chip now carries a ⓘ tap mark and this
  *  one names itself — STANCE ♥ HEART — so it reads as a labelled value, never
  *  a button that refuses to answer. ('NO STANCE' already carries the word, so
- *  the caption is dropped there rather than stuttering it twice.) */
+ *  the caption is dropped there rather than stuttering it twice.)
+ *
+ *  Cluster S1-board-C34 — the empty read stopped at the state word and left
+ *  the way out unnamed, on a chip that cannot be tapped for more. It now
+ *  prints the presenter's `hint` beside it: the action that fills the chip. */
 function StanceChip({ vm }: { vm: CombatStanceChipVM }) {
     const AXM = usePalette();
     const styles = useStyles();
@@ -763,6 +767,12 @@ function StanceChip({ vm }: { vm: CombatStanceChipVM }) {
             ) : null}
             <Text style={[styles.stanceChipGlyph, { color: active ? vm.colorHex : AXM.ash }]} allowFontScaling={false}>{vm.glyph}</Text>
             <Text style={[styles.stanceChipLabel, { color: active ? vm.colorHex : AXM.bone }]} allowFontScaling={false}>{vm.label}</Text>
+            {/* S1-board-C34 — the empty state names the action that fills it. */}
+            {vm.hint ? (
+                <Text style={styles.stanceChipHint} allowFontScaling={false} numberOfLines={1} testID="combat-player-stance-hint">
+                    · {vm.hint}
+                </Text>
+            ) : null}
         </View>
     );
 }
@@ -2008,6 +2018,9 @@ const useStyles = makeStyles((AXM) => ({
     // S1-board-C19 — the readout's own name, in the convictionCaption idiom:
     // chrome-quiet, still legible.
     stanceChipCaption: { fontFamily: FONTS.mono, fontSize: 7, letterSpacing: 0.8, color: AXM.bone },
+    // S1-board-C34 — the empty state's instruction, quieter than the value it
+    // follows so 'NO STANCE' stays the thing the eye lands on.
+    stanceChipHint: { fontFamily: FONTS.mono, fontSize: 9, letterSpacing: 0.6, color: AXM.bone },
     // S1-board-C19 — the tap mark on the momentum chip (the tappable half of
     // the pair). Quiet chrome; the chip's own colours stay the loud part.
     chipInfoMark: { fontFamily: FONTS.sans, fontSize: 10, color: AXM.bone, marginLeft: 5 },

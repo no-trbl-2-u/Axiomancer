@@ -713,6 +713,10 @@ export interface CombatStanceChipVM {
     label: string;   // 'HEART' / 'NO STANCE'
     glyph: string;   // the stance glyph / '—'
     colorHex: string;
+    /** Cluster S1-board-C34 — the empty state's INSTRUCTION: the action that
+     *  fills the chip ('PLAY A PAID CARD'). Null once a stance is held, where
+     *  the value is the whole answer. */
+    hint: string | null;
     a11y: string;
 }
 /** Spec 33 §6 (Phase D6b) — one die's gear slot in the rail + inspection VM. */
@@ -2886,18 +2890,30 @@ function momentumV2VM(state: CombatEncounterState): CombatMomentumV2VM | null {
 
 // ── Spec 33 §2 — player current-stance chip (flag-on) ────────────────────────
 
+/**
+ * Reshapes the player's current stance into its board chip.
+ *
+ * Purpose: the chip is the only surface that names the stance the player
+ * holds. Input: the encounter state (`state.playerStance`). Output: the chip
+ * VM, or null when the upgradeable-dice flag is off and the chip never mounts.
+ *
+ * Cluster S1-board-C34 — the empty read was a bare state word, 'NO STANCE',
+ * on a chip that answers nothing when tapped: it named a hole and not the
+ * action that fills it. The empty state now carries that action as `hint`.
+ */
 function playerStanceVM(state: CombatEncounterState): CombatStanceChipVM | null {
     if (!isUpgradeableDiceEnabled()) return null;
     const stance = state.playerStance ?? null;
     if (!stance) {
         return {
             stance: null, label: 'NO STANCE', glyph: '—', colorHex: '#6b6257',
+            hint: 'PLAY A PAID CARD',
             a11y: 'No stance yet — play a paid card to take its stance.',
         };
     }
     return {
         stance, label: STANCE_LABELS[stance], glyph: DIE_GLYPHS[stance] ?? '?',
-        colorHex: STANCE_COLORS[stance],
+        colorHex: STANCE_COLORS[stance], hint: null,
         a11y: `Current stance: ${STANCE_LABELS[stance]} — from the last paid card.`,
     };
 }

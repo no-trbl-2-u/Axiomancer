@@ -53,6 +53,36 @@ const ARENA_BG = require('@/assets/images/combat/arena-ruined-city.jpg');
  *  resolution so the effect fires exactly once per APPLY / END PHASE. */
 export interface CombatFx { seq: number; events: CombatEvent[]; }
 
+/** One stop of the top-HUD scrim's vertical gradient. */
+export interface CombatScrimStop { offset: number; color: string; opacity: number; }
+
+/**
+ * The top-HUD scrim's gradient stop table (cluster S1-board-C29).
+ *
+ * Purpose: the scrim used to fade to nothing by 85% of the scene band and then
+ * rise back to 0.4 ink — a dark tail that the band's own hard bottom edge
+ * sliced off, drawing a horizontal seam across the arena. The tail now runs
+ * all the way to the board's OWN ground colour at full opacity, so the band's
+ * last row of pixels already IS the ground behind it: the scrim fades out
+ * instead of ending in a visible edge.
+ *
+ * Inputs: `deepBg` — the HUD-legibility ink; `groundBg` — the colour the pane
+ * sits on below the scene band (the board root's `AXM.bg`).
+ * Output: the ordered stop table for the scrim's LinearGradient.
+ */
+export function combatTopScrimStops(deepBg: string, groundBg: string): readonly CombatScrimStop[] {
+    return [
+        { offset: 0, color: deepBg, opacity: 0.88 },
+        { offset: 0.22, color: deepBg, opacity: 0.42 },
+        { offset: 0.5, color: deepBg, opacity: 0.1 },
+        { offset: 0.78, color: deepBg, opacity: 0.04 },
+        // Past the figure's feet the scene dissolves INTO the board ground —
+        // the band's bottom edge and what lies under it are the same paint.
+        { offset: 0.9, color: groundBg, opacity: 0.38 },
+        { offset: 1, color: groundBg, opacity: 1 },
+    ];
+}
+
 /** Height of the floating top HUD (under the safe-area inset) — the board's
  *  content column leaves this much clearance before the play region. */
 export const COMBAT_HUD_HEIGHT = 148;
@@ -627,11 +657,11 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                 <Svg style={StyleSheet.absoluteFill} pointerEvents="none">
                     <Defs>
                         <LinearGradient id="axmCombatTopScrim" x1="0" y1="0" x2="0" y2="1">
-                            <Stop offset="0" stopColor={AXM.deepBg} stopOpacity={0.88} />
-                            <Stop offset="0.22" stopColor={AXM.deepBg} stopOpacity={0.42} />
-                            <Stop offset="0.5" stopColor={AXM.deepBg} stopOpacity={0.1} />
-                            <Stop offset="0.85" stopColor={AXM.deepBg} stopOpacity={0} />
-                            <Stop offset="1" stopColor={AXM.deepBg} stopOpacity={0.4} />
+                            {/* S1-board-C29 — the tail meets the board ground, so the
+                                scene band has no visible bottom edge. */}
+                            {combatTopScrimStops(AXM.deepBg, AXM.bg).map((st) => (
+                                <Stop key={st.offset} offset={st.offset} stopColor={st.color} stopOpacity={st.opacity} />
+                            ))}
                         </LinearGradient>
                     </Defs>
                     <Rect x="0" y="0" width="100%" height="100%" fill="url(#axmCombatTopScrim)" />
