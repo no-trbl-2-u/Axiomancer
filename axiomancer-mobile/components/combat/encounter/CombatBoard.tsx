@@ -183,6 +183,12 @@ function SignatureColumn({ conviction, signatures, onCast, onInfo, top, onMeasur
                 accessibilityLabel={`${conviction} conviction`}
             >
                 <Text style={[styles.convictionText, { color: AXM.sulfur }]} allowFontScaling={false}>◆ {conviction}</Text>
+                {/* FE-021: name it. This chip is the board's whole economy — every
+                  * rune below it is priced in ◆, and the enemy telegraph offers
+                  * '+1◆' — but the word CONVICTION appeared nowhere on the board,
+                  * only in the chip's accessibility label. A first-time player
+                  * could see the number move and never learn what it was. */}
+                <Text style={styles.convictionCaption} allowFontScaling={false}>CONVICTION</Text>
             </View>
             {signatures.map((s) => (
                 <Pressable
@@ -1868,7 +1874,9 @@ const useStyles = makeStyles((AXM) => ({
         borderWidth: 1, borderColor: AXM.sulfur, borderRadius: 6, backgroundColor: 'rgba(0,0,0,0.6)',
         paddingHorizontal: 7, paddingVertical: 3,
     },
-    convictionText: { fontFamily: FONTS.gothic, fontSize: 15, letterSpacing: 0.5 },
+    convictionText: { fontFamily: FONTS.gothic, fontSize: 15, letterSpacing: 0.5, textAlign: 'center' },
+    // FE-021 — the word, small enough to stay chrome, large enough to read.
+    convictionCaption: { fontFamily: FONTS.mono, fontSize: 6, letterSpacing: 0.6, color: AXM.bone, textAlign: 'center', marginTop: 1 },
     sigRune: {
         width: 46, height: 46, borderRadius: 23, borderWidth: 1.5, backgroundColor: 'rgba(0,0,0,0.6)',
         alignItems: 'center', justifyContent: 'center',
