@@ -14,7 +14,7 @@
 | cards | `skills/adjust-cards.md` | 2026-09-11 | e2b08057 | 7 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-12 | faba6c82 | 7 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-12 | 0a95396b | 7 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-12 | PENDING | 7 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-12 | 3c39acb9 | 7 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-11 | c4f97f69 | 6 |
 
 ## Log
@@ -22,7 +22,7 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-keywords pass 7, 2026-09-12, commit PENDING]** Zero-CREATE,
+> **[adjust-keywords pass 7, 2026-09-12, commit 3c39acb9]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
 > content-lifecycle gate (keywords' pass-6 commit `ef883fc9` was the only
 > stale-qualifying category at dispatch time, 16 commits since, past the
