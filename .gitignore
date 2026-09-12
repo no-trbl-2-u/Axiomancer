@@ -46,3 +46,4 @@ devlog/entries/*.html
 devlog/tuning-lab/index.html
 devlog/data/
 devlog/assets/catalog/
+.playwright-mcp

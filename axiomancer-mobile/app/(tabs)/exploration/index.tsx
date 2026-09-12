@@ -260,7 +260,7 @@ export default function ExplorationScreen() {
             {/* Node Graph */}
             {/* Legend/compass copy ride the `overlays` slot (viewport-fixed),
                 not `children` (the pannable canvas) — CRITIQUE pass 20. */}
-            <MapCanvas nodes={vm.nodes} edges={vm.edges} backdrop={mapBackdropFor(vm.region)} overlays={<MapOverlays legend={vm.legend} />}>
+            <MapCanvas nodes={vm.nodes} edges={vm.edges} backdrop={mapBackdropFor(vm.region)} overlays={<MapOverlays legend={vm.legend} hint={showMapHint ? vm.drawerCopy.mapHint : null} />}>
                 <NodeGrid
                     nodes={vm.nodes}
                     onNodePress={onNodePress}
@@ -289,11 +289,8 @@ export default function ExplorationScreen() {
                 />
             )}
             {nodeTip !== null && <NodeToast tip={nodeTip} />}
-            {showMapHint && (
-                <View style={styles.mapHint} pointerEvents="none">
-                    <Text style={styles.mapHintText}>Tap a glowing node to travel there</Text>
-                </View>
-            )}
+            {/* FE-005: the hint moved into <MapOverlays> so it stacks above
+              * the legend instead of landing on top of it at 375x812. */}
             {/* Phase 70 Tick B — `<AftermathBanner>` retired. Both
               * victory and parley outcomes now render inside
               * `<EncounterModalOverlay>` via `<CombatVictoryPanel>`
@@ -330,23 +327,5 @@ const useStyles = makeStyles((AXM) => ({
     },
     continentLabel: {
         color: AXM.bone,
-    },
-    mapHint: {
-        position: 'absolute',
-        bottom: 80,
-        left: 0,
-        right: 0,
-        alignItems: 'center',
-    },
-    mapHintText: {
-        fontFamily: FONTS.serifItalic,
-        fontSize: 13,
-        color: AXM.parchment,
-        backgroundColor: 'rgba(10,10,10,0.72)',
-        paddingHorizontal: 14,
-        paddingVertical: 6,
-        borderWidth: 1,
-        borderColor: AXM.ash,
-        textAlign: 'center',
     },
 }));

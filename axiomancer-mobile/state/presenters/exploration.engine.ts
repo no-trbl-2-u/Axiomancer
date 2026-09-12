@@ -119,6 +119,12 @@ export interface ExplorationViewModel {
         emptyMessage: string;
         title: string;
         leaguesLabel: string;
+        /**
+         * First-visit nudge drawn over the chart (FE-005). Lives here rather
+         * than in the screen so the map's furniture (legend, compass, hint)
+         * is authored in one place.
+         */
+        mapHint: string;
     };
     /** Optional event callout banner; `null` when no callout. */
     eventCallout: { title: string; iconKey: string } | null;
@@ -315,6 +321,7 @@ const DRAWER_COPY = {
     emptyMessage: 'the paths close as you go deeper — tap a glowing node to travel.',
     title: '✠ WHITHER, PILGRIM?',
     leaguesLabel: 'LEAGUES',
+    mapHint: 'Tap a glowing node to travel there',
 } as const;
 
 const FALLBACK_VM: ExplorationViewModel = {
