@@ -129,8 +129,19 @@ export default function RestScreen() {
 
                 {vm.phase === 'offer' && (
                     <View testID="rest-choice-offers">
-                        <Text style={styles.body} testID="rest-choice-intro">
-                            {vm.description ?? REST_CHOICE_INTRO}
+                        {/* FE-026: the authored node line used to REPLACE the
+                          * one-way warning (`vm.description ?? INTRO`), so on every
+                          * node that has flavour — which is most of them — the screen
+                          * said only scenery and never that the node is already spent
+                          * and there is no leaving without choosing. Flavour now sits
+                          * ABOVE the warning; the warning always shows. */}
+                        {vm.description ? (
+                            <Text style={styles.body} testID="rest-choice-intro">
+                                {vm.description}
+                            </Text>
+                        ) : null}
+                        <Text style={styles.oneWayNote} testID="rest-choice-intro-one-way">
+                            {REST_CHOICE_INTRO}
                         </Text>
                         {vm.offers.map((offer) => (
                             <OfferCard
@@ -229,6 +240,8 @@ const useStyles = makeStyles((AXM) => ({
         color: AXM.parchment,
         marginBottom: 8,
     },
+    // FE-026 — the irreversibility line, quieter than the scene but always there.
+    oneWayNote: { fontFamily: FONTS.serifItalic, fontSize: 12, color: AXM.bone, lineHeight: 16, marginTop: 6, marginBottom: 2 },
     offerCol: { marginBottom: 8 },
     offerButton: {
         borderWidth: 2,
