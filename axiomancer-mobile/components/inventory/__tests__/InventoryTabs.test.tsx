@@ -90,18 +90,21 @@ describe('InventoryTabs', () => {
         );
     });
 
-    it('omits the count from the accessibility label when count is zero', () => {
+    // FE-010 — an empty tab used to render a bare word with no badge and no
+    // count in its accessible name, which reads as a tab that failed to load
+    // rather than one that is empty. It now says so, in both channels.
+    it('says "empty" in the accessibility label when count is zero', () => {
         const { tree } = withAllProviders(
             <InventoryTabs tabs={mockTabs} activeTab="all" onTabPress={jest.fn()} />
         );
         const rendered = render(tree);
 
         expect(rendered.getByTestId('tab-consumable').props.accessibilityLabel).toBe(
-            'Consumable'
+            'Consumable, empty'
         );
     });
 
-    it('renders a count badge only for tabs with a positive count', () => {
+    it('renders a count badge on every tab, including the empty ones', () => {
         const { tree } = withAllProviders(
             <InventoryTabs tabs={mockTabs} activeTab="all" onTabPress={jest.fn()} />
         );
@@ -109,7 +112,21 @@ describe('InventoryTabs', () => {
 
         expect(rendered.getByText('5')).toBeTruthy();
         expect(rendered.getByText('2')).toBeTruthy();
-        expect(rendered.queryAllByText('0')).toHaveLength(0);
+        // FE-010: a zero is shown, not hidden.
+        expect(rendered.queryAllByText('0').length).toBeGreaterThan(0);
+    });
+
+    it('dims the badge on an empty tab so empty still looks different', () => {
+        const { tree } = withAllProviders(
+            <InventoryTabs tabs={mockTabs} activeTab="all" onTabPress={jest.fn()} />
+        );
+        const rendered = render(tree);
+
+        const zero = rendered.queryAllByText('0')[0];
+        const style = Array.isArray(zero.props.style)
+            ? Object.assign({}, ...zero.props.style.flat(Infinity).filter(Boolean))
+            : zero.props.style;
+        expect(style.opacity).toBeLessThan(1);
     });
 
     it('still renders the tabs when dimmed', () => {

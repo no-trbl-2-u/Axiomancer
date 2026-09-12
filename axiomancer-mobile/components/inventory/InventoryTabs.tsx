@@ -19,7 +19,7 @@ export function InventoryTabs({ tabs, activeTab, onTabPress, dimmed = false }: I
                 <TouchableOpacity
                     key={t.key}
                     accessibilityRole="button"
-                    accessibilityLabel={`${t.label}${t.count > 0 ? `, ${t.count} ${t.count === 1 ? 'item' : 'items'}` : ''}`}
+                    accessibilityLabel={`${t.label}, ${t.count === 0 ? 'empty' : `${t.count} ${t.count === 1 ? 'item' : 'items'}`}`}
                     accessibilityState={{ selected: activeTab === t.key }}
                     onPress={() => onTabPress(t.key)}
                     style={[styles.tab, activeTab === t.key && styles.tabActive]}
@@ -28,11 +28,20 @@ export function InventoryTabs({ tabs, activeTab, onTabPress, dimmed = false }: I
                     <Text style={[styles.tabText, activeTab === t.key && styles.tabTextActive]}>
                         {t.label}
                     </Text>
-                    {t.count > 0 && (
-                        <Text style={[styles.tabCount, activeTab === t.key && styles.tabCountActive]}>
-                            {t.count}
-                        </Text>
-                    )}
+                    {/* FE-010: always show the count. Hiding a zero left three of
+                      * the five tabs (PHIALS, STUFF, SEALED) with a bare word beside
+                      * two that carried numbers, which reads as tabs that failed to
+                      * load rather than tabs that are empty. A zero renders dimmed so
+                      * "empty" still looks different from "has things in it". */}
+                    <Text
+                        style={[
+                            styles.tabCount,
+                            activeTab === t.key && styles.tabCountActive,
+                            t.count === 0 && styles.tabCountEmpty,
+                        ]}
+                    >
+                        {t.count}
+                    </Text>
                 </TouchableOpacity>
             ))}
         </View>
@@ -91,5 +100,9 @@ const useStyles = makeStyles((AXM) => ({
     tabCountActive: {
         color: AXM.bone,
         backgroundColor: AXM.panelBg,
+    },
+    // FE-010 — an empty tab still shows its 0, just quietly.
+    tabCountEmpty: {
+        opacity: 0.45,
     },
 }));
