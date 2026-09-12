@@ -13,7 +13,10 @@
 //
 // Inputs (env):
 //   BASE_URL   — where the export is served (default http://127.0.0.1:8081)
-//   OUT        — artifact root (default .critique-artifacts/fresh-eyes/before)
+//   OUT        — artifact root (default .critique-artifacts-fresh-eyes/before).
+//                NOT under .critique-artifacts/: `npm run critique:drive` wipes
+//                that whole directory on start (critique-drive.mjs:318), which
+//                deleted a full before/after set mid-sweep.
 //   ONLY       — comma-separated screen names to capture (default: all)
 // Outputs: <OUT>/<viewport>/NN-<name>.png + .txt, and <OUT>/manifest.json
 
@@ -25,7 +28,7 @@ import { fileURLToPath } from 'node:url'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO = resolve(__dirname, '..')
 const BASE = process.env.BASE_URL ?? 'http://127.0.0.1:8081'
-const OUT = resolve(REPO, process.env.OUT ?? '.critique-artifacts/fresh-eyes/before')
+const OUT = resolve(REPO, process.env.OUT ?? '.critique-artifacts-fresh-eyes/before')
 const ONLY = process.env.ONLY ? new Set(process.env.ONLY.split(',')) : null
 
 const VIEWPORTS = {

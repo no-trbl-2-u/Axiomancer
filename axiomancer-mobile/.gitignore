@@ -45,6 +45,7 @@ screenshots/diff/
 # /critique unattended transport (Phase 34) — export + captured artifacts
 .critique-dist/
 .critique-artifacts/
+.critique-artifacts-fresh-eyes/
 
 # debug
 npm-debug.*
