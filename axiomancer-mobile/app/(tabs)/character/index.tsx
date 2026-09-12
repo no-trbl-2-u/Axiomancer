@@ -348,7 +348,7 @@ export default function CharacterScreen() {
           ))}
           <View style={styles.luckRow}>
             <Text style={styles.luckLabel}>LUCK · AVG</Text>
-            <Text style={styles.luckValue}>{vm.luck}</Text>
+            <Text style={styles.luckValue}>{vm.luckLabel}</Text>
           </View>
         </View>
         </View>

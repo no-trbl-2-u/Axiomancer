@@ -56,6 +56,7 @@ import {
     selectCombatLogHistory, COMBAT_LOG_TOGGLE_TEXT, COMBAT_LOG_TOGGLE_A11Y, COMBAT_LOG_CLOSE_A11Y,
     type CombatCardVM, type CombatEffectChipVM, type CombatSealVM, type CombatSignatureVM, type EnemyActionCardVM,
 } from '@/state/presenters/combat-encounter.engine';
+import { formatAveragedStat } from '@/state/presenters/stat-format';
 import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
 import { useGameState, useGameStore } from '@/state/GameStoreProvider';
 import {
@@ -1252,7 +1253,11 @@ export function CombatEncounterPanel({
                                     </View>
                                 ))}
                                 <View style={styles.pilgrimMetaRow}>
-                                    <Text style={styles.pilgrimMetaChip} allowFontScaling={false}>🍀 LUCK {d.luck ?? 0}</Text>
+                                    {/* FE-001: `derivedStats.luck` is an average, so it is
+                                      * usually a float; print it through the shared formatter
+                                      * so this chip and the SELF sheet agree and neither shows
+                                      * a 17-digit tail. */}
+                                    <Text style={styles.pilgrimMetaChip} allowFontScaling={false}>🍀 LUCK {formatAveragedStat(d.luck ?? 0)}</Text>
                                     <Text style={styles.pilgrimMetaChip} allowFontScaling={false}>XP {p.experience ?? 0} / {p.experienceToNextLevel ?? 0}</Text>
                                 </View>
 

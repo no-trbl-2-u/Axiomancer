@@ -21,6 +21,7 @@ import {
 } from '@mechanics';
 
 import { freezeViewModel } from './freeze';
+import { formatAveragedStat } from './stat-format';
 import { wornPerSlot, SLOT_CAPACITY, getSignatureSkill } from '@mechanics';
 import type { Equipment } from '@mechanics';
 
@@ -168,6 +169,13 @@ export interface CharacterViewModel {
     derived: readonly DerivedStatRow[];
     /** Average of the three base stats — the engine's "luck" surface. */
     luck: number;
+    /**
+     * `luck` formatted for display (FE-001). The raw average is a float
+     * (`(3+6+9)/3` is exact, `(5+5+8)/3` is not), and the SELF sheet prints
+     * it in a column of integer stats; `formatAveragedStat` caps it at one
+     * decimal so it reads as a stat rather than a rendering fault.
+     */
+    luckLabel: string;
     saves: readonly SaveOrTestRow[];
     effects: readonly CharacterEffectRow[];
     /**
@@ -372,6 +380,7 @@ export function selectCharacterViewModel(state: GameStore): CharacterViewModel {
         base: buildBase(player),
         derived: buildDerived(player),
         luck,
+        luckLabel: formatAveragedStat(luck),
         saves: buildSaves(player),
         effects,
         emptyEffectsMessage: 'none at hand.',
