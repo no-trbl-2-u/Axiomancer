@@ -151,10 +151,14 @@ export default function CharacterScreen() {
             <Text style={styles.characterName} numberOfLines={1}>{vm.displayName}</Text>
             <Text style={styles.identityAlignment} numberOfLines={1}>{vm.alignment.cellName}</Text>
             <View style={styles.xpRow}>
-              {/* FE-004: the label says TOWARD so it cannot be read as the
-                * current level, which the medallion to its right already shows. */}
-              <Text style={styles.xpLabel}>{vm.xpLabel}</Text>
-              <Text style={styles.xpValue}>{vm.xp} / {vm.xpMax}</Text>
+              {/* FE-004: value first, then the caption naming what it counts
+                * TOWARD. Side-by-side, the label and value each wrapped inside
+                * this ~130px column and interleaved into 'XP · 0 /' over
+                * 'LVL 2  1000'; stacked, each fits one line and the caption
+                * cannot be read as the current level (which the medallion to
+                * the right already shows). */}
+              <Text style={styles.xpValue} numberOfLines={1}>{vm.xp} / {vm.xpMax}</Text>
+              <Text style={styles.xpLabel} numberOfLines={1}>{vm.xpLabel}</Text>
             </View>
             <XpChain value={vm.xp} max={vm.xpMax} />
           </View>
@@ -510,9 +514,9 @@ const useStyles = makeStyles((AXM) => ({
   colHalf: { flex: 1 },
   ledgerHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   ledgerChevron: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.sulfur },
-  xpRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 2 },
-  xpLabel: { fontFamily: FONTS.mono, fontSize: 11, color: AXM.bone, letterSpacing: 1 },
-  xpValue: { fontFamily: FONTS.mono, fontSize: 11, color: AXM.sulfur },
+  xpRow: { flexDirection: 'column', marginBottom: 2 },
+  xpLabel: { fontFamily: FONTS.mono, fontSize: 10, color: AXM.bone, letterSpacing: 1 },
+  xpValue: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.sulfur },
   section: { paddingTop: 4, paddingHorizontal: 12, paddingBottom: 0 },
   deckLink: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginHorizontal: 12, marginTop: 6, paddingVertical: 10, paddingHorizontal: 14, borderWidth: 1, borderColor: AXM.ash, backgroundColor: AXM.panelBg },
   deckLinkText: { flex: 1 },

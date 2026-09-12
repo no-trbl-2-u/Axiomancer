@@ -152,7 +152,9 @@ export interface CharacterViewModel {
      * The row printed `XP · LVL {level + 1}` beside a framed medallion showing
      * `{level}`, so a sheet at level 1 read `XP · LVL 2` next to a large `1`
      * and the player could not tell which number was their level. The label
-     * now says the progress is TOWARD the next level.
+     * now says the progress is TO the next level. Kept short on purpose: the
+     * identity column is ~130px wide beside the portrait and the level
+     * medallion, and a longer label wraps to three lines there.
      */
     xpLabel: string;
     /**
@@ -400,7 +402,7 @@ export function selectCharacterViewModel(state: GameStore): CharacterViewModel {
         level: player.level,
         xp: player.experience,
         xpMax: player.experienceToNextLevel,
-        xpLabel: `XP · TOWARD LVL ${(player.level ?? 0) + 1}`,
+        xpLabel: `XP TO LVL ${(player.level ?? 0) + 1}`,
         pendingPoints: player.availableStatPoints ?? 0,
         levelUpReady:
             (player.experience ?? 0) >= (player.experienceToNextLevel ?? Infinity),

@@ -657,13 +657,13 @@ describe('FE-004: xp label names the NEXT level', () => {
     it('says TOWARD and points at level + 1', () => {
         const store = makeStore({ level: 1 });
         const vm = selectCharacterViewModel(store.getState() as never);
-        expect(vm.xpLabel).toBe('XP · TOWARD LVL 2');
+        expect(vm.xpLabel).toBe('XP TO LVL 2');
         expect(vm.xpLabel).not.toBe(`XP · LVL ${vm.level}`);
     });
 
     it('tracks a higher level', () => {
         const store = makeStore({ level: 15 });
         const vm = selectCharacterViewModel(store.getState() as never);
-        expect(vm.xpLabel).toBe('XP · TOWARD LVL 16');
+        expect(vm.xpLabel).toBe('XP TO LVL 16');
     });
 });
