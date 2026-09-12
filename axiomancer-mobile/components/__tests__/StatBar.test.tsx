@@ -114,3 +114,35 @@ describe('StatBar: divide-by-zero', () => {
         expect(findFillWidth(tree.toJSON())).toBe('NaN%');
     });
 });
+
+/**
+ * FE-019 — a nearly-spent bar must read as an alarm, not as an empty rail.
+ *
+ * The broke fixture's HUD showed 'VITAE 1/175' with a fill half a pixel wide
+ * and the numerals in ordinary parchment, so one hit from death looked the
+ * same as a bar that had failed to render.
+ */
+describe('FE-019: alarm state', () => {
+    it('colours the readout and the track edge at or below the threshold', () => {
+        const r = render(
+            <StatBar value={1} max={175} color="#8b1a1a" label="VITAE" alarmAt={0.25} />
+        );
+        expect(r.queryByTestId('statbar-value-alarmed')).not.toBeNull();
+        expect(r.queryByTestId('statbar-track-alarmed')).not.toBeNull();
+    });
+
+    it('stays calm above the threshold', () => {
+        const r = render(
+            <StatBar value={150} max={175} color="#8b1a1a" label="VITAE" alarmAt={0.25} />
+        );
+        expect(r.queryByTestId('statbar-value-alarmed')).toBeNull();
+        expect(r.queryByTestId('statbar-track-alarmed')).toBeNull();
+    });
+
+    it('never alarms when no threshold is given (the BURDEN bar)', () => {
+        const r = render(
+            <StatBar value={0} max={50} color="#8b4a1a" label="BURDEN · STONE" />
+        );
+        expect(r.queryByTestId('statbar-value-alarmed')).toBeNull();
+    });
+});

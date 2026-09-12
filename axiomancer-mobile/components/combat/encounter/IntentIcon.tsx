@@ -67,7 +67,14 @@ export function IntentIcon({ intent, onPress }: { intent: CombatIntentVM; onPres
             </View>
             {(intent.damage > 0 || intent.debuffs || intent.branch) && (
                 <View style={styles.pill}>
-                    {intent.damage > 0 && <Text style={[styles.pillText, { color: intent.color }]} allowFontScaling={false}>♥{intent.damage}</Text>}
+                    {/* FE-020: a minus, not a heart. This pill is the ENEMY's
+                      * telegraph and the number is damage it will deal to me, but
+                      * it printed '♥11' — and the same board uses '♥ 160' on my own
+                      * rail for my VITAE. One glyph meant my health in one corner
+                      * and the enemy's outgoing damage in the other, so the badge
+                      * read as the foe healing or having 11 health left. ♥ now means
+                      * only my VITAE; a minus means something is coming off it. */}
+                    {intent.damage > 0 && <Text style={[styles.pillText, { color: intent.color }]} allowFontScaling={false}>−{intent.damage}</Text>}
                     {intent.debuffs && <Text style={styles.debuffMark} allowFontScaling={false}>☠</Text>}
                     {/* WS9 — the fork glyph marks a committed branch phase */}
                     {intent.branch && <Text style={[styles.pillText, { color: intent.color }]} allowFontScaling={false}>⑂</Text>}
@@ -140,7 +147,21 @@ const useStyles = makeStyles((AXM) => ({
     // Spec 33 §5 — the open stance-check telegraph, terse and always visible.
     // Playtest 2026-09-04 — 8pt ash-on-dark was unreadable on a 390pt phone;
     // 10pt with a bone neutral for the "neither" line.
-    stanceCheck: { alignItems: 'flex-end', marginTop: 2, gap: 1 },
+    // FE-014 — the two telegraph lines are drawn over the enemy art, and at
+    // 375 the sprite reaches under them, so coloured 10pt mono on a busy
+    // painted background lost its edges. The sibling `pill` above already
+    // solves text-over-art with a near-opaque plate; this borrows it. Size and
+    // colour are untouched (they were tuned by the 2026-09-04 playtest) —
+    // only the ground behind them changes.
+    stanceCheck: {
+        alignItems: 'flex-end',
+        marginTop: 2,
+        gap: 1,
+        backgroundColor: 'rgba(0,0,0,0.82)',
+        borderRadius: 5,
+        paddingHorizontal: 5,
+        paddingVertical: 2,
+    },
     scPunish: { fontFamily: FONTS.mono, fontSize: 10, color: '#e2543b', letterSpacing: 0.2 },
     scYield: { fontFamily: FONTS.mono, fontSize: 10, color: '#5bbf6a', letterSpacing: 0.2 },
     scNone: { fontFamily: FONTS.mono, fontSize: 10, color: AXM.bone, letterSpacing: 0.2 },

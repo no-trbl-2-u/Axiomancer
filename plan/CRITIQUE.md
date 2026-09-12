@@ -461,6 +461,24 @@
 
 ## Pending
 
+### [MED] ui-fresh-eyes sweep 2026-09-12 — 21 rows shipped, a large candidate set still open
+- pass: dedicated UI fresh-eyes sweep (not a `/critique` pass — no 6-finding cap), plan/2026-09-12-ui-fresh-eyes.prompt.md adjusted for ultracode
+- viewport: 375x812 and 1280x800
+- auth_state: fixture-booted, static preview export (no Docker, no dev server in the container)
+- category: meta
+- observation: a full 27-route x 2-viewport walk plus an eight-lens observation
+  fleet. Twenty-one findings were verified individually and fixed in the same
+  sitting, each with a guarding test and a re-exported before/after capture —
+  among them a raw float in a stat readout, engine slugs printed to the player,
+  a character sheet whose grace and alignment were never wired to the state
+  they read, a DERIVED table with three headers over two columns, and the six
+  console errors the build has carried for several passes. Console is now clean
+  at every captured cell. The sweep's own candidate set is much larger than
+  what shipped and is NOT verified; the report keeps it separate on purpose.
+  Full write-up, gate results, refuted rows and the deferred decisions:
+  axiomancer-mobile/docs/reports/UI_FRESH_EYES_2026-09-12.md, with the raw
+  candidate table beside it in the same directory.
+
 ### [MED] combat — the arena's art registers are incoherent (painted foe, flat-vector dice, mono chrome)
 - pass: expo playthrough 2026-09-04 (owner-requested full-combat playtest, web export at 390x844)
 - viewport: 390x844

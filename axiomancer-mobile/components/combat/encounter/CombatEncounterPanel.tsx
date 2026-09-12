@@ -56,6 +56,7 @@ import {
     selectCombatLogHistory, COMBAT_LOG_TOGGLE_TEXT, COMBAT_LOG_TOGGLE_A11Y, COMBAT_LOG_CLOSE_A11Y,
     type CombatCardVM, type CombatEffectChipVM, type CombatSealVM, type CombatSignatureVM, type EnemyActionCardVM,
 } from '@/state/presenters/combat-encounter.engine';
+import { formatAveragedStat } from '@/state/presenters/stat-format';
 import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
 import { useGameState, useGameStore } from '@/state/GameStoreProvider';
 import {
@@ -770,6 +771,14 @@ export function CombatEncounterPanel({
                         </View>
                         <Text style={styles.revealName}>{vm.enemy.name}</Text>
                         <Text style={styles.revealHp}>♥ {vm.enemy.hp} / {vm.enemy.maxHp}</Text>
+                        {/* FE-025: this screen is the commit gate for a fight, and it
+                          * priced the fight entirely in the foe's numbers — its VITAE
+                          * and five phases of damage aimed at me — while my own VITAE
+                          * appeared nowhere. The one figure that decides whether to
+                          * take the fight now or turn back was the missing one. */}
+                        <Text style={styles.revealYours} testID="combat-reveal-player-vitae">
+                            YOURS ♥ {vm.player.hp} / {vm.player.maxHp}
+                        </Text>
                         {vm.enemy.stanceHint ? <Text style={styles.revealTell}>“{vm.enemy.stanceHint}”</Text> : null}
                         <Text style={styles.revealSection}>THREAT SEQUENCE — they telegraph WHAT, not their stance</Text>
                         {/* Playtest fix 2026-09-04 — no line clamp on the threat
@@ -1252,7 +1261,11 @@ export function CombatEncounterPanel({
                                     </View>
                                 ))}
                                 <View style={styles.pilgrimMetaRow}>
-                                    <Text style={styles.pilgrimMetaChip} allowFontScaling={false}>🍀 LUCK {d.luck ?? 0}</Text>
+                                    {/* FE-001: `derivedStats.luck` is an average, so it is
+                                      * usually a float; print it through the shared formatter
+                                      * so this chip and the SELF sheet agree and neither shows
+                                      * a 17-digit tail. */}
+                                    <Text style={styles.pilgrimMetaChip} allowFontScaling={false}>🍀 LUCK {formatAveragedStat(d.luck ?? 0)}</Text>
                                     <Text style={styles.pilgrimMetaChip} allowFontScaling={false}>XP {p.experience ?? 0} / {p.experienceToNextLevel ?? 0}</Text>
                                 </View>
 
@@ -1485,6 +1498,8 @@ const useStyles = makeStyles((AXM) => ({
     revealPortrait: { borderWidth: 2, borderRadius: 6, padding: 6, backgroundColor: AXM.deepBg },
     revealName: { fontFamily: FONTS.gothic, fontSize: 24, color: AXM.parchment, marginTop: 12, textAlign: 'center' },
     revealHp: { fontFamily: FONTS.mono, fontSize: 13, color: AXM.blood, marginTop: 2 },
+    // FE-025 — the player's side of the same trade, quieter than the foe's.
+    revealYours: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.bone, letterSpacing: 1, marginTop: 2 },
     revealTell: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 14, color: AXM.bone, textAlign: 'center', marginTop: 10, marginHorizontal: 10, lineHeight: 19 },
     revealSection: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.2, color: AXM.sulfur, marginTop: 20, marginBottom: 8, alignSelf: 'stretch' },
     revealPhase: { flexDirection: 'row', gap: 10, alignSelf: 'stretch', borderWidth: 1, borderColor: AXM.ash, backgroundColor: 'rgba(0,0,0,0.35)', padding: 9, marginBottom: 7 },

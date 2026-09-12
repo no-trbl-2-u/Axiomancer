@@ -13,9 +13,10 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { isDialogueAppliedEvent } from '@mechanics';
 
+import { LeaveRow } from '@/components/LeaveRow';
 import { ScreenBg } from '@/components/ScreenBg';
 import { useGameActions, useGameEvents, useGameState } from '@/state/GameStoreProvider';
-import { consequenceLabel } from '@/state/presenters/consequence-copy';
+import { consequenceLabel, visibleConsequences } from '@/state/presenters/consequence-copy';
 import {
     selectEventViewModel,
     selectHasActiveEvent,
@@ -34,9 +35,13 @@ const DIALOGUE_CONFIRM_TTL_MS = 500;
  *  so before the player taps it, not just via the generic ✓ flash. */
 function ReplyConsequences({ choice }: { choice: EventChoice }) {
     const styles = useStyles();
-    if (choice.consequences.length === 0) return null;
-    const shown = choice.consequences.slice(0, 3);
-    const overflow = choice.consequences.length - shown.length;
+    // FE-002: drop consequences with no player-facing label (story flags)
+    // before slicing, so they neither render an empty chip nor spend one of
+    // the three visible slots.
+    const visible = visibleConsequences(choice.consequences);
+    if (visible.length === 0) return null;
+    const shown = visible.slice(0, 3);
+    const overflow = visible.length - shown.length;
     return (
         <View style={styles.consequenceRow} testID={`dialogue-choice-${choice.id}-consequences`}>
             {shown.map((c, i) => (
@@ -178,7 +183,13 @@ export default function DialogueScreen() {
                     <Text style={styles.speechText}>{vm.body}</Text>
                 </View>
 
-                <Text style={styles.sectionLabel}>{vm.chrome.reckoningEyebrow}</Text>
+                {/* FE-011: the eyebrow heads the reply list, so it only renders
+                  * when there are replies. On a tree's closing node the list is
+                  * empty and 'A RECKONING' sat over nothing but the exit, which
+                  * reads as choices that failed to load. */}
+                {vm.choices.length > 0 && (
+                    <Text style={styles.sectionLabel}>{vm.chrome.reckoningEyebrow}</Text>
+                )}
                 {vm.choices.map(choice => (
                     <ReplyRow
                         key={choice.id}
@@ -188,15 +199,14 @@ export default function DialogueScreen() {
                     />
                 ))}
 
-                <TouchableOpacity
-                    accessibilityRole="button"
+                {/* FE-007: shared bordered control — this was bare text under
+                  * two boxed replies and read as a caption, not the way out. */}
+                <LeaveRow
+                    label="TIP YOUR CAP AND GO"
                     accessibilityLabel="Walk away"
                     onPress={actions.dismissEvent}
-                    style={styles.abandon}
                     testID="dialogue-leave"
-                >
-                    <Text style={styles.abandonText}>TIP YOUR CAP AND GO</Text>
-                </TouchableOpacity>
+                />
             </ScrollView>
         </ScreenBg>
     );
@@ -266,8 +276,6 @@ const useStyles = makeStyles((AXM) => ({
         marginTop: 3,
         textTransform: 'uppercase',
     },
-    abandon: { alignSelf: 'center', marginTop: 16, padding: 8 },
-    abandonText: { fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 2, color: AXM.bone },
     flexOne: { flex: 1 },
     consequenceRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 4 },
     consequenceChip: {

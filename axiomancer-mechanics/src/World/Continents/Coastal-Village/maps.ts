@@ -43,7 +43,7 @@ const oldDockmasterTree: DialogueTree = {
             // line ("Three ways out of the yard…") into Marrow's mouth: a
             // man pointing at roads beats a narrator listing them. Moved,
             // not retheme'd — 44g owns rewriting the rest of this tree.
-            text: "Old Marrow looks up from a tangle of nets. \"You've a sturdy back, child. Care to earn a coin?\" He tips his head at the yard behind you. \"Three ways out from here — the wharf road, the middle track, the lane past the shuttered houses. Go where you like, once we've talked.\"",
+            text: "Old Marrow looks up from a tangle of nets. “You've a sturdy back, child. Care to earn a coin?” He tips his head at the yard behind you. “Three ways out from here — the wharf road, the middle track, the lane past the shuttered houses. Go where you like, once we've talked.”",
             choices: [
                 {
                     text: "What needs doing?",
@@ -70,7 +70,7 @@ const oldDockmasterTree: DialogueTree = {
         },
         offer: {
             id: 'offer',
-            text: "\"A great crab — bigger than my hauling-table — has nested at the breakwater. Bring me proof you've slain it and the coin is yours.\"",
+            text: "“A great crab — bigger than my hauling-table — has nested at the breakwater. Bring me proof you've slain it and the coin is yours.”",
             choices: [
                 {
                     text: "Consider it done. (Accept the quest.)",
@@ -102,18 +102,18 @@ const oldDockmasterTree: DialogueTree = {
         },
         accepted: {
             id: 'accepted',
-            text: "Old Marrow nods slowly. \"Mind the tide. The reef takes the careless.\"",
+            text: "Old Marrow nods slowly. “Mind the tide. The reef takes the careless.”",
         },
         observer_recognition: {
             id: 'observer_recognition',
             // Phase 63 — terminal node for the post-shift reactive branch.
             // Old Marrow has been weighing nets long enough to notice when
             // the wind off a person changes.
-            text: "He sets the net down. \"Aye. Something's moved in you since we last spoke. The sea makes that kind of weather too — a tide that turns inside, not on the chart.\" He doesn't ask which way it turned.",
+            text: "He sets the net down. “Aye. Something's moved in you since we last spoke. The sea makes that kind of weather too — a tide that turns inside, not on the chart.” He doesn't ask which way it turned.",
         },
         thanks: {
             id: 'thanks',
-            text: "\"You did it, then. Take this — gods know I've no use for coin where I'm headed.\"",
+            text: "“You did it, then. Take this — gods know I've no use for coin where I'm headed.”",
             choices: [
                 {
                     text: "Take it — coin keeps a man fed.",
@@ -160,7 +160,7 @@ const oldDockmasterTree: DialogueTree = {
         next_steps: {
             id: 'next_steps',
             // Phase 8 — terminal node for the get-to-forest quest grant.
-            text: "\"North, past the last shacks. The road turns to forest before the wind picks up. Mind the treeline — the family that keeps the village fed doesn't walk past it lightly.\"",
+            text: "“North, past the last shacks. The road turns to forest before the wind picks up. Mind the treeline — the family that keeps the village fed doesn't walk past it lightly.”",
         },
     },
 };
@@ -170,7 +170,7 @@ const tideshopkeeperTree: DialogueTree = {
     nodes: {
         greet: {
             id: 'greet',
-            text: "\"Saltwater hardtack and twine. Coin only.\"",
+            text: "“Saltwater hardtack and twine. Coin only.”",
             choices: [
                 {
                     text: "Browse the stall.",
@@ -207,10 +207,10 @@ const beggarTree: DialogueTree = {
     nodes: {
         greet: {
             id: 'greet',
-            text: "A haggard figure sits against the weathered wall, an empty bowl at their feet. \"Spare what you can. The sea took my nets. It kept the rest.\"",
+            text: "A haggard figure sits against the weathered wall, an empty bowl at their feet. “Spare what you can. The sea took my nets. It kept the rest.”",
             choices: [
                 {
-                    text: "Give ten gold. \"Take it.\"",
+                    text: "Give ten gold. “Take it.”",
                     nextNodeId: 'grateful_generous',
                     // Phase 43 — Faith-Optimistic-Relational lean.
                     effect: {
@@ -220,7 +220,7 @@ const beggarTree: DialogueTree = {
                     },
                 },
                 {
-                    text: "Give five gold. \"I can spare this much.\"",
+                    text: "Give five gold. “I can spare this much.”",
                     nextNodeId: 'grateful_small',
                     effect: { grantCurrency: -5, moralDelta: 1 },
                 },
@@ -236,12 +236,12 @@ const beggarTree: DialogueTree = {
                     },
                 },
                 {
-                    text: "\"Everyone carries something.\" (Walk on.)",
+                    text: "“Everyone carries something.” (Walk on.)",
                     nextNodeId: 'dismissed',
                     effect: { moralDelta: -1 },
                 },
                 {
-                    text: "\"Find work, like everyone else.\" (Speak coldly.)",
+                    text: "“Find work, like everyone else.” (Speak coldly.)",
                     nextNodeId: 'harsh',
                     // Phase 43 — Logic-Pessimistic-Individual lean: cold
                     // rationality + dismissal of relational obligation.
@@ -272,7 +272,7 @@ const beggarTree: DialogueTree = {
                     // friendshipReward.flagSet). The beggar's voice softens
                     // when they recognise a fellow listener. Placed LAST per
                     // the same index-stability convention.
-                    text: "\"The bell by the docks has gone quiet.\" (Mention Little Belle.)",
+                    text: "“The bell by the docks has gone quiet.” (Mention Little Belle.)",
                     nextNodeId: 'gull_recognition',
                     requires: { flag: 'befriended-little-belle' },
                     effect: {
@@ -311,46 +311,46 @@ const beggarTree: DialogueTree = {
             id: 'father_echo_truth',
             // Phase 53e — terminal node for the read-back on
             // `boy-told-father-truth`.
-            text: "\"You are the one who told his father the whole sum.\" \"The village heard. It is a small village.\"",
+            text: "“You are the one who told his father the whole sum.” “The village heard. It is a small village.”",
         },
         father_echo_spared: {
             id: 'father_echo_spared',
             // Phase 53e — terminal node for the read-back on
             // `boy-spared-father-worry`.
-            text: "\"You are the one who spared him the worst of it.\" \"A kindness worn thin trying not to show. I know that shape.\"",
+            text: "“You are the one who spared him the worst of it.” “A kindness worn thin trying not to show. I know that shape.”",
         },
         father_echo_deflected: {
             id: 'father_echo_deflected',
             // Phase 53e — terminal node for the read-back on
             // `boy-deflected-father`.
-            text: "\"You are the one who turned it into a joke at table.\" \"Easier, that. Until the joke stops covering what it's covering.\"",
+            text: "“You are the one who turned it into a joke at table.” “Easier, that. Until the joke stops covering what it's covering.”",
         },
         grateful_generous: {
             id: 'grateful_generous',
-            text: "The beggar's hands close around the coins, trembling. \"Ten gold. This sees me through the season.\" They do not look up again.",
+            text: "The beggar's hands close around the coins, trembling. “Ten gold. This sees me through the season.” They do not look up again.",
         },
         grateful_small: {
             id: 'grateful_small',
-            text: "The beggar nods. \"Five gold is more than most spare. My thanks.\"",
+            text: "The beggar nods. “Five gold is more than most spare. My thanks.”",
         },
         grateful_kind: {
             id: 'grateful_kind',
-            text: "The beggar's face eases. \"You'd give your own food. That is rarer than gold. I'll remember it.\"",
+            text: "The beggar's face eases. “You'd give your own food. That is rarer than gold. I'll remember it.”",
         },
         dismissed: {
             id: 'dismissed',
-            text: "The beggar nods, unsurprised. \"Aye. We all find our own way.\" They turn back to the harbor.",
+            text: "The beggar nods, unsurprised. “Aye. We all find our own way.” They turn back to the harbor.",
         },
         harsh: {
             id: 'harsh',
-            text: "The beggar flinches as if struck. \"I have tried. The storms took more than nets.\" They lower their head and say nothing further.",
+            text: "The beggar flinches as if struck. “I have tried. The storms took more than nets.” They lower their head and say nothing further.",
         },
         gull_recognition: {
             id: 'gull_recognition',
             // Phase 62 — terminal node for the post-befriend-gull dialogue
             // branch. Establishes the village as a small network of listeners
             // who notice when a known bitter creature stops circling.
-            text: "The beggar's head tilts. \"Aye. It rang the same hour every dawn. I'd thought it was tolling for us. Maybe it was just keeping the service.\" Their gaze settles on the harbor. \"It's good to hear a quieter morning.\"",
+            text: "The beggar's head tilts. “Aye. It rang the same hour every dawn. I'd thought it was tolling for us. Maybe it was just keeping the service.” Their gaze settles on the harbor. “It's good to hear a quieter morning.”",
         },
     },
 };

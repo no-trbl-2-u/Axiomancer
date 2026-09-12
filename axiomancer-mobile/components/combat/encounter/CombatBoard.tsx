@@ -183,6 +183,12 @@ function SignatureColumn({ conviction, signatures, onCast, onInfo, top, onMeasur
                 accessibilityLabel={`${conviction} conviction`}
             >
                 <Text style={[styles.convictionText, { color: AXM.sulfur }]} allowFontScaling={false}>◆ {conviction}</Text>
+                {/* FE-021: name it. This chip is the board's whole economy — every
+                  * rune below it is priced in ◆, and the enemy telegraph offers
+                  * '+1◆' — but the word CONVICTION appeared nowhere on the board,
+                  * only in the chip's accessibility label. A first-time player
+                  * could see the number move and never learn what it was. */}
+                <Text style={styles.convictionCaption} allowFontScaling={false}>CONVICTION</Text>
             </View>
             {signatures.map((s) => (
                 <Pressable
@@ -1511,14 +1517,19 @@ export const CombatBoard = React.memo(function CombatBoard({
                     testID="combat-rail"
                     onLayout={(e) => setRailMeasuredH(e.nativeEvent.layout.height)}
                 >
+                    {/* FE-016: print the maximum. The enemy's bar above reads
+                      * '120 /120', so a bare '♥ 160' down here gave no way to tell
+                      * whether 160 is most of my VITAE or nearly none of it — the
+                      * one number a player checks before spending a turn. maxHp was
+                      * already on the view model, just unused. */}
                     <Text
                         style={styles.railHp}
                         numberOfLines={1}
                         allowFontScaling={false}
                         testID="combat-rail-vitae"
-                        accessibilityLabel={`VITAE ${vm.player.hp}`}
+                        accessibilityLabel={`VITAE ${vm.player.hp} of ${vm.player.maxHp}`}
                     >
-                        ♥ {vm.player.hp}
+                        ♥ {vm.player.hp}<Text style={styles.railHpMax}> / {vm.player.maxHp}</Text>
                     </Text>
                     <View style={styles.railLedger} testID="combat-ledger">
                         {vm.ledger.map((m, i) => <LedgerMark key={i} kind={m === 'clear' ? 'O' : m === 'overwhelmed' ? 'X' : 'pending'} size={14} />)}
@@ -1863,7 +1874,9 @@ const useStyles = makeStyles((AXM) => ({
         borderWidth: 1, borderColor: AXM.sulfur, borderRadius: 6, backgroundColor: 'rgba(0,0,0,0.6)',
         paddingHorizontal: 7, paddingVertical: 3,
     },
-    convictionText: { fontFamily: FONTS.gothic, fontSize: 15, letterSpacing: 0.5 },
+    convictionText: { fontFamily: FONTS.gothic, fontSize: 15, letterSpacing: 0.5, textAlign: 'center' },
+    // FE-021 — the word, small enough to stay chrome, large enough to read.
+    convictionCaption: { fontFamily: FONTS.mono, fontSize: 6, letterSpacing: 0.6, color: AXM.bone, textAlign: 'center', marginTop: 1 },
     sigRune: {
         width: 46, height: 46, borderRadius: 23, borderWidth: 1.5, backgroundColor: 'rgba(0,0,0,0.6)',
         alignItems: 'center', justifyContent: 'center',
@@ -1937,6 +1950,8 @@ const useStyles = makeStyles((AXM) => ({
         borderTopWidth: 1, borderTopColor: AXM.divider,
     },
     railHp: { fontFamily: FONTS.mono, fontSize: 13, lineHeight: 17, color: AXM.parchment, letterSpacing: 0.5, flexShrink: 0 },
+    // FE-016 — the maximum rides quieter than the live value.
+    railHpMax: { color: AXM.bone, fontSize: 11 },
     railLedger: { flexDirection: 'row', flexWrap: 'wrap', flexShrink: 1, gap: 3, alignItems: 'center', justifyContent: 'center' },
     railPiles: { flexDirection: 'row', alignItems: 'center', gap: 3, flexShrink: 0 },
     pileGlyph: { width: 13, height: 17, borderRadius: 2, borderWidth: 1, borderColor: AXM.ash, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center' },

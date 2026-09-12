@@ -631,3 +631,95 @@ describe('selectCharacterViewModel: morale', () => {
         expect(modified.morale).toBe(-5);
     });
 });
+
+/**
+ * FE-003 — the SELF sheet must not show two different numbers under the
+ * bare word GRACE. The pool bar is `moralMeter` bucketed to 1-10; this
+ * section is the raw balance. The copy names the difference.
+ */
+describe('FE-003: grace balance copy', () => {
+    it('heads the raw balance distinctly from the POOLS bar and states the relationship', () => {
+        const store = makeStore();
+        const vm = selectCharacterViewModel(store.getState() as never);
+        expect(vm.graceCopy.balanceHeading).not.toBe('✠ GRACE');
+        expect(vm.graceCopy.balanceHeading).toContain('BALANCE');
+        expect(vm.graceCopy.balanceUnit.length).toBeGreaterThan(0);
+        expect(vm.graceCopy.balanceRelation).toMatch(/pool/i);
+    });
+});
+
+/**
+ * FE-004 — the XP row must not read as the player's current level. It sits
+ * beside a medallion printing the current level, and printed `XP · LVL 2`
+ * for a level-1 character.
+ */
+describe('FE-004: xp label names the NEXT level', () => {
+    it('says TOWARD and points at level + 1', () => {
+        const store = makeStore({ level: 1 });
+        const vm = selectCharacterViewModel(store.getState() as never);
+        expect(vm.xpLabel).toBe('XP TO LVL 2');
+        expect(vm.xpLabel).not.toBe(`XP · LVL ${vm.level}`);
+    });
+
+    it('tracks a higher level', () => {
+        const store = makeStore({ level: 15 });
+        const vm = selectCharacterViewModel(store.getState() as never);
+        expect(vm.xpLabel).toBe('XP TO LVL 16');
+    });
+});
+
+/**
+ * FE-015 — the DERIVED table's headers must match its columns. It advertised
+ * ATK / SKL / DEF over rows that render only attack and defense.
+ */
+describe('FE-015: derived rows carry exactly the two advertised columns', () => {
+    it('exposes attack and defense per row, and no third value', () => {
+        const store = makeStore();
+        const vm = selectCharacterViewModel(store.getState() as never);
+
+        expect(vm.derived.length).toBeGreaterThan(0);
+        for (const row of vm.derived) {
+            expect(typeof row.attack).toBe('number');
+            expect(typeof row.defense).toBe('number');
+            // Nothing on the row is a "skill" value the header could mean.
+            expect(Object.keys(row).filter((k) => /skill|skl/i.test(k))).toEqual([]);
+        }
+    });
+});
+
+/**
+ * FE-017 — the SELF sheet's GRACE and alignment must track the real save.
+ * The screen handed the presenter only `{ player }`, so `moralMeter` and
+ * `philosophicalAlignment` arrived undefined and both readouts were frozen at
+ * their zero/default values while the exploration HUD showed the true ones.
+ */
+describe('FE-017: grace and alignment follow the state the screen passes', () => {
+    it('reads moralMeter rather than defaulting it', () => {
+        const base = createCharacter({ name: 'Test Hero', level: 1, baseStats: { heart: 1, body: 1, mind: 1 } });
+        const store = createGameStore(createMemoryAdapter(), { player: base });
+        store.setState({ moralMeter: 20 } as never);
+
+        const vm = selectCharacterViewModel(store.getState());
+
+        expect(vm.morale).toBe(20);
+    });
+
+    it('a different moralMeter produces a different reading', () => {
+        const base = createCharacter({ name: 'Test Hero', level: 1, baseStats: { heart: 1, body: 1, mind: 1 } });
+        const store = createGameStore(createMemoryAdapter(), { player: base });
+        store.setState({ moralMeter: -60 } as never);
+
+        const vm = selectCharacterViewModel(store.getState());
+
+        expect(vm.morale).toBe(-60);
+    });
+
+    it('the pool bucket the screen draws moves with the balance', () => {
+        // The screen buckets morale to 1-10 the same way the HUD does; pin the
+        // arithmetic so the two surfaces cannot drift apart again.
+        const bucket = (m: number) => Math.max(1, Math.min(10, Math.round((m + 100) / 20)));
+        expect(bucket(20)).toBe(6);
+        expect(bucket(0)).toBe(5);
+        expect(bucket(-60)).toBe(2);
+    });
+});

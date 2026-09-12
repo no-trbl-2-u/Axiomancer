@@ -3,6 +3,12 @@
 > Written 2026-09-12 at T's direction. This file is a **handoff prompt**:
 > paste it (or point a fresh Claude Code session at it) to run the sweep.
 > §1–§4 are decisions. Do not re-litigate them.
+>
+> **Adjusted 2026-09-12 for ultracode** (`§10`). The persona (§1), taxonomy
+> (§4), scope walls (§5), gate (§6), and acceptance criteria (§8) are
+> unchanged decisions. What ultracode changes is **how much of the sweep runs
+> in parallel and how hard each finding is tested before it is fixed** —
+> §3.3 transport, §3.4 orchestration, §5's fix fleet, §7's provenance.
 
 ---
 
@@ -22,6 +28,9 @@ Work mode:
 - **Fresh eyes are the asset.** Do §2 before reading any prior critique.
 - **Fix, don't file.** Every finding you can fix inside §5's scope, you fix
   in the same sitting. The report is the record, not the deliverable.
+- **Exhaustive, not fast (ultracode).** There is no finding cap and no token
+  budget. Where a stage can fan out, it fans out (§10). Where a finding can
+  be wrong, it is adversarially tested before it costs a commit (§4.1).
 
 ## 1. Persona (decided)
 
@@ -49,6 +58,14 @@ finding.
    `axiomancer-mobile/docs/reports/`. Mark each of your notes
    `new` / `known-open` / `known-closed-but-regressed`. Never drop a note
    because it was known; a repeat is evidence.
+
+**Ultracode freshness rule.** Fan-out does not launder freshness. Every
+observation agent in §10's Observe phase is given **captured evidence only**
+(screenshot paths, DOM text dumps, console dumps) plus §1's persona — never
+`plan/CRITIQUE.md`, `plan/AUDIT.md`, or `docs/reports/`. The freshness
+classification in step 3 is done **after** the Observe phase closes, by the
+main agent, against the merged finding set. An agent that was handed prior
+critique is a contaminated agent: discard its rows.
 
 ## 3. Surfaces (decided)
 
@@ -98,21 +115,49 @@ If a route is missing or a fixture no longer builds, log it as an `issue`
 
 ### 3.3 Transport
 
-1. Boot: `cd axiomancer-mobile && npm run web:container && npm run web:container:wait`
+Pick the **first** transport that boots. Record which one in the report §1.
+
+1. **Dev server (preferred when Docker exists):**
+   `cd axiomancer-mobile && npm run web:container && npm run web:container:wait`
    (fallback `npm run web`). Confirm `http://localhost:8081/` renders.
-2. **Drive it yourself from the main agent context** with the Playwright
-   MCP tools (`mcp__playwright__browser_navigate`, `_snapshot`,
-   `_take_screenshot`, `_click`, `_resize`, `_console_messages`). Do **not**
-   delegate the walk to a sub-agent; MCP grants do not propagate
-   (`skills/critique.md` §3.5).
-3. If the MCP tools are absent: `CRITIQUE_VIEWPORT=both npm run critique:drive`
-   for captures, then read every screenshot and `.txt` under
-   `axiomancer-mobile/.critique-artifacts/`. For interaction, write a
-   throwaway Playwright library script beside
-   `axiomancer-mobile/scripts/fixture-e2e.mjs` and delete it before commit.
-4. Screenshot **every** screen at **every** viewport before any fix
+2. **Static preview export (the headless-container transport — use when
+   Docker or the Expo CLI dev server is unavailable):**
+   `npm install` at the repo root first (a fresh container has no
+   `node_modules`, so `expo` is not on `PATH`), then
+   `BUILD_PROFILE=preview npx expo export --platform web --output-dir <dir>`
+   from `axiomancer-mobile`, and serve `<dir>` over a plain static HTTP
+   server on `127.0.0.1:8081` with an SPA fallback to `index.html`.
+   `BUILD_PROFILE=preview` bakes dev tools **on**, which is what makes
+   `?fixture=<id>` honoured (`docs/state-fixtures.md` → Guarantees). This
+   transport is equivalent for UI purposes and is **not** itself a finding.
+3. **Driving.** Drive the walk **yourself from the main agent context** with
+   the Playwright MCP tools (`mcp__playwright__browser_navigate`,
+   `_snapshot`, `_take_screenshot`, `_click`, `_resize`,
+   `_console_messages`, `_evaluate`). Do **not** delegate the *driving* to a
+   sub-agent; MCP grants do not propagate (`skills/critique.md` §3.5,
+   `axiomancer-mobile/scripts/critique-drive.mjs` header). Delegating the
+   *reading* of captured artifacts is not only allowed, it is the point of
+   §10's Observe phase.
+4. **Bulk capture lane (run in parallel with the interactive walk):**
+   `CRITIQUE_VIEWPORT=both npm run critique:drive` writes a screenshot, the
+   DOM innerText, and the console/page errors per screen per viewport into
+   `axiomancer-mobile/.critique-artifacts/`, plus `manifest.json`. Its route
+   list is narrower than §3.2, so it supplements the walk; it never replaces
+   it. Its `manifest.json` is also the §6 zero-`pageErrors` evidence.
+   For interaction beyond what the MCP tools reach, write a throwaway
+   Playwright library script beside `axiomancer-mobile/scripts/fixture-e2e.mjs`
+   and delete it before commit.
+5. Screenshot **every** screen at **every** viewport before any fix
    (`before/`) and again after (`after/`). Keep them in
    `axiomancer-mobile/.critique-artifacts/fresh-eyes/`.
+
+### 3.4 Route coverage ledger (required)
+
+Maintain `axiomancer-mobile/.critique-artifacts/fresh-eyes/coverage.md`: one
+row per (route × viewport) with `walked` / `captured` / `blocked <why>`. §8
+is checked against this ledger, not against memory. A route you could not
+reach is a row with `blocked` **and** an `issue` finding — never a silent
+omission (§10's no-silent-caps rule).
 
 ## 4. Finding taxonomy (decided)
 
@@ -129,9 +174,27 @@ Every note becomes one row:
 | `suspected source` | file:line in `axiomancer-mobile/` (or mechanics text source) |
 | `status` | `fixed <sha>` · `deferred [needs-user-call]` · `out-of-scope` |
 | `freshness` | `new` / `known-open` / `known-closed-but-regressed` |
+| `confidence` | 0–100: how much of this row is observed fact vs inference. 100 = reproduced in a screenshot or a console dump; below 60 = the verify panel kept it on a judgement call. Report it per row. |
+| `verdict` | `CONFIRMED` (survived §4.1) · `REFUTED` (dropped — listed, with why) |
 
 Misunderstanding test: write the wrong model you formed, then the screen
 element that produced it. No element, no finding.
+
+### 4.1 Adversarial verification (ultracode, required before any fix)
+
+No finding buys a commit on one agent's word. Every merged candidate row goes
+to a **perspective-diverse verify panel** of three independent agents, each
+prompted to *refute* it from a different lens:
+
+| Lens | The question it asks |
+|---|---|
+| `evidence` | Does the cited screenshot / DOM text / console dump actually show this? Quote the bytes or refute. |
+| `persona` | Would the §1 genre-literate player really misread this, or is this genre education / total-novice friction (§1's exclusions) or taste? |
+| `source` | Does the cited `file:line` produce this, and is the fix inside §5's scope — or is it a rule/number/state change that §5 walls off? |
+
+A row is `CONFIRMED` when **≥2 of 3** lenses fail to refute it. A `REFUTED`
+row is not deleted: it goes to the report's refuted table with the lens that
+killed it. Verifiers default to `refuted: true` when uncertain.
 
 ## 5. Fix on the spot (decided)
 
@@ -169,6 +232,20 @@ before issues before enhancements within a tier.
 - After each fix: re-screenshot that route at both viewports into `after/`.
 - Never skip, disable, or loosen a test to get green.
 
+### 5.1 Fix fleet (ultracode)
+
+Fixes fan out; **commits do not**. Partition the CONFIRMED rows into
+**file-disjoint groups** (two rows that touch the same file are one group,
+transitively) and run one fix agent per group in parallel. Each agent edits
+only its group's files, adds the doc comments and the hermetic test, runs the
+fast per-fix checks (§6.1), and **stops without committing**. The main agent
+then commits each group serially in §5's fix order, so history stays one
+commit per finding and no two agents race the index.
+
+A fix agent that finds its row out of §5's scope once it reads the source
+returns `out-of-scope` with the wall it hit, and the row moves to deferred —
+it does not widen.
+
 ## 6. Verification gate (every fix, then the whole PR)
 
 Run in the foreground, never backgrounded:
@@ -183,6 +260,16 @@ CRITIQUE_VIEWPORT=both npm run critique:drive   # zero pageErrors in manifest.js
 A mechanics text edit also triggers the AGENTS.md cross-package checklist:
 verify mobile and card-editor against it.
 
+### 6.1 Fast checks (per fix, inside the fix agent)
+
+Before a group is handed back for commit, its agent runs the narrow checks
+its diff touches — `npm run lint -w axiomancer-mobile`,
+`npm run typecheck -w axiomancer-mobile`, and the jest files covering the
+changed components (`npm test -w axiomancer-mobile -- <pattern>`). These are
+a pre-filter, never a substitute: the full §6 gate still runs in the
+foreground at the final commit, and the AGENTS.md cross-package checklist
+still applies to any mechanics text edit.
+
 ## 7. Report
 
 Write `axiomancer-mobile/docs/reports/UI_FRESH_EYES_2026-09-12.md`:
@@ -196,20 +283,37 @@ Write `axiomancer-mobile/docs/reports/UI_FRESH_EYES_2026-09-12.md`:
 5. **Before/after**: per fixed finding, the two screenshot paths.
 6. **Misunderstanding map**: the wrong models you formed, in walk order —
    this is the highest-value section; write it before the tables.
+7. **Refuted candidates** (ultracode): every `REFUTED` row, the lens that
+   killed it, and its one-line reason. A sweep that refutes nothing did not
+   verify anything.
+8. **Ultracode provenance** (ultracode): workflow run ids, agent counts per
+   phase, the rounds the Observe loop ran before going dry, and every
+   coverage gap from §3.4's ledger. Name what was dropped and why.
 
 Append a one-paragraph pointer to `plan/CRITIQUE.md` under the open
 section referencing the report (respect its filing format and lexicon
 lint). Do not paste the findings there.
 
+File any direction the sweep produced but did not ship to `plan/AUDIT.md`
+(findings, `[needs-user-call]` rows) and `plan/PHASE_CANDIDATES.md`
+(buildable ideas) per AGENTS.md standing rule 7. `[needs-user-call]` is this
+prompt's own tag by T's direction; file the same rows to `plan/AUDIT.md` so
+THE OPEN GATE's `[loop-call]` review still sees them.
+
 ## 8. Acceptance criteria
 
-- Every route in §3.2 walked at both viewports, with a `before/` screenshot.
+- Every route in §3.2 walked at both viewports, with a `before/` screenshot,
+  and a row in §3.4's coverage ledger.
 - Zero `blocker` or `major` rows left in `deferred` unless out of scope by §5.
 - Every `fixed` row has an `after/` screenshot and a commit sha.
 - §6 gate green at the final commit.
 - Report written; `plan/CRITIQUE.md` pointer appended.
 - One PR, branch `claude/ui-fresh-eyes-<suffix>`, body = report §1 + §2 +
   link to the report file.
+- **Ultracode:** every fixed row carries a `CONFIRMED` verdict from §4.1's
+  3-lens panel; the Observe loop reached a dry round (§10); the completeness
+  critic's final pass named no unwalked route, unverified claim, or unread
+  artifact.
 
 ## 9. Do not
 
@@ -218,3 +322,41 @@ lint). Do not paste the findings there.
   findings. This sweep has no cap.
 - Do not ask questions mid-run. Decide, record, continue.
 - Do not widen into balance, content, or engine work.
+- Do not delegate the browser driving (§3.3.3) — only the reading, the
+  verifying, the fixing, and the synthesis fan out.
+- Do not let a parallel fix agent commit. Commits are serial and the main
+  agent's (§5.1).
+
+## 10. Ultracode orchestration (how the sweep is actually run)
+
+Five `Workflow` scripts, in sequence, with the main agent reading each
+result before launching the next. The main agent keeps the browser, the git
+index, and the judgement; the fleets do the reading, refuting, fixing, and
+critiquing.
+
+| # | Workflow | Shape | What it consumes | What it returns |
+|---|---|---|---|---|
+| 1 | **Observe** | loop-until-dry over a multi-lens fan-out | the `before/` captures + DOM/console dumps from §3.3 (evidence only — never prior critique) | candidate finding rows |
+| 2 | **Verify** | pipeline: per row → 3-lens refute panel (§4.1) | one candidate row + its evidence + the repo source | `CONFIRMED` / `REFUTED` + confidence |
+| 3 | **Fix** | parallel over file-disjoint groups (§5.1) | a group of CONFIRMED rows | edits + fast-check results, uncommitted |
+| 4 | **Critique** | completeness critic + regression readers | the coverage ledger, the `after/` captures, the diff | what is still missing / what a fix broke |
+| 5 | **Report** | parallel section writers → main-agent merge | every CONFIRMED/REFUTED row, both capture sets | §7's report sections |
+
+**Observe lenses** (each agent is blind to the others; run them per viewport
+and per route batch): `vocabulary` (this game's words vs the genre's),
+`iconography` (glyphs, meters, badges — what do they claim to mean),
+`affordance` (what looks tappable, what is, what is not), `layout`
+(clipping, overlap, truncation, safe area, reflow at the other viewport),
+`information-scent` (can I tell what this screen wants from me), `flow`
+(what happens on back / after the action / on the empty state),
+`console` (every error, warning, and network failure in the dumps),
+`consistency` (does this screen contradict another screen's grammar).
+
+**Loop-until-dry:** re-run the Observe fan-out until **two consecutive
+rounds** add no new row after dedup. Dedup against every row ever seen (not
+only the confirmed ones) or verify-rejected rows resurface forever.
+
+**No silent caps.** Anything bounded — a route not reached, a batch trimmed,
+an agent that returned nothing, a re-run not spent — is `log()`ged during the
+run and lands in report §8. Silent truncation reads as full coverage; it is
+the one failure this sweep cannot recover from after the fact.

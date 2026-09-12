@@ -632,3 +632,18 @@ describe('encounter-modal seam (Tick D)', () => {
         expect(selectHasActiveEvent(store.getState() as never)).toBe(false);
     });
 });
+
+/**
+ * FE-008 — the map legend must use the same word for a locked node as the
+ * counter beside it, the tap-tip, and the node's accessible name. It said
+ * SHUT while everything else said sealed.
+ */
+describe('FE-008: legend and counter agree on SEALED', () => {
+    it('uses one word for the locked state across the legend strip', () => {
+        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const vm = selectExplorationViewModel(store.getState());
+        expect(vm.legend.left).toContain('SEALED');
+        expect(vm.legend.left).not.toContain('SHUT');
+        expect(vm.legend.right).toMatch(/sealed/);
+    });
+});

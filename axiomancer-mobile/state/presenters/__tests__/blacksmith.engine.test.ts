@@ -99,3 +99,23 @@ describe('forge offer VM (enabled / disabled + reason)', () => {
         expect(swap.offer.reason).toMatch(/cover/i);
     });
 });
+
+/**
+ * FE-023 — the forge prices in SHILLINGS but printed every price with `◆`,
+ * the glyph the combat board spends on CONVICTION. A player arriving from a
+ * fight reads the smith's prices as costing a combat resource.
+ */
+describe('FE-023: forge prices carry the shilling suffix, never the conviction glyph', () => {
+    it('an unaffordable offer states its price in shillings', () => {
+        const vm = selectBlacksmithVM({ blacksmith: { session: forging(1), tutorial: false } });
+        const heart = vm.dice.find((d) => d.color === 'heart')!;
+        expect(heart.hone.enabled).toBe(false);
+        expect(heart.hone.reason).toMatch(/costs \d+s\b/);
+        expect(heart.hone.reason).not.toContain('\u25C6');
+    });
+
+    it('no view-model string carries the conviction glyph', () => {
+        const vm = selectBlacksmithVM({ blacksmith: { session: forging(500), tutorial: false } });
+        expect(JSON.stringify(vm)).not.toContain('\u25C6');
+    });
+});

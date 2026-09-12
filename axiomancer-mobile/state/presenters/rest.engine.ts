@@ -10,13 +10,13 @@
  * IS that reason; this module only shapes it for render.
  */
 
-import { cardRemovalPrice, getCardById } from '@mechanics';
+import { cardRemovalPrice, getCardById, RESTCHOICE_TUNING } from '@mechanics';
 import type {
     RestChoiceOfferId,
     RestChoiceSession,
 } from '@mechanics';
 import type { AppStoreState } from '@/state/store';
-import { REST_CHOICE_OFFER_DESC, REST_CHOICE_OFFER_LABEL } from './rest.copy';
+import { REST_CHOICE_OFFER_DESC, REST_CHOICE_OFFER_LABEL, restOfferDesc } from './rest.copy';
 
 // ---------------------------------------------------------------------------
 // VM shapes
@@ -99,7 +99,11 @@ export function selectRestVM(state: Pick<AppStoreState, 'rest'>): RestChoiceVM {
     const offers: RestChoiceOfferVM[] = s.offers.map((o) => ({
         id: o.id,
         label: REST_CHOICE_OFFER_LABEL[o.id],
-        desc: REST_CHOICE_OFFER_DESC[o.id],
+        // FE-024: REST names the VITAE it restores, read off the engine's own
+        // heal fraction — the one number a hurt player is deciding on.
+        desc: o.id === 'rest'
+            ? restOfferDesc(s.maxHealth, RESTCHOICE_TUNING.restHealFraction)
+            : REST_CHOICE_OFFER_DESC[o.id],
         price: o.cost,
         enabled: !o.disabledReason,
         disabledReason: o.disabledReason ?? null,

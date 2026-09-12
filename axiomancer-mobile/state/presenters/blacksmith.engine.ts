@@ -82,7 +82,7 @@ export interface BlacksmithOutcomeVM {
     honed: number;
     tempered: number;
     swapped: number;
-    /** Compact tally chips, e.g. "2 HONED", "−7 ◆". */
+    /** Compact tally chips, e.g. "2 HONED", "−7s". */
     chips: readonly string[];
 }
 
@@ -104,7 +104,17 @@ const COLOR_LABELS: Record<DieGearColor, string> = Object.freeze({
     wild: 'WILD',
 });
 
-const CURRENCY_GLYPH = '◆';
+/**
+ * Shilling suffix for forge prices (FE-023).
+ *
+ * The forge prices everything in SHILLINGS (`ANVIL_VERB_PRICING`, ratified
+ * Phase 52f — "Upgrade prices in shillings"), but every price here used to
+ * print with `◆`, which the combat board spends on CONVICTION. A player
+ * arriving from a fight reads the smith's prices as costing a combat resource
+ * they cannot carry to a forge. `s` is the suffix the village already uses on
+ * its own ware prices (`12s`), so the two shops now agree.
+ */
+const CURRENCY_SUFFIX = 's';
 
 // ---------------------------------------------------------------------------
 // Composition
@@ -133,7 +143,7 @@ function faceSummary(gear: UpgradeableDieGear): string {
 /** Combine a cap reason with the affordability reason into one loud line. */
 function offerReason(capReason: string | null, affordable: boolean, price: number): string {
     if (capReason) return capReason;
-    if (!affordable) return `costs ${price} ${CURRENCY_GLYPH} — you can't cover it`;
+    if (!affordable) return `costs ${price}${CURRENCY_SUFFIX} — you can't cover it`;
     return '';
 }
 
@@ -262,7 +272,7 @@ function composeOutcomeChips(outcome: {
     if (outcome.honed > 0) chips.push(`${outcome.honed} HONED`);
     if (outcome.tempered > 0) chips.push(`${outcome.tempered} TEMPERED`);
     if (outcome.swapped > 0) chips.push(`${outcome.swapped} RE-GEARED`);
-    if (outcome.spent > 0) chips.push(`−${outcome.spent} ${CURRENCY_GLYPH}`);
+    if (outcome.spent > 0) chips.push(`−${outcome.spent}${CURRENCY_SUFFIX}`);
     if (chips.length === 0) chips.push('LEFT AS FOUND');
     return chips;
 }

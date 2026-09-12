@@ -21,6 +21,7 @@ import {
 } from '@mechanics';
 
 import { freezeViewModel } from './freeze';
+import { formatAveragedStat } from './stat-format';
 import { wornPerSlot, SLOT_CAPACITY, getSignatureSkill } from '@mechanics';
 import type { Equipment } from '@mechanics';
 
@@ -146,6 +147,17 @@ export interface CharacterViewModel {
     xp: number;
     xpMax: number;
     /**
+     * Label for the XP row (FE-004).
+     *
+     * The row printed `XP · LVL {level + 1}` beside a framed medallion showing
+     * `{level}`, so a sheet at level 1 read `XP · LVL 2` next to a large `1`
+     * and the player could not tell which number was their level. The label
+     * now says the progress is TO the next level. Kept short on purpose: the
+     * identity column is ~130px wide beside the portrait and the level
+     * medallion, and a longer label wraps to three lines there.
+     */
+    xpLabel: string;
+    /**
      * Phase 73 — unspent stat-allocation points. Engine surfaces this
      * via `Character.availableStatPoints`; the SELF-tab header inserts
      * the `<AscendStrip>` between the level box and XP chain when
@@ -168,6 +180,13 @@ export interface CharacterViewModel {
     derived: readonly DerivedStatRow[];
     /** Average of the three base stats — the engine's "luck" surface. */
     luck: number;
+    /**
+     * `luck` formatted for display (FE-001). The raw average is a float
+     * (`(3+6+9)/3` is exact, `(5+5+8)/3` is not), and the SELF sheet prints
+     * it in a column of integer stats; `formatAveragedStat` caps it at one
+     * decimal so it reads as a stat rather than a rendering fault.
+     */
+    luckLabel: string;
     saves: readonly SaveOrTestRow[];
     effects: readonly CharacterEffectRow[];
     /**
@@ -194,6 +213,23 @@ export interface CharacterViewModel {
      * the flee cost visible per deep-playtest F03 feedback.
      */
     morale: number;
+    /**
+     * Copy for the GRACE readouts (FE-003).
+     *
+     * The sheet shows grace twice: a 1-10 pool bar under POOLS, and the raw
+     * `moralMeter` balance further down. Both were headed with the bare word
+     * GRACE, so two different numbers appeared under one name with no stated
+     * relationship. These strings name the second one as the balance the pool
+     * is read from, and live here because presenters own player-facing copy.
+     */
+    graceCopy: {
+        /** Heading for the raw-balance section — distinct from the pool's word. */
+        readonly balanceHeading: string;
+        /** Sub-label under the balance number. */
+        readonly balanceUnit: string;
+        /** One line tying the balance to the pool bar above it. */
+        readonly balanceRelation: string;
+    };
     /** Accessibility labels for character screen elements. */
     a11y: {
         characterName: string;
@@ -366,12 +402,14 @@ export function selectCharacterViewModel(state: GameStore): CharacterViewModel {
         level: player.level,
         xp: player.experience,
         xpMax: player.experienceToNextLevel,
+        xpLabel: `XP TO LVL ${(player.level ?? 0) + 1}`,
         pendingPoints: player.availableStatPoints ?? 0,
         levelUpReady:
             (player.experience ?? 0) >= (player.experienceToNextLevel ?? Infinity),
         base: buildBase(player),
         derived: buildDerived(player),
         luck,
+        luckLabel: formatAveragedStat(luck),
         saves: buildSaves(player),
         effects,
         emptyEffectsMessage: 'none at hand.',
@@ -379,6 +417,11 @@ export function selectCharacterViewModel(state: GameStore): CharacterViewModel {
         cards: [],
         alignment,
         morale: state.moralMeter,
+        graceCopy: {
+            balanceHeading: '✠ GRACE · THE BALANCE',
+            balanceUnit: 'on the parish ledger',
+            balanceRelation: 'the pool above is this balance, read in tenths.',
+        },
         a11y: {
             characterName: `Character name: ${player.name}`,
             level: `Level ${player.level}`,

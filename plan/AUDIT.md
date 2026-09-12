@@ -226,6 +226,56 @@
 
 ## Pending
 
+### [loop-call] The deck-matrix baseline reads STALE because of a speech-mark edit (2026-09-12)
+`baseline:check` now reports the baseline stale by one mechanics-source commit:
+`df6e98f ui-fresh-eyes: FE-006 world content — speech marks that point the
+right way`. The flag is correct by the rule and wrong about the concern.
+`check-baseline-freshness.mjs` watches all of `axiomancer-mechanics/src`
+(WATCH_PATH, line 30), and FE-006 changed only string literals in four
+dialogue/world content files plus one test matcher — no rule, number, state
+transition or RNG. Nothing it touched is an input to the deck matrix, so a
+regen would spend a full sim run to reproduce the same numbers.
+
+Deliberately NOT regenerated. Anyone answering a balance question off this
+baseline can cite stamp `b1624da0 · 2026-09-11` as still true of the engine;
+the staleness is bookkeeping, not drift. If the coarse watch path keeps
+producing this, narrowing it to exclude `src/World/Continents/**` prose (or
+any content-only path) would stop text passes from invalidating measured
+balance truth.
+
+
+### [loop-call] UI fresh-eyes 2026-09-12 left six product decisions and a large unverified candidate set (2026-09-12)
+The sweep (`axiomancer-mobile/docs/reports/UI_FRESH_EYES_2026-09-12.md`) shipped
+21 fixes and filed the rest. Six rows are genuine product calls the loop should
+not make silently, each with a recommended option in the report's section 4:
+the fanned hand hiding every card's ledger but the last (an explicit owner
+directive, so changing it is a decision, not a fix); the unnamed left signet
+rail; `/rest` greying an option for two possible reasons while naming only one;
+`/hazard-deck`'s pastel visual language inside a black gothic app; `LEAGUES` as
+a proper noun on the title screen and a unit on the map; and the opening art
+plates carrying their source engraving's baked-in caption.
+
+Beyond those, the Observe fleet returned 309 candidate rows (16 of 16 agents,
+0 errors; 100 major), sorted and filed in
+`UI_FRESH_EYES_2026-09-12.candidates.md`. They are NOT verified — the sweep
+could not run its adversarial verify panel (2-way concurrency on a 4-CPU
+container) and five candidates were refuted by hand, one of them reported at
+confidence 100. The recurring themes worth a named pass rather than a row at a
+time: one concept carrying several words (currency, the journal, SEALED, SURGE,
+"the deck"), glyphs with no key, meters with no unit or goal, and definitions
+that exist in the tooltip registry but are unreachable from the screen that
+needs them.
+
+### [loop-call] `npm run critique:drive` deletes anything else living under `.critique-artifacts/` (2026-09-12)
+`critique-drive.mjs:318` clears the whole artifact root on start. During the
+fresh-eyes sweep this destroyed a complete 54-cell before/after capture set
+that had been written to `.critique-artifacts/fresh-eyes/`. Both sets were
+rebuilt and the sweep's driver now writes to `.critique-artifacts-fresh-eyes/`,
+but the hazard is still there for the next tool that shares that directory —
+either scope the delete to the driver's own subdirectory or document the
+directory as exclusively its own.
+
+
 ### [loop-call] Phase W6 (The Capital) reused "W5" as a map-sequence label collision, resolved by numbering the map "W6" instead (2026-09-10)
 - category: docs/naming residue (found while filing `/forge`'s Step-6
   residue for shipping The Capital, map 5 of the northern continent)

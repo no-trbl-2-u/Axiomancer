@@ -29,9 +29,19 @@ export default function CharacterScreen() {
   // selector. Pull the underlying slice and memoize the VM downstream
   // (mirrors the pattern fixed in event screen, Phase 6 Tick A).
   const player = useGameState((s) => s.player);
+  // FE-017: `selectCharacterViewModel` reads three slices — player,
+  // moralMeter and philosophicalAlignment — but the screen only ever handed
+  // it `{ player }`. The other two arrived undefined on every render, so the
+  // sheet's GRACE was pinned to the value for a zero balance and the
+  // alignment line to the default cell, no matter what the run had done. The
+  // exploration HUD reads moralMeter directly and showed 6/10 on the same
+  // save where this screen showed 5/10. Both slices are stable references, so
+  // subscribing to them keeps the getSnapshot identity contract intact.
+  const moralMeter = useGameState((s) => s.moralMeter);
+  const philosophicalAlignment = useGameState((s) => s.philosophicalAlignment);
   const vm = useMemo(
-    () => selectCharacterViewModel({ player } as never),
-    [player],
+    () => selectCharacterViewModel({ player, moralMeter, philosophicalAlignment } as never),
+    [player, moralMeter, philosophicalAlignment],
   );
   const store = useGameStore();
   const actions = useGameActions();
@@ -151,8 +161,14 @@ export default function CharacterScreen() {
             <Text style={styles.characterName} numberOfLines={1}>{vm.displayName}</Text>
             <Text style={styles.identityAlignment} numberOfLines={1}>{vm.alignment.cellName}</Text>
             <View style={styles.xpRow}>
-              <Text style={styles.xpLabel}>XP · LVL {vm.level + 1}</Text>
-              <Text style={styles.xpValue}>{vm.xp} / {vm.xpMax}</Text>
+              {/* FE-004: value first, then the caption naming what it counts
+                * TOWARD. Side-by-side, the label and value each wrapped inside
+                * this ~130px column and interleaved into 'XP · 0 /' over
+                * 'LVL 2  1000'; stacked, each fits one line and the caption
+                * cannot be read as the current level (which the medallion to
+                * the right already shows). */}
+              <Text style={styles.xpValue} numberOfLines={1}>{vm.xp} / {vm.xpMax}</Text>
+              <Text style={styles.xpLabel} numberOfLines={1}>{vm.xpLabel}</Text>
             </View>
             <XpChain value={vm.xp} max={vm.xpMax} />
           </View>
@@ -329,10 +345,16 @@ export default function CharacterScreen() {
         <View style={styles.colHalf} accessible accessibilityLabel={vm.a11y.derivedStats}>
         <SectionLabel size={13}>✠ DERIVED</SectionLabel>
         <View style={styles.derivedTable}>
+          {/* FE-015: two headers, because there are two columns of numbers.
+            * This row advertised ATK / SKL / DEF while every data row below
+            * renders only attack and defense, and the header's empty label cell
+            * used a different flex from the data rows' label cell — so three
+            * headers sat over two values, none of them aligned: '7' landed
+            * between ATK and SKL, '21' under DEF. DerivedStatRow carries no
+            * skill value, so SKL was advertising a column that does not exist. */}
           <View style={[styles.derivedRow, styles.derivedHeader]}>
             <Text style={[styles.derivedCell, styles.derivedRowLabel]} />
             <Text style={[styles.derivedCell, styles.derivedHeaderCell]}>ATK</Text>
-            <Text style={[styles.derivedCell, styles.derivedHeaderCell]}>SKL</Text>
             <Text style={[styles.derivedCell, styles.derivedHeaderCell]}>DEF</Text>
           </View>
           {vm.derived.map((row) => (
@@ -348,7 +370,7 @@ export default function CharacterScreen() {
           ))}
           <View style={styles.luckRow}>
             <Text style={styles.luckLabel}>LUCK · AVG</Text>
-            <Text style={styles.luckValue}>{vm.luck}</Text>
+            <Text style={styles.luckValue}>{vm.luckLabel}</Text>
           </View>
         </View>
         </View>
@@ -380,13 +402,20 @@ export default function CharacterScreen() {
        </View>
       </View>
 
-      {/* Phase 92 — Grace (né Morale, Phase 44h) */}
+      {/* Phase 92 — Grace (né Morale, Phase 44h).
+        * FE-003: this section and the GRACE bar under POOLS are the same
+        * resource at two scales — the bar is this balance bucketed to 1-10.
+        * Headed with the bare word GRACE they read as two separate pools with
+        * two different numbers, so the heading now names this one as the
+        * balance and a line under it states the relationship. Copy comes from
+        * the presenter (`vm.graceCopy`); the screen carries no literal. */}
       <View style={[styles.section, { marginTop: -18 }]}>
-        <SectionLabel size={13}>✠ GRACE</SectionLabel>
+        <SectionLabel size={13}>{vm.graceCopy.balanceHeading}</SectionLabel>
         <View style={styles.moraleRow}>
           <Text style={styles.moraleValue}>{Number.isFinite(vm.morale) ? vm.morale : 0}</Text>
-          <Text style={styles.moraleLabel}>account</Text>
+          <Text style={styles.moraleLabel}>{vm.graceCopy.balanceUnit}</Text>
         </View>
+        <Text style={styles.graceRelation}>{vm.graceCopy.balanceRelation}</Text>
       </View>
 
       {/* Afflictions & Blessings */}
@@ -501,9 +530,9 @@ const useStyles = makeStyles((AXM) => ({
   colHalf: { flex: 1 },
   ledgerHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   ledgerChevron: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.sulfur },
-  xpRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 2 },
-  xpLabel: { fontFamily: FONTS.mono, fontSize: 11, color: AXM.bone, letterSpacing: 1 },
-  xpValue: { fontFamily: FONTS.mono, fontSize: 11, color: AXM.sulfur },
+  xpRow: { flexDirection: 'column', marginBottom: 2 },
+  xpLabel: { fontFamily: FONTS.mono, fontSize: 10, color: AXM.bone, letterSpacing: 1 },
+  xpValue: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.sulfur },
   section: { paddingTop: 4, paddingHorizontal: 12, paddingBottom: 0 },
   deckLink: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginHorizontal: 12, marginTop: 6, paddingVertical: 10, paddingHorizontal: 14, borderWidth: 1, borderColor: AXM.ash, backgroundColor: AXM.panelBg },
   deckLinkText: { flex: 1 },
@@ -542,6 +571,8 @@ const useStyles = makeStyles((AXM) => ({
   moraleRow: { flexDirection: 'row', alignItems: 'baseline', gap: 8, marginTop: 4 },
   moraleValue: { fontFamily: FONTS.gothic, fontSize: 24, color: AXM.parchment },
   moraleLabel: { fontFamily: FONTS.serif, fontSize: 14, color: AXM.bone, letterSpacing: 1 },
+  // FE-003 — the line that ties the raw balance to the 1-10 pool bar above.
+  graceRelation: { fontFamily: FONTS.serifItalic, fontSize: 11, color: AXM.bone, lineHeight: 15, marginTop: 2 },
   effectsList: { marginTop: 4, gap: 4 },
   emptyLabel: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.bone, letterSpacing: 1, textTransform: 'uppercase' },
   effectRow: { flexDirection: 'row', gap: 8, alignItems: 'center', borderWidth: 1, padding: 5, paddingHorizontal: 7 },

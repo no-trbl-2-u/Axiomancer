@@ -223,10 +223,17 @@ const useStyles = makeStyles((AXM) => ({
     shopHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
     purse: { fontFamily: FONTS.mono, fontSize: 10, color: AXM.sulfur, letterSpacing: 1 },
     tabRow: { flexDirection: 'row', gap: 8, marginTop: 8, marginBottom: 8 },
+    // FE-028: the unselected tab used AXM.ash for its border, which is this
+    // app's DISABLED treatment (`offerDisabled` on both /rest and /blacksmith
+    // is `borderColor: AXM.ash`, and the combat rail greys an unaffordable
+    // rune to ash too). SELL therefore read as "this merchant does not buy"
+    // rather than "tap to switch", and went untried. parchmentMed is a
+    // mid-tone: clearly quieter than the selected tab's full parchment, and
+    // clearly not the dead ash.
     tabButton: {
         flex: 1,
         borderWidth: 2,
-        borderColor: AXM.ash,
+        borderColor: AXM.parchmentMed,
         backgroundColor: AXM.panelBg,
         paddingVertical: 6,
         alignItems: 'center',

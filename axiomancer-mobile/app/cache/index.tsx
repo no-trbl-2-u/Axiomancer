@@ -94,8 +94,19 @@ export default function CacheScreen() {
 
                 {vm.phase === 'offer' && (
                     <View testID="cache-choice-offers">
-                        <Text style={styles.body} testID="cache-choice-intro">
-                            {vm.description ?? CACHE_CHOICE_INTRO}
+                        {/* FE-026: the authored node line used to REPLACE the
+                          * one-way warning (`vm.description ?? INTRO`), so on every
+                          * node that has flavour — which is most of them — the screen
+                          * said only scenery and never that the node is already spent
+                          * and there is no leaving without choosing. Flavour now sits
+                          * ABOVE the warning; the warning always shows. */}
+                        {vm.description ? (
+                            <Text style={styles.body} testID="cache-choice-intro">
+                                {vm.description}
+                            </Text>
+                        ) : null}
+                        <Text style={styles.oneWayNote} testID="cache-choice-intro-one-way">
+                            {CACHE_CHOICE_INTRO}
                         </Text>
                         {vm.offers.map((offer) => (
                             <OfferCard
@@ -173,6 +184,8 @@ const useStyles = makeStyles((AXM) => ({
         color: AXM.parchment,
         marginBottom: 8,
     },
+    // FE-026 — the irreversibility line, quieter than the scene but always there.
+    oneWayNote: { fontFamily: FONTS.serifItalic, fontSize: 12, color: AXM.bone, lineHeight: 16, marginTop: 6, marginBottom: 2 },
     offerCol: { marginBottom: 8 },
     offerButton: {
         borderWidth: 2,

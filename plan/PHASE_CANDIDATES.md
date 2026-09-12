@@ -186,6 +186,29 @@
 
 ## Pending
 
+### [score 6.5] One concept, one word — a naming pass across the player-facing surfaces
+The 2026-09-12 UI fresh-eyes sweep found the same concept wearing several names
+on screens a player sees in the same minute, raised independently by three or
+more observation lenses: money is `SHILLING` / `PURSE` / `WALLET` / `12s`; the
+journal is `THE LEDGER` in the nav, `THE BOOK OF DEEDS` on the page it opens,
+`THE ACCOUNT` on the character sheet and `THE FOURTH LEDGER` in the labyrinth;
+`SEALED` is an inventory tab, a map node state and a no-retreat lock; `SURGE`
+is an enemy phase header, a hazard card keyword and the momentum chain; and
+"the deck" is unqualified on screens where the run carries two of them. Two of
+the smaller cases shipped in the sweep (the map legend's SHUT, the inventory's
+ACCESSORY), which is the pattern: each is a one-line change, and the value is
+in doing them together against a written lexicon rather than one at a time.
+Evidence and the full list: `axiomancer-mobile/docs/reports/UI_FRESH_EYES_2026-09-12.candidates.md`.
+
+### [score 6.0] Make the glossary reachable from the screens that need it
+The same sweep found definitions that exist but cannot be got at: the hazard
+deck's fourteen keyword chips render in a plain `View` with no tooltip target,
+its four headline stats (`DISTINCT`, `ACQUIRED`, `SCARS`) are display-only, and
+the combat board's `PLEA`/`CHARGE`/`◆` were named only in accessibility labels
+until the sweep surfaced two of them. The tooltip registry already carries most
+of the content; the gap is that the screens do not mount targets for it.
+
+
 ### [score 5.5] The Capital is the new frontier — no door onward yet, same as town-across-river before it
 - proposed: 2026-09-10, /forge (Phase W6, commit f56fa198)
 - source signals:

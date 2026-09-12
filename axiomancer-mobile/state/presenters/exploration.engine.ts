@@ -119,6 +119,12 @@ export interface ExplorationViewModel {
         emptyMessage: string;
         title: string;
         leaguesLabel: string;
+        /**
+         * First-visit nudge drawn over the chart (FE-005). Lives here rather
+         * than in the screen so the map's furniture (legend, compass, hint)
+         * is authored in one place.
+         */
+        mapHint: string;
     };
     /** Optional event callout banner; `null` when no callout. */
     eventCallout: { title: string; iconKey: string } | null;
@@ -315,6 +321,7 @@ const DRAWER_COPY = {
     emptyMessage: 'the paths close as you go deeper — tap a glowing node to travel.',
     title: '✠ WHITHER, PILGRIM?',
     leaguesLabel: 'LEAGUES',
+    mapHint: 'Tap a glowing node to travel there',
 } as const;
 
 const FALLBACK_VM: ExplorationViewModel = {
@@ -330,7 +337,7 @@ const FALLBACK_VM: ExplorationViewModel = {
     options: [],
     drawerCopy: DRAWER_COPY,
     eventCallout: null,
-    legend: { left: '● TRODDEN  ◌ OPEN  ✕ SHUT', right: '' },
+    legend: { left: '● TRODDEN  ◌ OPEN  ✕ SEALED', right: '' },
 };
 
 // Referential-stability memo (1-entry, keyed by the `world` slice this
@@ -462,7 +469,12 @@ function computeExplorationViewModel(state: GameStore): ExplorationViewModel {
         drawerCopy: DRAWER_COPY,
         eventCallout: null,
         legend: {
-            left: '● TRODDEN  ◌ OPEN  ✕ SHUT',
+            // FE-008: SEALED, not SHUT. The counter at the other end of this
+            // same strip says 'N sealed', the node tap-tip says 'This path is
+            // sealed.', and every locked node's accessible name ends 'sealed'
+            // — the legend was the only surface using a fourth word for the
+            // state it exists to define.
+            left: '● TRODDEN  ◌ OPEN  ✕ SEALED',
             right: `${def.nodes.length} nodes · ${locked.length} sealed`,
         },
     });

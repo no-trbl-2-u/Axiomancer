@@ -90,18 +90,21 @@ describe('InventoryTabs', () => {
         );
     });
 
-    it('omits the count from the accessibility label when count is zero', () => {
+    // FE-010 — an empty tab used to render a bare word with no badge and no
+    // count in its accessible name, which reads as a tab that failed to load
+    // rather than one that is empty. It now says so, in both channels.
+    it('says "empty" in the accessibility label when count is zero', () => {
         const { tree } = withAllProviders(
             <InventoryTabs tabs={mockTabs} activeTab="all" onTabPress={jest.fn()} />
         );
         const rendered = render(tree);
 
         expect(rendered.getByTestId('tab-consumable').props.accessibilityLabel).toBe(
-            'Consumable'
+            'Consumable, empty'
         );
     });
 
-    it('renders a count badge only for tabs with a positive count', () => {
+    it('renders a count badge on every tab, including the empty ones', () => {
         const { tree } = withAllProviders(
             <InventoryTabs tabs={mockTabs} activeTab="all" onTabPress={jest.fn()} />
         );
@@ -109,7 +112,40 @@ describe('InventoryTabs', () => {
 
         expect(rendered.getByText('5')).toBeTruthy();
         expect(rendered.getByText('2')).toBeTruthy();
-        expect(rendered.queryAllByText('0')).toHaveLength(0);
+        // FE-010: a zero is shown, not hidden.
+        expect(rendered.queryAllByText('0').length).toBeGreaterThan(0);
+    });
+
+    it('dims the badge on an empty tab so empty still looks different', () => {
+        const { tree } = withAllProviders(
+            <InventoryTabs tabs={mockTabs} activeTab="all" onTabPress={jest.fn()} />
+        );
+        const rendered = render(tree);
+
+        const zero = rendered.queryAllByText('0')[0];
+        const style = Array.isArray(zero.props.style)
+            ? Object.assign({}, ...zero.props.style.flat(Infinity).filter(Boolean))
+            : zero.props.style;
+        expect(style.opacity).toBeLessThan(1);
+    });
+
+    // FE-018 — a two-digit count broke '10' across two lines inside the badge
+    // on the midgame save (PHIALS 10).
+    it('keeps a two-digit count on one line', () => {
+        const twoDigit = mockTabs.map((t) =>
+            t.key === 'consumable' ? { ...t, count: 10 } : t,
+        );
+        const { tree } = withAllProviders(
+            <InventoryTabs tabs={twoDigit} activeTab="all" onTabPress={jest.fn()} />
+        );
+        const rendered = render(tree);
+
+        const badge = rendered.getByText('10');
+        expect(badge.props.numberOfLines).toBe(1);
+        const style = Array.isArray(badge.props.style)
+            ? Object.assign({}, ...badge.props.style.flat(Infinity).filter(Boolean))
+            : badge.props.style;
+        expect(style.flexShrink).toBe(0);
     });
 
     it('still renders the tabs when dimmed', () => {

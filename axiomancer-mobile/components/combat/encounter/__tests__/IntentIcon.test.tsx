@@ -78,3 +78,54 @@ describe('IntentIcon — variable-rung telegraph (phase 33b)', () => {
         expect(node.props.accessibilityLabel).toMatch(/Carries 4 STAGGER rungs, 3 remaining\./);
     });
 });
+
+/**
+ * FE-014 — the stance-check telegraph is drawn over the enemy art. At 375 the
+ * sprite reaches under it, and coloured 10pt mono on painted art lost its
+ * edges. It now sits on a near-opaque plate, the same solution the intent
+ * pill above it already uses.
+ */
+describe('FE-014: telegraph sits on a plate, not bare on the art', () => {
+    it('gives the stance-check block an opaque ground', () => {
+        const intent: CombatIntentVM = {
+            ...baseIntent,
+            stanceCheck: {
+                punishes: 'heart',
+                yields: 'body',
+                punishesText: 'Punishes HEART ×1.5',
+                yieldsText: 'Yields to BODY ×0.5 +1◆',
+                live: 'none',
+                resolution: null,
+            },
+        };
+        const { tree } = withAllProviders(<IntentIcon intent={intent} />);
+        render(tree);
+        const block = screen.getByTestId('combat-intent-stance-check');
+        const style = Array.isArray(block.props.style)
+            ? Object.assign({}, ...block.props.style.flat(Infinity).filter(Boolean))
+            : block.props.style;
+        expect(String(style.backgroundColor)).toMatch(/rgba\(0,\s*0,\s*0,/);
+        expect(Number(style.paddingHorizontal)).toBeGreaterThan(0);
+    });
+});
+
+/**
+ * FE-020 — the enemy intent pill printed the damage it will deal as '♥11'.
+ * The same board uses '♥ 160' on the player rail for the player's own VITAE,
+ * so one glyph meant my health in one corner and the foe's outgoing damage in
+ * the other.
+ */
+describe('FE-020: the intent pill does not wear a heart', () => {
+    it('prints incoming damage with a minus, not a heart', () => {
+        const { tree } = withAllProviders(<IntentIcon intent={baseIntent} />);
+        render(tree);
+        expect(screen.getByText('−10')).toBeTruthy();
+        expect(screen.queryByText('♥10')).toBeNull();
+    });
+
+    it('still states the damage plainly for a screen reader', () => {
+        const { tree } = withAllProviders(<IntentIcon intent={baseIntent} />);
+        render(tree);
+        expect(screen.getByTestId('combat-intent').props.accessibilityLabel).toMatch(/Deals 10 damage/);
+    });
+});

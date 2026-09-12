@@ -5,18 +5,25 @@
  * `consequenceLabel` — pinning every `ConsequenceKind` case so
  * `/event` and `/dialogue` cannot silently drift on what a
  * consequence chip says.
+ *
+ * FE-002 (2026-09-12 fresh-eyes sweep) rewrote four of these expectations.
+ * They had pinned the defect: the damage/heal branches said HP where the canon
+ * word is VITAE, and the quest/progress/card branches echoed the engine slug
+ * (`quest: starting-quest`) into player copy. The cases are still pinned —
+ * against the fixed strings. Resolver-level coverage lives in
+ * `engine-id-copy.test.ts`.
  */
 
 import { consequenceLabel } from '../consequence-copy';
 import type { EventConsequence } from '../event.engine';
 
 describe('consequenceLabel', () => {
-    it('renders damage', () => {
-        expect(consequenceLabel({ kind: 'damage', amount: 5 })).toBe('-5 HP');
+    it('renders damage in the canon VITAE word', () => {
+        expect(consequenceLabel({ kind: 'damage', amount: 5 })).toBe('-5 VITAE');
     });
 
-    it('renders heal', () => {
-        expect(consequenceLabel({ kind: 'heal', amount: 3 })).toBe('+3 HP');
+    it('renders heal in the canon VITAE word', () => {
+        expect(consequenceLabel({ kind: 'heal', amount: 3 })).toBe('+3 VITAE');
     });
 
     it('renders currency, pluralizing shillings', () => {
@@ -30,22 +37,25 @@ describe('consequenceLabel', () => {
         expect(consequenceLabel({ kind: 'moral', amount: 0 })).toBe('0 grace');
     });
 
-    it('renders item and flag from label', () => {
+    it('renders an item from its authored label, and no chip for a story flag', () => {
         expect(consequenceLabel({ kind: 'item', label: 'Rusty Key' })).toBe('Rusty Key');
-        expect(consequenceLabel({ kind: 'flag', label: 'marrow_pressed' })).toBe('marrow_pressed');
+        // A flag id is bookkeeping, never copy — FE-002.
+        expect(consequenceLabel({ kind: 'flag', label: 'marrow_pressed' })).toBe('');
     });
 
     it('renders quest-start — the chip Old Marrow\'s accept reply needs', () => {
         expect(consequenceLabel({ kind: 'quest-start', label: 'starting-quest' })).toBe(
-            'quest: starting-quest',
+            'new errand · The King of Revenge',
         );
     });
 
-    it('renders quest-progress and card-learn', () => {
+    it('renders quest-progress and card-learn without echoing the id', () => {
         expect(consequenceLabel({ kind: 'quest-progress', label: 'starting-quest' })).toBe(
-            'progress: starting-quest',
+            'errand · The King of Revenge',
         );
-        expect(consequenceLabel({ kind: 'card-learn', label: 'Fireball' })).toBe('card: Fireball');
+        expect(consequenceLabel({ kind: 'card-learn', label: 'thin-hymn' })).toBe(
+            'new card · Thin Hymn',
+        );
     });
 
     it('returns empty string for an unrecognized kind', () => {

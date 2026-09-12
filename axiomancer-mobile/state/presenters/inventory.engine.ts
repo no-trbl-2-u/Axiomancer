@@ -167,7 +167,7 @@ export interface EquipmentDockViewModel {
     slots: readonly EquipmentDockSlot[];
     /** Section eyebrow on the dock outer panel (ritual lowercase chrome). */
     headerLabel: string;
-    /** One-line hint under the eyebrow ("WORN VS. UNWORN AT A GLANCE"). */
+    /** One-line hint under the eyebrow ("TAP A SLOT TO SEE WHAT ELSE FITS"). */
     hintLabel: string;
     /** Empty-slot copy (lowercase ritual register, framed with em-dashes per the design). */
     bareLabel: string;
@@ -258,7 +258,12 @@ const TAB_LABELS: Record<InventoryTab, string> = {
 const SLOT_LABELS: Record<Equipment['slot'], string> = {
     weapon: 'Weapon',
     armor: 'Armor',
-    accessory: 'Accessory',
+    // FE-009: 'Trinket', not 'Accessory'. The worn-gear dock above the grid
+    // labels these three positions TRINKET I/II/III, and the SELF sheet was
+    // already aligned to Trinket by an earlier drift fix — the item grid was
+    // the last surface naming the same slot a second way, on the same
+    // unscrolled screen as the dock.
+    accessory: 'Trinket',
 };
 
 const BURDEN_MAX = 50;
@@ -280,7 +285,13 @@ const DOCK_SLOT_TITLE: Record<Equipment['slot'], string> = {
 const DOCK_ACCESSORY_NUMERALS = ['I', 'II', 'III'] as const;
 
 const DOCK_HEADER_LABEL = '✠ WORN UPON THE BODY';
-const DOCK_HINT_LABEL = 'WORN VS. UNWORN AT A GLANCE';
+// FE-027: the old hint, 'WORN VS. UNWORN AT A GLANCE', described a comparison
+// that is not on screen — the dock lists five worn slots with a name and what
+// each grants, and nothing unworn. The comparison is real but it is BEHIND a
+// tap: selecting a slot filters the grid below to the items that fit it
+// (`filterRowsBySlot`). The hint now says how to get it, which also teaches an
+// interaction nothing else on the screen advertises.
+const DOCK_HINT_LABEL = 'TAP A SLOT TO SEE WHAT ELSE FITS';
 const DOCK_BARE_LABEL = '— bare —';
 const DOCK_BANNER_EYEBROW = 'FITTING SLOT';
 const DOCK_BANNER_CLEAR_LABEL = 'CLEAR ✕';
