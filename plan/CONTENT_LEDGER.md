@@ -11,7 +11,7 @@
 
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
-| cards | `skills/adjust-cards.md` | 2026-09-11 | e2b08057 | 7 |
+| cards | `skills/adjust-cards.md` | 2026-09-12 | be34ca43 | 8 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-12 | faba6c82 | 7 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-12 | 0a95396b | 7 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-12 | 3c39acb9 | 7 |
@@ -22,7 +22,7 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-cards pass 8, 2026-09-12, commit <PENDING>]** Zero-CREATE,
+> **[adjust-cards pass 8, 2026-09-12, commit be34ca43]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
 > content-lifecycle gate (`cards` was the only stale-qualifying category
 > this tick: 15 commits since pass 7's commit `e2b08057`, at the 15-commit
