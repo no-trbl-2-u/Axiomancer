@@ -13,6 +13,7 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { isDialogueAppliedEvent } from '@mechanics';
 
+import { LeaveRow } from '@/components/LeaveRow';
 import { ScreenBg } from '@/components/ScreenBg';
 import { useGameActions, useGameEvents, useGameState } from '@/state/GameStoreProvider';
 import { consequenceLabel, visibleConsequences } from '@/state/presenters/consequence-copy';
@@ -192,15 +193,14 @@ export default function DialogueScreen() {
                     />
                 ))}
 
-                <TouchableOpacity
-                    accessibilityRole="button"
+                {/* FE-007: shared bordered control — this was bare text under
+                  * two boxed replies and read as a caption, not the way out. */}
+                <LeaveRow
+                    label="TIP YOUR CAP AND GO"
                     accessibilityLabel="Walk away"
                     onPress={actions.dismissEvent}
-                    style={styles.abandon}
                     testID="dialogue-leave"
-                >
-                    <Text style={styles.abandonText}>TIP YOUR CAP AND GO</Text>
-                </TouchableOpacity>
+                />
             </ScrollView>
         </ScreenBg>
     );
@@ -270,8 +270,6 @@ const useStyles = makeStyles((AXM) => ({
         marginTop: 3,
         textTransform: 'uppercase',
     },
-    abandon: { alignSelf: 'center', marginTop: 16, padding: 8 },
-    abandonText: { fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 2, color: AXM.bone },
     flexOne: { flex: 1 },
     consequenceRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 4 },
     consequenceChip: {

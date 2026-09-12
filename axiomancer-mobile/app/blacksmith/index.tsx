@@ -17,6 +17,7 @@ import { useRouter } from '@/lib/platform/router';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { Haptics, ImpactFeedbackStyle } from '@/lib/platform/haptics';
 
+import { LeaveRow } from '@/components/LeaveRow';
 import { ScreenBg } from '@/components/ScreenBg';
 import { AxmIcon } from '@/components/icons';
 import { useGameActions, useGameState } from '@/state/GameStoreProvider';
@@ -263,16 +264,14 @@ export default function BlacksmithScreen() {
                     </View>
                 )}
 
+                {/* FE-007: shared bordered control — see LeaveRow. */}
                 {vm.phase !== 'outcome' && vm.phase !== 'card' && (
-                    <TouchableOpacity
-                        accessibilityRole="button"
+                    <LeaveRow
+                        label="LET THE COALS DIE"
                         accessibilityLabel="Leave the forge untouched"
                         onPress={actions.abandonBlacksmith}
-                        style={styles.abandon}
                         testID="blacksmith-abandon"
-                    >
-                        <Text style={styles.abandonText}>LET THE COALS DIE</Text>
-                    </TouchableOpacity>
+                    />
                 )}
             </ScrollView>
         </ScreenBg>
@@ -397,8 +396,6 @@ const useStyles = makeStyles((AXM) => ({
         backgroundColor: AXM.bg,
     },
     bigButtonText: { fontFamily: FONTS.gothic, fontSize: 18, letterSpacing: 2, color: AXM.sulfur },
-    abandon: { alignSelf: 'center', marginTop: 18, padding: 6 },
-    abandonText: { fontFamily: FONTS.mono, fontSize: 12, letterSpacing: 2, color: AXM.bone },
     inactiveWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
     inactiveText: { ...TYPE.body, color: AXM.parchment, opacity: 0.55, textAlign: 'center' },
 }));
