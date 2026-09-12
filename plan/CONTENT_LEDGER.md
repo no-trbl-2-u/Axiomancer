@@ -12,7 +12,7 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-12 | be34ca43 | 8 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-12 | faba6c82 | 7 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-12 | 030e26ae | 8 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-12 | 0a95396b | 7 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-12 | 3c39acb9 | 7 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-12 | 99cac84e | 7 |
@@ -20,6 +20,64 @@
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-equipment pass 8, 2026-09-12, commit 030e26ae]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
+> content-lifecycle gate (`equipment` was the stalest qualifying category
+> this tick: 50 commits since pass 7's commit `faba6c82`, the oldest of the
+> five categories' own last-pass timestamps — cards `be34ca43` 36 commits,
+> npcs `99cac84e` 41, keywords `3c39acb9` 43, enemies `0a95396b` 48, all
+> more recently audited). `git log faba6c82..HEAD -- axiomancer-mechanics/
+> src/Items axiomancer-mechanics/src/World/MapEvents/content.ts
+> axiomancer-mechanics/src/Combat/combat.encounter.types.ts
+> axiomancer-mechanics/src/Effects` is empty — the 50 intervening commits
+> were the sibling categories' own pass-7/8 ticks, a ui-fresh-eyes sweep
+> (FE-001 through FE-028), a critique pass (36, no findings), and assorted
+> plan-doc/ledger bumps — nothing touched the item/shop/signature surface.
+> Re-derived every Step-1 signal fresh anyway rather than trusting the empty
+> path-scoped log alone, same discipline as the sibling categories' own
+> zero-diff re-audits: (1) **dominated relics** — re-read all 8 off
+> `relic.library.ts` (byte-identical since pass 7): 2 weapons tie at
+> body+2, 2 armor tie at maxHp+5, 4 accessories split
+> mind+2/mind+2/heart+2/heart+2 — every same-slot pair still differs only
+> by `grantsSignature` (re-confirmed non-`undefined` and distinct on all
+> 8), no strictly-dominated pair. (2) **shop/reward-pool coverage** — a
+> fresh grep of all 7 `shop.wares` blocks in `World/MapEvents/content.ts`
+> reconfirms the same 12 distinct shop-stocked consumable ids (unchanged,
+> no 8th village), and the other 10 remain reachable via `rollCacheReward`'s
+> uniform draw over the full unfiltered 22-entry `consumableLibrary`
+> (`cache-reward.ts` byte-identical since pass 1) — no orphaned item. (3)
+> **`grantsSignature` drift** — all 8 relic values re-checked against the
+> live 8-member `SignatureSkillId` union in `combat.encounter.types.ts`:
+> identical (`sig-overwhelming-argument`, `sig-rallying-blow`,
+> `sig-read-opponent`, `sig-second-wind`, `sig-conviction-strike`,
+> `sig-clever-gambit`, `sig-disarming-plea`, `sig-press-the-point`), no
+> rename/removal. (4) **dead consumable `effectId`s** — re-extracted the 11
+> non-heal-only ids from `consumable.library.ts` (unchanged, still 22
+> entries) and confirmed each resolves by id against
+> `buffs.library.json`/`debuffs.library.json` via a fresh grep, all 11
+> found, 0 dead references. (5) **`AccessoryKind` gap** — head/hands/feet
+> remain at zero live relics, same standing `[loop-call]`
+> (`plan/AUDIT.md`, 2026-09-04, answers the open `[HIGH]` in
+> `plan/CRITIQUE.md`) re-read at its current text: still open, still
+> accurate, no new evidence this pass to decide it solo between (a)
+> designing a 9th+ signature skill first or (b) breaking the relic's 1:1
+> identity rule for stat-only accessories — left filed, not re-litigated.
+> KB research (kb-query gate, skill §3 Step 2): not run — every
+> consideration this pass was audit-confirmed-clean (no CREATE/UPDATE),
+> exempt from the gate per skill §3 Step 2 (REMOVE/no-op carve-out).
+> Verify: ran both gates in full this pass (not skipped, despite zero
+> source diff) — `npm run verify --workspace axiomancer-mechanics`
+> (212/212 files, 3422 tests + build) and `npm run verify --workspace
+> axiomancer-mobile` (mobile jest/lint/typecheck/assets:check/art:test all
+> green, art:test 24/24). `npm run deploy:check` confirmed green pre-tick
+> (HEAD `3e248698`, both verify workflows success) and will be
+> re-confirmed after the ledger commit lands. No `plan/PHASE_CANDIDATES.md`
+> or new `plan/AUDIT.md` residue filed this pass — nothing actionable
+> surfaced outside the standing, already-filed AccessoryKind loop-call
+> re-cited above.
+```
 
 ```
 > **[adjust-cards pass 8, 2026-09-12, commit be34ca43]** Zero-CREATE,
