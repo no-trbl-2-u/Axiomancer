@@ -149,16 +149,26 @@
   SESSION, domain ERROR) to confirm before closing; can't be shipped
   blind on web alone.
 
-### [2.0] mobile — `as any` clusters at the state boundary
+### [x] [2.0] mobile — `as any` clusters at the state boundary — RESOLVED 2026-09-12 (issue #299)
 - category: debt
 - impact: 4
 - ease: 5
+- issue: #299
 - next: recurring drain bucket, not a single fix — but one concrete,
   cheap instance remains live: `axiomancer-mobile/state/persistence/
   migrations.ts:50` (`const gameState = state as any;` inside
   `migrateV1ToV2`). Narrow it to a typed unknown-shape guard (mirroring
   how the now-clean `state/actions.ts` engine-store bridge was fixed)
   rather than chasing the whole recurring bucket in one tick.
+- resolution: narrowed `migrateV1ToV2` to `state as Record<string,
+  unknown>` (mirroring `migrateV2ToV3`'s own already-typed pattern two
+  functions below it), then constructed a properly-typed `BaseStats`
+  object once `heart`/`body`/`mind` are runtime-checked as numbers, so
+  `deriveStats`/`deriveNonCombatStats` receive a real `BaseStats` value
+  instead of an unchecked `any`. Behavior unchanged — same guard clauses,
+  same error messages. `npm run verify --workspace axiomancer-mobile`:
+  261/261 suites, 2657/2657 tests, lint (0 errors, pre-existing warnings
+  only), typecheck clean, `assets:check`/`art:test` green.
 
 ### [1.6] `web:container` dev-server script is broken
 - category: external-critique
