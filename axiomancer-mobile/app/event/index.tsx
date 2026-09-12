@@ -22,7 +22,7 @@ import { ScreenBg } from '@/components/ScreenBg';
 import { SectionLabel } from '@/components/SectionLabel';
 import { Splatter } from '@/components/Splatter';
 import { useGameActions, useGameState } from '@/state/GameStoreProvider';
-import { consequenceLabel } from '@/state/presenters/consequence-copy';
+import { consequenceLabel, visibleConsequences } from '@/state/presenters/consequence-copy';
 import {
     selectEventViewModel,
     selectHasActiveEvent,
@@ -46,9 +46,12 @@ function resolveAccent(key: ChoiceAccentKey, AXM: Palette): string {
 
 function ConsequenceChips({ consequences }: { consequences: readonly EventConsequence[] }) {
     const styles = useStyles();
-    if (consequences.length === 0) return null;
-    const shown = consequences.slice(0, 3);
-    const overflow = consequences.length - shown.length;
+    // FE-002: see the sibling row in app/dialogue — filter unlabelled
+    // consequences before slicing so the overflow count stays honest.
+    const visible = visibleConsequences(consequences);
+    if (visible.length === 0) return null;
+    const shown = visible.slice(0, 3);
+    const overflow = visible.length - shown.length;
     return (
         <View style={styles.chipRow} testID="event-consequence-chips">
             {shown.map((c, i) => (

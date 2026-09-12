@@ -34,6 +34,7 @@ import { hazardDeathCount } from '../hazard/store-actions';
 import { REST_KEEPSAKE_FLAG_PREFIX } from '../rest/store-actions';
 import { CACHE_KEEPSAKE_FLAG_PREFIX } from '../cache/store-actions';
 import { getMapLayout } from '../exploration-maps';
+import { questTitle } from './engine-id-copy';
 
 /**
  * Honest signature for `selectMemoirViewModel`: takes engine
@@ -584,9 +585,12 @@ function buildActiveRows(activeQuests: readonly Quest[] | undefined): ReadonlyAr
                 done: boolean;
                 bullet: '✓' | '○';
             }[];
+            // FE-002: `name` is the engine's quest SLUG (`starting-quest`);
+            // the journal headlines this field, so resolve it to an authored
+            // title. `id` keeps the slug — it is the list key, not copy.
             return Object.freeze({
                 id: name || 'unnamed',
-                name: name || 'unnamed',
+                name: questTitle(name) || 'unnamed',
                 description,
                 status: 'active' as const,
                 objectives,
@@ -602,9 +606,10 @@ function buildCompletedRows(
     return Object.freeze(
         completedNames.map((name) => {
             const safeName = typeof name === 'string' ? name : 'unnamed';
+            // FE-002: same slug-to-title resolution as the active rows.
             return Object.freeze({
                 id: safeName,
-                name: safeName,
+                name: questTitle(safeName) || 'unnamed',
                 description: '',
                 status: 'completed' as const,
                 objectives: Object.freeze([]) as readonly {

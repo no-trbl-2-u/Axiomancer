@@ -15,7 +15,7 @@ import { isDialogueAppliedEvent } from '@mechanics';
 
 import { ScreenBg } from '@/components/ScreenBg';
 import { useGameActions, useGameEvents, useGameState } from '@/state/GameStoreProvider';
-import { consequenceLabel } from '@/state/presenters/consequence-copy';
+import { consequenceLabel, visibleConsequences } from '@/state/presenters/consequence-copy';
 import {
     selectEventViewModel,
     selectHasActiveEvent,
@@ -34,9 +34,13 @@ const DIALOGUE_CONFIRM_TTL_MS = 500;
  *  so before the player taps it, not just via the generic ✓ flash. */
 function ReplyConsequences({ choice }: { choice: EventChoice }) {
     const styles = useStyles();
-    if (choice.consequences.length === 0) return null;
-    const shown = choice.consequences.slice(0, 3);
-    const overflow = choice.consequences.length - shown.length;
+    // FE-002: drop consequences with no player-facing label (story flags)
+    // before slicing, so they neither render an empty chip nor spend one of
+    // the three visible slots.
+    const visible = visibleConsequences(choice.consequences);
+    if (visible.length === 0) return null;
+    const shown = visible.slice(0, 3);
+    const overflow = visible.length - shown.length;
     return (
         <View style={styles.consequenceRow} testID={`dialogue-choice-${choice.id}-consequences`}>
             {shown.map((c, i) => (
