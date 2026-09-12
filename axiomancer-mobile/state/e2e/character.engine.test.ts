@@ -667,3 +667,22 @@ describe('FE-004: xp label names the NEXT level', () => {
         expect(vm.xpLabel).toBe('XP TO LVL 16');
     });
 });
+
+/**
+ * FE-015 — the DERIVED table's headers must match its columns. It advertised
+ * ATK / SKL / DEF over rows that render only attack and defense.
+ */
+describe('FE-015: derived rows carry exactly the two advertised columns', () => {
+    it('exposes attack and defense per row, and no third value', () => {
+        const store = makeStore();
+        const vm = selectCharacterViewModel(store.getState() as never);
+
+        expect(vm.derived.length).toBeGreaterThan(0);
+        for (const row of vm.derived) {
+            expect(typeof row.attack).toBe('number');
+            expect(typeof row.defense).toBe('number');
+            // Nothing on the row is a "skill" value the header could mean.
+            expect(Object.keys(row).filter((k) => /skill|skl/i.test(k))).toEqual([]);
+        }
+    });
+});

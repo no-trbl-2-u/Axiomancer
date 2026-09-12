@@ -90,12 +90,14 @@ describe('FE-014: telegraph sits on a plate, not bare on the art', () => {
         const intent: CombatIntentVM = {
             ...baseIntent,
             stanceCheck: {
+                punishes: 'heart',
+                yields: 'body',
                 punishesText: 'Punishes HEART ×1.5',
                 yieldsText: 'Yields to BODY ×0.5 +1◆',
-                live: null,
+                live: 'none',
                 resolution: null,
             },
-        } as CombatIntentVM;
+        };
         const { tree } = withAllProviders(<IntentIcon intent={intent} />);
         render(tree);
         const block = screen.getByTestId('combat-intent-stance-check');

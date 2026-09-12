@@ -335,10 +335,16 @@ export default function CharacterScreen() {
         <View style={styles.colHalf} accessible accessibilityLabel={vm.a11y.derivedStats}>
         <SectionLabel size={13}>✠ DERIVED</SectionLabel>
         <View style={styles.derivedTable}>
+          {/* FE-015: two headers, because there are two columns of numbers.
+            * This row advertised ATK / SKL / DEF while every data row below
+            * renders only attack and defense, and the header's empty label cell
+            * used a different flex from the data rows' label cell — so three
+            * headers sat over two values, none of them aligned: '7' landed
+            * between ATK and SKL, '21' under DEF. DerivedStatRow carries no
+            * skill value, so SKL was advertising a column that does not exist. */}
           <View style={[styles.derivedRow, styles.derivedHeader]}>
             <Text style={[styles.derivedCell, styles.derivedRowLabel]} />
             <Text style={[styles.derivedCell, styles.derivedHeaderCell]}>ATK</Text>
-            <Text style={[styles.derivedCell, styles.derivedHeaderCell]}>SKL</Text>
             <Text style={[styles.derivedCell, styles.derivedHeaderCell]}>DEF</Text>
           </View>
           {vm.derived.map((row) => (
