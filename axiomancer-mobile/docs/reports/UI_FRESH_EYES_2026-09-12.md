@@ -142,9 +142,10 @@ preview export at both viewports.
 | FE-025 | major | issue | `/combat-encounter` | the pre-fight commit gate showed the foe's VITAE and none of mine | `4bd389a` |
 | FE-026 | major | issue | `/rest`, `/cache` | the one-way warning was dropped on every authored node | `de762de` |
 | FE-027 | minor | misunderstanding | `/inventory` | the dock hint promised a comparison that is behind a tap | `1485dca` |
+| FE-028 | major | issue | `/village` | the unselected SELL tab wore the app's disabled treatment | `2aeadf1` |
 
-**Totals (fixed):** 26 rows — 16 major, 9 minor, 1 polish; 7 misunderstandings,
-19 issues. Before/after captures: `.critique-artifacts-fresh-eyes/{before,after}/<viewport>/NN-<screen>.png`.
+**Totals (fixed):** 27 rows — 17 major, 9 minor, 1 polish; 7 misunderstandings,
+20 issues. Before/after captures: `.critique-artifacts-fresh-eyes/{before,after}/<viewport>/NN-<screen>.png`.
 
 ## 4. Deferred and refuted
 
@@ -190,12 +191,14 @@ Each names the decision and the recommended option first.
 
 ## 5. Still open — the candidate set this sweep did not reach
 
-The Observe fleet returned **229 candidate rows** from 10 of 16 lens agents
-before this report was written (the remaining agents were still running; see
-§7). String-keyed dedup collapsed almost none of them, because independent
-agents word the same finding differently — the true unique count is lower and
-needs a semantic pass, not a string key. Twenty-one of them are fixed above;
-the rest are filed, not fixed.
+The Observe fleet finished: **16 of 16 agents, 0 errors, 309 candidate rows**
+(100 major, 165 minor, 44 polish) over ~1h54m of agent time. String-keyed dedup
+collapsed almost none of them, because independent agents word the same finding
+differently — the true unique count is lower and needs a semantic pass, not a
+string key. Where several rows describe one thing, the repetition is itself
+signal: the fan's clipped card ledger was raised by four separate lenses, one
+at confidence 100. Twenty-seven rows are fixed above; the rest are filed, not
+fixed.
 
 The full table is in [`UI_FRESH_EYES_2026-09-12.candidates.md`](./UI_FRESH_EYES_2026-09-12.candidates.md),
 sorted by severity with each row's confidence and suspected source. Strongest
@@ -231,6 +234,7 @@ Per-finding pairs, both viewports:
 | FE-024, FE-026 | `before/<vp>/16-rest.png`, `before/<vp>/18-cache.png` | `after/<vp>/16-rest.png`, `after/<vp>/18-cache.png` |
 | FE-025 | `before/<vp>/11-combat-preview.png` | `after/<vp>/11-combat-preview.png` |
 | FE-027 | `before/<vp>/07-inventory-fresh.png` | `after/<vp>/07-inventory-fresh.png` |
+| FE-028 | `before/<vp>/14-village.png` | `after/<vp>/14-village.png` |
 
 Root: `axiomancer-mobile/.critique-artifacts-fresh-eyes/` (gitignored).
 `before/` was regenerated from the walked commit `7d7565c` after the original
@@ -244,16 +248,16 @@ set was destroyed mid-sweep — see §7.
   the captured evidence only — never `plan/CRITIQUE.md`, `plan/AUDIT.md` or
   `docs/reports/` — so freshness survived the fan-out.
 - **Observe was capped at one round, not run to dry.** This container has 4
-  CPUs, so the workflow concurrency cap is 2; 16 agents took ~2.5h and three
-  rounds would have taken most of a day. The loop-until-dry rule in the
-  adjusted prompt §10 was therefore **not satisfied** — a deliberate,
-  logged cap, not a silent one. 10 of 16 agents had returned when this report
-  was written.
+  CPUs, so the workflow concurrency cap is 2; the 16 agents took 1h54m of
+  wall time (2.65M subagent tokens, 1330 tool calls) and three rounds would
+  have taken most of a day. The loop-until-dry rule in the adjusted prompt §10
+  was therefore **not satisfied** — a deliberate, logged cap, not a silent one.
+  All 16 agents completed with 0 errors and 0 empty results.
 - **The three-lens adversarial verify panel (§4.1) did not run as a workflow.**
-  With 229 candidates and 2-way concurrency it was not reachable in this
+  With 309 candidates and 2-way concurrency it was not reachable in this
   sitting. Verification was done instead by the main agent, per row, before
   each fix: source read, DOM measurement in the live build, and a re-export
-  screenshot. Five candidates were refuted this way (§4) — including one at
+  screenshot. Six candidates were refuted this way (§4) — including one at
   confidence 100 that was a transport artifact. Rows in §5 carry **no**
   verification and must not be treated as confirmed.
 - **The fix fleet (§5.1) did not run either**, for the same reason: with two

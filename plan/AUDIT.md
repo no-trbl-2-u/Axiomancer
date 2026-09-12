@@ -237,8 +237,9 @@ rail; `/rest` greying an option for two possible reasons while naming only one;
 a proper noun on the title screen and a unit on the map; and the opening art
 plates carrying their source engraving's baked-in caption.
 
-Beyond those, the Observe fleet returned 229 candidate rows, sorted and filed
-in `UI_FRESH_EYES_2026-09-12.candidates.md`. They are NOT verified — the sweep
+Beyond those, the Observe fleet returned 309 candidate rows (16 of 16 agents,
+0 errors; 100 major), sorted and filed in
+`UI_FRESH_EYES_2026-09-12.candidates.md`. They are NOT verified — the sweep
 could not run its adversarial verify panel (2-way concurrency on a 4-CPU
 container) and five candidates were refuted by hand, one of them reported at
 confidence 100. The recurring themes worth a named pass rather than a row at a
