@@ -147,6 +147,15 @@ export interface CharacterViewModel {
     xp: number;
     xpMax: number;
     /**
+     * Label for the XP row (FE-004).
+     *
+     * The row printed `XP · LVL {level + 1}` beside a framed medallion showing
+     * `{level}`, so a sheet at level 1 read `XP · LVL 2` next to a large `1`
+     * and the player could not tell which number was their level. The label
+     * now says the progress is TOWARD the next level.
+     */
+    xpLabel: string;
+    /**
      * Phase 73 — unspent stat-allocation points. Engine surfaces this
      * via `Character.availableStatPoints`; the SELF-tab header inserts
      * the `<AscendStrip>` between the level box and XP chain when
@@ -391,6 +400,7 @@ export function selectCharacterViewModel(state: GameStore): CharacterViewModel {
         level: player.level,
         xp: player.experience,
         xpMax: player.experienceToNextLevel,
+        xpLabel: `XP · TOWARD LVL ${(player.level ?? 0) + 1}`,
         pendingPoints: player.availableStatPoints ?? 0,
         levelUpReady:
             (player.experience ?? 0) >= (player.experienceToNextLevel ?? Infinity),

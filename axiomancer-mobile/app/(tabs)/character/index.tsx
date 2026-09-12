@@ -151,7 +151,9 @@ export default function CharacterScreen() {
             <Text style={styles.characterName} numberOfLines={1}>{vm.displayName}</Text>
             <Text style={styles.identityAlignment} numberOfLines={1}>{vm.alignment.cellName}</Text>
             <View style={styles.xpRow}>
-              <Text style={styles.xpLabel}>XP · LVL {vm.level + 1}</Text>
+              {/* FE-004: the label says TOWARD so it cannot be read as the
+                * current level, which the medallion to its right already shows. */}
+              <Text style={styles.xpLabel}>{vm.xpLabel}</Text>
               <Text style={styles.xpValue}>{vm.xp} / {vm.xpMax}</Text>
             </View>
             <XpChain value={vm.xp} max={vm.xpMax} />
