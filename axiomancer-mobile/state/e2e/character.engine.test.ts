@@ -631,3 +631,19 @@ describe('selectCharacterViewModel: morale', () => {
         expect(modified.morale).toBe(-5);
     });
 });
+
+/**
+ * FE-003 — the SELF sheet must not show two different numbers under the
+ * bare word GRACE. The pool bar is `moralMeter` bucketed to 1-10; this
+ * section is the raw balance. The copy names the difference.
+ */
+describe('FE-003: grace balance copy', () => {
+    it('heads the raw balance distinctly from the POOLS bar and states the relationship', () => {
+        const store = makeStore();
+        const vm = selectCharacterViewModel(store.getState() as never);
+        expect(vm.graceCopy.balanceHeading).not.toBe('✠ GRACE');
+        expect(vm.graceCopy.balanceHeading).toContain('BALANCE');
+        expect(vm.graceCopy.balanceUnit.length).toBeGreaterThan(0);
+        expect(vm.graceCopy.balanceRelation).toMatch(/pool/i);
+    });
+});

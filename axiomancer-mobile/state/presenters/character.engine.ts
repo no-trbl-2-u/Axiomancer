@@ -202,6 +202,23 @@ export interface CharacterViewModel {
      * the flee cost visible per deep-playtest F03 feedback.
      */
     morale: number;
+    /**
+     * Copy for the GRACE readouts (FE-003).
+     *
+     * The sheet shows grace twice: a 1-10 pool bar under POOLS, and the raw
+     * `moralMeter` balance further down. Both were headed with the bare word
+     * GRACE, so two different numbers appeared under one name with no stated
+     * relationship. These strings name the second one as the balance the pool
+     * is read from, and live here because presenters own player-facing copy.
+     */
+    graceCopy: {
+        /** Heading for the raw-balance section — distinct from the pool's word. */
+        readonly balanceHeading: string;
+        /** Sub-label under the balance number. */
+        readonly balanceUnit: string;
+        /** One line tying the balance to the pool bar above it. */
+        readonly balanceRelation: string;
+    };
     /** Accessibility labels for character screen elements. */
     a11y: {
         characterName: string;
@@ -388,6 +405,11 @@ export function selectCharacterViewModel(state: GameStore): CharacterViewModel {
         cards: [],
         alignment,
         morale: state.moralMeter,
+        graceCopy: {
+            balanceHeading: '✠ GRACE · THE BALANCE',
+            balanceUnit: 'on the parish ledger',
+            balanceRelation: 'the pool above is this balance, read in tenths.',
+        },
         a11y: {
             characterName: `Character name: ${player.name}`,
             level: `Level ${player.level}`,

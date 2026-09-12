@@ -380,13 +380,20 @@ export default function CharacterScreen() {
        </View>
       </View>
 
-      {/* Phase 92 — Grace (né Morale, Phase 44h) */}
+      {/* Phase 92 — Grace (né Morale, Phase 44h).
+        * FE-003: this section and the GRACE bar under POOLS are the same
+        * resource at two scales — the bar is this balance bucketed to 1-10.
+        * Headed with the bare word GRACE they read as two separate pools with
+        * two different numbers, so the heading now names this one as the
+        * balance and a line under it states the relationship. Copy comes from
+        * the presenter (`vm.graceCopy`); the screen carries no literal. */}
       <View style={[styles.section, { marginTop: -18 }]}>
-        <SectionLabel size={13}>✠ GRACE</SectionLabel>
+        <SectionLabel size={13}>{vm.graceCopy.balanceHeading}</SectionLabel>
         <View style={styles.moraleRow}>
           <Text style={styles.moraleValue}>{Number.isFinite(vm.morale) ? vm.morale : 0}</Text>
-          <Text style={styles.moraleLabel}>account</Text>
+          <Text style={styles.moraleLabel}>{vm.graceCopy.balanceUnit}</Text>
         </View>
+        <Text style={styles.graceRelation}>{vm.graceCopy.balanceRelation}</Text>
       </View>
 
       {/* Afflictions & Blessings */}
@@ -542,6 +549,8 @@ const useStyles = makeStyles((AXM) => ({
   moraleRow: { flexDirection: 'row', alignItems: 'baseline', gap: 8, marginTop: 4 },
   moraleValue: { fontFamily: FONTS.gothic, fontSize: 24, color: AXM.parchment },
   moraleLabel: { fontFamily: FONTS.serif, fontSize: 14, color: AXM.bone, letterSpacing: 1 },
+  // FE-003 — the line that ties the raw balance to the 1-10 pool bar above.
+  graceRelation: { fontFamily: FONTS.serifItalic, fontSize: 11, color: AXM.bone, lineHeight: 15, marginTop: 2 },
   effectsList: { marginTop: 4, gap: 4 },
   emptyLabel: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.bone, letterSpacing: 1, textTransform: 'uppercase' },
   effectRow: { flexDirection: 'row', gap: 8, alignItems: 'center', borderWidth: 1, padding: 5, paddingHorizontal: 7 },
