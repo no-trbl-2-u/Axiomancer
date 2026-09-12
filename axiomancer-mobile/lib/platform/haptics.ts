@@ -52,15 +52,47 @@ const NOTIFICATION_TYPE: Record<NotificationFeedbackType, HapticFeedbackTypes> =
     [NotificationFeedbackType.Error]: HapticFeedbackTypes.notificationError,
 };
 
+/**
+ * May we fire a haptic right now?
+ *
+ * @returns false only on a web runtime that reports the document has never
+ *   received a user gesture; true everywhere else.
+ *
+ * FE-012: the web backend calls `navigator.vibrate()`, which Chromium refuses
+ * before the first gesture and logs as a console ERROR each time — "Blocked
+ * call to navigator.vibrate because user hasn't tapped on the frame or any
+ * embedded frame yet". Screens that pulse on mount (the combat board, the
+ * hazard entry) fired it cold, so every capture of those screens carried the
+ * error at both viewports. The call could never have vibrated anything at
+ * that moment, so skipping it loses no feedback and clears the log.
+ *
+ * Platforms without `navigator.userActivation` (native, older browsers) fall
+ * through to true and behave exactly as before.
+ *
+ * Pure read of runtime state; no mutation.
+ */
+function hapticsAllowed(): boolean {
+    const activation = (globalThis as {
+        navigator?: { userActivation?: { hasBeenActive?: boolean } };
+    }).navigator?.userActivation;
+    if (activation && typeof activation.hasBeenActive === 'boolean') {
+        return activation.hasBeenActive;
+    }
+    return true;
+}
+
 async function impactAsync(style: ImpactFeedbackStyle = ImpactFeedbackStyle.Light): Promise<void> {
+    if (!hapticsAllowed()) return;
     trigger(IMPACT_TYPE[style]);
 }
 
 async function notificationAsync(type: NotificationFeedbackType): Promise<void> {
+    if (!hapticsAllowed()) return;
     trigger(NOTIFICATION_TYPE[type]);
 }
 
 async function selectionAsync(): Promise<void> {
+    if (!hapticsAllowed()) return;
     trigger(HapticFeedbackTypes.selection);
 }
 
