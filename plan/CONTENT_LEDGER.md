@@ -12,7 +12,7 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-12 | be34ca43 | 8 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-12 | <PENDING> | 8 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-12 | 030e26ae | 8 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-12 | 0a95396b | 7 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-12 | 3c39acb9 | 7 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-12 | 99cac84e | 7 |
@@ -22,7 +22,7 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-equipment pass 8, 2026-09-12, commit <PENDING>]** Zero-CREATE,
+> **[adjust-equipment pass 8, 2026-09-12, commit 030e26ae]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
 > content-lifecycle gate (`equipment` was the stalest qualifying category
 > this tick: 50 commits since pass 7's commit `faba6c82`, the oldest of the
