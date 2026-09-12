@@ -34,6 +34,8 @@ export function InventoryTabs({ tabs, activeTab, onTabPress, dimmed = false }: I
                       * load rather than tabs that are empty. A zero renders dimmed so
                       * "empty" still looks different from "has things in it". */}
                     <Text
+                        numberOfLines={1}
+                        allowFontScaling={false}
                         style={[
                             styles.tabCount,
                             activeTab === t.key && styles.tabCountActive,
@@ -86,6 +88,9 @@ const useStyles = makeStyles((AXM) => ({
     tabTextActive: {
         color: AXM.parchment,
     },
+    // FE-018 — the badge sized to a single digit and sat in a flex row, so a
+    // two-digit count broke '10' across two lines inside the pill. It keeps a
+    // single-digit minimum but is no longer allowed to shrink or wrap.
     tabCount: {
         fontFamily: FONTS.mono,
         fontSize: 10,
@@ -95,6 +100,7 @@ const useStyles = makeStyles((AXM) => ({
         paddingHorizontal: 4,
         paddingVertical: 1,
         minWidth: 16,
+        flexShrink: 0,
         textAlign: 'center',
     },
     tabCountActive: {

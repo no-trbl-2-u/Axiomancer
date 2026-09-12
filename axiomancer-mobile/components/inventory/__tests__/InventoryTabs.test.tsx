@@ -129,6 +129,25 @@ describe('InventoryTabs', () => {
         expect(style.opacity).toBeLessThan(1);
     });
 
+    // FE-018 — a two-digit count broke '10' across two lines inside the badge
+    // on the midgame save (PHIALS 10).
+    it('keeps a two-digit count on one line', () => {
+        const twoDigit = mockTabs.map((t) =>
+            t.key === 'consumable' ? { ...t, count: 10 } : t,
+        );
+        const { tree } = withAllProviders(
+            <InventoryTabs tabs={twoDigit} activeTab="all" onTabPress={jest.fn()} />
+        );
+        const rendered = render(tree);
+
+        const badge = rendered.getByText('10');
+        expect(badge.props.numberOfLines).toBe(1);
+        const style = Array.isArray(badge.props.style)
+            ? Object.assign({}, ...badge.props.style.flat(Infinity).filter(Boolean))
+            : badge.props.style;
+        expect(style.flexShrink).toBe(0);
+    });
+
     it('still renders the tabs when dimmed', () => {
         const { tree } = withAllProviders(
             <InventoryTabs tabs={mockTabs} activeTab="all" onTabPress={jest.fn()} dimmed />
