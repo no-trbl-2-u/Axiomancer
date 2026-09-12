@@ -226,6 +226,24 @@
 
 ## Pending
 
+### [loop-call] The deck-matrix baseline reads STALE because of a speech-mark edit (2026-09-12)
+`baseline:check` now reports the baseline stale by one mechanics-source commit:
+`df6e98f ui-fresh-eyes: FE-006 world content — speech marks that point the
+right way`. The flag is correct by the rule and wrong about the concern.
+`check-baseline-freshness.mjs` watches all of `axiomancer-mechanics/src`
+(WATCH_PATH, line 30), and FE-006 changed only string literals in four
+dialogue/world content files plus one test matcher — no rule, number, state
+transition or RNG. Nothing it touched is an input to the deck matrix, so a
+regen would spend a full sim run to reproduce the same numbers.
+
+Deliberately NOT regenerated. Anyone answering a balance question off this
+baseline can cite stamp `b1624da0 · 2026-09-11` as still true of the engine;
+the staleness is bookkeeping, not drift. If the coarse watch path keeps
+producing this, narrowing it to exclude `src/World/Continents/**` prose (or
+any content-only path) would stop text passes from invalidating measured
+balance truth.
+
+
 ### [loop-call] UI fresh-eyes 2026-09-12 left six product decisions and a large unverified candidate set (2026-09-12)
 The sweep (`axiomancer-mobile/docs/reports/UI_FRESH_EYES_2026-09-12.md`) shipped
 21 fixes and filed the rest. Six rows are genuine product calls the loop should
