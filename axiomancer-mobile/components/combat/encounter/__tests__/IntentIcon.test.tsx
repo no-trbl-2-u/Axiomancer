@@ -78,3 +78,31 @@ describe('IntentIcon — variable-rung telegraph (phase 33b)', () => {
         expect(node.props.accessibilityLabel).toMatch(/Carries 4 STAGGER rungs, 3 remaining\./);
     });
 });
+
+/**
+ * FE-014 — the stance-check telegraph is drawn over the enemy art. At 375 the
+ * sprite reaches under it, and coloured 10pt mono on painted art lost its
+ * edges. It now sits on a near-opaque plate, the same solution the intent
+ * pill above it already uses.
+ */
+describe('FE-014: telegraph sits on a plate, not bare on the art', () => {
+    it('gives the stance-check block an opaque ground', () => {
+        const intent: CombatIntentVM = {
+            ...baseIntent,
+            stanceCheck: {
+                punishesText: 'Punishes HEART ×1.5',
+                yieldsText: 'Yields to BODY ×0.5 +1◆',
+                live: null,
+                resolution: null,
+            },
+        } as CombatIntentVM;
+        const { tree } = withAllProviders(<IntentIcon intent={intent} />);
+        render(tree);
+        const block = screen.getByTestId('combat-intent-stance-check');
+        const style = Array.isArray(block.props.style)
+            ? Object.assign({}, ...block.props.style.flat(Infinity).filter(Boolean))
+            : block.props.style;
+        expect(String(style.backgroundColor)).toMatch(/rgba\(0,\s*0,\s*0,/);
+        expect(Number(style.paddingHorizontal)).toBeGreaterThan(0);
+    });
+});

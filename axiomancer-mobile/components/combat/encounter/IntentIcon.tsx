@@ -140,7 +140,21 @@ const useStyles = makeStyles((AXM) => ({
     // Spec 33 §5 — the open stance-check telegraph, terse and always visible.
     // Playtest 2026-09-04 — 8pt ash-on-dark was unreadable on a 390pt phone;
     // 10pt with a bone neutral for the "neither" line.
-    stanceCheck: { alignItems: 'flex-end', marginTop: 2, gap: 1 },
+    // FE-014 — the two telegraph lines are drawn over the enemy art, and at
+    // 375 the sprite reaches under them, so coloured 10pt mono on a busy
+    // painted background lost its edges. The sibling `pill` above already
+    // solves text-over-art with a near-opaque plate; this borrows it. Size and
+    // colour are untouched (they were tuned by the 2026-09-04 playtest) —
+    // only the ground behind them changes.
+    stanceCheck: {
+        alignItems: 'flex-end',
+        marginTop: 2,
+        gap: 1,
+        backgroundColor: 'rgba(0,0,0,0.82)',
+        borderRadius: 5,
+        paddingHorizontal: 5,
+        paddingVertical: 2,
+    },
     scPunish: { fontFamily: FONTS.mono, fontSize: 10, color: '#e2543b', letterSpacing: 0.2 },
     scYield: { fontFamily: FONTS.mono, fontSize: 10, color: '#5bbf6a', letterSpacing: 0.2 },
     scNone: { fontFamily: FONTS.mono, fontSize: 10, color: AXM.bone, letterSpacing: 0.2 },
