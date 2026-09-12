@@ -10,6 +10,9 @@
  * toggle, and SELL lists the player's inventory (quest items
  * excluded) priced via the presenter's `sellables` — dispatching
  * `sellVillageItem` (engine `sellItem` owns the rules).
+ *
+ * Every BUY row states what the coin buys before it states the
+ * flavour, off the presenter's `effect` line (cluster S5-talk-C04).
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -124,7 +127,11 @@ export default function VillageScreen() {
                                 <TouchableOpacity
                                     key={ware.itemId}
                                     accessibilityRole="button"
-                                    accessibilityLabel={`Buy ${ware.name} for ${ware.price} shillings`}
+                                    accessibilityLabel={
+                                        ware.effect.length > 0
+                                            ? `Buy ${ware.name} for ${ware.price} shillings. ${ware.effect}`
+                                            : `Buy ${ware.name} for ${ware.price} shillings`
+                                    }
                                     accessibilityState={{ disabled: !ware.affordable }}
                                     disabled={!ware.affordable}
                                     onPress={() => actions.buyVillageWare(ware.itemId)}
@@ -133,6 +140,12 @@ export default function VillageScreen() {
                                 >
                                     <View style={styles.flexOne}>
                                         <Text style={styles.wareName}>{ware.name}</Text>
+                                        {/* S5-talk-C04: the mechanical read comes before the
+                                            flavour line — a stall that prices a thing has to
+                                            say what the thing does. */}
+                                        {ware.effect.length > 0 && (
+                                            <Text style={styles.wareEffect} testID={`village-ware-${ware.itemId}-effect`}>{ware.effect}</Text>
+                                        )}
                                         {ware.description.length > 0 && (
                                             <Text style={styles.wareDesc} testID={`village-ware-${ware.itemId}-desc`}>{ware.description}</Text>
                                         )}
@@ -278,6 +291,16 @@ const useStyles = makeStyles((AXM) => ({
     // description at DESC_FONT_SIZE, so the stalls looked like fine print
     // next to it. One size for a description wherever it appears.
     wareDesc: { fontFamily: FONTS.mono, fontSize: DESC_FONT_SIZE, color: AXM.bone, marginTop: 2, textTransform: 'uppercase' },
+    // S5-talk-C04: the effect line is the row's load-bearing text, so it takes
+    // full parchment while the flavour line below keeps the quieter bone.
+    wareEffect: {
+        fontFamily: FONTS.mono,
+        fontSize: DESC_FONT_SIZE,
+        color: AXM.parchment,
+        marginTop: 3,
+        letterSpacing: 0.4,
+        textTransform: 'uppercase',
+    },
     warePrice: { fontFamily: FONTS.gothic, fontSize: 18, color: AXM.sulfur },
     // Price tracks affordability, not just the row's opacity: value-gold
     // is loud enough to survive the unaffordable dim, so mute the colour
