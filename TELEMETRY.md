@@ -7,10 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-06T11:19:03Z | skill | digest | unknown | main | - |
-| 2026-08-06T14:43:28Z | slash-prompt | /march | unknown | user/ci | /march |
-| 2026-08-07T00:22:05Z | slash-prompt | /march | unknown | user/ci | /march |
-| 2026-08-07T00:23:04Z | skill | iterate | claude-sonnet-5 | main | - |
 | 2026-08-07T03:27:10Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-07T03:30:10Z | skill | critique | claude-sonnet-5 | main | - |
 | 2026-08-07T07:50:40Z | slash-prompt | /march | unknown | user/ci | /march |
@@ -407,3 +403,7 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-12T14:29:21Z | skill | adjust-npcs | claude-sonnet-5 | main | - |
 | 2026-09-12T16:29:33Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-12T16:30:39Z | skill | iterate | claude-sonnet-5 | main | - |
+| 2026-09-12T18:31:06Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-12T18:31:09Z | skill | march | unknown | main | - |
+| 2026-09-12T18:34:17Z | skill | adjust-cards | claude-sonnet-5 | main | - |
+| 2026-09-12T18:35:00Z | subagent | card-expert | claude-sonnet-5 | main | Run adjust-cards pass 8 tick |
