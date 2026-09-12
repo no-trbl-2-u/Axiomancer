@@ -67,7 +67,14 @@ export function IntentIcon({ intent, onPress }: { intent: CombatIntentVM; onPres
             </View>
             {(intent.damage > 0 || intent.debuffs || intent.branch) && (
                 <View style={styles.pill}>
-                    {intent.damage > 0 && <Text style={[styles.pillText, { color: intent.color }]} allowFontScaling={false}>♥{intent.damage}</Text>}
+                    {/* FE-020: a minus, not a heart. This pill is the ENEMY's
+                      * telegraph and the number is damage it will deal to me, but
+                      * it printed '♥11' — and the same board uses '♥ 160' on my own
+                      * rail for my VITAE. One glyph meant my health in one corner
+                      * and the enemy's outgoing damage in the other, so the badge
+                      * read as the foe healing or having 11 health left. ♥ now means
+                      * only my VITAE; a minus means something is coming off it. */}
+                    {intent.damage > 0 && <Text style={[styles.pillText, { color: intent.color }]} allowFontScaling={false}>−{intent.damage}</Text>}
                     {intent.debuffs && <Text style={styles.debuffMark} allowFontScaling={false}>☠</Text>}
                     {/* WS9 — the fork glyph marks a committed branch phase */}
                     {intent.branch && <Text style={[styles.pillText, { color: intent.color }]} allowFontScaling={false}>⑂</Text>}

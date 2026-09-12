@@ -108,3 +108,24 @@ describe('FE-014: telegraph sits on a plate, not bare on the art', () => {
         expect(Number(style.paddingHorizontal)).toBeGreaterThan(0);
     });
 });
+
+/**
+ * FE-020 — the enemy intent pill printed the damage it will deal as '♥11'.
+ * The same board uses '♥ 160' on the player rail for the player's own VITAE,
+ * so one glyph meant my health in one corner and the foe's outgoing damage in
+ * the other.
+ */
+describe('FE-020: the intent pill does not wear a heart', () => {
+    it('prints incoming damage with a minus, not a heart', () => {
+        const { tree } = withAllProviders(<IntentIcon intent={baseIntent} />);
+        render(tree);
+        expect(screen.getByText('−10')).toBeTruthy();
+        expect(screen.queryByText('♥10')).toBeNull();
+    });
+
+    it('still states the damage plainly for a screen reader', () => {
+        const { tree } = withAllProviders(<IntentIcon intent={baseIntent} />);
+        render(tree);
+        expect(screen.getByTestId('combat-intent').props.accessibilityLabel).toMatch(/Deals 10 damage/);
+    });
+});
