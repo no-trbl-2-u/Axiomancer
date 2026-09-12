@@ -23,6 +23,7 @@ import { SectionLabel } from '@/components/SectionLabel';
 import { CardDetailOverlay } from '@/components/hazard/HazardOverlays';
 import { HazardCard } from '@/components/hazard/HazardCard';
 import { HazardRemoveGrid } from '@/components/hazard/HazardRemoveGrid';
+import { HazardStatKey } from '@/components/hazard/HazardStatKey';
 import { DIE, HZ } from '@/components/hazard/palette';
 import { useGameState } from '@/state/GameStoreProvider';
 import { selectHazardDeckViewModel } from '@/state/presenters/hazard-deck.engine';
@@ -131,6 +132,8 @@ export default function HazardDeckScreen() {
             {/* The full deck — tap any card to inspect */}
             <View style={styles.section}>
                 <SectionLabel size={10}>✠ ALL CARDS</SectionLabel>
+                {/* S7-hazard-C04 — key the two unnamed marks the cards print. */}
+                <HazardStatKey />
                 <View style={styles.cardGrid}>
                     {vm.entries.map((entry) => (
                         <Pressable
