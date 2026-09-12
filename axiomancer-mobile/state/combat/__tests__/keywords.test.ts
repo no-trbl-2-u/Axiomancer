@@ -101,7 +101,7 @@ describe('keyword registry — KW-3 (no dead references)', () => {
         expect(CARD_SPECIAL_MECHANIC_KINDS.length).toBeGreaterThan(40);
     });
 
-    it('retired keywords (BARRIER, CONJURE, SENTENCE, TRANSMUTE, REPRISE) are gone', () => {
+    it('retired keywords (BARRIER, CONJURE, PERORATION, TRANSMUTE, REPRISE) are gone', () => {
         // FESTER left this list on 2026-08-08: the Profane Canon promoted it
         // back to a printed keyword (gangrene-gospel, The Untended Garden), so
         // it needs a gloss again.

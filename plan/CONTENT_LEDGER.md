@@ -14,12 +14,91 @@
 | cards | `skills/adjust-cards.md` | 2026-09-11 | e2b08057 | 7 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-12 | faba6c82 | 7 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-12 | 0a95396b | 7 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-11 | ef883fc9 | 6 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-12 | PENDING | 7 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-11 | c4f97f69 | 6 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-keywords pass 7, 2026-09-12, commit PENDING]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
+> content-lifecycle gate (keywords' pass-6 commit `ef883fc9` was the only
+> stale-qualifying category at dispatch time, 16 commits since, past the
+> 15-commit threshold; cards/equipment/enemies all passed within the last
+> day, npcs sat at 14 commits, under its own threshold). `git log
+> ef883fc9..HEAD -- axiomancer-mechanics/src/Cards axiomancer-mechanics/
+> src/Effects axiomancer-mechanics/src/Combat
+> axiomancer-mechanics/docs/keyword-atlas.md docs/retheme-map.json
+> axiomancer-mobile/state/combat/keywords.ts
+> axiomancer-card-editor/src/data/mechanics.ts` is empty — the 16
+> intervening commits were entirely the cards/equipment/enemies pass-7
+> ticks, the npcs pass-6 tick, a digest, two `/audit`-fix ticks (mobile
+> a11y + village-stall pricing), and an `/expand` no-op — nothing touched
+> the keyword surface. Re-derived every Step-1 signal fresh anyway rather
+> than trusting the empty path-scoped log alone: (1) **carrier-count
+> sweep** — a fresh `kind: '...'` grep across all 9
+> `src/Cards/library/*.cards.ts` modules reconfirms CHAIN/ECHO/EXECUTE/
+> OMEN/opening(AMBUSH)/FINALE/RUPTURE/TURNABOUT/extend_dots/lock_stance all
+> still sit at exactly 2 carriers apiece, no regression below the atlas's
+> own "≥2 cards or ≥2 enemies" floor; the 9 zero-carrier die-gear/card-local
+> kinds (`strip_random_buff`, `befriend_attempt`, `refresh_die`,
+> `convert_die_color`, `overheat`, `forge_floating_die`, `float_x_die`,
+> `spend_all_pips`, `echo_next_spell`) remain zero and
+> `KINDS_WITHOUT_MECHANIC_KEYWORD`-exempt, confirmed via `src/Cards/
+> types.ts`'s `CardSpecialMechanic`/`CardRider` union byte-identical since
+> `515ac4d9` (2026-09-02, long before pass 6). (2) **enemy-keyword carrier
+> sweep** (not explicitly re-run by pass 6's own log) — a fresh
+> `enemy.library.ts` `keywords:` array extraction gives hide 21, wounding
+> 13, venom 9, regrow 5, swift 19, brutal 21, unshaken 12, elusive 3,
+> ravenous 3 — all 9 atlas-listed enemy keywords carry ≥2, no REMOVE
+> candidate. (3) **CHARGE/SENTENCE internal-id spot-check** — confirmed
+> `combat.cards.ts`'s `mechanicText` switch prints `kind: 'premise'` as
+> "Charge" and `kind: 'peroration'` as "SENTENCE at N — ...", matching the
+> retheme map's own documented convention (R-1/R-2 rename the *display*
+> word; the internal id is stable, same pattern as R-14/R-15's explicit
+> "engine field key does NOT rename" notes) — not a drift, a correctly
+> understood id/display split. (4) **registry parity** — `axio_overview`
+> reconfirms 68 keyword rows and 128 cards, unchanged from pass 6. (5)
+> **Known drift section accuracy** — re-read `debuffs.library.json`
+> directly: `damagePerRound` 2/3/1 for poison/bleed/doom, unchanged; and
+> `src/Combat/effects.ts`'s `CAPITULATE_MIN` still 10, `
+> CAPITULATE_RESOLVE_FRACTION` still 0.35 — the atlas's "Known drift" note
+> stays accurate, still out of this skill's card-shaped scope, re-cited not
+> re-filed. (6) **mobile KW-1/KW-3 jest suite** — ran
+> `state/combat/__tests__/keywords.test.ts` directly (13/13 green) rather
+> than eyeballing the union walk by hand. **One genuine finding, fixed**:
+> the suite's own retirement test (`it('retired keywords (BARRIER,
+> CONJURE, SENTENCE, TRANSMUTE, REPRISE) are gone', ...)`) has carried a
+> stale title since the phase-29/44b SENTENCE rename landed — a `git log
+> --follow -p` on the test file shows the title was mechanically
+> find-replaced `PERORATION` -> `SENTENCE` at that rename, but the
+> assertion array underneath (which correctly checks the OLD pre-rename
+> name `'Peroration'` is gone, not the new live system term `SENTENCE`)
+> was never updated to match, so the title has claimed a live, undead
+> system term was "retired" for roughly five weeks. Not a functional bug —
+> the assertion itself was and remains correct — but a title/assertion
+> mismatch is exactly the wiring-honesty class of bug this skill's audit
+> exists to catch, so fixed it in place (title now reads `PERORATION`,
+> matching the array): `axiomancer-mobile/state/combat/__tests__/
+> keywords.test.ts` line 104. Re-ran the suite after the fix: still 13/13
+> green. KB research (kb-query gate, §3 Step 2): not run — this is a test
+> description correction, not a keyword CREATE/UPDATE, and every other
+> consideration this pass was audit-confirmed-clean (no CREATE/UPDATE),
+> exempt from the gate per skill §3 Step 2 (REMOVE/no-op carve-out). No
+> `plan/PHASE_CANDIDATES.md` or new `plan/AUDIT.md` residue filed this
+> pass. Verify: ran all gates in full — `npm run verify --workspace
+> axiomancer-mechanics` (212/212 files, 3422 tests + build, matching pass 6
+> exactly), `npm run verify --workspace axiomancer-mobile` (lint 0
+> errors/15 pre-existing warnings, typecheck clean, jest 261/261 suites/
+> 2657 tests — unchanged count, a title string isn't a new test —
+> assets:check 7/7, art:test 24/24), `npm run type-check --workspace
+> axiomancer-card-editor` (clean, exit 0), root `npm test` 123/123 (incl.
+> `content-drift.test.mjs`). `npm run deploy:check` confirmed green
+> pre-tick (HEAD `27987751`, no gated workflow triggered for the tip
+> commit) and will be re-confirmed after the ledger commit lands.
+```
 
 ```
 > **[adjust-enemies pass 7, 2026-09-12, commit 0a95396b]** Zero-CREATE,

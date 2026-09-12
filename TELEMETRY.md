@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-05T20:03:16Z | slash-prompt | /march | unknown | user/ci | /march |
-| 2026-08-06T03:48:22Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-06T09:19:49Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-06T09:20:58Z | skill | iterate | claude-sonnet-5 | main | - |
 | 2026-08-06T09:23:19Z | subagent | Explore | claude-sonnet-5 | main | Scope combat kill-path legibility fix |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-12T06:42:42Z | skill | iterate | claude-sonnet-5 | main | - |
 | 2026-09-12T08:33:36Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-12T08:36:12Z | skill | critique | claude-sonnet-5 | main | - |
+| 2026-09-12T10:27:52Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-12T10:30:54Z | skill | adjust-keywords | claude-sonnet-5 | main | - |
