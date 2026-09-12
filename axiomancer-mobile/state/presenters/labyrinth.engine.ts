@@ -104,6 +104,27 @@ export const LABYRINTH_COPY = Object.freeze({
     completeTitle: 'THE LAST CONTINENT',
     completeBody: 'The Unfounded Door was never locked. You walk through.',
     completeLastLine: '"Mind the first step. There is no first step."',
+    /**
+     * Screen-reader copy for the labyrinth's unadorned pressables
+     * (cluster S7-hazard-C20). The act cards, LEAVE and the MAP toggle
+     * carry no visual affordance a reader can infer, so they name
+     * themselves here rather than in the screen (Hard Rule #8 — copy
+     * lives in the presenter).
+     */
+    a11y: Object.freeze({
+        /**
+         * Spoken label for one act card on the act select.
+         * Purpose: name the descent and say whether it is already walked,
+         * since the card's state is carried visually by a lowercase word.
+         * Input: the act's title, and whether the act is completed.
+         * Output: the label string. Resolves cluster S7-hazard-C20.
+         */
+        actOption: (title: string, completed: boolean): string =>
+            completed ? `${title}. Walked. Descend again.` : `${title}. Descend.`,
+        leave: 'Leave the Aporia',
+        mapShow: 'Show the map of what you have walked',
+        mapHide: 'Hide the map. Back to the room.',
+    }),
     hintTiers: Object.freeze([
         { tier: 1 as const, label: 'A Nudge', desc: 'One true sentence, unhelpfully put.' },
         { tier: 2 as const, label: 'A Reading', desc: 'What the room actually holds.' },
