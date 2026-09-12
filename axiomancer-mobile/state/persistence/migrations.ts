@@ -1,4 +1,4 @@
-import type { GameState } from '@mechanics';
+import type { GameState, BaseStats } from '@mechanics';
 import {
     defaultAlignment,
     deriveStats,
@@ -47,30 +47,36 @@ function migrateV1ToV2(state: unknown): unknown {
         throw new Error('Migration v1→v2: invalid state object');
     }
 
-    const gameState = state as any;
-    
+    const gameState = state as Record<string, unknown>;
+    const player = gameState.player as Record<string, unknown> | null | undefined;
+
     // Check that we have a valid player with baseStats
-    if (!gameState.player || !gameState.player.baseStats) {
+    if (!player || !player.baseStats) {
         throw new Error('Migration v1→v2: missing player.baseStats');
     }
 
-    const player = gameState.player;
-    const baseStats = player.baseStats;
+    const baseStats = player.baseStats as Record<string, unknown>;
 
     // Check if baseStats has required fields
-    if (typeof baseStats.heart !== 'number' || 
-        typeof baseStats.body !== 'number' || 
+    if (typeof baseStats.heart !== 'number' ||
+        typeof baseStats.body !== 'number' ||
         typeof baseStats.mind !== 'number') {
         throw new Error('Migration v1→v2: invalid baseStats structure');
     }
 
+    const typedBaseStats: BaseStats = {
+        heart: baseStats.heart,
+        body: baseStats.body,
+        mind: baseStats.mind,
+    };
+
     // Only add missing fields, preserve existing ones
     if (!player.derivedStats) {
-        player.derivedStats = deriveStats(baseStats);
+        player.derivedStats = deriveStats(typedBaseStats);
     }
-    
+
     if (!player.nonCombatStats) {
-        player.nonCombatStats = deriveNonCombatStats(baseStats);
+        player.nonCombatStats = deriveNonCombatStats(typedBaseStats);
     }
 
     return gameState;
