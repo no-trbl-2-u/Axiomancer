@@ -23,6 +23,17 @@ import { selectVillageVM } from '@/state/presenters/village.engine';
 import { FONTS, TYPE } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
 
+/**
+ * Size for an option's description line on this screen.
+ *
+ * Purpose: the stalls print a ware's description in the same uppercase
+ * mono the inn (`/rest` `offerDesc`) uses, and printed it four points
+ * smaller — so the same sentence was comfortable at the inn and fine
+ * print at the stall. Input: none (a constant). Output: the point size
+ * both surfaces share. Cluster: S5-talk-C17.
+ */
+const DESC_FONT_SIZE = 12;
+
 export default function VillageScreen() {
     const styles = useStyles();
     const event = useGameState((s) => s.event);
@@ -123,7 +134,7 @@ export default function VillageScreen() {
                                     <View style={styles.flexOne}>
                                         <Text style={styles.wareName}>{ware.name}</Text>
                                         {ware.description.length > 0 && (
-                                            <Text style={styles.wareDesc}>{ware.description}</Text>
+                                            <Text style={styles.wareDesc} testID={`village-ware-${ware.itemId}-desc`}>{ware.description}</Text>
                                         )}
                                     </View>
                                     {ware.discounted && (
@@ -211,12 +222,18 @@ const useStyles = makeStyles((AXM) => ({
         marginTop: 12,
         marginBottom: 6,
     },
+    // S5-talk-C11: this was a full ash-bordered panel on panelBg — this app's
+    // DISABLED grammar (`offerDisabled` on /rest and /blacksmith, the greyed
+    // tab of FE-028) — so a named merchant read as a locked button and got
+    // pressed to no effect. It is an inert View by design: a sulfur left rule
+    // is the screen's flavour grammar (the event shell's `loreBox`), which
+    // reads as quoted voice and plainly not a control.
     merchantCard: {
-        borderWidth: 1,
-        borderColor: AXM.ash,
-        backgroundColor: AXM.panelBg,
-        padding: 10,
-        marginBottom: 6,
+        borderLeftWidth: 2,
+        borderLeftColor: AXM.sulfur,
+        paddingLeft: 10,
+        paddingVertical: 2,
+        marginBottom: 8,
     },
     merchantName: { fontFamily: FONTS.gothic, fontSize: 16, color: AXM.sulfur, letterSpacing: 1.2 },
     merchantLine: { fontFamily: FONTS.serifItalic, fontSize: 12, color: AXM.parchment, marginTop: 4 },
@@ -257,7 +274,10 @@ const useStyles = makeStyles((AXM) => ({
     // and legible, matching combat's disabled-item treatment (critic round).
     wareRowUnaffordable: { borderColor: AXM.ash },
     wareName: { fontFamily: FONTS.gothic, fontSize: 16, color: AXM.parchment, letterSpacing: 1 },
-    wareDesc: { fontFamily: FONTS.mono, fontSize: 8, color: AXM.bone, marginTop: 2, textTransform: 'uppercase' },
+    // S5-talk-C17: was 8 — the inn prints the identical uppercase-mono
+    // description at DESC_FONT_SIZE, so the stalls looked like fine print
+    // next to it. One size for a description wherever it appears.
+    wareDesc: { fontFamily: FONTS.mono, fontSize: DESC_FONT_SIZE, color: AXM.bone, marginTop: 2, textTransform: 'uppercase' },
     warePrice: { fontFamily: FONTS.gothic, fontSize: 18, color: AXM.sulfur },
     // Price tracks affordability, not just the row's opacity: value-gold
     // is loud enough to survive the unaffordable dim, so mute the colour

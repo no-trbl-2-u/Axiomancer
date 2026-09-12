@@ -30,6 +30,17 @@ import {
 import { FONTS, TYPE } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
+/**
+ * Widest the forge column is allowed to get.
+ *
+ * Purpose: on a desktop viewport the smith's prose ran the full window at
+ * ~165 characters to a line, which loses the eye on every return sweep.
+ * Input: none (a constant). Output: the cap applied to the scroll content
+ * column; below it the column is simply full-width, so phone layout is
+ * unchanged. Cluster: S5-talk-C13.
+ */
+const SCENE_MAX_WIDTH = 560;
+
 function hapticImpact(style: ImpactFeedbackStyle): void {
     try {
         Haptics.impactAsync(style).catch(() => undefined);
@@ -144,7 +155,11 @@ export default function BlacksmithScreen() {
 
     return (
         <ScreenBg scrollable={false} art="blacksmith">
-            <ScrollView style={styles.scrollOuter} contentContainerStyle={styles.scroll}>
+            <ScrollView
+                style={styles.scrollOuter}
+                contentContainerStyle={styles.scroll}
+                testID="blacksmith-scroll"
+            >
                 <View style={styles.eyebrowRow}>
                     <AxmIcon name="action-anvil" size={18} />
                     <Text style={styles.eyebrow}>THE ANVIL</Text>
@@ -281,7 +296,17 @@ export default function BlacksmithScreen() {
 
 const useStyles = makeStyles((AXM) => ({
     scrollOuter: { flex: 1 },
-    scroll: { padding: 14, paddingBottom: 24, flexGrow: 1, justifyContent: 'center' },
+    // S5-talk-C13: cap the column so the smith's prose keeps a readable
+    // measure on a wide window instead of running edge to edge.
+    scroll: {
+        padding: 14,
+        paddingBottom: 24,
+        flexGrow: 1,
+        justifyContent: 'center',
+        width: '100%',
+        maxWidth: SCENE_MAX_WIDTH,
+        alignSelf: 'center',
+    },
     eyebrowRow: {
         flexDirection: 'row',
         alignItems: 'center',
