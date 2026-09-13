@@ -385,6 +385,12 @@ async function playRound(page, sink, seed, round) {
         }
         if (!(await has(page.getByTestId(`combat-staged-${card.uid}`)))) break
         acted.staged++
+        // Settle the stage-enter animation before targeting it: a die dropped
+        // onto a still-animating staged card's rect can measure a stale
+        // bounding box (CombatBoard's resolveDrop measures live via
+        // measureInWindow) and silently miss — indistinguishable from a real
+        // drag failure, and it only ever shows up under CI's slower paint.
+        await page.waitForTimeout(150)
 
         // Power it, if the tray can.
         if (die) {
@@ -397,8 +403,8 @@ async function playRound(page, sink, seed, round) {
                     { kind: 'die-occluded', message: `${die.id} covered by ${occluder}` },
                 )
             }
-            for (let a = 0; a < 3 && !(await has(page.getByTestId('combat-staged-die'))); a++) {
-                await page.waitForTimeout(120)
+            for (let a = 0; a < 4 && !(await has(page.getByTestId('combat-staged-die'))); a++) {
+                await page.waitForTimeout(180)
                 await dragTo(
                     page,
                     page.getByTestId(`combat-die-${die.id}`),
