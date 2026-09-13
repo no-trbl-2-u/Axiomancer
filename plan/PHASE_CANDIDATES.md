@@ -200,6 +200,18 @@ ACCESSORY), which is the pattern: each is a one-line change, and the value is
 in doing them together against a written lexicon rather than one at a time.
 Evidence and the full list: `axiomancer-mobile/docs/reports/UI_FRESH_EYES_2026-09-12.candidates.md`.
 
+**Status after the 2026-09-12 swarm (PR #302): still open, and now better
+evidenced.** The swarm put all five naming clusters through a three-lens
+adversarial panel and every one was refuted — the adjudicator's reason in each
+case was that the competing senses never appear on the same screen, and appear
+in different grammar when they are near each other. That is a fair verdict on
+each name taken alone and an argument *for* doing them together against a
+written lexicon, which is what this candidate is. Three single-screen cases did
+ship in the swarm: the forge now prices in shillings rather than the combat
+glyph (`FE-056`), the gear section stopped naming a state it does not describe
+(`FE-037`), and the title copy lowercased LEAGUES to match the map (`FE-057`).
+Per-row verdicts: `UI_FRESH_EYES_SWARM_2026-09-12.ledger.md`.
+
 ### [score 6.0] Make the glossary reachable from the screens that need it
 The same sweep found definitions that exist but cannot be got at: the hazard
 deck's fourteen keyword chips render in a plain `View` with no tooltip target,
@@ -207,6 +219,15 @@ its four headline stats (`DISTINCT`, `ACQUIRED`, `SCARS`) are display-only, and
 the combat board's `PLEA`/`CHARGE`/`◆` were named only in accessibility labels
 until the sweep surfaced two of them. The tooltip registry already carries most
 of the content; the gap is that the screens do not mount targets for it.
+
+**Status after the 2026-09-12 swarm (PR #302): partly shipped, keep open.**
+The hazard deck's two unkeyed glyph-and-number pairs now carry an on-screen key
+(`FE-058`), the combat board's empty stance chip names the action that fills it
+(`FE-053`), and the primer stopped teaching a meter the board never draws
+(`FE-054`). The structural half is untouched: the fourteen keyword chips still
+render in a plain `View` with no tooltip target, and the panel refuted the
+row that reported it on the ground that the registry content exists — which is
+exactly this candidate's point, that content nobody can reach is not reachable.
 
 
 ### [score 5.5] The Capital is the new frontier — no door onward yet, same as town-across-river before it
