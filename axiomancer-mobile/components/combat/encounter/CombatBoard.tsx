@@ -1551,20 +1551,33 @@ export const CombatBoard = React.memo(function CombatBoard({
                     call 2026-07-19): it is a signature, cast from the rune column
                     like every other. The presenter reshapes its rune flag-on
                     (1◆ cost + the full firing gate + refusal reason). */}
-                {/* The tray outranks the rune column in z-order (2026-09-13).
-                    `sigTop` keeps the column clear of the tray whenever there is
-                    room, but it is derived from THREE measured values
-                    (`contentH`, `trayTop`, `sigH`) held in state: for the frame
-                    between a re-layout and the re-render that follows it, the
-                    column is still at its previous anchor and can sit over the
-                    tray. In that frame `elementFromPoint` at a die's centre
-                    returns a rune button, so the die cannot be dragged and a tap
-                    aimed at it casts a signature and spends Conviction instead.
-                    CI caught exactly that frame (PR #306, boss seed 16, at round
-                    9 on one run and round 5 on the next — the round is incidental,
-                    the stale frame is the bug). Ranking the tray above the column
-                    makes a die win the hit test no matter what the measurements
-                    are doing; the clearance clamp still does the visual work. */}
+                {/* The tray outranks the rune column in z-order (2026-09-13,
+                    re-fixed 2026-09-13). `sigTop` keeps the column clear of the
+                    tray whenever there is room, but it is derived from THREE
+                    measured values (`contentH`, `trayTop`, `sigH`) held in
+                    state: for the frame between a re-layout and the re-render
+                    that follows it, the column is still at its previous anchor
+                    and can sit over the tray. In that frame `elementFromPoint`
+                    at a die's centre returns a rune button, so the die cannot
+                    be dragged and a tap aimed at it casts a signature and
+                    spends Conviction instead. Ranking the tray's zIndex (31)
+                    above the column's (30) is only real if they are SIBLINGS —
+                    react-native-web gives every plain View `position: relative;
+                    z-index: 0` by default, so this tray layer used to be
+                    trapped inside `content`'s own stacking context while the
+                    column floated as `content`'s SIBLING at the `root` level.
+                    There, `content` (z-index 0) always lost to the column
+                    (z-index 30) regardless of the tray's internal 31, so the
+                    column painted — and hit-tested — on top of the tray
+                    whenever they overlapped. CI caught exactly that (PR #306,
+                    boss seed 16, round 9 one run and round 5 the next — the
+                    round is incidental, the stacking bug is not; it reproduced
+                    again on main at d4468c21, the merge that already carried
+                    the first zIndex attempt). The column is rendered as this
+                    layer's own sibling below so the 31-vs-30 comparison is a
+                    real one: a die wins the hit test no matter what the
+                    measurements are doing; the clearance clamp still does the
+                    visual work. */}
                 <View
                     onLayout={(e) => setTrayTop(e.nativeEvent.layout.y)}
                     pointerEvents="box-none"
@@ -1572,6 +1585,15 @@ export const CombatBoard = React.memo(function CombatBoard({
                 >
                     <DiceRow vm={vm} dieGesture={dieGesture} draggingDieId={draggingDieId} assignedDieIds={assignedDieIds} onFateTap={onFateTap} />
                 </View>
+
+                {/* signature rune column — left edge. A sibling of the tray
+                    layer above (both direct children of `content`) so their
+                    explicit zIndex values actually compete in one stacking
+                    context — see the comment on the tray layer. */}
+                <SignatureColumn
+                    conviction={vm.conviction} signatures={vm.signatures} onCast={onSignature} onInfo={onSignatureInfo}
+                    top={sigTop} onMeasureHeight={setSigH}
+                />
 
                 {/* the hand dock — edge-to-edge fan, bottoms cropped off-screen */}
                 <View style={styles.dock}>
@@ -1658,12 +1680,6 @@ export const CombatBoard = React.memo(function CombatBoard({
                 onPress={onPlayerInspect}
                 fx={fx}
                 bottomInset={bottomInset}
-            />
-
-            {/* signature rune column — left edge */}
-            <SignatureColumn
-                conviction={vm.conviction} signatures={vm.signatures} onCast={onSignature} onInfo={onSignatureInfo}
-                top={sigTop} onMeasureHeight={setSigH}
             />
 
             {/* SCRAP — only present while a card is being dragged (no permanent
