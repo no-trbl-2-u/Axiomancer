@@ -14,7 +14,7 @@
 | cards | `skills/adjust-cards.md` | 2026-09-12 | be34ca43 | 8 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-12 | 030e26ae | 8 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-13 | 832e3e5e | 8 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-13 | PENDING | 8 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-13 | 37dacef1 | 8 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-12 | 99cac84e | 7 |
 
 ## Log
@@ -22,7 +22,7 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-keywords pass 8, 2026-09-13, commit PENDING]** One UPDATE (a
+> **[adjust-keywords pass 8, 2026-09-13, commit 37dacef1]** One UPDATE (a
 > wiring-honesty bug fix), zero-CREATE, zero-REMOVE pass — dispatched
 > autonomously by `/march`'s content-lifecycle gate (`keywords` was the
 > stalest qualifying category this tick: 81 commits since pass 7's commit
