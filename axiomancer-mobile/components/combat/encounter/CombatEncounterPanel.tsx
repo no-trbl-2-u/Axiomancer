@@ -341,6 +341,27 @@ export function CombatEncounterPanel({
     // instantly ("blink"). Ignore backdrop dismiss for a moment after open (the ✕ always works).
     const detailOpenedAt = useRef(0);
     const [tipEffect, setTipEffect] = useState<CombatEffectChipVM | null>(null);
+    /**
+     * Which threat phases are expanded in the pre-combat reveal (owner directive
+     * 2026-09-13: "the enemy phases should be an accordion — we don't need to
+     * show them all by default").
+     *
+     * Holds the 1-based `phase.index` of every OPEN row. Seeded with `1` so the
+     * imminent phase — the only one that can hurt you this turn — is still read
+     * at a glance, while the rest of the sequence collapses to its headers.
+     */
+    const [openThreatPhases, setOpenThreatPhases] = useState<ReadonlySet<number>>(
+        () => new Set([1]),
+    );
+    /** Toggle one threat phase row open/closed by its 1-based phase index. */
+    const toggleThreatPhase = useCallback((phaseIndex: number) => {
+        setOpenThreatPhases((prev) => {
+            const next = new Set(prev);
+            if (next.has(phaseIndex)) next.delete(phaseIndex);
+            else next.add(phaseIndex);
+            return next;
+        });
+    }, []);
     // Phase 50 — a tapped Seal chip's CRACK/WAIT confirm sheet (mirrors the
     // PLEA/mercy modal pattern per Phase 49 decision 2).
     const [sealConfirm, setSealConfirm] = useState<CombatSealVM | null>(null);
@@ -703,6 +724,15 @@ export function CombatEncounterPanel({
     // CombatBoard's React.memo and re-render the whole 1200-line board on every
     // unrelated panel state change (tooltips, fx bumps) — felt as drag jank.
     const onInspect = useCallback((c: CombatCardVM) => { detailOpenedAt.current = Date.now(); setDetailCard(c); }, []);
+    /**
+     * Dismiss the card detail overlay. Shared by the backdrop, the card body,
+     * and the scrolled content so a tap ANYWHERE exits (owner directive
+     * 2026-09-13). The 350ms guard swallows the tail of the press that OPENED
+     * the overlay, which would otherwise close it on the same gesture.
+     */
+    const closeCardDetail = useCallback(() => {
+        if (Date.now() - detailOpenedAt.current > 350) setDetailCard(null);
+    }, []);
     const onPlayerInspect = useCallback(() => setPilgrimOpen(true), []);
     const onMomentumInfo = useCallback(() => setMomentumInfoOpen(true), []);
     const momentum = vm.momentum;
@@ -787,12 +817,29 @@ export function CombatEncounterPanel({
                             screen whose whole job is to telegraph it. */}
                         {live.threatPhases.map((p, i) => {
                             const meta = INTENT_ICONS[p.intentType ?? 'pass'];
+                            // Accordion row: the header (icon + PHASE n · INTENT +
+                            // chevron) is always present and is the whole touch
+                            // target; the threat text only mounts when open.
+                            const open = openThreatPhases.has(p.index);
                             return (
                                 <View key={i} style={styles.revealPhase}>
-                                    <Text style={[styles.revealPhaseIcon, { color: meta.color }]}>{meta.icon}</Text>
-                                    <View style={{ flex: 1 }}>
-                                        <Text style={styles.revealPhaseLabel}>PHASE {p.index} · {meta.label}</Text>
-                                        {p.branch ? (
+                                    <Pressable
+                                        onPress={() => toggleThreatPhase(p.index)}
+                                        accessibilityRole="button"
+                                        accessibilityState={{ expanded: open }}
+                                        accessibilityLabel={`Phase ${p.index}, ${meta.label}`}
+                                        accessibilityHint={open ? 'tap to collapse this phase' : 'tap to read this phase'}
+                                        testID={`combat-reveal-phase-${p.index}`}
+                                        style={styles.revealPhaseHead}
+                                    >
+                                        <Text style={[styles.revealPhaseIcon, { color: meta.color }]}>{meta.icon}</Text>
+                                        <Text style={[styles.revealPhaseLabel, styles.revealPhaseHeadLabel]}>
+                                            PHASE {p.index} · {meta.label}
+                                        </Text>
+                                        <Text style={styles.revealPhaseChevron}>{open ? '▾' : '▸'}</Text>
+                                    </Pressable>
+                                    <View style={[styles.revealPhaseBody, open ? null : styles.revealPhaseBodyHidden]}>
+                                        {open ? (p.branch ? (
                                             /* WS9 — a branch phase telegraphs its condition + BOTH
                                                outcomes before commit; the taken fork is marked after. */
                                             <View>
@@ -806,8 +853,8 @@ export function CombatEncounterPanel({
                                             </View>
                                         ) : (
                                             <Text style={styles.revealPhaseText}>{p.threatAction.description}</Text>
-                                        )}
-                                        {p.stanceHint ? <Text style={styles.revealPhaseTell}>🜲 stance hidden — {p.stanceHint}</Text> : null}
+                                        )) : null}
+                                        {open && p.stanceHint ? <Text style={styles.revealPhaseTell}>🜲 stance hidden — {p.stanceHint}</Text> : null}
                                     </View>
                                 </View>
                             );
@@ -937,12 +984,19 @@ export function CombatEncounterPanel({
                 FREE-vs-POWER fork. Un-boxed: everything floats on the dimmed backdrop.
                 The developer-facing mathLine / subtitle / readNote are NEVER shown. */}
             {detailCard && (
-                <Pressable style={styles.backdrop} testID="combat-card-detail" onPress={() => { if (Date.now() - detailOpenedAt.current > 350) setDetailCard(null); }}>
-                    <View style={styles.detailModalWrap} onStartShouldSetResponder={() => true}>
+                <Pressable style={styles.backdrop} testID="combat-card-detail" onPress={closeCardDetail}>
+                    {/* Owner directive 2026-09-13: a card detail screen exits on a
+                        tap ANYWHERE — the card body no longer claims the touch via
+                        `onStartShouldSetResponder`, and the scrolled content is
+                        wrapped in its own Pressable so a tap landing on the prose
+                        closes too. The ✕ stays as an explicit affordance. Scroll
+                        gestures are unaffected: a drag never fires `onPress`. */}
+                    <Pressable style={styles.detailModalWrap} onPress={closeCardDetail}>
                         <ScrollView
                             style={styles.detailScroll}
                             contentContainerStyle={styles.detailStack}
                         >
+                            <Pressable onPress={closeCardDetail}>
                             {/* (1) keyword DEFINITIONS at the top — ONE compact ledger
                                 (owner playtest 2026-07-18: five separate full-size boxes
                                 buried the card they were explaining). Hairline-separated
@@ -1043,9 +1097,10 @@ export function CombatEncounterPanel({
                             {detailCard.flavor ? (
                                 <Text style={styles.detailFlavor} testID="combat-card-detail-flavor">{detailCard.flavor}</Text>
                             ) : null}
+                            </Pressable>
                         </ScrollView>
 
-                    </View>
+                    </Pressable>
 
                     {/* close ✕ — pinned to the BACKDROP's bottom-right (reference shape), so
                         it never falls below the fold and never overlaps the keyword tags. */}
@@ -1502,7 +1557,14 @@ const useStyles = makeStyles((AXM) => ({
     revealYours: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.bone, letterSpacing: 1, marginTop: 2 },
     revealTell: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 14, color: AXM.bone, textAlign: 'center', marginTop: 10, marginHorizontal: 10, lineHeight: 19 },
     revealSection: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.2, color: AXM.sulfur, marginTop: 20, marginBottom: 8, alignSelf: 'stretch' },
-    revealPhase: { flexDirection: 'row', gap: 10, alignSelf: 'stretch', borderWidth: 1, borderColor: AXM.ash, backgroundColor: 'rgba(0,0,0,0.35)', padding: 9, marginBottom: 7 },
+    revealPhase: { alignSelf: 'stretch', borderWidth: 1, borderColor: AXM.ash, backgroundColor: 'rgba(0,0,0,0.35)', paddingHorizontal: 9, paddingVertical: 4, marginBottom: 7 },
+    // Accordion header: the whole strip is the toggle, sized to a thumb.
+    revealPhaseHead: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 44 },
+    revealPhaseHeadLabel: { flex: 1 },
+    revealPhaseChevron: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.bone },
+    // Body sits under the header, indented to clear the intent glyph.
+    revealPhaseBody: { paddingLeft: 30, paddingBottom: 7 },
+    revealPhaseBodyHidden: { paddingBottom: 0 },
     revealPhaseIcon: { fontSize: 20, lineHeight: 22 },
     revealPhaseLabel: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 0.6, color: AXM.parchment },
     revealPhaseText: { fontFamily: FONTS.serif, fontSize: 12, color: AXM.bone, marginTop: 2, lineHeight: 15 },

@@ -2158,9 +2158,15 @@ const useStyles = makeStyles((AXM) => ({
     // A page of the codex: name band on ink, framed art plate behind a
     // hairline rule, solid-ground ledger. Stance colours the frame; category
     // colours glyph + keyword. AXM tokens throughout — no scrim, no washes.
+    // Owner directive 2026-09-13: the 2pt `pixelShadow` ring (a dark RED in the
+    // default palette, #7a0d1c) read as a second border wrapped around every
+    // card, fighting the stance-coloured frame that is the card's real colour
+    // signal. The ring is gone — a card now carries exactly ONE border, the
+    // stance colour on `faceCard`. The drop shadow stays (depth cue, not a
+    // border) but is neutralised to ink so it cannot re-read as a red halo.
     faceOuter: {
-        borderRadius: 6, borderWidth: 2, borderColor: AXM.pixelShadow, backgroundColor: AXM.deepBg,
-        shadowColor: AXM.pixelShadow, shadowOpacity: 0.5, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: 6,
+        borderRadius: 6, backgroundColor: AXM.deepBg,
+        shadowColor: AXM.shadow, shadowOpacity: 0.5, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: 6,
     },
     faceCard: { flex: 1, borderWidth: 1.5, borderRadius: 4, backgroundColor: AXM.deepBg, overflow: 'hidden' },
     // ① The name band — horizontal blackletter; the wax pip is the rarity.

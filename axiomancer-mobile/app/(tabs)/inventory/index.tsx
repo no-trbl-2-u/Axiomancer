@@ -9,6 +9,7 @@ import { TooltipTarget } from '@/components/tooltip/TooltipTarget';
 import { EquipmentDock } from '@/components/inventory/EquipmentDock';
 import { InventoryTabs } from '@/components/inventory/InventoryTabs';
 import { ItemGrid } from '@/components/inventory/ItemGrid';
+import { EquipmentDetailModal } from '@/components/inventory/EquipmentDetailModal';
 import { ItemModal } from '@/components/inventory/ItemModal';
 import { SlotBanner } from '@/components/inventory/SlotBanner';
 import { useGameActions, useGameState, useGameStore } from '@/state/GameStoreProvider';
@@ -21,6 +22,10 @@ import {
     selectItemModalViewModel,
     type ItemModalViewModel,
 } from '@/state/presenters/inventory.modal.engine';
+import {
+    selectEquipmentDetailViewModel,
+    type EquipmentDetailViewModel,
+} from '@/state/presenters/equipment-detail.engine';
 
 export default function InventoryScreen() {
     const AXM = usePalette();
@@ -28,6 +33,11 @@ export default function InventoryScreen() {
     const [activeTab, setActiveTab] = useState<InventoryTab>('all');
     const [expandedItemId, setExpandedItemId] = useState<string | null>(null);
     const [modalItemId, setModalItemId] = useState<string | null>(null);
+    // Long-pressing a filled dock slot opens the read-only equipment detail
+    // card (2026-09-13 playthrough note #2). Separate from `modalItemId`, which
+    // drives the ACTION modal (use / equip / unequip) — this one never commits
+    // anything, so the two must not share a slot of state.
+    const [detailItemId, setDetailItemId] = useState<string | null>(null);
     // Phase 32 sub-tick F follow-up: tap a dock slot to filter the sack
     // to compatible items. selectedSlot === null when no filter active;
     // selecting filter clears the tab pick (mirrors design — slot filter
@@ -59,6 +69,12 @@ export default function InventoryScreen() {
         return selectItemModalViewModel(store.getState(), modalItemId);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [modalItemId, store, player]);
+
+    const detailVm = useMemo<EquipmentDetailViewModel | null>(() => {
+        if (detailItemId === null) return null;
+        return selectEquipmentDetailViewModel(store.getState(), detailItemId);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [detailItemId, store, player]);
 
     const onConfirmModal = useCallback(() => {
         if (modalVm === null || modalVm.itemId === null) {
@@ -132,7 +148,12 @@ export default function InventoryScreen() {
                 </View>
             </View>
 
-            <EquipmentDock vm={vm.equipmentDock} selectedSlot={selectedSlot} onSelectSlot={onSelectSlot} />
+            <EquipmentDock
+                vm={vm.equipmentDock}
+                selectedSlot={selectedSlot}
+                onSelectSlot={onSelectSlot}
+                onShowItemDetail={setDetailItemId}
+            />
 
             {vm.equipmentDock.selectedSlot !== null && (
                 <SlotBanner
@@ -166,6 +187,8 @@ export default function InventoryScreen() {
                 onConfirm={onConfirmModal}
                 onCancel={() => setModalItemId(null)}
             />
+
+            <EquipmentDetailModal vm={detailVm} onClose={() => setDetailItemId(null)} />
         </ScreenBg>
     );
 }

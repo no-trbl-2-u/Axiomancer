@@ -61,7 +61,7 @@ describe('S4-world-C17: SKIP is a button, and a hittable one', () => {
         const skip = tree.getByTestId('cutscene-skip');
 
         expect(skip.props.accessibilityRole).toBe('button');
-        expect(skip.props.accessibilityLabel).toBe('Skip to the end');
+        expect(skip.props.accessibilityLabel).toBe('Skip the scene');
     });
 
     it('reserves a box at least 44pt on its short edge', () => {
@@ -86,19 +86,22 @@ describe('S4-world-C17: SKIP is a button, and a hittable one', () => {
         expect(style.backgroundColor).toBeTruthy();
     });
 
-    it('still does its job: one press reveals every line and retires the control', () => {
+    // Owner call 2026-09-13: with the fade-through presentation (one line on
+    // screen at a time) there is no "reveal everything" state to jump to, so
+    // SKIP abandons the scene outright — it dismisses the pending event, which
+    // empties the store slice and drops the screen to its inactive shell.
+    it('still does its job: one press abandons the whole scene', () => {
         const store = makeStore();
         const tree = mount(store);
 
-        expect(tree.queryByTestId(`cutscene-line-${LINES.length - 1}`)).toBeNull();
+        expect(tree.getByTestId('cutscene-line-0')).toBeTruthy();
 
         act(() => {
             fireEvent.press(tree.getByTestId('cutscene-skip'));
         });
 
-        for (let i = 0; i < LINES.length; i += 1) {
-            expect(tree.getByTestId(`cutscene-line-${i}`)).toBeTruthy();
-        }
-        expect(tree.queryByTestId('cutscene-skip')).toBeNull();
+        expect(store.getState().event.pending).toBeNull();
+        expect(tree.queryByTestId('cutscene-advance')).toBeNull();
+        expect(tree.getByTestId('cutscene-inactive')).toBeTruthy();
     });
 });
