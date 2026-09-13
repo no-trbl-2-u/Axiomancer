@@ -1551,7 +1551,25 @@ export const CombatBoard = React.memo(function CombatBoard({
                     call 2026-07-19): it is a signature, cast from the rune column
                     like every other. The presenter reshapes its rune flag-on
                     (1◆ cost + the full firing gate + refusal reason). */}
-                <View onLayout={(e) => setTrayTop(e.nativeEvent.layout.y)} pointerEvents="box-none">
+                {/* The tray outranks the rune column in z-order (2026-09-13).
+                    `sigTop` keeps the column clear of the tray whenever there is
+                    room, but it is derived from THREE measured values
+                    (`contentH`, `trayTop`, `sigH`) held in state: for the frame
+                    between a re-layout and the re-render that follows it, the
+                    column is still at its previous anchor and can sit over the
+                    tray. In that frame `elementFromPoint` at a die's centre
+                    returns a rune button, so the die cannot be dragged and a tap
+                    aimed at it casts a signature and spends Conviction instead.
+                    CI caught exactly that frame (PR #306, boss seed 16, at round
+                    9 on one run and round 5 on the next — the round is incidental,
+                    the stale frame is the bug). Ranking the tray above the column
+                    makes a die win the hit test no matter what the measurements
+                    are doing; the clearance clamp still does the visual work. */}
+                <View
+                    onLayout={(e) => setTrayTop(e.nativeEvent.layout.y)}
+                    pointerEvents="box-none"
+                    style={styles.trayLayer}
+                >
                     <DiceRow vm={vm} dieGesture={dieGesture} draggingDieId={draggingDieId} assignedDieIds={assignedDieIds} onFateTap={onFateTap} />
                 </View>
 
@@ -1982,6 +2000,10 @@ const useStyles = makeStyles((AXM) => ({
 
     // ── signature rune column ──
     sigColumn: { position: 'absolute', left: 6, top: SIG_COLUMN_TOP, alignItems: 'center', gap: 8, zIndex: 30 },
+    // One rung above `sigColumn`'s 30, so a die is never swallowed by a rune
+    // (see the comment at the tray's call site). Still below the corner
+    // medallions at 40, which are deliberately the topmost board chrome.
+    trayLayer: { zIndex: 31 },
     convictionChip: {
         borderWidth: 1, borderColor: AXM.sulfur, borderRadius: 6, backgroundColor: 'rgba(0,0,0,0.6)',
         paddingHorizontal: 7, paddingVertical: 3,
