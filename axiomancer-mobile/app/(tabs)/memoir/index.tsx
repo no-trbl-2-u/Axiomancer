@@ -66,6 +66,12 @@ function QuestCard({ quest }: { quest: MemoirQuestRow }) {
  * pattern) — `useGameState(selectMemoirViewModel)` would churn
  * `useSyncExternalStore` because the VM is a frozen-new object
  * every call.
+ *
+ * Inputs: none (reads store slices via hooks). Output: the MEASURE /
+ * chronicle / errands / remains screen element.
+ * Resolves: 09-memoir-fresh — the MEASURE row's chips are laid out as
+ * shrinkable, wrappable flex children so the long UNTESTED hint stays
+ * inside a 375pt viewport instead of running off-screen.
  */
 export default function MemoirScreen() {
     const styles = useStyles();
@@ -205,7 +211,7 @@ export default function MemoirScreen() {
                 {/* Measure */}
                 <View style={styles.section} testID="memoir-measure">
                     <SectionLabel size={10}>{vm.measureEyebrow}</SectionLabel>
-                    <View style={styles.measureRow}>
+                    <View style={styles.measureRow} testID="memoir-measure-row">
                         {/* Phase 74 follow-up walkthrough — memoir Tick 1:
                             wrap each alignment chip in a TooltipTarget
                             pointing at the new kind:'alignment' ids
@@ -216,6 +222,7 @@ export default function MemoirScreen() {
                             accessibilityLabel="Explain moral alignment"
                             accessibilityHint="tap to read description"
                             testID="memoir-moral-chip-tooltip"
+                            style={styles.measureChipTarget}
                         >
                             <View
                                 style={[
@@ -245,6 +252,7 @@ export default function MemoirScreen() {
                             accessibilityLabel="Explain philosophical alignment"
                             accessibilityHint="tap to read description"
                             testID="memoir-philosophical-chip-tooltip"
+                            style={styles.measureChipTarget}
                         >
                             <View style={styles.measureChip} testID="memoir-philosophical-chip">
                                 <Text style={styles.measureLabel}>
@@ -405,7 +413,16 @@ const useStyles = makeStyles((AXM) => ({
         letterSpacing: 0.5,
     },
     objectiveDone: { color: AXM.sulfur, textDecorationLine: 'line-through' },
-    measureRow: { flexDirection: 'row', gap: 6, marginTop: 6 },
+    // 09-memoir-fresh: the chips hang off a TooltipTarget (a Pressable),
+    // so `measureChip`'s `flex: 1` only ever sized the inner View inside
+    // that pressable's column — the pressable itself kept RN's default
+    // `flexShrink: 0` and sized to max-content. Once the UNTESTED chip
+    // carried the presenter's 75-char hint it ran past the 375pt
+    // viewport. The row now wraps and the targets shrink: at 375 the
+    // long chip drops to its own line and fits the width; at 1280 both
+    // still fit side by side at content width, unchanged.
+    measureRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 },
+    measureChipTarget: { flexShrink: 1, minWidth: 0 },
     measureChip: {
         flex: 1,
         paddingVertical: 6,
