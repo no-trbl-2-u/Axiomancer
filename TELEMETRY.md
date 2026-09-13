@@ -7,9 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-08T19:09:56Z | skill | critique | claude-sonnet-5 | main | - |
-| 2026-08-08T21:35:47Z | subagent | general-purpose | claude-opus-5 | main | Phase 42 dark fantasy bible |
-| 2026-08-08T21:36:21Z | subagent | general-purpose | claude-opus-5 | main | Phase 43 objective function v2 |
 | 2026-08-08T21:36:46Z | subagent | general-purpose | claude-opus-5 | main | Phase 52a deck removal primitive |
 | 2026-08-08T21:37:13Z | subagent | general-purpose | claude-opus-5 | main | Phase 52b first-class inn |
 | 2026-08-08T21:37:40Z | subagent | general-purpose | claude-opus-5 | main | Phase 48 Closes-N root cause |
@@ -407,3 +404,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-13T20:33:15Z | skill | adjust-enemies | claude-sonnet-5 | main | - |
 | 2026-09-13T20:34:00Z | subagent | general-purpose | claude-sonnet-5 | main | Ship adjust-enemies pass 9 |
 | 2026-09-13T20:57:01Z | slash-prompt | /fix-ci | unknown | user/ci | /fix-ci 34781667060 |
+| 2026-09-13T22:28:59Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-13T22:30:04Z | skill | adjust-keywords | claude-sonnet-5 | main | - |
+| 2026-09-13T22:30:36Z | subagent | card-expert | claude-sonnet-5 | main | Run adjust-keywords lifecycle pass 9 |

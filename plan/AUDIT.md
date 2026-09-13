@@ -226,6 +226,38 @@
 
 ## Pending
 
+### [loop-call] Keyword registry has no analogue for Dawncaster's "Chaos" or generic "Upgrade" families (2026-09-13)
+`/adjust-keywords` pass 9's functions-column sweep (`DigitalCardGames/dawncaster/
+keywords.csv`, 141 rows) against our 68-row registry's eight families (damage,
+afflictions/payoffs, walls/reprisal, tempo/control, turn shape, deck-as-resource,
+resolve/harvest/mercy, dice) turned up two genre families we carry no analogue
+for at all:
+
+- **Chaos** (Balance/Order/Delirious/Dominated/Pinned) — cards that gate on a
+  parity property of your own deck/hand (even/odd cards remaining) or briefly
+  scramble/restrict what you may play (shuffled costs, forced-random-card,
+  leftmost/rightmost-only). A genuinely different lever from anything in our
+  "turn shape" family (which gates on position-in-turn/hand-size, never on a
+  randomized or parity-checked state).
+- **generic Upgrade** (Mergecraft/Infuse/permanent per-card damage growth) —
+  a card that gets permanently stronger outside of WRATH's fight-long stacking
+  buff; Dawncaster's version attaches to the CARD object itself (deck-building
+  layer), not to combat state, which is a different axis than anything we
+  currently price.
+
+Neither clears this skill's own CREATE bar ("a real design gap exists," not
+merely "a mechanic Dawncaster has that we lack") — no concrete card idea, rank
+slot, or theme attachment has been proposed for either, and both would need a
+new payload shape / verb class ratified before the 12-step wiring checklist
+even starts. Filed as a genre-toolbox observation for an owner to size, not
+actioned. If picked up: KB prior art already gathered above
+(`kb:dawncaster/keywords.csv`, community-sourced, confidence medium per the
+corpus's own `status: draft` — cite this row's csv read as the receipt, then
+`kb_read_doc` the individual `keywords/balance.okf.md` / `order.okf.md` /
+`dominated.okf.md` / `mergecraft.okf.md` / `infuse.okf.md` records before
+drafting semantics) plus the standard KB research gate for whichever family is
+chosen.
+
 ### [loop-call] The deck-matrix baseline reads STALE because of a speech-mark edit (2026-09-12)
 `baseline:check` now reports the baseline stale by one mechanics-source commit:
 `df6e98f ui-fresh-eyes: FE-006 world content — speech marks that point the

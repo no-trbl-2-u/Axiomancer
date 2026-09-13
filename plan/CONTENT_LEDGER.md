@@ -14,12 +14,121 @@
 | cards | `skills/adjust-cards.md` | 2026-09-13 | 4b1b6a64 | 9 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-13 | 22ce276c | 9 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-13 | 304608c1 | 9 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-13 | 37dacef1 | 8 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-13 | <PENDING> | 9 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-13 | abb3da01 | 8 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-keywords pass 9, 2026-09-13, commit <PENDING>]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
+> content-lifecycle gate (`keywords` was the stalest qualifying category this
+> tick: 23 commits since pass 8's commit `37dacef1`, past the 15-commit/36h
+> threshold and the oldest of the five categories' own last-pass timestamps —
+> npcs `abb3da01` sat under its own threshold, cards `4b1b6a64`/equipment
+> `22ce276c`/enemies `304608c1` all landed later the same day). `git log
+> 37dacef1..HEAD -- axiomancer-mechanics/src/Cards axiomancer-mechanics/
+> src/Effects axiomancer-mechanics/src/Combat
+> axiomancer-mechanics/docs/keyword-atlas.md docs/retheme-map.json
+> axiomancer-mobile/state/combat/keywords.ts
+> axiomancer-card-editor/src/data/mechanics.ts` is empty, matching the exact
+> 23-commit count `/march` measured; the matching `git diff --stat` over the
+> same path set is also empty. Read the 23 intervening commits directly rather
+> than trusting the empty path-scoped log alone: 21 of them were the sibling
+> cards/equipment/enemies pass-9 ticks (each already zero-diff and
+> independently confirmed clean of the keyword surface by their own logs
+> above) plus their ledger-bump commits; the remaining 2 were
+> `dd1c1c32`/`c15f4119` (a die-vs-signature-column z-index stacking-context
+> fix, `axiomancer-mobile/components/combat/encounter/CombatBoard.tsx` only —
+> hit-testing/layout, not the glyph/gloss/keyword-registry surface) and
+> `d4468c21` (a UI PR bundling intro fade, an equipment detail modal, and a
+> threat-reveal accordion — `app/(tabs)/inventory`, `app/cutscene`,
+> `CombatBoard.tsx`, `CombatEncounterPanel.tsx`, a new
+> `EquipmentDetailModal.tsx`/`equipment-detail.engine.ts` presenter — read all
+> three diffs in full; none touches `statusGlyphs.ts`, `glyphShapes.ts`,
+> `KEYWORD_GLOSS`, `mechanicHeadline`/`MECH_HEADLINE_PRIORITY`, or
+> `SPECIAL_MECHANIC_KINDS`/`wx.ts`). Re-derived every Step-1 signal fresh
+> anyway rather than trusting the empty diff, same discipline as every prior
+> pass: (1) **`CardSpecialMechanic`/`CardRider`/`SynergyStatePredicate` kind
+> count** — a fresh `kind: '...'` extraction from `src/Cards/types.ts` gives
+> 50 `CardSpecialMechanic` + 7 `SynergyStatePredicate` = 57, byte-identical to
+> pass 8 (the file itself shows zero commits since `37dacef1`). (2)
+> **display-switch parity** — counted `case '...'` arms inside
+> `combat.cards.ts`'s two generator functions directly rather than trusting
+> the file's unchanged status alone: `mechanicText` carries exactly 50 cases,
+> `statePredicateText` exactly 7 — 57/57 resolve, matching pass 8's own
+> post-fix state (56 pre-fix + the `conjure_card` fix it shipped = 57); no new
+> silent `default:` gap. (3) **card-library carrier-count sweep** — a fresh
+> `kind: '...'` grep across all 9 `src/Cards/library/*.cards.ts` modules
+> (unchanged file set, confirmed via the same empty path-scoped log)
+> reproduces pass 8's exact histogram: the ten kinds at exactly 2 carriers
+> (`chain`, `echo`, `execute`, `extend_dots`, `finale`, `lock_stance`, `omen`,
+> `opening`, `peroration`, `reap_all`, `replay_last`, `rupture`, `turnabout` —
+> 13 total, matching pass 8's expanded list including the three it named
+> individually) sit unchanged at the atlas's own "≥2 cards or ≥2 enemies"
+> floor; the ten one-carrier kinds (`bank_spent_die`, `conjure_card`,
+> `consume_affliction`, `convert_dots`, `grant_pip`, `purge_self`, `reap`,
+> `recoil_x`, `reroll_spent`, `spend_premises`) and the zero-carrier die-gear/
+> card-local kinds (`strip_random_buff`, `befriend_attempt`, `refresh_die`,
+> `convert_die_color`, `overheat`, `forge_floating_die`, `float_x_die`,
+> `spend_all_pips`, `echo_next_spell`) are unchanged from pass 8's own
+> cross-check against mobile's `KINDS_WITHOUT_MECHANIC_KEYWORD` exemption
+> list — no new REMOVE candidate (mobile file itself shows zero commits since
+> `37dacef1`, so the exemption mapping cannot have drifted). (4) **enemy-
+> keyword carrier sweep** — a fresh comment-stripped `{ kind: '...' }`
+> extraction across `enemy.library.ts`'s `keywords:`/`gain:` arrays gives
+> brutal 21, elusive 3, hide 21, ravenous 3, regrow 5, swift 19, unshaken 12,
+> venom 9, wounding 13 — byte-identical to pass 8 (file shows zero commits
+> since `e57f9f63`, pass 6, well before this window), all 9 atlas-listed
+> enemy keywords still carry ≥2. (5) **registry parity** — `axio_overview`
+> reconfirms 68 keyword rows, 128 cards, 78 enemies, unchanged from pass 8.
+> (6) **Known-drift section accuracy** — re-read `debuffs.library.json` and
+> `src/Combat/effects.ts` directly: POISON/BLEED/DOOM `damagePerRound` still
+> 2/3/1 and `CAPITULATE_MIN`/`CAPITULATE_RESOLVE_FRACTION` still 10/0.35
+> (`RUPTURE_CAP_FRACTION` still `Number.POSITIVE_INFINITY`) — the atlas's
+> "Known drift" note stays accurate, re-cited not re-filed. (7) **functions-
+> column design-gap sweep** (kb-query gate territory, run to satisfy Step 1's
+> own audit-signal table even though no CREATE resulted) — read the full
+> 141-row `DigitalCardGames/dawncaster/keywords.csv` fresh via `kb_read_doc`
+> and checked its `functions` column against our eight-family registry
+> (damage, afflictions/payoffs, walls/reprisal, tempo/control, turn shape,
+> deck-as-resource, resolve/harvest/mercy, dice): the genre families we do NOT
+> carry an analogue for — Dawncaster's "Chaos" (Balance/Order/Delirious/
+> Dominated/Pinned: hand-shuffling and parity-gated constraints) and generic
+> per-card "Upgrade" (Mergecraft/Infuse/permanent damage-per-upgrade) — are
+> the same two gaps every reading of this csv would surface, not a new
+> finding; neither clears the skill's own bar ("a real design gap exists," not
+> "a mechanic Dawncaster has that we don't") without a concrete card idea and
+> owner ratification of a NEW verb class, so filed as a `[loop-call]` residue
+> below rather than force-built into a CREATE this pass — consistent with
+> "don't force a finding that isn't real." (8) **mobile KW-1/KW-3 jest suite**
+> — ran `state/combat/__tests__/keywords.test.ts` directly (13/13 green,
+> matching pass 8, since no mobile keyword file moved). No genuine finding
+> this pass — every signal re-tested clean against a provably unchanged
+> source graph, not assumed stale-clean from an empty log alone. KB research
+> (skill §3 Step 2): the functions-column read above was exploratory (Step 1
+> audit signal, not a CREATE/UPDATE gate) and surfaced no ratified design gap,
+> so no CREATE/UPDATE shipped and the KB gate does not apply; REMOVE also
+> didn't apply (no candidate cleared the ≥2-carrier retirement bar either).
+> Verify: ran all four gates in full (not skipped, despite zero source diff)
+> — `npm run verify --workspace axiomancer-mechanics` (213/213 files, 3428
+> tests + build, matching pass 8/cards-pass-9/equipment-pass-9's count
+> exactly), `npm run verify --workspace axiomancer-mobile` (lint 0 errors/15
+> pre-existing warnings, typecheck clean, jest 299/299 suites, 2854 tests, 3/3
+> snapshots — matching pass 8 exactly, assets:check clean, art:test 24/24),
+> `npm run type-check --workspace axiomancer-card-editor` (clean, exit 0),
+> root `npm test` 123/123 (incl. `content-drift.test.mjs`, unaffected — no
+> atlas/mobile-gloss/card-editor table touched). `npm run deploy:check`
+> confirmed green pre-tick (HEAD `c15f4119`, verify-mobile workflow success)
+> and will be re-confirmed after this ledger commit lands. Residue: filed the
+> Chaos-family/generic-Upgrade design-gap reading from (7) to `plan/AUDIT.md`
+> as a `[loop-call]` — a genre-toolbox observation, not a ratified gap, left
+> for an owner to decide whether either is worth a new verb class; no
+> `plan/PHASE_CANDIDATES.md` entry, since neither has a concrete card idea
+> attached yet.
+```
 
 ```
 > **[adjust-enemies pass 9, 2026-09-13, commit 304608c1]** Zero-CREATE,
