@@ -22,6 +22,114 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
+> **[adjust-cards pass 9, 2026-09-13, commit <PENDING>]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
+> content-lifecycle gate (`cards` was the stalest qualifying category this
+> tick: 86 commits since pass 8's commit `be34ca43`, well past the
+> 15-commit/36h threshold; equipment `030e26ae`/enemies `832e3e5e`/keywords
+> `37dacef1`/npcs `abb3da01` all sat under their own thresholds). Deploy was
+> confirmed green pre-tick on HEAD `52690af1` (verify-mechanics and
+> verify-mobile both success) per the dispatch note, so no pre-tick
+> `deploy:check` re-run was needed. `git log be34ca43..HEAD --
+> axiomancer-mechanics/src/Cards axiomancer-mechanics/src/Effects
+> axiomancer-mechanics/src/Combat axiomancer-mechanics/docs/keyword-atlas.md
+> docs/retheme-map.json axiomancer-mobile/state/combat/keywords.ts
+> axiomancer-card-editor/src/data/mechanics.ts` returns exactly 2 commits of
+> the 86 intervening: `5282cc0a` (a `ui-fresh-eyes` shard renaming the
+> threat-preview's PLEA-shed clause from "steadies N resolve" to "shakes off
+> N PLEA" in `combat.threat.ts` — a display-string fix, not a card/keyword
+> change) and `37dacef1` (`/adjust-keywords` pass 8's own already-landed
+> `conjure_card` display-case fix in `combat.cards.ts` plus its new
+> `mechanic-text-coverage.engine.test.ts` guard). `git diff be34ca43..HEAD
+> --stat` over the same path set confirms only those 3 files moved (84
+> insertions/2 deletions total) and, critically, `src/Cards/cards.library.ts`
+> and every `src/Cards/library/*.cards.ts` module are BYTE-IDENTICAL to pass
+> 8's tree (`git log be34ca43..HEAD -- axiomancer-mechanics/src/Cards/library
+> axiomancer-mechanics/src/Cards/cards.library.ts` is empty) — the 86
+> intervening commits were entirely the npcs/keywords/enemies pass-8 ticks
+> (each with its own ledger-bump), a UI-fresh-eyes sweep (FE-001 through
+> FE-028 plus 8 tie-break/verified-finding shards), a content-pitch-session
+> plan doc, a CI flake hardening fix, an `/audit`-fix tick, and two digests —
+> nothing touched the card/effect/combat-authoring surface. Re-derived every
+> Step-1 signal fresh anyway rather than trusting the near-empty path-scoped
+> log alone: (1) **reachability** — ran
+> `combat-playtest.card-coverage.sim.test.ts` directly: 123/123 playable
+> cards (the full library minus the enemy-injected `curse` theme) still fire
+> under a fallback seed, matching pass 8 exactly — no REMOVE candidate. Also
+> confirmed the structural reason a "some card is in no preset/draft pool"
+> REMOVE signal essentially cannot fire under the live architecture:
+> `combat.deck-draft.ts`'s default (stage-unrestricted) pool is the FULL
+> `cardLibrary`, so every card ships in *some* pool by construction; the
+> coverage sim is the sharper, already-green dead-card detector. (2)
+> **near-duplicates** — wrote a fresh same-`(theme,rank,philosophicalAspect)`
+> collision scan restricted to kind-sets of size ≥2 (pass 6-8's own refined
+> methodology) against the live `cardLibrary` via a throwaway `tsx` script:
+> reproduces exactly the same 2 documented hits pass 4-8 have all found —
+> `thin-hymn`/`alms-of-breath` (`rider,sway`) and `the-last-assize`/
+> `the-vein-called-in` (`deal,overkill,recoil,wrath`) — no new collision. (3)
+> **pricing sanity + honesty + FREE-line + aspect-thirds** —
+> `pricing.engine.test.ts` (251), `curated-library.engine.test.ts` (14, the
+> FREE-line law), `preview-truth.engine.test.ts` (10),
+> `paid-summary-honesty.engine.test.ts` (4), and `deck-presets.engine.test.ts`
+> (9, the pinned 5/5/5 preset-aspect-thirds law) all re-run directly and
+> green, matching pass 8's counts exactly. (4) **scale-ladder drift** — wrote
+> two fresh throwaway scans against the live `cardLibrary` rather than
+> spot-checking by hand: a DEAL-only scan (pure single-mechanic cards,
+> multi-hit totals compared against the CLAUDE.md §5.2 per-rank bands)
+> and a GUARD/BARRIER-only scan (same methodology) — both report zero cards
+> below 60% of their rank's floor; the one apparent hit the DEAL scan's
+> naive first pass flagged (`the-blister-rosary`, rot rank 2, a bare `amount:
+> 3`) resolved on inspection to a `hits: 4` multi-hit card (3×4=12, exactly
+> the rank-2 multi-hit band total) once the script accounted for the `hits`
+> field — a script bug, not a pricing bug, traced and corrected before
+> concluding. (5) **aspect thirds** — `axio_overview`'s per-theme totals
+> (debt 19, trial 24, rot 19, choir 21, vigil 20, curse 5, grave 20) match
+> pass 8 exactly (byte-identical source); a fresh per-theme
+> body/mind/heart breakdown (rot 8/5/6, vigil 7/7/6, grave 7/8/5, trial
+> 8/8/8, choir 5/6/10, debt 6/5/8, curse 3/1/1 body/mind/heart) shows no
+> aspect starving badly enough to threaten the governing 5/5/5 law, which
+> stays green per (3) — no starvation case. (6) **FREE-line coverage** —
+> `curated-library.engine.test.ts`'s 14/14 green re-confirms every theme
+> still has a FREE-line-viable card. (7) **stale `// pts:` comment sweep** —
+> a fresh per-file `id:`-literal vs `// pts:`-comment count (all 9
+> `library/*.cards.ts` modules) shows small file-level discrepancies (choir
+> 16 ids/17 pts, trial 20/21, starters 8/10) traced to header/factory-level
+> documentation comments (the curse() factory's own shared `// pts:
+> deliberately worthless` note covering all 5 curses, which pass as
+> id-less positional-arg calls, not `id: '...'` literals) rather than any
+> card missing or lying about its comment — the arithmetic reconciles
+> exactly to 128 total cards, no gap. Standing `plan/AUDIT.md` `[loop-call]`s
+> re-checked against current source, not re-litigated: the 19 orphaned
+> `zoneHas(state, '<card-id>')` hooks in `combat.engine.ts` (filed pass 1) —
+> confirmed `combat.engine.ts` is untouched since pass 8
+> (`git log be34ca43..HEAD -- axiomancer-mechanics/src/Combat/combat.engine.ts`
+> is empty) and a fresh `zoneHas(state, '` count (46 total sites, matching
+> the file's unchanged state) reconfirms the finding stands unmodified,
+> still open, still mechanics-expert cleanup territory; and
+> `the-sextons-count`'s missing TWIN trigger (same filing) — re-read the
+> card's current `grave.cards.ts` entry and its two live
+> `zoneHas(state, 'the-sextons-count')` sites (RECALL/REPLAY, both still
+> correctly wired per the filed note) — TWIN itself still unwired for the
+> same stated variable-scope reason, still open, still
+> engine-constant/mechanics-expert territory. KB research (kb-query gate,
+> skill §3 Step 2): not run — every consideration this pass was
+> audit-confirmed-clean (no CREATE/UPDATE), exempt from the gate per skill
+> §3 Step 2 (REMOVE/no-op carve-out). Verify: ran all three gates in full
+> this pass (not skipped, despite the near-empty source diff) — `npm run
+> verify --workspace axiomancer-mechanics` (213/213 files, 3428 tests +
+> build, up from pass 8's 3422 via the keywords pass-8 tick's own 3 new
+> `mechanic-text-coverage` guard tests plus unrelated growth, not a card
+> signal), `npm run verify --workspace axiomancer-mobile` (lint 0 errors,
+> typecheck clean, jest green, `assets:check` clean, `art:test` 24/24 — the
+> full chained script ran to its final leg clean), `npm run type-check
+> --workspace axiomancer-card-editor` (clean, exit 0). `npm run deploy:check`
+> will be re-confirmed after this ledger commit lands. No
+> `plan/PHASE_CANDIDATES.md` or new `plan/AUDIT.md` residue filed this pass —
+> nothing actionable surfaced outside the standing, already-filed backlog
+> items re-cited above.
+```
+
+```
 > **[adjust-npcs pass 8, 2026-09-13, commit abb3da01]** One UPDATE (shipped a
 > standing `plan/PHASE_CANDIDATES.md` retheme candidate that seven prior
 > passes had correctly re-cited but never actioned), zero-CREATE,

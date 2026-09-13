@@ -7,9 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-08T09:22:59Z | slash-prompt | /digest | unknown | user/ci | /digest |
-| 2026-08-08T09:23:01Z | skill | digest | unknown | main | - |
-| 2026-08-08T11:37:10Z | subagent | Explore | claude-fable-5 | main | Inventory inline SVG usage |
 | 2026-08-08T11:37:15Z | subagent | Explore | claude-fable-5 | main | Distill design handoff intent |
 | 2026-08-08T13:25:19Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-08T14:43:46Z | subagent | scout | claude-opus-5 | main | Scout MTG/PvE card research |
@@ -407,3 +404,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-13T12:38:45Z | subagent | card-expert | claude-sonnet-5 | main | Run adjust-keywords pass 8 end-to-end |
 | 2026-09-13T14:28:24Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-13T14:32:08Z | subagent | content-curator | claude-sonnet-5 | main | Run adjust-npcs pass 8 end-to-end |
+| 2026-09-13T16:30:08Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-13T16:31:14Z | skill | adjust-cards | claude-sonnet-5 | main | - |
+| 2026-09-13T16:32:19Z | subagent | card-expert | claude-sonnet-5 | main | Run adjust-cards pass 9 end-to-end |
