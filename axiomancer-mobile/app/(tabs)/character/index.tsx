@@ -20,6 +20,23 @@ import { nextPlayerPortrait, portraitIdFromFlags, PORTRAIT_FLAG_PREFIX } from '@
 import { useGameActions, useGameState, useGameStore } from '@/state/GameStoreProvider';
 import { graceBreakLegend, selectCharacterViewModel } from '@/state/presenters/character.engine';
 
+/**
+ * The SELF sheet (`/character`).
+ *
+ * Purpose: render the character view model — identity, POOLS, DERIVED, SAVES &
+ * TESTS, the GRACE balance and effects — as the tab's scrolling sheet.
+ * Inputs: none by argument; reads the `player`, `moralMeter` and
+ * `philosophicalAlignment` store slices and turns them into a view model via
+ * `selectCharacterViewModel`.
+ * Output: the sheet element tree.
+ *
+ * Resolves `05-character-fresh / 06-character-midgame (/character, GRACE
+ * footer)`: the GRACE break legend added a stacked 12pt line under the pool
+ * track, which pushed 'the pool above is this balance, read in tenths.' onto
+ * the bottom tab bar and sliced it through the x-height. The legend now rides
+ * the pool label row, which is already 13pt tall, so the sheet's below-pools
+ * rhythm returns to where it sat before the legend existed.
+ */
 export default function CharacterScreen() {
   const AXM = usePalette();
   const styles = useStyles();
@@ -289,10 +306,26 @@ export default function CharacterScreen() {
             { label: 'GRACE', value: Math.max(1, Math.min(10, Math.round(((Number.isFinite(vm.morale) ? vm.morale : 0) + 100) / 20))), max: 10, color: AXM.sulfur, gloss: 'kept by the parish', breakAt: 2 },
           ].map((pool) => (
             <View key={pool.label} style={styles.poolRow}>
-              <View style={styles.poolHeader}>
+              <View style={styles.poolHeader} testID={`self-pool-header-${pool.label.toLowerCase()}`}>
                 <View style={styles.poolLabelRow}>
                   <Text style={[styles.poolLabel, { color: pool.color }]}>{pool.label}</Text>
                   <Text style={styles.poolGloss}>· {pool.gloss}</Text>
+                  {/* S3-sheet-C12: the tic was the only mark on the track and
+                    * carried no key, so it read as a notch in the bar. Copy
+                    * comes from the presenter; the threshold stays where it was.
+                    *
+                    * Repair (fresh-eyes GRACE footer): the key used to be its
+                    * own line under the track, which cost the sheet 12pt and
+                    * pushed 'read in tenths.' down onto the tab bar, sliced
+                    * through the x-height at BOTH viewports. Riding the label
+                    * line instead costs nothing — this row is already 13pt tall
+                    * for the pool name — so the sheet keeps its old rhythm and
+                    * the key stays beside the track it keys. */}
+                  {'breakAt' in pool && pool.breakAt != null && (
+                    <Text style={styles.poolBreakLegend} numberOfLines={1} testID="self-grace-break-legend">
+                      {graceBreakLegend(pool.breakAt)}
+                    </Text>
+                  )}
                 </View>
                 <Text style={styles.poolValue}>{pool.value}<Text style={styles.boneText}> / {pool.max}</Text></Text>
               </View>
@@ -302,14 +335,6 @@ export default function CharacterScreen() {
                   <View style={[styles.poolBreakTic, { left: `${(pool.breakAt / pool.max) * 100}%` }]} />
                 )}
               </View>
-              {/* S3-sheet-C12: the tic was the only mark on the track and
-                * carried no key, so it read as a notch in the bar. Copy comes
-                * from the presenter; the threshold stays where it was. */}
-              {'breakAt' in pool && pool.breakAt != null && (
-                <Text style={styles.poolBreakLegend} testID="self-grace-break-legend">
-                  {graceBreakLegend(pool.breakAt)}
-                </Text>
-              )}
             </View>
           ))}
         </View>
@@ -609,7 +634,9 @@ const useStyles = makeStyles((AXM) => ({
   poolsCard: { marginTop: 3, backgroundColor: AXM.panelBg, borderWidth: 1, borderColor: AXM.ash, paddingVertical: 5, paddingHorizontal: 12, gap: 4 },
   poolRow: {},
   poolHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 2 },
-  poolLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  // `flexShrink` so the label row yields to the value instead of overflowing
+  // the card once the GRACE row carries the break legend as a third child.
+  poolLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 1 },
   poolLabel: { fontFamily: FONTS.sans, fontSize: 13, letterSpacing: 1.6 },
   poolNewBadge: { fontFamily: FONTS.mono, fontSize: 8, color: AXM.bg, backgroundColor: AXM.sulfur, paddingHorizontal: 4, paddingVertical: 1, letterSpacing: 1, overflow: 'hidden' },
   poolGloss: { fontFamily: FONTS.serifItalic, fontSize: 12, color: AXM.bone },
@@ -617,8 +644,11 @@ const useStyles = makeStyles((AXM) => ({
   poolTrack: { position: 'relative' as const, height: 10, backgroundColor: AXM.deepBg, borderWidth: 1, borderColor: AXM.ash },
   poolFill: { position: 'absolute' as const, top: 1, bottom: 1, left: 1 },
   poolBreakTic: { position: 'absolute' as const, top: -2, bottom: -2, width: 1, backgroundColor: AXM.blood },
-  // S3-sheet-C12 — the tic's key: blood-coloured so the line and the mark read as one thing.
-  poolBreakLegend: { fontFamily: FONTS.mono, fontSize: 8, color: AXM.blood, letterSpacing: 0.6, marginTop: 2 },
+  // S3-sheet-C12 — the tic's key: blood-coloured so the line and the mark read
+  // as one thing. It rides the pool label row (no `marginTop`, no block of its
+  // own): stacked under the track it added 12pt to the sheet and drove the
+  // GRACE balance caption under the tab bar at both viewports.
+  poolBreakLegend: { fontFamily: FONTS.mono, fontSize: 8, color: AXM.blood, letterSpacing: 0.6, flexShrink: 1 },
   moraleLedger: { marginTop: 5, backgroundColor: AXM.deepBg, borderWidth: 1, borderColor: AXM.ash, paddingVertical: 7, paddingHorizontal: 12 },
   ledgerGrid: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 8, rowGap: 2, marginTop: 4 },
   ledgerRow: { flexDirection: 'row', alignItems: 'baseline', gap: 6, width: '48%' },
