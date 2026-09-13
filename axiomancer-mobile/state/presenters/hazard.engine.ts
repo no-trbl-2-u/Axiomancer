@@ -480,6 +480,42 @@ function routeChoices(session: HazardSessionState): HazardRouteChoiceVM[] {
     ];
 }
 
+// ---------------------------------------------------------------------------
+// FORCE / ESCAPE glyph key (cluster S7-hazard-C04)
+// ---------------------------------------------------------------------------
+
+/** The legend for the number pair printed on every hazard card. */
+export interface HazardStatKeyVM {
+    /** One line on how to read the pair. */
+    readonly caption: string;
+    /** Print order — FORCE first, ESCAPE second, as the card lays them out. */
+    readonly rows: readonly { readonly key: 'force' | 'escape'; readonly label: string }[];
+}
+
+/**
+ * Static copy for the card number-pair key (cluster S7-hazard-C04). The
+ * pair's meaning never varies with session state, so it is a constant,
+ * not a selector — components read it instead of hardcoding the words.
+ */
+export const HAZARD_STAT_KEY: HazardStatKeyVM = Object.freeze({
+    caption: 'Every card bears both marks — FORCE first, ESCAPE second.',
+    rows: Object.freeze([
+        Object.freeze({ key: 'force' as const, label: 'FORCE' }),
+        Object.freeze({ key: 'escape' as const, label: 'ESCAPE' }),
+    ]),
+});
+
+/**
+ * Spoken label for a card's FORCE/ESCAPE number pair, so the two
+ * unkeyed micro-glyphs are announced by name (cluster S7-hazard-C04).
+ *
+ * Inputs: `force`, `escape` — the pair's two numbers, in print order.
+ * Outputs: one string, e.g. "FORCE 3, ESCAPE 1".
+ */
+export function hazardStatPairLabel(force: number, escape: number): string {
+    return `${HAZARD_STAT_KEY.rows[0].label} ${force}, ${HAZARD_STAT_KEY.rows[1].label} ${escape}`;
+}
+
 const OUTCOME_COPY: Record<HazardOutcomeTier, { word: string; sub: string; line: string; cta: string }> = {
     perfect: {
         word: 'PERFECT',

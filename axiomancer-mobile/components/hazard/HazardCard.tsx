@@ -14,6 +14,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { hazardStatPairLabel } from '@/state/presenters/hazard.engine';
 import type { HazardCardVM } from '@/state/presenters/hazard.engine';
 import { FONTS } from '@/theme/axm';
 
@@ -83,7 +84,15 @@ function ManaSocket({
     );
 }
 
-/** FORCE / ESCAPE number pair (zeros dimmed). */
+/**
+ * StatPair — the FORCE / ESCAPE number pair a card prints (zeros dimmed).
+ * The two marks carry no printed name, so the pair announces itself by
+ * name for screen readers (cluster S7-hazard-C04); sighted players get
+ * the same key from `HazardStatKey`.
+ *
+ * Inputs: `force` / `escape` numbers, plus glyph `size` and `gap`.
+ * Outputs: the glyph+number row, labelled "FORCE n, ESCAPE n".
+ */
 function StatPair({
     force,
     escape,
@@ -101,7 +110,11 @@ function StatPair({
             <Text style={{ fontFamily: FONTS.gothic, fontSize: size + 4, lineHeight: size + 5, color: TYPE_INK[kind] }}>{val}</Text>
         </View>
     );
-    return <View style={{ flexDirection: 'row', gap }}>{[item('force', force), item('escape', escape)]}</View>;
+    return (
+        <View accessible accessibilityLabel={hazardStatPairLabel(force, escape)} style={{ flexDirection: 'row', gap }}>
+            {[item('force', force), item('escape', escape)]}
+        </View>
+    );
 }
 
 /** A FREE/MANA row used by hand + play modes. Hybrid cards (purple/gold)

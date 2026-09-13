@@ -5,6 +5,12 @@
  * renders a distinct combination of Circle / Path nodes; this
  * suite reads those counts + distinguishing prop values to
  * lock the visual semantic.
+ *
+ * S4-world-C06 re-pinned the accent: `available` (where you CAN go)
+ * carries the sulfur beacon, `current` (where you already stand) is a
+ * muted bone pin. The assertions below are the same strength as before,
+ * inverted, and each kind now also asserts it does NOT wear the other's
+ * accent so the pair can never drift back together.
  */
 
 import { describe, expect, it } from '@jest/globals';
@@ -32,22 +38,29 @@ describe('NodeMark: kind → SVG branch', () => {
         expect(paths[0].props.stroke).toBe(AXM.blood);
     });
 
-    it('current renders nested circles with sulfur accent (incl. backing)', () => {
+    it('current renders nested circles with a muted bone pin, never the sulfur beacon', () => {
         const tree = render(<NodeMark kind="current" />);
         const circles = tree.UNSAFE_getAllByType(Circle);
         expect(circles).toHaveLength(4);
-        // Inner-fill circle carries the sulfur accent.
-        const sulfurCircle = circles.find((c) => c.props.fill === AXM.sulfur);
-        expect(sulfurCircle).toBeDefined();
+        // Inner-fill circle carries the bone accent; the dashed ring says
+        // "standing here" rather than "go here".
+        const boneCircle = circles.find((c) => c.props.fill === AXM.bone);
+        expect(boneCircle).toBeDefined();
+        const dashedRing = circles.find((c) => c.props.strokeDasharray !== undefined);
+        expect(dashedRing).toBeDefined();
+        // S4-world-C06: the node you already occupy must not be the
+        // brightest mark on the chart.
+        expect(circles.some((c) => c.props.fill === AXM.sulfur)).toBe(false);
+        expect(circles.some((c) => c.props.stroke === AXM.sulfur)).toBe(false);
     });
 
-    it('available (default) renders 3 circles with parchment chrome (incl. backing)', () => {
+    it('available (default) renders 3 circles with the sulfur beacon (incl. backing)', () => {
         const tree = render(<NodeMark />);
         const circles = tree.UNSAFE_getAllByType(Circle);
         expect(circles).toHaveLength(3);
-        // Outer ring uses parchment stroke; inner dot uses parchment fill.
-        const strokeRing = circles.find((c) => c.props.stroke === AXM.parchment);
-        const fillDot = circles.find((c) => c.props.fill === AXM.parchment);
+        // Outer ring uses sulfur stroke; inner dot uses sulfur fill.
+        const strokeRing = circles.find((c) => c.props.stroke === AXM.sulfur);
+        const fillDot = circles.find((c) => c.props.fill === AXM.sulfur);
         expect(strokeRing).toBeDefined();
         expect(fillDot).toBeDefined();
     });

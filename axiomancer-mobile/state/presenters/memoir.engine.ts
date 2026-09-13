@@ -127,6 +127,15 @@ export interface PhilosophicalAlignment {
     label: string;
     /** One-line rationale shown beneath the label (or empty in the untested state). */
     rationale: string;
+    /**
+     * S8-memoir-C02: the line the screen renders beneath the chip while
+     * the measure is untested — it says WHAT the untested state means
+     * (the three base stats stand level) and HOW it resolves (the
+     * greatest of them names the bent), instead of echoing the chip's
+     * own word back at the player. Empty once `rationale` is populated,
+     * because the rationale already names the leading stat.
+     */
+    hint: string;
     /** Always `true` until exact alignments are defined upstream. */
     provisional: boolean;
 }
@@ -206,6 +215,12 @@ export interface MemoirViewModel {
     emptyChronicle: string;
     emptyQuests: string;
     emptyMoral: string;
+    /**
+     * Terse untested token. Retained on the contract, but since
+     * S8-memoir-C02 the screen renders
+     * `philosophicalAlignment.hint` in this slot instead — printing
+     * `untested.` under an `UNTESTED` chip said the same word twice.
+     */
     emptyPhilosophical: string;
     /** Phase 6 — shown when `remains.keepsakes` is empty. */
     emptyKeepsakes: string;
@@ -224,16 +239,21 @@ const DEFAULT_MORAL: MoralAlignment = Object.freeze({
  * the player's largest measure (3-way tie). The chip label sits in
  * chrome register (`UNTESTED`, all-caps, no period) so it visually
  * rhymes with the other alignment chips (IN ARREARS / INDIFFERENT /
- * IN GRACE). The screen pairs the chip with the narrative empty-state
- * line `vm.emptyPhilosophical` (`'untested.'`, lowercase + period)
- * per the brief's empty-state copy contract. CRITIQUE pass 7 LOW
- * drain split the two registers — before, both strings were
- * `'untested.'`, which read as a stray narrative fragment promoted
- * into a chrome slot.
+ * IN GRACE). CRITIQUE pass 7 LOW drain split the two registers —
+ * before, both strings were `'untested.'`, which read as a stray
+ * narrative fragment promoted into a chrome slot.
+ *
+ * S8-memoir-C02: splitting the registers still left `UNTESTED` stacked
+ * over `untested.` — the same word twice, teaching nothing. The chip's
+ * second line is now `hint`, which names what the untested state means
+ * and how it resolves. `vm.emptyPhilosophical` stays on the view-model
+ * as the terse token pinned by the shape contract; the screen no
+ * longer renders it.
  */
 const DEFAULT_PHILOSOPHICAL: PhilosophicalAlignment = Object.freeze({
     label: 'UNTESTED',
     rationale: '',
+    hint: 'heart, body and mind stand level. the greatest of the three names your bent.',
     provisional: true,
 }) as PhilosophicalAlignment;
 
@@ -284,8 +304,8 @@ function buildMoralAlignment(rawValue: unknown): MoralAlignment {
  * `state.player.baseStats` (engine shape: `{ heart, body, mind }`,
  * lowercase keys per `Game/game.reducer.js:32`). Highest stat wins;
  * pairwise ties favour Heart (per brief §"Tick C"). A 3-way tie
- * returns the `UNTESTED` chip + `untested.` narrative line so the player sees an empty-state chip rather
- * than a spuriously-emitted alignment.
+ * returns the `UNTESTED` chip + its explanatory `hint` so the player
+ * sees an empty-state chip rather than a spuriously-emitted alignment.
  */
 const PHILOSOPHICAL_BY_STAT: Readonly<Record<'heart' | 'body' | 'mind', string>> = Object.freeze({
     heart: 'of the Heart',
@@ -446,6 +466,18 @@ function buildChronicle(rawEvents: unknown): ReadonlyArray<ChronicleEntry> {
     return Object.freeze(capped) as readonly ChronicleEntry[];
 }
 
+/**
+ * Purpose: derive the MEASURE screen's provisional philosophical chip
+ * (label + second line) from the player's base stats.
+ * Input: `stats` — the engine's `BaseStats` (`{heart, body, mind}`), or
+ * `undefined` before a player exists.
+ * Output: a frozen `PhilosophicalAlignment`. When one stat leads, the
+ * chip names the bent and `rationale` explains which stat earned it
+ * (`hint` is then empty). On a 3-way tie it returns
+ * `DEFAULT_PHILOSOPHICAL` — the `UNTESTED` chip whose `hint` explains
+ * what untested means and what resolves it.
+ * Resolves: S8-memoir-C02 (the chip's second line repeated the label).
+ */
 function buildPhilosophicalAlignment(stats: BaseStats | undefined): PhilosophicalAlignment {
     // Engine `BaseStats` declares `heart/body/mind: number` as required;
     // the `Number.isFinite` guard stays as defense against NaN /
@@ -463,6 +495,7 @@ function buildPhilosophicalAlignment(stats: BaseStats | undefined): Philosophica
     return Object.freeze({
         label: PHILOSOPHICAL_BY_STAT[winner],
         rationale: `${STAT_PROPER_NAME[winner]} is your largest measure (${max}).`,
+        hint: '',
         provisional: true,
     }) as PhilosophicalAlignment;
 }
@@ -771,7 +804,8 @@ function buildRemains(
  * - **Philosophical alignment** — provisional heuristic that reads
  *   `state.player.baseStats` and picks the highest of
  *   `{ heart, body, mind }`. Pairwise ties favour Heart; 3-way tie
- *   returns the documented `UNTESTED` chip + `untested.` narrative empty state.
+ *   returns the documented `UNTESTED` chip, whose `hint` explains what
+ *   the untested state means and what resolves it (S8-memoir-C02).
  *   `provisional: true` until exact alignments are defined upstream.
  * - **Chronicle** — reads `state._recentEvents` (Phase 25 ring
  *   buffer, capacity 20) and folds typed events into reverse-

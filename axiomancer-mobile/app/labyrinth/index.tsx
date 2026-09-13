@@ -35,6 +35,15 @@ import { FONTS } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
 import type { Enemy } from '@mechanics';
 
+/**
+ * The /labyrinth route. Purpose: render THE APORIA's three states — act
+ * select, room scene, completion — over the labyrinth presenter's view
+ * models, and route arrival events to the encounter overlay.
+ * Inputs: none (reads the game store via selectors and the combat-mode
+ * hook). Output: the screen element. Its bare pressables (the act cards,
+ * LEAVE and the MAP toggle) carry `accessibilityRole` + presenter-owned
+ * labels, resolving cluster S7-hazard-C20.
+ */
 export default function LabyrinthScreen() {
     const styles = useStyles();
     const router = useRouter();
@@ -162,6 +171,8 @@ export default function LabyrinthScreen() {
                             key={act.id}
                             onPress={() => actions.enterLabyrinth(act.id)}
                             style={styles.actCard}
+                            accessibilityRole="button"
+                            accessibilityLabel={LABYRINTH_COPY.a11y.actOption(act.title, act.completed)}
                             testID={`labyrinth-act-${act.id}`}
                         >
                             <Text style={styles.actTitle}>{act.title}</Text>
@@ -171,7 +182,13 @@ export default function LabyrinthScreen() {
                             </Text>
                         </Pressable>
                     ))}
-                    <Pressable onPress={leave} style={styles.leaveButton} testID="labyrinth-leave">
+                    <Pressable
+                        onPress={leave}
+                        style={styles.leaveButton}
+                        accessibilityRole="button"
+                        accessibilityLabel={LABYRINTH_COPY.a11y.leave}
+                        testID="labyrinth-leave"
+                    >
                         <Text style={styles.leaveText}>{LABYRINTH_COPY.leave}</Text>
                     </Pressable>
                 </View>
@@ -187,7 +204,13 @@ export default function LabyrinthScreen() {
                     <Text style={styles.title}>{vm.title}</Text>
                     <Text style={styles.sub}>{vm.body}</Text>
                     <Text style={styles.warning}>{vm.lastLine}</Text>
-                    <Pressable onPress={leave} style={styles.leaveButton} testID="labyrinth-leave">
+                    <Pressable
+                        onPress={leave}
+                        style={styles.leaveButton}
+                        accessibilityRole="button"
+                        accessibilityLabel={LABYRINTH_COPY.a11y.leave}
+                        testID="labyrinth-leave"
+                    >
                         <Text style={styles.leaveText}>{LABYRINTH_COPY.leave}</Text>
                     </Pressable>
                 </View>
@@ -215,11 +238,21 @@ export default function LabyrinthScreen() {
             <View style={styles.root} testID="labyrinth-room">
                 {/* ── Header strip ── */}
                 <View style={styles.header}>
-                    <Pressable onPress={leave} testID="labyrinth-leave">
+                    <Pressable
+                        onPress={leave}
+                        accessibilityRole="button"
+                        accessibilityLabel={LABYRINTH_COPY.a11y.leave}
+                        testID="labyrinth-leave"
+                    >
                         <Text style={styles.headerAction}>{LABYRINTH_COPY.leave}</Text>
                     </Pressable>
                     <Text style={styles.headerTitle} numberOfLines={1}>{room.actTitle}</Text>
-                    <Pressable onPress={() => setShowMap((m) => !m)} testID="labyrinth-map-toggle">
+                    <Pressable
+                        onPress={() => setShowMap((m) => !m)}
+                        accessibilityRole="button"
+                        accessibilityLabel={showMap ? LABYRINTH_COPY.a11y.mapHide : LABYRINTH_COPY.a11y.mapShow}
+                        testID="labyrinth-map-toggle"
+                    >
                         <Text style={styles.headerAction}>{LABYRINTH_COPY.mapLabel}</Text>
                     </Pressable>
                 </View>

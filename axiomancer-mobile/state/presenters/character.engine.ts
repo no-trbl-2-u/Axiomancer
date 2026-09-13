@@ -384,6 +384,24 @@ function buildAlignmentSlice(state: GameStore): AlignmentSlice {
     return { cellName: cell.label, axes };
 }
 
+/**
+ * Legend copy for the red break tic drawn on a GRACE track.
+ *
+ * Purpose: the tic is the only mark on either grace bar (the exploration
+ * HUD's StatusCard and the SELF sheet's POOLS panel) and nothing named it,
+ * so it read as damage on the bar rather than as the arrears threshold the
+ * ledger warns about. Resolves cluster S3-sheet-C12.
+ *
+ * Input: `breakAt` — the tic's position on the 1-10 grace scale, passed by
+ * whichever surface draws the tic (the number stays where it already lives;
+ * this function only words it).
+ * Output: one lowercase marginal line, glyph first so the eye ties the text
+ * to the mark.
+ */
+export function graceBreakLegend(breakAt: number): string {
+    return `▏arrears at ${breakAt} or below`;
+}
+
 export function selectCharacterViewModel(state: GameStore): CharacterViewModel {
     const player = state.player;
     // derivedStats.luck is guaranteed present after v1→v2 persistence migration

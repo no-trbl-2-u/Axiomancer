@@ -19,9 +19,12 @@ describe('MapOverlays', () => {
         expect(root).toBeTruthy();
     });
 
-    it('renders the fixed compass chrome', () => {
+    it('renders the fixed compass chrome, naming the pan/pinch gesture', () => {
         render(<MapOverlays legend={legend} />);
-        expect(screen.getByText('N ↑ · scale: leagues')).toBeTruthy();
+        // S4-world-C07: the chart pans and zooms behind a much smaller
+        // window, so the always-on furniture has to say so — the first-visit
+        // hint chip fades and cannot be the only place it is told.
+        expect(screen.getByText('N ↑ · leagues · drag · pinch')).toBeTruthy();
     });
 
     it('renders the NODE GRAPH label', () => {
@@ -80,6 +83,47 @@ describe('MapOverlays', () => {
                 : hint.props.style;
             expect(flat.position).toBe('absolute');
             expect(flat.bottom).toBeGreaterThan(8);
+        });
+    });
+
+    /**
+     * 04-exploration-midgame (/exploration, map hint) @mobile — S4-world-C07
+     * widened the hint copy to name the gesture, but its box still ran from
+     * chart edge to chart edge. At 375x812 the longer pill spanned x~48-333
+     * and swallowed `<MapCanvas>`'s compass rose (a 52x52 SVG pinned at
+     * `right: 10, bottom: 10`, i.e. a 62px footprint in the very band the
+     * pill sits in), leaving a needle tip above it and a sliver of ring
+     * below. The box must stop short of that corner — and mirror the inset,
+     * or the pill drifts off the chart's centre line.
+     */
+    describe('04-exploration-midgame: the hint leaves the compass rose its corner', () => {
+        // MapCanvas: 52px rose pinned 10px off the chart's right edge.
+        const ROSE_FOOTPRINT = 62;
+        const LONG_HINT = 'Tap a glowing node to travel — drag or pinch the chart';
+
+        /** Flattened style of the rendered hint box, for the given copy. */
+        const hintBoxStyle = (hint: string) => {
+            render(<MapOverlays legend={legend} hint={hint} />);
+            const box = screen.getByTestId('map-hint');
+            return Array.isArray(box.props.style)
+                ? Object.assign({}, ...box.props.style.flat(Infinity).filter(Boolean))
+                : box.props.style;
+        };
+
+        it('stops short of the rose, so the longest copy wraps instead of covering it', () => {
+            const flat = hintBoxStyle(LONG_HINT);
+            expect(flat.right).toBeGreaterThan(ROSE_FOOTPRINT);
+        });
+
+        it('mirrors that inset on the left, keeping the pill centred on the chart', () => {
+            const flat = hintBoxStyle(LONG_HINT);
+            expect(flat.left).toBe(flat.right);
+            expect(flat.alignItems).toBe('center');
+        });
+
+        it('still reads the whole nudge, gesture and all', () => {
+            render(<MapOverlays legend={legend} hint={LONG_HINT} />);
+            expect(screen.getByText(LONG_HINT)).toBeTruthy();
         });
     });
 

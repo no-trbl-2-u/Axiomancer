@@ -58,6 +58,7 @@ export interface RestChoiceOutcomeVM {
 export interface RestChoiceVM {
     active: boolean;
     phase: RestChoiceSession['phase'] | 'none';
+    /** S6-camp-C03 — VITAE as it stands NOW: the snapshot, plus any settled heal. */
     health: number;
     maxHealth: number;
     currency: number;
@@ -90,6 +91,32 @@ export function selectHasActiveRest(state: Pick<AppStoreState, 'rest'>): boolean
 
 function cardName(cardId: string): string {
     return getCardById(cardId)?.name ?? cardId;
+}
+
+/**
+ * Displayed VITAE for the rest screen's purse readout (S6-camp-C03).
+ *
+ * The engine session is a frozen snapshot: `health` keeps the value the
+ * pilgrim walked in with, and the heal sits in the settled ledger until the
+ * host applies it at claim time. Rendering the raw snapshot beside a
+ * `+43 VITAE` outcome chip therefore showed the wounded number the choice
+ * had already repaired.
+ *
+ * @param health - the snapshot's pre-choice VITAE.
+ * @param maxHealth - the pilgrim's maximum VITAE; the ceiling on the readout.
+ * @param outcome - the settled ledger, or `null` while the choice is open.
+ * @returns the VITAE to render: the snapshot value while nothing is settled,
+ *   otherwise the snapshot plus the ledger's own `healed`, never past max.
+ *
+ * Reads the engine's `healed` number — it never re-derives the heal.
+ */
+export function restDisplayHealth(
+    health: number,
+    maxHealth: number,
+    outcome: RestChoiceSession['outcome'],
+): number {
+    if (outcome === null || outcome.healed <= 0) return health;
+    return Math.min(maxHealth, health + outcome.healed);
 }
 
 export function selectRestVM(state: Pick<AppStoreState, 'rest'>): RestChoiceVM {
@@ -130,7 +157,9 @@ export function selectRestVM(state: Pick<AppStoreState, 'rest'>): RestChoiceVM {
     return {
         active: true,
         phase: s.phase,
-        health: s.health,
+        // S6-camp-C03: the readout follows the settled ledger, not the
+        // pre-choice snapshot.
+        health: restDisplayHealth(s.health, s.maxHealth, s.outcome),
         maxHealth: s.maxHealth,
         currency: s.currency,
         offers,

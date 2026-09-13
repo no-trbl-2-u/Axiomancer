@@ -18,6 +18,11 @@ import {
     consumableLibrary,
     defaultSellPrice,
     getRelicById,
+    getSignatureSkill,
+    isConsumable,
+    isEquipment,
+    lookupEffect,
+    type Effect,
     type Item,
     type ShopWare,
 } from '@mechanics';
@@ -35,6 +40,12 @@ export interface VillageWareVM {
     itemId: string;
     name: string;
     description: string;
+    /**
+     * S5-talk-C04 — what buying this ware BUYS, in one terse mechanical
+     * line (`restores 20 VITAE`). Empty for an item with no payload this
+     * presenter can state; the row then prints its flavour line alone.
+     */
+    effect: string;
     /** Post-discount price — the actual amount charged. */
     price: number;
     /** Undiscounted price, for strikethrough display when `discounted`. */
@@ -92,6 +103,135 @@ export function resolveWareItem(ware: ShopWare): Item | null {
     return null;
 }
 
+// ---------------------------------------------------------------------------
+// Ware effect lines (S5-talk-C04)
+// ---------------------------------------------------------------------------
+
+/**
+ * The payload fields a shop ware's effect can carry.
+ *
+ * Structural, not nominal: the engine's `EffectPayload` is far wider than
+ * anything a stall sells, and this presenter reads only the fields the
+ * shipped shop consumables actually set. Cluster: S5-talk-C04.
+ */
+interface WarePayload {
+    cleanse?: boolean;
+    statModifiers?: readonly { stat: string; value: number; isMultiplier?: boolean }[];
+    regeneration?: { healthPerRound?: number };
+    defenseModifier?: number;
+    rollModifier?: number;
+    advantageModifier?: { grantAdvantage?: readonly string[] };
+}
+
+/**
+ * Render a number with an explicit sign.
+ *
+ * @param n - a modifier value.
+ * @returns `+3` / `-3`. An unsigned stat line reads as a total, not a change.
+ *   Cluster: S5-talk-C04.
+ */
+function signed(n: number): string {
+    return n > 0 ? `+${n}` : `${n}`;
+}
+
+/**
+ * Engine stat key -> the words a player reads.
+ *
+ * @param stat - a `lowerCamel` engine stat key (`physicalAttack`, `maxHp`).
+ * @returns the key split into spaced lower-case words (`physical attack`).
+ *   `maxHp` resolves to `max VITAE`: VITAE is the canon word for the health
+ *   pool, and a stall may not print `HP` at it. Cluster: S5-talk-C04.
+ */
+function statWords(stat: string): string {
+    if (stat === 'maxHp') return 'max VITAE';
+    return stat.replace(/([A-Z])/g, ' $1').toLowerCase().trim();
+}
+
+/**
+ * One stat modifier as a phrase.
+ *
+ * @param mod - a flat or multiplicative stat modifier off an effect payload
+ *   or a relic.
+ * @returns `+2 body` / `x1.5 physical attack`. Cluster: S5-talk-C04.
+ */
+function modWords(mod: { stat: string; value: number; isMultiplier?: boolean }): string {
+    const value = mod.isMultiplier ? `x${mod.value}` : signed(mod.value);
+    return `${value} ${statWords(mod.stat)}`;
+}
+
+/**
+ * One terse mechanical line for an effect a ware applies.
+ *
+ * @param effect - the engine effect the consumable references or inlines.
+ * @returns e.g. `advantage on body / mind / heart, 3 rounds`, or `''` when
+ *   the payload carries nothing this presenter knows how to state — a stall
+ *   says nothing rather than saying a shape it cannot read. Cluster:
+ *   S5-talk-C04.
+ */
+function effectWords(effect: Effect): string {
+    const payload = (effect.payload ?? {}) as WarePayload;
+    const parts: string[] = [];
+    for (const mod of payload.statModifiers ?? []) parts.push(modWords(mod));
+    const regen = payload.regeneration?.healthPerRound ?? 0;
+    if (regen !== 0) parts.push(`${signed(regen)} VITAE / round`);
+    if (payload.defenseModifier) parts.push(`${signed(payload.defenseModifier)} defense`);
+    if (payload.rollModifier) parts.push(`${signed(payload.rollModifier)} to rolls`);
+    const advantage = payload.advantageModifier?.grantAdvantage ?? [];
+    if (advantage.length > 0) parts.push(`advantage on ${advantage.join(' / ')}`);
+    if (payload.cleanse) parts.push('clears afflictions');
+    if (parts.length === 0) return '';
+    const rounds = effect.duration > 0
+        ? `, ${effect.duration} ${effect.duration === 1 ? 'round' : 'rounds'}`
+        : '';
+    return `${parts.join(', ')}${rounds}`;
+}
+
+/**
+ * What a ware DOES, in one line (S5-talk-C04).
+ *
+ * The stalls priced a name, a flavour line and a number — nothing on the row
+ * said what the coin bought, which is the one thing a shop in this genre
+ * always states. Everything here is read off the same libraries the engine
+ * applies on use; no rule, number or threshold is invented.
+ *
+ * @param item - the library item a ware resolves to (`resolveWareItem`).
+ * @returns a terse mechanical read — `restores 20 VITAE`,
+ *   `+5 defense, 3 rounds`, `+2 body - grants The Stilling` — or `''` for an
+ *   item with no statable payload (a material, or a consumable whose payload
+ *   shape this presenter does not read).
+ */
+export function wareEffectLine(item: Item): string {
+    if (isConsumable(item)) {
+        const parts: string[] = [];
+        const heal = item.healAmount ?? 0;
+        if (heal > 0) parts.push(`restores ${heal} VITAE`);
+        const effect = item.inlineEffect
+            ?? (item.effectId ? lookupEffect(item.effectId) : undefined);
+        const words = effect ? effectWords(effect) : '';
+        if (words) parts.push(words);
+        return parts.join(' · ');
+    }
+    if (isEquipment(item)) {
+        const parts: string[] = (item.statModifiers ?? []).map(modWords);
+        const signature = item.grantsSignature
+            ? getSignatureSkill(item.grantsSignature)?.name
+            : undefined;
+        if (signature) parts.push(`grants ${signature}`);
+        return parts.join(' · ');
+    }
+    return '';
+}
+
+/**
+ * Compose the settlement screen's view-model from the pending event.
+ *
+ * @param state - the event slice (for the pending `village` payload), the
+ *   player (purse + inventory), and the map goodwill tally + current map that
+ *   Phase 65's discount reads.
+ * @returns the render-ready `VillageVM`, or the inactive `EMPTY_VM` when no
+ *   village event is pending. Each ware now carries an `effect` line beside
+ *   its price (cluster S5-talk-C04); every other field is unchanged.
+ */
 export function selectVillageVM(
     state: Pick<AppStoreState, 'event' | 'player' | 'mapGoodwill' | 'world'>,
 ): VillageVM {
@@ -122,6 +262,7 @@ export function selectVillageVM(
                 itemId: ware.itemId,
                 name: item.name,
                 description: item.description ?? '',
+                effect: wareEffectLine(item),
                 price,
                 basePrice: ware.price,
                 discounted: price !== ware.price,

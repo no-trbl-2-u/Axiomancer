@@ -24,18 +24,19 @@ import {
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 
 const mockPush = jest.fn();
-const mockRouter = {
-    push: mockPush,
-    replace: jest.fn(),
-    back: jest.fn(),
-    canGoBack: () => true,
-};
 
 jest.mock('@/lib/platform/router', () => ({
-    // Return a stable reference so the EventGate useEffect's
-    // [hasPacedEvent, router] dep array doesn't fire on every
-    // re-render (matches expo-router's production behavior).
-    useRouter: () => mockRouter,
+    // S4-world-C03: the real `useRouter()` (lib/platform/router.ts) builds a
+    // FRESH object literal on every call, so `router` changes identity on
+    // every render and an effect keyed on it re-runs each time. This mock
+    // reproduces that exactly — a stable reference here would hide the
+    // double-push the gate now latches against.
+    useRouter: () => ({
+        push: mockPush,
+        replace: jest.fn(),
+        back: jest.fn(),
+        canGoBack: () => true,
+    }),
 }));
 
 afterEach(() => {
@@ -81,6 +82,14 @@ function makeRestResult(healed: number): ResolveMapEventResult {
     return {
         state: undefined as never,
         event: { kind: 'rest', healed, shelter: 'camp' },
+    };
+}
+
+/** The opening omen: the paced event a fresh boot lands on first. */
+function makeCutsceneResult(): ResolveMapEventResult {
+    return {
+        state: undefined as never,
+        event: { kind: 'cutscene', lines: ['The tide goes out and does not come back.'] },
     };
 }
 
@@ -137,5 +146,69 @@ describe('EventGate: paced events route to /event', () => {
         const store = makeStore();
         const tree = render(withProvider(store, <EventGate />));
         expect(tree.toJSON()).toBeNull();
+    });
+});
+
+/**
+ * S4-world-C03 — the opening omen mounted twice and buried the screen the
+ * player asked for. `useRouter()` returns a new object every render, so the
+ * gate's `[route, router]` effect re-fired (and re-pushed) on every re-render
+ * of the root layout while an event was still pending. The gate now latches
+ * the route it has already opened and releases the latch when the event
+ * resolves.
+ */
+describe('EventGate: one push per event (S4-world-C03)', () => {
+    it('pushes once across repeated re-renders with a fresh router each time', () => {
+        const store = makeStore();
+        setPending(store, makeRestResult(6));
+        const tree = render(withProvider(store, <EventGate />));
+        expect(mockPush).toHaveBeenCalledTimes(1);
+
+        // Each re-render hands the effect a brand-new router object, exactly
+        // as production does; the pending event has not changed.
+        for (let i = 0; i < 4; i += 1) {
+            act(() => {
+                tree.rerender(withProvider(store, <EventGate />));
+            });
+        }
+        expect(mockPush).toHaveBeenCalledTimes(1);
+    });
+
+    it('routes the omen to /cutscene exactly once, not twice onto itself', () => {
+        const store = makeStore();
+        const tree = render(withProvider(store, <EventGate />));
+
+        act(() => {
+            setPending(store, makeCutsceneResult());
+        });
+        act(() => {
+            tree.rerender(withProvider(store, <EventGate />));
+        });
+
+        expect(mockPush).toHaveBeenCalledTimes(1);
+        expect(mockPush).toHaveBeenCalledWith('/cutscene');
+    });
+
+    it('releases the latch when the event resolves, so the next event still routes', () => {
+        const store = makeStore();
+        render(withProvider(store, <EventGate />));
+
+        act(() => {
+            setPending(store, makeCutsceneResult());
+        });
+        expect(mockPush).toHaveBeenCalledTimes(1);
+
+        // The player dismisses the omen — the slice empties.
+        act(() => {
+            store.setState({ event: { ...EMPTY_EVENT_SLICE, pending: null } });
+        });
+        expect(mockPush).toHaveBeenCalledTimes(1);
+
+        // A second omen on a later node must open its screen again.
+        act(() => {
+            setPending(store, makeCutsceneResult());
+        });
+        expect(mockPush).toHaveBeenCalledTimes(2);
+        expect(mockPush).toHaveBeenLastCalledWith('/cutscene');
     });
 });

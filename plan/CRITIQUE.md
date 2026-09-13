@@ -461,6 +461,27 @@
 
 ## Pending
 
+### [MED] ui-fresh-eyes SWARM 2026-09-12 — the 309-row candidate set is drained
+- pass: swarm follow-up to the 2026-09-12 sweep, run from
+  `plan/2026-09-12-ui-fresh-eyes-swarm.prompt.md`
+- viewport: 375x812 and 1280x800
+- auth_state: fixture-booted, static preview export (no Docker in the container)
+- category: meta
+- observation: every one of the 309 candidate rows that sweep #301 left
+  unverified now carries a disposition. The rows collapsed to 187 semantic
+  clusters; 149 reached a three-lens adversarial panel; 30 findings shipped as
+  `FE-029`..`FE-058`, one genuine scope wall remains open, and the rest were
+  refuted, already fixed by #301, settled by an owner decision, or were capture
+  harness artifacts. Two regression readers then found ten regressions the sweep
+  had caused itself, and a repair fleet closed all ten. Two harness facts worth
+  carrying forward: the capture driver dismisses the combat tutorial coach, so
+  no screenshot shows a first-time player's first fight; and every cross-screen
+  naming cluster was refuted on the ground that the competing senses never
+  co-occur on one screen.
+- report: `axiomancer-mobile/docs/reports/UI_FRESH_EYES_SWARM_2026-09-12.md`,
+  row-by-row ledger alongside it as `.ledger.md`
+- source: ultracode swarm run, 96 agents across five workflows, 0 errors
+
 ### [MED] ui-fresh-eyes sweep 2026-09-12 — 21 rows shipped, a large candidate set still open
 - pass: dedicated UI fresh-eyes sweep (not a `/critique` pass — no 6-finding cap), plan/2026-09-12-ui-fresh-eyes.prompt.md adjusted for ultracode
 - viewport: 375x812 and 1280x800

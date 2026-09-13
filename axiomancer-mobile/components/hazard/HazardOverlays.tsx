@@ -32,6 +32,7 @@ import { makeStyles, usePalette } from '@/theme/runtime';
 
 import { HazardCard } from './HazardCard';
 import { HazardDie } from './HazardDie';
+import { HazardStatKey } from './HazardStatKey';
 import { LedgerMark, ProgGlyph } from './glyphs';
 import { HZ, routeAccent, TYPE_ACCENT } from './palette';
 
@@ -237,6 +238,14 @@ export function OutcomeOverlay({
 // Card detail — keyword call-outs + readable card. Tap anywhere closes.
 // ---------------------------------------------------------------------------
 
+/**
+ * CardDetailOverlay — the tap-to-read card: its keyword call-outs, the
+ * card at detail size, and (cluster S7-hazard-C04) the FORCE / ESCAPE
+ * key for the two unnamed marks the card prints.
+ *
+ * Inputs: `card` — the VM to read; `onClose` — fired on any tap.
+ * Outputs: the full-screen overlay; reads no store state of its own.
+ */
 export function CardDetailOverlay({ card, onClose }: { card: HazardCardVM; onClose: () => void }) {
     const styles = useStyles();
     return (
@@ -256,6 +265,8 @@ export function CardDetailOverlay({ card, onClose }: { card: HazardCardVM; onClo
                 <Animated.View entering={FadeIn.duration(180)}>
                     <HazardCard card={card} mode="detail" />
                 </Animated.View>
+                {/* S7-hazard-C04 — key the card's two unnamed marks. */}
+                <HazardStatKey />
             </View>
             <Text style={[styles.tapToContinue, { paddingBottom: 12 }]}>TAP ANYWHERE TO CLOSE</Text>
         </Pressable>

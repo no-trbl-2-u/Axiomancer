@@ -87,6 +87,7 @@ export default function CutsceneScreen() {
                 <TouchableOpacity
                     accessibilityRole="button"
                     accessibilityLabel="Skip to the end"
+                    activeOpacity={0.7}
                     onPress={() => setRevealed(lines.length)}
                     style={styles.skip}
                     testID="cutscene-skip"
@@ -123,8 +124,29 @@ const useStyles = makeStyles((AXM) => ({
         textAlign: 'center',
         marginTop: 16,
     },
-    skip: { position: 'absolute', top: 14, right: 14, padding: 8 },
-    skipText: { fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 2, color: AXM.bone },
+    // S4-world-C17: SKIP was a 10px bone caption with 8px of padding —
+    // it read as chrome, not a control, and its target was well under a
+    // thumb. Given a bordered plate, a legible label, and a 44pt minimum
+    // box, it looks pressable and can be hit.
+    skip: {
+        position: 'absolute',
+        top: 14,
+        right: 14,
+        minWidth: 84,
+        minHeight: 44,
+        paddingHorizontal: 16,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: AXM.parchmentMed,
+        backgroundColor: AXM.overlay,
+    },
+    skipText: {
+        fontFamily: FONTS.sans,
+        fontSize: 12,
+        letterSpacing: 3,
+        color: AXM.parchment,
+    },
     flexOne: { flex: 1 },
     inactiveWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
     inactiveText: { ...TYPE.body, color: AXM.parchment, opacity: 0.55, textAlign: 'center' },

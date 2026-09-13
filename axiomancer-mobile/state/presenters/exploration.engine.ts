@@ -321,7 +321,11 @@ const DRAWER_COPY = {
     emptyMessage: 'the paths close as you go deeper — tap a glowing node to travel.',
     title: '✠ WHITHER, PILGRIM?',
     leaguesLabel: 'LEAGUES',
-    mapHint: 'Tap a glowing node to travel there',
+    // S4-world-C07: the chart is a 936x1040 spread behind a phone-sized
+    // window — a first-time player counted 25 nodes in the legend, saw
+    // eight, and had no reason to think the sheet moved. The nudge names
+    // the gesture as well as the tap.
+    mapHint: 'Tap a glowing node to travel — drag or pinch the chart',
 } as const;
 
 const FALLBACK_VM: ExplorationViewModel = {

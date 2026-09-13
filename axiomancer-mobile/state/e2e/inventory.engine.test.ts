@@ -718,7 +718,7 @@ describe('selectInventoryViewModel: chrome strings', () => {
         const vm: InventoryViewModel = selectInventoryViewModel(store.getState());
 
         expect(vm.sectionHeader).toBe('SATCHEL · WALLET · BURDEN');
-        expect(vm.categoryHeaders.equipment).toBe('✠ WORN & WIELDED');
+        expect(vm.categoryHeaders.equipment).toBe('✠ GEAR & GIRDING');
         expect(vm.categoryHeaders.consumable).toBe('✠ PHIALS & SOPS');
         expect(vm.categoryHeaders.material).toBe('✠ STUFF');
         expect(vm.categoryHeaders.quest).toBe('✠ SEALED');

@@ -318,7 +318,24 @@ interface ThreatActionRiders {
     curseCardId?: string;
 }
 
-/** Builds a `CombatThreatAction` from authored intent + the computed damage. */
+/**
+ * Builds a `CombatThreatAction` from authored intent + the computed damage.
+ *
+ * Purpose: turn one authored threat step into BOTH the effect list the engine
+ * resolves and the one-line preview the board telegraphs.
+ * Inputs: `actionText` (the flavour clause), `damage` (already budget-scaled),
+ * an optional `effectId`/`intensity` player debuff, and the non-damage `riders`
+ * (enemy heal, enemy self-cleanse, PLEA shed, premise shed, glyph shatter,
+ * curse injection).
+ * Output: a `CombatThreatAction` — `effects` for the engine, `description` for
+ * the preview.
+ *
+ * S2-preview-C03: the PLEA rider's preview clause named that meter "resolve",
+ * while every player-facing surface — the board meter under the foe's VITAE,
+ * the intent chip, the combat log — names it PLEA. The clause now says PLEA,
+ * echoing the log's own "shakes off your plea" line, so the preview and the
+ * board name one meter once.
+ */
 function buildThreatAction(
     actionText: string, damage: number, effectId?: string, intensity?: number,
     riders?: ThreatActionRiders,
@@ -339,7 +356,7 @@ function buildThreatAction(
     if (enemyCleanse && enemyCleanse > 0) {
         parts.push(`sheds ${enemyCleanse} affliction${enemyCleanse === 1 ? '' : 's'}`);
     }
-    if (swayCleanse && swayCleanse > 0) parts.push(`steadies ${swayCleanse} resolve`);
+    if (swayCleanse && swayCleanse > 0) parts.push(`shakes off ${swayCleanse} PLEA`);
     if (premiseShed && premiseShed > 0) {
         parts.push(`unravels ${premiseShed} premise${premiseShed === 1 ? '' : 's'}`);
     }

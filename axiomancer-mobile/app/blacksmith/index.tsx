@@ -30,6 +30,17 @@ import {
 import { FONTS, TYPE } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
+/**
+ * Widest the forge column is allowed to get.
+ *
+ * Purpose: on a desktop viewport the smith's prose ran the full window at
+ * ~165 characters to a line, which loses the eye on every return sweep.
+ * Input: none (a constant). Output: the cap applied to the scroll content
+ * column; below it the column is simply full-width, so phone layout is
+ * unchanged. Cluster: S5-talk-C13.
+ */
+const SCENE_MAX_WIDTH = 560;
+
 function hapticImpact(style: ImpactFeedbackStyle): void {
     try {
         Haptics.impactAsync(style).catch(() => undefined);
@@ -38,7 +49,12 @@ function hapticImpact(style: ImpactFeedbackStyle): void {
     }
 }
 
-/** A single service offer as a button; greyed + reason when disabled. */
+/**
+ * A single service offer as a button: its label, its shilling price, the trade
+ * it makes (`MISS face → MANA` — cluster S5-talk-C12), and, when the offer is
+ * greyed, the LOUD reason. Reads one `BlacksmithOfferVM` off the presenter;
+ * mounted by `DieRow` (HONE + TEMPER) and `SwapRow` (SWAP) below.
+ */
 function OfferButton({ offer, onPress }: { offer: BlacksmithOfferVM; onPress: () => void }) {
     const styles = useStyles();
     const AXM = usePalette();
@@ -48,7 +64,10 @@ function OfferButton({ offer, onPress }: { offer: BlacksmithOfferVM; onPress: ()
                 accessibilityRole="button"
                 accessibilityLabel={
                     offer.enabled
-                        ? `${offer.label} the ${offer.color} die for ${offer.price} diamonds`
+                        // S5-talk-C12: the forge prices in SHILLINGS (FE-023); this
+                        // label still said "diamonds", the combat board's CONVICTION.
+                        ? `${offer.label} the ${offer.color} die for ${offer.price} shillings`
+                            + (offer.effect ? `: ${offer.effect}` : '')
                         : `${offer.label} unavailable: ${offer.reason}`
                 }
                 accessibilityState={{ disabled: !offer.enabled }}
@@ -68,6 +87,14 @@ function OfferButton({ offer, onPress }: { offer: BlacksmithOfferVM; onPress: ()
                     {offer.price}s
                 </Text>
             </TouchableOpacity>
+            {/* S5-talk-C12: HONE and TEMPER are the smith's words, not the
+                game's — each offer states the trade it makes in the same face
+                vocabulary the die read above it uses. */}
+            {offer.effect.length > 0 && (
+                <Text style={styles.offerEffect} testID={`blacksmith-offer-${offer.id}-effect`}>
+                    {offer.effect}
+                </Text>
+            )}
             {!offer.enabled && (
                 <Text style={styles.offerReason} testID={`blacksmith-offer-${offer.id}-reason`}>
                     {offer.reason}
@@ -144,7 +171,11 @@ export default function BlacksmithScreen() {
 
     return (
         <ScreenBg scrollable={false} art="blacksmith">
-            <ScrollView style={styles.scrollOuter} contentContainerStyle={styles.scroll}>
+            <ScrollView
+                style={styles.scrollOuter}
+                contentContainerStyle={styles.scroll}
+                testID="blacksmith-scroll"
+            >
                 <View style={styles.eyebrowRow}>
                     <AxmIcon name="action-anvil" size={18} />
                     <Text style={styles.eyebrow}>THE ANVIL</Text>
@@ -153,11 +184,8 @@ export default function BlacksmithScreen() {
 
                 {vm.phase === 'intro' && (
                     <View testID="blacksmith-intro">
-                        <Text style={styles.body}>
-                            The forge breathes low and orange. The smith turns your dice
-                            over, reading the dead weight in them. &quot;I can draw a miss
-                            out true, or harden a face into something that pays. Costs, of
-                            course.&quot;
+                        <Text style={styles.body} testID="blacksmith-intro-body">
+                            {vm.introBody}
                         </Text>
                         <TouchableOpacity
                             accessibilityRole="button"
@@ -175,12 +203,20 @@ export default function BlacksmithScreen() {
                     <View testID="blacksmith-forging">
                         <View style={styles.budgetRow}>
                             <Text style={styles.budgetLabel}>PURSE</Text>
+                            {/* S5-talk-C12: spelled out once, the way the village
+                                stall head spells its own purse, so the `12s` on
+                                every offer below has something to decode against. */}
                             <Text style={styles.budgetValue} testID="blacksmith-budget">
-                                {vm.budget}s
+                                {vm.budget} SHILLINGS
                             </Text>
                         </View>
 
                         <Text style={styles.sectionLabel}>YOUR DICE</Text>
+                        {/* S5-talk-C12: every die prints `1 BOON · 2 MANA · 3 MISS`
+                            and nothing said what those three words are worth. */}
+                        <Text style={styles.faceKey} testID="blacksmith-face-key">
+                            {vm.faceKey}
+                        </Text>
                         {vm.dice.map((die) => (
                             <DieRow
                                 key={die.color}
@@ -281,7 +317,17 @@ export default function BlacksmithScreen() {
 
 const useStyles = makeStyles((AXM) => ({
     scrollOuter: { flex: 1 },
-    scroll: { padding: 14, paddingBottom: 24, flexGrow: 1, justifyContent: 'center' },
+    // S5-talk-C13: cap the column so the smith's prose keeps a readable
+    // measure on a wide window instead of running edge to edge.
+    scroll: {
+        padding: 14,
+        paddingBottom: 24,
+        flexGrow: 1,
+        justifyContent: 'center',
+        width: '100%',
+        maxWidth: SCENE_MAX_WIDTH,
+        alignSelf: 'center',
+    },
     eyebrowRow: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -327,6 +373,15 @@ const useStyles = makeStyles((AXM) => ({
         marginTop: 6,
         marginBottom: 6,
     },
+    // S5-talk-C12: the legend for the per-die face read; chronicle voice, one
+    // step quieter than the die rows it explains.
+    faceKey: {
+        fontFamily: FONTS.serifItalic,
+        fontSize: 12,
+        lineHeight: 17,
+        color: AXM.bone,
+        marginBottom: 8,
+    },
     die: {
         borderWidth: 2,
         borderColor: AXM.ash,
@@ -357,6 +412,15 @@ const useStyles = makeStyles((AXM) => ({
     offerDisabled: { borderColor: AXM.ash, opacity: 0.5 },
     offerLabel: { fontFamily: FONTS.gothic, fontSize: 14, letterSpacing: 1.5, color: AXM.sulfur },
     offerPrice: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.sulfur },
+    // S5-talk-C12: the trade a verb makes, in the die read's own mono face.
+    offerEffect: {
+        fontFamily: FONTS.mono,
+        fontSize: 11,
+        lineHeight: 15,
+        letterSpacing: 0.5,
+        color: AXM.bone,
+        marginTop: 4,
+    },
     offerReason: {
         fontFamily: FONTS.serifItalic,
         fontSize: 11,

@@ -13,6 +13,20 @@ interface TitleScreenProps {
   onContinue: () => void;
 }
 
+/**
+ * TitleScreen — the launch screen presenter: key art, the tagline, the
+ * EMBARK call-to-action and the closing flavour line.
+ *
+ * Inputs: `onContinue` — invoked once the player commits to EMBARK.
+ * Output: the title screen element tree (no state of its own beyond the
+ * store actions it fires).
+ *
+ * Resolves DECISION-5 (rows C-103, C-105): `leagues` is a unit of
+ * distance, not a proper noun, so the tagline says "the leagues beyond"
+ * in lower case — matching the map compass hint, which already reads
+ * "N ↑ · leagues · drag · pinch". The step-card column
+ * header keeps its all-caps LEAGUES; that is a header, not prose.
+ */
 export function TitleScreen({ onContinue }: TitleScreenProps) {
   const styles = useStyles();
   const actions = useGameActions();
@@ -36,13 +50,31 @@ export function TitleScreen({ onContinue }: TitleScreenProps) {
           intact at full width instead; the container's own dark
           background fills the space below it, which the scrim
           bands already darken toward for the CTA panel. */}
-      <Image
-        source={TITLE_ART}
-        style={styles.artImage}
-        contentFit="contain"
-        contentPosition="top center"
-        accessibilityLabel="A crowned king enthroned beside a horned axiomancer in a stained-glass hall"
-      />
+      {/* S4-world-C22: `contain` ends the square plate in a ruled line
+          straight across the figures, with flat ground beneath it — a
+          seam, not an edge. The art now sits in its own square wrapper
+          so a short ramp of ground-coloured bands can be anchored to
+          the ART's own foot (not the screen's), dissolving that line at
+          any viewport height. Same no-gradient-dependency trick as the
+          scrim below. */}
+      <View style={styles.artWrap} pointerEvents="none">
+        <Image
+          source={TITLE_ART}
+          style={styles.artImage}
+          contentFit="contain"
+          contentPosition="top center"
+          accessibilityLabel="A crowned king enthroned beside a horned axiomancer in a stained-glass hall"
+        />
+        <View style={styles.artFoot}>
+          <View style={[styles.artFootBand, styles.artFootBand1]} />
+          <View style={[styles.artFootBand, styles.artFootBand2]} />
+          <View style={[styles.artFootBand, styles.artFootBand3]} />
+          <View style={[styles.artFootBand, styles.artFootBand4]} />
+          <View style={[styles.artFootBand, styles.artFootBand5]} />
+          <View style={[styles.artFootBand, styles.artFootBand6]} />
+          <View style={[styles.artFootBand, styles.artFootBand7]} />
+        </View>
+      </View>
 
       {/* Bottom scrim so the call-to-action reads over the art. */}
       <View style={styles.scrim} pointerEvents="none">
@@ -55,7 +87,7 @@ export function TitleScreen({ onContinue }: TitleScreenProps) {
       <View style={styles.content}>
         <Text style={styles.tagline}>
           The cursed lands await. Carry your ancient knowledge and cold
-          iron into the LEAGUES beyond.
+          iron into the leagues beyond.
         </Text>
 
         <Pressable
@@ -68,7 +100,7 @@ export function TitleScreen({ onContinue }: TitleScreenProps) {
           accessibilityLabel="Embark on your journey"
         >
           <Text style={styles.embarkButtonText}>EMBARK…</Text>
-          <Text style={styles.embarkHint}>tap a glowing node on the map to begin</Text>
+          <Text style={styles.embarkHint}>begin the pilgrimage</Text>
         </Pressable>
 
         <Text style={styles.footerText}>
@@ -89,13 +121,45 @@ const useStyles = makeStyles((AXM) => ({
   // Square art pinned to the top edge, full width — see the
   // `contentFit="contain"` comment above for why this replaces
   // absoluteFill+cover.
-  artImage: {
+  artWrap: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     aspectRatio: 1,
   },
+  artImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  // The feathered foot of the plate (S4-world-C22). Seven bands of the
+  // page ground over the art's own lower quarter, the last fully opaque,
+  // so the image has already become the field by the time it ends. Seven
+  // rather than the scrim's three: the scrim ramps over half a screen
+  // where a coarse step reads as atmosphere, this one ramps over ~90px
+  // where the same step would read as a stripe.
+  artFoot: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: '24%',
+    justifyContent: 'flex-end',
+  },
+  artFootBand: {
+    height: '14.28%',
+    backgroundColor: AXM.bg,
+  },
+  artFootBand1: { opacity: 0.08 },
+  artFootBand2: { opacity: 0.2 },
+  artFootBand3: { opacity: 0.35 },
+  artFootBand4: { opacity: 0.52 },
+  artFootBand5: { opacity: 0.71 },
+  artFootBand6: { opacity: 0.89 },
+  artFootBand7: { opacity: 1 },
   // Stacked translucent bands fake a bottom-up gradient without an
   // extra gradient dependency, fading the art into the dark CTA panel.
   scrim: {

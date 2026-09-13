@@ -29,6 +29,27 @@ import { makeStyles } from '@/theme/runtime';
  *  the pre-Phase-137 event modal's Tick C). */
 const DIALOGUE_CONFIRM_TTL_MS = 500;
 
+/**
+ * Widest the parley column is allowed to get.
+ *
+ * Purpose: on a desktop viewport the scene ran the full window and the
+ * spoken text measured ~165 characters to a line, which loses the eye on
+ * every return sweep. Input: none (a constant). Output: the cap applied
+ * to the scroll content column; below it the column is simply full-width,
+ * so phone layout is unchanged. Cluster: S5-talk-C13.
+ */
+const SCENE_MAX_WIDTH = 560;
+
+/**
+ * Size of a reply's consequence chip.
+ *
+ * Purpose: the chips were printed at 8pt, small enough to be unreadable
+ * beside every other description on the screen. Input: none (a constant).
+ * Output: the point size the chips share with the rest of the app's
+ * description copy. Cluster: S5-talk-C17.
+ */
+const CHIP_FONT_SIZE = 12;
+
 /** Preview chips for `choice.consequences` — ported from the dead
  *  `/event` fallback shell's `ConsequenceChips` (Phase 46c) so a
  *  quest-granting reply (e.g. Old Marrow's "Consider it done.") says
@@ -172,7 +193,11 @@ export default function DialogueScreen() {
 
     return (
         <ScreenBg scrollable={false} art="dialogue">
-            <ScrollView style={styles.scrollOuter} contentContainerStyle={styles.scroll}>
+            <ScrollView
+                style={styles.scrollOuter}
+                contentContainerStyle={styles.scroll}
+                testID="dialogue-scroll"
+            >
                 <Text style={styles.eyebrow}>◉ PARLEY</Text>
                 <View style={styles.nameplate} testID="dialogue-nameplate">
                     <Text style={styles.name}>{vm.title}</Text>
@@ -216,7 +241,17 @@ const useStyles = makeStyles((AXM) => ({
     scrollOuter: { flex: 1 },
     // Centre the conversation in the viewport so it doesn't sit in a sea
     // of empty black (critic round 1: narrative screens had huge dead space).
-    scroll: { padding: 14, paddingBottom: 24, flexGrow: 1, justifyContent: 'center' },
+    // S5-talk-C13: and cap the column so the spoken text keeps a readable
+    // measure on a wide window instead of running edge to edge.
+    scroll: {
+        padding: 14,
+        paddingBottom: 24,
+        flexGrow: 1,
+        justifyContent: 'center',
+        width: '100%',
+        maxWidth: SCENE_MAX_WIDTH,
+        alignSelf: 'center',
+    },
     eyebrow: {
         fontFamily: FONTS.sans,
         fontSize: 10,
@@ -278,9 +313,10 @@ const useStyles = makeStyles((AXM) => ({
     },
     flexOne: { flex: 1 },
     consequenceRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 4 },
+    // S5-talk-C17: was 8 — unreadable next to every other description line.
     consequenceChip: {
         fontFamily: FONTS.mono,
-        fontSize: 8,
+        fontSize: CHIP_FONT_SIZE,
         letterSpacing: 1,
         color: AXM.bone,
         borderWidth: 1,

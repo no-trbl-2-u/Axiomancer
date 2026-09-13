@@ -171,8 +171,16 @@ export default function ExplorationScreen() {
         [vm.options, selectedNodeId],
     );
 
-    // Tapping a node SELECTS it (showing the confirm panel) rather than moving
-    // immediately; locked / completed taps surface a brief toast.
+    /**
+     * Node tap handler for the exploration map.
+     *
+     * Input: the tapped `ExplorationNode`. Output: none — it either selects
+     * the node (opening `<NodeConfirmPanel>`) or raises a brief toast saying
+     * why the tap did nothing. Resolves S4-world-C06: the node the player is
+     * STANDING on fell through to a silent `return`, so the one mark the
+     * chart drew loudest was also the one that answered nothing when tapped.
+     * Every kind now says something back.
+     */
     const onNodePress = (node: ExplorationNode) => {
         if (node.kind === 'locked') {
             setNodeTip('This path is sealed.');
@@ -180,6 +188,10 @@ export default function ExplorationScreen() {
         }
         if (node.kind === 'completed') {
             setNodeTip('walked already');
+            return;
+        }
+        if (node.kind === 'current') {
+            setNodeTip('you stand here');
             return;
         }
         if (node.kind !== 'available') return;

@@ -41,6 +41,13 @@ export interface BlacksmithOfferVM {
     label: string;
     price: number;
     enabled: boolean;
+    /**
+     * S5-talk-C12 — what the verb BUYS, in the screen's own face words
+     * (`MISS face → MANA`). HONE and TEMPER are the smith's vocabulary, not
+     * the game's; the offer now states its trade instead of naming it.
+     * '' on a SWAP, whose row already prints the face read it installs.
+     */
+    effect: string;
     /** Loud reason when `!enabled`; '' when takeable. */
     reason: string;
 }
@@ -89,6 +96,10 @@ export interface BlacksmithOutcomeVM {
 export interface BlacksmithVM {
     active: boolean;
     phase: BlacksmithSession['phase'] | 'none';
+    /** S5-talk-C12 — the smith's opening speech; teaches the face words. */
+    introBody: string;
+    /** S5-talk-C12 — one line decoding the `1 BOON · 2 MANA · 3 MISS` read. */
+    faceKey: string;
     budget: number;
     spent: number;
     dice: readonly BlacksmithDieVM[];
@@ -116,6 +127,39 @@ const COLOR_LABELS: Record<DieGearColor, string> = Object.freeze({
  */
 const CURRENCY_SUFFIX = 's';
 
+/**
+ * The smith's opening speech (S5-talk-C12).
+ *
+ * It used to sell "drawing a miss out true" and "hardening a face into
+ * something that pays" — evocative, and the only place the forge's whole
+ * vocabulary appeared. A player who has never seen a die face here could not
+ * tell what either sentence bought. Same voice, but it now names the three
+ * faces the screen goes on to print, and what each one pays.
+ */
+const INTRO_BODY =
+    'The forge breathes low and orange. The smith turns your dice over, '
+    + 'reading the dead weight in them. “Six faces to a die. Most come up '
+    + 'MISS and pay you nothing. I can beat a MISS into a MANA face — that one '
+    + 'pays for a card. Or harden a MANA face into a BOON, which pays for the '
+    + 'card and pays CONVICTION besides. Costs, of course.”';
+
+/**
+ * The legend for the per-die face read (S5-talk-C12).
+ *
+ * Each die prints `1 BOON · 2 MANA · 3 MISS` and nothing said what those
+ * three words are worth. Straight off the engine's face semantics
+ * (`combat.upgradeable-dice.ts`): a MANA face powers one paid line of its
+ * colour, a BOON powers a card AND fires its conviction payload, a MISS is
+ * dead.
+ */
+const FACE_KEY =
+    'MANA pays for a card in its colour. BOON pays for a card and pays '
+    + 'CONVICTION besides. MISS pays nothing.';
+
+/** S5-talk-C12 — the trade each verb makes, in the same face words. */
+const HONE_EFFECT = 'MISS face → MANA';
+const TEMPER_EFFECT = 'MANA face → BOON';
+
 // ---------------------------------------------------------------------------
 // Composition
 // ---------------------------------------------------------------------------
@@ -123,6 +167,8 @@ const CURRENCY_SUFFIX = 's';
 const EMPTY_VM: BlacksmithVM = Object.freeze({
     active: false,
     phase: 'none',
+    introBody: INTRO_BODY,
+    faceKey: FACE_KEY,
     budget: 0,
     spent: 0,
     dice: Object.freeze([]),
@@ -147,6 +193,15 @@ function offerReason(capReason: string | null, affordable: boolean, price: numbe
     return '';
 }
 
+/**
+ * Build the HONE offer for one die.
+ *
+ * @param rail - the session's current die gear, one entry per colour.
+ * @param color - which die the offer is for.
+ * @param budget - the visit's spendable shillings, for the afford check.
+ * @returns the offer VM: price, whether it is takeable, the LOUD reason when
+ *   it is not, and (cluster S5-talk-C12) the trade it makes in face words.
+ */
 function honeOffer(rail: DieGearRail, color: DieGearColor, budget: number): BlacksmithOfferVM {
     const gear = rail[color];
     const price = ANVIL_VERB_PRICING.hone;
@@ -161,10 +216,20 @@ function honeOffer(rail: DieGearRail, color: DieGearColor, budget: number): Blac
         label: 'HONE',
         price,
         enabled: reason === '',
+        effect: HONE_EFFECT,
         reason,
     };
 }
 
+/**
+ * Build the TEMPER offer for one die.
+ *
+ * @param rail - the session's current die gear, one entry per colour.
+ * @param color - which die the offer is for.
+ * @param budget - the visit's spendable shillings, for the afford check.
+ * @returns the offer VM, same contract as `honeOffer` — including the face-word
+ *   trade line added for cluster S5-talk-C12.
+ */
 function temperOffer(rail: DieGearRail, color: DieGearColor, budget: number): BlacksmithOfferVM {
     const gear = rail[color];
     const price = ANVIL_VERB_PRICING.temper;
@@ -186,10 +251,19 @@ function temperOffer(rail: DieGearRail, color: DieGearColor, budget: number): Bl
         label: 'TEMPER',
         price,
         enabled: reason === '',
+        effect: TEMPER_EFFECT,
         reason,
     };
 }
 
+/**
+ * Compose the forge screen's view-model from the engine session.
+ *
+ * @param state - the blacksmith slice; `session === null` means no visit.
+ * @returns the render-ready `BlacksmithVM`, or the inactive `EMPTY_VM`. Carries
+ *   the smith's opening speech and the face-read key (cluster S5-talk-C12) so
+ *   no forge copy lives in the screen; every other field is unchanged.
+ */
 export function selectBlacksmithVM(state: Pick<AppStoreState, 'blacksmith'>): BlacksmithVM {
     const s = state.blacksmith?.session;
     if (!s) return EMPTY_VM;
@@ -225,6 +299,7 @@ export function selectBlacksmithVM(state: Pick<AppStoreState, 'blacksmith'>): Bl
                 label: 'SWAP',
                 price,
                 enabled: reason === '',
+                effect: '',
                 reason,
             },
             name: v.name,
@@ -253,6 +328,8 @@ export function selectBlacksmithVM(state: Pick<AppStoreState, 'blacksmith'>): Bl
     return {
         active: true,
         phase: s.phase,
+        introBody: INTRO_BODY,
+        faceKey: FACE_KEY,
         budget,
         spent: s.spent,
         dice,

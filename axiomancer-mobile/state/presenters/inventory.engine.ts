@@ -241,7 +241,14 @@ const TAB_ORDER: readonly InventoryTab[] = [
 /** Display strings for the inventory screen's chrome. */
 const SECTION_HEADER = 'SATCHEL · WALLET · BURDEN';
 const CATEGORY_HEADERS: Record<InventoryCategory, string> = {
-    equipment: '✠ WORN & WIELDED',
+    // S3-sheet-C22 (second half): every header echoes its own tab — PHIALS →
+    // '✠ PHIALS & SOPS', STUFF → '✠ STUFF', SEALED → '✠ SEALED'. This one was
+    // '✠ WORN & WIELDED' back when the tab read WORN, so renaming the tab to
+    // GEAR left the section heading as the surviving half of the same lie: it
+    // claims wornness over a list that includes everything carried unworn.
+    // GEAR & GIRDING restores the echo and names the goods, not their state;
+    // the per-row WORN badge stays the only claim about what is on the body.
+    equipment: '✠ GEAR & GIRDING',
     consumable: '✠ PHIALS & SOPS',
     material: '✠ STUFF',
     quest: '✠ SEALED',
@@ -249,7 +256,12 @@ const CATEGORY_HEADERS: Record<InventoryCategory, string> = {
 
 const TAB_LABELS: Record<InventoryTab, string> = {
     all: 'ALL',
-    equipment: 'WORN',
+    // S3-sheet-C22: every tab's badge counts the rows that tab shows, and this
+    // tab shows all equipment carried — so the badge read "8" while five things
+    // were worn. The count is right; the word was the liar. GEAR names the
+    // filter (equipment) instead of a state (equipped) the filter does not
+    // apply; the per-row WORN badge still marks what is actually on the body.
+    equipment: 'GEAR',
     consumable: 'PHIALS',
     material: 'STUFF',
     quest: 'SEALED',

@@ -10,6 +10,15 @@
  * toggle, and SELL lists the player's inventory (quest items
  * excluded) priced via the presenter's `sellables` — dispatching
  * `sellVillageItem` (engine `sellItem` owns the rules).
+ *
+ * Every BUY row states what the coin buys before it states the
+ * flavour, off the presenter's `effect` line (cluster S5-talk-C04).
+ *
+ * That effect line made the stall list taller than a phone and the way
+ * out rode off the bottom edge half-drawn. The screen now owns ONE
+ * scroller — the house shape (`/rest`, `/blacksmith`, the inventory
+ * page) — and TAKE THE ROAD is pinned below it, so the exit is whole at
+ * any stall count and at either width (14-village).
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -23,6 +32,27 @@ import { selectVillageVM } from '@/state/presenters/village.engine';
 import { FONTS, TYPE } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
 
+/**
+ * Size for an option's description line on this screen.
+ *
+ * Purpose: the stalls print a ware's description in the same uppercase
+ * mono the inn (`/rest` `offerDesc`) uses, and printed it four points
+ * smaller — so the same sentence was comfortable at the inn and fine
+ * print at the stall. Input: none (a constant). Output: the point size
+ * both surfaces share. Cluster: S5-talk-C17.
+ */
+const DESC_FONT_SIZE = 12;
+
+/**
+ * The settlement screen.
+ *
+ * Purpose: render the village view-model — name, body, merchant voices,
+ * and the BUY/SELL stalls — with the exit pinned beneath the scrolling
+ * stall list instead of trailing it. Inputs: none (reads the store via
+ * `useGameState`; dispatches through `useGameActions`). Output: the
+ * screen's element tree. Resolves: 14-village — the stalls scroll, the
+ * way out does not.
+ */
 export default function VillageScreen() {
     const styles = useStyles();
     const event = useGameState((s) => s.event);
@@ -54,8 +84,12 @@ export default function VillageScreen() {
     }
 
     return (
-        <ScreenBg art="village">
-            <ScrollView contentContainerStyle={styles.scroll}>
+        <ScreenBg scrollable={false} art="village">
+            <ScrollView
+                style={styles.scrollOuter}
+                contentContainerStyle={styles.scroll}
+                testID="village-scroll"
+            >
                 <View style={styles.eyebrowRow}>
                     <AxmIcon name="action-village" size={18} />
                     <Text style={styles.eyebrow}>SETTLEMENT</Text>
@@ -113,7 +147,11 @@ export default function VillageScreen() {
                                 <TouchableOpacity
                                     key={ware.itemId}
                                     accessibilityRole="button"
-                                    accessibilityLabel={`Buy ${ware.name} for ${ware.price} shillings`}
+                                    accessibilityLabel={
+                                        ware.effect.length > 0
+                                            ? `Buy ${ware.name} for ${ware.price} shillings. ${ware.effect}`
+                                            : `Buy ${ware.name} for ${ware.price} shillings`
+                                    }
                                     accessibilityState={{ disabled: !ware.affordable }}
                                     disabled={!ware.affordable}
                                     onPress={() => actions.buyVillageWare(ware.itemId)}
@@ -122,8 +160,14 @@ export default function VillageScreen() {
                                 >
                                     <View style={styles.flexOne}>
                                         <Text style={styles.wareName}>{ware.name}</Text>
+                                        {/* S5-talk-C04: the mechanical read comes before the
+                                            flavour line — a stall that prices a thing has to
+                                            say what the thing does. */}
+                                        {ware.effect.length > 0 && (
+                                            <Text style={styles.wareEffect} testID={`village-ware-${ware.itemId}-effect`}>{ware.effect}</Text>
+                                        )}
                                         {ware.description.length > 0 && (
-                                            <Text style={styles.wareDesc}>{ware.description}</Text>
+                                            <Text style={styles.wareDesc} testID={`village-ware-${ware.itemId}-desc`}>{ware.description}</Text>
                                         )}
                                     </View>
                                     {ware.discounted && (
@@ -160,7 +204,14 @@ export default function VillageScreen() {
                         )}
                     </>
                 )}
+            </ScrollView>
 
+            {/* 14-village: the exit sits OUTSIDE the scroller. Four wares
+                that each state their effect are taller than 812pt, and
+                inside the list the button was bisected by the bottom of
+                the screen. Pinned here it is whole however long the
+                stalls run, at 375 and at 1280 alike. */}
+            <View style={styles.exitBar}>
                 <TouchableOpacity
                     accessibilityRole="button"
                     accessibilityLabel="Leave the village"
@@ -170,12 +221,15 @@ export default function VillageScreen() {
                 >
                     <Text style={styles.bigButtonText}>TAKE THE ROAD</Text>
                 </TouchableOpacity>
-            </ScrollView>
+            </View>
         </ScreenBg>
     );
 }
 
 const useStyles = makeStyles((AXM) => ({
+    // One scroller, sized to the space the pinned exit leaves it
+    // (14-village) — the shape `/rest` and `/blacksmith` already use.
+    scrollOuter: { flex: 1 },
     scroll: { padding: 14, paddingBottom: 24 },
     eyebrowRow: {
         flexDirection: 'row',
@@ -211,12 +265,18 @@ const useStyles = makeStyles((AXM) => ({
         marginTop: 12,
         marginBottom: 6,
     },
+    // S5-talk-C11: this was a full ash-bordered panel on panelBg — this app's
+    // DISABLED grammar (`offerDisabled` on /rest and /blacksmith, the greyed
+    // tab of FE-028) — so a named merchant read as a locked button and got
+    // pressed to no effect. It is an inert View by design: a sulfur left rule
+    // is the screen's flavour grammar (the event shell's `loreBox`), which
+    // reads as quoted voice and plainly not a control.
     merchantCard: {
-        borderWidth: 1,
-        borderColor: AXM.ash,
-        backgroundColor: AXM.panelBg,
-        padding: 10,
-        marginBottom: 6,
+        borderLeftWidth: 2,
+        borderLeftColor: AXM.sulfur,
+        paddingLeft: 10,
+        paddingVertical: 2,
+        marginBottom: 8,
     },
     merchantName: { fontFamily: FONTS.gothic, fontSize: 16, color: AXM.sulfur, letterSpacing: 1.2 },
     merchantLine: { fontFamily: FONTS.serifItalic, fontSize: 12, color: AXM.parchment, marginTop: 4 },
@@ -257,7 +317,20 @@ const useStyles = makeStyles((AXM) => ({
     // and legible, matching combat's disabled-item treatment (critic round).
     wareRowUnaffordable: { borderColor: AXM.ash },
     wareName: { fontFamily: FONTS.gothic, fontSize: 16, color: AXM.parchment, letterSpacing: 1 },
-    wareDesc: { fontFamily: FONTS.mono, fontSize: 8, color: AXM.bone, marginTop: 2, textTransform: 'uppercase' },
+    // S5-talk-C17: was 8 — the inn prints the identical uppercase-mono
+    // description at DESC_FONT_SIZE, so the stalls looked like fine print
+    // next to it. One size for a description wherever it appears.
+    wareDesc: { fontFamily: FONTS.mono, fontSize: DESC_FONT_SIZE, color: AXM.bone, marginTop: 2, textTransform: 'uppercase' },
+    // S5-talk-C04: the effect line is the row's load-bearing text, so it takes
+    // full parchment while the flavour line below keeps the quieter bone.
+    wareEffect: {
+        fontFamily: FONTS.mono,
+        fontSize: DESC_FONT_SIZE,
+        color: AXM.parchment,
+        marginTop: 3,
+        letterSpacing: 0.4,
+        textTransform: 'uppercase',
+    },
     warePrice: { fontFamily: FONTS.gothic, fontSize: 18, color: AXM.sulfur },
     // Price tracks affordability, not just the row's opacity: value-gold
     // is loud enough to survive the unaffordable dim, so mute the colour
@@ -281,6 +354,9 @@ const useStyles = makeStyles((AXM) => ({
         backgroundColor: AXM.bg,
     },
     bigButtonText: { fontFamily: FONTS.gothic, fontSize: 18, letterSpacing: 2, color: AXM.parchment },
+    // The pinned exit keeps the page's 14pt gutter; the button's own
+    // marginTop is the gap above it, as it was inside the list.
+    exitBar: { paddingHorizontal: 14, paddingBottom: 14 },
     flexOne: { flex: 1 },
     inactiveWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
     inactiveText: { ...TYPE.body, color: AXM.parchment, opacity: 0.55, textAlign: 'center' },
