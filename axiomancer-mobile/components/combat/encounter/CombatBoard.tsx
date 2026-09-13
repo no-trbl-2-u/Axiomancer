@@ -236,30 +236,42 @@ export const RAIL_LINE_H = 26;
 // ── The hand fan's chrome-free band (cluster S1-board-C11) ───────────────────
 // The two bottom corners are chrome, not board: the player medallion sits at
 // left 10 and is PLAYER_DOCK_FOOTPRINT_W wide, the END stack at right 10 with
-// an 80pt disc. The fan used to run edge-to-edge (12pt insets) UNDER both at a
-// lower zIndex, so the first and last cards — the sliver you drag from and the
-// one fully-readable face — were parked beneath the medallions. The fan now
-// lays out BESIDE them.
+// an 80pt disc. The fan prefers the band BETWEEN them — but only a hand that
+// actually seats there takes it (see `handFanLayout`); the board's own edge
+// inset is the fallback, because five 120pt cards do not fit 183pt of phone.
 export const END_CORNER_FOOTPRINT_W = 90;
 export const HAND_FAN_LEFT = PLAYER_DOCK_FOOTPRINT_W;
 export const HAND_FAN_RIGHT = END_CORNER_FOOTPRINT_W;
 // Never tighter than a readable sliver, however large the hand.
 export const HAND_FAN_MIN_STEP = 28;
+// The board's own edge inset — the widest band the fan may honestly use, and
+// the reference layout the corner medallions float above at a higher zIndex.
+export const HAND_FAN_BOARD_EDGE = 12;
 
 /**
- * Lay the hand fan out inside the chrome-free band between the two corner
- * medallions (cluster S1-board-C11).
+ * Lay the hand fan out in the widest band it can honestly use (cluster
+ * S1-board-C11).
  *
  * Inputs: `screenW` (viewport width) and `n` (number of fanned cards).
  * Outputs: `band` — the width the fan lays out in; `step` — the visible width
  * of each non-last card; `overlap` — the negative margin that produces it.
  *
- * Pure: the board calls it once per render. A hand too large for the band
- * still overflows it (the sliver floor wins), but symmetrically and by a few
- * points, instead of burying whole cards under the chrome.
+ * Pure: the board calls it once per render. The chrome-free band between the
+ * corner medallions is preferred, and a hand that seats there above the sliver
+ * floor takes it — such a fan clears both corners entirely. A hand that does
+ * NOT seat there takes the full board band instead: forcing it into the narrow
+ * band shaved every card to the 28pt floor (four of five names cut to two
+ * letters, all art and cost chips hidden, each a 28pt drag target) AND still
+ * overflowed the band, so the last card landed half under the END disc with
+ * its keyword chip cut mid-word. A readable fan the corner chrome floats over
+ * beats an unreadable one crushed beside it.
  */
 export function handFanLayout(screenW: number, n: number): { band: number; step: number; overlap: number } {
-    const band = Math.max(HAND_CARD_W, screenW - HAND_FAN_LEFT - HAND_FAN_RIGHT);
+    const chromeBand = Math.max(HAND_CARD_W, screenW - HAND_FAN_LEFT - HAND_FAN_RIGHT);
+    const seatsBesideChrome = n <= 1 || (chromeBand - HAND_CARD_W) / (n - 1) >= HAND_FAN_MIN_STEP;
+    const band = seatsBesideChrome
+        ? chromeBand
+        : Math.max(chromeBand, screenW - HAND_FAN_BOARD_EDGE * 2);
     const step = n > 1
         ? Math.min(HAND_CARD_W - 16, Math.max(HAND_FAN_MIN_STEP, (band - HAND_CARD_W) / (n - 1)))
         : HAND_CARD_W;
@@ -667,6 +679,14 @@ function MomentumWheel({ lit, charged, onPress }: { lit: WheelStance[]; charged:
 
 const CHAIN_GLYPHS: Record<string, string> = { heart: '♥', body: '⚡', mind: '★' };
 
+// S1-board-C19 — the momentum chip's ⓘ tap mark is a plated box of this
+// width, set apart by this gap; `chipInfoGutter` mirrors the pair on the row's
+// leading edge so the readout keeps the centre line it held before the mark.
+// The glyph measures ~15pt in the capture (U+24D8 rides wide), so the box is
+// sized to seat it with a plate's worth of air, borders included.
+export const CHIP_INFO_MARK_W = 24;
+export const CHIP_INFO_MARK_GAP = 5;
+
 /** The spec-33 momentum chain: a single color + length (heart→body→mind),
  *  NOT the three-node wheel. A BREAK collapses it to null and reads LOUD
  *  (owner-locked strict rule — the chip teaches it); a SURGE flashes gold.
@@ -674,7 +694,10 @@ const CHAIN_GLYPHS: Record<string, string> = { heart: '♥', body: '⚡', mind: 
  *  Inputs: the momentum-V2 VM and the "how momentum works" opener. Output: the
  *  chip row. Cluster S1-board-C19 — this chip OPENS something and the stance
  *  chip directly below it does not, so it now carries a visible ⓘ mark: the
- *  tappable one of the pair is the one that says it is tappable. */
+ *  tappable one of the pair is the one that says it is tappable. The mark
+ *  carries its own backing plate (it sits on the arena floor, not on the
+ *  readout's plate) and a mirrored leading gutter, so marking the chip neither
+ *  costs the mark its contrast nor costs the readout its centre line. */
 function MomentumChainChip({ vm, onPress }: { vm: CombatMomentumV2VM; onPress?: () => void }) {
     const AXM = usePalette();
     const styles = useStyles();
@@ -688,6 +711,10 @@ function MomentumChainChip({ vm, onPress }: { vm: CombatMomentumV2VM; onPress?: 
             accessibilityLabel={a11y}
             accessibilityHint="Tap for how momentum works"
         >
+            {/* S1-board-C19 — the tap mark's mirror. An empty box of the mark's
+                own footprint, so adding the mark did not shove the readout off
+                the centre line it held. */}
+            <View style={styles.chipInfoGutter} testID="combat-momentum-info-gutter" />
             {broke ? (
                 <Text style={[styles.chainBroke, { color: AXM.blood }]} allowFontScaling={false} testID="combat-momentum-broke">
                     ✕ MOMENTUM BROKEN
@@ -697,7 +724,7 @@ function MomentumChainChip({ vm, onPress }: { vm: CombatMomentumV2VM; onPress?: 
                     ✦ MOMENTUM SURGE
                 </Text>
             ) : color === null || length === 0 ? (
-                <Text style={[styles.chainEmpty, { color: AXM.ash }]} allowFontScaling={false}>○ no momentum</Text>
+                <Text style={[styles.chainEmpty, { color: AXM.ash }]} allowFontScaling={false} testID="combat-momentum-empty">○ no momentum</Text>
             ) : (
                 <>
                     {Array.from({ length: surgeAt }, (_u, i) => {
@@ -1209,10 +1236,10 @@ export const CombatBoard = React.memo(function CombatBoard({
     const fan = vm.hand.filter((c) => !stagedSet.has(c.uid));
     const n = fan.length;
     const mid = (n - 1) / 2;
-    // Width is the binding constraint. S1-board-C11: the fan lays out in the
-    // chrome-free band BETWEEN the corner medallions (see `handFanLayout`) —
-    // it used to run edge-to-edge underneath them, which parked the player
-    // portrait on the first card and the END disc on the last.
+    // Width is the binding constraint. S1-board-C11: the fan prefers the
+    // chrome-free band BETWEEN the corner medallions (see `handFanLayout`),
+    // and falls back to the full board band for a hand too large to seat
+    // there — readable cards the corners float over, never a row of slivers.
     const { overlap } = handFanLayout(screenW, n);
     const draggingDieId = drag.active?.type === 'die' ? drag.active.dieId : null;
     // The full VM of the die in flight — the COLOR LAW dimming keys off its color.
@@ -2022,11 +2049,24 @@ const useStyles = makeStyles((AXM) => ({
     // follows so 'NO STANCE' stays the thing the eye lands on.
     stanceChipHint: { fontFamily: FONTS.mono, fontSize: 9, letterSpacing: 0.6, color: AXM.bone },
     // S1-board-C19 — the tap mark on the momentum chip (the tappable half of
-    // the pair). Quiet chrome; the chip's own colours stay the loud part.
-    chipInfoMark: { fontFamily: FONTS.sans, fontSize: 10, color: AXM.bone, marginLeft: 5 },
+    // the pair). Quiet chrome; the chip's own colours stay the loud part. It
+    // floats on the arena floor art beside the readout's plate, not on it, so
+    // it carries the same contrast-guaranteeing backing the empty readout got
+    // in CRITIQUE pass 21 — bare, it read at ~1.5:1 against the bright floor
+    // and vanished on desktop. Fixed width: `chipInfoGutter` mirrors it.
+    chipInfoMark: {
+        fontFamily: FONTS.sans, fontSize: 10, lineHeight: 14, color: AXM.bone, textAlign: 'center',
+        marginLeft: CHIP_INFO_MARK_GAP, width: CHIP_INFO_MARK_W,
+        backgroundColor: 'rgba(0,0,0,0.55)', borderWidth: 1, borderColor: AXM.ash,
+        borderRadius: 5, paddingVertical: 2, overflow: 'hidden',
+    },
+    // S1-board-C19 — the mark's mirror on the leading edge of the chip row.
+    chipInfoGutter: { width: CHIP_INFO_MARK_W + CHIP_INFO_MARK_GAP },
     fanGlow: { position: 'absolute', bottom: 0, left: 0 },
     // S1-board-C11 — the side paddings are the corner-medallion footprints,
-    // not decoration: the fan is centred in what is left between them.
+    // not decoration: the fan is centred in what is left between them. A hand
+    // too large for that band (see `handFanLayout`) overflows it symmetrically
+    // and the corners float over the outermost cards, as they did before.
     fan: {
         ...StyleSheet.absoluteFillObject, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center',
         paddingLeft: HAND_FAN_LEFT, paddingRight: HAND_FAN_RIGHT, paddingBottom: 20,

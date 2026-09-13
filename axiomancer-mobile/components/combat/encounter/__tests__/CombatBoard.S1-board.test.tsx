@@ -129,11 +129,15 @@ describe('S1-board-C11 — the hand fan lays out beside the corner chrome', () =
     });
 
     it('never tightens a card below the readable sliver, and never on a single card', () => {
-        expect(handFanLayout(PHONE.width, 9).step).toBe(HAND_FAN_MIN_STEP);
+        // Both inputs re-picked for the C11 repair, same properties: a hand the
+        // chrome band cannot seat now takes the BOARD band (the narrow band
+        // crushed a five-card hand to the floor and overflowed anyway), so the
+        // floor binds later — and 200pt was never narrower than one 120pt card.
+        expect(handFanLayout(PHONE.width, 12).step).toBe(HAND_FAN_MIN_STEP);
         expect(handFanLayout(PHONE.width, 1).step).toBe(HAND_CARD_W);
         expect(handFanLayout(PHONE.width, 1).overlap).toBe(0);
         // A viewport narrower than one card still yields a usable band.
-        expect(handFanLayout(200, 3).band).toBe(HAND_CARD_W);
+        expect(handFanLayout(100, 3).band).toBe(HAND_CARD_W);
     });
 });
 
