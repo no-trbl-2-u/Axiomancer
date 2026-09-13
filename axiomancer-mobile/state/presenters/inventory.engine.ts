@@ -241,7 +241,14 @@ const TAB_ORDER: readonly InventoryTab[] = [
 /** Display strings for the inventory screen's chrome. */
 const SECTION_HEADER = 'SATCHEL · WALLET · BURDEN';
 const CATEGORY_HEADERS: Record<InventoryCategory, string> = {
-    equipment: '✠ WORN & WIELDED',
+    // S3-sheet-C22 (second half): every header echoes its own tab — PHIALS →
+    // '✠ PHIALS & SOPS', STUFF → '✠ STUFF', SEALED → '✠ SEALED'. This one was
+    // '✠ WORN & WIELDED' back when the tab read WORN, so renaming the tab to
+    // GEAR left the section heading as the surviving half of the same lie: it
+    // claims wornness over a list that includes everything carried unworn.
+    // GEAR & GIRDING restores the echo and names the goods, not their state;
+    // the per-row WORN badge stays the only claim about what is on the body.
+    equipment: '✠ GEAR & GIRDING',
     consumable: '✠ PHIALS & SOPS',
     material: '✠ STUFF',
     quest: '✠ SEALED',
