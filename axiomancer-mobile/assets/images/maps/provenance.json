@@ -39,7 +39,7 @@
     "artist": "Gustave Dor\u00e9 (1832 \u2013 1883)",
     "license": "Public domain",
     "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
-    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44",
+    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44; 2026-09-13 UI pass (S4-world-C21 follow-through): blank page margins cropped away on all four sides (1120x895 -> 1078x854) so the plate runs full-bleed — this scan carries no printed caption band",
     "covers": [
       "the-pit.webp"
     ],
@@ -56,7 +56,7 @@
     "artist": "Gustave Dor\u00e9 (1832-1883)",
     "license": "Public domain",
     "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
-    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44",
+    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44; 2026-09-13 UI pass (S4-world-C21 follow-through): inspected at its render crop and deliberately left uncropped — this scan is already full-bleed, with no page margin and no printed caption band to take off",
     "covers": [
       "ludgate-hill.webp"
     ],
@@ -73,7 +73,7 @@
     "artist": "Gustave Dor\u00e9",
     "license": "Public domain",
     "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
-    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44",
+    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44; 2026-09-13 UI pass (S4-world-C21 follow-through): blank page margin cropped off the left edge and the foot (907x1120 -> 897x1112) — this scan carries no printed caption band",
     "covers": [
       "wentworth-street.webp"
     ],
