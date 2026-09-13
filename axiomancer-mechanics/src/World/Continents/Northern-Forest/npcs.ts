@@ -1,6 +1,6 @@
 import { NPC, DialogueTree } from '../../../NPCs/types';
 
-// ─── The Shrine Keeper (Transcendent-leaning mystic) ─────────────────────────
+// ─── The Shrine Keeper (skepticism vs belief in the stone's pattern) ─────────
 
 const shrineKeeperTree: DialogueTree = {
     id: 'shrine-keeper',
@@ -8,20 +8,20 @@ const shrineKeeperTree: DialogueTree = {
     nodes: {
         greet: {
             id: 'greet',
-            text: "The Shrine Keeper turns from tending ancient carved stones, eyes bright with otherworldly knowing. “Seeker, the patterns speak of your approach. The veil grows thin here—do you feel it?”",
+            text: "The Shrine Keeper kneels at a root-lifted stone, scraping moss from a carved groove. “Another set of boots on the path. The stone keeps its own count.”",
             choices: [
                 {
-                    text: "What patterns do you see?",
+                    text: "What does it count?",
                     nextNodeId: 'patterns',
                 },
                 {
-                    text: "I sense something... different about this place.",
+                    text: "Something here feels different to me.",
                     nextNodeId: 'veil_thin',
                     requires: { requiresAlignment: { axis: 'epistemology', op: 'gte', value: 20 } },
                     effect: { alignmentDelta: { epistemology: 2, scope: 1 } },
                 },
                 {
-                    text: "Just looking around. No mystical nonsense.",
+                    text: "Stone doesn't count. That's superstition.",
                     nextNodeId: 'skeptic_response',
                     requires: { requiresAlignment: { axis: 'epistemology', op: 'lte', value: -20 } },
                     effect: { alignmentDelta: { epistemology: -1, outlook: -1 } },
@@ -31,7 +31,7 @@ const shrineKeeperTree: DialogueTree = {
                     nextNodeId: undefined,
                 },
                 {
-                    text: "(The keeper studies you with renewed interest—something has shifted in your essence.)",
+                    text: "(The Keeper's eyes catch on you. Something in you has changed.)",
                     nextNodeId: 'observer_transformation',
                     requires: { playerAlignmentCellChangedSince: true },
                     effect: { alignmentDelta: { scope: 2 } },
@@ -40,23 +40,23 @@ const shrineKeeperTree: DialogueTree = {
         },
         patterns: {
             id: 'patterns',
-            text: "“The stones remember all who pass. Your spirit-trail weaves through probability and purpose—a seeker's path, but toward what?”",
+            text: "“Every hand that touches this groove wears it smoother. Yours will too. The question is what you're wearing it toward.”",
             choices: [
                 {
-                    text: "I seek understanding of the deeper truths.",
+                    text: "I want to understand what's really here.",
                     nextNodeId: 'truth_seeker',
-                    effect: { 
+                    effect: {
                         alignmentDelta: { epistemology: 3, scope: 2 },
-                        setFlag: 'shrine_keeper_recognizes_seeker' 
+                        setFlag: 'shrine_keeper_recognizes_seeker'
                     },
                 },
                 {
-                    text: "I'm searching for practical knowledge.",
+                    text: "I want knowledge I can use.",
                     nextNodeId: 'practical_seeker',
                     effect: { alignmentDelta: { epistemology: -1, outlook: 1 } },
                 },
                 {
-                    text: "That sounds like fortune-telling nonsense.",
+                    text: "That's a boot-worn groove. Nothing more.",
                     nextNodeId: 'dismiss_mysticism',
                     effect: { alignmentDelta: { epistemology: -2, scope: -1 } },
                 },
@@ -64,39 +64,39 @@ const shrineKeeperTree: DialogueTree = {
         },
         veil_thin: {
             id: 'veil_thin',
-            text: "“Yes. The boundary weakens where ancient powers once walked. Take this—a lens to see past the physical.” The keeper offers a crystalline fragment. It hums with its own light.",
+            text: "“You're not the first to feel it. Take this, and judge for yourself.” The Keeper presses a crystalline fragment into your palm. It is heavier than it looks.",
             choices: [
                 {
-                    text: "Accept the crystal gratefully.",
+                    text: "Accept the crystal.",
                     nextNodeId: undefined,
-                    effect: { 
+                    effect: {
                         setFlag: 'shrine_keeper_crystal_gift',
                         alignmentDelta: { epistemology: 2, scope: 1 },
-                        moralDelta: 1 
+                        moralDelta: 1
                     },
                 },
                 {
-                    text: "I cannot accept such a precious gift.",
+                    text: "I can't take something this valuable.",
                     nextNodeId: undefined,
-                    effect: { 
+                    effect: {
                         alignmentDelta: { scope: -1, outlook: 1 },
-                        moralDelta: 2 
+                        moralDelta: 2
                     },
                 },
             ],
         },
         skeptic_response: {
             id: 'skeptic_response',
-            text: "The keeper's expression grows sad but understanding. “The material world weighs heavy on some shoulders. When you're ready to see beyond stone and sinew, the shrine will remain.”",
+            text: "The Keeper's face doesn't change. “Some backs carry more weight than others. The shrine isn't going anywhere.”",
         },
         truth_seeker: {
             id: 'truth_seeker',
-            text: "“A kindred spirit, then. The ancients left wisdom carved in symbol and stone. Study the northern glyphs—they speak of cycles within cycles, of balance made manifest.”",
+            text: "“Then you already carry the right kind of empty. The north glyphs are cut plain, if you know where to stand.”",
             choices: [
                 {
                     text: "Will you teach me to read them?",
                     nextNodeId: undefined,
-                    effect: { 
+                    effect: {
                         setFlag: 'shrine_keeper_teaching_offered',
                         alignmentDelta: { epistemology: 2, scope: 1 }
                     },
@@ -105,26 +105,26 @@ const shrineKeeperTree: DialogueTree = {
         },
         practical_seeker: {
             id: 'practical_seeker',
-            text: "“Even practical paths may lead to transcendence, seeker. The ancient builders understood both stone and spirit—perhaps their techniques might serve you.”",
+            text: "“Practical is not nothing. Whoever cut this stone kept accounts as well as prayers.”",
         },
         dismiss_mysticism: {
             id: 'dismiss_mysticism',
-            text: "“Even skeptics serve the pattern, though they know it not. The stones care little for belief—they simply are.”",
+            text: "“Doubt doesn't erase a groove already worn. The stone doesn't care what you believe.”",
         },
         observer_transformation: {
             id: 'observer_transformation',
-            text: "“The constellation of your spirit has shifted since our last meeting. Change is the only constant—but this change carries purpose. The shrine blesses your new becoming.”",
+            text: "“You've changed since we last spoke. The stone will wear a new mark for it.”",
         },
     },
 };
 
 const shrineKeeper: NPC = {
     name: 'Shrine Keeper',
-    description: 'A mystical guardian of ancient shrine stones, keeper of transcendent wisdom and otherworldly perception.',
+    description: 'Tends a shrine of root-lifted stones and reads the wear each visitor leaves in them.',
     dialogueTree: shrineKeeperTree,
 };
 
-// ─── The Chronicler (Scholarly NPC with Chronicle integration) ───────────────
+// ─── The Chronicler (documented fact vs unsourced claim) ─────────────────────
 
 const chroniclerTree: DialogueTree = {
     id: 'chronicler',
@@ -132,7 +132,7 @@ const chroniclerTree: DialogueTree = {
     nodes: {
         greet: {
             id: 'greet',
-            text: "The Chronicler looks up from leather-bound tomes and scattered parchments. “A fellow seeker of knowledge? These northern lands hold secrets that predate the coastal settlements. Care to contribute to the Chronicle?”",
+            text: "The Chronicler sets down a quill beside a stack of tally slats. “Another traveler. Tell me something true, and I'll add it to the Chronicle.”",
             choices: [
                 {
                     text: "What are you chronicling here?",
@@ -141,7 +141,7 @@ const chroniclerTree: DialogueTree = {
                 {
                     text: "I've seen strange things in my travels.",
                     nextNodeId: 'share_observations',
-                    effect: { 
+                    effect: {
                         alignmentDelta: { epistemology: 1, scope: 1 },
                         setFlag: 'chronicler_met'
                     },
@@ -156,7 +156,7 @@ const chroniclerTree: DialogueTree = {
                     nextNodeId: undefined,
                 },
                 {
-                    text: "(The scholar glances up, noting how your bearing has changed since your last encounter.)",
+                    text: "(The Chronicler looks up. Something about you reads differently now.)",
                     nextNodeId: 'scholar_observation',
                     requires: { playerAlignmentCellChangedSince: true },
                     effect: { alignmentDelta: { epistemology: 1 } },
@@ -165,12 +165,12 @@ const chroniclerTree: DialogueTree = {
         },
         chronicling_purpose: {
             id: 'chronicling_purpose',
-            text: "“I document the forgotten histories—the pre-coastal civilizations, ancient migration patterns, the old alliances between folk and forest. Each traveler adds another thread to the tapestry.”",
+            text: "“I document the forgotten histories. Pre-coastal civilizations. Old migration routes. Alliances folk struck with the forest, before the village came.”",
             choices: [
                 {
                     text: "How can I contribute to this work?",
                     nextNodeId: 'contribution_offer',
-                    effect: { 
+                    effect: {
                         alignmentDelta: { epistemology: 2, scope: 1 },
                         setFlag: 'chronicle_contributor'
                     },
@@ -185,37 +185,37 @@ const chroniclerTree: DialogueTree = {
         },
         share_observations: {
             id: 'share_observations',
-            text: "“Every observation matters. What you call 'strange' might be echoes of the old ways—patterns the ancients left as guideposts for future generations.”",
+            text: "“Every observation matters. What you call strange, I call a pattern I haven't dated yet.”",
             choices: [
                 {
-                    text: "Tell me more about these ancient patterns.",
+                    text: "Tell me more about these patterns.",
                     nextNodeId: 'ancient_patterns',
-                    effect: { 
+                    effect: {
                         alignmentDelta: { epistemology: 1, scope: 1 }
                     },
                 },
                 {
                     text: "I've documented my travels carefully.",
                     nextNodeId: 'documented_travels',
-                    effect: { 
+                    effect: {
                         alignmentDelta: { epistemology: 1, scope: 2 },
-                        moralDelta: 1 
+                        moralDelta: 1
                     },
                 },
             ],
         },
         no_time: {
             id: 'no_time',
-            text: "“I understand—the present demands attention. But remember: today's actions become tomorrow's history. Perhaps our paths will cross when urgency gives way to reflection.”",
+            text: "“Understood. Write your history first. I'll still be here when you want it recorded.”",
         },
         contribution_offer: {
             id: 'contribution_offer',
-            text: "“Document what you witness in the northern reaches—unusual flora, remnant structures, local folklore. Each detail helps complete the Chronicle's tapestry.”",
+            text: "“Note what you find in the northern reaches. Unusual growth, old foundations, stories the locals repeat. Each entry earns its line.”",
             choices: [
                 {
                     text: "I accept this scholarly responsibility.",
                     nextNodeId: undefined,
-                    effect: { 
+                    effect: {
                         setFlag: 'chronicler_scholarly_mission',
                         alignmentDelta: { epistemology: 2, scope: 2 }
                     },
@@ -224,30 +224,30 @@ const chroniclerTree: DialogueTree = {
         },
         present_focus: {
             id: 'present_focus',
-            text: "“A pragmatic view—yet even pragmatists benefit from understanding historical patterns. The past informs present choices, whether we acknowledge it or not.”",
+            text: "“Pragmatic. Even pragmatists trip on roots they didn't know were there.”",
         },
         ancient_patterns: {
             id: 'ancient_patterns',
-            text: "“The ancients understood cycles—seasonal, generational, spiritual. They built with this knowledge, aligning settlements and sacred sites to greater rhythms. The northern forest bears their mark still.”",
+            text: "“They built by the seasons — planting, felling, resting the same ground in turn. You can still read the rotation in the tree rings.”",
         },
         documented_travels: {
             id: 'documented_travels',
-            text: "“A scholar's approach. Your records could fill gaps in the Chronicle. The systematic documentation of experience serves both personal growth and collective wisdom.”",
+            text: "“Good. Dated entries are worth more than memory. Bring me the gaps you've filled.”",
         },
         scholar_observation: {
             id: 'scholar_observation',
-            text: "“Fascinating—your intellectual posture has evolved since our last discussion. Experience truly is the greatest teacher. Your journey itself becomes worthy of chronicle.”",
+            text: "“You've changed your position since we last spoke. I'll want the reasons, not just the result.”",
         },
     },
 };
 
 const chronicler: NPC = {
     name: 'The Chronicler',
-    description: 'A dedicated scholar documenting forgotten histories and ancient wisdom of the northern lands.',
+    description: 'Keeps the Chronicle — a ledger of forgotten histories, migration routes, and things travelers swear they saw.',
     dialogueTree: chroniclerTree,
 };
 
-// ─── The Wandering Philosopher (Traveling NPC with diverse philosophical positions) ───
+// ─── The Wandering Philosopher (fate, will, or relationship) ─────────────────
 
 const wanderingPhilosopherTree: DialogueTree = {
     id: 'wandering-philosopher',
@@ -255,7 +255,7 @@ const wanderingPhilosopherTree: DialogueTree = {
     nodes: {
         greet: {
             id: 'greet',
-            text: "A weathered figure in simple robes sits contemplating the forest canopy. “A fellow traveler. The northern woods suit thinking. What brings you to walk these thoughtful paths?”",
+            text: "A weathered figure sits against a tree, whittling a peg with a worn knife. “Another traveler. This wood is good for thinking. What are you walking away from?”",
             choices: [
                 {
                     text: "I'm seeking my place in the world.",
@@ -279,7 +279,7 @@ const wanderingPhilosopherTree: DialogueTree = {
                     effect: { alignmentDelta: { outlook: -1, scope: -1 } },
                 },
                 {
-                    text: "(The philosopher's eyes light with recognition at your transformed bearing.)",
+                    text: "(The Philosopher looks up — something about you has changed.)",
                     nextNodeId: 'philosophical_recognition',
                     requires: { playerAlignmentCellChangedSince: true },
                     effect: { alignmentDelta: { epistemology: 1 } },
@@ -288,7 +288,7 @@ const wanderingPhilosopherTree: DialogueTree = {
         },
         seeking_place: {
             id: 'seeking_place',
-            text: "“A noble quest, then. Tell me—do you believe our place is determined by fate, forged by will, or discovered through relationship with others?”",
+            text: "“Fair question to walk on. Is our place fate, forged by will, or discovered through relationship with others?”",
             choices: [
                 {
                     text: "Fate guides us toward our destined role.",
@@ -298,7 +298,7 @@ const wanderingPhilosopherTree: DialogueTree = {
                 },
                 {
                     text: "We forge our own destiny through determination.",
-                    nextNodeId: 'will_perspective', 
+                    nextNodeId: 'will_perspective',
                     requires: { requiresAlignment: { axis: 'scope', op: 'lte', value: 0 } },
                     effect: { alignmentDelta: { scope: -2, outlook: 1 } },
                 },
@@ -309,9 +309,9 @@ const wanderingPhilosopherTree: DialogueTree = {
                     effect: { alignmentDelta: { scope: 2, outlook: 1 } },
                 },
                 {
-                    text: "I'm not sure—that's why I'm searching.",
+                    text: "I'm not sure. That's why I'm searching.",
                     nextNodeId: 'uncertain_seeker',
-                    effect: { 
+                    effect: {
                         alignmentDelta: { epistemology: 1 },
                         moralDelta: 1,
                         setFlag: 'philosopher_appreciates_honesty'
@@ -321,7 +321,7 @@ const wanderingPhilosopherTree: DialogueTree = {
         },
         passing_through: {
             id: 'passing_through',
-            text: "“Ah, but are any of us truly 'just passing through'? Every step changes both traveler and terrain. Your presence here ripples outward in ways you may never know.”",
+            text: "“Nobody just passes through. Every step changes the path a little, and the walker more.”",
             choices: [
                 {
                     text: "I hadn't considered the impact of my journey.",
@@ -337,7 +337,7 @@ const wanderingPhilosopherTree: DialogueTree = {
         },
         reflective_peace: {
             id: 'reflective_peace',
-            text: "“Yes. The forest teaches patience—each tree growing in its season, each creature following ancient rhythms. In stillness, we hear what urgency drowns out.”",
+            text: "“Yes. Trees keep their own season. No amount of hurry moves a coppice cut faster.”",
             choices: [
                 {
                     text: "What have the trees taught you?",
@@ -348,50 +348,50 @@ const wanderingPhilosopherTree: DialogueTree = {
         },
         impatient_response: {
             id: 'impatient_response',
-            text: "“I understand—action calls louder than contemplation for some souls. Yet even the most practical pursuits rest on philosophical foundations. Safe travels, friend.”",
+            text: "“Understood. Go, then. Even a fast walker rests on someone else's thinking eventually.”",
         },
         fate_perspective: {
             id: 'fate_perspective',
-            text: "“A transcendent view. Yet consider—if fate writes our story, do we bear responsibility for our choices? Perhaps fate provides the stage while we perform the play.”",
+            text: "“Fate writes, then. Who answers for the choices, if the ending's already set?”",
         },
         will_perspective: {
             id: 'will_perspective',
-            text: "“The voice of the self-determined. Yet pure individualism can become isolation. Even the strongest will benefits from wisdom gathered, from hands offered in aid.”",
+            text: "“Strong claim. Even the strongest arm still needs a second pair of hands sometimes.”",
         },
         community_perspective: {
             id: 'community_perspective',
-            text: "“Well spoken. We become ourselves through relationship—yet beware losing the self in the collective. True community honors both unity and individual authenticity.”",
+            text: "“Well answered. Just don't let the group finish every one of your sentences.”",
         },
         uncertain_seeker: {
             id: 'uncertain_seeker',
-            text: "“Honest uncertainty opens more doors than false certainty closes. Your willingness to seek—to question—already marks you as a philosopher at heart.”",
+            text: "“Good. A question honestly held opens more than a false answer ever will.”",
         },
         impact_realization: {
             id: 'impact_realization',
-            text: "“Each conversation plants seeds in both minds. Your questions change my answers. My words reshape your road. Meaning is made in the meeting.”",
+            text: "“Every talk changes both of us a little. Your questions shift my answers. Meaning gets made in the meeting, not before it.”",
         },
         simple_acceptance: {
             id: 'simple_acceptance',
-            text: "“Perhaps you're right—sometimes simplicity contains its own wisdom. Not every moment requires deep analysis to hold deep value.”",
+            text: "“Fair enough. Not every step needs unpacking to be worth taking.”",
         },
         tree_wisdom: {
             id: 'tree_wisdom',
-            text: "“Trees teach patience, interconnection through root-networks, the wisdom of seasons—knowing when to grow, when to rest, when to let go. They model existence without anxiety.”",
+            text: "“Patience, mostly. Roots share water underground long before either tree needs it. They rest on schedule, not on fear.”",
         },
         philosophical_recognition: {
             id: 'philosophical_recognition',
-            text: "“Remarkable—your philosophical stance has evolved since our last discourse. Growth of mind shows in posture and presence. You embody philosophy in motion.”",
+            text: "“You've changed your footing since we last talked. Good. Stillness was never the point.”",
         },
     },
 };
 
 const wanderingPhilosopher: NPC = {
     name: 'The Wandering Philosopher',
-    description: 'A contemplative traveler who explores diverse philosophical perspectives through Socratic dialogue.',
+    description: 'A traveler who camps light and answers most questions with a sharper one.',
     dialogueTree: wanderingPhilosopherTree,
 };
 
-// ─── The Forest Ranger (Conservation vs exploitation themes) ───────────────────
+// ─── The Forest Ranger (conservation vs exploitation) ────────────────────────
 
 const forestRangerTree: DialogueTree = {
     id: 'forest-ranger',
@@ -399,7 +399,7 @@ const forestRangerTree: DialogueTree = {
     nodes: {
         greet: {
             id: 'greet',
-            text: "The Forest Ranger emerges from behind an ancient oak, bow in hand and eyes alert. Their weathered face shows both the serenity of forest life and the weight of constant vigilance.",
+            text: "The Forest Ranger steps out from behind an oak, bow slack in one hand. Bark chips cling to their sleeve from measuring a fresh cut.",
             choices: [
                 {
                     text: "*Talk — Ask about their duties here",
@@ -428,19 +428,19 @@ const forestRangerTree: DialogueTree = {
         },
         talk_duties: {
             id: 'talk_duties',
-            text: "“I guard these ancient groves from those who would strip them bare for profit. There's a logging operation pushing north—they want the heartwood of the eldest trees, worth a fortune in the southern markets. I could stop them, but their families depend on the wages, and the village needs the trade income. How do we balance the forest's future against people's immediate needs? Sometimes I wonder if one person can make a difference against such forces.”",
+            text: "“I guard these groves from clear-cutting. There's a logging operation pushing north — they want the heartwood of the eldest trees. Good money, south of here. I could stop them. Their crews still need the wages. The village still needs the trade. I don't have a clean answer.”",
             choices: [
                 {
-                    text: "Trust that nature's wisdom will prevail—the forest will endure as it always has.",
+                    text: "The forest endures. It always has.",
                     nextNodeId: 'nature_wisdom_endures',
                     requires: { requiresAlignment: { axis: 'epistemology', op: 'gte', value: 15 } },
                     effect: { alignmentDelta: { epistemology: 2, scope: 2 } },
                 },
                 {
-                    text: "I'll help you find alternative livelihoods for the loggers—sustainable forest trades.",
+                    text: "I'll fund sustainable forest trades for the loggers.",
                     nextNodeId: 'sustainable_alternatives',
                     requires: { requiresAlignment: { axis: 'scope', op: 'gte', value: 15 } },
-                    effect: { 
+                    effect: {
                         alignmentDelta: { scope: 3, outlook: 2 },
                         moralDelta: 3,
                         grantCurrency: -25,
@@ -448,10 +448,10 @@ const forestRangerTree: DialogueTree = {
                     },
                 },
                 {
-                    text: "Trees grow back—people need to eat today. Let them take what they need.",
+                    text: "Trees grow back. Let them cut. People eat today.",
                     nextNodeId: 'pragmatic_exploitation',
                     requires: { requiresAlignment: { axis: 'scope', op: 'lte', value: -5 } },
-                    effect: { 
+                    effect: {
                         alignmentDelta: { scope: -2, outlook: -1 },
                         moralDelta: -2,
                         grantCurrency: 35,
@@ -462,30 +462,30 @@ const forestRangerTree: DialogueTree = {
         },
         request_guidance: {
             id: 'request_guidance',
-            text: "“These woods can be treacherous for the unwary. I know the safe paths—it would be my honor to guide a respectful traveler.”",
+            text: "“These woods punish the careless. I know the safe lines, for those who ask plainly.”",
         },
         nature_wisdom_endures: {
             id: 'nature_wisdom_endures',
-            text: "“You speak truth that goes deeper than immediate concerns. These trees have weathered ice ages and droughts. Perhaps my role is to trust in larger cycles while doing what I can in this moment.”",
+            text: "“Maybe. These trees weathered ice ages before either of us was born. I still count the cut ones.”",
         },
         sustainable_alternatives: {
             id: 'sustainable_alternatives',
-            text: "“Yes. There are other ways—mushroom cultivation, guided tours for scholars, carefully managed timber harvests. With your support, we can show the loggers a path that feeds families without destroying the forest's heart.”",
+            text: "“Good. Mushroom beds, scholar tours, timber cut on a real rotation. Show the crews it pays, and they'll take it.”",
         },
         pragmatic_exploitation: {
             id: 'pragmatic_exploitation',
-            text: "“I... I cannot agree with that, but I understand your reasoning. Perhaps you're right that immediate human needs must outweigh distant environmental concerns. The forest will have to fend for itself.”",
+            text: "“I won't agree. I won't stop you either. The forest fends for itself, same as always.”",
         },
     },
 };
 
 const forestRanger: NPC = {
     name: 'Forest Ranger',
-    description: 'A dedicated guardian of the northern woods torn between conservation duties and human economic needs.',
+    description: 'Patrols the northern woods and counts the trees a logging camp wants against the wages it pays.',
     dialogueTree: forestRangerTree,
 };
 
-// ─── The Hermit Sage (Isolation vs community obligation) ───────────────────────
+// ─── The Hermit Sage (isolation vs community obligation) ─────────────────────
 
 const hermitSageTree: DialogueTree = {
     id: 'hermit-sage',
@@ -493,14 +493,14 @@ const hermitSageTree: DialogueTree = {
     nodes: {
         greet: {
             id: 'greet',
-            text: "The Hermit Sage sits in meditation beside a small forest shrine, eyes closed in deep contemplation. They sense your approach and slowly open ancient, knowing eyes.",
+            text: "The Hermit Sage sits beside a small stone shrine, eyes closed, hands still. At your footstep, the eyes open.",
             choices: [
                 {
                     text: "*Talk — Ask why they chose solitude",
                     nextNodeId: 'talk_solitude_choice',
                 },
                 {
-                    text: "I seek wisdom, master.",
+                    text: "I seek wisdom.",
                     nextNodeId: 'seek_wisdom',
                 },
                 {
@@ -522,19 +522,19 @@ const hermitSageTree: DialogueTree = {
         },
         talk_solitude_choice: {
             id: 'talk_solitude_choice',
-            text: "“I retreated here decades ago to pursue understanding beyond the noise of daily concerns. In solitude, I've found clarity about existence, suffering, and transcendence. But lately, I question whether wisdom earned in isolation serves anyone but myself. The villages below struggle with moral crises that my knowledge might help resolve. Is enlightenment selfish if it's not shared? Yet sharing it means abandoning the very isolation that made it possible. Can you see the paradox that troubles my final years?”",
+            text: "“I came here decades ago, away from the noise. Solitude gave me clarity. Lately I wonder if wisdom earned in isolation serves anyone but me. The village below has troubles my knowledge might ease. Is enlightenment selfish, unshared? But sharing costs the isolation that made it. Do you see the trap I'm in?”",
             choices: [
                 {
-                    text: "Wisdom flows from the divine source—trust that it reaches those who need it.",
+                    text: "Wisdom finds its own way to those who need it.",
                     nextNodeId: 'divine_wisdom_flows',
                     requires: { requiresAlignment: { axis: 'epistemology', op: 'gte', value: 20 } },
                     effect: { alignmentDelta: { epistemology: 3, scope: -1 } },
                 },
                 {
-                    text: "I'll help you share your wisdom while preserving your contemplative practice.",
+                    text: "I'll help you share your wisdom while preserving your solitude.",
                     nextNodeId: 'balanced_sharing',
                     requires: { requiresAlignment: { axis: 'scope', op: 'gte', value: 10 } },
-                    effect: { 
+                    effect: {
                         alignmentDelta: { scope: 2, epistemology: 1 },
                         moralDelta: 2,
                         grantCurrency: -10,
@@ -542,10 +542,10 @@ const hermitSageTree: DialogueTree = {
                     },
                 },
                 {
-                    text: "Keep your secrets—the world profits more from your example than your advice.",
+                    text: "Keep your secrets. Your example teaches more than your advice would.",
                     nextNodeId: 'wisdom_through_example',
                     requires: { requiresAlignment: { axis: 'scope', op: 'lte', value: 0 } },
-                    effect: { 
+                    effect: {
                         alignmentDelta: { scope: -1, epistemology: 1 },
                         grantCurrency: 15,
                         setFlag: 'hermit_isolation_supporter'
@@ -555,30 +555,30 @@ const hermitSageTree: DialogueTree = {
         },
         seek_wisdom: {
             id: 'seek_wisdom',
-            text: "“Wisdom cannot be given, only discovered. But I can share what the silence has taught me, if you have ears to hear.”",
+            text: "“Wisdom isn't given, only found. I can tell you what the silence taught me, if you'll sit still for it.”",
         },
         divine_wisdom_flows: {
             id: 'divine_wisdom_flows',
-            text: "“Perhaps you're right. True wisdom transcends the vessel that contains it. If my understanding matters, it will find its way to those who need it through means I cannot foresee.”",
+            text: "“Maybe. If what I know matters, it will reach who needs it. Not through me, maybe. Still, somehow.”",
         },
         balanced_sharing: {
             id: 'balanced_sharing',
-            text: "“A thoughtful solution. Perhaps I can mentor a few seekers while preserving the solitude necessary for continued insight. Your offer of assistance in creating that balance touches my heart deeply.”",
+            text: "“A fair balance. A few students, and the solitude I still need between them. I hadn't thought anyone would offer to build that.”",
         },
         wisdom_through_example: {
             id: 'wisdom_through_example',
-            text: "“An interesting perspective. Perhaps the sight of someone choosing contemplation over accumulation teaches more than any words could. There is wisdom in your counsel to trust the power of witness.”",
+            text: "“Maybe. Someone choosing stillness over more, in plain sight, teaches without a word said.”",
         },
     },
 };
 
 const hermitSage: NPC = {
     name: 'Hermit Sage',
-    description: 'An enlightened recluse questioning whether wisdom gained in isolation should be shared with struggling communities.',
+    description: 'Decades alone at a forest shrine, weighing whether what he knows is worth carrying down.',
     dialogueTree: hermitSageTree,
 };
 
-// ─── The Lost Trader (Trust and deception in crisis) ───────────────────────────
+// ─── The Lost Trader (trust and deception in crisis) ─────────────────────────
 
 const lostTraderTree: DialogueTree = {
     id: 'lost-trader',
@@ -586,7 +586,7 @@ const lostTraderTree: DialogueTree = {
     nodes: {
         greet: {
             id: 'greet',
-            text: "A trader sits slumped against a fallen log, their cart overturned and goods scattered. They look up with desperate, calculating eyes as you approach through the forest gloom.",
+            text: "A trader sits against a fallen log, cart overturned, goods scattered across the path. They look up fast, already counting you.",
             choices: [
                 {
                     text: "*Talk — Ask what happened here",
@@ -597,26 +597,26 @@ const lostTraderTree: DialogueTree = {
                     nextNodeId: 'offer_assistance',
                 },
                 {
-                    text: "Keep walking—their problems aren't your concern.",
+                    text: "Keep walking. Not your concern.",
                     nextNodeId: undefined,
                 },
             ],
         },
         talk_what_happened: {
             id: 'talk_what_happened',
-            text: "“Bandits took everything—my horses, most of my cargo, even my coin purse. Left me here to die, they did. But here's the thing... I have one valuable item hidden that they missed. Worth enough to rebuild my trade, feed my family for a year. Problem is, I need someone to help me carry it to the next village, but... well, trusting a stranger with something that valuable after being robbed? Yet I can't move it alone, and staying here means slow death. Would you trust a desperate man in my position? And more importantly, should I trust you?”",
+            text: "“Bandits took everything. Horses, cargo, my coin purse. Left me for dead, they thought. One item's still hidden — worth enough to feed my family a year. I can't carry it alone, and I won't last out here. Would you trust a desperate man? More to the point — should I trust you?”",
             choices: [
                 {
-                    text: "Providence brought us together—trust is a sacred bond between strangers.",
+                    text: "Providence put us on the same road. That's a bond worth honoring.",
                     nextNodeId: 'sacred_trust_bond',
                     requires: { requiresAlignment: { axis: 'epistemology', op: 'gte', value: 15 } },
                     effect: { alignmentDelta: { epistemology: 2, scope: 1 } },
                 },
                 {
-                    text: "I'll help you transport it safely—we can build trust through honest action.",
+                    text: "I'll help you carry it. Trust is built through honest action.",
                     nextNodeId: 'honest_mutual_aid',
                     requires: { requiresAlignment: { axis: 'scope', op: 'gte', value: 10 } },
-                    effect: { 
+                    effect: {
                         alignmentDelta: { scope: 2, outlook: 1 },
                         moralDelta: 2,
                         grantCurrency: -5,
@@ -624,10 +624,10 @@ const lostTraderTree: DialogueTree = {
                     },
                 },
                 {
-                    text: "Show me this valuable item first—then we'll discuss terms that benefit us both.",
+                    text: "Show me the item first. Then we'll talk terms.",
                     nextNodeId: 'pragmatic_verification',
                     requires: { requiresAlignment: { axis: 'outlook', op: 'lte', value: 5 } },
-                    effect: { 
+                    effect: {
                         alignmentDelta: { outlook: -1, scope: -1 },
                         grantCurrency: 20,
                         setFlag: 'trader_pragmatic_partner'
@@ -637,32 +637,32 @@ const lostTraderTree: DialogueTree = {
         },
         offer_assistance: {
             id: 'offer_assistance',
-            text: "“You'd help a stranger? That's... that's kind. Though I warn you, kindness in these woods can be dangerous for both giver and receiver.”",
+            text: "“You'd help a stranger. That's rarer than the item I'm sitting on.”",
         },
         sacred_trust_bond: {
             id: 'sacred_trust_bond',
-            text: "“You speak of sacred bonds... yes, perhaps that's what separates civilization from wilderness. I choose to trust you, stranger, and hope you'll honor that faith.”",
+            text: "“Sacred bonds. Maybe that's the whole difference between a road and a wilderness. I'll trust you, then.”",
         },
         honest_mutual_aid: {
             id: 'honest_mutual_aid',
-            text: "“Honest action builds trust—I like that. You help me reach town, I'll share fair portion of the profits. We both benefit, we both take risks, we both prove ourselves worthy of trust.”",
+            text: "“Honest action. I like the sound of that. Get me to town, and you'll see a fair cut of the profit.”",
         },
         pragmatic_verification: {
             id: 'pragmatic_verification',
-            text: "“Clever—verify before you commit. Can't fault a person for being practical after what I've been through. Here's the item... now, shall we discuss our mutually beneficial arrangement?”",
+            text: "“Clever. Can't fault caution, given what I've survived. Here's the item. Now — terms.”",
         },
     },
 };
 
 const lostTrader: NPC = {
     name: 'Lost Trader',
-    description: 'A desperate merchant robbed by bandits, facing difficult choices about trust and deception in a crisis situation.',
+    description: 'Robbed clean by bandits save for one hidden item, and no way to carry it alone.',
     dialogueTree: lostTraderTree,
 };
 
 export {
     shrineKeeper,
-    chronicler, 
+    chronicler,
     wanderingPhilosopher,
     forestRanger,
     hermitSage,

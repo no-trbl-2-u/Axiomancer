@@ -201,17 +201,16 @@ describe('World/Continents Engine Tests', () => {
   });
 
   describe('Northern Forest NPCs', () => {
-    it('Shrine Keeper has transcendent wisdom themes with mystical elements', () => {
+    it('Shrine Keeper gates belief vs skepticism about the stone\'s pattern', () => {
       expect(shrineKeeper.name).toBe('Shrine Keeper');
       expect(shrineKeeper.dialogueTree!.id).toBe('shrine-keeper');
-      
+
       const greetNode = shrineKeeper.dialogueTree!.nodes['greet'];
-      expect(greetNode.text).toContain('patterns speak');
-      expect(greetNode.text).toContain('veil grows thin');
-      
+      expect(greetNode.text).toContain('keeps its own count');
+
       // Test veil recognition choice
-      const veilChoice = greetNode.choices!.find(c => 
-        c.text.includes('sense something... different')
+      const veilChoice = greetNode.choices!.find(c =>
+        c.text.includes('feels different')
       );
       expect(veilChoice?.requires?.requiresAlignment?.axis).toBe('epistemology');
       expect(veilChoice?.effect?.alignmentDelta?.epistemology).toBe(2);
@@ -223,7 +222,7 @@ describe('World/Continents Engine Tests', () => {
       
       const purposeNode = chronicler.dialogueTree!.nodes['chronicling_purpose'];
       expect(purposeNode.text).toContain('forgotten histories');
-      expect(purposeNode.text).toContain('pre-coastal civilizations');
+      expect(purposeNode.text).toContain('Pre-coastal civilizations');
       
       // Test contribution offer with flag setting
       const contributionNode = chronicler.dialogueTree!.nodes['contribution_offer'];

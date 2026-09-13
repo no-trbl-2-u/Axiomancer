@@ -278,8 +278,35 @@ exactly this candidate's point, that content nobody can reach is not reachable.
 - estimated phases: 0 (folded into the existing candidate).
 - conflicts: none.
 
-### [score 5.0] Retheme the six Northern-Forest dialogue trees to the ratified register (spec 34 §2) — all now reachable
+### ~~[score 5.0] Retheme the six Northern-Forest dialogue trees to the ratified register (spec 34 §2) — all now reachable~~ SHIPPED 2026-09-13 (adjust-npcs pass 8)
 - proposed: 2026-09-05, adjust-npcs pass 1
+- **SHIPPED 2026-09-13 (`/adjust-npcs` pass 8, content-curator):** rewrote all
+  six trees (`axiomancer-mechanics/src/World/Continents/Northern-Forest/
+  npcs.ts`) in place — same node ids, same `choices`/`requires`/`effect`
+  objects (no schema or mechanical change), only `text`/`description`
+  strings rewritten into the house register: short clauses, concrete
+  objects per speaker (stone-tending tools, a Chronicle's tally slats,
+  a whittled peg, blaze marks and wage numbers, a cold hearth, an
+  overturned cart), and a distinct voice card per NPC (Shrine
+  Keeper/exacting, Chronicler/accumulating, Wandering Philosopher/
+  corrective-Socratic, Forest Ranger/clipped-practical, Hermit
+  Sage/spare, Lost Trader/transactional) so each reads apart with
+  names removed. Cut the cited "wordier interiority" lines verbatim
+  (e.g. Hermit Sage's "touches my heart deeply") and every "ancient/
+  otherworldly/transcendent" filler adjective. KB gate run first
+  (`kb_search` for dialogue-voice/NPC-writing prior art, scopes
+  boardgames/all) — zero matches, corpus is card/mechanics-centric per
+  the skill's own anticipated miss; filed
+  `no-trbl-2-u/game-knowledge-base#80` and proceeded UNGROUNDED per
+  skill §3 Step 2. Updated the two engine tests that asserted the old
+  prose verbatim (`World/Continents/e2e/continents.engine.test.ts`,
+  `NPCs/e2e/story-npcs.engine.test.ts`) to match the new lines — every
+  other test-anchored substring (e.g. `'logging operation'`, `'wisdom
+  earned in isolation'`, `'Bandits took everything'`, `'Providence'`,
+  `'*Talk'`) was deliberately preserved verbatim in the new prose so no
+  further test edit was needed. `lint:content` and the full mechanics +
+  mobile verify gates green (see the pass-8 ledger log entry in
+  `plan/CONTENT_LEDGER.md` for exact counts).
 - source signals:
   - `/adjust-npcs` pass 1 staged the last two of `Northern-Forest/npcs.ts`'s
     six NPCs (Forest Ranger, Lost Trader) — all six trees (Shrine Keeper,
