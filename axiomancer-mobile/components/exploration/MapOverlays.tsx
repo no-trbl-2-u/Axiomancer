@@ -10,6 +10,12 @@
  * hint is showing and the presenter owns its words.
  * Mounted from: `app/(tabs)/exploration/index.tsx`, as `<MapCanvas overlays=…>`.
  *
+ * 04-exploration-midgame (/exploration, map hint) @mobile: the hint's copy
+ * grew (S4-world-C07) while its box still spanned the chart edge to edge, so
+ * at 375x812 the pill ran under `<MapCanvas>`'s compass rose and left it a
+ * needle tip and a sliver of ring. The box now keeps the rose's corner free —
+ * see `COMPASS_ROSE_CLEARANCE`.
+ *
  * FE-005: the hint used to be an absolutely-positioned view on the SCREEN at
  * `bottom: 80`, while the legend sits at `bottom: 8` INSIDE the map. At
  * 375x812 those two coincided and the hint chip covered the legend; at
@@ -60,6 +66,28 @@ export function MapOverlays({ legend, hint = null }: MapOverlaysProps) {
     );
 }
 
+/**
+ * Side inset, in px, that the travel hint keeps free at both ends of the
+ * chart.
+ *
+ * `<MapCanvas>` draws the compass rose as a 52x52 viewport-fixed SVG pinned at
+ * `right: 10, bottom: 10` — a 62px-wide footprint reaching 62px up from the
+ * chart's foot, which is exactly the band the hint pill sits in. 70 leaves the
+ * rose that corner plus an 8px gutter. The pill is centred on the chart, so
+ * the room it must leave on the right is mirrored on the left; inset one side
+ * only and the pill drifts off-centre.
+ *
+ * Resolves: 04-exploration-midgame (/exploration, map hint) @mobile.
+ */
+const COMPASS_ROSE_CLEARANCE = 70;
+
+/**
+ * Theme-reactive stylesheet for the chart furniture.
+ *
+ * Input: the active palette `AXM`. Output: the compass / node-graph label /
+ * hint / legend styles. The `hint` box's side insets resolve
+ * 04-exploration-midgame (/exploration, map hint) @mobile.
+ */
 const useStyles = makeStyles((AXM) => ({
     compass: {
         position: 'absolute',
@@ -83,12 +111,14 @@ const useStyles = makeStyles((AXM) => ({
         zIndex: 2,
     },
     // `bottom` clears the legend: the legend sits at 8 and its 8px mono line
-    // box is ~11px tall, so 26 leaves a clear gap at any viewport.
+    // box is ~11px tall, so 26 leaves a clear gap at any viewport. The side
+    // insets clear the compass rose the pill shares that band with, so longer
+    // hint copy wraps inside the chart instead of burying the rose.
     hint: {
         position: 'absolute',
         bottom: 26,
-        left: 12,
-        right: 12,
+        left: COMPASS_ROSE_CLEARANCE,
+        right: COMPASS_ROSE_CLEARANCE,
         alignItems: 'center',
         zIndex: 2,
     },
