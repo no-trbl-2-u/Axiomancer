@@ -13,6 +13,12 @@
  *
  * Every BUY row states what the coin buys before it states the
  * flavour, off the presenter's `effect` line (cluster S5-talk-C04).
+ *
+ * That effect line made the stall list taller than a phone and the way
+ * out rode off the bottom edge half-drawn. The screen now owns ONE
+ * scroller — the house shape (`/rest`, `/blacksmith`, the inventory
+ * page) — and TAKE THE ROAD is pinned below it, so the exit is whole at
+ * any stall count and at either width (14-village).
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -37,6 +43,16 @@ import { makeStyles } from '@/theme/runtime';
  */
 const DESC_FONT_SIZE = 12;
 
+/**
+ * The settlement screen.
+ *
+ * Purpose: render the village view-model — name, body, merchant voices,
+ * and the BUY/SELL stalls — with the exit pinned beneath the scrolling
+ * stall list instead of trailing it. Inputs: none (reads the store via
+ * `useGameState`; dispatches through `useGameActions`). Output: the
+ * screen's element tree. Resolves: 14-village — the stalls scroll, the
+ * way out does not.
+ */
 export default function VillageScreen() {
     const styles = useStyles();
     const event = useGameState((s) => s.event);
@@ -68,8 +84,12 @@ export default function VillageScreen() {
     }
 
     return (
-        <ScreenBg art="village">
-            <ScrollView contentContainerStyle={styles.scroll}>
+        <ScreenBg scrollable={false} art="village">
+            <ScrollView
+                style={styles.scrollOuter}
+                contentContainerStyle={styles.scroll}
+                testID="village-scroll"
+            >
                 <View style={styles.eyebrowRow}>
                     <AxmIcon name="action-village" size={18} />
                     <Text style={styles.eyebrow}>SETTLEMENT</Text>
@@ -184,7 +204,14 @@ export default function VillageScreen() {
                         )}
                     </>
                 )}
+            </ScrollView>
 
+            {/* 14-village: the exit sits OUTSIDE the scroller. Four wares
+                that each state their effect are taller than 812pt, and
+                inside the list the button was bisected by the bottom of
+                the screen. Pinned here it is whole however long the
+                stalls run, at 375 and at 1280 alike. */}
+            <View style={styles.exitBar}>
                 <TouchableOpacity
                     accessibilityRole="button"
                     accessibilityLabel="Leave the village"
@@ -194,12 +221,15 @@ export default function VillageScreen() {
                 >
                     <Text style={styles.bigButtonText}>TAKE THE ROAD</Text>
                 </TouchableOpacity>
-            </ScrollView>
+            </View>
         </ScreenBg>
     );
 }
 
 const useStyles = makeStyles((AXM) => ({
+    // One scroller, sized to the space the pinned exit leaves it
+    // (14-village) — the shape `/rest` and `/blacksmith` already use.
+    scrollOuter: { flex: 1 },
     scroll: { padding: 14, paddingBottom: 24 },
     eyebrowRow: {
         flexDirection: 'row',
@@ -324,6 +354,9 @@ const useStyles = makeStyles((AXM) => ({
         backgroundColor: AXM.bg,
     },
     bigButtonText: { fontFamily: FONTS.gothic, fontSize: 18, letterSpacing: 2, color: AXM.parchment },
+    // The pinned exit keeps the page's 14pt gutter; the button's own
+    // marginTop is the gap above it, as it was inside the list.
+    exitBar: { paddingHorizontal: 14, paddingBottom: 14 },
     flexOne: { flex: 1 },
     inactiveWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
     inactiveText: { ...TYPE.body, color: AXM.parchment, opacity: 0.55, textAlign: 'center' },
