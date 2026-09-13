@@ -13,6 +13,20 @@ interface TitleScreenProps {
   onContinue: () => void;
 }
 
+/**
+ * TitleScreen — the launch screen presenter: key art, the tagline, the
+ * EMBARK call-to-action and the closing flavour line.
+ *
+ * Inputs: `onContinue` — invoked once the player commits to EMBARK.
+ * Output: the title screen element tree (no state of its own beyond the
+ * store actions it fires).
+ *
+ * Resolves DECISION-5 (rows C-103, C-105): `leagues` is a unit of
+ * distance, not a proper noun, so the tagline says "the leagues beyond"
+ * in lower case — matching the map compass hint, which already reads
+ * "N ↑ · leagues · drag · pinch". The step-card column
+ * header keeps its all-caps LEAGUES; that is a header, not prose.
+ */
 export function TitleScreen({ onContinue }: TitleScreenProps) {
   const styles = useStyles();
   const actions = useGameActions();
@@ -73,7 +87,7 @@ export function TitleScreen({ onContinue }: TitleScreenProps) {
       <View style={styles.content}>
         <Text style={styles.tagline}>
           The cursed lands await. Carry your ancient knowledge and cold
-          iron into the LEAGUES beyond.
+          iron into the leagues beyond.
         </Text>
 
         <Pressable
