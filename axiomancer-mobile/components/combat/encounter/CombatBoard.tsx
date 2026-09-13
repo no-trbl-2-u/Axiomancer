@@ -1817,10 +1817,14 @@ export const CombatCardFace = React.memo(function CombatCardFace({
     const bandH = large ? 36 : 26;
     const ledgerH = large ? 60 : 42;
     const glyphSize = large ? 38 : narrow ? 18 : 24;
+    // The drop shadow is STANCE-coloured (owner directive 2026-09-13). It is
+    // applied inline on `faceOuter` rather than in the static style, because
+    // the colour is per-card data; `accent` (the armed staged-card read tint)
+    // wins where set, so the shadow always matches the frame above it.
     const rarity = card.rarity ?? 'common';
     const rarColor = rarity === 'rare' ? '#9a6ad6' : rarity === 'uncommon' ? '#6b8eb0' : '#8a8273';
     return (
-        <View style={[styles.faceOuter, { width, height }]}>
+        <View style={[styles.faceOuter, { width, height, shadowColor: accent ?? band }]}>
             <View style={[styles.faceCard, { borderColor: accent ?? band }]}>
                 {/* ① NAME BAND — horizontal blackletter on solid ink; the wax
                     pip carries rarity. The fan's visible sliver starts here.
@@ -2162,11 +2166,12 @@ const useStyles = makeStyles((AXM) => ({
     // default palette, #7a0d1c) read as a second border wrapped around every
     // card, fighting the stance-coloured frame that is the card's real colour
     // signal. The ring is gone — a card now carries exactly ONE border, the
-    // stance colour on `faceCard`. The drop shadow stays (depth cue, not a
-    // border) but is neutralised to ink so it cannot re-read as a red halo.
+    // stance colour on `faceCard`. The drop shadow stays as a depth cue and now
+    // carries the card's own stance colour, supplied inline by `CombatCardFace`
+    // (`shadowColor` is per-card data, so it cannot live in this static style).
     faceOuter: {
         borderRadius: 6, backgroundColor: AXM.deepBg,
-        shadowColor: AXM.shadow, shadowOpacity: 0.5, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: 6,
+        shadowOpacity: 0.5, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: 6,
     },
     faceCard: { flex: 1, borderWidth: 1.5, borderRadius: 4, backgroundColor: AXM.deepBg, overflow: 'hidden' },
     // ① The name band — horizontal blackletter; the wax pip is the rarity.
