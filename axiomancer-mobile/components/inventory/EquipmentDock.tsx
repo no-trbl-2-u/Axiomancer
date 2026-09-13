@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, useWindowDimensions } from 'react-native';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import { SectionLabel } from '@/components/SectionLabel';
@@ -13,15 +13,54 @@ function dockSlotKey(slot: EquipmentDockSlot): string {
     return slot.accessoryIndex !== undefined ? `${slot.key}-${slot.accessoryIndex}` : slot.key;
 }
 
+/** Viewport width (pt) at or above which the dock stops being width-starved:
+ *  past this the five slot rows have points to spare, so the bust is art again
+ *  rather than a gutter. Set above tablet-portrait widths, where the slot
+ *  column still needs every point it won. */
+const WIDE_DOCK_MIN_WIDTH = 900;
+
+/**
+ * The pilgrim bust's box inside the equipment dock, chosen from the viewport
+ * width.
+ *
+ * Purpose: the portrait sources are square (512x512) drawn with `fit="contain"`,
+ * so a box taller than it is wide letterboxes the art into dead black instead of
+ * showing more pilgrim — the 96x260 column the C11 fix left behind was ~70% empty.
+ * The box is therefore always square, and scaled to the room the dock has: at
+ * phone widths the gear list keeps the width it won (the "grants <signature>"
+ * sub-label must not truncate mid-word again), so the bust stays a narrow gutter;
+ * at desktop widths, where no sub-label ever wrapped, the bust reads as art again.
+ *
+ * Inputs: `viewportWidth` — window width in points (from `useWindowDimensions`).
+ * Outputs: `{ width, height }` in points, width === height.
+ * Resolves: 07-inventory-fresh / 08-inventory-midgame portrait collapse (mobile
+ * dead column, desktop thumbnail).
+ */
+export function equipmentDockPortraitBox(viewportWidth: number): { width: number; height: number } {
+    const side = viewportWidth >= WIDE_DOCK_MIN_WIDTH ? 300 : 112;
+    return { width: side, height: side };
+}
+
 interface EquipmentDockProps {
     vm: EquipmentDockViewModel;
     selectedSlot: EquipmentDockSlot['key'] | null;
     onSelectSlot: (key: EquipmentDockSlot['key'] | null) => void;
 }
 
+/**
+ * The WORN UPON THE BODY panel: pilgrim bust on the left, the five worn slots
+ * stacked on the right.
+ *
+ * Inputs: `vm` (dock view model — labels + slot rows), `selectedSlot` (the slot
+ * key currently being fitted, or null), `onSelectSlot` (slot press handler).
+ * Outputs: the dock view. Resolves: 07-inventory-fresh / 08-inventory-midgame —
+ * the portrait box is sized per viewport by `equipmentDockPortraitBox`.
+ */
 export function EquipmentDock({ vm, selectedSlot, onSelectSlot }: EquipmentDockProps) {
     const styles = useStyles();
     const AXM = usePalette();
+    const { width: viewportWidth } = useWindowDimensions();
+    const portraitBox = equipmentDockPortraitBox(viewportWidth);
 
     return (
         <View style={styles.dock} testID="equipment-dock">
@@ -48,8 +87,16 @@ export function EquipmentDock({ vm, selectedSlot, onSelectSlot }: EquipmentDockP
             {/* Portrait on the left, all 5 worn slots stacked in a single column
                 on the right. */}
             <View style={styles.dockGrid}>
-                <View style={styles.dockPortrait} testID="equipment-dock-portrait">
-                    <PlayerPortraitImage width="100%" height={260} fit="contain" contentPosition="center" />
+                <View
+                    style={[styles.dockPortrait, { width: portraitBox.width }]}
+                    testID="equipment-dock-portrait"
+                >
+                    <PlayerPortraitImage
+                        width="100%"
+                        height={portraitBox.height}
+                        fit="contain"
+                        contentPosition="center"
+                    />
                 </View>
                 <View style={styles.dockCol} testID="equipment-dock-slots">
                     {vm.slots.map((slot) => (
@@ -110,9 +157,9 @@ const useStyles = makeStyles((AXM) => ({
         alignItems: 'stretch',
     },
     dockPortrait: {
-        // S3-sheet-C11: a fixed narrow gutter instead of flex:1 — the bust is
-        // decoration beside five named slots, not half the panel.
-        width: 96,
+        // S3-sheet-C11: a fixed box instead of flex:1 — the bust never reclaims
+        // half the panel from the five named slots. The width itself is set
+        // inline from `equipmentDockPortraitBox` (viewport-dependent).
         flexShrink: 0,
         alignItems: 'center',
         justifyContent: 'center',
