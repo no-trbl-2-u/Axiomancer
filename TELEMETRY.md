@@ -7,7 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-07T13:46:13Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-07T13:46:51Z | skill | iterate | claude-sonnet-5 | main | - |
 | 2026-08-07T19:27:07Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-07T19:27:42Z | skill | iterate | claude-sonnet-5 | main | - |
@@ -407,3 +406,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-13T01:02:36Z | subagent | general-purpose | claude-fable-5-1 | main | Review PR #301 UI fixes diff |
 | 2026-09-13T01:02:45Z | subagent | general-purpose | claude-fable-5-1 | main | Review PR #302 swarm diff |
 | 2026-09-13T01:03:00Z | subagent | general-purpose | claude-fable-5-1 | main | Audit bot ticks and plan docs |
+| 2026-09-13T07:36:29Z | slash-prompt | /fix-ci | unknown | user/ci | /fix-ci 34745085584 |
