@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-08T02:27:43Z | skill | march | unknown | main | - |
-| 2026-08-08T02:30:45Z | skill | critique | claude-sonnet-5 | main | - |
 | 2026-08-08T07:27:43Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-08T07:37:19Z | subagent | card-expert | claude-sonnet-5 | main | Implement Phase 39 curve repair + library symmetry |
 | 2026-08-08T09:22:59Z | slash-prompt | /digest | unknown | user/ci | /digest |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-13T08:36:48Z | skill | adjust-enemies | claude-sonnet-5 | main | - |
 | 2026-09-13T09:01:30Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-09-13T09:01:33Z | skill | digest | unknown | main | - |
+| 2026-09-13T12:37:11Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-13T12:38:45Z | subagent | card-expert | claude-sonnet-5 | main | Run adjust-keywords pass 8 end-to-end |
