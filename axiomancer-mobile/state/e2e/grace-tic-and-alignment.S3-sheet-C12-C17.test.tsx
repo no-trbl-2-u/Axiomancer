@@ -46,8 +46,7 @@ function seededStore(): AppStore {
 
 describe('GRACE break tic carries a key (S3-sheet-C12)', () => {
     it('words the tic as the arrears threshold', () => {
-        expect(graceBreakLegend(2)).toContain('arrears');
-        expect(graceBreakLegend(2)).toContain('2');
+        expect(graceBreakLegend()).toContain('arrears');
     });
 
     it('labels the tic on the exploration HUD grace track', () => {
@@ -55,7 +54,7 @@ describe('GRACE break tic carries a key (S3-sheet-C12)', () => {
         const r = render(tree);
 
         expect(r.getByTestId('status-grace-break-legend').props.children).toBe(
-            graceBreakLegend(2),
+            graceBreakLegend(),
         );
     });
 
@@ -64,7 +63,7 @@ describe('GRACE break tic carries a key (S3-sheet-C12)', () => {
         const r = render(tree);
 
         expect(r.getByTestId('self-grace-break-legend').props.children).toBe(
-            graceBreakLegend(2),
+            graceBreakLegend(),
         );
     });
 });

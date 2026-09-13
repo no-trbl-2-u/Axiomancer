@@ -24,22 +24,26 @@ export const REST_CHOICE_OFFER_DESC: Record<RestChoiceOfferId, string> = Object.
 /**
  * The REST offer's description, with the heal it actually pays (FE-024).
  *
- * @param maxHealth - the pilgrim's maximum VITAE; the heal is a flat fraction
- *   of MAX, not of missing or current health (`RESTCHOICE_TUNING`).
+ * @param healed - the VITAE the engine says a REST would restore right now
+ *   (`previewRestChoiceHeal(session)` — the same arithmetic the commit
+ *   seals, cap included).
  * @returns the static sentence with the restored amount appended, or the
- *   static sentence alone when the maximum is unknown (0 or negative).
+ *   static sentence alone when there is nothing to promise (0, negative,
+ *   or not a number).
  *
  * The screen showed 'SLEEP WHERE YOU STAND. FREE.' beside a bar reading
  * 20/175 — three statements of the price and none of the payoff, so the only
- * number a hurt player wants was withheld until after committing. The
- * fraction stays in the engine; this reads it, it does not restate the rule.
+ * number a hurt player wants was withheld until after committing.
+ *
+ * Audit 2026-09-12: the first cut of this function re-derived the heal from
+ * the fraction alone and skipped the engine's missing-VITAE cap, so at
+ * 170/175 it promised 44 where the engine pays 5. The presenter no longer
+ * computes anything — it words the engine's number.
  */
-export function restOfferDesc(maxHealth: number, healFraction: number): string {
+export function restOfferDesc(healed: number): string {
     const base = REST_CHOICE_OFFER_DESC.rest;
-    if (!Number.isFinite(maxHealth) || maxHealth <= 0) return base;
-    const healed = Math.round(maxHealth * healFraction);
-    if (healed <= 0) return base;
-    return `${base} Restores ${healed} VITAE.`;
+    if (!Number.isFinite(healed) || healed <= 0) return base;
+    return `${base} Restores ${Math.round(healed)} VITAE.`;
 }
 
 export const REST_CHOICE_PURSE_LABEL = 'PURSE';

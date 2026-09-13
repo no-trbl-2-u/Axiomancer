@@ -5,7 +5,7 @@ import { makeStyles, usePalette } from '@/theme/runtime';
 import { StatBar } from './StatBar';
 import { SectionLabel } from './SectionLabel';
 import { useGameState } from '@/state/GameStoreProvider';
-import { graceBreakLegend } from '@/state/presenters/character.engine';
+import { graceBreakLegend, graceTrack } from '@/state/presenters/character.engine';
 
 interface StatusCardProps {
   /**
@@ -43,13 +43,14 @@ export function StatusCard(props: StatusCardProps = {}) {
   const hp = props.hp ?? playerHp;
   const hpMax = props.hpMax ?? playerHpMax;
 
-  // Map moralMeter (-100 to +100) to display scale (1-10)
-  // 0 maps to ~5.5, with break threshold at 2 representing very low morale
-  const moraleDisplay = Math.max(1, Math.min(10, Math.round((moralMeter + 100) / 20)));
-  const moraleMax = 10;
-  const moraleFillPercent = (moraleDisplay / moraleMax) * 100;
-  const moraleBreakAt = 2; // Break threshold at 2/10
-  const moraleBreakPercent = (moraleBreakAt / moraleMax) * 100;
+  // Audit 2026-09-12: the track's number, fill, tic and arrears verdict all
+  // come from the presenter, which reads the engine's band boundary — the
+  // HUD, the SELF sheet and /memoir name one threshold.
+  const grace = graceTrack(moralMeter);
+  const moraleDisplay = grace.value;
+  const moraleMax = grace.max;
+  const moraleFillPercent = grace.fillPct;
+  const moraleBreakPercent = grace.breakPct;
 
   return (
     <View style={styles.card}>
@@ -86,9 +87,9 @@ export function StatusCard(props: StatusCardProps = {}) {
           {/* S3-sheet-C12: the red tic sat in the GRACE track unlabelled and
             * read as a notch in the bar. Its key, worded by the presenter. */}
           <Text style={styles.moraleBreakLegend} testID="status-grace-break-legend">
-            {graceBreakLegend(moraleBreakAt)}
+            {graceBreakLegend()}
           </Text>
-          {moraleDisplay <= 2 && (
+          {grace.inArrears && (
             <Text style={styles.moraleWarning}>the ledger runs to arrears.</Text>
           )}
         </View>

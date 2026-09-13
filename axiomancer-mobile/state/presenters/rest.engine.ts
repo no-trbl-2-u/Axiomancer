@@ -10,7 +10,7 @@
  * IS that reason; this module only shapes it for render.
  */
 
-import { cardRemovalPrice, getCardById, RESTCHOICE_TUNING } from '@mechanics';
+import { cardRemovalPrice, getCardById, previewRestChoiceHeal } from '@mechanics';
 import type {
     RestChoiceOfferId,
     RestChoiceSession,
@@ -126,10 +126,11 @@ export function selectRestVM(state: Pick<AppStoreState, 'rest'>): RestChoiceVM {
     const offers: RestChoiceOfferVM[] = s.offers.map((o) => ({
         id: o.id,
         label: REST_CHOICE_OFFER_LABEL[o.id],
-        // FE-024: REST names the VITAE it restores, read off the engine's own
-        // heal fraction — the one number a hurt player is deciding on.
+        // FE-024: REST names the VITAE it restores — the one number a hurt
+        // player is deciding on. Audit 2026-09-12: read from the engine's own
+        // preview (cap included), never re-derived from the fraction.
         desc: o.id === 'rest'
-            ? restOfferDesc(s.maxHealth, RESTCHOICE_TUNING.restHealFraction)
+            ? restOfferDesc(previewRestChoiceHeal(s))
             : REST_CHOICE_OFFER_DESC[o.id],
         price: o.cost,
         enabled: !o.disabledReason,

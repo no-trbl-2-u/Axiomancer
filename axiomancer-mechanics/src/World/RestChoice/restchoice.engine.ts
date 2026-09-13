@@ -102,6 +102,26 @@ function sealOutcome(s: RestChoiceSession, outcome: RestChoiceOutcome): RestChoi
 // ---------------------------------------------------------------------------
 
 /**
+ * The VITAE a `rest` offer would restore if committed right now — the SAME
+ * number `chooseRestChoiceOffer` seals into the outcome.
+ *
+ * Purpose: let a host print the heal beside the offer without re-deriving
+ * the rule. The heal is `round(maxHealth × restHealFraction)`, capped at the
+ * VITAE actually missing, so a nearly-full pilgrim is never promised more
+ * than the commit pays (audit 2026-09-12: the mobile offer copy restated the
+ * fraction without the cap and read "Restores 44" at 170/175, where the
+ * engine heals 5).
+ *
+ * @param s - any object carrying the session's `maxHealth` and `health`.
+ * @returns the heal in VITAE, always `>= 0`.
+ */
+export function previewRestChoiceHeal(s: Pick<RestChoiceSession, 'maxHealth' | 'health'>): number {
+    const healCap = Math.max(0, s.maxHealth - s.health);
+    const raw = Math.round(s.maxHealth * T.restHealFraction);
+    return Math.max(0, Math.min(healCap, raw));
+}
+
+/**
  * offer → outcome | cut-pick. Commits ONE offer — the other vanishes (the
  * caller's `offers` list is only meaningful in the `offer` phase). A
  * disabled or unknown offer id is an invalid call: silent no-op.
@@ -112,9 +132,8 @@ export function chooseRestChoiceOffer(s: RestChoiceSession, offer: RestChoiceOff
     if (!found || found.disabledReason) return s;
 
     if (offer === 'rest') {
-        const healCap = Math.max(0, s.maxHealth - s.health);
-        const raw = Math.round(s.maxHealth * T.restHealFraction);
-        const healed = Math.max(0, Math.min(healCap, raw));
+        // One rule, one place: the preview and the commit share the arithmetic.
+        const healed = previewRestChoiceHeal(s);
         return sealOutcome(s, {
             chosen: 'rest', healed, spent: 0, removedCardId: null, removals: s.removals,
         });

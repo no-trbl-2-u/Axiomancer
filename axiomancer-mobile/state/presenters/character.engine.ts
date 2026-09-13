@@ -11,6 +11,7 @@
  */
 
 import {
+    AXIS_LOW_THRESHOLD,
     bucketAxis,
     defaultAlignment,
     getAlignmentCell,
@@ -384,22 +385,68 @@ function buildAlignmentSlice(state: GameStore): AlignmentSlice {
     return { cellName: cell.label, axes };
 }
 
+/** Width of the GRACE track in tenths — the readout prints `value / 10`. */
+export const GRACE_TRACK_MAX = 10;
+
+/**
+ * Geometry for a GRACE track (the exploration HUD's StatusCard and the SELF
+ * sheet's POOLS panel draw the same bar).
+ */
+export interface GraceTrack {
+    /** The printed tenths, 1-10: `round((meter + 100) / 20)` clamped. */
+    value: number;
+    /** Always `GRACE_TRACK_MAX`. */
+    max: number;
+    /** Fill width in percent from the RAW meter, so the fill and the tic compare exactly. */
+    fillPct: number;
+    /** The arrears tic's left offset in percent, from the engine's own band boundary. */
+    breakPct: number;
+    /** `true` when the meter sits in the IN ARREARS band (`<= AXIS_LOW_THRESHOLD`). */
+    inArrears: boolean;
+}
+
+/**
+ * Lays out a GRACE track from the moral meter (-100..100).
+ *
+ * Purpose: one source for the number, the fill, the tic and the arrears
+ * verdict, so the HUD, the SELF sheet and `/memoir` agree.
+ *
+ * Audit 2026-09-12: both surfaces hard-coded the tic at 2/10 (meter ≈ -60)
+ * while `/memoir` puts IN ARREARS at meter <= -34 (`AXIS_LOW_THRESHOLD`, the
+ * same boundary `bucketAxis` uses). The tic now sits at that boundary
+ * (33% of the track) and the fill follows the raw meter rather than the
+ * rounded tenths, so a meter of -33 draws just right of the tic
+ * (INDIFFERENT) and -34 touches it (IN ARREARS) — exactly the memoir chip.
+ *
+ * @param moralMeter - `state.moralMeter`; non-finite reads as 0.
+ * @returns a frozen-by-convention geometry object (plain data, no tokens).
+ */
+export function graceTrack(moralMeter: number): GraceTrack {
+    const meter = Number.isFinite(moralMeter) ? Math.max(-100, Math.min(100, moralMeter)) : 0;
+    const value = Math.max(1, Math.min(GRACE_TRACK_MAX, Math.round((meter + 100) / 20)));
+    return {
+        value,
+        max: GRACE_TRACK_MAX,
+        fillPct: ((meter + 100) / 200) * 100,
+        breakPct: ((AXIS_LOW_THRESHOLD + 100) / 200) * 100,
+        inArrears: meter <= AXIS_LOW_THRESHOLD,
+    };
+}
+
 /**
  * Legend copy for the red break tic drawn on a GRACE track.
  *
- * Purpose: the tic is the only mark on either grace bar (the exploration
- * HUD's StatusCard and the SELF sheet's POOLS panel) and nothing named it,
- * so it read as damage on the bar rather than as the arrears threshold the
- * ledger warns about. Resolves cluster S3-sheet-C12.
+ * Purpose: the tic is the only mark on either grace bar and nothing named
+ * it, so it read as damage on the bar rather than as the arrears threshold
+ * the ledger warns about. Resolves cluster S3-sheet-C12.
  *
- * Input: `breakAt` — the tic's position on the 1-10 grace scale, passed by
- * whichever surface draws the tic (the number stays where it already lives;
- * this function only words it).
  * Output: one lowercase marginal line, glyph first so the eye ties the text
- * to the mark.
+ * to the mark. It names no number: the printed tenths round, the band does
+ * not (a meter of -33 and -34 both print 3), so any tenths figure would
+ * contradict `/memoir` at the edge. The mark itself is the threshold.
  */
-export function graceBreakLegend(breakAt: number): string {
-    return `▏arrears at ${breakAt} or below`;
+export function graceBreakLegend(): string {
+    return '▏arrears left of the mark';
 }
 
 export function selectCharacterViewModel(state: GameStore): CharacterViewModel {

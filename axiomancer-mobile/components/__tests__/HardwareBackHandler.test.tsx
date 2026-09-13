@@ -12,12 +12,12 @@ import { afterAll, beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { act, render } from '@testing-library/react-native';
 import React from 'react';
 import { BackHandler, Platform } from 'react-native';
-import type { RestChoiceSession } from '@mechanics';
+import type { ResolveMapEventResult, RestChoiceSession } from '@mechanics';
 
 import { HardwareBackHandler } from '@/components/HardwareBackHandler';
 import { CombatModeProvider, useCombatMode } from '@/state/combat-mode';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
-import { createAppStore, EMPTY_REST_SLICE, type AppStore } from '@/state/store';
+import { createAppStore, EMPTY_EVENT_SLICE, EMPTY_REST_SLICE, type AppStore } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 
 type BackAction = () => boolean;
@@ -185,6 +185,77 @@ describe('HardwareBackHandler: rest-choice node branching (Phase 52d)', () => {
             act(() => {
                 store.setState({ rest: EMPTY_REST_SLICE });
             });
+            expect(lastBackAction()()).toBe(false);
+        } finally {
+            (Platform as { OS: string }).OS = originalOS;
+        }
+    });
+});
+
+/** The opening omen — a paced event `EventGate` routes to `/cutscene`. */
+function pacedCutscene(): ResolveMapEventResult {
+    return {
+        state: undefined as never,
+        event: { kind: 'cutscene', lines: ['The tide goes out and does not come back.'] },
+    };
+}
+
+/** A combat-prelude — combat-adjacent, rendered in place, never a paced route. */
+function combatPrelude(): ResolveMapEventResult {
+    const enemy = { id: 'cairn-rot', name: 'Cairn-rot', level: 3, health: 24 } as never;
+    return {
+        state: undefined as never,
+        event: {
+            kind: 'encounter',
+            encounter: { enemies: [enemy], origin: 'fishing-village:fv-3' } as never,
+            isBoss: false,
+        },
+    };
+}
+
+describe('HardwareBackHandler: pending paced event (audit 2026-09-12)', () => {
+    it('back action returns true while a paced event is pending', () => {
+        const originalOS = Platform.OS;
+        (Platform as { OS: string }).OS = 'android';
+        try {
+            const store = makeStore();
+            render(withProvider(store, <HardwareBackHandler />));
+            expect(lastBackAction()()).toBe(false);
+
+            act(() => {
+                store.setState({ event: { ...EMPTY_EVENT_SLICE, pending: pacedCutscene() } });
+            });
+            expect(lastBackAction()()).toBe(true);
+        } finally {
+            (Platform as { OS: string }).OS = originalOS;
+        }
+    });
+
+    it('back action returns false again once the paced event resolves', () => {
+        const originalOS = Platform.OS;
+        (Platform as { OS: string }).OS = 'android';
+        try {
+            const store = makeStore();
+            store.setState({ event: { ...EMPTY_EVENT_SLICE, pending: pacedCutscene() } });
+            render(withProvider(store, <HardwareBackHandler />));
+            expect(lastBackAction()()).toBe(true);
+
+            act(() => {
+                store.setState({ event: EMPTY_EVENT_SLICE });
+            });
+            expect(lastBackAction()()).toBe(false);
+        } finally {
+            (Platform as { OS: string }).OS = originalOS;
+        }
+    });
+
+    it('does not lock for a combat-prelude, which renders in place over the map', () => {
+        const originalOS = Platform.OS;
+        (Platform as { OS: string }).OS = 'android';
+        try {
+            const store = makeStore();
+            store.setState({ event: { ...EMPTY_EVENT_SLICE, pending: combatPrelude() } });
+            render(withProvider(store, <HardwareBackHandler />));
             expect(lastBackAction()()).toBe(false);
         } finally {
             (Platform as { OS: string }).OS = originalOS;
