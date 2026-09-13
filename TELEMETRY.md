@@ -7,9 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-08T13:25:19Z | slash-prompt | /march | unknown | user/ci | /march |
-| 2026-08-08T14:43:46Z | subagent | scout | claude-opus-5 | main | Scout MTG/PvE card research |
-| 2026-08-08T14:49:24Z | subagent | Explore | claude-fable-5 | main | Map mobile/editor card coupling |
 | 2026-08-08T19:07:21Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-08T19:09:56Z | skill | critique | claude-sonnet-5 | main | - |
 | 2026-08-08T21:35:47Z | subagent | general-purpose | claude-opus-5 | main | Phase 42 dark fantasy bible |
@@ -407,3 +404,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-13T16:31:14Z | skill | adjust-cards | claude-sonnet-5 | main | - |
 | 2026-09-13T16:32:19Z | subagent | card-expert | claude-sonnet-5 | main | Run adjust-cards pass 9 end-to-end |
 | 2026-09-13T18:32:29Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-13T20:29:40Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-13T20:33:15Z | skill | adjust-enemies | claude-sonnet-5 | main | - |
+| 2026-09-13T20:34:00Z | subagent | general-purpose | claude-sonnet-5 | main | Ship adjust-enemies pass 9 |

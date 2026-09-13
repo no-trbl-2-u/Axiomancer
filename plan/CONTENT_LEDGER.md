@@ -13,13 +13,94 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-13 | 4b1b6a64 | 9 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-13 | 22ce276c | 9 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-13 | 832e3e5e | 8 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-13 | <this commit> | 9 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-13 | 37dacef1 | 8 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-13 | abb3da01 | 8 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-enemies pass 9, 2026-09-13, commit <this commit>]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
+> content-lifecycle gate (`enemies` was the stalest qualifying category this
+> tick: 18 commits since pass 8's commit `832e3e5e`, past the 15-commit/36h
+> threshold and the oldest of the five categories' own last-pass timestamps —
+> keywords `37dacef1` 15 commits sat right at its own threshold, npcs
+> `abb3da01` 13, cards `4b1b6a64` 3, equipment `22ce276c` 1, all under their
+> own thresholds or more recently audited). `git log 832e3e5e..HEAD -- axiomancer-
+> mechanics/src/Enemy axiomancer-mechanics/src/Combat/combat.enemy-decks.ts
+> axiomancer-mechanics/src/Combat/combat.enemy-cards.ts axiomancer-mobile/
+> assets/images/enemies axiomancer-mechanics/src/World` returns exactly two
+> commits of the 18 intervening: `abb3da01` (`/adjust-npcs` pass 8's own
+> Northern-Forest dialogue retheme — touches `World/Continents/Northern-
+> Forest/npcs.ts` prose and its engine test, not enemy data) and `a74d946f`
+> (the 2026-09-12 work-audit fix — rest heal copy, Android paced-event back
+> lock, arrears threshold — touches `World/RestChoice` and mobile character/
+> status-card surfaces, not `src/Enemy` or the roster). Read both diffs in
+> full directly to confirm neither touches `enemy.library.ts`, `EnemiesByMap`,
+> `ENEMY_REGISTRY`, `loot.ts`, `enemy-keywords.ts`, `combat.enemy-decks.ts`,
+> or `combat.enemy-cards.ts` — confirmed clean. The other 16 intervening
+> commits were the cards/equipment pass-9 ticks (each with its own ledger
+> bump) and their content-only diffs, unrelated to the roster surface.
+> Re-derived every Step-1 signal fresh anyway with new throwaway extraction
+> scripts (independent of pass 8's own tooling) run directly against the live
+> tree, not copied from pass 8's numbers: (1) **orphan sweep** — 79
+> `createEnemy` consts, all 79 resolve into `ENEMY_REGISTRY` (0 missing), 77
+> resolve into some `EnemiesByMap` pool, same 2 deliberate exclusions as every
+> prior pass (`Sandbag_01` test fixture, `TheIncompleteness` the impossible-
+> ceiling boss) — no new orphan. (2) **roster-size floor / sibling-overlap
+> sweep** — all 10 pools recomputed fresh: fishing-village 13, northern-forest
+> 39, caverns 16, northern-city 8, connecting-river 5, town-across-river 4,
+> the-capital 8, aporia-colonnade 8, aporia-archive 8, aporia-proof 11 —
+> identical to pass 8. Full pairwise overlap re-run (all 45 pairs): the same 4
+> pairs exceed 70% of the smaller pool — northern-forest/aporia-colonnade
+> (87.5%), northern-forest/aporia-archive (87.5%), northern-forest/aporia-proof
+> (90.9%), caverns/aporia-archive (75.0%) — all the documented labyrinth
+> deliberate-reuse design (wandering foes scaling to the player via the
+> adaptive level bands), unchanged since pass 1. (3) **deck sweep** — 92 raw
+> `ENEMY_DECKS` key declarations, 78 unique after dedup, all 78 resolve
+> against the 79 `ENEMY_REGISTRY` slugs via the `enemy-<slug>` convention; 157
+> distinct card-id tokens referenced across every deck array resolve 1:1
+> against `ENEMY_CARD_LIBRARY`'s 157 keys — 0 unresolved, 0 unused (full
+> bijection, unchanged from pass 8). (4) **portrait sweep** — 77
+> `portraitAsset` values, 0 duplicates, all 77 resolve 1:1 into
+> `axiomancer-mobile/assets/images/enemies/index.ts`'s registry. (5)
+> **VITAE-band sweep** — 21 explicit `vitae:` overrides, same count as pass 8;
+> `enemy.library.ts` last-touched `e57f9f63` (pass 6, 2026-09-11) and the
+> VITAE-formula constants (`src/Enemy/index.ts`) last-touched `e9201415`
+> (2026-09-02) — neither has moved since pass 8 re-confirmed the standing
+> worst-deviation figure (ElderFireGiant +25.7%, inside the ~±26% tolerance
+> band), so that reading stands unchallenged. (6) **aftermath-prose/voice
+> sweep** — 0 `thee`/`thou`/`thy`/`thine`/`ye` matches in `enemy.library.ts`;
+> 47/79 enemies carry `finalBlowLines`, same as pass 8 — the standing 32-enemy
+> backlog (filed pass 1, `plan/AUDIT.md` `[content]`, scoped to
+> `content-curator` not this skill) re-read at its current text: still open,
+> still accurate, unworsened, re-cited not re-filed. (7) **loot-table sweep**
+> — 22 distinct `drop()` ids, all 22 resolve 1:1 against
+> `Items/consumable.library.ts`'s 22 ids. Also confirmed every dependency
+> surface a deck/loot/portrait sweep would need is unchanged since pass 8:
+> `combat.enemy-cards.ts` and `enemy-keywords.ts`/`types.ts` last-touched
+> 2026-09-02 (pre-dates pass 5), `consumable.library.ts` 2026-09-04,
+> `buffs.library.json`/`debuffs.library.json`/`effects.ts`
+> (`CAPITULATE_RESOLVE_FRACTION`/`CAPITULATE_MIN`) last-touched `636f3040`
+> 2026-09-04 — every cross-reference above is provably re-testing the same
+> graph pass 8 tested, not assumed stale-clean. KB research (kb-query gate,
+> skill §3 Step 2): not run — zero CREATE/UPDATE this pass, exempt under the
+> REMOVE/no-op carve-out the sibling categories' own zero-diff passes have
+> used identically. Verify: ran both gates in full (not skipped, despite zero
+> source diff) — `npm run verify --workspace axiomancer-mechanics` (213/213
+> files, 3428 tests, build green — matching pass 9's card/equipment-audit
+> count exactly), `npm run verify --workspace axiomancer-mobile` (full chained
+> lint/typecheck/jest/assets:check/art:test script exit 0; art:test's own
+> 24/24 confirmed directly in the tail). `npm run deploy:check` confirmed
+> green pre-tick (HEAD `12f12efb`, docs/plan-only tip commit, no gated
+> workflow triggered) and will be re-confirmed after this ledger commit
+> lands. No `plan/PHASE_CANDIDATES.md` or new `plan/AUDIT.md` residue filed
+> this pass — nothing actionable surfaced outside the standing, already-filed
+> 32-enemy `finalBlowLines` backlog re-cited above.
+```
 
 ```
 > **[adjust-equipment pass 9, 2026-09-13, commit 22ce276c]** Zero-CREATE,
