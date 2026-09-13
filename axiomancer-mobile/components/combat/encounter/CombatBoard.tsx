@@ -1551,7 +1551,25 @@ export const CombatBoard = React.memo(function CombatBoard({
                     call 2026-07-19): it is a signature, cast from the rune column
                     like every other. The presenter reshapes its rune flag-on
                     (1◆ cost + the full firing gate + refusal reason). */}
-                <View onLayout={(e) => setTrayTop(e.nativeEvent.layout.y)} pointerEvents="box-none">
+                {/* The tray outranks the rune column in z-order (2026-09-13).
+                    `sigTop` keeps the column clear of the tray whenever there is
+                    room, but it is derived from THREE measured values
+                    (`contentH`, `trayTop`, `sigH`) held in state: for the frame
+                    between a re-layout and the re-render that follows it, the
+                    column is still at its previous anchor and can sit over the
+                    tray. In that frame `elementFromPoint` at a die's centre
+                    returns a rune button, so the die cannot be dragged and a tap
+                    aimed at it casts a signature and spends Conviction instead.
+                    CI caught exactly that frame (PR #306, boss seed 16, at round
+                    9 on one run and round 5 on the next — the round is incidental,
+                    the stale frame is the bug). Ranking the tray above the column
+                    makes a die win the hit test no matter what the measurements
+                    are doing; the clearance clamp still does the visual work. */}
+                <View
+                    onLayout={(e) => setTrayTop(e.nativeEvent.layout.y)}
+                    pointerEvents="box-none"
+                    style={styles.trayLayer}
+                >
                     <DiceRow vm={vm} dieGesture={dieGesture} draggingDieId={draggingDieId} assignedDieIds={assignedDieIds} onFateTap={onFateTap} />
                 </View>
 
@@ -1817,10 +1835,14 @@ export const CombatCardFace = React.memo(function CombatCardFace({
     const bandH = large ? 36 : 26;
     const ledgerH = large ? 60 : 42;
     const glyphSize = large ? 38 : narrow ? 18 : 24;
+    // The drop shadow is STANCE-coloured (owner directive 2026-09-13). It is
+    // applied inline on `faceOuter` rather than in the static style, because
+    // the colour is per-card data; `accent` (the armed staged-card read tint)
+    // wins where set, so the shadow always matches the frame above it.
     const rarity = card.rarity ?? 'common';
     const rarColor = rarity === 'rare' ? '#9a6ad6' : rarity === 'uncommon' ? '#6b8eb0' : '#8a8273';
     return (
-        <View style={[styles.faceOuter, { width, height }]}>
+        <View style={[styles.faceOuter, { width, height, shadowColor: accent ?? band }]}>
             <View style={[styles.faceCard, { borderColor: accent ?? band }]}>
                 {/* ① NAME BAND — horizontal blackletter on solid ink; the wax
                     pip carries rarity. The fan's visible sliver starts here.
@@ -1978,6 +2000,10 @@ const useStyles = makeStyles((AXM) => ({
 
     // ── signature rune column ──
     sigColumn: { position: 'absolute', left: 6, top: SIG_COLUMN_TOP, alignItems: 'center', gap: 8, zIndex: 30 },
+    // One rung above `sigColumn`'s 30, so a die is never swallowed by a rune
+    // (see the comment at the tray's call site). Still below the corner
+    // medallions at 40, which are deliberately the topmost board chrome.
+    trayLayer: { zIndex: 31 },
     convictionChip: {
         borderWidth: 1, borderColor: AXM.sulfur, borderRadius: 6, backgroundColor: 'rgba(0,0,0,0.6)',
         paddingHorizontal: 7, paddingVertical: 3,
@@ -2158,9 +2184,16 @@ const useStyles = makeStyles((AXM) => ({
     // A page of the codex: name band on ink, framed art plate behind a
     // hairline rule, solid-ground ledger. Stance colours the frame; category
     // colours glyph + keyword. AXM tokens throughout — no scrim, no washes.
+    // Owner directive 2026-09-13: the 2pt `pixelShadow` ring (a dark RED in the
+    // default palette, #7a0d1c) read as a second border wrapped around every
+    // card, fighting the stance-coloured frame that is the card's real colour
+    // signal. The ring is gone — a card now carries exactly ONE border, the
+    // stance colour on `faceCard`. The drop shadow stays as a depth cue and now
+    // carries the card's own stance colour, supplied inline by `CombatCardFace`
+    // (`shadowColor` is per-card data, so it cannot live in this static style).
     faceOuter: {
-        borderRadius: 6, borderWidth: 2, borderColor: AXM.pixelShadow, backgroundColor: AXM.deepBg,
-        shadowColor: AXM.pixelShadow, shadowOpacity: 0.5, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: 6,
+        borderRadius: 6, backgroundColor: AXM.deepBg,
+        shadowOpacity: 0.5, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: 6,
     },
     faceCard: { flex: 1, borderWidth: 1.5, borderRadius: 4, backgroundColor: AXM.deepBg, overflow: 'hidden' },
     // ① The name band — horizontal blackletter; the wax pip is the rarity.

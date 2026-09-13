@@ -11,13 +11,28 @@ interface EquipmentSlotProps {
     bareLabel: string;
     selected: boolean;
     onPress: (key: EquipmentDockSlot['key'] | null) => void;
+    /**
+     * Long-press handler for a FILLED slot (2026-09-13 playthrough note #2).
+     * Receives the worn item's engine id; the screen resolves it into the
+     * equipment detail card. Optional — when omitted (or when the slot is
+     * empty) the long press falls back to the legacy `kind:'slot'` tooltip,
+     * which is still the only information an EMPTY slot has to give.
+     */
+    onShowItemDetail?: (itemId: string) => void;
 }
 
-export function EquipmentSlot({ slot, bareLabel, selected, onPress }: EquipmentSlotProps) {
-    // Phase 74 follow-up walkthrough Tick 1: long-press fires the
-    // kind:'slot' tooltip (content shared with the SELF surface).
-    // Single-tap stays for slot-filter select (existing behaviour),
-    // mirroring Phase 75 card-row pattern.
+export function EquipmentSlot({
+    slot,
+    bareLabel,
+    selected,
+    onPress,
+    onShowItemDetail,
+}: EquipmentSlotProps) {
+    // Long-press behaviour (2026-09-13 playthrough note #2): on a FILLED slot
+    // it opens the equipment detail card — the only place outside combat where
+    // a signature skill's real effect can be read. On an EMPTY slot there is no
+    // item to describe, so it keeps the Phase-74 `kind:'slot'` tooltip.
+    // Single-tap stays for slot-filter select (existing behaviour).
     const styles = useStyles();
     const tooltip = useTooltip();
     const slotRef = useRef<View | null>(null);
@@ -36,10 +51,17 @@ export function EquipmentSlot({ slot, bareLabel, selected, onPress }: EquipmentS
             ref={slotRef}
             accessibilityRole="button"
             accessibilityLabel={`${slot.label} slot${filled && slot.item ? `, ${slot.item.name}` : ', empty'}`}
-            accessibilityHint="hold to read slot description"
+            accessibilityHint={filled ? 'hold to inspect this item' : 'hold to read slot description'}
             accessibilityState={{ selected }}
             onPress={() => onPress(selected ? null : slot.key)}
-            onLongPress={() => tooltip.show({ kind: 'slot', id: slot.key, anchorRef: slotRef })}
+            onLongPress={() => {
+                const wornId = slot.item?.id;
+                if (wornId !== undefined && onShowItemDetail !== undefined) {
+                    onShowItemDetail(wornId);
+                    return;
+                }
+                tooltip.show({ kind: 'slot', id: slot.key, anchorRef: slotRef });
+            }}
             style={[
                 styles.dockSlot,
                 filled ? styles.dockSlotFilled : styles.dockSlotBare,

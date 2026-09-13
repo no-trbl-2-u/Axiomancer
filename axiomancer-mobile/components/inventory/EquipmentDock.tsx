@@ -45,6 +45,9 @@ interface EquipmentDockProps {
     vm: EquipmentDockViewModel;
     selectedSlot: EquipmentDockSlot['key'] | null;
     onSelectSlot: (key: EquipmentDockSlot['key'] | null) => void;
+    /** Long-press pass-through: a filled slot asks the screen to open the
+     *  equipment detail card for the worn item's id (2026-09-13 note #2). */
+    onShowItemDetail?: (itemId: string) => void;
 }
 
 /**
@@ -56,7 +59,12 @@ interface EquipmentDockProps {
  * Outputs: the dock view. Resolves: 07-inventory-fresh / 08-inventory-midgame —
  * the portrait box is sized per viewport by `equipmentDockPortraitBox`.
  */
-export function EquipmentDock({ vm, selectedSlot, onSelectSlot }: EquipmentDockProps) {
+export function EquipmentDock({
+    vm,
+    selectedSlot,
+    onSelectSlot,
+    onShowItemDetail,
+}: EquipmentDockProps) {
     const styles = useStyles();
     const AXM = usePalette();
     const { width: viewportWidth } = useWindowDimensions();
@@ -106,6 +114,7 @@ export function EquipmentDock({ vm, selectedSlot, onSelectSlot }: EquipmentDockP
                             bareLabel={vm.bareLabel}
                             selected={selectedSlot === slot.key}
                             onPress={onSelectSlot}
+                            onShowItemDetail={onShowItemDetail}
                         />
                     ))}
                 </View>
