@@ -25,6 +25,7 @@ export { RESTCHOICE_TUNING } from './restchoice.content';
 export type { CreateRestChoiceOptions } from './restchoice.engine';
 export {
     createRestChoiceSession,
+    previewRestChoiceHeal,
     chooseRestChoiceOffer,
     pickRestChoiceCut,
     claimRestChoiceOutcome,

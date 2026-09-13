@@ -61,7 +61,7 @@ describe('GRACE break legend rides the pool label line (fresh-eyes GRACE footer)
         // this lookup found nothing — which is the 12pt the sheet lost.
         const legend = within(header).getByTestId('self-grace-break-legend');
 
-        expect(legend.props.children).toBe(graceBreakLegend(2));
+        expect(legend.props.children).toBe(graceBreakLegend());
     });
 
     it('lays that header row out horizontally, so the legend shares the label line', () => {

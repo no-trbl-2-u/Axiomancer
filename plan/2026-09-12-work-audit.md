@@ -58,6 +58,28 @@ fallback band, not weakenings. No `.skip` / `.only` / deleted tests anywhere in
 the day. The world-content diff (`df6e98f`) is pure quote-glyph substitution.
 Spot-checked commit messages (5 in #301, 6 findings in #302) match their diffs.
 
+## Fixed in this PR (owner's call, 2026-09-13)
+
+The three MED code items ship here, each one file plus a test:
+
+- **Rest heal copy** — `previewRestChoiceHeal(session)` added to the engine
+  (`restchoice.engine.ts`, exported through the barrel) and used by
+  `chooseRestChoiceOffer`; `restOfferDesc` now words that number instead of
+  re-deriving it. Engine suite + `rest-offer-heal-cap.audit.test.ts` pin
+  170/175 → "Restores 5 VITAE".
+- **Android back on a paced event** — `HardwareBackHandler` locks while
+  `selectHasActivePacedEvent` is true, the same doctrine as the rest node.
+  Three new cases in `HardwareBackHandler.test.tsx` (paced locks, resolves
+  unlocks, combat-prelude does not lock).
+- **Arrears threshold** — `graceTrack(meter)` in `character.engine.ts` derives
+  the tic from `AXIS_LOW_THRESHOLD` (33% of the track) and the fill from the
+  raw meter; both surfaces use it; the legend names the mark, not a tenth.
+  `grace-track.audit.test.ts` proves `inArrears` agrees with `bucketAxis` at
+  every meter value.
+
+The three loop items (unexecuted expand, silent march tick, no adjust-*
+back-off) and the six LOW items are not fixed here.
+
 ## Verdict
 
 Everything on `main` is green and the shipped claims are honest. Risk is

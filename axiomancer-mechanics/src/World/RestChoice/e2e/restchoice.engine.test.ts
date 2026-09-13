@@ -13,6 +13,7 @@ import { describe, it, expect } from 'vitest';
 import {
     createRestChoiceSession,
     chooseRestChoiceOffer,
+    previewRestChoiceHeal,
     pickRestChoiceCut,
     claimRestChoiceOutcome,
     RESTCHOICE_TUNING,
@@ -182,5 +183,25 @@ describe('rest-choice — never reads GameState', () => {
         const a = offerSession();
         const b = offerSession();
         expect(a.offers).toEqual(b.offers);
+    });
+});
+
+describe('rest-choice — `previewRestChoiceHeal` prints what the commit pays (audit 2026-09-12)', () => {
+    it('equals the sealed heal for a hurt pilgrim', () => {
+        const s = offerSession({ maxHealth: 175, health: 20 });
+        const sealed = chooseRestChoiceOffer(s, 'rest');
+        expect(previewRestChoiceHeal(s)).toBe(Math.round(175 * RESTCHOICE_TUNING.restHealFraction));
+        expect(previewRestChoiceHeal(s)).toBe(sealed.outcome?.healed);
+    });
+
+    it('caps at the missing VITAE when the pilgrim is nearly full', () => {
+        const s = offerSession({ maxHealth: 175, health: 170 });
+        expect(previewRestChoiceHeal(s)).toBe(5);
+        expect(chooseRestChoiceOffer(s, 'rest').outcome?.healed).toBe(5);
+    });
+
+    it('is zero at full VITAE and never negative past it', () => {
+        expect(previewRestChoiceHeal({ maxHealth: 175, health: 175 })).toBe(0);
+        expect(previewRestChoiceHeal({ maxHealth: 175, health: 180 })).toBe(0);
     });
 });

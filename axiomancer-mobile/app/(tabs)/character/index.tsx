@@ -18,7 +18,7 @@ import { XpChain } from '@/components/XpChain';
 import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
 import { nextPlayerPortrait, portraitIdFromFlags, PORTRAIT_FLAG_PREFIX } from '@/assets/images/portraits';
 import { useGameActions, useGameState, useGameStore } from '@/state/GameStoreProvider';
-import { graceBreakLegend, selectCharacterViewModel } from '@/state/presenters/character.engine';
+import { graceBreakLegend, graceTrack, selectCharacterViewModel } from '@/state/presenters/character.engine';
 
 /**
  * The SELF sheet (`/character`).
@@ -60,6 +60,8 @@ export default function CharacterScreen() {
     () => selectCharacterViewModel({ player, moralMeter, philosophicalAlignment } as never),
     [player, moralMeter, philosophicalAlignment],
   );
+  // Audit 2026-09-12: GRACE track geometry from the presenter (engine band boundary).
+  const grace = graceTrack(vm.morale);
   const store = useGameStore();
   const actions = useGameActions();
   const router = useRouter();
@@ -303,7 +305,9 @@ export default function CharacterScreen() {
         <View style={styles.poolsCard}>
           {[
             { label: 'VITAE', value: player?.health ?? 0, max: player?.maxHealth ?? 1, color: AXM.blood, gloss: 'flesh holds' },
-            { label: 'GRACE', value: Math.max(1, Math.min(10, Math.round(((Number.isFinite(vm.morale) ? vm.morale : 0) + 100) / 20))), max: 10, color: AXM.sulfur, gloss: 'kept by the parish', breakAt: 2 },
+            // Audit 2026-09-12: the GRACE geometry (tenths, fill, arrears tic)
+            // comes from the presenter, which reads the engine's band boundary.
+            { label: 'GRACE', value: grace.value, max: grace.max, fillPct: grace.fillPct, breakPct: grace.breakPct, color: AXM.sulfur, gloss: 'kept by the parish' },
           ].map((pool) => (
             <View key={pool.label} style={styles.poolRow}>
               <View style={styles.poolHeader} testID={`self-pool-header-${pool.label.toLowerCase()}`}>
@@ -321,18 +325,18 @@ export default function CharacterScreen() {
                     * line instead costs nothing — this row is already 13pt tall
                     * for the pool name — so the sheet keeps its old rhythm and
                     * the key stays beside the track it keys. */}
-                  {'breakAt' in pool && pool.breakAt != null && (
+                  {'breakPct' in pool && pool.breakPct != null && (
                     <Text style={styles.poolBreakLegend} numberOfLines={1} testID="self-grace-break-legend">
-                      {graceBreakLegend(pool.breakAt)}
+                      {graceBreakLegend()}
                     </Text>
                   )}
                 </View>
                 <Text style={styles.poolValue}>{pool.value}<Text style={styles.boneText}> / {pool.max}</Text></Text>
               </View>
               <View style={styles.poolTrack}>
-                <View style={[styles.poolFill, { width: `${(pool.value / pool.max) * 100}%`, backgroundColor: pool.color }]} />
-                {'breakAt' in pool && pool.breakAt != null && (
-                  <View style={[styles.poolBreakTic, { left: `${(pool.breakAt / pool.max) * 100}%` }]} />
+                <View style={[styles.poolFill, { width: `${'fillPct' in pool && pool.fillPct != null ? pool.fillPct : (pool.value / pool.max) * 100}%`, backgroundColor: pool.color }]} />
+                {'breakPct' in pool && pool.breakPct != null && (
+                  <View style={[styles.poolBreakTic, { left: `${pool.breakPct}%` }]} />
                 )}
               </View>
             </View>
