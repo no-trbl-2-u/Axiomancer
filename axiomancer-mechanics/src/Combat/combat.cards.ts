@@ -382,6 +382,18 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
         // KW-2 (phase 29): no keyword badge — ouroboros (this mechanic's
         // sole, 1-of-rare carrier) speaks card-local rules text only.
         case 'replay_last': return `replay your last spell ×${m.times}`;
+        // /adjust-keywords pass 8 — CONJURE is a retired badge (KW-1/KW-3,
+        // mobile's own retirement test), so no keyword word here, but the
+        // generator had NO case at all for this kind (not even the plain-text
+        // fallback `replay_last`/`convert_dots` get) — it silently fell to
+        // `default: return null` and vanished from any PAID line that isn't
+        // covered by an authored `paidSummary`. grave-goods (this kind's sole
+        // carrier) masks the gap with its own authored summary, but a future
+        // conjure_card carrier without one would print a PAID line missing
+        // this clause entirely, and `scripts/export-catalog.ts`'s
+        // `specialMechanicLabel` (no `paidSummary` fallback there) already
+        // leaks the raw `conjure_card` id into the built catalog today.
+        case 'conjure_card': return `conjure ${getCardById(m.cardId)?.name ?? 'a card'} into your hand`;
         case 'create_temporary_die': return `KINDLE (${m.color})`;
         case 'grant_pip': return `+${m.count} pip${m.count === 1 ? '' : 's'} to every Reserve die${m.overflow ? ` — each pip with no room: ${riderText(m.overflow)}` : ''}`;
         // Phase 32 part 4c — rides the existing PIP vocabulary (no new

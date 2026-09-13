@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-07T19:27:42Z | skill | iterate | claude-sonnet-5 | main | - |
-| 2026-08-08T00:38:47Z | slash-prompt | /oversight | unknown | user/ci | /oversight |
 | 2026-08-08T02:27:40Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-08T02:27:43Z | skill | march | unknown | main | - |
 | 2026-08-08T02:30:45Z | skill | critique | claude-sonnet-5 | main | - |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-13T08:36:48Z | skill | adjust-enemies | claude-sonnet-5 | main | - |
 | 2026-09-13T09:01:30Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-09-13T09:01:33Z | skill | digest | unknown | main | - |
+| 2026-09-13T12:37:11Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-13T12:38:45Z | subagent | card-expert | claude-sonnet-5 | main | Run adjust-keywords pass 8 end-to-end |

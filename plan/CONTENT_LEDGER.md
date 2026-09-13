@@ -14,12 +14,129 @@
 | cards | `skills/adjust-cards.md` | 2026-09-12 | be34ca43 | 8 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-12 | 030e26ae | 8 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-13 | 832e3e5e | 8 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-12 | 3c39acb9 | 7 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-13 | PENDING | 8 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-12 | 99cac84e | 7 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-keywords pass 8, 2026-09-13, commit PENDING]** One UPDATE (a
+> wiring-honesty bug fix), zero-CREATE, zero-REMOVE pass — dispatched
+> autonomously by `/march`'s content-lifecycle gate (`keywords` was the
+> stalest qualifying category this tick: 81 commits since pass 7's commit
+> `3c39acb9`, past the 15-commit/36-hour threshold and the oldest of the
+> five categories' own last-pass timestamps — enemies `832e3e5e` landed
+> earlier today, cards `be34ca43`/equipment `030e26ae`/npcs `99cac84e` all
+> more recently audited). `git log 3c39acb9..HEAD -- axiomancer-mechanics/
+> src/Cards axiomancer-mechanics/src/Effects axiomancer-mechanics/src/Combat
+> axiomancer-mechanics/docs/keyword-atlas.md docs/retheme-map.json
+> axiomancer-mobile/state/combat/keywords.ts
+> axiomancer-card-editor/src/data/mechanics.ts` returns exactly one commit,
+> `5282cc0a` (a `ui-fresh-eyes` shard renaming the threat-preview's PLEA-shed
+> clause from "steadies N resolve" to "shakes off N PLEA" in
+> `combat.threat.ts` — a display-string consistency fix to an ALREADY-correct
+> atlas row (PLEA's own reminder text never said "resolve"), not a
+> keyword-registry change; read its full diff directly, confirmed no atlas /
+> mobile-gloss / card-editor surface touched). Re-derived every Step-1 signal
+> fresh anyway rather than trusting the near-empty path-scoped log alone: (1)
+> **carrier-count sweep** — a fresh `kind: '...'` grep across all 9
+> `src/Cards/library/*.cards.ts` modules (128 cards, unchanged from pass 7)
+> reproduces pass 7's own floor-count reading and extends it: CHAIN, ECHO,
+> EXECUTE, OMEN, opening (AMBUSH), FINALE, RUPTURE, TURNABOUT, extend_dots,
+> lock_stance — pass 7's own named list — plus `peroration` (SENTENCE),
+> `reap_all`, and `replay_last`, which were also already sitting at exactly
+> 2 carriers but weren't individually cited — all still at the atlas's own
+> "≥2 cards or ≥2 enemies" floor, no regression, no REMOVE candidate. The
+> zero- and single-carrier die-gear/card-local kinds (`strip_random_buff`,
+> `befriend_attempt`, `refresh_die`, `convert_die_color`, `overheat`,
+> `forge_floating_die`, `float_x_die`, `spend_all_pips`, `echo_next_spell` at
+> zero; `bank_spent_die`, `conjure_card`, `consume_affliction`,
+> `convert_dots`, `grant_pip`, `purge_self`, `reap`, `recoil_x`,
+> `reroll_spent`, `spend_premises` at one) all cross-checked directly against
+> mobile's own `KINDS_WITHOUT_MECHANIC_KEYWORD` exemption list and
+> `MECHANIC_KEYWORD` badge-reuse map (`state/combat/keywords.ts`) — every one
+> is either explicitly exempted (card-local one-off, or a die-gear verb whose
+> face prints FORGE/KINDLE/PIP directly, e.g. `forge_floating_die`/
+> `float_x_die` are FORGE's own carrier and are correctly carried by die gear
+> per the atlas's own "carried by: die gear (spec 33 §6)" note, not a card
+> literal) or already reuses an existing badge (`consume_affliction`→Rupture,
+> `purge_self`→Purge, `spend_premises`→Charge, `recoil_x`→Recoil), matching
+> pass 7's own reading exactly — no REMOVE candidate. (2) **enemy-keyword
+> carrier sweep** — a fresh `enemy.library.ts` `{ kind: '...' }` extraction
+> (scoped to both the base `keywords:` array and boss `gain:` stage arrays,
+> after stripping `//` comments) gives hide 21, wounding 13, venom 9, regrow
+> 5, swift 19, brutal 21, unshaken 12, elusive 3, ravenous 3 — byte-identical
+> to pass 7, all 9 atlas-listed enemy keywords carry ≥2. (3)
+> **`CardSpecialMechanic`/`CardRider` kind ↔ atlas/display-generator parity**
+> — cross-checked all 57 `kind: '...'` members declared in `src/Cards/
+> types.ts` (50 `CardSpecialMechanic` + 7 `SynergyStatePredicate`) against
+> `combat.cards.ts`'s two display switches (`mechanicText`/
+> `statePredicateText`): 56 of 57 resolve to a live `case`; one genuine gap,
+> fixed (below). (4) **registry parity** — `axio_overview` reconfirms 68
+> keyword rows and 128 cards, unchanged from pass 7. (5) **Known-drift
+> section accuracy** — re-read `debuffs.library.json` and `src/Combat/
+> effects.ts` directly: POISON/BLEED/DOOM `damagePerRound` still 2/3/1 and
+> `CAPITULATE_MIN`/`CAPITULATE_RESOLVE_FRACTION` still 10/0.35 (both files
+> last touched `636f3040`, 2026-09-04, well before pass 7) — the atlas's
+> "Known drift" note stays accurate, re-cited not re-filed. (6) **mobile
+> KW-1/KW-3 jest suite** — ran `state/combat/__tests__/keywords.test.ts`
+> directly (13/13 green, both before and after the fix below, since CONJURE
+> was never mapped to a badge and the fix touches no mobile file). **One
+> genuine finding, fixed** — `mechanicText`'s `switch (m.kind)`
+> (`combat.cards.ts`) carried NO case at all for `conjure_card` (the kind
+> grave-goods uses to hand a one-use Cinder haunt into hand): it fell to the
+> generic `default: return null`, so the clause silently disappears from any
+> auto-generated PAID line. grave-goods itself is unaffected on the live
+> card face — it carries an authored `paidSummary` that overrides the
+> generator entirely (`combat.cards.ts`, `const paid = authored ??
+> paidText(...)`) — but two other surfaces were NOT masked: (a) any future
+> `conjure_card` carrier authored without its own `paidSummary` would
+> silently print a PAID line missing the conjure clause, and (b)
+> `scripts/export-catalog.ts`'s `specialMechanicLabel` (no `paidSummary`
+> fallback there; feeds `npm run catalog`, the atlas's own cited source for
+> its carrier column) was ALREADY leaking the raw internal id `conjure_card`
+> into the built catalog, confirmed by reading its fallback chain
+> (`mechanicText(sm) ?? (amt != null ? ... : String(sm.kind))`) directly.
+> This is exactly the "silent `default:` arm" class of bug this skill's §1
+> calls out to ship regardless of priority — not a new keyword (CONJURE
+> stays retired/un-badged, per mobile's own `KINDS_WITHOUT_MECHANIC_KEYWORD`
+> entry; this only completes the generator's plain-text coverage the same
+> way `replay_last`/`convert_dots`/`befriend_attempt` already have it), so no
+> KB research gate applies (skill §3 Step 2 gates CREATE/UPDATE to keyword
+> SEMANTICS; this is a wiring-completeness fix to an already-shipped,
+> already-retired-as-a-badge mechanic — the same exemption pass 7 applied to
+> its own stale-test-title fix). Fixed: `axiomancer-mechanics/src/Combat/
+> combat.cards.ts` — added `case 'conjure_card': return \`conjure
+> ${getCardById(m.cardId)?.name ?? 'a card'} into your hand\`;` (reuses the
+> file's own already-imported `getCardById`, which explicitly resolves
+> Haunt-registry ids per its own doc comment — "CONJURE targets — real
+> cards, deliberately outside the pinned library"). Added a new hermetic
+> guard, `axiomancer-mechanics/src/Combat/e2e/
+> mechanic-text-coverage.engine.test.ts` (3 tests): every `specialMechanics`
+> entry any live card carries renders non-null `mechanicText` (the general
+> regression guard — catches the NEXT kind that skips its display case), the
+> guard has teeth (the roster carries ≥1 entry), and `conjure_card`
+> specifically now renders the conjured card's real name ("Cinder"), not its
+> raw kind string. KB research (skill §3 Step 2): not run — bug-fix
+> exemption per above, same class as pass 7's own stale-test-title fix.
+> Verify: ran all four gates in full — `npm run verify --workspace
+> axiomancer-mechanics` (213/213 files, 3425 tests — pass 7's 3422 + the 3
+> new guard tests — plus build, all green), `npm run verify --workspace
+> axiomancer-mobile` (297/297 suites, 2844 tests, lint 0 errors/15
+> pre-existing warnings, typecheck clean, assets:check 7/7, art:test 24/24 —
+> unchanged from the standing count, confirming the fix touched no mobile
+> surface), `npm run type-check --workspace axiomancer-card-editor` (clean,
+> exit 0), root `npm test` 123/123 (incl. `content-drift.test.mjs`,
+> unaffected — the atlas / mobile-gloss / card-editor tables that guard
+> compares were not touched, only the mechanics-internal display generator).
+> `npm run deploy:check` confirmed green pre-tick (HEAD `27f969e0`, both
+> verify-mobile and verify-mechanics workflows success, per the dispatch
+> note) and will be re-confirmed after the ledger commit lands. No
+> `plan/PHASE_CANDIDATES.md` or new `plan/AUDIT.md` residue filed this pass —
+> the fix above is the full extent of this tick's finding.
+```
 
 ```
 > **[adjust-enemies pass 8, 2026-09-13, commit 832e3e5e]** Zero-CREATE,
