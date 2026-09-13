@@ -409,3 +409,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-12T20:10:46Z | skill | workflow-authoring | claude-fable-5-1 | main | - |
 | 2026-09-12T20:30:51Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-12T20:30:53Z | skill | march | unknown | main | - |
+| 2026-09-12T21:49:43Z | skill | workflow-authoring | claude-opus-5 | main | - |
