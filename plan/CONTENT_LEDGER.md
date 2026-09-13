@@ -15,11 +15,151 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-12 | 030e26ae | 8 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-13 | 832e3e5e | 8 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-13 | 37dacef1 | 8 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-12 | 99cac84e | 7 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-13 | PENDING | 8 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-npcs pass 8, 2026-09-13, commit PENDING]** One UPDATE (shipped a
+> standing `plan/PHASE_CANDIDATES.md` retheme candidate that seven prior
+> passes had correctly re-cited but never actioned), zero-CREATE,
+> zero-REMOVE pass — dispatched autonomously by `/march`'s content-lifecycle
+> gate (`npcs`' pass-7 commit `99cac84e` was the stalest qualifying category
+> this tick: 81 commits since, past the 15-commit/36h threshold, and the
+> oldest of the four qualifying categories' own last-pass timestamps —
+> cards `be34ca43`/equipment `030e26ae` both landed 2026-09-12 later in the
+> day than npcs' own pass 7, enemies `832e3e5e` and keywords `37dacef1` both
+> landed earlier today but under their own 15-commit/36h threshold). Ran
+> this tick as `content-curator` directly (the skill's own Step 2 routing —
+> "narrative authoring is content-curator's job" — needs no further
+> sub-agent spawn when the dispatched agent already is one). `git log
+> 99cac84e..HEAD -- axiomancer-mechanics/src/NPCs axiomancer-mechanics/src/World
+> axiomancer-mechanics/specs/story axiomancer-mechanics/specs/characters`
+> returns exactly one commit, `df6e98ff` (the FE-006 speech-mark fix — ASCII
+> `"` to typographic curly quotes across four World/NPC content files,
+> text-only, no rule/id/effect touched — read its full diff directly to
+> confirm). Re-derived every Step-1 signal fresh anyway: (1) **unstaged NPC
+> sweep** — 21 authored `NPC` consts across the 4 files
+> (`Coastal-Village/npcs.ts` 5, `Coastal-Village/maps.ts` 3,
+> `Northern-Forest/npcs.ts` 6, `Northern-Continent/maps.ts` 7), unchanged
+> from pass 7. The standing 4-NPC `unstagedNpcs` backlog
+> (`Coastal-Village/maps.ts`: Tide-Shopkeeper, Village Healer, Dockworker's
+> Union Leader, Merchant's Widow) re-verified with each precondition
+> re-checked against current source, not just re-cited: `NPC.isShopkeeper`
+> still has zero mobile consumers (`grep -rn isShopkeeper
+> axiomancer-mobile` returns nothing — the flag exists only in mechanics
+> types/content and a `spec08.engine.test.ts` assertion; the shop UI the
+> Tide-Shopkeeper needs genuinely still doesn't exist, distinct from the
+> unrelated MapEvent-merchant shop path that seven `isShopkeeper: true`
+> interaction merchants already use across `MapEvents/content.ts`); the
+> rest rebuild (phases 52c/52d/59) has had no NPC-hosting capability added
+> since — `git log 99cac84e..HEAD -- axiomancer-mechanics/src/World/RestChoice`
+> returns two commits (`856ffaa7` FE-024, `1b23d5df` FE-026), both read in
+> full: pure copy/warning-order fixes to the existing rest screen, no NPC
+> field added — so Village Healer's stated precondition stays unmet; the
+> Union Leader/Merchant's Widow "real settlement screen" precondition was
+> re-examined against `/village`'s actual history (phase 5, well before
+> this backlog was filed) and confirmed the reason is about THEIR OWN map
+> context, not the screen's existence — unchanged. (2) **<2-staged-NPC
+> sweep** — all 7 maps' `npcs:` array lengths recomputed fresh: fishing-village
+> 8, northern-forest 6, caverns 1, northern-city 2, connecting-river 1,
+> town-across-river 1, the-capital 2 — identical to pass 7; the standing
+> `plan/AUDIT.md` `[needs-user-call]` row (caverns/connecting-river/
+> town-across-river) re-read at current text, still correctly un-actioned
+> per hard rule 3 (filling it means inventing 1-3 named characters'
+> personhood, `character-spec`/`story-spec` territory). (3) **dead-end/
+> stale-reference sweep** — ran the full live audit suite directly:
+> `narrative-reachability.test.ts` (5/5), `World/e2e/
+> narrative-reachability.engine.test.ts` (26/26), `MapEvents/e2e/
+> nf-21-nf-14-npc-staging.engine.test.ts` (4/4), `NPCs/e2e/
+> dialogue.engine.test.ts` (18/18), `NPCs/e2e/story-npcs.engine.test.ts`
+> (36/36 after this pass's edits), and `World/Continents/e2e/
+> continents.engine.test.ts` (28/28 after this pass's edits) — no orphaned
+> tree, unresolved interaction ref, or scenery-as-people. `teachCard` still
+> has zero live call sites (`NPCs/types.ts` field declaration only); all 10
+> distinct `startQuest` targets (unchanged from pass 7) resolve type-check
+> clean against `QuestName`. (4) **legacy flat `DialogueMap` sweep** — zero
+> live usage outside the type declaration and its re-exports, unchanged.
+> (5) **spec-to-NPC gap** — `git log 99cac84e..HEAD -- axiomancer-mechanics/
+> specs/` is empty; re-checked the one existing character spec
+> (`specs/characters/C-01-the-sophist.md`) against implementation from
+> scratch rather than assuming pass 7's silence meant "checked and clean" —
+> confirmed FULLY implemented across `src/World/Labyrinth/` (his voice is
+> every room's `scene`/`narration`/gate `refusalLines` in `act1-3.content.ts`,
+> his true name and the naming rite live in `labyrinth.engine.ts`
+> (`isSophistTrueName`, `TRUE_NAME = 'PROTAS'`), his finale enemy
+> `enemy-the-sophist` is registered and wired as act3's `bossSlug`) — not a
+> spec-without-implementation gap; he isn't a `src/NPCs/**` `NPC` entity
+> because his role (accordion narration + hint economy across an entire
+> continent) doesn't fit that shape, which is the correct call, not a
+> staging miss. **One UPDATE shipped** — the standing `plan/
+> PHASE_CANDIDATES.md` "[score 5.0] Retheme the six Northern-Forest
+> dialogue trees to the ratified register" candidate (filed pass 1,
+> 2026-09-05; re-cited-not-actioned by passes 2-7 as "sized like Phase 44g,
+> not this skill's job to rush") was actually shipped this pass rather than
+> re-cited an eighth time: rewrote all six trees (Shrine Keeper, the
+> Chronicler, the Wandering Philosopher, Forest Ranger, Hermit Sage, Lost
+> Trader) in `Northern-Forest/npcs.ts` into the house register per
+> `docs/narrative/STYLE_CONSTITUTION.md`/`VOICE_REGISTERS.md`/`LEXICON.md` —
+> same node ids, same `choices`/`requires`/`effect` objects byte-for-byte
+> (zero mechanical/schema change, confirmed by re-running the full dialogue
+> test suite unmodified in behavior), only `text`/`description` strings
+> rewritten: short clauses (no sentence over 20 words, `check-prose.mjs`'s
+> MB-1 ceiling), a concrete object and a distinct voice card per speaker
+> (Shrine Keeper/exacting stone-tender, Chronicler/accumulating
+> record-keeper, Wandering Philosopher/corrective-Socratic traveler, Forest
+> Ranger/clipped-practical patroller, Hermit Sage/spare recluse, Lost
+> Trader/transactional survivor) so each reads apart with names removed
+> (`EVALUATION.md`'s voice-blind gate), and cut the cited "wordier
+> interiority" filler verbatim (Hermit Sage's "touches my heart deeply",
+> the Shrine Keeper's "otherworldly perception", generic "ancient/
+> transcendent" adjectives throughout). KB research gate (skill §3 Step 2)
+> run before writing: `kb_search` for "dialogue voice distinct NPC",
+> "flavor text restraint concrete object", "narrative dialogue character
+> voice", and an NPC/character-writing reception regex, scopes
+> boardgames/all — zero matches (the corpus's 46 board games + 2 card
+> corpora are mechanics-centric; none of the campaign-narrative titles
+> present carry dialogue-craft or NPC-voice-reception docs). Filed
+> `no-trbl-2-u/game-knowledge-base#80` and proceeded UNGROUNDED per the
+> skill's own anticipated-miss clause. Updated the two engine tests that
+> asserted the OLD prose verbatim — `World/Continents/e2e/
+> continents.engine.test.ts` (2 assertions: the Shrine Keeper greet's
+> 'patterns speak'/'veil grows thin' pair, replaced with 'keeps its own
+> count'; the Chronicler's lowercase 'pre-coastal civilizations' capitalized
+> to match the new sentence-initial phrasing; retitled the now-inaccurate
+> "transcendent wisdom themes with mystical elements" `it()` title) and
+> `NPCs/e2e/story-npcs.engine.test.ts` (4 assertions in the Shrine Keeper
+> block, same pattern, plus the describe-block title) — every OTHER
+> test-anchored substring across both files (`'logging operation'`,
+> `'heartwood of the eldest trees'`, `'sustainable forest trades'`, `'wisdom
+> earned in isolation'`, `'enlightenment selfish'`, `'share your wisdom
+> while preserving'`, `'Bandits took everything'`, `'should I trust you'`,
+> `'desperate man'`, `'Providence'`, `'honest action'`, `'Fate guides us'`,
+> the three verbatim `seeking_place` choice labels, `'*Talk'`, and every
+> `setFlag`/`nextNodeId`/`requires` structural check) was deliberately
+> preserved character-for-character in the new prose so no further test
+> edit was forced — a deliberate low-risk-first drafting choice, not an
+> oversight. `node scripts/check-prose.mjs` and `check-lexicon.mjs` clean
+> both before and after (the file was already lint-clean; this pass fixes
+> register/craft, which the mechanical lint cannot check — that gap is
+> exactly why this was a `content-curator` judgment call, not a lint-driven
+> one). Verify: `npm run verify --workspace axiomancer-mechanics` (213/213
+> files, 3425 tests + build, matching pass 7's count exactly — zero new
+> tests, only existing assertions edited), `npm run verify --workspace
+> axiomancer-mobile` (297/297 suites, 2844 tests, lint 0 errors/15
+> pre-existing warnings, typecheck clean, assets:check clean, art:test
+> 24/24 — required because this diff touches `src/World/**`/`src/NPCs/**`
+> per the AGENTS.md cross-package checklist). `npm run deploy:check`
+> confirmed green pre-tick (HEAD `39193fce`, docs/plan-only tip commit, no
+> gated workflow triggered) and will be re-confirmed after this commit
+> lands. Residue: `plan/PHASE_CANDIDATES.md`'s retheme candidate struck as
+> SHIPPED (full closing note there); the two standing `plan/AUDIT.md`
+> `[needs-user-call]` rows (Northern-Continent single-NPC maps;
+> `unstagedNpcs` backlog is tracked in-file, not AUDIT.md) re-confirmed
+> open and correctly un-actioned, not re-filed.
+```
 
 ```
 > **[adjust-keywords pass 8, 2026-09-13, commit 37dacef1]** One UPDATE (a

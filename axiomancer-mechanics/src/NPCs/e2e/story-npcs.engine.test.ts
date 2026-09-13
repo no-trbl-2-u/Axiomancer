@@ -63,19 +63,19 @@ function ctxWithObserver(lastSeenCellId: string = 'different-cell'): DialogueCon
 
 // ─── Shrine Keeper Tests ──────────────────────────────────────────────────────
 
-describe('Shrine Keeper — Mystical NPC with alignment gates', () => {
+describe('Shrine Keeper — belief-vs-skepticism NPC with alignment gates', () => {
     const tree = shrineKeeper.dialogueTree!;
 
     it('provides greeting with multiple paths based on epistemology', () => {
         const greetNode = getDialogueNode(tree, 'greet');
-        expect(greetNode.text).toContain('patterns speak of your approach');
+        expect(greetNode.text).toContain('keeps its own count');
 
         // Test all choices visible with empty context (alignment-gated ones hidden)
         const choices = visibleChoices(greetNode, emptyCtx);
         expect(choices).toHaveLength(2); // 2 base choices, alignment-specific ones hidden
 
         const choiceTexts = choices.map(c => c.text);
-        expect(choiceTexts).toContain('What patterns do you see?');
+        expect(choiceTexts).toContain('What does it count?');
         expect(choiceTexts).toContain('Leave quietly.');
     });
 
@@ -84,7 +84,7 @@ describe('Shrine Keeper — Mystical NPC with alignment gates', () => {
         const greetNode = getDialogueNode(tree, 'greet');
         const choices = visibleChoices(greetNode, ctx);
 
-        const faithChoice = choices.find(c => c.text.includes('sense something... different'));
+        const faithChoice = choices.find(c => c.text.includes('feels different'));
         expect(faithChoice).toBeTruthy();
         expect(faithChoice!.requires?.requiresAlignment).toEqual({
             axis: 'epistemology',
@@ -98,7 +98,7 @@ describe('Shrine Keeper — Mystical NPC with alignment gates', () => {
         const greetNode = getDialogueNode(tree, 'greet');
         const choices = visibleChoices(greetNode, ctx);
 
-        const skepticChoice = choices.find(c => c.text.includes('mystical nonsense'));
+        const skepticChoice = choices.find(c => c.text.includes('superstition'));
         expect(skepticChoice).toBeTruthy();
         expect(skepticChoice!.requires?.requiresAlignment).toEqual({
             axis: 'epistemology',
@@ -131,7 +131,7 @@ describe('Shrine Keeper — Mystical NPC with alignment gates', () => {
 
         const observerChoice = choices.find(c => c.requires?.playerAlignmentCellChangedSince);
         expect(observerChoice).toBeTruthy();
-        expect(observerChoice!.text).toContain('shifted in your essence');
+        expect(observerChoice!.text).toContain('has changed');
         expect(observerChoice!.nextNodeId).toBe('observer_transformation');
     });
 });
