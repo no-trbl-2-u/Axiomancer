@@ -15,14 +15,14 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-12 | 030e26ae | 8 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-13 | 832e3e5e | 8 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-13 | 37dacef1 | 8 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-13 | PENDING | 8 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-13 | abb3da01 | 8 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-npcs pass 8, 2026-09-13, commit PENDING]** One UPDATE (shipped a
+> **[adjust-npcs pass 8, 2026-09-13, commit abb3da01]** One UPDATE (shipped a
 > standing `plan/PHASE_CANDIDATES.md` retheme candidate that seven prior
 > passes had correctly re-cited but never actioned), zero-CREATE,
 > zero-REMOVE pass — dispatched autonomously by `/march`'s content-lifecycle
