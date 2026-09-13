@@ -22,6 +22,64 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
+> **[adjust-equipment pass 9, 2026-09-13, commit <this commit>]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
+> content-lifecycle gate (`equipment` was the stalest qualifying category this
+> tick: 51 commits since pass 8's commit `030e26ae`, well past the
+> 15-commit/36h threshold and the oldest of the five categories' own
+> last-pass timestamps — enemies `832e3e5e` 16 commits, keywords `37dacef1`
+> 13, npcs `abb3da01` 11, cards `4b1b6a64` 1, all under their own thresholds).
+> `git log 030e26ae..HEAD -- axiomancer-mechanics/src/Items
+> axiomancer-mechanics/src/World/MapEvents/content.ts
+> axiomancer-mechanics/src/Combat/combat.encounter.types.ts
+> axiomancer-mechanics/src/Effects` and the matching `git diff --stat` are
+> both empty — none of the 51 intervening commits touched the item/shop/
+> signature surface (they were the sibling categories' own pass-8/9 ticks,
+> a large ui-fresh-eyes swarm, a critique pass, and assorted plan-doc/ledger
+> bumps). Re-derived every Step-1 signal fresh anyway rather than trusting
+> the empty path-scoped log alone, same discipline as the sibling
+> categories' own zero-diff re-audits: (1) **dominated relics** — re-read
+> all 8 `relic.library.ts` entries (byte-identical since pass 8): the two
+> weapon relics tie at body+2, the two armor relics tie at maxHp+5, and the
+> two mind/two heart accessories each tie within their pair — every same-slot
+> tie differs only by `grantsSignature` (re-confirmed non-`undefined` and
+> distinct on all 8), no strictly-dominated pair. (2) **shop/reward-pool
+> coverage** — a fresh `itemId: '...'` extraction across all 7 `shop.wares`
+> blocks in `World/MapEvents/content.ts` reconfirms the same 12 distinct
+> shop-stocked consumable ids, unchanged; the other 10 of the 22-entry
+> `consumableLibrary` remain reachable via `rollCacheReward`'s uniform draw
+> over the full unfiltered library (`cache-reward.ts` byte-identical since
+> pass 1) — no orphaned item. (3) **`grantsSignature` drift** — all 8 relic
+> values re-checked against the live 8-member `SignatureSkillId` union in
+> `combat.encounter.types.ts`: identical, no rename/removal. (4) **dead
+> consumable `effectId`s** — re-extracted the 11 non-heal-only ids from
+> `consumable.library.ts` (unchanged, still 22 entries) and confirmed each
+> resolves by id against `buffs.library.json`/`debuffs.library.json` via a
+> fresh grep, all 11 found, 0 dead references. (5) **`AccessoryKind` gap** —
+> head/hands/feet remain at zero live relics, same standing `[loop-call]`
+> (`plan/AUDIT.md`, 2026-09-04, answers the open `[HIGH]` in
+> `plan/CRITIQUE.md`) re-read at its current text: still open, still
+> accurate, no new evidence this pass to decide it solo between (a)
+> designing a 9th+ signature skill first or (b) breaking the relic's 1:1
+> identity rule for stat-only accessories — left filed, not re-litigated
+> (already promoted to `plan/PHASE_CANDIDATES.md` "[score 5.5] Fill the 3
+> empty accessory kinds" pending `/oversight`, re-cited not re-filed). KB
+> research (kb-query gate, skill §3 Step 2): not run — every consideration
+> this pass was audit-confirmed-clean (no CREATE/UPDATE), exempt from the
+> gate per skill §3 Step 2 (REMOVE/no-op carve-out). Verify: ran both gates
+> in full this pass (not skipped, despite zero source diff) — `npm run
+> verify --workspace axiomancer-mechanics` (213/213 files, 3428 tests +
+> build, matching pass 9's card-audit count exactly) and `npm run verify
+> --workspace axiomancer-mobile` (299/299 suites, 2854 tests, 3/3 snapshots,
+> lint/typecheck/jest/assets:check/art:test all green). `npm run
+> deploy:check` confirmed green pre-tick (HEAD `4e806143`, docs/plan-only
+> tip commit, no gated workflow triggered) and will be re-confirmed after
+> this commit lands. No `plan/PHASE_CANDIDATES.md` or new `plan/AUDIT.md`
+> residue filed this pass — nothing actionable surfaced outside the
+> standing, already-filed backlog items re-cited above.
+```
+
+```
 > **[adjust-cards pass 9, 2026-09-13, commit 4b1b6a64]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
 > content-lifecycle gate (`cards` was the stalest qualifying category this
