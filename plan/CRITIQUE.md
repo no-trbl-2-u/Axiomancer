@@ -1,13 +1,27 @@
 # Critique log
 
-> Last pass: 2026-09-12 at commit 894cad12
-> Pass count: 36
+> Last pass: 2026-09-14 at commit 7d470de1
+> Pass count: 37
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 37, 2026-09-14, commit 7d470de1] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5,
+> `CRITIQUE_VIEWPORT=both`), mobile (375×812) and desktop (1280×800),
+> against the full fixture-boosted screen set (title, onboarding,
+> combat-encounter preview, live combat board, exploration hub, plus
+> the six fixture-booted screens: dialogue, village, cutscene, rest,
+> hazard, late-game hub — 11 screens × 2 viewports = 22 captures, all
+> clean). Zero page errors, zero console errors. Read every screenshot
+> + domText directly. Two new findings filed (below). One candidate
+> dropped: the rest screen's "THE CUT" option renders visually dimmed
+> at 0/5 shillings, but the row already carries its own explanation
+> ("the deck is at its floor of 12 cards") — correctly-communicated
+> disabled state, not a defect.
 
 > **[critique pass 36, 2026-09-12, commit 894cad12] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5,
@@ -460,6 +474,66 @@
 > pass "ENTER COMBAT".
 
 ## Pending
+
+### [MED] combat — the mobile hand fan overlaps card-name bands, hiding the covered cards' names
+- pass: 37 (commit 7d470de1)
+- viewport: mobile (375×812) — confirmed absent on desktop (1280×800),
+  same encounter/hand
+- category: visual / legibility
+- observation: `Brine Hag`'s opening hand ("Thin Hymn", "Chilblain
+  Watch", "The Long Lent", "Spoiled Poultice", "Chilblain Watch") fans
+  five cards left-to-right on mobile with each card's name band
+  overlapped by the next card. Only the rightmost (topmost z-order)
+  card shows its full name; the other four read "THIN HYM", "CHILBLAI",
+  "THE LONG", "SPOILED " — the overlap physically covers the tail of
+  the name, not a text-wrap truncation (`CombatBoard.tsx`'s
+  `plateName` is `numberOfLines={2}` with an explicit comment that
+  long names should wrap rather than truncate to a stub). On desktop
+  the same hand renders with enough per-card width that all five names
+  are fully legible. This is the same root-cause shape as the
+  fanned-hand issue just fixed on the hazard route-choice screen
+  (`RouteSelect.tsx`, RESOLVED 2026-09-11, commit 8f3acef7, issue
+  #295: fan overlap covering text, not a wrap limit) — that fix did
+  not touch this component.
+- evidence: `axiomancer-mobile/.critique-artifacts/mobile/04-combat-board.png`
+  (crop of the hand row shows "THIN HYM|CHILBLAI|THE LONG|SPOILED |CHILBLAIN WATCH");
+  domText `04-combat-board.txt` confirms the untruncated names are
+  "Thin Hymn" / "Chilblain Watch" / "The Long Lent" / "Spoiled
+  Poultice"; desktop `04-combat-board.png` shows all five full names.
+- suggested fix: widen the mobile hand's per-card overlap/spacing (the
+  same lever `RouteSelect.tsx` used — `-32` to `-22` overlap) or wire
+  the existing `CardDetailOverlay`/inspect tap pattern onto covered
+  hand cards so a player can always read a name before playing a die
+  into it. Component: `components/combat/encounter/CombatBoard.tsx`
+  (`plateBand`/`plateName`, hand-row fan layout).
+- source: loop
+
+### [MED] village — two shop wares print byte-identical effect lines at different prices
+- pass: 37 (commit 7d470de1)
+- viewport: mobile and desktop (both show the same text)
+- category: comprehension / economy
+- observation: Glen Market's stall lists "Philosopher's Tea" (35s) and
+  "Void Essence" (40s) with the exact same mechanical line — "ADVANTAGE
+  ON BODY / MIND / HEART, 3 ROUNDS" — differing only in flavor text and
+  a 5-shilling price gap. `consumable.library.ts` confirms both items
+  share `effectId: 'buff_critical_damage_up'` with no `resourceGrant`
+  or other field distinguishing them; the code's own comments say the
+  items were intended to diverge (Philosopher's Tea: "sharpens the
+  mind"; Void Essence: "Heart aligns with the void-essence flavor") but
+  the Spec 05b Q3(B) ruling that dropped philosophical-token grants
+  from consumables left both wired to the same generic effect. A
+  first-time player facing this stall has no way to tell why Void
+  Essence costs more — the shop states nothing it doesn't state for
+  the cheaper item.
+- evidence: `axiomancer-mobile/.critique-artifacts/mobile/07-village.txt`
+  (`wanderer-nf-village` fixture); `axiomancer-mechanics/src/Items/consumable.library.ts`
+  lines 94-140.
+- suggested fix: either differentiate the two effects to match their
+  authored flavor split (e.g. one buffs a single stat's advantage
+  instead of all three), or collapse the price gap so the stall isn't
+  charging more for an identically-worded effect. Equipment-lifecycle
+  territory (`/adjust-equipment`).
+- source: loop
 
 ### [MED] ui-fresh-eyes SWARM 2026-09-12 — the 309-row candidate set is drained
 - pass: swarm follow-up to the 2026-09-12 sweep, run from

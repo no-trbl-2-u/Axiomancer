@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-09T02:34:43Z | slash-prompt | /march | unknown | user/ci | /march |
-| 2026-08-09T07:29:50Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-09T07:29:52Z | skill | march | unknown | main | - |
 | 2026-08-09T07:31:16Z | subagent | Explore | claude-sonnet-5 | main | Map keyword registry rename targets |
 | 2026-08-09T07:40:57Z | subagent | card-expert | claude-sonnet-5 | main | Implement phase 44b keyword retheme |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-14T01:09:39Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-14T01:14:06Z | skill | critique | claude-sonnet-5 | main | - |
 | 2026-09-14T01:17:27Z | skill | adjust-npcs | claude-sonnet-5 | main | - |
+| 2026-09-14T02:42:32Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-14T02:45:13Z | skill | critique | claude-sonnet-5 | main | - |
