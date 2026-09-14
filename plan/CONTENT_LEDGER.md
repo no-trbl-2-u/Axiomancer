@@ -13,7 +13,7 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-14 | 1242bd60 | 10 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-14 | 36ee098c | 10 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-14 | TBD | 10 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-14 | 55eec31d | 10 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-13 | 0afbfe89 | 9 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-14 | 24cebc11 | 9 |
 
@@ -22,7 +22,7 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-enemies pass 10, 2026-09-14, commit TBD]** Zero-CREATE,
+> **[adjust-enemies pass 10, 2026-09-14, commit 55eec31d]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
 > content-lifecycle gate (`enemies` was the only qualifying category this
 > tick: 15 commits since pass 9's commit `304608c1`, meeting the 15-commit
