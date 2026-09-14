@@ -7,11 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-10T10:03:28Z | slash-prompt | /digest | unknown | user/ci | /digest |
-| 2026-08-10T10:03:30Z | skill | digest | unknown | main | - |
-| 2026-08-10T13:52:03Z | slash-prompt | /march | unknown | user/ci | /march |
-| 2026-08-10T13:52:56Z | skill | critique | claude-sonnet-5 | main | - |
-| 2026-08-10T15:55:43Z | slash-prompt | /oversight | unknown | user/ci | /oversight |
 | 2026-08-10T15:55:46Z | skill | oversight | claude-sonnet-5 | main | - |
 | 2026-08-10T19:28:22Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-11T02:34:01Z | slash-prompt | /march | unknown | user/ci | /march |
@@ -407,3 +402,8 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-14T14:33:53Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-14T14:34:54Z | skill | iterate | claude-sonnet-5 | main | - |
 | 2026-09-14T16:32:00Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-14T18:35:10Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-14T18:35:56Z | skill | iterate | claude-sonnet-5 | main | - |
+| 2026-09-14T18:37:53Z | subagent | general-purpose | claude-sonnet-5 | main | Run /iterate tick end-to-end |
+| 2026-09-14T18:38:55Z | subagent | general-purpose | claude-sonnet-5 | main | Re-verify CRITIQUE.md Pending rows |
+| 2026-09-14T18:39:13Z | subagent | general-purpose | claude-sonnet-5 | main | Sweep AUDIT.md non-CRITIQUE Pending rows |

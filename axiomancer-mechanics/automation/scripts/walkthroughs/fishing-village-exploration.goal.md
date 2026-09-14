@@ -2,13 +2,13 @@
 
 **Surface under test:** the current first-level Fishing Village route from authored map traversal into live Hazard-Pattern combat.
 
-This walkthrough no longer uses the stale Harbor District combat assumption (`fv-11 → fv-14 → fv-15`). Current map truth routes the first reliable encounter through:
+This walkthrough no longer uses the stale Harbor District combat assumption (`fv-11 → fv-14 → fv-15`) or the since-displaced `fv-12` Market encounter. Current map truth routes the first reliable encounter through:
 
 ```txt
-fv-1 Hovel → fv-2 Crossing/cache → fv-12 Market/encounter
+fv-1 Hovel → fv-2 Crossing/cache → fv-11 → fv-13 (Little Belle)
 ```
 
-`fv-12` resolves an encounter with **Driftwood Husk**. The CLI must not stage the encounter into the removed legacy combat shell. It must enter the Hazard-Pattern combat driver and emit `hazardCombat:*` events.
+`fv-13` resolves an encounter with **Little Belle**. The CLI must not stage the encounter into the removed legacy combat shell. It must enter the Hazard-Pattern combat driver and emit `hazardCombat:*` events.
 
 ## Recommended command
 
@@ -25,7 +25,7 @@ The newer direct route form is also valid and preferred for CI/Kid evidence:
 
 ```bash
 npx ts-node src/CLI/game.cli.ts \
-  --route fv-2,fv-12 \
+  --route fv-2,fv-11,fv-13 \
   --auto-combat \
   --combat-policy status \
   --combat-seed 42 \
@@ -41,14 +41,15 @@ npx ts-node src/CLI/game.cli.ts \
 2. **Route movement** records move events in order:
 
    ```txt
-   fv-2 → fv-12
+   fv-2 → fv-11 → fv-13
    ```
 
 3. **Map events resolve**:
 
    - `fv-2` may resolve a cache/loot event.
-   - `fv-12` must resolve `event.kind === 'encounter'`.
-   - The encounter enemy must be `Driftwood Husk` unless the authored map/event pool has intentionally changed.
+   - `fv-11` may resolve a cache/loot event.
+   - `fv-13` must resolve `event.kind === 'encounter'`.
+   - The encounter enemy must be `Little Belle` unless the authored map/event pool has intentionally changed.
 
 4. **Hazard-Pattern combat starts from the route**:
 
@@ -74,7 +75,7 @@ npx ts-node src/CLI/game.cli.ts \
 ## Fail conditions
 
 - Any route target is unreachable from the current node.
-- `fv-12` no longer resolves an encounter and no replacement first-level encounter route is documented.
+- `fv-13` no longer resolves an encounter and no replacement first-level encounter route is documented.
 - The encounter is merely staged with a message such as “Run npm run combat” instead of entering Hazard-Pattern combat.
 - No `hazardCombat:start` appears in the state log or JSON event stream.
 - Direct `npm run combat` is used as substitute evidence for map traversal. It proves the combat command path only, not route integration.
@@ -83,4 +84,4 @@ npx ts-node src/CLI/game.cli.ts \
 
 - Mobile already proves the product path through `/exploration → fv-12 Market → Engage → CombatEncounterPanel`.
 - This mechanics walkthrough is the CLI equivalent: authored map route → `resolveMapEvent(encounter)` → Hazard-Pattern combat runner.
-- If `fv-12` changes, update this goal and script to the current first-level encounter route rather than reviving legacy combat assumptions.
+- If `fv-13` changes, update this goal and script to the current first-level encounter route rather than reviving legacy combat assumptions.

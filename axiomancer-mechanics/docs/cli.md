@@ -125,7 +125,7 @@ npm run hazard -- [flags]            # convenience alias
 
 | Flag | Effect |
 | --- | --- |
-| `--hazard <id>` | Pick a hazard card (e.g. `H01`). Prompts from the library when omitted. |
+| `--hazard <id>` | Pick a hazard card (e.g. `cracked-cliff`). Prompts from the library when omitted. |
 | `--route top\|bottom` | Choose the route. Prompts when omitted. |
 | `--auto` | A greedy heuristic plays each round (focus first, then matching progress cards, preferring affordable bottom actions). Otherwise the player picks cards by hand. |
 | `--seed <n\|str>` | Seed the shared RNG so dice rolls and the deck shuffle are reproducible. |
@@ -154,7 +154,7 @@ hazard-state snapshot, so automated tuning can learn from them.
 **Examples:**
 ```bash
 # Reproducible auto run of one hazard, machine-readable trace
-npm run hazard -- --auto --seed 42 --runs 1 --hazard H01 --route top \
+npm run hazard -- --auto --seed 42 --runs 1 --hazard cracked-cliff --route top \
   --json-events --state-log /tmp/hazard.jsonl
 
 # Interactive manual play, prompted for hazard + route
