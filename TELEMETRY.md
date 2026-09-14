@@ -7,9 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-08T21:36:46Z | subagent | general-purpose | claude-opus-5 | main | Phase 52a deck removal primitive |
-| 2026-08-08T21:37:13Z | subagent | general-purpose | claude-opus-5 | main | Phase 52b first-class inn |
-| 2026-08-08T21:37:40Z | subagent | general-purpose | claude-opus-5 | main | Phase 48 Closes-N root cause |
 | 2026-08-09T02:34:43Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-09T07:29:50Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-09T07:29:52Z | skill | march | unknown | main | - |
@@ -407,3 +404,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-13T22:28:59Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-13T22:30:04Z | skill | adjust-keywords | claude-sonnet-5 | main | - |
 | 2026-09-13T22:30:36Z | subagent | card-expert | claude-sonnet-5 | main | Run adjust-keywords lifecycle pass 9 |
+| 2026-09-14T01:09:39Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-14T01:14:06Z | skill | critique | claude-sonnet-5 | main | - |
+| 2026-09-14T01:17:27Z | skill | adjust-npcs | claude-sonnet-5 | main | - |
