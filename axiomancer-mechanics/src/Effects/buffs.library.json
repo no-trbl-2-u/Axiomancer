@@ -303,6 +303,54 @@
       ]
     },
     {
+      "id": "buff_liars_gambit",
+      "name": "Liar's Gambit",
+      "description": "A claim that calls itself false unravels any argument built against it. Your mind reads the contradiction and turns it into an opening.",
+      "type": "buff",
+      "category": "advantage",
+      "duration": 3,
+      "stacking": "none",
+      "resistedBy": "heart",
+      "resistDR": 13,
+      "payload": {
+        "advantageModifier": {
+          "grantAdvantage": [
+            "mind"
+          ]
+        }
+      },
+      "tier": 2,
+      "addedIn": "2026-09-14",
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
+      "id": "buff_abyssal_presence",
+      "name": "Abyssal Presence",
+      "description": "Some things refuse to be pinned down by observation, so you stop trying and simply stay. The abyss that stares back finds you staring first, heart steady and unmoved.",
+      "type": "buff",
+      "category": "advantage",
+      "duration": 3,
+      "stacking": "none",
+      "resistedBy": "body",
+      "resistDR": 13,
+      "payload": {
+        "advantageModifier": {
+          "grantAdvantage": [
+            "heart"
+          ]
+        }
+      },
+      "tier": 2,
+      "addedIn": "2026-09-14",
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
       "id": "buff_grace_momentum",
       "name": "Grace Momentum",
       "description": "Every round your resolve holds unshaken, it argues harder than the last. Mercy compounds.",

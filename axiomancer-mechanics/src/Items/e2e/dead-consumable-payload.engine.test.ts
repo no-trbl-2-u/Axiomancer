@@ -66,3 +66,37 @@ describe('the 5 previously-dead consumables now apply a real effect', () => {
         expect(greaterIntensity).toBe(baseIntensity * 2);
     });
 });
+
+describe('philosopher-tea and void-essence no longer print byte-identical effect lines (issue #307)', () => {
+    // Both used to share `buff_critical_damage_up` (grantAdvantage on all three
+    // stances), so the Glen Market shop printed the same "ADVANTAGE ON BODY /
+    // MIND / HEART" line for two items at different prices. Split onto
+    // `buff_liars_gambit` (mind-only) and `buff_abyssal_presence` (heart-only).
+    it('the two consumables reference different effect ids', () => {
+        const tea = getConsumableById('philosopher-tea')!;
+        const essence = getConsumableById('void-essence')!;
+        expect(tea.effectId).not.toBe(essence.effectId);
+    });
+
+    it('philosopher-tea grants advantage on mind only', () => {
+        const item = getConsumableById('philosopher-tea')!;
+        const effect = lookupEffect(item.effectId!)!;
+        expect(effect.payload.advantageModifier?.grantAdvantage).toEqual(['mind']);
+    });
+
+    it('void-essence grants advantage on heart only', () => {
+        const item = getConsumableById('void-essence')!;
+        const effect = lookupEffect(item.effectId!)!;
+        expect(effect.payload.advantageModifier?.grantAdvantage).toEqual(['heart']);
+    });
+
+    it('using each consumable applies its own single-stance advantage grant', () => {
+        const teaItem = getConsumableById('philosopher-tea')!;
+        const { player: afterTea } = useConsumableEffect(Player, teaItem, 1, lookupEffect);
+        expect(afterTea.effects.some(e => e.effectId === 'buff_liars_gambit')).toBe(true);
+
+        const essenceItem = getConsumableById('void-essence')!;
+        const { player: afterEssence } = useConsumableEffect(Player, essenceItem, 1, lookupEffect);
+        expect(afterEssence.effects.some(e => e.effectId === 'buff_abyssal_presence')).toBe(true);
+    });
+});

@@ -98,9 +98,14 @@ export const consumableLibrary: Consumable[] = [
             'A slow tea brewed from contradictions. Sharpens the mind and ' +
             'lingers on the tongue as a fresh argument.',
         category: 'consumable',
-        // Spec 05b Q3 (B): consumables grant stance tokens only — philosophical
-        // tokens stay card-only. The lore framing still hints at paradoxes.
-        effectId: 'buff_critical_damage_up',
+        // adjust-content pass (2026-09-14, issue #307): previously shared
+        // `buff_critical_damage_up` with void-essence, so the shop printed two
+        // byte-identical effect lines at different prices. Split onto its own
+        // mind-only advantage buff (`buff_liars_gambit`) — the flavor text's
+        // "sharpens the mind" now maps to a real, distinct payload. Spec 05b
+        // Q3 (B) still holds: consumables grant stance tokens only, no
+        // philosophical tokens.
+        effectId: 'buff_liars_gambit',
         quantity: 1,
     },
     {
@@ -133,9 +138,13 @@ export const consumableLibrary: Consumable[] = [
             'A vial of substance that refuses to be observed. Drinking it ' +
             'leaves the wearer slightly insistent and intensely present.',
         category: 'consumable',
-        // Spec 05b Q3 (B): no philosophical tokens. Heart aligns with the
-        // void-essence flavor of staring back at the abyss.
-        effectId: 'buff_critical_damage_up',
+        // adjust-content pass (2026-09-14, issue #307): previously shared
+        // `buff_critical_damage_up` with philosopher-tea, so the shop printed
+        // two byte-identical effect lines at different prices. Split onto its
+        // own heart-only advantage buff (`buff_abyssal_presence`) — heart
+        // aligns with the void-essence flavor of staring back at the abyss.
+        // Spec 05b Q3 (B) still holds: no philosophical tokens.
+        effectId: 'buff_abyssal_presence',
         quantity: 1,
     },
     // ── Content expansion pass 2026-06-07 ──

@@ -7,9 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-09T19:10:57Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
-| 2026-08-09T19:16:58Z | subagent | card-expert | claude-sonnet-5 | main | Implement phase 44c card library retheme |
-| 2026-08-09T21:40:53Z | skill | story-spec | claude-opus-5 | main | args: Author S-02 for the fishing village's reachable voice: which coastal NPCs get map ho |
 | 2026-08-10T02:40:23Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-10T08:12:47Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-10T08:13:23Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
@@ -407,3 +404,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-14T10:31:36Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-14T10:32:25Z | skill | expand | claude-sonnet-5 | main | - |
 | 2026-09-14T10:32:49Z | subagent | general-purpose | claude-sonnet-5 | main | Gather expand-pass signals |
+| 2026-09-14T12:43:05Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-14T12:43:38Z | skill | iterate | claude-sonnet-5 | main | - |
+| 2026-09-14T12:49:11Z | subagent | card-expert | claude-sonnet-5 | main | Differentiate two shop consumable effects |

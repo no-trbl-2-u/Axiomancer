@@ -96,6 +96,10 @@ const SUPPORT_KEYWORD: Record<string, string> = {
     buff_critical_rate_up: 'Mark',
     buff_critical_damage_up: 'Mark',
     buff_status_chance_up: 'Mark',
+    // issue #307: single-stance split of buff_critical_damage_up (philosopher-tea
+    // / void-essence no longer share an effect) — same closest-analogue mapping.
+    buff_liars_gambit: 'Mark',
+    buff_abyssal_presence: 'Mark',
 };
 
 /** Verb class → keyword for cards whose action is the keyword itself. */
