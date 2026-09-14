@@ -22,6 +22,136 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
+> **[adjust-keywords pass 10, 2026-09-14, commit <PENDING>]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched by this tick's `/march` loop
+> call as the `keywords` category (pass 9's commit `0afbfe89`, 2026-09-13,
+> was the stalest: 15 commits since, past the 15-commit/36h threshold and
+> the oldest of the five categories' own last-pass timestamps — cards
+> `1242bd60` 10 commits since, equipment `36ee098c` 9, npcs `24cebc11` 13,
+> enemies `55eec31d` 3, all sat under their own threshold). `git log
+> 0afbfe89..HEAD -- axiomancer-mechanics/src/Cards axiomancer-mechanics/
+> src/Effects axiomancer-mechanics/src/Combat
+> axiomancer-mechanics/docs/keyword-atlas.md docs/retheme-map.json
+> axiomancer-mobile/state/combat/keywords.ts
+> axiomancer-card-editor/src/data/mechanics.ts` returns exactly one commit
+> of the 15 intervening: `f19afd0d` (the #307 shop-effect-duplication fix —
+> splits `buff_critical_damage_up` into `buff_liars_gambit`/
+> `buff_abyssal_presence` for Philosopher's Tea/Void Essence so Glen Market
+> stops printing an identical line for two differently-priced items). Read
+> its full diff directly: it touches `src/Effects/buffs.library.json` (two
+> new buff entries), `src/Items/consumable.library.ts`, a new
+> `dead-consumable-payload.engine.test.ts`, and
+> `axiomancer-mobile/state/combat/keywords.ts`'s `SUPPORT_KEYWORD` map —
+> NOT `MECHANIC_KEYWORD`/`KEYWORD_GLOSS`. Confirmed via that map's own
+> header comment it is explicitly "NOT card keywords and NOT in the
+> 30-keyword glossary", mapped only so the combat log never prints a raw
+> effect id; both new ids reuse the existing 'Mark' closest-analogue
+> mapping (same pattern as the pre-existing `buff_critical_rate_up`/
+> `buff_critical_damage_up`/`buff_status_chance_up` rows) — no new keyword
+> badge, no atlas row implicated, correctly out of this skill's scope. The
+> other 14 intervening commits were the sibling cards/equipment/enemies
+> pass-10 and npcs-adjacent ticks and their ledger-bump commits, two
+> `/expand` passes with no candidates filed, a `critique` pass, and an
+> `/audit`-fix pair (finding [4.0], the same `f19afd0d` shop-effect-dup
+> above, and finding [5.6], stale hazard/route ids in
+> `axiomancer-mechanics/docs/cli.md` and the fishing-village walkthrough
+> only) — none touched the keyword-registry surface. Confirmed every
+> keyword-surface source file is byte-identical to pass 9's tree via direct
+> per-file `git log -1`, not just the path-scoped range query:
+> `src/Cards/types.ts` last-touched `515ac4d9` (2026-09-02, THE PATH),
+> `src/Combat/combat.cards.ts` `37dacef1` (pass 8),
+> `axiomancer-card-editor/src/data/mechanics.ts` `ed6b1be3` (2026-09-02),
+> `src/Effects/e2e/deprecated-effects.engine.test.ts` `e9201415`
+> (2026-09-02), `docs/keyword-atlas.md` `9016a99f` (pass 2),
+> `docs/retheme-map.json` `d83978cb` (2026-08-15) — all predate pass 9.
+> Re-derived every Step-1 signal fresh anyway via new throwaway extraction
+> scripts against the live tree, per this skill's own discipline (never
+> trust an empty diff alone): (1) **`CardSpecialMechanic`/
+> `SynergyStatePredicate` kind count** — a fresh `kind: '...'` parse of
+> `types.ts`'s two unions gives exactly 50 + 7 = 57, byte-identical file so
+> this reproduces pass 9's count directly, not assumed from it. (2)
+> **display-switch parity** — counted `case` arms directly in both
+> `combat.cards.ts` generator functions: `mechanicText` 50/50,
+> `statePredicateText` 7/7 (`enemy-dealt-no-damage-last-round`, `opening`,
+> `finale`, `recoil-paid-this-turn`, `enemy-drew-blood`, `requiem`, `flow`
+> — every arm prints a real face word, no bare `default:` fallthrough on
+> either switch). (3) **card-library carrier-count sweep** — a fresh
+> `kind: '...'` grep across all 9 `src/Cards/library/*.cards.ts` modules
+> reproduces pass 9's exact histogram: the 13 kinds at exactly 2 carriers
+> (`chain`, `echo`, `execute`, `extend_dots`, `finale`, `lock_stance`,
+> `omen`, `opening`, `peroration`, `reap_all`, `replay_last`, `rupture`,
+> `turnabout`), the 10 one-carrier kinds (`bank_spent_die`, `conjure_card`,
+> `consume_affliction`, `convert_dots`, `grant_pip`, `purge_self`, `reap`,
+> `recoil_x`, `reroll_spent`, `spend_premises`), and the 9 zero-carrier
+> die-gear/card-local kinds (`strip_random_buff`, `befriend_attempt`,
+> `refresh_die`, `convert_die_color`, `overheat`, `forge_floating_die`,
+> `float_x_die`, `spend_all_pips`, `echo_next_spell`) are unchanged. Cross-
+> checked the zero-carrier 9 directly against mobile's
+> `KINDS_WITHOUT_MECHANIC_KEYWORD` exemption list (read fresh, 23 entries:
+> the die-gear cluster, card-local one-offs, and `deal`/`rider`) plus the
+> live `MECHANIC_KEYWORD` map (27 entries) — 23 + 27 = 50, exhaustive
+> against `CardSpecialMechanic`, no new REMOVE candidate; every 2-carrier
+> kind still clears the atlas's own "≥2 cards or ≥2 enemies" floor. (4)
+> **enemy-keyword carrier sweep** — a fresh comment-stripped `kind: '...'`
+> extraction across `enemy.library.ts`'s keyword arrays gives brutal 21,
+> elusive 3, hide 21, ravenous 3, regrow 5, swift 19, unshaken 12, venom 9,
+> wounding 13 — byte-identical to pass 9 (file unchanged since `e57f9f63`,
+> pass 6), all 9 atlas-listed enemy keywords still carry ≥2. (5) **registry
+> parity** — `axio_overview`/`axio_keywords` reconfirm 68 keyword rows (59
+> player/enemy bold rows + 9 system-terms rows), 128 cards, 78 enemies,
+> unchanged from pass 9. (6) **overlapping-semantics sweep** — read the
+> full atlas table fresh across all 8 player families plus enemy and
+> system-terms: no pair's semantics collide closely enough to warrant a
+> drill-or-retire call (THORNS/BACKFIRE/RIPOSTE/QUARTER each sit on a
+> distinct axis — per-attack reprisal, rung-denial reprisal, one-phase
+> counter, incoming-damage reduction, respectively; FESTER/PROLONG split
+> cleanly along intensity vs. duration) — same reading as every prior
+> pass, no new collision found. (7) **`kb:` receipt sweep** — re-read the
+> atlas's own header: the prior-art-receipt requirement was explicitly
+> repealed 2026-09-02 ("A `kb:` receipt is welcome in the notes; it is not
+> required") — this signal is structurally satisfied by design, not a live
+> gap, consistent with every pass since the rewrite. (8) **Chaos/generic-
+> Upgrade design-gap re-check** (per the dispatch note) — re-read the
+> standing `[loop-call]` in `plan/AUDIT.md` (filed pass 9, 2026-09-13): no
+> card idea, theme attachment, or rank slot has been proposed for either
+> family in the 15 intervening commits (none of which touched card
+> authoring at all, per the diff above), so neither clears the skill's own
+> CREATE bar ("a real design gap exists," not "a mechanic Dawncaster has
+> that we lack") — still correctly left for owner ratification; re-cited,
+> not re-filed, not force-built into a CREATE this pass. (9) **mobile KW
+> jest suite** — ran `state/combat/__tests__/keywords.test.ts` directly:
+> 13/13 green (KW-1 unmapped-effect-id, KW-3 dead-reference ×4, terse-gloss
+> ×2, card-text-grammar ×3, KW-6 family parity, KW-5 persistent-card
+> reach), matching pass 9 exactly. No genuine finding this pass — every
+> signal re-tested clean against a provably near-unchanged source graph
+> (one commit touching the surface, and it resolved to an explicitly
+> out-of-scope support-effect mapping), not assumed stale-clean from an
+> empty log alone. KB research (skill §3 Step 2): not run — every
+> consideration this pass was audit-confirmed-clean (no CREATE/UPDATE),
+> exempt from the gate per the REMOVE/no-op carve-out the sibling
+> categories' own zero-diff passes have used identically; the one
+> KB-adjacent item (the Chaos/Upgrade re-check, item 8 above) was a re-read
+> of a receipt already gathered pass 9, not a fresh KB run. Verify: ran all
+> four gates in full this pass (not skipped, despite the near-empty source
+> diff) — `npm run verify --workspace axiomancer-mechanics` (213/213
+> files, 3435 tests + build green, up from pass 9's 3428 via the #307
+> fix's own new test file plus unrelated growth in sibling categories' own
+> passes, not a keyword-surface signal), `npm run verify --workspace
+> axiomancer-mobile` (full chained lint/typecheck/jest/assets:check/art:test
+> script exit 0, art:test's own 24/24 confirmed directly in the tail),
+> `npm run type-check --workspace axiomancer-card-editor` (clean, exit 0),
+> root `npm test` 123/123 incl. `content-drift.test.mjs` 11/11 (registry/
+> atlas/mobile-gloss parity, exemption-list accounting, and the "parsers
+> found real tables" self-check all green). `npm run deploy:check`
+> confirmed green pre-tick (HEAD `593650a1`, docs/plan-only tip commit, no
+> gated workflow triggered) and will be re-confirmed after this ledger
+> commit lands. No `plan/PHASE_CANDIDATES.md` or new `plan/AUDIT.md`
+> residue filed this pass — nothing actionable surfaced outside the
+> standing, already-filed Chaos/generic-Upgrade `[loop-call]` re-cited
+> above.
+```
+
+```
 > **[adjust-enemies pass 10, 2026-09-14, commit 55eec31d]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
 > content-lifecycle gate (`enemies` was the only qualifying category this
