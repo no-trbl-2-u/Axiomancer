@@ -163,6 +163,50 @@
 > stopping. No row shipped, no commit from this pass; Top 5 below is
 > otherwise unchanged (only the resolved [2.0] row is now `[x]`).
 
+> **Eighth pass, 2026-09-14 (`/march` tick).** Dispatch chain landed on
+> `/iterate` again (triage clean; critique not due — 5 commits/~7.9h since
+> pass 37; no pending phase; content-lifecycle gate checked all five
+> categories fresh, none past 15 commits/36h; `/forge`'s 48h world-growth
+> window still open via `c6ca37d7`; `/expand`'s 20-commit/48h window not
+> yet open at 1 commit/~3.7h since pass 15). Hard rule §7.5 applied again:
+> `plan/CRITIQUE.md` had 8 open Pending rows, two of them new since the
+> seventh pass's read (critique pass 37 filed the mobile hand-fan-overlap
+> row and the shop-effect-duplication row below). Standing Top 5 stayed
+> unchanged from pass seven ([5.9] blocked on owner device log, `[HIGH]`
+> late-collapse PARKED, [1.6]/[1.5] both under the 3.0 floor) — scored the
+> two new pass-37 rows against that floor instead of re-running a full
+> site audit. The hand-fan row: investigated `handFanLayout`
+> (`CombatBoard.tsx:269`) directly rather than trusting the critique
+> screenshot alone — a 2026-09-13 fix (`140f4c8b`) already picks the
+> widest available band for a 5-card hand (351px board-edge band over the
+> 183px chrome-safe one), so the ~62px overlap at n=5 is already close to
+> the structural floor for 120pt cards on a 375pt screen, and the
+> existing `onInspect` tap-to-detail wiring (confirmed live via
+> `CombatEncounterPanel.tsx:726`) already lets a player read any covered
+> card's full name by tapping its visible sliver — the residual gap is
+> first-glance legibility polish, not a functional block, and a real fix
+> risks reworking the fan's width math for marginal gain (impact ~5, ease
+> ~5, score 2.5 — left open, not shipped blind). The shop-effect row
+> scored higher: `buff_critical_damage_up`'s `grantAdvantage` payload
+> (`Stance[]`) already supports single-stance grants generically per
+> `effect-modifiers.ts:255-256`, confirmed via grep that the effect id is
+> referenced by no card or other item, so differentiating the two
+> consumables was a contained data-only addition, not an engine change
+> (impact 5, ease 8, score 4.0 — clears the floor). Shipped it (commit
+> `f19afd0d`, issue #307) via the `card-expert` sub-agent (delegation
+> table: balance/effect findings route there): two new single-stance
+> advantage buffs in `buffs.library.json`, the two consumables rewired,
+> mobile keyword gloss added, and a regression test pinning the two
+> consumables to distinct effect ids. `npm run verify --workspace
+> axiomancer-mechanics`: 213/213 files, 3432/3432 tests, build green.
+> `npm run verify --workspace axiomancer-mobile`: 299/299 suites,
+> 2854/2854 tests, 3/3 snapshots, lint/typecheck/assets/art green. Row
+> moved Pending → Done in `plan/CRITIQUE.md` with its resolution. Top 5
+> below is unchanged (the shipped finding lived in CRITIQUE.md, not this
+> table) — next pass should re-score the still-open hand-fan row fresh
+> rather than trusting this pass's 2.5 as durable, since the fan's exact
+> numbers shift with hand size and screen width.
+
 ## Top 5 findings (scored)
 
 ### [5.9] combat — user crash on ACCEPTING post-combat card reward (unreproduced, issue #216)

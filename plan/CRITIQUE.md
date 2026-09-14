@@ -508,32 +508,6 @@
   (`plateBand`/`plateName`, hand-row fan layout).
 - source: loop
 
-### [MED] village — two shop wares print byte-identical effect lines at different prices
-- pass: 37 (commit 7d470de1)
-- viewport: mobile and desktop (both show the same text)
-- category: comprehension / economy
-- observation: Glen Market's stall lists "Philosopher's Tea" (35s) and
-  "Void Essence" (40s) with the exact same mechanical line — "ADVANTAGE
-  ON BODY / MIND / HEART, 3 ROUNDS" — differing only in flavor text and
-  a 5-shilling price gap. `consumable.library.ts` confirms both items
-  share `effectId: 'buff_critical_damage_up'` with no `resourceGrant`
-  or other field distinguishing them; the code's own comments say the
-  items were intended to diverge (Philosopher's Tea: "sharpens the
-  mind"; Void Essence: "Heart aligns with the void-essence flavor") but
-  the Spec 05b Q3(B) ruling that dropped philosophical-token grants
-  from consumables left both wired to the same generic effect. A
-  first-time player facing this stall has no way to tell why Void
-  Essence costs more — the shop states nothing it doesn't state for
-  the cheaper item.
-- evidence: `axiomancer-mobile/.critique-artifacts/mobile/07-village.txt`
-  (`wanderer-nf-village` fixture); `axiomancer-mechanics/src/Items/consumable.library.ts`
-  lines 94-140.
-- suggested fix: either differentiate the two effects to match their
-  authored flavor split (e.g. one buffs a single stat's advantage
-  instead of all three), or collapse the price gap so the stall isn't
-  charging more for an identically-worded effect. Equipment-lifecycle
-  territory (`/adjust-equipment`).
-- source: loop
 
 ### [MED] ui-fresh-eyes SWARM 2026-09-12 — the 309-row candidate set is drained
 - pass: swarm follow-up to the 2026-09-12 sweep, run from
@@ -1814,6 +1788,50 @@ one level down, in the routing helper `onApply` calls next).
 - source: loop
 
 ## Done
+
+### [x] [MED] village — two shop wares print byte-identical effect lines at different prices — RESOLVED 2026-09-14 (commit f19afd0d, issue #307)
+- pass: 37 (commit 7d470de1)
+- viewport: mobile and desktop (both show the same text)
+- category: comprehension / economy
+- issue: #307
+- observation: Glen Market's stall lists "Philosopher's Tea" (35s) and
+  "Void Essence" (40s) with the exact same mechanical line — "ADVANTAGE
+  ON BODY / MIND / HEART, 3 ROUNDS" — differing only in flavor text and
+  a 5-shilling price gap. `consumable.library.ts` confirms both items
+  share `effectId: 'buff_critical_damage_up'` with no `resourceGrant`
+  or other field distinguishing them; the code's own comments say the
+  items were intended to diverge (Philosopher's Tea: "sharpens the
+  mind"; Void Essence: "Heart aligns with the void-essence flavor") but
+  the Spec 05b Q3(B) ruling that dropped philosophical-token grants
+  from consumables left both wired to the same generic effect. A
+  first-time player facing this stall has no way to tell why Void
+  Essence costs more — the shop states nothing it doesn't state for
+  the cheaper item.
+- evidence: `axiomancer-mobile/.critique-artifacts/mobile/07-village.txt`
+  (`wanderer-nf-village` fixture); `axiomancer-mechanics/src/Items/consumable.library.ts`
+  lines 94-140.
+- suggested fix: either differentiate the two effects to match their
+  authored flavor split (e.g. one buffs a single stat's advantage
+  instead of all three), or collapse the price gap so the stall isn't
+  charging more for an identically-worded effect. Equipment-lifecycle
+  territory (`/adjust-equipment`).
+- source: loop
+- resolution: differentiated rather than collapsed the price gap. The
+  engine's `advantageModifier.grantAdvantage` payload already supports
+  single-stance grants generically, so this was a data-only addition:
+  two new buffs in `buffs.library.json` (`buff_liars_gambit`, mind-only,
+  for Philosopher's Tea's "sharpens the mind"; `buff_abyssal_presence`,
+  heart-only, for Void Essence's "heart aligns with the void-essence
+  flavor"), both modeled on the retired pre-v3 `buff_advantage_body`/
+  `buff_advantage_heart` pair's numbers (duration 3, stacking none,
+  resistDR 13, resist-stance rotated one step from the granted stance).
+  `buff_critical_damage_up` (used by neither item after the rewire) is
+  untouched. Added mobile keyword gloss entries and a regression test
+  (`dead-consumable-payload.engine.test.ts`) pinning the two consumables
+  to distinct effect ids and their own single-stance grants. Verify:
+  `axiomancer-mechanics` 213/213 files, 3432/3432 tests, build green;
+  `axiomancer-mobile` 299/299 suites, 2854/2854 tests, 3/3 snapshots,
+  lint/typecheck/assets/art green.
 
 ### [x] [LOW] village — dimmed unaffordable stall items dim the item name along with the price — RESOLVED 2026-09-11 (issue #297)
 - pass: session-critic 2026-08-31 (Phase V8 closure `/critic-loop`
