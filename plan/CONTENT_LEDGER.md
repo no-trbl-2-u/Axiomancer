@@ -15,14 +15,14 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-13 | 22ce276c | 9 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-13 | 304608c1 | 9 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-13 | 0afbfe89 | 9 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-14 | <PENDING> | 9 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-14 | 24cebc11 | 9 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-npcs pass 9, 2026-09-14, commit <PENDING>]** Zero-CREATE,
+> **[adjust-npcs pass 9, 2026-09-14, commit 24cebc11]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
 > content-lifecycle gate (`npcs`' pass-8 commit `abb3da01` was the stalest
 > qualifying category this tick: 23 commits since, past the 15-commit/36h
