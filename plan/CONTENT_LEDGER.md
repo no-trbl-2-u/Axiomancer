@@ -22,6 +22,66 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
+> **[adjust-cards pass 10, 2026-09-14, commit <PENDING>]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
+> content-lifecycle gate (`cards` was the only qualifying category this
+> tick: 16 commits since pass 9's commit `4b1b6a64`, past the 15-commit
+> threshold; equipment `22ce276c` 14 commits, enemies `304608c1` 8,
+> keywords `0afbfe89` 4, npcs `24cebc11` 2 all sat under their own
+> 15-commit/36h thresholds). `git log 4b1b6a64..HEAD -- axiomancer-mechanics/
+> src/Cards axiomancer-mechanics/src/Effects axiomancer-mechanics/src/Combat
+> axiomancer-mechanics/docs/keyword-atlas.md docs/retheme-map.json
+> axiomancer-mobile/state/combat/keywords.ts
+> axiomancer-card-editor/src/data/mechanics.ts` is empty; the matching
+> `git diff --stat` over the same path set is also empty. Read the 16
+> intervening commits directly: all were the sibling equipment/enemies/
+> keywords/npcs pass-9 ticks (each already independently confirmed clean of
+> the card-authoring surface by their own logs above) plus their ledger-bump
+> commits, a CI dice-tray/rune-column stacking-context fix
+> (`dd1c1c32`/`c15f4119`, `CombatBoard.tsx` hit-testing only), a UI PR
+> bundling intro fade/equipment-detail-modal/threat-accordion/card-border-
+> shadow (`267234fe`/`31cc5cd5`/`d4468c21`, read all three diffs in full —
+> none touches `cards.library.ts`, `cards.pricing.ts`, `combat.cards.ts`'s
+> generators, or any preset/draft pool), and a critique pass — none of the
+> 16 touched the card/effect/combat-authoring surface. Confirmed
+> `src/Cards/cards.library.ts`, every `src/Cards/library/*.cards.ts` module,
+> `cards.pricing.ts`, `cards.sandbox-sets.ts`, `combat.starter-deck-presets.ts`,
+> and `combat.deck-draft.ts` are all byte-identical to pass 9's tree (the
+> matching `git log 4b1b6a64..HEAD -- <those paths>` is empty). Re-ran every
+> Step-1 guard directly rather than trusting the empty diff alone: (1)
+> **reachability** — `combat-playtest.card-coverage.sim.test.ts` 123/123,
+> matching pass 9 exactly. (2) **pricing sanity + honesty + FREE-line +
+> aspect-thirds** — `pricing.engine.test.ts` (251), `curated-library.engine.
+> test.ts` (14), `preview-truth.engine.test.ts` (10),
+> `paid-summary-honesty.engine.test.ts` (4), `deck-presets.engine.test.ts`
+> (9) all green, byte-identical counts to pass 9. (3) **registry parity** —
+> `axio_overview` reconfirms 128 cards, 68 keyword rows, and the identical
+> per-theme totals (debt 19, trial 24, rot 19, choir 21, vigil 20, curse 5,
+> grave 20), unchanged from pass 9. Standing `plan/AUDIT.md` `[loop-call]`s
+> re-checked against current source, not re-litigated: the 19 orphaned
+> `zoneHas(state, '<card-id>')` hooks in `combat.engine.ts` (filed pass 1;
+> file itself untouched since pass 9, confirmed via the same empty
+> path-scoped log) and `the-sextons-count`'s missing TWIN trigger (filed
+> pass 1; `grave.cards.ts` likewise untouched) — both re-confirmed still
+> open, still mechanics-expert/engine-constant territory, not this skill's
+> to solo. KB research (skill §3 Step 2): not run — every consideration this
+> pass was audit-confirmed-clean (no CREATE/UPDATE), exempt from the gate
+> per the REMOVE/no-op carve-out the sibling categories' own zero-diff
+> passes have used identically. Verify: ran all three gates in full (not
+> skipped, despite zero source diff) — `npm run verify --workspace
+> axiomancer-mechanics` (213/213 files, 3428 tests + build, byte-identical
+> to pass 9's count), `npm run verify --workspace axiomancer-mobile` (full
+> chained lint/typecheck/jest/assets:check/art:test script exit 0, art:test's
+> own 24/24 confirmed directly in the tail), `npm run type-check --workspace
+> axiomancer-card-editor` (clean, exit 0). `npm run deploy:check` confirmed
+> green pre-tick (HEAD `54550f57`, docs-only critique-pass tip commit, no
+> gated workflow triggered) and will be re-confirmed after this ledger
+> commit lands. No `plan/PHASE_CANDIDATES.md` or new `plan/AUDIT.md` residue
+> filed this pass — nothing actionable surfaced outside the two standing,
+> already-filed backlog items re-cited above.
+```
+
+```
 > **[adjust-npcs pass 9, 2026-09-14, commit 24cebc11]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
 > content-lifecycle gate (`npcs`' pass-8 commit `abb3da01` was the stalest
