@@ -207,6 +207,46 @@
 > rather than trusting this pass's 2.5 as durable, since the fan's exact
 > numbers shift with hand size and screen width.
 
+> **Ninth pass, 2026-09-14 (`/march` tick).** Hard rule §7.5 applied again:
+> `plan/CRITIQUE.md` still had open Pending rows, so two sub-agents did a
+> genuinely fresh re-read rather than trusting any prior pass's framing —
+> one read every `plan/CRITIQUE.md` Pending row end to end against current
+> source, the other swept `plan/AUDIT.md`'s own non-CRITIQUE Pending rows
+> for anything not already `[loop-call]`/`[needs-user-call]`/steward-lane.
+> Confirmed [5.9] (crash) still blocked on the owner's device log and
+> `[HIGH]` late-collapse still PARKED — neither picked. The CRITIQUE.md
+> sweep's best live candidate was the mobile hand-fan overlap row (~3.0,
+> real but layout-tuning-hard, `CombatBoard.tsx:269` re-verified). The
+> AUDIT.md sweep surfaced a genuinely fresh top score: `[docs]` "Scheduled
+> playtest references name retired Hazard and Fishing Village route
+> identities" (impact 7 x ease 8 / 10 = 5.6) — re-verified live by direct
+> read (not just trusting the row) of `docs/cli.md` (still `--hazard H01`
+> in two places), the walkthrough's `.goal.md` + `.json` script (still
+> `fv-2 -> fv-12` / Driftwood Husk), and `fishingVillage.nodes` (`fv-2`'s
+> `connectedNodes` no longer include `fv-12` at all — the old `--route
+> fv-2,fv-12` example was a broken command, not just stale prose). Shipped
+> it (commit `541e4ad4`, issue #308): fixed both `docs/cli.md` examples to
+> the current `cracked-cliff` hazard slug, rewrote the walkthrough's route
+> description/commands/pass-fail-conditions/diagnostic notes and its
+> `.json` script to the current authored `fv-2 -> fv-11 -> fv-13` / Little
+> Belle route, manually ran both the corrected `--script` and `--route`
+> forms end-to-end before shipping (both resolve the encounter and
+> complete Hazard-Pattern combat), and added the row's own requested
+> docs/registry parity witness to `cli.docs-examples.engine.test.ts`
+> (extends its existing --enemy/preset pattern: hazard ids must resolve
+> in `HAZARD_LIBRARY`, the walkthrough's documented `--route` chain must
+> be a real connected path in `fishingVillage.nodes` — the exact check
+> that would have caught this drift). `npm run verify --workspace
+> axiomancer-mechanics`: 213/213 files, 3435/3435 tests, build green.
+> Also surfaced but not shipped (kept for the next pass, see Top 5
+> below): a `[contract]` row on `axio-mcp-server.mjs`'s freshness-check-
+> once-per-process gate (~4.2), a `[tests]` row on the mobile verify gate
+> being blind to Playwright journeys (~3.5), and a re-assessment of the
+> `critique:drive` artifact-deletion hazard (tagged `[loop-call]` but
+> scores as a concrete, low-risk fix on direct read, ~3.2) — none picked
+> this tick per hard rule §7.1 (one fix per tick), all newly promoted
+> into the Top 5 refresh below.
+
 ## Top 5 findings (scored)
 
 ### [5.9] combat — user crash on ACCEPTING post-combat card reward (unreproduced, issue #216)
@@ -219,54 +259,69 @@
   SESSION, domain ERROR) to confirm before closing; can't be shipped
   blind on web alone.
 
-### [x] [2.0] mobile — `as any` clusters at the state boundary — RESOLVED 2026-09-12 (issue #299)
-- category: debt
+### [4.2] `[contract]` Phase 57 can zero the live axio-query corpus inside an already-running session
+- category: contract
+- impact: 6
+- ease: 7
+- next: `scripts/axio-mcp-server.mjs:55-59` gates a corpus-freshness regen
+  behind a boolean (`freshnessChecked`) set once per process lifetime, so a
+  mid-session data loss after the first tool call is never re-detected for
+  the rest of that session. The smoke test
+  (`axio-mcp-server.test.mjs:62`) uses `/\d+ cards/`, which a 0-count
+  response still passes — tighten to a real lower bound. Re-verified live
+  by direct read this pass (2026-09-14); not yet actioned.
+
+### [3.5] `[tests]` Verify gate is blind to the Playwright journeys
+- category: tests
+- impact: 7
+- ease: 5
+- next: `axiomancer-mobile/package.json`'s `verify` script is lint/
+  typecheck/test/assets:check/art:test only — none of the `e2e:*`
+  Playwright journeys run in it, so a real regression in a journey can
+  land on main with a green gate. The row itself leaves the choice (join
+  `verify` proper vs. a new `verify:journeys` leg vs. amend `bearings.md`
+  to name this a deliberate gap) to `/iterate`, not an owner. Re-verified
+  live this pass (2026-09-14); not yet actioned — the choice needs its
+  own tick, not a rider on this one.
+
+### [3.2] `npm run critique:drive` deletes anything else living under `.critique-artifacts/`
+- category: debt (filed `[loop-call]` in Pending below, but re-assessed
+  this pass — see note)
 - impact: 4
-- ease: 5
-- issue: #299
-- next: recurring drain bucket, not a single fix — but one concrete,
-  cheap instance remains live: `axiomancer-mobile/state/persistence/
-  migrations.ts:50` (`const gameState = state as any;` inside
-  `migrateV1ToV2`). Narrow it to a typed unknown-shape guard (mirroring
-  how the now-clean `state/actions.ts` engine-store bridge was fixed)
-  rather than chasing the whole recurring bucket in one tick.
-- resolution: narrowed `migrateV1ToV2` to `state as Record<string,
-  unknown>` (mirroring `migrateV2ToV3`'s own already-typed pattern two
-  functions below it), then constructed a properly-typed `BaseStats`
-  object once `heart`/`body`/`mind` are runtime-checked as numbers, so
-  `deriveStats`/`deriveNonCombatStats` receive a real `BaseStats` value
-  instead of an unchecked `any`. Behavior unchanged — same guard clauses,
-  same error messages. `npm run verify --workspace axiomancer-mobile`:
-  261/261 suites, 2657/2657 tests, lint (0 errors, pre-existing warnings
-  only), typecheck clean, `assets:check`/`art:test` green.
-
-### [1.6] `web:container` dev-server script is broken
-- category: external-critique
-- impact: 2
 - ease: 8
-- next: `axiomancer-mobile/scripts/dev-server-container.sh` still runs
-  `npx --yes expo start` inside the container, resolving a mismatched
-  Expo CLI — point it at the mounted repo's `node_modules/.bin/expo`
-  instead. Low impact (documented host workaround already exists) kept
-  this off the pick this tick despite trivial ease.
+- next: `critique-drive.mjs:318` `rm`s the entire `ARTIFACT_ROOT`
+  (`.critique-artifacts/`) on start rather than scoping the delete to its
+  own known output paths (`mobile/`, `desktop/`, `manifest.json`) — it
+  already destroyed an unrelated 54-cell capture set once
+  (2026-09-12 fresh-eyes sweep). On direct read this reads as a concrete,
+  low-risk, mechanical patch, not a genuine judgment call despite its
+  `[loop-call]` tag in Pending — flagging here so the next pass considers
+  it on its numeric merits rather than skipping it as owner-gated.
 
-### [1.5] card-editor cannot edit the three new mechanic fields
+### [3.0] mobile combat hand-fan overlap at 5-card hands (CRITIQUE.md Pending)
 - category: external-critique
-- impact: 3
+- impact: 6
 - ease: 5
-- next: `grant_pip.overflow`, `spend_all_pips.markPer`, and
-  `synergy.statePredicate` (`axiomancer-mechanics/src/Cards/types.ts`)
-  are still absent from `CardForm.tsx`'s `grant_pip`/`spend_all_pips`
-  cases (no `synergy` case exists at all). `markPer` is a cheap mirror
-  of the existing `spend_premises` stepper (~line 637); the other two
-  need real rider/closed-union form work — heavier scope than its
-  siblings above, hence the lower ease.
+- next: `handFanLayout()` (`CombatBoard.tsx:269`) still overlaps a 5-card
+  hand to ~58pt of a 120pt card width on a 375pt screen — confirmed live,
+  not stale. The fan's width math is already deliberately tuned (an
+  in-file comment documents a prior overflow trade-off), so a naive widen
+  risks regressing that; existing `onInspect` tap-to-detail already lets a
+  player read any covered card. Real fix needs care, not a quick patch —
+  hence parked below the cheaper wins above despite the comparable score.
 
 > **Parked, do not pick:** `[HIGH] late-stage global collapse — all 10
 > presets 0.00 late` carries an explicit `/oversight 2026-08-08` ruling
 > ("PARKED... do not pick this row, do not promote a phase off it") —
 > excluded from ranking above despite a high raw score. Re-check that
 > ruling before ever touching this row again.
+
+> Below the cut this pass: `[1.6]` `web:container` dev-server script
+> (`axiomancer-mobile/scripts/dev-server-container.sh` still runs `npx
+> --yes expo start` instead of the mounted repo's own `expo` binary) and
+> `[1.5]` card-editor missing `grant_pip.overflow`/`spend_all_pips.markPer`/
+> `synergy.statePredicate` form controls (`CardForm.tsx`) — both
+> re-confirmed live this pass, unchanged from pass 7/8's framing.
 
 ## Pending
 
@@ -1235,10 +1290,11 @@ directory as exclusively its own.
   shipping, so this guardrail should be mechanized before heavy prose
   volume lands.
 
-### [docs] Scheduled playtest references name retired Hazard and Fishing Village route identities
+### [x] [docs] Scheduled playtest references name retired Hazard and Fishing Village route identities — RESOLVED 2026-09-14 (commit `541e4ad4`, issue #308)
 - category: docs
 - impact: 7
 - ease: 8
+- issue: #308
 - detail: filed 2026-08-21 by the scheduled SomberSoft roundtable from the
   Kid's current-main playthrough. Two canonical-looking operator references
   now issue commands against identities the live CLIs/maps reject or no longer
@@ -1262,6 +1318,28 @@ directory as exclusively its own.
   ids and walkthrough node/enemy identities cannot drift silently again. Do
   not rewrite historical H01-H15 design doctrine where it is explicitly
   historical; fix executable command/reference surfaces.
+- resolution (2026-09-14): fixed exactly the two executable surfaces named
+  above, left historical H01-H15 design-doctrine docs untouched (confirmed via
+  grep that only `docs/cli.md`'s two live examples reference `H01` outside
+  explicitly-historical spec/BDD/TDD docs). `docs/cli.md` now examples
+  `--hazard cracked-cliff` in both the flag table and the runnable command.
+  `fishing-village-exploration.goal.md` now documents `fv-2 -> fv-11 -> fv-13`
+  / Little Belle throughout (route description, both recommended commands,
+  pass/fail conditions, diagnostic notes); its paired `.json` script now
+  targets `fv-11` then `fv-13` instead of the disconnected `fv-12`. Manually
+  ran both the corrected `--script` and `--route` forms end-to-end before
+  shipping — both resolve the `fv-13` encounter against Little Belle and
+  complete Hazard-Pattern combat. Added the requested parity witness to
+  `src/CLI/e2e/cli.docs-examples.engine.test.ts` (extends the file's existing
+  --enemy/preset pattern): one test asserts every `--hazard <id>` example in
+  `docs/cli.md` resolves in `HAZARD_LIBRARY`, two more assert the
+  walkthrough's documented `fv-N` node ids exist on `fishingVillage.nodes` and
+  that its `--route` chain is actually connected node-to-node — this is the
+  check that would have caught the original drift (the old `--route
+  fv-2,fv-12` example was a broken command, not just stale prose: fv-2's
+  `connectedNodes` no longer include fv-12 at all). `npm run verify
+  --workspace axiomancer-mechanics`: 213/213 files, 3435/3435 tests
+  (3432 + 3 new), build green.
 
 ### [gap] `npx playwright install chromium --with-deps` hung on an unreachable apt mirror, killing a full `march` tick
 - category: gap
