@@ -7,9 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-09T07:40:57Z | subagent | card-expert | claude-sonnet-5 | main | Implement phase 44b keyword retheme |
-| 2026-08-09T09:24:30Z | slash-prompt | /digest | unknown | user/ci | /digest |
-| 2026-08-09T09:24:32Z | skill | digest | unknown | main | - |
 | 2026-08-09T13:29:25Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-09T13:30:04Z | skill | critique | claude-sonnet-5 | main | - |
 | 2026-08-09T19:10:25Z | slash-prompt | /march | unknown | user/ci | /march |
@@ -407,3 +404,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-14T02:45:13Z | skill | critique | claude-sonnet-5 | main | - |
 | 2026-09-14T04:37:42Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-14T04:40:43Z | skill | adjust-cards | claude-sonnet-5 | main | - |
+| 2026-09-14T08:42:49Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-14T08:42:53Z | skill | march | unknown | main | - |
+| 2026-09-14T08:46:00Z | skill | adjust-equipment | claude-sonnet-5 | main | - |
