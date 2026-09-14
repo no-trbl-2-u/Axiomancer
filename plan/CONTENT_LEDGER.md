@@ -14,7 +14,7 @@
 | cards | `skills/adjust-cards.md` | 2026-09-14 | 1242bd60 | 10 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-14 | 36ee098c | 10 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-14 | 55eec31d | 10 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-13 | 0afbfe89 | 9 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-14 | 9d357e2b | 10 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-14 | 24cebc11 | 9 |
 
 ## Log
@@ -22,7 +22,7 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-keywords pass 10, 2026-09-14, commit <PENDING>]** Zero-CREATE,
+> **[adjust-keywords pass 10, 2026-09-14, commit 9d357e2b]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — dispatched by this tick's `/march` loop
 > call as the `keywords` category (pass 9's commit `0afbfe89`, 2026-09-13,
 > was the stalest: 15 commits since, past the 15-commit/36h threshold and
