@@ -7,7 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-10T08:13:23Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
 | 2026-08-10T10:03:28Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-08-10T10:03:30Z | skill | digest | unknown | main | - |
 | 2026-08-10T13:52:03Z | slash-prompt | /march | unknown | user/ci | /march |
@@ -407,3 +406,4 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-14T12:49:11Z | subagent | card-expert | claude-sonnet-5 | main | Differentiate two shop consumable effects |
 | 2026-09-14T14:33:53Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-14T14:34:54Z | skill | iterate | claude-sonnet-5 | main | - |
+| 2026-09-14T16:32:00Z | slash-prompt | /march | unknown | user/ci | /march |
