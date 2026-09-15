@@ -76,12 +76,13 @@ Tick in this file in the same commit that ships the phase.
       advisor-selection payoff sets up for the player character before
       more northern-continent geography ships (promoted via `/oversight`
       2026-09-15 from `PHASE_CANDIDATES.md` [score 5.5])
-- [ ] Phase 85 — Equipment progression: mechanics-expert design session
+- [x] Phase 85 — Equipment progression: mechanics-expert design session
       for 1-3 new signature skills sized for head/hands/feet accessories,
       then author + wire the relics carrying them, preserving
       `relic.library.ts`'s 1:1 relic-identity rule (promoted via
       `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md` [score 5.5];
       closes `AUDIT.md`'s equipment-progression loop-call)
+      — `feat(mechanics): equipment progression — 3 new signature skills for head/hands/feet — phase 85` (9f313d0c)
 - [ ] Phase 86 — Engine hook sweep: delete the 19 orphaned `zoneHas` sites
       in `combat.engine.ts` (rewriting `oracle-omen-v2`'s telegraph
       harness off `fated-course` first), wire the-sextons-count's TWIN
