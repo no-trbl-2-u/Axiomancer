@@ -65,10 +65,11 @@ Tick in this file in the same commit that ships the phase.
       hazard deck's 14 keyword chips (promoted via `/oversight` 2026-09-15
       from `PHASE_CANDIDATES.md` [score 6.0])
       — `feat(mobile): glossary reachability — hazard-deck keyword chips — phase 82` (ee8bf2e5)
-- [ ] Phase 83 — Combat arena backdrop: region-keyed backdrop set via the
+- [x] Phase 83 — Combat arena backdrop: region-keyed backdrop set via the
       Phase 73/78 art pipeline, starting with the coastal village
       (promoted via `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md`
       [score 6.0], absorbing the [score 4.5] capital cross-reference row)
+      — `feat(mobile): combat arena backdrop — region-keyed, coastal village — phase 83` (cb3b1c97)
 - [ ] Phase 84 — The Capital: attended `/world-spec` or `/story-spec`
       session deciding what the advisor-selection payoff sets up for the
       player character before more northern-continent geography ships
