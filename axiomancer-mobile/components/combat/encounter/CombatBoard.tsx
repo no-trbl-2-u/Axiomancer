@@ -945,11 +945,15 @@ export interface CombatBoardProps {
      *  (the LOG toggle, the tutorial coach) can track its real height instead
      *  of the static `COMBAT_HUD_HEIGHT` estimate. */
     onHudLayout?: (height: number) => void;
+    /** The live map region (`vm.region` from the exploration screen), keying
+     *  the arena backdrop plate (phase 83). Omitted by the dev-only sandbox
+     *  route, which falls back to the plate every unmapped region gets. */
+    region?: string;
 }
 
 export const CombatBoard = React.memo(function CombatBoard({
     vm, drag, stagedUids, onApply, onStage, onUnstage, onDiscard, onSignature, onEndPhase, resolving = false, onInspect, onChip, onSeal, onSignatureInfo, onPlayerInspect, momentum, onMomentumInfo, fx,
-    onFateTap, onReprisalNeeded, onHudLayout,
+    onFateTap, onReprisalNeeded, onHudLayout, region,
 }: CombatBoardProps) {
     const AXM = usePalette();
     const styles = useStyles();
@@ -1417,6 +1421,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                 topInset={topInset}
                 metaLine={metaLine}
                 onHudLayout={handleHudLayout}
+                region={region}
             />
 
             {/* interactive column */}

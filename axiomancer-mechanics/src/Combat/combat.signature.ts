@@ -90,6 +90,22 @@ export const SIGNATURE_SKILLS: Record<SignatureSkillId, SignatureSkill> = {
         magnitude: 2,
         description: 'MIND — draw 2 and refresh your stance die: turn information into tempo.',
     },
+    // ── Phase 85 (equipment progression — head/hands/feet accessories) ───────
+    'sig-mounting-dread': {
+        id: 'sig-mounting-dread', name: 'The Mounting Dread', kind: 'dot', cost: 9,
+        magnitude: 3, effectKind: 'dot', effectId: 'debuff_creeping_doom',
+        description: 'MIND — a dread that will not be reasoned with: an open-ended doom, guaranteed to take hold, that grows with everything the foe still tries.',
+    },
+    'sig-endless-labor': {
+        id: 'sig-endless-labor', name: 'The Endless Labor', kind: 'empower', cost: 6,
+        magnitude: 3,
+        description: 'BODY — the strength that does not rest: a permanent surge of might added to every blow you land for the rest of the fight.',
+    },
+    'sig-unbroken-stride': {
+        id: 'sig-unbroken-stride', name: 'The Unbroken Stride', kind: 'surge', cost: 4,
+        magnitude: 5,
+        description: 'BODY — a fleetness that punishes hesitation: your next blow lands harder, but only if you keep swinging.',
+    },
 };
 
 /** The player's archetype from their dominant base stat (heart > body > mind
@@ -254,6 +270,26 @@ export function applySignatureSkill(
             const newHand = [...state.hand, ...draw.drawn.map(cardId => ({ uid: `cg${++uid}`, cardId }))];
             next = refreshDraftedDie({ ...state, hand: newHand, drawPile: draw.drawPile, discard: draw.discard });
             events.push({ kind: 'hand-drawn', cards: draw.drawn });
+            break;
+        }
+        case 'empower': {
+            // BODY — grant WRATH directly (Phase 85): mirrors the card-authored
+            // WRATH grant in combat.engine.ts exactly (a flat add, combat-long,
+            // never fades) so a signature-granted stack behaves identically to a
+            // card-granted one for every downstream reader (scalePlayerHit, etc.).
+            const wrath = (state.wrath ?? 0) + skill.magnitude;
+            next = { ...state, wrath };
+            events.push({ kind: 'wrath-gained', cardId: skill.id, amount: skill.magnitude, total: wrath });
+            break;
+        }
+        case 'surge': {
+            // BODY — grant CHAIN directly (Phase 85): mirrors the card-authored
+            // CHAIN grant exactly, including marking the turn as fed so the
+            // signature's own grant doesn't fade at the very boundary it was
+            // cast on.
+            const chain = (state.chain ?? 0) + skill.magnitude;
+            next = { ...state, chain, chainFedThisTurn: true };
+            events.push({ kind: 'chain-gained', cardId: skill.id, amount: skill.magnitude, total: chain });
             break;
         }
     }

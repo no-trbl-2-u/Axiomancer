@@ -46,9 +46,9 @@ describe('buildCharacterFromPreset', () => {
         expect(player.equipment.armor?.id).toBe('relic-read');
         expect(player.equipment.accessories).toHaveLength(3);
         expect(player.knownCards).toHaveLength(7); // Phase 108 — includes Befriend starting card
-        // Apprentice declares no procedural gear: inventory = 8 relics (worn-first)
+        // Apprentice declares no procedural gear: inventory = 11 relics (worn-first)
         // + the 1 declared potion.
-        expect(player.inventory).toHaveLength(9);
+        expect(player.inventory).toHaveLength(12);
         const potion = player.inventory.find(i => i.id === 'minor-healing-potion');
         expect(potion).toBeDefined();
         expect((potion as Consumable | undefined)?.quantity).toBe(3);

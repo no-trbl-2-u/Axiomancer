@@ -13,12 +13,13 @@ A character wears **exactly 5 pieces across 3 slot kinds** — 1 weapon, 1 armor
 accessory: 3 }`). The worn loadout is `Character.equipment: EquipmentLoadout`
 (`{ weapon, armor, accessories[] }`).
 
-The **only equipment content is the 8 fixed "signet" relics**
+The **only equipment content is the 11 fixed "signet" relics**
 ([`src/Items/relic.library.ts`](../src/Items/relic.library.ts)) — 2 weapons, 2
-armor, 4 accessories. Each grants **one signature skill** (`grantsSignature`)
-plus a single **static stat bump** (`statModifiers`). The player owns all 8 and
-wears 1 weapon + 1 armor + 3 of the 4 accessories = **16 possible loadouts**
-(2 × 2 × C(4,3)).
+armor, 7 accessories (Phase 85 filled the `head`/`hands`/`feet` kinds that
+shipped empty in Phase 19). Each grants **one signature skill**
+(`grantsSignature`) plus a single **static stat bump** (`statModifiers`). The
+player owns all 11 and wears 1 weapon + 1 armor + 3 of the 7 accessories =
+**140 possible loadouts** (2 × 2 × C(7,3)).
 
 ## The `Equipment` shape (lean)
 
@@ -66,6 +67,7 @@ findable in the world is a deferred follow-up.
 ## Save migrations
 
 The v11→current chain keeps working: v11→v12 (re-slot to the 5-slot model),
-v12→v13 (seed the signet relics), v13→v14 (purge non-relic equipment). See
+v12→v13 (seed the signet relics), v13→v14 (purge non-relic equipment),
+v21→v22 (seed the Phase 85 head/hands/feet relics). See
 [`src/Game/game.migrate.ts`](../src/Game/game.migrate.ts). `LEGACY_SLOT_MAP`
 stays for old-save upgrades.

@@ -310,11 +310,15 @@
   player read any covered card. Real fix needs care, not a quick patch —
   hence parked below the cheaper wins above despite the comparable score.
 
-> **Parked, do not pick:** `[HIGH] late-stage global collapse — all 10
-> presets 0.00 late` carries an explicit `/oversight 2026-08-08` ruling
-> ("PARKED... do not pick this row, do not promote a phase off it") —
-> excluded from ranking above despite a high raw score. Re-check that
-> ruling before ever touching this row again.
+> **RESOLVED 2026-09-15 (Phase 81) — no longer parked.** `[HIGH]
+> late-stage global collapse — all 10 presets 0.00 late` is closed in
+> `plan/CRITIQUE.md`: both of the 2026-08-08 reopen conditions (redesign
+> landed, Phase 43 defined an objective function) held, and the fresh
+> measurement plus THE BIG NUMBERS REWRITE's repeal of any governing
+> win-rate shape mooted the row entirely (late win rate now reads 82%,
+> zero of 48 late cells at 0%). No longer excluded from future ranking
+> passes as a live row — it simply has nothing left to rank, being
+> closed. See `plan/phases/phase_81_late_campaign_difficulty_cliff.md`.
 
 > Below the cut this pass: `[1.6]` `web:container` dev-server script
 > (`axiomancer-mobile/scripts/dev-server-container.sh` still runs `npx

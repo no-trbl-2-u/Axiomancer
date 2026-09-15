@@ -1,12 +1,16 @@
 # Tuning
 
-> **HISTORICAL:** this document describes the legacy `src/Tuning/` automated
-> A/B tuning module, which was removed along with the legacy turn-based combat
-> resolver (and with it the `/combat-tuning` / `/legacy-combat-tuning`
-> commands and the `balance-analyst` agent — none of these exist today).
-> Current balance loops: `/combat-playtest` (evidence + verdict, report only)
-> and `/deck-tuning` (cards/decks); engine constants are tuned manually. See
-> `docs/playtest.md`.
+> **Status:** HISTORICAL — this document describes the legacy `src/Tuning/`
+> automated A/B tuning module, which was removed along with the legacy
+> turn-based combat resolver (and with it the `/combat-tuning` /
+> `/legacy-combat-tuning` commands and the `balance-analyst` agent — none of
+> these exist today). It also describes the status-primacy doctrine that
+> motivated the module's design (`lexicon.json`'s `status-primacy-doctrine` /
+> `status-engagement-floor-doctrine` rows), repealed 2026-09-02 — the
+> "Status-First Doctrine" section below is an AS-BUILT record of a retired
+> law, not current design law. Current balance loops: `/combat-playtest`
+> (evidence + verdict, report only) and `/deck-tuning` (cards/decks); engine
+> constants are tuned manually. See `docs/playtest.md`.
 
 ## Overview
 

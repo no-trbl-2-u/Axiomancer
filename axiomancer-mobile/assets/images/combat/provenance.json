@@ -1,0 +1,35 @@
+[
+  {
+    "generated_by": "user-supplied",
+    "date": "2026-07-05",
+    "tool": "external-illustration",
+    "prompt": "Pixel-art combat arena backdrop — a storm-lit ruined city skyline under a violet, lightning-forked sky, framed by crumbling walls, with a cracked stone tiled floor in the foreground",
+    "spec_section": "combat-battlefield",
+    "target_dimensions": "1024x923",
+    "used_by": [
+      "assets/images/combat/index.ts (arenaBackdropFor fallback, every region with no rule of its own)",
+      "assets/images/screens/index.ts (ScreenBg art=\"combat\", dev-only sandbox route)"
+    ],
+    "license": "UNRESOLVED",
+    "license_note": "Owner-supplied external illustration; no source or license was recorded at the time and none has been traced since. These assets already ship; this record states what is known rather than inventing terms. Blocked on the owner, same question as Potential Assets/MCP-Axiomancer/images/.",
+    "covers": [
+      "arena-ruined-city.jpg"
+    ]
+  },
+  {
+    "generated_by": "public-domain-acquisition",
+    "date": "2026-09-15",
+    "tool": "scripts/acquire-art.mjs (Commons API + sharp)",
+    "source": "https://commons.wikimedia.org/wiki/File:Bpt6k10470488_f369.jpg",
+    "artist": "Gustave Doré",
+    "license": "Public domain",
+    "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
+    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44",
+    "covers": [
+      "coastal-village.webp"
+    ],
+    "used_by": [
+      "assets/images/combat/index.ts (arenaBackdropFor, region /drowned parish/i)"
+    ]
+  }
+]

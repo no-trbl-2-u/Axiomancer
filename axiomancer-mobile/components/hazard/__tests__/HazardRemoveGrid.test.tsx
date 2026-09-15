@@ -56,7 +56,7 @@ describe('HazardRemoveGrid', () => {
 
     it('renders the heading and prompt when removable cards exist', () => {
         const { getByText } = render(<HazardRemoveGrid {...baseProps} onClose={jest.fn()} onConfirm={jest.fn()} />);
-        expect(getByText('THIN THE DECK')).toBeTruthy();
+        expect(getByText('THIN THE HAZARD DECK')).toBeTruthy();
         expect(getByText('Choose one acquired card to cut.')).toBeTruthy();
     });
 

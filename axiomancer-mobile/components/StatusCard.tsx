@@ -90,7 +90,7 @@ export function StatusCard(props: StatusCardProps = {}) {
             {graceBreakLegend()}
           </Text>
           {grace.inArrears && (
-            <Text style={styles.moraleWarning}>the ledger runs to arrears.</Text>
+            <Text style={styles.moraleWarning}>the account runs to arrears.</Text>
           )}
         </View>
       </View>

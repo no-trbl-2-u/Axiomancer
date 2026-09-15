@@ -43,38 +43,46 @@ Tick in this file in the same commit that ships the phase.
 
 **Next up (autonomous loop's queue):**
 
-- [ ] Phase 79 — Doctrine lexicon: register the 2026-09-02 status-primacy
+- [x] Phase 79 — Doctrine lexicon: register the 2026-09-02 status-primacy
       retirement in `lexicon.json`'s doctrine mechanism; fix the two live
       un-exempted hits (`statusGlyphs.ts`, `tuning.md`) (promoted via
       `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md` [score 8.0])
-- [ ] Phase 80 — Naming pass: one concept, one word across player-facing
+      — `feat(tooling): register the status-primacy doctrine retirement — phase 79` (eb779017)
+- [x] Phase 80 — Naming pass: one concept, one word across player-facing
       surfaces (money/journal/SEALED/SURGE/"the deck" clusters), against a
       written lexicon (promoted via `/oversight` 2026-09-15 from
       `PHASE_CANDIDATES.md` [score 6.5])
-- [ ] Phase 81 — Late-campaign difficulty cliff: verify against current
+      — `feat: naming pass — one concept, one word — phase 80` (69c68db6)
+- [x] Phase 81 — Late-campaign difficulty cliff: verify against current
       baseline whether THE PATH already closed the 4%/0%-cells gap; if
       still open, pick among the three named design options (card
       level-scaling term / flatten enemy VITAE growth / vigil `reprisal`
       wall answer) — may need a follow-up `/oversight` touch (promoted via
-      `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md` [score 6.5])
-- [ ] Phase 82 — Glossary reachability: mount tooltip targets on the
+      `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md` [score 6.5]) —
+      gap was already closed by THE PATH; no lever needed
+      — `docs: close the late-stage global collapse HIGH — phase 81` (ff9d405e)
+- [x] Phase 82 — Glossary reachability: mount tooltip targets on the
       hazard deck's 14 keyword chips (promoted via `/oversight` 2026-09-15
       from `PHASE_CANDIDATES.md` [score 6.0])
-- [ ] Phase 83 — Combat arena backdrop: region-keyed backdrop set via the
+      — `feat(mobile): glossary reachability — hazard-deck keyword chips — phase 82` (ee8bf2e5)
+- [x] Phase 83 — Combat arena backdrop: region-keyed backdrop set via the
       Phase 73/78 art pipeline, starting with the coastal village
       (promoted via `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md`
       [score 6.0], absorbing the [score 4.5] capital cross-reference row)
-- [ ] Phase 84 — The Capital: attended `/world-spec` or `/story-spec`
-      session deciding what the advisor-selection payoff sets up for the
-      player character before more northern-continent geography ships
-      (requires T present — do not guess) (promoted via `/oversight`
+      — `feat(mobile): combat arena backdrop — region-keyed, coastal village — phase 83` (cb3b1c97)
+- [blocked: requires attended `/world-spec` or `/story-spec` session with
+  T present — do not guess 2026-09-15] Phase 84 — The Capital: attended
+      `/world-spec` or `/story-spec` session deciding what the
+      advisor-selection payoff sets up for the player character before
+      more northern-continent geography ships (promoted via `/oversight`
       2026-09-15 from `PHASE_CANDIDATES.md` [score 5.5])
-- [ ] Phase 85 — Equipment progression: mechanics-expert design session
+- [x] Phase 85 — Equipment progression: mechanics-expert design session
       for 1-3 new signature skills sized for head/hands/feet accessories,
       then author + wire the relics carrying them, preserving
       `relic.library.ts`'s 1:1 relic-identity rule (promoted via
       `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md` [score 5.5];
       closes `AUDIT.md`'s equipment-progression loop-call)
+      — `feat(mechanics): equipment progression — 3 new signature skills for head/hands/feet — phase 85` (9f313d0c)
 - [ ] Phase 86 — Engine hook sweep: delete the 19 orphaned `zoneHas` sites
       in `combat.engine.ts` (rewriting `oracle-omen-v2`'s telegraph
       harness off `fated-course` first), wire the-sextons-count's TWIN

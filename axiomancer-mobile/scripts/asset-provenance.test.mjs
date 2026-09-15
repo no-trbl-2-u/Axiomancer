@@ -39,9 +39,10 @@ const NOT_ART_DIRS = new Set(['android', 'ios', 'web'])
 /**
  * Directories with one consumed-directly asset and no registry. Recorded so
  * adding a second file has to confront the missing `index.ts` rather than
- * quietly doubling an un-registried directory.
+ * quietly doubling an un-registried directory. `combat` graduated in phase
+ * 83 — it now has `index.ts`'s `arenaBackdropFor` resolver.
  */
-const REGISTRY_LESS = new Set(['combat'])
+const REGISTRY_LESS = new Set()
 
 /** Every directory under assets/images that holds raster art. */
 function artDirectories(dir = IMAGES, rel = '') {

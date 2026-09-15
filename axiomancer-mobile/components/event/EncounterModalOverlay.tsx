@@ -75,6 +75,10 @@ interface EncounterModalOverlayProps {
     onFight: () => void;
     /** Pays the retreat cost. Fired by the reveal's WITHDRAW (see doc-block). */
     onFlee: () => void;
+    /** The exploration screen's current map region (`vm.region` there — this
+     *  component's own `vm` is the event VM, hence the separate name), keying
+     *  the combat arena backdrop plate (phase 83). */
+    region?: string;
 }
 
 export function EncounterModalOverlay({
@@ -82,6 +86,7 @@ export function EncounterModalOverlay({
     encounterEnemy,
     onFight,
     onFlee,
+    region,
 }: EncounterModalOverlayProps) {
     // Phase 63b — internal mode. FIGHT advances prelude → combat
     // and bubbles the existing onFight callback up (which still
@@ -271,6 +276,7 @@ export function EncounterModalOverlay({
                         persistOutcome
                         onWithdraw={fleeAllowed ? handleWithdraw : undefined}
                         onExit={handleHazardExit}
+                        region={region}
                     />
                 </View>
             </View>

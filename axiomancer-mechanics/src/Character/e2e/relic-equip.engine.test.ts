@@ -9,23 +9,27 @@ import { calculateMaxHealth } from '../../Utils';
 import { getRelicById, getSignaturesForLoadout } from '../../Items/relic.library';
 
 describe('createCharacter — seedStartingRelics', () => {
-    it('wears the default 5-relic loadout and owns all 8 (worn-first in inventory)', () => {
+    it('wears the default 5-relic loadout and owns all 11 (worn-first in inventory)', () => {
         const c = createCharacter({ name: 'T', level: 1, baseStats: { heart: 5, body: 5, mind: 5 }, seedStartingRelics: true });
         expect(c.equipment.weapon?.id).toBe('relic-overwhelming');
         expect(c.equipment.armor?.id).toBe('relic-read');
         expect(c.equipment.accessories).toHaveLength(3);
-        // All 8 relics owned; inventory leads with the worn 5 (worn-first per slot
+        // All 11 relics owned; inventory leads with the worn 5 (worn-first per slot
         // so the presenter's inventory-position worn convention agrees), then the
-        // 3 benched.
+        // 6 benched.
         const relicIds = c.inventory.filter(i => i.id.startsWith('relic-')).map(i => i.id);
-        expect(relicIds).toHaveLength(8);
+        expect(relicIds).toHaveLength(11);
         // Owner call 2026-07-18: the Gambler's Knot (Press Fate) is default-worn;
-        // the Venom Sigil (The Oath Kept) is benched.
+        // the Venom Sigil (The Oath Kept) is benched. Phase 85's 3 new relics
+        // (head/hands/feet) also start benched.
         expect(relicIds.slice(0, 5)).toEqual([
             'relic-overwhelming', 'relic-read',
             'relic-clever-gambit', 'relic-disarming-plea', 'relic-press-the-point',
         ]);
-        expect(relicIds.slice(5).sort()).toEqual(['relic-conclusion', 'relic-conviction-strike', 'relic-second-wind']);
+        expect(relicIds.slice(5).sort()).toEqual([
+            'relic-conclusion', 'relic-conviction-strike', 'relic-endless-labor',
+            'relic-mounting-dread', 'relic-second-wind', 'relic-unbroken-stride',
+        ]);
     });
 
     it('folds the worn armor relic +5 maxHp onto maxHealth (and starts at full health)', () => {

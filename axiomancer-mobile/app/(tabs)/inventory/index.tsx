@@ -127,7 +127,7 @@ export default function InventoryScreen() {
                 <View style={styles.headerRow}>
                     <Text style={styles.title}>INVENTORY</Text>
                     <View style={styles.shillingBox}>
-                        <Text style={styles.shillingLabel}>SHILLING</Text>
+                        <Text style={styles.shillingLabel}>PURSE</Text>
                         <Text style={styles.shillingVal}>⚜ {vm.shilling}</Text>
                     </View>
                 </View>

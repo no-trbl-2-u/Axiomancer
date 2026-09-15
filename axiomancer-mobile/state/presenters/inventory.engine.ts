@@ -239,7 +239,11 @@ const TAB_ORDER: readonly InventoryTab[] = [
 ] as const;
 
 /** Display strings for the inventory screen's chrome. */
-const SECTION_HEADER = 'SATCHEL · WALLET · BURDEN';
+// Phase 80 (naming pass): the eyebrow said WALLET while the money box a few
+// pixels below it said SHILLING — two words for the same readout on one
+// screen. PURSE is the canonical money-container word everywhere else
+// (blacksmith/rest/village); this screen now agrees with itself and them.
+const SECTION_HEADER = 'SATCHEL · PURSE · BURDEN';
 const CATEGORY_HEADERS: Record<InventoryCategory, string> = {
     // S3-sheet-C22 (second half): every header echoes its own tab — PHIALS →
     // '✠ PHIALS & SOPS', STUFF → '✠ STUFF', SEALED → '✠ SEALED'. This one was

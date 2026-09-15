@@ -25,6 +25,7 @@ import { HazardCard } from '@/components/hazard/HazardCard';
 import { HazardRemoveGrid } from '@/components/hazard/HazardRemoveGrid';
 import { HazardStatKey } from '@/components/hazard/HazardStatKey';
 import { DIE, HZ } from '@/components/hazard/palette';
+import { TooltipTarget } from '@/components/tooltip/TooltipTarget';
 import { useGameState } from '@/state/GameStoreProvider';
 import { selectHazardDeckViewModel } from '@/state/presenters/hazard-deck.engine';
 import type { HazardCardVM } from '@/state/presenters/hazard.engine';
@@ -114,16 +115,24 @@ export default function HazardDeckScreen() {
                 </View>
             )}
 
-            {/* Keyword distribution */}
+            {/* Keyword distribution — tap a chip to read its glossary entry (Phase 82). */}
             {vm.keywordTally.length > 0 && (
                 <View style={styles.section}>
                     <SectionLabel size={10}>✠ KEYWORDS</SectionLabel>
                     <View style={styles.kwWrap}>
                         {vm.keywordTally.map((row) => (
-                            <View key={row.id} style={styles.kwChip} testID={`hazard-deck-kw-${row.id}`}>
+                            <TooltipTarget
+                                key={row.id}
+                                kind="hazard-keyword"
+                                id={row.id}
+                                style={styles.kwChip}
+                                accessibilityLabel={`Explain keyword ${row.name}`}
+                                accessibilityHint="tap to read description"
+                                testID={`hazard-deck-kw-${row.id}`}
+                            >
                                 <Text style={styles.kwName}>{row.name}</Text>
                                 <Text style={styles.kwCount}>{row.count}</Text>
-                            </View>
+                            </TooltipTarget>
                         ))}
                     </View>
                 </View>
@@ -161,11 +170,11 @@ export default function HazardDeckScreen() {
                     style={[styles.removeCta, { borderColor: vm.hasRemovable ? HZ.acid : AXM.ash }]}
                     onPress={() => setRemoveOpen(true)}
                     accessibilityRole="button"
-                    accessibilityLabel="Open the remove-card grid to thin your deck"
+                    accessibilityLabel="Open the remove-card grid to thin your hazard deck"
                     testID="hazard-deck-open-remove"
                 >
                     <Text style={[styles.removeCtaLabel, { color: vm.hasRemovable ? HZ.acid : AXM.bone }]}>
-                        THIN THE DECK
+                        THIN THE HAZARD DECK
                     </Text>
                     <Text style={styles.removeCtaSub}>
                         {vm.hasRemovable

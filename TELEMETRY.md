@@ -421,4 +421,17 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-15T09:02:14Z | skill | digest | unknown | - | - |
 | 2026-09-15T10:32:06Z | slash-prompt | /march | unknown | - | /march |
 | 2026-09-15T10:32:53Z | skill | adjust-equipment | claude-sonnet-5 | - | - |
+| 2026-09-15T12:41:27Z | slash-prompt | /march | unknown | - | /march |
+| 2026-09-15T12:41:56Z | skill | ship-a-phase | claude-sonnet-5 | - | - |
+| 2026-09-15T14:31:54Z | slash-prompt | /march | unknown | - | /march |
+| 2026-09-15T14:32:38Z | skill | ship-a-phase | claude-sonnet-5 | - | - |
+| 2026-09-15T14:33:47Z | subagent | Explore | claude-sonnet-5 | - | Inventory naming-cluster occurrences |
+| 2026-09-15T16:32:42Z | slash-prompt | /march | unknown | - | /march |
+| 2026-09-15T16:33:14Z | skill | ship-a-phase | claude-sonnet-5 | - | - |
+| 2026-09-15T18:33:32Z | slash-prompt | /march | unknown | - | /march |
+| 2026-09-15T20:29:37Z | slash-prompt | /march | unknown | - | /march |
+| 2026-09-15T20:30:06Z | skill | ship-a-phase | claude-sonnet-5 | - | - |
+| 2026-09-15T22:29:22Z | slash-prompt | /march | unknown | - | /march |
+| 2026-09-15T22:30:30Z | skill | ship-a-phase | claude-sonnet-5 | - | - |
+| 2026-09-15T22:32:00Z | subagent | mechanics-expert | claude-sonnet-5 | - | Design 3 new signature skills for equipment progression |
 | 2026-09-15T23:55:38Z | tick-end | - | claude-opus-5 | - | ok |

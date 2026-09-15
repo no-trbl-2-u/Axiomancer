@@ -93,7 +93,7 @@ export const COMBAT_TUTORIAL_STEPS: CombatTutorialStep[] = [
         body:
             'Wear their VITAE down to nothing — it is the only bar. A strike takes it straight ' +
             'off the top; a DoT bleeds them every turn; STAGGER strips their telegraphed action ' +
-            'rung by rung. Strikes, statuses, Conviction, Surge and your dice all compete on merit.',
+            'rung by rung. Strikes, statuses, Conviction, MOMENTUM and your dice all compete on merit.',
         lookFor: 'the enemy VITAE bar',
         done: (s) => pressured(s) || advanced(s),
     },

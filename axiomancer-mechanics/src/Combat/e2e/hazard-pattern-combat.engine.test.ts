@@ -425,6 +425,40 @@ describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
         expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_poison')).toBe(true);
     });
 
+    // ── Phase 85 (equipment progression — head/hands/feet accessories) ───────
+    it('The Mounting Dread applies a guaranteed, open-ended DoT to the enemy', () => {
+        mockSequentialRng(0.5);
+        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(90, 'mind'), [DOT_BODY], 4);
+        state = rollEncounterDice(state).state;
+        state = { ...state, conviction: 10 };
+        const r = playSignatureSkill(state, 'sig-mounting-dread');
+        expect(r.state.conviction).toBe(1); // cost 9
+        expect(r.state.enemy.effects.some(e => e.effectId === 'debuff_creeping_doom')).toBe(true);
+    });
+
+    it('The Endless Labor grants WRATH directly — combat-long, never fades', () => {
+        mockSequentialRng(0.5);
+        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(90, 'mind'), [DOT_BODY], 4);
+        state = rollEncounterDice(state).state;
+        state = { ...state, conviction: 6, wrath: 1 };
+        const r = playSignatureSkill(state, 'sig-endless-labor');
+        expect(r.state.conviction).toBe(0); // cost 6
+        expect(r.state.wrath).toBe(4); // 1 + magnitude 3
+        expect(r.events.some(e => e.kind === 'wrath-gained')).toBe(true);
+    });
+
+    it('The Unbroken Stride grants CHAIN directly and feeds the current turn', () => {
+        mockSequentialRng(0.5);
+        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(90, 'mind'), [DOT_BODY], 4);
+        state = rollEncounterDice(state).state;
+        state = { ...state, conviction: 4, chain: 0, chainFedThisTurn: false };
+        const r = playSignatureSkill(state, 'sig-unbroken-stride');
+        expect(r.state.conviction).toBe(0); // cost 4
+        expect(r.state.chain).toBe(5); // magnitude 5
+        expect(r.state.chainFedThisTurn).toBe(true);
+        expect(r.events.some(e => e.kind === 'chain-gained')).toBe(true);
+    });
+
     it('scrapping a hand card grants +1 Conviction and discards it', () => {
         mockSequentialRng(0.5);
         let state = initializeCombatEncounter(makePlayer([DOT_BODY, CONTROL_CARD]), makeEnemy(60), [DOT_BODY, CONTROL_CARD], 6);
