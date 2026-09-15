@@ -53,12 +53,14 @@ Tick in this file in the same commit that ships the phase.
       written lexicon (promoted via `/oversight` 2026-09-15 from
       `PHASE_CANDIDATES.md` [score 6.5])
       — `feat: naming pass — one concept, one word — phase 80` (69c68db6)
-- [ ] Phase 81 — Late-campaign difficulty cliff: verify against current
+- [x] Phase 81 — Late-campaign difficulty cliff: verify against current
       baseline whether THE PATH already closed the 4%/0%-cells gap; if
       still open, pick among the three named design options (card
       level-scaling term / flatten enemy VITAE growth / vigil `reprisal`
       wall answer) — may need a follow-up `/oversight` touch (promoted via
-      `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md` [score 6.5])
+      `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md` [score 6.5]) —
+      gap was already closed by THE PATH; no lever needed
+      — `docs: close the late-stage global collapse HIGH — phase 81` (ff9d405e)
 - [ ] Phase 82 — Glossary reachability: mount tooltip targets on the
       hazard deck's 14 keyword chips (promoted via `/oversight` 2026-09-15
       from `PHASE_CANDIDATES.md` [score 6.0])
