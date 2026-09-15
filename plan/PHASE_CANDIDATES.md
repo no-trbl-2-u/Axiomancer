@@ -269,7 +269,14 @@
 
 ## Pending
 
-### [score 6.5] One concept, one word — a naming pass across the player-facing surfaces
+> **Flagged via /oversight 2026-09-15:** of this section's ~60 rows, only 11
+> carried an active `[score N]` tag; the other ~49 are pre-scoring-convention
+> rows from the 2026-07/08 era, mostly already struck through as
+> PROMOTED/ABSORBED/SUPERSEDED/RESOLVED but left un-struck from Pending as
+> bookkeeping debt. Recommend a `/consolidate` pass to strike or archive the
+> dead ~49 so this section reflects only live candidates going forward.
+
+### ~~[score 6.5] One concept, one word — a naming pass across the player-facing surfaces~~ PROMOTED to Phase 80 via /oversight 2026-09-15
 The 2026-09-12 UI fresh-eyes sweep found the same concept wearing several names
 on screens a player sees in the same minute, raised independently by three or
 more observation lenses: money is `SHILLING` / `PURSE` / `WALLET` / `12s`; the
@@ -295,7 +302,7 @@ glyph (`FE-056`), the gear section stopped naming a state it does not describe
 (`FE-037`), and the title copy lowercased LEAGUES to match the map (`FE-057`).
 Per-row verdicts: `UI_FRESH_EYES_SWARM_2026-09-12.ledger.md`.
 
-### [score 6.0] Make the glossary reachable from the screens that need it
+### ~~[score 6.0] Make the glossary reachable from the screens that need it~~ PROMOTED to Phase 82 via /oversight 2026-09-15
 The same sweep found definitions that exist but cannot be got at: the hazard
 deck's fourteen keyword chips render in a plain `View` with no tooltip target,
 its four headline stats (`DISTINCT`, `ACQUIRED`, `SCARS`) are display-only, and
@@ -313,7 +320,7 @@ row that reported it on the ground that the registry content exists — which is
 exactly this candidate's point, that content nobody can reach is not reachable.
 
 
-### [score 5.5] The Capital is the new frontier — no door onward yet, same as town-across-river before it
+### ~~[score 5.5] The Capital is the new frontier — no door onward yet, same as town-across-river before it~~ PROMOTED to Phase 84 via /oversight 2026-09-15
 - proposed: 2026-09-10, /forge (Phase W6, commit f56fa198)
 - source signals:
   - THE CAPITAL (map 5 of the northern continent) ships terminal at
@@ -347,7 +354,7 @@ exactly this candidate's point, that content nobody can reach is not reachable.
   (b) is picked).
 - conflicts: none. Does not touch the labyrinth-continent gate.
 
-### [score 4.5] The combat arena backdrop gap (score-6.0 row below) now also covers the-capital and its own settlement flavor
+### ~~[score 4.5] The combat arena backdrop gap (score-6.0 row below) now also covers the-capital and its own settlement flavor~~ FOLDED into Phase 83 (the score-6.0 backdrop candidate below) via /oversight 2026-09-15 — no independent phase
 - proposed: 2026-09-10, /forge (Phase W6)
 - source signals: the-capital ships with no dedicated backdrop plate —
   it free-rides whatever the existing region-string regex resolves to
@@ -420,7 +427,7 @@ exactly this candidate's point, that content nobody can reach is not reachable.
   staging fix with a six-tree rewrite in the same diff, and because 44g's
   own precedent treats staging and retheme as sequential, separable work.
 
-### [score 8.0] Register the 2026-09-02 status-primacy doctrine retirement in `lexicon.json`'s doctrine mechanism — two live surfaces still assert it as current
+### ~~[score 8.0] Register the 2026-09-02 status-primacy doctrine retirement in `lexicon.json`'s doctrine mechanism — two live surfaces still assert it as current~~ PROMOTED to Phase 79 via /oversight 2026-09-15
 - proposed: 2026-09-03, expand pass 11
 - source signals:
   - spec.md diff (commit `63e3741f`, 2026-09-02): "Status effects are
@@ -471,7 +478,7 @@ exactly this candidate's point, that content nobody can reach is not reachable.
 - conflicts: none. Purely additive to an existing, CI-wired,
   already-ratified mechanism; touches no spec.md non-goal.
 
-### [score 6.5] The late-campaign difficulty cliff (4% win rate, 4 of 6 cells at 0%) survived THE PATH tuning pass and needs a named design-level fix, not another tuning pass
+### ~~[score 6.5] The late-campaign difficulty cliff (4% win rate, 4 of 6 cells at 0%) survived THE PATH tuning pass and needs a named design-level fix, not another tuning pass~~ PROMOTED to Phase 81 via /oversight 2026-09-15
 - proposed: 2026-09-03, expand pass 11
 - source signals:
   - `plan/2026-09-02-big-numbers-overhaul.decisions.md` (from the
@@ -513,7 +520,7 @@ exactly this candidate's point, that content nobody can reach is not reachable.
   should visibly move something" / "richer verbs, competing lines, none
   protected" pillars; touches no non-goal.
 
-### [score 6.0] The combat arena backdrop is still one fixed image across (now) three continents of distinct settings — critique's own routing instruction to `/expand` was never followed
+### ~~[score 6.0] The combat arena backdrop is still one fixed image across (now) three continents of distinct settings — critique's own routing instruction to `/expand` was never followed~~ PROMOTED to Phase 83 via /oversight 2026-09-15
 - proposed: 2026-09-03, expand pass 11
 - source signals:
   - `plan/CRITIQUE.md` Pending, pass 23: "every encounter renders the
@@ -606,7 +613,7 @@ exactly this candidate's point, that content nobody can reach is not reachable.
   third-party SDK" constraint in the 2026-07-20 session; this candidate
   only asks to promote work already approved, not to invent new scope.
 
-### [score 6.5] Register the ten retired starter-preset ids (and the retired Hazard/route ids) in `lexicon.json` so `check-lexicon.mjs` catches them
+### ~~[score 6.5] Register the ten retired starter-preset ids (and the retired Hazard/route ids) in `lexicon.json` so `check-lexicon.mjs` catches them~~ CLOSED as stale via /oversight 2026-09-15 — see note below
 - proposed: 2026-09-01, expand pass 10
 - source signals:
   - `plan/AUDIT.md` "Combat playtest reference still names the retired
@@ -651,6 +658,16 @@ exactly this candidate's point, that content nobody can reach is not reachable.
 - estimated phases: 1
 - conflicts: none. Purely additive to an existing, CI-wired, already-
   ratified mechanism; touches no spec.md non-goal.
+
+**CLOSED as stale via /oversight 2026-09-15:** all three cited evidence
+sites are already fixed in the current tree — `playtest.md`, `cli.md` +
+the fishing-village walkthrough, and the card-expert/deck-tuning docs all
+show zero hits for the retired preset/route ids. The `plan/AUDIT.md` row
+this candidate cites (Hazard/route ids, `[5.6]`) was closed today
+(2026-09-14, commits `541e4ad`/`593650a`) via a direct docs fix, not via
+the `lexicon.json` mechanism this candidate proposed. Not promoted — its
+evidence base is gone even though the underlying "add a lint row" idea has
+residual merit; re-file if the failure mode recurs.
 
 ### ~~[score 7.5] Extend `lexicon.json`/`check-lexicon.mjs` to catch retired-doctrine prose, not just retired identifiers~~ PROMOTED to Phase 66 via /oversight 2026-08-20
 - proposed: 2026-08-15, expand pass 8
@@ -1726,7 +1743,7 @@ exactly this candidate's point, that content nobody can reach is not reachable.
 - conflicts: none — process/tooling fix only; no spec.md non-goal
   touched.
 
-### [score 5.5] Fill the 3 empty accessory kinds (head/hands/feet) with new mid/late signature skills + relics
+### ~~[score 5.5] Fill the 3 empty accessory kinds (head/hands/feet) with new mid/late signature skills + relics~~ PROMOTED to Phase 85 via /oversight 2026-09-15
 - proposed: 2026-09-09, expand pass 12
 - source signals:
   - `plan/CRITIQUE.md:511` `[HIGH]` "no mid/late equipment or signature
@@ -1768,7 +1785,7 @@ exactly this candidate's point, that content nobody can reach is not reachable.
   1 can be briefed — that call is the point of filing this here rather
   than leaving it in AUDIT.md.
 
-### [score 4.5] Sweep dead profane-canon engine hooks — 19 orphaned `zoneHas` sites + the-sextons-count's missing TWIN wire
+### ~~[score 4.5] Sweep dead profane-canon engine hooks — 19 orphaned `zoneHas` sites + the-sextons-count's missing TWIN wire~~ PROMOTED to Phase 86 via /oversight 2026-09-15
 - proposed: 2026-09-09, expand pass 12
 - source signals:
   - `plan/AUDIT.md:201` `[loop-call]` "Dead engine hooks — 19 orphaned
@@ -1816,7 +1833,7 @@ exactly this candidate's point, that content nobody can reach is not reachable.
 - estimated phases: 1
 - conflicts: none identified.
 
-### [score 4.0] Smooth the first two forced/likely encounters — Brine Hag's 3-phase elite open + Ash Mire boss sitting on the natural forward path
+### ~~[score 4.0] Smooth the first two forced/likely encounters — Brine Hag's 3-phase elite open + Ash Mire boss sitting on the natural forward path~~ PROMOTED to Phase 87 via /oversight 2026-09-15
 - proposed: 2026-09-09, expand pass 12
 - source signals:
   - `plan/CRITIQUE.md:463` `[MED]` "the first map fight is an
@@ -1870,6 +1887,115 @@ exactly this candidate's point, that content nobody can reach is not reachable.
   filed above instead of gold-plating the mega-redesign into this pass.
 
 ## Promoted
+
+### Doctrine lexicon: register the status-primacy retirement (2026-09-15)
+- promoted: 2026-09-15 via `/oversight`, as **Phase 79**.
+- source row (stays in `## Pending` above, struck through): "[score 8.0]
+  Register the 2026-09-02 status-primacy doctrine retirement in
+  `lexicon.json`'s doctrine mechanism" (proposed 2026-09-03, expand pass 11).
+- why now: build-plan queue was fully drained; this is the highest-scored
+  clean candidate. Add `type: "doctrine"` lexicon rows for the retired
+  status-primacy language, fix `statusGlyphs.ts` and `tuning.md`'s two live
+  un-exempted hits, sweep for further lint catches.
+
+### Naming pass: one concept, one word (2026-09-15)
+- promoted: 2026-09-15 via `/oversight`, as **Phase 80**.
+- source row: "[score 6.5] One concept, one word — a naming pass across the
+  player-facing surfaces" (proposed 2026-09-12 swarm, PR #302).
+- why now: queue refill. Scope carries the written-lexicon approach the
+  source row argues for (money/journal/SEALED/SURGE/"the deck" clusters);
+  three single-screen cases already shipped in the swarm (FE-056/037/057).
+
+### Late-campaign difficulty cliff: verify then fix (2026-09-15)
+- promoted: 2026-09-15 via `/oversight`, as **Phase 81**.
+- source row: "[score 6.5] The late-campaign difficulty cliff... needs a
+  named design-level fix" (proposed 2026-09-03, expand pass 11).
+- **open sub-choice carried into the brief, NOT resolved by this
+  promotion:** the source row itself asks for a fresh `baseline:check`
+  read first — THE PATH (commit `515ac4d9`) may have already narrowed or
+  closed the 4%/0%-cells gap this row measured. Phase 81's first step is
+  that verification; only if the gap is still open does it need a pick
+  among the three named options (card level-scaling term / flatten enemy
+  VITAE growth / vigil `reprisal` wall answer) — that pick may need its
+  own `/oversight` touch once real numbers are in hand.
+
+### Glossary reachability: keyword-chip tooltips (2026-09-15)
+- promoted: 2026-09-15 via `/oversight`, as **Phase 82**.
+- source row: "[score 6.0] Make the glossary reachable from the screens
+  that need it" (proposed 2026-09-12 swarm, PR #302).
+- why now: queue refill. Three of four sub-findings already shipped in the
+  swarm (FE-058/053/054); this phase finishes the structural half — mount
+  tooltip targets on the hazard deck's 14 keyword chips.
+
+### Combat arena backdrop: region-keyed backdrops (2026-09-15)
+- promoted: 2026-09-15 via `/oversight`, as **Phase 83**. Absorbs the
+  struck-through [score 4.5] "capital cross-reference" row above — folded,
+  not independently promoted.
+- source row: "[score 6.0] The combat arena backdrop is still one fixed
+  image across (now) three continents" (proposed 2026-09-03, expand pass
+  11; itself a hand-off from `plan/CRITIQUE.md` pass 23).
+- why now: queue refill. Source row's own scope note flags 2-3 phases
+  (asset sourcing via the Phase 73/78 pipeline, then wiring); Phase 83
+  covers the first leg.
+
+### The Capital: narrative next-beat design session (2026-09-15)
+- promoted: 2026-09-15 via `/oversight`, as **Phase 84**.
+- source row: "[score 5.5] The Capital is the new frontier — no door
+  onward yet" (proposed 2026-09-10, `/forge` Phase W6).
+- **sub-choice decided:** the source row offered (a) ship map 6 literally,
+  or (b) a `/world-spec`/`story-spec` session decides what the capital's
+  advisor-selection payoff sets up for the player character before more
+  geography ships. Ruled **(b)** — an attended design session, not a
+  mechanical "map 6" bolt-on. Phase 84 is that session; it does not ship
+  a map itself.
+
+### Equipment progression: new signature skill(s) for empty accessory kinds (2026-09-15)
+- promoted: 2026-09-15 via `/oversight`, as **Phase 85**. Closes
+  `plan/AUDIT.md`'s "[loop-call] No mid/late equipment progression" row.
+- source row: "[score 5.5] Fill the 3 empty accessory kinds (head/hands/
+  feet)..." (proposed 2026-09-09, expand pass 12).
+- **sub-choice decided:** the source row's own AUDIT cross-reference named
+  three options — (a) design N new signature skills first, preserving the
+  1:1 relic-identity rule, (b) break the 1:1 rule with stat-only
+  accessories, or (c) something else. Ruled **(a)**: a mechanics-expert
+  design session for 1-3 new signature skills, then relics carrying them
+  into head/hands/feet, mirroring the existing 8's shape.
+
+### Engine hook sweep: dead zoneHas cleanup + TWIN wire (2026-09-15)
+- promoted: 2026-09-15 via `/oversight`, as **Phase 86**. Closes
+  `plan/AUDIT.md`'s "[loop-call] Dead engine hooks" and "[loop-call]
+  the-sextons-count is missing its TWIN trigger" rows.
+- source row: "[score 4.5] Sweep dead profane-canon engine hooks — 19
+  orphaned `zoneHas` sites + the-sextons-count's missing TWIN wire"
+  (proposed 2026-09-09, expand pass 12).
+- scope: delete/neutralize the 18 truly-dead `zoneHas` hooks and their
+  pinning tests, rewrite `oracle-omen-v2.engine.test.ts`'s deterministic
+  telegraph harness off the `fated-course` hook before removing it, wire
+  `the-sextons-count`'s TWIN clause correctly scoped (after the
+  `directDamage`/`drawPile`/`discard` locals, guarding against
+  double-counting with `reprise`).
+
+### Early-game encounter smoothing: Brine Hag / Ash Mire (2026-09-15)
+- promoted: 2026-09-15 via `/oversight`, as **Phase 87**.
+- source row: "[score 4.0] Smooth the first two forced/likely encounters —
+  Brine Hag's 3-phase elite open + Ash Mire boss sitting on the natural
+  forward path" (proposed 2026-09-09, expand pass 12).
+- scope: gate the fresh-save first encounter roll to a one-phase,
+  zero-keyword foe; audit the fishing-village unlock graph so at least one
+  ordinary encounter/rest node opens before or beside the Ash Mire boss
+  edge. Check both against `/world-tuning`'s per-map doctrine before
+  implementation.
+
+### W5 art adoption: wire the licensed replacement candidates (2026-09-15)
+- promoted: 2026-09-15 via `/oversight`, as **Phase 88**. Direct oversight
+  instruction, not an `/expand`-filed candidate — no source row to strike
+  (same shape as Phase 77/78's direct promotions). Closes `plan/AUDIT.md`'s
+  "[loop-call] Phase 78 — W5 art-pass candidates" row.
+- scope: adopt the first-listed (top) licensed candidate for each of the 9
+  W5 enemies researched in Phase 78 (`plan/phases/phase_78_art_pass_w5_sourcing.md`),
+  replacing the game-icons.net silhouette placeholders; carry over Phase
+  78's open sourcing notes (thin results for toll-sergeant/the-factor/
+  wharf-shrike; unpaid-delver needs compositing, not a single drop-in).
 
 ### Art-pass: open-source art sourcing research for W5 portraits (2026-09-02)
 - promoted: 2026-09-02 via `/oversight`, as **Phase 78**. Direct T

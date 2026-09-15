@@ -55,6 +55,22 @@ Consult `kb-query` board-game reception corpus for equipment/loot
 design prior art (dominated-item complaints, reward-pool staleness)
 when scoring a REMOVE/UPDATE candidate.
 
+### Step 1b — Widened audit scope (via `/oversight` 2026-09-15)
+
+If Step 1's structural-signal table returns nothing actionable (a
+zero-diff pass), don't stop there — passes 9-10 across all five content
+stewards logged consecutive zero-diff results, a plateau worth checking
+before trusting it as steady-state health. Run one additional deeper
+check before concluding zero-diff: a KB cross-reference pass comparing
+the current relic/consumable/shop pools against corpus prior-art gaps
+(`kb_search`/`kb_cards` for equipment mechanics well-represented in
+comparable games but absent or thin here — not just Step 1's structural
+completeness signals). File anything this turns up as a normal finding
+(Step 1's table categories still apply) and act on it in the same tick.
+If the deeper check also turns up nothing, the zero-diff result stands
+and gets logged as usual — this is a floor-raise on the audit, not a
+mandate to invent findings.
+
 ### Step 2 — KB research, then design
 
 **A KB research run is a GATE for every CREATE and UPDATE — nothing

@@ -49,6 +49,23 @@ see Step 2).
 | An NPC with a spec in `specs/characters/` or `specs/story/` that was never implemented in `src/NPCs/**` | CREATE |
 | An NPC absent from every map (orphaned entity, no spec references it either) | REMOVE candidate |
 
+### Step 1b — Widened audit scope (via `/oversight` 2026-09-15)
+
+If Step 1's structural-signal table returns nothing actionable (a
+zero-diff pass), don't stop there — passes 9-10 across all five content
+stewards logged consecutive zero-diff results, a plateau worth checking
+before trusting it as steady-state health. Run one additional deeper
+check before concluding zero-diff: a KB cross-reference pass comparing
+current NPC/dialogue coverage against corpus prior-art gaps (`kb_search`/
+`kb_find_games` for staging/dialogue patterns well-represented in
+comparable games but absent or thin here — not just Step 1's structural
+completeness signals). File anything this turns up as a normal finding
+(Step 1's table categories still apply, and hard rule 3's carve-out for
+autonomously inventing a named character's personhood still governs —
+file a gap, don't improvise a voice). If the deeper check also turns up
+nothing, the zero-diff result stands and gets logged as usual — this is
+a floor-raise on the audit, not a mandate to invent findings.
+
 ### Step 2 — KB research, then design
 
 **A KB research run is a GATE for every CREATE and UPDATE — nothing
