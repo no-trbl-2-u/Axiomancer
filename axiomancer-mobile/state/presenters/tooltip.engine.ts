@@ -14,13 +14,18 @@
  *   is intentionally dropped per user request.
  * - `'stance-chip'` — static ADV / DIS dice rules (Phase 75).
  * - `'card'` — engine-sourced via `getCombatCardById(id)` (Phase 75).
+ * - `'hazard-keyword'` — engine-sourced via `HAZARD_KEYWORDS[id]`
+ *   (Phase 82). The hazard-deck screen's keyword tally chips key
+ *   off `HazardKeywordId`; this kind reads the same glossary the
+ *   in-hazard card faces already draw from, so the two stay in sync
+ *   for free.
  *
  * Voice: title in uppercase mono / gothic, body in lowercase
  * chronicle (IM Fell English), footnote in mono for engine numbers.
  * Mirrors `event.engine.ts::preludeChrome` convention.
  */
 
-import { lookupEffect } from '@mechanics';
+import { HAZARD_KEYWORDS, lookupEffect } from '@mechanics';
 
 import { getCombatCardById } from '@/state/selectors/combat-cards';
 import type { AppStoreState } from '@/state/store';
@@ -34,6 +39,7 @@ export type TooltipKind =
     | 'effect'
     | 'stance-chip'
     | 'card'
+    | 'hazard-keyword'
     | 'slot'
     | 'burden'
     | 'item-stat'
@@ -555,6 +561,16 @@ export function selectTooltipContentFor(
             body: card.description,
             footnote: `stance ${card.stance.toUpperCase()}`,
             accent: accentForStat(card.stance),
+        };
+    }
+    if (kind === 'hazard-keyword') {
+        if (!id) return null;
+        const kw = HAZARD_KEYWORDS[id as keyof typeof HAZARD_KEYWORDS];
+        if (!kw) return null;
+        return {
+            title: kw.name,
+            body: kw.desc,
+            accent: 'neutral',
         };
     }
     if (kind === 'disabled-action') {

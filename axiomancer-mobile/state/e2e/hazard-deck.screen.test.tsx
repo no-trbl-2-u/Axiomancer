@@ -61,6 +61,19 @@ describe('hazard deck screen — library', () => {
         fireEvent.press(screen.getByTestId('hazard-deck-card-r_grip'));
         expect(screen.getByTestId('hazard-card-detail')).toBeTruthy();
     });
+
+    it('keyword chips are tooltip targets (Phase 82) and stay pressable', () => {
+        mount();
+        // The starter bag always carries `surge`-keyworded cards.
+        const chip = screen.getByTestId('hazard-deck-kw-surge');
+        expect(chip).toBeTruthy();
+        expect(chip.props.accessibilityRole).toBe('button');
+        // Real anchor measurement doesn't run under the test renderer
+        // (no host layout pass) — this only pins that tapping the
+        // wired target doesn't throw. Content-lookup correctness for
+        // `kind: 'hazard-keyword'` is covered in tooltip.engine.test.ts.
+        expect(() => fireEvent.press(chip)).not.toThrow();
+    });
 });
 
 describe('hazard deck screen — remove-card grid', () => {

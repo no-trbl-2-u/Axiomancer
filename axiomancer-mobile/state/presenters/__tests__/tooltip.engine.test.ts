@@ -366,6 +366,24 @@ describe('selectTooltipContentFor', () => {
         });
     });
 
+    describe('kind: hazard-keyword (Phase 82)', () => {
+        it('returns engine-sourced name + desc for a known hazard keyword id', () => {
+            const content = selectTooltipContentFor('hazard-keyword', 'surge', EMPTY_STATE);
+            expect(content).not.toBeNull();
+            expect(content?.title).toBe('SURGE');
+            expect(content?.body).toContain('Drop a matching-colour die');
+            expect(content?.accent).toBe('neutral');
+        });
+
+        it('returns null for an unknown hazard keyword id', () => {
+            expect(selectTooltipContentFor('hazard-keyword', 'no-such-keyword', EMPTY_STATE)).toBeNull();
+        });
+
+        it('returns null for an empty hazard keyword id', () => {
+            expect(selectTooltipContentFor('hazard-keyword', '', EMPTY_STATE)).toBeNull();
+        });
+    });
+
     describe('kind: disabled-action (Phase 95)', () => {
         it('returns content for item action', () => {
             const content = selectTooltipContentFor('disabled-action', 'item', EMPTY_STATE);
