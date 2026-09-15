@@ -357,6 +357,13 @@ corpus's own `status: draft` — cite this row's csv read as the receipt, then
 drafting semantics) plus the standard KB research gate for whichever family is
 chosen.
 
+**DECIDED via /oversight 2026-09-15:** authorize a concrete proposal. Neither
+family is rejected outright — `/adjust-keywords`'s next pass should draft an
+actual card idea + rank-slot proposal for Chaos or generic Upgrade (whichever
+the KB research favors) and bring it back through the normal CREATE-bar gate,
+rather than leaving this a bare genre-toolbox observation. Row stays open
+until that proposal lands.
+
 ### [loop-call] The deck-matrix baseline reads STALE because of a speech-mark edit (2026-09-12)
 `baseline:check` now reports the baseline stale by one mechanics-source commit:
 `df6e98f ui-fresh-eyes: FE-006 world content — speech marks that point the
@@ -373,6 +380,13 @@ the staleness is bookkeeping, not drift. If the coarse watch path keeps
 producing this, narrowing it to exclude `src/World/Continents/**` prose (or
 any content-only path) would stop text passes from invalidating measured
 balance truth.
+
+**DECIDED via /oversight 2026-09-15:** narrow the watch path. Exclude
+`src/World/Continents/**` and other content-only prose paths from
+`check-baseline-freshness.mjs`'s WATCH_PATH so a docs/dialogue-only commit
+stops tripping STALE. Ready to ship — no further design call needed; routing
+to the next `/iterate` pass (or a direct fix) as a normal finding, tag
+dropped.
 
 
 ### [loop-call] UI fresh-eyes 2026-09-12 left six product decisions and a large unverified candidate set (2026-09-12)
@@ -397,6 +411,14 @@ time: one concept carrying several words (currency, the journal, SEALED, SURGE,
 that exist in the tooltip registry but are unreachable from the screen that
 needs them.
 
+**DECIDED via /oversight 2026-09-15:** accept all 6 of the report's own
+recommended options (fanned-hand ledger, signet rail naming, `/rest` greyed
+option, hazard-deck pastel tone, `LEAGUES` usage, art-plate captions — see
+`UI_FRESH_EYES_2026-09-12.md` §4 for each one's specific recommendation).
+Ready to ship as 6 small fixes; routing to the next `/iterate` pass, tag
+dropped. Row closed as a decision; the 309-row unverified candidate set
+described below stays open and unrelated to this call.
+
 ### [loop-call] `npm run critique:drive` deletes anything else living under `.critique-artifacts/` (2026-09-12)
 `critique-drive.mjs:318` clears the whole artifact root on start. During the
 fresh-eyes sweep this destroyed a complete 54-cell before/after capture set
@@ -406,8 +428,11 @@ but the hazard is still there for the next tool that shares that directory —
 either scope the delete to the driver's own subdirectory or document the
 directory as exclusively its own.
 
+**DECIDED via /oversight 2026-09-15:** scope the delete to the driver's own
+subdirectory (`critique-drive.mjs:318`), not the whole `.critique-artifacts/`
+root. Ready to ship; routing to the next `/iterate` pass, tag dropped.
 
-### [loop-call] Phase W6 (The Capital) reused "W5" as a map-sequence label collision, resolved by numbering the map "W6" instead (2026-09-10)
+### [x] [loop-call] Phase W6 (The Capital) reused "W5" as a map-sequence label collision, resolved by numbering the map "W6" instead (2026-09-10)
 - category: docs/naming residue (found while filing `/forge`'s Step-6
   residue for shipping The Capital, map 5 of the northern continent)
 - detail: the map-growth sequence in `plan/steps/01_build_plan.md` runs
@@ -508,7 +533,7 @@ directory as exclusively its own.
   `plan/CONTENT_LEDGER.md`'s adjust-cards pass 3 entry for the full file list
   and verify results.
 
-### [content] Three of four Northern-Continent maps carry only 1 staged NPC [needs-user-call] (2026-09-05)
+### [content][gap] Three of four Northern-Continent maps carry only 1 staged NPC — DECIDED, needs an attended character-spec/story-spec session (2026-09-05)
 - category: content (found during `/adjust-npcs` pass 1's structural audit —
   Step 1's "map with fewer than 2 staged NPCs → CREATE" signal)
 - detail: `caverns` (`theDelver` only), `connecting-river` (`theBoatwoman`
@@ -535,6 +560,14 @@ directory as exclusively its own.
   this row should be closed as "by design" and the skill's threshold
   signal caveated) or whether one or more of the three maps should get a
   `character-spec`/`story-spec` session for a second voice.
+
+**DECIDED via /oversight 2026-09-15:** not by design — needs more voices.
+Authorize `character-spec`/`story-spec` sessions to design 1-3 new named
+NPCs for `caverns`, `connecting-river`, and/or `town-across-river`. This is
+an attended-session task, not autonomously shippable (hard rule 3): tag
+changed from `[needs-user-call]` to `[gap]`, ready for `/march` to dispatch
+to an interactive `character-spec`/`story-spec` session next time T is
+present. Row stays open until that session runs.
 
 ### [content] 30 of 73 roster enemies (41%) carry no aftermath prose (`finalBlowLines`/`causeLines`) (2026-09-05)
 - category: content (found during `/adjust-enemies` pass 1's structural
@@ -687,6 +720,12 @@ directory as exclusively its own.
   in-scope finding (5 dead consumables, see `CONTENT_LEDGER.md`) instead of
   guessing at this one.
 
+**DECIDED via /oversight 2026-09-15:** option (a) — design N new signature
+skills first, preserving `relic.library.ts`'s stated 1:1 relic-identity rule.
+Routed to **Phase 85** (promoted from PHASE_CANDIDATES.md's matching
+[score 5.5] row this same tick). Row closed; see Phase 85's brief for the
+mechanics-expert design session.
+
 ### [loop-call] Dead engine hooks — 19 orphaned `zoneHas` sites in combat.engine.ts (2026-09-04)
 - category: mechanics residue (found during `/adjust-cards` pass 1, filed
   rather than actioned — cleanup is a mechanics-expert-owned sweep, not a
@@ -706,6 +745,10 @@ directory as exclusively its own.
   cleanup sweep"). Needs a dedicated pass to delete the hooks and
   retire/repurpose their tests.
 
+**DECIDED via /oversight 2026-09-15:** ship the sweep. Routed to **Phase 86**
+(promoted from PHASE_CANDIDATES.md's matching [score 4.5] row this same
+tick, alongside the TWIN-wire row below). Row closed.
+
 ### [loop-call] the-sextons-count is missing its TWIN trigger (2026-09-04)
 - category: mechanics residue (found + deliberately not fixed during
   `/adjust-cards` pass 1's card-face-honesty sweep)
@@ -720,6 +763,11 @@ directory as exclusively its own.
   `reprise`. Trimmed the TWIN clause from the card's printed text rather
   than ship a rushed/wrong wire; re-adding it is a small dedicated
   mechanics-expert task.
+
+**DECIDED via /oversight 2026-09-15:** re-add TWIN, correctly scoped (after
+the `directDamage`/`drawPile`/`discard` locals, guarded against
+double-counting with `reprise`). Routed to **Phase 86**, same as the dead-hook
+sweep above. Row closed.
 
 ### [x] [loop-call] CHAIN and OMEN each show exactly 1 card carrier after a rider-inclusive audit (2026-09-05) — RESOLVED via `/adjust-cards` pass 2 (2026-09-06)
 - category: content residue (rider-inclusive follow-up to the 2026-09-04
@@ -905,7 +953,14 @@ directory as exclusively its own.
 - status: awaiting `/oversight` pick — no art wired into the game or
   `provenance.json`/`index.ts` this phase.
 
-### [loop-call] Phase W3 design decisions — the northern city ships (2026-08-28)
+**DECIDED via /oversight 2026-09-15:** adopt the first-listed (top) licensed
+candidate for each of the 9 enemies, replacing the game-icons.net silhouette
+placeholders. Routed to a new **Phase 88** (direct oversight instruction, same
+shape as Phase 78/77's promotion — no PHASE_CANDIDATES row to strike). Row
+closed; open sourcing questions (toll-sergeant/the-factor/wharf-shrike thin
+results, unpaid-delver compositing) carry into Phase 88's brief.
+
+### [x] [loop-call] Phase W3 design decisions — the northern city ships (2026-08-28)
 - category: design residue (THE OPEN GATE standing rule 7 — decisions filed
   for after-the-fact review, shipped either way; no action needed unless
   /oversight disagrees)

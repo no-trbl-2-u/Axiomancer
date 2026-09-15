@@ -43,6 +43,54 @@ Tick in this file in the same commit that ships the phase.
 
 **Next up (autonomous loop's queue):**
 
+- [ ] Phase 79 — Doctrine lexicon: register the 2026-09-02 status-primacy
+      retirement in `lexicon.json`'s doctrine mechanism; fix the two live
+      un-exempted hits (`statusGlyphs.ts`, `tuning.md`) (promoted via
+      `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md` [score 8.0])
+- [ ] Phase 80 — Naming pass: one concept, one word across player-facing
+      surfaces (money/journal/SEALED/SURGE/"the deck" clusters), against a
+      written lexicon (promoted via `/oversight` 2026-09-15 from
+      `PHASE_CANDIDATES.md` [score 6.5])
+- [ ] Phase 81 — Late-campaign difficulty cliff: verify against current
+      baseline whether THE PATH already closed the 4%/0%-cells gap; if
+      still open, pick among the three named design options (card
+      level-scaling term / flatten enemy VITAE growth / vigil `reprisal`
+      wall answer) — may need a follow-up `/oversight` touch (promoted via
+      `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md` [score 6.5])
+- [ ] Phase 82 — Glossary reachability: mount tooltip targets on the
+      hazard deck's 14 keyword chips (promoted via `/oversight` 2026-09-15
+      from `PHASE_CANDIDATES.md` [score 6.0])
+- [ ] Phase 83 — Combat arena backdrop: region-keyed backdrop set via the
+      Phase 73/78 art pipeline, starting with the coastal village
+      (promoted via `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md`
+      [score 6.0], absorbing the [score 4.5] capital cross-reference row)
+- [ ] Phase 84 — The Capital: attended `/world-spec` or `/story-spec`
+      session deciding what the advisor-selection payoff sets up for the
+      player character before more northern-continent geography ships
+      (requires T present — do not guess) (promoted via `/oversight`
+      2026-09-15 from `PHASE_CANDIDATES.md` [score 5.5])
+- [ ] Phase 85 — Equipment progression: mechanics-expert design session
+      for 1-3 new signature skills sized for head/hands/feet accessories,
+      then author + wire the relics carrying them, preserving
+      `relic.library.ts`'s 1:1 relic-identity rule (promoted via
+      `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md` [score 5.5];
+      closes `AUDIT.md`'s equipment-progression loop-call)
+- [ ] Phase 86 — Engine hook sweep: delete the 19 orphaned `zoneHas` sites
+      in `combat.engine.ts` (rewriting `oracle-omen-v2`'s telegraph
+      harness off `fated-course` first), wire the-sextons-count's TWIN
+      clause correctly scoped (promoted via `/oversight` 2026-09-15 from
+      `PHASE_CANDIDATES.md` [score 4.5]; closes `AUDIT.md`'s two matching
+      loop-calls)
+- [ ] Phase 87 — Early-game encounter smoothing: gate the fresh-save first
+      encounter to a one-phase zero-keyword foe; open an ordinary
+      encounter/rest node before or beside the Ash Mire boss edge
+      (promoted via `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md`
+      [score 4.0])
+- [ ] Phase 88 — W5 art adoption: wire the top licensed candidate per
+      enemy from Phase 78's research, replacing the silhouette
+      placeholders for all 9 W5 enemies (direct `/oversight` instruction,
+      2026-09-15; closes `AUDIT.md`'s W5 art-pass loop-call)
+
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics:
       fix `game.cli --route` map evidence so Fishing Village coverage
@@ -2993,6 +3041,41 @@ See the status rows above; generate briefs on demand.
   art sourcing (the W3/W5 silhouette call) with a standing
   research-and-present process. Resulting commit: this one; briefs
   generate on demand per the Status block scope lines.
+
+- **2026-09-15** — actor: **T via `/oversight`** (Claude Code, branch
+  `claude/oversight-didrne`). Action: **added Phases 79–88** — 9 promoted
+  from `plan/PHASE_CANDIDATES.md`'s 11 scored Pending rows (doctrine
+  lexicon 79, naming pass 80, late-campaign difficulty cliff 81, glossary
+  reachability 82, combat arena backdrop 83 absorbing its [score 4.5]
+  duplicate, The Capital design session 84, equipment progression 85,
+  engine hook sweep 86, early-game encounter smoothing 87) plus **Phase
+  88** (W5 art adoption, a direct instruction closing `plan/AUDIT.md`'s
+  W5 art-pass loop-call, same shape as Phase 77/78). One scored candidate
+  ([score 6.5] lexicon preset-ids) was found stale (its evidence was
+  fixed today by an unrelated commit) and closed rather than promoted.
+  Confirmed T's request: yes — T's stated reason for the batch: the
+  build-plan queue had fully drained (0 pending phases) while
+  `PHASE_CANDIDATES.md` carried 11 live scored rows sitting unpromoted;
+  T asked for "top 30" and, on learning only 11 scored/live rows existed
+  (the rest being unscored 2026-07/08-era bookkeeping debt), said
+  "promote 9 + also flag the ~49 legacy rows" — the flag is filed at the
+  top of `PHASE_CANDIDATES.md`'s Pending section, recommending a
+  `/consolidate` cleanup pass. Three embedded sub-choices the source rows
+  themselves called out as needing an `/oversight` pick were also ruled
+  this session: Phase 81 verifies against current baseline before
+  picking a design option (deferred, not guessed); Phase 84 ruled a
+  `/world-spec`/`/story-spec` session over a mechanical map-6 bolt-on;
+  Phase 85 ruled designing new signature skills over breaking the 1:1
+  relic-identity rule. Also this session: ratified `plan/AUDIT.md`'s open
+  `[loop-call]`/`[needs-user-call]` rows (UI fresh-eyes 6 decisions
+  accepted per the report's own recommendations, `critique:drive`
+  wipe-scope fix, keyword Chaos/Upgrade proposal authorized, baseline
+  watch-path narrowing, Northern-Continent NPC sparseness routed to an
+  attended `character-spec`/`story-spec` session) and widened the 5
+  content stewards' audit criteria in `skills/adjust-{cards,enemies,
+  equipment,keywords,npcs}.md` per the "zero-diff at pass 9-10" plateau
+  flag. Resulting commit: this one; briefs generate on demand per the
+  Status block scope lines.
 
 ## Phase log (commit hashes)
 

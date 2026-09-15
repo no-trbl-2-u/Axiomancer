@@ -7,10 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-11T07:45:22Z | slash-prompt | /march | unknown | user/ci | /march |
-| 2026-08-11T09:44:52Z | slash-prompt | /digest | unknown | user/ci | /digest |
-| 2026-08-11T09:44:55Z | skill | digest | unknown | main | - |
-| 2026-08-11T19:33:09Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-12T07:59:05Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-12T08:01:41Z | subagent | Explore | claude-sonnet-5 | main | Map mobile morality/alignment surfaces |
 | 2026-08-12T09:48:19Z | slash-prompt | /digest | unknown | user/ci | /digest |
@@ -407,3 +403,7 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-14T22:29:40Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-14T22:32:58Z | skill | adjust-keywords | claude-sonnet-5 | main | - |
 | 2026-09-14T22:33:30Z | subagent | card-expert | claude-sonnet-5 | main | Adjust-keywords pass 10 audit and ship |
+| 2026-09-15T00:07:23Z | slash-prompt | /oversight | unknown | user/ci | /oversight |
+| 2026-09-15T00:07:26Z | skill | oversight | unknown | main | - |
+| 2026-09-15T00:08:16Z | subagent | general-purpose | claude-sonnet-5 | main | Summarize plan state files for oversight briefing |
+| 2026-09-15T07:31:03Z | subagent | general-purpose | claude-sonnet-5 | main | Check top 30 phase candidates for staleness |
