@@ -47,3 +47,6 @@ devlog/tuning-lab/index.html
 devlog/data/
 devlog/assets/catalog/
 .playwright-mcp
+
+# Telemetry hook sidecar (pairs *-end rows with their start rows)
+.claude/hooks/.telemetry-state.json
