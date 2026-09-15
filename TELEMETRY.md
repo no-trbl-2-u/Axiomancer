@@ -7,12 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-12T21:41:32Z | slash-prompt | /oversight | unknown | user/ci | /oversight |
-| 2026-08-12T21:41:34Z | skill | oversight | claude-sonnet-5 | main | - |
-| 2026-08-13T03:06:35Z | slash-prompt | /march | unknown | user/ci | /march |
-| 2026-08-13T03:37:17Z | subagent | Explore | claude-sonnet-5 | main | Verify AUDIT.md batch 1 (7 findings) |
-| 2026-08-13T03:37:26Z | subagent | Explore | claude-sonnet-5 | main | Verify AUDIT.md batch 2 (7 findings) |
-| 2026-08-13T03:37:34Z | subagent | Explore | claude-sonnet-5 | main | Verify AUDIT.md batch 3 (7 findings) |
 | 2026-08-13T03:37:42Z | subagent | Explore | claude-sonnet-5 | main | Verify AUDIT.md batch 4 (7 findings) |
 | 2026-08-13T03:37:48Z | subagent | Explore | claude-sonnet-5 | main | Verify AUDIT.md batch 5 (7 findings) |
 | 2026-08-13T03:37:55Z | subagent | Explore | claude-sonnet-5 | main | Verify AUDIT.md batch 6 (7 findings) |
@@ -411,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-15T09:02:14Z | skill | digest | unknown | main | - |
 | 2026-09-15T10:32:06Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-15T10:32:53Z | skill | adjust-equipment | claude-sonnet-5 | main | - |
+| 2026-09-15T12:41:27Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-15T12:41:56Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
