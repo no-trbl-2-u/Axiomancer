@@ -61,9 +61,10 @@ Tick in this file in the same commit that ships the phase.
       `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md` [score 6.5]) —
       gap was already closed by THE PATH; no lever needed
       — `docs: close the late-stage global collapse HIGH — phase 81` (ff9d405e)
-- [ ] Phase 82 — Glossary reachability: mount tooltip targets on the
+- [x] Phase 82 — Glossary reachability: mount tooltip targets on the
       hazard deck's 14 keyword chips (promoted via `/oversight` 2026-09-15
       from `PHASE_CANDIDATES.md` [score 6.0])
+      — `feat(mobile): glossary reachability — hazard-deck keyword chips — phase 82` (ee8bf2e5)
 - [ ] Phase 83 — Combat arena backdrop: region-keyed backdrop set via the
       Phase 73/78 art pipeline, starting with the coastal village
       (promoted via `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md`
