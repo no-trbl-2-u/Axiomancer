@@ -1193,7 +1193,31 @@ one level down, in the routing helper `onApply` calls next).
   stage-eligible cells. Mechanics `npm run verify`: 190 files / 4085
   tests green.
 
-### [HIGH] late-stage global collapse — all 10 presets 0.00 late
+### [x] [HIGH] late-stage global collapse — all 10 presets 0.00 late — RESOLVED 2026-09-15 (Phase 81)
+- **RESOLVED (Phase 81, 2026-09-15).** The row's own 2026-08-08 reopen
+  conditions — the card redesign landing, and Phase 43 defining a live
+  objective function — have both happened. THE BIG NUMBERS REWRITE
+  (2026-09-02) is the redesign; Phase 43 shipped, but its "objective
+  function v2" is the repeal of having one at all —
+  `axiomancer-mechanics/CLAUDE.md` § Load-bearing doctrine, pillar 3:
+  *"There is no governing objective function any more: no win-rate
+  curve, no CQI, no rank bands, no count pins, no status-engagement
+  floor."* The row's 80/50/25-35/0 target band this row measured
+  against is dead law. Separately, and mooting the doctrine question
+  entirely: the measurement itself is stale. Fresh read of
+  `axiomancer-mechanics/docs/reports/baselines/deck-matrix-baseline.json`
+  (stamp `b123cdba`, measured 2026-09-15, `reduced-nightly` confidence,
+  stale by one unrelated equipment-content commit) shows late-band
+  aggregate win rate at **82.0%**, **zero of 48 late cells at 0%**
+  (worst cell 13.3%, `the-abortive` vs the `turtle` sim policy). "All
+  10 presets 0.00 late" has not been true since THE PATH (commit
+  `515ac4d9`, 2026-09-02) moved the late band 9% -> 44% via card
+  upgrades/deck tiers/CONDEMN rescale — a fourth lever, not any of the
+  three this row's PHASE_CANDIDATES successor named and declined to
+  pick. Full writeup: `plan/phases/phase_81_late_campaign_difficulty_cliff.md`.
+  Residual: the three weakest late cells (13-23%, all passive-policy
+  shaped) are a legitimate small follow-up, not a design-level cliff —
+  filed as a Follow-up in the phase brief, not a new HIGH.
 - **PARKED behind the card redesign (/oversight 2026-08-08).** T, ruling
   on this row's Phase 39 successors: *"This is fine. We're working on a
   new card redesign anyway."* Do not pick this row, do not promote a
