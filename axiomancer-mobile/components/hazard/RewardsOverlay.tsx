@@ -192,7 +192,7 @@ export function RewardsOverlay({
                 <View style={{ paddingHorizontal: 12, paddingTop: 10 }}>
                     {hasOffer ? (
                         <>
-                            <Text style={styles.offerTitle}>ADD A CARD TO YOUR DECK</Text>
+                            <Text style={styles.offerTitle}>ADD A CARD TO YOUR HAZARD DECK</Text>
                             <Text style={styles.offerSub}>{rewards.offerSubLabel}</Text>
                             <View style={styles.offerRow}>
                                 {rewards.offerCards.map((card, i) => (

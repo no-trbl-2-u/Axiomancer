@@ -163,7 +163,27 @@ torn edge and the map's compass rose / hatch-and-vignette backdrop
 texture, not a specific illustrated subject — acquiring "art" for a
 seeded jagged-edge mask would be a category error.
 
-## Working in this system — for the next screen or asset
+## Naming: one concept, one word — the player-facing lexicon
+
+Phase 80 (2026-09-15) closed the "one concept, one word" candidate the
+2026-09-12 UI fresh-eyes swarm raised for five clusters (`plan/PHASE_CANDIDATES.md`,
+[score 6.5]). The swarm's own three-lens panel refuted every cluster taken
+screen-by-screen — no single screen shows two senses of the same word at
+once — which is a fair verdict on each screen alone and the exact argument
+*for* a written lexicon: cross-screen drift is real even when no one screen
+is caught in the act. This table is that lexicon; extend it in place rather
+than re-litigating a cluster from scratch.
+
+| Concept | Canonical word | Notes / deliberate exceptions |
+|---|---|---|
+| The coin readout (a box/label showing the player's spendable total) | **PURSE** | Was split three ways: `blacksmith`/`rest`/`village` already said PURSE; the inventory screen alone said `WALLET` in its eyebrow chrome and `SHILLING` in the box label a few pixels below it — two words for money on the *same* header block. Both now say PURSE (phase 80). The currency *unit* stays **SHILLINGS** everywhere (unchanged, never competed with PURSE — a purse is a container, a shilling is what's in it). |
+| The GRACE/morale bookkeeping idea ("the Parish is watching your balance") | **ACCOUNT** | Character sheet's disclosure row already said "THE ACCOUNT" and the GRACE tooltip already said "nudges the account" (2 of 3 sites); the exploration HUD's `StatusCard` alone said "the ledger runs to arrears" — fixed to "the account runs to arrears" (phase 80). |
+| The momentum chain (the combat-board meter that grants a gold die on a streak) | **MOMENTUM** | The mechanics engine's own internal term is `surge` (`combat.objective.ts`), which is why mobile copy keeps drifting back to "Surge" even after a fix — `CombatTutorialPrimer.tsx` was corrected once (FE-054) but its near-duplicate twin in `combat-tutorial-steps.ts`'s in-board coach script wasn't; fixed to match (phase 80). The live board's own celebratory banner ("✦ MOMENTUM SURGE") is a deliberate bridge between the UI name and the engine name and is not a bug. |
+| A run's two separate card pools (the combat deck built at rest/cache; the hazard deck built during the hazard minigame) | **"deck" unqualified = combat deck. The hazard pool is always spelled out as "HAZARD DECK."** | The two systems reused the identical phrases "ADD A CARD TO YOUR DECK" and "THIN THE DECK" for different decks on different screens a player visits in the same run. The hazard screens (`RewardsOverlay`, `HazardRemoveGrid`, the hazard-deck screen's CTA) now say HAZARD DECK explicitly; the combat-side screens (rest/cache/`CombatRewardsOverlay`) keep the unqualified, default-sense "deck" (phase 80). |
+| The nav tab vs. the screen it opens (e.g. `THE LEDGER` tab → `THE BOOK OF DEEDS` header; `SATCHEL` tab → `INVENTORY` title) | **Deliberately allowed to differ.** | An evocative one-word tab name and a plainer screen title are an established pattern here, not drift — swarm C-159/160/164 refuted this exact pairing on that basis and this pass agrees. Don't "fix" a tab/screen name mismatch on sight; check whether it's this pattern first. |
+| `SEALED` — three genuinely different systems (an inventory category, a locked map path, a no-retreat combat lock) | **Left as three words for three concepts — not a bug.** | The swarm's panel found the senses never co-occur on one screen; this pass agrees and found no new same-screen collision to fix. If a future screen ever shows two SEALED senses together, that screen needs a qualifier, not a global rename. |
+
+
 
 1. **Color**: `AXM.*` tokens only, via `usePalette()`/`makeStyles()`.
    Never a hex literal in a component (a repo-wide hard rule, not just

@@ -61,7 +61,7 @@ export function HazardRemoveGrid({
     return (
         <View style={styles.root} testID="hazard-remove-grid">
             <View style={styles.header}>
-                <Text style={[styles.title, { color: AXM.parchment }]}>THIN THE DECK</Text>
+                <Text style={[styles.title, { color: AXM.parchment }]}>THIN THE HAZARD DECK</Text>
                 <Text style={[styles.sub, { color: AXM.bone }]}>
                     {empty
                         ? 'No acquired cards to remove yet.'

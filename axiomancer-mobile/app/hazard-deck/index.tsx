@@ -161,11 +161,11 @@ export default function HazardDeckScreen() {
                     style={[styles.removeCta, { borderColor: vm.hasRemovable ? HZ.acid : AXM.ash }]}
                     onPress={() => setRemoveOpen(true)}
                     accessibilityRole="button"
-                    accessibilityLabel="Open the remove-card grid to thin your deck"
+                    accessibilityLabel="Open the remove-card grid to thin your hazard deck"
                     testID="hazard-deck-open-remove"
                 >
                     <Text style={[styles.removeCtaLabel, { color: vm.hasRemovable ? HZ.acid : AXM.bone }]}>
-                        THIN THE DECK
+                        THIN THE HAZARD DECK
                     </Text>
                     <Text style={styles.removeCtaSub}>
                         {vm.hasRemovable
