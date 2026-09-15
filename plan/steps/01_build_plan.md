@@ -70,10 +70,11 @@ Tick in this file in the same commit that ships the phase.
       (promoted via `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md`
       [score 6.0], absorbing the [score 4.5] capital cross-reference row)
       — `feat(mobile): combat arena backdrop — region-keyed, coastal village — phase 83` (cb3b1c97)
-- [ ] Phase 84 — The Capital: attended `/world-spec` or `/story-spec`
-      session deciding what the advisor-selection payoff sets up for the
-      player character before more northern-continent geography ships
-      (requires T present — do not guess) (promoted via `/oversight`
+- [blocked: requires attended `/world-spec` or `/story-spec` session with
+  T present — do not guess 2026-09-15] Phase 84 — The Capital: attended
+      `/world-spec` or `/story-spec` session deciding what the
+      advisor-selection payoff sets up for the player character before
+      more northern-continent geography ships (promoted via `/oversight`
       2026-09-15 from `PHASE_CANDIDATES.md` [score 5.5])
 - [ ] Phase 85 — Equipment progression: mechanics-expert design session
       for 1-3 new signature skills sized for head/hands/feet accessories,
