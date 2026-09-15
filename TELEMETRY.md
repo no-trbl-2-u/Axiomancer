@@ -7,9 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-13T03:37:42Z | subagent | Explore | claude-sonnet-5 | main | Verify AUDIT.md batch 4 (7 findings) |
-| 2026-08-13T03:37:48Z | subagent | Explore | claude-sonnet-5 | main | Verify AUDIT.md batch 5 (7 findings) |
-| 2026-08-13T03:37:55Z | subagent | Explore | claude-sonnet-5 | main | Verify AUDIT.md batch 6 (7 findings) |
 | 2026-08-13T08:00:53Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-13T09:49:14Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-08-13T09:49:16Z | skill | digest | unknown | main | - |
@@ -407,3 +404,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-15T10:32:53Z | skill | adjust-equipment | claude-sonnet-5 | main | - |
 | 2026-09-15T12:41:27Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-15T12:41:56Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
+| 2026-09-15T14:31:54Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-15T14:32:38Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
+| 2026-09-15T14:33:47Z | subagent | Explore | claude-sonnet-5 | main | Inventory naming-cluster occurrences |
