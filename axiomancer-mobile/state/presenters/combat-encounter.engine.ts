@@ -2694,6 +2694,8 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
 
 const SIG_ICON: Record<string, string> = {
     scout: '👁', reroll: '🎲', sustain: '✚', control: '⛓', dot: '☠', mercy: '🕊', strike: '⚔', draw: '🎴',
+    // Phase 85 — head/hands/feet accessory signatures.
+    empower: '🔥', surge: '⚡',
 };
 
 function signaturesVM(state: CombatEncounterState): CombatSignatureVM[] {

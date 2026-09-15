@@ -10,9 +10,13 @@
  * non-relic equipment now that the procedural library is retired), v14 → v15
  * (Phase D5, backfill the die-gear rail), v15 → v16 (Phase 52a, default
  * the per-run card-removal counter), v16 → v17 (Phase 52e, retire the
- * rest minigame), and v17 → v18 (Phase 61, retire the Quest Board
- * minigame). The hops chain, so a v11 save lands at v18 in one
- * `migrate` call. Every other version mismatch still rejects.
+ * rest minigame), v17 → v18 (Phase 61, retire the Quest Board
+ * minigame), v18 → v19 (Phase 76, retire the Gathering minigame), v19 →
+ * v20 (Phase 63, retire the loot-cache Pick Pool minigame), v20 → v21
+ * (inter-map travel, seed the continent catalogue), and v21 → v22
+ * (Phase 85, seed the head/hands/feet signet relics). The hops chain, so
+ * a v11 save lands at v22 in one `migrate` call. Every other version
+ * mismatch still rejects.
  */
 
 import { GameState } from './types';
@@ -364,6 +368,36 @@ function migrateV20ToV21(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
+ * v21 → v22 (Phase 85): 3 new signet relics fill the `head`/`hands`/`feet`
+ * accessory kinds left empty since Phase 19. Appends the 3 new relics
+ * (benched, per `BENCHED_RELIC_IDS`-shape — new content never auto-equips
+ * over an already-chosen loadout) to inventory, skipping any id the save
+ * already carries (idempotent — a save re-migrated from a version that
+ * already saw this hop keeps a single copy). The worn loadout, `derivedStats`,
+ * and every other field pass through untouched: the new relics only affect
+ * combat once the player chooses to equip one. Pure over a raw save payload.
+ */
+function migrateV21ToV22(raw: Record<string, unknown>): Record<string, unknown> {
+    const player = raw.player as (Partial<Character> & { inventory?: Item[] }) | undefined;
+    if (!player || typeof player !== 'object') {
+        return { ...raw, version: 22 };
+    }
+
+    const { benched } = cloneStartingRelics();
+    const newRelics = benched.filter(r => r.id.startsWith('relic-')
+        && ['relic-mounting-dread', 'relic-endless-labor', 'relic-unbroken-stride'].includes(r.id));
+    const oldInventory: Item[] = Array.isArray(player.inventory) ? player.inventory.slice() : [];
+    const oldIds = new Set(oldInventory.map(i => i.id));
+    const missing = newRelics.filter(r => !oldIds.has(r.id));
+
+    return {
+        ...raw,
+        player: { ...player, inventory: [...oldInventory, ...missing] },
+        version: 22,
+    };
+}
+
+/**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
  * game). The name/signature is kept so the persistence layer's call site is
@@ -393,8 +427,9 @@ export function migrate(
     // counter; v16 → v17 retires the rest minigame; v17 → v18 retires the
     // Quest Board minigame; v18 → v19 retires the Gathering minigame; v19 →
     // v20 retires the loot-cache Pick Pool minigame and adds `mapGoodwill`;
-    // v20 → v21 seeds the continent catalogue for inter-map travel.
-    // Chained so a v11 save lands at v21 in one call.
+    // v20 → v21 seeds the continent catalogue for inter-map travel; v21 → v22
+    // appends the Phase 85 head/hands/feet signet relics to inventory.
+    // Chained so a v11 save lands at v22 in one call.
     if (version === 11 && toVersion >= 12) {
         working = migrateV11ToV12(working);
         version = 12;
@@ -434,6 +469,10 @@ export function migrate(
     if (version === 20 && toVersion >= 21) {
         working = migrateV20ToV21(working);
         version = 21;
+    }
+    if (version === 21 && toVersion >= 22) {
+        working = migrateV21ToV22(working);
+        version = 22;
     }
 
     if (version !== toVersion) {

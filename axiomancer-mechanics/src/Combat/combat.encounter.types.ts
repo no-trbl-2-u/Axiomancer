@@ -186,7 +186,10 @@ export type SignatureSkillKind =
     | 'dot'            // guaranteed DoT application at boosted intensity
     | 'mercy'          // disarming hit that softens a low-HP foe toward mercy (heart)
     | 'conclude'       // finisher: damage = sum of (intensity × per-stack weight) across all enemy effects (body)
-    | 'draw';          // draw cards + refund Conviction (mind economy)
+    | 'draw'           // draw cards + refund Conviction (mind economy)
+    // Phase 85 (equipment progression — head/hands/feet accessories):
+    | 'empower'        // grant WRATH: every future hit lands harder, for the rest of the fight, never fades (body)
+    | 'surge';         // grant CHAIN: the next hit lands harder, fades if the turn adds no more (body)
 
 export type SignatureSkillId =
     | 'sig-read-opponent'
@@ -197,7 +200,11 @@ export type SignatureSkillId =
     // Per-archetype exclusives (Spec 26b tuning §B)
     | 'sig-disarming-plea'    // heart
     | 'sig-rallying-blow'     // body
-    | 'sig-clever-gambit';    // mind
+    | 'sig-clever-gambit'     // mind
+    // Phase 85 — head/hands/feet accessory relics
+    | 'sig-mounting-dread'    // mind (head)
+    | 'sig-endless-labor'     // body (hands)
+    | 'sig-unbroken-stride';  // body (feet)
 
 /** Player archetype, derived from the dominant base stat. Drives the signature
  *  kit + (mobile) the portrait. */

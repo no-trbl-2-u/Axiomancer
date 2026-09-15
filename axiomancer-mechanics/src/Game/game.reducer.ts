@@ -102,8 +102,13 @@ import { STARTING_CARD_IDS } from '../Combat/combat.rewards';
  *   departed maps. The migration seeds the catalogue onto old saves,
  *   preserving `currentContinent` / `currentMap` and any completed /
  *   available state they carried (see `game.migrate.ts`).
+ * 2026-09-15 — bumped 21 → 22 (Phase 85): 3 new signet relics fill the
+ *   `head`/`hands`/`feet` accessory kinds that shipped empty in Phase 19.
+ *   The migration appends the 3 new relics (benched) to any save's
+ *   inventory that doesn't already carry them; the worn loadout and every
+ *   other field pass through untouched (see `game.migrate.ts`).
  */
-export const GAME_STATE_VERSION = 21;
+export const GAME_STATE_VERSION = 22;
 
 /** Builds a brand-new GameState with default player and world. */
 export function createNewGameState(): GameState {

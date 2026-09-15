@@ -1,5 +1,5 @@
 /**
- * Hermetic engine test — the 8 signet relics (Phase 19).
+ * Hermetic engine test — the 11 signet relics (Phase 19; extended Phase 85).
  *
  * Locks the relic library invariants (roster, slot split, stat pool, default
  * loadout legality) and the `getSignaturesForLoadout` derivation that replaces
@@ -19,15 +19,15 @@ import { emptyLoadout } from '../../Character/types';
 const ALL_SIGNATURE_IDS = Object.keys(SIGNATURE_SKILLS) as SignatureSkillId[];
 
 describe('relic library — roster + slot split', () => {
-    it('ships exactly 8 relics', () => {
-        expect(relicLibrary).toHaveLength(8);
+    it('ships exactly 11 relics', () => {
+        expect(relicLibrary).toHaveLength(11);
     });
 
-    it('splits 2 weapon / 2 armor / 4 accessory', () => {
+    it('splits 2 weapon / 2 armor / 7 accessory', () => {
         const bySlot = (slot: string) => relicLibrary.filter(r => r.slot === slot);
         expect(bySlot('weapon')).toHaveLength(2);
         expect(bySlot('armor')).toHaveLength(2);
-        expect(bySlot('accessory')).toHaveLength(4);
+        expect(bySlot('accessory')).toHaveLength(7);
     });
 
     it('every accessory relic carries an accessoryKind; weapons/armor do not', () => {
@@ -37,10 +37,10 @@ describe('relic library — roster + slot split', () => {
         }
     });
 
-    it('every relic grants exactly one signature; the 8 cover the full roster with no dupes', () => {
+    it('every relic grants exactly one signature; the 11 cover the full roster with no dupes', () => {
         const granted = relicLibrary.map(r => r.grantsSignature);
         expect(granted.every(Boolean)).toBe(true);
-        expect(new Set(granted).size).toBe(8);
+        expect(new Set(granted).size).toBe(11);
         expect([...granted].sort()).toEqual([...ALL_SIGNATURE_IDS].sort());
     });
 
@@ -57,7 +57,7 @@ describe('relic library — roster + slot split', () => {
         }
     });
 
-    it('stat pool is Body×2 (weapons), maxHp×2 (armor), Mind×2 + Heart×2 (accessories)', () => {
+    it('stat pool is Body×2 (weapons), maxHp×2 (armor), Mind×3 + Heart×2 + Body×2 (accessories)', () => {
         const statOf = (id: string) => getRelicById(id)!.statModifiers![0];
         for (const r of relicLibrary) {
             const mod = r.statModifiers![0];
@@ -65,12 +65,14 @@ describe('relic library — roster + slot split', () => {
             expect(mod.isMultiplier).toBe(false);
             if (r.slot === 'weapon') { expect(mod.stat).toBe('body'); expect(mod.value).toBe(2); }
             else if (r.slot === 'armor') { expect(mod.stat).toBe('maxHp'); expect(mod.value).toBe(5); }
-            else { expect(['mind', 'heart']).toContain(mod.stat); expect(mod.value).toBe(2); }
+            else { expect(['mind', 'heart', 'body']).toContain(mod.stat); expect(mod.value).toBe(2); }
         }
-        // Exactly 2 mind + 2 heart across the accessories.
+        // Phase 85 added a 3rd mind accessory (head) and 2 body accessories
+        // (hands, feet) — closing the accessories' body-stat gap.
         const accStats = relicLibrary.filter(r => r.slot === 'accessory').map(r => statOf(r.id).stat);
-        expect(accStats.filter(s => s === 'mind')).toHaveLength(2);
+        expect(accStats.filter(s => s === 'mind')).toHaveLength(3);
         expect(accStats.filter(s => s === 'heart')).toHaveLength(2);
+        expect(accStats.filter(s => s === 'body')).toHaveLength(2);
     });
 });
 
@@ -83,11 +85,11 @@ describe('relic library — default loadout', () => {
         expect(worn).toHaveLength(5);
     });
 
-    it('the 3 benched relics are exactly the non-default weapon/armor/accessory', () => {
-        expect(BENCHED_RELIC_IDS).toHaveLength(3);
+    it('the 6 benched relics are exactly the non-default weapon/armor/accessory', () => {
+        expect(BENCHED_RELIC_IDS).toHaveLength(6);
         const overlap = BENCHED_RELIC_IDS.filter(id => DEFAULT_WORN_RELIC_IDS.includes(id));
         expect(overlap).toEqual([]);
-        // Worn + benched partition the full 8.
+        // Worn + benched partition the full 11.
         expect([...DEFAULT_WORN_RELIC_IDS, ...BENCHED_RELIC_IDS].sort())
             .toEqual(relicLibrary.map(r => r.id).sort());
     });
@@ -96,7 +98,7 @@ describe('relic library — default loadout', () => {
         const a = cloneStartingRelics();
         const b = cloneStartingRelics();
         expect(a.worn).toHaveLength(5);
-        expect(a.benched).toHaveLength(3);
+        expect(a.benched).toHaveLength(6);
         // canonical order: weapon, armor, then accessories.
         expect(a.worn.map(r => r.slot)).toEqual(['weapon', 'armor', 'accessory', 'accessory', 'accessory']);
         // Fresh objects each call (equipping must not mutate the singleton library).

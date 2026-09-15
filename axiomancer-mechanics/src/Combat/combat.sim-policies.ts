@@ -227,6 +227,7 @@ const LEGACY_SIGNATURE_KINDS: readonly SignatureSkillKind[] =
 
 const ALL_SIGNATURE_KINDS: readonly SignatureSkillKind[] = Object.freeze([
     'scout', 'reroll', 'sustain', 'control', 'dot', 'mercy', 'conclude', 'draw',
+    'empower', 'surge',
 ]);
 
 /** The scripted witness roster. */

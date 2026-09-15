@@ -1,12 +1,12 @@
 /**
- * The 8 "signet" relics (Phase 19).
+ * The 11 "signet" relics (Phase 19; extended Phase 85).
  *
  * Signatures no longer come from the player's archetype — they come from WORN
  * equipment. Each relic is an ordinary `Equipment` typed into the Phase-18 slot
- * model (2 weapons, 2 armor, 4 accessories) that grants exactly ONE signature
+ * model (2 weapons, 2 armor, 7 accessories) that grants exactly ONE signature
  * (`grantsSignature`) plus a single static stat bump. A character wears 1 weapon
- * + 1 armor + 3 of the 4 accessories = 5 worn, so the slot model itself is the
- * wear-cap and the build choice (2 × 2 × C(4,3) = 16 loadouts).
+ * + 1 armor + 3 of the 7 accessories = 5 worn, so the slot model itself is the
+ * wear-cap and the build choice (2 × 2 × C(7,3) = 140 loadouts).
  *
  * These are FIXED content — plain `Equipment` literals at `common` rarity with
  * no `rolledMods`, no affixes, no `resourceInteraction`, no
@@ -20,8 +20,11 @@
  * folded onto `Character.maxHealth` by the equip reducers — no effect involved.
  *
  * Stat pool (locked, balance-tunable later): Body ×2 (weapons), +5 maxHp ×2
- * (armor), Mind ×2 + Heart ×2 (accessories). The default worn loadout below is
- * +2 body / +5 maxHp / +4 mind / +2 heart; NOT a locked balance claim.
+ * (armor), Mind ×3 + Heart ×2 + Body ×2 (accessories — Phase 85 filled the
+ * `head`/`hands`/`feet` kinds that shipped empty in Phase 19, closing the
+ * accessories' body-stat gap: `head` mind, `hands`/`feet` body). The default
+ * worn loadout below is unchanged by Phase 85 (+2 body / +5 maxHp / +4 mind /
+ * +2 heart); NOT a locked balance claim.
  */
 
 import type { Equipment } from './types';
@@ -45,9 +48,10 @@ interface RelicSpec {
 }
 
 /**
- * The 8 relics — mapping locked in `plan/phases/phase_19_equipment_granted_signatures.md`.
- * Names / accessory kinds are copy-tunable; the id → signature mapping is 1:1
- * and load-bearing.
+ * The 11 relics — the 8 mapping locked in
+ * `plan/phases/phase_19_equipment_granted_signatures.md`, extended by 3 in
+ * `plan/phases/phase_85_equipment_progression.md`. Names / accessory kinds are
+ * copy-tunable; the id → signature mapping is 1:1 and load-bearing.
  */
 const RELIC_SPECS: readonly RelicSpec[] = [
     // ── Weapons (2) — Body bumps ──────────────────────────────────────────────
@@ -108,6 +112,25 @@ const RELIC_SPECS: readonly RelicSpec[] = [
         description: 'Bend fate on the bad dice. Grants Press Fate.',
         slot: 'accessory', accessoryKind: 'charm', grantsSignature: 'sig-press-the-point',
         stat: 'heart', value: 2, defaultWorn: true,
+    },
+    // ── Phase 85 — head/hands/feet accessories (were empty since Phase 19) ───
+    {
+        id: 'relic-mounting-dread', name: "Cassandra's Circlet",
+        description: 'A dread that will not be reasoned with. Grants The Mounting Dread.',
+        slot: 'accessory', accessoryKind: 'head', grantsSignature: 'sig-mounting-dread',
+        stat: 'mind', value: 2, defaultWorn: false,
+    },
+    {
+        id: 'relic-endless-labor', name: "Sisyphus's Grip",
+        description: 'The strength that does not rest. Grants The Endless Labor.',
+        slot: 'accessory', accessoryKind: 'hands', grantsSignature: 'sig-endless-labor',
+        stat: 'body', value: 2, defaultWorn: false,
+    },
+    {
+        id: 'relic-unbroken-stride', name: "Achilles' Greaves",
+        description: 'A fleetness that punishes hesitation. Grants The Unbroken Stride.',
+        slot: 'accessory', accessoryKind: 'feet', grantsSignature: 'sig-unbroken-stride',
+        stat: 'body', value: 2, defaultWorn: false,
     },
 ];
 
