@@ -406,4 +406,8 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-15T00:07:23Z | slash-prompt | /oversight | unknown | user/ci | /oversight |
 | 2026-09-15T00:07:26Z | skill | oversight | unknown | main | - |
 | 2026-09-15T00:08:16Z | subagent | general-purpose | claude-sonnet-5 | main | Summarize plan state files for oversight briefing |
+| 2026-09-15T01:04:45Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-15T01:08:28Z | subagent | content-curator | claude-sonnet-5 | main | Run /adjust-npcs lifecycle tick |
+| 2026-09-15T06:47:16Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-15T06:50:03Z | skill | critique | claude-sonnet-5 | main | - |
 | 2026-09-15T07:31:03Z | subagent | general-purpose | claude-sonnet-5 | main | Check top 30 phase candidates for staleness |
