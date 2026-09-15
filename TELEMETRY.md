@@ -421,3 +421,4 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-15T09:02:14Z | skill | digest | unknown | - | - |
 | 2026-09-15T10:32:06Z | slash-prompt | /march | unknown | - | /march |
 | 2026-09-15T10:32:53Z | skill | adjust-equipment | claude-sonnet-5 | - | - |
+| 2026-09-15T23:55:38Z | tick-end | - | claude-opus-5 | - | ok |
