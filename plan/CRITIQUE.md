@@ -1,13 +1,33 @@
 # Critique log
 
-> Last pass: 2026-09-14 at commit 7d470de1
-> Pass count: 37
+> Last pass: 2026-09-15 at commit 24448fde
+> Pass count: 38
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 38, 2026-09-15, commit 24448fde] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
+> mobile (375×812) and desktop (1280×800) against the full
+> fixture-boosted screen set (title, onboarding, combat-encounter
+> preview, live combat board, exploration hub, plus the six
+> fixture-booted screens: dialogue, village, cutscene, rest, hazard,
+> late-game hub — 11 screens × 2 viewports = 22 captures, all clean).
+> Zero page errors, zero console errors. Read every screenshot +
+> domText directly. The open **[MED] combat — the mobile hand fan
+> overlaps card-name bands** row (filed pass 37, same commit 7d470de1)
+> reconfirmed exactly as filed: mobile hand still reads "THIN HYM /
+> CHILBLAI / THE LONG / SPOILED / CHILBLAIN WATCH", desktop still
+> renders all five names in full — no regression, no fix yet, not
+> re-filed (not bumping severity either; it's only one pass old and
+> hasn't had an `/iterate` turn at it yet). Also checked the
+> previously-declined desktop title-art-overlays-CTA cosmetic note
+> (pass 13-14) — still true, still not worth filing per `plan/bearings.md`
+> § Surface (desktop has no shipped surface). No other rows sighted.
+> Zero fresh findings this pass.
 
 > **[critique pass 37, 2026-09-14, commit 7d470de1] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5,
