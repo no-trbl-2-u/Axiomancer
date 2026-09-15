@@ -22,6 +22,90 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
+> **[adjust-cards pass 11, 2026-09-15, commit <PENDING>]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
+> content-lifecycle gate (`cards` was the stalest/due category this tick: 15
+> commits since pass 10's commit `1242bd60`, at the 15-commit threshold
+> exactly; equipment `36ee098c` sat under its own threshold at the time of
+> dispatch, as did enemies `55eec31d`, keywords `9d357e2b`, and npcs
+> `e6709572`). `git log 1242bd60..HEAD -- axiomancer-mechanics/src/Cards
+> axiomancer-mechanics/src/Effects axiomancer-mechanics/src/Combat
+> axiomancer-mechanics/docs/keyword-atlas.md docs/retheme-map.json
+> axiomancer-mobile/state/combat/keywords.ts
+> axiomancer-card-editor/src/data/mechanics.ts` returns exactly one commit of
+> the 15 intervening: `f19afd0d` (the #307 shop-effect-duplication fix —
+> splits `buff_critical_damage_up` into `buff_liars_gambit`/
+> `buff_abyssal_presence` for Philosopher's Tea/Void Essence). Read its full
+> diff directly (`git show f19afd0d --stat`): it touches
+> `src/Effects/buffs.library.json` (two new buff entries),
+> `src/Items/consumable.library.ts`, a new
+> `dead-consumable-payload.engine.test.ts`, and
+> `axiomancer-mobile/state/combat/keywords.ts`'s `SUPPORT_KEYWORD` map — a
+> shop-consumable/item fix, not `cards.library.ts` or any card-authoring
+> surface (the same commit was already independently confirmed out-of-scope
+> by this tick's sibling `adjust-keywords` pass-10 log, for the identical
+> reason). The other 14 intervening commits were the sibling
+> equipment/enemies/keywords/npcs pass-10 ticks and their ledger-bump
+> commits, two `/expand` passes (no candidates filed), a `critique` pass, and
+> an `audit`-fix pair (finding [5.6], stale hazard/route ids in `cli.md`/the
+> fishing-village walkthrough, and finding [4.0], the same `f19afd0d`
+> shop-effect-dup above) — none touched the card-authoring surface.
+> Confirmed every card-surface source file is byte-identical to pass 10's
+> tree via direct per-file `git log -1`, not just the path-scoped range
+> query: `src/Cards/cards.library.ts` last-touched `df4036fc` (pass 3),
+> `src/Cards/cards.pricing.ts` `7b84c8bb` (2026-09-02), `cards.sandbox-sets.ts`
+> `a0e377d8` (2026-08-23), `combat.starter-deck-presets.ts` `f29cea5c`
+> (pass 1), `combat.deck-draft.ts` `fbace426` (2026-08-02), `src/Cards/types.ts`
+> `515ac4d9` (THE PATH), `combat.cards.ts` `37dacef1` (keywords pass 8),
+> `src/Effects/e2e/deprecated-effects.engine.test.ts` `e9201415`
+> (2026-09-02), `docs/keyword-atlas.md` `9016a99f` (keywords pass 2), and all
+> nine `src/Cards/library/*.cards.ts` theme modules (`ed6b1be3`/`515ac4d9`/
+> `bf6223f1`/`f29cea5c`/`df4036fc`/`ff8d5fdf`, the newest of which is pass 3's
+> `df4036fc`) — all predate pass 10's `1242bd60`. Re-derived every Step-1
+> signal fresh anyway rather than trusting the empty diff alone: (1)
+> **reachability** — `combat-playtest.card-coverage.sim.test.ts` 123/123,
+> matching pass 10 exactly. (2) **pricing sanity + honesty + FREE-line +
+> aspect-thirds** — `pricing.engine.test.ts` (251), `curated-library.engine.
+> test.ts` (14), `preview-truth.engine.test.ts` (10),
+> `paid-summary-honesty.engine.test.ts` (4), `deck-presets.engine.test.ts`
+> (9) all green, byte-identical counts to pass 10. (3) **registry parity** —
+> `axio_overview` reconfirms 128 cards, 68 keyword rows, and the identical
+> per-theme totals (debt 19, trial 24, rot 19, choir 21, vigil 20, curse 5,
+> grave 20), unchanged from pass 10. Standing `plan/AUDIT.md` `[loop-call]`s
+> re-checked against current source, not re-litigated: the 19 orphaned
+> `zoneHas(state, '<card-id>')` hooks in `combat.engine.ts` (filed pass 1;
+> the file itself last-touched `636f3040`, 2026-09-04, well before this
+> window) and `the-sextons-count`'s missing TWIN trigger (filed pass 1;
+> `grave.cards.ts` untouched since `df4036fc`, pass 3) — both re-confirmed
+> still open, still mechanics-expert/engine-constant territory, not this
+> skill's to solo. Also swept `plan/AUDIT.md`/`plan/PHASE_CANDIDATES.md`/
+> `plan/CRITIQUE.md` for any new card-scoped item via `git log
+> 1242bd60..HEAD -- plan/AUDIT.md plan/PHASE_CANDIDATES.md
+> plan/CRITIQUE.md`: the 5 commits in that range are `critique` pass 38 (no
+> findings), the [5.6] docs fix (stale hazard/route ids, unrelated to cards),
+> two `/expand` passes (no candidates filed), and the [4.0] shop-effect-dup
+> fix above (already read in full, confirmed item/consumable-scoped) — no
+> new card-scoped residue. KB research (skill §3 Step 2): not run — every
+> consideration this pass was audit-confirmed-clean (no CREATE/UPDATE),
+> exempt from the gate per the REMOVE/no-op carve-out the sibling
+> categories' own zero-diff passes have used identically. Verify: ran all
+> three gates in full this pass (not skipped, despite zero source diff) —
+> `npm run verify --workspace axiomancer-mechanics` (213/213 files, 3435
+> tests + build green, byte-identical to this tick's sibling keywords/npcs
+> pass-10 count), `npm run verify --workspace axiomancer-mobile` (exit 0;
+> 299/299 suites, 2854 tests, 3/3 snapshots; lint/typecheck/jest/
+> assets:check/art:test all green, art:test's own 24/24 confirmed directly
+> in the tail), `npm run type-check --workspace axiomancer-card-editor`
+> (clean, exit 0). `npm run deploy:check` confirmed green pre-tick (HEAD
+> `f96f9902`, docs/plan-only tip commit, no gated workflow triggered) and
+> will be re-confirmed after this ledger commit lands. No
+> `plan/PHASE_CANDIDATES.md` or new `plan/AUDIT.md` residue filed this pass
+> — nothing actionable surfaced outside the two standing, already-filed
+> backlog items re-cited above (the 19-hook `zoneHas` cleanup; the-sextons-
+> count's TWIN trigger).
+```
+
+```
 > **[adjust-npcs pass 10, 2026-09-15, commit e6709572]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — dispatched by `/march`'s content-lifecycle
 > gate with `npcs` pre-flagged as the stalest/due category (pass 9's commit

@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-12T07:59:05Z | slash-prompt | /march | unknown | user/ci | /march |
-| 2026-08-12T08:01:41Z | subagent | Explore | claude-sonnet-5 | main | Map mobile morality/alignment surfaces |
 | 2026-08-12T09:48:19Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-08-12T09:48:21Z | skill | digest | unknown | main | - |
 | 2026-08-12T13:55:16Z | slash-prompt | /march | unknown | user/ci | /march |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-15T01:08:28Z | subagent | content-curator | claude-sonnet-5 | main | Run /adjust-npcs lifecycle tick |
 | 2026-09-15T06:47:16Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-15T06:50:03Z | skill | critique | claude-sonnet-5 | main | - |
+| 2026-09-15T08:39:30Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-15T08:43:01Z | subagent | card-expert | claude-sonnet-5 | main | Run adjust-cards pass 11 tick |
