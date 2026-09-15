@@ -47,7 +47,16 @@ export const consumableLibrary: Consumable[] = [
         name: 'Clarity Serum',
         description: 'A cold colorless serum. Strips a single hindrance from the mind.',
         category: 'consumable',
-        effectId: 'buff_cleanse',
+        // adjust-equipment pass 11 (2026-09-15): previously shared `buff_cleanse`
+        // (tier 2, full purge) with antidote, printing byte-identical cleanse
+        // lines in three live shops (Herb Trader, Camp Ledgerman, Iron Factor) at
+        // different prices — same shop-effect-duplication bug class as issue #307
+        // (philosopher-tea/void-essence). Split onto `buff_cleanse_minor` (tier
+        // 1): the flavor's "a single hindrance" now maps to a real, narrower
+        // payload (tier-1 debuffs only), distinct from antidote's full tier-2
+        // purge — reuses the existing tier-scoped cleanse routing, no new engine
+        // mechanic.
+        effectId: 'buff_cleanse_minor',
         quantity: 1,
     },
     {

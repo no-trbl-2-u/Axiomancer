@@ -262,7 +262,8 @@ export interface EffectPayload {
      *  card-powering purposes (pairs with `consumedOnUse`). */
     forceWildOnNextDie?: boolean;
     /**
-     * CLEANSE marker (Barber's Paradox / antidote / clarity-serum). An instant
+     * CLEANSE marker (Barber's Paradox / antidote, tier 2; Occam's Razor /
+     * clarity-serum, tier 1). An instant
      * (`duration: 0`) whose only job is to strip debuffs from the bearer — it
      * carries no persistent modifier. Appliers honor it by routing to
      * `removeEffectsByType(effects, 'debuff', effect.tier)` INSTEAD of adding

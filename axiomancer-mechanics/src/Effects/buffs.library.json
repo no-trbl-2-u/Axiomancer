@@ -327,6 +327,26 @@
       ]
     },
     {
+      "id": "buff_cleanse_minor",
+      "name": "Occam's Razor",
+      "description": "Shave away the least necessary explanation. One encumbrance, cleanly excised — the mind keeps only what it needs.",
+      "type": "buff",
+      "category": "stat",
+      "duration": 0,
+      "stacking": "none",
+      "resistedBy": "heart",
+      "resistDR": 12,
+      "payload": {
+        "cleanse": true
+      },
+      "tier": 1,
+      "addedIn": "2026-09-15",
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
       "id": "buff_abyssal_presence",
       "name": "Abyssal Presence",
       "description": "Some things refuse to be pinned down by observation, so you stop trying and simply stay. The abyss that stares back finds you staring first, heart steady and unmoved.",

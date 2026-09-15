@@ -12,7 +12,7 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-15 | b26bca91 | 11 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-14 | 36ee098c | 10 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-15 | 6043c01d | 11 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-14 | 55eec31d | 10 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-14 | 9d357e2b | 10 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-15 | e6709572 | 10 |
@@ -22,6 +22,48 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
+> **[adjust-equipment pass 11, 2026-09-15, commit 6043c01d]** Zero-CREATE,
+> zero-REMOVE pass — dispatched autonomously by `/march`'s content-lifecycle
+> gate (`equipment` was the only qualifying category this tick: 17 commits
+> since pass 10's commit `36ee098c`, past the 15-commit threshold; cards
+> `b26bca91` 2 commits, enemies `55eec31d` 11, keywords `9d357e2b` 7, npcs
+> `e6709572` 5, all sat under their own 15-commit/36h thresholds). Re-derived
+> all 5 Step-1 signals fresh: (1) dominated relics — none, all 8 same-slot
+> ties differ by distinct `grantsSignature`. (2) shop/reward coverage — 12 of
+> 22 consumables shop-stocked across the 7 `World/MapEvents/content.ts` ware
+> blocks, the other 10 reachable via `rollCacheReward`'s uniform draw, no
+> orphan. (3) `grantsSignature` drift — all 8 relic values still resolve in
+> the live 8-member `SignatureSkillId` union. (4) dead consumable
+> `effectId`s — all 12 non-heal-only ids resolve in `buffs.library.json`,
+> none on the card-vocabulary ban list (which governs cards, not items).
+> (5) `AccessoryKind` gap — head/hands/feet still at zero live relics, same
+> standing `[loop-call]` (`plan/AUDIT.md`, 2026-09-04), not re-litigated.
+> Beyond the five listed signals, found and fixed a real UPDATE: `antidote`
+> and `clarity-serum` both applied `buff_cleanse` (tier 2) and are co-listed
+> in three live shops (Herb Trader, Camp Ledgerman, Iron Factor) at
+> different prices (15/25, 16/30, 14/26) — the identical
+> byte-identical-effect-line-at-different-prices bug class issue #307 fixed
+> for philosopher-tea/void-essence on 2026-09-14. KB research (`kb-query`
+> gate, skill §3 Step 2): `kb_cards` on Dawncaster's cleanse-family cards
+> shows the prior-art pattern of "cleanse AN Affliction" (singular, partial)
+> as mechanically distinct from "cleanse all" cards — grounded `clarity-serum`
+> staying a cleanse-family item but at reduced scope, rather than inventing
+> an unrelated buff. Split `clarity-serum` onto a new `buff_cleanse_minor`
+> (tier 1, "Occam's Razor" — `buffs.library.json`): reuses the existing
+> tier-scoped `removeEffectsByType` routing in `useConsumableEffect`
+> (`equipment.engine.ts`) with zero engine changes, so a tier-1 cleanse now
+> strips only tier-1 debuffs (3 live: mark/kindling_ember/nettle_sting)
+> versus antidote's full tier 1+2 purge — the flavor's "a single hindrance"
+> now maps to a real, narrower payload. Updated the doc comments in
+> `Effects/types.ts` and `equipment.engine.ts` that named both items against
+> the one shared buff. Extended `consumable-cleanse.engine.test.ts` (new
+> tier-1-vs-tier-2 case), `dead-consumable-payload.engine.test.ts` (new
+> antidote/clarity-serum describe block, mirroring the philosopher-tea/
+> void-essence one), and `stat-band-effects.engine.test.ts` (added
+> `buff_cleanse_minor` to the no-stat-change sweep). Verify: green
+> (mechanics 213/213 files · 3440 tests; mobile 299/299 suites · 2854
+> tests, 3 snapshots).
+
 > **[adjust-cards pass 11, 2026-09-15, commit b26bca91]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
 > content-lifecycle gate (`cards` was the stalest/due category this tick: 15

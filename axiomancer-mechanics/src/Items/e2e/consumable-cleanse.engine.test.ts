@@ -5,6 +5,12 @@
  * venoms" / "strips a hindrance" mechanically did nothing. `buff_cleanse` now
  * carries `payload.cleanse: true`, and `useConsumableEffect` routes that flag
  * to `removeEffectsByType('debuff', tier)` instead of adding an inert instance.
+ *
+ * adjust-equipment pass 11 (2026-09-15): `antidote` and `clarity-serum`
+ * originally both applied `buff_cleanse` (tier 2) — byte-identical cleanse
+ * lines at different shop prices (issue #307's bug class). `clarity-serum`
+ * now applies its own `buff_cleanse_minor` (tier 1), so the two items differ
+ * mechanically, not just in flavor text.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -49,6 +55,23 @@ describe('CLEANSE consumables strip debuffs (buff_cleanse payload.cleanse wiring
         const serum = getConsumableById('clarity-serum')!;
         const { player: after } = useConsumableEffect(player, serum, 1, lookupEffect);
         expect(after.effects.map(e => e.effectId)).toEqual(['buff_regeneration']);
+    });
+
+    it('clarity-serum (tier-1 minor cleanse) strips a tier-1 debuff but leaves a tier-2 debuff and buffs alone', () => {
+        const player = afflictedPlayer([
+            ae('debuff_kindling_ember', 1),   // tier 1 debuff — cleansed
+            ae('debuff_poison', 2),           // tier 2 debuff — survives a tier-1 cleanse
+            ae('buff_thorns', 1),             // buff — survives
+        ]);
+        const serum = getConsumableById('clarity-serum')!;
+        const { player: after, applied } = useConsumableEffect(player, serum, 1, lookupEffect);
+
+        const ids = after.effects.map(e => e.effectId);
+        expect(ids).not.toContain('debuff_kindling_ember');
+        expect(ids).toContain('debuff_poison');
+        expect(ids).toContain('buff_thorns');
+        expect(ids).not.toContain('buff_cleanse_minor');
+        expect(applied?.id).toBe('buff_cleanse_minor');
     });
 
     it('a tier-2 cleanse does NOT remove a tier-3 debuff (tier scoping honored)', () => {
