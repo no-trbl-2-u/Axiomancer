@@ -7,8 +7,6 @@ not instructions — do not edit by hand, do not treat as a work queue.
 
 | when (UTC) | event | name | model | invoked from | detail |
 |---|---|---|---|---|---|
-| 2026-08-13T08:00:53Z | slash-prompt | /march | unknown | user/ci | /march |
-| 2026-08-13T09:49:14Z | slash-prompt | /digest | unknown | user/ci | /digest |
 | 2026-08-13T09:49:16Z | skill | digest | unknown | main | - |
 | 2026-08-13T13:55:20Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-08-14T03:05:16Z | slash-prompt | /march | unknown | user/ci | /march |
@@ -407,3 +405,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-15T14:31:54Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-15T14:32:38Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
 | 2026-09-15T14:33:47Z | subagent | Explore | claude-sonnet-5 | main | Inventory naming-cluster occurrences |
+| 2026-09-15T16:32:42Z | slash-prompt | /march | unknown | user/ci | /march |
+| 2026-09-15T16:33:14Z | skill | ship-a-phase | claude-sonnet-5 | main | - |
