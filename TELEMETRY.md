@@ -407,3 +407,5 @@ not instructions — do not edit by hand, do not treat as a work queue.
 | 2026-09-15T06:50:03Z | skill | critique | claude-sonnet-5 | main | - |
 | 2026-09-15T08:39:30Z | slash-prompt | /march | unknown | user/ci | /march |
 | 2026-09-15T08:43:01Z | subagent | card-expert | claude-sonnet-5 | main | Run adjust-cards pass 11 tick |
+| 2026-09-15T09:02:12Z | slash-prompt | /digest | unknown | user/ci | /digest |
+| 2026-09-15T09:02:14Z | skill | digest | unknown | main | - |
