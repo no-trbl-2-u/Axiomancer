@@ -31,7 +31,13 @@ const REGION_BACKDROPS: readonly (readonly [RegExp, number])[] = [
     [/river|crossing|ford|ferry/i, CHARON_CROSSING],
     // The two settled regions share a hand (both London: A Pilgrimage).
     [/city|citadel|capital/i, LUDGATE_HILL],
-    [/village|town|hamlet|harbou?r/i, WENTWORTH_STREET],
+    // "the Drowned Parish" (phase 44f's rename of the fishing-village map's
+    // region string) has none of "village|town|hamlet|harbour" in it, so the
+    // rename silently broke this rule's match on the game's own opening
+    // region — matched additively rather than re-derived, since
+    // `art-sources.json` already records Wentworth Street as intended for
+    // "town-across-river / fishing-village".
+    [/village|town|hamlet|harbou?r|drowned parish/i, WENTWORTH_STREET],
     [/forest|wood|wilds/i, FOREST_DARK],
 ];
 

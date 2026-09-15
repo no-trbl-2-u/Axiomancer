@@ -32,6 +32,7 @@ import Svg, { Circle, Defs, Ellipse, LinearGradient, Path, RadialGradient, Rect,
 
 import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
 import { getEncounterEnemyArt } from '@/assets/images/enemies';
+import { arenaAltTextFor, arenaBackdropFor } from '@/assets/images/combat';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import type {
@@ -44,10 +45,10 @@ import { keywordForEffect } from '@/state/combat/keywords';
 import { IntentIcon } from './IntentIcon';
 import { useJuiceFlash, useJuiceIdleBreath, useJuiceNumberPop, useJuicePulse, useJuiceShake } from '@/lib/juice';
 
-/** Full-bleed battlefield backdrop — a storm-lit ruined city over a cracked
- *  stone floor. Sits behind the enemy figure; the SVG `CreatureScene` draws
- *  `hideBackdrop` so its procedural moon/treeline doesn't overpaint the art. */
-const ARENA_BG = require('@/assets/images/combat/arena-ruined-city.jpg');
+/** Full-bleed battlefield backdrop — region-keyed (phase 83), falling back to
+ *  the ruined-city plate every other region already had. Sits behind the
+ *  enemy figure; the SVG `CreatureScene` draws `hideBackdrop` so its
+ *  procedural moon/treeline doesn't overpaint the art. */
 
 /** A bump of resolved engine events the pane animates. `seq` rises on each new
  *  resolution so the effect fires exactly once per APPLY / END PHASE. */
@@ -455,7 +456,7 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
 // ── The overlay ──────────────────────────────────────────────────────────────
 
 export const CombatCombatantPane = React.memo(function CombatCombatantPane({
-    enemy, player, onChip, fx, topInset = 0, metaLine, onHudLayout,
+    enemy, player, onChip, fx, topInset = 0, metaLine, onHudLayout, region,
 }: {
     enemy: CombatEnemyPaneVM;
     player: CombatPlayerPaneVM;
@@ -465,6 +466,10 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
     topInset?: number;
     /** Micro phase/round/turn meta rendered beside the enemy name (a11y keeps the words). */
     metaLine?: string;
+    /** The live map region (`vm.region`, e.g. "the Drowned Parish"), keying the
+     *  arena backdrop plate. Omitted by the dev-only sandbox route, which gets
+     *  the fallback plate — same as every region with no rule of its own. */
+    region?: string;
     /** Reports the HUD's real rendered height (top of screen to its bottom
      *  edge, `topInset` already included via the HUD's own padding) on every
      *  layout pass. The stance-check telegraph + alt-win meters make this
@@ -610,17 +615,23 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
     // fight's duration — see assets/images/enemies.
     const enemyArt = getEncounterEnemyArt(enemy.artKey, enemy.artNonce);
 
+    // Region-keyed arena backdrop (phase 83) — falls back to the ruined-city
+    // plate for every region with no rule of its own.
+    const arenaBg = arenaBackdropFor(region);
+    const arenaAlt = arenaAltTextFor(region);
+
     return (
         <Animated.View style={[StyleSheet.absoluteFillObject, shakeStyle]} pointerEvents="box-none" testID="combat-combatant-pane">
             {/* ── layer 0: the battlefield scene, enemy figure LARGE ── */}
             <View style={styles.sceneBand} pointerEvents="none">
                 {/* raster arena backdrop — full-bleed behind the foe */}
                 <Image
-                    source={ARENA_BG}
+                    source={arenaBg}
                     style={StyleSheet.absoluteFill}
                     contentFit="cover"
                     contentPosition="bottom center"
-                    accessibilityLabel="A storm-lit ruined city skyline over a cracked stone floor"
+                    accessibilityLabel={arenaAlt}
+                    testID="combat-arena-backdrop"
                 />
                 <Animated.View style={[StyleSheet.absoluteFillObject, enemyAnim]}>
                     <View style={styles.enemyFigureWrap}>

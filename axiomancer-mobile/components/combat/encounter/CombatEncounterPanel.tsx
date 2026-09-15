@@ -118,6 +118,10 @@ export interface CombatEncounterPanelProps {
     onWithdraw?: () => void;
     /** Fired once when the player dismisses the terminal summary. */
     onExit: (outcome: CombatOutcome | null) => void;
+    /** The live map region (`vm.region` from the exploration screen), keying
+     *  the arena backdrop plate (phase 83). The dev-only sandbox route omits
+     *  it and gets the fallback plate, same as any unmapped region. */
+    region?: string;
 }
 
 type StoreLike = ReturnType<typeof useGameStore>;
@@ -307,6 +311,7 @@ export function CombatEncounterPanel({
     persistOutcome = false,
     onWithdraw,
     onExit,
+    region,
 }: CombatEncounterPanelProps) {
     const styles = useStyles();
     const AXM = usePalette();
@@ -782,6 +787,7 @@ export function CombatEncounterPanel({
                     onFateTap={onFateTap}
                     onReprisalNeeded={onReprisalNeeded}
                     onHudLayout={setHudBottom}
+                    region={region}
                 />
             )}
 

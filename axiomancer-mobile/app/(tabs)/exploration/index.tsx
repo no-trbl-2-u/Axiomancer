@@ -298,6 +298,7 @@ export default function ExplorationScreen() {
                     encounterEnemy={activeEnemy}
                     onFight={onEncounterFight}
                     onFlee={onEncounterFlee}
+                    region={vm.region}
                 />
             )}
             {nodeTip !== null && <NodeToast tip={nodeTip} />}
