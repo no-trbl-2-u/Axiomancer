@@ -143,6 +143,22 @@
       "replacement": "Skull (R-14, rank 5)",
       "since": "2026-08-09 (phase 44c, spec 34 §5.2 R-14)",
       "note": "scoped to the rank-ladder enumeration context, not the bare word — 'axiom' is ordinary philosophy/math English (and the product name Axiomancer itself), so an unscoped \\bAxiom\\b would false-positive across the repo's own philosophy-jargon prose. Aporia itself gets no row (NL-9 — 'the Aporia' survives as the labyrinth place name)"
+    },
+    {
+      "id": "status-primacy-doctrine",
+      "type": "doctrine",
+      "pattern": "[Ss]tatus effects are the (?:MAIN|main) (?:fun|engagement mechanism)",
+      "replacement": "axiomancer-mechanics/CLAUDE.md 'Load-bearing doctrine (THE BIG NUMBERS REWRITE, 2026-09-02)' / VISION.md §Combat vision — status play, direct damage, the walls, and the alt-wins compete on merit; none of them is the intended path and none is protected. There is no governing objective function any more.",
+      "since": "2026-09-02 (THE BIG NUMBERS REWRITE, commit 63e3741f, repealing the 2026-08-08 unshackling's own CQI-as-successor framing along with it)",
+      "note": "assertion-scoped, same contract as the phase-66 doctrine rows (deleted outright by 82ac7bb4 alongside the design law they guarded, which is why this retirement went unregistered until phase 79 caught it live in statusGlyphs.ts and tuning.md). Re-registers what strike-ban-doctrine/status-primacy-doctrine/win-rate-objective-doctrine covered, updated for the fact that CQI itself is no longer the named successor."
+    },
+    {
+      "id": "status-engagement-floor-doctrine",
+      "type": "doctrine",
+      "pattern": "[Ee]ngagement floor[^.\\n]{0,60}status-effect usage|\\(enforces doctrine\\)|[Ll]ow status-effect engagement is a balance failure",
+      "replacement": "no status-engagement floor survives (axiomancer-mechanics/CLAUDE.md 'Load-bearing doctrine' §2/§3) — status-effect usage is not a regression gate or a graded target any more; the sims keep bug detectors and a wide sanity envelope, not a doctrine curve.",
+      "since": "2026-09-02 (THE BIG NUMBERS REWRITE, commit 63e3741f)",
+      "note": "assertion-scoped: catches the enforcement claim (an engagement floor exists and is applied), not a mention that no such floor survives — see axiomancer-mechanics/CLAUDE.md's own 'no status-engagement floor' line, which does not match this pattern's word order"
     }
   ]
 }

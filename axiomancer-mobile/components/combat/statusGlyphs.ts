@@ -2,9 +2,11 @@
  * Spec 25 §7.6 — Status-effect glyphs.
  *
  * Presentation-only mapping from an engine `Effect` to a visible glyph + colour
- * so the player can SEE every status effect on the combat board (the doctrine:
- * status effects are the main fun, and they must be legible). The engine owns
- * the effect content; this module owns the visual mapping (ADR-0001/0003).
+ * so the player can SEE every status effect on the combat board — status
+ * effects remain a major authored tool and must stay legible even though
+ * status primacy is no longer doctrine (THE BIG NUMBERS REWRITE, 2026-09-02;
+ * VISION.md §Combat vision). The engine owns the effect content; this module
+ * owns the visual mapping (ADR-0001/0003).
  *
  * Each effect resolves to:
  *   - a distinctive unicode glyph (a curated per-effect symbol where it matters,
