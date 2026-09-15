@@ -43,10 +43,11 @@ Tick in this file in the same commit that ships the phase.
 
 **Next up (autonomous loop's queue):**
 
-- [ ] Phase 79 — Doctrine lexicon: register the 2026-09-02 status-primacy
+- [x] Phase 79 — Doctrine lexicon: register the 2026-09-02 status-primacy
       retirement in `lexicon.json`'s doctrine mechanism; fix the two live
       un-exempted hits (`statusGlyphs.ts`, `tuning.md`) (promoted via
       `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md` [score 8.0])
+      — `feat(tooling): register the status-primacy doctrine retirement — phase 79` (eb779017)
 - [ ] Phase 80 — Naming pass: one concept, one word across player-facing
       surfaces (money/journal/SEALED/SURGE/"the deck" clusters), against a
       written lexicon (promoted via `/oversight` 2026-09-15 from
