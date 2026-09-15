@@ -88,6 +88,7 @@ describe('Phase 88 — Stat-band buffs: stat deltas via getEffectiveStats', () =
 
 const noStatCases = [
     { effectId: 'buff_cleanse', label: 'buff_cleanse (empty payload)' },
+    { effectId: 'buff_cleanse_minor', label: 'buff_cleanse_minor (empty payload)' },
     { effectId: 'buff_status_chance_up', label: 'buff_status_chance_up (rollModifier only)' },
 ];
 

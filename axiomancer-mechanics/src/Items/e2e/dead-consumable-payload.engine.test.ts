@@ -100,3 +100,36 @@ describe('philosopher-tea and void-essence no longer print byte-identical effect
         expect(afterEssence.effects.some(e => e.effectId === 'buff_abyssal_presence')).toBe(true);
     });
 });
+
+describe('antidote and clarity-serum no longer print byte-identical effect lines (adjust-equipment pass 11)', () => {
+    // Both used to share `buff_cleanse` (tier 2), so Herb Trader / Camp
+    // Ledgerman / Iron Factor each printed the same "CLEANSE" line for two
+    // wares at different prices — the same bug class as issue #307
+    // (philosopher-tea/void-essence). clarity-serum now applies its own
+    // `buff_cleanse_minor` (tier 1, strips tier-1 debuffs only).
+    it('the two consumables reference different effect ids', () => {
+        const antidote = getConsumableById('antidote')!;
+        const serum = getConsumableById('clarity-serum')!;
+        expect(antidote.effectId).not.toBe(serum.effectId);
+    });
+
+    it('clarity-serum cleanses at a lower tier than antidote', () => {
+        const antidote = getConsumableById('antidote')!;
+        const serum = getConsumableById('clarity-serum')!;
+        const antidoteEffect = lookupEffect(antidote.effectId!)!;
+        const serumEffect = lookupEffect(serum.effectId!)!;
+        expect(antidoteEffect.payload.cleanse).toBe(true);
+        expect(serumEffect.payload.cleanse).toBe(true);
+        expect(serumEffect.tier).toBeLessThan(antidoteEffect.tier);
+    });
+
+    it('using each consumable applies its own tier-scoped cleanse', () => {
+        const antidoteItem = getConsumableById('antidote')!;
+        const { applied: antidoteApplied } = useConsumableEffect(Player, antidoteItem, 1, lookupEffect);
+        expect(antidoteApplied?.id).toBe('buff_cleanse');
+
+        const serumItem = getConsumableById('clarity-serum')!;
+        const { applied: serumApplied } = useConsumableEffect(Player, serumItem, 1, lookupEffect);
+        expect(serumApplied?.id).toBe('buff_cleanse_minor');
+    });
+});
