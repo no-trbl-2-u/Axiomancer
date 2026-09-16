@@ -206,13 +206,33 @@ describe('fishing-village — narrative coverage floor (Phase 53c)', () => {
         expect(coverage.shareOfRoutes['fv-6']).toBe(1);
     });
 
-    it('measures the quest board rather than assuming it', () => {
-        // fv-15 ("build the boat") stays off the spine on purpose — see
+    it('measures the pre-boss encounter lane rather than assuming it', () => {
+        // fv-15 (Phase 61: foot-stealer, an ordinary encounter — the
+        // quest-board kind it carried pre-Phase-61 was retired entirely,
+        // no map authors it any more) stays off the spine on purpose — see
         // Phase 53c's brief, Follow-ups: moving it to 100% is a design
         // question for 46a/46c, which own the early-game. This asserts the
         // actual number so a future re-layer can't silently change it
         // without a test noticing.
         expect(coverage.shareOfRoutes['fv-15']).toBeCloseTo(1 / 3, 2);
+    });
+
+    it('opens an ordinary encounter beside the pre-boss rest on every route (Phase 87)', () => {
+        // Phase 87's promoted scope: "at least one ordinary encounter/rest
+        // node opens before or beside the boss edge." The rest guarantee
+        // (fv-20, above) already held; this is the matching guarantee for
+        // the encounter option (fv-15) — every node in the boss's prior
+        // column can reach BOTH, not just the rest node, so a route is
+        // never forced to skip combat entirely and still never forced INTO
+        // it either. Re-verified stale by two independent 2026-09-10
+        // passes (`plan/CRITIQUE.md`, `plan/AUDIT.md`) before this phase
+        // shipped — this test is what keeps it true going forward.
+        const encounterColumn = fishingVillage.nodes.find(n => n.id === 'fv-15')!.location[0];
+        const priorColumn = fishingVillage.nodes.filter(n => n.location[0] === encounterColumn - 1);
+        expect(priorColumn.length).toBeGreaterThan(0);
+        for (const node of priorColumn) {
+            expect(node.connectedNodes, `${node.id} cannot reach the pre-boss encounter`).toContain('fv-15');
+        }
     });
 });
 

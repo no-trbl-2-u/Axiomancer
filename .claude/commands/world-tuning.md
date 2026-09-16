@@ -18,9 +18,10 @@ description: World map/event balance loop — seeded policy probes over the pure
 
 Each map's authored `MapEventPool` spread (`src/World/MapEvents/content.ts`)
 is a deliberate curve, not a random mix: the fishing-village new-player map
-is combat-focused but varied (encounters a slight plurality, recovery and
-texture nodes filling the rest, exactly one quest node, exactly one boss);
-later maps and continents lean the spread differently as the doctrine
+is combat-focused but varied (encounters/interaction/rest tied for largest
+at 4 apiece, recovery and texture nodes filling the rest, exactly one boss —
+Phase 61 retired the quest-board kind entirely, so no map authors it any
+more); later maps and continents lean the spread differently as the doctrine
 dictates. Two contracts are LOCKED — never tune against them:
 
 1. **Encounters never scale below the source enemy's own level.** An
@@ -104,15 +105,16 @@ The empirical witnesses, in order of preference:
 | Axis | Target |
 |---|---|
 | Encounter floor | scaled encounter level ≥ `max(source.level, player.level)` on EVERY seed (hard invariant) |
-| Kind spread per map | matches the map's authored personality (e.g. fishing-village: encounter-kind a slight plurality, exactly 1 quest node, exactly 1 boss node) |
+| Kind spread per map | matches the map's authored personality (e.g. fishing-village: encounter/interaction/rest tied for largest, exactly 1 boss node) |
 | Kind coverage | every `MapEventKind` value fires at least once across the authored maps |
 | Hazard teeth | hazard payload damage is felt but never lethal on its own (bounded well under a fresh player's `maxHealth`) |
 | Rest generosity | rest payload `healFraction` meaningfully restores without trivializing the map's hazard/encounter density around it |
 | Gathering payoff | gathering payload item counts feel like a real detour reward, not filler |
 
 Doctrine constants (`src/World/MapEvents/content.ts`): fishing-village is the
-new-player map (25 nodes, combat a slight plurality, 1 quest node `fv-15`,
-1 boss node `fv-6`); northern-forest exercises the fuller `MapEventKind`
+new-player map (25 nodes, encounter/interaction/rest tied for largest at 4
+apiece, 1 boss node `fv-6` — no quest-board kind since Phase 61 retired it);
+northern-forest exercises the fuller `MapEventKind`
 roster per node. Re-derive exact per-node counts from the current content
 file before relying on them — this doc intentionally does not restate the
 full node table so it can't drift from `content.ts`.
