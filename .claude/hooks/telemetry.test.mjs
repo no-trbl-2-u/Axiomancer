@@ -83,15 +83,44 @@ test('a plain prompt is not logged', () => {
 // A plain prompt still opens a tick even though it writes no row. Without
 // that, an attended session that never invokes a logged verb has no tick
 // start and its tick-end can only report a '-' duration.
-test('a plain prompt still starts the tick clock', () => {
-  // Isolate: clear any tick left open by an earlier test, so this asserts
-  // that THIS prompt started the clock rather than inheriting one.
+/** Forget any tick left open by an earlier test, so a case starts clean. */
+const clearTick = () =>
   fs.rmSync(path.join(root, '.claude', 'hooks', '.telemetry-state.json'), { force: true })
+
+// A conversational turn is the user talking, not a tick. Logging it dirtied
+// TELEMETRY.md every turn and demanded a commit per turn, burying the real
+// ticks in churn.
+test('a conversational turn writes no tick-end row at all', () => {
+  clearTick()
+  const before = rows().length
   fire('prompt', { ...base(), prompt: 'a prose question, no slash' })
+  fire('tick-end', base())
+  assert.equal(rows().length, before, 'a turn that invoked no verb leaves no trace')
+})
+
+// …but a tick that did invoke something still closes with a duration, which
+// is the whole point of the tick-end row.
+test('a tick that invoked a verb closes with a duration', () => {
+  clearTick()
+  fire('prompt', { ...base(), prompt: 'a prose question, no slash' })
+  const call = { ...base(), tool_name: 'Skill', tool_input: { skill: 'critique' } }
+  fire('tool', call)
+  fire('tool-end', { ...call, tool_response: { status: 'success' } })
   fire('tick-end', base())
   const end = rows().at(-1)
   assert.match(end, /\| tick-end \|/)
   assert.match(end, /\| \d+[smh][^|]*\|/, `tick-end should carry a duration: ${end}`)
+})
+
+// A slash dispatch that then does nothing is the signal the tick-end row
+// exists to make legible — it must not be silenced as conversational.
+test('a slash dispatch that does nothing still closes the tick', () => {
+  clearTick()
+  fire('prompt', { ...base(), prompt: '/march' })
+  fire('tick-end', base())
+  const [dispatch, end] = rows().slice(-2)
+  assert.match(dispatch, /\| slash-prompt \| \/march \|/)
+  assert.match(end, /\| tick-end \|/, 'a dispatch that reached no verb is still a tick')
 })
 
 test('a subagent spawn writes a start row, then an end row with its duration', () => {
