@@ -80,6 +80,20 @@ test('a plain prompt is not logged', () => {
   assert.equal(rows().length, before)
 })
 
+// A plain prompt still opens a tick even though it writes no row. Without
+// that, an attended session that never invokes a logged verb has no tick
+// start and its tick-end can only report a '-' duration.
+test('a plain prompt still starts the tick clock', () => {
+  // Isolate: clear any tick left open by an earlier test, so this asserts
+  // that THIS prompt started the clock rather than inheriting one.
+  fs.rmSync(path.join(root, '.claude', 'hooks', '.telemetry-state.json'), { force: true })
+  fire('prompt', { ...base(), prompt: 'a prose question, no slash' })
+  fire('tick-end', base())
+  const end = rows().at(-1)
+  assert.match(end, /\| tick-end \|/)
+  assert.match(end, /\| \d+[smh][^|]*\|/, `tick-end should carry a duration: ${end}`)
+})
+
 test('a subagent spawn writes a start row, then an end row with its duration', () => {
   const spawn = {
     ...base(),

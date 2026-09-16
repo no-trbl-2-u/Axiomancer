@@ -318,15 +318,22 @@ function toolEnd(input) {
 }
 
 /**
- * UserPromptSubmit: CI dispatches skills as '/command' prompts
- * (claude-code-action) — no Skill tool call ever fires, so log the
- * prompt itself. The model is often '-' here: on a fresh session no
+ * UserPromptSubmit: marks the start of a tick, and logs the prompt when it
+ * is a slash dispatch. The model is often '-' here: on a fresh session no
  * assistant turn has happened yet, so there is nothing to read.
  */
 function promptMode(input) {
   const prompt = String(input?.prompt ?? '').trim()
+  // EVERY prompt starts a new tick, slash or not — otherwise an attended
+  // session that never invokes a logged verb has no tick start, and its
+  // tick-end row can only record a '-' duration. Anything still open
+  // belonged to the previous tick.
+  writeState({ tickStart: Date.now(), open: {} })
+  // Only slash prompts get a row: CI dispatches skills as '/command'
+  // prompts (claude-code-action) and no Skill tool call ever fires, so the
+  // prompt itself is the only record. Ordinary prose prompts are the
+  // user talking, not an invocation.
   if (!prompt.startsWith('/')) return
-  writeState({ tickStart: Date.now(), open: {} }) // a new prompt starts a new tick
   appendRow({
     event: 'slash-prompt',
     name: prompt.split(/\s+/)[0],

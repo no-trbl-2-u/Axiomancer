@@ -435,3 +435,5 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-15T22:30:30Z | skill | ship-a-phase | claude-sonnet-5 | - | - |
 | 2026-09-15T22:32:00Z | subagent | mechanics-expert | claude-sonnet-5 | - | Design 3 new signature skills for equipment progression |
 | 2026-09-15T23:55:38Z | tick-end | - | claude-opus-5 | - | ok |
+| 2026-09-16T00:03:50Z | tick-end | - | claude-opus-5 | - | ok |
+| 2026-09-16T00:04:03Z | tick-end | - | claude-opus-5 | - | ok |
