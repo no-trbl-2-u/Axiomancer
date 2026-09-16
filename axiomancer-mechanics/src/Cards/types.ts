@@ -680,7 +680,18 @@ export type SynergyStatePredicate =
      *  mirror of `opening`: the reward for a turn that keeps going, where
      *  `opening` (`maxPriorSpells: 0`) is AMBUSH, the reward for leading with
      *  it. */
-    | { kind: 'flow'; minPriorSpells: number };
+    | { kind: 'flow'; minPriorSpells: number }
+    /** EVENTIDE (`/adjust-keywords` pass 11, drilling Dawncaster's Balance/
+     *  Order "Chaos" family — AUDIT.md loop-call, DECIDED via /oversight
+     *  2026-09-15) — true when the player's draw pile holds an EVEN number of
+     *  cards at play time. A genuinely different axis from every other
+     *  turn-shape predicate: those gate on position-in-turn or hand/discard
+     *  SIZE; this gates on a PARITY property of the deck the player is
+     *  already playing, unrelated to when in the turn the card lands. One
+     *  drilled keyword rather than Dawncaster's two (Balance/Order) — an
+     *  even-only check covers the design niche without minting a near-
+     *  synonym pair. */
+    | { kind: 'eventide' };
 
 /**
  * Phase 66 — Tier 2 synergy clause. Optional payload on `Card` that

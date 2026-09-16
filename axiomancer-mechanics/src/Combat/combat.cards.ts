@@ -311,6 +311,10 @@ export function statePredicateText(p: SynergyStatePredicate): string {
         // as a face term with its threshold spelled out.
         case 'flow':
             return `FLOW ${p.minPriorSpells} (${p.minPriorSpells}+ spells already played this turn)`;
+        // EVENTIDE (`/adjust-keywords` pass 11) — the Chaos-family drill: a
+        // parity read on the player's own draw pile, not a turn-position gate.
+        case 'eventide':
+            return 'EVENTIDE (an even number of cards left in your draw pile)';
     }
 }
 

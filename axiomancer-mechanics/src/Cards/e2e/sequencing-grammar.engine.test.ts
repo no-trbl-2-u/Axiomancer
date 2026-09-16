@@ -259,6 +259,52 @@ describe('checkStatePredicate — the WS5 turn-shape predicates', () => {
         expect(checkStatePredicate(p, { enemyDamageLastRound: 0, enemyDamageThisTurn: 0 })).toBe(false);
         expect(checkStatePredicate(p, {})).toBe(false);
     });
+
+    // EVENTIDE (`/adjust-keywords` pass 11) — a fifth turn-shape predicate,
+    // added later than the WS5.2 batch above: a PARITY read on the draw
+    // pile rather than a turn-position/ledger-cost read. Vacuously TRUE on
+    // a bare view (0 % 2 === 0), same convention as opening/finale.
+    it('eventide: true while the draw pile holds an EVEN number of cards (absent = vacuously true)', () => {
+        const p = { kind: 'eventide' } as const;
+        expect(checkStatePredicate(p, { drawPile: [] })).toBe(true);
+        expect(checkStatePredicate(p, {})).toBe(true);
+        expect(checkStatePredicate(p, { drawPile: [1, 2] })).toBe(true);
+        expect(checkStatePredicate(p, { drawPile: [1, 2, 3, 4] })).toBe(true);
+        expect(checkStatePredicate(p, { drawPile: [1] })).toBe(false);
+        expect(checkStatePredicate(p, { drawPile: [1, 2, 3] })).toBe(false);
+    });
+
+    it('statePredicateText(eventide) prints the registry word with its rule', () => {
+        expect(statePredicateText({ kind: 'eventide' }))
+            .toBe('EVENTIDE (an even number of cards left in your draw pile)');
+    });
+});
+
+// ─── 2b. EVENTIDE end to end against the real library card ───────────────────
+
+describe('the-even-bell (live library card) — EVENTIDE fire/silent, real units', () => {
+    it('fires THORNS 6 for 3 turns on an even draw pile, stays silent on odd', () => {
+        const evenFrom = fixtureWith('the-even-bell', { clean: true },
+            s => ({ ...s, drawPile: ['spoiled-poultice', 'spoiled-poultice'] }));
+        const evenPlay = play(evenFrom, true);
+        const oddFrom = fixtureWith('the-even-bell', { clean: true },
+            s => ({ ...s, drawPile: ['spoiled-poultice'] }));
+        const oddPlay = play(oddFrom, true);
+
+        expect(conditionEvent(evenPlay.events, 'EVENTIDE'), 'EVENTIDE must fire on an even draw pile').toBeDefined();
+        expect(conditionEvent(oddPlay.events, 'EVENTIDE')).toBeUndefined();
+
+        const evenThorns = evenPlay.after.player.effects.find(e => e.effectId === 'buff_thorns');
+        expect(evenThorns?.intensity).toBe(6);
+        expect(oddPlay.after.player.effects.find(e => e.effectId === 'buff_thorns')).toBeUndefined();
+
+        // GUARD lands identically either way — EVENTIDE only gates the
+        // rider, not the card's own specialMechanics line (read/die scaling
+        // applies equally to both plays, so compare them to each other
+        // rather than pinning an absolute post-scaling number here).
+        expect(evenPlay.after.guard).toBe(oddPlay.after.guard);
+        expect(evenPlay.after.guard).toBeGreaterThan(0);
+    });
 });
 
 // ─── 3. Per-card condition gates (fire / silent, real units) ─────────────────

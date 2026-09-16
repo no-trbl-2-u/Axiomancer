@@ -22,6 +22,76 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
+> **[adjust-keywords pass 11, 2026-09-16, commit <PENDING>]** One CREATE
+> (EVENTIDE) — the first `/adjust-keywords` CREATE ever landed (passes 1-10
+> were zero-diff re-audits, one retirement, and small print/gloss fixes).
+> Dispatched autonomously by `/march`'s content-lifecycle gate (`keywords`
+> was the stalest qualifying category: last pass 2026-09-14T22:50Z/commit
+> `9d357e2b`, 52 commits and ~40h stale, the oldest of the five by
+> last-pass timestamp). `git log 9d357e2b..HEAD -- axiomancer-mechanics/
+> src/Cards axiomancer-mechanics/src/Effects axiomancer-mechanics/
+> src/Combat axiomancer-mechanics/docs/keyword-atlas.md
+> docs/retheme-map.json axiomancer-mobile/state/combat/keywords.ts
+> axiomancer-card-editor/src/data/mechanics.ts` returned 3 commits: `5885f024`
+> (adjust-equipment pass 11, an item-only `buff_cleanse_minor` split — not a
+> card keyword) and `9f313d0c` + `7cd4119c` (phase 85/86 engine work; the
+> latter's `the-sextons-count` fix restored a THIRD printed TWIN trigger the
+> engine had silently dropped since 2026-09-04 — already fixed by a direct
+> engine phase, not this steward, and reconfirmed clean via a fresh
+> `CardSpecialMechanic`/`SynergyStatePredicate` kind-count sweep: 50+7=57,
+> display-switch parity 50/50 and 7/7, carrier histogram (10 at exactly 1,
+> 13 at exactly 2, 9 at 0) all byte-identical to pass 10's own numbers).
+> Step 1 alone read zero-diff a THIRD consecutive time (after passes 9/10),
+> so per Step 1b (added via `/oversight` 2026-09-15 after that exact
+> plateau) ran the widened KB cross-reference check anyway: it resurfaced
+> the standing `[loop-call]` (`plan/AUDIT.md`, filed pass 9, **DECIDED for
+> a concrete proposal via `/oversight` 2026-09-15**) — Dawncaster's "Chaos"
+> functions-column family (Balance/Order: a parity gate on the player's own
+> deck/hand) and "generic Upgrade" (Mergecraft/Infusion: permanent
+> per-card-object growth) both have no registry analogue. KB research
+> (gate for this CREATE, per skill §3 Step 2): `kb_read_doc` on
+> `keywords/balance.okf.md`, `keywords/mergecraft.okf.md`,
+> `keywords/infusion.okf.md`, `keywords/dominated.okf.md` (all
+> `kb:dawncaster`, community-sourced, confidence medium, `status: draft`).
+> Picked Chaos over generic Upgrade: Balance/Order's parity read drops into
+> the EXISTING turn-shape `SynergyStatePredicate` slot (same surface as
+> AMBUSH/FLOW/FINALE/REQUIEM — no new payload shape needed), where generic
+> Upgrade would need net-new persistent per-card-object state the engine
+> does not carry today (a real payload-shape design task, correctly
+> deferred rather than rushed). Drilled to ONE keyword, not Dawncaster's
+> Balance/Order pair: `EVENTIDE` (`{ kind: 'eventide' }`) fires free while
+> the player's draw pile holds an EVEN number of cards — vacuously true off
+> a bare ledger view, same convention as `opening`/`finale`. Full wiring: a
+> new `drawPile` field on `synergy-predicates.ts`'s `SynergyLedgerView` +
+> its `checkStatePredicate` case, `combat.cards.ts`'s `statePredicateText`
+> case, `paid-summary-honesty.engine.test.ts`'s `KNOWN_UPPER`, mobile
+> `KEYWORD_GLOSS` (no glyph needed — same family as AMBUSH/FLOW/FINALE/
+> REQUIEM, none of which carry one), the atlas's new "Added" section (with
+> its KB receipts), and `AUDIT.md`'s loop-call marked `[x]` RESOLVED. No
+> card-editor change needed: `CardSynergy`/`SynergyStatePredicate` are
+> imported types in `axiomancer-card-editor/src/types.ts`, and
+> `cardCodegen.ts`'s `synergyLines` emits `statePredicate` generically (no
+> per-kind allowlist) — confirmed by reading both files directly, same
+> zero-touch precedent AMBUSH/FLOW/FINALE/REQUIEM already set. Two carriers
+> ship with the row (both Splinter/rank 3, within the §5.2 14-20 single-hit
+> / 16-22 GUARD band): **The Even Bell** (`the-even-bell`, vigil, mind) —
+> GUARD 18 + EVENTIDE[THORNS 6 for 3 turns], FREE THORNS 3 for 2 turns; and
+> **An Even Reckoning** (`an-even-reckoning`, debt, mind) — Deal 16 +
+> EVENTIDE[deal 14 more, +1 Soul], FREE deal 6. `debt.cards.ts`'s stale
+> aggregator count comment fixed in the same edit (16 → 17 cards). Hermetic
+> e2e in `sequencing-grammar.engine.test.ts`: unit `checkStatePredicate`
+> cases (even/odd/absent) + a `statePredicateText` pin + a live-library-card
+> fire/silent integration test playing `the-even-bell` end to end through
+> `playCombatCard` with a controlled even- vs odd-length `drawPile` (asserts
+> the EVENTIDE event fires/is absent, THORNS lands/does not land, and GUARD
+> lands identically either way). Verify: green (mechanics 214/214 files ·
+> 3464 tests + build; mobile lint + typecheck + jest 302/302 suites +
+> assets:check + art:test, including `keywords.test.ts` and
+> `glyphShapes.test.ts`; card-editor type-check; root `npm test` 134/134
+> incl. content-drift's atlas↔registry bidirectional checks).
+```
+
+```
 > **[adjust-enemies pass 11, 2026-09-16, commit b718b421]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass on the enemy library itself — dispatched
 > autonomously by `/march`'s content-lifecycle gate (`enemies` was the

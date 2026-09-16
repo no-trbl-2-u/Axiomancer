@@ -329,7 +329,7 @@
 
 ## Pending
 
-### [loop-call] Keyword registry has no analogue for Dawncaster's "Chaos" or generic "Upgrade" families (2026-09-13)
+### [x] [loop-call] Keyword registry has no analogue for Dawncaster's "Chaos" or generic "Upgrade" families (2026-09-13) — RESOLVED via `/adjust-keywords` pass 11 (2026-09-16)
 `/adjust-keywords` pass 9's functions-column sweep (`DigitalCardGames/dawncaster/
 keywords.csv`, 141 rows) against our 68-row registry's eight families (damage,
 afflictions/payoffs, walls/reprisal, tempo/control, turn shape, deck-as-resource,
@@ -367,6 +367,23 @@ actual card idea + rank-slot proposal for Chaos or generic Upgrade (whichever
 the KB research favors) and bring it back through the normal CREATE-bar gate,
 rather than leaving this a bare genre-toolbox observation. Row stays open
 until that proposal lands.
+
+**RESOLVED via `/adjust-keywords` pass 11 (2026-09-16):** shipped Chaos, not
+generic Upgrade — Balance/Order's parity read fits the existing turn-shape
+predicate slot cleanly (a new `SynergyStatePredicate` kind, same surface as
+AMBUSH/FLOW/FINALE/REQUIEM); generic Upgrade would need a NEW payload shape
+(per-card-object persistent state across combats, which nothing in the
+engine currently stores) and stayed out of scope for a single pass. New
+keyword **EVENTIDE** (`{ kind: 'eventide' }`, drilled to ONE even-only check
+rather than Dawncaster's Balance/Order pair): fires while the draw pile
+holds an even number of cards. Two carriers: The Even Bell (vigil, Splinter
+3) and An Even Reckoning (debt, Splinter 3). Full wiring + hermetic e2e +
+atlas row + mobile gloss, all verify gates green (mechanics, mobile,
+card-editor, root content-drift). See
+`axiomancer-mechanics/docs/keyword-atlas.md` § "Added" and the matching
+`plan/CONTENT_LEDGER.md` pass-11 log entry for the full file list. Generic
+Upgrade is NOT re-filed here — if it resurfaces, it needs its own KB
+research + payload-shape design pass, not a continuation of this row.
 
 ### [loop-call] The deck-matrix baseline reads STALE because of a speech-mark edit (2026-09-12)
 `baseline:check` now reports the baseline stale by one mechanics-source commit:

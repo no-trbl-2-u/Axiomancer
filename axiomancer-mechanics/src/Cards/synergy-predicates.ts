@@ -67,6 +67,11 @@ export interface SynergyLedgerView {
     /** The discard pile — only its LENGTH is read (REQUIEM, profane-canon
      *  rework). Structural: `string[]` satisfies this. */
     discard?: readonly unknown[];
+    /** The draw pile — only its LENGTH's PARITY is read (EVENTIDE,
+     *  `/adjust-keywords` pass 11). Structural: `string[]` satisfies this
+     *  (`CombatEncounterState.drawPile`, not the full reshuffle-source
+     *  `deck`). */
+    drawPile?: readonly unknown[];
 }
 
 /**
@@ -105,6 +110,13 @@ export function checkStatePredicate(
         case 'requiem':
             // The dead remember: ≥ n cards in the discard pile at play time.
             return (ledgers.discard?.length ?? 0) >= predicate.n;
+        case 'eventide':
+            // The ledger balances: the draw pile's remaining count is even.
+            // Absent-view convention: a bare view has no drawPile field, and
+            // `0 % 2 === 0`, so EVENTIDE is vacuously TRUE off a bare
+            // ledger — same convention as `opening`/`finale`, not the
+            // earned-cost convention of `flow`/`recoil-paid-this-turn`.
+            return (ledgers.drawPile?.length ?? 0) % 2 === 0;
     }
 }
 

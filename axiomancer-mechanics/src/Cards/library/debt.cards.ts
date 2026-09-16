@@ -221,6 +221,35 @@ const usury: Card = {
     tags: ['debt', 'wrath', 'multi-hit'],
 };
 
+const anEvenReckoning: Card = {
+    id: 'an-even-reckoning',
+    theme: 'debt',
+    name: 'An Even Reckoning',
+    philosophicalAspect: 'mind',
+    description:
+        'The clerk will not close a book on an odd number — bad luck follows ' +
+        'an uneven sum out the door and into the world. So he counts twice, ' +
+        'and the second count is always the one that matters.',
+    tier: 2, rank: 3, cardType: 'spell',
+    targetType: 'enemy',
+    paidSummary:
+        'Deal 16. EVENTIDE — with an even number of cards left in your draw pile, deal 14 more and gain 1 Soul.',
+    // pts: deal 16 (5.33) + eventide[deal 14 (4.67) + soul 1 (0.75)] × 0.5
+    // condition discount = 2.71 → paid ≈ 8.04. FREE deal 6 (2.0). The book
+    // only balances on roughly half the draws, same coin-flip reliability
+    // as any other condition rider — the Chaos-family gap the loop-call
+    // asked this pass to fill, priced through the existing threshold
+    // discount rather than a new pricing lever.
+    free: { damage: 6 },
+    specialMechanics: [{ kind: 'deal', amount: 16 }],
+    synergy: {
+        statePredicate: { kind: 'eventide' },
+        rider: { damage: 14, souls: 1 },
+    },
+    addedIn: '2026-09-16',
+    tags: ['debt', 'eventide', 'payoff'],
+};
+
 // ─── RIB — the bailiff calls ─────────────────────────────────────────────────
 
 const distraint: Card = {
@@ -424,11 +453,11 @@ const jointAndSeveral: Card = {
     tags: ['debt', 'hex', 'recoil-payoff'],
 };
 
-/** THE RECKONING — 16 cards, rank-ascending. */
+/** THE RECKONING — 17 cards, rank-ascending. */
 export const DEBT_CARDS: Card[] = [
     promissoryCut, tallyStick, chalkOnTheDoorpost,
     theVig, theGracePeriod,
-    deadPledge, insolvency, usury,
+    deadPledge, insolvency, usury, anEvenReckoning,
     distraint, surplusage, aPoundOfFlesh,
     blankIndenture, confessionOfJudgment, theRedLedger,
     theLastAssize, jointAndSeveral,

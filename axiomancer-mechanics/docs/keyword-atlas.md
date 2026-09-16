@@ -88,6 +88,7 @@ mid-flight. Run `npm run catalog` for the current binding.
 | **FINALE** | This line fires when playing the card leaves at most the printed number of cards in hand. | (see the catalog) |
 | **REQUIEM N** | A card's REQUIEM line fires free while your discard pile holds that many cards. | (see the catalog) |
 | **FALLEN** | A state: you carry 2 or more different afflictions. A card's FALLEN line fires free while you are Fallen. | (see the catalog) |
+| **EVENTIDE** | A card's EVENTIDE line fires free while your draw pile holds an even number of cards. | (see the catalog) |
 
 ## Player keywords — the deck as a resource
 
@@ -212,6 +213,43 @@ branches on `Number.isFinite(RUPTURE_CAP_FRACTION)` and renders "uncapped"
 today — so only the static first-sight popup lied. Fixed the gloss to match
 the row above (no cap claim); `docs/combat.md`'s matching claim was also
 stale and corrected in the same pass.)
+
+## Added
+
+- **EVENTIDE** (2026-09-16, `/adjust-keywords` pass 11) — a new turn-shape
+  `SynergyStatePredicate` kind (`{ kind: 'eventide' }`), drilling Dawncaster's
+  "Chaos" functions-column family (Balance/Order/Delirious/Dominated/Pinned;
+  `kb:dawncaster/keywords.csv`, community, medium confidence — cross-read
+  `keywords/balance.okf.md`, `keywords/mergecraft.okf.md`,
+  `keywords/dominated.okf.md`). Filed as a genre-toolbox observation by pass
+  9 (2026-09-13), DECIDED for a concrete proposal via `/oversight`
+  2026-09-15 (`plan/AUDIT.md`). Balance/Order gate on a PARITY property of
+  the player's own deck/health, a genuinely different axis than every other
+  turn-shape predicate (which gate on position-in-turn or hand/discard
+  SIZE) — one drilled keyword (even-only) covers the niche rather than
+  minting Dawncaster's two near-synonyms. Two carriers ship with the row:
+  The Even Bell (vigil, Splinter 3, GUARD + a THORNS rider) and An Even
+  Reckoning (debt, Splinter 3, DEAL + a damage/Soul rider). Full wiring:
+  `src/Cards/types.ts` (union member), `src/Cards/synergy-predicates.ts`
+  (`drawPile` ledger field + `checkStatePredicate` case),
+  `src/Combat/combat.cards.ts` (`statePredicateText` case),
+  `axiomancer-mobile/state/combat/keywords.ts` (`KEYWORD_GLOSS` — no glyph:
+  same family as AMBUSH/FLOW/FINALE/REQUIEM, which carry no glyph either),
+  `src/Combat/e2e/paid-summary-honesty.engine.test.ts` (`KNOWN_UPPER`),
+  hermetic coverage in `src/Cards/e2e/sequencing-grammar.engine.test.ts`
+  (unit predicate cases + a live-card fire/silent integration test). No
+  card-editor change needed: `CardSynergy`/`SynergyStatePredicate` are
+  imported types there (`src/types.ts`), and the codegen emits
+  `synergy.statePredicate` generically (`cardCodegen.ts`'s `synergyLines`),
+  so a new predicate kind round-trips with zero editor-side code —
+  confirmed against the same precedent AMBUSH/FLOW/FINALE/REQUIEM already
+  set (none of them touch `SPECIAL_MECHANIC_KINDS` or `wx.ts` either, since
+  those surfaces are for `CardSpecialMechanic`/display vocabulary, not
+  `CardSynergy.statePredicate`). `docs/retheme-map.json` checked for an
+  NL-8 collision: "Eventide"/"EVENTIDE" appears nowhere in the file; no new
+  row added there, matching every prior predicate CREATE (FLOW/TWIN etc.
+  never gained retheme-map rows either — that file is spec-34's historical
+  rename ledger, not a running keyword registry).
 
 ## Retired
 

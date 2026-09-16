@@ -310,9 +310,13 @@ const KEYWORD_GLOSS: Record<string, string> = {
     //    keyword, which KW-3 correctly refuses. ──
     Finale: 'This line fires only when playing the card leaves that few cards in your hand.',
     Relent: "When PLEA breaks the foe's resolve it offers to yield, and you choose whether to accept.",
-    // ── Turn shape (2) — the conditions a card's line waits on ──
+    // ── Turn shape (3) — the conditions a card's line waits on ──
     Ambush: 'This line fires only when the card is your first spell of the turn.',
     Flow: 'This line fires once you have already played that many spells this turn.',
+    // `/adjust-keywords` pass 11 — the Chaos-family drill (Dawncaster
+    // Balance/Order): a PARITY read on the draw pile, not a turn-position
+    // gate like AMBUSH/FLOW above.
+    Eventide: 'This line fires free while your draw pile holds an even number of cards.',
     // ── Card types (labels, not keywords — never rendered in the inspect
     // keyword panel since 2026-07-12; kept for help surfaces + the KW lints) ──
     Oath: 'A passive on your side: 3 rounds when played free, permanent when paid with a die.',

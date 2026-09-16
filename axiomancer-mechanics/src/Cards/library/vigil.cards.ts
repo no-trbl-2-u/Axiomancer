@@ -206,6 +206,33 @@ const theIceTakesItsTithe: Card = {
     tags: ['vigil', 'thorns', 'bleed'],
 };
 
+const theEvenBell: Card = {
+    id: 'the-even-bell',
+    theme: 'vigil',
+    name: 'The Even Bell',
+    philosophicalAspect: 'mind',
+    description:
+        'The watch keeps its own arithmetic, and the bell answers to nobody ' +
+        'but the number of the hour. Ring it on an odd count and it tolls ' +
+        'flat and false. Ring it even, and the wall itself leans in to listen.',
+    tier: 2, rank: 3, cardType: 'spell',
+    targetType: 'self',
+    paidSummary:
+        'GUARD 18. EVENTIDE — with an even number of cards left in your draw pile, also gain THORNS 6 for 3 turns.',
+    // pts: guard 18 (4.5) + eventide[thorns i6 d3] (13.5) × 0.5 condition
+    // discount = 6.75 → paid ≈ 11.25. FREE thorns i3 d2 (4.5). A wall card
+    // that pays out a real reprisal roughly every other draw, not on a
+    // narrow turn-position window like AMBUSH/FLOW.
+    free: { applyEffect: { effectId: 'buff_thorns', intensity: 3, duration: 2, to: 'self' } },
+    specialMechanics: [{ kind: 'guard', amount: 18 }],
+    synergy: {
+        statePredicate: { kind: 'eventide' },
+        rider: { applyEffect: { effectId: 'buff_thorns', intensity: 6, duration: 3, to: 'self' } },
+    },
+    addedIn: '2026-09-16',
+    tags: ['vigil', 'thorns', 'eventide'],
+};
+
 // ─── RIB — the debt becomes collectible ──────────────────────────────────────
 
 const theReprisalBell: Card = {
@@ -483,7 +510,7 @@ const caltropsUnderTheSnow: Card = {
 export const VIGIL_CARDS: Card[] = [
     frostbittenPalisade, iceOnTheLadderRungs,
     hoarfrostTeeth, theBellRope,
-    nothingCrossedTheIce, answerAtThePostern, theIceTakesItsTithe,
+    nothingCrossedTheIce, answerAtThePostern, theIceTakesItsTithe, theEvenBell,
     theReprisalBell, nullaBona, theHedgehog,
     theBesiegersWinter, theSallyPort, everyStoneAnOath,
     theWallSpeaksLast, nothingToReport, caltropsUnderTheSnow,

@@ -39,6 +39,8 @@ const KNOWN_UPPER = new Set([
     // plus the turn-shape conditions promoted to face terms.
     'DEAL', 'PIERCE', 'WRATH', 'FLAY', 'TWIN', 'CHAIN', 'EXECUTE', 'OVERKILL',
     'AMBUSH', 'FLOW', 'FINALE', 'BARRIER', 'TOLL',
+    // `/adjust-keywords` pass 11 — EVENTIDE, the Chaos-family parity drill.
+    'EVENTIDE',
     // structural / system words the faces already print in caps
     'FREE', 'ALL', 'WILD', 'VITAE', 'CONDEMN', 'SENTENCE', 'OPENING',
     'DOT', 'DOTS', 'HP',
