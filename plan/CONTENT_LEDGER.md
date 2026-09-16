@@ -22,6 +22,108 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
+> **[adjust-npcs pass 11, 2026-09-16, commit <PENDING>]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
+> content-lifecycle gate. Three categories qualified this tick (all past
+> their own 15-commit/36h threshold): cards (`b26bca91`,
+> 2026-09-15T08:56:09Z, 49 commits since), equipment (`6043c01d`,
+> 2026-09-15T09:26:40Z, 47 commits since), npcs (`e6709572`,
+> 2026-09-15T01:22:03Z, 52 commits since) — enemies (`b718b421`,
+> 2026-09-16T08:55:02Z, 6 commits) and keywords (`37c67a13`,
+> 2026-09-16T14:56:08Z, 1 commit) sat under their own threshold. `npcs` was
+> the stalest of the three qualifying categories by last-pass timestamp, so
+> the gate picked it. `git log e6709572..HEAD -- axiomancer-mechanics/src/NPCs
+> axiomancer-mechanics/src/World axiomancer-mechanics/specs/story
+> axiomancer-mechanics/specs/characters` returns exactly one commit of the 52
+> intervening: `2227fe9c` (Phase 87, early-game encounter smoothing) — read
+> its full diff directly: it adds regression-guard tests to
+> `World/MapEvents/e2e/content.engine.test.ts` and
+> `World/e2e/map-traversal.engine.test.ts` plus a doctrine-text correction in
+> `world-tuning.md`, all encounter/traversal surface, zero NPC/dialogue
+> content touched. The other 51 intervening commits were the sibling
+> cards/equipment/enemies/keywords pass-11 ticks and their ledger bumps,
+> phases 79-88 and their briefs/plan-updates, an `/oversight` session
+> (`74613182`, which is where this skill's own Step 1b was added), a
+> critique pass (38, no findings), and telemetry-hook fixes — none touched
+> the NPC/dialogue/story-spec surface. Re-derived every Step-1 signal fresh
+> against the live tree rather than trusting the near-empty path-scoped log
+> alone: (1) **NPC census** — 21 authored `NPC` consts across the 4 files
+> (`Coastal-Village/npcs.ts` 5, `Coastal-Village/maps.ts` 3,
+> `Northern-Forest/npcs.ts` 6, `Northern-Continent/maps.ts` 7), unchanged
+> from pass 10. (2) **reachability** — ran all four suites directly:
+> `World/narrative-reachability.test.ts` 5/5,
+> `World/e2e/narrative-reachability.engine.test.ts` 26/26 (all 10 registered
+> maps, including the three empty-by-design Aporia labyrinth maps),
+> `NPCs/e2e/dialogue.engine.test.ts` 18/18, `NPCs/e2e/story-npcs.engine.test.ts`
+> 36/36 — 85/85 total, byte-identical to pass 10's count; zero
+> `unresolvedInteractions`/`unreachableNpcs`/`sceneryAsPeople` on any map. (3)
+> **unstaged-NPC backlog re-verification** — the standing 4-NPC
+> `unstagedNpcs` list on `Coastal-Village/maps.ts` (Tide-Shopkeeper, Village
+> Healer, Dockworker's Union Leader, Merchant's Widow) re-read at its current
+> text: identical reasons, unchanged since pass 8. (4) **map NPC-floor
+> re-check** — fresh per-map counts against `MAP_REGISTRY` reproduce pass
+> 9/10's numbers exactly: fishing-village 8 rostered (4 reachable + 4
+> declared-unstaged), northern-forest 6, caverns 1, northern-city 2,
+> connecting-river 1, town-across-river 1, the-capital 2, the three Aporia
+> labyrinth maps 0 (by design — the Sophist's accordion narration, C-01,
+> confirmed still implemented). The standing `plan/AUDIT.md`
+> `[needs-user-call]` row ("Three of four Northern-Continent maps carry only
+> 1 staged NPC", filed 2026-09-05) re-cited, not re-filed — still open, still
+> correctly un-actioned (character-spec/story-spec territory). (5) **legacy
+> `DialogueMap` sweep** — zero live `dialogue:` (flat-map) field usage on any
+> authored NPC entry; every rostered NPC across all 10 maps carries a
+> `dialogueTree`. (6) **dead-end node sweep** — a fresh structural scan of
+> all 154 dialogue-tree nodes (106 leaves) for a leaf whose text reads as
+> mid-conversation (ends `?` or `...`) rather than an intentional
+> terminator: zero hits. (7) **teachCard / quest-reference sweep** —
+> `teachCard` still has zero call sites on any NPC dialogue effect; a fresh
+> `startQuest`/`progressQuest`/`completeQuest` extraction gives the same 9
+> distinct quest ids as pass 10 (matches pass 10's 11 raw refs against fewer
+> distinct ids once de-duplicated), all 9 resolve against the live
+> `QuestName` union (`World/quest.library.ts`) via direct read. (8)
+> **spec-to-NPC gap** — `git log e6709572..HEAD -- specs/` (repo root) is
+> empty; `specs/story/` (S-01, S-02) and `specs/characters/` (C-01)
+> unchanged since pass 8's from-scratch reading.
+>
+> **Step 1b widened audit (added via `/oversight` 2026-09-15, this is its
+> second run for `npcs` after pass 10 predated it):** queried `kb-query` MCP
+> for NPC/dialogue staging prior art — `kb_search` across
+> `dialogue|NPC|quest.?gat|dead.?end|branching conversation` and
+> `flavor text|characterization|voice|companion character|story beat`
+> (scope=all and boardgames), plus `kb_find_games` for a `narrative`
+> better-if label (no match — not a live tag). `kb_overview` confirms the
+> corpus's 46 board games carry zero `narrative`/`dialogue`-shaped
+> mechanics or better-if tags; every search hit was an incidental "choice"
+> mention in an unrelated mechanic (Arydia's NPC-pointer interaction rule,
+> Forgotten Waters' app-governed voiceover pacing) — none touching
+> dialogue-tree design, NPC voice differentiation, or player reception of
+> flavor-vs-reactive NPC text. This is a **confirmed genuine miss**, but not
+> a new one: `/adjust-npcs` passes 5 and 8 already filed this exact gap to
+> the `game-knowledge-base` repo as wishlist issues `#79` ("flavor vs.
+> reactive minor NPCs in market/town settings") and `#80` ("NPC dialogue
+> voice-distinctiveness prior art"), both closed 2026-09-16T05:35Z (the
+> `74613182` oversight session). Filing a third near-identical wishlist
+> would be pure duplication, so this pass cites the two standing issues
+> rather than re-filing. No genuine structural finding this pass — every
+> Step-1 signal re-tested clean, and the widened check reconfirms a known,
+> already-escalated corpus gap rather than surfacing a new one. KB research
+> (skill §3 Step 2): the Step 1b widened check above IS this pass's KB
+> research run — no CREATE/UPDATE shipped, so the REMOVE/no-op carve-out
+> applies. Verify: `npm run verify --workspace axiomancer-mechanics`
+> (214/214 files, 3464 tests + build green) and `npm run verify --workspace
+> axiomancer-mobile` (302/302 suites, 2869 tests, 24/24 art:test,
+> lint 0 errors/15 pre-existing warnings, typecheck clean) both ran in full
+> despite the NPC-surface source being unchanged this pass. `npm run
+> deploy:check` confirmed green pre-tick (HEAD `ec9d6eee`, no gated workflow
+> triggered for the docs/plan-only tip commit) and will be re-confirmed
+> after this ledger commit lands. No `plan/PHASE_CANDIDATES.md` or new
+> `plan/AUDIT.md` residue filed this pass — nothing actionable surfaced
+> outside the standing, already-filed backlogs re-cited above (S-02's 4-NPC
+> unstaged list; the Northern-Continent single-NPC-maps `[needs-user-call]`
+> row; wishlist issues #79/#80).
+```
+
+```
 > **[adjust-keywords pass 11, 2026-09-16, commit 37c67a13]** One CREATE
 > (EVENTIDE) — the first `/adjust-keywords` CREATE ever landed (passes 1-10
 > were zero-diff re-audits, one retirement, and small print/gloss fixes).

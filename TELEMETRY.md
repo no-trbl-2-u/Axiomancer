@@ -456,3 +456,4 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-16T08:45:59Z | subagent-end | general-purpose | claude-sonnet-5 | 1m29s | ok |
 | 2026-09-16T14:32:02Z | slash-prompt | /march | - | - | /march |
 | 2026-09-16T14:35:41Z | subagent | card-expert | claude-sonnet-5 | - | Run adjust-keywords pass 11 |
+| 2026-09-16T22:28:43Z | slash-prompt | /march | - | - | /march |
