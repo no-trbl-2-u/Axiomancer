@@ -90,11 +90,15 @@ Tick in this file in the same commit that ships the phase.
       `PHASE_CANDIDATES.md` [score 4.5]; closes `AUDIT.md`'s two matching
       loop-calls)
       — `feat(mechanics): engine hook sweep — delete 19 dead zoneHas sites, wire TWIN — phase 86` (7cd4119c)
-- [ ] Phase 87 — Early-game encounter smoothing: gate the fresh-save first
+- [x] Phase 87 — Early-game encounter smoothing: gate the fresh-save first
       encounter to a one-phase zero-keyword foe; open an ordinary
       encounter/rest node before or beside the Ash Mire boss edge
       (promoted via `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md`
-      [score 4.0])
+      [score 4.0]). Audit found both premises already fixed by the Phase
+      53c/60/61 gauntlet rebuild (independently RESOLVED-STALE 2026-09-10
+      in CRITIQUE/AUDIT); shipped as regression-guard tests + one doc-drift
+      fix instead of a redesign.
+      — `test(mechanics): early-game encounter smoothing — audit + regression guards — phase 87` (2227fe9c)
 - [ ] Phase 88 — W5 art adoption: wire the top licensed candidate per
       enemy from Phase 78's research, replacing the silhouette
       placeholders for all 9 W5 enemies (direct `/oversight` instruction,
