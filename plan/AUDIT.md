@@ -837,7 +837,7 @@ sweep above. Row closed.
   sanity guard unchanged. See `plan/CONTENT_LEDGER.md`'s adjust-cards pass 2
   entry for the full arithmetic and verify result.
 
-### [loop-call] Phase 78 — W5 art-pass candidates (2026-09-03)
+### [x] [loop-call] Phase 78 — W5 art-pass candidates (2026-09-03) — CLOSED by Phase 88 (2026-09-16)
 - category: design residue (art sourcing — awaiting `/oversight` pick;
   RESEARCH-AND-PRESENT per `plan/phases/phase_78_art_pass_w5_sourcing.md`,
   no art wired or committed this phase)
@@ -963,6 +963,15 @@ placeholders. Routed to a new **Phase 88** (direct oversight instruction, same
 shape as Phase 78/77's promotion — no PHASE_CANDIDATES row to strike). Row
 closed; open sourcing questions (toll-sergeant/the-factor/wharf-shrike thin
 results, unpaid-delver compositing) carry into Phase 88's brief.
+
+**CLOSED via Phase 88 (2026-09-16):** all 9 enemies re-sourced. 8 of 9 wired
+exactly as decided (top-listed game-icons.net candidate, rasterized via the
+established recipe). `enemy-wharf-shrike` is the one exception: its top pick
+("Raven 16x18 sprite", OpenGameArt) was verified at wiring time to be a
+mislabeled humanoid character sheet, not a corvid asset — wired the AUDIT
+row's second-listed candidate (openclipart "Shrike", Public Domain) instead.
+See `plan/phases/phase_88_w5_art_adoption.md` Decision 2 for the full
+verification trail.
 
 ### [x] [loop-call] Phase W3 design decisions — the northern city ships (2026-08-28)
 - category: design residue (THE OPEN GATE standing rule 7 — decisions filed

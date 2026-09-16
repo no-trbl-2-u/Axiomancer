@@ -71,9 +71,13 @@ const ENEMY_ART_BY_KEY: Record<string, number> = {
     'beelzebub':         require('./beelzebub.webp'),
     'death':             require('./death-f.webp'),
     'the-abortive':      require('./abortive.webp'),
-    // Northern continent — Phase W3 batch (2026-08-28). Licensed
-    // game-icons.net silhouettes (CC BY 3.0 — lorc / delapouite), white
-    // glyph on transparent, rasterized 512px WebP; see provenance.json.
+    // Northern continent — Phase W3 batch (2026-08-28), re-sourced by
+    // Phase 88 (2026-09-16) per the /oversight 2026-09-15 pick from Phase
+    // 78's research. Licensed game-icons.net silhouettes (CC BY 3.0 — lorc
+    // / delapouite), white glyph on transparent, rasterized 512px WebP,
+    // except wharf-shrike (openclipart "Shrike", Public Domain, recolored —
+    // Phase 78's top pick for it was verified mismatched, see Phase 88
+    // brief); see provenance.json.
     'seam-tick':         require('./seam-tick.webp'),
     'prop-wight':        require('./prop-wight.webp'),
     'unpaid-delver':     require('./unpaid-delver.webp'),
