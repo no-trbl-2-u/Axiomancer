@@ -17,6 +17,14 @@ see AGENTS.md → "Measured truth (baselines)". Source-of-rules questions
 data for the human, never a work queue. Commit its rows with the tick;
 never edit them.
 
+Each start row (`skill`, `subagent`, `slash-command`) pairs with an `-end`
+row carrying that call's duration and outcome, and every tick closes with a
+`tick-end` row. So a start row with no `-end` row means the call never
+returned, and a `slash-prompt` followed straight by `tick-end` means the
+tick genuinely did nothing. A `-` in any column means the value was not
+knowable when the row was written — the hook never guesses. Behaviour is
+covered by `node .claude/hooks/telemetry.test.mjs` (standalone, no runner).
+
 When doing a PR check-in or otherwise watching a PR (subscribed activity,
 scheduled re-checks), a discovered merge conflict is something to fix, not
 just report: fetch the base branch, merge (or rebase, per the repo's
