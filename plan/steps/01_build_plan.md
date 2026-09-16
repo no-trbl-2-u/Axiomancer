@@ -83,12 +83,13 @@ Tick in this file in the same commit that ships the phase.
       `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md` [score 5.5];
       closes `AUDIT.md`'s equipment-progression loop-call)
       — `feat(mechanics): equipment progression — 3 new signature skills for head/hands/feet — phase 85` (9f313d0c)
-- [ ] Phase 86 — Engine hook sweep: delete the 19 orphaned `zoneHas` sites
+- [x] Phase 86 — Engine hook sweep: delete the 19 orphaned `zoneHas` sites
       in `combat.engine.ts` (rewriting `oracle-omen-v2`'s telegraph
       harness off `fated-course` first), wire the-sextons-count's TWIN
       clause correctly scoped (promoted via `/oversight` 2026-09-15 from
       `PHASE_CANDIDATES.md` [score 4.5]; closes `AUDIT.md`'s two matching
       loop-calls)
+      — `feat(mechanics): engine hook sweep — delete 19 dead zoneHas sites, wire TWIN — phase 86` (7cd4119c)
 - [ ] Phase 87 — Early-game encounter smoothing: gate the fresh-save first
       encounter to a one-phase zero-keyword foe; open an ordinary
       encounter/rest node before or beside the Ash Mire boss edge
