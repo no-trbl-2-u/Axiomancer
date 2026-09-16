@@ -446,3 +446,6 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-16T04:35:21Z | slash-prompt | /march | - | - | /march |
 | 2026-09-16T04:39:08Z | subagent | Explore | claude-sonnet-5 | - | Map encounter-table and world-gen code for Phase 87 |
 | 2026-09-16T04:45:29Z | subagent-end | Explore | claude-sonnet-5 | 6m21s | ok |
+| 2026-09-16T06:46:54Z | slash-prompt | /march | - | - | /march |
+| 2026-09-16T06:47:54Z | skill | ship-a-phase | claude-sonnet-5 | - | - |
+| 2026-09-16T06:47:54Z | skill-end | ship-a-phase | claude-sonnet-5 | 0s | ok |
