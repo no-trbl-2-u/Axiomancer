@@ -350,7 +350,7 @@ const theSextonsCount: Card = {
     name: "The Sexton's Count",
     philosophicalAspect: 'mind',
     persistentEffect:
-        'Whenever you RECALL or REPLAY a card, the foe loses 8 VITAE and you MILL 1.',
+        'Whenever you RECALL, REPLAY, or TWIN a card, the foe loses 8 VITAE and you MILL 1.',
     description:
         'He rings once for every body raised, as courtesy demands, and he has ' +
         'never once been wrong about the number. The bell does not mourn. It ' +
@@ -359,13 +359,10 @@ const theSextonsCount: Card = {
     targetType: 'self',
     // pts: engine text — a toll on every repetition the deck already wanted to
     // make. Five to eight triggers in a running grave turn; the FREE face rents
-    // the same toll for three rounds. Card-face-honesty fix (2026-09-04
-    // /adjust-cards pass): the printed text named a third trigger, TWIN,
-    // whose hook was never wired (only RECALL/REPLAY fire in
-    // combat.engine.ts); dropped from the text rather than ship a claim the
-    // engine cannot honour. Re-adding TWIN as a trigger is a small engine
-    // task (hook the `echoed`/`twinCharge` resolution path) — flagged for a
-    // follow-up pass, not done here to avoid a rushed partial wire.
+    // the same toll for three rounds. TWIN wired phase 86 (2026-09-16),
+    // guarded against double-counting on a card that is both a reprise/
+    // replay carrier and resolving under an armed TWIN charge — see
+    // combat.engine.ts's `sextonsTolled` guard.
     addedIn: ADDED,
     tags: ['grave', 'oath', 'recursion'],
 };

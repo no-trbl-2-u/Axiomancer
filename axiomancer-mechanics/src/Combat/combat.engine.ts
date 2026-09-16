@@ -44,7 +44,7 @@ import {
     getHealingReceivedMult, getOutgoingDamageMult, getOutgoingThreatDamageMult, decayDotsOnHeal, consumeEffect,
     hasPayloadFlag, getStanceVulnMult, computeRoundsToKill,
     fireDotTrigger, growPerEnemyActionDots,
-    consumeAfflictions, consumeOneAffliction, getBackfirePerRung, consumeMarks, getMarkStacks,
+    consumeAfflictions, consumeOneAffliction, getBackfirePerRung, consumeMarks,
     applyCleanse,
     RUPTURE_PER_AFFLICTION_STACK, DISRUPT_DENY_AT,
     ruptureBurstCap,
@@ -174,8 +174,8 @@ export const SCRAP_CONVICTION_CAP_PER_TURN = 2;
 // to weight. Every HP source is DoT ticks, status payoffs, engine-gated drips,
 // or reflect.
 
-/** Spec 32 v3 T8 — PLEA decays this much at every turn boundary (the tension
- *  knob, ratified A2; `irresistible-grace` removes the decay). Tunable. */
+/** Spec 32 v3 T8 — PLEA decays this much at every turn boundary (the
+ *  tension knob, ratified A2). Tunable. */
 export const SWAY_DECAY_PER_TURN = 1;
 
 // ── Depth epic (combat-depth-epic) ───────────────────────────────────────────
@@ -1161,12 +1161,7 @@ function applyStanceAndMomentumV2(
             ?? (preState.reserve ?? []).find(d => d.id === played.dieId);
         if (preDie?.face === 'special' && preDie.color !== 'x') {
             const gear = activeDieGear(preState, preDie.color as 'heart' | 'body' | 'mind' | 'wild');
-            // Spec 33 §6 (D4) — FORGE special-amplifier enchants raise the fired
-            // payload WITHOUT changing what the special does (owner-lock D1):
-            // each active amplifier adds +1◆ on top of the gear payload. Wired
-            // by card id, exactly like the anvil-of-form / entropy-tax passives.
-            const specialAmp = zoneHas(state, 'forge-masters-stamp') ? 1 : 0;
-            const granted = gear.specialConviction + specialAmp;
+            const granted = gear.specialConviction;
             const conviction = Math.min(CONVICTION_CAP, state.conviction + granted);
             if (conviction > state.conviction) {
                 state = { ...state, conviction };
@@ -1472,8 +1467,7 @@ function decayManuallyTickedDots<T extends Combatant>(
     return changed ? { bearer: { ...bearer, effects }, washedOut } : { bearer, washedOut };
 }
 
-/** SOUL gain (Harvest): bumps the bank; `bone-orchard` (E) drips 1 HP per Soul
- *  gained — a soul-gated payoff (spec 32 v3 §1 source 3). */
+/** SOUL gain (Harvest): bumps the bank (spec 32 v3 §1 source 3). */
 function gainSouls(
     state: CombatEncounterState,
     amount: number,
@@ -1518,11 +1512,9 @@ function gainSway(
     events: CombatEvent[],
 ): CombatEncounterState {
     if (amount <= 0) return state;
-    // Grace late-stage rebalance (2026-07-08): buff_grace_momentum (stacked
-    // at the turn boundary while irresistible-grace holds PLEA from decaying
-    // — see processBetweenPhases) multiplies every PLEA gain by its payload's
-    // outgoingSwayGainMulPct per stack. "Protect the stack" becomes a
-    // genuinely compounding payoff instead of just a decay-proof floor.
+    // Grace late-stage rebalance (2026-07-08): buff_grace_momentum multiplies
+    // every PLEA gain by its payload's outgoingSwayGainMulPct per stack — a
+    // genuinely compounding payoff, not just a flat bonus.
     const momentum = state.player.effects.find(e => e.effectId === 'buff_grace_momentum');
     let scaledAmount = amount;
     if (momentum) {
@@ -2274,10 +2266,8 @@ function playBottomAction(
     const colorMatch = powering.color === 'wild' || powering.color === card.stance;
     const advantage = readToAdvantage(read);
     const poweringPips = powering.pips ?? 0;
-    // Penitent rebalance (2026-07-08): tracks blood-price HP taken THIS play
-    // (recoil mechanic + fate.recoilHp) so `mirror-of-guilt` can convert raw
-    // recoil, not just landed self-debuff applications, into reflection —
-    // see the mirror-of-guilt block below.
+    // Tracks blood-price HP taken THIS play (recoil mechanic + fate.recoilHp)
+    // for the Akrasia DEBT ledger below (Phase 32 part 3).
     let recoilTaken = 0;
 
     const events: CombatEvent[] = [{ kind: 'card-played', cardId: card.id, useBottom: true, dieId: powering.id, advantage, colorMatch }];
@@ -2328,17 +2318,15 @@ function playBottomAction(
 
     // 3. Execute the card (unchanged effect machinery) against a shim.
     //    ECHO (spec 32 v3 T10): the PAID payload fires twice when the card
-    //    carries ECHO, an `echo_next_spell` charge is pending, or the
-    //    `resonant-chamber` enchantment blesses the first spell of the turn.
+    //    carries ECHO or an `echo_next_spell` charge is pending.
     const mechsAll = sourceCard.specialMechanics ?? [];
     const echoCharge = state.echoNextSpell === true;
-    const chamberEcho = zoneHas(state, 'resonant-chamber') && (state.spellsPlayedThisTurn ?? 0) === 0;
     // THE BIG NUMBERS REWRITE — TWIN is the armed sibling of ECHO: a prior
     // play in this turn armed it, and THIS spell resolves twice. It is consumed
     // here (the local `twinArmed` is reset below), so a twinned spell that
     // itself arms TWIN cannot re-arm from its own second resolution.
     const twinCharge = state.twinArmed === true;
-    const echoed = mechsAll.some(m => m.kind === 'echo') || echoCharge || chamberEcho || twinCharge;
+    const echoed = mechsAll.some(m => m.kind === 'echo') || echoCharge || twinCharge;
     if (twinCharge) events.push({ kind: 'twin-fired', cardId: sourceCard.id });
 
     const before = intensityMap(state.enemy.effects);
@@ -2451,37 +2439,11 @@ function playBottomAction(
     }
     // Landed-status adjustments in one pass, all REAL units: rider intensity /
     // duration bonuses, RIPENED pips (+1 intensity per pip on a non-defend play,
-    // R2), the color-match +1 duration on status cards (R7), and the persistent
-    // zone's blessings — `venom-and-vein` (+1 on bleed/poison) and
-    // `crown-of-thorns` (+1 on everything while FALLEN). Spec 32 v3 §7.
+    // R2), and the color-match +1 duration on status cards (R7). Spec 32 v3 §7.
     const isDefendPlay = card.verbClass === 'defend';
-    const landsDot = (sourceCard.combatEffects ?? []).some(ce =>
-        ce.appliedTo === 'opponent' && lookupEffectDef(ce.effectId)?.payload.damageOverTime);
-    // Penitent rebalance (2026-07-08): crown-of-thorns used to grant a flat
-    // +1 regardless of how deep into Fallen the player had gone. It now
-    // scales with debt DEPTH — +1 at the 2-debuff Fallen minimum (unchanged
-    // from before), +1 more per self-debuff carried beyond that, capped at
-    // +4 — the "bigger, scarier Fallen state that compounds faster once
-    // triggered" the theme promises, instead of capping out the same
-    // whether the player carries 2 self-afflictions or 5.
-    const debtDepth = getDistinctDebuffCount(state.player);
-    const crownBonus = zoneHas(state, 'crown-of-thorns') && wasFallen
-        ? Math.min(4, Math.max(1, debtDepth - 1))
-        : 0;
-    const zoneIntensity =
-        (zoneHas(state, 'venom-and-vein') && landsDot ? 1 : 0)
-        + crownBonus;
-    // Erosion late-stage rebalance (2026-07-08): venom-and-vein now also
-    // stretches every bleed/poison it deepens by 1 turn (not just +1
-    // intensity), so its "deeper roots" payoff compounds specifically across
-    // the long fights it was printed for, rather than adding a flat power
-    // token that hits every fight equally hard regardless of length.
-    const zoneDuration = zoneHas(state, 'venom-and-vein') && landsDot ? 1 : 0;
     const bonusIntensity = firedRiders.reduce((n, r) => n + (r.bonusIntensity ?? 0), 0)
-        + zoneIntensity
         + (isDefendPlay ? 0 : poweringPips * PIP_INTENSITY_BONUS);
     const bonusDuration = firedRiders.reduce((n, r) => n + (r.bonusDuration ?? 0), 0)
-        + zoneDuration
         + (colorMatch && card.effectKind !== 'none' ? COLOR_MATCH_STATUS_DURATION_BONUS : 0);
     if (bonusIntensity > 0 || bonusDuration > 0) {
         let touched = false;
@@ -2520,6 +2482,10 @@ function playBottomAction(
     let twinArmed = false;
     /** VITAE this play drove past the foe's last point, for an OVERKILL clause. */
     let overkillExcess = 0;
+    /** the-sextons-count's RECALL/REPLAY sites set this so the generic TWIN
+     *  toll below never double-tolls a card that is both a reprise/replay
+     *  carrier and resolving under an armed TWIN charge (phase 86). */
+    let sextonsTolled = false;
     /** EXECUTE is evaluated ONCE, before this card's hits land, so a multi-hit
      *  card cannot flip its own threshold partway through the swing. */
     const executeArmed = (sourceCard.specialMechanics ?? []).some(
@@ -2576,15 +2542,6 @@ function playBottomAction(
             events.push({ kind: 'soul-gained', amount: n, total: souls, reason: 'granted' });
             swayGained += n;
         }
-        if (zoneHas(state, 'bone-orchard')) {
-            // Damage-instance clock advances on the drip; its washouts yield
-            // no Soul HERE (a self-grant would recurse this drip).
-            const hit = applyEnemyDamage(enemy, n, state.round, events);
-            enemy = hit.enemy;
-            mechanicDamage += n;
-            directDamage += n + hit.clockDamage;
-            events.push({ kind: 'damage-dealt', cardId: 'bone-orchard', target: 'enemy', amount: n });
-        }
     };
 
     // WS3.2 event clocks (spec 32 §12 #3): 'card-played' fires once per
@@ -2616,24 +2573,6 @@ function playBottomAction(
         }
         gainSoulsLocal(soulWorthyWashouts(clock.washedOut), 'expiry');
     };
-
-    // `stuck-in-their-head` (D): every ECHO / RECALL / replay drips damage, engine-
-    // gated. Refrain rebalance (2026-07-08): the flat 2 HP was a rounding
-    // error against late-stage HP pools no matter how many times the deck
-    // echoed Mark onto the enemy — it now scales with getMarkStacks(enemy),
-    // floor 2 (unchanged worst case) / cap 16 (~8 stacks), so "the tune gets
-    // louder each time" is a real mechanical fact, not just flavor text.
-    const stuckDrip = (): void => {
-        if (!zoneHas(state, 'stuck-in-their-head')) return;
-        const drip = Math.max(2, Math.min(16, getMarkStacks(enemy)));
-        const hit = applyEnemyDamage(enemy, drip, state.round, events);
-        enemy = hit.enemy;
-        mechanicDamage += drip;
-        directDamage += drip + hit.clockDamage;
-        gainSoulsLocal(soulWorthyWashouts(hit.washedOut), 'expiry');
-        events.push({ kind: 'damage-dealt', cardId: 'stuck-in-their-head', target: 'enemy', amount: drip });
-    };
-    if (echoed) stuckDrip();
 
     /**
      * THE BIG NUMBERS REWRITE — land one player hit on the foe, folding every
@@ -2926,9 +2865,8 @@ function playBottomAction(
                 // Fuel is priced off the LIVE enemy (same as WINNOWING's
                 // consumeOneAffliction), not the play-start snapshot — fuel
                 // that already ticked out or washed out earlier in this play
-                // (e.g. a stuck-in-their-head drip advancing the
-                // damage-instance clock, or the payoff tick above) was paid
-                // once and must not be re-paid by the burst.
+                // (e.g. the payoff tick above) was paid once and must not be
+                // re-paid by the burst.
                 const pending = getPendingDotTotal(enemy, state.round).total;
                 const consumedRes = consumeAfflictions(enemy);
                 enemy = consumedRes.combatant;
@@ -2999,7 +2937,7 @@ function playBottomAction(
                     const forged: CombatManaDie = {
                         id: `forge-${state.turn}-${state.log.length + events.length}`, color: mech.kindle,
                         state: 'available', temporary: true,
-                        pips: zoneHas(state, 'anvil-of-form') ? 1 : 0,
+                        pips: 0,
                     };
                     if (reserve.length < RESERVE_MAX) {
                         reserve = [...reserve, forged];
@@ -3143,7 +3081,6 @@ function playBottomAction(
                 }
                 if (returned.length > 0) {
                     events.push({ kind: 'reprised', cardId: card.id, returned });
-                    stuckDrip();
                     // `the-sextons-count` (E): he rings once for every body
                     // raised — a RECALL costs the foe 8 VITAE and mills you
                     // 1. Card face, THE BIG NUMBERS REWRITE 2026-09-02:
@@ -3153,6 +3090,7 @@ function playBottomAction(
                     // old DOOM 1; fixed to match the printed effect,
                     // card-face-honesty.
                     if (zoneHas(state, 'the-sextons-count')) {
+                        sextonsTolled = true;
                         const hit = applyEnemyDamage(enemy, 8, state.round, events);
                         enemy = hit.enemy;
                         directDamage += 8 + hit.clockDamage;
@@ -3196,12 +3134,12 @@ function playBottomAction(
                         } catch { break; }
                     }
                     events.push({ kind: 'echoed', cardId: lastCard.id });
-                    stuckDrip();
                     // `the-sextons-count` (E): a REPLAY is a body raised —
                     // the bell costs the foe 8 VITAE and mills you 1. Card
                     // face, THE BIG NUMBERS REWRITE 2026-09-02 (see the
                     // RECALL site above — same fix, same reason).
                     if (zoneHas(state, 'the-sextons-count')) {
+                        sextonsTolled = true;
                         const hit = applyEnemyDamage(enemy, 8, state.round, events);
                         enemy = hit.enemy;
                         directDamage += 8 + hit.clockDamage;
@@ -3237,7 +3175,7 @@ function playBottomAction(
                     const die: CombatManaDie = {
                         id: `float-${state.turn}-${state.log.length + events.length}`,
                         color, state: 'available', temporary: false, floating: true,
-                        pips: zoneHas(state, 'anvil-of-form') ? 1 : 0,
+                        pips: 0,
                     };
                     floatingDice = [...floatingDice, die];
                     forgedFloating.push(die);
@@ -3259,7 +3197,7 @@ function playBottomAction(
                     const die: CombatManaDie = {
                         id: `float-${state.turn}-${state.log.length + events.length}`,
                         color: 'wild', state: 'available', temporary: false, floating: true,
-                        pips: zoneHas(state, 'anvil-of-form') ? 1 : 0,
+                        pips: 0,
                     };
                     floatingDice = [...floatingDice, die];
                     forgedFloating.push(die);
@@ -3276,7 +3214,7 @@ function playBottomAction(
                     id: `forge-${state.turn}-${state.log.length + events.length}`, color: mech.color,
                     state: 'available', temporary: true,
                     ...(isUpgradeableDiceEnabled() ? { face: 'mana' as const } : {}),
-                    pips: zoneHas(state, 'anvil-of-form') ? 1 : 0,
+                    pips: 0,
                 };
                 const kindleBlocked = isUpgradeableDiceEnabled()
                     && (reserve.filter(d => d.temporary).length >= KINDLE_CONCURRENT_CAP
@@ -3358,9 +3296,23 @@ function playBottomAction(
             default: break; // guard/barrier/riposte/echo/befriend etc. handled elsewhere
         }
     }
-    // `practiced-cadence` (E): the first card each turn grants +1 Premise.
-    if (zoneHas(state, 'practiced-cadence') && (state.spellsPlayedThisTurn ?? 0) === 0) {
-        premisesGained += 1;
+    // `the-sextons-count` (E): TWIN is the third body raised — a play that
+    // resolved twice via the general TWIN mechanism tolls the bell exactly
+    // like RECALL/REPLAY (see the two sites above in the mechs loop), unless
+    // one of those sites already tolled it this play — a card that is BOTH
+    // a reprise/replay carrier AND resolving under an armed TWIN charge
+    // would otherwise pay the toll twice for one doubling (phase 86; the
+    // reason TWIN was trimmed from the printed text 2026-09-04 pending this
+    // exact scoping).
+    if (twinCharge && !sextonsTolled && zoneHas(state, 'the-sextons-count')) {
+        const hit = applyEnemyDamage(enemy, 8, state.round, events);
+        enemy = hit.enemy;
+        directDamage += 8 + hit.clockDamage;
+        events.push({ kind: 'damage-dealt', cardId: 'the-sextons-count', target: 'enemy', amount: 8 });
+        const tolled = drawCombatCards(drawPile, discard, state.deck, 1, _rng);
+        drawPile = tolled.drawPile;
+        discard = [...tolled.discard, ...tolled.drawn];
+        events.push({ kind: 'cards-milled', cards: tolled.drawn });
     }
     const reactFired = false;
     const permanentWildDice = state.permanentWildDice ?? 0;
@@ -3373,7 +3325,6 @@ function playBottomAction(
     // 4. Fold the card's effect-applications: DoT + control LAND on the enemy.
     //    DoT will tick real HP each phase (the status damage engine); control gates
     //    the enemy's turn via `canAct`. Attribute projected DoT for the summary.
-    const selfDebuffsLanded: { effectId: string; intensity: number; duration: number }[] = [];
     for (const ev of allCardEvents) {
         if (ev.kind === 'effect-applied') {
             const def = ev.effect;
@@ -3390,9 +3341,6 @@ function playBottomAction(
                 if ((before[def.id] ?? 0) < active.intensity) landedOnEnemy = true;
             } else if (active) {
                 events.push({ kind: 'effect-landed', cardId: card.id, effectId: def.id, target, effectKind: 'none', intensity: active.intensity, effect: def });
-                if (target === 'self' && def.type === 'debuff') {
-                    selfDebuffsLanded.push({ effectId: def.id, intensity: active.intensity, duration: active.remainingDuration });
-                }
             }
         } else if (ev.kind === 'buff-fumbled') {
             events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: ev.effect.id, message: ev.message });
@@ -3403,53 +3351,6 @@ function playBottomAction(
             });
         } else if (ev.kind === 'befriend-attempted' && ev.successful) {
             mercyOpened = true;
-        }
-    }
-    // `mirror-of-guilt` (D): every self-debuff the player's OWN cards land
-    // mirrors 1 stack of the same affliction onto the enemy — the debt argues
-    // for you (spec 32 v3 T4). Owner ruling (2026-07-12, detail-cleanup
-    // follow-up Bucket B #16, option E): the mirror is gated to afflictions
-    // with enemy-side meaning (a DoT or a MARK) — a self-debuff whose payload
-    // does nothing on an enemy no longer ghost-lands, and enemy-INFLICTED
-    // debuffs no longer reflect (that hook is gone from resolveThreatPhase).
-    const mirrorableOnEnemy = (def: Effect): boolean =>
-        !!def.payload.damageOverTime || (def.payload.tickAmplifyFlat ?? 0) > 0;
-    if (zoneHas(state, 'mirror-of-guilt')) {
-        for (const sd of selfDebuffsLanded) {
-            const def = lookupEffectDef(sd.effectId);
-            if (!def || !mirrorableOnEnemy(def)) continue;
-            const applied = applyEffect(enemy.effects, def, state.round, { intensityDelta: 1, sourceId: 'mirror-of-guilt' });
-            enemy = { ...enemy, effects: applied.activeEffects };
-            events.push({
-                kind: 'effect-landed', cardId: 'mirror-of-guilt', effectId: def.id, target: 'enemy',
-                effectKind: def.payload.damageOverTime ? 'dot' : 'control',
-                intensity: applied.result.activeEffect?.intensity ?? 1, effect: def,
-            });
-        }
-        // Penitent rebalance (2026-07-08): raw recoil (Self-Flagellant, Pact
-        // of Akrasia's fate cost) previously earned NO reflection at all —
-        // only a self-debuff APPLICATION did. Every MIRROR_RECOIL_HP_PER_STACK
-        // HP of recoil taken this play now also lands stacks of the player's
-        // most recently self-inflicted debuff (or a standing debuff_mark if
-        // this play took recoil with no self-debuff application of its own)
-        // onto the enemy — the debt argues for you even when it's paid in
-        // pure HP, not just in applied afflictions.
-        const MIRROR_RECOIL_HP_PER_STACK = 3;
-        const recoilStacks = Math.floor(recoilTaken / MIRROR_RECOIL_HP_PER_STACK);
-        if (recoilStacks > 0) {
-            const mirrorEffectId = selfDebuffsLanded.length > 0
-                ? selfDebuffsLanded[selfDebuffsLanded.length - 1].effectId
-                : 'debuff_mark';
-            const def = lookupEffectDef(mirrorEffectId);
-            if (def && mirrorableOnEnemy(def)) {
-                const applied = applyEffect(enemy.effects, def, state.round, { intensityDelta: recoilStacks, sourceId: 'mirror-of-guilt-recoil' });
-                enemy = { ...enemy, effects: applied.activeEffects };
-                events.push({
-                    kind: 'effect-landed', cardId: 'mirror-of-guilt', effectId: def.id, target: 'enemy',
-                    effectKind: def.payload.damageOverTime ? 'dot' : 'control',
-                    intensity: applied.result.activeEffect?.intensity ?? recoilStacks, effect: def,
-                });
-            }
         }
     }
 
@@ -3740,21 +3641,6 @@ function playBottomAction(
     // FORGE (spec 32 v3 §5) — the forged floating die joins the tray NOW, so it
     // can power a play THIS turn (the "bigger turns" intent).
     if (forgedFloating.length > 0) dice = [...dice, ...forgedFloating];
-    // `entropy-tax` (D): spending a KINDLED (temporary) or GHOST die marks
-    // the enemy — the manufactured resource has a price (spec 32 v3 T3).
-    // Restored Phase 39 (2026-08-08) alongside the card (retired at D8).
-    if (zoneHas(state, 'entropy-tax')
-        && (poweringSource === 'floating' || (poweringSource === 'reserve' && powering.temporary))) {
-        const markDef = lookupEffectDef('debuff_mark');
-        if (markDef) {
-            const applied = applyEffect(enemy.effects, markDef, state.round, { intensityDelta: 1, sourceId: 'entropy-tax' });
-            enemy = { ...enemy, effects: applied.activeEffects };
-            events.push({
-                kind: 'effect-landed', cardId: 'entropy-tax', effectId: markDef.id, target: 'enemy',
-                effectKind: 'control', intensity: applied.result.activeEffect?.intensity ?? 1, effect: markDef,
-            });
-        }
-    }
 
     // Defense card → GUARD (read-scaled + color-match + pips). Absorbed in
     // `resolveThreatPhase`.
@@ -3986,7 +3872,7 @@ function endCombat(state: CombatEncounterState, outcome: CombatEncounterState['f
  * in two places). Boss/unique rung REGROWTH
  * (plan/tuning/2026-07-08-win-path-scaling.md item 1c, anti-permalock):
  * accrued resilience from prior rounds where this boss's telegraph was
- * denied/weakened. `quagmire-of-doubt` (-1 standing) also removes a rung.
+ * denied/weakened.
  */
 function computeRungDenial(state: CombatEncounterState): {
     rungsTotal: number; rungsLost: number; rungDenied: boolean; naturalRungsTotal: number; rungGrowth: number;
@@ -4004,13 +3890,12 @@ function computeRungDenial(state: CombatEncounterState): {
         : (isBossTier ? THREAT_RUNGS_BOSS : THREAT_RUNGS);
     const rungGrowth = isBossTier ? Math.min(state.bossRungGrowth ?? 0, bossRungGrowthCap(naturalRungsTotal)) : 0;
     const rungsTotal = naturalRungsTotal + rungGrowth;
-    const quagmire = zoneHas(state, 'quagmire-of-doubt') ? 1 : 0;
     // UNSHAKEN (THE BIG NUMBERS REWRITE) — some things were never going to
     // flinch: no rung of this foe's telegraph can be denied, whatever STAGGER
     // and BACKFIRE have banked. The ledger still accrues (TURNABOUT can cash
     // it); it simply buys nothing against THIS foe's ladder.
     const unshaken = hasEnemyKeyword(state.enemy.keywords, 'unshaken');
-    const rungsLost = unshaken ? 0 : Math.min(rungsTotal, (state.staggerRungs ?? 0) + quagmire);
+    const rungsLost = unshaken ? 0 : Math.min(rungsTotal, (state.staggerRungs ?? 0));
     const rungDenied = !unshaken && rungsLost >= rungsTotal;
     return { rungsTotal, rungsLost, rungDenied, naturalRungsTotal, rungGrowth };
 }
@@ -4111,10 +3996,9 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     const disruptDenied = controlPips >= DISRUPT_DENY_AT;
     const isBossTier = state.enemy.difficulty === 'boss' || state.enemy.difficulty === 'unique';
     // STAGGER RUNGS (spec 32 v3 T5) — the telegraphed action carries
-    // THREAT_RUNGS rungs (bosses one more); accumulated STAGGER plus the
-    // `quagmire-of-doubt` disenchant (-1 standing) remove rungs. At 0 the turn
-    // is DENIED; partial removal weakens the hit proportionally, and each rung
-    // lost feeds BACKFIRE.
+    // THREAT_RUNGS rungs (bosses one more); accumulated STAGGER removes
+    // rungs. At 0 the turn is DENIED; partial removal weakens the hit
+    // proportionally, and each rung lost feeds BACKFIRE.
     const { rungsTotal, rungsLost, rungDenied, naturalRungsTotal, rungGrowth } = computeRungDenial(state);
     const denied = rollPenalty >= THREAT_DENY_AT || disruptDenied || rungDenied;
     const rungMult = rungDenied ? 0 : (rungsTotal - rungsLost) / rungsTotal;
@@ -4162,10 +4046,8 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
 
     let player = state.player;
     let enemy = state.enemy;
-    // Phase 33a — hoisted above the effect loop (was declared after it, for
-    // the unrelated mirror-of-longing PLEA-on-block interaction only) so the
-    // loop's swayCleanse hook can mutate the same locals `mirror-of-longing`
-    // reads/writes further down.
+    // Phase 33a — hoisted above the effect loop so the loop's swayCleanse
+    // hook can mutate the same locals PLEA reads/writes further down.
     let sway = state.sway ?? 0;
     let swayMilestoneWaveringFired = state.swayMilestoneWaveringFired;
     let swayMilestoneFalteringFired = state.swayMilestoneFalteringFired;
@@ -4185,7 +4067,6 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     let riposteFired = false;
     let attacksLanded = 0;
     let attacksFullyBlocked = 0;
-    let damagePrevented = 0;
     // Spec 32 §2 PA-3 — the raw (pre-soak) size of every attack the wall
     // (parry + guard + barrier, combined) brought all the way to 0 this
     // phase. RIPOSTE's counter scales off this, not a flat printed number —
@@ -4285,7 +4166,6 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                 if (riposte && !riposteFired && riposte.reduce > 0) {
                     const parried = Math.min(dmg, riposte.reduce);
                     dmg -= parried;
-                    damagePrevented += parried;
                     riposteFired = true;
                 }
                 // GUARD soaks first (one-shot, clamped), then BARRIER (persistent).
@@ -4297,12 +4177,10 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
                 const guardAbsorbed = Math.min(Math.floor(guard / soakDivisor), dmg);
                 guard -= guardAbsorbed * soakDivisor;
                 dmg -= guardAbsorbed;
-                damagePrevented += guardAbsorbed;
                 const barrierAbsorbed = Math.min(Math.floor(barrier / soakDivisor), dmg);
                 if (barrierAbsorbed > 0) {
                     barrier -= barrierAbsorbed * soakDivisor;
                     dmg -= barrierAbsorbed;
-                    damagePrevented += barrierAbsorbed;
                     events.push({ kind: 'barrier-absorbed', amount: barrierAbsorbed });
                 }
                 if (foeSwift && guardAbsorbed + barrierAbsorbed > 0) {
@@ -4525,14 +4403,6 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
             enemy = hit.enemy;
             directDamage += amount + hit.clockDamage;
             events.push({ kind: 'thorns-reflected', amount, target: 'enemy' });
-            // `hedgehogs-dilemma` (E): every THORNS trigger also marks the enemy.
-            if (zoneHas(state, 'hedgehogs-dilemma')) {
-                const markDef = lookupEffectDef('debuff_mark');
-                if (markDef) {
-                    const applied = applyEffect(enemy.effects, markDef, state.round, { intensityDelta: 1, sourceId: 'hedgehogs-dilemma' });
-                    enemy = { ...enemy, effects: applied.activeEffects };
-                }
-            }
         }
         events.push({ kind: 'threat-fired', phaseIndex: phase.index, description: phase.threatAction.description, effects: phase.threatAction.effects });
         // WS3.2 Doom growth (spec 32 §12 #3, card-local species): enemy-borne
@@ -4559,48 +4429,6 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     const threatMarks = state.threatMarks.slice();
     if (idx < threatMarks.length) threatMarks[idx] = mark;
 
-    // `mirror-of-longing` (D): the damage your defenses prevented converts to
-    // PLEA — their aggression argues your case (spec 32 v3 T8). `sway` /
-    // the milestone flags are hoisted above the effect loop now (Phase 33a)
-    // so this reads/writes the SAME locals the swayCleanse hook may have
-    // already moved this phase.
-    if (zoneHas(state, 'mirror-of-longing') && damagePrevented > 0) {
-        // Routed through gainSway (not a bare `sway += amount`) so
-        // buff_grace_momentum's per-stack multiplier applies here too, not
-        // just to card-driven PLEA gains (2026-07-08 Grace rebalance).
-        // Phase 32 part 4e — gainSway can also land a Wavering QUARTER stack
-        // on `enemy` and flip the milestone-fired flags; the FULL returned
-        // state is captured here (not just `.sway`) so that dividend isn't
-        // silently dropped at this one call site. `guard` is deliberately
-        // NOT read back from gainSway's result even though the Faltering
-        // payoff is PLEA (not GUARD) precisely so this fragile site — GUARD
-        // resets to 0 a few lines below regardless — never needs to care.
-        const swayResult = gainSway({ ...state, player, enemy, sway }, damagePrevented, events);
-        sway = swayResult.sway ?? sway;
-        enemy = swayResult.enemy;
-        swayMilestoneWaveringFired = swayResult.swayMilestoneWaveringFired;
-        swayMilestoneFalteringFired = swayResult.swayMilestoneFalteringFired;
-    }
-    // `crumbling-resolve` (D): an attack that failed to break your Guard costs
-    // the enemy a rung on its NEXT telegraph.
-    const crumbleRungs = zoneHas(state, 'crumbling-resolve') && attacksFullyBlocked > 0 ? 1 : 0;
-    // Bastion engagement fix (2026-07-08): the deck's whole kit (guard/thorns/
-    // riposte) previously did NOTHING if the enemy never physically attacked
-    // — "guard held, thorns had nothing to punish" against heart/mind casters
-    // was a dead hand. crumbling-resolve now ALSO drips direct damage every
-    // phase, unconditionally, off whatever guard+barrier is standing — the
-    // wall doesn't need to be struck to collect. Reads `guard`/`barrier`
-    // BEFORE the `guard: 0` reset below, so this fires the same phase the
-    // soak pool was built, whether or not the enemy ever swung into it.
-    if (zoneHas(state, 'crumbling-resolve') && guard + barrier > 0 && !isDefeated(enemy)) {
-        const upkeepDrip = Math.max(4, Math.round(0.2 * (guard + barrier)));
-        const hit = applyEnemyDamage(enemy, upkeepDrip, state.round, events);
-        enemy = hit.enemy;
-        directDamage += upkeepDrip + hit.clockDamage;
-        events.push({ kind: 'dot-tick', effectId: 'crumbling-resolve', label: 'Wall Upkeep', amount: upkeepDrip, target: 'enemy' });
-    }
-    // `achilles-and-the-tortoise` (E): a denied turn feeds your next draw.
-    const bonusDraw = zoneHas(state, 'achilles-and-the-tortoise') && hindered ? 1 : 0;
 
     // Boss/unique rung REGROWTH write-back (item 1c): this turn's telegraph
     // lost at least one rung (partial weaken or full denial) → the boss
@@ -4644,7 +4472,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         guard: 0,                       // brace is spent on this phase's threat; resets each phase
         barrier,                        // persistent soak — carries the unspent remainder across phases
         riposte: undefined,             // cleared each phase (like guard)
-        staggerRungs: crumbleRungs,     // consumed this phase; crumbling-resolve seeds the next
+        staggerRungs: 0,                // consumed this phase
         bossRungGrowth: nextBossRungGrowth,
         // Phase 32 part 4a (Control — TURNABOUT ledger): rolled forward every
         // phase; a `turnabout` play zeroes it in the SAME call it reads it.
@@ -4713,7 +4541,7 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     if (outcome) return endCombat(next, outcome, events);
 
     // Otherwise advance to between-phases.
-    return processBetweenPhases(next, rng, events, bonusDraw);
+    return processBetweenPhases(next, rng, events);
 }
 
 /** Returns a terminal outcome if one is pending, else null (HP model). */
@@ -5024,13 +4852,11 @@ export function processBetweenPhases(
 
     // OMENS resolve at the phase boundary (spec 32 v3 T6, phase 32 part 4d
     // — OMEN v2): a claim that matches the INCOMING phase's stance HITS —
-    // its rider fires free, scaled by the claim's `claimScale`
-    // (`the-oracles-eye` amplifies further; `fated-course` marks the foe on
-    // a hit). A wider claim (`windowRemaining` > 1) that does NOT match is
-    // still pending — it stays in `pendingOmens` with one fewer try, and
-    // gets re-checked at every subsequent boundary until it hits or the
-    // window reaches 0 (a final MISS — its ante was already spent at cast,
-    // never refunded).
+    // its rider fires free, scaled by the claim's `claimScale`. A wider
+    // claim (`windowRemaining` > 1) that does NOT match is still pending —
+    // it stays in `pendingOmens` with one fewer try, and gets re-checked at
+    // every subsequent boundary until it hits or the window reaches 0 (a
+    // final MISS — its ante was already spent at cast, never refunded).
     let omenHits = state.omenHits ?? 0;
     let omenState: CombatEncounterState = {
         ...state, player, enemy, threatPhases, revealedStances,
@@ -5041,23 +4867,7 @@ export function processBetweenPhases(
     let omenBonusDraw = 0;
     const pendingOmens = state.pendingOmens ?? [];
     if (pendingOmens.length > 0) {
-        // `fated-course` (D): a "curse of inevitability" — while it is attached,
-        // the enemy's next telegraph is FORCED to the stance a pending omen named,
-        // so the prophecy cannot miss (its mark is guaranteed and the named future
-        // is the only one left to them). OMEN v2 has no single absolute phase
-        // index anymore (every pending claim is checked every boundary) — forcing
-        // binds the FIRST pending claim, deterministic and no-op when only one
-        // omen is live (the common case).
-        let phasesForOmen = threatPhases;
-        if (zoneHas(state, 'fated-course')) {
-            const forcing = pendingOmens[0];
-            if (forcing && phasesForOmen[nextIndex]) {
-                phasesForOmen = phasesForOmen.map((p, i) =>
-                    i === nextIndex ? { ...p, enemyStance: forcing.stance } : p);
-                omenState = { ...omenState, threatPhases: phasesForOmen };
-            }
-        }
-        const incomingStance = phasesForOmen[nextIndex]?.enemyStance;
+        const incomingStance = threatPhases[nextIndex]?.enemyStance;
         const remaining: typeof pendingOmens = [];
         for (const omen of pendingOmens) {
             if (incomingStance !== undefined && omen.stance === incomingStance) {
@@ -5066,16 +4876,11 @@ export function processBetweenPhases(
                 const omenMech = (omenCard?.specialMechanics ?? []).find(m => m.kind === 'omen') as
                     Extract<CardSpecialMechanic, { kind: 'omen' }> | undefined;
                 if (omenMech) {
-                    // `the-oracles-eye` (E): omen riders land +50% (rounded up)
-                    // on top of the claim's own `claimScale` (narrower/bolder
-                    // claims already pay more; the eye compounds on top).
-                    const eye = zoneHas(state, 'the-oracles-eye');
-                    const scale = omen.claimScale * (eye ? 1.5 : 1);
                     // A scaled-down hedge rider never rounds all the way to 0
                     // on a REAL hit — the smallest legal payoff is 1 of
                     // whatever unit it prints.
                     const amp = (n: number | undefined): number | undefined =>
-                        n === undefined ? undefined : Math.max(1, Math.ceil(n * scale));
+                        n === undefined ? undefined : Math.max(1, Math.ceil(n * omen.claimScale));
                     const rider: CardRider = {
                         ...omenMech.rider,
                         guard: amp(omenMech.rider.guard),
@@ -5096,13 +4901,6 @@ export function processBetweenPhases(
                     omenState = applyRiderToState(
                         omenState, omen.cardId, { ...rider, drawCards: undefined }, events, rng,
                     );
-                }
-                if (zoneHas(state, 'fated-course')) {
-                    const markDef = lookupEffectDef('debuff_mark');
-                    if (markDef) {
-                        const applied = applyEffect(omenState.enemy.effects, markDef, state.round, { intensityDelta: 1, sourceId: 'fated-course' });
-                        omenState = { ...omenState, enemy: { ...omenState.enemy, effects: applied.activeEffects } };
-                    }
                 }
             } else {
                 const windowRemaining = omen.windowRemaining - 1;
@@ -5187,43 +4985,13 @@ export function processBetweenPhases(
         omenState = gainSway(omenState, (omenState.souls ?? 0) * 3, events);
     }
 
-    // PLEA decays at the turn boundary (ratified A2) unless `irresistible-grace`
-    // holds it; `captive-audience` (D) keeps the enemy marked while you hold
-    // 4+ Premises.
+    // PLEA decays at the turn boundary (ratified A2).
     let sway = omenState.sway ?? 0;
-    if (sway > 0 && !zoneHas(state, 'irresistible-grace')) {
+    if (sway > 0) {
         sway = Math.max(0, sway - SWAY_DECAY_PER_TURN);
         events.push({ kind: 'sway-decayed', total: sway });
-    } else if (sway > 0 && zoneHas(state, 'irresistible-grace')) {
-        // Grace late-stage rebalance (2026-07-08): every turn boundary the
-        // player holds PLEA continuously under Irresistible Grace's decay
-        // immunity, buff_grace_momentum stacks one further (capped at
-        // GRACE_MOMENTUM_MAX_STACKS) — "protect the stack" becomes a real,
-        // compounding payoff (read by gainSway) instead of just a floor.
-        const momentumDef = lookupEffectDef('buff_grace_momentum');
-        if (momentumDef) {
-            const current = omenState.player.effects.find(e => e.effectId === 'buff_grace_momentum');
-            const GRACE_MOMENTUM_MAX_STACKS = 9;
-            if (!current || current.intensity < GRACE_MOMENTUM_MAX_STACKS) {
-                const applied = applyEffect(omenState.player.effects, momentumDef, state.round, {
-                    intensityDelta: 1, sourceId: 'grace-momentum',
-                });
-                omenState = { ...omenState, player: { ...omenState.player, effects: applied.activeEffects } };
-                events.push({
-                    kind: 'effect-landed', cardId: 'irresistible-grace', effectId: 'buff_grace_momentum', target: 'self',
-                    effectKind: 'none', intensity: applied.result.activeEffect?.intensity ?? 1, effect: momentumDef,
-                });
-            }
-        }
     }
     omenState = { ...omenState, sway };
-    if (zoneHas(state, 'captive-audience') && (omenState.premises ?? 0) >= 4) {
-        const markDef = lookupEffectDef('debuff_mark');
-        if (markDef) {
-            const applied = applyEffect(omenState.enemy.effects, markDef, state.round, { intensityDelta: 1, sourceId: 'captive-audience' });
-            omenState = { ...omenState, enemy: { ...omenState.enemy, effects: applied.activeEffects } };
-        }
-    }
 
     // Fate Engine P1 R2 — RESERVE dice RIPEN: +1 pip per threat phase survived
     // (cap RESERVE_PIP_CAP). Holding a die through a telegraph is the gamble.
@@ -5239,9 +5007,9 @@ export function processBetweenPhases(
     // 5. Refill the hand up to COMBAT_HAND_SIZE (keep-hand rule, 2026-07-13):
     //    unplayed cards STAY in hand and occupy draw room, so holding a card
     //    is a real cost — a dead card clogs the hand until it is played or
-    //    scrapped. `achilles-and-the-tortoise` raises the refill target by 1
-    //    after a denied turn; omen-hit draws raise it too (see omenBonusDraw).
-    //    WS2.1 one-use law still holds: an unplayed CONJURED Haunt
+    //    scrapped. `bonusDraw` lets a caller raise the refill target (no
+    //    live caller does today); omen-hit draws raise it too (see
+    //    omenBonusDraw). WS2.1 one-use law still holds: an unplayed CONJURED Haunt
     //    leaves the combat ENTIRELY at the boundary — it never enters the
     //    hand-carryover (or the discard pile, where a reshuffle would
     //    resurrect it as a permanent deck card) and its uid is released from
@@ -5711,10 +5479,7 @@ export function isStanceReadoutBlurred(state: CombatEncounterState): boolean {
 export function isPhaseStanceRevealed(state: CombatEncounterState, phaseIndex: number): boolean {
     if (isStanceReadoutBlurred(state)) return false;
     return state.revealedStances.includes(phaseIndex)
-        || hasPayloadFlag(state.enemy, 'revealsStance') !== null
-        // `the-oracles-eye` (E): the enemy's next stance is ALWAYS revealed.
-        || (zoneHas(state, 'the-oracles-eye')
-            && phaseIndex === Math.min(state.currentPhaseIndex + 1, state.threatPhases.length - 1));
+        || hasPayloadFlag(state.enemy, 'revealsStance') !== null;
 }
 
 /** The current phase's enemy stance IF revealed, else null (drives the "?" UI). */
