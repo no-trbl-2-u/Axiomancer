@@ -13,7 +13,7 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-15 | b26bca91 | 11 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-15 | 6043c01d | 11 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-14 | 55eec31d | 10 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-16 | TBD | 11 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-14 | 9d357e2b | 10 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-15 | e6709572 | 10 |
 
@@ -22,6 +22,82 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
+> **[adjust-enemies pass 11, 2026-09-16, commit TBD]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass on the enemy library itself — dispatched
+> autonomously by `/march`'s content-lifecycle gate (`enemies` was the
+> stalest qualifying category this tick: last pass 2026-09-14T16:47Z/commit
+> `55eec31d`, oldest of the five by last-pass timestamp — cards `b26bca91`
+> 2026-09-15T08:56Z, equipment `6043c01d` 2026-09-15T09:26Z, keywords
+> `9d357e2b` 2026-09-14T22:50Z, npcs `e6709572` 2026-09-15T01:22Z — and all
+> five sat past their own 15-commit threshold, 40-51 commits deep, so the
+> gate's tie-break (stalest `last pass`) decided it). `git log
+> 55eec31d..HEAD -- axiomancer-mechanics/src/Enemy
+> axiomancer-mechanics/src/Combat/combat.enemy-decks.ts
+> axiomancer-mechanics/src/Combat/combat.enemy-cards.ts
+> axiomancer-mobile/assets/images/enemies axiomancer-mechanics/src/World`
+> was NOT empty this pass (unlike passes 9/10): Phase 88 (2026-09-16,
+> `ebb457f4`, direct `/oversight` instruction, not this steward) shipped
+> the W5 art adoption — the 9 northern-continent enemies that were carrying
+> licensed silhouette placeholders now render their `/oversight`-picked art
+> (8 of 9 the literal top research candidate, wharf-shrike the second-listed
+> after the top pick was verified mismatched). That drains this steward's
+> own standing signal table item ("a placeholder with a licensed/generated
+> replacement now available → UPDATE") before this pass even started — a
+> fresh sweep of all 77 live `portraitAsset` values confirms 0 duplicates
+> and 0 remaining placeholder-named assets. Re-derived the rest of Step 1
+> fresh: (1) orphan sweep — same 2 exclusions as pass 10 (`sandbag` test
+> fixture, `the-incompleteness` impossible-ceiling boss, both carry an
+> explicit `DESIGN REQUIREMENT` barring `EnemiesByMap` entry). (2)
+> roster-size/overlap — all 10 pools unchanged from pass 10 (fishing-village
+> 13, northern-forest 39, caverns 17, northern-city 8, connecting-river 5,
+> town-across-river 4, the-capital 8, aporia-colonnade/archive 8 each,
+> aporia-proof 11); the only >70%-of-smaller-pool hits remain the 4
+> standing Aporia-vs-forest/caverns pairs (87.5%/87.5%/90.9%/75.0%),
+> re-confirmed as the documented deliberate shared-roster design (the
+> labyrinth built from the world the player has already walked), not
+> re-litigated. town-across-river stays the thinnest pool (3 non-boss); its
+> own history (pass 2's backfill, then repeated stable re-reads since) reads
+> as an accepted coda-map shape, not an open finding. (3) deck/loot/VITAE-
+> band/aftermath-voice sweeps — all clean, matching pass 10's readings
+> (source files for these untouched since before pass 10). Standing
+> 32-enemy `finalBlowLines` backlog re-cited, not re-filed
+> (content-curator territory, `plan/AUDIT.md` `[content]`).
+>
+> **Step 1b widened audit (new this pass, added via `/oversight`
+> 2026-09-15 after passes 9-10's back-to-back zero-diff plateau):** ran a
+> `kb-query` MCP cross-reference (corpus: `slay-the-spire-the-board-game`,
+> `gloomhaven`, `aeons-end`) for enemy-archetype prior art well-represented
+> in comparable games but thin/absent here. Findings checked against the
+> live roster before filing anything: **elite-tier monster AI** and
+> **curse/deck-junking enemies** are both already well covered here
+> (`difficulty: 'elite'` on 20+ foes with its own stat/deck weight;
+> `curseCardId` — "THE archetype's single curse-injector" — on most
+> Northern Forest/Capital elites and several bosses), so those two are
+> struck. **Summoner/add-spawning enemies** and **a multi-hit attack that
+> punishes one stacked GUARD/BARRIER instead of chip damage** are
+> genuinely absent and genuinely engine-structural, not content-only:
+> combat is hard-coded 1-enemy (`World/encounter.ts`'s `enemies: [scaled]`,
+> `combat.engine.ts` reads a singular `state.enemy` throughout — a real
+> summoner needs multi-enemy combat state, not a keyword), and
+> `resolveThreatPhase` resolves exactly one telegraphed hit against
+> GUARD/BARRIER/RIPOSTE per phase with no repeat/hit-count field on
+> `EnemyCard` to drive a multi-hit loop. Per skill §5 failure mode 2 ("a
+> finding needs an engine constant change — file it, don't fake it" — this
+> needs more than a constant), filed rather than shipped:
+> `plan/PHASE_CANDIDATES.md` `[score 4.5]` "No summoner/add-spawning or
+> multi-hit-vs-stacked-wall enemy archetype", full KB citations + the
+> against-roster check inline. KB research (skill §3 Step 2): the Step 1b
+> widened check above IS this pass's KB research run — no CREATE/UPDATE
+> shipped, so the gate's REMOVE/no-op carve-out also applies to the
+> zero-diff Step 1 portion. Verify: `npm run verify --workspace
+> axiomancer-mechanics` (214/214 files, 3451 tests + build green) and `npm
+> run verify --workspace axiomancer-mobile` (green, 24/24 art:test +
+> lint/typecheck/jest, exit 0) both ran in full despite the enemy-library
+> source being unchanged this pass (only Phase 88's art landed, verified
+> already-green on its own merge). `npm run deploy:check` confirmed green
+> pre-tick (HEAD `7c218bb1`, docs/plan-only tip commit, no gated workflow
+> triggered) and will be re-confirmed after this ledger commit lands.
+
 > **[adjust-equipment pass 11, 2026-09-15, commit 6043c01d]** Zero-CREATE,
 > zero-REMOVE pass — dispatched autonomously by `/march`'s content-lifecycle
 > gate (`equipment` was the only qualifying category this tick: 17 commits

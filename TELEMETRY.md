@@ -449,3 +449,6 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-16T06:46:54Z | slash-prompt | /march | - | - | /march |
 | 2026-09-16T06:47:54Z | skill | ship-a-phase | claude-sonnet-5 | - | - |
 | 2026-09-16T06:47:54Z | skill-end | ship-a-phase | claude-sonnet-5 | 0s | ok |
+| 2026-09-16T08:39:23Z | slash-prompt | /march | - | - | /march |
+| 2026-09-16T08:44:30Z | subagent | general-purpose | claude-sonnet-5 | - | KB enemy-archetype gap research |
+| 2026-09-16T08:45:59Z | subagent-end | general-purpose | claude-sonnet-5 | 1m29s | ok |

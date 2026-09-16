@@ -276,6 +276,54 @@
 > bookkeeping debt. Recommend a `/consolidate` pass to strike or archive the
 > dead ~49 so this section reflects only live candidates going forward.
 
+### [score 4.5] No summoner/add-spawning or multi-hit-vs-stacked-wall enemy archetype
+- proposed: 2026-09-16, `/adjust-enemies` pass 11 (Step 1b widened audit,
+  added via `/oversight` 2026-09-15 to catch a steady-state plateau after
+  passes 9-10 both logged zero-diff)
+- source signals:
+  - a KB cross-reference (`kb-query` MCP, corpus `slay-the-spire-the-board-game`
+    + `gloomhaven` + `aeons-end`) found three archetypes as grounded, well-liked
+    prior art that the current ~78-enemy roster has no equivalent of:
+    **summoner enemies that spawn adds** (`kb:slay-the-spire-the-board-game/rules/edge-cases-faq`,
+    src-002/src-004 — the Gremlin Leader's Summon deck, adds persisting past
+    their summoner's death), **a multi-hit attack that punishes one stacked
+    GUARD/BARRIER instead of chip damage** (StS-BG's Buffer keyword, src-002 —
+    "triggers separately per hit of a multi-attack"), and **elite-tier
+    monster AI sharing a normal monster's card but at a harder stat tier**
+    (`kb:gloomhaven/rules/edge-cases-faq`, src-009/src-010 — praised as fast
+    yet unpredictable enough to force a plan revision).
+  - checked our roster against each before filing, so this isn't a blind
+    KB-says-so: the "elite tier" archetype is already well covered
+    (`difficulty: 'elite'` is a real tag across 20+ enemies with its own
+    stat/deck weight) and the "junk the player's deck" archetype is already
+    extensively covered (`curseCardId` — most Northern Forest/Capital elites
+    and several bosses are "THE archetype's single curse-injector"), so both
+    are struck from this finding; only the summoner/adds and the multi-hit
+    "punish a stacked wall" archetypes are genuinely absent.
+  - both are engine-structural, not content-only, so this pass files rather
+    than ships (skill §5 failure mode 2: "a finding needs an engine constant
+    change — file it, don't fake it" — this needs more than a constant).
+    Verified before filing: combat is hard-coded 1-enemy
+    (`World/encounter.ts`'s `enemies: [scaled]`, `combat.engine.ts` reads a
+    singular `state.enemy` throughout) — a literal summoner needs real
+    multi-enemy combat state, not a keyword. A multi-hit mechanic is smaller
+    but still needs new engine control flow: `resolveThreatPhase`
+    (`combat.engine.ts`) resolves exactly one telegraphed hit against
+    GUARD/BARRIER/RIPOSTE per phase, and `EnemyCard` (`combat.enemy-cards.ts`)
+    has no repeat/hit-count field to drive a loop — this is closer to
+    `EnemyKeyword`'s existing HIDE/SWIFT/BRUTAL shape (arithmetic changers)
+    than to a new content item, but the loop needs an explicit choice between
+    the two shapes (or both) before either is buildable.
+  - impact: moderate — every fight is still "one enemy telegraphs one hit,
+    player answers it"; the KB reception evidence (Gloomhaven, Aeon's End)
+    is specifically about the antagonist FEELING structurally different from
+    fight to fight, not just numerically bigger, which THE BIG NUMBERS
+    REWRITE's numeric axis doesn't cover.
+  - ease: low — genuine engine design work (an architecture choice + new
+    control flow), not a same-tick content pass; sized for a dedicated
+    phase, ideally with a `mechanics-expert` design session the way Phase 85
+    resolved the accessory-kind gap.
+
 ### ~~[score 6.5] One concept, one word — a naming pass across the player-facing surfaces~~ PROMOTED to Phase 80 via /oversight 2026-09-15
 The 2026-09-12 UI fresh-eyes sweep found the same concept wearing several names
 on screens a player sees in the same minute, raised independently by three or
