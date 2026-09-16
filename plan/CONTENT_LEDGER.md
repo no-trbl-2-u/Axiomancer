@@ -14,7 +14,7 @@
 | cards | `skills/adjust-cards.md` | 2026-09-15 | b26bca91 | 11 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-15 | 6043c01d | 11 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-16 | b718b421 | 11 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-14 | 9d357e2b | 10 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-16 | 37c67a13 | 11 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-15 | e6709572 | 10 |
 
 ## Log
@@ -22,7 +22,7 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-keywords pass 11, 2026-09-16, commit <PENDING>]** One CREATE
+> **[adjust-keywords pass 11, 2026-09-16, commit 37c67a13]** One CREATE
 > (EVENTIDE) — the first `/adjust-keywords` CREATE ever landed (passes 1-10
 > were zero-diff re-audits, one retirement, and small print/gloss fixes).
 > Dispatched autonomously by `/march`'s content-lifecycle gate (`keywords`
