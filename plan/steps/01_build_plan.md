@@ -99,10 +99,13 @@ Tick in this file in the same commit that ships the phase.
       in CRITIQUE/AUDIT); shipped as regression-guard tests + one doc-drift
       fix instead of a redesign.
       — `test(mechanics): early-game encounter smoothing — audit + regression guards — phase 87` (2227fe9c)
-- [ ] Phase 88 — W5 art adoption: wire the top licensed candidate per
+- [x] Phase 88 — W5 art adoption: wire the top licensed candidate per
       enemy from Phase 78's research, replacing the silhouette
       placeholders for all 9 W5 enemies (direct `/oversight` instruction,
-      2026-09-15; closes `AUDIT.md`'s W5 art-pass loop-call)
+      2026-09-15; closes `AUDIT.md`'s W5 art-pass loop-call). 8 of 9 used
+      the literal top pick; wharf-shrike fell back to the second-listed
+      candidate after the top pick was verified mismatched (see brief).
+      — `feat(mobile): W5 art adoption — wire the oversight-picked candidates — phase 88` (ebb457f4)
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics:
