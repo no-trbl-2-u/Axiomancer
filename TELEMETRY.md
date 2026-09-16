@@ -441,3 +441,5 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-16T00:06:02Z | tick-end | - | claude-opus-5 | 9s | ok |
 | 2026-09-16T00:06:26Z | tick-end | - | claude-opus-5 | - | ok |
 | 2026-09-16T00:07:36Z | tick-end | - | claude-opus-5 | 1m10s | ok |
+| 2026-09-16T01:05:37Z | skill | ship-a-phase | claude-sonnet-5 | - | - |
+| 2026-09-16T01:05:37Z | skill-end | ship-a-phase | claude-sonnet-5 | 0s | ok |
