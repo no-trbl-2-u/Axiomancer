@@ -289,6 +289,7 @@ function toolStart(input) {
   state.open ??= {}
   state.open[openKey(input?.session_id, c.event, c.name, c.detail)] = Date.now()
   state.tickStart ??= Date.now()
+  state.logged = true // this tick invoked a verb, so it earns a tick-end row
   writeState(state)
   appendRow({
     event: c.event,
@@ -307,6 +308,7 @@ function toolEnd(input) {
   const key = openKey(input?.session_id, c.event, c.name, c.detail)
   const started = state.open?.[key]
   if (state.open) delete state.open[key]
+  state.logged = true // this tick invoked a verb, so it earns a tick-end row
   writeState(state)
   appendRow({
     event: `${c.event}-end`,
@@ -324,16 +326,17 @@ function toolEnd(input) {
  */
 function promptMode(input) {
   const prompt = String(input?.prompt ?? '').trim()
+  // A slash prompt is CI dispatching a skill (claude-code-action fires
+  // '/command' with no Skill tool call, so the prompt is the only
+  // record). Prose is the user talking, not an invocation.
+  const isDispatch = prompt.startsWith('/')
   // EVERY prompt starts a new tick, slash or not — otherwise an attended
   // session that never invokes a logged verb has no tick start, and its
   // tick-end row can only record a '-' duration. Anything still open
-  // belonged to the previous tick.
-  writeState({ tickStart: Date.now(), open: {} })
-  // Only slash prompts get a row: CI dispatches skills as '/command'
-  // prompts (claude-code-action) and no Skill tool call ever fires, so the
-  // prompt itself is the only record. Ordinary prose prompts are the
-  // user talking, not an invocation.
-  if (!prompt.startsWith('/')) return
+  // belonged to the previous tick. `logged` decides whether this tick has
+  // earned a tick-end row; a verb invoked later in the tick sets it too.
+  writeState({ tickStart: Date.now(), open: {}, logged: isDispatch })
+  if (!isDispatch) return
   appendRow({
     event: 'slash-prompt',
     name: prompt.split(/\s+/)[0],
@@ -348,10 +351,21 @@ function promptMode(input) {
  * silent tick legible — a slash-prompt followed straight by a tick-end
  * with no rows between did genuinely nothing, which previously looked
  * identical to a tick whose work the hook could not see.
+ *
+ * It is written only for a tick that logged something (a slash dispatch,
+ * a skill, a subagent) or that has a call still open. An ordinary
+ * conversational turn invokes no verb and closes nothing, so it gets no
+ * row: it is the user talking, not a tick, and logging it buried the
+ * real ticks in churn — every turn dirtied TELEMETRY.md and demanded its
+ * own commit.
  */
 function tickEnd(input) {
   const state = readState()
   const leaked = Object.keys(state.open ?? {}).length
+  if (!state.logged && !leaked) {
+    writeState({})
+    return
+  }
   appendRow({
     event: 'tick-end',
     name: '-',
