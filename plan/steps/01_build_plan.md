@@ -83,21 +83,29 @@ Tick in this file in the same commit that ships the phase.
       `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md` [score 5.5];
       closes `AUDIT.md`'s equipment-progression loop-call)
       — `feat(mechanics): equipment progression — 3 new signature skills for head/hands/feet — phase 85` (9f313d0c)
-- [ ] Phase 86 — Engine hook sweep: delete the 19 orphaned `zoneHas` sites
+- [x] Phase 86 — Engine hook sweep: delete the 19 orphaned `zoneHas` sites
       in `combat.engine.ts` (rewriting `oracle-omen-v2`'s telegraph
       harness off `fated-course` first), wire the-sextons-count's TWIN
       clause correctly scoped (promoted via `/oversight` 2026-09-15 from
       `PHASE_CANDIDATES.md` [score 4.5]; closes `AUDIT.md`'s two matching
       loop-calls)
-- [ ] Phase 87 — Early-game encounter smoothing: gate the fresh-save first
+      — `feat(mechanics): engine hook sweep — delete 19 dead zoneHas sites, wire TWIN — phase 86` (7cd4119c)
+- [x] Phase 87 — Early-game encounter smoothing: gate the fresh-save first
       encounter to a one-phase zero-keyword foe; open an ordinary
       encounter/rest node before or beside the Ash Mire boss edge
       (promoted via `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md`
-      [score 4.0])
-- [ ] Phase 88 — W5 art adoption: wire the top licensed candidate per
+      [score 4.0]). Audit found both premises already fixed by the Phase
+      53c/60/61 gauntlet rebuild (independently RESOLVED-STALE 2026-09-10
+      in CRITIQUE/AUDIT); shipped as regression-guard tests + one doc-drift
+      fix instead of a redesign.
+      — `test(mechanics): early-game encounter smoothing — audit + regression guards — phase 87` (2227fe9c)
+- [x] Phase 88 — W5 art adoption: wire the top licensed candidate per
       enemy from Phase 78's research, replacing the silhouette
       placeholders for all 9 W5 enemies (direct `/oversight` instruction,
-      2026-09-15; closes `AUDIT.md`'s W5 art-pass loop-call)
+      2026-09-15; closes `AUDIT.md`'s W5 art-pass loop-call). 8 of 9 used
+      the literal top pick; wharf-shrike fell back to the second-listed
+      candidate after the top pick was verified mismatched (see brief).
+      — `feat(mobile): W5 art adoption — wire the oversight-picked candidates — phase 88` (ebb457f4)
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics:

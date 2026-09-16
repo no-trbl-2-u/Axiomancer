@@ -6,12 +6,12 @@
  *   reroll/draft-exempt → save-back), PREMISES / SENTENCE (+ CONDEMN),
  *   STAGGER rungs (deny + partial weaken) + BACKFIRE drip, OMEN
  *   declare/hit/miss, SOULS (expiry + REAP fizzle/spend + REAP-all cap),
- *   PLEA (gain / decay / capitulate / irresistible-grace), ECHO (doubles
- *   statuses + stuck-in-their-head drip + echo-next-spell charge), REPRISE
- *   (highest rank back + fireFree), ENCHANT/DISENCHANT zone play (FREE timed
- *   instance / PAID permanent, unique-in-play, leaves the deck cycle) +
- *   persistent hooks (venom-and-vein,
- *   mirror-of-guilt, crumbling-resolve), BLEED per-tick decay, MARK tick
+ *   PLEA (gain / decay / capitulate), ECHO (doubles statuses +
+ *   echo-next-spell charge), REPRISE (highest rank back + fireFree),
+ *   ENCHANT/DISENCHANT zone play (FREE timed instance / PAID permanent,
+ *   unique-in-play, leaves the deck cycle) + persistent hooks
+ *   (the-red-ledger, the-sextons-count RECALL/REPLAY/TWIN,
+ *   caltrops-under-the-snow), BLEED per-tick decay, MARK tick
  *   amplification — plus a per-preset theme-engine ignition smoke.
  *
  * Seeded / stubbed RNG only (src/test-utils/rng.ts); no disk / network / TTY.
@@ -462,7 +462,7 @@ describe('SOULS — expiry yields, REAP spends, REAP-all bursts uncapped', () =>
 
 // ── PLEA (T8) ────────────────────────────────────────────────────────────────
 
-describe('PLEA — gain, per-turn decay, RELENT, irresistible-grace', () => {
+describe('PLEA — gain, per-turn decay, RELENT', () => {
     const SOFT = 'thin-hymn'; // PAID: PLEA 8 (FREE: PLEA 3)
 
     it('gains stack and decays 1 at the turn boundary', () => {
@@ -512,21 +512,11 @@ describe('PLEA — gain, per-turn decay, RELENT, irresistible-grace', () => {
         const res = playFromHand(state, REAP); // burst 30 → HP 0
         expect(res.state.finalOutcome).toBe('victory');
     });
-
-    it('irresistible-grace (E) holds the PLEA — no decay at the boundary', () => {
-        mockSequentialRng(0.05);
-        let state = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
-        state = rollEncounterDice(state).state;
-        state = { ...state, sway: 3, persistentZone: ['irresistible-grace'] };
-        const res = resolveThreatPhase(state);
-        expect(res.state.sway).toBe(3);
-        expect(res.events.some(e => e.kind === 'sway-decayed')).toBe(false);
-    });
 });
 
 // ── ECHO + REPRISE (T10) ─────────────────────────────────────────────────────
 
-describe('ECHO — the PAID payload fires twice; stuck-in-their-head drips per echo', () => {
+describe('ECHO — the PAID payload fires twice', () => {
     // THE BIG NUMBERS REWRITE rewrote the ECHO carriers. `the-keening` is the
     // one that still lands a STATUS (DOOM 3 for 3) alongside its hit, so it is
     // the witness for "the PAID status payload fires twice".
@@ -539,26 +529,6 @@ describe('ECHO — the PAID payload fires twice; stuck-in-their-head drips per e
         expect(res.events.some(e => e.kind === 'echoed')).toBe(true);
         const doom = res.state.enemy.effects.find(e => e.effectId === 'debuff_creeping_doom');
         expect(doom?.intensity).toBe(6); // authored i3, applied twice
-    });
-
-    it('stuck-in-their-head (D) drips 2 on every echo', () => {
-        mockSequentialRng(0.05);
-        let state = openAndDraft(makePlayer([REFRAIN]), makeEnemy(300, 'heart'), [REFRAIN, REFRAIN, REFRAIN], 'heart');
-        state = { ...state, enemyAttachments: ['stuck-in-their-head'] };
-        const hpBefore = state.enemy.health;
-        const res = playFromHand(state, REFRAIN);
-        const drip = res.events.find(e => e.kind === 'damage-dealt' && (e as { cardId: string }).cardId === 'stuck-in-their-head') as
-            { amount: number } | undefined;
-        expect(drip).toBeDefined();
-        expect(drip!.amount).toBe(2);
-        // The attachment's drip is a real, evented damage instance on top of
-        // the card's own hit — every point of VITAE lost is accounted for by
-        // an emitted `damage-dealt`, and the drip is one of them.
-        const dealt = res.events
-            .filter(e => e.kind === 'damage-dealt' && (e as { target: string }).target === 'enemy')
-            .reduce((sum, e) => sum + (e as { amount: number }).amount, 0);
-        expect(hpBefore - res.state.enemy.health).toBe(dealt);
-        expect(dealt).toBeGreaterThan(drip!.amount);
     });
 
     it('a pending echo_next_spell charge echoes the NEXT spell, then is consumed', () => {
@@ -630,6 +600,90 @@ describe('REPRISE — returns the highest-rank discard; fireFree fires its FREE 
         const res = playFromHand(state, CIRC.id);
         expect(res.state.hand.some(h => h.cardId === 'petty-indictment')).toBe(true);
         expect(res.state.premises).toBe(2); // the reprised FREE line fired
+    });
+});
+
+// ── the-sextons-count — RECALL / REPLAY / TWIN (phase 86 wire) ───────────────
+
+function tollEvents(events: CombatEvent[]): CombatEvent[] {
+    return events.filter(e => e.kind === 'damage-dealt' && (e as { cardId?: string }).cardId === 'the-sextons-count');
+}
+
+describe('the-sextons-count — RECALL, REPLAY, and TWIN each toll 8 VITAE + MILL 1', () => {
+    it('RECALL (reprise) tolls the bell once', () => {
+        mockSequentialRng(0.05);
+        const RECALL_CARD = 'shallow-grave'; // Deal 11, RECALL 1 (heart) — no replay/twin of its own
+        let state = openAndDraft(makePlayer([RECALL_CARD]), makeEnemy(300, 'heart'), [RECALL_CARD, RECALL_CARD, RECALL_CARD], 'heart');
+        state = { ...state, persistentZone: ['the-sextons-count'], discard: ['spoiled-poultice'] };
+        const res = playFromHand(state, RECALL_CARD);
+        expect(res.events.some(e => e.kind === 'reprised')).toBe(true);
+        expect(tollEvents(res.events)).toHaveLength(1);
+        expect(res.events.some(e => e.kind === 'cards-milled')).toBe(true);
+    });
+
+    it('REPLAY (with no reprise of its own) tolls the bell once', () => {
+        // A synthetic carrier isolates REPLAY from RECALL — every REAL
+        // replay_last card in the library (open-every-grave,
+        // nothing-stays-buried) also prints reprise on the SAME card, and
+        // REPLAY's own toll mills a card into the discard as a side effect,
+        // which would let a same-card reprise succeed off that milled card
+        // and muddy this test's count.
+        mockSequentialRng(0.05);
+        const REPLAY_ONLY: Card = {
+            id: 'fx-replay-only', theme: 'grave', name: 'Replay Only (fixture)',
+            philosophicalAspect: 'heart', description: 'Test carrier for REPLAY with no reprise.',
+            tier: 1, rank: 2, cardType: 'spell', targetType: 'enemy',
+            paidSummary: 'REPLAY your last spell 1 time.',
+            free: { damage: 1 },
+            specialMechanics: [{ kind: 'replay_last', times: 1 }],
+            addedIn: '2026-09-16', tags: ['grave'],
+        };
+        registerSandboxCards([REPLAY_ONLY]);
+        let state = openAndDraft(makePlayer([REPLAY_ONLY.id]), makeEnemy(300, 'heart'), [REPLAY_ONLY.id, REPLAY_ONLY.id, REPLAY_ONLY.id], 'heart');
+        state = {
+            ...state,
+            persistentZone: ['the-sextons-count'],
+            discard: [],
+            lastSpellCardId: 'spoiled-poultice',
+            lastSpellRound: state.round,
+        };
+        const res = playFromHand(state, REPLAY_ONLY.id);
+        expect(res.events.some(e => e.kind === 'echoed')).toBe(true); // REPLAY fired
+        expect(tollEvents(res.events)).toHaveLength(1);
+    });
+
+    it('TWIN (a card with no reprise/replay of its own, resolving under an armed charge) tolls the bell once', () => {
+        mockSequentialRng(0.05);
+        const PLAIN = 'spoiled-poultice'; // Deal 7 + POISON, no reprise/replay/echo (body)
+        let state = openAndDraft(makePlayer([PLAIN]), makeEnemy(300, 'body'), [PLAIN, PLAIN, PLAIN], 'body');
+        state = { ...state, persistentZone: ['the-sextons-count'], twinArmed: true };
+        const res = playFromHand(state, PLAIN);
+        expect(res.events.some(e => e.kind === 'twin-fired')).toBe(true);
+        expect(tollEvents(res.events)).toHaveLength(1);
+    });
+
+    it('a REPLAY/RECALL carrier resolving under an armed TWIN charge tolls once PER real trigger, not a third time for the doubling itself', () => {
+        // The loop-call this guards against (AUDIT.md, 2026-09-04): a naive
+        // TWIN-charge-based toll fires unconditionally alongside RECALL/
+        // REPLAY's own sites, double- (here triple-) counting a single
+        // doubled resolution. `sextonsTolled` (set by the RECALL/REPLAY
+        // sites) suppresses the generic TWIN site for exactly this case.
+        mockSequentialRng(0.05);
+        const BOTH = 'open-every-grave'; // REPLAY x2 + RECALL 1 (heart)
+        let state = openAndDraft(makePlayer([BOTH]), makeEnemy(300, 'heart'), [BOTH, BOTH, BOTH], 'heart');
+        state = {
+            ...state,
+            persistentZone: ['the-sextons-count'],
+            discard: ['spoiled-poultice'],
+            lastSpellCardId: 'spoiled-poultice',
+            lastSpellRound: state.round,
+            twinArmed: true,
+        };
+        const res = playFromHand(state, BOTH);
+        expect(res.events.some(e => e.kind === 'twin-fired')).toBe(true);
+        expect(res.events.some(e => e.kind === 'echoed')).toBe(true);
+        expect(res.events.some(e => e.kind === 'reprised')).toBe(true);
+        expect(tollEvents(res.events)).toHaveLength(2); // REPLAY + RECALL, not a 3rd from the TWIN site
     });
 });
 
@@ -739,7 +793,7 @@ describe('ENCHANT / DISENCHANT — FREE timed line, PAID permanent, unique-in-pl
     });
 });
 
-describe('persistent hooks — the-red-ledger, mirror-of-guilt, crumbling-resolve', () => {
+describe('persistent hooks — the-red-ledger, caltrops-under-the-snow', () => {
     it('the-red-ledger (E): every RECOIL paid is billed again — WRATH 1 and 6 to the foe', () => {
         // Card face (THE BIG NUMBERS REWRITE, 2026-09-02): "Whenever you pay
         // RECOIL, gain WRATH 1 and deal 6 to the foe." Pinned to the printed
@@ -757,15 +811,16 @@ describe('persistent hooks — the-red-ledger, mirror-of-guilt, crumbling-resolv
         expect(dealt?.amount).toBe(6);
     });
 
-    // (The self-debuff reflection witness was retired with the Profane Canon:
-    //  no canon card lands a DEBUFF on its own caster, so the outbound half of
-    //  the mirror-of-guilt hook has no carrier to drive it. The hook itself is
-    //  scheduled for the dead-hook cleanup sweep; the inbound guard below is
-    //  the ruling that still matters.)
-    it('mirror-of-guilt (D): an ENEMY-inflicted debuff does NOT reflect (owner ruling 2026-07-12, Bucket B #16)', () => {
-        // The face is the contract: "every self-debuff your OWN cards land".
-        // The old resolveThreatPhase hook mirrored enemy-inflicted debuffs
-        // back at the enemy with no target-validity check — removed.
+    // (An enemy-inflicted debuff must never reflect back onto the enemy —
+    // owner ruling 2026-07-12, Bucket B #16: "every self-debuff YOUR OWN
+    // cards land" is the contract, so a hex the enemy inflicts on you is not
+    // eligible. The hook this guarded against — a since-deleted dead-card
+    // mirror keyed to `mirror-of-guilt`, retired phase 86 (2026-09-16) — is
+    // gone from `combat.engine.ts` entirely now; this test keeps using the
+    // same attachment id as an arbitrary probe value, since the invariant
+    // it's pinning is `resolveThreatPhase` never reflecting ANY enemy-borne
+    // debuff, regardless of what's attached.)
+    it('an ENEMY-inflicted debuff does NOT reflect onto the enemy (owner ruling 2026-07-12, Bucket B #16)', () => {
         mockSequentialRng(0.05);
         let state = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
         state = rollEncounterDice(state).state;
@@ -780,16 +835,6 @@ describe('persistent hooks — the-red-ledger, mirror-of-guilt, crumbling-resolv
         const res = resolveThreatPhase(state);
         expect(res.state.player.effects.some(e => e.effectId === 'debuff_poison')).toBe(true);  // the hex landed on YOU
         expect(res.state.enemy.effects.some(e => e.effectId === 'debuff_poison')).toBe(false);  // and did NOT reflect
-    });
-
-    it('crumbling-resolve (D): a fully blocked attack costs the enemy a rung on the NEXT telegraph', () => {
-        mockSequentialRng(0.05);
-        let state = initializeCombatEncounter(makePlayer([]), makeEnemy(300, 'mind'), undefined, 7);
-        state = rollEncounterDice(state).state;
-        state = { ...state, guard: 100, enemyAttachments: ['crumbling-resolve'] };
-        const res = resolveThreatPhase(state);
-        expect(res.state.player.health).toBe(200);       // the wall held
-        expect(res.state.staggerRungs).toBe(1);          // the next telegraph starts a rung down
     });
 
     it('caltrops-under-the-snow (D): an unguarded enemy hit seeds BLEED 8', () => {

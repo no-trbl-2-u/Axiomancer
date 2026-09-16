@@ -188,6 +188,55 @@ describe('fishing-village content — new-player map', () => {
             expect(boss.name).toBe('The King of Revenge');
         }
     });
+
+    // Phase 87 — the two CRITIQUE rows that proposed this phase (an elite,
+    // multi-phase Brine Hag as a fresh save's first fight; the Ash Mire
+    // boss reachable with zero prior encounters) were independently
+    // re-verified RESOLVED-STALE on 2026-09-10 (`plan/CRITIQUE.md`,
+    // `plan/AUDIT.md`): the Phase 53c/60/61 gauntlet rebuild already fixed
+    // both before this phase was promoted. These tests convert the
+    // now-true-by-accident invariants into a tested contract so a future
+    // content pass can't silently reintroduce either bug.
+    it('keeps every pre-boss combat foe non-elite, zero-keyword, and single-phase', () => {
+        mockSequentialRng(0.5);
+        const preBossEncounterNodes = ['fv-13', 'fv-15']; // little-belle, foot-stealer
+        for (const nodeId of preBossEncounterNodes) {
+            const state = freshWorldAt('fishing-village');
+            const result = resolveMapEvent({
+                ...state,
+                world: { ...state.world, currentMap: { ...state.world.currentMap, currentNode: nodeId, consumedNodes: [] } },
+            });
+            expect(result.event.kind).toBe('encounter');
+            if (result.event.kind === 'encounter') {
+                const foe = result.event.encounter.enemies[0];
+                expect(foe.difficulty, `${nodeId}'s foe (${foe.name}) must not be elite/boss`).toBe('normal');
+                expect(foe.keywords, `${nodeId}'s foe (${foe.name}) must carry no keywords`).toEqual([]);
+                expect(foe.stages, `${nodeId}'s foe (${foe.name}) must be single-phase`).toEqual([]);
+            }
+        }
+    });
+
+    it('never assigns Brine Hag (or any elite) to a fishing-village node', () => {
+        // Brine Hag stays in `EnemiesByMap['fishing-village']` (Enemy/index.ts)
+        // but every node's event pool carries an explicit pinned `enemySlug`
+        // (content.ts) — the map's own random-draw branch is unreachable, so
+        // she should never appear at any node, pre-boss or otherwise.
+        mockSequentialRng(0.5);
+        const def = getMapDefinition('coastal-continent', 'fishing-village');
+        for (const node of def.nodes) {
+            const state = freshWorldAt('fishing-village');
+            const result = resolveMapEvent({
+                ...state,
+                world: { ...state.world, currentMap: { ...state.world.currentMap, currentNode: node.id, consumedNodes: [] } },
+            });
+            if (result.event.kind === 'encounter') {
+                expect(result.event.encounter.enemies[0].name).not.toBe('Brine Hag');
+                if (!result.event.isBoss) {
+                    expect(result.event.encounter.enemies[0].difficulty).not.toBe('elite');
+                }
+            }
+        }
+    });
 });
 
 describe('northern-forest content (Phase 24)', () => {
