@@ -483,3 +483,6 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-17T20:20:00Z | skill | world-spec | claude-opus-5 | - | args: The Capital (Phase 84) — what the advisor-selection payoff sets up for the player ch |
 | 2026-09-17T20:20:00Z | skill-end | world-spec | claude-opus-5 | 0s | ok |
 | 2026-09-17T20:31:24Z | slash-prompt | /march | - | - | /march |
+| 2026-09-17T22:28:18Z | slash-prompt | /march | - | - | /march |
+| 2026-09-17T22:29:01Z | skill | ship-a-phase | claude-sonnet-5 | - | - |
+| 2026-09-17T22:29:01Z | skill-end | ship-a-phase | claude-sonnet-5 | 0s | ok |

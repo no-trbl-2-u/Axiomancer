@@ -105,6 +105,7 @@ const ENEMY_KEYWORD_GLYPHS: Record<EnemyKeyword['kind'], string> = Object.freeze
     regrow: '❦',     // it closes at every phase boundary
     ravenous: '☾',   // it feeds on what it lands
     wounding: '✚',   // a big hit puts a WOUND in your deck
+    flurry: '⁂',     // one telegraph, several strikes
 });
 const ENEMY_KEYWORD_COLOR = GLYPH_COLORS.thorns;
 

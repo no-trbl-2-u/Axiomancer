@@ -20,6 +20,8 @@
  *   - `ravenous`              → `resolveThreatPhase` (lifesteal on landing)
  *   - `unshaken`              → `computeRungDenial` (stagger immunity)
  *   - `regrow`                → `processBetweenPhases` (phase-boundary heal)
+ *   - `flurry`                → `resolveThreatPhase` (splits the telegraphed
+ *                                hit into N damage instances)
  */
 
 /** A keyword carried by an enemy, with its printed magnitude. */
@@ -49,7 +51,16 @@ export type EnemyKeyword =
     | { kind: 'ravenous' }
     /** WOUNDING N — any single unguarded hit of N or more shoves a WOUND card
      *  into your deck (Mage Knight's wounds; Dawncaster's Corruption). */
-    | { kind: 'wounding'; n: number };
+    | { kind: 'wounding'; n: number }
+    /** FLURRY N — the telegraphed hit lands as N separate strikes instead of
+     *  one, same total budget (StS-BG's Buffer, kb:slay-the-spire-the-board-game
+     *  /rules/edge-cases-faq src-002 — "triggers separately per hit of a
+     *  multi-attack"). Each strike is its own damage instance: RIPOSTE's
+     *  one-shot parry only blunts the first, and any VENOM/RAVENOUS/WOUNDING
+     *  this foe also carries fires once per landed strike, not once per
+     *  phase. GUARD/BARRIER are additive pools and drain the same total
+     *  either way — FLURRY changes the fight's texture, not its size. */
+    | { kind: 'flurry'; n: number };
 
 /** Every `EnemyKeyword` kind, at runtime — bound to the union below. */
 export const ENEMY_KEYWORD_KINDS = [
@@ -62,6 +73,7 @@ export const ENEMY_KEYWORD_KINDS = [
     'regrow',
     'ravenous',
     'wounding',
+    'flurry',
 ] as const;
 
 type MissingFromEnemyKindList = Exclude<
@@ -87,6 +99,7 @@ export const ENEMY_KEYWORD_LABEL: Readonly<Record<EnemyKeyword['kind'], string>>
     regrow: 'REGROW',
     ravenous: 'RAVENOUS',
     wounding: 'WOUNDING',
+    flurry: 'FLURRY',
 });
 
 /**
@@ -104,6 +117,7 @@ export const ENEMY_KEYWORD_GLOSS: Readonly<Record<EnemyKeyword['kind'], string>>
     regrow: 'This foe heals {n} at the end of each of its phases.',
     ravenous: 'This foe heals for the damage it lands on you.',
     wounding: 'An unguarded hit of {n} or more puts a WOUND in your deck.',
+    flurry: "This foe's hit lands as {n} separate strikes instead of one — RIPOSTE only blunts the first.",
 });
 
 /** Renders a keyword as the face string a player reads: `HIDE 6`, `BRUTAL`. */

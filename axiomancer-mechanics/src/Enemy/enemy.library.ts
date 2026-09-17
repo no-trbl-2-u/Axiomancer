@@ -2512,6 +2512,9 @@ export const GuildKnife = createEnemy({
     procUnlocks: {
         body: { attack: 2, defend: 2 },
     },
+    // Phase 90 — a short blade doesn't deliver its invoice in one stroke:
+    // FLURRY 3 (clause by clause, per the cause line already on the books).
+    keywords: [{ kind: 'flurry', n: 3 }],
     loot: [none(40), drop('quicksilver-vial', 25), drop('whetstone-oil', 20), drop('healing-potion', 15)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: -67 },
     finalBlowLines: {
