@@ -12,7 +12,7 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-17 | 989cad9f | 12 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-17 | PENDING | 12 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-17 | 6a28ba0b | 12 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-16 | b718b421 | 11 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-16 | 37c67a13 | 11 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-16 | 858607d5 | 11 |
@@ -22,7 +22,7 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-equipment pass 12, 2026-09-17, commit PENDING]** Zero-CREATE,
+> **[adjust-equipment pass 12, 2026-09-17, commit 6a28ba0b]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass on the relic/consumable data itself —
 > dispatched autonomously by `/march`'s content-lifecycle gate (`equipment`
 > was the only qualifying category this tick: 51 commits and ~43h since
