@@ -38,7 +38,7 @@ contradict existing design:
 
 | Topic | Read first |
 |---|---|
-| World structure | `docs/world.md`, `content/story/story-overview.md` |
+| World structure | `docs/world.md`, `content/story/story-bible.md` |
 | Existing maps | `src/World/Continents/<continent>/maps.ts` |
 | Encounter / hazard model | `docs/effects.md`, `src/Effects/` |
 | Existing world specs | list files in `specs/world/` |

@@ -40,7 +40,7 @@ contradict existing design:
 | Topic | Read first |
 |---|---|
 | Existing characters | list files in `specs/characters/`, `content/characters/` |
-| Story premise | `docs/story.md`, `content/story/story-overview.md` |
+| Story premise | `docs/story.md`, `content/story/story-bible.md` |
 | NPC mechanical model | `docs/npcs.md` |
 | Morality model (if relevant) | `specs/10-moral-difficulty-meter.md` |
 | Loose character notes | `braindump/` (recent files) |
