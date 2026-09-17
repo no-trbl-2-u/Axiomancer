@@ -2,7 +2,7 @@
 
 Axiomancer is a turn-based strategy RPG where players control a character who embarks on a journey to discover their true identity and the secrets behind the veil. After the king loses their advisor and opens the gates of the city to find their successor, the player must navigate the challenges of the labyrinth to reach the heart of the city and become the new advisor.
 
-The full arc is sketched in [`content/story/story-overview.md`](../content/story/story-overview.md); this file collects the per-NPC and per-beat documentation as it lands. Narrative specs live under [`specs/story/`](../specs/story/), [`specs/characters/`](../specs/characters/), and [`specs/world/`](../specs/world/) — see the Phase 22 authoring cards (`/story-spec`, `/character-spec`, `/world-spec`).
+The full arc is canon in [`content/story/story-bible.md`](../content/story/story-bible.md) (THE TALLY, 2026-09-17 — replaced the retired `story-overview.md`); this file collects the per-NPC and per-beat documentation as it lands. Narrative specs live under [`specs/story/`](../specs/story/), [`specs/characters/`](../specs/characters/), and [`specs/world/`](../specs/world/) — see the Phase 22 authoring cards (`/story-spec`, `/character-spec`, `/world-spec`).
 
 ## Characters
 

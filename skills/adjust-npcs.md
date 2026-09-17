@@ -98,6 +98,20 @@ autonomous tick can complete alone; file it to `plan/AUDIT.md` as
 
 ### Step 3 — Ship
 
+**Ship small, file large (THE GROWTH FLOOR ¶2, `plan/bearings.md`,
+2026-09-17).** Before filing any CREATE-shaped finding as a candidate,
+size it. **Small** — at most **3** new items on this steward's own
+surface, reusing existing keywords, effects, engine hooks and art, and
+touching only that surface and its registries — is BUILT IN THIS TICK
+through the CREATE path below, with no candidate row. **Large** — new
+engine wiring, a new keyword, new art, a cross-surface change, or more
+than 3 items — is filed as a candidate in `plan/PHASE_CANDIDATES.md`.
+When the call is genuinely ambiguous, **ship the small reading**: the
+failure this rule corrects is over-filing, so the tie goes to shipping
+and the residue records the call. Re-confirming a finding this steward
+already filed is not an output — ship it under this rule, or say in the
+commit body why it is still large.
+
 **CREATE** — new `NPC` entry with a `dialogueTree` (preferred over
 the legacy flat map for new authoring) + staged at a real map
 node/event + wired triggers (`teachCard`/`startQuest`/quest-objective

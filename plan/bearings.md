@@ -602,6 +602,40 @@ ambiguity.)
   names too**. A Phase 42 proposal to rename any of them must say so
   out loud, route through the Phase 44a map, and check
   `GAME_STATE_VERSION` — the mechanic survives either way.
+- **THE GROWTH FLOOR (T direct, attended `/oversight` 2026-09-17) — the
+  growth mandate gets guaranteed tick budget, and stewards ship small
+  gaps instead of filing them.** THE OPEN GATE ¶8 made growth a standing
+  mandate; measurement three weeks on showed the mandate had no tick
+  budget to spend. Across the logged telemetry window the `adjust-*`
+  family was dispatched 34 times and `/forge` once, and `/forge` shipped
+  nothing in 30 days. Cause: `/march` Step 3 is first-match-wins, and
+  3b's "or more than 36 hours ago" clause re-ripens one of five
+  categories faster than the loop ticks, so 3c is almost never reached.
+  T's ruling on being shown that:
+  1. **A growth floor pre-empts the steward lane.** When `/forge` has
+     not shipped in **7 days**, Step 3c runs *before* 3b for that tick
+     and the steward category waits its turn. The floor is a schedule
+     guarantee, not a licence to skip 3c's own 48h check on an ordinary
+     tick.
+  2. **Stewards ship small, file large.** A CREATE-shaped finding a
+     steward is already authorized to fill is BUILT IN THAT TICK when
+     it is small, and only filed as a candidate when it is large.
+     **Small** (ship now, no candidate row): at most **3** new items on
+     the steward's own surface, reusing existing keywords, effects,
+     engine hooks and art, touching only that surface and its
+     registries. **Large** (file as a candidate): anything needing new
+     engine wiring, a new keyword, new art, a cross-surface change, or
+     more than 3 items. When the call is genuinely ambiguous, SHIP THE
+     SMALL READING — the failure this ruling corrects is over-filing,
+     so the tie goes to shipping, and the residue records the call.
+  3. **Re-confirming a filed finding is not a pass's output.** A
+     steward that re-derives a gap it already filed either ships it
+     under ¶2 or says in the commit body why it is still large. Two
+     consecutive zero-diff passes on the same surface is a signal to
+     widen the audit, not a clean bill of health.
+  This ruling does not touch the verify/deploy gates, the art-provenance
+  law, or the LOCKED MECHANICS carve-out. Bigger authority, same rails.
+
 - **Balance doctrines (per encounter):** ~~status-effect play is
   the dominant win path (combat)~~ — **VOID for combat via the
   unshackling above; Phase 43 SHIPPED the replacement objective
