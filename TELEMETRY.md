@@ -463,3 +463,6 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-17T06:47:30Z | slash-prompt | /march | - | - | /march |
 | 2026-09-17T06:52:22Z | subagent | Explore | claude-sonnet-5 | - | Verify current art-register state for combat UI |
 | 2026-09-17T06:52:56Z | subagent-end | Explore | claude-sonnet-5 | 35s | ok |
+| 2026-09-17T08:52:57Z | slash-prompt | /digest | - | - | /digest |
+| 2026-09-17T08:53:00Z | skill | digest | - | - | - |
+| 2026-09-17T08:53:00Z | skill-end | digest | - | 0s | ok |
