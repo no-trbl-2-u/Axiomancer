@@ -22,6 +22,139 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
+> **[adjust-cards pass 12, 2026-09-17, commit <PENDING>]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
+> content-lifecycle gate (`cards` was the stalest qualifying category this
+> tick: 51 commits and ~41h since pass 11's commit `b26bca91`,
+> 2026-09-15T08:56:09Z, past the 15-commit/36h threshold; `equipment`
+> `6043c01d`, 2026-09-15T09:26:40Z, 49 commits/41h also qualified but was
+> the less-stale of the two by last-pass timestamp; `enemies` `b718b421`
+> 8 commits/17h, `keywords` `37c67a13` 3 commits/11h, and `npcs` `858607d5`
+> 1 commit/4h all sat under their own threshold). `git log
+> b26bca91..HEAD -- axiomancer-mechanics/src/Cards
+> axiomancer-mechanics/src/Effects axiomancer-mechanics/src/Combat
+> axiomancer-mechanics/docs/keyword-atlas.md docs/retheme-map.json
+> axiomancer-mobile/state/combat/keywords.ts
+> axiomancer-card-editor/src/data/mechanics.ts` returns 3 commits of the 51
+> intervening — NOT empty, unlike pass 11's own zero-diff window: (1)
+> `37c67a13` (`/adjust-keywords` pass 11 — created EVENTIDE, the
+> Chaos/Balance-family parity drill). Read its full diff directly: it is a
+> genuine CREATE on this steward's own surface even though a sibling skill
+> shipped it — two new Splinter/rank-3 cards, **The Even Bell** (`vigil`,
+> mind, GUARD 18 + EVENTIDE[THORNS 6 for 3] + FREE THORNS 3 for 2) and **An
+> Even Reckoning** (`debt`, mind, Deal 16 + EVENTIDE[deal 14 more, +1 Soul]
+> + FREE deal 6), plus a stale aggregator-count comment fix in
+> `debt.cards.ts` (16→17). Both cards carry `addedIn`/`// pts:` correctly
+> and are already covered by that pass's own hermetic e2e
+> (`sequencing-grammar.engine.test.ts`) — nothing left for this pass to
+> wire. (2) `7cd4119c` (Phase 86, engine hook sweep — direct
+> mechanics-expert work, not a steward tick): deletes the 19 orphaned
+> `zoneHas(state, '<card-id>')` hooks in `combat.engine.ts` and wires
+> `the-sextons-count`'s missing TWIN trigger — the exact two standing
+> `plan/AUDIT.md` `[loop-call]` rows this skill's own pass 1 (2026-09-04)
+> filed and every pass since re-cited without touching. Read the 13-line
+> `grave.cards.ts` hunk directly: it only restores `the-sextons-count`'s
+> printed "RECALL, REPLAY, or TWIN" persistent-effect text and updates its
+> `// pts:` comment to name the phase/guard (`sextonsTolled`) — re-read
+> both fresh and confirmed neither is stale or dishonest against the wired
+> engine hook. Re-read `plan/AUDIT.md`'s two rows (dead-hook sweep,
+> TWIN-wire) at their current text: both now read "Row closed" under a
+> **DECIDED via /oversight 2026-09-15** note citing Phase 86 — correctly
+> resolved, no longer open backlog for this steward to carry. (3)
+> `9f313d0c` (Phase 85, equipment progression — 3 new signature skills):
+> confirmed out of scope by direct diff read (`Items/relic.library.ts`,
+> `Combat/combat.signature.ts`, `Game/game.migrate.ts` — no
+> `Cards/**`/`Effects/**` touch). The other 48 intervening commits were the
+> sibling equipment/enemies/keywords/npcs pass-11 ticks and their ledger
+> bumps, Phase 87 (early-game encounter smoothing, `World`/`MapEvents`
+> only), Phase 88 (W5 art adoption, enemy portraits only), and the
+> `74613182` `/oversight` session (which authorized both Phase 85/86 and
+> the keyword Chaos/Upgrade proposal, and is where this skill's own Step 1b
+> was added — this is the first `/adjust-cards` pass to run under it, since
+> pass 11 predates the addition). Re-derived every Step-1 signal fresh
+> against the live tree rather than trusting the diff summary alone: (1)
+> **card-surface test suite** — `npx vitest run src/Cards` 18 files / 742
+> tests green (up from pass 11's implicit 18/base count via the 2 new
+> EVENTIDE cards' own e2e additions in `sequencing-grammar.engine.test.ts`).
+> (2) **reachability + pricing sanity + honesty + FREE-line + aspect-thirds**
+> — ran `combat-playtest.card-coverage.sim.test.ts`, `deck-presets.engine.
+> test.ts`, `pricing.engine.test.ts`, `curated-library.engine.test.ts`,
+> `preview-truth.engine.test.ts`, `paid-summary-honesty.engine.test.ts`
+> directly: 5 files / 407 tests green, all pass whether the EVENTIDE cards
+> are counted or not — no unreachable card, no honesty violation, the 5/5/5
+> preset law still holds. (3) **near-duplicates** — wrote a fresh
+> same-(rank, `philosophicalAspect`, kind-set≥2) collision scan via a
+> throwaway `vitest` script against the live 130-card `cardLibrary` export
+> (not from memory): exactly 2 collision buckets, and both are the exact
+> pairs documented every pass since pass 4 — `thin-hymn`/`alms-of-breath`
+> (`rider,sway` — the Threadbare-starter-vs.-choir's-own-Ash-card echo) and
+> `the-last-assize`/`the-vein-called-in` (`deal,overkill,recoil,wrath` —
+> debt's rank-6 capstone vs. its apocrypha escalation) — no new collision
+> despite the 2 new EVENTIDE cards and the `grave.cards.ts` edit landing in
+> this window. (4) **registry parity** — `axio_overview` reconfirms the
+> drift is exactly the EVENTIDE pass's own: 130 cards (128→130), debt 20
+> (19→20), vigil 21 (20→21), 69 keyword rows (68→69) — nothing this steward
+> needs to true up. (5) **TWIN carrier re-check post-Phase-86** — a fresh
+> `kind: 'twin'` grep across all `library/*.cards.ts` modules still returns
+> exactly 3 literal carriers (`apocrypha.cards.ts` ×1, `grave.cards.ts` ×2)
+> — Phase 86 wired `the-sextons-count`'s *persistent-effect trigger*
+> (RECALL/REPLAY/TWIN as conditions that toll its own payoff), it did not
+> add a new `kind: 'twin'` grant anywhere, so the carrier count for the
+> TWIN keyword itself is correctly unchanged. (6) **aspect-thirds per theme
+> module** — re-counted fresh: rot 6/5/5, debt 5/6/6 (was 5/6/5 pre-
+> EVENTIDE), grave 6/5/5, vigil 5/6/6 (was 5/6/5 pre-EVENTIDE), trial
+> 7/6/7, choir 5/5/6 — module-level counts have never been the pinned
+> thirds (only the PRESET deck is, and `deck-presets.engine.test.ts`'s 9/9
+> reconfirms that directly), so the EVENTIDE cards nudging debt/vigil's
+> mind column by 1 each is not a violation, matching the reading every pass
+> since pass 4 has given this same signal. (7) **`plan/AUDIT.md`/
+> `PHASE_CANDIDATES.md`/`CRITIQUE.md` sweep** — `git log b26bca91..HEAD --
+> plan/AUDIT.md plan/PHASE_CANDIDATES.md plan/CRITIQUE.md` returns exactly
+> the 2 commits already read above (`37c67a13`'s keyword-scoped loop-call
+> closure, and sibling `b718b421`'s enemy-archetype `[score 4.5]` filing,
+> engine-structural and enemy-scoped, not cards') plus the `74613182`
+> oversight session (already reviewed) — no new card-scoped residue.
+>
+> **Step 1b widened audit (this is the first `/adjust-cards` run under it —
+> added via `/oversight` 2026-09-15, after pass 11's own commit landed):**
+> the library's one visibly thin bucket relative to the six 16-21-card
+> theme decks is the 5-card enemy-injected curse family
+> (`CURSE_CARDS`/`starters.cards.ts`). Queried `kb_cards` (game
+> `slay-the-spire`) for its own dedicated curse-card family as the nearest
+> comparable-genre reference: the corpus's own curse cards (`Curse of the
+> Bell`, `Necronomicurse`, and the rest of that special/unplayable class)
+> are themselves a small fraction of its ~360-card pool, proportionally in
+> the same range as our 5-of-130 — read as genre-accurate proportion (a
+> curse family is *meant* to stay small and enemy-injected, not
+> player-drafted, in both games), not a genuine thinness gap, so nothing
+> filed. Also re-read `/adjust-keywords` pass 11's own Chaos/Upgrade
+> finding (the widened check's own precedent this window) to confirm it
+> left no card-content residue behind for this steward to duplicate:
+> EVENTIDE shipped with 2 carriers already authored by that pass, and the
+> sibling "generic Upgrade" family was correctly deferred as a
+> payload-shape/engine task, not a card-authoring one — nothing actionable
+> in that vein either. No genuine finding this pass — every Step-1 signal
+> re-tested clean against a real (not empty) 3-commit intervening window,
+> and the widened check's one candidate thin spot reads as accurate genre
+> proportion once checked against comparable prior art, not an
+> under-examined gap. KB research (skill §3 Step 2): the Step 1b widened
+> check above IS this pass's KB research run — no CREATE/UPDATE shipped
+> this pass, so the REMOVE/no-op carve-out applies. Verify: ran all three
+> gates in full (not skipped, despite the net-zero card-authoring diff) —
+> `npm run verify --workspace axiomancer-mechanics` (214/214 files, 3464
+> tests + build green, byte-identical to pass 11's own citation), `npm run
+> verify --workspace axiomancer-mobile` (exit 0; 302/302 suites, 2869
+> tests, 3/3 snapshots; lint/typecheck/jest/assets:check/art:test all
+> green), `npm run type-check --workspace axiomancer-card-editor` (clean,
+> exit 0). `npm run deploy:check` confirmed green pre-tick (HEAD
+> `d2337225`, docs/plan-only tip commit, no gated workflow triggered) and
+> will be re-confirmed after this ledger commit lands. No
+> `plan/PHASE_CANDIDATES.md` or new `plan/AUDIT.md` residue filed this pass
+> — nothing actionable surfaced beyond the two standing findings already
+> closed by Phase 86 this same window (re-confirmed closed, not re-filed).
+```
+
+```
 > **[adjust-npcs pass 11, 2026-09-16, commit 858607d5]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
 > content-lifecycle gate. Three categories qualified this tick (all past
