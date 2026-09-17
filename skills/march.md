@@ -132,6 +132,29 @@ tick):
 - Execute its procedure end-to-end.
 - Return.
 
+#### 3b-pre. Growth floor (THE GROWTH FLOOR ¶1, 2026-09-17)
+
+The steward lane below can starve 3c indefinitely: five categories
+re-ripen on a 36-hour clause faster than the loop ticks, and
+first-match-wins means 3c is never reached. The floor stops that.
+
+```bash
+git log --since="7 days ago" --oneline -- \
+  axiomancer-mechanics/src/World | head -5
+```
+
+If that log is EMPTY (no world-surface commit in **7 days**) and no
+phase work matched in 3a:
+
+- Read `skills/forge.md`.
+- Execute its procedure end-to-end.
+- Return.
+
+The steward category that would have run waits for the next tick; its
+ledger row is untouched, so it stays stalest and wins 3b next time.
+
+Otherwise fall through to 3b.
+
 #### 3b. Content lifecycle due (rate-limited, per category)?
 
 The five per-item content surfaces (cards, equipment, enemies,
@@ -168,7 +191,10 @@ rotation order: cards → equipment → enemies → keywords → npcs.
 If all three hold:
 
 - Read `skills/adjust-<category>.md` for the picked category.
-- Execute its procedure end-to-end.
+- Execute its procedure end-to-end. A CREATE-shaped finding the
+  steward is authorized to fill ships in that same tick when it is
+  **small**, and is filed as a candidate only when it is **large** —
+  the threshold is THE GROWTH FLOOR ¶2 in `plan/bearings.md`.
 - Return.
 
 Otherwise fall through to 3c.
@@ -283,7 +309,7 @@ skills/adjust-equipment.md           # Step 3b (content lifecycle)
 skills/adjust-enemies.md             # Step 3b (content lifecycle)
 skills/adjust-keywords.md            # Step 3b (content lifecycle)
 skills/adjust-npcs.md                # Step 3b (content lifecycle)
-skills/forge.md                      # Step 3c (growth mandate — maps/events/art)
+skills/forge.md                      # Step 3b-pre (growth floor) + Step 3c (growth mandate — maps/events/art)
 skills/expand.md                     # Step 3d (posture-gated)
 skills/iterate.md                    # Step 3e
 ```

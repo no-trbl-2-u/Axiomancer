@@ -355,11 +355,18 @@
 > content-steward passes shipped zero diffs" with "Throttle stewards,
 > bias iterate to backlog".
 >
-> **Standing note for the next oversight.** Four legacy
-> `[needs-user-call]` rows in this Pending queue (impact 9, 9, 8, 6;
-> all filed 2026-08-22 by the content-pipelines audit) have gone 26 days
-> undrained. They are loop-drainable under THE OPEN GATE ¶1 — the tag is
-> not a block. They are prime targets for this bias.
+> **Correction, same day.** The note first written here named four
+> legacy `[needs-user-call]` rows (filed 2026-08-22) as prime targets
+> for this bias. Two of them were then read directly and are STALE, not
+> open: the transitional-library / card-authority row is superseded by
+> `plan/bearings.md:363` (the hold is LIFTED) and by `skills/digest.md`,
+> which already carries THE PIPELINE LIBERATION; the LONGER LEASH row is
+> superseded by `plan/bearings.md:471`, which is the bearings entry the
+> row says does not exist. Both are closed below. The remaining two
+> (art pipeline, growth doctrine for pinned content counts) were NOT
+> re-verified and may be stale the same way — read the current tree
+> before spending a tick on either. All of them are loop-drainable under
+> THE OPEN GATE ¶1; the tag is not a block.
 
 
 ## Pending
@@ -1169,7 +1176,7 @@ verification trail.
   the `.claude/commands/forge.md` doorway pointer, in
   `docs(.claude): lift superseded OPEN GATE wall text from tuning commands — phase G1`.
 
-### [divergence] Transitional-library ruling outlived its subject — card authority is a dead letter [needs-user-call]
+### [x] [divergence] Transitional-library ruling outlived its subject — card authority is a dead letter — RESOLVED-STALE 2026-09-17 (/oversight): `plan/bearings.md:363` lifts the hold and `skills/digest.md` carries THE PIPELINE LIBERATION; the ruling the row calls live was already repealed
 - category: divergence
 - impact: 9
 - ease: 9
@@ -1214,7 +1221,7 @@ verification trail.
   fixed and wired into a new root `npm test`. Residual polish (if any
   drifted line surfaces) drains through normal /iterate.
 
-### [gap] THE LONGER LEASH is unratified and invisible to the loop [needs-user-call]
+### [x] [gap] THE LONGER LEASH is unratified and invisible to the loop — RESOLVED-STALE 2026-09-17 (/oversight): `plan/bearings.md:471` is the bearings entry this row says is missing, and no north-star heading still reads DRAFT-FOR-RATIFICATION
 - category: gap
 - impact: 9
 - ease: 8
