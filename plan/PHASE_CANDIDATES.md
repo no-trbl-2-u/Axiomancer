@@ -307,6 +307,43 @@
 
 ## Pending
 
+### [ ] [score 3.5] Summoner / add-spawning enemy archetype needs real multi-enemy combat state
+- proposed: 2026-09-17, `/ship-a-phase` (Phase 90 split)
+- source signals:
+  - carried over from `/adjust-enemies` pass 11's filed finding (commit
+    `b718b421`, promoted to Phase 90 via `/oversight` 2026-09-17): a KB
+    cross-reference (StS-BG/Gloomhaven/Aeon's End) found summoner/
+    add-spawning enemies as grounded, well-liked prior art genuinely
+    absent from the ~78-enemy roster.
+  - Phase 90 shipped that finding's OTHER half (a multi-hit archetype,
+    `FLURRY` keyword) in one tick because it turned out to be a small
+    resolution-time keyword, not an engine change. The summoner half is
+    NOT the same shape: verified directly in `resolveThreatPhase` and
+    `CombatEncounterState` — combat is hard-coded to exactly one enemy
+    throughout (`state.enemy` singular, read/written unconditionally by
+    every soak/rider/keyword function in the ~250-line phase resolver;
+    `World/encounter.ts`'s `enemies: [scaled]`). A literal summoner needs
+    a new `state.enemy` shape (array or a distinct adds-list), new UI
+    (multiple enemy panes/targeting), and every one of those functions
+    re-plumbed — genuinely a different, larger problem than the keyword
+    Phase 90 shipped.
+- rationale: real, evidenced, and still open — but "expensive-or-uncertain"
+  (engine-architecture question, not a content/keyword addition), so it
+  does not inherit the cheap half's ease. Not urgent (no fresh spec/design
+  change since it was filed); single signal source (the original KB
+  cross-reference, not re-multiplied by re-filing).
+- proposed scope: a `mechanics-expert` design session first (the shape
+  Phase 85 used for the accessory-kind gap) to settle the state-shape
+  question — e.g. a fixed-size adds array alongside the primary enemy vs.
+  a full N-combatant model — before any engine code, then the engine
+  change, then a first summoner enemy to prove it end-to-end. Likely 2-3
+  phases, not one.
+- estimated phases: 2-3
+- conflicts: none against spec.md non-goals; Hazard-Pattern Combat's
+  single-enemy-bar doctrine (`CLAUDE.md` "the enemy's sole bar VITAE") is
+  about win-condition legibility, not combatant count — a design session
+  would need to confirm adds don't erode that legibility before landing.
+
 ### ~~[ ] [score 5.0] Art-direction coherence — restyle the dice faces + HUD chrome to the painted portrait register, now that the pipeline blocker has cleared~~ PROMOTED to Phase 89 via /oversight 2026-09-17
 - proposed: 2026-09-17, expand pass 17
 - source signals:

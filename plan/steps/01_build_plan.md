@@ -116,11 +116,19 @@ Tick in this file in the same commit that ships the phase.
       FONTS.mono for bare numeric readouts, everything else to FONTS.sans.
       — `feat(mobile): art-direction coherence — die faces + HUD chrome —
       phase 89` (6137ca5b)
-- [ ] Phase 90 — Summoner / multi-hit enemy archetype: no roster enemy
+- [-] Phase 90 — Summoner / multi-hit enemy archetype: no roster enemy
       spawns adds or answers a stacked wall with multi-hit; author the
       archetype and stage it (promoted via `/oversight` 2026-09-17 from
       `PHASE_CANDIDATES.md` [score 4.5]; corroborated by `/adjust-enemies`
-      pass 11's filed roster gap, commit b718b421)
+      pass 11's filed roster gap, commit b718b421). SHIPPED the multi-hit
+      half 2026-09-17 (commit `39e2915e`): new `FLURRY N` EnemyKeyword,
+      resolved in `resolveThreatPhase` (mirrors SWIFT/BRUTAL), retrofit on
+      `enemy-guild-knife`. CARRY-OVER: the summoner/add-spawning half —
+      combat is hard-coded to one enemy throughout `resolveThreatPhase`, so
+      a literal summoner needs real multi-enemy combat state; verified and
+      deferred (see `plan/phases/phase_90_flurry_multi-hit_archetype.md`
+      Follow-ups) rather than attempted partially. Re-file as its own
+      `PHASE_CANDIDATES.md` row scoped to the engine-architecture question.
 - [ ] Phase 91 — Amber-CI tick recovery: a loop turn that ends while CI is
       amber skips every `deploy:check`-gated step with no retry. Either
       resume on deploy-gate completion, or make the post-green steps
