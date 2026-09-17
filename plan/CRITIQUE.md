@@ -585,7 +585,7 @@
   toward it; fold the pass-23 backdrop row into the same pass.
 - source: owner playtest
 
-### [HIGH] general — no mid/late equipment or signature skills exist for THE PATH's sixth axis
+### [x] [HIGH] general — no mid/late equipment or signature skills exist for THE PATH's sixth axis — RESOLVED 2026-09-15 (Phase 85, commit 9f313d0c)
 - pass: user-jot (commit 343d7e98)
 - viewport: unspecified
 - auth_state: anonymous
@@ -600,6 +600,12 @@
   (head/hands/feet) can't be filled without designing new signature skills
   first. Filed as `[loop-call]` in `plan/AUDIT.md` (owner call needed on
   approach) rather than guessed at solo. Still open here.
+- update (adjust-equipment pass 12, 2026-09-17): Phase 85 (2026-09-15,
+  commit `9f313d0c`) shipped the owner-decided option (a) — 3 new signature
+  skills (`sig-mounting-dread`/`sig-endless-labor`/`sig-unbroken-stride`)
+  plus their carrying relics for `head`/`hands`/`feet`. `relic.library.ts`
+  now ships 11 relics across all 6 `AccessoryKind`s, all `grantsSignature`
+  values resolving in the live `SignatureSkillId` union. Closed.
 
 ### [HIGH] combat — user crash on ACCEPTING the post-combat card reward (second unreproduced crash report)
 - **LIKELY THE SAME BUG — RESOLVED 2026-09-04 (verify before closing).** The

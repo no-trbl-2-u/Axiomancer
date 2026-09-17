@@ -715,7 +715,7 @@ present. Row stays open until that session runs.
   existing coverage shape. `npm run verify --workspace axiomancer-mobile`:
   261 suites / 2657 tests green.
 
-### [loop-call] No mid/late equipment progression — 8 relics are 1:1-locked to 8 signatures, 3 accessory kinds have zero live relics (2026-09-04)
+### [x] [loop-call] No mid/late equipment progression — 8 relics are 1:1-locked to 8 signatures, 3 accessory kinds have zero live relics (2026-09-04) — RESOLVED via Phase 85 (2026-09-15, commit 9f313d0c)
 - category: design residue (found during `/adjust-equipment` pass 1's
   structural audit; directly answers the pending `[HIGH] general — no
   mid/late equipment or signature skills exist for THE PATH's sixth axis`
@@ -746,6 +746,13 @@ skills first, preserving `relic.library.ts`'s stated 1:1 relic-identity rule.
 Routed to **Phase 85** (promoted from PHASE_CANDIDATES.md's matching
 [score 5.5] row this same tick). Row closed; see Phase 85's brief for the
 mechanics-expert design session.
+
+**SHIPPED 2026-09-15 (commit 9f313d0c):** Phase 85 authored 3 new signature
+skills (`sig-mounting-dread`, `sig-endless-labor`, `sig-unbroken-stride`) and
+their carrying relics for the `head`/`hands`/`feet` accessory kinds,
+preserving the 1:1 relic-identity rule. `relic.library.ts` now ships 11
+relics across all 6 `AccessoryKind`s. Re-verified during `/adjust-equipment`
+pass 12 (2026-09-17): no gap remains.
 
 ### [loop-call] Dead engine hooks — 19 orphaned `zoneHas` sites in combat.engine.ts (2026-09-04)
 - category: mechanics residue (found during `/adjust-cards` pass 1, filed

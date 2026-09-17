@@ -12,7 +12,7 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-17 | 989cad9f | 12 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-15 | 6043c01d | 11 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-17 | PENDING | 12 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-16 | b718b421 | 11 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-16 | 37c67a13 | 11 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-16 | 858607d5 | 11 |
@@ -22,6 +22,48 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
+> **[adjust-equipment pass 12, 2026-09-17, commit PENDING]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass on the relic/consumable data itself —
+> dispatched autonomously by `/march`'s content-lifecycle gate (`equipment`
+> was the only qualifying category this tick: 51 commits and ~43h since
+> pass 11's commit `6043c01d`, 2026-09-15T09:26:40Z, past the 15-commit/36h
+> threshold; `cards` `989cad9f` 1 commit/2h, `enemies` `b718b421` 10
+> commits/20h, `keywords` `37c67a13` 5 commits/14h, and `npcs` `858607d5` 3
+> commits/6h all sat under their own threshold). Re-derived all 6 Step-1
+> signals fresh against the now-11-relic library (Phase 85, 2026-09-15,
+> commit `9f313d0c`, shipped since pass 11): (1) slot coverage — 2 weapons,
+> 2 armor, 7 accessories spanning all 6 `AccessoryKind`s (`head`/`hands`/
+> `feet` filled by Phase 85), C(7,3)=35 accessory combinations, no CREATE
+> signal. (2) dominated relics — none; all same-slot ties (2 weapons, 2
+> armor) differ by distinct `grantsSignature`, no strictly-worse pair. (3)
+> shop/reward coverage — 12 of 22 consumables shop-stocked across
+> `World/MapEvents/content.ts`'s ware blocks, the other 10 reachable via
+> `rollCacheReward`'s uniform draw over the full `consumableLibrary`, no
+> orphan; all 11 relics are the fixed starting kit (never loot), all
+> acquired. (4) `grantsSignature` drift — all 11 relic values (the original
+> 8 plus Phase 85's 3) resolve in the live 11-member `SignatureSkillId`
+> union, 1:1. (5) dead consumable `effectId`s — all resolve in
+> `buffs.library.json`; retired-card-vocabulary ids referenced by
+> consumables (e.g. `buff_cleanse`, `buff_haste`, `buff_all_stats_up`) are
+> the deliberate "support"/"non-card" carve-out (`deprecated-effects.
+> engine.test.ts`), not a bug. (6) `AccessoryKind` gap — CLOSED: all 6
+> kinds now have live relics (was the standing gap since pass 1).
+> Step 1b widened audit (Step 1 returned nothing actionable on the data
+> itself, so the KB cross-reference ran before concluding zero-diff):
+> `kb_search` (scope `all`) on relic/equipment/loot prior art surfaced
+> Slay the Spire's relic model (`BoardGames/games/slay-the-spire-the-board-
+> game/`) — relics there are run-acquired mid-game rewards, not a fixed
+> starting kit. This is the same divergence `docs/equipment.md`'s "Loot &
+> shops" section already documents and defers ("Making relics findable in
+> the world is a deferred follow-up") — not a new finding, reconfirms the
+> known deferral. No other prior-art gap surfaced. The actual finding this
+> pass: `plan/AUDIT.md`'s equipment-progression `[loop-call]` and
+> `plan/CRITIQUE.md`'s matching `[HIGH]` row were still marked open even
+> though Phase 85 (2026-09-15, commit `9f313d0c`) shipped the exact fix
+> they were waiting on — closed both, citing the shipping commit. Verify:
+> green (mechanics 214/214 files · 3464 tests; mobile 302/302 suites).
+```
+
 > **[adjust-cards pass 12, 2026-09-17, commit 989cad9f]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
 > content-lifecycle gate (`cards` was the stalest qualifying category this
