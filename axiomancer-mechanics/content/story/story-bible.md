@@ -152,6 +152,30 @@ These are the bar, not shipped prose:
 > the road outside the wall and understood that he could do one of
 > those things.
 
+## 7b. The retired specs
+
+`specs/story/S-01`, `specs/story/S-02` and `specs/characters/C-01`
+were deleted with the overview (attended session, 2026-09-17, T:
+*"Also purge the story specs"*). The content they specified stays
+shipped and playable; only the authoring records are gone, and this
+bible is the record now.
+
+**One correction on the record.** S-01 and S-02 were fishing-village
+and northern-forest narrative — the old overview's first act, fairly
+called extrapolation. `C-01 (The Sophist, Protas)` was not: it never
+mentioned the advisor or the overview, and its lineage is the Aporia
+labyrinth (`W-01`), which is a separate design line with shipped
+content in `src/World/Labyrinth/content/act3.content.ts`. It was
+deleted because T's instruction named it, and it is recoverable:
+
+```bash
+git show 5e14166^:axiomancer-mechanics/specs/characters/C-01-the-sophist.md
+```
+
+`/adjust-npcs` runs a spec-to-NPC gap audit that read C-01. That
+audit surface is now one file smaller; the steward should not file
+the absence as a finding.
+
 ## 8. What this does NOT change
 
 - The LOCKED MECHANICS (Conviction, Surge, Dice) are untouched.
