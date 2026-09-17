@@ -467,3 +467,9 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-17T08:53:00Z | skill | digest | - | - | - |
 | 2026-09-17T08:53:00Z | skill-end | digest | - | 0s | ok |
 | 2026-09-17T10:31:33Z | slash-prompt | /march | - | - | /march |
+| 2026-09-17T12:42:04Z | slash-prompt | /march | - | - | /march |
+| 2026-09-17T12:44:45Z | skill | adjust-enemies | claude-sonnet-5 | - | - |
+| 2026-09-17T12:44:45Z | skill-end | adjust-enemies | claude-sonnet-5 | 0s | ok |
+| 2026-09-17T12:45:19Z | subagent | general-purpose | claude-sonnet-5 | - | Ship adjust-enemies pass 12 |
+| 2026-09-17T12:45:21Z | skill | adjust-enemies | claude-sonnet-5 | - | - |
+| 2026-09-17T12:45:22Z | skill-end | adjust-enemies | claude-sonnet-5 | 0s | ok |

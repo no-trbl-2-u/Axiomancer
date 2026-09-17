@@ -22,6 +22,100 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
+> **[adjust-enemies pass 12, 2026-09-17, commit <PENDING>]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
+> content-lifecycle gate (`enemies` was the only qualifying category this
+> tick: 15 commits since pass 11's commit `b718b421`, 2026-09-16T08:55:02Z,
+> past the 15-commit threshold exactly; `keywords` `37c67a13`
+> 2026-09-16T14:56:08Z 10 commits/~22h, `npcs` `858607d5`
+> 2026-09-16T22:38:32Z 8 commits/~14h, `cards` `989cad9f`
+> 2026-09-17T02:51:27Z 6 commits/~10h, `equipment` `6a28ba0b`
+> 2026-09-17T04:44:11Z 4 commits/~8h — all four sat under their own
+> 15-commit/36h threshold). `git log b718b421..HEAD -- axiomancer-mechanics/
+> src/Enemy axiomancer-mechanics/src/Combat/combat.enemy-decks.ts
+> axiomancer-mechanics/src/Combat/combat.enemy-cards.ts
+> axiomancer-mobile/assets/images/enemies axiomancer-mechanics/src/World`
+> is EMPTY — none of the 15 intervening commits (the sibling
+> keywords/npcs/cards/equipment pass-11/12 ticks and their ledger bumps,
+> an `expand` pass, a `critique` pass) touched the roster surface.
+> Confirmed per-file via `git log -1`, not just the path-scoped range:
+> `enemy.library.ts`/`combat.enemy-decks.ts` last-touched `e57f9f63`
+> (pass 6), `loot.ts` `42f91acd`, `enemy-keywords.ts` `7b84c8bb`,
+> `combat.enemy-cards.ts` `9caaa431` — all predate `b718b421`;
+> `axiomancer-mobile/assets/images/enemies/index.ts` last-touched
+> `ebb457f4` (Phase 88's W5 art adoption), already accounted for in pass
+> 11's own reading. Re-derived every Step-1 signal fresh anyway rather
+> than trusting the empty diff alone: (1) **orphan sweep** — 78 quoted
+> `ENEMY_REGISTRY` entries (`sandbag` uses an unquoted key, excluded from
+> the registry-parity script by construction, matching prior passes'
+> reading) all resolve into at least one `EnemiesByMap` pool except the
+> same 2 standing exclusions, both carrying an explicit `DESIGN
+> REQUIREMENT` comment barring pool entry: `sandbag` (test fixture) and
+> `the-incompleteness` (impossible-ceiling boss). (2) **roster-size /
+> overlap** — all 10 pools recomputed fresh via a throwaway script
+> against the live tree: fishing-village 13, northern-forest 39, caverns
+> 16, northern-city 8, connecting-river 5, town-across-river 4,
+> the-capital 8, aporia-colonnade 8, aporia-archive 8, aporia-proof 11 —
+> byte-identical to pass 11's own citation (source unchanged). The only
+> >70%-of-smaller-pool hits remain the 4 standing Aporia-vs-forest/caverns
+> pairs, re-confirmed as the documented deliberate shared-roster design,
+> not re-litigated; town-across-river stays the thinnest pool (3
+> non-boss), still reading as the accepted coda-map shape per its own
+> pass-2-then-stable history. (3) **loot-table sweep** — 22 distinct
+> `drop()` ids extracted fresh from `enemy.library.ts`, all 22 resolve
+> 1:1 against `Items/consumable.library.ts`'s live 22-id set (cross-
+> checked against `adjust-equipment` pass 12's own "12 of 22 shop-stocked"
+> figure — same 22-item universe), 0 stale references. (4)
+> **aftermath-prose/voice sweep** — a word-boundary
+> `\b(thee|thou|thy|thine|ye)\b` grep against `enemy.library.ts` returns
+> 0 hits (tighter than pass 10's substring-based first pass, which had to
+> discard 18 false positives from `without`/`toothy`-class substrings by
+> hand) — 0 genuine archaic-voice violations. 47/79 `createEnemy` records
+> carry `finalBlowLines`/`causeLines` (32 do not, including the `sandbag`
+> test fixture), unchanged — the standing 32-enemy backlog (filed pass 1,
+> `plan/AUDIT.md` `[content]`, explicitly scoped to `content-curator`,
+> "too large to fold into a routine pass") re-read at its current text,
+> still open, still accurate, re-cited not re-filed. (5) **plan-doc
+> sweep** — `git log b718b421..HEAD -- plan/AUDIT.md
+> plan/PHASE_CANDIDATES.md plan/CRITIQUE.md` returns 4 commits
+> (`37c67a13`'s keyword-scoped loop-call closure, `6a28ba0b`'s
+> equipment-scoped loop-call closures, `expand` pass 17's dice/HUD
+> art-direction candidate, `critique` pass 39's no-findings run) — none
+> enemy-scoped; no new roster residue.
+>
+> **Step 1b widened audit:** Step 1 read zero-diff, so per the standing
+> `/oversight` 2026-09-15 rule ran the widened `kb_search` cross-reference
+> again, deliberately off pass 11's own angle (which covered
+> summoner/add-spawning and multi-hit-vs-stacked-wall archetypes against
+> `slay-the-spire-the-board-game`/`gloomhaven`/`aeons-end`) to avoid
+> re-asking the same question: searched the full `boardgames` scope for
+> `trash mob|same (three|few) (fights|enemies)|repeat(ed)? encounter|
+> filler enemy` and separately for `monster variety|enemy variety|reused
+> (art|monster)|recolor` — both queries returned zero matches, so no new
+> roster-shape prior-art gap surfaced this pass. Pass 11's own standing
+> finding, `plan/PHASE_CANDIDATES.md` `[score 4.5]` "No summoner/
+> add-spawning or multi-hit-vs-stacked-wall enemy archetype", remains open
+> and unresolved (filed 2026-09-16, not yet promoted via `/oversight`) —
+> re-confirmed still accurate and still engine-structural (combat is
+> hard-coded 1-enemy, per `World/encounter.ts` and `combat.engine.ts`),
+> not re-filed as a duplicate. KB research (skill §3 Step 2): the Step 1b
+> widened check above IS this pass's KB research run — no CREATE/UPDATE
+> shipped, so the REMOVE/no-op carve-out the sibling categories' own
+> zero-diff passes have used identically applies here too. Verify: ran
+> both gates in full despite the empty source diff — `npm run verify
+> --workspace axiomancer-mechanics` (214/214 files, 3464 tests + build
+> green) and `npm run verify --workspace axiomancer-mobile` (exit 0;
+> lint + typecheck clean, jest 302/302 suites/2869 tests/3 snapshots,
+> assets:check + art:test 24/24 green). `npm run deploy:check` confirmed
+> green pre-tick (HEAD `b66ca34d`, docs/plan-only tip commit, no gated
+> workflow triggered) and will be re-confirmed after this ledger commit
+> lands. No new `plan/PHASE_CANDIDATES.md` or `plan/AUDIT.md` residue
+> filed this pass — nothing actionable surfaced beyond the standing,
+> already-filed 32-enemy `finalBlowLines` backlog and the pass-11
+> summoner/multi-hit candidate, both re-cited above.
+```
+
+```
 > **[adjust-equipment pass 12, 2026-09-17, commit 6a28ba0b]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass on the relic/consumable data itself —
 > dispatched autonomously by `/march`'s content-lifecycle gate (`equipment`
