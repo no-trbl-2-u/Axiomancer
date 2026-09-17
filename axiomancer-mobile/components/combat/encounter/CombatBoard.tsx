@@ -2031,7 +2031,7 @@ const useStyles = makeStyles((AXM) => ({
     },
     convictionText: { fontFamily: FONTS.gothic, fontSize: 15, letterSpacing: 0.5, textAlign: 'center' },
     // FE-021 — the word, small enough to stay chrome, large enough to read.
-    convictionCaption: { fontFamily: FONTS.mono, fontSize: 6, letterSpacing: 0.6, color: AXM.bone, textAlign: 'center', marginTop: 1 },
+    convictionCaption: { fontFamily: FONTS.sans, fontSize: 6, letterSpacing: 0.6, color: AXM.bone, textAlign: 'center', marginTop: 1 },
     sigRune: {
         width: 46, height: 46, borderRadius: 23, borderWidth: 1.5, backgroundColor: 'rgba(0,0,0,0.6)',
         alignItems: 'center', justifyContent: 'center',
@@ -2050,10 +2050,10 @@ const useStyles = makeStyles((AXM) => ({
     dieAssigned: { opacity: 0.4 },
     // Drawn X/dud die — a small greyed pip, not a full slot.
     dieXPip: { width: 24, height: 24, borderRadius: 6, borderWidth: 1, borderColor: '#3a3a3a', backgroundColor: 'rgba(0,0,0,0.4)', alignItems: 'center', justifyContent: 'center', opacity: 0.6, alignSelf: 'center' },
-    dieFateHint: { fontFamily: FONTS.mono, fontSize: 7, color: '#d4c026', marginTop: 1 },
+    dieFateHint: { fontFamily: FONTS.sans, fontSize: 7, color: '#d4c026', marginTop: 1 },
     // Spec 33 §4 — Press Fate reroll control (flag-on).
     dieXGlyph: { fontFamily: FONTS.sans, fontSize: 12, color: '#8a8273' },
-    dieConv: { fontFamily: FONTS.mono, fontSize: 9, color: AXM.bone, textAlign: 'center', marginTop: 2, letterSpacing: 0.5, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },
+    dieConv: { fontFamily: FONTS.sans, fontSize: 9, color: AXM.bone, textAlign: 'center', marginTop: 2, letterSpacing: 0.5, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },
     diePip: { fontFamily: FONTS.sans, fontSize: 10, textAlign: 'center', marginTop: 2, letterSpacing: 0.6, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },
 
     // ── the hand dock ── (Option A: fits the 194pt card raised ~20pt off the
@@ -2076,7 +2076,7 @@ const useStyles = makeStyles((AXM) => ({
     // fill + ash border. `overflow: 'hidden'` keeps the radius on Android
     // (the guardChip treatment).
     chainEmpty: {
-        fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 0.5,
+        fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 0.5,
         backgroundColor: 'rgba(0,0,0,0.55)', borderWidth: 1, borderColor: AXM.ash,
         borderRadius: 5, paddingHorizontal: 7, paddingVertical: 2, overflow: 'hidden',
     },
@@ -2088,13 +2088,13 @@ const useStyles = makeStyles((AXM) => ({
         backgroundColor: 'rgba(0,0,0,0.55)',
     },
     stanceChipGlyph: { fontFamily: FONTS.sans, fontSize: 13, textShadowRadius: 5, textShadowOffset: { width: 0, height: 0 } },
-    stanceChipLabel: { fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 1 },
+    stanceChipLabel: { fontFamily: FONTS.sans, fontSize: 10, letterSpacing: 1 },
     // S1-board-C19 — the readout's own name, in the convictionCaption idiom:
     // chrome-quiet, still legible.
-    stanceChipCaption: { fontFamily: FONTS.mono, fontSize: 7, letterSpacing: 0.8, color: AXM.bone },
+    stanceChipCaption: { fontFamily: FONTS.sans, fontSize: 7, letterSpacing: 0.8, color: AXM.bone },
     // S1-board-C34 — the empty state's instruction, quieter than the value it
     // follows so 'NO STANCE' stays the thing the eye lands on.
-    stanceChipHint: { fontFamily: FONTS.mono, fontSize: 9, letterSpacing: 0.6, color: AXM.bone },
+    stanceChipHint: { fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 0.6, color: AXM.bone },
     // S1-board-C19 — the tap mark on the momentum chip (the tappable half of
     // the pair). Quiet chrome; the chip's own colours stay the loud part. It
     // floats on the arena floor art beside the readout's plate, not on it, so
@@ -2137,7 +2137,7 @@ const useStyles = makeStyles((AXM) => ({
     railLedger: { flexDirection: 'row', flexWrap: 'wrap', flexShrink: 1, gap: 3, alignItems: 'center', justifyContent: 'center' },
     railPiles: { flexDirection: 'row', alignItems: 'center', gap: 3, flexShrink: 0 },
     pileGlyph: { width: 13, height: 17, borderRadius: 2, borderWidth: 1, borderColor: AXM.ash, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center' },
-    pileGlyphText: { fontFamily: FONTS.mono, fontSize: 7, color: AXM.ash, lineHeight: 9 },
+    pileGlyphText: { fontFamily: FONTS.sans, fontSize: 7, color: AXM.ash, lineHeight: 9 },
     pileCount: { fontFamily: FONTS.mono, fontSize: 11, color: AXM.bone, marginRight: 4 },
 
     // ── SCRAP medallion (drag-time only) ──
@@ -2146,7 +2146,7 @@ const useStyles = makeStyles((AXM) => ({
         borderWidth: 2, borderStyle: 'solid', borderColor: AXM.ash, backgroundColor: 'rgba(0,0,0,0.6)',
         alignItems: 'center', justifyContent: 'center',
     },
-    trashLabel: { fontFamily: FONTS.mono, fontSize: 9, letterSpacing: 1, color: AXM.bone, marginTop: 1 },
+    trashLabel: { fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 1, color: AXM.bone, marginTop: 1 },
 
     // ── player status strip (in-flow, above the dice; RIGHT-aligned so the
     //    left signature-rune column never covers it) ──
@@ -2154,21 +2154,21 @@ const useStyles = makeStyles((AXM) => ({
     // otherwise ran past the viewport, and the board now clips at its edge.
     statusStrip: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'flex-end', gap: 8, paddingHorizontal: 12, paddingBottom: 6 },
     guardChip: {
-        fontFamily: FONTS.mono, fontSize: 11, color: '#6fb3e0', letterSpacing: 0.5,
+        fontFamily: FONTS.sans, fontSize: 11, color: '#6fb3e0', letterSpacing: 0.5,
         backgroundColor: 'rgba(0,0,0,0.7)', borderWidth: 1, borderColor: '#6fb3e055', borderRadius: 4,
         paddingHorizontal: 5, paddingVertical: 2, overflow: 'hidden',
     },
     // THE BIG NUMBERS REWRITE — WRATH / CHAIN / TWIN, cut to GUARD's chip so
     // the whole rail reads as one ledger row. Colour comes from the call site.
     ledgerChip: {
-        fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 0.5,
+        fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 0.5,
         backgroundColor: AXM.backdrop, borderWidth: 1, borderRadius: 4,
         paddingHorizontal: 5, paddingVertical: 2, overflow: 'hidden',
     },
 
     // ── Charge track (phase 28) ──
     perorationTrack: { paddingHorizontal: 12, paddingBottom: 6, gap: 3 },
-    perorationLabel: { fontFamily: FONTS.mono, fontSize: 10, color: '#d9b44a', letterSpacing: 0.4 },
+    perorationLabel: { fontFamily: FONTS.sans, fontSize: 10, color: '#d9b44a', letterSpacing: 0.4 },
     perorationBarTrack: { height: 4, borderRadius: 2, backgroundColor: 'rgba(0,0,0,0.6)', overflow: 'hidden' },
     perorationBarFill: { height: '100%', borderRadius: 2 },
 
@@ -2196,7 +2196,7 @@ const useStyles = makeStyles((AXM) => ({
     // to; clipping it at `root` would have eaten the words instead.
     endConsequenceWrap: { position: 'absolute', top: -34, right: 0, width: 140, alignItems: 'center' },
     endConsequence: {
-        fontFamily: FONTS.mono, fontSize: 8.5,
+        fontFamily: FONTS.sans, fontSize: 8.5,
         letterSpacing: 0.4, color: AXM.sulfur, textAlign: 'center',
         textShadowColor: 'rgba(0,0,0,0.95)', textShadowRadius: 3,
     },
@@ -2251,7 +2251,7 @@ const useStyles = makeStyles((AXM) => ({
     plateRule: { width: StyleSheet.hairlineWidth, alignSelf: 'stretch', marginVertical: 6, backgroundColor: AXM.divider },
     plateRuleAcross: { height: StyleSheet.hairlineWidth, alignSelf: 'stretch', backgroundColor: AXM.divider },
     platePaidCell: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 5 },
-    paidRead: { fontFamily: FONTS.mono, fontSize: 11, marginTop: 1 },
+    paidRead: { fontFamily: FONTS.sans, fontSize: 11, marginTop: 1 },
     paidTextWrap: { flex: 1 },
     // The keyword is the loudest word on the face — it is the whole read now.
     paidKeyword: { fontFamily: FONTS.sans, fontSize: 12, lineHeight: 14, letterSpacing: 0.8 },

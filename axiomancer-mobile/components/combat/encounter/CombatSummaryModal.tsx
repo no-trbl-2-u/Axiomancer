@@ -74,7 +74,7 @@ const useStyles = makeStyles((AXM) => ({
     noRows: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 13, color: AXM.bone, textAlign: 'center' },
     coach: { fontFamily: FONTS.sans, fontSize: 11, color: '#c2a14e', textAlign: 'center', lineHeight: 15, marginTop: 6, paddingHorizontal: 4, letterSpacing: 0.2 },
     totals: { gap: 2, marginBottom: 8 },
-    total: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.bone },
+    total: { fontFamily: FONTS.sans, fontSize: 12, color: AXM.bone },
     best: { fontFamily: FONTS.sans, fontSize: 13, letterSpacing: 0.6, textAlign: 'center', marginBottom: 12 },
     btn: { borderWidth: 2, paddingVertical: 9, alignItems: 'center' },
     btnText: { fontFamily: FONTS.gothic, fontSize: 16, letterSpacing: 1 },

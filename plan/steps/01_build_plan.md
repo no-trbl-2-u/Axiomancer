@@ -107,10 +107,15 @@ Tick in this file in the same commit that ships the phase.
       candidate after the top pick was verified mismatched (see brief).
       — `feat(mobile): W5 art adoption — wire the oversight-picked candidates — phase 88` (ebb457f4)
 
-- [ ] Phase 89 — Art-direction coherence: restyle the dice faces + HUD
+- [x] Phase 89 — Art-direction coherence: restyle the dice faces + HUD
       chrome to the painted portrait register, now that the art-pipeline
       blocker has cleared (promoted via `/oversight` 2026-09-17 from
-      `PHASE_CANDIDATES.md` [score 5.0])
+      `PHASE_CANDIDATES.md` [score 5.0]). Shipped as a woodcut-codex
+      ink/hairline-rule restyle (not literal painted bitmaps — see brief);
+      CombatDie shell-face cross-hatch + hairline, HUD chrome reserves
+      FONTS.mono for bare numeric readouts, everything else to FONTS.sans.
+      — `feat(mobile): art-direction coherence — die faces + HUD chrome —
+      phase 89` (6137ca5b)
 - [ ] Phase 90 — Summoner / multi-hit enemy archetype: no roster enemy
       spawns adds or answers a stacked wall with multi-hit; author the
       archetype and stage it (promoted via `/oversight` 2026-09-17 from

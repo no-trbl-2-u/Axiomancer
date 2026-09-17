@@ -1424,7 +1424,7 @@ const useStyles = makeStyles((AXM) => ({
     },
     logScroll: { flex: 1, borderWidth: 1, borderColor: AXM.ash, backgroundColor: AXM.panelBg },
     logScrollContent: { padding: 12, gap: 4 },
-    logLine: { fontFamily: FONTS.mono, fontSize: 12, lineHeight: 17 },
+    logLine: { fontFamily: FONTS.serif, fontSize: 12, lineHeight: 17 },
     logClose: {
         alignSelf: 'center', marginTop: 14, width: 44, height: 44, borderRadius: 22,
         borderWidth: 2, borderColor: AXM.sulfur, backgroundColor: AXM.panelBg,
@@ -1467,7 +1467,7 @@ const useStyles = makeStyles((AXM) => ({
     detailPlays: { alignSelf: 'stretch', borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)', borderRadius: 6, backgroundColor: 'rgba(0,0,0,0.65)', overflow: 'hidden' },
     detailPlayRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, paddingHorizontal: 10, paddingVertical: 7 },
     detailPlayRowSep: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: 'rgba(255,255,255,0.14)' },
-    detailPlayTag: { fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 1, color: AXM.bone, width: 58, flexShrink: 0 },
+    detailPlayTag: { fontFamily: FONTS.sans, fontSize: 10, letterSpacing: 1, color: AXM.bone, width: 58, flexShrink: 0 },
     detailPlayBody: { flex: 1 },
     detailPlayText: { fontFamily: FONTS.serif, fontSize: 12.5, color: AXM.parchment, lineHeight: 17, flex: 1 },
     detailPlayBold: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 0.6, textTransform: 'uppercase' },
@@ -1512,7 +1512,7 @@ const useStyles = makeStyles((AXM) => ({
         textShadowRadius: 8, textShadowOffset: { width: 0, height: 0 },
     },
     tipGloss: { fontFamily: FONTS.serif, fontSize: 14, lineHeight: 20, color: AXM.parchmentDim, textAlign: 'center', marginTop: 8 },
-    tipMeta: { fontFamily: FONTS.mono, fontSize: 11, color: AXM.bone, letterSpacing: 0.6, marginTop: 10 },
+    tipMeta: { fontFamily: FONTS.sans, fontSize: 11, color: AXM.bone, letterSpacing: 0.6, marginTop: 10 },
     // ── REPRISE songbook picker (phase 28) ──
     reprisalList: { width: '100%', marginTop: 14, gap: 6 },
     reprisalRow: {
@@ -1544,7 +1544,7 @@ const useStyles = makeStyles((AXM) => ({
     pilgrimGridCol: { flex: 1, fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 1, color: AXM.bone, textAlign: 'center', opacity: 0.75 },
     pilgrimGridVal: { flex: 1, fontFamily: FONTS.mono, fontSize: 13, color: AXM.parchment, textAlign: 'center' },
     pilgrimMetaRow: { flexDirection: 'row', gap: 8, marginTop: 6 },
-    pilgrimMetaChip: { fontFamily: FONTS.mono, fontSize: 11, color: AXM.bone, letterSpacing: 0.4, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 4, backgroundColor: 'rgba(0,0,0,0.4)', paddingHorizontal: 7, paddingVertical: 3, overflow: 'hidden' },
+    pilgrimMetaChip: { fontFamily: FONTS.sans, fontSize: 11, color: AXM.bone, letterSpacing: 0.4, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 4, backgroundColor: 'rgba(0,0,0,0.4)', paddingHorizontal: 7, paddingVertical: 3, overflow: 'hidden' },
     pilgrimSection: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 2, color: AXM.sulfur, marginTop: 14, marginBottom: 6 },
     pilgrimEmpty: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 12, color: AXM.ash },
     pilgrimRow: { flexDirection: 'row', gap: 9, alignItems: 'flex-start', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 6, backgroundColor: 'rgba(0,0,0,0.4)', padding: 9, marginBottom: 6 },
@@ -1567,7 +1567,7 @@ const useStyles = makeStyles((AXM) => ({
     // Accordion header: the whole strip is the toggle, sized to a thumb.
     revealPhaseHead: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 44 },
     revealPhaseHeadLabel: { flex: 1 },
-    revealPhaseChevron: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.bone },
+    revealPhaseChevron: { fontFamily: FONTS.sans, fontSize: 12, color: AXM.bone },
     // Body sits under the header, indented to clear the intent glyph.
     revealPhaseBody: { paddingLeft: 30, paddingBottom: 7 },
     revealPhaseBodyHidden: { paddingBottom: 0 },
@@ -1584,7 +1584,7 @@ const useStyles = makeStyles((AXM) => ({
     // symmetric other half of a fight-or-flight binary.
     withdrawBtn: { borderWidth: 1, borderColor: AXM.ash, paddingHorizontal: 20, paddingVertical: 8, marginTop: 12, alignItems: 'center' },
     withdrawBtnText: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 2 },
-    withdrawSub: { fontFamily: FONTS.mono, fontSize: 8.5, letterSpacing: 0.8, color: AXM.ash, marginTop: 3 },
+    withdrawSub: { fontFamily: FONTS.sans, fontSize: 8.5, letterSpacing: 0.8, color: AXM.ash, marginTop: 3 },
 
     ghost: { position: 'absolute', top: 0, left: 0, zIndex: 999 },
     // ✕ badge riding the die ghost while it hovers an illegal target.
