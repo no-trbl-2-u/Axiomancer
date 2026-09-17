@@ -385,7 +385,7 @@ card-editor, root content-drift). See
 Upgrade is NOT re-filed here — if it resurfaces, it needs its own KB
 research + payload-shape design pass, not a continuation of this row.
 
-### [loop-call] The deck-matrix baseline reads STALE because of a speech-mark edit (2026-09-12)
+### [x] [loop-call] The deck-matrix baseline reads STALE because of a speech-mark edit (2026-09-12) — RESOLVED 2026-09-17 (`/iterate`, issue #321)
 `baseline:check` now reports the baseline stale by one mechanics-source commit:
 `df6e98f ui-fresh-eyes: FE-006 world content — speech marks that point the
 right way`. The flag is correct by the rule and wrong about the concern.
@@ -408,6 +408,24 @@ balance truth.
 stops tripping STALE. Ready to ship — no further design call needed; routing
 to the next `/iterate` pass (or a direct fix) as a normal finding, tag
 dropped.
+
+**RESOLVED via `/iterate` (2026-09-17, issue #321):** the literal decided fix
+(exclude `World/Continents/**` from a path-prefix `WATCH_PATH`) was verified
+against the actual motivating commit before shipping and found incomplete —
+`df6e98f` also touched `Game/e2e/old-marrow-observer.engine.test.ts` (an
+engine test's literal-quote matcher, updated to track the content edit), so
+excluding only the content directory would still have left that exact
+example flagged STALE. Shipped the fuller fix instead: `WATCH_PATH` became
+`WATCH_ROOT` plus an exported, unit-tested `isFreshnessRelevantPath(rel)`
+predicate that excludes both `World/Continents/**` (confirmed disjoint from
+the deck-matrix's actual inputs — `Combat/`, `Cards/`, `Enemy/`, `Character/`
+never import anything under `World/`) and any test file (`*.test.ts(x)`,
+`e2e/**`), while leaving every other `World/*` surface (Hazard, MapEvents,
+map.library.ts, ...) watched since those are not shown to be disjoint. `git
+log` now filters by per-commit changed-file content rather than a single
+path prefix. New `scripts/check-baseline-freshness.test.mjs` (6 cases,
+including the exact FE-006 file set) wired into the root `npm test`
+aggregator. `baseline:check` still reports FRESH post-fix — no regression.
 
 
 ### [loop-call] UI fresh-eyes 2026-09-12 left six product decisions and a large unverified candidate set (2026-09-12)

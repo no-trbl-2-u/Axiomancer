@@ -473,3 +473,6 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-17T12:45:19Z | subagent | general-purpose | claude-sonnet-5 | - | Ship adjust-enemies pass 12 |
 | 2026-09-17T12:45:21Z | skill | adjust-enemies | claude-sonnet-5 | - | - |
 | 2026-09-17T12:45:22Z | skill-end | adjust-enemies | claude-sonnet-5 | 0s | ok |
+| 2026-09-17T14:32:54Z | slash-prompt | /march | - | - | /march |
+| 2026-09-17T14:33:56Z | skill | iterate | claude-sonnet-5 | - | - |
+| 2026-09-17T14:33:56Z | skill-end | iterate | claude-sonnet-5 | 0s | ok |
