@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-09-15 at commit 24448fde
-> Pass count: 38
+> Last pass: 2026-09-17 at commit 38d7711f
+> Pass count: 39
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -492,6 +492,24 @@
 > in-combat rows (VITAE-vs-HP copy, DoT round-clock math, tuning-harness
 > starvation, doctrine-curve rebaseline) — a cold drive still can't
 > pass "ENTER COMBAT".
+
+> **[critique pass 39, 2026-09-17, commit 38d7711f] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
+> mobile (375×812) and desktop (1280×800) against the full 11-screen
+> set (title, onboarding, combat preview, live combat-board, exploration
+> hub, dialogue, village, cutscene, rest, hazard, late-game hub) — 22
+> captures, 0 with nav trouble, 0 console/page errors, no
+> undefined/NaN/`[object Object]` text artifacts in any DOM-text dump.
+> Self-assessed against the current Pending/Done log: the mobile
+> combat-board hand fan reproduces exactly as the pass-37 row already
+> describes (Thin Hymn/Chilblain Watch/The Long Lent/Spoiled Poultice
+> truncated by overlap, desktop unaffected) — not re-filed. Noticed but
+> declined to file: the late-game hub's node-graph map (desktop
+> viewport) shows a faint hand-drawn oval sitting off the node grid
+> with no connecting path; too easily read as intentional set-dressing
+> (the eye/omen motif recurs on the title screen and the WILDS tab
+> icon) to file as a defect without stronger evidence. Zero new
+> findings.
 
 ## Pending
 
