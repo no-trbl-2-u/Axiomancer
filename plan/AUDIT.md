@@ -342,6 +342,26 @@
 > `synergy.statePredicate` form controls (`CardForm.tsx`) — both
 > re-confirmed live this pass, unchanged from pass 7/8's framing.
 
+> **Bias: backlog drain (set via /oversight 2026-09-17).** `/iterate`
+> weights rows in this file 1.5x against the steward rotation until the
+> next oversight lifts it. Reason: four consecutive content-steward
+> passes shipped zero diffs (`/adjust-cards` 12, `/adjust-equipment` 12,
+> `/adjust-enemies` 12, `/adjust-npcs` 11 — all zero-CREATE,
+> zero-UPDATE, zero-REMOVE) while 131 rows here, 51 in
+> `plan/CRITIQUE.md` and 37 in `plan/PHASE_CANDIDATES.md` stayed open.
+> `/march` should prefer drain over the content-lifecycle rotation while
+> this banner stands; a real content gap waits at most one extra
+> rotation. T answered the `AskUserQuestion` ballot "Four consecutive
+> content-steward passes shipped zero diffs" with "Throttle stewards,
+> bias iterate to backlog".
+>
+> **Standing note for the next oversight.** Four legacy
+> `[needs-user-call]` rows in this Pending queue (impact 9, 9, 8, 6;
+> all filed 2026-08-22 by the content-pipelines audit) have gone 26 days
+> undrained. They are loop-drainable under THE OPEN GATE ¶1 — the tag is
+> not a block. They are prime targets for this bias.
+
+
 ## Pending
 
 ### [x] [loop-call] Keyword registry has no analogue for Dawncaster's "Chaos" or generic "Upgrade" families (2026-09-13) — RESOLVED via `/adjust-keywords` pass 11 (2026-09-16)
@@ -443,7 +463,7 @@ including the exact FE-006 file set) wired into the root `npm test`
 aggregator. `baseline:check` still reports FRESH post-fix — no regression.
 
 
-### [loop-call] UI fresh-eyes 2026-09-12 left six product decisions and a large unverified candidate set (2026-09-12)
+### [x] [loop-call] UI fresh-eyes 2026-09-12 left six product decisions and a large unverified candidate set (2026-09-12) — DECISION CLOSED via /oversight 2026-09-15, PROMOTED to Phase 95 via /oversight 2026-09-17 (the 309-row unverified candidate set stays open, tracked separately)
 The sweep (`axiomancer-mobile/docs/reports/UI_FRESH_EYES_2026-09-12.md`) shipped
 21 fixes and filed the rest. Six rows are genuine product calls the loop should
 not make silently, each with a recommended option in the report's section 4:
@@ -473,7 +493,7 @@ Ready to ship as 6 small fixes; routing to the next `/iterate` pass, tag
 dropped. Row closed as a decision; the 309-row unverified candidate set
 described below stays open and unrelated to this call.
 
-### [loop-call] `npm run critique:drive` deletes anything else living under `.critique-artifacts/` (2026-09-12)
+### [x] [loop-call] `npm run critique:drive` deletes anything else living under `.critique-artifacts/` (2026-09-12) — DECISION CLOSED via /oversight 2026-09-15, PROMOTED to Phase 94 via /oversight 2026-09-17
 `critique-drive.mjs:318` clears the whole artifact root on start. During the
 fresh-eyes sweep this destroyed a complete 54-cell before/after capture set
 that had been written to `.critique-artifacts/fresh-eyes/`. Both sets were
@@ -787,7 +807,7 @@ preserving the 1:1 relic-identity rule. `relic.library.ts` now ships 11
 relics across all 6 `AccessoryKind`s. Re-verified during `/adjust-equipment`
 pass 12 (2026-09-17): no gap remains.
 
-### [loop-call] Dead engine hooks — 19 orphaned `zoneHas` sites in combat.engine.ts (2026-09-04)
+### [x] [loop-call] Dead engine hooks — 19 orphaned `zoneHas` sites in combat.engine.ts (2026-09-04) — RESOLVED via Phase 86 (2026-09-16, commit 7cd4119c)
 - category: mechanics residue (found during `/adjust-cards` pass 1, filed
   rather than actioned — cleanup is a mechanics-expert-owned sweep, not a
   card-content change)
@@ -810,7 +830,7 @@ pass 12 (2026-09-17): no gap remains.
 (promoted from PHASE_CANDIDATES.md's matching [score 4.5] row this same
 tick, alongside the TWIN-wire row below). Row closed.
 
-### [loop-call] the-sextons-count is missing its TWIN trigger (2026-09-04)
+### [x] [loop-call] the-sextons-count is missing its TWIN trigger (2026-09-04) — RESOLVED via Phase 86 (2026-09-16, commit 7cd4119c)
 - category: mechanics residue (found + deliberately not fixed during
   `/adjust-cards` pass 1's card-face-honesty sweep)
 - detail: the card's printed text named a TWIN clause (RECALL/REPLAY/TWIN

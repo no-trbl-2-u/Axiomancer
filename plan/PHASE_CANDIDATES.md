@@ -307,7 +307,7 @@
 
 ## Pending
 
-### [ ] [score 5.0] Art-direction coherence — restyle the dice faces + HUD chrome to the painted portrait register, now that the pipeline blocker has cleared
+### ~~[ ] [score 5.0] Art-direction coherence — restyle the dice faces + HUD chrome to the painted portrait register, now that the pipeline blocker has cleared~~ PROMOTED to Phase 89 via /oversight 2026-09-17
 - proposed: 2026-09-17, expand pass 17
 - source signals:
   - `plan/CRITIQUE.md` [MED] "the arena's art registers are incoherent
@@ -359,7 +359,7 @@
 > bookkeeping debt. Recommend a `/consolidate` pass to strike or archive the
 > dead ~49 so this section reflects only live candidates going forward.
 
-### [score 4.5] No summoner/add-spawning or multi-hit-vs-stacked-wall enemy archetype
+### ~~[score 4.5] No summoner/add-spawning or multi-hit-vs-stacked-wall enemy archetype~~ PROMOTED to Phase 90 via /oversight 2026-09-17
 - proposed: 2026-09-16, `/adjust-enemies` pass 11 (Step 1b widened audit,
   added via `/oversight` 2026-09-15 to catch a steady-state plateau after
   passes 9-10 both logged zero-diff)
@@ -946,7 +946,7 @@ residual merit; re-file if the failure mode recurs.
   rather than deciding it inline keeps the decision-of-record with T
   while giving the loop a landing spot to pick up the design work.
 
-### Raise (or split around) the `march` workflow's 90-minute job ceiling
+### ~~Raise (or split around) the `march` workflow's 90-minute job ceiling~~ PROMOTED to Phase 92 via /oversight 2026-09-17
 - source: filed 2026-08-09 by digest, from the pulse. Run `31301228665`
   (2026-08-09) chained phases 44a and 44b into one tick and hit
   `.github/workflows/march.yml`'s `timeout_minutes: 90` exactly
@@ -1049,7 +1049,7 @@ residual merit; re-file if the failure mode recurs.
   44a. Filed so the option is visible rather than rediscovered mid-phase.
 - score: 3.5 (low urgency, high optionality)
 
-### Reconcile the card base: do duplicates reach the deck, and are loadout flags wired?
+### ~~Reconcile the card base: do duplicates reach the deck, and are loadout flags wired?~~ PROMOTED to Phase 93 via /oversight 2026-09-17
 - source: filed 2026-08-08 by Phase 52a (`dd5c46a`), paired with two
   `plan/AUDIT.md` rows. `buildCombatDeck` de-dupes whichever card base is in
   force, so the Threadbare recipe's 3x copies collapse and a live starting run
@@ -1066,7 +1066,7 @@ residual merit; re-file if the failure mode recurs.
   land before 52f**, and 52f should recheck the floor afterward — if
   duplicates start reaching the deck, 12 becomes conservative.
 
-### Loop turns that end while CI is amber leave post-green work undone, with no retry
+### ~~Loop turns that end while CI is amber leave post-green work undone, with no retry~~ PROMOTED to Phase 91 via /oversight 2026-09-17
 - source: filed 2026-08-08 by Phase 48 (`0aac2d3`) from march run
   31184116798, which ended with `result: "Waiting on CI — will resume once
   the verify-mobile run for commit 615ff26b finishes."` Nothing resumes: the

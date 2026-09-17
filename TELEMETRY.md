@@ -479,3 +479,4 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-17T18:36:53Z | slash-prompt | /march | - | - | /march |
 | 2026-09-17T18:37:48Z | skill | iterate | claude-sonnet-5 | - | - |
 | 2026-09-17T18:37:48Z | skill-end | iterate | claude-sonnet-5 | 0s | ok |
+| 2026-09-17T18:40:46Z | slash-prompt | /oversight | - | - | /oversight |
