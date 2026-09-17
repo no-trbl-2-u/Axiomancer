@@ -11,12 +11,14 @@
 
 import assert from 'node:assert/strict'
 import { spawn } from 'node:child_process'
+import fs from 'node:fs'
 import { createInterface } from 'node:readline'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import test from 'node:test'
 
 const SERVER = path.join(path.dirname(fileURLToPath(import.meta.url)), 'axio-mcp-server.mjs')
+const CARDS_JSON = path.join(path.dirname(SERVER), '..', 'devlog', 'data', 'cards.json')
 
 /** Spawn the server, send `requests` in order, resolve with their replies (matched by id). */
 function drive(requests) {
@@ -59,11 +61,13 @@ test('axio_overview returns non-empty counts', async () => {
     { jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'axio_overview', arguments: {} } },
   ])
   const text = replies.get(1)?.result?.content?.[0]?.text ?? ''
-  assert.match(text, /# Library — \d+ cards, \d+ enemies, \d+ effects/)
+  // A bare \d+ still passes on a 0-count response (an empty/broken export) —
+  // require a real nonzero lower bound so a corpus wipe fails this test.
+  assert.match(text, /# Library — [1-9]\d* cards, [1-9]\d* enemies, [1-9]\d* effects/)
   // Phase 68: the denominator is gone — the registry is growable (THE PIPELINE
   // LIBERATION), so a hardcoded "/30" published a cap the project retired and
   // made a new keyword read as an overflow instead of a row.
-  assert.match(text, /# Keyword registry — \d+ rows/)
+  assert.match(text, /# Keyword registry — [1-9]\d* rows/)
   assert.doesNotMatch(text, /\/30 rows/)
 })
 
@@ -107,6 +111,47 @@ test('axio_keywords returns the full registry when term is omitted', async () =>
   // The registry is growable (THE PIPELINE LIBERATION, 2026-08-22) — assert
   // a healthy roster, not a pinned count.
   assert.ok(text.split('\n').filter(Boolean).length >= 20)
+})
+
+test('a mid-session export deletion is re-detected on the next call, not just the process-first one', async () => {
+  // Regression witness for the Phase 57 incident (2026-08-24): a checkout
+  // mutation deleted the tracked devlog/data/*.json snapshots out from under
+  // an already-running server, which kept serving "0 cards" because
+  // freshness was only ever checked once per process lifetime.
+  const proc = spawn('node', [SERVER], { stdio: ['pipe', 'pipe', 'pipe'] })
+  const pending = new Map()
+  const rl = createInterface({ input: proc.stdout })
+  rl.on('line', (line) => {
+    if (!line.trim()) return
+    const msg = JSON.parse(line)
+    if (msg.id !== undefined && pending.has(msg.id)) {
+      pending.get(msg.id)(msg)
+      pending.delete(msg.id)
+    }
+  })
+  const call = (id, method, params) => new Promise((resolve) => {
+    pending.set(id, resolve)
+    proc.stdin.write(JSON.stringify({ jsonrpc: '2.0', id, method, params }) + '\n')
+  })
+
+  try {
+    await call(1, 'initialize', { protocolVersion: '2024-11-05' })
+    const first = await call(2, 'tools/call', { name: 'axio_overview', arguments: {} })
+    assert.match(first.result.content[0].text, /# Library — [1-9]\d* cards/)
+
+    fs.rmSync(CARDS_JSON)
+    assert.ok(!fs.existsSync(CARDS_JSON))
+
+    const second = await call(3, 'tools/call', { name: 'axio_overview', arguments: {} })
+    // Must re-detect the missing snapshot and regenerate — never silently
+    // keep serving stale in-memory state as if the corpus were untouched.
+    assert.match(second.result.content[0].text, /# Library — [1-9]\d* cards/)
+    assert.ok(fs.existsSync(CARDS_JSON))
+  }
+  finally {
+    proc.stdin.end()
+    proc.kill()
+  }
 })
 
 test('unknown tool name errors', async () => {

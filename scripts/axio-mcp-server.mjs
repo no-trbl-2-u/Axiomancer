@@ -18,11 +18,14 @@
 // `npm run catalog:export` (axiomancer-mechanics/scripts/export-catalog.ts)
 // from the live card/enemy/effect libraries, plus
 // axiomancer-mechanics/docs/keyword-atlas.md for the growable keyword registry.
-// Freshness is checked lazily on the first tool call (not at handshake time,
+// Freshness is checked lazily on every tool call (not at handshake time,
 // so `initialize`/`tools/list` never block on a multi-second ts-node
-// regen) and regenerated when missing or stale. If a regen fails, tools
-// serve the last snapshot with a `[STALE]` prefix rather than crashing —
-// grep/Read on the source libraries always still works as a fallback.
+// regen) via a cheap mtime comparison, and regenerated only when missing
+// or stale — so a mid-session edit to the source libraries is caught on
+// the very next call, not just the process's first one. If a regen fails,
+// tools serve the last snapshot with a `[STALE]` prefix rather than
+// crashing — grep/Read on the source libraries always still works as a
+// fallback.
 
 import { execSync } from 'node:child_process'
 import fs from 'node:fs'
@@ -52,11 +55,8 @@ function newestMtime(paths) {
 }
 
 let staleWarning = null
-let freshnessChecked = false
 
-function ensureFreshOnce() {
-  if (freshnessChecked) return
-  freshnessChecked = true
+function ensureFresh() {
   const exportsExist = [CARDS_JSON, ENEMIES_JSON, EFFECTS_JSON].every((p) => fs.existsSync(p))
   const exportsMtime = exportsExist ? newestMtime([CARDS_JSON, ENEMIES_JSON, EFFECTS_JSON]) : 0
   const sourcesMtime = newestMtime([CARDS_LIB, EFFECTS_LIB])
@@ -288,7 +288,7 @@ rl.on('line', (line) => {
     else if (method === 'tools/call') {
       const tool = TOOLS.find((t) => t.name === params?.name)
       if (!tool) return replyError(id, -32602, `Unknown tool: ${params?.name}`)
-      ensureFreshOnce()
+      ensureFresh()
       let text
       try { text = tool.run(params?.arguments ?? {}) }
       catch (err) {
