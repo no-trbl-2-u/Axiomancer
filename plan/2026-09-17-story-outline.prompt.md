@@ -1,4 +1,4 @@
-# Prompt: THE ROAD, EVENT BY EVENT — build the story outline from the ground up
+# Prompt: THE ROAD, EVENT BY EVENT — build the new story overview from the ground up
 
 > Written 2026-09-17 at T's direction, the same session that wrote
 > `content/story/story-bible.md` (THE TALLY). This file is a **handoff
@@ -7,11 +7,18 @@
 > single decision you settle before the first pitch. §3 is the method.
 > §4 is the pivot rule. §5 is the output contract.
 >
+> **What this is.** The structural successor to the retired
+> `content/story/story-overview.md` — the ordered list of what happens
+> to the player, start to end. T: *"this is not to help write actual
+> character voices or narration. This is to replace story overview."*
+>
 > **What this is not.** It is not `/story-spec`, which turns one beat
 > into one spec file. It is not `/brainstorm-mechanics`, which is
-> Socratic and widens the design space. This session is **linear and
-> narrowing**: it walks the player's road from the first minute forward,
-> one event at a time, and stops when the road has become a story. It
+> Socratic and widens the design space. It does not write voices,
+> dialogue, or narration — that is the bible's register and the spec
+> skills' job, later. This session is **linear and narrowing**: it
+> walks the player's road from the first minute forward, one event at
+> a time, and stops when the road has become a story. It
 > ends by recommending a pivot to higher-level work, not by doing it.
 >
 > **T's own words on the shape.** *"I don't want to talk about big
@@ -29,9 +36,9 @@
 You are the **story lead running an outlining session** for Miserere
 Mei, Deus. T is present. Every question goes through `AskUserQuestion`
 (root `AGENTS.md` hard rule; shape per `docs/asking-well.md`). You
-pitch, T chooses, you record, you advance. You do not write prose for
-the game in this session. You write the **road**: the ordered list of
-things that happen to the player, each one concrete enough that
+pitch, T chooses, you record, you advance. You do not write prose,
+voices, or narration for the game in this session. You write the
+**road**: the ordered list of things that happen to the player, each one concrete enough that
 `/story-spec` or `/world-spec` could pick it up without asking what it
 meant.
 
@@ -45,12 +52,13 @@ meant.
    the bible, say so in the pitch and let T choose knowingly — but the
    default is that the bible wins. T reopens it explicitly or not at
    all.
-2. **Register.** McCarthy-influenced, per the bible's header: unquoted
-   dialogue, sparse commas, `and`-chained clauses, flat declaratives
-   about terrible things, landscape as an indifferent fact. People
-   named by function. **Every pitch is written in this register.** T
-   is choosing between things that sound like the game, not between
-   summaries of things.
+2. **Structural, not voiced.** Pitches are outline entries: what
+   happens, to whom, where, and what it changes. Plain prose. The
+   bible's McCarthy-influenced register is for shipped text and the
+   voice-lock samples, not for this document. A pitch that reads like a
+   scene has gone too far; a pitch that reads like a theme has not gone
+   far enough. The bar is the old overview's own line-items, made
+   concrete enough to spec.
 3. **Seven maps are shipped and playable**, in this order:
    `fishing-village` → `northern-forest` → `caverns` → `northern-city`
    → `connecting-river` → `town-across-river` → `the-capital`. ~186
@@ -101,11 +109,12 @@ flag. Do not skip this. Turn fourteen forgets turn three otherwise.
 
 **3.2 Pitch four.** Four candidate next events. Each is:
 
-- **A beat, not a theme.** *"The morning the ribbon is cut for someone
-  else in the village, and he is the one handed the knife"* is a beat.
-  *"Starts in a fishing village"* is not.
-- **In the register** (§1.2). Two to four sentences. The reader should
-  be able to hear it.
+- **An event, not a theme.** *"The ribbon is cut for another child in
+  the village that morning; the boy is the one handed the knife"* is an
+  event. *"Starts in a fishing village"* is not.
+- **Plain and short.** One to three sentences of outline prose. Not
+  a scene, not dialogue, not voice — the old overview's register, made
+  sharper.
 - **Tagged** with what it does to the road: which tension it opens or
   tightens, which shipped node it keeps / moves / replaces, which flag
   it would set. One line.
@@ -162,14 +171,17 @@ it.
 
 ## 5. Output contract
 
-One file: `axiomancer-mechanics/braindump/<YYYY-MM-DD>-story-outline.md`
-(the `braindump/` convention: session captures, dated). Created on the
-first turn, appended every turn, committed every turn.
+One file: `axiomancer-mechanics/content/story/story-overview.md` —
+the same path the retired overview held, because this IS the new
+overview. Created on the first turn, appended every turn, committed
+every turn. `docs/story.md` and the two `.claude` spec skills point at
+`story-bible.md` today; when this file exists, point them at both.
 
 ```markdown
-# Story outline — the road, event by event
+# Story overview — the road, event by event
 
-> Session <date>, T present. Canon: content/story/story-bible.md.
+> Session <date>, T present. Thesis and ending: story-bible.md (THE
+> TALLY). This file is the sequence; that file is what it means.
 > Player: <the boy, unnamed | character creation — decided §2>.
 > Status: <walking | pivot recommended (§4 condition N)>.
 
@@ -191,14 +203,14 @@ first turn, appended every turn, committed every turn.
 what to decide first>
 ```
 
-That is the entire output. No spec files, no code, no prose for the
-game. If the session ends before the pivot, the file's `Status` line
+That is the entire output. No spec files, no code, no voices, no
+narration. If the session ends before the pivot, the file's `Status` line
 says `walking` and the next session resumes at 3.1 from the last event.
 
 ## 6. Hard rules
 
 1. **The bible wins** unless T reopens it by name.
-2. **Every pitch in the register.** No summaries.
+2. **Every pitch is an event.** Not a theme, not a scene.
 3. **One event per turn.** No batching, no "here are the next three."
 4. **Commit every turn.**
 5. **Recommend the pivot; do not perform it.**
