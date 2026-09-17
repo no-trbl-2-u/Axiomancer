@@ -107,6 +107,48 @@ Tick in this file in the same commit that ships the phase.
       candidate after the top pick was verified mismatched (see brief).
       — `feat(mobile): W5 art adoption — wire the oversight-picked candidates — phase 88` (ebb457f4)
 
+- [ ] Phase 89 — Art-direction coherence: restyle the dice faces + HUD
+      chrome to the painted portrait register, now that the art-pipeline
+      blocker has cleared (promoted via `/oversight` 2026-09-17 from
+      `PHASE_CANDIDATES.md` [score 5.0])
+- [ ] Phase 90 — Summoner / multi-hit enemy archetype: no roster enemy
+      spawns adds or answers a stacked wall with multi-hit; author the
+      archetype and stage it (promoted via `/oversight` 2026-09-17 from
+      `PHASE_CANDIDATES.md` [score 4.5]; corroborated by `/adjust-enemies`
+      pass 11's filed roster gap, commit b718b421)
+- [ ] Phase 91 — Amber-CI tick recovery: a loop turn that ends while CI is
+      amber skips every `deploy:check`-gated step with no retry. Either
+      resume on deploy-gate completion, or make the post-green steps
+      unconditional and idempotent so a later tick re-runs them safely
+      (promoted via `/oversight` 2026-09-17 from `PHASE_CANDIDATES.md`,
+      unscored row filed 2026-08-08 by Phase 48)
+- [ ] Phase 92 — `march` workflow job ceiling: run 31301228665 hit
+      `march.yml`'s `timeout_minutes: 90` exactly and was force-cancelled;
+      the prior tick ran 1:26:24. Decide between raising the ceiling and
+      splitting multi-phase ticks (promoted via `/oversight` 2026-09-17
+      from `PHASE_CANDIDATES.md`, unscored row filed 2026-08-09 by
+      `/digest`; pairs with `AUDIT.md`'s matching 90-minute row)
+- [ ] Phase 93 — Card-base reconciliation: `buildCombatDeck` de-dupes, so
+      the Threadbare recipe's 3x copies collapse (8 cards dealt against a
+      machine-checked 18), and `GameState.flags` never reaches
+      `initializeCombatEncounter`, leaving the loadout path dead in the
+      shipped runtime. One decision, two implementations (promoted via
+      `/oversight` 2026-09-17 from `PHASE_CANDIDATES.md`, unscored row
+      filed 2026-08-08 by Phase 52a)
+- [ ] Phase 94 — `critique:drive` artifact scope: `critique-drive.mjs`'s
+      `rm(ARTIFACT_ROOT)` clears the whole `.critique-artifacts/` root on
+      start. Scope the delete to the driver's own subdirectory. Ruling made
+      via `/oversight` 2026-09-15 and routed to `/iterate`; unshipped after
+      12 commits, so promoted to a phase row via `/oversight` 2026-09-17
+- [ ] Phase 95 — UI fresh-eyes six: ship the six product decisions accepted
+      via `/oversight` 2026-09-15 (fanned-hand ledger, signet-rail naming,
+      `/rest` greyed option, hazard-deck pastel tone, `LEAGUES` usage,
+      art-plate captions) per
+      `axiomancer-mobile/docs/reports/UI_FRESH_EYES_2026-09-12.md` §4.
+      Routed to `/iterate` on 2026-09-15 and unshipped, so promoted to a
+      phase row via `/oversight` 2026-09-17. Does NOT cover the 309-row
+      unverified candidate set, which stays open
+
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics:
       fix `game.cli --route` map evidence so Fishing Village coverage
@@ -2762,6 +2804,20 @@ See the status rows above; generate briefs on demand.
 > confirmation this was T's request, T's stated reason (or
 > "reason not stated" — never invent one), and the resulting
 > commit/issue/phase-brief when available.
+
+- **2026-09-17** — actor: **T via `/oversight`** (attended session,
+  branch `claude/oversight-kqgvvc`). Action: ADD seven phase rows —
+  Phases 89, 90, 91, 92, 93 (promoted from `PHASE_CANDIDATES.md`) and
+  Phases 94, 95 (promoted from `plan/AUDIT.md` loop-call rows already
+  decided at `/oversight` 2026-09-15 but unshipped). Confirmed T's
+  request: yes — T answered the `AskUserQuestion` ballot "The build plan
+  has zero pending phases" with "Promote top 5 candidates now", and "Two
+  decisions from the 2026-09-15 oversight were routed to /iterate and
+  never shipped" with "Promote both to phase rows". T's stated reason:
+  reason not stated beyond the ballot options as written — the queue was
+  empty so `/march` could never reach `/ship-a-phase`, and `/iterate`'s
+  score queue had not reached the 2026-09-15 rulings in 12 commits, so
+  the phase lane owns them instead. Resulting commit: this one.
 
 - **2026-08-08** — actor: **T via `/oversight`** (attended web session,
   not Hermes). Action: **added Phase 39** (post-D8 flag-on curve repair +
