@@ -247,6 +247,33 @@
 > this tick per hard rule §7.1 (one fix per tick), all newly promoted
 > into the Top 5 refresh below.
 
+> **Tenth pass, 2026-09-17 (`/march` tick).** Dispatch chain landed on
+> `/iterate` again (triage clean; critique not due — 4 commits/~9.4h since
+> pass 39; no pending phase; content-lifecycle gate checked all five
+> categories fresh, none past 15 commits/36h; `/forge`'s 48h world-growth
+> window still open via `2227fe9c`, ~37.7h old at dispatch; `/expand`'s
+> 20-commit/48h window not yet open at 6 commits/~13.9h since pass 17).
+> Hard rule §7.5 applied: `plan/CRITIQUE.md` still carries ~19 open
+> Pending rows, so this pass scored those alongside this table's own
+> standing rows rather than running a fresh site audit. [5.9] (crash)
+> stays excluded, still blocked on the owner's device log. **[4.2]
+> `[contract]` (axio-query stale-corpus gate) was the top actionable
+> score** — re-verified live by direct read of `axio-mcp-server.mjs:54-73`
+> (the `freshnessChecked` once-per-process gate, unchanged since pass 9's
+> filing) before shipping. Shipped it (commit `3652d663`, issue #323):
+> dropped the once-per-process gate so `ensureFresh()`'s cheap mtime
+> comparison runs on every `tools/call`, only paying for the actual
+> `npm run catalog:export` regen when genuinely stale or missing; tightened
+> the smoke test's `\d+` count assertions to a real `[1-9]\d*` lower bound;
+> added a hermetic regression test reproducing the exact Phase 57 incident
+> shape (delete `cards.json` mid-session, confirm the next call re-detects
+> and regenerates it). `node --test scripts/axio-mcp-server.test.mjs`: 9/9
+> pass. `node scripts/check-lexicon.mjs`: 241 files clean. Row moved
+> Pending → Done above (in this file, not `plan/CRITIQUE.md` — the finding
+> lived in `plan/AUDIT.md`'s own non-CRITIQUE Pending section). Top 5 below
+> is refreshed with the [4.2] row dropped; next pass should treat [3.5]
+> (Playwright-blind verify gate) as the new top score.
+
 ## Top 5 findings (scored)
 
 ### [5.9] combat — user crash on ACCEPTING post-combat card reward (unreproduced, issue #216)
@@ -258,18 +285,6 @@
   get the owner's device log (SELF -> dev tools -> DIAGNOSTICS -> PREV
   SESSION, domain ERROR) to confirm before closing; can't be shipped
   blind on web alone.
-
-### [4.2] `[contract]` Phase 57 can zero the live axio-query corpus inside an already-running session
-- category: contract
-- impact: 6
-- ease: 7
-- next: `scripts/axio-mcp-server.mjs:55-59` gates a corpus-freshness regen
-  behind a boolean (`freshnessChecked`) set once per process lifetime, so a
-  mid-session data loss after the first tool call is never re-detected for
-  the rest of that session. The smoke test
-  (`axio-mcp-server.test.mjs:62`) uses `/\d+ cards/`, which a 0-count
-  response still passes — tighten to a real lower bound. Re-verified live
-  by direct read this pass (2026-09-14); not yet actioned.
 
 ### [3.5] `[tests]` Verify gate is blind to the Playwright journeys
 - category: tests
@@ -1064,13 +1079,15 @@ verification trail.
   presented per next `/oversight`, the picked source becomes the
   standing pipeline until in-house generation is ready).
 
-### [contract] Phase 57 can zero the live axio-query corpus inside an already-running session
+### [x] [contract] Phase 57 can zero the live axio-query corpus inside an already-running session — RESOLVED 2026-09-17 (commit 3652d663, issue #323)
 - category: contract
 - observed: during the 2026-08-24 roundtable, the checkout fast-forwarded across Phase 57 (`cb788468`), which deleted the tracked `devlog/data/{cards,enemies,effects}.json` snapshots. The already-running `axio-query` process then returned `0 cards, 0 enemies, 0 effects` instead of regenerating. A manual `npm run catalog:export` restored `57 cards, 56 enemies, 24 effects` immediately.
 - cause seam: `scripts/axio-mcp-server.mjs` caches `freshnessChecked` for the process lifetime, while Phase 57 made the JSON inputs ignored/generated. A server that checked freshness before a checkout mutation can later lose those files without rechecking. `scripts/axio-mcp-server.test.mjs` calls the smoke test "returns non-empty counts" but only matches `\d+`, so zero passes.
 - impact: the MCP advertises live-library truth while silently returning an empty corpus after a legal pull/checkout transition. Card/effect research can then make false absence claims until the export is rebuilt or the MCP process restarts.
 - suggested fix: make freshness sensitive to missing/changed export files on every data-bearing tool call (or invalidate the cache when any snapshot disappears), strengthen the smoke to assert positive card/enemy/effect counts, and add a hermetic delete-after-first-call regression witness.
 - evidence: `scripts/axio-mcp-server.mjs:14-22,51-69,129-151`; `scripts/axio-mcp-server.test.mjs:57-63`; roundtable command sequence and MCP outputs dated 2026-08-24.
+- resolution: dropped the `freshnessChecked` once-per-process gate — `ensureFresh()` now re-runs its cheap mtime comparison on every `tools/call`, only paying for the actual `npm run catalog:export` regen when the export files are missing or genuinely stale. Tightened the smoke test's count assertions from a bare `\d+` (a 0-count response still passed) to a real `[1-9]\d*` lower bound, and added a hermetic regression test that deletes `cards.json` mid-session and confirms the very next tool call re-detects and regenerates it — all 9 smoke-test cases green, `check-lexicon.mjs` clean.
+- issue: #323
 
 ### [x] [docs] Combat playtest reference still names the retired ten-preset campaign — RESOLVED 2026-09-02 (commit dfa03ebb, issue #270)
 - category: docs
