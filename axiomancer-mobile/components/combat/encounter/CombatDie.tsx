@@ -8,6 +8,15 @@
  * face art, shadow right face, a cast shadow beneath), so combat and hazard
  * dice are visibly the same physical object.
  *
+ * Phase 89 (art-direction coherence) — the shell (top/right) faces carried a
+ * flat CG gradient with no ink linework, next to painted enemy portraits
+ * (Phase 88) and the codex's woodcut/hairline-rule language (Phase V). A
+ * faint cross-hatch on the shell faces plus an inner hairline (echoing the
+ * card plate's own hairline rule) nudges the die toward that ink register
+ * without touching geometry, colour semantics, or interaction — the stance
+ * colour, dead/greyed/cracked states, and drafted ring are all unchanged.
+ *
+
  * Renders the spec-33 four-die tray (the shipped default since THE FLIP,
  * 2026-07-18): every usable face may power a card of its color this round.
  * Under the legacy kill-switch (`EXPO_PUBLIC_UPGRADEABLE_DICE=0`) the same
@@ -29,7 +38,7 @@
 
 import React from 'react';
 import { View } from 'react-native';
-import Svg, { Circle, Defs, G, LinearGradient as SvgLinearGradient, Path, Polygon, RadialGradient, Rect, Stop } from 'react-native-svg';
+import Svg, { Circle, ClipPath, Defs, G, LinearGradient as SvgLinearGradient, Path, Polygon, RadialGradient, Rect, Stop } from 'react-native-svg';
 
 import { SPECIAL_CONVICTION_DEFAULT } from '@mechanics';
 import type { CombatDieVM } from '@/state/presenters/combat-encounter.engine';
@@ -101,6 +110,17 @@ function mixHex(hex: string, toward: string, t: number): string {
     const g = ch((na >> 8) & 255, (nb >> 8) & 255);
     const bl = ch(na & 255, nb & 255);
     return `rgb(${r},${g},${bl})`;
+}
+
+/** A field of parallel diagonal strokes covering the box `(x, y, w, h)` —
+ *  the woodcut cross-hatch overlay for the die's shell faces. Callers clip
+ *  to the actual face polygon; this just fills the bounding box cheaply. */
+function hatchLines(x: number, y: number, w: number, h: number, spacing: number): string[] {
+    const lines: string[] = [];
+    for (let i = -h; i < w + h; i += spacing) {
+        lines.push(`M ${x + i} ${y} L ${x + i - h} ${y + h}`);
+    }
+    return lines;
 }
 
 // The cube geometry in viewBox units: a 100-unit front face behind a 32-unit
@@ -217,6 +237,12 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
                         <Stop offset="55%" stopColor={accent} stopOpacity={0.95} />
                         <Stop offset="100%" stopColor={accent} stopOpacity={0.75} />
                     </SvgLinearGradient>
+                    <ClipPath id={`axmDieTopClip-${die.id}`}>
+                        <Polygon points={`${OV},0 ${VB},0 ${F},${OV} 0,${OV}`} />
+                    </ClipPath>
+                    <ClipPath id={`axmDieRightClip-${die.id}`}>
+                        <Polygon points={`${F},${OV} ${VB},0 ${VB},${F} ${F},${VB}`} />
+                    </ClipPath>
                 </Defs>
                 {/* top face (lit) */}
                 <Polygon
@@ -232,11 +258,26 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
                     stroke={edge}
                     strokeWidth={1.5}
                 />
+                {/* woodcut cross-hatch — the shell faces only, so the front face's
+                    info-bearing crystal glyph stays clean and uncluttered. */}
+                <G clipPath={`url(#axmDieTopClip-${die.id})`} opacity={greyed ? 0.08 : 0.16}>
+                    {hatchLines(0, -OV, VB, OV, 9).map((d, i) => (
+                        <Path key={`th-${i}`} d={d} stroke={edge} strokeWidth={1} />
+                    ))}
+                </G>
+                <G clipPath={`url(#axmDieRightClip-${die.id})`} opacity={greyed ? 0.08 : 0.2}>
+                    {hatchLines(F, -OV, OV, VB, 9).map((d, i) => (
+                        <Path key={`rh-${i}`} d={d} stroke={edge} strokeWidth={1} />
+                    ))}
+                </G>
                 {/* front face (mid — carries the face art) */}
                 <Rect x={0} y={OV} width={F} height={F} fill="#0b0812" stroke={edge} strokeWidth={1.5} />
                 <Rect x={0} y={OV} width={F} height={F} fill={`url(#${bodyId})`} />
                 {/* rim — the drafted/special/dead state ring, on the front face */}
                 <Rect x={2} y={OV + 2} width={F - 4} height={F - 4} fill="none" stroke={ring} strokeWidth={4} />
+                {/* inner hairline — the card plate's own hairline-rule motif,
+                    quiet chrome that never competes with the state ring's colour */}
+                <Rect x={7} y={OV + 7} width={F - 14} height={F - 14} fill="none" stroke="rgba(255,255,255,0.14)" strokeWidth={0.75} />
                 <G y={OV}>
                     {/* the face circle — greyed + empty on a dead face (miss / X / cracked) */}
                     <Circle

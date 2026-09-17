@@ -170,7 +170,7 @@ const useStyles = makeStyles((AXM) => ({
     },
     railLabel: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 2, color: AXM.bg },
     body: { flex: 1, alignItems: 'center', paddingHorizontal: 10, paddingVertical: 10 },
-    phase: { fontFamily: FONTS.mono, fontSize: 9, letterSpacing: 1.6 },
+    phase: { fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 1.6 },
     glyph: { fontSize: 42, lineHeight: 48, marginTop: 2 },
     label: { fontFamily: FONTS.gothic, fontSize: 20, letterSpacing: 1.4, marginTop: 2 },
     action: {
@@ -184,7 +184,7 @@ const useStyles = makeStyles((AXM) => ({
     },
     lines: { flexDirection: 'row', flexWrap: 'wrap', gap: 5, justifyContent: 'center', marginTop: 9 },
     line: {
-        fontFamily: FONTS.mono,
+        fontFamily: FONTS.sans,
         fontSize: 10,
         letterSpacing: 0.8,
         borderWidth: 1,

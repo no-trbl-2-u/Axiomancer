@@ -139,11 +139,11 @@ const useStyles = makeStyles((AXM) => ({
     },
     pillText: { fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 0.3 },
     debuffMark: { fontFamily: FONTS.sans, fontSize: 10, color: '#a86bdc' },
-    wallMathDenied: { fontFamily: FONTS.mono, fontSize: 9, color: '#d9b44a', marginTop: 1, letterSpacing: 0.5 },
+    wallMathDenied: { fontFamily: FONTS.sans, fontSize: 9, color: '#d9b44a', marginTop: 1, letterSpacing: 0.5 },
     wallMathNet: { fontFamily: FONTS.mono, fontSize: 9, color: '#8a8273', marginTop: 1 },
     rungRow: { flexDirection: 'row', gap: 1, marginTop: 1 },
-    rungFilled: { fontFamily: FONTS.mono, fontSize: 6, color: '#d9b44a' },
-    rungHollow: { fontFamily: FONTS.mono, fontSize: 6, color: '#8a8273' },
+    rungFilled: { fontFamily: FONTS.sans, fontSize: 6, color: '#d9b44a' },
+    rungHollow: { fontFamily: FONTS.sans, fontSize: 6, color: '#8a8273' },
     // Spec 33 §5 — the open stance-check telegraph, terse and always visible.
     // Playtest 2026-09-04 — 8pt ash-on-dark was unreadable on a 390pt phone;
     // 10pt with a bone neutral for the "neither" line.
@@ -162,9 +162,9 @@ const useStyles = makeStyles((AXM) => ({
         paddingHorizontal: 5,
         paddingVertical: 2,
     },
-    scPunish: { fontFamily: FONTS.mono, fontSize: 10, color: '#e2543b', letterSpacing: 0.2 },
-    scYield: { fontFamily: FONTS.mono, fontSize: 10, color: '#5bbf6a', letterSpacing: 0.2 },
-    scNone: { fontFamily: FONTS.mono, fontSize: 10, color: AXM.bone, letterSpacing: 0.2 },
-    scResolved: { fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 0.3 },
+    scPunish: { fontFamily: FONTS.sans, fontSize: 10, color: '#e2543b', letterSpacing: 0.2 },
+    scYield: { fontFamily: FONTS.sans, fontSize: 10, color: '#5bbf6a', letterSpacing: 0.2 },
+    scNone: { fontFamily: FONTS.sans, fontSize: 10, color: AXM.bone, letterSpacing: 0.2 },
+    scResolved: { fontFamily: FONTS.sans, fontSize: 10, letterSpacing: 0.3 },
     scLive: { textDecorationLine: 'underline' },
 }));

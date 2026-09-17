@@ -803,7 +803,7 @@ const useStyles = makeStyles((AXM) => ({
         flex: 1, fontFamily: FONTS.gothic, fontSize: 18, color: AXM.sulfur, letterSpacing: 0.6,
         textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 4, textShadowOffset: { width: 0, height: 1 },
     },
-    hudMeta: { fontFamily: FONTS.mono, fontSize: 9, color: AXM.bone, letterSpacing: 0.8 },
+    hudMeta: { fontFamily: FONTS.sans, fontSize: 9, color: AXM.bone, letterSpacing: 0.8 },
 
     // Emblem-anchored HP bar.
     hpBlock: { marginTop: 4, height: 58, justifyContent: 'flex-start' },

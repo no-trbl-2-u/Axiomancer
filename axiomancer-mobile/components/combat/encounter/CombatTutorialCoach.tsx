@@ -114,5 +114,5 @@ const useStyles = makeStyles((AXM) => ({
     skipText: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.2, color: AXM.bone },
     title: { fontFamily: FONTS.gothic, fontSize: 15, letterSpacing: 0.5, color: AXM.parchment, marginTop: 4 },
     body: { fontFamily: FONTS.serif, fontSize: 12, lineHeight: 16, color: AXM.bone, marginTop: 3 },
-    lookFor: { fontFamily: FONTS.mono, fontSize: 11, letterSpacing: 0.6, color: AXM.sulfur, marginTop: 5 },
+    lookFor: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 0.6, color: AXM.sulfur, marginTop: 5 },
 }));
