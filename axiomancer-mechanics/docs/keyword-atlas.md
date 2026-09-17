@@ -126,7 +126,7 @@ mid-flight. Run `npm run catalog` for the current binding.
 
 ---
 
-## Enemy keywords (9)
+## Enemy keywords (10)
 
 New with THE BIG NUMBERS REWRITE. An enemy carries 0–1 at simple/normal, 1–2
 at elite, 2–3 plus a STAGE at boss/unique. They print on the enemy pane with
@@ -145,9 +145,20 @@ so one foe can carry HIDE 3 and another HIDE 12.
 | **REGROW N** | This foe heals N at the end of each of its phases. | `processBetweenPhases` | (see the roster) |
 | **RAVENOUS** | This foe heals for the damage it lands on you. | `resolveThreatPhase` | (see the roster) |
 | **WOUNDING N** | An unguarded hit of N or more puts a WOUND in your deck. | `resolveThreatPhase` | (see the roster) |
+| **FLURRY N** | This foe's hit lands as N separate strikes instead of one — RIPOSTE only blunts the first. | `resolveThreatPhase` | (see the roster) |
 
 HIDE is the reason one big hit beats many small ones: it is subtracted from
 each damage instance, so `7 × 4` and `28 × 1` play differently against armour.
+
+FLURRY splits the SAME threat-damage budget into N strikes rather than
+inflating it — GUARD/BARRIER are additive pools that drain to the same total
+either way (order-invariant), so FLURRY doesn't punish a stacked wall the way
+HIDE punishes a spread-out attack. What it does change: RIPOSTE's flat,
+one-shot parry only blunts the FIRST strike (the rest land clean), and any
+VENOM/RAVENOUS/WOUNDING this foe also carries fires once per landed strike
+instead of once per phase — a flurry foe paired with VENOM stacks poison
+fast. Prior art: StS-BG's Buffer, `kb:slay-the-spire-the-board-game/rules/
+edge-cases-faq` (src-002) — "triggers separately per hit of a multi-attack."
 
 ### STAGE (boss/unique only)
 

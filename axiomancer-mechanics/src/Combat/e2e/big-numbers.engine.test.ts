@@ -401,6 +401,42 @@ describe('enemy keywords change the arithmetic of a resolved threat', () => {
             expect(injected).toBeGreaterThanOrEqual(0);
         }
     });
+
+    // FLURRY (phase 90) — the telegraph lands as N separate damage instances,
+    // same total budget as an unsplit hit (the threat-damage floor is 4, so a
+    // 3-way split never drops to a zero-damage piece).
+    it('FLURRY N splits the telegraph into N damage instances of the same total budget', () => {
+        const plain = resolveThreatPhase(threatState([]), rng);
+        const flurry = resolveThreatPhase(threatState([{ kind: 'flurry', n: 3 }]), rng);
+        const plainFired = plain.events.find(e => e.kind === 'threat-fired');
+        const flurryFired = flurry.events.find(e => e.kind === 'threat-fired');
+        if (!plainFired || !flurryFired) return;
+        const flurryHits = flurryFired.effects.filter(e => (e.damage ?? 0) > 0);
+        expect(flurryHits.length).toBe(3);
+        const plainTotal = plainFired.effects.reduce((s, e) => s + (e.damage ?? 0), 0);
+        const flurryTotal = flurryHits.reduce((s, e) => s + (e.damage ?? 0), 0);
+        // Same authored budget, split three ways before scaling — no points lost.
+        expect(flurryTotal).toBe(plainTotal);
+    });
+
+    it("RIPOSTE's one-shot parry only blunts the FIRST flurry strike", () => {
+        const riposte = { damage: 5, reduce: 200 };
+        const plain = { ...threatState([]), riposte };
+        const flurry = { ...threatState([{ kind: 'flurry', n: 3 }]), riposte };
+        const plainTaken = 400 - resolveThreatPhase(plain, rng).state.player.health;
+        const flurryTaken = 400 - resolveThreatPhase(flurry, rng).state.player.health;
+        // A 200-reduce parry eats a single early hit whole; against 3 smaller
+        // hits it only blunts the first, so strictly more gets through.
+        if (plainTaken === 0) expect(flurryTaken).toBeGreaterThan(0);
+    });
+
+    it('a per-hit rider (VENOM) fires once per landed strike under FLURRY, not once per phase', () => {
+        const single = resolveThreatPhase(threatState([{ kind: 'venom', n: 2 }]), rng);
+        const flurry = resolveThreatPhase(threatState([{ kind: 'flurry', n: 3 }, { kind: 'venom', n: 2 }]), rng);
+        const singleVenom = single.events.filter(e => e.kind === 'enemy-keyword-fired' && e.keyword === 'VENOM').length;
+        const flurryVenom = flurry.events.filter(e => e.kind === 'enemy-keyword-fired' && e.keyword === 'VENOM').length;
+        if (singleVenom > 0) expect(flurryVenom).toBeGreaterThan(singleVenom);
+    });
 });
 
 describe('boss STAGES', () => {

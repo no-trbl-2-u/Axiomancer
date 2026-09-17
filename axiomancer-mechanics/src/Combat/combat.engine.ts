@@ -3944,6 +3944,18 @@ function settleStake(
 }
 
 /**
+ * FLURRY's split: `total` divided into `hits` same-sum pieces, remainder
+ * spread across the first pieces (so a 31-damage FLURRY-3 lands 11/10/10, not
+ * a dropped point). Never zero-length and never a 0-damage piece for a
+ * positive total.
+ */
+function splitFlurryDamage(total: number, hits: number): number[] {
+    const base = Math.floor(total / hits);
+    const remainder = total - base * hits;
+    return Array.from({ length: hits }, (_, i) => base + (i < remainder ? 1 : 0));
+}
+
+/**
  * Resolves the current threat phase (HP model): the enemy executes its
  * telegraphed threat action on the player UNLESS a control status hinders it
  * (`canAct` → skipTurn). This is how control "hinders the enemy" — it loses its
@@ -4134,11 +4146,23 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
     const foeVenom = findEnemyKeyword(enemy.keywords, 'venom')?.n ?? 0;
     const foeRavenous = hasEnemyKeyword(enemy.keywords, 'ravenous');
     const foeWounding = findEnemyKeyword(enemy.keywords, 'wounding')?.n ?? 0;
+    // FLURRY N — splits each damage effect into N same-total-budget strikes,
+    // each its own damage instance (RIPOSTE's one-shot parry only blunts the
+    // first; VENOM/RAVENOUS/WOUNDING riders fire once per landed strike).
+    // Non-damage effects (debuffs, heals, riders) are untouched and still
+    // fire once. Same doctrine as the player-side DEAL family ("each hit is
+    // its own damage instance"), applied to the enemy's own telegraph.
+    const foeFlurry = findEnemyKeyword(enemy.keywords, 'flurry')?.n ?? 0;
+    const threatEffects = foeFlurry > 1
+        ? phase.threatAction.effects.flatMap((eff) => (
+            eff.damage && eff.damage > 0 ? splitFlurryDamage(eff.damage, foeFlurry).map((damage) => ({ damage })) : [eff]
+        ))
+        : phase.threatAction.effects;
 
     if (!hindered && !isDefeated(enemy)) {
         // The enemy attacks: its telegraphed threat action fires on the player.
         const playerTakenMult = getDamageTakenMultiplier(state.player);
-        for (const eff of phase.threatAction.effects) {
+        for (const eff of threatEffects) {
             if (eff.damage && eff.damage > 0) {
                 attacksLanded += 1;
                 // weakenMult folds soft-control AND partial rung loss.
@@ -4404,7 +4428,10 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
             directDamage += amount + hit.clockDamage;
             events.push({ kind: 'thorns-reflected', amount, target: 'enemy' });
         }
-        events.push({ kind: 'threat-fired', phaseIndex: phase.index, description: phase.threatAction.description, effects: phase.threatAction.effects });
+        // The log gets the RESOLVED effects (post-FLURRY-split), not the
+        // authored single-number telegraph — a flurry foe's combat log
+        // reads as three separate strikes, not one combined number.
+        events.push({ kind: 'threat-fired', phaseIndex: phase.index, description: phase.threatAction.description, effects: threatEffects });
         // WS3.2 Doom growth (spec 32 §12 #3, card-local species): enemy-borne
         // `growth: 'per-enemy-action'` DoTs deepen by 1 each time the enemy
         // actually acts — a hindered (denied) turn never feeds the Doom.
