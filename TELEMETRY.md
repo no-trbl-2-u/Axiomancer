@@ -487,6 +487,16 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-17T22:29:01Z | skill | ship-a-phase | claude-sonnet-5 | - | - |
 | 2026-09-17T22:29:01Z | skill-end | ship-a-phase | claude-sonnet-5 | 0s | ok |
 | 2026-09-18T01:03:30Z | slash-prompt | /march | - | - | /march |
+| 2026-09-18T01:11:54Z | slash-prompt | /combat-playtest | claude-sonnet-5 | - | /combat-playtest |
+| 2026-09-18T01:16:34Z | subagent | general-purpose | claude-sonnet-5 | - | Combat playtest — early stage qualitative pass |
+| 2026-09-18T01:16:35Z | subagent-end | general-purpose | claude-sonnet-5 | 1s | ok |
+| 2026-09-18T01:16:47Z | subagent | general-purpose | claude-sonnet-5 | - | Combat playtest — mid stage qualitative pass |
+| 2026-09-18T01:16:48Z | subagent-end | general-purpose | claude-sonnet-5 | 1s | ok |
+| 2026-09-18T01:16:59Z | subagent | general-purpose | claude-sonnet-5 | - | Combat playtest — late stage qualitative pass |
+| 2026-09-18T01:17:00Z | subagent-end | general-purpose | claude-sonnet-5 | 1s | ok |
+| 2026-09-18T01:17:14Z | subagent | general-purpose | claude-sonnet-5 | - | Combat playtest — impossible stage qualitative pass |
+| 2026-09-18T01:17:15Z | subagent-end | general-purpose | claude-sonnet-5 | 1s | ok |
+| 2026-09-18T01:17:25Z | tick-end | - | claude-sonnet-5 | 5m31s | ok |
 | 2026-09-18T02:39:30Z | slash-prompt | /march | - | - | /march |
 | 2026-09-18T02:42:53Z | skill | critique | claude-sonnet-5 | - | - |
 | 2026-09-18T02:42:53Z | skill-end | critique | claude-sonnet-5 | 0s | ok |

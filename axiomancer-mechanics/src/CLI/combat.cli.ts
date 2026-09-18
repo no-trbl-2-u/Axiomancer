@@ -457,8 +457,14 @@ async function resolveCliCapitulationChoice(
     auto: boolean,
 ): Promise<CombatEncounterState> {
     if (!state.capitulationChoiceActive) return state;
+    // None of the four CLI auto-policies (status/aggressive/safe/naive) is a
+    // mercy-seeker analog — each plays for its own win condition (dot/damage/
+    // utility/balanced) — so --auto declines the offer and keeps fighting for
+    // it, mirroring the sim roster's per-policy `capitulationChoice` (only
+    // `mercy-seeker`/`chaos` accept there). Was hardcoded to `accept`, which
+    // silently converted near-certain kills into mercy endings.
     const choice: 'accept' | 'continue' = auto
-        ? 'accept'
+        ? 'continue'
         : (await prompt<{ choice: 'accept' | 'continue' }>([{
             type: 'rawlist', name: 'choice', message: `${state.enemy.name} yields:`,
             choices: [
