@@ -17,11 +17,13 @@ import {
     addToLoadout, removeFromLoadout, getCombatLoadout,
 } from '../combat.loadout';
 import { buildCombatDeck } from '../combat.deck';
+import { initializeCombatEncounter } from '../combat.engine';
 import { isCombatSynergySatisfied, toCombatCard } from '../combat.cards';
 import { getCardById } from '../../Cards/cards.library';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import { lookupEffect } from '../../Effects';
 import { createCharacter } from '../../Character';
+import { GraveLarva } from '../../Enemy/enemy.library';
 import type { ActiveEffect } from '../../Effects/types';
 
 // Profane Canon (2026-08-08): fixture seats moved to the new library —
@@ -118,6 +120,38 @@ describe('buildCombatDeck with curated loadout', () => {
     it('falls back to knownCards when flags parameter is omitted', () => {
         const deck = buildCombatDeck(playerWithCards);
         expect(deck).toContain(EXTRA);
+    });
+});
+
+describe('initializeCombatEncounter — loadout flags reachability (Phase 93)', () => {
+    const player = createCharacter({
+        name: 'Tester',
+        level: 1,
+        baseStats: { heart: 5, body: 5, mind: 5 },
+    });
+    const EXTRA = 'the-long-lent'; // a third real card only knownCards carries
+    const playerWithCards = { ...player, knownCards: [CARD_A, CARD_B, EXTRA] };
+
+    it('deals the curated loadout, not the full knownCards list, when flags are passed', () => {
+        let flags: string[] = [];
+        flags = addToLoadout(flags, CARD_A);
+        flags = addToLoadout(flags, CARD_B);
+        const state = initializeCombatEncounter(playerWithCards, GraveLarva, undefined, 1, flags);
+        expect(state.deck).toContain(CARD_A);
+        expect(state.deck).toContain(CARD_B);
+        expect(state.deck).not.toContain(EXTRA);
+    });
+
+    it('falls back to knownCards when flags is omitted (pre-Phase-93 behavior unchanged)', () => {
+        const state = initializeCombatEncounter(playerWithCards, GraveLarva, undefined, 1);
+        expect(state.deck).toContain(EXTRA);
+    });
+
+    it('an explicit playerDeck still wins over loadout flags', () => {
+        let flags: string[] = [];
+        flags = addToLoadout(flags, CARD_A);
+        const state = initializeCombatEncounter(playerWithCards, GraveLarva, [EXTRA], 1, flags);
+        expect(state.deck).toEqual([EXTRA]);
     });
 });
 

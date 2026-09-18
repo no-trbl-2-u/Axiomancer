@@ -410,7 +410,14 @@ export function CombatEncounterPanel({
     // per encounter. Nothing engine-side reads `state.seed` after init.
     const initial = useMemo(
         () => {
-            const s = initializeCombatEncounter(bootstrapPlayer, enemy, deck, seed);
+            // Phase 93 — `GameState.flags` carries Phase 169's curated-loadout
+            // codec (`combat-loadout-card:` entries); reaching it here closes the
+            // "loadout path is dead in the shipped runtime" audit gap. No mobile
+            // surface writes those flags yet, so this is a no-op today — `deck`
+            // (an explicit override) still wins, and empty flags still fall back
+            // to `knownCards`, same as before this read existed.
+            const flags = (store.getState() as unknown as { flags?: string[] }).flags;
+            const s = initializeCombatEncounter(bootstrapPlayer, enemy, deck, seed, flags);
             const stamped = s.seed === undefined ? { ...s, seed: Math.floor(Math.random() * 0xffffffff) } : s;
             // AXM Log: thin mount marker only — the engine's `withLog` tap
             // already mirrors every CombatEvent this encounter produces.

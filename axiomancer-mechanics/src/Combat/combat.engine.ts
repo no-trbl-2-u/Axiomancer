@@ -463,18 +463,27 @@ const currentPhaseStance = (enc: CombatEncounterState): Stance => {
  * stay inside the encounter). Dice are NOT rolled yet — the state opens in the
  * `reveal` phase with an opening hand drawn, mirroring Hazard's route-select →
  * rolling → playing flow. Call `rollEncounterDice` to advance.
+ *
+ * `flags` is `GameState.flags` (Phase 169's curated-loadout codec, see
+ * `combat.loadout.ts`) — forwarded to `buildCombatDeck` only when `playerDeck`
+ * is omitted; an explicit `playerDeck` always wins. Omitted/empty `flags`
+ * falls back to `player.knownCards`, unchanged from before this parameter
+ * existed (audit: "the Phase-169 loadout path is dead in the shipped
+ * runtime" — this closes the reachability gap, not a behavior change for
+ * callers that don't pass flags).
  */
 export function initializeCombatEncounter(
     player: Character,
     enemy: Enemy,
     playerDeck?: string[],
     seed?: number,
+    flags?: readonly string[],
 ): CombatEncounterState {
     if (seed !== undefined) setSeed(seed);
 
     const clonedPlayer = deepClone(player);
     const clonedEnemy = deepClone(enemy);
-    const deck = playerDeck && playerDeck.length > 0 ? playerDeck.slice() : buildCombatDeck(clonedPlayer);
+    const deck = playerDeck && playerDeck.length > 0 ? playerDeck.slice() : buildCombatDeck(clonedPlayer, flags);
 
     let threatPhases = getThreatSequence(clonedEnemy);
     // WS9 (spec 32 §12 #7) — a branch on the OPENING phase commits at combat
