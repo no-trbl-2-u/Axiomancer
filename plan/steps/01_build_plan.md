@@ -180,14 +180,18 @@ Tick in this file in the same commit that ships the phase.
       `critique-drive:test` to the mobile verify gate
       — `fix(critique): scope critique:drive artifact wipe to its own
       subpaths` (a438d344)
-- [ ] Phase 95 — UI fresh-eyes six: ship the six product decisions accepted
+- [x] Phase 95 — UI fresh-eyes six: ship the six product decisions accepted
       via `/oversight` 2026-09-15 (fanned-hand ledger, signet-rail naming,
       `/rest` greyed option, hazard-deck pastel tone, `LEAGUES` usage,
       art-plate captions) per
       `axiomancer-mobile/docs/reports/UI_FRESH_EYES_2026-09-12.md` §4.
       Routed to `/iterate` on 2026-09-15 and unshipped, so promoted to a
       phase row via `/oversight` 2026-09-17. Does NOT cover the 309-row
-      unverified candidate set, which stays open
+      unverified candidate set, which stays open. Audit found 5 of 6
+      already satisfied (4 "leave as-is" acceptances + art captions
+      already fixed by `745b56ff`/FE-047); shipped the one real gap —
+      the combat primer now teaches the signature rune rail
+      — `feat(mobile): teach the signature rune rail in the combat primer — phase 95` (2aa77567)
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics:
