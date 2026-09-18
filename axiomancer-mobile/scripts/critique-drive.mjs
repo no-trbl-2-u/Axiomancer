@@ -35,7 +35,7 @@ import { createServer } from 'node:http'
 import { readFile, stat, mkdir, writeFile, rm } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { resolve, dirname, join, extname } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..')
@@ -48,6 +48,16 @@ const COMBAT_SEED = 16
 const VIEWPORTS = {
     mobile: { width: 375, height: 812 },
     desktop: { width: 1280, height: 800 },
+}
+
+// This driver's own output paths under ARTIFACT_ROOT — the only things it is
+// safe to wipe on start. `.critique-artifacts/` is not exclusively this
+// script's directory (Phase 94 / AUDIT.md [3.2]): the 2026-09-12 fresh-eyes
+// sweep wrote a `fresh-eyes/` subtree there and `rm(ARTIFACT_ROOT, ...)`
+// destroyed a complete 54-cell capture set that had nothing to do with this
+// driver. Scope the delete to what this driver itself produces.
+export function ownArtifactPaths(artifactRoot) {
+    return [...Object.keys(VIEWPORTS), 'manifest.json'].map((name) => join(artifactRoot, name))
 }
 
 // The critique screen set (skill §3). Each entry navigates a route and captures
@@ -314,8 +324,11 @@ async function main() {
     const viewports = want === 'both' ? ['mobile', 'desktop']
         : want === 'desktop' ? ['desktop'] : ['mobile']
 
-    // Fresh artifacts each run so a stale screenshot never masquerades as current.
-    await rm(ARTIFACT_ROOT, { recursive: true, force: true }).catch(() => {})
+    // Fresh artifacts each run so a stale screenshot never masquerades as
+    // current — but only this driver's own paths (see ownArtifactPaths).
+    for (const p of ownArtifactPaths(ARTIFACT_ROOT)) {
+        await rm(p, { recursive: true, force: true }).catch(() => {})
+    }
     await mkdir(ARTIFACT_ROOT, { recursive: true })
 
     runExpoExport()
@@ -363,7 +376,9 @@ async function main() {
     log(`artifacts → ${ARTIFACT_ROOT}  (read manifest.json, then the screenshots + .txt)`)
 }
 
-main().catch((err) => {
-    console.error('critique-drive: aborted —', err.message)
-    process.exit(process.exitCode || 3)
-})
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+    main().catch((err) => {
+        console.error('critique-drive: aborted —', err.message)
+        process.exit(process.exitCode || 3)
+    })
+}

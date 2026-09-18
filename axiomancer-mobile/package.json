@@ -19,7 +19,7 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
-    "verify": "npm run lint && npm run typecheck && npm test && npm run assets:check && npm run art:test",
+    "verify": "npm run lint && npm run typecheck && npm test && npm run assets:check && npm run art:test && npm run critique-drive:test",
     "verify:visual": "node scripts/smoke-screens.mjs",
     "e2e:hazard": "node scripts/hazard-e2e.mjs",
     "e2e:combat": "node scripts/combat-encounter-e2e.mjs",
@@ -47,6 +47,7 @@
     "art:gen": "node scripts/generate-art.mjs",
     "art:qa": "node scripts/art/qa.mjs",
     "art:test": "node --test scripts/art.test.mjs",
+    "critique-drive:test": "node --test scripts/critique-drive.test.mjs",
     "assets:acquire": "node scripts/acquire-art.mjs"
   },
   "dependencies": {
