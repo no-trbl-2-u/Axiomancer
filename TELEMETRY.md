@@ -497,3 +497,6 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-18T01:17:14Z | subagent | general-purpose | claude-sonnet-5 | - | Combat playtest — impossible stage qualitative pass |
 | 2026-09-18T01:17:15Z | subagent-end | general-purpose | claude-sonnet-5 | 1s | ok |
 | 2026-09-18T01:17:25Z | tick-end | - | claude-sonnet-5 | 5m31s | ok |
+| 2026-09-18T02:39:30Z | slash-prompt | /march | - | - | /march |
+| 2026-09-18T02:42:53Z | skill | critique | claude-sonnet-5 | - | - |
+| 2026-09-18T02:42:53Z | skill-end | critique | claude-sonnet-5 | 0s | ok |
