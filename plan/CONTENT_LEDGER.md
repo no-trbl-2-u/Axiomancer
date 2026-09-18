@@ -15,11 +15,148 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-17 | 6a28ba0b | 12 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-17 | 94da2e3f | 12 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-18 | 7bc53f82 | 12 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-16 | 858607d5 | 11 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-18 | 900f4858 | 12 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-npcs pass 12, 2026-09-18, commit 900f4858]** One UPDATE shipped
+> (staged an unstaged NPC), three UPDATEs
+> to stale-reference hygiene, zero CREATE. Dispatched autonomously by
+> `/march`'s content-lifecycle gate (`npcs` was the stalest qualifying
+> category: last pass `858607d5` 2026-09-16, 58 commits/~46h behind HEAD;
+> deploy confirmed green; no phase/higher-priority gate pending).
+>
+> **THE BLANK PAGE constraint (T direct, 2026-09-18, same day):** this pass
+> ran under a hard "no new named-character personhood" rule tighter than the
+> skill's own hard rule 3 — `specs/story/` and `specs/characters/` were wiped
+> today, so even the CREATE path this skill's Step 1 table would normally
+> point to (a map with <2 staged NPCs) is off the table this tick regardless
+> of the KB/design-review verdict. Governed every judgment call below.
+>
+> **Step 1 audit:** re-verified the partial audit handed off with this tick
+> against current engine state (not trusted at face value) plus a fresh sweep
+> of the rest of the signal table across all three NPC-content files
+> (`Coastal-Village/{npcs.ts,maps.ts}`, `Northern-Forest/npcs.ts`,
+> `Northern-Continent/maps.ts`): no orphaned NPCs (every `const NPC` is
+> referenced by some map's `npcs:` array), no `teachCard`/stale
+> `startQuest`/`progressQuest`/`completeQuest` reference (every quest name
+> cross-checked against `quest.library.ts`, all live), no legacy flat
+> `DialogueMap` usage anywhere (`dialogue:` — zero matches; every NPC already
+> uses `dialogueTree`), and exactly one dead-end node that reads as a bug:
+> the Tide-Shopkeeper's `browse` leaf, "(Shop implementation lands in a later
+> spec.)" — a promise now literally false (a shop-capable event kind
+> shipped; see below) though not currently player-visible since she stays
+> unstaged. The three Northern-Continent 1-NPC maps (`caverns`/`theDelver`,
+> `connecting-river`/`theBoatwoman`, `town-across-river`/`theSweetheart`)
+> are already filed at `plan/AUDIT.md` line 617 (`[gap]`, DECIDED via
+> `/oversight` 2026-09-15 — needs an attended `character-spec`/`story-spec`
+> session); re-confirmed still open, left untouched — THE BLANK PAGE makes
+> the block on autonomously closing it absolute this cycle, over and above
+> the skill's own hard rule 3.
+>
+> **The Coastal-Village `unstagedNpcs` backlog (4 NPCs, S-02 in origin,
+> S-02 itself now gone with the rest of `specs/story/`):** checked each
+> reason against current engine state rather than trusting it stale:
+> - **Village Healer** — reason cited the rest rebuild (phases 52c/52d),
+>   which shipped. Staged (see Ship below).
+> - **Tide-Shopkeeper** — reason cited "shop UI out of scope since Spec 08".
+>   That's now false in the letter (`VillagePayload`'s `merchants`/`shop`
+>   shipped, live on 6 maps) but true in substance: `'village'` is its own
+>   always-on node kind with its own screen (`VillageMerchantVM` reads only
+>   a merchant's dialogue-tree ROOT line as a flavor "stall-call" —
+>   confirmed in `axiomancer-mobile/state/presenters/village.engine.ts`),
+>   not something an `interaction` node's `DialogueChoice.effect` can open
+>   (no `openShop`-shaped effect exists on `DialogueChoice` — checked
+>   `src/NPCs/types.ts`). Staging her via `'village'` would discard her
+>   authored branching (browse/walk-on) for a flavor line and still need
+>   invented wares; staging her via `'interaction'` still can't sell.
+>   Blocker restated without the dead S-02 citation, left unstaged.
+> - **Dockworker's Union Leader / Merchant's Widow** — same treatment:
+>   S-02 citation replaced with a description of current engine state
+>   (the settlement-screen gap reads the same way the Tide-Shopkeeper's
+>   does — the `'village'` screen is a shop, not a multi-voice hub); the
+>   Widow's register-repetition concern (third grief-shaped voice beside
+>   Old Marrow and the Coastal Beggar) is a craft judgment call, not a
+>   staleness question, and is left open rather than autonomously
+>   overridden. Both stay unstaged.
+>
+> **KB research (skill §3 Step 2):** `kb_search` across all scopes for
+> `healer|clinic|apothecary` and `shopkeeper|merchant NPC|vendor dialogue`
+> — zero matches both queries. `kb_overview` confirms the corpus is 46
+> board games + two CCG card corpora (Dawncaster, Slay the Spire); no
+> dialogue-tree-bearing digital RPG is indexed, so there is no prior art on
+> reactive-vs-flavor NPC design, healer/vendor dialogue conventions, or
+> dead-end-node reception. Genuine corpus miss, not a phrasing problem
+> (tried several term combinations) — filed
+> [`game-knowledge-base#81`](https://github.com/no-trbl-2-u/game-knowledge-base/issues/81)
+> as a wishlist issue per the skill's instruction rather than skipping the
+> gate. REMOVE would be exempt but nothing here is a REMOVE.
+>
+> **Ship (Step 3):**
+> - **UPDATE (stage, the skill's #1 priority signal):** staged the Village
+>   Healer — already-authored `dialogueTree` (Phase 128), zero new prose —
+>   onto `fv-22`, a `fishing-village` node that carried a `gathering`
+>   payload (kelp-frond). Picked over every other open node: the map's
+>   `interaction` kind exists only by displacing another node (every node
+>   fv-1..fv-25 is claimed exactly once, enforced by content.ts's own
+>   `throw` on an unassigned node) and the three remaining `encounter`
+>   slots (fv-13, fv-15, fv-24) each carry a roster foe (little-belle,
+>   foot-stealer, water-holger respectively) with no other reachable
+>   placement anywhere in the map content — touching any of them would
+>   silently orphan an enemy, exactly the class of finding `adjust-enemies`
+>   audits for, and fv-13 additionally sets a flag the Coastal Beggar's
+>   tree reads. fv-22 carries neither risk (no flag, no pricing pin, and
+>   `driftwood`/`tide-shell`/`kelp-frond` are not referenced by any
+>   recipe/quest — checked). It also sits in the same column (8) as fv-9,
+>   one of the map's four rest nodes, which happens to satisfy the
+>   original placement intent ("the context of a rest node") without
+>   touching rest-node pacing at all. New scenery description written for
+>   the interaction pool entry (not new personhood — her voice, motive,
+>   and full tree pre-date this pass): "A canvas lean-to strung between two
+>   posts, herbs drying along the ridge line — the closest thing to a
+>   clinic this stretch of coast has." Register-checked against
+>   `docs/narrative/LEXICON.md`'s Fishing Village word bank and the ban
+>   list (no faux-archaic, no exclamation, no scriptural weather).
+> - **UPDATE (stale-reference hygiene):** rewrote all four
+>   `unstagedNpcs` reason strings to drop the dead `(S-02)` citation (the
+>   spec is gone, THE BLANK PAGE 2026-09-18) and restate each blocker
+>   against current engine state (see above). Fixed the Tide-Shopkeeper's
+>   `browse` leaf text — no longer promises a "later spec" that both has
+>   and hasn't landed depending on which half of the sentence you read;
+>   now states plainly that the stall does not transact.
+> - Updated the map's own header doc-comment (node-kind counts: gathering
+>   3→2, interaction 4→5) and fixed a pre-existing staleness in the same
+>   block unrelated to this pass's own edit (hazard count said 2, has been
+>   1 since the 2026-08-28 fv-10→travel conversion; TRAVEL wasn't listed
+>   at all) while already rewriting the block for accuracy.
+> - **Zero CREATE.** No new NPC, no new dialogue tree, no new persisted
+>   flag/id shape — `GAME_STATE_VERSION` migration not applicable.
+>
+> **Tests:** updated `content.engine.test.ts`'s fishing-village kind-tally
+> assertions (gathering 3→2, interaction 4→5, `interaction` now the sole
+> max rather than a 3-way tie) and mobile's mirrored
+> `map-encounter-minigames.engine.test.ts` assertion (same counts). No new
+> hermetic test needed for the Village Healer's tree itself — already
+> pinned by `src/NPCs/e2e/story-npcs.engine.test.ts`'s "Village Healer
+> (Phase 128)" block; staging only needed the reachability/kind-tally
+> coverage above, both green.
+>
+> **Gates:** `npm run verify --workspace axiomancer-mechanics` (214/214
+> files, 3470/3470 tests + build green). `npm run verify --workspace
+> axiomancer-mobile` (lint 0 errors/15 pre-existing warnings, typecheck
+> clean, jest 302/302 suites, 2869/2869 tests green after the mirrored fix,
+> assets:check/art:test/critique-drive:test green).
+>
+> `plan/AUDIT.md` residue: none newly filed — the one open NPC-shaped row
+> (Northern-Continent 1-NPC maps, line 617) was re-confirmed, not re-filed.
+> `plan/PHASE_CANDIDATES.md`: no new row — the settlement-screen gap for
+> the Union Leader/Merchant's Widow restates an already-implicit
+> reading of the Tide-Shopkeeper's long-standing shop-UI reason rather than
+> a new finding.
+```
 
 ```
 > **[adjust-keywords pass 12, 2026-09-18, commit 7bc53f82]** One UPDATE —
