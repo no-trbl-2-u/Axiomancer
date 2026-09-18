@@ -500,3 +500,4 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-18T08:37:46Z | slash-prompt | /march | - | - | /march |
 | 2026-09-18T08:38:05Z | skill | ship-a-phase | claude-sonnet-5 | - | - |
 | 2026-09-18T08:38:05Z | skill-end | ship-a-phase | claude-sonnet-5 | 0s | ok |
+| 2026-09-18T10:31:02Z | slash-prompt | /march | - | - | /march |
