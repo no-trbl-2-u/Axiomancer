@@ -170,11 +170,16 @@ Tick in this file in the same commit that ships the phase.
       promoted
       — `feat(combat): wire GameState.flags through initializeCombatEncounter
       — phase 93` (e0107985)
-- [ ] Phase 94 — `critique:drive` artifact scope: `critique-drive.mjs`'s
+- [x] Phase 94 — `critique:drive` artifact scope: `critique-drive.mjs`'s
       `rm(ARTIFACT_ROOT)` clears the whole `.critique-artifacts/` root on
       start. Scope the delete to the driver's own subdirectory. Ruling made
       via `/oversight` 2026-09-15 and routed to `/iterate`; unshipped after
-      12 commits, so promoted to a phase row via `/oversight` 2026-09-17
+      12 commits, so promoted to a phase row via `/oversight` 2026-09-17.
+      Shipped `ownArtifactPaths()` (mobile/, desktop/, manifest.json only),
+      guarded `main()`'s auto-invocation for testability, and added
+      `critique-drive:test` to the mobile verify gate
+      — `fix(critique): scope critique:drive artifact wipe to its own
+      subpaths` (a438d344)
 - [ ] Phase 95 — UI fresh-eyes six: ship the six product decisions accepted
       via `/oversight` 2026-09-15 (fanned-hand ledger, signet-rail naming,
       `/rest` greyed option, hazard-deck pastel tone, `LEAGUES` usage,
