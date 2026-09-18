@@ -155,13 +155,21 @@ Tick in this file in the same commit that ships the phase.
       raise needed. `timeout_minutes` unchanged at 75
       — `feat(loop): march job-ceiling decision — one phase per
       invocation, never chain — phase 92` (d7cc91d7)
-- [ ] Phase 93 — Card-base reconciliation: `buildCombatDeck` de-dupes, so
+- [x] Phase 93 — Card-base reconciliation: `buildCombatDeck` de-dupes, so
       the Threadbare recipe's 3x copies collapse (8 cards dealt against a
       machine-checked 18), and `GameState.flags` never reaches
       `initializeCombatEncounter`, leaving the loadout path dead in the
       shipped runtime. One decision, two implementations (promoted via
       `/oversight` 2026-09-17 from `PHASE_CANDIDATES.md`, unscored row
-      filed 2026-08-08 by Phase 52a)
+      filed 2026-08-08 by Phase 52a). Audit found the de-dup half already
+      fixed 2026-09-05 (`3fb4963b`), predating promotion. Shipped the
+      remaining half: `initializeCombatEncounter` gains an optional `flags`
+      param forwarded to `buildCombatDeck`, and mobile's
+      `CombatEncounterPanel` reads the store's flags into it — closes the
+      reachability gap without inventing a loadout-curation UI nothing
+      promoted
+      — `feat(combat): wire GameState.flags through initializeCombatEncounter
+      — phase 93` (e0107985)
 - [ ] Phase 94 — `critique:drive` artifact scope: `critique-drive.mjs`'s
       `rm(ARTIFACT_ROOT)` clears the whole `.critique-artifacts/` root on
       start. Scope the delete to the driver's own subdirectory. Ruling made
