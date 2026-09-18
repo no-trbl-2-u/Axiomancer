@@ -384,6 +384,12 @@ without the explicit API close (Phase 35 fix, 2026-07-17). The close is
 idempotent (an already-closed mirror is a no-op). Failures here are
 warnings, not blockers.
 
+If this tick ends before Step 12's `deploy:check` goes green, this
+comment never posts — but `.github/workflows/deploy-comment.yml`
+(Phase 91) is the floor underneath it: it fires on the gated
+`verify-*` workflows' own completion, independent of this tick's
+lifetime, and posts the same comment once CI is actually green.
+
 ### Step 13 — Done
 
 Return cleanly. The loop's next tick picks up the next phase.

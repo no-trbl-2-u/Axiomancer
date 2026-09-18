@@ -23,6 +23,21 @@
 //      loop turn ends before CI goes green) can be relied on. See the
 //      "closing-trailer sweep (Phase 48)" block below for the evidence.
 //
+//   4) The deploy-comment sweep ("deploy-comment") — the load-bearing
+//      deploy-URL comment since Phase 91. `close-trailers` fixed the
+//      close, but the deploy-URL comment (`close-comment` / `phase-close`,
+//      below) is still only posted by the SAME agent tick that authored
+//      the commit, gated behind that tick's own `deploy:check` finishing
+//      green before its container dies — exactly the failure shape
+//      Phase 48 fixed for the close. `deploy-comment` runs once, for one
+//      commit, only once CI has actually concluded green for it (driven by
+//      .github/workflows/deploy-comment.yml on the gated verify-*
+//      workflows' own `completed` event, not on any agent tick's
+//      lifetime), and posts the comment `close-comment`/`phase-close`
+//      would have posted. Idempotent (comment embeds the commit SHA) and
+//      self-healing (a fire while a sibling verify-* run is still pending
+//      no-ops; that sibling's own completion fires this again).
+//
 // Subcommands:
 //
 //   open --severity <high|med|low>
@@ -75,6 +90,20 @@
 //     leaked before the 2026-07-14 triage), so the trailer is a
 //     belt-and-suspenders backup, not the load-bearing close. Idempotent
 //     (an already-closed mirror is a no-op). Best-effort.
+//
+//   deploy-comment --sha <sha>
+//                  --deploy-url <url>
+//
+//     For the ONE commit at <sha>: finds every issue its message closes
+//     (same trailer parser as close-trailers) and posts the deploy-URL
+//     comment on each, unless a comment naming this exact SHA is already
+//     there. Never closes anything — close-trailers already owns that,
+//     independently. Meant to be invoked by
+//     .github/workflows/deploy-comment.yml, AFTER re-confirming (via
+//     scripts/deploy-check.mjs, checked out at <sha>) that every gated
+//     verify-* workflow for that commit has actually concluded success —
+//     this command itself does not re-check the deploy gate, it trusts the
+//     caller already did.
 //
 // Required env (from .env or shell):
 //   GH_TOKEN    repo-scoped PAT
@@ -492,6 +521,98 @@ export function sweepCloseTrailers({ commits, repo, io, dryRun = false }) {
   return { targets, closed, noop, errors, warnings }
 }
 
+// --- deploy-comment sweep (Phase 91) -----------------------------------
+//
+// close-trailers (above) closes issues on the push itself. It does NOT
+// post the deploy-URL comment — that comment can only be honest once CI
+// has actually concluded for the commit, which is minutes AFTER the push,
+// well past the point close-trailers already ran. The only thing that
+// used to post it was the authoring agent tick's own `close-comment` /
+// `phase-close` call, gated behind that SAME tick's `deploy:check` going
+// green before the tick's container dies (skills/iterate.md Step 7,
+// skills/ship-a-phase.md Step 12.5) — the exact failure shape Phase 48
+// fixed for the close. `deploy-comment` (wired to
+// .github/workflows/deploy-comment.yml, triggered by the gated verify-*
+// workflows' own `completed` event) posts it instead, once, independent
+// of any agent tick's lifetime.
+
+export function buildDeployCommentBody({ sha, deployUrl }) {
+  return [
+    `Shipped in \`${sha}\`, and CI is now green.`,
+    '',
+    `Live at ${deployUrl} after deploy ready (~3–5 min).`,
+    '',
+    '_Posted by `scripts/loop-issue.mjs deploy-comment`, which runs once the ' +
+      "gated verify-* workflows conclude for this commit — independent of " +
+      'whether the agent tick that authored it was still running (Phase 91). ' +
+      'The issue itself was already closed by `close-trailers` on push._',
+  ].join('\n')
+}
+
+// The gh-backed IO the deploy-comment sweep drives. Mirrors `defaultSweepIo`'s
+// split-for-testing shape.
+export function defaultDeploySweepIo(repo) {
+  return {
+    hasDeployComment(number, sha) {
+      const r = ghCall(['issue', 'view', String(number), '--repo', repo, '--json', 'comments'])
+      if (r.status !== 0) {
+        const out = `${r.stderr ?? ''}${r.stdout ?? ''}`
+        if (/could not resolve|not found|no issue found/i.test(out)) return { found: false, missing: true }
+        return { error: out.trim() || `gh issue view exited ${r.status}` }
+      }
+      try {
+        const data = JSON.parse(r.stdout || '{}')
+        const marker = `Shipped in \`${sha}\``
+        const found = (data.comments ?? []).some((c) => String(c.body ?? '').includes(marker))
+        return { found }
+      } catch (e) {
+        return { error: `gh issue view returned non-JSON: ${e.message}` }
+      }
+    },
+    comment(number, body) {
+      const r = ghCall(['issue', 'comment', String(number), '--repo', repo, '--body', body])
+      if (r.status === 0) return { ok: true }
+      return { error: (`${r.stderr ?? ''}${r.stdout ?? ''}`).trim() || `gh issue comment exited ${r.status}` }
+    },
+  }
+}
+
+// Idempotent deploy-comment sweep over the ONE commit at `sha`. Pure over
+// `io` — a comment already bearing this SHA's marker is a no-op, not an
+// error; only a real API failure lands in `errors`.
+export function sweepDeployComments({ commits, repo, io, deployUrl, dryRun = false }) {
+  const targets = collectCloseTargets(commits, { repo })
+  const commented = []
+  const noop = []
+  const errors = []
+  for (const t of targets) {
+    if (dryRun) {
+      noop.push({ ...t, reason: 'dry-run' })
+      continue
+    }
+    const has = io.hasDeployComment(t.number, t.sha) ?? {}
+    if (has.error) {
+      errors.push({ ...t, error: has.error })
+      continue
+    }
+    if (has.missing) {
+      noop.push({ ...t, reason: 'not-found' })
+      continue
+    }
+    if (has.found) {
+      noop.push({ ...t, reason: 'already-commented' })
+      continue
+    }
+    const res = io.comment(t.number, buildDeployCommentBody({ sha: t.sha, deployUrl })) ?? {}
+    if (res.error) {
+      errors.push({ ...t, error: res.error })
+      continue
+    }
+    commented.push(t)
+  }
+  return { targets, commented, noop, errors }
+}
+
 // --- subcommands ------------------------------------------------------
 
 function cmdCloseTrailers(flags) {
@@ -529,6 +650,49 @@ function cmdCloseTrailers(flags) {
   for (const e of result.errors) process.stderr.write(`  ERROR #${e.number}: ${e.error}\n`)
 
   // A close that failed is the exact bug this phase exists to stop hiding.
+  if (result.errors.length > 0) process.exit(1)
+}
+
+function cmdDeployComment(flags) {
+  const repo = process.env.GH_REPO
+  const sha = flags.sha
+  const deployUrl = flags['deploy-url']
+  const dryRun = flags['dry-run'] === 'true' || flags['dry-run'] === true
+
+  if (!repo) {
+    process.stderr.write('loop-issue: GH_REPO missing (set in .env)\n')
+    process.exit(1)
+  }
+  if (!sha || !deployUrl) {
+    process.stderr.write('loop-issue: --sha and --deploy-url are required\n')
+    process.exit(1)
+  }
+  if (!dryRun && !process.env.GH_TOKEN) {
+    process.stderr.write('loop-issue: GH_TOKEN missing from env (.env not loaded?)\n')
+    process.exit(1)
+  }
+
+  const read = readCommits(['log', '-1', '--format=%H%x1e%B%x1f', sha])
+  if (read.error) {
+    process.stderr.write(`loop-issue: could not read commit ${sha}: ${read.error}\n`)
+    process.exit(1)
+  }
+
+  const result = sweepDeployComments({
+    commits: read.commits,
+    repo,
+    io: defaultDeploySweepIo(repo),
+    deployUrl,
+    dryRun,
+  })
+
+  process.stdout.write(
+    `loop-issue: commit ${sha}, ${result.targets.length} closing reference(s)\n`,
+  )
+  for (const t of result.commented) process.stdout.write(`  commented #${t.number}\n`)
+  for (const t of result.noop) process.stdout.write(`  skipped #${t.number} (${t.reason})\n`)
+  for (const e of result.errors) process.stderr.write(`  ERROR #${e.number}: ${e.error}\n`)
+
   if (result.errors.length > 0) process.exit(1)
 }
 
@@ -847,6 +1011,8 @@ function main(argv) {
       return cmdPhaseClose(flags)
     case 'close-trailers':
       return cmdCloseTrailers(flags)
+    case 'deploy-comment':
+      return cmdDeployComment(flags)
     case '--help':
     case '-h':
     case 'help':
@@ -897,6 +1063,18 @@ Usage:
       to main by .github/workflows/close-trailers.yml. Exits 1 if a close
       actually failed.
 
+  node scripts/loop-issue.mjs deploy-comment --sha <sha> \\
+      --deploy-url <url> [--dry-run]
+      → for the one commit at <sha>, posts the deploy-URL comment on every
+      issue its message closes, unless already posted for this exact SHA.
+      Never closes anything (close-trailers owns that). Wired to
+      .github/workflows/deploy-comment.yml, which runs it only after
+      re-confirming CI is actually green for <sha> — this is the load-
+      bearing deploy comment: the agent-driven close-comment/phase-close
+      step is skipped whenever a loop turn ends before CI goes green
+      (Phase 91, same class of defect close-trailers fixed for the close).
+      Exits 1 if a comment post actually failed.
+
 Env (from .env or shell):
   GH_TOKEN, GH_REPO
 `)
@@ -918,6 +1096,9 @@ export const __test = {
   resolveRangeArgs,
   sweepCloseTrailers,
   buildTrailerCloseCommentBody,
+  buildDeployCommentBody,
+  defaultDeploySweepIo,
+  sweepDeployComments,
   LABEL_PALETTE,
   VALID_SEVERITY,
   VALID_CATEGORY,

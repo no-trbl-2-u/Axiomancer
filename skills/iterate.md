@@ -333,6 +333,12 @@ Failures of `close-comment` are warnings, not blockers — the fix
 shipped; the close is best-effort like the rest of the mirror.
 Continue to Step 8.
 
+If this tick ends before `deploy:check` goes green, this comment
+never posts — but `.github/workflows/deploy-comment.yml` (Phase 91)
+is the floor underneath it: it fires on the gated `verify-*`
+workflows' own completion, independent of this tick's lifetime, and
+posts the same comment once CI is actually green.
+
 ### Step 8 — Done
 
 Return cleanly. Loop's next tick re-audits.

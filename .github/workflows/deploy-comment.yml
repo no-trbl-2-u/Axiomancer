@@ -1,0 +1,105 @@
+name: deploy-comment
+
+# The deploy-URL-comment authority (build-plan Phase 91) — the floor
+# underneath close-comment / phase-close, same relationship close-trailers
+# already has to the close itself.
+#
+# close-trailers.yml (Phase 48) closes an issue the instant its commit
+# lands on `main`, so the close no longer depends on an agent tick
+# surviving until CI goes green. But the deploy-URL comment — confirming
+# CI actually passed and where the change is live — still only came from
+# the agent's own `close-comment` / `phase-close` step, gated behind that
+# SAME tick's own `npm run deploy:check` finishing before the tick's
+# container dies. A tick that ends while CI is amber (the loop's own job
+# hits its timeout, or `deploy:check` itself times out and the tick just
+# returns) skips that comment forever — nothing in a LATER tick resumes
+# it, because the next tick re-audits from scratch and moves on to other
+# work (plan/PHASE_CANDIDATES.md, "Loop turns that end while CI is amber
+# leave post-green work undone, with no retry", promoted 2026-09-17).
+#
+# This workflow triggers on the gated verify-* workflows' own COMPLETION
+# (not on any agent tick's lifetime), re-checks whether every gated
+# workflow for that exact commit is now green by re-running
+# scripts/deploy-check.mjs unmodified (checked out at the completed run's
+# own head_sha, not main's tip), and — only once genuinely green — posts
+# the deploy comment via scripts/loop-issue.mjs deploy-comment. It is
+# idempotent (the comment embeds the commit SHA; a repeat firing from a
+# sibling verify-* workflow's own completion is a no-op) and self-healing
+# (a firing that finds a sibling workflow still pending does nothing; that
+# sibling's own completion fires this workflow again). The agent-driven
+# close-comment / phase-close steps still run and race to post first
+# whenever the tick survives that long; this is the guarantee underneath
+# them, not a replacement.
+
+on:
+  workflow_run:
+    workflows: [verify-mechanics, verify-mobile, verify-card-editor]
+    types: [completed]
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+
+concurrency:
+  # Serialize per source SHA: sibling verify-* workflows completing seconds
+  # apart would otherwise race to comment. The dedupe check in
+  # deploy-comment already makes a race a no-op; serializing just avoids
+  # the wasted API round-trips and keeps run order predictable in the log.
+  group: deploy-comment-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: false
+
+jobs:
+  comment:
+    if: github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.event == 'push'
+    name: post the deploy comment once CI is fully green
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout at the completed run's own SHA
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          # deploy-check.mjs's zero-gated-runs fallback reads `git diff
+          # HEAD~1..HEAD`; that path shouldn't trigger here (we're invoked
+          # BECAUSE a gated run just completed, so it never sees zero
+          # runs), but depth 2 keeps HEAD~1 resolvable instead of turning a
+          # should-never-happen edge case into a hard script error.
+          fetch-depth: 2
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Zero dependencies (node:test + node:assert), so no install step.
+      - name: Witness — deploy-comment sweep
+        run: node --test scripts/loop-issue.test.mjs
+
+      - name: Re-check the deploy gate for this exact commit
+        id: gate
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          # Short on purpose — this job exists BECAUSE one gated workflow
+          # just completed. A sibling still in flight will re-trigger this
+          # same workflow on its own completion, so there is nothing to
+          # gain by polling long here; this window only absorbs the GitHub
+          # Actions API's own eventual-consistency lag.
+          DEPLOY_TIMEOUT_MS: '60000'
+        run: |
+          if node scripts/deploy-check.mjs; then
+            echo "green=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "green=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Post the deploy comment (only once every gated workflow is green)
+        if: steps.gate.outputs.green == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          node scripts/loop-issue.mjs deploy-comment \
+            --sha "${{ github.event.workflow_run.head_sha }}" \
+            --deploy-url "${{ github.event.workflow_run.html_url }}"

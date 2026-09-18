@@ -27,6 +27,8 @@ import {
     resolveRangeArgs,
     sweepCloseTrailers,
     buildTrailerCloseCommentBody,
+    buildDeployCommentBody,
+    sweepDeployComments,
 } from './loop-issue.mjs'
 
 const REPO = 'no-trbl-2-u/Axiomancer'
@@ -393,4 +395,118 @@ test('the sweep comment states that our sweep, not GitHub, did the closing', () 
     const body = buildTrailerCloseCommentBody({ number: 174, sha: '615ff26b9e9d', subject: 'fix(mobile): x' })
     assert.match(body, /close-trailers/)
     assert.match(body, /615ff26b/)
+})
+
+// --- deploy-comment sweep (Phase 91) -----------------------------------
+//
+// close-trailers moves the CLOSE onto the push. It does not — and by
+// design should not — post the deploy-URL comment, since that comment can
+// only be honest once CI has actually concluded, minutes after the push.
+// The deploy-comment sweep is the equivalent floor for that comment: it
+// only ever concerns ONE commit (the workflow_run event's head_sha), never
+// closes anything, and is idempotent on a SHA-scoped marker in the
+// comment body rather than issue state.
+
+const DEPLOY_URL = 'https://github.com/no-trbl-2-u/Axiomancer/actions/runs/1'
+
+/** Build a fake deploy-comment IO over a { number: [commentBody, ...] } map. */
+function fakeDeployIo(commentsByNumber, { commentFails = new Set() } = {}) {
+    const calls = { has: [], comment: [] }
+    return {
+        calls,
+        hasDeployComment(number, sha) {
+            calls.has.push(number)
+            const comments = commentsByNumber[number]
+            if (comments === undefined) return { found: false, missing: true }
+            const marker = `Shipped in \`${sha}\``
+            return { found: comments.some((body) => body.includes(marker)) }
+        },
+        comment(number, body) {
+            calls.comment.push({ number, body })
+            if (commentFails.has(number)) return { error: 'HTTP 503' }
+            ;(commentsByNumber[number] ??= []).push(body)
+            return { ok: true }
+        },
+    }
+}
+
+const deploySweep = (commits, io, opts = {}) =>
+    sweepDeployComments({ commits, repo: REPO, io, deployUrl: DEPLOY_URL, ...opts })
+
+test('the deploy-comment body names the commit and the live URL', () => {
+    const body = buildDeployCommentBody({ sha: '615ff26b9e9d', deployUrl: DEPLOY_URL })
+    assert.match(body, /Shipped in `615ff26b9e9d`/)
+    assert.match(body, new RegExp(DEPLOY_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
+})
+
+test('the sweep posts the deploy comment on an issue the commit closes', () => {
+    const io = fakeDeployIo({ 174: [] })
+    const result = deploySweep([{ sha: '615ff26b', message: COMMIT_615FF26B }], io)
+    assert.deepEqual(result.commented.map((t) => t.number), [174])
+    assert.equal(io.calls.comment.length, 1)
+    assert.equal(io.calls.comment[0].number, 174)
+    assert.match(io.calls.comment[0].body, /Shipped in `615ff26b`/)
+})
+
+test('IDEMPOTENCY: a comment already bearing this SHA is a no-op, not a repeat post', () => {
+    const io = fakeDeployIo({ 174: ['Shipped in `615ff26b`, and CI is now green.'] })
+    const result = deploySweep([{ sha: '615ff26b', message: COMMIT_615FF26B }], io)
+    assert.deepEqual(result.commented, [])
+    assert.deepEqual(result.noop.map((t) => t.reason), ['already-commented'])
+    assert.deepEqual(io.calls.comment, [])
+})
+
+test('IDEMPOTENCY: running the sweep twice over the same commit comments exactly once', () => {
+    const commentsByNumber = { 174: [] }
+    const io = fakeDeployIo(commentsByNumber)
+    const commits = [{ sha: '615ff26b', message: COMMIT_615FF26B }]
+    const first = deploySweep(commits, io)
+    const second = deploySweep(commits, io)
+    assert.deepEqual(first.commented.map((t) => t.number), [174])
+    assert.deepEqual(second.commented, [])
+    assert.deepEqual(second.noop.map((t) => t.reason), ['already-commented'])
+})
+
+test('a different commit closing the same issue posts its own, distinct comment', () => {
+    // Two shipping attempts at the same issue (a retry) must not be treated
+    // as the same event — each SHA gets its own comment.
+    const commentsByNumber = { 174: ['Shipped in `aaaaaaa`, and CI is now green.'] }
+    const io = fakeDeployIo(commentsByNumber)
+    const result = deploySweep([{ sha: 'bbbbbbb', message: 'fix: retry\n\nCloses #174' }], io)
+    assert.deepEqual(result.commented.map((t) => t.number), [174])
+    assert.equal(commentsByNumber[174].length, 2)
+})
+
+test('a referenced number that is not an issue is a no-op', () => {
+    const io = fakeDeployIo({})
+    const result = deploySweep([{ sha: 'aaa', message: 'fix: x\n\nCloses #999999' }], io)
+    assert.equal(result.errors.length, 0)
+    assert.deepEqual(result.noop.map((t) => t.reason), ['not-found'])
+    assert.deepEqual(io.calls.comment, [])
+})
+
+test('A FAILED COMMENT POST IS LOUD: an API failure lands in errors', () => {
+    const io = fakeDeployIo({ 174: [] }, { commentFails: new Set([174]) })
+    const result = deploySweep([{ sha: '615ff26b', message: COMMIT_615FF26B }], io)
+    assert.deepEqual(result.commented, [])
+    assert.equal(result.errors.length, 1)
+    assert.equal(result.errors[0].number, 174)
+    assert.match(result.errors[0].error, /503/)
+})
+
+test('dry-run reports its targets and makes no API call at all', () => {
+    const io = fakeDeployIo({ 174: [] })
+    const result = deploySweep([{ sha: '615ff26b', message: COMMIT_615FF26B }], io, { dryRun: true })
+    assert.deepEqual(result.targets.map((t) => t.number), [174])
+    assert.deepEqual(result.noop.map((t) => t.reason), ['dry-run'])
+    assert.deepEqual(io.calls.has, [])
+    assert.deepEqual(io.calls.comment, [])
+})
+
+test('a commit with no closing references touches nothing', () => {
+    const io = fakeDeployIo({ 174: [] })
+    const result = deploySweep([{ sha: 'aaa', message: 'digest: 2026-08-08' }], io)
+    assert.deepEqual(result.targets, [])
+    assert.deepEqual(io.calls.has, [])
+    assert.deepEqual(io.calls.comment, [])
 })
