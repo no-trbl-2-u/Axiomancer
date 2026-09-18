@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-09-17 at commit 38d7711f
-> Pass count: 39
+> Last pass: 2026-09-18 at commit 3a9689d8
+> Pass count: 40
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -509,6 +509,25 @@
 > with no connecting path; too easily read as intentional set-dressing
 > (the eye/omen motif recurs on the title screen and the WILDS tab
 > icon) to file as a defect without stronger evidence. Zero new
+> findings.
+
+> **[critique pass 40, 2026-09-18, commit 3a9689d8] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
+> mobile (375×812) and desktop (1280×800) against the full 11-screen
+> set (title, onboarding, combat preview, live combat-board, exploration
+> hub, dialogue, village, cutscene, rest, hazard, late-game hub) — 22
+> captures, 0 with nav trouble, 0 console/page errors, no
+> undefined/NaN/`[object Object]` text artifacts in any DOM-text dump.
+> Self-assessed against the current Pending/Done log: captures are
+> unchanged from pass 39 — the mobile combat-board hand fan still
+> reproduces the pass-37 row exactly (Thin Hymn/Chilblain Watch/The
+> Long Lent/Spoiled Poultice truncated by overlap, desktop unaffected;
+> not re-filed), the late-game hub's node-graph oval reproduces pass
+> 39's declined note unchanged (still no connecting path, still reads
+> as ambiguous set-dressing, no stronger evidence to file it now), and
+> the pass-14 desktop title-art-overlays-CTA note also reproduces
+> unchanged (still declined — no shipped desktop surface). None of the
+> 30 commits since pass 39 touched a captured screen's UI. Zero new
 > findings.
 
 ## Pending
