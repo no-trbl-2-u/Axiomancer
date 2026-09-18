@@ -45,9 +45,11 @@ meant.
 ## 1. Standing frame — read before the first pitch, do not re-litigate
 
 1. **`content/story/story-bible.md` (THE TALLY) is canon.** It is the
-   thesis and the ending: the rite is a cull, the boy talks the girl
-   into it, he walks out of the capital with no ribbon, the Labyrinth
-   opens to what the gate already spent. This session builds the road
+   thesis and the ending: the rite is a cull, the player talks someone
+   they love into it, they walk out of the capital with no ribbon, the
+   Labyrinth opens to what the gate already spent. (The bible tells this
+   with a boy and a girl because that is what was shipped; under §2's X
+   the *shape* binds, the figures do not — see §2's second consequence.) This session builds the road
    *toward* that. It does not rebuild it. If a pitch would contradict
    the bible, say so in the pitch and let T choose knowingly — but the
    default is that the bible wins. T reopens it explicitly or not at
@@ -75,29 +77,47 @@ meant.
    is one outline file (§5). Specs come later, one per beat, through
    the existing skills.
 
-## 2. The one big-picture decision — settle it first, then never again
+## 2. Who the player is — DECIDED, do not ask
 
-**Is the player a named character, or is there character creation?**
+**The player is X.** No name, no figure, no identifiers. Decided by T,
+2026-09-18, in the session that commissioned this prompt: *"let's go
+with this unknown person, no name, no figure, no identifiers except for
+'X' which will be a placeholder identifier while we brainstorm."*
 
-This is the single exception to "no big picture yet," because you
-cannot pitch "where does the player start" without an answer. Ask it
-once, with `AskUserQuestion`, before the first pitch. Present these
-facts with the ballot, because they are the cost of each option:
+**Do not put this to a ballot.** It is settled. Record it in the
+overview's header and proceed.
 
-- The engine writes 21 story flags and every one is `boy-*`. Every
-  dialogue tree addresses him. The bible's mechanism — *his* persuasion
-  is what kills her — depends on him being a specific person with a
-  specific history the game has been keeping.
-- Character creation would mean renaming those flags, re-voicing every
-  tree that assumes him, and losing the indictment, since a blank
-  cannot be blamed for a history it did not have.
+### What X means
 
-Recommended default: **the boy, unnamed, as shipped.** The house style
-already names people by function; a proper name would be the first one
-in the game, and it would be the wrong first. If T picks creation
-anyway, record it, note the wiring cost as a follow-up row, and pitch
-against a blank from then on. Either way: decided once, in the outline
-file's header, and not raised again in this session.
+- **`X` is scaffolding, not a name.** It is how this document refers to
+  the player while the road is being built. It never appears in shipped
+  game text, and it is not a working title for a name to be chosen
+  later. If the outline ever needs to *call* X something, that is a
+  finding for the pivot, not a decision for a turn.
+- **No figure** is stronger than *unnamed*. Do not presume X's age,
+  gender, body, station, trade, or family. A pitch that needs X to be a
+  child, or to have a father, is a pitch that is *proposing* that — say
+  so in the tag line, and let T take it knowingly.
+- **The order is inverted, deliberately.** Normally the character is
+  fixed and events follow. Here the events come first and X is whoever
+  the road turns out to have happened to. Who X is becomes an *output*
+  of this session, not an input. Lean into that — it is the reason the
+  decision was made this way.
+
+### Two live consequences the session carries
+
+1. **The 21 shipped `boy-*` flags assume a figure.** They are live and
+   playable (`boy-chased-the-rumor`, `boy-marked-the-crowning`, …). This
+   session does **not** rename them — that is engine work, and pausing
+   the road for it would be the tail wagging the dog. Note the cost once
+   in the overview's `Noted for the pivot`, then keep walking.
+2. **THE TALLY §3 presumes a relationship.** Its mechanism is that the
+   player talks someone he loves into the rite and she is taken. That
+   needs two specific people. Under an X with no figure, the outline has
+   to *arrive* at an equivalent bond rather than inherit one. §1.1 still
+   holds — the bible's ending wins — but the road is what earns it.
+   If by the pivot no such bond has emerged, say so plainly: that is
+   the most important finding the session could return.
 
 ## 3. The method — one event per turn
 
@@ -109,9 +129,11 @@ flag. Do not skip this. Turn fourteen forgets turn three otherwise.
 
 **3.2 Pitch four.** Four candidate next events. Each is:
 
-- **An event, not a theme.** *"The ribbon is cut for another child in
-  the village that morning; the boy is the one handed the knife"* is an
-  event. *"Starts in a fishing village"* is not.
+- **An event, not a theme.** *"The ribbon is cut for someone else in the
+  village that morning, and X is the one handed the knife"* is an event.
+  *"Starts in a fishing village"* is not. Note the pitch presumes X can
+  be handed a knife and nothing more — keep pitches that thin unless you
+  are deliberately proposing a figure, and tag it when you are.
 - **Plain and short.** One to three sentences of outline prose. Not
   a scene, not dialogue, not voice — the old overview's register, made
   sharper.
@@ -182,7 +204,8 @@ every turn. `docs/story.md` and the two `.claude` spec skills point at
 
 > Session <date>, T present. Thesis and ending: story-bible.md (THE
 > TALLY). This file is the sequence; that file is what it means.
-> Player: <the boy, unnamed | character creation — decided §2>.
+> Player: **X** — no name, no figure, no identifiers (decided 2026-09-18,
+> §2 of the prompt). X is a placeholder for brainstorming, never shipped text.
 > Status: <walking | pivot recommended (§4 condition N)>.
 
 ## Shipped inventory (read <date>)
