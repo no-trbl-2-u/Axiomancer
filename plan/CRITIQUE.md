@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-09-18 at commit 3a9689d8
-> Pass count: 40
+> Last pass: 2026-09-18 at commit 6a804a02
+> Pass count: 41
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -530,7 +530,53 @@
 > 30 commits since pass 39 touched a captured screen's UI. Zero new
 > findings.
 
+> **[critique pass 41, 2026-09-18, commit 6a804a02] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5,
+> `CRITIQUE_VIEWPORT=both`) at both mobile (375×812) and desktop
+> (1280×800) against the full 11-screen set (title, onboarding, combat
+> preview, live combat-board, exploration hub, dialogue, village,
+> cutscene, rest, hazard, late-game hub) — 22 captures, 0 with nav
+> trouble, 0 console/page errors, no undefined/NaN/`[object Object]`
+> text artifacts in any DOM-text dump. Self-assessed against the
+> current Pending/Done log: the mobile combat-board hand fan reproduces
+> the pass-37 row exactly (desktop unaffected, not re-filed); the
+> late-game hub's node-graph oval reproduces pass 39/40's declined note
+> unchanged; the hazard danger-card's sealed small panel (this pass's
+> fixture rolled "Flooded Undercroft") reconfirms pass 34's deliberate-
+> style call, not filed. One new finding: the village stall's "Void
+> Essence" description says "drinking it leaves the wearer..." —
+> equipment language ("wearer") on a consumable that's drunk, not worn.
+> Checked the rest of `consumable.library.ts` for the same slip:
+> `heart-draught` carries the identical "wearer" wording
+> ("quickens the wearer's convictions"); no other consumable does. Filed
+> below.
+
 ## Pending
+
+### [LOW] village / items — two consumables use "wearer" language for items the player drinks, not wears
+- pass: 41 (commit 6a804a02)
+- viewport: mobile and desktop (both render the same source text)
+- category: comprehension / voice
+- observation: `axiomancer-mechanics/src/Items/consumable.library.ts`
+  describes two `category: 'consumable'` items as affecting "the
+  wearer" even though both are drunk: `void-essence` ("A vial of
+  substance that refuses to be observed. Drinking it leaves the
+  wearer slightly insistent and intensely present.", line 147-148) and
+  `heart-draught` ("A warm draught that quickens the wearer's
+  convictions.", line 78). Every other consumable in the file
+  describes an effect on the drinker/self, not a "wearer" — this reads
+  as flavor text drafted from an equipment-item template and never
+  re-worded for a drinkable. Live in the shop: Void Essence is sold at
+  Glen Market (`wanderer-nf-village` fixture, confirmed in
+  `07-village.png`/`.txt` this pass).
+- evidence: `axiomancer-mobile/.critique-artifacts/{mobile,desktop}/07-village.png`;
+  `axiomancer-mechanics/src/Items/consumable.library.ts:78,147-148`.
+- suggested fix: reword both descriptions to drinker-appropriate
+  language, e.g. void-essence → "...leaves the drinker slightly
+  insistent and intensely present"; heart-draught → "...quickens the
+  drinker's convictions". Data-only text edit, no effect/wiring change.
+  Equipment/consumable-lifecycle territory (`/adjust-equipment`).
+- source: loop
 
 ### [MED] combat — the mobile hand fan overlaps card-name bands, hiding the covered cards' names
 - pass: 37 (commit 7d470de1)

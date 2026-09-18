@@ -516,3 +516,4 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-18T17:06:09Z | subagent-end | card-expert | claude-sonnet-5 | 31m15s | ok |
 | 2026-09-18T20:30:03Z | slash-prompt | /march | - | - | /march |
 | 2026-09-18T20:36:24Z | subagent | content-curator | claude-sonnet-5 | - | Execute adjust-npcs steward tick |
+| 2026-09-18T22:28:38Z | slash-prompt | /march | - | - | /march |
