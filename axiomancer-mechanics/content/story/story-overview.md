@@ -56,6 +56,16 @@ X begins drunk, guarding a prisoner in the castle dungeon.
   drunk) — taken knowingly by T. Keeps no shipped node: the road's start
   moves off `fishing-village` entirely. No flag yet.
 
+### 2. They bring his child down
+The prisoner's child is brought down the stair to make him talk, and X is
+the one told to hold the child still.
+— Tension: X's complicity stops being passive. The first event made X unfit
+  for the post; this one makes X an instrument of it, and gives the prisoner
+  a reason to remember X's face specifically. Proposes that the prisoner has
+  a child, and that X takes orders from someone further up the stair. Keeps
+  no shipped node. No flag yet; a future beat almost certainly reads this
+  back.
+
 ## Noted for the pivot
 - The road starts in a castle dungeon; the build starts at `fishing-village`
   fv-1. Someone has to decide whether the village becomes later, becomes a
