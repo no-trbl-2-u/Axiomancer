@@ -129,12 +129,18 @@ Tick in this file in the same commit that ships the phase.
       deferred (see `plan/phases/phase_90_flurry_multi-hit_archetype.md`
       Follow-ups) rather than attempted partially. Re-file as its own
       `PHASE_CANDIDATES.md` row scoped to the engine-architecture question.
-- [ ] Phase 91 — Amber-CI tick recovery: a loop turn that ends while CI is
+- [x] Phase 91 — Amber-CI tick recovery: a loop turn that ends while CI is
       amber skips every `deploy:check`-gated step with no retry. Either
       resume on deploy-gate completion, or make the post-green steps
       unconditional and idempotent so a later tick re-runs them safely
       (promoted via `/oversight` 2026-09-17 from `PHASE_CANDIDATES.md`,
-      unscored row filed 2026-08-08 by Phase 48)
+      unscored row filed 2026-08-08 by Phase 48). Audit found the close
+      itself already fixed (Phase 48's close-trailers); the remaining gap
+      was the deploy-URL comment. Shipped `loop-issue.mjs deploy-comment` +
+      `.github/workflows/deploy-comment.yml`, triggered by the gated
+      verify-* workflows' own completion rather than any agent tick's
+      lifetime — `feat(loop): amber-CI tick recovery — deploy-URL comment
+      floor — phase 91` (3f50d663)
 - [ ] Phase 92 — `march` workflow job ceiling: run 31301228665 hit
       `march.yml`'s `timeout_minutes: 90` exactly and was force-cancelled;
       the prior tick ran 1:26:24. Decide between raising the ceiling and
