@@ -53,6 +53,17 @@ const PANELS: PrimerPanel[] = [
             'into the PLAY AREA, drop a matching die on it and APPLY — or APPLY with no die for ' +
             'its weaker FREE line. Every usable die can power a card, so play several in one turn.',
     },
+    {
+        eyebrow: 'THE LEFT EDGE',
+        title: 'SIGNATURES COST CONVICTION, NOT DICE',
+        // UI fresh-eyes 2026-09-12 §4.2 — the rune column stays compact by
+        // owner design; its names live in long-press, not printed labels. The
+        // primer is where a first-time player learns that reflex exists.
+        body:
+            'Down the left edge sit your SIGNATURES — a few personal moves paid in ◆ CONVICTION ' +
+            'instead of a die. Tap an affordable rune to fire it. Long-press ANY rune, spent or ' +
+            'not, to read exactly what it does before you commit.',
+    },
 ];
 
 export function CombatTutorialPrimer({

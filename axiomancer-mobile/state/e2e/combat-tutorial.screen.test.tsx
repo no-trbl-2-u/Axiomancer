@@ -54,8 +54,9 @@ function mount(opts: { seenTutorial?: boolean } = {}): { store: AppStore } {
 
 const press = (id: string) => act(() => { fireEvent.press(screen.getByTestId(id)); });
 
-/** Page through the 3-panel primer to its BEGIN, dismissing it. */
+/** Page through the 4-panel primer to its BEGIN, dismissing it. */
 function clearPrimer() {
+    press('combat-primer-next');
     press('combat-primer-next');
     press('combat-primer-next');
     press('combat-primer-begin');
