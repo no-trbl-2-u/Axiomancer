@@ -1746,7 +1746,7 @@ verification trail.
   the commit's own evidence. If it recurs, re-file fresh rather than
   reopen this row.
 
-### [gap] `march` ticks are creeping toward the 90-minute job timeout; one was killed mid-cycle
+### [x] [gap] `march` ticks are creeping toward the 90-minute job timeout; one was killed mid-cycle — RESOLVED via Phase 92 (2026-09-18, commit d7cc91d7)
 - category: gap
 - impact: 6
 - ease: 5
@@ -1778,6 +1778,23 @@ verification trail.
   hang this time (real work in flight per the job log), no commit
   resulted. Reinforces the existing phase-candidate proposal; not a new
   finding.
+
+**RESOLVED via Phase 92 (2026-09-18, commit `d7cc91d7`):** the candidate's
+raise-vs-split choice was already decided by `plan/bearings.md` §
+Operational notes before this phase (`b53dac5d`, 2026-08-14, PR #205:
+"a tick that genuinely needs more should be split, not have its cap
+raised silently") — raising `timeout_minutes` was off the table. What was
+still open was why the split side of that policy failed once: Step 13 of
+`skills/ship-a-phase.md` already said "return cleanly" on 2026-08-09 (it
+shipped with the nexus adoption five weeks earlier) and the 44a+44b chain
+happened anyway. Phase 92 promoted the no-chaining constraint from step
+prose to an enumerated Hard Rule (§7 rule 12), the section agents follow
+more reliably per Hard Rule 11's own precedent. Re-measured before
+deciding: the last 100 `march` runs (checked 2026-09-18) show 0
+cancellations, slowest 53.3 min against the 75-min ceiling — the
+discipline has evidently held for weeks; this closes the documented gap
+that let it fail once, rather than a live problem. `timeout_minutes`
+stays at 75, unchanged.
 
 ### [docs] `skills/digest.md` §3b still reads baseline health against the win-rate doctrine curve Phase 43 retired
 - category: docs

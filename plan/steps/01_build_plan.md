@@ -141,12 +141,20 @@ Tick in this file in the same commit that ships the phase.
       verify-* workflows' own completion rather than any agent tick's
       lifetime — `feat(loop): amber-CI tick recovery — deploy-URL comment
       floor — phase 91` (3f50d663)
-- [ ] Phase 92 — `march` workflow job ceiling: run 31301228665 hit
+- [x] Phase 92 — `march` workflow job ceiling: run 31301228665 hit
       `march.yml`'s `timeout_minutes: 90` exactly and was force-cancelled;
       the prior tick ran 1:26:24. Decide between raising the ceiling and
       splitting multi-phase ticks (promoted via `/oversight` 2026-09-17
       from `PHASE_CANDIDATES.md`, unscored row filed 2026-08-09 by
-      `/digest`; pairs with `AUDIT.md`'s matching 90-minute row)
+      `/digest`; pairs with `AUDIT.md`'s matching 90-minute row). Bearings
+      already forecloses raising (2026-08-14, PR #205); the gap was that
+      "return cleanly" prose alone didn't stop the 44a+44b chain, so
+      shipped a new `ship-a-phase.md` §7 Hard Rule 12 (one phase per
+      invocation, never chain) instead. Re-measured: last 100 march runs,
+      0 cancellations, 53.3 min slowest against the 75-min ceiling — no
+      raise needed. `timeout_minutes` unchanged at 75
+      — `feat(loop): march job-ceiling decision — one phase per
+      invocation, never chain — phase 92` (d7cc91d7)
 - [ ] Phase 93 — Card-base reconciliation: `buildCombatDeck` de-dupes, so
       the Threadbare recipe's 3x copies collapse (8 cards dealt against a
       machine-checked 18), and `GameState.flags` never reaches
