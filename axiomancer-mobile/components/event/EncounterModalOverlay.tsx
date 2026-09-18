@@ -150,6 +150,10 @@ export function EncounterModalOverlay({
     // Phase 200 — the player snapshot the in-place hazard combat (Spec 26b)
     // initialises from (live map encounters).
     const player = useGameState((s) => s.player);
+    // Phase 93 — the real player's loadout flags, threaded to the panel
+    // explicitly (it corresponds to `player` above, unlike the dev sandbox's
+    // synthetic demo deck, which must not receive them).
+    const flags = useGameState((s) => (s as unknown as { flags?: string[] }).flags);
 
     // Phase 200 — teardown for the in-place hazard combat. The panel already
     // persisted HP/XP/loot on the terminal outcome; here we mirror the legacy
@@ -273,6 +277,7 @@ export function EncounterModalOverlay({
                         key={encounterEnemy.id}
                         enemy={encounterEnemy}
                         bootstrapPlayer={player}
+                        flags={flags}
                         persistOutcome
                         onWithdraw={fleeAllowed ? handleWithdraw : undefined}
                         onExit={handleHazardExit}

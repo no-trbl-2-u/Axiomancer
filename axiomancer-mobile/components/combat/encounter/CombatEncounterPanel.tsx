@@ -99,6 +99,16 @@ export interface CombatEncounterPanelProps {
     bootstrapPlayer: Character;
     /** Optional explicit deck (engine derives one from knownCards when omitted). */
     deck?: string[];
+    /**
+     * `GameState.flags` — when non-empty and loadout-shaped, overrides
+     * `bootstrapPlayer.knownCards` as the deck's card base (Phase 169's
+     * curated loadout, see `combat.loadout.ts`). Callers must pass the flags
+     * that actually correspond to `bootstrapPlayer` — the dev sandbox route
+     * synthesises a demo `bootstrapPlayer` disjoint from the real player's
+     * `knownCards`, so it omits this prop rather than pass the real store's
+     * flags, which would deal a card the demo player doesn't know.
+     */
+    flags?: readonly string[];
     /** Deterministic seed. */
     seed?: number;
     /** Force the first-fight tutorial primer/coach even if the flag is set. */
@@ -306,6 +316,7 @@ export function CombatEncounterPanel({
     enemy,
     bootstrapPlayer,
     deck,
+    flags,
     seed,
     forceTutorial = false,
     persistOutcome = false,
@@ -410,13 +421,17 @@ export function CombatEncounterPanel({
     // per encounter. Nothing engine-side reads `state.seed` after init.
     const initial = useMemo(
         () => {
-            // Phase 93 — `GameState.flags` carries Phase 169's curated-loadout
-            // codec (`combat-loadout-card:` entries); reaching it here closes the
-            // "loadout path is dead in the shipped runtime" audit gap. No mobile
-            // surface writes those flags yet, so this is a no-op today — `deck`
-            // (an explicit override) still wins, and empty flags still fall back
-            // to `knownCards`, same as before this read existed.
-            const flags = (store.getState() as unknown as { flags?: string[] }).flags;
+            // Phase 93 — `flags` (Phase 169's curated-loadout codec,
+            // `combat-loadout-card:` entries) is an explicit prop, not read
+            // from the store here: `createNewGameState` seeds every fresh
+            // save's flags with a loadout for `STARTING_CARD_IDS`, which is
+            // NOT a subset of the dev sandbox's synthetic demo deck
+            // (`bootstrapPlayer` there diverges from the real player's
+            // `knownCards`). Reading the store unconditionally dealt a
+            // loadout card the demo player didn't know and crashed combat
+            // (`Card 'first-spadeful' is not known.`) — see fix-ci run
+            // 35317577069. Each caller now supplies flags that actually
+            // correspond to the `bootstrapPlayer` it passed.
             const s = initializeCombatEncounter(bootstrapPlayer, enemy, deck, seed, flags);
             const stamped = s.seed === undefined ? { ...s, seed: Math.floor(Math.random() * 0xffffffff) } : s;
             // AXM Log: thin mount marker only — the engine's `withLog` tap
