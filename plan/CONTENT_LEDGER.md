@@ -22,6 +22,77 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
+> **[adjust-keywords pass 13, 2026-09-18, commit <PENDING>]** One UPDATE —
+> backfilled the **UNMOVED** keyword, presentation-only. Dispatched
+> autonomously by `/march`'s content-lifecycle gate (`keywords` was the
+> stalest qualifying category: last pass `37c67a13` 2026-09-16T14:56:08Z, 52
+> commits behind HEAD, deploy confirmed green, no phase/higher-priority gate
+> pending).
+>
+> **Step 1 audit:** cross-referenced every `CardSpecialMechanic`/
+> `SynergyStatePredicate` kind in `src/Cards/types.ts` against the atlas and
+> the mobile `KEYWORD_GLOSS`/`ENEMY_KEYWORD_GLOSS`/`SYSTEM_GLOSSARY`
+> registries (`axio_keywords` + a manual trace of every `mechanicText`/
+> `statePredicateText` case in `combat.cards.ts`). Every non-badged kind
+> (`bank_spent_die`, `convert_die_color`, `refresh_die`, `reroll_spent`,
+> `strip_random_buff`, `befriend_attempt`, `conjure_card`) prints plain
+> lowercase rules text by design — confirmed against `EDITOR_LOCAL_LABELS`
+> in `scripts/content-drift.test.mjs` and the phase-29 "ghosts" note in
+> `keywords.ts`'s module doc, not a gap. One genuine hit: `statePredicateText`'s
+> `'enemy-dealt-no-damage-last-round'` case (`combat.cards.ts:295-296`)
+> prints the capitalized face word **UNMOVED** into the ◆ die line on 6 live
+> vigil/apocrypha cards (quiet-watch, answer-at-the-postern, the-hedgehog,
+> the-sally-port, nothing-to-report, an apocrypha late-game capstone), well
+> past the ≥2-carrier bar, but has zero row in `docs/keyword-atlas.md` and
+> zero entry in `axiomancer-mobile/state/combat/keywords.ts`'s
+> `KEYWORD_GLOSS` — signal table row 6 ("a keyword face word prints but has
+> no popup/glyph wired"), a bug regardless of audit priority. Structurally
+> silent: `card-face-honesty.guard.test.ts`'s "every keyword a card prints
+> has a popup" sweep can only flag words `keywordsInPersistentText`
+> recognizes, and an unglossed word isn't recognized as a keyword at all —
+> same failure shape as pass 2's stale-RUPTURE-gloss finding, on the
+> presentation side rather than the numbers side.
+>
+> **Step 1b:** not reached — Step 1 was non-zero-diff.
+>
+> **KB research (skill §3 Step 2):** `kb_search`/`kb_keyword` on Dawncaster's
+> corpus for the "no damage taken" family found a strong analogue —
+> `kb:dawncaster/keywords/unscathed.okf.md` (src-001, community, confidence
+> medium): Unscathed — "You've taken no damage during the enemy turn.
+> Inactive on your first turn" — the same defensive-parity fantasy as the
+> vigil "quiet night" theme, with several Dawncaster cards (Recuperate,
+> Standoff, Flurry of Steel) gating a payoff on it exactly as our carriers
+> gate a dieless ◆ rider on UNMOVED. This is a backfill of an
+> already-shipped mechanic, not new design, so the gate is satisfied by
+> citation rather than by a fresh proposal.
+>
+> **Ship (Step 3, UPDATE, small — 1 item, presentation-only, no new engine
+> wiring):** added `KEYWORD_GLOSS.Unmoved` (`axiomancer-mobile/state/
+> combat/keywords.ts`) and the matching `docs/keyword-atlas.md` row +
+> "Added" section citation (full trace + KB receipt). Added `'UNMOVED'` to
+> `paid-summary-honesty.engine.test.ts`'s `KNOWN_UPPER` for consistency
+> with every other turn-shape word, though no authored `paidSummary`
+> currently references it (the word only ever appears in the generated ◆
+> die line, which that guard doesn't scan). No glyph — matches every other
+> turn-shape word (AMBUSH/FLOW/FINALE/REQUIEM/FALLEN/EVENTIDE carry none
+> either). No engine, pricing, or card-editor change: `SynergyStatePredicate`
+> round-trips through the editor generically, same precedent EVENTIDE
+> already established. First pass caught the wording lint red — my initial
+> gloss said "the enemy"; `state/combat/__tests__/keywords.test.ts`'s phase-40
+> grammar test (fixed vocabulary: "the foe") failed on `gloss:Unmoved`,
+> fixed and re-verified green.
+>
+> **Gates:** `npm run verify --workspace axiomancer-mechanics` (214/214
+> files, 3470 tests + build green), `npm run verify --workspace
+> axiomancer-mobile` (lint/typecheck/jest 302/302 suites/2869 tests green
+> after the wording fix, assets:check/art:test/critique-drive:test green),
+> `npm run type-check --workspace axiomancer-card-editor` (clean), root
+> `npm test` (150/150 incl. `content-drift.test.mjs` 11/11).
+> `plan/AUDIT.md` residue: none filed — no open call beyond the atlas's own
+> criteria.
+```
+
+```
 > **[adjust-enemies pass 12, 2026-09-17, commit 94da2e3f]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
 > content-lifecycle gate (`enemies` was the only qualifying category this

@@ -41,6 +41,9 @@ const KNOWN_UPPER = new Set([
     'AMBUSH', 'FLOW', 'FINALE', 'BARRIER', 'TOLL',
     // `/adjust-keywords` pass 11 — EVENTIDE, the Chaos-family parity drill.
     'EVENTIDE',
+    // `/adjust-keywords` pass 13 — UNMOVED, backfilled gloss for the
+    // long-live `enemy-dealt-no-damage-last-round` predicate.
+    'UNMOVED',
     // structural / system words the faces already print in caps
     'FREE', 'ALL', 'WILD', 'VITAE', 'CONDEMN', 'SENTENCE', 'OPENING',
     'DOT', 'DOTS', 'HP',

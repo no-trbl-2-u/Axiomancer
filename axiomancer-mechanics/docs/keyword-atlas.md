@@ -89,6 +89,7 @@ mid-flight. Run `npm run catalog` for the current binding.
 | **REQUIEM N** | A card's REQUIEM line fires free while your discard pile holds that many cards. | (see the catalog) |
 | **FALLEN** | A state: you carry 2 or more different afflictions. A card's FALLEN line fires free while you are Fallen. | (see the catalog) |
 | **EVENTIDE** | A card's EVENTIDE line fires free while your draw pile holds an even number of cards. | (see the catalog) |
+| **UNMOVED** | A card's UNMOVED line fires free while the foe dealt you no damage last round. | (see the catalog) |
 
 ## Player keywords — the deck as a resource
 
@@ -261,6 +262,40 @@ stale and corrected in the same pass.)
   row added there, matching every prior predicate CREATE (FLOW/TWIN etc.
   never gained retheme-map rows either — that file is spec-34's historical
   rename ledger, not a running keyword registry).
+
+- **UNMOVED** (2026-09-18, `/adjust-keywords` pass 13) — a backfill, not a
+  new mechanic. The `{ kind: 'enemy-dealt-no-damage-last-round' }`
+  `SynergyStatePredicate` has been live since the Profane Canon rework on 6
+  vigil/apocrypha cards (`src/Cards/library/vigil.cards.ts`:
+  quiet-watch/answer-at-the-postern/the-hedgehog/the-sally-port/
+  nothing-to-report, `apocrypha.cards.ts`'s late-game capstone) and already
+  prints its own face word — `combat.cards.ts`'s `statePredicateText` returns
+  `'UNMOVED (the enemy dealt you no damage last round)'` into the card's ◆
+  die line (`combat.cards.ts:547-548`) — but the row here and the mobile
+  `KEYWORD_GLOSS` entry were never added. Structurally silent: the
+  `card-face-honesty.guard.test.ts` sweep that checks "every keyword a card
+  prints has a popup" can only flag words `keywordsInPersistentText`
+  recognizes, and an ungossed word isn't recognized as a keyword at all, so
+  the guard passed green over a real gap — same shape as pass 2's RUPTURE
+  finding, on the presentation side instead of the numbers side. Found by
+  `/adjust-keywords` pass 13's structural audit (signal: "a keyword face
+  word prints but has no popup/glyph wired"), confirmed by tracing
+  `statePredicateText` -> `paidText`'s `dieLines` -> the mobile chip
+  scanners (`keywordsInPersistentText`, `buildDetailKeywords`) and finding
+  zero `Unmoved`/`UNMOVED` hits anywhere in `axiomancer-mobile`. Dawncaster
+  prior art: `kb:dawncaster/keywords/unscathed.okf.md` (src-001, community,
+  confidence medium) — Unscathed: "You've taken no damage during the enemy
+  turn. Inactive on your first turn" — same defensive-parity fantasy as our
+  vigil "quiet night" cards; several Dawncaster cards (Recuperate, Standoff,
+  Flurry of Steel) gate a payoff on it the same way our carriers gate a
+  dieless ◆ rider on UNMOVED. No engine, pricing, or wiring change: only
+  `axiomancer-mobile/state/combat/keywords.ts` (`KEYWORD_GLOSS.Unmoved`) and
+  this atlas row. No glyph, matching every other turn-shape word (AMBUSH/
+  FLOW/FINALE/REQUIEM/FALLEN/EVENTIDE carry none either). Verified via the
+  same trace, not reasoned from memory: once `KEYWORD_GLOSS.Unmoved` exists,
+  `buildDetailKeywords`'s existing dieLines sweep
+  (`combat-encounter.engine.ts:2271-2272`) and the guard test's identical
+  sweep pick it up automatically — no other mobile code needed.
 
 ## Retired
 

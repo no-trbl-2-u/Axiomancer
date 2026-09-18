@@ -317,6 +317,15 @@ const KEYWORD_GLOSS: Record<string, string> = {
     // Balance/Order): a PARITY read on the draw pile, not a turn-position
     // gate like AMBUSH/FLOW above.
     Eventide: 'This line fires free while your draw pile holds an even number of cards.',
+    // `/adjust-keywords` pass 13 — backfill, not a new mechanic: the
+    // `enemy-dealt-no-damage-last-round` SynergyStatePredicate has shipped on
+    // 6 vigil/apocrypha cards since the Profane Canon rework and already
+    // prints its UNMOVED die line (`combat.cards.ts`'s `statePredicateText`),
+    // but this gloss row and the matching atlas row were never added — a
+    // silent unwired face word (docs/keyword-atlas.md § "Added" has the
+    // full citation). Dawncaster analogue: Unscathed ("you've taken no
+    // damage during the enemy turn").
+    Unmoved: 'This line fires free while the foe dealt you no damage last round.',
     // ── Card types (labels, not keywords — never rendered in the inspect
     // keyword panel since 2026-07-12; kept for help surfaces + the KW lints) ──
     Oath: 'A passive on your side: 3 rounds when played free, permanent when paid with a die.',
