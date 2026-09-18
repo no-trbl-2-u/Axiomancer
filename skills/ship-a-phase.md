@@ -394,7 +394,8 @@ lifetime, and posts the same comment once CI is actually green.
 
 Return cleanly. The loop's next tick picks up the next phase.
 If you ran outside the loop, summarize what shipped + what's
-next in 2–3 lines.
+next in 2–3 lines. Do not pick up another `[ ]` row in this same
+invocation — see §7 Hard Rule 12.
 
 ## 7. Hard rules
 
@@ -437,6 +438,24 @@ next in 2–3 lines.
     turn, so the next tick can pick up cheaply instead of
     re-researching. Same rule as `skills/digest.md` §3.6/§4.7,
     extended to research sub-agents (not just `verify`/`deploy`).
+12. **One phase per invocation — never chain.** Once Step 13's
+    commits are pushed, stop: do not re-open `01_build_plan.md`
+    looking for the next `[ ]` row, and do not start a second
+    phase's brief/build/commit cycle in the same tick — even
+    when the next row is a lettered sibling of the one just
+    shipped (e.g. having just shipped `44a`, do not also ship
+    `44b`), and even when the job's time budget looks like it
+    has room left. This is what turned run `31301228665`
+    (2026-08-09, phases 44a+44b chained into one tick) into a
+    `timeout_minutes` kill (Phase 92, 2026-09-18): Step 13
+    already said "return cleanly" when that run happened and it
+    did not hold, because prose is not a stop the way an
+    enumerated hard rule is (see rule 11's own precedent). The
+    job ceiling is deliberately a per-tick budget cap, not a
+    per-phase one (`plan/bearings.md` § Operational notes: "a
+    tick that genuinely needs more should be split, not have
+    its cap raised silently") — the loop's next tick is the
+    mechanism for continuing, not this one running longer.
 
 ## 8. Cross-link retrofit policy
 

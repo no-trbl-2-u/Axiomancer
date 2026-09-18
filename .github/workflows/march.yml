@@ -41,8 +41,15 @@ jobs:
         --dangerously-skip-permissions
       prompt: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.focus_phase != '' && format('/ship-a-phase phase {0}', github.event.inputs.focus_phase) || '/march' }}
       # Typical tick is ~23 min; at least one wedged run burned the full
-      # 90-min budget (2026-08 usage review). 75 keeps headroom for a big
-      # ship-a-phase tick while capping runaway burn.
+      # 90-min budget (2026-08 usage review), which is why the ceiling
+      # dropped 90->75 (b53dac5d, 2026-08-14). Raising it further is off
+      # the table (plan/bearings.md § Operational notes: "a tick that
+      # genuinely needs more should be split, not have its cap raised
+      # silently") — the fix is skills/ship-a-phase.md §7 Hard Rule 12
+      # (one phase per invocation, never chain), added by Phase 92
+      # (2026-09-18) after the chained-phase incident that hit this
+      # ceiling exactly. Re-measured at Phase 92: last 100 runs, 0
+      # cancellations, 53.3 min slowest — comfortable headroom under 75.
       timeout_minutes: 75
       # /march can dispatch into /critique (rate-limited: ≥12 commits +
       # ≥24h, green deploy), which drives the local expo-web build with the
