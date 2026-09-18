@@ -17,6 +17,11 @@ have no position in the sequence; every beat after them may assume them.
   another people, and X, in cowardice, turned on his own. Set by T at event 3,
   2026-09-18. The dungeon X guards is therefore the annexer's, and X's post in
   it is what the betrayal bought.
+- **A second guard saw what X did in the cell.** Seeded by T at event 5 as a
+  future character. He is not yet a beat; he is a loaded gun the road has
+  not fired. Whatever he wants from X, he has had it since the night itself.
+- **She was injured in the siege of their city.** The pain is real, chronic,
+  and the reason she has the remedy at all. Set by T at event 5.
 - **T's write-in refers to X as "his."** Recorded as written. This is the first
   identifier X has carried and it sits against §2's "no figure" — see
   `Noted for the pivot`. Not re-litigated here.
@@ -101,6 +106,20 @@ sight and decides to lie to her, painting himself as the hero.
   has (§2 ¶2: proposed, and T took it). Keeps no shipped node. No flag yet;
   this is the road's first obvious flag candidate — what X told her, and
   whether it holds.
+
+### 5. She takes X in, and X finds the remedy
+She has nobody left, so she takes X into her house. X keeps drinking all day
+regardless, and she offers him the herbal remedy she takes for pain — a
+morphine in all but name — to settle the sickness that comes on him every
+morning. She uses it only for the worst of the injury the siege left her.
+X takes it all the time, becomes addicted, and begins suggesting she take it
+more often.
+— Tension: X starts converting her mercy into supply, and the last line of
+  the beat is X beginning to damage her on purpose to cover the damage X is
+  doing to himself. The lie from event 4 now has an economy attached: X needs
+  the house, so X needs the lie, so X needs her not to get better. Keeps no
+  shipped node. Two flag candidates: whether X takes the first dose, and
+  whether X pushes hers.
 
 ## Noted for the pivot
 - The road starts in a castle dungeon; the build starts at `fishing-village`
