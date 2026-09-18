@@ -8,6 +8,19 @@
 > brainstorming, never shipped text.
 > Status: walking.
 
+## Standing facts (established by T, not events)
+
+Facts the road carries from the moment they were set. They are not beats and
+have no position in the sequence; every beat after them may assume them.
+
+- **X is a traitor to his people.** The land X stands on is being annexed by
+  another people, and X, in cowardice, turned on his own. Set by T at event 3,
+  2026-09-18. The dungeon X guards is therefore the annexer's, and X's post in
+  it is what the betrayal bought.
+- **T's write-in refers to X as "his."** Recorded as written. This is the first
+  identifier X has carried and it sits against §2's "no figure" — see
+  `Noted for the pivot`. Not re-litigated here.
+
 ## Shipped inventory (read 2026-09-18)
 
 Seven playable maps, in shipped travel order. None of this is canon; it is
@@ -66,6 +79,17 @@ the one told to hold the child still.
   no shipped node. No flag yet; a future beat almost certainly reads this
   back.
 
+### 3. X kills the child, and the prisoner kills himself
+X is ordered to torture the child to make the prisoner speak. X, too drunk
+and jaded, ends up killing the child. The prisoner, so distraught, ends up
+getting loose and killing himself.
+— Tension: X is now the author of the harm, not the instrument of it, and
+  both witnesses to the night are dead. Nobody is left who can accuse X and
+  nobody is left who can absolve X. Establishes X as a traitor to his own
+  people in a land under annexation (see `Standing facts`), which reframes
+  events 1-2: the post, the drink and the orders are all the price of the
+  betrayal. Keeps no shipped node. No flag yet.
+
 ## Noted for the pivot
 - The road starts in a castle dungeon; the build starts at `fishing-village`
   fv-1. Someone has to decide whether the village becomes later, becomes a
@@ -74,6 +98,14 @@ the one told to hold the child still.
   deferred engine work (THE BLANK PAGE ¶2), but the cost is real and grows
   with every beat that reads one back.
 - "Castle" is a place the world does not have. No shipped map is a castle.
+- X now carries an identifier ("his," from T's own write-in at event 3) and a
+  station (a turncoat in the annexer's service). §2 said X has no figure and
+  that who X is would be an *output* of the road. That is happening early and
+  by accretion rather than by decision. Worth naming deliberately at the
+  pivot, not patching mid-walk.
+- The annexation is a world-scale fact with no world attached: who annexes
+  whom, and where the seven shipped maps sit relative to that line, is
+  undecided.
 
 ## Pivot recommendation
 <empty — §4 has not fired>
