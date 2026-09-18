@@ -3,6 +3,35 @@
 Canonical agent guidance lives in **`AGENTS.md`** and **`VISION.md`** (game
 doctrine). This file exists so the load-bearing doctrine is always in context.
 
+## THERE IS NO STORY (THE BLANK PAGE, T direct, 2026-09-18)
+
+**This game has no story canon and no law about what its story is.**
+T cleared the ground deliberately: *"Remove ALLL law about what the
+story is. We're starting from square one with an unidentifieable 'x'
+as the first/main character."*
+
+- No arc, no premise, no ending, no theme, no canonical characters.
+- **The player is X** — no name, no figure, no identifiers (age,
+  gender, body, station, trade, family). `X` is brainstorming
+  scaffolding, never shipped text, never a stand-in for a name to be
+  picked later.
+- **Shipped narrative is not canon.** ~186 dialogue nodes and the 21
+  `boy-*` flags are legacy text kept because deleting them would break
+  a working build. They are evidence of an old draft's assumptions, not
+  of what the story is.
+- **Do not invent canon.** Need a story fact that does not exist? Say it
+  does not exist and stop. Do not reconstruct an arc from shipped text,
+  restore a removed document, or write a replacement unprompted. This is
+  an explicit carve-out from the loop's content-growth mandate; growth in
+  cards, enemies, keywords, maps and art is unaffected.
+- `docs/narrative/` (style, voice, lexicon) is *craft* law and survives
+  untouched. Mechanics are untouched.
+
+Full ruling: `plan/bearings.md` → THE BLANK PAGE. Marker:
+`content/story/README.md`. It lifts when a new
+`content/story/story-overview.md` is built, event by event, per
+`plan/2026-09-17-story-outline.prompt.md`.
+
 ## Load-bearing doctrine (THE BIG NUMBERS REWRITE, 2026-09-02)
 
 Source of truth: `plan/2026-09-02-big-numbers-overhaul.prompt.md`. It repealed

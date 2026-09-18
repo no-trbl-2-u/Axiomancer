@@ -1,8 +1,8 @@
 # Prompt: THE ROAD, EVENT BY EVENT — build the new story overview from the ground up
 
-> Written 2026-09-17 at T's direction, the same session that wrote
-> `content/story/story-bible.md` (THE TALLY). This file is a **handoff
-> prompt**: paste it, or point a fresh attended Claude Code session at
+> Written 2026-09-17 at T's direction, revised 2026-09-18 when T
+> cleared every story law from the repo (THE BLANK PAGE). This file is
+> a **handoff prompt**: paste it, or point a fresh attended Claude Code session at
 > it, to run one outlining session. §1 is the standing frame. §2 is the
 > single decision you settle before the first pitch. §3 is the method.
 > §4 is the pivot rule. §5 is the output contract.
@@ -12,10 +12,15 @@
 > to the player, start to end. T: *"this is not to help write actual
 > character voices or narration. This is to replace story overview."*
 >
+> **There is no story.** The repo has no canon and no law about what
+> the story is — see `plan/bearings.md` (THE BLANK PAGE) and
+> `content/story/README.md`. This session starts from nothing. That is
+> the point, not an obstacle.
+>
 > **What this is not.** It is not `/story-spec`, which turns one beat
 > into one spec file. It is not `/brainstorm-mechanics`, which is
 > Socratic and widens the design space. It does not write voices,
-> dialogue, or narration — that is the bible's register and the spec
+> dialogue, or narration — that is `docs/narrative/` and the spec
 > skills' job, later. This session is **linear and narrowing**: it
 > walks the player's road from the first minute forward, one event at
 > a time, and stops when the road has become a story. It
@@ -44,16 +49,16 @@ meant.
 
 ## 1. Standing frame — read before the first pitch, do not re-litigate
 
-1. **`content/story/story-bible.md` (THE TALLY) is canon.** It is the
-   thesis and the ending: the rite is a cull, the player talks someone
-   they love into it, they walk out of the capital with no ribbon, the
-   Labyrinth opens to what the gate already spent. (The bible tells this
-   with a boy and a girl because that is what was shipped; under §2's X
-   the *shape* binds, the figures do not — see §2's second consequence.) This session builds the road
-   *toward* that. It does not rebuild it. If a pitch would contradict
-   the bible, say so in the pitch and let T choose knowingly — but the
-   default is that the bible wins. T reopens it explicitly or not at
-   all.
+1. **There is no canon, and you do not invent one.** No arc, no
+   premise, no ending, no theme, no canonical characters, no
+   world-story. Every prior story document was deleted on T's
+   instruction (`story-overview.md`, `S-01`, `S-02`, `C-01`,
+   `story-bible.md`, `W-02`). **None is a draft to return to** — do not
+   read them out of git history to "stay consistent," because there is
+   nothing to be consistent with. The road you build in this session is
+   the first story this game has. Where a turn needs a fact that does
+   not exist, the pitch proposes it and T decides; nothing is inherited.
+
 2. **Structural, not voiced.** Pitches are outline entries: what
    happens, to whom, where, and what it changes. Plain prose. The
    bible's McCarthy-influenced register is for shipped text and the
@@ -61,15 +66,19 @@ meant.
    scene has gone too far; a pitch that reads like a theme has not gone
    far enough. The bar is the old overview's own line-items, made
    concrete enough to spec.
-3. **Seven maps are shipped and playable**, in this order:
-   `fishing-village` → `northern-forest` → `caverns` → `northern-city`
-   → `connecting-river` → `town-across-river` → `the-capital`. ~186
-   dialogue nodes, 21 story flags (all `boy-*`), and the NPCs the bible
-   names. **Inventory these before pitching anything** — read
+3. **Seven maps are shipped and playable, and none of it is canon.**
+   In order: `fishing-village` → `northern-forest` → `caverns` →
+   `northern-city` → `connecting-river` → `town-across-river` →
+   `the-capital`, with ~186 dialogue nodes and 21 `boy-*` flags.
+   **Inventory these before pitching anything** — read
    `src/World/Continents/*/maps.ts` and `src/World/MapEvents/content.ts`
-   once each. A pitch may keep, move, or replace a shipped beat, but it
-   must know the beat exists. The first pitch of the session is always
-   against `fishing-village` as it stands.
+   once each — so that a pitch knows what exists. But a shipped line is
+   evidence of what an old draft assumed, **never** evidence of what the
+   story is. The road may keep, move, rewrite or discard any of it
+   freely; no shipped beat has standing, and the flag names are
+   identifiers, not a claim that X is a boy. The first pitch of the
+   session is against `fishing-village` because it is where a player
+   currently begins, not because it is where the story begins.
 4. **LOCKED MECHANICS** (Conviction, Surge, Dice — `plan/bearings.md`)
    are not story material. A beat may feed or spend them; no beat
    removes them.
@@ -111,13 +120,11 @@ overview's header and proceed.
    session does **not** rename them — that is engine work, and pausing
    the road for it would be the tail wagging the dog. Note the cost once
    in the overview's `Noted for the pivot`, then keep walking.
-2. **THE TALLY §3 presumes a relationship.** Its mechanism is that the
-   player talks someone he loves into the rite and she is taken. That
-   needs two specific people. Under an X with no figure, the outline has
-   to *arrive* at an equivalent bond rather than inherit one. §1.1 still
-   holds — the bible's ending wins — but the road is what earns it.
-   If by the pivot no such bond has emerged, say so plainly: that is
-   the most important finding the session could return.
+2. **X has no relationships either.** No family, no friend, no beloved,
+   no rival. If the road needs a bond for a beat to land, that bond is
+   something a pitch **proposes** and T accepts — never something the
+   session assumes because a story usually has one. Who X is connected
+   to is an output of this session, exactly as who X is.
 
 ## 3. The method — one event per turn
 
@@ -168,8 +175,8 @@ After every recorded event, check three conditions. **Recommend the
 pivot when any one holds.** Say which one, and say it plainly.
 
 1. **The ending is nameable.** From the events so far you could write
-   the last event without a ballot, and it lands on the bible's §6.
-   The road has found its destination; walking further is decoration.
+   the last event without a ballot, and it would not surprise T. The
+   road has found its own destination; walking further is decoration.
 2. **Three or more events lean on the same unresolved tension.** A
    thing keeps coming up that no single beat can settle — the father's
    silence, what the Ribbon-Picker actually knows, whether the girl
@@ -196,14 +203,18 @@ it.
 One file: `axiomancer-mechanics/content/story/story-overview.md` —
 the same path the retired overview held, because this IS the new
 overview. Created on the first turn, appended every turn, committed
-every turn. `docs/story.md` and the two `.claude` spec skills point at
-`story-bible.md` today; when this file exists, point them at both.
+every turn. While it does not exist, `content/story/README.md` stands
+in its place and says there is no story; **when this file is created,
+update that README to point at it** and repoint `docs/story.md` and the
+two `.claude` spec skills. THE BLANK PAGE's ¶1 lifts at that moment and
+not before.
 
 ```markdown
 # Story overview — the road, event by event
 
-> Session <date>, T present. Thesis and ending: story-bible.md (THE
-> TALLY). This file is the sequence; that file is what it means.
+> Session <date>, T present. Built from nothing — no prior canon, by
+> T's instruction (THE BLANK PAGE, plan/bearings.md). This file is the
+> first story this game has.
 > Player: **X** — no name, no figure, no identifiers (decided 2026-09-18,
 > §2 of the prompt). X is a placeholder for brainstorming, never shipped text.
 > Status: <walking | pivot recommended (§4 condition N)>.
