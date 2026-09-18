@@ -6,7 +6,9 @@
 > Player: **X** — no name, no figure, no identifiers (decided 2026-09-18,
 > §2 of `plan/2026-09-17-story-outline.prompt.md`). X is a placeholder for
 > brainstorming, never shipped text.
-> Status: pivot recommended (§4 condition 2), 2026-09-18, after event 5.
+> Status: walking. (§4 condition 2 was recommended after event 5 and T
+> declined it — see `Pivot recommendation`. That condition is spent; it is
+> not raised again unless something new fires it.)
 
 ## Standing facts (established by T, not events)
 
@@ -121,6 +123,14 @@ more often.
   shipped node. Two flag candidates: whether X takes the first dose, and
   whether X pushes hers.
 
+### 6. For a while things are okay
+For a while things are okay.
+— Tension: none, and that is the beat. The road buys a lull on credit —
+  everything in events 1-5 is still true underneath it, nothing has been
+  paid off, and the only thing that has changed is that X has stopped being
+  punished for it. Whatever ends this is worse for having been waited for.
+  Keeps no shipped node. No flag.
+
 ## Noted for the pivot
 - The road starts in a castle dungeon; the build starts at `fishing-village`
   fv-1. Someone has to decide whether the village becomes later, becomes a
@@ -139,6 +149,11 @@ more often.
   undecided.
 
 ## Pivot recommendation
+
+> **Declined by T after event 5, 2026-09-18.** The road kept walking. Per §4,
+> condition 2 is spent and is not raised again unless something new fires it.
+> The recommendation is kept below because its four questions are still the
+> right four, and the higher-level session will still want them.
 
 **Condition 2 fired: three or more events lean on the same unresolved
 tension.** Events 2, 3, 4 and 5 all turn on one thing no single beat can
