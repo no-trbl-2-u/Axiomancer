@@ -62,6 +62,17 @@ export interface CombatSimPolicy {
     /** How a Befriend-opened mercy choice resolves. */
     mercyChoice: 'spare' | 'exploit';
     /**
+     * How a PLEA-opened capitulation offer (RELENT) resolves: `accept` ends
+     * the fight in the enemy's yield; `continue` declines and keeps fighting
+     * for this witness's own preferred win condition. A static per-policy
+     * stance, not a lookahead — mirrors `mercyChoice`'s shape. Only
+     * `mercy-seeker` (mercy is its entire identity) and `chaos` (the
+     * non-optimizing noise floor) accept; every other witness plays through
+     * the offer, since RELENT is one alt-win among several that compete on
+     * merit (CLAUDE.md), not a default exit.
+     */
+    capitulationChoice: 'accept' | 'continue';
+    /**
      * OPTIONAL (extension beyond the base contract): rank affordable signatures;
      * highest wins. When absent the sim takes the FIRST affordable signature in
      * `state.signatures` order whose kind is in `signatureKinds` — the legacy
@@ -242,6 +253,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         signatureKinds: LEGACY_SIGNATURE_KINDS,
         convictionThreshold: 7,
         mercyChoice: 'spare',
+        capitulationChoice: 'continue',
         chooseX: (_s, card, range) => greedyChooseX(card, range),
         // Phase 31 (EA-7) — the informed read finally has a payday: greedy
         // stakes when it actually knows the phase's stance (via the draft
@@ -261,6 +273,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         signatureKinds: LEGACY_SIGNATURE_KINDS,
         convictionThreshold: 7,
         mercyChoice: 'spare',
+        capitulationChoice: 'continue',
         chooseX: (_s, card, range) => greedyChooseX(card, range),
         // Phase 51 — same payoff-timing doctrine as greedy.
         crackAt: 2,
@@ -287,6 +300,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         signatureKinds: ['dot', 'conclude'],
         convictionThreshold: 7,
         mercyChoice: 'exploit',
+        capitulationChoice: 'continue',
         // Phase 51 — the erosion/poison-first witness; the poison Seal is its
         // natural line.
         crackAt: 2,
@@ -309,6 +323,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         signatureKinds: ['control', 'dot'],
         convictionThreshold: 8,
         mercyChoice: 'spare',
+        capitulationChoice: 'continue',
         // Phase 51 — denial witness; a persistent barrier synergizes with
         // holding a lock game.
         crackAt: 2,
@@ -323,6 +338,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         signatureKinds: ['conclude'],
         convictionThreshold: 7,
         mercyChoice: 'exploit',
+        capitulationChoice: 'continue',
     },
     turtle: {
         id: 'turtle',
@@ -342,6 +358,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         signatureKinds: ['sustain', 'dot', 'control'],
         convictionThreshold: 9,
         mercyChoice: 'spare',
+        capitulationChoice: 'continue',
         // The outlast temperament commits the least blood the card allows.
         chooseX: (_s, _card, range) => range.min,
         // Phase 51 — the outlast/barrier witness; a persistent Seal payoff is
@@ -358,6 +375,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         signatureKinds: ALL_SIGNATURE_KINDS,
         convictionThreshold: 7,
         mercyChoice: 'exploit',
+        capitulationChoice: 'accept',
         rankSignature: (_s, _sig, rng) => rng(),
         // Seeded-uniform X across the whole legal range (inclusive).
         chooseX: (_s, _card, range, rng) => range.min + Math.floor(rng() * (range.max - range.min + 1)),
@@ -379,6 +397,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         signatureKinds: ['mercy', 'control'],
         convictionThreshold: 6,
         mercyChoice: 'spare',
+        capitulationChoice: 'accept',
     },
 };
 

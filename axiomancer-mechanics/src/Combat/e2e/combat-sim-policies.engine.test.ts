@@ -399,6 +399,7 @@ describe('crackAt decision seam — upgradeablePlayPhase (combat.encounter.sim)'
             // existing conviction/signature-cast branch it sits beside.
             convictionThreshold: 999,
             mercyChoice: 'spare',
+            capitulationChoice: 'continue',
             crackAt,
         };
     }

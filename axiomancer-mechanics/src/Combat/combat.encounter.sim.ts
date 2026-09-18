@@ -778,8 +778,9 @@ export function runOneEncounter(
     while (state.phase !== 'complete' && loopGuard < 200) {
         loopGuard++;
         if (state.capitulationChoiceActive) {
-            state = selectCapitulationChoice(state, 'accept').state;
-            break;
+            state = selectCapitulationChoice(state, policyObj.capitulationChoice).state;
+            if (state.phase === 'complete' || state.finalOutcome) break;
+            continue;
         }
         if (state.mercyChoiceActive) {
             state = selectMercyChoice(state, policyObj.mercyChoice).state;
@@ -796,8 +797,9 @@ export function runOneEncounter(
             liveOptions += r.liveOptions;
             if (state.finalOutcome) break;
             if (state.capitulationChoiceActive) {
-                state = selectCapitulationChoice(state, 'accept').state;
-                break;
+                state = selectCapitulationChoice(state, policyObj.capitulationChoice).state;
+                if (state.phase === 'complete' || state.finalOutcome) break;
+                continue;
             }
             if (state.mercyChoiceActive) {
                 state = selectMercyChoice(state, policyObj.mercyChoice).state;
