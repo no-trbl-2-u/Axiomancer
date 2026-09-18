@@ -6,7 +6,7 @@
 > Player: **X** — no name, no figure, no identifiers (decided 2026-09-18,
 > §2 of `plan/2026-09-17-story-outline.prompt.md`). X is a placeholder for
 > brainstorming, never shipped text.
-> Status: walking.
+> Status: pivot recommended (§4 condition 2), 2026-09-18, after event 5.
 
 ## Standing facts (established by T, not events)
 
@@ -139,4 +139,44 @@ more often.
   undecided.
 
 ## Pivot recommendation
-<empty — §4 has not fired>
+
+**Condition 2 fired: three or more events lean on the same unresolved
+tension.** Events 2, 3, 4 and 5 all turn on one thing no single beat can
+settle — what X did in that cell, and the fact that the only people who could
+name it are dead, gone quiet, or waiting. Event 5 is what made it a spine
+rather than an aftermath: the road left the dungeon, changed place, changed
+company, and the tension came with it and started paying rent.
+
+What the road has established:
+
+- X is a coward and a turncoat who took the annexer's coin, and the post in
+  the dungeon is what that purchase bought.
+- X killed a child in that cell out of drunk incompetence, and the child's
+  father killed himself over it. Both witnesses to the night are dead.
+- X lied to the one survivor, cast himself as her hero, and was loved for it.
+- X is now living inside that lie, addicted, and has begun steering her
+  toward the drug that keeps her manageable and himself supplied.
+- One other man saw the whole thing and has said nothing yet.
+
+What the higher-level session should decide first, in this order:
+
+1. **Is the lie survivable?** Everything after event 5 is either the lie
+   holding or the lie breaking, and the road cannot pick its next event
+   without knowing which shape it is walking toward. This is the ending
+   question wearing a different hat.
+2. **What is the second guard for?** He is the only mechanism the road has
+   for the truth arriving from outside. Decide whether he is blackmail, a
+   reckoning, or a mirror before he is written, because he determines
+   whether X is ever caught or only ever known.
+3. **Where does the annexation put the seven shipped maps?** The road's world
+   has a conquest in it and the build's world does not. Until someone rules
+   on that line, no beat can be placed on an existing map, and
+   `fishing-village` is still where a player actually starts.
+4. **What is X's relationship to the LOCKED MECHANICS?** Conviction, Surge
+   and Dice are untouched and unclaimed by this road. Addiction, withdrawal
+   and a maintained lie are unusually mechanical material; deciding whether
+   they feed the locked three or want something of their own is a design
+   call, not an outline one.
+
+Next session's input is this file. Do not resume at §3.1 until the pivot has
+answered at least question 1.
