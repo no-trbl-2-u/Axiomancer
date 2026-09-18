@@ -14,7 +14,7 @@
 | cards | `skills/adjust-cards.md` | 2026-09-17 | 989cad9f | 12 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-17 | 6a28ba0b | 12 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-17 | 94da2e3f | 12 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-16 | 37c67a13 | 11 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-18 | 7bc53f82 | 12 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-16 | 858607d5 | 11 |
 
 ## Log
@@ -22,7 +22,7 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-keywords pass 13, 2026-09-18, commit <PENDING>]** One UPDATE —
+> **[adjust-keywords pass 12, 2026-09-18, commit 7bc53f82]** One UPDATE —
 > backfilled the **UNMOVED** keyword, presentation-only. Dispatched
 > autonomously by `/march`'s content-lifecycle gate (`keywords` was the
 > stalest qualifying category: last pass `37c67a13` 2026-09-16T14:56:08Z, 52

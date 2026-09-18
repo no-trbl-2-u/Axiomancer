@@ -317,7 +317,7 @@ const KEYWORD_GLOSS: Record<string, string> = {
     // Balance/Order): a PARITY read on the draw pile, not a turn-position
     // gate like AMBUSH/FLOW above.
     Eventide: 'This line fires free while your draw pile holds an even number of cards.',
-    // `/adjust-keywords` pass 13 — backfill, not a new mechanic: the
+    // `/adjust-keywords` pass 12 — backfill, not a new mechanic: the
     // `enemy-dealt-no-damage-last-round` SynergyStatePredicate has shipped on
     // 6 vigil/apocrypha cards since the Profane Canon rework and already
     // prints its UNMOVED die line (`combat.cards.ts`'s `statePredicateText`),

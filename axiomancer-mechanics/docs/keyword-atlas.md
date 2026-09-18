@@ -263,7 +263,7 @@ stale and corrected in the same pass.)
   never gained retheme-map rows either — that file is spec-34's historical
   rename ledger, not a running keyword registry).
 
-- **UNMOVED** (2026-09-18, `/adjust-keywords` pass 13) — a backfill, not a
+- **UNMOVED** (2026-09-18, `/adjust-keywords` pass 12) — a backfill, not a
   new mechanic. The `{ kind: 'enemy-dealt-no-damage-last-round' }`
   `SynergyStatePredicate` has been live since the Profane Canon rework on 6
   vigil/apocrypha cards (`src/Cards/library/vigil.cards.ts`:
@@ -278,7 +278,7 @@ stale and corrected in the same pass.)
   recognizes, and an ungossed word isn't recognized as a keyword at all, so
   the guard passed green over a real gap — same shape as pass 2's RUPTURE
   finding, on the presentation side instead of the numbers side. Found by
-  `/adjust-keywords` pass 13's structural audit (signal: "a keyword face
+  `/adjust-keywords` pass 12's structural audit (signal: "a keyword face
   word prints but has no popup/glyph wired"), confirmed by tracing
   `statePredicateText` -> `paidText`'s `dieLines` -> the mobile chip
   scanners (`keywordsInPersistentText`, `buildDetailKeywords`) and finding
