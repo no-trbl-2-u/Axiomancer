@@ -602,6 +602,49 @@ ambiguity.)
   names too**. A Phase 42 proposal to rename any of them must say so
   out loud, route through the Phase 44a map, and check
   `GAME_STATE_VERSION` — the mechanic survives either way.
+- **THE BLANK PAGE (T direct, attended session 2026-09-18) — there is
+  no story, and no law about what the story is.** T, verbatim: *"Remove
+  ALLL law about what the story is. We're starting from square one with
+  an unidentifieable 'x' as the first/main character."* This supersedes
+  every narrative ruling above it and every story document in the tree.
+  1. **No canon exists.** No arc, no premise, no ending, no theme, no
+     canonical characters, no world-story. `content/story/story-bible.md`
+     (THE TALLY, written and cleared the same day) and
+     `specs/world/W-02-the-capital-payoff.md` are deleted, following the
+     2026-09-17 removal of `story-overview.md`, `specs/story/S-01`,
+     `S-02` and `specs/characters/C-01`. Recoverable from git; **none is
+     a draft to return to.**
+  2. **The player is X.** No name, no figure, no identifiers — no age,
+     gender, body, station, trade or family. `X` is brainstorming
+     scaffolding, never shipped text, and never a placeholder for a name
+     to be chosen later. The 21 shipped `boy-*` flags are identifiers,
+     not a claim about who the player is; renaming them is deferred
+     engine work, not a story decision.
+  3. **Shipped narrative content is not canon.** ~186 dialogue nodes
+     across seven maps stay playable because removing them would break a
+     working game, not because they are true. A shipped line is evidence
+     of what an old draft assumed. No beat has standing; a future outline
+     may keep, move, rewrite or discard any of it.
+  4. **The loop does not invent canon.** If a tick needs a story fact
+     that does not exist, it says so and stops — it does not fill the
+     gap, reconstruct an arc from shipped text, restore a removed
+     document, or write a replacement on its own initiative. This is a
+     deliberate carve-out from THE LONGER LEASH R-D/R-F and THE OPEN
+     GATE ¶8: the loop's content-growth mandate does **not** extend to
+     authoring story canon while this ruling stands. Growth in cards,
+     enemies, keywords, maps and art is unaffected.
+  5. **What survives.** `docs/narrative/` (style constitution, voice
+     registers, lexicon, anti-imitation) is craft law — *how* copy is
+     written, not *what* happened — and is untouched. LOCKED MECHANICS
+     and every combat/world system are untouched. This clearing is
+     narrative only.
+  6. **How it ends.** A new overview gets built from nothing, event by
+     event, in attended sessions per
+     `plan/2026-09-17-story-outline.prompt.md`. When
+     `content/story/story-overview.md` exists again, it supersedes this
+     ruling's ¶1. Nothing else lifts it.
+  Marker in the tree: `content/story/README.md`.
+
 - **THE GROWTH FLOOR (T direct, attended `/oversight` 2026-09-17) — the
   growth mandate gets guaranteed tick budget, and stewards ship small
   gaps instead of filing them.** THE OPEN GATE ¶8 made growth a standing

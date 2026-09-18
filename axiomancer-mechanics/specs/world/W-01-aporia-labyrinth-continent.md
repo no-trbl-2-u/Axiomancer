@@ -1,5 +1,22 @@
 # World Spec W-01 — The Aporia (labyrinth continent)
 
+> **NARRATIVE FRAMING VOID (THE BLANK PAGE, T direct 2026-09-18).**
+> There is no story canon — see `plan/bearings.md` and
+> `content/story/README.md`. Every story claim in this spec is
+> therefore **void, not canon**: that the Aporia is "the game's thesis
+> made spatial," that it gates an endgame, that it is a proving ground
+> for a philosophy, and every reference to the Sophist as a narrator or
+> finale (`specs/characters/C-01` was deleted 2026-09-17 and the
+> cross-reference below dangles by design).
+>
+> **What survives is the mechanic and the place:** a MAZE-style puzzle
+> continent of ~47 rooms, one-way descent, backtracking and revision as
+> the core verb, with validator-proven room content in `plan/labyrinth/`.
+> That is real engineering work and is kept on those terms alone.
+> Whether this place is ever in the game, and what it means if it is, is
+> a question for the new overview. Its access gate remains shut
+> (dev-menu/CLI-only) as it has been since 2026-07-07.
+
 ## Goal
 
 A MAZE-style puzzle labyrinth continent (after Christopher Manson's

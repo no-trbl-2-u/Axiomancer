@@ -1,8 +1,23 @@
-# Axiomancer Story
+# Shipped narrative content — a catalogue, NOT canon
 
-Axiomancer is a turn-based strategy RPG where players control a character who embarks on a journey to discover their true identity and the secrets behind the veil. After the king loses their advisor and opens the gates of the city to find their successor, the player must navigate the challenges of the labyrinth to reach the heart of the city and become the new advisor.
-
-The full arc is canon in [`content/story/story-bible.md`](../content/story/story-bible.md) (THE TALLY, 2026-09-17 — replaced the retired `story-overview.md`); this file collects the per-NPC and per-beat documentation as it lands. Narrative specs live under [`specs/story/`](../specs/story/), [`specs/characters/`](../specs/characters/), and [`specs/world/`](../specs/world/) — see the Phase 22 authoring cards (`/story-spec`, `/character-spec`, `/world-spec`).
+> **THERE IS NO STORY.** This game has no story canon and no law about
+> what its story is (THE BLANK PAGE, T direct 2026-09-18 — see
+> `plan/bearings.md` and `content/story/README.md`). The player is **X**:
+> no name, no figure, no identifiers.
+>
+> **What this file is:** a catalogue of narrative content that currently
+> ships, so an engineer can find it. Every entry below documents text
+> that is *in the build*. None of it documents what the story *is*.
+>
+> **Do not read an arc out of this file.** The premise this document
+> used to open with — a king, a dead advisor, a succession, a labyrinth
+> at the heart of a city — was cleared with the rest of the story law.
+> Shipped lines are evidence of what an old draft assumed, nothing more.
+> A future overview may keep, move, rewrite or discard any of them.
+>
+> Narrative *craft* rules still govern how copy is written:
+> `docs/narrative/` (style constitution, voice registers, lexicon).
+> Those are style law, not story law, and they are untouched.
 
 ## Characters
 
