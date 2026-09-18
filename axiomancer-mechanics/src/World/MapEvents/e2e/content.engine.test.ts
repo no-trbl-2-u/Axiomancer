@@ -76,7 +76,7 @@ describe('fishing-village content — new-player map', () => {
     // recovery + texture, encounters/interaction/rest tied for largest, and
     // ONE boss node (fv-6, an `encounter` with isBoss). See the new-player
     // override block in `content.ts`.
-    it('is a balanced spread, encounters/interaction/rest tied for largest, one boss', () => {
+    it('is a balanced spread, interaction the single largest kind, one boss', () => {
         mockSequentialRng(0.5);
         const counts = kindTally('fishing-village');
 
@@ -96,27 +96,31 @@ describe('fishing-village content — new-player map', () => {
         expect(counts.encounter).toBe(4);
         expect(counts.cutscene).toBe(1);
         expect(counts.rest).toBe(4);
-        expect(counts.gathering).toBe(3);
+        // adjust-npcs pass 12 (2026-09-18) — fv-22 (kelp-frond) staged the
+        // Village Healer instead: gathering drops 3 → 2.
+        expect(counts.gathering).toBe(2);
         expect(counts.hazard).toBe(1);
         expect(counts.travel).toBe(1);
         expect(counts['loot-cache']).toBe(3);
         // fv-14 "What Do I Tell Father?" (Phase 24), fv-16 "The Borrowed
         // Hook" and fv-4 "The Stranger's Net" (both Phase 53d/S-01).
         expect(counts.narration).toBe(3);
-        // Phase 53c (S-02) — four homed NPCs: Old Marrow (fv-2), the
-        // Coastal Beggar (fv-7), Captain Blackwater (fv-18), and the
-        // Fisherman's Daughter (fv-19, was the unrostered 'Weathered
-        // Fisher').
-        expect(counts.interaction).toBe(4);
+        // Phase 53c — four homed NPCs: Old Marrow (fv-2), the Coastal Beggar
+        // (fv-7), Captain Blackwater (fv-18), and the Fisherman's Daughter
+        // (fv-19, was the unrostered 'Weathered Fisher'). adjust-npcs
+        // pass 12 (2026-09-18) staged a fifth: the Village Healer (fv-22,
+        // was a `gathering` node — no roster foe or flag/pricing dependency
+        // to orphan, unlike every remaining `encounter` slot).
+        expect(counts.interaction).toBe(5);
         // Phase 60 — the re-homed anvil, a single fixed placement at fv-21
         // (not a cadence — see `content.ts`'s `FV_BLACKSMITH_NODES`).
         expect(counts.blacksmith).toBe(1);
-        // Encounter, interaction, and rest now tie for the largest kind at
-        // 4 apiece — no single kind dominates the map.
+        // Interaction is now the map's single largest kind; rest and
+        // encounter tie one behind it.
         const maxCount = Math.max(...Object.values(counts));
         expect(counts.interaction).toBe(maxCount);
-        expect(counts.rest).toBe(maxCount);
-        expect(counts.encounter).toBe(maxCount);
+        expect(counts.rest).toBe(maxCount - 1);
+        expect(counts.encounter).toBe(maxCount - 1);
         // Every node resolved to a real kind.
         expect(Object.values(counts).reduce((a, b) => a + b, 0)).toBe(25);
     });

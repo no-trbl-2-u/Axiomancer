@@ -111,22 +111,23 @@ describe('map encounter → minigame routing (northern-forest)', () => {
 });
 
 describe('fishing-village gauntlet routing', () => {
-    it('is varied with a balanced node mix: encounter/interaction/rest tied at the top, plus texture/narration nodes', () => {
+    it('is varied with a balanced node mix: interaction the single largest kind, plus texture/narration nodes', () => {
         const def = getMapDefinition('coastal-continent', 'fishing-village');
         const kinds = def.nodes.map((n) =>
             getNodePrimaryEventKind('coastal-continent', 'fishing-village', n.id),
         );
         const count = (k: string) => kinds.filter((x) => x === k).length;
         // Balanced variety (owner-requested), re-tuned by Phase 53c/53d/60/61
-        // (S-02 homed four NPCs onto former encounter/hazard nodes; S-01
-        // spent two more encounters on dilemmas; Phase 60 spent a third on
-        // the re-homed anvil; Phase 61 gave one back — the retired
-        // quest-board node rejoined the encounter roster): encounter,
-        // interaction, and rest now TIE for the largest kind at 4 apiece —
-        // no kind is dominant — and a real spread of recovery / texture /
+        // (four NPCs homed onto former encounter/hazard nodes; two more
+        // encounters spent on dilemmas; a third on the re-homed anvil; one
+        // given back — the retired quest-board node rejoined the encounter
+        // roster) and adjust-npcs pass 12 (2026-09-18, a fifth NPC — the
+        // Village Healer — homed onto a former gathering node): encounter
+        // and rest tie at 4, interaction is now the single largest kind at
+        // 5 — no kind dominates, and a real spread of recovery / texture /
         // narration nodes remains.
         expect(count('encounter')).toBe(4);
-        expect(count('interaction')).toBe(4);
+        expect(count('interaction')).toBe(5);
         expect(count('rest')).toBe(4);
         expect(count('gathering')).toBeGreaterThanOrEqual(1);
         expect(count('hazard')).toBeGreaterThanOrEqual(1);

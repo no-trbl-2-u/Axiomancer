@@ -184,7 +184,15 @@ const tideshopkeeperTree: DialogueTree = {
         },
         browse: {
             id: 'browse',
-            text: "The shopkeeper gestures at three crates. (Shop implementation lands in a later spec.)",
+            // adjust-npcs pass 12 (2026-09-18) — was "(Shop implementation
+            // lands in a later spec.)", written when no shop-capable event
+            // kind existed at all. One now does (`VillagePayload`'s
+            // `merchants`/`shop`, live on six other maps) but it is a
+            // separate always-on node kind, not something an `interaction`
+            // choice can open — so the honest line for THIS tree, staged or
+            // not, is that the stall does not transact here. Left unstaged;
+            // see `unstagedNpcs` below.
+            text: "Salt-cured fare, twine, and a coil of tarred line — nothing changes hands here.",
         },
     },
 };
@@ -547,15 +555,26 @@ const fishingVillage: MapDefinition = {
         mapImage: { alt: '', src: '' },
         combatImage: { alt: '', src: '' },
     },
-    // Phase 53a/53c (S-02) — written-not-staged, not lost. Old Marrow, the
-    // Coastal Beggar, Captain Blackwater, and the Fisherman's Daughter are
-    // homed as of Phase 53c; the remaining four stay declared-unstaged with
-    // a per-NPC reason, per S-02's roster-size call (four homed, four not).
+    // Phase 53a/53c — written-not-staged, not lost. Old Marrow, the
+    // Coastal Beggar, Captain Blackwater, the Fisherman's Daughter, and (as
+    // of adjust-npcs pass 12) the Village Healer are homed; the remaining
+    // three stay declared-unstaged with a per-NPC reason. The originating
+    // spec (S-02) is gone (THE BLANK PAGE, 2026-09-18) — reasons below are
+    // re-stated against current engine state, not the retired document.
     unstagedNpcs: [
-        { name: 'Tide-Shopkeeper', reason: 'isShopkeeper: true, and the shop UI has been out of scope since Spec 08 — a shop node that cannot sell is worse than no shop node (S-02).' },
-        { name: 'Village Healer', reason: 'Wants the context of a rest node; place her once the rest rebuild (phases 52c/52d) has fully settled (S-02).' },
-        { name: "Dockworker's Union Leader", reason: 'A village-politics voice with no village to be political in yet — belongs to whatever map gets a real settlement screen (S-02).' },
-        { name: "Merchant's Widow", reason: 'Same as the Union Leader; also the third grief-shaped character alongside Old Marrow and the Beggar — the register would repeat (S-02).' },
+        // adjust-npcs pass 12 (2026-09-18) — re-checked against current
+        // engine state: `isShopkeeper` shop UI now exists (`VillagePayload`'s
+        // `merchants`/`shop`, live on six maps via the 'village' event kind),
+        // but it is its own node kind with its own screen, not something an
+        // `interaction` node's `DialogueChoice.effect` can open — there is no
+        // `openShop`-shaped effect on `DialogueChoice`. Staging her via
+        // 'village' instead of 'interaction' would drop her tree's actual
+        // branching (the village screen reads only a merchant's root line as
+        // flavor, see `VillageMerchantVM`) for a shop she'd still need
+        // pre-picked wares for. Blocker still holds, restated without S-02.
+        { name: 'Tide-Shopkeeper', reason: "isShopkeeper: true, and the shop-capable event kind ('village') is a separate always-on node surface an NPC's dialogueTree cannot trigger — a stall staged as a plain interaction still cannot sell." },
+        { name: "Dockworker's Union Leader", reason: "A village-politics voice written for a real settlement hub; the 'village' event kind that shipped since is a shop screen (merchants read as a flavor line only, not this NPC's branching tree) rather than the multi-voice settlement scene the tree was written for." },
+        { name: "Merchant's Widow", reason: "Same placement gap as the Union Leader; also a third grief-shaped voice alongside Old Marrow and the Coastal Beggar on one small map — register repetition, unresolved without a fresh read on the map's emotional spread." },
     ],
 };
 

@@ -580,31 +580,40 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
 //                         rejoined this count in Phase 61, see below),
 //   - 4 REST nodes       (recover HP — the rest-choice node), one on the
 //                         spine just before the boss,
-//   - 3 GATHERING nodes  (low-risk materials — "The Gleaning"),
-//   - 2 HAZARD nodes     (light risk — the hazard minigame),
+//   - 2 GATHERING nodes  (low-risk materials — "The Gleaning"; was 3 until
+//                         adjust-npcs pass 12 staged the Village Healer
+//                         onto fv-22, see below),
+//   - 1 HAZARD node      (light risk — the hazard minigame; was 2 until
+//                         2026-08-28 turned fv-10, the terminal barnacle
+//                         hazard, into the coast-road DOOR — see TRAVEL),
 //   - 3 LOOT-CACHE nodes (a few coins the tide left behind),
 //   - 3 NARRATION nodes  (Phase 53d/S-01 — fv-14 "What Do I Tell Father?",
 //                         fv-16 "The Borrowed Hook", fv-4 "The Stranger's
 //                         Net"; each a dialogue-backed branching dilemma),
-//   - 4 INTERACTION nodes (Phase 53c — Old Marrow at fv-2, the Coastal
+//   - 5 INTERACTION nodes (Phase 53c — Old Marrow at fv-2, the Coastal
 //                         Beggar at fv-7, Captain Blackwater at fv-18, the
-//                         Fisherman's Daughter at fv-19),
+//                         Fisherman's Daughter at fv-19; adjust-npcs pass 12
+//                         — the Village Healer at fv-22),
 //   - 1 CUTSCENE node    (fv-1, the arrival — see `fvArrival` below),
 //   - 1 BLACKSMITH node  (fv-21, Phase 60 — the re-homed anvil, post-boss
 //                         and past every loot-cache reward so the visit is
-//                         actually funded), and
+//                         actually funded),
+//   - 1 TRAVEL node      (fv-10, the coast-road door north, 2026-08-28), and
 //   - 1 BOSS node        (fv-6, the region climax — an encounter w/ isBoss).
 // Phase 61 retired the Quest Board minigame ("The Boy's Almanac") and with
 // it fv-15's `quest` kind — no map carries that kind any more. fv-15
 // rejoins the encounter roster instead (see `FV_ENCOUNTER_FOES`'s fv-15
 // entry): the cleanest reversal of the very displacement Phase 53c/60
 // documented (an authored non-encounter kind always came FROM an encounter
-// slot; this is the first one going back). Interaction and rest tie for
-// the largest kind at 4 apiece — Phase 53d (S-01) spent two of the map's
-// encounter surplus on dilemmas and Phase 60 spent a third (fv-21) on the
-// anvil (see the spec's answered Open Question 1: displacing an
-// `encounter` node is the only reassignment that doesn't grow the grid or
-// merge two payloads onto one node). This block supersedes the legacy
+// slot; this is the first one going back). Interaction is now the map's
+// single largest kind at 5, rest and encounter tied behind it at 4 — Phase
+// 53d (S-01) spent two of the map's encounter surplus on dilemmas, Phase 60
+// spent a third (fv-21) on the anvil, and adjust-npcs pass 12 spent a
+// gathering slot (fv-22) on the Village Healer (see the spec's answered
+// Open Question 1: displacing an `encounter` node is the only reassignment
+// that doesn't grow the grid or merge two payloads onto one node — pass 12
+// displaced a `gathering` node instead, for the same reason: no roster foe
+// or flag/pricing dependency to orphan). This block supersedes the legacy
 // authored pools above (kept in source for reference). Foes stay
 // on the gentlest L1–L2 roster; the boss is pinned to a low absolute level
 // so a fresh player can actually win the climax (the shared coastal-tyrant
@@ -963,7 +972,9 @@ const FV_REST_NODES: Record<string, string> = {
     'fv-20': 'A dry hollow under an upturned hull. You rest a while.',
     'fv-25': 'A tide-pool grotto, still and warm. You let the quiet mend you.',
 };
-const FV_GATHER_NODES: Record<string, number> = { 'fv-5': 0, 'fv-8': 1, 'fv-22': 3 };
+// adjust-npcs pass 12 (2026-09-18) — fv-22 (kelp-frond, idx 3) is dropped
+// from this table; see `fvVillageHealerInteraction` below.
+const FV_GATHER_NODES: Record<string, number> = { 'fv-5': 0, 'fv-8': 1 };
 // 2026-08-28 — fv-10, the spine's terminal "coast road out", was a hazard
 // (jagged barnacles); it is now the map's DOOR. fv-23 keeps the map's one
 // remaining hazard node.
@@ -1022,6 +1033,22 @@ const fvFishermansDaughterInteraction = fvInteractionPool(
     'A young woman mends nets on the quay, watching the water more than her hands.',
 );
 
+// adjust-npcs pass 12 (2026-09-18) — the Village Healer carried a full
+// dialogue tree since Phase 128 and sat in `unstagedNpcs` waiting on the
+// rest rebuild (phases 52c/52d, since shipped). Staged here rather than
+// re-filed: fv-22 (a `gathering` node, kelp-frond) shares column 8 with
+// fv-9, one of the map's four rest nodes ("A roofless cottage out of the
+// wind") — the same waypoint cluster, without touching any rest node
+// (pacing) or pinned-encounter node (would orphan an enemy — every regular
+// `encounter` slot on this map carries a roster foe with no other reachable
+// home; see `FV_ENCOUNTER_FOES`). No flag or pricing dependency reads
+// fv-22's prior gathering payload.
+const fvVillageHealerInteraction = fvInteractionPool(
+    'fv-22',
+    'Village Healer',
+    'A canvas lean-to strung between two posts, herbs drying along the ridge line — the closest thing to a clinic this stretch of coast has.',
+);
+
 const FISHING_VILLAGE_NEW_PLAYER_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> =
     (() => {
         const out: Array<{ nodeId: string; pool: MapEventPool }> = [];
@@ -1045,6 +1072,8 @@ const FISHING_VILLAGE_NEW_PLAYER_POOLS: ReadonlyArray<{ nodeId: string; pool: Ma
                 out.push({ nodeId, pool: fvCaptainBlackwaterInteraction });
             } else if (nodeId === 'fv-19') {
                 out.push({ nodeId, pool: fvFishermansDaughterInteraction });
+            } else if (nodeId === 'fv-22') {
+                out.push({ nodeId, pool: fvVillageHealerInteraction });
             } else if (nodeId === 'fv-10') {
                 out.push({ nodeId, pool: fvCoastRoadNorth });
             } else if (FV_REST_NODES[nodeId]) {
