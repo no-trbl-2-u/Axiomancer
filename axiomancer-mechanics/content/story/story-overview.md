@@ -90,6 +90,18 @@ getting loose and killing himself.
   events 1-2: the post, the drink and the orders are all the price of the
   betrayal. Keeps no shipped node. No flag yet.
 
+### 4. The mother at the gate, and the lie
+The child's mother comes for her family at the gate, and X is the one sent
+out to tell her what became of them. But X falls in love with her at first
+sight and decides to lie to her, painting himself as the hero.
+— Tension: the first thing X builds after the cell is founded on the cell.
+  The lie has to be maintained, which means every later beat either feeds it
+  or threatens it, and the only two people who could have contradicted X are
+  the two people X is lying about. Gives X the first relationship the road
+  has (§2 ¶2: proposed, and T took it). Keeps no shipped node. No flag yet;
+  this is the road's first obvious flag candidate — what X told her, and
+  whether it holds.
+
 ## Noted for the pivot
 - The road starts in a castle dungeon; the build starts at `fishing-village`
   fv-1. Someone has to decide whether the village becomes later, becomes a
