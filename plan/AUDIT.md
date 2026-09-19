@@ -335,6 +335,31 @@
   player read any covered card. Real fix needs care, not a quick patch —
   hence parked below the cheaper wins above despite the comparable score.
 
+> **Triaged 2026-09-19 (issue #343) — design ready, ease likely higher
+> than filed.** User issue #343 mirrors this exact row and proposes a fix
+> that sidesteps the naive-widen risk noted above entirely: leave
+> `handFanLayout()`'s derived geometry untouched and instead size the
+> name *box* to the sliver that's actually visible — a
+> `NAME_BAND_LEFT_CHROME` constant (17.5pt, derived from the four chrome
+> styles rather than duplicated), a `nameColumnPeek(step)` helper, and an
+> optional `CombatCardFace.namePeek` prop that caps `plateName`'s
+> `maxWidth` only for the hand fan (the other four face sizes — staged,
+> reward offer, drag ghost, detail overlay — stay byte-identical). The
+> last (uncovered) card keeps the full band, and `handFanLayout` itself
+> stays unchanged so the existing C11/C11-R2 geometry invariants in
+> `CombatBoard.fresh-eyes-repair.test.tsx` keep holding. Issue also
+> proposes a `CombatBoard.handfan.test.tsx` guard suite (10 tests:
+> re-derive the chrome constant independently, pin the peek at the
+> captured viewport 57.75 -> 40.25, assert every covered card is capped
+> to exactly the peek and the last isn't, assert non-fanned faces stay
+> uncapped) and surfacing the existing tap-to-inspect hatch as visible
+> copy ("tap a card to read it"), not just an `accessibilityHint`. Not
+> re-scoring here — leaving that to whichever `/iterate` pass picks this
+> row up, since it should verify the design against current code first —
+> but flagging that ease is plausibly higher than 5 given the design and
+> test plan are already worked out. Reference `Closes #343` in the
+> closing commit.
+
 > **RESOLVED 2026-09-15 (Phase 81) — no longer parked.** `[HIGH]
 > late-stage global collapse — all 10 presets 0.00 late` is closed in
 > `plan/CRITIQUE.md`: both of the 2026-08-08 reopen conditions (redesign

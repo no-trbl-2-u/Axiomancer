@@ -549,3 +549,6 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-19T15:44:09Z | skill | workflow-authoring | claude-fable-5-1 | - | - |
 | 2026-09-19T15:44:09Z | skill-end | workflow-authoring | claude-fable-5-1 | 0s | ok |
 | 2026-09-19T15:45:36Z | tick-end | - | claude-fable-5-1 | 1m31s | ok |
+| 2026-09-19T16:29:37Z | slash-prompt | /march | - | - | /march |
+| 2026-09-19T16:29:52Z | skill | triage | claude-sonnet-5 | - | - |
+| 2026-09-19T16:29:52Z | skill-end | triage | claude-sonnet-5 | 0s | ok |
