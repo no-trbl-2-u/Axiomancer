@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-09-18 at commit 6a804a02
-> Pass count: 41
+> Last pass: 2026-09-19 at commit bbd22a94
+> Pass count: 42
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -551,7 +551,75 @@
 > ("quickens the wearer's convictions"); no other consumable does. Filed
 > below.
 
+> **[critique pass 42, 2026-09-19, commit bbd22a94] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5,
+> `CRITIQUE_VIEWPORT=both`) at both mobile (375×812) and desktop
+> (1280×800) against the full 11-screen set (title, onboarding, combat
+> preview, live combat-board, exploration hub, dialogue, village,
+> cutscene, rest, hazard, late-game hub) — 22 captures, 0 with nav
+> trouble, 0 console/page errors, no undefined/NaN/`[object Object]`
+> text artifacts in any DOM-text dump. Self-assessed against the
+> current Pending/Done log: the OMEN cutscene redirect (onboarding,
+> exploration-hub) holds clean at prior-pass baseline; the hazard
+> danger-card's flat-vector art (this pass's fixtures rolled "Flooded
+> Undercroft" mobile / "The Famine March" desktop) reconfirms pass 34's
+> deliberate-style call, not filed; the village "Void Essence" wearer
+> wording (pass 41, still Pending) reproduces unchanged, not re-filed.
+> One new finding: Phase 97 (commit cecae8f, resolving the mobile
+> hand-fan occlusion row) shipped a visible "tap a card to read it"
+> hint for the exact truncation this pass still shows (`04-combat-board.png`:
+> "CHILBLA IN...", "THE LONG...", "SPOILED POULT..." — confirmed
+> against `04-combat-board.txt`'s untruncated "Chilblain Watch"/"The
+> Long Lent"/"Spoiled Poultice") — but the hint only renders once a
+> card is already staged (`CombatBoard.tsx:1546`, gated on
+> `stagedCards.length > 0`), never for the hand fan itself where the
+> truncation lives and where a player would need it to choose which
+> covered card to play. Filed below.
+
 ## Pending
+
+### [MED] combat — Phase 97's "tap a card to read it" hint never shows for the truncated hand fan it was built to fix
+- pass: 42 (commit bbd22a94)
+- viewport: mobile (375×812) — the hand-fan truncation this hint
+  addresses doesn't occur on desktop (1280×800), so the gap is
+  practically mobile-only
+- category: comprehension / legibility
+- observation: Phase 97 (RESOLVED row below, commit cecae8f, issue
+  #343) fixed the mobile hand fan's name *occlusion* by capping
+  `plateName`'s width to the visible sliver (`namePeek`) so covered
+  names wrap/truncate instead of being painted over, and shipped a
+  visible line — `{deadTray ? '...' : 'drag a die onto your card ·
+  APPLY to commit · tap a card to read it'}` — advertising the
+  already-wired tap-to-inspect escape hatch. That line only renders
+  inside the `stagedCards.length > 0 && !stagedCards.some(assigned) &&
+  ...` branch (`CombatBoard.tsx:1546-1556`) — i.e. only after a card
+  has already been dragged up to stage. The hand fan itself
+  (`CombatBoard.tsx:1677-1706`, where `HandCard` receives `namePeek`
+  and the truncation actually happens) carries the same tap gesture
+  and an `accessibilityHint="Drag up to stage, or tap to read"`
+  (line 1690), but no on-screen text — a sighted player looking at
+  "CHILBLA IN..." / "THE LONG..." / "SPOILED POULT..." in the fan has
+  no visible cue that tapping reveals the full name; they have to
+  already know, or discover it by accident, before staging the very
+  card whose name they couldn't read. This reproduces on a fresh
+  `Brine Hag` opening hand with no staged cards yet, i.e. the exact
+  moment the hint is needed.
+- evidence: `axiomancer-mobile/.critique-artifacts/mobile/04-combat-board.png`
+  (hand row: "THIN HYMN", "CHILBLA IN...", "THE LONG...", "SPOILED
+  POULT...", "CHILBLAIN WATCH"); `04-combat-board.txt` confirms
+  untruncated names ("Chilblain Watch", "The Long Lent", "Spoiled
+  Poultice"); `axiomancer-mobile/components/combat/encounter/CombatBoard.tsx:1546-1556`
+  (hint gated on staged cards), `:1677-1706` (hand fan, no visible hint),
+  `:1690` (a11y-only hint on hand cards).
+- suggested fix: surface the same visible line (or a shorter variant)
+  whenever the fan contains a card whose `namePeek` is non-null and no
+  card is yet staged — e.g. extend the existing `stageHint` `Text` to
+  also render for `fan.some((c, i) => i !== fan.length - 1)` before
+  anything is staged, reusing the string that already exists at
+  `CombatBoard.tsx:1554`. Component: `CombatBoard.tsx` (`stageHint`,
+  hand-fan render block).
+- source: loop
+
 
 ### [x] [HIGH] process — a committed playtest bug report reached `main` filed NOWHERE in `plan/` — RESOLVED 2026-09-19 (phases 99-100)
 - pass: burn-day player-visibility sweep 2026-09-19
