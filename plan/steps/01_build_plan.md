@@ -235,6 +235,26 @@ Tick in this file in the same commit that ships the phase.
       whatever art you'd like for a true big impact"), authorized as a loop call
       by THE OPEN GATE 6.
       — `feat(mobile): every settled region fights on its own ground — phase 101` (e4e2704)
+- [x] Phase 102 — SUMMON, the add-spawning enemy archetype: a foe fields bodies
+      of its own that bite for a flat number every threat phase — outside the
+      `!hindered` gate, because bodies act — and are cleared by a dieless but
+      Conviction-priced `strikeAdd`. Never a win condition: clearing the brood
+      is progress, not victory. Shipped WHOLE, engine and surface: the chips,
+      the STRIKE/WAIT sheet, and the wall-math readout that stops printing a
+      bare DENIED while the adds are still biting. Carrier: The Jeweled Tree.
+      Designed by a three-lens adversarial panel that refuted the cheap path
+      (appending the bite to `threatEffects` corrupts four ledgers silently).
+      — `feat: SUMMON — the add-spawning archetype, engine and board — phase 102`
+- [x] Phase 103 — The last two arenas: the acquisition pipeline learns to crop a
+      plate off a scanned page (`detectPlateBox` takes the longest contiguous
+      dark run, not the first/last crossing), which was the exact blocker Phase
+      101 filed. The Caverns and The Capital get their own Dore plates —
+      bespoke arenas 4 of 7 -> 6 of 7 — and `arena-ruined-city.jpg` (pixel art,
+      licence UNRESOLVED, and the most-seen arena in the game because it was the
+      fallback) is retired under THE OPEN GATE 6. Two holes in the provenance
+      gate that let a deleted file stay referenced are closed, each proven to
+      fail on its condition.
+      — `feat(mobile): the last two arenas, and the plate that shouldn't have shipped — phase 103`
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics:

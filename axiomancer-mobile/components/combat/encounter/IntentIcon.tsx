@@ -27,10 +27,22 @@ export function IntentIcon({ intent, onPress }: { intent: CombatIntentVM; onPres
     // phase 28 — wall-math: the raw `damage` stake above is face value only;
     // `wallMath` is what actually lands right now, netted against live
     // guard/barrier/modifiers. State the REAL outcome in a11y, not the raw one.
-    const { willDeny, netDamage, rungsTotal, rungsLost } = intent.wallMath;
+    const { willDeny, netDamage, rungsTotal, rungsLost, addNetDamage, totalNetDamage } = intent.wallMath;
+    // Phase 102 (SUMMON) — DENYING THE FOE DOES NOT DENY ITS BROOD. Before this
+    // pass the readout printed a bare "DENIED" whenever `willDeny` was set,
+    // which with adds on the board is a flat lie: the player reads "no damage
+    // lands", ends the phase, and takes the bite anyway. A telegraph that
+    // understates what is coming is worse than no telegraph, so the brood's
+    // share is stated in both the badge and the a11y label whenever it exists.
+    const hasAdds = addNetDamage > 0;
     const wallMathLabel = willDeny
-        ? ' This turn will be DENIED — no damage lands.'
-        : intent.damage > 0 ? ` ${netDamage} will actually land through your current guard.` : '';
+        ? (hasAdds
+            ? ` The foe's own blow will be DENIED, but its brood still bites you for ${addNetDamage}.`
+            : ' This turn will be DENIED — no damage lands.')
+        : intent.damage > 0
+            ? ` ${netDamage} will actually land through your current guard.`
+                + (hasAdds ? ` Its brood bites for ${addNetDamage} more — ${totalNetDamage} in total.` : '')
+            : hasAdds ? ` Its brood bites you for ${addNetDamage}.` : '';
     // Phase 33b — the rung count was previously invisible entirely; state it
     // so STAGGER reads as a sized answer to a sized threat.
     const rungsRemaining = Math.max(0, rungsTotal - rungsLost);
@@ -80,8 +92,17 @@ export function IntentIcon({ intent, onPress }: { intent: CombatIntentVM; onPres
                     {intent.branch && <Text style={[styles.pillText, { color: intent.color }]} allowFontScaling={false}>⑂</Text>}
                 </View>
             )}
-            {willDeny ? (
+            {/* Phase 102 — the brood's share rides in this one readout rather
+                than a second badge: the player is reading "what do I lose if I
+                end the phase now?", and that is one number, not two. The DENIED
+                word is kept when the foe's own blow is denied (it is still true
+                and still worth knowing) but never alone while adds are alive. */}
+            {willDeny && !hasAdds ? (
                 <Text style={styles.wallMathDenied} testID="combat-intent-wallmath" allowFontScaling={false}>DENIED</Text>
+            ) : willDeny && hasAdds ? (
+                <Text style={styles.wallMathNet} testID="combat-intent-wallmath" allowFontScaling={false}>DENIED →{addNetDamage}</Text>
+            ) : hasAdds ? (
+                <Text style={styles.wallMathNet} testID="combat-intent-wallmath" allowFontScaling={false}>→{totalNetDamage}</Text>
             ) : intent.damage > 0 && netDamage !== intent.damage ? (
                 <Text style={styles.wallMathNet} testID="combat-intent-wallmath" allowFontScaling={false}>→{netDamage}</Text>
             ) : null}

@@ -32,7 +32,7 @@ import Svg, { Circle, Defs, Line, Polygon, RadialGradient, Stop } from 'react-na
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
-    startTurn, endTurn, draftStanceDie, discardCombatCard, playSignatureSkill, crackGlyph,
+    startTurn, endTurn, draftStanceDie, discardCombatCard, playSignatureSkill, crackGlyph, strikeAdd,
     tapFateDie, getPendingDotTotal, getFloatingDiceColors,
     selectEncounterMercyChoice, selectCapitulationChoice, buildCombatSummary,
     getLogger,
@@ -54,7 +54,7 @@ import { getEncounterEnemyArt } from '@/assets/images/enemies';
 import {
     INTENT_ICONS, buildCombatViewModel, resolveApplyRouting, rewardCardVMs, selectEnemyActionCard, STANCE_COLORS,
     selectCombatLogHistory, COMBAT_LOG_TOGGLE_TEXT, COMBAT_LOG_TOGGLE_A11Y, COMBAT_LOG_CLOSE_A11Y,
-    type CombatCardVM, type CombatEffectChipVM, type CombatSealVM, type CombatSignatureVM, type EnemyActionCardVM,
+    type CombatCardVM, type CombatEffectChipVM, type CombatSealVM, type CombatAddVM, type CombatSignatureVM, type EnemyActionCardVM,
 } from '@/state/presenters/combat-encounter.engine';
 import { formatAveragedStat } from '@/state/presenters/stat-format';
 import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
@@ -381,6 +381,8 @@ export function CombatEncounterPanel({
     // Phase 50 — a tapped Seal chip's CRACK/WAIT confirm sheet (mirrors the
     // PLEA/mercy modal pattern per Phase 49 decision 2).
     const [sealConfirm, setSealConfirm] = useState<CombatSealVM | null>(null);
+    // Phase 102 (SUMMON) — the add-strike confirm sheet, mirroring `sealConfirm`.
+    const [addConfirm, setAddConfirm] = useState<CombatAddVM | null>(null);
     // Signature-rune info popup (long-press / unaffordable tap) + pilgrim modal.
     const [sigInfo, setSigInfo] = useState<CombatSignatureVM | null>(null);
     const [pilgrimOpen, setPilgrimOpen] = useState(false);
@@ -629,6 +631,17 @@ export function CombatEncounterPanel({
     // Phase 50 — tap a Seal chip -> open the confirm sheet; CRACK commits
     // `crackGlyph` (dieless, mirrors onSignature's shape); WAIT just closes.
     const onSeal = useCallback((s: CombatSealVM) => setSealConfirm(s), []);
+    const onAdd = useCallback((a: CombatAddVM) => setAddConfirm(a), []);
+    // Phase 102 — `strikeAdd` is dieless but PRICED (unlike `crackGlyph`, whose
+    // die was paid at inscription), so this reads exactly like `onCrackSeal`
+    // but the sheet above it has to quote a cost. The engine is the gate, not
+    // this callback: an unaffordable strike returns an `effect-fizzled` event
+    // rather than mutating, so a stale sheet can never overdraw Conviction.
+    const onStrikeAdd = useCallback(() => {
+        if (!addConfirm) return;
+        apply((s) => strikeAdd(s, addConfirm.id).state);
+        setAddConfirm(null);
+    }, [apply, addConfirm]);
     const onCrackSeal = useCallback(() => {
         if (!sealConfirm) return;
         apply((s) => crackGlyph(s, sealConfirm.id).state);
@@ -801,6 +814,7 @@ export function CombatEncounterPanel({
                     onInspect={onInspect}
                     onChip={setTipEffect}
                     onSeal={onSeal}
+                    onAdd={onAdd}
                     onSignatureInfo={setSigInfo}
                     onPlayerInspect={onPlayerInspect}
                     momentum={momentum}
@@ -988,6 +1002,40 @@ export function CombatEncounterPanel({
                         <View style={styles.modalBtns}>
                             <Pressable onPress={onCrackSeal} testID="combat-seal-crack" accessibilityRole="button" accessibilityLabel={`Crack for ${sealConfirm.previewText}`} style={[styles.modalBtn, { borderColor: '#5bbf6a' }]}><Text style={[styles.modalBtnText, { color: '#5bbf6a' }]}>CRACK</Text></Pressable>
                             <Pressable onPress={() => setSealConfirm(null)} testID="combat-seal-wait" accessibilityRole="button" accessibilityLabel="Wait, don't crack yet" style={[styles.modalBtn, { borderColor: AXM.ash }]}><Text style={[styles.modalBtnText, { color: AXM.ash }]}>WAIT</Text></Pressable>
+                        </View>
+                    </View>
+                </View>
+            )}
+
+            {/* Phase 102 (SUMMON) — the add-strike confirm sheet. Same shape as the
+                Seal sheet above so the two dieless board actions are one learned
+                gesture, with one difference that matters: this one has a PRICE,
+                so the price is in the sheet and the STRIKE button is visibly
+                refused (never silently inert) when the player cannot pay it. */}
+            {addConfirm && (
+                <View style={styles.backdrop} testID="combat-add-confirm">
+                    <View style={[styles.modal, { borderColor: addConfirm.color }]}>
+                        <Text style={styles.modalTitle}>Strike down the {addConfirm.name}?</Text>
+                        <Text style={styles.modalSub}>
+                            {addConfirm.affordable
+                                ? `Costs ${addConfirm.cost} ◆ Conviction · it bites you for ${addConfirm.bite} every phase`
+                                : `Needs ${addConfirm.cost} ◆ Conviction — you cannot pay it yet · it bites you for ${addConfirm.bite} every phase`}
+                        </Text>
+                        <View style={styles.modalBtns}>
+                            <Pressable
+                                onPress={onStrikeAdd}
+                                disabled={!addConfirm.affordable}
+                                testID="combat-add-strike"
+                                accessibilityRole="button"
+                                accessibilityState={{ disabled: !addConfirm.affordable }}
+                                accessibilityLabel={addConfirm.affordable
+                                    ? `Strike down the ${addConfirm.name} for ${addConfirm.cost} Conviction`
+                                    : `Cannot strike down the ${addConfirm.name} — it costs ${addConfirm.cost} Conviction`}
+                                style={[styles.modalBtn, { borderColor: addConfirm.affordable ? '#5bbf6a' : AXM.ash, opacity: addConfirm.affordable ? 1 : 0.5 }]}
+                            >
+                                <Text style={[styles.modalBtnText, { color: addConfirm.affordable ? '#5bbf6a' : AXM.ash }]}>STRIKE</Text>
+                            </Pressable>
+                            <Pressable onPress={() => setAddConfirm(null)} testID="combat-add-wait" accessibilityRole="button" accessibilityLabel="Wait, leave it standing" style={[styles.modalBtn, { borderColor: AXM.ash }]}><Text style={[styles.modalBtnText, { color: AXM.ash }]}>WAIT</Text></Pressable>
                         </View>
                     </View>
                 </View>

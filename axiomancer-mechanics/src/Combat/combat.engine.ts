@@ -85,6 +85,7 @@ import type {
     CombatCard, CombatDieColor, CombatEncounterState, CombatEvent, CardPlay,
     CombatManaDie, CombatPhaseResult, CombatTransition, LandedEffect, CombatReadResult,
     CombatThreatEffect, CombatThreatPhase, WheelStance, GlyphInstance, GlyphPayload,
+    CombatAdd,
 } from './combat.encounter.types';
 
 // ── Tunable constants (HP model) ─────────────────────────────────────────────
@@ -270,6 +271,31 @@ export const WOUND_CARD_ID = 'the-wound';
 
 /** BRUTAL — the multiplier on whatever a foe's threat gets past your soak. */
 export const BRUTAL_DAMAGE_MULT = 1.5;
+
+// ── Phase 102 (SUMMON) — the brood's constants ──────────────────────────────
+
+/** Waves a single combat may ever spawn. Adds NEVER respawn on emptiness:
+ *  clearing a wave is progress the player keeps, because a respawn that the
+ *  player's own clear CAUSES is a tax, not a decision. Prior art runs the same
+ *  way on both sides — Aeon's End minions come from a finite nemesis deck
+ *  (kb:aeons-end/rules/scoring-endgame), STS-BG summons from a finite per-Act
+ *  Summon deck (kb:slay-the-spire-the-board-game/rules/setup, src-002). Every
+ *  add fight players tolerate has FINITE adds. */
+export const ADD_WAVE_CAP = 2;
+/** A spawned add's FLAT per-phase bite, as a fraction of the foe's level and
+ *  snapshotted at spawn (floor 2). Sized so a full wave lands well under the
+ *  foe's OWN printed telegraph — an L22 elite telegraphs ~31 per phase
+ *  (`combat.threat.ts`), against which 2 adds x 4 = 8 is ~26%. Adds must read
+ *  as a modifier on the wall, never as a second wall. The add term sits
+ *  OUTSIDE the escalation stack (THREAT_ESCALATION_MAX), so a long fight does
+ *  not double it. */
+export const ADD_BITE_PER_LEVEL = 0.2;
+/** `strikeAdd`'s Conviction price. CONVICTION_CAP is 12 and signatures run
+ *  1-9 (`combat.signature.ts`), so clearing a full 2-add wave costs 4 — one
+ *  Press Fate, a third of the cap. Real opportunity cost, never a lockout.
+ *  Deliberately NOT free like `crackGlyph`: a free, mandatory, repeating tap
+ *  is the canonical resented add shape. */
+export const STRIKE_ADD_COST = 2;
 
 /** The most every STAGE a foe has entered can add to its later phases,
  *  combined. Stage bonuses stack on top of the escalation clock, so this is
@@ -3965,6 +3991,58 @@ function splitFlurryDamage(total: number, hits: number): number[] {
 }
 
 /**
+ * Phase 102 (SUMMON) — the soak arithmetic for a FLAT hit that is NOT part of
+ * the foe's telegraph: armor, then GUARD, then BARRIER, with SWIFT's half
+ * divisor (the wall absorbs half its face value and is consumed at the full
+ * rate, exactly as in the telegraph loop).
+ *
+ * This is the SINGLE definition shared by `resolveThreatPhase`'s add block and
+ * `projectIncomingThreat`'s add term, so the on-screen wall math cannot drift
+ * from what the engine actually does — the design panel named that drift the
+ * worst class of lie a telegraph can tell, and two call sites for one formula
+ * is how it happens. Deliberately EXCLUDES riposte (a parry on the foe's own
+ * swing, one-shot per phase) and BRUTAL (a property of the foe's blow), and it
+ * never touches `attacksLanded`/`attacksFullyBlocked`: an add's bite is not an
+ * "attack" for any ledger that the authored telegraph reads.
+ */
+function soakFlatHit(
+    raw: number,
+    o: { armor: number; guard: number; barrier: number; swift: boolean },
+): { dealt: number; guard: number; barrier: number } {
+    let dmg = Math.max(0, raw - o.armor);
+    const div = o.swift ? 2 : 1;
+    let guard = o.guard;
+    let barrier = o.barrier;
+    const g = Math.min(Math.floor(guard / div), dmg);
+    guard -= g * div;
+    dmg -= g;
+    const b = Math.min(Math.floor(barrier / div), dmg);
+    barrier -= b * div;
+    dmg -= b;
+    return { dealt: dmg, guard, barrier };
+}
+
+/**
+ * Phase 102 — a wave of SUMMON adds, snapshotted off the foe's level at spawn
+ * time so a later STAGE cannot silently re-price a body already on the board.
+ *
+ * DETERMINISTIC BY CONSTRUCTION: no `rng()` call. `rng` is consumed by THE
+ * CLOCK and the hand refill inside the same `processBetweenPhases` pass, so a
+ * single stray draw here would shift every downstream seeded result — the
+ * whole e2e suite and the combat-playtest matrix move at once. Keep it pure.
+ */
+function spawnAddWave(enemy: Enemy, n: number, wave: number, name: string): CombatAdd[] {
+    const bite = Math.max(2, Math.round(enemy.level * ADD_BITE_PER_LEVEL));
+    return Array.from({ length: n }, (_, i) => ({
+        id: `add-${enemy.id}-${wave}-${i}`,
+        name,
+        vitae: 1,
+        maxVitae: 1,
+        bite,
+    }));
+}
+
+/**
  * Resolves the current threat phase (HP model): the enemy executes its
  * telegraphed threat action on the player UNLESS a control status hinders it
  * (`canAct` → skipTurn). This is how control "hinders the enemy" — it loses its
@@ -4451,6 +4529,47 @@ export function resolveThreatPhase(state: CombatEncounterState, rng: () => numbe
         }
     }
 
+    // ── Phase 102 (SUMMON) — the brood bites. DELIBERATELY OUTSIDE the
+    // telegraph loop above, and outside its `!hindered` gate:
+    //  · bodies act, so staggering or denying the FOE does not silence them;
+    //  · the printed bite is the bite — none of the loop's multiplier terms
+    //    (escalation, weaken, stage bonus, outgoing/taken mults, the stance
+    //    check) touches it, so the number on the chip cannot lie;
+    //  · `attacksLanded` / `attacksFullyBlocked` / `blockedBlowTotal` are NOT
+    //    incremented, so `lastThreatFullyBlocked`, the authored
+    //    'prior-threat-fully-blocked' branch condition, THE COVETED DIE's
+    //    'block' payout and RIPOSTE's counter gate all read exactly what they
+    //    would read with no brood on the board. The rejected design — a
+    //    synthetic entry appended to `threatEffects` — corrupts all four, and
+    //    no existing fixture fails when it does;
+    //  · `threat-fired` and `penaltiesApplied` keep reporting ONLY the foe's
+    //    authored telegraph; the brood gets its own `add-bit` event;
+    //  · no RAVENOUS, VENOM, WOUNDING, BRUTAL or RIPOSTE rides on it: the
+    //    foe's one protected bar never climbs off a body the player did not
+    //    clear, and no curse arrives from a hit the telegraph never printed.
+    // The wall DOES answer it (armor -> GUARD -> BARRIER, SWIFT's divisor),
+    // which is the second honest line of the design: eat it behind a wall you
+    // re-buy every phase, or pay STRIKE_ADD_COST once and be done with it.
+    const livingAdds = state.adds ?? [];
+    if (livingAdds.length > 0 && !isDefeated(enemy)) {
+        const rawBite = livingAdds.reduce((s, a) => s + a.bite, 0);
+        if (rawBite > 0) {
+            const soaked = soakFlatHit(rawBite, { armor: playerArmor, guard, barrier, swift: foeSwift });
+            guard = soaked.guard;
+            barrier = soaked.barrier;
+            if (soaked.dealt > 0) {
+                player = applyDamage(player, soaked.dealt);
+                // The ledger DOES count it: the player really took it from the
+                // foe's side of the table, and `enemyDamageThisTurn` has to
+                // reconcile against actual VITAE lost. This is the one ledger
+                // the brood is allowed to touch, and it is a decision on
+                // record rather than an omission.
+                enemyDamageDealt += soaked.dealt;
+            }
+            events.push({ kind: 'add-bit', addIds: livingAdds.map(a => a.id), raw: rawBite, dealt: soaked.dealt });
+        }
+    }
+
     // Mark: enemy hindered (control worked) → 'clear'; enemy acted → 'overwhelmed'.
     const mark: 'clear' | 'overwhelmed' = hindered ? 'clear' : 'overwhelmed';
     events.push({ kind: 'phase-resolved', phaseIndex: phase.index, mark });
@@ -4849,6 +4968,35 @@ export function processBetweenPhases(
         }
     }
 
+    // ── Phase 102 (SUMMON) — the brood spawns AFTER the stage block, so a
+    // stage whose `gain` grants SUMMON fires its own first wave on the very
+    // boundary it is entered rather than a phase late. Wave 1 at the FIRST
+    // boundary of the combat; every later wave needs a STAGE to fire. NEVER on
+    // emptiness: an emptiness check makes the player's own clear cause the
+    // respawn, which is a tax rather than a decision — the shape every add
+    // fight players resent has in common. A stage's `cleanse` (above) wipes
+    // `enemy.effects` and leaves the brood standing: bodies are not
+    // afflictions. `spawnAddWave` consumes no RNG, so inserting this between
+    // THE CLOCK and the hand refill shifts no seeded draw.
+    const summon = findEnemyKeyword(enemy.keywords, 'summon');
+    let adds = state.adds ?? [];
+    let addWavesSpawned = state.addWavesSpawned ?? 0;
+    if (summon && summon.n > 0 && !isDefeated(enemy) && addWavesSpawned < ADD_WAVE_CAP) {
+        const stageFiredNow = stagesEntered.length > (state.stagesEntered ?? []).length;
+        if (addWavesSpawned === 0 || stageFiredNow) {
+            const wave = spawnAddWave(enemy, summon.n, addWavesSpawned, summon.addName ?? `${enemy.name} Brood`);
+            adds = [...adds, ...wave];
+            addWavesSpawned += 1;
+            events.push({
+                kind: 'add-spawned',
+                enemyId: enemy.id,
+                wave: addWavesSpawned,
+                addIds: wave.map(a => a.id),
+                bite: wave[0].bite,
+            });
+        }
+    }
+
     const candidateIndex = Math.min(state.currentPhaseIndex + 1, state.threatPhases.length - 1);
     const candidatePhase = state.threatPhases[candidateIndex];
     const rageGated = candidatePhase.unlockAfterRound !== undefined && resolvedRound < candidatePhase.unlockAfterRound;
@@ -5123,6 +5271,11 @@ export function processBetweenPhases(
         // opened with (shuffled into the draw pile alongside the threat's own).
         stagesEntered,
         stageThreatBonus,
+        // Phase 102 (SUMMON) — the brood ledgers. Bare function-level locals,
+        // exactly like `stagesEntered`: `...omenState` does NOT carry them, and
+        // they survive the later `next` rebuilds by spread.
+        adds,
+        addWavesSpawned,
         ...(injectedCursesFromStage.length > 0
             ? { drawPile: [...draw.drawPile, ...injectedCursesFromStage] }
             : {}),
@@ -5455,6 +5608,57 @@ export function crackGlyph(
     return checkImmediateOutcome(next, events);
 }
 
+/**
+ * Phase 102 (SUMMON) — strike one add off the board. Dieless and PRICED: the
+ * phase gate and the Conviction debit are `playSignatureSkill`'s shape, NOT
+ * `crackGlyph`'s — `crackGlyph` deliberately spends nothing because its die
+ * was already paid at inscription, whereas a free, mandatory, repeating tap is
+ * the canonical resented add shape. The no-op / `withLog` /
+ * `checkImmediateOutcome` tail IS `crackGlyph`'s.
+ *
+ * Three outcomes, deliberately distinct:
+ *  · wrong phase, or an id that names no living add → a SILENT identity no-op
+ *    returning the SAME object reference (asserted with `toBe`, the Seal
+ *    convention), so a stale tap from the UI can never churn the log;
+ *  · a Conviction shortfall → one `effect-fizzled` event that DOES reach the
+ *    log, so the player's refused action stays attributable rather than
+ *    reading as a dead chip;
+ *  · success → exactly one add removed and `add-struck` emitted.
+ *
+ * It can never end a fight: `checkImmediateOutcome` reads `state.enemy` alone,
+ * so clearing the whole brood is progress with no win attached. No
+ * `swayOffersCapitulation` check either — the verb pushes no SWAY, matching
+ * `crackGlyph`'s tail rather than `playCombatCard`'s.
+ */
+export function strikeAdd(
+    state: CombatEncounterState,
+    addId: string,
+    _rng: () => number = defaultRng,
+): CombatTransition {
+    if (state.phase !== 'phase-play') return { state, events: [] };
+    const add = (state.adds ?? []).find(a => a.id === addId);
+    if (!add) return { state, events: [] };
+    if (state.conviction < STRIKE_ADD_COST) {
+        const events: CombatEvent[] = [{
+            kind: 'effect-fizzled',
+            cardId: add.id,
+            effectId: '',
+            message: `need ${STRIKE_ADD_COST} ◆ Conviction (have ${state.conviction})`,
+        }];
+        return { state: withLog(state, events), events };
+    }
+    const events: CombatEvent[] = [
+        { kind: 'add-struck', addId: add.id, name: add.name, cost: STRIKE_ADD_COST },
+    ];
+    let next: CombatEncounterState = {
+        ...state,
+        conviction: state.conviction - STRIKE_ADD_COST,
+        adds: (state.adds ?? []).filter(a => a.id !== addId),
+    };
+    next = withLog(next, events);
+    return checkImmediateOutcome(next, events);
+}
+
 /** The baseline signature kit (for the presenter / UI bar). */
 export { SIGNATURE_SKILLS, SIGNATURE_SKILL_LIST, getSignatureSkill } from './combat.signature';
 
@@ -5693,6 +5897,16 @@ export function projectReapAll(state: CombatEncounterState, card: CombatCard): {
  * `intentVM`'s existing raw-sum granularity) — a phase with more than one
  * damaging effect is summed before scaling, not scaled per-effect like the
  * real resolution; a known, documented simplification (see phase 28 brief).
+ *
+ * KNOWN DIVERGENCES from `resolveThreatPhase`, documented rather than closed —
+ * closing them moves the on-screen number for every existing foe and is its own
+ * tuning change, not a side effect of adding a keyword. The boss term here
+ * omits `enemyThreatMult`, `state.stageThreatBonus`, the flat `playerArmor`
+ * soak, the SWIFT soak divisor and BRUTAL, so against a staged, SWIFT or
+ * BRUTAL foe it UNDERSTATES, and the wall it reports as left over after the
+ * telegraph is correspondingly optimistic. The Phase 102 add term does NOT
+ * share that flaw: it runs through the same `soakFlatHit` the engine applies
+ * and is exact for the wall state it is handed.
  */
 export function projectIncomingThreat(state: CombatEncounterState): {
     rawDamage: number; projectedDamage: number; willDeny: boolean; guard: number; barrier: number; netDamage: number;
@@ -5700,6 +5914,14 @@ export function projectIncomingThreat(state: CombatEncounterState): {
      *  presenter can show rung magnitude (1-4) instead of leaving it
      *  invisible. `rungsTotal` reflects any authored `phase.rungs` override. */
     rungsTotal: number; rungsLost: number;
+    /** Phase 102 (SUMMON) — the brood's printed bite total, and what survives
+     *  the SAME `soakFlatHit` the engine applies, against the wall that is left
+     *  after the foe's own telegraph has eaten its share. `netDamage`
+     *  deliberately EXCLUDES the add term so `projectEnemyHealPerRound`'s
+     *  RAVENOUS estimate keeps reading the foe's own telegraph alone (a
+     *  RAVENOUS summoner's bar must never appear to climb off its brood); the
+     *  HUD wall-math readout reads `totalNetDamage`. */
+    addDamage: number; addNetDamage: number; totalNetDamage: number;
 } {
     const idx = Math.min(state.currentPhaseIndex, state.threatPhases.length - 1);
     const phase = state.threatPhases[idx];
@@ -5735,10 +5957,36 @@ export function projectIncomingThreat(state: CombatEncounterState): {
     const riposte = state.riposte ?? null;
     let remaining = projectedDamage;
     if (riposte && riposte.reduce > 0) remaining = Math.max(0, remaining - riposte.reduce);
-    remaining = Math.max(0, remaining - guard);
-    remaining = Math.max(0, remaining - barrier);
+    // Tracked as explicit absorptions rather than `Math.max(0, remaining - x)`
+    // so the LEFTOVER wall is exact (arithmetically identical to the previous
+    // two lines — `netDamage` is unchanged to the byte). Phase 102's add term
+    // needs the wall that survives the foe's own hit, and deriving it from
+    // `projectedDamage - remaining` would wrongly charge riposte's parry and
+    // barrier's share against GUARD.
+    const guardAbsorbed = Math.min(guard, remaining);
+    remaining -= guardAbsorbed;
+    const barrierAbsorbed = Math.min(barrier, remaining);
+    remaining -= barrierAbsorbed;
 
-    return { rawDamage, projectedDamage, willDeny, guard, barrier, netDamage: remaining, rungsTotal, rungsLost };
+    // Phase 102 (SUMMON) — the brood, through the same helper
+    // `resolveThreatPhase` uses, so the printed wall math and the applied wall
+    // math are one definition. NOT zeroed by `willDeny`: denying the FOE does
+    // not deny its brood, and a telegraph reading 0 while the adds bit would be
+    // the worst class of lie this selector can tell.
+    const addDamage = (state.adds ?? []).reduce((s, a) => s + a.bite, 0);
+    const addNetDamage = addDamage > 0
+        ? soakFlatHit(addDamage, {
+            armor: Math.max(0, getActiveEffectModifiers(state.player.effects as ActiveEffect[]).defenseDelta),
+            guard: guard - guardAbsorbed,
+            barrier: barrier - barrierAbsorbed,
+            swift: hasEnemyKeyword(state.enemy.keywords, 'swift'),
+        }).dealt
+        : 0;
+
+    return {
+        rawDamage, projectedDamage, willDeny, guard, barrier, netDamage: remaining, rungsTotal, rungsLost,
+        addDamage, addNetDamage, totalNetDamage: remaining + addNetDamage,
+    };
 }
 
 /** One hand card's finisher (rupture / reap) readiness, for

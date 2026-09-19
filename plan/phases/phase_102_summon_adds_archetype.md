@@ -1,7 +1,11 @@
 # Phase 102 — SUMMON: the add-spawning enemy archetype
 
-> **STATUS: DESIGNED, NOT SHIPPED.** This brief is the durable output of the
-> 2026-09-19 burn-day design pass. The code has not been written.
+> **STATUS: SHIPPED, 2026-09-19.** Design brief below, unedited; the shipping
+> record is the "## SHIPPED" section appended at the end of this file. Where the
+> two disagree, the SHIPPED section is what is in the tree and says why.
+>
+> This brief was the durable output of the 2026-09-19 burn-day design pass,
+> written before any code.
 >
 > It exists because a three-lens adversarial panel (doctrine/legibility, KB
 > prior-art/reception, engineering risk) reviewed one concrete proposal against
@@ -909,3 +913,119 @@ Copy `CombatBoard.seal.test.tsx` verbatim in shape (jest globals imported from `
 | 10 | **HUD overflow on 375×812** — a fifth row under a crest that already carries four `AltWinMeter`s | Vertical budget under the crest is spent (`CombatCombatantPane.tsx:719-751`) | Step 1 is the structural fix; the figure-anchor assertion in `CombatBoard.adds.test.tsx` is the regression gate. The add row goes in `hudRight` (`:762`), never as a fifth meter. |
 | 11 | **`enemyDamageLastRound` inflation** — counting the add bite into `enemyDamageDealt` changes a ledger some cards read | Deliberate choice (HP accounting must reconcile); only affects SUMMON foes, which are new | Assert it explicitly in the bite test so it is a decision on record, not a surprise. |
 | 12 | **The verb reads as dominated** — a player with a live wall never pays, so the chip is dead furniture | GUARD resets to 0 every phase (`:4508`), so the wall is a recurring card cost and the 2◆ clear is a one-time buyout — but this is a *design* bet, not a proven one | **Unmeasured.** Nothing in the KB corpus grounds a disjoint-currency add clear (prior-art lens, marked UNGROUNDED). This is the highest-risk novel element: it must be the first thing the post-ship baseline and a `/combat-playtest` run interrogate, and `strikeAddsAt`'s firing rate in the matrix is the cheapest read on it. |
+
+---
+
+# SHIPPED — 2026-09-19
+
+Both sides landed: the engine per the brief, and the player-facing surface the
+brief's §4 called for. The gates are green (mechanics 216 suites / 3542 tests;
+mobile 308 suites / 2946 tests), and the baseline was regenerated because
+mechanics source moved.
+
+## What the player actually gets
+
+A foe that fields bodies, and a board that says so. The Jeweled Tree now carries
+`SUMMON 2` and spawns a brood of **Brier Shoots**; each one bites for a flat
+number every threat phase, and each is cleared by a dieless-but-priced strike.
+
+- **The keyword chip** prints `SUMMON 2` on the foe with its own mark (`⁙`,
+  deliberately not FLURRY's asterism — FLURRY is more strikes from one body,
+  SUMMON is more bodies) and a gloss that states the part the player cannot
+  infer from looking: *they bite even while the foe is denied*.
+- **The add chips** render one per living body on the ENEMY side of the HUD, in
+  the threat register rather than the status-chip iron or the Seal gold. The
+  badge is the **bite**, not the health: every shipped add is 1/1 VITAE, so a
+  health badge would print the same two characters forever.
+- **The strike verb** is reached by tapping a chip, which opens a STRIKE/WAIT
+  confirm sheet — the same learned gesture as a Seal crack, with the one
+  difference that matters: this action has a price, so the sheet quotes it, and
+  the STRIKE button is *visibly refused* (never silently inert) when the player
+  cannot pay.
+
+## The defect this pass existed to prevent
+
+`IntentIcon` printed a bare **`DENIED`** whenever `willDeny` was set, and its
+a11y label said *"no damage lands"*. The engine resolves adds **outside** the
+`!hindered` gate, on the deliberate principle that bodies act. So a player who
+staggered a summoner read "nothing lands", ended the phase, and took the bite
+anyway — a telegraph actively instructing them to make a mistake.
+
+The readout now carries the brood's share: `DENIED →8` when the foe's own blow
+is stopped but its adds are not, the combined total when both land, and the
+brood's bite alone when the foe telegraphs nothing. It prints the **soaked**
+number, not the printed one, through the same `soakFlatHit` the engine applies —
+one definition, so the on-screen wall math cannot drift from the applied wall
+math.
+
+`netDamage` is deliberately left meaning *"the foe's own telegraphed hit"*.
+Every existing readout depends on that; the brood rides in `addNetDamage` /
+`totalNetDamage` beside it rather than being folded in.
+
+## Surface decisions — DO NOT ASK
+
+1. **Add chips on the ENEMY pane, not the player's.** A Seal is a token of
+   yours that you spend; an add is a body of theirs that you remove. Merging
+   them into the status strip would file "there are two more enemies" under
+   "the foe has a debuff".
+2. **An unaffordable chip is dimmed, not disabled.** A chip that silently
+   refuses a tap is indistinguishable from a broken one, and the confirm sheet
+   is the only place the price and the shortfall can be read.
+3. **The presenter forwards the bite, it never computes it.** The engine put
+   the add term outside the multiplier stack precisely so the printed number is
+   the applied number; a presenter that "helpfully" scaled it would reintroduce
+   the drift that decision exists to make impossible. Pinned by a test that
+   sets `stageThreatBonus` and `enemyThreatMult` and asserts the bite is
+   unmoved.
+4. **`STRIKE_ADD_COST` is imported, never restated.** A price the UI hardcodes
+   is a price that drifts from the engine charging it, and the sheet quotes this
+   number to the player.
+5. **`AddChips` tolerates an absent array.** `state.adds` is optional on the
+   engine's "absent = none" convention, and a VM cast through `unknown` (as one
+   test fixture is) hands the component `undefined`. A missing brood is the
+   ordinary case for every foe but one; it renders nothing rather than throwing.
+   Found exactly that way — a fixture omission became a render crash.
+
+## Engine deviations from the brief as written
+
+One, and it is a correction rather than a shortcut. Brief §9b prescribed
+`guard: Math.max(0, guard - (projectedDamage - remaining))` for the wall left
+over after the boss's hit. `projectedDamage - remaining` is the total absorbed
+by **riposte + guard + barrier**, so that formula charges riposte's parry and
+barrier's share against GUARD — systematically understating the leftover wall
+and therefore **overstating** `addNetDamage`, breaking the very parity the brief
+calls its ship gate. Shipped instead as explicit `guardAbsorbed` /
+`barrierAbsorbed` minimums, arithmetically identical for `netDamage` (byte
+unchanged) and exact for the leftover.
+
+## Pages × tests matrix
+
+| Suite | Asserts |
+|---|---|
+| `Combat/e2e/summon.engine.test.ts` (27, mechanics) | the win-condition doctrine in both directions; spawn one-shot / cap / stage-grant / cleanse-survival / no-RNG; bite flatness against four multiplier terms, a hindered foe, a defeated foe, armor/GUARD/BARRIER/SWIFT, BRUTAL, RIPOSTE, RAVENOUS, WOUNDING; the four-assertion ledger-isolation gate against a control run; `strikeAdd`'s three outcomes; projection parity |
+| `Combat/e2e/combat-sim-policies.engine.test.ts` (+6) | the `strikeAddsAt` roster assignment and the decision seam |
+| `components/.../IntentIcon.test.tsx` (+5) | a bare DENIED survives with no brood; the bite is stated alongside DENIED and the "no damage lands" claim is gone; the TOTAL is printed when both land; the brood shows when the foe telegraphs nothing; the SOAKED number is printed, never the raw one |
+| `components/.../CombatBoard.adds.test.tsx` (8, new) | one chip per body badged with its bite; NO row at all for the ordinary foe; the tap reports `onAdd` once and not `onChip`/`onApply`; an unaffordable chip still reports its tap; a11y states bite, VITAE and price; the shortfall is named when it cannot be paid; the bite is forwarded verbatim past `stageThreatBonus`/`enemyThreatMult`; the price is the engine's constant |
+| `state/e2e/summon-surface.engine.test.ts` (8, new) | drives the REAL engine with a REAL summoner: the wave reaches the screen as chips; SUMMON prints as a keyword chip with its own mark and the denied-foe gloss; the wall math carries the brood separately; the brood really costs VITAE; striking removes exactly that body and charges the price; clearing the whole brood never ends the fight; short Conviction marks chips rather than hiding them; a cleared wave does not respawn |
+
+## DoD
+
+- [x] engine: type, keyword, spawn, bite, verb, projection, barrels, sim policy
+- [x] carrier: The Jeweled Tree fields `SUMMON 2` (HIDE 5 re-listed by hand;
+      auto SWIFT deliberately dropped)
+- [x] surface: keyword glyph, add chips, STRIKE/WAIT confirm sheet
+- [x] the DENIED lie closed, with the soaked number printed
+- [x] mechanics gate green; mobile gate green; baseline regenerated
+- [x] atlas updated (`Enemy keywords (10)` → `(11)`), content-drift green
+
+## Follow-ups (out of scope)
+
+- A **second carrier** at a different rank. One summoner is an archetype's
+  proof, not its coverage.
+- `projectIncomingThreat`'s six pre-existing boss-side divergences
+  (`enemyThreatMult`, `stageThreatBonus`, `stanceCheck.mult`, flat armor, the
+  SWIFT divisor, BRUTAL) are documented at the site, not closed. Closing them
+  moves the on-screen number for every existing foe and is its own tuning
+  change.
+- An **add-spawn animation**. The chips appear between phases with no motion;
+  the `add-spawned` event is emitted and unread by the fx layer.

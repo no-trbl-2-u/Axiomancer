@@ -31,9 +31,11 @@ const PLATES: Record<ScreenArtKey, number> = {
     event: require('../maps/charon-crossing.webp'),
     // The Aporia is a hole in the ground with something at the bottom of it.
     labyrinth: require('../maps/the-pit.webp'),
-    // The one arena we have. Combat variety is a coverage problem, not a
-    // wiring one — see the phase V5 brief's follow-ups.
-    combat: require('../combat/arena-ruined-city.jpg'),
+    // The dev-only combat sandbox route's backdrop. Deliberately the arena
+    // FALLBACK plate rather than a region one: this screen has no region, so
+    // it should show what an unmapped region shows. Repointed in phase 103
+    // when `arena-ruined-city.jpg` was retired — see `../combat/index.ts`.
+    combat: require('../combat/arena-desolation.webp'),
     // A settlement is a street: Doré's Wentworth Street crowd.
     village: require('../maps/wentworth-street.webp'),
     // Rest happens off the road, under the trees.

@@ -29,16 +29,31 @@
  * graded toward the void by the shared recipe in `scripts/ingest-art.mjs`. See
  * `provenance.json` beside this file for the per-plate record.
  *
- * The one exception is the fallback, `arena-ruined-city.jpg` — owner-supplied,
- * licence UNRESOLVED, tracked in `plan/AUDIT.md`. It is the reason the licence
- * check exists at all.
+ * ## The fallback was replaced (Phase 103)
+ *
+ * It used to be `arena-ruined-city.jpg`: owner-supplied, licence UNRESOLVED,
+ * and — visible the moment anyone looked at it — saturated PIXEL ART of modern
+ * high-rise buildings, sitting among nine grayscale wood engravings. Because it
+ * is the fallback it was the most-seen arena in the game, so it was both the
+ * licence exposure and the worst visual mismatch in the product.
+ *
+ * THE OPEN GATE ¶6 (2026-08-28) makes that a loop call rather than an owner
+ * one: art that cannot be traced within reasonable effort is a re-art decision,
+ * "replace via the licensed trove and retire the untraceable asset". This is
+ * that retirement. The replacement is Doré's "The New Zealander" (1873), chosen
+ * because a fallback must stay coherent behind regions it was not drawn for:
+ * heavy dark mass at the edges, a lit band across the middle where the foe
+ * composites, and a subject — ruin outliving the city that made it — general
+ * enough not to contradict an unmapped region.
  */
 
-const ARENA_RUINED_CITY = require('./arena-ruined-city.jpg');
+const ARENA_DESOLATION = require('./arena-desolation.webp');
 const ARENA_COASTAL_VILLAGE = require('./coastal-village.webp');
 const ARENA_NORTHERN_CITY = require('./arena-northern-city.webp');
 const ARENA_CONNECTING_RIVER = require('./arena-connecting-river.webp');
 const ARENA_SWEETHEARTS_VILLAGE = require('./arena-sweethearts-village.webp');
+const ARENA_CAVERNS = require('./arena-caverns.webp');
+const ARENA_THE_CAPITAL = require('./arena-the-capital.webp');
 
 /**
  * One arena: the region it answers, the plate, and what a screen-reader user is
@@ -109,6 +124,33 @@ const REGION_ARENAS: readonly ArenaPlate[] = [
         art: ARENA_SWEETHEARTS_VILLAGE,
         alt: 'A slum lane of low terraces with children in the roadway and second-hand wares laid out on the stones',
     },
+    // Phase 103 — the two regions the earlier pass could not reach, now that the
+    // acquisition pipeline can crop a plate off a scanned page. Both are Doré
+    // Dante plates rather than London ones: neither the caverns nor the capital
+    // has a documentary-London equivalent, and the brief for this phase records
+    // that deliberate break from the single-source rule.
+    {
+        // "Abandon all hope ye who enter here" — a gate cut into a rock face,
+        // two figures at the threshold, a lit horizon band behind. The region
+        // BEGINS underground, so its arena wants the moment of going in rather
+        // than a cave interior. Distinct from the maps registry's Titans plate,
+        // which the player crossed to get here.
+        pattern: /cavern/i,
+        art: ARENA_CAVERNS,
+        alt: 'A vast gateway cut into a rock face, two small figures at its threshold beneath a lit horizon',
+    },
+    {
+        // The Empyrean Rose. The capital is where the advisor-selection payoff
+        // lands, so its arena is the one place that dwarfs the player: a court
+        // that is vast, ranked and wholly indifferent. The two supplicants at
+        // the base of the frame are exactly the player's position.
+        //
+        // Ordered AFTER the other rules but its pattern is narrow, so position
+        // is not load-bearing — see the ordering note above.
+        pattern: /the capital/i,
+        art: ARENA_THE_CAPITAL,
+        alt: 'Two small figures stand on a rock before an immense spiralling host of winged forms circling a blinding light',
+    },
 ];
 
 /**
@@ -118,8 +160,8 @@ const REGION_ARENAS: readonly ArenaPlate[] = [
  * of one, and every unmapped region keeps today's behaviour byte-for-byte.
  */
 const FALLBACK_ARENA: Omit<ArenaPlate, 'pattern'> = {
-    art: ARENA_RUINED_CITY,
-    alt: 'A storm-lit ruined city skyline over a cracked stone floor',
+    art: ARENA_DESOLATION,
+    alt: 'A cloaked figure sits on a broken wharf sketching the ruins of a dead city across black water under a clouded moon',
 };
 
 /** The matching plate for a region display string, or the fallback. */

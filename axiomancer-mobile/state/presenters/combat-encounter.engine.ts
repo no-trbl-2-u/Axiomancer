@@ -43,6 +43,10 @@ import {
     type UpgradeableDieGear,
     isMomentumDieId, type WheelStance,
     type GlyphInstance, type GlyphPayload,
+    // Phase 102 (SUMMON) — the brood. `STRIKE_ADD_COST` is imported rather than
+    // restated: a price the UI hardcodes is a price that drifts from the engine
+    // that charges it, and the confirm sheet quotes this number to the player.
+    STRIKE_ADD_COST,
 } from '@mechanics';
 // THE BIG NUMBERS REWRITE — the enemy-keyword module is NOT re-exported through
 // the top-level `@mechanics` barrel, so its type comes in on the subpath alias
@@ -91,6 +95,13 @@ const SEAL_COLOR = '#d9b44a';
 const SEAL_GLYPHS: Record<GlyphPayload['kind'], string> = { poison: '◈', barrier: '❖' };
 const SEAL_LABELS: Record<GlyphPayload['kind'], string> = { poison: 'Poison Seal', barrier: 'Barrier Seal' };
 
+// Phase 102 — SUMMON's brood. A colour of its own, deliberately NOT
+// `ENEMY_KEYWORD_COLOR` (iron grey, "a property of the thing you are hitting")
+// and NOT `SEAL_COLOR` (gold, "a charged token of yours"): an add is a live
+// THING ON THE BOARD that acts against you, so it borrows the threat register.
+const ADD_COLOR = '#b4543f';
+const ADD_GLYPH = '•';
+
 /** THE BIG NUMBERS REWRITE — a silhouette per ENEMY keyword, so the foe's
  *  pane reads as a shape before it reads as a word (the same doctrine the card
  *  glyphs follow). Iron grey throughout: these are properties of the thing you
@@ -106,6 +117,10 @@ const ENEMY_KEYWORD_GLYPHS: Record<EnemyKeyword['kind'], string> = Object.freeze
     ravenous: '☾',   // it feeds on what it lands
     wounding: '✚',   // a big hit puts a WOUND in your deck
     flurry: '⁂',     // one telegraph, several strikes
+    // Phase 102 — SUMMON. Five dots rather than the asterism FLURRY uses: both
+    // mean "more than one", but FLURRY means more strikes from ONE body and
+    // SUMMON means more BODIES, so they must not read as the same mark.
+    summon: '⁙',
 });
 const ENEMY_KEYWORD_COLOR = GLYPH_COLORS.thorns;
 
@@ -320,6 +335,15 @@ export interface CombatIntentVM {
     wallMath: {
         projectedDamage: number; netDamage: number; willDeny: boolean; guard: number; barrier: number;
         rungsTotal: number; rungsLost: number;
+        /** Phase 102 (SUMMON) — the brood's own arithmetic, carried SEPARATELY
+         *  from the foe's telegraph rather than folded into `netDamage`.
+         *  `netDamage` must keep meaning "what this telegraphed hit deals", or
+         *  every existing readout that reads it starts lying about the foe.
+         *  `totalNetDamage` is what the player actually loses this phase, and
+         *  it is what the HUD prints: a DENIED telegraph with a living brood
+         *  still costs VITAE, and showing bare "DENIED" there would be the
+         *  worst lie this readout can tell. */
+        addDamage: number; addNetDamage: number; totalNetDamage: number;
     };
     /** Spec 33 §5 (Phase D6b, FLAG-ON ONLY) — the OPEN stance-check telegraph for
      *  this phase (D6e authored `punishes`/`yields` on every threat phase): what
@@ -392,6 +416,40 @@ export interface CombatEnemyPaneVM {
      *  kill-round walk already nets out — surfaced so the meter can say WHY a
      *  fat pending stack is not yet a kill. */
     pendingDot: number; roundsToKill: number | null; isLethalInFlight: boolean; healPerRound: number;
+    /** Phase 102 (SUMMON) — the foe's living brood, one chip per body. Empty
+     *  for every foe that does not summon, which is all but one of them, so
+     *  this row simply does not render in the ordinary fight. On the ENEMY
+     *  pane and not the player's: a Seal is a token of YOURS that you spend,
+     *  an add is a body of THEIRS that you remove. */
+    adds: CombatAddVM[];
+    /** What one `strikeAdd` costs in Conviction, and whether the player can
+     *  pay it right now. Forwarded from the engine constant rather than
+     *  restated here — a price the UI hardcodes is a price that drifts. */
+    strikeAddCost: number; canStrikeAdd: boolean;
+}
+/**
+ * Phase 102 (SUMMON) — one renderable member of a foe's brood.
+ *
+ * `bite` is the FLAT number the engine applies, not a projection: the engine
+ * resolves adds outside the threat loop's multiplier stack precisely so the
+ * number on this chip is the number the player takes. It is printed as-is, and
+ * that is only honest because of where the engine put it.
+ *
+ * `affordable` is a snapshot of `conviction >= STRIKE_ADD_COST` at build time.
+ * The chip stays TAPPABLE when it is false — the confirm sheet then shows the
+ * price greyed with the shortfall named, because a chip that silently refuses
+ * a tap teaches the player nothing about why.
+ */
+export interface CombatAddVM {
+    id: string;
+    name: string;
+    bite: number;
+    vitae: number;
+    maxVitae: number;
+    glyph: string;
+    color: string;
+    cost: number;
+    affordable: boolean;
 }
 /** Phase 50 — a renderable "Seal" (Phase 33d's `GlyphInstance`, engine name
  *  unchanged, UI-facing label renamed per Phase 49 decision 3). `crackValue`/
@@ -1320,6 +1378,11 @@ function intentVM(state: CombatEncounterState): CombatIntentVM {
             projectedDamage: threat.projectedDamage, netDamage: threat.netDamage,
             willDeny: threat.willDeny, guard: threat.guard, barrier: threat.barrier,
             rungsTotal: threat.rungsTotal, rungsLost: threat.rungsLost,
+            // Engine truth, forwarded — `projectIncomingThreat` runs the brood
+            // through the SAME `soakFlatHit` that `resolveThreatPhase` applies,
+            // so this readout cannot drift from what actually happens.
+            addDamage: threat.addDamage, addNetDamage: threat.addNetDamage,
+            totalNetDamage: threat.totalNetDamage,
         },
         ...(isUpgradeableDiceEnabled() ? { stanceCheck } : {}),
     };
@@ -1389,6 +1452,9 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
         roundsToKill: lethality.roundsToKill,
         isLethalInFlight: lethality.isLethalInFlight,
         healPerRound: lethality.healPerRound,
+        adds: addsVM(state),
+        strikeAddCost: STRIKE_ADD_COST,
+        canStrikeAdd: state.conviction >= STRIKE_ADD_COST,
     };
 }
 
@@ -1404,6 +1470,23 @@ function sealVM(g: GlyphInstance): CombatSealVM {
 }
 function sealsVM(glyphs: GlyphInstance[] | undefined): CombatSealVM[] {
     return (glyphs ?? []).map(sealVM);
+}
+
+/**
+ * Phase 102 — maps the engine's brood to renderable chips.
+ *
+ * Nothing is computed here beyond affordability: `bite` is forwarded verbatim
+ * because the engine applies it verbatim (it resolves adds outside the threat
+ * loop's multiplier stack for exactly this reason), and a presenter that
+ * "helpfully" scaled it would reintroduce the drift the engine went out of its
+ * way to make impossible.
+ */
+function addsVM(state: CombatEncounterState): CombatAddVM[] {
+    const affordable = state.conviction >= STRIKE_ADD_COST;
+    return (state.adds ?? []).map((a) => ({
+        id: a.id, name: a.name, bite: a.bite, vitae: a.vitae, maxVitae: a.maxVitae,
+        glyph: ADD_GLYPH, color: ADD_COLOR, cost: STRIKE_ADD_COST, affordable,
+    }));
 }
 
 function playerPane(state: CombatEncounterState): CombatPlayerPaneVM {

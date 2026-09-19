@@ -36,7 +36,7 @@ import { arenaAltTextFor, arenaBackdropFor } from '@/assets/images/combat';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import type {
-    CombatEnemyPaneVM, CombatPlayerPaneVM, CombatEffectChipVM, CombatSealVM,
+    CombatEnemyPaneVM, CombatPlayerPaneVM, CombatEffectChipVM, CombatSealVM, CombatAddVM,
 } from '@/state/presenters/combat-encounter.engine';
 import { selectCombatLogLines } from '@/state/presenters/combat-encounter.engine';
 import { getCardById, type CombatEvent } from '@mechanics';
@@ -45,10 +45,11 @@ import { keywordForEffect } from '@/state/combat/keywords';
 import { IntentIcon } from './IntentIcon';
 import { useJuiceFlash, useJuiceIdleBreath, useJuiceNumberPop, useJuicePulse, useJuiceShake } from '@/lib/juice';
 
-/** Full-bleed battlefield backdrop — region-keyed (phase 83), falling back to
- *  the ruined-city plate every other region already had. Sits behind the
- *  enemy figure; the SVG `CreatureScene` draws `hideBackdrop` so its
- *  procedural moon/treeline doesn't overpaint the art. */
+/** Full-bleed battlefield backdrop — region-keyed (phase 83, completed for
+ *  every live region in phases 101/103), falling back to a neutral desolation
+ *  plate for a region with no rule. Sits behind the enemy figure; the SVG
+ *  `CreatureScene` draws `hideBackdrop` so its procedural moon/treeline
+ *  doesn't overpaint the art. */
 
 /** A bump of resolved engine events the pane animates. `seq` rises on each new
  *  resolution so the effect fires exactly once per APPLY / END PHASE. */
@@ -296,6 +297,75 @@ export function SealChips({ seals, onSeal }: {
     );
 }
 
+// ── Add chips (Phase 102 — SUMMON's brood) ──────────────────────────────────
+
+/**
+ * One chip per living add, on the ENEMY side of the board.
+ *
+ * ## Why not a Seal chip, and why not a status chip
+ *
+ * `SealChips` renders tokens the player OWNS and spends; `EffectChips` renders
+ * statuses and keywords, which are arithmetic rather than things. An add is
+ * neither: it is a body standing on the foe's side that acts on its own every
+ * phase until the player removes it. So it gets the threat-register colour, a
+ * solid-dot glyph (a body, not a mark), and its own row — merging it into the
+ * status strip would file "there are two more enemies" under "the foe has a
+ * debuff", which is the miscue the whole chip system exists to prevent.
+ *
+ * ## The badge is the bite, not the health
+ *
+ * Every shipped add is 1/1 VITAE, so a health badge would read `1/1` on every
+ * chip forever and tell the player nothing. The number that changes their
+ * decision is what it does to them each phase, so the badge prints the bite.
+ * Health is carried in the a11y label, where it costs no space.
+ *
+ * ## Unaffordable chips still open the sheet
+ *
+ * `affordable` dims the chip but does NOT block the tap. A chip that silently
+ * refuses is indistinguishable from a broken one; the confirm sheet states the
+ * price and the shortfall, which is the only place the player can learn why.
+ */
+export function AddChips({ adds, onAdd }: {
+    adds: CombatAddVM[] | undefined;
+    onAdd?: (a: CombatAddVM) => void;
+}) {
+    const styles = useStyles();
+    // `?? []` rather than `adds.length` — `CombatEncounterState.adds` is
+    // optional on the engine's explicit "absent = none" convention, and a VM
+    // built before this field existed (or cast through `unknown`, as the
+    // alt-win fixture is) hands us undefined. A missing brood is the ordinary
+    // case for every foe in the game but one; it must render nothing, never
+    // throw. Caught exactly this way: a fixture omission became a crash.
+    const living = adds ?? [];
+    if (living.length === 0) return null;
+    return (
+        <View style={styles.chipRow} pointerEvents="box-none" testID="combat-add-row">
+            {living.map((a) => (
+                <Pressable
+                    key={a.id}
+                    onPress={() => onAdd?.(a)}
+                    style={[styles.chip, { borderColor: a.color, opacity: a.affordable ? 1 : 0.55 }]}
+                    hitSlop={6}
+                    testID={`combat-add-${a.id}`}
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                        `${a.name}, ${a.vitae} of ${a.maxVitae} VITAE, bites you for ${a.bite} every phase. `
+                        + (a.affordable
+                            ? `Tap to strike it down for ${a.cost} Conviction.`
+                            : `You cannot strike it down yet — it costs ${a.cost} Conviction.`)
+                    }
+                >
+                    <View style={[StyleSheet.absoluteFill, { backgroundColor: a.color, opacity: 0.16 }]} />
+                    <Text style={[styles.chipGlyph, { color: a.color, textShadowColor: a.color }]}>{a.glyph}</Text>
+                    <View style={styles.chipBadge}>
+                        <Text style={styles.chipBadgeText} allowFontScaling={false}>−{a.bite}</Text>
+                    </View>
+                </Pressable>
+            ))}
+        </View>
+    );
+}
+
 // ── Player medallion (bottom-left corner chrome) ─────────────────────────────
 
 /**
@@ -456,11 +526,15 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
 // ── The overlay ──────────────────────────────────────────────────────────────
 
 export const CombatCombatantPane = React.memo(function CombatCombatantPane({
-    enemy, player, onChip, fx, topInset = 0, metaLine, onHudLayout, region,
+    enemy, player, onChip, onAdd, fx, topInset = 0, metaLine, onHudLayout, region,
 }: {
     enemy: CombatEnemyPaneVM;
     player: CombatPlayerPaneVM;
     onChip?: (e: CombatEffectChipVM) => void;
+    /** Phase 102 (SUMMON) — tap an add chip to open the strike confirm sheet.
+     *  Optional for the same reason `onChip` is: the dev sandbox mounts this
+     *  pane read-only, and a foe with no brood renders no chips at all. */
+    onAdd?: (a: CombatAddVM) => void;
     fx?: CombatFx;
     /** Safe-area insets, passed by the board (the overlay is absolute-fill). */
     topInset?: number;
@@ -615,8 +689,9 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
     // fight's duration — see assets/images/enemies.
     const enemyArt = getEncounterEnemyArt(enemy.artKey, enemy.artNonce);
 
-    // Region-keyed arena backdrop (phase 83) — falls back to the ruined-city
-    // plate for every region with no rule of its own.
+    // Region-keyed arena backdrop (phase 83) — falls back to the neutral
+    // desolation plate for a region with no rule of its own. As of phase 103
+    // no LIVE region takes that path; see `assets/images/combat/index.ts`.
     const arenaBg = arenaBackdropFor(region);
     const arenaAlt = arenaAltTextFor(region);
 
@@ -767,6 +842,11 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                             statuses, and tap the same plaque a status chip does. */}
                         <EffectChips effects={enemy.keywords} onChip={onChip} align="flex-end" />
                         <EffectChips effects={enemy.effects} onChip={onChip} align="flex-end" />
+                        {/* Phase 102 — the brood, LAST in this column and so
+                            nearest the battlefield: the chips sit between the
+                            foe's own printed properties and the ground the
+                            bodies are standing on. */}
+                        <AddChips adds={enemy.adds} onAdd={onAdd} />
                     </View>
                 </View>
                 {/* enemy floats rise from under the crest, over the figure */}

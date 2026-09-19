@@ -45,7 +45,7 @@ import { makeStyles, usePalette } from '@/theme/runtime';
 import type {
     CombatViewModel, CombatCardVM, CombatDieVM,
     CombatSignatureVM, CombatEffectChipVM, CombatPerorationVM,
-    CombatMomentumV2VM, CombatStanceChipVM, CombatSealVM,
+    CombatMomentumV2VM, CombatStanceChipVM, CombatSealVM, CombatAddVM,
 } from '@/state/presenters/combat-encounter.engine';
 import { armedReadValue, dieCanPowerCardVM, STANCE_COLORS } from '@/state/presenters/combat-encounter.engine';
 import { wheelNext, type WheelStance } from '@/state/combat/momentum';
@@ -961,6 +961,11 @@ export interface CombatBoardProps {
     onChip?: (e: CombatEffectChipVM) => void;
     /** Tap a Seal chip (Phase 50) → the CRACK/WAIT confirm sheet. */
     onSeal?: (s: CombatSealVM) => void;
+    /** Tap an add chip (Phase 102, SUMMON) → the STRIKE/WAIT confirm sheet.
+     *  Same shape as `onSeal` deliberately: both are dieless board actions
+     *  taken outside the card economy, so they should feel like one gesture
+     *  the player learns once. */
+    onAdd?: (a: CombatAddVM) => void;
     /** Long-press (or tap while unaffordable) on a signature rune → info popup. */
     onSignatureInfo?: (s: CombatSignatureVM) => void;
     /** Tap the player medallion → pilgrim stats/effects modal. */
@@ -998,7 +1003,7 @@ export interface CombatBoardProps {
 }
 
 export const CombatBoard = React.memo(function CombatBoard({
-    vm, drag, stagedUids, onApply, onStage, onUnstage, onDiscard, onSignature, onEndPhase, resolving = false, onInspect, onChip, onSeal, onSignatureInfo, onPlayerInspect, momentum, onMomentumInfo, fx,
+    vm, drag, stagedUids, onApply, onStage, onUnstage, onDiscard, onSignature, onEndPhase, resolving = false, onInspect, onChip, onSeal, onAdd, onSignatureInfo, onPlayerInspect, momentum, onMomentumInfo, fx,
     onFateTap, onReprisalNeeded, onHudLayout, region,
 }: CombatBoardProps) {
     const AXM = usePalette();
@@ -1467,6 +1472,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                 enemy={vm.enemy}
                 player={vm.player}
                 onChip={onChip}
+                onAdd={onAdd}
                 fx={fx}
                 topInset={topInset}
                 metaLine={metaLine}
