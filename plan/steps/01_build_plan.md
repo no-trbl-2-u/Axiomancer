@@ -212,7 +212,7 @@ Tick in this file in the same commit that ships the phase.
       guard between that crash and `main` was local-only. Wire it (and its own
       unit suite) into `verify-mobile.yml`, and re-run on edits to the guard.
       — `ci(mobile): enforce the Reanimated worklet guard — phase 98` (51fede4)
-- [ ] Phase 99 — A returning player can actually return. From the UNFILED
+- [x] Phase 99 — A returning player can actually return. From the UNFILED
       `axiomancer-mobile/docs/reports/PLAYTEST_BUGS_2026-09-18.md` (committed
       1d48483, referenced nowhere in `plan/`): BUG-02 (critical) every player
       with a save got a permanently blank screen on launch — `<Redirect>` fired
@@ -220,6 +220,7 @@ Tick in this file in the same commit that ships the phase.
       silently with no retry; BUG-03 (high) node movement was not a save
       checkpoint and there was no save-on-exit anywhere, so a walk and the
       opening quest were lost on reload.
+      — `fix(mobile): a returning player can actually return — phase 99` (fd83aa0)
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics:
