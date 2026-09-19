@@ -15,11 +15,81 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-19 | 46942361 | 13 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-19 | 181a84e2 | 13 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-19 | 0f9dd762 | 13 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-18 | 900f4858 | 12 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-19 | TBD | 13 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-npcs pass 13, 2026-09-19, commit TBD]** Zero-diff pass —
+> audit re-confirmed, no new finding, ledger bump only. Dispatched
+> autonomously by `/march`'s content-lifecycle gate (`npcs` was the stalest
+> qualifying category: last pass `900f4858` 2026-09-18T20:52:25Z, 44 commits
+> behind HEAD, past the 15-commit threshold; deploy green; no phase/higher-
+> priority gate pending).
+>
+> **Step 0:** `specs/story/` and `specs/characters/` remain wiped to their
+> templates — THE BLANK PAGE (2026-09-18) still stands, unlifted
+> (`content/story/story-overview.md` does not exist yet). Same hard
+> constraint as pass 12: no new named-character personhood, no story-canon
+> invention.
+>
+> **Step 1 audit:** no NPC/World-surface commit landed between pass 12
+> (`900f4858`) and this tick's HEAD (`ed416c84`) — confirmed via
+> `git log 900f4858..HEAD -- src/NPCs src/World/Continents src/World/MapEvents
+> src/World/types.ts` (empty). Re-ran every structural signal fresh rather
+> than trusting that null diff at face value:
+> - No orphaned NPC (every `const NPC` still referenced by exactly one map's
+>   `npcs:` array).
+> - No legacy flat `DialogueMap` usage anywhere (`dialogue:` — zero matches
+>   across `src/World/Continents/*/npcs.ts`; every NPC already on
+>   `dialogueTree`).
+> - No stale `startQuest`/`progressQuest`/`completeQuest`/`teachCard`
+>   reference: the only two quest refs in NPC content (`get-to-cave`,
+>   `gather-wood`, both Northern-Forest) both resolve against
+>   `src/World/quest.library.ts`'s live `id` union.
+> - No dead-end node reading as a bug: the Tide-Shopkeeper's `browse` leaf
+>   (pass 12's fix) is a genuine intentional terminator now, text matches
+>   the engine truth (`'village'` node kind is a separate always-on shop
+>   surface her `dialogueTree` cannot open).
+> - Northern-Continent's three 1-NPC maps (`caverns`/theDelver,
+>   `connecting-river`/theBoatwoman, `town-across-river`/theSweetheart)
+>   unchanged; still filed `plan/AUDIT.md` (`[gap]`, DECIDED via
+>   `/oversight` 2026-09-15, needs an attended `character-spec`/`story-spec`
+>   session) — re-confirmed open, left untouched; THE BLANK PAGE keeps this
+>   off the table regardless of hard rule 3.
+> - Coastal-Village's 3-NPC `unstagedNpcs` backlog (Tide-Shopkeeper,
+>   Dockworker's Union Leader, Merchant's Widow) re-checked against current
+>   engine state line by line: all three blockers are genuine engine-surface
+>   gaps (no `openShop`-shaped `DialogueChoice.effect` exists; the
+>   `'village'` node kind is a separate always-on screen that reads only a
+>   merchant's dialogue-tree ROOT line as flavor, not something an
+>   `interaction` node can substitute for) rather than staleness — unchanged
+>   since pass 12, correctly left unstaged.
+>
+> **Step 1b widened check:** Step 1 returned nothing actionable, so ran the
+> deeper KB cross-reference before accepting zero-diff. `kb_search` (scope
+> `all`) for `dialogue|NPC|conversation` — the only hits are Arydia's
+> dungeon-crawler NPC-as-map-pointer rules text
+> (`BoardGames/games/arydia-the-paths-we-dare-tread`), not dialogue-tree or
+> reactive-NPC design commentary. `kb_overview` reconfirms the corpus's 46
+> games are all board/card games with zero dialogue-tree-bearing digital
+> RPGs indexed — same genuine miss pass 12 already filed as
+> [`game-knowledge-base#81`](https://github.com/no-trbl-2-u/game-knowledge-base/issues/81);
+> no new wishlist filed since the existing one already covers this gap
+> shape.
+>
+> **Ship (Step 3):** none — zero CREATE, zero UPDATE, zero REMOVE. Every
+> structural signal and the widened KB check confirm pass 12's conclusions
+> hold; the two open items (Northern-Continent singleton maps,
+> Coastal-Village's 3-NPC unstaged backlog) are both correctly-blocked, not
+> stale.
+>
+> **Gates:** `npm run verify --workspace axiomancer-mechanics` (216 suites /
+> 3542 tests) and `npm run verify --workspace axiomancer-mobile` green,
+> unchanged (no source touched).
+```
 
 ```
 > **[adjust-keywords pass 13, 2026-09-19, commit 0f9dd762]** Restored FORGE
