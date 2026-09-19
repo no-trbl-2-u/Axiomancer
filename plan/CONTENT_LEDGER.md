@@ -13,13 +13,119 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-19 | 30e2e116 | 13 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-19 | 46942361 | 13 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-17 | 94da2e3f | 12 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-19 | TBD | 13 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-18 | 7bc53f82 | 12 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-18 | 900f4858 | 12 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-enemies pass 13, 2026-09-19, commit TBD]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
+> content-lifecycle gate (`enemies` was the stalest qualifying category
+> this tick: 58 commits and ~44h since pass 12's commit `94da2e3f`,
+> 2026-09-17T12:57:29Z, past both the 15-commit and 36h threshold;
+> `keywords` `7bc53f82` 2026-09-18T16:46:33Z 16 commits/~16h also
+> qualified on the commit count but was the less-stale of the two by
+> last-pass timestamp; `cards` `30e2e116` 3 commits/~4h, `equipment`
+> `46942361` 1 commit/~2h, and `npcs` `900f4858` 8 commits/~12h all sat
+> under their own threshold). `git log 94da2e3f..HEAD --
+> axiomancer-mechanics/src/Enemy
+> axiomancer-mechanics/src/Combat/combat.enemy-decks.ts
+> axiomancer-mechanics/src/Combat/combat.enemy-cards.ts
+> axiomancer-mobile/assets/images/enemies axiomancer-mechanics/src/World`
+> returns 2 commits, NOT empty unlike pass 12's own zero-diff window: (1)
+> `900f4858` (`/adjust-npcs` pass 12 — Village Healer staging). Read its
+> diff directly: `World/MapEvents/content.ts` NPC-staging only, zero
+> `Enemy/**` touch — confirmed out of scope. (2) `39e2915e` (Phase 90,
+> FLURRY multi-hit archetype — a build-plan phase, not a steward tick).
+> Read its full diff directly rather than trusting the commit summary: new
+> `EnemyKeyword` `{ kind: 'flurry'; n: number }` added to
+> `enemy-keywords.ts` with `ENEMY_KEYWORD_KINDS`/`_LABEL`/`_GLOSS` entries
+> (mirrors every existing keyword's wiring, kb-cited to
+> `kb:slay-the-spire-the-board-game/rules/edge-cases-faq` src-002),
+> resolved in `resolveThreatPhase` with 3 new engine tests, retrofit onto
+> `enemy-guild-knife` (`keywords: [{ kind: 'flurry', n: 3 }]`, matching its
+> existing "clause by clause" cause line), and `docs/keyword-atlas.md`
+> updated (9→10 enemy keywords). Confirmed the mobile glossary surface
+> needs no separate wire: `axiomancer-mobile/state/combat/keywords.ts`
+> derives its keyword-chip popups generically off the same
+> `ENEMY_KEYWORD_KINDS`/`_LABEL`/`_GLOSS` exports (`grep` confirms no
+> per-keyword mobile code), so Phase 82's reachability wiring already
+> covers FLURRY with zero additional touch. This is a fully-wired,
+> already-gated phase shipment — nothing left for this steward to fix or
+> re-wire. Re-derived every other Step-1 signal fresh against the live
+> tree: (1) **orphan sweep** — 78 quoted `ENEMY_REGISTRY` entries all
+> resolve into at least one `EnemiesByMap` pool except the same 2 standing
+> exclusions (`sandbag` test fixture, `the-incompleteness` impossible-
+> ceiling boss, both carrying an explicit `DESIGN REQUIREMENT` comment
+> barring pool entry). (2) **roster-size/overlap** — all 10 pools
+> recomputed fresh via a throwaway script: fishing-village 13,
+> northern-forest 39, caverns 16, northern-city 8, connecting-river 5,
+> town-across-river 4, the-capital 8, aporia-colonnade 8, aporia-archive
+> 8, aporia-proof 11 — byte-identical to pass 11/12's own citation (source
+> unchanged). The only >70%-of-smaller-pool hits remain the 4 standing
+> Aporia-vs-forest/caverns pairs, re-confirmed as the documented
+> deliberate shared-roster design; town-across-river stays the thinnest
+> pool (3 non-boss), still reading as the accepted coda-map shape. (3)
+> **loot-table sweep** — 22 distinct `drop()` ids extracted fresh, all 22
+> resolve 1:1 against `Items/consumable.library.ts`'s live 22-id set, 0
+> stale references. (4) **aftermath-prose/voice sweep** — a word-boundary
+> `\b(thee|thou|thy|thine|ye)\b` grep returns 0 hits; 47/79 `createEnemy`
+> records carry `finalBlowLines`/`causeLines` (32 do not, including the
+> `sandbag` fixture) — the standing 32-enemy backlog (`plan/AUDIT.md`
+> `[content]`, filed pass 1, scoped to `content-curator`, "too large to
+> fold into a routine pass") re-read at its current text, still open,
+> still accurate, re-cited not re-filed. (5) **plan-doc sweep** — `git log
+> 94da2e3f..HEAD -- plan/AUDIT.md plan/PHASE_CANDIDATES.md
+> plan/CRITIQUE.md` returns 11 commits (2 merges). Grepped every non-merge
+> commit's diff on these 3 files for an enemy/roster hit: only 2 qualify,
+> both already correctly resolved — `e20ac4b0` (the `/oversight` session
+> that promoted pass 11's filed finding to Phase 90) and `1b0f2acd` (Phase
+> 90's own build-plan tick, which re-filed the deferred half as
+> `plan/PHASE_CANDIDATES.md` `[score 3.5]` "Summoner / add-spawning enemy
+> archetype needs real multi-enemy combat state" — still open, still
+> engine-architecture-scoped, re-cited not re-filed here). The other 9
+> (equipment's own pass-13 tick, two `/critique` passes [40, 41],
+> `d0b3ed2f`'s THE GROWTH FLOOR ruling, a Phase 92 build-plan closure, an
+> `axio-query` AUDIT closure, a `baseline:check` fix, and 2 merges) touch
+> none of the roster's rows — no new roster-scoped residue.
+>
+> **Step 1b widened audit:** Step 1 read zero-diff on the data itself (one
+> already-fully-wired phase aside), so per the standing `/oversight`
+> 2026-09-15 rule ran the widened KB cross-reference on a fresh angle —
+> telegraph/tell clarity (how readably a foe's danger is signalled before
+> it lands) — deliberately off pass 11's summoner/multi-hit angle and pass
+> 12's trash-mob/variety angle. `kb_search` (scope `boardgames`) surfaced
+> `kb:spirit-island/index` (src-003) praising a staged explore→build→ravage
+> escalation that telegraphs danger a full round ahead, and
+> `kb:arydia-the-paths-we-dare-tread/reception/reviews` (src-005) praising
+> a rising-Threat-track AI-card reveal for the same readability reason.
+> Cross-checked both against the live engine before treating either as a
+> gap: Axiomancer's Hazard-Pattern Combat already implements this exact
+> pattern by design — THE CLOCK (`enemy.library.ts` header comment) prints
+> every enemy's telegraphed hit ahead of resolution, and STAGGER/FORETELL
+> cards exist specifically to glimpse or deny that telegraph
+> (`cards.pricing.ts`: "everything telegraphs openly now"). Both KB hits
+> corroborate the shipped design rather than surfacing a gap — no new
+> finding this pass.
+>
+> KB research (skill §3 Step 2): the Step 1b widened check above IS this
+> pass's KB research run — no CREATE/UPDATE shipped, so the REMOVE/no-op
+> carve-out prior zero-diff passes have used identically applies here too.
+> Verify: ran both gates in full despite the near-empty source diff —
+> `npm run verify --workspace axiomancer-mechanics` (214/214 files, 3470
+> tests + build green) and `npm run verify --workspace axiomancer-mobile`
+> (exit 0; lint + typecheck clean, jest 302/302 suites/2869 tests/3
+> snapshots). `npm run deploy:check` confirmed green pre-tick (no gated
+> workflow triggered for the docs/plan-only tip) and will be re-confirmed
+> after this ledger commit lands. No new `plan/PHASE_CANDIDATES.md` or
+> `plan/AUDIT.md` residue filed this pass — nothing actionable surfaced
+> beyond the standing, already-filed 32-enemy `finalBlowLines` backlog and
+> the summoner candidate, both re-cited above.
+```
 
 ```
 > **[adjust-equipment pass 13, 2026-09-19, commit 46942361]** Zero-CREATE,
