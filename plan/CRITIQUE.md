@@ -578,8 +578,9 @@
   Equipment/consumable-lifecycle territory (`/adjust-equipment`).
 - source: loop
 
-### [MED] combat — the mobile hand fan overlaps card-name bands, hiding the covered cards' names
+### [x] [MED] combat — the mobile hand fan overlaps card-name bands, hiding the covered cards' names — RESOLVED 2026-09-19 (Phase 97, commit cecae8f, issue #343)
 - pass: 37 (commit 7d470de1)
+- issue: #343
 - viewport: mobile (375×812) — confirmed absent on desktop (1280×800),
   same encounter/hand
 - category: visual / legibility
@@ -611,6 +612,26 @@
   (`plateBand`/`plateName`, hand-row fan layout).
 - source: loop
 
+
+- resolution (Phase 97, 2026-09-19): the row's own suggested fix — copy the
+  RouteSelect `-32` -> `-22` precedent — could not transfer. CombatBoard has no
+  flat margin (the overlap is derived by `handFanLayout` since the 2026-09-12
+  S1-board-C11 repair), and the geometry lever is exhausted: the fan must satisfy
+  `120 + 4*step <= 375`, capping `step` at 63.75 against the shipped 57.75, so
+  widening the overlap buys about ONE character before the outermost cards run
+  off the phone. Diagnosed instead as OCCLUSION rather than truncation —
+  `plateName` is already `numberOfLines={2}` and already wraps, but was laid out
+  across the full 95pt column and then painted over by an opaque neighbour
+  (`zIndex: i` ascending), leaving 40.25pt visible. Fixed by sizing the name BOX:
+  new `NAME_BAND_LEFT_CHROME` (17.5, derived from the four styles it sums) and
+  `nameColumnPeek(step)`, threaded to `CombatCardFace` as an optional `namePeek`
+  that caps `plateName`'s maxWidth so the name wraps inside the visible sliver.
+  `handFanLayout` was left byte-identical, so the C11-R/C11-R2 geometry
+  invariants stayed green untouched rather than being re-derived. Also shipped
+  the precedent's second half: the board now states "tap a card to read it"
+  visibly — the tap path was already wired but lived only in an
+  accessibilityHint. New 10-test guard suite
+  `CombatBoard.handfan.test.tsx`; combat-encounter 31 suites / 186 tests green.
 
 ### [MED] ui-fresh-eyes SWARM 2026-09-12 — the 309-row candidate set is drained
 - pass: swarm follow-up to the 2026-09-12 sweep, run from
