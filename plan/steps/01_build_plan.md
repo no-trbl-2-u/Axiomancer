@@ -221,12 +221,13 @@ Tick in this file in the same commit that ships the phase.
       checkpoint and there was no save-on-exit anywhere, so a walk and the
       opening quest were lost on reload.
       — `fix(mobile): a returning player can actually return — phase 99` (fd83aa0)
-- [ ] Phase 100 — The map tells the truth. The other two bugs from the unfiled
+- [x] Phase 100 — The map tells the truth. The other two bugs from the unfiled
       `PLAYTEST_BUGS_2026-09-18.md`: BUG-04 (medium) the exploration camera
       fitted once at mount and never re-framed, so after a move two of three
       onward paths sat off opposite edges (19 of 25 nodes off-screen at 414px);
       BUG-01 (low) the legend counted `lockedNodes` while the pips were drawn
       from `classifyNode`, so "25 nodes · 20 sealed" labelled 21 sealed pips.
+      — `fix(mobile): the map tells the truth — phase 100` (42d2ba2)
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics:

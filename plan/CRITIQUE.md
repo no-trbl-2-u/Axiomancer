@@ -553,6 +553,36 @@
 
 ## Pending
 
+### [x] [HIGH] process — a committed playtest bug report reached `main` filed NOWHERE in `plan/` — RESOLVED 2026-09-19 (phases 99-100)
+- pass: burn-day player-visibility sweep 2026-09-19
+- viewport: n/a
+- category: meta / process
+- observation: `axiomancer-mobile/docs/reports/PLAYTEST_BUGS_2026-09-18.md`
+  (committed 2026-09-18, `1d48483`) is a hands-on playtest bug hunt carrying
+  FOUR root-caused, reproducible bugs — one of them critical (every returning
+  player with a save got a permanently blank screen on launch). `grep -rn
+  'PLAYTEST_BUGS' plan/ .claude/` returned **zero hits**: no CRITIQUE row, no
+  AUDIT row, no `PHASE_CANDIDATES.md` row, no build-plan row. No loop verb
+  reads `axiomancer-mobile/docs/reports/`, so nothing in the autonomous loop
+  could ever have picked this up. All four bugs were still live at HEAD a day
+  later, and would have stayed live indefinitely.
+- evidence: the report itself; the zero-hit grep; all four bugs re-verified
+  against the tree at `b9acf40` before being fixed.
+- resolution: the four bugs shipped as Phase 99 (BUG-02 blank screen, BUG-03
+  save-on-exit) and Phase 100 (BUG-04 map camera, BUG-01 legend counter). This
+  row exists so the PROCESS gap is visible rather than silently closed along
+  with them.
+- **`[needs-user-call]` — the process gap itself is NOT fixed.** A
+  hand-written report under `<package>/docs/reports/` is invisible to the
+  loop by construction. Options for `/oversight`: (a) require every report
+  landing there to file a matching `plan/CRITIQUE.md` row in the same commit;
+  (b) teach `/iterate` (or `/march`'s triage step) to sweep
+  `*/docs/reports/*.md` for unfiled findings; (c) accept that reports are
+  human-only artefacts and route them through `/jot`. Until one is chosen,
+  the next hand-written report will go the same way.
+- source: loop (burn-day sweep)
+
+
 ### [LOW] village / items — two consumables use "wearer" language for items the player drinks, not wears
 - pass: 41 (commit 6a804a02)
 - viewport: mobile and desktop (both render the same source text)
