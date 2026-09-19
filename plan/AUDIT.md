@@ -286,18 +286,28 @@
   SESSION, domain ERROR) to confirm before closing; can't be shipped
   blind on web alone.
 
-### [3.5] `[tests]` Verify gate is blind to the Playwright journeys
+### [x] [3.5] `[tests]` Verify gate is blind to the Playwright journeys — RESOLVED 2026-09-19 (`/iterate`, `[loop-call]`)
 - category: tests
 - impact: 7
 - ease: 5
-- next: `axiomancer-mobile/package.json`'s `verify` script is lint/
-  typecheck/test/assets:check/art:test only — none of the `e2e:*`
-  Playwright journeys run in it, so a real regression in a journey can
-  land on main with a green gate. The row itself leaves the choice (join
-  `verify` proper vs. a new `verify:journeys` leg vs. amend `bearings.md`
-  to name this a deliberate gap) to `/iterate`, not an owner. Re-verified
-  live this pass (2026-09-14); not yet actioned — the choice needs its
-  own tick, not a rider on this one.
+- **[loop-call], decided 2026-09-19:** re-checked the premise before picking
+  an option — it's narrower than filed. `axiomancer-mobile/package.json`'s
+  `verify` script never ran any `e2e:*` script, true, but `verify-mobile.yml`
+  and `verify-mechanics.yml` already run 8 of the 11 `e2e:*` journeys as
+  their own scope-gated steps (`ci-e2e-scope.mjs` → hazard/encounters/combat/
+  run_integration), outside `verify` entirely — that's the load-bearing gate,
+  and the established convention (one step per journey, gated on the scope
+  output it belongs to), not an omission. Folding all of them into `verify`
+  proper would fight that convention and duplicate coverage CI already has.
+  The real live gap: `e2e:theme`, `e2e:exploration-roundtrip`, and
+  `e2e:upgradeable-dice` had **zero** CI trigger anywhere — not in `verify`,
+  not as a workflow step, not in `ci-e2e-scope.mjs`'s suite list. Fixed by
+  extending the existing convention rather than inventing a new one: added
+  three scope-gated steps to both workflows (`run_integration` for theme —
+  cross-cutting, boots any full run like `e2e:fixture` already does;
+  `encounters` for the roundtrip script — it drives `DebugTriggerEncounter`,
+  already an `encounters`-classified path; `combat` for upgradeable-dice —
+  it's a combat-surface flag-on harness).
 
 ### [3.2] `npm run critique:drive` deletes anything else living under `.critique-artifacts/`
 - category: debt (filed `[loop-call]` in Pending below, but re-assessed
