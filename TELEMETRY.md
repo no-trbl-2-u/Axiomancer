@@ -538,3 +538,10 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-19T10:29:08Z | skill | adjust-keywords | claude-sonnet-5 | - | - |
 | 2026-09-19T10:29:09Z | skill-end | adjust-keywords | claude-sonnet-5 | 0s | ok |
 | 2026-09-19T10:30:12Z | subagent | card-expert | claude-sonnet-5 | - | Run adjust-keywords pass 13 |
+| 2026-09-19T12:37:26Z | slash-prompt | /march | - | - | /march |
+| 2026-09-19T12:37:28Z | skill | march | - | - | - |
+| 2026-09-19T12:37:28Z | skill-end | march | - | 0s | ok |
+| 2026-09-19T12:38:34Z | skill | expand | claude-sonnet-5 | - | - |
+| 2026-09-19T12:38:34Z | skill-end | expand | claude-sonnet-5 | 0s | ok |
+| 2026-09-19T12:42:35Z | subagent | general-purpose | claude-sonnet-5 | - | KB reception check for expand signal I |
+| 2026-09-19T12:43:27Z | subagent-end | general-purpose | claude-sonnet-5 | 51s | ok |
