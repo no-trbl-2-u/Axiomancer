@@ -225,6 +225,26 @@ async function runRoundTrip(page, baseUrl) {
     // (2026-08-08) — on fishing-village that is an omen cutscene, a full-screen
     // ROUTE with no tab bar of its own. It is not the tab LOCK, so dismiss it
     // before reading the bar, or this harness measures the wrong thing.
+    //
+    // RACE FIXED 2026-09-19. This used to sample `cutscene-advance` ONCE, the
+    // instant after the modal hid. The arrival event resolves a beat later, so
+    // when the runner was slow the sample read zero, the dismissal was skipped,
+    // and the cutscene then mounted OVER the tab bar — and the harness spent its
+    // whole 10s budget waiting for a bar that a full-screen route was covering.
+    // It failed exactly that way in CI (run 35457152197) while passing locally
+    // on the same commit, which is the signature of a sampled race rather than
+    // a product bug: the passing log carries the "took the screen" line and the
+    // failing one does not.
+    //
+    // The fix is to wait for the SETTLED outcome instead of sampling: race the
+    // cutscene against the tab bar and act on whichever actually arrives. Either
+    // is a legitimate post-WITHDRAW state, so neither is a failure here — the
+    // real assertion is the tab-bar one below, which is left untouched.
+    await Promise.race([
+        page.getByTestId('cutscene-advance').waitFor({ state: 'visible', timeout: 8000 }),
+        page.locator(CHARACTER_TAB).first().waitFor({ state: 'visible', timeout: 8000 }),
+    ]).catch(() => {})
+
     if (await page.getByTestId('cutscene-advance').count()) {
         log('start-node arrival cutscene took the screen — playing it out')
         // SKIP only reveals the remaining lines; the scene ends on a tap of the
