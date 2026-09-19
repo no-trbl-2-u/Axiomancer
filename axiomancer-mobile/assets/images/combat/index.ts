@@ -36,6 +36,9 @@
 
 const ARENA_RUINED_CITY = require('./arena-ruined-city.jpg');
 const ARENA_COASTAL_VILLAGE = require('./coastal-village.webp');
+const ARENA_NORTHERN_CITY = require('./arena-northern-city.webp');
+const ARENA_CONNECTING_RIVER = require('./arena-connecting-river.webp');
+const ARENA_SWEETHEARTS_VILLAGE = require('./arena-sweethearts-village.webp');
 
 /**
  * One arena: the region it answers, the plate, and what a screen-reader user is
@@ -78,6 +81,33 @@ const REGION_ARENAS: readonly ArenaPlate[] = [
         pattern: /drowned parish/i,
         art: ARENA_COASTAL_VILLAGE,
         alt: 'Fishermen crowd a moored boat’s rigging, masts forested against a backlit dockside sky',
+    },
+    // Phase 101 — the northern continent's three settled regions. All three are
+    // plates from the SAME edition as the coastal arena above (Doré's "London:
+    // A Pilgrimage", 1872, via the Gallica scans on Commons), which is what
+    // makes the set read as one hand rather than four borrowed pictures.
+    {
+        // "Over London by Rail". A city grim by ordinary congestion, not by
+        // monsters — the register the northern city is written in.
+        pattern: /northern city/i,
+        art: ARENA_NORTHERN_CITY,
+        alt: 'Tenement backyards and chimney stacks crowd beneath a railway viaduct, seen through a dark brick arch',
+    },
+    {
+        // A landing rather than a view of open water: the region is a crossing
+        // you arrive at. Deliberately not the maps registry's Charon plate —
+        // the player has just walked over that one to get here.
+        pattern: /connecting river/i,
+        art: ARENA_CONNECTING_RIVER,
+        alt: 'A crowd presses at a dock gate under a low sun, a forest of ships’ masts massed behind',
+    },
+    {
+        // "Dudley Street, Seven Dials". Matched on `sweetheart` alone: the live
+        // display string carries an apostrophe ("The Sweetheart's Village") and
+        // a pattern that spans it would break on a straight/curly swap.
+        pattern: /sweetheart/i,
+        art: ARENA_SWEETHEARTS_VILLAGE,
+        alt: 'A slum lane of low terraces with children in the roadway and second-hand wares laid out on the stones',
     },
 ];
 

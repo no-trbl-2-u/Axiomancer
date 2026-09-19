@@ -228,6 +228,12 @@ Tick in this file in the same commit that ships the phase.
       BUG-01 (low) the legend counted `lockedNodes` while the pips were drawn
       from `classifyNode`, so "25 nodes · 20 sealed" labelled 21 sealed pips.
       — `fix(mobile): the map tells the truth — phase 100` (42d2ba2)
+- [ ] Phase 101 — Region arena plates: three of the six regions that fought in
+      front of the same generic ruined city get their own Dore plate, all from
+      the same edition as the coastal arena already shipped. Bespoke arenas go
+      from 1 of 7 regions to 4 of 7. Owner instruction 2026-09-19 ("find
+      whatever art you'd like for a true big impact"), authorized as a loop call
+      by THE OPEN GATE 6.
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics:
