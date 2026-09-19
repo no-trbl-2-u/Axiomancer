@@ -104,11 +104,33 @@ export interface Equipment extends BaseItem {
  * `intensityOverride` / `durationOverride` retune the referenced or inline
  * effect on a per-instance basis.
  *
+ * ## The desperation band (`healAmountBelowHalf`) — Phase 96
+ *
+ * A flat `healAmount` gives a player no reason to ever DRINK the potion: the
+ * flask is worth the same 20 HP at full health as at death's door, so the
+ * dominant strategy is to hoard it forever and the item never enters play.
+ * `healAmountBelowHalf` is the anti-hoarding lever: a SECOND, larger heal that
+ * fires only while the drinker is under
+ * {@link DESPERATION_HP_FRACTION} of their `maxHealth`.
+ *
+ * Prior art: Dawncaster's Healing Potion — "Gain 10 HEALTH. If you are below
+ * 50% health, gain 15 HEALTH instead" (`kb:dawncaster/0796-healing-potion`).
+ * The corpus bakes the conditional into the ITEM rather than leaving it to
+ * player judgment, which is what converts a hoarded resource into a used one.
+ *
+ * The field is OPTIONAL and purely additive: a consumable that omits it behaves
+ * exactly as before (flat `healAmount` at every HP level), so every pre-Phase-96
+ * item and every hand-written state literal keeps its current semantics.
+ *
  * @property category         - Always `'consumable'`.
  * @property quantity         - Number of this item in the stack.
  * @property effectId         - Optional effect-library lookup key applied on use.
  * @property inlineEffect     - Optional bespoke `Effect` applied on use.
  * @property healAmount       - Optional immediate flat HP heal applied on use.
+ * @property healAmountBelowHalf - Optional LARGER heal that replaces `healAmount`
+ *   while the drinker is below {@link DESPERATION_HP_FRACTION} of `maxHealth`.
+ *   Requires `healAmount` to be set (it is a conditional upgrade of that heal,
+ *   never a standalone payload); ignored when `healAmount` is absent.
  * @property intensityOverride - Optional intensity override for the applied effect.
  * @property durationOverride  - Optional duration override for the applied effect.
  */
@@ -118,6 +140,8 @@ export interface Consumable extends BaseItem {
     effectId?: string;
     inlineEffect?: Effect;
     healAmount?: number;
+    /** Phase 96 — the desperation-band heal. See the interface docblock. */
+    healAmountBelowHalf?: number;
     intensityOverride?: number;
     durationOverride?: number;
     /** Content-provenance metadata: `addedIn` is an ISO date / phase tag;

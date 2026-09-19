@@ -204,7 +204,18 @@ export function wareEffectLine(item: Item): string {
     if (isConsumable(item)) {
         const parts: string[] = [];
         const heal = item.healAmount ?? 0;
-        if (heal > 0) parts.push(`restores ${heal} VITAE`);
+        if (heal > 0) {
+            // Phase 96 — the shop line states BOTH bands. A stall that quotes
+            // only the flat number undersells every healing potion in the game
+            // and hides the one fact that should decide the purchase: this is
+            // worth half again when the buyer is losing.
+            const desperate = item.healAmountBelowHalf ?? 0;
+            parts.push(
+                desperate > 0
+                    ? `restores ${heal} VITAE, ${desperate} below half`
+                    : `restores ${heal} VITAE`,
+            );
+        }
         const effect = item.inlineEffect
             ?? (item.effectId ? lookupEffect(item.effectId) : undefined);
         const words = effect ? effectWords(effect) : '';

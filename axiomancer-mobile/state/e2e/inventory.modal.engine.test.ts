@@ -148,6 +148,78 @@ describe('selectItemModalViewModel: consumable preview (Q2)', () => {
     });
 });
 
+describe('selectItemModalViewModel: the desperation band (Phase 96)', () => {
+    /**
+     * A two-band potion. `makeStore` seeds the player at 5 HP against a
+     * `createCharacter`-derived maxHealth well above 10, so the default store
+     * player is DEEP inside the band — the "above the band" cases below have to
+     * raise health explicitly.
+     */
+    const banded: Consumable = {
+        ...potion,
+        id: 'banded-phial',
+        name: 'Banded Phial',
+        healAmount: 6,
+        healAmountBelowHalf: 9,
+    };
+
+    /** Rebuild the store with the player pinned to a given HP. */
+    function makeStoreAtHp(inventory: readonly Consumable[], health: number) {
+        const base = createCharacter({
+            name: 'Pilgrim',
+            level: 1,
+            baseStats: { heart: 4, body: 4, mind: 4 },
+        });
+        const player = { ...base, health, inventory: [...inventory] };
+        return createGameStore(createMemoryAdapter(), { player });
+    }
+
+    it('previews the LARGER heal, flagged, when the player is badly wounded', () => {
+        const store = makeStore([banded]); // seeded at 5 HP — inside the band
+        const vm = selectItemModalViewModel(store.getState(), 'banded-phial')!;
+
+        const lines = vm.previewLines.join(' ');
+        expect(lines).toMatch(/Heal 9 HP/);
+        expect(lines).toMatch(/badly wounded/i);
+        // The flat number must NOT be the headline while the band is active.
+        expect(vm.previewLines[0]).not.toMatch(/Heal 6 HP/);
+    });
+
+    it('previews the flat heal AND advertises the band when the player is healthy', () => {
+        const base = createCharacter({
+            name: 'Pilgrim', level: 1, baseStats: { heart: 4, body: 4, mind: 4 },
+        });
+        const store = makeStoreAtHp([banded], base.maxHealth);
+        const vm = selectItemModalViewModel(store.getState(), 'banded-phial')!;
+
+        const lines = vm.previewLines.join(' ');
+        // This advertisement is the lever's whole job: a player at full health
+        // has to be able to SEE that the flask is worth more later, or they will
+        // keep hoarding it.
+        expect(lines).toMatch(/Heal 6 HP/);
+        expect(lines).toMatch(/9 HP instead when below half/i);
+        expect(lines).not.toMatch(/badly wounded/i);
+    });
+
+    it('says nothing about a band for a band-less potion', () => {
+        const store = makeStore([potion]); // flat-only, player inside the band
+        const vm = selectItemModalViewModel(store.getState(), 'phial')!;
+
+        const lines = vm.previewLines.join(' ');
+        expect(lines).toMatch(/Heal 6 HP/);
+        expect(lines).not.toMatch(/below half/i);
+        expect(lines).not.toMatch(/badly wounded/i);
+    });
+
+    it('projects the HP delta off the band-resolved amount, not the flat one', () => {
+        // 5 HP, banded potion pays 9 → the projected line must read the 9.
+        const store = makeStore([banded]);
+        const vm = selectItemModalViewModel(store.getState(), 'banded-phial')!;
+
+        expect(vm.previewLines.some((l) => /\+9/.test(l))).toBe(true);
+    });
+});
+
 describe('selectItemModalViewModel: equipment preview (Q5)', () => {
     it('reports mode "equip" and an EQUIP · REPLACE label when there is a worn sibling (Phase 36)', () => {
         const store = makeStore([blade]);

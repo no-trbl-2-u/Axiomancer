@@ -316,6 +316,11 @@ export {
     addItemToInventory, removeItemFromInventory,
     isEquipment, isConsumable, isMaterial, isQuestItem,
     useConsumableEffect,
+    // Phase 96 — the desperation band (a healing potion pays 1.5x under half
+    // VITAE). `resolveConsumableHeal` is the shared resolver mobile's presenters
+    // preview with, so the shop line and the drink preview cannot drift from
+    // what the engine actually pays.
+    DESPERATION_HP_FRACTION, isDesperate, resolveConsumableHeal,
     // Phase 21 — procedural equipment factory/templates retired; loot caches
     // yield consumables via rollCacheReward. Phase 23 — modifier catalogue,
     // affix library, item sets, and the rarity model are torn down.

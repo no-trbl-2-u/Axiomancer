@@ -10,6 +10,13 @@ export {
 } from './item.reducer';
 export { useConsumableEffect } from './equipment.engine';
 export type { ConsumableUseResult } from './equipment.engine';
+// Phase 96 — the desperation band. `resolveConsumableHeal` is the ONE resolver
+// for the two-band heal; presenters import it rather than re-deriving the
+// threshold, which is what keeps the shop line, the drink preview and the
+// actual heal from disagreeing.
+export {
+    DESPERATION_HP_FRACTION, isDesperate, resolveConsumableHeal,
+} from './equipment.engine';
 // Phase 21 — the procedural equipment library + factory are retired; loot
 // caches yield consumables via `rollCacheReward`. Phase 23 — the modifier
 // catalogue, affix library, item sets, and rarity model are torn down (the

@@ -97,6 +97,38 @@ describe('wareEffectLine states the mechanical read (S5-talk-C04)', () => {
         expect(line).not.toMatch(/\bHP\b/);
     });
 
+    it('states BOTH bands for a two-band healing potion (Phase 96)', () => {
+        // Every shipped healing potion carries a desperation band. A stall that
+        // quotes only the flat number hides the one fact that should decide the
+        // purchase — that the flask is worth half again when the buyer is losing.
+        const banded = consumableLibrary.find(
+            (c) => (c.healAmountBelowHalf ?? 0) > 0,
+        )!;
+        expect(banded).toBeDefined();
+
+        const line = wareEffectLine(banded);
+
+        expect(line).toContain(`${banded.healAmount}`);
+        expect(line).toContain(`${banded.healAmountBelowHalf}`);
+        expect(line).toContain('below half');
+        expect(line).toContain('VITAE');
+        // The naming law still holds on the new clause.
+        expect(line).not.toMatch(/\bHP\b/);
+    });
+
+    it('states only the flat heal for a band-less consumable', () => {
+        const flat = consumableLibrary.find(
+            (c) => (c.healAmount ?? 0) > 0 && !(c.healAmountBelowHalf ?? 0),
+        );
+        // The library may legitimately band every healer; skip rather than
+        // invent a fixture that does not ship.
+        if (!flat) return;
+
+        const line = wareEffectLine(flat);
+        expect(line).toContain(`restores ${flat.healAmount} VITAE`);
+        expect(line).not.toContain('below half');
+    });
+
     it('states a cleanse as what it clears', () => {
         expect(CLEANSE_WARE).toBeDefined();
         expect(wareEffectLine(CLEANSE_WARE)).toContain('clears afflictions');
