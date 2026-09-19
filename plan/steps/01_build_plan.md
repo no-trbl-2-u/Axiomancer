@@ -192,6 +192,13 @@ Tick in this file in the same commit that ships the phase.
       already fixed by `745b56ff`/FE-047); shipped the one real gap —
       the combat primer now teaches the signature rune rail
       — `feat(mobile): teach the signature rune rail in the combat primer — phase 95` (2aa77567)
+- [ ] Phase 96 — Consumable desperation band: a healing potion pays 1.5x when
+      drunk below half VITAE, stated in the shop line and the drink preview
+      (promoted from `PHASE_CANDIDATES.md` [score 3.5], filed 2026-09-19 by
+      `/adjust-equipment` pass 13; KB-grounded on
+      `kb:dawncaster/0796-healing-potion`). The anti-hoarding lever: a flat heal
+      is worth the same at full health as at death's door, so the dominant play
+      was to hoard the flask forever.
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics:
