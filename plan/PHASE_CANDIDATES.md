@@ -522,6 +522,34 @@
   half-right would put a silent defect into the one screen the player spends
   most of their time on. The design work is the durable output; the build is a
   clean 2-phase job for a tick that can start from this row.
+- **[correction, same day] The full implementation order is now written up as
+  `plan/phases/phase_102_summon_adds_archetype.md`**, and completing it refuted
+  THREE claims made in the summary above. Recorded here because the summary was
+  already pushed and a reader should not act on it uncorrected:
+  1. **"Adding to `CombatEvent` breaks four exhaustive sites at typecheck" is
+     WRONG.** Both mobile switches carry a `default:`
+     (`combat-encounter.engine.ts:1153`, `:1286`), so new event members break
+     nothing there. The real typecheck gate is the `EnemyKeyword` union's four
+     sites in `Enemy/enemy-keywords.ts`.
+  2. **The soak ordering above was under-specified.** The corrected design
+     resolves the add bite in its own block AFTER the
+     `if (!hindered && !isDefeated(enemy))` block closes, through a shared
+     helper — which also settles a ruling the summary did not name: staggering
+     the boss does NOT silence the brood (bodies act), and killing the boss
+     still ends the fight, a deliberate divergence from STS:BG's persistent
+     summons (`kb:slay-the-spire-the-board-game/rules/edge-cases-faq:62-63`).
+  3. **"Spawn on a one-shot event with a per-encounter cap" now has numbers.**
+     N = 2 per wave, `ADD_WAVE_CAP` = 2, adds are 1/1 (one strike kills one),
+     `bite = max(2, round(enemy.level * 0.2))` snapshotted at spawn, and
+     `STRIKE_ADD_COST` = 2 conviction against a cap of 12. At L22 a full wave
+     is ~8 against the foe's own ~31 telegraph — 26%, "a modifier on the wall,
+     not a second wall". The finite-wave shape is grounded in Aeon's End's
+     finite nemesis deck and STS:BG's per-Act summon deck, both cited in the
+     brief.
+  The brief also carries the second honest line the prior-art lens demanded: a
+  live GUARD wall answers the brood, so eating the bite costs a defend card
+  every round while clearing costs a one-time 2 conviction. That is the
+  decision, and both sides are visible in the telegraph.
 - estimated phases: 2 (was "2-3", now bounded by a settled design)
 
 ### ~~[score 3.5] Consumables have no anti-hoarding lever — no cantrip-style secondary effect, no HP-conditional scaling~~ PROMOTED to Phase 96 and SHIPPED 2026-09-19 (commit 417b931)
