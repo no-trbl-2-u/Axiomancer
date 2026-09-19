@@ -200,6 +200,11 @@ Tick in this file in the same commit that ships the phase.
       is worth the same at full health as at death's door, so the dominant play
       was to hoard the flask forever.
       — `feat(items): consumable desperation band — phase 96` (417b931)
+- [ ] Phase 97 — Hand-fan name legibility: the mobile combat hand covered its
+      own card names ("THIN HYM / CHILBLAI / THE LONG / SPOILED "). From
+      `plan/CRITIQUE.md` [MED] pass 37, reconfirmed by passes 38-41. Occlusion,
+      not truncation — fixed by sizing the name BOX to the visible sliver, since
+      the geometry lever is capped at ~1 extra character at 375px. Issue #343.
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics:
