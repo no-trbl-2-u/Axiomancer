@@ -1,4 +1,4 @@
-import { NavigationContainer, Stack, linking, navigationRef } from '@/lib/platform/router';
+import { NavigationContainer, Stack, linking, navigationRef, flushPendingNavigation } from '@/lib/platform/router';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useFonts } from '@/lib/platform/font';
 import * as SplashScreen from '@/lib/platform/splash-screen';
@@ -17,6 +17,7 @@ import { FontProvider } from '@/hooks/useFontFallbacks';
 // Side-effect: skin the web scrollbar to match the gothic chrome.
 import '@/theme/web-scrollbar';
 import { createAsyncStorageAdapter } from '@/state/persistence/asyncStorageAdapter';
+import { SaveOnExit } from '@/components/SaveOnExit';
 import { createFixtureBootAdapter } from '@/state/persistence/fixtureBootAdapter';
 import { resolveBootFixture } from '@/state/fixtures';
 import { FixtureBoot } from '@/components/FixtureBoot';
@@ -224,7 +225,18 @@ function RootLayout() {
           <AestheticModeProvider>
           <CombatModeProvider>
           <TooltipProvider>
-            <NavigationContainer ref={navigationRef} linking={linking}>
+            {/* PLAYTEST_BUGS_2026-09-18 BUG-02: a returning player's very
+                first paint is `<Redirect href="/exploration">` (no title
+                screen to click through), which could fire BEFORE this
+                container attached. `dispatchTo` dropped it silently and
+                `Redirect`'s effect — keyed only on `[href]` — could never
+                re-run, so the app sat on a blank screen forever. The router
+                now queues that request; `onReady` is where it gets replayed. */}
+            <NavigationContainer
+              ref={navigationRef}
+              linking={linking}
+              onReady={flushPendingNavigation}
+            >
               <StatusBar barStyle="light-content" />
               <HardwareBackHandler />
               <NavLogger />
@@ -234,6 +246,11 @@ function RootLayout() {
               <CacheGate />
               <BlacksmithGate />
               <ToastHost />
+              {/* PLAYTEST_BUGS_2026-09-18 BUG-03: the app had no save-on-exit
+                  of any kind, and the adapter's 500ms write debounce could eat
+                  even a legitimate checkpoint if the player closed inside it.
+                  This takes a final save and flushes it on background/pagehide. */}
+              <SaveOnExit adapter={storeAdapter} />
               <DevAutoSeed />
               <FixtureBoot />
               <Stack screenOptions={{ headerShown: false }}>

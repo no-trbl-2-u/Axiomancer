@@ -23,6 +23,7 @@ import {
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { getLogger } from '@mechanics';
 
 export { NavigationContainer } from '@react-navigation/native';
 
@@ -137,11 +138,67 @@ function parseHref(href: string): { entry: RouteEntry | undefined; params?: Reco
   return { entry: ROUTE_TABLE[segment], params };
 }
 
+/**
+ * The navigation request that arrived before the container was ready.
+ *
+ * PLAYTEST_BUGS_2026-09-18 BUG-02 (critical — the game was unreachable for
+ * every returning player). `dispatchTo` used to `return` silently when
+ * `navigationRef.isReady()` was false, and nothing ever retried. A returning
+ * player has `showTitleScreen` false, so `app/index.tsx` renders
+ * `<Redirect href="/exploration" />` on its FIRST paint — which can land before
+ * the NavigationContainer attaches. `Redirect`'s effect is keyed on `[href]`,
+ * and `href` never changes, so the effect could not re-run: the redirect was
+ * dropped, the index route kept rendering `null`, and the player got a
+ * permanently blank screen with no error anywhere. Clearing the save made the
+ * title screen render again, which is what pinned it to this path.
+ *
+ * Last-write-wins on purpose: only the most recent request can still be
+ * correct. If two screens both asked to navigate while the container was
+ * starting, replaying the older one would land the player somewhere they have
+ * already navigated away from.
+ *
+ * This is deliberately module-scoped rather than React state — the callers are
+ * `useRouter().push/replace` and `<Redirect>`, which can fire from anywhere
+ * (including effects that run before any provider mounts).
+ */
+let pendingNavigation: { href: string; mode: 'push' | 'replace' } | null = null;
+
+/**
+ * Replay the navigation request that was dropped before the container was
+ * ready, if there was one.
+ *
+ * Called from `<NavigationContainer onReady>` in `app/_layout.tsx`. Idempotent:
+ * the pending request is cleared BEFORE it is dispatched, so a re-entrant or
+ * duplicate `onReady` cannot double-navigate, and a dispatch that itself fails
+ * does not leave a request queued forever.
+ *
+ * Exported for `_layout.tsx` and for the regression test.
+ */
+export function flushPendingNavigation(): void {
+  const queued = pendingNavigation;
+  pendingNavigation = null;
+  if (!queued) return;
+  dispatchTo(queued.href, queued.mode);
+}
+
+/** Test seam: forget any queued request between cases. */
+export function __resetPendingNavigationForTests(): void {
+  pendingNavigation = null;
+}
+
 function dispatchTo(href: string, mode: 'push' | 'replace'): void {
-  if (!navigationRef.isReady()) return;
+  if (!navigationRef.isReady()) {
+    // Queue rather than drop — see `pendingNavigation`. `onReady` replays it.
+    pendingNavigation = { href, mode };
+    return;
+  }
   const { entry, params } = parseHref(href);
   if (!entry) {
-    if (__DEV__) console.warn(`[lib/platform/router] unknown route: ${href}`);
+    // Was `__DEV__ && console.warn`, i.e. invisible in a production build —
+    // which is exactly why BUG-02 reached a player as a blank screen with
+    // nothing in the log. Route it through the app logger so the next
+    // occurrence lands in the crash tail (`PREV SESSION` under DIAGNOSTICS).
+    reportRouterFault('unknown-route', { href });
     return;
   }
   if (entry.tab) {
@@ -151,6 +208,21 @@ function dispatchTo(href: string, mode: 'push' | 'replace'): void {
   navigationRef.dispatch(
     mode === 'push' ? StackActions.push(entry.screen, params) : StackActions.replace(entry.screen, params),
   );
+}
+
+/**
+ * Log a navigation fault without ever letting logging break navigation.
+ *
+ * The logger reaches `@mechanics` and a log-tail adapter; if any of that is
+ * unavailable (a test harness, a cold boot before `initAppLogging`), a thrown
+ * error here would take out the very redirect we are trying to diagnose.
+ */
+function reportRouterFault(event: string, payload: Record<string, unknown>): void {
+  try {
+    getLogger().warn('nav', event, payload);
+  } catch {
+    /* logging never breaks navigation */
+  }
 }
 
 export function useRouter() {

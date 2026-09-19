@@ -334,7 +334,31 @@ describe('exploration lifecycle: multi-step navigation', () => {
         expect(byId['fv-20'].kind).toBe('available');
     });
 
-    it('a move does not implicitly call adapter.save (Spec 09 hook)', () => {
+    /**
+     * INVARIANT CHANGED, deliberately — Phase 99.
+     *
+     * This case used to assert the OPPOSITE ("a move does not implicitly call
+     * adapter.save"), labelled as a Spec 09 hook. That label was wrong, and the
+     * assertion encoded a mobile implementation gap as if it were the design:
+     *
+     *   - Spec 09 Q4 ("Save granularity") is RESOLVED, at Phase 51 (`4972f9a`),
+     *     in favour of Path B — autosave restricted to a curated
+     *     `DURABLE_ACTIONS` allowlist. `MOVE_TO_NODE` is ON that allowlist
+     *     (`axiomancer-mechanics/src/Game/store.ts`), so persisting on node
+     *     movement is the engine's ratified behaviour, not a violation of it.
+     *   - Mobile's `moveToAction` never got that behaviour because it writes
+     *     the new world with `store.setState({ world })` directly instead of
+     *     dispatching through the engine reducer, so the DURABLE_ACTIONS gate
+     *     never sees the move.
+     *
+     * The player-visible cost of that gap is PLAYTEST_BUGS_2026-09-18 BUG-03:
+     * a player who walked two nodes and reloaded was put back where they
+     * started, with the walk and the opening quest gone.
+     *
+     * What Spec 09 still forbids — and what the second half of this case
+     * pins — is UI-tier actions writing through. That has not changed.
+     */
+    it('a move IS a save checkpoint, matching the engine allowlist (Spec 09 Q4 / Phase 51)', () => {
         const adapter = createMemoryAdapter();
         const store = createAppStore({ adapter });
         const actions = createAppActions(store);
@@ -342,10 +366,25 @@ describe('exploration lifecycle: multi-step navigation', () => {
 
         actions.moveTo('fv-2');
 
-        expect(saveSpy).not.toHaveBeenCalled();
-
-        actions.save();
+        // `MOVE_TO_NODE` is a DURABLE_ACTION; movement is hard-won progress.
         expect(saveSpy).toHaveBeenCalledTimes(1);
+
+        // An explicit save still writes, and is not swallowed or coalesced away.
+        actions.save();
+        expect(saveSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it('a UI-tier action still does NOT write through (Spec 09 Path B)', () => {
+        const adapter = createMemoryAdapter();
+        const store = createAppStore({ adapter });
+        const actions = createAppActions(store);
+        const saveSpy = jest.spyOn(adapter, 'save');
+
+        // Dismissing an event card is presentation, not progress. Spec 09's
+        // whole point is that this class never reaches the disk.
+        actions.dismissEvent();
+
+        expect(saveSpy).not.toHaveBeenCalled();
     });
 });
 
