@@ -14,7 +14,7 @@
 | cards | `skills/adjust-cards.md` | 2026-09-19 | 30e2e116 | 13 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-19 | 46942361 | 13 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-19 | 181a84e2 | 13 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-19 | TBD | 13 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-19 | 0f9dd762 | 13 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-18 | 900f4858 | 12 |
 
 ## Log
@@ -22,7 +22,7 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-keywords pass 13, 2026-09-19, commit TBD]** Restored FORGE
+> **[adjust-keywords pass 13, 2026-09-19, commit 0f9dd762]** Restored FORGE
 > (`forge_floating_die`/`float_x_die`) to real registry status — dispatched
 > autonomously by `/march`'s content-lifecycle gate (`keywords` `7bc53f82`
 > 2026-09-18T16:46:33Z was the stalest qualifying category this tick: 19
