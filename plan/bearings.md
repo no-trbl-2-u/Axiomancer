@@ -638,12 +638,18 @@ ambiguity.)
      written, not *what* happened — and is untouched. LOCKED MECHANICS
      and every combat/world system are untouched. This clearing is
      narrative only.
-  6. **How it ends.** A new overview gets built from nothing, event by
-     event, in attended sessions per
-     `plan/2026-09-17-story-outline.prompt.md`. When
-     `content/story/story-overview.md` exists again, it supersedes this
-     ruling's ¶1. Nothing else lifts it.
-  Marker in the tree: `content/story/README.md`.
+  6. **How it ends — and it has ended, for ¶1.** A new overview got built
+     from nothing, event by event, in an attended session per
+     `plan/2026-09-17-story-outline.prompt.md`.
+     `axiomancer-mechanics/content/story/story-overview.md` exists as of
+     2026-09-18, so **¶1 is lifted**: canon exists again, and it is
+     whatever that file says — nothing more. ¶2 (the player is X), ¶3
+     (shipped content is not canon), ¶4 (the loop does not invent canon
+     beyond the road) and ¶5 stand unchanged. The road is short and still
+     being walked; a beat the overview does not cover does not exist, and
+     the loop still says so and stops rather than filling the gap.
+  Marker in the tree: `content/story/story-overview.md` (the road);
+  `content/story/README.md` is the superseded record of the clearing.
 
 - **THE GROWTH FLOOR (T direct, attended `/oversight` 2026-09-17) — the
   growth mandate gets guaranteed tick budget, and stewards ship small

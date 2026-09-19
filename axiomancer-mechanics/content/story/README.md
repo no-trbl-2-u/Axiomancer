@@ -1,4 +1,33 @@
-# THERE IS NO STORY
+# SUPERSEDED — see `story-overview.md`
+
+> **This document is no longer in force.** As of 2026-09-18 a new story
+> overview exists at `content/story/story-overview.md`, built from nothing
+> event by event with T present, per
+> `plan/2026-09-17-story-outline.prompt.md`. THE BLANK PAGE ¶1 ("no canon
+> exists") lifted at the moment that file was created — see
+> `plan/bearings.md`, which says so in its own terms.
+>
+> **Read `content/story/story-overview.md` for what the story is.** That
+> file is the road: the ordered list of what happens to the player. It is
+> still being walked, so it is short and its `Status` line says how far it
+> has got.
+>
+> What did NOT change when this document was superseded:
+> - **The player is still X** — no name, no figure, no identifiers. X is
+>   brainstorming scaffolding, never shipped text.
+> - **Shipped content is still not canon.** The ~186 dialogue nodes and 21
+>   `boy-*` flags stay playable because removing them would break a working
+>   game. A shipped line is evidence of what an old draft assumed. The
+>   overview may keep, move, rewrite or discard any of it.
+> - **Do not restore a removed document.** The table below is a record of
+>   what was cleared, not a shelf to take drafts off.
+> - **`docs/narrative/` is untouched** — craft law, not story law.
+>
+> The rest of this file is kept as the historical record of the clearing.
+
+---
+
+# THERE IS NO STORY (historical — cleared 2026-09-17/18, superseded 2026-09-18)
 
 **Status as of 2026-09-18: this game has no story canon, and no law
 about what its story is.** That is not an oversight or a gap waiting to
@@ -75,15 +104,12 @@ Specifically:
    Dice) and every combat/world system are unaffected. This clearing is
    about narrative only.
 
-## What happens next
+## What happened next
 
-A new story overview will be built from nothing, event by event, in
-attended sessions with T. The method is written up in
-`plan/2026-09-17-story-outline.prompt.md`: one event per turn, four
-pitches plus T's write-in, recorded and committed each turn, until the
-road is long enough to reason about from above.
+The overview was built, exactly as planned: one event per turn, four
+pitches plus T's write-in, recorded and committed each turn. It lives at
+`content/story/story-overview.md` and it supersedes this document rather
+than merging with it.
 
-When that file exists, **it** becomes the overview — and this document
-is superseded by it, not merged with it.
-
-Until then: there is no story.
+**Go read it.** Everything above this line describes the ground being
+cleared; the overview describes what is being built on it.

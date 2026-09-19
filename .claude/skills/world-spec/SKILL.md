@@ -38,7 +38,8 @@ contradict existing design:
 
 | Topic | Read first |
 |---|---|
-| World structure | `docs/world.md`, `content/story/README.md` (THERE IS NO STORY) |
+| World structure | `docs/world.md` |
+| Story premise | `content/story/story-overview.md` — the road, event by event. Short and still being walked; a beat it does not cover does not exist yet. |
 | Existing maps | `src/World/Continents/<continent>/maps.ts` |
 | Encounter / hazard model | `docs/effects.md`, `src/Effects/` |
 | Existing world specs | list files in `specs/world/` |
