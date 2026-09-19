@@ -419,6 +419,12 @@ reproduction and reported the numbers, not re-read by the orchestrator;
   `plan/CRITIQUE.md` row (hand-fan overlap, ~:611) is RESOLVED or needs a
   residual — 40.25pt fits ~9-10 uppercase glyphs over two lines, so
   `FROSTBITTEN PALISADE` truncates, it does not read.
+- **Independently corroborated.** `/critique` pass 42 (`ed416c8`, landed
+  on `main` twenty minutes after the merge, before this prompt was
+  written) filed the hint half of this row on its own: *"`[MED]` combat —
+  Phase 97's 'tap a card to read it' hint never shows for the truncated
+  hand fan it was built to fix"*, with the same gate line quoted. **Close
+  that row** when you fix this; do not file a second one.
 
 ### 3.14 [MED · dropped ship gate · confidence 85] The enemy figure is still anchored to a static HUD height — the add row can paint over the foe's head
 
