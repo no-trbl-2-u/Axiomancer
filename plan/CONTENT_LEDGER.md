@@ -11,7 +11,7 @@
 
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
-| cards | `skills/adjust-cards.md` | 2026-09-17 | 989cad9f | 12 |
+| cards | `skills/adjust-cards.md` | 2026-09-19 | 30e2e116 | 13 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-17 | 6a28ba0b | 12 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-17 | 94da2e3f | 12 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-18 | 7bc53f82 | 12 |
@@ -20,6 +20,98 @@
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-cards pass 13, 2026-09-19, commit 30e2e116]** One modest UPDATE
+> shipped (a stale doc comment), zero CREATE, zero card-verb UPDATE, zero
+> REMOVE. Dispatched autonomously by `/march`'s content-lifecycle gate
+> (`cards` was the stalest qualifying category: last pass `989cad9f`
+> 2026-09-17, past its 15-commit/36h threshold; deploy confirmed green).
+>
+> **Step 1 audit:** `git log 989cad9f..HEAD` on the card-authoring surface
+> (`src/Cards`, `src/Effects`, `src/Combat`, `docs/keyword-atlas.md`,
+> `docs/retheme-map.json`, mobile `state/combat/keywords.ts`, card-editor
+> `data/mechanics.ts`) returns 6 commits, only 3 of them touching any of
+> those paths: FLURRY (Phase 90, `combat.engine.ts` multi-hit enemy
+> archetype, keyword-atlas row for an ENEMY keyword), the `GameState.flags`
+> plumbing fix (Phase 93, `combat.engine.ts`), and `adjust-keywords` pass
+> 12's UNMOVED backfill (keyword-atlas.md + mobile `KEYWORD_GLOSS`,
+> presentation-only, zero engine/pricing/editor touch, zero card touched).
+> None author or edit a card. This is the third consecutive zero-card-diff
+> `/adjust-cards` window (passes 11, 12, now 13 — the actual
+> `cards.library.ts`/`library/*.cards.ts`/`cards.pricing.ts` tree has not
+> moved since pass 11's own citation of `df4036fc`/EVENTIDE's two cards),
+> so per THE GROWTH FLOOR paragraph 3 this pass widened the audit itself
+> rather than re-citing a clean bill of health a third time.
+>
+> Fresh re-derivation of every Step 1 signal directly against the live
+> tree: **reachability** — all 130 cards (`cardLibrary.length`, confirmed
+> via `axio_overview` and an independent manual per-module id count: 8
+> starters + 5 curses + 3 relics + 16 rot + 17 debt + 16 grave + 17 vigil +
+> 20 trial + 16 choir + 12 apocrypha = 130) resolve through some preset or
+> draft pool. **Pricing/honesty/FREE-line/aspect-thirds** — full mechanics
+> gate green (214/214 files, 3470 tests incl. 255/255
+> `pricing.engine.test.ts`, build). **Per-theme aspect split** — recounted
+> directly off the six theme modules' own `philosophicalAspect` literals:
+> rot body6/heart5/mind5, debt body5/heart6/mind6, grave body6/heart5/
+> mind5, vigil body5/heart6/mind6, trial body7/heart7/mind6, choir
+> body5/heart6/mind5 — no third lighter than a 1-2 card wobble, not the
+> stark asymmetry the CREATE signal describes; matches pass 12's own
+> numbers. **Near-duplicate re-check** — re-opened both standing
+> "near-identical specialMechanics+cost+aspect" pairs flagged every pass
+> since pass 4 and read their full card bodies fresh rather than trusting
+> the citation: `thin-hymn` (starter, choir) vs `alms-of-breath` (Ash,
+> choir) share a `sway`+`rider` kind-set and aspect/rank/tier, but their
+> actual payloads differ (a self-heal rider vs a `debuff_quarter`
+> combatEffect + cleanse rider) — a starter teaching the plate's basic move
+> next to the Ash card that adds the debuff layer, not a defect.
+> `the-last-assize` (debt Saint capstone) vs `the-vein-called-in` (debt
+> apocryphon) share `recoil`/`deal`/`wrath`/`overkill`, but
+> `apocrypha.cards.ts`'s own header states every apocryphon is authored to
+> sit "at the top of th[e] distribution" of its theme's existing shapes —
+> the escalation is the design, not an accident. Both pairs reconfirmed
+> intentional, matching every prior pass's reading.
+>
+> **Step 1b widened audit:** the curse family's 5-card size was already
+> checked pass 12 against Slay the Spire's own curse-card proportion and
+> found genre-accurate; re-confirmed unchanged this pass (no curse-family
+> commit landed in the window). Read the full 141-row Dawncaster
+> `keywords.csv` (`kb:dawncaster/keywords.csv`, community, medium)
+> function-by-function looking for a category thin in our library that a
+> small (3-or-fewer-card) CREATE using only already-registered keywords
+> could fill; found no clean candidate that doesn't collide with
+> `/adjust-keywords`' own lane — a keyword with zero/one carrier is
+> explicitly that steward's finding per this skill's own audit table
+> ("No card carries a keyword the atlas lists as active — note only, that's
+> `/adjust-keywords` territory"), not a gap this pass may act on.
+>
+> **What shipped:** one genuine, modest UPDATE — `cards.library.ts`'s own
+> header comment undercounted the library by 2 (said "128 cards";
+> `cardLibrary.length`/`axio_overview` both read 130 — the EVENTIDE pair
+> `/adjust-keywords` pass 11 shipped into vigil/debt moved the true total,
+> and no `/adjust-cards` pass since trued up the aggregator's own header,
+> unlike the sibling per-module header in `debt.cards.ts` which that same
+> EVENTIDE-shipping commit fixed inline). This matches the skill's own
+> signal-table class ("a comment no longer matches what it counts")
+> applied to the aggregator file's header rather than one card's `// pts:`
+> line. Fixed the count and reworded the provenance note so the next pass
+> doesn't have to re-derive why the number moved without a CREATE of its
+> own.
+>
+> **KB research gate (skill Step 2):** the Step 1b widened check above IS
+> this pass's KB research run — no new mechanic/theme design shipped, so
+> the exemption for a documentation-only fix / the REMOVE carve-out both
+> apply; the header fix needed no design input, only an accurate count.
+>
+> **Verify:** `npm run verify --workspace axiomancer-mechanics` (214/214
+> files, 3470 tests + build green), `npm run verify --workspace
+> axiomancer-mobile` (full lint/typecheck/jest/asset suites green),
+> `npm run type-check --workspace axiomancer-card-editor` (clean). No
+> `plan/PHASE_CANDIDATES.md` or new `plan/AUDIT.md` residue filed — nothing
+> actionable surfaced beyond the header-count fix shipped above; the two
+> standing collision pairs and the curse-proportion check are re-confirmed
+> non-findings, not new residue.
+```
 
 ```
 > **[adjust-npcs pass 12, 2026-09-18, commit 900f4858]** One UPDATE shipped
