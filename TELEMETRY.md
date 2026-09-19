@@ -546,3 +546,6 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-19T12:42:35Z | subagent | general-purpose | claude-sonnet-5 | - | KB reception check for expand signal I |
 | 2026-09-19T12:43:27Z | subagent-end | general-purpose | claude-sonnet-5 | 51s | ok |
 | 2026-09-19T14:28:10Z | slash-prompt | /march | - | - | /march |
+| 2026-09-19T15:44:09Z | skill | workflow-authoring | claude-fable-5-1 | - | - |
+| 2026-09-19T15:44:09Z | skill-end | workflow-authoring | claude-fable-5-1 | 0s | ok |
+| 2026-09-19T15:45:36Z | tick-end | - | claude-fable-5-1 | 1m31s | ok |
