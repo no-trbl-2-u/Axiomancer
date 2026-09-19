@@ -1163,6 +1163,16 @@ export const JeweledTree = createEnemy({
     procUnlocks: {
         heart: { attack: 2, defend: 2 },
     },
+    // Phase 102 — the gemstone eyes do not stay in the bark. SUMMON 2.
+    // `keywords` REPLACES `defaultEnemyKeywords` wholesale (see `Enemy/index.ts`),
+    // so HIDE 5 is re-listed by hand to keep the retrofit from being a silent
+    // nerf; the auto SWIFT is DELIBERATELY dropped — an elite carries 1-2
+    // keywords by budget, and the wall is now this fight's honest second line
+    // against the brood rather than something the foe halves.
+    keywords: [
+        { kind: 'hide', n: 5 },
+        { kind: 'summon', n: 2, addName: 'Brier Shoot' },
+    ],
     loot: [none(25), drop('resonance-crystal', 30), drop('heart-draught', 25), drop('greater-healing-potion', 20)],
     philosophicalAlignment: { epistemology: -67, outlook: 67, scope: 67 },
     cards: [card('thin-hymn')],

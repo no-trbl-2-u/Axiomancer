@@ -48,7 +48,7 @@ function renderBoard(region: string | undefined) {
 }
 
 describe('CombatBoard: region-keyed arena backdrop (phase 83)', () => {
-    it('the Drowned Parish resolves to the coastal-village plate, not the ruined-city fallback', () => {
+    it('the Drowned Parish resolves to the coastal-village plate, not the fallback', () => {
         const withRegion = renderBoard('the Drowned Parish');
         const withoutRegion = renderBoard(undefined);
         const backdropWith = withRegion.getByTestId('combat-arena-backdrop');
@@ -57,8 +57,16 @@ describe('CombatBoard: region-keyed arena backdrop (phase 83)', () => {
         expect(backdropWith.props.accessibilityLabel).not.toEqual(backdropWithout.props.accessibilityLabel);
     });
 
+    /**
+     * RE-DERIVED — phase 103. This case used to feed 'The Caverns', which was a
+     * live region with no rule of its own. Phase 103 gave it one (and the
+     * Capital too), so every LIVE region is now keyed and the fallback is
+     * reachable only by a string the game never produces. That is the point of
+     * the phase, so the case now feeds an invented region rather than asserting
+     * a real place still falls back.
+     */
     it('an unmapped region keeps the exact fallback plate and label the dev sandbox gets', () => {
-        const withUnmapped = renderBoard('The Caverns');
+        const withUnmapped = renderBoard('The Kingdom of Nowhere');
         const withNone = renderBoard(undefined);
         const backdropUnmapped = withUnmapped.getByTestId('combat-arena-backdrop');
         const backdropNone = withNone.getByTestId('combat-arena-backdrop');

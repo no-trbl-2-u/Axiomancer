@@ -3,31 +3,82 @@
   "_meta": {
     "generated": "2026-09-19",
     "purpose": "Input for authoring a new story outline. Each entry pairs what is literally depicted with the narrative hooks it offers, so a story pass can be written against the art the game already has rather than against art it would need commissioned.",
-    "scope": "The ten world plates only. Excluded: enemy/character portraits (the engine already carries authored `description` and `causeLines` prose per enemy in axiomancer-mechanics/src/Enemy/enemy.library.ts — read that directly rather than duplicating it here), card faces, treasure icons, UI motifs, and app icons.",
-    "house_register": "The Woodcut Codex (axiomancer-mobile/docs/VISUAL_LANGUAGE.md): FromSoftware x Inscryption x illuminated manuscript. Nine of the ten plates are 19th-century wood engravings by Gustave Dore, graded toward the void (grayscale, brightness 0.62 / contrast 1.08). The tenth is flagged.",
+    "scope": "The twelve world plates only. Excluded: enemy/character portraits (the engine already carries authored `description` and `causeLines` prose per enemy in axiomancer-mechanics/src/Enemy/enemy.library.ts — read that directly rather than duplicating it here), card faces, treasure icons, UI motifs, and app icons.",
+    "house_register": "The Woodcut Codex (axiomancer-mobile/docs/VISUAL_LANGUAGE.md): FromSoftware x Inscryption x illuminated manuscript. ALL twelve plates are now 19th-century wood engravings by Gustave Doré, graded toward the void (grayscale, brightness 0.62 / contrast 1.08). Ten are from London: A Pilgrimage (1872); two — the Caverns and the Capital arenas — are Dante plates, a deliberate break recorded in plan/phases/phase_103_the_last_two_arenas.md. The pixel-art outlier this catalogue previously flagged was retired in phase 103; no entry carries a coherenceFlag any more.",
     "tag_vocabulary": {
-      "place": ["city", "slum", "dock", "river", "forest", "underground", "ruin", "interior", "street", "threshold"],
-      "light": ["night", "gaslight", "low-sun", "overcast", "shaft-of-light", "storm"],
-      "population": ["crowd", "children", "solitary-figure", "giants", "labourers", "destitute"],
-      "theme": ["debt", "toll", "passage", "congregation", "poverty", "industry", "judgement", "abandonment", "scale", "surveillance"],
-      "hazard": ["corpse", "chains", "deep-water", "traffic", "collapse"]
+      "place": [
+        "city",
+        "slum",
+        "dock",
+        "river",
+        "forest",
+        "underground",
+        "ruin",
+        "interior",
+        "street",
+        "threshold"
+      ],
+      "light": [
+        "night",
+        "gaslight",
+        "low-sun",
+        "overcast",
+        "shaft-of-light",
+        "storm"
+      ],
+      "population": [
+        "crowd",
+        "children",
+        "solitary-figure",
+        "giants",
+        "labourers",
+        "destitute"
+      ],
+      "theme": [
+        "debt",
+        "toll",
+        "passage",
+        "congregation",
+        "poverty",
+        "industry",
+        "judgement",
+        "abandonment",
+        "scale",
+        "surveillance"
+      ],
+      "hazard": [
+        "corpse",
+        "chains",
+        "deep-water",
+        "traffic",
+        "collapse"
+      ]
     },
-    "how_to_use": "For a story outline: read `storySeeds` across all ten entries first — they are written to be combinable. `boundTo` says where in the world each plate already renders, so a beat set in that region already has its backdrop. `coherenceFlag` marks the one asset that does not belong to the house register and should not be used to anchor a beat."
+    "how_to_use": "For a story outline: read `storySeeds` across all twelve entries first — they are written to be combinable. `boundTo` says where in the world each plate already renders, so a beat set in that region already has its backdrop. `coherenceFlag` is null on every entry as of phase 103; `crossCutting.gaps` is where to look for what the art CANNOT currently stage."
   },
-
   "plates": [
     {
       "id": "coastal-village",
       "file": "axiomancer-mobile/assets/images/combat/coastal-village.webp",
       "surface": "combat-arena",
-      "boundTo": ["the Drowned Parish"],
+      "boundTo": [
+        "the Drowned Parish"
+      ],
       "artist": "Gustave Dore",
       "work": "London: A Pilgrimage (1872) — \"Off Billingsgate\"",
       "licence": "Public domain",
       "description": "Fishermen and boys crowd the rigging and stacked cargo of a moored boat. A forest of masts and dark furled sails fills the upper frame; barrels, coiled rope and nets fill the lower. Most of the figures are looking up and out of frame at something the viewer cannot see. The only light is a pale band of sky behind the masts.",
       "composition": "Heavy black at both edges (sails, rigging), one lit sky band across the upper middle.",
       "mood": "Working poverty at close quarters. Not menacing — watchful, and slightly expectant.",
-      "tags": ["dock", "low-sun", "crowd", "labourers", "congregation", "industry", "poverty"],
+      "tags": [
+        "dock",
+        "low-sun",
+        "crowd",
+        "labourers",
+        "congregation",
+        "industry",
+        "poverty"
+      ],
       "storySeeds": [
         "Everyone in the frame is looking at the same off-frame thing. Whatever the parish is watching, it arrives by water.",
         "A congregation that is also a workforce: the people who owe the parish their labour are the same people who fill its services.",
@@ -38,14 +89,24 @@
       "id": "arena-northern-city",
       "file": "axiomancer-mobile/assets/images/combat/arena-northern-city.webp",
       "surface": "combat-arena",
-      "boundTo": ["The Northern City"],
+      "boundTo": [
+        "The Northern City"
+      ],
       "artist": "Gustave Dore",
       "work": "London: A Pilgrimage (1872) — \"Over London by Rail\"",
       "licence": "Public domain",
       "description": "Seen through a dark brick arch: rank upon rank of tenement backyards, each walled, each with its own chimney stack and washing line, receding toward a railway viaduct where a train crosses trailing smoke. Tiny figures stand in the yards. Brick fills almost every surface.",
       "composition": "The arch puts near-black at both edges and across the top; a lit corridor runs up the centre to the viaduct.",
       "mood": "Grim by ordinary congestion rather than by monsters. Nobody is being tortured; everybody is simply penned.",
-      "tags": ["city", "slum", "overcast", "industry", "poverty", "surveillance", "scale"],
+      "tags": [
+        "city",
+        "slum",
+        "overcast",
+        "industry",
+        "poverty",
+        "surveillance",
+        "scale"
+      ],
       "storySeeds": [
         "Every yard is identical and every yard is walled. A city that administers its people in units.",
         "The viaduct passes over the tenements without stopping. Something crosses this district daily and has no business in it — a tax cart, a procession, an inspection.",
@@ -56,14 +117,25 @@
       "id": "arena-connecting-river",
       "file": "axiomancer-mobile/assets/images/combat/arena-connecting-river.webp",
       "surface": "combat-arena",
-      "boundTo": ["The Connecting River"],
+      "boundTo": [
+        "The Connecting River"
+      ],
       "artist": "Gustave Dore",
       "work": "London: A Pilgrimage (1872) — a dockside night scene",
       "licence": "Public domain",
       "description": "Night, or a very low sun. A crowd presses at the lit doorway of a low dockside shed, arms raised. A forest of ships' masts stands behind, black against a grey sky with a single pale sun or moon. A man strides across the open cobbles with a dog at his heel. A body lies face-down in the roadway, unattended. At right, a figure is slumped in a handcart while others stand by.",
       "composition": "Dark mass at both lower corners; the lit doorway sits left-of-centre and the pale sky band runs behind the masts.",
       "mood": "A queue that has turned into a scrum. Something is being handed out, or handed over, and there is not enough of it.",
-      "tags": ["dock", "river", "night", "crowd", "corpse", "destitute", "toll", "passage"],
+      "tags": [
+        "dock",
+        "river",
+        "night",
+        "crowd",
+        "corpse",
+        "destitute",
+        "toll",
+        "passage"
+      ],
       "storySeeds": [
         "A body lies in the open and the crowd at the door has not turned around. Whatever is being given out at that doorway is worth more than a death.",
         "This is a crossing you ARRIVE at, not one you watch. The ferry, the queue and the toll are all in the same frame.",
@@ -74,14 +146,24 @@
       "id": "arena-sweethearts-village",
       "file": "axiomancer-mobile/assets/images/combat/arena-sweethearts-village.webp",
       "surface": "combat-arena",
-      "boundTo": ["The Sweetheart's Village"],
+      "boundTo": [
+        "The Sweetheart's Village"
+      ],
       "artist": "Gustave Dore",
       "work": "London: A Pilgrimage (1872) — \"Dudley Street, Seven Dials\"",
       "licence": "Public domain",
       "description": "A slum lane crowded almost entirely with children — toddlers held by older children, a girl dragging a toy on a string, infants sitting on the kerb. A goat stands at the left among a knot of women. Rows and rows of second-hand boots are laid out on the pavement and in the gutter, tended by seated dealers. Women lean from upper windows. A cart and a lamppost stand further up the street; chimney stacks recede into haze.",
       "composition": "Terraces close the frame at both sides; the roadway opens a lit channel up the middle.",
       "mood": "Domestic and dense. Poor, but alive and entirely unbothered by being looked at.",
-      "tags": ["slum", "street", "overcast", "children", "crowd", "poverty", "debt"],
+      "tags": [
+        "slum",
+        "street",
+        "overcast",
+        "children",
+        "crowd",
+        "poverty",
+        "debt"
+      ],
       "storySeeds": [
         "The village's whole visible economy is SECOND-HAND BOOTS. Everything here belonged to somebody else first — including, perhaps, the debts.",
         "This is the only plate in the set where children outnumber adults. A settlement raising the next generation of somebody's obligation.",
@@ -89,35 +171,123 @@
       ]
     },
     {
-      "id": "arena-ruined-city",
-      "file": "axiomancer-mobile/assets/images/combat/arena-ruined-city.jpg",
+      "id": "arena-caverns",
+      "file": "axiomancer-mobile/assets/images/combat/arena-caverns.webp",
       "surface": "combat-arena",
-      "boundTo": ["FALLBACK — every region with no rule of its own (currently The Caverns, The Capital, Northern Forest)"],
-      "artist": "unknown",
-      "work": "unknown",
-      "licence": "UNRESOLVED",
-      "description": "PIXEL ART, not an engraving. A storm-lit skyline of ruined modern high-rise buildings with lit orange windows, under a saturated violet sky forked with white lightning, behind a foreground of cracked tan stone floor tiles.",
-      "composition": "Broken walls at both edges; the skyline and lightning occupy the centre; a wide empty tiled floor across the bottom third.",
-      "mood": "Video-game apocalypse. Reads as a different product from every other plate here.",
-      "tags": ["ruin", "city", "storm", "collapse"],
-      "coherenceFlag": "DOES NOT MATCH THE HOUSE REGISTER. It is saturated colour pixel art among nine grayscale wood engravings, and it depicts MODERN high-rise architecture, which no other asset in the game does. It also carries licence UNRESOLVED (owner-supplied, source never traced; tracked in plan/AUDIT.md and covered by THE OPEN GATE 6, which makes replacing it a loop call). Because it is the fallback it is currently the most-seen arena in the game. Do NOT anchor a story beat on it.",
+      "boundTo": [
+        "The Caverns (combat arena, region rule /cavern/i)"
+      ],
+      "artist": "Gustave Doré",
+      "work": "\"Abandon all hope ye who enter here\" — Dante's Inferno, Canto III, plate 8 (1861)",
+      "licence": "Public domain (read from Commons imageinfo extmetadata at acquisition)",
+      "description": "A vast gateway cut into a sheer rock face, its opening far taller than the two small figures standing at its threshold. Beyond and behind them a lit horizon band runs across the frame; the rock mass fills the upper two thirds in near-black.",
+      "composition": "The gate's dark mouth occupies the centre-left; the two figures are tiny at its base, giving the scale. The lit horizon runs behind them at roughly the vertical third, which is where a foe composites.",
+      "mood": "The moment before going in, not the inside. Threshold dread — the last place you can still turn around.",
+      "tags": [
+        "underground",
+        "threshold",
+        "ruin",
+        "overcast",
+        "solitary-figure",
+        "passage",
+        "scale",
+        "judgement"
+      ],
+      "coherenceFlag": null,
+      "notes": "A DANTE plate, not a London one — the first deliberate break from the single-source rule phase 101 set, because Doré drew no documentary-London underworld. Same artist, same decade, same technique, same grade. Deliberately NOT a cave interior: the region BEGINS underground, so its arena wants the moment of entry. Distinct from the maps registry's Titans plate, which the player crossed to get here.",
       "storySeeds": [
-        "Only usable seed: it implies a modern, vertical, electrified civilisation that fell — which contradicts the rest of the world's pre-industrial-to-Victorian register. If the story wants that contradiction it must be deliberate; otherwise this plate should be replaced rather than written around."
+        "A gate somebody CUT. The opening is worked, not natural — so it was made, by whom, and for what to pass through it.",
+        "The pair at the threshold. Two figures, one gesture: someone is being brought here, or led. A guide is a role the story does not yet have filled.",
+        "The light is BEHIND them. Everything ahead is the dark mass. A descent where the last of the day is at your back is a one-way reading of a journey that might not be."
       ]
     },
-
+    {
+      "id": "arena-the-capital",
+      "file": "axiomancer-mobile/assets/images/combat/arena-the-capital.webp",
+      "surface": "combat-arena",
+      "boundTo": [
+        "The Capital (combat arena, region rule /the capital/i)"
+      ],
+      "artist": "Gustave Doré",
+      "work": "The Empyrean Rose — Dante's Paradiso, Canto XXXI (1868)",
+      "licence": "Public domain (read from Commons imageinfo extmetadata at acquisition)",
+      "description": "Two small figures stand on a rock in the lower frame before an immense spiralling host of winged forms, ranked in receding tiers and circling a blinding point of light at the centre. The host fills almost the whole plate; the figures are a fraction of its height.",
+      "composition": "A vortex. Everything converges on the light at centre-frame, and the two supplicants at the base of the frame are the only thing at human scale — which is exactly the player's position in this region.",
+      "mood": "Overwhelming order. Not hostile and not welcoming: vast, ranked, and wholly indifferent to whoever is standing at the bottom of it.",
+      "tags": [
+        "interior",
+        "threshold",
+        "shaft-of-light",
+        "crowd",
+        "congregation",
+        "judgement",
+        "scale",
+        "surveillance"
+      ],
+      "coherenceFlag": null,
+      "notes": "The second Dante plate (see arena-caverns for why the single-source rule is broken here). Chosen because the Capital is where the advisor-selection payoff lands, so its arena should be the one place that DWARFS the player. The nearest thing in the set to an interior — a ranked hall rather than a street — which partly answers the NO INTERIOR gap.",
+      "storySeeds": [
+        "An audience you cannot address. The host is arranged to be looked AT, in tiers, around something too bright to look at directly. A petition to a power with no face.",
+        "Two arrivals, not one. Whoever is standing there was accompanied. The story has room for the person who brought them and does not go further.",
+        "Rank as architecture. The crowd is not a crowd, it is an ORDER — which means there is a place in it, and someone decides yours."
+      ]
+    },
+    {
+      "id": "arena-desolation",
+      "file": "axiomancer-mobile/assets/images/combat/arena-desolation.webp",
+      "surface": "combat-arena",
+      "boundTo": [
+        "FALLBACK — every region with no rule of its own (currently only the Northern Forest, and the dev-only combat sandbox route)"
+      ],
+      "artist": "Gustave Doré",
+      "work": "\"The New Zealander\", the closing plate of London: A Pilgrimage (1872 / 1873 printing)",
+      "licence": "Public domain (read from Commons imageinfo extmetadata at acquisition)",
+      "description": "A cloaked figure sits on a broken wharf with a sketchbook, drawing the ruins of a dead city across black water. Broken masonry and a shattered arch fill the left foreground; the far bank carries the gutted dome and spires of a great city; a clouded moon hangs over the water.",
+      "composition": "Heavy dark mass at both edges, a lit band of water and sky across the middle third, the solitary figure low-left with their back to the viewer. Chosen for that band: it is where a foe composites, so the plate stays legible behind a figure it was not drawn for.",
+      "mood": "The end of the story of a place, drawn by someone who arrived after it. Melancholy rather than violent — nothing is happening, it has already happened.",
+      "tags": [
+        "ruin",
+        "city",
+        "river",
+        "night",
+        "solitary-figure",
+        "abandonment",
+        "collapse",
+        "deep-water"
+      ],
+      "coherenceFlag": null,
+      "notes": "Replaced `arena-ruined-city.jpg` in phase 103. That plate was owner-supplied pixel art of modern high-rises with licence UNRESOLVED, and being the fallback it was the most-seen arena in the game. Retired under THE OPEN GATE ¶6. Because THIS plate is now the fallback, it is the arena a player sees for any region the game has not keyed — so it is deliberately general, and a story beat may lean on its mood but should not treat its specific ruins as a named place.",
+      "storySeeds": [
+        "The observer who outlives the subject. Someone is sitting in the wreckage DRAWING it — which makes a record, and a record implies a reader who was not there. Who is the drawing for?",
+        "A city that ended without a battle. Nothing in the frame says war; the ruin is simply older than the viewer. A world where the catastrophe is already in the past and nobody present remembers causing it.",
+        "The water is the boundary. The figure is on this side, the dead city on the far one, and there is no bridge in frame. Crossing is a choice someone has not yet made."
+      ]
+    },
     {
       "id": "the-pit",
       "file": "axiomancer-mobile/assets/images/maps/the-pit.webp",
       "surface": "map-backdrop",
-      "boundTo": ["cavern", "cave", "undercroft", "deep"],
+      "boundTo": [
+        "cavern",
+        "cave",
+        "undercroft",
+        "deep"
+      ],
       "artist": "Gustave Dore",
       "work": "Dante's Inferno, Canto XXXI — \"The Titans\"",
       "licence": "Public domain",
       "description": "Colossal chained giants stand and slump around the stone parapet of an enormous well. The nearest rests his head on his folded arm, asleep or exhausted, a heavy manacle and chain at his wrist. Dark water lies at the foot of the wall. At the right, two tiny robed figures stand on a rock slope, included purely for scale.",
       "composition": "The giants fill the upper left; the rock slope and the two small figures anchor the lower right.",
       "mood": "Vast, restrained, and old. The threat is bound — for now, and by somebody.",
-      "tags": ["underground", "solitary-figure", "giants", "chains", "deep-water", "scale", "judgement"],
+      "tags": [
+        "underground",
+        "solitary-figure",
+        "giants",
+        "chains",
+        "deep-water",
+        "scale",
+        "judgement"
+      ],
       "storySeeds": [
         "The giants are CHAINED, which means someone chained them and someone maintains the chains. The caverns have a warden, or had one.",
         "Two travellers at the size of insects. Whatever the player's business is down here, the place was not built to their scale and does not notice them.",
@@ -128,14 +298,26 @@
       "id": "charon-crossing",
       "file": "axiomancer-mobile/assets/images/maps/charon-crossing.webp",
       "surface": "map-backdrop",
-      "boundTo": ["river", "crossing", "ford", "ferry"],
+      "boundTo": [
+        "river",
+        "crossing",
+        "ford",
+        "ferry"
+      ],
       "artist": "Gustave Dore",
       "work": "Dante's Inferno, Canto III — \"Charon\"",
       "licence": "Public domain",
       "description": "A bearded, bare-chested old ferryman braces at the oar of a small boat on rough black water, his cloak slipping from his shoulder. Sheer cliffs rise at the left and the right of frame falls away into pure black. The boat is empty but for him.",
       "composition": "Near-total black across the upper right; the lit water and the figure occupy the lower centre.",
       "mood": "A working man doing an unpleasant job he has done many times. Not theatrical — practised.",
-      "tags": ["river", "deep-water", "solitary-figure", "toll", "passage", "judgement"],
+      "tags": [
+        "river",
+        "deep-water",
+        "solitary-figure",
+        "toll",
+        "passage",
+        "judgement"
+      ],
       "storySeeds": [
         "The boat is EMPTY. He is either coming to collect or has just delivered — both are story states.",
         "The ferryman is the game's clearest statement of its own thesis: passage is not free, and the price is set by somebody who will not negotiate.",
@@ -146,14 +328,24 @@
       "id": "forest-dark",
       "file": "axiomancer-mobile/assets/images/maps/forest-dark.webp",
       "surface": "map-backdrop",
-      "boundTo": ["forest", "wood", "wilds"],
+      "boundTo": [
+        "forest",
+        "wood",
+        "wilds"
+      ],
       "artist": "Gustave Dore",
       "work": "Dante's Inferno, Canto I — \"I found myself within a forest dark\"",
       "licence": "Public domain",
       "description": "Enormous tree trunks rise past the top of the frame like columns, their roots knotted over each other. A single robed figure stands small at the base of the largest trunk, turned back to look over one shoulder. Dense undergrowth and briar fill the foreground. A pale shaft of light falls exactly on the figure.",
       "composition": "Black trunk mass fills nearly the whole frame; one small lit pocket at centre-bottom where the figure stands.",
       "mood": "Lost. The most explicitly subjective plate in the set — it is about a person's situation, not a place.",
-      "tags": ["forest", "shaft-of-light", "solitary-figure", "abandonment", "threshold"],
+      "tags": [
+        "forest",
+        "shaft-of-light",
+        "solitary-figure",
+        "abandonment",
+        "threshold"
+      ],
       "storySeeds": [
         "The figure is looking BACK. The forest is the point at which the road behind stops being an option.",
         "The trees are drawn as architecture — trunks as columns, canopy as vault. A wood that was a building, or a building the wood took.",
@@ -164,14 +356,26 @@
       "id": "ludgate-hill",
       "file": "axiomancer-mobile/assets/images/maps/ludgate-hill.webp",
       "surface": "map-backdrop",
-      "boundTo": ["city", "citadel", "capital"],
+      "boundTo": [
+        "city",
+        "citadel",
+        "capital"
+      ],
       "artist": "Gustave Dore",
       "work": "London: A Pilgrimage (1872) — \"Ludgate Hill\"",
       "licence": "Public domain",
       "description": "A street choked to a standstill: omnibuses, drays, barrels, carts and a dense crowd jammed beneath a railway bridge, with a train crossing overhead. A great cathedral dome and spires rise behind through the smoke. Hoardings on the bridge carry large legible advertising.",
       "composition": "Dark buildings at both edges; the bridge crosses the upper third; the traffic jam fills the lower half.",
       "mood": "Total congestion. Power (the dome) is visible and unreachable behind the crush.",
-      "tags": ["city", "street", "overcast", "crowd", "traffic", "industry", "scale"],
+      "tags": [
+        "city",
+        "street",
+        "overcast",
+        "crowd",
+        "traffic",
+        "industry",
+        "scale"
+      ],
       "coherenceFlag": "Carries LEGIBLE PERIOD ADVERTISING on the bridge hoardings (newspaper mastheads and a company name). It is small in frame and reads as texture at backdrop scale, but it is real English text from 1872 and a close reader will see it. Worth knowing before using this plate in a close-up or a promotional shot.",
       "tags_note": "Bound to the generic city|citadel|capital family, so it currently serves BOTH the northern city and the capital on the map screen.",
       "storySeeds": [
@@ -184,14 +388,28 @@
       "id": "wentworth-street",
       "file": "axiomancer-mobile/assets/images/maps/wentworth-street.webp",
       "surface": "map-backdrop",
-      "boundTo": ["village", "town", "hamlet", "harbour", "drowned parish"],
+      "boundTo": [
+        "village",
+        "town",
+        "hamlet",
+        "harbour",
+        "drowned parish"
+      ],
       "artist": "Gustave Dore",
       "work": "London: A Pilgrimage (1872) — \"Wentworth Street, Whitechapel\"",
       "licence": "Public domain",
       "description": "A narrow slum street packed wall to wall with people. Market stalls and hanging goods line the right; a seated dealer works at a table. A cluster of small children and a dog occupy the foreground, several of the children staring directly out at the viewer. A woman leans from an upper window. The street recedes into haze and chimney stacks.",
       "composition": "Tall dark tenements close both sides; the crowd fills the centre; the foreground children are the lightest mass.",
       "mood": "Crowded, transactional, and openly observed. The children's direct stare is the plate's strongest feature.",
-      "tags": ["slum", "street", "crowd", "children", "poverty", "debt", "surveillance"],
+      "tags": [
+        "slum",
+        "street",
+        "crowd",
+        "children",
+        "poverty",
+        "debt",
+        "surveillance"
+      ],
       "storySeeds": [
         "The children look straight out of the frame at the player. The only plate in the set where the world looks back.",
         "A market that is also a home — people are selling in the room they live in. No separation between what you owe and where you sleep.",
@@ -199,7 +417,6 @@
       ]
     }
   ],
-
   "crossCutting": {
     "recurringMotifs": [
       "MASTS AND TRUNKS: the coastal arena's forest of masts, the forest map's columnar trees, and the river arena's massed masts are the same compositional idea three times — vertical dark bars against a pale band. A story can treat the parish's boats and the northern wood as versions of one another.",
@@ -208,10 +425,10 @@
       "CHILDREN: two plates are dominated by children (Sweetheart's Village, Wentworth Street) and both are the poorest places depicted. The game's inheritance-of-debt theme has its art already."
     ],
     "gaps": [
-      "NO INTERIOR. Every one of the ten is exterior or subterranean. There is no hall, chamber, church interior or throne room in the world-plate set — so any scene written indoors currently has no backdrop.",
-      "NO CAPITAL ARENA. The Capital falls back to the incoherent pixel plate, so the seat of power has no arena of its own. It is the single most story-important region without art.",
-      "NO CAVERN ARENA. Same — The Caverns falls back. The map screen has the Titans plate but the fight does not.",
-      "NO DAYLIGHT. Every plate is night, dusk, overcast or underground. That is coherent and probably correct for the register, but it means 'the one bright scene' is currently impossible to stage."
+      "NO TRUE INTERIOR. Ten of twelve plates are exterior or subterranean. `arena-the-capital` is the nearest thing — a ranked hall — but there is still no domestic room, church nave, shop or chamber, so an ordinary indoor scene has no backdrop. This is now the set's largest hole.",
+      "NO NORTHERN FOREST ARENA. The last region without its own combat plate; it falls back to `arena-desolation`. No longer blocked on tooling (phase 103 added the plate-page crop recipe) — only on finding the right plate.",
+      "NO DAYLIGHT. Every plate is night, dusk, overcast or underground. Coherent for the register, and probably correct, but it means 'the one bright scene' is currently impossible to stage. The closest is `arena-the-capital`'s central light, which is supernatural rather than daylight.",
+      "RESOLVED 2026-09-19 (phase 103): 'NO CAPITAL ARENA' and 'NO CAVERN ARENA' are closed — both regions have their own plate. The incoherent pixel-art fallback they fell back to has been retired."
     ]
   }
 }

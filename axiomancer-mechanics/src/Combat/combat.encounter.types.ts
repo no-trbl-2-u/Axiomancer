@@ -713,6 +713,14 @@ export type CombatEvent =
     // answered with a yield. `dieId` is absent when the table was full and the
     // payout converted to +1◆ instead (see the paired `die-overflowed` event).
     | { kind: 'coveted-die-stolen'; phaseIndex: number; method: 'stagger' | 'block' | 'yield'; dieId?: string }
+    // Phase 102 (SUMMON) — the brood. Own events, never folded into
+    // `threat-fired`/`penaltiesApplied`: the authored telegraph must keep
+    // reporting only what the foe itself announced.
+    | { kind: 'add-spawned'; enemyId: string; wave: number; addIds: string[]; bite: number }
+    /** `raw` is the printed sum of bites; `dealt` is what survived armor /
+     *  GUARD / BARRIER. Deliberately NOT counted in `attacksLanded`. */
+    | { kind: 'add-bit'; addIds: string[]; raw: number; dealt: number }
+    | { kind: 'add-struck'; addId: string; name: string; cost: number }
     | { kind: 'combat-ended'; outcome: CombatOutcome };
 
 // ---------------------------------------------------------------------------
@@ -741,6 +749,25 @@ export interface GlyphInstance {
     payload: GlyphPayload;
     charges: number;
     cap: number;
+}
+
+/**
+ * Phase 102 (SUMMON) — one member of a foe's brood. Deliberately NOT an
+ * `Enemy`: no threat sequence, no stages, no keywords, no loot, no art, no
+ * prose (cf. `Enemy/types.ts`, which is exactly the weight that makes literal
+ * multi-enemy combat an XL job). `bite` is FLAT: the number printed on the
+ * chip is the number the engine applies — it is resolved OUTSIDE the threat
+ * loop's multiplier stack, so no escalation, stage bonus, weaken or stance
+ * term ever touches it. Every shipped add is 1/1 VITAE (one `strikeAdd` kills
+ * it); the vitae fields exist so the chip can show pips and a future
+ * multi-strike add is representable without a state migration.
+ */
+export interface CombatAdd {
+    id: string;
+    name: string;
+    vitae: number;
+    maxVitae: number;
+    bite: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -844,6 +871,20 @@ export interface CombatEncounterState {
      *  a FREE-line `CardRider.glyphCharge`; cracked via `crackGlyph`; culled
      *  by the enemy counterplay hook `CombatThreatEffect.glyphShatter`. */
     glyphs?: GlyphInstance[];
+    /** Phase 102 (SUMMON) — the foe's living brood. Optional, "absent = none"
+     *  back-compat (the same convention as `tempZone`/`glyphs`). NEVER part of
+     *  the win condition: `checkImmediateOutcome` and `pendingOutcome` read
+     *  `state.enemy` alone, so clearing every add can no more end a fight than
+     *  cracking every Seal can. Spawned at a phase boundary, bites once per
+     *  threat phase, cleared by the dieless-but-priced `strikeAdd`. A STAGE's
+     *  `cleanse` does NOT clear it — cleanse wipes `enemy.effects`, and a body
+     *  is not an affliction. */
+    adds?: CombatAdd[];
+    /** Phase 102 — waves spawned this combat, capped at `ADD_WAVE_CAP`. Adds
+     *  NEVER respawn on emptiness: clearing a wave is progress the player
+     *  keeps, because "spawn when none are alive" makes clearing CAUSE the
+     *  respawn, which is a tax rather than a decision. */
+    addWavesSpawned?: number;
     /** Spec 32 v4 §2.1 — TEMPORARY enemy-attached disenchants from the FREE line;
      *  the timed mirror of `enemyAttachments`. Same tick/promote rules as
      *  {@link tempZone}. Optional (absent = none). */

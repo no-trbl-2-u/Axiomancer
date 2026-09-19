@@ -24,6 +24,9 @@ import {
     resolveThreatPhase, startTurn, draftStanceDie, endTurn, chooseDraft, revealedCurrentStance,
     playSignatureSkill, getDraftedDie, handCards, selectMercyChoice, selectCapitulationChoice, getSignatureSkill,
     tapFateDie, recoilXRange, placeStake, crackGlyph,
+    // Phase 102 (SUMMON) — the witness has to be TAUGHT the brood; a policy
+    // that cannot see `strikeAdd` measures a fight no player would play.
+    strikeAdd, STRIKE_ADD_COST, projectIncomingThreat,
 } from './combat.engine';
 import { RESERVE_MAX } from './combat.dice';
 import { isUpgradeableDiceEnabled, MOMENTUM_CHAIN_ORDER } from './combat.upgradeable-dice';
@@ -448,6 +451,24 @@ export function upgradeablePlayPhase(
                 }
                 const cracked = crackGlyph(working, target.id, rng);
                 if (cracked.state !== working) { working = cracked.state; if (working.finalOutcome) break; continue; }
+            }
+        }
+
+        // Phase 102 (SUMMON) — strikeAddsAt: pay only when the brood would
+        // actually get through the wall (a live wall answers it for free,
+        // which is the whole second line of the design, so a turtle correctly
+        // declines). Highest-bite add wins; ties resolve to `state.adds` order
+        // — deterministic, no RNG, mirroring the `crackAt` block above, and
+        // costing the same single guard-counted loop pass when it fires.
+        if (policy.strikeAddsAt !== undefined && working.conviction >= STRIKE_ADD_COST) {
+            const living = working.adds ?? [];
+            if (living.length > 0 && projectIncomingThreat(working).addNetDamage >= policy.strikeAddsAt) {
+                let target = living[0];
+                for (const a of living) {
+                    if (a.bite > target.bite) target = a;
+                }
+                const struck = strikeAdd(working, target.id, rng);
+                if (struck.state !== working) { working = struck.state; if (working.finalOutcome) break; continue; }
             }
         }
 

@@ -832,7 +832,7 @@
   Closed as Phase 98 (`verify-mobile.yml` now runs `npm run lint:worklets` and
   the guard's own unit test, and re-runs on any edit to the guard itself).
 
-### [MED] combat — the arena backdrop is region-keyed but only 1 of 7 regions has a plate (PARTIAL — Phase 83)
+### [x] [MED] combat — the arena backdrop is region-keyed but only 1 of 7 regions has a plate — RESOLVED 2026-09-19 (phases 101 + 103)
 - pass: 23 (commit c063ac48)
 - viewport: mobile (375×812)
 - category: visual
@@ -883,6 +883,34 @@
   pipeline), not an engineering one, which is why this stays filed rather than
   being shipped by a loop tick. Note the outstanding licence question on
   `arena-ruined-city.jpg` should be resolved in the same pass.
+
+- **RESOLVED 2026-09-19, in two phases, and the licence question with it.**
+  - Phase 101 keyed The Northern City, The Connecting River and The
+    Sweetheart's Village to their own Doré plates from the same edition as the
+    coastal arena (1 of 7 → 4 of 7). It could go no further because
+    `acquire-art.mjs` had no crop step, and the registers the remaining regions
+    want exist only on *scanned pages* — caption bands, cream margins, the
+    physical edge of the book. Hand-cropping outside the licence-proving
+    pipeline defeats the one thing that pipeline exists to do, so it stopped and
+    filed the tooling gap.
+  - Phase 103 built that step (`detectPlateBox` / `buildPlatePage`, recipe
+    `plate-page`, crop box recorded in provenance) and took The Caverns and The
+    Capital. **Bespoke arenas are 6 of 7.** Only The Northern Forest is left,
+    and it is no longer blocked on anything but finding the right plate.
+  - The licence question is closed the way this row asked. `arena-ruined-city.jpg`
+    is RETIRED, not documented: untraceable, licence UNRESOLVED, and on
+    inspection saturated pixel art of modern high-rises among nine grayscale
+    wood engravings — and, being the fallback, the most-seen arena in the game.
+    THE OPEN GATE ¶6 makes that a loop call. Doré's "The New Zealander" (1873)
+    replaced it; `assets/images/screens/index.ts` was repointed; the record was
+    removed with the file.
+  - Two holes in `scripts/asset-provenance.test.mjs` that let the deleted file
+    stay referenced are closed (a `../` require was never swept; a `covers`
+    entry was never checked against the disk), each proven to fail on the
+    condition it claims to catch.
+  - witness: `assets/images/combat/__tests__/index.test.ts` now asserts that NO
+    live region reaches the fallback — the row's actual claim, rather than one
+    example of it.
 
 ### [x] [MED] combat — the momentum chain chip's empty state ("no momentum") has no contrast against the arena floor art — RESOLVED 2026-08-28 (ui-cleanup pass)
 - pass: 21 (commit 75ba5a34)

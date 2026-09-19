@@ -462,3 +462,93 @@ describe('crackAt decision seam — upgradeablePlayPhase (combat.encounter.sim)'
         expect(crackedIds(result.state).slice(0, 2)).toEqual(['g1', 'g2']);
     });
 });
+
+// ── Phase 102 — the strikeAddsAt policy heuristic (SUMMON) ──────────────────
+// The panel was unanimous that the sim must be TAUGHT the brood rather than
+// left blind: an archetype the witness cannot answer produces matrix rows that
+// are wrong in a known direction, and `CLAUDE.md` routes every balance question
+// through those rows. Roster assignment mirrors `crackAt` exactly — the same
+// doctrine-fit five, so the two knobs can never drift apart silently.
+describe('strikeAddsAt roster assignment (combat.sim-policies)', () => {
+    it('exactly the crackAt five also carry strikeAddsAt: 1', () => {
+        const withStrike = COMBAT_SIM_POLICY_ORDER.filter(id => COMBAT_SIM_POLICIES[id].strikeAddsAt !== undefined);
+        expect(withStrike.sort()).toEqual(['blind', 'control-lock', 'dot-weaver', 'greedy', 'turtle'].sort());
+        for (const id of withStrike) expect(COMBAT_SIM_POLICIES[id].strikeAddsAt).toBe(1);
+    });
+
+    it('aggro-brute, chaos, and mercy-seeker are left never-striking', () => {
+        for (const id of ['aggro-brute', 'chaos', 'mercy-seeker'] as const) {
+            expect(COMBAT_SIM_POLICIES[id].strikeAddsAt).toBeUndefined();
+        }
+    });
+});
+
+// ── Phase 102 — the strikeAddsAt decision seam (combat.encounter.sim) ───────
+// Mirrors the `crackAt` seam above in shape, INCLUDING its deliberate gap: the
+// knob is wired only into `upgradeablePlayPhase`, so the flag-off legacy
+// `policyPlayPhase` body still never strikes an add. That is mirrored on
+// purpose and is not claimed as full sim parity.
+describe('strikeAddsAt decision seam — upgradeablePlayPhase (combat.encounter.sim)', () => {
+    function stubPolicy(strikeAddsAt: number | undefined): CombatSimPolicy {
+        return {
+            id: 'greedy',
+            name: 'strikeAddsAt test stub',
+            description: 'test-only witness for the strikeAddsAt decision seam',
+            blind: false,
+            preferredFocus: 'balanced',
+            rankCard: () => 0,
+            signatureKinds: [],
+            convictionThreshold: 999,
+            mercyChoice: 'spare',
+            capitulationChoice: 'continue',
+            strikeAddsAt,
+        };
+    }
+
+    function broodState(over: Partial<CombatEncounterState> = {}): CombatEncounterState {
+        setUpgradeableDice(true);
+        const initial = initializeCombatEncounter(loadout(MIX), deepClone(GraveLarva), undefined, 5);
+        return {
+            ...rollEncounterDice(initial).state,
+            conviction: 12,
+            adds: [
+                { id: 'a1', name: 'QA Shoot', vitae: 1, maxVitae: 1, bite: 4 },
+                { id: 'a2', name: 'QA Bough', vitae: 1, maxVitae: 1, bite: 9 },
+            ],
+            ...over,
+        };
+    }
+
+    const struckIds = (state: CombatEncounterState): string[] =>
+        state.log
+            .filter((e): e is Extract<typeof e, { kind: 'add-struck' }> => e.kind === 'add-struck')
+            .map(e => e.addId);
+
+    it('a policy with strikeAddsAt set clears the brood when it would get through', () => {
+        const result = upgradeablePlayPhase(broodState(), stubPolicy(1), () => 0.5, {}, {});
+        // Highest bite first — the body doing the most damage is the one worth
+        // the Conviction.
+        expect(struckIds(result.state)[0]).toBe('a2');
+        expect(struckIds(result.state)).toContain('a1');
+    });
+
+    it('a live wall answers the brood for free, so the witness declines to pay', () => {
+        // The second honest line of the design, taught rather than hard-coded:
+        // a turtle behind a wall projects `addNetDamage === 0` and keeps its ◆.
+        const result = upgradeablePlayPhase(broodState({ guard: 9999 }), stubPolicy(1), () => 0.5, {}, {});
+        expect(struckIds(result.state)).toEqual([]);
+        expect(result.state.adds).toHaveLength(2);
+    });
+
+    it('a policy with strikeAddsAt ABSENT never strikes — the byte-identical default', () => {
+        const result = upgradeablePlayPhase(broodState(), stubPolicy(undefined), () => 0.5, {}, {});
+        expect(struckIds(result.state)).toEqual([]);
+        expect(result.state.adds).toHaveLength(2);
+    });
+
+    it('an unaffordable strike is never attempted (no fizzle spam in the log)', () => {
+        const result = upgradeablePlayPhase(broodState({ conviction: 1 }), stubPolicy(1), () => 0.5, {}, {});
+        expect(struckIds(result.state)).toEqual([]);
+        expect(result.state.adds).toHaveLength(2);
+    });
+});

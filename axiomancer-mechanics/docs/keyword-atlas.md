@@ -127,7 +127,7 @@ mid-flight. Run `npm run catalog` for the current binding.
 
 ---
 
-## Enemy keywords (10)
+## Enemy keywords (11)
 
 New with THE BIG NUMBERS REWRITE. An enemy carries 0–1 at simple/normal, 1–2
 at elite, 2–3 plus a STAGE at boss/unique. They print on the enemy pane with
@@ -147,6 +147,7 @@ so one foe can carry HIDE 3 and another HIDE 12.
 | **RAVENOUS** | This foe heals for the damage it lands on you. | `resolveThreatPhase` | (see the roster) |
 | **WOUNDING N** | An unguarded hit of N or more puts a WOUND in your deck. | `resolveThreatPhase` | (see the roster) |
 | **FLURRY N** | This foe's hit lands as N separate strikes instead of one — RIPOSTE only blunts the first. | `resolveThreatPhase` | (see the roster) |
+| **SUMMON N** | This foe fields N of its own. Each bites you for its printed number every phase, even while the foe is denied. | `processBetweenPhases` + `resolveThreatPhase` + `strikeAdd` | (see the roster) |
 
 HIDE is the reason one big hit beats many small ones: it is subtracted from
 each damage instance, so `7 × 4` and `28 × 1` play differently against armour.
@@ -160,6 +161,22 @@ VENOM/RAVENOUS/WOUNDING this foe also carries fires once per landed strike
 instead of once per phase — a flurry foe paired with VENOM stacks poison
 fast. Prior art: StS-BG's Buffer, `kb:slay-the-spire-the-board-game/rules/
 edge-cases-faq` (src-002) — "triggers separately per hit of a multi-attack."
+
+SUMMON is the one enemy keyword that changes a fight's SIZE rather than only
+its arithmetic, and it is a deliberate exception. Its brood spawns once at a
+phase boundary (and once more on a STAGE), never on emptiness — clearing a wave
+is progress you keep. Each add's bite is FLAT: no escalation, stage bonus,
+weaken or stance term touches it, so the number on the chip is the number you
+take. Your armour, GUARD and BARRIER soak it; RIPOSTE, BRUTAL, RAVENOUS, VENOM
+and WOUNDING do not ride it, and a STAGE's cleanse does not clear it (a body is
+not an affliction). Staggering the foe does not silence its brood — not even
+stripping every rung to deny its action outright: bodies act on their own. But
+killing the foe ends the fight regardless of it — a deliberate divergence from
+`kb:slay-the-spire-the-board-game/rules/edge-cases-faq` (src-002), where
+"Summons don't 'flee' combat when the enemy that summoned them is killed."
+Adds are never a win condition: clearing the brood cannot end a fight, because
+`checkImmediateOutcome` reads the foe's VITAE alone. Clear them with the
+dieless STRIKE action for 2 Conviction, or hold a wall and eat them.
 
 ### STAGE (boss/unique only)
 

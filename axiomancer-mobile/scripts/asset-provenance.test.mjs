@@ -115,19 +115,82 @@ test('an UNRESOLVED license explains itself and is reported, not hidden', () => 
   }
 })
 
+// PHASE 103 — this gate had a hole, and a retirement fell through it.
+//
+// It used to match only `require('./…')`. But `screens/index.ts` reaches ACROSS
+// directories by design — its whole header note is that plates are reused from
+// `maps/` rather than re-acquired — so every one of its requires is `../…` and
+// none of them was ever checked. When `arena-ruined-city.jpg` was retired, the
+// registry kept a live `require('../combat/arena-ruined-city.jpg')` and this
+// suite stayed green. That is exactly the failure the file's own header calls
+// out: "a require() for a deleted file (a runtime crash)".
+//
+// So registries are now swept for EVERY relative require, and the sweep walks
+// every `index.ts` under assets/images rather than only the categories that
+// happen to hold raster files of their own — `screens/` holds none, which is
+// the second reason it was invisible here.
+
+/** Every `index.ts` under assets/images, registry or not. */
+function registryFiles(dir = IMAGES, rel = '') {
+  const out = []
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    const childRel = rel ? `${rel}/${e.name}` : e.name
+    if (e.isDirectory()) {
+      if (NOT_ART_DIRS.has(e.name)) continue
+      out.push(...registryFiles(path.join(dir, e.name), childRel))
+    } else if (e.name === 'index.ts') {
+      out.push({ rel: rel || '.', file: path.join(dir, e.name) })
+    }
+  }
+  return out
+}
+
+const registries = registryFiles()
+
+test('the sweep found registries to check', () => {
+  // Same reason as the directory guard above: without this, a layout move makes
+  // the require() gate below pass vacuously.
+  assert.ok(registries.length >= 3, `only found ${registries.length} registries`)
+  assert.ok(registries.some((r) => r.rel === 'screens'), 'screens/index.ts must be swept')
+  assert.ok(registries.some((r) => r.rel === 'combat'))
+})
+
 test('every registry require() points at a file that exists', () => {
   const broken = []
-  for (const { rel, dir } of dirs) {
-    // Registries live at the category root, not in every subdirectory.
-    const indexPath = path.join(IMAGES, rel.split('/')[0], 'index.ts')
-    if (!fs.existsSync(indexPath)) continue
-    const source = fs.readFileSync(indexPath, 'utf-8')
-    for (const m of source.matchAll(/require\('(\.\/[^']+)'\)/g)) {
-      const target = path.resolve(path.dirname(indexPath), m[1])
+  for (const { rel, file } of registries) {
+    const source = fs.readFileSync(file, 'utf-8')
+    // Relative requires only — `..` included. A bare package specifier is not
+    // this gate's business.
+    for (const m of source.matchAll(/require\('(\.[^']*)'\)/g)) {
+      const target = path.resolve(path.dirname(file), m[1])
       if (!fs.existsSync(target)) broken.push(`${rel}: ${m[1]}`)
     }
   }
   assert.deepEqual(broken, [], 'a require() for a missing file crashes the bundler')
+})
+
+// PHASE 103 — the mirror hole. A record whose `covers` names a file that was
+// deleted is a provenance entry for nothing: it keeps claiming a licence for an
+// asset that no longer ships, and (when the retired asset was the directory's
+// only UNRESOLVED one) it keeps printing debt that has already been paid off.
+// Nothing checked it, so the retired plate's record survived its own file.
+test('every provenance record covers files that actually exist', () => {
+  const phantom = []
+  for (const d of dirs) {
+    for (const entry of asList(provenanceFor(d))) {
+      // `covers` is also allowed to be a prose blanket ("every .webp in this
+      // directory"). That form names no file, so there is nothing to check.
+      if (!Array.isArray(entry.covers)) continue
+      for (const claim of entry.covers) {
+        // Entries may carry a parenthetical source note, e.g.
+        // `"the-stamper.webp (delapouite/stamper.svg)"` — the filename is the
+        // first token and the note describes where the art came from.
+        const name = String(claim).split(/\s+/)[0]
+        if (!fs.existsSync(path.join(d.dir, name))) phantom.push(`${d.rel}: ${name}`)
+      }
+    }
+  }
+  assert.deepEqual(phantom, [], 'a record for a deleted asset outlives the asset it documents')
 })
 
 test('every art file is reachable from a registry', () => {

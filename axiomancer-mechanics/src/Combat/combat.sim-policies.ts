@@ -108,6 +108,24 @@ export interface CombatSimPolicy {
      * body never reads it.
      */
     crackAt?: number;
+    /**
+     * Phase 102 (SUMMON) — the minimum PROJECTED post-soak add damage that
+     * justifies paying `STRIKE_ADD_COST`. Once
+     * `projectIncomingThreat(state).addNetDamage >= strikeAddsAt` and
+     * Conviction covers the price, the witness strikes the highest-bite living
+     * add. Absent = never strikes — the strict default, so every policy
+     * without this field is byte-identical to its pre-Phase-102 behavior
+     * (`crackAt`'s contract, mirrored deliberately).
+     *
+     * The threshold reads "clear whenever the brood would actually get through
+     * the wall": a turtle holding a live wall projects `addNetDamage === 0` and
+     * correctly declines to pay, which is the designed decision TAUGHT rather
+     * than hard-coded. Ties on bite resolve to `state.adds` order — no RNG.
+     * Wired ONLY into `upgradeablePlayPhase`; the flag-off legacy
+     * `policyPlayPhase` body never reads it, the same deliberate gap `crackAt`
+     * carries (see above). Not full sim parity, and not claimed as such.
+     */
+    strikeAddsAt?: number;
 }
 
 // ─── Score bands ─────────────────────────────────────────────────────────────
@@ -262,6 +280,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         // Phase 51 — payoffs-on-time is literally greedy's description; a
         // ripened Seal is exactly the kind of timed payoff it already reads.
         crackAt: 2,
+        strikeAddsAt: 1,
     },
     blind: {
         id: 'blind',
@@ -277,6 +296,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         chooseX: (_s, card, range) => greedyChooseX(card, range),
         // Phase 51 — same payoff-timing doctrine as greedy.
         crackAt: 2,
+        strikeAddsAt: 1,
     },
     'dot-weaver': {
         id: 'dot-weaver',
@@ -304,6 +324,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         // Phase 51 — the erosion/poison-first witness; the poison Seal is its
         // natural line.
         crackAt: 2,
+        strikeAddsAt: 1,
     },
     'control-lock': {
         id: 'control-lock',
@@ -327,6 +348,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         // Phase 51 — denial witness; a persistent barrier synergizes with
         // holding a lock game.
         crackAt: 2,
+        strikeAddsAt: 1,
     },
     'aggro-brute': {
         id: 'aggro-brute',
@@ -364,6 +386,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         // Phase 51 — the outlast/barrier witness; a persistent Seal payoff is
         // its natural line.
         crackAt: 2,
+        strikeAddsAt: 1,
     },
     chaos: {
         id: 'chaos',

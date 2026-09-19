@@ -22,6 +22,19 @@
  *   - `regrow`                → `processBetweenPhases` (phase-boundary heal)
  *   - `flurry`                → `resolveThreatPhase` (splits the telegraphed
  *                                hit into N damage instances)
+ *   - `summon`                → THREE sites (see below)
+ *
+ * SUMMON is a DELIBERATE SECOND CLASS of keyword, and the only one. Every
+ * other entry here changes the arithmetic of a fight without changing its
+ * size; SUMMON adds bodies, a state slot (`CombatEncounterState.adds`), a
+ * player verb (`strikeAdd`) and a UI surface. Its three apply sites:
+ *   - spawn → `processBetweenPhases` (the REGROW/STAGE boundary, post-stage)
+ *   - bite  → `resolveThreatPhase` (its own block, outside the threat loop)
+ *   - clear → `strikeAdd` (dieless, priced in Conviction)
+ * The gloss below is deliberately BITE-ONLY: the one-line format cannot carry
+ * spawn rule + bite rule + clear verb + price (`enemyKeywordGloss` does a
+ * single `{n}` substitution), so the clear rule and its price live on the
+ * chip's confirm sheet, where the player reads them at the moment of decision.
  */
 
 /** A keyword carried by an enemy, with its printed magnitude. */
@@ -60,7 +73,20 @@ export type EnemyKeyword =
      *  this foe also carries fires once per landed strike, not once per
      *  phase. GUARD/BARRIER are additive pools and drain the same total
      *  either way — FLURRY changes the fight's texture, not its size. */
-    | { kind: 'flurry'; n: number };
+    | { kind: 'flurry'; n: number }
+    /** SUMMON N — the foe fields N bodies of its own. They spawn once at a
+     *  phase boundary (and once more on a STAGE), never on emptiness; each
+     *  bites for its own printed FLAT number every threat phase, soaked by
+     *  your armor/GUARD/BARRIER but by no other term; they bite even while the
+     *  foe itself is denied, because bodies act. They are cleared by the
+     *  dieless-but-priced `strikeAdd`, and clearing one is terminal progress.
+     *  They are NOT a win condition — killing the brood can never end a fight,
+     *  and killing the foe ends it regardless of the brood (a deliberate
+     *  divergence from kb:slay-the-spire-the-board-game/rules/edge-cases-faq
+     *  src-002 — "Summons don't flee combat when the enemy that summoned them
+     *  is killed"). `addName` is authoring copy for the chip;
+     *  `enemyKeywordText`/`enemyKeywordGloss` never read it. */
+    | { kind: 'summon'; n: number; addName?: string };
 
 /** Every `EnemyKeyword` kind, at runtime — bound to the union below. */
 export const ENEMY_KEYWORD_KINDS = [
@@ -74,6 +100,7 @@ export const ENEMY_KEYWORD_KINDS = [
     'ravenous',
     'wounding',
     'flurry',
+    'summon',
 ] as const;
 
 type MissingFromEnemyKindList = Exclude<
@@ -100,6 +127,7 @@ export const ENEMY_KEYWORD_LABEL: Readonly<Record<EnemyKeyword['kind'], string>>
     ravenous: 'RAVENOUS',
     wounding: 'WOUNDING',
     flurry: 'FLURRY',
+    summon: 'SUMMON',
 });
 
 /**
@@ -118,6 +146,7 @@ export const ENEMY_KEYWORD_GLOSS: Readonly<Record<EnemyKeyword['kind'], string>>
     ravenous: 'This foe heals for the damage it lands on you.',
     wounding: 'An unguarded hit of {n} or more puts a WOUND in your deck.',
     flurry: "This foe's hit lands as {n} separate strikes instead of one — RIPOSTE only blunts the first.",
+    summon: 'This foe fields {n} of its own. Each bites you for its printed number every phase, even while the foe is denied.',
 });
 
 /** Renders a keyword as the face string a player reads: `HIDE 6`, `BRUTAL`. */

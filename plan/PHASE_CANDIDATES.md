@@ -378,7 +378,7 @@
 
 ## Pending
 
-### [ ] [score 5.5] Summoner / add-spawning enemy archetype — DESIGNED 2026-09-19, ready to build
+### ~~[score 5.5] Summoner / add-spawning enemy archetype~~ PROMOTED to Phase 102 and SHIPPED 2026-09-19
 - proposed: 2026-09-17, `/ship-a-phase` (Phase 90 split)
 - source signals:
   - carried over from `/adjust-enemies` pass 11's filed finding (commit
@@ -551,6 +551,20 @@
   every round while clearing costs a one-time 2 conviction. That is the
   decision, and both sides are visible in the telegraph.
 - estimated phases: 2 (was "2-3", now bounded by a settled design)
+- **SHIPPED 2026-09-19 as Phase 102 — engine AND surface, in one pass.** The
+  design above is what landed, with one correction found during the build: the
+  brief's §9b formula for "the wall left over after the boss's hit" charged
+  riposte's parry and barrier's share against GUARD, which would have
+  overstated the add term and broken the parity the brief itself calls the ship
+  gate. Shipped as explicit absorbed-minimums instead; `netDamage` byte
+  unchanged.
+  The surface half turned up a live defect the design pass had not predicted:
+  `IntentIcon` printed a bare `DENIED` and said "no damage lands" whenever the
+  foe was hindered — while the engine resolves adds OUTSIDE that gate on the
+  deliberate principle that bodies act. A player who staggered the summoner was
+  being instructed by the telegraph to take free damage. The readout now carries
+  the brood's soaked share beside the foe's own. See
+  `plan/phases/phase_102_summon_adds_archetype.md` → "## SHIPPED".
 
 ### ~~[score 3.5] Consumables have no anti-hoarding lever — no cantrip-style secondary effect, no HP-conditional scaling~~ PROMOTED to Phase 96 and SHIPPED 2026-09-19 (commit 417b931)
 - proposed: 2026-09-19, `/adjust-equipment` pass 13 (Step 1b widened audit,

@@ -124,6 +124,8 @@ export {
     playSignatureSkill, getDraftedDie, isPhaseStanceRevealed, revealedCurrentStance,
     // Phase 33d — GLYPHS pilot (sandbox-only): the dieless crack action
     crackGlyph,
+    // Phase 102 — SUMMON: the dieless-but-priced add clear, and its constants
+    strikeAdd, ADD_WAVE_CAP, STRIKE_ADD_COST, ADD_BITE_PER_LEVEL,
     // WS8.2 — stance-blur readout flag (mobile renders the stance panel fogged)
     isStanceReadoutBlurred,
     cardReadPreview, projectCardImpact, getSignatureSkill, SIGNATURE_SKILLS, SIGNATURE_SKILL_LIST,
@@ -210,6 +212,8 @@ export type {
     CardDieCost, FinisherProjection, CombatOutcomeProjection,
     // Phase 33d — GLYPHS pilot (sandbox-only): the charge-and-crack seal zone
     GlyphInstance, GlyphPayload,
+    // Phase 102 — SUMMON's brood: one member of an add wave
+    CombatAdd,
 } from './Combat';
 
 // ─── Playtest supercharge — stage matrix, policy roster, deck drafting ────────

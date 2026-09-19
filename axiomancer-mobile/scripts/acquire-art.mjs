@@ -123,6 +123,153 @@ function parseArgs(argv) {
 }
 
 /**
+ * The PLATE-PAGE recipe (phase 103) — find the printed plate on a scanned page
+ * and cut it out before grading.
+ *
+ * Why this exists: the best Doré sources are not always tight plate scans. The
+ * Gallica scans of `London: A Pilgrimage` are, which is why phases 83 and 101
+ * could use them untouched. But the Yale (YCBA) scans of the same book are
+ * PAGE PHOTOGRAPHS — cream margins, the book's own dark edge, marbled
+ * endpapers, sometimes the title text — and the well-named Dante series carries
+ * an English caption band under every plate. Those plates were unusable, which
+ * is why The Caverns and The Capital had no arena and why the fallback stayed
+ * an unlicensed pixel-art placeholder.
+ *
+ * `maps/forest-dark.webp` shows the shape of the old answer: its provenance
+ * records "plate margins + caption band cropped" by a one-off Pillow step in
+ * August 2026, done by hand OUTSIDE this script. That is precisely what this
+ * script exists to prevent — an asset whose transform nobody can reproduce or
+ * audit. So the crop becomes a recipe, and the box it derived is written into
+ * the provenance record.
+ *
+ * Why not `sharp.trim()`: measured, it does not work here. On a YCBA page it
+ * moved a 1249px height to 1225 — the dark book edge and marbled endpaper
+ * defeat a uniform-border heuristic, because they are neither uniform nor a
+ * border. The plate is instead found as the LARGEST CONTIGUOUS DARK BLOCK on
+ * each axis, which ignores narrow edge artifacts by construction.
+ *
+ * @param sharp   - the sharp module (injected, as everywhere in this file).
+ * @param raw     - the downloaded source bytes.
+ * @param maxEdge - longest edge of the output.
+ * @param inset   - fraction of the detected block trimmed from every side, to
+ *   drop the plate's own printed border rule. 0.01 by default.
+ * @returns the graded WebP buffer AND the box it used, so the caller can record it.
+ */
+export async function buildPlatePage(sharp, raw, maxEdge, inset = 0.01) {
+  const box = await detectPlateBox(sharp, raw)
+  const m = await sharp(raw).metadata()
+  const W = m.width ?? 0
+  const H = m.height ?? 0
+  const left = Math.round((box.x0 + inset) * W)
+  const top = Math.round((box.y0 + inset) * H)
+  const width = Math.round((box.x1 - box.x0 - inset * 2) * W)
+  const height = Math.round((box.y1 - box.y0 - inset * 2) * H)
+
+  // Guard the failure mode that actually happens: a box far SMALLER than the
+  // plate. Measured on Doré's Paradiso 31 at the first-cut coverage floor, the
+  // detector returned x[0.016,0.298] y[0.701,0.989] — a corner of clouds — and
+  // the pipeline cheerfully shipped it. A high-key plate (light interior on a
+  // light page) breaks the "plate is darker than page" premise this detector
+  // rests on, so it must fail loudly rather than crop to an artifact.
+  //
+  // There is deliberately NO upper guard. A box covering nearly the whole image
+  // is the correct, common answer for an already-tight plate scan: the detector
+  // is then trimming the hairline margin and the plate's own border rule, which
+  // is exactly what `inset` is for. Refusing that case (an earlier draft did)
+  // rejects the majority of good sources.
+  const frac = (width / W) * (height / H)
+  if (width < 32 || height < 32) {
+    throw new Error(`plate-page: detected box is degenerate (${width}x${height})`)
+  }
+  if (frac < 0.2) {
+    throw new Error(
+      `plate-page: detected box covers only ${(frac * 100).toFixed(1)}% of the source `
+      + `(${width}x${height} of ${W}x${H}) — the plate was not found. This source is `
+      + `probably high-key (a light plate on a light page), which this detector cannot read.`,
+    )
+  }
+
+  const webp = await sharp(raw)
+    .extract({ left, top, width, height })
+    .grayscale()
+    .modulate({ brightness: RECIPE.brightness })
+    .linear(RECIPE.contrast, -(128 * RECIPE.contrast) + 128)
+    .resize({ width: maxEdge, height: maxEdge, fit: 'inside', withoutEnlargement: true })
+    .webp({ quality: RECIPE.quality })
+    .toBuffer()
+
+  return { webp, crop: { left, top, width, height, sourceWidth: W, sourceHeight: H, inset }, frac }
+}
+
+/**
+ * Locate the printed plate on a scanned page, as fractions of width/height.
+ *
+ * Exported for its own test. Downsamples first (detection at ~1000px is far
+ * more accurate than it needs to be, and full-resolution scanning of a 30MP
+ * page is pointless), converts to luminance, then on each axis counts pixels
+ * meaningfully darker than the page's own mean and takes the LONGEST
+ * CONTIGUOUS RUN above a coverage floor.
+ *
+ * `darkPct` is the fraction of the other axis a line must be dark across to count
+ * as inside the block. It is 0.15, tuned against three real sources rather than
+ * guessed: at 0.35 the Doré Inferno plate 8 lost its lit horizon band (the sky
+ * is part of the plate but is not dark) and Paradiso 31 collapsed to a corner;
+ * at 0.05 the page background began to qualify and a page scan returned its full
+ * width. 0.15 reads all three correctly.
+ *
+ * The threshold is relative to the image's own mean rather than absolute:
+ * these scans vary from cream to grey depending on the institution and the
+ * paper's age, and an absolute cut-off tuned on one library's scans silently
+ * mis-crops another's.
+ */
+export async function detectPlateBox(sharp, raw, { darkPct = 0.15, sample = 1000 } = {}) {
+  const img = sharp(raw).removeAlpha().greyscale()
+  const meta = await img.metadata()
+  const { data, info } = await img
+    .resize({ width: Math.min(sample, meta.width ?? sample) })
+    .raw()
+    .toBuffer({ resolveWithObject: true })
+
+  const W = info.width
+  const H = info.height
+  let sum = 0
+  for (let i = 0; i < data.length; i++) sum += data[i]
+  const mean = sum / data.length
+  const thresh = mean * 0.82
+
+  const colDark = new Array(W).fill(0)
+  const rowDark = new Array(H).fill(0)
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      if (data[y * W + x] < thresh) { colDark[x]++; rowDark[y]++ }
+    }
+  }
+
+  // Longest contiguous run, NOT first/last crossing. A first/last search
+  // swallows the whole page the moment a dark book edge exists — measured, it
+  // returned x0=0.14,x1=1.0,y0=0,y1=1.0 on a page whose plate is ~57% x ~55%.
+  const span = (arr, otherAxisLen) => {
+    const need = otherAxisLen * darkPct
+    let best = [0, arr.length - 1]
+    let bestLen = -1
+    let run = -1
+    for (let i = 0; i <= arr.length; i++) {
+      const on = i < arr.length && arr[i] >= need
+      if (on && run < 0) run = i
+      if (!on && run >= 0) {
+        if (i - run > bestLen) { bestLen = i - run; best = [run, i - 1] }
+        run = -1
+      }
+    }
+    return [best[0] / arr.length, (best[1] + 1) / arr.length]
+  }
+
+  const [x0, x1] = span(colDark, H)
+  const [y0, y1] = span(rowDark, W)
+  return { x0, x1, y0, y1 }
+}
+
+/**
  * The silhouette recipe (phase V7). Unlike the Doré dim-plate recipe, this
  * produces a TRANSPARENT cutout: the source's ink/dark marks become an alpha
  * matte over solid black, everything else (the paper) becomes transparent, so
@@ -174,10 +321,23 @@ async function acquireOne(sharp, entry, opts) {
 
   const maxEdge = entry.maxEdge ?? RECIPE.maxEdge
   const silhouette = entry.recipe === 'silhouette'
+  const platePage = entry.recipe === 'plate-page'
 
   let webp
   let postProcessNote
-  if (silhouette) {
+  let cropRecord = null
+  if (platePage) {
+    // The crop is DERIVED, then recorded — see buildPlatePage's docblock for why
+    // a hand-cropped asset is the thing this script exists to prevent.
+    const built = await buildPlatePage(sharp, raw, maxEdge, entry.inset)
+    webp = built.webp
+    cropRecord = built.crop
+    postProcessNote = `plate detected on the scanned page and extracted to `
+      + `${built.crop.width}x${built.crop.height} at (${built.crop.left},${built.crop.top}) `
+      + `of ${built.crop.sourceWidth}x${built.crop.sourceHeight} (inset ${built.crop.inset}), `
+      + `then grayscale, brightness ${RECIPE.brightness} / contrast ${RECIPE.contrast} `
+      + `toward the void, longest edge <= ${maxEdge}px, WebP q${RECIPE.quality}`
+  } else if (silhouette) {
     webp = await buildSilhouette(sharp, raw, maxEdge)
     postProcessNote = `grayscale, trimmed to content, alpha matte from inverted luminance `
       + `(paper -> transparent, ink -> opaque black for tintColor), longest edge <= ${maxEdge}px, WebP q90`
@@ -221,6 +381,9 @@ async function acquireOne(sharp, entry, opts) {
     post_process: postProcessNote,
     covers: [`${entry.key}.webp`],
     used_by: [`assets/images/${entry.category}/index.ts`],
+    // Present only for the plate-page recipe: the exact box the detector chose,
+    // so the transform is reproducible from the record alone.
+    ...(cropRecord ? { crop: cropRecord } : {}),
   }
 
   if (!opts.dryRun) {

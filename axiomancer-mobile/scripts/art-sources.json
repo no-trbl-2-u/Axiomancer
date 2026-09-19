@@ -96,6 +96,33 @@
       "region": "The Sweetheart's Village",
       "why": "\"Dudley Street, Seven Dials\" - a slum lane with children in the roadway, a goat, and second-hand wares laid out on the stones. Domestic, poor and human-scale, which is what the town across the river is; the low terraces close the frame at both sides without the monumental weight the capital will want.",
       "maxEdge": 1120
+    },
+    {
+      "key": "arena-desolation",
+      "category": "combat",
+      "recipe": "plate-page",
+      "title": "File:YCBA London a Pilgrimage 07.jpg",
+      "region": "fallback (every region with no rule of its own)",
+      "why": "\"The New Zealander\" (Dore, London: A Pilgrimage, 1873) - a cloaked figure sits on a broken wharf sketching the ruins of a dead city across black water under a clouded moon. It replaces `arena-ruined-city.jpg`, which was saturated pixel art of modern high-rises among nine wood engravings AND carried licence UNRESOLVED. The fallback is the most-seen arena in the game, so it needs the most neutral composition in the set: heavy dark mass at the edges and along the bottom, a lit sky band and a ruined skyline across the middle where the foe composites, and nothing so place-specific that it contradicts an unrelated region. The source is a page scan, hence the plate-page recipe.",
+      "maxEdge": 1120
+    },
+    {
+      "key": "arena-caverns",
+      "category": "combat",
+      "title": "File:Gustave Doré - Dante Alighieri - Inferno - Plate 8 (Canto III - Abandon all hope ye who enter here).jpg",
+      "region": "The Caverns",
+      "why": "A vast gate cut into a rock face, sheer cliffs closing the right, two tiny figures at the threshold and a lit horizon band behind. The region begins underground - \"Iron caverns climb toward the first city; nobody arrives by daylight\" - so the arena wants the moment of going IN, not a cave interior. Distinct from the maps registry's Titans plate, which the player has just crossed to get here.",
+      "maxEdge": 1120,
+      "recipe": "plate-page"
+    },
+    {
+      "key": "arena-the-capital",
+      "category": "combat",
+      "title": "File:Paradiso Canto 31 (no caption).jpg",
+      "region": "The Capital",
+      "why": "The Empyrean Rose - two small dark figures on a rock at the bottom of frame, facing an immense spiralling amphitheatre of ranked figures converging on a blinding centre. The capital is where the advisor-selection payoff lands, so its arena should be the one place that dwarfs the player: a court that is vast, ordered and wholly indifferent. The two supplicants at the base are exactly the player's position, and the bright ring frames the composited foe rather than competing with it.",
+      "maxEdge": 1120,
+      "recipe": "plate-page"
     }
   ]
 }

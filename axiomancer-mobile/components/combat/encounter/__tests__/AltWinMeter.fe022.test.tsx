@@ -33,7 +33,7 @@ const BASE_ENEMY = {
     intent: {
         type: 'damage', icon: '⚔', label: 'ATTACKS', color: '#e2543b',
         description: 'A telegraphed strike.', damage: 10, debuffs: false, branch: null, next: null,
-        wallMath: { projectedDamage: 10, netDamage: 10, willDeny: false, guard: 0, barrier: 0, rungsTotal: 2, rungsLost: 0 },
+        wallMath: { projectedDamage: 10, netDamage: 10, willDeny: false, guard: 0, barrier: 0, rungsTotal: 2, rungsLost: 0, addDamage: 0, addNetDamage: 0, totalNetDamage: 10 },
     },
     sway: 0, swayTarget: 42, swayVisible: false,
     premises: 0, premiseAt: 5, premiseVisible: false,
@@ -41,6 +41,10 @@ const BASE_ENEMY = {
     pendingDot: 0, roundsToKill: 0, isLethalInFlight: false, healPerRound: 0,
     stanceKnown: false, stance: null, traits: [],
     keywords: [],
+    // Phase 102 — no brood, which is what every foe but the summoner has. This
+    // fixture is cast through `unknown`, so tsc cannot tell it when the VM
+    // gains a field; the omission surfaced as a render crash instead.
+    adds: [], strikeAddCost: 2, canStrikeAdd: false,
 } as unknown as CombatEnemyPaneVM;
 
 function renderPane(enemyOverrides: Partial<CombatEnemyPaneVM>) {
