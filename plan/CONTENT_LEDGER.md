@@ -14,12 +14,83 @@
 | cards | `skills/adjust-cards.md` | 2026-09-19 | 30e2e116 | 13 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-19 | 46942361 | 13 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-19 | 181a84e2 | 13 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-18 | 7bc53f82 | 12 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-19 | TBD | 13 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-18 | 900f4858 | 12 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-keywords pass 13, 2026-09-19, commit TBD]** Restored FORGE
+> (`forge_floating_die`/`float_x_die`) to real registry status — dispatched
+> autonomously by `/march`'s content-lifecycle gate (`keywords` `7bc53f82`
+> 2026-09-18T16:46:33Z was the stalest qualifying category this tick: 19
+> commits since last pass, past the 15-commit threshold; deploy green).
+> Step 1 structural audit: re-derived real carrier counts per mechanic
+> kind by grepping `axiomancer-mechanics/src/Cards/cards.library.ts` +
+> `library/*.ts` + `cards.allies.ts` + `cards.haunts.ts` for every
+> `CardSpecialMechanic` kind in `types.ts` (68 kinds; literal-grep
+> undercounts corrected by hand for kinds built via a shared factory
+> function — `purge_self` reads 1 by literal grep but is actually 5 via
+> `starters.cards.ts`'s `curse()` helper, `reap`(1)+`reap_all`(2) share
+> one REAP family at 3). One kind pair came back genuinely at **0**:
+> `forge_floating_die`/`float_x_die` (FORGE) — below even CURDLE's
+> 1-carrier miss (pass 1, 2026-09-05) and below the atlas's own "≥2 cards
+> or ≥2 enemies" discipline. Confirmed via a second signal already living
+> in-repo: `src/Combat/e2e/floating-die-persistence.engine.test.ts`'s own
+> comment states "`forge_floating_die` lost its library carrier (ex-nihilo,
+> retired with the forge theme)" — dated to THE PROFANE CANON
+> (2026-08-08, commit `84ef85bd`), which retired the whole forge/foundry
+> theme (`git log -S "'ex-nihilo'"` traces `ex-nihilo` through
+> `e50e819a`→`75c85d2a`→`8d50591e`→removed at `84ef85bd`) — yet the verb
+> stayed fully engine-wired (pricing `cards.pricing.ts`, upgrade table
+> `card-upgrades.ts`, display `combat.cards.ts`'s `mechanicText`, mobile
+> `KEYWORD_GLOSS.Forge` + `SYSTEM_TERM_COVERED_BY` + the die-verb headline
+> path `combat-encounter.engine.ts:1621`/`1994`/`2472`, card-editor
+> `wx.ts`'s `forge` entry + `CardForm.tsx`'s FORGE hint) because a
+> cross-combat floating-die persistence TEST still exercises it via a
+> synthetic sandbox fixture. 40+ days, 12 prior `/adjust-keywords` passes,
+> unactioned. `plan/AUDIT.md`'s existing CHAIN/OMEN and AMBUSH/FINALE
+> rows set the precedent for this exact shape: a thin-carrier kind that is
+> a genuine, fully-wired, load-bearing registry family member (FORGE sits
+> in "Player keywords — the dice" beside KINDLE/PIP/BOON/HONE/TEMPER, not
+> a card-local glue verb like CURDLE was) earns a second carrier rather
+> than a badge retirement. Step 2 KB gate (CREATE): `kb_keyword "forge"`
+> — no match; `kb_search` across the Dawncaster card corpus for
+> forge/conjure/create-a-die found no on-point analogue (Dawncaster has no
+> die-tray resource to forge at all) — closest genre parallel is its
+> Conjure/Create-an-Ingredient family (`kb:dawncaster/cards/0150-avenger-
+> s-choice-724041.okf.md`, `0180-battle-broth-126459.okf.md`,
+> `0213-big-eater-156895.okf.md`; community, medium confidence), cited
+> honestly as a miss rather than papered over — same shape as OMEN's own
+> resolution, grounded instead in the engine's own proven FORGE shape.
+> Step 3 ship-small (2 new items, zero new engine/mobile/editor wiring —
+> every one of the 12 keyword-checklist steps already exists for FORGE;
+> only step 6, carrying cards, was missing): authored two grave-themed
+> Splinter/Rib cards in `axiomancer-mechanics/src/Cards/library/
+> grave.cards.ts` — **The Unpaid Sexton** (`the-unpaid-sexton`, rank 3,
+> mind; deal 14 + `forge_floating_die` wild) and **It Gets Up Again**
+> (`it-gets-up-again`, rank 4, heart; deal 20 + `float_x_die`), grave
+> chosen over the fixed 3-slot one-per-aspect dice-valve relic seat
+> (`PRESET_DICE_VALVES` pins exactly 3, untouched) as the closest
+> thematic fit ("raise something from below that owes you one favor and
+> is gone for good"). `GRAVE_CARDS` 16 → 18. Both cards pass the
+> generic, cardLibrary-driven `card-effectiveness.engine.test.ts` (its
+> `forge_floating_die`/`float_x_die` `KIND_ASSERTIONS` branches already
+> existed and needed no new fixture work — `buildFixtureState`'s own
+> comment already reserves "room for forge_floating_die"),
+> `paid-summary-honesty.engine.test.ts` (FORGE/WILD already in
+> `KNOWN_UPPER`; both authored `paidSummary` strings carry every number
+> `paidText` generates), and `pricing.engine.test.ts`'s finite/
+> non-negative sanity guard. Verify: green — `npm run verify` (mechanics:
+> 214 files / 3480 tests), `npm run verify -w axiomancer-mobile`, `npm run
+> type-check -w axiomancer-card-editor`, root `npm test`
+> (`content-drift.test.mjs` included, 150/150). No atlas row edit needed
+> (FORGE's row already describes the mechanic correctly — only the
+> carrier count was stale, and the atlas doesn't print carrier counts);
+> no `docs/retheme-map.json` entry needed (FORGE isn't a spec-34 rename).
+```
 
 ```
 > **[adjust-enemies pass 13, 2026-09-19, commit 181a84e2]** Zero-CREATE,

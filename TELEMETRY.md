@@ -532,3 +532,9 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-19T08:52:03Z | slash-prompt | /digest | - | - | /digest |
 | 2026-09-19T08:52:04Z | skill | digest | - | - | - |
 | 2026-09-19T08:52:04Z | skill-end | digest | claude-sonnet-5 | 0s | ok |
+| 2026-09-19T10:28:25Z | slash-prompt | /march | - | - | /march |
+| 2026-09-19T10:28:27Z | skill | march | - | - | - |
+| 2026-09-19T10:28:27Z | skill-end | march | - | 0s | ok |
+| 2026-09-19T10:29:08Z | skill | adjust-keywords | claude-sonnet-5 | - | - |
+| 2026-09-19T10:29:09Z | skill-end | adjust-keywords | claude-sonnet-5 | 0s | ok |
+| 2026-09-19T10:30:12Z | subagent | card-expert | claude-sonnet-5 | - | Run adjust-keywords pass 13 |

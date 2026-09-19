@@ -213,6 +213,54 @@ const theKeening: Card = {
     tags: ['grave', 'echo', 'doom'],
 };
 
+// `/adjust-keywords` pass 13 (2026-09-19) — FORGE carrier restoration. The
+// forge/foundry theme that owned this verb (ex-nihilo) was retired whole by
+// THE PROFANE CANON (2026-08-08, commit 84ef85bd), leaving `forge_floating_die`/
+// `float_x_die` fully engine-wired (mechanicText, KEYWORD_GLOSS, the mobile
+// die-verb headline, card-editor `wx.ts`) but with ZERO live library
+// carriers — below the atlas's own "≥2 cards" discipline
+// (`docs/keyword-atlas.md` §Discipline), worse than CURDLE's single-carrier
+// miss. Per the established precedent for a load-bearing family member (CHAIN/
+// OMEN, AMBUSH/FINALE — `plan/AUDIT.md`'s matching rows), a genuine engine
+// mechanic with a real registry row and no wiring gap earns a second carrier
+// rather than a CURDLE-style retirement; grave's "raise something from below
+// that owes you one favor and is gone" register is the closest thematic fit
+// in the surviving seven themes (closer than the fixed 3-slot, one-per-aspect
+// dice-valve relic seat, which PRESET_DICE_VALVES pins and this pass does not
+// touch). KB research (`kb-query`): no on-point Dawncaster analogue exists —
+// Dawncaster has no die-tray resource to forge — the nearest genre parallel is
+// its Conjure/Create-a-token family (`kb:dawncaster/cards/0150-avenger-s-
+// choice-724041.okf.md`, `kb:dawncaster/cards/0180-battle-broth-126459.okf.md`,
+// `kb:dawncaster/cards/0213-big-eater-156895.okf.md` — "conjure"/"create" a
+// semi-permanent Ingredient resource), community/medium confidence, cited
+// honestly as a miss rather than papered over (same shape as OMEN's own
+// "no Dawncaster analogue" resolution) — grounded instead in the engine's own
+// proven FORGE shape.
+const theUnpaidSexton: Card = {
+    id: 'the-unpaid-sexton',
+    theme: 'grave',
+    name: 'The Unpaid Sexton',
+    philosophicalAspect: 'mind',
+    description:
+        'He was buried with his spade, which the parish considered a fair ' +
+        'settlement. Nobody told him the shift had ended. Give the ground a ' +
+        'task and something down there will still take it up, once, and ' +
+        'never complain about the wage again.',
+    tier: 2, rank: 3, cardType: 'spell',
+    targetType: 'enemy',
+    paidSummary: 'Deal 14. FORGE a WILD ghost die that plays beside your drafted die, spent for good.',
+    // pts: deal 14 (4.67) + forge wild (forgeFloating 5 + forgeWildBonus 1 =
+    // 6) = 10.67, + FREE deal 5. A Splinter hit that also mints a permanent
+    // extra die — the theme's first FORGE carrier since ex-nihilo retired.
+    free: { damage: 5 },
+    specialMechanics: [
+        { kind: 'deal', amount: 14 },
+        { kind: 'forge_floating_die', color: 'wild' },
+    ],
+    addedIn: '2026-09-19',
+    tags: ['grave', 'forge', 'dice'],
+};
+
 // ─── RIB — the loop takes hold ───────────────────────────────────────────────
 
 const dirgeForTheDisinterred: Card = {
@@ -287,6 +335,36 @@ const graveGoods: Card = {
     ],
     addedIn: ADDED,
     tags: ['grave', 'conjure', 'mill'],
+};
+
+// `/adjust-keywords` pass 13 (2026-09-19) — FORGE's second carrier (see the
+// note above theUnpaidSexton for the full audit finding and KB citation):
+// `float_x_die` is the theme's resurrection half of the verb — a die the
+// tray already wrote off comes back up.
+const itGetsUpAgain: Card = {
+    id: 'it-gets-up-again',
+    theme: 'grave',
+    name: 'It Gets Up Again',
+    philosophicalAspect: 'heart',
+    description:
+        'You put it down twice. The second time was for good measure. It has ' +
+        'opinions about that, and it is coming to share them — not against ' +
+        'you, this once. One favor, freely given, and then it is done with ' +
+        'you forever.',
+    tier: 2, rank: 4, cardType: 'spell',
+    targetType: 'enemy',
+    paidSummary: 'Deal 20. FORGE a dead X die into a WILD ghost die (no X: +1 Conviction).',
+    // pts: deal 20 (6.67) + float_x_die (forgeFloating 5 + forgeWildBonus 1 =
+    // 6, at the fate discount 0.7 = 4.2, plus the no-X fallback's 1 Conviction
+    // at the complementary 0.3 = 0.3, total 4.5) = 11.17, + FREE deal 7. The
+    // resurrection half of FORGE: a die already written off comes back WILD.
+    free: { damage: 7 },
+    specialMechanics: [
+        { kind: 'deal', amount: 20 },
+        { kind: 'float_x_die' },
+    ],
+    addedIn: '2026-09-19',
+    tags: ['grave', 'forge', 'dice', 'recursion'],
 };
 
 // ─── SKULL — the engine ──────────────────────────────────────────────────────
@@ -420,12 +498,13 @@ const theCongregationBelow: Card = {
     tags: ['grave', 'hex', 'requiem', 'clock'],
 };
 
-/** THE EXHUMATION — 16 cards, rank-ascending. */
+/** THE EXHUMATION — 18 cards, rank-ascending (16 original + FORGE's two
+ *  restored carriers, `/adjust-keywords` pass 13, 2026-09-19). */
 export const GRAVE_CARDS: Card[] = [
     spadework, theBoneTithe,
     shallowGrave, theQuietRow, theLychGate,
-    paupersPyre, theCharnelLedger, theKeening,
-    dirgeForTheDisinterred, theSecondBurial, graveGoods,
+    paupersPyre, theCharnelLedger, theKeening, theUnpaidSexton,
+    dirgeForTheDisinterred, theSecondBurial, graveGoods, itGetsUpAgain,
     openEveryGrave, thePlaguePit, theSextonsCount,
     theGeneralExhumation, theCongregationBelow,
 ];
