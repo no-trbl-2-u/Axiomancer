@@ -206,11 +206,12 @@ Tick in this file in the same commit that ships the phase.
       not truncation — fixed by sizing the name BOX to the visible sliver, since
       the geometry lever is capped at ~1 extra character at 375px. Issue #343.
       — `fix(mobile): the hand fan stops covering its own card names — phase 97` (cecae8f)
-- [ ] Phase 98 — Worklet guard in CI: `check-worklets.mjs` is the static guard
+- [x] Phase 98 — Worklet guard in CI: `check-worklets.mjs` is the static guard
       for the Reanimated-worklet crash class behind `plan/CRITIQUE.md`'s [HIGH]
       post-combat-ACCEPT row, and it had NO CI trigger of any kind — the one
       guard between that crash and `main` was local-only. Wire it (and its own
       unit suite) into `verify-mobile.yml`, and re-run on edits to the guard.
+      — `ci(mobile): enforce the Reanimated worklet guard — phase 98` (51fede4)
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics:
