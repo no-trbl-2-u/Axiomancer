@@ -672,7 +672,7 @@
   axiomancer-mobile/docs/reports/UI_FRESH_EYES_2026-09-12.md, with the raw
   candidate table beside it in the same directory.
 
-### [MED] combat — the arena's art registers are incoherent (painted foe, flat-vector dice, mono chrome)
+### [x] [MED] combat — the arena's art registers are incoherent (painted foe, flat-vector dice, mono chrome) — RESOLVED 2026-09-19 (Phase 89, commit 6137ca5b; residual is the backdrop row below)
 - pass: expo playthrough 2026-09-04 (owner-requested full-combat playtest, web export at 390x844)
 - viewport: 390x844
 - auth_state: fresh save, first map encounter (Brine Hag)
@@ -688,6 +688,25 @@
   are the most finished asset) and restyle the dice faces + chip chrome
   toward it; fold the pass-23 backdrop row into the same pass.
 - source: owner playtest
+
+- resolution (verified 2026-09-19): Phase 89 (`6137ca5b`, 9 files, +76/-35)
+  shipped both surfaces this row named as fixable — the CombatDie shell faces
+  got a woodcut cross-hatch clipped to their polygons plus an inner hairline
+  rule, and `FONTS.mono` is now RESERVED for bare numeric readouts across the
+  eight combat-encounter files (19 mono call sites remain against 121
+  sans/serif). The board no longer reads as three unrelated vocabularies.
+- DIVERGENCE this row's text does not anticipate, recorded honestly: Phase 89
+  deliberately chose the **Woodcut Codex ink/hairline** register, NOT the
+  "painted register" this row's suggested fix named. Painted enemy-portrait
+  bitmaps (Phase 88) are untouched and literal painted-bitmap dice are deferred
+  to a V4/V7 asset-acquisition phase. So three vocabularies were reduced to two
+  by a shared ink language rather than collapsed to one. That is an owner-level
+  art-direction judgement, not a measurement — flag it at the next `/oversight`
+  if the painted register was meant literally.
+- this row's second instruction — "fold the pass-23 backdrop row into the same
+  pass" — was NOT honoured by Phase 89 (its only change to
+  `CombatCombatantPane.tsx` is a 2-line font swap). That work is tracked on the
+  backdrop row below, which stays open as PARTIAL.
 
 ### [x] [HIGH] general — no mid/late equipment or signature skills exist for THE PATH's sixth axis — RESOLVED 2026-09-15 (Phase 85, commit 9f313d0c)
 - pass: user-jot (commit 343d7e98)
@@ -711,7 +730,7 @@
   now ships 11 relics across all 6 `AccessoryKind`s, all `grantsSignature`
   values resolving in the live `SignatureSkillId` union. Closed.
 
-### [HIGH] combat — user crash on ACCEPTING the post-combat card reward (second unreproduced crash report)
+### [x] [HIGH] combat — user crash on ACCEPTING the post-combat card reward (second unreproduced crash report) — RESOLVED 2026-09-19 (verified closed; CI gap closed by Phase 98, commit pending)
 - **LIKELY THE SAME BUG — RESOLVED 2026-09-04 (verify before closing).** The
   row below was root-caused to a Reanimated worklet calling a plain JS
   function (`EnemyActionCard.tsx`, fixed). Its signature matches this one
@@ -755,7 +774,35 @@
   harness cannot see), possibly the same underlying cause.
 - source: user
 
-### [MED] combat — every encounter renders the same fixed "ruined city" arena backdrop, regardless of the encounter's own narrative setting
+- resolution (2026-09-19, burn-day verification pass): the row's own
+  "verify before closing" instruction was carried out against the live tree.
+  Four independent confirmations: (1) the Reanimated worklet root-cause fix IS
+  present at HEAD — `EnemyActionCard.tsx` reads `shouldInstantSettleJuice()` on
+  the JS thread and lets the worklet capture the resulting boolean, with the
+  crash mechanism documented inline; (2) a STATIC GUARD for the whole class
+  exists and the tree is clean — `npm run lint:worklets` reports "195 file(s)
+  clean"; (3) `combat-round-e2e.mjs` now genuinely drives the ACCEPT path (it
+  taps the first offer tile before the preview-select/confirm walk), and the
+  live-mode variants that reach a victory run in CI; (4) Sentry (Phase 77) is
+  wired end-to-end with a baked-in DSN, so a survivor reports itself. The
+  sibling Done row records the same bug REPRODUCED and root-caused by Sentry on
+  2026-09-04 at `com.swmansion.worklets.AndroidUIScheduler.triggerUI` in
+  `EnemyActionCardTsx1`, which confirms this row's "LIKELY THE SAME BUG"
+  hypothesis was correct.
+- honest caveat on the close: the row's LITERAL close condition — the owner
+  playing a fixed NATIVE build through a victory + ACCEPT without a close — has
+  no in-repo record and remains UNVERIFIED. This row is closed on the
+  fix + guard + coverage + telemetry evidence above, not on that playthrough.
+  If the owner still sees a close on a current native build, reopen: Sentry will
+  now carry the identity automatically.
+- one real gap found while verifying, and fixed: the worklet guard had NO CI
+  trigger of any kind — not in the mobile verify gate, not as a workflow step,
+  and the root `npm test` that carries its unit suite runs nowhere in CI. The
+  single guard standing between this crash class and `main` was local-only.
+  Closed as Phase 98 (`verify-mobile.yml` now runs `npm run lint:worklets` and
+  the guard's own unit test, and re-runs on any edit to the guard itself).
+
+### [MED] combat — the arena backdrop is region-keyed but only 1 of 7 regions has a plate (PARTIAL — Phase 83)
 - pass: 23 (commit c063ac48)
 - viewport: mobile (375×812)
 - category: visual
@@ -783,6 +830,29 @@
   than something `/iterate` should attempt piecemeal. Route via
   `/expand` if picked up.
 - source: critique pass 23 (unattended, critique:drive artifacts)
+
+- update (verified 2026-09-19, burn-day verification pass): PARTIAL, not open
+  as originally written. The row's literal claim — "a single static image used
+  for literally every fight", `const ARENA_BG = require(...)` — is no longer
+  true. Phase 83 (`cb3b1c97`) replaced that single `require` with
+  `arenaBackdropFor(region)` / `arenaAltTextFor(region)`, rendered under testID
+  `combat-arena-backdrop`. The MECHANISM is shipped; the CONTENT is not.
+- the measured residual: exactly ONE region rule is keyed (`/drowned parish/i`
+  -> `coastal-village.webp`) against SEVEN live mobile regions, so six of seven
+  still render the original ruined-city plate. Against the engine's map registry
+  the ratio is 1 of 10 maps (three of which are dev-only Aporia labyrinth maps
+  with no mobile layout). `assets/images/combat/` holds exactly TWO backdrops:
+  `arena-ruined-city.jpg` (owner-supplied, licence UNRESOLVED per the file's own
+  header) and `coastal-village.webp` (a V4-pipeline Dore plate).
+- so the Brine Hag capture this row was filed on is now CORRECT — the coastal
+  village is the one region that has its plate. The gap moved to the other six.
+- Phase 83's own brief already names this residual verbatim as out-of-scope
+  follow-up: "Arena plates for the remaining regions (caverns,
+  connecting-river, northern-city, the-capital, northern-forest) — each its own
+  curation decision". Each plate is an art-sourcing call (the Phase 78/88
+  pipeline), not an engineering one, which is why this stays filed rather than
+  being shipped by a loop tick. Note the outstanding licence question on
+  `arena-ruined-city.jpg` should be resolved in the same pass.
 
 ### [x] [MED] combat — the momentum chain chip's empty state ("no momentum") has no contrast against the arena floor art — RESOLVED 2026-08-28 (ui-cleanup pass)
 - pass: 21 (commit 75ba5a34)
