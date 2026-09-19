@@ -1,55 +1,116 @@
 /**
- * Combat arena backdrops — Phase 83 (Woodcut Codex, V-series follow-up).
+ * Combat arena backdrops — Phase 83 (Woodcut Codex, V-series follow-up),
+ * extended to the whole region set in Phase 101.
  *
  * `CombatCombatantPane`'s full-bleed battlefield scene, region-keyed the same
  * way `assets/images/maps/index.ts` keys the exploration-map backdrop: an
- * ordered list of `(RegExp, plate)` rules, first match wins, unmatched falls
- * back to the arena that already shipped. V5 deferred "arena plates beyond
- * the one that exists" to a per-plate curation follow-up (its own brief's
- * words) rather than pad the slot with whatever engraving was to hand; this
- * is that follow-up's first plate, not a replacement for the slot.
+ * ordered list of rules, first match wins, unmatched falls back to the arena
+ * that already shipped.
  *
- * The region match is deliberately narrow (`/drowned parish/i`, the actual
- * live display string) rather than a reuse of the maps registry's generic
- * `village|town` rule — that generality is exactly what let it stop matching
- * silently after the 44f naming pass renamed the region, and a second
- * coastal-flavoured region can register its own rule later without
- * contorting this one.
+ * ## One table, not two (Phase 101)
+ *
+ * The plate and its screen-reader description used to live in two separate
+ * functions — an ordered `REGION_ARENAS` table for the image, and a hand-written
+ * `if` chain for the alt text. With one region that was merely redundant. With
+ * seven it is a drift hazard with a specific failure mode: a plate ships, its
+ * `if` branch is forgotten, and a screen-reader user is confidently told they
+ * are looking at a storm-lit ruined city while the sighted player sees a
+ * cathedral. Nothing would have caught it — the provenance gate checks that art
+ * is *reachable*, not that it is *described*.
+ *
+ * So a plate and its description are now ONE record. You cannot add the image
+ * without writing the words, because they are the same object.
+ *
+ * ## The register
+ *
+ * Every plate is a 19th-century engraving in the public domain, acquired and
+ * licence-proven by `scripts/acquire-art.mjs` (which reads Commons' own
+ * `imageinfo` extmetadata and refuses anything it cannot prove is PD/CC0), then
+ * graded toward the void by the shared recipe in `scripts/ingest-art.mjs`. See
+ * `provenance.json` beside this file for the per-plate record.
+ *
+ * The one exception is the fallback, `arena-ruined-city.jpg` — owner-supplied,
+ * licence UNRESOLVED, tracked in `plan/AUDIT.md`. It is the reason the licence
+ * check exists at all.
  */
 
 const ARENA_RUINED_CITY = require('./arena-ruined-city.jpg');
 const ARENA_COASTAL_VILLAGE = require('./coastal-village.webp');
 
 /**
- * Ordered: the FIRST pattern that matches wins. Every plate's licence is
- * proven at acquisition — see `provenance.json` and `scripts/acquire-art.mjs`
- * (the coastal plate) or `arena-ruined-city.provenance.json` (the
- * owner-supplied fallback, licence UNRESOLVED and tracked in `plan/AUDIT.md`).
+ * One arena: the region it answers, the plate, and what a screen-reader user is
+ * told they are looking at.
+ *
+ * @property pattern - matched case-insensitively against the region's live
+ *   display string (e.g. `'the Drowned Parish'`). Deliberately narrow — see the
+ *   ordering note on {@link REGION_ARENAS}.
+ * @property art     - the `require()`d asset module id.
+ * @property alt     - what is actually IN the plate. Not the region's name: a
+ *   user who cannot see the image gains nothing from being told the name of the
+ *   place they already know they are standing in.
  */
-const REGION_ARENAS: readonly (readonly [RegExp, number])[] = [
-    // The coastal village (the Drowned Parish) — the game's opening region.
-    [/drowned parish/i, ARENA_COASTAL_VILLAGE],
-];
-
-/** Resolve the arena backdrop for a region display string. */
-export function arenaBackdropFor(region: string | undefined): number {
-    for (const [pattern, art] of REGION_ARENAS) {
-        if (region && pattern.test(region)) return art;
-    }
-    // The one arena that already shipped is the honest default — not a
-    // rule in the table, so every currently-unmapped region keeps today's
-    // behaviour byte-for-byte.
-    return ARENA_RUINED_CITY;
+interface ArenaPlate {
+    readonly pattern: RegExp;
+    readonly art: number;
+    readonly alt: string;
 }
 
 /**
- * The scene's accessibility label, kept in step with the plate. A
- * screen-reader user hearing "ruined city skyline" over a dockside plate
- * would be told something false.
+ * Ordered: the FIRST pattern that matches wins.
+ *
+ * Every pattern is narrow and names its own region rather than reusing the maps
+ * registry's generic `village|town` / `city|citadel|capital` families. Two
+ * reasons, both learned the hard way:
+ *
+ *   1. A generic rule stops matching SILENTLY when a region is renamed — which
+ *      is exactly what happened to the maps registry after the 44f naming pass.
+ *   2. The generic `city|capital` family would collapse The Northern City and
+ *      The Capital onto one plate, and those are the two places this game most
+ *      wants to feel different from each other.
+ *
+ * Because the patterns are disjoint, order is not currently load-bearing — but
+ * it is still first-match-wins, so a future broad rule must be appended AFTER
+ * the narrow ones, never before.
+ */
+const REGION_ARENAS: readonly ArenaPlate[] = [
+    // The coastal village (the Drowned Parish) — the game's opening region.
+    {
+        pattern: /drowned parish/i,
+        art: ARENA_COASTAL_VILLAGE,
+        alt: 'Fishermen crowd a moored boat’s rigging, masts forested against a backlit dockside sky',
+    },
+];
+
+/**
+ * The arena shown wherever no rule matches.
+ *
+ * Kept OUT of the table on purpose: it is not a region rule, it is the absence
+ * of one, and every unmapped region keeps today's behaviour byte-for-byte.
+ */
+const FALLBACK_ARENA: Omit<ArenaPlate, 'pattern'> = {
+    art: ARENA_RUINED_CITY,
+    alt: 'A storm-lit ruined city skyline over a cracked stone floor',
+};
+
+/** The matching plate for a region display string, or the fallback. */
+function plateFor(region: string | undefined): Omit<ArenaPlate, 'pattern'> {
+    if (region) {
+        for (const plate of REGION_ARENAS) {
+            if (plate.pattern.test(region)) return plate;
+        }
+    }
+    return FALLBACK_ARENA;
+}
+
+/** Resolve the arena backdrop for a region display string. */
+export function arenaBackdropFor(region: string | undefined): number {
+    return plateFor(region).art;
+}
+
+/**
+ * The scene's accessibility label, kept in step with the plate BY CONSTRUCTION —
+ * both read the same record, so a plate cannot ship with another plate's words.
  */
 export function arenaAltTextFor(region: string | undefined): string {
-    if (region && /drowned parish/i.test(region)) {
-        return 'Fishermen crowd a moored boat’s rigging, masts forested against a backlit dockside sky';
-    }
-    return 'A storm-lit ruined city skyline over a cracked stone floor';
+    return plateFor(region).alt;
 }
