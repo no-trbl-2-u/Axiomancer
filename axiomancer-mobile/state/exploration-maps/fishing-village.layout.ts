@@ -5,8 +5,15 @@ export const fishingVillageLayout: MapLayout = {
     continent: 'CONTINENT · COASTAL',
     region: 'the Drowned Parish',
     // Ordinal only — no node/path count. The live count belongs to the map
-    // legend, computed from MapDefinition (CRITIQUE pass 19: a static count
-    // here disagreed with the legend's "N nodes · M sealed" on screen).
+    // legend (CRITIQUE pass 19: a static count here disagreed with the
+    // legend's "N nodes · M sealed" on screen).
+    //
+    // Phase 100: that legend counter no longer reads MapDefinition's lock list
+    // either. It is now derived from the same classified node array the PIPS
+    // are drawn from, because those two sources disagreed as well — the strip
+    // said "25 nodes · 20 sealed" over 21 sealed pips (PLAYTEST_BUGS_2026-09-18
+    // BUG-01). One source of truth, pinned by tests in
+    // `state/e2e/exploration.engine.test.ts`.
     regionProgress: 'Map i of ii',
     nodes: [
         // Spine nodes (fv-1..fv-10) — visual positions only; the node graph

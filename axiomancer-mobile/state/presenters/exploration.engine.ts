@@ -479,7 +479,22 @@ function computeExplorationViewModel(state: GameStore): ExplorationViewModel {
             // — the legend was the only surface using a fourth word for the
             // state it exists to define.
             left: '● TRODDEN  ◌ OPEN  ✕ SEALED',
-            right: `${def.nodes.length} nodes · ${locked.length} sealed`,
+            // PLAYTEST_BUGS_2026-09-18 BUG-01: this counter used to read
+            // `locked.length` off `world.currentMap.lockedNodes`, while the
+            // PIPS beside it are classified by `classifyNode`. Those are two
+            // different sources of truth and they disagreed on screen: the
+            // strip said "25 nodes · 20 sealed" over 21 nodes actually drawn
+            // sealed. The start node is the reason — it was never in
+            // `lockedNodes` (you begin standing on it), but once you walk away
+            // it is neither `reachable` nor `completed`, so the renderer calls
+            // it sealed while the engine's lock list never did.
+            //
+            // Counting the array the pips are drawn from makes the label a
+            // description of the map rather than a second opinion about it.
+            // `fishing-village.layout.ts` records an EARLIER disagreement with
+            // this same counter (critique pass 19), so this surface has bitten
+            // before — hence the test that pins label against pips directly.
+            right: `${nodes.length} nodes · ${nodes.filter((n) => n.kind === 'locked').length} sealed`,
         },
     });
 }

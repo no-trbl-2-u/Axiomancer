@@ -686,3 +686,67 @@ describe('FE-008: legend and counter agree on SEALED', () => {
         expect(vm.legend.right).toMatch(/sealed/);
     });
 });
+
+/**
+ * BUG-01 (PLAYTEST_BUGS_2026-09-18) — the legend counted a different set of
+ * nodes than the one it labels.
+ *
+ * The strip read "25 nodes · 20 sealed" over a map drawing 21 sealed pips. Two
+ * sources of truth: the PIPS come from `classifyNode`, the COUNTER came from
+ * `world.currentMap.lockedNodes`. The start node is where they part — it was
+ * never in `lockedNodes` (you begin standing on it), but once you walk away it
+ * is neither `reachable` nor `completed`, so the renderer calls it sealed while
+ * the engine's lock list never did.
+ *
+ * `fishing-village.layout.ts` records an EARLIER disagreement with this same
+ * counter (critique pass 19), so this surface has bitten before. These cases
+ * pin label against pips directly rather than against either source.
+ */
+describe('BUG-01: the legend counts the nodes the map actually draws', () => {
+    /** Pull the two numbers out of "N nodes · M sealed". */
+    const readCounter = (right: string) => {
+        const m = /^(\d+) nodes · (\d+) sealed$/.exec(right);
+        if (!m) throw new Error(`legend counter not in the expected shape: ${right}`);
+        return { nodes: Number(m[1]), sealed: Number(m[2]) };
+    };
+
+    it('agrees with the pips on a fresh map', () => {
+        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const vm = selectExplorationViewModel(store.getState());
+        const counter = readCounter(vm.legend.right);
+
+        expect(counter.nodes).toBe(vm.nodes.length);
+        expect(counter.sealed).toBe(vm.nodes.filter((n) => n.kind === 'locked').length);
+    });
+
+    it('still agrees after the player walks away from the start node', () => {
+        // THE REGRESSION: this is the exact step that used to split the two
+        // counts. The start node stops being reachable, was never completed,
+        // and was never in `lockedNodes` — so it became a sealed pip that the
+        // counter did not count.
+        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const actions = createAppActions(store);
+        actions.moveTo('fv-2');
+
+        const vm = selectExplorationViewModel(store.getState());
+        const counter = readCounter(vm.legend.right);
+
+        expect(counter.nodes).toBe(vm.nodes.length);
+        expect(counter.sealed).toBe(vm.nodes.filter((n) => n.kind === 'locked').length);
+    });
+
+    it('agrees again after a second move', () => {
+        // Cheap insurance that the agreement is structural, not a coincidence
+        // that happens to hold at one position.
+        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const actions = createAppActions(store);
+        actions.moveTo('fv-2');
+        actions.moveTo('fv-3');
+
+        const vm = selectExplorationViewModel(store.getState());
+        const counter = readCounter(vm.legend.right);
+
+        expect(counter.nodes).toBe(vm.nodes.length);
+        expect(counter.sealed).toBe(vm.nodes.filter((n) => n.kind === 'locked').length);
+    });
+});
