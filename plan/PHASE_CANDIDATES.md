@@ -344,6 +344,59 @@
   about win-condition legibility, not combatant count — a design session
   would need to confirm adds don't erode that legibility before landing.
 
+### [ ] [score 3.5] Consumables have no anti-hoarding lever — no cantrip-style secondary effect, no HP-conditional scaling
+- proposed: 2026-09-19, `/adjust-equipment` pass 13 (Step 1b widened audit,
+  angle deliberately off pass 12's own relic/loot-model query to avoid
+  re-asking the same question)
+- source signals:
+  - Step 1's own six structural signals re-derived clean and byte-identical
+    to pass 12 (2 weapons/2 armor/7 accessories spanning all 6
+    `AccessoryKind`s, no dominated same-slot pair, all 22 consumables
+    reachable — 12 shop-stocked, 10 via `rollCacheReward`'s uniform draw —
+    all `grantsSignature`/`effectId` values resolve live) — a genuine
+    zero-diff pass on the data itself, so the Step 1b widened KB check ran.
+  - `kb_cards` (dawncaster) cross-reference on potion/consumable design
+    (not equipment/relic models, already covered pass 12) surfaced three
+    concrete anti-hoarding levers the corpus uses that Axiomancer's item
+    set has none of: (1) near-every potion pairs its core effect with an
+    always-good secondary ("Draw a card" — `kb:dawncaster/0526-diamond-potion`,
+    `/1455-steelskin-potion`, `/1114-potion-of-alacrity`), so using one is
+    never strictly worse than sitting on it; (2) conditional scaling baked
+    into the item itself rather than left to player judgment — Healing
+    Potion: "Gain 10 HEALTH. If you are below 50% health, gain 15 HEALTH
+    instead" (`kb:dawncaster/0796-healing-potion`); (3) potions as a
+    renewable categorical resource with a generation/payoff loop
+    (`0041-alchemic-presence`, `0063-another-round`, `1117-potion-sash`,
+    `1152-quick-chemistry`), not a scarce hoard to protect.
+  - Verified against the live tree before filing: `Consumable.healAmount`
+    (`Items/types.ts`) is a flat number; `useConsumableEffect`
+    (`Items/equipment.engine.ts` line ~61) applies it unconditionally with
+    no read of the caller's current HP anywhere in the function — none of
+    the three levers exist today, not even partially.
+- rationale: real and KB-grounded, not a re-ask of pass 12's relic-model
+  finding (that one was about acquisition — run-found vs. fixed starting
+  kit, already deferred in `docs/equipment.md`; this one is about in-combat
+  incentive to actually use what's already owned). Single signal source
+  (one KB cross-reference) and no urgency (no recent spec change), but the
+  scope reads as genuinely small once landed: no new item category, no new
+  UI, just a new optional field + one conditional branch.
+- proposed scope: pick ONE lever to avoid scope creep — HP-conditional
+  scaling (closest fit: `Consumable` already carries flat numeric fields,
+  and `useConsumableEffect` already reads `player` so the HP check is a
+  local branch, not new plumbing). Add an optional field (e.g.
+  `healAmountBelowHalf`) to `Consumable`, branch on it in
+  `useConsumableEffect` against `player.health / player.maxHealth < 0.5`,
+  and retune the flat-`healAmount` potions (healing-potion,
+  minor-healing-potion, greater-/supreme-healing-potion, phoenix-tear) to
+  use it. This is new engine wiring (a new field + a new conditional branch
+  in `useConsumableEffect`), which is why this pass files rather than ships
+  it solo (THE GROWTH FLOOR ¶2) — `/adjust-equipment`'s own remit is
+  data-only.
+- estimated phases: 1
+- conflicts: none against spec.md non-goals or `docs/equipment.md`'s
+  lean-shape doctrine (this touches consumables, not the fixed relic set,
+  and adds no rarity/affix machinery).
+
 ### ~~[ ] [score 5.0] Art-direction coherence — restyle the dice faces + HUD chrome to the painted portrait register, now that the pipeline blocker has cleared~~ PROMOTED to Phase 89 via /oversight 2026-09-17
 - proposed: 2026-09-17, expand pass 17
 - source signals:

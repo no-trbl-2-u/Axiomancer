@@ -519,3 +519,8 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-18T22:28:38Z | slash-prompt | /march | - | - | /march |
 | 2026-09-19T04:33:08Z | slash-prompt | /march | - | - | /march |
 | 2026-09-19T04:37:08Z | subagent | card-expert | claude-sonnet-5 | - | Run adjust-cards steward tick |
+| 2026-09-19T06:42:11Z | slash-prompt | /march | - | - | /march |
+| 2026-09-19T06:43:11Z | skill | adjust-equipment | claude-sonnet-5 | - | - |
+| 2026-09-19T06:43:11Z | skill-end | adjust-equipment | claude-sonnet-5 | 0s | ok |
+| 2026-09-19T06:45:40Z | subagent | general-purpose | claude-sonnet-5 | - | KB search on consumable economy prior art |
+| 2026-09-19T06:46:41Z | subagent-end | general-purpose | claude-sonnet-5 | 1m00s | ok |

@@ -12,7 +12,7 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-19 | 30e2e116 | 13 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-17 | 6a28ba0b | 12 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-19 | TBD | 13 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-17 | 94da2e3f | 12 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-18 | 7bc53f82 | 12 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-18 | 900f4858 | 12 |
@@ -22,6 +22,73 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
+> **[adjust-equipment pass 13, 2026-09-19, commit TBD]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE on the relic/consumable data itself — dispatched
+> autonomously by `/march`'s content-lifecycle gate (`equipment` was the
+> stalest qualifying category this tick: 61 commits and ~50h since pass
+> 12's commit `6a28ba0b`, 2026-09-17T04:44:11Z, past the 15-commit/36h
+> threshold; `enemies` `94da2e3f` 56 commits/~42h also qualified but was
+> the less-stale of the two by last-pass timestamp; `cards` `30e2e116` 1
+> commit/~2h, `keywords` `7bc53f82` 14 commits/~14h, and `npcs` `900f4858`
+> 6 commits/~10h all sat under their own threshold). `git log
+> 6a28ba0b..HEAD -- axiomancer-mechanics/src/Items
+> axiomancer-mechanics/docs/equipment.md` returns zero commits — the
+> equipment/consumable surface is byte-identical to pass 12's tree.
+> Re-derived all 6 Step-1 signals fresh anyway: (1) slot coverage — still 2
+> weapons, 2 armor, 7 accessories spanning all 6 `AccessoryKind`s, no
+> CREATE signal. (2) dominated relics — none; all same-slot ties differ by
+> distinct `grantsSignature`. (3) shop/reward coverage — 12 of 22
+> consumables shop-stocked across `World/MapEvents/content.ts`'s 7 ware
+> blocks, the other 10 (including `heart-draught`, `berserker-brew`,
+> `regeneration-tonic`, `iron-skin-draught`, `whetstone-oil`,
+> `hunters-elixir`, `quicksilver-vial`, `war-horn-draught`,
+> `greater-resonance-crystal`, `revive-crystal`) reachable via
+> `rollCacheReward`'s uniform draw over the full `consumableLibrary`, no
+> orphan; all 11 relics are the fixed starting kit, all acquired. (4)
+> `grantsSignature` drift — all 11 relic values resolve in the live
+> `SignatureSkillId` union. (5) dead consumable `effectId`s — all 13
+> distinct ids used across the 22 consumables resolve in
+> `buffs.library.json`. (6) `AccessoryKind` gap — stays closed (all 6
+> kinds covered since Phase 85).
+>
+> **Step 1b widened audit:** Step 1 read zero-diff, so ran the KB
+> cross-reference again, deliberately off pass 12's own angle (relic/loot
+> acquisition models — Slay the Spire's run-found relics vs. our fixed
+> starting kit, already a documented deferral in `docs/equipment.md`) to
+> avoid re-asking the same question. This pass queried `kb_cards`
+> (dawncaster) on potion/consumable design specifically — not
+> equipment/relics — and surfaced a real, previously-uncovered angle: the
+> Dawncaster corpus gives potions three concrete anti-hoarding levers
+> Axiomancer's consumables have none of — (a) an always-good secondary
+> effect paired with the core one (`kb:dawncaster/0526-diamond-potion`,
+> `/1455-steelskin-potion`, `/1114-potion-of-alacrity` all cantrip a card
+> draw alongside their main payload, so using one is never strictly worse
+> than sitting on it), (b) HP-conditional scaling baked into the item
+> itself (`kb:dawncaster/0796-healing-potion`: "Gain 10 HEALTH. If you are
+> below 50% health, gain 15 HEALTH instead" — the item adjudicates the
+> moment instead of asking the player to guess), and (c) potions as a
+> renewable categorical resource with its own generation/payoff loop
+> (`0041-alchemic-presence`, `0063-another-round`, `1117-potion-sash`,
+> `1152-quick-chemistry`) rather than a scarce hoard to protect. Verified
+> against the live tree before filing: `Consumable.healAmount`
+> (`Items/types.ts`) is a flat number and `useConsumableEffect`
+> (`Items/equipment.engine.ts`) applies it unconditionally with no read of
+> the caller's current HP anywhere in the function — none of the three
+> levers exist today. This needs a new field on `Consumable` plus a new
+> conditional branch in `useConsumableEffect` (new engine wiring), so per
+> THE GROWTH FLOOR ¶2 this pass files rather than ships it solo:
+> `plan/PHASE_CANDIDATES.md` `[score 3.5]` "Consumables have no
+> anti-hoarding lever." KB research (skill §3 Step 2): the Step 1b widened
+> check above IS this pass's KB research run — no CREATE/UPDATE shipped on
+> the data itself, so the REMOVE/no-op carve-out the sibling categories'
+> zero-diff passes have used identically applies here too. Verify: ran
+> both gates in full despite the empty source diff — `npm run verify
+> --workspace axiomancer-mechanics` (214/214 files, 3470 tests + build
+> green) and `npm run verify --workspace axiomancer-mobile` (exit 0; lint +
+> typecheck clean, jest all green). `npm run deploy:check` confirmed green
+> pre-tick (HEAD `f61f949f`) and will be re-confirmed after this ledger
+> commit lands.
+
 > **[adjust-cards pass 13, 2026-09-19, commit 30e2e116]** One modest UPDATE
 > shipped (a stale doc comment), zero CREATE, zero card-verb UPDATE, zero
 > REMOVE. Dispatched autonomously by `/march`'s content-lifecycle gate
