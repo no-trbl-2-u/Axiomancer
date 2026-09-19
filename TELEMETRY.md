@@ -529,3 +529,6 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-19T08:37:08Z | skill-end | adjust-enemies | claude-sonnet-5 | 0s | ok |
 | 2026-09-19T08:39:23Z | subagent | general-purpose | claude-sonnet-5 | - | KB search for enemy design prior art angle |
 | 2026-09-19T08:39:48Z | subagent-end | general-purpose | claude-sonnet-5 | 25s | ok |
+| 2026-09-19T08:52:03Z | slash-prompt | /digest | - | - | /digest |
+| 2026-09-19T08:52:04Z | skill | digest | - | - | - |
+| 2026-09-19T08:52:04Z | skill-end | digest | claude-sonnet-5 | 0s | ok |
