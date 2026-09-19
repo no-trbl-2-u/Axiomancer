@@ -1212,6 +1212,17 @@ function moveToAction(store: AppStore, nodeId: string): MoveToResult {
 
     store.setState({ world: nextWorld });
 
+    // PLAYTEST_BUGS_2026-09-18 BUG-03: moving between nodes was NOT a
+    // checkpoint. Saves are explicit on mobile (Spec 09) and the checkpoint
+    // list was combat outcome, rest, cache, hazard, blacksmith, labyrinth and
+    // MAP CROSSING only — so a player who walked two nodes and reloaded was
+    // put back where they started, with the walk (and anything picked up by
+    // walking) gone. Node movement mutates `currentNode`, `completedNodes`,
+    // `availableNodes` and `discoveredNodes`: that is real, hard-won progress,
+    // and the same argument the crossing checkpoint already makes applies to
+    // it. The adapter debounces writes, so this is cheap even tapped quickly.
+    try { store.getState().save(); } catch { /* persistence must not block the road */ }
+
     return { moved: true, currentNodeId: nodeId, locked: false };
 }
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import { MapCanvas, computeFocusTransform } from '../MapCanvas';
+import { MapCanvas, computeFocusTransform, focusKeyOf } from '../MapCanvas';
 import type { ExplorationNode, ExplorationEdge } from '@/state/presenters/exploration.engine';
 
 const mockNodes: ExplorationNode[] = [
@@ -420,5 +420,100 @@ describe('computeFocusTransform', () => {
         ];
         const fit = computeFocusTransform(nodes, { w: 400, h: 800 });
         expect(fit.scale).toBe(0.6);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// BUG-04 — the camera re-frames as the road opens, without fighting a pan
+// ---------------------------------------------------------------------------
+
+/**
+ * `focusKeyOf` is the whole safety argument for re-fitting the camera, so it is
+ * pinned directly rather than inferred from a rendered Reanimated transform.
+ *
+ * PLAYTEST_BUGS_2026-09-18 BUG-04: the camera fitted once at mount
+ * (`initialized.current`) and never again, so after the player moved, their
+ * onward choices could sit entirely off-screen — measured at the Crossing on a
+ * 414px viewport, two of three onward paths off opposite edges, 19 of 25 nodes
+ * out of frame.
+ *
+ * The danger in fixing it is `plan/CRITIQUE.md`'s RESOLVED row at :2140 ("the
+ * map recenters against manual panning", commit 6fe4e47c, issue #294). A naive
+ * re-key on `nodes` would reopen it, because `nodes` is a fresh array on every
+ * render. These cases pin the property that keeps both closed.
+ */
+describe('focusKeyOf — what the camera considers a change', () => {
+    const node = (id: string, kind: ExplorationNode['kind']): ExplorationNode => ({
+        id, label: id, kind, type: 'encounter', x: 0, y: 0, triggersCombat: false,
+    });
+
+    it('is EQUAL across a fresh array with identical content', () => {
+        // THE REGRESSION GUARD for issue #294. The presenter hands MapCanvas a
+        // new array every render; if that alone counted as a change the camera
+        // would re-fit constantly and fight every pan.
+        const a = [node('n1', 'current'), node('n2', 'available')];
+        const b = [node('n1', 'current'), node('n2', 'available')];
+        expect(a).not.toBe(b);
+        expect(focusKeyOf(a)).toBe(focusKeyOf(b));
+    });
+
+    it('is EQUAL when the same options arrive in a different order', () => {
+        const a = [node('n1', 'current'), node('n2', 'available'), node('n3', 'available')];
+        const b = [node('n1', 'current'), node('n3', 'available'), node('n2', 'available')];
+        expect(focusKeyOf(a)).toBe(focusKeyOf(b));
+    });
+
+    it('CHANGES when the player moves', () => {
+        // This is BUG-04 itself: the moment the camera has to re-fit.
+        const before = [node('n1', 'current'), node('n2', 'available')];
+        const after = [node('n2', 'current'), node('n3', 'available')];
+        expect(focusKeyOf(before)).not.toBe(focusKeyOf(after));
+    });
+
+    it('CHANGES when a new path opens without the player moving', () => {
+        const before = [node('n1', 'current'), node('n2', 'available')];
+        const after = [node('n1', 'current'), node('n2', 'available'), node('n3', 'available')];
+        expect(focusKeyOf(before)).not.toBe(focusKeyOf(after));
+    });
+
+    it('is UNCHANGED by locked or completed nodes', () => {
+        // They are not the camera's subject; folding them in would re-fit the
+        // view for changes the player did not make to their position or options.
+        const bare = [node('n1', 'current'), node('n2', 'available')];
+        const dressed = [
+            node('n1', 'current'), node('n2', 'available'),
+            node('n9', 'locked'), node('n8', 'completed'),
+        ];
+        expect(focusKeyOf(bare)).toBe(focusKeyOf(dressed));
+    });
+
+    it('is stable with no current node (empty map / pre-boot)', () => {
+        expect(focusKeyOf([])).toBe(focusKeyOf([]));
+        expect(() => focusKeyOf([])).not.toThrow();
+    });
+});
+
+describe('MapCanvas re-frames on a focus change', () => {
+    const MockChildren = () => <></>;
+
+    it('re-renders with a changed focus set without throwing', () => {
+        // Integration smoke: the effect now runs more than once by design, so
+        // prove the second run is harmless against a live component.
+        const { getByTestId, rerender } = render(
+            <MapCanvas nodes={mockNodes} edges={mockEdges}><MockChildren /></MapCanvas>,
+        );
+        fireEvent(getByTestId('map-canvas-wrapper'), 'layout', {
+            nativeEvent: { layout: { width: 414, height: 896 } },
+        });
+
+        const moved: ExplorationNode[] = mockNodes.map((n) =>
+            n.id === 'node-1' ? { ...n, kind: 'completed' as const }
+            : n.id === 'node-2' ? { ...n, kind: 'current' as const }
+            : n);
+
+        expect(() =>
+            rerender(<MapCanvas nodes={moved} edges={mockEdges}><MockChildren /></MapCanvas>),
+        ).not.toThrow();
+        expect(getByTestId('map-canvas-wrapper')).toBeDefined();
     });
 });

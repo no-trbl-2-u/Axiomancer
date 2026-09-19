@@ -49,6 +49,48 @@ const MAX_SCALE = 3;
 // currently-open node starts visible.
 const FIT_PADDING = 40;
 
+/**
+ * The identity of the camera's SUBJECT — where the player stands, plus the
+ * steps open from there — as a stable string.
+ *
+ * Exported for unit coverage. This function is the whole safety argument for
+ * re-fitting the camera, so it is pinned directly rather than inferred from a
+ * rendered transform.
+ *
+ * Two findings meet here and pull in opposite directions:
+ *
+ *   - PLAYTEST_BUGS_2026-09-18 BUG-04: the camera fitted once at mount and
+ *     never again, so after the player moved, their onward choices could sit
+ *     entirely off-screen. Measured at the Crossing on a 414px viewport, two of
+ *     three onward paths were off opposite edges and 19 of 25 nodes were out of
+ *     frame. The camera therefore MUST re-fit when the road ahead changes.
+ *   - `plan/CRITIQUE.md`'s RESOLVED row at :2140 ("the map recenters against
+ *     manual panning", commit 6fe4e47c, issue #294): the camera MUST NOT fight
+ *     a player panning to look around.
+ *
+ * Keying the re-fit on this value satisfies both structurally instead of by
+ * heuristic. Panning changes neither where the player stands nor what is open
+ * to them, so it cannot produce a key change and therefore cannot produce a
+ * re-fit — no "has the user panned?" flag, and no window in which the camera
+ * could snap back mid-gesture. The camera moves only at moments the player
+ * themselves changed the map's subject.
+ *
+ * `completed` and `locked` nodes are deliberately NOT part of the key: they are
+ * not the camera's subject, and folding them in would re-fit the view for
+ * changes the player did not make to their own position or options.
+ *
+ * @param nodes - the exploration nodes as the presenter built them.
+ * @returns a key that is equal for any two node arrays describing the same
+ *   position and the same set of open steps, regardless of array identity or
+ *   ordering.
+ */
+export function focusKeyOf(nodes: readonly ExplorationNode[]): string {
+    const current = nodes.find((n) => n.kind === 'current')?.id ?? '';
+    // Sorted so a reordering of the same options is NOT a change.
+    const open = nodes.filter((n) => n.kind === 'available').map((n) => n.id).sort();
+    return `${current}|${open.join(',')}`;
+}
+
 interface FocusTransform { scale: number; tx: number; ty: number; }
 
 /** Exported for unit coverage — the pure math behind the initial camera fit. */
@@ -136,7 +178,23 @@ export function MapCanvas({ nodes, edges, backdrop, overlays, children }: MapCan
     // rather than the geometric middle of the (much larger) spread
     // canvas. We measure the viewport on layout, then centre once both
     // the viewport and the node set are available.
-    const initialized = React.useRef(false);
+    /**
+     * The identity of the camera's SUBJECT — where the player stands plus the
+     * steps open from there — as a stable string.
+     *
+     * PLAYTEST_BUGS_2026-09-18 BUG-04: the camera fitted once at mount and never
+     * again (`initialized.current` latched on first run), so after the player
+     * moved, the newly-opened branch could sit entirely off both edges. Measured
+     * at the Crossing on a 414px viewport: of the three onward paths, `fv-16`
+     * landed at x = -49 and `fv-11` at x = 419 — two of three choices invisible,
+     * 19 of 25 nodes off-screen, with nothing on screen saying more existed.
+     *
+     * Keying the fit on THIS rather than on `nodes` is what makes the fix safe.
+     * `nodes` is a fresh array every render, which is why the latch existed in
+     * the first place; this key changes only when the player's actual position
+     * or set of options changes. See the effect below for why that matters.
+     */
+    const focusKey = React.useMemo(() => focusKeyOf(nodes), [nodes]);
     const [viewport, setViewport] = React.useState<{ w: number; h: number } | null>(null);
     const onWrapLayout = React.useCallback(
         (e: { nativeEvent: { layout: { width: number; height: number } } }) => {
@@ -148,10 +206,31 @@ export function MapCanvas({ nodes, edges, backdrop, overlays, children }: MapCan
     );
 
     React.useEffect(() => {
-        if (initialized.current || !viewport || nodes.length === 0) return;
+        if (!viewport || nodes.length === 0) return;
         // The choosable nodes: where the player stands + the steps they
         // can take from here, fit whole into frame (zoomed out if a wide
         // branch demands it) rather than just centred at 1x.
+        //
+        // This runs on every CHANGE OF `focusKey` — not once, and not on every
+        // render. That distinction is the whole design, because it has to
+        // satisfy two findings at once:
+        //
+        //   - BUG-04 (this phase): fitting only once left the player's onward
+        //     choices off-screen after they moved. So the camera must re-fit
+        //     when the road ahead changes.
+        //   - CRITIQUE.md's RESOLVED row at :2140 ("the map recenters against
+        //     manual panning", commit 6fe4e47c, issue #294): the camera must
+        //     NOT fight a player who is panning to look around.
+        //
+        // Keying on `focusKey` satisfies both structurally rather than by
+        // heuristic: panning does not change where the player stands or what
+        // is open to them, so it cannot produce a re-fit — no "has the user
+        // panned?" flag is needed, and there is no window in which the camera
+        // could snap back mid-gesture. The camera moves only at the moments the
+        // player themselves changed the map's subject, which is precisely when
+        // that RESOLVED row's own text anticipated a re-fit would be wanted:
+        // "a tap-to-pan affordance is separable follow-up if a future pass
+        // still finds nodes going out of frame after a move."
         const fit = computeFocusTransform(nodes, viewport);
         scale.value = fit.scale;
         savedScale.value = fit.scale;
@@ -159,8 +238,11 @@ export function MapCanvas({ nodes, edges, backdrop, overlays, children }: MapCan
         ty.value = fit.ty;
         savedTx.value = fit.tx;
         savedTy.value = fit.ty;
-        initialized.current = true;
-    }, [viewport, nodes, tx, ty, savedTx, savedTy, scale, savedScale]);
+        // `nodes` is deliberately NOT a dependency — it is a fresh array every
+        // render, and depending on it would re-fit constantly, which is exactly
+        // the defect issue #294 closed. `focusKey` is its stable projection.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [viewport, focusKey, tx, ty, savedTx, savedTy, scale, savedScale]);
 
     const pinch = Gesture.Pinch()
         .onUpdate((e) => {

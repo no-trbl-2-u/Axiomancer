@@ -11,6 +11,7 @@ import {
     isConsumable,
     isEquipment,
     lookupEffect,
+    resolveConsumableHeal,
     type Character,
     type Consumable,
     type Equipment,
@@ -170,15 +171,37 @@ function buildConsumableModal(player: Character, item: Item): ItemModalViewModel
     // a legacy `effectId` string for fixtures / records that haven't
     // migrated yet.
     const legacyEffect = consumable.effectId ?? '';
-    const heal = consumable.healAmount ?? parseHealAmount(legacyEffect);
+    // Phase 96 — ask the engine what THIS player, at THIS HP, would actually be
+    // paid. `resolveConsumableHeal` is the same call `useConsumableEffect` makes,
+    // so the number previewed here is by construction the number drinking pays;
+    // the legacy `parseHealAmount` path stays as the fallback for un-migrated
+    // fixtures whose heal is still encoded in a free-form `effectId` string.
+    const { amount: resolvedHeal, desperate } = resolveConsumableHeal(player, consumable);
+    const heal = resolvedHeal > 0 ? resolvedHeal : parseHealAmount(legacyEffect);
     const projectedHp = heal > 0
         ? Math.min(player.maxHealth, player.health + heal)
         : player.health;
     const hpDelta = projectedHp - player.health;
 
     const previewLines: string[] = [];
-    if (consumable.healAmount && consumable.healAmount > 0) {
-        previewLines.push(`Heal ${consumable.healAmount} HP`);
+    if (resolvedHeal > 0) {
+        // The headline number is always what the player gets right now. When the
+        // desperation band is what earned it, say so on the same line — a player
+        // who is told "you are getting the wounded rate" learns the rule from
+        // one drink instead of inferring it from a number that changed.
+        previewLines.push(
+            desperate
+                ? `Heal ${resolvedHeal} HP (badly wounded)`
+                : `Heal ${resolvedHeal} HP`,
+        );
+        // Not currently desperate, but the item HAS a band: advertise the
+        // upside. This is the anti-hoarding lever's whole job — the player must
+        // be able to see, at full health, that the flask is worth more later.
+        if (!desperate && (consumable.healAmountBelowHalf ?? 0) > 0) {
+            previewLines.push(
+                `Heal ${consumable.healAmountBelowHalf} HP instead when below half HP`,
+            );
+        }
     } else if (legacyEffect) {
         previewLines.push(legacyEffect);
     }

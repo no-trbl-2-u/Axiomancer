@@ -192,6 +192,49 @@ Tick in this file in the same commit that ships the phase.
       already fixed by `745b56ff`/FE-047); shipped the one real gap —
       the combat primer now teaches the signature rune rail
       — `feat(mobile): teach the signature rune rail in the combat primer — phase 95` (2aa77567)
+- [x] Phase 96 — Consumable desperation band: a healing potion pays 1.5x when
+      drunk below half VITAE, stated in the shop line and the drink preview
+      (promoted from `PHASE_CANDIDATES.md` [score 3.5], filed 2026-09-19 by
+      `/adjust-equipment` pass 13; KB-grounded on
+      `kb:dawncaster/0796-healing-potion`). The anti-hoarding lever: a flat heal
+      is worth the same at full health as at death's door, so the dominant play
+      was to hoard the flask forever.
+      — `feat(items): consumable desperation band — phase 96` (417b931)
+- [x] Phase 97 — Hand-fan name legibility: the mobile combat hand covered its
+      own card names ("THIN HYM / CHILBLAI / THE LONG / SPOILED "). From
+      `plan/CRITIQUE.md` [MED] pass 37, reconfirmed by passes 38-41. Occlusion,
+      not truncation — fixed by sizing the name BOX to the visible sliver, since
+      the geometry lever is capped at ~1 extra character at 375px. Issue #343.
+      — `fix(mobile): the hand fan stops covering its own card names — phase 97` (cecae8f)
+- [x] Phase 98 — Worklet guard in CI: `check-worklets.mjs` is the static guard
+      for the Reanimated-worklet crash class behind `plan/CRITIQUE.md`'s [HIGH]
+      post-combat-ACCEPT row, and it had NO CI trigger of any kind — the one
+      guard between that crash and `main` was local-only. Wire it (and its own
+      unit suite) into `verify-mobile.yml`, and re-run on edits to the guard.
+      — `ci(mobile): enforce the Reanimated worklet guard — phase 98` (51fede4)
+- [x] Phase 99 — A returning player can actually return. From the UNFILED
+      `axiomancer-mobile/docs/reports/PLAYTEST_BUGS_2026-09-18.md` (committed
+      1d48483, referenced nowhere in `plan/`): BUG-02 (critical) every player
+      with a save got a permanently blank screen on launch — `<Redirect>` fired
+      before the NavigationContainer attached and `dispatchTo` dropped it
+      silently with no retry; BUG-03 (high) node movement was not a save
+      checkpoint and there was no save-on-exit anywhere, so a walk and the
+      opening quest were lost on reload.
+      — `fix(mobile): a returning player can actually return — phase 99` (fd83aa0)
+- [x] Phase 100 — The map tells the truth. The other two bugs from the unfiled
+      `PLAYTEST_BUGS_2026-09-18.md`: BUG-04 (medium) the exploration camera
+      fitted once at mount and never re-framed, so after a move two of three
+      onward paths sat off opposite edges (19 of 25 nodes off-screen at 414px);
+      BUG-01 (low) the legend counted `lockedNodes` while the pips were drawn
+      from `classifyNode`, so "25 nodes · 20 sealed" labelled 21 sealed pips.
+      — `fix(mobile): the map tells the truth — phase 100` (42d2ba2)
+- [x] Phase 101 — Region arena plates: three of the six regions that fought in
+      front of the same generic ruined city get their own Dore plate, all from
+      the same edition as the coastal arena already shipped. Bespoke arenas go
+      from 1 of 7 regions to 4 of 7. Owner instruction 2026-09-19 ("find
+      whatever art you'd like for a true big impact"), authorized as a loop call
+      by THE OPEN GATE 6.
+      — `feat(mobile): every settled region fights on its own ground — phase 101` (e4e2704)
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics:

@@ -266,6 +266,52 @@ export const HAND_FAN_BOARD_EDGE = 12;
  * its keyword chip cut mid-word. A readable fan the corner chrome floats over
  * beats an unreadable one crushed beside it.
  */
+/**
+ * The name band's own left chrome, in points — everything between a card face's
+ * left edge and the first pixel of its NAME text.
+ *
+ * Derived, never guessed, from the styles it sums (all in `useStyles` below):
+ *   1.5  `faceCard.borderWidth`
+ * + 6    `plateBand.paddingHorizontal` (the left half)
+ * + 5    `plateRarityPip.width` (the wax rarity pip)
+ * + 5    `plateBand.gap` (pip → text)
+ * = 17.5
+ *
+ * Exported so the fan and its tests read ONE number. If any of those four
+ * styles moves, this constant and `CombatBoard.handfan.test.tsx`'s derivation
+ * assertion move with it — the test re-sums them independently so a silent
+ * drift fails the gate rather than quietly re-clipping the names.
+ */
+export const NAME_BAND_LEFT_CHROME = 17.5;
+
+/**
+ * How much of a FANNED card's name column the player can actually see.
+ *
+ * Cluster CB-handfan (`plan/CRITIQUE.md` [MED], pass 37). In the fan, card `i`
+ * is covered by card `i+1`, which is opaque (`faceCard.backgroundColor`) and
+ * paints on top (`zIndex: i` ascending), so only `step` points of each covered
+ * card survive. The name band's own chrome eats the first
+ * {@link NAME_BAND_LEFT_CHROME} of that.
+ *
+ * Why this and not a wider overlap: the fan must satisfy
+ * `HAND_CARD_W + (n-1) * step <= screenW`, which at 375pt with 5 cards caps
+ * `step` at 63.75 against today's 57.75 — widening the overlap buys ~6pt, about
+ * one character, and then the outermost cards run off the phone. The geometry
+ * lever is exhausted; the name BOX is not. Sizing the box to the peek makes the
+ * name wrap inside the sliver the player can see (the band already grows and
+ * `numberOfLines={2}` already allows the second line — see the name-band
+ * comment in `CombatCardFace`), instead of laying the text out at the full
+ * 95pt column where its tail renders underneath the neighbouring card.
+ *
+ * @param step - the visible width of a non-last fanned card, from
+ *   {@link handFanLayout}.
+ * @returns the width the name text may honestly use, floored at 1 so a
+ *   degenerate step can never produce a negative or zero-width layout box.
+ */
+export function nameColumnPeek(step: number): number {
+    return Math.max(1, step - NAME_BAND_LEFT_CHROME);
+}
+
 export function handFanLayout(screenW: number, n: number): { band: number; step: number; overlap: number } {
     const chromeBand = Math.max(HAND_CARD_W, screenW - HAND_FAN_LEFT - HAND_FAN_RIGHT);
     const seatsBesideChrome = n <= 1 || (chromeBand - HAND_CARD_W) / (n - 1) >= HAND_FAN_MIN_STEP;
@@ -1244,7 +1290,11 @@ export const CombatBoard = React.memo(function CombatBoard({
     // chrome-free band BETWEEN the corner medallions (see `handFanLayout`),
     // and falls back to the full board band for a hand too large to seat
     // there — readable cards the corners float over, never a row of slivers.
-    const { overlap } = handFanLayout(screenW, n);
+    const { step, overlap } = handFanLayout(screenW, n);
+    // CB-handfan: every fanned card EXCEPT the last is covered by its
+    // right-hand neighbour, so its name must lay out inside the surviving
+    // sliver. The last card is uncovered and keeps the full band (null).
+    const handNamePeek = nameColumnPeek(step);
     const draggingDieId = drag.active?.type === 'die' ? drag.active.dieId : null;
     // The full VM of the die in flight — the COLOR LAW dimming keys off its color.
     const draggingDie = drag.active?.type === 'die' ? drag.active.die : null;
@@ -1489,7 +1539,13 @@ export const CombatBoard = React.memo(function CombatBoard({
                         ) : null}
                         {stagedCards.length > 0 && !stagedCards.some((c) => assignedDieFor(c.uid)) && !cardDragLive && !dropReject.reason ? (
                             <Text style={styles.stageHint} numberOfLines={1}>
-                                {deadTray ? 'no die matches your hand — APPLY · FREE still works' : 'drag a die onto your card · APPLY to commit'}
+                                {/* CB-handfan, the precedent's second half: a fanned card's
+                                    name can still wrap to two lines inside its sliver, so the
+                                    board states the escape hatch the way RouteSelect did
+                                    (8f3acef7, "TAP A CARD TO READ IT"). The tap path is
+                                    already wired — it was simply never advertised outside the
+                                    accessibilityHint, where a sighted player never meets it. */}
+                                {deadTray ? 'no die matches your hand — APPLY · FREE still works' : 'drag a die onto your card · APPLY to commit · tap a card to read it'}
                             </Text>
                         ) : null}
                     </View>
@@ -1633,7 +1689,10 @@ export const CombatBoard = React.memo(function CombatBoard({
                                         warns "may be overwritten by a layout animation" —
                                         once per hand card, every draw (playtest 2026-09-04). */}
                                     <View style={draggingCardUid === card.uid ? styles.handCardLifted : null}>
-                                        <HandCard card={card} />
+                                        <HandCard
+                                            card={card}
+                                            namePeek={i === fan.length - 1 ? null : handNamePeek}
+                                        />
                                     </View>
                                 </Animated.View>
                             </GestureDetector>
@@ -1816,12 +1875,20 @@ function paidValueFor(f: CombatCardVM['face'], override?: string): string {
 export const NARROW_FACE_W = 112;
 
 export const CombatCardFace = React.memo(function CombatCardFace({
-    card, width, height, large = false, accent = null, readPip = null, heroOverride, children,
+    card, width, height, large = false, accent = null, readPip = null, heroOverride, namePeek = null, children,
 }: {
     card: CombatCardVM;
     width: number;
     height: number;
     large?: boolean;
+    /**
+     * Cluster CB-handfan — cap the NAME text's layout width (points) because
+     * something opaque covers the rest of this face. Only the hand fan passes
+     * it; every other instance (staged 92, reward offer 100, drag ghost, detail
+     * overlay) leaves it null and lays the name out across the full band
+     * exactly as before, so this prop cannot regress the other four sizes.
+     */
+    namePeek?: number | null;
     /** Override the keyword/value/border colour (the armed staged-card read tint). */
     accent?: string | null;
     /** ▲ / ▼ / — read pip beside the keyword (read-dependent staged cards). */
@@ -1868,11 +1935,22 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                 {/* ① NAME BAND — horizontal blackletter on solid ink; the wax
                     pip carries rarity. The fan's visible sliver starts here.
                     A long name wraps to a second line (the band grows, the art
-                    plate gives) rather than truncating to a stub. */}
+                    plate gives) rather than truncating to a stub.
+
+                    CB-handfan: that wrap only helps if the text is LAID OUT in
+                    the width the player can see. A fanned card is covered by
+                    its right-hand neighbour, so `namePeek` caps the text box to
+                    the surviving sliver and the name wraps inside it — without
+                    the cap the tail is laid out correctly and then painted over,
+                    which reads as a truncation ("CHILBLAI") but is occlusion. */}
                 <View style={[styles.plateBand, { minHeight: bandH }]} pointerEvents="none">
                     <View style={[styles.plateRarityPip, large && styles.plateRarityPipLarge, { backgroundColor: rarColor }]} />
                     <Text
-                        style={[styles.plateName, large && styles.plateNameLarge]}
+                        style={[
+                            styles.plateName,
+                            large && styles.plateNameLarge,
+                            namePeek != null && { maxWidth: namePeek },
+                        ]}
                         numberOfLines={2}
                         allowFontScaling={false}
                         testID="combat-card-face-name"
@@ -1959,8 +2037,10 @@ export const CombatCardFace = React.memo(function CombatCardFace({
 // pass 2026-07-19: the board read too busy). Exported for the drag ghost.
 export const HAND_CARD_W = 120;
 export const HAND_CARD_H = 176;
-function HandCard({ card }: { card: CombatCardVM }) {
-    return <CombatCardFace card={card} width={HAND_CARD_W} height={HAND_CARD_H} />;
+function HandCard({ card, namePeek = null }: { card: CombatCardVM; namePeek?: number | null }) {
+    // `namePeek` is null for the topmost (rightmost) fanned card — nothing
+    // covers it, so its name uses the full band. See `nameColumnPeek`.
+    return <CombatCardFace card={card} width={HAND_CARD_W} height={HAND_CARD_H} namePeek={namePeek} />;
 }
 
 const useStyles = makeStyles((AXM) => ({

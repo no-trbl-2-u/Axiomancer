@@ -72,6 +72,30 @@
       "recipe": "silhouette",
       "why": "Plate VI's long drip trail at the base reads as spatter rather than a blob, rounding out the set with the one shape that actually looks flung rather than pooled.",
       "maxEdge": 480
+    },
+    {
+      "key": "arena-northern-city",
+      "category": "combat",
+      "title": "File:Bpt6k10470488 f277.jpg",
+      "region": "The Northern City",
+      "why": "\"Over London by Rail\" (Dore, London: A Pilgrimage, 1872) - tenement backyards and their chimney stacks stacked under a railway viaduct, the whole scene framed by a dark brick arch. The arch puts heavy black at both edges and leaves a lit band through the middle, which is where the foe composites; and the region is a city that is grim by ordinary congestion rather than by monsters, which is exactly what this plate is about.",
+      "maxEdge": 1120
+    },
+    {
+      "key": "arena-connecting-river",
+      "category": "combat",
+      "title": "File:Bpt6k10470488 f95.jpg",
+      "region": "The Connecting River",
+      "why": "A dock gate at low sun, a forest of masts massed behind it and a body face-down on the cobbles. Water and a landing without painting open river, so it reads as a crossing you arrive at rather than a view of one. Distinct from the maps registry's Charon plate, which the player has just walked over to get here.",
+      "maxEdge": 1120
+    },
+    {
+      "key": "arena-sweethearts-village",
+      "category": "combat",
+      "title": "File:Bpt6k10470488 f375.jpg",
+      "region": "The Sweetheart's Village",
+      "why": "\"Dudley Street, Seven Dials\" - a slum lane with children in the roadway, a goat, and second-hand wares laid out on the stones. Domestic, poor and human-scale, which is what the town across the river is; the low terraces close the frame at both sides without the monumental weight the capital will want.",
+      "maxEdge": 1120
     }
   ]
 }

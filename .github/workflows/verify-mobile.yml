@@ -13,11 +13,17 @@ on:
     paths:
       - 'axiomancer-mobile/**'
       - '.github/workflows/verify-mobile.yml'
+      # The worklet guard scans this package, so a change to the guard itself
+      # must re-run it — otherwise a weakened guard lands green.
+      - 'scripts/check-worklets.mjs'
+      - 'scripts/check-worklets.test.mjs'
   pull_request:
     branches: [main]
     paths:
       - 'axiomancer-mobile/**'
       - '.github/workflows/verify-mobile.yml'
+      - 'scripts/check-worklets.mjs'
+      - 'scripts/check-worklets.test.mjs'
   schedule:
     - cron: '13 7 * * 0'
   workflow_dispatch:
@@ -91,6 +97,22 @@ jobs:
 
       - name: Check retired terminology
         run: node scripts/check-lexicon.mjs
+
+      # CRITIQUE.md [HIGH] 2026-08-29 (post-combat reward ACCEPT crash) was
+      # root-caused to a Reanimated worklet calling a plain JS function
+      # (EnemyActionCard.tsx). `check-worklets.mjs` is the static guard for that
+      # WHOLE class — it scans mobile components/, app/, lib/ and hooks/ — but
+      # it had NO CI trigger of any kind: not in the mobile verify gate, not as
+      # a workflow step, and the root `npm test` that carries its unit suite
+      # runs nowhere in CI either. So the one guard standing between us and a
+      # repeat of a crash that took three user reports and ~30 seeded runs to
+      # pin was local-only, and a regression could reach main fully green.
+      # It costs ~0.25s. Same shape as every other guard step in this file.
+      - name: Check Reanimated worklets (no plain-JS calls inside a worklet)
+        run: npm run lint:worklets
+
+      - name: Test the worklet guard itself
+        run: node --test scripts/check-worklets.test.mjs
 
       - name: Test E2E scope classifier
         run: node --test scripts/ci-e2e-scope.test.mjs

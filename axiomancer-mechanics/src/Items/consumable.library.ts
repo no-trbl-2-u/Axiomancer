@@ -8,6 +8,26 @@
  * Effect IDs reference the global effects library (`src/Effects/buffs.library.json`,
  * `debuffs.library.json`); unknown IDs are silently skipped by `useConsumableEffect`,
  * so library authors are responsible for keeping references valid.
+ *
+ * ## Phase 96 — the desperation band on every healing potion
+ *
+ * All five flat-heal potions (`healing-potion`, `minor-healing-potion`,
+ * `greater-healing-potion`, `supreme-healing-potion`, `phoenix-tear`) now carry
+ * a `healAmountBelowHalf` at a flat **1.5x** their base `healAmount`, paid when
+ * the drinker is under half VITAE. The ratio is uniform on purpose: one rule the
+ * player learns once ("potions are worth half again when you are badly hurt")
+ * rather than five per-item numbers to memorise.
+ *
+ * Why the lever exists: a flat heal is worth the same at full health as at
+ * death's door, so the dominant play is to hoard the flask and never drink it.
+ * Prior art for baking the conditional into the item is Dawncaster's Healing
+ * Potion — "Gain 10 HEALTH. If you are below 50% health, gain 15 HEALTH instead"
+ * (`kb:dawncaster/0796-healing-potion`, the same 1.5x).
+ *
+ * Non-healing consumables are deliberately untouched: the lever answers the
+ * hoarding incentive on HEALS specifically, and the corpus's other two
+ * anti-hoarding levers (an always-good secondary rider, potions as a renewable
+ * categorical resource) are separate, larger designs left un-shipped here.
  */
 
 import { Consumable } from './types';
@@ -21,17 +41,19 @@ export const consumableLibrary: Consumable[] = [
     {
         id: 'healing-potion',
         name: 'Healing Potion',
-        description: 'A clean clay flask of red liquid. Restores moderate HP.',
+        description: 'A clean clay flask of red liquid. Restores moderate HP — more when drunk on the edge of death.',
         category: 'consumable',
         healAmount: 20,
+        healAmountBelowHalf: 30,
         quantity: 1,
     },
     {
         id: 'minor-healing-potion',
         name: 'Minor Healing Potion',
-        description: 'A small flask, half the strength of a true healing draught.',
+        description: 'A small flask, half the strength of a true healing draught. It gives more to those who need it most.',
         category: 'consumable',
         healAmount: 10,
+        healAmountBelowHalf: 15,
         quantity: 1,
     },
     {
@@ -160,9 +182,10 @@ export const consumableLibrary: Consumable[] = [
     {
         id: 'greater-healing-potion',
         name: 'Greater Healing Potion',
-        description: 'A deep crimson draught in cut crystal. Restores a great deal of HP.',
+        description: 'A deep crimson draught in cut crystal. Restores a great deal of HP, and a great deal more to the badly wounded.',
         category: 'consumable',
         healAmount: 50,
+        healAmountBelowHalf: 75,
         quantity: 1,
         addedIn: '2026-06-07',
         tags: ['consumable', 'healing', 'mid-game'],
@@ -170,9 +193,10 @@ export const consumableLibrary: Consumable[] = [
     {
         id: 'supreme-healing-potion',
         name: 'Supreme Healing Potion',
-        description: 'A draught of liquid dawn. Closes all but mortal wounds.',
+        description: 'A draught of liquid dawn. Closes all but mortal wounds, and answers the mortal ones hardest.',
         category: 'consumable',
         healAmount: 100,
+        healAmountBelowHalf: 150,
         quantity: 1,
         addedIn: '2026-06-07',
         tags: ['consumable', 'healing', 'late-game'],
@@ -230,12 +254,13 @@ export const consumableLibrary: Consumable[] = [
     {
         id: 'phoenix-tear',
         name: 'Phoenix Tear',
-        description: 'A single warm bead of ember that wards off the killing blow.',
+        description: 'A single warm bead of ember that wards off the killing blow. It burns brightest for the nearly dead.',
         category: 'consumable',
         // No bespoke prevent-KO effect exists yet; `buff_phoenix_vigor` sells
         // the rebirth fantasy with existing data (see `revive-crystal` note).
         effectId: 'buff_phoenix_vigor',
         healAmount: 40,
+        healAmountBelowHalf: 60,
         quantity: 1,
         addedIn: '2026-06-07',
         tags: ['consumable', 'healing', 'sustain', 'late-game'],

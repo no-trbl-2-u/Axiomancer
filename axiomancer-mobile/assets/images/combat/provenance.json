@@ -31,5 +31,53 @@
     "used_by": [
       "assets/images/combat/index.ts (arenaBackdropFor, region /drowned parish/i)"
     ]
+  },
+  {
+    "generated_by": "public-domain-acquisition",
+    "date": "2026-09-19",
+    "tool": "scripts/acquire-art.mjs (Commons API + sharp)",
+    "source": "https://commons.wikimedia.org/wiki/File:Bpt6k10470488_f277.jpg",
+    "artist": "Gustave Doré",
+    "license": "Public domain",
+    "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
+    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44",
+    "covers": [
+      "arena-northern-city.webp"
+    ],
+    "used_by": [
+      "assets/images/combat/index.ts"
+    ]
+  },
+  {
+    "generated_by": "public-domain-acquisition",
+    "date": "2026-09-19",
+    "tool": "scripts/acquire-art.mjs (Commons API + sharp)",
+    "source": "https://commons.wikimedia.org/wiki/File:Bpt6k10470488_f95.jpg",
+    "artist": "Gustave Doré",
+    "license": "Public domain",
+    "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
+    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44",
+    "covers": [
+      "arena-connecting-river.webp"
+    ],
+    "used_by": [
+      "assets/images/combat/index.ts"
+    ]
+  },
+  {
+    "generated_by": "public-domain-acquisition",
+    "date": "2026-09-19",
+    "tool": "scripts/acquire-art.mjs (Commons API + sharp)",
+    "source": "https://commons.wikimedia.org/wiki/File:Bpt6k10470488_f375.jpg",
+    "artist": "Gustave Doré",
+    "license": "Public domain",
+    "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
+    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44",
+    "covers": [
+      "arena-sweethearts-village.webp"
+    ],
+    "used_by": [
+      "assets/images/combat/index.ts"
+    ]
   }
 ]

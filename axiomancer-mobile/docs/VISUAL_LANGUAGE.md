@@ -27,6 +27,20 @@ Every screen reads color through `AXM.*` (from `usePalette()` /
 a **frozen snapshot of the active theme**, resolved once at module-load
 — see `theme/palette.ts` for the mechanism.
 
+> **Phase 101 (2026-09-19) — the accents were retuned toward historical
+> pigment.** The world plates are 19th-century wood engravings graded toward
+> the void, carrying essentially zero chroma; against them the previous
+> accents (a `#a6e22e` lime, a `#b81fae` magenta, a `#5ec5e8` cyan) read as UI
+> stickers on top of a print. Every theme's hues were desaturated and shifted
+> toward colours a hand-tinted plate would carry — iron-gall, oxblood, gold
+> leaf, verdigris, red ochre, lapis, orpiment, murex — keeping each theme's
+> identity and name. Contrast was measured before and after: no pair
+> regressed, and the two `blood/bg` pairs that were only AA-large now clear
+> full AA. `theme/__tests__/palette.test.ts` gained the contrast guard that
+> had never existed. **The type system was reviewed in the same pass and
+> deliberately left alone** — IM Fell English (a 17th-c English revival) and
+> Pirata One sit inside the same printed-book world as the plates.
+
 The base identity is one dark-gothic palette; the *accents* are
 theme-driven so the world can shift as the pilgrim moves between
 regions without touching components. Five themes ship today
