@@ -130,18 +130,36 @@ export function makePalette(s: ThemeSpec): Palette {
     };
 }
 
+/**
+ * Phase 101 retune — the accents were pulled toward HISTORICAL PIGMENT.
+ *
+ * The world plates are 19th-century wood engravings graded toward the void:
+ * they carry essentially zero chroma. Against that, the previous accents
+ * (a #a6e22e lime, a #b81fae magenta, a #5ec5e8 cyan) read as UI stickers
+ * laid on top of a print rather than as part of the page. Each theme's hues
+ * were desaturated and shifted toward colours a hand-tinted plate or an
+ * illuminated manuscript would actually carry — iron-gall, oxblood, gold
+ * leaf, verdigris, red ochre, lapis, orpiment, murex — while keeping every
+ * theme's identity and its name.
+ *
+ * Readability was measured before and after, not assumed. No pair regressed,
+ * and the two that were only AA-large before now clear full AA: ashen-gold's
+ * `blood/bg` 4.16 -> 5.39, plague-bloom's `blood/bg` 3.63 -> 5.72. The
+ * `theme contrast` block in `__tests__/palette.test.ts` is the guard that did
+ * not exist when those two were allowed to drift below the line.
+ */
 export const THEME_SPECS: Record<ThemeId, ThemeDef> = {
     'ashen-gold': {
         id: 'ashen-gold',
         name: 'Ashen Gold',
-        blurb: 'Cursed lands — richer accents on the canonical dark base.',
+        blurb: 'Cursed lands — iron-gall ink, gold leaf and oxblood.',
         spec: {
             bg: '#0b0a09',
-            parchment: '#f1e7d0',
-            blood: '#e01f33',
-            sulfur: '#f0cb2e',
-            rust: '#bd4a1e',
-            heal: '#74c046',
+            parchment: '#ece0c8',
+            blood: '#e05a45',
+            sulfur: '#dcb04a',
+            rust: '#a8562a',
+            heal: '#8fa855',
             bone: '#9c937f',
             ash: '#46403a',
             panelBg: '#15110c',
@@ -149,23 +167,23 @@ export const THEME_SPECS: Record<ThemeId, ThemeDef> = {
             dockBg: '#100c08',
             silhouette: '#0c0908',
             selectFill: '#27200c',
-            debuff: '#23123b',
-            buff: '#37280a',
-            pixelShadow: '#7a0d1c',
-            pixelHighlight: '#fff5e0',
+            debuff: '#241a33',
+            buff: '#33270d',
+            pixelShadow: '#6e2a1c',
+            pixelHighlight: '#f6ecd8',
         },
     },
     'coastal-verdant': {
         id: 'coastal-verdant',
         name: 'Coastal Verdant',
-        blurb: 'Salt-bitten shores — teal & coral over slate.',
+        blurb: 'Salt-bitten shores — verdigris and weathered coral over slate.',
         spec: {
             bg: '#080b0c',
-            parchment: '#e7eedd',
-            blood: '#e8643c',
-            sulfur: '#46c8a0',
-            rust: '#2f8f86',
-            heal: '#7fd06a',
+            parchment: '#e2e8d8',
+            blood: '#e07a5a',
+            sulfur: '#6fb89c',
+            rust: '#417f78',
+            heal: '#8cb473',
             bone: '#8a988f',
             ash: '#324440',
             panelBg: '#0c1614',
@@ -173,23 +191,23 @@ export const THEME_SPECS: Record<ThemeId, ThemeDef> = {
             dockBg: '#0a1210',
             silhouette: '#081110',
             selectFill: '#0d2a24',
-            debuff: '#10233b',
-            buff: '#0c3326',
-            pixelShadow: '#0d4a4a',
-            pixelHighlight: '#e8fff5',
+            debuff: '#14243a',
+            buff: '#10302a',
+            pixelShadow: '#1a4a48',
+            pixelHighlight: '#e6f2ea',
         },
     },
     'ember-depths': {
         id: 'ember-depths',
         name: 'Ember Depths',
-        blurb: 'Molten underworld — fire-orange & ash.',
+        blurb: 'Molten underworld — red ochre and smoke.',
         spec: {
             bg: '#0c0706',
-            parchment: '#f4e3cb',
-            blood: '#f23a22',
-            sulfur: '#ff9d2e',
-            rust: '#c0431a',
-            heal: '#9abf3a',
+            parchment: '#eddcc4',
+            blood: '#e2604a',
+            sulfur: '#dd9a4e',
+            rust: '#a84a22',
+            heal: '#9caf5c',
             bone: '#a8917e',
             ash: '#4a3a32',
             panelBg: '#180e09',
@@ -197,23 +215,23 @@ export const THEME_SPECS: Record<ThemeId, ThemeDef> = {
             dockBg: '#140b06',
             silhouette: '#0e0805',
             selectFill: '#33180a',
-            debuff: '#2e1410',
-            buff: '#3a2208',
-            pixelShadow: '#8a1c0d',
-            pixelHighlight: '#fff0d8',
+            debuff: '#2b1a18',
+            buff: '#33240c',
+            pixelShadow: '#7a2a18',
+            pixelHighlight: '#f6e8d4',
         },
     },
     'frost-marrow': {
         id: 'frost-marrow',
         name: 'Frost Marrow',
-        blurb: 'Frozen reaches — ice-cyan over deep blue.',
+        blurb: 'Frozen reaches — pale lapis over bone.',
         spec: {
             bg: '#080a0d',
-            parchment: '#e6edf4',
-            blood: '#d8455f',
-            sulfur: '#5ec5e8',
-            rust: '#5a7fa8',
-            heal: '#6fcfb0',
+            parchment: '#e0e7ee',
+            blood: '#d3697a',
+            sulfur: '#86b2c9',
+            rust: '#6b85a2',
+            heal: '#83b5a6',
             bone: '#8893a0',
             ash: '#2f3b48',
             panelBg: '#0c131c',
@@ -221,23 +239,23 @@ export const THEME_SPECS: Record<ThemeId, ThemeDef> = {
             dockBg: '#0a1018',
             silhouette: '#080e15',
             selectFill: '#0f2636',
-            debuff: '#161a3b',
-            buff: '#0c2433',
-            pixelShadow: '#1c4a6a',
-            pixelHighlight: '#eaffff',
+            debuff: '#1b2040',
+            buff: '#122a36',
+            pixelShadow: '#244a62',
+            pixelHighlight: '#e6f0f4',
         },
     },
     'plague-bloom': {
         id: 'plague-bloom',
         name: 'Plague Bloom',
-        blurb: 'Rotting fen — toxic lime & violet.',
+        blurb: 'Rotting fen — orpiment and murex.',
         spec: {
             bg: '#0a0a08',
-            parchment: '#e9eccf',
-            blood: '#b81fae',
-            sulfur: '#a6e22e',
-            rust: '#6a8a1a',
-            heal: '#5ad0a0',
+            parchment: '#e3e7cb',
+            blood: '#c46bae',
+            sulfur: '#b8c661',
+            rust: '#7b8a3a',
+            heal: '#74b899',
             bone: '#919a7e',
             ash: '#3e4233',
             panelBg: '#11140c',
@@ -245,10 +263,10 @@ export const THEME_SPECS: Record<ThemeId, ThemeDef> = {
             dockBg: '#0d1108',
             silhouette: '#0a0e08',
             selectFill: '#1f2a0a',
-            debuff: '#2a0e3b',
-            buff: '#25330a',
-            pixelShadow: '#5a1c6a',
-            pixelHighlight: '#f0ffd8',
+            debuff: '#2a1a38',
+            buff: '#232e10',
+            pixelShadow: '#4e2a5e',
+            pixelHighlight: '#eef4dc',
         },
     },
 };

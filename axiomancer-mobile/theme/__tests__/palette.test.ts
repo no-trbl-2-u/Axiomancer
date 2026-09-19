@@ -238,3 +238,81 @@ describe('registry shape', () => {
         expect(isThemeId(DEFAULT_THEME_ID)).toBe(true);
     });
 });
+
+// ---------------------------------------------------------------------------
+// Contrast (Phase 101 follow-on — the guard that did not exist)
+// ---------------------------------------------------------------------------
+
+/**
+ * Relative luminance per WCAG 2.1, and the contrast ratio between two hexes.
+ *
+ * Implemented here rather than imported because nothing in the app computes
+ * contrast at runtime — this is a build-time assertion about authored values,
+ * and a test that re-derives the formula independently is the point.
+ */
+function relativeLuminance(hex: string): number {
+    let h = hex.replace('#', '');
+    if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+    const channel = (v: number) => {
+        const c = v / 255;
+        return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+    };
+    const [r, g, b] = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
+    return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+}
+
+function contrastRatio(a: string, b: string): number {
+    const la = relativeLuminance(a);
+    const lb = relativeLuminance(b);
+    const [hi, lo] = la > lb ? [la, lb] : [lb, la];
+    return (hi + 0.05) / (lo + 0.05);
+}
+
+describe('theme contrast', () => {
+    /**
+     * Every pair here is a token the player actually READS as text or as a
+     * value chip, against the surface it is drawn on.
+     *
+     * `ash` is deliberately absent: VISUAL_LANGUAGE.md records it as
+     * borders/disabled only and explicitly NOT body or hint text, precisely
+     * because it is too low-contrast against `bg` (the Phase V8 critic-loop
+     * finding). Asserting AA on it would either fail honestly or push a border
+     * colour brighter than a border should be.
+     */
+    const READABLE_PAIRS: ReadonlyArray<readonly [keyof ThemeSpec, keyof ThemeSpec]> = [
+        ['parchment', 'bg'],
+        ['parchment', 'panelBg'],
+        ['bone', 'bg'],
+        ['bone', 'panelBg'],
+        ['sulfur', 'bg'],
+        ['blood', 'bg'],
+    ];
+
+    it.each(THEME_ORDER)('%s keeps every readable pair at WCAG AA (4.5:1)', (id) => {
+        const { spec } = THEME_SPECS[id];
+        // Collect, then assert once: a failure then names EVERY pair that
+        // broke and its ratio, instead of stopping at the first one.
+        const failures = READABLE_PAIRS
+            .map(([fg, bg]) => ({ pair: `${fg}/${bg}`, ratio: contrastRatio(spec[fg], spec[bg]) }))
+            .filter((r) => r.ratio < 4.5)
+            .map((r) => `${r.pair} = ${r.ratio.toFixed(2)}`);
+        expect(failures).toEqual([]);
+    });
+
+    it('the parchment/bg pair clears AA by a wide margin on every theme', () => {
+        // Body prose is the most-read text in the game; AA is the floor, not
+        // the target. This pins the intent that it stays comfortably above it.
+        for (const id of THEME_ORDER) {
+            const { spec } = THEME_SPECS[id];
+            expect(contrastRatio(spec.parchment, spec.bg)).toBeGreaterThanOrEqual(12);
+        }
+    });
+
+    it('contrastRatio is symmetric and self-consistent', () => {
+        // Guards the helper itself, so a broken formula cannot silently pass
+        // the assertions above.
+        expect(contrastRatio('#ffffff', '#000000')).toBeCloseTo(21, 1);
+        expect(contrastRatio('#000000', '#ffffff')).toBeCloseTo(21, 1);
+        expect(contrastRatio('#7a7a7a', '#7a7a7a')).toBeCloseTo(1, 5);
+    });
+});
