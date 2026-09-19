@@ -378,7 +378,7 @@
 
 ## Pending
 
-### [ ] [score 3.5] Summoner / add-spawning enemy archetype needs real multi-enemy combat state
+### [ ] [score 5.5] Summoner / add-spawning enemy archetype — DESIGNED 2026-09-19, ready to build
 - proposed: 2026-09-17, `/ship-a-phase` (Phase 90 split)
 - source signals:
   - carried over from `/adjust-enemies` pass 11's filed finding (commit
@@ -415,7 +415,116 @@
   about win-condition legibility, not combatant count — a design session
   would need to confirm adds don't erode that legibility before landing.
 
-### [ ] [score 3.5] Consumables have no anti-hoarding lever — no cantrip-style secondary effect, no HP-conditional scaling
+- **[2026-09-19 burn-day design pass] The design is now SETTLED and the row is
+  re-scored 3.5 -> 5.5** (same impact, much lower uncertainty: the shape is
+  decided, the traps are named, and the sizing is honest). A three-lens
+  adversarial panel — doctrine/legibility, KB prior-art/reception, and
+  engineering risk — reviewed one concrete proposal against the live tree.
+  **All three returned SOUND_WITH_CHANGES.** The changes are load-bearing and
+  are recorded here so the next tick builds the amended design, not the
+  refuted one.
+
+  **THE SHAPE (agreed).** Keep `state.enemy` untouched as the primary foe and
+  the sole VITAE win condition. Add an optional `adds?: CombatAdd[]` of
+  LIGHTWEIGHT records (`id`/`name`/`vitae`/`maxVitae`/`bite`) — never
+  `Enemy[]`, which drags in threat sequences, stages, keywords, loot, art and
+  prose and is what makes a literal `state.enemies` XL. A new
+  `{ kind: 'summon'; n }` EnemyKeyword follows the FLURRY precedent (39e2915e).
+  Adds render as tappable CHIPS, never a second bar. Doctrine verified as
+  enforced by CODE, not convention: `checkImmediateOutcome`
+  (`combat.engine.ts:3860-3866`) and `pendingOutcome` (`:4587-4591`) read only
+  `state.enemy`/`state.player`, so no adds array can create or block a win.
+
+  **REFUTED — do NOT append the add bite to `threatEffects`.** This was the
+  proposal's whole cheapness argument (one synthetic `{damage}` entry, and the
+  entire GUARD/BARRIER/RIPOSTE soak chain applies free). Two reviewers
+  independently found it corrupts combat accounting: the appended entry
+  increments `attacksLanded` (`:4176`) and `attacksFullyBlocked` (`:4300`),
+  which feed `lastThreatFullyBlocked` (`:4520`) and the coveted-die `'block'`
+  steal; it is emitted verbatim on the `threat-fired` event (`:4443`) and
+  pushed into `penaltiesApplied` -> `CombatPhaseResult` (`:4411`, `:4462`), so
+  the authored telegraph would report a hit the enemy never printed. It is
+  also inside the `if (!hindered && !isDefeated(enemy))` gate at `:4173`, so
+  STAGGER/DISRUPT on the primary foe would silence the adds too. **No existing
+  test catches any of this**, because every fixture uses a non-SUMMON foe.
+  Correct approach: resolve the add bite as its own block AFTER the
+  `for (const eff of threatEffects)` loop, reusing the soak arithmetic through
+  an extracted helper.
+
+  **REFUTED — the "sim is blind to `strikeAdd` like it is to `crackGlyph`"
+  hazard is factually FALSE**, and it was the stated excuse for keeping SUMMON
+  off the measured matrix. `crackGlyph` was taught to the sim in Phase 51:
+  `crackAt?: number` exists on the policy (`combat.sim-policies.ts:98-110`) and
+  is set on five of the eight policies (`:264`, `:279`, `:306`, `:329`, `:366`).
+  **All three reviewers independently concluded: TEACH THE SIM POLICY**, adding
+  a mirror knob (`strikeAddAt`) in the same increment — ~12 lines beside the
+  `crackAt` block, one optional field, absent = never, so the default is
+  byte-identical. An archetype permanently excluded from the baseline can never
+  be balanced by measurement, only by vibes (AGENTS.md "Measured truth").
+
+  **REFUTED — `crackGlyph` is the wrong template for a PRICED verb.** It spends
+  nothing (`combat.engine.ts:5412-5457`) — deliberately. Take the phase gate,
+  the silent no-op on an unknown id, the immutable rebuild, the single event
+  push, `withLog` and `checkImmediateOutcome` from `crackGlyph`; take the
+  Conviction debit from `playSignatureSkill` (or `placeStake`, `:965-983`).
+  Note `placeStake`'s guard silently no-ops when Conviction is short — the add
+  chip needs an explicit unaffordable state and a rejection event instead.
+
+  **OTHER MUST-CHANGES.** (a) Spawn must bind to a one-shot event (stage entry,
+  reusing the `stagesEntered` ledger at `:4805`) with a hard per-encounter cap,
+  NOT to an emptiness check — "spawn when none are alive" makes clearing cause
+  the next spawn. (b) Spawn AFTER the stage block, since REGROW deliberately
+  resolves before the stage check (`:4788-4791`). (c) Bar RAVENOUS
+  (`:4231-4239`) and WOUNDING (`:4259-4262`) from firing off the add term, or
+  the primary enemy heals off damage credited to the brood — writing add damage
+  into the sole VITAE bar. (d) `projectIncomingThreat` (`:5697-5744`) must
+  mirror the add term in the SAME increment or the on-screen wall math
+  understates incoming damage; note it already omits `enemyThreatMult`,
+  `stageThreatBonus`, `stanceCheck.mult` and the SWIFT/BRUTAL terms. (e) The
+  add chips need their OWN row with a distinct shell — they cannot join the
+  enemy's `hudRight` column, which already carries keyword and effect chips on
+  the `EffectChips` shell. (f) **Prerequisite, not a follow-up:** move
+  `enemyFigureWrap` off the static `COMBAT_HUD_HEIGHT` constant
+  (`CombatCombatantPane.tsx:786`, `:89`) onto the measured HUD height before
+  adding any HUD row, or the portrait anchor drifts. (g) Amend
+  `enemy-keywords.ts`'s header, which states every keyword changes "the
+  arithmetic of" a phase — SUMMON is a deliberate second class.
+
+  **NUMBERS.** `kb_cards` has no prior art for enemy-side summon costs (all
+  Dawncaster "Summon" hits are player-side Clones/Totems/Followers), so N and
+  bite are un-grounded. Panel recommendation: ship **N = 2** with
+  **sum(bite) strictly below the foe's own printed threat term**, so adds read
+  as a modifier on the wall rather than a second wall — accounting for
+  `THREAT_ESCALATION_MAX = 2.0`. Reception grounding that DID land: adds are a
+  famously resented archetype when the only answer is a tax. Arkham's
+  engagement cost is survivable because it offers a cheaper non-kill
+  alternative; the panel asks for a second honest line before shipping (the
+  synthetic-routing already makes the add term soakable by GUARD/BARRIER —
+  surface that to the player rather than leaving "clear them" as the only play).
+
+  **SIZING, corrected.** The recon's figures were wrong by 10-130% and a plan
+  whose sizing is that far off should not carry "one session" confidence: the
+  engine carries **110** `.enemy` refs (not 121), **30** damage-application
+  sites — 20 `applyEnemyDamage(` + 10 `applyDamage(enemy` (not 31), and
+  **seven** mutable `enemy` locals (not three). `resolveThreatPhase` is
+  `combat.engine.ts:3973-4583`, ~611 lines — NOT the "~250-line phase resolver"
+  this row claimed before today. The conclusion survives (a literal
+  `state.enemies: Enemy[]` with real targeting is XL), but the adds-as-chips
+  increment is **2 phases, not 1**: one for the engine (state shape, keyword,
+  spawn, the post-loop bite block, `strikeAdd`, the sim knob, the projection
+  term) and one for the UI (its own chip row, the HUD-height prerequisite, the
+  confirm sheet, the log/ledger event lines) plus the first summoner foe.
+
+  **WHY IT DID NOT SHIP ON THE 2026-09-19 BURN DAY.** Not blocked — deliberately
+  deferred. The cheap path was refuted the same day it was proposed, two of the
+  must-changes are prerequisites that touch the combat HUD's anchoring, and the
+  accounting corruption above is invisible to every existing test. Shipping it
+  half-right would put a silent defect into the one screen the player spends
+  most of their time on. The design work is the durable output; the build is a
+  clean 2-phase job for a tick that can start from this row.
+- estimated phases: 2 (was "2-3", now bounded by a settled design)
+
+### ~~[score 3.5] Consumables have no anti-hoarding lever — no cantrip-style secondary effect, no HP-conditional scaling~~ PROMOTED to Phase 96 and SHIPPED 2026-09-19 (commit 417b931)
 - proposed: 2026-09-19, `/adjust-equipment` pass 13 (Step 1b widened audit,
   angle deliberately off pass 12's own relic/loot-model query to avoid
   re-asking the same question)
