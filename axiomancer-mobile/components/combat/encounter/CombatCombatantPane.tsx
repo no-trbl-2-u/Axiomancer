@@ -89,6 +89,11 @@ export function combatTopScrimStops(deepBg: string, groundBg: string): readonly 
  *  content column leaves this much clearance before the play region. */
 export const COMBAT_HUD_HEIGHT = 148;
 
+/** The HUD's own top padding, under the safe-area inset. Named because the
+ *  enemy figure anchors off it: the figure's live `top` is this pad plus the
+ *  measured height of the HUD's full-width block. */
+export const COMBAT_HUD_PAD_TOP = 8;
+
 /** Screen-left footprint of the player medallion's dock: its 10pt left offset
  *  plus the 92pt medallion. The board reserves this much of the bottom band so
  *  the hand fan lays out BESIDE the medallion instead of under it
@@ -572,6 +577,10 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
     const styles = useStyles();
 
     const [enemyFloats, setEnemyFloats] = useState<Float[]>([]);
+    // Measured height of the HUD's full-width block (name row + VITAE bar +
+    // alt-win meters). The enemy figure's wrap anchors under it; 0 until the
+    // first layout pass, when `enemyFigureWrap`'s static top is the fallback.
+    const [hudBlockH, setHudBlockH] = useState(0);
     const idRef = useRef(0);
     const lastSeq = useRef(0);
 
@@ -744,7 +753,16 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                     testID="combat-arena-backdrop"
                 />
                 <Animated.View style={[StyleSheet.absoluteFillObject, enemyAnim]}>
-                    <View style={styles.enemyFigureWrap}>
+                    <View
+                        style={[
+                            styles.enemyFigureWrap,
+                            // Live anchor: 14pt tucked under the HUD's measured
+                            // full-width block. The static top in the stylesheet
+                            // is only the pre-layout fallback.
+                            hudBlockH > 0 ? { top: topInset + COMBAT_HUD_PAD_TOP + hudBlockH - 14 } : null,
+                        ]}
+                        testID="combat-enemy-figure-wrap"
+                    >
                         {/* grounding shadow so the alpha-matted figure sits ON the floor.
                             It stays OUTSIDE the idle wrapper: the shadow is the floor's,
                             not the creature's, so the figure breathes over a planted
@@ -816,49 +834,65 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
 
             {/* ── layer 2: top HUD ── */}
             <View
-                style={[styles.hud, { paddingTop: topInset + 8 }]}
+                style={[styles.hud, { paddingTop: topInset + COMBAT_HUD_PAD_TOP }]}
                 pointerEvents="box-none"
                 onLayout={(e) => onHudLayout?.(e.nativeEvent.layout.height)}
                 testID="combat-hud"
             >
-                <View style={styles.hudNameRow} pointerEvents="box-none">
-                    <Text style={styles.enemyName} numberOfLines={1}>{enemy.name}</Text>
-                    {metaLine ? <Text style={styles.hudMeta} allowFontScaling={false}>{metaLine}</Text> : null}
+                {/* The HUD's FULL-WIDTH block — name row, VITAE bar, alt-win
+                    meters. Measured on its own because the enemy figure anchors
+                    under it: these are the rows that lie edge to edge across the
+                    painting, while `hudUnderBar` below is a narrow right-hand chip
+                    column (the brood's chips included) that the top scrim already
+                    carries. Anchoring the figure to the WHOLE HUD instead would
+                    drag its top down past that column and collapse the foe to a
+                    thumbnail. `onHudLayout` above still reports the whole HUD —
+                    the board's dock spacer, the LOG toggle and the tutorial coach
+                    must keep clearing the chips too. */}
+                <View
+                    pointerEvents="box-none"
+                    onLayout={(e) => setHudBlockH(e.nativeEvent.layout.height)}
+                    testID="combat-hud-block"
+                >
+                    <View style={styles.hudNameRow} pointerEvents="box-none">
+                        <Text style={styles.enemyName} numberOfLines={1}>{enemy.name}</Text>
+                        {metaLine ? <Text style={styles.hudMeta} allowFontScaling={false}>{metaLine}</Text> : null}
+                    </View>
+                    <EnemyHpBar pct={enemy.hpPct} value={enemy.hp} max={enemy.maxHp} />
+                    {/* WI-5 — alt-win meters (PLEA → relent, CHARGE → oratory) */}
+                    {enemy.swayVisible ? (
+                        <AltWinMeter glyph="🕊" label="PLEA" value={enemy.sway} target={enemy.swayTarget} color={AXM.sulfur} testID="combat-sway-meter" outcome="RELENT" />
+                    ) : null}
+                    {enemy.premiseVisible ? (
+                        <AltWinMeter glyph="☞" label="CHARGE" value={enemy.premises} target={enemy.premiseAt} color={AXM.sulfur} testID="combat-premise-meter" outcome="CONDEMN" />
+                    ) : null}
+                    {/* THE BIG NUMBERS REWRITE — FLAY rides the FOE: how open it is
+                        to the next few hits. No target to fill toward, so the tally
+                        renders bare (the AltWinMeter's target-0 shape). */}
+                    {enemy.flayVisible ? (
+                        <AltWinMeter glyph="✂" label="FLAY" value={enemy.flay} target={0} color={AXM.rust} testID="combat-flay-meter" />
+                    ) : null}
+                    {/* Phase 2 (spec 30) — the status kill-path foresight. Makes the
+                        DoT win path foreseeable instead of invisible accumulation:
+                        a plain pending tally once stacks land, a "LETHAL IN N" call
+                        once they alone clear remaining HP. Playtest fix 2026-09-04:
+                        the tally prints the REAL pending figure (the fill bar clamps
+                        on its own — "45/45" while 240 was queued hid the surplus),
+                        and a foe whose REGROW/RAVENOUS keeps the stack from ever
+                        crossing says so instead of a bare, misleading DOT PENDING. */}
+                    {enemy.pendingDot > 0 ? (
+                        <AltWinMeter
+                            glyph="☠"
+                            label={enemy.isLethalInFlight
+                                ? `LETHAL IN ${enemy.roundsToKill}`
+                                : enemy.healPerRound > 0 ? `DOT PENDING · HEALS ${enemy.healPerRound}/RD` : 'DOT PENDING'}
+                            value={enemy.pendingDot}
+                            target={enemy.hp}
+                            color={AXM.blood}
+                            testID="combat-lethality-meter"
+                        />
+                    ) : null}
                 </View>
-                <EnemyHpBar pct={enemy.hpPct} value={enemy.hp} max={enemy.maxHp} />
-                {/* WI-5 — alt-win meters (PLEA → relent, CHARGE → oratory) */}
-                {enemy.swayVisible ? (
-                    <AltWinMeter glyph="🕊" label="PLEA" value={enemy.sway} target={enemy.swayTarget} color={AXM.sulfur} testID="combat-sway-meter" outcome="RELENT" />
-                ) : null}
-                {enemy.premiseVisible ? (
-                    <AltWinMeter glyph="☞" label="CHARGE" value={enemy.premises} target={enemy.premiseAt} color={AXM.sulfur} testID="combat-premise-meter" outcome="CONDEMN" />
-                ) : null}
-                {/* THE BIG NUMBERS REWRITE — FLAY rides the FOE: how open it is
-                    to the next few hits. No target to fill toward, so the tally
-                    renders bare (the AltWinMeter's target-0 shape). */}
-                {enemy.flayVisible ? (
-                    <AltWinMeter glyph="✂" label="FLAY" value={enemy.flay} target={0} color={AXM.rust} testID="combat-flay-meter" />
-                ) : null}
-                {/* Phase 2 (spec 30) — the status kill-path foresight. Makes the
-                    DoT win path foreseeable instead of invisible accumulation:
-                    a plain pending tally once stacks land, a "LETHAL IN N" call
-                    once they alone clear remaining HP. Playtest fix 2026-09-04:
-                    the tally prints the REAL pending figure (the fill bar clamps
-                    on its own — "45/45" while 240 was queued hid the surplus),
-                    and a foe whose REGROW/RAVENOUS keeps the stack from ever
-                    crossing says so instead of a bare, misleading DOT PENDING. */}
-                {enemy.pendingDot > 0 ? (
-                    <AltWinMeter
-                        glyph="☠"
-                        label={enemy.isLethalInFlight
-                            ? `LETHAL IN ${enemy.roundsToKill}`
-                            : enemy.healPerRound > 0 ? `DOT PENDING · HEALS ${enemy.healPerRound}/RD` : 'DOT PENDING'}
-                        value={enemy.pendingDot}
-                        target={enemy.hp}
-                        color={AXM.blood}
-                        testID="combat-lethality-meter"
-                    />
-                ) : null}
                 <View style={styles.hudUnderBar} pointerEvents="box-none">
                     {/* hidden-stance read — badge only, no text telegraph */}
                     <Text
@@ -897,7 +931,11 @@ const useStyles = makeStyles((AXM) => ({
     // Battlefield band — the scene fills the top ~62% and fades into the floor.
     sceneBand: { position: 'absolute', top: 0, left: 0, right: 0, height: '62%', backgroundColor: AXM.bg },
     // Enemy painting — anchored to the band's lower half, clear of the HUD; the
-    // grounding shadow hugs its feet.
+    // grounding shadow hugs its feet. This `top` is the PRE-LAYOUT FALLBACK
+    // only: once the HUD's full-width block reports its height the wrap
+    // overrides it with the measured anchor (see `combat-hud-block`), so a
+    // taller stack of meters pushes the figure down instead of being painted
+    // across its head.
     enemyFigureWrap: { position: 'absolute', left: 0, right: 0, top: COMBAT_HUD_HEIGHT - 14, bottom: '9%', alignItems: 'center', justifyContent: 'flex-end' },
     enemyShadow: { position: 'absolute', bottom: -12 },
     // The idle-breath wrapper fills its parent so the figure's percentage

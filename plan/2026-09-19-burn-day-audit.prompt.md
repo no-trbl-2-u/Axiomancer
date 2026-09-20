@@ -634,21 +634,48 @@ reproduction and reported the numbers, not re-read by the orchestrator;
   exhausted and pinned by C11-R / C11-R2, the name box is already the peek,
   and the escape hatch is now on the fan itself.
 
-### 3.14 [MED · dropped ship gate · confidence 85] The enemy figure is still anchored to a static HUD height — the add row can paint over the foe's head
+### 3.14 [MED · dropped ship gate · confidence 85] The enemy figure is still anchored to a static HUD height — ~~the add row can paint over the foe's head~~
+
+**PARTIAL, and fixed 2026-09-20. The headline is refuted; the anchor is
+real.** Measured at 375×812 (the pane's own stylesheet, the shipped art),
+the add chips are right-aligned at x290–363 while the figure's art is
+centre-drawn at x41–334 and tapers away from that corner: add-row coverage
+of opaque art is **0.00%** on The Jeweled Tree (the only SUMMON carrier),
+the hag and the butcher, at topInset 0 and 44 alike. The alpha check is
+reproducible straight off the asset — the source square is fully
+transparent everywhere the chip row lands, while a full-width band at the
+same height crosses 40% of the drawn art. What *does* lie across the foe is
+older chrome: FLAY 46.6%, DOT 32.6%, the keyword row 12.4%, the CHARGE
+meter 8.2%, the stance badge 7.5–9.1%. The brood is not the offender; it is
+the row that made the HUD 40pt taller than the last audit of this anchor.
 
 - Brief §1.6 called this a *prerequisite, shipped first*; the SHIPPED
   record does not mention dropping it. `CombatCombatantPane.tsx` ~:866
   `enemyFigureWrap.top: COMBAT_HUD_HEIGHT - 14` (static 148); `onLayout`
-  ~:789 only forwards to the board (whose dock spacer **is** measured), so
-  the play region moves and the figure does not. `hudRight` now stacks
-  IntentIcon + keyword row + status row + add row (3 × 34px) over a wrap
-  whose top is 134px. None of the eight `CombatBoard.adds.test.tsx` cases
-  asserts `top`.
+  ~:789 — **corrected: `:786` at `3cb4d9c`** — only forwards to the board
+  (whose dock spacer **is** measured), so the play region moves and the
+  figure does not. `hudRight` now stacks IntentIcon + keyword row + status
+  row + add row (3 × 34px) over a wrap whose top is 134px. None of the eight
+  `CombatBoard.adds.test.tsx` cases asserts `top`. **All of that is
+  confirmed** — a layout pass feeding a grown HUD left the wrap's `top` at
+  the static 134.
 - **Fix shape:** render 375×812 with PLEA + CHARGE meters, a keyword row, a
   status row and two adds; measure. If it paints over the head, anchor the
   wrap to the measured height (the pane already has the number in hand)
   and add the `top` assertion. Either way, record the deviation in the
   SHIPPED record under "Engine deviations" (§7).
+  **Corrected 2026-09-20 by this row's own fix: "the measured height" is the
+  wrong quantity.** The number `onHudLayout` carries is the WHOLE HUD, chip
+  column included (330–451pt measured), while the wrap's bottom is pinned at
+  9% of the scene band — so `top = hudH - 14` collapses the drawn foe from
+  292.5pt square to 136.5 / 94.2 / 62.5 / **20.3**pt, smaller than one status
+  chip, and worst exactly when the HUD is busiest. The brief's own step 1c
+  carries the same error and is annotated there. What shipped anchors to the
+  HUD's **full-width block** alone (`testID="combat-hud-block"`:
+  `top = topInset + COMBAT_HUD_PAD_TOP + hudBlockH - 14`) — pixel-identical
+  to today in the ordinary inset-0 case, never below 233pt, and it moves the
+  foe down precisely when the full-width bars claim the space. The deviation
+  is recorded in the SHIPPED record as deviation three.
 
 ## 4. Refuted, lower severity — fix opportunistically, or file
 
@@ -869,6 +896,13 @@ docs commit at the end):
   it exists (3.4); "Engine deviations" gains the dropped figure anchor
   (3.14), the shell/mount deviation (E-1), the wave-2 unreachability
   (3.9); the banner's `## SHIPPED` → `# SHIPPED` (D-5).
+  **Corrected 2026-09-20 by 3.14's own fix: that row corrects four sentences
+  in this brief, not one.** Besides the Engine-deviations silence, the §1.6
+  prerequisite (:115), the step 1c code block (:216, which prescribes the
+  unsafe `top: hudH - 14`), the §4 ship gate ("equals the measured HUD
+  height − 14") and the tests matrix's "(8, new)" for
+  `CombatBoard.adds.test.tsx` were all false or stale. All are corrected in
+  that commit, along with this audit's own refuted headline for the row.
 - `plan/phases/phase_103_the_last_two_arenas.md` — decision 4 (3.5);
   Follow-ups gain the signage (3.12).
 - `plan/phases/phase_99_returning_player_can_return.md` — :80-84 (3.7);

@@ -13,12 +13,14 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 
 import { initializeCombatEncounter, rollEncounterDice, STRIKE_ADD_COST } from '@mechanics';
 import type { CombatAdd, CombatEncounterState } from '@mechanics';
 import { CombatBoard, type DragController } from '@/components/combat/encounter/CombatBoard';
+import { COMBAT_HUD_HEIGHT, COMBAT_HUD_PAD_TOP } from '@/components/combat/encounter/CombatCombatantPane';
 import { buildCombatViewModel } from '@/state/presenters/combat-encounter.engine';
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
@@ -199,5 +201,63 @@ describe('the add VM forwards engine truth rather than restating it', () => {
 
         expect(vm.enemy.strikeAddCost).toBe(STRIKE_ADD_COST);
         expect(vm.enemy.adds[0].cost).toBe(STRIKE_ADD_COST);
+    });
+});
+
+describe('the enemy figure clears the HUD the brood grew', () => {
+    /**
+     * Phase 102 §1.6 called this a prerequisite and the ship dropped it: the
+     * figure's wrap was anchored to the static `COMBAT_HUD_HEIGHT` estimate
+     * while every other HUD-adjacent sibling (the board's dock spacer, the LOG
+     * toggle, the tutorial coach) had already moved to the measured height. The
+     * brood's chip row is what made that gap visible — it stacks a fourth row
+     * into `hudRight` — but the chips are right-aligned chrome and measured 0%
+     * over the foe's art. What actually crosses the figure is the HUD's
+     * FULL-WIDTH block: the name row, the VITAE bar and the alt-win meters
+     * (FLAY + DOT together reach ~47% of the drawn art). So the anchor tracks
+     * that block, not the whole HUD — anchoring to the whole HUD would pull the
+     * top down past the narrow chip column too and collapse the foe to a
+     * thumbnail.
+     *
+     * The assertion is arithmetic on the height fed into the layout event, so
+     * re-tuning any meter's own height cannot repeal it. It fails only when the
+     * figure stops tracking the block — a guard, not a pinned pixel.
+     */
+    it('anchors the figure under the HUD’s measured full-width block, not the static estimate', () => {
+        const { store } = withAllProviders(<></>);
+        const s = openEncounter(buildPlayer(store));
+        const vm = buildCombatViewModel({ ...s, adds: brood(2), conviction: 12 });
+        // The row's stated configuration: both alt-win meters live above the
+        // brood's chip row, so the full-width block is at its tallest.
+        const withMeters = {
+            ...vm,
+            enemy: { ...vm.enemy, swayVisible: true, premiseVisible: true },
+        };
+
+        const { tree } = withAllProviders(
+            <CombatBoard vm={withMeters} drag={noopDrag()} stagedUids={[]} {...boardCallbacks()} />,
+            { store },
+        );
+        render(tree);
+
+        const topOf = () => (StyleSheet.flatten(
+            screen.getByTestId('combat-enemy-figure-wrap').props.style,
+        ) as Record<string, unknown>).top;
+
+        // Before any layout pass lands, the static constant is the fallback —
+        // imported, never a copied literal.
+        expect(topOf()).toBe(COMBAT_HUD_HEIGHT - 14);
+
+        // No SafeAreaProvider in tests → topInset 0 (same as the LOG toggle's
+        // measured-height guard in `CombatEncounterPanel.log.test.tsx`).
+        const blockH = 131;
+        act(() => {
+            fireEvent(screen.getByTestId('combat-hud-block'), 'layout', {
+                nativeEvent: { layout: { x: 0, y: 0, width: 375, height: blockH } },
+            });
+        });
+
+        expect(topOf()).toBe(COMBAT_HUD_PAD_TOP + blockH - 14);
+        expect(topOf()).not.toBe(COMBAT_HUD_HEIGHT - 14);
     });
 });

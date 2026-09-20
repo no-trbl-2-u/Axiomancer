@@ -112,7 +112,7 @@ Consequences, each a deliberate ruling to be printed:
 
 The doctrine that actually governs is **FE-022**, in the repo's own words at `CombatCombatantPane.tsx:160-168`: a second full-width bar under VITAE sits where genre convention puts armour, so it must name its payoff. The HUD already stacks up to four `AltWinMeter`s (`:719-748`). Chips have no fill, no value/max fraction and no `progressbar` role; the VITAE crest (`:99-153`, `:817`) stays the only element carrying the big number. Adds-as-chips passes by construction.
 
-- **Prerequisite, shipped first:** `enemyFigureWrap` is anchored off the static `COMBAT_HUD_HEIGHT = 148` (`CombatCombatantPane.tsx:89`, `:786`) although the HUD is already measured via `onHudLayout` (`:711`, consumed in `CombatBoard.tsx:1010-1018`). A new chip row grows the HUD and not the figure. Move the anchor onto a locally-measured height before adding any row. (Doctrine #2 — prerequisite, not follow-up.)
+- **Prerequisite, shipped first:** `enemyFigureWrap` is anchored off the static `COMBAT_HUD_HEIGHT = 148` (`CombatCombatantPane.tsx:89`, `:786`) although the HUD is already measured via `onHudLayout` (`:711`, consumed in `CombatBoard.tsx:1010-1018`). A new chip row grows the HUD and not the figure. Move the anchor onto a locally-measured height before adding any row. (Doctrine #2 — prerequisite, not follow-up.) **Dropped from the ship and recovered 2026-09-20 by burn-day audit 3.14** — see Engine deviations, deviation three. The row's premise was half right: the anchor really was inert to layout, but the chip row is not what crosses the painting. Measured at 375x812 the chips are right-aligned at x290-363 and cover **0.00%** of the drawn art on the shipped carrier; the full-width meters above them cover up to 47%.
 - **`AddChips`, a new shell — not `EffectChips`.** `hudRight` (`:762-770`) already mounts two `EffectChips` families whose taps open an info plaque; an add chip's tap **spends**. Identical shell + identical column + one tap that informs and one that costs is the real legibility wound (doctrine #1). The add row gets its own tile geometry (taller, square corners, a BITE badge top-left and a ◆cost badge bottom-right), an explicit **locked** state when `conviction < cost`, and sits above the keyword row.
 - **Tap → confirm sheet**, never tap-to-spend: `onAdd → setAddConfirm → STRIKE / WAIT → strikeAdd`, the exact Seal pattern (`CombatEncounterPanel.tsx:631-636`).
 - Iron-grey register (`ENEMY_KEYWORD_COLOR = GLYPH_COLORS.thorns`, `combat-encounter.engine.ts:110`) — "properties of the thing you are hitting", never the seal/alt-win gold, which would imply a win track that does not exist.
@@ -215,6 +215,22 @@ with:
 ```tsx
                     <View style={[styles.enemyFigureWrap, hudH > 0 ? { top: hudH - 14 } : null]}>
 ```
+
+> **Corrected 2026-09-20 (burn-day audit 3.14) — do not apply 1a/1b/1c
+> verbatim.** `hudH` is the height of the WHOLE HUD, chip column included,
+> while the wrap's bottom is pinned at 9% of the scene band. Measured at
+> 375x812, `top = hudH - 14` collapses the drawn foe from 292.5pt square to
+> 136.5 / 94.2 / 62.5 / 20.3pt (inset 0 ordinary / inset 44 ordinary /
+> inset 0 with FLAY+DOT live / inset 44 with FLAY+DOT live). A 20pt foe is
+> smaller than one status chip — a worse defect than the one being fixed,
+> and it lands hardest exactly when the HUD is busiest. What shipped
+> instead measures the HUD's **full-width block** alone (name row + VITAE
+> bar + alt-win meters, `testID="combat-hud-block"`) and anchors
+> `top = topInset + COMBAT_HUD_PAD_TOP + hudBlockH - 14`. That is
+> byte-identical on screen in the ordinary inset-0 case and never takes the
+> foe below 233pt. `onHudLayout` is left forwarding the whole HUD: the
+> board's dock spacer, the LOG toggle and the tutorial coach must keep
+> clearing the chips.
 
 Leave `styles.enemyFigureWrap` (`:786`) as the fallback. **Ships and verifies on its own** — no SUMMON code depends on it, but no chip row may land before it.
 
@@ -888,7 +904,7 @@ Copy `CombatBoard.seal.test.tsx` verbatim in shape (jest globals imported from `
 - tapping calls `onAdd` **exactly once** with `expect.objectContaining({ id, bite, cost })`, and **not** `onChip`, **not** `onSeal`, **not** `onApply` — the tap-grammar pin
 - `state.conviction < 2` renders the locked state and the a11y label ends `'Not enough Conviction.'`
 - absent `state.adds` → `queryByTestId(/^combat-add-/)` is null, no crash in the HUD
-- with PLEA + CHARGE + DOT meters live **and** an add row, the enemy figure's rendered `top` equals the measured HUD height − 14, not `148 − 14` — the step-1 prerequisite pin
+- with PLEA + CHARGE + DOT meters live **and** an add row, the enemy figure's rendered `top` equals the measured HUD **full-width block** height − 14 (plus `topInset + COMBAT_HUD_PAD_TOP`), not `148 − 14` — the step-1 prerequisite pin. *Corrected 2026-09-20 (burn-day audit 3.14): this gate was dropped from the ship, and "the measured HUD height" was the wrong quantity to pin — that number includes the narrow chip column and renders the foe at 20-136pt. Now shipped and pinned against the full-width block.*
 
 ### `axiomancer-mobile/state/presenters/__tests__/combat-log-lines.engine.test.ts`
 
@@ -1028,7 +1044,7 @@ Every existing readout depends on that; the brood rides in `addNetDamage` /
 
 ## Engine deviations from the brief as written
 
-Two.
+Three.
 
 **One — a correction rather than a shortcut.** Brief §9b prescribed
 `guard: Math.max(0, guard - (projectedDamage - remaining))` for the wall left
@@ -1066,6 +1082,28 @@ that has `stages` lands (Follow-ups below; the audit ranks it §8 Block 2
 item 2, gated on row 3.2). This is not an engine bug — the spawn rule is
 correct and tested — it is a roster that cannot reach it.
 
+**Three — the §1.6 figure anchor was a prerequisite and the ship dropped
+it.** Recorded 2026-09-20 by burn-day audit 3.14; another silence in the
+record rather than a false claim in it. §1.6 above called the anchor
+*"Prerequisite, shipped first"* and §4 named the gate — *the enemy figure's
+rendered `top` tracks the measured HUD instead of the static estimate* —
+and neither shipped. `enemyFigureWrap.top` stayed at `COMBAT_HUD_HEIGHT -
+14` (a static 134) while the chip row grew the HUD to a measured 330pt at
+375x812, and none of the eight `CombatBoard.adds.test.tsx` cases asserted
+`top`. The audit's own headline for this — *"the add row can paint over the
+foe's head"* — does **not** reproduce: the chips are right-aligned at
+x290-363, the art is centre-drawn at x41-334 and tapers, so add-row
+coverage of opaque art measures **0.00%** on The Jeweled Tree, the hag and
+the butcher, at topInset 0 and 44 alike. What does lie across the foe is
+older, full-width chrome: FLAY 46.6%, DOT 32.6%, the keyword row 12.4%, the
+CHARGE meter 8.2%, the stance badge 7.5-9.1%. So the brood is not the
+offender — it is the row that made the HUD 40pt taller than the last audit
+of this anchor, and the anchor was already wrong on its own terms. Fixed as
+a measured anchor on the HUD's full-width block, not on the whole HUD (see
+the correction under step 1c for why the brief's literal shape is unsafe),
+pinned by a ninth `CombatBoard.adds.test.tsx` case that asserts the `top`
+arithmetic against a fed layout height.
+
 ## Pages × tests matrix
 
 | Suite | Asserts |
@@ -1073,7 +1111,7 @@ correct and tested — it is a roster that cannot reach it.
 | `Combat/e2e/summon.engine.test.ts` (27, mechanics) | the win-condition doctrine in both directions; spawn one-shot / cap / stage-grant / cleanse-survival / no-RNG; bite flatness against four multiplier terms, a hindered foe, a defeated foe, armor/GUARD/BARRIER/SWIFT, BRUTAL, RIPOSTE, RAVENOUS, WOUNDING; the four-assertion ledger-isolation gate against a control run; `strikeAdd`'s three outcomes; projection parity |
 | `Combat/e2e/combat-sim-policies.engine.test.ts` (+6) | the `strikeAddsAt` roster assignment and the decision seam |
 | `components/.../IntentIcon.test.tsx` (+5) | a bare DENIED survives with no brood; the bite is stated alongside DENIED and the "no damage lands" claim is gone; the TOTAL is printed when both land; the brood shows when the foe telegraphs nothing; the SOAKED number is printed, never the raw one |
-| `components/.../CombatBoard.adds.test.tsx` (8, new) | one chip per body badged with its bite; NO row at all for the ordinary foe; the tap reports `onAdd` once and not `onChip`/`onApply`; an unaffordable chip still reports its tap; a11y states bite, VITAE and price; the shortfall is named when it cannot be paid; the bite is forwarded verbatim past `stageThreatBonus`/`enemyThreatMult`; the price is the engine's constant |
+| `components/.../CombatBoard.adds.test.tsx` (8, new; +1 — burn-day audit 3.14) | one chip per body badged with its bite; NO row at all for the ordinary foe; the tap reports `onAdd` once and not `onChip`/`onApply`; an unaffordable chip still reports its tap; a11y states bite, VITAE and price; the shortfall is named when it cannot be paid; the bite is forwarded verbatim past `stageThreatBonus`/`enemyThreatMult`; the price is the engine's constant. **+1 (audit 3.14):** the enemy figure's `top` is the static constant before any layout pass and `topInset + COMBAT_HUD_PAD_TOP + blockHeight − 14` after one — the §1.6 prerequisite the ship dropped, pinned as arithmetic on the fed height so re-tuning a meter cannot repeal it |
 | `components/.../CombatCombatantPane.brood-bite.test.tsx` (6, new — burn-day audit 3.3) | drives the REAL engine on a live brood, both routes into the bad branch (the foe hindered, and the foe's blow fired but fully soaked): no bare `DENIED` float while a bite landed, the flourish names the brood's share, the board's damage tick fires on a bite-only phase, and the pilgrim floats what the bite took. Every number is read back off the emitted `add-bit` event |
 | `state/presenters/__tests__/enemy-action-card.engine.test.ts` (+4 — burn-day audit 3.3) | a denied phase the brood bit reports `addDealt` and a `brood` line; the averted telegraph stays marked `telegraph`, so only it reads as averted; a fully soaked bite reports nothing landed; a denied phase with no brood is unchanged |
 | `components/.../EnemyActionCard.test.tsx` (+3 — burn-day audit 3.3) | never a bare `DENIED` and never "none of it landed" while the brood bit; what landed is not struck through while the averted telegraph still is; the a11y sentence carries the bite |
