@@ -1,13 +1,45 @@
 # Critique log
 
-> Last pass: 2026-09-20 at commit c3f8fa04
-> Pass count: 43
+> Last pass: 2026-09-20 at commit 3e879e15
+> Pass count: 44
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 44, 2026-09-20, commit 3e879e15] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5,
+> `CRITIQUE_VIEWPORT=both`), mobile (375×812) and desktop (1280×800),
+> against the full 11-screen set (title, onboarding, combat preview,
+> live combat-board, exploration hub, dialogue, village, cutscene,
+> rest, hazard, late-game hub) — 22 captures, 0 nav trouble, 0
+> console/page errors. Read every screenshot + domText directly, and
+> cropped/zoomed the combat-board fan on both viewports with `sharp`
+> to check text legibility past the manifest's error fields. The
+> **[MED] Phase 97 hint gap** row (pass 42/43, closed as row 3.13 at
+> commit `c23c2905` between passes) is now confirmed fixed live: the
+> mobile fan (`04-combat-board.png`) shows "tap a card to read it"
+> rendered above the hand *before* any card is staged, the exact gap
+> the row named. Considered and dropped as not-a-finding: desktop's
+> fan clips the stat-row (not just the name-row) on every
+> non-frontmost card — e.g. `SPOILED POULTICE` reads "POIS"/"8/p" +
+> "ay" — but this is the same overlap mechanism visible on all four
+> covered cards uniformly (`GUAR`, `Dea`/`14`, `PLEA`/`+8` cut
+> identically), the name band stays fully legible as pass 43 found,
+> and the same "tap a card to read it" hint is present in desktop's
+> domText — a preview/tap-to-inspect design, not a fresh clipping
+> defect. The village "Void Essence" wearer wording (pass 41, still
+> Pending) reproduces unchanged on both viewports. The hazard
+> danger-card's small centered panel (fixtures rolled "The Famine
+> March" mobile / "Ashfall Crossing" desktop) reconfirms pass 34's
+> deliberate-style call, not filed. The late-game-hub map's faint
+> unlabeled oval in the open-fog area (pass 36, dropped as
+> grid-line anti-aliasing) still reproduces at the same position,
+> still not worth filing without a source check. The OMEN cutscene
+> redirect (onboarding, exploration-hub) holds clean at prior-pass
+> baseline. Zero fresh findings this pass.
 
 > **[critique pass 43, 2026-09-20, commit c3f8fa04] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5,
