@@ -543,7 +543,9 @@ export const StagedCard = React.memo(function StagedCard({
     // recomputed live at the known read so the staged number is exact at commit.
     let heroOverride: string | undefined;
     if (armed && f.readDependent) {
-        const colorMatch = assignedDie!.color === card.stance || assignedDie!.color === 'wild';
+        // Phase 104 — a grey card's colour-match bonus is neutral, even off wild.
+        const colorMatch = card.stance !== 'any'
+            && (assignedDie!.color === card.stance || assignedDie!.color === 'wild');
         const g = armedReadValue(f, read as CombatReadResult, colorMatch);
         // Read-scaled commit value: Guard NN / +NN% Vulnerable / NN DoT total.
         if (g != null) heroOverride = f.kind === 'guard' ? `Guard ${g}` : f.kind === 'vulnerable' ? `+${g}%` : `${g}`;

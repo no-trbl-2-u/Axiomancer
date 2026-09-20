@@ -203,6 +203,58 @@ const threadbareCope: Card = {
     tags: ['vigil', 'barrier', 'starter'],
 };
 
+// ─── THE GREY OFFICE — Phase 104's fresh-run seed ─────────────────────────────
+// Two colourless shapes (aspect 'any' — every die colour powers them, neutral
+// colour-match bonus), theme 'grey' (excluded from `REWARD_THEMES` and
+// `COMBAT_REWARD_POOL` — never offered, never counted toward a dominant
+// theme). Deliberately plain: fight one teaches STRIKE, WARD, FREE-vs-PAID,
+// and the die-spend loop with zero colour arithmetic. Priced UNDER the
+// starter curve on purpose — same doctrine as the rest of the Threadbare
+// Office: these are meant to be outgrown.
+
+const GREY_ADDED = '2026-09-20';
+
+const greyStrike: Card = {
+    id: 'grey-strike',
+    theme: 'grey',
+    name: 'A Plain Blow',
+    philosophicalAspect: 'any',
+    description:
+        'No flourish, no colour, no argument. You hit the thing that is ' +
+        'hitting you. It works today the same as it will in a month.',
+    tier: 1, rank: 1, cardType: 'spell',
+    targetType: 'enemy',
+    paidSummary: 'Deal 5.',
+    // pts: deliberately under the Ash curve (spoiled-poultice's PAID deals 7
+    // plus a DoT for the same die) — the grey office is the deck you outgrow.
+    free: { damage: 2 },
+    specialMechanics: [{ kind: 'deal', amount: 5 }],
+    addedIn: GREY_ADDED,
+    tags: ['grey', 'starter'],
+};
+
+const greyWard: Card = {
+    id: 'grey-ward',
+    theme: 'grey',
+    name: 'A Plain Ward',
+    philosophicalAspect: 'any',
+    description:
+        'No flourish, no colour, no argument. You put something solid ' +
+        'between yourself and the thing that wants in.',
+    tier: 1, rank: 1, cardType: 'spell',
+    targetType: 'self',
+    paidSummary: 'GUARD 5.',
+    // pts: deliberately under the Ash curve (chilblain-watch's PAID guards 12
+    // plus THORNS for the same die) — the grey office is the deck you outgrow.
+    free: { guard: 2 },
+    specialMechanics: [{ kind: 'guard', amount: 5 }],
+    addedIn: GREY_ADDED,
+    tags: ['grey', 'starter'],
+};
+
+/** The two grey-office starters (Phase 104) — never a reward, never a curse. */
+export const GREY_OFFICE_CARDS: Card[] = [greyStrike, greyWard];
+
 // ─── THE CURSES — what the world puts in your deck ───────────────────────────
 // Rank 1, theme `curse`, PAID line is PURGE (buy the deck clean for a die and
 // a tempo beat). The FREE line is always a real cost: a curse you can play for

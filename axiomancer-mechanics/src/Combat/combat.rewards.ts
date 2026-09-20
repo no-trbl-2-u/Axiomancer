@@ -17,18 +17,20 @@
 import type { Character } from '../Character/types';
 import { cardLibrary, getCardById } from '../Cards/cards.library';
 import { rankToRarity } from '../Cards/types';
-import { CARD_THEMES, type CardTheme } from '../Cards/card-themes';
+import { CARD_THEMES, THEME_KEYWORDS, type CardTheme } from '../Cards/card-themes';
+import { cardKeywords } from '../Cards/card-keywords';
 
 /**
  * The card-reward pool — the Profane Canon: the whole library EXCEPT the
  * curse class (theme `'curse'` cards are enemy-injected junk — offering one
- * as a reward would be a cruelty the reward screen does not stock). Drop
+ * as a reward would be a cruelty the reward screen does not stock) and the
+ * grey office (Phase 104 — a starter-only shape, never a reward). Drop
  * odds are governed by PER-RARITY weights: common cards drop freely,
  * uncommons less, rares are the prize. Invalid ids are filtered at roll time
  * so the list stays safe to edit.
  */
 export const COMBAT_REWARD_POOL: readonly string[] = Object.freeze(
-    cardLibrary.filter(card => card.theme !== 'curse').map(card => card.id),
+    cardLibrary.filter(card => card.theme !== 'curse' && card.theme !== 'grey').map(card => card.id),
 );
 
 /** Per-rarity drop weights (spec 32 v3 §4 — the reward-roll lever). Tunable. */
@@ -36,34 +38,33 @@ export const REWARD_RARITY_WEIGHTS: Readonly<Record<'common' | 'uncommon' | 'rar
     Object.freeze({ common: 1, uncommon: 0.5, rare: 0.2 });
 
 /**
- * The cards a brand-new player starts with — an opening offensive card PLUS a
- * basic defense card, so every player can GUARD from turn one, and one card in
- * EACH of the three stance colours. The rest unlock through ethical-dilemma
- * events via `unlockCardViaDilemma`. The mobile bootstrap seeds a new
- * character's `knownCards` from this list.
+ * Phase 104 (the grey office) — every brand-new player's opening 10-card
+ * deck: two colourless shapes (`philosophicalAspect: 'any'` — every die
+ * colour powers either), so fight one teaches STRIKE, WARD, FREE-vs-PAID, and
+ * the die-spend loop with zero colour arithmetic. Mobile's
+ * `ensureStarterCards` writes this list VERBATIM (copies kept — 7 + 3, not
+ * deduplicated) into a fresh character's `knownCards`.
  *
- * THE COLOUR LAW APPLIES TO THE STARTER DECK TOO (playthrough report
- * 2026-09-05). This list used to be `spoiled-poultice` + `chilblain-watch`,
- * and BOTH are `philosophicalAspect: 'body'` — so any player who reached
- * combat down this path (the `ensureStarterCards` fallback in mobile, taken
- * whenever the Threadbare starter-bundle seeding in `app/index.tsx` did not
- * fire) opened every fight with a hand that was 100% BODY. Since the mobile
- * palette paints body RED, the reported symptom was "every card in my deck
- * was red / the deck was never shuffled". The deck WAS shuffled — a shuffle of
- * two body cards is still two body cards. The fix is the deck, not the
- * shuffle: one starter per colour, so a heart or mind die always has something
- * legal to power.
- *
- * All four are drawn from the Threadbare Office (the neutral early-campaign
- * snapshot the starter bundle seeds), so this fallback deck is a strict SUBSET
- * of the canonical starting deck rather than a second, divergent one.
+ * (Superseded history: 2026-07-through-2026-09-19 this was
+ * `spoiled-poultice` + `chilblain-watch` + `first-spadeful` + `thin-hymn` —
+ * one card per stance colour, because a card back then always had a fixed
+ * colour and a colour-blind starter deck left a stance's die with nothing
+ * legal to power. THE COLOUR LAW AT THE STARTER GATE playthrough report
+ * (2026-09-05) is what that fix answered. The grey office's 'any' aspect
+ * makes the whole problem moot — there is no colour left to fail to cover —
+ * so the starting set no longer needs to span the three stances itself.)
  */
 export const STARTING_CARD_IDS: readonly string[] = Object.freeze([
-    'spoiled-poultice',     // BODY  — opening offense (the rot seed)
-    'chilblain-watch',      // BODY  — basic defense (GUARD) — guard from turn one
-    'first-spadeful',       // MIND  — plain offense + RECALL; the mind die's turn-one play
-    'thin-hymn',            // HEART — PLEA + heal; the heart die's turn-one play
+    'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike',
+    'grey-strike', 'grey-strike', 'grey-strike',
+    'grey-ward', 'grey-ward', 'grey-ward',
 ]);
+
+/** Fewer than this many reward cards taken ⇒ the draft is fully uniform (no
+ *  allegiance roll, no theme weighting, no rarity weighting, no guaranteed
+ *  slot). Counted by cards actually TAKEN (`combatRewardCards.length`), not
+ *  drafts shown — a SKIP does not advance it. See `rollCombatCardRewards`. */
+export const REWARD_RANDOM_PICKS = 3;
 
 /** The single OFFENSIVE card a brand-new player starts with. Kept for
  *  back-compat; prefer `STARTING_CARD_IDS` (which also grants a defense card). */
@@ -109,12 +110,13 @@ function validPool(extraPool: readonly string[] = []): string[] {
 // how a player ever gets shown that door. Deepen a build, never lock it.
 // ---------------------------------------------------------------------------
 
-/** Every theme a reward may belong to — the canon minus the curse class. */
-export type RewardTheme = Exclude<CardTheme, 'curse'>;
+/** Every theme a reward may belong to — the canon minus the curse class and
+ *  the grey office (Phase 104 — the grey starters are never a reward). */
+export type RewardTheme = Exclude<CardTheme, 'curse' | 'grey'>;
 
 /** The offerable themes, in canon order. */
 export const REWARD_THEMES: readonly RewardTheme[] = Object.freeze(
-    CARD_THEMES.filter((t): t is RewardTheme => t !== 'curse'),
+    CARD_THEMES.filter((t): t is RewardTheme => t !== 'curse' && t !== 'grey'),
 );
 
 /**
@@ -131,7 +133,7 @@ export const REWARD_OFF_THEME_RATE = 0.35;
 /** A reward candidate's theme, or `null` for a themeless (e.g. sandbox) card. */
 function themeOf(id: string): RewardTheme | null {
     const theme = getCardById(id)?.theme;
-    return theme && theme !== 'curse' ? theme : null;
+    return theme && theme !== 'curse' && theme !== 'grey' ? theme : null;
 }
 
 /**
@@ -176,15 +178,65 @@ function weightedIndex(weights: number[], roll: number): number {
     return weights.length - 1;
 }
 
+/** Rarity-weighted pick from `candidates` (assumed non-empty). */
+function rarityWeightedPick(candidates: readonly string[], rng: () => number): string {
+    const cardWeights = candidates.map(id => REWARD_RARITY_WEIGHTS[rankToRarity(getCardById(id)?.rank ?? 1)]);
+    const cardIdx = weightedIndex(cardWeights, rng());
+    return candidates[cardIdx >= 0 ? cardIdx : 0];
+}
+
+/** The existing theme-aware allegiance roll for one slot (assumed non-empty `remaining`). */
+function allegianceRoll(remaining: readonly string[], shares: Record<RewardTheme, number>, rng: () => number): string {
+    const offTheme = rng() < REWARD_OFF_THEME_RATE;
+    // Only themes that still have a candidate left may be drawn — an
+    // exhausted theme must not silently eat a slot.
+    const live = REWARD_THEMES.filter(t => remaining.some(id => themeOf(id) === t));
+    // On-theme weight IS the deck share; off-theme weight is its
+    // complement, so the least-played themes lead the pivot draw. An
+    // uncommitted deck (all shares 0) reads as uniform either way.
+    const themeWeights = live.map(t => (offTheme ? 1 - shares[t] : shares[t]));
+    const themeIdx = weightedIndex(themeWeights, rng());
+    // Fallbacks: no live theme (only themeless candidates left), or an
+    // on-theme draw whose whole weight mass is zero. Both resolve against
+    // the full remaining pool rather than dropping the offer.
+    const theme = themeIdx >= 0 ? live[themeIdx] : null;
+    const candidates = theme === null ? remaining : remaining.filter(id => themeOf(id) === theme);
+    return rarityWeightedPick(candidates, rng);
+}
+
 /**
- * Rolls `count` distinct card-reward offers after a won combat, drafted toward
- * the themes the player's deck already plays while keeping a real off-theme
- * pivot open (see `REWARD_OFF_THEME_RATE`). Pure — every decision is seeded by
- * `rng`, so the same (player, seed, count) always yields the same offers.
+ * The deck's DOMINANT theme (Phase 104) — the highest `deckThemeCounts`
+ * entry, ties resolved in `REWARD_THEMES` canon order; `null` when every
+ * count is 0 (an uncommitted deck earns no guarantee).
+ */
+function dominantTheme(player: Character): RewardTheme | null {
+    const counts = deckThemeCounts(player);
+    let best: RewardTheme | null = null;
+    for (const t of REWARD_THEMES) {
+        if (counts[t] > 0 && (best === null || counts[t] > counts[best])) best = t;
+    }
+    return best;
+}
+
+/**
+ * Rolls `count` distinct card-reward offers after a won combat. Pure — every
+ * decision is seeded by `rng`, so the same (player, seed, count) always
+ * yields the same offers.
  *
- * Each slot spends exactly three `rng` draws: allegiance, theme, card. Rarity
- * (`REWARD_RARITY_WEIGHTS`) is applied WITHIN the chosen theme, so the theme
- * lever and the rarity lever stay independent and separately tunable.
+ * Two regimes, gated on how many reward cards the player has already TAKEN
+ * (`combatRewardCards.length`, not drafts shown — a SKIP never advances it):
+ *
+ *   - Fewer than `REWARD_RANDOM_PICKS`: every slot is a flat uniform draw
+ *     over the whole pool — no allegiance roll, no theme weighting, no
+ *     rarity weighting, no guaranteed slot. The first few rewards a player
+ *     ever sees are a free, unbiased look at the canon.
+ *   - `REWARD_RANDOM_PICKS` or more: slot 0 is GUARANTEED to carry a keyword
+ *     from the deck's dominant theme family (`keywordsOf`, `Cards/index.ts`)
+ *     when one exists (empty candidate pool falls through to the ordinary
+ *     roll for that slot — never an empty offer, never a throw); every other
+ *     slot keeps the existing theme-aware allegiance roll (drafted toward the
+ *     themes the player's deck already plays, with a real off-theme pivot —
+ *     see `REWARD_OFF_THEME_RATE`).
  *
  * `extraPool` (WS6.2) injects extra candidate ids — the sandbox measurement
  * hook: registered sandbox cards can compete at the reward screen without
@@ -197,29 +249,36 @@ export function rollCombatCardRewards(
     count = 3,
     extraPool: readonly string[] = [],
 ): string[] {
-    const shares = deckThemeShares(player);
     const remaining = validPool(extraPool);
     const offers: string[] = [];
+
+    if ((player.combatRewardCards ?? []).length < REWARD_RANDOM_PICKS) {
+        while (offers.length < count && remaining.length > 0) {
+            const idx = Math.min(Math.floor(rng() * remaining.length), remaining.length - 1);
+            const pick = remaining[idx];
+            offers.push(pick);
+            remaining.splice(idx, 1);
+        }
+        return offers;
+    }
+
+    const shares = deckThemeShares(player);
+    const dominant = dominantTheme(player);
+    let slot = 0;
     while (offers.length < count && remaining.length > 0) {
-        const offTheme = rng() < REWARD_OFF_THEME_RATE;
-        // Only themes that still have a candidate left may be drawn — an
-        // exhausted theme must not silently eat a slot.
-        const live = REWARD_THEMES.filter(t => remaining.some(id => themeOf(id) === t));
-        // On-theme weight IS the deck share; off-theme weight is its
-        // complement, so the least-played themes lead the pivot draw. An
-        // uncommitted deck (all shares 0) reads as uniform either way.
-        const themeWeights = live.map(t => (offTheme ? 1 - shares[t] : shares[t]));
-        const themeIdx = weightedIndex(themeWeights, rng());
-        // Fallbacks: no live theme (only themeless candidates left), or an
-        // on-theme draw whose whole weight mass is zero. Both resolve against
-        // the full remaining pool rather than dropping the offer.
-        const theme = themeIdx >= 0 ? live[themeIdx] : null;
-        const candidates = theme === null ? remaining : remaining.filter(id => themeOf(id) === theme);
-        const cardWeights = candidates.map(id => REWARD_RARITY_WEIGHTS[rankToRarity(getCardById(id)?.rank ?? 1)]);
-        const cardIdx = weightedIndex(cardWeights, rng());
-        const pick = candidates[cardIdx >= 0 ? cardIdx : 0];
+        let pick: string | undefined;
+        if (slot === 0 && dominant !== null) {
+            const family = THEME_KEYWORDS[dominant];
+            const guaranteed = remaining.filter(id => {
+                const card = getCardById(id);
+                return !!card && cardKeywords(card).some(kw => family.includes(kw));
+            });
+            if (guaranteed.length > 0) pick = rarityWeightedPick(guaranteed, rng);
+        }
+        if (pick === undefined) pick = allegianceRoll(remaining, shares, rng);
         offers.push(pick);
         remaining.splice(remaining.indexOf(pick), 1);
+        slot++;
     }
     return offers;
 }

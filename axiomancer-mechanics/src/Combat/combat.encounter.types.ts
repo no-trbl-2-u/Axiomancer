@@ -20,6 +20,7 @@ import type { Character } from '../Character/types';
 import type { Enemy } from '../Enemy/types';
 import type { Effect, ActiveEffect } from '../Effects/types';
 import type { Stance } from './types';
+import type { CardAspect } from '../Cards/types';
 
 // ---------------------------------------------------------------------------
 // Dice — the stance-color economy (Spec 25 §4.2)
@@ -117,9 +118,10 @@ export interface CombatCard {
      *  cards use a `card-` prefix (e.g. `card-retreat`). */
     id: string;
     name: string;
-    /** Stance color identity (Heart / Body / Mind). Derived from the card's
-     *  `philosophicalAspect`. Synthetic cards may be `wild`. */
-    stance: CombatDieColor;
+    /** Colour identity (Heart / Body / Mind / Any). Derived verbatim from the
+     *  card's `philosophicalAspect` (Phase 104 — 'any' is the grey office's
+     *  colourless aspect, distinct from a die's own 'wild'/'x' colours). */
+    stance: CardAspect;
     verbClass: CombatVerbClass;
     /** Which effect-kind the bottom action applies (dot / control / none). */
     effectKind: CardEffectKind;

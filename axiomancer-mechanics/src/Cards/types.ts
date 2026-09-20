@@ -17,6 +17,14 @@ import type { GlyphPayload } from '../Combat/combat.encounter.types';
 export type StatType = 'body' | 'mind' | 'heart';
 
 /**
+ * Phase 104 — a CARD's colour identity. `StatType` plus `'any'`: the grey
+ * office's colourless aspect, powered by every die colour (body/mind/heart,
+ * AND wild) with a neutral (never on/off) colour-match bonus. `StatType`
+ * itself stays three stats — only a card's aspect widens.
+ */
+export type CardAspect = StatType | 'any';
+
+/**
  * Tier of a card — mirrors the effect tier system. Drives the resist tier
  * used when a card applies a `combatEffects` payload through the Spec 03
  * machinery (Tier 1 auto-applies, Tier 2 resisted, Tier 3 only nat-20 repels).
@@ -759,7 +767,8 @@ export interface CardSynergy {
  * @property id              - Unique identifier for this card.
  * @property name            - Display name.
  * @property description     - Flavor text or lore.
- * @property philosophicalAspect - Stat alignment of the card (heart/body/mind).
+ * @property philosophicalAspect - Stat alignment of the card (heart/body/mind),
+ *                              or 'any' for the grey office's colourless cards.
  * @property tier            - 1 / 2 / 3, mirrors the effect tier system.
  * @property targetType      - 'self' or 'enemy'.
  * @property combatEffects   - Optional list of effect payloads to apply.
@@ -771,7 +780,7 @@ export interface CardSynergy {
 export interface Card {
     id: string;
     name: string;
-    philosophicalAspect: StatType;
+    philosophicalAspect: CardAspect;
     description: string;
     tier: CardTier;
     targetType: CardTarget;

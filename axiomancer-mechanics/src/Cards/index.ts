@@ -9,12 +9,17 @@
  */
 
 export type {
-    Card, StatType, CardTier, CardTarget,
+    Card, StatType, CardAspect, CardTier, CardTarget,
     CardCombatEffects, CardSpecialMechanic,
     CardSynergy, SynergyPredicate,
     // WS4.2 — combat-state synergy predicate (spec 32 §12 item 4)
     SynergyStatePredicate,
 } from './types';
+
+// Local bindings (`export { x } from 'y'` below does not bind locally) for
+// `keywordsOf` (Phase 104).
+import { getCardById } from './cards.library';
+import { cardKeywords } from './card-keywords';
 
 // Phase 142 — Extended synergy predicate types
 export type { ExtendedSynergyPredicate, SynergyLedgerView } from './synergy-predicates';
@@ -91,6 +96,19 @@ export type { CardTheme } from './card-themes';
 export {
     CARD_THEMES, THEME_KEYWORDS, keywordsForTheme, isCardTheme,
 } from './card-themes';
+
+/**
+ * Phase 104 — a card's keyword surface for reward-draft matching: what it
+ * actually carries (`Cards/card-keywords.ts`), not just its declared theme —
+ * DOOM/MARK/BLEED recur across most families on purpose, so matching by
+ * theme membership alone would make almost every card match almost every
+ * theme. Unknown ids carry none. Not a `Card` field — derived on demand so
+ * the reward roll never drags a second source of truth onto the schema.
+ */
+export function keywordsOf(id: string): readonly string[] {
+    const card = getCardById(id);
+    return card ? cardKeywords(card) : [];
+}
 
 // Phase 33d — GLYPHS pilot (sandbox-only): `Card.glyph` / `CardRider.glyphCharge`
 // reference the Combat-owned glyph zone; re-exported wholesale here (mirrors

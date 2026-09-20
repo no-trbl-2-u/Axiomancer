@@ -95,14 +95,12 @@ describe('createAppActions: dispatch', () => {
         expect(store.getState().currentEncounter?.enemies[0]?.name).toBe('Test Lich');
     });
 
-    // Spec 32 v3 §7 — the authored starting deck: rot erosion + Guard, plus
-    // one card in EACH stance colour (playthrough report 2026-09-05 — the old
-    // two-card set was mono-BODY, so every opening hand read solid red and a
-    // heart or mind die had nothing legal to power). No synthetic Retreat is
-    // appended (no in-combat retreat exists). Every starter must be level-1
-    // learnable (none silently dropped by an unmet learning requirement) and
-    // each teaches a mechanic in fight one.
-    it('seeds the authored v3 starter deck for a fresh level-1 player', () => {
+    // Phase 104 (the grey office) — the authored starting deck: two
+    // colourless shapes (`grey-strike` ×7, `grey-ward` ×3), every die colour
+    // powers either, so fight one teaches STRIKE, WARD, FREE-vs-PAID, and the
+    // die-spend loop with zero colour arithmetic. No synthetic Retreat is
+    // appended (no in-combat retreat exists).
+    it('seeds the grey office for a fresh level-1 player', () => {
         const store = createAppStore({ adapter });
         const actions = createAppActions(store);
 
@@ -110,21 +108,22 @@ describe('createAppActions: dispatch', () => {
         actions.startCombat(makeEnemy());
         const player = selectPlayer(store.getState());
 
-        // Every seeded starter card must actually have been learned (none
-        // silently dropped by an unmet learning requirement).
+        // Every seeded starter card must resolve, verbatim copies kept.
         expect(player.knownCards).toEqual([
-            'spoiled-poultice', 'chilblain-watch', 'first-spadeful', 'thin-hymn',
+            'grey-strike', 'grey-strike', 'grey-strike', 'grey-strike',
+            'grey-strike', 'grey-strike', 'grey-strike',
+            'grey-ward', 'grey-ward', 'grey-ward',
         ]);
         for (const id of player.knownCards) {
             expect(getCardById(id)).toBeTruthy();
         }
 
-        // THE COLOUR LAW at the starter gate: the seeded deck spans all three
-        // stances, so no die colour is dead on turn one.
+        // Every seeded starter shares the same colourless aspect — any die
+        // powers any starter, so there is no colour left to fail to cover.
         const aspects = new Set(
             player.knownCards.map((id) => getCardById(id)!.philosophicalAspect),
         );
-        expect([...aspects].sort()).toEqual(['body', 'heart', 'mind']);
+        expect([...aspects]).toEqual(['any']);
 
         // The card deck is built from those known cards; the player must draw
         // real action cards from it.
@@ -133,19 +132,25 @@ describe('createAppActions: dispatch', () => {
         const visible = handCards(encounter).filter(
             ({ card }) => card.id !== 'card-retreat' && card.verbClass !== 'retreat',
         );
-        expect(deck.length).toBeGreaterThanOrEqual(4);
-        expect(visible.length).toBeGreaterThanOrEqual(4);
-        // A 4-card deck still draws a padded 5-card hand — every starter must
-        // be present (duplicates are the reshuffle law at work, not a bug).
+        expect(deck.length).toBe(10);
+        expect(visible.length).toBeGreaterThanOrEqual(5);
         const distinct = new Set(visible.map(({ card }) => card.id));
-        expect(distinct).toEqual(new Set([
-            'spoiled-poultice', 'chilblain-watch', 'first-spadeful', 'thin-hymn',
-        ]));
-        // One card erodes (DoT) and one defends — the strike is dead, so the
-        // opening hand teaches poison + Guard rather than a raw hit.
+        expect(distinct).toEqual(new Set(['grey-strike', 'grey-ward']));
+        // grey-ward defends; grey-strike's plain `deal` mechanic falls to the
+        // classifier's default bucket (no dedicated direct-damage class for
+        // a bare hit — see `classifyVerbClass`).
         const verbs = visible.map(({ card }) => card.verbClass);
-        expect(verbs).toContain('direct-dot');
         expect(verbs).toContain('defend');
+    });
+
+    it('seeding the grey office sets the bundle-chosen flag (no picker re-shown)', () => {
+        const store = createAppStore({ adapter });
+        const actions = createAppActions(store);
+
+        expect((store.getState() as unknown as { flags?: string[] }).flags ?? []).not.toContain('starter-bundle-chosen');
+        actions.startCombat(makeEnemy());
+        const flags = (store.getState() as unknown as { flags?: string[] }).flags ?? [];
+        expect(flags).toContain('starter-bundle-chosen');
     });
 
     it('endCombat clears the active encounter and preserves player progress', () => {

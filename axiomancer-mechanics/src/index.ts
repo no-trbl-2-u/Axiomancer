@@ -153,6 +153,8 @@ export {
     unlockCardViaDilemma,
     // Theme-aware reward draft (2026-08-08) — the deck-theme read + its pivot lever.
     REWARD_RARITY_WEIGHTS, REWARD_THEMES, REWARD_OFF_THEME_RATE,
+    // Phase 104 — the first-three-takes-uniform gate for the keyword pull.
+    REWARD_RANDOM_PICKS,
     deckThemeCounts, deckThemeShares,
     // PR #190 Press Fate partial re-roll
     dieIsRerollable, hasRerollableDice, rerollSpentDice,
@@ -346,7 +348,7 @@ export type {
 
 // ─── Cards ───────────────────────────────────────────────────────────────────
 export type {
-    Card, StatType, CardTier, CardTarget,
+    Card, StatType, CardAspect, CardTier, CardTarget,
     CardCombatEffects, CardSpecialMechanic,
     CardEvent, CardResolution, CardLookup,
     CardSynergy, SynergyPredicate,
@@ -372,6 +374,8 @@ export {
     checkStatePredicate,
     // Spec 32 §3/§6 — card themes + keyword families (phase 29 parity lint)
     CARD_THEMES, THEME_KEYWORDS, keywordsForTheme, isCardTheme,
+    // Phase 104 — a card's keyword surface for reward-draft matching
+    keywordsOf,
     // Phase 68 — runtime enumeration of the CardSpecialMechanic union, bound to
     // the type by compile-time assertions. Mobile KW-2 walks this list.
     CARD_SPECIAL_MECHANIC_KINDS, isCardSpecialMechanicKind,

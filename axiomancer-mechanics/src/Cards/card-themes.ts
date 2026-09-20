@@ -12,7 +12,7 @@
  * junk class (deck contamination), with PURGE as its only way out.
  */
 
-/** The six archetype packages + the enemy-injected curse class. */
+/** The six archetype packages + the enemy-injected curse class + the grey office. */
 export type CardTheme =
     | 'rot'      // — the Blight: plant DoTs, PROLONG/FESTER, RUPTURE, SIPHON
     | 'debt'     // — the Reckoning: RECOIL blood prices, FALLEN, DOOM interest
@@ -20,11 +20,15 @@ export type CardTheme =
     | 'vigil'    // — the Cold Watch: GUARD/THORNS/RIPOSTE, bloodless-night payoffs
     | 'trial'    // — the Indictment: CHARGE→CONDEMN, STAGGER, BACKFIRE, MARK
     | 'choir'    // — the Pale Choir: PLEA→RELENT, QUARTER, SOUL/REAP
-    | 'curse';   // — enemy-injected junk; PURGE or IMMOLATE it away
+    | 'curse'    // — enemy-injected junk; PURGE or IMMOLATE it away
+    // Phase 104 — the two starter-only grey cards. No archetype, so they must
+    // never tilt `deckThemeCounts`: excluded from `REWARD_THEMES` (never a
+    // reward) same as 'curse'.
+    | 'grey';
 
 /** Stable display/registry order. */
 export const CARD_THEMES: readonly CardTheme[] = Object.freeze([
-    'rot', 'debt', 'grave', 'vigil', 'trial', 'choir', 'curse',
+    'rot', 'debt', 'grave', 'vigil', 'trial', 'choir', 'curse', 'grey',
 ]);
 
 /**
@@ -44,6 +48,8 @@ export const THEME_KEYWORDS: Record<CardTheme, readonly string[]> = Object.freez
     trial: ['CHARGE', 'STAGGER', 'BACKFIRE', 'MARK', 'DOOM'],
     choir: ['PLEA', 'QUARTER', 'SOUL', 'REAP', 'DOOM', 'HEAL', 'CLEANSE', 'KINDLE'],
     curse: ['PURGE'],
+    // The grey office carries no archetype keywords by design (Phase 104).
+    grey: [],
 });
 
 /** The keyword family for a theme (empty for an unknown key). */

@@ -73,6 +73,7 @@ import {
     applyCombatDeckPresetAction,
     chosenStarterBundle,
     randomizeCombatDeckAction,
+    BUNDLE_CHOSEN_FLAG,
     type CombatDeckPresetId,
     type CombatDeckPresetResult,
 } from './combat/store-actions';
@@ -597,52 +598,41 @@ export interface UseItemResult {
 // ---------------------------------------------------------------------------
 
 /**
- * Starter repertoire — sourced from the engine's level-1 `apprentice`
- * preset (`getPresetById('apprentice').knownCards`) so the engine remains
- * the single source of truth for the starting card set. New games create
- * the player with `knownCards: []` and the normal flow never applies a
- * preset, so the first combat / first level-up seeds these.
- * `engineLearnCard` enforces requirements, so anything the level-1 player
- * doesn't qualify for is skipped.
+ * Phase 104 (the grey office) — the new player's starting combat repertoire.
+ * `STARTING_CARD_IDS` is the engine's 10-card grey recipe (`grey-strike` ×7,
+ * `grey-ward` ×3): two colourless shapes, any die powers either, so fight one
+ * teaches STRIKE, WARD, FREE-vs-PAID, and the die-spend loop with zero colour
+ * arithmetic. `buildCombatDeck` deals `knownCards` verbatim (copies are real,
+ * not deduplicated), so `ensureStarterCards` writes the recipe directly
+ * rather than `engineLearnCard`-ing a Set — a learn-requirement gate has no
+ * business touching cards the world hands every player on day one.
  */
-// Spec 32 v3 §7 — the new player's starting combat repertoire.
-//
-// In this engine a combat *card* is the draw-able projection of a *card*: the
-// draw pile is built from `player.knownCards` (`buildCombatDeck`), and a card's
-// POWERED action runs `executeCard`, which THROWS unless the player knows that
-// card. So the hand can only be as varied — and as effective — as the set of
-// cards the level-1 player actually KNOWS.
-//
-// The v3 themed-deck library authors the starting deck explicitly: the engine's
-// `STARTING_CARD_IDS` (slippery-slope + brace-for-impact, both level-1
-// learnable) plus the synthetic Retreat. Each starter teaches a mechanic in
-// fight one — poison erosion and Guard. `engineLearnCard` re-checks each
-// requirement, so anything unlearnable is skipped safely.
-const STARTER_CARD_IDS: readonly string[] = STARTING_CARD_IDS;
-
 function currentAlignment(store: AppStore): PhilosophicalAlignment {
     const state = store.getState() as unknown as GameState;
     return state.philosophicalAlignment ?? defaultAlignment();
 }
 
 /** Seeds the starter deck when the player knows nothing yet — the chosen
- *  starter bundle if one was picked (deck identity), else the tier-1 default. */
+ *  starter bundle if one was picked (the dev deck-swap menu only, post-104 —
+ *  the fresh-run flow never offers a picker), else the grey office. */
 function ensureStarterCards(store: AppStore): void {
     const player = store.getState().player;
     if (!player || (player.knownCards?.length ?? 0) > 0) return;
-    // Deck-identity path: a bundle was chosen pre-run. Direct-set its curated
-    // deck (the cards are valid engine ids; learn-requirements don't gate the
-    // combat deal — knownCards IS the deck source).
+    // Deck-identity path: a bundle was chosen pre-run (dev tool only). Direct-
+    // set its curated deck (the cards are valid engine ids; learn-requirements
+    // don't gate the combat deal — knownCards IS the deck source).
     const bundle = chosenStarterBundle(store);
     if (bundle) {
         store.setState({ player: { ...player, knownCards: [...bundle.cardIds], combatRewardCards: [] } });
         return;
     }
-    let next = player;
-    for (const id of STARTER_CARD_IDS) {
-        next = engineLearnCard(next, id);
-    }
-    if (next !== player) store.setState({ player: next });
+    const state = store.getState() as unknown as GameState;
+    const flags = new Set(state.flags ?? []);
+    flags.add(BUNDLE_CHOSEN_FLAG);
+    store.setState({
+        player: { ...player, knownCards: [...STARTING_CARD_IDS], combatRewardCards: [] },
+        flags: [...flags],
+    } as never);
 }
 
 /** One learnable-card offer row for the level-up learn modal. */
@@ -650,7 +640,7 @@ export interface LearnableCardOffer {
     id: string;
     name: string;
     description: string;
-    stance: 'body' | 'mind' | 'heart';
+    stance: 'body' | 'mind' | 'heart' | 'any';
     tier: number;
     /** Compact effect line — same format as the combat picker rows. */
     effectText: string;

@@ -27,11 +27,12 @@ import {
 import { keywordForEffect } from '@/state/combat/keywords';
 
 /**
- * The three philosophical stances a card can be locked to. Inlined
- * here after the legacy `combat.engine.ts` presenter (its former
- * home) was removed with the legacy turn-based combat surface.
+ * The philosophical stances a card can be locked to (plus Phase 104's
+ * colourless 'any' — the grey office). Inlined here after the legacy
+ * `combat.engine.ts` presenter (its former home) was removed with the legacy
+ * turn-based combat surface.
  */
-export type StanceKey = 'heart' | 'body' | 'mind';
+export type StanceKey = 'heart' | 'body' | 'mind' | 'any';
 
 export interface CombatCardOption {
     /** Stable engine card id. */

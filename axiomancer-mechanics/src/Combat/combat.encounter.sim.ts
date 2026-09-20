@@ -228,7 +228,7 @@ function selectCard(
     // color are playable (wild matches everything) — mismatches hard-fizzle.
     const cards = handCards(s)
         .filter(c => c.card.verbClass !== 'retreat' && !(notUids && notUids.has(c.uid)))
-        .filter(c => !matchColor || matchColor === 'wild' || c.card.stance === matchColor);
+        .filter(c => !matchColor || matchColor === 'wild' || c.card.stance === 'any' || c.card.stance === matchColor);
     let best: { uid: string; card: CombatCard } | null = null;
     let bestScore = -Infinity;
     for (const c of cards) {
@@ -256,7 +256,7 @@ function countLiveOptions(
     return handCards(s).filter(c =>
         c.card.verbClass !== 'retreat'
         && !notUids.has(c.uid)
-        && (matchColor === 'wild' || c.card.stance === matchColor)).length;
+        && (matchColor === 'wild' || c.card.stance === 'any' || c.card.stance === matchColor)).length;
 }
 
 /** An affordable Signature (kind allowed by the policy) to spend banked

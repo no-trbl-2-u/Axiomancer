@@ -39,7 +39,7 @@ const bestAutoCard = (s: CombatEncounterState, policy: HazardAutoPolicyId, match
     // Dice-law (2026-07-09): with a powering die in hand, only same-color cards
     // are playable (wild matches everything).
     const cards = handCards(s).filter(c => c.card.verbClass !== 'retreat')
-        .filter(c => !matchColor || matchColor === 'wild' || c.card.stance === matchColor);
+        .filter(c => !matchColor || matchColor === 'wild' || c.card.stance === 'any' || c.card.stance === matchColor);
     if (cards.length === 0) return null;
     const activeIds = new Set(s.enemy.effects.map(e => e.effectId));
     return cards.sort((a, b) => {

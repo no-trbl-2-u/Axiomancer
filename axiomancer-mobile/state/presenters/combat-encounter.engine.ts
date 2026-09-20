@@ -59,15 +59,19 @@ import { momentumV2A11y } from '@/state/combat/momentum';
 type CardSpecialMechanic = NonNullable<Card['specialMechanics']>[number];
 import { effectGlyph, GLYPH_COLORS, type StatusGlyph } from '@/components/combat/statusGlyphs';
 import { enemyKeywordChip, enemyKeywordGlossForToken, keywordForEffect, keywordForVerb, keywordForMechanic, keywordGloss, keywordsInPersistentText, persistentVerbKeyword, systemTermsForCard } from '@/state/combat/keywords';
+import { AXM } from '@/theme/axm';
 
-// ── Stance palette (Heart/Body/Mind/Wild/X) ──────────────────────────────────
+// ── Stance palette (Heart/Body/Mind/Wild/X/Any) ──────────────────────────────
 
 export const STANCE_COLORS: Record<string, string> = {
     // Body=RED, Mind=BLUE, Heart=PURPLE, Wild=GOLD (owner-specified dice palette).
     heart: '#9a5fd0', body: '#d6543f', mind: '#4f7fd6', wild: '#d9b44a', x: '#5a5a5a',
+    // Phase 104 — the grey office's colourless aspect: the neutral ink token
+    // (never a literal, unlike the fixed dice-identity hexes above).
+    any: AXM.bone,
 };
-const DIE_GLYPHS: Record<string, string> = { heart: '♥', body: '⚡', mind: '★', wild: '✦', x: '✕' };
-const STANCE_LABELS: Record<string, string> = { heart: 'HEART', body: 'BODY', mind: 'MIND', wild: 'WILD', x: 'X' };
+const DIE_GLYPHS: Record<string, string> = { heart: '♥', body: '⚡', mind: '★', wild: '✦', x: '✕', any: '✦' };
+const STANCE_LABELS: Record<string, string> = { heart: 'HEART', body: 'BODY', mind: 'MIND', wild: 'WILD', x: 'X', any: 'ANY' };
 
 // Spec 32 v3 — THE STRIKE IS DEAD: a FREE (no-die) play executes the card's
 // AUTHORED free rider (no flat chip exists). The free text below always comes
@@ -541,6 +545,8 @@ export function dieCanPowerCardVM(
     // so this check never fires and the verdict is byte-identical.
     if (die.face === 'miss') return false;
     if (cardStance === 'wild') return true;   // parity with combatDieCanPower
+    // Phase 104 — a grey card ('any') is powered by every non-X, non-miss die.
+    if (cardStance === 'any') return true;
     return die.color === 'wild' || die.color === cardStance;
 }
 

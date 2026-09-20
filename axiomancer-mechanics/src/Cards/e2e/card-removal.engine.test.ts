@@ -293,7 +293,7 @@ describe('Phase 52a — refusals are first-class, loud, and inert', () => {
         expect(result.ok).toBe(false);
         if (result.ok) return;
         expect(result.refusal.code).toBe('deck-at-floor');
-        expect(result.refusal.reason).toMatch(/floor of 12 cards/);
+        expect(result.refusal.reason).toMatch(/floor of 10 cards/);
         expect(result.refusal.floor).toBe(MIN_COMBAT_DECK_SIZE);
         expect(result.refusal.deckSize).toBe(MIN_COMBAT_DECK_SIZE);
         expect(result.player).toBe(player);
@@ -414,22 +414,15 @@ describe('Phase 52a — the escalating price (RATIFIED Phase 52f, measured incom
     });
 });
 
-describe('Phase 52a — MIN_COMBAT_DECK_SIZE is DERIVED from the shipped canon', () => {
-    it('is the low-water mark of the Profane Canon lineage (18 − PILGRIM_REMOVED)', () => {
-        const threadbare = getDeckPreset('threadbare')!.cardIds.length;
-        const pilgrim = getDeckPreset('pilgrim')!.cardIds.length;
-        expect(threadbare).toBe(18);
-        expect(pilgrim).toBe(30);
+describe('Phase 104 — MIN_COMBAT_DECK_SIZE is DERIVED from the grey office', () => {
+    it('is exactly 2x COMBAT_HAND_SIZE — the reshuffle-inside-one-round bound', () => {
+        // Below ~2 hands the draw pile reshuffles inside a single round and
+        // every fight deals the same hand.
+        expect(MIN_COMBAT_DECK_SIZE).toBe(COMBAT_HAND_SIZE * 2);
+    });
 
-        // The two dips the canon's own removal story takes: 18 − 6 = 12, 30 − 8 = 22.
-        const afterPilgrimCut = threadbare - sum(PRESET_LINEAGE.pilgrim.removed);
-        const afterApostateCut = pilgrim - sum(PRESET_LINEAGE.apostate.removed);
-        expect(afterPilgrimCut).toBe(12);
-        expect(afterApostateCut).toBe(22);
-
-        // The floor is the tightest one under which every documented removal in
-        // the shipped campaign is still legal.
-        expect(MIN_COMBAT_DECK_SIZE).toBe(Math.min(afterPilgrimCut, afterApostateCut));
+    it('matches the grey office — the smallest shipped starting deck', () => {
+        expect(MIN_COMBAT_DECK_SIZE).toBe(10);
     });
 
     it('clears every shipped preset shape (no preset is born below the floor)', () => {
@@ -439,11 +432,20 @@ describe('Phase 52a — MIN_COMBAT_DECK_SIZE is DERIVED from the shipped canon',
         }
     });
 
-    it('survives the preset laws at the floor: aspect thirds and more than two hands', () => {
-        // Exact aspect thirds (4/4/4) are still expressible at the floor; 10 —
-        // the brief's pre-canon proposal — is not divisible by 3.
-        expect(MIN_COMBAT_DECK_SIZE % 3).toBe(0);
-        // Below ~2 hands the draw pile reshuffles inside a single round.
-        expect(MIN_COMBAT_DECK_SIZE).toBeGreaterThan(COMBAT_HAND_SIZE * 2);
+    it('the campaign presets keep their own (now-superseded) low-water mark above the floor', () => {
+        // History, not the current derivation (see MIN_COMBAT_DECK_SIZE's
+        // doc comment): the Profane Canon lineage's own tightest point —
+        // 18 − PILGRIM_REMOVED — is still a real number, just no longer the
+        // one setting the floor.
+        const threadbare = getDeckPreset('threadbare')!.cardIds.length;
+        const pilgrim = getDeckPreset('pilgrim')!.cardIds.length;
+        expect(threadbare).toBe(18);
+        expect(pilgrim).toBe(30);
+
+        const afterPilgrimCut = threadbare - sum(PRESET_LINEAGE.pilgrim.removed);
+        const afterApostateCut = pilgrim - sum(PRESET_LINEAGE.apostate.removed);
+        expect(afterPilgrimCut).toBe(12);
+        expect(afterApostateCut).toBe(22);
+        expect(Math.min(afterPilgrimCut, afterApostateCut)).toBeGreaterThan(MIN_COMBAT_DECK_SIZE);
     });
 });

@@ -252,6 +252,10 @@ describe('Spec 25 §7 — presenter previews', () => {
         const cardId = state.hand[0]?.cardId ?? DOT_BODY;
         const card = getCard(cardId)!;
         const phaseStance = state.threatPhases[state.currentPhaseIndex].enemyStance;
+        // DOT_BODY is a fixed body-aspect fixture card, never the grey
+        // office's colourless 'any' — narrow for `resolveCardDieCost`, which
+        // (like `cardDieCostPreview`) only accepts a real die colour.
+        if (card.stance === 'any') throw new Error('unexpected grey-aspect fixture card');
         expect(cardDieCostPreview(state, card)).toEqual(resolveCardDieCost(card.stance, phaseStance));
     });
 });

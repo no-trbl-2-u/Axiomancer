@@ -55,7 +55,7 @@ import { bindSandboxLibraryGuard, getSandboxCard } from './cards.sandbox';
 import { getHauntById } from './cards.haunts';
 import { getAllyById } from './cards.allies';
 import { getUpgradedCardById, isUpgradedCardId } from './card-upgrades';
-import { STARTER_CARDS, CURSE_CARDS } from './library/starters.cards';
+import { STARTER_CARDS, CURSE_CARDS, GREY_OFFICE_CARDS } from './library/starters.cards';
 import { RELIC_CARDS } from './library/relics.cards';
 import { ROT_CARDS } from './library/rot.cards';
 import { DEBT_CARDS } from './library/debt.cards';
@@ -67,6 +67,7 @@ import { APOCRYPHA_CARDS } from './library/apocrypha.cards';
 
 export const cardLibrary: Card[] = [
     ...STARTER_CARDS,
+    ...GREY_OFFICE_CARDS,
     ...RELIC_CARDS,
     ...CURSE_CARDS,
     ...ROT_CARDS,

@@ -60,7 +60,9 @@ function originArchetype(preset: CombatDeckPreset): StatType {
     const tally: Record<StatType, number> = { heart: 0, body: 0, mind: 0 };
     for (const id of preset.cardIds) {
         const card = getCardById(id);
-        if (card) tally[card.philosophicalAspect]++;
+        // Phase 104 — campaign presets never carry a grey ('any') card; this
+        // guard is a type-narrowing formality, not a real branch.
+        if (card && card.philosophicalAspect !== 'any') tally[card.philosophicalAspect]++;
     }
     if (tally.body >= tally.heart && tally.body >= tally.mind) return 'body';
     if (tally.mind >= tally.heart && tally.mind >= tally.body) return 'mind';

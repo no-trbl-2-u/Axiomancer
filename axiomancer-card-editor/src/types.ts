@@ -16,7 +16,7 @@
  */
 import type {
     Card,
-    StatType,
+    CardAspect,
     CardTier,
     CardTarget,
     CardRank,
@@ -37,7 +37,7 @@ import type { CardTheme } from '@mechanics/Cards/card-themes';
 export interface CardDraft {
     id: string;
     name: string;
-    philosophicalAspect: StatType;
+    philosophicalAspect: CardAspect;
     description: string;
     tier: CardTier;
     targetType: CardTarget;

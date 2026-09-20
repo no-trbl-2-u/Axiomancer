@@ -28,8 +28,8 @@ import type { RestChoiceSession, Character } from '../../../index';
 const DECK = [
     'spoiled-poultice', 'chilblain-watch', 'petty-indictment', 'first-spadeful',
     'grandmothers-psalter', 'thumbprick-oath', 'thin-hymn', 'threadbare-cope',
-    'unction-of-boils', 'the-sextons-bell', 'the-long-lent', 'promissory-cut',
-] as const; // exactly MIN_COMBAT_DECK_SIZE (12)
+    'unction-of-boils', 'the-sextons-bell',
+] as const; // exactly MIN_COMBAT_DECK_SIZE (Phase 104: 10)
 
 function offerSession(overrides: Partial<Parameters<typeof createRestChoiceSession>[1]> = {}): RestChoiceSession {
     return createRestChoiceSession(1, {
@@ -37,7 +37,7 @@ function offerSession(overrides: Partial<Parameters<typeof createRestChoiceSessi
         maxHealth: 100,
         health: 50,
         currency: 100,
-        deckCardIds: [...DECK, 'the-vig'], // 13 — one above the floor by default
+        deckCardIds: [...DECK, 'the-vig'], // 11 — one above the floor by default
         removals: 0,
         ...overrides,
     });

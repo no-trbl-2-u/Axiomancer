@@ -20,7 +20,7 @@ import { toCombatCard } from '@mechanics/Combat/combat.cards';
 // ── Types (erased at runtime; here for full-fidelity editing) ────────────────
 import type {
     Card,
-    StatType,
+    CardAspect,
     CardTier,
     CardTarget,
     CardRank,
@@ -92,11 +92,13 @@ export interface Option<T extends string | number> {
     label: string;
 }
 
-/** Philosophical aspect / stance color (heart / body / mind). */
-export const STANCES: Option<StatType>[] = [
+/** Philosophical aspect / stance color (heart / body / mind), plus Phase
+ *  104's colourless 'any' (the grey office — every die colour powers it). */
+export const STANCES: Option<CardAspect>[] = [
     { value: 'body', label: 'BODY' },
     { value: 'mind', label: 'MIND' },
     { value: 'heart', label: 'HEART' },
+    { value: 'any', label: 'ANY' },
 ];
 /** Card tier (1 / 2 / 3) — mirrors the effect tier system. */
 export const TIERS: Option<CardTier>[] = [

@@ -15,10 +15,10 @@ import {
     CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS, CONCEDE_PREMISES_UNIQUE,
 } from './effects';
 import type { Effect, ActiveEffect } from '../Effects/types';
-import type { Card, CardCombatEffects, CardRider, CardSpecialMechanic, SynergyStatePredicate } from '../Cards/types';
+import type { Card, CardAspect, CardCombatEffects, CardRider, CardSpecialMechanic, SynergyStatePredicate } from '../Cards/types';
 import { rankToRarity, CARD_RANK_NAMES } from '../Cards/types';
 import type {
-    CombatCard, CombatDieColor, CombatVerbClass, CardEffectKind,
+    CombatCard, CombatVerbClass, CardEffectKind,
 } from './combat.encounter.types';
 import { getCardById } from '../Cards/cards.library';
 import { OVERHEAT_BUST_CHANCE } from './combat.dice';
@@ -87,8 +87,10 @@ export function effectImpact(
     return { track: 'none', amount: 0 };
 }
 
-/** Stance color for a projected combat card — its philosophical aspect (§4.3). */
-export function cardStanceColor(card: Card): CombatDieColor {
+/** Stance color for a projected combat card — its philosophical aspect (§4.3).
+ *  Phase 104 — 'any' is the grey office's colourless aspect: every die colour
+ *  powers it, with a neutral (never on/off) colour-match bonus. */
+export function cardStanceColor(card: Card): CardAspect {
     return card.philosophicalAspect;
 }
 
