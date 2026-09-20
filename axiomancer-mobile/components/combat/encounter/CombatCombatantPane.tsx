@@ -763,6 +763,26 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                         ]}
                         testID="combat-enemy-figure-wrap"
                     >
+                        {/* FIGURE PLATE (device playtest 2026-09-20). The roster art is
+                            alpha-matted by keying BLACK out of a painting, so every dark
+                            interior stroke of a creature is partly transparent and the
+                            engraved arena backdrop reads straight through its body — the
+                            foe looked like a ghost over the crew. A soft dark radial plate
+                            sits between the backdrop and the figure: where the art is
+                            opaque nothing changes; where its shading was keyed away, the
+                            hole now shows the plate's ink instead of the engraving. Same
+                            layer as the ground shadow (outside the breath wrapper) so the
+                            plate is the scene's, not the creature's. */}
+                        <Svg style={StyleSheet.absoluteFill} pointerEvents="none" testID="combat-enemy-figure-plate">
+                            <Defs>
+                                <RadialGradient id="axmEnemyFigurePlate" cx="50%" cy="58%" rx="50%" ry="50%">
+                                    <Stop offset="0" stopColor={AXM.bg} stopOpacity={0.92} />
+                                    <Stop offset="0.55" stopColor={AXM.bg} stopOpacity={0.7} />
+                                    <Stop offset="1" stopColor={AXM.bg} stopOpacity={0} />
+                                </RadialGradient>
+                            </Defs>
+                            <Ellipse cx="50%" cy="58%" rx="42%" ry="46%" fill="url(#axmEnemyFigurePlate)" />
+                        </Svg>
                         {/* grounding shadow so the alpha-matted figure sits ON the floor.
                             It stays OUTSIDE the idle wrapper: the shadow is the floor's,
                             not the creature's, so the figure breathes over a planted
