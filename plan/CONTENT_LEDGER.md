@@ -14,7 +14,7 @@
 | cards | `skills/adjust-cards.md` | 2026-09-20 | 7de3890b | 14 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-20 | 8e4a7976 | 14 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-20 | e461848b | 14 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-19 | 0f9dd762 | 13 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-20 | 04f9393d | 14 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-19 | 6c82d06b | 13 |
 
 ## Log
@@ -22,6 +22,43 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
+> **[adjust-keywords pass 14, 2026-09-20, commit 04f9393d]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE on the live keyword atlas — dispatched
+> autonomously by `/march`'s content-lifecycle gate (`keywords` was the
+> stalest qualifying category this tick: 73 commits and ~32h since pass
+> 13's commit `0f9dd762`, 2026-09-19T10:43:12Z, past both the 15-commit
+> and 36h threshold — every other category also qualified on commit
+> count but was less stale by last-pass timestamp: `npcs` `6c82d06b`
+> 2026-09-19T22:42:31Z, `cards` `7de3890b` 2026-09-20T08:48:28Z,
+> `equipment` `8e4a7976` 2026-09-20T10:40:06Z, `enemies` `e461848b`
+> 2026-09-20T12:51:45Z). Delegated to `card-expert` (its standing owner):
+> Step 1 structural audit swept every `CardSpecialMechanic`/
+> `SynergyStatePredicate` kind against every atlas row — carrier counts
+> that looked thin at the raw-literal level (`reap`=1, `consume_affliction`
+> =1, `recoil_x`=1, `purge_self`=1) all resolved clean once badge-sharing
+> (REAP/REAP_ALL, RUPTURE/consume_affliction, RECOIL/RECOIL_X) and the
+> `curse()` factory's 5 stamped carriers were counted correctly; no
+> near-synonym pairs; no unglossed face words (traced `mechanicText`/
+> `statePredicateText` end to end, corroborated by `node --test
+> scripts/content-drift.test.mjs` 11/11 green). Step 1b's widened KB
+> cross-reference (triggered on Step 1's zero-diff) read the full
+> 141-row Dawncaster `keywords.csv` functions sweep and surfaced one
+> real gap: **Vulnerable** (`kb:dawncaster/keywords/vulnerable.okf.md`,
+> src-001, community, confidence medium) — a debuff that amplifies
+> damage the afflicted side later TAKES. Verified in `src/Combat/
+> effects.ts` that our only multiplier family (`getOutgoingDamageMult`,
+> driving QUARTER) dampens the BEARER's own output in both directions
+> it's read, and MARK only amplifies DoT ticks, not DEAL/WRATH/CHAIN/
+> EXECUTE direct hits — no field anywhere multiplies damage a combatant
+> is about to receive from the other side. Real and KB-grounded, but the
+> fix is a new `EffectPayload` field plus a new read site inside the
+> shared damage-resolution path (checked against HIDE/BRUTAL/EXECUTE/
+> WRATH/CHAIN/PIERCE ordering) — cross-cutting engine wiring, not a
+> same-tick reuse of an existing hook. Per THE GROWTH FLOOR ¶2 ("ship
+> small, file large"), filed as a Pending candidate in
+> `plan/PHASE_CANDIDATES.md` (score 3.0) rather than implemented this
+> tick.
+
 > **[adjust-enemies pass 14, 2026-09-20, commit e461848b]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE on enemy data — dispatched autonomously by
 > `/march`'s content-lifecycle gate (`enemies` was the stalest qualifying
