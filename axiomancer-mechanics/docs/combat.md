@@ -666,8 +666,11 @@ persisted on `GameState.flags` via a `combat-loadout-card:` prefix codec (mirror
 Hazard deck-flags pattern). When no loadout flags are present the engine falls back to
 `knownSkills` for full backwards compatibility with pre-169 saves.
 
-`createNewGameState()` seeds the loadout with `STARTING_SKILL_IDS` so a fresh character
-always has a valid curated loadout from first boot.
+`createNewGameState()` no longer seeds a loadout (save v23, 2026-09-20): a seeded
+4-card loadout shadowed the chosen starter bundle in `knownCards` for the whole run
+(rest-node CUTs refused at the floor; `executeCard` threw `not known` for a seeded
+starter the bundle lacked). The codec remains for dev/e2e deck pinning; the v22 → v23
+migration strips any loadout flags an older save still carries.
 
 `isCombatSynergySatisfied` is a pure read-only helper for mobile: pass a `CombatCard` in
 hand and the enemy's current `ActiveEffect[]` — it returns `true` when the card's backing

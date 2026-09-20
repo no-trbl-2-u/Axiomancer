@@ -13,10 +13,11 @@
  * rest minigame), v17 → v18 (Phase 61, retire the Quest Board
  * minigame), v18 → v19 (Phase 76, retire the Gathering minigame), v19 →
  * v20 (Phase 63, retire the loot-cache Pick Pool minigame), v20 → v21
- * (inter-map travel, seed the continent catalogue), and v21 → v22
- * (Phase 85, seed the head/hands/feet signet relics). The hops chain, so
- * a v11 save lands at v22 in one `migrate` call. Every other version
- * mismatch still rejects.
+ * (inter-map travel, seed the continent catalogue), v21 → v22
+ * (Phase 85, seed the head/hands/feet signet relics), and v22 → v23
+ * (2026-09-20, strip the starting curated-loadout flags that shadowed the
+ * starter bundle). The hops chain, so a v11 save lands at v23 in one
+ * `migrate` call. Every other version mismatch still rejects.
  */
 
 import { GameState } from './types';
@@ -29,6 +30,7 @@ import { calculateMaxHealth } from '../Utils';
 import { reslotLegacyLoadout, reslotLegacyEquipment, type LegacySlot } from './legacy-slots';
 import { concreteDefaultRail } from '../Character/dieGear.reducer';
 import { GAME_STATE_VERSION } from './game.reducer';
+import { COMBAT_LOADOUT_FLAG_PREFIX } from '../Combat/combat.loadout';
 
 /**
  * v11 → v12 (Phase 18): fold the player's 7-slot equipment record into the
@@ -398,6 +400,30 @@ function migrateV21ToV22(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
+ * v22 → v23 (2026-09-20): retire the STARTING-LOADOUT SEED.
+ *
+ * `createNewGameState` used to write one `combat-loadout-card:<id>:<n>` flag
+ * per `STARTING_CARD_IDS` entry. `buildCombatDeck` deals a loadout INSTEAD of
+ * `knownCards` whenever one exists, so that 4-card seed silently replaced the
+ * 18+-card starter bundle the player chose for the entire run: rest-node
+ * CUTs were refused `deck-at-floor` (4 + a few rewards = the 12-card floor),
+ * and a seeded starter the chosen bundle did not contain (`thin-hymn` on a
+ * non-Threadbare bundle) was dealt but failed `executeCard`'s `knownCards`
+ * ownership guard — the "Card 'thin-hymn' is not known." crash.
+ *
+ * Drops every loadout flag. Nothing else is touched: `knownCards` and
+ * `combatRewardCards` already hold the real deck, and `cardRemovals` (the
+ * price counter) is per-run and unaffected. Idempotent — a save with no
+ * loadout flags passes through with only its version stamped. Pure over a
+ * raw save payload.
+ */
+function migrateV22ToV23(raw: Record<string, unknown>): Record<string, unknown> {
+    const flags = Array.isArray(raw.flags) ? (raw.flags as unknown[]) : [];
+    const kept = flags.filter(f => typeof f !== 'string' || !f.startsWith(COMBAT_LOADOUT_FLAG_PREFIX));
+    return { ...raw, flags: kept, version: 23 };
+}
+
+/**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
  * game). The name/signature is kept so the persistence layer's call site is
@@ -473,6 +499,10 @@ export function migrate(
     if (version === 21 && toVersion >= 22) {
         working = migrateV21ToV22(working);
         version = 22;
+    }
+    if (version === 22 && toVersion >= 23) {
+        working = migrateV22ToV23(working);
+        version = 23;
     }
 
     if (version !== toVersion) {
