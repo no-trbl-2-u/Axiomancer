@@ -208,6 +208,11 @@ export function stageEligibleCardIds(
     for (const card of pool.values()) {
         if (card.tier > stage.maxCardTier) continue;
         if (rankMaturityLevel(card.rank) > stage.playerLevel) continue;
+        // Phase 104 — the grey office is what a run OPENS with, never what it
+        // drafts toward: a stage pool models the reward-built deck, so the two
+        // grey starters stay out of it (they are excluded from the reward pool
+        // for the same reason).
+        if (card.theme === 'grey') continue;
         ids.push(card.id);
     }
     // THE PATH — CARD UPGRADES (axis 3). By this stage the player has spent

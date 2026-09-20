@@ -67,7 +67,6 @@ import { CHOIR_CARDS } from './library/choir.cards';
 import { APOCRYPHA_CARDS } from './library/apocrypha.cards';
 
 export const cardLibrary: Card[] = [
-    ...GREY_OFFICE_CARDS,
     ...STARTER_CARDS,
     ...RELIC_CARDS,
     ...CURSE_CARDS,
@@ -78,6 +77,10 @@ export const cardLibrary: Card[] = [
     ...TRIAL_CARDS,
     ...CHOIR_CARDS,
     ...APOCRYPHA_CARDS,
+    // Phase 104 — the grey office LAST, so every seeded draw that indexes the
+    // library in order (the playtest draft pool, the sandbox harnesses) lands
+    // where it did before the two starters existed.
+    ...GREY_OFFICE_CARDS,
 ];
 
 const registry = new Map<string, Card>(cardLibrary.map(card => [card.id, card]));
