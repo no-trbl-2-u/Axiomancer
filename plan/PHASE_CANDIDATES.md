@@ -2360,6 +2360,69 @@ residual merit; re-file if the failure mode recurs.
 - conflicts: none against spec.md non-goals; doesn't touch the 3
   surviving big-numbers constraints.
 
+### [score 3.0] No player-applied "the foe takes more damage" debuff — every existing multiplier dampens the BEARER's own output, none amplifies damage the bearer RECEIVES
+- proposed: 2026-09-20, `/adjust-keywords` pass 14 (Step 1b widened KB
+  cross-reference; Step 1's own structural audit — carrier-count sweep
+  across every `CardSpecialMechanic`/`SynergyStatePredicate` kind against
+  every atlas row, plus a run of `node --test scripts/content-drift.test.mjs`
+  — came back 11/11 green and zero-diff, so the widened check ran).
+- source signals:
+  - KB: `kb:dawncaster/keywords/vulnerable.okf.md` (src-001, community,
+    confidence medium) — "Take 10% more damage from each Action for each
+    stack of Vulnerable. Stacks up to 100% extra damage" — a genre-standard
+    debuff that amplifies damage the AFFLICTED side later takes, stacking
+    and persistent, distinct from the "reduce the target's own outgoing
+    damage" family Dawncaster also carries separately (Weakness).
+  - Live-code check: our closest analogue is QUARTER (`debuff_quarter`,
+    payload `outgoingDamageMulPct: -10`), read by
+    `getOutgoingDamageMult(bearer)` (`src/Combat/effects.ts:351-360`) —
+    its own doc comment states it is "Applied to the enemy's telegraphed
+    threat damage and the player's powered strike," i.e. it always
+    dampens the BEARER's own hit, never amplifies a hit landing ON the
+    bearer. MARK (`tickAmplifyFlat`) is the nearest thing to an
+    amplify-incoming lever, but it only touches DoT TICKS ("+1 VITAE per
+    Mark stack" on every damage-over-time tick), not DEAL/WRATH/CHAIN/
+    EXECUTE direct-hit damage — confirmed by grepping every
+    `EffectPayload` field in `src/Effects/types.ts` and every read site
+    in `src/Combat/effects.ts`/`combat.engine.ts`: no field multiplies
+    damage a combatant is ABOUT TO RECEIVE from the other side. `EXECUTE`
+    comes closest in spirit but is a card-authored conditional
+    (foe-HP-threshold-gated, doubles that ONE card's own damage), not a
+    stacking debuff any card can apply and any other card can then hit
+    into.
+  - This is a genuine gap, not a near-synonym: QUARTER/MARK/EXECUTE/WRATH/
+    CHAIN/FLAY already cover "make MY next hit(s) bigger" (WRATH/CHAIN/
+    FLAY) and "make THEIR hits smaller" (QUARTER) and "amplify DoT ticks"
+    (MARK) and "conditionally double THIS card" (EXECUTE) — none of them
+    is "mark the foe so every future source of damage against it (mine
+    AND my teammates'-equivalent effects, i.e. any card) counts for
+    more," which is the axis Vulnerable drills.
+- rationale: real and KB-grounded, but the wiring is NOT small. It needs a
+  new `EffectPayload` field (an `incomingDamageMulPct`-shaped multiplier
+  read at the OPPOSITE end of `getOutgoingDamageMult`'s call sites — i.e.
+  a new `getIncomingDamageMult(target)` hooked into wherever
+  DEAL/WRATH/CHAIN/EXECUTE resolve damage against the enemy in
+  `combat.engine.ts`), which is core damage-math surgery that has to be
+  checked against every existing multiplier in that chain (HIDE,
+  BRUTAL, EXECUTE, WRATH/CHAIN stacking, PIERCE) for stacking/ordering
+  correctness, plus a new debuff library entry, a carrying card or two,
+  pricing, a hermetic e2e, and the mobile gloss/glyph. That is
+  cross-cutting engine wiring touching the shared damage-resolution
+  path, not a same-tick reuse of an existing hook — squarely THE GROWTH
+  FLOOR ¶2's "file large" case, not "ship small."
+- proposed scope: a `mechanics-expert` design session first (ordering
+  against HIDE/BRUTAL/EXECUTE/WRATH/CHAIN in the damage-resolution
+  chain, and whether it lives as a new debuff field or rides the
+  existing MARK verb with a widened trigger) before any engine code,
+  then the full 12-step keyword wiring checklist for the resulting
+  verb, then 1-2 carrying cards.
+- estimated phases: 1-2
+- conflicts: none against spec.md non-goals; doesn't touch the 3
+  surviving big-numbers constraints. Interacts with (but doesn't
+  conflict with) THE BIG NUMBERS REWRITE's "buff the neighbours, don't
+  shrink the card" pillar — a Vulnerable-style multiplier would need to
+  be priced generously, not as a nerf lever.
+
 ## Considered (below threshold) — pass 12 additions
 
 - **Art-direction coherence** (`plan/CRITIQUE.md:446` arena art
