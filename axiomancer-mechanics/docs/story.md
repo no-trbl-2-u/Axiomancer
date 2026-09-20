@@ -1,15 +1,18 @@
 # Shipped narrative content — a catalogue, NOT canon
 
-> **THERE IS NO STORY.** This game has no story canon and no law about
-> what its story is (THE BLANK PAGE, T direct 2026-09-18 — see
-> `plan/bearings.md` and `content/story/README.md`). The player is **X**:
+> **The story lives in `content/story/story-overview.md`** — the road,
+> event by event, built from nothing with T present (2026-09-18). That
+> file supersedes `content/story/README.md`'s "THERE IS NO STORY" ruling,
+> which is now the historical record of the clearing. The player is **X**:
 > no name, no figure, no identifiers.
 >
 > **What this file is:** a catalogue of narrative content that currently
 > ships, so an engineer can find it. Every entry below documents text
 > that is *in the build*. None of it documents what the story *is*.
 >
-> **Do not read an arc out of this file.** The premise this document
+> **Do not read an arc out of this file.** The overview is the only
+> place an arc is authored; this catalogue is downstream of it and may
+> describe beats the road has already discarded. The premise this document
 > used to open with — a king, a dead advisor, a succession, a labyrinth
 > at the heart of a city — was cleared with the rest of the story law.
 > Shipped lines are evidence of what an old draft assumed, nothing more.

@@ -3,14 +3,17 @@
 Canonical agent guidance lives in **`AGENTS.md`** and **`VISION.md`** (game
 doctrine). This file exists so the load-bearing doctrine is always in context.
 
-## THERE IS NO STORY (THE BLANK PAGE, T direct, 2026-09-18)
+## THE STORY IS THE ROAD (THE BLANK PAGE ¶1 lifted, 2026-09-18)
 
-**This game has no story canon and no law about what its story is.**
-T cleared the ground deliberately: *"Remove ALLL law about what the
+**The story is `content/story/story-overview.md` and nothing else.**
+T cleared every prior story law first — *"Remove ALLL law about what the
 story is. We're starting from square one with an unidentifieable 'x'
-as the first/main character."*
+as the first/main character."* — and the overview was then built from
+nothing, one event per turn, with T choosing each one.
 
-- No arc, no premise, no ending, no theme, no canonical characters.
+- **Read the overview before writing anything narrative.** It is the
+  ordered list of what happens to the player. It is short and still being
+  walked: a beat it does not cover **does not exist yet**.
 - **The player is X** — no name, no figure, no identifiers (age,
   gender, body, station, trade, family). `X` is brainstorming
   scaffolding, never shipped text, never a stand-in for a name to be
@@ -19,17 +22,17 @@ as the first/main character."*
   `boy-*` flags are legacy text kept because deleting them would break
   a working build. They are evidence of an old draft's assumptions, not
   of what the story is.
-- **Do not invent canon.** Need a story fact that does not exist? Say it
-  does not exist and stop. Do not reconstruct an arc from shipped text,
+- **Do not invent canon beyond the road.** Need a story fact the overview
+  does not carry? Say it does not exist and stop. Do not reconstruct an arc from shipped text,
   restore a removed document, or write a replacement unprompted. This is
   an explicit carve-out from the loop's content-growth mandate; growth in
   cards, enemies, keywords, maps and art is unaffected.
 - `docs/narrative/` (style, voice, lexicon) is *craft* law and survives
   untouched. Mechanics are untouched.
 
-Full ruling: `plan/bearings.md` → THE BLANK PAGE. Marker:
-`content/story/README.md`. It lifts when a new
-`content/story/story-overview.md` is built, event by event, per
+Full ruling: `plan/bearings.md` → THE BLANK PAGE (¶1 lifted; ¶2–¶5 stand).
+`content/story/README.md` is the superseded record of the clearing — history,
+not law. The road is walked further in attended sessions per
 `plan/2026-09-17-story-outline.prompt.md`.
 
 ## Load-bearing doctrine (THE BIG NUMBERS REWRITE, 2026-09-02)
