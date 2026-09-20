@@ -1,10 +1,15 @@
 {
-  "__comment": "Story-generation catalogue of the game's WORLD PLATES — the ten full-bleed backdrops a player actually stands in front of (five combat arenas, five exploration-map backdrops). One object per image. Written 2026-09-19. Every `description` was written from LOOKING at the shipped file, not from its filename or its provenance record; where a plate carries text or an oddity, the entry says so. Provenance facts (artist/work/licence) are copied from the per-directory provenance.json files and are authoritative there, not here. Enemy portraits (77), character portraits (15), card faces (19), treasure (4), UI splatter motifs (4) and app icons (27) are deliberately NOT in this file — see `scope` below.",
+  "__comment": "Story-generation catalogue of the game's WORLD PLATES — the full-bleed backdrops a player actually stands in front of, one object per plate file in axiomancer-mobile/assets/images/{combat,maps}. The tally lives in `_meta.plateCount` / `_meta.surfaceCounts` and is stated there alone: a count repeated in prose drifts from the data it counts. Written 2026-09-19. Every `description` was written from LOOKING at the shipped file, not from its filename or its provenance record; where a plate carries text or an oddity, the entry says so. Provenance facts (artist/work/licence) are copied from the per-directory provenance.json files and are authoritative there, not here. Enemy portraits (77), character portraits (15), card faces (19), treasure (4), UI splatter motifs (4) and app icons (27) are deliberately NOT in this file — see `scope` below.",
   "_meta": {
     "generated": "2026-09-19",
     "purpose": "Input for authoring a new story outline. Each entry pairs what is literally depicted with the narrative hooks it offers, so a story pass can be written against the art the game already has rather than against art it would need commissioned.",
     "scope": "The twelve world plates only. Excluded: enemy/character portraits (the engine already carries authored `description` and `causeLines` prose per enemy in axiomancer-mechanics/src/Enemy/enemy.library.ts — read that directly rather than duplicating it here), card faces, treasure icons, UI motifs, and app icons.",
-    "house_register": "The Woodcut Codex (axiomancer-mobile/docs/VISUAL_LANGUAGE.md): FromSoftware x Inscryption x illuminated manuscript. ALL twelve plates are now 19th-century wood engravings by Gustave Doré, graded toward the void (grayscale, brightness 0.62 / contrast 1.08). Ten are from London: A Pilgrimage (1872); two — the Caverns and the Capital arenas — are Dante plates, a deliberate break recorded in plan/phases/phase_103_the_last_two_arenas.md. The pixel-art outlier this catalogue previously flagged was retired in phase 103; no entry carries a coherenceFlag any more.",
+    "plateCount": 12,
+    "surfaceCounts": {
+      "combat-arena": 7,
+      "map-backdrop": 5
+    },
+    "house_register": "The Woodcut Codex (axiomancer-mobile/docs/VISUAL_LANGUAGE.md): FromSoftware x Inscryption x illuminated manuscript. ALL twelve plates are now 19th-century wood engravings by Gustave Doré, graded toward the void (grayscale, brightness 0.62 / contrast 1.08). Ten are from London: A Pilgrimage (1872); two — the Caverns and the Capital arenas — are Dante plates, a deliberate break recorded in plan/phases/phase_103_the_last_two_arenas.md. The pixel-art outlier this catalogue previously flagged was retired in phase 103; the `coherenceFlag`s that remain record legible 1872 text on `ludgate-hill` and `arena-desolation`.",
     "tag_vocabulary": {
       "place": [
         "city",
@@ -54,7 +59,7 @@
         "collapse"
       ]
     },
-    "how_to_use": "For a story outline: read `storySeeds` across all twelve entries first — they are written to be combinable. `boundTo` says where in the world each plate already renders, so a beat set in that region already has its backdrop. `coherenceFlag` is null on every entry as of phase 103; `crossCutting.gaps` is where to look for what the art CANNOT currently stage."
+    "how_to_use": "For a story outline: read `storySeeds` across all twelve entries first — they are written to be combinable. `boundTo` says where in the world each plate already renders, so a beat set in that region already has its backdrop. `coherenceFlag` records an oddity worth knowing before a close-up or a promotional shot — currently `ludgate-hill` and `arena-desolation`, both legible 1872 text; entries with nothing flagged carry it as `null` or omit the key, and neither form means more than that; `crossCutting.gaps` is where to look for what the art CANNOT currently stage."
   },
   "plates": [
     {
@@ -242,7 +247,7 @@
       "artist": "Gustave Doré",
       "work": "\"The New Zealander\", the closing plate of London: A Pilgrimage (1872 / 1873 printing)",
       "licence": "Public domain (read from Commons imageinfo extmetadata at acquisition)",
-      "description": "A cloaked figure sits on a broken wharf with a sketchbook, drawing the ruins of a dead city across black water. Broken masonry and a shattered arch fill the left foreground; the far bank carries the gutted dome and spires of a great city; a clouded moon hangs over the water.",
+      "description": "A cloaked figure sits on a broken wharf with a sketchbook, drawing the ruins of a dead city across black water. Broken masonry and a shattered arch fill the left foreground; the far bank carries the gutted dome and spires of a great city; at the right edge, nearest the viewer, a columned classical facade carries an inscribed frieze that the frame cuts mid-word (see `coherenceFlag`); a clouded moon hangs over the water.",
       "composition": "Heavy dark mass at both edges, a lit band of water and sky across the middle third, the solitary figure low-left with their back to the viewer. Chosen for that band: it is where a foe composites, so the plate stays legible behind a figure it was not drawn for.",
       "mood": "The end of the story of a place, drawn by someone who arrived after it. Melancholy rather than violent — nothing is happening, it has already happened.",
       "tags": [
@@ -255,7 +260,7 @@
         "collapse",
         "deep-water"
       ],
-      "coherenceFlag": null,
+      "coherenceFlag": "Carries LEGIBLE PERIOD SIGNAGE: the frieze of the columned building at the right edge reads COMMERCIAL WHAR[F], running off the plate mid-word (x 784-894, y 447-460 of 894x1120; cap height ~13px). A denser inscription band sits directly above it and does not resolve at any brightness — it is texture, and no string is claimed for it. At backdrop scale the frieze reads as texture too: `contentFit=\"cover\"` anchored bottom-centre leaves roughly 4 device px of cap height on a phone and crops it off a wide viewport entirely. But it is real English text from 1872 and a close reader or a promotional crop will see it. Same class as `ludgate-hill`. Recorded rather than cropped: the right-edge dark mass it sits in is the reason this plate was chosen for the fallback slot (see `composition`), and `buildPlatePage`'s `inset` trims all four sides, so there is no asymmetric crop to reach for. Found in the burn-day audit of 2026-09-19.",
       "notes": "Replaced `arena-ruined-city.jpg` in phase 103. That plate was owner-supplied pixel art of modern high-rises with licence UNRESOLVED, and being the fallback it was the most-seen arena in the game. Retired under THE OPEN GATE ¶6. Because THIS plate is now the fallback, it is the arena a player sees for any region the game has not keyed — so it is deliberately general, and a story beat may lean on its mood but should not treat its specific ruins as a named place.",
       "storySeeds": [
         "The observer who outlives the subject. Someone is sitting in the wreckage DRAWING it — which makes a record, and a record implies a reader who was not there. Who is the drawing for?",

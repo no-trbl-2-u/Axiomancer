@@ -38,17 +38,17 @@ import { makeStyles, usePalette } from '@/theme/runtime';
 import type {
     CombatEnemyPaneVM, CombatPlayerPaneVM, CombatEffectChipVM, CombatSealVM, CombatAddVM,
 } from '@/state/presenters/combat-encounter.engine';
-import { selectCombatLogLines } from '@/state/presenters/combat-encounter.engine';
+import { ADD_COLOR, selectCombatLogLines } from '@/state/presenters/combat-encounter.engine';
 import { getCardById, type CombatEvent } from '@mechanics';
 import { effectGlyph } from '@/components/combat/statusGlyphs';
 import { keywordForEffect } from '@/state/combat/keywords';
 import { IntentIcon } from './IntentIcon';
 import { useJuiceFlash, useJuiceIdleBreath, useJuiceNumberPop, useJuicePulse, useJuiceShake } from '@/lib/juice';
 
-/** Full-bleed battlefield backdrop — region-keyed (phase 83, completed for
- *  every live region in phases 101/103), falling back to a neutral desolation
- *  plate for a region with no rule. Sits behind the enemy figure; the SVG
- *  `CreatureScene` draws `hideBackdrop` so its procedural moon/treeline
+/** Full-bleed battlefield backdrop — region-keyed (phase 83, extended in
+ *  phases 101/103 to six of the seven live regions), falling back to a neutral
+ *  desolation plate for a region with no rule. Sits behind the enemy figure;
+ *  the SVG `CreatureScene` draws `hideBackdrop` so its procedural moon/treeline
  *  doesn't overpaint the art. */
 
 /** A bump of resolved engine events the pane animates. `seq` rises on each new
@@ -88,6 +88,11 @@ export function combatTopScrimStops(deepBg: string, groundBg: string): readonly 
 /** Height of the floating top HUD (under the safe-area inset) — the board's
  *  content column leaves this much clearance before the play region. */
 export const COMBAT_HUD_HEIGHT = 148;
+
+/** The HUD's own top padding, under the safe-area inset. Named because the
+ *  enemy figure anchors off it: the figure's live `top` is this pad plus the
+ *  measured height of the HUD's full-width block. */
+export const COMBAT_HUD_PAD_TOP = 8;
 
 /** Screen-left footprint of the player medallion's dock: its 10pt left offset
  *  plus the 92pt medallion. The board reserves this much of the bottom band so
@@ -414,7 +419,7 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
     }, []);
     const drop = useCallback((id: number) => setFloats((p) => p.filter((f) => f.id !== id)), []);
     const landHit = useCallback((dmg: number, blocked: number, fired: boolean) => {
-        push(`-${dmg}`, '#e2543b', 0);
+        if (dmg > 0) push(`-${dmg}`, '#e2543b', 0);
         if (fired && blocked > 0) push(`BLOCKED ${blocked}`, '#9aa0a6', 40);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => undefined);
     }, [push]);
@@ -423,11 +428,18 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
         if (!fx || fx.seq === 0 || fx.seq === lastSeq.current) return;
         lastSeq.current = fx.seq;
         let dmg = 0;
+        // Phase 102 — the brood's bite is its OWN event, and it lands outside
+        // the engine's `!hindered` gate: a denied phase can still cost VITAE.
+        // Kept SEPARATE from `dmg` on purpose — `blocked` below is the foe's
+        // telegraph arithmetic, and folding a bite into it would print a
+        // BLOCKED number the foe never promised (burn-day audit 3.3).
+        let bite = 0;
         let threatFired = false;
         const ticks: number[] = [];
         const statuses: { text: string; color: string }[] = [];
         for (const e of fx.events) {
             if (e.kind === 'damage-dealt' && e.target === 'self') dmg += e.amount;
+            else if (e.kind === 'add-bit') bite += e.dealt;
             else if (e.kind === 'dot-tick' && e.target === 'self') ticks.push(e.amount);
             else if (e.kind === 'threat-fired') threatFired = true;
             else if (e.kind === 'effect-landed' && e.target === 'self') {
@@ -439,8 +451,9 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
             }
         }
         const IMPACT = 100;
-        if (dmg > 0) {
-            const norm = Math.min(1, dmg / Math.max(1, player.maxHp));
+        const total = dmg + bite;
+        if (total > 0) {
+            const norm = Math.min(1, total / Math.max(1, player.maxHp));
             const blocked = enemyIntentDamage - dmg;
             if (!reduceMotion.current) {
                 const recoil = 4 + norm * 8;
@@ -454,8 +467,16 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
             impact.value = 0;
             impact.value = withDelay(IMPACT, withTiming(1, { duration: 1 }, (fin) => { if (fin) runOnJS(landHit)(dmg, blocked, threatFired); }));
         }
+        // The brood's float is pushed HERE, not from `landHit`: the bite is a
+        // second actor, not the foe's telegraphed blow landing at its impact
+        // apex, so it does not wait on the telegraph's 100ms delay. One buzz
+        // per phase — `landHit` already fires one when the foe's blow landed.
+        if (bite > 0) {
+            push(`-${bite}`, ADD_COLOR, -28);
+            if (dmg === 0) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => undefined);
+        }
         ticks.forEach((t, k) => push(`-${t}`, '#a86bdc', (k % 2 === 0 ? -1 : 1) * (20 + Math.floor(k / 2) * 16)));
-        const hadFloat = dmg > 0 || ticks.length > 0;
+        const hadFloat = dmg > 0 || bite > 0 || ticks.length > 0;
         statuses.forEach((s, k) => { if (!hadFloat) push(s.text, s.color, (k % 2 === 0 ? 1 : -1) * 30); });
         if (statuses.length > 0) setStatusPulseKey((k) => k + 1);
     }, [fx, player.maxHp, enemyIntentDamage, shift, flash, squash, contact, impact, landHit, push]);
@@ -556,6 +577,10 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
     const styles = useStyles();
 
     const [enemyFloats, setEnemyFloats] = useState<Float[]>([]);
+    // Measured height of the HUD's full-width block (name row + VITAE bar +
+    // alt-win meters). The enemy figure's wrap anchors under it; 0 until the
+    // first layout pass, when `enemyFigureWrap`'s static top is the fallback.
+    const [hudBlockH, setHudBlockH] = useState(0);
     const idRef = useRef(0);
     const lastSeq = useRef(0);
 
@@ -590,6 +615,10 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
         if (!fx || fx.seq === 0 || fx.seq === lastSeq.current) return;
         lastSeq.current = fx.seq;
         let playerDmg = 0;
+        // Phase 102 — VITAE the brood took this phase. Its own event, because
+        // the engine resolves the bite outside the `!hindered` gate: a phase
+        // the player denied can still cost health (burn-day audit 3.3).
+        let addBite = 0;
         let enemyDmg = 0;
         let denied = false;
         let threatFired = false;
@@ -600,6 +629,8 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
         for (const e of fx.events) {
             if (e.kind === 'damage-dealt') {
                 if (e.target === 'self') playerDmg += e.amount; else enemyDmg += e.amount;
+            } else if (e.kind === 'add-bit') {
+                addBite += e.dealt;
             } else if (e.kind === 'dot-tick') {
                 ticks.push({ side: e.target === 'self' ? 'player' : 'enemy', amount: e.amount });
             } else if (e.kind === 'phase-resolved' && e.mark === 'clear') {
@@ -642,11 +673,15 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
         //     (100ms — the shared delay baked into the shake/flash hook calls
         //     below). The medallion-side beats (recoil/flash/squash/slash/
         //     float/haptic) fire in `PlayerMedallion` off the same event stream.
-        if (playerDmg > 0) {
+        const playerTook = playerDmg + addBite;
+        if (playerTook > 0) {
             // Normalise the hit to its share of max HP so a 4-dmg chip and a 40-dmg
             // crusher no longer feel identical — every beat scales off `norm`.
-            const norm = Math.min(1, playerDmg / Math.max(1, player.maxHp));
-            if (!reduceMotion.current) {
+            const norm = Math.min(1, playerTook / Math.max(1, player.maxHp));
+            if (!reduceMotion.current && playerDmg > 0) {
+                // The lunge belongs to the FOE's own blow. A denied foe did not
+                // lunge — its brood bit — so a bite-only phase shakes the board
+                // without animating a swing that never happened.
                 const lunge = 8 + norm * 10;        // 8–18px enemy lunge apex
                 enemyScale.value = withSequence(withTiming(0.97, { duration: 90 }), withTiming(1 + norm * 0.08, { duration: 120 }), withTiming(1, { duration: 200 }));
                 enemyShift.value = withSequence(withTiming(-6, { duration: 90 }), withTiming(lunge, { duration: 120 }), withTiming(0, { duration: 220 }));
@@ -655,9 +690,16 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
             // gate their own reduced-motion internally, so this call is
             // unconditional (the hook no-ops when appropriate).
             setDamageTick((prev) => ({ key: prev.key + 1, norm }));
+            // The foe's own blow was held but the brood still took VITAE: the
+            // word DENIED is still true and still worth knowing, and it must
+            // never stand alone. Same honesty rule `IntentIcon`'s wall-math
+            // readout follows (burn-day audit 3.3).
+            if (playerDmg === 0 && (denied || (threatFired && enemy.intent.damage > 0))) {
+                pushEnemy(`DENIED · BROOD −${addBite}`, '#d9b44a', 0);
+            }
         } else if (denied || (threatFired && enemy.intent.damage > 0)) {
-            // (b) the turn resolved with no damage to the player → DENIED flourish
-            //     over the enemy (teaches "variety / guard denies the turn").
+            // (b) the turn resolved with no damage to the player at all → DENIED
+            //     flourish over the enemy (teaches "variety / guard denies the turn").
             pushEnemy('DENIED', '#d9b44a', 0);
         }
         // (d-symmetric) the player's APPLY landed on the enemy → flinch + float.
@@ -690,8 +732,10 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
     const enemyArt = getEncounterEnemyArt(enemy.artKey, enemy.artNonce);
 
     // Region-keyed arena backdrop (phase 83) — falls back to the neutral
-    // desolation plate for a region with no rule of its own. As of phase 103
-    // no LIVE region takes that path; see `assets/images/combat/index.ts`.
+    // desolation plate for a region with no rule of its own. The Northern
+    // Forest is the one live region still on that path: it has no plate yet.
+    // See `assets/images/combat/index.ts` and the AWAITING_PLATE list in its
+    // test, which pins that count in both directions (burn-day audit 3.11).
     const arenaBg = arenaBackdropFor(region);
     const arenaAlt = arenaAltTextFor(region);
 
@@ -709,7 +753,16 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
                     testID="combat-arena-backdrop"
                 />
                 <Animated.View style={[StyleSheet.absoluteFillObject, enemyAnim]}>
-                    <View style={styles.enemyFigureWrap}>
+                    <View
+                        style={[
+                            styles.enemyFigureWrap,
+                            // Live anchor: 14pt tucked under the HUD's measured
+                            // full-width block. The static top in the stylesheet
+                            // is only the pre-layout fallback.
+                            hudBlockH > 0 ? { top: topInset + COMBAT_HUD_PAD_TOP + hudBlockH - 14 } : null,
+                        ]}
+                        testID="combat-enemy-figure-wrap"
+                    >
                         {/* grounding shadow so the alpha-matted figure sits ON the floor.
                             It stays OUTSIDE the idle wrapper: the shadow is the floor's,
                             not the creature's, so the figure breathes over a planted
@@ -781,49 +834,65 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
 
             {/* ── layer 2: top HUD ── */}
             <View
-                style={[styles.hud, { paddingTop: topInset + 8 }]}
+                style={[styles.hud, { paddingTop: topInset + COMBAT_HUD_PAD_TOP }]}
                 pointerEvents="box-none"
                 onLayout={(e) => onHudLayout?.(e.nativeEvent.layout.height)}
                 testID="combat-hud"
             >
-                <View style={styles.hudNameRow} pointerEvents="box-none">
-                    <Text style={styles.enemyName} numberOfLines={1}>{enemy.name}</Text>
-                    {metaLine ? <Text style={styles.hudMeta} allowFontScaling={false}>{metaLine}</Text> : null}
+                {/* The HUD's FULL-WIDTH block — name row, VITAE bar, alt-win
+                    meters. Measured on its own because the enemy figure anchors
+                    under it: these are the rows that lie edge to edge across the
+                    painting, while `hudUnderBar` below is a narrow right-hand chip
+                    column (the brood's chips included) that the top scrim already
+                    carries. Anchoring the figure to the WHOLE HUD instead would
+                    drag its top down past that column and collapse the foe to a
+                    thumbnail. `onHudLayout` above still reports the whole HUD —
+                    the board's dock spacer, the LOG toggle and the tutorial coach
+                    must keep clearing the chips too. */}
+                <View
+                    pointerEvents="box-none"
+                    onLayout={(e) => setHudBlockH(e.nativeEvent.layout.height)}
+                    testID="combat-hud-block"
+                >
+                    <View style={styles.hudNameRow} pointerEvents="box-none">
+                        <Text style={styles.enemyName} numberOfLines={1}>{enemy.name}</Text>
+                        {metaLine ? <Text style={styles.hudMeta} allowFontScaling={false}>{metaLine}</Text> : null}
+                    </View>
+                    <EnemyHpBar pct={enemy.hpPct} value={enemy.hp} max={enemy.maxHp} />
+                    {/* WI-5 — alt-win meters (PLEA → relent, CHARGE → oratory) */}
+                    {enemy.swayVisible ? (
+                        <AltWinMeter glyph="🕊" label="PLEA" value={enemy.sway} target={enemy.swayTarget} color={AXM.sulfur} testID="combat-sway-meter" outcome="RELENT" />
+                    ) : null}
+                    {enemy.premiseVisible ? (
+                        <AltWinMeter glyph="☞" label="CHARGE" value={enemy.premises} target={enemy.premiseAt} color={AXM.sulfur} testID="combat-premise-meter" outcome="CONDEMN" />
+                    ) : null}
+                    {/* THE BIG NUMBERS REWRITE — FLAY rides the FOE: how open it is
+                        to the next few hits. No target to fill toward, so the tally
+                        renders bare (the AltWinMeter's target-0 shape). */}
+                    {enemy.flayVisible ? (
+                        <AltWinMeter glyph="✂" label="FLAY" value={enemy.flay} target={0} color={AXM.rust} testID="combat-flay-meter" />
+                    ) : null}
+                    {/* Phase 2 (spec 30) — the status kill-path foresight. Makes the
+                        DoT win path foreseeable instead of invisible accumulation:
+                        a plain pending tally once stacks land, a "LETHAL IN N" call
+                        once they alone clear remaining HP. Playtest fix 2026-09-04:
+                        the tally prints the REAL pending figure (the fill bar clamps
+                        on its own — "45/45" while 240 was queued hid the surplus),
+                        and a foe whose REGROW/RAVENOUS keeps the stack from ever
+                        crossing says so instead of a bare, misleading DOT PENDING. */}
+                    {enemy.pendingDot > 0 ? (
+                        <AltWinMeter
+                            glyph="☠"
+                            label={enemy.isLethalInFlight
+                                ? `LETHAL IN ${enemy.roundsToKill}`
+                                : enemy.healPerRound > 0 ? `DOT PENDING · HEALS ${enemy.healPerRound}/RD` : 'DOT PENDING'}
+                            value={enemy.pendingDot}
+                            target={enemy.hp}
+                            color={AXM.blood}
+                            testID="combat-lethality-meter"
+                        />
+                    ) : null}
                 </View>
-                <EnemyHpBar pct={enemy.hpPct} value={enemy.hp} max={enemy.maxHp} />
-                {/* WI-5 — alt-win meters (PLEA → relent, CHARGE → oratory) */}
-                {enemy.swayVisible ? (
-                    <AltWinMeter glyph="🕊" label="PLEA" value={enemy.sway} target={enemy.swayTarget} color={AXM.sulfur} testID="combat-sway-meter" outcome="RELENT" />
-                ) : null}
-                {enemy.premiseVisible ? (
-                    <AltWinMeter glyph="☞" label="CHARGE" value={enemy.premises} target={enemy.premiseAt} color={AXM.sulfur} testID="combat-premise-meter" outcome="CONDEMN" />
-                ) : null}
-                {/* THE BIG NUMBERS REWRITE — FLAY rides the FOE: how open it is
-                    to the next few hits. No target to fill toward, so the tally
-                    renders bare (the AltWinMeter's target-0 shape). */}
-                {enemy.flayVisible ? (
-                    <AltWinMeter glyph="✂" label="FLAY" value={enemy.flay} target={0} color={AXM.rust} testID="combat-flay-meter" />
-                ) : null}
-                {/* Phase 2 (spec 30) — the status kill-path foresight. Makes the
-                    DoT win path foreseeable instead of invisible accumulation:
-                    a plain pending tally once stacks land, a "LETHAL IN N" call
-                    once they alone clear remaining HP. Playtest fix 2026-09-04:
-                    the tally prints the REAL pending figure (the fill bar clamps
-                    on its own — "45/45" while 240 was queued hid the surplus),
-                    and a foe whose REGROW/RAVENOUS keeps the stack from ever
-                    crossing says so instead of a bare, misleading DOT PENDING. */}
-                {enemy.pendingDot > 0 ? (
-                    <AltWinMeter
-                        glyph="☠"
-                        label={enemy.isLethalInFlight
-                            ? `LETHAL IN ${enemy.roundsToKill}`
-                            : enemy.healPerRound > 0 ? `DOT PENDING · HEALS ${enemy.healPerRound}/RD` : 'DOT PENDING'}
-                        value={enemy.pendingDot}
-                        target={enemy.hp}
-                        color={AXM.blood}
-                        testID="combat-lethality-meter"
-                    />
-                ) : null}
                 <View style={styles.hudUnderBar} pointerEvents="box-none">
                     {/* hidden-stance read — badge only, no text telegraph */}
                     <Text
@@ -862,7 +931,11 @@ const useStyles = makeStyles((AXM) => ({
     // Battlefield band — the scene fills the top ~62% and fades into the floor.
     sceneBand: { position: 'absolute', top: 0, left: 0, right: 0, height: '62%', backgroundColor: AXM.bg },
     // Enemy painting — anchored to the band's lower half, clear of the HUD; the
-    // grounding shadow hugs its feet.
+    // grounding shadow hugs its feet. This `top` is the PRE-LAYOUT FALLBACK
+    // only: once the HUD's full-width block reports its height the wrap
+    // overrides it with the measured anchor (see `combat-hud-block`), so a
+    // taller stack of meters pushes the figure down instead of being painted
+    // across its head.
     enemyFigureWrap: { position: 'absolute', left: 0, right: 0, top: COMBAT_HUD_HEIGHT - 14, bottom: '9%', alignItems: 'center', justifyContent: 'flex-end' },
     enemyShadow: { position: 'absolute', bottom: -12 },
     // The idle-breath wrapper fills its parent so the figure's percentage

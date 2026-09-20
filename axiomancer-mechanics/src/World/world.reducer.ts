@@ -59,6 +59,14 @@ function findNode(map: MapState, nodeId: NodeId): MapNode | undefined {
  * higher-level orchestrator in `Game/world.orchestrator.ts`, since the world
  * reducer is purely WorldState-shaped and the player lives at the
  * `GameState` level.
+ *
+ * THIS IS THE ARRIVAL VERB, and arriving is what a MapEvent fires on. The
+ * move therefore records the debt — `pendingArrival` — which `resolveMapEvent`
+ * clears when the arrival is answered (burn-day audit 2026-09-19 row 3.1
+ * follow-up). Being PLACED on a node is a different act with a different
+ * verb (`placeOnNode` / `teleportToNode`), and those clear the field: a
+ * fixture or a dev jump stands the player somewhere, it does not walk them
+ * there, so nothing is owed.
  */
 export function moveToNode(state: WorldState, nodeId: NodeId): WorldState {
     const map = state.currentMap;
@@ -93,7 +101,7 @@ export function moveToNode(state: WorldState, nodeId: NodeId): WorldState {
     }
     return {
         ...state,
-        currentMap: { ...map, currentNode: nodeId },
+        currentMap: { ...map, currentNode: nodeId, pendingArrival: nodeId },
     };
 }
 
@@ -352,7 +360,9 @@ export function teleportToNode(state: WorldState, nodeId: NodeId): WorldState {
         throw new IllegalMoveError(`teleportToNode: '${nodeId}' is unknown on map '${map.name}'.`);
     }
     if (map.currentNode === nodeId) return state;
-    return { ...state, currentMap: { ...map, currentNode: nodeId } };
+    // A teleport PLACES the player (the Oubliette's eject, a waystone recall):
+    // no door was walked, so no arrival is owed at the far end.
+    return { ...state, currentMap: { ...map, currentNode: nodeId, pendingArrival: null } };
 }
 
 /**
@@ -581,6 +591,14 @@ export function auditRouteCoverage(
  * Throws `IllegalMoveError` only when `nodeId` is not on the current map.
  *
  * Mobile's `/dev` WORLD → JUMP row delegates here.
+ *
+ * BEING PLACED IS NOT ARRIVING, and this verb says so in the state it writes:
+ * `pendingArrival` is cleared (burn-day audit 2026-09-19 row 3.1 follow-up).
+ * Placement un-consumes the node so its content is live for a tester, and
+ * before the debt was recorded explicitly that "live, unconsumed node under
+ * the player" was indistinguishable from an arrival nobody had answered —
+ * the exploration screen fired the fixture's boss gate on mount and the map
+ * was never seen. `no event fired` above is the contract; this keeps it.
  */
 export function placeOnNode(state: WorldState, nodeId: NodeId): WorldState {
     const map = state.currentMap;
@@ -593,6 +611,7 @@ export function placeOnNode(state: WorldState, nodeId: NodeId): WorldState {
     const placed: MapState = {
         ...map,
         currentNode: nodeId,
+        pendingArrival: null,
         lockedNodes: without(map.lockedNodes),
         completedNodes: without(map.completedNodes),
         consumedNodes: without(map.consumedNodes),

@@ -99,7 +99,7 @@ const SEAL_LABELS: Record<GlyphPayload['kind'], string> = { poison: 'Poison Seal
 // `ENEMY_KEYWORD_COLOR` (iron grey, "a property of the thing you are hitting")
 // and NOT `SEAL_COLOR` (gold, "a charged token of yours"): an add is a live
 // THING ON THE BOARD that acts against you, so it borrows the threat register.
-const ADD_COLOR = '#b4543f';
+export const ADD_COLOR = '#b4543f';
 const ADD_GLYPH = '•';
 
 /** THE BIG NUMBERS REWRITE — a silhouette per ENEMY keyword, so the foe's
@@ -983,8 +983,12 @@ function stanceCheckVM(
 
 // ── The enemy's played "card" (the after-the-fact reveal) ────────────────────
 
-/** One structured line off the resolved threat action ("6 DAMAGE", "POISON ×2"). */
-export interface EnemyActionLineVM { text: string; color: string }
+/** One structured line off the resolved threat action ("6 DAMAGE", "POISON ×2").
+ *  `source` says whose payload it is: a `telegraph` line is the foe's OWN
+ *  announced action (struck through on the card when the player denied it), a
+ *  `brood` line is what the adds took anyway. The brood bites outside the
+ *  engine's `!hindered` gate, so a brood line must never read as averted. */
+export interface EnemyActionLineVM { text: string; color: string; source: 'telegraph' | 'brood' }
 
 /**
  * What the enemy just did, shaped as a card the player can read for a beat
@@ -1003,9 +1007,15 @@ export interface EnemyActionCardVM {
      *  payload is the `lines` below, so printing both reads as a stutter). */
     actionText: string;
     lines: EnemyActionLineVM[];
-    /** The player's control HELD — the action never fired. `lines` then reads
-     *  as what was averted, not what landed. */
+    /** The foe's OWN blow never fired — the player's control held it. This is
+     *  narrower than "nothing landed": the brood bites OUTSIDE the engine's
+     *  `!hindered` gate, so `addDealt` below can still be positive on a denied
+     *  phase. `telegraph` lines read as what was averted; `brood` lines read as
+     *  what landed regardless. */
     denied: boolean;
+    /** VITAE the brood took during this phase — 0 when there was no brood on
+     *  the board, or when the wall soaked all of it. */
+    addDealt: number;
 }
 
 /** `buildThreatAction` prints `${actionText} (${parts}).` — keep the sentence,
@@ -1020,7 +1030,7 @@ function stripThreatPayload(description: string): string {
 function enemyActionLines(effects: readonly CombatThreatEffect[]): EnemyActionLineVM[] {
     const lines: EnemyActionLineVM[] = [];
     for (const e of effects) {
-        if (e.damage && e.damage > 0) lines.push({ text: `${e.damage} DAMAGE`, color: INTENT_ICONS.damage.color });
+        if (e.damage && e.damage > 0) lines.push({ text: `${e.damage} DAMAGE`, color: INTENT_ICONS.damage.color, source: 'telegraph' });
         if (e.effectId) {
             const effect = lookupEffect(e.effectId);
             const kw = keywordForEffect(e.effectId) ?? effect?.name ?? e.effectId;
@@ -1028,14 +1038,15 @@ function enemyActionLines(effects: readonly CombatThreatEffect[]): EnemyActionLi
             lines.push({
                 text: `${kw.toUpperCase()}${intensity > 1 ? ` ×${intensity}` : ''}`,
                 color: effect ? effectGlyph(effect).color : INTENT_ICONS.debuff.color,
+                source: 'telegraph',
             });
         }
-        if (e.enemyHeal && e.enemyHeal > 0) lines.push({ text: `HEALS ${e.enemyHeal}`, color: INTENT_ICONS.buff.color });
-        if (e.enemyCleanse && e.enemyCleanse > 0) lines.push({ text: `SHEDS ${e.enemyCleanse}`, color: INTENT_ICONS.buff.color });
-        if (e.swayCleanse && e.swayCleanse > 0) lines.push({ text: `−${e.swayCleanse} PLEA`, color: INTENT_ICONS.debuff.color });
-        if (e.premiseShed && e.premiseShed > 0) lines.push({ text: `−${e.premiseShed} PREMISE`, color: INTENT_ICONS.debuff.color });
-        if (e.glyphShatter) lines.push({ text: 'SHATTERS A GLYPH', color: INTENT_ICONS.debuff.color });
-        if (e.curseCardId) lines.push({ text: 'CURSES YOUR DECK', color: INTENT_ICONS.debuff.color });
+        if (e.enemyHeal && e.enemyHeal > 0) lines.push({ text: `HEALS ${e.enemyHeal}`, color: INTENT_ICONS.buff.color, source: 'telegraph' });
+        if (e.enemyCleanse && e.enemyCleanse > 0) lines.push({ text: `SHEDS ${e.enemyCleanse}`, color: INTENT_ICONS.buff.color, source: 'telegraph' });
+        if (e.swayCleanse && e.swayCleanse > 0) lines.push({ text: `−${e.swayCleanse} PLEA`, color: INTENT_ICONS.debuff.color, source: 'telegraph' });
+        if (e.premiseShed && e.premiseShed > 0) lines.push({ text: `−${e.premiseShed} PREMISE`, color: INTENT_ICONS.debuff.color, source: 'telegraph' });
+        if (e.glyphShatter) lines.push({ text: 'SHATTERS A GLYPH', color: INTENT_ICONS.debuff.color, source: 'telegraph' });
+        if (e.curseCardId) lines.push({ text: 'CURSES YOUR DECK', color: INTENT_ICONS.debuff.color, source: 'telegraph' });
     }
     return lines;
 }
@@ -1065,14 +1076,22 @@ export function selectEnemyActionCard(
     if (description.length === 0) return null;
     const effects = fired ? fired.effects : phase?.threatAction.effects ?? [];
     const meta = INTENT_ICONS[(phase?.intentType ?? 'pass') as CombatIntentType];
+    // Phase 102 — the brood bites in its own `add-bit` event, outside the
+    // engine's `!hindered` gate. A card built from the telegraph alone called
+    // a phase that cost real VITAE "denied — none of it landed" (burn-day
+    // audit 3.3), so the bite rides here as a line of its own.
+    const addDealt = events.reduce((n, e) => (e.kind === 'add-bit' ? n + e.dealt : n), 0);
+    const lines = enemyActionLines(effects);
+    if (addDealt > 0) lines.push({ text: `BROOD −${addDealt}`, color: ADD_COLOR, source: 'brood' });
     return {
         phaseIndex,
         icon: meta.icon,
         label: phase?.intentLabel ?? meta.label,
         color: meta.color,
         actionText: stripThreatPayload(description),
-        lines: enemyActionLines(effects),
+        lines,
         denied,
+        addDealt,
     };
 }
 
@@ -1090,6 +1109,18 @@ export function selectEnemyActionCard(
  * over the combatant (null = log only), so the two surfaces can never drift
  * apart. Events with no line here are handled elsewhere (damage, DoT ticks,
  * status applications) and are deliberately absent rather than duplicated.
+ *
+ * Corrected 2026-09-20 (burn-day audit 3.4): that last sentence was read as
+ * blanket permission, and four kinds the engine emits were handled NOWHERE
+ * else — the brood's `add-spawned` / `add-bit` / `add-struck` and the strike's
+ * `effect-fizzled` all fell to `default:` and vanished from the log, the
+ * history and the float layer at once. "Absent because it is handled
+ * elsewhere" is only honest when the other surface actually exists and can be
+ * named. `add-bit` is the shape of the exception: it belongs in the LOG,
+ * which nothing else writes, and NOT in the float layer, which the pilgrim's
+ * medallion and the pane's `DENIED · BROOD −N` already own (audit 3.3) —
+ * hence a line with `float: null`. A kind with no arm at all must be one no
+ * surface narrates.
  */
 export interface CombatLogLineVM {
     kind: CombatEvent['kind'];
@@ -1208,6 +1239,67 @@ export function selectCombatLogLines(events: readonly CombatEvent[]): CombatLogL
                     float: null,
                 });
                 break;
+            // ── Phase 102 (SUMMON) — the brood, narrated (burn-day audit 3.4)
+            //
+            // The engine emitted all three of these plus the strike's refusal
+            // into `state.log` and this switch had no arm for any of them, so
+            // they fell to `default:` and the log, the history and the float
+            // layer went silent together. A player ate a bite, watched VITAE
+            // fall, and found nothing anywhere naming what took it.
+            //
+            // Deliberately NOT led by the word SUMMON: a STAGE that grants the
+            // keyword emits `enemy-keyword-fired` with the face string
+            // `SUMMON 2` on the very boundary this wave spawns on, and two
+            // sentences opening on the same word is the duplication this
+            // docblock forbids.
+            case 'add-spawned': {
+                const n = e.addIds.length;
+                out.push({
+                    kind: e.kind, side: 'enemy', color: ADD_COLOR,
+                    text: `The foe fields ${n} more ${n === 1 ? 'body' : 'bodies'}. Each bites you for ${e.bite} every phase, even while the foe is denied.`,
+                    float: `BROOD +${n}`,
+                });
+                break;
+            }
+            // Both numbers, because the wall math is the decision the readout
+            // is asking the player to make. LOG-ONLY on purpose: the bite's
+            // float already lives on the pilgrim's own medallion, in this
+            // colour, and rides the pane's `DENIED · BROOD −N` composite
+            // (audit 3.3) — a token here would be a third shout for one bite,
+            // pushed over the FOE's pane at that.
+            case 'add-bit': {
+                const soaked = Math.max(0, e.raw - e.dealt);
+                out.push({
+                    kind: e.kind, side: 'player', color: ADD_COLOR,
+                    text: soaked > 0
+                        ? `The brood bites for ${e.raw} — your wall eats ${soaked}. You take ${e.dealt}.`
+                        : `The brood bites for ${e.raw}. You take ${e.dealt}.`,
+                    float: null,
+                });
+                break;
+            }
+            // `e.cost` is the engine's `STRIKE_ADD_COST` riding on the event —
+            // read off the event, never restated here, so a re-price moves the
+            // sentence with it.
+            case 'add-struck':
+                out.push({
+                    kind: e.kind, side: 'enemy', color: ADD_COLOR,
+                    text: `${e.name} is struck down. ◆${e.cost} spent.`,
+                    float: 'STRUCK',
+                });
+                break;
+            // A refused action, in the engine's OWN words (`need 2 ◆ Conviction
+            // (have 0)`) — never re-worded or re-cased here, or the two
+            // vocabularies drift. Log-only: this fires from two dozen sites
+            // (an empty discard, no glyph to charge, an unaffordable
+            // signature), and a float would carpet the board on every mis-tap.
+            case 'effect-fizzled':
+                out.push({
+                    kind: e.kind, side: 'player', color: GLYPH_COLORS.thorns,
+                    text: `Refused — ${e.message}.`,
+                    float: null,
+                });
+                break;
             default:
                 break;
         }
@@ -1252,11 +1344,17 @@ export function selectCombatLogHistory(state: CombatEncounterState): CombatLogHi
     const out: CombatLogHistoryEntryVM[] = [];
     let seq = 0;
     let lastTurn: number | null = null;
+    // Phase 102 — the engine pushes `add-bit` immediately before the phase's
+    // own `phase-resolved`, so anything seen since the last phase boundary
+    // belongs to the phase about to be marked. Scoped, never cumulative: a
+    // bite in an earlier phase must not colour a later DENIED (audit 3.3).
+    let biteThisPhase = 0;
     const push = (side: CombatLogHistoryEntryVM['side'], color: string, text: string) => {
         seq += 1;
         out.push({ id: `log-${seq}`, side, color, text });
     };
     for (const e of events) {
+        if (e.kind === 'add-bit') biteThisPhase += e.dealt;
         switch (e.kind) {
             // A turn boundary — the divider, then the tray's own dice summary.
             // Derived off the same event: `startTurn` emits exactly one of
@@ -1305,8 +1403,15 @@ export function selectCombatLogHistory(state: CombatEncounterState): CombatLogHi
                 break;
             // 'overwhelmed' phases already read through 'threat-fired'; the
             // DENIED half of the story (mark === 'clear') is otherwise silent.
+            // DENIED means the foe's OWN blow was held — never "nothing
+            // landed", because a live brood bites through a hindered phase.
             case 'phase-resolved':
-                if (e.mark === 'clear') push('player', GLYPH_COLORS.statup, `PHASE ${e.phaseIndex} — DENIED.`);
+                if (e.mark === 'clear') {
+                    push('player', GLYPH_COLORS.statup, biteThisPhase > 0
+                        ? `PHASE ${e.phaseIndex} — DENIED, but the brood bit you for ${biteThisPhase}.`
+                        : `PHASE ${e.phaseIndex} — DENIED.`);
+                }
+                biteThisPhase = 0;
                 break;
             // Same wording the open stance-check telegraph resolves to
             // (`stanceCheckVM` above) — one vocabulary, never two.

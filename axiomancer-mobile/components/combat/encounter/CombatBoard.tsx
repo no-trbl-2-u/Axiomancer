@@ -277,10 +277,13 @@ export const HAND_FAN_BOARD_EDGE = 12;
  * + 5    `plateBand.gap` (pip → text)
  * = 17.5
  *
- * Exported so the fan and its tests read ONE number. If any of those four
- * styles moves, this constant and `CombatBoard.handfan.test.tsx`'s derivation
- * assertion move with it — the test re-sums them independently so a silent
- * drift fails the gate rather than quietly re-clipping the names.
+ * Exported so the fan and its tests read ONE number, and gated for real:
+ * `CombatBoard.handfan.test.tsx` renders {@link useCombatBoardStyles} and sums
+ * `faceCard.borderWidth + plateBand.paddingHorizontal + plateRarityPip.width +
+ * plateBand.gap` off the SHIPPED sheet, so moving any one of those four styles
+ * turns this constant red instead of quietly re-clipping every name. (Until
+ * the 2026-09-20 burn-day audit that test re-typed the four numbers as
+ * literals beside the constant — a tautology that could never fail.)
  */
 export const NAME_BAND_LEFT_CHROME = 17.5;
 
@@ -1257,9 +1260,16 @@ export const CombatBoard = React.memo(function CombatBoard({
                 .onUpdate((e) => { gx.value = e.absoluteX; gy.value = e.absoluteY; })
                 .onEnd((e) => { runOnJS(endJS)(e.absoluteX, e.absoluteY); })
                 .onFinalize((e, ok) => { if (!ok) runOnJS(endJS)(-1, -1); });
-            const tap = Gesture.Tap().maxDistance(9).onEnd(() => {
-                if (from === 'hand') runOnJS(inspectJS)(uid); else runOnJS(unstageJS)(uid);
-            });
+            // `withTestId` is RNGH's own test affordance and is inert in
+            // production — the registry only stores the id under Jest. It is
+            // what lets a suite drive this real `Exclusive(pan, tap)` and
+            // assert the tap-to-read hatch the board advertises actually
+            // reaches `onInspect`; `from` pins which branch fired.
+            const tap = Gesture.Tap().maxDistance(9)
+                .withTestId(`combat-card-tap-${from}-${uid}`)
+                .onEnd(() => {
+                    if (from === 'hand') runOnJS(inspectJS)(uid); else runOnJS(unstageJS)(uid);
+                });
             g = Gesture.Exclusive(pan, tap);
             gestureCacheRef.current.set(key, g);
         }
@@ -1544,14 +1554,16 @@ export const CombatBoard = React.memo(function CombatBoard({
                             </Animated.Text>
                         ) : null}
                         {stagedCards.length > 0 && !stagedCards.some((c) => assignedDieFor(c.uid)) && !cardDragLive && !dropReject.reason ? (
-                            <Text style={styles.stageHint} numberOfLines={1}>
-                                {/* CB-handfan, the precedent's second half: a fanned card's
-                                    name can still wrap to two lines inside its sliver, so the
-                                    board states the escape hatch the way RouteSelect did
-                                    (8f3acef7, "TAP A CARD TO READ IT"). The tap path is
-                                    already wired — it was simply never advertised outside the
-                                    accessibilityHint, where a sighted player never meets it. */}
-                                {deadTray ? 'no die matches your hand — APPLY · FREE still works' : 'drag a die onto your card · APPLY to commit · tap a card to read it'}
+                            <Text style={styles.stageHint} numberOfLines={1} testID="combat-stage-hint">
+                                {/* This line is for the card already lifted out of the fan.
+                                    The tap-to-read hatch used to be tacked on here too, which
+                                    put it 67 chars into a `numberOfLines={1}` line (RN
+                                    ellipsizes the TAIL, so the hatch was the clause that got
+                                    dropped) and, worse, only ever showed it AFTER a card was
+                                    staged — past the moment the player needed it to choose
+                                    which occluded card to lift. It now lives on the fan, at
+                                    `styles.fanHint` below. */}
+                                {deadTray ? 'no die matches your hand — APPLY · FREE still works' : 'drag a die onto your card · APPLY to commit'}
                             </Text>
                         ) : null}
                     </View>
@@ -1674,6 +1686,20 @@ export const CombatBoard = React.memo(function CombatBoard({
                         </Defs>
                         <Circle cx={50} cy={30} r={55} fill="url(#axmFanGlow)" />
                     </Svg>
+                    {/* CB-handfan, the precedent's second half (RouteSelect 8f3acef7,
+                        "TAP A CARD TO READ IT"): every fanned card but the last is
+                        covered, so its name is capped to `handNamePeek` and reads
+                        short. The escape hatch belongs HERE — on the fan, while the
+                        clipped names are what the player is looking at — not in the
+                        staged line, which only appears once a card has already been
+                        chosen. `fan.length > 1` is exactly the condition under which
+                        a `namePeek` cap is applied below, so the hint shows precisely
+                        when a name is being clipped. */}
+                    {fan.length > 1 && !cardDragLive ? (
+                        <Text style={styles.fanHint} numberOfLines={1} testID="combat-tap-hint">
+                            tap a card to read it
+                        </Text>
+                    ) : null}
                     <View style={styles.fan} testID="combat-hand" pointerEvents="box-none">
                         {fan.map((card, i) => (
                             <GestureDetector key={card.uid} gesture={handCardGesture(card)}>
@@ -2049,7 +2075,12 @@ function HandCard({ card, namePeek = null }: { card: CombatCardVM; namePeek?: nu
     return <CombatCardFace card={card} width={HAND_CARD_W} height={HAND_CARD_H} namePeek={namePeek} />;
 }
 
-const useStyles = makeStyles((AXM) => ({
+/**
+ * The board's stylesheet, exported so a test can gate the numbers that
+ * {@link NAME_BAND_LEFT_CHROME} sums against the sheet the board actually
+ * renders with. Every call site inside this file still reads `useStyles`.
+ */
+export const useCombatBoardStyles = makeStyles((AXM) => ({
     // S1-board-C12 — the fight fits the phone. The board is the viewport: any
     // floating chrome that bleeds past its edge (the END disc's backing glow,
     // an over-wide consequence line) is clipped here instead of widening the
@@ -2204,6 +2235,14 @@ const useStyles = makeStyles((AXM) => ({
         ...StyleSheet.absoluteFillObject, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center',
         paddingLeft: HAND_FAN_LEFT, paddingRight: HAND_FAN_RIGHT, paddingBottom: 20,
     },
+    // The fan's tap-to-read hatch. Absolutely positioned across the top of the
+    // dock so it costs the fan no layout: the 176pt cards sit flush to the
+    // dock's 20pt bottom padding, leaving the top 20pt of the 216pt dock free.
+    fanHint: {
+        position: 'absolute', top: 1, left: 0, right: 0, textAlign: 'center', pointerEvents: 'none',
+        fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 12,
+        color: AXM.bone, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3,
+    },
     // The hand card whose drag ghost is in flight — dimmed in place.
     handCardLifted: { opacity: 0.3 },
 
@@ -2345,3 +2384,6 @@ const useStyles = makeStyles((AXM) => ({
     paidValue: { fontFamily: FONTS.mono, fontSize: 11, lineHeight: 15, color: AXM.parchment },
     paidValueLarge: { fontSize: 15, lineHeight: 20 },
 }));
+
+/** In-file alias: the ten `const styles = useStyles()` call sites are unchanged. */
+const useStyles = useCombatBoardStyles;

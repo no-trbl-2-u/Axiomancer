@@ -446,6 +446,29 @@ describe('telemetry — folding a transcript reads the locked systems', () => {
         expect(diceEconomyBreadth(t)).toBe(3);
     });
 
+    it('counts a STRUCK ADD as Conviction SPENT — the strike tap is a sink, not a cast', () => {
+        // Audit 3.8. Phase 102 (SUMMON) added a second Conviction sink,
+        // `strikeAdd` (`combat.engine.ts`), which charges `STRIKE_ADD_COST` per
+        // body cleared and says so in an `add-struck` event carrying the cost.
+        // The fold read only `signature-cast`, so a fight whose only sink was
+        // the strike tap scored as ZERO Conviction use: the index PUNISHED a
+        // deck for playing the locked system, which is the opposite of what the
+        // locked-mechanics guard exists to do.
+        const events: CombatEvent[] = [
+            { kind: 'conviction-gained', amount: 12, total: 12, reason: 'unpicked-die' },
+            { kind: 'add-struck', addId: 'a1', name: 'QA Shoot', cost: 2 },
+            { kind: 'add-struck', addId: 'a2', name: 'QA Bough', cost: 2 },
+        ];
+        const t = foldObjectiveEvents(events, emptyObjectiveTelemetry());
+
+        expect(t.convictionGained).toBe(12);
+        expect(t.convictionSpent).toBe(4);
+        // A strike is a SPEND, not a CAST. `signatureCasts` is documented and
+        // read as the `signature-cast` COUNT; folding strikes into it would
+        // make that counter lie the way `convictionSpent` used to.
+        expect(t.signatureCasts).toBe(0);
+    });
+
     it('reads the LEGACY wheel too, so the comparison dice model is not scored as chain failure', () => {
         const events: CombatEvent[] = [
             { kind: 'wheel-lit', lit: ['heart'] },

@@ -10,6 +10,9 @@
  *   - only the ENEMY's turn produces a card (a player APPLY does not)
  *   - a fired phase carries its action sentence + structured payload lines
  *   - a HINDERED phase still produces a card, marked denied
+ *   - a HINDERED phase the BROOD still bit reports the bite (burn-day audit
+ *     3.3): `denied` means the foe's own blow was held, never "nothing
+ *     landed", because the engine resolves the bite outside that gate
  *   - the `buildThreatAction` parenthetical is stripped from the sentence
  *     (the payload lines carry it — printing both reads as a stutter)
  *
@@ -171,5 +174,46 @@ describe('selectEnemyActionCard: the denied phase', () => {
             stateWithPhases(),
         );
         expect(card).toBeNull();
+    });
+});
+
+describe('selectEnemyActionCard: a denied phase the brood still bit', () => {
+    // Phase 102 — the brood bites OUTSIDE the engine's `!hindered` gate, in an
+    // `add-bit` event of its own. A card read off the telegraph alone called a
+    // phase that cost real VITAE "denied", with nothing on it that landed.
+    //
+    // THE BIG NUMBERS REWRITE: the amount below is arbitrary and every
+    // assertion reads it back off the event — retune the bite and this suite
+    // is unmoved. What is pinned is that the card reports what LANDED.
+    const BIT = 8;
+    const bite = (dealt: number): CombatEvent =>
+        ({ kind: 'add-bit', addIds: ['qa-add-0', 'qa-add-1'], raw: BIT, dealt } as CombatEvent);
+    const CLEAR: CombatEvent = { kind: 'phase-resolved', phaseIndex: 2, mark: 'clear' };
+
+    it('reports what the brood took, as a line of its own', () => {
+        const card = selectEnemyActionCard([bite(BIT), CLEAR], stateWithPhases())!;
+        expect(card.denied).toBe(true);
+        expect(card.addDealt).toBe(BIT);
+        const brood = card.lines.filter((l) => l.source === 'brood');
+        expect(brood).toHaveLength(1);
+        expect(brood[0].text).toContain(String(BIT));
+    });
+
+    it('keeps the averted telegraph marked as the foe\'s own, so only it reads as averted', () => {
+        const card = selectEnemyActionCard([bite(BIT), CLEAR], stateWithPhases())!;
+        expect(card.lines.filter((l) => l.source === 'telegraph').map((l) => l.text))
+            .toEqual(['4 DAMAGE', 'POISON ×2']);
+    });
+
+    it('reports nothing landed when the wall soaked the whole bite', () => {
+        const card = selectEnemyActionCard([bite(0), CLEAR], stateWithPhases())!;
+        expect(card.addDealt).toBe(0);
+        expect(card.lines.every((l) => l.source === 'telegraph')).toBe(true);
+    });
+
+    it('a denied phase with no brood at all is unchanged', () => {
+        const card = selectEnemyActionCard([CLEAR], stateWithPhases())!;
+        expect(card.addDealt).toBe(0);
+        expect(card.lines.map((l) => l.text)).toEqual(['4 DAMAGE', 'POISON ×2']);
     });
 });

@@ -79,6 +79,12 @@ rest of this prompt is written so you do not need to ask.
    **STALE by 1 mechanics-source commit (e333fbb)** — that is §3 row 6, not
    a pre-existing condition. Do not quote SUMMON balance figures from the
    current file; its stamp names a tree without SUMMON.
+   **Corrected 2026-09-20 by row 3.6's fix:** the file's *numbers* are not
+   suspect — ten of ten mid-stage cells reproduce exactly on today's SUMMON
+   tree, so they are the Phase 102 engine's figures. What is false is the
+   *provenance*: the stamp names `5a2158a`, a tree with zero SUMMON. Cite
+   those figures as the SUMMON engine's, never as `5a2158a`'s. The alarm now
+   reads STALE by 5, not 1 — the four audit fixes landed on top of `e333fbb`.
 3. **The gates, and the hooks around them.**
    - `npm run verify --workspace axiomancer-mechanics` (type-check ×3,
      lint, vitest, build) — ~4 min. `npm run verify --workspace
@@ -169,12 +175,40 @@ reproduction and reported the numbers, not re-read by the orchestrator;
 - **Fix shape:** the save must not precede the event. Either move the
   `save()` out of `moveToAction` to *after* `resolveCurrentMapEvent`
   settles (the caller owns the sequence), or record the pending arrival in
-  the saved world so reload re-fires it. Prefer the first: it is one line
-  moved and keeps "a move is a checkpoint" true for non-encounter nodes.
-  Add the reload-past-an-encounter case to `state/e2e/exploration.engine.
-  test.ts` as the guard. **Do not** re-derive the test that now says "a
-  move IS a checkpoint" back to its old label — see 3.7 for what that
-  test's rationale must actually cite.
+  the saved world so reload re-fires it. ~~Prefer the first: it is one line
+  moved~~ — **CORRECTED while fixing this row: the first option is
+  inert, and the second is the one that holds.** Measured: moving the save
+  below the resolve persists a byte-identical world (the arrival lives only
+  in the mobile `event` slice, which `Game/store.ts` never saves), and
+  `SaveOnExit` checkpoints on `pagehide` regardless — so re-timing the
+  move's save cannot close the hole. Worse, the save's position *before*
+  the resolve is what the shipped fix leans on: below the resolve the node
+  is already in `consumedNodes` and the reload reads "arrival answered".
+  Add the reload-past-an-encounter case as the guard, and assert the
+  ENGAGED fight, not `event.pending` — `EncounterModalOverlay` auto-engages
+  on mount and `beginHazardEncounter` clears the slice on the way in, so
+  `pending` reads null before *and* after the fix. **Do not** re-derive the
+  test that now says "a move IS a checkpoint" back to its old label — see
+  3.7 for what that test's rationale must actually cite.
+- **CORRECTED AGAIN while following this row up** (`6655cf0` shipped red
+  CI; the follow-up commit is the fix). `6655cf0` said the second option
+  "needs no new persisted field: `consumedNodes` already means *this
+  arrival was answered*" and derived `arrivalPending` from an unconsumed
+  node under the player. That sentence was false and `e2e:fixture` case A
+  proved it within the day: **being PLACED on a node is not the same as
+  ARRIVING at it**, an unconsumed node cannot tell the two apart, and
+  `placeOnNode` — the state-fixture / `/dev` JUMP primitive — deliberately
+  *un-consumes* the node it places you on. So the deep link
+  `/exploration?fixture=sage-fv-boss-gate` read as an unanswered arrival,
+  fired the fv-9 boss gate on mount, and the map never rendered. The row's
+  second option ships as written after all: `MapState.pendingArrival` is a
+  real persisted field, written by the arrival verb (`moveToNode`, and
+  mobile's own move), cleared by `resolveMapEvent` when the arrival is
+  answered and by the placement verbs (`placeOnNode`, `teleportToNode`),
+  which owe nothing. Guards: the reload case above still stands
+  (`start-node-arrival.engine.test.tsx`), plus the placement twin and the
+  travel-door twin in `exploration.engine.test.ts` and the verb-level file
+  `axiomancer-mechanics/src/World/e2e/arrival-debt.engine.test.ts`.
 
 ### 3.2 [HIGH · player-visible on any SWIFT carrier · confidence 95] The SUMMON projection omits the SWIFT divisor — the brief's *ship gate* is false (Phase 102 engine)
 
@@ -183,20 +217,36 @@ reproduction and reported the numbers, not re-read by the orchestrator;
   definition, so printed and applied wall math cannot drift".
 - **True:** the engine drains GUARD under SWIFT as `guardAbsorbed =
   min(floor(guard / soakDivisor), dmg); guard -= guardAbsorbed *
-  soakDivisor` (`combat.engine.ts` ~:4287-4289). The projection's
+  soakDivisor` (`combat.engine.ts` ~:4287-4289). ~~The projection's
   Phase-102 absorption is `guardAbsorbed = Math.min(guard, remaining)`
-  (~:5977) — no divisor — so the leftover wall handed to `soakFlatHit` is
-  **overstated** and the add term **under-reported**. The shipped parity
-  suite (`summon.engine.test.ts` ~:528-582) empties or denies every
-  telegraph, so it cannot see it.
+  (~:5977)~~ — **CORRECTED while fixing this row: the site is mislabelled.**
+  The Phase-102 add term (~:5977-5984) already called `soakFlatHit`
+  correctly. The defective statement was the projection's *own telegraph*
+  soak, `const guardAbsorbed = Math.min(guard, remaining)` at ~:5966-5969 —
+  no divisor, **and no `playerArmor` either** — so the leftover wall handed
+  to `soakFlatHit` is **overstated** and the add term **under-reported**.
+  The causal chain the row states is exactly right; only the line label was
+  off. The shipped parity suite (`summon.engine.test.ts` ~:528-582) empties
+  or denies every telegraph, so it cannot see it.
 - **Evidence:** skeptic 20-cell probe (`swift × guard{0,5,10,20,40} ×
   telegraph{10,30}`, two 4-bite adds): `swift=true guard=20 tele=10 →
   projected 3, engine add-bit.dealt 8`; `swift=true guard=40 tele=30 → 3 vs
   8`. All non-SWIFT cells agree. Orchestrator re-read both sites.
-- **Latent today, live tomorrow:** The Jeweled Tree has no SWIFT (its auto
-  SWIFT was deliberately dropped). But `defaultEnemyStages` SECOND WIND
-  grants SWIFT, so the first boss/unique carrier — §8 recommends one — puts
-  this on screen as a telegraph that says 3 while the player loses 8.
+- ~~**Latent today, live tomorrow:**~~ — **CORRECTED while fixing this row:
+  the SWIFT half is latent; the armor half is LIVE TODAY.** The Jeweled Tree
+  has no SWIFT (its auto SWIFT was deliberately dropped), and
+  `defaultEnemyStages` SECOND WIND grants SWIFT, so the first boss/unique
+  carrier — §8 recommends one — would put the SWIFT half on screen. But the
+  same block also dropped the flat `playerArmor` soak, which needs no SWIFT
+  at all: the shipped Jeweled Tree against a player holding
+  `buff_damage_reduction` (body-elixir / iron-skin-draught, armor 5) reads a
+  brood bite the engine does not apply, in a band around `projectedDamage`.
+  Both halves shipped closed in one commit — divisor-only left non-SWIFT
+  armored cells lying, so the row's own prescribed guard could not be
+  written honestly. Note also that SECOND WIND bundles `gain: [{kind:
+  'swift'}]` with `threatBonus: 0.15` in the same stage object, and
+  `stageThreatBonus` is a *separate*, still-open projection omission: the
+  fix makes the staged case strictly closer, not exact.
 - **Fix shape:** apply the same divisor in the projection's own absorption
   (`floor(guard / div)` absorbed, `× div` consumed) — this also moves
   `netDamage` for SWIFT foes, which is the *correct* number and a
@@ -205,6 +255,12 @@ reproduction and reported the numbers, not re-read by the orchestrator;
   through GUARD** with SWIFT on and off, asserting `addNetDamage ===
   add-bit.dealt` cell by cell. A parity test that only tests the empty
   case is not a ship gate.
+  **AMENDED while fixing this row: the divisor alone is not enough.** The
+  same block also dropped the flat `playerArmor` soak, so divisor-only
+  leaves armored cells wrong — including **non-SWIFT** ones — and the guard
+  test this row prescribes cannot then be written honestly. Shipped as one
+  `soakFlatHit` call covering armor, divisor and wall together, which also
+  moves `netDamage` for every **armored player**, not only for SWIFT foes.
 
 ### 3.3 [HIGH · player-visible · confidence 85] Three DENIED surfaces still lie, and a bite plays no hit reaction (Phase 102 surface)
 
@@ -292,59 +348,134 @@ reproduction and reported the numbers, not re-read by the orchestrator;
   e333fbb`.
 - **Fix shape:** two commits. (1) Make the regen script refuse when
   `git status --porcelain axiomancer-mechanics/src` is non-empty, so this
-  cannot recur; add the check to `scripts/check-baseline-freshness.test.
-  mjs`. (2) Re-run `npm run baseline:regen` on a clean HEAD **after 3.2 and
+  cannot recur; guard it in `scripts/regen-deck-matrix-baseline.test.mjs`
+  — **not** in `scripts/check-baseline-freshness.test.mjs`, as this row
+  first said: that file executes in no CI job (it is reachable only through
+  the root `npm test`, which no workflow invokes), so the guard could never
+  have gone red on `main`. Landed 2026-09-20 with both baseline-stamp tests
+  wired into `.github/workflows/verify-mechanics.yml` and that job's
+  `paths:` filters widened to carry the four files, without which a
+  scripts-only change does not even trigger the job. (2) Re-run `npm run baseline:regen` on a clean HEAD **after 3.2 and
   3.8 land** (both move SUMMON cells) and stamp it with a note naming the
   causes — the brief's own risk row 8 asked for "a stamp naming BOTH
   causes" (SUMMON + the dropped SWIFT on The Jeweled Tree) and got neither.
 
-### 3.7 [MED · doctrine · confidence 95] Phase 99's persistence rationale cites a commit that does not exist and inverts which layer owns the policy
+### 3.7 [MED · doctrine · confidence 95 → REFUTED-IN-PART] Phase 99's persistence rationale inverts which layer owns the policy (the commit it cites is real)
 
 - **Claimed** (brief :80-84, `exploration.engine.test.ts` :344-361): Spec 09
   Q4 is resolved at Phase 51 (`4972f9a`) via the engine's `DURABLE_ACTIONS`
   allowlist; mobile "simply never inherited it, because it bypasses the
   reducer".
-- **True:** `git cat-file -t 4972f9a` → *Not a valid object name*. And the
-  mechanism story is backwards: mobile's `wrapDeflectingAdapter`
-  (`state/store.ts` ~:270-287) **swallows every engine autosave** unless
-  inside the explicit `store.save()` passthrough — pinned by
-  `combat-hud.engine.test.ts` ~:228-238. Dispatching `MOVE_TO_NODE` through
-  the reducer would *also* not have saved on mobile. Two contradictory
-  owners now exist: the engine allowlist and seven hand-placed `save()`
-  sites in mobile behind a comment (~:262-264, "engine auto-persists on
-  every dispatch as of 0.5.0 … saves are explicit") that is itself stale.
-- **Fix shape:** find the real commit (`git log -S'DURABLE_ACTIONS' --
-  axiomancer-mechanics/src/Game/store.ts` — the introducing hash, not the
-  two adjacent ones the orchestrator saw) and cite it; rewrite the test's
-  rationale and the brief's decision to say *"mobile owns save timing via
-  the deflecting adapter; a move is a checkpoint by mobile policy, guarded
-  here"* — which is true — and open a `plan/CRITIQUE.md` `[MED]` row for
-  the doctrine question (one owner, or two with a written rule).
+- **True, as corrected 2026-09-20 by this row's own fix:**
+  - **The citation half is REFUTED.** This row shipped saying `4972f9a`
+    "does not exist" on the strength of `git cat-file -t 4972f9a` → *Not a
+    valid object name*. That proves only that the working tree is a
+    **shallow clone** (graft `4b19f2d`, 2026-09-17): 154 of the 161
+    hash-like tokens cited across `axiomancer-mechanics/{specs,docs,
+    RELEASES.md,CHANGELOG.md}` and `plan/phases` fail identically there.
+    The commit is real on `origin` — `4972f9a39ede…`, 2026-05-19, "feat(game):
+    Phase 51 — autosave throttling via DURABLE_ACTIONS allowlist" — and all
+    four sites citing it are correct. **Commit existence cannot be settled
+    in this tree; check the remote.** Any other row in this audit whose
+    evidence is a failed `git cat-file` / `git show` / `git log -S` against
+    a pre-graft hash is suspect on the same grounds.
+  - **The mechanism half is CONFIRMED.** The story is backwards: mobile's
+    `wrapDeflectingAdapter` (`state/store.ts` ~:270-287) **swallows every
+    engine autosave**, durable actions included, unless inside the explicit
+    `store.save()` passthrough. Dispatching `MOVE_TO_NODE` through the
+    reducer would *also* not have saved on mobile. Two contradictory owners
+    exist: the engine allowlist, and **15** hand-placed `save()` sites in
+    mobile (13 checkpoints + the exposed verb + the exit flush — not the
+    "seven" this row first counted) behind a comment (~:262-264, "engine
+    auto-persists on every dispatch as of 0.5.0 … saves are explicit") that
+    is itself stale. Note the pin this row cited does not pin:
+    `combat-hud.engine.test.ts` ~:228-238 drives `START_COMBAT`, which is
+    **not** a durable action, so it passes with or without the wrapper.
+- **Fix shape (first instruction DROPPED — see above):** ~~find the real
+  commit and cite it~~ — `4972f9a` already **is** the real commit, and that
+  `git log -S` recipe cannot run in a shallow clone (it returns only the
+  graft commit), so following it would have replaced four correct citations
+  with a wrong hash. What stands: rewrite the test's rationale and the
+  brief's decision to say *"mobile owns save timing via the deflecting
+  adapter; a move is a checkpoint by mobile policy, guarded here"* — which
+  is true — and open the doctrine row (one owner, or two with a written
+  rule) in `plan/AUDIT.md` as a `[loop-call]`, per §7.
 
-### 3.8 [MED · measurement · confidence 85] The quality index scores a strike-spending fight as zero Conviction use (Phase 102 sim)
+### 3.8 [MED · measurement · confidence 85] The quality index does not count Conviction spent on the strike tap (Phase 102 sim) — FIXED
 
 - `combat.objective.telemetry.ts` ~:235 accrues `convictionSpent` only from
-  `signature-cast`; `add-struck` is invisible to it. Baseline greedy vs
-  jeweled-tree: `objectiveTelemetry.convictionSpent 36→0`, `spine
-  0.559→0.409`, `combatQuality.index 0.711→0.651`, while the sim's own
-  `avgConvictionSpent` rose 0.88→2.18. Two Conviction ledgers disagree on
-  every SUMMON row. Separately the sim's strike block (`combat.encounter.
-  sim.ts` ~:463) runs **before** the round's wall is bought, so the matrix
-  over-strikes in a known direction.
-- **Fix shape:** fold `add-struck.cost` into `convictionSpent`; move the
-  `strikeAddsAt` decision after the card pass (or evaluate it against the
-  policy's projected guard). Then 3.6's regen.
+  `signature-cast`; `add-struck` is invisible to it. Confirmed at source and
+  reproduced. Separately the sim's strike block (`combat.encounter.sim.ts`
+  ~:463) runs **before** the round's wall is bought, so the matrix
+  over-strikes in a known direction. Confirmed: on a board with guard 2 and
+  two bite-1 adds the witness paid 4 ◆ for a brood the same phase's own
+  wall (+5) took to `addNetDamage` 0.
+- **Corrections to this row, from the confirmation pass (2026-09-20).** The
+  row as first written overstated three things and they are restated here
+  rather than left standing:
+  - "scores a strike-spending fight as **zero** Conviction" is literally true
+    only when the strike tap is the fight's **only** sink — reproduced
+    (board spent 4, ledger 0). On a real jeweled-tree cell the ledger still
+    reads whatever the signature casts contributed: a 24-run greedy cell
+    charged 38 ◆, 34 of it on 17 strikes, and the ledger read 4. The defect
+    is **proportional and silent** (89.5% missing), not a flat zero.
+  - The figures `convictionSpent 36→0`, `spine 0.559→0.409`,
+    `combatQuality.index 0.711→0.651`, `avgConvictionSpent 0.88→2.18`
+    are **not reproducible** and are withdrawn. They came from a baseline
+    matrix whose stamp (`5a2158a`, measured 2026-09-19) names a tree without
+    SUMMON — the very defect §3.6 files. Direction confirmed on fresh runs;
+    magnitudes wait on §3.6's regen.
+  - "the matrix over-strikes in a known direction" is confirmed but is **not
+    board-independent**. `addNetDamage` soaks against the wall left after the
+    foe's own telegraph, so on a big brood (bite 4+9) a +5 wall changes
+    nothing and the strike was in fact correct. The honest claim, and the one
+    the guard pins, is narrower: the witness **can** pay for a brood the same
+    phase answers for free.
+  - The two Conviction ledgers do disagree on every SUMMON row, but they are
+    two different quantities: the sim's `avgConvictionSpent` is the crude
+    proxy `max(0, turn - conviction)` (`combat.encounter.sim.ts` ~:854), not
+    a sink census, and it disagrees with the fold off the SUMMON rows too.
+    Only the fold feeds the score.
+- **Fixed as:** `add-struck.cost` folded into `convictionSpent` (a spend, not
+  a cast — `signatureCasts` is left alone); the `strikeAddsAt` decision moved
+  out of the powered-play preamble to a bounded pass after the card pass and
+  the wind-down, re-projecting after each strike. The alternative the row
+  offered — "evaluate it against the policy's projected guard" — was
+  **rejected**: it would make the sim predict its own card pass, a second
+  speculative model of the thing it is about to do. Reading the wall the phase
+  actually ends holding is the truth instead of a guess. Guards:
+  `combat-objective.engine.test.ts` (fold arithmetic),
+  `combat-sim-policies.engine.test.ts` (the ledger reconciles the board; the
+  witness declines a brood its own wall answers).
+- **Still open, found here and filed rather than folded in (out of this row's
+  scope):** `omen-declared.ante` (`combat.engine.ts` ~:2825) is a **third**
+  live Conviction sink the fold still cannot see — two shipped trial cards
+  carry `anteConviction: 2` (`Cards/library/trial.cards.ts` :360, :527). The
+  docstring on `convictionSpent` names the gap.
+- The matrix's jeweled-tree cells all move on this commit — that is §3.6's
+  regen, which must FOLLOW it.
 
 ### 3.9 [MED · design-reach · confidence 95] The only SUMMON carrier cannot reach wave 2
 
-- The Jeweled Tree has no `stages` field; 21 enemies do (`KingOfRevenge`,
-  `Kudan`, `Mirac`, `RawheadRex`, `FateSpinner`, …). `ADD_WAVE_CAP = 2`
-  and the STAGE-gated second wave are therefore dead in play. Not a bug in
-  the engine (the tests drive it with a synthetic staged foe) — a coverage
-  gap the brief's Follow-ups name as "a second carrier". §8 #4 makes it the
-  first content move; note it in the SHIPPED record now.
+- The Jeweled Tree has no `stages` field; 21 shipped enemies can fire a
+  stage (`KingOfRevenge`, `Kudan`, `Mirac`, `RawheadRex`, `FateSpinner`, …)
+  and the sole SUMMON carrier is not one of them. `ADD_WAVE_CAP = 2` and
+  the STAGE-gated second wave are therefore dead in play. Not a bug in the
+  engine (the tests drive it with a synthetic staged foe) — a coverage gap
+  the brief's Follow-ups name as "a second carrier".
+  **Corrected 2026-09-20 by this row's own fix**, on two counts. (a) The
+  cross-reference was wrong: the second carrier is **§8 Block 2 item 2**,
+  not #4 (#4 is add-spawn motion in the fx layer), and it is not the first
+  content move — §8 ranks the Northern Forest arena plate ahead of it and
+  gates the carrier "after 3.2". (b) "21 enemies do" counted authored
+  `stages:` fields; every boss and unique also inherits a two-stage floor
+  from `defaultEnemyStages`, and the count survives only because each of
+  them authors its own. **Disposition:** recorded, not closed — the
+  SHIPPED record's "Engine deviations" now carries it, `plan/CRITIQUE.md`
+  has the row, and the carrier retrofit stays §8 Block 2 item 2 for a
+  content tick. §4 D-3's pin rode along.
 
-### 3.10 [MED · a11y · confidence 85] "No pair regressed" is false — `rust` text is below AA on the default theme after the palette retune
+### 3.10 [MED · a11y · confidence 85 → CONFIRMED, FIXED] "No pair regressed" is false — `rust` text is below AA on the default theme after the palette retune
 
 - Independent WCAG recompute of `4c39360^` vs current `palette.ts`: the two
   advertised gains are exact (blood/bg 4.16→5.39, 3.63→5.72). But
@@ -362,6 +493,38 @@ reproduction and reported the numbers, not re-read by the orchestrator;
   Also: the retune orphaned `CombatSummaryModal.tsx:17-19` — `defeat:
   '#e01f33'` is the *pre-retune* ashen-gold blood, now on no palette, one of
   six hex literals in that component (§4 C-5).
+- **Corrected 2026-09-20 by this row's own fix.** The finding holds; three
+  counts in the paragraph above do not.
+  - "parchment/bg fell … sulfur/bg fell … heal/bg fell" understates the
+    scale. Of the 60 readable-token pairs (6 accents × `bg`/`panelBg` × 5
+    themes), **36 moved down, not a handful** — and, against the sentence
+    this row exists to refute, **zero is the wrong number in the other
+    direction too**. Only `rust` crossed the AA line.
+  - "14 `color: AXM.rust` sites across 9 components" counts a test file.
+    The re-count is **13 production sites across 8 components**
+    (`ErrorBoundary`, `PrevSessionCrashPrompt`, `CombatFriendshipPanel` ×6,
+    `LabyrinthAccordion`, `DebugCombatDeck`, `DebugHazardButton`,
+    `DebugHazardDeckRandomize`, `DebugTriggerEncounter`); the 14th match is
+    `components/__tests__/DifficultyBadge.test.tsx`. The surface is in fact
+    *wider* than the grep, not narrower — `rust` also reaches text through
+    props (`CombatCombatantPane` `color={AXM.rust}`, `DifficultyBadge`
+    `unique`, `TapTooltip` `ACCENT_COLORS.body`).
+  - "now sit below 4.5" is exact for all three themes, but only
+    coastal-verdant **regressed across** the line (`rust/bg` 5.07 → 4.26,
+    `rust/panelBg` 4.73 → 3.97). On ashen-gold (3.92 → 3.80 / 3.72 → 3.61)
+    and ember-depths (3.87 → 3.50 / 3.67 → 3.32) `rust` was already below
+    AA before Phase 101; the retune deepened a pre-existing deficit rather
+    than creating one.
+  - Fixed by lifting `rust` lightness only — hue and saturation held, so no
+    theme's identity moves: ashen-gold `#a8562a`→`#c36431` (4.89/4.64),
+    coastal-verdant `#417f78`→`#478b83` (4.97/4.64), ember-depths
+    `#a84a22`→`#cd5a2a` (4.86/4.61). `frost-marrow` and `plague-bloom`
+    already cleared and are untouched. `READABLE_PAIRS` gained
+    `rust/bg` and `rust/panelBg`. `ash` stays excluded, for the documented
+    borders/disabled reason. The `CombatSummaryModal` hex literals were
+    deliberately left to §4 C-5 — `OUTCOME_COLOR` is module-level, outside
+    `usePalette()`, and its purple `#a86bdc` maps to no token on any theme,
+    so that cleanup is a restructure and a design call, not a rename.
 
 ### 3.11 [MED · truth-in-docs · confidence 95] "No LIVE region falls back any more" is false — the Northern Forest is live and falls back
 
@@ -391,12 +554,28 @@ reproduction and reported the numbers, not re-read by the orchestrator;
   entry carries a `coherenceFlag` — `ludgate-hill` still does — and
   `__comment` still says "the ten … (five combat arenas, five map
   backdrops)" while `_meta.scope` says twelve.
-- **Fix shape:** view the plate (`Read` the webp), decide (crop the right
-  edge via a tighter `inset`/explicit box, or record it as a
-  `coherenceFlag` like ludgate-hill), and reconcile the three `_meta`
-  sentences with `plates.length`.
+- **Fix shape (first option DROPPED — see below):** view the plate (`Read`
+  the webp), record it as a `coherenceFlag` like ludgate-hill, and
+  reconcile the three `_meta` sentences with `plates.length`.
+  **Corrected 2026-09-20 by 3.12's own fix: "crop the right edge via a
+  tighter `inset`/explicit box" is not a thing this pipeline can do.**
+  `buildPlatePage` (`axiomancer-mobile/scripts/acquire-art.mjs`) trims
+  `inset` from all FOUR sides of the block `detectPlateBox` finds, and its
+  only caller passes `entry.inset` from `art-sources.json` — there is no
+  explicit-box path. The frieze occupies the right 12.3% of the plate, so a
+  uniform inset that removed it would take the same slice off the other
+  three sides and gut the composition; an asymmetric box would be new
+  plumbing plus a re-fetch of a 4975x6472 scan the repo does not hold. It
+  would also delete the right-edge dark mass that `composition` and
+  `art-sources.json`'s `why` both name as the reason this plate was chosen
+  for the fallback slot. The two options were never symmetric: one is a
+  JSON edit, the other is a re-acquisition. Precedent runs the same way —
+  phase 103 flagged ludgate-hill rather than re-cropping it.
+  The heading's "most-seen arena" STANDS, and 3.11's fix is why: the
+  Northern Forest is a live, encounter-bearing map with no arena rule, so
+  it fights in front of this plate.
 
-### 3.13 [MED · fake gate · confidence 85] Phase 97's chrome-sum guard is hand-typed literals, the tap-to-read hint never shows on the fan it was written for, and two tests execute zero assertions
+### 3.13 [MED · fake gate · confidence 85 → CONFIRMED, FIXED] Phase 97's chrome-sum guard is hand-typed literals, the tap-to-read hint never shows on the fan it was written for, and one test executes zero assertions
 
 - `NAME_BAND_LEFT_CHROME = 17.5` is arithmetically right (`faceCard
   borderWidth 1.5 + plateBand paddingHorizontal 6 + plateRarityPip width 5
@@ -425,22 +604,78 @@ reproduction and reported the numbers, not re-read by the orchestrator;
   Phase 97's 'tap a card to read it' hint never shows for the truncated
   hand fan it was built to fix"*, with the same gate line quoted. **Close
   that row** when you fix this; do not file a second one.
+- **Corrections to this row, from the confirmation pass and the fix
+  (2026-09-20).** The row's TITLE said *two* tests execute zero
+  assertions. Measured, by instrumenting `afterEach` with
+  `expect.getState().assertionCalls` over the whole suite, exactly
+  **one** does — "states the tap hatch on the board" at 0. The other nine
+  run 1 to 7 each, including "omits maxWidth when namePeek is not passed",
+  which the title appears to have counted as the second. The title is
+  corrected above; the row's BODY was already right, it only ever
+  documented the one. The second non-gate is real but a different kind:
+  the chrome-sum test ran its one assertion and could never fail it.
+  Line numbers had rotted as §1.5 warns — the literal block was `:101-106`
+  not `~:106-111`, the zero-assertion test `:196-205` not `~:186-195`, the
+  docblock `:269-284` not `~:271-285`, the stage hint `:1546-1556` (gate on
+  `:1546`, string on `:1554`) not `~:1548`. Everything else in the row held
+  verbatim, including the arithmetic: `1.5 + 6 + 5 + 5 == 17.5` against the
+  live styles, so the constant's VALUE was right and only its guard was
+  fake — the fix leaves `NAME_BAND_LEFT_CHROME` alone.
+- **The two CRITIQUE calls this row asked for, decided 2026-09-20.** The
+  pass-42 hint row is CLOSED by this fix (one finding, closed once; no
+  second row filed). The hand-fan overlap row — at `plan/CRITIQUE.md`
+  `:760`, not `~:611` — STAYS RESOLVED and gains a residual note rather
+  than being reopened. Re-captured at 375x812 after the fix, the fan reads
+  `THIN HYMN / CHILBLA IN ... / THE LONG ... / SPOILED POULTI... /
+  CHILBLAIN WATCH`: occlusion is gone, which is what that row filed, and
+  truncation remains, which it did not. The row's prediction holds — 40.25pt
+  at 13pt/15pt affords about nine or ten uppercase glyphs over two lines, so
+  `FROSTBITTEN PALISADE` truncates. No new Pending row: the geometry lever is
+  exhausted and pinned by C11-R / C11-R2, the name box is already the peek,
+  and the escape hatch is now on the fan itself.
 
-### 3.14 [MED · dropped ship gate · confidence 85] The enemy figure is still anchored to a static HUD height — the add row can paint over the foe's head
+### 3.14 [MED · dropped ship gate · confidence 85] The enemy figure is still anchored to a static HUD height — ~~the add row can paint over the foe's head~~
+
+**PARTIAL, and fixed 2026-09-20. The headline is refuted; the anchor is
+real.** Measured at 375×812 (the pane's own stylesheet, the shipped art),
+the add chips are right-aligned at x290–363 while the figure's art is
+centre-drawn at x41–334 and tapers away from that corner: add-row coverage
+of opaque art is **0.00%** on The Jeweled Tree (the only SUMMON carrier),
+the hag and the butcher, at topInset 0 and 44 alike. The alpha check is
+reproducible straight off the asset — the source square is fully
+transparent everywhere the chip row lands, while a full-width band at the
+same height crosses 40% of the drawn art. What *does* lie across the foe is
+older chrome: FLAY 46.6%, DOT 32.6%, the keyword row 12.4%, the CHARGE
+meter 8.2%, the stance badge 7.5–9.1%. The brood is not the offender; it is
+the row that made the HUD 40pt taller than the last audit of this anchor.
 
 - Brief §1.6 called this a *prerequisite, shipped first*; the SHIPPED
   record does not mention dropping it. `CombatCombatantPane.tsx` ~:866
   `enemyFigureWrap.top: COMBAT_HUD_HEIGHT - 14` (static 148); `onLayout`
-  ~:789 only forwards to the board (whose dock spacer **is** measured), so
-  the play region moves and the figure does not. `hudRight` now stacks
-  IntentIcon + keyword row + status row + add row (3 × 34px) over a wrap
-  whose top is 134px. None of the eight `CombatBoard.adds.test.tsx` cases
-  asserts `top`.
+  ~:789 — **corrected: `:786` at `3cb4d9c`** — only forwards to the board
+  (whose dock spacer **is** measured), so the play region moves and the
+  figure does not. `hudRight` now stacks IntentIcon + keyword row + status
+  row + add row (3 × 34px) over a wrap whose top is 134px. None of the eight
+  `CombatBoard.adds.test.tsx` cases asserts `top`. **All of that is
+  confirmed** — a layout pass feeding a grown HUD left the wrap's `top` at
+  the static 134.
 - **Fix shape:** render 375×812 with PLEA + CHARGE meters, a keyword row, a
   status row and two adds; measure. If it paints over the head, anchor the
   wrap to the measured height (the pane already has the number in hand)
   and add the `top` assertion. Either way, record the deviation in the
   SHIPPED record under "Engine deviations" (§7).
+  **Corrected 2026-09-20 by this row's own fix: "the measured height" is the
+  wrong quantity.** The number `onHudLayout` carries is the WHOLE HUD, chip
+  column included (330–451pt measured), while the wrap's bottom is pinned at
+  9% of the scene band — so `top = hudH - 14` collapses the drawn foe from
+  292.5pt square to 136.5 / 94.2 / 62.5 / **20.3**pt, smaller than one status
+  chip, and worst exactly when the HUD is busiest. The brief's own step 1c
+  carries the same error and is annotated there. What shipped anchors to the
+  HUD's **full-width block** alone (`testID="combat-hud-block"`:
+  `top = topInset + COMBAT_HUD_PAD_TOP + hudBlockH - 14`) — pixel-identical
+  to today in the ordinary inset-0 case, never below 233pt, and it moves the
+  foe down precisely when the full-width bars claim the space. The deviation
+  is recorded in the SHIPPED record as deviation three.
 
 ## 4. Refuted, lower severity — fix opportunistically, or file
 
@@ -493,7 +728,10 @@ Grouped by slice; each is one line. Line numbers as reported at `bbd22a9`.
 - B-7 Five root `npm test` files (`check-naming-law`, `axio-mcp-server`,
   `check-devlog-not-served`, `check-baseline-freshness`, `.claude/hooks/
   telemetry`) run in **no** workflow. Phase 98 closed one CI gap; this is
-  the next.
+  the next. **Four, as of 2026-09-20:** row 3.6's fix wired
+  `check-baseline-freshness.test.mjs` — and the new
+  `regen-deck-matrix-baseline.test.mjs` beside it — into
+  `verify-mechanics.yml`. The remaining four are still unrun.
 
 **C — Phases 101 / 103, catalogue, palette, e2e**
 - C-1 `arena-desolation`'s `used_by` / `replaces` were hand-edited after
@@ -530,6 +768,11 @@ Grouped by slice; each is one line. Line numbers as reported at `bbd22a9`.
   from `soakFlatHit`; the telegraph loop's equivalent does.
 - D-3 Nothing pins The Jeweled Tree's authored keyword list (HIDE 5 +
   SUMMON 2, no SWIFT) but the baseline. Add a mechanics test.
+  **Done 2026-09-20 with row 3.9** — `axiomancer-mechanics/src/Enemy/e2e/
+  new-enemies.engine.test.ts`, three pins against `defaultEnemyKeywords`
+  rather than against literals: SUMMON present with a named brood, the
+  hand-relisted HIDE at no less than the rank's default (the retrofit is
+  not a silent nerf), and the rank's auto SWIFT absent.
 - D-4 Hygiene: unused `_rng` on `strikeAdd`; the strike shortfall reuses
   `effect-fizzled` with `cardId = add id, effectId = ''` — give it its own
   event or document the reuse; the atlas says `2` where it should name
@@ -653,6 +896,13 @@ docs commit at the end):
   it exists (3.4); "Engine deviations" gains the dropped figure anchor
   (3.14), the shell/mount deviation (E-1), the wave-2 unreachability
   (3.9); the banner's `## SHIPPED` → `# SHIPPED` (D-5).
+  **Corrected 2026-09-20 by 3.14's own fix: that row corrects four sentences
+  in this brief, not one.** Besides the Engine-deviations silence, the §1.6
+  prerequisite (:115), the step 1c code block (:216, which prescribes the
+  unsafe `top: hudH - 14`), the §4 ship gate ("equals the measured HUD
+  height − 14") and the tests matrix's "(8, new)" for
+  `CombatBoard.adds.test.tsx` were all false or stale. All are corrected in
+  that commit, along with this audit's own refuted headline for the row.
 - `plan/phases/phase_103_the_last_two_arenas.md` — decision 4 (3.5);
   Follow-ups gain the signage (3.12).
 - `plan/phases/phase_99_returning_player_can_return.md` — :80-84 (3.7);
@@ -663,14 +913,44 @@ docs commit at the end):
   "deferred regen" note is stale (the regen happened at `f1cdbba`); the
   outcome sentence (A-2).
 - `axiomancer-mobile/assets/images/combat/__tests__/index.test.ts`
-  ~:56-58 and `CombatCombatantPane.tsx` ~:693-694 (3.11).
+  ~:56-58 and `CombatCombatantPane.tsx` ~:693-694 (3.11). **Corrected
+  2026-09-20 by 3.11's own fix: there were FOUR sites, not two.** The row
+  and this bullet both missed `CombatCombatantPane.tsx` ~:48-49 ("completed
+  for every live region in phases 101/103") and
+  `__tests__/CombatBoard.region-arena.test.tsx` ~:62-63 ("every LIVE region
+  is now keyed"), plus the coverage claim at `assets/images/combat/
+  index.ts:3` ("extended to the whole region set in Phase 101" — never true
+  at any phase; 101 reached 4 of 7). All four are corrected in that commit.
 - `CombatBoard.tsx` ~:271-285 and `CombatBoard.handfan.test.tsx` header
-  ~:24-26 (3.13).
+  ~:24-26 (3.13). **Corrected 2026-09-20 by 3.13's own fix: seven
+  sentences, not two.** The bullet missed the test file's two inline
+  comments that carry the finding itself — `:99-100` ("Re-summed
+  independently here so a silent drift in any of the four styles fails the
+  gate", measured false: mutating `plateBand.paddingHorizontal` to 8 left it
+  green) and `:202-203` ("when it is absent the assertion below still
+  documents the intended copy", which documents nothing to a runner: that
+  test was the zero-assertion one). It also missed
+  `plan/phases/phase_97_hand_fan_name_legibility.md` decision **6** — the
+  companion bullet below names only decision 7 — whose "the value appears in
+  exactly two places, and the test re-derives it independently" is false
+  twice (six places; no re-derivation), and that brief's Outcome ("a player
+  can read every card in their hand"), which 40.25pt of peek does not buy.
+  All seven are corrected in that commit.
 - `exploration.engine.test.ts` :344-361 (3.7); `MapCanvas.tsx` :67, :193,
   :221, :241-243 and `MapCanvas.test.tsx` :440 (B-3, B-5).
 - `palette.ts:145`, `docs/VISUAL_LANGUAGE.md:37-38` (3.10).
 - `docs/art-catalog.json` `__comment`, `_meta.house_register`, `_meta.
-  how_to_use` (3.12).
+  how_to_use` (3.12). **Corrected 2026-09-20 by 3.12's own fix: five
+  sentences, not three.** The bullet missed the two that carry the finding
+  itself — `plates[arena-desolation].description`, which names the left
+  foreground and the far bank but not the right-edge building whose frieze
+  the row is about, while `__comment` promises every description was
+  "written from LOOKING at the shipped file"; and that entry's
+  `coherenceFlag`, `null` against legible English text. It also missed that
+  `_meta.how_to_use`'s "null on every entry" is false twice over: nine of
+  twelve entries omit the key rather than carrying `null`. All five are
+  corrected in that commit, and `_meta` gains `plateCount` /
+  `surfaceCounts` so the tally has exactly one home to be checked against.
 - `state/store.ts` ~:262-264 stale "0.5.0" comment (3.7).
 - `combat.engine.ts` add-block comment "a decision on record" — add the
   record (D-1).
@@ -701,9 +981,16 @@ gate), 3.6 + 3.8 (measurement), 3.10 (default-theme text below AA). Size
 M in total. **Confidence 90.**
 
 **Block 2 — finish the two archetypes the day opened (next 1-3 ticks).**
-1. **Northern Forest arena plate** — 6/7 → 7/7 and 3.11 becomes true by
-   construction. S, unblocked, most-seen remaining fallback (the forest is
-   the second map). Fix 3.5 first or you will crop a page. **90.**
+1. **Northern Forest arena plate** — 6/7 → 7/7. S, unblocked, most-seen
+   remaining fallback (the forest is the second map). Fix 3.5 first or you
+   will crop a page. **90.** **Corrected 2026-09-20 by 3.11's fix: it does
+   not "become true by construction".** 3.11's fix derives the arena test's
+   input set from the map registry and names `Northern Forest` in an
+   `AWAITING_PLATE` list that is asserted in BOTH directions, so shipping
+   the plate turns that test RED until the same commit deletes the entry and
+   the comments in `CombatCombatantPane.tsx` and `assets/images/combat/
+   index.ts` that name the forest. That is the intended signal, not a
+   surprise: budget the deletion into the plate's commit.
 2. **A second SUMMON carrier that has `stages`** — so wave 2 exists in
    play and the SWIFT path (3.2) is exercised on a real foe. `Mirac` and
    `RawheadRex` are already in the mid-stage matrix roster beside The
@@ -846,4 +1133,9 @@ as the guard test where §3 says so.
   print every pair that fell and every pair below 4.5.
 - **3.6 stamp.** `git show 5a2158a:axiomancer-mechanics/src/Combat/
   combat.engine.ts | grep -c SUMMON` → 0.
-- **3.7 citation.** `git cat-file -t 4972f9a` → not a valid object.
+- **3.7 citation — THIS RECIPE IS INVALID, corrected 2026-09-20.**
+  `git cat-file -t 4972f9a` → not a valid object, **in a shallow clone**,
+  which every working tree here is. It shows nothing about the commit:
+  154/161 hashes cited in repo prose fail the same way. `4972f9a` exists on
+  `origin` (verified 2026-09-20). Check hashes against the remote, never
+  against this tree.

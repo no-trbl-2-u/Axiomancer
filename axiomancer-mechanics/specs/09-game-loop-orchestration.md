@@ -63,7 +63,11 @@ return to map → level up → quest progress → save / load → all driven by
 4. **Save granularity.** Save on every action (autosave), only on map
    transitions, only when the player explicitly saves?
    > Your answer: Autosave but leave a comment near the main logic that we'll revisit this  if the game seems too brutal
-   > **DONE at Phase 51 (`4972f9a`).** Path B picked: autosave is restricted to a curated `DURABLE_ACTIONS` allowlist (`COMBAT_ROUND`, `LEVEL_UP`, `END_COMBAT`, `MOVE_TO_NODE`, `APPLY_DIALOGUE`, `SAVE_GAME`). UI-tier actions never write through. Implementation in `src/Game/store.ts` (DURABLE_ACTIONS + gated dispatch save). Hermetic coverage in `src/Game/e2e/autosave-throttling.engine.test.ts`. The two `TODO(spec-09)` markers in `store.ts` + `game.reducer.ts` are drained.
+   > **DONE at Phase 51 (`4972f9a`).** Path B picked: autosave is restricted to a curated `DURABLE_ACTIONS` allowlist — as shipped at Phase 51: `COMBAT_ROUND`, `LEVEL_UP`, `END_COMBAT`, `MOVE_TO_NODE`, `APPLY_DIALOGUE`, `SAVE_GAME`. UI-tier actions never write through. Implementation in `src/Game/store.ts` (DURABLE_ACTIONS + gated dispatch save). Hermetic coverage in `src/Game/e2e/autosave-throttling.engine.test.ts`. The two `TODO(spec-09)` markers in `store.ts` + `game.reducer.ts` are drained.
+   >
+   > **Amended since (burn-day audit 2026-09-19, row 3.7).** That six-entry list is the Phase 51 record, not the live set: `COMBAT_ROUND` has been dropped, `RESET_RUN` (Phase 72) and `UNLOCK_CODEX_ENTRY` (Phase 73) added. Read `src/Game/store.ts` for the current allowlist.
+   >
+   > **Scope of this answer.** The allowlist binds the engine only. A consumer that wraps the `PersistenceAdapter` it passes to `createGameStore` can suppress the gate entirely, and `axiomancer-mobile` does (`state/store.ts` `wrapDeflectingAdapter`): there, no durable action ever writes and every checkpoint is an explicit `save()` call. Q4 therefore answers "when does the ENGINE persist", not "when does the game persist" — see the `[loop-call]` row in `plan/AUDIT.md` for the open question of which layer should own it.
 
 5. **Persistence transport.** `nullAdapter` and `node.adapter.ts` exist.
    The React Native app needs an `AsyncStorage` adapter. Should this

@@ -18,7 +18,7 @@ import {
     strikeAdd, STRIKE_ADD_COST, ADD_WAVE_CAP,
 } from '@mechanics';
 import type { CombatEncounterState, Enemy } from '@mechanics';
-import { buildCombatViewModel } from '@/state/presenters/combat-encounter.engine';
+import { buildCombatViewModel, selectCombatLogHistory } from '@/state/presenters/combat-encounter.engine';
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { createAppStore } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
@@ -156,5 +156,71 @@ describe('SUMMON — the verb the chips reach', () => {
 
         expect(buildCombatViewModel(s).enemy.adds).toHaveLength(0);
         expect(s.addWavesSpawned ?? 0).toBeLessThanOrEqual(ADD_WAVE_CAP);
+    });
+});
+
+/**
+ * Burn-day audit 3.4 — the property the chips and the readout cannot carry:
+ * a player who loses VITAE must be able to find out, after the fact, what
+ * took it. Floats die in a second; the log is the ledger.
+ *
+ * This is the system guard. The unit suite
+ * (`state/presenters/__tests__/combat-log-lines.engine.test.ts`) pins the
+ * switch arms against hand-built events; only this pins the seam — real
+ * engine, real brood, real `state.log`. If someone later renames the brood's
+ * events or routes the bite through `damage-dealt`, the unit suite can go
+ * green by deletion and this still holds.
+ */
+describe('SUMMON — the log accounts for what the brood did', () => {
+    it('explains the VITAE the brood took', () => {
+        const s = fightWithBrood();
+        const before = s.player.health;
+        const t = resolveThreatPhase({ ...s, guard: 0, barrier: 0 }, () => 0.5);
+
+        // Engine truth first — a log assertion is worthless if nothing bit.
+        const bit = (t.events ?? []).find((e) => e.kind === 'add-bit');
+        expect(bit).toBeDefined();
+        const dealt = (bit as { dealt: number }).dealt;
+        expect(dealt).toBeGreaterThan(0);
+        expect(t.state.player.health).toBeLessThan(before);
+
+        const history = selectCombatLogHistory(t.state);
+        const brood = history.filter((l) => /brood/i.test(l.text));
+        expect(brood.length).toBeGreaterThan(0);
+        // The engine's own number, not a projection of it.
+        expect(brood.some((l) => l.text.includes(String(dealt)))).toBe(true);
+    });
+
+    it('records the wave arriving, so the bodies are never unexplained', () => {
+        const s = fightWithBrood();
+        expect((s.adds ?? []).length).toBe(2);
+
+        const history = selectCombatLogHistory(s);
+        const printed = (s.adds ?? [])[0].bite;
+        const spawn = history.filter((l) => l.text.includes(`${(s.adds ?? []).length}`) && /bodies/i.test(l.text));
+        expect(spawn.length).toBeGreaterThan(0);
+        expect(spawn.some((l) => l.text.includes(String(printed)))).toBe(true);
+    });
+
+    /**
+     * `strikeAdd`'s docblock promises a Conviction shortfall stays
+     * "attributable rather than reading as a dead chip". It reached
+     * `state.log` and the presenter dropped it, so on screen it read as
+     * exactly the dead chip. This is that promise, end to end.
+     */
+    it('attributes a refused strike in the engine’s own words', () => {
+        const s: CombatEncounterState = {
+            ...fightWithBrood(), phase: 'phase-play', conviction: STRIKE_ADD_COST - 1,
+        };
+        const target = (s.adds ?? [])[0];
+        const t = strikeAdd(s, target.id);
+
+        const fizzle = (t.events ?? []).find((e) => e.kind === 'effect-fizzled');
+        expect(fizzle).toBeDefined();
+        const message = (fizzle as { message: string }).message;
+        expect((t.state.adds ?? []).length).toBe((s.adds ?? []).length);
+
+        const history = selectCombatLogHistory(t.state);
+        expect(history.some((l) => l.text.includes(message))).toBe(true);
     });
 });

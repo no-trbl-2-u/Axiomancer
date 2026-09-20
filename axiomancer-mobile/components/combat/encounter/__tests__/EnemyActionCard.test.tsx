@@ -8,6 +8,7 @@
  * Hermetic = self-contained + deterministic + isolated. See docs/testing.md.
  */
 import React from 'react';
+import { StyleSheet } from 'react-native';
 import { act, render } from '@testing-library/react-native';
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 
@@ -24,13 +25,23 @@ const FIRED: EnemyActionCardVM = {
     color: '#e2543b',
     actionText: 'Cairn-rot exhales rot',
     lines: [
-        { text: '4 DAMAGE', color: '#e2543b' },
-        { text: 'POISON ×2', color: '#a86bdc' },
+        { text: '4 DAMAGE', color: '#e2543b', source: 'telegraph' },
+        { text: 'POISON ×2', color: '#a86bdc', source: 'telegraph' },
     ],
     denied: false,
+    addDealt: 0,
 };
 
 const DENIED: EnemyActionCardVM = { ...FIRED, denied: true };
+
+/** Phase 102 — the foe's own blow was held, and its brood bit anyway. The
+ *  amount is arbitrary and read back in every assertion below. */
+const BIT = 8;
+const DENIED_BITTEN: EnemyActionCardVM = {
+    ...DENIED,
+    addDealt: BIT,
+    lines: [...DENIED.lines, { text: `BROOD −${BIT}`, color: '#b4543f', source: 'brood' }],
+};
 
 beforeEach(() => { jest.useFakeTimers(); });
 afterEach(() => { jest.useRealTimers(); });
@@ -101,5 +112,42 @@ describe('EnemyActionCard: it never eats a touch', () => {
         );
         const r = render(tree);
         expect(r.getByTestId('combat-enemy-action-card').props.pointerEvents).toBe('none');
+    });
+});
+
+describe('EnemyActionCard: a denied phase the brood still bit (burn-day audit 3.3)', () => {
+    // The card used to print DENIED and the sentence "none of it landed" over
+    // a phase that took real VITAE, because it read the foe's telegraph and
+    // nothing else. The brood bites outside the engine's hindered gate.
+    it('never reads a bare DENIED, and never says nothing landed', () => {
+        const { tree } = withAllProviders(
+            <EnemyActionCard vm={DENIED_BITTEN} enemyName="Cairn-rot" revealKey={1} onDone={() => {}} />,
+        );
+        const r = render(tree);
+        expect(r.queryAllByText('DENIED')).toHaveLength(0);
+        expect(r.queryAllByText('your control held — none of it landed')).toHaveLength(0);
+        const headline = r.queryAllByText(/DENIED/).map((n) => String(n.props.children));
+        expect(headline.some((t) => t.includes(String(BIT)))).toBe(true);
+    });
+
+    it('does not strike through what the brood actually landed', () => {
+        const { tree } = withAllProviders(
+            <EnemyActionCard vm={DENIED_BITTEN} enemyName="Cairn-rot" revealKey={1} onDone={() => {}} />,
+        );
+        const r = render(tree);
+        const struck = (node: ReturnType<typeof r.getByText>): boolean =>
+            StyleSheet.flatten(node.props.style)?.textDecorationLine === 'line-through';
+        // the averted telegraph still reads as averted…
+        expect(struck(r.getByText('4 DAMAGE'))).toBe(true);
+        // …and what landed does not.
+        expect(struck(r.getByText(`BROOD −${BIT}`))).toBe(false);
+    });
+
+    it('carries the bite in the one a11y sentence', () => {
+        const { tree } = withAllProviders(
+            <EnemyActionCard vm={DENIED_BITTEN} enemyName="Cairn-rot" revealKey={1} onDone={() => {}} />,
+        );
+        const r = render(tree);
+        expect(r.queryByLabelText(new RegExp(`brood bit you for ${BIT}`))).not.toBeNull();
     });
 });

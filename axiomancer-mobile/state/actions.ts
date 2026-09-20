@@ -1136,8 +1136,17 @@ export function readCurrentNodeId(world: WorldState): string {
     return world.currentMap.currentNode;
 }
 
-function writeCurrentNodeId(map: MapState, nodeId: string): MapState {
-    return { ...map, currentNode: nodeId };
+/**
+ * Stand the player on `nodeId` as an ARRIVAL: the cursor moves and the node's
+ * unanswered arrival is recorded (`pendingArrival`), exactly as the engine's
+ * own arrival verb `moveToNode` does. Mobile keeps its own move (the screen's
+ * reachability rules differ from the reducer's), so it must write the same
+ * sentence the engine writes — otherwise the move's checkpoint would save a
+ * player standing on a node with no record of what they still owe it
+ * (burn-day audit 2026-09-19 row 3.1 follow-up).
+ */
+function writeArrivalNodeId(map: MapState, nodeId: string): MapState {
+    return { ...map, currentNode: nodeId, pendingArrival: nodeId };
 }
 
 function moveToAction(store: AppStore, nodeId: string): MoveToResult {
@@ -1160,8 +1169,15 @@ function moveToAction(store: AppStore, nodeId: string): MoveToResult {
     }
 
     // Node kind comes from the engine's authored event pools. Encounter /
-    // boss nodes (both resolve to the `encounter` kind) stay reusable — they
-    // are not completed/consumed on entry; every other kind completes.
+    // boss nodes (both resolve to the `encounter` kind) are not completed or
+    // consumed BY THE MOVE, so the node stays walkable and the screen keeps
+    // drawing the player on it; every other kind completes here.
+    //
+    // That is a statement about this function alone, not about the node's
+    // life (burn-day audit 2026-09-19 row 3.1). Resolving the arrival marks
+    // the node consumed whatever its kind (`resolve-map-event.ts`), so a
+    // fight that has been answered is NOT re-offered on a second visit —
+    // measured: a second arrival at fv-13 fires nothing.
     const nodeKind = getNodePrimaryEventKind(map.continent, map.name, nodeId);
     const isEncounterNode = nodeKind === 'encounter';
 
@@ -1196,7 +1212,7 @@ function moveToAction(store: AppStore, nodeId: string): MoveToResult {
 
     nextWorld = {
         ...nextWorld,
-        currentMap: writeCurrentNodeId(nextWorld.currentMap, nodeId),
+        currentMap: writeArrivalNodeId(nextWorld.currentMap, nodeId),
     };
 
     // Phase 27: populate the engine's parallel data model
@@ -1221,6 +1237,27 @@ function moveToAction(store: AppStore, nodeId: string): MoveToResult {
     // `availableNodes` and `discoveredNodes`: that is real, hard-won progress,
     // and the same argument the crossing checkpoint already makes applies to
     // it. The adapter debounces writes, so this is cheap even tapped quickly.
+    //
+    // THE ARRIVAL IS NOT IN THIS SNAPSHOT, AND THAT IS DELIBERATE (burn-day
+    // audit 2026-09-19 row 3.1). The caller resolves the node's event AFTER
+    // this returns (`app/(tabs)/exploration/index.tsx` → `onConfirmMove`), so
+    // the checkpoint records a player standing on a node whose event they
+    // have not answered — on an encounter node, a fight they have not had.
+    // What makes that honest is that the debt is recorded too, and recorded
+    // as itself: the move above wrote `pendingArrival: nodeId` onto the map
+    // (`writeArrivalNodeId`), it rides this very save, and the map screen
+    // re-offers it on the next mount (`vm.arrivalPending`). Saving here
+    // rather than after the resolve is therefore load-bearing, not a
+    // leftover — `resolveMapEvent` clears `pendingArrival` the moment the
+    // arrival is answered, so a save taken below it would persist "nothing
+    // owed" and the reload would walk past the fight.
+    //
+    // The debt is a record of ARRIVING, not a guess from the shape of the
+    // map. Reading it off "the node under the player is unconsumed" instead
+    // (the first cut of row 3.1) could not tell a walk from a placement, and
+    // `placeOnNode` un-consumes the node it places you on — so every state
+    // fixture and every `/dev` JUMP looked like an arrival nobody had
+    // answered and fired its event on mount.
     try { store.getState().save(); } catch { /* persistence must not block the road */ }
 
     return { moved: true, currentNodeId: nodeId, locked: false };

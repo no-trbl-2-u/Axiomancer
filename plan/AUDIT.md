@@ -406,6 +406,66 @@
 
 ## Pending
 
+### [loop-call] The local verify gate and CI disagree about what green means: the Playwright journeys run only in CI (2026-09-20)
+- category: process
+- impact: 7
+- ease: 6
+- detail: filed by the burn-day audit 2026-09-19, found by the audit running
+  against itself. `npm run verify --workspace axiomancer-mobile` does not run
+  the Playwright journeys; `e2e:fixture`, `e2e:combat`, `e2e:encounters`,
+  `e2e:exploration-roundtrip` and the rest are separate scripts that only the
+  `verify + affected Playwright journeys` and `mechanics + affected consumers`
+  workflows invoke. Row 3.1 shipped behind a green foreground mobile gate
+  (308 suites / 2950 tests) and turned CI red on `e2e:fixture` case A: the
+  generalised arrival derivation treated a fixture placement as an unanswered
+  arrival, so `node-fv-9` never rendered. Five consecutive fix agents each ran
+  the full package gate before committing and none could have caught it. The
+  fix (`9f2bf6c`) is unrelated to this row; the gap is that a contributor's
+  definition of "gate green" excludes a suite that can reject their push.
+  This is the mirror of the existing observation that five root `npm test`
+  files run in no workflow (burn-day audit section 4, B-7): there, guards that
+  CI never runs; here, guards that only CI runs. Phase 57's own guard had the
+  same shape until row 3.6 wired `check-baseline-freshness` and
+  `regen-deck-matrix-baseline` into `verify-mechanics.yml` (`d8428d5`).
+- options: (a) add an opt-in `verify:journeys` script and name it in AGENTS.md
+  alongside the standing gate, so the reachable local command exists even if it
+  is not run every time; (b) fold the journeys into `npm run verify` and accept
+  the added minutes plus the browser dependency on every contributor run;
+  (c) leave the split and document it loudly in AGENTS.md so nobody again reads
+  a green package gate as a green tree. The audit did not choose — the cost of
+  (b) is a real change to every contributor's inner loop and is the loop's call
+  to weigh, not this session's to impose while shipping fourteen other rows.
+- source: burn-day audit 2026-09-19, section 9 residue
+
+### [loop-call] Two layers own save policy: the engine's DURABLE_ACTIONS allowlist and mobile's hand-placed checkpoints behind a deflecting adapter (2026-09-20)
+- category: contract
+- impact: 6
+- ease: 5
+- detail: filed by the burn-day audit 2026-09-19, row 3.7. The engine gates
+  autosave to a curated `DURABLE_ACTIONS` set (`axiomancer-mechanics/src/
+  Game/store.ts`, Phase 51 `4972f9a`). Mobile then makes that gate
+  unreachable: `wrapDeflectingAdapter` (`axiomancer-mobile/state/store.ts`)
+  swallows every engine autosave — durable actions included — unless it is
+  inside the passthrough that the explicit `store.save()` verb opens. So no
+  durable action has ever written on mobile, and persistence there is
+  carried entirely by hand-placed checkpoints: 15 `getState().save()` call
+  sites outside tests — `components/SaveOnExit.tsx`, `state/actions.ts`
+  (the exposed verb, the move checkpoint, the map crossing),
+  `state/combat/store-actions.ts` ×3, `state/hazard/store-actions.ts` ×3,
+  `state/blacksmith/store-actions.ts` ×2, `state/cache/store-actions.ts`,
+  `state/labyrinth/store-actions.ts`, `state/rest/store-actions.ts`. That
+  is 13 checkpoints plus the verb plus the exit flush. Neither layer knows
+  about the other, and nothing written down says which wins or where a new
+  checkpoint belongs — which is how Phase 99 came to justify a correct fix
+  with a rationale that named the wrong owner (PLAYTEST_BUGS_2026-09-18
+  BUG-03). The call: pick one owner (add the mobile verbs to the engine
+  allowlist and drop the wrapper, or keep the wrapper and say so in the
+  engine docs), or keep both and write the rule. Whichever way it goes, the
+  ownership as it stands today is now guarded — `axiomancer-mobile/state/
+  e2e/exploration.engine.test.ts`, "mobile owns save timing" — so the
+  decision has to be taken deliberately rather than drifted into.
+- next: /oversight
+
 ### [x] [loop-call] Keyword registry has no analogue for Dawncaster's "Chaos" or generic "Upgrade" families (2026-09-13) — RESOLVED via `/adjust-keywords` pass 11 (2026-09-16)
 `/adjust-keywords` pass 9's functions-column sweep (`DigitalCardGames/dawncaster/
 keywords.csv`, 141 rows) against our 68-row registry's eight families (damage,

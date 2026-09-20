@@ -17,7 +17,10 @@
  * Conviction, the Surge meter and the Dice system are permanent. The three
  * blocks below are their first-class measurement surface — they are read from
  * the systems' OWN events, so a card library that routes around a system
- * produces zeroes in that system's block and cannot score them back.
+ * produces zeroes in that system's block and cannot score them back. That cuts
+ * both ways and is the standing hazard here (audit 3.8): a sink the fold does
+ * not read scores as evasion even when the fight PLAYED the system hard, so
+ * every new Conviction/Surge/Dice verb has to be folded in when it ships.
  *
  * Pure + hermetic: no RNG, no I/O, no clock. Reads only the transcript it is
  * handed.
@@ -60,7 +63,12 @@ export interface CombatObjectiveTelemetry {
     /** Σ `conviction-gained`.amount — every income source (unpicked die, read
      *  win, fate tap, BOON, surge overflow, scrap, card effects). */
     convictionGained: number;
-    /** Σ `signature-cast`.cost — Conviction actually CONVERTED into a play. */
+    /** Σ `signature-cast`.cost + `add-struck`.cost — Conviction actually
+     *  CONVERTED into a play, across both sinks the powered sim can reach.
+     *  KNOWN GAP (audit 3.8, filed rather than fixed here): `omen-declared`
+     *  .ante is a third live sink — two shipped trial cards carry
+     *  `anteConviction` — and is not folded yet, so a deck that antes omens
+     *  still under-reports its spend. */
     convictionSpent: number;
     /** `signature-cast` count. */
     signatureCasts: number;
@@ -235,6 +243,12 @@ export function foldObjectiveEvents(
         else if (ev.kind === 'signature-cast') {
             into.convictionSpent += ev.cost;
             into.signatureCasts++;
+        } else if (ev.kind === 'add-struck') {
+            // Audit 3.8 — Phase 102's strike tap is a Conviction SINK
+            // (`strikeAdd`, `combat.engine.ts`), and the event carries the
+            // price it charged. It is a spend, NOT a cast: `signatureCasts`
+            // stays the `signature-cast` count on purpose.
+            into.convictionSpent += ev.cost;
         } else if (ev.kind === 'special-fired') into.specialsFired++;
 
         // ── Surge / momentum (both dice models) ─────────────────────────────

@@ -17,7 +17,7 @@ import { compile, validateSpec } from './art/prompt.mjs'
 import { PALETTE, PREAMBLE, STYLE_VERSION, CATEGORIES } from './art/style.mjs'
 import { paletteDistance, summarize } from './art/qa.mjs'
 import { postProcess } from './generate-art.mjs'
-import { ACCEPTED_LICENCES, buildSilhouette, loadSources, verifyLicence } from './acquire-art.mjs'
+import { ACCEPTED_LICENCES, buildPlatePage, buildSilhouette, detectPlateBox, loadSources, verifyLicence } from './acquire-art.mjs'
 
 const spec = {
   slug: 'tallow-bailiff',
@@ -265,4 +265,95 @@ test('every manifest entry is a proposal with a reason, not a licence claim', ()
     assert.equal(a.license, undefined, `${a.key} asserts a licence; only the source may`)
     assert.equal(a.licence, undefined, `${a.key} asserts a licence; only the source may`)
   }
+})
+
+// ── the plate-page detector (phase 103 — the plate on a scanned page) ────────
+
+/**
+ * A synthetic scanned page: cream paper (luminance 235) with blocks painted
+ * on it. Each rect is `[left, top, width, height, luminance]`, luminance
+ * defaulting to ink (40). Encoded to PNG so the detector decodes a real image
+ * rather than reading a raw buffer this test handed it.
+ */
+async function platePage(sharp, W, H, rects) {
+  const gray = Buffer.alloc(W * H * 3, 235)
+  for (const [left, top, w, h, lum = 40] of rects) {
+    for (let y = top; y < top + h; y++) {
+      for (let x = left; x < left + w; x++) {
+        const i = (y * W + x) * 3
+        gray[i] = gray[i + 1] = gray[i + 2] = lum
+      }
+    }
+  }
+  return sharp(gray, { raw: { width: W, height: H, channels: 3 } }).png().toBuffer()
+}
+
+test('a blank page is refused, not cropped to itself', async () => {
+  const { default: sharp } = await import('sharp')
+  // Nothing on this page is darker than the page's own mean, so no column and
+  // no row reaches the coverage floor. The detector must say so. It used to
+  // return [0,1] on both axes — the whole page, at frac 0.96 — which sails
+  // past the `frac < 0.2` guard and ships the scan's margins, book edge and
+  // caption band as if they were the plate.
+  const page = await platePage(sharp, 1000, 1200, [])
+  await assert.rejects(
+    () => buildPlatePage(sharp, page, 512),
+    /no plate detected/,
+    'a page with no dark block must raise, not hand back the page as its own plate',
+  )
+})
+
+test('a plate too small to reach the coverage floor is refused, not widened to the page', async () => {
+  const { default: sharp } = await import('sharp')
+  // 120x120 of ink: a column inside it is dark for 120px and needs 180
+  // (0.15 x 1200); a row is dark for 120px and needs 150 (0.15 x 1000). It
+  // qualifies on neither axis, so there is no block — and the answer must be
+  // the same throw as the blank page, not the identical full-page fabrication.
+  const page = await platePage(sharp, 1000, 1200, [[440, 540, 120, 120]])
+  await assert.rejects(
+    () => buildPlatePage(sharp, page, 512),
+    /no plate detected/,
+    'a plate below the coverage floor must raise, not widen to the page',
+  )
+})
+
+test('a plate with page margins is found where it is', async () => {
+  const { default: sharp } = await import('sharp')
+  const page = await platePage(sharp, 1000, 1200, [[215, 270, 570, 660]])
+  const box = await detectPlateBox(sharp, page)
+  assert.ok(Math.abs(box.x0 - 0.215) < 0.01, `x0 was ${box.x0}`)
+  assert.ok(Math.abs(box.x1 - 0.785) < 0.01, `x1 was ${box.x1}`)
+  assert.ok(Math.abs(box.y0 - 0.225) < 0.01, `y0 was ${box.y0}`)
+  assert.ok(Math.abs(box.y1 - 0.775) < 0.01, `y1 was ${box.y1}`)
+  const built = await buildPlatePage(sharp, page, 512)
+  assert.ok(built.frac > 0.2, `a real plate must clear the floor, frac was ${built.frac}`)
+})
+
+test('a tight scan that fills its page is still accepted', async () => {
+  const { default: sharp } = await import('sharp')
+  // Phase 103 decision 4 put NO upper guard on the detected box on purpose: a
+  // box covering nearly the whole image is the right answer for an
+  // already-tight plate scan. This pins that, and it must keep holding after
+  // the not-found throw exists.
+  //
+  // The plate carries a lit band (luminance 205, a sky) across its top third.
+  // That is not decoration: a plate of UNIFORM ink drags the image's own mean
+  // down onto the ink, and past ~95% coverage nothing reads as darker than
+  // 0.82 x mean at all. A uniform control would then be pinning the
+  // threshold's calibration rather than the pipeline's behaviour, and would
+  // invert on a one-pixel change of margin. With the band, ink sits ~47
+  // luminance units clear of the threshold instead of ~5.
+  //
+  // Only x is pinned. The lit band legitimately lifts y0 off the plate's top
+  // edge — that is phase 103 decision 3's measured sky-band behaviour (a sky
+  // is part of the plate but is not dark), not a defect.
+  const page = await platePage(sharp, 1000, 1200, [
+    [20, 24, 960, 1152],
+    [20, 24, 960, 384, 205],
+  ])
+  const box = await detectPlateBox(sharp, page)
+  assert.ok(Math.abs(box.x0 - 0.020) < 0.01, `x0 was ${box.x0}`)
+  assert.ok(Math.abs(box.x1 - 0.980) < 0.01, `x1 was ${box.x1}`)
+  const built = await buildPlatePage(sharp, page, 512)
+  assert.ok(built.crop.width > 0 && built.crop.height > 0)
 })

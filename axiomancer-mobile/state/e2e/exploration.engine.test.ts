@@ -8,11 +8,12 @@
  */
 
 import { afterEach, describe, it, expect, jest } from '@jest/globals';
-import { createMapState, getMapDefinition } from '@mechanics';
+import { createMapState, getMapDefinition, getNodeEventPool } from '@mechanics';
 
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import { createAppActions } from '@/state/actions';
 import { createAppStore } from '@/state/store';
+import { jumpToNode } from '@/state/dev/world-travel';
 // Side-effect: registers exploration map event pools so resolveMapEvent
 // produces real events in the travel-to-event path tests below.
 import {
@@ -345,20 +346,29 @@ describe('exploration lifecycle: multi-step navigation', () => {
      *     in favour of Path B — autosave restricted to a curated
      *     `DURABLE_ACTIONS` allowlist. `MOVE_TO_NODE` is ON that allowlist
      *     (`axiomancer-mechanics/src/Game/store.ts`), so persisting on node
-     *     movement is the engine's ratified behaviour, not a violation of it.
-     *   - Mobile's `moveToAction` never got that behaviour because it writes
-     *     the new world with `store.setState({ world })` directly instead of
-     *     dispatching through the engine reducer, so the DURABLE_ACTIONS gate
-     *     never sees the move.
+     *     movement is a ratified save granularity, not a violation of it.
+     *   - CORRECTED — burn-day audit 2026-09-19 row 3.7. This comment used to
+     *     say mobile "never got that behaviour" because `moveToAction` writes
+     *     the world with `store.setState({ world })` instead of dispatching,
+     *     "so the DURABLE_ACTIONS gate never sees the move". The bypass is
+     *     real; the causal story was backwards. Dispatching `MOVE_TO_NODE`
+     *     through the reducer would not have saved here either:
+     *     `wrapDeflectingAdapter` (`state/store.ts`) swallows EVERY engine
+     *     autosave — durable ones included — unless it is inside the explicit
+     *     `store.save()` passthrough. The engine allowlist is inert on mobile.
+     *     Mobile owns save timing, and a move is a checkpoint because
+     *     `moveToAction` (`state/actions.ts`) takes an explicit save. That
+     *     ownership is itself guarded by the case below.
      *
-     * The player-visible cost of that gap is PLAYTEST_BUGS_2026-09-18 BUG-03:
-     * a player who walked two nodes and reloaded was put back where they
-     * started, with the walk and the opening quest gone.
+     * The player-visible cost of not taking that checkpoint is
+     * PLAYTEST_BUGS_2026-09-18 BUG-03: a player who walked two nodes and
+     * reloaded was put back where they started, with the walk and the opening
+     * quest gone.
      *
-     * What Spec 09 still forbids — and what the second half of this case
+     * What Spec 09 still forbids — and what the UI-tier case further below
      * pins — is UI-tier actions writing through. That has not changed.
      */
-    it('a move IS a save checkpoint, matching the engine allowlist (Spec 09 Q4 / Phase 51)', () => {
+    it('a move IS a save checkpoint — mobile policy, at the Spec 09 Q4 / Phase 51 granularity', () => {
         const adapter = createMemoryAdapter();
         const store = createAppStore({ adapter });
         const actions = createAppActions(store);
@@ -366,12 +376,56 @@ describe('exploration lifecycle: multi-step navigation', () => {
 
         actions.moveTo('fv-2');
 
-        // `MOVE_TO_NODE` is a DURABLE_ACTION; movement is hard-won progress.
+        // Movement is hard-won progress. The write comes from the explicit
+        // checkpoint in `moveToAction` (`state/actions.ts`) — NOT from
+        // `MOVE_TO_NODE` being a DURABLE_ACTION, which mobile deflects.
         expect(saveSpy).toHaveBeenCalledTimes(1);
 
         // An explicit save still writes, and is not swallowed or coalesced away.
         actions.save();
         expect(saveSpy).toHaveBeenCalledTimes(2);
+    });
+
+    /**
+     * The OWNERSHIP guard — burn-day audit 2026-09-19 row 3.7.
+     *
+     * The case above is green for a reason its own comment used to get
+     * backwards. The engine's `DURABLE_ACTIONS` allowlist does not reach
+     * mobile at all: `wrapDeflectingAdapter` (`state/store.ts`) swallows
+     * EVERY engine autosave, durable ones included, unless the wrapper is
+     * inside the `store.save()` passthrough. Mobile owns save timing.
+     *
+     * Two directions this must stay red against, both of which are the
+     * false belief becoming code:
+     *   (a) drop the deflecting wrapper so the engine allowlist really does
+     *       own mobile persistence — arm A starts writing;
+     *   (b) drop the explicit save in `moveToAction` on the belief that
+     *       `MOVE_TO_NODE` being on the allowlist already covers the walk —
+     *       arm B stops writing, and that is PLAYTEST_BUGS_2026-09-18
+     *       BUG-03 returning.
+     */
+    it('mobile owns save timing: a DURABLE engine action is deflected, the explicit checkpoint writes', () => {
+        // Arm A — the engine verb, straight through the engine reducer.
+        // `MOVE_TO_NODE` IS on the engine's DURABLE_ACTIONS allowlist, so a
+        // bare engine store would write here. On mobile it must not.
+        const engineArm = createMemoryAdapter();
+        const engineStore = createAppStore({ adapter: engineArm });
+        const engineSpy = jest.spyOn(engineArm, 'save');
+
+        engineStore.getState().moveToNode('fv-2');
+
+        expect(engineSpy).not.toHaveBeenCalled();
+
+        // Arm B — the mobile verb. The save a walk actually gets is the
+        // explicit checkpoint `moveToAction` takes (`state/actions.ts`),
+        // which is mobile policy, not the engine allowlist.
+        const mobileArm = createMemoryAdapter();
+        const mobileStore = createAppStore({ adapter: mobileArm });
+        const mobileSpy = jest.spyOn(mobileArm, 'save');
+
+        createAppActions(mobileStore).moveTo('fv-2');
+
+        expect(mobileSpy).toHaveBeenCalledTimes(1);
     });
 
     it('a UI-tier action still does NOT write through (Spec 09 Path B)', () => {
@@ -748,5 +802,109 @@ describe('BUG-01: the legend counts the nodes the map actually draws', () => {
 
         expect(counter.nodes).toBe(vm.nodes.length);
         expect(counter.sealed).toBe(vm.nodes.filter((n) => n.kind === 'locked').length);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Burn-day audit 2026-09-19 row 3.1: the arrival the map still owes you
+// ---------------------------------------------------------------------------
+
+describe('selectExplorationViewModel: arrivalPending', () => {
+    it('still owes an encounter arrival that the player never answered', () => {
+        // A move checkpoints BEFORE its arrival resolves (`moveToAction`
+        // saves, then the screen calls `resolveCurrentMapEvent`), so a reload
+        // taken during the prelude rebuilds the app standing on the node with
+        // the fight unanswered. The move recorded the debt as `pendingArrival`
+        // and that record rides the save — this flag is how the screen reads
+        // it back.
+        const adapter = createMemoryAdapter();
+        const store = createAppStore({ adapter });
+        const actions = createAppActions(store);
+        actions.moveTo('fv-2');
+        actions.moveTo('fv-11');
+        actions.moveTo('fv-13'); // engine kind `encounter`
+
+        const reloaded = createAppStore({ adapter });
+
+        expect(reloaded.getState().world.currentMap.currentNode).toBe('fv-13');
+        expect(selectExplorationViewModel(reloaded.getState()).arrivalPending).toBe(true);
+    });
+
+    it('owes nothing once the arrival has been answered', () => {
+        // The negative twin: resolving IS the answer — it clears
+        // `pendingArrival` — so an answered arrival is never re-offered,
+        // here or after a reload.
+        const adapter = createMemoryAdapter();
+        const store = createAppStore({ adapter });
+        const actions = createAppActions(store);
+        actions.moveTo('fv-2');
+        actions.moveTo('fv-11');
+        actions.moveTo('fv-13');
+        actions.resolveCurrentMapEvent();
+        actions.save();
+
+        expect(store.getState().world.currentMap.consumedNodes).toContain('fv-13');
+        expect(selectExplorationViewModel(store.getState()).arrivalPending).toBe(false);
+        expect(selectExplorationViewModel(createAppStore({ adapter }).getState()).arrivalPending)
+            .toBe(false);
+    });
+
+    it('owes nothing for a node the player was PLACED on', () => {
+        // Row 3.1 follow-up, and the defect that shipped with row 3.1: being
+        // placed on a node is not the same as arriving at it. `placeOnNode`
+        // (state fixtures, `/dev` JUMP) stands the player anywhere and
+        // deliberately UN-consumes the node so its content stays live — so
+        // "the node under the player is unconsumed and has a pool" read every
+        // placement as an unanswered arrival. The map screen paid it on
+        // mount, and `/exploration?fixture=sage-fv-boss-gate` engaged the
+        // fv-9 boss instead of drawing the map. A placement writes no debt.
+        const store = createAppStore({ adapter: createMemoryAdapter() });
+        expect(jumpToNode(store, 'fv-9')).toBe(true);
+
+        const vm = selectExplorationViewModel(store.getState());
+        const map = store.getState().world.currentMap;
+
+        expect(vm.currentNodeId).toBe('fv-9');
+        // The conditions the old inference fired on are all still true ...
+        expect(map.consumedNodes).not.toContain('fv-9');
+        expect(getNodeEventPool(map.continent, map.name, 'fv-9')).not.toBeUndefined();
+        // ... and nothing is owed, because nobody walked here.
+        expect(vm.arrivalPending).toBe(false);
+        expect(vm.startNodePending).toBe(false);
+    });
+
+    it('owes a travel door the player walked onto, and the crossing answers it', () => {
+        // A door is deliberately never consumed ("a door is repeatable" —
+        // `resolve-map-event.ts`), so consumption cannot say whether it has
+        // been answered. The record can: walking onto the door owes it (a
+        // reload here should still cross, not strand the player standing on
+        // a door), and resolving it clears the debt on the map being LEFT,
+        // before the crossing files that map away — otherwise returning
+        // through the door would cross again with no input.
+        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const actions = createAppActions(store);
+        const world = store.getState().world;
+        // fv-10 is the northern-forest door. Walk onto it from its neighbour
+        // rather than jumping, so this is a real arrival.
+        store.setState({
+            world: {
+                ...world,
+                currentMap: {
+                    ...world.currentMap,
+                    currentNode: 'fv-9',
+                    availableNodes: [...world.currentMap.availableNodes, 'fv-10'],
+                },
+            },
+        });
+        expect(actions.moveTo('fv-10').moved).toBe(true);
+
+        expect(selectExplorationViewModel(store.getState()).arrivalPending).toBe(true);
+
+        actions.resolveCurrentMapEvent();
+
+        // The crossing happened, and the departed map no longer owes the door.
+        const after = store.getState().world;
+        expect(after.currentMap.name).not.toBe('fishing-village');
+        expect(after.mapStates?.['fishing-village']?.pendingArrival ?? null).toBeNull();
     });
 });

@@ -117,10 +117,14 @@ export interface CombatSimPolicy {
      * without this field is byte-identical to its pre-Phase-102 behavior
      * (`crackAt`'s contract, mirrored deliberately).
      *
-     * The threshold reads "clear whenever the brood would actually get through
-     * the wall": a turtle holding a live wall projects `addNetDamage === 0` and
+     * The threshold reads "clear whatever the brood still gets through the
+     * wall": a turtle behind a live wall projects `addNetDamage === 0` and
      * correctly declines to pay, which is the designed decision TAUGHT rather
-     * than hard-coded. Ties on bite resolve to `state.adds` order — no RNG.
+     * than hard-coded. Audit 3.8 — "a live wall" means the wall the phase ENDS
+     * holding, not the one it started with: the decision is settled after the
+     * card pass and the wind-down, because a witness that reads the opening
+     * wall can buy a body its own next play would have answered for free.
+     * Ties on bite resolve to `state.adds` order — no RNG.
      * Wired ONLY into `upgradeablePlayPhase`; the flag-off legacy
      * `policyPlayPhase` body never reads it, the same deliberate gap `crackAt`
      * carries (see above). Not full sim parity, and not claimed as such.

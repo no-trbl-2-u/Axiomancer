@@ -151,3 +151,47 @@ describe('selectCombatLogHistory — carries every line selectCombatLogLines alr
         expect(line.text).toContain('She rises anew.');
     });
 });
+
+describe('selectCombatLogHistory — DENIED never denies a bite that landed', () => {
+    // Phase 102 / burn-day audit 3.3. The engine pushes `add-bit` immediately
+    // before that phase's `phase-resolved`, so a hindered phase with a live
+    // brood is `add-bit` + `phase-resolved: clear` — and the history wrote
+    // `PHASE n — DENIED.` over the top of VITAE the player had just lost.
+    //
+    // The amount is read back off the event in every assertion (THE BIG
+    // NUMBERS REWRITE): retune the bite and nothing here moves.
+    const BIT = 8;
+    const bite = (dealt: number): CombatEvent =>
+        ({ kind: 'add-bit', addIds: ['qa-add-0'], raw: BIT, dealt } as CombatEvent);
+
+    it('names the bite in the DENIED line when the brood took VITAE that phase', () => {
+        const events: CombatEvent[] = [bite(BIT), { kind: 'phase-resolved', phaseIndex: 2, mark: 'clear' }];
+        const denied = selectCombatLogHistory(stateWith(events)).filter((l) => l.text.includes('DENIED'));
+        expect(denied).toHaveLength(1);
+        expect(denied[0].text).not.toBe('PHASE 2 — DENIED.');
+        expect(denied[0].text).toContain(String(BIT));
+    });
+
+    it('still reads as a clean DENIED when no brood was on the board', () => {
+        const events: CombatEvent[] = [{ kind: 'phase-resolved', phaseIndex: 2, mark: 'clear' }];
+        const [line] = selectCombatLogHistory(stateWith(events));
+        expect(line.text).toBe('PHASE 2 — DENIED.');
+    });
+
+    it('still reads as a clean DENIED when the wall soaked the whole bite', () => {
+        const events: CombatEvent[] = [bite(0), { kind: 'phase-resolved', phaseIndex: 2, mark: 'clear' }];
+        const denied = selectCombatLogHistory(stateWith(events)).filter((l) => l.text.includes('DENIED'));
+        expect(denied[0].text).toBe('PHASE 2 — DENIED.');
+    });
+
+    it('a bite in an EARLIER phase never colours a later DENIED', () => {
+        const events: CombatEvent[] = [
+            bite(BIT),
+            { kind: 'phase-resolved', phaseIndex: 1, mark: 'overwhelmed' },
+            { kind: 'phase-resolved', phaseIndex: 2, mark: 'clear' },
+        ];
+        const denied = selectCombatLogHistory(stateWith(events)).filter((l) => l.text.includes('DENIED'));
+        expect(denied).toHaveLength(1);
+        expect(denied[0].text).toBe('PHASE 2 — DENIED.');
+    });
+});

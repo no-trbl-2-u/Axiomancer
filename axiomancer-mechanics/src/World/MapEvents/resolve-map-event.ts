@@ -2,6 +2,10 @@
  * `resolveMapEvent` — the Spec 23 dispatcher.
  *
  * Walks the contract:
+ *   0. Answer the node's arrival: clear `pendingArrival` if it names this
+ *      node. Resolving IS the answer, whatever the roll produces, so this
+ *      happens before any handler runs (burn-day audit 2026-09-19 row 3.1
+ *      follow-up).
  *   1. Look up the active node on the current map.
  *   2. If the node is already in `consumedNodes`, return
  *      `{ kind: 'none' }` immediately (one-shot enforcement).
@@ -208,6 +212,20 @@ function rollPool(
 }
 
 /**
+ * Clears `pendingArrival` when it names `nodeId` — the arrival at that node
+ * has just been answered (burn-day audit 2026-09-19 row 3.1 follow-up).
+ * Identity-stable when nothing was owed, so a no-op resolve stays a no-op.
+ */
+function answerArrival(state: GameState, nodeId: NodeId): GameState {
+    const map = state.world.currentMap;
+    if ((map.pendingArrival ?? null) !== nodeId) return state;
+    return {
+        ...state,
+        world: { ...state.world, currentMap: { ...map, pendingArrival: null } },
+    };
+}
+
+/**
  * Resolves the MapEvent for the player's current node. See file header.
  */
 export function resolveMapEvent(
@@ -217,26 +235,42 @@ export function resolveMapEvent(
     const map = state.world.currentMap;
     const nodeId = map.currentNode;
 
+    // 0. This call IS the answer to the node's arrival, whatever the roll
+    //    turns up — so the debt the move recorded is paid here, before any
+    //    handler runs. Before the handler matters for `travel`: it swaps
+    //    `currentMap` for the destination and files the departed map under
+    //    `world.mapStates`, so a clear applied afterwards would scribble on
+    //    the wrong map and leave the door owed forever on the one the player
+    //    left (burn-day audit 2026-09-19 row 3.1 follow-up).
+    const answered = answerArrival(state, nodeId);
+
     // 1. Already consumed? Idempotent no-op.
-    if (map.consumedNodes.includes(nodeId)) {
+    if (answered.world.currentMap.consumedNodes.includes(nodeId)) {
         const none: ResolvedEvent = { kind: 'none' };
-        return { state, event: none };
+        return { state: answered, event: none };
     }
 
     // Restore the pre-Phase-25 reach-objective auto-advance — any active
     // `reach: target=nodeId` quest objective ticks on arrival, before the
     // pool roll. Pure no-op for non-reach quests or fully-completed reaches.
-    const questsAfterReach = advanceReachObjectives(state.quests, nodeId);
-    const stateAfterReach: GameState = questsAfterReach === state.quests
-        ? state
-        : { ...state, quests: questsAfterReach };
+    const questsAfterReach = advanceReachObjectives(answered.quests, nodeId);
+    const stateAfterReach: GameState = questsAfterReach === answered.quests
+        ? answered
+        : { ...answered, quests: questsAfterReach };
+
+    // The two early branches below (no pool, no entry) rebuild the map from
+    // `answeredMap`, never from the pre-answer `map` — rebuilding from `map`
+    // would restore the arrival the resolve just paid. The handler branches
+    // rebuild from their own output instead, which descends from `answered`
+    // and so carries the cleared debt the same way.
+    const answeredMap = answered.world.currentMap;
 
     // 2. Find the active pool.
-    const pool = lookupPool(map.continent, map.name, nodeId);
+    const pool = lookupPool(answeredMap.continent, answeredMap.name, nodeId);
     if (!pool) {
         // No pool registered — reveal + unlock adjacents + consume to advance
         // discovery and traversal, but produce no event.
-        const next = unlockAdjacent(revealAdjacent(map, nodeId), nodeId);
+        const next = unlockAdjacent(revealAdjacent(answeredMap, nodeId), nodeId);
         const consumed = markNodeConsumed(next, nodeId);
         return {
             state: { ...stateAfterReach, world: { ...stateAfterReach.world, currentMap: consumed } },
@@ -247,7 +281,7 @@ export function resolveMapEvent(
     // 3. Roll an entry.
     const entry = rollPool(pool, rng);
     if (!entry) {
-        const next = unlockAdjacent(revealAdjacent(map, nodeId), nodeId);
+        const next = unlockAdjacent(revealAdjacent(answeredMap, nodeId), nodeId);
         const consumed = markNodeConsumed(next, nodeId);
         return {
             state: { ...stateAfterReach, world: { ...stateAfterReach.world, currentMap: consumed } },

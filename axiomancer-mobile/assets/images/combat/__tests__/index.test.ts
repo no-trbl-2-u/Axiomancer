@@ -1,30 +1,53 @@
 /**
- * Combat arena backdrop resolver — phase 83 (one rule), extended to the whole
- * region set in phases 101 and 103. Mirrors
- * `assets/images/maps/__tests__/index.test.ts`'s coverage of `mapBackdropFor`:
- * same region-keyed-with-fallback shape.
+ * Combat arena backdrop resolver — phase 83 (one rule), extended in phases 101
+ * and 103. Mirrors `assets/images/maps/__tests__/index.test.ts`'s coverage of
+ * `mapBackdropFor`: same region-keyed-with-fallback shape. Six of the seven
+ * live regions have a plate of their own; `AWAITING_PLATE` below names the
+ * seventh and the assertions here pin that count in both directions.
  */
 
 import { describe, expect, it } from '@jest/globals';
 
 import { arenaAltTextFor, arenaBackdropFor } from '@/assets/images/combat';
+import { ALL_MAP_LAYOUTS } from '@/state/exploration-maps';
 
 /**
- * Every region string the game can actually hand the resolver, and the plate
- * each one is meant to reach. Written out rather than derived from the module's
- * own table on purpose: a test that reads the implementation's table asserts
- * only that the table equals itself, and would have stayed green through both
- * of the regressions this file exists to catch (a region silently falling back,
- * and a plate shipping with another plate's words).
+ * Every region string the game can actually hand the resolver, read from the
+ * map registry rather than hand-listed.
+ *
+ * This list used to be written out, on the argument that deriving it from the
+ * module's own table would assert only that the table equals itself. That
+ * argument is right about the EXPECTED PLATES below — never derive those from
+ * `REGION_ARENAS` — and was wrong about the INPUT set, which is what this is.
+ * `ALL_MAP_LAYOUTS` is not the implementation under test; it is the game's own
+ * statement of which maps exist. Hand-written, the input set omitted the
+ * Northern Forest for two phases and every assertion here stayed green over the
+ * six regions that were left (burn-day audit 3.11). Derived, a new map with no
+ * arena rule fails on its first commit.
  */
-const KEYED_REGIONS = [
-    'the Drowned Parish',
-    'The Northern City',
-    'The Connecting River',
-    "The Sweetheart's Village",
-    'The Caverns',
-    'The Capital',
-] as const;
+const LIVE_REGIONS: readonly string[] = ALL_MAP_LAYOUTS.map((l) => l.region);
+
+/**
+ * The live regions that legitimately still reach the fallback plate, and why.
+ *
+ * `Northern Forest` (`state/exploration-maps/northern-forest.layout.ts`, map
+ * `northern-forest`, "Map ii of ii") has no plate of its own yet. Phase 103
+ * took the set from 4/7 to 6/7 and the brief says so — `plan/phases/
+ * phase_103_the_last_two_arenas.md:13` reads "6 of 7" — but the comments in
+ * this file, in `CombatCombatantPane.tsx` and in
+ * `__tests__/CombatBoard.region-arena.test.tsx` all claimed 7/7, and the
+ * hand-written input set above made the omission invisible. It is named here
+ * instead, where it is asserted rather than assumed.
+ *
+ * This list is meant to reach length 0. It is pinned in BOTH directions below:
+ * a region added to it that is not falling back fails, and a region falling
+ * back that is not in it fails. So the day the forest plate ships, the case
+ * goes red and points at this entry and at the comments that name it.
+ */
+const AWAITING_PLATE: readonly string[] = ['Northern Forest'];
+
+/** The live regions that are meant to have a plate of their own. */
+const PLATED_REGIONS: readonly string[] = LIVE_REGIONS.filter((r) => !AWAITING_PLATE.includes(r));
 
 describe('arenaBackdropFor', () => {
     it('resolves the coastal village (the Drowned Parish) to its own plate', () => {
@@ -40,7 +63,7 @@ describe('arenaBackdropFor', () => {
 
     /**
      * INVARIANT CHANGED, deliberately — phase 103, the second such change to
-     * this case.
+     * this case; corrected again by burn-day audit 3.11.
      *
      * Phase 101 narrowed it from "The Northern City and The Sweetheart's
      * Village fall back" to "The Caverns and The Capital fall back". Both
@@ -52,28 +75,44 @@ describe('arenaBackdropFor', () => {
      * is the exact blocker phase 101's follow-up list named. So the Caverns and
      * the Capital have their own plates and are asserted against them below.
      *
-     * What is left here is the only thing that should ever have been here: a
-     * region string with no rule at all, and the undefined dev-sandbox case.
-     * Those two must keep falling back, and there is no longer any live region
-     * among them.
+     * What is left here is a region string with no rule at all, the undefined
+     * dev-sandbox case, and one live region — the Northern Forest, which has no
+     * plate yet and is named in `AWAITING_PLATE` above. This case used to say
+     * there was no live region among them, which was never true of phase 103's
+     * tree.
      */
-    it('falls back only for a region with no rule, and for no live region', () => {
+    it('falls back for a region with no rule, for undefined, and for exactly the regions AWAITING_PLATE names', () => {
         const fallback = arenaBackdropFor(undefined);
         expect(arenaBackdropFor('unknown region')).toEqual(fallback);
         expect(arenaBackdropFor('The Kingdom of Nowhere')).toEqual(fallback);
-        // The load-bearing half: no region the game can actually be in lands here.
-        for (const region of KEYED_REGIONS) {
-            expect(arenaBackdropFor(region)).not.toEqual(fallback);
-        }
+        // The load-bearing half, in both directions. Fails with MORE than
+        // AWAITING_PLATE when a live region loses or never had a rule — the
+        // regression this file exists to catch. Fails with FEWER when a plate
+        // ships, which is the signal to delete that entry above and correct the
+        // comments that name it.
+        const fellBack = LIVE_REGIONS.filter((r) => arenaBackdropFor(r) === fallback);
+        expect([...fellBack].sort()).toEqual([...AWAITING_PLATE].sort());
     });
 
-    it('gives each keyed region its OWN plate, all distinct from each other', () => {
-        const plates = KEYED_REGIONS.map((r) => arenaBackdropFor(r));
+    /**
+     * AWAITING_PLATE is an exemption, so it must not be able to rot into one.
+     * A region renamed in its layout file would otherwise leave a ghost entry
+     * quietly excusing the new name from every assertion in this file.
+     */
+    it('AWAITING_PLATE names only regions the game can actually be in', () => {
+        expect(AWAITING_PLATE.filter((r) => !LIVE_REGIONS.includes(r))).toEqual([]);
+    });
+
+    it('gives each plated region its OWN plate, all distinct from each other', () => {
+        const plates = PLATED_REGIONS.map((r) => arenaBackdropFor(r));
         // No two regions share a plate, which is the whole point: six fights in
         // six places should not look like the same fight. Raised from four in
         // phase 103; it must rise again with every plate added.
-        expect(new Set(plates).size).toBe(KEYED_REGIONS.length);
-        expect(KEYED_REGIONS.length).toBe(6);
+        expect(new Set(plates).size).toBe(PLATED_REGIONS.length);
+        // Pinned as two numbers, not one: a dropped plate and a dropped map are
+        // different failures and neither may hide behind the other.
+        expect(PLATED_REGIONS).toHaveLength(6);
+        expect(LIVE_REGIONS).toHaveLength(7);
     });
 
     it("matches the village on `sweetheart` alone, so the apostrophe cannot break it", () => {
@@ -124,11 +163,11 @@ describe('arenaAltTextFor', () => {
      * the fallback must describe something, and it must not be any keyed
      * region's description.
      */
-    it('has its own fallback description, shared by no keyed region', () => {
+    it('has its own fallback description, shared by no plated region', () => {
         const fallback = arenaAltTextFor(undefined);
         expect(fallback.length).toBeGreaterThan(20);
         expect(arenaAltTextFor('unknown region')).toEqual(fallback);
-        for (const region of KEYED_REGIONS) {
+        for (const region of PLATED_REGIONS) {
             expect(arenaAltTextFor(region)).not.toEqual(fallback);
         }
     });
@@ -140,14 +179,14 @@ describe('arenaAltTextFor', () => {
      * property rather than the wiring: every region with its own plate must
      * also have its own description, and no two may share one.
      */
-    it('gives every keyed region its own description, never the fallback text', () => {
-        const texts = KEYED_REGIONS.map((r) => arenaAltTextFor(r));
+    it('gives every plated region its own description, never the fallback text', () => {
+        const texts = PLATED_REGIONS.map((r) => arenaAltTextFor(r));
         const fallback = arenaAltTextFor(undefined);
         for (const t of texts) {
             expect(t).not.toEqual(fallback);
             expect(t.length).toBeGreaterThan(20);
         }
-        expect(new Set(texts).size).toBe(KEYED_REGIONS.length);
+        expect(new Set(texts).size).toBe(PLATED_REGIONS.length);
     });
 
     /**
@@ -157,7 +196,7 @@ describe('arenaAltTextFor', () => {
      * region is the failure mode this pins.
      */
     it('describes the plate rather than naming the region back to the user', () => {
-        for (const region of KEYED_REGIONS) {
+        for (const region of PLATED_REGIONS) {
             expect(arenaAltTextFor(region).toLowerCase()).not.toContain(region.toLowerCase());
         }
     });

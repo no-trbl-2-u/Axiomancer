@@ -90,6 +90,10 @@ export function createMapState(def: MapDefinition): MapState {
         // Spec 23 — fog-of-war seeded with the starting node; nothing consumed yet.
         discoveredNodes: [startId],
         consumedNodes: [],
+        // The player is PLACED on the starting node, never arrives at it, so
+        // the map opens owing no arrival. The start node's own content is the
+        // screen's `startNodePending` affair (2026-08-08 first-map audit).
+        pendingArrival: null,
         // Phase 135 — hazard persistence extensions, initialized as empty.
         hazardOutcomes: [],
         // W-01 — secret doors / act gates arrive pre-blocked on labyrinth

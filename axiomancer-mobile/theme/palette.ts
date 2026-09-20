@@ -142,11 +142,26 @@ export function makePalette(s: ThemeSpec): Palette {
  * leaf, verdigris, red ochre, lapis, orpiment, murex — while keeping every
  * theme's identity and its name.
  *
- * Readability was measured before and after, not assumed. No pair regressed,
- * and the two that were only AA-large before now clear full AA: ashen-gold's
- * `blood/bg` 4.16 -> 5.39, plague-bloom's `blood/bg` 3.63 -> 5.72. The
- * `theme contrast` block in `__tests__/palette.test.ts` is the guard that did
- * not exist when those two were allowed to drift below the line.
+ * Readability was measured before and after. The two pairs that were only
+ * AA-large before now clear full AA: ashen-gold's `blood/bg` 4.16 -> 5.39,
+ * plague-bloom's `blood/bg` 3.63 -> 5.72.
+ *
+ * What this comment claimed until 2026-09-20 — "no pair regressed" — was
+ * false. Of the 60 readable-token pairs (6 accents x `bg`/`panelBg` x 5
+ * themes), 36 moved down; most stayed far clear of AA (ashen-gold
+ * `sulfur/bg` 12.52 -> 9.75, `heal/bg` 8.83 -> 7.44, `parchment/bg`
+ * 16.09 -> 15.13). One token crossed the line: `rust`, against BOTH `bg`
+ * and `panelBg`, on ashen-gold (the default), coastal-verdant and
+ * ember-depths. On coastal-verdant that was a clean regression across AA
+ * (`rust/bg` 5.07 -> 4.26); on the other two the retune deepened a deficit
+ * that already existed. `rust` was retuned back over the line on 2026-09-20
+ * — lightness lifted only, hue and saturation held, so the pigment
+ * direction is unchanged: ashen-gold 4.89/4.64, coastal-verdant 4.97/4.64,
+ * ember-depths 4.86/4.61 against `bg`/`panelBg`.
+ *
+ * It went uncaught because `READABLE_PAIRS` in `__tests__/palette.test.ts`
+ * did not list `rust` at all, and covered the other accents against `bg`
+ * only. That block now asserts `rust/bg` and `rust/panelBg` on every theme.
  */
 export const THEME_SPECS: Record<ThemeId, ThemeDef> = {
     'ashen-gold': {
@@ -158,7 +173,7 @@ export const THEME_SPECS: Record<ThemeId, ThemeDef> = {
             parchment: '#ece0c8',
             blood: '#e05a45',
             sulfur: '#dcb04a',
-            rust: '#a8562a',
+            rust: '#c36431',
             heal: '#8fa855',
             bone: '#9c937f',
             ash: '#46403a',
@@ -182,7 +197,7 @@ export const THEME_SPECS: Record<ThemeId, ThemeDef> = {
             parchment: '#e2e8d8',
             blood: '#e07a5a',
             sulfur: '#6fb89c',
-            rust: '#417f78',
+            rust: '#478b83',
             heal: '#8cb473',
             bone: '#8a988f',
             ash: '#324440',
@@ -206,7 +221,7 @@ export const THEME_SPECS: Record<ThemeId, ThemeDef> = {
             parchment: '#eddcc4',
             blood: '#e2604a',
             sulfur: '#dd9a4e',
-            rust: '#a84a22',
+            rust: '#cd5a2a',
             heal: '#9caf5c',
             bone: '#a8917e',
             ash: '#4a3a32',

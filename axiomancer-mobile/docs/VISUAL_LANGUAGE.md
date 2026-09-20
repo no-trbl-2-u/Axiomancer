@@ -34,12 +34,28 @@ a **frozen snapshot of the active theme**, resolved once at module-load
 > stickers on top of a print. Every theme's hues were desaturated and shifted
 > toward colours a hand-tinted plate would carry — iron-gall, oxblood, gold
 > leaf, verdigris, red ochre, lapis, orpiment, murex — keeping each theme's
-> identity and name. Contrast was measured before and after: no pair
-> regressed, and the two `blood/bg` pairs that were only AA-large now clear
-> full AA. `theme/__tests__/palette.test.ts` gained the contrast guard that
-> had never existed. **The type system was reviewed in the same pass and
+> identity and name. Contrast was measured before and after: the two
+> `blood/bg` pairs that were only AA-large now clear full AA.
+> `theme/__tests__/palette.test.ts` gained the contrast guard that had never
+> existed. **The type system was reviewed in the same pass and
 > deliberately left alone** — IM Fell English (a 17th-c English revival) and
 > Pirata One sit inside the same printed-book world as the plates.
+
+> **Correction (2026-09-20, burn-day audit row 3.10).** The paragraph above
+> claimed "no pair regressed". It did not hold. 36 of the 60 readable-token
+> pairs (6 accents against `bg` and `panelBg` across 5 themes) lost contrast
+> in the Phase 101 retune. Nearly all of them stayed far above AA and are
+> left as they are — the accents were meant to sit back. One token did not:
+> `rust` fell below 4.5:1 against both `bg` and `panelBg` on ashen-gold (the
+> default), coastal-verdant and ember-depths, and `rust` is read as text
+> (error codes, crash labels, the friendship panel, difficulty badges).
+> On coastal-verdant that was a clean crossing of AA, 5.07 -> 4.26; on
+> ashen-gold and ember-depths the retune deepened a deficit that predated
+> it. `rust` has been lifted back over the line on those three themes by
+> raising lightness alone, holding hue and saturation, so red ochre stays
+> red ochre and verdigris stays verdigris. The guard missed it because
+> `READABLE_PAIRS` did not list `rust` and tested the other accents against
+> `bg` only; it now asserts `rust/bg` and `rust/panelBg` on every theme.
 
 The base identity is one dark-gothic palette; the *accents* are
 theme-driven so the world can shift as the pilgrim moves between

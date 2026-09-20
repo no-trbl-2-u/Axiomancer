@@ -72,6 +72,32 @@ So this phase built the missing step. `scripts/acquire-art.mjs` gains:
    raises. There is deliberately **no upper guard**: a plate that legitimately
    fills its page is the normal case for the Gallica scans, and an upper bound
    would reject exactly the images that need no cropping.
+
+   **Corrected by the burn-day audit of 2026-09-19 (row 3.5).** As written this
+   claim was true only of the case where a block IS found and is too small. It
+   was false for the case it names — the plate not being found at all. `span()`
+   initialised its answer to the whole axis and only overwrote it when a run
+   closed, so a page where nothing reached `darkPct` (a blank page, or a plate
+   below the coverage floor) came back as x[0,1] y[0,1] at `frac` 0.96 and
+   raised nothing: the scan's margins, book edge and caption band would have
+   shipped as the plate. No `frac` threshold could have caught it — two of the
+   three plates below legitimately sit at 0.904 and 0.913. `detectPlateBox` now
+   raises "no plate detected" instead, pinned by four cases in
+   `scripts/art.test.mjs` (blank page, plate below the floor, plate with page
+   margins, tight scan). The three plates below are untouched by the change:
+   all three found real runs, and both controls are bit-identical across it.
+
+   **Still open, and the sentence is still false for it.** The detector throws
+   when it finds NO block; it continues to guess when it finds the WRONG one.
+   Longest-run prefers whichever dark block is widest, so a 600px book edge
+   beside a 200px plate crops the edge at `frac` 0.568 with no throw. Neither
+   remedy the audit row suggested works: preferring the darkest run picks the
+   edge too (a solid edge means 40, the plate's column 137.5), and a per-axis
+   `minFrac` at 0.2 is arithmetically a no-op and misses a 0.6×1.0 box at any
+   value. The honest fix is an ambiguity guard on the competing runs, and its
+   ratio must be **measured** against the live sources the way `darkPct` was in
+   decision 3 — not guessed. That must close before the Northern Forest
+   acquisition, which is the next `plate-page` source.
 5. **The licence is never asserted, only read.** Every plate went through
    `acquire-art.mjs`, which reads Commons' own `imageinfo` extmetadata and
    refuses anything it cannot prove PD/CC0. All three returned `Public domain —
@@ -142,3 +168,11 @@ errors (15 pre-existing warnings, unchanged). Provenance gate 9/9.
 - `maps/ludgate-hill.webp` carries legible 1872 advertising (`LLOYD NEWS ONE
   PENNY`), flagged in `docs/art-catalog.json`. Period-correct, but it is text in
   a game whose UI is also text.
+- `combat/arena-desolation.webp` — the plate this phase installed as the
+  fallback — carries the same class of text: the right-edge building's frieze
+  reads `COMMERCIAL WHAR[F]`, cut mid-word by the plate edge. It went
+  unrecorded through this phase's visual inspection and was found in the
+  burn-day audit of 2026-09-19 (row 3.12); it is flagged in
+  `docs/art-catalog.json` now, not cropped — `buildPlatePage`'s `inset` trims
+  all four sides, and the right-edge dark mass it sits in is the reason this
+  plate was chosen for the fallback slot.

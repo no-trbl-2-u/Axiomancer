@@ -60,10 +60,16 @@ describe('CombatBoard: region-keyed arena backdrop (phase 83)', () => {
     /**
      * RE-DERIVED — phase 103. This case used to feed 'The Caverns', which was a
      * live region with no rule of its own. Phase 103 gave it one (and the
-     * Capital too), so every LIVE region is now keyed and the fallback is
-     * reachable only by a string the game never produces. That is the point of
-     * the phase, so the case now feeds an invented region rather than asserting
-     * a real place still falls back.
+     * Capital too), so the Caverns no longer demonstrates the fallback and the
+     * case feeds an invented region instead.
+     *
+     * It said "every LIVE region is now keyed and the fallback is reachable
+     * only by a string the game never produces". That was false when written:
+     * the Northern Forest has no plate and reaches the fallback in play
+     * (burn-day audit 3.11). Which live regions still fall back is a unit-level
+     * property, asserted over the map registry in
+     * `assets/images/combat/__tests__/index.test.ts`; this file pins only that
+     * the `region` prop threads down to the pane, so it stays as written.
      */
     it('an unmapped region keeps the exact fallback plate and label the dev sandbox gets', () => {
         const withUnmapped = renderBoard('The Kingdom of Nowhere');

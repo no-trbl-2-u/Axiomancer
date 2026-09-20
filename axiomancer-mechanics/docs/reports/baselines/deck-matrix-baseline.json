@@ -1,7 +1,7 @@
 {
  "meta": {
-  "generatedAt": "2026-09-19",
-  "commit": "5a2158a",
+  "generatedAt": "2026-09-20",
+  "commit": "78e4faf",
   "command": "npm run combat-playtest -- --stage=all --policy=all --deck=policy-pick --runs=60 --seed=1 --cards --json",
   "seeds": {
    "baseline": 1,
@@ -9,7 +9,7 @@
   },
   "runsPerCell": 60,
   "confidence": "full",
-  "note": "Full re-baseline via scripts/regen-deck-matrix-baseline.mjs at 5a2158a."
+  "note": "Full re-baseline after the burn-day audit of 2026-09-19. Four causes, not one: SUMMON itself (e333fbb, never measured with the archetype in the stamped tree - audit row 3.6); The Jeweled Tree shipping without its auto SWIFT; row 3.2's projection fix, which routes both terms of projectIncomingThreat through soakFlatHit so the SWIFT divisor and the flat armor soak apply; and row 3.8's telemetry fix, which folds add-struck cost into convictionSpent and moves the strike decision after the round's wall is bought. Rows 3.2 and 3.8 are why the SUMMON cells moved - convictionSpent 0 to 118 and avgConvictionSpent 2.18 to 1.87 on the jeweled-tree greedy cell are the two ledgers agreeing for the first time."
  },
  "report": {
   "diceModel": "upgradeable",
@@ -21545,21 +21545,21 @@
      "roundsStdDev": 0.5153208277913441,
      "statusEngagement": 0.19035202086049544,
      "combatQuality": {
-      "index": 0.6509253481321581,
+      "index": 0.7467477316442018,
       "components": {
-       "spine": 0.4088581463604649,
+       "spine": 0.6484141051405742,
        "arc": 0.7748677248677253,
        "width": 0.7183257918552035,
        "identity": 1
       },
       "spineComponents": {
-       "conviction": 0,
+       "conviction": 0.7186678763403277,
        "surge": 0.49324110574806146,
        "dice": 0.7333333333333334
       },
       "readings": {
        "convictionPerRound": 1.032967032967033,
-       "convictionSpendShare": 0,
+       "convictionSpendShare": 0.6276595744680851,
        "momentumStepsPerRound": 1.6593406593406594,
        "surgeCompletionShare": 0.2932330827067669,
        "diceSpendShare": 0.2688888888888889,
@@ -21579,8 +21579,8 @@
       "runs": 60,
       "rounds": 182,
       "convictionGained": 188,
-      "convictionSpent": 0,
-      "signatureCasts": 0,
+      "convictionSpent": 118,
+      "signatureCasts": 1,
       "specialsFired": 69,
       "momentumAdvances": 263,
       "momentumBreaks": 94,
@@ -21605,13 +21605,14 @@
        "thumbprick-oath": 1898,
        "a-pound-of-flesh+": 5113,
        "the-long-lent": 2007,
-       "every-wound-accounted": 4778,
+       "every-wound-accounted": 4772,
        "surplusage": 1543,
        "the-charnel-ledger": 313,
-       "overheard-name": 265
+       "overheard-name": 265,
+       "sig-disarming-plea": 6
       }
      },
-     "avgConvictionSpent": 2.183333333333333,
+     "avgConvictionSpent": 1.8666666666666667,
      "dotHpFraction": 0.2192117146740322,
      "strikeFraction": 0.7807882853259678,
      "mechanicBurstFraction": 0,
@@ -21768,7 +21769,7 @@
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 1111,
+       "free": 1105,
        "paid": 3667
       },
       "unplayedAtPhaseEnd": 0,
@@ -21837,21 +21838,21 @@
      "roundsStdDev": 0.5153208277913441,
      "statusEngagement": 0.19035202086049544,
      "combatQuality": {
-      "index": 0.6509253481321581,
+      "index": 0.7467477316442018,
       "components": {
-       "spine": 0.4088581463604649,
+       "spine": 0.6484141051405742,
        "arc": 0.7748677248677253,
        "width": 0.7183257918552035,
        "identity": 1
       },
       "spineComponents": {
-       "conviction": 0,
+       "conviction": 0.7186678763403277,
        "surge": 0.49324110574806146,
        "dice": 0.7333333333333334
       },
       "readings": {
        "convictionPerRound": 1.032967032967033,
-       "convictionSpendShare": 0,
+       "convictionSpendShare": 0.6276595744680851,
        "momentumStepsPerRound": 1.6593406593406594,
        "surgeCompletionShare": 0.2932330827067669,
        "diceSpendShare": 0.2688888888888889,
@@ -21871,8 +21872,8 @@
       "runs": 60,
       "rounds": 182,
       "convictionGained": 188,
-      "convictionSpent": 0,
-      "signatureCasts": 0,
+      "convictionSpent": 118,
+      "signatureCasts": 1,
       "specialsFired": 69,
       "momentumAdvances": 263,
       "momentumBreaks": 94,
@@ -21897,13 +21898,14 @@
        "thumbprick-oath": 1898,
        "a-pound-of-flesh+": 5113,
        "the-long-lent": 2007,
-       "every-wound-accounted": 4778,
+       "every-wound-accounted": 4772,
        "surplusage": 1543,
        "the-charnel-ledger": 313,
-       "overheard-name": 265
+       "overheard-name": 265,
+       "sig-disarming-plea": 6
       }
      },
-     "avgConvictionSpent": 2.183333333333333,
+     "avgConvictionSpent": 1.8666666666666667,
      "dotHpFraction": 0.2192117146740322,
      "strikeFraction": 0.7807882853259678,
      "mechanicBurstFraction": 0,
@@ -22060,7 +22062,7 @@
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 1111,
+       "free": 1105,
        "paid": 3667
       },
       "unplayedAtPhaseEnd": 0,
@@ -22129,21 +22131,21 @@
      "roundsStdDev": 0.5312459150169732,
      "statusEngagement": 0.5317324185248714,
      "combatQuality": {
-      "index": 0.5640068585762575,
+      "index": 0.6350353390967153,
       "components": {
-       "spine": 0.43151598903323607,
+       "spine": 0.6090871903343804,
        "arc": 0.5997685185185189,
        "width": 0.45729166666666665,
        "identity": 1
       },
       "spineComponents": {
-       "conviction": 0,
+       "conviction": 0.532713603903433,
        "surge": 0.6710671544844187,
        "dice": 0.6234808126152896
       },
       "readings": {
        "convictionPerRound": 1.25,
-       "convictionSpendShare": 0,
+       "convictionSpendShare": 0.22702702702702704,
        "momentumStepsPerRound": 2.385135135135135,
        "surgeCompletionShare": 0.4503311258278146,
        "diceSpendShare": 0.38872832369942195,
@@ -22163,7 +22165,7 @@
       "runs": 60,
       "rounds": 148,
       "convictionGained": 185,
-      "convictionSpent": 0,
+      "convictionSpent": 42,
       "signatureCasts": 0,
       "specialsFired": 79,
       "momentumAdvances": 285,
@@ -22192,11 +22194,11 @@
        "the-note-falls-due": 14352
       }
      },
-     "avgConvictionSpent": 1.7666666666666666,
+     "avgConvictionSpent": 1.05,
      "dotHpFraction": 0.1806913914980149,
      "strikeFraction": 0.8072044156095671,
      "mechanicBurstFraction": 0.012104192892417934,
-     "guardMitigatedFraction": 0.5219123505976095,
+     "guardMitigatedFraction": 0.5137254901960784,
      "avgActiveEffectsPerPhase": 1.5333333333333334,
      "deckUtilization": 1,
      "usageEntropy": 0.9761401934577862,
@@ -22418,21 +22420,21 @@
      "roundsStdDev": 0.6920179830675564,
      "statusEngagement": 0.35526315789473684,
      "combatQuality": {
-      "index": 0.5992055705424651,
+      "index": 0.6328916473851259,
       "components": {
-       "spine": 0.3746654527409854,
+       "spine": 0.4588806448476373,
        "arc": 0.9761068883651648,
        "width": 0.6148648648648649,
        "identity": 0.5489312958787121
       },
       "spineComponents": {
-       "conviction": 0,
+       "conviction": 0.2526455763199557,
        "surge": 0.6293213236492388,
        "dice": 0.49467503457371736
       },
       "readings": {
        "convictionPerRound": 1.0106382978723405,
-       "convictionSpendShare": 0,
+       "convictionSpendShare": 0.06315789473684211,
        "momentumStepsPerRound": 1.4574468085106382,
        "surgeCompletionShare": 0.5434782608695652,
        "diceSpendShare": 0.24470338983050846,
@@ -22452,7 +22454,7 @@
       "runs": 60,
       "rounds": 94,
       "convictionGained": 95,
-      "convictionSpent": 0,
+      "convictionSpent": 6,
       "signatureCasts": 0,
       "specialsFired": 32,
       "momentumAdvances": 112,
@@ -22481,7 +22483,7 @@
        "threadbare-cope+": 214
       }
      },
-     "avgConvictionSpent": 1,
+     "avgConvictionSpent": 0.7166666666666667,
      "dotHpFraction": 0.09378914020481839,
      "strikeFraction": 0.9062108597951816,
      "mechanicBurstFraction": 0,
@@ -22995,21 +22997,21 @@
      "roundsStdDev": 0.7139483330201315,
      "statusEngagement": 0.16946959896507116,
      "combatQuality": {
-      "index": 0.6215563487710762,
+      "index": 0.6958350548774236,
       "components": {
-       "spine": 0.4540791803959068,
+       "spine": 0.6397759456617753,
        "arc": 0.758305776014109,
        "width": 0.5670840787119857,
        "identity": 0.9128761124452607
       },
       "spineComponents": {
-       "conviction": 0.2138089935299395,
+       "conviction": 0.7708992893275453,
        "surge": 0.4673464436718208,
        "dice": 0.68108210398596
       },
       "readings": {
        "convictionPerRound": 1.2914285714285714,
-       "convictionSpendShare": 0.035398230088495575,
+       "convictionSpendShare": 0.46017699115044247,
        "momentumStepsPerRound": 1.9657142857142857,
        "surgeCompletionShare": 0.2222222222222222,
        "diceSpendShare": 0.3092485549132948,
@@ -23029,7 +23031,7 @@
       "runs": 60,
       "rounds": 175,
       "convictionGained": 226,
-      "convictionSpent": 8,
+      "convictionSpent": 104,
       "signatureCasts": 1,
       "specialsFired": 91,
       "momentumAdvances": 310,
@@ -23058,7 +23060,7 @@
        "first-spadeful": 348
       }
      },
-     "avgConvictionSpent": 1.9666666666666666,
+     "avgConvictionSpent": 1.3166666666666667,
      "dotHpFraction": 0.3466491458607096,
      "strikeFraction": 0.6533508541392904,
      "mechanicBurstFraction": 0,
@@ -42885,21 +42887,21 @@
    }
   ],
   "combatQuality": {
-   "index": 0.7578752971677153,
+   "index": 0.7589337497368146,
    "components": {
-    "spine": 0.7445921160388307,
+    "spine": 0.7472382474615789,
     "arc": 0.7935494514569281,
     "width": 0.558255439439755,
     "identity": 1
    },
    "spineComponents": {
-    "conviction": 0.8295432996641952,
+    "conviction": 0.8374816939324397,
     "surge": 0.5762524950376244,
     "dice": 0.8279805534146727
    },
    "readings": {
     "convictionPerRound": 1.8649834581229323,
-    "convictionSpendShare": 0.36898026254364835,
+    "convictionSpendShare": 0.3760760368233339,
     "momentumStepsPerRound": 2.5013755876719483,
     "surgeCompletionShare": 0.3320669380370873,
     "diceSpendShare": 0.3427758984164338,
@@ -42974,21 +42976,21 @@
     "winRate": 0.9175,
     "statusEngagement": 0.24464981878275613,
     "combatQuality": {
-     "index": 0.7092906308133667,
+     "index": 0.7170439848357522,
      "components": {
-      "spine": 0.6144847784161441,
+      "spine": 0.6338681634721077,
       "arc": 0.7846351324865236,
       "width": 0.5866896816263905,
       "identity": 1
      },
      "spineComponents": {
-      "conviction": 0.44812707622083886,
+      "conviction": 0.5062772313887299,
       "surge": 0.5889655823691492,
       "dice": 0.8063616766584444
      },
      "readings": {
       "convictionPerRound": 1.2211187381334891,
-      "convictionSpendShare": 0.16445401267790935,
+      "convictionSpendShare": 0.20990312163616792,
       "momentumStepsPerRound": 2.098437271797868,
       "surgeCompletionShare": 0.34688045721543104,
       "diceSpendShare": 0.3251095767917088,

@@ -74,14 +74,33 @@ export default function ExplorationScreen() {
     const hasEvent = useGameState(selectHasActiveEvent);
     const anySession = useGameState(selectHasAnyActiveSession);
 
-    // 2026-08-08 first-map audit — resolve the START node's event once, on
-    // arrival at the map. Events fire on ARRIVAL at a node, and the player
-    // never "arrives" at the node they are placed on, so whatever the map
-    // authored for its starting node was dead content: on fishing-village
-    // that silently swallowed fv-1's entire pool. The mechanics CLI has
-    // resolved the start node behind `--resolve-start` since Phase 14; this
-    // is the app's equivalent. `resolveCurrentMapEvent` marks the node
-    // consumed, so `startNodePending` makes it a genuine one-shot per map.
+    // Resolve the arrival this screen still owes the player, once, on mount.
+    //
+    // 2026-08-08 first-map audit — the original case was the START node.
+    // Events fire on ARRIVAL at a node, and the player never "arrives" at
+    // the node they are placed on, so whatever the map authored for its
+    // starting node was dead content: on fishing-village that silently
+    // swallowed fv-1's entire pool. The mechanics CLI has resolved the start
+    // node behind `--resolve-start` since Phase 14; this is the app's
+    // equivalent.
+    //
+    // Burn-day audit 2026-09-19 row 3.1 — the start node is only the FIRST
+    // unanswered arrival, not the only one. A move checkpoints before its
+    // arrival resolves (`moveToAction` saves, then `onConfirmMove` calls
+    // `resolveCurrentMapEvent`), so a player who reloaded in between came
+    // back standing on the node with its onward edges open and no fight
+    // pending — the encounter was skipped outright. `vm.arrivalPending` is
+    // that debt, read off the engine's `pendingArrival` record, and it is
+    // cleared by the resolve, so it stays a genuine one-shot: an answered
+    // arrival never re-fires, here or after a reload.
+    //
+    // The two flags are owed for different reasons and neither implies the
+    // other (row 3.1 follow-up). `arrivalPending` is a record of WALKING onto
+    // a node; `startNodePending` is the map placing you on its first one.
+    // Being PLACED somewhere else — a state fixture, a `/dev` JUMP — is
+    // neither, and owes nothing: firing on the fixture's placement is what
+    // made `/exploration?fixture=sage-fv-boss-gate` engage the fv-9 boss
+    // instead of drawing the map.
     //
     // Two guards, and CI taught me both of them.
     //
@@ -98,14 +117,15 @@ export default function ExplorationScreen() {
     // render-time reading would see an idle app that is about to be busy, so
     // let the interaction settle and re-read the store at fire time.
     const store = useGameStore();
+    const arrivalOwed = vm.arrivalPending || vm.startNodePending;
     useEffect(() => {
-        if (!vm.startNodePending || anySession || inEncounterModal || inCombat) return;
+        if (!arrivalOwed || anySession || inEncounterModal || inCombat) return;
         const settle = setTimeout(() => {
             if (selectHasAnyActiveSession(store.getState())) return;
             actions.resolveCurrentMapEvent();
         }, 0);
         return () => clearTimeout(settle);
-    }, [vm.mapId, vm.startNodePending, anySession, inEncounterModal, inCombat, store, actions]);
+    }, [vm.mapId, vm.currentNodeId, arrivalOwed, anySession, inEncounterModal, inCombat, store, actions]);
     // Phase 63c — the modal mount lifecycle now spans the full
     // encounter session (prelude → combat → aftermath), not just
     // the moment `selectHasActiveEvent` returns true. Once combat

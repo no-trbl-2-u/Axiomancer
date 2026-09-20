@@ -60,7 +60,7 @@ export interface CombatAdd {
 |---|---|---|
 | `SUMMON N` → adds per wave | **N = 2** on every shipped carrier | Prior-art lens: "N = 2 with small bite is the only starting point I'd defend; N = 3+ or bite ≥ the foe's own term makes clearing mandatory, which is the tax." |
 | `ADD_WAVE_CAP` | **2 waves per combat** | Prior-art blocker #2. Aeon's End minions come from a finite nemesis deck (`kb:aeons-end/rules/scoring-endgame:40-42`); STS:BG summons come from a finite per-Act Summon deck (`kb:slay-the-spire-the-board-game/rules/setup:44,49`, src-002) and were deliberately made persistent-but-never-respawning (`.../edge-cases-faq:62-63`). "Spawn when none are alive" is rejected: it makes clearing cause the respawn, which is a tax, not a decision. |
-| spawn trigger | wave 1 at the **first phase boundary**; wave 2 only at a boundary where a **STAGE fires**; never on emptiness | One-shot events, not an emptiness check. Placed after the STAGE block (`combat.engine.ts:4850`) so a stage-granted SUMMON fires on the boundary it is entered — doctrine #9. |
+| spawn trigger | wave 1 at the **first phase boundary**; wave 2 only at a boundary where a **STAGE fires**; never on emptiness. *Burn-day audit 2026-09-19 row 3.9:* this describes the engine, not play — **no shipped carrier can satisfy the second clause** (see Engine deviations) | One-shot events, not an emptiness check. Placed after the STAGE block (`combat.engine.ts:4850`) so a stage-granted SUMMON fires on the boundary it is entered — doctrine #9. |
 | add vitae | **1 / 1** | The record carries `vitae`/`maxVitae` so the chip can show pips and a future multi-hit add is representable, but every shipped add is a 1-pip add: one `strikeAdd` kills it. Two taps at 2◆ each to remove one body is the drip-drain the prior-art lens flagged as the resented shape. |
 | add `bite` | `Math.max(2, Math.round(enemy.level * 0.2))` snapshotted at spawn. **L22 → 4 per add, 8 for a full wave.** | The foe's own phase-0 telegraph at L22 elite is `Math.max(4, round((6 + 0.8*22) * dMult))` ≈ 31 (`combat.threat.ts:293-301`). 8 / 31 = 26% — "strictly below the foe's own printed threat term" (prior-art #7). Escalation caps at `THREAT_ESCALATION_MAX = 2.0` (`combat.engine.ts:202`), but the add term is **outside** that stack, so a long fight does not double it. |
 | `STRIKE_ADD_COST` | **2 ◆** | `CONVICTION_CAP = 12` (`combat.engine.ts:166`); signatures cost 1-9 with The Stilling at 8 and Press Fate / Second Wind at 4 (`combat.signature.ts:41-105`). Clearing a full wave costs 4◆ — one Press Fate, a third of the cap. Real opportunity cost, never a lockout. |
@@ -112,7 +112,7 @@ Consequences, each a deliberate ruling to be printed:
 
 The doctrine that actually governs is **FE-022**, in the repo's own words at `CombatCombatantPane.tsx:160-168`: a second full-width bar under VITAE sits where genre convention puts armour, so it must name its payoff. The HUD already stacks up to four `AltWinMeter`s (`:719-748`). Chips have no fill, no value/max fraction and no `progressbar` role; the VITAE crest (`:99-153`, `:817`) stays the only element carrying the big number. Adds-as-chips passes by construction.
 
-- **Prerequisite, shipped first:** `enemyFigureWrap` is anchored off the static `COMBAT_HUD_HEIGHT = 148` (`CombatCombatantPane.tsx:89`, `:786`) although the HUD is already measured via `onHudLayout` (`:711`, consumed in `CombatBoard.tsx:1010-1018`). A new chip row grows the HUD and not the figure. Move the anchor onto a locally-measured height before adding any row. (Doctrine #2 — prerequisite, not follow-up.)
+- **Prerequisite, shipped first:** `enemyFigureWrap` is anchored off the static `COMBAT_HUD_HEIGHT = 148` (`CombatCombatantPane.tsx:89`, `:786`) although the HUD is already measured via `onHudLayout` (`:711`, consumed in `CombatBoard.tsx:1010-1018`). A new chip row grows the HUD and not the figure. Move the anchor onto a locally-measured height before adding any row. (Doctrine #2 — prerequisite, not follow-up.) **Dropped from the ship and recovered 2026-09-20 by burn-day audit 3.14** — see Engine deviations, deviation three. The row's premise was half right: the anchor really was inert to layout, but the chip row is not what crosses the painting. Measured at 375x812 the chips are right-aligned at x290-363 and cover **0.00%** of the drawn art on the shipped carrier; the full-width meters above them cover up to 47%.
 - **`AddChips`, a new shell — not `EffectChips`.** `hudRight` (`:762-770`) already mounts two `EffectChips` families whose taps open an info plaque; an add chip's tap **spends**. Identical shell + identical column + one tap that informs and one that costs is the real legibility wound (doctrine #1). The add row gets its own tile geometry (taller, square corners, a BITE badge top-left and a ◆cost badge bottom-right), an explicit **locked** state when `conviction < cost`, and sits above the keyword row.
 - **Tap → confirm sheet**, never tap-to-spend: `onAdd → setAddConfirm → STRIKE / WAIT → strikeAdd`, the exact Seal pattern (`CombatEncounterPanel.tsx:631-636`).
 - Iron-grey register (`ENEMY_KEYWORD_COLOR = GLYPH_COLORS.thorns`, `combat-encounter.engine.ts:110`) — "properties of the thing you are hitting", never the seal/alt-win gold, which would imply a win track that does not exist.
@@ -215,6 +215,22 @@ with:
 ```tsx
                     <View style={[styles.enemyFigureWrap, hudH > 0 ? { top: hudH - 14 } : null]}>
 ```
+
+> **Corrected 2026-09-20 (burn-day audit 3.14) — do not apply 1a/1b/1c
+> verbatim.** `hudH` is the height of the WHOLE HUD, chip column included,
+> while the wrap's bottom is pinned at 9% of the scene band. Measured at
+> 375x812, `top = hudH - 14` collapses the drawn foe from 292.5pt square to
+> 136.5 / 94.2 / 62.5 / 20.3pt (inset 0 ordinary / inset 44 ordinary /
+> inset 0 with FLAY+DOT live / inset 44 with FLAY+DOT live). A 20pt foe is
+> smaller than one status chip — a worse defect than the one being fixed,
+> and it lands hardest exactly when the HUD is busiest. What shipped
+> instead measures the HUD's **full-width block** alone (name row + VITAE
+> bar + alt-win meters, `testID="combat-hud-block"`) and anchors
+> `top = topInset + COMBAT_HUD_PAD_TOP + hudBlockH - 14`. That is
+> byte-identical on screen in the ordinary inset-0 case and never takes the
+> foe below 233pt. `onHudLayout` is left forwarding the whole HUD: the
+> board's dock spacer, the LOG toggle and the tutorial coach must keep
+> clearing the chips.
 
 Leave `styles.enemyFigureWrap` (`:786`) as the fallback. **Ships and verifies on its own** — no SUMMON code depends on it, but no chip row may land before it.
 
@@ -866,7 +882,7 @@ Vitest. Copy the header / import / fixture / helper block from `big-numbers.engi
 - success → `conviction` drops by exactly `STRIKE_ADD_COST`, exactly one add removed, one `add-struck` event, `finalOutcome` still `undefined`
 
 **`describe('the telegraph does not lie')`**
-- `projectIncomingThreat(s).addNetDamage` **equals** the `add-bit.dealt` that `resolveThreatPhase(s)` actually applies — across four states: bare, GUARD 0, GUARD > bite, and a SWIFT foe. This is the ship gate.
+- `projectIncomingThreat(s).addNetDamage` **equals** the `add-bit.dealt` that `resolveThreatPhase(s)` actually applies — ~~across four states: bare, GUARD 0, GUARD > bite, and a SWIFT foe~~. This is the ship gate. **CORRECTED by burn-day audit 2026-09-19 row 3.2:** as shipped, the four states all emptied or denied the foe's telegraph, and the `SWIFT foe` state did too — which is the one configuration in which this divergence cannot appear, because the leftover wall is the whole wall on both sides. The gate was green while `addNetDamage` was wrong in 35 of 324 wall cells. It now runs a LIVE telegraph across `swift × guard{0,3,5,8,10,20,24,32,40} × barrier{0,4,6} × telegraph{0,10,30} × armor`, paired with a second case that pins the printed `totalNetDamage` to the VITAE the engine actually takes off the bar.
 - `projectEnemyHealPerRound` on a RAVENOUS SUMMON foe is **unchanged** by the presence of adds (the `netDamage`/`totalNetDamage` split)
 - with the boss's telegraph denied (`willDeny === true`), `netDamage === 0` but `addNetDamage > 0` — a denied turn does not read as safe
 
@@ -888,7 +904,7 @@ Copy `CombatBoard.seal.test.tsx` verbatim in shape (jest globals imported from `
 - tapping calls `onAdd` **exactly once** with `expect.objectContaining({ id, bite, cost })`, and **not** `onChip`, **not** `onSeal`, **not** `onApply` — the tap-grammar pin
 - `state.conviction < 2` renders the locked state and the a11y label ends `'Not enough Conviction.'`
 - absent `state.adds` → `queryByTestId(/^combat-add-/)` is null, no crash in the HUD
-- with PLEA + CHARGE + DOT meters live **and** an add row, the enemy figure's rendered `top` equals the measured HUD height − 14, not `148 − 14` — the step-1 prerequisite pin
+- with PLEA + CHARGE + DOT meters live **and** an add row, the enemy figure's rendered `top` equals the measured HUD **full-width block** height − 14 (plus `topInset + COMBAT_HUD_PAD_TOP`), not `148 − 14` — the step-1 prerequisite pin. *Corrected 2026-09-20 (burn-day audit 3.14): this gate was dropped from the ship, and "the measured HUD height" was the wrong quantity to pin — that number includes the narrow chip column and renders the foe at 20-136pt. Now shipped and pinned against the full-width block.*
 
 ### `axiomancer-mobile/state/presenters/__tests__/combat-log-lines.engine.test.ts`
 
@@ -907,7 +923,7 @@ Copy `CombatBoard.seal.test.tsx` verbatim in shape (jest globals imported from `
 | 4 | **Atlas / gloss drift** — count heading left at `(10)`, or a gloss key not indented exactly four spaces | `content-drift.mjs:139` matches `/^ {4}([a-z_]+):/gm`; the heading is hand-maintained | `node scripts/content-drift.test.mjs` via `.github/workflows/verify-drift.yml:17,34` — reports the atlas row as an orphan rather than pointing at the gloss, so read the gloss indentation first. |
 | 5 | **Silent `undefined` prop** — `onAdd` declared in `CombatBoardProps` but absent from the `CombatBoard.tsx:1001` destructure | `React.memo` + one very long destructure line; compiles clean, chip renders, tap does nothing | The "tapping calls `onAdd` exactly once" case in `CombatBoard.adds.test.tsx`. Nothing else catches it. |
 | 6 | **Seeded-RNG drift across the whole e2e + playtest matrix** if anything in the spawn block calls `rng()` | `rng` is consumed by THE CLOCK (`:4767`) and the hand refill (`:5061`); an inserted call at `4851` shifts every downstream draw | `big-numbers.engine.test.ts`, `phase-33b-enemy-archetypes.engine.test.ts`, `legibility-sweep.engine.test.ts` and the combat-playtest matrix all move at once. `spawnAddWave` is deterministic by construction — keep it that way. |
-| 7 | **Projection/engine divergence** — a later change to the add soak in one place only | Two call sites for one formula | The `addNetDamage === add-bit.dealt` parity test across four wall states. Both sites call `soakFlatHit`; if someone inlines one, this fails. |
+| 7 | **Projection/engine divergence** — a later change to the add soak in one place only | Two call sites for one formula | ~~The `addNetDamage === add-bit.dealt` parity test across four wall states. Both sites call `soakFlatHit`; if someone inlines one, this fails.~~ **The risk landed and the mitigation did not catch it** (burn-day audit 2026-09-19 row 3.2): a THIRD site was inlined — `projectIncomingThreat`'s own telegraph soak — and the suite stayed 32/32 green, because all four wall states emptied or denied the telegraph. The parity case now drives a live telegraph over a wall matrix and is paired with a HUD-total-vs-VITAE-lost case; the count of call sites was never the thing to watch, the coverage of the states was. |
 | 8 | **The baseline moves and nobody can attribute it** | Rostering Jeweled Tree with SUMMON changes the `mid` profile's numbers, and dropping its auto SWIFT changes them again | `npm run baseline:check` must be re-stamped in the same tick, with the commit naming *both* causes. A SUMMON foe reaching the roster before `strikeAddsAt` lands produces a row that is wrong in a known direction — gate the roster entry behind the policy knob if they cannot land together. |
 | 9 | **New events silently dropped** from the log, the telemetry fold and the burst roll-up | There is **no** exhaustive `CombatEvent` consumer anywhere; both mobile switches have `default:` (`:1153`, `:1286`) and `mechanicBurstDamage` (`combat.encounter.sim.ts:852-857`) is a hardcoded six-kind list | Only the log-lines presenter tests. `add-bit` is damage to the **player**, so it correctly stays out of `mechanicBurstDamage` (which credits damage to the enemy) — but confirm that deliberately rather than by omission. |
 | 10 | **HUD overflow on 375×812** — a fifth row under a crest that already carries four `AltWinMeter`s | Vertical budget under the crest is spent (`CombatCombatantPane.tsx:719-751`) | Step 1 is the structural fix; the figure-anchor assertion in `CombatBoard.adds.test.tsx` is the regression gate. The add row goes in `hudRight` (`:762`), never as a fifth meter. |
@@ -918,10 +934,25 @@ Copy `CombatBoard.seal.test.tsx` verbatim in shape (jest globals imported from `
 
 # SHIPPED — 2026-09-19
 
-Both sides landed: the engine per the brief, and the player-facing surface the
-brief's §4 called for. The gates are green (mechanics 216 suites / 3542 tests;
-mobile 308 suites / 2946 tests), and the baseline was regenerated because
-mechanics source moved.
+The engine landed per the brief. The player-facing surface landed in **part**:
+§14d's four `selectCombatLogLines` cases and the §4 assertions that were to
+pin them did not ship with this phase, so the brood's `add-spawned` /
+`add-bit` / `add-struck` and the strike's `effect-fizzled` reached `state.log`
+and were dropped by the presenter's `default:` — invisible in the log, the
+history and the float layer alike. Risk 9 below fired exactly as written, and
+the mitigation it named was the omitted suite. Closed 2026-09-20 by burn-day
+audit 3.4; the matrix and the DoD below now say so. The gates were green
+(mechanics 216 suites / 3542 tests; mobile 308 suites / 2946 tests), and the
+baseline *file* was regenerated because mechanics source moved — but its
+**stamp was false**, and the alarm has read STALE on `main` ever since. The
+regen ran with the Phase 102 work still uncommitted, so it recorded
+`git rev-parse --short HEAD` = `5a2158a`, a tree whose `combat.engine.ts`
+contains zero occurrences of SUMMON, for numbers measured on the SUMMON
+engine. The numbers themselves are sound (ten of ten mid-stage cells
+reproduce exactly on the shipped tree); the provenance claim is not.
+Burn-day audit 3.6, 2026-09-20: the regen script now refuses to measure
+while `axiomancer-mechanics/src` is dirty, so this cannot recur; the
+truthful re-stamp follows on a clean HEAD.
 
 ## What the player actually gets
 
@@ -951,12 +982,37 @@ a11y label said *"no damage lands"*. The engine resolves adds **outside** the
 staggered a summoner read "nothing lands", ended the phase, and took the bite
 anyway — a telegraph actively instructing them to make a mistake.
 
-The readout now carries the brood's share: `DENIED →8` when the foe's own blow
-is stopped but its adds are not, the combined total when both land, and the
-brood's bite alone when the foe telegraphs nothing. It prints the **soaked**
-number, not the printed one, through the same `soakFlatHit` the engine applies —
-one definition, so the on-screen wall math cannot drift from the applied wall
-math.
+The readout now carries the brood's share — `IntentIcon`'s readout, and in this
+pass **only that one**; see the row 3.3 correction below. `DENIED →8` when the
+foe's own blow is stopped but its adds are not, the combined total when both
+land, and the brood's bite alone when the foe telegraphs nothing. It prints the
+**soaked** number, not the printed one, through the same `soakFlatHit` the
+engine applies —
+~~one definition, so the on-screen wall math cannot drift from the applied wall
+math.~~ **CORRECTED by burn-day audit 2026-09-19 row 3.2: it drifted.** The add
+term did call the shared helper, but the *leftover wall* it was handed came from
+a second inline copy in the same function that dropped the SWIFT divisor and the
+flat `playerArmor` soak. Measured before the fix: 35 of 324 wall cells wrong on
+`addNetDamage`, 112 of 324 wrong on the printed `totalNetDamage` — a SWIFT foe
+behind GUARD 40 against a 30-damage telegraph printed 3 while the engine took
+18, tying the largest gap measured at 15 VITAE. Both of the projection's terms
+now go through the one helper, which is what the sentence above always claimed.
+
+**CORRECTED by burn-day audit 2026-09-19 row 3.3 — the heading above overstates
+what this pass closed.** `IntentIcon` was the only surface fixed, and the same
+lie kept playing on three siblings reading the same phase. The pane floated a gold bare `DENIED` over
+the foe (`CombatCombatantPane.tsx`), the enemy-action reveal card printed
+`DENIED`, the sentence *"your control held — none of it landed"* and an a11y
+summary that said only *"…'s action was denied"*, and the log history wrote
+`PHASE n — DENIED.` as that phase's whole story. Worse, neither fx reducer read
+`add-bit` at all — they counted player damage only from `damage-dealt` with
+`target === 'self'` — so a bite cost VITAE with **no** float, recoil, flash,
+board shake or haptic anywhere on screen. All four surfaces now read the
+`add-bit` event: the pane floats `DENIED · BROOD −N`, the card carries a
+`BROOD −N` line that is never struck through and reads *"your control held —
+its brood bit anyway"*, the history names the bite in the DENIED line, and the
+pilgrim takes a hit reaction scaled to what the brood actually took. `DENIED`
+now means, everywhere, *the foe's own blow was held* — never *nothing landed*.
 
 `netDamage` is deliberately left meaning *"the foe's own telegraphed hit"*.
 Every existing readout depends on that; the brood rides in `addNetDamage` /
@@ -988,7 +1044,9 @@ Every existing readout depends on that; the brood rides in `addNetDamage` /
 
 ## Engine deviations from the brief as written
 
-One, and it is a correction rather than a shortcut. Brief §9b prescribed
+Three.
+
+**One — a correction rather than a shortcut.** Brief §9b prescribed
 `guard: Math.max(0, guard - (projectedDamage - remaining))` for the wall left
 over after the boss's hit. `projectedDamage - remaining` is the total absorbed
 by **riposte + guard + barrier**, so that formula charges riposte's parry and
@@ -996,7 +1054,55 @@ barrier's share against GUARD — systematically understating the leftover wall
 and therefore **overstating** `addNetDamage`, breaking the very parity the brief
 calls its ship gate. Shipped instead as explicit `guardAbsorbed` /
 `barrierAbsorbed` minimums, arithmetically identical for `netDamage` (byte
-unchanged) and exact for the leftover.
+unchanged) and ~~exact for the leftover~~ — **CORRECTED by burn-day audit
+2026-09-19 row 3.2: exact only for a non-SWIFT foe against an unarmored
+player.** Those minimums were a third inline copy of arithmetic `soakFlatHit`
+already owned, and they omitted the SWIFT divisor and the armor subtraction the
+helper performs, so the leftover was overstated and the add term under-reported.
+The leftover is now taken from a `soakFlatHit` call on the foe's own hit, which
+also moves `netDamage` — downward for every armored player, upward for every
+SWIFT foe. That movement is the correction, not a retune: it is what the engine
+was applying all along.
+
+**Two — the second wave is live engine and dead roster.** Recorded
+2026-09-20 by burn-day audit 3.9; this is a silence in the record above
+rather than a false claim in it. `ADD_WAVE_CAP = 2` and the STAGE-gated
+second wave shipped exercised only by suites that build their own foe. The
+shipped carrier, The Jeweled Tree, is `difficulty: 'elite'` and authors no
+`stages`; `defaultEnemyStages` (`Enemy/index.ts`) hands the two-stage floor
+to bosses and uniques only, so `createEnemy` gives the carrier `stages: []`.
+`processBetweenPhases` gates every wave after the first on `stageFiredNow`,
+so the sole door to wave 2 is a stage this foe can never enter. Driven
+against the real library enemy over eight phase boundaries, damaged and
+undamaged, `addWavesSpawned` tops out at 1. Nor can the gap close by
+accident: `summon` appears in no branch of `defaultEnemyKeywords`, and
+outside the library nothing but tests calls `createEnemy`. So the
+archetype's coverage **in play** is wave 1 only, until a second carrier
+that has `stages` lands (Follow-ups below; the audit ranks it §8 Block 2
+item 2, gated on row 3.2). This is not an engine bug — the spawn rule is
+correct and tested — it is a roster that cannot reach it.
+
+**Three — the §1.6 figure anchor was a prerequisite and the ship dropped
+it.** Recorded 2026-09-20 by burn-day audit 3.14; another silence in the
+record rather than a false claim in it. §1.6 above called the anchor
+*"Prerequisite, shipped first"* and §4 named the gate — *the enemy figure's
+rendered `top` tracks the measured HUD instead of the static estimate* —
+and neither shipped. `enemyFigureWrap.top` stayed at `COMBAT_HUD_HEIGHT -
+14` (a static 134) while the chip row grew the HUD to a measured 330pt at
+375x812, and none of the eight `CombatBoard.adds.test.tsx` cases asserted
+`top`. The audit's own headline for this — *"the add row can paint over the
+foe's head"* — does **not** reproduce: the chips are right-aligned at
+x290-363, the art is centre-drawn at x41-334 and tapers, so add-row
+coverage of opaque art measures **0.00%** on The Jeweled Tree, the hag and
+the butcher, at topInset 0 and 44 alike. What does lie across the foe is
+older, full-width chrome: FLAY 46.6%, DOT 32.6%, the keyword row 12.4%, the
+CHARGE meter 8.2%, the stance badge 7.5-9.1%. So the brood is not the
+offender — it is the row that made the HUD 40pt taller than the last audit
+of this anchor, and the anchor was already wrong on its own terms. Fixed as
+a measured anchor on the HUD's full-width block, not on the whole HUD (see
+the correction under step 1c for why the brief's literal shape is unsafe),
+pinned by a ninth `CombatBoard.adds.test.tsx` case that asserts the `top`
+arithmetic against a fed layout height.
 
 ## Pages × tests matrix
 
@@ -1005,27 +1111,58 @@ unchanged) and exact for the leftover.
 | `Combat/e2e/summon.engine.test.ts` (27, mechanics) | the win-condition doctrine in both directions; spawn one-shot / cap / stage-grant / cleanse-survival / no-RNG; bite flatness against four multiplier terms, a hindered foe, a defeated foe, armor/GUARD/BARRIER/SWIFT, BRUTAL, RIPOSTE, RAVENOUS, WOUNDING; the four-assertion ledger-isolation gate against a control run; `strikeAdd`'s three outcomes; projection parity |
 | `Combat/e2e/combat-sim-policies.engine.test.ts` (+6) | the `strikeAddsAt` roster assignment and the decision seam |
 | `components/.../IntentIcon.test.tsx` (+5) | a bare DENIED survives with no brood; the bite is stated alongside DENIED and the "no damage lands" claim is gone; the TOTAL is printed when both land; the brood shows when the foe telegraphs nothing; the SOAKED number is printed, never the raw one |
-| `components/.../CombatBoard.adds.test.tsx` (8, new) | one chip per body badged with its bite; NO row at all for the ordinary foe; the tap reports `onAdd` once and not `onChip`/`onApply`; an unaffordable chip still reports its tap; a11y states bite, VITAE and price; the shortfall is named when it cannot be paid; the bite is forwarded verbatim past `stageThreatBonus`/`enemyThreatMult`; the price is the engine's constant |
-| `state/e2e/summon-surface.engine.test.ts` (8, new) | drives the REAL engine with a REAL summoner: the wave reaches the screen as chips; SUMMON prints as a keyword chip with its own mark and the denied-foe gloss; the wall math carries the brood separately; the brood really costs VITAE; striking removes exactly that body and charges the price; clearing the whole brood never ends the fight; short Conviction marks chips rather than hiding them; a cleared wave does not respawn |
+| `components/.../CombatBoard.adds.test.tsx` (8, new; +1 — burn-day audit 3.14) | one chip per body badged with its bite; NO row at all for the ordinary foe; the tap reports `onAdd` once and not `onChip`/`onApply`; an unaffordable chip still reports its tap; a11y states bite, VITAE and price; the shortfall is named when it cannot be paid; the bite is forwarded verbatim past `stageThreatBonus`/`enemyThreatMult`; the price is the engine's constant. **+1 (audit 3.14):** the enemy figure's `top` is the static constant before any layout pass and `topInset + COMBAT_HUD_PAD_TOP + blockHeight − 14` after one — the §1.6 prerequisite the ship dropped, pinned as arithmetic on the fed height so re-tuning a meter cannot repeal it |
+| `components/.../CombatCombatantPane.brood-bite.test.tsx` (6, new — burn-day audit 3.3) | drives the REAL engine on a live brood, both routes into the bad branch (the foe hindered, and the foe's blow fired but fully soaked): no bare `DENIED` float while a bite landed, the flourish names the brood's share, the board's damage tick fires on a bite-only phase, and the pilgrim floats what the bite took. Every number is read back off the emitted `add-bit` event |
+| `state/presenters/__tests__/enemy-action-card.engine.test.ts` (+4 — burn-day audit 3.3) | a denied phase the brood bit reports `addDealt` and a `brood` line; the averted telegraph stays marked `telegraph`, so only it reads as averted; a fully soaked bite reports nothing landed; a denied phase with no brood is unchanged |
+| `components/.../EnemyActionCard.test.tsx` (+3 — burn-day audit 3.3) | never a bare `DENIED` and never "none of it landed" while the brood bit; what landed is not struck through while the averted telegraph still is; the a11y sentence carries the bite |
+| `state/presenters/__tests__/combat-log-history.engine.test.ts` (+4 — burn-day audit 3.3) | the DENIED line names the bite; a clean `DENIED` survives with no brood and with a fully soaked bite; a bite in an EARLIER phase never colours a later DENIED |
+| `state/presenters/__tests__/combat-log-lines.engine.test.ts` (+7 — burn-day audit 3.4) | the suite §4 named and this phase did not add to. The bite's sentence carries the printed number, the wall's share and what was taken; a fully soaked bite is still written down; the bite never floats (that surface is the medallion's and the pane's, audit 3.3); the spawn states the body count and the bite and does not re-announce the `SUMMON n` the foe's own keyword receipt already printed; the strike names the body and quotes the price off the event; a refusal reaches the log in the engine's own words and does not shout |
+| `state/e2e/summon-surface.engine.test.ts` (8, new; +3 — burn-day audit 3.4) | drives the REAL engine with a **synthetic** summoner — *corrected 2026-09-20 (burn-day audit 3.9)*: the engine is real, the foe is `createMockEncounterEnemy()` with `SUMMON 2` retrofitted, held local to the suite on purpose; no SUMMON test anywhere exercises a library enemy. What it proves: the wave reaches the screen as chips; SUMMON prints as a keyword chip with its own mark and the denied-foe gloss; the wall math carries the brood separately; the brood really costs VITAE; striking removes exactly that body and charges the price; clearing the whole brood never ends the fight; short Conviction marks chips rather than hiding them; a cleared wave does not respawn. **+3 (audit 3.4):** the log explains the VITAE the brood took, records the wave arriving, and attributes a refused strike in the engine's own words — the system guard that survives the events being renamed or re-routed |
 
 ## DoD
 
 - [x] engine: type, keyword, spawn, bite, verb, projection, barrels, sim policy
 - [x] carrier: The Jeweled Tree fields `SUMMON 2` (HIDE 5 re-listed by hand;
-      auto SWIFT deliberately dropped)
+      auto SWIFT deliberately dropped) — and **reaches wave 1 only**: it is
+      an elite with no `stages`, so the STAGE-gated second wave ships
+      unreachable on the whole roster (burn-day audit 3.9, Engine deviations
+      above). The authored list itself is now pinned by
+      `Enemy/e2e/new-enemies.engine.test.ts` (audit §4 D-3); until
+      2026-09-20 only the regenerated baseline would have noticed a silent
+      edit to it
 - [x] surface: keyword glyph, add chips, STRIKE/WAIT confirm sheet
+- [x] surface: the log narrates the brood (§14d) — **not in this phase**;
+      landed 2026-09-20 with burn-day audit 3.4
 - [x] the DENIED lie closed, with the soaked number printed
-- [x] mechanics gate green; mobile gate green; baseline regenerated
+- [x] mechanics gate green; mobile gate green; baseline file regenerated —
+      but risk row 8 ("re-stamped in the same tick, with the commit naming
+      *both* causes") was **not** met: the shipped stamp named `5a2158a`, a
+      tree without SUMMON, and its note names neither cause. Guarded
+      2026-09-20 by burn-day audit 3.6; the truthful re-stamp follows
 - [x] atlas updated (`Enemy keywords (10)` → `(11)`), content-drift green
 
 ## Follow-ups (out of scope)
 
-- A **second carrier** at a different rank. One summoner is an archetype's
-  proof, not its coverage.
+- A **second carrier** at a different rank, **and it must have `stages`**.
+  One summoner is an archetype's proof, not its coverage. *Corrected
+  2026-09-20 (burn-day audit 3.9):* this bullet understated the gap. Without
+  a carrier that can enter a stage, wave 2 is not merely uncovered, it is
+  **unreachable** — the sole carrier is an elite with `stages: []` and
+  `stageFiredNow` is the only door. `Mirac` and `RawheadRex` already sit in
+  the mid-stage matrix roster beside The Jeweled Tree, so either is a
+  one-keyword retrofit; the audit ranks the move §8 Block 2 item 2, gated
+  on row 3.2 (the SWIFT divisor, which is exactly the path a staged carrier
+  would exercise) and on a re-stamped baseline per risk row 8.
 - `projectIncomingThreat`'s six pre-existing boss-side divergences
   (`enemyThreatMult`, `stageThreatBonus`, `stanceCheck.mult`, flat armor, the
   SWIFT divisor, BRUTAL) are documented at the site, not closed. Closing them
   moves the on-screen number for every existing foe and is its own tuning
   change.
-- An **add-spawn animation**. The chips appear between phases with no motion;
-  the `add-spawned` event is emitted and unread by the fx layer.
+- An **add-spawn animation**. The chips appear between phases with no motion.
+  *Corrected 2026-09-20 (burn-day audit 3.4):* this bullet said `add-spawned`
+  was "emitted and unread by the fx layer", which understated and misfiled the
+  gap on two counts — it was not one event but four (`add-spawned`, `add-bit`,
+  `add-struck` and the strike's `effect-fizzled`), and they were unread by the
+  LOG and the HISTORY as well as the fx layer, because all three read the one
+  `selectCombatLogLines` switch. All four now have cases. What remains
+  genuinely out of scope here is only the motion.

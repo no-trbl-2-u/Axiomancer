@@ -600,7 +600,88 @@
 
 ## Pending
 
-### [MED] combat — Phase 97's "tap a card to read it" hint never shows for the truncated hand fan it was built to fix
+### [MED] combat — the only SUMMON carrier cannot reach wave 2, so half the spawn rule is dead on the roster
+- pass: burn-day audit 2026-09-19 (row 3.9)
+- viewport: n/a — engine reach, not layout
+- category: design-reach / coverage
+- observation: Phase 102 shipped SUMMON with a two-wave rule: wave 1 at the
+  first phase boundary, wave 2 only at a boundary where a STAGE fires. The
+  roster's sole carrier is The Jeweled Tree, an elite. Elites get no stages
+  — `defaultEnemyStages` hands its two-stage floor to bosses and uniques
+  only — and the tree authors none, so it can never enter a stage, so the
+  only door to wave 2 never opens. `ADD_WAVE_CAP = 2` is live engine and
+  dead roster: a player can meet the brood, but never the second wave. It
+  is not an engine bug; the rule is correct and tested. The tests simply
+  never asked a shipped enemy.
+- evidence: `axiomancer-mechanics/src/Enemy/enemy.library.ts` — `JeweledTree`
+  is `difficulty: 'elite'`, `keywords: [hide 5, summon 2]`, no `stages` key;
+  `Enemy/index.ts` — `stages: stages ?? defaultEnemyStages(difficulty, …)`,
+  which returns `[]` for anything that is not a boss or unique;
+  `Combat/combat.engine.ts` — `ADD_WAVE_CAP = 2`, and `processBetweenPhases`
+  gates every wave after the first on `stageFiredNow`. Driven against the
+  real library enemy over eight phase boundaries, damaged past 50% VITAE and
+  undamaged, `addWavesSpawned` tops out at 1. Counterfactual, same harness:
+  `RawheadRex` with SUMMON 2 reaches wave 2/2 at its `vitaePct: 0.6` stage.
+  `summon` appears in no branch of `defaultEnemyKeywords` and nothing
+  outside the library calls `createEnemy` in production, so no other shipped
+  foe carries it. Every SUMMON suite builds its own foe:
+  `Combat/e2e/summon.engine.test.ts` uses `makeEnemy({ keywords, stages })`;
+  `axiomancer-mobile/state/e2e/summon-surface.engine.test.ts` retrofits
+  `createMockEncounterEnemy()`.
+- suggested fix: a second carrier that has `stages` — the audit's §8 Block 2
+  item 2, a one-keyword retrofit on `RawheadRex` or `Mirac`, both already in
+  the mid-stage matrix roster beside the tree. `RawheadRex` is the better
+  data point: its `UP FROM UNDER THE STAIRS` stage grants SWIFT at the same
+  boundary that would fire wave 2, so the SWIFT path row 3.2 fixed gets
+  exercised on a real foe. Two gates first — row 3.2 must be in (it is), and
+  the deck-matrix baseline must be re-stamped in the same tick naming both
+  causes (Phase 102 risk row 8), since the trade moves a rostered mid-profile
+  foe. Ship it with a guard that sweeps `EnemyLibrary` for SUMMON carriers,
+  opens a real encounter, damages the foe past its stage threshold and
+  asserts some carrier reaches `ADD_WAVE_CAP` — reachability only, no
+  magnitudes, so retunes leave it alone. Explicitly rejected: authoring
+  `stages` onto the elite carrier (it repeals the boss/unique stage floor
+  for the whole roster) and loosening `stageFiredNow` to a round or
+  emptiness check (the engine comment refuses the emptiness check by name —
+  it makes the player's own clear cause the respawn).
+- source: burn-day audit 2026-09-19
+
+### [MED] exploration — a reload taken DURING a live encounter still lands past the fight
+- pass: burn-day audit 2026-09-19 (row 3.1 fix, residual)
+- viewport: both (375×812 and 1280×800) — the loss is in persistence, not
+  layout; on web it is one browser reload away
+- category: progression / persistence
+- observation: row 3.1 closed the reload-during-the-PRELUDE hole — an
+  arrival the player never answered is now re-offered on the next mount,
+  because the node's absence from `consumedNodes` is the debt and
+  `consumedNodes` rides the save. But `consumedNodes` marks "the MapEvent
+  resolved", i.e. "the prelude was shown", not "the fight ended". The
+  moment the player commits to the fight, `beginHazardEncounter` clears
+  the event slice and the hazard-pattern combat runs in the panel's local
+  React state, while the node is already consumed. A reload from there
+  rebuilds the app standing past the encounter, its onward edges open,
+  with no fight pending and nothing owed — the same player-visible loss as
+  row 3.1, one step later. It bites hardest on a boss node, where the walk
+  back is longest.
+- evidence: `axiomancer-mechanics/src/World/MapEvents/resolve-map-event.ts`
+  (`markNodeConsumed` runs at resolve time, on every non-travel path);
+  `axiomancer-mobile/state/actions.ts` `beginHazardEncounter` (clears the
+  event slice, then `startCombat`); `axiomancer-mechanics/src/Game/store.ts`
+  — the persisted payload destructures `currentEncounter: _drop` with the
+  standing comment "encounters re-roll on load (Spec 07)", so no live fight
+  is ever written; the panel's own turn state is not in the store at all.
+- suggested fix: two shapes, and the choice is a design call, not a
+  mechanical one. (a) Defer `markNodeConsumed` until the encounter settles
+  (victory / flee / defeat) so the existing `arrivalPending` re-offer
+  covers the fight too — smallest change, but it makes "consumed" mean
+  "answered" and every other consumer of that field has to agree. (b)
+  Persist enough to rebuild the fight (foe id, the encounter's seed, the
+  node) and re-enter the panel on load — truer to the player's experience,
+  and it contradicts the Spec 07 "encounters re-roll on load" note, which
+  would need reopening first. Do NOT ship (a) and (b) together.
+- source: burn-day audit 2026-09-19
+
+### [x] [MED] combat — Phase 97's "tap a card to read it" hint never shows for the truncated hand fan it was built to fix — RESOLVED 2026-09-20 (burn-day audit row 3.13)
 - pass: 42 (commit bbd22a94)
 - viewport: mobile (375×812) — the hand-fan truncation this hint
   addresses doesn't occur on desktop (1280×800), so the gap is
@@ -641,6 +722,24 @@
   `CombatBoard.tsx:1554`. Component: `CombatBoard.tsx` (`stageHint`,
   hand-fan render block).
 - source: loop
+- resolution (burn-day audit row 3.13, 2026-09-20): the row reproduced exactly
+  as filed, and the audit had found the same thing independently — this row and
+  audit row 3.13 are one finding, closed here once. The hatch now renders on the
+  fan itself: a `styles.fanHint` line inside the hand dock, gated on
+  `fan.length > 1 && !cardDragLive`, which is precisely the condition under
+  which `HandCard` receives a non-null `namePeek` — so the sentence is on screen
+  exactly while a name is being clipped, and gone once nothing is covered. The
+  suggested fix here was to extend the existing `stageHint` and reuse its
+  string; the audit split it instead, because the string was also 67 characters
+  inside `numberOfLines={1}` at 12pt and RN ellipsizes the TAIL — so `tap a card
+  to read it` was the clause being dropped even in the staged branch where it
+  did render. The staged line is now `drag a die onto your card · APPLY to
+  commit` (43 chars) and the fan line `tap a card to read it` (21), each guarded
+  against a 56-character one-line budget. `ellipsizeMode` was deliberately NOT
+  added: RN already defaults to `'tail'`, so the ellipsis was never the bug.
+  Guards in `CombatBoard.handfan.test.tsx`, all three verified red first: the
+  hatch is present with `stagedUids={[]}`, both hint lines fit their line, and
+  a tap driven through the gesture's registered test id reaches `onInspect`.
 
 
 ### [x] [HIGH] process — a committed playtest bug report reached `main` filed NOWHERE in `plan/` — RESOLVED 2026-09-19 (phases 99-100)
@@ -752,6 +851,25 @@
   visibly — the tap path was already wired but lived only in an
   accessibilityHint. New 10-test guard suite
   `CombatBoard.handfan.test.tsx`; combat-encounter 31 suites / 186 tests green.
+- residual, and the reason this row STAYS resolved (burn-day audit row 3.13,
+  2026-09-20): re-captured at 375x812 on the same Brine Hag opening hand, the
+  fan now reads `THIN HYMN / CHILBLA IN ... / THE LONG ... / SPOILED POULTI... /
+  CHILBLAIN WATCH`. That is this row's complaint answered — the names are no
+  longer PAINTED OVER, which is what "hiding the covered cards' names" meant and
+  what the pass-37 through pass-41 captures showed — but it is not "every name
+  reads in the fan". The visible sliver is 40.25pt and `plateName` is 13pt/15pt,
+  so a covered card affords roughly nine or ten uppercase glyphs across its two
+  lines and anything longer ellipsizes: `FROSTBITTEN PALISADE` truncates, it
+  does not read. No new Pending row is filed for that, because no lever is left
+  that this row could ask for. The geometry is exhausted and pinned
+  (`120 + 4*step <= 375` caps `step` at 63.75 against 57.75, and C11-R / C11-R2
+  in `CombatBoard.fresh-eyes-repair.test.tsx` hold it there); the name box is
+  already sized to exactly the peek; and the way to read a long name in full is
+  the tap hatch, which as of this audit is finally ON the fan, in the same frame
+  as the truncation — see the row closed above. If the loop ever wants full
+  names in the fan itself, that is a different change with a different cost (the
+  vertical-stagger lever in Phase 97 decision 8, already filed as a follow-up
+  there), not an unfinished piece of this one.
 
 ### [MED] ui-fresh-eyes SWARM 2026-09-12 — the 309-row candidate set is drained
 - pass: swarm follow-up to the 2026-09-12 sweep, run from
@@ -850,7 +968,7 @@
   now ships 11 relics across all 6 `AccessoryKind`s, all `grantsSignature`
   values resolving in the live `SignatureSkillId` union. Closed.
 
-### [x] [HIGH] combat — user crash on ACCEPTING the post-combat card reward (second unreproduced crash report) — RESOLVED 2026-09-19 (verified closed; CI gap closed by Phase 98, commit pending)
+### [x] [HIGH] combat — user crash on ACCEPTING the post-combat card reward (second unreproduced crash report) — RESOLVED 2026-09-19 (verified closed; CI gap closed by Phase 98, `51fede4`)
 - **LIKELY THE SAME BUG — RESOLVED 2026-09-04 (verify before closing).** The
   row below was root-caused to a Reanimated worklet calling a plain JS
   function (`EnemyActionCard.tsx`, fixed). Its signature matches this one

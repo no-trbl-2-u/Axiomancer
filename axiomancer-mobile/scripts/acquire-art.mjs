@@ -165,12 +165,19 @@ export async function buildPlatePage(sharp, raw, maxEdge, inset = 0.01) {
   const width = Math.round((box.x1 - box.x0 - inset * 2) * W)
   const height = Math.round((box.y1 - box.y0 - inset * 2) * H)
 
-  // Guard the failure mode that actually happens: a box far SMALLER than the
+  // Guard one of the two ways detection fails: a box far SMALLER than the
   // plate. Measured on Doré's Paradiso 31 at the first-cut coverage floor, the
   // detector returned x[0.016,0.298] y[0.701,0.989] — a corner of clouds — and
   // the pipeline cheerfully shipped it. A high-key plate (light interior on a
   // light page) breaks the "plate is darker than page" premise this detector
   // rests on, so it must fail loudly rather than crop to an artifact.
+  //
+  // The other way — no dark block ANYWHERE, which used to come back as the
+  // whole page at frac 0.96 and so was caught by nothing here — is now refused
+  // upstream by `detectPlateBox` itself, which raises before this function
+  // sees a box. No frac threshold could have separated the two: of the three
+  // plates phase 103 shipped, two sit at frac 0.904 and 0.913, a hair from the
+  // 0.96 the detector used to invent when it found nothing.
   //
   // There is deliberately NO upper guard. A box covering nearly the whole image
   // is the correct, common answer for an already-tight plate scan: the detector
@@ -204,7 +211,9 @@ export async function buildPlatePage(sharp, raw, maxEdge, inset = 0.01) {
 /**
  * Locate the printed plate on a scanned page, as fractions of width/height.
  *
- * Exported for its own test. Downsamples first (detection at ~1000px is far
+ * Exported for its own test — the plate-page cases in `scripts/art.test.mjs`,
+ * which pin a blank page, a plate below the coverage floor, a plate with page
+ * margins, and a tight scan that fills its page. Downsamples first (detection at ~1000px is far
  * more accurate than it needs to be, and full-resolution scanning of a 30MP
  * page is pointless), converts to luminance, then on each axis counts pixels
  * meaningfully darker than the page's own mean and takes the LONGEST
@@ -221,6 +230,17 @@ export async function buildPlatePage(sharp, raw, maxEdge, inset = 0.01) {
  * these scans vary from cream to grey depending on the institution and the
  * paper's age, and an absolute cut-off tuned on one library's scans silently
  * mis-crops another's.
+ *
+ * RAISES when no line on either axis reaches `darkPct` — a blank page, or a
+ * plate too small to qualify. Returning a box it did not find is the one thing
+ * this function must not do, because every downstream guard is a LOWER bound
+ * and a fabricated full-page box passes them all.
+ *
+ * It does NOT yet raise when it finds the wrong block: longest-run still
+ * prefers whichever dark block is widest, so a 600px book edge beside a 200px
+ * plate crops the edge (frac 0.568, no throw). Separating those honestly needs
+ * a competing-run ratio measured against the live sources the way `darkPct`
+ * was, not a guessed constant.
  */
 export async function detectPlateBox(sharp, raw, { darkPct = 0.15, sample = 1000 } = {}) {
   const img = sharp(raw).removeAlpha().greyscale()
@@ -248,9 +268,17 @@ export async function detectPlateBox(sharp, raw, { darkPct = 0.15, sample = 1000
   // Longest contiguous run, NOT first/last crossing. A first/last search
   // swallows the whole page the moment a dark book edge exists — measured, it
   // returned x0=0.14,x1=1.0,y0=0,y1=1.0 on a page whose plate is ~57% x ~55%.
+  //
+  // `best` starts as NULL, not as the whole axis. It is only ever written when
+  // a run CLOSES, so an initialiser of `[0, len - 1]` was not a default — it
+  // was an answer the detector had not found, returned as though it had. On a
+  // page where nothing reaches `need` that produced x[0,1] y[0,1]: the whole
+  // scan, margins and book edge and caption band, at frac 0.96, which clears
+  // the `frac < 0.2` floor in `buildPlatePage` without a murmur. Not finding
+  // the plate must be sayable.
   const span = (arr, otherAxisLen) => {
     const need = otherAxisLen * darkPct
-    let best = [0, arr.length - 1]
+    let best = null
     let bestLen = -1
     let run = -1
     for (let i = 0; i <= arr.length; i++) {
@@ -261,11 +289,21 @@ export async function detectPlateBox(sharp, raw, { darkPct = 0.15, sample = 1000
         run = -1
       }
     }
+    if (!best) return null
     return [best[0] / arr.length, (best[1] + 1) / arr.length]
   }
 
-  const [x0, x1] = span(colDark, H)
-  const [y0, y1] = span(rowDark, W)
+  const xs = span(colDark, H)
+  const ys = span(rowDark, W)
+  if (!xs || !ys) {
+    throw new Error(
+      `plate-page: no plate detected — no ${!xs ? 'column' : 'row'} is dark across `
+      + `${(darkPct * 100).toFixed(0)}% of the other axis, so there is no block to crop to. `
+      + `The page is probably blank, or the plate is too small to reach the coverage floor.`,
+    )
+  }
+  const [x0, x1] = xs
+  const [y0, y1] = ys
   return { x0, x1, y0, y1 }
 }
 
