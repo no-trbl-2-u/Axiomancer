@@ -834,7 +834,14 @@ docs commit at the end):
   "deferred regen" note is stale (the regen happened at `f1cdbba`); the
   outcome sentence (A-2).
 - `axiomancer-mobile/assets/images/combat/__tests__/index.test.ts`
-  ~:56-58 and `CombatCombatantPane.tsx` ~:693-694 (3.11).
+  ~:56-58 and `CombatCombatantPane.tsx` ~:693-694 (3.11). **Corrected
+  2026-09-20 by 3.11's own fix: there were FOUR sites, not two.** The row
+  and this bullet both missed `CombatCombatantPane.tsx` ~:48-49 ("completed
+  for every live region in phases 101/103") and
+  `__tests__/CombatBoard.region-arena.test.tsx` ~:62-63 ("every LIVE region
+  is now keyed"), plus the coverage claim at `assets/images/combat/
+  index.ts:3` ("extended to the whole region set in Phase 101" — never true
+  at any phase; 101 reached 4 of 7). All four are corrected in that commit.
 - `CombatBoard.tsx` ~:271-285 and `CombatBoard.handfan.test.tsx` header
   ~:24-26 (3.13).
 - `exploration.engine.test.ts` :344-361 (3.7); `MapCanvas.tsx` :67, :193,
@@ -872,9 +879,16 @@ gate), 3.6 + 3.8 (measurement), 3.10 (default-theme text below AA). Size
 M in total. **Confidence 90.**
 
 **Block 2 — finish the two archetypes the day opened (next 1-3 ticks).**
-1. **Northern Forest arena plate** — 6/7 → 7/7 and 3.11 becomes true by
-   construction. S, unblocked, most-seen remaining fallback (the forest is
-   the second map). Fix 3.5 first or you will crop a page. **90.**
+1. **Northern Forest arena plate** — 6/7 → 7/7. S, unblocked, most-seen
+   remaining fallback (the forest is the second map). Fix 3.5 first or you
+   will crop a page. **90.** **Corrected 2026-09-20 by 3.11's fix: it does
+   not "become true by construction".** 3.11's fix derives the arena test's
+   input set from the map registry and names `Northern Forest` in an
+   `AWAITING_PLATE` list that is asserted in BOTH directions, so shipping
+   the plate turns that test RED until the same commit deletes the entry and
+   the comments in `CombatCombatantPane.tsx` and `assets/images/combat/
+   index.ts` that name the forest. That is the intended signal, not a
+   surprise: budget the deletion into the plate's commit.
 2. **A second SUMMON carrier that has `stages`** — so wave 2 exists in
    play and the SWIFT path (3.2) is exercised on a real foe. `Mirac` and
    `RawheadRex` are already in the mid-stage matrix roster beside The

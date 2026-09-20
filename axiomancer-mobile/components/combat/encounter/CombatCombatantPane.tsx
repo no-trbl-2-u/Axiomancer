@@ -45,10 +45,10 @@ import { keywordForEffect } from '@/state/combat/keywords';
 import { IntentIcon } from './IntentIcon';
 import { useJuiceFlash, useJuiceIdleBreath, useJuiceNumberPop, useJuicePulse, useJuiceShake } from '@/lib/juice';
 
-/** Full-bleed battlefield backdrop — region-keyed (phase 83, completed for
- *  every live region in phases 101/103), falling back to a neutral desolation
- *  plate for a region with no rule. Sits behind the enemy figure; the SVG
- *  `CreatureScene` draws `hideBackdrop` so its procedural moon/treeline
+/** Full-bleed battlefield backdrop — region-keyed (phase 83, extended in
+ *  phases 101/103 to six of the seven live regions), falling back to a neutral
+ *  desolation plate for a region with no rule. Sits behind the enemy figure;
+ *  the SVG `CreatureScene` draws `hideBackdrop` so its procedural moon/treeline
  *  doesn't overpaint the art. */
 
 /** A bump of resolved engine events the pane animates. `seq` rises on each new
@@ -723,8 +723,10 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
     const enemyArt = getEncounterEnemyArt(enemy.artKey, enemy.artNonce);
 
     // Region-keyed arena backdrop (phase 83) — falls back to the neutral
-    // desolation plate for a region with no rule of its own. As of phase 103
-    // no LIVE region takes that path; see `assets/images/combat/index.ts`.
+    // desolation plate for a region with no rule of its own. The Northern
+    // Forest is the one live region still on that path: it has no plate yet.
+    // See `assets/images/combat/index.ts` and the AWAITING_PLATE list in its
+    // test, which pins that count in both directions (burn-day audit 3.11).
     const arenaBg = arenaBackdropFor(region);
     const arenaAlt = arenaAltTextFor(region);
 

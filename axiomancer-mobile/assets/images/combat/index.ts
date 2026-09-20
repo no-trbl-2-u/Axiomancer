@@ -1,6 +1,8 @@
 /**
  * Combat arena backdrops — Phase 83 (Woodcut Codex, V-series follow-up),
- * extended to the whole region set in Phase 101.
+ * extended in Phases 101 and 103. Not the whole region set: the Northern
+ * Forest has no plate and falls back. The count is pinned by this module's
+ * test against the map registry, never restated here.
  *
  * `CombatCombatantPane`'s full-bleed battlefield scene, region-keyed the same
  * way `assets/images/maps/index.ts` keys the exploration-map backdrop: an
