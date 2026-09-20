@@ -918,10 +918,16 @@ Copy `CombatBoard.seal.test.tsx` verbatim in shape (jest globals imported from `
 
 # SHIPPED — 2026-09-19
 
-Both sides landed: the engine per the brief, and the player-facing surface the
-brief's §4 called for. The gates are green (mechanics 216 suites / 3542 tests;
-mobile 308 suites / 2946 tests), and the baseline was regenerated because
-mechanics source moved.
+The engine landed per the brief. The player-facing surface landed in **part**:
+§14d's four `selectCombatLogLines` cases and the §4 assertions that were to
+pin them did not ship with this phase, so the brood's `add-spawned` /
+`add-bit` / `add-struck` and the strike's `effect-fizzled` reached `state.log`
+and were dropped by the presenter's `default:` — invisible in the log, the
+history and the float layer alike. Risk 9 below fired exactly as written, and
+the mitigation it named was the omitted suite. Closed 2026-09-20 by burn-day
+audit 3.4; the matrix and the DoD below now say so. The gates were green
+(mechanics 216 suites / 3542 tests; mobile 308 suites / 2946 tests), and the
+baseline was regenerated because mechanics source moved.
 
 ## What the player actually gets
 
@@ -1043,7 +1049,8 @@ was applying all along.
 | `state/presenters/__tests__/enemy-action-card.engine.test.ts` (+4 — burn-day audit 3.3) | a denied phase the brood bit reports `addDealt` and a `brood` line; the averted telegraph stays marked `telegraph`, so only it reads as averted; a fully soaked bite reports nothing landed; a denied phase with no brood is unchanged |
 | `components/.../EnemyActionCard.test.tsx` (+3 — burn-day audit 3.3) | never a bare `DENIED` and never "none of it landed" while the brood bit; what landed is not struck through while the averted telegraph still is; the a11y sentence carries the bite |
 | `state/presenters/__tests__/combat-log-history.engine.test.ts` (+4 — burn-day audit 3.3) | the DENIED line names the bite; a clean `DENIED` survives with no brood and with a fully soaked bite; a bite in an EARLIER phase never colours a later DENIED |
-| `state/e2e/summon-surface.engine.test.ts` (8, new) | drives the REAL engine with a REAL summoner: the wave reaches the screen as chips; SUMMON prints as a keyword chip with its own mark and the denied-foe gloss; the wall math carries the brood separately; the brood really costs VITAE; striking removes exactly that body and charges the price; clearing the whole brood never ends the fight; short Conviction marks chips rather than hiding them; a cleared wave does not respawn |
+| `state/presenters/__tests__/combat-log-lines.engine.test.ts` (+7 — burn-day audit 3.4) | the suite §4 named and this phase did not add to. The bite's sentence carries the printed number, the wall's share and what was taken; a fully soaked bite is still written down; the bite never floats (that surface is the medallion's and the pane's, audit 3.3); the spawn states the body count and the bite and does not re-announce the `SUMMON n` the foe's own keyword receipt already printed; the strike names the body and quotes the price off the event; a refusal reaches the log in the engine's own words and does not shout |
+| `state/e2e/summon-surface.engine.test.ts` (8, new; +3 — burn-day audit 3.4) | drives the REAL engine with a REAL summoner: the wave reaches the screen as chips; SUMMON prints as a keyword chip with its own mark and the denied-foe gloss; the wall math carries the brood separately; the brood really costs VITAE; striking removes exactly that body and charges the price; clearing the whole brood never ends the fight; short Conviction marks chips rather than hiding them; a cleared wave does not respawn. **+3 (audit 3.4):** the log explains the VITAE the brood took, records the wave arriving, and attributes a refused strike in the engine's own words — the system guard that survives the events being renamed or re-routed |
 
 ## DoD
 
@@ -1051,6 +1058,8 @@ was applying all along.
 - [x] carrier: The Jeweled Tree fields `SUMMON 2` (HIDE 5 re-listed by hand;
       auto SWIFT deliberately dropped)
 - [x] surface: keyword glyph, add chips, STRIKE/WAIT confirm sheet
+- [x] surface: the log narrates the brood (§14d) — **not in this phase**;
+      landed 2026-09-20 with burn-day audit 3.4
 - [x] the DENIED lie closed, with the soaked number printed
 - [x] mechanics gate green; mobile gate green; baseline regenerated
 - [x] atlas updated (`Enemy keywords (10)` → `(11)`), content-drift green
@@ -1064,5 +1073,11 @@ was applying all along.
   SWIFT divisor, BRUTAL) are documented at the site, not closed. Closing them
   moves the on-screen number for every existing foe and is its own tuning
   change.
-- An **add-spawn animation**. The chips appear between phases with no motion;
-  the `add-spawned` event is emitted and unread by the fx layer.
+- An **add-spawn animation**. The chips appear between phases with no motion.
+  *Corrected 2026-09-20 (burn-day audit 3.4):* this bullet said `add-spawned`
+  was "emitted and unread by the fx layer", which understated and misfiled the
+  gap on two counts — it was not one event but four (`add-spawned`, `add-bit`,
+  `add-struck` and the strike's `effect-fizzled`), and they were unread by the
+  LOG and the HISTORY as well as the fx layer, because all three read the one
+  `selectCombatLogLines` switch. All four now have cases. What remains
+  genuinely out of scope here is only the motion.

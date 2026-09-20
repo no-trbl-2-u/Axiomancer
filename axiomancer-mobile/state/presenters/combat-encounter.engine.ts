@@ -1109,6 +1109,18 @@ export function selectEnemyActionCard(
  * over the combatant (null = log only), so the two surfaces can never drift
  * apart. Events with no line here are handled elsewhere (damage, DoT ticks,
  * status applications) and are deliberately absent rather than duplicated.
+ *
+ * Corrected 2026-09-20 (burn-day audit 3.4): that last sentence was read as
+ * blanket permission, and four kinds the engine emits were handled NOWHERE
+ * else — the brood's `add-spawned` / `add-bit` / `add-struck` and the strike's
+ * `effect-fizzled` all fell to `default:` and vanished from the log, the
+ * history and the float layer at once. "Absent because it is handled
+ * elsewhere" is only honest when the other surface actually exists and can be
+ * named. `add-bit` is the shape of the exception: it belongs in the LOG,
+ * which nothing else writes, and NOT in the float layer, which the pilgrim's
+ * medallion and the pane's `DENIED · BROOD −N` already own (audit 3.3) —
+ * hence a line with `float: null`. A kind with no arm at all must be one no
+ * surface narrates.
  */
 export interface CombatLogLineVM {
     kind: CombatEvent['kind'];
@@ -1224,6 +1236,67 @@ export function selectCombatLogLines(events: readonly CombatEvent[]): CombatLogL
                 out.push({
                     kind: e.kind, side: 'enemy', color: GLYPH_COLORS.thorns,
                     text: `Your plea fades between turns. PLEA −${SWAY_DECAY_PER_TURN} (${e.total} holds).`,
+                    float: null,
+                });
+                break;
+            // ── Phase 102 (SUMMON) — the brood, narrated (burn-day audit 3.4)
+            //
+            // The engine emitted all three of these plus the strike's refusal
+            // into `state.log` and this switch had no arm for any of them, so
+            // they fell to `default:` and the log, the history and the float
+            // layer went silent together. A player ate a bite, watched VITAE
+            // fall, and found nothing anywhere naming what took it.
+            //
+            // Deliberately NOT led by the word SUMMON: a STAGE that grants the
+            // keyword emits `enemy-keyword-fired` with the face string
+            // `SUMMON 2` on the very boundary this wave spawns on, and two
+            // sentences opening on the same word is the duplication this
+            // docblock forbids.
+            case 'add-spawned': {
+                const n = e.addIds.length;
+                out.push({
+                    kind: e.kind, side: 'enemy', color: ADD_COLOR,
+                    text: `The foe fields ${n} more ${n === 1 ? 'body' : 'bodies'}. Each bites you for ${e.bite} every phase, even while the foe is denied.`,
+                    float: `BROOD +${n}`,
+                });
+                break;
+            }
+            // Both numbers, because the wall math is the decision the readout
+            // is asking the player to make. LOG-ONLY on purpose: the bite's
+            // float already lives on the pilgrim's own medallion, in this
+            // colour, and rides the pane's `DENIED · BROOD −N` composite
+            // (audit 3.3) — a token here would be a third shout for one bite,
+            // pushed over the FOE's pane at that.
+            case 'add-bit': {
+                const soaked = Math.max(0, e.raw - e.dealt);
+                out.push({
+                    kind: e.kind, side: 'player', color: ADD_COLOR,
+                    text: soaked > 0
+                        ? `The brood bites for ${e.raw} — your wall eats ${soaked}. You take ${e.dealt}.`
+                        : `The brood bites for ${e.raw}. You take ${e.dealt}.`,
+                    float: null,
+                });
+                break;
+            }
+            // `e.cost` is the engine's `STRIKE_ADD_COST` riding on the event —
+            // read off the event, never restated here, so a re-price moves the
+            // sentence with it.
+            case 'add-struck':
+                out.push({
+                    kind: e.kind, side: 'enemy', color: ADD_COLOR,
+                    text: `${e.name} is struck down. ◆${e.cost} spent.`,
+                    float: 'STRUCK',
+                });
+                break;
+            // A refused action, in the engine's OWN words (`need 2 ◆ Conviction
+            // (have 0)`) — never re-worded or re-cased here, or the two
+            // vocabularies drift. Log-only: this fires from two dozen sites
+            // (an empty discard, no glyph to charge, an unaffordable
+            // signature), and a float would carpet the board on every mis-tap.
+            case 'effect-fizzled':
+                out.push({
+                    kind: e.kind, side: 'player', color: GLYPH_COLORS.thorns,
+                    text: `Refused — ${e.message}.`,
                     float: null,
                 });
                 break;
