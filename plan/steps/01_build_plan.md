@@ -274,8 +274,8 @@ Tick in this file in the same commit that ships the phase.
       mobile + card-editor (aspect union). Brief:
       `plan/phases/phase_104_grey_office_keyword_pull.md`. Shipped
       2026-09-20 — `feat: the grey office and the keyword pull - phase 104`
-      (612f396; CRLF restore 1f6c0fd-class follow-up; baseline re-measured
-      in the ledger commit).
+      (612f396; CRLF restore e6ff36b; draft-pool exclusion c09d1a3; baseline
+      re-measured fe98331 — cell-identical to main).
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics:
