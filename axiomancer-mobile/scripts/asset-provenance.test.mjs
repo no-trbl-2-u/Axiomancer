@@ -216,3 +216,80 @@ test('the registry-less list holds only directories that are still registry-less
     )
   }
 })
+
+// ---------------------------------------------------------------------------
+// BURN-DAY AUDIT 2026-09-19, row 3.12 — THE WORLD-PLATE CATALOGUE.
+//
+// `docs/art-catalog.json` is the register of the full-bleed backdrops a player
+// stands in front of. Nothing in the tree read it, so it drifted from the art
+// it describes and then from itself: it promised "where a plate carries text or
+// an oddity, the entry says so" while `arena-desolation` carried a legible
+// `COMMERCIAL WHAR[F]` frieze and said nothing; it stated its own plate count
+// twice, in two different numbers, neither matching `plates.length`; and two
+// `_meta` sentences declared that no entry carries a `coherenceFlag` while
+// `ludgate-hill` carried one.
+//
+// The catalogue lives outside this package, so `.github/workflows/verify-
+// mobile.yml` lists `docs/art-catalog.json` in its path filters — without that
+// a catalogue-only edit re-breaks these sentences and never re-runs this gate.
+//
+// What is pinned here is deliberately narrow: the plate set against disk, the
+// count against a single declared field, and the CONTRADICTION between the
+// register's prose and its own data. Not the wording, and not which plates
+// carry text — there is no cheap machine check for "this image has text in
+// it", so a list of those would fail when the set is merely different rather
+// than wrong.
+
+const CATALOG = path.resolve(MOBILE, '..', 'docs', 'art-catalog.json')
+const catalog = JSON.parse(fs.readFileSync(CATALOG, 'utf-8'))
+
+/** The directories under assets/images that hold world plates. */
+const PLATE_DIRS = ['combat', 'maps']
+
+/** Every prose string in the catalogue's header, joined for claim-matching. */
+const catalogProse = () =>
+  [catalog.__comment, ...Object.values(catalog._meta).filter((v) => typeof v === 'string')].join('\n')
+
+test('every world plate on disk has exactly one catalogue entry', () => {
+  const onDisk = PLATE_DIRS.flatMap((dir) =>
+    fs
+      .readdirSync(path.join(IMAGES, dir))
+      .filter((name) => RASTER.has(path.extname(name).toLowerCase()))
+      .map((name) => `axiomancer-mobile/assets/images/${dir}/${name}`),
+  ).sort()
+  const catalogued = catalog.plates.map((p) => p.file).sort()
+  assert.deepEqual(
+    catalogued,
+    onDisk,
+    'the catalogue claims to be the complete world-plate register: one entry per plate, no entry outliving its file',
+  )
+})
+
+test('the catalogue states its own plate count and it is true', () => {
+  assert.equal(catalog._meta.plateCount, catalog.plates.length)
+  const tally = {}
+  for (const p of catalog.plates) tally[p.surface] = (tally[p.surface] ?? 0) + 1
+  assert.deepEqual(catalog._meta.surfaceCounts, tally)
+})
+
+test('the catalogue does not claim a clean coherence register while an entry is flagged', () => {
+  const flagged = catalog.plates.filter((p) => p.coherenceFlag != null).map((p) => p.id)
+  const prose = catalogProse()
+  const claimsClean =
+    /no entry carries a coherence\s*flag/i.test(prose) ||
+    /coherenceFlag`? is null on every entry/i.test(prose)
+  assert.ok(
+    !(claimsClean && flagged.length > 0),
+    `_meta claims no entry carries a coherenceFlag, but these do: ${flagged.join(', ')}`,
+  )
+})
+
+test('arena-desolation records its legible frieze', () => {
+  // Measured off the shipped file, not inferred: the right-edge building's
+  // frieze reads COMMERCIAL WHAR[F], cut mid-word by the plate's right edge.
+  // Only the flag's PRESENCE is pinned — its wording is prose and may be
+  // rewritten without breaking this.
+  const desolation = catalog.plates.find((p) => p.id === 'arena-desolation')
+  assert.ok(desolation, 'arena-desolation must be in the catalogue')
+  assert.ok(desolation.coherenceFlag, 'arena-desolation carries COMMERCIAL WHAR[F] and must say so')
+})

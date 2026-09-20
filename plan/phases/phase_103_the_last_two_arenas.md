@@ -168,3 +168,11 @@ errors (15 pre-existing warnings, unchanged). Provenance gate 9/9.
 - `maps/ludgate-hill.webp` carries legible 1872 advertising (`LLOYD NEWS ONE
   PENNY`), flagged in `docs/art-catalog.json`. Period-correct, but it is text in
   a game whose UI is also text.
+- `combat/arena-desolation.webp` — the plate this phase installed as the
+  fallback — carries the same class of text: the right-edge building's frieze
+  reads `COMMERCIAL WHAR[F]`, cut mid-word by the plate edge. It went
+  unrecorded through this phase's visual inspection and was found in the
+  burn-day audit of 2026-09-19 (row 3.12); it is flagged in
+  `docs/art-catalog.json` now, not cropped — `buildPlatePage`'s `inset` trims
+  all four sides, and the right-edge dark mass it sits in is the reason this
+  plate was chosen for the fallback slot.

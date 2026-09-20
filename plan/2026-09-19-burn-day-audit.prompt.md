@@ -554,10 +554,26 @@ reproduction and reported the numbers, not re-read by the orchestrator;
   entry carries a `coherenceFlag` — `ludgate-hill` still does — and
   `__comment` still says "the ten … (five combat arenas, five map
   backdrops)" while `_meta.scope` says twelve.
-- **Fix shape:** view the plate (`Read` the webp), decide (crop the right
-  edge via a tighter `inset`/explicit box, or record it as a
-  `coherenceFlag` like ludgate-hill), and reconcile the three `_meta`
-  sentences with `plates.length`.
+- **Fix shape (first option DROPPED — see below):** view the plate (`Read`
+  the webp), record it as a `coherenceFlag` like ludgate-hill, and
+  reconcile the three `_meta` sentences with `plates.length`.
+  **Corrected 2026-09-20 by 3.12's own fix: "crop the right edge via a
+  tighter `inset`/explicit box" is not a thing this pipeline can do.**
+  `buildPlatePage` (`axiomancer-mobile/scripts/acquire-art.mjs`) trims
+  `inset` from all FOUR sides of the block `detectPlateBox` finds, and its
+  only caller passes `entry.inset` from `art-sources.json` — there is no
+  explicit-box path. The frieze occupies the right 12.3% of the plate, so a
+  uniform inset that removed it would take the same slice off the other
+  three sides and gut the composition; an asymmetric box would be new
+  plumbing plus a re-fetch of a 4975x6472 scan the repo does not hold. It
+  would also delete the right-edge dark mass that `composition` and
+  `art-sources.json`'s `why` both name as the reason this plate was chosen
+  for the fallback slot. The two options were never symmetric: one is a
+  JSON edit, the other is a re-acquisition. Precedent runs the same way —
+  phase 103 flagged ludgate-hill rather than re-cropping it.
+  The heading's "most-seen arena" STANDS, and 3.11's fix is why: the
+  Northern Forest is a live, encounter-bearing map with no arena rule, so
+  it fights in front of this plate.
 
 ### 3.13 [MED · fake gate · confidence 85] Phase 97's chrome-sum guard is hand-typed literals, the tap-to-read hint never shows on the fan it was written for, and two tests execute zero assertions
 
@@ -848,7 +864,17 @@ docs commit at the end):
   :221, :241-243 and `MapCanvas.test.tsx` :440 (B-3, B-5).
 - `palette.ts:145`, `docs/VISUAL_LANGUAGE.md:37-38` (3.10).
 - `docs/art-catalog.json` `__comment`, `_meta.house_register`, `_meta.
-  how_to_use` (3.12).
+  how_to_use` (3.12). **Corrected 2026-09-20 by 3.12's own fix: five
+  sentences, not three.** The bullet missed the two that carry the finding
+  itself — `plates[arena-desolation].description`, which names the left
+  foreground and the far bank but not the right-edge building whose frieze
+  the row is about, while `__comment` promises every description was
+  "written from LOOKING at the shipped file"; and that entry's
+  `coherenceFlag`, `null` against legible English text. It also missed that
+  `_meta.how_to_use`'s "null on every entry" is false twice over: nine of
+  twelve entries omit the key rather than carrying `null`. All five are
+  corrected in that commit, and `_meta` gains `plateCount` /
+  `surfaceCounts` so the tally has exactly one home to be checked against.
 - `state/store.ts` ~:262-264 stale "0.5.0" comment (3.7).
 - `combat.engine.ts` add-block comment "a decision on record" — add the
   record (D-1).

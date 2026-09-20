@@ -17,6 +17,10 @@ on:
       # must re-run it — otherwise a weakened guard lands green.
       - 'scripts/check-worklets.mjs'
       - 'scripts/check-worklets.test.mjs'
+      # Same reason, mirrored: `assets:check` reads the world-plate catalogue,
+      # which lives outside this package. Without this line a catalogue-only
+      # edit re-breaks the register and never re-runs the guard that caught it.
+      - 'docs/art-catalog.json'
   pull_request:
     branches: [main]
     paths:
@@ -24,6 +28,7 @@ on:
       - '.github/workflows/verify-mobile.yml'
       - 'scripts/check-worklets.mjs'
       - 'scripts/check-worklets.test.mjs'
+      - 'docs/art-catalog.json'
   schedule:
     - cron: '13 7 * * 0'
   workflow_dispatch:
