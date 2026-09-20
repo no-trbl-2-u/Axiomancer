@@ -43,7 +43,7 @@ describe('the 5 previously-dead consumables now apply a real effect', () => {
     const cases: Array<[id: string, expectedEffectId: string]> = [
         ['focus-vial', 'buff_accuracy_up'],
         ['heart-draught', 'buff_status_chance_up'],
-        ['body-elixir', 'buff_damage_reduction'],
+        ['body-elixir', 'buff_stoic_resolve'],
         ['resonance-crystal', 'buff_all_stats_up'],
         ['greater-resonance-crystal', 'buff_all_stats_up'],
     ];
@@ -131,5 +131,39 @@ describe('antidote and clarity-serum no longer print byte-identical effect lines
         const serumItem = getConsumableById('clarity-serum')!;
         const { applied: serumApplied } = useConsumableEffect(Player, serumItem, 1, lookupEffect);
         expect(serumApplied?.id).toBe('buff_cleanse_minor');
+    });
+});
+
+describe('body-elixir and iron-skin-draught no longer print byte-identical effect lines (adjust-equipment pass 14)', () => {
+    // Both used to share `buff_damage_reduction` (tier 2), so the Cursed
+    // Paladin's loot table printed the same "GUARD" line for two drops at the
+    // same weight — the same bug class as issue #307 and pass 11
+    // (antidote/clarity-serum), surfaced in a reward table instead of a shop.
+    // body-elixir now applies its own `buff_stoic_resolve` (tier 1, lesser
+    // defenseModifier).
+    it('the two consumables reference different effect ids', () => {
+        const elixir = getConsumableById('body-elixir')!;
+        const draught = getConsumableById('iron-skin-draught')!;
+        expect(elixir.effectId).not.toBe(draught.effectId);
+    });
+
+    it('body-elixir applies a lesser defense buff than iron-skin-draught', () => {
+        const elixir = getConsumableById('body-elixir')!;
+        const draught = getConsumableById('iron-skin-draught')!;
+        const elixirEffect = lookupEffect(elixir.effectId!)!;
+        const draughtEffect = lookupEffect(draught.effectId!)!;
+        expect(elixirEffect.payload.defenseModifier).toBeGreaterThan(0);
+        expect(draughtEffect.payload.defenseModifier).toBeGreaterThan(0);
+        expect(elixirEffect.tier).toBeLessThan(draughtEffect.tier);
+    });
+
+    it('using each consumable applies its own tier-scoped defense buff', () => {
+        const elixirItem = getConsumableById('body-elixir')!;
+        const { applied: elixirApplied } = useConsumableEffect(Player, elixirItem, 1, lookupEffect);
+        expect(elixirApplied?.id).toBe('buff_stoic_resolve');
+
+        const draughtItem = getConsumableById('iron-skin-draught')!;
+        const { applied: draughtApplied } = useConsumableEffect(Player, draughtItem, 1, lookupEffect);
+        expect(draughtApplied?.id).toBe('buff_damage_reduction');
     });
 });

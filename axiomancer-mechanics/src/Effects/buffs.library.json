@@ -387,6 +387,26 @@
         "non-card",
         "charm"
       ]
+    },
+    {
+      "id": "buff_stoic_resolve",
+      "name": "Stoic Resolve",
+      "description": "The body cannot be argued out of a stance it has already chosen. It gives less than a shield, but it does not flinch.",
+      "type": "buff",
+      "category": "defense",
+      "duration": 2,
+      "stacking": "none",
+      "resistedBy": "heart",
+      "resistDR": 12,
+      "payload": {
+        "defenseModifier": 3
+      },
+      "tier": 1,
+      "addedIn": "2026-09-20",
+      "tags": [
+        "support",
+        "non-card"
+      ]
     }
   ]
 }

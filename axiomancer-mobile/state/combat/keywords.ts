@@ -88,6 +88,10 @@ const SUPPORT_KEYWORD: Record<string, string> = {
     buff_phoenix_vigor: 'Heal',
     buff_cleanse: 'Cleanse',
     buff_absolved: 'Cleanse',
+    // adjust-equipment pass 11 (2026-09-15) split clarity-serum onto this tier-1
+    // cleanse but never added the mapping here — clarity-serum's combat log
+    // silently printed no keyword ever since. Backfilled adjust-equipment pass 14.
+    buff_cleanse_minor: 'Cleanse',
     buff_damage_reduction: 'Guard',
     buff_all_stats_up: 'Guard',
     buff_invincibility: 'Guard',
@@ -100,6 +104,9 @@ const SUPPORT_KEYWORD: Record<string, string> = {
     // / void-essence no longer share an effect) — same closest-analogue mapping.
     buff_liars_gambit: 'Mark',
     buff_abyssal_presence: 'Mark',
+    // adjust-equipment pass 14 (2026-09-20): tier-1 split of buff_damage_reduction
+    // (body-elixir vs iron-skin-draught, same byte-identical-effect bug class).
+    buff_stoic_resolve: 'Guard',
 };
 
 /** Verb class → keyword for cards whose action is the keyword itself. */

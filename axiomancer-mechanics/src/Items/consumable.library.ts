@@ -109,9 +109,18 @@ export const consumableLibrary: Consumable[] = [
         name: 'Body Elixir',
         description: 'A heavy elixir that locks the muscles into purpose.',
         category: 'consumable',
-        // adjust-equipment pass 1 (2026-09-04): same dead-payload bug as
-        // focus-vial. Closest generic analogue for "locks the muscles".
-        effectId: 'buff_damage_reduction',
+        // adjust-equipment pass 14 (2026-09-20): previously shared
+        // `buff_damage_reduction` (tier 2) with iron-skin-draught, so the
+        // Cursed Paladin's loot table printed two byte-identical "GUARD" lines
+        // at the same 25% weight — same shop/reward-pool-effect-duplication bug
+        // class as issue #307 (philosopher-tea/void-essence) and pass 11
+        // (antidote/clarity-serum), surfaced here in a reward table rather than
+        // a shop. Split onto the new tier-1 `buff_stoic_resolve` (lesser
+        // defenseModifier, no new engine mechanic) — iron-skin-draught's "hardens
+        // the skin against blows" keeps the stronger, more literal armor image;
+        // body-elixir's vaguer "locks the muscles into purpose" now maps to a
+        // real, weaker payload instead of an identical one.
+        effectId: 'buff_stoic_resolve',
         quantity: 1,
     },
     {
