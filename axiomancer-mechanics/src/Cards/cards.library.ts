@@ -1,11 +1,12 @@
 /**
  * THE CARD LIBRARY — the aggregator (THE BIG NUMBERS REWRITE, 2026-09-02).
  *
- * Solo, dark-fantasy, PvE. 130 cards (count pins repealed 2026-09-02 — this
+ * Solo, dark-fantasy, PvE. 132 cards (count pins repealed 2026-09-02 — this
  * total drifts as `/adjust-cards` ships CREATEs, or as sibling `adjust-*`
  * passes author cards on this surface (e.g. `/adjust-keywords`' EVENTIDE
- * pair, pass 11, 2026-09-16); read `cardLibrary.length` for the live figure,
- * never trust this comment as a source of truth): 8
+ * pair, pass 11, 2026-09-16, and its FORGE-carrier grave pair — The Unpaid
+ * Sexton / It Gets Up Again — pass 13, 2026-09-19); read `cardLibrary.length`
+ * for the live figure, never trust this comment as a source of truth): 8
  * starters (the deliberately weak Threadbare Office), 3 dice-valve relics, 5
  * enemy-injected curses, twelve Saint-rank apocrypha (two per theme), and six
  * theme modules (16-20 cards each). The cards themselves live in
