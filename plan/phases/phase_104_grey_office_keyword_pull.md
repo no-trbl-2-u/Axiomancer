@@ -3,26 +3,9 @@
 > Filed 2026-09-20 from a direct T ruling (device playtest, learning-curve
 > complaint). Decisions below were taken by T in the same session; the two
 > derived consequences (deck floor, picker retirement) are recorded here as
-> decisions, not questions. Shipped 2026-09-20 in the attended session that
-> filed it (T: "now implement what's left"), as its own PR after the v23
-> loadout-seed fix (PR #349) merged.
->
-> **As-shipped deltas from the brief below** (recorded, not re-litigated):
-> - Decision 3: `cardStanceColor` projects `'any'` onto the existing `'wild'`
->   DIE colour rather than adding `'any'` to `CombatDieColor` — the engine's
->   wild-matches-everything rule then carries the grey card through the
->   power check, the read (`none`), resonance and forge fallbacks unchanged.
->   `colorMatch` is TRUE for a grey card (on-colour for every die), not
->   neutral: neither starter carries a die-bonus line, and "never off-colour"
->   was the property that mattered. Mobile paints the FACE from the library
->   card's own aspect (`faceStanceKey`) so grey never borrows the wild gold.
-> - Decision 4: the bundle picker was already bypassed (Phase 46b auto-seeds
->   `NEW_PLAYER_STARTER_BUNDLE_ID`); the seed now points at a new
->   `grey-office` bundle, first in `STARTER_BUNDLES`, and the dev deck-swap
->   menu keeps every campaign preset.
-> - Decision 6/7: `keywordsOf` is `cardKeywords` in `combat.rewards.ts`,
->   reading `cardComplexity(card).keywords` — one derivation shared with the
->   complexity report. `dominantTheme` is exported beside it.
+> decisions, not questions. Ships via `/ship-a-phase` as its own PR — it is
+> deliberately NOT bundled with the v23 loadout-seed fix (PR #349), which
+> only removed the bug that hid the current starter bundle.
 
 ## Outcome
 

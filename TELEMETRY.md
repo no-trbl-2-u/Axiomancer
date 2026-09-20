@@ -573,3 +573,6 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-20T20:29:17Z | slash-prompt | /march | - | - | /march |
 | 2026-09-20T20:32:38Z | subagent | card-expert | claude-sonnet-5 | - | Adjust-keywords pass 14 audit + ship |
 | 2026-09-20T20:39:40Z | subagent-end | card-expert | claude-sonnet-5 | 7m02s | ok |
+| 2026-09-20T22:27:59Z | slash-prompt | /march | - | - | /march |
+| 2026-09-20T22:28:22Z | skill | ship-a-phase | claude-sonnet-5 | - | - |
+| 2026-09-20T22:28:22Z | skill-end | ship-a-phase | claude-sonnet-5 | 0s | ok |

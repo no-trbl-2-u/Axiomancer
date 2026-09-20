@@ -543,8 +543,9 @@ export const StagedCard = React.memo(function StagedCard({
     // recomputed live at the known read so the staged number is exact at commit.
     let heroOverride: string | undefined;
     if (armed && f.readDependent) {
-        // Phase 104 — a grey (wild-stance) card is on-colour for every die.
-        const colorMatch = card.stance === 'wild' || assignedDie!.color === card.stance || assignedDie!.color === 'wild';
+        // Phase 104 — a grey card's colour-match bonus is neutral, even off wild.
+        const colorMatch = card.stance !== 'any'
+            && (assignedDie!.color === card.stance || assignedDie!.color === 'wild');
         const g = armedReadValue(f, read as CombatReadResult, colorMatch);
         // Read-scaled commit value: Guard NN / +NN% Vulnerable / NN DoT total.
         if (g != null) heroOverride = f.kind === 'guard' ? `Guard ${g}` : f.kind === 'vulnerable' ? `+${g}%` : `${g}`;
@@ -573,9 +574,7 @@ export const StagedCard = React.memo(function StagedCard({
                     accessibilityRole="button"
                     accessibilityState={{ disabled: dropIneligible }}
                     accessibilityLabel={dropIneligible
-                        ? (card.stance === 'wild'
-                            ? `${card.name} staged — any die can power this card.`
-                            : `${card.name} staged — only a ${card.stance.toUpperCase()} or WILD die can power this card.`)
+                        ? `${card.name} staged — only a ${card.stance.toUpperCase()} or WILD die can power this card.`
                         : `${card.name} staged — ${f.verbLine}. Tap to unstage.`}
                 >
                   {/* inner wrappers carry the drop-pop scale + reject shake so

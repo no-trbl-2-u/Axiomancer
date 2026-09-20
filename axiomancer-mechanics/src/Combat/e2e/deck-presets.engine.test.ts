@@ -56,11 +56,13 @@ describe('campaign presets — the evolving deck', () => {
     it('exact aspect thirds per preset (the generalized color law)', () => {
         for (const id of SPEC_PRESET_IDS) {
             const preset = getDeckPreset(id)!;
-            // Phase 104 — presets never seat a grey (`'any'`) card; a grey id
-            // here would land under a fourth key and fail the equality below.
-            const byAspect: Record<string, number> = { body: 0, mind: 0, heart: 0 };
+            const byAspect = { body: 0, mind: 0, heart: 0 };
             for (const cardId of preset.cardIds) {
-                byAspect[getCardById(cardId)!.philosophicalAspect] += 1;
+                const aspect = getCardById(cardId)!.philosophicalAspect;
+                // Phase 104 — the grey office is starter-only; a preset carrying
+                // one would be a real regression, not a type-narrowing formality.
+                expect(aspect, `${id}: ${cardId} is a grey card in a preset`).not.toBe('any');
+                byAspect[aspect as 'body' | 'mind' | 'heart'] += 1;
             }
             const third = preset.cardIds.length / 3;
             expect(byAspect, id).toEqual({ body: third, mind: third, heart: third });

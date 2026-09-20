@@ -72,36 +72,22 @@ import type {
  * The deck-size floor. Removal that would take `buildCombatDeck`'s output
  * below this is REFUSED, not clamped.
  *
- * **12, derived from the shipped Profane Canon (84ef85b), not chosen.** The
- * campaign presets are snapshots of ONE deck evolving — threadbare 18 →
- * pilgrim 30 → apostate 45 under a 50-card hard cap — and the LINEAGE LAW
- * (`PRESET_LINEAGE`, machine-checked in `Combat/e2e/deck-presets.engine.test.ts`)
- * spells out the removals each stage makes. Apply them and the canon's own
- * removal story dips to:
+ * **10, re-derived by Phase 104 (the grey office).** A fresh run now deals a
+ * 10-card starting deck (`grey-strike` ×7, `grey-ward` ×3 — see
+ * `Combat/combat.rewards.ts`'s `STARTING_CARD_IDS`), the smallest shipped
+ * starting shape in the tree, so the floor tracks it: **10 = 2 ×
+ * `COMBAT_HAND_SIZE`** (5), the reshuffle-inside-one-round bound below which
+ * the draw pile reshuffles inside a single round and every fight deals the
+ * same hand. A fresh run's first CUT is legal only after the first reward
+ * card is taken (10 + 1 reward > floor) — the intended tempo.
  *
- *   - 18 − `PILGRIM_REMOVED` (6 copies)  = **12**  ← the low-water mark
- *   - 30 − `APOSTATE_REMOVED` (8 copies) = 22
- *
- * So 12 is the TIGHTEST floor under which every documented removal in the
- * shipped campaign is still legal, and one card lower than any of them is not.
- * Two corroborations: 12 is divisible by 3, so the presets' exact-aspect-thirds
- * law (4/4/4) survives at the floor — 10 cannot be an aspect-balanced deck; and
- * 12 is 2.4× `COMBAT_HAND_SIZE` (5), below which the draw pile reshuffles
- * inside a single round and every fight deals the same hand.
- *
- * (The brief's opening proposal of 10 was justified as "the smallest shipped
- * preset shape". That justification died with the Profane Canon: no preset,
- * cap, or pin in the tree is 10 any more. `card-removal.engine.test.ts` pins
- * the derivation, so a future re-cut of the lineage forces this to be re-derived
- * rather than silently drifting.)
- *
- * **Re-derived to 10 (Phase 104, 2026-09-20).** The grey office — the deck
- * every new run now opens with (`STARTING_CARD_IDS`, 7 STRIKE / 3 WARD) — is
- * the smallest shipped starting deck at 10, so the floor must sit AT it, not
- * above it: a fresh run's first CUT is refused until one reward is taken,
- * which is the intended tempo (T's ruling). 10 is still 2 × `COMBAT_HAND_SIZE`,
- * the reshuffle-inside-one-round bound, and the Profane Canon lineage's own
- * low-water mark (12) stays comfortably legal above it.
+ * (Superseded derivation, kept for history: 2026-07-through-2026-09-19 pinned
+ * this at 12, derived from the campaign-preset LINEAGE LAW's low-water mark
+ * (18 − 6 Pilgrim removals). That story is still true of the three campaign
+ * presets — they are untouched by this phase — but the floor now tracks the
+ * smallest shipped deck overall, which is the grey office, not a preset.
+ * `card-removal.engine.test.ts` pins the derivation, so a future re-cut of
+ * either shape forces this to be re-derived rather than silently drifting.)
  */
 export const MIN_COMBAT_DECK_SIZE = 10;
 

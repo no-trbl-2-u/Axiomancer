@@ -27,15 +27,14 @@ function makeStore() {
  */
 describe('Starter bundles — the pre-run deck picker (the campaign snapshots)', () => {
     const EXPECTED_SIZES: Record<string, number> = {
-        'grey-office': 10, // Phase 104 — the new-player seed
         threadbare: 18,
         pilgrim: 30,
         apostate: 45,
     };
 
-    it('exposes the grey office, then one bundle per campaign snapshot in the engine display order', () => {
+    it('exposes one bundle per campaign snapshot, in the engine display order', () => {
         const ids = STARTER_BUNDLES.map((b) => b.id);
-        expect(ids).toEqual(['grey-office', 'threadbare', 'pilgrim', 'apostate']);
+        expect(ids).toEqual(['threadbare', 'pilgrim', 'apostate']);
         // No duplicate ids.
         expect(new Set(ids).size).toBe(ids.length);
     });
@@ -47,9 +46,8 @@ describe('Starter bundles — the pre-run deck picker (the campaign snapshots)',
                 expect(FULL_POOL.has(id)).toBe(true);
                 expect(getCard(id)).toBeTruthy();
             }
-            // Presentation: every campaign tile carries its stage's two hallmark
-            // keywords; the grey office has no family and so no pills (Phase 104).
-            expect(b.pills.length).toBe(b.id === 'grey-office' ? 0 : 2);
+            // Presentation: every tile carries its stage's two hallmark keywords.
+            expect(b.pills.length).toBe(2);
             expect(b.description.length).toBeGreaterThan(0);
         }
     });
@@ -93,10 +91,9 @@ describe('Starter bundles — the pre-run deck picker (the campaign snapshots)',
         expect(store.getState().player.knownCards.length).toBeGreaterThan(0);
     });
 
-    it('the new-player default (phase 46b; Phase 104) resolves to the grey office', () => {
+    it('the new-player default (phase 46b) resolves to the neutral Threadbare Office', () => {
         const bundle = starterBundleById(NEW_PLAYER_STARTER_BUNDLE_ID);
-        expect(bundle?.id).toBe('grey-office');
-        expect(bundle?.cardIds).toEqual([...STARTING_CARD_IDS]);
+        expect(bundle?.id).toBe('threadbare');
         expect(bundle?.archetype).toBeNull(); // unmapped-archetype — same shape as the test above
     });
 });

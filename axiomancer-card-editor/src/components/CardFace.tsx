@@ -36,7 +36,9 @@ type DraftWithImage = CardDraft & { img?: string | null };
 /** The projected, face-ready view of a card. */
 export interface FaceCard {
     name: string;
-    die: DieKey;
+    /** Phase 104 — 'any' (the grey office) is a card ASPECT, not a die
+     *  colour, so it stays out of `DieKey`; painted neutral by consumers. */
+    die: DieKey | 'any';
     rarity: RarityKey;
     img: string | null;
     /** Keyword that drives the top-left glyph. */
@@ -233,7 +235,7 @@ function freeKeyword(card: CardDraft): { kw: KeywordId | string; val: number } {
 
 /** Derive face-ready fields from any editable card draft. */
 export function projectFace(card: CardDraft): FaceCard {
-    const die = card.philosophicalAspect as DieKey; // body | mind | heart
+    const die = card.philosophicalAspect; // body | mind | heart | any
     // Spec 32 v3 §4 — rarity derives from the rank ladder (gold is gone).
     const rarity: RarityKey = rankToRarity(card.rank);
     const primary = primaryKeyword(card);
@@ -461,12 +463,14 @@ export function KwGlyph({
 }
 
 // ── Die pip — small coloured token signalling "costs one die" ────────────────
-export function DiePip({ die, size = 16 }: { die: DieKey; size?: number }) {
-    const d = DIE[die] || DIE.body;
-    if (die === 'wild') {
+export function DiePip({ die, size = 16 }: { die: DieKey | 'any'; size?: number }) {
+    const d = DIE[die as DieKey] || DIE.body;
+    // Phase 104 — a grey card is powered by every die colour, same as wild;
+    // its pip shows the wild glyph.
+    if (die === 'wild' || die === 'any') {
         return (
             <span
-                title="Wild die"
+                title={die === 'any' ? 'Any die (grey office)' : 'Wild die'}
                 style={{
                     width: size,
                     height: size,
@@ -563,7 +567,9 @@ export function CardFace({
     onArtPick?: (() => void) | null;
 }) {
     const face = projectFace(card);
-    const die = DIE[face.die] || DIE.body;
+    // Phase 104 — a grey card ('any') paints neutral, never the DIE.body
+    // fallback a plain lookup miss would otherwise land on.
+    const die = face.die === 'any' ? { label: 'ANY', color: WX.bone, soft: 'rgba(138,130,115,0.16)' } : (DIE[face.die] || DIE.body);
     const rar = RARITY[face.rarity] || RARITY.common;
     const band = face.die === 'wild' ? '#d9b44a' : die.color;
     const scale = width / 200;

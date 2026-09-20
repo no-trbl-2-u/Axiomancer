@@ -106,7 +106,8 @@ function openFed(cardId: string, color: CombatDieColor): CombatEncounterState {
 function paidBurst(cardId: string): number {
     const card = getCardById(cardId);
     if (!card) return 0;
-    // Phase 104 — a grey card projects as the wild stance; feed it a wild die.
+    // Phase 104 — the grey office's colourless 'any' aspect has no die
+    // colour of its own; wild powers it same as every other card.
     const s = openFed(cardId, card.philosophicalAspect === 'any' ? 'wild' : card.philosophicalAspect);
     const before = s.enemy.health;
     const res = playCombatCard(s, { uid: 'ceiling-under-test' }, true, 't1-d0', rng);

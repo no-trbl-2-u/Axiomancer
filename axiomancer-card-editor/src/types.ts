@@ -37,7 +37,6 @@ import type { CardTheme } from '@mechanics/Cards/card-themes';
 export interface CardDraft {
     id: string;
     name: string;
-    /** Phase 104 — `'any'` is a grey card: every die colour powers it. */
     philosophicalAspect: CardAspect;
     description: string;
     tier: CardTier;

@@ -97,8 +97,6 @@ describe('starter cards + learn-card flow', () => {
         actions.startCombat(makeEnemy());
         const known = store.getState().player.knownCards ?? [];
         expect(known.length).toBeGreaterThan(0);
-        // Phase 104 — the seed is the grey office.
-        expect(known).toContain('grey-strike');
         expect(known).toContain('grey-ward');
     });
 

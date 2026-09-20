@@ -320,7 +320,8 @@ export {
     unlockCardViaDilemma,
     // Theme-aware reward draft (2026-08-08) — the deck-theme read + its pivot lever.
     REWARD_RARITY_WEIGHTS, REWARD_THEMES, REWARD_OFF_THEME_RATE,
-    REWARD_RANDOM_PICKS, GREY_OFFICE_SHAPE, cardKeywords, dominantTheme,
+    // Phase 104 — the first-three-takes-uniform gate for the keyword pull.
+    REWARD_RANDOM_PICKS,
     deckThemeCounts, deckThemeShares,
 } from './combat.rewards';
 export type { RewardTheme } from './combat.rewards';

@@ -18,7 +18,7 @@
 import { describe, it, expect } from 'vitest';
 
 import {
-    COMBAT_REWARD_POOL, REWARD_OFF_THEME_RATE, REWARD_RANDOM_PICKS, REWARD_RARITY_WEIGHTS, REWARD_THEMES,
+    COMBAT_REWARD_POOL, REWARD_OFF_THEME_RATE, REWARD_RARITY_WEIGHTS, REWARD_THEMES,
     addRewardCard, deckThemeCounts, deckThemeShares, rollCombatCardRewards,
 } from './combat.rewards';
 import { getDeckPreset } from './combat.starter-deck-presets';
@@ -47,19 +47,24 @@ function seededRng(seed: number): () => number {
     return next;
 }
 
-/**
- * A player whose deck is `cardIds`. Phase 104: the first `REWARD_RANDOM_PICKS`
- * entries are held as TAKEN rewards (the rest as learned cards) so the
- * theme-pull assertions below exercise the leaning draft, not the uniform
- * first-three regime — the tally (`deckThemeCounts`) is the union of both
- * lists, so every count is unchanged by the split. An empty deck stays empty
- * and therefore stays in the uniform regime.
- */
 function playerWithDeck(cardIds: readonly string[]): Character {
     const player = deepClone(Player);
-    player.combatRewardCards = cardIds.slice(0, REWARD_RANDOM_PICKS);
-    player.knownCards = cardIds.slice(REWARD_RANDOM_PICKS);
+    player.knownCards = [...cardIds];
+    player.combatRewardCards = [];
     return player;
+}
+
+/**
+ * Phase 104 — the theme/rarity-aware roll only activates once
+ * `REWARD_RANDOM_PICKS` (3) reward cards are already held; below that every
+ * slot is uniform (see `combat.rewards.ts`). The theme/rarity tests in this
+ * file pin the WEIGHTED path's behaviour, so their fixtures must already be
+ * past that gate. Filler is drawn from the deck's own cards (when it has
+ * any) so it never introduces a theme the deck doesn't already play.
+ */
+function pastRandomPicksFloor(player: Character): Character {
+    const filler = player.knownCards.slice(0, 3);
+    return { ...player, combatRewardCards: [...(player.combatRewardCards ?? []), ...filler] };
 }
 
 /** Rolls `screens` reward screens off consecutive seeds and flattens the offers. */
@@ -123,9 +128,12 @@ describe('theme-aware combat card rewards', () => {
         });
 
         it('the deck itself moves the offers — two decks, one seed, different draws', () => {
-            const apostate = rollCombatCardRewards(playerWithDeck(APOSTATE), seededRng(77), 3);
+            // Phase 104 — deck composition only steers the roll once
+            // REWARD_RANDOM_PICKS reward cards are already held (below that,
+            // every draw is uniform and deck-blind by design).
+            const apostate = rollCombatCardRewards(pastRandomPicksFloor(playerWithDeck(APOSTATE)), seededRng(77), 3);
             const rotOnly = rollCombatCardRewards(
-                playerWithDeck(cardLibrary.filter(c => c.theme === 'rot').map(c => c.id)),
+                pastRandomPicksFloor(playerWithDeck(cardLibrary.filter(c => c.theme === 'rot').map(c => c.id))),
                 seededRng(77),
                 3,
             );
@@ -136,7 +144,7 @@ describe('theme-aware combat card rewards', () => {
     describe('the on-theme pull is real', () => {
         it('a single-theme deck is offered its own theme far above pool chance', () => {
             const graveIds = cardLibrary.filter(c => c.theme === 'grave').map(c => c.id);
-            const offers = sweep(playerWithDeck(graveIds), 400);
+            const offers = sweep(pastRandomPicksFloor(playerWithDeck(graveIds)), 400);
             const onTheme = share(offers, id => themeOf(id) === 'grave');
             // Pool chance for one of six themes is ~1/6. A deck that plays
             // ONLY grave should take every on-theme slot, so the measured rate
@@ -146,7 +154,7 @@ describe('theme-aware combat card rewards', () => {
         });
 
         it("the Apostate's three lead themes (rot/debt/vigil) dominate its offers", () => {
-            const offers = sweep(playerWithDeck(APOSTATE), 400);
+            const offers = sweep(pastRandomPicksFloor(playerWithDeck(APOSTATE)), 400);
             const lead = share(offers, id => ['rot', 'debt', 'vigil'].includes(themeOf(id)));
             expect(lead).toBeGreaterThan(0.5);
         });
@@ -163,7 +171,7 @@ describe('theme-aware combat card rewards', () => {
         it('the Apostate (0 trial, 1 choir) is still shown trial and choir', () => {
             const counts = deckThemeCounts(playerWithDeck(APOSTATE));
             expect(counts.trial).toBe(0); // the seat the deck does not hold at all
-            const offers = sweep(playerWithDeck(APOSTATE), 500);
+            const offers = sweep(pastRandomPicksFloor(playerWithDeck(APOSTATE)), 500);
             // Both unseated themes must appear at a rate a player NOTICES —
             // the design floor is "a real door", not a rounding error.
             expect(share(offers, id => themeOf(id) === 'trial')).toBeGreaterThan(0.04);
@@ -171,7 +179,7 @@ describe('theme-aware combat card rewards', () => {
         });
 
         it('a 3-offer screen shows the Apostate a pivot card most of the time it matters', () => {
-            const player = playerWithDeck(APOSTATE);
+            const player = pastRandomPicksFloor(playerWithDeck(APOSTATE));
             let screensWithPivot = 0;
             for (let seed = 1; seed <= 500; seed++) {
                 const offers = rollCombatCardRewards(player, seededRng(seed), 3);
@@ -185,7 +193,7 @@ describe('theme-aware combat card rewards', () => {
 
         it('even a single-theme deck keeps every other theme on the table', () => {
             const rotIds = cardLibrary.filter(c => c.theme === 'rot').map(c => c.id);
-            const offers = sweep(playerWithDeck(rotIds), 500);
+            const offers = sweep(pastRandomPicksFloor(playerWithDeck(rotIds)), 500);
             for (const theme of REWARD_THEMES.filter(t => t !== 'rot')) {
                 expect(share(offers, id => themeOf(id) === theme)).toBeGreaterThan(0.02);
             }
@@ -194,7 +202,7 @@ describe('theme-aware combat card rewards', () => {
 
     describe('rarity scaling holds', () => {
         it('commons lead, uncommons follow, rares stay the prize', () => {
-            const offers = sweep(playerWithDeck(THREADBARE), 500);
+            const offers = sweep(pastRandomPicksFloor(playerWithDeck(THREADBARE)), 500);
             const rarity = (id: string): string => rankToRarity(getCardById(id)?.rank ?? 1);
             const common = share(offers, id => rarity(id) === 'common');
             const uncommon = share(offers, id => rarity(id) === 'uncommon');
@@ -277,7 +285,7 @@ describe('theme-aware combat card rewards', () => {
         it('appends to the persistent reward collection without touching knownCards', () => {
             const player = playerWithDeck(APOSTATE);
             const rewarded = addRewardCard(player, COMBAT_REWARD_POOL[0]);
-            expect(rewarded.combatRewardCards).toEqual([...player.combatRewardCards!, COMBAT_REWARD_POOL[0]]);
+            expect(rewarded.combatRewardCards).toEqual([COMBAT_REWARD_POOL[0]]);
             expect(rewarded.knownCards).toEqual(player.knownCards);
         });
     });

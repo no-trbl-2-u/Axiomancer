@@ -10,12 +10,17 @@ import { useEffect, useRef, useState } from 'react';
 import { toDraft } from '../../types';
 import type { Card } from '../../data/mechanics';
 import { CardFace, DiePip, KwGlyph, projectFace } from '../CardFace';
-import { WX, WX_NOISE, DIE, KEYWORDS, kwLine, type KeywordMeta } from '../../theme/wx';
+import { WX, WX_NOISE, DIE, KEYWORDS, kwLine, type KeywordMeta, type DieKey } from '../../theme/wx';
 import { Btn } from '../form';
 
 const DUMMY_MAX = 100;
 const PLAYER_MAX = 50;
 const PER_STACK: Record<string, number> = { bleed: 3, poison: 2, dot: 2 };
+
+// Phase 104 — 'any' (the grey office) is a card aspect, not a `DieKey`, so it
+// has no `DIE` row; paint it the neutral ink token like `CardFace` does.
+const ANY_DIE_META = { label: 'ANY', color: WX.bone, soft: 'rgba(138,130,115,0.16)' };
+const dieMeta = (die: DieKey | 'any') => (die === 'any' ? ANY_DIE_META : DIE[die]);
 
 type Tone = 'dmg' | 'buff' | 'ctrl' | 'enemy' | 'head' | 'info';
 interface LogLine {
@@ -223,7 +228,7 @@ export function DummyTab({
         if (!selected || !face) return;
         const kw = powered ? face.paidKw : face.freeKw;
         const val = powered ? face.paidVal : face.freeVal;
-        const label = powered ? `▶ Played PAID · ${selected.name} (${DIE[face.die].label} die)` : `▶ Played FREE · ${selected.name}`;
+        const label = powered ? `▶ Played PAID · ${selected.name} (${dieMeta(face.die).label} die)` : `▶ Played FREE · ${selected.name}`;
         commit((S2) => applyKeyword(S2, kw, val), label);
     };
 
@@ -388,9 +393,9 @@ export function DummyTab({
                         <div style={{ flex: 1 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                                 <DiePip die={face.die} size={12} />
-                                <span style={{ fontFamily: WX.sans, fontSize: 9, letterSpacing: 1, color: DIE[face.die].color }}>◆ PAID</span>
+                                <span style={{ fontFamily: WX.sans, fontSize: 9, letterSpacing: 1, color: dieMeta(face.die).color }}>◆ PAID</span>
                             </div>
-                            <div style={{ fontFamily: WX.mono, fontSize: 13, color: DIE[face.die].color }}>{kwLine(face.paidKw, face.paidVal)}</div>
+                            <div style={{ fontFamily: WX.mono, fontSize: 13, color: dieMeta(face.die).color }}>{kwLine(face.paidKw, face.paidVal)}</div>
                         </div>
                     </div>
                 )}
@@ -404,7 +409,7 @@ export function DummyTab({
                     </Btn>
                     <button
                         onClick={() => playCard(true)}
-                        style={{ flex: 1, padding: '12px 8px', cursor: 'pointer', font: 'inherit', fontFamily: WX.sans, fontSize: 14, letterSpacing: 1.5, background: DIE[face.die].soft, color: DIE[face.die].color, border: `1px solid ${DIE[face.die].color}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                        style={{ flex: 1, padding: '12px 8px', cursor: 'pointer', font: 'inherit', fontFamily: WX.sans, fontSize: 14, letterSpacing: 1.5, background: dieMeta(face.die).soft, color: dieMeta(face.die).color, border: `1px solid ${dieMeta(face.die).color}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
                     >
                         <DiePip die={face.die} size={13} /> PLAY PAID
                     </button>

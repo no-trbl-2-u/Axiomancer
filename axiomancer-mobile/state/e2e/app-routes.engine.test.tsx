@@ -121,22 +121,21 @@ describe('app/index.tsx: onboarding flow', () => {
         expect(getByTestId('title-screen')).toBeTruthy();
     });
 
-    it('auto-seeds the Threadbare Office and proceeds to the map once a new player dismisses the title', () => {
-        // Phase 46b: a brand-new player is no longer offered a picker among
-        // Threadbare/Pilgrim/Apostate — they are auto-seeded and sent straight
-        // to the map (plan/phases/phase_46a_early_game_rethink.md D4). Phase
-        // 104: that seed is the grey office.
+    it('proceeds straight to the map once a new player dismisses the title, no picker shown', () => {
+        // Phase 104 (the grey office): a brand-new player is no longer routed
+        // through any starter-bundle picker or auto-seed here — dismissing
+        // the title redirects immediately, and `ensureStarterCards` seeds the
+        // grey office lazily at first combat instead.
         const store = makeStore();
-        const { getByTestId } = render(withProviders(store, <IndexScreen />));
+        const { getByTestId, queryByTestId } = render(withProviders(store, <IndexScreen />));
 
         act(() => {
             fireEvent.press(getByTestId('title-screen'));
         });
 
         expect(getByTestId('redirect-/exploration')).toBeTruthy();
-        expect(chosenStarterBundle(store)?.id).toBe('grey-office');
-        expect(store.getState().player.knownCards).toHaveLength(10);
-        expect(store.getState().player.knownCards.length).toBeGreaterThan(0);
+        expect(queryByTestId('bundle-select')).toBeNull();
+        expect(chosenStarterBundle(store)).toBeNull();
     });
 
     it('redirects to active tab for returning player (leveled up)', () => {

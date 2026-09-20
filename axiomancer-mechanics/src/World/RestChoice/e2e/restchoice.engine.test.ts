@@ -25,13 +25,11 @@ import {
 } from '../../../index';
 import type { RestChoiceSession, Character } from '../../../index';
 
-// Phase 104 — the floor is 10 (the grey office's size); this fixture sits
-// exactly on it.
 const DECK = [
     'spoiled-poultice', 'chilblain-watch', 'petty-indictment', 'first-spadeful',
     'grandmothers-psalter', 'thumbprick-oath', 'thin-hymn', 'threadbare-cope',
     'unction-of-boils', 'the-sextons-bell',
-] as const; // exactly MIN_COMBAT_DECK_SIZE (10)
+] as const; // exactly MIN_COMBAT_DECK_SIZE (Phase 104: 10)
 
 function offerSession(overrides: Partial<Parameters<typeof createRestChoiceSession>[1]> = {}): RestChoiceSession {
     return createRestChoiceSession(1, {

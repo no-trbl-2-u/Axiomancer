@@ -32,15 +32,17 @@ import { buildPresetDeck } from '../../Combat/combat.starter-deck-presets';
 import { GraveLarva } from '../../Enemy/enemy.library';
 import type { CombatState } from '../../Combat/types';
 
-/** The four ids `STARTING_CARD_IDS` held from 2026-09-05 to 2026-09-20 — the
- *  seed a v22 save actually carries. Pinned literally: Phase 104 replaced the
- *  live constant with the grey office, but old saves still hold these. */
-const LEGACY_STARTING_CARD_IDS = ['spoiled-poultice', 'chilblain-watch', 'first-spadeful', 'thin-hymn'] as const;
+// Phase 104 (2026-09-20) repurposed `STARTING_CARD_IDS` for the grey-office
+// fresh-run seed, so this migration fixture pins the EXACT pre-v23 seed by
+// value instead of tracking the live (now differently-shaped) constant.
+const LEGACY_V22_SEED_IDS: readonly string[] = [
+    'spoiled-poultice', 'chilblain-watch', 'first-spadeful', 'thin-hymn',
+];
 
 /** The pre-v23 seed, rebuilt exactly as `createNewGameState` used to write it. */
 function legacySeedFlags(): string[] {
     let flags: string[] = [];
-    for (const id of LEGACY_STARTING_CARD_IDS) flags = addToLoadout(flags, id);
+    for (const id of LEGACY_V22_SEED_IDS) flags = addToLoadout(flags, id);
     return flags;
 }
 
@@ -114,7 +116,7 @@ describe('migrate v22 → v23 — strip the starting-loadout seed', () => {
     it('REPRO: the seed dealt a starter the bundle lacked and executeCard threw; v23 does not', () => {
         // A themed bundle that does NOT contain the seeded `thin-hymn`.
         const bundle = buildPresetDeck('pilgrim').filter(id => id !== 'thin-hymn');
-        expect(LEGACY_STARTING_CARD_IDS).toContain('thin-hymn');
+        expect(LEGACY_V22_SEED_IDS).toContain('thin-hymn');
         const raw = v22Save();
         const before = migrate(raw, 22, 22);
         const player = { ...before.player, knownCards: bundle, combatRewardCards: [] };

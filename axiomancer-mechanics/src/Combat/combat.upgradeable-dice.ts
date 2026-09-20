@@ -26,6 +26,7 @@ import { getRng } from '../Utils/rng';
 import type {
     CombatDieColor, CombatEncounterState, CombatManaDie, UpgradeableDieGear, WheelStance,
 } from './combat.encounter.types';
+import type { CardAspect } from '../Cards/types';
 
 // ---------------------------------------------------------------------------
 // The flag
@@ -366,6 +367,6 @@ export function resolveStanceCheck(
 }
 
 /** True for the three chain/stance colors (never wild/x). */
-export function isChainStance(s: CombatDieColor): s is WheelStance {
+export function isChainStance(s: CombatDieColor | CardAspect): s is WheelStance {
     return s === 'heart' || s === 'body' || s === 'mind';
 }

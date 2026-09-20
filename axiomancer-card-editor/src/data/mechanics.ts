@@ -92,12 +92,12 @@ export interface Option<T extends string | number> {
     label: string;
 }
 
-/** Philosophical aspect / stance color (heart / body / mind). */
+/** Philosophical aspect / stance color (heart / body / mind), plus Phase
+ *  104's colourless 'any' (the grey office — every die colour powers it). */
 export const STANCES: Option<CardAspect>[] = [
     { value: 'body', label: 'BODY' },
     { value: 'mind', label: 'MIND' },
     { value: 'heart', label: 'HEART' },
-    // Phase 104 — a GREY card: any die powers it (the grey-office starters).
     { value: 'any', label: 'ANY' },
 ];
 /** Card tier (1 / 2 / 3) — mirrors the effect tier system. */

@@ -269,13 +269,11 @@ Tick in this file in the same commit that ships the phase.
       carrying a keyword from the dominant theme's family (`THEME_KEYWORDS`,
       dominant by `deckThemeCounts`), so a deck grows toward its own
       keywords instead of the whole canon.
+      — `feat: the grey office and the keyword pull — phase 104` (510953cf)
       `MIN_COMBAT_DECK_SIZE` re-derives to 10. Direct T request 2026-09-20
       (learning-curve ruling, decisions recorded in the brief). Mechanics +
       mobile + card-editor (aspect union). Brief:
-      `plan/phases/phase_104_grey_office_keyword_pull.md`. Shipped
-      2026-09-20 — `feat: the grey office and the keyword pull - phase 104`
-      (612f396; CRLF restore e6ff36b; draft-pool exclusion c09d1a3; baseline
-      re-measured fe98331 — cell-identical to main).
+      `plan/phases/phase_104_grey_office_keyword_pull.md`.
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics:

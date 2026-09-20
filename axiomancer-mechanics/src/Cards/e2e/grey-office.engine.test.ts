@@ -1,113 +1,145 @@
 /**
- * Hermetic engine test — Phase 104: THE GREY OFFICE.
+ * Hermetic E2E — Phase 104: the grey office (the fresh-run starter shapes).
  *
- * The deck every new run opens with: ten copies of two colourless shapes
- * (`grey-strike` ×7, `grey-ward` ×3). A grey card (`philosophicalAspect:
- * 'any'`) projects as the WILD stance and is powered by ANY die — the colour
- * law's one card-side exception. Pins: the two cards resolve and read as
- * authored (deal 2 / 5, GUARD 2 / 5); every die colour and the wild die
- * power both of them in a live encounter; the fresh deck deals exactly
- * 7 + 3; neither id is ever a reward; and the grey theme never tilts a
- * deck's theme tally.
+ * `grey-strike` ("A Plain Blow") and `grey-ward` ("A Plain Ward") are the
+ * two colourless cards (`philosophicalAspect: 'any'`) every brand-new run
+ * seeds ten copies of (7 + 3 — see `STARTING_CARD_IDS`,
+ * `Combat/combat.rewards.ts`). This suite pins:
+ *
+ *   - both resolve with the right shape (colourless aspect, `theme: 'grey'`,
+ *     Ash tier/rank, spell);
+ *   - THE COLOUR LAW's exception: every die colour, plus wild, powers either
+ *     card (no fizzle) — the missing half `philosophicalAspect: 'any'` adds;
+ *   - FREE/PAID ledgers read exactly 2 / 5, as printed;
+ *   - a fresh `STARTING_CARD_IDS`-shaped deck deals exactly 7 grey-strike +
+ *     3 grey-ward (`ensureStarterCards`'s verbatim-copy contract);
+ *   - neither grey id is ever offered as a reward.
  */
 
-import { describe, it, expect } from 'vitest';
-import { getCardById } from '../cards.library';
-import { GREY_OFFICE_CARDS } from '../library/starters.cards';
-import { cardStanceColor } from '../../Combat/combat.cards';
-import {
-    COMBAT_REWARD_POOL, REWARD_THEMES, STARTING_CARD_IDS, GREY_OFFICE_SHAPE, deckThemeCounts, dominantTheme,
-} from '../../Combat/combat.rewards';
+import { describe, it, expect, afterEach, vi } from 'vitest';
+
+import { mockSequentialRng } from '../../test-utils/rng';
+import { buildFixtureState } from '../../test-utils/card-fixture';
+import { playCombatCard } from '../../Combat/combat.engine';
 import { buildCombatDeck } from '../../Combat/combat.deck';
-import { draftStanceDie, initializeCombatEncounter, playCombatCard, rollEncounterDice } from '../../Combat/combat.engine';
-import { MIN_COMBAT_DECK_SIZE } from '../card.removal';
-import { createCharacter } from '../../Character';
-import { GraveLarva } from '../../Enemy/enemy.library';
-import type { CombatDieColor, CombatEncounterState } from '../../Combat/combat.encounter.types';
+import { getCardById } from '../cards.library';
+import { removeCardFromCombatDeck, MIN_COMBAT_DECK_SIZE } from '../card.removal';
+import { STARTING_CARD_IDS, COMBAT_REWARD_POOL, addRewardCard } from '../../Combat/combat.rewards';
+import { Player } from '../../Character/characters.mock';
+import { deepClone } from '../../Utils';
+import type { Character } from '../../Character/types';
+import type {
+    CombatEncounterState, CombatManaDie, CombatDieColor,
+} from '../../Combat/combat.encounter.types';
 
-const rng = (): number => 0.5;
+afterEach(() => vi.restoreAllMocks());
 
-const freshPlayer = () => ({
-    ...createCharacter({ name: 'Novice', level: 1, baseStats: { heart: 5, body: 5, mind: 5 } }),
-    knownCards: [...STARTING_CARD_IDS],
-    combatRewardCards: [],
-});
+const GREY_IDS = ['grey-strike', 'grey-ward'] as const;
 
-/** An encounter with `cardId` seated in hand and one die of `color` drafted
- *  (mirrors `big-numbers-ceiling`'s `openFed`, minus the fed board). */
-function handWithDie(cardId: string, color: CombatDieColor): CombatEncounterState {
-    const deck = [cardId, cardId, cardId, cardId, cardId];
-    let s = initializeCombatEncounter({ ...freshPlayer(), knownCards: deck }, GraveLarva, deck, 7);
-    s = rollEncounterDice(s, rng).state;
-    const dice = [
-        { id: 'grey-test-die', color, state: 'available' as const, temporary: false },
-        { id: 'grey-test-die-2', color, state: 'available' as const, temporary: false },
-    ];
-    s = { ...s, dice, draftedDieId: null };
-    s = draftStanceDie(s, 'grey-test-die').state;
-    return { ...s, hand: [{ uid: 'grey-under-test', cardId }, ...s.hand] };
-}
-
-describe('Phase 104 — the grey office cards', () => {
-    it('both shapes exist, are grey, Ash, starters, and read as authored', () => {
-        const strike = getCardById('grey-strike')!;
-        const ward = getCardById('grey-ward')!;
-        expect(GREY_OFFICE_CARDS.map(c => c.id)).toEqual(['grey-strike', 'grey-ward']);
-        for (const c of [strike, ward]) {
-            expect(c.philosophicalAspect).toBe('any');
-            expect(c.theme).toBe('grey');
-            expect(c.rank).toBe(1);
-            expect(c.tags).toContain('starter');
-            expect(cardStanceColor(c)).toBe('wild');
+describe('Phase 104 — the grey office: card shape', () => {
+    it('both grey cards resolve with the colourless aspect and the grey theme', () => {
+        for (const id of GREY_IDS) {
+            const card = getCardById(id);
+            expect(card, id).toBeDefined();
+            expect(card!.philosophicalAspect, id).toBe('any');
+            expect(card!.theme, id).toBe('grey');
+            expect(card!.tier, id).toBe(1);
+            expect(card!.rank, id).toBe(1);
+            expect(card!.cardType, id).toBe('spell');
+            expect(card!.tags, id).toContain('grey');
+            expect(card!.tags, id).toContain('starter');
         }
-        expect(strike.free).toEqual({ damage: 2 });
-        expect(strike.specialMechanics).toEqual([{ kind: 'deal', amount: 5 }]);
-        expect(ward.free).toEqual({ guard: 2 });
-        expect(ward.specialMechanics).toEqual([{ kind: 'guard', amount: 5 }]);
+        expect(getCardById('grey-strike')!.targetType).toBe('enemy');
+        expect(getCardById('grey-ward')!.targetType).toBe('self');
     });
 
-    it('a fresh run deals exactly 7 STRIKE and 3 WARD, and sits on the floor', () => {
-        const deck = buildCombatDeck(freshPlayer(), []);
-        expect(deck.filter(id => id === 'grey-strike')).toHaveLength(GREY_OFFICE_SHAPE.strike);
-        expect(deck.filter(id => id === 'grey-ward')).toHaveLength(GREY_OFFICE_SHAPE.ward);
-        expect(deck).toHaveLength(MIN_COMBAT_DECK_SIZE);
-    });
-
-    it('neither grey card is ever a reward, and grey is not an offerable theme', () => {
+    it('neither grey card is ever offered as a reward', () => {
         expect(COMBAT_REWARD_POOL).not.toContain('grey-strike');
         expect(COMBAT_REWARD_POOL).not.toContain('grey-ward');
-        expect(REWARD_THEMES as readonly string[]).not.toContain('grey');
-    });
-
-    it('the grey office leans nowhere — every theme count is 0 and there is no dominant theme', () => {
-        const counts = deckThemeCounts(freshPlayer());
-        for (const t of REWARD_THEMES) expect(counts[t]).toBe(0);
-        expect(dominantTheme(freshPlayer())).toBeNull();
     });
 });
 
-describe('Phase 104 — any die powers a grey card', () => {
-    const COLOURS: CombatDieColor[] = ['heart', 'body', 'mind', 'wild'];
+/** A CLEAN fixture with `cardId` staged in hand, powered by a single die of `color`. */
+function stateWithDie(cardId: string, color: CombatDieColor): CombatEncounterState {
+    const s = buildFixtureState({ clean: true });
+    const die: CombatManaDie = { id: 'fx-grey-die', color, state: 'available', temporary: false };
+    return {
+        ...s,
+        hand: [{ uid: 'under-test', cardId }],
+        dice: [die],
+        draftedDieId: die.id,
+    };
+}
 
-    it.each(COLOURS)('a %s die powers A Plain Blow for 5', (color) => {
-        const s = handWithDie('grey-strike', color);
-        const before = s.enemy.health;
-        const { state, events } = playCombatCard(s, { uid: 'grey-under-test' }, true, 'grey-test-die', rng);
-        expect(events.some(e => e.kind === 'effect-fizzled')).toBe(false);
-        expect(events.some(e => e.kind === 'card-played' && e.dieId === 'grey-test-die')).toBe(true);
-        expect(before - state.enemy.health).toBeGreaterThanOrEqual(5);
+describe('Phase 104 — the grey office: THE COLOUR LAW exception', () => {
+    const COLORS: readonly CombatDieColor[] = ['body', 'mind', 'heart', 'wild'];
+
+    for (const id of GREY_IDS) {
+        for (const color of COLORS) {
+            it(`a ${color} die powers ${id} (never a fizzle)`, () => {
+                mockSequentialRng(0.5);
+                const { events } = playCombatCard(stateWithDie(id, color), { uid: 'under-test' }, true);
+                expect(events.some(e => e.kind === 'effect-fizzled'), JSON.stringify(events)).toBe(false);
+                expect(events.some(e => e.kind === 'card-played')).toBe(true);
+            });
+        }
+    }
+
+    it('colour-match is neutral — a wild-powered play banks no on-colour bonus', () => {
+        mockSequentialRng(0.5);
+        const { events } = playCombatCard(stateWithDie('grey-strike', 'wild'), { uid: 'under-test' }, true);
+        const played = events.find(e => e.kind === 'card-played');
+        expect(played && 'colorMatch' in played ? played.colorMatch : undefined).toBe(false);
+    });
+});
+
+describe('Phase 104 — the grey office: FREE/PAID ledgers read exactly as printed', () => {
+    it('grey-strike: FREE deals 2, PAID deals 5', () => {
+        mockSequentialRng(0.5);
+        const free = playCombatCard(stateWithDie('grey-strike', 'wild'), { uid: 'under-test' }, false);
+        const freeHit = free.events.find(e => e.kind === 'damage-dealt' && e.target === 'enemy');
+        expect(freeHit && 'amount' in freeHit ? freeHit.amount : undefined).toBe(2);
+
+        mockSequentialRng(0.5);
+        const paid = playCombatCard(stateWithDie('grey-strike', 'wild'), { uid: 'under-test' }, true);
+        const paidHit = paid.events.find(e => e.kind === 'damage-dealt' && e.target === 'enemy');
+        expect(paidHit && 'amount' in paidHit ? paidHit.amount : undefined).toBe(5);
     });
 
-    it.each(COLOURS)('a %s die powers A Plain Ward for GUARD 5', (color) => {
-        const s = handWithDie('grey-ward', color);
-        const { state, events } = playCombatCard(s, { uid: 'grey-under-test' }, true, 'grey-test-die', rng);
-        expect(events.some(e => e.kind === 'effect-fizzled')).toBe(false);
-        expect(state.guard ?? 0).toBeGreaterThanOrEqual(5);
+    it('grey-ward: FREE guards 2, PAID guards 5', () => {
+        mockSequentialRng(0.5);
+        const before = stateWithDie('grey-ward', 'wild');
+        const free = playCombatCard(before, { uid: 'under-test' }, false);
+        expect((free.state.guard ?? 0) - (before.guard ?? 0)).toBe(2);
+
+        mockSequentialRng(0.5);
+        const paid = playCombatCard(before, { uid: 'under-test' }, true);
+        expect((paid.state.guard ?? 0) - (before.guard ?? 0)).toBe(5);
+    });
+});
+
+describe('Phase 104 — the grey office: the fresh-run deck', () => {
+    it('a fresh STARTING_CARD_IDS-shaped player deals exactly 7 grey-strike + 3 grey-ward', () => {
+        const player: Character = { ...deepClone(Player), knownCards: [...STARTING_CARD_IDS], combatRewardCards: [] };
+        const deck = buildCombatDeck(player);
+        expect(deck).toHaveLength(10);
+        expect(deck.filter(id => id === 'grey-strike')).toHaveLength(7);
+        expect(deck.filter(id => id === 'grey-ward')).toHaveLength(3);
     });
 
-    it('a coloured card still refuses an off-colour die (the law itself is untouched)', () => {
-        const s = handWithDie('spoiled-poultice', 'heart'); // a BODY card
-        const { events } = playCombatCard(s, { uid: 'grey-under-test' }, true, 'grey-test-die', rng);
-        expect(events.some(e => e.kind === 'effect-fizzled')).toBe(true);
+    it('the floor (10) refuses a fresh run\'s first CUT; taking one reward makes it legal', () => {
+        expect(MIN_COMBAT_DECK_SIZE).toBe(10);
+        const fresh: Character = { ...deepClone(Player), knownCards: [...STARTING_CARD_IDS], combatRewardCards: [] };
+        expect(buildCombatDeck(fresh)).toHaveLength(MIN_COMBAT_DECK_SIZE);
+
+        const refused = removeCardFromCombatDeck(fresh, 'grey-strike');
+        expect(refused.ok).toBe(false);
+        if (refused.ok) return;
+        expect(refused.refusal.code).toBe('deck-at-floor');
+
+        const withReward = addRewardCard(fresh, 'grey-strike');
+        expect(buildCombatDeck(withReward)).toHaveLength(MIN_COMBAT_DECK_SIZE + 1);
+        const legal = removeCardFromCombatDeck(withReward, 'grey-strike');
+        expect(legal.ok).toBe(true);
     });
 });

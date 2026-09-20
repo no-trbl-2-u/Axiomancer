@@ -34,7 +34,7 @@ import { getCardById } from '../Cards/cards.library';
 import { baseCardId } from '../Cards/card-upgrades';
 import { executeCard } from '../Cards/card.engine';
 import { checkStatePredicate } from '../Cards/synergy-predicates';
-import type { Card, CardRider, CardSpecialMechanic } from '../Cards/types';
+import type { Card, CardAspect, CardRider, CardSpecialMechanic } from '../Cards/types';
 import type { CombatState, Combatant, Stance } from './types';
 import { applyDamage, heal, isDefeated, erodeMaxHealth } from './health';
 import {
@@ -319,7 +319,7 @@ function nextWheelStance(s: WheelStance): WheelStance {
     return WHEEL_ORDER[(WHEEL_ORDER.indexOf(s) + 1) % WHEEL_ORDER.length];
 }
 
-function isWheelStance(s: CombatDieColor): s is WheelStance {
+function isWheelStance(s: CombatDieColor | CardAspect): s is WheelStance {
     return s === 'heart' || s === 'body' || s === 'mind';
 }
 
@@ -359,7 +359,7 @@ export function isMomentumDieId(id: string): boolean {
 function advanceMomentumWheel(
     preState: CombatEncounterState,
     transition: CombatTransition,
-    stance: CombatDieColor,
+    stance: CombatDieColor | CardAspect,
 ): CombatTransition {
     if (!isWheelStance(stance)) return transition;
     if (!transition.events.some(e => e.kind === 'card-played')) return transition;
@@ -1180,7 +1180,7 @@ export function playCombatCard(
 function applyStanceAndMomentumV2(
     preState: CombatEncounterState,
     transition: CombatTransition,
-    stance: CombatDieColor,
+    stance: CombatDieColor | CardAspect,
     useBottom: boolean,
 ): CombatTransition {
     if (!useBottom) return transition;
@@ -2276,10 +2276,10 @@ function playBottomAction(
     // 1b. THE COLOR LAW (dice-law rework 2026-07-09): a die can only power a
     //     card of ITS color. WILD (gold) is the sole exception — it matches
     //     every card. A fate-X play acts wild by definition. Applies to every
-    //     power source: drafted, Reserve, and floating alike.
-    //     Phase 104 — the exception runs both ways: a WILD-stance card (the
-    //     grey office, `philosophicalAspect: 'any'`) is powered by ANY die.
-    if (poweringSource !== 'fate-x' && card.stance !== 'wild' && powering.color !== 'wild' && powering.color !== card.stance) {
+    //     power source: drafted, Reserve, and floating alike. Phase 104 — a
+    //     card of aspect 'any' (the grey office) has no colour to mismatch:
+    //     every die colour powers it.
+    if (poweringSource !== 'fate-x' && card.stance !== 'any' && powering.color !== 'wild' && powering.color !== card.stance) {
         const events: CombatEvent[] = [{
             kind: 'effect-fizzled', cardId: card.id, effectId: '',
             message: `a ${powering.color} die cannot power a ${card.stance} card — colors must match`,
@@ -2289,19 +2289,21 @@ function playBottomAction(
 
     // 2. The read + color-match. The read belongs to the TURN's draft contest
     //    (state.lastRead); a WILD powering die re-reads by adopting the card's
-    //    stance; a fate-X play has no stance → none.
+    //    stance; a fate-X play has no stance → none. A grey card ('any') has no
+    //    stance to contest with either — same as fate-X, always 'none'.
     const enemyStance = currentPhaseStance(state);
     // Spec 33 §2 — the hidden-stance read is RETIRED under the flag: every
     // play lands printed (mult 1.0); the 1.5/0.5 rails now belong to the open
     // stance checks at phase end (`resolveThreatPhase`).
-    const read: CombatReadResult = isUpgradeableDiceEnabled() || poweringSource === 'fate-x'
+    const read: CombatReadResult = isUpgradeableDiceEnabled() || poweringSource === 'fate-x' || card.stance === 'any'
         ? 'none'
         : powering.color === 'wild'
-            ? clampPlayerRead(state.player, resolveRead(card.stance as CombatDieColor, enemyStance), card.stance as CombatDieColor)
+            ? clampPlayerRead(state.player, resolveRead(card.stance, enemyStance), card.stance)
             : state.lastRead;
     const mult = READ_DAMAGE_MULT[read];
-    // A grey (wild-stance) card is on-colour for every die — never off-colour.
-    const colorMatch = card.stance === 'wild' || powering.color === 'wild' || powering.color === card.stance;
+    // Phase 104 — a grey card's colour-match bonus is NEUTRAL: never on-colour
+    // (even powered by wild), never off-colour.
+    const colorMatch = card.stance !== 'any' && (powering.color === 'wild' || powering.color === card.stance);
     const advantage = readToAdvantage(read);
     const poweringPips = powering.pips ?? 0;
     // Tracks blood-price HP taken THIS play (recoil mechanic + fate.recoilHp)
@@ -2423,7 +2425,7 @@ function playBottomAction(
     let conviction = state.conviction;
     const resonanceColor: 'heart' | 'body' | 'mind' | null =
         dieHasStance(powering.color) ? (powering.color as 'heart' | 'body' | 'mind')
-            : powering.color === 'wild' && dieHasStance(card.stance) ? (card.stance as 'heart' | 'body' | 'mind')
+            : powering.color === 'wild' && card.stance !== 'any' && dieHasStance(card.stance) ? (card.stance as 'heart' | 'body' | 'mind')
                 : null;
     if (resonanceColor) {
         resonance = { ...resonance, [resonanceColor]: resonance[resonanceColor] + 1 };
@@ -2813,7 +2815,7 @@ function playBottomAction(
                 const maxWindow = Math.max(1, mech.maxWindow);
                 const legacyStance: Stance = dieHasStance(powering.color)
                     ? (powering.color as Stance)
-                    : dieHasStance(card.stance) ? (card.stance as Stance) : 'heart';
+                    : card.stance !== 'any' && dieHasStance(card.stance) ? (card.stance as Stance) : 'heart';
                 const stance: Stance = omenClaim && dieHasStance(omenClaim.stance)
                     ? omenClaim.stance
                     : legacyStance;
@@ -3205,7 +3207,7 @@ function playBottomAction(
                     ? 'wild'
                     : dieHasStance(powering.color)
                         ? (powering.color as 'heart' | 'body' | 'mind')
-                        : dieHasStance(card.stance) ? (card.stance as 'heart' | 'body' | 'mind') : 'wild';
+                        : card.stance !== 'any' && dieHasStance(card.stance) ? (card.stance as 'heart' | 'body' | 'mind') : 'wild';
                 if (floatingDice.length >= FLOATING_DICE_CAP) {
                     conviction = Math.min(CONVICTION_CAP, conviction + 1);
                     events.push({ kind: 'conviction-gained', amount: 1, total: conviction, reason: 'effect' });
@@ -5351,13 +5353,15 @@ function clampDotTickBreakdown(ticks: readonly DotTick[], actualDamage: number):
  */
 export function chooseDraft(
     dice: readonly CombatManaDie[],
-    cardStance: CombatDieColor,
+    cardStance: CombatDieColor | CardAspect,
     enemyStance: Stance | null,
 ): string | null {
     if (dice.length === 0) return null;
     const usable = dice.filter(d => d.state === 'available' && d.color !== 'x' && !d.floating);
     if (usable.length === 0) return dice.find(d => !d.floating)?.id ?? null; // forced X — bank the token
-    const matches = usable.filter(d => d.color === 'wild' || d.color === cardStance);
+    // Phase 104 — a grey card ('any') is powered by every die colour, so
+    // every usable die is a "match".
+    const matches = usable.filter(d => cardStance === 'any' || d.color === 'wild' || d.color === cardStance);
     // `enemyStance === null` ⇒ the player can't see the stance yet (blind play):
     // skip the advantage seek and draft for a color-match instead.
     const winsRead = (d: CombatManaDie): boolean => enemyStance !== null
@@ -5373,7 +5377,7 @@ export function chooseDraft(
 /** Ensures a usable drafted die exists for a card (starts a turn + drafts if not). */
 function ensureDraftForCard(
     state: CombatEncounterState,
-    cardStance: CombatDieColor,
+    cardStance: CombatDieColor | CardAspect,
     rng: () => number,
 ): CombatTransition {
     const cur = draftedDie(state);
@@ -5431,12 +5435,12 @@ export function resolveCombatPhase(
                 const cur = getDraftedDie(working);
                 const stance = card?.stance ?? 'wild';
                 const curUsable = cur && cur.state === 'available' && cur.color !== 'x'
-                    && (cur.color === 'wild' || cur.color === stance);
+                    && (stance === 'any' || cur.color === 'wild' || cur.color === stance);
                 if (!curUsable) {
                     const alt = [
                         ...(working.reserve ?? []),
                         ...working.dice.filter(d => d.floating && d.state === 'available'),
-                    ].find(d => d.color === 'wild' || d.color === stance);
+                    ].find(d => stance === 'any' || d.color === 'wild' || d.color === stance);
                     if (alt) dieId = alt.id;
                 }
             }
@@ -5694,6 +5698,8 @@ export function handCards(state: CombatEncounterState): Array<{ uid: string; car
  * alongside `resolveCardDieCost`.
  */
 export function cardDieCostPreview(state: CombatEncounterState, card: CombatCard): CardDieCost {
+    // Phase 104 — a grey card ('any') has no stance to read advantage from.
+    if (card.stance === 'any') return { cost: 1, advantage: 'neutral' };
     return resolveCardDieCost(card.stance, currentPhaseStance(state));
 }
 
@@ -5745,7 +5751,8 @@ export function revealedCurrentStance(state: CombatEncounterState): Stance | nul
 export function cardReadPreview(state: CombatEncounterState, card: CombatCard): { read: CombatReadResult; colorMatch: boolean } | null {
     const d = draftedDie(state);
     if (!d) return null;
-    return { read: state.lastRead, colorMatch: d.color === 'wild' || d.color === card.stance };
+    // Phase 104 — a grey card's colour-match bonus is neutral, even off wild.
+    return { read: state.lastRead, colorMatch: card.stance !== 'any' && (d.color === 'wild' || d.color === card.stance) };
 }
 
 /**

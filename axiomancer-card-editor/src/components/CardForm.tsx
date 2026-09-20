@@ -31,12 +31,14 @@ import {
     lookupEffectOption,
     type SpecialMechanicKind,
 } from '../data/mechanics';
-import { WX, DIE, ART_STRIPES, type DieKey } from '../theme/wx';
+import { WX, DIE, DIE_ORDER, ART_STRIPES, type DieKey } from '../theme/wx';
 import { FieldLabel, TextField, Segmented, Dropdown, Stepper, Btn } from './form';
 
 type DraftImg = CardDraft & { img?: string | null };
 
-const dieColor = (v: CardAspect) => DIE[v as DieKey].color;
+// Phase 104 — 'any' (the grey office) is a CARD aspect, not a die colour, so
+// it deliberately stays out of `DieKey`/`DIE`; paint it the neutral ink token.
+const dieColor = (v: CardAspect) => (v === 'any' ? WX.bone : DIE[v as DieKey].color);
 
 // ── A collapsible section ────────────────────────────────────────────────────
 function Section({
@@ -585,7 +587,7 @@ function MechanicFields({ mechanic, patch }: { mechanic: CardSpecialMechanic; pa
                 <div>
                     <FieldLabel hint="KINDLE colour">DIE COLOUR</FieldLabel>
                     <Segmented
-                        options={[...STANCES, { value: 'wild', label: 'WILD' }] as { value: string; label: string }[]}
+                        options={DIE_ORDER.map((k) => ({ value: k, label: DIE[k].label }))}
                         value={mechanic.color}
                         onChange={(v) => patch({ color: v })}
                     />

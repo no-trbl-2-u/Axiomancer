@@ -79,9 +79,9 @@ describe('Combat deck presets', () => {
     });
 
     it('starter-baseline restores the engine starting deck', () => {
+        // Phase 104 — the engine starting deck is now the grey office.
         const result = applyCombatDeckPresetAction(makeStore(), 'starter-baseline');
         expect(result.cardIds).toEqual([...STARTING_CARD_IDS]);
-        // Phase 104 — the engine starting deck is the grey office.
         expect(result.cardIds).toContain('grey-strike');
         expect(result.cardIds).toContain('grey-ward');
     });

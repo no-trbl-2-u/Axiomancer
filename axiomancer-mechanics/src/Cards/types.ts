@@ -17,12 +17,10 @@ import type { GlyphPayload } from '../Combat/combat.encounter.types';
 export type StatType = 'body' | 'mind' | 'heart';
 
 /**
- * Phase 104 — a CARD's colour. The three stat colours, plus `'any'`: the GREY
- * office starters that EVERY die colour may power (the colour law's one
- * card-side exception; `'wild'` was already the die-side one). `StatType`
- * itself is NOT widened — stats stay three; only cards can be grey. The
- * combat projection (`cardStanceColor`) maps `'any'` onto the `'wild'` die
- * colour so the engine's existing wild-matches-everything rule carries it.
+ * Phase 104 — a CARD's colour identity. `StatType` plus `'any'`: the grey
+ * office's colourless aspect, powered by every die colour (body/mind/heart,
+ * AND wild) with a neutral (never on/off) colour-match bonus. `StatType`
+ * itself stays three stats — only a card's aspect widens.
  */
 export type CardAspect = StatType | 'any';
 
@@ -769,7 +767,8 @@ export interface CardSynergy {
  * @property id              - Unique identifier for this card.
  * @property name            - Display name.
  * @property description     - Flavor text or lore.
- * @property philosophicalAspect - Colour of the card (heart/body/mind, or `any` for a grey starter).
+ * @property philosophicalAspect - Stat alignment of the card (heart/body/mind),
+ *                              or 'any' for the grey office's colourless cards.
  * @property tier            - 1 / 2 / 3, mirrors the effect tier system.
  * @property targetType      - 'self' or 'enemy'.
  * @property combatEffects   - Optional list of effect payloads to apply.

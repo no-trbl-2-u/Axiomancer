@@ -1,13 +1,12 @@
 /**
  * THE CARD LIBRARY — the aggregator (THE BIG NUMBERS REWRITE, 2026-09-02).
  *
- * Solo, dark-fantasy, PvE. 134 cards (count pins repealed 2026-09-02 — this
+ * Solo, dark-fantasy, PvE. 132 cards (count pins repealed 2026-09-02 — this
  * total drifts as `/adjust-cards` ships CREATEs, or as sibling `adjust-*`
  * passes author cards on this surface (e.g. `/adjust-keywords`' EVENTIDE
  * pair, pass 11, 2026-09-16, and its FORGE-carrier grave pair — The Unpaid
  * Sexton / It Gets Up Again — pass 13, 2026-09-19); read `cardLibrary.length`
- * for the live figure, never trust this comment as a source of truth): 2
- * grey-office starters (Phase 104), 8
+ * for the live figure, never trust this comment as a source of truth): 8
  * starters (the deliberately weak Threadbare Office), 3 dice-valve relics, 5
  * enemy-injected curses, twelve Saint-rank apocrypha (two per theme), and six
  * theme modules (16-20 cards each). The cards themselves live in
@@ -68,6 +67,7 @@ import { APOCRYPHA_CARDS } from './library/apocrypha.cards';
 
 export const cardLibrary: Card[] = [
     ...STARTER_CARDS,
+    ...GREY_OFFICE_CARDS,
     ...RELIC_CARDS,
     ...CURSE_CARDS,
     ...ROT_CARDS,
@@ -77,10 +77,6 @@ export const cardLibrary: Card[] = [
     ...TRIAL_CARDS,
     ...CHOIR_CARDS,
     ...APOCRYPHA_CARDS,
-    // Phase 104 — the grey office LAST, so every seeded draw that indexes the
-    // library in order (the playtest draft pool, the sandbox harnesses) lands
-    // where it did before the two starters existed.
-    ...GREY_OFFICE_CARDS,
 ];
 
 const registry = new Map<string, Card>(cardLibrary.map(card => [card.id, card]));
