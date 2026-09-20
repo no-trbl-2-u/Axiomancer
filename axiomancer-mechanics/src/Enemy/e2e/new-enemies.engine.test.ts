@@ -14,6 +14,8 @@
 import { describe, it, expect } from 'vitest';
 import { ENEMY_REGISTRY, EnemyLibrary, EnemiesByMap, TheIncompleteness, Sandbag_01 } from '../enemy.library';
 import { AUTHORED_THREAT_SEQUENCES } from '../../Combat/combat.threat-sequences';
+import { defaultEnemyKeywords } from '../index';
+import { findEnemyKeyword, hasEnemyKeyword } from '../enemy-keywords';
 import type { Enemy } from '../types';
 
 /** The Aporia act bosses (W-01) — authored labyrinth content, not paintings. */
@@ -310,5 +312,55 @@ describe('2026-07-06: the art-driven base roster', () => {
                 expect(enemy.portraitAsset, `slug ${slug} portraitAsset`).toBe(slug);
             }
         });
+    });
+});
+
+/**
+ * Phase 102 (burn-day audit 2026-09-19, §4 D-3) — the carrier's authored list.
+ *
+ * `createEnemy` treats an authored `keywords` array as a REPLACEMENT for
+ * `defaultEnemyKeywords`, never an addition (`Enemy/index.ts`). The Jeweled
+ * Tree is the roster's only SUMMON carrier and hand-relists HIDE for exactly
+ * that reason. Until this block, nothing but the deck-matrix baseline noticed
+ * if an edit to that array quietly took HIDE away with it — and the baseline
+ * is regenerated, not asserted.
+ *
+ * These pin RELATIONS, not magnitudes (THE BIG NUMBERS REWRITE): retune the
+ * HIDE curve, the brood size or the elite defaults and they still pass. They
+ * fail when an edit silently undoes a recorded Phase 102 decision.
+ *
+ * They do NOT pin that this is the only carrier, nor that it cannot reach
+ * wave 2 — that is the coverage gap recorded in the SHIPPED record and in
+ * `plan/CRITIQUE.md` (audit 3.9), and a second carrier closing it must not
+ * turn this file red.
+ */
+describe('Phase 102: The Jeweled Tree carries what its authored keyword list replaces', () => {
+    const tree = ENEMY_REGISTRY['jeweled-tree'] as Enemy;
+    const defaults = defaultEnemyKeywords(tree.level, tree.difficulty);
+
+    it('fields SUMMON with a brood of at least one body, and a name for it', () => {
+        const summon = findEnemyKeyword(tree.keywords, 'summon');
+        expect(summon, 'The Jeweled Tree no longer carries SUMMON').toBeDefined();
+        expect(summon!.n).toBeGreaterThanOrEqual(1);
+        expect(summon!.addName?.length ?? 0).toBeGreaterThan(0);
+    });
+
+    it('re-lists HIDE at no less than its rank would have granted — the retrofit is not a silent nerf', () => {
+        const authored = findEnemyKeyword(tree.keywords, 'hide');
+        const inherited = findEnemyKeyword(defaults, 'hide');
+        expect(inherited, 'the elite default no longer grants HIDE; this pin has nothing to compare against').toBeDefined();
+        expect(authored, 'the authored list dropped HIDE, which the defaults would have granted').toBeDefined();
+        expect(authored!.n).toBeGreaterThanOrEqual(inherited!.n);
+    });
+
+    it('drops the auto SWIFT its rank would have granted — the recorded Phase 102 trade', () => {
+        expect(
+            hasEnemyKeyword(defaults, 'swift'),
+            'the elite default no longer grants SWIFT; this pin has nothing to compare against',
+        ).toBe(true);
+        expect(
+            hasEnemyKeyword(tree.keywords, 'swift'),
+            'SWIFT is back on the carrier — if that is deliberate, amend the Phase 102 DoD in the same commit',
+        ).toBe(false);
     });
 });

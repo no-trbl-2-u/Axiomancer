@@ -578,6 +578,52 @@
 
 ## Pending
 
+### [MED] combat — the only SUMMON carrier cannot reach wave 2, so half the spawn rule is dead on the roster
+- pass: burn-day audit 2026-09-19 (row 3.9)
+- viewport: n/a — engine reach, not layout
+- category: design-reach / coverage
+- observation: Phase 102 shipped SUMMON with a two-wave rule: wave 1 at the
+  first phase boundary, wave 2 only at a boundary where a STAGE fires. The
+  roster's sole carrier is The Jeweled Tree, an elite. Elites get no stages
+  — `defaultEnemyStages` hands its two-stage floor to bosses and uniques
+  only — and the tree authors none, so it can never enter a stage, so the
+  only door to wave 2 never opens. `ADD_WAVE_CAP = 2` is live engine and
+  dead roster: a player can meet the brood, but never the second wave. It
+  is not an engine bug; the rule is correct and tested. The tests simply
+  never asked a shipped enemy.
+- evidence: `axiomancer-mechanics/src/Enemy/enemy.library.ts` — `JeweledTree`
+  is `difficulty: 'elite'`, `keywords: [hide 5, summon 2]`, no `stages` key;
+  `Enemy/index.ts` — `stages: stages ?? defaultEnemyStages(difficulty, …)`,
+  which returns `[]` for anything that is not a boss or unique;
+  `Combat/combat.engine.ts` — `ADD_WAVE_CAP = 2`, and `processBetweenPhases`
+  gates every wave after the first on `stageFiredNow`. Driven against the
+  real library enemy over eight phase boundaries, damaged past 50% VITAE and
+  undamaged, `addWavesSpawned` tops out at 1. Counterfactual, same harness:
+  `RawheadRex` with SUMMON 2 reaches wave 2/2 at its `vitaePct: 0.6` stage.
+  `summon` appears in no branch of `defaultEnemyKeywords` and nothing
+  outside the library calls `createEnemy` in production, so no other shipped
+  foe carries it. Every SUMMON suite builds its own foe:
+  `Combat/e2e/summon.engine.test.ts` uses `makeEnemy({ keywords, stages })`;
+  `axiomancer-mobile/state/e2e/summon-surface.engine.test.ts` retrofits
+  `createMockEncounterEnemy()`.
+- suggested fix: a second carrier that has `stages` — the audit's §8 Block 2
+  item 2, a one-keyword retrofit on `RawheadRex` or `Mirac`, both already in
+  the mid-stage matrix roster beside the tree. `RawheadRex` is the better
+  data point: its `UP FROM UNDER THE STAIRS` stage grants SWIFT at the same
+  boundary that would fire wave 2, so the SWIFT path row 3.2 fixed gets
+  exercised on a real foe. Two gates first — row 3.2 must be in (it is), and
+  the deck-matrix baseline must be re-stamped in the same tick naming both
+  causes (Phase 102 risk row 8), since the trade moves a rostered mid-profile
+  foe. Ship it with a guard that sweeps `EnemyLibrary` for SUMMON carriers,
+  opens a real encounter, damages the foe past its stage threshold and
+  asserts some carrier reaches `ADD_WAVE_CAP` — reachability only, no
+  magnitudes, so retunes leave it alone. Explicitly rejected: authoring
+  `stages` onto the elite carrier (it repeals the boss/unique stage floor
+  for the whole roster) and loosening `stageFiredNow` to a round or
+  emptiness check (the engine comment refuses the emptiness check by name —
+  it makes the player's own clear cause the respawn).
+- source: burn-day audit 2026-09-19
+
 ### [MED] exploration — a reload taken DURING a live encounter still lands past the fight
 - pass: burn-day audit 2026-09-19 (row 3.1 fix, residual)
 - viewport: both (375×812 and 1280×800) — the loss is in persistence, not

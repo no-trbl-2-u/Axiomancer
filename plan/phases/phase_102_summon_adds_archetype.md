@@ -60,7 +60,7 @@ export interface CombatAdd {
 |---|---|---|
 | `SUMMON N` → adds per wave | **N = 2** on every shipped carrier | Prior-art lens: "N = 2 with small bite is the only starting point I'd defend; N = 3+ or bite ≥ the foe's own term makes clearing mandatory, which is the tax." |
 | `ADD_WAVE_CAP` | **2 waves per combat** | Prior-art blocker #2. Aeon's End minions come from a finite nemesis deck (`kb:aeons-end/rules/scoring-endgame:40-42`); STS:BG summons come from a finite per-Act Summon deck (`kb:slay-the-spire-the-board-game/rules/setup:44,49`, src-002) and were deliberately made persistent-but-never-respawning (`.../edge-cases-faq:62-63`). "Spawn when none are alive" is rejected: it makes clearing cause the respawn, which is a tax, not a decision. |
-| spawn trigger | wave 1 at the **first phase boundary**; wave 2 only at a boundary where a **STAGE fires**; never on emptiness | One-shot events, not an emptiness check. Placed after the STAGE block (`combat.engine.ts:4850`) so a stage-granted SUMMON fires on the boundary it is entered — doctrine #9. |
+| spawn trigger | wave 1 at the **first phase boundary**; wave 2 only at a boundary where a **STAGE fires**; never on emptiness. *Burn-day audit 2026-09-19 row 3.9:* this describes the engine, not play — **no shipped carrier can satisfy the second clause** (see Engine deviations) | One-shot events, not an emptiness check. Placed after the STAGE block (`combat.engine.ts:4850`) so a stage-granted SUMMON fires on the boundary it is entered — doctrine #9. |
 | add vitae | **1 / 1** | The record carries `vitae`/`maxVitae` so the chip can show pips and a future multi-hit add is representable, but every shipped add is a 1-pip add: one `strikeAdd` kills it. Two taps at 2◆ each to remove one body is the drip-drain the prior-art lens flagged as the resented shape. |
 | add `bite` | `Math.max(2, Math.round(enemy.level * 0.2))` snapshotted at spawn. **L22 → 4 per add, 8 for a full wave.** | The foe's own phase-0 telegraph at L22 elite is `Math.max(4, round((6 + 0.8*22) * dMult))` ≈ 31 (`combat.threat.ts:293-301`). 8 / 31 = 26% — "strictly below the foe's own printed threat term" (prior-art #7). Escalation caps at `THREAT_ESCALATION_MAX = 2.0` (`combat.engine.ts:202`), but the add term is **outside** that stack, so a long fight does not double it. |
 | `STRIKE_ADD_COST` | **2 ◆** | `CONVICTION_CAP = 12` (`combat.engine.ts:166`); signatures cost 1-9 with The Stilling at 8 and Press Fate / Second Wind at 4 (`combat.signature.ts:41-105`). Clearing a full wave costs 4◆ — one Press Fate, a third of the cap. Real opportunity cost, never a lockout. |
@@ -1028,7 +1028,9 @@ Every existing readout depends on that; the brood rides in `addNetDamage` /
 
 ## Engine deviations from the brief as written
 
-One, and it is a correction rather than a shortcut. Brief §9b prescribed
+Two.
+
+**One — a correction rather than a shortcut.** Brief §9b prescribed
 `guard: Math.max(0, guard - (projectedDamage - remaining))` for the wall left
 over after the boss's hit. `projectedDamage - remaining` is the total absorbed
 by **riposte + guard + barrier**, so that formula charges riposte's parry and
@@ -1046,6 +1048,24 @@ also moves `netDamage` — downward for every armored player, upward for every
 SWIFT foe. That movement is the correction, not a retune: it is what the engine
 was applying all along.
 
+**Two — the second wave is live engine and dead roster.** Recorded
+2026-09-20 by burn-day audit 3.9; this is a silence in the record above
+rather than a false claim in it. `ADD_WAVE_CAP = 2` and the STAGE-gated
+second wave shipped exercised only by suites that build their own foe. The
+shipped carrier, The Jeweled Tree, is `difficulty: 'elite'` and authors no
+`stages`; `defaultEnemyStages` (`Enemy/index.ts`) hands the two-stage floor
+to bosses and uniques only, so `createEnemy` gives the carrier `stages: []`.
+`processBetweenPhases` gates every wave after the first on `stageFiredNow`,
+so the sole door to wave 2 is a stage this foe can never enter. Driven
+against the real library enemy over eight phase boundaries, damaged and
+undamaged, `addWavesSpawned` tops out at 1. Nor can the gap close by
+accident: `summon` appears in no branch of `defaultEnemyKeywords`, and
+outside the library nothing but tests calls `createEnemy`. So the
+archetype's coverage **in play** is wave 1 only, until a second carrier
+that has `stages` lands (Follow-ups below; the audit ranks it §8 Block 2
+item 2, gated on row 3.2). This is not an engine bug — the spawn rule is
+correct and tested — it is a roster that cannot reach it.
+
 ## Pages × tests matrix
 
 | Suite | Asserts |
@@ -1059,13 +1079,19 @@ was applying all along.
 | `components/.../EnemyActionCard.test.tsx` (+3 — burn-day audit 3.3) | never a bare `DENIED` and never "none of it landed" while the brood bit; what landed is not struck through while the averted telegraph still is; the a11y sentence carries the bite |
 | `state/presenters/__tests__/combat-log-history.engine.test.ts` (+4 — burn-day audit 3.3) | the DENIED line names the bite; a clean `DENIED` survives with no brood and with a fully soaked bite; a bite in an EARLIER phase never colours a later DENIED |
 | `state/presenters/__tests__/combat-log-lines.engine.test.ts` (+7 — burn-day audit 3.4) | the suite §4 named and this phase did not add to. The bite's sentence carries the printed number, the wall's share and what was taken; a fully soaked bite is still written down; the bite never floats (that surface is the medallion's and the pane's, audit 3.3); the spawn states the body count and the bite and does not re-announce the `SUMMON n` the foe's own keyword receipt already printed; the strike names the body and quotes the price off the event; a refusal reaches the log in the engine's own words and does not shout |
-| `state/e2e/summon-surface.engine.test.ts` (8, new; +3 — burn-day audit 3.4) | drives the REAL engine with a REAL summoner: the wave reaches the screen as chips; SUMMON prints as a keyword chip with its own mark and the denied-foe gloss; the wall math carries the brood separately; the brood really costs VITAE; striking removes exactly that body and charges the price; clearing the whole brood never ends the fight; short Conviction marks chips rather than hiding them; a cleared wave does not respawn. **+3 (audit 3.4):** the log explains the VITAE the brood took, records the wave arriving, and attributes a refused strike in the engine's own words — the system guard that survives the events being renamed or re-routed |
+| `state/e2e/summon-surface.engine.test.ts` (8, new; +3 — burn-day audit 3.4) | drives the REAL engine with a **synthetic** summoner — *corrected 2026-09-20 (burn-day audit 3.9)*: the engine is real, the foe is `createMockEncounterEnemy()` with `SUMMON 2` retrofitted, held local to the suite on purpose; no SUMMON test anywhere exercises a library enemy. What it proves: the wave reaches the screen as chips; SUMMON prints as a keyword chip with its own mark and the denied-foe gloss; the wall math carries the brood separately; the brood really costs VITAE; striking removes exactly that body and charges the price; clearing the whole brood never ends the fight; short Conviction marks chips rather than hiding them; a cleared wave does not respawn. **+3 (audit 3.4):** the log explains the VITAE the brood took, records the wave arriving, and attributes a refused strike in the engine's own words — the system guard that survives the events being renamed or re-routed |
 
 ## DoD
 
 - [x] engine: type, keyword, spawn, bite, verb, projection, barrels, sim policy
 - [x] carrier: The Jeweled Tree fields `SUMMON 2` (HIDE 5 re-listed by hand;
-      auto SWIFT deliberately dropped)
+      auto SWIFT deliberately dropped) — and **reaches wave 1 only**: it is
+      an elite with no `stages`, so the STAGE-gated second wave ships
+      unreachable on the whole roster (burn-day audit 3.9, Engine deviations
+      above). The authored list itself is now pinned by
+      `Enemy/e2e/new-enemies.engine.test.ts` (audit §4 D-3); until
+      2026-09-20 only the regenerated baseline would have noticed a silent
+      edit to it
 - [x] surface: keyword glyph, add chips, STRIKE/WAIT confirm sheet
 - [x] surface: the log narrates the brood (§14d) — **not in this phase**;
       landed 2026-09-20 with burn-day audit 3.4
@@ -1079,8 +1105,16 @@ was applying all along.
 
 ## Follow-ups (out of scope)
 
-- A **second carrier** at a different rank. One summoner is an archetype's
-  proof, not its coverage.
+- A **second carrier** at a different rank, **and it must have `stages`**.
+  One summoner is an archetype's proof, not its coverage. *Corrected
+  2026-09-20 (burn-day audit 3.9):* this bullet understated the gap. Without
+  a carrier that can enter a stage, wave 2 is not merely uncovered, it is
+  **unreachable** — the sole carrier is an elite with `stages: []` and
+  `stageFiredNow` is the only door. `Mirac` and `RawheadRex` already sit in
+  the mid-stage matrix roster beside The Jeweled Tree, so either is a
+  one-keyword retrofit; the audit ranks the move §8 Block 2 item 2, gated
+  on row 3.2 (the SWIFT divisor, which is exactly the path a staged carrier
+  would exercise) and on a re-stamped baseline per risk row 8.
 - `projectIncomingThreat`'s six pre-existing boss-side divergences
   (`enemyThreatMult`, `stageThreatBonus`, `stanceCheck.mult`, flat armor, the
   SWIFT divisor, BRUTAL) are documented at the site, not closed. Closing them

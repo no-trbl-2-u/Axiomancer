@@ -439,12 +439,23 @@ reproduction and reported the numbers, not re-read by the orchestrator;
 
 ### 3.9 [MED · design-reach · confidence 95] The only SUMMON carrier cannot reach wave 2
 
-- The Jeweled Tree has no `stages` field; 21 enemies do (`KingOfRevenge`,
-  `Kudan`, `Mirac`, `RawheadRex`, `FateSpinner`, …). `ADD_WAVE_CAP = 2`
-  and the STAGE-gated second wave are therefore dead in play. Not a bug in
-  the engine (the tests drive it with a synthetic staged foe) — a coverage
-  gap the brief's Follow-ups name as "a second carrier". §8 #4 makes it the
-  first content move; note it in the SHIPPED record now.
+- The Jeweled Tree has no `stages` field; 21 shipped enemies can fire a
+  stage (`KingOfRevenge`, `Kudan`, `Mirac`, `RawheadRex`, `FateSpinner`, …)
+  and the sole SUMMON carrier is not one of them. `ADD_WAVE_CAP = 2` and
+  the STAGE-gated second wave are therefore dead in play. Not a bug in the
+  engine (the tests drive it with a synthetic staged foe) — a coverage gap
+  the brief's Follow-ups name as "a second carrier".
+  **Corrected 2026-09-20 by this row's own fix**, on two counts. (a) The
+  cross-reference was wrong: the second carrier is **§8 Block 2 item 2**,
+  not #4 (#4 is add-spawn motion in the fx layer), and it is not the first
+  content move — §8 ranks the Northern Forest arena plate ahead of it and
+  gates the carrier "after 3.2". (b) "21 enemies do" counted authored
+  `stages:` fields; every boss and unique also inherits a two-stage floor
+  from `defaultEnemyStages`, and the count survives only because each of
+  them authors its own. **Disposition:** recorded, not closed — the
+  SHIPPED record's "Engine deviations" now carries it, `plan/CRITIQUE.md`
+  has the row, and the carrier retrofit stays §8 Block 2 item 2 for a
+  content tick. §4 D-3's pin rode along.
 
 ### 3.10 [MED · a11y · confidence 85] "No pair regressed" is false — `rust` text is below AA on the default theme after the palette retune
 
@@ -635,6 +646,11 @@ Grouped by slice; each is one line. Line numbers as reported at `bbd22a9`.
   from `soakFlatHit`; the telegraph loop's equivalent does.
 - D-3 Nothing pins The Jeweled Tree's authored keyword list (HIDE 5 +
   SUMMON 2, no SWIFT) but the baseline. Add a mechanics test.
+  **Done 2026-09-20 with row 3.9** — `axiomancer-mechanics/src/Enemy/e2e/
+  new-enemies.engine.test.ts`, three pins against `defaultEnemyKeywords`
+  rather than against literals: SUMMON present with a named brood, the
+  hand-relisted HIDE at no less than the rank's default (the retrofit is
+  not a silent nerf), and the rank's auto SWIFT absent.
 - D-4 Hygiene: unused `_rng` on `strikeAdd`; the strike shortfall reuses
   `effect-fizzled` with `cardId = add id, effectId = ''` — give it its own
   event or document the reuse; the atlas says `2` where it should name
