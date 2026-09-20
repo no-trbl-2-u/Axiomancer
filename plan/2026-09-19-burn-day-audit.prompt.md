@@ -475,7 +475,7 @@ reproduction and reported the numbers, not re-read by the orchestrator;
   has the row, and the carrier retrofit stays §8 Block 2 item 2 for a
   content tick. §4 D-3's pin rode along.
 
-### 3.10 [MED · a11y · confidence 85] "No pair regressed" is false — `rust` text is below AA on the default theme after the palette retune
+### 3.10 [MED · a11y · confidence 85 → CONFIRMED, FIXED] "No pair regressed" is false — `rust` text is below AA on the default theme after the palette retune
 
 - Independent WCAG recompute of `4c39360^` vs current `palette.ts`: the two
   advertised gains are exact (blood/bg 4.16→5.39, 3.63→5.72). But
@@ -493,6 +493,38 @@ reproduction and reported the numbers, not re-read by the orchestrator;
   Also: the retune orphaned `CombatSummaryModal.tsx:17-19` — `defeat:
   '#e01f33'` is the *pre-retune* ashen-gold blood, now on no palette, one of
   six hex literals in that component (§4 C-5).
+- **Corrected 2026-09-20 by this row's own fix.** The finding holds; three
+  counts in the paragraph above do not.
+  - "parchment/bg fell … sulfur/bg fell … heal/bg fell" understates the
+    scale. Of the 60 readable-token pairs (6 accents × `bg`/`panelBg` × 5
+    themes), **36 moved down, not a handful** — and, against the sentence
+    this row exists to refute, **zero is the wrong number in the other
+    direction too**. Only `rust` crossed the AA line.
+  - "14 `color: AXM.rust` sites across 9 components" counts a test file.
+    The re-count is **13 production sites across 8 components**
+    (`ErrorBoundary`, `PrevSessionCrashPrompt`, `CombatFriendshipPanel` ×6,
+    `LabyrinthAccordion`, `DebugCombatDeck`, `DebugHazardButton`,
+    `DebugHazardDeckRandomize`, `DebugTriggerEncounter`); the 14th match is
+    `components/__tests__/DifficultyBadge.test.tsx`. The surface is in fact
+    *wider* than the grep, not narrower — `rust` also reaches text through
+    props (`CombatCombatantPane` `color={AXM.rust}`, `DifficultyBadge`
+    `unique`, `TapTooltip` `ACCENT_COLORS.body`).
+  - "now sit below 4.5" is exact for all three themes, but only
+    coastal-verdant **regressed across** the line (`rust/bg` 5.07 → 4.26,
+    `rust/panelBg` 4.73 → 3.97). On ashen-gold (3.92 → 3.80 / 3.72 → 3.61)
+    and ember-depths (3.87 → 3.50 / 3.67 → 3.32) `rust` was already below
+    AA before Phase 101; the retune deepened a pre-existing deficit rather
+    than creating one.
+  - Fixed by lifting `rust` lightness only — hue and saturation held, so no
+    theme's identity moves: ashen-gold `#a8562a`→`#c36431` (4.89/4.64),
+    coastal-verdant `#417f78`→`#478b83` (4.97/4.64), ember-depths
+    `#a84a22`→`#cd5a2a` (4.86/4.61). `frost-marrow` and `plague-bloom`
+    already cleared and are untouched. `READABLE_PAIRS` gained
+    `rust/bg` and `rust/panelBg`. `ash` stays excluded, for the documented
+    borders/disabled reason. The `CombatSummaryModal` hex literals were
+    deliberately left to §4 C-5 — `OUTCOME_COLOR` is module-level, outside
+    `usePalette()`, and its purple `#a86bdc` maps to no token on any theme,
+    so that cleanup is a restructure and a design call, not a rename.
 
 ### 3.11 [MED · truth-in-docs · confidence 95] "No LIVE region falls back any more" is false — the Northern Forest is live and falls back
 

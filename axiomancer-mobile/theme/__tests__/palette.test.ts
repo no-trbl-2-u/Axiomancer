@@ -286,6 +286,8 @@ describe('theme contrast', () => {
         ['bone', 'panelBg'],
         ['sulfur', 'bg'],
         ['blood', 'bg'],
+        ['rust', 'bg'],
+        ['rust', 'panelBg'],
     ];
 
     it.each(THEME_ORDER)('%s keeps every readable pair at WCAG AA (4.5:1)', (id) => {
