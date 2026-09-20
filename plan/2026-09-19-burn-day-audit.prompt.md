@@ -169,12 +169,21 @@ reproduction and reported the numbers, not re-read by the orchestrator;
 - **Fix shape:** the save must not precede the event. Either move the
   `save()` out of `moveToAction` to *after* `resolveCurrentMapEvent`
   settles (the caller owns the sequence), or record the pending arrival in
-  the saved world so reload re-fires it. Prefer the first: it is one line
-  moved and keeps "a move is a checkpoint" true for non-encounter nodes.
-  Add the reload-past-an-encounter case to `state/e2e/exploration.engine.
-  test.ts` as the guard. **Do not** re-derive the test that now says "a
-  move IS a checkpoint" back to its old label — see 3.7 for what that
-  test's rationale must actually cite.
+  the saved world so reload re-fires it. ~~Prefer the first: it is one line
+  moved~~ — **CORRECTED while fixing this row: the first option is
+  inert, and the second is the one that holds.** Measured: moving the save
+  below the resolve persists a byte-identical world (the arrival lives only
+  in the mobile `event` slice, which `Game/store.ts` never saves), and
+  `SaveOnExit` checkpoints on `pagehide` regardless — so re-timing the
+  move's save cannot close the hole. Worse, the save's position *before*
+  the resolve is what the shipped fix leans on: below the resolve the node
+  is already in `consumedNodes` and the reload reads "arrival answered".
+  Add the reload-past-an-encounter case as the guard, and assert the
+  ENGAGED fight, not `event.pending` — `EncounterModalOverlay` auto-engages
+  on mount and `beginHazardEncounter` clears the slice on the way in, so
+  `pending` reads null before *and* after the fix. **Do not** re-derive the
+  test that now says "a move IS a checkpoint" back to its old label — see
+  3.7 for what that test's rationale must actually cite.
 
 ### 3.2 [HIGH · player-visible on any SWIFT carrier · confidence 95] The SUMMON projection omits the SWIFT divisor — the brief's *ship gate* is false (Phase 102 engine)
 

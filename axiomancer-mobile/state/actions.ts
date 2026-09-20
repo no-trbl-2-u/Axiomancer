@@ -1160,8 +1160,15 @@ function moveToAction(store: AppStore, nodeId: string): MoveToResult {
     }
 
     // Node kind comes from the engine's authored event pools. Encounter /
-    // boss nodes (both resolve to the `encounter` kind) stay reusable — they
-    // are not completed/consumed on entry; every other kind completes.
+    // boss nodes (both resolve to the `encounter` kind) are not completed or
+    // consumed BY THE MOVE, so the node stays walkable and the screen keeps
+    // drawing the player on it; every other kind completes here.
+    //
+    // That is a statement about this function alone, not about the node's
+    // life (burn-day audit 2026-09-19 row 3.1). Resolving the arrival marks
+    // the node consumed whatever its kind (`resolve-map-event.ts`), so a
+    // fight that has been answered is NOT re-offered on a second visit —
+    // measured: a second arrival at fv-13 fires nothing.
     const nodeKind = getNodePrimaryEventKind(map.continent, map.name, nodeId);
     const isEncounterNode = nodeKind === 'encounter';
 
@@ -1221,6 +1228,18 @@ function moveToAction(store: AppStore, nodeId: string): MoveToResult {
     // `availableNodes` and `discoveredNodes`: that is real, hard-won progress,
     // and the same argument the crossing checkpoint already makes applies to
     // it. The adapter debounces writes, so this is cheap even tapped quickly.
+    //
+    // THE ARRIVAL IS NOT IN THIS SNAPSHOT, AND THAT IS DELIBERATE (burn-day
+    // audit 2026-09-19 row 3.1). The caller resolves the node's event AFTER
+    // this returns (`app/(tabs)/exploration/index.tsx` → `onConfirmMove`), so
+    // the checkpoint records a player standing on a node whose event they
+    // have not answered — on an encounter node, a fight they have not had.
+    // What makes that honest is that the debt is recorded too: the arrival is
+    // unanswered exactly while the node is absent from `consumedNodes`, which
+    // rides this very save, and the map screen re-offers it on the next mount
+    // (`vm.arrivalPending`). Saving here rather than after the resolve is
+    // therefore load-bearing, not a leftover — a save taken below the resolve
+    // would persist "arrival answered" and the reload would walk past it.
     try { store.getState().save(); } catch { /* persistence must not block the road */ }
 
     return { moved: true, currentNodeId: nodeId, locked: false };

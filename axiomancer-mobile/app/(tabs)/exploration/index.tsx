@@ -74,14 +74,26 @@ export default function ExplorationScreen() {
     const hasEvent = useGameState(selectHasActiveEvent);
     const anySession = useGameState(selectHasAnyActiveSession);
 
-    // 2026-08-08 first-map audit — resolve the START node's event once, on
-    // arrival at the map. Events fire on ARRIVAL at a node, and the player
-    // never "arrives" at the node they are placed on, so whatever the map
-    // authored for its starting node was dead content: on fishing-village
-    // that silently swallowed fv-1's entire pool. The mechanics CLI has
-    // resolved the start node behind `--resolve-start` since Phase 14; this
-    // is the app's equivalent. `resolveCurrentMapEvent` marks the node
-    // consumed, so `startNodePending` makes it a genuine one-shot per map.
+    // Resolve the arrival this screen still owes the player, once, on mount.
+    //
+    // 2026-08-08 first-map audit — the original case was the START node.
+    // Events fire on ARRIVAL at a node, and the player never "arrives" at
+    // the node they are placed on, so whatever the map authored for its
+    // starting node was dead content: on fishing-village that silently
+    // swallowed fv-1's entire pool. The mechanics CLI has resolved the start
+    // node behind `--resolve-start` since Phase 14; this is the app's
+    // equivalent.
+    //
+    // Burn-day audit 2026-09-19 row 3.1 — the start node is only the FIRST
+    // unanswered arrival, not the only one. A move checkpoints before its
+    // arrival resolves (`moveToAction` saves, then `onConfirmMove` calls
+    // `resolveCurrentMapEvent`), so a player who reloaded in between came
+    // back standing on the node with its onward edges open and no fight
+    // pending — the encounter was skipped outright. The flag is therefore
+    // `vm.arrivalPending`, which owes ANY unconsumed arrival, not just the
+    // map's first one. `resolveCurrentMapEvent` marks the node consumed
+    // (`consumedNodes`, which rides the save), so it stays a genuine
+    // one-shot: answered arrivals never re-fire, here or after a reload.
     //
     // Two guards, and CI taught me both of them.
     //
@@ -99,13 +111,13 @@ export default function ExplorationScreen() {
     // let the interaction settle and re-read the store at fire time.
     const store = useGameStore();
     useEffect(() => {
-        if (!vm.startNodePending || anySession || inEncounterModal || inCombat) return;
+        if (!vm.arrivalPending || anySession || inEncounterModal || inCombat) return;
         const settle = setTimeout(() => {
             if (selectHasAnyActiveSession(store.getState())) return;
             actions.resolveCurrentMapEvent();
         }, 0);
         return () => clearTimeout(settle);
-    }, [vm.mapId, vm.startNodePending, anySession, inEncounterModal, inCombat, store, actions]);
+    }, [vm.mapId, vm.currentNodeId, vm.arrivalPending, anySession, inEncounterModal, inCombat, store, actions]);
     // Phase 63c — the modal mount lifecycle now spans the full
     // encounter session (prelude → combat → aftermath), not just
     // the moment `selectHasActiveEvent` returns true. Once combat

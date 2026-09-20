@@ -750,3 +750,65 @@ describe('BUG-01: the legend counts the nodes the map actually draws', () => {
         expect(counter.sealed).toBe(vm.nodes.filter((n) => n.kind === 'locked').length);
     });
 });
+
+// ---------------------------------------------------------------------------
+// Burn-day audit 2026-09-19 row 3.1: the arrival the map still owes you
+// ---------------------------------------------------------------------------
+
+describe('selectExplorationViewModel: arrivalPending', () => {
+    it('still owes an encounter arrival that the player never answered', () => {
+        // A move checkpoints BEFORE its arrival resolves (`moveToAction`
+        // saves, then the screen calls `resolveCurrentMapEvent`), so a reload
+        // taken during the prelude rebuilds the app standing on the node with
+        // the fight unanswered. `consumedNodes` rides the save, so the debt
+        // is still legible — and this flag is how the screen reads it.
+        const adapter = createMemoryAdapter();
+        const store = createAppStore({ adapter });
+        const actions = createAppActions(store);
+        actions.moveTo('fv-2');
+        actions.moveTo('fv-11');
+        actions.moveTo('fv-13'); // engine kind `encounter`
+
+        const reloaded = createAppStore({ adapter });
+
+        expect(reloaded.getState().world.currentMap.currentNode).toBe('fv-13');
+        expect(selectExplorationViewModel(reloaded.getState()).arrivalPending).toBe(true);
+    });
+
+    it('owes nothing once the arrival has been answered', () => {
+        // The negative twin: resolving marks the node consumed, and a
+        // consumed arrival is never re-offered — here or after a reload.
+        const adapter = createMemoryAdapter();
+        const store = createAppStore({ adapter });
+        const actions = createAppActions(store);
+        actions.moveTo('fv-2');
+        actions.moveTo('fv-11');
+        actions.moveTo('fv-13');
+        actions.resolveCurrentMapEvent();
+        actions.save();
+
+        expect(store.getState().world.currentMap.consumedNodes).toContain('fv-13');
+        expect(selectExplorationViewModel(store.getState()).arrivalPending).toBe(false);
+        expect(selectExplorationViewModel(createAppStore({ adapter }).getState()).arrivalPending)
+            .toBe(false);
+    });
+
+    it('never owes a travel door, which is repeatable by design', () => {
+        // Doors are deliberately not consumed on resolve ("a door is
+        // repeatable" — `resolve-map-event.ts`), so "unconsumed" is
+        // permanently true while the player stands on one. If that counted
+        // as an unanswered arrival, merely opening the map screen would walk
+        // the player onto the next map with no input.
+        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const world = store.getState().world;
+        store.setState({
+            world: { ...world, currentMap: { ...world.currentMap, currentNode: 'fv-10' } },
+        });
+
+        const vm = selectExplorationViewModel(store.getState());
+
+        expect(vm.currentNodeId).toBe('fv-10');
+        expect(store.getState().world.currentMap.consumedNodes).not.toContain('fv-10');
+        expect(vm.arrivalPending).toBe(false);
+    });
+});

@@ -578,6 +578,41 @@
 
 ## Pending
 
+### [MED] exploration — a reload taken DURING a live encounter still lands past the fight
+- pass: burn-day audit 2026-09-19 (row 3.1 fix, residual)
+- viewport: both (375×812 and 1280×800) — the loss is in persistence, not
+  layout; on web it is one browser reload away
+- category: progression / persistence
+- observation: row 3.1 closed the reload-during-the-PRELUDE hole — an
+  arrival the player never answered is now re-offered on the next mount,
+  because the node's absence from `consumedNodes` is the debt and
+  `consumedNodes` rides the save. But `consumedNodes` marks "the MapEvent
+  resolved", i.e. "the prelude was shown", not "the fight ended". The
+  moment the player commits to the fight, `beginHazardEncounter` clears
+  the event slice and the hazard-pattern combat runs in the panel's local
+  React state, while the node is already consumed. A reload from there
+  rebuilds the app standing past the encounter, its onward edges open,
+  with no fight pending and nothing owed — the same player-visible loss as
+  row 3.1, one step later. It bites hardest on a boss node, where the walk
+  back is longest.
+- evidence: `axiomancer-mechanics/src/World/MapEvents/resolve-map-event.ts`
+  (`markNodeConsumed` runs at resolve time, on every non-travel path);
+  `axiomancer-mobile/state/actions.ts` `beginHazardEncounter` (clears the
+  event slice, then `startCombat`); `axiomancer-mechanics/src/Game/store.ts`
+  — the persisted payload destructures `currentEncounter: _drop` with the
+  standing comment "encounters re-roll on load (Spec 07)", so no live fight
+  is ever written; the panel's own turn state is not in the store at all.
+- suggested fix: two shapes, and the choice is a design call, not a
+  mechanical one. (a) Defer `markNodeConsumed` until the encounter settles
+  (victory / flee / defeat) so the existing `arrivalPending` re-offer
+  covers the fight too — smallest change, but it makes "consumed" mean
+  "answered" and every other consumer of that field has to agree. (b)
+  Persist enough to rebuild the fight (foe id, the encounter's seed, the
+  node) and re-enter the panel on load — truer to the player's experience,
+  and it contradicts the Spec 07 "encounters re-roll on load" note, which
+  would need reopening first. Do NOT ship (a) and (b) together.
+- source: burn-day audit 2026-09-19
+
 ### [MED] combat — Phase 97's "tap a card to read it" hint never shows for the truncated hand fan it was built to fix
 - pass: 42 (commit bbd22a94)
 - viewport: mobile (375×812) — the hand-fan truncation this hint

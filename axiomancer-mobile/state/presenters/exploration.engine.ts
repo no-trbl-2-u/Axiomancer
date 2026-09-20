@@ -94,14 +94,32 @@ export interface ExplorationViewModel {
     /** Engine node id of the player's current location. */
     currentNodeId: string;
     /**
-     * True while the map's STARTING node still has an unresolved event.
+     * True while the map's STARTING node still has an unresolved event — the
+     * narrowed, historical case of `arrivalPending` below.
      *
      * Events fire on arrival, and the player never arrives at the node they
      * are placed on, so a map's starting-node content used to be unreachable
-     * (2026-08-08 first-map audit). The exploration screen watches this flag
-     * and resolves the node once per map entry.
+     * (2026-08-08 first-map audit). The exploration screen now watches
+     * `arrivalPending`, which covers this case and every other unanswered
+     * arrival; this flag stays as the start-node pin
+     * (`state/e2e/start-node-arrival.engine.test.tsx`).
      */
     startNodePending: boolean;
+    /**
+     * True while the node the player is STANDING ON still owes them its
+     * arrival event.
+     *
+     * Events fire on ARRIVAL, but a move checkpoints before the arrival
+     * resolves: `moveToAction` saves (BUG-03), and only then does the screen
+     * call `resolveCurrentMapEvent`. A player who reloaded in between came
+     * back standing on the node with its onward edges already open and
+     * nothing pending — on an encounter node the fight was silently skipped
+     * (burn-day audit 2026-09-19 row 3.1). `consumedNodes` is the engine's
+     * "this arrival was answered" marker and it rides the save, so the debt
+     * is legible off the bytes on disk; the exploration screen watches this
+     * flag and pays it on mount.
+     */
+    arrivalPending: boolean;
     nodes: readonly ExplorationNode[];
     edges: readonly ExplorationEdge[];
     actions: readonly ExplorationAction[];
@@ -335,6 +353,7 @@ const FALLBACK_VM: ExplorationViewModel = {
     mapId: '',
     currentNodeId: '',
     startNodePending: false,
+    arrivalPending: false,
     nodes: [],
     edges: [],
     actions: [],
@@ -404,6 +423,7 @@ function computeExplorationViewModel(state: GameStore): ExplorationViewModel {
             mapId: mapName,
             currentNodeId: readCurrentNodeId(world),
             startNodePending: false,
+            arrivalPending: false,
         });
     }
 
@@ -444,16 +464,37 @@ function computeExplorationViewModel(state: GameStore): ExplorationViewModel {
         };
     });
 
-    // Only pending while the player is still standing where the map put
-    // them, the node carries authored content, and nothing has consumed it.
-    // Whether it is SAFE to resolve right now (no event or combat already
-    // owning the screen) is the screen's call, not the map's — this view
-    // model is memoised on `state.world` and must not read the event slice.
+    // Only pending while the node the player stands on carries authored
+    // content and nothing has consumed it. Whether it is SAFE to resolve
+    // right now (no event or combat already owning the screen) is the
+    // screen's call, not the map's — this view model is memoised on
+    // `state.world` and must not read the event slice.
+    //
+    // `consumedNodes` is the engine's "this arrival was answered" marker —
+    // every non-travel resolve path marks it (`resolve-map-event.ts`) and it
+    // rides the save — so an arrival the player never answered is still
+    // legible after a reload. That is what makes the move's early checkpoint
+    // honest (burn-day audit 2026-09-19 row 3.1): the debt is re-offered on
+    // the next mount instead of being walked past.
+    //
+    // TRAVEL DOORS ARE EXCLUDED. A door is deliberately never consumed ("a
+    // door is repeatable", `resolve-map-event.ts`), so `!consumed` is
+    // permanently true while the player stands on one; firing it from here
+    // would walk them onto another map with no input, which is a different
+    // contract from walking ONTO the door.
+    //
+    // The labyrinth is out of scope only because the aporia maps carry no
+    // mobile layout (`state/exploration-maps`), so those states take the
+    // fallback view model above. `labyrinthMove` defers the boss room's
+    // arrival for the finale panel on purpose, so registering a labyrinth
+    // layout would need this derivation revisited first.
     const consumed = (world.currentMap.consumedNodes ?? []) as readonly string[];
-    const startNodePending =
-        currentNodeId === def.startingNode.id
-        && !consumed.includes(currentNodeId)
-        && getNodeEventPool(continent, mapName, currentNodeId) !== undefined;
+    const arrivalPool = getNodeEventPool(continent, mapName, currentNodeId);
+    const arrivalPending =
+        arrivalPool !== undefined
+        && !arrivalPool.entries.some((entry) => entry.kind === 'travel')
+        && !consumed.includes(currentNodeId);
+    const startNodePending = arrivalPending && currentNodeId === def.startingNode.id;
 
     const options = buildOptions(metaById, orderById, reachable, currentNodeId);
     const actions = buildActions(options);
@@ -466,6 +507,7 @@ function computeExplorationViewModel(state: GameStore): ExplorationViewModel {
         mapId: mapName,
         currentNodeId,
         startNodePending,
+        arrivalPending,
         nodes,
         edges,
         actions,

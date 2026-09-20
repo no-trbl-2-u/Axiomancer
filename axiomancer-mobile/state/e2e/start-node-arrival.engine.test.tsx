@@ -161,3 +161,44 @@ describe('start-node arrival: the map resolves the node it puts you on', () => {
         expect(store.getState().event?.pending ?? null).toBeNull();
     });
 });
+
+/**
+ * Burn-day audit 2026-09-19 row 3.1 — the arrival is owed across a reload.
+ *
+ * A move is a checkpoint (BUG-03), and the checkpoint is taken BEFORE the
+ * arrival event resolves: `moveToAction` saves, and only then does
+ * `onConfirmMove` call `resolveCurrentMapEvent`. On an encounter node that
+ * used to mean a player who reloaded during the prelude came back standing
+ * ON the node, with its onward edges already open and no fight pending —
+ * the encounter was silently skipped. The arrival re-fire (the screen's
+ * `vm.arrivalPending` effect) is what makes the early checkpoint honest.
+ */
+describe('an arrival the player never answered survives a reload', () => {
+    it('engages the encounter when the map screen remounts on the saved node', () => {
+        const adapter = createMemoryAdapter();
+        const store = createAppStore({ adapter });
+        const actions = createAppActions(store);
+        actions.moveTo('fv-2');
+        actions.moveTo('fv-11');
+        actions.moveTo('fv-13'); // engine kind `encounter`
+
+        // The player reloads before answering the prelude: rebuild the app
+        // from the bytes the move checkpointed.
+        const reloaded = createAppStore({ adapter });
+        expect(reloaded.getState().world.currentMap.currentNode).toBe('fv-13');
+        expect(reloaded.getState().world.currentMap.consumedNodes).not.toContain('fv-13');
+
+        const tree = mountExploration(reloaded);
+
+        // The arrival is answered ...
+        expect(reloaded.getState().world.currentMap.consumedNodes).toContain('fv-13');
+        // ... and the fight the player was owed is actually on screen. Do NOT
+        // assert `event.pending` here: `EncounterModalOverlay` auto-engages on
+        // mount and `beginHazardEncounter` clears the event slice on the way
+        // in, so `pending` is null by the time this line runs — before AND
+        // after the fix. The sibling start-node case can assert `pending`
+        // only because fv-1 is a CUTSCENE, which has no auto-engage.
+        expect(reloaded.getState().currentEncounter).not.toBeNull();
+        expect(tree.queryByTestId('encounter-modal-hazard-combat')).not.toBeNull();
+    });
+});
