@@ -208,6 +208,19 @@ export interface BlockedRoute {
  * @property consumedNodes   - Spec 23: nodes whose MapEvent has been resolved.
  *                             One-shot: a consumed node returns `{ kind: 'none' }`
  *                             from `resolveMapEvent`.
+ * @property pendingArrival  - The node the player ARRIVED at and has not yet
+ *                             answered (burn-day audit 2026-09-19 row 3.1
+ *                             follow-up). Written by the arrival verb
+ *                             (`moveToNode`), cleared by `resolveMapEvent`
+ *                             the moment the arrival is answered and by the
+ *                             placement verbs (`placeOnNode`,
+ *                             `teleportToNode`), which stand the player on a
+ *                             node without arriving at it. It rides the save,
+ *                             so a reload taken between the move's checkpoint
+ *                             and its event can re-offer the arrival instead
+ *                             of walking past it. Absent/`null` = nothing
+ *                             owed; saves written before this field default
+ *                             to that.
  * @property hazardOutcomes   - Phase 135: persistent hazard effects applied to this map.
  *                             Tracks modifier effects and cleared/blocked/modified states.
  * @property blockedRoutes    - Phase 135: routes blocked by hazard outcomes (e.g., collapsed bridge).
@@ -223,6 +236,7 @@ export interface MapState {
     uniqueEvents: UniqueEvent[];
     discoveredNodes: NodeId[];
     consumedNodes: NodeId[];
+    pendingArrival?: NodeId | null;
     hazardOutcomes: HazardNodeOutcome[];
     blockedRoutes: BlockedRoute[];
 }

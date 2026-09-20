@@ -184,6 +184,25 @@ reproduction and reported the numbers, not re-read by the orchestrator;
   `pending` reads null before *and* after the fix. **Do not** re-derive the
   test that now says "a move IS a checkpoint" back to its old label — see
   3.7 for what that test's rationale must actually cite.
+- **CORRECTED AGAIN while following this row up** (`6655cf0` shipped red
+  CI; the follow-up commit is the fix). `6655cf0` said the second option
+  "needs no new persisted field: `consumedNodes` already means *this
+  arrival was answered*" and derived `arrivalPending` from an unconsumed
+  node under the player. That sentence was false and `e2e:fixture` case A
+  proved it within the day: **being PLACED on a node is not the same as
+  ARRIVING at it**, an unconsumed node cannot tell the two apart, and
+  `placeOnNode` — the state-fixture / `/dev` JUMP primitive — deliberately
+  *un-consumes* the node it places you on. So the deep link
+  `/exploration?fixture=sage-fv-boss-gate` read as an unanswered arrival,
+  fired the fv-9 boss gate on mount, and the map never rendered. The row's
+  second option ships as written after all: `MapState.pendingArrival` is a
+  real persisted field, written by the arrival verb (`moveToNode`, and
+  mobile's own move), cleared by `resolveMapEvent` when the arrival is
+  answered and by the placement verbs (`placeOnNode`, `teleportToNode`),
+  which owe nothing. Guards: the reload case above still stands
+  (`start-node-arrival.engine.test.tsx`), plus the placement twin and the
+  travel-door twin in `exploration.engine.test.ts` and the verb-level file
+  `axiomancer-mechanics/src/World/e2e/arrival-debt.engine.test.ts`.
 
 ### 3.2 [HIGH · player-visible on any SWIFT carrier · confidence 95] The SUMMON projection omits the SWIFT divisor — the brief's *ship gate* is false (Phase 102 engine)
 

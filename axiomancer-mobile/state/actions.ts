@@ -1136,8 +1136,17 @@ export function readCurrentNodeId(world: WorldState): string {
     return world.currentMap.currentNode;
 }
 
-function writeCurrentNodeId(map: MapState, nodeId: string): MapState {
-    return { ...map, currentNode: nodeId };
+/**
+ * Stand the player on `nodeId` as an ARRIVAL: the cursor moves and the node's
+ * unanswered arrival is recorded (`pendingArrival`), exactly as the engine's
+ * own arrival verb `moveToNode` does. Mobile keeps its own move (the screen's
+ * reachability rules differ from the reducer's), so it must write the same
+ * sentence the engine writes — otherwise the move's checkpoint would save a
+ * player standing on a node with no record of what they still owe it
+ * (burn-day audit 2026-09-19 row 3.1 follow-up).
+ */
+function writeArrivalNodeId(map: MapState, nodeId: string): MapState {
+    return { ...map, currentNode: nodeId, pendingArrival: nodeId };
 }
 
 function moveToAction(store: AppStore, nodeId: string): MoveToResult {
@@ -1203,7 +1212,7 @@ function moveToAction(store: AppStore, nodeId: string): MoveToResult {
 
     nextWorld = {
         ...nextWorld,
-        currentMap: writeCurrentNodeId(nextWorld.currentMap, nodeId),
+        currentMap: writeArrivalNodeId(nextWorld.currentMap, nodeId),
     };
 
     // Phase 27: populate the engine's parallel data model
@@ -1234,12 +1243,21 @@ function moveToAction(store: AppStore, nodeId: string): MoveToResult {
     // this returns (`app/(tabs)/exploration/index.tsx` → `onConfirmMove`), so
     // the checkpoint records a player standing on a node whose event they
     // have not answered — on an encounter node, a fight they have not had.
-    // What makes that honest is that the debt is recorded too: the arrival is
-    // unanswered exactly while the node is absent from `consumedNodes`, which
-    // rides this very save, and the map screen re-offers it on the next mount
-    // (`vm.arrivalPending`). Saving here rather than after the resolve is
-    // therefore load-bearing, not a leftover — a save taken below the resolve
-    // would persist "arrival answered" and the reload would walk past it.
+    // What makes that honest is that the debt is recorded too, and recorded
+    // as itself: the move above wrote `pendingArrival: nodeId` onto the map
+    // (`writeArrivalNodeId`), it rides this very save, and the map screen
+    // re-offers it on the next mount (`vm.arrivalPending`). Saving here
+    // rather than after the resolve is therefore load-bearing, not a
+    // leftover — `resolveMapEvent` clears `pendingArrival` the moment the
+    // arrival is answered, so a save taken below it would persist "nothing
+    // owed" and the reload would walk past the fight.
+    //
+    // The debt is a record of ARRIVING, not a guess from the shape of the
+    // map. Reading it off "the node under the player is unconsumed" instead
+    // (the first cut of row 3.1) could not tell a walk from a placement, and
+    // `placeOnNode` un-consumes the node it places you on — so every state
+    // fixture and every `/dev` JUMP looked like an arrival nobody had
+    // answered and fired its event on mount.
     try { store.getState().save(); } catch { /* persistence must not block the road */ }
 
     return { moved: true, currentNodeId: nodeId, locked: false };

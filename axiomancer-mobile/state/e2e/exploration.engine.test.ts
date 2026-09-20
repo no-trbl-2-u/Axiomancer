@@ -8,11 +8,12 @@
  */
 
 import { afterEach, describe, it, expect, jest } from '@jest/globals';
-import { createMapState, getMapDefinition } from '@mechanics';
+import { createMapState, getMapDefinition, getNodeEventPool } from '@mechanics';
 
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import { createAppActions } from '@/state/actions';
 import { createAppStore } from '@/state/store';
+import { jumpToNode } from '@/state/dev/world-travel';
 // Side-effect: registers exploration map event pools so resolveMapEvent
 // produces real events in the travel-to-event path tests below.
 import {
@@ -760,8 +761,9 @@ describe('selectExplorationViewModel: arrivalPending', () => {
         // A move checkpoints BEFORE its arrival resolves (`moveToAction`
         // saves, then the screen calls `resolveCurrentMapEvent`), so a reload
         // taken during the prelude rebuilds the app standing on the node with
-        // the fight unanswered. `consumedNodes` rides the save, so the debt
-        // is still legible — and this flag is how the screen reads it.
+        // the fight unanswered. The move recorded the debt as `pendingArrival`
+        // and that record rides the save — this flag is how the screen reads
+        // it back.
         const adapter = createMemoryAdapter();
         const store = createAppStore({ adapter });
         const actions = createAppActions(store);
@@ -776,8 +778,9 @@ describe('selectExplorationViewModel: arrivalPending', () => {
     });
 
     it('owes nothing once the arrival has been answered', () => {
-        // The negative twin: resolving marks the node consumed, and a
-        // consumed arrival is never re-offered — here or after a reload.
+        // The negative twin: resolving IS the answer — it clears
+        // `pendingArrival` — so an answered arrival is never re-offered,
+        // here or after a reload.
         const adapter = createMemoryAdapter();
         const store = createAppStore({ adapter });
         const actions = createAppActions(store);
@@ -793,22 +796,62 @@ describe('selectExplorationViewModel: arrivalPending', () => {
             .toBe(false);
     });
 
-    it('never owes a travel door, which is repeatable by design', () => {
-        // Doors are deliberately not consumed on resolve ("a door is
-        // repeatable" — `resolve-map-event.ts`), so "unconsumed" is
-        // permanently true while the player stands on one. If that counted
-        // as an unanswered arrival, merely opening the map screen would walk
-        // the player onto the next map with no input.
+    it('owes nothing for a node the player was PLACED on', () => {
+        // Row 3.1 follow-up, and the defect that shipped with row 3.1: being
+        // placed on a node is not the same as arriving at it. `placeOnNode`
+        // (state fixtures, `/dev` JUMP) stands the player anywhere and
+        // deliberately UN-consumes the node so its content stays live — so
+        // "the node under the player is unconsumed and has a pool" read every
+        // placement as an unanswered arrival. The map screen paid it on
+        // mount, and `/exploration?fixture=sage-fv-boss-gate` engaged the
+        // fv-9 boss instead of drawing the map. A placement writes no debt.
         const store = createAppStore({ adapter: createMemoryAdapter() });
-        const world = store.getState().world;
-        store.setState({
-            world: { ...world, currentMap: { ...world.currentMap, currentNode: 'fv-10' } },
-        });
+        expect(jumpToNode(store, 'fv-9')).toBe(true);
 
         const vm = selectExplorationViewModel(store.getState());
+        const map = store.getState().world.currentMap;
 
-        expect(vm.currentNodeId).toBe('fv-10');
-        expect(store.getState().world.currentMap.consumedNodes).not.toContain('fv-10');
+        expect(vm.currentNodeId).toBe('fv-9');
+        // The conditions the old inference fired on are all still true ...
+        expect(map.consumedNodes).not.toContain('fv-9');
+        expect(getNodeEventPool(map.continent, map.name, 'fv-9')).not.toBeUndefined();
+        // ... and nothing is owed, because nobody walked here.
         expect(vm.arrivalPending).toBe(false);
+        expect(vm.startNodePending).toBe(false);
+    });
+
+    it('owes a travel door the player walked onto, and the crossing answers it', () => {
+        // A door is deliberately never consumed ("a door is repeatable" —
+        // `resolve-map-event.ts`), so consumption cannot say whether it has
+        // been answered. The record can: walking onto the door owes it (a
+        // reload here should still cross, not strand the player standing on
+        // a door), and resolving it clears the debt on the map being LEFT,
+        // before the crossing files that map away — otherwise returning
+        // through the door would cross again with no input.
+        const store = createAppStore({ adapter: createMemoryAdapter() });
+        const actions = createAppActions(store);
+        const world = store.getState().world;
+        // fv-10 is the northern-forest door. Walk onto it from its neighbour
+        // rather than jumping, so this is a real arrival.
+        store.setState({
+            world: {
+                ...world,
+                currentMap: {
+                    ...world.currentMap,
+                    currentNode: 'fv-9',
+                    availableNodes: [...world.currentMap.availableNodes, 'fv-10'],
+                },
+            },
+        });
+        expect(actions.moveTo('fv-10').moved).toBe(true);
+
+        expect(selectExplorationViewModel(store.getState()).arrivalPending).toBe(true);
+
+        actions.resolveCurrentMapEvent();
+
+        // The crossing happened, and the departed map no longer owes the door.
+        const after = store.getState().world;
+        expect(after.currentMap.name).not.toBe('fishing-village');
+        expect(after.mapStates?.['fishing-village']?.pendingArrival ?? null).toBeNull();
     });
 });

@@ -94,30 +94,42 @@ export interface ExplorationViewModel {
     /** Engine node id of the player's current location. */
     currentNodeId: string;
     /**
-     * True while the map's STARTING node still has an unresolved event — the
-     * narrowed, historical case of `arrivalPending` below.
+     * True while the map's STARTING node still has an unresolved event.
      *
-     * Events fire on arrival, and the player never arrives at the node they
-     * are placed on, so a map's starting-node content used to be unreachable
-     * (2026-08-08 first-map audit). The exploration screen now watches
-     * `arrivalPending`, which covers this case and every other unanswered
-     * arrival; this flag stays as the start-node pin
+     * The ONE placement the game deliberately treats as an arrival. Events
+     * fire on arrival, and the player never arrives at the node they are
+     * placed on, so a map's starting-node content used to be unreachable
+     * (2026-08-08 first-map audit) — on fishing-village that silently
+     * swallowed fv-1's whole pool. The exploration screen pays this on entry,
+     * as the CLI's `--resolve-start` does
      * (`state/e2e/start-node-arrival.engine.test.tsx`).
+     *
+     * It is deliberately NOT the same sentence as `arrivalPending`: this one
+     * is derived from the map's shape (you are on the start node, it carries
+     * unconsumed content), because a placement leaves no record of itself.
      */
     startNodePending: boolean;
     /**
-     * True while the node the player is STANDING ON still owes them its
-     * arrival event.
+     * True while the node the player WALKED ONTO still owes them its arrival
+     * event.
      *
      * Events fire on ARRIVAL, but a move checkpoints before the arrival
      * resolves: `moveToAction` saves (BUG-03), and only then does the screen
      * call `resolveCurrentMapEvent`. A player who reloaded in between came
      * back standing on the node with its onward edges already open and
      * nothing pending — on an encounter node the fight was silently skipped
-     * (burn-day audit 2026-09-19 row 3.1). `consumedNodes` is the engine's
-     * "this arrival was answered" marker and it rides the save, so the debt
-     * is legible off the bytes on disk; the exploration screen watches this
-     * flag and pays it on mount.
+     * (burn-day audit 2026-09-19 row 3.1).
+     *
+     * This reads the engine's own record of the debt — `pendingArrival`,
+     * written by the arrival verb and cleared by `resolveMapEvent` — rather
+     * than inferring it from an unconsumed node, because BEING PLACED ON A
+     * NODE IS NOT ARRIVING AT IT and only the record can tell the two apart.
+     * `placeOnNode` (state fixtures, `/dev` JUMP) even un-consumes the node
+     * it places you on, so the inference read every placement as an
+     * unanswered arrival and fired it on mount: the fixture deep link
+     * `/exploration?fixture=sage-fv-boss-gate` engaged the fv-9 boss instead
+     * of drawing the map (row 3.1 follow-up). The record rides the save, so
+     * the debt is legible off the bytes on disk.
      */
     arrivalPending: boolean;
     nodes: readonly ExplorationNode[];
@@ -464,37 +476,44 @@ function computeExplorationViewModel(state: GameStore): ExplorationViewModel {
         };
     });
 
-    // Only pending while the node the player stands on carries authored
-    // content and nothing has consumed it. Whether it is SAFE to resolve
-    // right now (no event or combat already owning the screen) is the
-    // screen's call, not the map's — this view model is memoised on
-    // `state.world` and must not read the event slice.
+    // THE ARRIVAL THE MAP STILL OWES THE PLAYER (burn-day audit 2026-09-19
+    // row 3.1 + follow-up). Two different sentences, deliberately kept apart.
     //
-    // `consumedNodes` is the engine's "this arrival was answered" marker —
-    // every non-travel resolve path marks it (`resolve-map-event.ts`) and it
-    // rides the save — so an arrival the player never answered is still
-    // legible after a reload. That is what makes the move's early checkpoint
-    // honest (burn-day audit 2026-09-19 row 3.1): the debt is re-offered on
-    // the next mount instead of being walked past.
+    // `arrivalPending` is READ, not inferred: `pendingArrival` is the record
+    // the arrival verb writes (`moveToNode`, and mobile's own move) and
+    // `resolveMapEvent` clears the moment the arrival is answered. It rides
+    // the save, so an arrival interrupted by a reload — the move checkpoints
+    // BEFORE its event resolves — is still owed on the next mount instead of
+    // being walked past. Travel doors need no special case here: crossing
+    // answers the door even though a door is never consumed, and a reload
+    // taken while standing on one still owes the crossing the player walked
+    // into.
     //
-    // TRAVEL DOORS ARE EXCLUDED. A door is deliberately never consumed ("a
-    // door is repeatable", `resolve-map-event.ts`), so `!consumed` is
-    // permanently true while the player stands on one; firing it from here
-    // would walk them onto another map with no input, which is a different
-    // contract from walking ONTO the door.
+    // Inferring it instead from "the node under the player is unconsumed"
+    // cannot tell a walk from a placement, and `placeOnNode` un-consumes the
+    // node it places you on — so every state fixture and every `/dev` JUMP
+    // read as an unanswered arrival and the screen fired it on mount.
+    //
+    // `startNodePending` is the one placement the game treats as an arrival,
+    // and it has to be derived precisely because a placement leaves no
+    // record: the player is put on the start node by `createMapState`, never
+    // walks onto it. Whether it is SAFE to resolve either of them right now
+    // (no event or combat already owning the screen) is the screen's call,
+    // not the map's — this view model is memoised on `state.world` and must
+    // not read the event slice.
     //
     // The labyrinth is out of scope only because the aporia maps carry no
     // mobile layout (`state/exploration-maps`), so those states take the
     // fallback view model above. `labyrinthMove` defers the boss room's
-    // arrival for the finale panel on purpose, so registering a labyrinth
-    // layout would need this derivation revisited first.
+    // arrival for the finale panel on purpose — it leaves `pendingArrival`
+    // set until the finale resolves it — so registering a labyrinth layout
+    // would need this read revisited first.
     const consumed = (world.currentMap.consumedNodes ?? []) as readonly string[];
-    const arrivalPool = getNodeEventPool(continent, mapName, currentNodeId);
-    const arrivalPending =
-        arrivalPool !== undefined
-        && !arrivalPool.entries.some((entry) => entry.kind === 'travel')
-        && !consumed.includes(currentNodeId);
-    const startNodePending = arrivalPending && currentNodeId === def.startingNode.id;
+    const arrivalPending = (world.currentMap.pendingArrival ?? null) === currentNodeId;
+    const startNodePending =
+        currentNodeId === def.startingNode.id
+        && !consumed.includes(currentNodeId)
+        && getNodeEventPool(continent, mapName, currentNodeId) !== undefined;
 
     const options = buildOptions(metaById, orderById, reachable, currentNodeId);
     const actions = buildActions(options);
