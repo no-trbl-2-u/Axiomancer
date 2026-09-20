@@ -38,7 +38,7 @@ import { makeStyles, usePalette } from '@/theme/runtime';
 import type {
     CombatEnemyPaneVM, CombatPlayerPaneVM, CombatEffectChipVM, CombatSealVM, CombatAddVM,
 } from '@/state/presenters/combat-encounter.engine';
-import { selectCombatLogLines } from '@/state/presenters/combat-encounter.engine';
+import { ADD_COLOR, selectCombatLogLines } from '@/state/presenters/combat-encounter.engine';
 import { getCardById, type CombatEvent } from '@mechanics';
 import { effectGlyph } from '@/components/combat/statusGlyphs';
 import { keywordForEffect } from '@/state/combat/keywords';
@@ -414,7 +414,7 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
     }, []);
     const drop = useCallback((id: number) => setFloats((p) => p.filter((f) => f.id !== id)), []);
     const landHit = useCallback((dmg: number, blocked: number, fired: boolean) => {
-        push(`-${dmg}`, '#e2543b', 0);
+        if (dmg > 0) push(`-${dmg}`, '#e2543b', 0);
         if (fired && blocked > 0) push(`BLOCKED ${blocked}`, '#9aa0a6', 40);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => undefined);
     }, [push]);
@@ -423,11 +423,18 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
         if (!fx || fx.seq === 0 || fx.seq === lastSeq.current) return;
         lastSeq.current = fx.seq;
         let dmg = 0;
+        // Phase 102 — the brood's bite is its OWN event, and it lands outside
+        // the engine's `!hindered` gate: a denied phase can still cost VITAE.
+        // Kept SEPARATE from `dmg` on purpose — `blocked` below is the foe's
+        // telegraph arithmetic, and folding a bite into it would print a
+        // BLOCKED number the foe never promised (burn-day audit 3.3).
+        let bite = 0;
         let threatFired = false;
         const ticks: number[] = [];
         const statuses: { text: string; color: string }[] = [];
         for (const e of fx.events) {
             if (e.kind === 'damage-dealt' && e.target === 'self') dmg += e.amount;
+            else if (e.kind === 'add-bit') bite += e.dealt;
             else if (e.kind === 'dot-tick' && e.target === 'self') ticks.push(e.amount);
             else if (e.kind === 'threat-fired') threatFired = true;
             else if (e.kind === 'effect-landed' && e.target === 'self') {
@@ -439,8 +446,9 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
             }
         }
         const IMPACT = 100;
-        if (dmg > 0) {
-            const norm = Math.min(1, dmg / Math.max(1, player.maxHp));
+        const total = dmg + bite;
+        if (total > 0) {
+            const norm = Math.min(1, total / Math.max(1, player.maxHp));
             const blocked = enemyIntentDamage - dmg;
             if (!reduceMotion.current) {
                 const recoil = 4 + norm * 8;
@@ -454,8 +462,16 @@ export const PlayerMedallion = React.memo(function PlayerMedallion({
             impact.value = 0;
             impact.value = withDelay(IMPACT, withTiming(1, { duration: 1 }, (fin) => { if (fin) runOnJS(landHit)(dmg, blocked, threatFired); }));
         }
+        // The brood's float is pushed HERE, not from `landHit`: the bite is a
+        // second actor, not the foe's telegraphed blow landing at its impact
+        // apex, so it does not wait on the telegraph's 100ms delay. One buzz
+        // per phase — `landHit` already fires one when the foe's blow landed.
+        if (bite > 0) {
+            push(`-${bite}`, ADD_COLOR, -28);
+            if (dmg === 0) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy).catch(() => undefined);
+        }
         ticks.forEach((t, k) => push(`-${t}`, '#a86bdc', (k % 2 === 0 ? -1 : 1) * (20 + Math.floor(k / 2) * 16)));
-        const hadFloat = dmg > 0 || ticks.length > 0;
+        const hadFloat = dmg > 0 || bite > 0 || ticks.length > 0;
         statuses.forEach((s, k) => { if (!hadFloat) push(s.text, s.color, (k % 2 === 0 ? 1 : -1) * 30); });
         if (statuses.length > 0) setStatusPulseKey((k) => k + 1);
     }, [fx, player.maxHp, enemyIntentDamage, shift, flash, squash, contact, impact, landHit, push]);
@@ -590,6 +606,10 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
         if (!fx || fx.seq === 0 || fx.seq === lastSeq.current) return;
         lastSeq.current = fx.seq;
         let playerDmg = 0;
+        // Phase 102 — VITAE the brood took this phase. Its own event, because
+        // the engine resolves the bite outside the `!hindered` gate: a phase
+        // the player denied can still cost health (burn-day audit 3.3).
+        let addBite = 0;
         let enemyDmg = 0;
         let denied = false;
         let threatFired = false;
@@ -600,6 +620,8 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
         for (const e of fx.events) {
             if (e.kind === 'damage-dealt') {
                 if (e.target === 'self') playerDmg += e.amount; else enemyDmg += e.amount;
+            } else if (e.kind === 'add-bit') {
+                addBite += e.dealt;
             } else if (e.kind === 'dot-tick') {
                 ticks.push({ side: e.target === 'self' ? 'player' : 'enemy', amount: e.amount });
             } else if (e.kind === 'phase-resolved' && e.mark === 'clear') {
@@ -642,11 +664,15 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
         //     (100ms — the shared delay baked into the shake/flash hook calls
         //     below). The medallion-side beats (recoil/flash/squash/slash/
         //     float/haptic) fire in `PlayerMedallion` off the same event stream.
-        if (playerDmg > 0) {
+        const playerTook = playerDmg + addBite;
+        if (playerTook > 0) {
             // Normalise the hit to its share of max HP so a 4-dmg chip and a 40-dmg
             // crusher no longer feel identical — every beat scales off `norm`.
-            const norm = Math.min(1, playerDmg / Math.max(1, player.maxHp));
-            if (!reduceMotion.current) {
+            const norm = Math.min(1, playerTook / Math.max(1, player.maxHp));
+            if (!reduceMotion.current && playerDmg > 0) {
+                // The lunge belongs to the FOE's own blow. A denied foe did not
+                // lunge — its brood bit — so a bite-only phase shakes the board
+                // without animating a swing that never happened.
                 const lunge = 8 + norm * 10;        // 8–18px enemy lunge apex
                 enemyScale.value = withSequence(withTiming(0.97, { duration: 90 }), withTiming(1 + norm * 0.08, { duration: 120 }), withTiming(1, { duration: 200 }));
                 enemyShift.value = withSequence(withTiming(-6, { duration: 90 }), withTiming(lunge, { duration: 120 }), withTiming(0, { duration: 220 }));
@@ -655,9 +681,16 @@ export const CombatCombatantPane = React.memo(function CombatCombatantPane({
             // gate their own reduced-motion internally, so this call is
             // unconditional (the hook no-ops when appropriate).
             setDamageTick((prev) => ({ key: prev.key + 1, norm }));
+            // The foe's own blow was held but the brood still took VITAE: the
+            // word DENIED is still true and still worth knowing, and it must
+            // never stand alone. Same honesty rule `IntentIcon`'s wall-math
+            // readout follows (burn-day audit 3.3).
+            if (playerDmg === 0 && (denied || (threatFired && enemy.intent.damage > 0))) {
+                pushEnemy(`DENIED · BROOD −${addBite}`, '#d9b44a', 0);
+            }
         } else if (denied || (threatFired && enemy.intent.damage > 0)) {
-            // (b) the turn resolved with no damage to the player → DENIED flourish
-            //     over the enemy (teaches "variety / guard denies the turn").
+            // (b) the turn resolved with no damage to the player at all → DENIED
+            //     flourish over the enemy (teaches "variety / guard denies the turn").
             pushEnemy('DENIED', '#d9b44a', 0);
         }
         // (d-symmetric) the player's APPLY landed on the enemy → flinch + float.

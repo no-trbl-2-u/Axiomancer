@@ -951,10 +951,12 @@ a11y label said *"no damage lands"*. The engine resolves adds **outside** the
 staggered a summoner read "nothing lands", ended the phase, and took the bite
 anyway — a telegraph actively instructing them to make a mistake.
 
-The readout now carries the brood's share: `DENIED →8` when the foe's own blow
-is stopped but its adds are not, the combined total when both land, and the
-brood's bite alone when the foe telegraphs nothing. It prints the **soaked**
-number, not the printed one, through the same `soakFlatHit` the engine applies —
+The readout now carries the brood's share — `IntentIcon`'s readout, and in this
+pass **only that one**; see the row 3.3 correction below. `DENIED →8` when the
+foe's own blow is stopped but its adds are not, the combined total when both
+land, and the brood's bite alone when the foe telegraphs nothing. It prints the
+**soaked** number, not the printed one, through the same `soakFlatHit` the
+engine applies —
 ~~one definition, so the on-screen wall math cannot drift from the applied wall
 math.~~ **CORRECTED by burn-day audit 2026-09-19 row 3.2: it drifted.** The add
 term did call the shared helper, but the *leftover wall* it was handed came from
@@ -964,6 +966,22 @@ flat `playerArmor` soak. Measured before the fix: 35 of 324 wall cells wrong on
 behind GUARD 40 against a 30-damage telegraph printed 3 while the engine took
 18, tying the largest gap measured at 15 VITAE. Both of the projection's terms
 now go through the one helper, which is what the sentence above always claimed.
+
+**CORRECTED by burn-day audit 2026-09-19 row 3.3 — the heading above overstates
+what this pass closed.** `IntentIcon` was the only surface fixed, and the same
+lie kept playing on three siblings reading the same phase. The pane floated a gold bare `DENIED` over
+the foe (`CombatCombatantPane.tsx`), the enemy-action reveal card printed
+`DENIED`, the sentence *"your control held — none of it landed"* and an a11y
+summary that said only *"…'s action was denied"*, and the log history wrote
+`PHASE n — DENIED.` as that phase's whole story. Worse, neither fx reducer read
+`add-bit` at all — they counted player damage only from `damage-dealt` with
+`target === 'self'` — so a bite cost VITAE with **no** float, recoil, flash,
+board shake or haptic anywhere on screen. All four surfaces now read the
+`add-bit` event: the pane floats `DENIED · BROOD −N`, the card carries a
+`BROOD −N` line that is never struck through and reads *"your control held —
+its brood bit anyway"*, the history names the bite in the DENIED line, and the
+pilgrim takes a hit reaction scaled to what the brood actually took. `DENIED`
+now means, everywhere, *the foe's own blow was held* — never *nothing landed*.
 
 `netDamage` is deliberately left meaning *"the foe's own telegraphed hit"*.
 Every existing readout depends on that; the brood rides in `addNetDamage` /
@@ -1021,6 +1039,10 @@ was applying all along.
 | `Combat/e2e/combat-sim-policies.engine.test.ts` (+6) | the `strikeAddsAt` roster assignment and the decision seam |
 | `components/.../IntentIcon.test.tsx` (+5) | a bare DENIED survives with no brood; the bite is stated alongside DENIED and the "no damage lands" claim is gone; the TOTAL is printed when both land; the brood shows when the foe telegraphs nothing; the SOAKED number is printed, never the raw one |
 | `components/.../CombatBoard.adds.test.tsx` (8, new) | one chip per body badged with its bite; NO row at all for the ordinary foe; the tap reports `onAdd` once and not `onChip`/`onApply`; an unaffordable chip still reports its tap; a11y states bite, VITAE and price; the shortfall is named when it cannot be paid; the bite is forwarded verbatim past `stageThreatBonus`/`enemyThreatMult`; the price is the engine's constant |
+| `components/.../CombatCombatantPane.brood-bite.test.tsx` (6, new — burn-day audit 3.3) | drives the REAL engine on a live brood, both routes into the bad branch (the foe hindered, and the foe's blow fired but fully soaked): no bare `DENIED` float while a bite landed, the flourish names the brood's share, the board's damage tick fires on a bite-only phase, and the pilgrim floats what the bite took. Every number is read back off the emitted `add-bit` event |
+| `state/presenters/__tests__/enemy-action-card.engine.test.ts` (+4 — burn-day audit 3.3) | a denied phase the brood bit reports `addDealt` and a `brood` line; the averted telegraph stays marked `telegraph`, so only it reads as averted; a fully soaked bite reports nothing landed; a denied phase with no brood is unchanged |
+| `components/.../EnemyActionCard.test.tsx` (+3 — burn-day audit 3.3) | never a bare `DENIED` and never "none of it landed" while the brood bit; what landed is not struck through while the averted telegraph still is; the a11y sentence carries the bite |
+| `state/presenters/__tests__/combat-log-history.engine.test.ts` (+4 — burn-day audit 3.3) | the DENIED line names the bite; a clean `DENIED` survives with no brood and with a fully soaked bite; a bite in an EARLIER phase never colours a later DENIED |
 | `state/e2e/summon-surface.engine.test.ts` (8, new) | drives the REAL engine with a REAL summoner: the wave reaches the screen as chips; SUMMON prints as a keyword chip with its own mark and the denied-foe gloss; the wall math carries the brood separately; the brood really costs VITAE; striking removes exactly that body and charges the price; clearing the whole brood never ends the fight; short Conviction marks chips rather than hiding them; a cleared wave does not respawn |
 
 ## DoD

@@ -239,9 +239,13 @@ Tick in this file in the same commit that ships the phase.
       of its own that bite for a flat number every threat phase — outside the
       `!hindered` gate, because bodies act — and are cleared by a dieless but
       Conviction-priced `strikeAdd`. Never a win condition: clearing the brood
-      is progress, not victory. Shipped WHOLE, engine and surface: the chips,
-      the STRIKE/WAIT sheet, and the wall-math readout that stops printing a
-      bare DENIED while the adds are still biting. Carrier: The Jeweled Tree.
+      is progress, not victory. ~~Shipped WHOLE, engine and surface~~
+      **— engine and surface, but not whole (burn-day audit 2026-09-19 row
+      3.3)**: the chips, the STRIKE/WAIT sheet, and the wall-math readout that
+      stops printing a bare DENIED while the adds are still biting — that
+      readout and no other. The pane's DENIED float, the enemy-action card and
+      the log history kept printing the lie, and a bite played no hit reaction
+      at all, until row 3.3 closed all four. Carrier: The Jeweled Tree.
       Designed by a three-lens adversarial panel that refuted the cheap path
       (appending the bite to `threatEffects` corrupts four ledgers silently).
       — `feat: SUMMON — the add-spawning archetype, engine and board — phase 102`
