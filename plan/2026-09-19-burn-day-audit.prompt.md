@@ -192,20 +192,36 @@ reproduction and reported the numbers, not re-read by the orchestrator;
   definition, so printed and applied wall math cannot drift".
 - **True:** the engine drains GUARD under SWIFT as `guardAbsorbed =
   min(floor(guard / soakDivisor), dmg); guard -= guardAbsorbed *
-  soakDivisor` (`combat.engine.ts` ~:4287-4289). The projection's
+  soakDivisor` (`combat.engine.ts` ~:4287-4289). ~~The projection's
   Phase-102 absorption is `guardAbsorbed = Math.min(guard, remaining)`
-  (~:5977) — no divisor — so the leftover wall handed to `soakFlatHit` is
-  **overstated** and the add term **under-reported**. The shipped parity
-  suite (`summon.engine.test.ts` ~:528-582) empties or denies every
-  telegraph, so it cannot see it.
+  (~:5977)~~ — **CORRECTED while fixing this row: the site is mislabelled.**
+  The Phase-102 add term (~:5977-5984) already called `soakFlatHit`
+  correctly. The defective statement was the projection's *own telegraph*
+  soak, `const guardAbsorbed = Math.min(guard, remaining)` at ~:5966-5969 —
+  no divisor, **and no `playerArmor` either** — so the leftover wall handed
+  to `soakFlatHit` is **overstated** and the add term **under-reported**.
+  The causal chain the row states is exactly right; only the line label was
+  off. The shipped parity suite (`summon.engine.test.ts` ~:528-582) empties
+  or denies every telegraph, so it cannot see it.
 - **Evidence:** skeptic 20-cell probe (`swift × guard{0,5,10,20,40} ×
   telegraph{10,30}`, two 4-bite adds): `swift=true guard=20 tele=10 →
   projected 3, engine add-bit.dealt 8`; `swift=true guard=40 tele=30 → 3 vs
   8`. All non-SWIFT cells agree. Orchestrator re-read both sites.
-- **Latent today, live tomorrow:** The Jeweled Tree has no SWIFT (its auto
-  SWIFT was deliberately dropped). But `defaultEnemyStages` SECOND WIND
-  grants SWIFT, so the first boss/unique carrier — §8 recommends one — puts
-  this on screen as a telegraph that says 3 while the player loses 8.
+- ~~**Latent today, live tomorrow:**~~ — **CORRECTED while fixing this row:
+  the SWIFT half is latent; the armor half is LIVE TODAY.** The Jeweled Tree
+  has no SWIFT (its auto SWIFT was deliberately dropped), and
+  `defaultEnemyStages` SECOND WIND grants SWIFT, so the first boss/unique
+  carrier — §8 recommends one — would put the SWIFT half on screen. But the
+  same block also dropped the flat `playerArmor` soak, which needs no SWIFT
+  at all: the shipped Jeweled Tree against a player holding
+  `buff_damage_reduction` (body-elixir / iron-skin-draught, armor 5) reads a
+  brood bite the engine does not apply, in a band around `projectedDamage`.
+  Both halves shipped closed in one commit — divisor-only left non-SWIFT
+  armored cells lying, so the row's own prescribed guard could not be
+  written honestly. Note also that SECOND WIND bundles `gain: [{kind:
+  'swift'}]` with `threatBonus: 0.15` in the same stage object, and
+  `stageThreatBonus` is a *separate*, still-open projection omission: the
+  fix makes the staged case strictly closer, not exact.
 - **Fix shape:** apply the same divisor in the projection's own absorption
   (`floor(guard / div)` absorbed, `× div` consumed) — this also moves
   `netDamage` for SWIFT foes, which is the *correct* number and a
@@ -214,6 +230,12 @@ reproduction and reported the numbers, not re-read by the orchestrator;
   through GUARD** with SWIFT on and off, asserting `addNetDamage ===
   add-bit.dealt` cell by cell. A parity test that only tests the empty
   case is not a ship gate.
+  **AMENDED while fixing this row: the divisor alone is not enough.** The
+  same block also dropped the flat `playerArmor` soak, so divisor-only
+  leaves armored cells wrong — including **non-SWIFT** ones — and the guard
+  test this row prescribes cannot then be written honestly. Shipped as one
+  `soakFlatHit` call covering armor, divisor and wall together, which also
+  moves `netDamage` for every **armored player**, not only for SWIFT foes.
 
 ### 3.3 [HIGH · player-visible · confidence 85] Three DENIED surfaces still lie, and a bite plays no hit reaction (Phase 102 surface)
 

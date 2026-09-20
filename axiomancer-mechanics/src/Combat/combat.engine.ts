@@ -3996,12 +3996,18 @@ function splitFlurryDamage(total: number, hits: number): number[] {
  * divisor (the wall absorbs half its face value and is consumed at the full
  * rate, exactly as in the telegraph loop).
  *
- * This is the SINGLE definition shared by `resolveThreatPhase`'s add block and
- * `projectIncomingThreat`'s add term, so the on-screen wall math cannot drift
- * from what the engine actually does — the design panel named that drift the
- * worst class of lie a telegraph can tell, and two call sites for one formula
- * is how it happens. Deliberately EXCLUDES riposte (a parry on the foe's own
- * swing, one-shot per phase) and BRUTAL (a property of the foe's blow), and it
+ * This is the SINGLE definition of the wall arithmetic shared by
+ * `resolveThreatPhase`'s add block and BOTH of `projectIncomingThreat`'s terms
+ * — the foe's own telegraphed hit as well as the add term — so the on-screen
+ * wall math cannot drift from what the engine actually does. The design panel
+ * named that drift the worst class of lie a telegraph can tell, and audit 3.2
+ * is how it happened anyway: the projection kept a third, divergent inline copy
+ * for its own telegraph soak, missing this helper's SWIFT divisor and armor
+ * subtraction, and the add term inherited the bad leftover wall. If you need
+ * this arithmetic anywhere, call this function.
+ *
+ * Deliberately EXCLUDES riposte (a parry on the foe's own swing, one-shot per
+ * phase) and BRUTAL (a property of the foe's blow), and it
  * never touches `attacksLanded`/`attacksFullyBlocked`: an add's bite is not an
  * "attack" for any ledger that the authored telegraph reads.
  */
@@ -5901,12 +5907,23 @@ export function projectReapAll(state: CombatEncounterState, card: CombatCard): {
  * KNOWN DIVERGENCES from `resolveThreatPhase`, documented rather than closed —
  * closing them moves the on-screen number for every existing foe and is its own
  * tuning change, not a side effect of adding a keyword. The boss term here
- * omits `enemyThreatMult`, `state.stageThreatBonus`, the flat `playerArmor`
- * soak, the SWIFT soak divisor and BRUTAL, so against a staged, SWIFT or
- * BRUTAL foe it UNDERSTATES, and the wall it reports as left over after the
- * telegraph is correspondingly optimistic. The Phase 102 add term does NOT
- * share that flaw: it runs through the same `soakFlatHit` the engine applies
- * and is exact for the wall state it is handed.
+ * omits `enemyThreatMult` (`getOutgoingThreatDamageMult`),
+ * `state.stageThreatBonus`, BRUTAL, and — while the Upgradeable-Dice flag is
+ * on — an authored phase's `stanceCheck.mult`, so against a staged, BRUTAL or
+ * stance-punished foe it UNDERSTATES, and the wall it reports as left over
+ * after the telegraph is correspondingly optimistic.
+ *
+ * Audit 3.2: the flat `playerArmor` soak and the SWIFT soak divisor were on
+ * that list and are no longer — both terms now run through the same
+ * `soakFlatHit` the engine applies. So the leftover wall handed to the Phase
+ * 102 add term, and therefore `addNetDamage` and `totalNetDamage`, are EXACT
+ * for a single-damaging-effect telegraph from an unstaged foe with no
+ * outgoing-threat-damage rider and no firing stance check. They remain
+ * APPROXIMATE — strictly closer than before, not closed — for a staged foe,
+ * a foe carrying `getOutgoingThreatDamageMult !== 1`, a multi-effect or FLURRY
+ * phase (the engine soaks per effect, this projection soaks the sum once), and
+ * a flag-on `stanceCheck`. `summon.engine.test.ts`'s wall matrix pins the exact
+ * case and names those preconditions as its construction.
  */
 export function projectIncomingThreat(state: CombatEncounterState): {
     rawDamage: number; projectedDamage: number; willDeny: boolean; guard: number; barrier: number; netDamage: number;
@@ -5955,18 +5972,27 @@ export function projectIncomingThreat(state: CombatEncounterState): {
     const guard = state.guard ?? 0;
     const barrier = state.barrier ?? 0;
     const riposte = state.riposte ?? null;
+    const playerArmor = Math.max(0, getActiveEffectModifiers(state.player.effects as ActiveEffect[]).defenseDelta);
+    const foeSwift = hasEnemyKeyword(state.enemy.keywords, 'swift');
     let remaining = projectedDamage;
     if (riposte && riposte.reduce > 0) remaining = Math.max(0, remaining - riposte.reduce);
-    // Tracked as explicit absorptions rather than `Math.max(0, remaining - x)`
-    // so the LEFTOVER wall is exact (arithmetically identical to the previous
-    // two lines — `netDamage` is unchanged to the byte). Phase 102's add term
-    // needs the wall that survives the foe's own hit, and deriving it from
-    // `projectedDamage - remaining` would wrongly charge riposte's parry and
-    // barrier's share against GUARD.
-    const guardAbsorbed = Math.min(guard, remaining);
-    remaining -= guardAbsorbed;
-    const barrierAbsorbed = Math.min(barrier, remaining);
-    remaining -= barrierAbsorbed;
+    // Audit 3.2 — the foe's own hit goes through the SAME `soakFlatHit` the
+    // engine applies, so this function no longer keeps a second, divergent
+    // inline copy of the wall arithmetic. The copy that stood here dropped both
+    // the SWIFT divisor and the flat armor soak, which OVERSTATED the leftover
+    // wall handed to the add term below and so UNDER-reported `addNetDamage` —
+    // measured wrong in 35 of 324 wall cells, and the printed HUD total wrong
+    // in 112. RIPOSTE stays outside the helper (a one-shot parry on the foe's
+    // own swing, deliberately excluded there); applying it before armor is
+    // arithmetically identical to the engine's armor-then-riposte order, since
+    // both reduce to `max(0, d - armor - reduce)` over non-negative terms.
+    //
+    // The absorption stays an explicit soak rather than `Math.max(0, remaining
+    // - x)` because Phase 102's add term needs the wall that SURVIVES the foe's
+    // own hit, and deriving it from `projectedDamage - remaining` would wrongly
+    // charge riposte's parry and barrier's share against GUARD.
+    const soaked = soakFlatHit(remaining, { armor: playerArmor, guard, barrier, swift: foeSwift });
+    remaining = soaked.dealt;
 
     // Phase 102 (SUMMON) — the brood, through the same helper
     // `resolveThreatPhase` uses, so the printed wall math and the applied wall
@@ -5976,10 +6002,10 @@ export function projectIncomingThreat(state: CombatEncounterState): {
     const addDamage = (state.adds ?? []).reduce((s, a) => s + a.bite, 0);
     const addNetDamage = addDamage > 0
         ? soakFlatHit(addDamage, {
-            armor: Math.max(0, getActiveEffectModifiers(state.player.effects as ActiveEffect[]).defenseDelta),
-            guard: guard - guardAbsorbed,
-            barrier: barrier - barrierAbsorbed,
-            swift: hasEnemyKeyword(state.enemy.keywords, 'swift'),
+            armor: playerArmor,
+            guard: soaked.guard,
+            barrier: soaked.barrier,
+            swift: foeSwift,
         }).dealt
         : 0;
 

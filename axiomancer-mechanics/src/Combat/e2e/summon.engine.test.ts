@@ -527,46 +527,90 @@ describe('strikeAdd', () => {
 
 describe('the telegraph does not lie', () => {
     // THE SHIP GATE: the projected add damage IS the applied add damage, across
-    // every wall state. Both sides call `soakFlatHit`; inline one of them and
-    // this fails. The foe's own telegraph is emptied (or denied) in these cases
-    // so the comparison isolates the add term from the projection's own
-    // documented boss-side divergences.
+    // every wall state — driven through a LIVE telegraph, because the leftover
+    // wall the add term is handed is computed by the projection itself.
+    //
+    // The earlier form of this case emptied or denied the foe's telegraph in
+    // every cell. That is the one configuration in which the projection's own
+    // wall soak cannot diverge from the engine's (the leftover wall is the
+    // whole wall on both sides), so it stayed green while the projection
+    // dropped both the SWIFT divisor and the flat armor soak.
     function parity(s: CombatEncounterState): { projected: number; applied: number } {
         const projected = projectIncomingThreat(s).addNetDamage;
         const applied = findEvents(resolveThreatPhase(s, rng).events, 'add-bit')[0]?.dealt ?? 0;
         return { projected, applied };
     }
 
-    it('addNetDamage equals the add-bit the engine applies — bare, walled, and SWIFT', () => {
-        const foe = makeEnemy({ keywords: [SUMMON_2] });
-        const bare = addState(withTelegraph(open(foe), []));
-        const raw = 2 * EXPECTED_BITE;
+    // The wall/telegraph matrix both cases below run. The GUARD list contains
+    // every literal the earlier four-state form asserted (0, 3, 8, 24, 32) and
+    // the BARRIER list its 4, so this widens the dimensions covered without
+    // dropping a cell it had.
+    //
+    // PRECONDITIONS the exact equality leans on, held BY CONSTRUCTION rather
+    // than by exclusion: `makeEnemy` clones GraveLarva with `keywords` and
+    // `stages` overridden, so the fixture carries no BRUTAL, no FLURRY and no
+    // stage (`stageThreatBonus === 0`); its `getOutgoingThreatDamageMult` is 1;
+    // each cell telegraphs at most ONE damaging effect; and the
+    // Upgradeable-Dice flag is off, so no authored `stanceCheck` multiplies the
+    // telegraph. Those are exactly the divergences `projectIncomingThreat`'s
+    // docblock still leaves open. A foe carrying any of them is outside this
+    // matrix's scope — widen the fixture and you must close them first.
+    const MATRIX_GUARDS = [0, 3, 5, 8, 10, 20, 24, 32, 40];
+    const MATRIX_BARRIERS = [0, 4, 6];
+    const MATRIX_TELEGRAPHS = [0, 10, 30];
 
-        for (const s of [
-            bare,
-            { ...bare, guard: 0 },
-            { ...bare, guard: raw * 3 },
-            { ...bare, barrier: Math.floor(raw / 2) },
-        ]) {
-            const { projected, applied } = parity(s);
-            expect(projected).toBe(applied);
-        }
-
-        const swift = addState(withTelegraph(open(makeEnemy({ keywords: [SUMMON_2, { kind: 'swift' }] })), []));
-        for (const s of [swift, { ...swift, guard: raw }, { ...swift, guard: raw * 4 }]) {
-            const { projected, applied } = parity(s);
-            expect(projected).toBe(applied);
-        }
-
-        // ARMOR too: both sides derive it from the SAME `defenseDelta`
-        // aggregate, and the projection's boss-side omission of armor (a
-        // documented divergence) must not leak into the add term.
+    function wallCells(): Array<{ label: string; state: CombatEncounterState }> {
         const armorDef = lookupEffect('buff_damage_reduction')!;
-        const armored = applyEffect(bare.player.effects as ActiveEffect[], armorDef, bare.round);
-        const armorState = { ...bare, player: { ...bare.player, effects: armored.activeEffects } };
-        for (const s of [armorState, { ...armorState, guard: 3 }]) {
-            const { projected, applied } = parity(s);
-            expect(projected).toBe(applied);
+        const out: Array<{ label: string; state: CombatEncounterState }> = [];
+        for (const swift of [false, true]) {
+            const keywords: EnemyKeyword[] = swift ? [SUMMON_2, { kind: 'swift' }] : [SUMMON_2];
+            for (const dmg of MATRIX_TELEGRAPHS) {
+                const base = addState(withTelegraph(
+                    open(makeEnemy({ keywords })), dmg > 0 ? [{ damage: dmg }] : [],
+                ));
+                for (const armored of [false, true]) {
+                    const s = armored
+                        ? {
+                            ...base,
+                            player: {
+                                ...base.player,
+                                effects: applyEffect(
+                                    base.player.effects as ActiveEffect[], armorDef, base.round,
+                                ).activeEffects,
+                            },
+                        }
+                        : base;
+                    for (const guard of MATRIX_GUARDS) {
+                        for (const barrier of MATRIX_BARRIERS) {
+                            out.push({
+                                label: `swift=${swift} tele=${dmg} armor=${armored} guard=${guard} barrier=${barrier}`,
+                                state: { ...s, guard, barrier },
+                            });
+                        }
+                    }
+                }
+            }
+        }
+        return out;
+    }
+
+    it('addNetDamage equals the add-bit the engine applies — through a LIVE telegraph, SWIFT on and off, armored and bare', () => {
+        for (const { label, state } of wallCells()) {
+            const { projected, applied } = parity(state);
+            expect(projected, label).toBe(applied);
+        }
+    });
+
+    it('the HUD total is the VITAE the player actually loses — one damaging effect, unstaged foe', () => {
+        // This is what makes the pair a guard rather than a readout test: it
+        // pins the printed total to the health the engine actually takes off
+        // the bar. It pins a RELATION, never a magnitude — retune
+        // ADD_BITE_PER_LEVEL, THREAT_DAMAGE_SCALE, the armor value or the SWIFT
+        // divisor and every cell still holds.
+        for (const { label, state } of wallCells()) {
+            const before = state.player.health;
+            const after = resolveThreatPhase(state, rng).state.player.health;
+            expect(projectIncomingThreat(state).totalNetDamage, label).toBe(before - after);
         }
     });
 

@@ -866,7 +866,7 @@ Vitest. Copy the header / import / fixture / helper block from `big-numbers.engi
 - success → `conviction` drops by exactly `STRIKE_ADD_COST`, exactly one add removed, one `add-struck` event, `finalOutcome` still `undefined`
 
 **`describe('the telegraph does not lie')`**
-- `projectIncomingThreat(s).addNetDamage` **equals** the `add-bit.dealt` that `resolveThreatPhase(s)` actually applies — across four states: bare, GUARD 0, GUARD > bite, and a SWIFT foe. This is the ship gate.
+- `projectIncomingThreat(s).addNetDamage` **equals** the `add-bit.dealt` that `resolveThreatPhase(s)` actually applies — ~~across four states: bare, GUARD 0, GUARD > bite, and a SWIFT foe~~. This is the ship gate. **CORRECTED by burn-day audit 2026-09-19 row 3.2:** as shipped, the four states all emptied or denied the foe's telegraph, and the `SWIFT foe` state did too — which is the one configuration in which this divergence cannot appear, because the leftover wall is the whole wall on both sides. The gate was green while `addNetDamage` was wrong in 35 of 324 wall cells. It now runs a LIVE telegraph across `swift × guard{0,3,5,8,10,20,24,32,40} × barrier{0,4,6} × telegraph{0,10,30} × armor`, paired with a second case that pins the printed `totalNetDamage` to the VITAE the engine actually takes off the bar.
 - `projectEnemyHealPerRound` on a RAVENOUS SUMMON foe is **unchanged** by the presence of adds (the `netDamage`/`totalNetDamage` split)
 - with the boss's telegraph denied (`willDeny === true`), `netDamage === 0` but `addNetDamage > 0` — a denied turn does not read as safe
 
@@ -907,7 +907,7 @@ Copy `CombatBoard.seal.test.tsx` verbatim in shape (jest globals imported from `
 | 4 | **Atlas / gloss drift** — count heading left at `(10)`, or a gloss key not indented exactly four spaces | `content-drift.mjs:139` matches `/^ {4}([a-z_]+):/gm`; the heading is hand-maintained | `node scripts/content-drift.test.mjs` via `.github/workflows/verify-drift.yml:17,34` — reports the atlas row as an orphan rather than pointing at the gloss, so read the gloss indentation first. |
 | 5 | **Silent `undefined` prop** — `onAdd` declared in `CombatBoardProps` but absent from the `CombatBoard.tsx:1001` destructure | `React.memo` + one very long destructure line; compiles clean, chip renders, tap does nothing | The "tapping calls `onAdd` exactly once" case in `CombatBoard.adds.test.tsx`. Nothing else catches it. |
 | 6 | **Seeded-RNG drift across the whole e2e + playtest matrix** if anything in the spawn block calls `rng()` | `rng` is consumed by THE CLOCK (`:4767`) and the hand refill (`:5061`); an inserted call at `4851` shifts every downstream draw | `big-numbers.engine.test.ts`, `phase-33b-enemy-archetypes.engine.test.ts`, `legibility-sweep.engine.test.ts` and the combat-playtest matrix all move at once. `spawnAddWave` is deterministic by construction — keep it that way. |
-| 7 | **Projection/engine divergence** — a later change to the add soak in one place only | Two call sites for one formula | The `addNetDamage === add-bit.dealt` parity test across four wall states. Both sites call `soakFlatHit`; if someone inlines one, this fails. |
+| 7 | **Projection/engine divergence** — a later change to the add soak in one place only | Two call sites for one formula | ~~The `addNetDamage === add-bit.dealt` parity test across four wall states. Both sites call `soakFlatHit`; if someone inlines one, this fails.~~ **The risk landed and the mitigation did not catch it** (burn-day audit 2026-09-19 row 3.2): a THIRD site was inlined — `projectIncomingThreat`'s own telegraph soak — and the suite stayed 32/32 green, because all four wall states emptied or denied the telegraph. The parity case now drives a live telegraph over a wall matrix and is paired with a HUD-total-vs-VITAE-lost case; the count of call sites was never the thing to watch, the coverage of the states was. |
 | 8 | **The baseline moves and nobody can attribute it** | Rostering Jeweled Tree with SUMMON changes the `mid` profile's numbers, and dropping its auto SWIFT changes them again | `npm run baseline:check` must be re-stamped in the same tick, with the commit naming *both* causes. A SUMMON foe reaching the roster before `strikeAddsAt` lands produces a row that is wrong in a known direction — gate the roster entry behind the policy knob if they cannot land together. |
 | 9 | **New events silently dropped** from the log, the telemetry fold and the burst roll-up | There is **no** exhaustive `CombatEvent` consumer anywhere; both mobile switches have `default:` (`:1153`, `:1286`) and `mechanicBurstDamage` (`combat.encounter.sim.ts:852-857`) is a hardcoded six-kind list | Only the log-lines presenter tests. `add-bit` is damage to the **player**, so it correctly stays out of `mechanicBurstDamage` (which credits damage to the enemy) — but confirm that deliberately rather than by omission. |
 | 10 | **HUD overflow on 375×812** — a fifth row under a crest that already carries four `AltWinMeter`s | Vertical budget under the crest is spent (`CombatCombatantPane.tsx:719-751`) | Step 1 is the structural fix; the figure-anchor assertion in `CombatBoard.adds.test.tsx` is the regression gate. The add row goes in `hudRight` (`:762`), never as a fifth meter. |
@@ -955,8 +955,15 @@ The readout now carries the brood's share: `DENIED →8` when the foe's own blow
 is stopped but its adds are not, the combined total when both land, and the
 brood's bite alone when the foe telegraphs nothing. It prints the **soaked**
 number, not the printed one, through the same `soakFlatHit` the engine applies —
-one definition, so the on-screen wall math cannot drift from the applied wall
-math.
+~~one definition, so the on-screen wall math cannot drift from the applied wall
+math.~~ **CORRECTED by burn-day audit 2026-09-19 row 3.2: it drifted.** The add
+term did call the shared helper, but the *leftover wall* it was handed came from
+a second inline copy in the same function that dropped the SWIFT divisor and the
+flat `playerArmor` soak. Measured before the fix: 35 of 324 wall cells wrong on
+`addNetDamage`, 112 of 324 wrong on the printed `totalNetDamage` — a SWIFT foe
+behind GUARD 40 against a 30-damage telegraph printed 3 while the engine took
+18, tying the largest gap measured at 15 VITAE. Both of the projection's terms
+now go through the one helper, which is what the sentence above always claimed.
 
 `netDamage` is deliberately left meaning *"the foe's own telegraphed hit"*.
 Every existing readout depends on that; the brood rides in `addNetDamage` /
@@ -996,7 +1003,15 @@ barrier's share against GUARD — systematically understating the leftover wall
 and therefore **overstating** `addNetDamage`, breaking the very parity the brief
 calls its ship gate. Shipped instead as explicit `guardAbsorbed` /
 `barrierAbsorbed` minimums, arithmetically identical for `netDamage` (byte
-unchanged) and exact for the leftover.
+unchanged) and ~~exact for the leftover~~ — **CORRECTED by burn-day audit
+2026-09-19 row 3.2: exact only for a non-SWIFT foe against an unarmored
+player.** Those minimums were a third inline copy of arithmetic `soakFlatHit`
+already owned, and they omitted the SWIFT divisor and the armor subtraction the
+helper performs, so the leftover was overstated and the add term under-reported.
+The leftover is now taken from a `soakFlatHit` call on the foe's own hit, which
+also moves `netDamage` — downward for every armored player, upward for every
+SWIFT foe. That movement is the correction, not a retune: it is what the engine
+was applying all along.
 
 ## Pages × tests matrix
 
