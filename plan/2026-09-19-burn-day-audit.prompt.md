@@ -79,6 +79,12 @@ rest of this prompt is written so you do not need to ask.
    **STALE by 1 mechanics-source commit (e333fbb)** — that is §3 row 6, not
    a pre-existing condition. Do not quote SUMMON balance figures from the
    current file; its stamp names a tree without SUMMON.
+   **Corrected 2026-09-20 by row 3.6's fix:** the file's *numbers* are not
+   suspect — ten of ten mid-stage cells reproduce exactly on today's SUMMON
+   tree, so they are the Phase 102 engine's figures. What is false is the
+   *provenance*: the stamp names `5a2158a`, a tree with zero SUMMON. Cite
+   those figures as the SUMMON engine's, never as `5a2158a`'s. The alarm now
+   reads STALE by 5, not 1 — the four audit fixes landed on top of `e333fbb`.
 3. **The gates, and the hooks around them.**
    - `npm run verify --workspace axiomancer-mechanics` (type-check ×3,
      lint, vitest, build) — ~4 min. `npm run verify --workspace
@@ -342,8 +348,14 @@ reproduction and reported the numbers, not re-read by the orchestrator;
   e333fbb`.
 - **Fix shape:** two commits. (1) Make the regen script refuse when
   `git status --porcelain axiomancer-mechanics/src` is non-empty, so this
-  cannot recur; add the check to `scripts/check-baseline-freshness.test.
-  mjs`. (2) Re-run `npm run baseline:regen` on a clean HEAD **after 3.2 and
+  cannot recur; guard it in `scripts/regen-deck-matrix-baseline.test.mjs`
+  — **not** in `scripts/check-baseline-freshness.test.mjs`, as this row
+  first said: that file executes in no CI job (it is reachable only through
+  the root `npm test`, which no workflow invokes), so the guard could never
+  have gone red on `main`. Landed 2026-09-20 with both baseline-stamp tests
+  wired into `.github/workflows/verify-mechanics.yml` and that job's
+  `paths:` filters widened to carry the four files, without which a
+  scripts-only change does not even trigger the job. (2) Re-run `npm run baseline:regen` on a clean HEAD **after 3.2 and
   3.8 land** (both move SUMMON cells) and stamp it with a note naming the
   causes — the brief's own risk row 8 asked for "a stamp naming BOTH
   causes" (SUMMON + the dropped SWIFT on The Jeweled Tree) and got neither.
@@ -583,7 +595,10 @@ Grouped by slice; each is one line. Line numbers as reported at `bbd22a9`.
 - B-7 Five root `npm test` files (`check-naming-law`, `axio-mcp-server`,
   `check-devlog-not-served`, `check-baseline-freshness`, `.claude/hooks/
   telemetry`) run in **no** workflow. Phase 98 closed one CI gap; this is
-  the next.
+  the next. **Four, as of 2026-09-20:** row 3.6's fix wired
+  `check-baseline-freshness.test.mjs` — and the new
+  `regen-deck-matrix-baseline.test.mjs` beside it — into
+  `verify-mechanics.yml`. The remaining four are still unrun.
 
 **C — Phases 101 / 103, catalogue, palette, e2e**
 - C-1 `arena-desolation`'s `used_by` / `replaces` were hand-edited after

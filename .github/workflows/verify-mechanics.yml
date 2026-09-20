@@ -14,6 +14,10 @@ on:
       - 'axiomancer-mechanics/**'
       - 'scripts/ci-e2e-scope.mjs'
       - 'scripts/ci-e2e-scope.test.mjs'
+      - 'scripts/check-baseline-freshness.mjs'
+      - 'scripts/check-baseline-freshness.test.mjs'
+      - 'scripts/regen-deck-matrix-baseline.mjs'
+      - 'scripts/regen-deck-matrix-baseline.test.mjs'
       - '.github/workflows/verify-mechanics.yml'
       - 'package-lock.json'
   pull_request:
@@ -22,6 +26,10 @@ on:
       - 'axiomancer-mechanics/**'
       - 'scripts/ci-e2e-scope.mjs'
       - 'scripts/ci-e2e-scope.test.mjs'
+      - 'scripts/check-baseline-freshness.mjs'
+      - 'scripts/check-baseline-freshness.test.mjs'
+      - 'scripts/regen-deck-matrix-baseline.mjs'
+      - 'scripts/regen-deck-matrix-baseline.test.mjs'
       - '.github/workflows/verify-mechanics.yml'
       - 'package-lock.json'
 
@@ -87,6 +95,15 @@ jobs:
 
       - name: Baseline freshness (soft warning)
         run: node scripts/check-baseline-freshness.mjs
+
+      # Burn-day audit 2026-09-19 row 3.6: these two guard the baseline's
+      # STAMP — the alarm's relevance filter, and the regen script's refusal
+      # to measure a working tree the stamped commit does not contain. They
+      # were reachable only through the root `npm test`, which no workflow
+      # invokes, so neither could ever go red on main. The `paths:` filters
+      # above carry the same four files for the same reason.
+      - name: Test baseline stamp guards
+        run: node --test scripts/check-baseline-freshness.test.mjs scripts/regen-deck-matrix-baseline.test.mjs
 
       - name: Check retired terminology
         run: node scripts/check-lexicon.mjs

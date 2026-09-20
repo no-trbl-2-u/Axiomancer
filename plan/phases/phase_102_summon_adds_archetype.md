@@ -927,7 +927,16 @@ history and the float layer alike. Risk 9 below fired exactly as written, and
 the mitigation it named was the omitted suite. Closed 2026-09-20 by burn-day
 audit 3.4; the matrix and the DoD below now say so. The gates were green
 (mechanics 216 suites / 3542 tests; mobile 308 suites / 2946 tests), and the
-baseline was regenerated because mechanics source moved.
+baseline *file* was regenerated because mechanics source moved — but its
+**stamp was false**, and the alarm has read STALE on `main` ever since. The
+regen ran with the Phase 102 work still uncommitted, so it recorded
+`git rev-parse --short HEAD` = `5a2158a`, a tree whose `combat.engine.ts`
+contains zero occurrences of SUMMON, for numbers measured on the SUMMON
+engine. The numbers themselves are sound (ten of ten mid-stage cells
+reproduce exactly on the shipped tree); the provenance claim is not.
+Burn-day audit 3.6, 2026-09-20: the regen script now refuses to measure
+while `axiomancer-mechanics/src` is dirty, so this cannot recur; the
+truthful re-stamp follows on a clean HEAD.
 
 ## What the player actually gets
 
@@ -1061,7 +1070,11 @@ was applying all along.
 - [x] surface: the log narrates the brood (§14d) — **not in this phase**;
       landed 2026-09-20 with burn-day audit 3.4
 - [x] the DENIED lie closed, with the soaked number printed
-- [x] mechanics gate green; mobile gate green; baseline regenerated
+- [x] mechanics gate green; mobile gate green; baseline file regenerated —
+      but risk row 8 ("re-stamped in the same tick, with the commit naming
+      *both* causes") was **not** met: the shipped stamp named `5a2158a`, a
+      tree without SUMMON, and its note names neither cause. Guarded
+      2026-09-20 by burn-day audit 3.6; the truthful re-stamp follows
 - [x] atlas updated (`Enemy keywords (10)` → `(11)`), content-drift green
 
 ## Follow-ups (out of scope)
