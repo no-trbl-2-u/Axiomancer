@@ -1,7 +1,20 @@
 # DevLog
 
-A private, self-contained site served from this one directory. `index.html` is a
-**hub** with three links:
+Two sites are built from this one directory.
+
+**The public DevLog** (`npm run site:public`, output `dist/devlog-public/`) is
+the game's public face: the log, the evidence and the full catalog, written for
+a player rather than a maintainer. Its design system is
+[`DESIGN.md`](./DESIGN.md); its builder is `scripts/build-devlog-public.mjs`.
+T reversed the 2026-08-15 content policy on 2026-09-20 with the spoiler cost
+stated — see `plan/2026-09-20-devlog-public-publish.prompt.md`. Publication
+happens at DEPLOY time, from that build directory, which is gitignored and
+guarded like every other generated output here: nothing generated is ever
+committed, so publishing stays a deliberate act.
+
+**The private index** (`npm run site:build`) is the internal tool this file
+originally described, unchanged: a self-contained set of pages opened from the
+filesystem. `index.html` is a **hub** with three links:
 
 - **Catalog** (`catalog.html`) — one HTML file containing every combat card,
   enemy, and live status effect, with inline CSS and inline JavaScript. It has no
@@ -19,12 +32,14 @@ nightly `/digest` skill authors a structured markdown entry into
 `entries/DIGEST_<date>.md`; `scripts/build-devlog.mjs` renders it into a
 self-contained styled HTML page at `entries/DIGEST_<date>.html` — markdown
 source and built HTML live side by side in `entries/`.
-Only the markdown source, the dated screenshot captures, and the
-hand-authored tuning-lab reports are committed. The built HTML, the catalog
-JSON/art, and the tuning-lab index are generated output, gitignored, and
-rebuilt locally by `npm run site:build` — Cloudflare Pages serves whatever
-`main`'s tree contains, so nothing generated here is committed to it
-(phase 57).
+Only the markdown source, the dated captures (screens, card and foe plates,
+world plates, rules pairs), and the hand-authored tuning-lab reports are
+committed. The built HTML, the catalog JSON/art, and the tuning-lab index are
+generated output, gitignored, and rebuilt on demand by `npm run site:build` —
+the game's Cloudflare Pages project serves whatever `main`'s tree contains, so
+nothing generated here is committed to it (phase 57, still in force). The
+public DevLog is a separate Pages project that runs its own build; see
+`docs/devlog-public-deploy.md`.
 
 ## Catalog (`catalog.html`)
 
@@ -71,6 +86,12 @@ pages refresh automatically on the next digest commit (no manual step).
 **What:** one line
 **Why:** one line
 **Shot:** combat-encounter — caption
+
+## [content] A card is reprinted
+**What:** one line
+**Why:** one line
+**Evidence:** card frostbitten-palisade — caption   <- card | foe | plate | rule
+**No capture:** why this change has no picture
 
 ## While you were out
 | Tick | Verb | Outcome |

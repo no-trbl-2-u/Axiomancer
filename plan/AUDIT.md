@@ -406,6 +406,70 @@
 
 ## Pending
 
+### [loop-call] Art the public DevLog may not publish: 90 files with an UNRESOLVED licence (2026-09-20)
+- category: content
+- impact: 7
+- ease: 3
+- detail: the public DevLog build gates every image on its directory's
+  `provenance.json` (`scripts/devlog-art-licence.mjs`). The audit it produces,
+  run against today's tree: `maps/` 5/5, `combat/` 7/7 and `splatter/` 4/4
+  publish (public domain); `enemies/` publishes 25 of 77 (24 CC BY 3.0 with the
+  artist rendered, 1 public domain); `cards/` 0 of 19, `portraits/` 0 of 15 and
+  `treasure/` 0 of 4 publish. Every withheld file reads "UNRESOLVED" — the
+  provenance gate's own word for owner-supplied external illustration with no
+  source and no licence traced since. This is the publish prompt's §1 carve-out
+  exercised exactly as it is written: T's ruling makes the CONTENT public, and
+  it is not T's to waive a third party's licence. So the public catalog's card
+  plates publish their frame, name and ledger and say in the frame the painting
+  would fill that the painting is withheld and why.
+- next: not a build fix — a content debt. Either trace the provenance of the
+  2026-07-06 illustration drop (52 foe portraits, 19 card paintings, 15
+  character portraits, 4 treasure images) or replace those files with art whose
+  licence is on record, the way `acquire-art.mjs` acquires the plates. Filed as
+  a candidate in `plan/PHASE_CANDIDATES.md`. Until then the public catalog is
+  honest but thin, and it says so on every plate.
+
+### [loop-call] Seven calls made while building the public DevLog (2026-09-20)
+- category: process
+- impact: 3
+- ease: 9
+- detail: decisions the build made itself, per THE OPEN GATE, recorded for
+  after-the-fact review rather than asked. (1) **Panels publish by default;
+  `Needs you` alone is withheld** — it is correspondence, not a report, and
+  every post says at its foot that it is held back; `/digest` now carries the
+  obligation to promote its player-facing half into `Queues now`. (2) **Fonts
+  load from Google Fonts** with a full local fallback, rather than blocking the
+  build on vendoring four families; self-hosting is filed as a candidate. (3)
+  **Card and foe plates render as SVG** of the card's printed text in the
+  shipped face's layout, not a rasterised app screenshot: the nightly has no
+  browser and no model call, and the site captions the plate as what it is. (4)
+  **The hero's holed sheet is generated** rather than importing the design
+  prototype's placeholder, which had no provenance. (5) **The 54 legacy entries
+  get a derived title** (the headline's first clause, or a word-boundary cut of
+  it) because they predate the title field `/digest` now authors — derived
+  always from the author's own words, never invented. (6) **Two latent grammar
+  bugs were fixed while extracting the shared parser**: a headline and a field
+  value now run on across wrapped lines instead of truncating at the first, and
+  a bracketed heading in the older vocabulary (`[docs]`, `[combat]`, `[mobile]`)
+  renders as the work item it is rather than falling through to the panel
+  branch. Both fixes improve the private index too. (7) **A page's payload
+  budget counts every image it references**, not only what paints first.
+- next: review at the next `/oversight`; nothing here blocks.
+
+### [loop-call] `plan/bearings.md` still says there is no hosted web surface, and a second Pages project is about to exist (2026-09-20)
+- category: divergence
+- impact: 5
+- ease: 9
+- detail: bearings L35-37 states "**No hosted web surface.**" as a standing
+  decision. It was already in tension with the game's Cloudflare project (the
+  open divergence row above); T's 2026-09-20 reversal makes a SECOND project
+  deliberate policy. The sentence was not edited in this branch because the
+  project does not exist yet and editing a record ahead of the tree is the
+  precise fault the burn-day audit was called to clean up.
+- next: when the Pages project is created (`docs/devlog-public-deploy.md` step
+  8), correct bearings' sentence and the § Surface paragraph in the same commit
+  that records the URL. Not before.
+
 ### [loop-call] The local verify gate and CI disagree about what green means: the Playwright journeys run only in CI (2026-09-20)
 - category: process
 - impact: 7
@@ -1784,6 +1848,19 @@ verification trail.
   URLs should 404. **Row stays open** — the Cloudflare project itself
   (production domain, guessable per-branch previews) still needs a
   human at the dashboard, per the text above.
+- **CONTENT POLICY REVERSED by T, 2026-09-20 — the row's shape changes.**
+  The DevLog, its evidence and the full catalog are now deliberately public
+  (`plan/2026-09-20-devlog-public-publish.prompt.md`), so "content labeled
+  private is live on a public domain" is no longer the finding. What remains
+  of this row is unchanged and still open: bearings' "no hosted web surface"
+  sentence versus a Cloudflare project nobody in-repo controls, and the
+  guessable per-branch previews. Both still need a human at the dashboard.
+  The reversal did NOT loosen phase 57's mechanism: generated output stays
+  untracked, the guard stays wired, and publication happens at deploy time
+  from `dist/devlog-public/` (`npm run site:public`), a directory the guard
+  now also covers. Bearings' sentence is the one record that must change
+  when the second Pages project exists — filed below as a loop-call rather
+  than edited blind, because the project does not exist yet.
 
 ### [x] [contract] `exploration-combat-roundtrip-e2e` regression: FLEE leaves the tab bar hidden — RESOLVED via /oversight 2026-08-10: fixed by #194
 - category: contract

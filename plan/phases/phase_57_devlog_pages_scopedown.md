@@ -1,5 +1,29 @@
 # Phase 57 — Stop publishing the private DevLog
 
+> **SUPERSEDED IN PART, 2026-09-20 — read this before the brief.**
+>
+> T reversed the CONTENT POLICY this phase rested on: the development log,
+> its evidence, and the full catalog (every card, effect and enemy, with art)
+> are now deliberately PUBLIC, with the spoiler cost stated. See
+> `plan/2026-09-20-devlog-public-publish.prompt.md`.
+>
+> What is superseded: the sentence "this content was never meant to be
+> public". What is NOT superseded, and stays exactly as this phase built it:
+> every mechanism below. Generated output is still untracked and gitignored,
+> `scripts/check-devlog-not-served.mjs` still guards the tree, the pre-commit
+> hook and the weekly sweep are untouched, and `/digest` still commits only
+> source.
+>
+> The public site is a SECOND Cloudflare Pages project, built at deploy time
+> from `dist/devlog-public/` (`npm run site:public`) and never committed —
+> which is what makes the new publication deliberate rather than accidental,
+> this phase's actual complaint. The guard now covers that build directory
+> too, and `scripts/build-devlog-public.test.mjs` proves the guard still
+> exits 0 with a build present.
+>
+> The DoD below is historical and stays ticked as it was. Nothing in it was
+> undone.
+
 > Infra/CI phase, not a page-family/feature-surface phase. Several
 > `skills/plan-a-phase.md` §4 sections (routes, hero/body composition,
 > mobile reflow) don't apply and are marked N/A below rather than

@@ -46,6 +46,11 @@ devlog/entries/*.html
 devlog/tuning-lab/index.html
 devlog/data/
 devlog/assets/catalog/
+
+# DevLog — the PUBLIC site's build output (2026-09-20). Published at deploy
+# time by `npm run devlog:public`, from this directory, and never committed:
+# phase 57's guard covers it too (scripts/check-devlog-not-served.mjs).
+dist/
 .playwright-mcp
 
 # Telemetry hook sidecar (pairs *-end rows with their start rows)

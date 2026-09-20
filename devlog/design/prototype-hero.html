@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hero reveal — three treatments — Miserere Mei, Deus DevLog</title>
+<!--
+  A design prototype, not a built page:   npm run site:public   then open this.
+  Three scroll behaviours for the holed sheet over a real Doré plate. Only the
+  first ships (DESIGN.md §6); the other two are the record of why it was chosen.
+  Scroll inside each frame.
+-->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pirata+One&family=IM+Fell+English:ital@0;1&family=Bebas+Neue&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../dist/devlog-public/assets/tokens.css">
+<link rel="stylesheet" href="../../dist/devlog-public/assets/site.css">
+<style>
+  /* Prototype-only furniture: the three frames sit side by side so the
+     treatments can be compared in one glance. Nothing here belongs to the
+     site's system — the site has one hero, not three in a row. */
+  .frames { display: flex; flex-wrap: wrap; gap: 34px; align-items: flex-start; }
+  .frame { width: 390px; max-width: 100%; }
+  .frame-scroll { height: 700px; overflow-y: auto; overflow-x: hidden; position: relative; border: 1px solid var(--ash); background: var(--bg); }
+  .frame-scroll .hero { position: sticky; top: 0; height: 700px; min-height: 0; }
+  .frame-scroll .hero-title h1 { font-size: 50px; }
+  .runway { height: 560px; }
+  .tail { position: relative; background: var(--bg); border-top: 1px solid var(--divider); padding: 26px 22px 40px; }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in"><span class="brand">&#10016; The Chronicle &mdash; hero treatments</span></div>
+</header>
+
+<main class="band band-full">
+  <p class="eyebrow">&#10016; Hero reveal &mdash; what the holes do</p><hr class="rule">
+  <p class="dim">Three scroll behaviours for the holed sheet over a real Doré plate (<code>assets/images/maps/forest-dark.webp</code>). The sheet is the generated <code>hero-sheet.svg</code>; drop a hand-cut one in its place and every treatment still works. Reduced motion, in all three: no transform at all &mdash; the sheet cross-fades to the plate over the same scroll distance, which is why the title never rides on the animation.</p>
+
+  <div class="frames">
+    <div class="frame">
+      <p class="mono">1a &mdash; parallax drift <strong>(ships)</strong></p>
+      <p class="dim">The plate behind travels slower than the sheet in front, so the world moves inside the holes while the sheet holds still. Nothing changes shape &mdash; the depth does the work.</p>
+      <div class="frame-scroll" data-mode="parallax"></div>
+    </div>
+    <div class="frame">
+      <p class="mono">1b &mdash; holes bloom open</p>
+      <p class="dim">The sheet scales past the frame, so every hole widens until the plate has eaten the page. The most dramatic, and the most reliant on the sheet's edge quality: at small sizes it reads as a filter effect rather than a world.</p>
+      <div class="frame-scroll" data-mode="bloom"></div>
+    </div>
+    <div class="frame">
+      <p class="mono">1c &mdash; sheet lifts away</p>
+      <p class="dim">The sheet is torn upward off a plate that barely moves &mdash; a page turning. Cheapest to compute and calmest on a phone, but it says &ldquo;a page turned&rdquo; rather than &ldquo;there is a world behind this&rdquo;.</p>
+      <div class="frame-scroll" data-mode="lift"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+// Each frame gets the same hero markup; only the transform differs. The paint
+// function is the shipped one's shape (one passive scroll listener writing two
+// transforms) with the two rejected treatments kept alongside for comparison.
+(function () {
+  'use strict';
+  var HERO = [
+    '<div class="hero" data-hero>',
+    '  <img class="hero-plate" src="../../axiomancer-mobile/assets/images/maps/forest-dark.webp" alt="" aria-hidden="true">',
+    '  <img class="hero-sheet" src="../../dist/devlog-public/assets/hero-sheet.svg" alt="" aria-hidden="true">',
+    '  <div class="hero-vignette"></div>',
+    '  <div class="hero-title"><h1>Miserere<br>Mei, Deus</h1></div>',
+    '  <p class="hero-cue">DESCEND</p>',
+    '</div>',
+    '<div class="runway"></div>',
+    '<div class="tail">',
+    '  <p class="eyebrow">&#10016; The newest entry</p><hr class="rule">',
+    '  <p class="mono">xxix &middot; viii &middot; mmxxvi</p>',
+    '  <h2>The card face, reprinted</h2>',
+    '  <p class="dim">The side-rail face is retired for a codex-page layout: a blackletter name band, a framed plate behind a hairline rule, and a ledger at the foot.</p>',
+    '</div>',
+  ].join('\n');
+
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var RUN = 560;
+
+  function paint(frame) {
+    var hero = frame.querySelector('[data-hero]');
+    var plate = frame.querySelector('.hero-plate');
+    var sheet = frame.querySelector('.hero-sheet');
+    var title = frame.querySelector('.hero-title');
+    var cue = frame.querySelector('.hero-cue');
+    if (!hero || !plate || !sheet) return;
+
+    var p = Math.max(0, Math.min(1, frame.scrollTop / RUN));
+    var between = function (a, b) { return a + (b - a) * p; };
+
+    if (reduced.matches) {
+      plate.style.transform = 'none';
+      sheet.style.transform = 'none';
+      sheet.style.opacity = String(1 - p);
+      plate.style.opacity = String(between(0.62, 0.95));
+    } else if (frame.getAttribute('data-mode') === 'parallax') {
+      plate.style.transform = 'translateY(' + (p * 96).toFixed(1) + 'px) scale(' + between(1, 1.06).toFixed(3) + ')';
+      sheet.style.transform = 'translateY(' + (-p * 26).toFixed(1) + 'px)';
+      sheet.style.opacity = String(1 - p * 0.72);
+      plate.style.opacity = String(between(0.62, 0.92));
+    } else if (frame.getAttribute('data-mode') === 'bloom') {
+      plate.style.transform = 'scale(' + between(1.02, 1).toFixed(3) + ')';
+      sheet.style.transformOrigin = '50% 42%';
+      sheet.style.transform = 'scale(' + between(1, 1.85).toFixed(3) + ')';
+      sheet.style.opacity = String(1 - Math.max(0, p - 0.45) / 0.55);
+      plate.style.opacity = String(between(0.62, 0.92));
+    } else {
+      plate.style.transform = 'translateY(' + (p * 22).toFixed(1) + 'px)';
+      sheet.style.transform = 'translateY(' + (-p * 104).toFixed(1) + '%) rotate(' + (-p * 1.2).toFixed(2) + 'deg)';
+      sheet.style.opacity = '1';
+      plate.style.opacity = String(between(0.62, 0.92));
+    }
+
+    // The title never rides the animation: it fades on its own curve and is
+    // legible at every scroll position in every motion setting.
+    title.style.opacity = String(Math.max(0, 1 - p * 1.8));
+    title.style.transform = reduced.matches ? 'none' : 'translateY(' + (-p * 34).toFixed(1) + 'px)';
+    cue.style.opacity = String(Math.max(0, 1 - p * 3));
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.frame-scroll'), function (frame) {
+    frame.innerHTML = HERO;
+    frame.addEventListener('scroll', function () { paint(frame); }, { passive: true });
+    reduced.addEventListener('change', function () { paint(frame); });
+    paint(frame);
+  });
+})();
+</script>
+</body>
+</html>

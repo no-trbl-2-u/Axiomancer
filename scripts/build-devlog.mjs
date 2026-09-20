@@ -39,7 +39,17 @@
 import { readdirSync, readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { escapeHtml, slug, inline, page } from "./devlog-shell.mjs";
+import { escapeHtml, inline, page, slug } from "./devlog-shell.mjs";
+// The entry grammar (parse + block Markdown + the category vocabulary) is
+// shared with the public DevLog build — scripts/devlog-entry.mjs is its single
+// home, so the two sites can never drift into two grammars.
+import {
+  CATEGORIES,
+  CAT_LABEL,
+  extractFields,
+  mdToHtml,
+  parseEntry,
+} from "./devlog-entry.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DEVLOG = join(ROOT, "devlog");
@@ -49,213 +59,6 @@ const DATA = join(DEVLOG, "data");
 const TUNING_LAB = join(DEVLOG, "tuning-lab");
 
 const ENTRY_RE = /^DIGEST_(\d{4}-\d{2}-\d{2})\.md$/;
-
-const CATEGORIES = ["mechanics", "ui", "content", "infra", "balance"];
-const CAT_LABEL = {
-  mechanics: "mechanics",
-  ui: "UI",
-  content: "content",
-  infra: "infra",
-  balance: "balance",
-};
-
-// ---------------------------------------------------------------------------
-// Status is color + text, never color alone (format contract): tag known
-// outcome words with a colored dot while keeping the word. Applied to table
-// cells only, where the pulse/queue outcomes live.
-// ---------------------------------------------------------------------------
-const STATUS = [
-  { re: /\b(shipped|landed|merged|done|pass(?:ed)?|green|clean)\b/gi, cls: "ok" },
-  { re: /\b(no-?op|quiet|skip(?:ped)?|idle|none)\b/gi, cls: "neutral" },
-  { re: /\b(blocked|needs[- ]user|waiting|pending)\b/gi, cls: "warn" },
-  { re: /\b(crashed|failed|failure|error|broke(?:n)?|red)\b/gi, cls: "bad" },
-];
-function statusize(html) {
-  // Skip cells that contain markup (links/code) to avoid matching inside tags.
-  if (/[<]/.test(html)) return html;
-  for (const { re, cls } of STATUS) {
-    html = html.replace(re, (m) => `<span class="st st-${cls}">${m}</span>`);
-  }
-  return html;
-}
-
-// ---------------------------------------------------------------------------
-// Diff rendering — a fenced ```diff block becomes a colored +/- view
-// ---------------------------------------------------------------------------
-function renderDiff(text) {
-  const rows = text
-    .split("\n")
-    .map((l) => {
-      let cls = "ctx";
-      if (l.startsWith("@@")) cls = "hunk";
-      else if (/^(\+\+\+|---|diff |index )/.test(l)) cls = "meta";
-      else if (l.startsWith("+")) cls = "add";
-      else if (l.startsWith("-")) cls = "del";
-      const body = escapeHtml(l) || "&nbsp;";
-      return `<div class="dl ${cls}">${body}</div>`;
-    })
-    .join("");
-  return `<div class="diff" role="img" aria-label="code diff">${rows}</div>`;
-}
-
-// ---------------------------------------------------------------------------
-// Block markdown → HTML (used for card bodies and panels)
-// ---------------------------------------------------------------------------
-function isTableSep(line) {
-  return /^\s*\|?[\s:|-]*-[\s:|-]*\|?\s*$/.test(line) && line.includes("-");
-}
-function splitRow(line) {
-  return line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((c) => c.trim());
-}
-
-function mdToHtml(md) {
-  const lines = md.replace(/\r\n/g, "\n").split("\n");
-  const out = [];
-  let i = 0;
-
-  while (i < lines.length) {
-    const line = lines[i];
-    if (line.trim() === "") { i++; continue; }
-
-    // Fenced code — ```diff gets the colored diff view, everything else <pre>.
-    if (/^```/.test(line.trim())) {
-      const lang = line.trim().replace(/^```/, "").trim().toLowerCase();
-      const buf = [];
-      i++;
-      while (i < lines.length && !/^```/.test(lines[i].trim())) { buf.push(lines[i]); i++; }
-      i++; // closing fence
-      out.push(lang === "diff" ? renderDiff(buf.join("\n")) : `<pre><code>${escapeHtml(buf.join("\n"))}</code></pre>`);
-      continue;
-    }
-
-    // Heading (inside a body — rare; keep it working)
-    const h = line.match(/^(#{1,6})\s+(.*)$/);
-    if (h) {
-      const level = Math.min(6, h[1].length + 1);
-      const text = h[2].trim();
-      out.push(`<h${level} id="${slug(text)}">${inline(text)}</h${level}>`);
-      i++;
-      continue;
-    }
-
-    // Table
-    if (line.includes("|") && i + 1 < lines.length && isTableSep(lines[i + 1])) {
-      const header = splitRow(line);
-      i += 2;
-      const rows = [];
-      while (i < lines.length && lines[i].includes("|") && lines[i].trim() !== "") {
-        rows.push(splitRow(lines[i]));
-        i++;
-      }
-      const thead = `<thead><tr>${header.map((c) => `<th>${inline(c)}</th>`).join("")}</tr></thead>`;
-      const tbody = `<tbody>${rows.map((r) => `<tr>${r.map((c) => `<td>${statusize(inline(c))}</td>`).join("")}</tr>`).join("")}</tbody>`;
-      out.push(`<div class="tablewrap"><table>${thead}${tbody}</table></div>`);
-      continue;
-    }
-
-    // Unordered list
-    if (/^\s*[-*]\s+/.test(line)) {
-      const items = [];
-      while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) {
-        items.push(`<li>${inline(lines[i].replace(/^\s*[-*]\s+/, ""))}</li>`);
-        i++;
-      }
-      out.push(`<ul>${items.join("")}</ul>`);
-      continue;
-    }
-
-    // Ordered list
-    if (/^\s*\d+\.\s+/.test(line)) {
-      const items = [];
-      while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) {
-        items.push(`<li>${inline(lines[i].replace(/^\s*\d+\.\s+/, ""))}</li>`);
-        i++;
-      }
-      out.push(`<ol>${items.join("")}</ol>`);
-      continue;
-    }
-
-    // Paragraph
-    const para = [];
-    while (
-      i < lines.length &&
-      lines[i].trim() !== "" &&
-      !/^#{1,6}\s+/.test(lines[i]) &&
-      !/^```/.test(lines[i].trim()) &&
-      !/^\s*[-*]\s+/.test(lines[i]) &&
-      !/^\s*\d+\.\s+/.test(lines[i])
-    ) {
-      para.push(lines[i].trim());
-      i++;
-    }
-    out.push(`<p>${inline(para.join(" "))}</p>`);
-  }
-
-  return out.join("\n");
-}
-
-// ---------------------------------------------------------------------------
-// Parse a structured entry into a headline + ordered sections
-// ---------------------------------------------------------------------------
-function parseEntry(md) {
-  const lines = md.replace(/\r\n/g, "\n").split("\n");
-  let headline = "";
-  const sections = [];
-  let cur = null; // { kind, category, title, bodyLines }
-
-  const push = () => { if (cur) sections.push(cur); cur = null; };
-
-  for (const raw of lines) {
-    const line = raw;
-    const sec = line.match(/^##\s+(.*)$/);
-    if (sec) {
-      push();
-      const title = sec[1].trim();
-      const cat = title.match(/^\[([a-z-]+)\]\s*(.*)$/i);
-      if (cat && CATEGORIES.includes(cat[1].toLowerCase())) {
-        cur = { kind: "card", category: cat[1].toLowerCase(), title: cat[2].trim() || cat[1], bodyLines: [] };
-      } else {
-        cur = { kind: "panel", title, bodyLines: [] };
-      }
-      continue;
-    }
-    if (!cur) {
-      // Preamble: the first blockquote line is the headline.
-      if (!headline) {
-        const q = line.match(/^>\s?(.*)$/);
-        if (q && q[1].trim()) headline = q[1].trim();
-      }
-      continue;
-    }
-    cur.bodyLines.push(line);
-  }
-  push();
-
-  return { headline, sections };
-}
-
-// Pull labelled fields (**What:** ...) out of a card body; return fields + the
-// remaining free-form body markdown.
-function extractFields(bodyLines) {
-  const fields = { what: "", why: "", commits: [], shots: [] };
-  const rest = [];
-  for (const line of bodyLines) {
-    let m;
-    if ((m = line.match(/^\*\*What:\*\*\s*(.*)$/i))) { fields.what = m[1].trim(); continue; }
-    if ((m = line.match(/^\*\*Why:\*\*\s*(.*)$/i))) { fields.why = m[1].trim(); continue; }
-    if ((m = line.match(/^\*\*Commits:\*\*\s*(.*)$/i))) {
-      fields.commits = m[1].split(/[\s,]+/).map((s) => s.trim()).filter(Boolean);
-      continue;
-    }
-    if ((m = line.match(/^\*\*Shot:\*\*\s*(.*)$/i))) {
-      const [screen, ...cap] = m[1].split(/\s+—\s+|\s+-\s+/);
-      fields.shots.push({ screen: (screen || "").trim(), caption: cap.join(" — ").trim() });
-      continue;
-    }
-    rest.push(line);
-  }
-  return { fields, body: rest.join("\n").trim() };
-}
 
 // ---------------------------------------------------------------------------
 // Render a UI screenshot set (before / after / diff) if the assets exist

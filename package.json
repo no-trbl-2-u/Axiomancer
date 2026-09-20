@@ -2,7 +2,7 @@
   "name": "axiomancer",
   "private": true,
   "version": "0.0.0",
-  "description": "Miserere Mei, Deus monorepo — mechanics engine + mobile app + card editor.",
+  "description": "Miserere Mei, Deus monorepo \u2014 mechanics engine + mobile app + card editor.",
   "workspaces": [
     "axiomancer-mechanics",
     "axiomancer-mobile",
@@ -20,11 +20,14 @@
     "deploy:check": "node scripts/deploy-check.mjs",
     "devlog:build": "node scripts/build-devlog.mjs",
     "devlog:shots": "node axiomancer-mobile/scripts/devlog-shots.mjs",
+    "devlog:public": "node scripts/build-devlog-public.mjs",
+    "devlog:catalog-shots": "node scripts/devlog-catalog-shots.mjs",
+    "devlog:plate-shots": "node scripts/devlog-plate-shots.mjs",
     "catalog:export": "npm --workspace axiomancer-mechanics run catalog:export",
     "catalog:build": "node scripts/build-catalog.mjs",
     "catalog": "npm run catalog:export && npm run catalog:build",
     "site:build": "npm run catalog && npm run devlog:build",
-    "test": "node --test scripts/ci-e2e-scope.test.mjs scripts/check-naming-law.test.mjs scripts/check-lexicon.test.mjs scripts/check-prose.test.mjs scripts/content-drift.test.mjs scripts/loop-issue.test.mjs scripts/axio-mcp-server.test.mjs scripts/check-devlog-not-served.test.mjs scripts/check-worklets.test.mjs scripts/check-baseline-freshness.test.mjs scripts/regen-deck-matrix-baseline.test.mjs .claude/hooks/telemetry.test.mjs",
+    "test": "node --test scripts/ci-e2e-scope.test.mjs scripts/check-naming-law.test.mjs scripts/check-lexicon.test.mjs scripts/check-prose.test.mjs scripts/content-drift.test.mjs scripts/loop-issue.test.mjs scripts/axio-mcp-server.test.mjs scripts/check-devlog-not-served.test.mjs scripts/devlog-entry.test.mjs scripts/devlog-tokens.test.mjs scripts/devlog-art-licence.test.mjs scripts/devlog-card-plate.test.mjs scripts/build-devlog-public.test.mjs scripts/check-worklets.test.mjs scripts/check-baseline-freshness.test.mjs scripts/regen-deck-matrix-baseline.test.mjs .claude/hooks/telemetry.test.mjs",
     "baseline:check": "node scripts/check-baseline-freshness.mjs",
     "baseline:regen": "node scripts/regen-deck-matrix-baseline.mjs",
     "critique:drive": "npm --workspace axiomancer-mobile run critique:drive",
@@ -32,7 +35,8 @@
     "lint:names": "node scripts/check-naming-law.mjs --sweep",
     "lint:content": "npm run lint:prose && npm run lint:names",
     "lint:grants": "node scripts/check-harness-grants.mjs",
-    "lint:worklets": "node scripts/check-worklets.mjs"
+    "lint:worklets": "node scripts/check-worklets.mjs",
+    "site:public": "npm run catalog:export && npm run devlog:public"
   },
   "overrides": {
     "react": "19.1.0",

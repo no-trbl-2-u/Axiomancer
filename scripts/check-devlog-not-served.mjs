@@ -7,6 +7,12 @@
 // inputs (entries/*.md, dated screenshots, hand-authored tuning-lab reports)
 // stay tracked; only the regenerable output is gitignored.
 //
+// The public DevLog (2026-09-20) does NOT weaken this. It builds to
+// `dist/devlog-public/`, which is gitignored and listed here as generated too:
+// publication happens at deploy time, from a build, so generated output still
+// never enters `main`'s tree. That is what makes the new publication
+// deliberate rather than accidental — phase 57's actual complaint.
+//
 //   node scripts/check-devlog-not-served.mjs             # scan the real tree
 //   node scripts/check-devlog-not-served.mjs <paths...>   # scan an explicit list
 //
@@ -22,6 +28,8 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
  *  derived from other tracked sources and rebuilt on demand by
  *  `npm run site:build`, never a member that should be committed. */
 export function isGeneratedDevlogPath(rel) {
+  // The public site's build directory — every byte of it is generated.
+  if (rel === 'dist' || rel.startsWith('dist/')) return true
   if (rel === 'devlog/index.html' || rel === 'devlog/log.html' || rel === 'devlog/catalog.html') return true
   if (rel === 'devlog/tuning-lab/index.html') return true
   if (/^devlog\/entries\/.*\.html$/.test(rel)) return true
@@ -55,7 +63,7 @@ if (isDirectRun(import.meta.url)) {
   const args = process.argv.slice(2)
   const paths = args.length
     ? args
-    : execFileSync('git', ['ls-files', 'devlog/'], { cwd: ROOT, encoding: 'utf-8' })
+    : execFileSync('git', ['ls-files', 'devlog/', 'dist/'], { cwd: ROOT, encoding: 'utf-8' })
         .split('\n')
         .filter(Boolean)
 
@@ -66,5 +74,5 @@ if (isDirectRun(import.meta.url)) {
     console.error('\nRun `npm run site:build` locally to regenerate; do not commit the output.')
     process.exit(1)
   }
-  console.log(`check-devlog-not-served: ${paths.length} tracked devlog/ path(s) clean.`)
+  console.log(`check-devlog-not-served: ${paths.length} tracked devlog/ and dist/ path(s) clean.`)
 }
