@@ -1,13 +1,35 @@
 # Critique log
 
-> Last pass: 2026-09-19 at commit bbd22a94
-> Pass count: 42
+> Last pass: 2026-09-20 at commit c3f8fa04
+> Pass count: 43
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 43, 2026-09-20, commit c3f8fa04] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5,
+> `CRITIQUE_VIEWPORT=both`), mobile (375×812) and desktop (1280×800),
+> against the full 11-screen set (title, onboarding, combat preview,
+> live combat-board, exploration hub, dialogue, village, cutscene,
+> rest, hazard, late-game hub) — 22 captures, 0 nav trouble, 0
+> console/page errors, no undefined/NaN/`[object Object]` text
+> artifacts in any DOM-text dump. Read every screenshot + domText
+> directly. Self-assessed against the current Pending/Done log: the
+> mobile hand-fan reproduces the open **[MED] Phase 97 hint gap** row
+> (pass 42, commit bbd22a94) unchanged — `04-combat-board.png` still
+> shows "CHILBLA IN...", "THE LONG...", "SPOILED POULT..." with no
+> visible tap-to-read cue in the fan itself; desktop's fan still
+> renders all five names in full, confirming the gap stays
+> mobile-only. The village "Void Essence" wearer wording (pass 41,
+> still Pending) reproduces unchanged. The hazard danger-card's
+> flat-vector art (this pass's fixtures rolled "Flooded Undercroft"
+> mobile / "The Creeping Rot" desktop) reconfirms pass 34's
+> deliberate-style call, not filed. The OMEN cutscene redirect
+> (onboarding, exploration-hub) holds clean at prior-pass baseline.
+> Zero fresh findings this pass.
 
 > **[critique pass 38, 2026-09-15, commit 24448fde] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5) at both
