@@ -659,7 +659,7 @@
   would need reopening first. Do NOT ship (a) and (b) together.
 - source: burn-day audit 2026-09-19
 
-### [MED] combat — Phase 97's "tap a card to read it" hint never shows for the truncated hand fan it was built to fix
+### [x] [MED] combat — Phase 97's "tap a card to read it" hint never shows for the truncated hand fan it was built to fix — RESOLVED 2026-09-20 (burn-day audit row 3.13)
 - pass: 42 (commit bbd22a94)
 - viewport: mobile (375×812) — the hand-fan truncation this hint
   addresses doesn't occur on desktop (1280×800), so the gap is
@@ -700,6 +700,24 @@
   `CombatBoard.tsx:1554`. Component: `CombatBoard.tsx` (`stageHint`,
   hand-fan render block).
 - source: loop
+- resolution (burn-day audit row 3.13, 2026-09-20): the row reproduced exactly
+  as filed, and the audit had found the same thing independently — this row and
+  audit row 3.13 are one finding, closed here once. The hatch now renders on the
+  fan itself: a `styles.fanHint` line inside the hand dock, gated on
+  `fan.length > 1 && !cardDragLive`, which is precisely the condition under
+  which `HandCard` receives a non-null `namePeek` — so the sentence is on screen
+  exactly while a name is being clipped, and gone once nothing is covered. The
+  suggested fix here was to extend the existing `stageHint` and reuse its
+  string; the audit split it instead, because the string was also 67 characters
+  inside `numberOfLines={1}` at 12pt and RN ellipsizes the TAIL — so `tap a card
+  to read it` was the clause being dropped even in the staged branch where it
+  did render. The staged line is now `drag a die onto your card · APPLY to
+  commit` (43 chars) and the fan line `tap a card to read it` (21), each guarded
+  against a 56-character one-line budget. `ellipsizeMode` was deliberately NOT
+  added: RN already defaults to `'tail'`, so the ellipsis was never the bug.
+  Guards in `CombatBoard.handfan.test.tsx`, all three verified red first: the
+  hatch is present with `stagedUids={[]}`, both hint lines fit their line, and
+  a tap driven through the gesture's registered test id reaches `onInspect`.
 
 
 ### [x] [HIGH] process — a committed playtest bug report reached `main` filed NOWHERE in `plan/` — RESOLVED 2026-09-19 (phases 99-100)
@@ -811,6 +829,25 @@
   visibly — the tap path was already wired but lived only in an
   accessibilityHint. New 10-test guard suite
   `CombatBoard.handfan.test.tsx`; combat-encounter 31 suites / 186 tests green.
+- residual, and the reason this row STAYS resolved (burn-day audit row 3.13,
+  2026-09-20): re-captured at 375x812 on the same Brine Hag opening hand, the
+  fan now reads `THIN HYMN / CHILBLA IN ... / THE LONG ... / SPOILED POULTI... /
+  CHILBLAIN WATCH`. That is this row's complaint answered — the names are no
+  longer PAINTED OVER, which is what "hiding the covered cards' names" meant and
+  what the pass-37 through pass-41 captures showed — but it is not "every name
+  reads in the fan". The visible sliver is 40.25pt and `plateName` is 13pt/15pt,
+  so a covered card affords roughly nine or ten uppercase glyphs across its two
+  lines and anything longer ellipsizes: `FROSTBITTEN PALISADE` truncates, it
+  does not read. No new Pending row is filed for that, because no lever is left
+  that this row could ask for. The geometry is exhausted and pinned
+  (`120 + 4*step <= 375` caps `step` at 63.75 against 57.75, and C11-R / C11-R2
+  in `CombatBoard.fresh-eyes-repair.test.tsx` hold it there); the name box is
+  already sized to exactly the peek; and the way to read a long name in full is
+  the tap hatch, which as of this audit is finally ON the fan, in the same frame
+  as the truncation — see the row closed above. If the loop ever wants full
+  names in the fan itself, that is a different change with a different cost (the
+  vertical-stagger lever in Phase 97 decision 8, already filed as a follow-up
+  there), not an unfinished piece of this one.
 
 ### [MED] ui-fresh-eyes SWARM 2026-09-12 — the 309-row candidate set is drained
 - pass: swarm follow-up to the 2026-09-12 sweep, run from

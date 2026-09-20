@@ -17,25 +17,37 @@
  * name text is instead laid out inside the sliver it can actually occupy.
  *
  * What this suite pins:
- *   1. `NAME_BAND_LEFT_CHROME` still equals the four styles it claims to sum.
+ *   1. `NAME_BAND_LEFT_CHROME` equals the four styles it claims to sum, read
+ *      off the SHIPPED stylesheet (`useCombatBoardStyles`) — not re-typed here.
  *   2. `nameColumnPeek` is the peek, floored, and never exceeds the step.
  *   3. Every covered hand card carries a name box no wider than the peek.
  *   4. The LAST (uncovered) card keeps the full band — no cap.
  *   5. Non-hand faces (staged, reward offer, detail overlay) are uncapped.
- *   6. Tapping a hand card reaches `onInspect` — the escape hatch the board now
- *      advertises. Combat had NO test for this path before this suite.
+ *   6. The tap-to-read hatch is on screen while the fan is still occluded, and
+ *      both hint lines fit the single line they are given.
+ *   7. Tapping a hand card reaches `onInspect`.
+ *
+ * Corrected by the burn-day audit of 2026-09-19 (row 3.13). As first shipped,
+ * item 1 re-typed the four style numbers as literals beside the constant — a
+ * tautology that stayed green when a style moved — and item 6 claimed the tap
+ * path was tested when the file contained no such test at all: its one
+ * tap-related assertion sat behind an `if (hint)` that never ran, because the
+ * hint it looked for only rendered once a card had already been staged. Both
+ * are now real gates, each verified red against the tree that shipped them.
  */
 
 import React from 'react';
 import { StyleSheet } from 'react-native';
-import { render, screen } from '@testing-library/react-native';
+import { act, render, renderHook, screen } from '@testing-library/react-native';
 import { afterAll, beforeAll, describe, expect, it, jest } from '@jest/globals';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
+import { State } from 'react-native-gesture-handler';
+import { fireGestureHandler, getByGestureTestId } from 'react-native-gesture-handler/jest-utils';
 
 import { initializeCombatEncounter, rollEncounterDice } from '@mechanics';
 import {
     CombatBoard, CombatCardFace, handFanLayout, nameColumnPeek,
-    NAME_BAND_LEFT_CHROME, HAND_CARD_W,
+    NAME_BAND_LEFT_CHROME, HAND_CARD_W, useCombatBoardStyles,
     type DragController,
 } from '@/components/combat/encounter/CombatBoard';
 import { buildCombatViewModel, type CombatViewModel } from '@/state/presenters/combat-encounter.engine';
@@ -77,11 +89,14 @@ function freshVM(): { store: ReturnType<typeof withAllProviders>['store']; vm: C
     return { store, vm: buildCombatViewModel(s) };
 }
 
-function renderBoard(cbs = boardCallbacks()): { vm: CombatViewModel; cbs: ReturnType<typeof boardCallbacks> } {
+type Rendered = { vm: CombatViewModel; cbs: ReturnType<typeof boardCallbacks> };
+
+/** Render the board with whatever `stagedUids` the caller derives from the hand. */
+function renderBoardWith(stage: (vm: CombatViewModel) => string[], cbs = boardCallbacks()): Rendered {
     const { store, vm } = freshVM();
     const { tree } = withAllProviders(
         <SafeAreaInsetsContext.Provider value={INSETS}>
-            <CombatBoard vm={vm} drag={noopDrag()} stagedUids={[]} {...cbs} />
+            <CombatBoard vm={vm} drag={noopDrag()} stagedUids={stage(vm)} {...cbs} />
         </SafeAreaInsetsContext.Provider>,
         { store },
     );
@@ -89,21 +104,36 @@ function renderBoard(cbs = boardCallbacks()): { vm: CombatViewModel; cbs: Return
     return { vm, cbs };
 }
 
+/** The fan as the player first meets it: nothing staged, every name occluded. */
+const renderBoard = (cbs = boardCallbacks()): Rendered => renderBoardWith(() => [], cbs);
+/** One card lifted out of the fan and un-died — the staged hint's own branch. */
+const renderBoardStaged = (cbs = boardCallbacks()): Rendered =>
+    renderBoardWith((vm) => [vm.hand[0]!.uid], cbs);
+
 /** Flatten a node's style down to a plain record. */
 const flatten = (style: unknown) => StyleSheet.flatten(style as never) as Record<string, number | string>;
 
 // ── 1. The derived constant ─────────────────────────────────────────────────
 
 describe('NAME_BAND_LEFT_CHROME is derived, not guessed', () => {
-    it('equals the four styles it claims to sum', () => {
-        // Re-summed independently here so a silent drift in any of the four
-        // styles fails the gate rather than quietly re-clipping every name.
-        const faceCardBorder = 1.5;      // styles.faceCard.borderWidth
-        const bandPaddingLeft = 6;       // styles.plateBand.paddingHorizontal
-        const rarityPipWidth = 5;        // styles.plateRarityPip.width
-        const pipToTextGap = 5;          // styles.plateBand.gap
-        expect(NAME_BAND_LEFT_CHROME)
-            .toBe(faceCardBorder + bandPaddingLeft + rarityPipWidth + pipToTextGap);
+    it('equals the four SHIPPED styles it claims to sum', () => {
+        // Read off the stylesheet the board actually renders with, never
+        // re-typed here: a literal re-sum is a tautology (17.5 === 1.5+6+5+5
+        // holds whatever the styles do), and that is exactly how this
+        // constant could drift while the gate stayed green.
+        const { result } = renderHook(() => useCombatBoardStyles());
+        const s = result.current;
+        const parts = [
+            s.faceCard.borderWidth,          // card face's own left edge
+            s.plateBand.paddingHorizontal,   // the band's left half
+            s.plateRarityPip.width,          // the wax rarity pip
+            s.plateBand.gap,                 // pip -> text
+        ];
+        // A renamed or dropped key must fail loudly here rather than turn the
+        // sum into NaN and take the assertion below down with an unreadable
+        // message.
+        for (const part of parts) expect(typeof part).toBe('number');
+        expect(NAME_BAND_LEFT_CHROME).toBe(parts.reduce((a, b) => (a as number) + (b as number), 0));
     });
 });
 
@@ -192,16 +222,71 @@ describe('CombatCardFace leaves every non-fanned face uncapped', () => {
 
 // ── 6. The escape hatch ─────────────────────────────────────────────────────
 
+/** The text a `<Text>` node actually renders, flattened out of its children. */
+const textOf = (node: { props: { children?: unknown } }): string => {
+    const walk = (c: unknown): string =>
+        Array.isArray(c) ? c.map(walk).join('')
+            : typeof c === 'string' || typeof c === 'number' ? String(c)
+                : '';
+    return walk(node.props.children);
+};
+
+/**
+ * One `numberOfLines={1}` line of `stageHint` copy, in characters.
+ *
+ * The dock is the full 375pt viewport; `stageHint` is 12pt serif italic,
+ * whose average uppercase-and-lowercase advance measured off the 375x812
+ * critique capture is ~5.6pt, so a line holds ~63 glyphs before React
+ * Native silently drops its TAIL (`ellipsizeMode` defaults to 'tail'). 56
+ * is that with a margin for the wider glyphs. This is a legibility floor,
+ * not a copy freeze — any rewrite that fits stays green.
+ */
+const ONE_LINE_BUDGET = 56;
+
 describe('tap-to-read — the affordance the board now advertises', () => {
-    it('states the tap hatch on the board, not only to a screen reader', () => {
-        renderBoard();
+    it('states the tap hatch on the fan itself, while the names are still occluded', () => {
         // The precedent (RouteSelect, 8f3acef7) changed its visible label for
         // exactly this reason: the wiring existed, but a sighted player only
-        // ever met it in an accessibilityHint.
-        const hint = screen.queryByText(/tap a card to read it/i);
-        // The stage hint only renders once a card is staged and undied; when it
-        // is absent the assertion below still documents the intended copy.
-        if (hint) expect(hint).toBeTruthy();
+        // ever met it in an accessibilityHint. Phase 97 then put the line
+        // where only a player who had ALREADY staged a card could read it —
+        // past the moment they needed it to choose which covered card to lift.
+        const { vm } = renderBoard();
+        // A covered card exists, so at least one name is being clipped right
+        // now: this is precisely when the hatch has to be on screen.
+        expect(vm.hand.length).toBeGreaterThan(1);
+        expect(screen.getByTestId('combat-tap-hint')).toBeTruthy();
+        expect(screen.getByText(/tap .*card.* to read/i)).toBeTruthy();
+    });
+
+    it('the fan hatch fits the one line it is given', () => {
+        renderBoard();
+        const node = screen.getByTestId('combat-tap-hint');
+        expect(node.props.numberOfLines).toBe(1);
+        expect(textOf(node).length).toBeLessThanOrEqual(ONE_LINE_BUDGET);
+    });
+
+    it('the staged hint fits the one line it is given', () => {
+        renderBoardStaged();
+        const node = screen.getByTestId('combat-stage-hint');
+        expect(node.props.numberOfLines).toBe(1);
+        expect(textOf(node).length).toBeLessThanOrEqual(ONE_LINE_BUDGET);
+    });
+
+    it('tapping a hand card reaches onInspect', async () => {
+        // The hatch the two hints advertise. It is a gesture, not an onPress,
+        // so `fireEvent.press` never reaches it — driving the real
+        // `Gesture.Exclusive(pan, tap)` through its registered test id is the
+        // only way to assert the player's tap actually opens the card.
+        const { vm, cbs } = renderBoard();
+        const card = vm.hand[0]!;
+        fireGestureHandler(getByGestureTestId(`combat-card-tap-hand-${card.uid}`), [
+            { state: State.BEGAN }, { state: State.ACTIVE }, { state: State.END },
+        ]);
+        // `runOnJS` hands the call to the JS thread via `queueMicrotask`
+        // (react-native-worklets), so it lands after a flush, not inline.
+        await act(async () => { await Promise.resolve(); });
+        expect(cbs.onInspect).toHaveBeenCalledTimes(1);
+        expect((cbs.onInspect.mock.calls[0] as [{ uid: string }])[0].uid).toBe(card.uid);
     });
 
     it('every hand card still announces the tap hatch to a screen reader', () => {

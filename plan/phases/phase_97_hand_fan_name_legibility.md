@@ -10,6 +10,15 @@ On a phone, a player can read every card in their hand. Before this, four of
 five cards read `THIN HYM / CHILBLAI / THE LONG / SPOILED ` — you had to play a
 card to find out what it was.
 
+> **Corrected 2026-09-20 (burn-day audit row 3.13).** Overstated. What this
+> phase bought is that a covered name TRUNCATES LEGIBLY instead of being
+> painted over: the capture taken twenty minutes after the merge reads
+> `CHILBLA IN... / THE LONG... / SPOILED POULT...`. The visible sliver is
+> 40.25pt, which at `plateName` 13pt/15pt holds about nine or ten uppercase
+> glyphs over two lines, so a long name such as `FROSTBITTEN PALISADE` still
+> cannot be read in the fan. Reading it in full is the tap hatch's job — which
+> is why the audit moved that hatch onto the fan, where the clipped names are.
+
 ## Why
 
 The critique filed this at pass 37 and passes 38, 39, 40 and 41 each re-drove the
@@ -80,12 +89,34 @@ No engine contract changes. `namePeek` is an optional presentational prop with a
 6. **The chrome constant is derived once and re-summed in the test.** The value
    appears in exactly two places, and the test re-derives it independently so a
    silent style drift fails the gate rather than quietly re-clipping every name.
+   - **Correction, 2026-09-20 (burn-day audit row 3.13).** Both halves of this
+     decision were false as shipped. The value appeared in SIX places — the
+     constant, the four style declarations it sums, and the test's own copy of
+     those four numbers — and the test did not re-derive anything: it re-typed
+     `1.5 / 6 / 5 / 5` as literals with the style names in trailing comments,
+     so `paddingHorizontal: 6 -> 8` left the assertion green (measured) while
+     every covered name over-clipped by 2pt. The stylesheet is now exported as
+     `useCombatBoardStyles` and the test sums the SHIPPED numbers, which makes
+     the gate real: the same mutation now fails it, `expected 19.5, received
+     17.5`.
 7. **Ship the precedent's second half too.** The tap-to-read path is already
    wired end-to-end (`Gesture.Tap` → `inspectJS` → `onInspect` → the detail
    overlay) but was advertised only in an `accessibilityHint`, where a sighted
    player never meets it. The board hint line now says `tap a card to read it`,
    exactly as RouteSelect's label change did. This also closes a real coverage
    hole: combat's tap path had **no test at all**.
+   - **Correction, 2026-09-20 (burn-day audit row 3.13).** The hint line shipped
+     inside the STAGED branch (`stagedCards.length > 0 && …`), which renders only
+     after a card has been lifted OUT of the fan — so a player reading the
+     occluded fan, which is the whole audience for the sentence, never saw it.
+     It had also grown to 67 characters inside `numberOfLines={1}` at 12pt, and
+     RN ellipsizes the tail, so `tap a card to read it` was the clause dropped.
+     And the coverage hole was not closed: the suite's one tap test guarded its
+     single assertion behind `if (hint)`, `hint` was always null, and the test
+     passed on **zero assertions executed** (measured). The hatch now renders on
+     the fan itself whenever a name is being clipped, the staged line is trimmed
+     to what fits, and `onInspect` is asserted for real by driving the gesture
+     through its registered test id.
 8. **No vertical-stagger change.** The recon flagged that `translateY` currently
    staggers the left half of the fan the wrong way (each covering card sits
    *higher* than the card it covers). That is a real second lever, but it trades
@@ -109,7 +140,7 @@ max-width changes, inside a band that already grows for a second line.
 
 | Suite | Asserts |
 |---|---|
-| `CombatBoard.handfan.test.tsx` (new, 10 tests) | chrome constant re-derived independently; peek is step-minus-chrome, floored, never wider than the step; the shipped 375px geometry yields 57.75 -> 40.25; every covered card capped to exactly the peek; the last card uncapped; non-fanned faces uncapped; the board states the tap hatch; hand cards still announce it to a screen reader |
+| `CombatBoard.handfan.test.tsx` (new; 10 tests as shipped, 13 after the 2026-09-20 audit) | chrome constant summed off the shipped stylesheet (as shipped: re-typed as literals, see decision 6's correction); peek is step-minus-chrome, floored, never wider than the step; the shipped 375px geometry yields 57.75 -> 40.25; every covered card capped to exactly the peek; the last card uncapped; non-fanned faces uncapped; the tap hatch is on screen while the fan is occluded and both hint lines fit one line; a tap reaches `onInspect`; hand cards still announce the hatch to a screen reader |
 | `CombatBoard.fresh-eyes-repair.test.tsx` (unchanged) | C11-R / C11-R2 geometry invariants — still green, deliberately untouched |
 | all 31 combat-encounter suites | 186 tests green |
 
@@ -126,8 +157,10 @@ max-width changes, inside a band that already grows for a second line.
 - [x] `NAME_BAND_LEFT_CHROME` + `nameColumnPeek` exported and derived
 - [x] `namePeek` threaded fan -> `HandCard` -> `CombatCardFace`
 - [x] last card uncapped; other four face sizes untouched
-- [x] tap-to-read stated on the board
-- [x] 10-test guard suite; 31 suites / 186 tests green
+- [x] tap-to-read stated on the board — *as shipped, only in the staged branch;
+      moved onto the fan itself by the 2026-09-20 audit (decision 7's correction)*
+- [x] 10-test guard suite; 31 suites / 186 tests green — *two of those ten were
+      not gates: see decisions 6 and 7. Now 13, each verified red first.*
 - [x] mirror issue #343 opened, closed by the shipping commit
 
 ## Follow-ups (out of scope)

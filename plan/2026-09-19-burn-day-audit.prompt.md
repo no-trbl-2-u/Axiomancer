@@ -575,7 +575,7 @@ reproduction and reported the numbers, not re-read by the orchestrator;
   Northern Forest is a live, encounter-bearing map with no arena rule, so
   it fights in front of this plate.
 
-### 3.13 [MED · fake gate · confidence 85] Phase 97's chrome-sum guard is hand-typed literals, the tap-to-read hint never shows on the fan it was written for, and two tests execute zero assertions
+### 3.13 [MED · fake gate · confidence 85 → CONFIRMED, FIXED] Phase 97's chrome-sum guard is hand-typed literals, the tap-to-read hint never shows on the fan it was written for, and one test executes zero assertions
 
 - `NAME_BAND_LEFT_CHROME = 17.5` is arithmetically right (`faceCard
   borderWidth 1.5 + plateBand paddingHorizontal 6 + plateRarityPip width 5
@@ -604,6 +604,35 @@ reproduction and reported the numbers, not re-read by the orchestrator;
   Phase 97's 'tap a card to read it' hint never shows for the truncated
   hand fan it was built to fix"*, with the same gate line quoted. **Close
   that row** when you fix this; do not file a second one.
+- **Corrections to this row, from the confirmation pass and the fix
+  (2026-09-20).** The row's TITLE said *two* tests execute zero
+  assertions. Measured, by instrumenting `afterEach` with
+  `expect.getState().assertionCalls` over the whole suite, exactly
+  **one** does — "states the tap hatch on the board" at 0. The other nine
+  run 1 to 7 each, including "omits maxWidth when namePeek is not passed",
+  which the title appears to have counted as the second. The title is
+  corrected above; the row's BODY was already right, it only ever
+  documented the one. The second non-gate is real but a different kind:
+  the chrome-sum test ran its one assertion and could never fail it.
+  Line numbers had rotted as §1.5 warns — the literal block was `:101-106`
+  not `~:106-111`, the zero-assertion test `:196-205` not `~:186-195`, the
+  docblock `:269-284` not `~:271-285`, the stage hint `:1546-1556` (gate on
+  `:1546`, string on `:1554`) not `~:1548`. Everything else in the row held
+  verbatim, including the arithmetic: `1.5 + 6 + 5 + 5 == 17.5` against the
+  live styles, so the constant's VALUE was right and only its guard was
+  fake — the fix leaves `NAME_BAND_LEFT_CHROME` alone.
+- **The two CRITIQUE calls this row asked for, decided 2026-09-20.** The
+  pass-42 hint row is CLOSED by this fix (one finding, closed once; no
+  second row filed). The hand-fan overlap row — at `plan/CRITIQUE.md`
+  `:760`, not `~:611` — STAYS RESOLVED and gains a residual note rather
+  than being reopened. Re-captured at 375x812 after the fix, the fan reads
+  `THIN HYMN / CHILBLA IN ... / THE LONG ... / SPOILED POULTI... /
+  CHILBLAIN WATCH`: occlusion is gone, which is what that row filed, and
+  truncation remains, which it did not. The row's prediction holds — 40.25pt
+  at 13pt/15pt affords about nine or ten uppercase glyphs over two lines, so
+  `FROSTBITTEN PALISADE` truncates. No new Pending row: the geometry lever is
+  exhausted and pinned by C11-R / C11-R2, the name box is already the peek,
+  and the escape hatch is now on the fan itself.
 
 ### 3.14 [MED · dropped ship gate · confidence 85] The enemy figure is still anchored to a static HUD height — the add row can paint over the foe's head
 
@@ -859,7 +888,20 @@ docs commit at the end):
   index.ts:3` ("extended to the whole region set in Phase 101" — never true
   at any phase; 101 reached 4 of 7). All four are corrected in that commit.
 - `CombatBoard.tsx` ~:271-285 and `CombatBoard.handfan.test.tsx` header
-  ~:24-26 (3.13).
+  ~:24-26 (3.13). **Corrected 2026-09-20 by 3.13's own fix: seven
+  sentences, not two.** The bullet missed the test file's two inline
+  comments that carry the finding itself — `:99-100` ("Re-summed
+  independently here so a silent drift in any of the four styles fails the
+  gate", measured false: mutating `plateBand.paddingHorizontal` to 8 left it
+  green) and `:202-203` ("when it is absent the assertion below still
+  documents the intended copy", which documents nothing to a runner: that
+  test was the zero-assertion one). It also missed
+  `plan/phases/phase_97_hand_fan_name_legibility.md` decision **6** — the
+  companion bullet below names only decision 7 — whose "the value appears in
+  exactly two places, and the test re-derives it independently" is false
+  twice (six places; no re-derivation), and that brief's Outcome ("a player
+  can read every card in their hand"), which 40.25pt of peek does not buy.
+  All seven are corrected in that commit.
 - `exploration.engine.test.ts` :344-361 (3.7); `MapCanvas.tsx` :67, :193,
   :221, :241-243 and `MapCanvas.test.tsx` :440 (B-3, B-5).
 - `palette.ts:145`, `docs/VISUAL_LANGUAGE.md:37-38` (3.10).
