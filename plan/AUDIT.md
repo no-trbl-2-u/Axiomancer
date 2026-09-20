@@ -406,6 +406,35 @@
 
 ## Pending
 
+### [loop-call] Two layers own save policy: the engine's DURABLE_ACTIONS allowlist and mobile's hand-placed checkpoints behind a deflecting adapter (2026-09-20)
+- category: contract
+- impact: 6
+- ease: 5
+- detail: filed by the burn-day audit 2026-09-19, row 3.7. The engine gates
+  autosave to a curated `DURABLE_ACTIONS` set (`axiomancer-mechanics/src/
+  Game/store.ts`, Phase 51 `4972f9a`). Mobile then makes that gate
+  unreachable: `wrapDeflectingAdapter` (`axiomancer-mobile/state/store.ts`)
+  swallows every engine autosave — durable actions included — unless it is
+  inside the passthrough that the explicit `store.save()` verb opens. So no
+  durable action has ever written on mobile, and persistence there is
+  carried entirely by hand-placed checkpoints: 15 `getState().save()` call
+  sites outside tests — `components/SaveOnExit.tsx`, `state/actions.ts`
+  (the exposed verb, the move checkpoint, the map crossing),
+  `state/combat/store-actions.ts` ×3, `state/hazard/store-actions.ts` ×3,
+  `state/blacksmith/store-actions.ts` ×2, `state/cache/store-actions.ts`,
+  `state/labyrinth/store-actions.ts`, `state/rest/store-actions.ts`. That
+  is 13 checkpoints plus the verb plus the exit flush. Neither layer knows
+  about the other, and nothing written down says which wins or where a new
+  checkpoint belongs — which is how Phase 99 came to justify a correct fix
+  with a rationale that named the wrong owner (PLAYTEST_BUGS_2026-09-18
+  BUG-03). The call: pick one owner (add the mobile verbs to the engine
+  allowlist and drop the wrapper, or keep the wrapper and say so in the
+  engine docs), or keep both and write the rule. Whichever way it goes, the
+  ownership as it stands today is now guarded — `axiomancer-mobile/state/
+  e2e/exploration.engine.test.ts`, "mobile owns save timing" — so the
+  decision has to be taken deliberately rather than drifted into.
+- next: /oversight
+
 ### [x] [loop-call] Keyword registry has no analogue for Dawncaster's "Chaos" or generic "Upgrade" families (2026-09-13) — RESOLVED via `/adjust-keywords` pass 11 (2026-09-16)
 `/adjust-keywords` pass 9's functions-column sweep (`DigitalCardGames/dawncaster/
 keywords.csv`, 141 rows) against our 68-row registry's eight families (damage,

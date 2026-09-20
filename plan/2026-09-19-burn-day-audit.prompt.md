@@ -360,28 +360,46 @@ reproduction and reported the numbers, not re-read by the orchestrator;
   causes — the brief's own risk row 8 asked for "a stamp naming BOTH
   causes" (SUMMON + the dropped SWIFT on The Jeweled Tree) and got neither.
 
-### 3.7 [MED · doctrine · confidence 95] Phase 99's persistence rationale cites a commit that does not exist and inverts which layer owns the policy
+### 3.7 [MED · doctrine · confidence 95 → REFUTED-IN-PART] Phase 99's persistence rationale inverts which layer owns the policy (the commit it cites is real)
 
 - **Claimed** (brief :80-84, `exploration.engine.test.ts` :344-361): Spec 09
   Q4 is resolved at Phase 51 (`4972f9a`) via the engine's `DURABLE_ACTIONS`
   allowlist; mobile "simply never inherited it, because it bypasses the
   reducer".
-- **True:** `git cat-file -t 4972f9a` → *Not a valid object name*. And the
-  mechanism story is backwards: mobile's `wrapDeflectingAdapter`
-  (`state/store.ts` ~:270-287) **swallows every engine autosave** unless
-  inside the explicit `store.save()` passthrough — pinned by
-  `combat-hud.engine.test.ts` ~:228-238. Dispatching `MOVE_TO_NODE` through
-  the reducer would *also* not have saved on mobile. Two contradictory
-  owners now exist: the engine allowlist and seven hand-placed `save()`
-  sites in mobile behind a comment (~:262-264, "engine auto-persists on
-  every dispatch as of 0.5.0 … saves are explicit") that is itself stale.
-- **Fix shape:** find the real commit (`git log -S'DURABLE_ACTIONS' --
-  axiomancer-mechanics/src/Game/store.ts` — the introducing hash, not the
-  two adjacent ones the orchestrator saw) and cite it; rewrite the test's
-  rationale and the brief's decision to say *"mobile owns save timing via
-  the deflecting adapter; a move is a checkpoint by mobile policy, guarded
-  here"* — which is true — and open a `plan/CRITIQUE.md` `[MED]` row for
-  the doctrine question (one owner, or two with a written rule).
+- **True, as corrected 2026-09-20 by this row's own fix:**
+  - **The citation half is REFUTED.** This row shipped saying `4972f9a`
+    "does not exist" on the strength of `git cat-file -t 4972f9a` → *Not a
+    valid object name*. That proves only that the working tree is a
+    **shallow clone** (graft `4b19f2d`, 2026-09-17): 154 of the 161
+    hash-like tokens cited across `axiomancer-mechanics/{specs,docs,
+    RELEASES.md,CHANGELOG.md}` and `plan/phases` fail identically there.
+    The commit is real on `origin` — `4972f9a39ede…`, 2026-05-19, "feat(game):
+    Phase 51 — autosave throttling via DURABLE_ACTIONS allowlist" — and all
+    four sites citing it are correct. **Commit existence cannot be settled
+    in this tree; check the remote.** Any other row in this audit whose
+    evidence is a failed `git cat-file` / `git show` / `git log -S` against
+    a pre-graft hash is suspect on the same grounds.
+  - **The mechanism half is CONFIRMED.** The story is backwards: mobile's
+    `wrapDeflectingAdapter` (`state/store.ts` ~:270-287) **swallows every
+    engine autosave**, durable actions included, unless inside the explicit
+    `store.save()` passthrough. Dispatching `MOVE_TO_NODE` through the
+    reducer would *also* not have saved on mobile. Two contradictory owners
+    exist: the engine allowlist, and **15** hand-placed `save()` sites in
+    mobile (13 checkpoints + the exposed verb + the exit flush — not the
+    "seven" this row first counted) behind a comment (~:262-264, "engine
+    auto-persists on every dispatch as of 0.5.0 … saves are explicit") that
+    is itself stale. Note the pin this row cited does not pin:
+    `combat-hud.engine.test.ts` ~:228-238 drives `START_COMBAT`, which is
+    **not** a durable action, so it passes with or without the wrapper.
+- **Fix shape (first instruction DROPPED — see above):** ~~find the real
+  commit and cite it~~ — `4972f9a` already **is** the real commit, and that
+  `git log -S` recipe cannot run in a shallow clone (it returns only the
+  graft commit), so following it would have replaced four correct citations
+  with a wrong hash. What stands: rewrite the test's rationale and the
+  brief's decision to say *"mobile owns save timing via the deflecting
+  adapter; a move is a checkpoint by mobile policy, guarded here"* — which
+  is true — and open the doctrine row (one owner, or two with a written
+  rule) in `plan/AUDIT.md` as a `[loop-call]`, per §7.
 
 ### 3.8 [MED · measurement · confidence 85] The quality index does not count Conviction spent on the strike tap (Phase 102 sim) — FIXED
 
@@ -967,4 +985,9 @@ as the guard test where §3 says so.
   print every pair that fell and every pair below 4.5.
 - **3.6 stamp.** `git show 5a2158a:axiomancer-mechanics/src/Combat/
   combat.engine.ts | grep -c SUMMON` → 0.
-- **3.7 citation.** `git cat-file -t 4972f9a` → not a valid object.
+- **3.7 citation — THIS RECIPE IS INVALID, corrected 2026-09-20.**
+  `git cat-file -t 4972f9a` → not a valid object, **in a shallow clone**,
+  which every working tree here is. It shows nothing about the commit:
+  154/161 hashes cited in repo prose fail the same way. `4972f9a` exists on
+  `origin` (verified 2026-09-20). Check hashes against the remote, never
+  against this tree.

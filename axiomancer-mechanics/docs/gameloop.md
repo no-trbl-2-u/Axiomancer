@@ -99,18 +99,34 @@ rewrite — they all funnel through `dispatch` now.
 
 Autosave is restricted to a curated `DURABLE_ACTIONS` allowlist (Spec 09
 Q4 path B, shipped at Phase 51 `4972f9a`). The allowlist lives in
-`src/Game/store.ts`:
+`src/Game/store.ts`, and it has been amended since Phase 51 — as of now
+it reads:
 
 ```ts
 const DURABLE_ACTIONS: ReadonlySet<GameAction['type']> = new Set([
-    'COMBAT_ROUND', 'LEVEL_UP', 'END_COMBAT',
-    'MOVE_TO_NODE', 'APPLY_DIALOGUE', 'SAVE_GAME',
+    'LEVEL_UP', 'END_COMBAT', 'MOVE_TO_NODE',
+    'APPLY_DIALOGUE', 'SAVE_GAME',
+    'RESET_RUN',          // Phase 72
+    'UNLOCK_CODEX_ENTRY', // Phase 73
 ]);
 ```
 
+Phase 51 also shipped `COMBAT_ROUND` in this set; it has since been
+dropped. This block is prose and can rot — `src/Game/store.ts` is the
+authority. (Corrected by the burn-day audit 2026-09-19, row 3.7, which
+found this copy still printing the Phase 51 six.)
+
 Only actions whose `type` appears in the set write through to
 `adapter.save(...)`. UI-tier actions (stat-allocation prompts, tab
-switches, choice highlights, etc.) never persist. The original Spec 09
+switches, choice highlights, etc.) never persist.
+
+This allowlist is the **engine's** policy, not necessarily the app's. A
+consumer is free to wrap the `PersistenceAdapter` it hands to
+`createGameStore`, and one does: `axiomancer-mobile`'s
+`wrapDeflectingAdapter` swallows every autosave this gate lets through,
+so on that consumer the allowlist has no effect at all and persistence is
+entirely explicit. Do not reason about when a given app saves from this
+section alone. The original Spec 09
 Q4 default ("fires after every action") was the pre-loop Q4 answer; the
 two `TODO(spec-09)` markers that flagged the cadence concern (one in
 `store.ts`, one in `game.reducer.ts`) were both removed by Phase 51 —

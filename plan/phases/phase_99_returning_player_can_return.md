@@ -59,6 +59,8 @@ still reads `currentNode: "fv-1"`, `quests.active: []`. Both are gone.
    world with `store.setState({ world })` **directly**, bypassing the engine
    reducer — so the engine's `DURABLE_ACTIONS` autosave gate never sees the
    move, even though `MOVE_TO_NODE` is on that allowlist.
+   *(The bypass is real; the "so" is not — see [Correction](#correction-2026-09-20-burn-day-audit-37)
+   below. Dispatching would not have saved on mobile either.)*
 2. There was no save-on-exit **at all**. `flush()` has existed on the
    persistence adapter since it was written with **zero** callers outside its own
    tests, and there was no `AppState`, `pagehide` or `visibilitychange` handler
@@ -80,8 +82,10 @@ were the design:
 - Spec 09 Q4 ("Save granularity") is **resolved**, at Phase 51 (`4972f9a`), in
   favour of Path B — autosave restricted to a curated `DURABLE_ACTIONS`
   allowlist. `MOVE_TO_NODE` is **on** that allowlist.
-- So persisting on node movement is the engine's ratified behaviour. Mobile
-  simply never inherited it, because it bypasses the reducer.
+- So persisting on node movement is a ratified save granularity, not a
+  violation of Spec 09. *(This bullet originally read "Mobile simply never
+  inherited it, because it bypasses the reducer." That is false — see
+  [Correction](#correction-2026-09-20-burn-day-audit-37) below.)*
 
 The case is re-derived (not relaxed) to assert the correct invariant, with the
 citation in the test body, and a **new** case pins the half of Spec 09 that has
@@ -155,3 +159,43 @@ untouched: no file outside `axiomancer-mobile/` changed, so **no baseline regen*
   no `plan/` entry of any kind. That is a process gap, not a code one: a
   committed bug report that no loop verb can see is invisible work. Worth an
   `/oversight` ruling on where hand-written playtest reports get filed.
+
+## Correction (2026-09-20, burn-day audit 3.7)
+
+This brief shipped the right fix under the wrong rationale. The code is
+unchanged by this correction; only the story about it is.
+
+**What the brief said.** That `MOVE_TO_NODE` is on the engine's
+`DURABLE_ACTIONS` allowlist, so persisting on movement is "the engine's
+ratified behaviour", and mobile "simply never inherited it, because it
+bypasses the reducer".
+
+**What is actually true.** Mobile could not have inherited it through the
+reducer either. `createAppStore` hands the engine a wrapped adapter —
+`wrapDeflectingAdapter` in `axiomancer-mobile/state/store.ts` — whose
+`save()` is a no-op unless the wrapper is inside the passthrough that the
+explicit `store.save()` verb opens. That swallows **every** engine
+autosave, durable actions included. The `DURABLE_ACTIONS` allowlist is
+therefore inert on mobile: dispatching `MOVE_TO_NODE` through the reducer
+would have written nothing. Demonstrated both ways by the new guard case in
+`state/e2e/exploration.engine.test.ts` ("mobile owns save timing"): the
+engine verb `moveToNode` writes nothing, and the mobile verb `moveTo`
+writes exactly once.
+
+**So the fix is right and the reason was wrong.** A move is a checkpoint
+because `moveToAction` (`state/actions.ts`) takes an explicit `save()` —
+mobile policy, made here, deliberately. Mobile owns save timing; the engine
+allowlist is the engine's own policy and reaches no further.
+
+**What is not in dispute.** The Phase 51 citation `4972f9a` is correct.
+The audit's row 3.7 opened by claiming that commit "does not exist"; it
+does — `4972f9a39ede…`, 2026-05-19, "feat(game): Phase 51 — autosave
+throttling via DURABLE_ACTIONS allowlist", verified against `origin`. It
+fails `git cat-file` in a working tree only because those checkouts are
+shallow, where essentially no pre-graft hash in this repo's prose resolves.
+That half of the row is refuted and the citation stands.
+
+**Left open.** Two layers now hold persistence policy: the engine's
+allowlist and mobile's hand-placed `save()` checkpoints behind the
+deflecting adapter. Deciding one owner — or writing down which wins and
+where a new checkpoint goes — is a `[loop-call]` row in `plan/AUDIT.md`.

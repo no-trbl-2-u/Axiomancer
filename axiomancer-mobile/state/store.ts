@@ -259,13 +259,24 @@ export const DEFAULT_DEV_OVERRIDES_SLICE: DevOverridesSlice = Object.freeze({
 export const RECENT_EVENTS_CAPACITY = 20;
 
 /**
- * The engine auto-persists on every dispatch as of
- * `axiomancer-mechanics@0.5.0`. On mobile we don't want every action to
- * touch AsyncStorage — saves are explicit (Spec 09).
+ * On mobile we don't want the engine deciding when AsyncStorage is
+ * touched — saves are explicit (Spec 09).
  *
- * `wrapDeflectingAdapter` proxies `load()` straight through but swallows
- * `save()` unless the wrapper is in "passthrough" mode, which we only
- * engage for the duration of an explicit `store.save()` call below.
+ * The engine gates its own autosave to a curated `DURABLE_ACTIONS` set
+ * (Phase 51, `4972f9a`; `axiomancer-mechanics/src/Game/store.ts`), which
+ * is narrower than the "persists on every dispatch" behaviour this
+ * comment used to describe — that sentence was stale from Phase 51 and is
+ * corrected here by the burn-day audit 2026-09-19, row 3.7.
+ *
+ * But mobile does not merely narrow that gate, it bypasses it entirely:
+ * `wrapDeflectingAdapter` proxies `load()` straight through and swallows
+ * `save()` — INCLUDING the engine's durable-action autosaves — unless the
+ * wrapper is in "passthrough" mode, which we only engage for the duration
+ * of an explicit `store.save()` call below. So the engine allowlist has no
+ * effect here, and every checkpoint on mobile is a deliberate `save()`
+ * call site. Guarded by `state/e2e/exploration.engine.test.ts` ("mobile
+ * owns save timing"). Two owners of one policy is a known open question —
+ * see the `[loop-call]` row in `plan/AUDIT.md`.
  */
 function wrapDeflectingAdapter(real: PersistenceAdapter) {
     let passthrough = false;

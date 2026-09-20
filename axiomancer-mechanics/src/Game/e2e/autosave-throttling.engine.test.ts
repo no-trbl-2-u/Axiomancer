@@ -5,8 +5,16 @@
  * across a series of dispatched actions. UI-tier actions (USE_ITEM,
  * EQUIP_ITEM, ALLOCATE_STAT_POINT, LEARN_CARD, SHIFT_MORAL_METER,
  * SHIFT_PHILOSOPHICAL_ALIGNMENT, START_COMBAT, PROCESS_NODE) must NOT
- * trigger `adapter.save`. The curated durable set (COMBAT_ROUND,
- * LEVEL_UP, END_COMBAT, MOVE_TO_NODE, APPLY_DIALOGUE, SAVE_GAME) must.
+ * trigger `adapter.save`. The curated durable set must — as of now
+ * LEVEL_UP, END_COMBAT, MOVE_TO_NODE, APPLY_DIALOGUE, SAVE_GAME,
+ * RESET_RUN (Phase 72) and UNLOCK_CODEX_ENTRY (Phase 73). Phase 51 also
+ * shipped COMBAT_ROUND in the set and it has since been dropped; this
+ * line said otherwise until the burn-day audit 2026-09-19, row 3.7.
+ * `src/Game/store.ts` is the authority, not this comment.
+ *
+ * Note the scope: this pins the ENGINE's policy. A consumer may wrap the
+ * adapter and suppress the gate — `axiomancer-mobile` does — so nothing
+ * here says when any given app writes to disk.
  */
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
