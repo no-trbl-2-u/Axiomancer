@@ -25,7 +25,8 @@ import {
     type CombatSimPolicyId, type CombatSimPolicy,
 } from '../combat.sim-policies';
 import { runOneEncounter, upgradeablePlayPhase } from '../combat.encounter.sim';
-import { initializeCombatEncounter, rollEncounterDice } from '../combat.engine';
+import { initializeCombatEncounter, rollEncounterDice, projectIncomingThreat } from '../combat.engine';
+import { emptyObjectiveTelemetry, foldObjectiveEvents } from '../combat.objective.telemetry';
 import { setUpgradeableDice } from '../combat.upgradeable-dice';
 import { toCombatCard } from '../combat.cards';
 import type { CombatCard, CombatEncounterState, GlyphInstance } from '../combat.encounter.types';
@@ -544,6 +545,61 @@ describe('strikeAddsAt decision seam — upgradeablePlayPhase (combat.encounter.
         const result = upgradeablePlayPhase(broodState(), stubPolicy(undefined), () => 0.5, {}, {});
         expect(struckIds(result.state)).toEqual([]);
         expect(result.state.adds).toHaveLength(2);
+    });
+
+    it('never pays for a brood the wall THIS SAME PHASE buys answers for free', () => {
+        // Audit 3.8, the sibling of the live-wall law above — same law, but the
+        // wall is BOUGHT DURING the phase instead of pre-set, which is the only
+        // shape a real fight ever has. The decision used to be taken in the
+        // powered-play preamble, before the card pass, so the witness read a
+        // stale wall and bought a body the very next play removed for free.
+        //
+        // Fixture: guard 2 at the top of the phase leaves this small brood
+        // getting through (addNetDamage 2 >= strikeAddsAt 1), but the wall the
+        // phase itself buys takes addNetDamage to 0.
+        const state = broodState({
+            guard: 2,
+            adds: [
+                { id: 'a1', name: 'QA Shoot', vitae: 1, maxVitae: 1, bite: 1 },
+                { id: 'a2', name: 'QA Bough', vitae: 1, maxVitae: 1, bite: 1 },
+            ],
+        });
+        const result = upgradeablePlayPhase(state, stubPolicy(1), () => 0.5, {}, {});
+
+        // Asserted UNCONDITIONALLY: if MIX's draw order or chilblain-watch's
+        // guard ever changes, this fails loudly on its own premise rather than
+        // passing vacuously.
+        expect(
+            projectIncomingThreat(result.state).addNetDamage,
+            'fixture premise: the wall this phase buys answers this brood',
+        ).toBe(0);
+        expect(struckIds(result.state)).toEqual([]);
+        expect(result.state.adds).toHaveLength(2);
+        expect(result.state.conviction).toBeGreaterThanOrEqual(state.conviction);
+    });
+
+    it('the score ledger accounts for every Conviction the board charged', () => {
+        // Audit 3.8, the cross-module half: `foldObjectiveEvents` is what the
+        // Combat Quality Index reads, and it was blind to `add-struck`, so a
+        // fight that paid its Conviction through the strike tap scored as
+        // having spent none of it.
+        //
+        // Fixture premise: `convictionThreshold: 999` keeps every signature
+        // unaffordable and MIX carries no omen card, so the strike tap is the
+        // ONLY Conviction sink this phase can reach. That premise is what makes
+        // the conservation equality below statable at all, so it is asserted
+        // rather than assumed.
+        const before = broodState();
+        const result = upgradeablePlayPhase(before, stubPolicy(1), () => 0.5, {}, {});
+        const telemetry = foldObjectiveEvents(result.state.log, emptyObjectiveTelemetry());
+
+        expect(struckIds(result.state).length, 'fixture premise: this phase DID strike').toBeGreaterThan(0);
+        expect(telemetry.convictionGained, 'fixture premise: this phase has no Conviction income').toBe(0);
+        // The law, in relation form rather than magnitude: whatever the board
+        // removed from the pool, the ledger the score reads must show as spent.
+        // It survives any retune of STRIKE_ADD_COST or of how many bodies the
+        // witness clears.
+        expect(telemetry.convictionSpent).toBe(before.conviction - result.state.conviction);
     });
 
     it('an unaffordable strike is never attempted (no fizzle spam in the log)', () => {

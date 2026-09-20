@@ -371,19 +371,59 @@ reproduction and reported the numbers, not re-read by the orchestrator;
   here"* — which is true — and open a `plan/CRITIQUE.md` `[MED]` row for
   the doctrine question (one owner, or two with a written rule).
 
-### 3.8 [MED · measurement · confidence 85] The quality index scores a strike-spending fight as zero Conviction use (Phase 102 sim)
+### 3.8 [MED · measurement · confidence 85] The quality index does not count Conviction spent on the strike tap (Phase 102 sim) — FIXED
 
 - `combat.objective.telemetry.ts` ~:235 accrues `convictionSpent` only from
-  `signature-cast`; `add-struck` is invisible to it. Baseline greedy vs
-  jeweled-tree: `objectiveTelemetry.convictionSpent 36→0`, `spine
-  0.559→0.409`, `combatQuality.index 0.711→0.651`, while the sim's own
-  `avgConvictionSpent` rose 0.88→2.18. Two Conviction ledgers disagree on
-  every SUMMON row. Separately the sim's strike block (`combat.encounter.
-  sim.ts` ~:463) runs **before** the round's wall is bought, so the matrix
-  over-strikes in a known direction.
-- **Fix shape:** fold `add-struck.cost` into `convictionSpent`; move the
-  `strikeAddsAt` decision after the card pass (or evaluate it against the
-  policy's projected guard). Then 3.6's regen.
+  `signature-cast`; `add-struck` is invisible to it. Confirmed at source and
+  reproduced. Separately the sim's strike block (`combat.encounter.sim.ts`
+  ~:463) runs **before** the round's wall is bought, so the matrix
+  over-strikes in a known direction. Confirmed: on a board with guard 2 and
+  two bite-1 adds the witness paid 4 ◆ for a brood the same phase's own
+  wall (+5) took to `addNetDamage` 0.
+- **Corrections to this row, from the confirmation pass (2026-09-20).** The
+  row as first written overstated three things and they are restated here
+  rather than left standing:
+  - "scores a strike-spending fight as **zero** Conviction" is literally true
+    only when the strike tap is the fight's **only** sink — reproduced
+    (board spent 4, ledger 0). On a real jeweled-tree cell the ledger still
+    reads whatever the signature casts contributed: a 24-run greedy cell
+    charged 38 ◆, 34 of it on 17 strikes, and the ledger read 4. The defect
+    is **proportional and silent** (89.5% missing), not a flat zero.
+  - The figures `convictionSpent 36→0`, `spine 0.559→0.409`,
+    `combatQuality.index 0.711→0.651`, `avgConvictionSpent 0.88→2.18`
+    are **not reproducible** and are withdrawn. They came from a baseline
+    matrix whose stamp (`5a2158a`, measured 2026-09-19) names a tree without
+    SUMMON — the very defect §3.6 files. Direction confirmed on fresh runs;
+    magnitudes wait on §3.6's regen.
+  - "the matrix over-strikes in a known direction" is confirmed but is **not
+    board-independent**. `addNetDamage` soaks against the wall left after the
+    foe's own telegraph, so on a big brood (bite 4+9) a +5 wall changes
+    nothing and the strike was in fact correct. The honest claim, and the one
+    the guard pins, is narrower: the witness **can** pay for a brood the same
+    phase answers for free.
+  - The two Conviction ledgers do disagree on every SUMMON row, but they are
+    two different quantities: the sim's `avgConvictionSpent` is the crude
+    proxy `max(0, turn - conviction)` (`combat.encounter.sim.ts` ~:854), not
+    a sink census, and it disagrees with the fold off the SUMMON rows too.
+    Only the fold feeds the score.
+- **Fixed as:** `add-struck.cost` folded into `convictionSpent` (a spend, not
+  a cast — `signatureCasts` is left alone); the `strikeAddsAt` decision moved
+  out of the powered-play preamble to a bounded pass after the card pass and
+  the wind-down, re-projecting after each strike. The alternative the row
+  offered — "evaluate it against the policy's projected guard" — was
+  **rejected**: it would make the sim predict its own card pass, a second
+  speculative model of the thing it is about to do. Reading the wall the phase
+  actually ends holding is the truth instead of a guess. Guards:
+  `combat-objective.engine.test.ts` (fold arithmetic),
+  `combat-sim-policies.engine.test.ts` (the ledger reconciles the board; the
+  witness declines a brood its own wall answers).
+- **Still open, found here and filed rather than folded in (out of this row's
+  scope):** `omen-declared.ante` (`combat.engine.ts` ~:2825) is a **third**
+  live Conviction sink the fold still cannot see — two shipped trial cards
+  carry `anteConviction: 2` (`Cards/library/trial.cards.ts` :360, :527). The
+  docstring on `convictionSpent` names the gap.
+- The matrix's jeweled-tree cells all move on this commit — that is §3.6's
+  regen, which must FOLLOW it.
 
 ### 3.9 [MED · design-reach · confidence 95] The only SUMMON carrier cannot reach wave 2
 

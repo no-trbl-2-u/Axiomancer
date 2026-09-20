@@ -454,24 +454,6 @@ export function upgradeablePlayPhase(
             }
         }
 
-        // Phase 102 (SUMMON) — strikeAddsAt: pay only when the brood would
-        // actually get through the wall (a live wall answers it for free,
-        // which is the whole second line of the design, so a turtle correctly
-        // declines). Highest-bite add wins; ties resolve to `state.adds` order
-        // — deterministic, no RNG, mirroring the `crackAt` block above, and
-        // costing the same single guard-counted loop pass when it fires.
-        if (policy.strikeAddsAt !== undefined && working.conviction >= STRIKE_ADD_COST) {
-            const living = working.adds ?? [];
-            if (living.length > 0 && projectIncomingThreat(working).addNetDamage >= policy.strikeAddsAt) {
-                let target = living[0];
-                for (const a of living) {
-                    if (a.bite > target.bite) target = a;
-                }
-                const struck = strikeAdd(working, target.id, rng);
-                if (struck.state !== working) { working = struck.state; if (working.finalOutcome) break; continue; }
-            }
-        }
-
         const sources: { dieId: string; color: string }[] = [];
         for (const d of working.dice) {
             if (d.state !== 'available' || d.color === 'x') continue;
@@ -521,6 +503,42 @@ export function upgradeablePlayPhase(
         plays++;
         bumpUsage(usage, resT.card, 'top');
     }
+    // Phase 102 (SUMMON) — strikeAddsAt, settled AFTER the card pass and the
+    // wind-down, the last thing before the turn ends. The threshold reads
+    // "clear whatever the brood still gets through", and the only wall that
+    // question can honestly be asked against is the one this phase actually
+    // ends holding. Audit 3.8: this block used to sit in the powered-play
+    // preamble, ahead of every play, so the witness read a stale wall and could
+    // spend ◆ on a body the very next card answered for free. Striking here is
+    // still in time — the brood bites in `resolveThreatPhase`, which runs after
+    // this function returns.
+    //
+    // Highest-bite add wins; ties resolve to `state.adds` order — deterministic,
+    // no RNG, mirroring the `crackAt` block above. The projection is re-read
+    // after every strike, so the witness stops paying the moment what is left
+    // of the brood is soaked. Bounded like the drain above.
+    let strikes = 0;
+    while (
+        policy.strikeAddsAt !== undefined
+        && working.phase === 'phase-play'
+        && !working.finalOutcome
+        && !working.mercyChoiceActive
+        && working.conviction >= STRIKE_ADD_COST
+        && strikes < 30
+    ) {
+        strikes++;
+        const living = working.adds ?? [];
+        if (living.length === 0) break;
+        if (projectIncomingThreat(working).addNetDamage < policy.strikeAddsAt) break;
+        let target = living[0];
+        for (const a of living) {
+            if (a.bite > target.bite) target = a;
+        }
+        const struck = strikeAdd(working, target.id, rng);
+        if (struck.state === working) break;
+        working = struck.state;
+    }
+
     if (working.phase === 'phase-play' && !working.finalOutcome && working.turnTakenThisPhase) {
         working = endTurn(working).state;
     }
