@@ -41,8 +41,6 @@ import { getRng } from '../Utils/rng';
 import { applyAlignmentDelta, defaultAlignment } from '../Ledger';
 import { applyFactionReputationDeltas, createDefaultFactionReputations } from '../Faction';
 import { generateRunId } from './run-loop';
-import { addToLoadout } from '../Combat/combat.loadout';
-import { STARTING_CARD_IDS } from '../Combat/combat.rewards';
 
 /**
  * Increment when GameState's shape changes. Save loaders branch on this so
@@ -107,13 +105,32 @@ import { STARTING_CARD_IDS } from '../Combat/combat.rewards';
  *   The migration appends the 3 new relics (benched) to any save's
  *   inventory that doesn't already carry them; the worn loadout and every
  *   other field pass through untouched (see `game.migrate.ts`).
+ * 2026-09-20 — bumped 22 → 23: retired the STARTING-LOADOUT SEED. Every
+ *   fresh save used to carry a Phase-169 `combat-loadout-card:` flag per
+ *   `STARTING_CARD_IDS` (4 cards). Nothing in the shipped product ever
+ *   edits that loadout, but `buildCombatDeck` deals it INSTEAD of
+ *   `knownCards` whenever it exists — so the starter bundle the player
+ *   chose (18+ cards, written to `knownCards`) was never the deck that was
+ *   dealt. Two live symptoms: (a) a 4-card base + a few rewards sits at
+ *   `MIN_COMBAT_DECK_SIZE` and every rest-node CUT is refused
+ *   `deck-at-floor` with shillings in hand; (b) a bundle that does not
+ *   contain a seeded starter (e.g. `thin-hymn`) still deals it, and
+ *   `executeCard`'s ownership guard (which reads `knownCards`, never the
+ *   loadout) throws `Card 'thin-hymn' is not known.` mid-combat. The
+ *   migration strips every `combat-loadout-card:` flag; `knownCards` +
+ *   `combatRewardCards` is the deck again (see `game.migrate.ts`). The
+ *   loadout codec itself stays (dev/e2e harnesses still pin decks through
+ *   it) — it is simply no longer seeded.
  */
-export const GAME_STATE_VERSION = 22;
+export const GAME_STATE_VERSION = 23;
 
 /** Builds a brand-new GameState with default player and world. */
 export function createNewGameState(): GameState {
-    let flags: string[] = [];
-    for (const id of STARTING_CARD_IDS) flags = addToLoadout(flags, id);
+    // No curated-loadout seed (v23, 2026-09-20 — see the version log above):
+    // the combat deck is `knownCards` + `combatRewardCards`, and the client
+    // seeds `knownCards` from the chosen starter bundle (`ensureStarterCards`).
+    // A loadout flag here would shadow that bundle for the whole run.
+    const flags: string[] = [];
     return {
         version: GAME_STATE_VERSION,
         runId: generateRunId(() => getRng().random()),
