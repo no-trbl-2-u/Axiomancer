@@ -2308,6 +2308,58 @@ residual merit; re-file if the failure mode recurs.
 - estimated phases: 1
 - conflicts: none against spec.md non-goals.
 
+### [score 3.0] RAGE_UNLOCK_ROUND's self-heal escalation is unreachable — every roster enemy is authored, so the qualitative "punish attrition" phase never fires in a real fight
+- proposed: 2026-09-20, `/adjust-enemies` pass 14 (Step 1b widened KB audit)
+- source signals:
+  - KB: `kb:aeons-end/rules/overview` ("The Nemesis deck escalates through
+    tiers") and `kb:aeons-end/rules/edge-cases-faq` ("The Nemesis deck
+    remains ordered by tier to preserve escalation") — a well-regarded
+    pattern where a cooperative boss's threat qualitatively worsens as
+    the fight lengthens, not just numerically.
+  - Live-code check: Axiomancer already built this exact pattern —
+    `combat.threat.ts:458-471` (`RAGE_UNLOCK_ROUND`/`RAGE_DAMAGE_WEIGHT`/
+    `RAGE_HEAL_FRACTION`), a locked "Phase 3" appended only to
+    `generateDefaultThreatSequence`'s output, self-healing 50% and
+    hitting 1.6x harder specifically to punish a slow, non-status-play
+    attrition win ("a fight won by trading basic strikes gets partially
+    healed back").
+  - But `combat.threat.ts:539` only calls `generateDefaultThreatSequence`
+    when `AUTHORED_THREAT_SEQUENCES[enemy.id]` is falsy, and that map is
+    keyed off `ENEMY_DECKS` (`combat.threat-sequences.ts:23-24`). Every
+    real roster enemy carries an `id: 'enemy-<slug>'` with a matching
+    `ENEMY_DECKS['enemy-<slug>']` entry (verified: all 78 non-fixture
+    `ENEMY_REGISTRY` entries, including `the-incompleteness`). The only
+    entity whose `id` doesn't resolve in `ENEMY_DECKS` is the test
+    fixture `Sandbag_01` (`id: 'sandbag-01'`, no `enemy-` prefix), which
+    is never placed in any `EnemiesByMap` pool. So RAGE never fires
+    against a real fight today — `src/Combat/e2e/rage-phase.engine.test.ts`
+    exercises it directly against `generateDefaultThreatSequence`, so the
+    surface is unit-tested but end-to-end unreachable.
+  - Once an authored deck's own phases are exhausted, `currentPhaseIndex`
+    clamps to the last phase (`Math.min(idx+1, length-1)` at half a dozen
+    sites in `combat.engine.ts`; confirmed intentional per
+    `oracle-omen-v2.engine.test.ts:291`'s "currentPhaseIndex clamps to
+    it") and the fight repeats that phase's printed number forever — the
+    escalating-danger role falls entirely to THE CLOCK's continuous
+    multiplier (`THREAT_ESCALATION_*`, boss-scaled 1.6x rate, capped at
+    2.0x), which is numeric-only and doesn't specifically punish
+    attrition the way RAGE's self-heal was designed to.
+- rationale: a real, evidenced gap between an already-authored qualitative
+  design and what any actual fight can reach — but it's a judgment call,
+  not a data fix: either (a) retire RAGE as superseded-by-THE-CLOCK dead
+  code, or (b) give some/all bosses an authored equivalent (an optional
+  per-enemy rage override threaded through `ENEMY_DECKS`/
+  `AUTHORED_THREAT_SEQUENCES`, not just the generated-sequence path).
+  Neither is a roster *data* edit this steward can make solo. Impact is
+  real but subtle (most fights end before it would matter); ease is low
+  (needs the retire-vs-revive call before any code moves).
+- proposed scope: a design session (mechanics-expert consult) to settle
+  retire-vs-revive; if revive, start with 1-2 late bosses as the proof
+  before any wider rollout.
+- estimated phases: 1
+- conflicts: none against spec.md non-goals; doesn't touch the 3
+  surviving big-numbers constraints.
+
 ## Considered (below threshold) — pass 12 additions
 
 - **Art-direction coherence** (`plan/CRITIQUE.md:446` arena art

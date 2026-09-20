@@ -13,13 +13,116 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-20 | 7de3890b | 14 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-20 | 8e4a7976 | 14 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-19 | 181a84e2 | 13 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-20 | TBD | 14 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-19 | 0f9dd762 | 13 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-19 | 6c82d06b | 13 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-enemies pass 14, 2026-09-20, commit TBD]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE on enemy data — dispatched autonomously by
+> `/march`'s content-lifecycle gate (`enemies` was the stalest qualifying
+> category this tick: 53 commits and ~27.8h since pass 13's commit
+> `181a84e2`, 2026-09-19T08:48:27Z, past both the 15-commit and 36h
+> threshold; `keywords` `0f9dd762` 2026-09-19T10:43:12Z 50 commits/~25.9h
+> also qualified on the commit count but was the less-stale of the two by
+> last-pass timestamp; `npcs` `6c82d06b` 2026-09-19T22:42:31Z 17
+> commits/~13.9h barely qualified and was the least stale of the three;
+> `cards` `7de3890b` 3 commits/~3.8h and `equipment` `8e4a7976` 1
+> commit/~1.9h both sat under their own threshold). `git log
+> 181a84e2..HEAD -- axiomancer-mechanics/src/Enemy
+> axiomancer-mechanics/src/Combat/combat.enemy-decks.ts
+> axiomancer-mechanics/src/Combat/combat.enemy-cards.ts
+> axiomancer-mobile/assets/images/enemies axiomancer-mechanics/src/World`
+> returns exactly one commit of the 53 intervening: `e333fbbf` (Phases
+> 102-103, the SUMMON add-spawning archetype + the last two Doré arenas —
+> a build-plan phase, not a steward tick). Read its `Enemy/**` diff
+> directly rather than trusting the summary: `enemy-keywords.ts` gains a
+> `{ kind: 'summon'; n; addName? }` keyword through THREE apply sites
+> (spawn/bite/clear), mirrors every existing keyword's
+> `ENEMY_KEYWORD_KINDS`/`_LABEL`/`_GLOSS` wiring, and cites
+> `kb:slay-the-spire-the-board-game/rules/edge-cases-faq` (src-002) for
+> its one deliberate divergence (adds don't flee when the summoner dies);
+> `enemy.library.ts` retrofits it onto The Jeweled Tree (SUMMON 2, "Brier
+> Shoot") with HIDE 5 re-listed by hand so the retrofit isn't a silent
+> nerf. Fully wired end-to-end (engine, `IntentIcon`'s SOAKED-share fix,
+> mobile glossary reachability inherited generically per Phase 82) —
+> nothing left for this steward to fix or re-wire. Re-derived every other
+> Step-1 signal fresh: (1) **orphan sweep** — 78 non-fixture
+> `ENEMY_REGISTRY` entries all resolve into a pool except the same
+> standing exclusion, `the-incompleteness` (impossible-ceiling boss,
+> explicit `DESIGN REQUIREMENT` comment barring pool entry); `sandbag`
+> is the test-fixture exclusion, byte-identical to every prior pass. (2)
+> **roster-size/overlap** — all 10 pools recomputed fresh: fishing-village
+> 13, northern-forest 39, caverns 16, northern-city 8, connecting-river 5,
+> town-across-river 4, the-capital 8, aporia-colonnade 8, aporia-archive
+> 8, aporia-proof 11 — byte-identical to passes 9-13 (source unchanged).
+> (3) **loot-table sweep** — 22 distinct `drop()` ids, all 22 resolve
+> against `Items/consumable.library.ts`'s live set, 0 stale references,
+> same as pass 13. (4) **aftermath-prose/voice sweep** — 0
+> `\b(thee|thou|thy|thine|ye)\b` hits; 79 `createEnemy` records, same
+> count as pass 13, the standing 32-enemy `finalBlowLines` backlog
+> re-cited not re-filed. (5) **plan-doc sweep** — `git log
+> 181a84e2..HEAD -- plan/AUDIT.md plan/PHASE_CANDIDATES.md
+> plan/CRITIQUE.md` returns 11 commits; only 2 touch the roster's own
+> summoner candidate (`3abcadf5`/`59a65fe4`, writing up and settling the
+> design that Phase 102 above then shipped — already resolved, not
+> re-filed) and 1 is critique pass 42's single finding (a card-hand-fan
+> UI truncation issue, `CombatBoard.tsx`, confirmed out of scope — not
+> `src/Enemy` or the roster).
+>
+> **Step 1b widened audit:** Step 1 read effectively zero-diff (one
+> already-fully-wired phase aside), so ran the widened KB cross-reference
+> on a fresh angle — boss/enrage phase-transition design — deliberately
+> off pass 11 (summoner/multi-hit), pass 12 (trash-mob/variety), and pass
+> 13 (telegraph/tell clarity)'s own angles. `kb_search` (scope
+> `boardgames`) surfaced `kb:aeons-end/rules/overview` ("The Nemesis deck
+> escalates through tiers") and `kb:aeons-end/rules/edge-cases-faq` ("The
+> Nemesis deck remains ordered by tier to preserve escalation") — a
+> well-regarded pattern where a cooperative boss's threat qualitatively
+> worsens as a fight lengthens, not just numerically. Cross-checked
+> against the live engine before treating either as a gap, same
+> discipline pass 13 used for its own telegraph hit — but unlike pass
+> 13's outcome, this one did NOT corroborate a shipped design: Axiomancer
+> already authored this exact pattern (`RAGE_UNLOCK_ROUND`/
+> `RAGE_DAMAGE_WEIGHT`/`RAGE_HEAL_FRACTION`, `combat.threat.ts:458-471`,
+> a locked self-heal-and-hit-harder "Phase 3" built specifically to
+> punish slow non-status attrition), but tracing its call site
+> (`combat.threat.ts:539`) into `AUTHORED_THREAT_SEQUENCES`
+> (`combat.threat-sequences.ts:23-24`, keyed off `ENEMY_DECKS`) found it
+> unreachable in any real fight: every roster enemy's `id: 'enemy-<slug>'`
+> resolves an `ENEMY_DECKS` entry, so the qualitative rage phase can only
+> ever fire for the never-pooled test fixture `Sandbag_01` (`id:
+> 'sandbag-01'`, no `enemy-` prefix). Confirmed the fallback isn't
+> academic either — once an authored deck's phases exhaust,
+> `currentPhaseIndex` clamps to the final one (intentional, per
+> `oracle-omen-v2.engine.test.ts:291`) and repeats it forever, leaving
+> only THE CLOCK's numeric-only escalation standing in. This is a real,
+> previously-unflagged gap between an already-authored qualitative design
+> and what any actual fight can reach, but it's an engine-reachability
+> judgment call (retire RAGE as superseded, or revive it per-boss), not a
+> roster data edit this steward can ship solo — filed per THE GROWTH
+> FLOOR ¶2: `plan/PHASE_CANDIDATES.md` `[score 3.0]` "RAGE_UNLOCK_ROUND's
+> self-heal escalation is unreachable — every roster enemy is authored,
+> so the qualitative 'punish attrition' phase never fires in a real
+> fight." KB research (skill §3 Step 2): the Step 1b widened check above
+> IS this pass's KB research run — no CREATE/UPDATE shipped on enemy
+> data itself, so the REMOVE/no-op carve-out prior zero-diff passes have
+> used identically applies here too. Verify: ran both gates in full
+> despite the near-empty source diff — `npm run verify --workspace
+> axiomancer-mechanics` (216/216 files, 3545 tests + build green) and
+> `npm run verify --workspace axiomancer-mobile` (exit 0; lint +
+> typecheck clean, jest all green). `npm run deploy:check` confirmed
+> green pre-tick (HEAD `fa5dfb8b`) and will be re-confirmed after this
+> ledger commit lands. No new `plan/AUDIT.md` residue filed this pass —
+> the one new finding went to `plan/PHASE_CANDIDATES.md` per the above;
+> nothing else actionable surfaced beyond the standing, already-filed
+> 32-enemy `finalBlowLines` backlog and the (now-shipped) summoner
+> candidate, both re-cited above.
+```
 
 ```
 > **[adjust-equipment pass 14, 2026-09-20, commit 8e4a7976]** One
