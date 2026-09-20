@@ -35,7 +35,7 @@ describe('COMBAT_CARDS: library coverage', () => {
     });
 
     it('every stance is a known StanceKey literal', () => {
-        const known: ReadonlyArray<CombatCardOption['stance']> = ['heart', 'body', 'mind'];
+        const known: ReadonlyArray<CombatCardOption['stance']> = ['heart', 'body', 'mind', 'any'];
         for (const card of COMBAT_CARDS) {
             expect(known).toContain(card.stance);
         }

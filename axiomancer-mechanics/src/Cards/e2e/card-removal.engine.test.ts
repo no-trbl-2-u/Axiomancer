@@ -19,6 +19,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { STARTING_CARD_IDS } from '../../Combat/combat.rewards';
 
 import {
     removeCardFromCombatDeck,
@@ -293,7 +294,7 @@ describe('Phase 52a — refusals are first-class, loud, and inert', () => {
         expect(result.ok).toBe(false);
         if (result.ok) return;
         expect(result.refusal.code).toBe('deck-at-floor');
-        expect(result.refusal.reason).toMatch(/floor of 12 cards/);
+        expect(result.refusal.reason).toMatch(/floor of 10 cards/);
         expect(result.refusal.floor).toBe(MIN_COMBAT_DECK_SIZE);
         expect(result.refusal.deckSize).toBe(MIN_COMBAT_DECK_SIZE);
         expect(result.player).toBe(player);
@@ -414,8 +415,15 @@ describe('Phase 52a — the escalating price (RATIFIED Phase 52f, measured incom
     });
 });
 
-describe('Phase 52a — MIN_COMBAT_DECK_SIZE is DERIVED from the shipped canon', () => {
-    it('is the low-water mark of the Profane Canon lineage (18 − PILGRIM_REMOVED)', () => {
+describe('Phase 52a / 104 — MIN_COMBAT_DECK_SIZE is DERIVED from the shipped decks', () => {
+    it('is the size of the grey office — the smallest deck a run ever opens with (Phase 104)', () => {
+        // The floor sits AT the starting deck, never above it: a fresh run's
+        // first CUT is refused until one reward is taken (T's ruling).
+        expect(STARTING_CARD_IDS).toHaveLength(10);
+        expect(MIN_COMBAT_DECK_SIZE).toBe(STARTING_CARD_IDS.length);
+    });
+
+    it('keeps every documented removal in the Profane Canon lineage legal', () => {
         const threadbare = getDeckPreset('threadbare')!.cardIds.length;
         const pilgrim = getDeckPreset('pilgrim')!.cardIds.length;
         expect(threadbare).toBe(18);
@@ -426,10 +434,7 @@ describe('Phase 52a — MIN_COMBAT_DECK_SIZE is DERIVED from the shipped canon',
         const afterApostateCut = pilgrim - sum(PRESET_LINEAGE.apostate.removed);
         expect(afterPilgrimCut).toBe(12);
         expect(afterApostateCut).toBe(22);
-
-        // The floor is the tightest one under which every documented removal in
-        // the shipped campaign is still legal.
-        expect(MIN_COMBAT_DECK_SIZE).toBe(Math.min(afterPilgrimCut, afterApostateCut));
+        expect(MIN_COMBAT_DECK_SIZE).toBeLessThanOrEqual(Math.min(afterPilgrimCut, afterApostateCut));
     });
 
     it('clears every shipped preset shape (no preset is born below the floor)', () => {
@@ -439,11 +444,9 @@ describe('Phase 52a — MIN_COMBAT_DECK_SIZE is DERIVED from the shipped canon',
         }
     });
 
-    it('survives the preset laws at the floor: aspect thirds and more than two hands', () => {
-        // Exact aspect thirds (4/4/4) are still expressible at the floor; 10 —
-        // the brief's pre-canon proposal — is not divisible by 3.
-        expect(MIN_COMBAT_DECK_SIZE % 3).toBe(0);
-        // Below ~2 hands the draw pile reshuffles inside a single round.
-        expect(MIN_COMBAT_DECK_SIZE).toBeGreaterThan(COMBAT_HAND_SIZE * 2);
+    it('is still more than two hands — below that the draw pile reshuffles inside a round', () => {
+        // The aspect-thirds corroboration (12 % 3 === 0) was retired with the
+        // grey office: a colourless deck has no thirds to keep.
+        expect(MIN_COMBAT_DECK_SIZE).toBeGreaterThanOrEqual(COMBAT_HAND_SIZE * 2);
     });
 });

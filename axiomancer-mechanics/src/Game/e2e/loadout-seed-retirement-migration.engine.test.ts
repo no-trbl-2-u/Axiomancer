@@ -25,7 +25,6 @@ import {
     COMBAT_LOADOUT_FLAG_PREFIX, addToLoadout, getCombatLoadout,
 } from '../../Combat/combat.loadout';
 import { buildCombatDeck } from '../../Combat/combat.deck';
-import { STARTING_CARD_IDS } from '../../Combat/combat.rewards';
 import { MIN_COMBAT_DECK_SIZE, removeCardFromCombatDeck } from '../../Cards/card.removal';
 import { executeCard } from '../../Cards/card.engine';
 import { getCardById } from '../../Cards/cards.library';
@@ -33,10 +32,15 @@ import { buildPresetDeck } from '../../Combat/combat.starter-deck-presets';
 import { GraveLarva } from '../../Enemy/enemy.library';
 import type { CombatState } from '../../Combat/types';
 
+/** The four ids `STARTING_CARD_IDS` held from 2026-09-05 to 2026-09-20 — the
+ *  seed a v22 save actually carries. Pinned literally: Phase 104 replaced the
+ *  live constant with the grey office, but old saves still hold these. */
+const LEGACY_STARTING_CARD_IDS = ['spoiled-poultice', 'chilblain-watch', 'first-spadeful', 'thin-hymn'] as const;
+
 /** The pre-v23 seed, rebuilt exactly as `createNewGameState` used to write it. */
 function legacySeedFlags(): string[] {
     let flags: string[] = [];
-    for (const id of STARTING_CARD_IDS) flags = addToLoadout(flags, id);
+    for (const id of LEGACY_STARTING_CARD_IDS) flags = addToLoadout(flags, id);
     return flags;
 }
 
@@ -110,7 +114,7 @@ describe('migrate v22 → v23 — strip the starting-loadout seed', () => {
     it('REPRO: the seed dealt a starter the bundle lacked and executeCard threw; v23 does not', () => {
         // A themed bundle that does NOT contain the seeded `thin-hymn`.
         const bundle = buildPresetDeck('pilgrim').filter(id => id !== 'thin-hymn');
-        expect(STARTING_CARD_IDS).toContain('thin-hymn');
+        expect(LEGACY_STARTING_CARD_IDS).toContain('thin-hymn');
         const raw = v22Save();
         const before = migrate(raw, 22, 22);
         const player = { ...before.player, knownCards: bundle, combatRewardCards: [] };

@@ -339,7 +339,8 @@ describe('selectTooltipContentFor', () => {
             // getCombatCardById uppercases the name.
             expect(content?.title).toBe(first.name.toUpperCase());
             expect(content?.body).toBe(first.description);
-            expect(content?.footnote).toMatch(/^stance (HEART|BODY|MIND)$/);
+            // Phase 104 — the library now opens with the grey office (`any`).
+            expect(content?.footnote).toMatch(/^stance (HEART|BODY|MIND|ANY)$/);
         });
 
         it('returns null for an unknown card id', () => {

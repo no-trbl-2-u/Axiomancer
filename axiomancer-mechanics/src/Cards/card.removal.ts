@@ -94,8 +94,16 @@ import type {
  * cap, or pin in the tree is 10 any more. `card-removal.engine.test.ts` pins
  * the derivation, so a future re-cut of the lineage forces this to be re-derived
  * rather than silently drifting.)
+ *
+ * **Re-derived to 10 (Phase 104, 2026-09-20).** The grey office — the deck
+ * every new run now opens with (`STARTING_CARD_IDS`, 7 STRIKE / 3 WARD) — is
+ * the smallest shipped starting deck at 10, so the floor must sit AT it, not
+ * above it: a fresh run's first CUT is refused until one reward is taken,
+ * which is the intended tempo (T's ruling). 10 is still 2 × `COMBAT_HAND_SIZE`,
+ * the reshuffle-inside-one-round bound, and the Profane Canon lineage's own
+ * low-water mark (12) stays comfortably legal above it.
  */
-export const MIN_COMBAT_DECK_SIZE = 12;
+export const MIN_COMBAT_DECK_SIZE = 10;
 
 /** Loud copy per refusal code. Kept beside the codes so they never drift. */
 function refusalReason(code: CardRemovalRefusalCode, cardId: string, deckSize: number): string {

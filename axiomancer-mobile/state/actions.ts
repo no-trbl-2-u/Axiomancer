@@ -613,11 +613,11 @@ export interface UseItemResult {
 // card. So the hand can only be as varied — and as effective — as the set of
 // cards the level-1 player actually KNOWS.
 //
-// The v3 themed-deck library authors the starting deck explicitly: the engine's
-// `STARTING_CARD_IDS` (slippery-slope + brace-for-impact, both level-1
-// learnable) plus the synthetic Retreat. Each starter teaches a mechanic in
-// fight one — poison erosion and Guard. `engineLearnCard` re-checks each
-// requirement, so anything unlearnable is skipped safely.
+// Phase 104 — the engine's `STARTING_CARD_IDS` is THE GREY OFFICE: ten
+// copies of two colourless shapes (7 STRIKE / 3 WARD). Copies are real, so
+// the fallback seeds the list VERBATIM (learn-requirements do not gate the
+// combat deal — `knownCards` IS the deck source), exactly as the bundle path
+// does.
 const STARTER_CARD_IDS: readonly string[] = STARTING_CARD_IDS;
 
 function currentAlignment(store: AppStore): PhilosophicalAlignment {
@@ -638,11 +638,7 @@ function ensureStarterCards(store: AppStore): void {
         store.setState({ player: { ...player, knownCards: [...bundle.cardIds], combatRewardCards: [] } });
         return;
     }
-    let next = player;
-    for (const id of STARTER_CARD_IDS) {
-        next = engineLearnCard(next, id);
-    }
-    if (next !== player) store.setState({ player: next });
+    store.setState({ player: { ...player, knownCards: [...STARTER_CARD_IDS], combatRewardCards: [] } });
 }
 
 /** One learnable-card offer row for the level-up learn modal. */
@@ -650,7 +646,7 @@ export interface LearnableCardOffer {
     id: string;
     name: string;
     description: string;
-    stance: 'body' | 'mind' | 'heart';
+    stance: 'body' | 'mind' | 'heart' | 'any'; // Phase 104 — `'any'`: a grey card
     tier: number;
     /** Compact effect line — same format as the combat picker rows. */
     effectText: string;

@@ -630,10 +630,19 @@ progression levers.
   deck — the reliable plan through a bad draw. Played via `playSignatureSkill`,
   gated on Conviction.
 - **Deckbuilding.** After a won combat, `rollCombatCardRewards` offers a
-  1-of-N card draft (archetype-biased) that `addRewardCard` appends to the
-  player's persistent collection. New *cards* (a new card type) are unlocked
-  rarely via ethical-dilemma events through the `unlockSkillViaDilemma` hook;
-  a new player starts with `STARTING_SKILL_ID` only.
+  1-of-N card draft that `addRewardCard` appends to the player's persistent
+  collection. Phase 104 (2026-09-20) — THREE REGIMES by reward cards TAKEN
+  (`combatRewardCards.length`; a skip advances nothing): fewer than
+  `REWARD_RANDOM_PICKS` (3) → every slot UNIFORM over the pool (no theme
+  share, no rarity weight); three or more → the theme-aware roll, with slot 0
+  GUARANTEED from the dominant theme's keyword family (`dominantTheme`,
+  `THEME_KEYWORDS`, `cardKeywords`) whenever a leader exists. New *cards* (a
+  new card type) are unlocked rarely via ethical-dilemma events through the
+  `unlockCardViaDilemma` hook. A new player starts with THE GREY OFFICE
+  (`STARTING_CARD_IDS`: `grey-strike` ×7, `grey-ward` ×3) — grey cards
+  (`philosophicalAspect: 'any'`, theme `'grey'`) project as the WILD stance,
+  so any die powers them; they are never a reward and never count in a deck's
+  theme tally. `MIN_COMBAT_DECK_SIZE` is 10, the grey office's size.
 
 | Function / Type | Description |
 |-----------------|-------------|

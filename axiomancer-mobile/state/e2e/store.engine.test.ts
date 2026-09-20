@@ -17,7 +17,7 @@ import { afterEach, beforeEach, describe, it, expect, jest } from '@jest/globals
 import {
     buildCombatDeck,
     createEnemy,
-    getCardById,
+    getCardById, STARTING_CARD_IDS,
     initializeCombatEncounter,
     handCards,
     selectIsInCombat,
@@ -110,21 +110,20 @@ describe('createAppActions: dispatch', () => {
         actions.startCombat(makeEnemy());
         const player = selectPlayer(store.getState());
 
-        // Every seeded starter card must actually have been learned (none
-        // silently dropped by an unmet learning requirement).
-        expect(player.knownCards).toEqual([
-            'spoiled-poultice', 'chilblain-watch', 'first-spadeful', 'thin-hymn',
-        ]);
+        // Phase 104 — the seed is the engine's grey office, VERBATIM (copies
+        // kept: 7 STRIKE / 3 WARD), never a learn-gated subset.
+        expect(player.knownCards).toEqual([...STARTING_CARD_IDS]);
+        expect(player.knownCards).toHaveLength(10);
         for (const id of player.knownCards) {
             expect(getCardById(id)).toBeTruthy();
         }
 
-        // THE COLOUR LAW at the starter gate: the seeded deck spans all three
-        // stances, so no die colour is dead on turn one.
+        // THE COLOUR LAW at the starter gate: no die colour is dead on turn
+        // one — every grey card is powered by any die.
         const aspects = new Set(
             player.knownCards.map((id) => getCardById(id)!.philosophicalAspect),
         );
-        expect([...aspects].sort()).toEqual(['body', 'heart', 'mind']);
+        expect([...aspects]).toEqual(['any']);
 
         // The card deck is built from those known cards; the player must draw
         // real action cards from it.
@@ -133,19 +132,15 @@ describe('createAppActions: dispatch', () => {
         const visible = handCards(encounter).filter(
             ({ card }) => card.id !== 'card-retreat' && card.verbClass !== 'retreat',
         );
-        expect(deck.length).toBeGreaterThanOrEqual(4);
+        expect(deck).toHaveLength(10);
         expect(visible.length).toBeGreaterThanOrEqual(4);
-        // A 4-card deck still draws a padded 5-card hand — every starter must
-        // be present (duplicates are the reshuffle law at work, not a bug).
+        // Phase 104 — the opening hand is dealt from the grey office alone:
+        // every visible card is one of its two shapes, and every one of them
+        // projects as the WILD stance (any die powers it).
         const distinct = new Set(visible.map(({ card }) => card.id));
-        expect(distinct).toEqual(new Set([
-            'spoiled-poultice', 'chilblain-watch', 'first-spadeful', 'thin-hymn',
-        ]));
-        // One card erodes (DoT) and one defends — the strike is dead, so the
-        // opening hand teaches poison + Guard rather than a raw hit.
-        const verbs = visible.map(({ card }) => card.verbClass);
-        expect(verbs).toContain('direct-dot');
-        expect(verbs).toContain('defend');
+        expect(distinct.size).toBeGreaterThan(0);
+        for (const id of distinct) expect(['grey-strike', 'grey-ward']).toContain(id);
+        for (const { card } of visible) expect(card.stance).toBe('wild');
     });
 
     it('endCombat clears the active encounter and preserves player progress', () => {

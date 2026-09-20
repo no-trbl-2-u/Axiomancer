@@ -9,7 +9,7 @@
  */
 
 export type {
-    Card, StatType, CardTier, CardTarget,
+    Card, StatType, CardAspect, CardTier, CardTarget,
     CardCombatEffects, CardSpecialMechanic,
     CardSynergy, SynergyPredicate,
     // WS4.2 — combat-state synergy predicate (spec 32 §12 item 4)

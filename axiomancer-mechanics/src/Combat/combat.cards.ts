@@ -89,7 +89,11 @@ export function effectImpact(
 
 /** Stance color for a projected combat card — its philosophical aspect (§4.3). */
 export function cardStanceColor(card: Card): CombatDieColor {
-    return card.philosophicalAspect;
+    // Phase 104 — a GREY card (`'any'`) projects as the WILD stance: the engine
+    // already treats wild as "matches everything", so any die powers it, a
+    // wild die on it reads `none`, and the resonance / forge fallbacks that
+    // need a concrete colour keep the powering die's own.
+    return card.philosophicalAspect === 'any' ? 'wild' : card.philosophicalAspect;
 }
 
 /** Payoff mechanics that read as the "closer" class (status-payoff bursts). */

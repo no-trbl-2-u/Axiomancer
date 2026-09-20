@@ -123,9 +123,9 @@ describe('app/index.tsx: onboarding flow', () => {
 
     it('auto-seeds the Threadbare Office and proceeds to the map once a new player dismisses the title', () => {
         // Phase 46b: a brand-new player is no longer offered a picker among
-        // Threadbare/Pilgrim/Apostate — they are auto-seeded into the
-        // neutral Threadbare Office and sent straight to the map. See
-        // plan/phases/phase_46a_early_game_rethink.md D4.
+        // Threadbare/Pilgrim/Apostate — they are auto-seeded and sent straight
+        // to the map (plan/phases/phase_46a_early_game_rethink.md D4). Phase
+        // 104: that seed is the grey office.
         const store = makeStore();
         const { getByTestId } = render(withProviders(store, <IndexScreen />));
 
@@ -134,7 +134,8 @@ describe('app/index.tsx: onboarding flow', () => {
         });
 
         expect(getByTestId('redirect-/exploration')).toBeTruthy();
-        expect(chosenStarterBundle(store)?.id).toBe('threadbare');
+        expect(chosenStarterBundle(store)?.id).toBe('grey-office');
+        expect(store.getState().player.knownCards).toHaveLength(10);
         expect(store.getState().player.knownCards.length).toBeGreaterThan(0);
     });
 

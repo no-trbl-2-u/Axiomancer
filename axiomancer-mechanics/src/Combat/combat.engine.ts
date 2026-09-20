@@ -2277,7 +2277,9 @@ function playBottomAction(
     //     card of ITS color. WILD (gold) is the sole exception — it matches
     //     every card. A fate-X play acts wild by definition. Applies to every
     //     power source: drafted, Reserve, and floating alike.
-    if (poweringSource !== 'fate-x' && powering.color !== 'wild' && powering.color !== card.stance) {
+    //     Phase 104 — the exception runs both ways: a WILD-stance card (the
+    //     grey office, `philosophicalAspect: 'any'`) is powered by ANY die.
+    if (poweringSource !== 'fate-x' && card.stance !== 'wild' && powering.color !== 'wild' && powering.color !== card.stance) {
         const events: CombatEvent[] = [{
             kind: 'effect-fizzled', cardId: card.id, effectId: '',
             message: `a ${powering.color} die cannot power a ${card.stance} card — colors must match`,
@@ -2298,7 +2300,8 @@ function playBottomAction(
             ? clampPlayerRead(state.player, resolveRead(card.stance as CombatDieColor, enemyStance), card.stance as CombatDieColor)
             : state.lastRead;
     const mult = READ_DAMAGE_MULT[read];
-    const colorMatch = powering.color === 'wild' || powering.color === card.stance;
+    // A grey (wild-stance) card is on-colour for every die — never off-colour.
+    const colorMatch = card.stance === 'wild' || powering.color === 'wild' || powering.color === card.stance;
     const advantage = readToAdvantage(read);
     const poweringPips = powering.pips ?? 0;
     // Tracks blood-price HP taken THIS play (recoil mechanic + fate.recoilHp)

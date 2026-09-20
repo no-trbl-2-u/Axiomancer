@@ -16,7 +16,7 @@ import { cardLibrary, getCardById } from '../cards.library';
 import { CARD_RANK_NAMES } from '../types';
 import { CARD_THEMES } from '../card-themes';
 import type { Card } from '../types';
-import { COMBAT_REWARD_POOL, STARTING_CARD_IDS } from '../../Combat/combat.rewards';
+import { COMBAT_REWARD_POOL, STARTING_CARD_IDS, GREY_OFFICE_SHAPE } from '../../Combat/combat.rewards';
 import { listDeckPresets, cardOrigin } from '../../Combat/combat.starter-deck-presets';
 
 /** The seven theme tags — every card carries exactly one. */
@@ -119,29 +119,33 @@ describe('profane canon — id hygiene and provenance', () => {
             expect([1, 2, 3, 4, 5, 6]).toContain(card.rank);
             expect(['spell', 'oath', 'hex']).toContain(card.cardType);
             expect(['self', 'enemy']).toContain(card.targetType);
-            expect(['body', 'mind', 'heart']).toContain(card.philosophicalAspect);
+            // Phase 104 — `'any'` is the grey office's colour (every die powers it).
+            expect(['body', 'mind', 'heart', 'any']).toContain(card.philosophicalAspect);
             // Provenance stamp: a well-formed ISO date. The 2026-08-08 floor
             // (Profane Canon wholesale replacement) was repealed 2026-09-02.
             expect(card.addedIn).toMatch(/^\d{4}-\d{2}-\d{2}$/);
         }
     });
 
-    it('the starting set resolves, teaches a mechanic each, and spans all three colours', () => {
+    it('the starting set is the grey office: 7 STRIKE / 3 WARD, every card grey (Phase 104)', () => {
         expect(STARTING_CARD_IDS).toEqual([
-            'spoiled-poultice', 'chilblain-watch', 'first-spadeful', 'thin-hymn',
+            ...Array(GREY_OFFICE_SHAPE.strike).fill('grey-strike'),
+            ...Array(GREY_OFFICE_SHAPE.ward).fill('grey-ward'),
         ]);
-        for (const id of STARTING_CARD_IDS) {
+        expect(STARTING_CARD_IDS).toHaveLength(10);
+        for (const id of new Set(STARTING_CARD_IDS)) {
             const card = getCardById(id);
             expect(card, id).toBeDefined();
             expect(card!.rank).toBe(1); // starters are Ash
             expect(card!.tags).toContain('starter');
+            expect(card!.theme).toBe('grey');
         }
-        // THE COLOUR LAW AT THE STARTER GATE (playthrough report 2026-09-05):
-        // the fallback starter deck used to be two BODY cards, so a new
-        // player's every hand was mono-red and a heart or mind die had nothing
-        // legal to power. Every stance must be represented.
+        // THE COLOUR LAW AT THE STARTER GATE (playthrough report 2026-09-05)
+        // asked that a heart or mind die always have something legal to
+        // power. The grey office satisfies it trivially: every starter is
+        // `'any'`, so every die powers every card.
         const aspects = new Set(STARTING_CARD_IDS.map(id => getCardById(id)!.philosophicalAspect));
-        expect([...aspects].sort()).toEqual(['body', 'heart', 'mind']);
+        expect([...aspects]).toEqual(['any']);
     });
 
     it('the reward pool never seats a curse, and every id resolves', () => {

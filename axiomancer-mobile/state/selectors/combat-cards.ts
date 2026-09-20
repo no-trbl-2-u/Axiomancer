@@ -31,7 +31,7 @@ import { keywordForEffect } from '@/state/combat/keywords';
  * here after the legacy `combat.engine.ts` presenter (its former
  * home) was removed with the legacy turn-based combat surface.
  */
-export type StanceKey = 'heart' | 'body' | 'mind';
+export type StanceKey = 'heart' | 'body' | 'mind' | 'any'; // Phase 104 — `'any'`: a grey card, powered by any die
 
 export interface CombatCardOption {
     /** Stable engine card id. */

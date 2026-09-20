@@ -65,9 +65,9 @@ const COMBAT_CARD_POOL: readonly string[] = Object.freeze(
 );
 
 /**
- * The starting deck (spec 32 v3 §7): the engine's `STARTING_CARD_IDS`
- * (slippery-slope + brace-for-impact) — each teaches a mechanic in fight one.
- * The synthetic Retreat rides along via `buildCombatDeck`.
+ * The starting deck — Phase 104: the engine's `STARTING_CARD_IDS`, THE GREY
+ * OFFICE (7 STRIKE / 3 WARD, every card powered by any die). Copies are
+ * real, so the list is seeded verbatim.
  */
 const STARTER_DECK_IDS: readonly string[] = STARTING_CARD_IDS;
 
@@ -213,11 +213,28 @@ const BUNDLE_CHROME: Record<ThemedDeckId, { accent: string; pills: readonly stri
     apostate: { accent: '#a63a3a', pills: ['DOOM', 'THORNS'], archetype: 'guardian' },
 };
 
-// One bundle per themed preset deck, in the engine's display order. Each
-// carries its theme's reward-skew archetype so wins bias rewards toward the
-// same family.
-export const STARTER_BUNDLES: readonly StarterBundle[] = Object.freeze(
-    listDeckPresets().map((preset): StarterBundle => {
+/**
+ * Phase 104 — THE GREY OFFICE, the bundle every brand-new run is seeded with
+ * (`NEW_PLAYER_STARTER_BUNDLE_ID`). Ten grey cards, no archetype, no hallmark
+ * pills: the deck leans nowhere until its first rewards are taken. The card
+ * ids are engine truth (`STARTING_CARD_IDS`).
+ */
+const GREY_OFFICE_BUNDLE: StarterBundle = Object.freeze({
+    id: 'grey-office',
+    name: 'The Grey Office',
+    description: 'Seven plain blows and three plain wards. Any die powers any of them. What the deck becomes is decided by what you take.',
+    archetype: null,
+    accent: '#8a8273',
+    pills: [],
+    cardIds: [...STARTER_DECK_IDS],
+});
+
+// The grey office first, then one bundle per themed preset deck in the
+// engine's display order. Each preset carries its theme's reward-skew
+// archetype so wins bias rewards toward the same family.
+export const STARTER_BUNDLES: readonly StarterBundle[] = Object.freeze([
+    GREY_OFFICE_BUNDLE,
+    ...listDeckPresets().map((preset): StarterBundle => {
         const chrome = BUNDLE_CHROME[preset.id as ThemedDeckId];
         return {
             id: preset.id,
@@ -229,15 +246,15 @@ export const STARTER_BUNDLES: readonly StarterBundle[] = Object.freeze(
             cardIds: [...preset.cardIds],
         };
     }),
-);
+]);
 
 export function starterBundleById(id: string): StarterBundle | null {
     return STARTER_BUNDLES.find((b) => b.id === id) ?? null;
 }
 
-/** The sole starter offered to a brand-new player (phase 46b, per 46a's D4:
- *  the neutral, earliest campaign snapshot — no picker among the three). */
-export const NEW_PLAYER_STARTER_BUNDLE_ID: string = 'threadbare';
+/** The sole starter a brand-new player is seeded with (phase 46b: no picker;
+ *  Phase 104: the grey office replaces the Threadbare Office as that seed). */
+export const NEW_PLAYER_STARTER_BUNDLE_ID: string = 'grey-office';
 
 /** The starter bundle chosen this run (read from flags), or null. */
 export function chosenStarterBundle(store: AppStore): StarterBundle | null {

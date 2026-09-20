@@ -259,7 +259,7 @@ Tick in this file in the same commit that ships the phase.
       gate that let a deleted file stay referenced are closed, each proven to
       fail on its condition.
       — `feat(mobile): the last two arenas, and the plate that shouldn't have shipped — phase 103` (e333fbb)
-- [ ] Phase 104 — The grey office and the keyword pull: a new player starts
+- [x] Phase 104 — The grey office and the keyword pull: a new player starts
       with a 10-card deck of GREY cards (a new `'any'` card aspect that every
       die colour may power — the colour law's first exception) in two shapes
       only, STRIKE (deal 2 free / 5 paid) x7 and WARD (GUARD 2 free / 5 paid)
@@ -272,7 +272,9 @@ Tick in this file in the same commit that ships the phase.
       `MIN_COMBAT_DECK_SIZE` re-derives to 10. Direct T request 2026-09-20
       (learning-curve ruling, decisions recorded in the brief). Mechanics +
       mobile + card-editor (aspect union). Brief:
-      `plan/phases/phase_104_grey_office_keyword_pull.md`.
+      `plan/phases/phase_104_grey_office_keyword_pull.md`. Shipped
+      2026-09-20 — `feat: the grey office and the keyword pull — phase 104`
+      (hash recorded in the follow-up ledger commit).
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics:

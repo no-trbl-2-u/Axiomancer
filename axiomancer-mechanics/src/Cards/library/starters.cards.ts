@@ -284,6 +284,57 @@ const theWound: Card = curse(
     'Its FREE line costs you 2 VITAE.',
 );
 
+// ── Phase 104 — THE GREY OFFICE ───────────────────────────────────────────────
+// The deck every new run opens with: two shapes, ten copies, no colour. A
+// grey card (`philosophicalAspect: 'any'`) is powered by ANY die, so fight
+// one teaches STRIKE, WARD, FREE-vs-PAID and the die spend with zero colour
+// arithmetic. Both are priced UNDER the starter curve on purpose — like the
+// Threadbare Office, they exist to be outgrown and cut. Theme `'grey'` keeps
+// them out of the reward pool and out of every deck's theme tally.
+
+const GREY_ADDED = '2026-09-20';
+
+const greyStrike: Card = {
+    id: 'grey-strike',
+    theme: 'grey',
+    name: 'A Plain Blow',
+    philosophicalAspect: 'any',
+    description:
+        'No form to it, no name for it. A fist, a stone, the flat of whatever ' +
+        'you were holding. It is the first thing anybody learns and the last ' +
+        'thing anybody forgets.',
+    tier: 1, rank: 1, cardType: 'spell',
+    targetType: 'enemy',
+    paidSummary: 'Deal 5.',
+    // pts: deal 5 (1.67) + FREE deal 2. Deliberately under the Ash curve.
+    free: { damage: 2 },
+    specialMechanics: [{ kind: 'deal', amount: 5 }],
+    addedIn: GREY_ADDED,
+    tags: ['grey', 'damage', 'starter'],
+};
+
+const greyWard: Card = {
+    id: 'grey-ward',
+    theme: 'grey',
+    name: 'A Plain Ward',
+    philosophicalAspect: 'any',
+    description:
+        'An arm up. A step back. The oldest prayer there is, and the only one ' +
+        'that has never once gone unanswered — for a moment.',
+    tier: 1, rank: 1, cardType: 'spell',
+    targetType: 'self',
+    paidSummary: 'GUARD 5.',
+    // pts: guard 5 (1.25) + FREE guard 2. Deliberately under the Ash curve.
+    free: { guard: 2 },
+    specialMechanics: [{ kind: 'guard', amount: 5 }],
+    addedIn: GREY_ADDED,
+    tags: ['grey', 'guard', 'starter'],
+};
+
+/** Phase 104 — the two grey shapes. Seated 7 STRIKE / 3 WARD by
+ *  `STARTING_CARD_IDS` (`Combat/combat.rewards.ts`). */
+export const GREY_OFFICE_CARDS: Card[] = [greyStrike, greyWard];
+
 /** The eight starters, in Threadbare seating order. */
 export const STARTER_CARDS: Card[] = [
     spoiledPoultice, chilblainWatch, firstSpadeful, pettyIndictment,

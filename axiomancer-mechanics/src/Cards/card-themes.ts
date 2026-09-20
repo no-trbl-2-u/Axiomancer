@@ -20,11 +20,13 @@ export type CardTheme =
     | 'vigil'    // — the Cold Watch: GUARD/THORNS/RIPOSTE, bloodless-night payoffs
     | 'trial'    // — the Indictment: CHARGE→CONDEMN, STAGGER, BACKFIRE, MARK
     | 'choir'    // — the Pale Choir: PLEA→RELENT, QUARTER, SOUL/REAP
-    | 'curse';   // — enemy-injected junk; PURGE or IMMOLATE it away
+    | 'curse'    // — enemy-injected junk; PURGE or IMMOLATE it away
+    | 'grey';    // — Phase 104: the two starter shapes every new run opens with;
+                 //   no archetype, never a reward, never counted in a deck's theme tally
 
 /** Stable display/registry order. */
 export const CARD_THEMES: readonly CardTheme[] = Object.freeze([
-    'rot', 'debt', 'grave', 'vigil', 'trial', 'choir', 'curse',
+    'rot', 'debt', 'grave', 'vigil', 'trial', 'choir', 'curse', 'grey',
 ]);
 
 /**
@@ -44,6 +46,9 @@ export const THEME_KEYWORDS: Record<CardTheme, readonly string[]> = Object.freez
     trial: ['CHARGE', 'STAGGER', 'BACKFIRE', 'MARK', 'DOOM'],
     choir: ['PLEA', 'QUARTER', 'SOUL', 'REAP', 'DOOM', 'HEAL', 'CLEANSE', 'KINDLE'],
     curse: ['PURGE'],
+    // Phase 104 — the grey office has NO family: a new deck leans nowhere
+    // until its first rewards are taken.
+    grey: [],
 });
 
 /** The keyword family for a theme (empty for an unknown key). */

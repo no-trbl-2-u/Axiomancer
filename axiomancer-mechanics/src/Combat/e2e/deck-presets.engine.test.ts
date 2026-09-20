@@ -56,7 +56,9 @@ describe('campaign presets — the evolving deck', () => {
     it('exact aspect thirds per preset (the generalized color law)', () => {
         for (const id of SPEC_PRESET_IDS) {
             const preset = getDeckPreset(id)!;
-            const byAspect = { body: 0, mind: 0, heart: 0 };
+            // Phase 104 — presets never seat a grey (`'any'`) card; a grey id
+            // here would land under a fourth key and fail the equality below.
+            const byAspect: Record<string, number> = { body: 0, mind: 0, heart: 0 };
             for (const cardId of preset.cardIds) {
                 byAspect[getCardById(cardId)!.philosophicalAspect] += 1;
             }

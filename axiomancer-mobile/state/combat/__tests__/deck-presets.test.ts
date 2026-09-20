@@ -81,8 +81,9 @@ describe('Combat deck presets', () => {
     it('starter-baseline restores the engine starting deck', () => {
         const result = applyCombatDeckPresetAction(makeStore(), 'starter-baseline');
         expect(result.cardIds).toEqual([...STARTING_CARD_IDS]);
-        expect(result.cardIds).toContain('spoiled-poultice');
-        expect(result.cardIds).toContain('chilblain-watch');
+        // Phase 104 — the engine starting deck is the grey office.
+        expect(result.cardIds).toContain('grey-strike');
+        expect(result.cardIds).toContain('grey-ward');
     });
 
     it('THE LINEAGE LAW: each later preset contains its predecessor minus removals (never a fresh deck)', () => {

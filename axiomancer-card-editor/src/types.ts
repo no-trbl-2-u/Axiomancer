@@ -16,7 +16,7 @@
  */
 import type {
     Card,
-    StatType,
+    CardAspect,
     CardTier,
     CardTarget,
     CardRank,
@@ -37,7 +37,8 @@ import type { CardTheme } from '@mechanics/Cards/card-themes';
 export interface CardDraft {
     id: string;
     name: string;
-    philosophicalAspect: StatType;
+    /** Phase 104 — `'any'` is a grey card: every die colour powers it. */
+    philosophicalAspect: CardAspect;
     description: string;
     tier: CardTier;
     targetType: CardTarget;

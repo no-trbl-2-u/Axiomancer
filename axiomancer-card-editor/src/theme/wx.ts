@@ -33,7 +33,7 @@ export const WX = {
 } as const;
 
 // ── Die / stance colours (heart=purple, body=red, mind=blue, wild=gold) ──────
-export type DieKey = 'body' | 'mind' | 'heart' | 'wild';
+export type DieKey = 'body' | 'mind' | 'heart' | 'wild' | 'any';
 
 export interface DieMeta {
     label: string;
@@ -46,6 +46,8 @@ export const DIE: Record<DieKey, DieMeta> = {
     mind: { label: 'MIND', color: '#4f7fd6', soft: 'rgba(79,127,214,0.16)' },
     heart: { label: 'HEART', color: '#9a5fd0', soft: 'rgba(154,95,208,0.16)' },
     wild: { label: 'WILD', color: '#d9b44a', soft: 'rgba(217,180,74,0.16)' },
+    // Phase 104 — a GREY card (`philosophicalAspect: 'any'`): neutral ash.
+    any: { label: 'ANY', color: '#8a8273', soft: 'rgba(138,130,115,0.16)' },
 };
 export const DIE_ORDER: DieKey[] = ['body', 'mind', 'heart', 'wild'];
 

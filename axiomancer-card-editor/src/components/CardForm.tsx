@@ -13,7 +13,7 @@
 import { useRef, useState, type ChangeEvent, type ReactNode } from 'react';
 import type {
     CardSpecialMechanic,
-    StatType,
+    CardAspect,
     CardCombatEffects,
 } from '@mechanics/Cards/types';
 import type { CardDraft } from '../types';
@@ -36,7 +36,7 @@ import { FieldLabel, TextField, Segmented, Dropdown, Stepper, Btn } from './form
 
 type DraftImg = CardDraft & { img?: string | null };
 
-const dieColor = (v: StatType) => DIE[v as DieKey].color;
+const dieColor = (v: CardAspect) => DIE[v as DieKey].color;
 
 // ── A collapsible section ────────────────────────────────────────────────────
 function Section({

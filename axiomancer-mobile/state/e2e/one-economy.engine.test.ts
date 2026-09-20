@@ -97,7 +97,9 @@ describe('starter cards + learn-card flow', () => {
         actions.startCombat(makeEnemy());
         const known = store.getState().player.knownCards ?? [];
         expect(known.length).toBeGreaterThan(0);
-        expect(known).toContain('chilblain-watch');
+        // Phase 104 — the seed is the grey office.
+        expect(known).toContain('grey-strike');
+        expect(known).toContain('grey-ward');
     });
 
     it('getLearnableCardOffers returns ≤3 unknown, requirement-met offers with effect lines', () => {
@@ -108,7 +110,7 @@ describe('starter cards + learn-card flow', () => {
         for (const offer of offers) {
             expect(known).not.toContain(offer.id);
             expect(offer.effectText.length).toBeGreaterThan(0);
-            expect(['body', 'mind', 'heart']).toContain(offer.stance);
+            expect(['body', 'mind', 'heart', 'any']).toContain(offer.stance);
         }
     });
 

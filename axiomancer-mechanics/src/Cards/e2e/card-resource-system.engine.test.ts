@@ -29,7 +29,7 @@ describe('Card library structural invariants', () => {
             expect(card.id).toMatch(/^[a-z][a-z0-9-]*$/);  // kebab-case
             expect([1, 2, 3]).toContain(card.tier);
             expect(['self', 'enemy']).toContain(card.targetType);
-            expect(['body', 'mind', 'heart']).toContain(card.philosophicalAspect);
+            expect(['body', 'mind', 'heart', 'any']).toContain(card.philosophicalAspect);
             // Spec 32 v3 — the quality axis + card type replace the deleted
             // basePower/scalingStat damage fields (THE STRIKE IS DEAD).
             expect([1, 2, 3, 4, 5, 6]).toContain(card.rank);

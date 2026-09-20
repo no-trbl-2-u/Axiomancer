@@ -65,9 +65,23 @@ import { enemyKeywordChip, enemyKeywordGlossForToken, keywordForEffect, keywordF
 export const STANCE_COLORS: Record<string, string> = {
     // Body=RED, Mind=BLUE, Heart=PURPLE, Wild=GOLD (owner-specified dice palette).
     heart: '#9a5fd0', body: '#d6543f', mind: '#4f7fd6', wild: '#d9b44a', x: '#5a5a5a',
+    // Phase 104 — a GREY card (`philosophicalAspect: 'any'`): neutral ash, the
+    // Threadbare accent. Any die powers it, so it borrows no die's colour.
+    any: '#8a8273',
 };
-const DIE_GLYPHS: Record<string, string> = { heart: '♥', body: '⚡', mind: '★', wild: '✦', x: '✕' };
-const STANCE_LABELS: Record<string, string> = { heart: 'HEART', body: 'BODY', mind: 'MIND', wild: 'WILD', x: 'X' };
+const DIE_GLYPHS: Record<string, string> = { heart: '♥', body: '⚡', mind: '★', wild: '✦', x: '✕', any: '✦' };
+const STANCE_LABELS: Record<string, string> = { heart: 'HEART', body: 'BODY', mind: 'MIND', wild: 'WILD', x: 'X', any: 'ANY DIE' };
+
+/**
+ * Phase 104 — the stance key a card FACE paints with. The engine projects a
+ * grey card (`'any'`) onto the `'wild'` stance so any die powers it; the face
+ * must not borrow the wild die's gold for that, so it reads the library
+ * card's own colour and paints grey cards neutral.
+ */
+function faceStanceKey(card: CombatCard, sourceCard?: Card): string {
+    const aspect = (sourceCard ?? getCardById(card.id))?.philosophicalAspect;
+    return aspect === 'any' ? 'any' : card.stance;
+}
 
 // Spec 32 v3 — THE STRIKE IS DEAD: a FREE (no-die) play executes the card's
 // AUTHORED free rider (no flat chip exists). The free text below always comes
@@ -2478,7 +2492,7 @@ function buildDetailKeywords(card: CombatCard, c: CardCalc, sourceCard?: Card): 
 /** Honest card FACE view-model (the 5-zone hand card). */
 export function faceStats(card: CombatCard, sourceCard?: Card, enemyDifficulty?: EnemyDifficulty): CombatCardFaceVM {
     const c = cardCalc(card, sourceCard);
-    const stanceColor = STANCE_COLORS[card.stance] ?? '#888';
+    const stanceColor = STANCE_COLORS[faceStanceKey(card, sourceCard)] ?? '#888';
     const kw = c.keyword ? c.keyword.toUpperCase() : null;
     // The authored FREE line (engine riderText) — never a fabricated chip.
     const free = freeLineText(card, sourceCard);
@@ -2554,7 +2568,7 @@ export function faceStats(card: CombatCard, sourceCard?: Card, enemyDifficulty?:
 function detailCore(card: CombatCard, sourceCard?: Card, enemyDifficulty?: EnemyDifficulty): DetailCore {
     const c = cardCalc(card, sourceCard);
     const Title = c.keyword ?? '';
-    const STANCE = STANCE_LABELS[card.stance] ?? card.stance.toUpperCase();
+    const STANCE = STANCE_LABELS[faceStanceKey(card, sourceCard)] ?? card.stance.toUpperCase();
     // Spec 32 v3 — the meta chip surfaces the RANK NAME + CARD TYPE (where the
     // gold tag used to sit): e.g. 'BODY · ASH · SPELL · DOT'.
     const rankName = card.rank ? RANK_NAMES[card.rank] : null;
@@ -2731,7 +2745,7 @@ export function detailStats(card: CombatCard, sourceCard?: Card, enemyDifficulty
     const core = detailCore(card, sourceCard, enemyDifficulty);
     const c = cardCalc(card, sourceCard);
     const face = faceStats(card, sourceCard, enemyDifficulty);
-    const STANCE = STANCE_LABELS[card.stance] ?? card.stance.toUpperCase();
+    const STANCE = STANCE_LABELS[faceStanceKey(card, sourceCard)] ?? card.stance.toUpperCase();
     // The free (die-optional) value — the full-truth authored line.
     const freePill = face.freeHeroText + (face.freeHeroSub ? ` (${face.freeHeroSub})` : '');
     // The exact ▲/—/▼ read triplet for the read-scaled kinds.
@@ -2861,7 +2875,7 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
         const needsReprisalChoice = (sourceCard?.specialMechanics ?? []).some(m => m.kind === 'reprise');
         return {
             uid, cardId: card.id, name: card.name, stance: card.stance,
-            stanceColor: STANCE_COLORS[card.stance] ?? '#888',
+            stanceColor: STANCE_COLORS[faceStanceKey(card, sourceCard)] ?? '#888',
             verbClass: card.verbClass, effectKind: card.effectKind,
             rarity: card.rarity, rank: card.rank,
             rankName: card.rank ? RANK_NAMES[card.rank] : null,
@@ -2968,7 +2982,7 @@ export function rewardCardVMs(ids: readonly string[]): CombatCardVM[] {
             // The offer is one card per id, so the id IS a stable uid.
             uid: `reward-${id}`,
             cardId: id, name: card.name, stance: card.stance,
-            stanceColor: STANCE_COLORS[card.stance] ?? '#888',
+            stanceColor: STANCE_COLORS[faceStanceKey(card, sourceCard)] ?? '#888',
             verbClass: card.verbClass, effectKind: card.effectKind,
             rarity: card.rarity, rank: card.rank,
             rankName: card.rank ? RANK_NAMES[card.rank] : null,

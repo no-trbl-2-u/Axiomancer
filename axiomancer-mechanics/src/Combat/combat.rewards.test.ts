@@ -18,7 +18,7 @@
 import { describe, it, expect } from 'vitest';
 
 import {
-    COMBAT_REWARD_POOL, REWARD_OFF_THEME_RATE, REWARD_RARITY_WEIGHTS, REWARD_THEMES,
+    COMBAT_REWARD_POOL, REWARD_OFF_THEME_RATE, REWARD_RANDOM_PICKS, REWARD_RARITY_WEIGHTS, REWARD_THEMES,
     addRewardCard, deckThemeCounts, deckThemeShares, rollCombatCardRewards,
 } from './combat.rewards';
 import { getDeckPreset } from './combat.starter-deck-presets';
@@ -47,10 +47,18 @@ function seededRng(seed: number): () => number {
     return next;
 }
 
+/**
+ * A player whose deck is `cardIds`. Phase 104: the first `REWARD_RANDOM_PICKS`
+ * entries are held as TAKEN rewards (the rest as learned cards) so the
+ * theme-pull assertions below exercise the leaning draft, not the uniform
+ * first-three regime — the tally (`deckThemeCounts`) is the union of both
+ * lists, so every count is unchanged by the split. An empty deck stays empty
+ * and therefore stays in the uniform regime.
+ */
 function playerWithDeck(cardIds: readonly string[]): Character {
     const player = deepClone(Player);
-    player.knownCards = [...cardIds];
-    player.combatRewardCards = [];
+    player.combatRewardCards = cardIds.slice(0, REWARD_RANDOM_PICKS);
+    player.knownCards = cardIds.slice(REWARD_RANDOM_PICKS);
     return player;
 }
 
@@ -269,7 +277,7 @@ describe('theme-aware combat card rewards', () => {
         it('appends to the persistent reward collection without touching knownCards', () => {
             const player = playerWithDeck(APOSTATE);
             const rewarded = addRewardCard(player, COMBAT_REWARD_POOL[0]);
-            expect(rewarded.combatRewardCards).toEqual([COMBAT_REWARD_POOL[0]]);
+            expect(rewarded.combatRewardCards).toEqual([...player.combatRewardCards!, COMBAT_REWARD_POOL[0]]);
             expect(rewarded.knownCards).toEqual(player.knownCards);
         });
     });
