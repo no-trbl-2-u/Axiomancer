@@ -12,7 +12,7 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-20 | 7de3890b | 14 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-19 | 46942361 | 13 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-20 | 8e4a7976 | 14 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-19 | 181a84e2 | 13 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-19 | 0f9dd762 | 13 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-19 | 6c82d06b | 13 |
@@ -20,6 +20,88 @@
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-equipment pass 14, 2026-09-20, commit 8e4a7976]** One
+> UPDATE shipped, zero CREATE/REMOVE. Dispatched autonomously by
+> `/march`'s content-lifecycle gate (`equipment` was the stalest
+> qualifying category this tick: 53 commits and ~27.5h since pass 13's
+> commit `46942361`, 2026-09-19T06:57:07Z, past the 15-commit/36h
+> threshold; `enemies` `181a84e2` 51 commits/~25.7h, `keywords`
+> `0f9dd762` 48 commits/~23.8h, and `npcs` `6c82d06b` 15 commits/~11.8h
+> also qualified but were less stale; `cards` `7de3890b` 1 commit/~1.7h
+> sat under its own threshold). `git log 46942361..HEAD --
+> axiomancer-mechanics/src/Items axiomancer-mechanics/docs/equipment.md`
+> returns one commit of the 53 intervening: `417b9310` (Phase 96, the
+> consumable desperation-band heal). Not this steward's own work — read
+> it directly and confirmed correctly wired (`DESPERATION_HP_FRACTION`
+> gate in `equipment.engine.ts`, all 5 flat-heal potions carrying
+> `healAmountBelowHalf` at a uniform 1.5x), nothing left to do on it.
+>
+> Re-derived all 6 Step-1 signals fresh: (1) slot coverage — unchanged,
+> 2 weapons/2 armor/7 accessories, all 6 `AccessoryKind`s live. (2)
+> dominated relics — none, all same-slot ties differ by
+> `grantsSignature`. (3) shop/reward coverage — 12 of 22 consumables
+> shop-stocked, the other 10 reachable via `rollCacheReward`'s uniform
+> draw, no orphan. (4) `grantsSignature` drift — all 11 relic values
+> resolve in the live `SignatureSkillId` union. (5) dead consumable
+> `effectId`s — all resolve in `buffs.library.json`. (6) `AccessoryKind`
+> gap — stays closed. All six read zero-diff, same as passes 12-13.
+>
+> **Beyond Step 1** (Step 1b's widened-audit floor, via `/oversight`
+> 2026-09-15): went one level deeper than pass 11-13's shop-pool-only
+> duplication check and cross-referenced
+> `effectId` sharing against `enemy.library.ts` loot tables too, not
+> just `World/MapEvents/content.ts`'s 7 shop ware blocks. Found a real
+> instance the shop-only check couldn't see: `body-elixir` and
+> `iron-skin-draught` both applied `buff_damage_reduction` (tier 2) AND
+> co-occur in the Cursed Paladin's (`enemy-cursed-paladin`) loot table at
+> the same 25% weight — the identical byte-identical-effect bug class as
+> issue #307 (philosopher-tea/void-essence, shops) and pass 11
+> (antidote/clarity-serum, shops), just surfaced in a reward table
+> instead of a shop. Checked the other two candidate clusters
+> (`focus-vial`/`hunters-elixir` on `buff_accuracy_up`;
+> `berserker-brew`/`quicksilver-vial`/`war-horn-draught` on
+> `buff_haste`) for the same co-occurrence and found none — those pairs
+> never appear in the same shop or the same loot table, so they stay as
+> the already-established "13 distinct ids across 22 consumables, reuse
+> expected" baseline (pass 12/13's signal 5), not a new finding.
+>
+> KB research (skill §3 Step 2, gate for the UPDATE): `kb_cards`
+> (dawncaster) on defense/armor-flavored potions (Steelskin Potion —
+> "Gain 6 Armor. Draw a card.", Diamond Potion — "Gain 1 Impervious.
+> Draw a card.") confirmed no exact "muscle/body-purpose" defensive
+> analogue exists in the corpus either — same closest-analogue territory
+> as body-elixir's original pass-1 (2026-09-04) mapping, so this pass
+> differentiates by TIER rather than inventing an ungrounded new flavor
+> match. Split `body-elixir` onto a new tier-1 `buff_stoic_resolve`
+> (`defenseModifier: 3`, duration 2, vs. `buff_damage_reduction`'s
+> `defenseModifier: 5`, duration 3) — reuses the existing
+> `defenseModifier` channel (`Combat/effect-modifiers.ts`), zero new
+> engine mechanic, same shape as pass 11's `buff_cleanse_minor` split.
+> `iron-skin-draught`'s "hardens the skin against blows" keeps the
+> stronger tier-2 buff as the more literal armor image; `body-elixir`'s
+> vaguer "locks the muscles into purpose" now reads as the lesser,
+> distinct payload.
+>
+> While wiring the split, found and fixed a second, pre-existing gap on
+> the same surface: pass 11's own `buff_cleanse_minor` split (2026-09-15)
+> never added a `SUPPORT_KEYWORD` entry in
+> `axiomancer-mobile/state/combat/keywords.ts` — `clarity-serum`'s combat
+> log has silently printed no keyword for 14 passes since. `KW-1`
+> (`keywords.test.ts`) didn't catch it because that guard only sweeps
+> effect ids referenced by `cardLibrary`, not consumable-only ids.
+> Backfilled `buff_cleanse_minor: 'Cleanse'` alongside the new
+> `buff_stoic_resolve: 'Guard'` entry.
+>
+> Extended `dead-consumable-payload.engine.test.ts`: updated the
+> `body-elixir` case in the "5 previously-dead consumables" table to its
+> new effect id, and added a
+> "body-elixir and iron-skin-draught no longer print byte-identical
+> effect lines" describe block mirroring the antidote/clarity-serum and
+> philosopher-tea/void-essence ones. Verify: green (mechanics 216/216
+> files · 3545 tests; mobile green, keywords.test.ts included).
+```
 
 ```
 > **[adjust-cards pass 14, 2026-09-20, commit 7de3890b]** One modest
