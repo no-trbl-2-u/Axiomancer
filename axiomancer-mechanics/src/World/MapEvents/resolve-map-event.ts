@@ -258,9 +258,11 @@ export function resolveMapEvent(
         ? answered
         : { ...answered, quests: questsAfterReach };
 
-    // Every branch below rebuilds the map from `answeredMap`, never from the
-    // pre-answer `map` — rebuilding from `map` would restore the arrival the
-    // resolve just paid.
+    // The two early branches below (no pool, no entry) rebuild the map from
+    // `answeredMap`, never from the pre-answer `map` — rebuilding from `map`
+    // would restore the arrival the resolve just paid. The handler branches
+    // rebuild from their own output instead, which descends from `answered`
+    // and so carries the cleared debt the same way.
     const answeredMap = answered.world.currentMap;
 
     // 2. Find the active pool.
