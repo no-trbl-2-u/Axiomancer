@@ -23,7 +23,8 @@ import { buildFixtureState } from '../../test-utils/card-fixture';
 import { playCombatCard } from '../../Combat/combat.engine';
 import { buildCombatDeck } from '../../Combat/combat.deck';
 import { getCardById } from '../cards.library';
-import { STARTING_CARD_IDS, COMBAT_REWARD_POOL } from '../../Combat/combat.rewards';
+import { removeCardFromCombatDeck, MIN_COMBAT_DECK_SIZE } from '../card.removal';
+import { STARTING_CARD_IDS, COMBAT_REWARD_POOL, addRewardCard } from '../../Combat/combat.rewards';
 import { Player } from '../../Character/characters.mock';
 import { deepClone } from '../../Utils';
 import type { Character } from '../../Character/types';
@@ -124,5 +125,21 @@ describe('Phase 104 — the grey office: the fresh-run deck', () => {
         expect(deck).toHaveLength(10);
         expect(deck.filter(id => id === 'grey-strike')).toHaveLength(7);
         expect(deck.filter(id => id === 'grey-ward')).toHaveLength(3);
+    });
+
+    it('the floor (10) refuses a fresh run\'s first CUT; taking one reward makes it legal', () => {
+        expect(MIN_COMBAT_DECK_SIZE).toBe(10);
+        const fresh: Character = { ...deepClone(Player), knownCards: [...STARTING_CARD_IDS], combatRewardCards: [] };
+        expect(buildCombatDeck(fresh)).toHaveLength(MIN_COMBAT_DECK_SIZE);
+
+        const refused = removeCardFromCombatDeck(fresh, 'grey-strike');
+        expect(refused.ok).toBe(false);
+        if (refused.ok) return;
+        expect(refused.refusal.code).toBe('deck-at-floor');
+
+        const withReward = addRewardCard(fresh, 'grey-strike');
+        expect(buildCombatDeck(withReward)).toHaveLength(MIN_COMBAT_DECK_SIZE + 1);
+        const legal = removeCardFromCombatDeck(withReward, 'grey-strike');
+        expect(legal.ok).toBe(true);
     });
 });
