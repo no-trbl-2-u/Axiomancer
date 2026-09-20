@@ -259,6 +259,19 @@ Tick in this file in the same commit that ships the phase.
       gate that let a deleted file stay referenced are closed, each proven to
       fail on its condition.
       — `feat(mobile): the last two arenas, and the plate that shouldn't have shipped — phase 103` (e333fbb)
+- [ ] Phase 104 — The grey office and the keyword pull: a new player starts
+      with a 10-card deck of GREY cards (a new `'any'` card aspect that every
+      die colour may power — the colour law's first exception) in two shapes
+      only, STRIKE (deal 2 free / 5 paid) x7 and WARD (GUARD 2 free / 5 paid)
+      x3, replacing the three-way bundle picker for a fresh run. The first
+      reward pick seeds the run's identity: from then on every reward draft
+      guarantees at least one offer carrying a keyword from the dominant
+      theme's family (`THEME_KEYWORDS`, dominant by `deckThemeCounts`), so a
+      deck grows toward its own keywords instead of the whole canon.
+      `MIN_COMBAT_DECK_SIZE` re-derives to 10. Direct T request 2026-09-20
+      (learning-curve ruling, decisions recorded in the brief). Mechanics +
+      mobile + card-editor (aspect union). Brief:
+      `plan/phases/phase_104_grey_office_keyword_pull.md`.
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics:
