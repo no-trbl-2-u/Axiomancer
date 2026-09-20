@@ -11,15 +11,17 @@
 
 A brand-new player opens the campaign with a **10-card deck of GREY cards** —
 two card shapes, nothing else — and every die colour can power any of them.
-The first post-combat reward pick seeds the run's identity: from then on,
-**every reward draft guarantees at least one offer that carries a keyword from
-the deck's dominant theme family**, so the deck grows toward the keywords the
+The first three reward cards the player TAKES are drawn **completely at
+random** — uniform over the whole non-curse pool, no theme weighting, no rarity
+weighting, no guarantee. Once three reward cards sit in the deck, **every
+reward draft guarantees at least one offer that carries a keyword from the
+deck's dominant theme family**, so the deck grows toward the keywords the
 player already chose instead of sampling the whole canon each fight.
 
 Player-facing result: fight one teaches STRIKE, WARD, FREE-vs-PAID, and the
-die-spend loop with zero colour arithmetic. Fight two's reward is the first
-real choice. Fight three onward, the draft already leans the way the player
-leaned.
+die-spend loop with zero colour arithmetic. The first three rewards taken are
+a free look at the canon. From the fourth reward screen after that, the draft
+already leans the way the player leaned.
 
 ## What exists, measured
 
@@ -102,30 +104,39 @@ leaned.
    derivation comment + `/floor of 12 cards/` pin update to 10. A fresh
    run's first CUT is legal only after the first reward is taken — that is
    the intended tempo (T picked 10 knowing the floor was 12).
-6. **Keyword pull = dominant theme's family.** T's choice over "union of
-   picked rewards" and "most recent pick". Definition: `dominantTheme =
-   argmax deckThemeCounts(player)` over `REWARD_THEMES`; ties resolve in
-   `REWARD_THEMES` order; when every count is 0 (the grey office, before
-   the first pick) there is NO guarantee and the roll is unchanged. Slot 0
-   of every draft is the GUARANTEED slot: its candidate pool is
+6. **The first three rewards TAKEN are uniform-random.** T's ruling
+   (2026-09-20 follow-up): while `(player.combatRewardCards ?? []).length <
+   REWARD_RANDOM_PICKS` (new constant, `3`), `rollCombatCardRewards` fills
+   every slot uniformly from `validPool` — no allegiance roll, no theme
+   share, no rarity weight, no guaranteed slot; distinct ids per draft as
+   today. Counted by cards actually taken, so a SKIP does not advance it
+   (T chose "cards taken" over "drafts shown"); derived from
+   `combatRewardCards.length`, so no new save field. The grey office never
+   tilts the count (its cards live in `knownCards`).
+7. **Keyword pull = dominant theme's family, from the fourth taken card
+   on.** T's choice over "union of picked rewards" and "most recent pick".
+   Definition: `dominantTheme = argmax deckThemeCounts(player)` over
+   `REWARD_THEMES`; ties resolve in `REWARD_THEMES` order; when every count
+   is 0 there is NO guarantee and the roll is the existing theme-aware one.
+   Slot 0 of every draft is the GUARANTEED slot: its candidate pool is
    `validPool ∩ { id : keywordsOf(id) ∩ THEME_KEYWORDS[dominantTheme] ≠ ∅ }`,
    rarity-weighted as today; slots 1..n keep the existing allegiance roll.
    `keywordsOf(id)` is the atlas derivation already used by the catalog
    (theme family ∪ mechanic-kind keywords) — expose it from
    `Cards/card-themes.ts` or `Cards/index.ts`, do not add a `keywords` field
    to `Card`.
-7. **Dominant theme, not first pick.** Because a first-pick `rot` card puts
-   rot at count 1 and every other theme at 0, the very next draft already
-   guarantees a rot-family keyword — T's "whatever keyword is on the new
-   card" holds from draft two onward without a separate "first pick"
-   memory. No new save field.
-8. **Sims and presets.** The campaign presets (threadbare / pilgrim /
+8. **Dominant theme, not first pick.** After three random takes the tally
+   already has a leader (or a tie, resolved in canon order), so the fourth
+   draft guarantees that family without a separate "first pick" memory. No
+   new save field.
+9. **Sims and presets.** The campaign presets (threadbare / pilgrim /
    apostate) and `deck-presets.engine.test.ts` are untouched. Add a fourth
    stage profile `'grey'` to `combat.stage-profiles.ts` ONLY if the
    combat-playtest matrix needs it to run a fresh-start row; otherwise
    leave the matrix alone. The reward-draft sim
-   (`combat.reward-draft.sim.ts`) gains a guaranteed-slot assertion.
-9. **Colour palette for grey.** Mobile paints `'any'` cards in the neutral
+   (`combat.reward-draft.sim.ts`) gains a guaranteed-slot assertion and a
+   first-three-uniform assertion.
+10. **Colour palette for grey.** Mobile paints `'any'` cards in the neutral
    ink token (`AXM.ink` / the existing `#8a8273`-class Threadbare accent —
    use the token, never the literal). The die-pip glyph on a grey face
    shows the wild glyph. Card editor's aspect select gains `any` and
@@ -154,15 +165,17 @@ leaned.
 - `CombatCard.stance: CardAspect`.
 - `CardTheme` gains `'grey'`; `THEME_KEYWORDS.grey = []`; `REWARD_THEMES`
   excludes `'grey'` and `'curse'`.
-- `rollCombatCardRewards` signature unchanged; behaviour: slot 0 guaranteed
-  when a dominant theme exists.
+- `REWARD_RANDOM_PICKS = 3` exported beside `REWARD_OFF_THEME_RATE`.
+- `rollCombatCardRewards` signature unchanged; behaviour: uniform over the
+  pool while fewer than `REWARD_RANDOM_PICKS` reward cards are held; after
+  that, slot 0 guaranteed when a dominant theme exists.
 - `MIN_COMBAT_DECK_SIZE = 10`.
 - No `GameState` shape change; no migration.
 
 ## Empty / loading / error states
 
-- Grey office before first pick: draft shows the plain roll; copy on the
-  reward screen unchanged.
+- Fewer than three reward cards held: the draft is the uniform roll; copy
+  on the reward screen unchanged.
 - Guaranteed slot with an empty candidate pool (every family card already
   offered this draft): fall through to the plain roll for that slot —
   never an empty offer, never a throw.
@@ -173,10 +186,13 @@ leaned.
   every die colour + wild powers `grey-strike` / `grey-ward`; FREE/PAID
   ledgers read 2 / 5; a fresh `ensureStarterCards`-shaped player deals
   exactly 7 + 3; neither grey id is in `COMBAT_REWARD_POOL`.
-- `Combat/e2e/reward-keyword-pull.engine.test.ts` (new): with a rot-only
-  reward history slot 0 always carries a rot-family keyword across 200
-  seeded rolls; with an all-zero deck the roll equals today's roll
-  bit-for-bit; tie order is `REWARD_THEMES` order; empty-pool fallthrough.
+- `Combat/e2e/reward-keyword-pull.engine.test.ts` (new): with 0, 1, 2
+  reward cards held every slot is uniform (a 2000-roll chi-square against
+  the pool stays inside the envelope; rares are not under-drawn); with 3
+  rot cards held slot 0 always carries a rot-family keyword across 200
+  seeded rolls; a SKIP does not advance the count; with 3+ cards and an
+  all-zero tally the roll equals today's roll bit-for-bit; tie order is
+  `REWARD_THEMES` order; empty-pool fallthrough.
 - `card-removal.engine.test.ts`: floor pin 12 → 10 + re-derivation comment.
 - `combat-loadout.engine.test.ts` unaffected.
 - mobile: `state/e2e` seeding test (fresh save → 10 grey entries, bundle
@@ -193,7 +209,8 @@ regenerate the deck-matrix baseline per AGENTS.md → "Measured truth").
 ## DoD
 
 - A fresh run deals 10 grey cards, no picker, any die powers any card.
-- After one rot pick, every subsequent draft's first slot is rot-family.
+- The first three reward cards taken come from uniform drafts; after three
+  rot picks, every subsequent draft's first slot is rot-family.
 - Floor 10; a fresh run's first CUT is refused until one reward is taken,
   then legal.
 - All three package gates green; baseline stamp refreshed.

@@ -264,10 +264,11 @@ Tick in this file in the same commit that ships the phase.
       die colour may power — the colour law's first exception) in two shapes
       only, STRIKE (deal 2 free / 5 paid) x7 and WARD (GUARD 2 free / 5 paid)
       x3, replacing the three-way bundle picker for a fresh run. The first
-      reward pick seeds the run's identity: from then on every reward draft
-      guarantees at least one offer carrying a keyword from the dominant
-      theme's family (`THEME_KEYWORDS`, dominant by `deckThemeCounts`), so a
-      deck grows toward its own keywords instead of the whole canon.
+      three reward cards taken are drawn uniformly at random over the pool;
+      from the fourth on, every reward draft guarantees at least one offer
+      carrying a keyword from the dominant theme's family (`THEME_KEYWORDS`,
+      dominant by `deckThemeCounts`), so a deck grows toward its own
+      keywords instead of the whole canon.
       `MIN_COMBAT_DECK_SIZE` re-derives to 10. Direct T request 2026-09-20
       (learning-curve ruling, decisions recorded in the brief). Mechanics +
       mobile + card-editor (aspect union). Brief:
