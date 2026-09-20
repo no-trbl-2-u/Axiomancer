@@ -40,6 +40,16 @@ flowchart LR
 - **Write path:** `gh issue create --repo no-trbl-2-u/game-knowledge-base --label wishlist --title "<game or topic>" --body "<why it would help>"`. The MCP server is read-only, so coverage requests go through GitHub issues, which the KB's daily scout consumes. This needs `gh` authenticated (or `GH_TOKEN`); a failure to file must be reported but does not sink the design session.
 - **Secrets:** `KB_MCP_TOKEN` (above) is the relevant secret and lives in the process environment only. Filing a wishlist issue additionally needs `gh` credentials or `GH_TOKEN`. No KB credential is written into this repo.
 
+### Cloudflare Pages — the public DevLog
+
+- **Owner / location:** a Cloudflare Pages project (`axiomancer-devlog`, to be created) built from this repository. **Not yet created** — the dashboard steps, the build settings and the post-deploy proof are in [`docs/devlog-public-deploy.md`](./devlog-public-deploy.md). It is separate from the `axiomancer` project, which serves the game's web build.
+- **Purpose:** publish the development log, its before/after evidence, and the full catalog to players. T reversed the 2026-08-15 "never meant to be public" content policy on 2026-09-20, with the spoiler cost stated (`plan/2026-09-20-devlog-public-publish.prompt.md`).
+- **Materialization:** a build, never a commit. `npm run site:public` writes `dist/devlog-public/`, which is gitignored; Pages runs the same command at deploy time and serves that directory. Phase 57's guard (`scripts/check-devlog-not-served.mjs`, its pre-commit hook, the weekly sweep) is unchanged and now covers `dist/` as well, so generated output still never enters `main`'s tree — which is what makes this publication deliberate rather than accidental.
+- **What is withheld:** the maintainer's `Needs you` correspondence panel (every post says so at its foot), and every art file whose provenance cannot prove public redistribution — 19 card paintings, 52 of 77 foe portraits, 15 character portraits and 4 treasure images are UNRESOLVED and are not published. See `devlog/DESIGN.md` §10; the gate is `scripts/devlog-art-licence.mjs`.
+- **Availability:** publication only. No build, test, or gameplay path depends on it; if the project is down or absent, the nightly still writes and builds the site locally.
+- **Verification:** `node scripts/check-devlog-public-live.mjs <url>` after a deploy — it proves the newest post is actually served, which a healthy-looking front page does not.
+- **Secrets:** none in-repo. The project is configured at the dashboard; the repo holds no Cloudflare token and no `wrangler.toml`.
+
 ### MCP servers and tool boundaries
 
 - **`kb-query`:** remote HTTP server owned and deployed by the **external** KB repo. It is the sole route from this repo to the corpus — there is no local file fallback. Its unavailability removes prior-art grounding for that run; it never removes an Axiomancer capability, because the corpus is not rules authority.

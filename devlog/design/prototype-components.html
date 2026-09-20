@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The before/after component — Miserere Mei, Deus DevLog</title>
+<!--
+  A design prototype, not a built page. It links the stylesheets the real site
+  emits, so it can never drift from what ships:
+
+      npm run site:public     then open this file
+
+  Every state of the signature component is on this one page, which is what a
+  design review needs and what the built pages cannot give (they show whichever
+  states the day's work happened to produce). DESIGN.md §7 is the spec.
+-->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pirata+One&family=IM+Fell+English:ital@0;1&family=Bebas+Neue&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../../dist/devlog-public/assets/tokens.css">
+<link rel="stylesheet" href="../../dist/devlog-public/assets/site.css">
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <span class="brand">&#10016; The Chronicle &mdash; component gallery</span>
+    <form class="theme-pick" hidden data-theme-pick>
+      <label class="mono" for="theme">Theme</label>
+      <select id="theme" name="theme">
+        <option value="ashen-gold">ashen-gold</option>
+        <option value="coastal-verdant">coastal-verdant</option>
+        <option value="ember-depths">ember-depths</option>
+        <option value="frost-marrow">frost-marrow</option>
+        <option value="plague-bloom">plague-bloom</option>
+      </select>
+    </form>
+  </div>
+</header>
+
+<main class="band band-wide">
+  <p class="eyebrow">&#10016; The signature component</p><hr class="rule">
+  <h1>Before and after</h1>
+  <p class="dim">One component, four shapes, five states. The labelled pair is the primary: it is the only treatment that answers &ldquo;which one is new?&rdquo; without an interaction, works with no script, prints, and reads the same on a phone as on a desk.</p>
+
+  <h2>Primary &mdash; the labelled pair</h2>
+  <p class="dim">Two plates, each captioned, the newer one framed in gold. Below 560px they stack, newest last, so the reading order stays before-then-after. A chip carries a date only where the capture manifest proves one.</p>
+  <figure class="ba ba-phone">
+    <div class="ba-grid">
+      <div class="ba-side ba-before">
+        <p class="ba-chip"><span class="ba-pip"></span>BEFORE</p>
+        <div class="ba-box"><img loading="lazy" src="../assets/2026-08-29/character.before.png" alt="The character screen before the change: the purse box is labelled with two different words for money."></div>
+      </div>
+      <div class="ba-side ba-after">
+        <p class="ba-chip"><span class="ba-pip"></span>AFTER &middot; 29 AUG</p>
+        <div class="ba-box"><img loading="lazy" src="../assets/2026-08-29/character.after.png" alt="The character screen after the change: both labels read PURSE, and the account row sits beneath it."></div>
+      </div>
+    </div>
+    <figcaption class="ba-cap">character &mdash; tall phone capture, 9:19.5</figcaption>
+  </figure>
+
+  <h2>The other two image shapes</h2>
+  <p class="dim">A card plate is 3:4 and sits side by side in a tighter grid. An arena plate is 16:9 and stacks, so a wide image keeps its width.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:22px">
+    <figure class="ba ba-card">
+      <div class="ba-grid">
+        <div class="ba-side ba-before">
+          <p class="ba-chip"><span class="ba-pip"></span>BEFORE</p>
+          <div class="ba-box" style="aspect-ratio:3/4"><img loading="lazy" src="../../axiomancer-mobile/assets/images/maps/ludgate-hill.webp" alt="The Ludgate Hill plate before the regrade: the sky reads flat." style="height:100%;object-fit:cover"></div>
+        </div>
+        <div class="ba-side ba-after">
+          <p class="ba-chip"><span class="ba-pip"></span>AFTER</p>
+          <div class="ba-box" style="aspect-ratio:3/4"><img loading="lazy" src="../../axiomancer-mobile/assets/images/maps/wentworth-street.webp" alt="The Ludgate Hill plate after the regrade: the crowd separates from the ground." style="height:100%;object-fit:cover"></div>
+        </div>
+      </div>
+      <figcaption class="ba-cap">card plate &mdash; 3:4</figcaption>
+    </figure>
+    <figure class="ba ba-wide">
+      <div class="ba-grid">
+        <div class="ba-side ba-before">
+          <p class="ba-chip"><span class="ba-pip"></span>BEFORE</p>
+          <div class="ba-box" style="aspect-ratio:16/9"><img loading="lazy" src="../../axiomancer-mobile/assets/images/maps/the-pit.webp" alt="The arena plate before replacement: the pit, cropped square." style="height:100%;object-fit:cover"></div>
+        </div>
+        <div class="ba-side ba-after">
+          <p class="ba-chip"><span class="ba-pip"></span>AFTER</p>
+          <div class="ba-box" style="aspect-ratio:16/9"><img loading="lazy" src="../../axiomancer-mobile/assets/images/combat/arena-caverns.webp" alt="The arena plate after: the Caverns engraving, graded toward the void." style="height:100%;object-fit:cover"></div>
+        </div>
+      </div>
+      <figcaption class="ba-cap">arena plate &mdash; 16:9, stacked so the wide shape keeps its width</figcaption>
+    </figure>
+  </div>
+
+  <h2>Alternate &mdash; tap to swap</h2>
+  <p class="dim">Same frame, both states, no drag. Tap, click, or focus and press space. It beats the wipe for small differences because the eye compares in place. With no script it renders as the pair below; the upgrade happens in the browser.</p>
+  <figure class="ba ba-phone" data-ba="swap">
+    <div class="ba-grid">
+      <div class="ba-side ba-before">
+        <p class="ba-chip"><span class="ba-pip"></span>BEFORE</p>
+        <div class="ba-box"><img loading="lazy" src="../assets/2026-08-29/memoir.before.png" alt="The memoir screen before the change: the entries run edge to edge."></div>
+      </div>
+      <div class="ba-side ba-after">
+        <p class="ba-chip"><span class="ba-pip"></span>AFTER</p>
+        <div class="ba-box"><img loading="lazy" src="../assets/2026-08-29/memoir.after.png" alt="The memoir screen after the change: a woodcut plate sits behind the entries."></div>
+      </div>
+    </div>
+    <figcaption class="ba-cap">memoir &mdash; tap, or focus and press space</figcaption>
+  </figure>
+
+  <h2>Alternate &mdash; the wipe</h2>
+  <p class="dim">A dragged rule reveals the new plate over the old. The most satisfying and the least honest: half of each image at all times, a thumb over the interesting part, and nothing for a reader who never drags. Rejected as primary; kept for pairs that differ everywhere at once. Arrow keys move it 5% at a time; Home and End go to the ends.</p>
+  <figure class="ba ba-phone" data-ba="wipe">
+    <div class="ba-grid">
+      <div class="ba-side ba-before">
+        <p class="ba-chip"><span class="ba-pip"></span>BEFORE</p>
+        <div class="ba-box"><img loading="lazy" src="../assets/2026-08-29/inventory.before.png" alt="The inventory screen before the change: the item rows sit on a flat ground."></div>
+      </div>
+      <div class="ba-side ba-after">
+        <p class="ba-chip"><span class="ba-pip"></span>AFTER</p>
+        <div class="ba-box"><img loading="lazy" src="../assets/2026-08-29/inventory.after.png" alt="The inventory screen after the change: a dimmed plate sits behind the item rows."></div>
+      </div>
+    </div>
+    <figcaption class="ba-cap">inventory &mdash; drag, or focus the handle and use the arrow keys</figcaption>
+  </figure>
+
+  <h2>The fourth shape &mdash; a rules-text pair</h2>
+  <p class="dim">An affliction's before and after is its rules text. A picture of a sentence is an invented picture, so the component has a text mode: same labels, same reading order, no image.</p>
+  <figure class="ba ba-text">
+    <p class="ba-label">buff cleanse minor</p>
+    <div class="ba-grid">
+      <div class="ba-side ba-before"><p class="ba-chip"><span class="ba-pip"></span>BEFORE</p><p class="ba-rule">Absolved &mdash; CLEANSE &mdash; Type buff &middot; Category special &middot; Duration permanent</p></div>
+      <div class="ba-side ba-after"><p class="ba-chip"><span class="ba-pip"></span>AFTER</p><p class="ba-rule">Absolved &mdash; CLEANSE &mdash; Type buff &middot; Category special &middot; Duration permanent &middot; Stacking none</p></div>
+    </div>
+    <figcaption class="ba-cap">rule &mdash; the reading, before and after</figcaption>
+  </figure>
+
+  <h2>The two states that are not decoration</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px">
+    <div>
+      <p class="mono">while the plates load</p>
+      <div class="ba-grid">
+        <div class="ba-box" style="aspect-ratio:9/19.5"></div>
+        <div class="ba-box" style="aspect-ratio:9/19.5"></div>
+      </div>
+      <p class="dim">The box is reserved at the capture's own ratio, so nothing below it jumps. Hatched, not spinning &mdash; the page holds still.</p>
+    </div>
+    <div>
+      <p class="mono">when there is no picture</p>
+      <aside class="nocap">
+        <p class="nocap-label">No picture of this one</p>
+        <p>The combat board was captured on both sides of this change, but on both frames the board sits under the tutorial card &mdash; the two pictures differ by four per cent, and none of it is the face. Rather than print a pair a reader cannot tell apart, the log says so.</p>
+      </aside>
+      <p class="dim">Missing evidence is stated, never faked. An &ldquo;after&rdquo; is never shown twice and a neighbouring day's capture is never reused.</p>
+    </div>
+  </div>
+
+  <div class="nocap">
+    <p class="nocap-label">The alt-text rule the pipeline follows</p>
+    <p>Per image, never per pair: <em>&ldquo;The &lt;screen&gt; screen &lt;before|after&gt; the change: &lt;the one visible difference, in plain words&gt;.&rdquo;</em> The difference clause is taken from the work item's own what-changed line, trimmed to its first clause &mdash; never generated freshly, never &ldquo;a screenshot of the app&rdquo;. A pair whose what-changed line is missing does not publish an image. It publishes the sentence saying no capture exists.</p>
+  </div>
+</main>
+
+<script src="../../dist/devlog-public/assets/site.js" defer></script>
+</body>
+</html>

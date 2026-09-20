@@ -130,6 +130,7 @@ async function gitMode(since, date) {
     kept.push(meta);
   }
 
+  writeManifest(outDir, date, since, kept);
   emit(kept, date, skipped);
 }
 
@@ -140,7 +141,34 @@ async function pairMode(screen, beforePath, afterPath, date) {
   const afterBuf = readFileSync(afterPath);
   const { meta, files } = computeTrio(deps, screen, beforeBuf, afterBuf);
   writeFiles(outDir, files); // explicit pair — no threshold
+  writeManifest(outDir, date, null, [meta]);
   emit([meta], date, 0);
+}
+
+/**
+ * Record what "before" actually was.
+ *
+ * The public DevLog labels each plate in a pair ("BEFORE - 27 AUG"), and it may
+ * only print a date it can prove. The before blob is the baseline as it stood
+ * at <since>, so that ref's own commit date is the honest label; without this
+ * manifest the site would have to guess from the neighbouring entry, and a
+ * guessed date on a piece of evidence is worse than no date.
+ */
+function writeManifest(outDir, date, since, shots) {
+  if (!shots.length) return;
+  const iso = (ref) => {
+    const res = git(["log", "-1", "--format=%cs", ref], { encoding: "utf-8" });
+    return res.status === 0 ? String(res.stdout).trim() : "";
+  };
+  const manifest = {
+    generated_by: "scripts/devlog-shots.mjs",
+    date,
+    since: since || null,
+    sinceDate: since ? iso(since) : "",
+    shots: shots.map((s) => ({ screen: s.screen, before: s.before, ratio: s.ratio })),
+  };
+  mkdirSync(outDir, { recursive: true });
+  writeFileSync(join(outDir, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
 }
 
 function emit(shots, date, skipped) {

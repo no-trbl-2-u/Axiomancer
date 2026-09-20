@@ -378,6 +378,42 @@
 
 ## Pending
 
+### Trace or replace the UNRESOLVED art, now that a public page shows the gap
+- **signal:** the public DevLog's licence gate (`plan/AUDIT.md`, loop-call
+  2026-09-20): 90 shipped art files carry licence "UNRESOLVED" — 52 of 77 foe
+  portraits, all 19 card paintings, all 15 character portraits, all 4 treasure
+  images. They ship inside the game as a known debt; on a public page they
+  cannot be republished at all, so the catalog publishes their frames and says
+  the painting is withheld.
+- **shape:** per-directory, in the `acquire-art.mjs` pattern that already
+  produced provable plates: trace the 2026-07-06 drop's sources where possible,
+  otherwise reacquire or commission, and write a provenance record per file.
+  The card faces are the highest-value slice (19 files, and the catalog's card
+  grid is the page a curious reader lands on).
+- **size:** large; splits cleanly by directory, and each directory is
+  independently shippable.
+
+### Self-host the DevLog's four type families
+- **signal:** `devlog/DESIGN.md` §2 and §11 residue. The public site loads
+  Pirata One, IM Fell English, Bebas Neue and JetBrains Mono from Google Fonts.
+  All four are open-licence and self-hostable; the design says so and the build
+  does not do it yet.
+- **shape:** subset to Latin, vendor into the repo, serve from the build
+  directory, drop the third-party request and the preconnect. ~120 KB, already
+  inside the budget.
+- **size:** small.
+
+### Measured-balance evidence in the DevLog pipeline
+- **signal:** the publish prompt's evidence kind 5 and `devlog/DESIGN.md` §11
+  residue. A tuning change's before/after is the measured delta, and the
+  baseline's stamp and confidence must ride with any published number
+  (AGENTS.md "Measured truth"). Today the panel is authored by hand.
+- **shape:** derive the delta from `deck-matrix-baseline.json` across the day's
+  range, render it as the component's text pair, and refuse to publish a number
+  whose baseline is stale.
+- **size:** medium.
+
+
 ### ~~[score 5.5] Summoner / add-spawning enemy archetype~~ PROMOTED to Phase 102 and SHIPPED 2026-09-19
 - proposed: 2026-09-17, `/ship-a-phase` (Phase 90 split)
 - source signals:

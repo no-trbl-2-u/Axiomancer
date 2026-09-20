@@ -93,22 +93,70 @@ its own cadence.
    flat status dump. Structure (the build parses it — see
    `scripts/build-devlog.mjs`):
 
-   - `# <YYYY-MM-DD>` then a `>` blockquote **headline** (one
-     line; a quiet day says so here).
+   **The entry is now PUBLISHED** (T, 2026-09-20 — see
+   `plan/2026-09-20-devlog-public-publish.prompt.md`). Write every
+   line for a player who has never opened a terminal, not for the
+   maintainer. The same file still renders the private index; the
+   public site is `npm run site:public`.
+
+   - `# <YYYY-MM-DD> — <title>` — the heading line carries a TITLE
+     now. Five to nine words naming the day's largest change, in the
+     reader's language ("The world gains a door"), not the loop's.
+     Without one the public site derives a title from the headline's
+     first clause, which is a fallback, not the intent.
+   - then a `>` blockquote **headline** — the standfirst; it may run
+     over several `>` lines and they are joined.
    - **Work-item cards** — one per meaningful change, each a
      `## [<category>] <title>` with `<category>` one of
      `mechanics | ui | content | infra | balance`. Under it:
-     `**What:**` (one line — what changed) and `**Why:**` (one
-     line — the reason, mined from the commit body / PR / ADR /
-     `plan/` note; never invent). Optional: `**Commits:**` short
-     SHAs; a fenced ```diff block with a *representative* hunk
-     (≤~40 lines — the telling change, not the whole diff);
-     `**Shot:** <screen> — <caption>` for UI (step 4a).
+     `**What:**` (what changed) and `**Why:**` (the reason, mined
+     from the commit body / PR / ADR / `plan/` note; never invent).
+     Both fields may run over several wrapped lines — they end at a
+     blank line or the next field.
+
+     **The `**Why:**` is mandatory and substantive.** It is the most
+     important field on the public page. A why that restates the
+     what ("because the number was wrong") fails the contract: name
+     the player-facing consequence, the evidence, or the decision
+     behind the change. A work item whose why cannot be written from
+     the record does not get an invented one — say what is known and
+     say that the reason was not recorded.
+
+     Optional: `**Commits:**` short SHAs; a fenced ```diff block with
+     a *representative* hunk (≤~40 lines — the telling change, not
+     the whole diff); the evidence fields:
+
+     - `**Shot:** <screen> — <caption>` for a UI screen (step 4a)
+     - `**Evidence:** <kind> <id> — <caption>` for everything else,
+       `<kind>` being `card`, `foe`, `plate` or `rule` (steps 4b, 4c)
+     - `**No capture:** <sentence>` when a change has no picture and
+       one cannot be made. Missing evidence is STATED, never faked:
+       never show an "after" twice, never reuse a neighbouring day's
+       capture.
    - **Panels** — un-bracketed `##` sections rendered as-is:
      `While you were out` (pulse table: tick, verb, outcome —
      no-ops included), `Needs you` (blocked rows, needs-user
      issues, `[needs-user-call]`s), `Tuning proposals` (step 5,
      or "none"). Add `Queues now` / `Today's intent` as useful.
+
+     **Panels are public by default. `Needs you` is the one
+     exception** — the public build withholds it, because it is
+     correspondence between the maintainer and his tooling, and
+     every post says at its foot that it is held back. That places
+     an obligation on this skill: anything in `Needs you` that a
+     PLAYER would want to know (a boss that can flatten a new
+     pilgrim, a map tap that silently does nothing) is written into
+     `Queues now` as well, in plain words. Only the correspondence
+     is withheld; nothing about the game's real state is.
+
+     Write the other three for a stranger: `While you were out`
+     publishes as *The night's watch*, `Tuning proposals` as *The
+     measure — did the fighting change?*, `Queues now` as *What is
+     still unfinished*. Verb/outcome shorthand and raw queue counts
+     read as machine output; sentences read as a report. Any panel
+     the build does not recognise publishes under its own title, and
+     the build names it in its output — so a new internal panel is
+     noticed the night it appears.
 
    Then `npm run site:build` renders the entry into styled HTML,
    refreshes the hub (`devlog/index.html`), AND regenerates the
@@ -146,6 +194,39 @@ its own cadence.
     baselines (the verify gate's approved captures), already
     made when the UI change landed.
 
+4b. **Card, foe and affliction evidence** — the same idea for
+    content that is data rather than pixels:
+
+    ```bash
+    npm run devlog:catalog-shots -- <since-ref> <YYYY-MM-DD>
+    ```
+
+    It exports the catalog at `<since-ref>` (the engine's OWN
+    exporter, in a throwaway worktree) and diffs it against the
+    current one on the fields a player can read. Every changed or
+    new card and foe gets a before/after plate
+    (`card-<id>.{before,after}.svg`, `foe-<id>...`); every changed
+    affliction gets a rules-text pair (`rule-<id>.after.json`). It
+    prints the `**Evidence:**` lines to paste into the matching
+    work-item card. Deterministic, no browser, no model call.
+
+4c. **World-plate evidence** — an arena or map engraving that was
+    added or replaced:
+
+    ```bash
+    npm run devlog:plate-shots -- <since-ref> <YYYY-MM-DD>
+    ```
+
+    Before is the blob at `<since-ref>`, after is the file now. The
+    licence gate runs first: a plate whose provenance cannot prove
+    public redistribution is never copied into the capture
+    directory, and the run says which it withheld and why.
+
+    All three collectors write `devlog/assets/<date>/manifest.json`,
+    which records the ref the "before" side came from. The public
+    site prints a date on the older plate only where that manifest
+    proves one.
+
    **Format contract** (the shared shell in
    `scripts/build-devlog.mjs` guarantees this; keep it honest if
    you touch the shell):
@@ -168,8 +249,14 @@ its own cadence.
    numbers. **Never edit gates, cadences, ceilings, or rules
    directly** — proposals only; `/oversight` promotes. The
    loop does not vote on its own constraints.
-6. **Gate + commit + push:** `npm run verify`, then one commit
-   `digest: <YYYY-MM-DD>` and push. Cloud ticks confirm the
+6. **Gate + commit + push:** `npm run verify`, then `npm run
+   site:public` (the public build, which is also the check that
+   tonight's entry renders for a stranger — it reports any panel it
+   did not recognise and any capture it withheld for want of a
+   what-line), then one commit `digest: <YYYY-MM-DD>` and push.
+   The build output (`dist/`) is gitignored and stays uncommitted;
+   the deploy happens from the Pages project, not from the tree
+   (`docs/devlog-public-deploy.md`). Cloud ticks confirm the
    deploy per the standing rules if the digest commit
    triggers one. Run `npm run verify` **synchronously, in the
    same turn** — do not background it and do not call
@@ -191,6 +278,10 @@ its own cadence.
    entries and the engine libraries.
 2. Ship nothing else — breadth failures become findings, not
    fixes. The night shift briefs; the dispatcher ships.
+2b. The entry is public. Every work item carries a substantive
+   `**Why:**`; evidence is captured for every kind of change that
+   has one (§4a-4c); a change with no picture says so in a
+   `**No capture:**` line rather than borrowing one.
 3. Proposals, never actions (the meta-loop rail).
 4. A quiet day still gets a digest — "quiet" is information.
 5. One commit; cloud ticks carry the `Cloud-Run:` trailer.
