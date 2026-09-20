@@ -11,7 +11,7 @@
 
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
-| cards | `skills/adjust-cards.md` | 2026-09-19 | 30e2e116 | 13 |
+| cards | `skills/adjust-cards.md` | 2026-09-20 | 7de3890b | 14 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-19 | 46942361 | 13 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-19 | 181a84e2 | 13 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-19 | 0f9dd762 | 13 |
@@ -20,6 +20,99 @@
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-cards pass 14, 2026-09-20, commit 7de3890b]** One modest
+> UPDATE shipped (a stale aggregator header count), zero card-verb
+> CREATE/UPDATE/REMOVE. Dispatched autonomously by `/march`'s
+> content-lifecycle gate (`cards` was the stalest qualifying category:
+> last pass `30e2e116` 2026-09-19T04:47:06Z, 53 commits behind HEAD,
+> past the 15-commit/36h threshold; deploy confirmed green; no
+> phase/higher-priority gate pending).
+>
+> **Step 1 audit — fresh, not re-cited:** `git log 30e2e116..HEAD` on
+> the card-authoring surface returns 2 commits touching it: `0f9dd762`
+> (`/adjust-keywords` pass 13, restored the FORGE verb via two new
+> grave carriers, GRAVE_CARDS 16 -> 18) and `e333fbbf` (Phase 102-103,
+> SUMMON — an enemy-side archetype; its only touch on this surface is a
+> `docs/keyword-atlas.md` row, zero player cards). Neither commit is
+> this skill's own work, so the last audit's findings needed a full
+> re-derivation, not a re-cite. Independently re-counted every library
+> module directly from source rather than trusting `axio_overview`'s
+> 132 alone: starters 8 + curses 5 + relics 3 + apocrypha 12 + choir 16
+> + debt 17 + grave 18 + rot 16 + trial 20 + vigil 17 = 132, confirming
+> it. **Reachability** — all 132 resolve through some preset/draft
+> pool (unchanged shape from pass 13's own sweep). **Near-duplicates**
+> — the two standing pairs (`thin-hymn`/`alms-of-breath`,
+> `the-last-assize`/`the-vein-called-in`) re-read fresh, both still
+> intentional per every prior pass. **Aspect thirds** — recomputed all
+> seven theme modules' `philosophicalAspect` literals fresh (not
+> copied from pass 13's numbers, since grave moved): rot body6/heart5/
+> mind5, debt body5/heart6/mind6, grave **body6/heart6/mind6** (was
+> body6/heart5/mind5 at pass 13 — the two FORGE-carrier cards happened
+> to land one heart and one mind, closing the third-lighter gap as a
+> side effect of a keyword-motivated CREATE, not a cards-motivated
+> one), vigil body5/heart6/mind6, trial body7/heart7/mind6, choir
+> body5/heart6/mind5 — no third lighter than a 1-2 card wobble
+> anywhere. **Scale-ladder drift** — the genuinely new angle this
+> pass: a full six-rank sweep (`axio_cards` at Ash/Tooth/Splinter/Rib/
+> Skull/Saint, not the Rib/Saint-only spot-checks passes 6-10 ran)
+> against the CLAUDE.md SS5 ladder. Every rank's single-hit/multi-hit/
+> GUARD numbers sit inside or above their band with three apparent
+> outliers, each checked against its full card body rather than judged
+> off the headline number alone: `dirge-for-the-disinterred` (Rib,
+> Deal 11 against a 20-30 band) carries ECHO, roughly doubling its
+> real output; `knucklebone-recant` (Tooth, Deal 6 against 9-14)
+> carries a reroll-every-spent-die utility effect priced separately;
+> `thumbprick-oath` (Ash, Deal 14 against 6-9) carries RECOIL 5, debt's
+> signature power-now-cost-later trade. None is a pricing bug — the
+> ladder is a reference, not an enforced band (THE BIG NUMBERS
+> REWRITE repealed rank-band grading), and manufacturing a reprice off
+> a single-digit headline delta with a documented compensating verb
+> would be padding the audit, not fixing one.
+>
+> **Step 1b widened audit:** ran a KB angle not tried by any prior
+> `/adjust-cards` pass — `kb_cards game=slay-the-spire "curse"` (rather
+> than another Dawncaster keywords.csv sweep, pass 13's own angle).
+> Result: `kb:slay-the-spire/cards/0086-curse-of-the-bell` and
+> `.../0222-necronomicurse` (community, medium) are both pure
+> unplayable deck-taxes — no active effect, the drawback is entirely
+> "occupies a card slot." Our five curses (`arrears`, `gnaw-marks`,
+> `mouthful-of-brine`, `overheard-name`, `the-wound`) each carry an
+> active FREE-line effect (RECOIL/BLEED/DOOM/MILL) before `purge_self`
+> removes them — a genuine mechanical divergence from the closest StS
+> analogue, but `starters.cards.ts`'s own `curse()` factory doc-comment
+> already states the asymmetry is deliberate ("a curse is a tax on
+> your draws, and the PAID line is the receipt for removing it"), so
+> this confirms a documented design choice rather than surfacing a new
+> one. No other prior-art gap found.
+>
+> **What shipped:** one UPDATE — `cards.library.ts`'s own header
+> comment still said "130 cards" (`cardLibrary.length` reads 132; the
+> two FORGE-carrier grave cards landed via `0f9dd762`, same day as but
+> after pass 13's own header fix at `30e2e116`, so the two ticks
+> straddled each other in the wrong order for the count to survive).
+> Same signal class as pass 13's own fix (an aggregator-level comment,
+> not a per-card `// pts:` line) — fixed the count and extended the
+> provenance note to name the FORGE-carrier pair so the next pass that
+> lands between two sibling-steward CREATEs on the same day has a
+> paper trail instead of a guess.
+>
+> **KB research gate (skill Step 2):** the Step 1b widened check above
+> IS this pass's KB research run — no new mechanic/theme design
+> shipped, so the header-fix (a REMOVE-adjacent documentation
+> correction needing no design input) and the exemption both apply.
+>
+> **Verify:** `npm run verify --workspace axiomancer-mechanics`
+> (216/216 files, 3542 tests + build green), `npm run verify
+> --workspace axiomancer-mobile` (lint/typecheck/jest/asset suites
+> green, exit 0), `npm run type-check --workspace
+> axiomancer-card-editor` (clean). No `plan/PHASE_CANDIDATES.md` or new
+> `plan/AUDIT.md` residue filed — nothing actionable surfaced beyond
+> the header-count fix shipped above; the near-duplicate pairs, the
+> curse-design divergence, and the scale-ladder outliers are
+> re-confirmed non-findings, not new residue.
+```
 
 ```
 > **[adjust-npcs pass 13, 2026-09-19, commit 6c82d06b]** Zero-diff pass —
