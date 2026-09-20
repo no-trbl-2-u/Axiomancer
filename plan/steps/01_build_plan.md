@@ -248,7 +248,7 @@ Tick in this file in the same commit that ships the phase.
       at all, until row 3.3 closed all four. Carrier: The Jeweled Tree.
       Designed by a three-lens adversarial panel that refuted the cheap path
       (appending the bite to `threatEffects` corrupts four ledgers silently).
-      — `feat: SUMMON — the add-spawning archetype, engine and board — phase 102`
+      — `feat: SUMMON — the add-spawning archetype, engine and board — phase 102` (e333fbb)
 - [x] Phase 103 — The last two arenas: the acquisition pipeline learns to crop a
       plate off a scanned page (`detectPlateBox` takes the longest contiguous
       dark run, not the first/last crossing), which was the exact blocker Phase
@@ -258,7 +258,7 @@ Tick in this file in the same commit that ships the phase.
       fallback) is retired under THE OPEN GATE 6. Two holes in the provenance
       gate that let a deleted file stay referenced are closed, each proven to
       fail on its condition.
-      — `feat(mobile): the last two arenas, and the plate that shouldn't have shipped — phase 103`
+      — `feat(mobile): the last two arenas, and the plate that shouldn't have shipped — phase 103` (e333fbb)
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics:

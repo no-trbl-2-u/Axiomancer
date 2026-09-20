@@ -946,7 +946,7 @@
   now ships 11 relics across all 6 `AccessoryKind`s, all `grantsSignature`
   values resolving in the live `SignatureSkillId` union. Closed.
 
-### [x] [HIGH] combat — user crash on ACCEPTING the post-combat card reward (second unreproduced crash report) — RESOLVED 2026-09-19 (verified closed; CI gap closed by Phase 98, commit pending)
+### [x] [HIGH] combat — user crash on ACCEPTING the post-combat card reward (second unreproduced crash report) — RESOLVED 2026-09-19 (verified closed; CI gap closed by Phase 98, `51fede4`)
 - **LIKELY THE SAME BUG — RESOLVED 2026-09-04 (verify before closing).** The
   row below was root-caused to a Reanimated worklet calling a plain JS
   function (`EnemyActionCard.tsx`, fixed). Its signature matches this one

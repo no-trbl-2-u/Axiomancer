@@ -406,6 +406,37 @@
 
 ## Pending
 
+### [loop-call] The local verify gate and CI disagree about what green means: the Playwright journeys run only in CI (2026-09-20)
+- category: process
+- impact: 7
+- ease: 6
+- detail: filed by the burn-day audit 2026-09-19, found by the audit running
+  against itself. `npm run verify --workspace axiomancer-mobile` does not run
+  the Playwright journeys; `e2e:fixture`, `e2e:combat`, `e2e:encounters`,
+  `e2e:exploration-roundtrip` and the rest are separate scripts that only the
+  `verify + affected Playwright journeys` and `mechanics + affected consumers`
+  workflows invoke. Row 3.1 shipped behind a green foreground mobile gate
+  (308 suites / 2950 tests) and turned CI red on `e2e:fixture` case A: the
+  generalised arrival derivation treated a fixture placement as an unanswered
+  arrival, so `node-fv-9` never rendered. Five consecutive fix agents each ran
+  the full package gate before committing and none could have caught it. The
+  fix (`9f2bf6c`) is unrelated to this row; the gap is that a contributor's
+  definition of "gate green" excludes a suite that can reject their push.
+  This is the mirror of the existing observation that five root `npm test`
+  files run in no workflow (burn-day audit section 4, B-7): there, guards that
+  CI never runs; here, guards that only CI runs. Phase 57's own guard had the
+  same shape until row 3.6 wired `check-baseline-freshness` and
+  `regen-deck-matrix-baseline` into `verify-mechanics.yml` (`d8428d5`).
+- options: (a) add an opt-in `verify:journeys` script and name it in AGENTS.md
+  alongside the standing gate, so the reachable local command exists even if it
+  is not run every time; (b) fold the journeys into `npm run verify` and accept
+  the added minutes plus the browser dependency on every contributor run;
+  (c) leave the split and document it loudly in AGENTS.md so nobody again reads
+  a green package gate as a green tree. The audit did not choose — the cost of
+  (b) is a real change to every contributor's inner loop and is the loop's call
+  to weigh, not this session's to impose while shipping fourteen other rows.
+- source: burn-day audit 2026-09-19, section 9 residue
+
 ### [loop-call] Two layers own save policy: the engine's DURABLE_ACTIONS allowlist and mobile's hand-placed checkpoints behind a deflecting adapter (2026-09-20)
 - category: contract
 - impact: 6
