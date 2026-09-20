@@ -273,8 +273,9 @@ Tick in this file in the same commit that ships the phase.
       (learning-curve ruling, decisions recorded in the brief). Mechanics +
       mobile + card-editor (aspect union). Brief:
       `plan/phases/phase_104_grey_office_keyword_pull.md`. Shipped
-      2026-09-20 — `feat: the grey office and the keyword pull — phase 104`
-      (hash recorded in the follow-up ledger commit).
+      2026-09-20 — `feat: the grey office and the keyword pull - phase 104`
+      (612f396; CRLF restore 1f6c0fd-class follow-up; baseline re-measured
+      in the ledger commit).
 
 **Field evidence blockers (direct T promotion):**
 - [x] Phase 14 — First-map route audit and survivorship semantics:
