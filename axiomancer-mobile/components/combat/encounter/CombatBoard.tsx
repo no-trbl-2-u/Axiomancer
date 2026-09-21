@@ -48,6 +48,9 @@ import type {
     CombatMomentumV2VM, CombatStanceChipVM, CombatSealVM, CombatAddVM,
 } from '@/state/presenters/combat-encounter.engine';
 import { armedReadValue, dieCanPowerCardVM, STANCE_COLORS } from '@/state/presenters/combat-encounter.engine';
+// D4 (2026-09-21) — the ONE mobile source for the rarity band. The face never
+// re-bands a rank and never re-types a rarity hue; see `card-rarity.engine.ts`.
+import { rarityFor, RARITY_LABEL, RARITY_PIPS, RARITY_COLOR } from '@/state/presenters/card-rarity.engine';
 import { wheelNext, type WheelStance } from '@/state/combat/momentum';
 import type { CombatReadResult } from '@mechanics';
 import { isUpgradeableDiceEnabled } from '@mechanics';
@@ -276,6 +279,12 @@ export const HAND_FAN_BOARD_EDGE = 12;
  * + 5    `plateRarityPip.width` (the wax rarity pip)
  * + 5    `plateBand.gap` (pip → text)
  * = 17.5
+ *
+ * D4 (2026-09-21) turned the single pip into a three-slot TRACK and this number
+ * did not move, which is the whole reason the track stacks vertically: the
+ * track is a column, so its width is still exactly one `plateRarityPip.width`.
+ * A horizontal row would have made this 31.5 and cost every fanned card ~14pt
+ * of name.
  *
  * Exported so the fan and its tests read ONE number, and gated for real:
  * `CombatBoard.handfan.test.tsx` renders {@link useCombatBoardStyles} and sums
@@ -1714,7 +1723,13 @@ export const CombatBoard = React.memo(function CombatBoard({
                                     }}
                                     testID={`combat-hand-${card.uid}`}
                                     accessible accessibilityRole="button"
-                                    accessibilityLabel={`${card.name}, ${card.stance} card. ${card.face.verbLine}.`}
+                                    // D4 — the fanned face has no room to PRINT the
+                                    // rarity word (see the REVERSAL note on
+                                    // `CombatCardFace`), so the band is where a
+                                    // screen-reader player gets it. This pressable is
+                                    // `accessible`, which collapses the face's own
+                                    // track label, so the word has to be said here.
+                                    accessibilityLabel={`${card.name}, ${RARITY_LABEL[rarityFor(card)]}, ${card.stance} card. ${card.face.verbLine}.`}
                                     accessibilityHint="Drag up to stage, or tap to read"
                                 >
                                     {/* The in-flight dim lives on a plain inner view: FadeIn
@@ -1886,7 +1901,29 @@ function paidValueFor(f: CombatCardVM['face'], override?: string): string {
  * as pages of the codex, in line with the ratified Woodcut Codex direction:
  *   · ① NAME BAND, top, HORIZONTAL, blackletter on solid ink — the fan shows
  *     each card's left edge, so the name now reads without turning your head;
- *     rarity is a small wax pip at the band's head, not a text tag;
+ *     rarity is a wax pip TRACK at the band's head, plus a named tag on the
+ *     large face;
+ *
+ *     REVERSAL, 2026-09-21 (owner finding 8, ratified decision D4). This line
+ *     used to read "rarity is a small wax pip at the band's head, NOT a text
+ *     tag", and the face rendered exactly one pip in one of three hues. The
+ *     owner's report — "no way to recognise a card's rarity at a glance" —
+ *     retired that stance: one pip in a hue is a colour-only signal, illegible
+ *     in greyscale, to a colourblind player, and to anyone who has not yet
+ *     learned that purple means rare. D4 replaces it with the three-legged
+ *     signal — NAMED LABEL + PIP ROW + FRAME COLOUR, never colour alone.
+ *
+ *     What that costs, and the trade the face actually takes: the pip track is
+ *     a fixed THREE-SLOT column (filled = the band's pip count, hollow = the
+ *     rest), stacked VERTICALLY rather than laid out in a row. A horizontal
+ *     three-pip row would widen {@link NAME_BAND_LEFT_CHROME} by ~14pt, and in
+ *     the hand fan that chrome is subtracted from the ~57pt sliver of each
+ *     covered card — it would have eaten a third of every fanned card's name
+ *     to re-fix the legibility bug cluster CB-handfan just fixed. Vertical
+ *     keeps the band's left chrome at its shipped width, so the count is legible
+ *     and no name loses a character. The NAMED tag rides the `large` face only
+ *     (inspect overlay, reward preview) for the same reason: at 120pt the word
+ *     "UNCOMMON" and the card's own name cannot both have the band;
  *   · ② ART PLATE — a framed print with a hairline rule and dark margins, not
  *     a full-bleed background. No stance wash, no scrim: the plate is clean
  *     and the text never fights the art for contrast;
@@ -1907,6 +1944,53 @@ function paidValueFor(f: CombatCardVM['face'], override?: string): string {
  *  The hand card (120) sits above it; the reward offer (100) and the compact
  *  staged card (92) below. Exported for the face test. */
 export const NARROW_FACE_W = 112;
+
+/**
+ * How many slots the rarity track always draws — the top of the band
+ * (`RARITY_PIPS.rare`). Exported so a test reads the same number the face does
+ * instead of re-typing a 3.
+ */
+export const RARITY_TRACK_SLOTS = RARITY_PIPS.rare;
+
+/**
+ * D4's PIP ROW leg — the greyscale-safe half of the rarity signal.
+ *
+ * Always {@link RARITY_TRACK_SLOTS} slots: the first `pips` are filled in the
+ * band's hue, the rest are hollow rings. Drawing the empty slots is the point —
+ * "two filled of three" is readable on a single card, where a bare pair of pips
+ * only means something once you have another card beside it to compare against.
+ * Filled-vs-hollow is a SHAPE difference, so it survives greyscale and colour
+ * blindness with {@link RARITY_COLOR} switched off entirely; the hue is the
+ * decoration on top, never the message.
+ *
+ * Stacked vertically on purpose — see the REVERSAL note in `CombatCardFace`'s
+ * doc block: a horizontal row would widen {@link NAME_BAND_LEFT_CHROME} and
+ * re-break the fanned-name read.
+ */
+function RarityTrack({ pips, color, large, label }: { pips: number; color: string; large: boolean; label: string }) {
+    const styles = useStyles();
+    return (
+        <View
+            style={large ? styles.plateRarityTrackLarge : styles.plateRarityTrack}
+            accessible
+            accessibilityRole="text"
+            accessibilityLabel={label}
+            testID="combat-card-face-rarity-pips"
+        >
+            {Array.from({ length: RARITY_TRACK_SLOTS }, (_, i) => (
+                <View
+                    key={i}
+                    testID={`combat-card-face-rarity-pip-${i}`}
+                    style={[
+                        styles.plateRarityPip,
+                        large && styles.plateRarityPipLarge,
+                        i < pips ? { backgroundColor: color } : styles.plateRarityPipEmpty,
+                    ]}
+                />
+            ))}
+        </View>
+    );
+}
 
 export const CombatCardFace = React.memo(function CombatCardFace({
     card, width, height, large = false, accent = null, readPip = null, heroOverride, namePeek = null, children,
@@ -1961,13 +2045,22 @@ export const CombatCardFace = React.memo(function CombatCardFace({
     // applied inline on `faceOuter` rather than in the static style, because
     // the colour is per-card data; `accent` (the armed staged-card read tint)
     // wins where set, so the shadow always matches the frame above it.
-    const rarity = card.rarity ?? 'common';
-    const rarColor = rarity === 'rare' ? '#9a6ad6' : rarity === 'uncommon' ? '#6b8eb0' : '#8a8273';
+
+    // D4 — the rarity band, derived ONCE by the wave-0 module from the card's
+    // own rank. The three hex literals that used to sit here (and a second copy
+    // of them in `CombatRewardsOverlay`) now live in `RARITY_COLOR`, and the
+    // hues are unchanged: what D4 adds is the pip COUNT, the empty-slot track,
+    // and the large face's named tag. (`band`, just above, is already taken by
+    // the STANCE colour — these two are different systems on one face.)
+    const rarBand = rarityFor(card);
+    const rarColor = RARITY_COLOR[rarBand];
+    const rarLabel = RARITY_LABEL[rarBand];
     return (
         <View style={[styles.faceOuter, { width, height, shadowColor: accent ?? band }]}>
             <View style={[styles.faceCard, { borderColor: accent ?? band }]}>
                 {/* ① NAME BAND — horizontal blackletter on solid ink; the wax
-                    pip carries rarity. The fan's visible sliver starts here.
+                    pip TRACK carries rarity (D4). The fan's visible sliver
+                    starts here.
                     A long name wraps to a second line (the band grows, the art
                     plate gives) rather than truncating to a stub.
 
@@ -1977,8 +2070,14 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                     the surviving sliver and the name wraps inside it — without
                     the cap the tail is laid out correctly and then painted over,
                     which reads as a truncation ("CHILBLAI") but is occlusion. */}
-                <View style={[styles.plateBand, { minHeight: bandH }]} pointerEvents="none">
-                    <View style={[styles.plateRarityPip, large && styles.plateRarityPipLarge, { backgroundColor: rarColor }]} />
+                <View style={[styles.plateBand, { minHeight: bandH }]} pointerEvents="none" testID="combat-card-face-band">
+                    {/* The track carries the WORD for a screen reader, so a face
+                        that is NOT wrapped in a labelled pressable (the staged
+                        card, the drag ghost) still announces its rarity. Where
+                        the face IS inside one — the hand card and the reward
+                        tile — that parent label wins, and both of those name the
+                        rarity themselves. */}
+                    <RarityTrack pips={RARITY_PIPS[rarBand]} color={rarColor} large={large} label={rarLabel} />
                     <Text
                         style={[
                             styles.plateName,
@@ -1991,6 +2090,20 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                     >
                         {card.name.toUpperCase()}
                     </Text>
+                    {/* D4's NAMED LABEL leg — `large` only. The inspect overlay
+                        and the reward preview have the band width for a word;
+                        the 120pt hand card does not, and spending its name
+                        column on "UNCOMMON" would undo cluster CB-handfan. */}
+                    {large ? (
+                        <Text
+                            style={[styles.plateRarityLabel, { color: rarColor }]}
+                            numberOfLines={1}
+                            allowFontScaling={false}
+                            testID="combat-card-face-rarity"
+                        >
+                            {rarLabel.toUpperCase()}
+                        </Text>
+                    ) : null}
                 </View>
                 {/* ② ART PLATE — a framed print behind a hairline rule; dark
                     margins, no wash, no scrim. Inert cards grey the plate. */}
@@ -2344,14 +2457,35 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
         shadowOpacity: 0.5, shadowRadius: 6, shadowOffset: { width: 0, height: 3 }, elevation: 6,
     },
     faceCard: { flex: 1, borderWidth: 1.5, borderRadius: 4, backgroundColor: AXM.deepBg, overflow: 'hidden' },
-    // ① The name band — horizontal blackletter; the wax pip is the rarity.
+    // ① The name band — horizontal blackletter; the wax pip TRACK is the rarity
+    // (D4, 2026-09-21 — see the REVERSAL note in `CombatCardFace`).
     plateBand: {
         flexDirection: 'row', alignItems: 'center', paddingHorizontal: 6, gap: 5,
         backgroundColor: AXM.deepBg,
         borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: AXM.divider,
     },
+    // The track is a COLUMN (RN's default `flexDirection`), so its width is one
+    // pip's width and `NAME_BAND_LEFT_CHROME` is unchanged by D4. Laying the
+    // three slots out in a row instead would widen the band's left chrome by
+    // ~14pt and shave that off every fanned card's visible name.
+    plateRarityTrack: { alignItems: 'center', justifyContent: 'center', gap: 2 },
+    plateRarityTrackLarge: { alignItems: 'center', justifyContent: 'center', gap: 3 },
+    // `plateRarityPip.width` is summed into NAME_BAND_LEFT_CHROME off the
+    // shipped sheet by `CombatBoard.handfan.test.tsx` — changing it moves the
+    // fan's name box, so change it knowing that.
     plateRarityPip: { width: 5, height: 5, borderRadius: 3 },
     plateRarityPipLarge: { width: 7, height: 7, borderRadius: 4 },
+    // An UNEARNED slot: hollow, not merely dimmer. Filled-vs-hollow is a shape
+    // difference, which is what keeps "one of three" readable in greyscale and
+    // to a colourblind player — D4's "never colour alone".
+    plateRarityPipEmpty: { backgroundColor: 'transparent', borderWidth: 1, borderColor: AXM.ash },
+    // D4's named tag — `large` faces only. Sits at the band's tail, after the
+    // name's `flex: 1`, so it can never squeeze the name on a small face
+    // (it is not rendered there at all).
+    plateRarityLabel: {
+        fontFamily: FONTS.sans, fontSize: 10, letterSpacing: 1.6,
+        marginLeft: 6, flexShrink: 0,
+    },
     // Explicit lineHeights: the name / keyword / value may WRAP (never clip)
     // on a small face, so their two-line height is a known quantity.
     plateName: { flex: 1, fontFamily: FONTS.gothic, fontSize: 13, lineHeight: 15, letterSpacing: 0.4, color: AXM.parchment, paddingVertical: 2 },
