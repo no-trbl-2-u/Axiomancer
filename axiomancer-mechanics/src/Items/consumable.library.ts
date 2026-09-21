@@ -277,9 +277,23 @@ export const consumableLibrary: Consumable[] = [
     {
         id: 'war-horn-draught',
         name: 'War Horn Draught',
-        description: 'A roaring brew that floods the body with martial resolve.',
+        description: 'A roaring brew that floods the body with martial resolve, longer and harder than any lesser tonic.',
         category: 'consumable',
-        effectId: 'buff_haste',
+        // adjust-equipment pass 15 (2026-09-21): three consumables shared
+        // `buff_haste` byte-for-byte — berserker-brew, quicksilver-vial, and this
+        // one — but only this one is tagged 'late-game'. A late-game reward
+        // indistinguishable from an early common drop is the same
+        // dominated-item complaint pass 11/14 fixed elsewhere, just without the
+        // two ever co-occurring in one shop/table to make it visible there.
+        // Prior art: the Dawncaster corpus scales its Haste-granting items by
+        // rarity rather than treating them as interchangeable — `Haste`
+        // [Common] grants 2 Haste flat, `Potion of Alacrity` [Rare] grants 3
+        // (kb:dawncaster/0789-haste, kb:dawncaster/1114-potion-of-alacrity).
+        // Split onto a new tier-3 `buff_haste_surge` (rollModifier 4 -> 6, the
+        // same 1.5x ratio Phase 96 already established for the desperation
+        // band) — berserker-brew and quicksilver-vial keep the base `buff_haste`
+        // since neither carries a tier tag implying either should be stronger.
+        effectId: 'buff_haste_surge',
         quantity: 1,
         addedIn: '2026-06-07',
         tags: ['consumable', 'resource', 'late-game'],

@@ -96,6 +96,10 @@ const SUPPORT_KEYWORD: Record<string, string> = {
     buff_all_stats_up: 'Guard',
     buff_invincibility: 'Guard',
     buff_haste: 'Draw',
+    // adjust-equipment pass 15 (2026-09-21): war-horn-draught's tier-3 split
+    // off buff_haste (see consumable.library.ts) — same closest-analogue
+    // mapping as its parent effect, backfilled in the same tick this time.
+    buff_haste_surge: 'Draw',
     buff_accuracy_up: 'Foretell',
     buff_critical_rate_up: 'Mark',
     buff_critical_damage_up: 'Mark',

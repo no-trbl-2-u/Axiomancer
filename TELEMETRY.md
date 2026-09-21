@@ -589,3 +589,6 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-21T04:41:12Z | skill-end | adjust-cards | claude-sonnet-5 | 0s | ok |
 | 2026-09-21T04:41:59Z | subagent | card-expert | claude-sonnet-5 | - | Full adjust-cards audit and ship |
 | 2026-09-21T04:45:59Z | subagent-end | card-expert | claude-sonnet-5 | 4m00s | ok |
+| 2026-09-21T06:58:14Z | slash-prompt | /march | - | - | /march |
+| 2026-09-21T06:59:00Z | skill | adjust-equipment | claude-sonnet-5 | - | - |
+| 2026-09-21T06:59:00Z | skill-end | adjust-equipment | claude-sonnet-5 | 0s | ok |

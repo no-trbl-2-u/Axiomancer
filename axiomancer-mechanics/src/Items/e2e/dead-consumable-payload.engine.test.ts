@@ -167,3 +167,30 @@ describe('body-elixir and iron-skin-draught no longer print byte-identical effec
         expect(draughtApplied?.id).toBe('buff_damage_reduction');
     });
 });
+
+describe('war-horn-draught no longer prints the same haste line as berserker-brew / quicksilver-vial (adjust-equipment pass 15)', () => {
+    // All three applied `buff_haste` byte-for-byte, but only war-horn-draught
+    // is tagged 'late-game' — the dominated-item complaint pass 11/14 fixed
+    // elsewhere, here without the items ever sharing one shop/reward table.
+    // Split war-horn-draught onto its own tier-3 `buff_haste_surge`.
+    it('war-horn-draught references a different effect id than its siblings', () => {
+        const draught = getConsumableById('war-horn-draught')!;
+        const brew = getConsumableById('berserker-brew')!;
+        const vial = getConsumableById('quicksilver-vial')!;
+        expect(draught.effectId).not.toBe(brew.effectId);
+        expect(draught.effectId).not.toBe(vial.effectId);
+        expect(brew.effectId).toBe(vial.effectId);
+    });
+
+    it('war-horn-draught grants a stronger roll bonus than the shared buff_haste', () => {
+        const draughtEffect = lookupEffect(getConsumableById('war-horn-draught')!.effectId!)!;
+        const sharedEffect = lookupEffect(getConsumableById('berserker-brew')!.effectId!)!;
+        expect(draughtEffect.payload.rollModifier ?? 0).toBeGreaterThan(sharedEffect.payload.rollModifier ?? 0);
+    });
+
+    it('using war-horn-draught applies its own surge effect', () => {
+        const item = getConsumableById('war-horn-draught')!;
+        const { applied } = useConsumableEffect(Player, item, 1, lookupEffect);
+        expect(applied?.id).toBe('buff_haste_surge');
+    });
+});

@@ -120,6 +120,32 @@
       ]
     },
     {
+      "id": "buff_haste_surge",
+      "name": "Twin's Undertow",
+      "description": "The dilation does not slacken between beats. The moment stretches further, and stays stretched.",
+      "type": "buff",
+      "category": "advantage",
+      "duration": 2,
+      "stacking": "none",
+      "resistedBy": "mind",
+      "resistDR": 17,
+      "payload": {
+        "rollModifier": 6,
+        "advantageModifier": {
+          "grantAdvantage": [
+            "body",
+            "mind",
+            "heart"
+          ]
+        }
+      },
+      "tier": 3,
+      "tags": [
+        "support",
+        "non-card"
+      ]
+    },
+    {
       "id": "buff_regeneration",
       "name": "Tristram's Recovery",
       "description": "Like the writer who takes a year to document a day, your healing works faster than wounds accumulate. Eventually, you'll catch up.",
