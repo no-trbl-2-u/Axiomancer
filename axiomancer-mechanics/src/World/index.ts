@@ -72,6 +72,14 @@ export {
     reachableObjectives, killObjectives, collectObjectives, advanceKillObjectives,
 } from './quest.engine';
 
+// The `Reward` union resolver. `quest.engine.ts` owns log/objective machinery
+// and pays nothing; this is the payout half, including the `{ kind: 'item' }`
+// and bare-`Item` reward shapes the store's END_COMBAT branch never handled.
+export {
+    payQuestReward, payQuestRewards, isItemReward, isKindedReward, itemOf,
+} from './quest-reward';
+export type { QuestRewardPayout } from './quest-reward';
+
 export {
     moveToNode, completeCurrentNode, IllegalMoveError,
     changeMap, completeMap, unlockMap,

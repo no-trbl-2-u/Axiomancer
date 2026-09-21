@@ -17,7 +17,7 @@
 import type { Character } from '../Character/types';
 import type { Item } from './types';
 import type { ShopWare } from './shop.types';
-import { deepClone } from '../Utils';
+import { grantItem } from './item-grant';
 
 /**
  * Default sell price for a shop ware (Phase 37, exploit-fix iterate).
@@ -44,10 +44,14 @@ export function buyItem(
 ): Character {
     if (price < 0) return character;
     if (character.currency < price) return character;
+    // Routed through the shared grant path so the clone-on-grant rule lives in
+    // one place. `stack: false` preserves today's shop semantics exactly —
+    // buying a second potion adds a second row rather than bumping a stack.
+    // Converging the shop onto stacking is a separate, player-visible call.
+    const { character: withPurchase } = grantItem(character, item, { stack: false });
     return {
-        ...character,
+        ...withPurchase,
         currency: character.currency - price,
-        inventory: [...character.inventory, deepClone(item)],
     };
 }
 

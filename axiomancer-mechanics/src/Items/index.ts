@@ -5,9 +5,15 @@ export {
     isEquipment, isConsumable, isMaterial, isQuestItem,
 } from './types';
 export {
-    addItem, removeItem, useConsumable, stackItem,
+    addItem, removeItem, useConsumable, stackItem, addItemStacking,
     addItemToInventory, removeItemFromInventory,
 } from './item.reducer';
+// The shared grant/equip/swap path — the one door every "the player now has
+// this item" transition walks through, plus the D5 reward-screen predicate.
+export {
+    grantItem, qualifiesForItemRewardScreen, partitionGrantsForReward, displacedBy,
+} from './item-grant';
+export type { GrantItemOptions, ItemGrantResult, GrantOutcome } from './item-grant';
 export { useConsumableEffect } from './equipment.engine';
 export type { ConsumableUseResult } from './equipment.engine';
 // Phase 96 — the desperation band. `resolveConsumableHeal` is the ONE resolver
