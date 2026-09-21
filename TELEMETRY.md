@@ -600,3 +600,6 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-21T08:43:33Z | subagent | general-purpose | claude-sonnet-5 | - | Run adjust-enemies pass 15 |
 | 2026-09-21T08:43:35Z | skill | adjust-enemies | claude-sonnet-5 | - | - |
 | 2026-09-21T08:43:35Z | skill-end | adjust-enemies | claude-sonnet-5 | 0s | ok |
+| 2026-09-21T10:32:27Z | slash-prompt | /march | - | - | /march |
+| 2026-09-21T10:32:53Z | skill | critique | claude-sonnet-5 | - | - |
+| 2026-09-21T10:32:54Z | skill-end | critique | claude-sonnet-5 | 0s | ok |
