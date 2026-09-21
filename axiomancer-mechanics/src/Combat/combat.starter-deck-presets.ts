@@ -259,6 +259,11 @@ export interface CardOrigin {
  * preset re-tags it automatically.
  */
 export function cardOrigin(cardId: string): CardOrigin {
+    // Phase 104 — the grey office is the deck every run opens with; its two
+    // cards are starters even though no campaign preset seats them.
+    if (getCardById(cardId)?.theme === 'grey') {
+        return { source: 'starter', presetDeck: 'The Grey Office', presetDeckId: 'grey-office' };
+    }
     for (const id of COMBAT_DECK_PRESET_ORDER) {
         const preset = COMBAT_DECK_PRESETS[id];
         if (preset && preset.cardIds.includes(cardId)) {

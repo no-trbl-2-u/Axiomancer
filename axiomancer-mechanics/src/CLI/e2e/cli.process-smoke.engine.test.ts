@@ -107,7 +107,7 @@ describe('CLI process-level smoke (real ts-node startup)', () => {
                 // fv-16 converted from an `encounter` to a Phase 53d/S-01
                 // narration dilemma; fv-11 -> fv-13 (little-belle) is the
                 // nearest surviving column-3 encounter from fv-2.
-                '--route', 'fv-2,fv-11,fv-13', '--auto-combat',
+                '--route', 'fv-2,fv-26,fv-11,fv-27,fv-13', '--auto-combat',
                 '--combat-policy', 'status', '--combat-seed', '42',
                 '--combat-max-turns', '12',
                 '--json-events', '--state-log', logPath,

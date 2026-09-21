@@ -12,11 +12,11 @@ import { describe, it, expect } from '@jest/globals';
 import { fishingVillageLayout } from '../fishing-village.layout';
 
 describe('fishingVillageLayout: structure validation', () => {
-    it('contains exactly 25 nodes (fv-1..fv-25)', () => {
-        expect(fishingVillageLayout.nodes).toHaveLength(25);
+    it('contains exactly 28 nodes (fv-1..fv-28, the three gates included)', () => {
+        expect(fishingVillageLayout.nodes).toHaveLength(28);
 
         const ids = fishingVillageLayout.nodes.map(n => n.id);
-        const expectedIds = Array.from({ length: 25 }, (_, i) => `fv-${i + 1}`);
+        const expectedIds = Array.from({ length: 28 }, (_, i) => `fv-${i + 1}`);
 
         for (const expectedId of expectedIds) {
             expect(ids).toContain(expectedId);

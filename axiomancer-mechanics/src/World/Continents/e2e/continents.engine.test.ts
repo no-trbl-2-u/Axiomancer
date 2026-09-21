@@ -21,7 +21,7 @@ describe('World/Continents Engine Tests', () => {
       expect(fishingVillage.continent).toBe('coastal-continent');
       expect(fishingVillage.description).toContain('home town');
       expect(fishingVillage.startingNode.id).toBe('fv-1');
-      expect(fishingVillage.nodes).toHaveLength(25); // Phase 65 expanded grid
+      expect(fishingVillage.nodes).toHaveLength(28); // Phase 65 expanded grid + the three gates (2026-09-21)
       expect(fishingVillage.npcs).toHaveLength(8); // All coastal NPCs
       expect(fishingVillage.quests).toHaveLength(2); // starting-quest + get-to-forest (Phase 8)
     });
@@ -38,15 +38,18 @@ describe('World/Continents Engine Tests', () => {
       const fv1 = fishingVillage.nodes.find(n => n.id === 'fv-1');
       expect(fv1?.connectedNodes).toEqual(['fv-2']);
 
+      // THE THREE GATES (2026-09-21): Old Marrow opens onto the first gate,
+      // and the gate onto every column-3 lane; each lane funnels into the
+      // next gate.
       const fv2 = fishingVillage.nodes.find(n => n.id === 'fv-2');
-      expect(fv2?.connectedNodes).toContain('fv-16');  // wharf lane
-      expect(fv2?.connectedNodes).toContain('fv-3');   // spine
-      expect(fv2?.connectedNodes).toContain('fv-11');  // inland lane
+      expect(fv2?.connectedNodes).toEqual(['fv-26']);
+      const gate1 = fishingVillage.nodes.find(n => n.id === 'fv-26');
+      expect(gate1?.connectedNodes).toContain('fv-16');  // wharf lane
+      expect(gate1?.connectedNodes).toContain('fv-3');   // spine
+      expect(gate1?.connectedNodes).toContain('fv-11');  // inland lane
 
       const fv3 = fishingVillage.nodes.find(n => n.id === 'fv-3');
-      expect(fv3?.connectedNodes).toContain('fv-4');
-      expect(fv3?.connectedNodes).toContain('fv-17');
-      expect(fv3?.connectedNodes).toContain('fv-14');
+      expect(fv3?.connectedNodes).toEqual(['fv-27']);
 
       // Terminal column — the only place a run is allowed to run out of moves.
       const fv10 = fishingVillage.nodes.find(n => n.id === 'fv-10');

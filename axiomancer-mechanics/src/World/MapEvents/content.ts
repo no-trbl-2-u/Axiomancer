@@ -574,9 +574,11 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
 //
 // The first continent's STARTING map is combat-FOCUSED but no longer "all
 // battle" — a flat wall of identical encounters with no recovery was both
-// monotonous and unwinnable in playtests. The map now spreads 25 nodes across
+// monotonous and unwinnable in playtests. The map now spreads 28 nodes across
 // a real mix:
-//   - 4 ENCOUNTER nodes  (3 regular + the fv-6 boss — the spine; fv-15
+//   - 7 ENCOUNTER nodes  (3 regular + the fv-6 boss + THE THREE GATES
+//                         fv-26/27/28, 2026-09-21 — every route fights
+//                         three times before the breakwater; fv-15
 //                         rejoined this count in Phase 61, see below),
 //   - 4 REST nodes       (recover HP — the rest-choice node), one on the
 //                         spine just before the boss,
@@ -628,6 +630,13 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
 // assignment explicit and monotonic — column 1 is the softest thing in the
 // village, column 9 the hardest thing short of the breakwater itself.
 const FV_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description: string }> = {
+    // THE THREE GATES (2026-09-21, the grey office rebalance) — one choke
+    // before each open column, so every route to the breakwater fights
+    // three times and carries three rewards into the King. Levels ramp
+    // 1 / 1 / 2 through the pinned-slug path (`max(source.level, player)`).
+    'fv-26': { slug: 'grave-larva',      description: 'Something pale turns over in the wet sand where the drowned are buried, and keeps turning.' },
+    'fv-27': { slug: 'float-eye',        description: 'A lidless thing drifts over the salt flats at head height, and it has already seen you.' },
+    'fv-28': { slug: 'chattering-skull', description: 'On the breakwater steps a skull talks to itself about the tide. It stops when you come near.' },
     // c3 — Phase 53c: little-belle moves off fv-7 (now Coastal Beggar's
     // node) onto fv-13, one of column 1's two displaced nodes. Must stay
     // ahead of the Beggar's column so `befriended-little-belle` can be set
@@ -1052,7 +1061,7 @@ const fvVillageHealerInteraction = fvInteractionPool(
 const FISHING_VILLAGE_NEW_PLAYER_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> =
     (() => {
         const out: Array<{ nodeId: string; pool: MapEventPool }> = [];
-        for (let i = 1; i <= 25; i++) {
+        for (let i = 1; i <= 28; i++) {
             const nodeId = `fv-${i}`;
             if (nodeId === 'fv-1') {
                 out.push({ nodeId, pool: fvArrival });

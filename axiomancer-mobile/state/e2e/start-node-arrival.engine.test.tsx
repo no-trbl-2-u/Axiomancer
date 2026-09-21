@@ -179,7 +179,9 @@ describe('an arrival the player never answered survives a reload', () => {
         const store = createAppStore({ adapter });
         const actions = createAppActions(store);
         actions.moveTo('fv-2');
+        actions.moveTo('fv-26');
         actions.moveTo('fv-11');
+        actions.moveTo('fv-27');
         actions.moveTo('fv-13'); // engine kind `encounter`
 
         // The player reloads before answering the prelude: rebuild the app

@@ -90,8 +90,11 @@ describe('stage-eligible card pools', () => {
             // share of the deck the player has spent rest-site beats on. The
             // pool is still one entry per eligible card, so compare on BASE ids.
             const pool = new Set(stageEligibleCardIds(stage).map(baseCardId));
+            // Phase 104 — the grey office is a run's opening hand, never a
+            // draft target, so the two grey starters sit outside every pool.
             const expected = cardLibrary.filter(c =>
-                c.tier <= stage.maxCardTier
+                c.theme !== 'grey'
+                && c.tier <= stage.maxCardTier
                 && rankMaturityLevel(c.rank) <= stage.playerLevel);
             expect(pool.size, `${id} pool size`).toBe(expected.length);
             for (const card of expected) {

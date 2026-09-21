@@ -90,5 +90,6 @@ test('the exporter still emits every field the plate reads', () => {
     assert.ok(cards.length > 0)
     for (const field of CARD_FIELDS) assert.ok(field in cards[0], `cards.json lost "${field}"`)
     for (const field of FACE_FIELDS) assert.ok(field in cards[0].face, `cards.json's face lost "${field}"`)
-    assert.ok(['body', 'mind', 'heart'].includes(stanceOf(cards[0])), 'the Stance chip stopped resolving')
+    // Phase 104 — `any` is the grey office's colour (every die powers it).
+    assert.ok(['body', 'mind', 'heart', 'any'].includes(stanceOf(cards[0])), 'the Stance chip stopped resolving')
 })

@@ -122,7 +122,12 @@ describe('gauntlet map traversal invariants', () => {
                     'caverns', 'northern-city', 'connecting-river',
                     'town-across-river', 'the-capital',
                 ];
-                const singletonTolerance = FOUR_SINGLETON_MAPS.includes(def.name) ? 4 : 3;
+                // THE THREE GATES (2026-09-21): fishing-village adds three
+                // deliberate chokepoints — a fight before each open column,
+                // so every route carries three rewards into the breakwater.
+                // Six singletons: shore, quest-giver, three gates, boss.
+                const singletonTolerance = def.name === 'fishing-village' ? 6
+                    : FOUR_SINGLETON_MAPS.includes(def.name) ? 4 : 3;
                 expect(branching).toBeGreaterThanOrEqual(widths.size - singletonTolerance);
             });
         });
@@ -161,33 +166,42 @@ describe('fishing-village — the first map the player ever walks', () => {
         }
     });
 
-    it('keeps the spine fv-1..fv-10 on y=0 (Phase 65 D1)', () => {
+    it('keeps the spine fv-1..fv-10 on y=0, in order, with the three gates between (Phase 65 D1; gates 2026-09-21)', () => {
+        let previous = -1;
         for (let i = 1; i <= 10; i++) {
             const node = fishingVillage.nodes.find(n => n.id === `fv-${i}`)!;
             expect(node.location[1], `fv-${i} should be on the spine`).toBe(0);
-            expect(node.location[0], `fv-${i} should sit in column ${i - 1}`).toBe(i - 1);
+            expect(node.location[0], `fv-${i} should sit further along than fv-${i - 1}`).toBeGreaterThan(previous);
+            previous = node.location[0];
+        }
+        // The gates sit on the spine too, one column before each open column.
+        for (const [id, column] of [['fv-26', 2], ['fv-27', 4], ['fv-28', 6]] as const) {
+            const gate = fishingVillage.nodes.find(n => n.id === id)!;
+            expect(gate.location).toEqual([column, 0]);
         }
     });
 
-    it('walks a full ten-beat run every time', () => {
-        // One node per column, ten columns. Every route is the same length,
-        // which is what makes the 25-node map a set of three real lanes
-        // rather than a maze with good and bad exits.
-        expect(audit.longestRoute).toBe(10);
+    it('walks a full thirteen-beat run every time', () => {
+        // One node per column, thirteen columns (ten beats plus the three
+        // gates). Every route is the same length, which is what makes the
+        // 28-node map a set of three real lanes rather than a maze with good
+        // and bad exits.
+        expect(audit.longestRoute).toBe(13);
         expect(audit.strands).toEqual([]);
     });
 
-    it('narrows column 1 to Old Marrow alone (Phase 53c)', () => {
-        // fv-2 is now fishing-village's third forced-singleton column
-        // (with fv-1 and fv-6) — deliberately, so the quest-giver is
-        // guaranteed rather than a coin flip. fv-12 and fv-13, displaced
-        // from column 1, must not have quietly become a fourth.
+    it('narrows column 1 to Old Marrow alone, and the three gates to one fight each (Phase 53c; 2026-09-21)', () => {
+        // fv-2 is fishing-village's forced quest-giver column (with fv-1 and
+        // fv-6 as the other original singletons); the three gates fv-26 /
+        // fv-27 / fv-28 (columns 2, 4, 6) are the deliberate fights every
+        // route takes before the breakwater. fv-12 and fv-13, displaced
+        // from column 1, must not have quietly become another.
         const widths = new Map<number, number>();
         for (const node of fishingVillage.nodes) {
             widths.set(node.location[0], (widths.get(node.location[0]) ?? 0) + 1);
         }
         const singletonColumns = [...widths.entries()].filter(([, w]) => w === 1).map(([x]) => x);
-        expect(singletonColumns.sort((a, b) => a - b)).toEqual([0, 1, 5]);
+        expect(singletonColumns.sort((a, b) => a - b)).toEqual([0, 1, 2, 4, 6, 8]);
     });
 });
 

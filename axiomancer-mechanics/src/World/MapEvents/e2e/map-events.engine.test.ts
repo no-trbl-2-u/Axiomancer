@@ -301,15 +301,15 @@ describe('resolveMapEvent — Phase 31 traversal fix', () => {
         });
         state = { ...state, world: { ...state.world, currentMap: { ...state.world.currentMap, currentNode: 'fv-2' } } };
 
-        // Before resolving fv-2: fv-3 is locked.
-        expect(state.world.currentMap.lockedNodes).toContain('fv-3');
-        expect(state.world.currentMap.availableNodes).not.toContain('fv-3');
+        // Before resolving fv-2: fv-26 is locked.
+        expect(state.world.currentMap.lockedNodes).toContain('fv-26');
+        expect(state.world.currentMap.availableNodes).not.toContain('fv-26');
 
         const afterFv2 = resolveMapEvent(state).state.world.currentMap;
 
-        // After resolving fv-2: fv-3 has moved from locked → available.
-        expect(afterFv2.availableNodes).toContain('fv-3');
-        expect(afterFv2.lockedNodes).not.toContain('fv-3');
+        // After resolving fv-2: fv-26 has moved from locked → available.
+        expect(afterFv2.availableNodes).toContain('fv-26');
+        expect(afterFv2.lockedNodes).not.toContain('fv-26');
     });
 
     it('idempotent — re-resolving a consumed node does not re-promote unlocked adjacents', () => {
@@ -335,12 +335,12 @@ describe('resolveMapEvent — Phase 31 traversal fix', () => {
         // Move to fv-2 first (legal — fv-2 is already available; no pool needed
         // to move).
         const atFv2 = { ...state, world: { ...state.world, currentMap: { ...state.world.currentMap, currentNode: 'fv-2' } } };
-        expect(atFv2.world.currentMap.lockedNodes).toContain('fv-3');
+        expect(atFv2.world.currentMap.lockedNodes).toContain('fv-26');
         const result = resolveMapEvent(atFv2);
         expect(result.event.kind).toBe('none');
         // Discovery + traversal both advance even without a pool.
-        expect(result.state.world.currentMap.availableNodes).toContain('fv-3');
-        expect(result.state.world.currentMap.lockedNodes).not.toContain('fv-3');
+        expect(result.state.world.currentMap.availableNodes).toContain('fv-26');
+        expect(result.state.world.currentMap.lockedNodes).not.toContain('fv-26');
     });
 });
 

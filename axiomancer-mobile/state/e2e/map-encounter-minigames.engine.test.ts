@@ -111,7 +111,7 @@ describe('map encounter → minigame routing (northern-forest)', () => {
 });
 
 describe('fishing-village gauntlet routing', () => {
-    it('is varied with a balanced node mix: interaction the single largest kind, plus texture/narration nodes', () => {
+    it('is varied with a balanced node mix: interaction and encounter the largest kinds, plus texture/narration nodes', () => {
         const def = getMapDefinition('coastal-continent', 'fishing-village');
         const kinds = def.nodes.map((n) =>
             getNodePrimaryEventKind('coastal-continent', 'fishing-village', n.id),
@@ -126,7 +126,9 @@ describe('fishing-village gauntlet routing', () => {
         // and rest tie at 4, interaction is now the single largest kind at
         // 5 — no kind dominates, and a real spread of recovery / texture /
         // narration nodes remains.
-        expect(count('encounter')).toBe(4);
+        // 2026-09-21 — THE THREE GATES (fv-26/27/28, the grey office rebalance):
+        // encounter 4 → 7, now the map's largest kind.
+        expect(count('encounter')).toBe(7);
         expect(count('interaction')).toBe(5);
         expect(count('rest')).toBe(4);
         expect(count('gathering')).toBeGreaterThanOrEqual(1);

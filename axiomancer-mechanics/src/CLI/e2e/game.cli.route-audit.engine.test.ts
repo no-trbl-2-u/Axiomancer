@@ -33,7 +33,7 @@ afterEach(() => {
 });
 
 describe('Phase 14 — route survivorship vs coverage-audit classification', () => {
-    it('--route-audit reports all 25 Fishing Village nodes without mutating a single life', async () => {
+    it('--route-audit reports all 28 Fishing Village nodes without mutating a single life', async () => {
         const logPath = tmpPath('coverage');
 
         await runGameCli(['--route-audit', 'fishing-village', '--state-log', logPath]);
@@ -42,8 +42,8 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         expect(summary.classification).toBe('coverage-audit');
         expect(summary.survived).toBe(true);
         expect(summary.unvisitedNodeIds).toEqual([]);
-        expect((summary.visitedNodeIds as string[]).length).toBe(25);
-        expect((summary.resolvedNodeIds as string[]).length).toBe(25);
+        expect((summary.visitedNodeIds as string[]).length).toBe(28);
+        expect((summary.resolvedNodeIds as string[]).length).toBe(28);
         expect(summary.combatOutcomes).toEqual({});
 
         // fv-6 is the authored boss node; fv-1 is the arrival cutscene
@@ -193,7 +193,7 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         // through fv-11 -> fv-13 (little-belle) instead of fv-3 -> fv-4 to
         // reach the pre-boss fodder fight.
         await runGameCli([
-            '--route', 'fv-2,fv-11,fv-13,fv-5,fv-6,fv-7',
+            '--route', 'fv-2,fv-26,fv-11,fv-27,fv-13,fv-28,fv-5,fv-6,fv-7',
             '--auto-combat',
             '--combat-policy', 'naive',
             '--combat-seed', '32',
@@ -272,7 +272,7 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         // fv-13 (little-belle) is the nearest surviving column-3 encounter
         // reachable from fv-2 via fv-11.
         await runGameCli([
-            '--route', 'fv-2,fv-11,fv-13',
+            '--route', 'fv-2,fv-26,fv-11,fv-27,fv-13',
             '--auto-combat',
             '--combat-policy', 'status',
             '--combat-seed', '42',
@@ -283,9 +283,9 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         const summary = routeEnd(logPath);
         expect(summary.classification).toBe('survivorship');
         expect(summary.survived).toBe(true);
-        expect(summary.visitedNodeIds).toEqual(['fv-1', 'fv-2', 'fv-11', 'fv-13']);
+        expect(summary.visitedNodeIds).toEqual(['fv-1', 'fv-2', 'fv-26', 'fv-11', 'fv-27', 'fv-13']);
         const unvisited = summary.unvisitedNodeIds as string[];
         expect(unvisited).toContain('fv-25');
-        expect(unvisited.length).toBe(21);
+        expect(unvisited.length).toBe(22); // 28 nodes − the 6 visited
     });
 });

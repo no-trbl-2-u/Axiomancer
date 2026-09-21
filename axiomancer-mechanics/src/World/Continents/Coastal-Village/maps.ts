@@ -505,47 +505,59 @@ const fishingVillage: MapDefinition = {
         { id: 'fv-1',  location: [0, 0], connectedNodes: ['fv-2'] },
         // ── c1 — Old Marrow, the quest-giver. Narrowed to a single node
         //        (Phase 53c) so the map's premise is on every route.
-        { id: 'fv-2',  location: [1, 0], connectedNodes: ['fv-3', 'fv-16', 'fv-11'] },
-        // ── c2 — encounter / rest / loot ─────────────────────────────
-        { id: 'fv-16', location: [2, 1], connectedNodes: ['fv-4', 'fv-17', 'fv-12'] },
-        { id: 'fv-3',  location: [2, 0], connectedNodes: ['fv-4', 'fv-17', 'fv-14'] },
-        { id: 'fv-11', location: [2, -1], connectedNodes: ['fv-4', 'fv-14', 'fv-13'] },
-        // ── c3 — loot / encounter / narration, plus fv-12 and fv-13
+        { id: 'fv-2',  location: [1, 0], connectedNodes: ['fv-26'] },
+        // ── THE THREE GATES (2026-09-21, the grey office rebalance) ───
+        //        Every route to the breakwater now passes THREE fights, one
+        //        gate before each open column, so the deck that meets the
+        //        King has taken three rewards — the same three the reward
+        //        draft treats as the free look before the keyword pull.
+        //        The lanes between the gates are exactly what they were;
+        //        a gate simply opens onto the whole next column.
+        // ── c2 — GATE 1: the tide-line (grave-larva, level 1) ────────
+        { id: 'fv-26', location: [2, 0], connectedNodes: ['fv-16', 'fv-3', 'fv-11'] },
+        // ── c3 — narration / rest / loot ─────────────────────────────
+        { id: 'fv-16', location: [3, 1], connectedNodes: ['fv-27'] },
+        { id: 'fv-3',  location: [3, 0], connectedNodes: ['fv-27'] },
+        { id: 'fv-11', location: [3, -1], connectedNodes: ['fv-27'] },
+        // ── c4 — GATE 2: the salt flats (float-eye, level 1) ─────────
+        { id: 'fv-27', location: [4, 0], connectedNodes: ['fv-17', 'fv-4', 'fv-14', 'fv-12', 'fv-13'] },
+        // ── c5 — loot / narration / encounter, plus fv-12 and fv-13
         //        (Phase 53c, displaced from column 1). Every node in this
-        //        column opens onto ALL of c4 (lane drift relaxed) so every
-        //        route can reach the pre-boss rest at fv-20 — the
-        //        pre-audit map's stated "heal before the climax" intent,
-        //        now guaranteed.
-        { id: 'fv-17', location: [3, 1], connectedNodes: ['fv-15', 'fv-5', 'fv-20'] },
-        { id: 'fv-4',  location: [3, 0], connectedNodes: ['fv-15', 'fv-5', 'fv-20'] },
-        { id: 'fv-14', location: [3, -1], connectedNodes: ['fv-15', 'fv-5', 'fv-20'] },
-        { id: 'fv-12', location: [3, 2], connectedNodes: ['fv-15', 'fv-5', 'fv-20'] },
-        { id: 'fv-13', location: [3, -2], connectedNodes: ['fv-15', 'fv-5', 'fv-20'] },
-        // ── c4 — the last breath: encounter / gathering / REST ───────
+        //        column opens onto the third gate, and the gate onto ALL of
+        //        c7, so every route can still reach the pre-boss rest at
+        //        fv-20 — the "heal before the climax" intent, guaranteed.
+        { id: 'fv-17', location: [5, 1], connectedNodes: ['fv-28'] },
+        { id: 'fv-4',  location: [5, 0], connectedNodes: ['fv-28'] },
+        { id: 'fv-14', location: [5, -1], connectedNodes: ['fv-28'] },
+        { id: 'fv-12', location: [5, 2], connectedNodes: ['fv-28'] },
+        { id: 'fv-13', location: [5, -2], connectedNodes: ['fv-28'] },
+        // ── c6 — GATE 3: the breakwater steps (chattering-skull, level 2) ─
+        { id: 'fv-28', location: [6, 0], connectedNodes: ['fv-15', 'fv-5', 'fv-20'] },
+        // ── c7 — the last breath: encounter / gathering / REST ───────
         // (fv-15 was the quest-board node pre-Phase-61; retired to an
         // encounter — see `MapEvents/content.ts`'s `FV_ENCOUNTER_FOES`.)
-        { id: 'fv-15', location: [4, 1], connectedNodes: ['fv-6'] },
-        { id: 'fv-5',  location: [4, 0], connectedNodes: ['fv-6'] },
-        { id: 'fv-20', location: [4, -1], connectedNodes: ['fv-6'] },
-        // ── c5 — the breakwater. Every route passes through here. ────
-        { id: 'fv-6',  location: [5, 0], connectedNodes: ['fv-18', 'fv-7', 'fv-19'] },
-        // ── c6 — the post-boss three, one per lane (Phase 53c, S-02):
+        { id: 'fv-15', location: [7, 1], connectedNodes: ['fv-6'] },
+        { id: 'fv-5',  location: [7, 0], connectedNodes: ['fv-6'] },
+        { id: 'fv-20', location: [7, -1], connectedNodes: ['fv-6'] },
+        // ── c8 — the breakwater. Every route passes through here. ────
+        { id: 'fv-6',  location: [8, 0], connectedNodes: ['fv-18', 'fv-7', 'fv-19'] },
+        // ── c9 — the post-boss three, one per lane (Phase 53c, S-02):
         //        Captain Blackwater (wharf), the Coastal Beggar (spine),
         //        the Fisherman's Daughter (inland, reacting to fv-14) ──
-        { id: 'fv-18', location: [6, 1], connectedNodes: ['fv-8', 'fv-21'] },
-        { id: 'fv-7',  location: [6, 0], connectedNodes: ['fv-8', 'fv-21', 'fv-25'] },
-        { id: 'fv-19', location: [6, -1], connectedNodes: ['fv-8', 'fv-25'] },
-        // ── c7 — encounter / gathering / rest ────────────────────────
-        { id: 'fv-21', location: [7, 1], connectedNodes: ['fv-9', 'fv-22'] },
-        { id: 'fv-8',  location: [7, 0], connectedNodes: ['fv-9', 'fv-22', 'fv-23'] },
-        { id: 'fv-25', location: [7, -1], connectedNodes: ['fv-9', 'fv-23'] },
-        // ── c8 — gathering / rest / hazard ───────────────────────────
-        { id: 'fv-22', location: [8, 1], connectedNodes: ['fv-24', 'fv-10'] },
-        { id: 'fv-9',  location: [8, 0], connectedNodes: ['fv-24', 'fv-10'] },
-        { id: 'fv-23', location: [8, -1], connectedNodes: ['fv-10'] },
-        // ── c9 — the coast road out. Authored terminal column. ───────
-        { id: 'fv-24', location: [9, 1], connectedNodes: [] },
-        { id: 'fv-10', location: [9, 0], connectedNodes: [] },
+        { id: 'fv-18', location: [9, 1], connectedNodes: ['fv-8', 'fv-21'] },
+        { id: 'fv-7',  location: [9, 0], connectedNodes: ['fv-8', 'fv-21', 'fv-25'] },
+        { id: 'fv-19', location: [9, -1], connectedNodes: ['fv-8', 'fv-25'] },
+        // ── c10 — blacksmith / gathering / rest ──────────────────────
+        { id: 'fv-21', location: [10, 1], connectedNodes: ['fv-9', 'fv-22'] },
+        { id: 'fv-8',  location: [10, 0], connectedNodes: ['fv-9', 'fv-22', 'fv-23'] },
+        { id: 'fv-25', location: [10, -1], connectedNodes: ['fv-9', 'fv-23'] },
+        // ── c11 — healer / rest / hazard ─────────────────────────────
+        { id: 'fv-22', location: [11, 1], connectedNodes: ['fv-24', 'fv-10'] },
+        { id: 'fv-9',  location: [11, 0], connectedNodes: ['fv-24', 'fv-10'] },
+        { id: 'fv-23', location: [11, -1], connectedNodes: ['fv-10'] },
+        // ── c12 — the coast road out. Authored terminal column. ──────
+        { id: 'fv-24', location: [12, 1], connectedNodes: [] },
+        { id: 'fv-10', location: [12, 0], connectedNodes: [] },
     ],
     npcs: [oldMarrow, tideShopkeeper, coastalBeggar, captainBlackwater, fishermansDaughter, villageHealer, unionLeader, merchantWidow],
     enemies: [],
