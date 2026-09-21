@@ -1,13 +1,35 @@
 # Critique log
 
-> Last pass: 2026-09-20 at commit 3e879e15
-> Pass count: 44
+> Last pass: 2026-09-21 at commit 9af1cb2d
+> Pass count: 45
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 45, 2026-09-21, commit 9af1cb2d] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5,
+> `CRITIQUE_VIEWPORT=both`), mobile (375×812) and desktop (1280×800),
+> against the full 11-screen set (title, onboarding, combat preview,
+> live combat-board, exploration hub, dialogue, village, cutscene,
+> rest, hazard, late-game hub) — 22 captures, 0 nav trouble, 0
+> console/page errors. Read every screenshot + domText directly
+> across both viewports (title, combat-board, village, rest, hazard,
+> dialogue, combat preview, late-game-hub — the full screen-type
+> spread). Phase 104 ("the grey office and the keyword pull") shipped
+> since the last pass; checked its deck-floor surface specifically —
+> the rest screen's "THE CUT" still reads "the deck is at its floor of
+> 10 cards" (was 12 pre-104) with the option correctly dimmed, same
+> already-reviewed pattern as passes 36/37 (correctly-communicated
+> disabled state, not a defect). All previously-dropped candidates
+> reconfirmed unchanged and not re-filed: the desktop combat-board's
+> non-frontmost card stat-row clipping (`SPOILED POULTICE` → "POIS"/
+> "8/p"+"ay", pass 44), the desktop hazard panel's sparse framing
+> (pass 34/36, confirmed deliberate), and the OMEN cutscene redirect
+> on onboarding/exploration-hub (pass 41, still open in Pending, not
+> re-filed here). Zero fresh findings this pass.
 
 > **[critique pass 44, 2026-09-20, commit 3e879e15] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5,
