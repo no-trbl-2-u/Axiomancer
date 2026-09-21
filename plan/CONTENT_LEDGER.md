@@ -11,7 +11,7 @@
 
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
-| cards | `skills/adjust-cards.md` | 2026-09-20 | 7de3890b | 14 |
+| cards | `skills/adjust-cards.md` | 2026-09-21 | 86871b9f | 15 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-20 | 8e4a7976 | 14 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-20 | e461848b | 14 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-20 | 04f9393d | 14 |
@@ -22,6 +22,64 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
+> **[adjust-cards pass 15, 2026-09-21, commit 86871b9f]** One modest
+> UPDATE shipped (a stale aggregator header count), zero card-verb
+> CREATE/UPDATE/REMOVE. Dispatched autonomously by `/march`'s
+> content-lifecycle gate: `cards` was the stalest qualifying category
+> (last pass `7de3890b` 2026-09-20T08:48:28Z, 43 commits behind HEAD,
+> past the 15-commit/36h threshold; `equipment` `8e4a7976`
+> 2026-09-20T10:40:06Z and `enemies` `e461848b` 2026-09-20T12:51:45Z
+> also qualified on commit count but were less stale by last-pass
+> timestamp; `keywords` `04f9393d` 2026-09-20T20:40:22Z qualified only
+> just (16 commits, under 36h); `npcs` `73e0a70c` 2026-09-21T02:56:22Z
+> did NOT qualify — 1 commit and under 2h since its own pass 14).
+> Deploy confirmed green (docs/plan-only HEAD, nothing gated to check).
+>
+> **Step 1 audit — fresh, not re-cited:** two commits landed on the
+> card-authoring surface since pass 14 (`7de3890b`): `e333fbbf` (Phase
+> 102-103, SUMMON — enemy-side archetype, zero player-card touch,
+> confirmed by direct diff read) and `510953cf`/`9af1cb2d` (Phase 104,
+> the grey office) — a genuine sibling-authored CREATE that moved
+> `cardLibrary.length` 132 -> 134 without a header bump. Re-derived
+> reachability fresh (134/134: starters 8 + grey-office 2 via
+> `STARTING_CARD_IDS` + relics 3 + curses 5 + apocrypha 12 + six theme
+> modules 104), near-duplicates (unchanged: `thin-hymn`/`alms-of-breath`,
+> `the-last-assize`/`the-vein-called-in`, both intentional per every
+> prior pass; the two new grey cards collide with nothing), aspect
+> thirds (unchanged across all six theme modules — Phase 104 touched
+> none of them), and pricing/card-face-honesty/FREE-line guards
+> (`pricing.engine.test.ts` 263/263, `curated-library.engine.test.ts`
+> 14/14, `deck-presets.engine.test.ts` 9/9, all green including the two
+> new grey cards).
+>
+> **Step 1b widened audit:** ran a fresh angle not used by passes 9-14
+> (StS curse proportion, Dawncaster keywords.csv, StS curse deep-dive)
+> — genre prior art for small colourless starting decks, directly
+> relevant to Phase 104's own shape. `kb:slay-the-spire/cards`
+> Strike/Defend/Bash (the Ironclad "Basic" rarity), `kb:dominion`,
+> `kb:dune-imperium`, and `kb:dark-pact` setup docs all confirm a
+> ~10-card starting deck as a deckbuilder norm — our grey office (7
+> grey-strike + 3 grey-ward = 10) matches it. One divergence noted but
+> not actionable: StS's Basic rarity carries a signature third card
+> (Bash) where our grey office deliberately has only two — Phase 104's
+> own shipping commit already argues this omission explicitly
+> ("meant to be outgrown," zero colour arithmetic), so this reads as a
+> confirmed intentional choice, not new residue. Nothing filed.
+>
+> **What shipped:** one UPDATE — `cards.library.ts`'s own header
+> comment still said "132 cards" and made no mention of the grey
+> office (Phase 104 only touched the import + array-spread lines, not
+> the prose header). Corrected 132 -> 134, added the grey-office clause
+> with its design rationale, extended the provenance note to name
+> Phase 104 alongside the two prior sibling-authored additions it
+> already cited. No card verb, id, or wiring touched — pure
+> documentation-accuracy fix, same class as pass 13/14's own header
+> corrections. No KB receipt needed (a count/prose correction, not a
+> new mechanic or design call — same exemption pass 13/14 used).
+>
+> Verify: green (mechanics 220 files/3604 tests + build; mobile
+> lint/typecheck/test/asset suites; card-editor type-check).
+
 > **[adjust-npcs pass 14, 2026-09-21, commit 73e0a70c]** Zero-diff
 > pass — audit re-confirmed, no new finding, ledger bump only. Dispatched
 > autonomously by `/march`'s content-lifecycle gate: `npcs` was the
