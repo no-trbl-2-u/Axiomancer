@@ -22,6 +22,81 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
+> **[adjust-cards pass 16, 2026-09-21, commit <PENDING>]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
+> content-lifecycle gate: `cards` was the stalest qualifying category this
+> tick (last pass `86871b9f` 2026-09-21T04:50:29Z, 26 commits behind HEAD
+> `e231bc01` 2026-09-21T18:48:27Z, past the 15-commit/36h threshold;
+> `equipment` `f74f198e` 2026-09-21T07:07:28Z (24 commits) and `enemies`
+> `f78f0550` 2026-09-21T09:00:58Z (22 commits) both also qualified on
+> commit count but were less stale by last-pass timestamp; `keywords`
+> `fb0a0f3c` 2026-09-21T12:50:21Z did NOT qualify — 6 commits and ~9.7h
+> since its own pass 15, under both thresholds; `npcs` `9821b636`
+> 2026-09-21T18:48:17Z did NOT qualify — 1 commit and ~3.7h since its
+> pass 15). Deploy confirmed green (`npm run deploy:check`: no gated
+> workflow for HEAD yet within the grace window, docs/plan-only tick).
+>
+> **Step 1 audit — fresh, not re-cited:** `git diff --stat 86871b9f..HEAD`
+> over the card-authoring surfaces (`src/Cards`,
+> `combat.starter-deck-presets.ts`, `combat.deck-draft.ts`) shows only a
+> 5-line non-content change: `f66a9ae9` taught `cardOrigin()` to tag the
+> grey-theme starters directly (`getCardById(cardId)?.theme === 'grey'`)
+> instead of relying solely on preset-membership lookup — an engine
+> display-attribution fix from the sibling `game-balance-card-mechanics`
+> branch merge, zero card ids/text/pricing touched. `axio_overview`
+> confirms the library unchanged at 134 cards across 8 themes (grey 2,
+> debt 20, trial 24, rot 19, choir 21, vigil 21, curse 5, grave 22).
+> Re-ran the full card-surface e2e trio fresh rather than trusting the
+> diff summary alone: `pricing.engine.test.ts` 263/263,
+> `curated-library.engine.test.ts` 14/14 (FREE-line + reachability),
+> `deck-presets.engine.test.ts` 9/9 (aspect-thirds) — all green,
+> byte-identical counts to pass 15's own citation. Near-duplicates
+> re-confirmed unchanged (thin-hymn/alms-of-breath,
+> the-last-assize/the-vein-called-in, both intentional per every prior
+> pass since pass 9).
+>
+> **Step 1b widened audit:** Step 1 returned nothing actionable, so ran
+> the KB cross-reference before accepting zero-diff, on two angles not
+> used by any prior `/adjust-cards` pass (prior angles: curse proportion,
+> Dawncaster keywords.csv functions sweep, starting-deck-size genre
+> comparison). `kb_overview` reconfirms the corpus is byte-identical to
+> every prior pass's read (46 board/card games, 2801 okf docs, dawncaster
+> 1692/slay-the-spire 360 card records) — no new source landed. (1)
+> Direct-damage prior art (`kb_cards game=slay-the-spire "deal damage"`,
+> relevant post-BIG-NUMBERS-REWRITE since DEAL is now a first-class verb):
+> Slay the Spire's scaling-DEAL cards (Body Slam/Mind Blast/Ritual Dagger)
+> are a genre-standard shape; `axio_cards query=deal` shows DEAL is
+> already pervasive across five of our eight themes (debt/trial/rot/
+> grave/vigil, 40+ hits at the query's own limit) — not a gap. (2)
+> Alt-win/mercy prior art (`kb_search pacify|surrender|non-lethal|
+> persuade|befriend|negotiate`, scope `all`, relevant since CLAUDE.md
+> names Befriend/RELENT-via-PLEA/CONDEMN-via-CHARGE as the three
+> alt-wins): only hit is our own design-graph doc
+> (`Axiomancer/design-graph/relations.okf.md`) — no external prior art on
+> this specific mercy-resolution shape. Checked our own PLEA (choir, 21
+> cards, `PLEA` payoffs up to 70 + a `SENTENCE`-style long-Kyrie finisher)
+> and CHARGE (trial, 24 cards, `+Charges` build-up to `SENTENCE`/
+> `CONDEMN` finishers) families directly — both well-populated, not thin.
+> Checked whether Befriend itself has card-layer support: no library card
+> carries `befriend_attempt` (`axio_cards query=befriend` — no match);
+> `src/Cards/e2e/befriend.card.engine.test.ts`'s own header confirms this
+> is deliberate — "The pre-v3 `befriend` LIBRARY CARD retired with the
+> spec 32 v3 overhaul (Befriend lives in enemy-signature / mercy flows
+> now — ADR-0007 keeps the path alive...)" — a standing Phase 108 design
+> decision, not a fresh gap for this pass to re-open.
+>
+> **What shipped:** nothing on the card surface — genuine zero-diff.
+> KB research (skill §3 Step 2): the Step 1b widened check above IS this
+> pass's KB research run; no CREATE/UPDATE shipped, so the REMOVE/no-op
+> carve-out prior zero-diff passes have used identically applies here too.
+>
+> **Verify:** `npm run verify --workspace axiomancer-mechanics` (222
+> files, 3618 tests + build green), `npm run verify --workspace
+> axiomancer-mobile` (lint/typecheck/jest/asset/critique-drive suites all
+> green, exit 0), `npm run type-check --workspace axiomancer-card-editor`
+> (clean) — all three ran in full despite the empty source diff.
+```
+
 > **[adjust-npcs pass 15, 2026-09-21, commit 9821b636]** Zero-diff pass —
 > audit re-confirmed, no new CREATE/UPDATE/REMOVE, ledger bump only.
 > Dispatched autonomously by `/march`'s content-lifecycle gate: `npcs`
