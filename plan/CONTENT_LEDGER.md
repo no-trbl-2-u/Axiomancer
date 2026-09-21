@@ -14,12 +14,100 @@
 | cards | `skills/adjust-cards.md` | 2026-09-21 | 86871b9f | 15 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-21 | f74f198e | 15 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-21 | f78f0550 | 15 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-20 | 04f9393d | 14 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-21 | TBD | 15 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-21 | 73e0a70c | 14 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-keywords pass 15, 2026-09-21, commit TBD]** Zero-diff pass —
+> audit re-confirmed, no new CREATE/UPDATE/REMOVE, ledger bump only.
+> Dispatched autonomously by `/march`'s content-lifecycle gate: `keywords`
+> was the stalest qualifying category this tick (last pass `04f9393d`
+> 2026-09-20T20:40:22Z, 36 commits / ~14h behind HEAD `c91f3185`
+> 2026-09-21T10:36:02Z — past the 15-commit threshold even though under
+> 36h; every sibling steward had already ticked more recently this same
+> day: `cards` `86871b9f` 2026-09-21T04:50:29Z, `npcs` `73e0a70c`
+> 2026-09-21T02:56:22Z, `equipment` `f74f198e` 2026-09-21T07:07:28Z,
+> `enemies` `f78f0550` 2026-09-21T09:00:58Z). Deploy confirmed green; no
+> phase work pending.
+>
+> **Step 0:** read `axiomancer-mechanics/CLAUDE.md` (THE BIG NUMBERS
+> REWRITE — no CQI/status-engagement-floor grading), the live
+> `docs/keyword-atlas.md`, and `docs/retheme-map.json` fresh rather than
+> trusting pass 14's reading — no doctrine change landed in the 36
+> intervening commits.
+>
+> **Step 1 structural audit:** re-derived every signal rather than
+> reusing pass 14's numbers. `git log 04f9393d..HEAD` against the full
+> keyword-surface path set (`src/Cards/types.ts`, `src/Combat/
+> combat.cards.ts`, `src/Combat/combat.engine.ts`, `src/Effects/**`,
+> `axiomancer-mobile/state/combat/keywords.ts`,
+> `axiomancer-mechanics/docs/keyword-atlas.md`,
+> `axiomancer-card-editor/src/data/mechanics.ts`) returns exactly one
+> touching commit of the 36 intervening: `510953cf` (Phase 104, "the grey
+> office and the keyword pull"). Read its diff directly rather than
+> trusting the one-line summary: it adds `CardAspect` (`StatType | 'any'`)
+> as a new value on the EXISTING `philosophicalAspect` colour axis, not a
+> new `CardSpecialMechanic`/`CardRider` kind — the two grey starter cards
+> it ships (`grey-strike`, `grey-ward`) carry only the already-registered
+> `deal`/`guard` mechanics, fully wired through mobile (`STANCES` palette)
+> and the card-editor (`STANCES: Option<CardAspect>[]`) in the same
+> commit. Not a keyword-atlas finding: `CardAspect` is a card-identity/
+> colour-matching axis (mechanics-expert's lane per THE COLOUR LAW), not
+> combat vocabulary with reminder text — no row is owed. Re-ran every
+> other Step 1 signal fresh: (1) carrier-count sweep — `grep`'d every
+> `kind:` literal in `CardSpecialMechanic`/`CardRider` against every
+> `case '...'` in `combat.cards.ts`'s `mechanicText` switch: identical
+> 56-entry sets, zero silent `default:` arms; (2) semantic-overlap check —
+> no new near-synonym pairs (nothing new was minted); (3) `kb:` receipt
+> backfill — no atlas row lost a receipt; (4) `node --test
+> scripts/content-drift.test.mjs`: 11/11 green (byte-identical to pass
+> 14's result). The one adjacent equipment-pass touch in the window,
+> `f74f198e` (`buff_haste_surge`, mapped to the existing `Draw` mobile
+> badge), is an effect-id split already fully handled by
+> `/adjust-equipment` pass 15 and needs no atlas action — `buff_haste`
+> was never a registered card-facing keyword.
+>
+> **Step 1b widened KB cross-reference:** re-read the full 141-row
+> Dawncaster `keywords.csv` functions sweep (`kb:dawncaster/keywords.csv`,
+> community, confidence medium) against our now-nine-family registry
+> rather than trusting pass 9/11/14's conclusions at face value. Both
+> open threads from prior passes were re-checked, not re-derived: **generic
+> Upgrade** (Mergecraft/Infuse/permanent per-card damage growth) stays
+> explicitly NOT re-filed per pass 11's resolution — it would need a new
+> persistent-per-card-object payload shape the engine has never stored,
+> and no card idea/rank-slot has been proposed for it since; **Vulnerable**
+> (incoming-damage amplification, `kb:dawncaster/keywords/
+> vulnerable.okf.md`, src-001) stays filed at `plan/PHASE_CANDIDATES.md`
+> (score 3.0, Pending) exactly as pass 14 left it — still real, still
+> cross-cutting damage-resolution surgery, not re-actioned here. Checked
+> two families with no prior atlas mention for a genuine new gap: "Holy
+> Energy" (Holy/Zeal/Revelation — a second resource pool gated to a card
+> type) resolves to the same shape our BODY/MIND/HEART die-colour-match
+> system (now widened by Phase 104's `CardAspect` 'any') already covers,
+> not a distinct axis; "Instakill" (Charmed/Deep Wound — an
+> opponent-applied stacking affliction that kills outright at a
+> threshold) functionally overlaps EXECUTE's already-shipped "below X%
+> VITAE, damage doubles" near-kill lever and the CONDEMN/RELENT alt-wins,
+> without a concrete card idea or rank-slot to differentiate it — same bar
+> pass 9 applied to Chaos/Upgrade before either was filed, not met here.
+> No new citable gap. Zero-diff confirmed on the widened pass, not just
+> the structural one.
+>
+> **Ship (Step 3):** none — zero CREATE, zero UPDATE, zero REMOVE. Every
+> structural signal and the widened KB check hold pass 14's conclusions;
+> the one intervening keyword-adjacent commit (Phase 104) was already
+> fully wired end to end and needs no atlas row.
+>
+> **Gates:** `npm run verify --workspace axiomancer-mechanics`, `npm run
+> verify --workspace axiomancer-mobile`, `npm run type-check --workspace
+> axiomancer-card-editor`, and `npm test` (root, includes
+> `content-drift.test.mjs` 11/11) all green — unchanged, no source
+> touched.
+```
 
 ```
 > **[adjust-enemies pass 15, 2026-09-21, commit f78f0550]** 31 enemies +

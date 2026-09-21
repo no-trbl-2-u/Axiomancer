@@ -603,3 +603,7 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-21T10:32:27Z | slash-prompt | /march | - | - | /march |
 | 2026-09-21T10:32:53Z | skill | critique | claude-sonnet-5 | - | - |
 | 2026-09-21T10:32:54Z | skill-end | critique | claude-sonnet-5 | 0s | ok |
+| 2026-09-21T12:40:03Z | slash-prompt | /march | - | - | /march |
+| 2026-09-21T12:42:48Z | skill | adjust-keywords | claude-sonnet-5 | - | - |
+| 2026-09-21T12:42:48Z | skill-end | adjust-keywords | claude-sonnet-5 | 0s | ok |
+| 2026-09-21T12:43:20Z | subagent | card-expert | claude-sonnet-5 | - | Run adjust-keywords lifecycle tick |
