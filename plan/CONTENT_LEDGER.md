@@ -13,13 +13,86 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-21 | 86871b9f | 15 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-21 | f74f198e | 15 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-20 | e461848b | 14 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-21 | f78f0550 | 15 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-20 | 04f9393d | 14 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-21 | 73e0a70c | 14 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-enemies pass 15, 2026-09-21, commit f78f0550]** 31 enemies +
+> TriEyes UPDATEd (32 total records touched), zero CREATE/REMOVE.
+> Dispatched autonomously by `/march`'s content-lifecycle gate: `enemies`
+> (`e461848b` 2026-09-20T12:51:45Z, 43 commits/~20.2h behind HEAD
+> `863a306b`) was the stalest qualifying category past the 15-commit/36h
+> threshold; deploy confirmed green (verify-mobile + verify-mechanics
+> success on HEAD `863a306b`); no phase work pending (build plan queue
+> drained).
+>
+> **Step 1 audit:** re-ran the full structural sweep fresh rather than
+> trusting passes 9-14's byte-identical roster-size/overlap numbers at
+> face value. Orphan sweep, loot-table sweep and roster-size/overlap all
+> re-confirmed zero-diff (same as pass 14). The one live signal, standing
+> since pass 1 (2026-09-05) and re-cited-not-fixed through passes 2-14:
+> **aftermath prose missing** on 31 `EnemyLibrary` entries (0 of
+> `finalBlowLines`/`causeLines`) plus a second, previously-unflagged
+> instance the new full-roster test (below) caught on the same run —
+> `TriEyes` carries a `friendshipReward` but no `pactLines`, a gap none
+> of the prior 14 passes' hand-picked-subset test could see. Every prior
+> pass judged the 30-32-enemy backlog "too large for a routine
+> single-enemy edit" (pass 1's own framing) and re-cited it without
+> shipping; THE GROWTH FLOOR ¶3 — two zero-diff-shaped re-citations is a
+> signal to act, not a clean bill of health — applied directly: this is
+> an UPDATE (existing records gaining an optional field), not a
+> CREATE, so the ¶2 3-item ship-small cap doesn't gate it, and the
+> content itself is pure prose (no engine/mobile/editor wiring), so
+> "large" was never really true — just unbudgeted.
+>
+> **KB research gate (skill §3 Step 2):** `kb_search` (scope `all`) for
+> flavor-text / epitaph / death-line / kill-line / banter / narrative
+> patterns returned zero matches — the 46-game corpus is board-game
+> rules text with no dialogue- or prose-bearing titles indexed, the same
+> genuine miss `/adjust-npcs` pass 13 already filed as
+> [`game-knowledge-base#81`](https://github.com/no-trbl-2-u/game-knowledge-base/issues/81).
+> Documented honestly rather than re-filed (the wishlist already covers
+> this gap shape). Grounding for the 189 authored strings is the in-repo
+> established voice instead: the 47 already-authored `finalBlowLines`/
+> `causeLines`/`pactLines` entries set the register (terse, cold,
+> image-anchored to the enemy's own `description`/`stanceHint`, three
+> variants — brutal/quiet/ironic and brutal/broken/quiet), and every new
+> line was keyed to its own enemy's established metaphor (Grave Larva's
+> "teeth", Ghast's "asks before it takes", The Sophist's "borrows your
+> argument") rather than templated. Zero `\b(thee|thou|thy|thine|ye)\b`
+> hits, confirmed both by grep and by a new hermetic test (below).
+>
+> **Ship (Step 3, UPDATE path):** wrote `finalBlowLines` (3 lines) +
+> `causeLines` (3 lines) for all 31 backlog enemies (GraveLarva,
+> ChatteringSkull, FootStealer, CursedHead, Ghast, DoomEgg, TheButcher,
+> Wichtlein, BullBegger, WeepingHead, GoblinShaman, Sugata, PaleBrood,
+> Mabadi, FrayedOne, BoneTotem, BoneWizard, CursedPaladin, VampireThrall,
+> JeweledTree, OgreNaga, Sidelle, AshenBoneDrake, Zoma, MabadiUndrowned,
+> TriEyesHollowed, BlackDeath, TheUnnameable, FireGiant, GreaterDevil,
+> TheSophist — the last already carried `pactLines`, so only the two
+> missing fields were added) plus `pactLines` (3 lines) for TriEyes.
+> Same `id`/slug throughout, no re-creation, no engine/registry/pool
+> touch. Extended `aftermath-lines.engine.test.ts` (previously swept only
+> a 21-enemy hand-picked subset — how this backlog went unflagged for 14
+> passes) with two full-`EnemyLibrary`-sweep tests: one pinning every
+> entry carries `finalBlowLines`/`causeLines` (and `pactLines` when
+> `friendshipReward` is present), one pinning zero archaic-register hits
+> roster-wide — closing the backlog and guarding against it silently
+> reopening in either shape.
+>
+> **Verify:** `npm run verify --workspace axiomancer-mechanics` (220/220
+> files, 3609 tests + build green — up from 3607 pre-tick, the two new
+> guard tests) and `npm run verify --workspace axiomancer-mobile` (lint/
+> typecheck/jest/asset suites, exit 0). No `plan/PHASE_CANDIDATES.md` or
+> `plan/AUDIT.md` residue filed — the backlog this pass closes was the
+> only standing enemies-surface finding on file; nothing new surfaced.
+```
+
 
 ```
 > **[adjust-equipment pass 15, 2026-09-21, commit f74f198e]** One
