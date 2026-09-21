@@ -12,7 +12,7 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-21 | 86871b9f | 15 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-20 | 8e4a7976 | 14 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-21 | f74f198e | 15 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-20 | e461848b | 14 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-20 | 04f9393d | 14 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-21 | 73e0a70c | 14 |
@@ -22,6 +22,55 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
+> **[adjust-equipment pass 15, 2026-09-21, commit f74f198e]** One
+> UPDATE shipped: split `war-horn-draught` off the `buff_haste` effect
+> it shared byte-for-byte with `berserker-brew` and `quicksilver-vial`,
+> zero CREATE/REMOVE. Dispatched autonomously by `/march`'s
+> content-lifecycle gate: `equipment` (`8e4a7976` 2026-09-20T10:40:06Z,
+> 43 commits behind HEAD), `enemies` (`e461848b` 2026-09-20T12:51:45Z,
+> 41 commits) and `keywords` (`04f9393d` 2026-09-20T20:40:22Z, 18
+> commits) all qualified past the 15-commit/36h threshold; `equipment`
+> was stalest by last-pass timestamp. `cards` (`86871b9f`
+> 2026-09-21T04:50:29Z) and `npcs` (`73e0a70c` 2026-09-21T02:56:22Z)
+> did not qualify. Deploy confirmed green (verify-mechanics success on
+> HEAD `008b489d` before this tick's own changes).
+>
+> **Step 1 audit:** slot/dominance/grantsSignature/AccessoryKind
+> checks all clean (11 relics, all 11 `SignatureSkillId`s live, no
+> statModifiers domination — every same-value pair differentiated by a
+> unique `grantsSignature`; every `AccessoryKind` has >=1 live piece).
+> All 22 consumables resolve their `effectId` and appear in >=1
+> shop/reward pool (full audit, not a sample). The one live finding:
+> `buff_haste` was shared byte-for-byte by three consumables
+> (`berserker-brew`, `quicksilver-vial`, `war-horn-draught`) with no
+> co-occurrence in any single shop/loot table (so the pass-11/14
+> same-pool trigger never fired), but `war-horn-draught` alone carries
+> the `'late-game'` tag — a late-tier reward mechanically identical to
+> two early/common drops is the same dominated-item shape those passes
+> fixed, just invisible without a direct diff read.
+>
+> **Design + KB grounding:** `kb_cards` (dawncaster) returned
+> `Haste` [Common] "Gain 2 Haste" (kb:dawncaster/0789-haste) vs
+> `Potion of Alacrity` [Rare] "Gain 3 Haste. Draw a card"
+> (kb:dawncaster/1114-potion-of-alacrity) — the corpus scales
+> Haste-granting items by rarity rather than treating them as
+> interchangeable. `buff_haste`'s `rollModifier`/`advantageModifier`
+> payload is flat (not `rollModifierPerIntensity`), so `intensityOverride`
+> would be a no-op differentiator (confirmed against
+> `src/Combat/index.test.ts`'s "flat rollModifier is
+> intensity-independent" contract) — the lever had to be a new effect
+> entry, not a consumable-side override. Added tier-3 `buff_haste_surge`
+> (`rollModifier` 4 -> 6, the 1.5x ratio Phase 96 already established
+> for the desperation band) and re-pointed `war-horn-draught` at it.
+> `berserker-brew`/`quicksilver-vial` keep base `buff_haste` — neither
+> carries a tier tag implying either should be stronger than the other,
+> so splitting them apart too would invent a distinction the content
+> doesn't claim. Backfilled `buff_haste_surge: 'Draw'` into mobile's
+> `SUPPORT_KEYWORD` map in the same tick (the exact gap pass 14 had to
+> catch retroactively for pass 11's split). New regression-guard tests
+> in `dead-consumable-payload.engine.test.ts`. Verify: green (mechanics
+> 220 files / 3607 tests; mobile green).
+>
 > **[adjust-cards pass 15, 2026-09-21, commit 86871b9f]** One modest
 > UPDATE shipped (a stale aggregator header count), zero card-verb
 > CREATE/UPDATE/REMOVE. Dispatched autonomously by `/march`'s
