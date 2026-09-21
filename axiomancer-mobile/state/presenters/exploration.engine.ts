@@ -10,7 +10,7 @@
  */
 
 import type { GameStore, MapEventKind } from '@mechanics';
-import { getMapDefinition, getNodePrimaryEventKind, getNodeEventPool, legalMovesFrom } from '@mechanics';
+import { getMapDefinition, getNodePrimaryEventKind, getNodeEventPool, legalMovesFrom, forwardEdges } from '@mechanics';
 
 import { readCurrentNodeId } from '../actions';
 import { getMapLayout } from '@/state/exploration-maps';
@@ -49,6 +49,20 @@ export interface ExplorationEdge {
     traveled: boolean;
     /** True when either endpoint is locked. */
     locked: boolean;
+    /**
+     * True for a D1 LATERAL LANE RIB — an edge that steps sideways between
+     * two lanes of the same column instead of one column forward.
+     *
+     * The engine draws the distinction itself (`forwardEdges()` in
+     * `world.reducer.ts`, which is what its own route audits walk), so the
+     * presenter reads it rather than re-deriving it from coordinates. The
+     * canvas needs it because 69 ribs landed on the seven maps at once: drawn
+     * at the same weight as the forward roads they turn the chart into an
+     * undifferentiated mesh, and the spine the player is actually progressing
+     * along stops being findable. Drawn lighter, they read as what they are —
+     * you may also step sideways here.
+     */
+    lateral: boolean;
 }
 
 export interface ExplorationAction {
@@ -254,15 +268,36 @@ function engineNodeType(continent: string, mapName: string, nodeId: string): Nod
  * panel that then did nothing. A node you have seen but cannot walk to from
  * where you stand reads as 'locked' — which is exactly what the gauntlet's
  * no-back-travel rule makes it.
+ *
+ * ── 2026-09-21, D1: SPENT IS NOT SEALED ──
+ *
+ * `spent` is the set the engine calls `isNodeSpent()`:
+ * `completedNodes ∪ consumedNodes`. Those two lists are written by DIFFERENT
+ * verbs — `completeNode` and `markNodeConsumed` — and neither implies the
+ * other, so a node answered through the consume path lands in one list and
+ * not the other.
+ *
+ * This function used to test `completedNodes` alone. Under the pre-D1 rules
+ * that was survivable; under D1 it is a lie on screen, because the frontier
+ * now excludes every spent node from `legalMovesFrom`. A consumed-but-not-
+ * completed node therefore matched none of the three branches above and fell
+ * through to `locked` — drawn SEALED, counted in the legend's "N sealed", and
+ * described to a screen reader as sealed, when in truth the player had walked
+ * it and answered it. Exactly the state D1 named TRODDEN, wearing the badge
+ * of the state it is furthest from.
+ *
+ * The spent set is passed in (rather than recomputed here) so the ONE place
+ * that decides what "resolved" means stays `world.reducer.ts` — see the call
+ * site, which reads both engine lists and never redefines their union.
  */
 function classifyNode(
     nodeId: string,
     currentNodeId: string,
-    completed: readonly string[],
+    spent: ReadonlySet<string>,
     reachable: readonly string[],
 ): NodeKind {
     if (nodeId === currentNodeId) return 'current';
-    if (completed.includes(nodeId)) return 'completed';
+    if (spent.has(nodeId)) return 'completed';
     if (reachable.includes(nodeId)) return 'available';
     return 'locked';
 }
@@ -277,21 +312,44 @@ interface ResolvedNodeMeta {
 }
 
 // Edges come from the ENGINE graph (`getMapDefinition().nodes[].connectedNodes`).
+//
+// D1's lateral lane ribs are authored BOTH WAYS, so the same pair appears
+// twice in `connectedNodes`; the `seen` key is order-insensitive precisely so
+// one line is drawn per pair rather than two stacked on each other.
+//
+// `forward` is the engine's own forward-skeleton adjacency
+// (`forwardEdges(def)`), passed in by the caller. An edge is a RIB exactly
+// when neither endpoint lists the other as a forward neighbour — the same
+// test the engine's route audits use, asked once here instead of being
+// re-derived from `location[0]` in the presenter.
 function buildEdges(
-    nodes: ReadonlyArray<{ id: string; connectedNodes: readonly string[] }>,
-    completed: readonly string[],
+    nodes: readonly { id: string; connectedNodes: readonly string[] }[],
+    forward: ReadonlyMap<string, readonly string[]>,
+    spent: ReadonlySet<string>,
     locked: readonly string[],
 ): ExplorationEdge[] {
     const edges: ExplorationEdge[] = [];
     const seen = new Set<string>();
+    const isForward = (a: string, b: string): boolean =>
+        (forward.get(a) ?? []).includes(b) || (forward.get(b) ?? []).includes(a);
     for (const node of nodes) {
         for (const target of node.connectedNodes) {
             const key = node.id < target ? `${node.id}|${target}` : `${target}|${node.id}`;
             if (seen.has(key)) continue;
             seen.add(key);
-            const traveled = completed.includes(node.id) && completed.includes(target);
+            // A road reads as TRAVELLED once both its ends are answered —
+            // spent, in D1's word, not merely `completedNodes` (see
+            // `classifyNode`: the two lists diverge, and reading only one
+            // left roads between walked nodes drawn as untrodden).
+            const traveled = spent.has(node.id) && spent.has(target);
             const isLocked = locked.includes(node.id) || locked.includes(target);
-            edges.push({ fromId: node.id, toId: target, traveled, locked: isLocked });
+            edges.push({
+                fromId: node.id,
+                toId: target,
+                traveled,
+                locked: isLocked,
+                lateral: !isForward(node.id, target),
+            });
         }
     }
     return edges;
@@ -347,6 +405,41 @@ function buildActions(options: readonly ExplorationOption[]): ExplorationAction[
     }));
 }
 
+/**
+ * The three map-node states, as the legend strip names them.
+ *
+ * ── owner finding 9 / D1, 2026-09-21 ──
+ *
+ * The glyphs are not decoration: they are the legend's half of the
+ * colour-blind contract that `components/NodeMark.tsx` draws the other half
+ * of. Each one is a picture of how much of the disc its state fills, so the
+ * key teaches the same distinction the chart makes:
+ *
+ *   ● TRODDEN — a SOLID mass. Answered; it yields nothing more.
+ *   ◉ OPEN    — a ring around a lit core. The frontier: walk here.
+ *   ◌ SEALED  — an EMPTY broken ring. Shut to you.
+ *
+ * The retired `✕ SEALED` is the mark the owner's Drowned Parish screenshot
+ * caught: a blood-red cross on 23 of 28 nodes, so the loudest thing on the
+ * chart was the state that means "nothing for you here". A sealed node now
+ * recedes instead of shouting, and the legend had to stop promising a cross
+ * that is no longer drawn.
+ *
+ * FE-008 still holds: SEALED, not SHUT — one word for the state across the
+ * legend, the counter beside it, the node tap-tip, and every locked node's
+ * accessible name.
+ */
+export const MAP_LEGEND_KEYS = [
+    { glyph: '\u25CF', label: 'TRODDEN' },
+    { glyph: '\u25C9', label: 'OPEN' },
+    { glyph: '\u25CC', label: 'SEALED' },
+] as const;
+
+/** The legend strip's left half, built from `MAP_LEGEND_KEYS` so the two cannot drift. */
+export const MAP_LEGEND_LEFT: string = MAP_LEGEND_KEYS
+    .map((k) => `${k.glyph} ${k.label}`)
+    .join('   ');
+
 const DRAWER_COPY = {
     emptyMessage: 'the paths close as you go deeper — tap a glowing node to travel.',
     title: '✠ WHITHER, PILGRIM?',
@@ -372,7 +465,7 @@ const FALLBACK_VM: ExplorationViewModel = {
     options: [],
     drawerCopy: DRAWER_COPY,
     eventCallout: null,
-    legend: { left: '● TRODDEN  ◌ OPEN  ✕ SEALED', right: '' },
+    legend: { left: MAP_LEGEND_LEFT, right: '' },
 };
 
 // Referential-stability memo (1-entry, keyed by the `world` slice this
@@ -440,10 +533,21 @@ function computeExplorationViewModel(state: GameStore): ExplorationViewModel {
     }
 
     const completed = world.currentMap.completedNodes as readonly string[];
+    const consumedNodes = (world.currentMap.consumedNodes ?? []) as readonly string[];
     const locked = world.currentMap.lockedNodes as readonly string[];
     const currentNodeId = readCurrentNodeId(world);
     // The engine owns "where can I go from here" (see `classifyNode`).
     const reachable: readonly string[] = legalMovesFrom(world.currentMap);
+    // D1's SPENT set — `isNodeSpent()`'s union, read off the two lists the
+    // save actually carries. The engine's own predicate takes a `MapState`
+    // one node at a time; over ~28 nodes per map that is 28 map-definition
+    // lookups per render, so the union is materialised once here against the
+    // same two lists `isNodeSpent` reads and never against a third rule.
+    const spent: ReadonlySet<string> = new Set<string>([...completed, ...consumedNodes]);
+    // The engine's forward skeleton — what separates a progression road from
+    // a D1 lateral rib on the canvas. Definition-only, so it is stable for
+    // the life of the map.
+    const forward = forwardEdges(def);
 
     // Per-node display meta: position/label/blurb from the mobile layout (by id),
     // kind/icon from the engine's authored event pools. Nodes without an authored
@@ -464,7 +568,7 @@ function computeExplorationViewModel(state: GameStore): ExplorationViewModel {
 
     const nodes: ExplorationNode[] = def.nodes.map((eng) => {
         const meta = metaById.get(eng.id)!;
-        const nodeKind = classifyNode(eng.id, currentNodeId, completed, reachable);
+        const nodeKind = classifyNode(eng.id, currentNodeId, spent, reachable);
         return {
             id: eng.id,
             x: meta.x,
@@ -508,16 +612,15 @@ function computeExplorationViewModel(state: GameStore): ExplorationViewModel {
     // arrival for the finale panel on purpose — it leaves `pendingArrival`
     // set until the finale resolves it — so registering a labyrinth layout
     // would need this read revisited first.
-    const consumed = (world.currentMap.consumedNodes ?? []) as readonly string[];
     const arrivalPending = (world.currentMap.pendingArrival ?? null) === currentNodeId;
     const startNodePending =
         currentNodeId === def.startingNode.id
-        && !consumed.includes(currentNodeId)
+        && !consumedNodes.includes(currentNodeId)
         && getNodeEventPool(continent, mapName, currentNodeId) !== undefined;
 
     const options = buildOptions(metaById, orderById, reachable, currentNodeId);
     const actions = buildActions(options);
-    const edges = buildEdges(def.nodes, completed, locked);
+    const edges = buildEdges(def.nodes, forward, spent, locked);
 
     return freezeViewModel({
         continent: layout.continent,
@@ -539,7 +642,7 @@ function computeExplorationViewModel(state: GameStore): ExplorationViewModel {
             // sealed.', and every locked node's accessible name ends 'sealed'
             // — the legend was the only surface using a fourth word for the
             // state it exists to define.
-            left: '● TRODDEN  ◌ OPEN  ✕ SEALED',
+            left: MAP_LEGEND_LEFT,
             // PLAYTEST_BUGS_2026-09-18 BUG-01: this counter used to read
             // `locked.length` off `world.currentMap.lockedNodes`, while the
             // PIPS beside it are classified by `classifyNode`. Those are two

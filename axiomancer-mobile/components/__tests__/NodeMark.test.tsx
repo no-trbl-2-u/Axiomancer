@@ -11,6 +11,13 @@
  * muted bone pin. The assertions below are the same strength as before,
  * inverted, and each kind now also asserts it does NOT wear the other's
  * accent so the pair can never drift back together.
+ *
+ * 2026-09-21 (owner finding 9 / D1) — the three states a player has to
+ * tell apart must be distinguishable WITHOUT COLOUR. The `✕` that 23 of
+ * 28 nodes wore in the owner's Drowned Parish screenshot is gone, and the
+ * `NODE_MARK_COLOURLESS` block below pins the channels that replaced it:
+ * fill (mass), size (radius), and shape. Those assertions read no hue at
+ * all — they would hold on a greyscale screen — which is the whole point.
  */
 
 import { describe, expect, it } from '@jest/globals';
@@ -18,24 +25,34 @@ import { render } from '@testing-library/react-native';
 import React from 'react';
 import Svg, { Circle, Path } from 'react-native-svg';
 
-import { NodeMark } from '@/components/NodeMark';
+import { NodeMark, NODE_MARK_RADIUS, type NodeMarkKind } from '@/components/NodeMark';
 import { AXM } from '@/theme/axm';
 
 describe('NodeMark: kind → SVG branch', () => {
-    it('completed renders the skull glyph on a backing disc (1 path + 3 circles)', () => {
+    it('completed renders the skull cut out of a solid disc (1 path + 4 circles)', () => {
         const tree = render(<NodeMark kind="completed" />);
         expect(tree.UNSAFE_getAllByType(Path)).toHaveLength(1);
-        // backing disc + two eye sockets
-        expect(tree.UNSAFE_getAllByType(Circle)).toHaveLength(3);
+        // backing disc + the solid bone mass + two eye sockets
+        expect(tree.UNSAFE_getAllByType(Circle)).toHaveLength(4);
     });
 
-    it('locked renders 2 circles + 1 path with AXM.blood stroke (X mark)', () => {
+    it('locked renders an EMPTY broken ring — no cross, no fill, no accent hue', () => {
         const tree = render(<NodeMark kind="locked" />);
-        // backing disc + dashed seal ring
-        expect(tree.UNSAFE_getAllByType(Circle)).toHaveLength(2);
-        const paths = tree.UNSAFE_getAllByType(Path);
-        expect(paths).toHaveLength(1);
-        expect(paths[0].props.stroke).toBe(AXM.blood);
+        // backing shadow + the dashed seal ring. Nothing else.
+        const circles = tree.UNSAFE_getAllByType(Circle);
+        expect(circles).toHaveLength(2);
+
+        // The `✕` is retired: a sealed node stops offering itself rather
+        // than shouting. It was the loudest mark on a map where it is the
+        // majority state.
+        expect(tree.UNSAFE_queryAllByType(Path)).toHaveLength(0);
+        expect(circles.some((c) => c.props.stroke === AXM.blood)).toBe(false);
+        expect(circles.some((c) => c.props.fill === AXM.blood)).toBe(false);
+
+        // The ring itself is hollow and broken.
+        const ring = circles.find((c) => c.props.strokeDasharray !== undefined);
+        expect(ring).toBeDefined();
+        expect(ring!.props.fill).toBe('none');
     });
 
     it('current renders nested circles with a muted bone pin, never the sulfur beacon', () => {
@@ -69,6 +86,70 @@ describe('NodeMark: kind → SVG branch', () => {
         const tree = render(<NodeMark kind="available" />);
         expect(tree.UNSAFE_getAllByType(Circle)).toHaveLength(3);
         expect(tree.UNSAFE_queryAllByType(Path)).toHaveLength(0);
+    });
+});
+
+/**
+ * NODE_MARK_COLOURLESS — owner finding 9: "three node states must be
+ * visually distinct WITHOUT relying on colour alone".
+ *
+ * Every assertion here is hue-free on purpose. If the glyphs are ever
+ * retuned so the only difference left is a palette token, this block goes
+ * red even though the screen still "looks fine" to a trichromat reviewer.
+ */
+describe('NODE_MARK_COLOURLESS: the three states separate without hue', () => {
+    it('separates them by SIZE — open is the largest mark, sealed the smallest', () => {
+        expect(NODE_MARK_RADIUS.available).toBeGreaterThan(NODE_MARK_RADIUS.completed);
+        expect(NODE_MARK_RADIUS.completed).toBeGreaterThan(NODE_MARK_RADIUS.locked);
+        // The gap has to be visible at a glance, not a rounding difference.
+        expect(NODE_MARK_RADIUS.available - NODE_MARK_RADIUS.locked).toBeGreaterThanOrEqual(5);
+    });
+
+    it('separates them by FILL — trodden is a solid mass, sealed is empty, open is a ring + core', () => {
+        /** Every `fill` value the kind actually paints (excluding 'none'). */
+        const fills = (kind: NodeMarkKind): string[] =>
+            render(<NodeMark kind={kind} />)
+                .UNSAFE_getAllByType(Circle)
+                .map((c) => c.props.fill)
+                .filter((f): f is string => typeof f === 'string' && f !== 'none');
+
+        // SEALED paints one thing: the shadow that lifts it off the sheet.
+        // Its ring is hollow — the only kind on the chart that is.
+        const sealedRing = render(<NodeMark kind="locked" />)
+            .UNSAFE_getAllByType(Circle)
+            .find((c) => c.props.strokeDasharray !== undefined);
+        expect(sealedRing!.props.fill).toBe('none');
+
+        // TRODDEN paints a body disc INSIDE the backing — a closed mass.
+        expect(fills('completed').length).toBeGreaterThan(fills('locked').length);
+
+        // OPEN paints a core inside a ring.
+        expect(fills('available').length).toBeGreaterThanOrEqual(3);
+    });
+
+    it('separates them by SHAPE — only trodden carries a figure, only sealed is broken', () => {
+        const hasPath = (kind: NodeMarkKind) =>
+            render(<NodeMark kind={kind} />).UNSAFE_queryAllByType(Path).length > 0;
+        expect(hasPath('completed')).toBe(true);
+        expect(hasPath('locked')).toBe(false);
+        expect(hasPath('available')).toBe(false);
+
+        const isDashed = (kind: NodeMarkKind) =>
+            render(<NodeMark kind={kind} />)
+                .UNSAFE_getAllByType(Circle)
+                .some((c) => c.props.strokeDasharray !== undefined);
+        expect(isDashed('locked')).toBe(true);
+        expect(isDashed('available')).toBe(false);
+        expect(isDashed('completed')).toBe(false);
+    });
+
+    it('gives every kind an accessible name that states the state in words', () => {
+        const label = (kind: NodeMarkKind) =>
+            render(<NodeMark kind={kind} />).UNSAFE_getByType(Svg).props.accessibilityLabel as string;
+        expect(label('available')).toMatch(/available/i);
+        expect(label('completed')).toMatch(/trodden/i);
+        expect(label('locked')).toMatch(/sealed/i);
+        expect(label('current')).toMatch(/current/i);
     });
 });
 
