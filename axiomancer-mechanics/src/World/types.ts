@@ -135,12 +135,22 @@ export interface MapDefinition {
     readonly quests?: readonly Quest[];
     readonly images?: { mapImage: Image; combatImage: Image };
     /**
-     * Traversal doctrine (W-01). `'gauntlet'` (default when absent) is the
-     * classic forward-only walk: completed nodes lock, progress is a
-     * spreading unlock frontier. `'labyrinth'` is the Aporia mode: free
-     * travel along the current node's edges INCLUDING back into completed
-     * or consumed rooms; `lockedNodes` is not consulted. One-shot events
-     * (`consumedNodes`) apply in both modes.
+     * Traversal doctrine (W-01, amended by D1 on 2026-09-21).
+     *
+     * `'gauntlet'` (default when absent) is now FRONTIER ROAMING: a node the
+     * player has resolved is SPENT and cannot be re-entered, and every
+     * UNVISITED node joined by an unblocked edge to ANY visited node is a
+     * legal destination — not merely the ones adjacent to where the player
+     * stands. The explored edge of the map is open all at once, so a lane
+     * skipped earlier stays walkable and the region boss becomes
+     * unavoidable only when the frontier runs out. It is still a gauntlet
+     * in the sense that matters: nothing resolved is ever re-farmed.
+     * `lockedNodes` is legacy bookkeeping the reducer keeps in step; it is
+     * not consulted for legality.
+     *
+     * `'labyrinth'` is the Aporia mode, untouched by D1: free travel along
+     * the CURRENT node's edges INCLUDING back into completed or consumed
+     * rooms. One-shot events (`consumedNodes`) apply in both modes.
      */
     readonly traversal?: 'gauntlet' | 'labyrinth';
     /**

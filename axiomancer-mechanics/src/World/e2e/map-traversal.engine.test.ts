@@ -17,7 +17,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { MAP_REGISTRY } from '../map.registry';
-import { auditMapTraversal, auditRouteCoverage } from '../world.reducer';
+import { auditMapTraversal, auditRouteCoverage, forwardEdges } from '../world.reducer';
 import { fishingVillage, northernForest } from '../Continents/Coastal-Village/maps';
 import { caverns, northernCity, connectingRiver, townAcrossRiver, theCapital } from '../Continents/Northern-Continent/maps';
 import type { MapDefinition } from '../types';
@@ -67,20 +67,88 @@ describe('gauntlet map traversal invariants', () => {
                 expect(audit.terminalNodes.length).toBeGreaterThan(0);
             });
 
-            it('runs every edge strictly forward by one column', () => {
-                // The column law is what makes strands structurally impossible:
-                // a route visits exactly one node per column and can never
-                // revisit one, so a node's forward neighbours can never already
-                // be completed. Any edge that skips or reverses a column
-                // re-opens the soft-lock class this audit closed.
+            it('runs every edge one column forward, or sideways between neighbouring lanes (D1)', () => {
+                // THE LAYER LAW, 2026-09-21. The column law — every edge runs
+                // from column x to x+1 — is what made strands structurally
+                // impossible under the old gauntlet walk, and it still governs
+                // the FORWARD SKELETON that both route audits measure. D1's
+                // lateral lane ribs are the one permitted exception: an edge
+                // may also run sideways WITHIN a column, between two lanes that
+                // are neighbours in that column's y-order. A rib never skips or
+                // reverses a column, so it cannot let a route miss a gate, and
+                // it cannot re-open the soft-lock class this audit closed.
                 const columnOf = new Map(def.nodes.map(n => [n.id, n.location[0]]));
+                const rowOf = new Map(def.nodes.map(n => [n.id, n.location[1]]));
+                // Per column, the lanes in y-order — a rib is legal only
+                // between entries that are adjacent in this list.
+                const lanes = new Map<number, number[]>();
                 for (const node of def.nodes) {
+                    const col = node.location[0];
+                    lanes.set(col, [...(lanes.get(col) ?? []), node.location[1]].sort((a, b) => b - a));
+                }
+                for (const node of def.nodes) {
+                    const here = columnOf.get(node.id)!;
                     for (const next of node.connectedNodes) {
+                        const there = columnOf.get(next);
+                        expect(there, `${node.id} -> ${next}: unknown node`).toBeDefined();
+                        if (there === here + 1) continue;
                         expect(
-                            columnOf.get(next),
-                            `${node.id} -> ${next} must run from column ${columnOf.get(node.id)} to the next`,
-                        ).toBe(columnOf.get(node.id)! + 1);
+                            there,
+                            `${node.id} -> ${next} must run one column forward or stay in column ${here}`,
+                        ).toBe(here);
+                        const order = lanes.get(here)!;
+                        const gap = Math.abs(order.indexOf(rowOf.get(node.id)!) - order.indexOf(rowOf.get(next)!));
+                        expect(
+                            gap,
+                            `${node.id} -> ${next} is a lateral rib across ${gap} lanes; ribs join NEIGHBOURING lanes only`,
+                        ).toBe(1);
                     }
+                }
+            });
+
+            it('keeps the terminal column free of lateral ribs', () => {
+                // A rib in the last column would give a terminal node an
+                // outgoing edge, and `connectedNodes: []` is how several
+                // per-map tests (and mobile's map legend) recognise the
+                // authored end of a map.
+                const maxX = Math.max(...def.nodes.map(n => n.location[0]));
+                for (const node of def.nodes.filter(n => n.location[0] === maxX)) {
+                    expect(node.connectedNodes, `${node.id} is in the terminal column`).toEqual([]);
+                }
+            });
+
+            it('gives every multi-node column a walkable lane chain (D1)', () => {
+                // The ribs are what turn a column of parallel rungs into a
+                // place the player can move along. Every non-terminal column
+                // with more than one node must be connected sideways end to
+                // end, or one of its lanes is only reachable through the
+                // column before it — exactly the fragility a blocked route
+                // turns into orphaned content.
+                const maxX = Math.max(...def.nodes.map(n => n.location[0]));
+                const byColumn = new Map<number, string[]>();
+                for (const node of def.nodes) {
+                    byColumn.set(node.location[0], [...(byColumn.get(node.location[0]) ?? []), node.id]);
+                }
+                const edgesOf = (id: string): readonly string[] =>
+                    def.nodes.find(n => n.id === id)?.connectedNodes ?? [];
+                for (const [col, members] of byColumn) {
+                    if (col === maxX || members.length < 2) continue;
+                    const inColumn = new Set<string>(members);
+                    const seen = new Set<string>([members[0]]);
+                    const queue = [members[0]];
+                    while (queue.length > 0) {
+                        const cur = queue.shift()!;
+                        const touching = [
+                            ...edgesOf(cur).filter(id => inColumn.has(id)),
+                            ...members.filter(id => edgesOf(id).includes(cur)),
+                        ];
+                        for (const id of touching) {
+                            if (seen.has(id)) continue;
+                            seen.add(id);
+                            queue.push(id);
+                        }
+                    }
+                    expect(seen.size, `${def.name} column ${col} is not laterally connected`).toBe(members.length);
                 }
             });
 
@@ -321,7 +389,9 @@ describe('northern-city — map 2 of the northern continent (Phase W3)', () => {
         expect(boss.connectedNodes).toEqual(['ncy-26']);
         const seam = northernCity.nodes.find(n => n.id === 'ncy-23')!;
         expect(seam.location[0]).toBe(8);
-        expect(seam.connectedNodes).toEqual(['ncy-25']);
+        // Forward skeleton, not raw edges — D1 gave ncy-23 a lateral rib to
+        // its lane neighbour, which is traversal, not progression.
+        expect(forwardEdges(northernCity).get('ncy-23')).toEqual(['ncy-25']);
     });
 });
 

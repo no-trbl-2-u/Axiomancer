@@ -474,6 +474,10 @@ export {
     validateMoveToNode, findAlternativePaths, getBlockedRoutesFromNode, getReachableNodes,
     // 2026-08-08 first-map audit: traversal queries + the strand audit.
     legalMovesFrom, isStranded, isMapTerminalNode, auditMapTraversal,
+    // D1 (2026-09-21) — frontier roaming: the derived spent/frontier sets
+    // every surface classifies nodes from, plus the forward skeleton the
+    // progression audits walk.
+    visitedNodes, isNodeSpent, frontierNodes, isFrontierExhausted, forwardEdges,
     // Phase 53c — the route-coverage walk, beside the strand audit.
     auditRouteCoverage,
     // Phase 148: Minigame Harness

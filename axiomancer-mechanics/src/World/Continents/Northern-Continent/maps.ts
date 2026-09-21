@@ -2,6 +2,15 @@
  * Northern Continent map definitions (2026-08-28 — inter-map travel;
  * Phase W3 — the northern city).
  *
+ * 2026-09-21, D1 — every map in this file carries LATERAL LANE RIBS on
+ * top of its forward skeleton: sideways edges between neighbouring lanes
+ * in each multi-node column except the terminal one, authored both ways.
+ * The forward skeleton (column x -> x+1) is untouched, so every route
+ * still takes the same beats and meets the same boss; the ribs give the
+ * canvas a branching web to draw and give frontier roaming a sideways
+ * step. See `Coastal-Village/maps.ts`'s layering-law block for the full
+ * rationale and `forwardEdges()` in `world.reducer.ts` for the split.
+ *
  * Map 1: THE CAVERNS — iron-ore galleries climbing toward the first
  * northern city (`map.library.ts`'s narrative). The player arrives
  * through the cave mouth at northern-forest `nf-10`. As of Phase W3 the
@@ -186,40 +195,40 @@ const caverns: MapDefinition = {
         //        map's premise is on every route (fv-2 precedent).
         { id: 'nc-2',  location: [1, 0], connectedNodes: ['nc-10', 'nc-3', 'nc-17'] },
         // ── c2 — gathering / encounter / hazard ──────────────────────
-        { id: 'nc-10', location: [2, 1], connectedNodes: ['nc-11', 'nc-4'] },
-        { id: 'nc-3',  location: [2, 0], connectedNodes: ['nc-11', 'nc-4', 'nc-18'] },
-        { id: 'nc-17', location: [2, -1], connectedNodes: ['nc-4', 'nc-18', 'nc-24'] },
+        { id: 'nc-10', location: [2, 1], connectedNodes: ['nc-11', 'nc-4', 'nc-3'] },
+        { id: 'nc-3',  location: [2, 0], connectedNodes: ['nc-11', 'nc-4', 'nc-18', 'nc-10', 'nc-17'] },
+        { id: 'nc-17', location: [2, -1], connectedNodes: ['nc-4', 'nc-18', 'nc-24', 'nc-3'] },
         // ── c3 — gathering / rest / encounter, plus nc-24 hanging off the
         //        sump at y=-2. Every node in this column opens onto ALL of
         //        c4 (lane drift relaxed, the fv c3 pattern) so no lane —
         //        least of all nc-24's — can strand a run.
-        { id: 'nc-11', location: [3, 1], connectedNodes: ['nc-12', 'nc-5', 'nc-19'] },
-        { id: 'nc-4',  location: [3, 0], connectedNodes: ['nc-12', 'nc-5', 'nc-19'] },
-        { id: 'nc-18', location: [3, -1], connectedNodes: ['nc-12', 'nc-5', 'nc-19'] },
-        { id: 'nc-24', location: [3, -2], connectedNodes: ['nc-12', 'nc-5', 'nc-19'] },
+        { id: 'nc-11', location: [3, 1], connectedNodes: ['nc-12', 'nc-5', 'nc-19', 'nc-4'] },
+        { id: 'nc-4',  location: [3, 0], connectedNodes: ['nc-12', 'nc-5', 'nc-19', 'nc-11', 'nc-18'] },
+        { id: 'nc-18', location: [3, -1], connectedNodes: ['nc-12', 'nc-5', 'nc-19', 'nc-4', 'nc-24'] },
+        { id: 'nc-24', location: [3, -2], connectedNodes: ['nc-12', 'nc-5', 'nc-19', 'nc-18'] },
         // ── c4 — loot / encounter / gathering ────────────────────────
-        { id: 'nc-12', location: [4, 1], connectedNodes: ['nc-13', 'nc-6'] },
-        { id: 'nc-5',  location: [4, 0], connectedNodes: ['nc-13', 'nc-6', 'nc-20'] },
-        { id: 'nc-19', location: [4, -1], connectedNodes: ['nc-6', 'nc-20'] },
+        { id: 'nc-12', location: [4, 1], connectedNodes: ['nc-13', 'nc-6', 'nc-5'] },
+        { id: 'nc-5',  location: [4, 0], connectedNodes: ['nc-13', 'nc-6', 'nc-20', 'nc-12', 'nc-19'] },
+        { id: 'nc-19', location: [4, -1], connectedNodes: ['nc-6', 'nc-20', 'nc-5'] },
         // ── c5 — encounter / VILLAGE (the Ledger Camp) / hazard ──────
-        { id: 'nc-13', location: [5, 1], connectedNodes: ['nc-14', 'nc-7'] },
-        { id: 'nc-6',  location: [5, 0], connectedNodes: ['nc-14', 'nc-7', 'nc-21'] },
-        { id: 'nc-20', location: [5, -1], connectedNodes: ['nc-7', 'nc-21'] },
+        { id: 'nc-13', location: [5, 1], connectedNodes: ['nc-14', 'nc-7', 'nc-6'] },
+        { id: 'nc-6',  location: [5, 0], connectedNodes: ['nc-14', 'nc-7', 'nc-21', 'nc-13', 'nc-20'] },
+        { id: 'nc-20', location: [5, -1], connectedNodes: ['nc-7', 'nc-21', 'nc-6'] },
         // ── c6 — loot / encounter / rest ─────────────────────────────
-        { id: 'nc-14', location: [6, 1], connectedNodes: ['nc-15', 'nc-8'] },
-        { id: 'nc-7',  location: [6, 0], connectedNodes: ['nc-15', 'nc-8', 'nc-22'] },
-        { id: 'nc-21', location: [6, -1], connectedNodes: ['nc-8', 'nc-22'] },
+        { id: 'nc-14', location: [6, 1], connectedNodes: ['nc-15', 'nc-8', 'nc-7'] },
+        { id: 'nc-7',  location: [6, 0], connectedNodes: ['nc-15', 'nc-8', 'nc-22', 'nc-14', 'nc-21'] },
+        { id: 'nc-21', location: [6, -1], connectedNodes: ['nc-8', 'nc-22', 'nc-7'] },
         // ── c7 — encounter / encounter / hazard ──────────────────────
-        { id: 'nc-15', location: [7, 1], connectedNodes: ['nc-16', 'nc-9'] },
-        { id: 'nc-8',  location: [7, 0], connectedNodes: ['nc-16', 'nc-9', 'nc-23'] },
-        { id: 'nc-22', location: [7, -1], connectedNodes: ['nc-9', 'nc-23'] },
+        { id: 'nc-15', location: [7, 1], connectedNodes: ['nc-16', 'nc-9', 'nc-8'] },
+        { id: 'nc-8',  location: [7, 0], connectedNodes: ['nc-16', 'nc-9', 'nc-23', 'nc-15', 'nc-22'] },
+        { id: 'nc-22', location: [7, -1], connectedNodes: ['nc-9', 'nc-23', 'nc-8'] },
         // ── c8 — THE SEALED STAIR / rest / loot. The stair toward
         //        northern-city is scenery, not a door: the next map is not
         //        shipped, so the exit is authored sealed (a cutscene) and
         //        the map ends at the boss instead.
-        { id: 'nc-16', location: [8, 1], connectedNodes: ['nc-25'] },
-        { id: 'nc-9',  location: [8, 0], connectedNodes: ['nc-25'] },
-        { id: 'nc-23', location: [8, -1], connectedNodes: ['nc-25'] },
+        { id: 'nc-16', location: [8, 1], connectedNodes: ['nc-25', 'nc-9'] },
+        { id: 'nc-9',  location: [8, 0], connectedNodes: ['nc-25', 'nc-16', 'nc-23'] },
+        { id: 'nc-23', location: [8, -1], connectedNodes: ['nc-25', 'nc-9'] },
         // ── c9 — the Under-Gate. Every run goes through here. ────────
         { id: 'nc-25', location: [9, 0], connectedNodes: ['nc-26'] },
         // ── c10 — the gate stands open (Phase W3). The DOOR to
@@ -420,40 +429,40 @@ const northernCity: MapDefinition = {
         //        face is on every route (the fv-2/nc-2 precedent).
         { id: 'ncy-2',  location: [1, 0], connectedNodes: ['ncy-10', 'ncy-3', 'ncy-17'] },
         // ── c2 — timber yard / encounter / loot ──────────────────────
-        { id: 'ncy-10', location: [2, 1], connectedNodes: ['ncy-11', 'ncy-4'] },
-        { id: 'ncy-3',  location: [2, 0], connectedNodes: ['ncy-11', 'ncy-4', 'ncy-18'] },
-        { id: 'ncy-17', location: [2, -1], connectedNodes: ['ncy-4', 'ncy-18', 'ncy-24'] },
+        { id: 'ncy-10', location: [2, 1], connectedNodes: ['ncy-11', 'ncy-4', 'ncy-3'] },
+        { id: 'ncy-3',  location: [2, 0], connectedNodes: ['ncy-11', 'ncy-4', 'ncy-18', 'ncy-10', 'ncy-17'] },
+        { id: 'ncy-17', location: [2, -1], connectedNodes: ['ncy-4', 'ncy-18', 'ncy-24', 'ncy-3'] },
         // ── c3 — hazard / inn / gathering, plus ncy-24 hanging off the
         //        harbor at y=-2. Every node in this column opens onto ALL
         //        of c4 (lane drift relaxed, the fv/nc c3 pattern) so no
         //        lane — least of all ncy-24's — can strand a run.
-        { id: 'ncy-11', location: [3, 1], connectedNodes: ['ncy-12', 'ncy-5', 'ncy-19'] },
-        { id: 'ncy-4',  location: [3, 0], connectedNodes: ['ncy-12', 'ncy-5', 'ncy-19'] },
-        { id: 'ncy-18', location: [3, -1], connectedNodes: ['ncy-12', 'ncy-5', 'ncy-19'] },
-        { id: 'ncy-24', location: [3, -2], connectedNodes: ['ncy-12', 'ncy-5', 'ncy-19'] },
+        { id: 'ncy-11', location: [3, 1], connectedNodes: ['ncy-12', 'ncy-5', 'ncy-19', 'ncy-4'] },
+        { id: 'ncy-4',  location: [3, 0], connectedNodes: ['ncy-12', 'ncy-5', 'ncy-19', 'ncy-11', 'ncy-18'] },
+        { id: 'ncy-18', location: [3, -1], connectedNodes: ['ncy-12', 'ncy-5', 'ncy-19', 'ncy-4', 'ncy-24'] },
+        { id: 'ncy-24', location: [3, -2], connectedNodes: ['ncy-12', 'ncy-5', 'ncy-19', 'ncy-18'] },
         // ── c4 — loot / the rumor / the chandlery ────────────────────
-        { id: 'ncy-12', location: [4, 1], connectedNodes: ['ncy-13', 'ncy-6'] },
-        { id: 'ncy-5',  location: [4, 0], connectedNodes: ['ncy-13', 'ncy-6', 'ncy-20'] },
-        { id: 'ncy-19', location: [4, -1], connectedNodes: ['ncy-6', 'ncy-20'] },
+        { id: 'ncy-12', location: [4, 1], connectedNodes: ['ncy-13', 'ncy-6', 'ncy-5'] },
+        { id: 'ncy-5',  location: [4, 0], connectedNodes: ['ncy-13', 'ncy-6', 'ncy-20', 'ncy-12', 'ncy-19'] },
+        { id: 'ncy-19', location: [4, -1], connectedNodes: ['ncy-6', 'ncy-20', 'ncy-5'] },
         // ── c5 — loot / THE IRON MARKET / hazard ─────────────────────
-        { id: 'ncy-13', location: [5, 1], connectedNodes: ['ncy-14', 'ncy-7'] },
-        { id: 'ncy-6',  location: [5, 0], connectedNodes: ['ncy-14', 'ncy-7', 'ncy-21'] },
-        { id: 'ncy-20', location: [5, -1], connectedNodes: ['ncy-7', 'ncy-21'] },
+        { id: 'ncy-13', location: [5, 1], connectedNodes: ['ncy-14', 'ncy-7', 'ncy-6'] },
+        { id: 'ncy-6',  location: [5, 0], connectedNodes: ['ncy-14', 'ncy-7', 'ncy-21', 'ncy-13', 'ncy-20'] },
+        { id: 'ncy-20', location: [5, -1], connectedNodes: ['ncy-7', 'ncy-21', 'ncy-6'] },
         // ── c6 — encounter / encounter / the shipwright ──────────────
-        { id: 'ncy-14', location: [6, 1], connectedNodes: ['ncy-15', 'ncy-8'] },
-        { id: 'ncy-7',  location: [6, 0], connectedNodes: ['ncy-15', 'ncy-8', 'ncy-22'] },
-        { id: 'ncy-21', location: [6, -1], connectedNodes: ['ncy-8', 'ncy-22'] },
+        { id: 'ncy-14', location: [6, 1], connectedNodes: ['ncy-15', 'ncy-8', 'ncy-7'] },
+        { id: 'ncy-7',  location: [6, 0], connectedNodes: ['ncy-15', 'ncy-8', 'ncy-22', 'ncy-14', 'ncy-21'] },
+        { id: 'ncy-21', location: [6, -1], connectedNodes: ['ncy-8', 'ncy-22', 'ncy-7'] },
         // ── c7 — the assize bell / encounter / encounter ─────────────
-        { id: 'ncy-15', location: [7, 1], connectedNodes: ['ncy-16', 'ncy-9'] },
-        { id: 'ncy-8',  location: [7, 0], connectedNodes: ['ncy-16', 'ncy-9', 'ncy-23'] },
-        { id: 'ncy-22', location: [7, -1], connectedNodes: ['ncy-9', 'ncy-23'] },
+        { id: 'ncy-15', location: [7, 1], connectedNodes: ['ncy-16', 'ncy-9', 'ncy-8'] },
+        { id: 'ncy-8',  location: [7, 0], connectedNodes: ['ncy-16', 'ncy-9', 'ncy-23', 'ncy-15', 'ncy-22'] },
+        { id: 'ncy-22', location: [7, -1], connectedNodes: ['ncy-9', 'ncy-23', 'ncy-8'] },
         // ── c8 — inn / inn / THE SEALED RIVER-GATE. The way toward
         //        connecting-river is scenery, not a door: W4 ships that
         //        map, so the exit is authored sealed (a cutscene) and the
         //        map ends at the Harbormaster instead (the W2 pattern).
-        { id: 'ncy-16', location: [8, 1], connectedNodes: ['ncy-25'] },
-        { id: 'ncy-9',  location: [8, 0], connectedNodes: ['ncy-25'] },
-        { id: 'ncy-23', location: [8, -1], connectedNodes: ['ncy-25'] },
+        { id: 'ncy-16', location: [8, 1], connectedNodes: ['ncy-25', 'ncy-9'] },
+        { id: 'ncy-9',  location: [8, 0], connectedNodes: ['ncy-25', 'ncy-16', 'ncy-23'] },
+        { id: 'ncy-23', location: [8, -1], connectedNodes: ['ncy-25', 'ncy-9'] },
         // ── c9 — the Harbormaster. Every run goes through here. ──────
         { id: 'ncy-25', location: [9, 0], connectedNodes: ['ncy-26'] },
         // ── c10 — the water-gate stands open (Phase W4). The DOOR to
@@ -630,18 +639,18 @@ const connectingRiver: MapDefinition = {
         //        premise is on every route (the fv-2/nc-2 precedent).
         { id: 'cr-2',  location: [1, 0], connectedNodes: ['cr-3', 'cr-4', 'cr-5'] },
         // ── c2 — encounter / rest / gathering ─────────────────────────
-        { id: 'cr-3',  location: [2, 1], connectedNodes: ['cr-6', 'cr-7', 'cr-8'] },
-        { id: 'cr-4',  location: [2, 0], connectedNodes: ['cr-6', 'cr-7', 'cr-8'] },
-        { id: 'cr-5',  location: [2, -1], connectedNodes: ['cr-6', 'cr-7', 'cr-8'] },
+        { id: 'cr-3',  location: [2, 1], connectedNodes: ['cr-6', 'cr-7', 'cr-8', 'cr-4'] },
+        { id: 'cr-4',  location: [2, 0], connectedNodes: ['cr-6', 'cr-7', 'cr-8', 'cr-3', 'cr-5'] },
+        { id: 'cr-5',  location: [2, -1], connectedNodes: ['cr-6', 'cr-7', 'cr-8', 'cr-4'] },
         // ── c3 — hazard / loot / encounter ────────────────────────────
-        { id: 'cr-6',  location: [3, 1], connectedNodes: ['cr-9', 'cr-10', 'cr-11'] },
-        { id: 'cr-7',  location: [3, 0], connectedNodes: ['cr-9', 'cr-10', 'cr-11'] },
-        { id: 'cr-8',  location: [3, -1], connectedNodes: ['cr-9', 'cr-10', 'cr-11'] },
+        { id: 'cr-6',  location: [3, 1], connectedNodes: ['cr-9', 'cr-10', 'cr-11', 'cr-7'] },
+        { id: 'cr-7',  location: [3, 0], connectedNodes: ['cr-9', 'cr-10', 'cr-11', 'cr-6', 'cr-8'] },
+        { id: 'cr-8',  location: [3, -1], connectedNodes: ['cr-9', 'cr-10', 'cr-11', 'cr-7'] },
         // ── c4 — THE RIVER COURT (the ritual) / THE LANDING (shop) /
         //        encounter ────────────────────────────────────────────
-        { id: 'cr-9',  location: [4, 1], connectedNodes: ['cr-12'] },
-        { id: 'cr-10', location: [4, 0], connectedNodes: ['cr-12'] },
-        { id: 'cr-11', location: [4, -1], connectedNodes: ['cr-12'] },
+        { id: 'cr-9',  location: [4, 1], connectedNodes: ['cr-12', 'cr-10'] },
+        { id: 'cr-10', location: [4, 0], connectedNodes: ['cr-12', 'cr-9', 'cr-11'] },
+        { id: 'cr-11', location: [4, -1], connectedNodes: ['cr-12', 'cr-10'] },
         // ── c5 — the Waterreeve. Every run goes through here. ─────────
         { id: 'cr-12', location: [5, 0], connectedNodes: ['cr-13'] },
         // ── c6 — the water-gate stands open. The DOOR to
@@ -778,9 +787,9 @@ const townAcrossRiver: MapDefinition = {
         { id: 'tar-2', location: [1, 0], connectedNodes: ['tar-3', 'tar-4', 'tar-5'] },
         // ── c2 — rest (inn) / THE VILLAGE COURT (the ritual, mirrored) /
         //        encounter ─────────────────────────────────────────────
-        { id: 'tar-3', location: [2, 1], connectedNodes: ['tar-6'] },
-        { id: 'tar-4', location: [2, 0], connectedNodes: ['tar-6'] },
-        { id: 'tar-5', location: [2, -1], connectedNodes: ['tar-6'] },
+        { id: 'tar-3', location: [2, 1], connectedNodes: ['tar-6', 'tar-4'] },
+        { id: 'tar-4', location: [2, 0], connectedNodes: ['tar-6', 'tar-3', 'tar-5'] },
+        { id: 'tar-5', location: [2, -1], connectedNodes: ['tar-6', 'tar-4'] },
         // ── c3 — the Portreeve. Every run goes through here. ──────────
         { id: 'tar-6', location: [3, 0], connectedNodes: ['tar-7'] },
         // ── c4 — the ribbon-road stands open (Phase W5). The DOOR to
@@ -946,12 +955,12 @@ const theCapital: MapDefinition = {
         //        face is on every route (the fv-2/nc-2 precedent).
         { id: 'cap-2', location: [1, 0], connectedNodes: ['cap-3', 'cap-4', 'cap-5'] },
         // ── c2 — hazard / rest (inn) / gathering ───────────────────────
-        { id: 'cap-3', location: [2, 1], connectedNodes: ['cap-6', 'cap-7'] },
-        { id: 'cap-4', location: [2, 0], connectedNodes: ['cap-6', 'cap-7'] },
-        { id: 'cap-5', location: [2, -1], connectedNodes: ['cap-6', 'cap-7'] },
+        { id: 'cap-3', location: [2, 1], connectedNodes: ['cap-6', 'cap-7', 'cap-4'] },
+        { id: 'cap-4', location: [2, 0], connectedNodes: ['cap-6', 'cap-7', 'cap-3', 'cap-5'] },
+        { id: 'cap-5', location: [2, -1], connectedNodes: ['cap-6', 'cap-7', 'cap-4'] },
         // ── c3 — the market / loot-cache ───────────────────────────────
-        { id: 'cap-6', location: [3, 1], connectedNodes: ['cap-8'] },
-        { id: 'cap-7', location: [3, -1], connectedNodes: ['cap-8'] },
+        { id: 'cap-6', location: [3, 1], connectedNodes: ['cap-8', 'cap-7'] },
+        { id: 'cap-7', location: [3, -1], connectedNodes: ['cap-8', 'cap-6'] },
         // ── c4 — the court convenes. Every run goes through here. ──────
         { id: 'cap-8', location: [4, 0], connectedNodes: ['cap-9'] },
         // ── c5 — The Factor. The climax — no door onward yet. ──────────

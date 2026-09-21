@@ -45,15 +45,163 @@ function findNode(map: MapState, nodeId: NodeId): MapNode | undefined {
     return def.nodes.find(n => n.id === nodeId);
 }
 
+// ── D1 — the frontier (2026-09-21) ──────────────────────────────────────────
+//
+// The ratified traversal doctrine. A node the player has RESOLVED is SPENT:
+// still drawn, still part of the graph, but answered — it yields nothing and
+// is no longer a destination. Everything unvisited that touches the visited
+// set across an unblocked edge is the FRONTIER, and the whole frontier is
+// open at once. The player therefore roams the explored edge of the map
+// instead of being pushed down a single lane, and the region boss becomes
+// unavoidable only once the frontier is empty.
+//
+// Nothing here is persisted. The frontier is DERIVED from the three sets the
+// save already carries (`currentNode`, `completedNodes`, `consumedNodes`)
+// plus the static graph, so D1 needs no `GAME_STATE_VERSION` bump and no
+// migration — old saves read correctly on the first load.
+
+/**
+ * The nodes that count as ALREADY ANSWERED for frontier purposes: everything
+ * resolved (`completedNodes` ∪ `consumedNodes`) plus the node the player is
+ * standing on.
+ *
+ * Standing on a node counts, but merely having WALKED THROUGH one does not:
+ * `moveToNode` marks nothing spent, so a node the player stepped off without
+ * resolving drops back onto the frontier and can be returned to. D1 spends a
+ * node on RESOLUTION, not on departure.
+ */
+function visitedSet(map: MapState): Set<NodeId> {
+    const seen = new Set<NodeId>(map.completedNodes);
+    for (const id of map.consumedNodes) seen.add(id);
+    seen.add(map.currentNode);
+    return seen;
+}
+
+/** `visitedSet` as an array — the spent set plus the node under the player. */
+export function visitedNodes(map: MapState): NodeId[] {
+    return [...visitedSet(map)];
+}
+
+/**
+ * True when `nodeId` has been resolved on this map — D1's "spent/sealed".
+ * A spent node still renders and still carries its authored content; it
+ * simply cannot be re-entered or re-farmed. The node the player is standing
+ * on is NOT spent by standing there (see `visitedSet`).
+ */
+export function isNodeSpent(map: MapState, nodeId: NodeId): boolean {
+    return map.completedNodes.includes(nodeId) || map.consumedNodes.includes(nodeId);
+}
+
+/**
+ * Undirected, unblocked adjacency over the map definition.
+ *
+ * Edges are authored one-way (forward, plus D1's lateral lane ribs) but are
+ * drawn and walked as undirected lines, so the frontier reads them both
+ * ways. Blocked routes are cut here, which is what makes a hazard-blocked
+ * edge genuinely block: a node reachable only across it never enters the
+ * frontier.
+ */
+function unblockedAdjacency(map: MapState): Map<NodeId, Set<NodeId>> {
+    const def = getMapDefinition(map.continent, map.name);
+    const adj = new Map<NodeId, Set<NodeId>>();
+    for (const node of def.nodes) adj.set(node.id, new Set<NodeId>());
+    for (const node of def.nodes) {
+        for (const next of node.connectedNodes) {
+            if (!adj.has(next)) continue;
+            if (isRouteBlocked(map, node.id, next) !== undefined) continue;
+            adj.get(node.id)!.add(next);
+            adj.get(next)!.add(node.id);
+        }
+    }
+    return adj;
+}
+
+/**
+ * D1's frontier: every UNVISITED node joined by an unblocked edge to ANY
+ * visited node. Returned in map-definition order so callers render a stable
+ * list. Gauntlet-shaped; labyrinth maps have their own rule and should ask
+ * `legalMovesFrom` instead.
+ */
+export function frontierNodes(map: MapState): NodeId[] {
+    const def = getMapDefinition(map.continent, map.name);
+    if (!def.nodes.some(n => n.id === map.currentNode)) return [];
+    const visited = visitedSet(map);
+    const adj = unblockedAdjacency(map);
+    return def.nodes
+        .map(n => n.id)
+        .filter(id => !visited.has(id))
+        .filter(id => {
+            for (const neighbour of adj.get(id) ?? []) {
+                if (visited.has(neighbour)) return true;
+            }
+            return false;
+        });
+}
+
+/**
+ * True when nothing unvisited touches the explored set any more — the map is
+ * walked out. On a map whose climax sits behind its last open lane this is
+ * also the moment the boss stops being optional, which is D1's "the boss is
+ * forced only when the frontier is exhausted" stated as a query.
+ */
+export function isFrontierExhausted(map: MapState): boolean {
+    return frontierNodes(map).length === 0;
+}
+
+/**
+ * Promotes the current frontier into `availableNodes` and out of
+ * `lockedNodes`.
+ *
+ * Those two lists are the LEGACY unlock bookkeeping (the CLI's move filter
+ * and mobile's defence-in-depth tap gate still read them); `legalMovesFrom`
+ * is the authority. The sync is ADDITIVE on `availableNodes` — it never
+ * removes, because that list is documented as cumulative and consumers
+ * subtract from it themselves — and subtractive on `lockedNodes`, so a node
+ * that has joined the frontier stops reading as locked.
+ *
+ * No-ops on labyrinth maps, which do not consult either list.
+ */
+function syncFrontierLists(map: MapState): MapState {
+    const def = getMapDefinition(map.continent, map.name);
+    if (def.traversal === 'labyrinth') return map;
+    const frontier = new Set<NodeId>(frontierNodes(map));
+    if (frontier.size === 0) return map;
+    const available = new Set<NodeId>(map.availableNodes);
+    const added = [...frontier].filter(id => !available.has(id));
+    const stillLocked = map.lockedNodes.filter(id => !frontier.has(id));
+    if (added.length === 0 && stillLocked.length === map.lockedNodes.length) return map;
+    return {
+        ...map,
+        availableNodes: [...map.availableNodes, ...added],
+        lockedNodes: stillLocked,
+    };
+}
+
 /**
  * Moves the player to `nodeId` on the current map. Pure WorldState reducer.
  *
- * Validation (Spec 08 Q2 — option B with completed-node locking):
+ * Validation (D1, 2026-09-21 — FRONTIER ROAMING replaces linear adjacency):
  *   1. The destination must be a real node on the map.
- *   2. The destination must be in the *current* node's `connectedNodes`
- *      (linear adjacency).
- *   3. Completed nodes are locked from re-entry — no back-travel.
- *   4. The destination must not be in `lockedNodes`.
+ *   2. The destination must not be SPENT — a node the player has already
+ *      resolved (`completedNodes` / `consumedNodes`) is answered; it stays
+ *      drawn on the canvas but is no longer a destination, so nothing can
+ *      be re-farmed.
+ *   3. The destination must be on the FRONTIER: unvisited, and joined by an
+ *      unblocked edge to ANY visited node — not merely to the node the
+ *      player is standing on. That is the whole of D1: the explored edge of
+ *      the map is open, so a player may double back and clear a lane they
+ *      skipped instead of being shovelled forward into the boss. The boss
+ *      is never *forced* until the frontier is exhausted, which falls out
+ *      of this rule rather than being special-cased.
+ *   4. Blocked routes (hazard outcomes, secret doors) are cut out of the
+ *      adjacency the frontier is derived from, so a node reachable ONLY
+ *      across a blocked edge is not a legal destination. A node still
+ *      reachable by some other unblocked edge stays legal — that is
+ *      `map.dispatcher.ts`'s "alternative path", now expressed in the
+ *      legality rule itself instead of only in a suggestion.
+ *
+ * Labyrinth maps are untouched by D1: they keep free travel along the
+ * CURRENT room's doors including back into solved rooms (W-01).
  *
  * Hazard ticking (Spec 08 Q3 — each `moveToNode` call) is performed by the
  * higher-level orchestrator in `Game/world.orchestrator.ts`, since the world
@@ -74,30 +222,52 @@ export function moveToNode(state: WorldState, nodeId: NodeId): WorldState {
         // Idempotent on no-op (already here).
         return state;
     }
-    const currentNode = findNode(map, map.currentNode);
+    const def = getMapDefinition(map.continent, map.name);
+    const currentNode = def.nodes.find(n => n.id === map.currentNode);
     if (!currentNode) {
         throw new IllegalMoveError(`moveToNode: current node '${map.currentNode}' is unknown on map '${map.name}'.`);
     }
-    if (!currentNode.connectedNodes.includes(nodeId)) {
-        throw new IllegalMoveError(`moveToNode: '${nodeId}' is not adjacent to '${map.currentNode}'.`);
+    if (def.traversal === 'labyrinth') {
+        // W-01 — labyrinth maps allow free travel along the current room's
+        // doors, including back into completed/consumed rooms ("solved space
+        // is solved" — re-entry is free, the one-shot event just won't fire).
+        if (!currentNode.connectedNodes.includes(nodeId)) {
+            throw new IllegalMoveError(`moveToNode: '${nodeId}' is not adjacent to '${map.currentNode}'.`);
+        }
+        const blockedRoute = map.blockedRoutes.find(
+            route => (route.from === map.currentNode && route.to === nodeId) ||
+                     (route.from === nodeId && route.to === map.currentNode)
+        );
+        if (blockedRoute) {
+            throw new IllegalMoveError(`moveToNode: route from '${map.currentNode}' to '${nodeId}' is blocked — ${blockedRoute.reason}`);
+        }
+        return {
+            ...state,
+            currentMap: { ...map, currentNode: nodeId, pendingArrival: nodeId },
+        };
     }
-    // W-01 — labyrinth maps allow free travel along the current room's
-    // doors, including back into completed/consumed rooms ("solved space
-    // is solved" — re-entry is free, the one-shot event just won't fire).
-    // Gauntlet maps keep the classic forward-only doctrine below.
-    const labyrinth = getMapDefinition(map.continent, map.name).traversal === 'labyrinth';
-    if (!labyrinth && map.completedNodes.includes(nodeId)) {
-        throw new IllegalMoveError(`moveToNode: '${nodeId}' is already completed — back-travel is not permitted.`);
+
+    if (!def.nodes.some(n => n.id === nodeId)) {
+        throw new IllegalMoveError(`moveToNode: '${nodeId}' is unknown on map '${map.name}'.`);
     }
-    if (!labyrinth && map.lockedNodes.includes(nodeId)) {
-        throw new IllegalMoveError(`moveToNode: '${nodeId}' is locked.`);
+    if (visitedSet(map).has(nodeId)) {
+        throw new IllegalMoveError(`moveToNode: '${nodeId}' is spent — its arrival has already been answered.`);
     }
-    const blockedRoute = map.blockedRoutes.find(
-        route => (route.from === map.currentNode && route.to === nodeId) ||
-                 (route.from === nodeId && route.to === map.currentNode)
-    );
-    if (blockedRoute) {
-        throw new IllegalMoveError(`moveToNode: route from '${map.currentNode}' to '${nodeId}' is blocked — ${blockedRoute.reason}`);
+    if (!frontierNodes(map).includes(nodeId)) {
+        // Name the blockage when that is what actually stopped the move: if
+        // the destination touches the node the player stands on and THAT
+        // edge is blocked, "the bridge is down" is the true and useful
+        // sentence. It only reaches here when no other unblocked edge to
+        // the explored region exists — a destination still reachable the
+        // long way round stays legal, which is `map.dispatcher.ts`'s
+        // alternative path honoured in the legality rule.
+        const touching = currentNode.connectedNodes.includes(nodeId)
+            || def.nodes.find(n => n.id === nodeId)?.connectedNodes.includes(map.currentNode);
+        const blockedReason = touching ? isRouteBlocked(map, map.currentNode, nodeId) : undefined;
+        if (blockedReason !== undefined) {
+            throw new IllegalMoveError(`moveToNode: route from '${map.currentNode}' to '${nodeId}' is blocked — ${blockedReason}`);
+        }
+        throw new IllegalMoveError(`moveToNode: '${nodeId}' is not on the explored frontier of '${map.name}'.`);
     }
     return {
         ...state,
@@ -122,14 +292,18 @@ export function completeCurrentNode(state: WorldState): WorldState {
     const newlyAvailable = unlocks.filter(
         n => !map.completedNodes.includes(n) && !map.availableNodes.includes(n),
     );
+    // D1 — completing a node spends it, which grows the frontier: sync the
+    // legacy unlock lists against the whole frontier, not just this node's
+    // own edges, so a lane the player left open earlier still reads as
+    // available.
     return {
         ...state,
-        currentMap: {
+        currentMap: syncFrontierLists({
             ...map,
             completedNodes: [...map.completedNodes, nodeId],
             availableNodes: [...map.availableNodes, ...newlyAvailable],
             lockedNodes: newLocked,
-        },
+        }),
     };
 }
 
@@ -162,10 +336,10 @@ export function completeNode(state: WorldState, nodeId: string): WorldState {
     if (map.completedNodes.includes(nodeId)) return state;
     return {
         ...state,
-        currentMap: {
+        currentMap: syncFrontierLists({
             ...map,
             completedNodes: [...map.completedNodes, nodeId],
-        },
+        }),
     };
 }
 
@@ -247,7 +421,9 @@ export function revealAdjacent(state: MapState, nodeId: NodeId): MapState {
  */
 export function markNodeConsumed(state: MapState, nodeId: NodeId): MapState {
     if (state.consumedNodes.includes(nodeId)) return state;
-    return { ...state, consumedNodes: [...state.consumedNodes, nodeId] };
+    // D1 — a consumed node is SPENT, so everything it touches joins the
+    // frontier. Keep the legacy unlock lists honest about that.
+    return syncFrontierLists({ ...state, consumedNodes: [...state.consumedNodes, nodeId] });
 }
 
 /**
@@ -288,13 +464,16 @@ export function unlockAdjacent(state: MapState, nodeId: NodeId): MapState {
         }
     }
 
-    if (newlyAvailable.length === 0) return state;
+    // D1 — the local promotion above is kept (callers and their tests pin
+    // it), then widened to the whole frontier: a lane the player walked past
+    // without resolving must not silently fall back into `lockedNodes`.
+    if (newlyAvailable.length === 0) return syncFrontierLists(state);
 
-    return {
+    return syncFrontierLists({
         ...state,
         availableNodes: [...state.availableNodes, ...newlyAvailable],
         lockedNodes: stillLocked,
-    };
+    });
 }
 
 // ── Hazard Persistence (Phase 135) ─────────────────────────────────────────
@@ -388,31 +567,41 @@ export function isRouteBlocked(state: MapState, from: NodeId, to: NodeId): strin
 // ── Traversal audit (2026-08-08 first-map audit) ─────────────────────────────
 
 /**
- * The nodes the player may legally move to from `map.currentNode` right now.
+ * The nodes the player may legally move to right now.
  *
  * This is the single source of truth for "where can I go" — `moveToNode`'s
- * validation, expressed as a query instead of an exception. Gauntlet maps
- * exclude completed and locked nodes (no back-travel); labyrinth maps allow
- * re-entry into solved rooms. Blocked routes are excluded on both.
+ * validation, expressed as a query instead of an exception.
+ *
+ * D1 (2026-09-21): on a gauntlet map this is the FRONTIER, not the current
+ * node's neighbours. The set no longer depends on where the player is
+ * standing at all — every unvisited node touching the explored region is
+ * offered, so a skipped lane stays open and the boss is only forced once
+ * nothing else is left. `lockedNodes` is no longer consulted: it is legacy
+ * bookkeeping that `syncFrontierLists` keeps in step, never the authority.
+ * Labyrinth maps keep W-01's rule — the current room's doors, solved rooms
+ * included. Blocked routes are excluded on both.
  */
 export function legalMovesFrom(map: MapState): NodeId[] {
     const def = getMapDefinition(map.continent, map.name);
     const node = def.nodes.find(n => n.id === map.currentNode);
     if (!node) return [];
-    const labyrinth = def.traversal === 'labyrinth';
-    return node.connectedNodes.filter(id => {
-        if (!labyrinth && map.completedNodes.includes(id)) return false;
-        if (!labyrinth && map.lockedNodes.includes(id)) return false;
-        return isRouteBlocked(map, map.currentNode, id) === undefined;
-    });
+    if (def.traversal === 'labyrinth') {
+        return node.connectedNodes.filter(
+            id => isRouteBlocked(map, map.currentNode, id) === undefined,
+        );
+    }
+    return frontierNodes(map);
 }
 
 /**
- * True when the player has no legal move left. On a gauntlet map that is
- * either the authored end of the map (`connectedNodes: []`) or a STRAND — a
- * run that walked itself into a corner and cannot continue.
+ * True when the player has no legal move left.
  *
- * Distinguish the two with `isMapTerminalNode`.
+ * Under D1 a gauntlet map runs out of moves only when the FRONTIER is
+ * exhausted — every node has been resolved, or the survivors are cut off
+ * behind blocked routes. Walking into a corner is no longer possible: the
+ * frontier does not depend on where the player stands, so a dead-end lane
+ * is a detour, not a soft-lock. `isMapTerminalNode` still distinguishes the
+ * authored end of a map.
  */
 export function isStranded(map: MapState): boolean {
     return legalMovesFrom(map).length === 0;
@@ -426,7 +615,11 @@ export function isStranded(map: MapState): boolean {
 export function isMapTerminalNode(map: MapState, nodeId: NodeId): boolean {
     const def = getMapDefinition(map.continent, map.name);
     const node = def.nodes.find(n => n.id === nodeId);
-    return node !== undefined && node.connectedNodes.length === 0;
+    if (node === undefined) return false;
+    // Forward skeleton, not raw edges: D1's lateral lane ribs are traversal,
+    // not progression, so a last-column node that gained a rib is still the
+    // authored end of the map.
+    return (forwardEdges(def).get(nodeId) ?? []).length === 0;
 }
 
 /** One strand a traversal audit found: entering `nodeId` by `via` dead-ends. */
@@ -473,12 +666,39 @@ export interface MapTraversalAudit {
  * the walk early rather than looping forever, and the returned
  * `routesExplored` will equal the cap.
  */
+/**
+ * The FORWARD SKELETON of a map: for every node, the neighbours that sit one
+ * column further along (`location[0] + 1`).
+ *
+ * D1 (2026-09-21) added LATERAL RIBS — same-column edges between neighbouring
+ * lanes — so the canvas draws a branching web instead of a ladder of rungs
+ * and a hazard-blocked edge can be routed around. Those ribs are traversal
+ * edges, not progression edges. The two route audits below measure
+ * PROGRESSION — "how many beats does a run take", "what share of runs meets
+ * the quest-giver" — so they walk the forward skeleton alone. Walking the
+ * ribs as well would let a single-life route snake sideways through a whole
+ * column and would multiply the route count into the millions without
+ * describing anything a player experiences.
+ */
+export function forwardEdges(def: MapDefinition): Map<string, string[]> {
+    const columnOf = new Map(def.nodes.map(n => [n.id, n.location[0]]));
+    const forward = new Map<string, string[]>();
+    for (const node of def.nodes) {
+        const here = columnOf.get(node.id)!;
+        forward.set(
+            node.id,
+            node.connectedNodes.filter(id => columnOf.get(id) === here + 1),
+        );
+    }
+    return forward;
+}
+
 export function auditMapTraversal(
     def: MapDefinition,
     maxRoutes = 500_000,
 ): MapTraversalAudit {
-    const byId = new Map(def.nodes.map(n => [n.id, n]));
-    const terminalNodes = def.nodes.filter(n => n.connectedNodes.length === 0).map(n => n.id);
+    const byId = forwardEdges(def);
+    const terminalNodes = def.nodes.filter(n => (byId.get(n.id) ?? []).length === 0).map(n => n.id);
     const audit: MapTraversalAudit = {
         mapName: def.name,
         terminalNodes,
@@ -492,7 +712,7 @@ export function auditMapTraversal(
     const reached = new Set<NodeId>([def.startingNode.id]);
     const walk = (cur: NodeId, completed: Set<NodeId>, route: NodeId[]): void => {
         if (audit.routesExplored >= maxRoutes) return;
-        const options = (byId.get(cur)?.connectedNodes ?? []).filter(id => !completed.has(id));
+        const options = (byId.get(cur) ?? []).filter(id => !completed.has(id));
         if (options.length === 0) {
             audit.routesExplored += 1;
             audit.longestRoute = Math.max(audit.longestRoute, route.length);
@@ -542,7 +762,7 @@ export function auditRouteCoverage(
     def: MapDefinition,
     maxRoutes = 500_000,
 ): MapRouteCoverage {
-    const byId = new Map(def.nodes.map(n => [n.id, n]));
+    const byId = forwardEdges(def);
     const routesThrough: Record<NodeId, number> = {};
     for (const node of def.nodes) routesThrough[node.id] = 0;
     const coverage: MapRouteCoverage = {
@@ -555,7 +775,7 @@ export function auditRouteCoverage(
 
     const walk = (cur: NodeId, completed: Set<NodeId>, route: NodeId[]): void => {
         if (coverage.totalRoutes >= maxRoutes) return;
-        const options = (byId.get(cur)?.connectedNodes ?? []).filter(id => !completed.has(id));
+        const options = (byId.get(cur) ?? []).filter(id => !completed.has(id));
         if (options.length === 0) {
             coverage.totalRoutes += 1;
             for (const id of route) routesThrough[id] = (routesThrough[id] ?? 0) + 1;
