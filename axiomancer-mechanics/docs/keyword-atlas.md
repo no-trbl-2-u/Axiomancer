@@ -135,6 +135,15 @@ popups. Glosses below are copied from `src/Enemy/enemy-keywords.ts`
 (`ENEMY_KEYWORD_GLOSS`); `{n}` is substituted with the instance's own number,
 so one foe can carry HIDE 3 and another HIDE 12.
 
+**The early HIDE ramp (2026-09-20).** HIDE is capped by the foe's LEVEL at
+`max(0, level − 3)` (`hideCapForLevel`, `Enemy/index.ts`), applied to the
+difficulty defaults, to authored lists in `createEnemy`, and to every live
+encounter in `scaleEnemyToLevel`. A level-1..3 foe carries no HIDE at all —
+the fishing village's pinned level-3 King of Revenge fights bare-skinned
+against the grey office — and the cap only reaches the authored mid-tier
+values (HIDE 3 at level 6) where those kits already sit. Only HIDE ramps;
+WOUNDING, BRUTAL and the rest are untouched.
+
 | keyword | reminder text | applied in | carried by |
 |---|---|---|---|
 | **HIDE N** | Every hit against this foe is reduced by N, never below 1. PIERCE ignores it. | `applyEnemyDamage` | (see the roster) |

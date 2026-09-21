@@ -194,7 +194,58 @@ export function enemyStatBudget(
  * exceptions. HIDE arrives first (it is the keyword that makes card choice
  * matter), then the band-specific character.
  */
+/**
+ * THE EARLY HIDE RAMP (2026-09-20, T's ruling after the grey office shipped).
+ *
+ * HIDE is the flat per-hit soak (`{ kind: 'hide', n }`), and the grey office
+ * a run opens with deals 2 FREE / 5 PAID — a boss's old floor of HIDE 3 turned
+ * those into 1 / 2 and made the fishing village's pinned level-3 King of
+ * Revenge unwinnable for a deck with no rewards yet. The ruling: the boss
+ * loses its HIDE at that level rather than the deck being buffed or the
+ * boss being handicapped by reward count. So HIDE is capped by LEVEL, one
+ * point per level from level 4: a level-1..3 foe carries none, level 4
+ * carries at most 1, level 6 at most 3 — which is exactly where the
+ * authored mid-tier kits (the King at his home level 6, the Butcher's HIDE
+ * 2) already sit, so nothing above the opening changes. Applied wherever a
+ * foe's level is decided: the difficulty defaults below, `createEnemy`'s
+ * authored lists, and `scaleEnemyToLevel` (every live map encounter).
+ */
+export const HIDE_RAMP_FIRST_LEVEL = 4;
+
+/** The most HIDE a foe of `level` may carry: `max(0, level − 3)`. */
+export function hideCapForLevel(level: number): number {
+    return Math.max(0, Math.floor(level) - (HIDE_RAMP_FIRST_LEVEL - 1));
+}
+
+/**
+ * Clamps every HIDE keyword in `keywords` to {@link hideCapForLevel} for
+ * `level`, dropping a HIDE that clamps to 0. Every other keyword passes
+ * through untouched (WOUNDING, BRUTAL and the rest are not level-ramped —
+ * the ruling named HIDE alone). Pure; returns the same array when nothing
+ * changes.
+ */
+export function applyHideRamp(keywords: readonly EnemyKeyword[], level: number): EnemyKeyword[] {
+    const cap = hideCapForLevel(level);
+    let changed = false;
+    const out: EnemyKeyword[] = [];
+    for (const k of keywords) {
+        if (k.kind !== 'hide' || k.n <= cap) { out.push(k); continue; }
+        changed = true;
+        if (cap > 0) out.push({ kind: 'hide', n: cap });
+    }
+    return changed ? out : [...keywords];
+}
+
 export function defaultEnemyKeywords(
+    level: number,
+    difficulty: EnemyDifficulty | undefined,
+): EnemyKeyword[] {
+    return applyHideRamp(defaultEnemyKeywordsUnramped(level, difficulty), level);
+}
+
+/** The difficulty-derived kit BEFORE the early HIDE ramp — the mid/late
+ *  formulas, unchanged since THE BIG NUMBERS REWRITE. */
+function defaultEnemyKeywordsUnramped(
     level: number,
     difficulty: EnemyDifficulty | undefined,
 ): EnemyKeyword[] {
@@ -304,7 +355,8 @@ export function createEnemy(options: CreateEnemyOptions): Enemy {
         // THE BIG NUMBERS REWRITE — an authored list wins outright; otherwise
         // the foe inherits the difficulty-derived floor so every fight has some
         // arithmetic of its own.
-        keywords: keywords ?? defaultEnemyKeywords(level, difficulty),
+        // THE EARLY HIDE RAMP — an authored list still bows to the level cap.
+        keywords: applyHideRamp(keywords ?? defaultEnemyKeywords(level, difficulty), level),
         stages: stages ?? defaultEnemyStages(difficulty, maxHealth),
     };
 }
