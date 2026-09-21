@@ -15,14 +15,14 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-21 | f74f198e | 15 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-21 | f78f0550 | 15 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-21 | fb0a0f3c | 15 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-21 | TBD | 15 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-21 | 9821b636 | 15 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-npcs pass 15, 2026-09-21, commit TBD]** Zero-diff pass —
+> **[adjust-npcs pass 15, 2026-09-21, commit 9821b636]** Zero-diff pass —
 > audit re-confirmed, no new CREATE/UPDATE/REMOVE, ledger bump only.
 > Dispatched autonomously by `/march`'s content-lifecycle gate: `npcs`
 > was the stalest qualifying category this tick (last pass `73e0a70c`
