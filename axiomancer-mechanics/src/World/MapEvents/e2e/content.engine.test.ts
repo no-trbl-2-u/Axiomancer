@@ -76,7 +76,7 @@ describe('fishing-village content — new-player map', () => {
     // recovery + texture, encounters/interaction/rest tied for largest, and
     // ONE boss node (fv-6, an `encounter` with isBoss). See the new-player
     // override block in `content.ts`.
-    it('is a balanced spread, interaction and encounter the largest kinds, one boss', () => {
+    it('is a balanced spread, encounter the largest kind since the three gates, one boss', () => {
         mockSequentialRng(0.5);
         const counts = kindTally('fishing-village');
 
@@ -93,15 +93,14 @@ describe('fishing-village content — new-player map', () => {
         // roster as foot-stealer. 2026-08-28 (inter-map travel): fv-10, the
         // terminal-column barnacle hazard, became the coast-road DOOR to
         // northern-forest — hazard drops 2 → 1, travel appears at 1.
-        // 2026-09-20 — fv-5 (the spine's driftwood gathering) became the
-        // grave-larva encounter so no spine walk reaches the boss unfought: 4 → 5.
-        expect(counts.encounter).toBe(5);
+        // 2026-09-21 — THE THREE GATES (fv-26/27/28): every route fights three
+        // times before the breakwater: 4 → 7.
+        expect(counts.encounter).toBe(7);
         expect(counts.cutscene).toBe(1);
         expect(counts.rest).toBe(4);
         // adjust-npcs pass 12 (2026-09-18) — fv-22 (kelp-frond) staged the
         // Village Healer instead: gathering drops 3 → 2.
-        // 2026-09-20 — fv-5 left for the encounter roster: gathering 2 → 1.
-        expect(counts.gathering).toBe(1);
+        expect(counts.gathering).toBe(2);
         expect(counts.hazard).toBe(1);
         expect(counts.travel).toBe(1);
         expect(counts['loot-cache']).toBe(3);
@@ -118,14 +117,14 @@ describe('fishing-village content — new-player map', () => {
         // Phase 60 — the re-homed anvil, a single fixed placement at fv-21
         // (not a cadence — see `content.ts`'s `FV_BLACKSMITH_NODES`).
         expect(counts.blacksmith).toBe(1);
-        // Interaction and encounter tie as the map's largest kinds (fv-5
-        // joined the encounter roster 2026-09-20); rest sits one behind.
+        // Encounter is the map's largest kind since the three gates
+        // (2026-09-21); interaction follows, then rest.
         const maxCount = Math.max(...Object.values(counts));
-        expect(counts.interaction).toBe(maxCount);
         expect(counts.encounter).toBe(maxCount);
-        expect(counts.rest).toBe(maxCount - 1);
+        expect(counts.interaction).toBe(5);
+        expect(counts.rest).toBe(4);
         // Every node resolved to a real kind.
-        expect(Object.values(counts).reduce((a, b) => a + b, 0)).toBe(25);
+        expect(Object.values(counts).reduce((a, b) => a + b, 0)).toBe(28);
     });
 
     it('fv-21 is the re-homed blacksmith node, offering the witness swap variant', () => {

@@ -126,9 +126,9 @@ describe('fishing-village gauntlet routing', () => {
         // and rest tie at 4, interaction is now the single largest kind at
         // 5 — no kind dominates, and a real spread of recovery / texture /
         // narration nodes remains.
-        // 2026-09-20 — fv-5 became the spine's grave-larva encounter (the grey
-        // office rebalance): encounter 4 → 5, tying interaction as the largest kind.
-        expect(count('encounter')).toBe(5);
+        // 2026-09-21 — THE THREE GATES (fv-26/27/28, the grey office rebalance):
+        // encounter 4 → 7, now the map's largest kind.
+        expect(count('encounter')).toBe(7);
         expect(count('interaction')).toBe(5);
         expect(count('rest')).toBe(4);
         expect(count('gathering')).toBeGreaterThanOrEqual(1);

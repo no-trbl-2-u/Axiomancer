@@ -574,18 +574,17 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
 //
 // The first continent's STARTING map is combat-FOCUSED but no longer "all
 // battle" — a flat wall of identical encounters with no recovery was both
-// monotonous and unwinnable in playtests. The map now spreads 25 nodes across
+// monotonous and unwinnable in playtests. The map now spreads 28 nodes across
 // a real mix:
-//   - 5 ENCOUNTER nodes  (4 regular + the fv-6 boss — the spine; fv-15
-//                         rejoined this count in Phase 61, and fv-5 joined
-//                         2026-09-20 so every spine walk fights once before
-//                         the boss — see below),
+//   - 7 ENCOUNTER nodes  (3 regular + the fv-6 boss + THE THREE GATES
+//                         fv-26/27/28, 2026-09-21 — every route fights
+//                         three times before the breakwater; fv-15
+//                         rejoined this count in Phase 61, see below),
 //   - 4 REST nodes       (recover HP — the rest-choice node), one on the
 //                         spine just before the boss,
-//   - 1 GATHERING node   (low-risk materials — "The Gleaning"; was 3 until
+//   - 2 GATHERING nodes  (low-risk materials — "The Gleaning"; was 3 until
 //                         adjust-npcs pass 12 staged the Village Healer
-//                         onto fv-22, then 2 until fv-5 became an encounter
-//                         2026-09-20, see below),
+//                         onto fv-22, see below),
 //   - 1 HAZARD node      (light risk — the hazard minigame; was 2 until
 //                         2026-08-28 turned fv-10, the terminal barnacle
 //                         hazard, into the coast-road DOOR — see TRAVEL),
@@ -631,12 +630,13 @@ const NORTHERN_FOREST_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool 
 // assignment explicit and monotonic — column 1 is the softest thing in the
 // village, column 9 the hardest thing short of the breakwater itself.
 const FV_ENCOUNTER_FOES: Record<string, { slug: EnemySlug; description: string }> = {
-    // 2026-09-20 (the grey office): fv-5 joins the roster so the spine lane
-    // — fv-2 → fv-3 → fv-4 → fv-5 → fv-6 — no longer walks a fresh deck into
-    // the breakwater boss without a single fight, and so a single reward,
-    // behind it. The other pre-boss lane (fv-20) keeps its rest: a player
-    // who chooses the hull over the larva chose the harder boss.
-    'fv-5':  { slug: 'grave-larva',      description: 'Something pale turns over in the wet sand where the drowned are buried, and keeps turning.' },
+    // THE THREE GATES (2026-09-21, the grey office rebalance) — one choke
+    // before each open column, so every route to the breakwater fights
+    // three times and carries three rewards into the King. Levels ramp
+    // 1 / 1 / 2 through the pinned-slug path (`max(source.level, player)`).
+    'fv-26': { slug: 'grave-larva',      description: 'Something pale turns over in the wet sand where the drowned are buried, and keeps turning.' },
+    'fv-27': { slug: 'float-eye',        description: 'A lidless thing drifts over the salt flats at head height, and it has already seen you.' },
+    'fv-28': { slug: 'chattering-skull', description: 'On the breakwater steps a skull talks to itself about the tide. It stops when you come near.' },
     // c3 — Phase 53c: little-belle moves off fv-7 (now Coastal Beggar's
     // node) onto fv-13, one of column 1's two displaced nodes. Must stay
     // ahead of the Beggar's column so `befriended-little-belle` can be set
@@ -983,9 +983,7 @@ const FV_REST_NODES: Record<string, string> = {
 };
 // adjust-npcs pass 12 (2026-09-18) — fv-22 (kelp-frond, idx 3) is dropped
 // from this table; see `fvVillageHealerInteraction` below.
-// fv-5 (driftwood) became the spine's first encounter 2026-09-20 — see
-// `FV_ENCOUNTER_FOES`; the tide shell at fv-8 is the one gathering left.
-const FV_GATHER_NODES: Record<string, number> = { 'fv-8': 1 };
+const FV_GATHER_NODES: Record<string, number> = { 'fv-5': 0, 'fv-8': 1 };
 // 2026-08-28 — fv-10, the spine's terminal "coast road out", was a hazard
 // (jagged barnacles); it is now the map's DOOR. fv-23 keeps the map's one
 // remaining hazard node.
@@ -1063,7 +1061,7 @@ const fvVillageHealerInteraction = fvInteractionPool(
 const FISHING_VILLAGE_NEW_PLAYER_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> =
     (() => {
         const out: Array<{ nodeId: string; pool: MapEventPool }> = [];
-        for (let i = 1; i <= 25; i++) {
+        for (let i = 1; i <= 28; i++) {
             const nodeId = `fv-${i}`;
             if (nodeId === 'fv-1') {
                 out.push({ nodeId, pool: fvArrival });

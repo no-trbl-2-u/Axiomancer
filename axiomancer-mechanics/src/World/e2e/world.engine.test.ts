@@ -55,18 +55,18 @@ describe('moveToNode', () => {
 
     it('rejects locked nodes', () => {
         const world = createStartingWorld();
-        // fv-3 starts locked (only fv-2 is adjacent to start).
-        expect(world.currentMap.lockedNodes).toContain('fv-3');
-        expect(() => moveToNode(world, 'fv-3')).toThrow(IllegalMoveError);
+        // fv-26 (the first gate) starts locked (only fv-2 is adjacent to start).
+        expect(world.currentMap.lockedNodes).toContain('fv-26');
+        expect(() => moveToNode(world, 'fv-26')).toThrow(IllegalMoveError);
     });
 
     it('locks completed nodes against back-travel (Q2)', () => {
         let world = createStartingWorld();
         world = moveToNode(world, 'fv-2');
         world = completeCurrentNode(world);
-        // After completing fv-2, fv-3 becomes available.
-        expect(world.currentMap.availableNodes).toContain('fv-3');
-        world = moveToNode(world, 'fv-3');
+        // After completing fv-2, the first gate (fv-26) becomes available.
+        expect(world.currentMap.availableNodes).toContain('fv-26');
+        world = moveToNode(world, 'fv-26');
         // Can't go back to the completed fv-2.
         expect(() => moveToNode(world, 'fv-2')).toThrow(IllegalMoveError);
     });
@@ -189,14 +189,11 @@ describe('resolveMapEvent dispatch', () => {
     it('returns kind=encounter on encounter nodes', () => {
         mockSequentialRng(0.5);
         let state = startingState();
-        // fv-4 converted from an `encounter` to a Phase 53d/S-01 narration
-        // dilemma ("The Stranger's Net"); fv-11 -> fv-13 (little-belle) is
-        // now the nearest surviving column-3 encounter from fv-2.
+        // fv-26 is the first of the three gates (2026-09-21): the nearest
+        // encounter from fv-2, and on every route.
         state = { ...state, world: moveToNode(state.world, 'fv-2') };
         state = { ...state, world: completeCurrentNode(state.world) };
-        state = { ...state, world: moveToNode(state.world, 'fv-11') };
-        state = { ...state, world: completeCurrentNode(state.world) };
-        state = { ...state, world: moveToNode(state.world, 'fv-13') };
+        state = { ...state, world: moveToNode(state.world, 'fv-26') };
         const result = resolveMapEvent(state);
         expect(result.event.kind).toBe('encounter');
         if (result.event.kind === 'encounter') {
@@ -220,7 +217,7 @@ describe('resolveMapEvent dispatch', () => {
     it('returns kind=encounter with isBoss=true on the boss node', () => {
         mockSequentialRng(0.5);
         let state = startingState();
-        for (const target of ['fv-2', 'fv-3', 'fv-4', 'fv-5', 'fv-6'] as const) {
+        for (const target of ['fv-2', 'fv-26', 'fv-3', 'fv-27', 'fv-4', 'fv-28', 'fv-5', 'fv-6'] as const) {
             state = { ...state, world: moveToNode(state.world, target) };
             if (target !== 'fv-6') state = { ...state, world: completeCurrentNode(state.world) };
         }
@@ -277,8 +274,8 @@ describe('applyDialogueChoice', () => {
 describe('Phase 65 — expanded fishing-village layout', () => {
     const fv = () => getMapDefinition('coastal-continent', 'fishing-village');
 
-    it('grows from 10 to 25 nodes (spine + 3 sub-areas)', () => {
-        expect(fv().nodes.length).toBe(25);
+    it('grows from 10 to 28 nodes (spine + 3 sub-areas + the three gates)', () => {
+        expect(fv().nodes.length).toBe(28);
     });
 
     it('preserves the spine fv-1..fv-10 along y=0', () => {
@@ -290,17 +287,20 @@ describe('Phase 65 — expanded fishing-village layout', () => {
         }
     });
 
-    it('keeps the spine branching onto both flanking lanes', () => {
-        // Pre-audit this read "extends (does not replace) the spine
-        // connectedNodes" and named fv-13 / fv-16 as sub-area branches. The
-        // 2026-08-08 re-layer turned the free-form sub-areas into three
-        // lanes; the property that matters is unchanged and now explicit —
-        // a spine node opens onto its own lane AND both flanks.
+    it('every gate opens onto its whole next column, and every lane funnels into the next gate', () => {
+        // THE THREE GATES (2026-09-21): the lanes are what they were, but a
+        // gate sits before each open column. A gate opens onto every lane;
+        // every lane's nodes lead only to the next gate — so no route can
+        // skip a fight, and every route can still choose its lane.
         const map = fv();
-        const fv3 = map.nodes.find(n => n.id === 'fv-3')!;
-        expect(fv3.connectedNodes).toContain('fv-4');   // spine ahead
-        expect(fv3.connectedNodes).toContain('fv-17');  // wharf lane
-        expect(fv3.connectedNodes).toContain('fv-14');  // inland lane
+        const node = (id: string) => map.nodes.find(n => n.id === id)!;
+        expect(node('fv-2').connectedNodes).toEqual(['fv-26']);
+        expect(node('fv-26').connectedNodes.sort()).toEqual(['fv-11', 'fv-16', 'fv-3']);
+        for (const id of ['fv-16', 'fv-3', 'fv-11']) expect(node(id).connectedNodes).toEqual(['fv-27']);
+        expect(node('fv-27').connectedNodes.sort()).toEqual(['fv-12', 'fv-13', 'fv-14', 'fv-17', 'fv-4']);
+        for (const id of ['fv-17', 'fv-4', 'fv-14', 'fv-12', 'fv-13']) expect(node(id).connectedNodes).toEqual(['fv-28']);
+        expect(node('fv-28').connectedNodes.sort()).toEqual(['fv-15', 'fv-20', 'fv-5']);
+        for (const id of ['fv-15', 'fv-5', 'fv-20']) expect(node(id).connectedNodes).toEqual(['fv-6']);
     });
 
     it('leaves no dead-end spurs off the lanes', () => {

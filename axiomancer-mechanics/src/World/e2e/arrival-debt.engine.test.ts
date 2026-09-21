@@ -68,9 +68,9 @@ describe('the arrival verb records what the player is owed', () => {
     });
 
     it('each further move owes only the node under the player', () => {
-        const walked = moveToNode(walk(freshWorld(), 'fv-2'), 'fv-11');
+        const walked = moveToNode(walk(freshWorld(), 'fv-2'), 'fv-26');
 
-        expect(walked.currentMap.pendingArrival).toBe('fv-11');
+        expect(walked.currentMap.pendingArrival).toBe('fv-26');
     });
 });
 
@@ -115,7 +115,7 @@ describe('the placement verbs owe nothing — being placed is not arriving', () 
 
 describe('resolving the arrival is what answers it', () => {
     it('clears the debt for the node it resolved', () => {
-        const before = gameOn(walk(freshWorld(), 'fv-2', 'fv-11', 'fv-13'));
+        const before = gameOn(walk(freshWorld(), 'fv-2', 'fv-26', 'fv-11', 'fv-27', 'fv-13'));
         expect(before.world.currentMap.pendingArrival).toBe('fv-13');
 
         const { state } = resolveMapEvent(before);
@@ -142,7 +142,7 @@ describe('resolving the arrival is what answers it', () => {
     });
 
     it('clears a stale debt on a node that was already consumed', () => {
-        const walked = walk(freshWorld(), 'fv-2', 'fv-11', 'fv-13');
+        const walked = walk(freshWorld(), 'fv-2', 'fv-26', 'fv-11', 'fv-27', 'fv-13');
         const consumed: WorldState = {
             ...walked,
             currentMap: { ...walked.currentMap, consumedNodes: ['fv-13'] },

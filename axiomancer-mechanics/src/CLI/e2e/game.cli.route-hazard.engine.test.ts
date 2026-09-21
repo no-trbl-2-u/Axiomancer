@@ -33,7 +33,7 @@ describe('Game CLI route walkthrough → Hazard-Pattern combat', () => {
         // dilemma ("The Borrowed Hook"); fv-11 -> fv-13 (little-belle) is
         // now the nearest surviving column-3 encounter from fv-2.
         await runGameCli([
-            '--route', 'fv-2,fv-11,fv-13',
+            '--route', 'fv-2,fv-26,fv-11,fv-27,fv-13',
             '--auto-combat',
             '--combat-policy', 'status',
             '--combat-seed', '42',
@@ -53,7 +53,9 @@ describe('Game CLI route walkthrough → Hazard-Pattern combat', () => {
             .filter(r => r.action === 'resolveMapEvent')
             .map(r => r.event as { kind?: string; encounter?: { enemies?: Array<{ name?: string }> } })
             .find(event => event.kind === 'encounter');
-        expect(encounterEvent?.encounter?.enemies?.[0]?.name).toBe('Little Belle');
+        // THE THREE GATES (2026-09-21): the first encounter on any route is
+        // now the first gate, fv-26 (Grave Larva); Little Belle waits at fv-13.
+        expect(encounterEvent?.encounter?.enemies?.[0]?.name).toBe('Grave Larva');
 
         const end = logs.find(r => r.action === 'hazardCombat:end');
         expect((end?.event as { outcome?: string })?.outcome).toMatch(/victory|defeat|mercy|capitulate|concede|retreat/);

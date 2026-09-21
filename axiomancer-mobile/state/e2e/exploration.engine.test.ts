@@ -122,17 +122,19 @@ describe('selectExplorationViewModel: engine reads', () => {
         const store = createAppStore({ adapter: createMemoryAdapter() });
         const actions = createAppActions(store);
 
-        // fv-2's engine neighbours after Phase 53c/53d: fv-3 (rest), fv-16
-        // (narration — "The Borrowed Hook") and fv-11 (loot-cache). None of
-        // those three is an `encounter` node anymore, so the encounter
-        // assertion below reaches one column further, to fv-13 (Little
-        // Belle) via fv-11.
+        // THE THREE GATES: fv-2's only engine neighbour is the first gate
+        // fight fv-26 (Tide-Line, an `encounter`) — available and a combat
+        // trigger the moment the player stands on fv-2. The rest node fv-3
+        // sits one column past the gate, so it is still locked here.
         actions.moveTo('fv-2');
         const vm = selectExplorationViewModel(store.getState());
-        const fv3 = vm.nodes.find((n) => n.id === 'fv-3')!;
-        expect(fv3.kind).toBe('available');
-        expect(fv3.type).toBe('rest');
-        expect(fv3.triggersCombat).toBe(false);
+        const fv26 = vm.nodes.find((n) => n.id === 'fv-26')!;
+        expect(fv26.kind).toBe('available');
+        expect(fv26.type).toBe('encounter');
+        expect(fv26.triggersCombat).toBe(true);
+        const fv3Locked = vm.nodes.find((n) => n.id === 'fv-3')!;
+        expect(fv3Locked.kind).toBe('locked');
+        expect(fv3Locked.triggersCombat).toBe(false);
 
         // fv-15 (the retired quest-board node, Phase 61) is a regular
         // encounter type now, but it's several columns ahead of fv-2 —
@@ -142,12 +144,14 @@ describe('selectExplorationViewModel: engine reads', () => {
         expect(fv15.kind).not.toBe('available');
         expect(fv15.triggersCombat).toBe(false);
 
-        actions.moveTo('fv-11');
+        // Past the gate the rest node fv-3 opens: available, and never a
+        // combat trigger.
+        actions.moveTo('fv-26');
         const vm2 = selectExplorationViewModel(store.getState());
-        const fv13 = vm2.nodes.find((n) => n.id === 'fv-13')!;
-        expect(fv13.kind).toBe('available');
-        expect(fv13.type).toBe('encounter');
-        expect(fv13.triggersCombat).toBe(true);
+        const fv3 = vm2.nodes.find((n) => n.id === 'fv-3')!;
+        expect(fv3.kind).toBe('available');
+        expect(fv3.type).toBe('rest');
+        expect(fv3.triggersCombat).toBe(false);
     });
 
     it('encounter step-card icon is "sword", NOT "flee" — exploration-audit [3.5] DRIFT fix', () => {
@@ -158,14 +162,13 @@ describe('selectExplorationViewModel: engine reads', () => {
         // future refactor doesn't silently revert.
         const store = createAppStore({ adapter: createMemoryAdapter() });
         const actions = createAppActions(store);
-        actions.moveTo('fv-2');
-        actions.moveTo('fv-11'); // unlocks fv-13 (encounter) as an option
+        actions.moveTo('fv-2'); // unlocks the first gate fv-26 (encounter)
 
         const vm = selectExplorationViewModel(store.getState());
-        const encounterOption = vm.options.find((o) => o.nodeId === 'fv-13');
+        const encounterOption = vm.options.find((o) => o.nodeId === 'fv-26');
         expect(encounterOption).toBeDefined();
         // actions[i] mirrors options[i] order; find the matching action.
-        const idx = vm.options.findIndex((o) => o.nodeId === 'fv-13');
+        const idx = vm.options.findIndex((o) => o.nodeId === 'fv-26');
         const encounterAction = vm.actions[idx];
         expect(encounterAction.iconKey).toBe('sword');
         expect(encounterAction.iconKey).not.toBe('flee');
@@ -189,11 +192,19 @@ describe('moveTo action: happy path', () => {
         expect(vm.currentNodeId).toBe('fv-2');
         const byId = Object.fromEntries(vm.nodes.map((n) => [n.id, n]));
         expect(byId['fv-2'].kind).toBe('current');
-        // fv-3, fv-16 and fv-11 are the engine neighbours of fv-2 and
-        // should now be reachable.
-        expect(byId['fv-3'].kind).toBe('available');
-        expect(byId['fv-16'].kind).toBe('available');
-        expect(byId['fv-11'].kind).toBe('available');
+        // THE THREE GATES: fv-26 is fv-2's only engine neighbour; the old
+        // fan (fv-3 / fv-16 / fv-11) opens only once the gate is passed.
+        expect(byId['fv-26'].kind).toBe('available');
+        expect(byId['fv-3'].kind).toBe('locked');
+        expect(byId['fv-16'].kind).toBe('locked');
+        expect(byId['fv-11'].kind).toBe('locked');
+
+        actions.moveTo('fv-26');
+        const after = selectExplorationViewModel(store.getState());
+        const byId2 = Object.fromEntries(after.nodes.map((n) => [n.id, n]));
+        expect(byId2['fv-3'].kind).toBe('available');
+        expect(byId2['fv-16'].kind).toBe('available');
+        expect(byId2['fv-11'].kind).toBe('available');
     });
 
     it('refreshes the options drawer with the new available nodes after a move', () => {
@@ -201,6 +212,7 @@ describe('moveTo action: happy path', () => {
         const actions = createAppActions(store);
 
         actions.moveTo('fv-2');
+        actions.moveTo('fv-26'); // through the first gate
 
         const vm = selectExplorationViewModel(store.getState());
         const optionIds = vm.options.map((o) => o.nodeId).sort();
@@ -242,10 +254,12 @@ describe('moveTo action: locked / invalid targets', () => {
         const actions = createAppActions(store);
 
         // fv-13 resolves to an engine `encounter` kind (reached via
-        // fv-2 → fv-11), so it is not completed on entry — it stays
-        // reachable and can be re-entered.
+        // fv-2 → fv-26 → fv-11 → fv-27), so it is not completed on entry —
+        // it stays reachable and can be re-entered.
         actions.moveTo('fv-2');
+        actions.moveTo('fv-26');
         actions.moveTo('fv-11');
+        actions.moveTo('fv-27');
         actions.moveTo('fv-13');
         const result = actions.moveTo('fv-13');
 
@@ -318,7 +332,9 @@ describe('exploration lifecycle: multi-step navigation', () => {
         const actions = createAppActions(store);
 
         actions.moveTo('fv-2');  // Old Marrow's interaction node
+        actions.moveTo('fv-26'); // first gate fight — reusable
         actions.moveTo('fv-11'); // loot-cache — consumed on entry
+        actions.moveTo('fv-27'); // second gate fight — reusable
         actions.moveTo('fv-13'); // encounter — reusable, not completed
 
         const completed = store.getState().world.currentMap.completedNodes;
@@ -329,10 +345,11 @@ describe('exploration lifecycle: multi-step navigation', () => {
         const vm = selectExplorationViewModel(store.getState());
         const byId = Object.fromEntries(vm.nodes.map((n) => [n.id, n]));
         expect(byId['fv-13'].kind).toBe('current');
-        // fv-15, fv-5 and fv-20 are fv-13's forward neighbours in the ENGINE graph.
-        expect(byId['fv-15'].kind).toBe('available');
-        expect(byId['fv-5'].kind).toBe('available');
-        expect(byId['fv-20'].kind).toBe('available');
+        // The third gate (fv-28) is fv-13's only forward neighbour in the
+        // ENGINE graph (2026-09-21); the last column sits behind it.
+        expect(byId['fv-28'].kind).toBe('available');
+        expect(byId['fv-15'].kind).toBe('locked');
+        expect(byId['fv-5'].kind).toBe('locked');
     });
 
     /**
@@ -795,7 +812,7 @@ describe('BUG-01: the legend counts the nodes the map actually draws', () => {
         const store = createAppStore({ adapter: createMemoryAdapter() });
         const actions = createAppActions(store);
         actions.moveTo('fv-2');
-        actions.moveTo('fv-3');
+        actions.moveTo('fv-26'); // the first gate, fv-2's only neighbour
 
         const vm = selectExplorationViewModel(store.getState());
         const counter = readCounter(vm.legend.right);
@@ -821,7 +838,9 @@ describe('selectExplorationViewModel: arrivalPending', () => {
         const store = createAppStore({ adapter });
         const actions = createAppActions(store);
         actions.moveTo('fv-2');
+        actions.moveTo('fv-26');
         actions.moveTo('fv-11');
+        actions.moveTo('fv-27');
         actions.moveTo('fv-13'); // engine kind `encounter`
 
         const reloaded = createAppStore({ adapter });
@@ -838,7 +857,9 @@ describe('selectExplorationViewModel: arrivalPending', () => {
         const store = createAppStore({ adapter });
         const actions = createAppActions(store);
         actions.moveTo('fv-2');
+        actions.moveTo('fv-26');
         actions.moveTo('fv-11');
+        actions.moveTo('fv-27');
         actions.moveTo('fv-13');
         actions.resolveCurrentMapEvent();
         actions.save();

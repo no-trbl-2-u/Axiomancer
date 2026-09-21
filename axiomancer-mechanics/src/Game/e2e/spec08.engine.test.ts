@@ -56,9 +56,10 @@ describe('Spec 08 e2e — fishing-village exploration loop', () => {
         expect(step2.effects.startedQuest).toBe('starting-quest');
 
         // 2. Traverse the spine to the boss. The intermediate nodes are a mix
-        // of encounters and recovery/texture nodes (rest at fv-3, gathering at
-        // fv-5); resolving + completing each advances the unlock graph.
-        for (const node of ['fv-2', 'fv-3', 'fv-4', 'fv-5'] as const) {
+        // of the three gate encounters (fv-26/27/28, 2026-09-21) and
+        // recovery/texture nodes (rest at fv-3, gathering at fv-5); resolving
+        // + completing each advances the unlock graph.
+        for (const node of ['fv-2', 'fv-26', 'fv-3', 'fv-27', 'fv-4', 'fv-28', 'fv-5'] as const) {
             store.setState({ world: moveToNode(store.getState().world, node) });
             const r = resolveMapEvent(store.getState());
             store.setState(r.state);
@@ -104,8 +105,8 @@ describe('Spec 08 e2e — fishing-village exploration loop', () => {
 
         store.setState({ world: completeCurrentNode(store.getState().world) });
 
-        // Step 2: fv-2 → fv-3.
-        world = moveToNode(store.getState().world, 'fv-3');
+        // Step 2: fv-2 → fv-26 (the first gate, 2026-09-21).
+        world = moveToNode(store.getState().world, 'fv-26');
         tick = processWorldEffectTick(store.getState().player);
         store.setState({ world, player: tick.player });
         expect(store.getState().player.health).toBeLessThan(hpAfter1);

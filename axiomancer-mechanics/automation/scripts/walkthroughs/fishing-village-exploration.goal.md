@@ -5,7 +5,7 @@
 This walkthrough no longer uses the stale Harbor District combat assumption (`fv-11 → fv-14 → fv-15`) or the since-displaced `fv-12` Market encounter. Current map truth routes the first reliable encounter through:
 
 ```txt
-fv-1 Hovel → fv-2 Crossing/cache → fv-11 → fv-13 (Little Belle)
+fv-1 Hovel → fv-2 Crossing → fv-26 (gate: Grave Larva) → fv-11 → fv-27 (gate: Float-Eye) → fv-13 (Little Belle)
 ```
 
 `fv-13` resolves an encounter with **Little Belle**. The CLI must not stage the encounter into the removed legacy combat shell. It must enter the Hazard-Pattern combat driver and emit `hazardCombat:*` events.
@@ -25,7 +25,7 @@ The newer direct route form is also valid and preferred for CI/Kid evidence:
 
 ```bash
 npx ts-node src/CLI/game.cli.ts \
-  --route fv-2,fv-11,fv-13 \
+  --route fv-2,fv-26,fv-11,fv-27,fv-13 \
   --auto-combat \
   --combat-policy status \
   --combat-seed 42 \
@@ -41,12 +41,13 @@ npx ts-node src/CLI/game.cli.ts \
 2. **Route movement** records move events in order:
 
    ```txt
-   fv-2 → fv-11 → fv-13
+   fv-2 → fv-26 → fv-11 → fv-27 → fv-13
    ```
 
 3. **Map events resolve**:
 
    - `fv-2` may resolve a cache/loot event.
+   - `fv-26` and `fv-27` are THE GATES (2026-09-21): each resolves an encounter (Grave Larva, Float-Eye) — every route to the breakwater fights three times.
    - `fv-11` may resolve a cache/loot event.
    - `fv-13` must resolve `event.kind === 'encounter'`.
    - The encounter enemy must be `Little Belle` unless the authored map/event pool has intentionally changed.
