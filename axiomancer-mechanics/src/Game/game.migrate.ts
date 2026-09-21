@@ -14,9 +14,11 @@
  * minigame), v18 → v19 (Phase 76, retire the Gathering minigame), v19 →
  * v20 (Phase 63, retire the loot-cache Pick Pool minigame), v20 → v21
  * (inter-map travel, seed the continent catalogue), v21 → v22
- * (Phase 85, seed the head/hands/feet signet relics), and v22 → v23
+ * (Phase 85, seed the head/hands/feet signet relics), v22 → v23
  * (2026-09-20, strip the starting curated-loadout flags that shadowed the
- * starter bundle). The hops chain, so a v11 save lands at v23 in one
+ * starter bundle), and v23 → v24 (2026-09-21, stamp the first-node relic
+ * grant as already settled — every existing save already wears the
+ * Suppliant's Ring). The hops chain, so a v11 save lands at v24 in one
  * `migrate` call. Every other version mismatch still rejects.
  */
 
@@ -31,6 +33,7 @@ import { reslotLegacyLoadout, reslotLegacyEquipment, type LegacySlot } from './l
 import { concreteDefaultRail } from '../Character/dieGear.reducer';
 import { GAME_STATE_VERSION } from './game.reducer';
 import { COMBAT_LOADOUT_FLAG_PREFIX } from '../Combat/combat.loadout';
+import { FIRST_NODE_RELIC_FLAG } from '../Character/first-node-grant';
 
 /**
  * v11 → v12 (Phase 18): fold the player's 7-slot equipment record into the
@@ -424,6 +427,31 @@ function migrateV22ToV23(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
+ * v23 → v24 (2026-09-21): the Suppliant's Ring moved from the silent seed to
+ * the run's first node.
+ *
+ * Every save written at v23 or earlier already OWNS the ring — it was folded
+ * into the character by `createCharacter` at t=0. So this migration grants
+ * nothing and takes nothing away. All it does is stamp
+ * `first-node-relic-granted` so no first-node hook ever offers an existing
+ * player a relic they are already wearing.
+ *
+ * The one save that could arrive here without the ring is a v23 save whose
+ * player dropped or sold it — a legal thing to have done. Stamping the flag
+ * for that save is deliberate: the first-node grant is a NEW-RUN ceremony,
+ * not a restitution mechanism, and silently re-issuing a relic the player
+ * chose to part with would be the engine overruling them.
+ *
+ * Idempotent (a save already carrying the flag passes through with only its
+ * version stamped) and pure over a raw save payload.
+ */
+function migrateV23ToV24(raw: Record<string, unknown>): Record<string, unknown> {
+    const flags = Array.isArray(raw.flags) ? (raw.flags as unknown[]) : [];
+    const next = flags.includes(FIRST_NODE_RELIC_FLAG) ? flags : [...flags, FIRST_NODE_RELIC_FLAG];
+    return { ...raw, flags: next, version: 24 };
+}
+
+/**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
  * game). The name/signature is kept so the persistence layer's call site is
@@ -454,8 +482,10 @@ export function migrate(
     // Quest Board minigame; v18 → v19 retires the Gathering minigame; v19 →
     // v20 retires the loot-cache Pick Pool minigame and adds `mapGoodwill`;
     // v20 → v21 seeds the continent catalogue for inter-map travel; v21 → v22
-    // appends the Phase 85 head/hands/feet signet relics to inventory.
-    // Chained so a v11 save lands at v22 in one call.
+    // appends the Phase 85 head/hands/feet signet relics to inventory; v22 →
+    // v23 strips the curated-loadout seed flags; v23 → v24 stamps the
+    // first-node relic grant settled. Chained so a v11 save lands at v24 in
+    // one call.
     if (version === 11 && toVersion >= 12) {
         working = migrateV11ToV12(working);
         version = 12;
@@ -503,6 +533,10 @@ export function migrate(
     if (version === 22 && toVersion >= 23) {
         working = migrateV22ToV23(working);
         version = 23;
+    }
+    if (version === 23 && toVersion >= 24) {
+        working = migrateV23ToV24(working);
+        version = 24;
     }
 
     if (version !== toVersion) {

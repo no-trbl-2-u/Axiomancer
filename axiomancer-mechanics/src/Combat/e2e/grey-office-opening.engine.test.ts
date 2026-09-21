@@ -15,6 +15,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { createNewGameState } from '../../Game/game.reducer';
+import { grantFirstNodeRelic } from '../../Character/first-node-grant';
 import { ENEMY_REGISTRY } from '../../Enemy/enemy.library';
 import { scaleEnemyToLevel } from '../../World/encounter';
 import { simulateHazardPatternCombatDetailed } from '../combat.encounter.sim';
@@ -23,7 +24,19 @@ import type { Character } from '../../Character/types';
 
 const FV_BOSS_LEVEL = 3;
 const lcg = (seed: number) => { let s = seed; return () => { s = (s * 48271) % 2147483647; return s / 2147483647; }; };
-const fresh = (): Character => ({ ...createNewGameState().player, knownCards: [...STARTING_CARD_IDS], combatRewardCards: [] });
+// A level-1 player standing at the village's first FIGHT — i.e. one who has
+// already walked their first node. Since v24 the Suppliant's Ring is handed
+// over there rather than seeded silently at t=0
+// (`Character/first-node-grant.ts`), so settling the grant here is what makes
+// this "a real level-1 fresh player": it restores the exact worn loadout,
+// signature kit and derived stats these pins were measured against, and is
+// also the only state a fight can actually be reached from (`START_COMBAT`
+// settles the grant too).
+const freshPlayer = (): Character => {
+    const s = createNewGameState();
+    return grantFirstNodeRelic(s.player, s.flags).character;
+};
+const fresh = (): Character => ({ ...freshPlayer(), knownCards: [...STARTING_CARD_IDS], combatRewardCards: [] });
 const withRewards = (n: number, seed: number): Character => {
     const rng = lcg(seed); let p = fresh();
     for (let i = 0; i < n; i++) p = addRewardCard(p, rollCombatCardRewards(p, rng, 3)[0]);

@@ -21,6 +21,8 @@ export {
     dieSpecialCap, dieGearMissFaces,
     DIE_GEAR_COLORS, DIE_GEAR_FACE_COUNT,
     characterPresets, getPresetById, buildCharacterFromPreset,
+    grantFirstNodeRelic, withholdFirstNodeRelic, isFirstNodeRelicPending,
+    FIRST_NODE_RELIC_ID, STAND_IN_RELIC_ID, FIRST_NODE_RELIC_FLAG,
     levelLadderPresets, ladderL1Preset, ladderL15Preset, ladderL30Preset, ladderL50Preset,
 } from './Character';
 export type {
@@ -31,6 +33,7 @@ export type {
     EquipDelta, EquipDeltaMode,
     StatDeltaEntry, SignatureDeltaEntry,
     DieGearColor, DieGearRail, DieGearOutcome,
+    FirstNodeRelicGrant, FirstNodeGrantReason,
 } from './Character';
 
 // ─── Enemy ────────────────────────────────────────────────────────────────────

@@ -28,6 +28,9 @@ import {
     unequipItem as unequipItemReducer,
 } from '../Character/equipment.reducer';
 import { createCharacter, allocateStatPoint } from '../Character';
+import {
+    grantFirstNodeRelic, withholdFirstNodeRelic, isFirstNodeRelicPending,
+} from '../Character/first-node-grant';
 import { learnCard } from '../Cards';
 import { createStartingWorld, emptyQuestLog } from '../World';
 import { moveToNode as moveWorld } from '../World/world.reducer';
@@ -121,8 +124,20 @@ import { generateRunId } from './run-loop';
  *   `combatRewardCards` is the deck again (see `game.migrate.ts`). The
  *   loadout codec itself stays (dev/e2e harnesses still pin decks through
  *   it) — it is simply no longer seeded.
+ * 2026-09-21 — bumped 23 → 24: the SUPPLIANT'S RING moved out of the silent
+ *   seed and into the run's first node. A fresh v24 save carries 10 relics,
+ *   not 11, with the Venom Sigil holding the ring's accessory seat and no
+ *   `first-node-relic-granted` flag; the first node hands the ring over,
+ *   swaps it into that seat, and benches the Sigil — landing on the exact
+ *   loadout v23 seeded silently at t=0. The finding this answers was "new
+ *   players start with no items": the ring was never missing (measured — a
+ *   v23 fresh state carries it worn, and the SATCHEL renders it), it was
+ *   handed over inside `createCharacter` before any screen existed to say
+ *   so. The migration stamps `first-node-relic-granted` on every existing
+ *   save, which already owns the ring, so no save is ever offered it twice
+ *   (see `game.migrate.ts`).
  */
-export const GAME_STATE_VERSION = 23;
+export const GAME_STATE_VERSION = 24;
 
 /** Builds a brand-new GameState with default player and world. */
 export function createNewGameState(): GameState {
@@ -138,14 +153,22 @@ export function createNewGameState(): GameState {
         // not the {1,1,1}/15 HP placeholder — a 15 HP start is one-shot
         // territory for the early encounters. Starter cards are seeded by the
         // client on first combat (`ensureStarterCards`).
-        player: createCharacter({
+        // Phase 19 — start with the signet relics (5 worn) so the player
+        // enters combat with a full signature kit derived from the loadout.
+        //
+        // v24 — one of those five, the Suppliant's Ring, is WITHHELD from the
+        // seed and handed over at the run's first node instead, where the
+        // player can see it arrive (`Character/first-node-grant.ts`). The
+        // accessory row stays at capacity meanwhile (the Venom Sigil holds
+        // the seat), so the worn count, the signature count and the
+        // positional worn-convention are all unchanged — only WHEN the ring
+        // is handed over, and whether anything says so.
+        player: withholdFirstNodeRelic(createCharacter({
             name: 'Player',
             level: 1,
             baseStats: { heart: 5, body: 5, mind: 5 },
-            // Phase 19 — start with the 8 signet relics (5 worn) so the player
-            // enters combat with a full signature kit derived from the loadout.
             seedStartingRelics: true,
-        }),
+        })),
         world: createStartingWorld(),
         quests: emptyQuestLog(),
         flags,
@@ -221,6 +244,20 @@ function shiftMoralMeter(state: GameState, delta: number, gating?: { min?: numbe
 // ─── Reducer ──────────────────────────────────────────────────────────────────
 
 /**
+ * Settle a still-pending first-node relic grant (the Suppliant's Ring) onto
+ * `state`, returning the same reference when there was nothing to settle.
+ *
+ * This is the reducer's floor, not the ceremony. See
+ * `Character/first-node-grant.ts` for why the grant exists and what the
+ * client-side hand-over looks like.
+ */
+function settleFirstNodeRelic(state: GameState): GameState {
+    if (!isFirstNodeRelicPending(state.player, state.flags)) return state;
+    const result = grantFirstNodeRelic(state.player, state.flags);
+    return { ...state, player: result.character, flags: [...result.flags] };
+}
+
+/**
  * Pure dispatch spine. Routes every `GameAction` to the corresponding sub-
  * reducer and returns the resulting `GameState`. Never throws on unknown
  * action types — instead returns state unchanged (caller is responsible for
@@ -232,16 +269,24 @@ function shiftMoralMeter(state: GameState, delta: number, gating?: { min?: numbe
 export function gameReducer(state: GameState, action: GameAction): GameState {
     switch (action.type) {
         case 'START_COMBAT': {
+            // The first-node grant's hard floor: nobody fights without their
+            // starting kit. The ceremony belongs to the first node (a client
+            // calls `grantFirstNodeRelic` there and shows what arrived), but
+            // if a run reaches a fight with the grant still pending, settle
+            // it here rather than let the player swing without The Open Hand.
+            // Idempotent — a settled grant is a no-op.
+            const staged = settleFirstNodeRelic(state);
+
             const encounter: Encounter = isEncounter(action.payload.target)
                 ? action.payload.target
                 : { enemies: [action.payload.target] };
             if (encounter.enemies.length === 0) {
                 throw new Error('START_COMBAT: encounter has no enemies.');
             }
-            
+
             // Apply moral meter scaling to enemy stats (Phase 92)
             const enemy = encounter.enemies[0]!;
-            const scaledBaseStats = applyMoralMeterScaling(enemy.baseStats, state.moralMeter);
+            const scaledBaseStats = applyMoralMeterScaling(enemy.baseStats, staged.moralMeter);
             let scaledEnemy = {
                 ...enemy,
                 baseStats: scaledBaseStats,
@@ -249,7 +294,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             
             // Phase 109 — Apply 'open-minded' status to region bosses when the region was spared
             const isBoss = enemy.difficulty === 'boss';
-            const regionSpared = state.regionConsequences.sparedRegions.includes(enemy.mapName);
+            const regionSpared = staged.regionConsequences.sparedRegions.includes(enemy.mapName);
             if (isBoss && regionSpared) {
                 const openMindedEffect = lookupEffect('buff_absolved');
                 if (openMindedEffect) {
@@ -277,7 +322,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 enemies: [scaledEnemy, ...encounter.enemies.slice(1)],
             };
             return {
-                ...state,
+                ...staged,
                 currentEncounter: scaledEncounter,
             };
         }
@@ -421,6 +466,13 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         }
 
         case 'MOVE_TO_NODE': {
+            // Deliberately does NOT settle the first-node relic grant. Moving
+            // is a world-only transition — `game.loop.engine.test.ts` pins
+            // `next.player === state.player` — and handing the player an item
+            // for walking would be a side effect nothing asked for. The grant
+            // settles where a node is RESOLVED (`PROCESS_NODE`, or a client
+            // calling `grantFirstNodeRelic` with a screen to show it), with
+            // `START_COMBAT` as the floor.
             return {
                 ...state,
                 world: moveWorld(state.world, action.payload.nodeId),
@@ -428,7 +480,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         }
 
         case 'PROCESS_NODE': {
-            return resolveMapEvent(state).state;
+            // Resolving a node IS the first node happening. Clients with a
+            // screen to show the hand-over on — mobile — call
+            // `grantFirstNodeRelic` themselves and present the result; this
+            // settles it for everyone else (the CLI, the engine store).
+            return resolveMapEvent(settleFirstNodeRelic(state)).state;
         }
 
         case 'APPLY_DIALOGUE': {

@@ -196,6 +196,11 @@ export type { Character, BaseStats, DerivedStats, NonCombatStats, PreviewAllocat
 export { emptyLoadout } from './types';
 export { equipItem, unequipItem, getEquipmentModifiers, getEquippedItems } from './equipment.reducer';
 export type { AggregatedEquipmentModifiers } from './equipment.reducer';
+export {
+    grantFirstNodeRelic, withholdFirstNodeRelic, isFirstNodeRelicPending,
+    FIRST_NODE_RELIC_ID, STAND_IN_RELIC_ID, FIRST_NODE_RELIC_FLAG,
+} from './first-node-grant';
+export type { FirstNodeRelicGrant, FirstNodeGrantReason } from './first-node-grant';
 export { computeEquipDelta } from './equip-delta';
 export type {
     EquipDelta, EquipDeltaMode,
