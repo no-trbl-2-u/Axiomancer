@@ -280,9 +280,12 @@ describe('detailStats — same numbers as the face', () => {
         expect(d.outcomeStats.find(st => st.label === 'TRIGGER')?.value).toBe('per card played');
         expect(d.outcomeStats.find(st => st.label === 'DURATION')?.value).toBe('3t');
         expect(d.stacksText).toBe('Stacks by intensity.');
-        // §C: the +DIE read triplet scales the per-tick base (8 → ▲10 / ▼8),
-        // and the one global legend decodes the columns (audit 2026-07-12).
-        expect(d.dieTriplet).toBe('▲10 · —8 · ▼8');
+        // §C: the +DIE read triplet scales the per-tick base (8 → ▲10 / ▼8).
+        // 2026-09-21 (W3, owner finding 3) — the decode used to be a separate
+        // prose row under the fork; it now rides the triplet, so the combat
+        // overlay spends one row on the fact instead of two. `readLegend`
+        // keeps the full sentence for the out-of-combat DECK screen.
+        expect(d.dieTriplet).toBe('READ ▲10 · —8 · ▼8 — won · even · lost');
         expect(d.readLegend).toContain('▲ won read');
         // The FREE pill is the authored free line, de-abbreviated.
         expect(d.freePill).toBe('poison ×3 · 2 turns');
@@ -388,7 +391,7 @@ describe('card-wording audit (2026-07-12) — the +DIE row carries only what the
         const d = detailStats(card, sourceCard);
         expect(d.diePaidLine).toContain('GUARD 12');
         expect(d.diePaidLine).toContain('THORNS');
-        expect(d.dieTriplet).toMatch(/^▲\d+ · —12 · ▼\d+$/);
+        expect(d.dieTriplet).toMatch(/^READ ▲\d+ · —12 · ▼\d+ — won · even · lost$/);
         expect(d.readLegend).toContain("your die's stance");
     });
     it('persistent cards carry the duration footer (the 6-deck free-vs-paid confusion)', () => {

@@ -124,6 +124,11 @@ describe('hermeticity guard: isolation (no disk in tests)', () => {
         // monorepo root .claude/commands, and the tests moved to /archive.
         'scripts/__tests__/smoke-bundler.test.ts',
         'scripts/__tests__/smoke-screens.test.ts',
+        // the combat card-detail guard (findings 3/5/6) pins what the overlay's
+        // JSX contains and in what ORDER. That shape IS the feature under test,
+        // the same standing as the route guards above; mounting the whole
+        // encounter panel to rediscover it would test the fixture instead.
+        'components/combat/encounter/__tests__/CombatEncounterPanel.card-detail.test.ts',
     ]);
 
     const FS_PATTERN =

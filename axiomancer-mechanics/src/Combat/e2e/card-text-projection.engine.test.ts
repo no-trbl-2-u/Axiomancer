@@ -1,0 +1,117 @@
+/**
+ * The card-text projection must be the SAME truth as the printed lines.
+ *
+ * `combat.card-text.ts` exists so mobile stops re-deriving the card's payload
+ * (owner finding 4 — the detail panel disagreed with the card). That only
+ * holds if the clause list is exhaustive and its wording is the engine's own,
+ * so this guard pins both against the whole live library:
+ *
+ * - joined FREE clauses === `riderText(card.free)`
+ * - joined PAID clauses === `paidText(card)`
+ * - every authored status and every mechanic the engine prints has a clause
+ * - no clause carries a number its own engine wording does not print
+ */
+
+import { describe, expect, it } from 'vitest';
+
+import { cardLibrary } from '../../Cards/cards.library';
+import { lookupEffect } from '../../Effects';
+import { mechanicText, paidText, riderText } from '../combat.cards';
+import {
+    clausesText, freeClauses, paidClauses, paidDetailText, riderClauses,
+} from '../combat.card-text';
+
+describe('card-text projection', () => {
+    it('the FREE clause list rejoins into the engine\'s own rider text', () => {
+        const drift: string[] = [];
+        for (const card of cardLibrary) {
+            if (!card.free) continue;
+            const opts = { selfTargetCard: card.targetType === 'self' };
+            const joined = clausesText(riderClauses(card.free, opts));
+            const engine = riderText(card.free, opts);
+            if (joined !== engine) drift.push(`${card.id}: "${joined}" !== "${engine}"`);
+        }
+        expect(drift).toEqual([]);
+    });
+
+    it('the PAID clause list rejoins into the engine\'s own paid text', () => {
+        const drift: string[] = [];
+        for (const card of cardLibrary) {
+            const joined = paidDetailText(card, lookupEffect);
+            const engine = paidText(card, lookupEffect);
+            if (joined !== engine) drift.push(`${card.id}: "${joined}" !== "${engine}"`);
+        }
+        expect(drift).toEqual([]);
+    });
+
+    it('no authored payload is dropped from the PAID clause list', () => {
+        const missing: string[] = [];
+        for (const card of cardLibrary) {
+            const clauses = paidClauses(card, lookupEffect);
+            for (const ce of card.combatEffects ?? []) {
+                if (!lookupEffect(ce.effectId)) continue;
+                if (!clauses.some(c => c.source === 'effect' && c.id === ce.effectId)) {
+                    missing.push(`${card.id}: status ${ce.effectId}`);
+                }
+            }
+            for (const m of card.specialMechanics ?? []) {
+                if (!mechanicText(m)) continue;
+                if (!clauses.some(c => c.source === 'mechanic' && c.id === m.kind)) {
+                    missing.push(`${card.id}: mechanic ${m.kind}`);
+                }
+            }
+        }
+        expect(missing).toEqual([]);
+    });
+
+    it('a clause never carries a number its own wording does not print', () => {
+        const bad: string[] = [];
+        for (const card of cardLibrary) {
+            const all = [...paidClauses(card, lookupEffect), ...freeClauses(card)];
+            for (const c of all) {
+                const printed = (c.text.match(/\d+(?:\.\d+)?/g) ?? []).map(Number);
+                for (const n of c.numbers) {
+                    if (!printed.includes(n)) bad.push(`${card.id}/${c.id}: ${n} not in "${c.text}"`);
+                }
+            }
+        }
+        expect(bad).toEqual([]);
+    });
+
+    it('a DEAL clause survives on a card that also carries other verbs', () => {
+        // The exact regression behind finding 4: `the-lazars-kiss` deals 20 and
+        // the old presenter walk dropped it, because DEAL carries no keyword
+        // badge and the walk was keyed on badges.
+        const card = cardLibrary.find(c => c.id === 'the-lazars-kiss');
+        expect(card).toBeDefined();
+        const clauses = paidClauses(card!, lookupEffect);
+        const deal = clauses.find(c => c.id === 'deal');
+        expect(deal).toBeDefined();
+        expect(deal!.label).toBe('DEAL');
+        expect(deal!.value).toBe('20');
+        expect(clauses.map(c => c.id)).toContain('convert_dots');
+        expect(clauses.map(c => c.id)).toContain('rider');
+    });
+
+    it('a bare rider clause hands over its own parts, joining back to its text', () => {
+        const drift: string[] = [];
+        for (const card of cardLibrary) {
+            for (const c of paidClauses(card, lookupEffect)) {
+                if (c.id !== 'rider') continue;
+                if (!c.parts) { drift.push(`${card.id}: rider clause carries no parts`); continue; }
+                const rejoined = clausesText(c.parts);
+                if (rejoined !== c.text) drift.push(`${card.id}: "${rejoined}" !== "${c.text}"`);
+            }
+        }
+        expect(drift).toEqual([]);
+    });
+
+    it('a self-cost clause reads as a cost, not as harm done to the foe', () => {
+        const card = cardLibrary.find(c => c.id === 'thumbprick-oath');
+        expect(card).toBeDefined();
+        const recoil = paidClauses(card!, lookupEffect).find(c => c.id === 'recoil');
+        expect(recoil).toBeDefined();
+        expect(recoil!.side).toBe('self');
+        expect(recoil!.label).toBe('RECOIL');
+    });
+});
