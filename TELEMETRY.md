@@ -611,3 +611,6 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-21T15:02:44Z | subagent-end | Explore | claude-opus-5 | 2m01s | ok |
 | 2026-09-21T15:18:21Z | subagent | Explore | claude-opus-5 | - | Recon item grant + equip paths |
 | 2026-09-21T15:18:22Z | subagent-end | Explore | claude-opus-5 | 1s | ok |
+| 2026-09-21T18:36:22Z | slash-prompt | /march | - | - | /march |
+| 2026-09-21T18:39:11Z | skill | adjust-npcs | claude-sonnet-5 | - | - |
+| 2026-09-21T18:39:11Z | skill-end | adjust-npcs | claude-sonnet-5 | 0s | ok |

@@ -15,11 +15,85 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-21 | f74f198e | 15 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-21 | f78f0550 | 15 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-21 | fb0a0f3c | 15 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-21 | 73e0a70c | 14 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-21 | TBD | 15 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-npcs pass 15, 2026-09-21, commit TBD]** Zero-diff pass —
+> audit re-confirmed, no new CREATE/UPDATE/REMOVE, ledger bump only.
+> Dispatched autonomously by `/march`'s content-lifecycle gate: `npcs`
+> was the stalest qualifying category this tick (last pass `73e0a70c`
+> 2026-09-21T02:56:22Z, 26 commits behind HEAD `79d1d7ae`
+> 2026-09-21T16:08:56Z — past the 15-commit threshold; `cards`
+> `86871b9f` 2026-09-21T04:50:29Z, `equipment` `f74f198e`
+> 2026-09-21T07:07:28Z, and `enemies` `f78f0550` 2026-09-21T09:00:58Z
+> all also qualified on commit count but were less stale by last-pass
+> timestamp; `keywords` `fb0a0f3c` 2026-09-21T12:50:21Z did NOT qualify —
+> only 4 commits and ~3h since its own pass 15, under both thresholds).
+> Deploy green (docs/plan-only HEAD, nothing gated to check).
+>
+> **Step 0:** re-read `axiomancer-mechanics/CLAUDE.md` — THE STORY IS
+> THE ROAD (¶1 lifted 2026-09-18) still governs: `content/story/
+> story-overview.md` carries the same 6 events as pass 14 read it (no
+> commit in this window touched `content/story/`), and every one of
+> them still "keeps no shipped node" per its own log line. Nothing on
+> the road has reached a beat with a shipped-content shape this tick
+> either — same constraint, same conclusion as pass 14.
+>
+> **Step 1 audit:** `git log 73e0a70c..HEAD -- src/NPCs
+> src/World/Continents src/World/MapEvents src/World/types.ts` shows
+> only two touches to `src/World/Continents` in the 26-commit window —
+> `65d4abee` (early HIDE ramp; swaps one fishing-village node's content
+> pool from gathering to an encounter) and `36ba0e6a` (three gate nodes
+> added to fishing-village's topology) — both pure topology/encounter
+> changes with zero touch to any `npcs:`/`unstagedNpcs:` array or NPC
+> const. Re-ran every structural signal fresh anyway:
+> - All 21 `const NPC` entries (`oldMarrow` through `theRibbonPicker`)
+>   unchanged in count, still each referenced from exactly one map's
+>   `npcs:` or `unstagedNpcs:` array — no orphan.
+> - Zero legacy `dialogue:` (flat `DialogueMap`) usage across
+>   `src/World/Continents/*/npcs.ts` and `*/maps.ts` — every NPC still
+>   on `dialogueTree`.
+> - No stale `startQuest`/`progressQuest`/`completeQuest`/`teachCard`
+>   reference: `teachCard` has zero usages in NPC content; every
+>   quest-effect name (`gather-iron`, `get-to-cave`, `get-to-forest`,
+>   `get-to-northern-city`, `find-islanders`, `get-to-connecting-river`,
+>   `get-to-town-across-river`, `get-to-the-capital`, `gather-wood`,
+>   `starting-quest`) resolves against the live `quest.library.ts` union
+>   (type-checked green by the verify gate below).
+> - Coastal-Village's 3-NPC `unstagedNpcs` backlog (Tide-Shopkeeper,
+>   Dockworker's Union Leader, Merchant's Widow) unchanged — still the
+>   same genuine engine-surface gap (no `openShop`-shaped
+>   `DialogueChoice.effect` exists), correctly left unstaged.
+> - Northern-Continent's three 1-NPC maps (`caverns`/theDelver,
+>   `connecting-river`/theBoatwoman, `town-across-river`/theSweetheart)
+>   unchanged; `plan/AUDIT.md`'s `[gap]` row (DECIDED via `/oversight`
+>   2026-09-15) re-confirmed still open and still not this autonomous
+>   tick's call — same reconciliation-with-THE-STORY-IS-THE-ROAD note
+>   as pass 14 stands untouched.
+>
+> **Step 1b widened check:** Step 1 returned nothing actionable, so ran
+> the deeper KB cross-reference before accepting zero-diff. `kb_overview`
+> confirms the corpus is byte-identical to pass 14's read (46 board/card
+> games, 2801 okf docs, zero dialogue-tree-bearing digital RPGs) — no
+> new source landed to re-scan. One fresh-angle search (`hub|settlement|
+> npc roster|cast size|merchant`, scope `all`) returned only unrelated
+> URL/hostname matches (`...github.io/...hub...`), no dialogue/NPC
+> commentary. No new citable gap; existing wishlist
+> [`game-knowledge-base#81`](https://github.com/no-trbl-2-u/game-knowledge-base/issues/81)
+> still covers the corpus-shape miss pass 13 filed.
+>
+> **Ship (Step 3):** none — zero CREATE, zero UPDATE, zero REMOVE. Both
+> open items (Northern-Continent singleton maps, Coastal-Village's
+> 3-NPC unstaged backlog) are re-confirmed correctly-blocked, not stale.
+>
+> **Gates:** `npm run verify --workspace axiomancer-mechanics` (222
+> files / 3618 tests) and `npm run verify --workspace axiomancer-mobile`
+> green (unchanged, no source touched).
+```
 
 ```
 > **[adjust-keywords pass 15, 2026-09-21, commit fb0a0f3c]** Zero-diff pass —
