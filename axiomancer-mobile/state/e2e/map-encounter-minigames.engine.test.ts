@@ -9,12 +9,17 @@
  * Phase 76 retired "The Gleaning": it grants its items inline through
  * the same intercept point, with no session and no screen.
  *
+ * 2026-09-21 (owner finding 2) — "no screen" turned out to be the bug: a
+ * gather node granted its items and then said nothing a player could read.
+ * The grant is still inline and still session-free, but it now surfaces on
+ * the paced `/event` card. See `gathering-acknowledgement.engine.test.ts`.
+ *
  * This pins that contract end-to-end through the store action layer
  * (the same path `app/(tabs)/exploration` drives on a node tap):
  *   - treasure node → loot-cache session, no paced /event route
  *   - rest node → rest session
- *   - gather node → items land in inventory inline, no session, no
- *     paced /event route
+ *   - gather node → items land in inventory inline, no session, and the
+ *     paced /event acknowledgement card
  * plus the design invariant:
  *   - the lone northern-forest quest interaction shows real mobile
  *     dialogue (forgotten-pilgrim), never the empty "A figure waits."
@@ -97,7 +102,14 @@ describe('map encounter → minigame routing (northern-forest)', () => {
         expect(selectPacedEventRoute(store.getState())).toBeNull();
     });
 
-    it('gather node grants its items inline, no session and no paced /event', () => {
+    // 2026-09-21 (owner finding 2, "the Gather node is now a no-op") — this
+    // case used to assert the OPPOSITE tail: items land, and then nothing.
+    // That was the bug. The grant still happens in the engine resolver with
+    // no session and no minigame (the Gleaning stays retired), but the node
+    // now pays out onto the paced `/event` card so the player is told what
+    // they picked up. Full coverage of the card lives in
+    // `gathering-acknowledgement.engine.test.ts`.
+    it('gather node grants its items and opens the paced /event acknowledgement, with no session', () => {
         const { store, actions } = makeStoreAndActions();
         seatAt(store, 'northern-forest', firstNodeOfKind('northern-forest', 'gathering'));
         const before = store.getState().player.inventory.length;
@@ -105,8 +117,12 @@ describe('map encounter → minigame routing (northern-forest)', () => {
         expect(actions.resolveCurrentMapEvent('gather')).toBe(true);
 
         expect(store.getState().player.inventory.length).toBeGreaterThan(before);
-        expect(selectHasActiveEvent(store.getState())).toBe(false);
-        expect(selectPacedEventRoute(store.getState())).toBeNull();
+        expect(selectHasActiveEvent(store.getState())).toBe(true);
+        expect(selectPacedEventRoute(store.getState())).toBe('/event');
+        // The Gleaning's session slices stay empty — this is a card, not a
+        // minigame coming back.
+        expect(selectHasActiveCache(store.getState())).toBe(false);
+        expect(selectHasActiveRest(store.getState())).toBe(false);
     });
 });
 

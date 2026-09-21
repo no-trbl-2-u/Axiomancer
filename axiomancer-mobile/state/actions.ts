@@ -1521,24 +1521,25 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
             return true;
         }
 
-        // Gathering events grant their items inline (Phase 76 retired "The
-        // Gleaning" minigame). The engine's resolveMapEvent already
-        // appended the payload items to the inventory in `resolvedState` —
-        // unlike hazard/rest above, that grant stands as-is; there is no
-        // minigame spoils step to defer to. No screen detour: clear the
-        // event slice and surface a toast naming what was gathered.
-        if (result.event.kind === 'gathering') {
-            store.setState({
-                ...resolvedState,
-                event: EMPTY_EVENT_SLICE,
-            });
-            const itemNames = result.event.items.map(i => i.name).join(', ');
-            if (itemNames) {
-                pushToast(store, `Gathered ${itemNames}.`);
-            }
-            return true;
-        }
-
+        // Gathering has NO interceptor (2026-09-21, owner finding 2 — "the
+        // Gather node is now a no-op").
+        //
+        // Phase 76 retired "The Gleaning" minigame and left the grant inline:
+        // the engine's `resolveGathering` appends the payload items to the
+        // inventory in `resolvedState`, and that part was never broken — all
+        // twelve authored gathering nodes roll a real, named item (measured;
+        // pinned in `MapEvents/e2e/gathering-grant.engine.test.ts`). What WAS
+        // broken: the only acknowledgement was `pushToast('Gathered …')` —
+        // three seconds of 10pt mono at `bottom: 80`, drawn by a `<ToastHost>`
+        // that `app/_layout.tsx` declares BEFORE `<Stack>` with no `zIndex`,
+        // so the navigator's opaque `<ScreenBg>` paints straight over it.
+        //
+        // So gathering falls through to the paced-event tail below like
+        // `interaction` / `village` / `cutscene`, and `composeGathering`
+        // renders an acknowledgement card that names what was picked up and
+        // waits for the player. No session, no RNG, no new route — the
+        // Gleaning stays retired; only the receipt came back.
+        //
         // Rest events launch the rest-choice node (Phase 52d) instead of
         // the legacy silent heal. The engine's resolveMapEvent already
         // applied the passive heal to `result.state`; restore the
@@ -1656,6 +1657,19 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
             sourceNodeType: sourceNodeType ?? null,
         };
         store.setState({ ...resolvedState, event: nextEvent });
+
+        // A gathering grant is already folded into `resolvedState` by the
+        // engine resolver, and unlike every other paced kind it is a
+        // PERMANENT change to the inventory rather than a choice the player is
+        // still weighing — the acknowledgement card cannot refuse it.
+        // Checkpoint it here, on the same argument the crossing save above
+        // makes: saves are explicit on mobile (Spec 09), `moveToAction`'s
+        // checkpoint is taken BEFORE the arrival resolves, and a close on the
+        // acknowledgement card would otherwise cost the player what they had
+        // just picked up. "The item is in SATCHEL afterward, and stays there."
+        if (result.event.kind === 'gathering') {
+            try { store.getState().save(); } catch { /* persistence must not block the road */ }
+        }
 
         return result.event.kind !== 'none';
     } catch (error) {

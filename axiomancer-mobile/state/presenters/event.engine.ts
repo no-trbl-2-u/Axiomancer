@@ -47,7 +47,14 @@ import { toRomanLower } from './roman';
 export type EventKind = 'combat-prelude' | 'narrative-choice';
 // Phase 137 cleanup: the 'rest' / 'gather' variants left with their
 // kinds — those events launch minigames and never reach this VM.
-export type EventVariant = 'encounter' | 'boss' | 'quest' | 'npc';
+//
+// 2026-09-21 (owner finding 2, "the Gather node is now a no-op"): 'gather'
+// comes BACK. Phase 76 retired the Gleaning minigame and Phase 137 then
+// filed `gathering` as a dead-end kind, which left the node with no
+// player-facing surface at all — see `composeGathering` for the whole
+// argument. The kind now composes a real acknowledgement card, so it needs
+// its variant again. 'rest' stays gone: the rest-choice node still owns it.
+export type EventVariant = 'encounter' | 'boss' | 'quest' | 'npc' | 'gather';
 export type ChoiceAccentKey = 'blood' | 'sulfur' | 'parchment' | 'bone' | 'rust';
 
 export type ConsequenceKind =
@@ -274,8 +281,13 @@ export type PacedEventRoute = '/event' | '/village' | '/dialogue' | '/cutscene';
  * Phase 137 gave interaction / village / cutscene dedicated screens;
  * everything else paced keeps the generic `/event` shell. Returns
  * `null` when no paced event is active (rest / loot-cache / quest /
- * hazard / gathering never reach the event slice anymore — their
- * interceptors start minigame sessions instead).
+ * hazard never reach the event slice — their interceptors start
+ * minigame sessions instead).
+ *
+ * 2026-09-21 — `gathering` reaches the slice again and mounts the
+ * generic `/event` shell as its acknowledgement card (owner finding 2;
+ * see `composeGathering`). It is the one kind that routes here in
+ * production, so `/event` is no longer a dead fallback.
  */
 export function selectPacedEventRoute(state: AppStoreState): PacedEventRoute | null {
     if (!selectHasActivePacedEvent(state)) return null;
@@ -648,18 +660,18 @@ function composeNarrative(resolved: ResolvedEvent): Omit<EventViewModel, 'prelud
             return composeVillage(resolved.villageName, resolved.merchants, body, artSlug);
         case 'cutscene':
             return composeCutscene(body, artSlug);
-        // Dead-end kinds (Phase 137 cleanup): rest / gathering /
-        // loot-cache / hazard never reach the event slice —
+        case 'gathering':
+            return composeGathering(resolved.items, body, artSlug);
+        // Dead-end kinds (Phase 137 cleanup): rest / loot-cache /
+        // hazard never reach the event slice —
         // `resolveCurrentMapEventAction` intercepts them and starts
         // their minigame/choice sessions instead (the rest-choice
-        // node, "The Reliquary", the hazard board — gathering grants
-        // its items inline since Phase 76 retired "The Gleaning").
+        // node, "The Reliquary", the hazard board).
         // 'encounter' renders through the combat-prelude
         // path before composeNarrative is reached; 'none' is guarded
         // by selectHasActiveEvent. All fall to the empty VM
         // defensively.
         case 'rest':
-        case 'gathering':
         case 'loot-cache':
         case 'hazard':
         case 'encounter':
@@ -780,6 +792,83 @@ function composeCutscene(body: string, artSlug: EventArtSlug): Omit<EventViewMod
         lore: null,
         // Cutscenes are often long; skip is always available.
         canSkip: true,
+    };
+}
+
+/**
+ * `Name` or `Name x3` — the stack size only surfaces when there is a stack.
+ * `quantity` lives on `Material` (and on stacked consumables); the other
+ * `Item` members do not carry it, so the read is narrowed rather than cast.
+ */
+function gatheredLabel(item: Item): string {
+    const quantity = 'quantity' in item && typeof item.quantity === 'number' ? item.quantity : 1;
+    return quantity > 1 ? `${item.name} x${quantity}` : item.name;
+}
+
+/**
+ * The gathering acknowledgement card.
+ *
+ * 2026-09-21, owner finding 2 — "the Gather node is now a no-op". It was
+ * not a no-op in the engine: `resolveGathering` appends the payload items
+ * to `player.inventory` and `resolve-map-event` advances any `collect`
+ * quest objectives, and both were measured working on all twelve authored
+ * gathering nodes. What was missing was any surface. Phase 76 retired the
+ * "Gleaning" minigame and replaced its screen with a 3-second, 10pt toast;
+ * Phase 137 then filed `gathering` as a dead-end kind here. So the player
+ * walked onto a node, the node went dark, and the only trace was a strip
+ * of text that the navigator paints over (`<ToastHost>` is declared BEFORE
+ * `<Stack>` in `app/_layout.tsx`, with no `zIndex`, and every screen's
+ * `<ScreenBg>` is opaque).
+ *
+ * This is NOT the Gleaning coming back. There is no session, no RNG, no
+ * tuning surface and no new route — the grant still happens in the engine
+ * resolver, exactly as Phase 76 left it, and this composes the same paced
+ * `narrative-choice` card that `interaction` / `village` / `cutscene`
+ * already use. The card's only job is to name what the player just picked
+ * up and to wait for them, so the acknowledgement outlives a glance.
+ *
+ * The button is a continue, not a decision: the items are already in the
+ * inventory by the time this VM exists, so the label acknowledges a thing
+ * done rather than offering a choice the player does not have.
+ */
+function composeGathering(
+    items: ReadonlyArray<Item>,
+    body: string,
+    artSlug: EventArtSlug,
+): Omit<EventViewModel, 'preludeChrome' | 'chrome' | 'sourceNodeType'> {
+    const labels = items.map(gatheredLabel);
+    const foundSomething = labels.length > 0;
+    return {
+        kind: 'narrative-choice',
+        variant: 'gather',
+        artSlug,
+        badge: 'A GATHERING',
+        badgeAccentKey: 'rust',
+        // The names ARE the payload of this card — the owner's complaint was
+        // that nothing told them what they had gathered.
+        title: foundSomething ? labels.join(' · ').toUpperCase() : 'NOTHING WORTH TAKING',
+        // Where it went, so the player knows which tab to look in.
+        subtitle: foundSomething ? 'into the satchel' : '',
+        body,
+        choices: [
+            {
+                id: 'acknowledge',
+                label: foundSomething
+                    ? (labels.length === 1 ? 'POCKET IT' : 'POCKET THEM')
+                    : 'MOVE ON',
+                description: 'Continue',
+                // One chip per item. The screen shows three and counts the
+                // rest, so a fat pool still reads.
+                consequences: labels.map((label) => ({ kind: 'item' as const, label })),
+                iconKey: 'herbs',
+                accentKey: 'rust',
+                enabled: true,
+                subtitle: null,
+                decode: null,
+            },
+        ],
+        lore: null,
+        canSkip: body.length > 240,
     };
 }
 

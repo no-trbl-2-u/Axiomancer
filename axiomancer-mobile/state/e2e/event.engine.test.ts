@@ -557,13 +557,18 @@ describe('selectEventViewModel: referential stability (Maximum-update-depth guar
 });
 
 describe('selectEventViewModel: narrative-choice composition', () => {
-    // Phase 137 cleanup — rest / gathering / loot-cache events are
-    // intercepted in resolveCurrentMapEventAction (they launch the
-    // rest-choice session / "The Gleaning" / "The Reliquary") and never
-    // reach the modal. The composer treats them as dead-end kinds.
-    it('composes minigame-intercepted kinds (rest / gathering / loot-cache) to the empty VM', () => {
+    // Phase 137 cleanup — rest / loot-cache events are intercepted in
+    // resolveCurrentMapEventAction (they launch the rest-choice session /
+    // "The Reliquary") and never reach the modal. The composer treats them
+    // as dead-end kinds.
+    //
+    // 2026-09-21 (owner finding 2) — `gathering` LEFT this list. It used to
+    // sit here because Phase 76 retired "The Gleaning" and left the grant
+    // inline with only a toast; a dead-end VM was the presenter agreeing
+    // that a gather node had nothing to say. It has something to say now.
+    it('composes minigame-intercepted kinds (rest / loot-cache) to the empty VM', () => {
         const store = makeStore();
-        for (const result of [makeRestResult(7), makeGatheringResult(), makeLootCacheResult()]) {
+        for (const result of [makeRestResult(7), makeLootCacheResult()]) {
             setPending(store, result);
             const vm = selectEventViewModel(store.getState());
             expect(vm.kind).toBe('narrative-choice');
@@ -571,6 +576,63 @@ describe('selectEventViewModel: narrative-choice composition', () => {
             expect(vm.artSlug).toBe('interaction-generic');
             expect(vm.choices).toHaveLength(0);
         }
+    });
+
+    it('composes a gathering event into an acknowledgement card naming every item', () => {
+        const store = makeStore();
+        setPending(store, makeGatheringResult());
+        const vm = selectEventViewModel(store.getState());
+
+        expect(vm.kind).toBe('narrative-choice');
+        expect(vm.variant).toBe('gather');
+        expect(vm.badge).toBe('A GATHERING');
+        expect(vm.title).toBe('WITHERWORT · FLINT SHARD');
+        expect(vm.subtitle).toBe('into the satchel');
+        expect(vm.choices).toHaveLength(1);
+        expect(vm.choices[0]?.id).toBe('acknowledge');
+        // Plural payload, plural verb.
+        expect(vm.choices[0]?.label).toBe('POCKET THEM');
+        expect(vm.choices[0]?.consequences).toEqual([
+            { kind: 'item', label: 'Witherwort' },
+            { kind: 'item', label: 'Flint shard' },
+        ]);
+    });
+
+    it('gathering body falls back to the kind placeholder when the node authored none', () => {
+        const store = makeStore();
+        setPending(store, makeGatheringResult());
+        expect(selectEventViewModel(store.getState()).body).toBe('Useful things, here.');
+    });
+
+    it('gathering shows a stacked payload as "Name xN"', () => {
+        const store = makeStore();
+        setPending(store, {
+            state: undefined as never,
+            event: {
+                kind: 'gathering',
+                items: [
+                    { id: 'berry', name: 'Dark Berries', category: 'material', quantity: 2 } as never,
+                ],
+            },
+        });
+        const vm = selectEventViewModel(store.getState());
+        expect(vm.title).toBe('DARK BERRIES X2');
+        expect(vm.choices[0]?.label).toBe('POCKET IT');
+        expect(vm.choices[0]?.consequences).toEqual([{ kind: 'item', label: 'Dark Berries x2' }]);
+    });
+
+    it('a gathering payload that rolled nothing says so rather than showing a blank card', () => {
+        const store = makeStore();
+        setPending(store, {
+            state: undefined as never,
+            event: { kind: 'gathering', items: [] },
+        });
+        const vm = selectEventViewModel(store.getState());
+        expect(vm.title).toBe('NOTHING WORTH TAKING');
+        expect(vm.subtitle).toBe('');
+        expect(vm.choices).toHaveLength(1);
+        expect(vm.choices[0]?.label).toBe('MOVE ON');
+        expect(vm.choices[0]?.consequences).toEqual([]);
     });
 
     it('maps a village event to a single LEAVE choice (shop UI deferred)', () => {
