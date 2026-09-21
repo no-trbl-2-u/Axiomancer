@@ -7,6 +7,7 @@ import {
     type GameEventEmitter,
     type GameState,
     type GameStore,
+    type Item,
     type PersistenceAdapter,
     type ResolveMapEventResult,
     type StoreApi,
@@ -175,9 +176,50 @@ export interface MobileCombatRewardSlice {
     claimed: boolean;
 }
 
+/**
+ * One item waiting on the player's CONFIRM / EQUIP at `/item-reward`.
+ *
+ * The item is NOT yet in the inventory: the grant is what CONFIRM and EQUIP
+ * commit, both through the engine's single `grantItem` path. D7 makes the
+ * screen dismissible, so every exit route (back, swipe, Android hardware-back)
+ * drains the queue as CONFIRM — the item cannot be lost by leaving.
+ */
+export interface PendingItemReward {
+    /** The item to hand over. Cloned again by `grantItem` on commit. */
+    item: Item;
+    /** Where it came from, for the screen's eyebrow. `null` shows the default. */
+    source: string | null;
+    /**
+     * Flags stamped onto `GameState.flags` when this entry commits — how a
+     * one-shot grant (the first-node Suppliant's Ring) records that it settled.
+     */
+    settleFlags: readonly string[];
+    /**
+     * Which accessory position EQUIP should displace when the row is full.
+     * Omitted means the engine default (the last worn accessory).
+     */
+    replaceIndex?: number;
+}
+
+/**
+ * Mobile-only ITEM REWARD slice (owner finding 10; decisions D5/D6/D7).
+ *
+ * A FIFO queue so a batch grant (a gathering haul, a loot cache, an encounter's
+ * drops) can present its qualifying items one after another — the head is the
+ * item on screen. Empty means no reward screen is open.
+ *
+ * Transient by design: the COMMIT is what persists (the `grantItem` result
+ * written onto `player`, followed by an explicit `save()`), never the pending
+ * offer.
+ */
+export interface MobileItemRewardSlice {
+    queue: readonly PendingItemReward[];
+}
+
 export type AppStoreState = GameStore & {
     event: MobileEventSlice;
     combatReward: MobileCombatRewardSlice;
+    itemReward: MobileItemRewardSlice;
     hazard: MobileHazardSlice;
     rest: MobileRestSlice;
     cache: MobileCacheSlice;
@@ -212,6 +254,10 @@ export const EMPTY_EVENT_SLICE: MobileEventSlice = Object.freeze({
 export const EMPTY_COMBAT_REWARD_SLICE: MobileCombatRewardSlice = Object.freeze({
     offers: Object.freeze([]),
     claimed: false,
+});
+
+export const EMPTY_ITEM_REWARD_SLICE: MobileItemRewardSlice = Object.freeze({
+    queue: Object.freeze([]),
 });
 
 export const EMPTY_HAZARD_SLICE: MobileHazardSlice = Object.freeze({ session: null, tutorial: false });
@@ -325,6 +371,7 @@ export function createAppStore(options: CreateAppStoreOptions = {}): AppStore {
         save: () => withPassthrough(engineSave),
         event: EMPTY_EVENT_SLICE,
         combatReward: EMPTY_COMBAT_REWARD_SLICE,
+        itemReward: EMPTY_ITEM_REWARD_SLICE,
         hazard: EMPTY_HAZARD_SLICE,
         rest: EMPTY_REST_SLICE,
         cache: EMPTY_CACHE_SLICE,

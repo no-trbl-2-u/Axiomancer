@@ -1,0 +1,139 @@
+/**
+ * Hermetic E2E — the `/item-reward` screen (owner finding 10; D5 / D6 / D7).
+ *
+ * Mounts the real route against a rigged store and drives its two commits.
+ * The D7 assertion is the one that matters most: UNMOUNTING the screen — what
+ * back, swipe and Android hardware-back all do, since this route deliberately
+ * carries no `gestureEnabled: false` and no `<HardwareBackHandler>` — must
+ * behave exactly as CONFIRM. No exit path may lose a reward.
+ */
+
+import React from 'react';
+import { act, fireEvent, render, screen } from '@testing-library/react-native';
+import { afterEach, describe, expect, it, jest } from '@jest/globals';
+import { getConsumableById, getRelicById, SLOT_CAPACITY } from '@mechanics';
+import type { Character, Equipment, GameState, Item } from '@mechanics';
+
+import ItemRewardScreen from '@/app/item-reward/index';
+import { offerItemRewardAction } from '@/state/item-reward/store-actions';
+import type { AppStore } from '@/state/store';
+import { withAllProviders } from '@/test-utils/withAllProviders';
+
+const mockBack = jest.fn();
+jest.mock('@/lib/platform/router', () => ({
+    useRouter: () => ({ back: mockBack, push: jest.fn(), canGoBack: () => true }),
+}));
+
+afterEach(() => {
+    jest.clearAllMocks();
+});
+
+function relic(id: string): Equipment {
+    const found = getRelicById(id);
+    if (!found) throw new Error(`test fixture missing relic ${id}`);
+    return found;
+}
+
+/** A relic the seeded character is guaranteed NOT to be wearing. */
+const BENCHED_ACCESSORY = 'relic-mounting-dread';
+
+function player(store: AppStore): Character {
+    return (store.getState() as unknown as GameState).player;
+}
+
+function mount(offer?: (store: AppStore) => void) {
+    const { tree, store } = withAllProviders(<ItemRewardScreen />);
+    if (offer) offer(store);
+    const view = render(tree);
+    return { store, view };
+}
+
+describe('/item-reward screen', () => {
+    it('presents the item, its signature skill, and the trade EQUIP would make', () => {
+        mount((store) => offerItemRewardAction(store, relic(BENCHED_ACCESSORY)));
+
+        expect(screen.getByTestId('item-reward-name').props.children).toBe("Cassandra's Circlet");
+        expect(screen.getByTestId('item-reward-signature')).toBeTruthy();
+        expect(screen.getByTestId('item-reward-stats')).toBeTruthy();
+        // D6 — the displaced piece is named before the player commits.
+        expect(screen.getByTestId('item-reward-trade-note').props.children)
+            .toContain('satchel');
+        // D7 — the player is told that leaving keeps it.
+        expect(screen.getByTestId('item-reward-keep-note')).toBeTruthy();
+    });
+
+    it('hides EQUIP — does not grey it — for an item that cannot be worn', () => {
+        mount((store) =>
+            offerItemRewardAction(store, getConsumableById('healing-potion') as Item, {
+                includeInline: true,
+            }),
+        );
+
+        expect(screen.queryByTestId('item-reward-equip')).toBeNull();
+        expect(screen.getByTestId('item-reward-confirm')).toBeTruthy();
+    });
+
+    it('CONFIRM puts it in the satchel and changes nothing on the body', () => {
+        const { store } = mount((s) => offerItemRewardAction(s, relic(BENCHED_ACCESSORY)));
+        const wornBefore = player(store).equipment.accessories.map((a) => a.id);
+
+        act(() => {
+            fireEvent.press(screen.getByTestId('item-reward-confirm'));
+        });
+
+        const after = player(store);
+        expect(after.inventory.map((i) => i.id)).toContain(BENCHED_ACCESSORY);
+        expect(after.equipment.accessories.map((a) => a.id)).toEqual(wornBefore);
+        expect(store.getState().itemReward.queue).toHaveLength(0);
+    });
+
+    it('EQUIP puts it in the satchel AND on the body, returning the displaced piece', () => {
+        const { store } = mount((s) => offerItemRewardAction(s, relic(BENCHED_ACCESSORY)));
+        const displaced = player(store).equipment.accessories[SLOT_CAPACITY.accessory - 1]!;
+
+        act(() => {
+            fireEvent.press(screen.getByTestId('item-reward-equip'));
+        });
+
+        const after = player(store);
+        expect(after.equipment.accessories.map((a) => a.id)).toContain(BENCHED_ACCESSORY);
+        expect(after.inventory.map((i) => i.id)).toContain(BENCHED_ACCESSORY);
+        // Nothing is destroyed by a swap.
+        expect(after.inventory.map((i) => i.id)).toContain(displaced.id);
+        expect(store.getState().itemReward.queue).toHaveLength(0);
+    });
+
+    it('D7 — unmounting the screen (back / swipe / hardware-back) behaves as CONFIRM', () => {
+        const { store, view } = mount((s) => offerItemRewardAction(s, relic(BENCHED_ACCESSORY)));
+        const wornBefore = player(store).equipment.accessories.map((a) => a.id);
+
+        act(() => {
+            view.unmount();
+        });
+
+        const after = player(store);
+        expect(after.inventory.map((i) => i.id)).toContain(BENCHED_ACCESSORY);
+        expect(after.equipment.accessories.map((a) => a.id)).toEqual(wornBefore);
+        expect(store.getState().itemReward.queue).toHaveLength(0);
+    });
+
+    it('dismissing mid-batch keeps every queued item', () => {
+        const { store, view } = mount((s) =>
+            offerItemRewardAction(s, [relic(BENCHED_ACCESSORY), relic('relic-endless-labor')]),
+        );
+
+        act(() => {
+            view.unmount();
+        });
+
+        const ids = player(store).inventory.map((i) => i.id);
+        expect(ids).toContain(BENCHED_ACCESSORY);
+        expect(ids).toContain('relic-endless-labor');
+    });
+
+    it('unwinds the route once the queue is empty', () => {
+        mount();
+        expect(screen.getByTestId('item-reward-inactive')).toBeTruthy();
+        expect(mockBack).toHaveBeenCalled();
+    });
+});
