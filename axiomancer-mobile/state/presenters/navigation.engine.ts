@@ -16,7 +16,7 @@ import { selectHasActiveHazard } from './hazard.engine';
 import { selectHasActiveRest } from './rest.engine';
 import { freezeViewModel } from './freeze';
 
-export type TabRoute = 'exploration' | 'character' | 'memoir' | 'inventory';
+export type TabRoute = 'exploration' | 'character' | 'memoir' | 'inventory' | 'deck';
 export type ActiveRoute = TabRoute | 'combat-encounter';
 
 export interface TabBadge {
@@ -69,6 +69,12 @@ const EMPTY_BADGES: Record<TabRoute, TabBadge | null> = Object.freeze({
     character: null,
     memoir: null,
     inventory: null,
+    // DECK (2026-09-21) carries no badge. A badge is a call to ACT, and the
+    // deck screen is a reference surface — nothing on it is pending. The
+    // obvious candidate ("you drafted a new card") already announces itself
+    // in the rewards overlay the player just dismissed; repeating it here
+    // would be the third telling of one event.
+    deck: null,
 }) as Record<TabRoute, TabBadge | null>;
 
 const EVENT_BADGE: TabBadge = Object.freeze({ text: '!', kind: 'event' });
@@ -118,6 +124,7 @@ export function selectTabBadges(state: AppStoreState): Record<TabRoute, TabBadge
         character: levelupReady ? LEVELUP_BADGE : hasEvent ? EVENT_BADGE : null,
         memoir: questPending ? EVENT_BADGE : null,
         inventory: null,
+        deck: null,
     };
 }
 

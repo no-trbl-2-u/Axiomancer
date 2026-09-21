@@ -5,13 +5,18 @@ import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import { AxmIcon, type AxmIconName } from '@/components/icons';
 import { useCombatMode } from '@/state/combat-mode';
-import { TAB_TITLES } from '@/state/presenters/tabs.engine';
+import {
+  TAB_BAR_LABEL_FONT_SIZE,
+  TAB_BAR_LABEL_LETTER_SPACING,
+  TAB_TITLES,
+} from '@/state/presenters/tabs.engine';
 import { useGameState } from '@/state/GameStoreProvider';
 import { selectTabBadges } from '@/state/presenters/navigation.engine';
 import ExplorationScreen from './exploration/index';
 import CharacterScreen from './character/index';
 import MemoirScreen from './memoir/index';
 import InventoryScreen from './inventory/index';
+import DeckScreen from './deck/index';
 
 function TabBadge({ text, kind }: { text: string; kind: 'event' | 'levelup' }) {
   const AXM = usePalette();
@@ -37,6 +42,13 @@ const TAB_ICONS: Record<string, { name: AxmIconName; label: string }> = {
   bag: { name: 'action-bag', label: 'Inventory tab' },
   scroll: { name: 'action-scroll', label: 'Event tab' },
   quill: { name: 'action-quill', label: 'Memoir tab' },
+  // DECK (2026-09-21, finding 7 / D2). The icon canon has no stacked-cards
+  // glyph and minting one would mean editing the shared registry from a tab
+  // change, so DECK borrows `action-arcane` — the canon's spell mark, which
+  // is literally what the combat deck is a stack of. Its a11y label is
+  // overridden here, as every tab's is. A bespoke card-stack glyph is filed
+  // as a follow-up for the icon canon's own pass.
+  cards: { name: 'action-arcane', label: 'Deck tab' },
 };
 
 function TabIconWithBadge({
@@ -213,6 +225,35 @@ export default function TabLayout() {
           },
         }}
       />
+      {/* DECK is registered LAST so no existing tab changes position — the
+          four tabs players already have muscle memory for keep their slots,
+          and DECK lands beside SATCHEL, the other "what you carry" surface.
+          It locks with the rest during the encounter modal: the deck is
+          reference material, and reading it mid-fight is exactly the
+          hard-stop the modal exists to enforce. */}
+      <Tabs.Screen
+        name="deck/index"
+        component={DeckScreen}
+        options={{
+          title: TAB_TITLES.deck,
+          tabBarLabel: TAB_TITLES.deck,
+          tabBarIcon: ({ color, size, focused }) => (
+            <TabIconWithBadge
+              kind="cards"
+              color={color}
+              size={size}
+              focused={focused}
+              badge={badges.deck}
+            />
+          ),
+          tabBarButton: lockOtherTabs ? () => null : undefined,
+        }}
+        listeners={{
+          tabPress: (e) => {
+            if (lockOtherTabs) e.preventDefault();
+          },
+        }}
+      />
     </Tabs>
   );
 }
@@ -233,10 +274,16 @@ const useStyles = makeStyles((AXM) => ({
     paddingBottom: 8,
     display: 'none' as const,
   },
+  // Type size and tracking come from the presenter so the tab-bar FIT
+  // contract in `state/e2e/tabs.engine.test.ts` measures the label the bar
+  // actually draws. Tracking dropped 2 -> 1 when DECK made the bar five tabs
+  // wide: THE LEDGER at tracking 2 clears a 360pt phone by 6pt but overflows
+  // a 320pt one, and a clipped label is silent (the navigator's Label is
+  // `numberOfLines: 1`, so it ellipsises rather than breaking the layout).
   tabLabel: {
     fontFamily: FONTS.sans,
-    fontSize: 10,
-    letterSpacing: 2,
+    fontSize: TAB_BAR_LABEL_FONT_SIZE,
+    letterSpacing: TAB_BAR_LABEL_LETTER_SPACING,
   },
   iconContainer: {
     position: 'relative',

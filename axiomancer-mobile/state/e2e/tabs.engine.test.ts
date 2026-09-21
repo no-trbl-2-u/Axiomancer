@@ -10,7 +10,17 @@
 
 import { afterEach, describe, it, expect, jest } from '@jest/globals';
 
-import { isTabHidden, selectVisibleTabs, TAB_TITLES, type TabKey } from '@/state/presenters/tabs.engine';
+import {
+    isTabHidden,
+    measureTabBarFit,
+    measureTabLabel,
+    NARROW_VIEWPORT_PT,
+    NARROWEST_VIEWPORT_PT,
+    selectVisibleTabs,
+    TAB_TITLES,
+    visibleTabTitles,
+    type TabKey,
+} from '@/state/presenters/tabs.engine';
 
 afterEach(() => {
     jest.restoreAllMocks();
@@ -70,24 +80,38 @@ describe('selectVisibleTabs: mutual exclusion', () => {
 
 describe('selectVisibleTabs: always-visible tabs', () => {
     it.each([false, true])(
-        'always shows SELF, MEMOIR, and SATCHEL (inCombat=%p)',
+        'always shows SELF, MEMOIR, SATCHEL, and DECK (inCombat=%p)',
         (inCombat) => {
             const vm = selectVisibleTabs(inCombat);
 
             expect(vm.visibleTabs).toEqual(
-                expect.arrayContaining(['character', 'memoir', 'inventory']),
+                expect.arrayContaining(['character', 'memoir', 'inventory', 'deck']),
             );
             expect(vm.hiddenTabs).not.toEqual(
-                expect.arrayContaining(['character', 'memoir', 'inventory']),
+                expect.arrayContaining(['character', 'memoir', 'inventory', 'deck']),
             );
         },
     );
 
-    it('returns 4 visible tabs (1 positional + 3 always-visible) post-Phase-33', () => {
+    it('returns 5 visible tabs (1 positional + 4 always-visible) post-DECK', () => {
+        // Finding 7 / D2 (2026-09-21) added DECK as the fifth VISIBLE tab.
+        // Phase 33's count of 4 is the pre-DECK number.
         for (const inCombat of [false, true]) {
             const vm = selectVisibleTabs(inCombat);
-            expect(vm.visibleTabs).toHaveLength(4);
+            expect(vm.visibleTabs).toHaveLength(5);
         }
+    });
+
+    it('appends DECK last so no existing tab changes position', () => {
+        // The point of appending rather than slotting DECK beside SELF: four
+        // tabs' worth of muscle memory survives the addition. If a later
+        // change reorders the bar, this is the test that should argue with it.
+        expect(selectVisibleTabs(false).visibleTabs).toEqual([
+            'exploration', 'character', 'memoir', 'inventory', 'deck',
+        ]);
+        expect(selectVisibleTabs(true).visibleTabs).toEqual([
+            'combat', 'character', 'memoir', 'inventory', 'deck',
+        ]);
     });
 
     it('lists the positional tab first so it remains the leftmost in the bar', () => {
@@ -101,7 +125,7 @@ describe('selectVisibleTabs: always-visible tabs', () => {
 // ---------------------------------------------------------------------------
 
 describe('isTabHidden: agreement with selectVisibleTabs', () => {
-    const allTabs: TabKey[] = ['exploration', 'combat', 'character', 'memoir', 'inventory'];
+    const allTabs: TabKey[] = ['exploration', 'combat', 'character', 'memoir', 'inventory', 'deck'];
 
     it.each([false, true])(
         'agrees with selectVisibleTabs for every tab when inCombat=%p',
@@ -144,7 +168,7 @@ describe('selectVisibleTabs: purity', () => {
 
 describe('TAB_TITLES: tab-label contract', () => {
     it('exposes a non-empty string title for every TabKey', () => {
-        const keys: TabKey[] = ['exploration', 'combat', 'character', 'memoir', 'inventory'];
+        const keys: TabKey[] = ['exploration', 'combat', 'character', 'memoir', 'inventory', 'deck'];
         for (const key of keys) {
             expect(typeof TAB_TITLES[key]).toBe('string');
             expect(TAB_TITLES[key].length).toBeGreaterThan(0);
@@ -179,5 +203,78 @@ describe('TAB_TITLES: tab-label contract', () => {
         expect(TAB_TITLES.character).toBe('SELF');
         expect(TAB_TITLES.memoir).toBe('THE LEDGER');
         expect(TAB_TITLES.inventory).toBe('SATCHEL');
+        // D2 (2026-09-21) names the fifth tab DECK, in those words.
+        expect(TAB_TITLES.deck).toBe('DECK');
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Tab-bar FIT — the overflow contract DECK has to clear (finding 7 / D2)
+// ---------------------------------------------------------------------------
+
+describe('measureTabBarFit: no tab-bar overflow at 360pt', () => {
+    it('fits every visible label at 360pt in both modes', () => {
+        for (const inCombat of [false, true]) {
+            const fit = measureTabBarFit(visibleTabTitles(inCombat), NARROW_VIEWPORT_PT);
+
+            expect(fit.tabCount).toBe(5);
+            // Reported as an object so a failure prints WHICH label overflowed
+            // and by how much, rather than just `false`.
+            expect({
+                mode: inCombat ? 'combat' : 'exploration',
+                widest: fit.widestTitle,
+                labelPt: Math.round(fit.widestLabelPt * 10) / 10,
+                budgetPt: fit.labelBudgetPt,
+                fits: fit.fits,
+            }).toEqual({
+                mode: inCombat ? 'combat' : 'exploration',
+                widest: fit.widestTitle,
+                labelPt: Math.round(fit.widestLabelPt * 10) / 10,
+                budgetPt: fit.labelBudgetPt,
+                fits: true,
+            });
+        }
+    });
+
+    it('still fits on the narrowest supported phone (320pt)', () => {
+        // 360pt is the brief's bar; 320pt is an SE-class device that really
+        // ships. A contract that only clears the wider one is a contract that
+        // clips on the narrower one, silently (the navigator's label is
+        // numberOfLines: 1, so overflow ellipsises instead of breaking layout).
+        const fit = measureTabBarFit(visibleTabTitles(false), NARROWEST_VIEWPORT_PT);
+        expect(fit.fits).toBe(true);
+    });
+
+    it('keeps real headroom, so the next title change is not a cliff edge', () => {
+        const fit = measureTabBarFit(visibleTabTitles(false), NARROW_VIEWPORT_PT);
+        expect(fit.widestTitle).toBe(TAB_TITLES.memoir);
+        expect(fit.slackPt).toBeGreaterThan(10);
+    });
+
+    it('detects an overflow rather than always answering yes', () => {
+        // The check has to be capable of failing, or it proves nothing. A
+        // sixth tab with a long title is the shape of the next regression.
+        const overloaded = [...visibleTabTitles(false), 'THE UNDERCROFT'];
+        expect(measureTabBarFit(overloaded, NARROW_VIEWPORT_PT).fits).toBe(false);
+    });
+});
+
+describe('measureTabLabel: the measurement itself', () => {
+    it('is monotonic — a longer word is never measured narrower', () => {
+        expect(measureTabLabel('SATCHEL')).toBeGreaterThan(measureTabLabel('SELF'));
+        expect(measureTabLabel('THE LEDGER')).toBeGreaterThan(measureTabLabel('DECK'));
+    });
+
+    it('measures the empty label as zero and never returns NaN', () => {
+        expect(measureTabLabel('')).toBe(0);
+        for (const title of Object.values(TAB_TITLES)) {
+            expect(Number.isFinite(measureTabLabel(title))).toBe(true);
+        }
+    });
+
+    it('charges an unmeasured glyph at the widest known advance', () => {
+        // An out-of-table character (a digit, punctuation, a glyph) must
+        // over-estimate, never sail through unmeasured.
+        expect(measureTabLabel('?')).toBeGreaterThanOrEqual(measureTabLabel('W'));
     });
 });

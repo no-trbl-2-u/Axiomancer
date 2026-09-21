@@ -1,0 +1,353 @@
+/**
+ * Hermetic tests for the DECK screen presenter (finding 7 / D2).
+ *
+ * Fixtures are LIVE library cards, read out of the sibling engine, because the
+ * thing most worth pinning here is agreement: the deck screen must print the
+ * same rarity the shared rarity module derives, the same lines the combat
+ * detail prints, and the same prose the card actually authors. A hand-written
+ * card fixture could agree with a hand-written expectation while both
+ * disagreed with the shipped data — which is exactly the class of bug
+ * (finding 4) this whole change exists to stop repeating.
+ *
+ *   spoiled-poultice       rank 1 body spell  — a common
+ *   the-besiegers-winter   rank 5 mind spell  — a rare, for rank-descending order
+ *   ossuary-drawer         rank 3 mind spell  — an uncommon, the middle band
+ *   the-untended-garden    rank 5 mind oath   — the OATHS group
+ *   the-congregation-below rank 6 mind hex    — the HEXES group
+ *
+ * Hermetic = self-contained + deterministic + isolated.
+ * See docs/testing.md for the full standard.
+ */
+
+import { describe, expect, it } from '@jest/globals';
+import {
+    buildCombatDeck,
+    createNewGameState,
+    getCardById,
+    lookupEffect,
+    toCombatCard,
+    type Character,
+} from '@mechanics';
+
+import { rarityFor } from '@/state/presenters/card-rarity.engine';
+import { detailStats } from '@/state/presenters/combat-encounter.engine';
+import {
+    DECK_SOURCE_NOTE,
+    selectDeckViewModel,
+    type DeckCardVM,
+} from '@/state/presenters/deck.engine';
+
+const COMMON_SPELL = 'spoiled-poultice';
+const RARE_SPELL = 'the-besiegers-winter';
+const UNCOMMON_SPELL = 'ossuary-drawer';
+const OATH = 'the-untended-garden';
+const HEX = 'the-congregation-below';
+
+/** A run state carrying exactly this deck. `flags` stays empty so
+ *  `buildCombatDeck` reads `knownCards` rather than a curated loadout. */
+function runWith(
+    knownCards: readonly string[],
+    combatRewardCards: readonly string[] = [],
+    flags: readonly string[] = [],
+) {
+    const player = createNewGameState().player as Character;
+    return {
+        player: { ...player, knownCards: [...knownCards], combatRewardCards: [...combatRewardCards] },
+        flags: [...flags],
+    } as never;
+}
+
+function findCard(vm: ReturnType<typeof selectDeckViewModel>, cardId: string): DeckCardVM {
+    const found = vm.groups.flatMap((g) => g.cards).find((c) => c.cardId === cardId);
+    if (!found) throw new Error(`card ${cardId} missing from the deck VM`);
+    return found;
+}
+
+// ---------------------------------------------------------------------------
+// The list itself
+// ---------------------------------------------------------------------------
+
+describe('selectDeckViewModel: the deck it shows', () => {
+    it('lists the cards the run actually carries', () => {
+        const vm = selectDeckViewModel(runWith([COMMON_SPELL, OATH, HEX]));
+
+        expect(vm.empty).toBe(false);
+        expect(vm.distinctCards).toBe(3);
+        expect(vm.totalCards).toBe(3);
+        expect(vm.groups.flatMap((g) => g.cards).map((c) => c.cardId).sort()).toEqual(
+            [COMMON_SPELL, HEX, OATH].sort(),
+        );
+    });
+
+    it('counts COPIES rather than de-duplicating them', () => {
+        // A deckbuilder's copy counts are load-bearing — `buildCombatDeck`
+        // preserves them deliberately (it used to de-duplicate, which dealt an
+        // 18-card deck as 8). A deck screen that collapsed them would lie
+        // about the deck the next fight deals.
+        const vm = selectDeckViewModel(runWith([COMMON_SPELL, COMMON_SPELL, COMMON_SPELL, OATH]));
+
+        expect(vm.totalCards).toBe(4);
+        expect(vm.distinctCards).toBe(2);
+        expect(findCard(vm, COMMON_SPELL).count).toBe(3);
+        expect(findCard(vm, OATH).count).toBe(1);
+    });
+
+    it('includes reward cards, which stack on top of the known-card base', () => {
+        const vm = selectDeckViewModel(runWith([COMMON_SPELL], [COMMON_SPELL, RARE_SPELL]));
+
+        expect(vm.totalCards).toBe(3);
+        expect(findCard(vm, COMMON_SPELL).count).toBe(2);
+        expect(findCard(vm, RARE_SPELL).count).toBe(1);
+    });
+
+    it('shows exactly what buildCombatDeck would deal', () => {
+        // The one invariant that makes this screen trustworthy: its total is
+        // the engine's deck length, not a recount of something adjacent.
+        const state = runWith([COMMON_SPELL, COMMON_SPELL, OATH, HEX], [RARE_SPELL]);
+        const player = (state as unknown as { player: Character }).player;
+
+        expect(selectDeckViewModel(state).totalCards).toBe(buildCombatDeck(player, []).length);
+    });
+
+    it('drops an id the card library no longer knows instead of rendering a blank row', () => {
+        const vm = selectDeckViewModel(runWith([COMMON_SPELL, 'card-that-was-retired']));
+
+        expect(vm.distinctCards).toBe(1);
+        expect(vm.totalCards).toBe(1);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Grouping + ordering
+// ---------------------------------------------------------------------------
+
+describe('selectDeckViewModel: grouping by card type', () => {
+    it('sorts a card into the group its engine card type names', () => {
+        const vm = selectDeckViewModel(runWith([COMMON_SPELL, OATH, HEX]));
+
+        expect(vm.groups.map((g) => g.key)).toEqual(['spell', 'oath', 'hex']);
+        expect(vm.groups.map((g) => g.label)).toEqual(['SPELLS', 'OATHS', 'HEXES']);
+        for (const group of vm.groups) {
+            for (const card of group.cards) {
+                expect(card.cardType).toBe(group.key);
+                expect(getCardById(card.cardId)?.cardType ?? 'spell').toBe(group.key);
+            }
+        }
+    });
+
+    it('omits a group the deck has no cards for', () => {
+        const vm = selectDeckViewModel(runWith([COMMON_SPELL, RARE_SPELL]));
+
+        expect(vm.groups.map((g) => g.key)).toEqual(['spell']);
+    });
+
+    it('counts group totals in COPIES, not rows', () => {
+        const vm = selectDeckViewModel(runWith([COMMON_SPELL, COMMON_SPELL, RARE_SPELL, OATH]));
+        const spells = vm.groups.find((g) => g.key === 'spell');
+
+        expect(spells?.cards).toHaveLength(2);
+        expect(spells?.count).toBe(3);
+    });
+
+    it('orders a group best-first by rank, which orders by rarity for free', () => {
+        // Rarity is BANDED from rank, so rank-descending is strictly finer
+        // than rarity-descending — and it needs no rarity order of its own,
+        // which the shared rarity module deliberately does not export.
+        const vm = selectDeckViewModel(runWith([COMMON_SPELL, RARE_SPELL, UNCOMMON_SPELL]));
+        const spells = vm.groups.find((g) => g.key === 'spell');
+        const ranks = (spells?.cards ?? []).map((c) => c.rank ?? 0);
+
+        expect(spells?.cards.map((c) => c.cardId)).toEqual([RARE_SPELL, UNCOMMON_SPELL, COMMON_SPELL]);
+        expect([...ranks].sort((a, b) => b - a)).toEqual(ranks);
+    });
+
+    it('gives every group a blurb naming how that type behaves', () => {
+        const vm = selectDeckViewModel(runWith([COMMON_SPELL, OATH, HEX]));
+
+        for (const group of vm.groups) {
+            expect(group.blurb.length).toBeGreaterThan(0);
+        }
+    });
+});
+
+// ---------------------------------------------------------------------------
+// D4 — rarity comes from the shared module, never re-derived here
+// ---------------------------------------------------------------------------
+
+describe('selectDeckViewModel: rarity (D4)', () => {
+    it('agrees with the shared rarity module for every card in the deck', () => {
+        const ids = [COMMON_SPELL, UNCOMMON_SPELL, RARE_SPELL, OATH, HEX];
+        const vm = selectDeckViewModel(runWith(ids));
+
+        for (const id of ids) {
+            const card = findCard(vm, id);
+            expect(card.rarity.band).toBe(rarityFor(getCardById(id)));
+        }
+    });
+
+    it('carries all three legs of the signal, so colour is never alone', () => {
+        const vm = selectDeckViewModel(runWith([COMMON_SPELL, UNCOMMON_SPELL, RARE_SPELL]));
+
+        for (const card of vm.groups.flatMap((g) => g.cards)) {
+            expect(card.rarity.label.length).toBeGreaterThan(0);
+            expect(card.rarity.pips).toBeGreaterThan(0);
+            expect(card.rarity.color).toMatch(/^#[0-9a-f]{6}$/i);
+            // The a11y sentence names the band in words — the screen reader
+            // sees neither pips nor hue.
+            expect(card.a11yLabel).toContain(card.rarity.label);
+        }
+    });
+
+    it('tallies rarity thinnest-band-first and accounts for every copy', () => {
+        const vm = selectDeckViewModel(
+            runWith([COMMON_SPELL, COMMON_SPELL, UNCOMMON_SPELL, RARE_SPELL]),
+        );
+        const pips = vm.rarityTally.map((r) => r.pips);
+
+        expect(vm.rarityTally.map((r) => r.band)).toEqual(['common', 'uncommon', 'rare']);
+        expect([...pips].sort((a, b) => a - b)).toEqual(pips);
+        expect(vm.rarityTally.reduce((sum, r) => sum + r.count, 0)).toBe(vm.totalCards);
+        expect(vm.rareCards).toBe(1);
+    });
+
+    it('omits a band the deck carries none of', () => {
+        const vm = selectDeckViewModel(runWith([COMMON_SPELL]));
+
+        expect(vm.rarityTally.map((r) => r.band)).toEqual(['common']);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Finding 4 — the printed lines are the engine's, not a second derivation
+// ---------------------------------------------------------------------------
+
+describe('selectDeckViewModel: printed text is shared, not forked', () => {
+    it('prints exactly what the combat detail presenter prints for the same card', () => {
+        const ids = [COMMON_SPELL, UNCOMMON_SPELL, RARE_SPELL, OATH, HEX];
+        const vm = selectDeckViewModel(runWith(ids));
+
+        for (const id of ids) {
+            const source = getCardById(id);
+            const projected = toCombatCard(id, getCardById, lookupEffect);
+            const detail = detailStats(projected!, source);
+            const card = findCard(vm, id);
+
+            expect(card.name).toBe(projected!.name);
+            expect(card.metaChip).toBe(detail.metaChip);
+            expect(card.outcomeLine).toBe(detail.outcomeLine);
+            expect(card.freeText).toBe(detail.freePill);
+            expect(card.paidText).toBe(detail.diePaidLine);
+            expect(card.keywords).toEqual(detail.keywords);
+            expect(card.dieLines).toEqual(projected!.dieLines ?? []);
+        }
+    });
+
+    it('never invents a number — every printed line is non-empty or absent', () => {
+        const vm = selectDeckViewModel(runWith([COMMON_SPELL, OATH, HEX, RARE_SPELL]));
+
+        for (const card of vm.groups.flatMap((g) => g.cards)) {
+            expect(card.freeText.length).toBeGreaterThan(0);
+            expect(card.outcomeLine.length).toBeGreaterThan(0);
+            if (card.paidText !== null) expect(card.paidText.length).toBeGreaterThan(0);
+        }
+    });
+
+    it('gives persistent cards their free-vs-permanent footer and spells none', () => {
+        const vm = selectDeckViewModel(runWith([COMMON_SPELL, OATH, HEX]));
+
+        expect(findCard(vm, OATH).durationFooter).not.toBeNull();
+        expect(findCard(vm, HEX).durationFooter).not.toBeNull();
+        expect(findCard(vm, COMMON_SPELL).durationFooter).toBeNull();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Finding 6/7 — flavor's new home
+// ---------------------------------------------------------------------------
+
+describe('selectDeckViewModel: flavor', () => {
+    it("carries the card's authored prose verbatim", () => {
+        const ids = [COMMON_SPELL, OATH, HEX];
+        const vm = selectDeckViewModel(runWith(ids));
+
+        for (const id of ids) {
+            const card = findCard(vm, id);
+            expect(card.flavor).toBe(getCardById(id)!.description);
+            expect(card.flavor!.length).toBeGreaterThan(0);
+        }
+    });
+
+    it('keeps flavor separate from the mechanical lines', () => {
+        // The reason finding 6 could take prose out of combat at all: it is a
+        // distinct field, not spliced into the text the player reads to act.
+        const card = findCard(selectDeckViewModel(runWith([COMMON_SPELL])), COMMON_SPELL);
+
+        expect(card.outcomeLine).not.toBe(card.flavor);
+        expect(card.freeText).not.toContain(card.flavor);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Colour tally
+// ---------------------------------------------------------------------------
+
+describe('selectDeckViewModel: colour tally', () => {
+    it('counts every copy and orders most-carried first', () => {
+        const vm = selectDeckViewModel(
+            runWith([COMMON_SPELL, COMMON_SPELL, UNCOMMON_SPELL, RARE_SPELL]),
+        );
+        const counts = vm.stanceTally.map((s) => s.count);
+
+        expect(counts.reduce((a, b) => a + b, 0)).toBe(vm.totalCards);
+        expect([...counts].sort((a, b) => b - a)).toEqual(counts);
+        for (const row of vm.stanceTally) {
+            expect(row.label).toBe(row.label.toUpperCase());
+            expect(row.color.length).toBeGreaterThan(0);
+        }
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Empty + purity
+// ---------------------------------------------------------------------------
+
+describe('selectDeckViewModel: empty and edge states', () => {
+    it('returns the empty VM with a reason when the run carries no deck', () => {
+        const vm = selectDeckViewModel(runWith([]));
+
+        expect(vm.empty).toBe(true);
+        expect(vm.groups).toEqual([]);
+        expect(vm.totalCards).toBe(0);
+        expect(vm.emptyReason.length).toBeGreaterThan(0);
+    });
+
+    it('returns the empty VM rather than throwing when there is no player', () => {
+        expect(selectDeckViewModel({ player: undefined } as never).empty).toBe(true);
+    });
+
+    it('returns the empty VM when every id in the deck is unknown', () => {
+        expect(selectDeckViewModel(runWith(['nope-one', 'nope-two'])).empty).toBe(true);
+    });
+
+    it('always states what the screen is showing — the full run deck', () => {
+        expect(selectDeckViewModel(runWith([])).sourceNote).toBe(DECK_SOURCE_NOTE);
+        expect(selectDeckViewModel(runWith([COMMON_SPELL])).sourceNote).toBe(DECK_SOURCE_NOTE);
+    });
+});
+
+describe('selectDeckViewModel: purity', () => {
+    it('returns a deep-equal VM for the same input twice', () => {
+        const state = runWith([COMMON_SPELL, OATH, HEX]);
+
+        expect(selectDeckViewModel(state)).toEqual(selectDeckViewModel(state));
+    });
+
+    it('does not mutate the state it was handed', () => {
+        const state = runWith([COMMON_SPELL, COMMON_SPELL, OATH]);
+        const snapshot = JSON.stringify(state);
+
+        selectDeckViewModel(state);
+
+        expect(JSON.stringify(state)).toBe(snapshot);
+    });
+});

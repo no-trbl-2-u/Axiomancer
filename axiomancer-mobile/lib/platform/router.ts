@@ -73,6 +73,7 @@ const ROUTE_TABLE: Readonly<Record<string, RouteEntry>> = {
   character: { screen: 'character/index', tab: true },
   memoir: { screen: 'memoir/index', tab: true },
   inventory: { screen: 'inventory/index', tab: true },
+  deck: { screen: 'deck/index', tab: true },
 };
 
 // `NavigationContainer`'s linking config — mirrors `ROUTE_TABLE`
@@ -117,6 +118,7 @@ export const linking = {
           'character/index': 'character',
           'memoir/index': 'memoir',
           'inventory/index': 'inventory',
+          'deck/index': 'deck',
         },
       },
     },
