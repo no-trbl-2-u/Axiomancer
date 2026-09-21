@@ -607,3 +607,7 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-21T12:42:48Z | skill | adjust-keywords | claude-sonnet-5 | - | - |
 | 2026-09-21T12:42:48Z | skill-end | adjust-keywords | claude-sonnet-5 | 0s | ok |
 | 2026-09-21T12:43:20Z | subagent | card-expert | claude-sonnet-5 | - | Run adjust-keywords lifecycle tick |
+| 2026-09-21T15:00:43Z | subagent | Explore | claude-opus-5 | - | Recon mobile UI + map code |
+| 2026-09-21T15:02:44Z | subagent-end | Explore | claude-opus-5 | 2m01s | ok |
+| 2026-09-21T15:18:21Z | subagent | Explore | claude-opus-5 | - | Recon item grant + equip paths |
+| 2026-09-21T15:18:22Z | subagent-end | Explore | claude-opus-5 | 1s | ok |
