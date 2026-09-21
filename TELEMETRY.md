@@ -579,3 +579,8 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-21T01:08:59Z | slash-prompt | /march | - | - | /march |
 | 2026-09-21T01:09:33Z | skill | critique | claude-sonnet-5 | - | - |
 | 2026-09-21T01:09:33Z | skill-end | critique | claude-sonnet-5 | 0s | ok |
+| 2026-09-21T02:42:45Z | slash-prompt | /march | - | - | /march |
+| 2026-09-21T02:45:54Z | skill | adjust-npcs | claude-sonnet-5 | - | - |
+| 2026-09-21T02:45:54Z | skill-end | adjust-npcs | claude-sonnet-5 | 0s | ok |
+| 2026-09-21T02:48:13Z | subagent | general-purpose | claude-sonnet-5 | - | KB widened check for NPC/dialogue prior art |
+| 2026-09-21T02:49:08Z | subagent-end | general-purpose | claude-sonnet-5 | 56s | ok |

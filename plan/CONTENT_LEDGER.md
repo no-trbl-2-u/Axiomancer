@@ -15,11 +15,105 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-20 | 8e4a7976 | 14 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-20 | e461848b | 14 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-20 | 04f9393d | 14 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-19 | 6c82d06b | 13 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-21 | TBD | 14 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-npcs pass 14, 2026-09-21, commit TBD]** Zero-diff
+> pass — audit re-confirmed, no new finding, ledger bump only. Dispatched
+> autonomously by `/march`'s content-lifecycle gate: `npcs` was the
+> stalest qualifying category (last pass `6c82d06b` 2026-09-19T22:42:31Z,
+> 55 commits behind HEAD, past the 15-commit threshold; `cards`
+> `7de3890b` 2026-09-20T08:48:28Z, `equipment` `8e4a7976`
+> 2026-09-20T10:40:06Z, and `enemies` `e461848b` 2026-09-20T12:51:45Z all
+> also qualified on commit count but were less stale by last-pass
+> timestamp; `keywords` `04f9393d` 2026-09-20T20:40:22Z did NOT qualify —
+> only 14 commits and ~6h since its pass 14, under both thresholds).
+> Deploy green (docs/plan-only HEAD, nothing gated to check).
+>
+> **Step 0:** `content/story/story-overview.md` now exists —
+> **THE BLANK PAGE ¶1 lifted 2026-09-18** (`axiomancer-mechanics/
+> CLAUDE.md`), superseding pass 13's "does not exist yet" note. The road
+> carries 6 events (drunk on the dungeon watch through "for a while
+> things are okay") plus standing facts (X is a traitor to his people; a
+> second guard witnessed the cell; her siege injury) — every event's own
+> log line reads **"keeps no shipped node"**, and the road's own
+> `Noted for the pivot` section says the build-start map (fishing-village)
+> and the road-start setting (a castle dungeon) haven't been reconciled
+> yet. Net effect for this steward: THE STORY IS THE ROAD's "do not
+> invent canon beyond the road" carve-out (unlike cards/enemies/keywords/
+> maps, explicitly NOT exempted from it) means there is still nothing on
+> the road this tick can author into `src/NPCs`/`src/World/Continents`
+> content — the road hasn't reached a beat with a shipped-content shape.
+> `specs/story/` and `specs/characters/` remain template-only; same hard
+> constraint as passes 12/13 on inventing personhood.
+>
+> **Step 1 audit:** confirmed zero NPC/dialogue-content commit landed
+> between pass 13 (`6c82d06b`) and this tick's HEAD (`06154359`) —
+> `git log 6c82d06b..HEAD -- src/NPCs src/World/Continents
+> src/World/MapEvents src/World/types.ts` shows only two unrelated
+> audit-3.1 follow-up commits (arrival-tracking engine/reducer fix,
+> `9f2bf6cb`/`b0ad5ab2` — `MapState.pendingArrival`, no NPC/dialogue
+> surface touched) plus the story-outline commits above (prose-only,
+> `content/story/`, no `src/` change). Re-ran every structural signal
+> fresh rather than trusting that null diff at face value:
+> - No orphaned NPC — all 21 `const NPC` entries (`oldMarrow` through
+>   `theRibbonPicker`) still referenced from exactly one map's `npcs:` or
+>   `unstagedNpcs:` array.
+> - No legacy flat `DialogueMap` usage (`dialogue:` — zero matches across
+>   `src/World/Continents/*/npcs.ts`; every NPC already on
+>   `dialogueTree`).
+> - No stale `startQuest`/`progressQuest`/`completeQuest`/`teachCard`
+>   reference — the only two quest refs in NPC content (`get-to-cave`,
+>   `gather-wood`, both Northern-Forest) both resolve against
+>   `src/World/quest.library.ts`'s live `id` union.
+> - No dead-end node reading as a bug (Tide-Shopkeeper's `browse` leaf
+>   stays a genuine intentional terminator, unchanged since pass 12's
+>   fix).
+> - Coastal-Village's 3-NPC `unstagedNpcs` backlog (Tide-Shopkeeper,
+>   Dockworker's Union Leader, Merchant's Widow) unchanged — still a
+>   genuine engine-surface gap (no `openShop`-shaped `DialogueChoice.effect`
+>   exists), correctly left unstaged.
+> - Northern-Continent's three 1-NPC maps (`caverns`/theDelver,
+>   `connecting-river`/theBoatwoman, `town-across-river`/theSweetheart)
+>   unchanged; `plan/AUDIT.md`'s `[gap]` row (DECIDED via `/oversight`
+>   2026-09-15 to authorize a `character-spec`/`story-spec` session)
+>   re-confirmed open, left untouched. **Flagging, not actioning:** that
+>   DECIDED ruling predates THE STORY IS THE ROAD (2026-09-18) by ten
+>   days — when the attended session finally runs, "add 1-3 new named
+>   voices" and "do not invent canon beyond the road" will need
+>   reconciling (the road hasn't named anyone but X yet). Not this
+>   autonomous tick's call; noting it so the session isn't surprised.
+>
+> **Step 1b widened check:** Step 1 returned nothing actionable, so ran
+> the deeper KB cross-reference before accepting zero-diff — five search
+> angles beyond pass 12/13's `dialogue|NPC|conversation` sweep:
+> branching/moral-choice, quest-gating/NPC-memory, dead-end/terminal-node,
+> alignment/reputation, and narrative/storytelling (scope `other`).
+> `kb_overview` confirms the corpus is unchanged since pass 13 (46 board/
+> card games, 2801 okf docs, zero dialogue-tree-bearing digital RPGs).
+> Every angle came back a confirmed miss or a tangent (Gloomhaven's
+> branching-campaign-flag mechanic and the `campaign-progression` pattern
+> doc's persistence-legibility principle are cross-session bookkeeping,
+> not dialogue-tree/NPC-reactivity commentary; Dawncaster's "Alignment"
+> card name is an unrelated icon term, not our philosophical-alignment
+> mechanic). No new citable gap — existing wishlist
+> [`game-knowledge-base#81`](https://github.com/no-trbl-2-u/game-knowledge-base/issues/81)
+> still fully covers this corpus-shape miss; not re-filed.
+>
+> **Ship (Step 3):** none — zero CREATE, zero UPDATE, zero REMOVE. Every
+> structural signal and the widened KB check confirm pass 13's
+> conclusions hold; the two open items (Northern-Continent singleton
+> maps, Coastal-Village's 3-NPC unstaged backlog) are both
+> correctly-blocked, not stale.
+>
+> **Gates:** `npm run verify --workspace axiomancer-mechanics` (220 files
+> / 3604 tests) and `npm run verify --workspace axiomancer-mobile` green
+> (unchanged, no source touched).
+```
 
 ```
 > **[adjust-keywords pass 14, 2026-09-20, commit 04f9393d]** Zero-CREATE,
