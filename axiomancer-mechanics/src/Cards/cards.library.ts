@@ -1,17 +1,21 @@
 /**
  * THE CARD LIBRARY — the aggregator (THE BIG NUMBERS REWRITE, 2026-09-02).
  *
- * Solo, dark-fantasy, PvE. 132 cards (count pins repealed 2026-09-02 — this
+ * Solo, dark-fantasy, PvE. 134 cards (count pins repealed 2026-09-02 — this
  * total drifts as `/adjust-cards` ships CREATEs, or as sibling `adjust-*`
- * passes author cards on this surface (e.g. `/adjust-keywords`' EVENTIDE
- * pair, pass 11, 2026-09-16, and its FORGE-carrier grave pair — The Unpaid
- * Sexton / It Gets Up Again — pass 13, 2026-09-19); read `cardLibrary.length`
- * for the live figure, never trust this comment as a source of truth): 8
- * starters (the deliberately weak Threadbare Office), 3 dice-valve relics, 5
- * enemy-injected curses, twelve Saint-rank apocrypha (two per theme), and six
- * theme modules (16-20 cards each). The cards themselves live in
- * `./library/*.cards.ts` — one module per theme, so a theme can be reworked
- * without touching the other five, and so the six decks read as six decks.
+ * passes / build phases author cards on this surface (e.g. `/adjust-keywords`'
+ * EVENTIDE pair, pass 11, 2026-09-16, its FORGE-carrier grave pair — The
+ * Unpaid Sexton / It Gets Up Again — pass 13, 2026-09-19, and Phase 104's
+ * two grey-office starters, 2026-09-20); read `cardLibrary.length` for the
+ * live figure, never trust this comment as a source of truth): 8 starters
+ * (the deliberately weak Threadbare Office, the campaign-preset lineage's
+ * starting recipe), 2 grey-office starters (Phase 104's colourless,
+ * even-weaker-on-purpose fresh-run seed — aspect `'any'`, no archetype
+ * keywords, never a reward), 3 dice-valve relics, 5 enemy-injected curses,
+ * twelve Saint-rank apocrypha (two per theme), and six theme modules
+ * (16-20 cards each). The cards themselves live in `./library/*.cards.ts` —
+ * one module per theme, so a theme can be reworked without touching the
+ * other five, and so the six decks read as six decks.
  * This file only assembles and indexes them.
  *
  *   rot   — the Blight: plant POISON/BLEED, PROLONG and FESTER them, FLAY the
