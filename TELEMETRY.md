@@ -592,3 +592,11 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-21T06:58:14Z | slash-prompt | /march | - | - | /march |
 | 2026-09-21T06:59:00Z | skill | adjust-equipment | claude-sonnet-5 | - | - |
 | 2026-09-21T06:59:00Z | skill-end | adjust-equipment | claude-sonnet-5 | 0s | ok |
+| 2026-09-21T08:42:00Z | slash-prompt | /march | - | - | /march |
+| 2026-09-21T08:42:02Z | skill | march | - | - | - |
+| 2026-09-21T08:42:02Z | skill-end | march | - | 0s | ok |
+| 2026-09-21T08:42:49Z | skill | adjust-enemies | claude-sonnet-5 | - | - |
+| 2026-09-21T08:42:49Z | skill-end | adjust-enemies | claude-sonnet-5 | 0s | ok |
+| 2026-09-21T08:43:33Z | subagent | general-purpose | claude-sonnet-5 | - | Run adjust-enemies pass 15 |
+| 2026-09-21T08:43:35Z | skill | adjust-enemies | claude-sonnet-5 | - | - |
+| 2026-09-21T08:43:35Z | skill-end | adjust-enemies | claude-sonnet-5 | 0s | ok |

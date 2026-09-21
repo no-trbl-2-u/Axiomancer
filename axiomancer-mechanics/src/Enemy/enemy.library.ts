@@ -122,6 +122,16 @@ export const GraveLarva = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(80), drop('minor-healing-potion', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
+    finalBlowLines: {
+        brutal: 'The options finish narrowing. Teeth was always going to win.',
+        quiet:  'It stops deciding. The ground it hatched from reclaims an unfinished thing.',
+        ironic: 'It never got to become anything. Now it never will.',
+    },
+    causeLines: {
+        brutal: 'It decides, at last, and the decision has teeth.',
+        broken: 'It keeps chewing toward you, patient as dirt, until dirt is what you are.',
+        quiet:  'You misjudge something with no argument left in it but appetite.',
+    },
     addedIn: ADDED,
     tags: ['early-game', 'enemy'],
 });
@@ -173,6 +183,16 @@ export const ChatteringSkull = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(75), drop('clarity-serum', 20), drop('focus-vial', 5)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
+    finalBlowLines: {
+        brutal: 'The jaw comes off mid-word. The argument finally has nothing left to repeat it with.',
+        quiet:  'It runs out of the word before you run out of patience. A close thing.',
+        ironic: 'It lost the argument the day it died. It just kept losing it, on a loop, until you arrived to collect.',
+    },
+    causeLines: {
+        brutal: 'The last word lands, and it turns out to have been an argument for something.',
+        broken: 'It repeats itself until repetition becomes a kind of erosion, and you are the shore.',
+        quiet:  'You stop listening for one round. The word gets in anyway.',
+    },
     addedIn: ADDED,
     tags: ['early-game', 'enemy'],
 });
@@ -249,6 +269,16 @@ export const FootStealer = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(60), drop('body-elixir', 25), drop('minor-healing-potion', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
+    finalBlowLines: {
+        brutal: 'It loses its footing for the first and only time. The collection closes.',
+        quiet:  'It sets your balance back down, unstolen, and lies still.',
+        ironic: 'It spent so long taking footing it forgot to keep its own.',
+    },
+    causeLines: {
+        brutal: 'It takes your footing and, with it, everything that was standing on it.',
+        broken: 'Inch by inch, your balance joins its collection.',
+        quiet:  'You misstep once. It was already holding the difference.',
+    },
     addedIn: ADDED,
     tags: ['early-game', 'enemy'],
 });
@@ -328,6 +358,16 @@ export const CursedHead = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(60), drop('heart-draught', 25), drop('minor-healing-potion', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
+    finalBlowLines: {
+        brutal: 'The grudge outlives the argument by exactly as long as it takes to lose.',
+        quiet:  'It settles, at last, into the one position it never tried: agreement.',
+        ironic: 'It remembered everything except this ending. It will not get the chance to revise the record.',
+    },
+    causeLines: {
+        brutal: 'The grudge lands with the weight of every wrong it never once admitted.',
+        broken: 'It relitigates the same point, round after round, until you concede by exhaustion.',
+        quiet:  'You nod, just once, to end it faster. The curse takes the nod as surrender.',
+    },
     addedIn: ADDED,
     tags: ['early-game', 'enemy'],
 });
@@ -347,6 +387,16 @@ export const Ghast = createEnemy({
     loot: [none(55), drop('clarity-serum', 25), drop('focus-vial', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
     cards: [card('scolds-bridle')],
+    finalBlowLines: {
+        brutal: 'It asks one last time. The blow answers before the manners can.',
+        quiet:  'It withdraws the question, hunger and all, without waiting to hear how it would have ended.',
+        ironic: 'For once it waits for an answer. The answer is this.',
+    },
+    causeLines: {
+        brutal: 'It asks, takes, and is already asking again before you finish disagreeing.',
+        broken: 'Each polite request costs a little more than the last. You keep answering anyway.',
+        quiet:  'You hesitate to be rude. It was never going to wait that long.',
+    },
     addedIn: ADDED,
     tags: ['early-game', 'enemy'],
 });
@@ -365,6 +415,16 @@ export const DoomEgg = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(55), drop('antidote', 25), drop('healing-potion', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
+    finalBlowLines: {
+        brutal: 'The countdown ends early. The bill goes unpaid.',
+        quiet:  'It stops counting. Whatever was hatching decides against it.',
+        ironic: 'It spent its whole clutch threatening to hatch. It never got the chance to bill you for the wait.',
+    },
+    causeLines: {
+        brutal: 'It finally hatches, all at once, directly into you.',
+        broken: 'Round by round it counts down, and round by round the interest compounds.',
+        quiet:  'You forget it was counting. It never forgets.',
+    },
     addedIn: ADDED,
     tags: ['early-game', 'enemy'],
 });
@@ -387,6 +447,16 @@ export const TheButcher = createEnemy({
     loot: [none(35), drop('body-elixir', 35), drop('healing-potion', 20), drop('berserker-brew', 10)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
     cards: [card('unction-of-boils')],
+    finalBlowLines: {
+        brutal: 'He meets an argument the cleaver cannot dress. It costs him the block.',
+        quiet:  'The cleaver goes still on the table, for once, between courses.',
+        ironic: 'He quartered every question put to him. This one quartered back.',
+    },
+    causeLines: {
+        brutal: 'He dresses the argument the only way he knows, and you were the argument.',
+        broken: 'Joint by joint, he takes the question apart, and you were holding it.',
+        quiet:  'You put down your guard for a beat. The cleaver does not share your patience.',
+    },
     addedIn: ADDED,
     tags: ['early-game', 'elite', 'enemy'],
 });
@@ -649,6 +719,16 @@ export const Wichtlein = createEnemy({
     loot: [none(55), drop('focus-vial', 25), drop('clarity-serum', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 },
     cards: [card('scolds-bridle')],
+    finalBlowLines: {
+        brutal: 'The third knock never lands. The ceiling holds; the miner does not.',
+        quiet:  'It sets down its little hammer, having finally measured wrong.',
+        ironic: 'It spent its whole life portending endings. It did not see its own coming.',
+    },
+    causeLines: {
+        brutal: 'The third knock arrives on schedule. Schedules, it turns out, are load-bearing.',
+        broken: 'Knock by knock, it measures the ground under you until there is none left.',
+        quiet:  'You hear two knocks and stop counting. The third one does not ask permission.',
+    },
     addedIn: ADDED,
     tags: ['mid-game', 'enemy'],
 });
@@ -754,6 +834,16 @@ export const BullBegger = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(60), drop('body-elixir', 25), drop('healing-potion', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
+    finalBlowLines: {
+        brutal: 'The raised fist finally lowers. Nobody was going to answer it anyway.',
+        quiet:  'It stops asking, for the first time, and the silence is the closest thing to charity it ever received.',
+        ironic: 'It begged for everything and kept none of it, including this.',
+    },
+    causeLines: {
+        brutal: 'The asking and the taking arrive together, the way they always do.',
+        broken: 'It begs and takes in the same motion, over and over, until there is nothing left to give or steal.',
+        quiet:  'You offer something, once, to make it stop. It takes the offering and the rest besides.',
+    },
     addedIn: ADDED,
     tags: ['mid-game', 'enemy'],
 });
@@ -773,6 +863,16 @@ export const WeepingHead = createEnemy({
     loot: [none(55), drop('heart-draught', 30), drop('healing-potion', 15)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: -67 },
     cards: [card('thin-hymn')],
+    finalBlowLines: {
+        brutal: 'The river runs dry mid-current. The grief does not get to finish its sentence.',
+        quiet:  'It cries one last, quiet time, and the crying is the whole of the ending.',
+        ironic: 'It drowned everyone who pitied it. Pity was never on offer here.',
+    },
+    causeLines: {
+        brutal: 'The current you pitied closes over your head without changing its expression.',
+        broken: 'You wade in an inch at a time, sure you can stop. The grief has other plans for your ankles.',
+        quiet:  'You feel sorry for it, once. The river remembers the exact moment.',
+    },
     addedIn: ADDED,
     tags: ['mid-game', 'enemy'],
 });
@@ -792,6 +892,16 @@ export const GoblinShaman = createEnemy({
     loot: [none(50), drop('clarity-serum', 25), drop('focus-vial', 15), drop('philosopher-tea', 10)],
     philosophicalAlignment: { epistemology: -67, outlook: 0, scope: 0 },
     cards: [card('shallow-grave')],
+    finalBlowLines: {
+        brutal: 'All three gods call in their debts at once. The shaman cannot cover the interest.',
+        quiet:  'The rattle goes still. Three small gods, unpaid, go looking for a new creditor.',
+        ironic: 'It spent its life collecting interest on borrowed misfortune. This one, it owed outright.',
+    },
+    causeLines: {
+        brutal: 'The rattle shakes once, and three overdue gods collect on you instead.',
+        broken: 'Interest accrues, misfortune by misfortune, until the debt is more than you can carry.',
+        quiet:  'You ignore the rattle as noise. The gods inside it were never bluffing.',
+    },
     addedIn: ADDED,
     tags: ['mid-game', 'enemy'],
 });
@@ -810,6 +920,16 @@ export const Sugata = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(55), drop('heart-draught', 25), drop('quicksilver-vial', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: 0, scope: -67 },
+    finalBlowLines: {
+        brutal: 'It stops mid-step. The erasing finishes what the dance was holding off.',
+        quiet:  'It completes one last figure, and the rest of it goes quietly unwritten.',
+        ironic: 'It danced to stay whole. Stopping was never the danger it thought you were.',
+    },
+    causeLines: {
+        brutal: 'It keeps dancing straight through you, because stopping was never an option it kept.',
+        broken: 'Step by step, it wears down whatever you brought to the fight, the way erasure wears down a page.',
+        quiet:  'You watch it dance a beat too long. It finishes the figure inside your guard.',
+    },
     addedIn: ADDED,
     tags: ['mid-game', 'enemy'],
 });
@@ -828,6 +948,16 @@ export const PaleBrood = createEnemy({
     tier1Overrides: T1_DEFAULT,
     loot: [none(60), drop('body-elixir', 25), drop('healing-potion', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
+    finalBlowLines: {
+        brutal: 'Whatever it remembered about flying dies with the rest of it, still unremembered.',
+        quiet:  'It curls in on itself the way larvae do, and does not open again.',
+        ironic: 'It spent its whole short life certain it was owed wings. It was owed nothing.',
+    },
+    causeLines: {
+        brutal: 'It hits you with the fury of something that was promised more than this.',
+        broken: 'It comes at you again and again, hungry the way only something unfinished can be.',
+        quiet:  'You underestimate a thing still learning what it is. It finishes learning on you.',
+    },
     addedIn: ADDED,
     tags: ['mid-game', 'enemy'],
 });
@@ -869,6 +999,11 @@ export const TriEyes = createEnemy({
             'assuming the count was the point."',
         flagSet: 'befriended-tri-eyes',
     },
+    pactLines: {
+        quiet:   'The third eye closes, voluntarily, for the length of a held breath. The tally stops needing you in it.',
+        setDown: 'It sets the count down between you, mid-sum, and does not pick it back up.',
+        heavy:   '"The tally balances." A long blink, all three sockets at once. "There was one error I kept recounting: assuming the count was the point."',
+    },
     finalBlowLines: {
         brutal: 'The third eye closes last, still counting.',
         quiet:  'A methodical collapse, each error catalogued to the end.',
@@ -901,6 +1036,16 @@ export const Mabadi = createEnemy({
     loot: [none(40), drop('body-elixir', 30), drop('whetstone-oil', 20), drop('healing-potion', 10)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: -67 },
     cards: [card('knucklebone-recant')],
+    finalBlowLines: {
+        brutal: 'The cane finally meets an argument it cannot outlast.',
+        quiet:  'He sets the cane down, upright, the way a duelist concedes a bout he respected.',
+        ironic: 'He outlasted every opponent who mattered. He did not outlast you, which is its own small argument.',
+    },
+    causeLines: {
+        brutal: 'The cane finds the beat you had not learned yet, and finds it hard.',
+        broken: 'He wears down your guard the way patience wears down everything, one measured strike at a time.',
+        quiet:  'You move a half-beat early. He was already there, the way he always is.',
+    },
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -923,6 +1068,16 @@ export const FrayedOne = createEnemy({
     loot: [none(40), drop('clarity-serum', 25), drop('void-essence', 20), drop('philosopher-tea', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
     cards: [card('the-long-lent')],
+    finalBlowLines: {
+        brutal: 'The last thread goes, and there is nothing left to replace it with.',
+        quiet:  'It comes fully undone, at last, into a pile of threads that were always going to be someone else\'s.',
+        ironic: 'It spent itself trying not to unravel. Unraveling was the only trick it had left.',
+    },
+    causeLines: {
+        brutal: 'It loses a thread and takes one of yours to cover the loss, mid-swing.',
+        broken: 'Thread by thread, it patches itself with pieces it did not earn, and most of them are yours.',
+        quiet:  'You stop paying attention to the fraying edges. It was counting on exactly that.',
+    },
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -945,6 +1100,16 @@ export const BoneTotem = createEnemy({
     loot: [none(40), drop('iron-skin-draught', 25), drop('clarity-serum', 20), drop('void-essence', 15)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 67 },
     cards: [card('unction-of-boils')],
+    finalBlowLines: {
+        brutal: 'The stack comes down before the sentence finishes. The curse goes unsaid.',
+        quiet:  'The topmost skull settles, its one word spoken at last, to no one in particular.',
+        ironic: 'It spent generations assembling a curse one word at a time. You supplied the last word for it, and it was no.',
+    },
+    causeLines: {
+        brutal: 'The sentence finishes. It was never going to be a kind one.',
+        broken: 'Word by word, skull by skull, the curse assembles itself around you.',
+        quiet:  'You mishear one word as harmless. The sentence was never about being heard correctly.',
+    },
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -967,6 +1132,16 @@ export const BoneWizard = createEnemy({
     loot: [none(35), drop('philosopher-tea', 25), drop('clarity-serum', 25), drop('void-essence', 15)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 67 },
     cards: [card('spoiled-poultice')],
+    finalBlowLines: {
+        brutal: 'The peer review concludes, unfavorably, and permanently.',
+        quiet:  'It sets down the last of its borrowed authority and returns, finally, to being bone.',
+        ironic: 'It graded everything it met and found most of it wanting. This time, the wanting was its own.',
+    },
+    causeLines: {
+        brutal: 'It grades the encounter and marks you down, thoroughly and at length.',
+        broken: 'It studies your every opening, footnote by footnote, until there is nothing left ungraded.',
+        quiet:  'You make one small error. Its whole education was built to notice exactly that.',
+    },
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1061,6 +1236,16 @@ export const CursedPaladin = createEnemy({
     loot: [none(35), drop('iron-skin-draught', 25), drop('body-elixir', 25), drop('healing-potion', 15)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
     cards: [card('knucklebone-recant'), card('thin-hymn')],
+    finalBlowLines: {
+        brutal: 'The armor stops walking. The oath inside it finally runs out of people to be right at.',
+        quiet:  'It kneels, an old posture the armor remembers better than the man ever did.',
+        ironic: 'It searched for someone to be right at for longer than it had a faith left to be right about. It found you instead.',
+    },
+    causeLines: {
+        brutal: 'The oath swings through you the way it swings through every argument: certain, and total.',
+        broken: 'It keeps being right at you, round after round, long after being right stopped being a virtue.',
+        quiet:  'You concede a point, just to end it. The armor takes the concession as an opening.',
+    },
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1080,6 +1265,16 @@ export const VampireThrall = createEnemy({
     loot: [none(55), drop('body-elixir', 25), drop('healing-potion', 20)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
     cards: [card('unction-of-boils')],
+    finalBlowLines: {
+        brutal: 'The final installment comes due, and there is no will left to pay it with.',
+        quiet:  'It stops reaching, mid-payment, the debt finally called even.',
+        ironic: 'It spent its will down to nothing chasing someone else\'s leash. It dies owing itself the most.',
+    },
+    causeLines: {
+        brutal: 'It throws everything it has left at you, on credit it will never be asked to repay.',
+        broken: 'Installment by installment, it wears you down on someone else\'s account.',
+        quiet:  'You mistake its devotion for exhaustion. The devotion has more left in it than you do.',
+    },
     addedIn: ADDED,
     tags: ['mid-game', 'enemy'],
 });
@@ -1176,6 +1371,16 @@ export const JeweledTree = createEnemy({
     loot: [none(25), drop('resonance-crystal', 30), drop('heart-draught', 25), drop('greater-healing-potion', 20)],
     philosophicalAlignment: { epistemology: -67, outlook: 67, scope: 67 },
     cards: [card('thin-hymn')],
+    finalBlowLines: {
+        brutal: 'The trunk splits before the mouth gets its turn.',
+        quiet:  'The gemstone eyes dim, one by one, the wanting finally unmet.',
+        ironic: 'It fed on wanting for a thousand years. You wanted nothing from it, and that, it turns out, starves.',
+    },
+    causeLines: {
+        brutal: 'The mouth gets its turn after all, and the turn is the whole of it.',
+        broken: 'It feeds on your wanting a little at a time, and the wanting does not run out before you do.',
+        quiet:  'You look too long at the gemstones. The looking was the first bite.',
+    },
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1198,6 +1403,16 @@ export const OgreNaga = createEnemy({
     loot: [none(35), drop('body-elixir', 30), drop('hunters-elixir', 20), drop('greater-healing-potion', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
     cards: [card('unction-of-boils')],
+    finalBlowLines: {
+        brutal: 'The coils go slack. The debate ends the one way it never has: unfinished.',
+        quiet:  'It settles into itself, crown and coil both, and does not rise for the next argument.',
+        ironic: 'It never lost a debate it could reach. This one, it could not.',
+    },
+    causeLines: {
+        brutal: 'The crown of teeth closes on the argument, and the argument was you.',
+        broken: 'Coil by coil, it tightens the terms until there is no room left to disagree.',
+        quiet:  'You step within reach for one exchange. Reach was the entire debate.',
+    },
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1220,6 +1435,16 @@ export const Sidelle = createEnemy({
     loot: [none(35), drop('whetstone-oil', 25), drop('body-elixir', 25), drop('greater-healing-potion', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
     cards: [card('knucklebone-recant')],
+    finalBlowLines: {
+        brutal: 'The spite finally runs out of structure to hold it up.',
+        quiet:  'It folds its wings for the first time, an old capitulation it never once used.',
+        ironic: 'It could have flown the whole time. It chose to crawl, out of spite, all the way to this.',
+    },
+    causeLines: {
+        brutal: 'It crawls through your guard the way it crawls through everything: on principle, and hard.',
+        broken: 'It refuses every easier path, and drags you down the hard one alongside it.',
+        quiet:  'You expect it to fly. It never does. That expectation costs you the exchange.',
+    },
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1408,6 +1633,16 @@ export const AshenBoneDrake = createEnemy({
     loot: [none(30), drop('iron-skin-draught', 25), drop('greater-healing-potion', 25), drop('war-horn-draught', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 0 },
     cards: [card('knucklebone-recant'), card('shallow-grave')],
+    finalBlowLines: {
+        brutal: 'What refused finally has nothing left to refuse with.',
+        quiet:  'The ash settles. Even the argument, eventually, runs out of fire to make its point with.',
+        ironic: 'It survived the fire that took everything else by refusing to stop. It could not refuse this.',
+    },
+    causeLines: {
+        brutal: 'It answers with the only argument the fire left it: force, entire.',
+        broken: 'It refuses, again and again, to be the thing that yields, and neither, eventually, are you.',
+        quiet:  'You mistake the ash for spent. What is left underneath was never going to be reasoned with.',
+    },
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1556,6 +1791,16 @@ export const Zoma = createEnemy({
     loot: [none(30), drop('philosopher-tea', 30), drop('clarity-serum', 25), drop('greater-resonance-crystal', 15)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 0 },
     cards: [card('scolds-bridle'), card('shallow-grave')],
+    finalBlowLines: {
+        brutal: 'Both heads go still at once. For once, the argument resolves unanimously.',
+        quiet:  'The two voices trail into the same silence, having finally agreed on something.',
+        ironic: 'They spent their whole shared life disagreeing about which one loved you less. Neither gets to finish the point.',
+    },
+    causeLines: {
+        brutal: 'Two heads land the same blow from two directions, and the disagreement was never about mercy.',
+        broken: 'One head wears you down while the other argues about the pace. Both get their way eventually.',
+        quiet:  'You listen to one voice and miss the other. The second one was always the one to watch.',
+    },
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1579,6 +1824,16 @@ export const MabadiUndrowned = createEnemy({
     loot: [none(30), drop('body-elixir', 25), drop('whetstone-oil', 25), drop('supreme-healing-potion', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
     cards: [card('knucklebone-recant'), card('spoiled-poultice')],
+    finalBlowLines: {
+        brutal: 'The interest goes uncollected. The principal, this once, keeps its debtor.',
+        quiet:  'He sets the cane down in the shallows, the debt closed on terms he did not choose.',
+        ironic: 'The river gave him back to collect. It did not warn him what collecting would cost.',
+    },
+    causeLines: {
+        brutal: 'He collects the principal with a coldness the river taught him and you never learned to match.',
+        broken: 'He calls the debt in a little at a time, round after round, colder than the man he was.',
+        quiet:  'You mistake the calm for the old Mabadi\'s patience. The river replaced patience with arithmetic.',
+    },
     addedIn: ADDED,
     tags: ['mid-game', 'elite', 'enemy'],
 });
@@ -1605,6 +1860,16 @@ export const TriEyesHollowed = createEnemy({
     loot: [none(30), drop('clarity-serum', 25), drop('philosopher-tea', 25), drop('void-essence', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
     cards: [card('passing-bell'), card('the-long-lent')],
+    finalBlowLines: {
+        brutal: 'The third eye finds an error it cannot finish cataloguing.',
+        quiet:  'All three sockets go dark at once, the tally closed with nothing left to want it open.',
+        ironic: 'It counted for the counting\'s own sake, long after wanting anything else had left it. The count still ends.',
+    },
+    causeLines: {
+        brutal: 'The tally finds you wanting, and wanting, for this watcher, has only ever meant one thing.',
+        broken: 'Error by error, faster now that nothing else moves it, the count wears you down to a number.',
+        quiet:  'You make no mistake it can see. It counts the absence of one instead, and that is enough.',
+    },
     addedIn: ADDED,
     tags: ['late-game', 'elite', 'enemy'],
 });
@@ -1627,6 +1892,16 @@ export const BlackDeath = createEnemy({
     loot: [none(25), drop('antidote', 30), drop('supreme-healing-potion', 25), drop('phoenix-tear', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
     cards: [card('unction-of-boils'), card('knucklebone-recant')],
+    finalBlowLines: {
+        brutal: 'The spine finally gives out what the plague never could.',
+        quiet:  'It stops walking, at last, and the stillness reads like every town it never got to.',
+        ironic: 'It walked because waiting cost it towns. Walking, in the end, cost it more.',
+    },
+    causeLines: {
+        brutal: 'It remembers your town\'s taste and takes a second helping, unasked.',
+        broken: 'It spreads through your guard the patient way plague always has, town by town, breath by breath.',
+        quiet:  'You hold your ground a moment too long. It was always going to prefer that to a chase.',
+    },
     addedIn: ADDED,
     tags: ['late-game', 'elite', 'enemy'],
 });
@@ -1649,6 +1924,16 @@ export const TheUnnameable = createEnemy({
     loot: [none(25), drop('void-essence', 35), drop('philosopher-tea', 20), drop('supreme-healing-potion', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
     cards: [card('spoiled-poultice'), card('shallow-grave')],
+    finalBlowLines: {
+        brutal: 'It goes down still unnamed. No one survives long enough to try again.',
+        quiet:  'It folds into the shape language avoided all along, and the avoiding, at last, is complete.',
+        ironic: 'It ate every name anyone offered it. It leaves without one, which may have been the point.',
+    },
+    causeLines: {
+        brutal: 'It answers in the shape it thinks in, and the shape was built to avoid surviving it.',
+        broken: 'You try to name what is happening to you. The trying, apparently, is the meal.',
+        quiet:  'You look at it too directly, once. Looking, it turns out, was the naming it wanted.',
+    },
     addedIn: ADDED,
     tags: ['late-game', 'elite', 'enemy'],
 });
@@ -1671,6 +1956,16 @@ export const FireGiant = createEnemy({
     loot: [none(25), drop('war-horn-draught', 30), drop('supreme-healing-potion', 25), drop('iron-skin-draught', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: 0, scope: -67 },
     cards: [card('unction-of-boils'), card('knucklebone-recant')],
+    finalBlowLines: {
+        brutal: 'The furnace goes cold in one motion. The genealogy ends here, undocumented.',
+        quiet:  'He sets the sword down, and for a moment it is only a mountain\'s spine again, resting.',
+        ironic: 'The sword resented being demoted from mountain to blade. It got its wish: it is nothing again.',
+    },
+    causeLines: {
+        brutal: 'The hammer blow lands with the weight of a whole mountain\'s resentment.',
+        broken: 'Blow after blow, the furnace does not cool, and neither does what it is doing to you.',
+        quiet:  'You block once, correctly. The sword remembers being bedrock. Bedrock does not care about correctly.',
+    },
     addedIn: ADDED,
     tags: ['late-game', 'elite', 'enemy'],
 });
@@ -1694,6 +1989,16 @@ export const GreaterDevil = createEnemy({
     loot: [none(25), drop('void-essence', 30), drop('supreme-healing-potion', 25), drop('greater-resonance-crystal', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 },
     cards: [card('scolds-bridle'), card('ossuary-drawer')],
+    finalBlowLines: {
+        brutal: 'The paperwork, for once, fails to account for the outcome.',
+        quiet:  'It sets down the ledger, the office finally, formally, vacated.',
+        ironic: 'It administered a contract with no flaw in it anywhere. The flaw was never in the contract.',
+    },
+    causeLines: {
+        brutal: 'The contract executes itself, flawlessly, exactly as filed, and you are the line item.',
+        broken: 'Clause by clause, the paperwork finds every opening you did not know you signed away.',
+        quiet:  'You skim the terms instead of reading them. The office was counting on exactly that.',
+    },
     addedIn: ADDED,
     tags: ['late-game', 'elite', 'enemy'],
 });
@@ -3380,6 +3685,16 @@ export const TheSophist = createEnemy({
         quiet:   'The narration stops. For the first time in centuries, the house has no one to explain it.',
         setDown: 'He closes the third ledger and lays the pen across it, nib toward you. The fourth ledger stays blank. That is the concession.',
         heavy:   '"I sold certainty at the door because I could not afford it myself. You walked in without buying. Note it in the record: one walked in without buying."',
+    },
+    finalBlowLines: {
+        brutal: 'The borrowed argument runs out of premises to stand on, and so does he.',
+        quiet:  'He sets the ledger down mid-signature, the third of a name left permanently unfinished.',
+        ironic: 'He held every argument at a more flattering angle than the one who made it. This one, held straight, was the one he could not survive.',
+    },
+    causeLines: {
+        brutal: 'He hands your own argument back heavier than you gave it, and heavier is the whole of the blow.',
+        broken: 'He borrows a little more of your certainty with each exchange, until the case you came in with is entirely his.',
+        quiet:  'You concede one small point to move the conversation along. He was already building on it.',
     },
     journalEntry: {
         id: 'codex-the-sophist',
