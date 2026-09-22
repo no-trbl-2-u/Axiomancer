@@ -1,13 +1,36 @@
 # Critique log
 
-> Last pass: 2026-09-22 at commit 413c59b8
-> Pass count: 47
+> Last pass: 2026-09-22 at commit 87a8b6fc
+> Pass count: 48
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 48, 2026-09-22, commit 87a8b6fc] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5,
+> `CRITIQUE_VIEWPORT=both`), mobile (375×812) and desktop (1280×800),
+> against the full 11-screen set (title, onboarding, combat preview,
+> live combat-board, exploration hub, dialogue, village, cutscene,
+> rest, hazard, late-game hub) — 22 captures, 0 nav trouble, 0
+> console/page errors. Read every screenshot directly across both
+> viewports. Previously-filed candidates reconfirmed unchanged and not
+> re-filed: the mobile combat-board hand fan's truncated card names
+> (Thin Hymn/Chilblain Watch/The Long Lent/Spoiled Poultice, pass 37),
+> the hazard danger-card's small centered panel (deliberate per pass
+> 34), the late-game hub's faint unlabeled desktop oval (declined per
+> pass 34/39/40, still ambiguous). One new finding: the late-game hub's
+> node-graph map (`sage-fv-boss-gate` fixture, "the Drowned Parish", 28
+> nodes/20 sealed) renders its full hex grid on desktop but is
+> completely blank on mobile (375×812) — no nodes, no edges, no
+> backdrop art, just the "NODE GRAPH" label and legend text sitting
+> over solid black. The DOM text confirms the data loaded ("28 nodes ·
+> 20 sealed"); this reads as a render/camera-fit defect, not a data
+> gap. Filed below as HIGH — the node graph is the map's core
+> traversal affordance (§3's "Town / exploration hub" slot), unusable
+> at the viewport width that matters most for a mobile-first game.
 
 > **[critique pass 47, 2026-09-22, commit 413c59b8] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5,
@@ -678,6 +701,45 @@
 > covered card to play. Filed below.
 
 ## Pending
+
+### [HIGH] exploration — the late-game hub's node-graph map renders completely blank on mobile
+- pass: 48 (commit 87a8b6fc)
+- viewport: mobile (375×812); desktop (1280×800) unaffected
+- category: navigation / mobile
+- observation: booted the `sage-fv-boss-gate` fixture ("the Drowned
+  Parish", 28 nodes · 20 sealed) at both viewports via
+  `critique:drive`. Desktop renders the full hex node graph — nine
+  visible nodes, connecting roads, the "NODE GRAPH" compass mark, all
+  centered in frame. Mobile shows only the header (VITAE/GRACE bars),
+  the "the Drowned Parish" title, the "NODE GRAPH" label, and the
+  legend/count text ("28 nodes · 20 sealed") — the entire graph area
+  between them is solid black. No nodes, no edges, no backdrop plate
+  render. The "Tap a glowing node to travel — drag or pinch the chart"
+  hint floats over empty space with nothing to tap.
+- evidence: `axiomancer-mobile/.critique-artifacts/mobile/11-late-game-hub.png`
+  vs `desktop/11-late-game-hub.png` (pass 48); DOM text
+  `mobile/11-late-game-hub.txt` confirms the node data loaded ("28
+  nodes · 20 sealed") despite nothing rendering — this is a render/
+  camera-fit gap, not a data gap. Likely area:
+  `axiomancer-mobile/components/exploration/MapCanvas.tsx` —
+  `computeFocusTransform` (:98-123) fits the focus bounding box against
+  `viewport.w`/`viewport.h`, and `viewport` is captured once from the
+  first `onWrapLayout` call (`setViewport((prev) => prev ?? { w,
+  h })`, :265) and never corrected afterward; at a 375px-wide viewport
+  the fit math (`FIT_PADDING = 40`, `MIN_SCALE = 0.6`) has far less
+  room than desktop's 1280px, and a wide-enough focus bbox for this
+  28-node map could clamp to `MIN_SCALE` without the resulting
+  transform actually landing any node inside the visible frame.
+- suggested fix: reproduce locally at 375px width against the
+  `sage-fv-boss-gate` fixture and log `computeFocusTransform`'s real
+  inputs/output for this map, to confirm whether the `MIN_SCALE` floor
+  or the first-layout-wins `viewport` capture is what leaves the focus
+  bbox outside the visible viewport. A unit test on
+  `computeFocusTransform` using this fixture's actual node coordinates
+  at `viewport = {w: 375, h: 812}` should pin the exact break before
+  touching the component.
+- source: critique pass 48 (unattended `/march` tick, `critique:drive`
+  transport)
 
 ### [MED] combat — the only SUMMON carrier cannot reach wave 2, so half the spawn rule is dead on the roster
 - pass: burn-day audit 2026-09-19 (row 3.9)

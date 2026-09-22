@@ -626,3 +626,4 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-22T14:33:07Z | slash-prompt | /march | - | - | /march |
 | 2026-09-22T19:31:50Z | skill | digest | claude-opus-5-5 | - | args: Cover PR #353 (UI/map overhaul: first-node Suppliant's Ring, gathering card, card te |
 | 2026-09-22T19:31:50Z | skill-end | digest | claude-opus-5-5 | 0s | ok |
+| 2026-09-22T20:30:12Z | slash-prompt | /march | - | - | /march |
