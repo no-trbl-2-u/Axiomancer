@@ -1,0 +1,137 @@
+# .easignore — what EAS Build must NOT upload.
+#
+# HOW EAS READS THIS FILE (verified against eas-cli's vcs/local.js and
+# vcs/clients/git.js, not assumed):
+#
+#   1. It is read from the GIT ROOT (this directory), never from
+#      axiomancer-mobile/ — EAS archives the whole monorepo because the app
+#      consumes axiomancer-mechanics as local source via the `@mechanics`
+#      alias.
+#   2. When this file exists, EAS IGNORES EVERY .gitignore IN THE REPO.
+#      Section 1 below therefore re-states all five .gitignore files. Drop
+#      a rule from Section 1 and EAS starts uploading whatever it guarded
+#      — including signing keys.
+#   3. Syntax is .gitignore syntax, evaluated from the repo root. A rule
+#      copied out of a nested .gitignore is re-rooted under that package's
+#      directory so it keeps its original scope.
+#   4. It cannot shrink `.git/`. EAS ships a depth-1 clone whose pack holds
+#      every tracked blob at HEAD, so files removed here still ride along
+#      inside `.git`. This file only trims the working-tree copy.
+#
+# Verify any change with (writes the exact archive locally, uploads nothing):
+#   cd axiomancer-mobile && npx eas-cli build:inspect -p android -e preview \
+#     --stage archive --output /tmp/eas-archive --force
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 1 — .gitignore parity (REQUIRED; see note 2 above)
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Secrets and signing material ───────────────────────────────────────────
+# Deliberately GLOBAL (unscoped) rather than re-rooted: a key must never ship
+# from any directory. `git ls-files` confirms no tracked file matches these
+# except the two .env.example templates, which are re-included below.
+*.jks
+*.p8
+*.p12
+*.key
+*.pem
+*.mobileprovision
+.env
+.env.*
+!.env.example
+
+# ── From /.gitignore (repo root; rules already apply repo-wide) ───────────
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+.expo/
+.expo-shared/
+web-build/
+*.orig.*
+*.tgz
+.tuning/
+.cache/
+.DS_Store
+*.log
+.playwright-mcp
+.claude/worktrees/
+.claude/settings.local.json
+.claude/hooks/.telemetry-state.json
+
+# ── From /axiomancer-mobile/.gitignore (re-rooted) ─────────────────────────
+# /ios and /android MUST stay excluded: they are prebuild output, and if EAS
+# sees them it treats the project as bare and skips managed prebuild.
+/axiomancer-mobile/ios
+/axiomancer-mobile/android
+/axiomancer-mobile/pnpm-lock.yaml
+/axiomancer-mobile/bun.lock
+/axiomancer-mobile/expo-env.d.ts
+/axiomancer-mobile/app-example
+/axiomancer-mobile/**/.kotlin/
+/axiomancer-mobile/**/.metro-health-check*
+/axiomancer-mobile/**/walk-*.png
+/axiomancer-mobile/**/npm-debug.*
+/axiomancer-mobile/**/yarn-debug.*
+/axiomancer-mobile/**/yarn-error.*
+/axiomancer-mobile/.smoke-dist/
+/axiomancer-mobile/.critique-dist/
+/axiomancer-mobile/.critique-artifacts/
+/axiomancer-mobile/.critique-artifacts-fresh-eyes/
+/axiomancer-mobile/.audit-dist/
+/axiomancer-mobile/.claude/scheduled_tasks.lock
+
+# ── From /axiomancer-mechanics/.gitignore (re-rooted) ──────────────────────
+/axiomancer-mechanics/**/.vscode/
+/axiomancer-mechanics/**/.idea/
+/axiomancer-mechanics/**/*.swp
+/axiomancer-mechanics/**/*.swo
+/axiomancer-mechanics/**/Thumbs.db
+/axiomancer-mechanics/**/npm-debug.log*
+/axiomancer-mechanics/**/game-state.json
+/axiomancer-mechanics/**/logs/
+/axiomancer-mechanics/**/*.jsonl
+/axiomancer-mechanics/automation/testing-logs/*.txt
+/axiomancer-mechanics/automation/last-verify-report.json
+/axiomancer-mechanics/.claude/scheduled_tasks.lock
+
+# ── From /axiomancer-mechanics/automation/playtest/reports/.gitignore ──────
+/axiomancer-mechanics/automation/playtest/reports/*.json
+
+# /axiomancer-card-editor/.gitignore holds only node_modules/ and dist/,
+# both already covered repo-wide above.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECTION 2 — Build-irrelevant trees (the actual size savings)
+# ─────────────────────────────────────────────────────────────────────────────
+# Each entry was checked before it went here: no import from the app
+# (app/, components/, state/, lib/, theme/), from axiomancer-mechanics/src,
+# or from metro.config.js / app.config.ts / babel config reaches into it,
+# and no install lifecycle script (preinstall/postinstall/prepare) exists
+# in any of the four package.json files. KEEP, even though they look
+# optional: the root package.json + package-lock.json and all three
+# workspace directories (npm ci resolves every declared workspace), and
+# axiomancer-mechanics/src + content + automation.
+
+# Repo-level docs, planning memory, art sources, and the DevLog site.
+/plan/
+/Potential Assets/
+/tmp-images/
+/devlog/
+/docs/
+/skills/
+/.claude/
+/.github/
+
+# Mobile: visual-regression baselines, design notes, reference art, specs.
+/axiomancer-mobile/screenshots/
+/axiomancer-mobile/design/
+/axiomancer-mobile/docs/
+/axiomancer-mobile/reference-images/
+/axiomancer-mobile/specs/
+
+# Mechanics: documentation, specs, and scratch — never imported by src/.
+/axiomancer-mechanics/docs/
+/axiomancer-mechanics/specs/
+/axiomancer-mechanics/braindump/
+/axiomancer-mechanics/scratch/
