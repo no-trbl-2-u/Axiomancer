@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-09-21 at commit 66decb5e
-> Pass count: 46
+> Last pass: 2026-09-22 at commit 413c59b8
+> Pass count: 47
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -9,29 +9,30 @@
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
 
-> **[critique pass 46, 2026-09-21, commit 66decb5e] Unattended `/march`
+> **[critique pass 47, 2026-09-22, commit 413c59b8] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5,
 > `CRITIQUE_VIEWPORT=both`), mobile (375×812) and desktop (1280×800),
 > against the full 11-screen set (title, onboarding, combat preview,
 > live combat-board, exploration hub, dialogue, village, cutscene,
 > rest, hazard, late-game hub) — 22 captures, 0 nav trouble, 0
-> console/page errors. The 22 commits since pass 45 (`9af1cb2d`) were
-> content-data passes only (adjust-enemies pass 15's finalBlowLines/
-> causeLines backfill, adjust-equipment pass 15's war-horn-draught
-> split, adjust-cards pass 15's header-count fix, adjust-npcs pass 14
-> zero-diff) plus phase-104 follow-up already covered by pass 45 —
-> none touch these 11 screens' rendered surface, since finalBlowLines/
-> causeLines only fire on live kill events, not the static captures
-> here. Read every screenshot directly across both viewports (title,
-> combat-board, village, hazard spot-checked pixel-for-pixel against
-> pass 45's descriptions). All previously-dropped candidates
-> reconfirmed unchanged and not re-filed: the desktop combat-board's
-> non-frontmost card stat-row clipping (`SPOILED POULTICE` → "POIS"/
-> "8/p"+"ay", pass 44), the desktop hazard panel's sparse framing
-> (pass 34/36, confirmed deliberate), and the OMEN cutscene redirect
-> on onboarding/exploration-hub (pass 41, still open in Pending, not
-> re-filed here). The village "Void Essence" wearer wording (pass 41,
-> still Pending) reproduces unchanged. Zero fresh findings this pass.
+> console/page errors. The 12 commits since pass 46 (`66decb5e`) were
+> content-data ledger passes only (adjust-equipment pass 16, adjust-
+> cards pass 16, adjust-npcs pass 15, adjust-keywords pass 15 — all
+> "zero-diff, ledger bump only") plus two telemetry-record commits and
+> a merged UI-improvements PR (#352); `git diff --stat 66decb5e..HEAD
+> -- axiomancer-mobile axiomancer-mechanics/src` returns empty, so
+> none of these touch the 11 screens' rendered surface. Read every
+> screenshot directly across both viewports (title, combat preview,
+> live combat-board, dialogue, village, rest, hazard, late-game hub
+> spot-checked pixel-for-pixel against pass 46's descriptions). All
+> previously-filed candidates reconfirmed unchanged and not re-filed:
+> the desktop combat-board's non-frontmost card stat-row clipping
+> (`SPOILED POULTICE` → "POIS"/"8/p"+"ay", pass 44), the desktop
+> hazard panel's sparse framing (pass 34/36, confirmed deliberate),
+> the OMEN cutscene redirect on onboarding/exploration-hub (pass 41,
+> still open in Pending, not re-filed here), and the village "Void
+> Essence" wearer wording (pass 41, still Pending). Zero fresh
+> findings this pass.
 
 > **[critique pass 45, 2026-09-21, commit 9af1cb2d] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5,
