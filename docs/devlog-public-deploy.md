@@ -68,8 +68,37 @@ recorded. Do this once, in one sitting:
    Per-branch preview URLs are guessable, and the open AUDIT row about
    guessable previews on the game's project applies here too — do not open a
    second instance of the same finding.
-7. **Deploy**, wait for the first build, then run the proof below.
-8. **Record the URL** in this file (replace the placeholder in the next
+7. **Build watch paths** (Settings > Build > Build watch paths). The default
+   (`*`) rebuilds on every push to `main` — about 300 builds a month at the
+   loop's cadence, against the free plan's 500 per account, shared with the
+   game's `axiomancer` project
+   (<https://developers.cloudflare.com/pages/platform/limits/>). Scope it to
+   what `npm ci && npm run site:public` actually reads. A `*` matches across
+   `/`, and is only allowed at the start or end of a rule
+   (<https://developers.cloudflare.com/pages/configuration/build-watch-paths/>).
+   - **Include:**
+     - `devlog/*` — entries, captures, tuning lab
+     - `scripts/devlog*`, `scripts/build-devlog-public.mjs` — the build and
+       its modules
+     - `axiomancer-mechanics/src/*`,
+       `axiomancer-mechanics/scripts/export-catalog.ts` — the catalog export
+     - `axiomancer-mobile/theme/palette.ts`,
+       `axiomancer-mobile/state/presenters/combat-encounter.engine.ts` — design
+       tokens and `STANCE_COLORS`
+     - `axiomancer-mobile/state/combat/keywords.ts`,
+       `axiomancer-mobile/components/combat/statusGlyphs.ts` — imported by the
+       catalog export
+     - `axiomancer-mobile/assets/images/*` — plates, portraits, provenance
+     - `package.json`, `package-lock.json`, `axiomancer-mechanics/package.json`,
+       `axiomancer-mobile/package.json`, `axiomancer-card-editor/package.json` —
+       `npm ci` installs every workspace
+   - **Exclude:** `*.test.ts`, `*.test.tsx`
+
+   Adding a new file the build reads means adding it here too, or the site
+   silently stops updating for changes to it. Pushes with 20+ commits or
+   3000+ files bypass the filter and always build.
+8. **Deploy**, wait for the first build, then run the proof below.
+9. **Record the URL** in this file (replace the placeholder in the next
    section) and in `docs/external-architecture.md`'s register, and correct
    `plan/bearings.md`'s "no hosted web surface" sentence in the same commit —
    it will be false the moment this project exists.
@@ -105,8 +134,10 @@ change to the build command.
 
 `/digest` writes the entry and the day's captures, runs `npm run verify` and
 `npm run site:public`, and commits **source only** — the entry, the dated
-captures, nothing generated. Pushing `main` triggers the Pages build, which
-runs the same command the digest just ran locally. There is no separate
+captures, nothing generated. Pushing `main` triggers the Pages build (the
+entry is under `devlog/`, inside the watch paths above), which runs the same
+command the digest just ran locally. Loop commits that touch only `plan/`,
+`docs/` or tests skip the build. There is no separate
 publish step and no generated file in the commit.
 
 If the Pages project does not exist yet, nothing about that changes: the
