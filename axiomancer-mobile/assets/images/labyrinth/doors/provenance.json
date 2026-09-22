@@ -2,8 +2,8 @@
   {
     "generated_by": "owner-supplied",
     "date": "2026-08-27",
-    "tool": "scripts/ingest-art.mjs (sharp) \u2014 ungraded",
-    "post_process": "longest edge <= 640px, WebP q44",
+    "tool": "scripts/ingest-art.mjs (sharp) — ungraded",
+    "post_process": "longest edge <= 640px, WebP q44; 2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs",
     "license": "UNRESOLVED",
     "covers": [
       "door02-d.webp",

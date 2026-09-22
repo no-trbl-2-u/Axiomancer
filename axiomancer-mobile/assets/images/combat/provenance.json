@@ -7,7 +7,7 @@
     "artist": "Gustave Doré",
     "license": "Public domain",
     "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
-    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44",
+    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44; 2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs",
     "covers": [
       "coastal-village.webp"
     ],
@@ -23,7 +23,7 @@
     "artist": "Gustave Doré",
     "license": "Public domain",
     "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
-    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44",
+    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44; 2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs",
     "covers": [
       "arena-northern-city.webp"
     ],
@@ -39,7 +39,7 @@
     "artist": "Gustave Doré",
     "license": "Public domain",
     "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
-    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44",
+    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44; 2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs",
     "covers": [
       "arena-connecting-river.webp"
     ],
@@ -55,7 +55,7 @@
     "artist": "Gustave Doré",
     "license": "Public domain",
     "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
-    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44",
+    "post_process": "grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44; 2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs",
     "covers": [
       "arena-sweethearts-village.webp"
     ],
@@ -71,7 +71,7 @@
     "artist": "Gustave Doré",
     "license": "Public domain",
     "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
-    "post_process": "plate detected on the scanned page and extracted to 2756x3452 at (721,1602) of 4975x6472 (inset 0.01), then grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44",
+    "post_process": "plate detected on the scanned page and extracted to 2756x3452 at (721,1602) of 4975x6472 (inset 0.01), then grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44; 2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs",
     "covers": [
       "arena-desolation.webp"
     ],
@@ -98,7 +98,7 @@
     "artist": "Gustave Doré (1832 – 1883)",
     "license": "Public domain",
     "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
-    "post_process": "plate detected on the scanned page and extracted to 2690x2192 at (65,74) of 2820x2314 (inset 0.01), then grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44",
+    "post_process": "plate detected on the scanned page and extracted to 2690x2192 at (65,74) of 2820x2314 (inset 0.01), then grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44; 2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs",
     "covers": [
       "arena-caverns.webp"
     ],
@@ -123,7 +123,7 @@
     "artist": "Gustave Doré",
     "license": "Public domain",
     "license_verified": "read from the Commons imageinfo extmetadata at acquisition, not asserted by the operator",
-    "post_process": "plate detected on the scanned page and extracted to 2328x2873 at (61,62) of 2448x2992 (inset 0.01), then grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44",
+    "post_process": "plate detected on the scanned page and extracted to 2328x2873 at (61,62) of 2448x2992 (inset 0.01), then grayscale, brightness 0.62 / contrast 1.08 toward the void, longest edge <= 1120px, WebP q44; 2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs",
     "covers": [
       "arena-the-capital.webp"
     ],
