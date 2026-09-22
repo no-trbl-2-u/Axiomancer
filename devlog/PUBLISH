@@ -8,8 +8,10 @@
 #   every loop commit.
 #
 # WHO WRITES IT
-#   /digest appends ONE line when that night's entry carries a
-#   player-visible change (skills/digest.md §3 step 5b — the publish gate).
+#   /digest appends ONE line only when the window since the last line
+#   carries a major release (a shipped phase or a new system), a UI or
+#   quality-of-life change, or a fix to something that blocks play
+#   (skills/digest.md §3 step 5b, the publish gate). When unsure, it holds.
 #   A person may append a `manual:` line to force a deploy, e.g. after a
 #   fix to the site's own build scripts.
 #

@@ -249,31 +249,61 @@ its own cadence.
    numbers. **Never edit gates, cadences, ceilings, or rules
    directly** — proposals only; `/oversight` promotes. The
    loop does not vote on its own constraints.
-5b. **Publish gate** (T, 2026-09-22): the public site deploys ONLY
-    when `devlog/PUBLISH` changes — it is the Pages project's sole
+5b. **Publish gate** (T, 2026-09-22: "major releases and QOL UI
+    updates mostly"): the public site deploys ONLY when
+    `devlog/PUBLISH` changes. That file is the Pages project's sole
     build watch path (`docs/devlog-public-deploy.md` step 7). Decide
-    whether tonight publishes, then act on the decision:
+    whether tonight publishes, then act on the decision.
 
-    - **Publish** when at least one work item is a change a player
-      would notice in the game: a new feature or system, a UI or
-      quality-of-life change, new content (cards, foes, items,
-      regions, art, text a player reads), or a fix to something a
-      player could hit. The test is the player's, not the loop's:
-      *would someone playing tonight's build see or feel this?*
-    - **Do not publish** when every item is loop-internal: ledger /
-      zero-diff steward passes, critique passes with no findings,
-      tooling, CI, docs, plan edits, or a baseline re-measure. A
-      balance change publishes only if it changes what a player
-      plays (a card's numbers, a fight's roster), never for a
-      measurement alone.
-    - **To publish,** append one line to `devlog/PUBLISH`:
-      `<YYYY-MM-DD> — <tonight's entry title>`. Append-only; never
-      edit a past line. Commit it with the entry.
-    - **Either way,** the entry is still written and committed —
-      the ledger is complete whether or not the site moves, and the
-      next publish renders every entry since. State the decision in
-      the `While you were out` panel (one line: published, or held
-      back and why).
+    **Publish** when the window since the last `devlog/PUBLISH`
+    line carries at least one of these three triggers:
+
+    1. **A major release**:
+       - a build-plan phase shipped (checked off in the window); or
+       - a new game system, mechanic or feature a player uses: a
+         new screen, a new way to play, a new enemy archetype, a
+         new region.
+
+       A single card, foe, item or line of text is not a release on
+       its own.
+    2. **A UI or quality-of-life change** a player sees or feels:
+       - a screen, control, readout or layout change;
+       - a legibility or accessibility fix;
+       - a flow that got shorter or clearer.
+
+       These are typically `[ui]` work items, but judge the change,
+       not the chip.
+    3. **A fix to something that blocks play**: a crash, a blank or
+       stuck screen, lost progress or save, or a fight or node that
+       cannot be finished. Lesser bug fixes wait.
+
+    **Hold** (do not publish) for everything else, even when a
+    player could notice it:
+    - content additions alone (new or reworded cards, foes, items,
+      dialogue, flavour, art swaps);
+    - balance and number changes;
+    - minor bug fixes;
+    - all loop-internal work: steward passes, critique and audit
+      passes, tooling, CI, docs, plans, and baseline re-measures.
+
+    Held items are not lost. They are in the committed entries and
+    appear on the site with the next publish.
+
+    **When unsure, hold.** A missed night costs two days of latency.
+    A noisy site costs build quota and the reader's trust.
+
+    **The window is cumulative.** Judge everything since the last
+    `devlog/PUBLISH` line, not just tonight's commits. A phase that
+    shipped on a held night still counts on the next one.
+
+    **To publish,** append one line to `devlog/PUBLISH`:
+    `<YYYY-MM-DD> — <tonight's entry title>`. It is append-only:
+    never edit a past line. Commit it with the entry.
+
+    **Either way,** write and commit the entry, and state the
+    decision in one line in the `While you were out` panel:
+    - `published — <which trigger>`, or
+    - `held — <why>`.
 
 6. **Gate + commit + push:** `npm run verify`, then `npm run
    site:public` (the public build, which is also the check that
@@ -313,9 +343,10 @@ its own cadence.
 5. One commit; cloud ticks carry the `Cloud-Run:` trailer.
 6. No `Co-Authored-By`, no emojis, no `--no-verify` — the
    standing rules apply at 3am too.
-6b. Publishing is the §3 step 5b decision, recorded only by
-   appending to `devlog/PUBLISH`. Never edit a past line of that
-   file, and never touch it on a night that does not publish.
+6b. Publishing is the §3 step 5b decision (major release, UI or
+   QOL change, or play-blocking fix; when unsure, hold). It is
+   recorded only by appending to `devlog/PUBLISH`. Never edit a
+   past line of that file, and never touch it on a night that holds.
 7. Never end the turn with the commit/push still pending on
    a backgrounded command or a scheduled wakeup — this run has
    no later turn to resume into (§3.6).
@@ -339,7 +370,7 @@ its own cadence.
 
 ```bash
 devlog/entries/DIGEST_<date>.md      # the deliverable (append, never overwrite)
-devlog/PUBLISH                       # append a line ONLY on a player-visible night (§3 5b) — the sole deploy trigger
+devlog/PUBLISH                       # append ONLY for a major release / UI-QOL change / play-blocking fix (§3 5b) — the sole deploy trigger
 npm run devlog:shots -- <ref> <date> # collect UI before/after/diff (if screens changed)
 npm run site:build                   # catalog (export+render) + entry HTML + hub
 npm run baseline:check               # is the deck-matrix baseline stale?
