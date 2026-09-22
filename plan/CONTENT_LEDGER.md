@@ -12,7 +12,7 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-21 | 2a162f5e | 16 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-21 | f74f198e | 15 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-21 | 5d9b6063 | 16 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-21 | f78f0550 | 15 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-21 | fb0a0f3c | 15 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-21 | 9821b636 | 15 |
@@ -22,6 +22,78 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
+> **[adjust-equipment pass 16, 2026-09-21, commit 5d9b6063]**
+> Zero-CREATE, zero-UPDATE, zero-REMOVE pass — dispatched autonomously
+> by `/march`'s content-lifecycle gate: `equipment` (`f74f198e`
+> 2026-09-21T07:07:28Z, 26 commits behind HEAD `a0412c52`
+> 2026-09-21T22:39:48Z) and `enemies` (`f78f0550`
+> 2026-09-21T09:00:58Z, 24 commits) both qualified past the
+> 15-commit/36h threshold; `equipment` was stalest by last-pass
+> timestamp. `keywords` (`fb0a0f3c` 2026-09-21T12:50:21Z, 8 commits)
+> and `npcs` (`9821b636` 2026-09-21T18:48:17Z, 3 commits) did NOT
+> qualify — both under 15 commits and under 36h. `cards`
+> (`2a162f5e` 2026-09-21T22:39:41Z, 1 commit) was pass 16 as of this
+> same tick's own dispatch turn, nowhere near its own threshold.
+> Deploy confirmed green (`npm run deploy:check`: no gated workflow
+> for HEAD yet within the grace window, docs/plan-only tick).
+>
+> **Step 1 audit — fresh, not re-cited:** slot coverage (2 weapons, 2
+> armor, 7 accessories, all 6 `AccessoryKind`s live), dominance (no
+> same-slot pair strictly worse on every `statModifiers` value — every
+> tie differs by `grantsSignature`), signature drift (all 11
+> `grantsSignature` values resolve live in `SignatureSkillId` and in
+> `combat.signature.ts`'s roster), consumable `effectId` resolution
+> (all 22 resolve in `buffs.library.json`/`debuffs.library.json`), and
+> shop/reward reachability (all 22 consumables occur in >=1 of the 7
+> shop ware blocks or an `enemy.library.ts` loot table — 12
+> shop-stocked, 10 reward-only) all re-derived clean, byte-identical
+> to pass 15's own findings. Checked every shop pool and every enemy
+> loot table for a shared-`effectId` pair co-occurring in the same
+> pool (the pass-11/14/15 bug class) — none found beyond the
+> already-known, already-differentiated tiers (heal-amount ladders,
+> the pass-15 haste split). A genuine zero-diff pass on the data
+> itself, so the Step 1b widened KB check ran.
+>
+> **Step 1b widened KB check — two angles, both dead ends, honestly
+> recorded:**
+> (1) `kb_search`/`kb_cards` on Dawncaster's card-based "Equipment"
+> category (`Durability`, `Enable`/re-enable, Frenzy-triggered
+> procs — e.g. `kb:dawncaster/0022-aegis`, `/0186-battle-station`)
+> confirmed the corpus's closest analogue to our relic set uses
+> mechanics (durability, procedural re-enabling) this project's lean
+> signet-relic shape deliberately retired (docs/equipment.md,
+> phases 18-23) — not something this data-only steward can reach for
+> without the explicit design call Hard Rule 3 requires. `kb_cards`
+> (slay-the-spire) on relic acquisition (found through play, not a
+> fixed starting kit) re-confirms pass 12's own relic/loot-model
+> finding, already logged as a deliberate deferral in
+> `docs/equipment.md` ("Making relics findable in the world is a
+> deferred follow-up") — re-citing it here is not a new finding.
+> (2) Revisited pass 13's own un-shipped residue — the corpus's
+> "always-good secondary" potion lever (Diamond Potion "Gain 1
+> Impervious. Draw a card.", `kb:dawncaster/0526-diamond-potion`;
+> Steelskin Potion "Gain 6 Armor. Draw a card.",
+> `kb:dawncaster/1455-steelskin-potion`, both re-verified live) —
+> and checked it against the live engine before treating it as
+> actionable: `useConsumableEffect` (`Items/equipment.engine.ts`)
+> fires only from the world-side `USE_ITEM` reducer
+> (`Game/game.reducer.ts`), never from inside
+> `initializeCombatEncounter`'s combat loop, and combat's `drawPile`
+> doesn't exist until that function builds it from scratch — so
+> "draw a card" has no pile to draw from at the moment a consumable
+> is actually used. The corpus's lever is a combat-time card rider;
+> ours is a pre-combat world action. Transplanting it as literally
+> described would be a mechanical mismatch, not a real gap — the
+> lever pass 13 DID ship (HP-conditional heal scaling) is the one
+> that actually maps onto this engine's out-of-combat-use model.
+> Both angles are genuine re-checks, not invented findings, and
+> neither survives contact with the live tree as something this
+> steward should ship or file.
+>
+> **Conclusion:** the item surface is at the same steady state pass
+> 15 left it in. Nothing to CREATE, UPDATE, or REMOVE this tick.
+> Ledger bump only, per skill §5 failure mode 3.
+>
 > **[adjust-cards pass 16, 2026-09-21, commit 2a162f5e]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
 > content-lifecycle gate: `cards` was the stalest qualifying category this
