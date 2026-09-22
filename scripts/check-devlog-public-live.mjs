@@ -12,6 +12,9 @@
 //   2. the NEWEST POST serves, and carries its own title    (the build is current)
 //   3. the CATALOG serves, and carries a card plate         (the catalog shipped)
 //   4. the FEED serves as XML                               (the machine half works)
+//   5. when devlog/builds.json offers a build: the landing links THAT build's
+//      APK, and the APK still downloads    (an Expo artifact can expire; a dead
+//      download button is the worst thing a stranger can find on the page)
 //
 // A stale deploy passes (1) and fails (2) — which is the failure this check
 // exists for, because a Pages project that silently stops rebuilding looks
@@ -20,6 +23,7 @@
 // Exit codes: 0 all good; 1 a check failed; 3 config/usage.
 
 import { readEntries } from './build-devlog-public.mjs'
+import { latestAndroid, readBuilds } from './devlog-builds.mjs'
 
 const BASE = (process.argv[2] || process.env.DEVLOG_PUBLIC_URL || '').replace(/\/$/, '')
 const TIMEOUT_MS = Number(process.env.DEVLOG_PUBLIC_TIMEOUT_MS ?? 20000)
@@ -78,6 +82,15 @@ check('the catalog carries card plates', /class="plate /.test(catalog.body))
 const feed = await get('/feed.xml')
 check('the feed serves', feed.ok, feed.error || `HTTP ${feed.status}`)
 check('the feed is an Atom document', /<feed[^>]*xmlns="http:\/\/www\.w3\.org\/2005\/Atom"/.test(feed.body))
+
+// 5. The playable build — only when the tree offers one (devlog/builds.json).
+const offered = latestAndroid(readBuilds())
+if (offered) {
+    check(`the landing offers the latest build (${offered.date})`, landing.body.includes(offered.apkUrl))
+    /** HEAD the APK itself: a 200 with a body length proves the download works without a login. */
+    const apk = await fetch(offered.apkUrl, { method: 'HEAD', redirect: 'follow' }).catch((e) => ({ ok: false, status: e.message }))
+    check('the offered APK still downloads', apk.ok, `HTTP ${apk.status}`)
+}
 
 if (failures.length) {
     console.error(`\ncheck-devlog-public-live: ${failures.length} check(s) failed.`)
