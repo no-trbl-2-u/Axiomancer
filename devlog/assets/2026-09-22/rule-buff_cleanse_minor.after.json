@@ -1,0 +1,5 @@
+{
+  "id": "buff_cleanse_minor",
+  "before": "Occam's Razor — CLEANSE_MINOR — Type buff · Category stat · Tier 1 · Duration instant · Stacking none",
+  "after": "Occam's Razor — CLEANSE — Type buff · Category stat · Tier 1 · Duration instant · Stacking none"
+}
