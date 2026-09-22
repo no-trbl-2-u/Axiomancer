@@ -68,8 +68,31 @@ recorded. Do this once, in one sitting:
    Per-branch preview URLs are guessable, and the open AUDIT row about
    guessable previews on the game's project applies here too — do not open a
    second instance of the same finding.
-7. **Deploy**, wait for the first build, then run the proof below.
-8. **Record the URL** in this file (replace the placeholder in the next
+7. **Build watch paths** (Settings > Build > Build watch paths):
+   - **Include:** `devlog/PUBLISH`
+   - **Exclude:** *(empty)*
+
+   The site deploys on player-visible news, not on every push (T,
+   2026-09-22). `devlog/PUBLISH` is an append-only publish ledger.
+   `/digest` appends a line only for a major release (a shipped phase or
+   new system), a UI or quality-of-life change, or a fix to something that
+   blocks play (`skills/digest.md` §3 step 5b). Content, balance and minor
+   fixes are held back and appear with the next publish. The default (`*`)
+   rebuilt on every push to `main`: about 300 builds a month at the loop's
+   cadence, against the free plan's 500 per account, which the game's
+   `axiomancer` project shares
+   (<https://developers.cloudflare.com/pages/platform/limits/>).
+
+   Consequences:
+   - Engine, catalog, art and site-script changes reach the public site
+     only with the next publish. To ship a fix to the site's own build
+     sooner, append a `<YYYY-MM-DD> — manual: <reason>` line to
+     `devlog/PUBLISH`.
+   - Pages ignores the filter and always builds a push of 20+ commits or
+     3000+ files
+     (<https://developers.cloudflare.com/pages/configuration/build-watch-paths/>).
+8. **Deploy**, wait for the first build, then run the proof below.
+9. **Record the URL** in this file (replace the placeholder in the next
    section) and in `docs/external-architecture.md`'s register, and correct
    `plan/bearings.md`'s "no hosted web surface" sentence in the same commit —
    it will be false the moment this project exists.
@@ -105,9 +128,12 @@ change to the build command.
 
 `/digest` writes the entry and the day's captures, runs `npm run verify` and
 `npm run site:public`, and commits **source only** — the entry, the dated
-captures, nothing generated. Pushing `main` triggers the Pages build, which
-runs the same command the digest just ran locally. There is no separate
-publish step and no generated file in the commit.
+captures, nothing generated. On a night that passes the publish gate
+(a major release, a UI or quality-of-life change, or a play-blocking fix) it also
+appends a line to `devlog/PUBLISH`. That push triggers the Pages build, which
+runs the same command the digest just ran locally. On any other night, and
+for every other loop commit, the site does not move. The ledger line is the
+whole publish step, and there is no generated file in the commit.
 
 If the Pages project does not exist yet, nothing about that changes: the
 nightly still builds locally, and the build is its own check that the entry
@@ -122,5 +148,6 @@ renders.
 | build fails on `sharp` | the Pages image lacks a prebuilt binary; the build degrades to copying originals if `sharp` is absent, so this is a warning, not a stop — confirm the log says so |
 | a page is over budget | `--strict` is not on by default; run `node scripts/build-devlog-public.mjs --strict` locally to see which page and why (DESIGN.md §9) |
 | the newest post is missing | the entry's file name must match `DIGEST_<YYYY-MM-DD>.md` |
+| the newest post is missing, and the build did not run | that night did not publish: no new line in `devlog/PUBLISH` (by design unless it carried a major release, a UI/QOL change or a play-blocking fix) — append a `manual:` line to force one |
 | an image is missing from a post | the capture is missing, or the work item has no usable `**What:**` line — the site refuses to publish an image it cannot label (DESIGN.md §7) |
 | a card's art is blank | expected: card paintings are licence-withheld (DESIGN.md §10) |

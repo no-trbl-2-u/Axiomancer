@@ -1,0 +1,26 @@
+# devlog/PUBLISH — the public DevLog's publish ledger.
+#
+# WHY THIS FILE EXISTS
+#   The Cloudflare Pages project `axiomancer-devlog` builds ONLY when this
+#   file changes (its build watch paths include nothing else — see
+#   docs/devlog-public-deploy.md, step 7). A push that does not touch it
+#   never deploys, so the public site moves on player-visible news, not on
+#   every loop commit.
+#
+# WHO WRITES IT
+#   /digest appends ONE line only when the window since the last line
+#   carries a major release (a shipped phase or a new system), a UI or
+#   quality-of-life change, or a fix to something that blocks play
+#   (skills/digest.md §3 step 5b, the publish gate). When unsure, it holds.
+#   A person may append a `manual:` line to force a deploy, e.g. after a
+#   fix to the site's own build scripts.
+#
+# RULES
+#   - Append-only. Never edit or delete a past line; git history is the
+#     record of every publish.
+#   - One line per publish: `<YYYY-MM-DD> — <the entry's title>` or
+#     `<YYYY-MM-DD> — manual: <reason>`.
+#   - Nothing between publishes is lost: the build renders every entry in
+#     devlog/entries/, so a skipped night appears with the next publish.
+
+2026-09-22 — The map opens, and your cards tell the truth
