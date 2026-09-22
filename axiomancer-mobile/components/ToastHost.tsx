@@ -96,6 +96,15 @@ const useStyles = makeStyles((AXM) => ({
         right: 0,
         bottom: 80,
         alignItems: 'center',
+        /* The host is mounted in `app/_layout.tsx` as a sibling declared BEFORE
+           <Stack>, and React Native paints siblings in declaration order. Every
+           screen's <ScreenBg> is flex:1 with an opaque background, so without an
+           explicit stacking order the navigator paints straight over the strip
+           and EVERY toast in the app is silent — the region crossing, the
+           accessory-slots-full refusal, the flee cost. `elevation` is the same
+           statement for Android, which orders by elevation before zIndex. */
+        zIndex: 100,
+        elevation: 100,
     },
     toast: {
         paddingVertical: 6,

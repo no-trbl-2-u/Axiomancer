@@ -216,7 +216,15 @@ describe('moveTo action: happy path', () => {
 
         const vm = selectExplorationViewModel(store.getState());
         const optionIds = vm.options.map((o) => o.nodeId).sort();
-        expect(optionIds).toEqual(['fv-11', 'fv-16', 'fv-3'].sort());
+        // D1 (2026-09-21) — frontier roaming replaced linear adjacency. The
+        // drawer offers the whole explored edge, so the fan the gate opened
+        // arrives together AND `fv-1` is back: this harness moves off the
+        // shore without ever resolving it, and D1 spends a node on
+        // RESOLUTION, not on departure. (In play `resolveMapEvent` consumes
+        // the start node and seals it; see the engine's matching case,
+        // `src/World/world.reducer.test.ts` → 'spends a node on RESOLUTION,
+        // not on departure'.)
+        expect(optionIds).toEqual(['fv-1', 'fv-11', 'fv-16', 'fv-3'].sort());
     });
 });
 

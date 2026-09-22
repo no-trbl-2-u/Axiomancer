@@ -23,6 +23,8 @@ import { describe, expect, it, jest } from '@jest/globals';
 import { getCardById } from '@mechanics';
 import { CombatRewardsOverlay } from '@/components/combat/encounter/CombatRewardsOverlay';
 import { rewardCardVMs } from '@/state/presenters/combat-encounter.engine';
+import { RARITY_LABEL, RARITY_PIPS, rarityFor } from '@/state/presenters/card-rarity.engine';
+import { RARITY_TRACK_SLOTS } from '@/components/combat/encounter/CombatBoard';
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
 // Three real library cards spanning stances and rarities.
@@ -51,7 +53,12 @@ describe('CombatRewardsOverlay', () => {
         for (const offer of offers) {
             const label = screen.getByTestId(`combat-reward-${offer.cardId}`).props.accessibilityLabel as string;
             expect(label).toContain(offer.name);
-            expect(label).toContain(offer.rarity ?? 'common');
+            // D4 (2026-09-21) — the label now names the band in the player's
+            // own words ('Uncommon'), where it used to splice the raw VM field
+            // ('uncommon'). Compared case-insensitively so this pins the FACT
+            // (the label says which band) and not the casing, which is the
+            // renderer's call.
+            expect(label.toLowerCase()).toContain(offer.rarity ?? 'common');
         }
     });
 
@@ -132,5 +139,54 @@ describe('CombatRewardsOverlay', () => {
         render(withAllProviders(<CombatRewardsOverlay offers={[]} onPick={() => undefined} />).tree);
         expect(screen.getByTestId('combat-rewards')).toBeTruthy();
         for (const id of OFFER_IDS) expect(screen.queryByTestId(`combat-reward-${id}`)).toBeNull();
+    });
+});
+
+/**
+ * D4 (2026-09-21, owner finding 8) — the draft is the screen where a
+ * colour-only rarity signal cost the most: three cards side by side, one kept
+ * for the rest of the run, and the only thing telling them apart was a border
+ * hue. All three of D4's legs must be on the tile, and the two that survive
+ * greyscale must be legible with the colour channel ignored.
+ */
+describe('CombatRewardsOverlay — D4 rarity, never colour alone', () => {
+    it('prints the band by NAME under every offer', () => {
+        const { offers } = renderOverlay();
+        for (const offer of offers) {
+            const tag = screen.getByTestId(`combat-reward-rarity-${offer.cardId}`);
+            expect(String(tag.props.children)).toBe(RARITY_LABEL[rarityFor(offer)].toUpperCase());
+        }
+    });
+
+    it('the printed word agrees with the face’s pip count on the same tile', () => {
+        // Two legs, one truth: if the caption and the pips could disagree, the
+        // screen would be teaching the player a hue that means nothing.
+        const { offers } = renderOverlay();
+        for (const offer of offers) {
+            const band = rarityFor(offer);
+            expect(String(screen.getByTestId(`combat-reward-rarity-${offer.cardId}`).props.children))
+                .toBe(RARITY_LABEL[band].toUpperCase());
+            expect(RARITY_PIPS[band]).toBeGreaterThan(0);
+            expect(RARITY_PIPS[band]).toBeLessThanOrEqual(RARITY_TRACK_SLOTS);
+        }
+    });
+
+    it('names the band in the tile’s accessibility label, in the player’s words', () => {
+        const { offers } = renderOverlay();
+        for (const offer of offers) {
+            const label = screen.getByTestId(`combat-reward-${offer.cardId}`).props.accessibilityLabel as string;
+            expect(label).toContain(RARITY_LABEL[rarityFor(offer)]);
+        }
+    });
+
+    it('carries the rarity into the inspect preview, where the large face prints it', () => {
+        // The preview is the last surface before the commit. It renders the
+        // `large` face, which is the size that has room for the named tag.
+        const { offers } = renderOverlay();
+        const first = offers[0]!;
+        fireEvent.press(screen.getByTestId(`combat-reward-${first.cardId}`));
+        expect(screen.getByTestId('combat-reward-preview')).toBeTruthy();
+        const tags = screen.getAllByTestId('combat-card-face-rarity');
+        expect(tags.some((t) => String(t.props.children) === RARITY_LABEL[rarityFor(first)].toUpperCase())).toBe(true);
     });
 });

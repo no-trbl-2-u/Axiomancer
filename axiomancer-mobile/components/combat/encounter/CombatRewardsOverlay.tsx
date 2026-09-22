@@ -17,6 +17,16 @@
  *     deck draws its good cards more often — and is styled as a peer of TAKE,
  *     not a greyed-out afterthought. The Threadbare Office exists to teach
  *     exactly that.
+ *
+ * 2026-09-21 — D4 (owner finding 8: "no way to recognise a card's rarity at a
+ * glance"). The tile frame was already tinted by rarity, which made this the
+ * screen where a colour-only signal did the most damage: the draft is the one
+ * moment the player is asked to compare three cards and keep one for the rest
+ * of the run, and the difference between them was a hue nobody had been taught.
+ * Each tile now carries all three of D4's legs — the frame colour it always
+ * had, the pip track the shared `CombatCardFace` draws, and a printed rarity
+ * word beneath the face. The three hex literals this file used to hold are
+ * gone; `card-rarity.engine.ts` is the only place they live.
  */
 
 import React, { useState } from 'react';
@@ -26,6 +36,11 @@ import { CombatCardFace } from '@/components/combat/encounter/CombatBoard';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import type { CombatCardVM } from '@/state/presenters/combat-encounter.engine';
+// D4 (2026-09-21) — the ONE mobile source for the rarity band. This file used
+// to keep its own `RARITY_COLORS` record holding the same three hex literals
+// the card face held; both now read `RARITY_COLOR`, so the draft frame and the
+// face's pips can never drift apart again.
+import { rarityFor, RARITY_LABEL, RARITY_COLOR } from '@/state/presenters/card-rarity.engine';
 
 /** Offer-tile face size. Smaller than the hand card (three must fit a phone
  *  width side by side) but the SAME face component at the same aspect. */
@@ -34,12 +49,6 @@ const OFFER_H = 147;
 /** Inspect-preview face size. */
 const PREVIEW_W = 208;
 const PREVIEW_H = 305;
-
-const RARITY_COLORS: Record<string, string> = {
-    rare: '#9a6ad6',
-    uncommon: '#6b8eb0',
-    common: '#8a8273',
-};
 
 export function CombatRewardsOverlay({
     offers,
@@ -64,7 +73,12 @@ export function CombatRewardsOverlay({
                 <View style={styles.offerRow}>
                     {offers.map((card) => {
                         const on = picked === card.cardId;
-                        const rarityColor = RARITY_COLORS[card.rarity ?? 'common'] ?? RARITY_COLORS.common;
+                        // D4's three legs on one tile: the FRAME COLOUR (this
+                        // border, unless the tile is selected — selection owns
+                        // the gold), the PIP ROW (drawn by `CombatCardFace`'s
+                        // own track), and the NAMED LABEL (the caption below).
+                        const band = rarityFor(card);
+                        const rarityColor = RARITY_COLOR[band];
                         return (
                             <Pressable
                                 key={card.cardId}
@@ -72,7 +86,7 @@ export function CombatRewardsOverlay({
                                 testID={`combat-reward-${card.cardId}`}
                                 accessibilityRole="button"
                                 accessibilityState={{ selected: on }}
-                                accessibilityLabel={`${card.name}, ${card.rarity ?? 'common'} ${card.stance} card. ${card.detail.outcomeLine}. Tap to read it in full${on ? ', selected' : ''}`}
+                                accessibilityLabel={`${card.name}, ${RARITY_LABEL[band]}, ${card.stance} card. ${card.detail.outcomeLine}. Tap to read it in full${on ? ', selected' : ''}`}
                                 style={[
                                     styles.offerFrame,
                                     {
@@ -83,6 +97,19 @@ export function CombatRewardsOverlay({
                                 ]}
                             >
                                 <CombatCardFace card={card} width={OFFER_W} height={OFFER_H} />
+                                {/* D4's NAMED LABEL leg. The 100pt offer face is
+                                    too narrow to print the word in its own name
+                                    band, and this is the one screen where the
+                                    player is choosing BETWEEN cards — the band
+                                    has to be a word here, not a hue to decode. */}
+                                <Text
+                                    style={[styles.offerRarity, { color: rarityColor }]}
+                                    numberOfLines={1}
+                                    allowFontScaling={false}
+                                    testID={`combat-reward-rarity-${card.cardId}`}
+                                >
+                                    {RARITY_LABEL[band].toUpperCase()}
+                                </Text>
                                 {on && (
                                     <View style={[styles.pickedBadge, { backgroundColor: AXM.sulfur }]}>
                                         <Text style={styles.pickedBadgeText}>✓</Text>
@@ -190,7 +217,10 @@ const useStyles = makeStyles((AXM) => ({
     title: { fontFamily: FONTS.gothic, fontSize: 20, color: AXM.parchment, textAlign: 'center' },
     sub: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 12, color: AXM.bone, textAlign: 'center', marginTop: 3, marginBottom: 14 },
     offerRow: { flexDirection: 'row', gap: 8, justifyContent: 'center' },
-    offerFrame: { borderWidth: 2, padding: 3 },
+    offerFrame: { borderWidth: 2, padding: 3, alignItems: 'center' },
+    // The rarity word under each offer face. Hue matches the frame it sits in,
+    // but the WORD is the signal — the colour is never asked to carry it alone.
+    offerRarity: { fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 1.4, marginTop: 3 },
     pickedBadge: { position: 'absolute', top: -9, right: -9, width: 22, height: 22, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
     pickedBadgeText: { fontFamily: FONTS.gothic, fontSize: 14, color: '#0a0a0a' },
     btnRow: { flexDirection: 'row', gap: 10, marginTop: 18 },

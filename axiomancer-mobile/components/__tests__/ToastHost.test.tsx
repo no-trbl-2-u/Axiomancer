@@ -16,6 +16,7 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { act, render } from '@testing-library/react-native';
 import React from 'react';
+import { StyleSheet } from 'react-native';
 
 import { ToastHost } from '@/components/ToastHost';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
@@ -220,5 +221,38 @@ describe('ToastHost: accessibility', () => {
             node = node.parent;
         }
         expect(live).toBe('polite');
+    });
+});
+
+describe('ToastHost: stacking order', () => {
+    /**
+     * The host is a sibling declared BEFORE <Stack> in `app/_layout.tsx`, and
+     * React Native paints siblings in declaration order over an opaque
+     * <ScreenBg>. Without an explicit stacking order the navigator covers the
+     * strip and every toast in the app goes silent, with nothing to see and no
+     * error anywhere. Pinned so a style tidy-up cannot quietly re-mute them.
+     */
+    it('lifts the strip above the navigator it is declared before', () => {
+        const store = makeStore();
+        const tree = render(withProvider(store, <ToastHost />));
+        act(() => {
+            pushToast(store, 'You cross into the fishing village.');
+        });
+        type Walkable = { props: { style?: unknown }; parent: Walkable | null };
+        let node: Walkable | null = tree.getByText(
+            'You cross into the fishing village.',
+        ) as unknown as Walkable;
+        let host: Record<string, unknown> | undefined;
+        for (let i = 0; i < 6 && node; i++) {
+            const flat = StyleSheet.flatten(node.props.style) as Record<string, unknown> | undefined;
+            if (flat && flat.position === 'absolute') {
+                host = flat;
+                break;
+            }
+            node = node.parent;
+        }
+        expect(host).toBeDefined();
+        expect(host!.zIndex).toBeGreaterThan(0);
+        expect(host!.elevation).toBeGreaterThan(0);
     });
 });

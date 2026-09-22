@@ -8,29 +8,21 @@
  * `END_COMBAT` directly without going through the store).
  */
 
-import { Item, isConsumable, isMaterial } from '../Items/types';
+import { Item } from '../Items/types';
 import { Encounter } from '../World/types';
 import { LootTableEntry } from '../Enemy/types';
 import { rollLoot } from '../Enemy/loot';
-import {
-    addItem as addItemReducer,
-    stackItem as stackInventoryItem,
-} from '../Items/item.reducer';
 
 /**
- * Stack-aware inventory append. Stackable kinds (consumables / materials)
- * with a matching `id` already in inventory bump the quantity; everything
- * else is appended.
+ * Stack-aware inventory append.
+ *
+ * The rule moved down to the Items layer (`Items/item.reducer.ts`) so the
+ * shared grant path (`Items/item-grant.ts`) and this victory-loot fold ask the
+ * same function what "stacks" means. Re-exported here unchanged — signature and
+ * behaviour are identical, and `game.reducer.ts` keeps importing it from this
+ * module.
  */
-export function addItemStacking(inventory: Item[], item: Item): Item[] {
-    if (isConsumable(item) || isMaterial(item)) {
-        const existing = inventory.find(i => i.id === item.id);
-        if (existing && (isConsumable(existing) || isMaterial(existing))) {
-            return stackInventoryItem(inventory, item.id, item.quantity);
-        }
-    }
-    return addItemReducer(inventory, item);
-}
+export { addItemStacking } from '../Items/item.reducer';
 
 /** Roll one drop per enemy in the encounter. */
 export function rollEncounterLoot(

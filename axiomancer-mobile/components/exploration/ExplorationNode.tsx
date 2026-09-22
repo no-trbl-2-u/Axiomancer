@@ -33,7 +33,7 @@ interface ExplorationNodeProps {
 // exactly on (n.x, n.y) via a percentage position + a half-node negative
 // margin (px), so centring is correct regardless of the canvas size the
 // map is spread across (see MapCanvas SPREAD).
-const NODE_SIZE = 44;
+export const NODE_SIZE = 44;
 
 export function ExplorationNode({ node: n, onNodePress, isSelected }: ExplorationNodeProps) {
     const styles = useStyles();

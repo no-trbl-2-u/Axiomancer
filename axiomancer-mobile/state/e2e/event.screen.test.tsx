@@ -114,6 +114,20 @@ function interaction(npcName: string): ResolveMapEventResult {
     };
 }
 
+function gathering(
+    items: ReadonlyArray<{ id: string; name: string; quantity?: number }>,
+    description?: string,
+): ResolveMapEventResult {
+    return {
+        state: undefined as never,
+        event: {
+            kind: 'gathering',
+            items: items.map((i) => ({ quantity: 1, ...i, category: 'material' } as never)),
+            ...(description === undefined ? {} : { description }),
+        },
+    };
+}
+
 function setDialogueCursor(store: AppStore, choiceText: string) {
     const tree = {
         rootId: 'root',
@@ -260,6 +274,64 @@ describe('EventScreen render', () => {
             expect(queryByTestId('event-consequence-chips')).toBeNull();
             unmount();
         }
+    });
+
+    // 2026-09-21, owner finding 2 — "the Gather node is now a no-op". The
+    // items always landed; nothing on screen ever said so. These three pin
+    // that the acknowledgement actually RENDERS: the name of what was
+    // gathered, where it went, and a button that waits for the player
+    // instead of a toast that outruns them.
+    it('renders a gathering event naming the item, where it went, and a receipt chip', () => {
+        const store = makeStore();
+        setPending(
+            store,
+            gathering([{ id: 'driftwood', name: 'Driftwood' }], 'You crouch to gather what the tide left behind.'),
+        );
+
+        const { getByTestId, getByText } = render(
+            withProvider(store, <EventScreen />),
+        );
+
+        expect(getByText('DRIFTWOOD')).toBeTruthy();
+        // The subtitle row prefixes an em-dash, so match on the copy itself.
+        expect(getByText(/into the satchel/)).toBeTruthy();
+        expect(getByTestId('event-choice-acknowledge')).toBeTruthy();
+        expect(getByText('POCKET IT')).toBeTruthy();
+        expect(getByTestId('event-consequence-chips')).toBeTruthy();
+    });
+
+    it('renders every gathered name on the card, not just the first', () => {
+        const store = makeStore();
+        setPending(
+            store,
+            gathering([
+                { id: 'berry', name: 'Dark Berries', quantity: 2 },
+                { id: 'petal', name: 'Moonbell Petals' },
+            ]),
+        );
+
+        const { getByText } = render(
+            withProvider(store, <EventScreen />),
+        );
+
+        expect(getByText('DARK BERRIES X2 · MOONBELL PETALS')).toBeTruthy();
+        expect(getByText('POCKET THEM')).toBeTruthy();
+    });
+
+    it('dispatches the acknowledgement and clears the card', () => {
+        const store = makeStore();
+        setPending(store, gathering([{ id: 'driftwood', name: 'Driftwood' }]));
+
+        const { getByTestId, queryByTestId } = render(
+            withProvider(store, <EventScreen />),
+        );
+
+        act(() => {
+            fireEvent.press(getByTestId('event-choice-acknowledge'));
+        });
+
+        expect(store.getState().event.pending).toBeNull();
+        expect(queryByTestId('event-choice-acknowledge')).toBeNull();
     });
 
     it('renders an interaction event with a single SO BE IT choice and the npc name', () => {

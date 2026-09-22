@@ -21,6 +21,8 @@ export {
     dieSpecialCap, dieGearMissFaces,
     DIE_GEAR_COLORS, DIE_GEAR_FACE_COUNT,
     characterPresets, getPresetById, buildCharacterFromPreset,
+    grantFirstNodeRelic, withholdFirstNodeRelic, isFirstNodeRelicPending,
+    FIRST_NODE_RELIC_ID, STAND_IN_RELIC_ID, FIRST_NODE_RELIC_FLAG,
     levelLadderPresets, ladderL1Preset, ladderL15Preset, ladderL30Preset, ladderL50Preset,
 } from './Character';
 export type {
@@ -31,6 +33,7 @@ export type {
     EquipDelta, EquipDeltaMode,
     StatDeltaEntry, SignatureDeltaEntry,
     DieGearColor, DieGearRail, DieGearOutcome,
+    FirstNodeRelicGrant, FirstNodeGrantReason,
 } from './Character';
 
 // ─── Enemy ────────────────────────────────────────────────────────────────────
@@ -337,6 +340,14 @@ export {
     buyItem, sellItem, defaultSellPrice,
     relicLibrary, getRelicById, getSignaturesForLoadout, cloneStartingRelics,
     DEFAULT_WORN_RELIC_IDS, BENCHED_RELIC_IDS,
+    // The shared grant/equip/swap path. `equipItem` never returns the displaced
+    // piece (weapon/armor replace in place; a full accessory row is a guarded
+    // no-op), so every grant site routes through `grantItem` rather than
+    // re-deriving the unequip -> addItem -> equipItem chain.
+    // `qualifiesForItemRewardScreen` is D5: the one predicate that decides
+    // ceremony (reward screen) vs. the lightweight inline grant.
+    addItemStacking,
+    grantItem, qualifiesForItemRewardScreen, partitionGrantsForReward, displacedBy,
 } from './Items';
 export type {
     Item, Equipment, Consumable, Material, QuestItem,
@@ -344,6 +355,7 @@ export type {
     ConsumableUseResult,
     CacheLootTier, RollCacheRewardOptions,
     ShopWare, ShopInventory,
+    GrantItemOptions, ItemGrantResult, GrantOutcome,
 } from './Items';
 
 // ─── Cards ───────────────────────────────────────────────────────────────────
@@ -421,8 +433,13 @@ export {
     emptyQuestLog, isQuestComplete, findActiveQuest, findQuest,
     startQuest, progressQuest, completeQuest, discoverQuest,
     reachableObjectives, killObjectives, collectObjectives, advanceKillObjectives,
+    // The `Reward` union resolver — the payout half `quest.engine.ts` leaves to
+    // the store. Covers the `{ kind: 'item' }` and bare-`Item` reward shapes
+    // that were declarable but never paid.
+    payQuestReward, payQuestRewards, isItemReward, isKindedReward, itemOf,
     seedInputToUint32, minigameRunSeed, branchMinigameSeed,
 } from './World';
+export type { QuestRewardPayout } from './World';
 
 // Hazard Minigame (v2 — faithful port of the mobile living rules source).
 // The full public surface (engine transitions, content, tuning, deck-flag
@@ -457,6 +474,10 @@ export {
     validateMoveToNode, findAlternativePaths, getBlockedRoutesFromNode, getReachableNodes,
     // 2026-08-08 first-map audit: traversal queries + the strand audit.
     legalMovesFrom, isStranded, isMapTerminalNode, auditMapTraversal,
+    // D1 (2026-09-21) — frontier roaming: the derived spent/frontier sets
+    // every surface classifies nodes from, plus the forward skeleton the
+    // progression audits walk.
+    visitedNodes, isNodeSpent, frontierNodes, isFrontierExhausted, forwardEdges,
     // Phase 53c — the route-coverage walk, beside the strand audit.
     auditRouteCoverage,
     // Phase 148: Minigame Harness

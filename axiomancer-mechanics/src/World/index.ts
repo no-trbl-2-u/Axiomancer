@@ -72,6 +72,14 @@ export {
     reachableObjectives, killObjectives, collectObjectives, advanceKillObjectives,
 } from './quest.engine';
 
+// The `Reward` union resolver. `quest.engine.ts` owns log/objective machinery
+// and pays nothing; this is the payout half, including the `{ kind: 'item' }`
+// and bare-`Item` reward shapes the store's END_COMBAT branch never handled.
+export {
+    payQuestReward, payQuestRewards, isItemReward, isKindedReward, itemOf,
+} from './quest-reward';
+export type { QuestRewardPayout } from './quest-reward';
+
 export {
     moveToNode, completeCurrentNode, IllegalMoveError,
     changeMap, completeMap, unlockMap,
@@ -81,6 +89,10 @@ export {
     teleportToNode, placeOnNode, unblockMapRoute,
     // 2026-08-08 first-map audit: traversal queries + the strand audit.
     legalMovesFrom, isStranded, isMapTerminalNode, auditMapTraversal,
+    // D1 (2026-09-21) — frontier roaming: the derived spent/frontier sets
+    // every surface classifies nodes from, plus the forward skeleton the
+    // progression audits walk.
+    visitedNodes, isNodeSpent, frontierNodes, isFrontierExhausted, forwardEdges,
     // Phase 53c — the route-coverage walk, beside the strand audit.
     auditRouteCoverage,
 } from './world.reducer';

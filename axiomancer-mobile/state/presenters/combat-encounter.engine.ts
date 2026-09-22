@@ -53,7 +53,17 @@ import {
 // (same workaround as `CardSpecialMechanic` below). The player-facing LABEL and
 // GLOSS are adapted in `state/combat/keywords.ts`, never read raw here.
 import type { EnemyKeyword } from '@mechanics/Enemy';
+// W3 (2026-09-21, owner finding 4) — the card-text projection. The detail
+// panel's printed clauses are DERIVED here, in mechanics, from the effect
+// data; this presenter only formats them (keyword casing, separators,
+// de-abbreviation). It never decides what is in the list. Sub-path alias,
+// like `@mechanics/Enemy` above: the module is deliberately not re-exported
+// through the top-level barrel, which several workers are editing in parallel.
+import { paidClauses, type CardClause } from '@mechanics/Combat/combat.card-text';
 import { momentumV2A11y } from '@/state/combat/momentum';
+// D4 — the single mobile source for the rarity band (wave-0 contract). Never
+// re-band a rank here; `rarityFor` owns that question for every surface.
+import { rarityFor, RARITY_LABEL, RARITY_PIPS, RARITY_COLOR } from '@/state/presenters/card-rarity.engine';
 
 /** The barrel doesn't re-export the union, so derive it from Card. */
 type CardSpecialMechanic = NonNullable<Card['specialMechanics']>[number];
@@ -640,9 +650,10 @@ export interface CombatCardDetailVM {
     /** The no-die (free) value — the full-truth authored line (the face's ◇
      *  rail is its terse projection). Kept as a presenter truth surface. */
     freePill: string;
-    /** The FULL authored paid line — every effect a die-powered play fires,
-     *  headline first ('RUPTURE all afflictions + SIPHON 35% + RECALL 2').
-     *  null when the face's single ◆ keyword·value already says all of it. */
+    /** The FULL paid line — EVERY clause a die-powered play fires, in authored
+     *  order, derived from `paidClauses()` in mechanics
+     *  ('DEAL 20  +  CURDLE …  +  HEAL 16'). Null only for a card that prints
+     *  no payload at all (a persistent card with no authored summary). */
     diePaidLine: string | null;
     /** The exact ▲/—/▼ read triplet for read-scaled kinds (guard/barrier/
      *  dot/vulnerable); null otherwise. */
@@ -660,11 +671,26 @@ export interface CombatCardDetailVM {
      *  (and that no keyword chip already explains). Replaces the KW-7 dump of
      *  all six entries on every inspect. */
     systemTerms: { term: string; def: string }[];
+    /** D4 — the rarity band's player-facing name ('Common' / 'Uncommon' /
+     *  'Rare'), from the wave-0 `card-rarity.engine` module. */
+    rarityLabel: string;
+    /** D4 — how many pips to draw. The COUNT is the greyscale-safe signal. */
+    rarityPips: number;
+    /** D4 — the band's hue. Never render it as the only rarity cue. */
+    rarityColor: string;
+    /** The ◇ row's tag. 2026-09-21 (W3, finding 3): a persistent card's free
+     *  duration rides the tag it qualifies instead of a separate footer row. */
+    freeTag: string;
+    /** The ◆ row's tag, carrying the fact the row's own decision needs — the
+     *  colour law on a spell ('+DIE · HEART/WILD'), the permanence on a
+     *  persistent card. Both used to be standalone prose rows. */
+    paidTag: string;
 }
 
 /** detailStats' switch builds everything BUT the pill fields; the wrapper appends them. */
 type DetailCore = Omit<CombatCardDetailVM,
-    'freePill' | 'diePaidLine' | 'dieTriplet' | 'readLegend' | 'durationFooter' | 'colorMatchHint' | 'systemTerms'>;
+    'freePill' | 'diePaidLine' | 'dieTriplet' | 'readLegend' | 'durationFooter' | 'colorMatchHint' | 'systemTerms'
+    | 'rarityLabel' | 'rarityPips' | 'rarityColor' | 'freeTag' | 'paidTag'>;
 
 export interface CombatCardVM {
     uid: string; cardId: string; name: string; stance: string; stanceColor: string;
@@ -2569,11 +2595,17 @@ function detailCore(card: CombatCard, sourceCard?: Card, enemyDifficulty?: Enemy
     const typeLabel = card.cardType === 'oath' ? 'OATH'
         : card.cardType === 'hex' ? 'HEX'
             : card.cardType === 'spell' ? 'SPELL' : null;
+    // 2026-09-21 (W3, owner finding 3) — the trailing engine-jargon word
+    // ('DOT' / 'CONTROL' / 'DIRECT-DAMAGE') is CUT: the keyword ledger above
+    // and the ◆ +DIE row below both already say what the card does, in the
+    // player's vocabulary, and no one re-plans a turn because the strip says
+    // DIRECT-DOT. Its slot goes to the rarity band (D4), so the strip carries
+    // one more decision-relevant fact in the same single row.
     const metaChip = [
         card.stance.toUpperCase(),
         rankName ? rankName.toUpperCase() : `TIER ${card.tier}`,
+        RARITY_LABEL[rarityFor(card)].toUpperCase(),
         ...(typeLabel ? [typeLabel] : []),
-        card.effectKind === 'dot' ? 'DOT' : card.effectKind === 'control' ? 'CONTROL' : card.verbClass.toUpperCase(),
     ].join(' · ');
     const keywords = buildDetailKeywords(card, c, sourceCard);
     // The authored FREE line (engine riderText) — the strike/chip is dead.
@@ -2650,83 +2682,94 @@ function detailCore(card: CombatCard, sourceCard?: Card, enemyDifficulty?: Enemy
     }
 }
 
-/** A non-headline mechanic's terse `KEYWORD · value` contribution to the paid
- *  line. The face kinds (guard/rupture/siphon/reap/forge…) have no
- *  `mechanicHeadline` entry — they normally ARE the headline — so they get
- *  explicit spellings here for when they ride shotgun on a multi-effect card. */
-function mechPaidPart(m: CardSpecialMechanic, enemyDifficulty?: EnemyDifficulty): { kw: string; val: string | null } | null {
-    switch (m.kind) {
-        case 'guard': return { kw: 'Guard', val: `${m.amount}` };
-        case 'barrier': return { kw: 'Guard', val: `${m.amount} (persists)` };
-        case 'riposte': return { kw: 'Riposte', val: `CTR ${m.damage} · CUT ${m.reduce}` };
-        case 'rupture': return { kw: 'Rupture', val: 'all afflictions' };
-        case 'siphon': return { kw: 'Siphon', val: `${Math.round(m.pct * 100)}%` };
-        case 'reap': return { kw: 'Reap', val: null };
-        case 'reap_all': return { kw: 'Reap', val: 'all Souls' };
-        case 'forge_floating_die': case 'float_x_die': return { kw: 'Forge', val: null };
-        case 'create_temporary_die': return { kw: 'Kindle', val: m.color };
-        case 'grant_pip': return { kw: 'Pip', val: `+${m.count}` };
-        case 'spend_all_pips': return { kw: 'Pip', val: 'spend all' };
-        // THE BIG NUMBERS REWRITE — DEAL has no keyword row (its headline is
-        // the number, not a badge), so the generic path below would drop it
-        // from a multi-effect paid line entirely. Spell it out here.
-        case 'deal': return { kw: 'Deal', val: `${m.amount}${m.hits && m.hits > 1 ? ` × ${m.hits}` : ''}${m.pierce ? ' (pierce)' : ''}` };
-        // Pure die plumbing — never a player-facing paid-line row.
-        case 'refresh_die': case 'convert_die_color': case 'bank_spent_die': case 'reroll_spent':
-            return null;
-        default: {
-            const h = mechanicHeadline(m, enemyDifficulty);
-            if (!h?.keyword) return null;
-            return { kw: h.keyword, val: h.heroText || null };
-        }
+/**
+ * Format ONE engine clause as the terse `KEYWORD value` the ◆ +DIE rail uses.
+ *
+ * Presentation only. The clause — which payload it is, what it applies, what
+ * numbers it prints — came from `paidClauses()` in mechanics. All this does is
+ * choose the player-facing WORD (the registry keyword when the card's
+ * vocabulary registers one, the engine's own leading word otherwise) and spell
+ * the value the way the rest of the UI spells it (`×3 · 2 turns`, never the
+ * `i3 d2` code).
+ *
+ * A clause the engine prints as a full sentence (no headline word — a
+ * card-local rules clause such as CURDLE's flip) is printed verbatim: inventing
+ * a badge for it would be exactly the drift this rewrite removed.
+ */
+function formatPaidClause(c: CardClause): string {
+    const registry = c.source === 'effect' ? keywordForEffect(c.id) : keywordForMechanic(c.id);
+    // A bare `rider` mechanic is nothing BUT its rider, and mechanics hands the
+    // sub-clauses over already joined-equal to its own text — so formatting
+    // them gives 'HEAL 16' instead of the engine's lowercase 'heal 16', with
+    // no derivation happening twice.
+    if (!registry && c.parts?.length) {
+        return c.parts.map(formatPaidClause).join(' · ');
     }
+    const word = (registry ?? c.label).toUpperCase();
+    if (!word) return deabbreviateShorthand(vitaeCopy(c.text));
+    const value = clauseValue(c);
+    if (!value) return word;
+    // Some engine clauses TRAIL the word the badge already says ('+5 Charges',
+    // '+2 Souls'), and 'CHARGE +5 Charges' is exactly the busy-ness of finding
+    // 3. Drop the trailing repeat — but only when a number survives it, so the
+    // badge still leads a real value. A clause whose word is load-bearing prose
+    // ('your next spell gains ECHO') prints as written, keeping the registry
+    // word uppercase so the ledger above still links to it.
+    const trailingDupe = new RegExp(`\\s*\\b${word}s?\\b\\s*$`, 'i');
+    if (trailingDupe.test(value)) {
+        const trimmed = value.replace(trailingDupe, '').trim();
+        return /\d/.test(trimmed) ? `${word} ${trimmed}` : value;
+    }
+    return `${word} ${value}`;
 }
 
-/** 2026-07-12 (card-wording audit) — the FULL authored PAID line. The old +DIE
- *  pill collapsed a multi-effect paid line to ONE headline keyword, so the
- *  real extra effects (SIPHON, RECALL, POISON…) surfaced only as keyword
- *  panels and read as orphans the card never printed. Enumerate every paid
- *  component, headline first; null when the face's single ◆ keyword·value
- *  already says all of it (the single-effect card — no duplication). */
-function paidLine(c: CardCalc, face: CombatCardFaceVM, sourceCard?: Card, enemyDifficulty?: EnemyDifficulty): string | null {
-    // Persistent cards: the paid play is the same passive made permanent — the
-    // face + durationFooter carry it; an enumeration would restate the passive.
-    if (c.kind === 'oath' || c.kind === 'hex') return null;
-    const parts: string[] = [];
-    const seen = new Set<string>();
-    const add = (kw: string | null | undefined, val?: string | null) => {
-        if (!kw) return;
-        const up = kw.toUpperCase();
-        if (seen.has(up)) return;
-        seen.add(up);
-        parts.push(val ? `${up} ${val}` : up);
-    };
-    // 1. the face headline, exactly as the ◆ rail words it. A heroText that
-    //    already leads with the keyword word ('Guard 8') isn't double-prefixed.
-    const headKw = face.keyword ?? c.keyword;
-    const heroVal = face.heroText && face.heroSub
-        ? `${face.heroText} · ${face.heroSub}`
-        : face.heroText || face.heroSub || '';
-    if (headKw && heroVal.toUpperCase().startsWith(headKw.toUpperCase())) {
-        add(headKw, heroVal.slice(headKw.length).trim() || null);
-    } else {
-        add(headKw, heroVal || null);
+/** The value half of a clause. A DoT reads as its real tick ('8/play'), which
+ *  is the number the engine applies; a round-clock status reads intensity and
+ *  turns. Every number comes off the clause, none is computed here. */
+function clauseValue(c: CardClause): string {
+    if (c.source === 'effect' && c.dot) {
+        const unit = c.dot.trigger === 'card-played' ? '/play'
+            : c.dot.trigger === 'damage-instance' ? '/hit'
+                : c.dot.trigger === 'payoff' ? '/payoff' : '/turn';
+        const clock = c.dot.growsOnEnemyAction ? ' · grows as the foe acts'
+            : c.dot.trigger === 'damage-instance' ? ` · ${c.intensity} stacks`
+                : ` · ${c.duration} turn${c.duration === 1 ? '' : 's'}`;
+        return `${c.dot.perTick}${unit}${clock}${c.cross ?? ''}`;
     }
-    // 2. every other authored status effect (opponent riders + self costs).
-    for (const ce of sourceCard?.combatEffects ?? []) {
-        if (ce === c.ce) continue;
-        const i = ce.intensity ?? 1;
-        const d = ce.duration;
-        add(keywordForEffect(ce.effectId),
-            `×${i}${d ? ` · ${d}t` : ''}${ce.appliedTo === 'self' ? ' (self)' : ''}`);
+    return deabbreviateShorthand(vitaeCopy(c.value));
+}
+
+/**
+ * The FULL ◆ +DIE line: every clause the paid play fires, in authored order.
+ *
+ * 2026-09-21 (owner findings 3-6, W3) — REWRITTEN at the source. The old
+ * implementation walked `specialMechanics` a second time mobile-side through a
+ * partial `mechPaidPart` switch, deduped on the printed WORD, and returned
+ * `null` whenever fewer than two clauses survived — at which point the panel
+ * fell back to a one-clause headline sentence. Between them those three rules
+ * silently dropped, across the live library:
+ *
+ * - every DEAL on a multi-verb card (DEAL carries no keyword badge on purpose,
+ *   so the badge-keyed walk skipped it — `the-lazars-kiss` printed
+ *   'CURDLE +3 + HEAL 16' and never said it deals 20);
+ * - every self-cost that was the only survivor (`thumbprick-oath` printed
+ *   'Deal 14 VITAE.' and never said it costs you 5 VITAE);
+ * - the real PLEA 38 on a card that also carries a PLEA-mapped self-buff,
+ *   because the dedupe was keyed on the word.
+ *
+ * Now the list comes from `paidClauses()` in mechanics and nothing filters it.
+ * Per D3 the terse shorthand stays — only its SOURCE changed.
+ */
+function paidLine(card: CombatCard, sourceCard?: Card): string | null {
+    if (!sourceCard) return null;
+    // A persistent card's paid play is its passive made permanent; the authored
+    // one-line `persistentEffect` IS that passive, and the engine prints the
+    // same words on `bottomActionText`.
+    if (card.cardType === 'oath' || card.cardType === 'hex') {
+        return sourceCard.persistentEffect ? vitaeCopy(sourceCard.persistentEffect) : null;
     }
-    // 3. every other special mechanic.
-    for (const m of sourceCard?.specialMechanics ?? []) {
-        if (m === c.mech) continue;
-        const part = mechPaidPart(m, enemyDifficulty);
-        if (part) add(part.kw, part.val);
-    }
-    return parts.length > 1 ? parts.join('  +  ') : null;
+    const parts = paidClauses(sourceCard, lookupEffect).map(formatPaidClause).filter(Boolean);
+    return parts.length ? parts.join('  +  ') : null;
 }
 
 /** Honest card DETAIL view-model (inspect modal) — the CORE plus the +DIE row
@@ -2736,10 +2779,13 @@ function paidLine(c: CardCalc, face: CombatCardFaceVM, sourceCard?: Card, enemyD
 export function detailStats(card: CombatCard, sourceCard?: Card, enemyDifficulty?: EnemyDifficulty): CombatCardDetailVM {
     const core = detailCore(card, sourceCard, enemyDifficulty);
     const c = cardCalc(card, sourceCard);
-    const face = faceStats(card, sourceCard, enemyDifficulty);
     const STANCE = STANCE_LABELS[card.stance] ?? card.stance.toUpperCase();
-    // The free (die-optional) value — the full-truth authored line.
-    const freePill = face.freeHeroText + (face.freeHeroSub ? ` (${face.freeHeroSub})` : '');
+    // The free (die-optional) value — the ENGINE's own free line, not the
+    // face's hero slot. 2026-09-21 (W3): the face hard-codes 'mercy' on a
+    // befriend card, so reading the pill off the face made the NO-DIE row of
+    // any befriend card disagree with its authored rider. `freeLineText` is
+    // `riderText` from mechanics, de-abbreviated — nothing else.
+    const freePill = freeLineText(card, sourceCard);
     // The exact ▲/—/▼ read triplet for the read-scaled kinds.
     let dieTriplet: string | null = null;
     if (c.kind === 'guard' || c.kind === 'barrier') {
@@ -2761,13 +2807,18 @@ export function detailStats(card: CombatCard, sourceCard?: Card, enemyDifficulty
     } else if (c.kind === 'vulnerable') {
         dieTriplet = `▲+${c.vulnPctAdv}% · —+${c.vulnPct}% · ▼−1 turn`;
     }
-    // The ▲/—/▼ legend — the single most-cited undefined notation of the
-    // 10-deck playtest. ONE global line, rendered only when a triplet is. The
-    // read is the die's STANCE against the foe's stance — never the roll.
+    // The ▲/—/▼ legend. 2026-09-21 (W3, owner finding 3 — "too busy"): a
+    // standing prose row explaining a notation that only ever renders one line
+    // above it is a row the combat overlay no longer spends. The decode now
+    // rides the triplet itself (`READ ▲12 · —8 · ▼6 — won · even · lost`), so
+    // the same fact costs one row instead of two. The field stays on the VM
+    // because the DECK screen — read out of combat, where a full sentence is
+    // affordable — still renders it.
     const readLegend = dieTriplet
         ? "▲ won read · — even · ▼ lost read — your die's stance against the foe's picks the column."
         : null;
-    const diePaidLine = paidLine(c, face, sourceCard, enemyDifficulty);
+    if (dieTriplet) dieTriplet = `READ ${dieTriplet} — won · even · lost`;
+    const diePaidLine = paidLine(card, sourceCard);
     // Spec 32 v4 persistent fork, restated as ONE footer line (the audit's
     // 6-deck "3 rounds vs rest of combat" confusion) — never a stacked panel.
     const durationFooter = c.kind === 'oath' || c.kind === 'hex'
@@ -2783,7 +2834,23 @@ export function detailStats(card: CombatCard, sourceCard?: Card, enemyDifficulty
         [card.topActionText, card.bottomActionText, ...(card.dieLines ?? []), core.freeLine, core.stacksText ?? ''].join(' '),
         core.keywords.map(k => k.name),
     );
-    return { ...core, freePill, diePaidLine, dieTriplet, readLegend, durationFooter, colorMatchHint, systemTerms };
+    // D4 — the rarity band, derived ONCE by the wave-0 module. Named label +
+    // pip count + hue; the panel renders label and pips so the signal survives
+    // greyscale and colour blindness, and the hue is decoration on top.
+    const band = rarityFor(card);
+    // finding 3 — the two prose footers the overlay used to stack under the
+    // fork ('3 rounds free · permanent with a die', 'Only a HEART or WILD die
+    // can power this card.') collapse into the tags of the rows they describe.
+    // Same facts, two fewer rows, and each fact now sits on the row whose
+    // decision it actually changes.
+    const persistent = c.kind === 'oath' || c.kind === 'hex';
+    const freeTag = persistent ? `NO DIE · ${persistentFreeRounds(card)}` : 'NO DIE';
+    const paidTag = persistent ? '+DIE · rest of combat' : `+DIE · ${STANCE}/WILD`;
+    return {
+        ...core, freePill, diePaidLine, dieTriplet, readLegend, durationFooter, colorMatchHint, systemTerms,
+        rarityLabel: RARITY_LABEL[band], rarityPips: RARITY_PIPS[band], rarityColor: RARITY_COLOR[band],
+        freeTag, paidTag,
+    };
 }
 
 /** Read-scaled hero value at the moment of commit (read known) — StagedCard only.

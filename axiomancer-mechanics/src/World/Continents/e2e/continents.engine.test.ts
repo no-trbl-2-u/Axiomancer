@@ -6,6 +6,7 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { restoreOriginalRng } from '../../../test-utils/rng';
 import { fishingVillage, northernForest } from '../Coastal-Village/maps';
+import { forwardEdges } from '../../world.reducer';
 import { captainBlackwater, fishermansDaughter, villageHealer, unionLeader, merchantWidow } from '../Coastal-Village/npcs';
 import { shrineKeeper, chronicler, wanderingPhilosopher, forestRanger, hermitSage, lostTrader } from '../Northern-Forest/npcs';
 
@@ -48,8 +49,13 @@ describe('World/Continents Engine Tests', () => {
       expect(gate1?.connectedNodes).toContain('fv-3');   // spine
       expect(gate1?.connectedNodes).toContain('fv-11');  // inland lane
 
+      // D1 (2026-09-21) gave each open column lateral lane ribs, so a lane
+      // node's raw edge list now carries its neighbours as well. The funnel
+      // property is about PROGRESSION, so it is read off the forward
+      // skeleton — the ribs never reach forward.
+      expect([...(forwardEdges(fishingVillage).get('fv-3') ?? [])]).toEqual(['fv-27']);
       const fv3 = fishingVillage.nodes.find(n => n.id === 'fv-3');
-      expect(fv3?.connectedNodes).toEqual(['fv-27']);
+      expect(fv3?.connectedNodes).toEqual(expect.arrayContaining(['fv-27', 'fv-16', 'fv-11']));
 
       // Terminal column — the only place a run is allowed to run out of moves.
       const fv10 = fishingVillage.nodes.find(n => n.id === 'fv-10');

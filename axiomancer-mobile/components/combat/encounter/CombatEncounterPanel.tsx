@@ -1114,7 +1114,24 @@ export function CombatEncounterPanel({
                             </View>
                             {/* the card's own metadata strip — off the face since
                                 2026-08-10, so it reads here instead. */}
-                            <Text style={styles.detailMetaStrip} testID="combat-card-detail-meta">{detailCard.detail.metaChip}</Text>
+                            <View style={styles.detailMetaRow}>
+                                <Text style={styles.detailMetaStrip} testID="combat-card-detail-meta">{detailCard.detail.metaChip}</Text>
+                                {/* D4 — rarity as a PIP ROW beside the named band already
+                                    in the meta strip. The count is what survives greyscale
+                                    and colour blindness; the hue is decoration on top of
+                                    it, never the signal by itself. Both come from the
+                                    wave-0 `card-rarity.engine` module — no local banding. */}
+                                <View
+                                    style={styles.detailRarityPips}
+                                    testID="combat-card-detail-rarity"
+                                    accessibilityRole="text"
+                                    accessibilityLabel={`${detailCard.detail.rarityLabel} card`}
+                                >
+                                    {Array.from({ length: detailCard.detail.rarityPips }).map((_, i) => (
+                                        <View key={i} style={[styles.detailRarityPip, { backgroundColor: detailCard.detail.rarityColor }]} />
+                                    ))}
+                                </View>
+                            </View>
 
                             {/* (3) the NO-DIE / +DIE fork — RESTORED 2026-08-10. It was retired
                                 on 2026-07-16 because the face carried the free glyph, the paid
@@ -1124,11 +1141,11 @@ export function CombatEncounterPanel({
                                 in the ledger at the top. */}
                             <View style={styles.detailPlays}>
                                 <View style={styles.detailPlayRow}>
-                                    <Text style={styles.detailPlayTag}>◇ NO DIE</Text>
+                                    <Text style={styles.detailPlayTag}>{`◇ ${detailCard.detail.freeTag}`}</Text>
                                     <Text style={styles.detailPlayText}>{detailCard.detail.freePill}</Text>
                                 </View>
                                 <View style={[styles.detailPlayRow, styles.detailPlayRowSep]}>
-                                    <Text style={[styles.detailPlayTag, { color: detailCard.face.categoryColor }]}>◆ +DIE</Text>
+                                    <Text style={[styles.detailPlayTag, { color: detailCard.face.categoryColor }]}>{`◆ ${detailCard.detail.paidTag}`}</Text>
                                     <View style={styles.detailPlayBody}>
                                         <OutcomeText
                                             text={detailCard.detail.diePaidLine ?? detailCard.detail.outcomeLine}
@@ -1145,10 +1162,15 @@ export function CombatEncounterPanel({
                                     </View>
                                 </View>
                             </View>
+                            {/* STACKS survives the 2026-09-21 declutter: whether a status
+                                stacks is exactly why a player replays a card mid-fight.
+                                The three prose rows that stood here — the ▲/—/▼ legend,
+                                the persistent duration footer and the colour-match hint —
+                                are gone: the legend now rides the triplet itself and the
+                                other two ride the ◇/◆ tags of the rows they qualify. The
+                                VM still carries all three for the DECK screen, which is
+                                read out of combat and can afford full sentences. */}
                             {detailCard.detail.stacksText ? <Text style={styles.detailStacks}>{detailCard.detail.stacksText}</Text> : null}
-                            {detailCard.detail.readLegend ? <Text style={styles.detailLegend}>{detailCard.detail.readLegend}</Text> : null}
-                            {detailCard.detail.durationFooter ? <Text style={styles.detailLegend}>{detailCard.detail.durationFooter}</Text> : null}
-                            <Text style={styles.detailLegend}>{detailCard.detail.colorMatchHint}</Text>
 
                             {/* KW-7 (phase 29, re-scoped 2026-07-12) — system-term definitions
                                 (Conviction, Resonance, Reserve/Pips, Floating, rungs, WILD/X):
@@ -1168,11 +1190,14 @@ export function CombatEncounterPanel({
                                 </View>
                             )}
 
-                            {/* (4) FLAVOR — authored prose, overlay BOTTOM only (owner
-                                directive 2026-07-09: the face stays purely functional). */}
-                            {detailCard.flavor ? (
-                                <Text style={styles.detailFlavor} testID="combat-card-detail-flavor">{detailCard.flavor}</Text>
-                            ) : null}
+                            {/* (4) FLAVOR — DELETED from the combat overlay, 2026-09-21
+                                (owner finding 6: "flavor text should not appear in the
+                                combat card detail"). Mid-fight the player is deciding
+                                which die to spend, and a paragraph of fiction between
+                                them and that decision is the busiest thing on the panel.
+                                The prose is NOT deleted from the data — `card.flavor`
+                                still rides the VM and the DECK screen is its home, where
+                                it is read between fights. Do not restore it here. */}
                             </Pressable>
                         </ScrollView>
 
@@ -1534,6 +1559,11 @@ const useStyles = makeStyles((AXM) => ({
     detailStacks: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 11, color: AXM.bone, marginTop: 6 },
     // 2026-08-10 declutter — everything the bare face no longer prints reads here.
     detailMetaStrip: { fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 1.6, color: AXM.bone, opacity: 0.7, marginBottom: 8 },
+    // D4 — the rarity pip row sits on the meta strip's own line, so the band
+    // costs no extra row in a panel that must fit one 360pt screen.
+    detailMetaRow: { alignSelf: 'stretch', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+    detailRarityPips: { flexDirection: 'row', alignItems: 'center', gap: 3, marginBottom: 8 },
+    detailRarityPip: { width: 5, height: 5, borderRadius: 2.5 },
     detailPlays: { alignSelf: 'stretch', borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)', borderRadius: 6, backgroundColor: 'rgba(0,0,0,0.65)', overflow: 'hidden' },
     detailPlayRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, paddingHorizontal: 10, paddingVertical: 7 },
     detailPlayRowSep: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: 'rgba(255,255,255,0.14)' },
@@ -1542,7 +1572,6 @@ const useStyles = makeStyles((AXM) => ({
     detailPlayText: { fontFamily: FONTS.serif, fontSize: 12.5, color: AXM.parchment, lineHeight: 17, flex: 1 },
     detailPlayBold: { fontFamily: FONTS.sans, fontSize: 12, letterSpacing: 0.6, textTransform: 'uppercase' },
     detailDieLine: { fontFamily: FONTS.mono, fontSize: 10.5, color: AXM.sulfur, letterSpacing: 0.2, marginTop: 3 },
-    detailLegend: { alignSelf: 'stretch', fontFamily: FONTS.sans, fontSize: 9.5, color: AXM.bone, opacity: 0.65, lineHeight: 14, marginTop: 6 },
     detailFreeBox: { alignSelf: 'stretch', marginBottom: 8 },
     detailFreeLine: { fontFamily: FONTS.serif, fontSize: 12.5, color: AXM.bone, lineHeight: 17, marginBottom: 5 },
     detailPowerLine: { fontFamily: FONTS.serif, fontSize: 12.5, lineHeight: 17, marginBottom: 5 },
@@ -1550,7 +1579,6 @@ const useStyles = makeStyles((AXM) => ({
     systemsGlossary: { alignSelf: 'stretch', marginTop: 6, marginBottom: 4, paddingTop: 6, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)' },
     systemsGlossaryLine: { fontFamily: FONTS.sans, fontSize: 9.5, color: AXM.bone, opacity: 0.65, lineHeight: 15, marginBottom: 3 },
     systemsGlossaryTerm: { fontFamily: FONTS.sans, fontSize: 9.5, letterSpacing: 1, color: AXM.ash, opacity: 1 },
-    detailFlavor: { alignSelf: 'stretch', fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 12, color: AXM.bone, opacity: 0.75, lineHeight: 17, marginTop: 10, textAlign: 'center' },
     detailReadNote: { fontFamily: FONTS.serifItalic, fontStyle: 'italic', fontSize: 11, color: AXM.bone, lineHeight: 15 },
     detailLine: { fontFamily: FONTS.serif, fontSize: 13, color: AXM.parchment, lineHeight: 18 },
     // 2026-07-18 (owner playtest) — ONE compact ledger, not a box per keyword.

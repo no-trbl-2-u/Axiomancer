@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
     useAnimatedStyle,
@@ -7,6 +7,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Path, Circle, G, Defs, RadialGradient, Stop, Rect } from 'react-native-svg';
 import { Image } from '@/lib/platform/image';
+import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import { Splatter } from '@/components/Splatter';
 import type { ExplorationNode, ExplorationEdge } from '@/state/presenters/exploration.engine';
@@ -32,7 +33,7 @@ interface MapCanvasProps {
 // the nodes overlap and labels collide. We spread them across a larger
 // pannable canvas (SPREAD×) so each node has breathing room — the window
 // clips to a viewport the user pans/zooms around. (Visual-audit 2026-06.)
-const SPREAD = 2.6;
+export const SPREAD = 2.6;
 const CANVAS_W = 360 * SPREAD;
 const CANVAS_H = 400 * SPREAD;
 
@@ -121,6 +122,67 @@ export function computeFocusTransform(
     return { scale, tx: viewport.w / 2 - cx * scale, ty: viewport.h / 2 - cy * scale };
 }
 
+/** How one edge is inked. Exported with `edgeStroke` for unit coverage. */
+export interface EdgeStroke {
+    color: string;
+    width: number;
+    opacity: number;
+    /** SVG dash pattern, or `undefined` for a solid line. */
+    dash: string | undefined;
+    /** Whether the dark "road casing" is drawn under the stroke. */
+    casing: boolean;
+}
+
+/** The palette tokens `edgeStroke` reads. Narrowed so the function stays pure. */
+interface EdgePalette { parchment: string; ash: string; bone: string; }
+
+/**
+ * The ink for one edge — the whole of how the chart tells its road types
+ * apart, as a pure function so it can be asserted without reading SVG.
+ *
+ * ── owner finding 9 / D1, 2026-09-21: RIBS ARE NOT ROADS ──
+ *
+ * D1 landed 69 LATERAL LANE RIBS across the seven maps — sideways steps
+ * between neighbouring lanes of the same column. They are traversal, not
+ * progression: the engine's own route audits walk the forward skeleton and
+ * deliberately ignore them (`forwardEdges()` in `world.reducer.ts`).
+ *
+ * Inked at the same weight as the forward roads, they very nearly undo the
+ * thing they were added for. A column of five lanes gains four ribs, the fan
+ * out of the gate before it already draws five diagonals, and the chart
+ * becomes an even mesh in which the spine the player is progressing along is
+ * no longer findable — "branching" read as "tangled". So a rib is drawn at
+ * half the weight, without the dark casing that makes a road read as a road,
+ * and finely dashed. The hierarchy on the page then matches the hierarchy in
+ * the rules: solid, cased lines carry you forward; hairlines let you step
+ * across.
+ *
+ * The three progression states keep their existing separation, and it is not
+ * hue-only either: travelled is the widest and solid, open is mid-weight and
+ * solid, sealed is thin and coarsely dashed.
+ */
+export function edgeStroke(e: ExplorationEdge, AXM: EdgePalette): EdgeStroke {
+    const color = e.traveled ? AXM.parchment : (e.locked ? AXM.ash : AXM.bone);
+    const baseWidth = e.traveled ? 3.5 : (e.locked ? 2 : 2.5);
+    const baseOpacity = e.traveled ? 0.95 : 0.7;
+    if (e.lateral) {
+        return {
+            color,
+            width: baseWidth * 0.5,
+            opacity: baseOpacity * 0.55,
+            dash: '2 4',
+            casing: false,
+        };
+    }
+    return {
+        color,
+        width: baseWidth,
+        opacity: baseOpacity,
+        dash: e.locked ? '5 5' : undefined,
+        casing: true,
+    };
+}
+
 // Phase V1/V2 (the Woodcut Codex) — the map reads as a chart, not a
 // void: a faint diagonal hatch over the whole sheet (the handoff's
 // `.axm-hatch` texture, redrawn as strokes so no Pattern support is
@@ -205,6 +267,48 @@ export function MapCanvas({ nodes, edges, backdrop, overlays, children }: MapCan
         [],
     );
 
+    /**
+     * Commit a camera transform to every shared value at once.
+     *
+     * Both the automatic fit and the manual RECENTRE go through here, so the
+     * two can never drift into different ideas of what "framed on the player"
+     * means — and, just as importantly, both write the `saved*` values as
+     * well. Leaving those stale is what would make the next pan snap the
+     * chart back to wherever it was before the recentre.
+     */
+    const commitCamera = React.useCallback((fit: FocusTransform) => {
+        scale.value = fit.scale;
+        savedScale.value = fit.scale;
+        tx.value = fit.tx;
+        ty.value = fit.ty;
+        savedTx.value = fit.tx;
+        savedTy.value = fit.ty;
+    }, [scale, savedScale, tx, ty, savedTx, savedTy]);
+
+    /**
+     * RECENTRE — the drag affordance's missing return leg.
+     *
+     * owner finding 9 / D1, 2026-09-21. The chart is a 936x1040 spread behind
+     * a phone-sized window and the pan is unbounded, so a player who drags to
+     * look down a side strand can end up holding a blank corner of the sheet
+     * with no way back except guessing. That was survivable while the map was
+     * a vertical ladder and the only interesting thing was directly ahead;
+     * with lateral ribs and D1's frontier roaming, looking sideways is now
+     * the point, so looking sideways has to be undoable.
+     *
+     * It re-runs the SAME fit the camera performs on mount and whenever the
+     * road ahead changes, which is why it needs no geometry of its own and
+     * cannot disagree with the automatic camera. Chosen over clamping the pan
+     * because a clamp has to model where the scaled canvas actually sits on
+     * screen, and this file's fit math and React Native's transform origin do
+     * not currently agree about that; a wrong clamp fights the player's drag
+     * on every gesture, whereas a redundant recentre costs one tap.
+     */
+    const recenter = React.useCallback(() => {
+        if (!viewport || nodes.length === 0) return;
+        commitCamera(computeFocusTransform(nodes, viewport));
+    }, [viewport, nodes, commitCamera]);
+
     React.useEffect(() => {
         if (!viewport || nodes.length === 0) return;
         // The choosable nodes: where the player stands + the steps they
@@ -231,18 +335,12 @@ export function MapCanvas({ nodes, edges, backdrop, overlays, children }: MapCan
         // that RESOLVED row's own text anticipated a re-fit would be wanted:
         // "a tap-to-pan affordance is separable follow-up if a future pass
         // still finds nodes going out of frame after a move."
-        const fit = computeFocusTransform(nodes, viewport);
-        scale.value = fit.scale;
-        savedScale.value = fit.scale;
-        tx.value = fit.tx;
-        ty.value = fit.ty;
-        savedTx.value = fit.tx;
-        savedTy.value = fit.ty;
+        commitCamera(computeFocusTransform(nodes, viewport));
         // `nodes` is deliberately NOT a dependency — it is a fresh array every
         // render, and depending on it would re-fit constantly, which is exactly
         // the defect issue #294 closed. `focusKey` is its stable projection.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [viewport, focusKey, tx, ty, savedTx, savedTy, scale, savedScale]);
+    }, [viewport, focusKey, commitCamera]);
 
     const pinch = Gesture.Pinch()
         .onUpdate((e) => {
@@ -315,23 +413,26 @@ export function MapCanvas({ nodes, edges, backdrop, overlays, children }: MapCan
                             // a connected route. A dark casing under the stroke
                             // gives each path a defined "road" edge.
                             const d = `M ${A.x} ${A.y} L ${B.x} ${B.y}`;
-                            const color = e.traveled ? AXM.parchment : (e.locked ? AXM.ash : AXM.bone);
-                            const w = e.traveled ? 3.5 : (e.locked ? 2 : 2.5);
+                            const ink = edgeStroke(e, AXM);
                             const mx = (A.x + B.x) / 2;
                             const my = (A.y + B.y) / 2;
                             return (
                                 <G key={`${e.fromId}|${e.toId}`}>
-                                    <Path d={d} stroke={AXM.deepBg} strokeWidth={w + 3} fill="none" opacity={0.95} strokeLinecap="round" />
+                                    {ink.casing && (
+                                        <Path d={d} stroke={AXM.deepBg} strokeWidth={ink.width + 3} fill="none" opacity={0.95} strokeLinecap="round" />
+                                    )}
                                     <Path
                                         d={d}
-                                        stroke={color}
-                                        strokeWidth={w}
-                                        strokeDasharray={e.locked ? '5 5' : undefined}
+                                        stroke={ink.color}
+                                        strokeWidth={ink.width}
+                                        strokeDasharray={ink.dash}
                                         fill="none"
-                                        opacity={e.traveled ? 0.95 : 0.7}
+                                        opacity={ink.opacity}
                                         strokeLinecap="round"
                                     />
-                                    {e.traveled && <Circle cx={mx} cy={my} r={2.5} fill={AXM.sulfur} />}
+                                    {/* The travelled-road bead marks progression, so a rib
+                                        never wears one even once both its lanes are spent. */}
+                                    {e.traveled && !e.lateral && <Circle cx={mx} cy={my} r={2.5} fill={AXM.sulfur} />}
                                 </G>
                             );
                         })}
@@ -379,6 +480,22 @@ export function MapCanvas({ nodes, edges, backdrop, overlays, children }: MapCan
                     {overlays}
                 </View>
             )}
+            {/* RECENTRE — the one piece of chart furniture that takes a touch.
+                Rendered AFTER the pointerEvents="none" overlay layer so the
+                legend can never sit on top of it, and stacked directly above
+                the compass rose so the right margin reads as one column of
+                instruments rather than two scattered chips. */}
+            <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Recentre the chart on your position"
+                accessibilityHint="Frames where you stand and every path open to you"
+                onPress={recenter}
+                hitSlop={8}
+                style={styles.recenter}
+                testID="map-recenter"
+            >
+                <Text style={styles.recenterGlyph}>◎</Text>
+            </Pressable>
         </View>
     );
 }
@@ -418,6 +535,29 @@ const useStyles = makeStyles((AXM) => ({
         right: 10,
         bottom: 10,
         opacity: 0.85,
+    },
+    // Stacked directly above the 52x52 rose pinned at right:10, bottom:10,
+    // with an 8px gutter — 10 + 52 + 8 = 70. Same right edge, so the two read
+    // as one column of instruments.
+    recenter: {
+        position: 'absolute',
+        right: 10,
+        bottom: 70,
+        width: 32,
+        height: 32,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: AXM.ash,
+        backgroundColor: 'rgba(10,10,10,0.72)',
+        zIndex: 4,
+    },
+    recenterGlyph: {
+        fontFamily: FONTS.mono,
+        fontSize: 15,
+        lineHeight: 18,
+        color: AXM.bone,
     },
     backdropPlate: {
         ...StyleSheet.absoluteFillObject,

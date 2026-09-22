@@ -12,7 +12,7 @@
 
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import {
-    createStartingWorld, moveToNode, completeCurrentNode, IllegalMoveError,
+    createStartingWorld, moveToNode, completeCurrentNode, IllegalMoveError, forwardEdges,
     resolveMapEvent, applyDialogueChoice, getMapDefinition, createMapState,
     emptyQuestLog, startQuest, progressQuest, isQuestComplete, completeQuest,
 } from '../index';
@@ -292,15 +292,39 @@ describe('Phase 65 — expanded fishing-village layout', () => {
         // gate sits before each open column. A gate opens onto every lane;
         // every lane's nodes lead only to the next gate — so no route can
         // skip a fight, and every route can still choose its lane.
+        //
+        // Read against the FORWARD SKELETON, not raw `connectedNodes`: D1
+        // (same day) added lateral ribs between neighbouring lanes, which are
+        // sideways traversal and never a way onward. The gate guarantee is a
+        // statement about progression, so it is measured on progression edges.
+        const map = fv();
+        const forward = forwardEdges(map);
+        const onward = (id: string) => [...(forward.get(id) ?? [])].sort();
+        expect(onward('fv-2')).toEqual(['fv-26']);
+        expect(onward('fv-26')).toEqual(['fv-11', 'fv-16', 'fv-3']);
+        for (const id of ['fv-16', 'fv-3', 'fv-11']) expect(onward(id)).toEqual(['fv-27']);
+        expect(onward('fv-27')).toEqual(['fv-12', 'fv-13', 'fv-14', 'fv-17', 'fv-4']);
+        for (const id of ['fv-17', 'fv-4', 'fv-14', 'fv-12', 'fv-13']) expect(onward(id)).toEqual(['fv-28']);
+        expect(onward('fv-28')).toEqual(['fv-15', 'fv-20', 'fv-5']);
+        for (const id of ['fv-15', 'fv-5', 'fv-20']) expect(onward(id)).toEqual(['fv-6']);
+    });
+
+    it('ribs every open lane column sideways without giving a lane a second way onward (D1)', () => {
+        // The ribs are the half of D1 that shows on the canvas: each open
+        // column is walkable end to end, so a hazard that blocks one approach
+        // cannot orphan a lane. They must not add PROGRESSION, though — the
+        // gate guarantee above depends on a lane having exactly one way
+        // onward, and a rib that reached forward would break it silently.
         const map = fv();
         const node = (id: string) => map.nodes.find(n => n.id === id)!;
-        expect(node('fv-2').connectedNodes).toEqual(['fv-26']);
-        expect(node('fv-26').connectedNodes.sort()).toEqual(['fv-11', 'fv-16', 'fv-3']);
-        for (const id of ['fv-16', 'fv-3', 'fv-11']) expect(node(id).connectedNodes).toEqual(['fv-27']);
-        expect(node('fv-27').connectedNodes.sort()).toEqual(['fv-12', 'fv-13', 'fv-14', 'fv-17', 'fv-4']);
-        for (const id of ['fv-17', 'fv-4', 'fv-14', 'fv-12', 'fv-13']) expect(node(id).connectedNodes).toEqual(['fv-28']);
-        expect(node('fv-28').connectedNodes.sort()).toEqual(['fv-15', 'fv-20', 'fv-5']);
-        for (const id of ['fv-15', 'fv-5', 'fv-20']) expect(node(id).connectedNodes).toEqual(['fv-6']);
+        const columnOf = (id: string) => node(id).location[0];
+        for (const [a, b] of [['fv-16', 'fv-3'], ['fv-3', 'fv-11'],
+                              ['fv-12', 'fv-17'], ['fv-17', 'fv-4'], ['fv-4', 'fv-14'], ['fv-14', 'fv-13'],
+                              ['fv-15', 'fv-5'], ['fv-5', 'fv-20']] as const) {
+            expect(columnOf(a), `${a}/${b} must share a column`).toBe(columnOf(b));
+            expect(node(a).connectedNodes, `${a} -> ${b}`).toContain(b);
+            expect(node(b).connectedNodes, `${b} -> ${a}`).toContain(a);
+        }
     });
 
     it('leaves no dead-end spurs off the lanes', () => {
@@ -310,6 +334,8 @@ describe('Phase 65 — expanded fishing-village layout', () => {
         // level design: entering fv-15 ended the run outright, four nodes in.
         const map = fv();
         const terminal = map.nodes.filter(n => n.connectedNodes.length === 0);
+        // D1's ribs never touch the terminal column, so raw-edge terminality
+        // still names exactly the authored ends of the map.
         expect(terminal.map(n => n.id).sort()).toEqual(['fv-10', 'fv-24']);
         for (const id of ['fv-15', 'fv-25', 'fv-17', 'fv-19']) {
             const node = map.nodes.find(n => n.id === id)!;

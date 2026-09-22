@@ -7,9 +7,11 @@
  */
 
 import React from 'react';
+import { StyleSheet } from 'react-native';
 import { render, screen } from '@testing-library/react-native';
 
 import { MapOverlays } from '../MapOverlays';
+import { MAP_LEGEND_LEFT } from '@/state/presenters/exploration.engine';
 
 describe('MapOverlays', () => {
     const legend = { left: 'visited', right: 'sealed' };
@@ -124,6 +126,74 @@ describe('MapOverlays', () => {
         it('still reads the whole nudge, gesture and all', () => {
             render(<MapOverlays legend={legend} hint={LONG_HINT} />);
             expect(screen.getByText(LONG_HINT)).toBeTruthy();
+        });
+    });
+
+    /**
+     * owner finding 9, 2026-09-21 — THE CLIPPED LEGEND.
+     *
+     * The strip was cut off on screen for two independent reasons, and a
+     * fix for either alone leaves the other live, so both are pinned:
+     *
+     *   1. it ran under `<MapCanvas>`'s compass rose (a 52x52 SVG pinned at
+     *      `right: 10, bottom: 10` — a 62px corner reaching up from the
+     *      chart's foot) while the legend sat at `bottom: 8`;
+     *   2. neither `Text` could give way in the row, and `graphWrap` is
+     *      `overflow: 'hidden'`, so the moment the two strings exceeded the
+     *      strip they were clipped rather than wrapped.
+     *
+     * These assertions are geometric on purpose: the collision was geometric,
+     * and shortening the copy would hide it rather than fix it.
+     */
+    describe('owner finding 9: the legend cannot be clipped', () => {
+        // MapCanvas: 52px rose pinned 10px off the chart's right edge.
+        const ROSE_FOOTPRINT = 62;
+
+        const legendBox = () => {
+            render(<MapOverlays legend={legend} />);
+            return StyleSheet.flatten(screen.getByTestId('map-legend').props.style);
+        };
+
+        it('leaves the compass rose its corner instead of drawing across it', () => {
+            expect(legendBox().right).toBeGreaterThan(ROSE_FOOTPRINT);
+        });
+
+        it('stacks the keys and the counter, so neither has to share a line', () => {
+            // As a row they competed for one strip's width; as a column each
+            // line owns the full remaining width.
+            expect(legendBox().flexDirection).toBe('column');
+        });
+
+        it('BOUNDS each line to the strip, so long copy wraps instead of running off', () => {
+            // This is the assertion that actually closes the clipping. In a
+            // column, `alignItems: 'stretch'` is what hands each Text the
+            // container's width as its wrap bound; content-sized lines
+            // (`flex-start`) would overflow exactly as the row did, and
+            // `flexShrink` governs HEIGHT on this axis, not width.
+            expect(legendBox().alignItems).toBe('stretch');
+            for (const id of ['map-legend-keys', 'map-legend-count']) {
+                const flat = StyleSheet.flatten(screen.getByTestId(id).props.style);
+                // Belt and braces: Yoga defaults flexShrink to 0.
+                expect(flat.flexShrink).toBe(1);
+                // And nothing may clamp a wrapped line back to one row.
+                expect(screen.getByTestId(id).props.numberOfLines).toBeUndefined();
+            }
+        });
+
+        it('holds the real legend copy, not just the short test fixture', () => {
+            render(<MapOverlays legend={{ left: MAP_LEGEND_LEFT, right: '28 nodes · 23 sealed' }} />);
+            expect(screen.getByText(MAP_LEGEND_LEFT)).toBeTruthy();
+            expect(screen.getByText('28 nodes · 23 sealed')).toBeTruthy();
+        });
+
+        it('keeps the travel hint clear of the now two-line strip', () => {
+            // FE-005 again: the hint and the legend collided once already
+            // because their offsets were chosen independently. The legend is
+            // anchored at bottom: 8 and grows upward over two ~11px lines.
+            render(<MapOverlays legend={legend} hint="x" />);
+            const hint = StyleSheet.flatten(screen.getByTestId('map-hint').props.style);
+            const strip = StyleSheet.flatten(screen.getByTestId('map-legend').props.style);
+            expect(hint.bottom).toBeGreaterThan(strip.bottom + 22);
         });
     });
 

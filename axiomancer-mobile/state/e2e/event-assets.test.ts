@@ -33,10 +33,19 @@ describe('selectEventArtSlug', () => {
         expect(selectEventArtSlug(ev)).toBe('boss');
     });
 
-    it('maps minigame-intercepted kinds (rest / gathering / loot-cache) to the generic fallback — Phase 137', () => {
+    it('maps minigame-intercepted kinds (rest / loot-cache) to the generic fallback — Phase 137', () => {
         expect(selectEventArtSlug({ kind: 'rest', healed: 5, shelter: 'camp' })).toBe('interaction-generic');
-        expect(selectEventArtSlug({ kind: 'gathering', items: [] })).toBe('interaction-generic');
         expect(selectEventArtSlug({ kind: 'loot-cache', items: [], currency: 0 })).toBe('interaction-generic');
+    });
+
+    // 2026-09-21 (owner finding 2) — gathering DOES reach the modal now, as
+    // the acknowledgement card. It borrows the generic figure on purpose: a
+    // bespoke slug means a new exhaustive `Record` member in
+    // `PlaceholderIllustration` plus a drawing, which is an art errand. The
+    // slug is pinned here so that errand shows up as a failing test, not as
+    // silent drift.
+    it('gathering borrows the generic fallback until it earns its own drawing', () => {
+        expect(selectEventArtSlug({ kind: 'gathering', items: [] })).toBe('interaction-generic');
     });
 
     it('maps interaction to "interaction-generic"', () => {

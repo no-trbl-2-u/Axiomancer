@@ -20,6 +20,14 @@ import type { ResolvedEvent } from '@mechanics';
 // resolve interceptors start minigame sessions instead, except
 // gathering, which grants its items inline since Phase 76), so only
 // the kinds the modal can actually render keep an art slug.
+//
+// 2026-09-21 (owner finding 2): `gathering` reaches the modal again as an
+// acknowledgement card (`event.engine.ts::composeGathering`), but it
+// deliberately keeps borrowing `'interaction-generic'` rather than
+// reclaiming a bespoke slug. A new `EventArtSlug` member is an exhaustive
+// `Record` in `components/event/PlaceholderIllustration.tsx` plus its test
+// plus a drawing; that is an art errand, not this fix. Filed as a
+// follow-up — the card reads correctly meanwhile.
 export const EVENT_ART_SLUGS = [
     'encounter',
     'boss',
@@ -46,12 +54,13 @@ export function selectEventArtSlug(event: ResolvedEvent): EventArtSlug {
             return 'village';
         case 'cutscene':
             return 'cutscene';
-        // Phase 137 cleanup: rest / gathering / loot-cache / hazard
-        // never reach the event modal — their interceptors start
-        // minigame sessions instead (gathering grants its items inline
-        // since Phase 76). Generic fallback kept defensively.
-        case 'rest':
+        // 2026-09-21 — `gathering` DOES reach the modal now (owner finding
+        // 2); it borrows the generic figure until it earns a drawing of its
+        // own. Every other kind below still never reaches the modal — their
+        // interceptors start minigame sessions instead — and keeps the
+        // generic fallback defensively.
         case 'gathering':
+        case 'rest':
         case 'loot-cache':
         case 'hazard':
         case 'narration':

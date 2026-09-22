@@ -1,6 +1,7 @@
 import React from 'react';
+import { StyleSheet } from 'react-native';
 import { render, fireEvent } from '@testing-library/react-native';
-import { MapCanvas, computeFocusTransform, focusKeyOf } from '../MapCanvas';
+import { MapCanvas, computeFocusTransform, focusKeyOf, edgeStroke } from '../MapCanvas';
 import type { ExplorationNode, ExplorationEdge } from '@/state/presenters/exploration.engine';
 
 const mockNodes: ExplorationNode[] = [
@@ -48,18 +49,21 @@ const mockEdges: ExplorationEdge[] = [
         toId: 'node-2',
         traveled: false,
         locked: false,
+        lateral: false,
     },
     {
         fromId: 'node-2',
         toId: 'node-3',
         traveled: false,
         locked: true,
+        lateral: false,
     },
     {
         fromId: 'node-1',
         toId: 'node-4',
         traveled: true,
         locked: false,
+        lateral: false,
     },
 ];
 
@@ -229,18 +233,21 @@ describe('MapCanvas', () => {
                 toId: 'node-2',
                 traveled: true,
                 locked: false,
+                lateral: false,
             },
             {
                 fromId: 'node-2',
                 toId: 'node-3',
                 traveled: false,
                 locked: true,
+                lateral: false,
             },
             {
                 fromId: 'node-1',
                 toId: 'node-4',
                 traveled: false,
                 locked: false,
+                lateral: false,
             },
         ];
 
@@ -260,12 +267,14 @@ describe('MapCanvas', () => {
                 toId: 'nonexistent-2',
                 traveled: false,
                 locked: false,
+                lateral: false,
             },
             {
                 fromId: 'node-1',
                 toId: 'nonexistent-3',
                 traveled: false,
                 locked: false,
+                lateral: false,
             },
         ];
 
@@ -515,5 +524,134 @@ describe('MapCanvas re-frames on a focus change', () => {
             rerender(<MapCanvas nodes={moved} edges={mockEdges}><MockChildren /></MapCanvas>),
         ).not.toThrow();
         expect(getByTestId('map-canvas-wrapper')).toBeDefined();
+    });
+});
+
+// ---------------------------------------------------------------------------
+// owner finding 9 / D1 — a branching chart has to stay readable
+// ---------------------------------------------------------------------------
+
+/**
+ * `edgeStroke` is the whole of how the chart tells a forward road from one of
+ * D1's 69 lateral lane ribs, so it is pinned directly rather than inferred
+ * from rendered SVG (the sheet also draws ~43 hatch `Path`s and 5 contour
+ * `Path`s, which would make a count-based assertion meaningless).
+ */
+describe('edgeStroke: ribs read as ribs, roads read as roads', () => {
+    const AXM = { parchment: '#p', ash: '#a', bone: '#b' };
+    const edge = (over: Partial<ExplorationEdge> = {}): ExplorationEdge => ({
+        fromId: 'a', toId: 'b', traveled: false, locked: false, lateral: false, ...over,
+    });
+
+    it('draws a lateral rib lighter than the forward road it sits beside', () => {
+        const road = edgeStroke(edge(), AXM);
+        const rib = edgeStroke(edge({ lateral: true }), AXM);
+        expect(rib.width).toBeLessThan(road.width);
+        expect(rib.opacity).toBeLessThan(road.opacity);
+    });
+
+    it('gives a rib no road casing — the casing is what makes a line read as a road', () => {
+        expect(edgeStroke(edge(), AXM).casing).toBe(true);
+        expect(edgeStroke(edge({ lateral: true }), AXM).casing).toBe(false);
+    });
+
+    it('keeps a rib dashed even when it is open, so it never impersonates a road', () => {
+        // An OPEN forward road is solid; a sealed one is coarsely dashed.
+        expect(edgeStroke(edge(), AXM).dash).toBeUndefined();
+        expect(edgeStroke(edge({ locked: true }), AXM).dash).toBe('5 5');
+        // Every rib is finely dashed regardless of state.
+        expect(edgeStroke(edge({ lateral: true }), AXM).dash).toBe('2 4');
+        expect(edgeStroke(edge({ lateral: true, traveled: true }), AXM).dash).toBe('2 4');
+    });
+
+    it('keeps the progression states separated by WIDTH, not only by hue', () => {
+        // Greyscale has to carry it: travelled is the widest, sealed the thinnest.
+        const traveled = edgeStroke(edge({ traveled: true }), AXM);
+        const open = edgeStroke(edge(), AXM);
+        const sealed = edgeStroke(edge({ locked: true }), AXM);
+        expect(traveled.width).toBeGreaterThan(open.width);
+        expect(open.width).toBeGreaterThan(sealed.width);
+    });
+
+    it('still inks a rib in its state colour, so a rib into a sealed lane is visibly shut', () => {
+        expect(edgeStroke(edge({ lateral: true, locked: true }), AXM).color).toBe(AXM.ash);
+        expect(edgeStroke(edge({ lateral: true, traveled: true }), AXM).color).toBe(AXM.parchment);
+    });
+});
+
+/**
+ * RECENTRE — the return leg of the drag affordance. The pan is unbounded, so
+ * a player who drags off to look down a side strand can be left holding a
+ * blank corner of a 936x1040 sheet. With D1's frontier roaming, looking
+ * sideways is the point, so it has to be undoable.
+ */
+describe('MapCanvas: the recentre control', () => {
+    const MockChildren = () => <></>;
+
+    const mounted = () => {
+        const r = render(
+            <MapCanvas nodes={mockNodes} edges={mockEdges}><MockChildren /></MapCanvas>,
+        );
+        fireEvent(r.getByTestId('map-canvas-wrapper'), 'layout', {
+            nativeEvent: { layout: { width: 360, height: 640 } },
+        });
+        return r;
+    };
+
+    it('renders a labelled control that takes a touch', () => {
+        const { getByTestId } = mounted();
+        const btn = getByTestId('map-recenter');
+        expect(btn.props.accessibilityRole).toBe('button');
+        expect(String(btn.props.accessibilityLabel)).toMatch(/recentre/i);
+    });
+
+    it('sits above the compass rose rather than beside it', () => {
+        // MapCanvas pins the 52x52 rose at right:10, bottom:10 — a 62px-tall
+        // corner. The control has to start above that or the chart's one
+        // touchable instrument is buried under a decorative one.
+        const { getByTestId } = mounted();
+        const flat = StyleSheet.flatten(getByTestId('map-recenter').props.style);
+        expect(flat.position).toBe('absolute');
+        expect(flat.bottom).toBeGreaterThanOrEqual(62);
+        expect(flat.right).toBe(10);
+    });
+
+    it('is a real touch target — it is NOT inside the pointerEvents="none" overlay layer', () => {
+        // The regression this guards: the legend layer is pointerEvents="none"
+        // so it can never swallow a pan. Anything tappable placed inside it
+        // would silently stop responding.
+        const { getByTestId } = render(
+            <MapCanvas nodes={mockNodes} edges={mockEdges} overlays={<MockChildren />}>
+                <MockChildren />
+            </MapCanvas>,
+        );
+        const fixed = getByTestId('map-overlays-fixed');
+        const btn = getByTestId('map-recenter');
+        expect(fixed.props.pointerEvents).toBe('none');
+        // Walk up from the button; the none-layer must not be an ancestor.
+        let node: typeof btn | null = btn.parent as typeof btn | null;
+        while (node) {
+            expect(node).not.toBe(fixed);
+            node = node.parent as typeof btn | null;
+        }
+    });
+
+    it('presses without throwing, before and after a layout is known', () => {
+        const unmeasured = render(
+            <MapCanvas nodes={mockNodes} edges={mockEdges}><MockChildren /></MapCanvas>,
+        );
+        // No viewport yet — must be a safe no-op, not a crash.
+        expect(() => fireEvent.press(unmeasured.getByTestId('map-recenter'))).not.toThrow();
+
+        const { getByTestId } = mounted();
+        expect(() => fireEvent.press(getByTestId('map-recenter'))).not.toThrow();
+    });
+
+    it('is a no-op on an empty map rather than a divide-by-nothing', () => {
+        const r = render(<MapCanvas nodes={[]} edges={[]}><MockChildren /></MapCanvas>);
+        fireEvent(r.getByTestId('map-canvas-wrapper'), 'layout', {
+            nativeEvent: { layout: { width: 360, height: 640 } },
+        });
+        expect(() => fireEvent.press(r.getByTestId('map-recenter'))).not.toThrow();
     });
 });

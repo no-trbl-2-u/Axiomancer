@@ -30,6 +30,7 @@ import { BlacksmithGate } from '@/components/BlacksmithGate';
 import { CacheGate } from '@/components/CacheGate';
 import { EventGate } from '@/components/EventGate';
 import { HazardGate } from '@/components/HazardGate';
+import { ItemRewardGate } from '@/components/item-reward/ItemRewardGate';
 import { RestGate } from '@/components/RestGate';
 import { NavLogger } from '@/components/NavLogger';
 import { ToastHost } from '@/components/ToastHost';
@@ -43,6 +44,7 @@ import EventScreen from './event/index';
 import HazardScreen from './hazard/index';
 import CombatEncounterScreen from './combat-encounter/index';
 import HazardDeckScreen from './hazard-deck/index';
+import ItemRewardScreen from './item-reward/index';
 import RestScreen from './rest/index';
 import CacheScreen from './cache/index';
 import BlacksmithScreen from './blacksmith/index';
@@ -244,6 +246,7 @@ function RootLayout() {
               <HazardGate />
               <RestGate />
               <CacheGate />
+              <ItemRewardGate />
               <BlacksmithGate />
               <ToastHost />
               {/* PLAYTEST_BUGS_2026-09-18 BUG-03: the app had no save-on-exit
@@ -274,6 +277,16 @@ function RootLayout() {
                 <Stack.Screen
                   name="hazard-deck/index"
                   component={HazardDeckScreen}
+                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
+                />
+                {/* D7 — the ONE reward screen that is dismissible on purpose.
+                    No `gestureEnabled: false` and no <HardwareBackHandler>: the
+                    item is already the player's and every exit commits it as
+                    CONFIRM (see `app/item-reward/index.tsx`). Do not "fix" this
+                    to match the hazard/cache/rest screens beside it. */}
+                <Stack.Screen
+                  name="item-reward/index"
+                  component={ItemRewardScreen}
                   options={{ headerShown: false, presentation: 'fullScreenModal' }}
                 />
                 <Stack.Screen

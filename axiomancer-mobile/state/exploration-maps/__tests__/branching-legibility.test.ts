@@ -1,0 +1,144 @@
+/**
+ * Branching-graph legibility guard — can the 360x400 sheet actually CARRY
+ * the graph the engine authored?
+ *
+ * The parity guard next door answers "does every engine node have a
+ * position". It does not answer "are those positions any good", and after D1
+ * that gap matters: 69 LATERAL LANE RIBS landed across the seven maps at
+ * once, all of them joining two nodes that already existed. Parity stayed
+ * green by construction — no node was added or removed — while the number of
+ * lines drawn on the sheet rose by more than half on the starting map alone
+ * (46 roads to 46 roads + 14 ribs).
+ *
+ * A rib between two nodes that sit too close together is a line nobody can
+ * see: the node glyph is 44 device px on a canvas spread SPREAD x wider than
+ * this viewBox, so it covers `NODE_SIZE / SPREAD` viewBox units, and an edge
+ * shorter than that is entirely hidden under the two marks it joins. The
+ * owner's finding was that the map does not read as branching; a rib drawn
+ * under a node glyph is a branch that was authored and never shown.
+ *
+ * These assertions are derived from the real render constants rather than
+ * hard-coded, so shrinking the spread or growing the glyph moves the bar with
+ * them instead of quietly invalidating the guard.
+ */
+
+import { describe, it, expect } from '@jest/globals';
+import { getMapDefinition, forwardEdges } from '@mechanics';
+
+import { SPREAD } from '@/components/exploration/MapCanvas';
+import { NODE_SIZE } from '@/components/exploration/ExplorationNode';
+import { getMapLayout } from '../index';
+
+/** The canonical sheet every layout fixture is authored against. */
+const VIEWBOX = { w: 360, h: 400 };
+
+/**
+ * How much of the sheet ONE node glyph covers, in viewBox units.
+ *
+ * `<ExplorationNode>` draws a `NODE_SIZE`-px mark on `<MapCanvas>`'s spread
+ * canvas, which is `SPREAD`x the viewBox — so the mark's footprint here is
+ * the quotient. Two glyphs closer together than this overlap outright.
+ */
+const GLYPH_DIAMETER = NODE_SIZE / SPREAD;
+
+const MAPS = [
+    { mapId: 'fishing-village', continent: 'coastal-continent' },
+    { mapId: 'northern-forest', continent: 'coastal-continent' },
+    { mapId: 'caverns', continent: 'northern-continent' },
+    { mapId: 'northern-city', continent: 'northern-continent' },
+    { mapId: 'connecting-river', continent: 'northern-continent' },
+    { mapId: 'town-across-river', continent: 'northern-continent' },
+    { mapId: 'the-capital', continent: 'northern-continent' },
+] as const;
+
+interface DrawnEdge { a: string; b: string; lateral: boolean; length: number; }
+
+/** Every edge the canvas actually draws for a map, de-duplicated and measured. */
+function drawnEdges(continent: string, mapId: string): DrawnEdge[] {
+    const def = getMapDefinition(continent as never, mapId as never);
+    const layout = getMapLayout(mapId);
+    if (!layout) throw new Error(`no layout for ${mapId}`);
+    const pos = new Map(layout.nodes.map((n) => [n.id, { x: n.x, y: n.y }] as const));
+    const forward = forwardEdges(def);
+    const isForward = (a: string, b: string) =>
+        (forward.get(a) ?? []).includes(b) || (forward.get(b) ?? []).includes(a);
+
+    const out: DrawnEdge[] = [];
+    const seen = new Set<string>();
+    for (const node of def.nodes) {
+        for (const target of node.connectedNodes) {
+            const key = [node.id, target].sort().join('|');
+            if (seen.has(key)) continue;
+            seen.add(key);
+            const A = pos.get(node.id);
+            const B = pos.get(target);
+            if (!A || !B) continue; // parity guard owns this failure mode
+            out.push({
+                a: node.id,
+                b: target,
+                lateral: !isForward(node.id, target),
+                length: Math.hypot(A.x - B.x, A.y - B.y),
+            });
+        }
+    }
+    return out;
+}
+
+describe('exploration map: the sheet can carry the branching graph', () => {
+    for (const { mapId, continent } of MAPS) {
+        describe(mapId, () => {
+            it('gives every node its own position — two nodes never share one mark', () => {
+                const layout = getMapLayout(mapId)!;
+                const byPos = new Map<string, string[]>();
+                for (const n of layout.nodes) {
+                    const key = `${n.x},${n.y}`;
+                    byPos.set(key, [...(byPos.get(key) ?? []), n.id]);
+                }
+                const collisions = [...byPos.entries()].filter(([, ids]) => ids.length > 1);
+                expect(collisions).toEqual([]);
+            });
+
+            it('keeps every node on the sheet', () => {
+                // A node outside the viewBox is only reachable by panning to a
+                // place nothing tells the player about.
+                for (const n of getMapLayout(mapId)!.nodes) {
+                    expect(n.x).toBeGreaterThanOrEqual(0);
+                    expect(n.x).toBeLessThanOrEqual(VIEWBOX.w);
+                    expect(n.y).toBeGreaterThanOrEqual(0);
+                    expect(n.y).toBeLessThanOrEqual(VIEWBOX.h);
+                }
+            });
+
+            it('draws no edge shorter than the glyphs at its ends', () => {
+                // The bar a branch has to clear to be a branch on screen.
+                const tooShort = drawnEdges(continent, mapId)
+                    .filter((e) => e.length <= GLYPH_DIAMETER)
+                    .map((e) => `${e.a}|${e.b} (${e.length.toFixed(1)} < ${GLYPH_DIAMETER.toFixed(1)})`);
+                // Named, so a failure says WHICH pair sits on top of itself.
+                expect(tooShort).toEqual([]);
+            });
+
+            it('draws every lateral rib D1 authored, once and visibly', () => {
+                const edges = drawnEdges(continent, mapId);
+                const ribs = edges.filter((e) => e.lateral);
+                // Every shipped gauntlet map has at least one multi-lane
+                // column, so every one of them gained ribs. A map with none
+                // means either the ribs were lost or the forward-skeleton
+                // read is wrong — both silent on screen.
+                expect(ribs.length).toBeGreaterThan(0);
+                for (const r of ribs) expect(r.length).toBeGreaterThan(GLYPH_DIAMETER);
+            });
+        });
+    }
+
+    it('accounts for all 69 ribs D1 authored across the shipped maps', () => {
+        // A total, not a per-map count: this is the one number that catches a
+        // whole map's ribs disappearing in a refactor of the forward-skeleton
+        // read, which no per-map "> 0" assertion would notice.
+        const total = MAPS.reduce(
+            (n, m) => n + drawnEdges(m.continent, m.mapId).filter((e) => e.lateral).length,
+            0,
+        );
+        expect(total).toBe(69);
+    });
+});

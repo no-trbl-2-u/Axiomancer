@@ -37,6 +37,26 @@ export function useConsumable(inventory: Item[], itemId: string): Item[] {
     );
 }
 
+/**
+ * Stack-aware inventory append. Stackable kinds (consumables / materials) with
+ * a matching `id` already in inventory bump the existing quantity; everything
+ * else is appended as a new row.
+ *
+ * Lives here, at the Items layer, because every grant surface needs it —
+ * `Game/combat-grants.ts` re-exports this function under its historical name
+ * so the victory-loot fold keeps its import, and `item-grant.ts` uses it so the
+ * shared grant path and the encounter-loot path cannot drift on what "stacks".
+ */
+export function addItemStacking(inventory: Item[], item: Item): Item[] {
+    if (isConsumable(item) || isMaterial(item)) {
+        const existing = inventory.find(i => i.id === item.id);
+        if (existing && (isConsumable(existing) || isMaterial(existing))) {
+            return stackItem(inventory, item.id, item.quantity);
+        }
+    }
+    return addItem(inventory, item);
+}
+
 /** Increases the quantity of a stackable item (consumable or material). */
 export function stackItem(inventory: Item[], itemId: string, amount: number): Item[] {
     return inventory.map(item => {

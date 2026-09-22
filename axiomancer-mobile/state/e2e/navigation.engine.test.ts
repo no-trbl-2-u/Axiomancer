@@ -73,6 +73,10 @@ describe('navigation.engine', () => {
                 character: null,
                 memoir: null,
                 inventory: null,
+                // DECK (2026-09-21, finding 7 / D2) is the fifth tab route.
+                // It is deliberately badge-less: a badge is a call to ACT and
+                // the deck screen is reference material.
+                deck: null,
             });
         });
 

@@ -441,7 +441,7 @@ export function mechanicText(m: CardSpecialMechanic): string | null {
  *  Any OTHER DoT effect is card-local vocabulary and prints its per-turn bite
  *  inline (card-wording audit 2026-07-13: nettle sting / kindling ember were
  *  the two undefined species). */
-const REGISTRY_DOT_IDS: ReadonlySet<string> = new Set(['debuff_poison', 'debuff_bleed']);
+export const REGISTRY_DOT_IDS: ReadonlySet<string> = new Set(['debuff_poison', 'debuff_bleed']);
 
 /** Human text for a card's PAID payload: statuses + mechanics, real units.
  *  An effect names its side only when it crosses the card's printed target.
