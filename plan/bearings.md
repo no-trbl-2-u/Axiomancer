@@ -37,9 +37,14 @@ painted into `title-embark.jpg` and waits on new art. See
 `new-north-star.prompt.md` (repo root) for the broader Mörk-Borg-directed
 tonal pivot this name change was decided alongside.
 
-**No hosted web surface.** The product ships as a mobile app via
-manual EAS builds; `main` does not auto-deploy. See "Verify gate
-+ deploy gate" below.
+**One hosted web surface: the public DevLog.** The product ships as
+a mobile app via manual EAS builds; the app itself does not
+auto-deploy. The DevLog + catalog are published from `main` by the
+Cloudflare Pages project `axiomancer-devlog` at
+https://axiomancer-devlog.pages.dev (built by `npm run site:public`;
+proof: `node scripts/check-devlog-public-live.mjs <url>`; see
+`docs/devlog-public-deploy.md`). See "Verify gate + deploy gate"
+below.
 
 ## Surface
 
@@ -47,8 +52,8 @@ manual EAS builds; `main` does not auto-deploy. See "Verify gate
 
 This is not a website. `axiomancer-mechanics` is a `library` +
 `cli`; `axiomancer-mobile` is a native `app` (with an
-expo-web build used only for dev/e2e/playtesting). There is no
-public human-facing URL.
+expo-web build used only for dev/e2e/playtesting). The game has
+no public human-facing URL; the DevLog above is the only one.
 
 Consequences for the loop:
 - The opt-in branding capability (`/ship-asset` + `brander`) is
