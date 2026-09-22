@@ -69,8 +69,12 @@ recorded. Do this once, in one sitting:
    guessable previews on the game's project applies here too — do not open a
    second instance of the same finding.
 7. **Build watch paths** (Settings > Build > Build watch paths):
-   - **Include:** `devlog/PUBLISH`
+   - **Include:** `devlog/PUBLISH`, `devlog/builds.json`
    - **Exclude:** *(empty)*
+
+   `devlog/builds.json` is the playable-build ledger (see "Offering a
+   playable build" below). A newly recorded build is news a player can act
+   on, so recording one redeploys the site on its own.
 
    The site deploys on player-visible news, not on every push (T,
    2026-09-22). `devlog/PUBLISH` is an append-only publish ledger.
@@ -138,6 +142,33 @@ whole publish step, and there is no generated file in the commit.
 If the Pages project does not exist yet, nothing about that changes: the
 nightly still builds locally, and the build is its own check that the entry
 renders.
+
+---
+
+## Offering a playable build
+
+The landing page carries a **Play the latest build** band. It links the
+newest Android preview APK recorded in `devlog/builds.json`, and it only
+appears when that file holds a valid record.
+
+- **Why a link.** The APK is about 100 MB. Pages refuses any file over
+  25 MiB, so the site links Expo's artifact URL, which serves the APK without
+  a login.
+- **Why not the build page.** Expo's build page is not linked, because it may
+  require an Expo login.
+- **Recording a build.** After an EAS `preview` build finishes, run:
+
+  ```bash
+  npm run devlog:record-build   # needs EXPO_TOKEN or a logged-in eas-cli
+  ```
+
+  It prepends the newest finished Android preview build (date, commit, APK
+  URL, measured size) to `devlog/builds.json`. It does nothing if that build
+  is already recorded. Commit the file. Merging it to `main` redeploys the
+  site with the new link.
+- **No builds in the nightly.** The nightly digest does not record builds.
+  The night workflow holds no Expo credentials, and preview builds are
+  started by hand.
 
 ---
 

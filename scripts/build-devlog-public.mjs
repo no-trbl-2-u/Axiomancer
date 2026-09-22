@@ -45,6 +45,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { CATEGORIES, CAT_LABEL, EVIDENCE_KINDS, categoryCounts, escapeHtml, extractFields, inline, mdToHtml, parseEntry } from './devlog-entry.mjs'
 import { DEFAULT_THEME, THEME_IDS, stylesheet } from './devlog-tokens.mjs'
 import { readProvenance, verdictFor } from './devlog-art-licence.mjs'
+import { formatSize, latestAndroid, readBuilds } from './devlog-builds.mjs'
 import {
     MARKS, altText, beforeAfter, beforeAfterText, chip, dateStamp, eyebrow,
     firstClause, noCapture, page, panel, roman, romanDate, SITE_CSS, shortDate,
@@ -536,6 +537,37 @@ async function renderIndex(entries, media, out, pageNumber, pages) {
 }
 
 /** The landing page: a plate, a title, what this is, and the newest entry. */
+/**
+ * The "Play the latest build" band on the landing page.
+ *
+ * Pure: takes the newest valid record from devlog/builds.json (see
+ * scripts/devlog-builds.mjs) and returns HTML, or '' when there is no build to
+ * offer, so a missing or malformed ledger never breaks the page.
+ *
+ * It links Expo's artifact URL directly. That URL serves the APK without a
+ * login, and the APK (~100 MiB) is too large to host on Pages (25 MiB per
+ * file). Expo's build page is deliberately NOT linked: it may require an
+ * Expo login, and a public page must not send a stranger to a sign-in wall.
+ *
+ * @param {object | null} build - a ledger record, or null
+ * @returns {string} an HTML band, or ''
+ */
+export function playBandHtml(build) {
+    if (!build) return ''
+    const size = formatSize(build.sizeBytes)
+    const label = size ? `Download for Android (${size})` : 'Download for Android'
+    const commit = build.commit ? ` from commit <code>${escapeHtml(build.commit)}</code>` : ''
+    return `<div class="band band-read" id="play">
+  ${eyebrow('Play the latest build')}
+  ${dateStamp(build.date)}
+  <p>The newest preview build of the game, built${commit}. It is unfinished and changes often.</p>
+  <nav class="pager">
+    <a href="${escapeHtml(build.apkUrl)}" rel="nofollow" download>${escapeHtml(label)}</a>
+  </nav>
+  <p class="dim">Android only. The file is an APK installed outside the Play Store, so your phone will ask you to allow installs from this source. There is no iPhone build yet.</p>
+</div>`
+}
+
 async function renderLanding(entries, media, out) {
     const root = ''
     const newest = entries[0]
@@ -564,6 +596,10 @@ async function renderLanding(entries, media, out) {
         })
     }
 
+    // The play band sits between "What this is" and the newest entry: the
+    // reader has just been told what the game is, and can now try it.
+    const play = playBandHtml(latestAndroid(readBuilds()))
+
     const body = `<section class="hero" data-hero>
   <img class="hero-plate" src="assets/hero-plate.webp" alt="" aria-hidden="true">
   <img class="hero-sheet" src="assets/hero-sheet.svg" alt="" aria-hidden="true">
@@ -576,6 +612,7 @@ async function renderLanding(entries, media, out) {
   <p style="font-size:clamp(19px,2.4vw,23px);line-height:1.5">A dark fantasy deckbuilding RPG, built in the open. Every night the work of the last day is written down here — what changed, what it looks like now, and why it was worth changing.</p>
   <p class="dim">Nothing below is a mock-up. The pictures are the game's own screens, captured before the change and after it.</p>
 </div>
+${play}
 <div class="band band-read">
   ${eyebrow('The newest entry')}
   ${dateStamp(newest.date)}
@@ -868,7 +905,7 @@ export function readEntries() {
     return entries
 }
 
-export async function build({ out = DEFAULT_OUT, strict = false, origin = 'https://devlog.axiomancer.pages.dev', clean = true } = {}) {
+export async function build({ out = DEFAULT_OUT, strict = false, origin = 'https://axiomancer-devlog.pages.dev', clean = true } = {}) {
     const entries = readEntries()
     if (!entries.length) throw new Error('devlog-public: no entries found in devlog/entries')
 

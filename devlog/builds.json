@@ -1,0 +1,16 @@
+{
+  "$comment": "Playable-build ledger for the public DevLog. Written only by scripts/devlog-record-build.mjs; newest first; never edit or delete a past record. See scripts/devlog-builds.mjs.",
+  "android": [
+    {
+      "date": "2026-09-22",
+      "finishedAt": "2026-09-22T18:09:55.207Z",
+      "buildId": "e2cc7925-7287-46de-9396-3c3b562950c5",
+      "profile": "preview",
+      "commit": "c6de91a",
+      "appVersion": "1.0.0",
+      "apkUrl": "https://expo.dev/artifacts/eas/On1cgyCz5t59yx1gJ9Ux6xcP9NDhloiI_TrctuTTYtU.apk",
+      "buildPageUrl": "https://expo.dev/accounts/no.trbl.2.u/projects/axiomancer-mobile/builds/e2cc7925-7287-46de-9396-3c3b562950c5",
+      "sizeBytes": 106287034
+    }
+  ]
+}
