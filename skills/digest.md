@@ -249,6 +249,32 @@ its own cadence.
    numbers. **Never edit gates, cadences, ceilings, or rules
    directly** — proposals only; `/oversight` promotes. The
    loop does not vote on its own constraints.
+5b. **Publish gate** (T, 2026-09-22): the public site deploys ONLY
+    when `devlog/PUBLISH` changes — it is the Pages project's sole
+    build watch path (`docs/devlog-public-deploy.md` step 7). Decide
+    whether tonight publishes, then act on the decision:
+
+    - **Publish** when at least one work item is a change a player
+      would notice in the game: a new feature or system, a UI or
+      quality-of-life change, new content (cards, foes, items,
+      regions, art, text a player reads), or a fix to something a
+      player could hit. The test is the player's, not the loop's:
+      *would someone playing tonight's build see or feel this?*
+    - **Do not publish** when every item is loop-internal: ledger /
+      zero-diff steward passes, critique passes with no findings,
+      tooling, CI, docs, plan edits, or a baseline re-measure. A
+      balance change publishes only if it changes what a player
+      plays (a card's numbers, a fight's roster), never for a
+      measurement alone.
+    - **To publish,** append one line to `devlog/PUBLISH`:
+      `<YYYY-MM-DD> — <tonight's entry title>`. Append-only; never
+      edit a past line. Commit it with the entry.
+    - **Either way,** the entry is still written and committed —
+      the ledger is complete whether or not the site moves, and the
+      next publish renders every entry since. State the decision in
+      the `While you were out` panel (one line: published, or held
+      back and why).
+
 6. **Gate + commit + push:** `npm run verify`, then `npm run
    site:public` (the public build, which is also the check that
    tonight's entry renders for a stranger — it reports any panel it
@@ -287,6 +313,9 @@ its own cadence.
 5. One commit; cloud ticks carry the `Cloud-Run:` trailer.
 6. No `Co-Authored-By`, no emojis, no `--no-verify` — the
    standing rules apply at 3am too.
+6b. Publishing is the §3 step 5b decision, recorded only by
+   appending to `devlog/PUBLISH`. Never edit a past line of that
+   file, and never touch it on a night that does not publish.
 7. Never end the turn with the commit/push still pending on
    a backgrounded command or a scheduled wakeup — this run has
    no later turn to resume into (§3.6).
@@ -310,6 +339,7 @@ its own cadence.
 
 ```bash
 devlog/entries/DIGEST_<date>.md      # the deliverable (append, never overwrite)
+devlog/PUBLISH                       # append a line ONLY on a player-visible night (§3 5b) — the sole deploy trigger
 npm run devlog:shots -- <ref> <date> # collect UI before/after/diff (if screens changed)
 npm run site:build                   # catalog (export+render) + entry HTML + hub
 npm run baseline:check               # is the deck-matrix baseline stale?
