@@ -77,7 +77,7 @@ recorded. Do this once, in one sitting:
 ### The URL, once it exists
 
 ```
-DEVLOG_PUBLIC_URL = <not yet created — fill this in with the deploy>
+DEVLOG_PUBLIC_URL = https://axiomancer-devlog.pages.dev
 ```
 
 ---
