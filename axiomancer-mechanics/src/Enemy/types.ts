@@ -55,7 +55,9 @@ export interface BefriendabilityConfig {
 }
 
 /**
- * Decision-making strategy used by an enemy each round (Spec 07).
+ * Decision-making strategy used by an enemy each round (Spec 07). Retained as
+ * data only: the legacy turn-based AI driver that branched on it was removed
+ * (the Hazard-Pattern engine drives foes via authored threat sequences).
  *
  * - `random`     — picks any stance and any action uniformly.
  * - `aggressive` — attacks ~75% of the time; favours the stance that beats
@@ -305,8 +307,8 @@ export interface Enemy {
      */
     journalEntry?: CodexEntry;
     /**
-     * Content-provenance metadata used by the tuning `--focus` filter
-     * (`src/Tuning/focus.parser.ts`). `addedIn` is an ISO date / phase tag;
+     * Content-provenance metadata (originally consumed by the since-retired
+     * tuning `--focus` filter). `addedIn` is an ISO date / phase tag;
      * `tags` are freeform labels (e.g. `'late-game'`, `'boss'`). Both
      * optional and ignored by the combat engine.
      */

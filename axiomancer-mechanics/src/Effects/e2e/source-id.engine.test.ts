@@ -3,8 +3,9 @@
  *
  * Pins the convention that every applied effect carries a sourceId
  * pointing back to the agent that caused it: player.id on the card
- * path, actor.id on the proc path (Character | Enemy), item.id for
- * equipment passives, and undefined for environmental hazards.
+ * path, actor.id on the proc path (Character | Enemy), never from
+ * equipment (Phase 20 — equipment applies no effects), and undefined for
+ * environmental hazards.
  *
  * The unit-level coverage of `applyEffect`'s sourceId plumbing lives
  * in `src/Effects/e2e/effects.engine.test.ts`. This file drives the

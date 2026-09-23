@@ -35,7 +35,7 @@ export {
 export { consumableLibrary, getConsumableById } from './consumable.library';
 export { buyItem, sellItem, defaultSellPrice } from './shop.reducer';
 export type { ShopWare, ShopInventory } from './shop.types';
-// Phase 19 — the 8 signet relics + worn-loadout signature derivation.
+// Phase 19 — the 11 signet relics (Phase 85 added 3) + worn-loadout signature derivation.
 export {
     relicLibrary, getRelicById, getSignaturesForLoadout, cloneStartingRelics,
     DEFAULT_WORN_RELIC_IDS, BENCHED_RELIC_IDS,

@@ -53,7 +53,7 @@ export interface CreateEnemyOptions {
     causeLines?: CauseLines;
     /** Phase 73 — optional per-foe codex / journal entry (GH#65 ask 3). */
     journalEntry?: CodexEntry;
-    /** Content-provenance metadata for the tuning `--focus` filter. */
+    /** Content-provenance metadata (the tuning `--focus` filter that consumed it is retired). */
     addedIn?: string;
     tags?: string[];
     /** Spec 26 §3.1 — asset id for the enemy's combat portrait (kebab-case). */
@@ -184,7 +184,7 @@ export function enemyStatBudget(
  * THE BIG NUMBERS REWRITE (2026-09-02) — the keyword floor.
  *
  * Every foe should change the arithmetic of a fight somehow, but hand-authoring
- * nine keywords across seventy-two enemies would mostly produce noise. So the
+ * eleven keywords across some eighty enemies would mostly produce noise. So the
  * roster gets a DERIVED baseline by difficulty and level, and the enemies worth
  * a character note author their own list (which wins outright — this is a
  * default, not an addition).

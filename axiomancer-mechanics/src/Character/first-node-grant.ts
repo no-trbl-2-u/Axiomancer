@@ -29,7 +29,8 @@
  * `withholdFirstNodeRelic` and `grantFirstNodeRelic` are exact inverses over
  * the seeded character:
  *
- * - **withhold** (applied once, in `createNewGameState`) takes the fully
+ * - **withhold** (kept for callers that seed the kit themselves — since the
+ *   2026-09-23 owner call `createNewGameState` seeds no relics) takes the fully
  *   seeded character and removes the Suppliant's Ring from both `inventory`
  *   and the worn accessory row, promoting the highest-ranked benched
  *   accessory (`STAND_IN_RELIC_ID`, the Venom Sigil) into the freed seat.
@@ -63,9 +64,9 @@
  * `defaultWorn` on `relic.library.ts` feeds `cloneStartingRelics()`, which
  * also feeds `buildCharacterFromPreset` — and therefore every combat sim and
  * the measured baselines. Changing it there would move balance for a UI
- * finding. The withholding is applied at `createNewGameState()` only: the one
- * real-player origination point. Presets, fixtures, mocks and sims keep the
- * exact loadout they have today.
+ * finding. The withholding was applied at `createNewGameState()` only (the one
+ * real-player origination point, which now seeds nothing at all). Presets,
+ * fixtures, mocks and sims keep the exact loadout they have today.
  *
  * ## Settling
  *
@@ -198,7 +199,7 @@ function benchInInventory(inventory: readonly Item[], relicId: string): Item[] {
  *
  * Returns the character unchanged when the ring is not worn/owned (already
  * withheld, or a caller-chosen loadout that never had it), so this is safe to
- * apply once at `createNewGameState` and nowhere else.
+ * apply once to any seeded character (`createNewGameState` no longer calls it).
  */
 export function withholdFirstNodeRelic(character: Character): Character {
     const accessories = character.equipment.accessories;

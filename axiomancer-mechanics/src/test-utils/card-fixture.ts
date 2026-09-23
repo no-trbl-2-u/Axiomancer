@@ -9,7 +9,7 @@
  *     precondition buffet: enemy afflictions with DoT fuel + MARK stacks,
  *     Souls, Premises, discard fodder, reserve/floating dice with pip
  *     headroom, a pre-damaged Fallen player, a banked TURNABOUT denial
- *     ledger. Every one of the 57 cards' PAID-face preconditions is
+ *     ledger. Every library card's PAID-face preconditions are
  *     satisfiable here.
  *   - CLEAN (`{ clean: true }`) — the doctrine witness's null board: the
  *     SAME player and die tray, but the enemy carries NO pre-applied

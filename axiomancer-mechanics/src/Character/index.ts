@@ -48,13 +48,13 @@ export interface CreateCharacterOptions {
      */
     equipment?: Equipment[];
     /**
-     * Phase 19 — seed the 8 signet relics: the fixed default 5 are worn (1
-     * weapon + 1 armor + 3 accessories) and the other 3 seed the inventory, so a
+     * Phase 19 — seed the 11 signet relics: the fixed default 5 are worn (1
+     * weapon + 1 armor + 3 accessories) and the other 6 seed the inventory, so a
      * fresh character always enters combat with a full signature kit (signatures
      * derive from the worn loadout, not archetype). Off by default so bare
-     * `createCharacter` fixtures keep their exact (relic-free) stats; the real
-     * player-origination points (`createNewGameState`, `buildCharacterFromPreset`,
-     * the `Player` mock) opt in. Ignored when an explicit `equipment` list is
+     * `createCharacter` fixtures keep their exact (relic-free) stats;
+     * `buildCharacterFromPreset` and the `Player` mock opt in (`createNewGameState`
+     * no longer seeds relics — owner call 2026-09-23). Ignored when an explicit `equipment` list is
      * passed (the caller is choosing the loadout).
      */
     seedStartingRelics?: boolean;
@@ -73,7 +73,7 @@ export function createCharacter(options: CreateCharacterOptions): Character {
         knownCards = [], procUnlocks, seedStartingRelics = false,
     } = options;
 
-    // Phase 19 — the 8 signet relics: 5 default-worn, 3 benched.
+    // Phase 19 — the 11 signet relics: 5 default-worn, 6 benched.
     // Opt-in and only when the caller hasn't chosen an explicit loadout.
     const useRelics = seedStartingRelics && equipment.length === 0;
     const relics = useRelics ? cloneStartingRelics() : { worn: [] as Equipment[], benched: [] as Equipment[] };
@@ -110,7 +110,7 @@ export function createCharacter(options: CreateCharacterOptions): Character {
         procUnlocks,
     };
 
-    // Equip every worn piece in order so stat modifiers, passive effects, and
+    // Equip every worn piece in order so stat modifiers and
     // the maxHp fold get applied via the canonical path (weapon/armor replace,
     // accessories fill the first 3 positions).
     let initialised = baseChar;

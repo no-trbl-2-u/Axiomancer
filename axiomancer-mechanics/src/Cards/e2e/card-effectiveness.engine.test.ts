@@ -12,8 +12,7 @@
  * rider was moved onto the PAID `rider` mechanic so it fires WITH the replay)
  * moved the Echo deck's late win rate 3% -> 37%.
  *
- * This suite closes that gap: for every one of the 70 spec 32 v3 library
- * cards, it plays the PAID (bottom) face into ONE shared, rich precondition
+ * This suite closes that gap: for every library card, it plays the PAID (bottom) face into ONE shared, rich precondition
  * fixture and asserts a KIND-AWARE, magnitude-checked observable delta —
  * never mere event-kind presence, since a broken payoff can still emit an
  * event with amount 0 (exactly the historical Ouroboros shape).

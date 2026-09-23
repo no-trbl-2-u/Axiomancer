@@ -5,7 +5,7 @@
  *   - register / lookup / clear lifecycle, `hasSandboxContent`
  *   - collision safety (library ids and duplicate sandbox ids throw; atomic)
  *   - library-card overrides: shallow merge visible through `getCardById`
- *   - the post-v3 EMPTY set registry (`SANDBOX_CARD_SETS = {}` — the pre-v3
+ *   - the post-v3 set registry (only `GLYPHS_51_PILOT` — the pre-v3
  *     experiment sets referenced retired cards/effects and the deleted
  *     `basePower` field, so the reset cleared them; `/deck-tuning` authors
  *     fresh v3 sets here)

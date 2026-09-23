@@ -3,7 +3,7 @@
  *
  * These were authored client-side before; the engine now owns the data.
  * Verifies each ladder preset resolves through `buildCharacterFromPreset`
- * (so every equipment / consumable / card id is real), escalates with
+ * (so every consumable / card id is real), escalates with
  * level, and stays OUT of the canonical `characterPresets` picker.
  */
 

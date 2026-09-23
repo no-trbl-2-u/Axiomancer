@@ -8,9 +8,10 @@
  * live everywhere cards are looked up — deck building, `toCombatCard`
  * projection, and card execution — with zero engine changes.
  *
- * Doctrine: status effects are the MAIN fun and the EFFICIENT path to dropping
- * enemy HP. The sandbox exists so new status-applying cards can be A/B-tested
- * against the sim before a literal is promoted into the library.
+ * Doctrine at authoring time (repealed 2026-09-02 — see `cards.library.ts`):
+ * status play as the efficient path to dropping enemy HP. The sandbox exists
+ * so new cards can be A/B-tested against the sim before a literal is promoted
+ * into the library.
  *
  * Cycle safety: this module imports ONLY types from './types'. The library
  * binds its own base lookup here at module init via `bindSandboxLibraryGuard`

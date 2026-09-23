@@ -3,7 +3,7 @@
  * plan/phases/phase_62_ally_cards.md).
  *
  * Allies (`cards.allies.ts`) are real `Card` records that live OUTSIDE the
- * pinned 57-card library, mirroring the Haunt sibling-pool pattern
+ * curated library, mirroring the Haunt sibling-pool pattern
  * (`haunts.engine.test.ts`'s WS2.1 contract), resolved via `getCardById`'s
  * sandbox -> haunt -> ally -> library chain. This suite pins the contract:
  *

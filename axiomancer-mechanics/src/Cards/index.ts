@@ -1,7 +1,8 @@
 /**
  * Cards module — types and runtime engine.
  *
- * Cards run on the resonance economy described in `specs/04-cards-engine.md`.
+ * Cards run on the resonance economy (the original `specs/04-cards-engine.md`
+ * was removed in the skill→card unification — see `specs/README.md`).
  * The engine functions here are pure: callers thread state forward
  * themselves.
  *
@@ -50,7 +51,7 @@ export {
 } from './cards.library';
 
 // WS2.1 — the Haunt registry (spec 34 R-13: renamed from Thoughtform): the
-// cards CONJURE creates. Real `Card` records outside the pinned 57-card
+// cards CONJURE creates. Real `Card` records outside the curated
 // library (correction C-11); resolved by `getCardById` via the sandbox →
 // haunt → ally → library chain.
 export {
@@ -58,7 +59,7 @@ export {
 } from './cards.haunts';
 
 // Phase 62 — the Ally registry: village-goodwill grants (Phase 65). Real
-// `Card` records outside the pinned 57-card library, same sibling-pool
+// `Card` records outside the curated library, same sibling-pool
 // pattern as Haunts; resolved by `getCardById` via the sandbox → haunt →
 // ally → library chain.
 export {

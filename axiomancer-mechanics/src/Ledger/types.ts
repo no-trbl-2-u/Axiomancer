@@ -10,8 +10,8 @@
  *
  * Each axis is an integer in `[-100, +100]`. The current `(low|mid|high)`
  * bucket triple at thresholds `±34` indexes one of 27 cells in
- * `philosophicalAlignment.library`. The system is orthogonal to
- * `moralMeter` — see `docs/philosophy.md`.
+ * `alignment.library.ts`. The system is orthogonal to
+ * `moralMeter` — see `docs/oaths.md`.
  */
 
 /** One of three buckets per axis, computed from a `[-100, +100]` integer. */

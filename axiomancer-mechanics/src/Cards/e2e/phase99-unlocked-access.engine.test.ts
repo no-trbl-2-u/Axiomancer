@@ -4,8 +4,8 @@
  * Verifies that the combat catalogue is exactly the player's knownCards; there
  * is no equipped-card loadout gate (the legacy `equippedSkills` field was
  * removed entirely in Phase 159), and combat cards carry no resource cost.
- * Save-side migration of legacy `equippedSkills` into `knownCards` is covered
- * by `src/Game/e2e/phase99-migration.engine.test.ts`.
+ * The save-side migration of legacy `equippedSkills` into `knownCards` and its
+ * suite were since retired — no engine code references the field.
  */
 
 import { describe, test, expect, beforeEach } from 'vitest';

@@ -4,14 +4,14 @@
  * correction C-11).
  *
  * Haunts (`cards.haunts.ts`) are real `Card` records that live
- * OUTSIDE the pinned 57-card library: reachable only through a
+ * OUTSIDE the curated library: reachable only through a
  * `conjure_card` play, resolved via `getCardById`'s
  * sandbox → haunt → library chain. This suite pins the whole
  * contract:
  *
  *   1. EXCLUSION — no Haunt ever appears in `COMBAT_REWARD_POOL` or
  *      any stage's `stageEligibleCardIds` (both derive from `cardLibrary`,
- *      which Haunts never join — the 57/45 pins stay intact).
+ *      which Haunts never join).
  *   2. RESOLUTION — the lookup chain resolves a Haunt id, and a
  *      registered sandbox card still shadows it (sandbox-first).
  *   3. ONE-USE — a conjured Haunt is playable (PAID and FREE faces)

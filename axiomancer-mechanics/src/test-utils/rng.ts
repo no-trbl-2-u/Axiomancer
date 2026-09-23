@@ -56,7 +56,7 @@ export function restoreOriginalRng(): void {
  *   - With `randomInt(1, 20)`, successive calls yield 19 then 3.
  *   - For "advantage" (keep max): 19. For "disadvantage" (keep min): 3.
  *
- * This is the convention used in `src/Combat/e2e/combat.engine.test.ts`.
+ * This is the convention used in `src/Game/e2e/game.loop.engine.test.ts`.
  */
 export function mockAlternatingRng(): MockInstance<() => number> {
     installMathBackedRng();

@@ -8,7 +8,7 @@
  * long enough to finish the argument.
  *
  * Scale (2026-09-02): the RELENT threshold is 35% of the foe's VITAE with a
- * floor of 20, against pools running 48 (level-one trash) to 900 (a late
+ * floor of 10, against pools running 48 (level-one trash) to 900 (a late
  * boss). So Ash PLEA is 8, Saint PLEA is 38 and carries its own multiplier —
  * and `reap_all` is uncapped, so Miserere's 14-per-Soul against a fat bank is
  * a three-figure swing and is meant to be.
@@ -39,7 +39,7 @@ const almsOfBreath: Card = {
     tier: 1, rank: 1, cardType: 'spell',
     targetType: 'enemy',
     paidSummary: 'Apply QUARTER 2 for 2 turns. PLEA 8. CLEANSE 1.',
-    // pts: the Ash PLEA rate is 8 against a floor of 20, so three of these
+    // pts: the Ash PLEA rate is 8 against a floor of 10, so two of these
     // talk a level-one thing down. FREE seeds the plate for everything after.
     free: { sway: 3, souls: 1 },
     combatEffects: [{ effectId: 'debuff_quarter', appliedTo: 'opponent', intensity: 2, duration: 2 }],

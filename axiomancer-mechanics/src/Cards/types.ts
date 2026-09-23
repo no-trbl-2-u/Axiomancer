@@ -1,7 +1,8 @@
 /**
  * Cards System Types
- * Cards run on the resonance economy (heart / body / mind). See
- * `specs/04-cards-engine.md` for the full economy design.
+ * Cards run on the resonance economy (heart / body / mind). The original
+ * `specs/04-cards-engine.md` was removed in the skill→card unification (see
+ * `specs/README.md`); the live design is spec 32 + THE BIG NUMBERS REWRITE.
  */
 
 import type { CardTheme } from './card-themes';
@@ -99,7 +100,8 @@ export interface CardCombatEffects {
 /**
  * Bespoke card mechanics that don't map cleanly onto an ActiveEffect
  * payload. Each is processed by `executeCard` after `combatEffects`
- * (spec 32 v3: there is no damage step — the strike is dead). Kept as a
+ * (direct damage is the combat-engine-owned `deal` mechanic below — THE BIG
+ * NUMBERS REWRITE repealed spec 32 v3's strike ban). Kept as a
  * discriminated union so the resolver / UI can branch on `kind` without
  * runtime tag parsing.
  *
@@ -773,9 +775,9 @@ export interface CardSynergy {
  * @property targetType      - 'self' or 'enemy'.
  * @property combatEffects   - Optional list of effect payloads to apply.
  * @property specialMechanics - Optional bespoke behaviours. Resolved after
- *                              `combatEffects`. (Spec 32 v3: there is NO
- *                              damage step — `basePower` was deleted from the
- *                              schema; raw HP damage is a compile error.)
+ *                              `combatEffects`. (`basePower` was deleted from
+ *                              the schema by spec 32 v3; direct damage returned
+ *                              2026-09-02 as the `deal` mechanic.)
  */
 export interface Card {
     id: string;
@@ -800,7 +802,7 @@ export interface Card {
      */
     cardType: CardType;
     /**
-     * Spec 32 — the card's THEME (one of ten). A theme is a family of keywords
+     * Spec 32 — the card's THEME (one of eight). A theme is a family of keywords
      * ({@link CardTheme} / `THEME_KEYWORDS`): the two hallmark keywords plus the utility
      * keywords it synergises with. Drives the catalog's theme/keyword search.
      * Every library card declares one; optional only so throwaway test fixtures
@@ -852,8 +854,8 @@ export interface Card {
      */
     incrementsFriendship?: number;
     /**
-     * Content-provenance metadata used by the tuning `--focus` filter
-     * (`src/Tuning/focus.parser.ts`). `addedIn` is an ISO date / phase tag;
+     * Content-provenance metadata (originally consumed by the since-retired
+     * tuning `--focus` filter). `addedIn` is an ISO date / phase tag;
      * `tags` are freeform labels (e.g. `'mid-game'`, `'damage'`). Both
      * optional and ignored by the card engine.
      */

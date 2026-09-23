@@ -24,7 +24,8 @@ export const AXM_LOG_LEVEL_RANK: Record<AxmLogLevel, number> = {
  * - `combat`      — every CombatEvent flowing through the engine's `withLog`
  * - `game`        — game-store actions + sanitized TypedGameEvents
  * - `world`       — world/map processing outside the store event stream
- * - `minigame`    — hazard/gathering/rest/loot-cache/quest-board sessions
+ * - `minigame`    — hazard sessions (the gathering / rest / loot-cache /
+ *                   quest-board minigames that once shared this domain are retired)
  * - `rng`         — seed sets / RNG replacement (the replay key)
  * - `cli`         — CLI envelope events mirrored off stdout
  * - `action`      — mobile action-dispatch wrapper (name, duration, errors)

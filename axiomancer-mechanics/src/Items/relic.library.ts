@@ -8,7 +8,7 @@
  * + 1 armor + 3 of the 7 accessories = 5 worn, so the slot model itself is the
  * wear-cap and the build choice (2 × 2 × C(7,3) = 140 loadouts).
  *
- * These are FIXED content — plain `Equipment` literals at `common` rarity with
+ * These are FIXED content — plain `Equipment` literals with
  * no `rolledMods`, no affixes, no `resourceInteraction`, no
  * `passiveEffects`/procs. They are deliberately NOT routed through `dropItem`
  * (the procedural roll/rarity/affix machinery is being retired in phases 21-23).
@@ -39,7 +39,7 @@ import type { SignatureSkillId } from '../Combat/combat.encounter.types';
 
 /**
  * A relic definition row. `defaultWorn` marks the fixed starting loadout (1
- * weapon + 1 armor + 3 accessories) — the other 3 relics start in inventory.
+ * weapon + 1 armor + 3 accessories) — the other 6 relics start in inventory.
  */
 interface RelicSpec {
     id: string;
@@ -167,7 +167,7 @@ function relicFromSpec(spec: RelicSpec): Equipment {
 }
 
 /**
- * The 8 relics as canonical singletons (source of truth). Order is stable:
+ * The 11 relics as canonical singletons (source of truth). Order is stable:
  * weapons, armor, accessories. Callers that mutate/equip should clone via
  * `cloneStartingRelics` — combat and the equip reducers deep-clone the wearer,
  * but the library itself must never be aliased into a mutable character.
@@ -184,13 +184,13 @@ export function getRelicById(id: string): Equipment | undefined {
 export const DEFAULT_WORN_RELIC_IDS: readonly string[] =
     RELIC_SPECS.filter(s => s.defaultWorn).map(s => s.id);
 
-/** The relic ids that start in inventory (the other 3). */
+/** The relic ids that start in inventory (the other 6). */
 export const BENCHED_RELIC_IDS: readonly string[] =
     RELIC_SPECS.filter(s => !s.defaultWorn).map(s => s.id);
 
 /**
  * Fresh deep clones of the starting relics, split into the 5 default-worn (in
- * canonical equip order: weapon, armor, accessories) and the 3 benched. Every
+ * canonical equip order: weapon, armor, accessories) and the 6 benched. Every
  * call returns brand-new objects so nothing aliases the singleton library.
  */
 export function cloneStartingRelics(): { worn: Equipment[]; benched: Equipment[] } {

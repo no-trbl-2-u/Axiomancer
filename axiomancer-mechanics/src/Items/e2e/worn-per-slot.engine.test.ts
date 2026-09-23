@@ -2,8 +2,7 @@
  * Hermetic E2E — Phase 18 capacity-aware worn-state convention.
  *
  * `wornPerSlot` treats the first `SLOT_CAPACITY[slot]` equipment items per slot
- * as worn (weapon/armor: 1; accessory: 3). `firstEquippedPerSlot` is the
- * deprecated first-per-slot wrapper; `isEquippedFirstOfSlot` /
+ * as worn (weapon/armor: 1; accessory: 3). `isEquippedFirstOfSlot` /
  * `findEquippedInSlot` report membership and the would-be-displaced piece.
  */
 

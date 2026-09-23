@@ -6,7 +6,7 @@
  * mobile app resolves 1:1 to its painting — no more random art pools.
  *
  * Roster shape:
- *   - EARLY (fishing-village, L1-8): 13 foes — 3 simple, 7 normal, 3 elite,
+ *   - EARLY (fishing-village, L1-8): 13 foes — 2 simple, 7 normal, 3 elite,
  *     1 boss (The King of Revenge — the village climax fight).
  *   - EARLY-MID (northern-forest, L9-18): 13 foes incl. the Kudan unique and
  *     the two balance-audit anchors (Tri-Eyes = Normal anchor, Mirac = boss
@@ -3838,7 +3838,8 @@ export const TheIncompleteness = createEnemy({
 
 // ─── Library indices ──────────────────────────────────────────────────────────
 
-/** The 2026-07-06 art-driven roster — all 52 production enemies, band order. */
+/** Every production enemy — the 2026-07-06 52-painting roster plus the later
+ *  batches — in band order (plus the playtest ceiling). */
 export const EnemyLibrary = [
     // Fishing village — early (L1-8)
     GraveLarva, FloatEye, ChatteringSkull, LittleBelle, FootStealer, WaterHolger,
