@@ -49,9 +49,10 @@ is canon; the map table and the open questions are working material.
    reach, so it is where a hunted man runs.
 8. **The debt is money.** The prisoner's debt, transferred onto X at the
    fort, is a literal sum owed to the annexing power (T, 2026-09-23).
-9. **She does not die.** Her fall from the cliff does not kill her (T,
-   2026-09-23). X does not know this; he never looked for her body. Whether
-   it ever comes to light is being clarified (open question 1).
+9. **She does not die, and it comes to light later.** Her fall from the
+   cliff does not kill her (T, 2026-09-23). X does not know this; he never
+   looked for her body. Her survival **is revealed later** in the story (T,
+   2026-09-23). When, how, and to whom is open (open question 1).
 
 ## The prologue
 
@@ -118,10 +119,9 @@ prisoner's wife, mother of the child); whether she comes (she does not).
    light.** Rulings 4–5 had the lie to her breaking at the capital; the
    prologue breaks it in her house instead. The capital's ledger and the
    fort's records are still ruled (5), but what they expose, and to whom, is
-   open. Asked on 2026-09-23; T answered "She actually doesn't die, but that
-   doesn't come to light later." That answers her fate (ruling 9) but is
-   ambiguous about whether her survival is ever revealed — being clarified.
-   Blocks 7.
+   open. Her survival is ruled to come to light later (ruling 9); when, how,
+   and to whom is open, as is whether that reveal and the capital's record
+   are the same moment. Blocks 7.
 2. ~~**Why X goes north.**~~ Answered: fleeing the guards (ruling 7). Still
    open inside it: what keeps him going map after map, and whether the
    guards stay on his trail.
