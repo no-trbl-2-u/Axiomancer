@@ -11,7 +11,7 @@
 
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
-| cards | `skills/adjust-cards.md` | 2026-09-23 | <PENDING> | 17 |
+| cards | `skills/adjust-cards.md` | 2026-09-23 | 68769014 | 17 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-21 | 5d9b6063 | 16 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-23 | d02bda13 | 16 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-23 | 06d2ab2e | 16 |
@@ -22,7 +22,7 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-cards pass 17, 2026-09-23, commit <PENDING>]** Zero-CREATE,
+> **[adjust-cards pass 17, 2026-09-23, commit 68769014]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE on the card surface itself — one candidate
 > filed to `plan/PHASE_CANDIDATES.md` from the widened KB check.
 > Dispatched autonomously by `/march`'s content-lifecycle gate: `cards`
