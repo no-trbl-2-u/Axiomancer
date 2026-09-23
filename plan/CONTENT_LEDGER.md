@@ -15,11 +15,89 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-21 | 5d9b6063 | 16 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-23 | d02bda13 | 16 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-23 | 06d2ab2e | 16 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-21 | 9821b636 | 15 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-23 | <PENDING> | 16 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-npcs pass 16, 2026-09-23, commit <PENDING>]** Zero-diff pass —
+> audit re-confirmed, no new CREATE/UPDATE/REMOVE, ledger bump only.
+> Dispatched autonomously by `/march`'s content-lifecycle gate: `npcs`
+> (`9821b636` 2026-09-21T18:48:17Z) was the stalest qualifying category
+> this tick by last-pass timestamp — `cards` (`2a162f5e`
+> 2026-09-21T22:39:41Z) and `equipment` (`5d9b6063`
+> 2026-09-22T01:16:46Z) also qualified (each >15 commits behind HEAD)
+> but were less stale; `enemies` (`d02bda13`, 3 commits behind) and
+> `keywords` (`06d2ab2e`, 1 commit behind) had both just ticked this
+> same session and did not qualify. Deploy confirmed green (`npm run
+> deploy:check` on HEAD `5f020d52` — no gated workflow yet, docs/plan-
+> only tick, nothing to check). No phase work pending (build plan queue
+> drained — only `[blocked: …]`/`[skipped]` rows remain, no `[ ]` row);
+> growth floor clear (`src/World` commits within 7 days:
+> `1da16935`/`ab6e80b8`).
+>
+> **Step 0:** read `axiomancer-mechanics/CLAUDE.md` fresh — THE STORY IS
+> THE ROAD (¶1 lifted 2026-09-18) still governs and hard rule 3 (don't
+> invent a named character's personhood autonomously) still stands;
+> THE BIG NUMBERS REWRITE is not this surface's concern.
+>
+> **Step 1 structural audit:** `git log 9821b636..HEAD -- src/NPCs
+> src/World/Continents src/World/MapEvents src/World/types.ts
+> content/story/` returns exactly two touching commits of the 40
+> intervening: `1da16935` ("world: open the whole explored frontier for
+> traversal and spend nodes on resolution") and `ab6e80b8` ("event: give
+> gathering nodes a visible acknowledgement card instead of a covered
+> toast"). Read both diffs directly: `1da16935` touches
+> `Coastal-Village/maps.ts` and `Northern-Continent/maps.ts` but only
+> node topology/traversal fields — zero lines touching any `npcs:`,
+> `unstagedNpcs:`, or `const NPC` block. `ab6e80b8` touches mobile event
+> presentation only, no `src/NPCs`/`src/World/Continents` files at all.
+> Re-ran every Step 1 signal fresh anyway:
+> - All 21 `const NPC` entries (`oldMarrow` through `theRibbonPicker`)
+>   unchanged in count, each still referenced from exactly one map's
+>   `npcs:` or `unstagedNpcs:` array — no orphan.
+> - Zero legacy `dialogue:` (flat `DialogueMap`) usage across
+>   `src/World/Continents/*/npcs.ts` and `*/maps.ts` — every NPC still
+>   on `dialogueTree`.
+> - Zero `teachCard` usage in NPC content; every `startQuest` name
+>   (`find-islanders`, `gather-iron`, `gather-wood`, `get-to-cave`,
+>   `get-to-connecting-river`, `get-to-forest`, `get-to-northern-city`,
+>   `get-to-the-capital`, `get-to-town-across-river`, `starting-quest`)
+>   resolves against the live `QuestName` union (type-checked green by
+>   the verify gate below).
+> - Coastal-Village's 3-NPC `unstagedNpcs` backlog (Tide-Shopkeeper,
+>   Dockworker's Union Leader, Merchant's Widow) unchanged — still the
+>   same genuine engine-surface gap (no `openShop`-shaped
+>   `DialogueChoice.effect` exists), correctly left unstaged.
+> - Northern-Continent's three 1-NPC maps (`caverns`/theDelver,
+>   `connecting-river`/theBoatwoman, `town-across-river`/theSweetheart)
+>   unchanged; `plan/AUDIT.md`'s `[gap]` row (DECIDED via `/oversight`
+>   2026-09-15, still needs an attended character-spec/story-spec
+>   session) re-confirmed still open and still not this autonomous
+>   tick's call.
+>
+> **Step 1b widened check:** Step 1 returned nothing actionable, so ran
+> the deeper KB cross-reference before accepting zero-diff. `kb_overview`
+> confirms the corpus is unchanged (46 board/card games, 2801 okf docs,
+> zero dialogue-tree-bearing digital RPGs) — no new source landed to
+> re-scan. A fresh-angle `kb_search` (`dialogue|dead.?end|npc
+> roster|reactive npc|merchant`, scope `all`) returned only two
+> tangential hits (a Slay the Spire board-game "Andrew rule" culling
+> note, a Dawncaster `valuable` keyword mention) — no dialogue/NPC
+> staging commentary. No new citable gap; the existing wishlist
+> [`game-knowledge-base#81`](https://github.com/no-trbl-2-u/game-knowledge-base/issues/81)
+> still covers the corpus-shape miss pass 13 filed.
+>
+> **Ship (Step 3):** none — zero CREATE, zero UPDATE, zero REMOVE. Both
+> open items (Northern-Continent singleton maps, Coastal-Village's
+> 3-NPC unstaged backlog) are re-confirmed correctly-blocked, not stale.
+>
+> **Gates:** `npm run verify --workspace axiomancer-mechanics` (229
+> files / 3734 tests) and `npm run verify --workspace axiomancer-mobile`
+> green (unchanged, no source touched).
+```
 
 ```
 > **[adjust-keywords pass 16, 2026-09-23, commit 06d2ab2e]** Zero-diff
