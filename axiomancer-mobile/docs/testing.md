@@ -183,7 +183,7 @@ same PR and say why.
 - **Fixtures / mocks** live in `state/mocks/<feature>.mock.ts` (or any
   location outside `app/`). They must be plain data — no `Math.random`,
   no environment reads.
-- **Test utilities** live in `test-utils/` at the repo root. Anything
+- **Test utilities** live in `test-utils/` at the package root. Anything
   that references the `jest` global must never sit inside `app/`.
 
 ## Required test categories per implementation

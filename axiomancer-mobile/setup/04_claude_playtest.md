@@ -110,7 +110,7 @@ bundle).
   `browser_snapshot` (the snapshot is a structured a11y tree —
   great for asserting state).
 - Read the dev console via `browser_read_console_messages`
-  (catches the `__DEV__` diagnostic streams in `combat.tsx` /
+  (catches the `__DEV__` diagnostic streams in
   `actions.ts` while they're still alive).
 - Reset state by reloading the page (re-runs the
   rehydrate-from-AsyncStorage flow).
