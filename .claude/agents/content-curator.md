@@ -53,10 +53,10 @@ All engine paths relative to `axiomancer-mechanics/`:
 | Surface | File(s) | Player-visible via |
 |---|---|---|
 | Dialogue trees + NPCs | `src/World/Continents/<Continent>/npcs.ts`; types in `src/NPCs/types.ts` (`DialogueTree`/`DialogueNode`/`DialogueChoice` — gates: quest/flag/alignment; effects: startQuest/teachCard/setFlag/moralDelta/alignmentDelta/…) | `/dialogue` route |
-| Map-event pools | `src/World/MapEvents/content.ts` (`description`, `cutscene.lines[]`, `narration` monologue trees, `interaction` refs) | `/event`, `/cutscene` (NOTE: `description` does not reach `ResolvedEvent` until Phase 58 lands — check the build plan before relying on it) |
+| Map-event pools | `src/World/MapEvents/content.ts` (`description`, `cutscene.lines[]`, `narration` monologue trees, `interaction` refs) | `/event`, `/cutscene` (`description` reaches `ResolvedEvent` since Phase 58) |
 | Labyrinth rooms | `src/World/Labyrinth/content/act{1,2,3}.content.ts` (`scene`, `narration`, `pois[].remark`, gate riddles/refusals) | `/labyrinth` |
 | Quest objectives (QuestLog) | `src/World/quest.library.ts` / `quest.engine.ts` (`startQuest`/`progressQuest`/`completeQuest`, `startingQuest`) — the Quest Board minigame that used to sit alongside these was retired in Phase 61; story beats now author through dialogue/narration content instead | `/memoir` (quest section), `DebugQuestState` |
-| Minigame flavor | `src/World/Gathering/gathering.content.ts`, `src/World/Hazard/hazard.content.ts`, `src/World/RestChoice/restchoice.content.ts` (`flavor:` fields) | minigame screens |
+| Minigame flavor | `src/World/Hazard/hazard.content.ts`, `src/World/RestChoice/restchoice.content.ts` (`flavor:` fields) | minigame screens |
 | Enemy aftermath prose | `src/Enemy/enemy.library.ts` (`finalBlowLines`, `causeLines`, `pactLines`, `journalEntry`) — pinned by `src/Enemy/e2e/aftermath-lines.engine.test.ts` | aftermath/memoir |
 | Mobile-owned chrome copy | presenters + `*.copy.ts` (e.g. `axiomancer-mobile/state/presenters/rest.copy.ts`) — never hardcode copy in components | screens |
 
@@ -100,10 +100,6 @@ format as part of the deliverable.
 - **Voice miss:** if your draft fails an `EVALUATION.md` hard gate
   (e.g. speakers indistinguishable with names removed), rewrite before
   delivering — do not ship a draft graded below 2 on any dimension.
-- **Phase 58 not landed:** prose authored into `description` fields is
-  invisible to players until the plumbing ships — say so in your
-  report and prefer surfaces that render today (cutscene lines,
-  dialogue, labyrinth scenes) for player-facing work.
 - **Scope creep into mechanics:** a story beat that needs a new engine
   capability (new gate kind, new effect) is a written proposal to the
   caller, not an improvised engine edit.

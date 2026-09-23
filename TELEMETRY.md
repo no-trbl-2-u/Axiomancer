@@ -647,3 +647,20 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-23T14:24:33Z | skill | consolidate | claude-opus-5-5 | - | - |
 | 2026-09-23T14:24:33Z | skill-end | consolidate | claude-opus-5-5 | 0s | ok |
 | 2026-09-23T14:34:32Z | tick-end | - | claude-opus-5-5 | 11m47s | ok |
+| 2026-09-23T15:29:59Z | subagent | general-purpose | claude-fable-5-1 | - | Audit root AI guidance docs |
+| 2026-09-23T15:30:01Z | subagent-end | general-purpose | claude-fable-5-1 | 2s | ok |
+| 2026-09-23T15:30:10Z | subagent | general-purpose | claude-fable-5-1 | - | Audit loop verbs and plan memory |
+| 2026-09-23T15:30:11Z | subagent-end | general-purpose | claude-fable-5-1 | 1s | ok |
+| 2026-09-23T15:30:20Z | subagent | general-purpose | claude-fable-5-1 | - | Audit mechanics package docs |
+| 2026-09-23T15:30:21Z | subagent-end | general-purpose | claude-fable-5-1 | 1s | ok |
+| 2026-09-23T15:30:30Z | subagent | general-purpose | claude-fable-5-1 | - | Audit mobile and editor docs |
+| 2026-09-23T15:30:31Z | subagent-end | general-purpose | claude-fable-5-1 | 1s | ok |
+| 2026-09-23T15:30:42Z | subagent | general-purpose | claude-fable-5-1 | - | Audit Combat source comments |
+| 2026-09-23T15:30:43Z | subagent-end | general-purpose | claude-fable-5-1 | 1s | ok |
+| 2026-09-23T15:30:50Z | subagent | general-purpose | claude-fable-5-1 | - | Audit Cards/Effects/Enemy/etc comments |
+| 2026-09-23T15:30:52Z | subagent-end | general-purpose | claude-fable-5-1 | 1s | ok |
+| 2026-09-23T15:30:59Z | subagent | general-purpose | claude-fable-5-1 | - | Audit World/Game/CLI comments |
+| 2026-09-23T15:31:00Z | subagent-end | general-purpose | claude-fable-5-1 | 1s | ok |
+| 2026-09-23T15:31:08Z | subagent | general-purpose | claude-fable-5-1 | - | Audit scripts and hooks comments |
+| 2026-09-23T15:31:09Z | subagent-end | general-purpose | claude-fable-5-1 | 1s | ok |
+| 2026-09-23T15:31:12Z | tick-end | - | claude-fable-5-1 | 3m36s | ok |

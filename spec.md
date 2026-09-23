@@ -67,10 +67,10 @@ systems.
 
 ### Shipped (v1 surface)
 
-The engine (`axiomancer-mechanics` v0.37.0) ships five standalone
-encounter drivers, each with its own CLI subcommand, seeded
-engine, content library, tuning loop, and hermetic e2e tests, plus
-one pure-choice rest node with no standalone driver:
+The engine (`axiomancer-mechanics` v0.37.0) ships three standalone
+encounter drivers (`combat` / `hazard` / `labyrinth`), each with its
+own CLI subcommand, seeded engine, content library, and hermetic e2e
+tests, plus pure-choice nodes with no standalone driver:
 
 - **Hazard-Pattern Combat** — the primary combat system (Spec
   25/26). Card-and-dice; the enemy has ONE bar = VITAE. THE BIG
@@ -81,13 +81,17 @@ one pure-choice rest node with no standalone driver:
   Dropping VITAE to 0 is the main win condition, with Befriend,
   RELENT and CONDEMN as authored alternatives.
 - **Hazard minigame** ("v2") — environmental hazard card game.
-- **Gathering** — "The Gleaning."
+- **Labyrinth** — the three-act labyrinth driver
+  (`src/World/Labyrinth/`).
+- **Gathering** — "The Gleaning" minigame was retired in Phase 76;
+  `gathering` nodes now grant their items inline.
 - **Rest** — the rest-choice node (Phase 52c-d): one irreversible
   choice of heal / anvil / cut. Retired the former rest minigame
   (Phase 52e).
-- **Loot-cache** — "The Reliquary" (three layers, one probe).
-- **Quest Board** — "The Boy's Almanac" (authored tabletop
-  board).
+- **Loot-cache** — "The Reliquary": since Phase 63 a three-way
+  choice node (card / item / sacrifice), no standalone driver.
+- **Quest Board** — "The Boy's Almanac" minigame was retired in
+  Phase 61; the QuestLog objective tracker stays.
 - The legacy turn-based combat (`resolveCombatRound`) and its
   dev-only tab were fully removed; Hazard-Pattern Combat is the
   only combat engine.
@@ -101,9 +105,10 @@ balance-sim harness.
 
 The mobile app (`axiomancer-mobile` v1.9.0) presents this engine
 through an expo-router shell: a tabbed home (character,
-exploration, inventory, memoir) plus per-encounter routes
-(combat-encounter, hazard, gathering, rest, cache, quest,
-dialogue, event, cutscene, village) and dev routes. Dark-only
+exploration, inventory, memoir, deck) plus per-encounter routes
+(combat-encounter, hazard, hazard-deck, item-reward, rest, cache,
+blacksmith, labyrinth, dialogue, event, cutscene, village), menu
+routes (index, saves, settings) and dev routes. Dark-only
 theme; four period display fonts; SVG placeholder art system.
 
 ### Queued / in progress
@@ -114,8 +119,8 @@ theme; four period display fonts; SVG placeholder art system.
   projected-lethality readout. (Specs 31/32 shipped since this
   section was last reviewed — Spec 31 fate-engine card/effect
   revamp and Spec 32 v3 no-strike card library, see above.)
-- Authored content: `specs/characters`, `specs/story`,
-  `specs/world` currently hold only templates — character/story/
+- Authored content: `specs/characters` and `specs/story` currently
+  hold only templates (`specs/world` has `W-01`) — character/story/
   world authoring is the open content pipeline (driven by the
   `character-spec` / `story-spec` / `world-spec` design skills).
 - Northern-forest region content extension (apply the
