@@ -2,7 +2,7 @@
  * Hermetic E2E — Hazard-Pattern Combat (Spec 25 + Spec 26b stance-draft redesign).
  *
  * Covers the new turn model end to end with seeded / stubbed RNG:
- *   - per-turn 2-die draft; the unpicked die → +1 Conviction
+ *   - per-turn 3-die draft (`TURN_DICE_COUNT`); each unpicked die → +1 Conviction
  *   - the hidden-stance read (advantage / disadvantage) scales pressure and a
  *     read-win grants bonus Conviction; first draft reveals the phase stance
  *   - cards keep colors → a color-match bonus on an offensive land
@@ -192,7 +192,7 @@ describe('Spec 25 §6 — card classification', () => {
     });
 });
 
-// ── Initialization + the 2-die draft (§1) ────────────────────────────────────
+// ── Initialization + the per-turn draft (§1) ────────────────────────────────────
 
 describe('Spec 26b §1 — initialization + draft', () => {
     it('opens in reveal, draws 5, then rolls a 3-die turn pool (dice-law 2026-07-09)', () => {

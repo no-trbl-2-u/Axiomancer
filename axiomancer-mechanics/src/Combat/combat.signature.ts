@@ -108,7 +108,7 @@ export const SIGNATURE_SKILLS: Record<SignatureSkillId, SignatureSkill> = {
     },
 };
 
-/** The player's archetype from their dominant base stat (heart > body > mind
+/** The player's archetype from their dominant base stat (body > mind > heart
  *  tiebreak). Phase 19 retired archetype→signature gating; `playerArchetype`
  *  survives only to flavour the mobile portrait. */
 export function playerArchetype(player: { baseStats: { heart: number; body: number; mind: number } }): PlayerArchetype {

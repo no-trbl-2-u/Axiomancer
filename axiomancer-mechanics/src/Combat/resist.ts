@@ -25,8 +25,8 @@
  * removed from `EffectApplicationResult` at this iterate drain.
  *
  * Direction (a)'s damage-side text ("damage rolls separately + applies its
- * own resistance") requires a damage-resist primitive that doesn't exist
- * today; filed as a Pending candidate at Phase 80 ship-time.
+ * own resistance") is served by the damage-resist primitive shipped at
+ * Phase 93 (`damage-resist.ts`, `calculateDamageResistance`).
  */
 
 import { createDieRoll } from '../Utils';

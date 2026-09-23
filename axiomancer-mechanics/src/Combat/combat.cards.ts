@@ -5,9 +5,11 @@
  * class, rank/rarity, card type, and FREE/PAID action text. The projection is
  * pure — it reads the card + effect libraries and never mutates.
  *
- * THE STRIKE IS DEAD (§1): there is no chip line, no strike line, and no
- * damage-preview path for raw HP. Every printed number is a real engine unit
- * (the P0-truth law survives the overhaul).
+ * THE STRIKE IS DEAD (§1): there is no chip line and no auto-derived strike
+ * line. (Direct damage returned as the authored `deal` mechanic in THE BIG
+ * NUMBERS REWRITE, 2026-09-02, and `bottomDamagePreview` counts it.) Every
+ * printed number is a real engine unit (the P0-truth law survives the
+ * overhaul).
  */
 
 import { MAX_EFFECT_INTENSITY, FREE_ENCHANT_ROUNDS } from '../Game/game-mechanics.constants';

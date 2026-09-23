@@ -4,10 +4,11 @@
  * `resolveCombatPhase` drives the HP-model combat: the enemy's SOLE bar is HP,
  * and the player drops it to 0. Every verb is a combat card (projected from a
  * learned card); the player rolls stance dice and plays cards. Combat is
- * STATUS-FIRST — the strike is dead (spec 32 §12): every point of enemy HP
+ * STATUS-FIRST — the auto-derived strike is dead (spec 32 §12): enemy HP
  * falls through a printed status or its payoff (DoT ticks, affliction bursts
- * like RUPTURE/REAP, ratified enchant-gated drips, reflect), never because a
- * spell "hit". Control hinders the enemy's turn instead. The legacy resolver,
+ * like RUPTURE/REAP, ratified enchant-gated drips, reflect) or, since THE
+ * BIG NUMBERS REWRITE (2026-09-02), the authored `deal` damage family.
+ * Control hinders the enemy's turn instead. The legacy resolver,
  * the effects engine, the card engine, and all effects are UNCHANGED — this
  * engine *drives* `executeCard` / `applyEffect` differently.
  *
@@ -165,15 +166,16 @@ export const THREAT_DENY_AT = 8;
 export const THREAT_WEAKEN_FLOOR = 0.4;
 /** Conviction is capped so a long grind can't bank a Signature spam. */
 export const CONVICTION_CAP = 12;
-/** WI-10 — how many scraps per turn PAY +1 Conviction. The hand refills to 6, so
- *  an ungated scrap paid +6◆/turn against the 12 cap (scrap-the-hand). Beyond
+/** WI-10 — how many scraps per turn PAY +1 Conviction. The hand refills to
+ *  COMBAT_HAND_SIZE (then 6, now 5), so an ungated scrap paid a full hand of ◆
+ *  per turn against the 12 cap (scrap-the-hand). Beyond
  *  this many, a scrap still cycles the dead card but pays nothing. Tunable under
  *  EA-2's baseline. */
 export const SCRAP_CONVICTION_CAP_PER_TURN = 2;
 // Spec 32 v3 §1 — DIRECT_DAMAGE_WEIGHT is DEAD: the strike was purged from the
-// schema (`basePower` no longer exists), so there is no immediate-strike path
-// to weight. Every HP source is DoT ticks, status payoffs, engine-gated drips,
-// or reflect.
+// schema (`basePower` no longer exists), so there is no auto-derived strike
+// path to weight. Direct damage exists only as the authored `deal` family
+// (THE BIG NUMBERS REWRITE), scaled by `scalePlayerHit`.
 
 /** Spec 32 v3 T8 — PLEA decays this much at every turn boundary (the
  *  tension knob, ratified A2). Tunable. */
@@ -413,7 +415,7 @@ export interface CardDieCost {
  * against the enemy's phase stance onto the historical 0/1/2-die price
  * (advantage → 0, neutral → 1, disadvantage → 2; Wild/X → neutral). NO play
  * path charges this price any more: play legality and the actual die COST are
- * owned by THE COLOR LAW inside `playCombatCard` (~:1150 — a die powers only a
+ * owned by THE COLOR LAW inside `playCombatCard` (step 1b — a die powers only a
  * card of its color; WILD is the sole exception), and the read's power scaling
  * lives in `READ_DAMAGE_MULT`. This function survives ONLY as the
  * advantage-read classifier behind `cardDieCostPreview` (the UI/CLI RPS
@@ -641,7 +643,7 @@ export function rollEncounterDice(
 }
 
 /**
- * Spec 26b §1 — starts a turn: rolls THIS turn's 2-die draft pool. Clears any
+ * Spec 26b §1 — starts a turn: rolls THIS turn's `TURN_DICE_COUNT`-die draft pool. Clears any
  * prior draft. No-op unless in phase-play with no live dice/draft.
  */
 export function startTurn(
@@ -828,7 +830,7 @@ export function draftStanceDie(
     if (state.phase !== 'phase-play') return { state, events: [] };
     if (state.draftedDieId !== null) return { state, events: [] };
     // Spec 32 v3 §5 — a GHOST die cannot be drafted as the stance: it is an
-    // extra power source beyond the turn's 2-die draft (the "bigger turns"
+    // extra power source beyond the turn's rolled draft (the "bigger turns"
     // intent), spent directly on PAID plays like a Reserve die.
     const drafted = state.dice.find(d => d.id === dieId && !d.floating);
     if (!drafted) return { state, events: [] };
@@ -1124,7 +1126,7 @@ function withLog(state: CombatEncounterState, events: CombatEvent[]): CombatEnco
 /**
  * Plays one card from hand. `useBottom` powers the full effect (costs dice via
  * RPS scaling, executes the card, drives impact + the die-refresh loop); the
- * free top action contributes a weak flat impact with no die.
+ * free top action fires the card's authored FREE rider with no die.
  *
  * `play.chosenX` (WS7.2, spec 32 §12 item 5) — the player-chosen X for a
  * chosen-X mechanic (`recoil_x`); the engine clamps it to [min, affordable].
@@ -1246,8 +1248,8 @@ function applyStanceAndMomentumV2(
  * toward a Signature Skill (the agency lever through a bad hand). Phase-play only.
  *
  * WI-10 (2026-07-12): only the first {@link SCRAP_CONVICTION_CAP_PER_TURN} scraps
- * per turn PAY. The hand refills to 6, so an ungated scrap-the-hand banked
- * +6◆/turn against the 12 cap; beyond the cap a scrap still cycles the dead card
+ * per turn PAY. The hand refills to COMBAT_HAND_SIZE (then 6, now 5), so an
+ * ungated scrap-the-hand banked a full hand of ◆ per turn against the 12 cap; beyond the cap a scrap still cycles the dead card
  * (agency preserved) but pays nothing. The `conviction-gained` event carries
  * `reason: 'scrap'` so the gate is testable and telemetry can see it.
  */
@@ -5406,7 +5408,7 @@ function ensureDraftForCard(
 
 /**
  * Applies a batch of card plays then resolves the current threat phase — the
- * top-level entry point. Bottom plays auto-manage turns (roll 2, draft the best
+ * top-level entry point. Bottom plays auto-manage turns (roll the tray, draft the best
  * die) so callers can express a plan as a card list. Plays stop early if an
  * outcome fires mid-batch.
  */
@@ -5481,8 +5483,8 @@ export function selectCapitulationChoice(
 // ── Mercy choice (Phase 112 / §3) ────────────────────────────────────────────
 
 /**
- * Resolves the spare/exploit mercy choice opened by Control Saturation or a
- * successful Befriend. `spare` confirms the friendship (mercy) end; `exploit`
+ * Resolves the spare/exploit mercy choice opened by a successful Befriend
+ * (`checkImmediateOutcome`). `spare` confirms the friendship (mercy) end; `exploit`
  * trades the opening for a heavy strike that may finish the enemy.
  */
 export function selectMercyChoice(
@@ -5515,7 +5517,7 @@ export function selectMercyChoice(
 /**
  * Casts a signature skill, spending Conviction (◆). Always available regardless
  * of the hand. Fizzles (no-op + event) when underfunded. Can trigger an
- * immediate outcome (e.g. The Stilling saturating the control track).
+ * immediate outcome (e.g. The Butcher's Bill finishing the foe).
  */
 export function playSignatureSkill(
     state: CombatEncounterState,

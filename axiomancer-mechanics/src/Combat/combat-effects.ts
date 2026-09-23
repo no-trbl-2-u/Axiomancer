@@ -9,8 +9,9 @@
  *
  * Triggering rules (per Spec 03):
  *   Q1 — Hit gate: procs only fire when the action actually damaged the
- *        opponent (`resolveAttackHit`). Fumble self-debuffs still fire even
- *        on a missed/lost contest, but the wiring path runs on hits.
+ *        opponent (the legacy turn-based resolver's hit check, since
+ *        removed — no live path calls `rollForCombatEffects` today). Fumble
+ *        self-debuffs still fire even on a missed/lost contest.
  *   Q2 — Final chance scales with the actor's stance stat plus any active
  *        `buff_status_chance_up` intensity:
  *            chance = baseChance
@@ -178,7 +179,8 @@ export interface RollForCombatEffectsParams {
     unlocks?: ProcUnlocks;
     overrides?: ProcOverrides;
     /**
-     * RNG used for the per-trigger proc roll. Defaults to `Math.random`.
+     * RNG used for the per-trigger proc roll. Defaults to the seedable global
+     * singleton (`getRng().random`).
      * Injected so tests can pin behavior deterministically alongside the
      * existing `mockFixedRng` flow used elsewhere in Combat.
      */
@@ -250,8 +252,8 @@ export function rollForCombatEffects(
  * resolver's full `EffectApplicationResult` so callers can emit an event
  * stream (battle log, automation harness, etc.).
  *
- * `attackerHeartBonus` raises the DR for debuff procs, matching the
- * `resolveEffectApplication` contract.
+ * `attackerHeartBonus` is forwarded to `resolveEffectApplication`, which has
+ * ignored it since Phase 80 (debuffs always land).
  */
 export function applyProcOutcome(
     outcome: ProcRollOutcome,
@@ -277,7 +279,7 @@ export function applyProcOutcome(
 
     // First materialise the ActiveEffect via applyEffect so it has the right
     // intensity / duration / cached resist data, then run resolveEffectApplication
-    // to resolve crit / fumble / rebound for tier 2 / 3.
+    // to resolve crit / fumble for tier 2 buffs (debuffs / tier 3 always land).
     const { activeEffects: stagedEffects, result: stageResult } = applyEffect(
         targetEffects, effect, round,
         {

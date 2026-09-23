@@ -9,9 +9,9 @@
  * across stages/policies/decks and aggregates stage summaries plus card
  * coverage, so the balance loops can see the whole campaign at once.
  *
- * Doctrine (CLAUDE.md): status effects are the MAIN fun — HP is the sole win
- * condition and status is the EFFICIENT way to drop it. The matrix exists to
- * witness that at EVERY stage: `statusEngagement` and `dotHpFraction` sit next
+ * HP is the sole win condition (the old status-primacy doctrine is retired —
+ * see `docs/lexicon.json`). The matrix still reports the status witnesses at
+ * EVERY stage: `statusEngagement` and `dotHpFraction` sit next
  * to `winRate` in every summary, and the deliberately weak `aggro-brute`
  * baseline is expected to underperform the status policies.
  *

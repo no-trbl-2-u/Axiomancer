@@ -7,8 +7,8 @@
  * control / stat-debuff locks, and so on. Drafting is how the playtest matrix
  * exercises the WHOLE library instead of the same few curated lists.
  *
- * Doctrine (CLAUDE.md): status effects are the MAIN fun — HP is the sole win
- * condition and status is the EFFICIENT way to drop it. Every draft therefore
+ * HP is the sole win condition and status is one way to drop it (the old
+ * status-primacy doctrine is retired — see `docs/lexicon.json`). Every draft
  * guarantees at least one defend card and at least one status-applying card
  * (when the pool allows), so no drafted deck is locked out of the status game.
  *
@@ -21,7 +21,7 @@
  * guarantees at least one such newcomer card (when the pool has one and room
  * allows), the same way it guarantees defend/status — this does not touch
  * `FOCUS_WEIGHT`/`OFF_FOCUS_WEIGHT` or the odds for the library's existing
- * 70 cards, and is a no-op whenever `extraCards` is empty (every real starter
+ * cards, and is a no-op whenever `extraCards` is empty (every real starter
  * preset — `combat.starter-deck-presets.ts` — uses fixed 'preset' lists, not
  * 'draft', so this guarantee never touches production decks).
  *
@@ -45,7 +45,7 @@ import { stageEligibleCardIds } from './combat.stage-profiles';
 export const FOCUS_WEIGHT = 4;
 /** Weight for off-focus cards (every card keeps a chance to appear). */
 export const OFF_FOCUS_WEIGHT = 1;
-/** Default deck size (excludes the auto-appended Retreat). */
+/** Default deck size (no escape card is appended). */
 const DEFAULT_DRAFT_SIZE = 10;
 /** Default max copies of any single card in a draft. */
 const DEFAULT_MAX_COPIES = 2;
@@ -61,7 +61,7 @@ export interface DeckDraftOptions {
     /** Restricts the pool to `stageEligibleCardIds(stage)`; default: the full
      *  card library (plus `extraCards`). */
     stage?: CombatStageProfile;
-    /** Cards drafted, excluding the auto-appended Retreat. Default 10. */
+    /** Cards drafted (no escape card is appended). Default 10. */
     size?: number;
     /** Max copies of any single card. Default 2. */
     maxCopies?: number;
