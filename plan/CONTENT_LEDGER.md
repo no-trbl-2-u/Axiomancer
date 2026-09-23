@@ -14,12 +14,102 @@
 | cards | `skills/adjust-cards.md` | 2026-09-21 | 2a162f5e | 16 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-21 | 5d9b6063 | 16 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-23 | d02bda13 | 16 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-21 | fb0a0f3c | 15 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-23 | <PENDING> | 16 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-21 | 9821b636 | 15 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-keywords pass 16, 2026-09-23, commit <PENDING>]** Zero-diff
+> pass — audit re-confirmed, no new CREATE/UPDATE/REMOVE, ledger bump
+> only. Dispatched autonomously by `/march`'s content-lifecycle gate:
+> `keywords` (`fb0a0f3c` 2026-09-21T12:50:21Z) was the stalest
+> qualifying category this tick by last-pass timestamp — `cards`
+> (`2a162f5e` 2026-09-21T22:39:41Z), `equipment` (`5d9b6063`
+> 2026-09-22T01:16:46Z) and `npcs` (`9821b636` 2026-09-21T18:48:17Z) all
+> qualified too (each >15 commits behind HEAD) but were less stale;
+> `enemies` had just ticked this same session (`d02bda13`, 1 commit
+> behind). Deploy confirmed green (`npm run deploy:check` on HEAD
+> `cb904b6e`); no phase work pending (build plan queue drained, no `[ ]`
+> row); growth floor clear (`src/World` commits within 7 days).
+>
+> **Step 0:** read `axiomancer-mechanics/CLAUDE.md` (THE BIG NUMBERS
+> REWRITE — no CQI/status-engagement-floor grading; THE STORY IS THE
+> ROAD — irrelevant to keyword work), the live `docs/keyword-atlas.md`,
+> and `docs/retheme-map.json` fresh rather than trusting pass 15's
+> reading.
+>
+> **Step 1 structural audit:** `git log fb0a0f3c..HEAD` against the
+> full keyword-surface path set (`src/Cards/types.ts`,
+> `src/Combat/combat.cards.ts`, `src/Combat/combat.engine.ts`,
+> `src/Effects/**`, `axiomancer-mobile/state/combat/keywords.ts`,
+> `docs/keyword-atlas.md`, `axiomancer-card-editor/src/data/
+> mechanics.ts`, `src/Enemy/enemy-keywords.ts`) returns exactly one
+> touching commit of the 8 intervening: `4fcb6f2f` ("combat: project
+> card text in the engine so the detail panel stops re-deriving it").
+> Read its diff directly: it adds a new pure presentation module
+> (`Combat/combat.card-text.ts`) that projects existing
+> `mechanicText`/`riderText` output into a structured clause list for
+> the mobile detail panel — a card-detail honesty fix (25 cards were
+> silently dropping a paid clause, 15 more printed a clause with
+> numbers omitted), not a new `CardSpecialMechanic`/`CardRider` kind or
+> keyword. Its only edit to `combat.cards.ts` itself widens
+> `REGISTRY_DOT_IDS` from module-private to exported — zero behavior
+> change. No atlas row owed. Re-ran every other Step 1 signal fresh:
+> (1) carrier-count/orphan sweep — every `kind:` literal in
+> `CardSpecialMechanic`/`CardRider` (`src/Cards/types.ts`) against
+> every `case '...':` in `combat.cards.ts`'s `mechanicText` switch:
+> 55/55 identical sets, zero silent `default:` arms; (2)
+> semantic-overlap check — no new near-synonym pairs (nothing new was
+> minted this window); (3) `kb:` receipt backfill — no atlas row lost a
+> receipt; (4) `node --test scripts/content-drift.test.mjs`: 11/11
+> green, matching pass 15's result byte-for-byte.
+>
+> **Step 1b widened KB cross-reference:** rather than re-reading the
+> same functions-column sweep passes 9/11/14/15 already exhausted,
+> queried three keyword families not previously checked against this
+> registry, via `kb_keyword`: **Stunned/Silenced**
+> (`kb:dawncaster/keywords/stunned.okf.md`,
+> `kb:dawncaster/keywords/silenced.okf.md`, community, confidence
+> medium) — "cards/Magic Actions can't be played" for N turns/stacks —
+> a hard play-lockout. Not filed: it directly conflicts with THE BIG
+> NUMBERS REWRITE's surviving pillar 2 ("Every card has a FREE line...
+> a card must be playable without a die") for its full duration — a
+> mechanic whose entire point is "you may not play cards" is a design
+> non-starter under a still-live hard constraint, not a gap worth a
+> candidate row. **Weakness** (`kb:dawncaster/keywords/weakness.okf.md`,
+> community, confidence medium) — "next damage you deal is reduced by
+> 50%" — is the outgoing-damage mirror of the already-filed **Vulnerable**
+> candidate (`plan/PHASE_CANDIDATES.md`, score 3.0, Pending since pass
+> 14, re-confirmed pending by pass 15): both are damage-modifying
+> debuffs inflicted on a combatant, same family, no differentiated
+> niche or concrete card idea for a second entry — filing it separately
+> would be exactly the near-synonym-minting the atlas discipline exists
+> to prevent, so it stays un-filed and Vulnerable's existing candidate
+> row is understood to cover the axis. **Frozen**
+> (`kb:dawncaster/keywords/frozen.okf.md`, community, confidence medium)
+> — forced top-of-deck manipulation against the holder — overlaps the
+> existing deck-as-resource family (FORETELL/MILL/RECALL) without a
+> differentiated niche or a concrete card idea; same bar pass 9 applied
+> to Chaos/Upgrade before either was filed, not met here. No new
+> citable gap. Zero-diff confirmed on the widened pass, not just the
+> structural one.
+>
+> **Ship (Step 3):** none — zero CREATE, zero UPDATE, zero REMOVE. The
+> one intervening keyword-adjacent commit was a presentation-honesty
+> fix already fully wired end to end; the widened KB check's three new
+> families all fail the discipline bar (hard-constraint conflict,
+> already-filed-family overlap, or no differentiated niche/concrete
+> card).
+>
+> **Gates:** `npm run verify --workspace axiomancer-mechanics` (3734
+> tests), `npm run verify --workspace axiomancer-mobile`, `npm run
+> type-check --workspace axiomancer-card-editor`, and `npm test` (root,
+> 208 tests, includes `content-drift.test.mjs` 11/11) all green —
+> unchanged, no source touched.
+```
 
 ```
 > **[adjust-enemies pass 16, 2026-09-23, commit d02bda13]**

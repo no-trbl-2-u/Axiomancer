@@ -631,3 +631,4 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-23T01:04:08Z | skill | adjust-enemies | claude-sonnet-5 | - | - |
 | 2026-09-23T01:04:08Z | skill-end | adjust-enemies | claude-sonnet-5 | 0s | ok |
 | 2026-09-23T01:05:50Z | subagent | general-purpose | claude-sonnet-5 | - | Run adjust-enemies lifecycle tick |
+| 2026-09-23T02:39:12Z | slash-prompt | /march | - | - | /march |
