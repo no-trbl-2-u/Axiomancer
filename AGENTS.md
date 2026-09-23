@@ -248,10 +248,11 @@ These apply to every loop skill and session. `plan/bearings.md` echoes
 them; update here first.
 
 1. **Commit and push as a single atomic act** to `main`. No unpushed
-   commits between ticks; no dirty tree left behind. `TELEMETRY.md` is part
-   of every commit that changes it: the tracked `.githooks/pre-commit`
-   auto-stages it, and `.githooks/pre-push` blocks if newer rows remain
-   uncommitted. Session startup installs the hooks through `core.hooksPath`.
+   commits between ticks; no dirty tree left behind. The session's
+   `telemetry/` shard is part of every commit that changes it: the tracked
+   `.githooks/pre-commit` auto-stages `telemetry/`, and `.githooks/pre-push`
+   blocks if newer rows remain uncommitted. One shard per session, so the
+   log never conflicts on merge. Session startup installs the hooks through `core.hooksPath`.
 2. **No `Co-Authored-By:` trailers, no emojis** — in commits, code, or
    content.
 3. **The verify gate is non-negotiable.** No `--no-verify`, no

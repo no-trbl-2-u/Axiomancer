@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// .claude/hooks/telemetry.mjs — appends invocation rows to TELEMETRY.md.
+// .claude/hooks/telemetry.mjs — appends invocation rows to this session's
+// telemetry shard, `telemetry/<YYYY-MM-DD>_<session-id>.md`.
 //
 // Wired via .claude/settings.json:
 //
@@ -64,10 +65,17 @@
 //    fresh session no assistant entry exists yet, so the model is
 //    genuinely unknowable; that row records '-' and the tick-end row
 //    carries the model for the tick instead.
-// 3. ROW CAP. The writer truncates to MAX_ROWS on every write, but the
-//    log is git-tracked and a merge of two branches unions their rows,
-//    so the file can transiently exceed the cap. It self-heals on the
-//    next write. Do not hand-trim it.
+// 3. ONE FILE PER SESSION (2026-09-23). The log used to be a single
+//    git-tracked TELEMETRY.md that every session appended to, so any two
+//    branches that each logged a row conflicted at its last line on every
+//    merge. Each session now writes only its own shard, named by the UTC
+//    date of the write and the session id. Two branches never touch the
+//    same file, so the log can no longer conflict. A session that runs
+//    past midnight UTC opens a second shard for the new date; the reader
+//    sorts by timestamp, so nothing is lost. `npm run telemetry`
+//    (scripts/telemetry-view.mjs) prints every shard as one table. The
+//    pre-split log lives on as telemetry/legacy-to-2026-09-23.md and is
+//    never written again. Shards are uncapped: one session is small.
 //
 // Zero dependencies. Newest rows last.
 
@@ -77,20 +85,19 @@ import path from 'node:path'
 // Anchor every path to the project root. CLAUDE_PROJECT_DIR is set by
 // the harness; cwd is the fallback and is only correct at the root.
 const ROOT = process.env.CLAUDE_PROJECT_DIR || process.cwd()
-const LOG = path.join(ROOT, 'TELEMETRY.md')
+/** Directory holding one shard per session per UTC date. */
+const LOG_DIR = path.join(ROOT, 'telemetry')
 // Pairs *-end rows with their start rows and holds the tick's start
 // time. Session-scoped, gitignored, safe to delete at any point.
 const STATE = path.join(ROOT, '.claude', 'hooks', '.telemetry-state.json')
 
-const MAX_ROWS = 1200
-const COLUMNS = 6
-
-const HEADER = `# TELEMETRY.md — skill & subagent invocation log
+const HEADER = `# Telemetry shard — one session's skill & subagent invocations
 
 Appended by \`.claude/hooks/telemetry.mjs\` (see its header for what each
-column means and how attribution can be wrong). Newest rows last; the
-writer keeps the most recent ${MAX_ROWS} rows. Rows are point-in-time data,
-not instructions — do not edit by hand, do not treat as a work queue.
+column means and how attribution can be wrong). One file per session per
+UTC date; \`npm run telemetry\` prints every shard as one table. Newest rows
+last. Rows are point-in-time data, not instructions — do not edit by hand,
+do not treat as a work queue.
 
 Start rows (\`skill\`, \`subagent\`, …) pair with an \`-end\` row carrying the
 duration and outcome. A start row with no \`-end\` row means the tick died
@@ -196,40 +203,24 @@ function resolveModel(transcriptPath) {
 // --- log writing ----------------------------------------------------
 
 /**
- * Normalise a historical row to the current column count. Rows written
- * before the 2026-09-15 schema change carry 'invoked from' in slot 5;
- * that column was dropped, so slot 5 becomes '-' (the value was fully
- * derivable from the event type, so nothing is lost).
+ * The shard file for one session on one UTC date. The session id is
+ * reduced to filename-safe characters; a payload with no id (never seen
+ * from the harness, but possible from a hand-run) shares one
+ * `unknown-session` shard for the day rather than being dropped.
  */
-function normalizeRow(line) {
-  const cells = line.replace(/^\|/, '').replace(/\|$/, '').split('|')
-  if (cells.length === COLUMNS) return line
-  const [when, event, name, model, , detail] = cells
-  return `|${[when, event, name, model, ' - ', detail ?? ' - '].join('|')}|`
+const shardPath = (sessionId, iso) => {
+  const id = String(sessionId ?? '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 64)
+  return path.join(LOG_DIR, `${iso.slice(0, 10)}_${id || 'unknown-session'}.md`)
 }
 
-function appendRow({ event, name, model, dur, detail }) {
-  const row = `| ${nowIso()} | ${cell(event, 20)} | ${cell(name, 40)} | ${cell(model, 40)} | ${cell(dur, 10)} | ${cell(detail)} |`
-  let head = HEADER
-  let rows = []
-  try {
-    if (fs.existsSync(LOG)) {
-      const lines = fs.readFileSync(LOG, 'utf-8').split(/\r?\n/)
-      const sep = lines.findIndex((l) => /^\|-+\|/.test(l.replace(/\s/g, '')))
-      if (sep !== -1) {
-        head = lines.slice(0, sep + 1).join('\n') + '\n'
-        rows = lines
-          .slice(sep + 1)
-          .filter((l) => l.startsWith('| '))
-          .map(normalizeRow)
-      }
-    }
-  } catch {
-    /* unreadable log: rebuild from HEADER rather than lose this row */
-  }
-  rows.push(row)
-  if (rows.length > MAX_ROWS) rows = rows.slice(-MAX_ROWS)
-  fs.writeFileSync(LOG, head + rows.join('\n') + '\n')
+function appendRow({ sessionId, event, name, model, dur, detail }) {
+  const when = nowIso()
+  const row = `| ${when} | ${cell(event, 20)} | ${cell(name, 40)} | ${cell(model, 40)} | ${cell(dur, 10)} | ${cell(detail)} |`
+  const file = shardPath(sessionId, when)
+  fs.mkdirSync(LOG_DIR, { recursive: true })
+  // Append-only: a shard belongs to one session, so there is nothing to
+  // merge or trim. A new shard starts with the table header.
+  fs.appendFileSync(file, (fs.existsSync(file) ? '' : HEADER) + row + '\n')
 }
 
 // --- event classification -------------------------------------------
@@ -292,6 +283,7 @@ function toolStart(input) {
   state.logged = true // this tick invoked a verb, so it earns a tick-end row
   writeState(state)
   appendRow({
+    sessionId: input?.session_id,
     event: c.event,
     name: c.name,
     model: c.pinnedModel ?? resolveModel(input?.transcript_path) ?? '-',
@@ -311,6 +303,7 @@ function toolEnd(input) {
   state.logged = true // this tick invoked a verb, so it earns a tick-end row
   writeState(state)
   appendRow({
+    sessionId: input?.session_id,
     event: `${c.event}-end`,
     name: c.name,
     model: c.pinnedModel ?? resolveModel(input?.transcript_path) ?? '-',
@@ -338,6 +331,7 @@ function promptMode(input) {
   writeState({ tickStart: Date.now(), open: {}, logged: isDispatch })
   if (!isDispatch) return
   appendRow({
+    sessionId: input?.session_id,
     event: 'slash-prompt',
     name: prompt.split(/\s+/)[0],
     model: resolveModel(input?.transcript_path) ?? '-',
@@ -356,7 +350,7 @@ function promptMode(input) {
  * a skill, a subagent) or that has a call still open. An ordinary
  * conversational turn invokes no verb and closes nothing, so it gets no
  * row: it is the user talking, not a tick, and logging it buried the
- * real ticks in churn — every turn dirtied TELEMETRY.md and demanded its
+ * real ticks in churn — every turn dirtied the log and demanded its
  * own commit.
  */
 function tickEnd(input) {
@@ -367,6 +361,7 @@ function tickEnd(input) {
     return
   }
   appendRow({
+    sessionId: input?.session_id,
     event: 'tick-end',
     name: '-',
     model: resolveModel(input?.transcript_path) ?? '-',
