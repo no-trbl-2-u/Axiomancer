@@ -652,3 +652,8 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-23T15:26:43Z | skill-end | oversight | claude-sonnet-5 | 0s | ok |
 | 2026-09-23T15:48:21Z | skill | world-spec | claude-sonnet-5 | - | args: Phase 84 — The Capital. Context: Phase 84 (plan/steps/01_build_plan.md, currently [b |
 | 2026-09-23T15:48:21Z | skill-end | world-spec | claude-sonnet-5 | 0s | ok |
+| 2026-09-23T16:34:40Z | slash-prompt | /march | - | - | /march |
+| 2026-09-23T16:34:42Z | skill | march | - | - | - |
+| 2026-09-23T16:34:42Z | skill-end | march | - | 0s | ok |
+| 2026-09-23T16:35:33Z | skill | adjust-enemies | claude-sonnet-5 | - | - |
+| 2026-09-23T16:35:33Z | skill-end | adjust-enemies | claude-sonnet-5 | 0s | ok |

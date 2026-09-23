@@ -1463,10 +1463,18 @@ export const RawheadRex = createEnemy({
     // A slab of cellar meat: well above the curve, but low HIDE — nothing about
     // rawhead is armoured. It just does not stop.
     vitae: 500,
+    // adjust-enemies pass 17 (2026-09-23) — the roster's sole SUMMON carrier
+    // (JeweledTree, an elite) never gets a `stages` boundary, so wave 2 of
+    // its brood could never fire (CRITIQUE.md pass-burn-day-2026-09-19 row
+    // 3.9). Rawhead already carries two authored stages, so it is the
+    // reachable carrier: wave 1 spawns at the fight's first boundary, wave 2
+    // rides the same "UP FROM UNDER THE STAIRS" crossing that already grants
+    // SWIFT — one keyword, no new stage authored.
     keywords: [
         { kind: 'hide', n: 5 },
         { kind: 'brutal' },
         { kind: 'ravenous' },
+        { kind: 'summon', n: 2, addName: 'Cellar Thing' },
     ],
     stages: [
         {

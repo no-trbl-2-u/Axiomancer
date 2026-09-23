@@ -1,7 +1,7 @@
 {
  "meta": {
   "generatedAt": "2026-09-23",
-  "commit": "01a33c5",
+  "commit": "2b17a4c4",
   "command": "npm run combat-playtest -- --stage=all --policy=all --deck=policy-pick --runs=60 --seed=1 --cards --json",
   "seeds": {
    "baseline": 1,
@@ -9,7 +9,7 @@
   },
   "runsPerCell": 60,
   "confidence": "full",
-  "note": "Full re-baseline via scripts/regen-deck-matrix-baseline.mjs at 01a33c5."
+  "note": "Full re-baseline via scripts/regen-deck-matrix-baseline.mjs at 2b17a4c4."
  },
  "report": {
   "diceModel": "upgradeable",
@@ -23854,45 +23854,45 @@
     ],
     "stats": {
      "runs": 60,
-     "victories": 23,
+     "victories": 18,
      "mercies": 0,
-     "defeats": 37,
+     "defeats": 42,
      "retreats": 0,
-     "winRate": 0.38333333333333336,
+     "winRate": 0.3,
      "winPathCounts": {
-      "victory": 23,
+      "victory": 18,
       "mercy": 0,
       "capitulate": 0,
       "concede": 0,
-      "defeat": 37,
+      "defeat": 42,
       "retreat": 0
      },
-     "avgRounds": 4.15,
-     "roundsStdDev": 0.5722761571129772,
-     "statusEngagement": 0.17179902755267423,
+     "avgRounds": 4.066666666666666,
+     "roundsStdDev": 0.44221663871405575,
+     "statusEngagement": 0.17516447368421054,
      "combatQuality": {
-      "index": 0.7647399651258512,
+      "index": 0.7613371013416653,
       "components": {
-       "spine": 0.6832274077034939,
-       "arc": 0.8006693315757281,
-       "width": 0.706408345752608,
+       "spine": 0.7149296500071305,
+       "arc": 0.7274151638285347,
+       "width": 0.717557251908397,
        "identity": 1
       },
       "spineComponents": {
-       "conviction": 0.7056854595862706,
-       "surge": 0.5785721758880774,
-       "dice": 0.7654245876361337
+       "conviction": 0.8148217143826667,
+       "surge": 0.5647703225572138,
+       "dice": 0.7651969130815112
       },
       "readings": {
-       "convictionPerRound": 1.3172690763052208,
-       "convictionSpendShare": 0.3780487804878049,
-       "momentumStepsPerRound": 2.0200803212851404,
-       "surgeCompletionShare": 0.3347457627118644,
-       "diceSpendShare": 0.2929373996789727,
+       "convictionPerRound": 1.3278688524590163,
+       "convictionSpendShare": 0.6666666666666666,
+       "momentumStepsPerRound": 2.0040983606557377,
+       "surgeCompletionShare": 0.31896551724137934,
+       "diceSpendShare": 0.29276315789473684,
        "diceEconomyBreadth": 4,
-       "arcCentroid": 0.5502342660515048,
-       "meanLiveOptions": 2.412816691505216,
-       "dominantCardShare": 0.22336172795579648
+       "arcCentroid": 0.5245953073399872,
+       "meanLiveOptions": 2.435114503816794,
+       "dominantCardShare": 0.21523481514552373
       },
       "weights": {
        "spine": 0.4,
@@ -23903,222 +23903,222 @@
      },
      "objectiveTelemetry": {
       "runs": 60,
-      "rounds": 249,
-      "convictionGained": 328,
-      "convictionSpent": 124,
-      "signatureCasts": 19,
+      "rounds": 244,
+      "convictionGained": 324,
+      "convictionSpent": 216,
+      "signatureCasts": 3,
       "specialsFired": 113,
-      "momentumAdvances": 424,
-      "momentumBreaks": 157,
-      "surges": 79,
-      "surgeDiceSpent": 72,
-      "diceRolled": 2492,
-      "diceSpent": 730,
+      "momentumAdvances": 415,
+      "momentumBreaks": 158,
+      "surges": 74,
+      "surgeDiceSpent": 70,
+      "diceRolled": 2432,
+      "diceSpent": 712,
       "diceEconomyVerbs": {
-       "die-banked": 131,
-       "die-ripened": 220,
-       "die-floated": 25,
-       "die-overflowed": 51
+       "die-banked": 130,
+       "die-ripened": 219,
+       "die-floated": 24,
+       "die-overflowed": 47
       },
       "arcRuns": 60,
-      "arcCentroidSum": 33.01405596309029,
-      "decisionPoints": 671,
-      "liveOptions": 1619,
+      "arcCentroidSum": 31.47571844039923,
+      "decisionPoints": 655,
+      "liveOptions": 1595,
       "damageByCard": {
-       "chalk-on-the-doorpost": 5152,
-       "ice-on-the-ladder-rungs": 4952,
-       "the-unpaid-sexton+": 2718,
-       "the-charnel-ledger": 1120,
-       "thumbprick-oath": 3609,
-       "a-pound-of-flesh+": 10672,
-       "the-long-lent": 5752,
-       "every-wound-accounted": 9640,
-       "surplusage": 3533,
-       "overheard-name": 552,
-       "sig-disarming-plea": 79
+       "chalk-on-the-doorpost": 5149,
+       "ice-on-the-ladder-rungs": 5207,
+       "the-unpaid-sexton+": 2651,
+       "the-charnel-ledger": 1166,
+       "thumbprick-oath": 3458,
+       "a-pound-of-flesh+": 10124,
+       "the-long-lent": 5855,
+       "every-wound-accounted": 9321,
+       "surplusage": 3558,
+       "overheard-name": 536,
+       "sig-disarming-plea": 12
       }
      },
-     "avgConvictionSpent": 1.1333333333333333,
-     "dotHpFraction": 0.2571940996292117,
-     "strikeFraction": 0.7428059003707883,
+     "avgConvictionSpent": 2.3833333333333333,
+     "dotHpFraction": 0.26437796439644373,
+     "strikeFraction": 0.7356220356035562,
      "mechanicBurstFraction": 0,
-     "guardMitigatedFraction": 0.10041985889278449,
-     "avgActiveEffectsPerPhase": 2.02212389380531,
+     "guardMitigatedFraction": 0.09745040136422244,
+     "avgActiveEffectsPerPhase": 1.9777777777777779,
      "deckUtilization": 1,
-     "usageEntropy": 0.9971815538760972,
+     "usageEntropy": 0.99696249134251,
      "dominantCardId": "a-pound-of-flesh+",
-     "dominantCardShare": 0.3685504659924648
+     "dominantCardShare": 0.3666472497295498
     },
     "cardUsage": {
      "the-unpaid-sexton+": {
       "cardId": "the-unpaid-sexton+",
-      "plays": 117,
-      "bottomPlays": 25,
-      "topPlays": 92,
+      "plays": 113,
+      "bottomPlays": 24,
+      "topPlays": 89,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 1773,
-       "paid": 945
+       "free": 1748,
+       "paid": 903
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 122,
+      "drawsSeen": 118,
       "runsDrawn": 60,
-      "winsWhenDrawn": 23
+      "winsWhenDrawn": 18
      },
      "overheard-name": {
       "cardId": "overheard-name",
-      "plays": 87,
+      "plays": 86,
       "bottomPlays": 49,
-      "topPlays": 38,
+      "topPlays": 37,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 206,
+       "free": 190,
        "paid": 346
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 90,
+      "drawsSeen": 89,
       "runsDrawn": 60,
-      "winsWhenDrawn": 23
+      "winsWhenDrawn": 18
      },
      "chalk-on-the-doorpost": {
       "cardId": "chalk-on-the-doorpost",
-      "plays": 132,
-      "bottomPlays": 109,
+      "plays": 131,
+      "bottomPlays": 108,
       "topPlays": 23,
-      "statusLands": 109,
+      "statusLands": 108,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 838,
-       "paid": 4314
+       "free": 871,
+       "paid": 4278
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 134,
+      "drawsSeen": 133,
       "runsDrawn": 60,
-      "winsWhenDrawn": 23
+      "winsWhenDrawn": 18
      },
      "the-charnel-ledger": {
       "cardId": "the-charnel-ledger",
-      "plays": 141,
+      "plays": 143,
       "bottomPlays": 12,
-      "topPlays": 129,
+      "topPlays": 131,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 1050,
+       "free": 1096,
        "paid": 70
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 149,
+      "drawsSeen": 147,
       "runsDrawn": 60,
-      "winsWhenDrawn": 23
+      "winsWhenDrawn": 18
      },
      "ice-on-the-ladder-rungs": {
       "cardId": "ice-on-the-ladder-rungs",
-      "plays": 125,
-      "bottomPlays": 103,
+      "plays": 127,
+      "bottomPlays": 105,
       "topPlays": 22,
-      "statusLands": 103,
+      "statusLands": 105,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 122,
-       "paid": 4830
+       "paid": 5085
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 126,
+      "drawsSeen": 128,
       "runsDrawn": 60,
-      "winsWhenDrawn": 23
+      "winsWhenDrawn": 18
      },
      "thumbprick-oath": {
       "cardId": "thumbprick-oath",
-      "plays": 128,
-      "bottomPlays": 110,
+      "plays": 124,
+      "bottomPlays": 106,
       "topPlays": 18,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 254,
-       "paid": 3355
+       "paid": 3204
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 128,
+      "drawsSeen": 125,
       "runsDrawn": 60,
-      "winsWhenDrawn": 23
+      "winsWhenDrawn": 18
      },
      "the-long-lent": {
       "cardId": "the-long-lent",
-      "plays": 121,
-      "bottomPlays": 27,
+      "plays": 120,
+      "bottomPlays": 26,
       "topPlays": 94,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 4660,
-       "paid": 1092
+       "free": 4804,
+       "paid": 1051
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 129,
+      "drawsSeen": 126,
       "runsDrawn": 59,
-      "winsWhenDrawn": 23
+      "winsWhenDrawn": 18
      },
      "a-pound-of-flesh+": {
       "cardId": "a-pound-of-flesh+",
-      "plays": 128,
-      "bottomPlays": 128,
+      "plays": 122,
+      "bottomPlays": 122,
       "topPlays": 0,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 10672
+       "paid": 10124
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 129,
+      "drawsSeen": 123,
       "runsDrawn": 60,
-      "winsWhenDrawn": 23
+      "winsWhenDrawn": 18
      },
      "every-wound-accounted": {
       "cardId": "every-wound-accounted",
-      "plays": 129,
-      "bottomPlays": 74,
+      "plays": 125,
+      "bottomPlays": 70,
       "topPlays": 55,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 1899,
-       "paid": 7741
+       "free": 1945,
+       "paid": 7376
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 130,
+      "drawsSeen": 127,
       "runsDrawn": 60,
-      "winsWhenDrawn": 23
+      "winsWhenDrawn": 18
      },
      "surplusage": {
       "cardId": "surplusage",
-      "plays": 126,
-      "bottomPlays": 34,
+      "plays": 125,
+      "bottomPlays": 33,
       "topPlays": 92,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 2012,
-       "paid": 1521
+       "free": 2050,
+       "paid": 1508
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 132,
+      "drawsSeen": 128,
       "runsDrawn": 60,
-      "winsWhenDrawn": 23
+      "winsWhenDrawn": 18
      }
     }
    },
@@ -24147,45 +24147,45 @@
     ],
     "stats": {
      "runs": 60,
-     "victories": 23,
+     "victories": 18,
      "mercies": 0,
-     "defeats": 37,
+     "defeats": 42,
      "retreats": 0,
-     "winRate": 0.38333333333333336,
+     "winRate": 0.3,
      "winPathCounts": {
-      "victory": 23,
+      "victory": 18,
       "mercy": 0,
       "capitulate": 0,
       "concede": 0,
-      "defeat": 37,
+      "defeat": 42,
       "retreat": 0
      },
-     "avgRounds": 4.15,
-     "roundsStdDev": 0.5722761571129772,
-     "statusEngagement": 0.17179902755267423,
+     "avgRounds": 4.066666666666666,
+     "roundsStdDev": 0.44221663871405575,
+     "statusEngagement": 0.17516447368421054,
      "combatQuality": {
-      "index": 0.7647399651258512,
+      "index": 0.7613371013416653,
       "components": {
-       "spine": 0.6832274077034939,
-       "arc": 0.8006693315757281,
-       "width": 0.706408345752608,
+       "spine": 0.7149296500071305,
+       "arc": 0.7274151638285347,
+       "width": 0.717557251908397,
        "identity": 1
       },
       "spineComponents": {
-       "conviction": 0.7056854595862706,
-       "surge": 0.5785721758880774,
-       "dice": 0.7654245876361337
+       "conviction": 0.8148217143826667,
+       "surge": 0.5647703225572138,
+       "dice": 0.7651969130815112
       },
       "readings": {
-       "convictionPerRound": 1.3172690763052208,
-       "convictionSpendShare": 0.3780487804878049,
-       "momentumStepsPerRound": 2.0200803212851404,
-       "surgeCompletionShare": 0.3347457627118644,
-       "diceSpendShare": 0.2929373996789727,
+       "convictionPerRound": 1.3278688524590163,
+       "convictionSpendShare": 0.6666666666666666,
+       "momentumStepsPerRound": 2.0040983606557377,
+       "surgeCompletionShare": 0.31896551724137934,
+       "diceSpendShare": 0.29276315789473684,
        "diceEconomyBreadth": 4,
-       "arcCentroid": 0.5502342660515048,
-       "meanLiveOptions": 2.412816691505216,
-       "dominantCardShare": 0.22336172795579648
+       "arcCentroid": 0.5245953073399872,
+       "meanLiveOptions": 2.435114503816794,
+       "dominantCardShare": 0.21523481514552373
       },
       "weights": {
        "spine": 0.4,
@@ -24196,222 +24196,222 @@
      },
      "objectiveTelemetry": {
       "runs": 60,
-      "rounds": 249,
-      "convictionGained": 328,
-      "convictionSpent": 124,
-      "signatureCasts": 19,
+      "rounds": 244,
+      "convictionGained": 324,
+      "convictionSpent": 216,
+      "signatureCasts": 3,
       "specialsFired": 113,
-      "momentumAdvances": 424,
-      "momentumBreaks": 157,
-      "surges": 79,
-      "surgeDiceSpent": 72,
-      "diceRolled": 2492,
-      "diceSpent": 730,
+      "momentumAdvances": 415,
+      "momentumBreaks": 158,
+      "surges": 74,
+      "surgeDiceSpent": 70,
+      "diceRolled": 2432,
+      "diceSpent": 712,
       "diceEconomyVerbs": {
-       "die-banked": 131,
-       "die-ripened": 220,
-       "die-floated": 25,
-       "die-overflowed": 51
+       "die-banked": 130,
+       "die-ripened": 219,
+       "die-floated": 24,
+       "die-overflowed": 47
       },
       "arcRuns": 60,
-      "arcCentroidSum": 33.01405596309029,
-      "decisionPoints": 671,
-      "liveOptions": 1619,
+      "arcCentroidSum": 31.47571844039923,
+      "decisionPoints": 655,
+      "liveOptions": 1595,
       "damageByCard": {
-       "chalk-on-the-doorpost": 5152,
-       "ice-on-the-ladder-rungs": 4952,
-       "the-unpaid-sexton+": 2718,
-       "the-charnel-ledger": 1120,
-       "thumbprick-oath": 3609,
-       "a-pound-of-flesh+": 10672,
-       "the-long-lent": 5752,
-       "every-wound-accounted": 9640,
-       "surplusage": 3533,
-       "overheard-name": 552,
-       "sig-disarming-plea": 79
+       "chalk-on-the-doorpost": 5149,
+       "ice-on-the-ladder-rungs": 5207,
+       "the-unpaid-sexton+": 2651,
+       "the-charnel-ledger": 1166,
+       "thumbprick-oath": 3458,
+       "a-pound-of-flesh+": 10124,
+       "the-long-lent": 5855,
+       "every-wound-accounted": 9321,
+       "surplusage": 3558,
+       "overheard-name": 536,
+       "sig-disarming-plea": 12
       }
      },
-     "avgConvictionSpent": 1.1333333333333333,
-     "dotHpFraction": 0.2571940996292117,
-     "strikeFraction": 0.7428059003707883,
+     "avgConvictionSpent": 2.3833333333333333,
+     "dotHpFraction": 0.26437796439644373,
+     "strikeFraction": 0.7356220356035562,
      "mechanicBurstFraction": 0,
-     "guardMitigatedFraction": 0.10041985889278449,
-     "avgActiveEffectsPerPhase": 2.02212389380531,
+     "guardMitigatedFraction": 0.09745040136422244,
+     "avgActiveEffectsPerPhase": 1.9777777777777779,
      "deckUtilization": 1,
-     "usageEntropy": 0.9971815538760972,
+     "usageEntropy": 0.99696249134251,
      "dominantCardId": "a-pound-of-flesh+",
-     "dominantCardShare": 0.3685504659924648
+     "dominantCardShare": 0.3666472497295498
     },
     "cardUsage": {
      "the-unpaid-sexton+": {
       "cardId": "the-unpaid-sexton+",
-      "plays": 117,
-      "bottomPlays": 25,
-      "topPlays": 92,
+      "plays": 113,
+      "bottomPlays": 24,
+      "topPlays": 89,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 1773,
-       "paid": 945
+       "free": 1748,
+       "paid": 903
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 122,
+      "drawsSeen": 118,
       "runsDrawn": 60,
-      "winsWhenDrawn": 23
+      "winsWhenDrawn": 18
      },
      "overheard-name": {
       "cardId": "overheard-name",
-      "plays": 87,
+      "plays": 86,
       "bottomPlays": 49,
-      "topPlays": 38,
+      "topPlays": 37,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 206,
+       "free": 190,
        "paid": 346
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 90,
+      "drawsSeen": 89,
       "runsDrawn": 60,
-      "winsWhenDrawn": 23
+      "winsWhenDrawn": 18
      },
      "chalk-on-the-doorpost": {
       "cardId": "chalk-on-the-doorpost",
-      "plays": 132,
-      "bottomPlays": 109,
+      "plays": 131,
+      "bottomPlays": 108,
       "topPlays": 23,
-      "statusLands": 109,
+      "statusLands": 108,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 838,
-       "paid": 4314
+       "free": 871,
+       "paid": 4278
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 134,
+      "drawsSeen": 133,
       "runsDrawn": 60,
-      "winsWhenDrawn": 23
+      "winsWhenDrawn": 18
      },
      "the-charnel-ledger": {
       "cardId": "the-charnel-ledger",
-      "plays": 141,
+      "plays": 143,
       "bottomPlays": 12,
-      "topPlays": 129,
+      "topPlays": 131,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 1050,
+       "free": 1096,
        "paid": 70
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 149,
+      "drawsSeen": 147,
       "runsDrawn": 60,
-      "winsWhenDrawn": 23
+      "winsWhenDrawn": 18
      },
      "ice-on-the-ladder-rungs": {
       "cardId": "ice-on-the-ladder-rungs",
-      "plays": 125,
-      "bottomPlays": 103,
+      "plays": 127,
+      "bottomPlays": 105,
       "topPlays": 22,
-      "statusLands": 103,
+      "statusLands": 105,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 122,
-       "paid": 4830
+       "paid": 5085
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 126,
+      "drawsSeen": 128,
       "runsDrawn": 60,
-      "winsWhenDrawn": 23
+      "winsWhenDrawn": 18
      },
      "thumbprick-oath": {
       "cardId": "thumbprick-oath",
-      "plays": 128,
-      "bottomPlays": 110,
+      "plays": 124,
+      "bottomPlays": 106,
       "topPlays": 18,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 254,
-       "paid": 3355
+       "paid": 3204
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 128,
+      "drawsSeen": 125,
       "runsDrawn": 60,
-      "winsWhenDrawn": 23
+      "winsWhenDrawn": 18
      },
      "the-long-lent": {
       "cardId": "the-long-lent",
-      "plays": 121,
-      "bottomPlays": 27,
+      "plays": 120,
+      "bottomPlays": 26,
       "topPlays": 94,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 4660,
-       "paid": 1092
+       "free": 4804,
+       "paid": 1051
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 129,
+      "drawsSeen": 126,
       "runsDrawn": 59,
-      "winsWhenDrawn": 23
+      "winsWhenDrawn": 18
      },
      "a-pound-of-flesh+": {
       "cardId": "a-pound-of-flesh+",
-      "plays": 128,
-      "bottomPlays": 128,
+      "plays": 122,
+      "bottomPlays": 122,
       "topPlays": 0,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 10672
+       "paid": 10124
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 129,
+      "drawsSeen": 123,
       "runsDrawn": 60,
-      "winsWhenDrawn": 23
+      "winsWhenDrawn": 18
      },
      "every-wound-accounted": {
       "cardId": "every-wound-accounted",
-      "plays": 129,
-      "bottomPlays": 74,
+      "plays": 125,
+      "bottomPlays": 70,
       "topPlays": 55,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 1899,
-       "paid": 7741
+       "free": 1945,
+       "paid": 7376
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 130,
+      "drawsSeen": 127,
       "runsDrawn": 60,
-      "winsWhenDrawn": 23
+      "winsWhenDrawn": 18
      },
      "surplusage": {
       "cardId": "surplusage",
-      "plays": 126,
-      "bottomPlays": 34,
+      "plays": 125,
+      "bottomPlays": 33,
       "topPlays": 92,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 2012,
-       "paid": 1521
+       "free": 2050,
+       "paid": 1508
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 132,
+      "drawsSeen": 128,
       "runsDrawn": 60,
-      "winsWhenDrawn": 23
+      "winsWhenDrawn": 18
      }
     }
    },
@@ -24453,32 +24453,32 @@
       "defeat": 18,
       "retreat": 0
      },
-     "avgRounds": 3.7666666666666666,
-     "roundsStdDev": 0.6155395104206468,
-     "statusEngagement": 0.5520361990950227,
+     "avgRounds": 3.75,
+     "roundsStdDev": 0.622494979899436,
+     "statusEngagement": 0.5505004549590536,
      "combatQuality": {
-      "index": 0.6114939207850194,
+      "index": 0.7284848528893019,
       "components": {
-       "spine": 0.49395729972289837,
-       "arc": 0.6879672359066729,
-       "width": 0.45959595959595956,
+       "spine": 0.7838808345513242,
+       "arc": 0.6922357196159461,
+       "width": 0.4593679458239278,
        "identity": 1
       },
       "spineComponents": {
-       "conviction": 0,
-       "surge": 0.6688560540599386,
-       "dice": 0.8130158451087566
+       "conviction": 0.8717797887081347,
+       "surge": 0.6674912392349772,
+       "dice": 0.8123714757108607
       },
       "readings": {
-       "convictionPerRound": 1.4955752212389382,
-       "convictionSpendShare": 0,
-       "momentumStepsPerRound": 3.0309734513274336,
-       "surgeCompletionShare": 0.4473684210526316,
-       "diceSpendShare": 0.4406631762652705,
+       "convictionPerRound": 1.52,
+       "convictionSpendShare": 0.5730994152046783,
+       "momentumStepsPerRound": 3.022222222222222,
+       "surgeCompletionShare": 0.44554455445544555,
+       "diceSpendShare": 0.43996494303242767,
        "diceEconomyBreadth": 3,
-       "arcCentroid": 0.5107885325673355,
-       "meanLiveOptions": 1.9191919191919191,
-       "dominantCardShare": 0.3584179945520652
+       "arcCentroid": 0.5122825018655811,
+       "meanLiveOptions": 1.9187358916478556,
+       "dominantCardShare": 0.35896650447117595
       },
       "weights": {
        "spine": 0.4,
@@ -24489,48 +24489,48 @@
      },
      "objectiveTelemetry": {
       "runs": 60,
-      "rounds": 226,
-      "convictionGained": 338,
-      "convictionSpent": 0,
+      "rounds": 225,
+      "convictionGained": 342,
+      "convictionSpent": 196,
       "signatureCasts": 0,
-      "specialsFired": 150,
-      "momentumAdvances": 549,
+      "specialsFired": 151,
+      "momentumAdvances": 545,
       "momentumBreaks": 168,
-      "surges": 136,
-      "surgeDiceSpent": 224,
-      "diceRolled": 2292,
-      "diceSpent": 1010,
+      "surges": 135,
+      "surgeDiceSpent": 222,
+      "diceRolled": 2282,
+      "diceSpent": 1004,
       "diceEconomyVerbs": {
-       "die-banked": 76,
-       "die-ripened": 92,
+       "die-banked": 75,
+       "die-ripened": 91,
        "die-overflowed": 14
       },
       "arcRuns": 60,
-      "arcCentroidSum": 30.647311954040127,
-      "decisionPoints": 891,
-      "liveOptions": 1710,
+      "arcCentroidSum": 30.736950111934863,
+      "decisionPoints": 886,
+      "liveOptions": 1700,
       "damageByCard": {
        "the-ducking-stool": 1743,
-       "chalk-on-the-doorpost": 16505,
+       "chalk-on-the-doorpost": 16397,
        "the-village-comes-over-the-hill": 1315,
-       "salt-in-the-font+": 1302,
-       "gangrene-gospel": 23082,
+       "salt-in-the-font+": 1268,
+       "gangrene-gospel": 22754,
        "a-pound-of-flesh+": 3088,
        "the-black-cap": 6392,
        "usury+": 1452,
-       "the-note-falls-due": 30658
+       "the-note-falls-due": 30468
       }
      },
-     "avgConvictionSpent": 1.0666666666666667,
-     "dotHpFraction": 0.19524366308932226,
-     "strikeFraction": 0.7874263999665929,
-     "mechanicBurstFraction": 0.017329936944084853,
-     "guardMitigatedFraction": 0.09410926849119951,
-     "avgActiveEffectsPerPhase": 1.5869565217391304,
+     "avgConvictionSpent": 2.6333333333333333,
+     "dotHpFraction": 0.1946807614555256,
+     "strikeFraction": 0.7878411388140162,
+     "mechanicBurstFraction": 0.017478099730458222,
+     "guardMitigatedFraction": 0.09237068104653486,
+     "avgActiveEffectsPerPhase": 1.5846994535519126,
      "deckUtilization": 1,
-     "usageEntropy": 0.9573362187527639,
+     "usageEntropy": 0.9578440196749098,
      "dominantCardId": "the-note-falls-due",
-     "dominantCardShare": 0.4155457552370452
+     "dominantCardShare": 0.4162312395775431
     },
     "cardUsage": {
      "the-village-comes-over-the-hill": {
@@ -24552,35 +24552,35 @@
      },
      "salt-in-the-font+": {
       "cardId": "salt-in-the-font+",
-      "plays": 108,
-      "bottomPlays": 61,
-      "topPlays": 47,
-      "statusLands": 61,
+      "plays": 106,
+      "bottomPlays": 60,
+      "topPlays": 46,
+      "statusLands": 60,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 440,
-       "paid": 862
+       "free": 425,
+       "paid": 843
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 171,
+      "drawsSeen": 169,
       "runsDrawn": 60,
       "winsWhenDrawn": 42
      },
      "chalk-on-the-doorpost": {
       "cardId": "chalk-on-the-doorpost",
-      "plays": 187,
-      "bottomPlays": 165,
+      "plays": 186,
+      "bottomPlays": 164,
       "topPlays": 22,
-      "statusLands": 165,
+      "statusLands": 164,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 1934,
-       "paid": 14571
+       "paid": 14463
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 231,
+      "drawsSeen": 230,
       "runsDrawn": 60,
       "winsWhenDrawn": 42
      },
@@ -24597,7 +24597,7 @@
        "paid": 1530
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 160,
+      "drawsSeen": 159,
       "runsDrawn": 60,
       "winsWhenDrawn": 42
      },
@@ -24620,18 +24620,18 @@
      },
      "gangrene-gospel": {
       "cardId": "gangrene-gospel",
-      "plays": 176,
-      "bottomPlays": 167,
+      "plays": 174,
+      "bottomPlays": 165,
       "topPlays": 9,
-      "statusLands": 167,
+      "statusLands": 165,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 23082
+       "paid": 22754
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 223,
+      "drawsSeen": 221,
       "runsDrawn": 60,
       "winsWhenDrawn": 42
      },
@@ -24671,18 +24671,18 @@
      },
      "the-note-falls-due": {
       "cardId": "the-note-falls-due",
-      "plays": 179,
-      "bottomPlays": 162,
+      "plays": 178,
+      "bottomPlays": 161,
       "topPlays": 17,
-      "statusLands": 162,
+      "statusLands": 161,
       "discards": 0,
       "fizzles": 1,
       "lineContribution": {
        "free": 383,
-       "paid": 30275
+       "paid": 30085
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 198,
+      "drawsSeen": 197,
       "runsDrawn": 60,
       "winsWhenDrawn": 42
      },
@@ -24699,7 +24699,7 @@
        "paid": 2807
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 120,
+      "drawsSeen": 119,
       "runsDrawn": 60,
       "winsWhenDrawn": 42
      }
@@ -24747,21 +24747,21 @@
      "roundsStdDev": 0.4119735698102757,
      "statusEngagement": 0.2568659127625202,
      "combatQuality": {
-      "index": 0.6431466298942601,
+      "index": 0.6610363465580874,
       "components": {
-       "spine": 0.6583492304469687,
+       "spine": 0.703073522106537,
        "arc": 0.5532898523987002,
        "width": 0.6236979166666667,
        "identity": 0.7782992752164284
       },
       "spineComponents": {
-       "conviction": 0.46108396762070397,
+       "conviction": 0.5952568425994088,
        "surge": 0.7104659772022196,
        "dice": 0.8034977465179826
       },
       "readings": {
        "convictionPerRound": 1.5354330708661417,
-       "convictionSpendShare": 0.13846153846153847,
+       "convictionSpendShare": 0.23076923076923078,
        "momentumStepsPerRound": 2.15748031496063,
        "surgeCompletionShare": 0.5047619047619047,
        "diceSpendShare": 0.32280431432973805,
@@ -24781,8 +24781,8 @@
       "runs": 60,
       "rounds": 127,
       "convictionGained": 195,
-      "convictionSpent": 27,
-      "signatureCasts": 6,
+      "convictionSpent": 45,
+      "signatureCasts": 5,
       "specialsFired": 66,
       "momentumAdvances": 221,
       "momentumBreaks": 52,
@@ -24812,11 +24812,11 @@
        "every-name-in-the-register": 679
       }
      },
-     "avgConvictionSpent": 0.55,
+     "avgConvictionSpent": 0.65,
      "dotHpFraction": 0.13797054400496503,
      "strikeFraction": 0.862029455995035,
      "mechanicBurstFraction": 0,
-     "guardMitigatedFraction": 0.058365758754863814,
+     "guardMitigatedFraction": 0.05671077504725898,
      "avgActiveEffectsPerPhase": 1.6119402985074627,
      "deckUtilization": 1,
      "usageEntropy": 0.9933818620009462,
@@ -25021,45 +25021,45 @@
     ],
     "stats": {
      "runs": 60,
-     "victories": 52,
+     "victories": 51,
      "mercies": 0,
-     "defeats": 8,
+     "defeats": 9,
      "retreats": 0,
-     "winRate": 0.8666666666666667,
+     "winRate": 0.85,
      "winPathCounts": {
-      "victory": 52,
+      "victory": 51,
       "mercy": 0,
       "capitulate": 0,
       "concede": 0,
-      "defeat": 8,
+      "defeat": 9,
       "retreat": 0
      },
-     "avgRounds": 4.466666666666667,
-     "roundsStdDev": 1.7650936393164969,
-     "statusEngagement": 0.2643764002987304,
+     "avgRounds": 4.383333333333334,
+     "roundsStdDev": 1.6841582137343531,
+     "statusEngagement": 0.26428027418126426,
      "combatQuality": {
-      "index": 0.644271548798538,
+      "index": 0.6368336844220264,
       "components": {
-       "spine": 0.5863394381963707,
-       "arc": 0.7405349837833624,
-       "width": 0.44894204231830726,
-       "identity": 0.8987574607365844
+       "spine": 0.5876863617583205,
+       "arc": 0.7134180430442605,
+       "width": 0.449812382739212,
+       "identity": 0.8896143493986038
       },
       "spineComponents": {
-       "conviction": 0.14962640041614494,
-       "surge": 0.6666666666666666,
-       "dice": 0.9427252475063006
+       "conviction": 0.1510420081067772,
+       "surge": 0.6689090768555398,
+       "dice": 0.9431080003126445
       },
       "readings": {
-       "convictionPerRound": 1.328358208955224,
-       "convictionSpendShare": 0.016853932584269662,
-       "momentumStepsPerRound": 3.0858208955223883,
-       "surgeCompletionShare": 0.4444444444444444,
-       "diceSpendShare": 0.4443654461429079,
+       "convictionPerRound": 1.326996197718631,
+       "convictionSpendShare": 0.017191977077363897,
+       "momentumStepsPerRound": 3.08745247148289,
+       "surgeCompletionShare": 0.4474393530997305,
+       "diceSpendShare": 0.4447263501268576,
        "diceEconomyBreadth": 4,
-       "arcCentroid": 0.5291872443241769,
-       "meanLiveOptions": 1.8978840846366145,
-       "dominantCardShare": 0.49049701570536625
+       "arcCentroid": 0.5196963150654912,
+       "meanLiveOptions": 1.899624765478424,
+       "dominantCardShare": 0.4941542602405585
       },
       "weights": {
        "spine": 0.4,
@@ -25070,87 +25070,87 @@
      },
      "objectiveTelemetry": {
       "runs": 60,
-      "rounds": 268,
-      "convictionGained": 356,
+      "rounds": 263,
+      "convictionGained": 349,
       "convictionSpent": 6,
       "signatureCasts": 6,
-      "specialsFired": 153,
-      "momentumAdvances": 659,
-      "momentumBreaks": 210,
-      "surges": 168,
-      "surgeDiceSpent": 268,
-      "diceRolled": 2813,
-      "diceSpent": 1250,
+      "specialsFired": 149,
+      "momentumAdvances": 646,
+      "momentumBreaks": 205,
+      "surges": 166,
+      "surgeDiceSpent": 264,
+      "diceRolled": 2759,
+      "diceSpent": 1227,
       "diceEconomyVerbs": {
-       "die-banked": 85,
-       "die-ripened": 115,
+       "die-banked": 83,
+       "die-ripened": 112,
        "die-overflowed": 23,
        "press-fate-rerolled": 6
       },
       "arcRuns": 60,
-      "arcCentroidSum": 31.751234659450613,
-      "decisionPoints": 1087,
-      "liveOptions": 2063,
+      "arcCentroidSum": 31.181778903929473,
+      "decisionPoints": 1066,
+      "liveOptions": 2025,
       "damageByCard": {
-       "the-tolling-hand": 1149,
-       "nothing-further-your-honour": 3787,
-       "every-coin-in-the-poorbox+": 17833,
-       "sixpence-for-the-ferryman+": 5122,
-       "a-pound-of-flesh+": 6634,
-       "thumbprick-oath": 1832
+       "the-tolling-hand": 1109,
+       "nothing-further-your-honour": 3754,
+       "every-coin-in-the-poorbox+": 17625,
+       "sixpence-for-the-ferryman+": 4886,
+       "a-pound-of-flesh+": 6501,
+       "thumbprick-oath": 1792
       }
      },
      "avgConvictionSpent": 0.5,
-     "dotHpFraction": 0.03394852692177447,
-     "strikeFraction": 0.2870597697257027,
-     "mechanicBurstFraction": 0.6789917033525229,
-     "guardMitigatedFraction": 0.30434782608695654,
-     "avgActiveEffectsPerPhase": 2.509259259259259,
+     "dotHpFraction": 0.033391800043850034,
+     "strikeFraction": 0.291975443981583,
+     "mechanicBurstFraction": 0.674632755974567,
+     "guardMitigatedFraction": 0.2794487968662563,
+     "avgActiveEffectsPerPhase": 2.4858490566037736,
      "deckUtilization": 1,
-     "usageEntropy": 0.9389591235711973,
+     "usageEntropy": 0.9370403279854239,
      "dominantCardId": "every-coin-in-the-poorbox+",
-     "dominantCardShare": 0.5709300464222827
+     "dominantCardShare": 0.5725934829927553
     },
     "cardUsage": {
      "the-tolling-hand": {
       "cardId": "the-tolling-hand",
-      "plays": 131,
-      "bottomPlays": 126,
+      "plays": 128,
+      "bottomPlays": 123,
       "topPlays": 5,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 16,
-       "paid": 1133
+       "paid": 1093
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 137,
+      "drawsSeen": 134,
       "runsDrawn": 58,
-      "winsWhenDrawn": 50
+      "winsWhenDrawn": 49
      },
      "nothing-further-your-honour": {
       "cardId": "nothing-further-your-honour",
-      "plays": 141,
-      "bottomPlays": 130,
+      "plays": 140,
+      "bottomPlays": 129,
       "topPlays": 11,
-      "statusLands": 130,
+      "statusLands": 129,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 65,
-       "paid": 3722
+       "paid": 3689
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 144,
+      "drawsSeen": 143,
       "runsDrawn": 60,
-      "winsWhenDrawn": 52
+      "winsWhenDrawn": 51
      },
      "chilblain-watch+": {
       "cardId": "chilblain-watch+",
-      "plays": 134,
-      "bottomPlays": 108,
-      "topPlays": 26,
+      "plays": 131,
+      "bottomPlays": 106,
+      "topPlays": 25,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
@@ -25159,15 +25159,15 @@
        "paid": 0
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 152,
+      "drawsSeen": 149,
       "runsDrawn": 60,
-      "winsWhenDrawn": 52
+      "winsWhenDrawn": 51
      },
      "the-bone-tithe": {
       "cardId": "the-bone-tithe",
-      "plays": 138,
-      "bottomPlays": 91,
-      "topPlays": 47,
+      "plays": 136,
+      "bottomPlays": 90,
+      "topPlays": 46,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
@@ -25176,14 +25176,14 @@
        "paid": 0
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 157,
+      "drawsSeen": 155,
       "runsDrawn": 60,
-      "winsWhenDrawn": 52
+      "winsWhenDrawn": 51
      },
      "hoarfrost-teeth": {
       "cardId": "hoarfrost-teeth",
-      "plays": 121,
-      "bottomPlays": 99,
+      "plays": 119,
+      "bottomPlays": 97,
       "topPlays": 22,
       "statusLands": 0,
       "discards": 0,
@@ -25193,84 +25193,84 @@
        "paid": 0
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 137,
+      "drawsSeen": 135,
       "runsDrawn": 59,
-      "winsWhenDrawn": 51
+      "winsWhenDrawn": 50
      },
      "every-coin-in-the-poorbox+": {
       "cardId": "every-coin-in-the-poorbox+",
-      "plays": 128,
-      "bottomPlays": 66,
-      "topPlays": 62,
+      "plays": 125,
+      "bottomPlays": 65,
+      "topPlays": 60,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 17833
+       "paid": 17625
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 133,
+      "drawsSeen": 130,
       "runsDrawn": 60,
-      "winsWhenDrawn": 52
+      "winsWhenDrawn": 51
      },
      "a-pound-of-flesh+": {
       "cardId": "a-pound-of-flesh+",
-      "plays": 130,
-      "bottomPlays": 127,
+      "plays": 128,
+      "bottomPlays": 125,
       "topPlays": 3,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 30,
-       "paid": 6604
+       "paid": 6471
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 133,
+      "drawsSeen": 131,
       "runsDrawn": 60,
-      "winsWhenDrawn": 52
+      "winsWhenDrawn": 51
      },
      "sixpence-for-the-ferryman+": {
       "cardId": "sixpence-for-the-ferryman+",
-      "plays": 145,
-      "bottomPlays": 128,
+      "plays": 142,
+      "bottomPlays": 125,
       "topPlays": 17,
-      "statusLands": 128,
+      "statusLands": 125,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 246,
-       "paid": 4876
+       "paid": 4640
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 149,
+      "drawsSeen": 146,
       "runsDrawn": 60,
-      "winsWhenDrawn": 52
+      "winsWhenDrawn": 51
      },
      "thumbprick-oath": {
       "cardId": "thumbprick-oath",
-      "plays": 130,
-      "bottomPlays": 108,
+      "plays": 128,
+      "bottomPlays": 106,
       "topPlays": 22,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 75,
-       "paid": 1757
+       "paid": 1717
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 133,
+      "drawsSeen": 131,
       "runsDrawn": 57,
-      "winsWhenDrawn": 49
+      "winsWhenDrawn": 48
      },
      "the-long-kyrie": {
       "cardId": "the-long-kyrie",
-      "plays": 131,
-      "bottomPlays": 96,
+      "plays": 128,
+      "bottomPlays": 93,
       "topPlays": 35,
-      "statusLands": 96,
+      "statusLands": 93,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
@@ -25278,15 +25278,15 @@
        "paid": 0
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 142,
+      "drawsSeen": 139,
       "runsDrawn": 59,
-      "winsWhenDrawn": 51
+      "winsWhenDrawn": 50
      },
-     "the-wound": {
-      "cardId": "the-wound",
-      "plays": 6,
-      "bottomPlays": 6,
-      "topPlays": 0,
+     "gnaw-marks": {
+      "cardId": "gnaw-marks",
+      "plays": 3,
+      "bottomPlays": 2,
+      "topPlays": 1,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
@@ -25299,11 +25299,11 @@
       "runsDrawn": 0,
       "winsWhenDrawn": 0
      },
-     "gnaw-marks": {
-      "cardId": "gnaw-marks",
-      "plays": 4,
-      "bottomPlays": 2,
-      "topPlays": 2,
+     "the-wound": {
+      "cardId": "the-wound",
+      "plays": 5,
+      "bottomPlays": 5,
+      "topPlays": 0,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
@@ -25343,45 +25343,45 @@
     ],
     "stats": {
      "runs": 60,
-     "victories": 40,
+     "victories": 39,
      "mercies": 0,
-     "defeats": 20,
+     "defeats": 21,
      "retreats": 0,
-     "winRate": 0.6666666666666666,
+     "winRate": 0.65,
      "winPathCounts": {
-      "victory": 40,
+      "victory": 39,
       "mercy": 0,
       "capitulate": 0,
       "concede": 0,
-      "defeat": 20,
+      "defeat": 21,
       "retreat": 0
      },
-     "avgRounds": 3.6666666666666665,
-     "roundsStdDev": 0.6497862896539325,
-     "statusEngagement": 0.16424682395644283,
+     "avgRounds": 3.65,
+     "roundsStdDev": 0.6278269400612457,
+     "statusEngagement": 0.16363636363636364,
      "combatQuality": {
-      "index": 0.7502269095204175,
+      "index": 0.7707343979841893,
       "components": {
-       "spine": 0.6042192053572142,
-       "arc": 0.9905671659203835,
-       "width": 0.5544871794871795,
+       "spine": 0.6573313399906293,
+       "arc": 0.9862462076416726,
+       "width": 0.556201550387597,
        "identity": 1
       },
       "spineComponents": {
-       "conviction": 0.543557306504609,
-       "surge": 0.4520484775850446,
-       "dice": 0.8170518319819893
+       "conviction": 0.8108848540793832,
+       "surge": 0.4530344078240516,
+       "dice": 0.7080747580684533
       },
       "readings": {
-       "convictionPerRound": 1.3272727272727274,
-       "convictionSpendShare": 0.2226027397260274,
-       "momentumStepsPerRound": 2.2363636363636363,
-       "surgeCompletionShare": 0.20434782608695654,
-       "diceSpendShare": 0.33378684807256237,
-       "diceEconomyBreadth": 4,
-       "arcCentroid": 0.6233014919278658,
-       "meanLiveOptions": 2.108974358974359,
-       "dominantCardShare": 0.4384213236513436
+       "convictionPerRound": 1.3150684931506849,
+       "convictionSpendShare": 0.6597222222222222,
+       "momentumStepsPerRound": 2.232876712328767,
+       "surgeCompletionShare": 0.2052401746724891,
+       "diceSpendShare": 0.33424657534246577,
+       "diceEconomyBreadth": 3,
+       "arcCentroid": 0.6151861726745854,
+       "meanLiveOptions": 2.112403100775194,
+       "dominantCardShare": 0.4389687169306385
       },
       "weights": {
        "spine": 0.4,
@@ -25392,89 +25392,88 @@
      },
      "objectiveTelemetry": {
       "runs": 60,
-      "rounds": 220,
-      "convictionGained": 292,
-      "convictionSpent": 65,
-      "signatureCasts": 9,
-      "specialsFired": 133,
-      "momentumAdvances": 445,
-      "momentumBreaks": 183,
+      "rounds": 219,
+      "convictionGained": 288,
+      "convictionSpent": 190,
+      "signatureCasts": 1,
+      "specialsFired": 131,
+      "momentumAdvances": 442,
+      "momentumBreaks": 182,
       "surges": 47,
       "surgeDiceSpent": 68,
-      "diceRolled": 2205,
-      "diceSpent": 736,
+      "diceRolled": 2190,
+      "diceSpent": 732,
       "diceEconomyVerbs": {
        "die-banked": 107,
-       "die-ripened": 162,
-       "die-overflowed": 9,
-       "press-fate-rerolled": 1
+       "die-ripened": 160,
+       "die-overflowed": 10
       },
       "arcRuns": 60,
-      "arcCentroidSum": 37.39808951567195,
-      "decisionPoints": 780,
-      "liveOptions": 1645,
+      "arcCentroidSum": 36.911170360475126,
+      "decisionPoints": 774,
+      "liveOptions": 1635,
       "damageByCard": {
-       "the-coffin-path": 15277,
-       "ice-on-the-ladder-rungs": 26790,
-       "open-every-grave": 50233,
-       "the-tolling-hand": 2961,
-       "a-pound-of-flesh+": 10277,
-       "chalk-on-the-doorpost": 3623,
-       "surplusage": 4769,
+       "the-coffin-path": 15551,
+       "ice-on-the-ladder-rungs": 26445,
+       "open-every-grave": 50193,
+       "the-tolling-hand": 2834,
+       "a-pound-of-flesh+": 10239,
+       "chalk-on-the-doorpost": 3650,
+       "surplusage": 4784,
        "first-spadeful": 647
       }
      },
-     "avgConvictionSpent": 0.8333333333333334,
-     "dotHpFraction": 0.4064767862022895,
-     "strikeFraction": 0.5935232137977106,
+     "avgConvictionSpent": 2.1333333333333333,
+     "dotHpFraction": 0.40674780605362476,
+     "strikeFraction": 0.5932521939463753,
      "mechanicBurstFraction": 0,
-     "guardMitigatedFraction": 0.08852721451440769,
+     "guardMitigatedFraction": 0.08592407436338072,
      "avgActiveEffectsPerPhase": 1.4944444444444445,
      "deckUtilization": 1,
-     "usageEntropy": 0.9950601542330201,
+     "usageEntropy": 0.9949891376541068,
      "dominantCardId": "a-pound-of-flesh+",
-     "dominantCardShare": 0.4583399460403111
+     "dominantCardShare": 0.4586113759135685
     },
     "cardUsage": {
      "the-tolling-hand": {
       "cardId": "the-tolling-hand",
-      "plays": 102,
-      "bottomPlays": 84,
+      "plays": 100,
+      "bottomPlays": 82,
       "topPlays": 18,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 494,
-       "paid": 2467
+       "paid": 2340
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 106,
+      "drawsSeen": 105,
       "runsDrawn": 59,
-      "winsWhenDrawn": 39
+      "winsWhenDrawn": 38
      },
      "open-every-grave": {
       "cardId": "open-every-grave",
-      "plays": 131,
+      "plays": 130,
       "bottomPlays": 49,
-      "topPlays": 82,
+      "topPlays": 81,
       "statusLands": 49,
       "discards": 0,
-      "fizzles": 74,
+      "fizzles": 72,
       "lineContribution": {
-       "free": 2185,
+       "free": 2145,
        "paid": 48048
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 132,
+      "drawsSeen": 130,
       "runsDrawn": 59,
-      "winsWhenDrawn": 39
+      "winsWhenDrawn": 38
      },
      "caltrops-under-the-snow": {
       "cardId": "caltrops-under-the-snow",
       "plays": 74,
-      "bottomPlays": 46,
-      "topPlays": 28,
+      "bottomPlays": 45,
+      "topPlays": 29,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
@@ -25483,43 +25482,43 @@
        "paid": 0
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 73,
+      "drawsSeen": 74,
       "runsDrawn": 59,
-      "winsWhenDrawn": 40
+      "winsWhenDrawn": 39
      },
      "the-coffin-path": {
       "cardId": "the-coffin-path",
-      "plays": 128,
-      "bottomPlays": 121,
+      "plays": 129,
+      "bottomPlays": 122,
       "topPlays": 7,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 304,
-       "paid": 14973
+       "paid": 15247
       },
       "unplayedAtPhaseEnd": 0,
       "drawsSeen": 114,
       "runsDrawn": 60,
-      "winsWhenDrawn": 40
+      "winsWhenDrawn": 39
      },
      "ice-on-the-ladder-rungs": {
       "cardId": "ice-on-the-ladder-rungs",
       "plays": 128,
-      "bottomPlays": 121,
-      "topPlays": 7,
-      "statusLands": 121,
+      "bottomPlays": 120,
+      "topPlays": 8,
+      "statusLands": 120,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 26790
+       "paid": 26445
       },
       "unplayedAtPhaseEnd": 0,
       "drawsSeen": 113,
       "runsDrawn": 58,
-      "winsWhenDrawn": 40
+      "winsWhenDrawn": 39
      },
      "chalk-on-the-doorpost": {
       "cardId": "chalk-on-the-doorpost",
@@ -25530,13 +25529,13 @@
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 2926,
+       "free": 2953,
        "paid": 697
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 114,
+      "drawsSeen": 113,
       "runsDrawn": 57,
-      "winsWhenDrawn": 38
+      "winsWhenDrawn": 37
      },
      "a-pound-of-flesh+": {
       "cardId": "a-pound-of-flesh+",
@@ -25548,12 +25547,12 @@
       "fizzles": 0,
       "lineContribution": {
        "free": 21,
-       "paid": 10256
+       "paid": 10218
       },
       "unplayedAtPhaseEnd": 0,
       "drawsSeen": 98,
       "runsDrawn": 57,
-      "winsWhenDrawn": 38
+      "winsWhenDrawn": 37
      },
      "first-spadeful": {
       "cardId": "first-spadeful",
@@ -25570,7 +25569,7 @@
       "unplayedAtPhaseEnd": 0,
       "drawsSeen": 127,
       "runsDrawn": 58,
-      "winsWhenDrawn": 38
+      "winsWhenDrawn": 37
      },
      "surplusage": {
       "cardId": "surplusage",
@@ -25581,19 +25580,19 @@
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 2165,
-       "paid": 2604
+       "free": 2153,
+       "paid": 2631
       },
       "unplayedAtPhaseEnd": 0,
       "drawsSeen": 117,
       "runsDrawn": 58,
-      "winsWhenDrawn": 39
+      "winsWhenDrawn": 38
      },
      "threadbare-cope+": {
       "cardId": "threadbare-cope+",
       "plays": 102,
-      "bottomPlays": 86,
-      "topPlays": 16,
+      "bottomPlays": 85,
+      "topPlays": 17,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
@@ -25602,9 +25601,9 @@
        "paid": 0
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 106,
-      "runsDrawn": 57,
-      "winsWhenDrawn": 38
+      "drawsSeen": 104,
+      "runsDrawn": 56,
+      "winsWhenDrawn": 37
      }
     }
    },
@@ -25633,45 +25632,45 @@
     ],
     "stats": {
      "runs": 60,
-     "victories": 19,
+     "victories": 17,
      "mercies": 0,
-     "defeats": 41,
+     "defeats": 43,
      "retreats": 0,
-     "winRate": 0.31666666666666665,
+     "winRate": 0.2833333333333333,
      "winPathCounts": {
-      "victory": 19,
+      "victory": 17,
       "mercy": 0,
       "capitulate": 0,
       "concede": 0,
-      "defeat": 41,
+      "defeat": 43,
       "retreat": 0
      },
-     "avgRounds": 4.133333333333334,
-     "roundsStdDev": 0.4268749491621858,
-     "statusEngagement": 0.10074626865671642,
+     "avgRounds": 4.1,
+     "roundsStdDev": 0.39581140290126343,
+     "statusEngagement": 0.10182370820668693,
      "combatQuality": {
-      "index": 0.7793234291241254,
+      "index": 0.7732406937172382,
       "components": {
-       "spine": 0.7115480704212924,
-       "arc": 0.7578340680986624,
-       "width": 0.7762284196547145,
+       "spine": 0.7037456236566231,
+       "arc": 0.7469697770183559,
+       "width": 0.7749999999999999,
        "identity": 1
       },
       "spineComponents": {
-       "conviction": 0.7905694150420949,
-       "surge": 0.5238664812961065,
-       "dice": 0.8202083149256761
+       "conviction": 0.7650920556760059,
+       "surge": 0.5232248642363369,
+       "dice": 0.8229199510575265
       },
       "readings": {
-       "convictionPerRound": 1.5524193548387097,
-       "convictionSpendShare": 0.4025974025974026,
-       "momentumStepsPerRound": 2.2016129032258065,
-       "surgeCompletionShare": 0.2744360902255639,
-       "diceSpendShare": 0.33637083993660855,
+       "convictionPerRound": 1.5406504065040652,
+       "convictionSpendShare": 0.37994722955145116,
+       "momentumStepsPerRound": 2.182926829268293,
+       "surgeCompletionShare": 0.2737642585551331,
+       "diceSpendShare": 0.33859862292426085,
        "diceEconomyBreadth": 5,
-       "arcCentroid": 0.5352419238345318,
-       "meanLiveOptions": 2.552456839309429,
-       "dominantCardShare": 0.2336916768258894
+       "arcCentroid": 0.5314394219564246,
+       "meanLiveOptions": 2.55,
+       "dominantCardShare": 0.23196276183087663
       },
       "weights": {
        "spine": 0.4,
@@ -25682,70 +25681,70 @@
      },
      "objectiveTelemetry": {
       "runs": 60,
-      "rounds": 248,
-      "convictionGained": 385,
-      "convictionSpent": 155,
-      "signatureCasts": 49,
-      "specialsFired": 146,
-      "momentumAdvances": 473,
-      "momentumBreaks": 193,
-      "surges": 73,
+      "rounds": 246,
+      "convictionGained": 379,
+      "convictionSpent": 144,
+      "signatureCasts": 46,
+      "specialsFired": 144,
+      "momentumAdvances": 465,
+      "momentumBreaks": 191,
+      "surges": 72,
       "surgeDiceSpent": 88,
-      "diceRolled": 2524,
-      "diceSpent": 849,
+      "diceRolled": 2469,
+      "diceSpent": 836,
       "diceEconomyVerbs": {
        "die-floated": 53,
        "die-banked": 125,
-       "die-ripened": 214,
-       "die-overflowed": 34,
-       "press-fate-rerolled": 7
+       "die-ripened": 212,
+       "die-overflowed": 33,
+       "press-fate-rerolled": 6
       },
       "arcRuns": 60,
-      "arcCentroidSum": 32.11451543007191,
-      "decisionPoints": 753,
-      "liveOptions": 1922,
+      "arcCentroidSum": 31.886365317385472,
+      "decisionPoints": 740,
+      "liveOptions": 1887,
       "damageByCard": {
-       "ice-on-the-ladder-rungs": 3521,
-       "the-unpaid-sexton+": 3486,
-       "chalk-on-the-doorpost": 3715,
-       "thumbprick-oath": 3607,
-       "a-pound-of-flesh+": 10543,
-       "the-long-lent": 6324,
-       "surplusage": 4398,
-       "every-wound-accounted": 8307,
-       "the-charnel-ledger": 798,
-       "sig-disarming-plea": 78,
+       "ice-on-the-ladder-rungs": 3429,
+       "the-unpaid-sexton+": 3413,
+       "chalk-on-the-doorpost": 3624,
+       "thumbprick-oath": 3487,
+       "a-pound-of-flesh+": 10166,
+       "the-long-lent": 6276,
+       "surplusage": 4250,
+       "every-wound-accounted": 8013,
+       "the-charnel-ledger": 758,
+       "sig-disarming-plea": 72,
        "overheard-name": 338
       }
      },
-     "avgConvictionSpent": 0.9166666666666666,
-     "dotHpFraction": 0.21615827124328685,
-     "strikeFraction": 0.7838417287567132,
+     "avgConvictionSpent": 0.8166666666666667,
+     "dotHpFraction": 0.21595544055085303,
+     "strikeFraction": 0.784044559449147,
      "mechanicBurstFraction": 0,
-     "guardMitigatedFraction": 0.06823559781439573,
-     "avgActiveEffectsPerPhase": 1.7816593886462881,
+     "guardMitigatedFraction": 0.06593777702731225,
+     "avgActiveEffectsPerPhase": 1.7699115044247788,
      "deckUtilization": 1,
-     "usageEntropy": 0.9952982401396698,
+     "usageEntropy": 0.9955400308636755,
      "dominantCardId": "a-pound-of-flesh+",
-     "dominantCardShare": 0.3458605861308857
+     "dominantCardShare": 0.3440611597986202
     },
     "cardUsage": {
      "the-unpaid-sexton+": {
       "cardId": "the-unpaid-sexton+",
-      "plays": 146,
+      "plays": 144,
       "bottomPlays": 53,
-      "topPlays": 93,
+      "topPlays": 91,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 1665,
+       "free": 1592,
        "paid": 1821
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 153,
+      "drawsSeen": 150,
       "runsDrawn": 60,
-      "winsWhenDrawn": 19
+      "winsWhenDrawn": 17
      },
      "overheard-name": {
       "cardId": "overheard-name",
@@ -25762,143 +25761,143 @@
       "unplayedAtPhaseEnd": 0,
       "drawsSeen": 81,
       "runsDrawn": 60,
-      "winsWhenDrawn": 19
+      "winsWhenDrawn": 17
      },
      "chalk-on-the-doorpost": {
       "cardId": "chalk-on-the-doorpost",
-      "plays": 129,
+      "plays": 127,
       "bottomPlays": 67,
-      "topPlays": 62,
+      "topPlays": 60,
       "statusLands": 67,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 1348,
+       "free": 1257,
        "paid": 2367
       },
       "unplayedAtPhaseEnd": 0,
       "drawsSeen": 137,
       "runsDrawn": 60,
-      "winsWhenDrawn": 19
+      "winsWhenDrawn": 17
      },
      "the-charnel-ledger": {
       "cardId": "the-charnel-ledger",
-      "plays": 148,
-      "bottomPlays": 69,
-      "topPlays": 79,
+      "plays": 145,
+      "bottomPlays": 67,
+      "topPlays": 78,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 490,
-       "paid": 308
-      },
-      "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 153,
-      "runsDrawn": 60,
-      "winsWhenDrawn": 19
-     },
-     "ice-on-the-ladder-rungs": {
-      "cardId": "ice-on-the-ladder-rungs",
-      "plays": 145,
-      "bottomPlays": 68,
-      "topPlays": 77,
-      "statusLands": 68,
-      "discards": 0,
-      "fizzles": 0,
-      "lineContribution": {
-       "free": 464,
-       "paid": 3057
+       "paid": 268
       },
       "unplayedAtPhaseEnd": 0,
       "drawsSeen": 151,
       "runsDrawn": 60,
-      "winsWhenDrawn": 19
+      "winsWhenDrawn": 17
+     },
+     "ice-on-the-ladder-rungs": {
+      "cardId": "ice-on-the-ladder-rungs",
+      "plays": 141,
+      "bottomPlays": 67,
+      "topPlays": 74,
+      "statusLands": 67,
+      "discards": 0,
+      "fizzles": 0,
+      "lineContribution": {
+       "free": 432,
+       "paid": 2997
+      },
+      "unplayedAtPhaseEnd": 0,
+      "drawsSeen": 148,
+      "runsDrawn": 60,
+      "winsWhenDrawn": 17
      },
      "thumbprick-oath": {
       "cardId": "thumbprick-oath",
-      "plays": 140,
-      "bottomPlays": 119,
+      "plays": 138,
+      "bottomPlays": 117,
       "topPlays": 21,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 228,
-       "paid": 3379
+       "paid": 3259
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 141,
+      "drawsSeen": 139,
       "runsDrawn": 60,
-      "winsWhenDrawn": 19
+      "winsWhenDrawn": 17
      },
      "the-long-lent": {
       "cardId": "the-long-lent",
-      "plays": 141,
+      "plays": 139,
       "bottomPlays": 60,
-      "topPlays": 81,
+      "topPlays": 79,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 4148,
+       "free": 4100,
        "paid": 2176
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 146,
+      "drawsSeen": 144,
       "runsDrawn": 60,
-      "winsWhenDrawn": 19
+      "winsWhenDrawn": 17
      },
      "a-pound-of-flesh+": {
       "cardId": "a-pound-of-flesh+",
-      "plays": 132,
-      "bottomPlays": 132,
+      "plays": 128,
+      "bottomPlays": 128,
       "topPlays": 0,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 0,
-       "paid": 10543
+       "paid": 10166
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 132,
+      "drawsSeen": 130,
       "runsDrawn": 60,
-      "winsWhenDrawn": 19
+      "winsWhenDrawn": 17
      },
      "surplusage": {
       "cardId": "surplusage",
-      "plays": 140,
-      "bottomPlays": 68,
-      "topPlays": 72,
+      "plays": 137,
+      "bottomPlays": 66,
+      "topPlays": 71,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
-       "free": 1363,
-       "paid": 3035
+       "free": 1330,
+       "paid": 2920
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 146,
+      "drawsSeen": 145,
       "runsDrawn": 59,
-      "winsWhenDrawn": 19
+      "winsWhenDrawn": 17
      },
      "every-wound-accounted": {
       "cardId": "every-wound-accounted",
-      "plays": 138,
-      "bottomPlays": 63,
+      "plays": 136,
+      "bottomPlays": 61,
       "topPlays": 75,
       "statusLands": 0,
       "discards": 0,
       "fizzles": 0,
       "lineContribution": {
        "free": 2330,
-       "paid": 5977
+       "paid": 5683
       },
       "unplayedAtPhaseEnd": 0,
-      "drawsSeen": 140,
+      "drawsSeen": 139,
       "runsDrawn": 60,
-      "winsWhenDrawn": 19
+      "winsWhenDrawn": 17
      }
     }
    },
@@ -26013,7 +26012,7 @@
      "dotHpFraction": 0.40936168899314773,
      "strikeFraction": 0.5906383110068523,
      "mechanicBurstFraction": 0,
-     "guardMitigatedFraction": 0.08480644439471918,
+     "guardMitigatedFraction": 0.08152290815229081,
      "avgActiveEffectsPerPhase": 1.6397849462365592,
      "deckUtilization": 1,
      "usageEntropy": 0.9959192639571443,
@@ -42887,28 +42886,28 @@
    }
   ],
   "combatQuality": {
-   "index": 0.7589337497368146,
+   "index": 0.7600066360467143,
    "components": {
-    "spine": 0.7472382474615789,
-    "arc": 0.7935494514569281,
-    "width": 0.558255439439755,
+    "spine": 0.7508004112169525,
+    "arc": 0.7920549054610244,
+    "width": 0.5583637259733858,
     "identity": 1
    },
    "spineComponents": {
-    "conviction": 0.8374816939324397,
-    "surge": 0.5762524950376244,
-    "dice": 0.8279805534146727
+    "conviction": 0.8483408428635726,
+    "surge": 0.5760598265975337,
+    "dice": 0.8280005641897514
    },
    "readings": {
-    "convictionPerRound": 1.8649834581229323,
-    "convictionSpendShare": 0.3760760368233339,
-    "momentumStepsPerRound": 2.5013755876719483,
-    "surgeCompletionShare": 0.3320669380370873,
-    "diceSpendShare": 0.3427758984164338,
+    "convictionPerRound": 1.8654864789517702,
+    "convictionSpendShare": 0.3857879399237839,
+    "momentumStepsPerRound": 2.5009408976860885,
+    "surgeCompletionShare": 0.33184492381958064,
+    "diceSpendShare": 0.3427924671492733,
     "diceEconomyBreadth": 5,
-    "arcCentroid": 0.5477423080099248,
-    "meanLiveOptions": 2.11651087887951,
-    "dominantCardShare": 0.16225578235331423
+    "arcCentroid": 0.5472192169113586,
+    "meanLiveOptions": 2.1167274519467716,
+    "dominantCardShare": 0.16235123140278615
    },
    "weights": {
     "spine": 0.4,
@@ -42973,31 +42972,31 @@
    {
     "stage": "mid",
     "cells": 40,
-    "winRate": 0.9175,
-    "statusEngagement": 0.24464981878275613,
+    "winRate": 0.9116666666666666,
+    "statusEngagement": 0.24478896881374435,
     "combatQuality": {
-     "index": 0.7170439848357522,
+     "index": 0.7249711659310856,
      "components": {
-      "spine": 0.6338681634721077,
-      "arc": 0.7846351324865236,
-      "width": 0.5866896816263905,
+      "spine": 0.6568632642032302,
+      "arc": 0.7790444487473811,
+      "width": 0.5873237403147409,
       "identity": 1
      },
      "spineComponents": {
-      "conviction": 0.5062772313887299,
-      "surge": 0.5889655823691492,
-      "dice": 0.8063616766584444
+      "conviction": 0.5762076287243315,
+      "surge": 0.5880099434378474,
+      "dice": 0.8063722204475119
      },
      "readings": {
-      "convictionPerRound": 1.2211187381334891,
-      "convictionSpendShare": 0.20990312163616792,
-      "momentumStepsPerRound": 2.098437271797868,
-      "surgeCompletionShare": 0.34688045721543104,
-      "diceSpendShare": 0.3251095767917088,
+      "convictionPerRound": 1.2214411247803163,
+      "convictionSpendShare": 0.27182254196642686,
+      "momentumStepsPerRound": 2.0954891622729934,
+      "surgeCompletionShare": 0.34575569358178054,
+      "diceSpendShare": 0.3251180789547254,
       "diceEconomyBreadth": 5,
-      "arcCentroid": 0.5446222963702833,
-      "meanLiveOptions": 2.173379363252781,
-      "dominantCardShare": 0.1926291803909647
+      "arcCentroid": 0.5426655570615834,
+      "meanLiveOptions": 2.1746474806294818,
+      "dominantCardShare": 0.1931881841242266
      },
      "weights": {
       "spine": 0.4,
@@ -43006,19 +43005,19 @@
       "identity": 0.15
      }
     },
-    "dotHpFraction": 0.19951617943960695,
-    "avgRounds": 2.8529166666666668,
-    "roundsStdDev": 0.7033720007222517,
+    "dotHpFraction": 0.1998490866941481,
+    "avgRounds": 2.845,
+    "roundsStdDev": 0.6936939535033815,
     "winPathCounts": {
-     "victory": 2183,
+     "victory": 2169,
      "mercy": 0,
      "capitulate": 0,
      "concede": 19,
-     "defeat": 198,
+     "defeat": 212,
      "retreat": 0
     },
     "deckUtilization": 1,
-    "usageEntropy": 0.9832481185131227,
+    "usageEntropy": 0.9832061598734803,
     "dominantCardId": "the-bench-does-not-retire+",
     "dominantCardShare": 0.885946806628531
    },
