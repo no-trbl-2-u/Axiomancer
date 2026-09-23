@@ -19,7 +19,7 @@
 // Safety: this is a MECHANICAL word-boundary replacement, not a semantic
 // rename. It does not know that a card comment discussing "the premise of
 // this test" is English prose, not the PREMISE keyword — that is why every
-// invocation defaults to a dry-run report (file:line, occurrence count) and
+// invocation defaults to a dry-run report (file, occurrence count) and
 // requires an explicit --write to touch disk, and why callers MUST pass
 // explicit globs (there is no default "scan everything" mode) so a phase
 // scopes its own blast radius and reviews the resulting diff before commit.

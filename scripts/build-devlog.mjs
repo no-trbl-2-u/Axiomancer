@@ -134,7 +134,7 @@ function countsBar(counts) {
 }
 
 // ---------------------------------------------------------------------------
-// The hub (devlog/index.html) — four links into the site
+// The hub (devlog/index.html) — three links into the site
 // ---------------------------------------------------------------------------
 function dataCount(name) {
   try {
