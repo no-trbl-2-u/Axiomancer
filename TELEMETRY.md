@@ -627,3 +627,20 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-22T19:31:50Z | skill | digest | claude-opus-5-5 | - | args: Cover PR #353 (UI/map overhaul: first-node Suppliant's Ring, gathering card, card te |
 | 2026-09-22T19:31:50Z | skill-end | digest | claude-opus-5-5 | 0s | ok |
 | 2026-09-22T20:30:12Z | slash-prompt | /march | - | - | /march |
+| 2026-09-23T01:03:01Z | slash-prompt | /march | - | - | /march |
+| 2026-09-23T01:04:08Z | skill | adjust-enemies | claude-sonnet-5 | - | - |
+| 2026-09-23T01:04:08Z | skill-end | adjust-enemies | claude-sonnet-5 | 0s | ok |
+| 2026-09-23T01:05:50Z | subagent | general-purpose | claude-sonnet-5 | - | Run adjust-enemies lifecycle tick |
+| 2026-09-23T02:39:12Z | slash-prompt | /march | - | - | /march |
+| 2026-09-23T04:35:34Z | slash-prompt | /march | - | - | /march |
+| 2026-09-23T04:38:35Z | skill | adjust-npcs | claude-sonnet-5 | - | - |
+| 2026-09-23T04:38:35Z | skill-end | adjust-npcs | claude-sonnet-5 | 0s | ok |
+| 2026-09-23T06:47:35Z | slash-prompt | /march | - | - | /march |
+| 2026-09-23T06:51:36Z | subagent | card-expert | claude-sonnet-5 | - | Run adjust-cards steward tick |
+| 2026-09-23T08:38:58Z | slash-prompt | /march | - | - | /march |
+| 2026-09-23T08:42:11Z | skill | adjust-equipment | claude-sonnet-5 | - | - |
+| 2026-09-23T08:42:11Z | skill-end | adjust-equipment | claude-sonnet-5 | 0s | ok |
+| 2026-09-23T08:54:02Z | slash-prompt | /digest | - | - | /digest |
+| 2026-09-23T08:54:04Z | skill | digest | - | - | - |
+| 2026-09-23T08:54:04Z | skill-end | digest | - | 0s | ok |
+| 2026-09-23T10:31:59Z | slash-prompt | /march | - | - | /march |

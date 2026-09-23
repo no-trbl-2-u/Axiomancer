@@ -11,15 +11,423 @@
 
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
-| cards | `skills/adjust-cards.md` | 2026-09-21 | 2a162f5e | 16 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-21 | 5d9b6063 | 16 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-21 | f78f0550 | 15 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-21 | fb0a0f3c | 15 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-21 | 9821b636 | 15 |
+| cards | `skills/adjust-cards.md` | 2026-09-23 | 68769014 | 17 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-23 | 9a162fc8 | 17 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-23 | d02bda13 | 16 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-23 | 06d2ab2e | 16 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-23 | 2789a2af | 16 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-equipment pass 17, 2026-09-23, commit 9a162fc8]**
+> Zero-CREATE, zero-UPDATE, zero-REMOVE pass — dispatched autonomously
+> by `/march`'s content-lifecycle gate: `equipment` (`5d9b6063`
+> 2026-09-22T01:16:46Z, 40 commits behind HEAD `768484ae`
+> 2026-09-23T07:01:34Z) was the sole qualifying category this tick
+> (past the 15-commit threshold by a wide margin); `cards` (`68769014`,
+> 1 commit), `enemies` (`d02bda13`, 7 commits), `keywords`
+> (`06d2ab2e`, 5 commits) and `npcs` (`2789a2af`, 3 commits) had all
+> ticked within the last day and did not qualify. Deploy confirmed
+> green (`npm run deploy:check`: no gated workflow for HEAD yet within
+> the grace window, docs/plan-only tick); no phase work pending.
+>
+> **Step 1 audit — fresh, not re-cited:** slot coverage (2 weapons, 2
+> armor, 7 accessories, all 6 `AccessoryKind`s live), dominance (no
+> same-slot pair strictly worse on every `statModifiers` value — every
+> tie differs only by `grantsSignature`), signature drift (all 11
+> `grantsSignature` values resolve live in `SignatureSkillId` and in
+> `combat.signature.ts`'s roster), consumable `effectId` resolution
+> (all 22 resolve in `buffs.library.json`/`debuffs.library.json`), and
+> shop/reward reachability (all 22 consumables occur in >=1 shop ware
+> block or `enemy.library.ts` loot table) all re-derived clean,
+> byte-identical to pass 16's own findings. Checked every shop pool
+> and every enemy loot table for a shared-`effectId` pair co-occurring
+> in the same pool (the pass-11/14/15 bug class) — `focus-vial`/
+> `hunters-elixir` (both `buff_accuracy_up`) and `berserker-brew`/
+> `quicksilver-vial` (both `buff_haste`) are the only same-effect
+> pairs in the library, and neither pair ever co-occurs in one shop or
+> loot table (confirmed by grep over every `content.ts` shop block and
+> every `enemy.library.ts` loot row), so neither is the pass-11/14/15
+> visible-duplication bug — pass 15's own conclusion on the haste trio
+> re-confirmed, not re-opened. A genuine zero-diff pass on the data
+> itself, so the Step 1b widened KB check ran.
+>
+> **Step 1b widened KB check:** `kb_find_games`/`kb_search` confirm
+> the boardgame corpus's mechanics vocabulary has no `equipment`/
+> `itemization` tag to check against; `kb_cards`/`kb_keyword` confirm
+> Dawncaster has no `relic`/`trinket`/`artifact`/`equip` card type —
+> the corpus's closest equipment analogue was already exhausted by
+> pass 16 (Durability/re-enable procs, both retired mechanics per
+> `docs/equipment.md` phases 18-23; Slay-the-Spire's found-not-started
+> relic-acquisition model, already logged as a deliberate deferral).
+> Re-running those same two searches this pass reproduced the same
+> dead ends rather than a new angle — no new corpus gap to file. The
+> already-filed "always-good secondary" consumable lever
+> (`plan/PHASE_CANDIDATES.md`) is unshipped residue from pass 13, out
+> of this tick's own findings, not re-filed.
+>
+> Verify: green (mechanics + mobile, both re-run clean). Commit only
+> the ledger bump — no code diff this pass.
+```
+
+```
+> **[adjust-cards pass 17, 2026-09-23, commit 68769014]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE on the card surface itself — one candidate
+> filed to `plan/PHASE_CANDIDATES.md` from the widened KB check.
+> Dispatched autonomously by `/march`'s content-lifecycle gate: `cards`
+> (`2a162f5e` 2026-09-21T22:39:41Z, 40 commits behind HEAD
+> `f3c38a4f` 2026-09-23T04:45:43Z) was the stalest qualifying category
+> this tick by both commit-count and last-pass timestamp; `equipment`
+> (`5d9b6063` 2026-09-22T01:16:46Z, 38 commits) also qualified on
+> commit count but was less stale; `enemies` (`d02bda13`, 5 commits),
+> `keywords` (`06d2ab2e`, 3 commits) and `npcs` (`2789a2af`, 1 commit)
+> had all just ticked this same session and did not qualify. Deploy
+> confirmed green (per the dispatching `/march` tick); no phase work
+> pending.
+>
+> **Step 0:** read `axiomancer-mechanics/CLAUDE.md` (THE BIG NUMBERS
+> REWRITE, load-bearing — no CQI/rank-band/win-rate-curve/count-pin
+> grading) and `plan/bearings.md` LOCKED MECHANICS fresh; no doctrine
+> change landed in the 40-commit window.
+>
+> **Step 1 audit — fresh, not re-cited:** `git log 2a162f5e..HEAD` over
+> the card-authoring surfaces (`src/Cards/**`,
+> `combat.starter-deck-presets.ts`, `combat.deck-draft.ts`,
+> `combat.engine.ts`, `combat.cards.ts`) of the 40 intervening commits
+> returns exactly one touch: `4fcb6f2f` ("combat: project card text in
+> the engine so the detail panel stops re-deriving it") — read the
+> diff directly rather than trusting the one-line summary: it exports
+> the already-private `REGISTRY_DOT_IDS` constant for a new mobile-side
+> pure projection module to consume; zero card ids/text/pricing/mechanic
+> touched. `axio_overview` confirms the library unchanged at 134 cards
+> across 8 themes (grey 2, debt 20, trial 24, rot 19, choir 21, vigil
+> 21, curse 5, grave 22). Re-ran the full card-surface e2e trio fresh:
+> `pricing.engine.test.ts` 263/263, `curated-library.engine.test.ts`
+> 14/14 (FREE-line + reachability), `deck-presets.engine.test.ts` 9/9
+> (aspect-thirds) — all green, byte-identical counts to pass 16's own
+> citation. Also read `src/Cards/card-upgrades.ts`'s
+> `upgradeMechanicDefault` switch end to end against the full 52-kind
+> `CardSpecialMechanic` union in `types.ts`: exhaustive, no `default:`
+> arm, every kind either raises a real number or is explicitly listed
+> as cost/gate/divisor-only — a genuine audit pass, not a re-cite, and
+> it came back clean.
+>
+> **Step 1b widened audit:** Step 1 returned nothing actionable, so ran
+> the KB cross-reference before accepting zero-diff, on an angle not
+> used by any prior `/adjust-cards` pass (prior angles: curse
+> proportion, Dawncaster keywords.csv functions sweep, StS curse
+> deep-dive, starting-deck-size genre comparison, direct-damage prior
+> art, alt-win/mercy prior art, Stunned/Silenced/Weakness/Frozen
+> keyword checks). Queried `kb_cards game=slay-the-spire "upgrade"`:
+> `kb:slay-the-spire/cards/0015-armaments-armaments` ("Gain 5 Block.
+> Upgrade a card in your hand for the rest of combat"),
+> `kb:slay-the-spire/cards/0013-apotheosis-apotheosis` ("Upgrade ALL
+> your cards for the rest of combat. Exhaust"), and
+> `kb:slay-the-spire/cards/0202-lesson-learned-lessonlearned` ("If
+> Fatal, Upgrade a random card in your deck. Exhaust") — a genre-staple
+> niche (a card granting an upgrade as a COMBAT EFFECT, temporary or
+> permanent) that Axiomancer's own `+`-card system
+> (`src/Cards/card-upgrades.ts`) has never wired: it is meta-progression
+> only (an authored patch or the default rule, applied between runs),
+> with no `CardSpecialMechanic` kind that lets a card trigger it
+> mid-fight. Confirmed genuinely absent, not a near-synonym, via the
+> full 52-kind sweep already run in Step 1 plus a library-wide
+> `axio_cards`/grep check — no card or keyword-atlas row references any
+> such verb. Sized against Step 3's ship-small/file-large rule: a
+> card-triggered upgrade needs a new `CardSpecialMechanic` kind, a
+> targeting model, a combat-engine hook, and (for the StS
+> this-fight-only flavor) a REVERT-at-combat-end transient-state shape
+> the engine has never carried — new engine wiring plus a new keyword,
+> past this steward's 3-item ship-small ceiling. Filed as
+> `plan/PHASE_CANDIDATES.md` `[score 3.0]` "No card grants an
+> in-combat/temporary card upgrade — Slay the Spire's
+> Armaments/Apotheosis niche has no analogue" rather than built solo.
+>
+> **What shipped:** nothing on the card surface itself — genuine
+> zero-diff on CREATE/UPDATE/REMOVE. KB research (skill §3 Step 2): the
+> Step 1b widened check above IS this pass's KB research run.
+>
+> **Verify:** `npm run verify --workspace axiomancer-mechanics` (229
+> files, 3734 tests + build green), `npm run verify --workspace
+> axiomancer-mobile` (lint/typecheck/jest/asset/critique-drive suites,
+> exit 0), `npm run type-check --workspace axiomancer-card-editor`
+> (clean) — all three ran in full despite the empty card-data diff.
+```
+
+```
+> **[adjust-npcs pass 16, 2026-09-23, commit 2789a2af]** Zero-diff pass —
+> audit re-confirmed, no new CREATE/UPDATE/REMOVE, ledger bump only.
+> Dispatched autonomously by `/march`'s content-lifecycle gate: `npcs`
+> (`9821b636` 2026-09-21T18:48:17Z) was the stalest qualifying category
+> this tick by last-pass timestamp — `cards` (`2a162f5e`
+> 2026-09-21T22:39:41Z) and `equipment` (`5d9b6063`
+> 2026-09-22T01:16:46Z) also qualified (each >15 commits behind HEAD)
+> but were less stale; `enemies` (`d02bda13`, 3 commits behind) and
+> `keywords` (`06d2ab2e`, 1 commit behind) had both just ticked this
+> same session and did not qualify. Deploy confirmed green (`npm run
+> deploy:check` on HEAD `5f020d52` — no gated workflow yet, docs/plan-
+> only tick, nothing to check). No phase work pending (build plan queue
+> drained — only `[blocked: …]`/`[skipped]` rows remain, no `[ ]` row);
+> growth floor clear (`src/World` commits within 7 days:
+> `1da16935`/`ab6e80b8`).
+>
+> **Step 0:** read `axiomancer-mechanics/CLAUDE.md` fresh — THE STORY IS
+> THE ROAD (¶1 lifted 2026-09-18) still governs and hard rule 3 (don't
+> invent a named character's personhood autonomously) still stands;
+> THE BIG NUMBERS REWRITE is not this surface's concern.
+>
+> **Step 1 structural audit:** `git log 9821b636..HEAD -- src/NPCs
+> src/World/Continents src/World/MapEvents src/World/types.ts
+> content/story/` returns exactly two touching commits of the 40
+> intervening: `1da16935` ("world: open the whole explored frontier for
+> traversal and spend nodes on resolution") and `ab6e80b8` ("event: give
+> gathering nodes a visible acknowledgement card instead of a covered
+> toast"). Read both diffs directly: `1da16935` touches
+> `Coastal-Village/maps.ts` and `Northern-Continent/maps.ts` but only
+> node topology/traversal fields — zero lines touching any `npcs:`,
+> `unstagedNpcs:`, or `const NPC` block. `ab6e80b8` touches mobile event
+> presentation only, no `src/NPCs`/`src/World/Continents` files at all.
+> Re-ran every Step 1 signal fresh anyway:
+> - All 21 `const NPC` entries (`oldMarrow` through `theRibbonPicker`)
+>   unchanged in count, each still referenced from exactly one map's
+>   `npcs:` or `unstagedNpcs:` array — no orphan.
+> - Zero legacy `dialogue:` (flat `DialogueMap`) usage across
+>   `src/World/Continents/*/npcs.ts` and `*/maps.ts` — every NPC still
+>   on `dialogueTree`.
+> - Zero `teachCard` usage in NPC content; every `startQuest` name
+>   (`find-islanders`, `gather-iron`, `gather-wood`, `get-to-cave`,
+>   `get-to-connecting-river`, `get-to-forest`, `get-to-northern-city`,
+>   `get-to-the-capital`, `get-to-town-across-river`, `starting-quest`)
+>   resolves against the live `QuestName` union (type-checked green by
+>   the verify gate below).
+> - Coastal-Village's 3-NPC `unstagedNpcs` backlog (Tide-Shopkeeper,
+>   Dockworker's Union Leader, Merchant's Widow) unchanged — still the
+>   same genuine engine-surface gap (no `openShop`-shaped
+>   `DialogueChoice.effect` exists), correctly left unstaged.
+> - Northern-Continent's three 1-NPC maps (`caverns`/theDelver,
+>   `connecting-river`/theBoatwoman, `town-across-river`/theSweetheart)
+>   unchanged; `plan/AUDIT.md`'s `[gap]` row (DECIDED via `/oversight`
+>   2026-09-15, still needs an attended character-spec/story-spec
+>   session) re-confirmed still open and still not this autonomous
+>   tick's call.
+>
+> **Step 1b widened check:** Step 1 returned nothing actionable, so ran
+> the deeper KB cross-reference before accepting zero-diff. `kb_overview`
+> confirms the corpus is unchanged (46 board/card games, 2801 okf docs,
+> zero dialogue-tree-bearing digital RPGs) — no new source landed to
+> re-scan. A fresh-angle `kb_search` (`dialogue|dead.?end|npc
+> roster|reactive npc|merchant`, scope `all`) returned only two
+> tangential hits (a Slay the Spire board-game "Andrew rule" culling
+> note, a Dawncaster `valuable` keyword mention) — no dialogue/NPC
+> staging commentary. No new citable gap; the existing wishlist
+> [`game-knowledge-base#81`](https://github.com/no-trbl-2-u/game-knowledge-base/issues/81)
+> still covers the corpus-shape miss pass 13 filed.
+>
+> **Ship (Step 3):** none — zero CREATE, zero UPDATE, zero REMOVE. Both
+> open items (Northern-Continent singleton maps, Coastal-Village's
+> 3-NPC unstaged backlog) are re-confirmed correctly-blocked, not stale.
+>
+> **Gates:** `npm run verify --workspace axiomancer-mechanics` (229
+> files / 3734 tests) and `npm run verify --workspace axiomancer-mobile`
+> green (unchanged, no source touched).
+```
+
+```
+> **[adjust-keywords pass 16, 2026-09-23, commit 06d2ab2e]** Zero-diff
+> pass — audit re-confirmed, no new CREATE/UPDATE/REMOVE, ledger bump
+> only. Dispatched autonomously by `/march`'s content-lifecycle gate:
+> `keywords` (`fb0a0f3c` 2026-09-21T12:50:21Z) was the stalest
+> qualifying category this tick by last-pass timestamp — `cards`
+> (`2a162f5e` 2026-09-21T22:39:41Z), `equipment` (`5d9b6063`
+> 2026-09-22T01:16:46Z) and `npcs` (`9821b636` 2026-09-21T18:48:17Z) all
+> qualified too (each >15 commits behind HEAD) but were less stale;
+> `enemies` had just ticked this same session (`d02bda13`, 1 commit
+> behind). Deploy confirmed green (`npm run deploy:check` on HEAD
+> `cb904b6e`); no phase work pending (build plan queue drained, no `[ ]`
+> row); growth floor clear (`src/World` commits within 7 days).
+>
+> **Step 0:** read `axiomancer-mechanics/CLAUDE.md` (THE BIG NUMBERS
+> REWRITE — no CQI/status-engagement-floor grading; THE STORY IS THE
+> ROAD — irrelevant to keyword work), the live `docs/keyword-atlas.md`,
+> and `docs/retheme-map.json` fresh rather than trusting pass 15's
+> reading.
+>
+> **Step 1 structural audit:** `git log fb0a0f3c..HEAD` against the
+> full keyword-surface path set (`src/Cards/types.ts`,
+> `src/Combat/combat.cards.ts`, `src/Combat/combat.engine.ts`,
+> `src/Effects/**`, `axiomancer-mobile/state/combat/keywords.ts`,
+> `docs/keyword-atlas.md`, `axiomancer-card-editor/src/data/
+> mechanics.ts`, `src/Enemy/enemy-keywords.ts`) returns exactly one
+> touching commit of the 8 intervening: `4fcb6f2f` ("combat: project
+> card text in the engine so the detail panel stops re-deriving it").
+> Read its diff directly: it adds a new pure presentation module
+> (`Combat/combat.card-text.ts`) that projects existing
+> `mechanicText`/`riderText` output into a structured clause list for
+> the mobile detail panel — a card-detail honesty fix (25 cards were
+> silently dropping a paid clause, 15 more printed a clause with
+> numbers omitted), not a new `CardSpecialMechanic`/`CardRider` kind or
+> keyword. Its only edit to `combat.cards.ts` itself widens
+> `REGISTRY_DOT_IDS` from module-private to exported — zero behavior
+> change. No atlas row owed. Re-ran every other Step 1 signal fresh:
+> (1) carrier-count/orphan sweep — every `kind:` literal in
+> `CardSpecialMechanic`/`CardRider` (`src/Cards/types.ts`) against
+> every `case '...':` in `combat.cards.ts`'s `mechanicText` switch:
+> 55/55 identical sets, zero silent `default:` arms; (2)
+> semantic-overlap check — no new near-synonym pairs (nothing new was
+> minted this window); (3) `kb:` receipt backfill — no atlas row lost a
+> receipt; (4) `node --test scripts/content-drift.test.mjs`: 11/11
+> green, matching pass 15's result byte-for-byte.
+>
+> **Step 1b widened KB cross-reference:** rather than re-reading the
+> same functions-column sweep passes 9/11/14/15 already exhausted,
+> queried three keyword families not previously checked against this
+> registry, via `kb_keyword`: **Stunned/Silenced**
+> (`kb:dawncaster/keywords/stunned.okf.md`,
+> `kb:dawncaster/keywords/silenced.okf.md`, community, confidence
+> medium) — "cards/Magic Actions can't be played" for N turns/stacks —
+> a hard play-lockout. Not filed: it directly conflicts with THE BIG
+> NUMBERS REWRITE's surviving pillar 2 ("Every card has a FREE line...
+> a card must be playable without a die") for its full duration — a
+> mechanic whose entire point is "you may not play cards" is a design
+> non-starter under a still-live hard constraint, not a gap worth a
+> candidate row. **Weakness** (`kb:dawncaster/keywords/weakness.okf.md`,
+> community, confidence medium) — "next damage you deal is reduced by
+> 50%" — is the outgoing-damage mirror of the already-filed **Vulnerable**
+> candidate (`plan/PHASE_CANDIDATES.md`, score 3.0, Pending since pass
+> 14, re-confirmed pending by pass 15): both are damage-modifying
+> debuffs inflicted on a combatant, same family, no differentiated
+> niche or concrete card idea for a second entry — filing it separately
+> would be exactly the near-synonym-minting the atlas discipline exists
+> to prevent, so it stays un-filed and Vulnerable's existing candidate
+> row is understood to cover the axis. **Frozen**
+> (`kb:dawncaster/keywords/frozen.okf.md`, community, confidence medium)
+> — forced top-of-deck manipulation against the holder — overlaps the
+> existing deck-as-resource family (FORETELL/MILL/RECALL) without a
+> differentiated niche or a concrete card idea; same bar pass 9 applied
+> to Chaos/Upgrade before either was filed, not met here. No new
+> citable gap. Zero-diff confirmed on the widened pass, not just the
+> structural one.
+>
+> **Ship (Step 3):** none — zero CREATE, zero UPDATE, zero REMOVE. The
+> one intervening keyword-adjacent commit was a presentation-honesty
+> fix already fully wired end to end; the widened KB check's three new
+> families all fail the discipline bar (hard-constraint conflict,
+> already-filed-family overlap, or no differentiated niche/concrete
+> card).
+>
+> **Gates:** `npm run verify --workspace axiomancer-mechanics` (3734
+> tests), `npm run verify --workspace axiomancer-mobile`, `npm run
+> type-check --workspace axiomancer-card-editor`, and `npm test` (root,
+> 208 tests, includes `content-drift.test.mjs` 11/11) all green —
+> unchanged, no source touched.
+```
+
+```
+> **[adjust-enemies pass 16, 2026-09-23, commit d02bda13]**
+> Zero-CREATE, zero-UPDATE, zero-REMOVE pass — dispatched autonomously
+> by `/march`'s content-lifecycle gate: `enemies` (`f78f0550`
+> 2026-09-21T09:00:58Z, 57 commits behind HEAD `1d279bf3`
+> 2026-09-23T00:02:27Z, ~39.0h) was by far the stalest qualifying
+> category past the 15-commit/36h threshold — `keywords` (`fb0a0f3c`
+> 2026-09-21T12:50:21Z, 41 commits/~35.2h) also qualified but was less
+> stale by both metrics; `npcs` (`9821b636` 2026-09-21T18:48:17Z, 36
+> commits/~29.2h), `equipment` (`5d9b6063` 2026-09-22T01:16:46Z, 32
+> commits/~22.8h) and `cards` (`2a162f5e` 2026-09-21T22:39:41Z, 34
+> commits/~25.4h) all sat under their own 36h leg of the threshold.
+> Both gates confirmed green pre-tick and re-confirmed after (below).
+>
+> **Step 1 audit — all five structural signals re-derived fresh, not
+> re-cited:** (1) **deck law violations** — the roster's decks carry
+> exactly 10 distinct `card()` ids (`knucklebone-recant`,
+> `ossuary-drawer`, `passing-bell`, `petty-indictment`, `scolds-bridle`,
+> `shallow-grave`, `spoiled-poultice`, `the-long-lent`, `thin-hymn`,
+> `unction-of-boils`), all resolving into live, non-retired theme files
+> (`relics`/`choir`/`starters`/`trial`/`grave`/`rot` `.cards.ts`) with
+> current `specialMechanics` kinds; the 11 distinct `EnemyKeyword` kinds
+> in play (hide/swift/brutal/venom/unshaken/elusive/regrow/ravenous/
+> wounding/flurry/summon) are exactly `ENEMY_KEYWORD_KINDS` — no stray
+> kind, no reference to CURDLE (the one keyword `/adjust-keywords` has
+> ever retired — pass 1, 2026-09-05 — and even that was a badge-only
+> retirement with no ban-list entry, carried by a player card, not an
+> enemy deck). Clean. (2) **portrait collisions/placeholders** — 77
+> `portraitAsset` values, zero duplicates, all 77 resolve 1:1 into
+> `axiomancer-mobile/assets/images/enemies/index.ts`'s
+> `ENEMY_ART_BY_KEY` with a distinct `.webp` each (verified by diffing
+> both key sets, not by inspection); the two standing exclusions
+> (`Sandbag_01` test fixture, `TheIncompleteness` impossible-ceiling
+> boss, both established pass 3) are unchanged and are the only
+> `ENEMY_REGISTRY` entries without one. No enemy falls to the
+> hash-pick fallback. Clean. (3) **VITAE/damage band** — recomputed
+> the live formula (`ENEMY_VITAE_BASE=30`, `ENEMY_VITAE_PER_LEVEL=8`,
+> `ENEMY_VITAE_MULT` `{0.6/1.0/1.4/1.9/2.4}`,
+> `game-mechanics.constants.ts:206-220`) against all 21 enemies
+> authoring an explicit `vitae` override: worst deviation is still
+> ElderFireGiant (boss, L46) at +25.7%, byte-identical to pass 3's
+> established ~±26% tolerance band — no new outlier. Enemy-keyword
+> magnitudes (HIDE/VENOM/WOUNDING/REGROW/FLURRY/SUMMON `n` values)
+> range 2-120 across the roster, scaling smoothly from early- to
+> late-game bosses; nothing anomalous. Clean. (4) **aftermath prose /
+> voice** — re-confirmed pass 15's backlog-closing UPDATE actually
+> stuck: 78 of 79 `createEnemy` records carry both `finalBlowLines`
+> and `causeLines` (the one exception, `Sandbag_01`, is the same
+> test-fixture exclusion as every other signal); `pactLines` count
+> (11) exactly equals `friendshipReward` count (11) — no
+> friendship-bearing enemy lacks its pact prose. Zero
+> `\b(thee|thou|thy|thine|ye)\b` hits roster-wide. Clean — the
+> 14-pass backlog pass 15 closed has not silently reopened. (5)
+> **loot-table sweep** — 22 distinct `drop()` ids in
+> `enemy.library.ts`, all 22 resolve live in
+> `Items/consumable.library.ts`; `loot.ts` itself is pure
+> weight-normalising roll logic with zero hardcoded item ids. Clean.
+> Spot-checked (not re-litigated) the dispatcher's own pre-pass
+> claims on the other two Step-1 rows: orphan sweep — only
+> `TheIncompleteness` is absent from every `EnemiesByMap` pool (exact
+> match to the standing exception); roster-size/overlap — all 10
+> pools recomputed byte-identical to passes 9-15 (fishing-village 13,
+> northern-forest 39, caverns 16, northern-city 8, connecting-river 5,
+> town-across-river 4, the-capital 8, aporia-colonnade/archive 8/8,
+> aporia-proof 11), and northern-city/the-capital's overlap recomputes
+> to exactly 5/8 = 62.5%, matching the documented figure.
+>
+> **Step 1b widened audit:** Step 1 read zero-diff, so ran the KB
+> cross-reference fresh rather than trusting the dispatcher's framing.
+> `kb_overview` + `kb_find_games` (`better_if_label: combat-resolution`)
+> surfaced Kingdom Death: Monster as the corpus's nearest
+> monster-design-heavy title; its `better-if`/`actions` docs are both
+> `confidence: low`/`status: needs_followup` with no enumerated
+> monster-ability catalog to mine — not a citable gap. Targeted
+> `kb_search` (scope `boardgames`) for archetypes absent from our
+> 11-keyword set — split-on-death/clone, reflect-damage/thorns/
+> counterattack, enrage-on-damage/berserk, and the Mage Knight ability
+> names our own model draws from (Paralyze/Petrify/Arcane Immunity/
+> Cumbersome/Assassination/Fortified) — returned either zero matches
+> or only incidental prose hits (`heroes-of-terrinoth`'s counterattack
+> is a dice-pool rule, not a monster archetype; `mage-knight`'s
+> "fortified site" FAQ is terrain, not an enemy keyword). The one
+> near-hit, Legendary Encounters' escalating hidden hive deck that
+> spawns more Alien drones per player, is functionally what our own
+> SUMMON keyword (Phase 102-103) already ships. Re-ran the roster-shape
+> repeat-rate query (`trash mob|same (three|few) (fights|enemies)|
+> repeat(ed)? encounter|filler (enemy|monster)`, scope `all`) that
+> passes 9-15 have run before: zero matches again, the same genuine
+> corpus gap already filed as
+> [`game-knowledge-base#81`](https://github.com/no-trbl-2-u/game-knowledge-base/issues/81)
+> by `/adjust-npcs` pass 13 and re-confirmed, not re-filed. No citable,
+> actionable archetype gap surfaced — this is a genuine zero-diff, not
+> a corpus-search miss.
+>
+> **Verify:** `npm run verify --workspace axiomancer-mechanics` (229
+> files, 3734 tests + build green) and `npm run verify --workspace
+> axiomancer-mobile` (lint/typecheck/jest/asset/critique-drive suites,
+> exit 0), both run in full despite the empty source diff. No new
+> `plan/AUDIT.md` or `plan/PHASE_CANDIDATES.md` residue — nothing
+> actionable surfaced beyond what prior passes already hold (the
+> already-filed RAGE_UNLOCK_ROUND-reachability candidate from pass 14
+> is untouched, out of this pass's own findings).
+```
 
 ```
 > **[adjust-equipment pass 16, 2026-09-21, commit 5d9b6063]**
