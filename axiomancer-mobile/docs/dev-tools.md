@@ -126,7 +126,7 @@ read the log.** Section container ids are `dev-section-<key>`.
 | `DebugLootRarityButtons`, `state/dev/loot-rarity.ts`, `loot*Item` actions, `scripts/loot-rarity-e2e.mjs` | The rarity model was retired in Phase 21; all four buttons granted the same relic. |
 | `DebugEncounterButtons` | Duplicated the rest + cache launchers and collided on `debug-rest-button`. |
 | `DebugPlaythroughPresets` (FRESH / ENDGAME) | Raw `setState` with a hand-rolled card list; superseded by the L1–L50 ladder. |
-| `DebugSeedButton` | Composite of POPULATE + RESET MAP; the `debugSeed` action stays for auto-seed on first dev launch. |
+| `DebugSeedButton` | Composite of POPULATE + RESET MAP; the `debugSeed` action is dev-only and on demand — nothing auto-seeds at launch since 2026-09-23 (a new game starts empty in every build). |
 | `DebugAporiaButton`, `DebugMapResetButton` | Folded into `DebugWorldTravel`. |
 | `DebugCombatEncounterButton`, `DebugCombatTutorialButton` | Merged into `DebugCombatSandbox`. |
 | `DebugAddItemById` | Free-text input replaced by `DebugItemPicker` chips. |

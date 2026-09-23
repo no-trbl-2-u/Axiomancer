@@ -181,12 +181,13 @@ app/                       expo-router routes
   index.tsx                title screen → main menu (CONTINUE · NEW GAME · LOAD GAME · SETTINGS)
   saves/                   the three save slots (NEW GAME / LOAD GAME picker)
   settings/                player settings (theme, text size, motion, haptics, hints, sound)
-  (tabs)/                  four-tab shell
+  (tabs)/                  five-tab shell
     _layout.tsx            tab bar config
     exploration/           map / node graph
-    character/             character sheet
+    character/             character sheet (links to /settings)
     memoir/                quests, chronicle, alignment
     inventory/             inventory + equipment
+    deck/                  the combat deck, read-only
   combat-encounter/        Spec 25 Hazard-Pattern combat modal (card-and-dice)
   hazard/                  hazard minigame
   hazard-deck/             hazard deck builder
