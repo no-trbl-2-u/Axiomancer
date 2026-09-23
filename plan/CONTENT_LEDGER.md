@@ -13,13 +13,83 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-23 | 68769014 | 17 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-23 | 9a162fc8 | 17 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-23 | d02bda13 | 16 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-23 | 96f73da3 | 17 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-23 | 06d2ab2e | 16 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-23 | 2789a2af | 16 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-enemies pass 17, 2026-09-23, commit 96f73da3]**
+> One-UPDATE pass — dispatched autonomously by `/march`'s content-lifecycle
+> gate: `enemies` (`d02bda13` 2026-09-23T01:22:46Z, 21 commits behind HEAD
+> `2ea854e3` 2026-09-23T16:34:58Z) was the stalest qualifying category —
+> `cards` (`68769014`, 15 commits), `keywords` (`06d2ab2e`, 19 commits) and
+> `npcs` (`2789a2af`, 17 commits) all qualified too (past the 15-commit
+> threshold) but were less stale by last-pass timestamp; `equipment`
+> (`9a162fc8`, 13 commits, ~7.7h) did not qualify. Deploy confirmed green
+> pre-tick (`npm run deploy:check`: verify-mechanics + verify-mobile both
+> success for 2ea854e3). No phase work pending (Step 3a empty).
+>
+> **The fix — a filed CRITIQUE finding, not a fresh Step-1 audit signal.**
+> `plan/CRITIQUE.md`'s Pending section already carried a `[MED]` finding
+> (burn-day audit 2026-09-19, row 3.9): SUMMON's two-wave rule
+> (`ADD_WAVE_CAP = 2`, `combat.engine.ts`) needs a phase boundary where a
+> STAGE fires to ever reach wave 2, and the roster's sole carrier
+> (`JeweledTree`, an elite) never authors `stages` — elites get none from
+> `defaultEnemyStages` — so wave 2 was permanently unreachable against a
+> real fight. Pass 16 confirmed this same gap was still open (not
+> re-derived — the finding's own suggested fix named `RawheadRex` as "the
+> better data point": a boss that already carries two authored `stages`,
+> including a `vitaePct: 0.6` boundary ("UP FROM UNDER THE STAIRS") that
+> already grants SWIFT. Retrofitting one keyword — `{ kind: 'summon', n: 2,
+> addName: 'Cellar Thing' }` — onto Rawhead's base `keywords` array makes
+> wave 1 spawn at the fight's first boundary and wave 2 ride that same
+> stage crossing, with zero new engine wiring, zero new stages, reusing
+> the existing SUMMON keyword end to end. Rawhead now carries 4 base
+> keywords (hide/brutal/ravenous/summon) — one above the 2-3 typical boss
+> spread this roster otherwise shows (`ElderFireGiant`/`Tezcatlipoca`/
+> `ArchDemon` all carry 3), but not unprecedented in shape, and the design
+> space for keyword combinations was opened by THE BIG NUMBERS REWRITE
+> (2026-09-02) — no stat/keyword budget law survives to violate. **Small**
+> per THE GROWTH FLOOR ¶2 (`plan/bearings.md`): one item, one existing
+> keyword, one existing stage, no new engine hook, no new art — shipped
+> directly, no candidate row.
+>
+> **Guard shipped alongside:** `src/Combat/e2e/summon-reachability.engine.test.ts`
+> — sweeps the live `EnemyLibrary` for SUMMON carriers, drives a REAL
+> encounter (not a synthetic fixture) through `processBetweenPhases` to
+> spawn wave 1, then forces each carrier's own authored stage thresholds in
+> order and re-drives the boundary, asserting at least one carrier reaches
+> `ADD_WAVE_CAP`. Verified red before the fix (`git stash` on
+> `enemy.library.ts` alone): both the roster-reachability assertion and
+> the Rawhead-specific assertion failed exactly as the finding predicted
+> (`JeweledTree` alone never crosses a stage boundary). Green after.
+> `summon.engine.test.ts` (Phase 102's synthetic doctrine pins) is
+> untouched — this is a new, separate roster-level guard, not a rewrite.
+>
+> **Verify:** `npm run verify --workspace axiomancer-mechanics` (231 files,
+> 3746 tests + build green) and `npm run verify --workspace
+> axiomancer-mobile` (lint/typecheck/jest/asset/critique-drive suites,
+> exit 0), both green.
+>
+> **Baseline:** the CRITIQUE finding's own suggested fix required a
+> deck-matrix re-stamp in the same tick "since the trade moves a rostered
+> mid-profile foe" (Phase 102 risk row 8) — `npm run baseline:regen` ships
+> as an immediate follow-up commit against this pass's own HEAD (the
+> script refuses to measure against an uncommitted tree), naming both
+> causes in its own commit body.
+>
+> No Step 1b widened audit ran this pass — a real, already-evidenced
+> finding was available and THE GROWTH FLOOR ¶2/¶3 direct shipping over
+> re-deriving a fresh audit when actionable work is already on record;
+> the standing structural-signal table (deck law, portrait collisions,
+> VITAE/damage band, aftermath prose, loot-table refs) was last swept
+> clean at pass 16 and this pass's own change doesn't touch any of those
+> five surfaces beside the one keyword edited.
+```
 
 ```
 > **[adjust-equipment pass 17, 2026-09-23, commit 9a162fc8]**

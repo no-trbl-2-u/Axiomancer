@@ -671,3 +671,8 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-23T16:27:33Z | subagent | general-purpose | claude-fable-5-1 | - | Apply mobile doc decisions |
 | 2026-09-23T16:27:34Z | subagent-end | general-purpose | claude-fable-5-1 | 1s | ok |
 | 2026-09-23T16:28:07Z | tick-end | - | claude-fable-5-1 | 1m53s | ok |
+| 2026-09-23T16:34:40Z | slash-prompt | /march | - | - | /march |
+| 2026-09-23T16:34:42Z | skill | march | - | - | - |
+| 2026-09-23T16:34:42Z | skill-end | march | - | 0s | ok |
+| 2026-09-23T16:35:33Z | skill | adjust-enemies | claude-sonnet-5 | - | - |
+| 2026-09-23T16:35:33Z | skill-end | adjust-enemies | claude-sonnet-5 | 0s | ok |
