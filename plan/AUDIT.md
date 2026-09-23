@@ -406,7 +406,7 @@
 
 ## Pending
 
-### [loop-call] Art the public DevLog may not publish: 90 files with an UNRESOLVED licence (2026-09-20)
+### [x] [loop-call] Art the public DevLog may not publish: 90 files with an UNRESOLVED licence (2026-09-20) — RATIFIED via /oversight 2026-09-23
 - category: content
 - impact: 7
 - ease: 3
@@ -428,8 +428,11 @@
   licence is on record, the way `acquire-art.mjs` acquires the plates. Filed as
   a candidate in `plan/PHASE_CANDIDATES.md`. Until then the public catalog is
   honest but thin, and it says so on every plate.
+- **RATIFIED via /oversight 2026-09-23:** the `PHASE_CANDIDATES.md` filing
+  ("Trace or replace the UNRESOLVED art") is the right shape — left as filed,
+  competing for promotion on its own turn rather than promoted immediately.
 
-### [loop-call] Seven calls made while building the public DevLog (2026-09-20)
+### [x] [loop-call] Seven calls made while building the public DevLog (2026-09-20) — RATIFIED via /oversight 2026-09-23
 - category: process
 - impact: 3
 - ease: 9
@@ -455,8 +458,10 @@
   branch. Both fixes improve the private index too. (7) **A page's payload
   budget counts every image it references**, not only what paints first.
 - next: review at the next `/oversight`; nothing here blocks.
+- **RATIFIED via /oversight 2026-09-23:** all seven calls stand as made. No
+  action needed.
 
-### [loop-call] `plan/bearings.md` still says there is no hosted web surface, and a second Pages project is about to exist (2026-09-20)
+### [x] [loop-call] `plan/bearings.md` still says there is no hosted web surface, and a second Pages project is about to exist (2026-09-20) — RATIFIED via /oversight 2026-09-23
 - category: divergence
 - impact: 5
 - ease: 9
@@ -469,8 +474,10 @@
 - next: when the Pages project is created (`docs/devlog-public-deploy.md` step
   8), correct bearings' sentence and the § Surface paragraph in the same commit
   that records the URL. Not before.
+- **RATIFIED via /oversight 2026-09-23:** correctly deferred as filed. No
+  action until the triggering event (Pages project creation).
 
-### [loop-call] The local verify gate and CI disagree about what green means: the Playwright journeys run only in CI (2026-09-20)
+### [x] [loop-call] The local verify gate and CI disagree about what green means: the Playwright journeys run only in CI (2026-09-20) — DECIDED via /oversight 2026-09-23
 - category: process
 - impact: 7
 - ease: 6
@@ -500,8 +507,13 @@
   (b) is a real change to every contributor's inner loop and is the loop's call
   to weigh, not this session's to impose while shipping fourteen other rows.
 - source: burn-day audit 2026-09-19, section 9 residue
+- **DECIDED via /oversight 2026-09-23:** option (a) — add an opt-in
+  `verify:journeys` script, named in AGENTS.md alongside the standing gate,
+  so the reachable local command exists without adding minutes/a browser
+  dependency to every contributor's default `npm run verify`. Ready to ship;
+  routing to the next `/iterate` pass, tag dropped.
 
-### [loop-call] Two layers own save policy: the engine's DURABLE_ACTIONS allowlist and mobile's hand-placed checkpoints behind a deflecting adapter (2026-09-20)
+### [x] [loop-call] Two layers own save policy: the engine's DURABLE_ACTIONS allowlist and mobile's hand-placed checkpoints behind a deflecting adapter (2026-09-20) — DECIDED via /oversight 2026-09-23
 - category: contract
 - impact: 6
 - ease: 5
@@ -529,6 +541,17 @@
   e2e/exploration.engine.test.ts`, "mobile owns save timing" — so the
   decision has to be taken deliberately rather than drifted into.
 - next: /oversight
+- **DECIDED via /oversight 2026-09-23:** keep `wrapDeflectingAdapter`; mobile
+  stays the sole owner of save timing via its hand-placed checkpoints — least
+  churn, matches the already-shipped guard test
+  (`axiomancer-mobile/state/e2e/exploration.engine.test.ts`, "mobile owns
+  save timing"). Write this down explicitly as the ratified rule in the
+  engine's own docs (where `DURABLE_ACTIONS` is defined) so the next reader
+  doesn't mistake the allowlist for live behavior on mobile. Ready to ship
+  as a docs-only fix; routing to the next `/iterate` pass, tag dropped. The
+  companion mid-encounter persistence fix (`plan/PHASE_CANDIDATES.md`'s
+  "No single owner for save/persistence policy" row, second phase) stays
+  open — this decision unblocks it but does not implement it.
 
 ### [x] [loop-call] Keyword registry has no analogue for Dawncaster's "Chaos" or generic "Upgrade" families (2026-09-13) — RESOLVED via `/adjust-keywords` pass 11 (2026-09-16)
 `/adjust-keywords` pass 9's functions-column sweep (`DigitalCardGames/dawncaster/

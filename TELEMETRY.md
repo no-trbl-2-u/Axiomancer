@@ -647,6 +647,11 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-23T14:24:33Z | skill | consolidate | claude-opus-5-5 | - | - |
 | 2026-09-23T14:24:33Z | skill-end | consolidate | claude-opus-5-5 | 0s | ok |
 | 2026-09-23T14:34:32Z | tick-end | - | claude-opus-5-5 | 11m47s | ok |
+| 2026-09-23T15:26:39Z | slash-prompt | /oversight | - | - | /oversight |
+| 2026-09-23T15:26:43Z | skill | oversight | - | - | - |
+| 2026-09-23T15:26:43Z | skill-end | oversight | claude-sonnet-5 | 0s | ok |
+| 2026-09-23T15:48:21Z | skill | world-spec | claude-sonnet-5 | - | args: Phase 84 — The Capital. Context: Phase 84 (plan/steps/01_build_plan.md, currently [b |
+| 2026-09-23T15:48:21Z | skill-end | world-spec | claude-sonnet-5 | 0s | ok |
 | 2026-09-23T16:34:40Z | slash-prompt | /march | - | - | /march |
 | 2026-09-23T16:34:42Z | skill | march | - | - | - |
 | 2026-09-23T16:34:42Z | skill-end | march | - | 0s | ok |

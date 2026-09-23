@@ -70,12 +70,14 @@ Tick in this file in the same commit that ships the phase.
       (promoted via `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md`
       [score 6.0], absorbing the [score 4.5] capital cross-reference row)
       — `feat(mobile): combat arena backdrop — region-keyed, coastal village — phase 83` (cb3b1c97)
-- [blocked: requires attended `/world-spec` or `/story-spec` session with
-  T present — do not guess 2026-09-15] Phase 84 — The Capital: attended
-      `/world-spec` or `/story-spec` session deciding what the
-      advisor-selection payoff sets up for the player character before
-      more northern-continent geography ships (promoted via `/oversight`
-      2026-09-15 from `PHASE_CANDIDATES.md` [score 5.5])
+- [x] Phase 84 — The Capital: attended `/world-spec` session (promoted via
+      `/oversight` 2026-09-15 from `PHASE_CANDIDATES.md` [score 5.5];
+      **re-scoped via `/oversight` 2026-09-23** — the original
+      advisor-selection-payoff framing was found stale against THE BLANK
+      PAGE (2026-09-18), which retired that narrative as non-canon; T
+      ruled the session narrow instead: the-capital's map structure only,
+      a door onward independent of any story canon) —
+      `specs/world/W-02-the-capital-door-onward.md`
 - [x] Phase 85 — Equipment progression: mechanics-expert design session
       for 1-3 new signature skills sized for head/hands/feet accessories,
       then author + wire the relics carrying them, preserving
@@ -2930,6 +2932,27 @@ See the status rows above; generate briefs on demand.
 > confirmation this was T's request, T's stated reason (or
 > "reason not stated" — never invent one), and the resulting
 > commit/issue/phase-brief when available.
+
+- **2026-09-23** — actor: **T via `/oversight`** (attended session, branch
+  `claude/oversight-7vknwr`). Action: **re-scoped Phase 84** (material
+  scope change, not add/remove). The phase's original brief — an attended
+  `/world-spec`/`/story-spec` session deciding what the-capital's
+  advisor-selection payoff sets up for the player character — was found
+  stale on read: THE BLANK PAGE (2026-09-18) retired that narrative as
+  non-canon three days after Phase 84 was promoted, and
+  `content/story/story-overview.md`'s own pivot question 3 (where the
+  seven shipped maps sit relative to the new road) is still undecided.
+  Flagged to T before proceeding rather than run the session on a stale
+  premise. Confirmed T's request: yes — T answered the `AskUserQuestion`
+  ballot "Phase 84's premise is legacy narrative THE BLANK PAGE already
+  ruled non-canon... how should I proceed?" with "Re-scope Phase 84
+  narrowly: treat the-capital as purely legacy/mechanical (its map
+  structure, node layout) and design a NEW, small world beat for it that
+  doesn't depend on the old advisor-selection canon at all." T's stated
+  reason: not stated beyond the ballot option as written. Resulting
+  artifact: `specs/world/W-02-the-capital-door-onward.md` (a door-onward
+  beat past the Factor fight, `cap-9`, authored with zero story-canon
+  content); phase marked `[x]` shipped in this same commit.
 
 - **2026-09-17** — actor: **T via `/oversight`** (attended session,
   branch `claude/oversight-kqgvvc`). Action: ADD seven phase rows —

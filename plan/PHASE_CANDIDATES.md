@@ -482,6 +482,13 @@
   cross-package boundary, so needs the audit's own flagged gap (the
   cross-package impact checklist doesn't cover world/enemy surfaces
   mobile consumes) kept in mind when scoping the brief.
+- **DECIDED via /oversight 2026-09-23 (first phase):** keep
+  `wrapDeflectingAdapter` — mobile remains the sole owner of save timing;
+  document it as the ratified rule in the engine docs. See
+  `plan/AUDIT.md`'s "Two layers own save policy" loop-call for the full
+  decision text. Routed to `/iterate` as a docs-only fix. The second phase
+  (the mid-encounter persistence fix itself) stays open, unblocked by this
+  decision but not yet scoped or shipped.
 
 ### Trace or replace the UNRESOLVED art, now that a public page shows the gap
 - **signal:** the public DevLog's licence gate (`plan/AUDIT.md`, loop-call
@@ -2620,6 +2627,32 @@ residual merit; re-file if the failure mode recurs.
 - estimated phases: 1
 - conflicts: none against spec.md non-goals; doesn't touch the 3
   surviving big-numbers constraints or the LOCKED MECHANICS.
+
+### [ ] [score 2.0] Consider a service layer for cross-project/external-API needs — no concrete need filed yet
+- proposed: 2026-09-23, via `/oversight` (T's own architecture question,
+  raised as the session's free-form adjustment)
+- signal: none concrete. T asked whether the four projects
+  (axiomancer-mechanics, axiomancer-mobile, devlog, the nexus loop itself)
+  need another layer — specifically a service layer that talks to outside
+  APIs. Read against the current tree: the engine is offline-first, mobile
+  persists entirely through engine autosave + hand-placed checkpoints (no
+  backend anywhere), and the public DevLog is a static site with no
+  server-side calls (per its own build notes: "the nightly has no browser
+  and no model call"). No open AUDIT/CRITIQUE/PHASE_CANDIDATES row asks for
+  cross-device saves, live-ops content pushes, or real usage analytics.
+- rationale: filed low-priority rather than designed speculatively. A
+  service layer is real infrastructure (hosting, auth, data handling) for
+  capabilities nothing currently asks for; adding one ahead of a concrete
+  need is the inverse of THE GROWTH FLOOR's ship-small discipline. This row
+  exists so the question resurfaces the moment a real trigger appears
+  (cross-device save/sync, live balance patches without an app release, or
+  actual player-usage analytics) instead of being silently forgotten.
+- proposed scope: undefined until a concrete trigger is filed. When one is,
+  scope it against that specific need (e.g. a save-sync endpoint is a much
+  smaller service than a live-ops content CDN) rather than building a
+  general-purpose layer up front.
+- estimated phases: n/a — not actionable without a concrete driving need.
+- conflicts: none against spec.md non-goals.
 
 ## Considered (below threshold) — pass 12 additions
 
