@@ -627,3 +627,7 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-22T19:31:50Z | skill | digest | claude-opus-5-5 | - | args: Cover PR #353 (UI/map overhaul: first-node Suppliant's Ring, gathering card, card te |
 | 2026-09-22T19:31:50Z | skill-end | digest | claude-opus-5-5 | 0s | ok |
 | 2026-09-22T20:30:12Z | slash-prompt | /march | - | - | /march |
+| 2026-09-23T01:03:01Z | slash-prompt | /march | - | - | /march |
+| 2026-09-23T01:04:08Z | skill | adjust-enemies | claude-sonnet-5 | - | - |
+| 2026-09-23T01:04:08Z | skill-end | adjust-enemies | claude-sonnet-5 | 0s | ok |
+| 2026-09-23T01:05:50Z | subagent | general-purpose | claude-sonnet-5 | - | Run adjust-enemies lifecycle tick |

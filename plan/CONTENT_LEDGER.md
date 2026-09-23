@@ -13,13 +13,117 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-21 | 2a162f5e | 16 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-21 | 5d9b6063 | 16 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-21 | f78f0550 | 15 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-23 | <PENDING> | 16 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-21 | fb0a0f3c | 15 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-21 | 9821b636 | 15 |
 
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-enemies pass 16, 2026-09-23, commit <PENDING>]**
+> Zero-CREATE, zero-UPDATE, zero-REMOVE pass — dispatched autonomously
+> by `/march`'s content-lifecycle gate: `enemies` (`f78f0550`
+> 2026-09-21T09:00:58Z, 57 commits behind HEAD `1d279bf3`
+> 2026-09-23T00:02:27Z, ~39.0h) was by far the stalest qualifying
+> category past the 15-commit/36h threshold — `keywords` (`fb0a0f3c`
+> 2026-09-21T12:50:21Z, 41 commits/~35.2h) also qualified but was less
+> stale by both metrics; `npcs` (`9821b636` 2026-09-21T18:48:17Z, 36
+> commits/~29.2h), `equipment` (`5d9b6063` 2026-09-22T01:16:46Z, 32
+> commits/~22.8h) and `cards` (`2a162f5e` 2026-09-21T22:39:41Z, 34
+> commits/~25.4h) all sat under their own 36h leg of the threshold.
+> Both gates confirmed green pre-tick and re-confirmed after (below).
+>
+> **Step 1 audit — all five structural signals re-derived fresh, not
+> re-cited:** (1) **deck law violations** — the roster's decks carry
+> exactly 10 distinct `card()` ids (`knucklebone-recant`,
+> `ossuary-drawer`, `passing-bell`, `petty-indictment`, `scolds-bridle`,
+> `shallow-grave`, `spoiled-poultice`, `the-long-lent`, `thin-hymn`,
+> `unction-of-boils`), all resolving into live, non-retired theme files
+> (`relics`/`choir`/`starters`/`trial`/`grave`/`rot` `.cards.ts`) with
+> current `specialMechanics` kinds; the 11 distinct `EnemyKeyword` kinds
+> in play (hide/swift/brutal/venom/unshaken/elusive/regrow/ravenous/
+> wounding/flurry/summon) are exactly `ENEMY_KEYWORD_KINDS` — no stray
+> kind, no reference to CURDLE (the one keyword `/adjust-keywords` has
+> ever retired — pass 1, 2026-09-05 — and even that was a badge-only
+> retirement with no ban-list entry, carried by a player card, not an
+> enemy deck). Clean. (2) **portrait collisions/placeholders** — 77
+> `portraitAsset` values, zero duplicates, all 77 resolve 1:1 into
+> `axiomancer-mobile/assets/images/enemies/index.ts`'s
+> `ENEMY_ART_BY_KEY` with a distinct `.webp` each (verified by diffing
+> both key sets, not by inspection); the two standing exclusions
+> (`Sandbag_01` test fixture, `TheIncompleteness` impossible-ceiling
+> boss, both established pass 3) are unchanged and are the only
+> `ENEMY_REGISTRY` entries without one. No enemy falls to the
+> hash-pick fallback. Clean. (3) **VITAE/damage band** — recomputed
+> the live formula (`ENEMY_VITAE_BASE=30`, `ENEMY_VITAE_PER_LEVEL=8`,
+> `ENEMY_VITAE_MULT` `{0.6/1.0/1.4/1.9/2.4}`,
+> `game-mechanics.constants.ts:206-220`) against all 21 enemies
+> authoring an explicit `vitae` override: worst deviation is still
+> ElderFireGiant (boss, L46) at +25.7%, byte-identical to pass 3's
+> established ~±26% tolerance band — no new outlier. Enemy-keyword
+> magnitudes (HIDE/VENOM/WOUNDING/REGROW/FLURRY/SUMMON `n` values)
+> range 2-120 across the roster, scaling smoothly from early- to
+> late-game bosses; nothing anomalous. Clean. (4) **aftermath prose /
+> voice** — re-confirmed pass 15's backlog-closing UPDATE actually
+> stuck: 78 of 79 `createEnemy` records carry both `finalBlowLines`
+> and `causeLines` (the one exception, `Sandbag_01`, is the same
+> test-fixture exclusion as every other signal); `pactLines` count
+> (11) exactly equals `friendshipReward` count (11) — no
+> friendship-bearing enemy lacks its pact prose. Zero
+> `\b(thee|thou|thy|thine|ye)\b` hits roster-wide. Clean — the
+> 14-pass backlog pass 15 closed has not silently reopened. (5)
+> **loot-table sweep** — 22 distinct `drop()` ids in
+> `enemy.library.ts`, all 22 resolve live in
+> `Items/consumable.library.ts`; `loot.ts` itself is pure
+> weight-normalising roll logic with zero hardcoded item ids. Clean.
+> Spot-checked (not re-litigated) the dispatcher's own pre-pass
+> claims on the other two Step-1 rows: orphan sweep — only
+> `TheIncompleteness` is absent from every `EnemiesByMap` pool (exact
+> match to the standing exception); roster-size/overlap — all 10
+> pools recomputed byte-identical to passes 9-15 (fishing-village 13,
+> northern-forest 39, caverns 16, northern-city 8, connecting-river 5,
+> town-across-river 4, the-capital 8, aporia-colonnade/archive 8/8,
+> aporia-proof 11), and northern-city/the-capital's overlap recomputes
+> to exactly 5/8 = 62.5%, matching the documented figure.
+>
+> **Step 1b widened audit:** Step 1 read zero-diff, so ran the KB
+> cross-reference fresh rather than trusting the dispatcher's framing.
+> `kb_overview` + `kb_find_games` (`better_if_label: combat-resolution`)
+> surfaced Kingdom Death: Monster as the corpus's nearest
+> monster-design-heavy title; its `better-if`/`actions` docs are both
+> `confidence: low`/`status: needs_followup` with no enumerated
+> monster-ability catalog to mine — not a citable gap. Targeted
+> `kb_search` (scope `boardgames`) for archetypes absent from our
+> 11-keyword set — split-on-death/clone, reflect-damage/thorns/
+> counterattack, enrage-on-damage/berserk, and the Mage Knight ability
+> names our own model draws from (Paralyze/Petrify/Arcane Immunity/
+> Cumbersome/Assassination/Fortified) — returned either zero matches
+> or only incidental prose hits (`heroes-of-terrinoth`'s counterattack
+> is a dice-pool rule, not a monster archetype; `mage-knight`'s
+> "fortified site" FAQ is terrain, not an enemy keyword). The one
+> near-hit, Legendary Encounters' escalating hidden hive deck that
+> spawns more Alien drones per player, is functionally what our own
+> SUMMON keyword (Phase 102-103) already ships. Re-ran the roster-shape
+> repeat-rate query (`trash mob|same (three|few) (fights|enemies)|
+> repeat(ed)? encounter|filler (enemy|monster)`, scope `all`) that
+> passes 9-15 have run before: zero matches again, the same genuine
+> corpus gap already filed as
+> [`game-knowledge-base#81`](https://github.com/no-trbl-2-u/game-knowledge-base/issues/81)
+> by `/adjust-npcs` pass 13 and re-confirmed, not re-filed. No citable,
+> actionable archetype gap surfaced — this is a genuine zero-diff, not
+> a corpus-search miss.
+>
+> **Verify:** `npm run verify --workspace axiomancer-mechanics` (229
+> files, 3734 tests + build green) and `npm run verify --workspace
+> axiomancer-mobile` (lint/typecheck/jest/asset/critique-drive suites,
+> exit 0), both run in full despite the empty source diff. No new
+> `plan/AUDIT.md` or `plan/PHASE_CANDIDATES.md` residue — nothing
+> actionable surfaced beyond what prior passes already hold (the
+> already-filed RAGE_UNLOCK_ROUND-reachability candidate from pass 14
+> is untouched, out of this pass's own findings).
+```
 
 ```
 > **[adjust-equipment pass 16, 2026-09-21, commit 5d9b6063]**
