@@ -644,3 +644,5 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-23T08:54:04Z | skill | digest | - | - | - |
 | 2026-09-23T08:54:04Z | skill-end | digest | - | 0s | ok |
 | 2026-09-23T10:31:59Z | slash-prompt | /march | - | - | /march |
+| 2026-09-23T14:24:33Z | skill | consolidate | claude-opus-5-5 | - | - |
+| 2026-09-23T14:24:33Z | skill-end | consolidate | claude-opus-5-5 | 0s | ok |
