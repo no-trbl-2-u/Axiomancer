@@ -163,7 +163,7 @@ describe('ToastHost: emitter path', () => {
         const emitter = getEmitterForStore(store);
         const tree = render(withProvider(store, <ToastHost />));
 
-        // Simulate 4 items added synchronously (the DevAutoSeed / chest scenario
+        // Simulate 4 items added synchronously (the dev POPULATE / chest scenario
         // that previously caused "Maximum update depth exceeded").
         expect(() => {
             act(() => {

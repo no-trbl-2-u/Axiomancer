@@ -281,6 +281,7 @@ describe('Phase 37 shop content', () => {
     it('the authored village payload carries a shop inventory with consumable IDs that resolve', async () => {
         mockSequentialRng(0.5);
         const { getConsumableById } = await import('../../../Items/consumable.library');
+        const { getRelicById } = await import('../../../Items/relic.library');
         for (const map of ['northern-forest'] as const) {
             const state = freshWorldAt(map);
             const def = getMapDefinition('coastal-continent', map);
@@ -299,7 +300,11 @@ describe('Phase 37 shop content', () => {
             expect(result.event.shop, `${map} village should carry a shop`).toBeDefined();
             expect(result.event.shop!.wares.length).toBeGreaterThan(0);
             for (const ware of result.event.shop!.wares) {
-                expect(getConsumableById(ware.itemId), `ware ${ware.itemId} must resolve in consumableLibrary`).toBeDefined();
+                // A ware is a consumable OR (since 2026-09-23, THE VERY START)
+                // a signet relic sold by fixed id — the markets are where the
+                // Phase-19 kit is bought now that a fresh run seeds none.
+                const resolves = getConsumableById(ware.itemId) ?? getRelicById(ware.itemId);
+                expect(resolves, `ware ${ware.itemId} must resolve in consumableLibrary or relicLibrary`).toBeDefined();
                 expect(ware.price).toBeGreaterThanOrEqual(0);
             }
         }

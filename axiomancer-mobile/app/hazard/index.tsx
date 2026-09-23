@@ -29,6 +29,8 @@ import { currentTutorialStep } from '@/components/hazard/tutorial-steps';
 import { RewardsOverlay } from '@/components/hazard/RewardsOverlay';
 import { RouteSelect } from '@/components/hazard/RouteSelect';
 import { HAZARD_TUTORIAL_FLAG } from '@/state/hazard/store-actions';
+import { useSetting } from '@/state/settings';
+import { isTutorialDone } from '@/state/tutorials';
 import { useGameActions, useGameState } from '@/state/GameStoreProvider';
 import { selectHazardViewModel, type HazardCardVM } from '@/state/presenters/hazard.engine';
 import type { SeedInput } from '@mechanics';
@@ -37,8 +39,9 @@ type DropResolver = (payload: DragPayload, x: number, y: number) => void | Promi
 
 export default function HazardScreen() {
     const hazard = useGameState((s) => s.hazard);
+    const tutorialHints = useSetting('tutorialHints');
     const tutorialDone = useGameState((s) =>
-        ((s as unknown as { flags?: string[] }).flags ?? []).includes(HAZARD_TUTORIAL_FLAG),
+        isTutorialDone((s as unknown as { flags?: string[] }).flags, HAZARD_TUTORIAL_FLAG, tutorialHints),
     );
     const vm = useMemo(() => selectHazardViewModel({ hazard }), [hazard]);
     const actions = useGameActions();

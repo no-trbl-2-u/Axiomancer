@@ -139,6 +139,14 @@ const nfForestMarket: MapEventPool = {
                     { itemId: 'philosopher-tea',      price: 35 },
                     { itemId: 'void-essence',         price: 40 },
                     { itemId: 'clarity-serum',        price: 28 },
+                    // Signet relics (owner call 2026-09-23 — a fresh run seeds
+                    // no relics; the markets sell them). The first market on
+                    // the road stocks the Phase-19 starter kit's weapon, armor
+                    // and charm, so the intended opening loadout is buyable
+                    // before the forest deepens. Ids resolve via `getRelicById`.
+                    { itemId: 'relic-overwhelming',   price: 45 },
+                    { itemId: 'relic-read',           price: 45 },
+                    { itemId: 'relic-press-the-point', price: 35 },
                 ],
             },
             description: 'A small forest market keeps trade alive on the path.',
@@ -372,6 +380,9 @@ const nfHerbTrader: MapEventPool = {
                     { itemId: 'minor-healing-potion', price: 10 },
                     { itemId: 'antidote',             price: 15 },
                     { itemId: 'clarity-serum',        price: 25 },
+                    // Signet relics — the two benched Phase-19 pieces.
+                    { itemId: 'relic-conclusion',     price: 40 },
+                    { itemId: 'relic-second-wind',    price: 40 },
                 ],
             },
             description: 'A herb trader\'s carefully hidden camp among the mist-shrouded trees.',
@@ -1221,6 +1232,10 @@ const ncLedgerCamp: MapEventPool = {
                     { itemId: 'antidote',             price: 16 },
                     { itemId: 'clarity-serum',        price: 30 },
                     { itemId: 'philosopher-tea',      price: 38 },
+                    // Signet relics — underground prices.
+                    { itemId: 'relic-conviction-strike', price: 40 },
+                    { itemId: 'relic-mounting-dread', price: 45 },
+                    { itemId: 'relic-clever-gambit',  price: 40 },
                 ],
             },
             description: 'Delvers trade around a shared lamp. Prices are underground prices.',
@@ -1455,6 +1470,10 @@ const ncyIronMarket: MapEventPool = {
                     { itemId: 'antidote',             price: 14 },
                     { itemId: 'clarity-serum',        price: 26 },
                     { itemId: 'philosopher-tea',      price: 34 },
+                    // Signet relics — the iron trade stocks the weapon and armor.
+                    { itemId: 'relic-conclusion',     price: 50 },
+                    { itemId: 'relic-second-wind',    price: 50 },
+                    { itemId: 'relic-endless-labor',  price: 45 },
                 ],
             },
             description: 'Every stall weighs true. The scales are checked by men who are not kind about it.',
@@ -1476,6 +1495,10 @@ const ncyChandlery: MapEventPool = {
                     { itemId: 'body-elixir',          price: 22 },
                     { itemId: 'focus-vial',           price: 18 },
                     { itemId: 'void-essence',         price: 38 },
+                    // Signet relics — a chandler's odd lots.
+                    { itemId: 'relic-unbroken-stride', price: 45 },
+                    { itemId: 'relic-overwhelming',   price: 50 },
+                    { itemId: 'relic-read',           price: 50 },
                 ],
             },
             description: 'Rope, tallow, salt, and remedies. Everything a crew buys the day before it regrets something.',
@@ -1843,6 +1866,10 @@ const crTheLanding: MapEventPool = {
                     { itemId: 'healing-potion',       price: 28 },
                     { itemId: 'antidote',             price: 13 },
                     { itemId: 'body-elixir',          price: 20 },
+                    // Signet relics — what the islanders trade off passing crews.
+                    { itemId: 'relic-press-the-point', price: 40 },
+                    { itemId: 'relic-mounting-dread', price: 45 },
+                    { itemId: 'relic-clever-gambit',  price: 40 },
                 ],
             },
             description: 'A trading post on stilts, built to outlast the flood line. The islanders sell what the river won\'t take back.',

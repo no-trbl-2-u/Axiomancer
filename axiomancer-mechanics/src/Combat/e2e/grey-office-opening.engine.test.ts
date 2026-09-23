@@ -14,7 +14,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { createNewGameState } from '../../Game/game.reducer';
+import { createCharacter } from '../../Character';
 import { grantFirstNodeRelic } from '../../Character/first-node-grant';
 import { ENEMY_REGISTRY } from '../../Enemy/enemy.library';
 import { scaleEnemyToLevel } from '../../World/encounter';
@@ -32,9 +32,17 @@ const lcg = (seed: number) => { let s = seed; return () => { s = (s * 48271) % 2
 // signature kit and derived stats these pins were measured against, and is
 // also the only state a fight can actually be reached from (`START_COMBAT`
 // settles the grant too).
+// 2026-09-23 (THE VERY START): `createNewGameState` seeds NO relics any more
+// — a real fresh player enters the first fight with the ring alone. These
+// pins were MEASURED against the Phase-19 kit (5 worn relics, the loadout
+// every preset and sim still seeds), so the kit is seeded here explicitly
+// via `createCharacter` to keep the numbers meaningful. The ring-only real
+// opening is pinned separately in `fresh-start.engine.test.ts`.
 const freshPlayer = (): Character => {
-    const s = createNewGameState();
-    return grantFirstNodeRelic(s.player, s.flags).character;
+    const kitted = createCharacter({
+        name: 'Player', level: 1, baseStats: { heart: 5, body: 5, mind: 5 }, seedStartingRelics: true,
+    });
+    return grantFirstNodeRelic(kitted, []).character;
 };
 const fresh = (): Character => ({ ...freshPlayer(), knownCards: [...STARTING_CARD_IDS], combatRewardCards: [] });
 const withRewards = (n: number, seed: number): Character => {

@@ -13,7 +13,7 @@ import appJson from './app.json';
 // through to `__DEV__` — true in Metro dev server, false in
 // production bundles. This prevents a production APK built
 // without EAS_BUILD_PROFILE from accidentally receiving
-// devToolsEnabled=true and running DevAutoSeed.
+// devToolsEnabled=true and exposing the /dev route.
 const buildProfile = process.env.EAS_BUILD_PROFILE ?? process.env.BUILD_PROFILE;
 const devToolsEnabled = buildProfile != null ? buildProfile !== 'production' : undefined;
 

@@ -60,7 +60,10 @@ export interface MobileHazardSlice {
 export const EMPTY_HAZARD_SLICE: MobileHazardSlice = Object.freeze({ session: null, tutorial: false });
 
 /** Flag set once the guided first crossing is completed or skipped. */
-export const HAZARD_TUTORIAL_FLAG = 'hazard-tutorial-done';
+// Source of truth moved to `state/tutorials.ts` (SETTINGS gate, 2026-09-23);
+// re-exported so existing importers keep working.
+export { HAZARD_TUTORIAL_FLAG } from '../tutorials';
+import { HAZARD_TUTORIAL_FLAG, isTutorialDone } from '../tutorials';
 
 /**
  * The tutorial session is pinned so the coach script always matches the
@@ -360,7 +363,7 @@ export function beginHazardAction(store: AppStore, options: BeginHazardOptions =
  */
 export function completeHazardTutorialAction(store: AppStore, skipped: boolean): void {
     const state = store.getState() as unknown as GameState;
-    if (!(state.flags ?? []).includes(HAZARD_TUTORIAL_FLAG)) {
+    if (!isTutorialDone(state.flags, HAZARD_TUTORIAL_FLAG, true)) {
         store.setState({ flags: [...(state.flags ?? []), HAZARD_TUTORIAL_FLAG] } as never);
         try {
             store.getState().save();

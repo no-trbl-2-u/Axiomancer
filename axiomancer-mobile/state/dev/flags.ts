@@ -16,14 +16,20 @@
 
 import type { GameState } from '@mechanics';
 
-import { COMBAT_TUTORIAL_FLAG, BUNDLE_CHOSEN_FLAG } from '@/state/combat/store-actions';
-import { HAZARD_TUTORIAL_FLAG, HAZARD_HEXED_FLAG } from '@/state/hazard/store-actions';
+import { BUNDLE_CHOSEN_FLAG } from '@/state/combat/store-actions';
+import { HAZARD_HEXED_FLAG } from '@/state/hazard/store-actions';
 import type { AppStore } from '@/state/store';
+import {
+    BLACKSMITH_TUTORIAL_FLAG,
+    COMBAT_TUTORIAL_FLAG,
+    HAZARD_TUTORIAL_FLAG,
+    NIGHT_WATCH_TUTORIAL_FLAG,
+    TUTORIAL_FLAGS,
+} from '@/state/tutorials';
 
-/** Blacksmith first-visit coach; mirrored from the blacksmith store module. */
-export const BLACKSMITH_TUTORIAL_FLAG = 'blacksmith-tutorial-done';
-/** Rest-choice ("night watch") first-visit coach. */
-export const NIGHT_WATCH_TUTORIAL_FLAG = 'night-watch-tutorial-done';
+// The coach flags themselves live in `state/tutorials.ts` (the SETTINGS
+// gate reads them too); re-exported so the dev leaves keep their imports.
+export { BLACKSMITH_TUTORIAL_FLAG, NIGHT_WATCH_TUTORIAL_FLAG, TUTORIAL_FLAGS };
 
 /** One toggleable flag with its chip label. */
 export interface KnownFlag {
@@ -39,14 +45,6 @@ export const KNOWN_FLAGS: readonly KnownFlag[] = Object.freeze([
     { flag: NIGHT_WATCH_TUTORIAL_FLAG, label: 'REST TUT' },
     { flag: BUNDLE_CHOSEN_FLAG, label: 'BUNDLE PICKED' },
     { flag: HAZARD_HEXED_FLAG, label: 'HEXED' },
-]);
-
-/** The tutorial subset, for the ALL TUTS ON / OFF shortcuts. */
-export const TUTORIAL_FLAGS: readonly string[] = Object.freeze([
-    COMBAT_TUTORIAL_FLAG,
-    HAZARD_TUTORIAL_FLAG,
-    BLACKSMITH_TUTORIAL_FLAG,
-    NIGHT_WATCH_TUTORIAL_FLAG,
 ]);
 
 /** Read the flag list off any store state. */

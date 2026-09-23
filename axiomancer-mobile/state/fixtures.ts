@@ -24,7 +24,7 @@
  *   readFixtureRequest(search)      which channel asked, and for what
  *   resolveFixtureRequest(request)  id → registry fixture / object → validated
  *   resolveBootFixture(options)     gate + resolve + build; memoised for the boot
- *   getBootFixture()                the memo (DevAutoSeed / FixtureBoot read it)
+ *   getBootFixture()                the memo (FixtureBoot and the index route read it)
  */
 
 import {

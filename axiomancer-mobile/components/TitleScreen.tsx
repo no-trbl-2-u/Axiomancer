@@ -2,7 +2,6 @@ import { View, Text, Pressable } from 'react-native';
 import { Image } from '@/lib/platform/image';
 import { FONTS } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
-import { useGameActions } from '@/state/GameStoreProvider';
 
 // The throne-room key art doubles as the launcher icon; here it anchors
 // the top of the title screen and the painted "AxiomanceR" wordmark
@@ -17,9 +16,9 @@ interface TitleScreenProps {
  * TitleScreen — the launch screen presenter: key art, the tagline, the
  * EMBARK call-to-action and the closing flavour line.
  *
- * Inputs: `onContinue` — invoked once the player commits to EMBARK.
- * Output: the title screen element tree (no state of its own beyond the
- * store actions it fires).
+ * Inputs: `onContinue` — invoked once the player commits to EMBARK (the
+ * index route then shows the main menu).
+ * Output: the title screen element tree (no state of its own).
  *
  * Resolves DECISION-5 (rows C-103, C-105): `leagues` is a unit of
  * distance, not a proper noun, so the tagline says "the leagues beyond"
@@ -29,13 +28,11 @@ interface TitleScreenProps {
  */
 export function TitleScreen({ onContinue }: TitleScreenProps) {
   const styles = useStyles();
-  const actions = useGameActions();
 
+  // Owner call 2026-09-23 (THE VERY START): EMBARK no longer dev-seeds the
+  // character. It only hands off to the main menu; a new game starts with
+  // nothing in every build, and the `/dev` route seeds on demand.
   const handleStartGame = () => {
-    // Seed the game with basic starter equipment/stats if needed
-    if (__DEV__) {
-      actions.debugSeed();
-    }
     onContinue();
   };
 

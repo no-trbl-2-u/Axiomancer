@@ -16,8 +16,10 @@
 
 import { describe, expect, it } from '@jest/globals';
 import {
+    createCharacter,
     getConsumableById,
     getRelicById,
+    withholdFirstNodeRelic,
     wornPerSlot,
     FIRST_NODE_RELIC_FLAG,
     FIRST_NODE_RELIC_ID,
@@ -46,8 +48,20 @@ import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 // Harness
 // ---------------------------------------------------------------------------
 
+/**
+ * A store whose player wears the Phase-19 kit with the ring withheld (the
+ * pre-2026-09-23 fresh state). A real fresh run now wears NOTHING (THE VERY
+ * START), so the swap / displacement cases seed the kit explicitly: a full
+ * accessory row is what makes EQUIP a swap rather than a free fill.
+ */
 function makeStore(): AppStore {
-    return createAppStore({ adapter: createMemoryAdapter() });
+    const store = createAppStore({ adapter: createMemoryAdapter() });
+    store.setState({
+        player: withholdFirstNodeRelic(createCharacter({
+            name: 'Kitted', level: 1, baseStats: { heart: 5, body: 5, mind: 5 }, seedStartingRelics: true,
+        })),
+    } as never);
+    return store;
 }
 
 function gameState(store: AppStore): GameState {
@@ -130,7 +144,8 @@ describe('item-reward view model', () => {
         expect(vm.signature?.name).toBe('The Open Hand');
         expect(vm.signature?.cost).toBeGreaterThan(0);
         expect(vm.signature?.description.length).toBeGreaterThan(0);
-        expect(vm.statLines.map((s) => s.id)).toContain('heart');
+        // The ring grants ONLY its signature (owner call 2026-09-23) — no stat line.
+        expect(vm.statLines).toHaveLength(0);
         expect(vm.flavor.length).toBeGreaterThan(0);
     });
 

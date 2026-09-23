@@ -20,11 +20,17 @@
  * folded onto `Character.maxHealth` by the equip reducers — no effect involved.
  *
  * Stat pool (locked, balance-tunable later): Body ×2 (weapons), +5 maxHp ×2
- * (armor), Mind ×3 + Heart ×2 + Body ×2 (accessories — Phase 85 filled the
+ * (armor), Mind ×3 + Heart ×1 + Body ×2 (accessories — Phase 85 filled the
  * `head`/`hands`/`feet` kinds that shipped empty in Phase 19, closing the
- * accessories' body-stat gap: `head` mind, `hands`/`feet` body). The default
- * worn loadout below is unchanged by Phase 85 (+2 body / +5 maxHp / +4 mind /
- * +2 heart); NOT a locked balance claim.
+ * accessories' body-stat gap: `head` mind, `hands`/`feet` body). The
+ * Suppliant's Ring is the one relic with NO stat bump (owner call
+ * 2026-09-23): it is the first-node hand-over, and the hand-over grants the
+ * signature skill only. `defaultWorn` still names the Phase-19 kit, but that
+ * kit is no longer SEEDED into a fresh run (see `Game/game.reducer.ts`
+ * `createNewGameState`, owner call 2026-09-23 — the player starts with
+ * nothing, earns the ring at the first node, and buys the other ten from the
+ * village markets in `World/MapEvents/content.ts`). `cloneStartingRelics`
+ * stays the loadout the presets, fixtures and sims are measured against.
  */
 
 import type { Equipment } from './types';
@@ -42,8 +48,14 @@ interface RelicSpec {
     slot: Equipment['slot'];
     accessoryKind?: Equipment['accessoryKind'];
     grantsSignature: SignatureSkillId;
-    stat: 'body' | 'mind' | 'heart' | 'maxHp';
-    value: number;
+    /**
+     * The single static stat bump. Optional: a relic without one grants
+     * ONLY its signature (`statModifiers: []`). Today that is the Suppliant's
+     * Ring alone.
+     */
+    stat?: 'body' | 'mind' | 'heart' | 'maxHp';
+    /** The bump's magnitude; ignored when `stat` is absent. */
+    value?: number;
     defaultWorn: boolean;
 }
 
@@ -99,10 +111,12 @@ const RELIC_SPECS: readonly RelicSpec[] = [
         stat: 'mind', value: 2, defaultWorn: true,
     },
     {
+        // Owner call 2026-09-23: the ring is the first-node hand-over and
+        // carries NO stat bump — it grants The Open Hand and nothing else.
         id: 'relic-disarming-plea', name: "Suppliant's Ring",
         description: 'Soften the foe toward mercy. Grants The Open Hand.',
         slot: 'accessory', accessoryKind: 'ring', grantsSignature: 'sig-disarming-plea',
-        stat: 'heart', value: 2, defaultWorn: true,
+        defaultWorn: true,
     },
     {
         // Default-worn by owner call 2026-07-18 (drains D7 report F3): Press
@@ -142,7 +156,10 @@ function relicFromSpec(spec: RelicSpec): Equipment {
         description: spec.description,
         category: 'equipment',
         slot: spec.slot,
-        statModifiers: [{ stat: spec.stat, value: spec.value, isMultiplier: false }],
+        // A spec without a `stat` is a signature-only relic (the ring).
+        statModifiers: spec.stat === undefined
+            ? []
+            : [{ stat: spec.stat, value: spec.value ?? 0, isMultiplier: false }],
         grantsSignature: spec.grantsSignature,
     };
     if (spec.slot === 'accessory') relic.accessoryKind = spec.accessoryKind;

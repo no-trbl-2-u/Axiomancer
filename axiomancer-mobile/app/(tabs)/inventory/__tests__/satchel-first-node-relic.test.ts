@@ -1,9 +1,12 @@
 /**
  * SATCHEL × the first-node relic grant.
  *
- * The owner's finding was "new players start with no items". The satchel was
- * never empty — this file pins that, and pins what the player now actually
- * SEES when the run's first node hands over the Suppliant's Ring.
+ * Since 2026-09-23 (THE VERY START, owner call) a brand-new run's satchel IS
+ * empty and the dock IS bare — this file pins that, and pins what the player
+ * actually SEES when the run's first node hands over the Suppliant's Ring
+ * (the first thing they own). The displacement case — a full accessory row
+ * benching the stand-in — is kept over an explicitly kitted character, the
+ * loadout presets and sims still seed.
  *
  * Presenter-level, not a render test: the SATCHEL screen consumes
  * `selectInventoryViewModel` unconditionally (`app/(tabs)/inventory/index.tsx`
@@ -15,7 +18,9 @@
 
 import { describe, it, expect } from '@jest/globals';
 
-import { grantFirstNodeRelic, FIRST_NODE_RELIC_ID, STAND_IN_RELIC_ID } from '@mechanics';
+import {
+    createCharacter, grantFirstNodeRelic, withholdFirstNodeRelic, FIRST_NODE_RELIC_ID, STAND_IN_RELIC_ID,
+} from '@mechanics';
 import type { GameState } from '@mechanics';
 
 import { createAppStore, type AppStore } from '@/state/store';
@@ -26,6 +31,17 @@ const RING_NAME = "Suppliant's Ring";
 
 function freshStore(): AppStore {
     return createAppStore({ adapter: createMemoryAdapter() });
+}
+
+/** The pre-2026-09-23 fresh state: the Phase-19 kit worn, the ring withheld. */
+function kittedStore(): AppStore {
+    const store = freshStore();
+    store.setState({
+        player: withholdFirstNodeRelic(createCharacter({
+            name: 'Kitted', level: 1, baseStats: { heart: 5, body: 5, mind: 5 }, seedStartingRelics: true,
+        })),
+    } as never);
+    return store;
 }
 
 function vmOf(store: AppStore) {
@@ -40,18 +56,18 @@ function settleGrant(store: AppStore) {
 }
 
 describe('SATCHEL — a brand-new run', () => {
-    it('is not empty: the starting relics render as real rows', () => {
+    it('is empty: the very start carries no items and the tabs count zero', () => {
         const vm = vmOf(freshStore());
-        expect(vm.isEmpty).toBe(false);
-        expect(vm.items.length).toBeGreaterThan(0);
-        expect(vm.tabs.find(t => t.key === 'all')?.count).toBe(vm.items.length);
+        expect(vm.isEmpty).toBe(true);
+        expect(vm.items).toHaveLength(0);
+        expect(vm.tabs.find(t => t.key === 'all')?.count).toBe(0);
     });
 
-    it('wears a full five-relic loadout in the dock, with no bare slot', () => {
+    it('shows a bare five-slot dock — nothing worn yet', () => {
         const vm = vmOf(freshStore());
         expect(vm.equipmentDock.slots).toHaveLength(5);
         for (const slot of vm.equipmentDock.slots) {
-            expect(slot.item).not.toBeNull();
+            expect(slot.item).toBeNull();
         }
     });
 
@@ -85,8 +101,18 @@ describe('SATCHEL — after the first node grants the ring', () => {
         expect(dockIds).toContain(FIRST_NODE_RELIC_ID);
     });
 
-    it('returns the displaced relic to the sack rather than destroying it', () => {
+    it('fills the first trinket seat on a bare body, displacing nothing', () => {
         const store = freshStore();
+        const result = settleGrant(store);
+        expect(result.displaced).toBeNull();
+        const vm = vmOf(store);
+        expect(vm.isEmpty).toBe(false);
+        expect(vm.items.map(i => i.id)).toEqual([FIRST_NODE_RELIC_ID]);
+        expect(vm.equipmentDock.slots.filter(s => s.item !== null)).toHaveLength(1);
+    });
+
+    it('returns the displaced relic to the sack rather than destroying it (kitted body)', () => {
+        const store = kittedStore();
         const before = vmOf(store);
         const result = settleGrant(store);
         const after = vmOf(store);

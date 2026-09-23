@@ -21,7 +21,7 @@ import {
     grantFirstNodeRelic, withholdFirstNodeRelic, isFirstNodeRelicPending,
     FIRST_NODE_RELIC_ID, STAND_IN_RELIC_ID, FIRST_NODE_RELIC_FLAG,
 } from '../first-node-grant';
-import { getSignaturesForLoadout } from '../../Items/relic.library';
+import { getRelicById, getSignaturesForLoadout } from '../../Items/relic.library';
 import { wornPerSlot } from '../../Items/equipped';
 import { SLOT_CAPACITY } from '../../Items/types';
 import type { Character } from '../types';
@@ -124,7 +124,10 @@ describe('grantFirstNodeRelic — the hand-over', () => {
         const a = grantFirstNodeRelic(before, []).granted!;
         const b = grantFirstNodeRelic(before, []).granted!;
         expect(a).not.toBe(b);
-        expect(a.statModifiers?.[0]).not.toBe(b.statModifiers?.[0]);
+        // The ring carries no stat modifier (owner call 2026-09-23), so the
+        // aliasing guard is on the array itself, not on a first entry.
+        expect(a.statModifiers).not.toBe(b.statModifiers);
+        expect(a.statModifiers).not.toBe(getRelicById(FIRST_NODE_RELIC_ID)!.statModifiers);
     });
 
     it('lands on a character equivalent to the pre-v24 silent seed', () => {
@@ -190,19 +193,30 @@ describe('isFirstNodeRelicPending', () => {
 });
 
 describe('createNewGameState — the run starts owing the player the ring', () => {
-    it('seeds ten relics, not eleven, and owes the eleventh', () => {
+    // Owner call 2026-09-23 (THE VERY START): a fresh run seeds NO relics.
+    // The ring is still owed and still arrives at the first node; the other
+    // ten are village-market wares. See `fresh-start.engine.test.ts` for the
+    // full empty-start contract.
+    it('seeds no relics and owes the ring', () => {
         const s = createNewGameState();
-        expect(s.player.inventory).toHaveLength(10);
+        expect(s.player.inventory).toHaveLength(0);
         expect(ids(s.player)).not.toContain(FIRST_NODE_RELIC_ID);
         expect(s.flags).not.toContain(FIRST_NODE_RELIC_FLAG);
     });
 
-    it('still enters the world wearing a full five-relic loadout', () => {
+    it('enters the world wearing nothing, and the first-node grant fills the first accessory seat', () => {
         const s = createNewGameState();
-        expect(s.player.equipment.weapon).not.toBeNull();
-        expect(s.player.equipment.armor).not.toBeNull();
-        expect(s.player.equipment.accessories).toHaveLength(SLOT_CAPACITY.accessory);
-        expect(getSignaturesForLoadout(s.player.equipment)).toHaveLength(5);
+        expect(s.player.equipment.weapon).toBeNull();
+        expect(s.player.equipment.armor).toBeNull();
+        expect(s.player.equipment.accessories).toHaveLength(0);
+        expect(getSignaturesForLoadout(s.player.equipment)).toHaveLength(0);
+
+        const g = grantFirstNodeRelic(s.player, s.flags);
+        expect(g.reason).toBe('granted');
+        expect(g.displaced).toBeNull();
+        expect(accIds(g.character)).toEqual([FIRST_NODE_RELIC_ID]);
+        expect(getSignaturesForLoadout(g.character.equipment)).toEqual(['sig-disarming-plea']);
+        expect(g.character.equipment.accessories.length).toBeLessThanOrEqual(SLOT_CAPACITY.accessory);
     });
 });
 

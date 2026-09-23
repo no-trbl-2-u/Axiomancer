@@ -178,7 +178,9 @@ commit and returns the real exit code.
 ```
 app/                       expo-router routes
   _layout.tsx              root stack + font loader
-  index.tsx                redirects to /exploration
+  index.tsx                title screen → main menu (CONTINUE · NEW GAME · LOAD GAME · SETTINGS)
+  saves/                   the three save slots (NEW GAME / LOAD GAME picker)
+  settings/                player settings (theme, text size, motion, haptics, hints, sound)
   (tabs)/                  four-tab shell
     _layout.tsx            tab bar config
     exploration/           map / node graph
@@ -284,7 +286,9 @@ The harness itself ships with [`specs/01-test-harness-setup.md`](./specs/01-test
 
 ## Theme
 
-Dark-only by design. Tokens in `theme/axm.ts`:
+Dark-only by design; the player picks one of five palettes on `/settings`
+(COLOUR THEME — the picker moved there from the SELF tab on 2026-09-23;
+see `docs/save-slots-and-settings.md`). Tokens in `theme/axm.ts`:
 
 | Token           | Hex        | Use                              |
 | --------------- | ---------- | -------------------------------- |

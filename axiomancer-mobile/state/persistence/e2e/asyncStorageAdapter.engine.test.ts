@@ -1,9 +1,15 @@
 /**
- * Hermetic E2E — AsyncStorage persistence adapter (Spec 09).
+ * Hermetic E2E — AsyncStorage persistence adapter (Spec 09; three save
+ * slots since 2026-09-23).
  *
  * Drives `createAsyncStorageAdapter` end-to-end against
  * AsyncStorage's official jest mock. Hermetic = self-contained +
  * deterministic + isolated. See docs/testing.md.
+ *
+ * Slot semantics under test: `load()`/`save()` are scoped to the ACTIVE
+ * slot; preload reads every slot and the remembered last slot; an
+ * unreadable slot is reported, never thrown; the legacy single-slot key is
+ * deleted and never read.
  */
 
 /* eslint-disable @typescript-eslint/no-require-imports */
@@ -17,10 +23,13 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { createAsyncStorageAdapter } from '../asyncStorageAdapter';
 import {
-    createAsyncStorageAdapter,
-    SAVE_KEY,
-} from '../asyncStorageAdapter';
+    LAST_SLOT_KEY,
+    LEGACY_SAVE_KEY,
+    mostRecentSlot,
+    slotStorageKey,
+} from '../saveSlots';
 import {
     CURRENT_SCHEMA_VERSION,
     type MigrationMap,
@@ -49,41 +58,75 @@ function buildState(playerName = 'Pilgrim'): GameState {
 // ---------------------------------------------------------------------------
 
 describe('createAsyncStorageAdapter — preload + load', () => {
-    it('preload with no saved data leaves the cache empty; load returns null', async () => {
+    it('preload with no saved data leaves every slot empty; load returns null', async () => {
         const adapter = createAsyncStorageAdapter();
 
         await adapter.preload();
 
         expect(adapter.load()).toBeNull();
+        expect(adapter.getActiveSlot()).toBeNull();
+        expect(adapter.listSlots().map((s) => s.status)).toEqual(['empty', 'empty', 'empty']);
     });
 
-    it('preload reads a previously-saved envelope from AsyncStorage', async () => {
-        const state = buildState('Pilgrim');
-        await AsyncStorage.setItem(SAVE_KEY, JSON.stringify(wrap(state)));
+    it('preload reads every slot and boots straight into the remembered last slot', async () => {
+        await AsyncStorage.setItem(slotStorageKey(2), JSON.stringify(wrap(buildState('Pilgrim'), 1_000)));
+        await AsyncStorage.setItem(slotStorageKey(3), JSON.stringify(wrap(buildState('Other'), 2_000)));
+        await AsyncStorage.setItem(LAST_SLOT_KEY, '2');
 
         const adapter = createAsyncStorageAdapter();
         await adapter.preload();
 
-        const loaded = adapter.load();
-        expect(loaded).not.toBeNull();
-        expect(loaded?.player.name).toBe('Pilgrim');
+        expect(adapter.getActiveSlot()).toBe(2);
+        expect(adapter.load()?.player.name).toBe('Pilgrim');
+        expect(adapter.readSlot(3)?.player.name).toBe('Other');
+        expect(adapter.readSlot(1)).toBeNull();
+        const summaries = adapter.listSlots();
+        expect(summaries.map((s) => s.status)).toEqual(['empty', 'saved', 'saved']);
+        expect(summaries[1]?.savedAt).toBe(1_000);
+        expect(summaries[2]?.level).toBe(1);
+        expect(mostRecentSlot(summaries)).toBe(3);
     });
 
-    it('preload throws on corrupted JSON (Q7=A — surface to host)', async () => {
-        await AsyncStorage.setItem(SAVE_KEY, '{ not valid json');
+    it('a remembered last slot that is empty does not become active', async () => {
+        await AsyncStorage.setItem(LAST_SLOT_KEY, '1');
+        const adapter = createAsyncStorageAdapter();
+        await adapter.preload();
+        expect(adapter.getActiveSlot()).toBeNull();
+        expect(adapter.load()).toBeNull();
+    });
+
+    it('preload reports corrupted JSON as an unreadable slot instead of throwing', async () => {
+        await AsyncStorage.setItem(slotStorageKey(1), '{ not valid json');
+        await AsyncStorage.setItem(LAST_SLOT_KEY, '1');
 
         const adapter = createAsyncStorageAdapter();
+        await expect(adapter.preload()).resolves.toBeUndefined();
 
-        await expect(adapter.preload()).rejects.toThrow();
+        expect(adapter.listSlots()[0]?.status).toBe('unreadable');
+        expect(adapter.readSlot(1)).toBeNull();
+        // The torn slot is never booted into.
+        expect(adapter.getActiveSlot()).toBeNull();
     });
 
-    it('preload throws on a save from a future schema version', async () => {
+    it('preload reports a save from a future schema version as unreadable', async () => {
         const envelope: StoredEnvelope = { schemaVersion: 999, state: {} };
-        await AsyncStorage.setItem(SAVE_KEY, JSON.stringify(envelope));
+        await AsyncStorage.setItem(slotStorageKey(2), JSON.stringify(envelope));
 
         const adapter = createAsyncStorageAdapter();
+        await adapter.preload();
 
-        await expect(adapter.preload()).rejects.toThrow(/future version/);
+        expect(adapter.listSlots()[1]?.status).toBe('unreadable');
+    });
+
+    it('preload deletes the retired single-slot key and never reads it (owner call: discard legacy)', async () => {
+        await AsyncStorage.setItem(LEGACY_SAVE_KEY, JSON.stringify(wrap(buildState('Legacy'))));
+
+        const adapter = createAsyncStorageAdapter();
+        await adapter.preload();
+
+        expect(adapter.load()).toBeNull();
+        expect(adapter.listSlots().every((s) => s.status === 'empty')).toBe(true);
+        expect(await AsyncStorage.getItem(LEGACY_SAVE_KEY)).toBeNull();
     });
 });
 
@@ -109,20 +152,85 @@ function createFakeStorage(): FakeStorage {
 }
 
 describe('createAsyncStorageAdapter — save (debounced)', () => {
+    it('save with NO active slot is dropped — nothing is written into an unpicked slot', async () => {
+        const storage = createFakeStorage();
+        const adapter = createAsyncStorageAdapter({ debounceMs: 0, storage });
+
+        adapter.save(buildState('Ghost'));
+        await adapter.flush();
+
+        expect(adapter.load()).toBeNull();
+        expect(storage.setItem).not.toHaveBeenCalled();
+    });
+
     it('save updates the load cache immediately', () => {
         const adapter = createAsyncStorageAdapter({
             debounceMs: 50,
             storage: createFakeStorage(),
         });
+        adapter.selectSlot(1);
 
         adapter.save(buildState('Alice'));
 
         expect(adapter.load()?.player.name).toBe('Alice');
     });
 
+    it('save writes to the ACTIVE slot key, stamped with the clock', async () => {
+        const storage = createFakeStorage();
+        const adapter = createAsyncStorageAdapter({ debounceMs: 0, storage, now: () => 42_000 });
+        adapter.selectSlot(3);
+
+        adapter.save(buildState('Slot Three'));
+        await adapter.flush();
+
+        const slotWrites = storage.setItem.mock.calls.filter(([key]) => key === slotStorageKey(3));
+        expect(slotWrites).toHaveLength(1);
+        const written = JSON.parse(slotWrites[0]![1]) as StoredEnvelope;
+        expect(written.savedAt).toBe(42_000);
+        expect(unwrap(written).player.name).toBe('Slot Three');
+        expect(adapter.listSlots()[2]?.savedAt).toBe(42_000);
+        // The selection is remembered for the next launch.
+        expect(storage.setItem).toHaveBeenCalledWith(LAST_SLOT_KEY, '3');
+    });
+
+    it('selecting a new slot flushes a write pending for the old slot into the OLD slot', async () => {
+        const storage = createFakeStorage();
+        const adapter = createAsyncStorageAdapter({ debounceMs: 50, storage });
+        adapter.selectSlot(1);
+        adapter.save(buildState('One'));
+
+        adapter.selectSlot(2);
+        await adapter.flush();
+
+        const slotWrites = storage.setItem.mock.calls.filter(([key]) => key.startsWith('@axiomancer/save:v2:slot-'));
+        expect(slotWrites.map(([key]) => key)).toEqual([slotStorageKey(1)]);
+        expect(adapter.readSlot(2)).toBeNull();
+    });
+
+    it('subscribers are told about writes, selects and clears', async () => {
+        const storage = createFakeStorage();
+        const adapter = createAsyncStorageAdapter({ debounceMs: 0, storage });
+        const listener = jest.fn();
+        const unsubscribe = adapter.subscribe(listener);
+
+        adapter.selectSlot(1);
+        adapter.save(buildState());
+        await adapter.flush();
+        await adapter.clearSlot(1);
+        const calls = listener.mock.calls.length;
+        expect(calls).toBeGreaterThanOrEqual(3);
+
+        unsubscribe();
+        adapter.selectSlot(2);
+        expect(listener.mock.calls.length).toBe(calls);
+    });
+
+
     it('save coalesces bursts within the debounce window into one AsyncStorage write', async () => {
         const storage = createFakeStorage();
         const adapter = createAsyncStorageAdapter({ debounceMs: 50, storage });
+        adapter.selectSlot(1);
+        storage.setItem.mockClear();
 
         adapter.save(buildState('A'));
         adapter.save(buildState('B'));
@@ -143,6 +251,8 @@ describe('createAsyncStorageAdapter — save (debounced)', () => {
     it('debounceMs: 0 writes synchronously on every save', async () => {
         const storage = createFakeStorage();
         const adapter = createAsyncStorageAdapter({ debounceMs: 0, storage });
+        adapter.selectSlot(1);
+        storage.setItem.mockClear();
 
         adapter.save(buildState('A'));
         adapter.save(buildState('B'));
@@ -166,28 +276,45 @@ describe('createAsyncStorageAdapter — save (debounced)', () => {
 // clear
 // ---------------------------------------------------------------------------
 
-describe('createAsyncStorageAdapter — clear', () => {
-    it('clear removes the stored save and resets the cache', async () => {
+describe('createAsyncStorageAdapter — clear / clearSlot', () => {
+    it('clear removes the ACTIVE slot on disk and resets its cache; other slots survive', async () => {
         const adapter = createAsyncStorageAdapter({ debounceMs: 10 });
-
-        adapter.save(buildState());
+        adapter.selectSlot(2);
+        adapter.save(buildState('Two'));
         await adapter.flush();
+        adapter.selectSlot(1);
+        adapter.save(buildState('One'));
+        await adapter.flush();
+
         await adapter.clear();
 
         expect(adapter.load()).toBeNull();
-        expect(await AsyncStorage.getItem(SAVE_KEY)).toBeNull();
+        expect(adapter.getActiveSlot()).toBe(1);
+        expect(await AsyncStorage.getItem(slotStorageKey(1))).toBeNull();
+        expect(adapter.readSlot(2)?.player.name).toBe('Two');
+        expect(adapter.listSlots().map((s) => s.status)).toEqual(['empty', 'saved', 'empty']);
     });
 
     it('clear cancels a pending debounced write', async () => {
         const storage = createFakeStorage();
         const adapter = createAsyncStorageAdapter({ debounceMs: 50, storage });
+        adapter.selectSlot(1);
+        storage.setItem.mockClear();
 
         adapter.save(buildState());
         await adapter.clear();
         await adapter.flush();
 
         expect(storage.setItem).not.toHaveBeenCalled();
-        expect(storage.removeItem).toHaveBeenCalledTimes(1);
+        // Exactly the slot key goes (the legacy key is preload's job).
+        expect(storage.removeItem).toHaveBeenCalledWith(slotStorageKey(1));
+    });
+
+    it('clear with no active slot is a no-op', async () => {
+        const storage = createFakeStorage();
+        const adapter = createAsyncStorageAdapter({ storage });
+        await adapter.clear();
+        expect(storage.removeItem).not.toHaveBeenCalled();
     });
 });
 
@@ -261,9 +388,10 @@ describe('migrations — unwrap', () => {
             },
         };
         await AsyncStorage.setItem(
-            SAVE_KEY,
+            slotStorageKey(1),
             JSON.stringify({ schemaVersion: 2, state: v2State }),
         );
+        await AsyncStorage.setItem(LAST_SLOT_KEY, '1');
 
         const adapter = createAsyncStorageAdapter();
         await adapter.preload();

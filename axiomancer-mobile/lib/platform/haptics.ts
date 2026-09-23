@@ -1,5 +1,7 @@
 import { trigger, HapticFeedbackTypes } from 'react-native-haptic-feedback';
 
+import { settingsStore } from '@/state/settings';
+
 /**
  * The Expo-decouple swap for haptics (phase 47d). Backed by
  * `react-native-haptic-feedback`, the bare-RN library the build-plan
@@ -55,8 +57,10 @@ const NOTIFICATION_TYPE: Record<NotificationFeedbackType, HapticFeedbackTypes> =
 /**
  * May we fire a haptic right now?
  *
- * @returns false only on a web runtime that reports the document has never
- *   received a user gesture; true everywhere else.
+ * @returns false when the player switched HAPTICS off in SETTINGS
+ *   (2026-09-23; read synchronously from `settingsStore`), or on a web
+ *   runtime that reports the document has never received a user gesture;
+ *   true everywhere else.
  *
  * FE-012: the web backend calls `navigator.vibrate()`, which Chromium refuses
  * before the first gesture and logs as a console ERROR each time — "Blocked
@@ -72,6 +76,7 @@ const NOTIFICATION_TYPE: Record<NotificationFeedbackType, HapticFeedbackTypes> =
  * Pure read of runtime state; no mutation.
  */
 function hapticsAllowed(): boolean {
+    if (!settingsStore.get().haptics) return false;
     const activation = (globalThis as {
         navigator?: { userActivation?: { hasBeenActive?: boolean } };
     }).navigator?.userActivation;

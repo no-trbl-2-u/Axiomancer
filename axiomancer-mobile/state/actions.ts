@@ -136,6 +136,7 @@ import {
     type ClaimBlacksmithResult,
 } from './blacksmith/store-actions';
 import type { CacheLootTier, DieGearColor } from '@mechanics';
+import { isTutorialDone } from './tutorials';
 import {
     applyPlayerTierPresetAction,
     type ApplyPlayerTierPresetResult,
@@ -1516,7 +1517,8 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
             // The first-ever crossing runs as the guided tutorial (pinned
             // seed + hazard, coach overlay); the persistent flag set on
             // completion/skip keeps every later crossing organic.
-            const tutorialDone = (gameState.flags ?? []).includes(HAZARD_TUTORIAL_FLAG);
+            // SETTINGS → TUTORIAL HINTS off reads every coach as done.
+            const tutorialDone = isTutorialDone(gameState.flags, HAZARD_TUTORIAL_FLAG);
             beginHazardAction(store, tutorialDone ? {} : { tutorial: true });
             return true;
         }
@@ -1608,7 +1610,7 @@ function resolveCurrentMapEventAction(store: AppStore, sourceNodeType?: string):
             // The first-ever visit runs as the guided tutorial; the
             // persistent flag set on completion/skip keeps every later
             // visit organic.
-            const tutorialDone = (gameState.flags ?? []).includes(BLACKSMITH_TUTORIAL_FLAG);
+            const tutorialDone = isTutorialDone(gameState.flags, BLACKSMITH_TUTORIAL_FLAG);
             beginBlacksmithAction(store, {
                 variants: result.event.variants,
                 tutorial: !tutorialDone,

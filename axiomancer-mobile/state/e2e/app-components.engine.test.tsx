@@ -14,6 +14,7 @@ import { render } from '@testing-library/react-native';
 import React from 'react';
 import { createAppStore } from '@/state/store';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
+import { SaveSlotsProvider } from '@/state/SaveSlotsProvider';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 
 // Mock expo-router for all tests
@@ -24,6 +25,7 @@ jest.mock('@/lib/platform/router', () => ({
         back: jest.fn(),
         canGoBack: () => false,
     }),
+    useLocalSearchParams: () => ({}),
     Redirect: () => null,
     Tabs: () => null,
     Stack: () => null,
@@ -38,7 +40,11 @@ import MemoirScreen from '@/app/(tabs)/memoir/index';
 describe('App Component Smoke Tests', () => {
     const TestWrapper = ({ children }: { children: React.ReactNode }) => {
         const store = createAppStore({ adapter: createMemoryAdapter() });
-        return <GameStoreProvider store={store}>{children}</GameStoreProvider>;
+        return (
+            <GameStoreProvider store={store}>
+                <SaveSlotsProvider>{children}</SaveSlotsProvider>
+            </GameStoreProvider>
+        );
     };
 
     describe('Main App Screens', () => {
