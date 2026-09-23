@@ -14,7 +14,7 @@
 | cards | `skills/adjust-cards.md` | 2026-09-21 | 2a162f5e | 16 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-21 | 5d9b6063 | 16 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-23 | d02bda13 | 16 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-23 | <PENDING> | 16 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-23 | 06d2ab2e | 16 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-21 | 9821b636 | 15 |
 
 ## Log
@@ -22,7 +22,7 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-keywords pass 16, 2026-09-23, commit <PENDING>]** Zero-diff
+> **[adjust-keywords pass 16, 2026-09-23, commit 06d2ab2e]** Zero-diff
 > pass — audit re-confirmed, no new CREATE/UPDATE/REMOVE, ledger bump
 > only. Dispatched autonomously by `/march`'s content-lifecycle gate:
 > `keywords` (`fb0a0f3c` 2026-09-21T12:50:21Z) was the stalest
