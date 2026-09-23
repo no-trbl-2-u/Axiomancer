@@ -26,7 +26,7 @@ the contract. Witness for why this exists: edba726 / the root
 ## Verify
 
 ```
-npm run verify -w axiomancer-card-editor   # type-check + lint + build
+npm run verify -w axiomancer-card-editor   # type-check + lint + test + build
 ```
 
 CI (`verify-card-editor.yml`) runs the same gate on changes to this

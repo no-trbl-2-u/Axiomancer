@@ -36,7 +36,7 @@ See [`README.md`](./README.md) for architecture docs.
 
 ## Technical constraints
 
-- **Path alias `@/*` resolves to repo root** — see `tsconfig.json`.
+- **Path alias `@/*` resolves to this package's root** — see `tsconfig.json`.
 - **SVGs are placeholders.** Every SVG in this codebase is a coded
   placeholder. The swap contract is documented in
   [`SVG_ASSET_SPEC.md`](./SVG_ASSET_SPEC.md).

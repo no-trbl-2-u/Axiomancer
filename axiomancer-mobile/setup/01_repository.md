@@ -6,7 +6,7 @@ Complete these comprehensive steps when you need full development environment se
 
 ## Prerequisites
 
-- **Node.js 20+** — required by the React Native toolchain
+- **Node.js 22+** (`engines` in `package.json`) — required by the React Native toolchain
 - **Git** — for version control and repository management
 - **Code editor** — VS Code recommended for TypeScript support
 
@@ -83,6 +83,7 @@ This runs:
 - `npm run lint` — ESLint with Expo's configuration
 - `npm run typecheck` — TypeScript strict type checking  
 - `npm test` — Jest test suite with React Native Testing Library
+- `npm run assets:check`, `npm run art:test`, `npm run critique-drive:test` — asset provenance and script guards
 
 All steps should pass. If any fail, see the troubleshooting section below.
 
@@ -128,7 +129,7 @@ Understanding where things live:
 ```
 axiomancer-mobile/
 ├── app/                     # Expo Router file-based routes  
-│   └── (tabs)/             # Main app tabs: combat, character, exploration, inventory, event
+│   └── (tabs)/             # Main app tabs: exploration, character, memoir, inventory, deck
 ├── components/             # Reusable UI components
 ├── state/                  # Game state management and presenters
 ├── theme/                  # Design tokens and typography
@@ -174,12 +175,12 @@ axiomancer-mobile/
 ### Node.js Version Issues
 
 **Problem:** Package installation or Metro bundler fails
-**Solution:** Verify Node.js 20+ is installed:
+**Solution:** Verify Node.js 22+ is installed:
 ```bash
-node --version  # Should show 20.x or higher
+node --version  # Should show 22.x or higher
 ```
 
-If using an older version, install Node.js 20+ from https://nodejs.org or use a version manager like nvm.
+If using an older version, install Node.js 22+ from https://nodejs.org or use a version manager like nvm.
 
 ### Metro Bundler Problems
 
@@ -232,9 +233,9 @@ sudo chown -R $(whoami) node_modules/.cache .expo
 
 Once repository setup is complete:
 
-1. **For EAS Build setup:** See [`setup/02_eas.md`](./02_eas.md) _(Coming Soon)_
-2. **For store deployment:** See [`setup/03_store_setup.md`](./03_store_setup.md) _(Coming Soon)_
-3. **For AI testing workflow:** See [`setup/04_claude_playtest.md`](./04_claude_playtest.md) _(Coming Soon)_
+1. **For EAS Build setup:** See [`setup/02_eas.md`](./02_eas.md)
+2. **For store deployment:** See [`setup/03_store_setup.md`](./03_store_setup.md)
+3. **For AI testing workflow:** See [`setup/04_claude_playtest.md`](./04_claude_playtest.md)
 
 ## Getting Help
 

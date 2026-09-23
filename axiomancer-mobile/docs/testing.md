@@ -58,7 +58,7 @@ Examples of e2e entry points by module:
 | `app/(tabs)/exploration/`   | `selectExplorationViewModel(state)` in `state/presenters/exploration.engine.ts`        |
 | `app/event/`                | `selectEventViewModel(state)` in `state/presenters/event.engine.ts`                    |
 | `app/(tabs)/_layout.tsx`    | `selectVisibleTabs(inCombat)` in `state/presenters/tabs.engine.ts`                     |
-| Engine store lifecycle      | `createGameStore(memoryAdapter, …)` driven through `startCombat` / `updateCombat` / `endCombat` from `axiomancer-mechanics` |
+| Engine store lifecycle      | `createGameStore(memoryAdapter, …)` driven through `startCombat` / `endCombat` / `save` from `axiomancer-mechanics` |
 | `components/<X>.tsx`        | `render(<X {...props} />)` → assert on `getByText` / `getByA11yLabel`. Only when the component has branching UI logic worth pinning. |
 
 Unit tests for individual helpers are still welcome, but they do not
@@ -67,7 +67,7 @@ satisfy the hermetic-e2e requirement on their own.
 ## What CANNOT be tested hermetically (today)
 
 - **Real device behaviour** (haptics, real fonts loading, real splash
-  screen). Mock `expo-haptics`, `expo-font`, `expo-splash-screen` in
+  screen). Mock `react-native-haptic-feedback`, `expo-font`, `expo-splash-screen` in
   `jest.setup.ts`.
 - **Reanimated worklets running on the UI thread.** Use
   `react-native-reanimated/mock` from the Jest config. Worklet timing
@@ -102,10 +102,10 @@ Since Axiomancer Mobile is a React Native / Expo app, tests must account for pla
 
 All Expo modules and React Native native modules must be mocked for hermetic testing. Current mocks in `jest.setup.ts` include:
 
-- **expo-haptics:** Mocked to prevent actual device vibration during tests
+- **react-native-haptic-feedback:** Mocked to prevent actual device vibration during tests
 - **expo-font:** Mocked to simulate font loading without real font files
 - **expo-splash-screen:** Mocked to prevent splash screen API calls
-- **AsyncStorage:** Use `@react-native-async-storage/async-storage/mock` for storage persistence tests
+- **AsyncStorage:** `@react-native-async-storage/async-storage/jest/async-storage-mock` (the package's in-memory mock) is wired app-wide in `jest.setup.ts`
 
 When adding new native modules, follow this pattern:
 ```ts
@@ -136,13 +136,15 @@ are covered by Playwright playthroughs against the exported web build:
 
 - `npm run e2e:hazard` — `scripts/hazard-e2e.mjs`: both hazard routes,
   drag gestures, the no-re-cast dice doctrine.
-- `npm run e2e:gathering` — `scripts/gathering-e2e.mjs`: both gleaning
-  stances, including a forced eruption.
-- `npm run e2e:minigames` — both, sharing one `expo export`.
+- `npm run e2e:combat`, `e2e:encounters`, `e2e:exploration-roundtrip`,
+  `e2e:upgradeable-dice`, `e2e:combat-round` — the other `scripts/*-e2e.mjs`
+  journeys.
+- `npm run e2e:minigames` — all of the above, sharing one `expo export`.
 
 They are deterministic (seeds pinned through the `__AXM_*` dev hooks)
-and hermetic (everything runs against localhost). CI runs them in the
-`e2e-minigames` job of `.github/workflows/verify.yml`. When asserting
+and hermetic (everything runs against localhost). CI runs the affected
+journeys in `.github/workflows/verify-mobile.yml` (scoped by
+`scripts/ci-e2e-scope.mjs` at the monorepo root). When asserting
 on copy that mounts behind a reanimated `entering` delay, poll
 (`waitForCopy` in the scripts) instead of reading `innerText` once.
 
@@ -176,8 +178,8 @@ same PR and say why.
     presenter / state tests. Companion code:
     `state/presenters/<feature>.engine.ts`.
   - `<module>/<file>.test.ts` (outside `app/`) for pure unit tests.
-  - `components/<Component>.test.tsx` for render tests of components
-    with branching UI.
+  - `components/__tests__/<Component>.test.tsx` for render tests of
+    components with branching UI.
 - **Fixtures / mocks** live in `state/mocks/<feature>.mock.ts` (or any
   location outside `app/`). They must be plain data — no `Math.random`,
   no environment reads.
@@ -256,7 +258,7 @@ the gate it routes on.
 
 import { afterEach, describe, it, expect, jest } from '@jest/globals';
 
-import { mockAlternatingRng } from '@/app/test-utils/rng';
+import { mockAlternatingRng } from '@/test-utils/rng';
 // import the public entry point under test
 // e.g. import { buildCombatViewModel } from '../combat-encounter.engine';
 

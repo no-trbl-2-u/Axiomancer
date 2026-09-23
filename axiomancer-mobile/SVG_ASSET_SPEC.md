@@ -20,8 +20,7 @@ resolved — either swapped for acquired art/registry icons, or torn down as
 dead code. See the **Asset checklist** at the bottom for the current,
 reconciled state of every row; the numbered sections above it are kept for
 swap-procedure history and still apply verbatim to the few genuinely
-outstanding rows (`GlyphMind`, map node markers, XP chain, labyrinth
-backdrops). `docs/VISUAL_LANGUAGE.md` documents the finished system this
+outstanding rows (`GlyphMind`, map node markers, XP chain). `docs/VISUAL_LANGUAGE.md` documents the finished system this
 spec was building toward.
 
 ---
@@ -277,13 +276,14 @@ case 'sword':
 ## Quick reference — color palette
 
 ```
-AXM.bg        = '#0a0a0a'    // near-black background
-AXM.parchment = '#e8dfc8'    // main text / inactive icon
-AXM.blood     = '#c0152a'    // HP, danger, bleed
-AXM.sulfur    = '#d4c026'    // mana, selected, active
-AXM.rust      = '#9e3a1a'    // friendship, rust accents
-AXM.bone      = '#8a8273'    // secondary text, inactive tabs
-AXM.ash       = '#3a3530'    // borders, disabled
+// default `ashen-gold` theme (`theme/palette.ts` THEME_SPECS); the other four themes re-author these
+AXM.bg        = '#0b0a09'    // near-black background
+AXM.parchment = '#ece0c8'    // main text / inactive icon
+AXM.blood     = '#e05a45'    // HP, danger, bleed
+AXM.sulfur    = '#dcb04a'    // mana, selected, active
+AXM.rust      = '#c36431'    // friendship, rust accents
+AXM.bone      = '#9c937f'    // secondary text, inactive tabs
+AXM.ash       = '#46403a'    // borders, disabled
 ```
 
 All monochrome assets should use `currentColor` internally so they inherit
@@ -349,10 +349,10 @@ the `color` prop without needing separate colored variants.
       `app/(tabs)/_layout.tsx` reads `AxmIcon` directly (the verbatim inline
       duplicate V1's brief called out by name is gone). Same stale-row
       correction as above.
-- [ ] Labyrinth room-scene backdrops (47 rooms, 3:2, ink-on-parchment —
-      contract in `assets/images/labyrinth/index.ts`; procedural SVG
-      placeholder in `components/labyrinth/RoomScene.tsx` until then) —
-      OUT OF SCOPE for Phase V7: this is live art (the labyrinth IS the
-      Aporia acts, not a fallback), but a 47-plate curated acquisition is
-      its own phase-sized effort, not a slice of V7. Left for a dedicated
-      follow-up.
+- [x] Labyrinth room-scene backdrops (47 rooms) — RESOLVED:
+      `assets/images/labyrinth/index.ts` now dresses every room from a
+      shared wall/door WebP kit (`walls/`, `doors/`, `ROOM_ART`), and
+      `components/labyrinth/RoomScene.tsx` renders the wall as the
+      full-bleed backdrop `<Image>` with door images inside the engine-driven
+      hotspots. (Was OUT OF SCOPE for Phase V7 — a 47-plate acquisition was
+      its own phase-sized effort; it has since landed.)
