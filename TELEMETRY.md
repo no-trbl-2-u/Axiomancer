@@ -647,3 +647,6 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-23T14:24:33Z | skill | consolidate | claude-opus-5-5 | - | - |
 | 2026-09-23T14:24:33Z | skill-end | consolidate | claude-opus-5-5 | 0s | ok |
 | 2026-09-23T14:34:32Z | tick-end | - | claude-opus-5-5 | 11m47s | ok |
+| 2026-09-23T15:26:39Z | slash-prompt | /oversight | - | - | /oversight |
+| 2026-09-23T15:26:43Z | skill | oversight | - | - | - |
+| 2026-09-23T15:26:43Z | skill-end | oversight | claude-sonnet-5 | 0s | ok |
