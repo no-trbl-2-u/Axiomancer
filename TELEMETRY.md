@@ -643,3 +643,4 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-23T08:54:02Z | slash-prompt | /digest | - | - | /digest |
 | 2026-09-23T08:54:04Z | skill | digest | - | - | - |
 | 2026-09-23T08:54:04Z | skill-end | digest | - | 0s | ok |
+| 2026-09-23T10:31:59Z | slash-prompt | /march | - | - | /march |
