@@ -17,6 +17,16 @@
 > the structural gap the map has had since Phase W5 — using no story fact
 > beyond what's already shipped scenery (the wall, the ledger, the court),
 > and it invents no new canon about X, the second guard, or anyone's fate.
+>
+> **Addendum, 2026-09-23 (same day, later in this session).** T set a new
+> `story-overview.md` Standing Fact after this spec shipped: the capital is
+> commonly believed to be the annexation's last unconquered ground, and
+> that belief is wrong — not because it fell, but because it was never a
+> refuge; its coldness is its own nature. T confirmed this reads as
+> **compatible** with this spec's "relief cut short" door beat, not a
+> contradiction — no revision made. Left here as the cross-reference for
+> whoever authors the-capital's *arrival* side (`cap-1`/`cap-2`) next,
+> since that Standing Fact is the belief that arrival beat should undercut.
 
 ## Goal
 

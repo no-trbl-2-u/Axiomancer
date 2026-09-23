@@ -27,6 +27,24 @@ have no position in the sequence; every beat after them may assume them.
 - **T's write-in refers to X as "his."** Recorded as written. This is the first
   identifier X has carried and it sits against §2's "no figure" — see
   `Noted for the pivot`. Not re-litigated here.
+- **The capital was believed to be the annexation's last unconquered
+  ground — the belief was always false.** Common knowledge along the road
+  (not X's private hope alone): ordinary people believe the capital is the
+  last place the annexation hasn't reached — it's why the river-court
+  islanders and the sweetheart's own village send a chosen child there
+  each generation, the safest bet either place has. The belief is wrong,
+  and not because the annexer got there first: the capital was never
+  conquered, but it was also never a refuge. Its coldness — ribbons
+  weighed instead of faces, a ledger that "balances either way" — is the
+  capital's own nature, nothing the annexation did to it. Whoever arrives
+  expecting the last safe place finds out it never was, immediately, on
+  arrival. Set by T, 2026-09-23. (Note: the shipped, non-canon Herald
+  dialogue at `the-capital`'s `cap-2` already reads almost exactly this
+  way — "ribbons instead of faces," "the tally balances either way" — a
+  coincidence of an earlier draft, not evidence it was ever canon, but
+  worth knowing if a future beat is authored there: the existing text
+  needs no retheming to fit this fact, only a frame that it is not
+  reassuring.)
 
 ## Shipped inventory (read 2026-09-18)
 
@@ -146,7 +164,11 @@ For a while things are okay.
   pivot, not patching mid-walk.
 - The annexation is a world-scale fact with no world attached: who annexes
   whom, and where the seven shipped maps sit relative to that line, is
-  undecided.
+  undecided. **Partially answered 2026-09-23** (see `Standing facts`): the
+  capital's *reputation* is now set (believed unconquered, wrongly believed
+  safe). Still undecided: whether it's genuinely outside the annexation's
+  reach or simply never tested, and where the other six maps
+  (fishing-village through town-across-river) sit relative to the line.
 
 ## Pivot recommendation
 
