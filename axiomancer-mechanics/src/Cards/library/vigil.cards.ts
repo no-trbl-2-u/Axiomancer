@@ -16,7 +16,7 @@
  * `hoarfrost-teeth`, `nothing-crossed-the-ice`, `the-reprisal-bell`,
  * `the-besiegers-winter`, `every-stone-an-oath`, `caltrops-under-the-snow`) —
  * their names and descriptions are unchanged, their numbers are rewritten to
- * the new scale ladder. The other nine are new.
+ * the new scale ladder. The other ten are new.
  *
  * Shape and voice copied from `src/Cards/library/starters.cards.ts`
  * (`plan/2026-09-02-card-authoring-brief.md` is the spec). This file is

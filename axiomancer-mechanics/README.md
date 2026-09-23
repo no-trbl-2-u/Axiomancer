@@ -2,7 +2,7 @@
 
 Turn-based RPG engine with a Heart / Body / Mind combat system. Status effects, skills, and enemies are themed around logical fallacies and philosophical paradoxes.
 
-This package is the **non-UI engine** only — a workspace package in the Axiomancer monorepo, consumed as local source via the `@mechanics` alias by `axiomancer-mobile` and `card-editor`. All logic is exposed through the package barrel at [`src/index.ts`](./src/index.ts).
+This package is the **non-UI engine** only — a workspace package in the Axiomancer monorepo, consumed as local source via the `@mechanics` alias by `axiomancer-mobile` and `axiomancer-card-editor`. All logic is exposed through the package barrel at [`src/index.ts`](./src/index.ts).
 
 **Looking for a tour?** See [`docs/quickstart.md`](./docs/quickstart.md) —
 a single-page entry point covering what's shipped, how to drive
@@ -26,7 +26,7 @@ architecture and product decisions that govern mechanics work.
 
 The package is **not published to npm** — it lives in the Axiomancer
 monorepo and is consumed as local source via the `@mechanics` alias by
-`axiomancer-mobile` and `card-editor`.
+`axiomancer-mobile` and `axiomancer-card-editor`.
 
 For local engine development (from the repo root):
 
@@ -77,6 +77,8 @@ turn loop.
 
 The barrel exports are organised by domain:
 
+> **Superseded (2026-09-23):** the Enemy, Items and Skills rows below name retired exports (`decideEnemyAction` and the AI presets, `executeSkill` / `canUseSkill` / `calculateSkillDamage` / `learnSkill` / `getAvailableSkills`, the procedural template and set-item helpers) — live truth: src/index.ts (the barrel), src/Enemy/enemy.library.ts, src/Cards/card.engine.ts, src/Items/. Body kept as a historical record pending rewrite (plan/AUDIT.md).
+
 | Group           | Highlights                                                                                                   |
 | --------------- | ------------------------------------------------------------------------------------------------------------ |
 | Character       | `createCharacter` (auto-generates `Character.id` via `getRng()` when not supplied — Phase 35), `equipItem`/`unequipItem`, `getEquipmentModifiers`, `allocateStatPoint` + `STAT_POINTS_PER_LEVEL` + `availableStatPoints` field on `Character` (Phase 29), presets API (`characterPresets`, `getPresetById`, `buildCharacterFromPreset`), types (`Character`, `BaseStats`, `DerivedStats`, `NonCombatStats`, `CharacterPreset`) |
@@ -87,7 +89,7 @@ The barrel exports are organised by domain:
 | Effects         | `applyEffect`, `applyTier1CombatEffect`, `clearTier1EffectsForStance`/`ForType`, `lookupEffect`/`getEffectByName`/`getEffectsByType`, `effectsLibrary`, `processWorldEffectTick`/`getActiveHazards`, types (`Effect`, `ActiveEffect`, `EffectTier`, `StatModifier`, `DamageOverTime`, `RegenerationConfig`, `ActiveHazard`). Phase 80 always-land contract: Tier 2 debuffs + Tier 3 always land (no resist roll); only Tier 2 buff caster fumble/crit survives. See [`docs/effects.md`](./docs/effects.md). |
 | Items           | `addItem`/`removeItem`/`stackItem`, `useConsumable`/`useConsumableEffect`, equipment helpers (`aggregateCombatStartTokens`, `applyEquipmentGenerationBonus`, `getEquipmentProcTriggers`), `equipmentTemplates`/`uniqueTemplates`, `consumableLibrary`, type guards; shop economy (`buyItem`/`sellItem`/`defaultSellPrice`, types `ShopWare`/`ShopInventory` — Phase 37 + iterate `3ba5319`); set items (`getActiveSetBonuses` + 5 siblings: `getActiveSetBonusesForCharacter`/`aggregateSetStartTokens`/`applySetGenerationBonus`/`getActiveSetPassiveEffectIds`/`getEquippedItemSets`, library `itemSetLibrary`/`getItemSetById`, types `SetBonus`/`ItemSet` — Phase 54); base types (`Item`, `Equipment`, `Consumable`, `Material`, `QuestItem`, `EquipmentTemplate`, `UniqueItemTemplate`); Phase 75 added `previewTemplateAtRarity(templateId, rarity, playerLevel, rng?): Equipment \| undefined` — UI-tier wrapper around `dropItem` for mobile item-library mod-visibility (closes the user-jot at `b5c8165`). Phase 76 added `previewTemplateAtAllRarities(templateId, playerLevel, rng?): Record<ItemRarity, Equipment \| undefined>` — batch wrapper around the Phase 75 single-cell helper for UI tooltip / item-detail views rendering the full rarity strip in one call. Phase 152 added the affix-naming layer: `dropItemWithAffixes(templateId, playerLevel, rng?, opts?: DropWithAffixesOptions)` (drop + prefix/suffix roll), `composeItemName`, the `prefixes`/`suffixes`/`allAffixes` libraries with `getAffixById`/`affixesForSlot` lookups, `AFFIX_RARITY_WEIGHTS` draw scale, and types (`DropWithAffixesOptions`, `AffixControl`, `Affix`, `AffixRole`). |
 | Skills          | `executeSkill`, `canUseSkill`/`spendResources`/`calculateSkillDamage`, `generateBasicActionResources`/`generatePhilosophicalResource`, runtime learning (`learnSkill`, `getAvailableSkills`, `meetsLearningRequirement` — Phase 30; `learningRequirement` field on every Tier 2 / Tier 3 entry — Phase 33), top-level skill library (`skillLibrary`/`getSkillById` — Phase 50 unit 1 engine-handoff fix), types (`Skill`, `CombatResources`, `SkillTier`, `SkillResolution`, `SkillEvent`, `SkillLookup`); Tier 2 synergy primitive (`SkillSynergy` + `SynergyPredicate` types; 5 authored skills — `resonance-bleed`/`intensity-feedback`/`bat-swarm-thoughtform`/`resonance-burst`/`resonance-detonation` — Phase 66) |
-| Game            | `createGameStore`/`createNewGameState`, `gameReducer`/`migrate`, `createEventEmitter`, selectors (`selectPlayer`, `selectCombat`, `selectInventory`, `selectMoralMeter`, `selectVersion`), `nullAdapter` (Node adapter `createNodeAdapter` lives on `'axiomancer-mechanics/node'` since Phase 21), mechanic constants (`FRIENDSHIP_COUNTER_MAX`, `MAX_EFFECT_DURATION`, `PASSIVE_DEFENSE_MULTIPLIER`, `STAT_POINTS_PER_LEVEL`, …), GameAction union extended with `ALLOCATE_STAT_POINT` (Phase 29) and `LEARN_SKILL` (Phase 30), typed event surface (`EnginePayload` with optional `unlockedSkills` on `character:levelup` per Phase 30 unit 2 and `combatEvents` on `combat:round` per iterate `5ac6caa`, `TypedGameEvent` + 10 per-topic aliases, 10 `is*Event` guards), types (`GameState`, `GameStore`, `GameAction`, `GameEvent`/`GameEventEmitter`, `PersistenceAdapter`); `GameState.lastSeenAlignmentCells?: Record<string, string>` (Phase 63 — Beta; per-tree observer cache); Phase 72 added run-loop semantics — `store.resetRun({ keepCharacter: bool })` + required `GameState.runId: string` (16-char hex; bumped per reset) + `generateRunId` helper + `STARTING_REGION` constant; `GAME_STATE_VERSION` bumped 5 → 6 with `migrateV5toV6` defaulting `runId` for legacy saves. Closes GH#65 ask 2. Phase 73 added `CodexState` + required `GameState.codex: CodexState` slice + `store.unlockCodexEntry(entryId)` + `UNLOCK_CODEX_ENTRY` action + auto-firing wire on friendship outcomes; `GAME_STATE_VERSION` bumped 6 → 7 with `migrateV6toV7` defaulting `codex` for legacy saves. Closes GH#65 ask 3. |
+| Game            | `createGameStore`/`createNewGameState`, `gameReducer`/`migrate`, `createEventEmitter`, selectors (`selectPlayer`, `selectIsInCombat`, `selectInventory`, `selectMoralMeter`, `selectVersion`), `nullAdapter` (Node adapter `createNodeAdapter` lives on `'axiomancer-mechanics/node'` since Phase 21), mechanic constants (`FRIENDSHIP_COUNTER_MAX`, `MAX_EFFECT_DURATION`, `PASSIVE_DEFENSE_MULTIPLIER`, `STAT_POINTS_PER_LEVEL`, …), GameAction union extended with `ALLOCATE_STAT_POINT` (Phase 29) and `LEARN_SKILL` (Phase 30), typed event surface (`EnginePayload` with optional `unlockedCards` on `character:levelup` per Phase 30 unit 2; the `combat:round` topic and its `combatEvents` field were removed with the legacy resolver; `TypedGameEvent` + 9 per-topic aliases, 9 `is*Event` guards), types (`GameState`, `GameStore`, `GameAction`, `GameEvent`/`GameEventEmitter`, `PersistenceAdapter`); `GameState.lastSeenAlignmentCells?: Record<string, string>` (Phase 63 — Beta; per-tree observer cache); Phase 72 added run-loop semantics — `store.resetRun({ keepCharacter: bool })` + required `GameState.runId: string` (16-char hex; bumped per reset) + `generateRunId` helper + `STARTING_REGION` constant; `GAME_STATE_VERSION` bumped 5 → 6 with `migrateV5toV6` defaulting `runId` for legacy saves. Closes GH#65 ask 2. Phase 73 added `CodexState` + required `GameState.codex: CodexState` slice + `store.unlockCodexEntry(entryId)` + `UNLOCK_CODEX_ENTRY` action + auto-firing wire on friendship outcomes; `GAME_STATE_VERSION` bumped 6 → 7 with `migrateV6toV7` defaulting `codex` for legacy saves. Closes GH#65 ask 3. |
 | World           | `createStartingWorld`, world reducer (`changeMap`/`completeMap`/`unlockMap`/`completeNode`/`unlockNode`/`changeContinent`, plus Phase-23 `revealAdjacent`/`markNodeConsumed` and Phase-31 `unlockAdjacent`), map registry (`MAP_REGISTRY`, `getMapDefinition`, `createMapState`), node traversal (`moveToNode`, `completeCurrentNode`, `applyDialogueChoice`), MapEvents engine (`resolveMapEvent`, `registerMapEventPool`, `setDefaultMapEventPool`, `setNodeEventPoolOverride`, types: `MapEventKind`, `MapEventPool`, `ResolvedEvent`, etc.; the legacy `processNode` + `MapEvent` / `MapEventType` surface was removed in Phase 25), quests (`emptyQuestLog`, `startQuest`/`progressQuest`/`completeQuest`/`discoverQuest`; reach-objective auto-advance restored at iterate `8611881`), encounters (`generateEncounter`, `scaleEnemyToLevel`, `DIFFICULTY_LEVEL_BANDS`), types (`WorldState`, `MapState`, `MapDefinition`, `MapNode`, `Quest`, `Encounter`) |
 | NPCs            | `getDialogueNode`, `visibleChoices`, `isLeafNode`, types (`NPC`, `DialogueMap`, `DialogueTree`, `DialogueNode`, `DialogueChoice`, `DialogueContext`); `DialogueChoice.effect.alignmentDelta?: Partial<PhilosophicalAlignment>` since Phase 43. Phase 63 added the alignment-observer machinery: `DialogueTree.id?: string` (opts a tree into the cache), `DialogueChoice.requires.playerAlignmentCellChangedSince?: boolean` (reactive gate), `DialogueContext.lastSeenAlignmentCellId?: string` (caller-sourced input) |
 | The Oaths       | 3-axis alignment cube + 27-cell content registry (Phase 42; re-skinned Phase 44h per spec 34 §6). Engine: `bucketAxis`/`getAlignmentCell`/`applyAlignmentDelta`/`defaultAlignment`, constants (`AXIS_HIGH_THRESHOLD`, `AXIS_LOW_THRESHOLD`), library (`philosophicalAlignmentLibrary` — 27 entries, each carrying a damned exemplar + cautionary tale + 3 besetting sins). Types (`PhilosophicalAlignment`, `AxisBucket`, `BesettingSin`, `PhilosophicalAlignmentCell`). Display names: CREED/AUGURY/TROTH (engine fields `epistemology`/`outlook`/`scope`, unchanged). State: `GameState.philosophicalAlignment` (Phase 42, `GAME_STATE_VERSION` 5 with `migrateV4toV5`), `SHIFT_PHILOSOPHICAL_ALIGNMENT` action + store action. Authoring surfaces: `DialogueChoice.effect.alignmentDelta` + `MapEventPoolEntry.alignmentDelta` (Phase 43). Enemy alignment + outlook AI bias (Phase 45). Alignment gates: `AlignmentGate` type (`{ axis, op: 'gte'\|'lte', value }`), `DialogueChoice.requires.requiresAlignment?` + `SkillLearningRequirement.requiresAlignment?`, optional `alignment` param on `meetsLearningRequirement` / `getAvailableSkills` / `learnSkill`, `DialogueContext.alignment?` (Phase 46). See [`docs/oaths.md`](./docs/oaths.md). |
@@ -102,6 +104,8 @@ effect coverage sweep); 5 per-module quickstart pages at
 
 ### Hazard public API
 
+> **Superseded (2026-09-23):** the standalone Hazard minigame exports below (`initializeHazard`, `drawOpeningHand`, `HAZARD_CARD_LIBRARY`, `HazardMinigameState`, …) no longer exist; combat is Hazard-Pattern Combat driven from `src/Combat` (`initializeCombatEncounter`, `resolveCombatPhase`) — live truth: src/Combat/, src/index.ts. Body kept as a historical record pending rewrite (plan/AUDIT.md).
+
 `axiomancer-mechanics@0.16.0` ships the Hazard minigame through the top-level barrel. Consumers can import `initializeHazard`, `drawOpeningHand`, `selectRoute`, `rollDiceAndStartRound`, `playCardInRound`, `resolveRound`, `advanceToNextRound`, `computeFinalScore`, `HAZARD_CARD_LIBRARY`, `ACTION_CARD_LIBRARY`, `STARTER_DECK_CARD_IDS`, and Hazard types such as `HazardMinigameState`, `HazardCard`, `HazardActionCard`, `HazardManaDie`, and `HazardRoundResult`. See [`docs/hazard-minigame-api.md`](./docs/hazard-minigame-api.md).
 
 ## CLIs
@@ -110,7 +114,7 @@ The repo also ships a hands-on demo CLI. It is NOT part of the published package
 
 | Command          | What it does                                                                  |
 | ---------------- | ----------------------------------------------------------------------------- |
-| `npm run game`   | Interactive demo — tabbed map / combat / journal / skills / inventory loop.   |
+| `npm run game`   | Interactive demo — tabbed map / journal / cards / codex / inventory / character / dev loop. |
 
 ### Agent-driven CLI mode
 
@@ -175,7 +179,7 @@ src/
   Enemy/                   # createEnemy + AI logic + library
   Game/                    # store + persistence + constants + actions + reducer
   Items/                   # inventory reducers + item types
-  Skills/                  # skill engine + library + resource economy (Spec 04 / 04b)
+  Cards/                   # card engine + library (the former Skills module; Spec 04 / 04b)
   World/                   # world state, reducers, map and quest libraries
   NPCs/                    # NPC types
   Utils/                   # math, dice, stat derivation, type guards
@@ -183,20 +187,20 @@ src/
 docs/                      # design notes per system
 docs/effects/              # one markdown per buff/debuff
 docs/references/           # source material (fallacies, paradoxes, pantheon, Mörk Borg)
-specs/                     # implementation specs (numbered 01–24, with story/world/character subdirs from Phase 22)
+specs/                     # implementation specs (numbered 01–35, with story/world/character subdirs from Phase 22)
 content/                   # author's notebook: characters / locations / story (not loaded by engine)
-plan/                      # build plan, phase briefs, AUDIT.md, CRITIQUE.md, PHASE_CANDIDATES.md
+../plan/                   # build plan, phase briefs, AUDIT.md, CRITIQUE.md, PHASE_CANDIDATES.md (monorepo root)
 automation/                # standalone walkthrough script + replay fixtures
 ```
 
 ## Documentation
 
 - [`docs/narrative/STYLE_CONSTITUTION.md`](./docs/narrative/STYLE_CONSTITUTION.md) — narrative constitution, with linked voice registers, lexicon, anti-imitation safeguards, evaluation rubric, and encounter pilot
-- [`plan/steps/01_build_plan.md`](./plan/steps/01_build_plan.md) — phased development plan with progress tracking
+- [`../plan/steps/01_build_plan.md`](../plan/steps/01_build_plan.md) — phased development plan with progress tracking
 - [`docs/source-of-truth-hierarchy.md`](./docs/source-of-truth-hierarchy.md) — Nexus hierarchy for resolving T decisions, CDRs/ADRs, central ledger, build plans, candidates, critique/audit, and reports
-- [`plan/AUDIT.md`](./plan/AUDIT.md) — code audit and quality findings (drained by `/iterate`)
-- [`plan/CRITIQUE.md`](./plan/CRITIQUE.md) — architecture / quality findings filed by `/critique`
-- [`Knowledge-Gaps.md`](./Knowledge-Gaps.md) — open design and intent questions
+- [`../plan/AUDIT.md`](../plan/AUDIT.md) — code audit and quality findings (drained by `/iterate`)
+- [`../plan/CRITIQUE.md`](../plan/CRITIQUE.md) — architecture / quality findings filed by `/critique`
+- [`../plan/PHASE_CANDIDATES.md`](../plan/PHASE_CANDIDATES.md) — open design and intent questions (with [`../plan/AUDIT.md`](../plan/AUDIT.md))
 - [`braindump/BRAINDUMP.md`](./braindump/BRAINDUMP.md) — unorganised idea backlog
 - [`docs/testing.md`](./docs/testing.md) — **hermetic e2e testing standard (required for every implementation)**
 - [`docs/playtest.md`](./docs/playtest.md) — Hazard-Pattern Combat playtest reference: stage profiles, sim-policy roster, deck-selection grammar, sandbox card workflow, CLI cookbook
@@ -222,7 +226,7 @@ automation/                # standalone walkthrough script + replay fixtures
 | `npm run test:watch`    | Vitest in watch mode                                                                                  |
 | `npm run lint`          | Run ESLint                                                                                            |
 | `npm run check`         | Lint + type-check                                                                                     |
-| **`npm run verify`**    | **Hard gate** — `type-check && type-check:tests && lint && test && build` chained; runs before every commit |
+| **`npm run verify`**    | **Hard gate** — `type-check && type-check:tests && type-check:cli && lint && test && build` chained; runs before every commit |
 | **`npm run deploy:check`** | **Hard gate** — lives at the monorepo ROOT (run `npm run deploy:check` from the repo root, not this package); runs after every push |
 | `npm run verify:agent`  | Agent-friendly verify report (Phase 39 + 40); writes `automation/last-verify-report.json` + markdown summary on stdout |
 | `npm run game`          | Interactive demo CLI (tabbed loop)                                                                    |

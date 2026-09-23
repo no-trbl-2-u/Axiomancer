@@ -32,8 +32,9 @@ ship.
 2. Is it medium (a system, multiple files, multiple decisions)? Write
    a new spec in this folder using the template below. Add it to the
    `specs/README.md` table.
-3. Is it big (whole new phase / new screen)? Update `GAME-ROADMAP.md`
-   first, then write one spec per workable chunk.
+3. Is it big (whole new phase / new screen)? Update the root
+   `plan/steps/01_build_plan.md` (phase queue) first, then write one
+   spec per workable chunk.
 
 ---
 
@@ -85,9 +86,9 @@ state flows through presenters to UI components.
 
 2. **Trace the presenter chain.** Find the presenter that consumes the
    engine state for your failing feature:
-   - Token/mana display → `state/presenters/combat.engine.ts`
-   - Character stats → `state/presenters/character.ts`
-   - Exploration state → `state/presenters/exploration.ts`
+   - Combat board / conviction display → `state/presenters/combat-encounter.engine.ts`
+   - Character stats → `state/presenters/character.engine.ts`
+   - Exploration state → `state/presenters/exploration.engine.ts`
 
 3. **Add temporary logging.** Insert `console.log` statements at key
    boundary points:
@@ -167,7 +168,7 @@ If you have no overrides, the AI will implement in this order:
 ## Acceptance checklist
 
 - [ ] All questions answered.
-- [ ] At least one hermetic e2e test under `app/<route>/e2e/` covers
+- [ ] At least one hermetic e2e test under `state/e2e/` covers
       the change (see `docs/testing.md`).
 - [ ] `npm test` and `npx tsc --noEmit` are clean.
 - [ ] …

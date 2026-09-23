@@ -8,14 +8,20 @@ the loop verbs (`/ship-a-phase`, `/march`, `/iterate`, `/oversight`, …). Domai
 
 Answering a **balance/measurement** question (win rates, engagement, preset
 spreads)? Run `npm run baseline:check` first and cite the baseline's stamp —
-see AGENTS.md → "Measured truth (baselines)". Source-of-rules questions
+see AGENTS.md → "Truth sources" and `docs/truth-sources.md` →
+"Measured truth (baselines)". Source-of-rules questions
 (cards, pricing, keywords) read the current tree and need no such check.
 (A SessionStart hook prints baseline freshness at open.)
 
-`TELEMETRY.md` is an append-only invocation log written by
+`telemetry/` is an append-only invocation log written by
 `.claude/hooks/telemetry.mjs` (skills, slash commands, subagent spawns) —
-data for the human, never a work queue. Commit its rows with the tick;
-never edit them.
+data for the human, never a work queue. Each session writes only its own
+shard, `telemetry/<YYYY-MM-DD>_<session-id>.md`, so two branches never touch
+the same file and the log cannot cause a merge conflict (the single shared
+`TELEMETRY.md` conflicted on nearly every merge until 2026-09-23; its rows
+are frozen in `telemetry/legacy-to-2026-09-23.md`). Read it all as one
+time-sorted table with `npm run telemetry` (`--since YYYY-MM-DD`,
+`--tail N`). Commit a session's shard with the tick; never edit rows.
 
 Each start row (`skill`, `subagent`, `slash-command`) pairs with an `-end`
 row carrying that call's duration and outcome, and a tick that invoked
@@ -25,7 +31,8 @@ means the call never returned, and a `slash-prompt` followed straight by
 invokes no verb writes nothing at all — it is the user talking, not a tick.
 A `-` in any column means the value was not knowable when the row was
 written — the hook never guesses. Behaviour is covered by
-`node .claude/hooks/telemetry.test.mjs` (standalone, no runner).
+`node .claude/hooks/telemetry.test.mjs` and
+`scripts/telemetry-view.test.mjs` (both in the root `npm test`).
 
 A tick's `tick-end` row is written *after* that tick's own commit — nothing
 can commit the record of its own ending — so it lands in the next tick's

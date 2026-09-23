@@ -57,7 +57,7 @@ export function shuffleCombatDeck<T>(items: readonly T[], rng: () => number = de
  * and all, so the 18-card Threadbare Office was dealt as an 8-card deck (and
  * the 45-card Apostate Canon as 30). An 8-card deck reshuffles inside a single
  * round — which is what made every fight deal the same few cards — and it sat
- * BELOW `MIN_COMBAT_DECK_SIZE` (12), so deck removal refused every request
+ * BELOW `MIN_COMBAT_DECK_SIZE` (then 12; now 10), so deck removal refused every request
  * with `deck-at-floor`. A deckbuilder's copy counts are load-bearing; the base
  * now keeps them, exactly as the reward list always has.
  *

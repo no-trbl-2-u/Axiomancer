@@ -2654,6 +2654,75 @@ residual merit; re-file if the failure mode recurs.
 - estimated phases: n/a — not actionable without a concrete driving need.
 - conflicts: none against spec.md non-goals.
 
+### [score 3.0] No card/effect pre-empts an incoming affliction — CLEANSE only removes one after the fact, nothing prevents the application
+- proposed: 2026-09-23, `/adjust-keywords` pass 17 (Step 1b widened KB
+  cross-reference; Step 1's own structural audit read zero-diff —
+  `combat.cards.ts`'s `mechanicText` switch still matches every
+  `CardSpecialMechanic`/`CardRider` kind 55/55 with zero silent
+  `default:` arms, `node --test scripts/content-drift.test.mjs` 11/11
+  green, and the atlas's 72 rows still match `axio_keywords`'s live
+  count exactly — the only 8 intervening commits on the keyword-surface
+  path set were the docs-audit's stale-comment corrections
+  (`f5db5ca6`/`fb1bffd5`/`adf35108`), zero schema/engine/atlas changes).
+  Spot-checked six lower-population keywords for the ≥2-carrier REMOVE
+  signal too (TWIN, IMMOLATE, PURGE, OMEN, FLAY, TICK via `axio_cards`)
+  — all clear the bar with 2-5 live carriers each; no retirement
+  candidate found.
+- source signals:
+  - KB: `kb:dawncaster/keywords/ward.okf.md` (community, confidence
+    medium) — "Whenever you gain an Affliction, prevent that Affliction
+    and lower your Ward by 1 instead. Fades at the start of the turn" —
+    a PRE-EMPTIVE stacking buff distinct from Dawncaster's own Cleanse
+    (`kb:dawncaster/keywords/cleanse.okf.md`, "Removes an Affliction" —
+    after-the-fact, same shape as our own CLEANSE). Also checked
+    Impervious (`kb:dawncaster/keywords/impervious.okf.md`) and Insight
+    (`kb:dawncaster/keywords/insight.okf.md`) as the wider
+    damage-negation family — both are DAMAGE-prevention, not
+    affliction-prevention, and our own `buff_invincibility`
+    (`defenseModifier: 99`, non-card, Signature-only) already occupies
+    that niche; Ward's axis (blocking a STATUS application, not a
+    damage instance) is the one left genuinely uncovered.
+  - Live-code check: `src/Effects/index.ts`'s `applyEffect` is the SOLE
+    application point for every buff and debuff (player and enemy
+    alike) — read start to finish, it has no interception/consult step
+    against the target's own active-effect list before stacking a new
+    one; the only related lever, `buff_cleanse`/`buff_cleanse_minor`
+    (`payload.cleanse: true`), fires as its own separate mechanic
+    AFTER an affliction already landed, never before. Grepped both
+    effect libraries (`src/Effects/{buffs,debuffs}.library.json`,
+    29 entries total) for `prevent`/`immune`/`ward` in any
+    description or payload key: zero hits outside one debuff's flavor
+    text (`debuff_curse`'s description uses "denied," unrelated). No
+    existing buff, debuff, `CardSpecialMechanic`, or `CardRider` blocks
+    an incoming affliction before it stacks.
+  - This is a genuine gap, not a near-synonym: CLEANSE (`CLEANSE N`,
+    already in the atlas) removes UP TO N afflictions you already
+    hold; the Ward axis stops one from landing in the first place —
+    different point in the sequence, same family (affliction
+    management) Dawncaster itself keeps as two separate keywords.
+- rationale: real and KB-grounded, but not a Step 3 ship-small CREATE.
+  `applyEffect` is a single, heavily-shared pure function (every
+  status application in the engine funnels through it); teaching it
+  to consult a "Ward" stack on the TARGET before stacking a new
+  debuff is a new interception hook on a load-bearing shared path, not
+  a same-tick reuse of an existing one — it would need careful
+  ordering against the resist-roll (`resistedBy`/`resistDR`) that
+  already gates whether an effect lands at all, a new
+  `EffectPayload`/buff-payload shape, a carrying card or two, pricing,
+  a hermetic e2e, and the mobile gloss/glyph. Squarely THE GROWTH
+  FLOOR ¶2's "file large" case.
+- proposed scope: a `mechanics-expert` design session first (where the
+  Ward consult sits relative to the existing resist roll — before it,
+  after it, or replacing it entirely for the one interaction — since
+  both are "does this affliction land" gates and stacking two would be
+  redundant), then the full 12-step keyword wiring checklist for the
+  resulting buff/keyword, then 1-2 carrying cards (a defensive-stance
+  vigil card or a choir ward-of-grace fit both the existing theme
+  vocabulary).
+- estimated phases: 1
+- conflicts: none against spec.md non-goals; doesn't touch the 3
+  surviving big-numbers constraints or the LOCKED MECHANICS.
+
 ## Considered (below threshold) — pass 12 additions
 
 - **Art-direction coherence** (`plan/CRITIQUE.md:446` arena art

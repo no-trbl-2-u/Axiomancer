@@ -1,6 +1,6 @@
 name: deck-tuning
 
-# Card Forge balance loop: sandbox-first card/deck tuning through the
+# Card Forge balance loop: card/deck tuning through the
 # playtest matrix; report + changes land on a new branch + PR (never main).
 # See .claude/commands/deck-tuning.md. Runs against axiomancer-mechanics.
 # Scheduled weekly-staggered so at most one tuning loop runs per day;

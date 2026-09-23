@@ -2,7 +2,7 @@
  * Equip-change delta — hermetic E2E tests (Phase 154).
  *
  * Pins the three delta modes (equip / unequip / swap), the deltas-only
- * contract, structured affix-keyword surfacing, and the engine-simulated stat
+ * contract, signature gained/lost surfacing, and the engine-simulated stat
  * diff. Hermetic: builds characters/equipment in-line, no mocks.
  */
 

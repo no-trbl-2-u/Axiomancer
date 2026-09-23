@@ -67,7 +67,7 @@ export const SLOT_CAPACITY: Record<EquipmentSlot, number> = {
  *
  * The procedural library, rarity model, affix system, item sets, and all
  * equipment→combat effect channels are retired (phases 18-23). Equipment is
- * now the 8 fixed signet relics only, each carrying static `statModifiers` and
+ * now the 11 fixed signet relics only, each carrying static `statModifiers` and
  * one `grantsSignature`. Nothing else drives combat.
  *
  * @property category       - Always `'equipment'`.

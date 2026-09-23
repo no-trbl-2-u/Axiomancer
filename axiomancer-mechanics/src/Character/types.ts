@@ -113,8 +113,8 @@ export interface Character {
     nonCombatStats: NonCombatStats;
     inventory: Item[];
     /**
-     * Spec 08 Q8 — generic in-game currency counter. Shops have not landed yet,
-     * so only the number is tracked; shop reducers come in a later spec.
+     * Spec 08 Q8 — generic in-game currency counter. Spent / earned through the
+     * Phase 37 shop reducers (`Items/shop.reducer.ts`).
      */
     currency: number;
     equipment: EquipmentLoadout;

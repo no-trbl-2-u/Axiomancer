@@ -60,6 +60,8 @@ minimum, time permitting:
 
 ### Path A — Golden Path (required)
 
+> **Superseded (2026-09-23):** steps 3–5 below describe the retired encounter-prelude modal (FIGHT / FLEE seal, auto-engaged since 2026-08-10), the stance pick and the four-phase round loop; the live flow is Hazard-Pattern Combat — a reveal screen (ENTER COMBAT, with retreat offered there) into card-and-dice rounds hosted by `CombatEncounterPanel` — live truth: `axiomancer-mobile/docs/combat.md`. Body kept as a historical record pending rewrite (plan/AUDIT.md).
+
 The complete new-player experience:
 
 1. **Title / Entry.** What's the first screen? Is it clear what
@@ -95,9 +97,11 @@ Visit each tab and spend 30 seconds as a new player:
    Is there an action to take (level up, allocate points)?
 2. **SATCHEL** — Inventory/equipment. Is it clear what items
    do? Can equipment be used/equipped?
-3. **MEMOIR** — Journal/log. Is there anything here? Does it
+3. **THE LEDGER** (memoir) — Journal/log. Is there anything here? Does it
    make sense?
-4. **WILDS** — Back to exploration. Note anything new.
+4. **DECK** — The cards you carry. Is it clear what each card
+   does and which ones are in play?
+5. **WILDS** — Back to exploration. Note anything new.
 
 ### Path D — Edge Cases (if time permits)
 

@@ -52,7 +52,7 @@ function makeSeededRng(seed: number): () => number {
 
 /**
  * The origin's archetype = the dominant `philosophicalAspect` across the
- * preset's 15-card recipe (duplicates count — commons carry the deck's
+ * preset's recipe (duplicates count — commons carry the deck's
  * texture). Tie precedence matches `playerArchetype` (body ≥ mind ≥ heart),
  * so the derived stat spread and the engine's derivation can never disagree.
  */
@@ -70,7 +70,9 @@ function originArchetype(preset: CombatDeckPreset): StatType {
 }
 
 /** A minimal player whose dominant base stat pins `playerArchetype` to the
- *  origin's aspect — `rollCombatCardRewards` reads nothing else. */
+ *  origin's aspect. (`rollCombatCardRewards` no longer reads the archetype —
+ *  since the 2026-08-08 theme-aware draft it reads `knownCards` /
+ *  `combatRewardCards`, which this mock leaves at the `Player` fixture's.) */
 function makeOriginPlayer(archetype: StatType): Character {
     const p = deepClone(Player);
     p.baseStats = { heart: 2, body: 2, mind: 2 };
@@ -106,7 +108,8 @@ export interface RewardDraftSimOptions {
 export interface RewardDraftSimResult {
     /** The preset origin simulated (e.g. 'erosion'). */
     originId: string;
-    /** The origin's derived archetype (drives the reward roll's 2× bias). */
+    /** The origin's derived archetype (formerly drove the reward roll's 2×
+     *  bias; the roll has been theme-aware since 2026-08-08). */
     archetype: StatType;
     /** The origin's focus (drives the pick policy's verb-class ranking). */
     focus: CombatDeckFocus;
@@ -177,8 +180,8 @@ function resolveExtraPool(options: RewardDraftSimOptions): string[] {
 
 /**
  * Simulates `screens` reward screens for one preset origin: each screen rolls
- * `rollCombatCardRewards` (3 distinct offers, archetype-biased 2×, rarity
- * weights per spec 32 v3 §4) with the origin's derived archetype, then the
+ * `rollCombatCardRewards` (3 distinct offers; theme-aware allegiance + rarity
+ * weights per spec 32 v3 §4 — see `combat.rewards.ts`) with the origin's derived archetype, then the
  * pick policy takes the best offer by `focusWeight(origin.focus, verbClass)`,
  * rarity tie-break. Deterministic for a given (originId, seed, screens) — and,
  * with the WS6.2 hook, a given injected pool. Throws on an unknown origin id —

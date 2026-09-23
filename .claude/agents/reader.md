@@ -43,8 +43,8 @@ proceed to the page set.
 
 If the pass mode is `authenticated`, read `plan/bearings.md`'s
 `Auth:` line and execute the matching pattern **before**
-walking the page set. Each pattern's full env-var list and
-rationale lives in `nexus/customization/auth-aware-critique.md`.
+walking the page set. The table is the full env-var list per
+pattern.
 
 | `Auth:` value | What you do at Step 0 |
 |---|---|
@@ -88,15 +88,18 @@ session (if any) is established.
 
 ### Path A — browser tools (preferred)
 
-Use `mcp__claude-in-chrome__*` when available. You can:
+Use the `mcp__playwright__browser_*` tools when available. You can:
 
-- `tabs_context_mcp` first to see existing tabs.
-- `tabs_create_mcp` to open the URL.
-- `read_page` and `get_page_text` for rendered content.
-- `find` to locate elements.
-- `resize_window` for mobile (375×800) and desktop (1280×800).
-- `read_console_messages` for JS errors, broken images.
-- `read_network_requests` for slow resources, asset 404s.
+- `mcp__playwright__browser_tabs` first to see existing tabs.
+- `mcp__playwright__browser_navigate` to open the URL.
+- `mcp__playwright__browser_snapshot` for rendered content and to
+  locate elements; `mcp__playwright__browser_take_screenshot` for
+  the visual.
+- `mcp__playwright__browser_evaluate` for page facts (`scrollWidth`,
+  `<head>` meta).
+- `mcp__playwright__browser_resize` for mobile (375×800) and desktop (1280×800).
+- `mcp__playwright__browser_console_messages` for JS errors, broken images.
+- `mcp__playwright__browser_network_requests` for slow resources, asset 404s.
 
 Always check both viewports. Always read the console.
 

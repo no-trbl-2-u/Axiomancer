@@ -3,11 +3,12 @@
 Two layers live here:
 
 1. **CI and deterministic builds:** `verify-mechanics`, `verify-mobile`,
-   `verify-card-editor`, `preview-build`, `build-devlog`. Each package has one
+   `verify-card-editor`, `verify-drift`, `verify-prose`, `preview-build`,
+   `build-devlog`, `check-lexicon`, `check-devlog-served`. Each package has one
    owning verify workflow: mechanics owns root dependency changes and runs
    affected mobile/editor consumer gates; mobile and editor run only for their
    own paths. Mobile verification installs once, exports once, and reuses that
-   inspected export for the affected Hazard / Gathering / Encounter / Combat
+   inspected export for the affected Hazard / Encounter / Combat
    journeys. Shared or unknown runtime changes fail closed to all journeys;
    Sunday/manual mobile runs are the unconditional full-suite backstop.
    `npm run deploy:check` polls the verify workflows.
@@ -37,15 +38,15 @@ Two layers live here:
 | `check-lexicon.yml` | deterministic retired-term lint | weekly + manual | Active package verify jobs run this lint in their existing runner; the tracked pre-commit hook protects docs-only commits, and this workflow is the remote backstop. |
 | `close-trailers.yml` | deterministic `loop-issue.mjs close-trailers` | every push to `main` (+ PRs touching the script) | **The auto-close authority** (Phase 48). Sweeps *every* commit in the pushed range, parses the closing keywords out of the commit prose, and closes each referenced issue via the API, idempotently. GitHub's native `Closes #N` parser is inert in this repo, and the agent-driven `close-comment` step is gated behind a green `deploy:check` — so it is skipped whenever a loop turn ends while CI is still amber (this is what leaked #174 for 11 hours). Runs `scripts/loop-issue.test.mjs` as a gating witness first, so a parser regression turns `main` red instead of silently leaking issues. No Claude invocation. |
 | `deploy-comment.yml` | deterministic `loop-issue.mjs deploy-comment` | `workflow_run: completed` on `verify-mechanics`/`verify-mobile`/`verify-card-editor` | **The deploy-URL-comment authority** (Phase 91) — the same floor `close-trailers.yml` is for the close, applied to the comment. The agent-driven `close-comment`/`phase-close` step posts the deploy comment only if the SAME tick's own `deploy:check` goes green before the tick's container dies; a tick that ends while CI is still amber skips it forever, with nothing in a later tick to resume it. This workflow instead fires on the gated verify-* workflows' own completion, re-checks green via `scripts/deploy-check.mjs` (checked out at that exact commit, short timeout), and posts the comment only once truly green — idempotent (SHA-scoped marker) and self-healing (a sibling workflow still pending re-fires this on its own completion). Never closes anything; `close-trailers.yml` already owns that. No Claude invocation. |
-| `march.yml` | `/march` | 2-hour cron + manual | The autonomous-beast tick: triage → critique → ship-a-phase → iterate. Manual runs accept `focus_phase`; when set, the run dispatches `/ship-a-phase phase <focus_phase>` instead of normal `/march`. Pushes to `main`. |
-| `night.yml` | `/digest` | daily 08:47 UTC + manual | Morning briefing to `plan/DIGEST.html` (stylized, self-contained page) + nightly breadth checks. |
+| `march.yml` | `/march` | 2-hour cron + manual | The autonomous-beast tick: triage → critique → ship-a-phase → adjust-* → forge → expand → iterate. Manual runs accept `focus_phase`; when set, the run dispatches `/ship-a-phase phase <focus_phase>` instead of normal `/march`. Pushes to `main`. |
+| `night.yml` | `/digest` | every other day 08:47 UTC + manual | Morning briefing to `devlog/entries/DIGEST_<date>.md` + nightly breadth checks. |
 | `consolidate.yml` | `/consolidate` | monthly (2nd, 07:23 UTC) + manual | Memory curator: compacts `plan/` durable memory (bearings, CRITIQUE archive, lessons/reflexes hygiene). Curation only — meaning never changes. Pushes to `main`. |
-| `triage.yml` | `/triage` | issue opened/reopened + manual | Immediate triage on arrival; march still sweeps as backstop. |
+| `triage.yml` | `/triage` | manual only (per-issue `issues:` trigger removed 2026-08) | Manual pass on a specific issue; march's triage gate is the standing sweep. |
 | `ci-autofix.yml` | `/fix-ci` | `verify-*` failure on `main` + manual | Red-main first responder. Pushes the fix to `main`. |
-| `dep-upgrades.yml` | `/dep-upgrades` | Mon 06:13 UTC + manual | Patch/minor bumps, full verify, one PR. Locked stack untouched. |
+| `dep-upgrades.yml` | `/dep-upgrades` | manual (Mon 06:13 UTC cron disabled 2026-07-08) | Patch/minor bumps, full verify, one PR. Locked stack untouched. |
 | `iterate.yml`, `critique.yml`, `expand.yml`, `ship-a-phase.yml`, `plan-a-phase.yml` | same-named | manual only | March dispatches these on its own; direct dispatch = force one tick. `iterate.yml` runs Opus 4.8 (medium effort) — a deliberate quality pass; march-dispatched iterate stays on Sonnet 5. |
-| `deck-tuning.yml` … `world-tuning.yml` (7) | same-named | weekly, staggered Mon–Sun 03:29 UTC + manual | Mechanics balance loops; each delivers a branch + PR, never `main`. |
-| `combat-playtest.yml` | `/combat-playtest` | monthly (1st) + manual | Report-only doctrine verdict, branch + PR. |
+| `deck-tuning.yml`, `hazard-tuning.yml`, `world-tuning.yml` | same-named | manual (weekly 03:29 UTC crons disabled 2026-07-08) | Mechanics balance loops; each delivers a branch + PR, never `main`. |
+| `combat-playtest.yml` | `/combat-playtest` | manual (monthly cron disabled 2026-07-08) | Report-only doctrine verdict, branch + PR. |
 | `critic-loop.yml`, `deep-playtest.yml`, `combat-ux-tuning.yml`, `hermes-playtest.yml` | same-named | manual only | Mobile expo-web loops; install Playwright, long-running. |
 | `claude.yml` | — | `@claude` mention in issues/PRs | Interactive responder. |
 

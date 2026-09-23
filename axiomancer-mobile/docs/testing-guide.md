@@ -7,7 +7,7 @@
 
 ### Core Functionality
 - [ ] App launches without crashes on first install
-- [ ] All tabs (Combat, Character, Inventory, Exploration, Event, Memoir) are accessible
+- [ ] All tabs (WILDS, SELF, THE LEDGER, SATCHEL, DECK; STRIFE while in combat) are accessible
 - [ ] Navigation between screens works smoothly
 - [ ] Game state persists correctly between app sessions
 - [ ] Combat mechanics function as expected

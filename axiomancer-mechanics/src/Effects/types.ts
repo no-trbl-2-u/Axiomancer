@@ -146,9 +146,9 @@ export interface EffectPayload {
     revealsStance?: boolean;
     /**
      * Cards/Status Master Spec §1 — extensions for the 12 new status
-     * entries. Data-only for now: no resolver reads these fields yet (the
-     * DoT tick resolver, card-play resolution, and die-roll resolution paths
-     * that would consume them are a later implementation stage). Kept on
+     * entries. Originally data-only; the DoT-modifier fields are now read by
+     * `Combat/effects.ts`, while the fields marked below as not yet wired
+     * remain data-only (card-play and die-roll resolution never read them). Kept on
      * `EffectPayload` rather than as bespoke top-level fields so the shape
      * stays discoverable from one place.
      */
@@ -311,12 +311,12 @@ export interface Effect {
      * Phase 44 — cross-link back to the originating
      * `PhilosophicalAlignmentCell.id` (kebab-case) for effects authored
      * from a fallacy in the 27-cell library. Optional; only set on
-     * philosophy-sourced effects. See `docs/philosophy.md`.
+     * philosophy-sourced effects. See `docs/oaths.md`.
      */
     sourcedFromCell?: string;
     /**
-     * Content-provenance metadata used by the tuning `--focus` filter
-     * (`src/Tuning/focus.parser.ts`). `addedIn` is an ISO date (`YYYY-MM-DD`)
+     * Content-provenance metadata (originally consumed by the since-retired
+     * tuning `--focus` filter). `addedIn` is an ISO date (`YYYY-MM-DD`)
      * or phase tag marking when the effect was authored; `tags` are freeform
      * labels. Both optional and ignored by the effects engine. Present in the
      * JSON library entries as plain fields.

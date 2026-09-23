@@ -5,8 +5,8 @@ repo_root=$(git rev-parse --show-toplevel)
 cd "$repo_root"
 
 # A telemetry row written after the last commit must not be stranded by push.
-if [ -n "$(git status --porcelain -- TELEMETRY.md)" ]; then
-  printf '%s\n' 'pre-push: TELEMETRY.md has uncommitted changes.' >&2
+if [ -n "$(git status --porcelain -- telemetry/)" ]; then
+  printf '%s\n' 'pre-push: telemetry/ has uncommitted changes.' >&2
   printf '%s\n' 'Commit normally; the pre-commit hook will stage it automatically.' >&2
   exit 1
 fi

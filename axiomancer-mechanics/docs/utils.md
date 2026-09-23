@@ -164,13 +164,13 @@ const nonCombat = deriveNonCombatStats({ body: 10, heart: 8, mind: 12 });
 //          emotionalSave, emotionalTest
 ```
 
-#### `calculateMaxHealth(level: number, healthStats: Pick<BaseStats, 'body' | 'heart'>): number`
+#### `calculateMaxHealth(level: number, healthStats: BaseStats): number`
 
-Calculates maximum health based on level and constitution stats.
+Calculates maximum VITAE from the base stats (`level` is accepted for call-site compatibility but unused).
 
 ```typescript
-const maxHP = calculateMaxHealth(3, { body: 10, heart: 8 });
-// Formula: level * average(body, heart) * HEALTH_PER_STAT
+const maxHP = calculateMaxHealth(3, { body: 10, heart: 8, mind: 12 });
+// Formula: PLAYER_VITAE_BASE + (body + heart + mind) * HEALTH_PER_STAT
 ```
 
 ### General utilities

@@ -25,13 +25,11 @@ import { cardLibrary, getCardById } from './cards.library';
 // ─── Damage Calculation ──────────────────────────────────────────────────────
 
 /**
- * Spec 32 v3 §1 — THE STRIKE IS DEAD. `basePower` was deleted from the Card
- * schema, so no card carries a damage/heal magnitude any more: every point of
- * enemy HP falls to DoT ticks, status-payoff bursts, engine-gated drips, or
- * reflect (all combat-engine owned). This function is kept for API
- * compatibility (sim policies / projections multiply by it) and returns 0
- * unconditionally — a card that "deals damage" is now a compile error at the
- * schema and a no-op here.
+ * Spec 32 v3 §1 deleted `basePower` from the Card schema; THE BIG NUMBERS
+ * REWRITE (2026-09-02) brought direct damage back as the combat-engine-owned
+ * `deal` mechanic, not as a card magnitude, so the legacy card engine still
+ * deals no damage of its own. This function is kept for API compatibility
+ * (sim policies / projections multiply by it) and returns 0 unconditionally.
  */
 export function calculateCardDamage(
     _actor: Combatant,
@@ -140,7 +138,8 @@ export interface CardLookup {
 /**
  * Runs a card end-to-end against the current `CombatState`:
  *
- *   1. Validate the card is equipped (player) or in the enemy's rotation.
+ *   1. Validate the card is owned (player: known / reward / haunt / curse) or
+ *      in the enemy's rotation.
  *   2. Apply damage / heal based on `targetType`.
  *   3. Resolve each `combatEffects` payload through `resolveEffectApplication`
  *      so resist tier matches the card's `tier`.

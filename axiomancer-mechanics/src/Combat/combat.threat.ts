@@ -99,10 +99,10 @@ export interface AuthoredThreatPhase {
      *  while the upgradeable-dice flag is on (`resolveStanceCheck`); inert
      *  otherwise, so authoring it never disturbs the flag-off baseline. */
     stanceCheck?: { punishes?: Stance; yields?: Stance };
-    /** Phase 33c (spec 33 §1) — THE COVETED DIE: authored on exactly one
-     *  phase (the 2nd authored step) of every BOSS/UNIQUE sequence, never on
-     *  elite/normal/simple, never via backfill. Undefined = no coveted die on
-     *  this phase (the common case). */
+    /** Phase 33c (spec 33 §1) — THE COVETED DIE: seated at the DECK level by
+     *  `compileEnemyDeck` (`DECK_STAKES`, defaulting to a BOSS/UNIQUE deck's
+     *  2nd card), never via backfill. Undefined = no coveted die on this
+     *  phase (the common case). */
     stake?: boolean;
 }
 
@@ -287,8 +287,8 @@ function rotateStance(from: Stance, steps: number): Stance {
  * not two). Reference points at `damageWeight` 1.0, phase 0:
  * Measured against the playtest matrix on 2026-09-02 and pulled back from
  * 2.5: at 2.5 a mid-campaign boss killed the player in 4 phases before any
- * deck could assemble. Reference points at weight 1.0, phase 0:
- * L1 normal 7 · L6 boss 23 · L7 elite 19 · L18 boss 52 · L110 unique 264.
+ * deck could assemble. Reference points at weight 1.0, phase 0 (per-level 0.8):
+ * L1 normal 6 · L6 boss 16 · L7 elite 13 · L18 boss 31 · L110 unique 136.
  */
 const THREAT_BASE = 6;
 const THREAT_PER_LEVEL = 0.8;
@@ -481,8 +481,8 @@ export const RAGE_HEAL_FRACTION = 0.5;
  * off-color checks per fight (§2 authoring law). Wholly inert while the flag is
  * off (`resolveThreatPhase` gates its resolution on `isUpgradeableDiceEnabled`).
  * Density (every phase) + payout (+1◆) are D7 dials — this is the uniform first
- * pass; authored boss sequences (`AUTHORED_THREAT_SEQUENCES`) carry no check yet
- * and are a follow-up for per-boss "two stances / not-X" variety (§2).
+ * pass; per-enemy authored checks live at the deck level (`DECK_STANCE_CHECKS`
+ * in `combat.enemy-decks.ts`, Phase D9) and win over this backfill.
  */
 export function defaultStanceCheck(enemyStance: Stance): { punishes: Stance; yields: Stance } {
     return { punishes: enemyStance, yields: rotateStance(enemyStance, 1) };

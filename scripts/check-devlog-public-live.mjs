@@ -5,7 +5,7 @@
 //   DEVLOG_PUBLIC_URL=https://… node scripts/check-devlog-public-live.mjs
 //
 // In the spirit of `scripts/deploy-check.mjs`: after a deploy, prove the thing
-// that was supposed to happen actually happened. Three assertions, each chosen
+// that was supposed to happen actually happened. Five assertions, each chosen
 // because it fails differently:
 //
 //   1. the LANDING page serves, and names the game          (the site is up)

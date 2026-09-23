@@ -21,8 +21,9 @@
  * 12 / 24 / 40 / 60 after an apocryphal card filing nine Charges beat the
  * deliberately unwinnable Unfinished 87% of the time.
  * `the-black-cap` declares SENTENCE at 12 and CONDEMN at 14 — a two-Charge
- * overshoot off a full docket, above both the elite floor of 10 and the boss
- * floor of 12, so the alt-win must be *built* rather than stumbled into.
+ * overshoot off a full docket, above the base floor of 12 (elite / boss /
+ * unique fights raise it to 24 / 40 / 60 via `concedeFloorFor`), so the
+ * alt-win must be *built* rather than stumbled into.
  * Exactly one card in this file carries a `peroration` with `concedeAt`.
  *
  * This file is data-only. All runtime behaviour lives in

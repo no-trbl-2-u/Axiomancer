@@ -63,7 +63,7 @@ The engine's `CombatEncounterState.phase` (`CombatEncounterPhase` in
 | `phase-play` | Player plays cards (`draftStanceDie`, `playCombatCard`, `endTurn` to re-roll). |
 | `phase-resolve` | Effect kinds compared, enemy threat action fires, phase graded Clear/Overwhelmed (`resolveThreatPhase`). |
 | `between-phases` | DoT ticks, durations tick, hand draws back to 5. |
-| `mercy-choice` | Control Saturation opened the spare/exploit modal (`selectEncounterMercyChoice`). |
+| `mercy-choice` | Control Saturation opened the spare/exploit modal (`selectMercyChoice`). |
 | `complete` | Combat over, `finalOutcome` determined. |
 
 ## Turn flow (Spec 26b)

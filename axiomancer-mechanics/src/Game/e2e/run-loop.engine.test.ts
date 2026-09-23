@@ -1,10 +1,10 @@
 /**
  * Phase 72 — Run-loop semantics (closes GH#65 ask 2).
  *
- * Pins the preserve / reset matrix for `resetRun({ keepCharacter })` plus
- * the v5 → v6 migration that defaults `runId` on legacy saves. The phase
- * brief at `plan/phases/phase_72_run_loop_semantics.md` lays out the
- * decisions D1..D15 these cases pin.
+ * Pins the preserve / reset matrix for `resetRun({ keepCharacter })`. (The
+ * v5 → v6 migration hop that defaulted `runId` is gone — `migrate` rejects
+ * saves below v11.) The Phase 72 brief laid out the decisions D1..D15
+ * these cases pin.
  */
 import { describe, it, expect } from 'vitest';
 import { createGameStore } from '../store';

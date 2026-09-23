@@ -10,7 +10,7 @@
 
 ```ts
 interface GameState {
-  version: number;                   // GAME_STATE_VERSION (current: 7)
+  version: number;                   // GAME_STATE_VERSION (current: 24)
   runId: string;                     // Phase 72 — UUID per run; bumped by resetRun
   player: Character;
   world: WorldState;
@@ -45,8 +45,6 @@ on load (Spec 11). Every top-level transition is expressed as a `GameAction`:
 ```ts
 type GameAction =
   | { type: 'START_COMBAT';        payload: { target: Enemy | Encounter } }
-  | { type: 'COMBAT_ROUND';        payload: { playerAction: Action; playerStance: Stance;
-                                              skillId?: string; itemId?: string } }
   | { type: 'END_COMBAT';          payload?: { grantedLoot?: Item[]; grantedXp?: number } }
   | { type: 'MOVE_TO_NODE';        payload: { nodeId: string } }
   | { type: 'PROCESS_NODE'  }
@@ -138,7 +136,7 @@ at `src/Game/e2e/autosave-throttling.engine.test.ts`.
 
 ```ts
 type GameEventType =
-  | 'combat:started' | 'combat:round' | 'combat:ended'
+  | 'combat:started' | 'combat:ended'
   | 'world:moved'   | 'world:processed' | 'dialogue:applied'
   | 'character:levelup'
   | 'inventory:changed'
@@ -149,7 +147,7 @@ interface EnginePayload {
   action: GameAction;       // the dispatched action that produced this event
   state: GameState;         // post-reducer snapshot
   report?: CombatEndReport; // only on 'combat:ended'
-  unlockedSkills?: string[];// Phase 30 unit 2 — only on 'character:levelup'
+  unlockedCards?: string[]; // Phase 30 unit 2 — only on 'character:levelup'
                             // when the promotion crossed an eligibility gate
 }
 
@@ -172,22 +170,22 @@ than casting `payload` by hand. The package exports one per topic:
 
 ```ts
 import {
-  TypedLevelUpEvent, TypedCombatRoundEvent, TypedCombatEndedEvent,
-  // ... full set covers all 10 GameEventTypes
-  isLevelUpEvent, isCombatRoundEvent, isCombatEndedEvent,
+  TypedLevelUpEvent, TypedCombatStartedEvent, TypedCombatEndedEvent,
+  // ... full set covers all 9 GameEventTypes
+  isLevelUpEvent, isCombatStartedEvent, isCombatEndedEvent,
   // ... matching is*Event guards exported from events.utils
 } from 'axiomancer-mechanics';
 
 emitter.on('character:levelup', e => {
   if (!isLevelUpEvent(e)) return;
-  const unlocked = e.payload.unlockedSkills ?? [];   // type-narrowed; no cast
+  const unlocked = e.payload.unlockedCards ?? [];    // type-narrowed; no cast
   if (unlocked.length) showUnlockToast(unlocked);
 });
 ```
 
 The `is*Event` guards live in `src/Game/events.utils.ts` and narrow the
 generic `GameEvent` down to the matching `TypedGameEvent<T>`. The
-`unlockedSkills` field is populated by `enrichExtra` in
+`unlockedCards` field is populated by `enrichExtra` in
 `src/Game/store.ts` whenever a `LEVEL_UP` dispatch actually promoted
 the level — empty array / undefined otherwise.
 
@@ -253,19 +251,15 @@ to `migrate()`, which:
 
 - Returns it as-is when versions match.
 - Refuses payloads newer than the runtime.
-- Funnels older payloads through stepwise upgrades. The ladder today:
-  `migrateV2toV3` (adds `moralMeter`, Spec 10) → `migrateV3toV4` (adds
-  `rngState`, Spec 11) → `migrateV4toV5` (adds `philosophicalAlignment`
-  defaulting to `{ epistemology: 0, outlook: 0, scope: 0 }`, Phase 42).
+- Funnels older payloads through stepwise upgrades. The ladder today
+  chains `migrateV11ToV12` … `migrateV23ToV24` (see the hop-by-hop
+  comment in `src/Game/game.migrate.ts`); saves older than v11 are
+  refused with an error.
 - Validates the top-level shape before handing back a `GameState`.
 
-When `GAME_STATE_VERSION` next bumps, add a `migrateV5toV6` step and call it
-from `migrate()` for `fromVersion < 6`. Each step is a pure
-`(prev) => next` function — no I/O, no defaults pulled at call time.
-
-**Phase 72 update:** `GAME_STATE_VERSION` is now `6`. The ladder gained
-`migrateV5toV6` which defaults the required `runId: string` field on
-legacy v5 saves via `generateRunId(() => getRng().random())`.
+When `GAME_STATE_VERSION` next bumps, add a `migrateV24ToV25` step and call it
+from `migrate()`. Each step is a pure `(prev) => next` function — no I/O,
+no defaults pulled at call time.
 
 ## Run-loop reset (Phase 72)
 

@@ -40,8 +40,8 @@ entry:
   pass.
 - `Auth:` field missing → exit with `[needs-user-call]`. Do
   not guess.
-- See `nexus/customization/auth-aware-critique.md` for
-  patterns and env vars.
+- The patterns and their env vars are tabled in
+  `.claude/agents/reader.md` (Step 0).
 
 When invoked from `/march`, conditions are pre-checked.
 
@@ -349,8 +349,7 @@ git commit && git push               # single critique: <summary> commit
 ```
 
 If the app ever sits behind a login wall, the playtester needs
-an auth path — see nexus's
-[`customization/auth-aware-critique.md`](../../customization/auth-aware-critique.md)
-for the five patterns (test-user, session-cookie, bearer-token,
+an auth path — see `.claude/agents/reader.md` Step 0 for the
+patterns (test-user, session-cookie, bearer-token, shared-secret,
 preview-env, magic-link). Never fall back to critiquing the
 logged-out shell silently.

@@ -54,9 +54,8 @@ export function getThornsReflect(bearer: Combatant): number {
 // ─── 0.34.0 status-depth epic — HP-model selectors + tunable scalars ──────────
 // These power the new card mechanics (VULNERABLE / RUPTURE / COMPOUND / DISRUPT)
 // and the mobile honesty layer. Pure reads over a combatant's `effects`; the HP
-// behavior itself is owned by `combat.engine.ts`. Registered in the tuning
-// registry (`src/Tuning/tunable.registry.ts`) so `/combat-tuning` can rebalance
-// them by simulation; `effects.ts` is a writable (non-engine) home for them.
+// behavior itself is owned by `combat.engine.ts`. Kept here (a writable,
+// non-engine home) so the tuning loops can rebalance them by simulation.
 
 /** VULNERABLE — hard ceiling on the outgoing-damage multiplier against a marked
  *  target. Conservative for burst (a marked foe takes at most ×2.0). Tunable. */
@@ -192,8 +191,8 @@ export const CONCEDE_PREMISES_BOSS = 40;
 export const CONCEDE_PREMISES_UNIQUE = 60;
 /** The Premise-tally FLOOR a CONDEMN Peroration must clear against an enemy of
  *  this difficulty — the SINGLE source the engine's concede resolution AND every
- *  presenter/catalog surface read, so a card face can never advertise the base 8
- *  while the live fight demands 10 (elite) or 12 (boss/unique). WI-6. */
+ *  presenter/catalog surface read, so a card face can never advertise the base 12
+ *  while the live fight demands 24 (elite), 40 (boss) or 60 (unique). WI-6. */
 export function concedeFloorFor(difficulty: EnemyDifficulty | undefined): number {
     switch (difficulty) {
         case 'unique': return CONCEDE_PREMISES_UNIQUE;

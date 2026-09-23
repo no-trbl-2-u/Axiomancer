@@ -20,9 +20,9 @@ cards, filtered by `tier <= maxCardTier` and learning level).
 
 | Id | Name | Player | HP | Max tier | Enemy roster (slugs) |
 |---|---|---|---|---|---|
-| `early` | The Shallows | level 3, 5/5/5 | 90 | 1 | tidepool-crab, salt-gnaw-rat, mournful-gull, hollow-eyed-beggar, hush-wraith, coastal-tyrant |
-| `mid` | The Long Road | level 20, 17/17/17 | 255 | 2 | audit-sentinel, rimeclaw-prowler, glassmind-oracle, mire-of-consensus, the-lich-of-missing-steps |
-| `late` | The Deep Wood | level 45, 37/39/38 | 570 | 3 | famine-of-the-deep-wood, warrant-of-the-void, graveward-keeper, the-last-consensus, axiom-breaker, the-terminal-proof |
+| `early` | The Shallows | level 3, 5/5/5 | 90 | 1 | grave-larva, foot-stealer, little-belle, water-holger, the-butcher, king-of-revenge |
+| `mid` | The Long Road | level 20, 17/17/17 | 255 | 3 | tri-eyes, mirac, hasshaku-sama, jeweled-tree, rawhead-rex |
+| `late` | The Deep Wood | level 45, 37/39/38 | 570 | 3 | fire-giant, rangda, tezcatlipoca, arch-demon, death, the-abortive |
 | `impossible` | The Unprovable | level 50, 40/44/42 | 630 | 3 | the-incompleteness |
 
 The `impossible` stage is a ceiling probe: The Incompleteness never appears
@@ -138,17 +138,15 @@ Every run declares its model — the text report prints a `Dice model:` header
 and the `--json` `PlaytestReport` carries a `diceModel` field. The interactive
 `combat` CLI's answer protocol (script/stdin JSONL) lives in `src/CLI/io.ts`.
 
-## The e2e bands are the balance contract
+## The e2e bands were the balance contract
 
-`src/Combat/e2e/combat-playtest.balance-bands.sim.test.ts` pins per-stage
-bands over the matrix (blind win-rate floors per stage, the impossible
-ceiling `winRate <= 0.15` with `defeats > 0`, `statusEngagement > 0.2` on
-every non-impossible stage, `dotHpFraction > 0.25` under greedy, and the
-doctrine assertion that `dot-weaver` beats `aggro-brute` late). Every
-threshold is marked `// PLAYTEST-CALIBRATION`: currently generous
-placeholders that tighten as calibration runs land. Because the bands run in
-`npm run verify`, any card, deck, or constant change that breaks the
-doctrine fails the gate — that is the point. Companion witnesses:
+`src/Combat/e2e/combat-playtest.balance-bands.sim.test.ts` used to pin
+per-stage bands over the matrix (win-rate floors/ceilings, the
+status-engagement and DoT-erosion witnesses, the `dot-weaver` beats
+`aggro-brute` assertion). Those bands were repealed 2026-09-02 by THE BIG
+NUMBERS REWRITE; the file is now a smoke test — the matrix runs across every
+stage without crashing and every cell's outcome accounting is exact with a
+finite win rate. Companion witnesses:
 `combat-playtest.matrix.sim.test.ts` (determinism + invariants) and
 `combat-playtest.card-coverage.sim.test.ts` (every library card must be
 playable — dead cards fail the build).

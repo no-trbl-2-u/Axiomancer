@@ -149,7 +149,7 @@ over `AxmIcon` that keep their historical short keys (`'sword'`,
 `'poison'`, …) mapped onto registry names (`action-sword`,
 `effect-poison`). Callers never changed; only the art underneath did.
 
-Registry coverage today: 11 `action-*` marks, 8 `effect-*` marks — see
+Registry coverage today: 18 `action-*` marks, 8 `effect-*` marks — see
 `components/icons/icon-registry.ts` for the full list and each mark's
 `<artist>/<icon>` attribution.
 

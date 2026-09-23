@@ -7,7 +7,7 @@
  *   npm run combat-dice-economy                       # greedy, seeds 1-5, early/mid/late
  *   npm run combat-dice-economy -- --policy=blind
  *   npm run combat-dice-economy -- --seeds=1,2,3,4,5,6,7,8
- *   npm run combat-dice-economy -- --preset=erosion --stage=mid
+ *   npm run combat-dice-economy -- --preset=threadbare --stage=mid
  *
  * The report is measurement-only (no code change). The D3 tuning doc quotes it;
  * D7 ratifies the derived constants and flips the bands to hard assertions.

@@ -10,9 +10,9 @@
  *   1. Stat / health / xp derivation contracts from `createCharacter`.
  *   2. Default fields and option pass-through.
  *   3. Spec 05 Q3 option A: starting `equipment` is folded into `derivedStats`
- *      and `effects` at create-time.
- *   4. `equipItem` slot replacement drops the prior occupant's passive
- *      effects, keeps unrelated effects, and recomputes `derivedStats`.
+ *      at create-time (Phase 20: equipment applies NO effects).
+ *   4. `equipItem` slot replacement keeps `effects` untouched and recomputes
+ *      `derivedStats`.
  *   5. `unequipItem` on an empty slot is a referential no-op.
  *   6. `getEquipmentModifiers` aggregates flat + multiplier modifiers
  *      across slots (multiplier convention: store m−1 in `statMultBonus`).

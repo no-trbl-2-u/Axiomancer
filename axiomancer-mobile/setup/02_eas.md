@@ -5,7 +5,7 @@ This guide covers configuring the EAS Build deploy gate for `scripts/deploy-chec
 ## Prerequisites
 
 - Expo account with access to this project
-- EAS CLI installed (`npm install -g @expo/eas-cli`)
+- EAS CLI installed (`npm install -g eas-cli`)
 - Project configured for EAS Build (`eas.json` exists)
 
 ## Step 1: Generate EXPO_TOKEN
@@ -107,7 +107,7 @@ The deploy gate script follows this contract:
 
 **Problem:** `EAS CLI error: ...`
 **Solution:**
-1. Update EAS CLI: `npm install -g @expo/eas-cli@latest`
+1. Update EAS CLI: `npm install -g eas-cli@latest`
 2. Check network connectivity
 3. Verify project configuration with `eas project:info`
 

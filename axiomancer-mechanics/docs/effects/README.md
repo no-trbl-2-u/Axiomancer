@@ -1,5 +1,7 @@
 # docs/effects — Per-Effect Deep-Dives
 
+> **Superseded (2026-09-23):** this index and the per-effect files under it describe the retired 88-effect catalogue and `src/Combat/phases/scenario.ts` call sites; the scenario phase no longer exists and the live libraries hold 29 effects (19 buffs + 10 debuffs) — live truth: src/Effects/buffs.library.json, src/Effects/debuffs.library.json, src/Combat/effects.ts. Body kept as a historical record pending rewrite (plan/AUDIT.md).
+
 This directory holds one markdown file per buff (`buffs/buff_*.md`) and
 debuff (`debuffs/debuff_*.md`). Each file documents a single effect's
 payload, mechanics, and design intent.

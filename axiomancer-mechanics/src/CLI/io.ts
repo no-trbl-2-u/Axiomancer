@@ -28,9 +28,10 @@ export interface CliFlags {
     /** Path to a `.jsonl` file where per-decision state records are appended. */
     stateLogPath?: string;
     /**
-     * Path to a save file (JSON). When set, the CLI uses `createNodeAdapter`
-     * backed by this path instead of the null adapter — making Save / Load
-     * tabs durable across sessions.
+     * Path to a save file (JSON). When set, the Save / Load tabs use a
+     * `createNodeAdapter` snapshot slot backed by this path (the store
+     * itself keeps the null adapter) — making Save / Load durable across
+     * sessions.
      */
     saveFile?: string;
     /**

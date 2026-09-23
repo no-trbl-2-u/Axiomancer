@@ -31,7 +31,7 @@ the run contract:
 
 - server command, port, readiness text, and kill policy
 - required browser tools
-- deterministic minigame seeds (`minigameSeeds`) for hazard, gathering, rest, cache, and quest runs
+- deterministic minigame seeds (`minigameSeeds`) for hazard, rest, cache, and quest runs
 - required paths
 - report schema and finding fields
 

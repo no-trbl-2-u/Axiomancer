@@ -1,10 +1,11 @@
 /**
  * Hazard Minigame — Public API (v2).
  *
- * Faithful port of the mobile v2 Hazard engine, the living rules source
- * (`../axiomancer-mobile/state/hazard/`). The package exports the exact
- * mobile surface so mobile can delete its local engine and consume these
- * exports instead. See `docs/hazard-v2-vs-mechanics-divergence.md`.
+ * Faithful port of the mobile v2 Hazard engine that was the living rules
+ * source (`../axiomancer-mobile/state/hazard/`, now only store actions).
+ * The package exports the exact mobile surface; mobile has deleted its
+ * local engine and consumes these exports. See
+ * `docs/hazard-v2-vs-mechanics-divergence.md`.
  */
 
 // ── Engine types ───────────────────────────────────────────────────────────

@@ -4,9 +4,8 @@
 > in full), this file is read **by offset** — a skill greps
 > for its own `<!-- @domain:x -->` anchor and reads from
 > there, not the whole file. Caps are hard: ≤500 bytes per
-> bullet. See `../../customization/lessons-layer.md` for the
-> promotion path (lesson → reflex) and the drain path (reflex
-> → skill procedure edit).
+> bullet. The promotion path is lesson → reflex (`reflexes.md`);
+> the drain path is reflex → skill procedure edit.
 
 <!-- @domain:deploy -->
 

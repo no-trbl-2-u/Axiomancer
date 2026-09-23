@@ -239,9 +239,8 @@ export function unequipItem(
 
 /**
  * List of every worn piece in canonical order (weapon, armor, accessories by
- * position). Used by combat helpers that walk equipment without caring about
- * slot identity (combat-start tokens, generation bonuses, proc triggers) and
- * by `getEquipmentModifiers`.
+ * position). Used by `getEquipmentModifiers`, the save migration and dev
+ * tooling — anything that walks equipment without caring about slot identity.
  */
 export function getEquippedItems(loadout: EquipmentLoadout): Equipment[] {
     const out: Equipment[] = [];

@@ -110,11 +110,11 @@ Live, at the repo root:
   `legacy-combat-tuning`, `playtest`, `resolve-playtest`, and `bump-engine`
   (npm-pin-era engine bumps, retired with the monorepo merge) were trimmed.
 - `.claude/skills/` — design skills: `brainstorm-mechanics`, `character-spec`,
-  `story-spec`, `world-spec`.
+  `story-spec`, `world-spec`; plus the `kb-query` lookup skill.
 - `.claude/agents/` — `scout`, `reader`, `mechanics-expert`, `playtester`,
   `card-expert` (card/keyword design AND implementation — the working
   agent behind `/deck-tuning`; grounded in the Dawncaster corpus — see
-  "Game knowledge base" below), `content-curator` (narrative
+  "Truth sources" below), `content-curator` (narrative
   writer-shipper — dialogue trees, event prose, flavor — `/iterate`'s
   content-gap worker).
 
@@ -174,10 +174,11 @@ store, and deep-links the web build (`?fixture=<id>` /
 
 ## Verify
 
-- `npm run verify --workspace axiomancer-mechanics` — type-check + tests + build
-- `npm run verify --workspace axiomancer-mobile` — lint + typecheck + jest
+- `npm run verify --workspace axiomancer-mechanics` — type-check + lint + tests + build
+- `npm run verify --workspace axiomancer-mobile` — lint + typecheck + jest +
+  asset-provenance / art / critique-drive tests
 - `npm run verify --workspace axiomancer-card-editor` — type-check (incl. the
-  `mechanics.contract.ts` drift assertions) + lint + build
+  `mechanics.contract.ts` drift assertions) + lint + tests + build
   (`type-check` alone remains the fast cross-package gate)
 - **Fresh `.claude/worktrees/*` checkouts**: run `npm install` at the
   worktree root before verifying. A worktree has no per-workspace
@@ -247,10 +248,11 @@ These apply to every loop skill and session. `plan/bearings.md` echoes
 them; update here first.
 
 1. **Commit and push as a single atomic act** to `main`. No unpushed
-   commits between ticks; no dirty tree left behind. `TELEMETRY.md` is part
-   of every commit that changes it: the tracked `.githooks/pre-commit`
-   auto-stages it, and `.githooks/pre-push` blocks if newer rows remain
-   uncommitted. Session startup installs the hooks through `core.hooksPath`.
+   commits between ticks; no dirty tree left behind. The session's
+   `telemetry/` shard is part of every commit that changes it: the tracked
+   `.githooks/pre-commit` auto-stages `telemetry/`, and `.githooks/pre-push`
+   blocks if newer rows remain uncommitted. One shard per session, so the
+   log never conflicts on merge. Session startup installs the hooks through `core.hooksPath`.
 2. **No `Co-Authored-By:` trailers, no emojis** — in commits, code, or
    content.
 3. **The verify gate is non-negotiable.** No `--no-verify`, no

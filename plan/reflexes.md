@@ -4,9 +4,8 @@
 > in full by every skill's Step 0, so it stays small on
 > purpose. A reflex is a lesson from `lessons.md` that changed
 > behavior on ~weekly cadence; promoting it here means every
-> skill sees it without a domain lookup. See
-> `../../customization/lessons-layer.md` for the two-tier
-> model and the promotion/drain paths.
+> skill sees it without a domain lookup. `lessons.md`'s header states the
+> caps and the drain path (reflex → skill procedure edit).
 
 1. Commit and push are one atomic act. No unpushed commits
    sit at the end of a turn — the next tick assumes

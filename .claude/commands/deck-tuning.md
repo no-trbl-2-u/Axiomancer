@@ -52,8 +52,7 @@ description: Card Forge balance loop for Hazard-Pattern Combat — full card aut
 > library, CQI (spec 35) is its objective function, and this skill is
 > live against it. New keywords and new `specialMechanics` kinds are
 > also buildable now — through card-expert's FULL wiring checklist
-> with cross-package verifies, never half-wired. Library growth
-> updates the count pins in the same commit, citing the liberation.
+> with cross-package verifies, never half-wired.
 
 ## Disambiguation — three combat loops, one doctrine
 
@@ -262,7 +261,7 @@ The tunable surface is TIERED. Work from the freest tier inward:
   across >= 2 stages and >= 2 policies is best practice, not a
   precondition (THE UNSHACKLING voided the per-change owner ballot —
   Phase 41); a card may promote on design judgment alone when the change
-  is obviously good. Update the card-count pin if the library grows.
+  is obviously good.
 
 - **The verify gate is non-negotiable.** `npm run verify` after any change —
   including the card-coverage e2e (a promoted card must be playable) and the
@@ -281,6 +280,8 @@ The tunable surface is TIERED. Work from the freest tier inward:
   continue.
 
 ## 4. Design targets (the objective function)
+
+> **Superseded (2026-09-23):** §4/§4a below describe the balance-band contract (per-stage win-rate floors/ceiling, the `// PLAYTEST-CALIBRATION` thresholds and the card-count pins), which was repealed 2026-09-02 by the big-numbers overhaul; the balance-band e2e is now a crash-free smoke test with no graded bands and there is no governing objective function — live truth: `axiomancer-mechanics/src/Combat/e2e/combat-playtest.balance-bands.sim.test.ts` (header), `plan/bearings.md` (THE BIG NUMBERS REWRITE). Body kept as a historical record pending rewrite (plan/AUDIT.md).
 
 **Doctrine (load-bearing, set 2026-07-08 — see `VISION.md` → Combat vision):
 starter preset decks must adhere to this win-rate curve**, blind
@@ -347,11 +348,11 @@ Card-level targets on top of the bands:
 |---|---|
 | Single-card spam | no card > 70% of attributed enemy-HP damage (`dom` in the tables; `buildCombatSummary` is the attribution machinery) |
 | Dead cards | every library card shows plays in the card-coverage e2e and non-trivial usage somewhere in the full `--cards` matrix — for cards the preset matrix cannot reach, the witness is a SWAP-VARIANT sweep (§3), not the preset sweep |
-| FREE/PAID line balance | for every common/uncommon in its home preset, NEITHER printed line takes >85% or <15% of the card's plays — both tails mean one line is dead weight. Soft bands: the lint (`src/Combat/e2e/combat-playtest.line-telemetry.sim.test.ts`, thresholds `// PLAYTEST-CALIBRATION`) flags via `console.info`, never fails; cards tagged `intentionallyAsymmetric` (`Card`, `src/Cards/types.ts`) are exempt by design declaration |
+| FREE/PAID line balance | for every common/uncommon in its home preset, NEITHER printed line takes >85% or <15% of the card's plays — both tails mean one line is dead weight. Soft bands: the lint (`src/Combat/e2e/combat-playtest.line-telemetry.sim.test.ts`) flags via `console.info`, never fails; cards tagged `intentionallyAsymmetric` (`Card`, `src/Cards/types.ts`) are exempt by design declaration |
 | Pool ratios (historical v3 targets — re-derive from the live Profane Canon before relying on them; the direct-damage-zero law is RETIRED) | DoT >= 25%; control >= 15%; GUARD >= 1 per theme; Befriend >= 1; state-interactive >= 2 — treat as heuristics pending a CQI-derived re-derivation |
 | Per-stage pool health | each stage's eligible pool (`stageEligibleCardIds`) contains at least one live DoT, control, and defend line |
 | Archetype honesty | each stage-ladder preset (§8) wins through its own theme packages AND its intended win path (win-path mix); `dot`-focus drafts land more DoT than `balanced` drafts; the `aggro-brute` POLICY stays the weak baseline (a sim policy — the v2 `aggro-strike` preset is retired) |
-| Per-deck floors & ceiling (balance the VARIANCE, not the mean) | FLOORS are graded on the starter deck's design window only — every theme preset >= 40% early, >= 25% mid (target ratchets). **Late is informational telemetry, NOT a graded floor** (deck-progression model, owner-confirmed 2026-07-08: an un-matured starter losing late is correct, not a dead-on-arrival bug). The DOMINANCE ceiling applies on EVERY stage incl. late: NO preset > 98% anywhere — a 100% cell is a dominance finding regardless of stage. Impossible targets a hard 0% ceiling for starter presets. Live enforcement values are the `PRESET_FLOORS` (early+mid) / `PRESET_CEILING` (all stages) constants in the balance-band e2e (`// PLAYTEST-CALIBRATION`, pinned loose today) — ratchet floors toward these targets as forge items land; stage averages that hit band while presets sit at 0% on a graded stage or 100% anywhere are a FAIL |
+| Per-deck floors & ceiling (balance the VARIANCE, not the mean) | FLOORS are graded on the starter deck's design window only — every theme preset >= 40% early, >= 25% mid (target ratchets). **Late is informational telemetry, NOT a graded floor** (deck-progression model, owner-confirmed 2026-07-08: an un-matured starter losing late is correct, not a dead-on-arrival bug). The DOMINANCE ceiling applies on EVERY stage incl. late: NO preset > 98% anywhere — a 100% cell is a dominance finding regardless of stage. Impossible targets a hard 0% ceiling for starter presets. The balance-band e2e no longer enforces these floors and ceiling (repealed 2026-09-02, see the §4 banner) — grade them by hand from the matrix; stage averages that hit band while presets sit at 0% on a graded stage or 100% anywhere are a FAIL |
 
 Every run's report includes the per-preset spread table (min/median/max
 win rate per stage, one row per preset) — stage averages alone are not
@@ -574,7 +575,7 @@ Read the live roster from `COMBAT_DECK_PRESETS`
 | Free (composition) | `src/Combat/combat.starter-deck-presets.ts` | the stage-ladder preset card lists (§8) |
 | Free (composition) | `src/Combat/combat.deck-draft.ts` | focus weights (4x), draft size (10), max copies (2), guarantees |
 | Free (measurement) | `+swap:` variants of preset recipes | temporary seat swaps (treatment arm only) — evidence device, never ships as-is |
-| Direct (evidence recommended) | `src/Cards/cards.library.ts` | card literals: numerics, riders, new cards + the `// pts:` comment and count-pin bumps |
+| Direct (evidence recommended) | `src/Cards/cards.library.ts` | card literals: numerics, riders, new cards + the `// pts:` comment |
 | Buildable (full wiring checklist) | `src/Cards/types.ts` + engine/display/pricing/mobile/editor surfaces | new keywords, `specialMechanics` kinds, effect ids — via card-expert's 12-step checklist + hermetic e2e + cross-package verifies (THE PIPELINE LIBERATION, 2026-08-22) |
 | Open (evidence recommended) | engine constants | threat/Conviction economy — tunable directly with measured evidence (THE OPEN GATE ¶4); `/combat-playtest` is the other lane for this surface |
 | Loop-stewarded, high bar | LOCKED MECHANICS | Conviction / Surge / Dice: cards and keywords may read/feed/spend/interact freely; removing, no-op'ing, or routing around any of the three needs overwhelming design evidence, filed as `[loop-call]` (THE OPEN GATE ¶2) |

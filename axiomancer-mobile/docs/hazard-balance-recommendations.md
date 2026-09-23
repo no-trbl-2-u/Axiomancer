@@ -9,7 +9,7 @@ hazard (no automatic re-casts), Safe = combined meter, Risk = dual BOTH-required
 meters, 3 rounds, persistent hand with draw-up-to-5, trash-bin salvage, tiered
 Perfect/Complete/Failure outcomes, pick-1-of-3 card rewards, reserve bonus, and
 consequence ladder by rounds lost. Tuning evidence: greedy-bot Monte-Carlo in
-`state/hazard/__tests__/balance.sim.test.ts` (300 seeded runs per hazard/route
+`axiomancer-mechanics/src/World/Hazard/e2e/hazard.balance.sim.test.ts` (mechanics; 300 seeded runs per hazard/route
 cell; guard bands currently enforce Safe ≥90% at-least-one-win / ≤8% failure and
 Risk 75–98% at-least-one-win / 3–25% failure).
 
@@ -24,7 +24,7 @@ Playtest feedback: the crossings had grown too easy. Every authored threshold
 was raised one step (safe `+1/+2/+2` per round, risk `+0/+1/+1` per meter). In
 the greedy-bot Monte-Carlo this moved safe perfect ~60–70% → ~30–40% (still
 ~99% at-least-one-win) and risk perfect ~20% → ~10% (failure ~10%+), leaving real
-headroom for a skilled player. Guard bands in `balance.sim.test.ts` were
+headroom for a skilled player. Guard bands in `hazard.balance.sim.test.ts` (mechanics) were
 re-blessed to match (safe perfect 0.18–0.52 / failure ≤0.10; risk perfect
 0.03–0.22 / failure 0.03–0.25).
 

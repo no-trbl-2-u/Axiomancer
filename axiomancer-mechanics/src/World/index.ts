@@ -107,8 +107,8 @@ export {
 } from './map.dispatcher';
 
 // Spec 23 — MapEvents engine.
-// Importing `./MapEvents/content` for its side effect registers the
-// Phase 24 pools (fishing-village + northern-forest) on module load.
+// Importing `./MapEvents/content` for its side effect registers every
+// authored map's pools (coastal + northern continents) on module load.
 import './MapEvents/content';
 
 export {

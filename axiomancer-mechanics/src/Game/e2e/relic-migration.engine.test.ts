@@ -1,8 +1,9 @@
 /**
  * Hermetic engine test — Phase 19 save migration (v12 → v13).
  *
- * A v12 save has the 5-slot loadout but no signet relics. Migrating seeds the 8
- * relics (default 5 worn, displaced gear + other 3 to inventory) and recomputes
+ * A v12 save has the 5-slot loadout but no signet relics. Migrating seeds the
+ * relics via `cloneStartingRelics` (default 5 worn, displaced gear + the
+ * benched rest to inventory) and recomputes
  * derivedStats / maxHealth so a loaded save derives a full signature kit from the
  * worn loadout instead of the retired archetype kit.
  */

@@ -106,7 +106,7 @@ one of these — then decide it deliberately and file the call as
 | Layer | Choice | Notes |
 |---|---|---|
 | Repo | npm workspaces monorepo (3 flat packages) | **npm, never pnpm/yarn** |
-| Engines | Node ≥20, npm ≥10 | root `package.json` `engines` |
+| Engines | Node ≥22, npm ≥10 | root `package.json` `engines` |
 | React | 19.1.0 (pinned via root `overrides`) | react / react-dom / react-test-renderer |
 | **mechanics** language | TypeScript strict, CommonJS | `type-check` = `tsc --noEmit` |
 | mechanics runtime | ts-node (CLI) | no build needed to run CLIs |
@@ -116,9 +116,9 @@ one of these — then decide it deliberately and file the call as
 | mechanics state | zustand (`createGameStore`) | |
 | **mobile** framework | Expo ~54 + expo-router 6, RN 0.81, TS 5.9 strict | |
 | mobile test | **Jest** (jest-expo) | no build leg — Metro bundles at runtime |
-| mobile lint | `expo lint` | |
+| mobile lint | `eslint app components` | |
 | mobile e2e | Playwright (expo-web) + per-minigame scripts | `scripts/*-e2e.mjs` |
-| **card-editor** | Vite + React (local dev tool) | `type-check` only; not published |
+| **card-editor** | Vite + React (local dev tool) | `verify` = type-check + lint + vitest + build; not published |
 | Structured data | **none** — content is in-repo TS libraries | no gh-as-db; `/ship-data` not adopted; no `data/BACKLOG.md` |
 | Design layer | **none** — no `design/` export dir | design happens via the `.claude/skills/` design skills into `axiomancer-mechanics/specs/` |
 | Deploy (mobile) | EAS Build (manual, release-time) | not per-push |
@@ -154,9 +154,10 @@ npm run combat-playtest        # stage x policy matrix
 The barrel is the **locked public contract** for mobile +
 card-editor. Additive exports are fine; a rename/removal is a
 deliberate, semver-major phase that migrates the consumers in the
-same change. Deprecated-but-live aliases kept for mobile (do not
-remove until mobile migrates): `skillLibrary`->`cardLibrary`,
-`getSkillById`->`getCardById`, `Skill*` type family -> `Card*`.
+same change. No deprecated aliases remain: the former
+`skillLibrary`->`cardLibrary`, `getSkillById`->`getCardById` and
+`Skill*` -> `Card*` shims are gone from the barrel and no consumer
+references them.
 
 ### Mobile routes (expo-router `app/`)
 
@@ -701,9 +702,13 @@ ambiguity.)
   function (CQI, spec 35) on 2026-08-08 — combat readings now judge
   against CQI, not the dead status-dominance law.** Still live for the
   minigames:
-  Gathering greed < restraint <
-  skill; Loot-cache informed > blind > coward; Quest Board
-  naive-finishes / deliberate-finishes-well; ~~Rest
+  ~~Gathering greed < restraint <
+  skill~~ — **VOID, Phase 76 retired the Gathering minigame**;
+  ~~Loot-cache informed > blind > coward~~ — **VOID, Phase 63
+  retired the Pick Pool minigame (the loot cache is a three-way
+  one-shot choice now)**; ~~Quest Board
+  naive-finishes / deliberate-finishes-well~~ — **VOID, Phase 61
+  retired the Quest Board minigame**; ~~Rest
   meagre-but-never-lethal (posture gradient)~~ — **VOID, Phase 52e
   retired the minigame (the rest-choice node replacing it is a
   one-shot player pick, not a tuned balance curve)**; Hazard -> CDR-0006
@@ -792,9 +797,9 @@ the touched workspace when you can.
 npm run verify
 
 # scoped (preferred — pick the package the phase touches)
-npm run verify --workspace axiomancer-mechanics   # type-check + type-check:tests + lint + vitest + build
-npm run verify --workspace axiomancer-mobile      # lint + typecheck + jest
-npm run type-check --workspace axiomancer-card-editor
+npm run verify --workspace axiomancer-mechanics   # type-check + type-check:tests + type-check:cli + lint + vitest + build
+npm run verify --workspace axiomancer-mobile      # lint + typecheck + jest + assets:check + art:test + critique-drive:test
+npm run verify --workspace axiomancer-card-editor # type-check + lint + vitest + build
 ```
 
 Mechanics changes to the public surface must ALSO run the mobile
@@ -802,9 +807,10 @@ Mechanics changes to the public surface must ALSO run the mobile
 
 Each leg is a hard gate. There is **no `data:validate` leg**
 (no structured data layer). Mobile has **no build leg** (Metro
-bundles at runtime); its `verify:visual` smoke screens and
-`e2e:*` scripts are the hermetic UI legs, run as part of
-CI (`verify-mobile.yml`) rather than the per-commit local gate.
+bundles at runtime); its `e2e:*` scripts are the hermetic UI
+legs, run as part of CI (`verify-mobile.yml`) rather than the
+per-commit local gate; the `verify:visual` smoke screens run only
+as an opt-in step of `preview-build.yml`.
 
 ### Post-push: `npm run deploy:check`
 
@@ -838,8 +844,9 @@ gate.
 `axiomancer-mechanics/src/Cards/cards.library.ts` (card DATA edits
 from the card editor) still runs the full mechanics gate + mobile
 lint/typecheck/jest + bundler smoke, but `verify-mobile.yml` skips
-its slow Playwright `e2e-minigames` job (the `detect-scope`
-job gates it; defaults to running on any uncertainty). Any mobile
+its slow Playwright `e2e:*` steps (the `scope` step, via
+`scripts/ci-e2e-scope.mjs`, gates them per journey; defaults to
+running on any uncertainty). Any mobile
 change or any *other* mechanics change runs the full e2e. The
 deploy gate is unaffected — a skipped job does not fail the run.
 
@@ -859,7 +866,8 @@ deploy gate is unaffected — a skipped job does not fail the run.
   - Timeouts are budget caps: march 75, night 45. A tick that
     genuinely needs more should be split, not have its cap raised
     silently.
-  - March stays at 4×/6h for now. If overage still stings, the
+  - March runs every 2h (12×/day; raised from 4×/6h on 2026-09-01
+    at T's request) for now. If overage still stings, the
     next levers (loop-managed since THE OPEN GATE ¶7, in order)
     are march 2×/day, then a self-hosted runner (only inside a
     dedicated VM — the loop runs `--dangerously-skip-permissions`).

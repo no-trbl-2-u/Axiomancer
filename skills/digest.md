@@ -23,7 +23,7 @@ O(everything) work that must never run per-commit.
 /digest                      # the full nightly pass
 ```
 
-Runs from `.github/workflows/night.yml` (daily) or by hand.
+Runs from `.github/workflows/night.yml` (odd days only) or by hand.
 Never dispatched by `/march` — it is its own loop shape with
 its own cadence.
 

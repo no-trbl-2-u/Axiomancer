@@ -8,7 +8,7 @@
  * Phase 09 keeps payloads minimal but real. Where the underlying reducer
  * needs richer context (e.g. dialogue requires the active tree), the payload
  * carries it through — the CLI / UI is responsible for staging that context
- * before dispatch. See `phase_09_game_loop_orchestration.md` Unit 1.
+ * before dispatch. See `specs/09-game-loop-orchestration.md`.
  */
 
 import { Enemy } from '../Enemy/types';

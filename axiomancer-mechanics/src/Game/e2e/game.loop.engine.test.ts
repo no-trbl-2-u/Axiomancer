@@ -6,8 +6,8 @@
  *
  *   1. createGameStore + createEventEmitter
  *   2. START_COMBAT against GraveLarva (low-HP enemy → cheap victory)
- *   3. updateCombat drops the enemy to 0 HP (emits combat:round)
- *   4. END_COMBAT — outcome is 'victory', loot + XP applied
+ *   3. the Hazard-Pattern driver decides the fight outside the store
+ *   4. endCombat('victory') — loot + XP applied
  *   5. LEVEL_UP — confirms the placeholder level-up reducer (Phase 09 brief)
  *   6. MOVE_TO_NODE to fv-2
  *   7. SAVE_GAME (via the memory adapter)

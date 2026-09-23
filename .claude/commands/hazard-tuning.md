@@ -332,6 +332,8 @@ before the next.
 Before closing the report, cross-check the following known gaps between CDR-0006
 doctrine and the shipped engine. Do not tune numbers around them — flag them.
 
+> **Superseded (2026-09-23):** the table below predates the current `hazard.engine.ts` (its cited identifiers — `penaltiesApplied`, `advanceToNextRound`, `processBetweenRounds`, `resolveRound`, the `hazard.engine.ts:221` TODO — no longer exist in the engine; the round resolver is `resolveHazardRound` / `continueHazardAfterResolve`) and must be re-derived against it — live truth: `axiomancer-mechanics/src/World/Hazard/hazard.engine.ts`. Body kept as a historical record pending rewrite (plan/AUDIT.md).
+
 | Gap | Shipped state | CDR-0006 doctrine |
 |---|---|---|
 | Per-round failure penalties | Not yet applied (`penaltiesApplied: []` TODO in `hazard.engine.ts:221`) | Applied per round on X resolution |
@@ -502,6 +504,8 @@ not present in CLI output, JSON events, state logs, or committed tests.
 | Scoring bands / reward tables | `hazard.content.ts` + `hazard.tuning.ts` | 3-round: 3O→strong, 2O→normal, 1O→minor, 0O→penalty |
 
 **Known engine gaps (do not tune around; flag only):**
+
+> **Superseded (2026-09-23):** the table below predates the current `hazard.engine.ts` (its cited identifiers — `penaltiesApplied`, `advanceToNextRound`, `processBetweenRounds`, `resolveRound`, the `hazard.engine.ts:221` TODO — no longer exist in the engine; the round resolver is `resolveHazardRound` / `continueHazardAfterResolve`) and must be re-derived against it — live truth: `axiomancer-mechanics/src/World/Hazard/hazard.engine.ts`. Body kept as a historical record pending rewrite (plan/AUDIT.md).
 
 | Gap | File | Marker |
 |---|---|---|

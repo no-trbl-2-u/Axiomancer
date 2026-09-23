@@ -8,7 +8,7 @@
  * run is reproducible from its seed.
  *
  * The default `greedy` policy models a read-playing human: each turn it rolls
- * 2 dice, drafts the one that wins the hidden-stance read (preferring a
+ * 3 dice, drafts the one that wins the hidden-stance read (preferring a
  * color-match), powers the best STATUS card (favouring a NEW distinct status
  * for the combo refresh), rides the combo loop, banks Conviction and spends it
  * on damaging Signatures, and Befriends a low-HP foe to take the mercy/spare
@@ -154,7 +154,8 @@ export interface CombatCardUsage {
     fizzles?: number;
     /** HP-swing attributed per line: immediate enemy-HP loss during the play
      *  plus the projected DoT of effects it landed (`damagePerRound ×
-     *  intensity × remainingDuration` — the `recordAttribution` formula).
+     *  intensity × remainingDuration` — the formula `recordAttribution` used
+     *  before WI-9; the ledger itself no longer projects).
      *  `free` = top-line plays, `paid` = powered bottom-line plays. */
     lineContribution?: { free: number; paid: number };
     /** Hand entries discarded un-played at phase end (the engine's draw-fresh
@@ -290,8 +291,9 @@ function lineRow(
  * WS1.1 — the HP swing one play produced, measured sim-side so it needs no
  * engine tag: the enemy HP the play removed RIGHT NOW (payoff bursts, TICK
  * advances, reflect) plus the projected DoT of every enemy-side effect it
- * landed — the same `damagePerRound × max(1,intensity) ×
- * max(1,remainingDuration)` projection `recordAttribution` uses, read off the
+ * landed — the `damagePerRound × max(1,intensity) ×
+ * max(1,remainingDuration)` projection `recordAttribution` used before WI-9
+ * (the ledger now records provenance only), read off the
  * post-play active effect (falling back to the landed intensity × 1 when the
  * active row is gone, e.g. instantly consumed).
  */

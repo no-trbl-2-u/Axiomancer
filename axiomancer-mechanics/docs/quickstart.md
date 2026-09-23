@@ -21,12 +21,12 @@ canonical entry points. Cross-link to the per-module doc for depth.
 | **Combat** | Hazard-Pattern Combat (`initializeCombatEncounter` / `playCombatCard` / `resolveThreatPhase` / `simulateHazardPatternCombat`), stat accessors, advantage / crit / friendship | 9, 15, 32, 36, 38, 165+ | [combat.md](./combat.md) |
 | **Effects** | `applyEffect`, Tier 1-3 procs, `statModifiers` + intensity scaling, fallacy payloads | 1, 3, 38, 44, 48 | [effects.md](./effects.md) |
 | **Enemy** | `createEnemy`, AI strategies + outlook-bias (Phase 45), enemy-card caster path (Phase 49), per-enemy alignment + `friendshipReward` (+ Phase 69 `alignmentDelta`) + Phase 68 `BefriendabilityConfig` | 7, 45, 49, 57, 60, 62, 68, 69 | [enemy.md](./enemy.md) |
-| **Game** | `createGameStore`, save/load + migrators (`GAME_STATE_VERSION` 7), event surface, autosave throttling, persistence adapters, run-loop semantics (`resetRun` + `runId`), Codex slice | 9, 11, 12, 21, 35, 38, 50, 51, 55, 72, 73 | [gameloop.md](./gameloop.md) |
+| **Game** | `createGameStore`, save/load + migrators (`GAME_STATE_VERSION` 24), event surface, autosave throttling, persistence adapters, run-loop semantics (`resetRun` + `runId`), Codex slice | 9, 11, 12, 21, 35, 38, 50, 51, 55, 72, 73 | [gameloop.md](./gameloop.md) |
 | **Items** | `addItem` / shop reducers (`buyItem`/`sellItem`/`defaultSellPrice` — Phase 37), set items engine (Phase 54), `previewTemplateAtRarity` UI-tier preview helper (Phase 75 — closes the user-jot for mobile item-library mod-visibility), `previewTemplateAtAllRarities` batch wrapper (Phase 76 — UI tooltip / item-detail rarity-strip views in a single call) | 5, 5b, 37, 54, 75, 76 | [items.md](./items.md), [equipment.md](./equipment.md) |
 | **NPCs** | `getDialogueNode` + `visibleChoices`, alignment gates (Phase 46), tree-id observer cache (Phase 63) | 14, 22, 46, 63 | [npcs.md](./npcs.md) |
 | **The Oaths** | 3-axis alignment cube + 27-cell library, `alignmentDelta` authoring, enemy alignment + AI bias (Phase 45), alignment-gated content (Phase 46) | 42-46 | [oaths.md](./oaths.md) |
 | **Cards** | `executeCard` caster-agnostic (Phase 49), `learnCard` + runtime learning (Phase 30), Tier 1-3 card library + Tier 2 synergy clauses (Phase 66) | 4, 4b, 30, 33, 44, 49, 66 | cards.md |
-| **World** | `createStartingWorld` + per-continent maps, MapEvents engine (`resolveMapEvent`, nine-kind pool taxonomy — Phase 23/24, 'quest' added Phase 137), expanded fishing-village (Phase 65 — 25 nodes, 3 sub-areas) | 8, 23, 24, 25, 31, 65 | [world.md](./world.md) |
+| **World** | `createStartingWorld` + per-continent maps, MapEvents engine (`resolveMapEvent`, eleven-kind pool taxonomy — Phase 23/24; the Phase 137 'quest' kind was later retired), expanded fishing-village (Phase 65 — 25 nodes, 3 sub-areas) | 8, 23, 24, 25, 31, 65 | [world.md](./world.md) |
 | **Utils** | RNG harness, derived stats, dice / type guards | 11 | — |
 
 Marquee mechanics shipped end-to-end: moral meter (Phase 10), set
@@ -52,11 +52,11 @@ tabs:
 
 | Tab | Surface |
 |---|---|
-| **Self** | View items, allocate stat points (Phase 29), learn cards (Phase 30) |
+| **Character** | View items, allocate stat points (Phase 29), learn cards (Phase 30) |
 | **Map** | Walk available nodes, resolve MapEvents (`resolveMapEvent`), see discovered / consumed nodes |
 | **Combat** | Hazard-Pattern Combat via the `combat` subcommand (`npm run combat`): draft a stance die, play cards, resolve the threat phase |
 | **Save / Load** | Persistence via the configured `PersistenceAdapter` (default: file slot via `--save-file`) |
-| **Debug** | Spawn arbitrary enemies for testing (`debugSpawn`); useful for combat / loot validation |
+| **DEV** | Spawn arbitrary enemies for testing (`debugSpawn`); useful for combat / loot validation |
 | **Quit** | Exit cleanly; the engine emits a final `cli:exit` event |
 
 ### Scripted CLI mode (Phase 20)
@@ -79,7 +79,7 @@ The scripted mode is what the agent-graded harness drives at
 
 ## 3. Walkthrough catalog — exercise each surface
 
-Ten authored walkthroughs at `automation/scripts/walkthroughs/`; each
+Sixteen authored walkthroughs at `automation/scripts/walkthroughs/`; each
 ships a `<name>.json` script + `<name>.goal.md` test spec. Run via:
 
 ```bash
@@ -96,8 +96,8 @@ npm run game -- --script automation/scripts/walkthroughs/<name>.json  # direct r
 | `map-events` | Map tab + `resolveMapEvent` dispatcher firing on `fv-2` | apprentice | — |
 | `save-load` | Save / Load tabs + `--save-file` slot + Phase 31 fv-1 → fv-2 → fv-3 rollback | apprentice | — |
 | `shop` | Phase 37 `buyItem` / `sellItem` round-trip + `defaultSellPrice` invariant | wanderer | — |
-| `card-learning` | Character-tab Learn prompt (Phase 30 unit 3) | wanderer | — |
-| `cards-in-combat` | In-combat `card` action with `ad-hominem-strike` | wanderer | wet-hound (debug) |
+| `skill-learning` | Character-tab Learn prompt (Phase 30 unit 3) | wanderer | — |
+| `skills-in-combat` | In-combat `card` action with `ad-hominem-strike` | wanderer | wet-hound (debug) |
 | `stat-allocation` | Phase 29 stat-allocation prompt loop driven by post-combat level-ups | sage | coastal-tyrant |
 
 See [`automation/scripts/walkthroughs/README.md`](../automation/scripts/walkthroughs/README.md) for
@@ -171,7 +171,8 @@ sub-areas: Harbor District `fv-11..fv-15`, Inland Streets
 `fv-16..fv-20`, Cliff Path `fv-21..fv-25`). Each node fires a
 weighted `MapEventPool` on entry per the Phase 23 taxonomy
 (encounter / interaction / gathering / rest / village / cutscene /
-hazard / loot-cache, plus 'quest' since Phase 137). See [`world.md` § "Demo Content"](./world.md#demo-content-fishing-village)
+hazard / loot-cache, plus narration / blacksmith / travel; the Phase 137
+'quest' kind was retired). See [`world.md` § "Demo Content"](./world.md#demo-content-fishing-village)
 for the full layout.
 
 ### Save / load
@@ -181,10 +182,9 @@ durable actions only — `COMBAT_ROUND`, `LEVEL_UP`, `END_COMBAT`,
 `MOVE_TO_NODE`, `APPLY_DIALOGUE`, `SAVE_GAME`; Phase 72 added
 `RESET_RUN`; Phase 73 added `UNLOCK_CODEX_ENTRY`). `store.load()`
 restores via the configured `PersistenceAdapter` + `migrate()` ladder
-(`GAME_STATE_VERSION = 7`; `migrateV4toV5` defaults
-`philosophicalAlignment` to `{0,0,0}`; `migrateV5toV6` defaults
-`runId` via `generateRunId(() => getRng().random())`; `migrateV6toV7`
-defaults `codex` to `{ unlockedEntries: [] }`).
+(`GAME_STATE_VERSION = 24`; the ladder in `src/Game/game.migrate.ts`
+chains `migrateV11ToV12` … `migrateV23ToV24`, and saves older than v11
+are refused).
 
 For Node consumers, `'axiomancer-mechanics/node'` exports
 `createNodeAdapter(filePath)` to persist to a JSON file.
@@ -215,11 +215,11 @@ shift the cube on resolution (Phase 43).
 ## 5. Verify + deploy gates
 
 ```bash
-npm run verify       # type-check + type-check:tests + lint + tests + build
+npm run verify       # type-check + type-check:tests + type-check:cli + lint + tests + build
 ```
 
 The `verify` gate enforces:
-- TypeScript strict (`tsc --noEmit`), plus the tests tsconfig (`type-check:tests`).
+- TypeScript strict (`tsc --noEmit`), plus the tests tsconfig (`type-check:tests`) and the CLI tsconfig (`type-check:cli`).
 - ESLint (flat config, `@typescript-eslint` plugin; warnings advisory).
 - Vitest hermetic suite (`src/**/e2e/*.engine.test.ts`).
 - Build (`tsc && tsc-alias` → `dist/`).
@@ -248,7 +248,6 @@ Focused guides with runnable code samples for each major module:
 | Character | [quickstart-character.md](./quickstart-character.md) | `createCharacter`, presets, stat allocation, card learning |
 | Combat | [quickstart-combat.md](./quickstart-combat.md) | `initializeCombatEncounter`, `playCombatCard`, threat phases, outcomes, sim |
 | Items | [quickstart-items.md](./quickstart-items.md) | `dropItem`, `previewTemplateAtRarity`, equip, shop, set bonuses |
-| Cards | quickstart-cards.md | `executeCard`, resource generation, synergy events, Tier 1/2/3 |
 | World | [quickstart-world.md](./quickstart-world.md) | `resolveMapEvent`, MapEventPool authoring, `alignmentDelta` |
 
 ---

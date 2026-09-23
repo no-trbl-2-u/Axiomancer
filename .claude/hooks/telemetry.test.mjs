@@ -54,15 +54,21 @@ const fire = (mode, payload, cwd = root) =>
     env: { ...process.env, CLAUDE_PROJECT_DIR: root },
   })
 
-/** Every data row currently in the throwaway root's log. */
-const rows = () => {
-  const log = path.join(root, 'TELEMETRY.md')
-  if (!fs.existsSync(log)) return []
-  return fs
-    .readFileSync(log, 'utf-8')
-    .split('\n')
+/** The throwaway root's shard directory, and the shard files in it. */
+const logDir = () => path.join(root, 'telemetry')
+const shards = () => (fs.existsSync(logDir()) ? fs.readdirSync(logDir()).sort() : [])
+
+/**
+ * Every data row in the throwaway root's shards, in write order. Each
+ * shard is append-only, and within one test run the rows are written
+ * sequentially, so sorting by the timestamp cell (stable) recovers the
+ * write order across shards.
+ */
+const rows = () =>
+  shards()
+    .flatMap((f) => fs.readFileSync(path.join(logDir(), f), 'utf-8').split('\n'))
     .filter((l) => /^\| 20\d\d-/.test(l))
-}
+    .sort((a, b) => (a.slice(2, 22) < b.slice(2, 22) ? -1 : a.slice(2, 22) > b.slice(2, 22) ? 1 : 0))
 
 const base = () => ({ session_id: 's1', transcript_path: transcript })
 
@@ -88,7 +94,7 @@ const clearTick = () =>
   fs.rmSync(path.join(root, '.claude', 'hooks', '.telemetry-state.json'), { force: true })
 
 // A conversational turn is the user talking, not a tick. Logging it dirtied
-// TELEMETRY.md every turn and demanded a commit per turn, burying the real
+// the log every turn and demanded a commit per turn, burying the real
 // ticks in churn.
 test('a conversational turn writes no tick-end row at all', () => {
   clearTick()
@@ -174,7 +180,35 @@ test('a tick running inside a package still writes to the root log', () => {
   const before = rows().length
   fire('tool', { ...base(), tool_name: 'Task', tool_input: { subagent_type: 'Explore' } }, pkg)
   assert.equal(rows().length, before + 1, 'the row landed in the root log')
-  assert.ok(!fs.existsSync(path.join(pkg, 'TELEMETRY.md')), 'no second log was created')
+  assert.ok(!fs.existsSync(path.join(pkg, 'telemetry')), 'no second log was created')
+})
+
+// The reason the log is sharded (2026-09-23): a single shared file made
+// every pair of branches that each logged a row conflict on merge. Two
+// sessions must therefore never write to the same file.
+test('two sessions write to two separate shards, named by date and session id', () => {
+  const call = (session_id) => ({ session_id, transcript_path: transcript, tool_name: 'Skill', tool_input: { skill: 'jot' } })
+  fire('tool', call('sess-A'))
+  fire('tool', call('sess-B'))
+  const today = new Date().toISOString().slice(0, 10)
+  const a = path.join(logDir(), `${today}_sess-A.md`)
+  const b = path.join(logDir(), `${today}_sess-B.md`)
+  assert.ok(fs.existsSync(a) && fs.existsSync(b), `expected both shards, got ${shards().join(', ')}`)
+  assert.equal(fs.readFileSync(a, 'utf-8').split('\n').filter((l) => /^\| 20/.test(l)).length, 1)
+  assert.equal(fs.readFileSync(b, 'utf-8').split('\n').filter((l) => /^\| 20/.test(l)).length, 1)
+})
+
+test('a session id is reduced to filename-safe characters', () => {
+  fire('tool', { session_id: '../../etc/pa ss', transcript_path: transcript, tool_name: 'Skill', tool_input: { skill: 'jot' } })
+  const today = new Date().toISOString().slice(0, 10)
+  assert.ok(fs.existsSync(path.join(logDir(), `${today}_etcpass.md`)), `got ${shards().join(', ')}`)
+  assert.ok(!fs.existsSync(path.join(root, '..', 'etc')), 'no path traversal out of the log directory')
+})
+
+test('a payload with no session id still logs, to an unknown-session shard', () => {
+  fire('tool', { transcript_path: transcript, tool_name: 'Skill', tool_input: { skill: 'jot' } })
+  const today = new Date().toISOString().slice(0, 10)
+  assert.ok(fs.existsSync(path.join(logDir(), `${today}_unknown-session.md`)))
 })
 
 test('garbage on stdin never blocks the tick', () => {
@@ -187,10 +221,14 @@ test('garbage on stdin never blocks the tick', () => {
   )
 })
 
-test('the log is capped and stays parseable as a markdown table', () => {
-  const log = fs.readFileSync(path.join(root, 'TELEMETRY.md'), 'utf-8')
-  const header = log.split('\n').find((l) => l.startsWith('| when'))
-  assert.equal(header.split('|').length - 2, 6, 'six columns')
+test('every shard carries one table header and stays parseable as a markdown table', () => {
+  assert.ok(shards().length > 0)
+  for (const f of shards()) {
+    const lines = fs.readFileSync(path.join(logDir(), f), 'utf-8').split('\n')
+    const headers = lines.filter((l) => l.startsWith('| when'))
+    assert.equal(headers.length, 1, `${f} has exactly one table header`)
+    assert.equal(headers[0].split('|').length - 2, 6, 'six columns')
+  }
   for (const row of rows()) {
     assert.equal(row.split('|').length - 2, 6, `row has six cells: ${row}`)
   }

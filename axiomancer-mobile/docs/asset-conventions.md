@@ -114,10 +114,10 @@ else ship. Same question as `Potential Assets/MCP-Axiomancer/images/`.
 ## Known gaps (queued work, build plan)
 
 - No bundle-size budget (spec 11 Q5 was left blank).
-- `assets/images/maps/` has one plate; `combat/` one arena — coverage,
-  not convention, problems. `combat/` also has no `index.ts`; its one
-  asset is consumed directly, and `asset-provenance.test.mjs` records
-  the directory as registry-less so a second arena has to confront it.
+- `assets/images/maps/` has five plates; `combat/` six arenas plus one
+  village plate — coverage, not convention, problems. `combat/` gained
+  its `index.ts` (`arenaBackdropFor`) in phase 83, so
+  `asset-provenance.test.mjs`'s registry-less set is now empty.
 - `labyrinth/walls/` shipped at 720x1280, above the 640px longest-edge
   cap, on the assumption that a lossy-on-lossy re-encode would save
   little. Measured 2026-09-22 (`scripts/shrink-art.mjs --dry-run`): 2.76 MB

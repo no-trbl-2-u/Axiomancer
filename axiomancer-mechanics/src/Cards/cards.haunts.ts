@@ -6,9 +6,9 @@
  * WS2.1 (plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md,
  * correction C-11): Haunts are REAL `Card` records resolved through
  * `getCardById`'s lookup chain, but they must NOT live in
- * `cards.library.ts` — the library is pinned at 57 cards / 45 spells (the
- * Profane Canon count; this comment originally cited the pre-rework 70/50
- * pin and is corrected here, phase 62) (effectiveness + pricing lints), and
+ * `cards.library.ts` — the library's count pins (57 cards / 45 spells at the
+ * Profane Canon; 70/50 before it) were repealed 2026-09-02, but the library
+ * lints (effectiveness + pricing) still map over `cardLibrary` alone, and
  * a Haunt is unreachable
  * except through a `conjure_card` play. Keeping them in a separate
  * registry means they are automatically excluded from the reward pool
@@ -25,7 +25,7 @@
  *   - entries are one-use at the engine level (`conjuredUids`,
  *     combat.engine.ts): a played, free-played, or scrapped conjured card
  *     leaves the combat entirely instead of entering the discard cycle;
- *   - any rank is legal; the pins (57/45) do not count this registry.
+ *   - any rank is legal; the library lints do not count this registry.
  *
  * Cycle safety: this module imports ONLY types, mirroring
  * `cards.sandbox.ts` — `cards.library.ts` imports it for the lookup
@@ -95,8 +95,8 @@ const minorCharge: Card = {
 };
 
 /**
- * Every Haunt in existence. NOT part of the pinned 57-card library — the
- * 57/45 pins do not count these, and no reward/stage/draft pool ever
+ * Every Haunt in existence. NOT part of the curated library — the library
+ * lints do not count these, and no reward/stage/draft pool ever
  * offers one.
  */
 export const hauntLibrary: Card[] = [cinder, minorCharge];

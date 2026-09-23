@@ -29,11 +29,10 @@ type TownAcrossRiverQuests =
  * objective-tracking quests consumed by `quest.engine.ts`, dialogue
  * gating (`DialogueChoice.requires.quest`), and reach objectives.
  *
- * Note (Phase 137): main-STORY beats are a different surface — they
- * play as authored Quest Board minigames (`World/QuestBoard`, e.g.
- * `build-the-boat`). A quest-log quest may accompany a board (the
- * log tracks objectives; the board plays the beat), but the two
- * registries are intentionally separate.
+ * Note (Phase 137, retired Phase 61): main-STORY beats used to play as
+ * authored Quest Board minigames (`World/QuestBoard`, e.g.
+ * `build-the-boat`); that module is gone. The quest log tracks
+ * objectives only.
  *
  * @todo: Keep QuestName updated with new quest-log quests.
  */

@@ -6,7 +6,7 @@
  * explicit. The roller normalises weights at call time and returns one entry.
  *
  * RNG injection: pass a `rng()` returning a number in [0, 1). Defaults to
- * `Math.random`. Tests stub via the helpers in `src/test-utils/rng.ts`
+ * the seedable singleton (`getRng().random`). Tests stub via the helpers in `src/test-utils/rng.ts`
  * (`mockSequentialRng` / `mockFixedRng` / `mockAlternatingRng`) or by
  * passing a scripted function.
  */

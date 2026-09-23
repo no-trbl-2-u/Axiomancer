@@ -1,8 +1,9 @@
 /**
  * MapEvent pool content for fishing-village + northern-forest (Spec 24)
- * and, since 2026-08-28 (inter-map travel), the caverns.
+ * and, since 2026-08-28 (inter-map travel), the northern continent's maps
+ * (caverns, northern-city, connecting-river, town-across-river, the-capital).
  *
- * Each authored fv-N / nf-N / nc-N node gets a single-entry pool override
+ * Each authored node (fv-N / nf-N / nc-N / ncy-N / cr-N / tar-N / cap-N) gets a single-entry pool override
  * so the dispatcher reproduces (and extends) the authored events
  * `processNode` used to fire. Every `MapEventKind` value is covered
  * at least once across the shipped maps.
@@ -1265,9 +1266,9 @@ const ncSealedStair: MapEventPool = {
         kind: 'cutscene', weight: 1,
         payload: {
             kind: 'cutscene',
-            // The way toward northern-city — the NEXT map, not shipped.
-            // Authored as sealed scenery, not a door; the map ends at the
-            // Under-Gate boss instead.
+            // The stair toward northern-city stays sealed scenery, not a
+            // door: the real door is nc-26, one column past the Under-Gate
+            // boss (Phase W3).
             lines: [
                 'A stair climbs toward the city. Climbs, then stops: rockfall, packed tight, older than the tally-boards.',
                 'Whoever opens it will do it from the other side, or through the gate below.',
@@ -2269,7 +2270,7 @@ const THE_CAPITAL_POOLS: ReadonlyArray<{ nodeId: string; pool: MapEventPool }> =
 
 /**
  * Registers every authored map-event pool + node override for the coastal
- * continent. Self-invoked on import for the package's side-effect contract;
+ * and northern continents. Self-invoked on import for the package's side-effect contract;
  * also exported so hermetic tests can replay it after
  * `_clearMapEventPoolRegistry()`.
  */

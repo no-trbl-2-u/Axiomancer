@@ -4,13 +4,14 @@
  * One point ~ 3 HP of neutral-read swing. Every card in
  * `cards.library.ts` ships its arithmetic in a comment; `scoreCard` is the
  * executable form of that arithmetic, and the pricing lint
- * (`src/Cards/e2e/pricing.engine.test.ts`) asserts each SPELL's score lands
- * inside its printed rank's band. Enchantments and disenchants are engine
+ * (`src/Cards/e2e/pricing.engine.test.ts`) asserts each card's score is a
+ * finite number — the rank-band assertion was repealed 2026-09-02, so the
+ * table is ADVISORY. Enchantments and disenchants are engine
  * text (persistent rule rewrites) — they are not scored.
  *
  * The table is intentionally coarse: `/deck-tuning` remains the empirical
- * court. The lint exists to catch rank dishonesty (a rank-6 card scoring 2,
- * a Doxa scoring 14), not to arbitrate half-points.
+ * court. The lint exists to catch broken arithmetic (a NaN score), not to
+ * arbitrate half-points.
  */
 
 import type { Card, CardRider, CardSpecialMechanic } from './types';

@@ -1,5 +1,7 @@
 # Effects
 
+> **Superseded (2026-09-23):** the 88-effect catalogue (40 buffs + 48 debuffs) and the `src/Combat/phases/scenario.ts` call sites described below are retired — the scenario phase no longer exists and the live libraries hold 29 effects (19 buffs + 10 debuffs) — live truth: src/Effects/buffs.library.json, src/Effects/debuffs.library.json, src/Combat/effects.ts. Body kept as a historical record pending rewrite (plan/AUDIT.md).
+
 Developer reference for every status effect in Axiomancer Mechanics. For an individual
 effect deep-dive (data fields, combat interaction, test cases) see the per-effect
 documents in [`docs/effects/`](./effects/).
@@ -29,8 +31,8 @@ documents in [`docs/effects/`](./effects/).
 Audit shipped at Phase 79 (commit `3d213bd` 2026-05-24) walked
 all 88 effects (40 buffs + 48 debuffs) against four axes: per-effect
 test coverage, doc coverage, spec acceptance, and engine resolution
-shape. Full per-tier / per-category verdict tables in
-[`plan/phases/phase_79_general_effects_audit.md`](../plan/phases/phase_79_general_effects_audit.md).
+shape. Full per-tier / per-category verdict tables lived in the Phase 79
+general-effects-audit brief, which is no longer in `plan/phases/`.
 
 **Coverage gap surfaced.** 56 of 88 (64%) effects carry **zero direct
 test-file references** by effect id. Larger gap than Phase 78's
@@ -77,7 +79,7 @@ new Pending candidate. Phase 84 removed the dead-code
 `buff-fumbled` (only fires on Tier 2 buff caster fumble).
 The revisit-if-unbalanced
 caveat lives at `plan/PHASE_CANDIDATES.md` Promoted Phase 80 row +
-the brief at `plan/phases/phase_80_skills_always_land_pure_split.md`.
+the Phase 80 brief (no longer in `plan/phases/`).
 
 ---
 
@@ -137,7 +139,7 @@ authored intensity + duration.
 | Mode        | Behaviour                                                                                                  |
 |-------------|-------------------------------------------------------------------------------------------------------------|
 | `none`      | Strongest instance wins. Equal or weaker re-application is ignored. Duration is **not** refreshed.          |
-| `intensity` | `intensity` increments by `intensityDelta` each application (capped at `MAX_EFFECT_INTENSITY = 10`). Duration resets or extends additively per `ApplyEffectOptions`. |
+| `intensity` | `intensity` increments by `intensityDelta` each application (capped at `MAX_EFFECT_INTENSITY = 30`). Duration resets or extends additively per `ApplyEffectOptions`. |
 | `duration`  | `remainingDuration` extends by `effect.duration` on reapply (capped at `MAX_EFFECT_DURATION = 10`).         |
 
 `ApplyEffectOptions` (used by Tier 1 system):

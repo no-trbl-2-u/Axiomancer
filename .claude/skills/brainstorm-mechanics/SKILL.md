@@ -23,7 +23,8 @@ fallacies and paradoxes, and a morality-driven difficulty meter.
 `BRAINDUMP.md` paths in this skill live under the
 `axiomancer-mechanics/` package — e.g.
 `axiomancer-mechanics/braindump/`,
-`axiomancer-mechanics/specs/`. Never create these directories
+`axiomancer-mechanics/specs/` (`BRAINDUMP.md` itself is
+`axiomancer-mechanics/braindump/BRAINDUMP.md`). Never create these directories
 at the monorepo root.
 
 ---
@@ -35,7 +36,7 @@ don't contradict existing design:
 
 | Topic | Read first |
 |---|---|
-| Combat, stances, damage | `docs/combat.md`, `src/Combat/combat.resolver.ts` |
+| Combat, stances, damage | `docs/combat.md`, `src/Combat/combat.engine.ts` |
 | Effects, tiers, stacking | `docs/effects.md`, relevant `specs/0*-*.md` |
 | Skills (fallacy/paradox) | `docs/skills.md` |
 | Enemies | `docs/enemy.md`, `src/**/*.library.ts` |
