@@ -43,9 +43,15 @@ is canon; the map table and the open questions are working material.
    their beliefs are shown to be incorrect the moment they enter." This is
    common belief along the road, not X's alone. The capital was not
    conquered; its coldness is its own nature.
-7. **Why X travels, and whether she comes.** Partly answered by the
-   prologue: she does not come, and X leaves the house by sneaking out. Why
-   X then goes north is still open (open question 2).
+7. **Why X travels, and whether she comes.** She does not come; X leaves the
+   house by sneaking out. **He goes north fleeing the guards** (T,
+   2026-09-23): the capital is the one place people say the annexers cannot
+   reach, so it is where a hunted man runs.
+8. **The debt is money.** The prisoner's debt, transferred onto X at the
+   fort, is a literal sum owed to the annexing power (T, 2026-09-23).
+9. **She does not die.** Her fall from the cliff does not kill her (T,
+   2026-09-23). X does not know this; he never looked for her body. Whether
+   it ever comes to light is being clarified (open question 1).
 
 ## The prologue
 
@@ -108,17 +114,21 @@ Ordered by what the rest depends on. Each notes what it blocks.
 Answered by the prologue and closed: what X did at the fort; who she is (the
 prisoner's wife, mother of the child); whether she comes (she does not).
 
-1. **What the capital's record breaks now.** Rulings 4–5 had the lie to her
-   breaking at the capital; the prologue breaks it in her house instead. The
-   capital's ledger and the fort's records are still ruled (5), but what they
-   expose, and to whom, is open. Blocks 6.
-2. **Why X goes north.** He sneaks out of the house. What makes him keep
-   going, map after map, to the capital? Blocks the whole middle of the arc.
-3. **The debt.** The annexing power transferred the prisoner's debt onto X
-   (prologue 4). What the debt is (money, blood, service), who holds it, and
-   whether it follows him north. *Implication, not a ruling (confidence 55):*
-   a debt in a ledger is a natural thread to the capital, which weighs and
-   records everyone.
+1. **What the capital's record breaks now, and whether her survival comes to
+   light.** Rulings 4–5 had the lie to her breaking at the capital; the
+   prologue breaks it in her house instead. The capital's ledger and the
+   fort's records are still ruled (5), but what they expose, and to whom, is
+   open. Asked on 2026-09-23; T answered "She actually doesn't die, but that
+   doesn't come to light later." That answers her fate (ruling 9) but is
+   ambiguous about whether her survival is ever revealed — being clarified.
+   Blocks 7.
+2. ~~**Why X goes north.**~~ Answered: fleeing the guards (ruling 7). Still
+   open inside it: what keeps him going map after map, and whether the
+   guards stay on his trail.
+3. **The debt: who holds it, and does it follow him?** Answered that it is
+   money (ruling 8). Open: who collects it, and whether it follows him north.
+   *Implication, not a ruling (confidence 55):* a sum in a ledger is a
+   natural thread to the capital, which weighs and records everyone.
 4. **The annexing power.** Who they are, how far their reach extends, and how
    the fort's records came to sit in the capital's ledgers. *Implication, not
    a ruling (confidence 60):* ruling 5 means the capital and the annexer share
