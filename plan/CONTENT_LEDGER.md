@@ -14,10 +14,111 @@
 | cards | `skills/adjust-cards.md` | 2026-09-23 | 68769014 | 17 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-23 | 9a162fc8 | 17 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-23 | 96f73da3 | 17 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-23 | 06d2ab2e | 16 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-23 | 71648d3a | 17 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-23 | 2789a2af | 16 |
 
 ## Log
+
+```
+> **[adjust-keywords pass 17, 2026-09-23, commit 71648d3a]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — one candidate filed. Dispatched
+> autonomously by `/march`'s content-lifecycle gate (Step 3b): all five
+> content-lifecycle categories qualified (each past the 15-commit-since
+> -last-pass threshold), and `keywords` (`06d2ab2e` 2026-09-23T02:48:03Z,
+> 44 commits behind HEAD `077e986c` 2026-09-23T13:16:54-04:00) was the
+> stalest by last-pass commit timestamp — `npcs` (`2789a2af`
+> 2026-09-23T04:45:34Z, 42 commits), `cards` (`68769014`
+> 2026-09-23T07:01:18Z, 40 commits), `equipment` (`9a162fc8`
+> 2026-09-23T08:50:03Z, 38 commits) and `enemies` (`96f73da3`
+> 2026-09-23T16:47:29Z, 24 commits) all qualified too but were less
+> stale. Deploy confirmed green pre-tick (`npm run deploy:check` at HEAD
+> `077e986c`: verify-mechanics, verify-mobile, verify-card-editor all
+> `success`). No phase work pending (Step 3a of `/march` empty — no `[ ]`
+> row in `plan/steps/01_build_plan.md`).
+>
+> **Step 0:** re-read `axiomancer-mechanics/CLAUDE.md` (THE BIG NUMBERS
+> REWRITE — no CQI/status-engagement-floor grading, no rank bands, no
+> count pins), the live `docs/keyword-atlas.md` (72 rows, discipline
+> unchanged since the 2026-09-02 rewrite), and `docs/retheme-map.json`
+> (NL-8 collision law) fresh rather than trusting pass 16's reading —
+> no doctrine change landed in the 44-commit window.
+>
+> **Step 1 structural audit — fresh, not re-cited:** `git log
+> 06d2ab2e..HEAD` against the full keyword-surface path set
+> (`src/Cards/types.ts`, `src/Combat/combat.cards.ts`,
+> `src/Combat/combat.engine.ts`, `src/Effects/**`,
+> `axiomancer-mobile/state/combat/keywords.ts`,
+> `docs/keyword-atlas.md`, `axiomancer-card-editor/src/data/
+> mechanics.ts`, `src/Enemy/enemy-keywords.ts`) shows touches only to
+> `src/Cards/types.ts`, `src/Combat/combat.cards.ts`,
+> `src/Combat/combat.engine.ts` and three `src/Effects/**` files, all
+> three commits (`f5db5ca6`/`fb1bffd5`/`adf35108`) from the
+> comments-docs-audit branch — read the diffs directly: doc-comment
+> corrections only (dead spec pointers fixed, `/combat-tuning` renamed
+> to its live `/combat-playtest` + `/deck-tuning` successors in
+> comments, a stale "2-die draft"/"hand refills to 6" magic number
+> replaced with the named constant), zero schema/engine/atlas changes,
+> zero new `kind:` literals. Re-ran every Step 1 signal fresh: (1)
+> carrier-count/orphan sweep — every `kind:` literal in
+> `CardSpecialMechanic`/`CardRider` (`src/Cards/types.ts`) against every
+> `case '...':` in `combat.cards.ts`'s `mechanicText` switch: 55/55
+> identical sets, zero silent `default:` arms, byte-identical to pass
+> 16's own count; cross-checked the `combat.engine.ts` mech switch too —
+> its `default:` arm (line ~3338) explicitly reads "guard/barrier/
+> riposte/echo/befriend etc. handled elsewhere," and traced each of
+> those 9 kinds (`guard`/`barrier`/`riposte`/`echo`/`convert_die_color`/
+> `bank_spent_die`/`refresh_die`/`strip_random_buff`/`befriend_attempt`)
+> to its real handler elsewhere in the file — deliberately excluded,
+> not silently inert; (2) `axio_keywords`'s live count (72 rows) matches
+> the atlas exactly; (3) semantic-overlap check — no new near-synonym
+> pairs; (4) `kb:` receipt backfill — no atlas row lost a receipt; (5)
+> `node --test scripts/content-drift.test.mjs`: 11/11 green, matching
+> pass 16 byte-for-byte. Spot-checked the REMOVE signal (keyword with
+> <3 carriers) on six of the registry's lower-population keywords via
+> `axio_cards` — TWIN (4 carriers), IMMOLATE (2), PURGE (5), OMEN (2),
+> FLAY (4), TICK (3) — all clear the ≥2 bar; no retirement candidate.
+>
+> **Step 1b widened KB cross-reference:** ran it regardless of the
+> zero-diff result per this tick's dispatch instructions. Three fresh
+> angles not used by passes 9/11/14/15/16 (which already covered
+> Chaos/Order/Balance, Stunned/Silenced, Weakness, Frozen): **Rally**
+> (`kb:dawncaster/keywords/rally.okf.md`, community, medium) — heal on
+> every enemy card play, decaying — same reactive-counter shape as our
+> own THORNS/DOOM but no concrete card idea or differentiated niche
+> proposed, so not filed. **Synergy** (`kb:dawncaster/keywords/
+> synergy.okf.md`) — triggers off a same-card-TYPE sequencing (melee/
+> magic/ranged/divine) our system doesn't carry as a taxonomy (we use
+> theme, not type); would need a new classification axis before any
+> card idea, filed nowhere. **Ward** (`kb:dawncaster/keywords/
+> ward.okf.md`, community, medium) — "Whenever you gain an Affliction,
+> prevent that Affliction and lower your Ward by 1 instead" — checked
+> against `src/Effects/index.ts`'s `applyEffect` (the sole application
+> point for every buff/debuff, player and enemy alike) directly: no
+> interception step exists before an effect stacks, and both effect
+> libraries (29 entries) have zero `prevent`/`immune`/`ward` payload
+> keys. Distinct from our own CLEANSE (removes an affliction already
+> held) and from `buff_invincibility`'s non-card `defenseModifier: 99`
+> (blocks DAMAGE, not affliction application) — a genuine, differently
+> -shaped gap. Filed as a candidate (below), not shipped: the fix is a
+> new interception hook on `applyEffect`'s shared, load-bearing path,
+> ordered against the existing resist roll — new engine wiring past
+> this steward's ship-small ceiling (THE GROWTH FLOOR ¶2).
+>
+> **Ship (Step 3):** none on the keyword surface itself — zero CREATE,
+> zero UPDATE, zero REMOVE (the three intervening commits were
+> comment-only). One candidate filed to `plan/PHASE_CANDIDATES.md`
+> (`[score 3.0] No card/effect pre-empts an incoming affliction`) per
+> THE GROWTH FLOOR's file-large path.
+>
+> **Gates:** `npm run verify --workspace axiomancer-mechanics` (231
+> files, 3746 tests + build green), `npm run verify --workspace
+> axiomancer-mobile` (lint/typecheck/jest/asset/critique-drive suites,
+> exit 0), `npm run type-check --workspace axiomancer-card-editor`
+> (clean), and `npm test` (root, 208 tests incl. `content-drift.test.mjs`
+> 11/11) all green.
+```
+
+
 
 Newest first. One entry per `/adjust-*` tick:
 
