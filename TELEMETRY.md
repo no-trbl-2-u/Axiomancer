@@ -650,3 +650,5 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-23T15:26:39Z | slash-prompt | /oversight | - | - | /oversight |
 | 2026-09-23T15:26:43Z | skill | oversight | - | - | - |
 | 2026-09-23T15:26:43Z | skill-end | oversight | claude-sonnet-5 | 0s | ok |
+| 2026-09-23T15:48:21Z | skill | world-spec | claude-sonnet-5 | - | args: Phase 84 — The Capital. Context: Phase 84 (plan/steps/01_build_plan.md, currently [b |
+| 2026-09-23T15:48:21Z | skill-end | world-spec | claude-sonnet-5 | 0s | ok |
