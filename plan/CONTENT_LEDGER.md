@@ -14,13 +14,13 @@
 | cards | `skills/adjust-cards.md` | 2026-09-23 | 68769014 | 17 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-23 | 9a162fc8 | 17 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-23 | 96f73da3 | 17 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-23 | <PENDING> | 17 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-23 | 71648d3a | 17 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-23 | 2789a2af | 16 |
 
 ## Log
 
 ```
-> **[adjust-keywords pass 17, 2026-09-23, commit <PENDING>]** Zero-CREATE,
+> **[adjust-keywords pass 17, 2026-09-23, commit 71648d3a]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — one candidate filed. Dispatched
 > autonomously by `/march`'s content-lifecycle gate (Step 3b): all five
 > content-lifecycle categories qualified (each past the 15-commit-since
