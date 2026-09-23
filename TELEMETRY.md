@@ -664,3 +664,9 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-23T15:31:08Z | subagent | general-purpose | claude-fable-5-1 | - | Audit scripts and hooks comments |
 | 2026-09-23T15:31:09Z | subagent-end | general-purpose | claude-fable-5-1 | 1s | ok |
 | 2026-09-23T15:31:12Z | tick-end | - | claude-fable-5-1 | 3m36s | ok |
+| 2026-09-23T16:26:56Z | subagent | general-purpose | claude-fable-5-1 | - | Apply loop/harness doc decisions |
+| 2026-09-23T16:26:58Z | subagent-end | general-purpose | claude-fable-5-1 | 1s | ok |
+| 2026-09-23T16:27:19Z | subagent | general-purpose | claude-fable-5-1 | - | Apply mechanics doc decisions |
+| 2026-09-23T16:27:20Z | subagent-end | general-purpose | claude-fable-5-1 | 1s | ok |
+| 2026-09-23T16:27:33Z | subagent | general-purpose | claude-fable-5-1 | - | Apply mobile doc decisions |
+| 2026-09-23T16:27:34Z | subagent-end | general-purpose | claude-fable-5-1 | 1s | ok |
