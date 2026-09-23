@@ -13,7 +13,7 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-23 | 68769014 | 17 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-23 | 9a162fc8 | 17 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-23 | <PENDING> | 17 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-23 | 96f73da3 | 17 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-23 | 06d2ab2e | 16 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-23 | 2789a2af | 16 |
 
@@ -22,7 +22,7 @@
 Newest first. One entry per `/adjust-*` tick:
 
 ```
-> **[adjust-enemies pass 17, 2026-09-23, commit <PENDING>]**
+> **[adjust-enemies pass 17, 2026-09-23, commit 96f73da3]**
 > One-UPDATE pass — dispatched autonomously by `/march`'s content-lifecycle
 > gate: `enemies` (`d02bda13` 2026-09-23T01:22:46Z, 21 commits behind HEAD
 > `2ea854e3` 2026-09-23T16:34:58Z) was the stalest qualifying category —
