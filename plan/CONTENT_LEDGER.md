@@ -12,7 +12,7 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-23 | 68769014 | 17 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-21 | 5d9b6063 | 16 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-23 | <PENDING> | 17 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-23 | d02bda13 | 16 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-23 | 06d2ab2e | 16 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-23 | 2789a2af | 16 |
@@ -20,6 +20,58 @@
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-equipment pass 17, 2026-09-23, commit <PENDING>]**
+> Zero-CREATE, zero-UPDATE, zero-REMOVE pass — dispatched autonomously
+> by `/march`'s content-lifecycle gate: `equipment` (`5d9b6063`
+> 2026-09-22T01:16:46Z, 40 commits behind HEAD `768484ae`
+> 2026-09-23T07:01:34Z) was the sole qualifying category this tick
+> (past the 15-commit threshold by a wide margin); `cards` (`68769014`,
+> 1 commit), `enemies` (`d02bda13`, 7 commits), `keywords`
+> (`06d2ab2e`, 5 commits) and `npcs` (`2789a2af`, 3 commits) had all
+> ticked within the last day and did not qualify. Deploy confirmed
+> green (`npm run deploy:check`: no gated workflow for HEAD yet within
+> the grace window, docs/plan-only tick); no phase work pending.
+>
+> **Step 1 audit — fresh, not re-cited:** slot coverage (2 weapons, 2
+> armor, 7 accessories, all 6 `AccessoryKind`s live), dominance (no
+> same-slot pair strictly worse on every `statModifiers` value — every
+> tie differs only by `grantsSignature`), signature drift (all 11
+> `grantsSignature` values resolve live in `SignatureSkillId` and in
+> `combat.signature.ts`'s roster), consumable `effectId` resolution
+> (all 22 resolve in `buffs.library.json`/`debuffs.library.json`), and
+> shop/reward reachability (all 22 consumables occur in >=1 shop ware
+> block or `enemy.library.ts` loot table) all re-derived clean,
+> byte-identical to pass 16's own findings. Checked every shop pool
+> and every enemy loot table for a shared-`effectId` pair co-occurring
+> in the same pool (the pass-11/14/15 bug class) — `focus-vial`/
+> `hunters-elixir` (both `buff_accuracy_up`) and `berserker-brew`/
+> `quicksilver-vial` (both `buff_haste`) are the only same-effect
+> pairs in the library, and neither pair ever co-occurs in one shop or
+> loot table (confirmed by grep over every `content.ts` shop block and
+> every `enemy.library.ts` loot row), so neither is the pass-11/14/15
+> visible-duplication bug — pass 15's own conclusion on the haste trio
+> re-confirmed, not re-opened. A genuine zero-diff pass on the data
+> itself, so the Step 1b widened KB check ran.
+>
+> **Step 1b widened KB check:** `kb_find_games`/`kb_search` confirm
+> the boardgame corpus's mechanics vocabulary has no `equipment`/
+> `itemization` tag to check against; `kb_cards`/`kb_keyword` confirm
+> Dawncaster has no `relic`/`trinket`/`artifact`/`equip` card type —
+> the corpus's closest equipment analogue was already exhausted by
+> pass 16 (Durability/re-enable procs, both retired mechanics per
+> `docs/equipment.md` phases 18-23; Slay-the-Spire's found-not-started
+> relic-acquisition model, already logged as a deliberate deferral).
+> Re-running those same two searches this pass reproduced the same
+> dead ends rather than a new angle — no new corpus gap to file. The
+> already-filed "always-good secondary" consumable lever
+> (`plan/PHASE_CANDIDATES.md`) is unshipped residue from pass 13, out
+> of this tick's own findings, not re-filed.
+>
+> Verify: green (mechanics + mobile, both re-run clean). Commit only
+> the ledger bump — no code diff this pass.
+```
 
 ```
 > **[adjust-cards pass 17, 2026-09-23, commit 68769014]** Zero-CREATE,
