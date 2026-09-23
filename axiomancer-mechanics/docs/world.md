@@ -111,9 +111,10 @@ player-side helpers under `Effects/`:
 The current dispatcher is `resolveMapEvent(state, rng?)` from
 `src/World/MapEvents/resolve-map-event.ts`, shipped in Spec 23 and
 populated with content in Phase 24. It returns `{ state, event }`
-where `event` is a discriminated union over the ten `MapEventKind`
+where `event` is a discriminated union over the eleven `MapEventKind`
 values ('quest' joined the original eight in Phase 137 and was retired
-in Phase 61; 'narration' joined in 2026-06):
+in Phase 61; 'narration' joined in 2026-06, 'blacksmith' and 'travel'
+later in 2026-08):
 
 | Event kind     | Result shape                                                              |
 |----------------|---------------------------------------------------------------------------|
@@ -219,7 +220,7 @@ can:
 - Be hidden until a gate passes (`requires.quest`, `requires.flag`,
   `requires.questCompleted`).
 - Fire a side effect when picked (`effect.startQuest`, `progressQuest`,
-  `completeQuest`, `teachSkill`, `setFlag`, `grantCurrency`).
+  `completeQuest`, `teachCard`, `setFlag`, `grantCurrency`).
 
 `applyDialogueChoice(gameState, tree, choice) → { gameState, nextNode, effects }`
 applies the side effect, advances the cursor, and returns the next node
@@ -328,8 +329,9 @@ Phase 23 introduced the **MapEvents** node-event surface. Phase 25
 removed the bespoke `processNode` predecessor; MapEvents is now the
 only node-event dispatcher.
 
-- **Taxonomy.** Eight kinds: `encounter`, `interaction`, `gathering`,
-  `rest`, `village`, `cutscene`, `hazard`, `loot-cache`. The old
+- **Taxonomy.** Eleven kinds: `encounter`, `interaction`, `gathering`,
+  `rest`, `village`, `cutscene`, `hazard`, `loot-cache`, `narration`,
+  `blacksmith`, `travel`. The old
   `npc`/`shop` kinds are folded into `interaction` and `village`.
 - **Pool authoring.** Events are not authored per node; they're rolled
   from a **weighted pool** at the moment a node is entered. Pools live

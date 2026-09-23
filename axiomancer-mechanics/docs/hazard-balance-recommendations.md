@@ -11,7 +11,7 @@ hazard (no automatic re-casts), Safe = combined meter, Risk = dual BOTH-required
 meters, 3 rounds, persistent hand with draw-up-to-5, trash-bin salvage, tiered
 Perfect/Complete/Failure outcomes, pick-1-of-3 card rewards, reserve bonus, and
 consequence ladder by rounds lost. Tuning evidence: greedy-bot Monte-Carlo in
-`src/World/Hazard/__tests__/balance.sim.test.ts` (300 seeded runs per hazard/route
+`src/World/Hazard/e2e/hazard.balance.sim.test.ts` (300 seeded runs per hazard/route
 cell; guard bands currently enforce Safe ≥90% at-least-one-win / ≤8% failure and
 Risk 75–98% at-least-one-win / 3–25% failure).
 

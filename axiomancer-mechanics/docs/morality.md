@@ -87,7 +87,7 @@ The default friendship trigger (Phase 36) is `friendshipCounter >= 3`
 round increments the counter. Phase 68 added a per-enemy override:
 when the befriended enemy carries `Enemy.befriendabilityConfig`, the
 trigger is the AND-composed predicate set (`roundsThreshold` /
-`hpGate` / `requiredStances` / `requiredSkillUse`), not the global
+`hpGate` / `requiredStances` / `requiredCardUse`), not the global
 counter cap. The +1 moralMeter shift fires the same way regardless of
 which trigger path resolved — `outcome === 'friendship'` is the only
 condition this module reads. See `docs/combat.md` § "Friendship Path"

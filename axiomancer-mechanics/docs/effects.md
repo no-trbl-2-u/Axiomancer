@@ -137,7 +137,7 @@ authored intensity + duration.
 | Mode        | Behaviour                                                                                                  |
 |-------------|-------------------------------------------------------------------------------------------------------------|
 | `none`      | Strongest instance wins. Equal or weaker re-application is ignored. Duration is **not** refreshed.          |
-| `intensity` | `intensity` increments by `intensityDelta` each application (capped at `MAX_EFFECT_INTENSITY = 10`). Duration resets or extends additively per `ApplyEffectOptions`. |
+| `intensity` | `intensity` increments by `intensityDelta` each application (capped at `MAX_EFFECT_INTENSITY = 30`). Duration resets or extends additively per `ApplyEffectOptions`. |
 | `duration`  | `remainingDuration` extends by `effect.duration` on reapply (capped at `MAX_EFFECT_DURATION = 10`).         |
 
 `ApplyEffectOptions` (used by Tier 1 system):

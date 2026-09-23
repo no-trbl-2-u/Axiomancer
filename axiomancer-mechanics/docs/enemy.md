@@ -7,7 +7,7 @@
 
 ## Type Shape
 
-Defined in [`src/Enemy/types.d.ts`](../src/Enemy/types.d.ts).
+Defined in [`src/Enemy/types.ts`](../src/Enemy/types.ts).
 
 | Field | Type | Purpose |
 |-------|------|---------|

@@ -72,7 +72,7 @@ unchanged, but the absolute semver guarantee starts at 1.0.
 - `gameReducer()` — Stable.
 - `GameState`, `GameAction`, `GameActions` types — Stable.
 - Event emitter (`createEventEmitter`) — Stable.
-- Selectors (`selectPlayer`, `selectCombat`, `selectInventory`,
+- Selectors (`selectPlayer`, `selectIsInCombat`, `selectInventory`,
   `selectMoralMeter`, etc.) — Stable.
 - `PersistenceAdapter` interface — Stable. (The concrete
   `createNodeAdapter` lives on the `./node` subpath only — see Node.js
@@ -142,11 +142,10 @@ Codex tab (renders `state.codex.unlockedEntries` via enemy library
 lookup) and Begin Again tab (`store.resetRun({ keepCharacter })`).
 Agent-graded walkthrough at `automation/scripts/walkthroughs/codex-unlock.*`.
 
-**Per-module quickstart pages (Phase 87).** Five focused guides with
+**Per-module quickstart pages (Phase 87).** Four focused guides with
 runnable code samples: [`quickstart-character.md`](./quickstart-character.md),
 [`quickstart-combat.md`](./quickstart-combat.md),
 [`quickstart-items.md`](./quickstart-items.md),
-`quickstart-cards.md`,
 [`quickstart-world.md`](./quickstart-world.md).
 
 ### Events (Beta)
@@ -158,11 +157,11 @@ interface EnginePayload {
     action: GameAction;                  // what triggered the event
     state: GameState;                    // the post-reducer state
     report?: CombatEndReport;            // only on combat:ended
-    unlockedSkills?: string[];           // only on character:levelup (Phase 30)
+    unlockedCards?: string[];            // only on character:levelup (Phase 30)
 }
 ```
 
-`unlockedSkills` (Phase 30 unit 2) lists card ids newly eligible to
+`unlockedCards` (Phase 30 unit 2) lists card ids newly eligible to
 learn after a level promotion crossed a tier-eligibility threshold. An
 empty array means the levelup didn't unlock anything new; the field is
 absent on every other topic.
@@ -292,19 +291,18 @@ cell has shifted. See `docs/npcs.md` § "Reactive NPCs — alignment
 observers (Phase 63)" for the consumer-side API.
 
 `TypedGameEvent<T>` narrows the event by topic; `payload` is always
-the engine envelope above. Per-topic aliases ship for all 10
+the engine envelope above. Per-topic aliases ship for all 9
 `GameEventType` values:
 
-- `TypedCombatStartedEvent`, `TypedCombatRoundEvent`,
-  `TypedCombatEndedEvent`
+- `TypedCombatStartedEvent`, `TypedCombatEndedEvent`
 - `TypedWorldMovedEvent`, `TypedWorldProcessedEvent`
 - `TypedLevelUpEvent`, `TypedInventoryChangedEvent`
 - `TypedDialogueAppliedEvent`, `TypedGameSavedEvent`,
   `TypedGameLoadedEvent`
 
-And 10 type guards for filter / find style narrowing:
+And 9 type guards for filter / find style narrowing:
 
-- `isCombatStartedEvent`, `isCombatRoundEvent`, `isCombatEndedEvent`
+- `isCombatStartedEvent`, `isCombatEndedEvent`
 - `isWorldMovedEvent`, `isWorldProcessedEvent`
 - `isLevelUpEvent`, `isInventoryChangedEvent`
 - `isDialogueAppliedEvent`, `isGameSavedEvent`, `isGameLoadedEvent`
@@ -457,9 +455,10 @@ reality.
 ### MapEvents (Phase 23 / 24) — Beta
 
 The MapEvents engine resolves what happens when the player enters a
-node. Eight event kinds (`encounter`, `interaction`, `gathering`,
-`rest`, `village`, `cutscene`, `hazard`, `loot-cache`) plus a
-fog-of-war discovery / one-shot consumption model.
+node. Eleven event kinds (`encounter`, `interaction`, `gathering`,
+`rest`, `village`, `cutscene`, `hazard`, `loot-cache`, `narration`,
+`blacksmith`, `travel`) plus a fog-of-war discovery / one-shot
+consumption model.
 
 - `resolveMapEvent(state, rng?)` — Beta. Single-entry dispatcher.
 - Pool registration helpers — Beta:

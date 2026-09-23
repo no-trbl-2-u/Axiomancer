@@ -8,7 +8,7 @@
 
 ## Type Shape
 
-Defined in [`src/NPCs/types.d.ts`](../src/NPCs/types.d.ts).
+Defined in [`src/NPCs/types.ts`](../src/NPCs/types.ts).
 
 ```ts
 interface NPC {
@@ -48,7 +48,7 @@ interface DialogueChoice {
         startQuest?: QuestName;
         progressQuest?: { name: QuestName; objectiveId: string; amount?: number };
         completeQuest?: QuestName;
-        teachSkill?: string;
+        teachCard?: string;
         setFlag?: string;
         grantCurrency?: number;
         moralDelta?: number;        // Phase 14: direct moral-meter shift, clamped [-100, +100]
@@ -121,7 +121,7 @@ import { applyDialogueChoice } from 'axiomancer-mechanics';
 
 `applyDialogueChoice` reads the current map's `MapDefinition.quests` to
 resolve a quest by name, then routes the choice's `effect` payload through
-the quest engine (start / progress / complete), the player's `knownSkills`
+the quest engine (start / progress / complete), the player's `knownCards`
 (teach), `gameState.flags` (set flag), `player.currency` (grant currency),
 and `gameState.moralMeter` (`moralDelta`, clamped to `[-100, +100]`).
 It returns the next dialogue node (or `null` when the conversation ends)

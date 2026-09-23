@@ -41,13 +41,13 @@ Examples of e2e entry points by module:
 | Module           | Hermetic e2e entry point                                                             |
 | ---------------- | ------------------------------------------------------------------------------------- |
 | `Combat`         | The Hazard-Pattern engine transitions (`initializeCombatEncounter` / `playCombatCard` / `resolveThreatPhase` in `Combat/combat.engine.ts`) + the `createGameStore` lifecycle |
-| `Effects`        | `applyEffect` / `applyTier1CombatEffect` / `tickAllEffects` driving an effect to expiry; Phase 88 coverage sweep: `stat-band-effects.engine.test.ts`, `advantage-effects.engine.test.ts`, `control-effects.engine.test.ts`, `damage-variants.engine.test.ts` |
+| `Effects`        | `applyEffect` / `applyTier1CombatEffect` / `tickAllEffects` driving an effect to expiry; Phase 88 coverage sweep: `stat-band-effects.engine.test.ts`, `advantage-effects.engine.test.ts` |
 | `Enemy`          | `createEnemy` + AI / strategy assertions in `enemy.engine.test.ts`; per-enemy content pins in `alignment.engine.test.ts` (Phase 45), `befriendability-config.engine.test.ts` (Phase 68), `aftermath-lines.engine.test.ts` (Phase 71) |
 | `Game`           | `createGameStore(nullAdapter, …)` driven through `startCombat` / `updateCombat` / `endCombat`; run-loop semantics in `run-loop.engine.test.ts` (Phase 72); codex unlocks in `codex.engine.test.ts` (Phase 73) |
 | `World`          | World reducer chained through map → node → continent transitions                      |
 | `Items`          | Item reducer chained through `addItem` → `useConsumable` → `removeItem`               |
 | `Character`      | `createCharacter` → `deriveStats` → `calculateMaxHealth` round-trip                   |
-| `Cards`         | `executeSkill` driving a SkillLookup against the live `skillLibrary`; `learnSkill` / `getAvailableSkills` for the Phase 30 runtime path; `fallacy-cards.engine.test.ts` (Phase 88), `phase83-card-coverage.engine.test.ts` (Phase 83) |
+| `Cards`         | `executeCard` driving a card against the live `cardLibrary`; `learnCard` / `getAvailableCards` for the Phase 30 runtime path (`learning.engine.test.ts`) |
 | `NPCs`           | `getDialogueNode` + `visibleChoices` walking a `DialogueTree`; `applyDialogueChoice` through the Game store |
 | `CLI`            | `parseArgv`, `logState`, `setStateLogPath`, `prompt` (script mode) in `src/CLI/e2e/io.engine.test.ts` — covers the Phase 20 scripted surface |
 
@@ -92,7 +92,7 @@ outcome.
 **Phase 81 catalog expansion (2026-05-24).** Three new walkthroughs
 ship for Phase 65 / 80 / 68 coverage: `fishing-village-exploration`
 (Apprentice Harbor District traversal → MournfulGull encounter at
-fv-15, Phase 60 befriendable placement), `tier2-card-chain`
+fv-15, Phase 60 befriendable placement), `tier2-skill-chain`
 (Wanderer casts Tier 2 `eternal-regress` two-effect compound under
 the **Phase 80 always-land contract**; closes one of Phase 78's MED
 zero-coverage primitives at the player-experience tier), and
@@ -103,7 +103,7 @@ walkthrough originally scoped for Phase 81 pivoted per brief D2 (the
 5 synergy cards aren't in any preset's `knownSkills`).
 
 **Phase 120 (2026-06-05).** Ships the deferred Phase 66 synergy
-walkthrough: `synergy-cards-chain`. Wanderer preset extended to
+walkthrough: `synergy-skills-chain`. Wanderer preset extended to
 include all 5 Phase 66 synergy cards; walkthrough exercises
 `resonance-burst` synergy firing by first casting `eternal-regress`
 (applies `debuff_confusion`) then casting `resonance-burst` (synergizes

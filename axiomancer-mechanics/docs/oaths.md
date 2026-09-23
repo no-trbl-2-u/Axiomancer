@@ -78,8 +78,9 @@ State + reducer:
 - Store action `shiftPhilosophicalAlignment(delta)` mirrors
   `shiftMoralMeter(delta, gating?)`.
 
-Save migration: `migrateV4toV5` defaults the field to `{0, 0, 0}` on
-legacy saves (`src/Game/game.migrate.ts`).
+Save migration: the original `migrateV4toV5` step (defaulting the field
+to `{0, 0, 0}`) has since been retired — the ladder in
+`src/Game/game.migrate.ts` now starts at v11 and refuses older saves.
 
 ## The 27 cells
 

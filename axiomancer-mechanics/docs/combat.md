@@ -290,7 +290,7 @@ existential (at least one element).
 | `roundsThreshold?: number` | Per-enemy override of `FRIENDSHIP_COUNTER_MAX`. Defaults to the global value (3) when absent on a config that sets other fields. |
 | `hpGate?: { belowPct: number }` | Enemy HP fraction must be ≤ `belowPct` at the eligibility check. Pure snapshot — healing back above the threshold un-qualifies. Range [0, 1]. |
 | `requiredStances?: Stance[]` | Player must have used at least one of the named stances during combat (existential). Derived from `state.log[].playerAction.stance`. Empty array = no requirement. |
-| `requiredSkillUse?: string[]` | Player must have cast at least one of the named card IDs during combat (existential). Derived from `state.log[].playerAction` entries with `action === 'card'`. Empty array = no requirement. |
+| `requiredCardUse?: string[]` | Player must have cast at least one of the named card IDs during combat (existential). Derived from `state.log[].playerAction` entries with `action === 'card'`. Empty array = no requirement. |
 | `defaultFallback?: 'both-defend-cap'` | Explicit "fall through to Phase 36". When set, other fields are ignored for THIS enemy; eligibility uses the global counter cap exactly. |
 
 The engine helper that evaluates the predicate lives in
@@ -444,7 +444,7 @@ with the legacy driver.)
 | `Advantage` | `'advantage' \| 'neutral' \| 'disadvantage'` — RPS matchup outcome |
 | `CritStyle` | `'double' \| 'pierce'` — Phase 32 auto-selected crit variant |
 | `CombatAction` | `{ stance: Stance; action: Action }` — the combined stance + action choice for one side of a round |
-| `CombatPhase` | `'choosing_stance' \| 'choosing_action' \| 'choosing_skill' \| 'mercy_choice' \| 'resolving' \| 'ended'` — the state-machine phase of a turn-based combat encounter |
+| `CombatPhase` | `'choosing_stance' \| 'choosing_action' \| 'mercy_choice' \| 'resolving' \| 'ended'` — the state-machine phase of a turn-based combat encounter |
 | `AggregatedEffectModifiers` | Summed numeric modifiers from all active effects; consumed by `getEffectiveStats` |
 | `EffectiveStats` | `{ baseStats, derivedStats, nonCombatStats, defenseDelta }` — combatant stats after all active-effect modifiers are applied; produced by `getEffectiveStats` |
 | `DamageType` | `'physical' \| 'mental' \| 'emotional'` — damage category used by resistance calculations |
@@ -527,7 +527,7 @@ The canonical design record for the current library is
 language, the enemy model) alongside
 [`specs/25-hazard-pattern-combat.md`](../specs/25-hazard-pattern-combat.md) for
 the underlying engine loop. `specs/32-no-strike-card-library.md` is HISTORICAL.
-`src/Cards/cards.types.ts` / `card-trigger.engine.ts` carry the most complete
+`src/Cards/types.ts` / `card.engine.ts` carry the most complete
 design rationale for the separate Cards system.
 
 ## Hazard-Pattern Combat (Spec 25)
