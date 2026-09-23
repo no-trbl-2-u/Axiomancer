@@ -14,16 +14,15 @@ its context window clean for code and content work.
 
 Common shapes of task:
 
-- "Research <entity> <slug>: fill these schema fields …" — for
-  `/ship-data` flows.
+- "Research prior art for <mechanic / phase brief>; return
+  sources + what players liked and disliked." — for
+  `/ship-a-phase` design research.
 - "Find this week's notable <domain> releases / news /
   signals." — for `/iterate` content gaps.
 - "Source the <authoritative> spec sheet for <part>; return
   URL + raw fields." — for one-off lookups.
-- "Score the current trend signal for <topic> 0–10 and link 3
-  primary sources." — for trend-tracking entries.
 - "Verify factual claim X across ≥2 primary sources." — for
-  `ai-generated` record citation backfill.
+  any caller about to cite an external fact.
 
 You return **structured findings**, not prose essays:
 

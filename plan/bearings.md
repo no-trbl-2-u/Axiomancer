@@ -702,9 +702,13 @@ ambiguity.)
   function (CQI, spec 35) on 2026-08-08 — combat readings now judge
   against CQI, not the dead status-dominance law.** Still live for the
   minigames:
-  Gathering greed < restraint <
-  skill; Loot-cache informed > blind > coward; Quest Board
-  naive-finishes / deliberate-finishes-well; ~~Rest
+  ~~Gathering greed < restraint <
+  skill~~ — **VOID, Phase 76 retired the Gathering minigame**;
+  ~~Loot-cache informed > blind > coward~~ — **VOID, Phase 63
+  retired the Pick Pool minigame (the loot cache is a three-way
+  one-shot choice now)**; ~~Quest Board
+  naive-finishes / deliberate-finishes-well~~ — **VOID, Phase 61
+  retired the Quest Board minigame**; ~~Rest
   meagre-but-never-lethal (posture gradient)~~ — **VOID, Phase 52e
   retired the minigame (the rest-choice node replacing it is a
   one-shot player pick, not a tuned balance curve)**; Hazard -> CDR-0006
