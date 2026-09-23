@@ -23,6 +23,8 @@ into a "completed" header. New assets can be dropped into
 
 ## Current state
 
+> **Superseded (2026-09-23):** "no real assets" is no longer true; `assets/images/` now holds per-category registries (`cards`, `combat`, `enemies`, `labyrinth`, `maps`, `portraits`, `screens`, `splatter`, `treasure`, each with an `index.ts`) backed by shipped raster art — live truth: `assets/images/*/index.ts`. Body kept as a historical record pending rewrite (plan/AUDIT.md).
+
 - `SVG_ASSET_SPEC.md` enumerates 12+ asset categories with exact
   dimensions and contract.
 - No real assets are in `assets/images/` (only the Expo template

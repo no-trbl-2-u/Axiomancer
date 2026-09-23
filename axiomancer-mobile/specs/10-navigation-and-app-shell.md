@@ -18,6 +18,8 @@ on cold start to the right screen.
 
 ## Current state
 
+> **Superseded (2026-09-23):** the inventory below describes the five-tab shell (with `event` as a tab) that predates the current app; there are now six tab keys (`exploration`, `combat`, `character`, `memoir`, `inventory`, `deck`) and `combat` / `exploration` swap visibility depending on whether a combat is live, while `event` is a stack route, not a tab — live truth: `state/presenters/tabs.engine.ts` (`TabKey`, `TAB_TITLES`, `selectVisibleTabs`) and `app/(tabs)/_layout.tsx`. Body kept as a historical record pending rewrite (plan/AUDIT.md).
+
 - `app/_layout.tsx` is the root Stack, mounting `(tabs)` and
   `index.tsx` (which redirects to exploration).
 - `app/(tabs)/_layout.tsx` is the Tabs layout with five screens, each

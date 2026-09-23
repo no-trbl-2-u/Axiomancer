@@ -32,8 +32,9 @@ ship.
 2. Is it medium (a system, multiple files, multiple decisions)? Write
    a new spec in this folder using the template below. Add it to the
    `specs/README.md` table.
-3. Is it big (whole new phase / new screen)? Update `GAME-ROADMAP.md`
-   first, then write one spec per workable chunk.
+3. Is it big (whole new phase / new screen)? Update the root
+   `plan/steps/01_build_plan.md` (phase queue) first, then write one
+   spec per workable chunk.
 
 ---
 

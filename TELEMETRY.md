@@ -670,3 +670,4 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-23T16:27:20Z | subagent-end | general-purpose | claude-fable-5-1 | 1s | ok |
 | 2026-09-23T16:27:33Z | subagent | general-purpose | claude-fable-5-1 | - | Apply mobile doc decisions |
 | 2026-09-23T16:27:34Z | subagent-end | general-purpose | claude-fable-5-1 | 1s | ok |
+| 2026-09-23T16:28:07Z | tick-end | - | claude-fable-5-1 | 1m53s | ok |

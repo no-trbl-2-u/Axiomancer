@@ -2,6 +2,8 @@
 
 > How `axiomancer-mechanics` connects to mobile UI patterns
 
+> **Superseded (2026-09-23):** the illustrative code below (`selectCombatViewModel` reading `state.combat`, `actions.selectStance` / `actions.resolveCombatRound`, the `choosing_stance` phase loop) predates Hazard-Pattern combat; the legacy turn-based combat driver was removed in mechanics 0.37.0, `selectStance` / `resolveCombatRound` no longer exist, and `state.combat` stays `null` during a live encounter (the engine keeps `CombatState` only as a shim for `executeCard`). The architectural principles (presenter boundary, engine truth, no parallel rules) still hold — live truth: `docs/combat.md` + `state/presenters/combat-encounter.engine.ts`. Body kept as a historical record pending rewrite (plan/AUDIT.md).
+
 This document explains the architectural bridge between the `axiomancer-mechanics` engine (a sibling workspace consumed as local source via the `@mechanics` alias) and mobile-specific UI concerns. Newcomers should read this alongside [`docs/presenters.md`](./presenters.md) and [`docs/adr/ADR-0001-engine-truth-and-presenter-boundary.md`](./adr/ADR-0001-engine-truth-and-presenter-boundary.md).
 
 ## Overview — The Translation Layer

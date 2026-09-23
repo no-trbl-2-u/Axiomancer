@@ -23,6 +23,8 @@ passes a manual VoiceOver / TalkBack audit.
 
 ## Current state
 
+> **Superseded (2026-09-23):** the inventory below is stale; `accessibilityLabel` is now used across `components/` and `app/`, `theme/axm.ts` carries a `TYPE` scale and a `SPACING` scale alongside the palette and fonts, a theme picker (`<ThemeSwitcher>`) ships on the `app/settings` screen, and haptics run through `react-native-haptic-feedback` via `lib/platform/haptics.ts` (`expo-haptics` is not a dependency) — live truth: `theme/axm.ts`, `theme/runtime.tsx`, `lib/platform/haptics.ts`, `package.json`. Body kept as a historical record pending rewrite (plan/AUDIT.md).
+
 - No `accessibilityLabel` / `accessibilityRole` props in the screens.
 - Reanimated is installed but used only in components that auto-
   respect reduce-motion via Reanimated's defaults — not yet
