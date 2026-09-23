@@ -635,3 +635,5 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-23T04:35:34Z | slash-prompt | /march | - | - | /march |
 | 2026-09-23T04:38:35Z | skill | adjust-npcs | claude-sonnet-5 | - | - |
 | 2026-09-23T04:38:35Z | skill-end | adjust-npcs | claude-sonnet-5 | 0s | ok |
+| 2026-09-23T06:47:35Z | slash-prompt | /march | - | - | /march |
+| 2026-09-23T06:51:36Z | subagent | card-expert | claude-sonnet-5 | - | Run adjust-cards steward tick |

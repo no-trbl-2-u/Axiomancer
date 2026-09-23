@@ -11,7 +11,7 @@
 
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
-| cards | `skills/adjust-cards.md` | 2026-09-21 | 2a162f5e | 16 |
+| cards | `skills/adjust-cards.md` | 2026-09-23 | <PENDING> | 17 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-21 | 5d9b6063 | 16 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-23 | d02bda13 | 16 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-23 | 06d2ab2e | 16 |
@@ -20,6 +20,90 @@
 ## Log
 
 Newest first. One entry per `/adjust-*` tick:
+
+```
+> **[adjust-cards pass 17, 2026-09-23, commit <PENDING>]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE on the card surface itself — one candidate
+> filed to `plan/PHASE_CANDIDATES.md` from the widened KB check.
+> Dispatched autonomously by `/march`'s content-lifecycle gate: `cards`
+> (`2a162f5e` 2026-09-21T22:39:41Z, 40 commits behind HEAD
+> `f3c38a4f` 2026-09-23T04:45:43Z) was the stalest qualifying category
+> this tick by both commit-count and last-pass timestamp; `equipment`
+> (`5d9b6063` 2026-09-22T01:16:46Z, 38 commits) also qualified on
+> commit count but was less stale; `enemies` (`d02bda13`, 5 commits),
+> `keywords` (`06d2ab2e`, 3 commits) and `npcs` (`2789a2af`, 1 commit)
+> had all just ticked this same session and did not qualify. Deploy
+> confirmed green (per the dispatching `/march` tick); no phase work
+> pending.
+>
+> **Step 0:** read `axiomancer-mechanics/CLAUDE.md` (THE BIG NUMBERS
+> REWRITE, load-bearing — no CQI/rank-band/win-rate-curve/count-pin
+> grading) and `plan/bearings.md` LOCKED MECHANICS fresh; no doctrine
+> change landed in the 40-commit window.
+>
+> **Step 1 audit — fresh, not re-cited:** `git log 2a162f5e..HEAD` over
+> the card-authoring surfaces (`src/Cards/**`,
+> `combat.starter-deck-presets.ts`, `combat.deck-draft.ts`,
+> `combat.engine.ts`, `combat.cards.ts`) of the 40 intervening commits
+> returns exactly one touch: `4fcb6f2f` ("combat: project card text in
+> the engine so the detail panel stops re-deriving it") — read the
+> diff directly rather than trusting the one-line summary: it exports
+> the already-private `REGISTRY_DOT_IDS` constant for a new mobile-side
+> pure projection module to consume; zero card ids/text/pricing/mechanic
+> touched. `axio_overview` confirms the library unchanged at 134 cards
+> across 8 themes (grey 2, debt 20, trial 24, rot 19, choir 21, vigil
+> 21, curse 5, grave 22). Re-ran the full card-surface e2e trio fresh:
+> `pricing.engine.test.ts` 263/263, `curated-library.engine.test.ts`
+> 14/14 (FREE-line + reachability), `deck-presets.engine.test.ts` 9/9
+> (aspect-thirds) — all green, byte-identical counts to pass 16's own
+> citation. Also read `src/Cards/card-upgrades.ts`'s
+> `upgradeMechanicDefault` switch end to end against the full 52-kind
+> `CardSpecialMechanic` union in `types.ts`: exhaustive, no `default:`
+> arm, every kind either raises a real number or is explicitly listed
+> as cost/gate/divisor-only — a genuine audit pass, not a re-cite, and
+> it came back clean.
+>
+> **Step 1b widened audit:** Step 1 returned nothing actionable, so ran
+> the KB cross-reference before accepting zero-diff, on an angle not
+> used by any prior `/adjust-cards` pass (prior angles: curse
+> proportion, Dawncaster keywords.csv functions sweep, StS curse
+> deep-dive, starting-deck-size genre comparison, direct-damage prior
+> art, alt-win/mercy prior art, Stunned/Silenced/Weakness/Frozen
+> keyword checks). Queried `kb_cards game=slay-the-spire "upgrade"`:
+> `kb:slay-the-spire/cards/0015-armaments-armaments` ("Gain 5 Block.
+> Upgrade a card in your hand for the rest of combat"),
+> `kb:slay-the-spire/cards/0013-apotheosis-apotheosis` ("Upgrade ALL
+> your cards for the rest of combat. Exhaust"), and
+> `kb:slay-the-spire/cards/0202-lesson-learned-lessonlearned` ("If
+> Fatal, Upgrade a random card in your deck. Exhaust") — a genre-staple
+> niche (a card granting an upgrade as a COMBAT EFFECT, temporary or
+> permanent) that Axiomancer's own `+`-card system
+> (`src/Cards/card-upgrades.ts`) has never wired: it is meta-progression
+> only (an authored patch or the default rule, applied between runs),
+> with no `CardSpecialMechanic` kind that lets a card trigger it
+> mid-fight. Confirmed genuinely absent, not a near-synonym, via the
+> full 52-kind sweep already run in Step 1 plus a library-wide
+> `axio_cards`/grep check — no card or keyword-atlas row references any
+> such verb. Sized against Step 3's ship-small/file-large rule: a
+> card-triggered upgrade needs a new `CardSpecialMechanic` kind, a
+> targeting model, a combat-engine hook, and (for the StS
+> this-fight-only flavor) a REVERT-at-combat-end transient-state shape
+> the engine has never carried — new engine wiring plus a new keyword,
+> past this steward's 3-item ship-small ceiling. Filed as
+> `plan/PHASE_CANDIDATES.md` `[score 3.0]` "No card grants an
+> in-combat/temporary card upgrade — Slay the Spire's
+> Armaments/Apotheosis niche has no analogue" rather than built solo.
+>
+> **What shipped:** nothing on the card surface itself — genuine
+> zero-diff on CREATE/UPDATE/REMOVE. KB research (skill §3 Step 2): the
+> Step 1b widened check above IS this pass's KB research run.
+>
+> **Verify:** `npm run verify --workspace axiomancer-mechanics` (229
+> files, 3734 tests + build green), `npm run verify --workspace
+> axiomancer-mobile` (lint/typecheck/jest/asset/critique-drive suites,
+> exit 0), `npm run type-check --workspace axiomancer-card-editor`
+> (clean) — all three ran in full despite the empty card-data diff.
+```
 
 ```
 > **[adjust-npcs pass 16, 2026-09-23, commit 2789a2af]** Zero-diff pass —

@@ -2459,6 +2459,63 @@ residual merit; re-file if the failure mode recurs.
   shrink the card" pillar — a Vulnerable-style multiplier would need to
   be priced generously, not as a nerf lever.
 
+### [score 3.0] No card grants an in-combat/temporary card upgrade — Slay the Spire's Armaments/Apotheosis niche has no analogue
+- proposed: 2026-09-23, `/adjust-cards` pass 17 (Step 1b widened KB
+  cross-reference; Step 1's own structural audit read zero-diff — same
+  134 cards, `pricing.engine.test.ts` 263/263, `curated-library.engine
+  .test.ts` 14/14, `deck-presets.engine.test.ts` 9/9, all byte-identical
+  to pass 16's own citation, and the only touching commit on the
+  card-authoring surface in the 40-commit window was an unrelated
+  `export` rename on `REGISTRY_DOT_IDS` in `combat.cards.ts`).
+- source signals:
+  - KB: `kb:slay-the-spire/cards/0015-armaments-armaments` (community,
+    medium) — "Gain 5 Block. Upgrade a card in your hand for the rest
+    of combat," `kb:slay-the-spire/cards/0013-apotheosis-apotheosis`
+    — "Upgrade ALL your cards for the rest of combat. Exhaust," and
+    `kb:slay-the-spire/cards/0202-lesson-learned-lessonlearned` — "Deal
+    10 damage. If Fatal, Upgrade a random card in your deck. Exhaust."
+    A genre-staple niche (temporary-for-this-fight or permanent-to-deck
+    card-granted upgrades) distinct from a player's own meta-progression
+    upgrade choice.
+  - Live-code check: Axiomancer already has a full `+`-card system
+    (`src/Cards/card-upgrades.ts` — `upgradeCard`/`getUpgradedCardById`,
+    a pure default-numeric-rule-plus-authored-patch model, exhaustively
+    switched over all 52 `CardSpecialMechanic` kinds with no `default:`
+    arm, so a missing case fails the build) but it is wired ONLY as a
+    between-run meta-progression axis (the file's own header: "Players
+    should also be able to upgrade their cards") — no
+    `CardSpecialMechanic` kind lets a card grant an upgrade to another
+    card as a COMBAT EFFECT. Confirmed via the full 52-kind
+    `CardSpecialMechanic` enumeration (`src/Cards/types.ts`) and a
+    library-wide `axio_cards`/grep sweep: no card, sandbox card, or
+    keyword-atlas row references any such verb.
+  - This is a genuine gap, not a near-synonym: our upgrade axis and
+    StS's Armaments/Apotheosis niche share the same computed-`+`
+    machinery in spirit but operate on different triggers (meta-screen
+    choice vs. a card played mid-fight) and different scopes (permanent
+    vs. this-fight-only).
+- rationale: real and KB-grounded, but not a Step 3 ship-small CREATE —
+  `upgradeCard` is pure and reusable, but a card-triggered call needs a
+  new `CardSpecialMechanic` kind (e.g. `grant_upgrade`), a targeting
+  model (self hand card / random deck card / whole hand), a
+  combat-engine hook to apply it, and — for the "this fight only" StS
+  flavor — a REVERT-at-combat-end path, a transient-state shape the
+  engine doesn't carry today (today's `+` is always permanent, computed
+  once at draft/meta time). Past that: pricing, display text, and the
+  full 12-step keyword wiring checklist (mobile gloss, card-editor
+  vocabulary, atlas row). New engine wiring plus a new keyword — past
+  this steward's ship-small ceiling (THE GROWTH FLOOR ¶2).
+- proposed scope: a `mechanics-expert`/`card-expert` design session
+  first (permanent-to-deck vs. this-fight-only, or both as separate
+  verbs; whether the revert path is worth building or the niche ships
+  permanent-only to start), then the full keyword wiring checklist for
+  the resulting verb, then 1-2 carrying cards (a natural fit for
+  grave's MILL/RECALL-adjacent "invest in the deck itself" register, or
+  debt's compounding-power theme).
+- estimated phases: 1
+- conflicts: none against spec.md non-goals; doesn't touch the 3
+  surviving big-numbers constraints or the LOCKED MECHANICS.
+
 ## Considered (below threshold) — pass 12 additions
 
 - **Art-direction coherence** (`plan/CRITIQUE.md:446` arena art
