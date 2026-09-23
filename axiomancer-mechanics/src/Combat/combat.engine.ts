@@ -157,7 +157,7 @@ export const THREAT_DAMAGE_SCALE = 1;
  * distinct. THREAT_WEAKEN_FLOOR is a safety clamp: a weakened-but-not-denied
  * enemy still lands at least this fraction (it does not bind at the current
  * tunables — deny triggers first — but guards against future deep stacks).
- * Tuned by /combat-tuning. Exported so the mobile presenter can state the honest
+ * Tuned by /combat-playtest (engine constants) and /deck-tuning. Exported so the mobile presenter can state the honest
  * "-X% enemy attack" a control card actually delivers. (Until 0.33.0 the HP
  * engine never read these mods, so ~24 control/stat debuffs were inert.)
  */
@@ -191,7 +191,7 @@ export const SWAY_DECAY_PER_TURN = 1;
  * unloseable. The counters are on-vision: race the foe down (DoT) before the ramp
  * bites, OR deny its turns (control) to skip the escalated hits. This is also what
  * finally gives the threat ledger teeth — every round the clock advances is a round
- * the 'overwhelmed' marks were paid for. Tuned by /combat-tuning.
+ * the 'overwhelmed' marks were paid for. Tuned by /combat-playtest (engine constants) and /deck-tuning.
  */
 export const THREAT_ESCALATION_PER_ROUND = 0.22;
 /** Rounds of grace before the clock starts — a fast clean kill is unpunished. */
@@ -199,7 +199,7 @@ export const THREAT_ESCALATION_GRACE = 1;
 /** Cap on the escalation multiplier so a long grind ramps but never runs away into a
  *  one-shot — keeps the clock tense, not a hard wall. Calibrated conservatively: the
  *  optimal witness bot still wins (combat stays fair, not broken) while human-paced
- *  play feels real pressure. Sharpening the bands further is a /combat-tuning job that
+ *  play feels real pressure. Sharpening the bands further is a /combat-playtest (engine constants) and /deck-tuning job that
  *  hinges on the denial/kill-speed economy (the optimal bot kills in ~2-4 rounds and
  *  barely feels the clock). */
 export const THREAT_ESCALATION_MAX = 2.0;
@@ -209,7 +209,7 @@ export const THREAT_ESCALATION_MAX = 2.0;
  * the "steeper curve for bosses" doctrine: a boss fight that drags becomes
  * qualitatively more lethal than a normal fight dragging just as long. The
  * counters (finish fast via DoT, deny turns via control) are unchanged — they
- * are simply more urgent facing a boss. Tuned by /combat-tuning.
+ * are simply more urgent facing a boss. Tuned by /combat-playtest (engine constants) and /deck-tuning.
  */
 export const THREAT_ESCALATION_BOSS_MULT = 1.6;
 /**
@@ -219,7 +219,7 @@ export const THREAT_ESCALATION_BOSS_MULT = 1.6;
  * scaled and already capped at THREAT_ESCALATION_MAX) adds +1 intensity to
  * whatever status the enemy's telegraphed hit applies this phase. Reuses the
  * damage clock's numbers instead of a second independent tuning knob, so it
- * ramps and caps on exactly the same schedule. Tuned by /combat-tuning.
+ * ramps and caps on exactly the same schedule. Tuned by /combat-playtest (engine constants) and /deck-tuning.
  */
 export const THREAT_EFFECT_ESCALATION_STEP = 0.34;
 /**
@@ -229,7 +229,7 @@ export const THREAT_EFFECT_ESCALATION_STEP = 0.34;
  * debuff `debuff_curse` — "Grelling's Malediction"), chosen 50/50 by the
  * seeded rng. A long grind doesn't just get more dangerous on the continuous
  * clock — every five rounds it also gets a genuinely NEW threat on the board.
- * Tuned by /combat-tuning.
+ * Tuned by /combat-playtest (engine constants) and /deck-tuning.
  */
 export const THREAT_ENCHANT_CURSE_EVERY_ROUNDS = 5;
 /**
@@ -242,7 +242,7 @@ export const THREAT_ENCHANT_CURSE_EVERY_ROUNDS = 5;
  *                    sooner (floor 1 — it always lands)
  *   — neutral/none → EXACTLY the printed intensity/duration.
  * Deterministic and previewable: the card face can show the exact triplet.
- * Tuned by /combat-tuning.
+ * Tuned by /combat-playtest (engine constants) and /deck-tuning.
  */
 export const READ_ADVANTAGE_INTENSITY_BONUS = 1;
 export const READ_DISADVANTAGE_DURATION_PENALTY = 1;
@@ -250,7 +250,7 @@ export const READ_DISADVANTAGE_DURATION_PENALTY = 1;
 // ── Fate Engine P1 (spec 31 §1) — the dice get a second read ─────────────────
 
 /** R2 — each pip on a spent Reserve die adds this much intensity to the status
- *  the play lands (the ripened die hits harder). Tuned by /combat-tuning. */
+ *  the play lands (the ripened die hits harder). Tuned by /combat-playtest (engine constants) and /deck-tuning. */
 export const PIP_INTENSITY_BONUS = 2;
 /** R2 — each pip on a spent Reserve die adds this much Guard on a defend card.
  *  THE BIG NUMBERS REWRITE — raised 2 → 5 so a ripened die is worth banking

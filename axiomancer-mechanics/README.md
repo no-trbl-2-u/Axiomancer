@@ -77,6 +77,8 @@ turn loop.
 
 The barrel exports are organised by domain:
 
+> **Superseded (2026-09-23):** the Enemy, Items and Skills rows below name retired exports (`decideEnemyAction` and the AI presets, `executeSkill` / `canUseSkill` / `calculateSkillDamage` / `learnSkill` / `getAvailableSkills`, the procedural template and set-item helpers) — live truth: src/index.ts (the barrel), src/Enemy/enemy.library.ts, src/Cards/card.engine.ts, src/Items/. Body kept as a historical record pending rewrite (plan/AUDIT.md).
+
 | Group           | Highlights                                                                                                   |
 | --------------- | ------------------------------------------------------------------------------------------------------------ |
 | Character       | `createCharacter` (auto-generates `Character.id` via `getRng()` when not supplied — Phase 35), `equipItem`/`unequipItem`, `getEquipmentModifiers`, `allocateStatPoint` + `STAT_POINTS_PER_LEVEL` + `availableStatPoints` field on `Character` (Phase 29), presets API (`characterPresets`, `getPresetById`, `buildCharacterFromPreset`), types (`Character`, `BaseStats`, `DerivedStats`, `NonCombatStats`, `CharacterPreset`) |
@@ -101,6 +103,8 @@ effect coverage sweep); 5 per-module quickstart pages at
 [`docs/quickstart-*.md`](./docs/) (Phase 87).
 
 ### Hazard public API
+
+> **Superseded (2026-09-23):** the standalone Hazard minigame exports below (`initializeHazard`, `drawOpeningHand`, `HAZARD_CARD_LIBRARY`, `HazardMinigameState`, …) no longer exist; combat is Hazard-Pattern Combat driven from `src/Combat` (`initializeCombatEncounter`, `resolveCombatPhase`) — live truth: src/Combat/, src/index.ts. Body kept as a historical record pending rewrite (plan/AUDIT.md).
 
 `axiomancer-mechanics@0.16.0` ships the Hazard minigame through the top-level barrel. Consumers can import `initializeHazard`, `drawOpeningHand`, `selectRoute`, `rollDiceAndStartRound`, `playCardInRound`, `resolveRound`, `advanceToNextRound`, `computeFinalScore`, `HAZARD_CARD_LIBRARY`, `ACTION_CARD_LIBRARY`, `STARTER_DECK_CARD_IDS`, and Hazard types such as `HazardMinigameState`, `HazardCard`, `HazardActionCard`, `HazardManaDie`, and `HazardRoundResult`. See [`docs/hazard-minigame-api.md`](./docs/hazard-minigame-api.md).
 
@@ -196,7 +200,7 @@ automation/                # standalone walkthrough script + replay fixtures
 - [`docs/source-of-truth-hierarchy.md`](./docs/source-of-truth-hierarchy.md) — Nexus hierarchy for resolving T decisions, CDRs/ADRs, central ledger, build plans, candidates, critique/audit, and reports
 - [`../plan/AUDIT.md`](../plan/AUDIT.md) — code audit and quality findings (drained by `/iterate`)
 - [`../plan/CRITIQUE.md`](../plan/CRITIQUE.md) — architecture / quality findings filed by `/critique`
-- [`Knowledge-Gaps.md`](./Knowledge-Gaps.md) — open design and intent questions
+- [`../plan/PHASE_CANDIDATES.md`](../plan/PHASE_CANDIDATES.md) — open design and intent questions (with [`../plan/AUDIT.md`](../plan/AUDIT.md))
 - [`braindump/BRAINDUMP.md`](./braindump/BRAINDUMP.md) — unorganised idea backlog
 - [`docs/testing.md`](./docs/testing.md) — **hermetic e2e testing standard (required for every implementation)**
 - [`docs/playtest.md`](./docs/playtest.md) — Hazard-Pattern Combat playtest reference: stage profiles, sim-policy roster, deck-selection grammar, sandbox card workflow, CLI cookbook

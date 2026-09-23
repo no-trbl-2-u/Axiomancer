@@ -392,6 +392,8 @@ reality.
 
 ### Cards
 
+> **Superseded (2026-09-23):** `canUseSkill`, `SkillTier` and the "21-card library" below are retired; the live library is `cardLibrary` (129 cards assembled from `src/Cards/library/*.cards.ts`) and learning is ungated — live truth: src/Cards/cards.library.ts, src/Cards/card.engine.ts, src/index.ts. Body kept as a historical record pending rewrite (plan/AUDIT.md).
+
 - Card execution (`executeCard`, `canUseSkill`,
   `calculateCardDamage`, `spendResources`) — Stable.
 - Card types (`Card`, `SkillsStatType`,
@@ -521,6 +523,8 @@ authoring; the first batch is live as of Phase 44.
 - `Effect.sourcedFromCell?: string` — Beta. Same for fallacy-themed status effects.
 - 4 new Tier 3 fallacy cards (`appeal-to-consequences`, `nirvana-fallacy`, `pascals-wager`, `appeal-to-fear`) in `cardLibrary`.
 - 3 new fallacy status effects (`debuff_no_true_scotsman`, `buff_special_pleading`, `debuff_category_error`) in `effectsLibrary`.
+
+> **Superseded (2026-09-23):** `CardLearningRequirement.requiresAlignment` and the alignment argument on `meetsLearningRequirement` / `getAvailableCards` / `learnCard` below are gone (learning gate removed 2026-07-08); only the `DialogueChoice.requires.requiresAlignment` gate is live — live truth: src/Cards/card.engine.ts, src/NPCs/. Body kept as a historical record pending rewrite (plan/AUDIT.md).
 
 **Phase 46 — alignment-gated content:**
 - `AlignmentGate` type (`{ axis: 'epistemology' | 'outlook' | 'scope', op: 'gte' | 'lte', value: number }`) — Beta. Predicate shape for gating content on the player's current alignment cube position.

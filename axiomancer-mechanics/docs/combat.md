@@ -85,6 +85,8 @@ The multiplier depends on the defender's type-advantage over the attacker.
 
 ## Tier 1 Auto-Effects
 
+> **Superseded (2026-09-23):** the stance attack/defend auto-effect loop below belongs to the removed turn-based resolver; `combat.engine.ts` does not call `applyTier1CombatEffect` / `clearTier1EffectsForStance` — live truth: src/Combat/combat.engine.ts, src/Effects/index.ts. Body kept as a historical record pending rewrite (plan/AUDIT.md).
+
 Every `attack` or `defend` action automatically applies a Tier 1 effect — no resist roll.
 Switching action types removes the previous type's self-buff immediately via `clearTier1EffectsForStance()`.
 
@@ -110,6 +112,8 @@ These are live engine helpers in `src/Combat/effects.ts` (no CLI inline math —
 | **Heart/Attack — roll penalty** | Roll phase | −5 to the player's attack modifier |
 
 ## Spec 03 — Tier 2 / Tier 3 Effect Procs
+
+> **Superseded (2026-09-23):** the proc matrix below is not read by live Hazard-Pattern combat (see the legacy note that follows) — live truth: src/Combat/combat.engine.ts, src/Combat/combat-effects.ts. Body kept as a historical record pending rewrite (plan/AUDIT.md).
 
 > **Legacy subsystem.** This basic-attack/defend proc engine is not wired into
 > live Hazard-Pattern combat (`combat.engine.ts` does not read it). Its runtime
@@ -167,6 +171,8 @@ Clamped to [0, 1].
 See `docs/effects.md` for the full per-tier breakdown and stacking rules.
 
 ## Damage Resistance (Phase 93)
+
+> **Superseded (2026-09-23):** `calculateSkillDamage` no longer exists; direct damage is the `DEAL` mechanic resolved in the combat engine — live truth: src/Combat/combat.engine.ts, src/Combat/combat.cards.ts. Body kept as a historical record pending rewrite (plan/AUDIT.md).
 
 Phase 93 completes Phase 80's direction (a) "pure split": effects always land (Phase 80), damage applies resistance separately (Phase 93).
 
@@ -252,6 +258,8 @@ The reducer side (Phase 10) also shifts the moral meter `+1` (see
 through `applyLevelUps` if the (now possibly-bonused) XP crossed a threshold.
 
 ### Befriendable-enemy content (Phase 60)
+
+> **Superseded (2026-09-23):** the seven enemies in the table below (MournfulGull, HollowEyedBeggar, TideflukeReaver, HushWraith, HollowSaint, …) are no longer in the roster; `friendshipReward` is authored on 11 current entries — live truth: src/Enemy/enemy.library.ts. Body kept as a historical record pending rewrite (plan/AUDIT.md).
 
 Per-enemy `Enemy.friendshipReward?: FriendshipReward` lets authors
 attach bonus content to the friendship resolution. Seven enemies ship
@@ -402,6 +410,8 @@ with the legacy driver.)
 
 ## Combat Mechanics API
 
+> **Superseded (2026-09-23):** `rollSkillCheck` and `getSkillDamageType` below no longer exist (the stat / advantage / crit helpers are still exported but the attack contest that used them went with the turn-based resolver) — live truth: src/Combat/index.ts, src/Combat/combat.engine.ts. Body kept as a historical record pending rewrite (plan/AUDIT.md).
+
 | Function | Description |
 |----------|-------------|
 | `determineAdvantage(attacker, defender)` | Returns advantage relationship |
@@ -452,6 +462,8 @@ with the legacy driver.)
 | `BattleLogEntry` | Per-round log record (`round`, `playerAction`, `enemyAction`, `advantage`, rolls, damage fields, `result`) stored in `CombatState.log` |
 
 ## Card terminology
+
+> **Superseded (2026-09-23):** the naming-collision note below cites `SKILLS_LIBRARY` / `triggerCombatSkill`, which no longer exist; there is one card library — live truth: src/Cards/cards.library.ts, src/Cards/card.engine.ts. Body kept as a historical record pending rewrite (plan/AUDIT.md).
 
 The combat deck is built from **cards** (`knownCards`): a card is a Hazard-style
 combat entity in the deck/hand/reward loop — free/powered action halves, a stance

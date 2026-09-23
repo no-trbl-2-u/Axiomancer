@@ -5,6 +5,8 @@
 
 ## Resolve a map event
 
+> **Superseded (2026-09-23):** the sample below is stale — `resolveMapEvent(state, rng?)` takes no node id (it reads `state.world.currentMap.currentNode`), and the `discovery` / `dialogue` / `trade` / `puzzle` kinds do not exist (`MapEventKind` is `encounter | interaction | gathering | rest | village | cutscene | hazard | loot-cache | narration | blacksmith | travel`) — live truth: src/World/MapEvents/resolve-map-event.ts, src/World/MapEvents/types.ts. Body kept as a historical record pending rewrite (plan/AUDIT.md).
+
 ```typescript
 import { resolveMapEvent } from 'axiomancer-mechanics';
 

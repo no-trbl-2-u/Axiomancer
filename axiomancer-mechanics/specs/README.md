@@ -7,7 +7,7 @@
 
 ## Why this folder exists
 
-`GAME-ROADMAP.md` lists *what* is left to do. `Knowledge-Gaps.md` lists *what
+[`plan/steps/01_build_plan.md`](../../plan/steps/01_build_plan.md) lists *what* is left to do. [`plan/AUDIT.md`](../../plan/AUDIT.md) / [`plan/PHASE_CANDIDATES.md`](../../plan/PHASE_CANDIDATES.md) list *what
 isn't decided*. Neither tells you *what to do next* or *how to start*. The
 specs in this folder bridge that gap: each one is small enough to start work
 from, structured around the decisions that block implementation, and tagged
@@ -77,7 +77,7 @@ most other work. Feel free to override.
 | 13 **DONE** | [`23-map-events.md`](./23-map-events.md) | Phase 23. MapEvents engine + pool authoring pattern; acceptance fully ticked at Phase 41 unit 3 + Phase 43 alignmentDelta extension. |
 | 14 **DONE** | [`14-philosophical-alignment.md`](./14-philosophical-alignment.md) | Phases 42–46. 3-axis alignment cube (Epistemology × Outlook × Scope) + 27-cell content registry; observable, payloadable, enemy-side, and gated. Spec authored retroactively at Phase 58 (engine shipped Phase 42 `bdfda00`; content surface filled through Phase 46). |
 | 15 **DONE** | [`15-difficulty-curve.md`](./15-difficulty-curve.md) | Phase 116. Difficulty doctrine defining target bands per progression tier (fishing-village / northern-forest / endgame): rounds-to-resolve, survivability %, damage ratios, friendship reachability. References Phase 104 probe fields as measurement surface. Pure docs/spec. |
-| 16 **DONE** | [`../plan/phases/phase_99_unlocked_skill_access.md`](../plan/phases/phase_99_unlocked_skill_access.md) | Phase 99 (shipped `5759932`; re-shipped as Phase 141 `aad63c5`). Removes the legacy equipped-skill/loadout gate. Learned/unlocked skills become combat-accessible; combat/CLI/playtest consumers show only currently affordable skills. |
+| 16 **DONE** | Phase 99 — unlocked skill access (brief no longer in `plan/phases/`) | Phase 99 (shipped `5759932`; re-shipped as Phase 141 `aad63c5`). Removes the legacy equipped-skill/loadout gate. Learned/unlocked skills become combat-accessible; combat/CLI/playtest consumers show only currently affordable skills. |
 | 25 **DONE** | [`25-hazard-pattern-combat.md`](./25-hazard-pattern-combat.md) | 2026-06-21. Hazard-Pattern Combat — the card-and-dice driver (`resolveCombatPhase`) where status effects fill two Pressure Tracks (DoT Erosion + Control Saturation) that are the only practical win conditions. Ships alongside the legacy `resolveCombatRound`. Engine + mobile + glyphs shipped; tuned by `/combat-playtest` + `/deck-tuning`. |
 | 26 *draft* | [`26-catalyst-multiplicative-scaling.md`](./26-catalyst-multiplicative-scaling.md) | Combat depth follow-up #1. Catalyst card class — multiply stacked DoT into an explosive DoT-track spike (StS Catalyst). The build-then-detonate payoff the linear pressure model lacks. Depends on Spec 25. |
 | 27 *draft* | [`27-card-salvage-sideways-play.md`](./27-card-salvage-sideways-play.md) | Combat depth follow-up #2. Spend any card sideways for a generic benefit (mint a die / chip pressure) — Mage Knight's no-dead-cards rule. Ports the Hazard salvage pattern. Depends on Spec 25. |

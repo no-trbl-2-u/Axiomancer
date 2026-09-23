@@ -6,14 +6,14 @@
  * Sweeps `runPlaytestMatrix` (campaign stages x sim policies x deck
  * selections) and prints the aligned report.
  *
- * **Phase 43 — the objective function is `cqi`, the Combat Quality Index**
- * (`src/Combat/combat.objective.ts`): does the deck's engine RUN — assembling
- * across turns (arc), offering more than one line per powering die (width),
- * carried by a lead card that isn't the whole deck (identity), and flowing
- * through the three LOCKED systems, Conviction / the Surge meter / the Dice
- * (spine, the heaviest term). `statusEngagement` and `dotHpFraction` are still
- * printed beside it, but THE UNSHACKLING voided the status-dominance doctrine
- * they enforced: read them as warning lights, never as the target.
+ * **`cqi`, the Combat Quality Index** (`src/Combat/combat.objective.ts`), is
+ * printed as a diagnostic: does the deck's engine RUN — assembling across
+ * turns (arc), offering more than one line per powering die (width), carried
+ * by a lead card that isn't the whole deck (identity), and flowing through
+ * Conviction / the Surge meter / the Dice (spine). Nothing is graded against
+ * it — THE BIG NUMBERS REWRITE (2026-09-02) repealed every governing combat
+ * objective function, CQI included. `statusEngagement` and `dotHpFraction`
+ * print beside it as warning lights, never as a target.
  *
  * Usage:
  *   npm run combat-playtest                                        # all stages, greedy witness, policy-pick decks

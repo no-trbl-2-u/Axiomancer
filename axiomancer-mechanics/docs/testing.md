@@ -223,10 +223,9 @@ arrays. Each entry is a one-line string. Heuristics that fire:
 `callouts` is `[]` when nothing is notable; the markdown block omits
 the `### Call-outs` section entirely in that case.
 
-Schema details and design decisions live in
-[`plan/phases/phase_39_agent_verify_report.md`](../plan/phases/phase_39_agent_verify_report.md)
-and
-[`plan/phases/phase_40_prior_run_diff.md`](../plan/phases/phase_40_prior_run_diff.md).
+Schema details and design decisions lived in the Phase 39 (agent verify
+report) and Phase 40 (prior-run diff) briefs, which are no longer in
+`plan/phases/`.
 
 ---
 

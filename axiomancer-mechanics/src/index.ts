@@ -245,11 +245,12 @@ export type {
 } from './Combat';
 export type { PlaytestPresetSummary, PlaytestPresetStageRow } from './Combat/combat.playtest';
 
-// ─── Objective function v2 — the Combat Quality Index (Phase 43) ──────────────
-// THE metric `/deck-tuning` and `/combat-playtest` optimise, replacing the
-// voided status-dominance doctrine that `statusEngagement` enforced.
-// `assertLockedMechanicsFirstClass` is the guard that keeps Conviction, the
-// Surge meter and the Dice system permanently first-class in the score.
+// ─── Combat Quality Index (Phase 43) — diagnostic only ────────────────────────
+// Printed by `/deck-tuning` and `/combat-playtest` beside the legacy
+// `statusEngagement` warning light; nothing is graded against it — THE BIG
+// NUMBERS REWRITE (2026-09-02) repealed every governing combat objective
+// function, CQI included. `assertLockedMechanicsFirstClass` still keeps
+// Conviction, the Surge meter and the Dice system first-class in the score.
 export {
     scoreCombatObjective, formatCombatQuality, assertLockedMechanicsFirstClass,
     scoreConvictionUse, scoreSurgeUse, scoreDiceUse,
