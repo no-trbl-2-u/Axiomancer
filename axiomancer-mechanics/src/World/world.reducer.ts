@@ -203,8 +203,8 @@ function syncFrontierLists(map: MapState): MapState {
  * Labyrinth maps are untouched by D1: they keep free travel along the
  * CURRENT room's doors including back into solved rooms (W-01).
  *
- * Hazard ticking (Spec 08 Q3 — each `moveToNode` call) is performed by the
- * higher-level orchestrator in `Game/world.orchestrator.ts`, since the world
+ * Hazard ticking (Spec 08 Q3 — each `moveToNode` call) belongs to the
+ * higher-level orchestrator above this reducer (`Game/`), since the world
  * reducer is purely WorldState-shaped and the player lives at the
  * `GameState` level.
  *
@@ -479,9 +479,10 @@ export function unlockAdjacent(state: MapState, nodeId: NodeId): MapState {
 // ── Hazard Persistence (Phase 135) ─────────────────────────────────────────
 
 /**
- * Records a persistent hazard outcome for a specific node. Used by hazard 
- * cards H08, H12, H15 to emit world-state modifications that affect future 
- * encounters. Idempotent — overwrites existing outcome for same hazardId/nodeId.
+ * Records a persistent hazard outcome for a specific node. Authored for the
+ * retired Phase-135 hazard library (H08, H12, H15 — see
+ * `Hazard/e2e/hazard.persistence.engine.test.ts`); no engine caller today.
+ * Idempotent — overwrites existing outcome for same hazardId/nodeId.
  */
 export function recordHazardOutcome(state: MapState, outcome: HazardNodeOutcome): MapState {
     const existing = state.hazardOutcomes.filter(
@@ -494,9 +495,9 @@ export function recordHazardOutcome(state: MapState, outcome: HazardNodeOutcome)
 }
 
 /**
- * Blocks a bidirectional route between two nodes. Used by H12 "Riddled Bridge" 
- * final round failure to prevent passage. Idempotent — overwrites existing 
- * block for same route pair.
+ * Blocks a bidirectional route between two nodes. Authored for the retired
+ * H12 "Riddled Bridge" final-round failure (Phase 135); today only tests
+ * call it. Idempotent — overwrites existing block for same route pair.
  */
 export function blockMapRoute(state: MapState, from: NodeId, to: NodeId, reason: string): MapState {
     const existing = state.blockedRoutes.filter(
@@ -545,8 +546,8 @@ export function teleportToNode(state: WorldState, nodeId: NodeId): WorldState {
 }
 
 /**
- * Query all hazard outcomes affecting a specific node. Used by the
- * HazardModifierTable system to compute threshold adjustments.
+ * Query all hazard outcomes affecting a specific node. Authored for the
+ * retired Phase-135 threshold-modifier system; no engine caller today.
  */
 export function getHazardOutcomesForNode(state: MapState, nodeId: NodeId): HazardNodeOutcome[] {
     return state.hazardOutcomes.filter(outcome => outcome.nodeId === nodeId);
@@ -807,7 +808,8 @@ export function auditRouteCoverage(
  * also marked discovered + available (and cleared from locked / completed /
  * consumed) so an exploration renderer shows it as the live position, and
  * its neighbours are revealed + unlocked so the walk can continue from
- * there (`legalMovesFrom` filters on `lockedNodes`).
+ * there (the legacy `availableNodes` / `lockedNodes` readers stay in step;
+ * `legalMovesFrom` itself no longer consults them).
  * Throws `IllegalMoveError` only when `nodeId` is not on the current map.
  *
  * Mobile's `/dev` WORLD → JUMP row delegates here.

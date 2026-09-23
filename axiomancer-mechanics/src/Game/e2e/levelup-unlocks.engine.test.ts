@@ -2,10 +2,11 @@
  * Hermetic e2e — Phase 30 unit 2 (Spec 06 Q7 + Phase 30 brief).
  *
  * Verifies that `character:levelup` events emitted by the store carry
- * an `unlockedCards: string[]` payload listing card ids that crossed
- * their `learningRequirement` threshold during the promotion. The
- * computation lives in `enrichExtra` in `src/Game/store.ts`; this test
- * drives the public store surface (no internal-helper calls).
+ * an `unlockedCards: string[]` payload — always empty now that card
+ * eligibility no longer depends on level (learning requirements were
+ * removed 2026-07-08). The computation lives in `enrichExtra` in
+ * `src/Game/store.ts`; this test drives the public store surface (no
+ * internal-helper calls).
  */
 
 import { describe, it, expect } from 'vitest';

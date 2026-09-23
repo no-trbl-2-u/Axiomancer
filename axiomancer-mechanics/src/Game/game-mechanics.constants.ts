@@ -54,9 +54,9 @@ export const STAT_POINTS_PER_LEVEL = 3;
 // action.  The multiplier is selected based on the defender's type-advantage
 // relative to the attacker (heart > body > mind > heart).
 //
-//   Defending with ADVANTAGE    → 3× defense  (picked the right counter-type)
-//   Defending with NEUTRAL      → 2× defense  (same type, no bonus)
-//   Defending with DISADVANTAGE → 1.5× defense (picked the wrong type, weaker)
+//   Defending with ADVANTAGE    → 2× defense  (picked the right counter-type)
+//   Defending with NEUTRAL      → 1.5× defense (same type, no bonus)
+//   Defending with DISADVANTAGE → 1× defense  (picked the wrong type, weaker)
 //
 // Keys deliberately match the Advantage union type so they can be used as
 // a direct lookup: DEFENSE_MULTIPLIERS[advantage].
@@ -201,13 +201,13 @@ export const ENEMY_GEAR_TIER_PER_LEVEL = 0.02;
 //                 × ENEMY_VITAE_MULT[difficulty])
 //
 // An enemy may author `vitae` directly on `createEnemy` to override the curve
-// (every boss and unique does). Reference points: L1 normal ≈ 48, L7 elite ≈
-// 250, L6 boss ≈ 345, L13 normal ≈ 264, L18 boss ≈ 885, L110 unique ≈ 6,432.
+// (every boss and unique does). Reference points off the curve: L1 normal ≈
+// 38, L7 elite ≈ 120, L6 boss ≈ 148, L13 normal ≈ 134, L18 boss ≈ 331.
 export const ENEMY_VITAE_BASE = 30;
 // Measured against the playtest matrix 2026-09-02 and pulled back from 18: a
 // player's damage per turn is set by CARD RANK and does not grow with level,
 // so a pool growing at 18/level outran any deck by the late campaign (every
-// late cell read 0%). At 12/level the curve stays ahead of card growth without
+// late cell read 0%). At 8/level the curve stays ahead of card growth without
 // leaving it behind.
 export const ENEMY_VITAE_PER_LEVEL = 8;
 

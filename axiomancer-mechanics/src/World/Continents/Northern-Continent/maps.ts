@@ -223,9 +223,9 @@ const caverns: MapDefinition = {
         { id: 'nc-8',  location: [7, 0], connectedNodes: ['nc-16', 'nc-9', 'nc-23', 'nc-15', 'nc-22'] },
         { id: 'nc-22', location: [7, -1], connectedNodes: ['nc-9', 'nc-23', 'nc-8'] },
         // ── c8 — THE SEALED STAIR / rest / loot. The stair toward
-        //        northern-city is scenery, not a door: the next map is not
-        //        shipped, so the exit is authored sealed (a cutscene) and
-        //        the map ends at the boss instead.
+        //        northern-city is scenery, not a door: it is authored
+        //        sealed (a cutscene); the real door is nc-26, one column
+        //        past the boss (Phase W3).
         { id: 'nc-16', location: [8, 1], connectedNodes: ['nc-25', 'nc-9'] },
         { id: 'nc-9',  location: [8, 0], connectedNodes: ['nc-25', 'nc-16', 'nc-23'] },
         { id: 'nc-23', location: [8, -1], connectedNodes: ['nc-25', 'nc-9'] },

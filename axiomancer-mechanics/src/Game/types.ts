@@ -35,7 +35,7 @@ import { FactionReputations } from '../Faction/types';
  *                              epistemology / outlook / scope, each integer
  *                              in [-100, +100], defaults 0/0/0. Buckets to
  *                              one of 27 cells in `philosophicalAlignmentLibrary`.
- *                              Orthogonal to `moralMeter` — see docs/philosophy.md.
+ *                              Orthogonal to `moralMeter` — see docs/oaths.md.
  */
 /**
  * Phase 73 — per-foe codex / journal entry unlocked when the player
@@ -106,8 +106,8 @@ export interface GameState {
      * time AND bumped on every `resetRun()` call (the consumer-facing
      * surface for "begin again at the hearth" flows). Persists in save
      * data so future runs-history features can key off per-run identity.
-     * Closes GH#65 ask 2; legacy v5 saves get a default id via
-     * `migrateV5toV6`.
+     * Closes GH#65 ask 2. (The v5 → v6 migration hop that defaulted it is
+     * gone — saves below v11 are rejected by `migrate`.)
      */
     runId: string;
     player: Character;
@@ -130,7 +130,8 @@ export interface GameState {
     /**
      * Phase 73 — codex slice (closes GH#65 ask 3). Required state
      * slice; defaults to `{ unlockedEntries: [] }` on new games.
-     * `migrateV6toV7` defaults the slice for legacy v6 saves.
+     * (The v6 → v7 migration hop that defaulted it is gone — saves below
+     * v11 are rejected by `migrate`.)
      */
     codex: CodexState;
     /**

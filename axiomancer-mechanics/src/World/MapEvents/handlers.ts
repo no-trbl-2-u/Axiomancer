@@ -113,8 +113,9 @@ export function resolveRest(
     payload: RestPayload,
 ): ResolveMapEventResult {
     // Phase 52b — the per-node `healFraction` knob is retired. The passive
-    // heal runs at the carried-forward shipped default until 52c derives it
-    // from `shelter`; see `rest-shelter.ts` for why the number is pinned.
+    // heal runs at the carried-forward shipped default; hosts that use
+    // `World/RestChoice` (52c) replace it with that engine's flat heal. See
+    // `rest-shelter.ts` for why the number is pinned.
     const shelter = restShelterOf(payload);
     const before = state.player.health;
     const newHp = Math.min(

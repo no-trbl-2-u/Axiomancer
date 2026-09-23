@@ -23,18 +23,19 @@ import type { RestPayload, RestShelter } from './types';
 export const DEFAULT_REST_SHELTER: RestShelter = 'camp';
 
 /**
- * CARRIED FORWARD, PENDING PHASE 52c — do not tune here.
+ * CARRIED FORWARD from the retired `healFraction` knob — do not tune here.
  *
  * The retired `RestPayload.healFraction` defaulted to 1.0
  * (`payload.healFraction ?? 1.0` in `resolveRest`, and
  * `options.healFraction ?? 1.0` in mobile's `beginRestAction`). Phase 52b
- * removes the per-node knob without doing 52c's arithmetic, so the shipped
- * default is carried forward verbatim as this constant.
+ * removed the per-node knob, so the shipped default is carried forward
+ * verbatim as this constant for the engine's passive `resolveRest` heal.
  *
- * Phase 52c replaces it with the shelter-derived rule T ruled on
- * (attended chat, 2026-08-08): a camp heals a flat 20% of max VITAE, an
- * inn heals in full and mends scars. Any tuning belongs there — changing
- * this number in 52b would make 52c's regression illegible.
+ * Phase 52c shipped the player-facing rest as `World/RestChoice`, whose
+ * `rest` offer heals a flat fraction of max VITAE
+ * (`RESTCHOICE_TUNING.restHealFraction`, no shelter distinction — T direct,
+ * 2026-08-15); the inn scar mend still hangs off `shelter`. Any tuning
+ * belongs there.
  */
 export const REST_PASSIVE_HEAL_FRACTION = 1.0;
 

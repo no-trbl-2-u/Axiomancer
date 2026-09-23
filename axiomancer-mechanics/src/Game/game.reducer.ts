@@ -200,10 +200,9 @@ function isEncounter(target: Enemy | Encounter): target is Encounter {
 }
 
 /**
- * Minimal level-up step (placeholder per Phase 09 brief). While the player has
- * accumulated enough XP for the next level, increment `level`, recompute
- * `maxHealth`, raise the threshold, and refill HP. Spec 06's full progression
- * (stat allocation, card unlocks) flows in later.
+ * Level-up step. While the player has accumulated enough XP for the next
+ * level, increment `level`, recompute `maxHealth`, raise the threshold, refill
+ * HP, and bank Spec 06's stat points (spent later via `ALLOCATE_STAT_POINT`).
  */
 function applyLevelUps(player: Character): Character {
     let next = player;
@@ -562,7 +561,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
             return state;
 
         case 'RESET_RUN': {
-            // Phase 72 — closes GH#65 ask 2. See plan/phases/phase_72_run_loop_semantics.md.
+            // Phase 72 — closes GH#65 ask 2.
             const { keepCharacter } = action.payload;
             const freshRunId = generateRunId(() => getRng().random());
 
@@ -607,7 +606,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         }
 
         case 'UNLOCK_CODEX_ENTRY': {
-            // Phase 73 — closes GH#65 ask 3. See plan/phases/phase_73_codex_journal_surface.md.
+            // Phase 73 — closes GH#65 ask 3.
             const { entryId } = action.payload;
             if (state.codex.unlockedEntries.includes(entryId)) return state;
             return {

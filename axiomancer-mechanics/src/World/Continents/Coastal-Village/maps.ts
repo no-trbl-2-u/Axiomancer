@@ -8,8 +8,8 @@
  * The `fishing-village` static chain demos the Spec 08 exploration loop.
  * Runtime event kinds come from the MapEvent registry and may override these
  * templates. Phase 53d converted fv-4 into the "Stranger's Net" narration
- * dilemma; the nearest early encounter from fv-2 is now reached through
- * fv-11 → fv-13 (Little Belle). Route witnesses must consult resolved event
+ * dilemma; since THE THREE GATES (2026-09-21) the first encounter past fv-2
+ * is the fv-26 gate, with Little Belle at fv-13. Route witnesses must consult resolved event
  * content rather than infer encounter kinds from this static map definition.
  */
 

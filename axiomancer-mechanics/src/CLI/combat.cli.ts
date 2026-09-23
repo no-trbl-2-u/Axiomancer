@@ -27,7 +27,7 @@
  *                        explicit --enemy is given (seed-deterministic pick)
  *   --deck <selection>   preset:<id>[+swap:<out>/<in>,...] | draft:<focus> | cards:a,b,c | policy-pick
  *                        (policy-pick drafts with the --policy's natural focus;
- *                        status → dot, because status play is the efficient path)
+ *                        status → dot)
  *   --sandbox <setId[,setId...]>  apply sandbox card set(s) (cards.sandbox-sets) first
  *   --script <path>      JSON answer array (shared io.ts layer). Play steps
  *                        answer the card prompt as `top:<uid>` or `bot:<uid>`;
@@ -146,8 +146,9 @@ export interface RunHazardCombatCliResult {
 const AUTO_POLICIES: readonly CombatAutoPolicyId[] = ['naive', 'safe', 'aggressive', 'status'];
 
 /** `--deck policy-pick` drafts with the auto policy's natural focus. The
- *  default (status → dot) leans into the doctrine: status effects are the
- *  MAIN fun and the EFFICIENT way to drop HP to 0. */
+ *  default (status → dot) pairs the status policy with the DoT draft; no
+ *  doctrine protects status play any more (THE BIG NUMBERS REWRITE,
+ *  2026-09-02 — see `docs/lexicon.json` `status-primacy-doctrine`). */
 const AUTO_POLICY_DECK_FOCUS: Record<CombatAutoPolicyId, CombatDeckFocus> = {
     status: 'dot',
     aggressive: 'damage',

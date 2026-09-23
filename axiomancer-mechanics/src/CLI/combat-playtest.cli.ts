@@ -19,7 +19,7 @@
  *   npm run combat-playtest                                        # all stages, greedy witness, policy-pick decks
  *   npm run combat-playtest -- --stage=early --policy=all
  *   npm run combat-playtest -- --policy=dot-weaver --deck=draft:dot
- *   npm run combat-playtest -- --deck=preset:dot-erosion --runs=100 --seed=7
+ *   npm run combat-playtest -- --deck=preset:threadbare --runs=100 --seed=7
  *   npm run combat-playtest -- --enemy=king-of-revenge --cards
  *   npm run combat-playtest -- --sandbox=forge-example --json
  *
@@ -32,7 +32,7 @@
  *                                           every copy of <out> replaced by <in>
  *                                           (pair with --sandbox when <in> is a
  *                                           sandbox swap-pool card)
- *   --deck=preset:all                       sweep ALL TEN presets in one matrix and
+ *   --deck=preset:all                       sweep ALL presets (`COMBAT_DECK_PRESET_ORDER`) in one matrix and
  *                                           print the per-preset x stage rollups
  *                                           (doctrine-band fit, skill gap, complexity)
  *   --enemy=<slug>                          restrict rosters to one enemy

@@ -8,7 +8,7 @@
  *
  * `TypedGameEvent<T>` narrows the `type` field for consumers; the
  * `payload` shape is the same for every topic. Per-topic aliases
- * (`TypedCombatStartedEvent`, ...) cover all 10 `GameEventType`
+ * (`TypedCombatStartedEvent`, ...) cover all nine `GameEventType`
  * values so the narrowed type is concrete at every guard call site.
  *
  * Pre-Phase-21 also shipped seven per-topic Payload interfaces
