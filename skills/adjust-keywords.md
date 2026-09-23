@@ -201,7 +201,7 @@ criteria → `plan/AUDIT.md` as `[loop-call]`.
 ```bash
 # Reads
 axiomancer-mechanics/docs/keyword-atlas.md
-axiomancer-mechanics/docs/retheme-map.json
+docs/retheme-map.json                          # repo root
 axiomancer-mechanics/src/Cards/types.ts        # CardSpecialMechanic union
 axiomancer-mechanics/src/Combat/combat.cards.ts # mechanicText switch
 axiomancer-mobile/state/combat/keywords.ts      # KEYWORD_GLOSS

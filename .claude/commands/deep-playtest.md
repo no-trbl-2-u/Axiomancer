@@ -14,7 +14,7 @@ description: Play through the game as a first-time player via the playtester age
 > `axiomancer-mobile/docs/reports/PLAYTEST_REPORT.md`. This is
 > the experience audit.
 >
-> **Opt-in by design.** Requires a user-started `pnpm web`
+> **Opt-in by design.** Requires a user-started `npm run web`
 > instance. Cannot autostart the dev server.
 
 ## 1. Purpose
@@ -43,7 +43,7 @@ then route fixes into normal development work.
 1. **Playwright MCP enabled** in the Claude Code session
    (`mcp__playwright__*` tools available).
 
-The dev server (`pnpm web`) does **not** need to be running —
+The dev server (`npm run web`) does **not** need to be running —
 the skill starts it automatically and tears it down when done
 (see Step 1). If the user already has a server running, the
 skill detects it and skips the start/stop.
@@ -74,7 +74,7 @@ curl -s -o /dev/null -w "HTTP %{http_code}\n" --max-time 5 \
 
 ```bash
 # run_in_background: true
-pnpm web
+npm run web
 ```
 
 Set `SELF_STARTED_SERVER=true`. Then poll until the bundle is
