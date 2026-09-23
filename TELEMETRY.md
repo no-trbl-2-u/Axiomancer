@@ -647,6 +647,9 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-23T14:24:33Z | skill | consolidate | claude-opus-5-5 | - | - |
 | 2026-09-23T14:24:33Z | skill-end | consolidate | claude-opus-5-5 | 0s | ok |
 | 2026-09-23T14:34:32Z | tick-end | - | claude-opus-5-5 | 11m47s | ok |
+| 2026-09-23T15:26:39Z | slash-prompt | /oversight | - | - | /oversight |
+| 2026-09-23T15:26:43Z | skill | oversight | - | - | - |
+| 2026-09-23T15:26:43Z | skill-end | oversight | claude-sonnet-5 | 0s | ok |
 | 2026-09-23T15:29:59Z | subagent | general-purpose | claude-fable-5-1 | - | Audit root AI guidance docs |
 | 2026-09-23T15:30:01Z | subagent-end | general-purpose | claude-fable-5-1 | 2s | ok |
 | 2026-09-23T15:30:10Z | subagent | general-purpose | claude-fable-5-1 | - | Audit loop verbs and plan memory |
@@ -664,6 +667,8 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-23T15:31:08Z | subagent | general-purpose | claude-fable-5-1 | - | Audit scripts and hooks comments |
 | 2026-09-23T15:31:09Z | subagent-end | general-purpose | claude-fable-5-1 | 1s | ok |
 | 2026-09-23T15:31:12Z | tick-end | - | claude-fable-5-1 | 3m36s | ok |
+| 2026-09-23T15:48:21Z | skill | world-spec | claude-sonnet-5 | - | args: Phase 84 — The Capital. Context: Phase 84 (plan/steps/01_build_plan.md, currently [b |
+| 2026-09-23T15:48:21Z | skill-end | world-spec | claude-sonnet-5 | 0s | ok |
 | 2026-09-23T16:26:56Z | subagent | general-purpose | claude-fable-5-1 | - | Apply loop/harness doc decisions |
 | 2026-09-23T16:26:58Z | subagent-end | general-purpose | claude-fable-5-1 | 1s | ok |
 | 2026-09-23T16:27:19Z | subagent | general-purpose | claude-fable-5-1 | - | Apply mechanics doc decisions |

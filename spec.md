@@ -120,7 +120,7 @@ theme; four period display fonts; SVG placeholder art system.
   section was last reviewed — Spec 31 fate-engine card/effect
   revamp and Spec 32 v3 no-strike card library, see above.)
 - Authored content: `specs/characters` and `specs/story` currently
-  hold only templates (`specs/world` has `W-01`) — character/story/
+  hold only templates (`specs/world` has `W-01` and `W-02`) — character/story/
   world authoring is the open content pipeline (driven by the
   `character-spec` / `story-spec` / `world-spec` design skills).
 - Northern-forest region content extension (apply the
