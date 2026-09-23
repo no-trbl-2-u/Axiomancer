@@ -82,6 +82,18 @@ just reproduce gap §4 exists to close. `--no-grade` skips the
 grayscale/brightness/contrast pass — the grade is for raw acquisitions
 (the Dore plate), not for art that already carries its own styling.
 
+`scripts/shrink-art.mjs` is the recipe's other half — the same two size
+steps (resize to the cap -> WebP q44, NO grade) applied in place to art
+that landed before the recipe existed, with a dated note appended to the
+covering provenance entry in the same run. It never converts `.jpg`/`.png`
+(registries `require()` them by name) and never grows a file. `maps/` is
+excluded by convention (below) and by `plate-crop.test.ts`, which binds
+each plate's note to its pixel size.
+
+```bash
+node scripts/shrink-art.mjs --dirs enemies,labyrinth/walls --dry-run
+```
+
 `npm run assets:check --workspace axiomancer-mobile` is the gate: every
 art directory has a provenance record, every record carries date / tool
 / license / covers, every `require()` resolves, and every file is
@@ -106,9 +118,10 @@ else ship. Same question as `Potential Assets/MCP-Axiomancer/images/`.
   not convention, problems. `combat/` also has no `index.ts`; its one
   asset is consumed directly, and `asset-provenance.test.mjs` records
   the directory as registry-less so a second arena has to confront it.
-- `labyrinth/walls/` ships at 720x1280, above the 640px longest-edge
-  cap. They are already WebP, so re-encoding would be lossy-on-lossy
-  for a modest saving; left as a deliberate exception, not an oversight.
+- `labyrinth/walls/` shipped at 720x1280, above the 640px longest-edge
+  cap, on the assumption that a lossy-on-lossy re-encode would save
+  little. Measured 2026-09-22 (`scripts/shrink-art.mjs --dry-run`): 2.76 MB
+  -> 0.64 MB. Closed by the build-size pass; the walls now sit at the cap.
 - `maps/` is a **standing exception to the 640px cap**: map backdrops are
   full-bleed under a chart layer, so they are acquired at 1120px (the
   recorded `forest-dark` recipe). `art:qa` counts them in its `over`

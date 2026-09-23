@@ -46,7 +46,7 @@
     "assets:ingest": "node scripts/ingest-art.mjs",
     "art:gen": "node scripts/generate-art.mjs",
     "art:qa": "node scripts/art/qa.mjs",
-    "art:test": "node --test scripts/art.test.mjs",
+    "art:test": "node --test scripts/art.test.mjs scripts/shrink-art.test.mjs",
     "critique-drive:test": "node --test scripts/critique-drive.test.mjs",
     "assets:acquire": "node scripts/acquire-art.mjs"
   },

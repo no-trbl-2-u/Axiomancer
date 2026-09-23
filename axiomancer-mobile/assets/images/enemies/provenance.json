@@ -10,7 +10,8 @@
       "assets/images/enemies/index.ts (registry — see its header for surfaces)"
     ],
     "license": "UNRESOLVED",
-    "license_note": "Owner-supplied external illustration; no source or license was recorded at the time and none has been traced since. These assets already ship; this record states what is known rather than inventing terms. Blocked on the owner, same question as Potential Assets/MCP-Axiomancer/images/."
+    "license_note": "Owner-supplied external illustration; no source or license was recorded at the time and none has been traced since. These assets already ship; this record states what is known rather than inventing terms. Blocked on the owner, same question as Potential Assets/MCP-Axiomancer/images/.",
+    "post_process": "2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs"
   },
   {
     "generated_by": "acquisition",
@@ -29,7 +30,8 @@
     ],
     "used_by": [
       "assets/images/enemies/index.ts (registry — see its header for surfaces)"
-    ]
+    ],
+    "post_process": "2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs"
   },
   {
     "generated_by": "acquisition",
@@ -47,7 +49,8 @@
     ],
     "used_by": [
       "assets/images/enemies/index.ts (registry — see its header for surfaces)"
-    ]
+    ],
+    "post_process": "2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs"
   },
   {
     "generated_by": "acquisition",
@@ -63,7 +66,8 @@
     ],
     "used_by": [
       "assets/images/enemies/index.ts (registry — see its header for surfaces)"
-    ]
+    ],
+    "post_process": "2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs"
   },
   {
     "generated_by": "acquisition",
@@ -81,7 +85,8 @@
     ],
     "used_by": [
       "assets/images/enemies/index.ts (registry — see its header for surfaces)"
-    ]
+    ],
+    "post_process": "2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs"
   },
   {
     "generated_by": "acquisition",
@@ -96,7 +101,8 @@
     ],
     "used_by": [
       "assets/images/enemies/index.ts (registry — see its header for surfaces)"
-    ]
+    ],
+    "post_process": "2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs"
   },
   {
     "generated_by": "acquisition",
@@ -112,7 +118,8 @@
     ],
     "used_by": [
       "assets/images/enemies/index.ts (registry — see its header for surfaces)"
-    ]
+    ],
+    "post_process": "2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs"
   },
   {
     "generated_by": "acquisition",
@@ -127,7 +134,8 @@
     ],
     "used_by": [
       "assets/images/enemies/index.ts (registry — see its header for surfaces)"
-    ]
+    ],
+    "post_process": "2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs"
   },
   {
     "generated_by": "acquisition",
@@ -143,7 +151,8 @@
     ],
     "used_by": [
       "assets/images/enemies/index.ts (registry — see its header for surfaces)"
-    ]
+    ],
+    "post_process": "2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs"
   },
   {
     "generated_by": "acquisition",
@@ -159,7 +168,8 @@
     ],
     "used_by": [
       "assets/images/enemies/index.ts (registry — see its header for surfaces)"
-    ]
+    ],
+    "post_process": "2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs"
   },
   {
     "generated_by": "acquisition",
@@ -175,7 +185,8 @@
     ],
     "used_by": [
       "assets/images/enemies/index.ts (registry — see its header for surfaces)"
-    ]
+    ],
+    "post_process": "2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs"
   },
   {
     "generated_by": "acquisition",
@@ -197,7 +208,8 @@
     ],
     "used_by": [
       "assets/images/enemies/index.ts (registry — see its header for surfaces)"
-    ]
+    ],
+    "post_process": "2026-09-22 build-size pass: re-encoded in place to the ingest recipe (longest edge <= 640px, WebP q44) by scripts/shrink-art.mjs"
   },
   {
     "generated_by": "acquisition",
