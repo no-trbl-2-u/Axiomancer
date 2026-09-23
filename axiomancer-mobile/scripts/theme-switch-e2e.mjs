@@ -77,8 +77,13 @@ try {
 
     const toggle = page.getByTestId('theme-switcher-toggle');
     check('COLOUR THEME switcher present', await toggle.count() > 0);
-    await toggle.click();
-    await page.waitForTimeout(300);
+    // On /settings the picker mounts EXPANDED (2026-09-23); clicking the
+    // toggle there would collapse it and hide the swatches. Only expand when
+    // the swatches are not already on screen.
+    if (await page.getByTestId('theme-frost-marrow').count() === 0) {
+        await toggle.click();
+        await page.waitForTimeout(300);
+    }
 
     const before = await labelColor();
     check('read initial themed label colour', !!before);
@@ -99,8 +104,8 @@ try {
     const sentinel = await page.evaluate(() => window.__noReload);
     check('no full page reload during switches', sentinel === 'alive');
 
-    // URL unchanged (still on /character).
-    check('stayed on /character', new URL(page.url()).pathname.startsWith('/character'));
+    // URL unchanged (still on /settings).
+    check('stayed on /settings', new URL(page.url()).pathname.startsWith('/settings'));
 
     check('zero console / page errors', consoleErrors.length === 0);
     if (consoleErrors.length) console.log('  errors:', consoleErrors.slice(0, 5));
