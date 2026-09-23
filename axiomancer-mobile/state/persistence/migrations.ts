@@ -26,6 +26,13 @@ export const CURRENT_SCHEMA_VERSION = 3;
 export interface StoredEnvelope {
     schemaVersion: number;
     state: unknown;
+    /**
+     * Epoch ms of the write (2026-09-23, save slots). Optional: envelopes
+     * written before the slot system carry none and read as `0` — "oldest"
+     * — when CONTINUE picks the most recent slot. A property of the WRITE,
+     * so it lives on the envelope, not inside the game state.
+     */
+    savedAt?: number;
 }
 
 /** Migration from version `N` to `N + 1`. */
@@ -123,8 +130,16 @@ export const DEFAULT_MIGRATIONS: MigrationMap = {
     2: migrateV2ToV3,
 };
 
-export function wrap(state: GameState): StoredEnvelope {
-    return { schemaVersion: CURRENT_SCHEMA_VERSION, state };
+/**
+ * Wrap a state for storage.
+ *
+ * @param state   the game state to persist.
+ * @param savedAt epoch ms of this write; omitted → no stamp (legacy shape).
+ */
+export function wrap(state: GameState, savedAt?: number): StoredEnvelope {
+    return savedAt === undefined
+        ? { schemaVersion: CURRENT_SCHEMA_VERSION, state }
+        : { schemaVersion: CURRENT_SCHEMA_VERSION, state, savedAt };
 }
 
 /**

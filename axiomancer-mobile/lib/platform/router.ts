@@ -53,6 +53,8 @@ type RouteEntry = { screen: string; tab: boolean };
 
 const ROUTE_TABLE: Readonly<Record<string, RouteEntry>> = {
   '': { screen: 'index', tab: false },
+  saves: { screen: 'saves/index', tab: false },
+  settings: { screen: 'settings/index', tab: false },
   event: { screen: 'event/index', tab: false },
   hazard: { screen: 'hazard/index', tab: false },
   'combat-encounter': { screen: 'combat-encounter/index', tab: false },
@@ -97,6 +99,8 @@ export const linking = {
   config: {
     screens: {
       index: '',
+      'saves/index': 'saves',
+      'settings/index': 'settings',
       'event/index': 'event',
       'hazard/index': 'hazard',
       'combat-encounter/index': 'combat-encounter',

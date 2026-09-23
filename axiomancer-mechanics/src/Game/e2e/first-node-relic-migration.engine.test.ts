@@ -11,6 +11,7 @@
 import { describe, it, expect } from 'vitest';
 import { migrate } from '../game.migrate';
 import { createNewGameState, GAME_STATE_VERSION, gameReducer } from '../game.reducer';
+import { createCharacter } from '../../Character';
 import {
     grantFirstNodeRelic, isFirstNodeRelicPending,
     FIRST_NODE_RELIC_ID, FIRST_NODE_RELIC_FLAG,
@@ -23,7 +24,13 @@ import {
  */
 function v23Save(extraFlags: string[] = []): Record<string, unknown> {
     const fresh = createNewGameState();
-    const settled = grantFirstNodeRelic(fresh.player, []);
+    // A v23 save carried the whole Phase-19 kit (11 relics, 5 worn). Since
+    // 2026-09-23 a fresh run seeds nothing, so the pre-v24 shape is rebuilt
+    // here from a kit-seeded character rather than from the fresh state.
+    const kitted = createCharacter({
+        name: 'Player', level: 1, baseStats: { heart: 5, body: 5, mind: 5 }, seedStartingRelics: true,
+    });
+    const settled = grantFirstNodeRelic(kitted, []);
     return {
         ...fresh,
         version: 23,

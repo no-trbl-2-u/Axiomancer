@@ -9,6 +9,9 @@
  * launches and the active theme is highlighted.
  *
  * This is a real player setting, so it is not gated behind dev tools.
+ * Hosted on `/settings` since 2026-09-23 (the SELF tab links there); the
+ * row carries no outer margin so the settings list spaces it like its
+ * siblings.
  */
 
 import React, { useState } from 'react';
@@ -94,8 +97,8 @@ export function ThemeSwitcher({ initialExpanded = false }: ThemeSwitcherProps) {
 
 const useStyles = makeStyles((AXM) => ({
     row: {
-        marginTop: 16,
-        marginHorizontal: 12,
+        marginTop: 0,
+        marginHorizontal: 0,
         paddingVertical: 8,
         paddingHorizontal: 10,
         borderWidth: 1,

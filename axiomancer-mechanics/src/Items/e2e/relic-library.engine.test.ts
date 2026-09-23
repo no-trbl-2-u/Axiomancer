@@ -57,9 +57,15 @@ describe('relic library — roster + slot split', () => {
         }
     });
 
-    it('stat pool is Body×2 (weapons), maxHp×2 (armor), Mind×3 + Heart×2 + Body×2 (accessories)', () => {
+    it('stat pool is Body×2 (weapons), maxHp×2 (armor), Mind×3 + Heart×1 + Body×2 (accessories); the ring carries none', () => {
         const statOf = (id: string) => getRelicById(id)!.statModifiers![0];
         for (const r of relicLibrary) {
+            if (r.id === 'relic-disarming-plea') {
+                // Owner call 2026-09-23: the Suppliant's Ring grants ONLY its
+                // signature (The Open Hand) — no stat bump at all.
+                expect(r.statModifiers).toEqual([]);
+                continue;
+            }
             const mod = r.statModifiers![0];
             expect(r.statModifiers).toHaveLength(1);
             expect(mod.isMultiplier).toBe(false);
@@ -69,9 +75,11 @@ describe('relic library — roster + slot split', () => {
         }
         // Phase 85 added a 3rd mind accessory (head) and 2 body accessories
         // (hands, feet) — closing the accessories' body-stat gap.
-        const accStats = relicLibrary.filter(r => r.slot === 'accessory').map(r => statOf(r.id).stat);
+        const accStats = relicLibrary
+            .filter(r => r.slot === 'accessory' && r.id !== 'relic-disarming-plea')
+            .map(r => statOf(r.id).stat);
         expect(accStats.filter(s => s === 'mind')).toHaveLength(3);
-        expect(accStats.filter(s => s === 'heart')).toHaveLength(2);
+        expect(accStats.filter(s => s === 'heart')).toHaveLength(1);
         expect(accStats.filter(s => s === 'body')).toHaveLength(2);
     });
 });

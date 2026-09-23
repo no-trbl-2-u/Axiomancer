@@ -22,8 +22,9 @@ import { createFixtureBootAdapter } from '@/state/persistence/fixtureBootAdapter
 import { resolveBootFixture } from '@/state/fixtures';
 import { FixtureBoot } from '@/components/FixtureBoot';
 import { CorruptSaveModal } from '@/components/CorruptSaveModal';
-import { DevAutoSeed } from '@/components/DevAutoSeed';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { SaveSlotsProvider } from '@/state/SaveSlotsProvider';
+import { SettingsProvider, settingsStore } from '@/state/settings';
 import { PrevSessionCrashPrompt } from '@/components/PrevSessionCrashPrompt';
 import { HardwareBackHandler } from '@/components/HardwareBackHandler';
 import { BlacksmithGate } from '@/components/BlacksmithGate';
@@ -39,6 +40,8 @@ import { getLogger } from '@mechanics';
 import { initAppLogging } from '@/state/logging';
 import { attachCrashBreadcrumbs, initCrashReporting, withCrashReporting } from '@/lib/monitoring';
 import IndexScreen from './index';
+import SaveSlotsScreen from './saves/index';
+import SettingsScreen from './settings/index';
 import TabLayout from './(tabs)/_layout';
 import EventScreen from './event/index';
 import HazardScreen from './hazard/index';
@@ -93,6 +96,11 @@ attachCrashBreadcrumbs();
 // the provider's `adapter` / `store` props.
 const persistenceAdapter = createAsyncStorageAdapter();
 
+// Player settings (theme, motion, haptics, text size, tutorial hints, audio)
+// hydrate from their own AsyncStorage key alongside the save preload below.
+// They are a UX preference, not gameplay state — a new game never resets them.
+const settingsHydrated = settingsStore.hydrate();
+
 // State-fixture boot (2026-09-07, `state/fixtures.ts`): when a dev build
 // is asked for a fixture (`?fixture=<id>` or `__AXM_FIXTURE__`), the
 // store boots from that compiled state through an in-memory adapter —
@@ -118,8 +126,7 @@ function RootLayout() {
 
   useEffect(() => {
     let cancelled = false;
-    persistenceAdapter
-      .preload()
+    Promise.all([persistenceAdapter.preload(), settingsHydrated])
       .catch((err: unknown) => {
         // Q7=A on Spec 09: surface "save corrupted — start new game?" to
         // the user. Phase 53 wires the user-facing CorruptSaveModal; the
@@ -218,6 +225,11 @@ function RootLayout() {
       />
       <PrevSessionCrashPrompt />
       <GameStoreProvider adapter={storeAdapter}>
+        {/* The slot store the menu drives. A fixture boot gets an in-memory
+            one (the provider's default) so a test session can never reach
+            the player's real slots. */}
+        <SaveSlotsProvider slots={bootFixture ? undefined : persistenceAdapter}>
+        <SettingsProvider>
         {/* ErrorBoundary mounts INSIDE the GameStoreProvider so
             the fallback ErrorScreen can read engine state via
             useGameState for the debug snapshot (filed via
@@ -254,11 +266,27 @@ function RootLayout() {
                   even a legitimate checkpoint if the player closed inside it.
                   This takes a final save and flushes it on background/pagehide. */}
               <SaveOnExit adapter={storeAdapter} />
-              <DevAutoSeed />
               <FixtureBoot />
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="(tabs)" component={TabLayout} options={{ headerShown: false }} />
+              {/* `initialRouteName="index"`: every launch begins at the title
+                  and its menu (owner call 2026-09-23). Without it the native
+                  stack would open on the first registered screen — the tabs
+                  — and skip the title on a phone while web (URL `/`) showed
+                  it. The former dev-only auto-seed (`DevAutoSeed`) is gone
+                  with the same call: a new game starts with nothing, in dev
+                  builds too; the `/dev` route still seeds on demand. */}
+              <Stack initialRouteName="index" screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="index" component={IndexScreen} options={{ headerShown: false }} />
+                <Stack.Screen name="(tabs)" component={TabLayout} options={{ headerShown: false }} />
+                <Stack.Screen
+                  name="saves/index"
+                  component={SaveSlotsScreen}
+                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
+                />
+                <Stack.Screen
+                  name="settings/index"
+                  component={SettingsScreen}
+                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
+                />
                 <Stack.Screen
                   name="event/index"
                   component={EventScreen}
@@ -351,6 +379,8 @@ function RootLayout() {
           </AestheticModeProvider>
           </FontProvider>
         </ErrorBoundary>
+        </SettingsProvider>
+        </SaveSlotsProvider>
       </GameStoreProvider>
     </GestureHandlerRootView>
   );

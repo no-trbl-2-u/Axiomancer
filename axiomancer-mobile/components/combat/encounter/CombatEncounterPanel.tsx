@@ -63,6 +63,8 @@ import {
     COMBAT_TUTORIAL_FLAG, completeCombatTutorialAction,
     claimCombatRewardAction, resetCombatRewardAction, rollCombatRewardAction,
 } from '@/state/combat/store-actions';
+import { useSetting } from '@/state/settings';
+import { isTutorialDone } from '@/state/tutorials';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 
@@ -337,8 +339,9 @@ export function CombatEncounterPanel({
     const rewardsClaimed = useGameState((s) => s.combatReward?.claimed ?? false);
 
     // ── first-fight tutorial (primer panels → turn-one coach) ──
+    const tutorialHints = useSetting('tutorialHints');
     const seenTutorial = useGameState(
-        (s) => ((s as unknown as { flags?: string[] }).flags ?? []).includes(COMBAT_TUTORIAL_FLAG),
+        (s) => isTutorialDone((s as unknown as { flags?: string[] }).flags, COMBAT_TUTORIAL_FLAG, tutorialHints),
     );
     const [primerDone, setPrimerDone] = useState(false);
     const [tutorialDismissed, setTutorialDismissed] = useState(false);

@@ -9,7 +9,7 @@ import { LearnCardModal } from '@/components/levelup/LearnCardModal';
 import { LevelReadyStrip } from '@/components/levelup/LevelReadyStrip';
 import { LevelUpModal } from '@/components/levelup/LevelUpModal';
 import { DevToolsLink } from '@/components/dev/DevToolsLink';
-import { ThemeSwitcher } from '@/components/ThemeSwitcher';
+import { SettingsLink } from '@/components/menu/SettingsLink';
 import { ScreenBg } from '@/components/ScreenBg';
 import { SectionLabel } from '@/components/SectionLabel';
 import { StanceGlyph } from '@/components/StanceGlyph';
@@ -548,7 +548,8 @@ export default function CharacterScreen() {
           </View>
         </View>
       )}
-      <ThemeSwitcher />
+      {/* The COLOUR THEME picker moved to /settings (2026-09-23). */}
+      <SettingsLink />
       <DevToolsLink />
     </ScreenBg>
   );

@@ -11,7 +11,7 @@
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
-import { getConsumableById, getRelicById, SLOT_CAPACITY } from '@mechanics';
+import { createCharacter, getConsumableById, getRelicById, SLOT_CAPACITY } from '@mechanics';
 import type { Character, Equipment, GameState, Item } from '@mechanics';
 
 import ItemRewardScreen from '@/app/item-reward/index';
@@ -43,6 +43,14 @@ function player(store: AppStore): Character {
 
 function mount(offer?: (store: AppStore) => void) {
     const { tree, store } = withAllProviders(<ItemRewardScreen />);
+    // A fresh run wears NOTHING since 2026-09-23 (THE VERY START), so the
+    // D6 "trade" cases seed the Phase-19 kit explicitly: a full accessory
+    // row is what makes EQUIP a swap rather than a free fill.
+    store.setState({
+        player: createCharacter({
+            name: 'Kitted', level: 1, baseStats: { heart: 5, body: 5, mind: 5 }, seedStartingRelics: true,
+        }),
+    });
     if (offer) offer(store);
     const view = render(tree);
     return { store, view };

@@ -1,5 +1,5 @@
 // Live theme-switch e2e against the exported production web build.
-// Serves .smoke-dist, opens /character, expands the COLOUR THEME picker,
+// Serves .smoke-dist, opens /settings (the picker moved there 2026-09-23), expands the COLOUR THEME picker,
 // switches themes, and asserts the palette actually re-paints in place
 // (no reload, no console errors).
 
@@ -62,7 +62,7 @@ let failed = false;
 const check = (label, cond) => { console.log(`${cond ? 'PASS' : 'FAIL'}: ${label}`); if (!cond) failed = true; };
 
 try {
-    await page.goto(`${base}/character`, { waitUntil: 'networkidle' });
+    await page.goto(`${base}/settings`, { waitUntil: 'networkidle' });
     await page.waitForTimeout(1500);
 
     // Sentinel to detect a full reload (a reload wipes window state).

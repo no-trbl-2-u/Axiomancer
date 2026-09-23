@@ -23,7 +23,7 @@ Ids come from the engine registry (`STATE_FIXTURES`;
 nor written — and a fixture with `arrive: true` fires the current node's
 event once navigation is ready (`components/FixtureBoot.tsx`), so
 `/dialogue`, `/village`, `/cutscene`, `/event` open cold.
-`DevAutoSeed` stands down on a fixture boot. Production ignores both
+The title menu is skipped on a fixture boot. Production ignores both
 channels (`persistence/fixture-boot-ignored`); an unknown id or invalid
 document falls back to a normal boot (`persistence/fixture-boot-failed`
 carries the field-path problems). Code: `state/fixtures.ts`,

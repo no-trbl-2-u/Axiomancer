@@ -11,7 +11,17 @@ selectors + dispatch typed actions.
 | `state/store.ts` | `createAppStore({ adapter?, overrides? })` — wraps the engine's `createGameStore`. Defaults to `nullAdapter`. |
 | `state/actions.ts` | `createAppActions(store)` — typed wrappers around engine actions (`startCombat`, `endCombat`, `setCombatPhase`, `setPlayerStance`, item ops, `save`). |
 | `state/GameStoreProvider.tsx` | `<GameStoreProvider>` mounts the store + `useGameState`, `useGameActions`, `useGameStore` hooks. |
+| `state/persistence/saveSlots.ts` | The three-slot vocabulary: ids, storage keys, `SaveSlotSummary`, `mostRecentSlot`, the `SaveSlotStore` interface (2026-09-23). |
+| `state/persistence/asyncStorageAdapter.ts` | The AsyncStorage `PersistenceAdapter` + `SaveSlotStore`: `load()`/`save()` scoped to the ACTIVE slot; `preload()` reads all three. |
+| `state/persistence/memorySlotStore.ts` | In-memory `SaveSlotStore` for tests and fixture boots. |
+| `state/menu/store-actions.ts` | NEW GAME / LOAD GAME / CONTINUE / RETURN TO TITLE — `hydrateStoreWithGameState` swaps the engine state inside the live store. |
+| `state/SaveSlotsProvider.tsx` | `<SaveSlotsProvider slots>` + `useSaveSlots()` / `useSaveSlotSummaries()`. |
+| `state/settings.ts` | Player settings (`settingsStore`, `useSetting`, `useSettings`) — motion, haptics, text size, tutorial hints, volumes. |
+| `state/tutorials.ts` | The coach flags, `isTutorialDone(flags, flag, hints)` and `resetTutorialsAction`. |
 | `state/e2e/store.engine.test.ts` | Hermetic e2e — provider boot, action dispatch, adapter invocation, selector stability. |
+
+Save slots, the main menu and the settings screen are documented in
+[`save-slots-and-settings.md`](./save-slots-and-settings.md).
 
 ## Reading state — selectors
 

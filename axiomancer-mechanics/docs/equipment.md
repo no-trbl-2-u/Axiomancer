@@ -58,11 +58,33 @@ There is no rarity, `requiredLevel`, `rolledMods`, affix, `passiveEffects`,
 | `isEquippedFirstOfSlot(inventory, item)` | Whether `item` is within its slot's worn window. |
 | `findEquippedInSlot(inventory, candidate)` | The piece a candidate would displace when its slot row is full, else `null`. |
 
+## The very start (owner call 2026-09-23)
+
+`createNewGameState()` seeds **nothing**: an empty inventory, an empty
+loadout, zero coin, zero XP, level 1 at the 5/5/5 apprentice baseline. The
+Phase-19 kit (`cloneStartingRelics`, `defaultWorn`) is still what presets,
+fixtures, mocks and every sim build on — only the real-player origination
+point changed, so the measured baselines are untouched.
+
+Two things make the empty start a game:
+
+1. **The Suppliant's Ring is handed over at the run's first node**
+   (`src/Character/first-node-grant.ts`; `START_COMBAT` / `PROCESS_NODE`
+   settle it as a floor). With an empty accessory row it fills the first
+   seat and displaces nothing. The ring is the one relic with **no stat
+   bump** — it grants The Open Hand and nothing else (`statModifiers: []`).
+2. **The other ten relics are village-market wares** — see below.
+
+Pinned by `src/Game/e2e/fresh-start.engine.test.ts`.
+
 ## Loot & shops
 
-Relics are a **fixed starting kit**, not loot. Loot surfaces (The Reliquary,
-enemy drops, shops) yield consumables / currency (phase 21). Making relics
-findable in the world is a deferred follow-up.
+Relics are **sold, not dropped**. Every non-ring relic is a `shop.wares`
+entry (by fixed id, resolved through `getRelicById`) on at least one of the
+six authored village markets in `src/World/MapEvents/content.ts` — the
+first market on the road (Glen Market, northern forest) stocks the
+Phase-19 starter kit's weapon, armor and charm. Loot surfaces (The
+Reliquary, enemy drops) still yield consumables / currency only (phase 21).
 
 ## Save migrations
 

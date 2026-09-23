@@ -34,6 +34,7 @@ import {
     paletteFor,
     resolveActiveThemeId,
 } from './palette';
+import { settingsStore, type TextScale } from '@/state/settings';
 
 // --- live store -----------------------------------------------------------
 
@@ -123,6 +124,40 @@ export function usePalette(): Palette {
 
 type NamedStyles<T> = { [P in keyof T]: ViewStyle | TextStyle | ImageStyle };
 
+// --- text size (SETTINGS → TEXT SIZE, 2026-09-23) --------------------------
+
+const readTextScale = (): TextScale => settingsStore.get().textScale;
+
+/** Subscribe to the player's text-size step; re-renders on change. */
+export function useTextScale(): TextScale {
+    return useSyncExternalStore(settingsStore.subscribe, readTextScale, readTextScale);
+}
+
+/**
+ * Multiply every `fontSize` / `lineHeight` in a stylesheet factory's result
+ * by `scale`. Pure; returns the input untouched at scale 1 so the default
+ * stylesheet is byte-identical to the authored one. Other metrics (padding,
+ * widths, letter-spacing) are deliberately NOT scaled: text grows, chrome
+ * holds, and `numberOfLines` / flex wrapping absorb the difference.
+ */
+export function scaleTextStyles<T extends NamedStyles<T> | NamedStyles<Record<string, unknown>>>(
+    styles: T,
+    scale: number,
+): T {
+    if (scale === 1) return styles;
+    const round = (n: number): number => Math.round(n * scale * 10) / 10;
+    const out: Record<string, unknown> = {};
+    for (const key of Object.keys(styles)) {
+        const style = (styles as Record<string, Record<string, unknown>>)[key];
+        if (!style || typeof style !== 'object') { out[key] = style; continue; }
+        const next: Record<string, unknown> = { ...style };
+        if (typeof next.fontSize === 'number') next.fontSize = round(next.fontSize);
+        if (typeof next.lineHeight === 'number') next.lineHeight = round(next.lineHeight);
+        out[key] = next;
+    }
+    return out as T;
+}
+
 /**
  * The reactive replacement for a module-scope `StyleSheet.create`.
  *
@@ -141,13 +176,16 @@ type NamedStyles<T> = { [P in keyof T]: ViewStyle | TextStyle | ImageStyle };
 export function makeStyles<T extends NamedStyles<T> | NamedStyles<Record<string, unknown>>>(
     factory: (AXM: Palette) => T,
 ): () => T {
-    const cache = new Map<ThemeId, T>();
+    // Cached per (theme, text scale): the factory runs once per pair.
+    const cache = new Map<string, T>();
     return function useStyles(): T {
         const id = useThemeId();
-        let styles = cache.get(id);
+        const scale = useTextScale();
+        const key = `${id}:${scale}`;
+        let styles = cache.get(key);
         if (!styles) {
-            styles = StyleSheet.create(factory(paletteFor(id)));
-            cache.set(id, styles);
+            styles = StyleSheet.create(scaleTextStyles(factory(paletteFor(id)), scale));
+            cache.set(key, styles);
         }
         return styles;
     };

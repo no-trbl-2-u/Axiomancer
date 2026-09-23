@@ -39,7 +39,10 @@ import { resolveMinigameSeed } from '../minigame-seeds';
 import { EMPTY_BLACKSMITH_SLICE, type AppStore } from '../store';
 
 /** Flag set once the guided first visit is completed or skipped. */
-export const BLACKSMITH_TUTORIAL_FLAG = 'blacksmith-tutorial-done';
+// Source of truth moved to `state/tutorials.ts` (SETTINGS gate, 2026-09-23);
+// re-exported so existing importers keep working.
+export { BLACKSMITH_TUTORIAL_FLAG } from '../tutorials';
+import { BLACKSMITH_TUTORIAL_FLAG, isTutorialDone } from '../tutorials';
 
 /**
  * Dev/test seed override (`globalThis.__AXM_BLACKSMITH_SEED__`),
@@ -217,7 +220,7 @@ export function abandonBlacksmithAction(store: AppStore): void {
  */
 export function completeBlacksmithTutorialAction(store: AppStore, skipped: boolean): void {
     const state = store.getState() as unknown as GameState;
-    if (!(state.flags ?? []).includes(BLACKSMITH_TUTORIAL_FLAG)) {
+    if (!isTutorialDone(state.flags, BLACKSMITH_TUTORIAL_FLAG, true)) {
         store.setState({ flags: [...(state.flags ?? []), BLACKSMITH_TUTORIAL_FLAG] } as never);
         try {
             store.getState().save();

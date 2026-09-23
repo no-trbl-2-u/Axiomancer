@@ -29,7 +29,7 @@ import {
 } from '../Character/equipment.reducer';
 import { createCharacter, allocateStatPoint } from '../Character';
 import {
-    grantFirstNodeRelic, withholdFirstNodeRelic, isFirstNodeRelicPending,
+    grantFirstNodeRelic, isFirstNodeRelicPending,
 } from '../Character/first-node-grant';
 import { learnCard } from '../Cards';
 import { createStartingWorld, emptyQuestLog } from '../World';
@@ -136,6 +136,11 @@ import { generateRunId } from './run-loop';
  *   so. The migration stamps `first-node-relic-granted` on every existing
  *   save, which already owns the ring, so no save is ever offered it twice
  *   (see `game.migrate.ts`).
+ * 2026-09-23 — NO version bump: THE VERY START. A fresh save now seeds NO
+ *   relics at all (empty inventory, empty loadout, zero coin, zero XP). The
+ *   save SHAPE is unchanged, so existing saves need no migration — they keep
+ *   whatever kit they already carry. The ring still arrives at the first
+ *   node; the other ten relics are village-market wares (owner call).
  */
 export const GAME_STATE_VERSION = 24;
 
@@ -153,22 +158,27 @@ export function createNewGameState(): GameState {
         // not the {1,1,1}/15 HP placeholder — a 15 HP start is one-shot
         // territory for the early encounters. Starter cards are seeded by the
         // client on first combat (`ensureStarterCards`).
-        // Phase 19 — start with the signet relics (5 worn) so the player
-        // enters combat with a full signature kit derived from the loadout.
         //
-        // v24 — one of those five, the Suppliant's Ring, is WITHHELD from the
-        // seed and handed over at the run's first node instead, where the
-        // player can see it arrive (`Character/first-node-grant.ts`). The
-        // accessory row stays at capacity meanwhile (the Venom Sigil holds
-        // the seat), so the worn count, the signature count and the
-        // positional worn-convention are all unchanged — only WHEN the ring
-        // is handed over, and whether anything says so.
-        player: withholdFirstNodeRelic(createCharacter({
+        // Owner call 2026-09-23 — THE VERY START: a fresh run seeds NO items,
+        // no equipment, no currency and no XP. `seedStartingRelics` is off, so
+        // the inventory and the worn loadout are both empty. The one relic
+        // the run owes the player, the Suppliant's Ring, is still handed over
+        // at the first node (`Character/first-node-grant.ts` — with an empty
+        // accessory row it simply fills the first seat, displacing nothing).
+        // The other ten signet relics are village-market wares now
+        // (`World/MapEvents/content.ts`), bought with coin the run earns.
+        //
+        // Presets, fixtures, mocks and sims still seed the Phase-19 kit via
+        // `buildCharacterFromPreset` / `cloneStartingRelics`, so the measured
+        // baselines are untouched by this — only the real-player origination
+        // point changed. (The v24 stand-in swap, `withholdFirstNodeRelic`,
+        // is kept exported for callers that seed the kit themselves.)
+        player: createCharacter({
             name: 'Player',
             level: 1,
             baseStats: { heart: 5, body: 5, mind: 5 },
-            seedStartingRelics: true,
-        })),
+            seedStartingRelics: false,
+        }),
         world: createStartingWorld(),
         quests: emptyQuestLog(),
         flags,

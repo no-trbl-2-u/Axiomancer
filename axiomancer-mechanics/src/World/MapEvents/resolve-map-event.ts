@@ -87,6 +87,15 @@ export function registerMapEventPool(pool: MapEventPool): void {
     poolRegistry.set(pool.id, pool);
 }
 
+/**
+ * Read-only: every registered pool, in registration order. For audits that
+ * sweep authored content (e.g. "is every relic sold somewhere?") without
+ * reaching into the module-private registry.
+ */
+export function listRegisteredMapEventPools(): readonly MapEventPool[] {
+    return [...poolRegistry.values()];
+}
+
 export function setDefaultMapEventPool(
     continent: string,
     mapName: string,

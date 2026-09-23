@@ -8,7 +8,9 @@
  *   <AestheticModeProvider>            // canonical | codex toggle
  *     <CombatModeProvider>             // inCombat + lastOutcome + inEncounterModal
  *       <GameStoreProvider store>      // engine + mobile slices
- *         <NavigationContainer> ... </NavigationContainer>  // (callers add if needed)
+ *         <SaveSlotsProvider>          // the three save slots (in-memory here)
+ *           <SettingsProvider>         // player settings (never touches storage here)
+ *             <NavigationContainer> ... </NavigationContainer>  // (callers add if needed)
  *
  * Inline copies of this scaffold appeared in
  * `EncounterModalOverlay.test.tsx`, `DebugCombatButton.test.tsx`,
@@ -26,7 +28,10 @@ import React from 'react';
 import { TooltipProvider } from '@/components/tooltip/TooltipProvider';
 import { CombatModeProvider } from '@/state/combat-mode';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
+import { SaveSlotsProvider } from '@/state/SaveSlotsProvider';
 import { AestheticModeProvider, type AestheticMode } from '@/state/aesthetic-mode';
+import type { SaveSlotStore } from '@/state/persistence/saveSlots';
+import { SettingsProvider, createSettingsStore, type SettingsStore } from '@/state/settings';
 import { createAppStore, type AppStore } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 
@@ -35,7 +40,18 @@ export interface AllProvidersOptions {
     aesthetic?: AestheticMode;
     /** Optional pre-built store. Defaults to a fresh memory-adapter store. */
     store?: AppStore;
+    /** Optional slot store (2026-09-23). Defaults to a fresh in-memory one. */
+    slots?: SaveSlotStore;
+    /** Optional settings store (2026-09-23). Defaults to a fresh one at the defaults. */
+    settings?: SettingsStore;
 }
+
+/** A settings store under test never reaches AsyncStorage. */
+const NO_STORAGE = {
+    getItem: async () => null,
+    setItem: async () => undefined,
+    removeItem: async () => undefined,
+};
 
 export interface AllProvidersResult {
     /** The wrapped JSX, ready to pass to `render(...)`. */
@@ -55,11 +71,16 @@ export function withAllProviders(
     options: AllProvidersOptions = {},
 ): AllProvidersResult {
     const store = options.store ?? createAppStore({ adapter: createMemoryAdapter() });
+    const settings = options.settings ?? createSettingsStore({ storage: NO_STORAGE });
     const tree = (
         <AestheticModeProvider initialMode={options.aesthetic ?? 'canonical'} skipHydration>
             <CombatModeProvider>
                 <GameStoreProvider store={store}>
-                    <TooltipProvider>{child}</TooltipProvider>
+                    <SaveSlotsProvider slots={options.slots}>
+                        <SettingsProvider store={settings}>
+                            <TooltipProvider>{child}</TooltipProvider>
+                        </SettingsProvider>
+                    </SaveSlotsProvider>
                 </GameStoreProvider>
             </CombatModeProvider>
         </AestheticModeProvider>
