@@ -3,7 +3,9 @@
 > Written 2026-09-20 at T's direction. This file is a **handoff prompt**:
 > point a fresh Claude Code session at it to design the public DevLog site.
 > Its sibling, `plan/2026-09-20-devlog-public-publish.prompt.md`, builds and
-> deploys what this one designs. **Read that file first** — it defines the
+> deploys what this one designs, and **is blocked until this prompt has
+> run** — it checks for `devlog/DESIGN.md` and stops if it is missing, so
+> this is the first of the two. **Read that file first** — it defines the
 > post contract, and the post contract is this site's content inventory.
 > Design nothing that the pipeline cannot fill, and leave nothing the
 > pipeline produces without a place to live.
@@ -142,8 +144,9 @@ Done when all of the following exist on a branch, with a ready-for-review PR:
 
 1. `devlog/DESIGN.md` — the system, the decisions, the contrast table with
    real measured numbers.
-2. Working static prototypes of all six page types, using real entries and
-   the real committed before/after PNGs, openable from the filesystem.
+2. Working static prototypes of all six page types in `devlog/prototypes/`,
+   using real entries and the real committed before/after PNGs, openable from
+   the filesystem. The sibling prompt checks this path.
 3. The before/after component as a self-contained, documented prototype with
    every state demonstrated: touch, keyboard, no-JS, loading, and all three
    aspect ratios.

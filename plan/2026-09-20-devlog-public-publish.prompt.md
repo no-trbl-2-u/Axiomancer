@@ -3,14 +3,39 @@
 > Written 2026-09-20 at T's direction. This file is a **handoff prompt**:
 > point a fresh Claude Code session at it to build and deploy the public
 > DevLog. Its sibling, `plan/2026-09-20-devlog-site-design.prompt.md`,
-> designs what this one publishes. This prompt owns the **post contract**
-> below; the design prompt treats it as the site's content inventory.
+> designs what this one publishes, and **runs first** — see the Prerequisite.
+> This prompt owns the **post contract** below; the design prompt treats
+> it as the site's content inventory.
 >
 > **This prompt reverses a shipped ruling.** Read section 1 before anything
 > else. Phase 57 deliberately un-published the DevLog. You are re-publishing
 > it, deliberately, on different terms. Do not discover this halfway through
 > and stop; do not quietly leave phase 57's record saying the opposite of
 > what the tree now does.
+
+## Prerequisite — the design runs first, and this prompt checks
+
+**Do not start this prompt until `devlog/DESIGN.md` exists on `main`.** The
+design prompt (`plan/2026-09-20-devlog-site-design.prompt.md`) produces it,
+along with the page-type prototypes and the before/after component spec this
+prompt renders. Your first action is to check:
+
+```
+test -f devlog/DESIGN.md && ls devlog/prototypes/
+```
+
+If it is missing, **stop and say so** — the design has not been run. Do not
+design the site yourself on the way past. An unreviewed design is a worse
+outcome here than a delay, because this one ships to the public under the
+project's name and a design nobody looked at is exactly what a player sees
+first. Sections 1 and 5 (the publication reversal and the `/digest` contract)
+are the only parts that do not depend on the design, and they are not worth
+splitting the work over.
+
+If the design exists but is thinner than a section of this prompt needs — no
+alt-text rule, no spec for an aspect ratio you have to render — that is a gap
+to name and fill narrowly, in this prompt's own PR, recording what you decided
+and why. It is not licence to redesign.
 
 ## 0. Your mandate
 
@@ -193,7 +218,9 @@ section 2 without human help:
 Done when all of the following are true on a branch with a ready-for-review PR:
 
 1. The public site builds from a single documented command and renders every
-   page type the design prompt specifies.
+   page type the design prompt specifies, against the `devlog/DESIGN.md`
+   that existed when you started — with any gap you had to fill named in
+   the PR rather than silently designed.
 2. Before/after evidence works for at least: UI screens (existing), cards
    (new), and one further kind from section 3 — with the remainder either
    implemented or filed as named follow-ups, never silently dropped.
