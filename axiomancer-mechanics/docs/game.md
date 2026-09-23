@@ -213,10 +213,12 @@ Each playthrough gets a unique run identifier:
 ```typescript
 import { generateRunId, STARTING_REGION } from 'axiomancer-mechanics';
 
-const newGameState = createNewGameState({
-  runId: generateRunId(), // Timestamp-based ID
-  startingRegion: STARTING_REGION // 'coastal-village'
-});
+// `createNewGameState()` takes no arguments and stamps its own run id
+// (`generateRunId(() => getRng().random())`, 16-char hex). Every
+// `store.resetRun(...)` assigns a fresh one.
+const newGameState = createNewGameState();
+newGameState.runId;   // e.g. '3f9c0a1b2d4e5f60'
+STARTING_REGION;      // the region a fresh world starts in
 ```
 
 ### New Game Creation
@@ -224,11 +226,14 @@ const newGameState = createNewGameState({
 ```typescript
 import { createNewGameState } from 'axiomancer-mechanics';
 
-const initialState = createNewGameState({
-  character: customCharacter, // Optional
-  startingRegion: 'coastal-village', // Optional
-  runId: 'custom-run-id' // Optional
-});
+// No options: every real run starts from the same place — the very
+// start (2026-09-23): level 1 at the 5/5/5 baseline, empty inventory,
+// empty loadout, zero coin, zero XP. The Suppliant's Ring is owed and
+// handed over at the first node. To start from a customised character,
+// build one (`createCharacter` / `buildCharacterFromPreset`) and pass it as
+// an override to `createGameStore(adapter, { player })`, or use a state
+// fixture (`docs/state-fixtures.md`).
+const initialState = createNewGameState();
 ```
 
 ## Integration Examples

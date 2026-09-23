@@ -324,9 +324,10 @@ reality.
 > `getEquipmentTemplate`, `getTemplatesBySlot`, `uniqueTemplates`,
 > `getUniqueTemplate`, `dropItem`, `rollModifiers`, `resolveModifiers`,
 > `rarityWeightTable`, `previewTemplateAtRarity`, and the set-bonus/item-set
-> APIs no longer exist. The live equipment surface is the 8 signet relics
+> APIs no longer exist. The live equipment surface is the 11 signet relics
 > (`relicLibrary`, `getRelicById`, `getSignaturesForLoadout`) plus the equip
-> reducers and `wornPerSlot`. See [`equipment.md`](./equipment.md).
+> reducers and `wornPerSlot`. A fresh run seeds none of them (2026-09-23):
+> the ring arrives at the first node and the rest are village-market wares. See [`equipment.md`](./equipment.md).
 
 - Item creation and manipulation functions — Stable.
 - Equipment templates and generation (`equipmentTemplates`,

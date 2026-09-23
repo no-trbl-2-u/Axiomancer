@@ -43,3 +43,13 @@
   banner; the one doc that did pose as current law
   (`axiomancer-mechanics/docs/playtest.md`) was already fixed this
   week (commit dfa03ebb, tracked in `plan/AUDIT.md`).
+- 2026-09-23: bearings 880→880 lines, CRITIQUE 3002→2908, lessons
+  64→64 (reflexes 34→34); 4 rows archived (Done rows resolved
+  2026-07-10..07-17 → `plan/archive/CRITIQUE_2026.md`, new file), 0
+  merged; terminology sweep clean (check-lexicon 244 files / 21
+  terms). No lesson duplicates; no reflex drained — reflex 1's stop
+  check in `.claude/hooks/guard.mjs` is warning-only unless
+  `NEXUS_STRICT_STOP=1`, so it is not a hard enforcement. Stale facts
+  found in bearings' locked `URL / API / CLI contract` and repo-shape
+  blocks (route list, CLI subcommands, agent roster) were left for a
+  separate docs-consistency commit rather than edited under curation.

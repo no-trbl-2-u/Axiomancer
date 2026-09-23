@@ -142,8 +142,8 @@ Add new surfaces via new phases; do not change existing shapes.
 ### Mechanics CLI (`src/CLI/game.cli.ts`)
 
 ```
-npm run game -- <sub>          # sub in combat | hazard | gathering | loot-cache
-npm run hazard | gathering | loot-cache | combat   # named shortcuts
+npm run game -- <sub>          # sub in combat | hazard | labyrinth (no sub = the full run)
+npm run combat | hazard | labyrinth   # named shortcuts
 npm run combat-sim             # Monte-Carlo balance witness
 npm run combat-playtest        # stage x policy matrix
 # agent flags: --script <path> | --stdin | --json-events | --state-log
@@ -160,10 +160,14 @@ remove until mobile migrates): `skillLibrary`->`cardLibrary`,
 
 ### Mobile routes (expo-router `app/`)
 
-`(tabs)/`: character, exploration, inventory, memoir. Plus
-`index`, `combat-encounter`, `hazard`, `hazard-deck`, `gathering`,
-`rest`, `cache`, `quest`, `dialogue`, `event`, `cutscene`,
-`village`, and dev routes (`dev`, `devaftermath`, `devart`).
+`(tabs)/`: character, exploration, inventory, memoir, deck. Plus
+`index` (title → main menu), `saves` (the three save slots),
+`settings`, `combat-encounter`, `hazard`, `hazard-deck`,
+`item-reward`, `rest`, `cache`, `blacksmith`, `labyrinth`,
+`dialogue`, `event`, `cutscene`, `village`, and dev routes (`dev`,
+`devaftermath`, `devart`). The `gathering` and `quest` routes are
+retired; `app/_layout.tsx` + `lib/platform/router.ts` are the
+registration truth.
 Canon combat copy: **VITAE** (not HEALTH), **STANCE / CHOOSE A
 STANCE** (not GUARD) — copy regressions are rejected.
 
@@ -197,7 +201,7 @@ Axiomancer/
 ├── scripts/                    # deploy-check · notify · loop-issue
 ├── .claude/
 │   ├── commands/               # loop-verb pointers + domain tuning cmds
-│   ├── agents/                 # scout · reader · mechanics-expert · playtester
+│   ├── agents/                 # scout · reader · mechanics-expert · playtester · content-curator · card-expert
 │   ├── skills/                 # domain DESIGN skills (brainstorm/character/story/world-spec)
 │   ├── hooks/guard.mjs · settings.json (enforcement, always on)
 ```
@@ -217,6 +221,7 @@ Defined under `.claude/agents/`. Spawn aggressively.
 | `playtester` | Play the game via the running expo-web build (Playwright) — the real `/critique` observer for this project | Structured playtest report |
 | `mechanics-expert` | Second opinion on a mechanic design / balance call | Structured analysis (never code) |
 | `content-curator` | Author + ship narrative content (dialogue trees, event prose, flavor) in the house voice — `/iterate`'s content-gap worker | Shipped content through the gates |
+| `card-expert` | Design + implement cards/keywords with prior-art receipts — the working agent behind `/deck-tuning` and the `adjust-cards` / `adjust-keywords` lifecycle | Shipped cards/keywords through the gates |
 
 For `/critique`, prefer **`playtester`** (it already drives the
 app end-to-end) over the generic `reader`; there is no hosted URL

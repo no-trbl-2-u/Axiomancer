@@ -42,7 +42,7 @@ Design laws (mirrors `io.ts` / `telemetry.mjs` conventions):
 | `cli` | the CLI's stdout envelope stream mirrored at debug | `CLI/io.ts` `emit()` |
 | `action` | mobile action dispatches: `{ durationMs }` at debug, failures at error (then rethrown) | `wrapActionsWithLogging` (`state/logging.ts`) |
 | `nav` | `route-changed { pathname }` at info | `<NavLogger />` |
-| `persistence` | `preload` / `save-written` / `save-failed` / `slot-cleared` / `corrupt-save-cleared` | `asyncStorageAdapter.ts`, `app/_layout.tsx` |
+| `persistence` | save slots: `preload` (per-slot status + active slot) / `slot-selected` / `slot-unreadable` / `slot-cleared` / `save-written` / `save-failed` / `save-no-slot` / `last-slot-write-failed`; menu: `new-game` / `load-game` / `load-game-empty`; settings: `settings-read-failed` / `settings-write-failed`; boot: `preload-failed` / `corrupt-save-cleared` / `corrupt-save-clear-failed` / `fixture-boot` / `fixture-boot-failed` / `fixture-boot-ignored` | `state/persistence/asyncStorageAdapter.ts`, `state/menu/store-actions.ts`, `state/settings.ts`, `state/fixtures.ts`, `app/_layout.tsx` |
 | `error` | `react-boundary` crashes (message + stacks) | `ErrorBoundary.tsx` |
 | `world` / `minigame` / `ui` | reserved / sparse today (`ui/app-logging-initialized`); minigame engine taps are a filed follow-up | — |
 

@@ -2792,6 +2792,27 @@ stays at 75, unchanged.
   that flag-on is the default nightly measurement, more urgent than its
   filing date suggests.
 
+### Fixture player rebuild seeds the relic kit a real new game no longer has
+- category: divergence
+- impact: 3
+- ease: 7
+- detail: filed 2026-09-23 (docs-consistency pass after PR #360). Since
+  PR #360 `createNewGameState()` seeds NO relics (the very start).
+  `applyPlayer` in
+  `axiomancer-mechanics/src/Game/fixtures/state-fixture.builder.ts`
+  still rebuilds any fixture that overrides `level` or `baseStats` with
+  `createCharacter({ ..., inventory: current.inventory,
+  seedStartingRelics: true })`. So a preset-less fixture such as
+  "fresh game at level 3" boots wearing the full Phase-19 kit, a state
+  no real player can reach. When a preset is applied first, its
+  inventory already holds relics and the rebuild prepends a second
+  kit; that duplicate is unverified here. `docs/state-fixtures.md`
+  describes the code accurately; the code and the new-game contract
+  disagree.
+- next: decide whether a fixture rebuild should mirror the real start
+  (no kit unless the preset supplied one) and add a builder test
+  pinning the choice. Not fixed in the docs pass (code, out of scope).
+
 ### 2026-07-20 missing-layers survey — unpromoted findings (audio, settings, a11y, perf, flags, save export)
 - category: gap
 - impact: 5
@@ -2827,6 +2848,13 @@ stays at 75, unchanged.
 - next: /expand — re-propose individual items as candidates when their
   blockers move (a settings screen unlocks audio + a11y toggles; the
   flag registry becomes worth it at the next 2-3 flags).
+- update 2026-09-23 (PR #360): (2) **settings screen now exists**
+  (`/settings`; the theme picker moved there from the SELF tab) and (3)
+  gained a **text-size** step plus a reduced-motion override. (1) audio
+  is still absent — music/SFX volumes are persisted but nothing plays.
+  (6) saves are now **three slots** (`@axiomancer/save:v2:slot-*`);
+  export/backup is still absent. (4) and (5) unchanged. Row stays open
+  for (1), (4), (5), (6).
 
 ### [x] `skills/digest.md` §3 cites breadth-check plumbing that doesn't exist in this repo — RESOLVED (verified via /oversight 2026-08-12)
 - category: divergence
