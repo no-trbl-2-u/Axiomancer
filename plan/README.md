@@ -15,7 +15,7 @@ plan/
 ├── CRITIQUE.md                          # external-observer findings (append-only via /critique)
 ├── PHASE_CANDIDATES.md                  # phase candidates from /expand, gated by /oversight
 ├── CURRENT-STATE.md                     # snapshot of where the project stands
-├── reflexes.md                          # adopt-by-need: ≤50-line always-read core (see nexus/customization/lessons-layer.md)
+├── reflexes.md                          # adopt-by-need: ≤50-line always-read core
 ├── lessons.md                           # adopt-by-need: domain-keyed corpus, read by offset
 ├── steps/
 │   └── 01_build_plan.md                 # at-a-glance status block + per-phase scope
@@ -72,10 +72,9 @@ scoring. Set / cleared via `/oversight reset`.
 
 `reflexes.md` + `lessons.md` are a two-tier lessons layer —
 copy them in once the project has accumulated real recurring
-lessons (not day-1 setup notes). See
-`nexus/customization/lessons-layer.md` for the caps, the
-promotion path (lesson → reflex), and the drain path (reflex
-→ skill procedure edit).
+lessons (not day-1 setup notes). The caps, the promotion path
+(lesson → reflex), and the drain path (reflex → skill procedure
+edit) are stated in the two files' own headers.
 
 ## Manually ticking phases
 

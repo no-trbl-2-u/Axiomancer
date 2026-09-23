@@ -12,7 +12,7 @@
  * every fight you call on them — the "persistent companion" reading the
  * brief asked about, built entirely from vocabulary that already exists.
  *
- * Ally cards live OUTSIDE the pinned 57-card library, mirroring the
+ * Ally cards live OUTSIDE the curated library, mirroring the
  * sibling-pool pattern `cards.haunts.ts` established (WS2.1 / correction
  * C-11): real `Card` records, resolved through `getCardById`'s lookup
  * chain, but structurally excluded from `cardLibrary` — and therefore from
@@ -76,7 +76,7 @@ const theSwornSecond: Card = {
 };
 
 /**
- * Every Ally in existence. NOT part of the pinned 57-card library — no
+ * Every Ally in existence. NOT part of the curated library — no
  * reward/stage/draft pool ever offers one; Phase 65's village-goodwill
  * payout is the only intended grant path (not built here).
  */

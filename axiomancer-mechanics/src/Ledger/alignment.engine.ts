@@ -50,9 +50,8 @@ const cellsByTriple: Map<string, PhilosophicalAlignmentCell> = (() => {
  *
  * Buckets each axis and looks up the cell in the library. Throws if
  * the resulting triple isn't in the library — invariant: the library
- * is exhaustive once Unit 2 lands. Before Unit 2 ships only one
- * triple resolves; consumers calling this for unauthored triples
- * surface the error early.
+ * is exhaustive (all 27 cells are authored), so a throw means a
+ * malformed triple, not a missing cell.
  */
 export function getAlignmentCell(alignment: PhilosophicalAlignment): PhilosophicalAlignmentCell {
     const key = `${bucketAxis(alignment.epistemology)}-${bucketAxis(alignment.outlook)}-${bucketAxis(alignment.scope)}`;

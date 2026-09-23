@@ -5,7 +5,7 @@
  * `applyAlignmentDelta`, the cell-lookup invariant, the
  * `SHIFT_PHILOSOPHICAL_ALIGNMENT` action through `gameReducer`, the
  * save/load JSON round-trip, and the v4 → v5 migrator. Library
- * exhaustiveness + PDF spot-check cases land with Unit 2.
+ * exhaustiveness (27 cells) and the Unit 2 PDF spot-checks are pinned below.
  */
 
 import { describe, it, expect } from 'vitest';

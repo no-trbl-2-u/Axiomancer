@@ -1,8 +1,8 @@
 /**
  * Deterministic RNG for the Blacksmith encounter engine (mulberry32).
  *
- * Sibling copy of the LootCache/Rest RNG so the `World/Blacksmith/`
- * directory stays self-contained. The engine threads explicit RNG state
+ * Sibling copy of the Hazard RNG (`World/Hazard/hazard.rng.ts`) so the
+ * `World/Blacksmith/` directory stays self-contained. The engine threads explicit RNG state
  * through the session; it NEVER calls Math.random directly. The blacksmith's
  * upgrade transitions are deterministic (no rolls), so the state is threaded
  * but stays untouched — held for parity with the other minigame engines and

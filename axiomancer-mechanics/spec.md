@@ -29,7 +29,7 @@ No database, no server, no web UI.
 - Multiple save slots (deferred).
 - **v1.0.0 stable-API stamp before the spec contracts settle.** Pre-1.0
   minor bumps may carry breaking public-API changes (deprecation
-  lifecycle per `RELEASING.md`); `1.0.0` graduates the contract surface
+  lifecycle per `RELEASING.md`, since removed); `1.0.0` graduates the contract surface
   to semver-strict only once the spec coverage matches the shipped
   engine. Until then, downstream consumers (e.g. `axiomancer-mobile`)
   pin exact versions and bump deliberately per release.

@@ -58,7 +58,7 @@ The empirical witnesses, in order of preference:
    spread (e.g. fishing-village's encounter plurality + single quest/boss),
    per-node kind resolution, and full-kind coverage across the authored maps.
 2. **Seeded policy probes** — no `world.sim.ts` exists yet; building one
-   with codified per-map kind-spread bands (mirroring `gathering.sim.ts`)
+   with codified per-map kind-spread bands (mirroring `World/Hazard/hazard.sim.ts`)
    is in scope for this loop to ship directly (THE OPEN GATE ¶5), not just
    a standing suggestion. Until it lands, probe with a scratch driver over
    ≥ 50 seeds per
@@ -145,7 +145,7 @@ full node table so it can't drift from `content.ts`.
    `balance(world): <ts> report + suggestions (<n> changes applied)`; push
    and open a PR (ready for review, never draft, never auto-merged).
    Buildable when it earns its place: a `world.sim.ts` with codified
-   per-map kind-spread bands, mirroring `gathering.sim.ts` (THE OPEN GATE
+   per-map kind-spread bands, mirroring `World/Hazard/hazard.sim.ts` (THE OPEN GATE
    ¶5 — no longer propose-only).
 
 ## 6. Hard rules

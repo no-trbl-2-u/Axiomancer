@@ -29,7 +29,7 @@
  * the engine does all scaling, so the roster retunes from constants.
  *
  * ── THE BIG NUMBERS REWRITE (2026-09-02) ──────────────────────────────────
- * `threatDamageBudget` is now round((6 + 2.5·level) · DIFFICULTY_MULT ·
+ * `threatDamageBudget` is now round((6 + 0.8·level) · DIFFICULTY_MULT ·
  * (1 + 0.2·phaseIndex) · damageWeight) and the old global THREAT_DAMAGE_SCALE
  * (1.7) is retired. Every weight in this file was re-banded to §5.3:
  *

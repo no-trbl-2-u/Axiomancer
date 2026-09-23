@@ -28,7 +28,7 @@ Procedure:
    name alone.
 3. **Reproduce locally:** run that workspace's verify leg
    (`npm run verify -w axiomancer-mechanics`, `npm run verify -w
-   axiomancer-mobile`, or `npm run type-check -w axiomancer-card-editor`)
+   axiomancer-mobile`, or `npm run verify -w axiomancer-card-editor`)
    and confirm you see the same failure.
 4. **Fix the root cause** — the minimal correct fix, not a suppression.
    Never skip/disable a test or loosen a type to get green; if the correct

@@ -4,7 +4,7 @@
  * Phase 142 introduced the registry; the Fate Engine P1 trim (spec 31 §3.3)
  * rebuilt it; the spec 32 v3 keyword reset (2026-07-08) RE-PINNED it to the
  * six-effect card vocabulary (poison / bleed / mark / backfire / quarter /
- * thorns). Every ingredient below is a live library id the 70-card pool can
+ * thorns). Every ingredient below is a live library id the card pool can
  * actually assemble — the deprecated-effects ban list enforces this. The live
  * engine consumes ONLY `amplify_damage` results
  * (`getDotAmplificationByEffect`), so every combo here uses that type.

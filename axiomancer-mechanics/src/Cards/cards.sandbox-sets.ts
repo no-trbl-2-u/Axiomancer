@@ -13,7 +13,7 @@
  * rule the spec-32 v3 overhaul applied to ITS predecessors; the retired pools
  * live in git history). `/deck-tuning` authors fresh canon-era sets here
  * (cards must use the profane-canon keyword set and the v3 `Card` schema —
- * no raw HP damage; the schema enforces the doctrine).
+ * direct damage is legal again via `deal` since THE BIG NUMBERS REWRITE).
  *
  * Promotion path: a sandbox card that proves out across stages/policies moves
  * its literal into `cards.library.ts` in the same PR as the evidence table.

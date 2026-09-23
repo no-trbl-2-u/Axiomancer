@@ -2,7 +2,9 @@
 
 > How `axiomancer-mechanics` connects to mobile UI patterns
 
-This document explains the architectural bridge between the `axiomancer-mechanics` npm engine and mobile-specific UI concerns. Newcomers should read this alongside [`docs/presenters.md`](./presenters.md) and [`docs/adr/ADR-0001-engine-truth-and-presenter-boundary.md`](./adr/ADR-0001-engine-truth-and-presenter-boundary.md).
+> **Superseded (2026-09-23):** the illustrative code below (`selectCombatViewModel` reading `state.combat`, `actions.selectStance` / `actions.resolveCombatRound`, the `choosing_stance` phase loop) predates Hazard-Pattern combat; the legacy turn-based combat driver was removed in mechanics 0.37.0, `selectStance` / `resolveCombatRound` no longer exist, and `state.combat` stays `null` during a live encounter (the engine keeps `CombatState` only as a shim for `executeCard`). The architectural principles (presenter boundary, engine truth, no parallel rules) still hold — live truth: `docs/combat.md` + `state/presenters/combat-encounter.engine.ts`. Body kept as a historical record pending rewrite (plan/AUDIT.md).
+
+This document explains the architectural bridge between the `axiomancer-mechanics` engine (a sibling workspace consumed as local source via the `@mechanics` alias) and mobile-specific UI concerns. Newcomers should read this alongside [`docs/presenters.md`](./presenters.md) and [`docs/adr/ADR-0001-engine-truth-and-presenter-boundary.md`](./adr/ADR-0001-engine-truth-and-presenter-boundary.md).
 
 ## Overview — The Translation Layer
 
@@ -12,7 +14,7 @@ Axiomancer Mobile is fundamentally a **presentation layer** on top of the `axiom
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │ axiomancer-     │    │ Mobile          │    │ React Native    │
 │ mechanics       │───▶│ Presenters      │───▶│ Components      │
-│ (npm engine)    │    │ (translation)   │    │ (UI)            │
+│ (local source)  │    │ (translation)   │    │ (UI)            │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
      Game Truth              Bridge Layer           User Interface
 ```
@@ -224,11 +226,11 @@ Investigation path:
 When the engine evolves, mobile follows a predictable upgrade path:
 
 ```
-Engine 0.15.0 → 0.16.0: New card resource system
+Engine change: New card resource system (lands in ../axiomancer-mechanics/src)
 
-Mobile migration:
-1. Update npm dependency: axiomancer-mechanics@^0.16.0
-2. Update presenters: combat.engine.ts card picker logic  
+Mobile migration (no version pin — the sibling source is picked up on the next build):
+1. Read the new engine types via `@mechanics`
+2. Update presenters: combat-encounter.engine.ts card picker logic  
 3. Update components: New resource displays (if needed)
 4. Update tests: New presenter contracts
 
@@ -394,7 +396,7 @@ useEffect(() => {
 1. **Understand mobile constraints first**: Touch targets, screen size, performance
 2. **Read the presenter docs**: [`docs/presenters.md`](./presenters.md)
 3. **Study mobile-specific adaptations**: Above patterns section
-4. **Examine a complete example**: [`state/presenters/combat.engine.ts`](../state/presenters/combat.engine.ts)
+4. **Examine a complete example**: [`state/presenters/combat-encounter.engine.ts`](../state/presenters/combat-encounter.engine.ts)
 5. **Follow the data flow**: Engine state → Mobile Presenter → React Native Component
 6. **Test the boundary**: Every presenter has hermetic tests in `state/e2e/`
 

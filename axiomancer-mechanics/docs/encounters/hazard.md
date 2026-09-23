@@ -205,14 +205,14 @@ outcome          HazardOutcome | null
 Exported from `src/World/Hazard/index.ts`. Key transitions:
 
 ```typescript
-createHazardSession(hazardId, seed, bagCardIds)  // entry point
-selectHazardRoute(state, route)                   // lock Safe or Risk
+createHazardSession(seed, bagCardIds, hazardId)  // entry point
+selectHazardRoute(state, route, bagCardIds)       // lock Safe or Risk
 finishHazardRolling(state)                        // roll dice → 'playing'
-stageHazardCard(state, uid)
+stageHazardCard(state, uid, bagCardIds)
 powerHazardCard(state, uid, dieId)
-applyHazardCard(state, uid)                       // fires utility effect
-resolveHazardRound(state)                         // O / X judgement
-continueHazardAfterResolve(state)                 // advance to next round
+applyHazardCard(state, uid, bagCardIds)           // fires utility effect
+resolveHazardRound(state, bagCardIds)             // O / X judgement
+continueHazardAfterResolve(state, bagCardIds)     // advance to next round
 hazardSubquestStatus(state, subquestId)           // 'active' | 'done' | 'failed'
 claimHazardRewards(state, pickedCardId | null)    // → 'done'
 ```

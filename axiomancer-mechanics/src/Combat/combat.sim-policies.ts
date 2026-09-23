@@ -7,9 +7,8 @@
  * hidden enemy stance, and how a mercy choice resolves. The sim driver stays
  * one loop; the policies make it a matrix.
  *
- * Doctrine (CLAUDE.md): status effects are the MAIN fun — HP is the sole win
- * condition and status is the EFFICIENT way to drop it. The roster is built to
- * witness that: `dot-weaver` and `control-lock` play the doctrinal game,
+ * HP is the sole win condition (the old status-primacy doctrine is retired —
+ * see `docs/lexicon.json`). The roster was built to witness status play: `dot-weaver` and `control-lock` play the doctrinal game,
  * `aggro-brute` is the deliberately weak basic-attack baseline (its
  * underperformance IS the design), and `greedy`/`blind` remain the tuned
  * balance witnesses with bit-identical behavior to the pre-roster sim.

@@ -26,7 +26,7 @@
 //    never reach the public site by a later accident. The run says which files
 //    it withheld and why.
 //
-// Exit 0 always (a collector, not a gate).
+// Exit 0 always (a collector, not a gate); boot failures exit 3.
 
 import { spawnSync } from 'node:child_process'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'

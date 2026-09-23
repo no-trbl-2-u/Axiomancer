@@ -50,7 +50,9 @@ export function resolveStateFixture(
     return fixture;
 }
 
-/** Resolve + compile in one step — what `runGameCli` calls. */
+/** Resolve + compile in one step — the `axiomancer-mechanics/node` barrel
+ *  export (`runGameCli` itself calls `resolveStateFixture` +
+ *  `buildStateFromFixture` separately so it can read `fixture.arrive`). */
 export const bootStateFromFixture = (
     ref: string,
     readFile?: (path: string) => string,

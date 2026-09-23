@@ -1,7 +1,7 @@
 /**
  * Hermetic E2E — Spec 26b Hazard-Pattern Combat: DEFENSE cards / GUARD.
  *
- * Defense cards (basePower 0, a `guard` specialMechanic) grant the player GUARD —
+ * Defense cards (a `guard` specialMechanic) grant the player GUARD —
  * a transient shield that absorbs the enemy's NEXT telegraphed threat in
  * `resolveThreatPhase`, then resets each phase. This suite pins the contract:
  *

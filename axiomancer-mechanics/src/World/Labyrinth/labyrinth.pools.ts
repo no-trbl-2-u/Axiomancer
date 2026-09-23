@@ -160,7 +160,8 @@ function overridePool(act: LabyrinthActDef, room: LabyrinthRoomDef): MapEventPoo
         // One-shot meagre rest. Phase 52b — a waystone is a CAMP: the stone
         // holds your place, it does not keep an inn. The per-waystone
         // healFraction band (0.35 / 0.5, generous on the act's LAST stone)
-        // was retired with the knob; 52c re-derives the heal from `shelter`.
+        // was retired with the knob; 52c's `World/RestChoice` heals a flat
+        // fraction regardless of shelter.
         return {
             id,
             entries: [{

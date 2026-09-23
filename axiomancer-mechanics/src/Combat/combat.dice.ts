@@ -1,9 +1,11 @@
 /**
  * Spec 25 — Hazard-Pattern Combat: stance dice (§4.2).
  *
- * Adapts the Hazard die state-machine (`src/World/Hazard/hazard.dice` patterns)
- * to the combat stance economy. Four dice are rolled at combat start and persist
- * as board objects; spent dice stay spent (no auto-reset between threat phases —
+ * Adapts the Hazard die state-machine (`src/World/Hazard/hazard.engine`
+ * patterns) to the combat stance economy. Spec 25's original model rolled four
+ * dice at combat start (`COMBAT_DICE_COUNT`, kept for the shim); since the
+ * 2026-07-09 dice-law rework the live tray is `TURN_DICE_COUNT` dice rolled
+ * fresh every turn. Dice persist as board objects; spent dice stay spent (no auto-reset between threat phases —
  * the same doctrine as Hazard). Card effects and the self-reinforcing status
  * loop are the only normal ways to reclaim a spent die.
  *
@@ -262,9 +264,10 @@ export function hasRerollableDice(dice: readonly CombatManaDie[]): boolean {
  * re-rolls each die you've used (`spent`/`exhausted`) or that shows a dead `x`
  * face, and leaves every still-usable die untouched. Re-rolled dice get a fresh
  * color and reset state (X → `locked`, else `available`) while KEEPING their id
- * (so the UI animates the same die object). Like `rollTurnDice`, guarantees at
- * least one stance-bearing die across the resulting pool — converting one of the
- * re-rolled dice (never a preserved one) when none qualifies.
+ * (so the UI animates the same die object). Unlike `rollTurnDice` (honest since
+ * the 2026-07-09 rework), still guarantees at least one stance-bearing die
+ * across the resulting pool — converting one of the re-rolled dice (never a
+ * preserved one) when none qualifies.
  */
 export function rerollSpentDice(
     dice: readonly CombatManaDie[],

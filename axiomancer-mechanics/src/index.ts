@@ -104,8 +104,9 @@ export type {
 } from './Combat';
 
 // ─── Spec 25 — Hazard-Pattern Combat ──────────────────────────────────────────
-// Card-and-dice combat: HP is the sole win condition. Status effects erode HP
-// far faster than the deliberately weak basic strike.
+// Card-and-dice combat: VITAE (`isDefeated`) is the main win condition beside
+// the alt-wins (Befriend, RELENT, CONDEMN); status play and direct damage
+// compete on merit (THE BIG NUMBERS REWRITE, 2026-09-02).
 export {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveCombatPhase, resolveThreatPhase, processBetweenPhases,
@@ -222,8 +223,8 @@ export type {
 } from './Combat';
 
 // ─── Playtest supercharge — stage matrix, policy roster, deck drafting ────────
-// Doctrine witnesses at every campaign stage: status play must stay the
-// efficient path to dropping enemy HP.
+// Witnesses at every campaign stage (the status-primacy doctrine they once
+// enforced was repealed 2026-09-02; nothing is graded against it).
 export {
     simulateHazardPatternCombatDetailed, runOneEncounter,
     COMBAT_STAGE_ORDER, COMBAT_STAGE_PROFILES,
@@ -244,11 +245,12 @@ export type {
 } from './Combat';
 export type { PlaytestPresetSummary, PlaytestPresetStageRow } from './Combat/combat.playtest';
 
-// ─── Objective function v2 — the Combat Quality Index (Phase 43) ──────────────
-// THE metric `/deck-tuning` and `/combat-playtest` optimise, replacing the
-// voided status-dominance doctrine that `statusEngagement` enforced.
-// `assertLockedMechanicsFirstClass` is the guard that keeps Conviction, the
-// Surge meter and the Dice system permanently first-class in the score.
+// ─── Combat Quality Index (Phase 43) — diagnostic only ────────────────────────
+// Printed by `/deck-tuning` and `/combat-playtest` beside the legacy
+// `statusEngagement` warning light; nothing is graded against it — THE BIG
+// NUMBERS REWRITE (2026-09-02) repealed every governing combat objective
+// function, CQI included. `assertLockedMechanicsFirstClass` still keeps
+// Conviction, the Surge meter and the Dice system first-class in the score.
 export {
     scoreCombatObjective, formatCombatQuality, assertLockedMechanicsFirstClass,
     scoreConvictionUse, scoreSurgeUse, scoreDiceUse,
@@ -286,7 +288,7 @@ export type { SandboxCardSet } from './Cards/cards.sandbox-sets';
 // ─── Deck removal (Phase 52a) — taking a card OUT, and what that costs ───────
 // The engine's first removal primitive plus the per-run escalating price. The
 // rest-choice engine (52c) and the picker screen (52d) consume these; prices
-// are PROVISIONAL until Phase 52f calibrates them against measured income.
+// were ratified in Phase 52f against measured income.
 export {
     removeCardFromCombatDeck, MIN_COMBAT_DECK_SIZE,
     CARD_REMOVAL_PRICING,
@@ -441,25 +443,23 @@ export {
 } from './World';
 export type { QuestRewardPayout } from './World';
 
-// Hazard Minigame (v2 — faithful port of the mobile living rules source).
+// Hazard Minigame (v2 — faithful port of the former mobile living rules source).
 // The full public surface (engine transitions, content, tuning, deck-flag
-// codec, seeded RNG, and types) is exported directly from the Hazard module
-// so mobile can delete its local engine and import these instead.
+// codec, seeded RNG, and types) is exported directly from the Hazard module;
+// mobile has deleted its local engine and imports these.
 // See `docs/hazard-v2-vs-mechanics-divergence.md`.
 export * from './World/Hazard';
 
-// Quest Board minigame ("The Boy's Almanac" — the story-quest encounter:
-// each main-story beat plays as an authored tabletop board inside the
-// fiction; fully sandboxed, only the completion record flows back).
-// Seeded-RNG helpers are aliased (`questBoard*`) per the same doctrine.
+// Quest Board minigame ("The Boy's Almanac") — retired in Phase 61; nothing
+// is exported for it any more (see `game.migrate.ts`'s v17 → v18 hop).
 
 // Blacksmith encounter ("The Anvil" — Spec 33 §6 die-gear upgrades: HONE /
 // TEMPER / gear swap). RNG aliased `blacksmith*`.
 export * from './World/Blacksmith';
 // Rest-choice encounter (Phase 52c-d) — the rest node's one irreversible
-// choice of `rest` / `anvil` / `cut`, composing the Blacksmith engine and
-// the Cards/card.removal primitive rather than rebuilding either. Replaced
-// the former rest minigame, retired in Phase 52e.
+// choice of `rest` / `cut` (the `anvil` offer was dropped in Phase 59),
+// composing the Cards/card.removal primitive rather than rebuilding it.
+// Replaced the former rest minigame, retired in Phase 52e.
 export * from './World/RestChoice';
 // Loot-cache-choice encounter ("The Reliquary") — the cache node's one
 // irreversible choice of `card` / `item` / `sacrifice`. Replaced the

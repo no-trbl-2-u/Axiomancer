@@ -14,7 +14,7 @@ const hero = createCharacter({
   baseStats: { body: 4, mind: 6, heart: 5 },
 });
 // hero.id is auto-generated (char-<base36> from RNG)
-// hero.maxHealth = level × avg(body, heart) × 10
+// hero.maxHealth = PLAYER_VITAE_BASE (50) + (body + heart + mind) × HEALTH_PER_STAT (8)
 ```
 
 ## Use a preset
@@ -22,7 +22,7 @@ const hero = createCharacter({
 ```typescript
 import { buildCharacterFromPreset, getPresetById } from 'axiomancer-mechanics';
 
-const sage = buildCharacterFromPreset('sage');
+const sage = buildCharacterFromPreset(getPresetById('sage')!);
 // Level 15, pre-equipped gear, full card roster
 // Presets: 'apprentice' (L1), 'wanderer' (L8), 'sage' (L15)
 ```
@@ -44,12 +44,12 @@ const upgraded = allocateStatPoint(hero, 'mind');
 ```typescript
 import { learnCard, getAvailableCards } from 'axiomancer-mechanics';
 
-// Check what's learnable at current level + alignment
-const available = getAvailableCards(hero, hero.knownCards);
+// Every library card the character does not already know
+const available = getAvailableCards(hero);
 
-// Learn if requirements met
-const result = learnCard(hero, 'false-dilemma');
-// result.character has the card in knownCards; there is no equipped-card gate (ADR-0002)
+// Returns a new Character with the card in knownCards (no-op if already known)
+const learned = learnCard(hero, 'unction-of-boils');
+// learned.knownCards includes the card; there is no equipped-card gate (ADR-0002)
 ```
 
 ## Equip items

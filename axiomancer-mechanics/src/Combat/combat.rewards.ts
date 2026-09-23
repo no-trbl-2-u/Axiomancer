@@ -5,9 +5,9 @@
  *   1. CARD REWARDS (frequent, after a won combat) grow the DECK — extra copies
  *      and variety. They append to `Character.combatRewardCards`, which
  *      `buildCombatDeck` stacks on top of the learned-card baseline.
- *   2. CARD UNLOCKS (rare, via ethical-dilemma events — not implemented yet)
- *      add a NEW card type. `unlockCardViaDilemma` is the hook those events will
- *      call; it bypasses the normal learning requirements (the dilemma IS the
+ *   2. CARD UNLOCKS (rare, via ethical-dilemma events) add a NEW card type.
+ *      `unlockCardViaDilemma` is the hook those events call (mobile's village
+ *      goodwill 'sacrifice' claim, `state/cache/store-actions.ts`, already does); it bypasses the normal learning requirements (the dilemma IS the
  *      gate), unlike `learnCard`.
  *
  * Pure: rolling takes an explicit `rng`. The mobile aftermath offers the 1-of-N
@@ -66,8 +66,9 @@ export const STARTING_CARD_IDS: readonly string[] = Object.freeze([
  *  drafts shown — a SKIP does not advance it. See `rollCombatCardRewards`. */
 export const REWARD_RANDOM_PICKS = 3;
 
-/** The single OFFENSIVE card a brand-new player starts with. Kept for
- *  back-compat; prefer `STARTING_CARD_IDS` (which also grants a defense card). */
+/** The single OFFENSIVE card a brand-new player started with before Phase 104
+ *  (no longer in `STARTING_CARD_IDS`). Kept for back-compat; prefer
+ *  `STARTING_CARD_IDS`. */
 export const STARTING_CARD_ID = 'spoiled-poultice';
 
 /**
@@ -292,7 +293,7 @@ export function addRewardCard(player: Character, cardId: string): Character {
  * Spec 26b §D — unlock a NEW card from an ethical-dilemma event. Bypasses the
  * normal `learnCard` requirement gates (level/stat/prereq) because the dilemma
  * choice is itself the gate. No-op (same ref) when already known or unknown id.
- * The dilemma EVENTS are not implemented yet; this is the hook they will call.
+ * Live caller: mobile's village-goodwill 'sacrifice' claim (Phase 65).
  */
 export function unlockCardViaDilemma(player: Character, cardId: string): Character {
     if (player.knownCards.includes(cardId)) return player;

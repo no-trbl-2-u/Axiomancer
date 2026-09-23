@@ -4,8 +4,8 @@
  * Branching dialogue is data-only — the engine walks a `DialogueTree`, hands
  * back the current node and visible choices, and lets the caller (CLI / UI)
  * decide when to advance. Side effects on a chosen `DialogueChoice` are
- * surfaced as a `DialogueEffect` payload; the orchestrator (`processDialogueChoice`)
- * applies them to `GameState`.
+ * carried on `DialogueChoice.effect`; the orchestrator (`applyDialogueChoice`,
+ * `World/dialogue.runtime.ts`) applies them to `GameState`.
  */
 
 import { DialogueChoice, DialogueNode, DialogueTree } from './types';

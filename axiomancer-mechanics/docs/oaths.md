@@ -78,8 +78,9 @@ State + reducer:
 - Store action `shiftPhilosophicalAlignment(delta)` mirrors
   `shiftMoralMeter(delta, gating?)`.
 
-Save migration: `migrateV4toV5` defaults the field to `{0, 0, 0}` on
-legacy saves (`src/Game/game.migrate.ts`).
+Save migration: the original `migrateV4toV5` step (defaulting the field
+to `{0, 0, 0}`) has since been retired — the ladder in
+`src/Game/game.migrate.ts` now starts at v11 and refuses older saves.
 
 ## The 27 cells
 
@@ -120,8 +121,8 @@ Phase 42 (spec 34 §6.2.2 — cell ids are lookup keys, not display copy).
 
 Each cell carries three besetting sins (name, example, rationale). They
 ship as data but are not wired to gameplay yet — the same "content fuel"
-status the original fallacy content held (see `plan/phases/phase_42_philosophical_alignment.md`
-"Follow-ups"). Two Tier-3 skills and their linked status effects that once
+status the original fallacy content held (see the Phase 42 brief's
+"Follow-ups"; that brief is no longer in `plan/phases/`). Two Tier-3 skills and their linked status effects that once
 sourced from this content (`nirvana-fallacy`, `appeal-to-fear`, and their
 `sourcedFromCell`-linked effects) no longer exist in the codebase — the
 Profane Canon rework (`84ef85b`) removed the spec-32 card library they
@@ -221,6 +222,8 @@ The predicate sits on two existing requirement shapes:
   doesn't satisfy the gate (or isn't provided), the choice is hidden.
   Mirrors the existing `requires.flag` semantic — a missing context
   field implicitly hides the gated content.
+
+> **Superseded (2026-09-23):** the card-side gate below (`SkillLearningRequirement.requiresAlignment`, `getAvailableSkills`, `learnSkill`, `LEARN_SKILL`) no longer exists — the learning-requirement gate was removed 2026-07-08 and `getAvailableCards` / `learnCard` (`src/Cards/card.engine.ts`, `LEARN_CARD` in `src/Game/game.reducer.ts`) take no alignment argument; only the dialogue gate above is live — live truth: src/Cards/card.engine.ts, src/NPCs/. Body kept as a historical record pending rewrite (plan/AUDIT.md).
 
 - `SkillLearningRequirement.requiresAlignment?: AlignmentGate` —
   evaluated by `meetsLearningRequirement(character, card, alignment?)`.

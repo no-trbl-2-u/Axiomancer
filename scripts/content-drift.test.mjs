@@ -144,7 +144,7 @@ test('every keyword the atlas registers has a gloss in a live registry', () => {
   // a keyword that does not exist.
   //
   // TWO registries count. Card keywords live in mobile's `KEYWORD_GLOSS`; the
-  // nine ENEMY keywords live in mechanics' `ENEMY_KEYWORD_GLOSS`, kept separate
+  // ENEMY keywords live in mechanics' `ENEMY_KEYWORD_GLOSS`, kept separate
   // on purpose so the mobile KW lints stay card-only.
   const registry = {
     ...mobileRegistryKeywords(), ...enemyRegistryKeywords(), ...systemGlossaryTerms(),

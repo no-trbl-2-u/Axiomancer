@@ -19,8 +19,8 @@ description: Automated combat UX A/B tuner.
 ## 1. Purpose
 
 `/combat-ux-tuning` is the Mobile-side companion to the mechanics-side
-numeric tuning (engine-constant tuning is currently manual — the
-combat-tuning loop was trimmed at the monorepo merge). Mechanics owns the
+numeric tuning loops (`/combat-playtest` for engine constants,
+`/deck-tuning` for cards and presets — THE OPEN GATE ¶4). Mechanics owns the
 card-and-dice combat numbers. This skill tunes the **player input surface** for
 that combat: how reliably and directly an automated player can enter combat,
 stage a card, assign/power with dice, APPLY, END PHASE, and progress the fight.

@@ -10,8 +10,8 @@
  *   2. If the node is already in `consumedNodes`, return
  *      `{ kind: 'none' }` immediately (one-shot enforcement).
  *   3. Roll one entry from the node's event pool. Pool resolution
- *      prefers `MapDefinition.nodeEventPools[nodeId]` over
- *      `MapDefinition.defaultEventPool`. Missing pool → `{ kind: 'none' }`.
+ *      prefers the node override (`setNodeEventPoolOverride`) over the
+ *      map default (`setDefaultMapEventPool`). Missing pool → `{ kind: 'none' }`.
  *   4. Hand the rolled payload off to the matching handler from
  *      `handlers.ts`.
  *   5. Add the node to `consumedNodes` and reveal its adjacents.

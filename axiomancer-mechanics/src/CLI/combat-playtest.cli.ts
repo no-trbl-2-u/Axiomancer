@@ -6,20 +6,20 @@
  * Sweeps `runPlaytestMatrix` (campaign stages x sim policies x deck
  * selections) and prints the aligned report.
  *
- * **Phase 43 — the objective function is `cqi`, the Combat Quality Index**
- * (`src/Combat/combat.objective.ts`): does the deck's engine RUN — assembling
- * across turns (arc), offering more than one line per powering die (width),
- * carried by a lead card that isn't the whole deck (identity), and flowing
- * through the three LOCKED systems, Conviction / the Surge meter / the Dice
- * (spine, the heaviest term). `statusEngagement` and `dotHpFraction` are still
- * printed beside it, but THE UNSHACKLING voided the status-dominance doctrine
- * they enforced: read them as warning lights, never as the target.
+ * **`cqi`, the Combat Quality Index** (`src/Combat/combat.objective.ts`), is
+ * printed as a diagnostic: does the deck's engine RUN — assembling across
+ * turns (arc), offering more than one line per powering die (width), carried
+ * by a lead card that isn't the whole deck (identity), and flowing through
+ * Conviction / the Surge meter / the Dice (spine). Nothing is graded against
+ * it — THE BIG NUMBERS REWRITE (2026-09-02) repealed every governing combat
+ * objective function, CQI included. `statusEngagement` and `dotHpFraction`
+ * print beside it as warning lights, never as a target.
  *
  * Usage:
  *   npm run combat-playtest                                        # all stages, greedy witness, policy-pick decks
  *   npm run combat-playtest -- --stage=early --policy=all
  *   npm run combat-playtest -- --policy=dot-weaver --deck=draft:dot
- *   npm run combat-playtest -- --deck=preset:dot-erosion --runs=100 --seed=7
+ *   npm run combat-playtest -- --deck=preset:threadbare --runs=100 --seed=7
  *   npm run combat-playtest -- --enemy=king-of-revenge --cards
  *   npm run combat-playtest -- --sandbox=forge-example --json
  *
@@ -32,7 +32,7 @@
  *                                           every copy of <out> replaced by <in>
  *                                           (pair with --sandbox when <in> is a
  *                                           sandbox swap-pool card)
- *   --deck=preset:all                       sweep ALL TEN presets in one matrix and
+ *   --deck=preset:all                       sweep ALL presets (`COMBAT_DECK_PRESET_ORDER`) in one matrix and
  *                                           print the per-preset x stage rollups
  *                                           (doctrine-band fit, skill gap, complexity)
  *   --enemy=<slug>                          restrict rosters to one enemy

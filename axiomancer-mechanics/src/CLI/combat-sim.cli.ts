@@ -25,8 +25,9 @@ import type { Enemy } from '../Enemy/types';
 import { LittleBelle, TheFerryman, KingOfRevenge, FateSpinner } from '../Enemy/enemy.library';
 import { deepClone } from '../Utils';
 import { simulateHazardPatternCombat, type CombatSimPolicyId } from '../Combat/combat.encounter.sim';
-// Phase 43 — objective function v2 (Combat Quality Index), surfaced beside the
-// legacy `statusEngagement` warning light.
+// Combat Quality Index — printed as a diagnostic beside the legacy
+// `statusEngagement` warning light; no governing objective function remains
+// (THE BIG NUMBERS REWRITE, 2026-09-02).
 import { formatCombatQuality } from '../Combat/combat.objective';
 
 export const ENEMIES: Record<string, Enemy> = { LittleBelle, TheFerryman, KingOfRevenge, FateSpinner };

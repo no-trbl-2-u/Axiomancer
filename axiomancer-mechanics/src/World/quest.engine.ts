@@ -11,7 +11,7 @@
  *      the `completed` list.
  *
  * All reducers are pure. Helpers (`isQuestComplete`, `findActiveQuest`,
- * `questsTouchingNode`) are read-only.
+ * `findQuest`, the `*Objectives` lookups) are read-only.
  */
 
 import { Quest, QuestLog, QuestObjective, QuestStatus } from './types';

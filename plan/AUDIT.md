@@ -406,6 +406,118 @@
 
 ## Pending
 
+### [docs] Live docs whose bodies describe retired systems — banner-only pass, rewrites owed (2026-09-23)
+- category: docs
+- impact: 5
+- ease: 4
+- detail: the 2026-09-23 comments/docs accuracy audit (PR from branch
+  `claude/comments-docs-audit-95f2sz`) fixed every single-fact error it could
+  prove, but these files describe whole retired subsystems and were only given
+  a dated `> **Superseded (2026-09-23)**` banner naming the live truth. Each
+  line: file — what the body still describes — live source of truth.
+  - `axiomancer-mechanics/docs/effects.md` — 88-effect catalogue, tier tables,
+    `src/Combat/phases/scenario.ts` call sites — `src/Effects/buffs.library.json`
+    (19), `src/Effects/debuffs.library.json` (10), `src/Combat/effects.ts`.
+  - `axiomancer-mechanics/docs/effects/README.md` + per-effect files under
+    `docs/effects/{buffs,debuffs}/` — ids that no longer exist, scenario.ts
+    pointers — same sources.
+  - `axiomancer-mechanics/docs/enemy.md` — 15/30-enemy library,
+    `enemy.logic.ts`, six AI strategies, `decideEnemyAction` — the 79-entry
+    `src/Enemy/enemy.library.ts`, `src/Enemy/types.ts`, `src/Combat/combat.engine.ts`.
+  - `axiomancer-mechanics/docs/combat.md` — six legacy sections (Tier 1
+    auto-effects, Spec 03 proc matrix, Damage Resistance sample using
+    `calculateSkillDamage`, Phase 60 friendship table naming enemies that no
+    longer exist, Combat Mechanics API `rollSkillCheck`/`getSkillDamageType`,
+    Card terminology `SKILLS_LIBRARY`) — `src/Combat/combat.engine.ts`
+    (`deal`), `src/Combat/index.ts`, `src/Enemy/enemy.library.ts`
+    (11 `friendshipReward` entries).
+  - `axiomancer-mechanics/docs/api.md` — Cards section (`canUseSkill`,
+    `SkillTier`, "21-card library") and the Phase 46 alignment-gate paragraph
+    — `src/Cards/library/*.cards.ts`, `src/Cards/card.engine.ts`, `src/index.ts`.
+  - `axiomancer-mechanics/README.md` — module-table rows for Enemy / Items /
+    Skills and the "Hazard public API" paragraph name exports that do not exist
+    — `src/index.ts` barrel.
+  - `axiomancer-mechanics/docs/quickstart-world.md` — sample calls
+    `resolveMapEvent(state, 'fv-2')` and kinds discovery/dialogue/trade/puzzle
+    — `src/World/MapEvents/resolve-map-event.ts` (`(state, rng?)`),
+    `src/World/MapEvents/types.ts` (eleven kinds).
+  - `axiomancer-mechanics/docs/oaths.md` "Authoring gates" card-gate bullet —
+    `SkillLearningRequirement.requiresAlignment`, `learnSkill`, `LEARN_SKILL`
+    — `src/Cards/card.engine.ts` (gate removed 2026-07-08).
+  - `axiomancer-mobile/docs/engine-integration-architecture.md` — code
+    examples on `state.combat` / `selectStance` / `resolveCombatRound` /
+    `choosing_stance` — `docs/combat.md`,
+    `state/presenters/combat-encounter.engine.ts`.
+  - `axiomancer-mobile/specs/10-navigation-and-app-shell.md`,
+    `11-asset-pipeline.md`, `12-accessibility-and-theming.md` — "Current
+    state" inventories (five tabs incl. event; no assets; no type scale; no
+    a11y labels; expo-haptics) — `state/presenters/tabs.engine.ts`,
+    `assets/images/*/index.ts`, `theme/axm.ts`, `lib/platform/haptics.ts`.
+  - `.claude/commands/deck-tuning.md` §4/§4a — balance-band contract with
+    `PRESET_FLOORS` / `PRESET_CEILING` / `// PLAYTEST-CALIBRATION`, repealed
+    2026-09-02 — `src/Combat/e2e/combat-playtest.balance-bands.sim.test.ts`
+    header, `plan/bearings.md` THE BIG NUMBERS REWRITE.
+  - `.claude/commands/hazard-tuning.md` — both "Known engine gaps" tables cite
+    `penaltiesApplied` TODO, `refreshDiceBetweenRounds`, `advanceToNextRound`,
+    `processBetweenRounds`, `resolveRound`, none in the engine —
+    `src/World/Hazard/hazard.engine.ts` (`resolveHazardRound`,
+    `continueHazardAfterResolve`) vs CDR-0006.
+  - `.claude/agents/playtester.md` Path A steps 3-5 and Path B — prelude modal
+    / FIGHT-FLEE / stance / STAND-DO-CLASH-LET round loop —
+    `axiomancer-mobile/docs/combat.md`,
+    `components/combat/encounter/CombatEncounterPanel.tsx`.
+- next: one `/iterate` tick per file (or per section for combat.md): rewrite
+  the body from the named live source, drop the banner. Also dated-record
+  drift the audit saw but did not touch, for the same pass if cheap:
+  `axiomancer-mobile/specs/README.md` DONE dates disagree with the spec
+  headers (01: 05-11 not 05-08; 02: 05-11 not 05-09; 03: 05-12; 05/06/07/09:
+  05-13); `axiomancer-mobile/docs/E2E_INVENTORY.md` is stamped against commit
+  12a485d; `axiomancer-mechanics/docs/world.md:306,393,414` still says
+  "all 8 MapEventKind" (union is eleven); `docs/hazard-minigame-api.md`
+  names a `HazardCardEffect` type that does not exist.
+
+### [debt] Five code-side defects surfaced by the 2026-09-23 comments audit (2026-09-23)
+- category: debt
+- impact: 4
+- ease: 6
+- detail: comment-vs-code mismatches where the CODE is the stale side. Each
+  was left untouched by the docs PR (the two one-liners it did fix:
+  `verify-drift.yml` now triggers on `enemy-keywords.ts`;
+  `check-naming-law.mjs` now sweeps `apocrypha.cards.ts`).
+  1. `axiomancer-mechanics/scripts/export-catalog.ts:106-113` —
+     `parsePricingComments` reads `src/Cards/cards.library.ts`, which is the
+     aggregator since THE BIG NUMBERS REWRITE; the `// pts:` blocks live in
+     `src/Cards/library/*.cards.ts`, so catalog pricing is always empty.
+     Confidence 60.
+  2. `axiomancer-mechanics/src/CLI/combat-sim.cli.ts:11-13,43-45` — usage
+     text and default loadout name `slippery-slope`, `brace-for-impact`,
+     `festering-argument`, `soft-word`; none exist in the card library.
+     Confidence 50 that the default path is broken (may fall through).
+  3. `axiomancer-mechanics/src/Effects/world-tick.ts` —
+     `processWorldEffectTick` has no caller outside tests in mechanics or
+     mobile; `World/world.reducer.ts:206` used to point at a
+     `Game/world.orchestrator.ts` that does not exist. Either wire it into
+     `moveToNode` or delete it. Confidence 60.
+  4. `axiomancer-mechanics/src/Effects/index.ts:167-190` —
+     `TIER1_EFFECT_MAP` maps to `tier1_*` ids absent from both effect
+     libraries (the deprecated-effects test bans them), so
+     `applyTier1CombatEffect` always returns `noChange`; likewise
+     `Enemy/enemy.library.ts:89-92` `T1_DEFAULT`. Delete or re-point.
+     Confidence 80.
+  5. `scripts/axio-mcp-server.mjs:39-62` — `ensureFresh` stats only
+     `Cards/cards.library.ts` and `Effects/effects.library.ts`; an edit to
+     `Cards/library/*.cards.ts` does not bump the mtime, so the "mid-session
+     edit is caught" claim in its header is false for card edits.
+     Confidence 50.
+  Also observed: `scripts/check-baseline-freshness.mjs:33-41` says
+  `World/Continents/**` is import-disjoint from Combat/Cards/Enemy/Character,
+  but `Enemy/index.ts` and `Enemy/types.ts` type-import `MapName` from
+  `../World/map.library` (runtime-erased, so the sweep numbers are unaffected).
+- next: `/iterate` — verify each with a failing test first (1, 4 and 5 are
+  cheap to witness), then fix or delete; 3 is a design call (wire or remove)
+  and needs a `[loop-call]` note in the commit body.
+
+
 ### [x] [loop-call] Art the public DevLog may not publish: 90 files with an UNRESOLVED licence (2026-09-20) — RATIFIED via /oversight 2026-09-23
 - category: content
 - impact: 7

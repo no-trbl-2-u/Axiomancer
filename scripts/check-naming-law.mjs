@@ -35,6 +35,7 @@ export const ID_SOURCES = [
   { file: 'axiomancer-mechanics/src/Cards/library/vigil.cards.ts' },
   { file: 'axiomancer-mechanics/src/Cards/library/trial.cards.ts' },
   { file: 'axiomancer-mechanics/src/Cards/library/choir.cards.ts' },
+  { file: 'axiomancer-mechanics/src/Cards/library/apocrypha.cards.ts' },
   { file: 'axiomancer-mechanics/src/Enemy/enemy.library.ts' },
 ]
 

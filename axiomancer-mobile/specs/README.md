@@ -7,8 +7,8 @@
 
 ## Why this folder exists
 
-`GAME-ROADMAP.md` lists *what* is left to do at a high level.
-`Knowledge-Gaps.md` lists *what isn't decided*. Neither tells you *what
+The root [`plan/steps/01_build_plan.md`](../../plan/steps/01_build_plan.md) (the phase queue) lists *what* is left to do at a high level.
+The root [`plan/AUDIT.md`](../../plan/AUDIT.md) / [`plan/PHASE_CANDIDATES.md`](../../plan/PHASE_CANDIDATES.md) list *what isn't decided*. Neither tells you *what
 to do next* or *how to start*. The specs in this folder bridge that
 gap: each one is small enough to start work from, structured around the
 decisions that block implementation, and tagged with dependencies so
@@ -64,6 +64,7 @@ split it into a follow-up spec rather than ploughing on.
 - **Spec 12** — Accessibility and theming (screen reader support, font scaling)
 
 All three can be worked in parallel as they have no interdependencies.
+Much of 10-12 was absorbed by later phases (theme picker, settings, asset registries, hide-in-combat tabs) — see each spec's superseded note.
 
 ## Recommended order
 

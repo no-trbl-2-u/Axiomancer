@@ -101,7 +101,7 @@ const RULES = [
 
 // Backgrounding the gate is its own rule because it needs the
 // run_in_background flag, not just the command string. This is
-// the "post-result exit hang" — see playbooks/cloud-loop.md.
+// the "post-result exit hang" — see AGENTS.md standing rule 3.
 function backgroundedGate(input) {
   const cmd = String(input?.tool_input?.command ?? '')
   const bg = input?.tool_input?.run_in_background === true

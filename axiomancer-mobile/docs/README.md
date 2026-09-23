@@ -92,4 +92,4 @@ See [`adr/README.md`](./adr/README.md) for ADR process and templates.
 
 For the complete project structure and quick start guide, see the
 [main README](../README.md). For planning and build process
-documentation, see [`plan/`](../plan/).
+documentation, see [`plan/`](../../plan/) at the monorepo root.

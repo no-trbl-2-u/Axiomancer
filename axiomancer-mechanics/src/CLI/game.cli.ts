@@ -4,7 +4,7 @@
  * Game CLI — demonstrational full-loop driver (Spec 09 Q7).
  *
  * Wires every public verb on the game store into a tabbed inquirer prompt
- * so the engine can be exercised by hand. Five tabs:
+ * so the engine can be exercised by hand. Tabs (see `pickTab`):
  *
  *   • Map             — list adjacent nodes, dispatch MOVE_TO_NODE, then
  *                       PROCESS_NODE to trigger the node's authored event.
@@ -12,7 +12,10 @@
  *                       Hazard-Pattern combat driver runs via `npm run combat`.
  *   • Journal         — read-only: active / completed quests + alignment stub.
  *   • Cards          — read-only: known/unlocked cards.
+ *   • Codex           — read-only: unlocked journal entries.
  *   • Inventory       — read-only listing of carried items.
+ *   • Character       — stats sheet + stat allocation + card learning.
+ *   • DEV / Begin again / Save / Load / Quit.
  *
  * Logic stays in the store / reducer. This file only formats and dispatches.
  *

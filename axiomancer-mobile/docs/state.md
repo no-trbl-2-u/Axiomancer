@@ -9,7 +9,7 @@ selectors + dispatch typed actions.
 | File | Role |
 |---|---|
 | `state/store.ts` | `createAppStore({ adapter?, overrides? })` — wraps the engine's `createGameStore`. Defaults to `nullAdapter`. |
-| `state/actions.ts` | `createAppActions(store)` — typed wrappers around engine actions (`startCombat`, `endCombat`, `setCombatPhase`, `setPlayerStance`, item ops, `save`). |
+| `state/actions.ts` | `createAppActions(store)` — typed wrappers around engine actions (`startCombat`, `endCombat`, item ops, `moveTo`, `save`) plus the minigame / menu verbs. |
 | `state/GameStoreProvider.tsx` | `<GameStoreProvider>` mounts the store + `useGameState`, `useGameActions`, `useGameStore` hooks. |
 | `state/persistence/saveSlots.ts` | The three-slot vocabulary: ids, storage keys, `SaveSlotSummary`, `mostRecentSlot`, the `SaveSlotStore` interface (2026-09-23). |
 | `state/persistence/asyncStorageAdapter.ts` | The AsyncStorage `PersistenceAdapter` + `SaveSlotStore`: `load()`/`save()` scoped to the ACTIVE slot; `preload()` reads all three. |
@@ -29,11 +29,11 @@ Prefer per-field selectors to keep re-renders narrow:
 
 ```ts
 const hp = useGameState((s) => s.player.health);
-const inCombat = useGameState((s) => s.combat !== null);
+const inCombat = useGameState((s) => s.currentEncounter != null);
 ```
 
 The engine also re-exports memoizable selectors (`selectPlayer`,
-`selectCombat`, `selectInventory`, `selectVersion`, `selectIsInCombat`)
+`selectMoralMeter`, `selectInventory`, `selectVersion`, `selectIsInCombat`)
 — import them via the `@mechanics` alias and pass them straight in:
 
 ```ts
@@ -47,9 +47,9 @@ Never call `store.getState().startCombat(...)` from a screen. Go
 through `useGameActions()`:
 
 ```ts
-const { startCombat, setCombatPhase, endCombat } = useGameActions();
+const { startCombat, endCombat } = useGameActions();
 startCombat(enemy);
-setCombatPhase('choosing_action');
+endCombat('victory');
 ```
 
 `useGameActions()` returns the same object for the lifetime of the
@@ -60,7 +60,8 @@ provider, so it is safe in `useEffect` dependency lists.
 1. Add the method to `AppActions` in `state/actions.ts`.
 2. Implement it in `createAppActions` — typically pull the relevant
    slice via `store.getState()`, run an engine reducer, and call
-   `store.getState().updateCombat(...)` or the equivalent setter.
+   the matching engine action (e.g. `store.getState().save()`) or
+   `store.setState(...)` for a mobile-only slice.
 3. Add a dispatch test under `state/e2e/store.engine.test.ts`.
 
 ## Persistence

@@ -5,7 +5,7 @@
  * PURE STATIC ANALYSIS: no sim runs. A card's complexity is what a player must
  * hold in their head to play it — its keyword vocabulary, its mechanical
  * moving parts, and its conditional gates. A preset's complexity adds the
- * vocabulary-load view: how many distinct keywords the 15-card deck asks the
+ * vocabulary-load view: how many distinct keywords the preset deck asks the
  * player to know, and how many of those are ORPHANS (carried by exactly one
  * unique card — pure cognitive load with no in-deck reinforcement).
  *

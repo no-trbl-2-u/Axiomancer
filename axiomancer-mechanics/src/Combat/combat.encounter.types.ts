@@ -11,8 +11,8 @@
  * card engine (Spec 25 §12 Q4 recommendation (b)): the `executeCard` /
  * `applyEffect` machinery is untouched — the engine *drives* it differently.
  *
- * Doctrine (CLAUDE.md): status effects are the MAIN fun. DoT erosion + control
- * make a fight something the player *assembles a solution* for rather than
+ * DoT erosion + control (one win path among several — the old status-primacy
+ * doctrine is retired, see `docs/lexicon.json`) make a fight something the player *assembles a solution* for rather than
  * *trades stats* in.
  */
 
@@ -101,9 +101,8 @@ export type CombatVerbClass =
                            // No in-combat retreat exists; combat resolves only
                            // by winning or losing. Kept in the union rather than
                            // deleted so every exhaustive Record/switch keyed on
-                           // CombatVerbClass elsewhere doesn't need a blind,
-                           // unverified edit (this repo has no local TS
-                           // toolchain to confirm a full deletion is safe).
+                           // CombatVerbClass elsewhere doesn't need a
+                           // sweeping edit.
 
 /** The effect-kind a card's bottom action applies. `none` = utility / damage only. */
 export type CardEffectKind = 'dot' | 'control' | 'none';
@@ -208,8 +207,8 @@ export type SignatureSkillId =
     | 'sig-endless-labor'     // body (hands)
     | 'sig-unbroken-stride';  // body (feet)
 
-/** Player archetype, derived from the dominant base stat. Drives the signature
- *  kit + (mobile) the portrait. */
+/** Player archetype, derived from the dominant base stat. Drives (mobile) the
+ *  portrait only — Phase 19 retired the archetype→signature gating. */
 export type PlayerArchetype = 'heart' | 'body' | 'mind';
 
 /** A signature skill — an always-available ability funded by Conviction (◆),
@@ -394,11 +393,11 @@ export interface CombatThreatPhase {
     /** Phase 33c (spec 33 §1) — this phase carries THE COVETED DIE: denying
      *  its telegraph (STAGGER-to-0), fully blocking it, or answering its
      *  `stanceCheck`'s `yields` converts it to a temp gold die
-     *  (`resolveThreatPhase`, ceiling-gated — overflow → +1◆). Authored ONLY
-     *  on one phase (the 2nd authored step) per BOSS/UNIQUE
-     *  `AUTHORED_THREAT_SEQUENCES` entry — never backfilled, never on
-     *  elite/normal/simple. Undefined = no coveted die this phase (the
-     *  common case). Inert while the flag is off. */
+     *  (`resolveThreatPhase`, ceiling-gated — overflow → +1◆). Authored at
+     *  the DECK level (`DECK_STAKES` in `combat.enemy-decks.ts`; the default
+     *  seats it on a BOSS/UNIQUE deck's 2nd card) — never backfilled.
+     *  Undefined = no coveted die this phase (the common case). Inert while
+     *  the flag is off. */
     stake?: boolean;
 }
 
@@ -467,7 +466,7 @@ export type CombatEncounterPhase =
     | 'phase-play'     // player plays cards
     | 'phase-resolve'  // effect kinds compared, enemy action fires, Clear/Overwhelmed
     | 'between-phases' // DoT ticks, durations tick, draw 5
-    | 'mercy-choice'   // Control Saturation opened the Phase 112 spare/exploit modal
+    | 'mercy-choice'   // a successful Befriend opened the Phase 112 spare/exploit modal
     | 'complete';      // combat over, outcome determined
 
 // ---------------------------------------------------------------------------
@@ -1095,8 +1094,8 @@ export interface CombatEncounterState {
     directDamageDealt: number;             // raw HP damage (for the summary)
     log: CombatEvent[];                    // event stream for UI rendering
     finalOutcome: CombatOutcome | null;    // null until combat ends
-    /** Phase 112 — set when a successful Befriend / Control Saturation opens the
-     *  spare/exploit mercy choice. */
+    /** Phase 112 — set when a successful Befriend opens the spare/exploit
+     *  mercy choice. */
     mercyChoiceActive?: boolean;
     /**
      * Master Spec §4 — permanent wild-die pool growth. Unlike `dice` (rolled

@@ -32,7 +32,7 @@ export interface InteractionResult {
     type: InteractionTriggerType;
     /** Which effect is the target of the amplification. */
     targetEffectId: string;
-    /** Magnitude of the amplification (multiplier for intensity/duration, flat bonus for damage). */
+    /** Magnitude of the amplification (a multiplier for intensity, duration and damage alike). */
     amplificationValue: number;
     /** Human-readable message for combat logs. */
     message: string;

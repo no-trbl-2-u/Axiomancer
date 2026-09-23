@@ -135,7 +135,7 @@ read the log.** Section container ids are `dev-section-<key>`.
 
 ## CI coupling
 
-`scripts/ci-e2e-scope.mjs` maps `Debug*` files to the Playwright journey
+`scripts/ci-e2e-scope.mjs` (monorepo root) maps `Debug*` files to the Playwright journey
 they can launch (`DebugEnemy|DebugQuest|DebugRest|DebugReward|
 DebugTriggerEncounter|DebugWorld` → encounters; `DebugHazard*` → hazard;
 `DebugCombat*` → combat). Browser scripts depend on these ids staying

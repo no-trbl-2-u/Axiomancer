@@ -9,9 +9,9 @@
  *
  * Each preset is a declarative recipe. `buildCharacterFromPreset` lifts
  * the recipe into a real `Character` by calling `createCharacter`
- * through the canonical path: equipment is constructed via
- * `dropItem(templateId, level, 'common')` so stat folding goes through
- * the same code combat uses, and consumables are cloned from the
+ * through the canonical path: the fixed signet-relic loadout is seeded by
+ * `createCharacter` (the procedural `dropItem` equipment path is retired —
+ * see `buildCharacterFromPreset`), and consumables are cloned from the
  * shared `consumableLibrary` so the canonical library is never
  * mutated.
  */
@@ -39,7 +39,8 @@ export interface CharacterPreset {
     summary: string;
     level: number;
     baseStats: BaseStats;
-    /** Equipment to drop and equip. Each slot is filled at 'common' rarity. */
+    /** Vestigial: the procedural equipment library is retired, so these entries
+     *  no longer resolve (see `buildCharacterFromPreset`). */
     equipment: CharacterPresetEquipmentEntry[];
     /** Card IDs the character knows. The full known set is the combat
      *  catalogue (ADR-0002); there is no equipped-card rotation. */
@@ -147,7 +148,7 @@ export const characterPresets: CharacterPreset[] = [
 // stays apprentice / wanderer / sage; `getPresetById` searches both.
 // Previously authored client-side (`axiomancer-mobile`); moved here so the
 // engine owns the preset data (curated level / stat / card / gear
-// selection) — `buildCharacterFromPreset` validates every id at build time.
+// selection) — `buildCharacterFromPreset` validates every consumable id at build time.
 
 export const ladderL1Preset: CharacterPreset = {
     id: 'kid-l1',
@@ -270,7 +271,7 @@ export function buildCharacterFromPreset(preset: CharacterPreset): Character {
     // Phase 21 — the procedural equipment library + factory are retired. The
     // declared `preset.equipment` template entries no longer resolve to anything
     // (there is no more procedural gear), so presets carry only their consumables
-    // and wear the fixed 8-relic default loadout seeded by `createCharacter`. The
+    // and wear the fixed 11-relic default loadout seeded by `createCharacter`. The
     // `equipment` field is retained on the recipe as vestigial metadata.
     return createCharacter({
         name: preset.name,

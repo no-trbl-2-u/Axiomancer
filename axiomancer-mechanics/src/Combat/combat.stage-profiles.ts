@@ -8,10 +8,10 @@
  * `buildStagePlayer` turns a profile into a ready-to-fight `Character` whose
  * known cards are exactly the stage-eligible card pool.
  *
- * Doctrine (CLAUDE.md): status effects are the MAIN fun — HP is the sole win
- * condition and status is the EFFICIENT way to drop it. Stage rosters exist so
- * the playtest matrix can verify that status play stays the winning path at
- * EVERY stage of the campaign, not just at one tuned snapshot.
+ * HP is the sole win condition (the old status-primacy doctrine is retired —
+ * see `docs/lexicon.json`). Stage rosters exist so the playtest matrix can
+ * measure every win path at EVERY stage of the campaign, not just at one
+ * tuned snapshot.
  *
  * Pure data + pure helpers. Enemy slugs are NOT validated at import time — the
  * stage-profiles e2e asserts every slug against `ENEMY_REGISTRY`.
@@ -26,8 +26,8 @@ import { deepClone, deriveStats, calculateMaxHealth } from '../Utils';
 import { MAX_DIE_UPGRADE_LEVEL } from './combat.dice';
 
 /**
- * Deck-MATURITY level implied by a card's RANK (the quality ladder Doxa 1 …
- * Aporia 6). Cards no longer carry a player-level requirement (removed
+ * Deck-MATURITY level implied by a card's RANK (the quality ladder Ash 1 …
+ * Saint 6). Cards no longer carry a player-level requirement (removed
  * 2026-07-08); the playtest harness instead uses this rank→maturity mapping to
  * decide which cards a player "at stage X" would plausibly hold — so the stage
  * pools (and the balance-band win-rate curve they feed) are unchanged. This is
@@ -53,7 +53,8 @@ export interface CombatStageProfile {
     playerLevel: number;
     /** Heart/Body/Mind core attributes at this stage. */
     playerBaseStats: BaseStats;
-    /** Player max (and starting) HP at this stage. */
+    /** Authored max HP of the profile's era — documentation only:
+     *  `buildStagePlayer` DERIVES the live VITAE from level + stats. */
     playerMaxHealth: number;
     /** Deck maturity gate — only cards with `tier <= maxCardTier` are eligible. */
     maxCardTier: CardTier;
@@ -257,7 +258,7 @@ export function buildStagePlayer(stage: CombatStageProfile): Character {
     player.health = vitae;
     player.knownCards = stageEligibleCardIds(stage);
     // THE PATH — carry the dice axes into the encounter. `upgradedCardShare` is
-    // consumed at deck-build time (see `stageDeckCardIds`), not here.
+    // consumed by `stageEligibleCardIds` (the `knownCards` pool above), not here.
     player.bonusTurnDice = stage.bonusBaseDice;
     player.dieUpgradeLevel = stage.dieUpgradeLevel;
     return player;

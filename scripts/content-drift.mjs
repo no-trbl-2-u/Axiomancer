@@ -127,7 +127,7 @@ export function mobileRegistryKeywords() {
  *
  * THE BIG NUMBERS REWRITE (2026-09-02): the atlas covers TWO vocabularies now
  * — the card keywords a player's own cards print (mobile `KEYWORD_GLOSS`) and
- * the nine keywords a FOE carries. The enemy set is deliberately kept out of
+ * the keywords a FOE carries. The enemy set is deliberately kept out of
  * `KEYWORD_GLOSS` so the mobile KW lints, which iterate card keywords, stay
  * untouched; it lives in mechanics beside the union it glosses. Both are real
  * registries, so both count when asking "does this atlas row gloss anywhere".

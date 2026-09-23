@@ -4,10 +4,11 @@
  * `resolveCombatPhase` drives the HP-model combat: the enemy's SOLE bar is HP,
  * and the player drops it to 0. Every verb is a combat card (projected from a
  * learned card); the player rolls stance dice and plays cards. Combat is
- * STATUS-FIRST — the strike is dead (spec 32 §12): every point of enemy HP
+ * STATUS-FIRST — the auto-derived strike is dead (spec 32 §12): enemy HP
  * falls through a printed status or its payoff (DoT ticks, affliction bursts
- * like RUPTURE/REAP, ratified enchant-gated drips, reflect), never because a
- * spell "hit". Control hinders the enemy's turn instead. The legacy resolver,
+ * like RUPTURE/REAP, ratified enchant-gated drips, reflect) or, since THE
+ * BIG NUMBERS REWRITE (2026-09-02), the authored `deal` damage family.
+ * Control hinders the enemy's turn instead. The legacy resolver,
  * the effects engine, the card engine, and all effects are UNCHANGED — this
  * engine *drives* `executeCard` / `applyEffect` differently.
  *
@@ -156,7 +157,7 @@ export const THREAT_DAMAGE_SCALE = 1;
  * distinct. THREAT_WEAKEN_FLOOR is a safety clamp: a weakened-but-not-denied
  * enemy still lands at least this fraction (it does not bind at the current
  * tunables — deny triggers first — but guards against future deep stacks).
- * Tuned by /combat-tuning. Exported so the mobile presenter can state the honest
+ * Tuned by /combat-playtest (engine constants) and /deck-tuning. Exported so the mobile presenter can state the honest
  * "-X% enemy attack" a control card actually delivers. (Until 0.33.0 the HP
  * engine never read these mods, so ~24 control/stat debuffs were inert.)
  */
@@ -165,15 +166,16 @@ export const THREAT_DENY_AT = 8;
 export const THREAT_WEAKEN_FLOOR = 0.4;
 /** Conviction is capped so a long grind can't bank a Signature spam. */
 export const CONVICTION_CAP = 12;
-/** WI-10 — how many scraps per turn PAY +1 Conviction. The hand refills to 6, so
- *  an ungated scrap paid +6◆/turn against the 12 cap (scrap-the-hand). Beyond
+/** WI-10 — how many scraps per turn PAY +1 Conviction. The hand refills to
+ *  COMBAT_HAND_SIZE (then 6, now 5), so an ungated scrap paid a full hand of ◆
+ *  per turn against the 12 cap (scrap-the-hand). Beyond
  *  this many, a scrap still cycles the dead card but pays nothing. Tunable under
  *  EA-2's baseline. */
 export const SCRAP_CONVICTION_CAP_PER_TURN = 2;
 // Spec 32 v3 §1 — DIRECT_DAMAGE_WEIGHT is DEAD: the strike was purged from the
-// schema (`basePower` no longer exists), so there is no immediate-strike path
-// to weight. Every HP source is DoT ticks, status payoffs, engine-gated drips,
-// or reflect.
+// schema (`basePower` no longer exists), so there is no auto-derived strike
+// path to weight. Direct damage exists only as the authored `deal` family
+// (THE BIG NUMBERS REWRITE), scaled by `scalePlayerHit`.
 
 /** Spec 32 v3 T8 — PLEA decays this much at every turn boundary (the
  *  tension knob, ratified A2). Tunable. */
@@ -189,7 +191,7 @@ export const SWAY_DECAY_PER_TURN = 1;
  * unloseable. The counters are on-vision: race the foe down (DoT) before the ramp
  * bites, OR deny its turns (control) to skip the escalated hits. This is also what
  * finally gives the threat ledger teeth — every round the clock advances is a round
- * the 'overwhelmed' marks were paid for. Tuned by /combat-tuning.
+ * the 'overwhelmed' marks were paid for. Tuned by /combat-playtest (engine constants) and /deck-tuning.
  */
 export const THREAT_ESCALATION_PER_ROUND = 0.22;
 /** Rounds of grace before the clock starts — a fast clean kill is unpunished. */
@@ -197,7 +199,7 @@ export const THREAT_ESCALATION_GRACE = 1;
 /** Cap on the escalation multiplier so a long grind ramps but never runs away into a
  *  one-shot — keeps the clock tense, not a hard wall. Calibrated conservatively: the
  *  optimal witness bot still wins (combat stays fair, not broken) while human-paced
- *  play feels real pressure. Sharpening the bands further is a /combat-tuning job that
+ *  play feels real pressure. Sharpening the bands further is a /combat-playtest (engine constants) and /deck-tuning job that
  *  hinges on the denial/kill-speed economy (the optimal bot kills in ~2-4 rounds and
  *  barely feels the clock). */
 export const THREAT_ESCALATION_MAX = 2.0;
@@ -207,7 +209,7 @@ export const THREAT_ESCALATION_MAX = 2.0;
  * the "steeper curve for bosses" doctrine: a boss fight that drags becomes
  * qualitatively more lethal than a normal fight dragging just as long. The
  * counters (finish fast via DoT, deny turns via control) are unchanged — they
- * are simply more urgent facing a boss. Tuned by /combat-tuning.
+ * are simply more urgent facing a boss. Tuned by /combat-playtest (engine constants) and /deck-tuning.
  */
 export const THREAT_ESCALATION_BOSS_MULT = 1.6;
 /**
@@ -217,7 +219,7 @@ export const THREAT_ESCALATION_BOSS_MULT = 1.6;
  * scaled and already capped at THREAT_ESCALATION_MAX) adds +1 intensity to
  * whatever status the enemy's telegraphed hit applies this phase. Reuses the
  * damage clock's numbers instead of a second independent tuning knob, so it
- * ramps and caps on exactly the same schedule. Tuned by /combat-tuning.
+ * ramps and caps on exactly the same schedule. Tuned by /combat-playtest (engine constants) and /deck-tuning.
  */
 export const THREAT_EFFECT_ESCALATION_STEP = 0.34;
 /**
@@ -227,7 +229,7 @@ export const THREAT_EFFECT_ESCALATION_STEP = 0.34;
  * debuff `debuff_curse` — "Grelling's Malediction"), chosen 50/50 by the
  * seeded rng. A long grind doesn't just get more dangerous on the continuous
  * clock — every five rounds it also gets a genuinely NEW threat on the board.
- * Tuned by /combat-tuning.
+ * Tuned by /combat-playtest (engine constants) and /deck-tuning.
  */
 export const THREAT_ENCHANT_CURSE_EVERY_ROUNDS = 5;
 /**
@@ -240,7 +242,7 @@ export const THREAT_ENCHANT_CURSE_EVERY_ROUNDS = 5;
  *                    sooner (floor 1 — it always lands)
  *   — neutral/none → EXACTLY the printed intensity/duration.
  * Deterministic and previewable: the card face can show the exact triplet.
- * Tuned by /combat-tuning.
+ * Tuned by /combat-playtest (engine constants) and /deck-tuning.
  */
 export const READ_ADVANTAGE_INTENSITY_BONUS = 1;
 export const READ_DISADVANTAGE_DURATION_PENALTY = 1;
@@ -248,7 +250,7 @@ export const READ_DISADVANTAGE_DURATION_PENALTY = 1;
 // ── Fate Engine P1 (spec 31 §1) — the dice get a second read ─────────────────
 
 /** R2 — each pip on a spent Reserve die adds this much intensity to the status
- *  the play lands (the ripened die hits harder). Tuned by /combat-tuning. */
+ *  the play lands (the ripened die hits harder). Tuned by /combat-playtest (engine constants) and /deck-tuning. */
 export const PIP_INTENSITY_BONUS = 2;
 /** R2 — each pip on a spent Reserve die adds this much Guard on a defend card.
  *  THE BIG NUMBERS REWRITE — raised 2 → 5 so a ripened die is worth banking
@@ -413,7 +415,7 @@ export interface CardDieCost {
  * against the enemy's phase stance onto the historical 0/1/2-die price
  * (advantage → 0, neutral → 1, disadvantage → 2; Wild/X → neutral). NO play
  * path charges this price any more: play legality and the actual die COST are
- * owned by THE COLOR LAW inside `playCombatCard` (~:1150 — a die powers only a
+ * owned by THE COLOR LAW inside `playCombatCard` (step 1b — a die powers only a
  * card of its color; WILD is the sole exception), and the read's power scaling
  * lives in `READ_DAMAGE_MULT`. This function survives ONLY as the
  * advantage-read classifier behind `cardDieCostPreview` (the UI/CLI RPS
@@ -641,7 +643,7 @@ export function rollEncounterDice(
 }
 
 /**
- * Spec 26b §1 — starts a turn: rolls THIS turn's 2-die draft pool. Clears any
+ * Spec 26b §1 — starts a turn: rolls THIS turn's `TURN_DICE_COUNT`-die draft pool. Clears any
  * prior draft. No-op unless in phase-play with no live dice/draft.
  */
 export function startTurn(
@@ -828,7 +830,7 @@ export function draftStanceDie(
     if (state.phase !== 'phase-play') return { state, events: [] };
     if (state.draftedDieId !== null) return { state, events: [] };
     // Spec 32 v3 §5 — a GHOST die cannot be drafted as the stance: it is an
-    // extra power source beyond the turn's 2-die draft (the "bigger turns"
+    // extra power source beyond the turn's rolled draft (the "bigger turns"
     // intent), spent directly on PAID plays like a Reserve die.
     const drafted = state.dice.find(d => d.id === dieId && !d.floating);
     if (!drafted) return { state, events: [] };
@@ -1124,7 +1126,7 @@ function withLog(state: CombatEncounterState, events: CombatEvent[]): CombatEnco
 /**
  * Plays one card from hand. `useBottom` powers the full effect (costs dice via
  * RPS scaling, executes the card, drives impact + the die-refresh loop); the
- * free top action contributes a weak flat impact with no die.
+ * free top action fires the card's authored FREE rider with no die.
  *
  * `play.chosenX` (WS7.2, spec 32 §12 item 5) — the player-chosen X for a
  * chosen-X mechanic (`recoil_x`); the engine clamps it to [min, affordable].
@@ -1246,8 +1248,8 @@ function applyStanceAndMomentumV2(
  * toward a Signature Skill (the agency lever through a bad hand). Phase-play only.
  *
  * WI-10 (2026-07-12): only the first {@link SCRAP_CONVICTION_CAP_PER_TURN} scraps
- * per turn PAY. The hand refills to 6, so an ungated scrap-the-hand banked
- * +6◆/turn against the 12 cap; beyond the cap a scrap still cycles the dead card
+ * per turn PAY. The hand refills to COMBAT_HAND_SIZE (then 6, now 5), so an
+ * ungated scrap-the-hand banked a full hand of ◆ per turn against the 12 cap; beyond the cap a scrap still cycles the dead card
  * (agency preserved) but pays nothing. The `conviction-gained` event carries
  * `reason: 'scrap'` so the gate is testable and telemetry can see it.
  */
@@ -5406,7 +5408,7 @@ function ensureDraftForCard(
 
 /**
  * Applies a batch of card plays then resolves the current threat phase — the
- * top-level entry point. Bottom plays auto-manage turns (roll 2, draft the best
+ * top-level entry point. Bottom plays auto-manage turns (roll the tray, draft the best
  * die) so callers can express a plan as a card list. Plays stop early if an
  * outcome fires mid-batch.
  */
@@ -5481,8 +5483,8 @@ export function selectCapitulationChoice(
 // ── Mercy choice (Phase 112 / §3) ────────────────────────────────────────────
 
 /**
- * Resolves the spare/exploit mercy choice opened by Control Saturation or a
- * successful Befriend. `spare` confirms the friendship (mercy) end; `exploit`
+ * Resolves the spare/exploit mercy choice opened by a successful Befriend
+ * (`checkImmediateOutcome`). `spare` confirms the friendship (mercy) end; `exploit`
  * trades the opening for a heavy strike that may finish the enemy.
  */
 export function selectMercyChoice(
@@ -5515,7 +5517,7 @@ export function selectMercyChoice(
 /**
  * Casts a signature skill, spending Conviction (◆). Always available regardless
  * of the hand. Fizzles (no-op + event) when underfunded. Can trigger an
- * immediate outcome (e.g. The Stilling saturating the control track).
+ * immediate outcome (e.g. The Butcher's Bill finishing the foe).
  */
 export function playSignatureSkill(
     state: CombatEncounterState,

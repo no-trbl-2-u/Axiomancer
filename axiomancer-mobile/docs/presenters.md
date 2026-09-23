@@ -81,8 +81,8 @@ phase, the player's inventory) belongs on the engine, not on
 |---|---|
 | Presenter | `state/presenters/<screen>.engine.ts` |
 | Presenter test | `state/e2e/<screen>.engine.test.ts` |
-| Screen (UI shell) | `app/(tabs)/<screen>.tsx` |
-| Component render test | `components/<Component>.test.tsx` |
+| Screen (UI shell) | `app/(tabs)/<screen>/index.tsx` |
+| Component render test | `components/__tests__/<Component>.test.tsx` |
 
 > Non-route files must live **outside `app/`** — Expo Router walks
 > every `.ts`/`.tsx` under `app/` and would mount them as routes. See
@@ -99,7 +99,7 @@ Every presenter calls `freezeViewModel` on its return value:
 ```ts
 import { freezeViewModel } from './freeze';
 
-export function selectCombatViewModel(state: GameStore): CombatViewModel {
+export function selectCharacterViewModel(state: GameStore): CharacterViewModel {
     return freezeViewModel({ /* … */ });
 }
 ```
@@ -111,8 +111,9 @@ signature is identity — screens see the same `CombatViewModel` shape.
 ## Composing presenters
 
 A screen-level presenter may compose smaller ones. The canonical
-example is `selectCombatViewModel`, which embeds
-`selectCombatHudViewModel`'s output under a `hud` field. Composition
+example is `navigation.engine.ts`, which reads `selectHasActiveEvent` /
+`selectHasActiveHazard` / `selectHasActiveRest` / `selectHasActiveCache` /
+`selectHasActiveBlacksmith` from their own presenters. Composition
 keeps each piece testable on its own and lets specs grow the VM
 gradually without breaking older callers.
 

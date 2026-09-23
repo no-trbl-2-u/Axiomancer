@@ -3,7 +3,7 @@
 > **Superseded (phases 18-21 + 23):** the procedural drop / rarity-preview /
 > set-bonus flow shown below was retired. `dropItem`, `getEquipmentTemplate`,
 > `getActiveSetBonuses`, `itemSetLibrary`, `getItemSetById`, and `SetBonus` no
-> longer exist — equipment is now the 8 fixed signet relics
+> longer exist — equipment is now the 11 fixed signet relics
 > (`relicLibrary` / `getSignaturesForLoadout`). See
 > [`equipment.md`](./equipment.md) for the shipped model; the samples here are
 > retained as design history.

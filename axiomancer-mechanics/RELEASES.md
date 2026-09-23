@@ -2,7 +2,7 @@
 
 Short-form per-version summaries. For per-phase detail see
 [`CHANGELOG.md`](./CHANGELOG.md); for the release-cut ceremony see
-[`RELEASING.md`](./RELEASING.md).
+`RELEASING.md` (since removed).
 
 ## 0.22.0 — 2026-06-17
 

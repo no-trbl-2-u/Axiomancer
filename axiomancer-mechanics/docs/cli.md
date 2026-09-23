@@ -78,7 +78,7 @@ npm run combat -- --enemy foot-stealer --preset wanderer
 - `hazardCombat:resolveThreat` — threat phase resolved + between-phases
 - `hazardCombat:mercy` — mercy choice made
 - `hazardCombat:signature` — signature skill cast
-- `hazardCombat:end` — encounter over; `event.outcome` ∈ `{victory, mercy, defeat, retreat}`
+- `hazardCombat:end` — encounter over; `event.outcome` ∈ `{victory, mercy, capitulate, concede, defeat}`
 
 ### `combat-sim.cli.ts` - Hazard-Pattern Combat Balance Sim
 
@@ -136,7 +136,7 @@ npm run hazard -- [flags]            # convenience alias
 | `--state-log <path>` | Append a per-decision JSONL trace (init, route, dice, each round, final score). |
 
 **Encounter vs. player state.** Each run creates a fresh per-encounter *hazard
-state* (the engine's `HazardMinigameState`); dice exhaustion / refresh and deck
+state* (the engine's `HazardSessionState`); dice exhaustion / refresh and deck
 state persist **within** that encounter and are discarded when it ends. A
 cross-run *player ledger* (vitae / supply / items / threatened-X) persists
 across `--runs` and is only reset when the process exits.
@@ -168,7 +168,7 @@ Development utilities for testing and debugging the game engine.
 **Key Functions:**
 - `devSetLevel()` - Set character level
 - `devSetStats()` - Modify character base stats
-- `devLearnSkills()` - Manage card progression (Phase 99 removed separate card equipment; `devEquipSkills` was removed in Phase 159)
+- `devLearnCards()` / `devUnlockCards()` - Manage card progression (Phase 99 removed separate card equipment; `devEquipSkills` was removed in Phase 159)
 - `devGrantAllEquipment()` / `devGrantAllConsumables()` - Grant items
 - `devSpawnEnemy()` - Spawn specific enemies for testing
 - `devMaxOut()` - Max out character for endgame testing
@@ -198,7 +198,7 @@ Flexible I/O abstraction supporting multiple input and output modes:
 - `--stdin` - Read input from stdin (line-buffered)
 - `--json-events` - Output JSON events instead of human-readable text
 - `--state-log <path>` - Log game state to JSONL file
-- `--save <path>` - Use persistent save file
+- `--save-file <path>` - Use persistent save file
 
 ## Examples
 

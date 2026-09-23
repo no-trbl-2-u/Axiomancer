@@ -44,7 +44,7 @@ All commands are in `package.json`:
 | Test | `npm test` (vitest) |
 | Lint | `npm run lint` |
 | Lint + type-check | `npm run check` |
-| Demo CLI | `npm run game` (tabbed map / combat / journal / skills / inventory / debug loop) |
+| Demo CLI | `npm run game` (tabbed map / journal / cards / codex / inventory / character / dev loop) |
 | Boot at a known state | `npm run game -- --fixture <id\|path.json\|list>` — declarative state fixtures shared with mobile (`docs/state-fixtures.md` at the root) |
 | Verify gate | `npm run verify` (type-check + type-check:tests + type-check:cli + lint + test + build) |
 | Deploy gate | `npm run deploy:check` — lives at the monorepo ROOT, not in this package; run `npm run deploy:check` from the repo root |
@@ -96,7 +96,7 @@ Never squash or amend after pushing unless explicitly asked.
   the project root when used. This file is gitignored and ephemeral.
 - **Spec update**: If using a spec file to implement a change, update the
   spec as you walk through the steps.
-- **Wording-pin discipline**: `grace-card-wording` and the paid-summary
+- **Wording-pin discipline**: `choir-card-wording` and the paid-summary
   honesty guard (`paidText` in `src/Combat/combat.cards.ts`) pin AUTHORED
   card prose to its underlying payload. If you reword a card's authored
   summary, update its pin in the same commit — never silence or loosen a

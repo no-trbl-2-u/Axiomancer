@@ -11,10 +11,10 @@
 //   exit 2  →  timeout
 //   exit 3  →  config / auth failure
 //
-// Pick your provider below; uncomment the matching block.
+// Pick your provider with DEPLOY_PROVIDER (default: github-actions).
 // Configure auth in .env.
 //
-// See nexus/playbooks/ci-providers.md for full details.
+// See .github/workflows/README.md for the CI-green gate details.
 
 import { execSync } from 'node:child_process'
 import fs from 'node:fs'

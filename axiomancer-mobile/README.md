@@ -58,13 +58,13 @@ The boundaries, stated plainly:
 *- **Need deployment setup** (EAS builds, .env configuration, store publishing)*
 *- **Are joining as a new maintainer** and want full project context and troubleshooting resources*
 
-*The quick start below assumes you already have Node.js 20+, Expo CLI, and basic React Native familiarity.*
+*The quick start below assumes you already have Node.js 22+, Expo CLI, and basic React Native familiarity.*
 
 ### Prerequisites
 
 This mobile app uses **React Native** (cross-platform mobile framework) with **Expo** (toolchain that simplifies React Native development). Each prerequisite serves a specific role in the mobile development pipeline:
 
-- **Node.js 20+** — React Native's JavaScript bundler (Metro) and development tools require modern Node.js versions for performance and compatibility
+- **Node.js 22+** (`engines` in `package.json`) — React Native's JavaScript bundler (Metro) and development tools require modern Node.js versions for performance and compatibility
 - **Expo CLI** — the command-line interface for Expo's development tools; install globally with `npm install -g @expo/cli`
 - **Target platforms:**
   - **iOS:** Xcode (Mac only) for iOS Simulator, or Expo Go app for testing on physical devices
@@ -83,10 +83,10 @@ npm start              # Opens Metro bundler with QR code
 # 3. Choose your target platform:
 npm run ios            # iOS simulator (requires Xcode)
 npm run android        # Android emulator (requires Android Studio)
-npm run web            # Web browser (localhost:19006)
+npm run web            # Web browser (localhost:8081)
 
 # 4. Before committing changes:
-npm run verify         # Runs lint + typecheck + test
+npm run verify         # Runs lint + typecheck + test + asset/art/critique-drive checks
 ```
 
 **First time setup:** Install Expo Go on your mobile device and scan the QR code from `npm start`, or set up development simulators following [Expo's environment setup guide](https://docs.expo.dev/get-started/installation/).
@@ -99,14 +99,14 @@ npm run verify         # Runs lint + typecheck + test
 | `npm run ios`       | Start the iOS simulator.                                     |
 | `npm run android`   | Start the Android emulator.                                  |
 | `npm run web`       | Start the web target.                                        |
-| `npm run web:container` | Start Expo web inside a `node:20-alpine` container (port 18081 by default). Used for the AI screenshot walkthrough below. |
+| `npm run web:container` | Start Expo web inside a `node:22-alpine` container (port 18081 by default). Used for the AI screenshot walkthrough below. |
 | `npm run web:container:wait` | Block until the containerised dev server responds with HTTP 200. |
 | `npm run web:container:down` | Stop and remove the container. |
-| `npm run lint`      | `expo lint` (ESLint with Expo's config).                     |
+| `npm run lint`      | `eslint app components` (ESLint with Expo's config).         |
 | `npm run typecheck` | Type-check with TypeScript.                                  |
 | `npm test`          | Run Jest (test harness already configured).                  |
 | `npm run test:watch` | Run Jest in watch mode for interactive development.         |
-| `npm run verify`    | Run lint + typecheck + test. Development quality gate.       |
+| `npm run verify`    | Run lint + typecheck + test + `assets:check` + `art:test` + `critique-drive:test`. Development quality gate. |
 | `npm run verify:visual` | Visual smoke tests — generate and compare screenshots.   |
 | `npm run e2e:hazard`    | Browser-driven end-to-end hazard minigame playthrough.       |
 | `npm run smoke:bundler` | Smoke test for bundler configuration.                    |
@@ -188,7 +188,7 @@ app/                       expo-router routes
     memoir/                quests, chronicle, alignment
     inventory/             inventory + equipment
     deck/                  the combat deck, read-only
-  combat-encounter/        Spec 25 Hazard-Pattern combat modal (card-and-dice)
+  combat-encounter/        dev-only sandbox launcher for Hazard-Pattern combat (live combat mounts in EncounterModalOverlay)
   hazard/                  hazard minigame
   hazard-deck/             hazard deck builder
   rest/                    rest-choice encounter (Phase 52d)
@@ -203,7 +203,6 @@ components/                reusable presentational components
   EffectGlyph.tsx          buff / debuff glyphs
   ActionIcon.tsx           sword / shield / etc. icons
   StatBar.tsx              HP / mana progress bar
-  EffectChip.tsx           buff/debuff chip with icon + label
   …                        see folder
 theme/                     palette + font tokens
   axm.ts                   AXM.* colours + FONTS.* family names
@@ -289,17 +288,18 @@ The harness itself ships with [`specs/01-test-harness-setup.md`](./specs/01-test
 
 Dark-only by design; the player picks one of five palettes on `/settings`
 (COLOUR THEME — the picker moved there from the SELF tab on 2026-09-23;
-see `docs/save-slots-and-settings.md`). Tokens in `theme/axm.ts`:
+see `docs/save-slots-and-settings.md`). Tokens in `theme/axm.ts` (hex
+values below are the default `ashen-gold` theme from `theme/palette.ts`):
 
 | Token           | Hex        | Use                              |
 | --------------- | ---------- | -------------------------------- |
-| `AXM.bg`        | `#0a0a0a`  | near-black background            |
-| `AXM.parchment` | `#e8dfc8`  | main text / inactive icon        |
-| `AXM.blood`     | `#c0152a`  | HP, danger, bleed                |
-| `AXM.sulfur`    | `#d4c026`  | mana, selected, active           |
-| `AXM.rust`      | `#9e3a1a`  | friendship, rust accents         |
-| `AXM.bone`      | `#8a8273`  | secondary text, inactive tabs    |
-| `AXM.ash`       | `#3a3530`  | borders, disabled                |
+| `AXM.bg`        | `#0b0a09`  | near-black background            |
+| `AXM.parchment` | `#ece0c8`  | main text / inactive icon        |
+| `AXM.blood`     | `#e05a45`  | HP, danger, bleed                |
+| `AXM.sulfur`    | `#dcb04a`  | mana, selected, active           |
+| `AXM.rust`      | `#c36431`  | friendship, rust accents         |
+| `AXM.bone`      | `#9c937f`  | secondary text, inactive tabs    |
+| `AXM.ash`       | `#46403a`  | borders, disabled                |
 
 Fonts:
 
@@ -321,7 +321,7 @@ Wiring:
   server (`chromium`, `--headless`, `--isolated`). Claude Code loads
   it automatically when started in this repo.
 - [`scripts/dev-server-container.sh`](./scripts/dev-server-container.sh)
-  spins up Expo web inside a throw-away `node:20-alpine` container so
+  spins up Expo web inside a throw-away `node:22-alpine` container so
   the host doesn't accumulate Metro state between sessions.
 
 One-time setup on a fresh checkout:

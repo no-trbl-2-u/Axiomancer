@@ -18,12 +18,12 @@ restart.
 ## 0. Prerequisites
 
 You probably already have these — most are already set up by
-`pnpm install` and the existing dev workflow.
+`npm install` and the existing dev workflow.
 
-- **Node + pnpm** — `node --version` should print 20+;
-  `pnpm --version` should print 8+.
-- **Project deps installed** — run `pnpm install` once at the
-  repo root if you haven't.
+- **Node + npm** — `node --version` should print 22+;
+  `npm --version` should print 10+.
+- **Project deps installed** — run `npm install` once at the
+  monorepo root (npm workspaces) if you haven't.
 - **A free TCP port for the web build** — Expo defaults to
   **8081**. Nothing else on your machine should be listening on
   it. (If something is, see step 4.)
@@ -41,10 +41,10 @@ on-the-fly when the page loads.
 
 ## 1. Start the web dev server (the one thing you do)
 
-In a terminal at the repo root:
+In a terminal at the monorepo root:
 
 ```bash
-pnpm web
+npm run web --workspace axiomancer-mobile
 ```
 
 That's it. Wait until you see something like:
@@ -63,7 +63,7 @@ terminal (e.g. you're stepping away), wrap it in `nohup` or use
 `tmux`/`screen`:
 
 ```bash
-nohup pnpm web > /tmp/expo-web.log 2>&1 &
+nohup npm run web --workspace axiomancer-mobile > /tmp/expo-web.log 2>&1 &
 echo $! > /tmp/expo-web.pid    # write PID for later kill
 ```
 
@@ -110,7 +110,7 @@ bundle).
   `browser_snapshot` (the snapshot is a structured a11y tree —
   great for asserting state).
 - Read the dev console via `browser_read_console_messages`
-  (catches the `__DEV__` diagnostic streams in `combat.tsx` /
+  (catches the `__DEV__` diagnostic streams in
   `actions.ts` while they're still alive).
 - Reset state by reloading the page (re-runs the
   rehydrate-from-AsyncStorage flow).
@@ -130,7 +130,7 @@ bundle).
 ### Port 8081 already in use
 
 ```bash
-PORT=8090 pnpm web    # pick any free port
+PORT=8090 npm run web --workspace axiomancer-mobile    # pick any free port
 ```
 
 …and hand the new URL to Claude:
@@ -139,19 +139,18 @@ PORT=8090 pnpm web    # pick any free port
 ### "Cannot find module" or other Expo errors at startup
 
 ```bash
-pnpm install                   # ensure deps are up to date
+npm install                    # ensure deps are up to date
 rm -rf node_modules/.cache .expo
-pnpm web
+npm run web --workspace axiomancer-mobile
 ```
 
 ### Claude says "no Playwright tools available"
 
 The Playwright MCP server isn't loaded in this session.
-- If you're running `claude` from a project that has its own
-  `.claude/settings.json`, check that
-  `mcp.servers.playwright` is enabled there.
-- Otherwise, in this repo's `.claude/settings.json` (if it
-  exists) or your user config, add the Playwright MCP server
+- This repo declares it in `.mcp.json` (root and
+  `axiomancer-mobile/.mcp.json`); check that project MCP servers
+  are enabled for the session.
+- Otherwise, in your user config, add the Playwright MCP server
   entry per the Claude Code MCP setup docs.
 
 ### Claude's headless browser can't reach localhost
@@ -159,10 +158,10 @@ The Playwright MCP server isn't loaded in this session.
 This usually means Claude is running inside a sandbox/VM that
 can't see your host's `localhost`. Two fixes:
 - Bind Expo to all interfaces so it's reachable from inside the
-  sandbox: `EXPO_PACKAGER_HOSTNAME=0.0.0.0 pnpm web`.
+  sandbox: `EXPO_PACKAGER_HOSTNAME=0.0.0.0 npm run web --workspace axiomancer-mobile`.
 - Or — for the rare case Claude is running on a different host
   entirely — expose the dev server via a tunnel
-  (`pnpm dlx localtunnel --port 8081`) and hand the public URL
+  (`npx localtunnel --port 8081`) and hand the public URL
   to Claude.
 
 ### Bundle fails with "module 'react-native-svg' not found"
@@ -181,7 +180,7 @@ When you're done:
 1. In Claude, ask: "close the Playwright tabs". Claude calls
    `mcp__playwright__browser_close` and tab/browser process
    exit.
-2. In your terminal, `Ctrl-C` the `pnpm web` process.
+2. In your terminal, `Ctrl-C` the `npm run web` process.
 3. If you used `nohup`, run `kill $(cat /tmp/expo-web.pid)` and
    then `rm /tmp/expo-web.pid`.
 

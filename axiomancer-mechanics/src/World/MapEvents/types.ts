@@ -1,7 +1,7 @@
 /**
  * MapEvents (Spec 23) — type surface.
  *
- * Ten event kinds plus a weighted-pool authoring model. ('quest' joined
+ * Eleven event kinds plus a weighted-pool authoring model. ('quest' joined
  * the original eight in Phase 137 and was retired in Phase 61 — the
  * Quest Board minigame it launched is gone.) See `specs/23-map-events.md`
  * for the original spec; see

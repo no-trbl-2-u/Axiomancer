@@ -47,7 +47,7 @@ these fields and fall back to their defense stats when a save is requested via
 ## Resources
 
 ```
-maxHealth = level × average(body, heart) × HEALTH_PER_STAT (10)
+maxHealth = PLAYER_VITAE_BASE (50) + (body + heart + mind) × HEALTH_PER_STAT (8)
 ```
 
 Health starts at max on character creation. Cards run on the resonance
@@ -135,9 +135,9 @@ via `getEffectiveStats(target).baseStats[stance]` in `Combat/effect-modifiers.ts
 
 | Preset       | Level | Base Stats | Equipment                            | Cards                |
 |--------------|-------|------------|--------------------------------------|-----------------------|
-| `apprentice` | 1     | 5 / 5 / 5  | —                                    | 6 Tier-1 known        |
-| `wanderer`   | 8     | 5 / 4 / 4  | iron-blade, hide-vest, leather-cap   | 6 T1 + 3 T2 known     |
-| `sage`       | 15    | 7 / 6 / 6  | steel-blade, chain-mail, chain-coif  | all 12 cards known   |
+| `apprentice` | 1     | 5 / 5 / 5  | —                                    | 7 Tier-1 known        |
+| `wanderer`   | 8     | 5 / 4 / 4  | iron-blade, hide-vest, leather-cap   | 7 T1 + 3 T2 + 1 synergy known |
+| `sage`       | 15    | 20 / 30 / 25 | steel-blade, chain-mail, chain-coif | all 14 cards known   |
 
 All preset equipment is rolled at `'common'` rarity so the build is
 deterministic (Common returns an empty rolled-modifier list). Add more
@@ -152,4 +152,4 @@ available in combat, and the combat UI shows only currently affordable cards.
 Legacy v7 saves fold their old rotation into `knownCards` at load. The `id`
 field shipped at
 Phase 35 (Knowledge-Gaps Q12); see the `id` JSDoc on `Character` in
-`src/Character/types.d.ts` and the auto-gen path in `createCharacter`.
+`src/Character/types.ts` and the auto-gen path in `createCharacter`.

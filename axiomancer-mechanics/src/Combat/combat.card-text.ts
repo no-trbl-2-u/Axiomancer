@@ -187,7 +187,7 @@ function dotFacts(def: Effect, intensity: number, duration: number): ClauseDot |
  * The FREE (dieless) line's clauses, in the engine's own printed order.
  *
  * Mirrors `riderText` clause for clause — `clausesText(freeClauses(...))`
- * equals `riderText(card.free)`, which `combat.card-text.engine.test.ts` pins
+ * equals `riderText(card.free)`, which `card-text-projection.engine.test.ts` pins
  * across the whole library.
  */
 export function riderClauses(r: CardRider, opts?: { selfTargetCard?: boolean }): CardClause[] {

@@ -38,8 +38,9 @@ export type CritStyle = 'double' | 'pierce';
  * @property stance  - heart/body/mind.
  * @property action  - attack/defend/item/flee.
  * @property itemId  - Inventory item ID, required when `action === 'item'`.
- *                    Per Spec 05 only consumables are usable in combat — the
- *                    resolver emits an `item-blocked` event for anything else.
+ *                    Per Spec 05 only consumables are usable in combat. (The
+ *                    legacy resolver that emitted an `item-blocked` event for
+ *                    anything else was removed with the turn-based driver.)
  */
 export interface CombatAction {
     stance: Stance;
@@ -78,7 +79,8 @@ export type CombatPhase =
  * @property active            - True while combat is in progress.
  * @property phase             - Current step within the round.
  * @property round             - 1-indexed round number.
- * @property friendshipCounter - Increments when both combatants defend.
+ * @property friendshipCounter - Incremented by the shared card engine (`executeCard`)
+ *                               for cards that carry `incrementsFriendship`.
  * @property playerChoice      - Player's choice for the current round (built up over phases).
  * @property enemyChoice       - Enemy's choice for the current round.
  */

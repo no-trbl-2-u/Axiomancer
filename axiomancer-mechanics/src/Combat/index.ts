@@ -4,7 +4,7 @@
  * Combat-specific logic is split across focused modules:
  *   advantage.ts        — type-advantage relationships and modifiers
  *   stats.ts            — stat lookups for combatants
- *   dice.ts             — card checks and crit detection
+ *   dice.ts             — crit detection
  *   damage.ts           — final damage and attack outcome
  *   health.ts           — applyDamage / heal / status checks
  *   effects.ts          — combatant-side effect manipulations
@@ -254,7 +254,7 @@ export {
 export { COMBAT_HAND_SIZE, buildCombatDeck, drawCombatCards, shuffleCombatDeck } from './combat.deck';
 export {
     COMBAT_DECK_PRESETS, COMBAT_DECK_PRESET_ORDER,
-    // 5/5/5 recipe color law (spec 32 §12 item 9) — the documented borrow map
+    // aspect-thirds recipe color law (spec 32 §12 item 9) — the documented borrow map
     PRESET_LINEAGE,
     listDeckPresets, getDeckPreset, buildPresetDeck,
 } from './combat.starter-deck-presets';

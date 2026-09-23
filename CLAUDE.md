@@ -8,7 +8,8 @@ the loop verbs (`/ship-a-phase`, `/march`, `/iterate`, `/oversight`, …). Domai
 
 Answering a **balance/measurement** question (win rates, engagement, preset
 spreads)? Run `npm run baseline:check` first and cite the baseline's stamp —
-see AGENTS.md → "Measured truth (baselines)". Source-of-rules questions
+see AGENTS.md → "Truth sources" and `docs/truth-sources.md` →
+"Measured truth (baselines)". Source-of-rules questions
 (cards, pricing, keywords) read the current tree and need no such check.
 (A SessionStart hook prints baseline freshness at open.)
 

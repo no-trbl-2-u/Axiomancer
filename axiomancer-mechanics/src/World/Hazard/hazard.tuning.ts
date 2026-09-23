@@ -17,7 +17,7 @@
  *
  * The authored hazard thresholds stay in `hazard.content.ts` (they are
  * per-hazard, not global), but they are the other half of the
- * difficulty dial and are guarded by `__tests__/balance.sim.test.ts`.
+ * difficulty dial and are guarded by `e2e/hazard.balance.sim.test.ts`.
  */
 
 import type { HazardDieKind } from './hazard.types';

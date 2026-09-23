@@ -1,6 +1,6 @@
 /**
  * Hermeticity guard — enforces the testing standard (docs/testing.md,
- * agents.md rule 6) mechanically instead of by convention.
+ * AGENTS.md standing rule 4) mechanically instead of by convention.
  *
  * Like the public-surface snapshot, this suite reads COMMITTED repo
  * sources (a sanctioned exception to the no-disk-I/O rule: the inputs
