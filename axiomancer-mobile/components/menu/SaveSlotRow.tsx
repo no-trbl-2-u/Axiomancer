@@ -3,8 +3,8 @@
  *
  * Draws the numeral, the detail line (`Level 3 · Northern Forest` / `an
  * empty page` / the torn line), the stamp, and up to two verbs: the primary
- * action for the mode (BEGIN / OVERWRITE / RESUME) and CLEAR for any
- * non-empty slot. Confirmation for the destructive verbs is the SCREEN's
+ * action for the mode (BEGIN / OVERWRITE / JOURNEY ON…) and DELETE SAVE for
+ * any non-empty slot. Confirmation for the destructive verbs is the SCREEN's
  * job (it owns the sheet); this row only reports the tap.
  *
  * Inputs: `row` (a `SaveSlotRowVM`), `onAction`, `onClear`.

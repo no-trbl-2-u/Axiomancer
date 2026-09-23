@@ -5,9 +5,10 @@
  * One screen, two modes:
  *   - `new`  — NEW GAME. An empty row BEGINs at once; an occupied row asks
  *              before it is OVERWRITTEN.
- *   - `load` — LOAD GAME. An occupied row RESUMEs; empty rows have no verb.
- * In both modes any non-empty row (including a torn one) offers CLEAR
- * behind a confirmation.
+ *   - `load` — LOAD GAME. An occupied row offers JOURNEY ON…; empty rows
+ *              have no verb.
+ * In both modes any non-empty row (including a torn one) offers DELETE
+ * SAVE behind a confirmation.
  *
  * The rows come from `selectSaveSlotRows` over the live slot summaries;
  * the verbs are the `useSaveSlots()` actions. After a BEGIN / RESUME the

@@ -76,7 +76,7 @@ describe('/saves — NEW GAME', () => {
 });
 
 describe('/saves — LOAD GAME', () => {
-    it('RESUME loads the slot; empty slots offer no verb', () => {
+    it('JOURNEY ON… loads the slot; empty slots offer no verb', () => {
         const slots = createMemorySlotStore({ initial: { 3: { state: savedState('Third', 5), savedAt: 10 } } });
         const { store } = mount('load', slots);
 
@@ -89,7 +89,7 @@ describe('/saves — LOAD GAME', () => {
         expect(mockReplace).toHaveBeenCalledWith('/exploration');
     });
 
-    it('CLEAR asks first, then wipes the slot', async () => {
+    it('DELETE SAVE asks first, then wipes the slot', async () => {
         const slots = createMemorySlotStore({ initial: { 2: { state: savedState('Gone', 2), savedAt: 10 } } });
         mount('load', slots);
 

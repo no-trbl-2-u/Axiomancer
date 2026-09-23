@@ -47,18 +47,19 @@ export const SAVE_SLOTS_COPY = Object.freeze({
     subtitleLoad: 'choose a page to resume',
     empty: 'an empty page',
     unreadable: 'the page was torn — it cannot be read',
-    unreadableAction: 'CLEAR',
     startAction: 'BEGIN',
     overwriteAction: 'OVERWRITE',
-    loadAction: 'RESUME',
-    clearAction: 'CLEAR',
+    // Owner call 2026-09-23 (second pass): the LOAD screen's verbs read
+    // JOURNEY ON… (resume) and DELETE SAVE (clear).
+    loadAction: 'JOURNEY ON…',
+    clearAction: 'DELETE SAVE',
     back: 'BACK',
     overwriteTitle: 'overwrite this chronicle?',
     overwriteBody: 'the page will be wiped and a new pilgrimage begun in its place. this cannot be undone.',
     overwriteConfirm: 'WIPE AND BEGIN',
-    clearTitle: 'clear this chronicle?',
+    clearTitle: 'delete this save?',
     clearBody: 'the page will be wiped. this cannot be undone.',
-    clearConfirm: 'WIPE',
+    clearConfirm: 'DELETE',
     cancel: 'KEEP IT',
 });
 
@@ -83,7 +84,7 @@ export interface SaveSlotRowVM {
     /** The primary button's verb, or `none` when the row has no primary action. */
     readonly action: SlotRowAction;
     readonly actionLabel: string;
-    /** Whether the row also offers CLEAR (any non-empty slot). */
+    /** Whether the row also offers DELETE SAVE (any non-empty slot). */
     readonly clearable: boolean;
     /** True when this is the slot CONTINUE would pick. */
     readonly mostRecent: boolean;

@@ -53,10 +53,13 @@ describe('selectSaveSlotRows', () => {
         expect(rows.map((r) => r.mostRecent)).toEqual([true, false, false]);
     });
 
-    it('LOAD mode: saved → RESUME, empty and torn have no primary verb', () => {
+    it('LOAD mode: saved → JOURNEY ON…, empty and torn have no primary verb', () => {
         const rows = selectSaveSlotRows(summaries, 'load', NOW);
         expect(rows.map((r) => r.action)).toEqual(['load', 'none', 'none']);
         expect(rows[0]?.actionLabel).toBe(SAVE_SLOTS_COPY.loadAction);
+        // Owner call: the LOAD verbs read JOURNEY ON… and DELETE SAVE.
+        expect(SAVE_SLOTS_COPY.loadAction).toBe('JOURNEY ON\u2026');
+        expect(SAVE_SLOTS_COPY.clearAction).toBe('DELETE SAVE');
     });
 
     it('numerals are roman', () => {

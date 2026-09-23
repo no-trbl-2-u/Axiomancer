@@ -53,7 +53,7 @@ old one first.
 
 **Unreadable slots.** Bytes that fail to parse or migrate read as
 `unreadable`. They are never loaded, never thrown over; the LOAD screen
-shows the row torn and offers CLEAR. `preload()` rejects only when
+shows the row torn and offers DELETE SAVE. `preload()` rejects only when
 storage itself fails (the root `CorruptSaveModal` still handles that).
 
 **Hydration.** The store is created once at boot. Switching runs means
@@ -64,8 +64,9 @@ restore the engine RNG from `rngState` — so every screen and gate keeps
 the store reference it holds and a loaded run replays deterministically.
 
 **NEW GAME** saves at once, so CONTINUE finds the slot even if the app is
-killed on the first screen. Overwriting an occupied slot and clearing any
-slot go through a confirmation sheet.
+killed on the first screen. On the LOAD GAME screen an occupied row reads
+JOURNEY ON…; DELETE SAVE sits beside it on any non-empty row. Overwriting an
+occupied slot and deleting any slot go through a confirmation sheet.
 
 ## Settings
 
