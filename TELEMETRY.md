@@ -657,3 +657,4 @@ before the call returned. `-` means not known at write time, never a guess.
 | 2026-09-23T16:34:42Z | skill-end | march | - | 0s | ok |
 | 2026-09-23T16:35:33Z | skill | adjust-enemies | claude-sonnet-5 | - | - |
 | 2026-09-23T16:35:33Z | skill-end | adjust-enemies | claude-sonnet-5 | 0s | ok |
+| 2026-09-23T17:15:29Z | slash-prompt | /world-spec | claude-opus-5-5 | - | /world-spec take the current images, the theme for all the maps (ignoring how they're conn |
