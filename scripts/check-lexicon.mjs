@@ -26,7 +26,8 @@
 //
 // Three exemption mechanisms, in order of checking:
 //   zone    — dated-record paths (CHANGELOG, braindump/, devlog/, specs/,
-//             plan/ except bearings.md, reports, ADRs, automation/) may
+//             plan/ except bearings.md, reports, ADRs, automation/,
+//             telemetry/) may
 //             speak in period terms; never scanned.
 //   banner  — a file whose first 40 lines carry '**Status:** HISTORICAL'
 //             is a point-in-time record; skipped whole.
@@ -52,6 +53,7 @@ export function loadRegistry(registryPath = REGISTRY_PATH) {
 const ZONE_DIRS = [
   'node_modules/', '.git/', 'tmp-images/', '.claude/worktrees/',
   'devlog/', 'braindump/', 'docs/reports/', 'docs/adr/', 'automation/', 'specs/',
+  'telemetry/',
 ]
 const ZONE_BASENAMES = ['CHANGELOG.md', 'RELEASES.md', 'lexicon.json', 'TELEMETRY.md']
 const PLAN_LIVE = 'plan/bearings.md' // the only live plan/ surface
