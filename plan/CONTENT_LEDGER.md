@@ -11,7 +11,7 @@
 
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
-| cards | `skills/adjust-cards.md` | 2026-09-23 | 68769014 | 17 |
+| cards | `skills/adjust-cards.md` | 2026-09-24 | f155b027 | 18 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-23 | 9a162fc8 | 17 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-23 | 96f73da3 | 17 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-23 | 71648d3a | 17 |
@@ -20,7 +20,7 @@
 ## Log
 
 ```
-> **[adjust-cards pass 18, 2026-09-24, commit <PENDING>]** Zero-diff pass —
+> **[adjust-cards pass 18, 2026-09-24, commit f155b027]** Zero-diff pass —
 > dispatched autonomously by `/march`'s content-lifecycle gate (Step 3b):
 > `cards` (`68769014` 2026-09-23T07:01:18Z, 47 commits behind HEAD
 > `76dbe0df` 2026-09-24T04:44:09Z, ~25.8h) was the stalest qualifying
