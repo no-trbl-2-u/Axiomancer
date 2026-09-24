@@ -75,7 +75,18 @@ is canon; the map table and the open questions are working material.
     in some chronological way"). One distinction to settle then: the order
     the events happened (the fort first) versus the order the player
     unlocks them.
-13. **The annexing power needs a name** (T, 2026-09-24). Being chosen.
+13. **The Covenant.** The annexing power's organization is called **The
+    Covenant** (T, 2026-09-24; "for now"). It is distinct from the country
+    its people come from; **the origin country is unnamed** (open question
+    4).
+14. **The Covenant is everything at once.** One body is the army, the local
+    law enforcement, the federal law enforcement, the intelligence wing, the
+    religious sect, the lawyers and the academics. There is no line between
+    religion, state, courts and enforcement: there is no separate local
+    police, and the army rules the land directly. Every member is versed in
+    "the truth" and has every right to be judge, jury and executioner.
+    Modeled on real-world countries where the army, not local police,
+    enforces the law (T, 2026-09-24).
 
 ## The prologue
 
@@ -153,12 +164,18 @@ prisoner's wife, mother of the child); whether she comes (she does not).
    money (ruling 8). Open: who collects it, and whether it follows him north.
    *Implication, not a ruling (confidence 55):* a sum in a ledger is a
    natural thread to the capital, which weighs and records everyone.
-4. **The annexing power.** Who they are, how far their reach extends, and how
-   the fort's records came to sit in the capital's ledgers. *Implication, not
-   a ruling (confidence 60):* ruling 5 means the capital and the annexer share
-   paperwork, which suggests the capital is administratively tied to the power
-   people believe it stands against. That would be the concrete form of
-   ruling 6.
+4. **The Covenant's origin and the capital's tie to it.** Named and defined
+   (rulings 13–14); reach is nearly the whole world (ruling 11). Open: the
+   **name of the origin country**, what "the truth" they are versed in
+   actually is, and how the fort's records came to sit in the capital's
+   ledgers. *Implication, not a ruling (confidence 60):* ruling 5 means the
+   capital and The Covenant share paperwork, which suggests the capital is
+   administratively tied to the power people believe it stands against.
+   That would be the concrete form of ruling 6.
+   *Implication, not a ruling (confidence 50):* the guards who raided the
+   house in the prologue are Covenant, and so are the fort's jailers. A
+   body that calls its doctrine "the truth" is a sharp counterweight to a
+   story about X's lie.
 5. ~~**How the player learns the prologue.**~~ Answered (T, 2026-09-24):
    withheld at the start and learned later, through a memories section in
    the Memoir tab — rulings 10–12. Still open: what triggers each memory,
