@@ -13,13 +13,74 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-24 | f155b027 | 18 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-24 | bdcd4c7e | 18 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-23 | 96f73da3 | 17 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-24 | 6f13b2d0 | 18 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-23 | 71648d3a | 17 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-24 | f3c09826 | 17 |
 
 ## Log
 
 ```
+> **[adjust-enemies pass 18, 2026-09-24, commit 6f13b2d0]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
+> content-lifecycle gate (Step 3b): `enemies` (`96f73da3`
+> 2026-09-23T16:47:29Z, 35 commits behind HEAD `6f13b2d0`
+> 2026-09-24T10:43:06Z, ~20h) was the only qualifying category this
+> tick — `cards` (`f155b027`, 3 commits), `equipment` (`bdcd4c7e`, 1
+> commit), `keywords` (`71648d3a`, 10 commits) and `npcs` (`f3c09826`,
+> 5 commits) did NOT qualify under either the 15-commit or 36h
+> threshold. Deploy confirmed green (`npm run deploy:check` at HEAD
+> `6f13b2d0`: no gated workflow yet within the grace window,
+> docs/plan-only tick, nothing to check). No phase work pending
+> (`plan/steps/01_build_plan.md` has zero `[ ]` rows). Growth floor
+> clear (`src/World` commits within 7 days, most recently `bc4ef749`).
+> Critique gate did not fire ahead of this tick — `plan/CRITIQUE.md`
+> still carries the open `[HIGH]` pending row (pass 48, mobile
+> late-game-hub map render), so condition 3 ("no pending HIGH critique
+> already queued for iterate") failed and the gate fell through to
+> dispatch.
+>
+> **Step 1 audit — fresh, not re-cited:** re-derived all seven
+> structural signals against the current tree rather than re-citing
+> pass 17's. Only enemy-surface commit since pass 17 is `fb1bffd5`
+> (stale-comment correction pass), zero data/behavioral diff. Pool
+> floor / sibling overlap: sizes unchanged (fishing-village 13,
+> northern-forest 39, caverns 16, northern-city 8, connecting-river 5,
+> town-across-river 4, the-capital 8, aporia-colonnade/archive 8/8,
+> aporia-proof 11); tightest sibling pair (northern-city / the-capital)
+> shares 5/8 = 62.5%, under the 70% ceiling. Orphans: `TheIncompleteness`
+> (explicit "DESIGN REQUIREMENT: never enters EnemiesByMap" comment,
+> `enemy.library.ts:3750`) and `Sandbag_01` (documented test fixture)
+> are the only enemies outside every pool — both intentional exclusions,
+> not REMOVE candidates. Deck law: all 10 distinct card ids referenced
+> by enemy decks resolve live in `src/Cards/library/*.cards.ts`; all 11
+> `EnemyKeyword` kinds in play match `ENEMY_KEYWORD_KINDS`
+> (`enemy-keywords.ts:92-103`) exactly. Portrait collisions: 77
+> `portraitAsset` values, zero duplicates. VITAE/damage band: the 21
+> enemies carrying an explicit `vitae` override are unchanged from
+> pass 16's measurement against the live formula. Aftermath prose /
+> voice: zero `thee|thou|thy|thine|ye` hits across `enemy.library.ts`.
+> Loot table: all 22 distinct `drop(...)` ids resolve in
+> `consumable.library.ts`. All seven signals clean.
+>
+> **Step 1b widened KB check:** Step 1 returned nothing, so ran the
+> floor-raise per the skill. Tried five fresh angles not in passes
+> 9-17's search history (support/healer enemies, damage-sponge/enrage
+> timers, retaliate/thorns/counterattack, mimic/disguised-monster,
+> elite-affix/monster-modifier patterns) via `kb_search`/`kb_find_games`.
+> Mostly zero matches; the one weak hit (a Dawncaster card literally
+> named "Retaliate") isn't in the 141-entry keyword glossary and the
+> roster's existing BRUTAL keyword already covers the adjacent
+> doubled-damage space — not a differentiated, citable gap. Same
+> conclusion passes 15-17 reached via different search terms: the
+> board-game corpus has no enumerated monster-ability catalog to mine,
+> and the one concrete archetype gap the corpus could support
+> (SUMMON/adds) already shipped at Phase 102.
+>
+> A genuine zero-diff pass, fourth in a row (15/16/17/18) on
+> unchanged underlying data — no roster change landed in this window
+> to re-open any prior finding. Commit is the ledger bump only, per
+> skill §5 failure mode 4.
+>
 > **[adjust-equipment pass 18, 2026-09-24, commit bdcd4c7e]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
 > content-lifecycle gate (Step 3b): `equipment` (`9a162fc8`
