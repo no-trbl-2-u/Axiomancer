@@ -99,7 +99,14 @@ is canon; the map table and the open questions are working material.
     (2026-09-24): (1) X must become the new head of The Covenant, the
     *Snowpiercer* route; (2) the cataclysm is not real but a necessary evil
     to keep peace, the *Watchmen* route; (3) The Covenant is greedy, though
-    it began with good intentions.
+    it began with good intentions. Split into two questions, **both deferred
+    by T (2026-09-24)**: (A) is the cataclysm real — route 2 says no, route
+    3 implies yes; (B) where X ends up relative to The Covenant — route 1,
+    compatible with either answer to A. Notes for when they are decided:
+    route 2 needs the inner Covenant to know the prophecy is false (ruling
+    15 has them believing they failed to stop it); a real, coming cataclysm
+    re-imports the guaranteed apocalypse `plan/north-star-mork-borg.md` R-A
+    (lines 47–52) deliberately declined.
 
 ## The prologue
 
