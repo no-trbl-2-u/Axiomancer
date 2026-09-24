@@ -15,12 +15,12 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-23 | 9a162fc8 | 17 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-23 | 96f73da3 | 17 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-23 | 71648d3a | 17 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-24 | <PENDING> | 17 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-24 | f3c09826 | 17 |
 
 ## Log
 
 ```
-> **[adjust-npcs pass 17, 2026-09-24, commit <PENDING>]** Zero-diff pass —
+> **[adjust-npcs pass 17, 2026-09-24, commit f3c09826]** Zero-diff pass —
 > audit re-confirmed byte-identical to pass 16, no new CREATE/UPDATE/
 > REMOVE, ledger bump only. Dispatched autonomously by `/march`'s
 > content-lifecycle gate (Step 3b): `npcs` (`2789a2af`
