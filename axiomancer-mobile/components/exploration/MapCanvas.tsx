@@ -378,7 +378,7 @@ export function MapCanvas({ nodes, edges, backdrop, overlays, children }: MapCan
             <Splatter color={AXM.sulfur} size={130} seed={9} style={styles.sulfurSplatter} />
 
             <GestureDetector gesture={composed}>
-                <Animated.View style={[styles.canvas, mapTransform]}>
+                <Animated.View testID="map-canvas" style={[styles.canvas, mapTransform]}>
                     {/* The engraving plate — pans and zooms with the chart so the
                         wood feels painted onto the page, dimmed so roads and
                         nodes keep contrast (dim, never blur). */}
@@ -514,6 +514,14 @@ const useStyles = makeStyles((AXM) => ({
         left: 0,
         width: CANVAS_W,
         height: CANVAS_H,
+        // `computeFocusTransform`'s tx/ty pivot the scale around the canvas's
+        // own TOP-LEFT corner. The platform default pivots around the CENTER
+        // instead, which is invisible whenever scale lands at 1 (desktop
+        // always does — `Math.min(1, …)` caps it) but throws the whole canvas
+        // off-frame the moment a narrow viewport clamps to MIN_SCALE (CRITIQUE
+        // pass 48: the late-game hub's node graph rendered fully blank on
+        // mobile — the fitted canvas landed almost entirely below the fold).
+        transformOrigin: '0 0',
     },
     graphBackground: {
         backgroundColor: AXM.deepBg,
