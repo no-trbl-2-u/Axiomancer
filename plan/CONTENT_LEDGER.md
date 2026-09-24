@@ -15,11 +15,106 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-23 | 9a162fc8 | 17 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-23 | 96f73da3 | 17 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-23 | 71648d3a | 17 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-23 | 2789a2af | 16 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-24 | <PENDING> | 17 |
 
 ## Log
 
 ```
+> **[adjust-npcs pass 17, 2026-09-24, commit <PENDING>]** Zero-diff pass —
+> audit re-confirmed byte-identical to pass 16, no new CREATE/UPDATE/
+> REMOVE, ledger bump only. Dispatched autonomously by `/march`'s
+> content-lifecycle gate (Step 3b): `npcs` (`2789a2af`
+> 2026-09-23T04:45:34Z, 47 commits behind HEAD `2ed183e6`) was the
+> stalest qualifying category this tick — `cards` (`68769014`
+> 2026-09-23T07:01:18Z, 45 commits), `equipment` (`9a162fc8`
+> 2026-09-23T08:50:03Z, 43 commits) and `enemies` (`96f73da3`
+> 2026-09-23T16:47:29Z, 29 commits) all qualified too but were less
+> stale; `keywords` (`71648d3a` 2026-09-23T18:47:44Z, 4 commits, ~10h)
+> had just ticked and did not qualify. Deploy confirmed green (`npm run
+> deploy:check` at HEAD `2ed183e6`: no gated workflow yet for HEAD,
+> and no verify-* workflow triggered for HEAD's paths — docs/plan-only
+> tick, nothing to check). No phase work pending (`plan/steps/
+> 01_build_plan.md` has zero `[ ]` rows — only `[x]`/`[skipped]`/
+> `[blocked: …]`); growth floor clear (`src/World` commits within 7
+> days, e.g. `bc4ef749`/`e8369e19`/`1da16935`), so 3b-pre didn't
+> pre-empt this dispatch. The critique gate (`/march` Step 2) did not
+> fire ahead of this tick either — `plan/CRITIQUE.md` already carries
+> an open `[HIGH]` pending row (pass 48, mobile late-game-hub map
+> render), so condition 3 ("no pending HIGH critique already queued
+> for iterate") failed and the gate fell through to dispatch.
+>
+> **Step 0:** re-read `axiomancer-mechanics/CLAUDE.md` fresh — THE
+> STORY IS THE ROAD (¶1 lifted 2026-09-18) still governs and hard rule
+> 3 (don't invent a named character's personhood autonomously) still
+> stands; THE BIG NUMBERS REWRITE is not this surface's concern.
+>
+> **Step 1 structural audit — fresh, not re-cited:** `git log
+> 2789a2af..HEAD -- src/NPCs src/World/Continents src/World/MapEvents
+> src/World/types.ts specs/story specs/characters` returns exactly 3
+> touching commits of the 47 intervening: `fb1bffd5` and `bc4ef749`
+> are comment-only doc-correction passes (no NPC/dialogue content
+> touched), and `e8369e19` ("the very start: empty new game, three
+> save slots, main menu, settings") touches
+> `src/World/MapEvents/content.ts` and `resolve-map-event.ts` but only
+> adds signet-relic shop-pool entries and a new read-only
+> `listRegisteredMapEventPools()` helper — zero lines touching any
+> `npcs:`, `unstagedNpcs:`, `NPC`, or `DialogueTree` block. `specs/
+> characters` and `specs/story` carry zero commits in the window. Ran
+> every Step 1 signal fresh anyway:
+> - All 21 `const *: NPC` entries (`shrineKeeper` through
+>   `theRibbonPicker`, spanning `Northern-Forest/npcs.ts`,
+>   `Coastal-Village/npcs.ts`, `Coastal-Village/maps.ts`, and
+>   `Northern-Continent/maps.ts`) unchanged in count and each still
+>   referenced from exactly one map's `npcs:` or `unstagedNpcs:` array
+>   — no orphan.
+> - Zero legacy `dialogue: {` (flat `DialogueMap`) usage across
+>   `src/World/Continents/*/npcs.ts` and `*/maps.ts` — every NPC still
+>   on `dialogueTree`.
+> - Zero `teachCard` usage in NPC content; every `startQuest` name
+>   (`find-islanders`, `gather-iron`, `gather-wood`, `get-to-cave`,
+>   `get-to-connecting-river`, `get-to-forest`, `get-to-northern-city`,
+>   `get-to-the-capital`, `get-to-town-across-river`, `starting-quest`)
+>   unchanged from pass 16 and type-checked green by the verify gate
+>   below.
+> - Coastal-Village's 3-NPC `unstagedNpcs` backlog (Tide-Shopkeeper,
+>   Dockworker's Union Leader, Merchant's Widow) unchanged — re-read
+>   `src/NPCs/types.ts`'s `DialogueChoice.effect` shape directly
+>   (`startQuest`/`progressQuest`/`completeQuest`/`teachCard`/
+>   `setFlag`/`grantCurrency`/`moralDelta`/alignment deltas) to
+>   confirm no `openShop`-shaped effect has landed since pass 16 —
+>   none has; the shop-UI blocker still holds exactly as documented.
+> - Northern-Continent's three 1-NPC maps (`caverns`/theDelver,
+>   `connecting-river`/theBoatwoman, `town-across-river`/theSweetheart)
+>   unchanged; `plan/AUDIT.md`'s `[gap]` row (DECIDED via `/oversight`
+>   2026-09-15, still needs an attended character-spec/story-spec
+>   session) re-confirmed still open and still not this autonomous
+>   tick's call.
+>
+> **Step 1b widened check:** Step 1 returned nothing actionable, so
+> ran the deeper KB cross-reference before accepting zero-diff.
+> `kb_overview` confirms the corpus is unchanged (46 board/card games,
+> 2801 okf docs) — no new source landed to re-scan since pass 16's
+> check. A fresh-angle `kb_search` (`vendor|merchant|shopkeeper|
+> market.{0,20}npc`, scope boardgames) turned up only a Slay the Spire
+> board-game merchant/card-culling note (src-008) — a mechanic
+> observation, not a staging or dialogue-structure insight, and not
+> applicable to the Tide-Shopkeeper blocker (a UI-surface gap, not a
+> mechanic gap). Zero-diff confirmed on the widened check too.
+>
+> **Verify:** green — mechanics (231 test files, 3746 tests, build)
+> and mobile (`npm run verify --workspace axiomancer-mobile`).
+>
+> **Ship:** ledger bump only, no code changes on the NPC surface this
+> pass.
+>
+> **Residue:** none new. The two open items both remain exactly where
+> pass 16 left them: the Coastal-Village 3-NPC unstaged backlog stays
+> genuinely blocked on the missing shop-effect surface (re-confirmed
+> above, not filed again — same finding, no new information), and
+> Northern-Continent's three 1-NPC maps stay parked on
+> `plan/AUDIT.md`'s `[needs-user-call]` row pending an attended
+> character-spec/story-spec session.
+
 > **[adjust-keywords pass 17, 2026-09-23, commit 71648d3a]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — one candidate filed. Dispatched
 > autonomously by `/march`'s content-lifecycle gate (Step 3b): all five
