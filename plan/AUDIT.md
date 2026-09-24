@@ -431,7 +431,7 @@
 
 ## Pending
 
-### [docs] Seven files still describe `story-overview.md` as an event-by-event road with a figureless X (2026-09-24)
+### [x] [docs] Seven files still describe `story-overview.md` as an event-by-event road with a figureless X (2026-09-24) — RESOLVED 2026-09-24
 - category: docs
 - impact: 7
 - ease: 8
@@ -462,6 +462,13 @@
   agents do not invent canon. Keep "X" as the placeholder name. Drop "no
   figure". Put a superseded banner on the outline prompt rather than
   deleting it. Docs only.
+- **RESOLVED 2026-09-24 (T asked, same session):** all seven rewritten as
+  above. `bearings.md` ¶2 keeps its original wording with a dated amendment
+  under it, and a new ¶7 records the switch to a top-down document. Also
+  fixed an eighth pointer found while doing it:
+  `.claude/skills/story-spec/SKILL.md` sent "Story premise" to
+  `docs/story.md`, which only catalogues shipped non-canon content; it now
+  points to the overview.
 
 ### [content] The shipped Drowned Parish opening contradicts the ruled story — attended session needed (2026-09-24)
 - category: content

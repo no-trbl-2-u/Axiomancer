@@ -3,26 +3,26 @@
 Canonical agent guidance lives in **`AGENTS.md`** and **`VISION.md`** (game
 doctrine). This file exists so the load-bearing doctrine is always in context.
 
-## THE STORY IS THE ROAD (THE BLANK PAGE ¶1 lifted, 2026-09-18)
+## THE STORY IS THE OVERVIEW (THE BLANK PAGE ¶1 lifted 2026-09-18; rewritten top-down 2026-09-23/24)
 
 **The story is `content/story/story-overview.md` and nothing else.**
-T cleared every prior story law first — *"Remove ALLL law about what the
-story is. We're starting from square one with an unidentifieable 'x'
-as the first/main character."* — and the overview was then built from
-nothing, one event per turn, with T choosing each one.
+T cleared every prior story law on 2026-09-18, then, in attended sessions on
+2026-09-23/24, replaced the event-by-event road with an **over-arching story
+document**: numbered rulings, T's prologue, a per-map place-and-theme table,
+and ordered open questions.
 
-- **Read the overview before writing anything narrative.** It is the
-  ordered list of what happens to the player. It is short and still being
-  walked: a beat it does not cover **does not exist yet**.
-- **The player is X** — no name, no figure, no identifiers (age,
-  gender, body, station, trade, family). `X` is brainstorming
-  scaffolding, never shipped text, never a stand-in for a name to be
-  picked later.
+- **Read the overview before writing anything narrative.** Its numbered
+  rulings are canon. Its open questions are not decided. A story fact it
+  does not carry **does not exist yet**.
+- **The player is X** — no name. `X` is brainstorming scaffolding, never
+  shipped text, never a stand-in for a name to be picked later. X is **not**
+  figureless any more: T's prologue gives him a sex, a past, a station and a
+  habit. Take those from the overview; add nothing to them.
 - **Shipped narrative is not canon.** ~186 dialogue nodes and the 21
   `boy-*` flags are legacy text kept because deleting them would break
   a working build. They are evidence of an old draft's assumptions, not
-  of what the story is.
-- **Do not invent canon beyond the road.** Need a story fact the overview
+  of what the story is. Several contradict the rulings (see `plan/AUDIT.md`).
+- **Do not invent canon beyond the overview.** Need a story fact the overview
   does not carry? Say it does not exist and stop. Do not reconstruct an arc from shipped text,
   restore a removed document, or write a replacement unprompted. This is
   an explicit carve-out from the loop's content-growth mandate; growth in
@@ -30,10 +30,11 @@ nothing, one event per turn, with T choosing each one.
 - `docs/narrative/` (style, voice, lexicon) is *craft* law and survives
   untouched. Mechanics are untouched.
 
-Full ruling: `plan/bearings.md` → THE BLANK PAGE (¶1 lifted; ¶2–¶5 stand).
-`content/story/README.md` is the superseded record of the clearing — history,
-not law. The road is walked further in attended sessions per
-`plan/2026-09-17-story-outline.prompt.md`.
+Full ruling: `plan/bearings.md` → THE BLANK PAGE (¶1 lifted; ¶2 amended
+2026-09-24; ¶3–¶5 stand). `content/story/README.md` is the superseded record
+of the clearing — history, not law. The overview grows in attended sessions
+with T; `plan/2026-09-17-story-outline.prompt.md` (one event per turn) is
+superseded.
 
 ## Load-bearing doctrine (THE BIG NUMBERS REWRITE, 2026-09-02)
 

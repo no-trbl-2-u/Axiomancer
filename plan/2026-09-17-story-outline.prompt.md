@@ -1,5 +1,14 @@
 # Prompt: THE ROAD, EVENT BY EVENT — build the new story overview from the ground up
 
+> **Superseded (2026-09-24).** In attended sessions on 2026-09-23/24 T
+> replaced the event-by-event road this prompt produced with a top-down
+> over-arching story document at the same path,
+> `axiomancer-mechanics/content/story/story-overview.md` (numbered rulings,
+> the prologue, a per-map place-and-theme table, open questions). Do not run
+> this method against it. The overview now grows in attended sessions with
+> T. Kept as the record of how the 2026-09-18 road was built; that road is
+> recoverable at `5089f43`.
+
 > Written 2026-09-17 at T's direction, revised 2026-09-18 when T
 > cleared every story law from the repo (THE BLANK PAGE). This file is
 > a **handoff prompt**: paste it, or point a fresh attended Claude Code session at
