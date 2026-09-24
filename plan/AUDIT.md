@@ -377,6 +377,31 @@
 > `synergy.statePredicate` form controls (`CardForm.tsx`) — both
 > re-confirmed live this pass, unchanged from pass 7/8's framing.
 
+> **Eleventh pass, 2026-09-24 (`/march` tick).** Dispatch chain landed on
+> `/iterate` again (triage clean; critique gate blocked by this very row —
+> an open HIGH keeps the critique window shut per its own third condition;
+> no pending phase; content-lifecycle gate checked all five categories,
+> none past 15 commits/36h; `/forge`'s 48h world-growth window still open;
+> `/expand`'s 20-commit/48h window not yet open at 1 commit/~3.7h since
+> pass 20). Hard rule §7.5 applied: `plan/CRITIQUE.md`'s HIGH row
+> (exploration — late-game hub node graph blank on mobile, pass 48) is the
+> newest and highest-severity open item in either queue, well above this
+> table's own stale (2026-09-17) Top 5 — picked it directly rather than
+> re-running a fresh audit. Root cause was NOT the row's own two named
+> suspects (`MIN_SCALE` floor, first-layout-wins `viewport` capture) —
+> both re-verified correct on direct read. Found instead, via a throwaway
+> Playwright probe against the exported web build: `computeFocusTransform`
+> assumes the canvas `Animated.View` pivots its scale around its own
+> top-left corner, but the platform default pivots around the CENTER —
+> invisible while the fitted scale sits at 1 (desktop always lands there)
+> but throwing the whole canvas off-frame once a narrow viewport clamps to
+> `MIN_SCALE`. Shipped `transformOrigin: '0 0'` (commit `2dfcafeb`, issue
+> #366) plus a regression test pinning the style. `npm run verify`
+> (axiomancer-mobile): green. Row moved Pending → Done in
+> `plan/CRITIQUE.md` (not this file — the finding lived there, not here).
+> This table's own Top 5 is unchanged and still due a fresh re-score next
+> pass; treat it as stale rather than authoritative.
+
 > **Bias: backlog drain (set via /oversight 2026-09-17).** `/iterate`
 > weights rows in this file 1.5x against the steward rotation until the
 > next oversight lifts it. Reason: four consecutive content-steward

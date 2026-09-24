@@ -172,6 +172,25 @@ describe('MapCanvas', () => {
         expect(expectedCanvasH).toBe(1040);
     });
 
+    it('pivots the canvas transform at its own top-left (CRITIQUE pass 48)', () => {
+        // `computeFocusTransform`'s tx/ty treat the canvas's own TOP-LEFT
+        // corner as the scale pivot. The platform default pivots around the
+        // CENTER instead, which stayed invisible for as long as the fitted
+        // scale happened to land at 1 (desktop always does — `Math.min(1, …)`
+        // caps it) but threw the whole canvas off-frame the moment a narrow
+        // viewport clamped to MIN_SCALE: the late-game hub's node graph
+        // rendered fully blank on mobile because the fitted canvas landed
+        // almost entirely below the fold. `transformOrigin: '0 0'` makes the
+        // real pivot match what the math already assumes.
+        const { getByTestId } = render(
+            <MapCanvas nodes={mockNodes} edges={mockEdges}>
+                <MockChildren />
+            </MapCanvas>
+        );
+        const flat = StyleSheet.flatten(getByTestId('map-canvas').props.style);
+        expect(flat.transformOrigin).toBe('0 0');
+    });
+
     it('mounts overlays in the viewport-fixed furniture layer (CRITIQUE pass 20)', () => {
         const { getByTestId } = render(
             <MapCanvas nodes={mockNodes} edges={mockEdges} overlays={<MockChildren />}>

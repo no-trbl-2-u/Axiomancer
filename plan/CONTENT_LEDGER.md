@@ -11,15 +11,303 @@
 
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
-| cards | `skills/adjust-cards.md` | 2026-09-23 | 68769014 | 17 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-23 | 9a162fc8 | 17 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-23 | 96f73da3 | 17 |
+| cards | `skills/adjust-cards.md` | 2026-09-24 | f155b027 | 18 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-24 | bdcd4c7e | 18 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-24 | 6f13b2d0 | 18 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-23 | 71648d3a | 17 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-23 | 2789a2af | 16 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-24 | f3c09826 | 17 |
 
 ## Log
 
 ```
+> **[adjust-enemies pass 18, 2026-09-24, commit 6f13b2d0]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
+> content-lifecycle gate (Step 3b): `enemies` (`96f73da3`
+> 2026-09-23T16:47:29Z, 35 commits behind HEAD `6f13b2d0`
+> 2026-09-24T10:43:06Z, ~20h) was the only qualifying category this
+> tick — `cards` (`f155b027`, 3 commits), `equipment` (`bdcd4c7e`, 1
+> commit), `keywords` (`71648d3a`, 10 commits) and `npcs` (`f3c09826`,
+> 5 commits) did NOT qualify under either the 15-commit or 36h
+> threshold. Deploy confirmed green (`npm run deploy:check` at HEAD
+> `6f13b2d0`: no gated workflow yet within the grace window,
+> docs/plan-only tick, nothing to check). No phase work pending
+> (`plan/steps/01_build_plan.md` has zero `[ ]` rows). Growth floor
+> clear (`src/World` commits within 7 days, most recently `bc4ef749`).
+> Critique gate did not fire ahead of this tick — `plan/CRITIQUE.md`
+> still carries the open `[HIGH]` pending row (pass 48, mobile
+> late-game-hub map render), so condition 3 ("no pending HIGH critique
+> already queued for iterate") failed and the gate fell through to
+> dispatch.
+>
+> **Step 1 audit — fresh, not re-cited:** re-derived all seven
+> structural signals against the current tree rather than re-citing
+> pass 17's. Only enemy-surface commit since pass 17 is `fb1bffd5`
+> (stale-comment correction pass), zero data/behavioral diff. Pool
+> floor / sibling overlap: sizes unchanged (fishing-village 13,
+> northern-forest 39, caverns 16, northern-city 8, connecting-river 5,
+> town-across-river 4, the-capital 8, aporia-colonnade/archive 8/8,
+> aporia-proof 11); tightest sibling pair (northern-city / the-capital)
+> shares 5/8 = 62.5%, under the 70% ceiling. Orphans: `TheIncompleteness`
+> (explicit "DESIGN REQUIREMENT: never enters EnemiesByMap" comment,
+> `enemy.library.ts:3750`) and `Sandbag_01` (documented test fixture)
+> are the only enemies outside every pool — both intentional exclusions,
+> not REMOVE candidates. Deck law: all 10 distinct card ids referenced
+> by enemy decks resolve live in `src/Cards/library/*.cards.ts`; all 11
+> `EnemyKeyword` kinds in play match `ENEMY_KEYWORD_KINDS`
+> (`enemy-keywords.ts:92-103`) exactly. Portrait collisions: 77
+> `portraitAsset` values, zero duplicates. VITAE/damage band: the 21
+> enemies carrying an explicit `vitae` override are unchanged from
+> pass 16's measurement against the live formula. Aftermath prose /
+> voice: zero `thee|thou|thy|thine|ye` hits across `enemy.library.ts`.
+> Loot table: all 22 distinct `drop(...)` ids resolve in
+> `consumable.library.ts`. All seven signals clean.
+>
+> **Step 1b widened KB check:** Step 1 returned nothing, so ran the
+> floor-raise per the skill. Tried five fresh angles not in passes
+> 9-17's search history (support/healer enemies, damage-sponge/enrage
+> timers, retaliate/thorns/counterattack, mimic/disguised-monster,
+> elite-affix/monster-modifier patterns) via `kb_search`/`kb_find_games`.
+> Mostly zero matches; the one weak hit (a Dawncaster card literally
+> named "Retaliate") isn't in the 141-entry keyword glossary and the
+> roster's existing BRUTAL keyword already covers the adjacent
+> doubled-damage space — not a differentiated, citable gap. Same
+> conclusion passes 15-17 reached via different search terms: the
+> board-game corpus has no enumerated monster-ability catalog to mine,
+> and the one concrete archetype gap the corpus could support
+> (SUMMON/adds) already shipped at Phase 102.
+>
+> A genuine zero-diff pass, fourth in a row (15/16/17/18) on
+> unchanged underlying data — no roster change landed in this window
+> to re-open any prior finding. Commit is the ledger bump only, per
+> skill §5 failure mode 4.
+>
+> **[adjust-equipment pass 18, 2026-09-24, commit bdcd4c7e]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
+> content-lifecycle gate (Step 3b): `equipment` (`9a162fc8`
+> 2026-09-23T08:50:03Z, 47 commits behind HEAD `fc45aba7`
+> 2026-09-24T08:53:01Z, ~25.7h) was the stalest qualifying category this
+> tick — `enemies` (`96f73da3` 2026-09-23T16:47:29Z, 33 commits) also
+> qualified on the commit-count threshold but was less stale by
+> last-pass timestamp; `cards` (`f155b027`, 1 commit), `keywords`
+> (`71648d3a`, 8 commits) and `npcs` (`f3c09826`, 3 commits) did NOT
+> qualify — under both the 15-commit and 36h thresholds. Deploy
+> confirmed green (`npm run deploy:check` at HEAD `fc45aba7`: no gated
+> workflow yet within the grace window, docs/plan-only tick, nothing to
+> check). No phase work pending (`plan/steps/01_build_plan.md` has zero
+> `[ ]` rows). Critique gate did not fire ahead of this tick —
+> `plan/CRITIQUE.md` carries an open `[HIGH]` pending row (pass 48,
+> mobile late-game-hub map render), so condition 3 ("no pending HIGH
+> critique already queued for iterate") failed and the gate fell
+> through to dispatch. Growth floor clear (`src/World` commits within
+> 7 days).
+>
+> **Step 1 audit — fresh, not re-cited:** re-derived every structural
+> signal against the current tree, not just re-cited pass 17's. Slot
+> coverage: 2 weapons, 2 armor, 7 accessories across all 6 live
+> `AccessoryKind`s (amulet ×1, charm ×2, ring ×1, head ×1, hands ×1,
+> feet ×1) — no kind empty, and each capacity-1 slot (weapon/armor)
+> still offers 2 picks, accessory (capacity 3) offers 7, so meaningful
+> choice holds. Dominance: no same-slot relic pair is strictly worse on
+> every `statModifiers` value with no offsetting `grantsSignature`
+> difference (weapon/armor pairs tie in magnitude but differ in
+> signature by design). Signature drift: all 11 `grantsSignature`
+> values resolve live against `SignatureSkillId` in
+> `combat.encounter.types.ts` (1:1, no orphans, no new signatures
+> added since pass 17). Consumable `effectId` resolution: all 22
+> resolve in `buffs.library.json`. Shop/reward reachability: all 10
+> sellable relics (the Suppliant's Ring is the deliberate first-node
+> grant, never sold) appear in >=1 village-market `shop.wares` block in
+> `content.ts`; all 22 consumables occur in >=1 shop ware block or
+> `enemy.library.ts` loot table (`hunters-elixir` down to exactly one
+> loot row, `enemy.library.ts:1403`, still counts). Re-checked every
+> shop pool and loot table for a shared-`effectId` pair co-occurring in
+> one pool (the pass-11/14/15 bug class): `focus-vial`/`hunters-elixir`
+> (`buff_accuracy_up`) and `berserker-brew`/`quicksilver-vial`
+> (`buff_haste`) remain the only same-effect pairs in the library, and
+> neither co-occurs in a single shop or loot table — pass 17's
+> conclusion reconfirmed unchanged, not re-opened. A genuine zero-diff
+> pass on the data itself, so the Step 1b widened KB check ran.
+>
+> **Step 1b widened KB check:** ran a fresh angle from pass 17's
+> (which exhausted the corpus's `equipment`/`itemization` mechanics
+> tags and Dawncaster's `relic`/`trinket`/`artifact`/`equip` card
+> types) — this pass searched the boardgame corpus's campaign/loot
+> RPGs directly (`kb_search` for dominated-item/same-relic/gear-choice
+> phrasing, and for generic loot/hoarding complaints) rather than the
+> mechanics-tag index. No board game in the corpus carries an
+> `itemization`/`equipment` tag at all, and the two loot-driven
+> campaign games present (Gloomhaven, Too Many Bones) have no indexed
+> `better-if` complaint about dominated gear or reward-pool staleness —
+> the corpus's discussion of their loot stays at the descriptive
+> "loot funds progression" level, nothing that maps onto a concrete gap
+> in the 11-relic/22-consumable set. No new corpus angle surfaced a
+> finding; the already-filed "always-good secondary" consumable lever
+> (`plan/PHASE_CANDIDATES.md`, pass-13 residue) is unshipped and out of
+> this tick's own findings, not re-filed.
+>
+> Verify: green (mechanics 231 files/3746 tests + build; mobile
+> lint/typecheck/jest/asset/critique-drive). Commit only the ledger
+> bump — no code diff this pass.
+```
+
+```
+> **[adjust-cards pass 18, 2026-09-24, commit f155b027]** Zero-diff pass —
+> dispatched autonomously by `/march`'s content-lifecycle gate (Step 3b):
+> `cards` (`68769014` 2026-09-23T07:01:18Z, 47 commits behind HEAD
+> `76dbe0df` 2026-09-24T04:44:09Z, ~25.8h) was the stalest qualifying
+> category this tick — `equipment` (`9a162fc8` 2026-09-23T08:50:03Z, 45
+> commits) and `enemies` (`96f73da3` 2026-09-23T16:47:29Z, 31 commits)
+> both also qualified on commit count but were less stale by last-pass
+> timestamp; `keywords` (`71648d3a` 2026-09-23T18:47:44Z, 6 commits) and
+> `npcs` (`f3c09826` 2026-09-24T04:44:05Z, 1 commit) did NOT qualify —
+> under both the 15-commit and 36h thresholds. Deploy confirmed green
+> (`npm run deploy:check` at HEAD `76dbe0df`: no gated workflow yet within
+> the grace window, no verify-* workflow triggered for HEAD's paths). No
+> phase work pending (`plan/steps/01_build_plan.md` has zero `[ ]` rows).
+> Critique gate did not fire ahead of this tick — `plan/CRITIQUE.md`
+> carries an open `[HIGH]` pending row (pass 48, mobile late-game-hub map
+> render), so condition 3 ("no pending HIGH critique already queued for
+> iterate") failed and the gate fell through to dispatch. Growth floor
+> clear (`src/World` commits within 7 days).
+>
+> **Step 1 audit — fresh, not re-cited (delegated to `card-expert`,
+> consult mode):** `git diff 68769014..HEAD` over every card-authoring
+> surface (`cards.library.ts`, `combat.starter-deck-presets.ts`,
+> `cards.sandbox-sets.ts`, `combat.deck-draft.ts`, `cards.allies.ts`,
+> `cards.haunts.ts`, `library/{choir,trial,vigil}.cards.ts`) shows only
+> comment-only doc corrections from the `comments-docs-audit` merge
+> (`fb1bffd5`/`f5db5ca6`/`adf35108` via `f58637ca`) — stale counts/
+> doctrine references fixed in prose, no card id/text/mechanic/price
+> touched; the only other card-adjacent commit in the window
+> (`96f73da3`) is `/adjust-enemies` pass 17's RawheadRex retrofit,
+> enemy-side. Re-ran the full card-surface e2e trio fresh:
+> `pricing.engine.test.ts` 263/263, `curated-library.engine.test.ts`
+> 14/14 (FREE-line + reachability), `deck-presets.engine.test.ts` 9/9
+> (aspect-thirds) — all green, byte-identical to pass 17. `axio_overview`
+> reconfirms 134 cards / 8 themes unchanged.
+>
+> **Step 1b widened audit — fresh angle:** ran KB cross-reference on
+> Slay the Spire's Retain family (`kb:slay-the-spire/cards/0132-
+> equilibrium-undo`, `0250-protect-protect`, `0348-well-laid-plans-
+> well_laid_plans`, `0238-perseverance-perseverance`, `0353-windmill-
+> strike-windmillstrike`). Finding: **not a gap, already structurally
+> subsumed** — Axiomancer's hand-carryover rule (`combat.engine.ts`
+> ~L5204-5226, the "keep-hand rule, 2026-07-13" comment) makes every
+> unplayed card stay in hand by default, unlike Slay the Spire's
+> discard-by-default baseline that Retain exists to escape. Also
+> spot-checked AOE/multi-target (no gap — `CardTarget` is `'self' |
+> 'enemy'` only and encounters never carry more than one enemy by
+> design) and dodge/evasion (no gap by doctrine — a chance-based no-op
+> play conflicts with THE BIG NUMBERS REWRITE's "every play visibly
+> moves something" pillar). Recorded here so a future pass doesn't
+> re-propose Retain as an unbuilt gap.
+>
+> **Step 2/3:** nothing to ship — zero actionable findings from Step 1
+> or Step 1b (skill §5 failure mode 4: no manufactured change). Pass
+> 17's filed candidate (`plan/PHASE_CANDIDATES.md` [score 3.0], the
+> in-combat/temporary card-upgrade niche) reconfirmed still open, still
+> accurate, still correctly sized past this steward's ship-small
+> ceiling — no code has landed against `card-upgrades.ts` or the
+> `CardSpecialMechanic` union in the window.
+>
+> Verify: green (mechanics 231 files/3746 tests + build; mobile
+> lint/typecheck/jest/asset/critique-drive; card-editor type-check).
+
+> **[adjust-npcs pass 17, 2026-09-24, commit f3c09826]** Zero-diff pass —
+> audit re-confirmed byte-identical to pass 16, no new CREATE/UPDATE/
+> REMOVE, ledger bump only. Dispatched autonomously by `/march`'s
+> content-lifecycle gate (Step 3b): `npcs` (`2789a2af`
+> 2026-09-23T04:45:34Z, 47 commits behind HEAD `2ed183e6`) was the
+> stalest qualifying category this tick — `cards` (`68769014`
+> 2026-09-23T07:01:18Z, 45 commits), `equipment` (`9a162fc8`
+> 2026-09-23T08:50:03Z, 43 commits) and `enemies` (`96f73da3`
+> 2026-09-23T16:47:29Z, 29 commits) all qualified too but were less
+> stale; `keywords` (`71648d3a` 2026-09-23T18:47:44Z, 4 commits, ~10h)
+> had just ticked and did not qualify. Deploy confirmed green (`npm run
+> deploy:check` at HEAD `2ed183e6`: no gated workflow yet for HEAD,
+> and no verify-* workflow triggered for HEAD's paths — docs/plan-only
+> tick, nothing to check). No phase work pending (`plan/steps/
+> 01_build_plan.md` has zero `[ ]` rows — only `[x]`/`[skipped]`/
+> `[blocked: …]`); growth floor clear (`src/World` commits within 7
+> days, e.g. `bc4ef749`/`e8369e19`/`1da16935`), so 3b-pre didn't
+> pre-empt this dispatch. The critique gate (`/march` Step 2) did not
+> fire ahead of this tick either — `plan/CRITIQUE.md` already carries
+> an open `[HIGH]` pending row (pass 48, mobile late-game-hub map
+> render), so condition 3 ("no pending HIGH critique already queued
+> for iterate") failed and the gate fell through to dispatch.
+>
+> **Step 0:** re-read `axiomancer-mechanics/CLAUDE.md` fresh — THE
+> STORY IS THE ROAD (¶1 lifted 2026-09-18) still governs and hard rule
+> 3 (don't invent a named character's personhood autonomously) still
+> stands; THE BIG NUMBERS REWRITE is not this surface's concern.
+>
+> **Step 1 structural audit — fresh, not re-cited:** `git log
+> 2789a2af..HEAD -- src/NPCs src/World/Continents src/World/MapEvents
+> src/World/types.ts specs/story specs/characters` returns exactly 3
+> touching commits of the 47 intervening: `fb1bffd5` and `bc4ef749`
+> are comment-only doc-correction passes (no NPC/dialogue content
+> touched), and `e8369e19` ("the very start: empty new game, three
+> save slots, main menu, settings") touches
+> `src/World/MapEvents/content.ts` and `resolve-map-event.ts` but only
+> adds signet-relic shop-pool entries and a new read-only
+> `listRegisteredMapEventPools()` helper — zero lines touching any
+> `npcs:`, `unstagedNpcs:`, `NPC`, or `DialogueTree` block. `specs/
+> characters` and `specs/story` carry zero commits in the window. Ran
+> every Step 1 signal fresh anyway:
+> - All 21 `const *: NPC` entries (`shrineKeeper` through
+>   `theRibbonPicker`, spanning `Northern-Forest/npcs.ts`,
+>   `Coastal-Village/npcs.ts`, `Coastal-Village/maps.ts`, and
+>   `Northern-Continent/maps.ts`) unchanged in count and each still
+>   referenced from exactly one map's `npcs:` or `unstagedNpcs:` array
+>   — no orphan.
+> - Zero legacy `dialogue: {` (flat `DialogueMap`) usage across
+>   `src/World/Continents/*/npcs.ts` and `*/maps.ts` — every NPC still
+>   on `dialogueTree`.
+> - Zero `teachCard` usage in NPC content; every `startQuest` name
+>   (`find-islanders`, `gather-iron`, `gather-wood`, `get-to-cave`,
+>   `get-to-connecting-river`, `get-to-forest`, `get-to-northern-city`,
+>   `get-to-the-capital`, `get-to-town-across-river`, `starting-quest`)
+>   unchanged from pass 16 and type-checked green by the verify gate
+>   below.
+> - Coastal-Village's 3-NPC `unstagedNpcs` backlog (Tide-Shopkeeper,
+>   Dockworker's Union Leader, Merchant's Widow) unchanged — re-read
+>   `src/NPCs/types.ts`'s `DialogueChoice.effect` shape directly
+>   (`startQuest`/`progressQuest`/`completeQuest`/`teachCard`/
+>   `setFlag`/`grantCurrency`/`moralDelta`/alignment deltas) to
+>   confirm no `openShop`-shaped effect has landed since pass 16 —
+>   none has; the shop-UI blocker still holds exactly as documented.
+> - Northern-Continent's three 1-NPC maps (`caverns`/theDelver,
+>   `connecting-river`/theBoatwoman, `town-across-river`/theSweetheart)
+>   unchanged; `plan/AUDIT.md`'s `[gap]` row (DECIDED via `/oversight`
+>   2026-09-15, still needs an attended character-spec/story-spec
+>   session) re-confirmed still open and still not this autonomous
+>   tick's call.
+>
+> **Step 1b widened check:** Step 1 returned nothing actionable, so
+> ran the deeper KB cross-reference before accepting zero-diff.
+> `kb_overview` confirms the corpus is unchanged (46 board/card games,
+> 2801 okf docs) — no new source landed to re-scan since pass 16's
+> check. A fresh-angle `kb_search` (`vendor|merchant|shopkeeper|
+> market.{0,20}npc`, scope boardgames) turned up only a Slay the Spire
+> board-game merchant/card-culling note (src-008) — a mechanic
+> observation, not a staging or dialogue-structure insight, and not
+> applicable to the Tide-Shopkeeper blocker (a UI-surface gap, not a
+> mechanic gap). Zero-diff confirmed on the widened check too.
+>
+> **Verify:** green — mechanics (231 test files, 3746 tests, build)
+> and mobile (`npm run verify --workspace axiomancer-mobile`).
+>
+> **Ship:** ledger bump only, no code changes on the NPC surface this
+> pass.
+>
+> **Residue:** none new. The two open items both remain exactly where
+> pass 16 left them: the Coastal-Village 3-NPC unstaged backlog stays
+> genuinely blocked on the missing shop-effect surface (re-confirmed
+> above, not filed again — same finding, no new information), and
+> Northern-Continent's three 1-NPC maps stay parked on
+> `plan/AUDIT.md`'s `[needs-user-call]` row pending an attended
+> character-spec/story-spec session.
+
 > **[adjust-keywords pass 17, 2026-09-23, commit 71648d3a]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — one candidate filed. Dispatched
 > autonomously by `/march`'s content-lifecycle gate (Step 3b): all five
