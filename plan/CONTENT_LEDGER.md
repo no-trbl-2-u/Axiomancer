@@ -12,12 +12,82 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-24 | f155b027 | 18 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-23 | 9a162fc8 | 17 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-24 | <PENDING> | 18 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-23 | 96f73da3 | 17 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-23 | 71648d3a | 17 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-24 | f3c09826 | 17 |
 
 ## Log
+
+```
+> **[adjust-equipment pass 18, 2026-09-24, commit <PENDING>]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
+> content-lifecycle gate (Step 3b): `equipment` (`9a162fc8`
+> 2026-09-23T08:50:03Z, 47 commits behind HEAD `fc45aba7`
+> 2026-09-24T08:53:01Z, ~25.7h) was the stalest qualifying category this
+> tick — `enemies` (`96f73da3` 2026-09-23T16:47:29Z, 33 commits) also
+> qualified on the commit-count threshold but was less stale by
+> last-pass timestamp; `cards` (`f155b027`, 1 commit), `keywords`
+> (`71648d3a`, 8 commits) and `npcs` (`f3c09826`, 3 commits) did NOT
+> qualify — under both the 15-commit and 36h thresholds. Deploy
+> confirmed green (`npm run deploy:check` at HEAD `fc45aba7`: no gated
+> workflow yet within the grace window, docs/plan-only tick, nothing to
+> check). No phase work pending (`plan/steps/01_build_plan.md` has zero
+> `[ ]` rows). Critique gate did not fire ahead of this tick —
+> `plan/CRITIQUE.md` carries an open `[HIGH]` pending row (pass 48,
+> mobile late-game-hub map render), so condition 3 ("no pending HIGH
+> critique already queued for iterate") failed and the gate fell
+> through to dispatch. Growth floor clear (`src/World` commits within
+> 7 days).
+>
+> **Step 1 audit — fresh, not re-cited:** re-derived every structural
+> signal against the current tree, not just re-cited pass 17's. Slot
+> coverage: 2 weapons, 2 armor, 7 accessories across all 6 live
+> `AccessoryKind`s (amulet ×1, charm ×2, ring ×1, head ×1, hands ×1,
+> feet ×1) — no kind empty, and each capacity-1 slot (weapon/armor)
+> still offers 2 picks, accessory (capacity 3) offers 7, so meaningful
+> choice holds. Dominance: no same-slot relic pair is strictly worse on
+> every `statModifiers` value with no offsetting `grantsSignature`
+> difference (weapon/armor pairs tie in magnitude but differ in
+> signature by design). Signature drift: all 11 `grantsSignature`
+> values resolve live against `SignatureSkillId` in
+> `combat.encounter.types.ts` (1:1, no orphans, no new signatures
+> added since pass 17). Consumable `effectId` resolution: all 22
+> resolve in `buffs.library.json`. Shop/reward reachability: all 10
+> sellable relics (the Suppliant's Ring is the deliberate first-node
+> grant, never sold) appear in >=1 village-market `shop.wares` block in
+> `content.ts`; all 22 consumables occur in >=1 shop ware block or
+> `enemy.library.ts` loot table (`hunters-elixir` down to exactly one
+> loot row, `enemy.library.ts:1403`, still counts). Re-checked every
+> shop pool and loot table for a shared-`effectId` pair co-occurring in
+> one pool (the pass-11/14/15 bug class): `focus-vial`/`hunters-elixir`
+> (`buff_accuracy_up`) and `berserker-brew`/`quicksilver-vial`
+> (`buff_haste`) remain the only same-effect pairs in the library, and
+> neither co-occurs in a single shop or loot table — pass 17's
+> conclusion reconfirmed unchanged, not re-opened. A genuine zero-diff
+> pass on the data itself, so the Step 1b widened KB check ran.
+>
+> **Step 1b widened KB check:** ran a fresh angle from pass 17's
+> (which exhausted the corpus's `equipment`/`itemization` mechanics
+> tags and Dawncaster's `relic`/`trinket`/`artifact`/`equip` card
+> types) — this pass searched the boardgame corpus's campaign/loot
+> RPGs directly (`kb_search` for dominated-item/same-relic/gear-choice
+> phrasing, and for generic loot/hoarding complaints) rather than the
+> mechanics-tag index. No board game in the corpus carries an
+> `itemization`/`equipment` tag at all, and the two loot-driven
+> campaign games present (Gloomhaven, Too Many Bones) have no indexed
+> `better-if` complaint about dominated gear or reward-pool staleness —
+> the corpus's discussion of their loot stays at the descriptive
+> "loot funds progression" level, nothing that maps onto a concrete gap
+> in the 11-relic/22-consumable set. No new corpus angle surfaced a
+> finding; the already-filed "always-good secondary" consumable lever
+> (`plan/PHASE_CANDIDATES.md`, pass-13 residue) is unshipped and out of
+> this tick's own findings, not re-filed.
+>
+> Verify: green (mechanics 231 files/3746 tests + build; mobile
+> lint/typecheck/jest/asset/critique-drive). Commit only the ledger
+> bump — no code diff this pass.
+```
 
 ```
 > **[adjust-cards pass 18, 2026-09-24, commit f155b027]** Zero-diff pass —
