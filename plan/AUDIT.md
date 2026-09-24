@@ -431,6 +431,99 @@
 
 ## Pending
 
+### [docs] Seven files still describe `story-overview.md` as an event-by-event road with a figureless X (2026-09-24)
+- category: docs
+- impact: 7
+- ease: 8
+- detail: residue of the 2026-09-23/24 attended story sessions (PRs #362,
+  #365). T replaced `axiomancer-mechanics/content/story/story-overview.md`
+  (clean slate) with an over-arching story document: rulings, the prologue,
+  the per-map themes, and open questions. It is no longer a road walked one
+  event per turn, and X is no longer figureless (T's own prologue gives him a
+  sex, a past, a station, and a habit). The live docs that tell agents what
+  that file is still describe the old shape:
+  - `axiomancer-mechanics/CLAUDE.md` "THE STORY IS THE ROAD" (always in
+    context): "the ordered list of what happens to the player", "still being
+    walked", "no name, no figure, no identifiers".
+  - `plan/bearings.md` THE BLANK PAGE, ~lines 625–662: "No name, no figure",
+    "event by event", "the road".
+  - `axiomancer-mechanics/content/story/README.md` lines 1–12: "That file is
+    the road".
+  - `axiomancer-mechanics/docs/story.md` lines 3–7: "the road, event by
+    event … no name, no figure".
+  - `.claude/skills/world-spec/SKILL.md` line 42 and
+    `.claude/skills/character-spec/SKILL.md` line 43: "the road, event by
+    event. Short and still being walked".
+  - `plan/2026-09-17-story-outline.prompt.md`: the whole method (one event
+    per turn, pivot rule) is superseded by T's switch to a top-down document.
+- next: rewrite each description to "the over-arching story document:
+  rulings, prologue, per-map themes, open questions". Keep the rule that
+  still holds: a story fact the document does not carry does not exist, and
+  agents do not invent canon. Keep "X" as the placeholder name. Drop "no
+  figure". Put a superseded banner on the outline prompt rather than
+  deleting it. Docs only.
+
+### [content] The shipped Drowned Parish opening contradicts the ruled story — attended session needed (2026-09-24)
+- category: content
+- impact: 8
+- ease: 3
+- detail: `story-overview.md` rulings 7 and 10–12: play begins as X, a grown
+  man, flees the Drowned Parish with The Covenant tracking him. The player
+  knows nothing else at the start; the prologue arrives later as memories.
+  The shipped map (`axiomancer-mechanics/src/World/Continents/Coastal-Village/maps.ts`,
+  `src/World/MapEvents/content.ts` `FISHING_VILLAGE_NEW_PLAYER_POOLS`)
+  instead opens at the docks (`fv-1` `fvArrival`). Old Marrow hires a local
+  boy to kill the King of Revenge (`fv-2`, `starting-quest`; boss `fv-6`),
+  and three dinner-table dilemmas give him a father (`fv-4`
+  stranger's net, `fv-14` what do I tell father, `fv-16` borrowed hook).
+  The other 18 nodes (rest, hazard, loot, gathering, monster encounters) do
+  not depend on the story and can stay.
+- next: an attended `/story-spec` session on the Drowned Parish opening. One
+  was started 2026-09-24 and paused by T before any answer. It had put four
+  questions to T: who pressures X on the map (Covenant guards, the village,
+  or both), what happens to Old Marrow, what the three dilemma nodes become,
+  and what `fv-1` shows. Not loop-drainable: THE STORY IS THE ROAD forbids
+  inventing canon the overview does not carry.
+
+### [content] Legacy story threads that likely contradict the new rulings: `boy-*` flags and the ribbon/advisor-selection rite (2026-09-24)
+- category: content
+- impact: 5
+- ease: 3
+- detail: two shipped threads assume the discarded story.
+  (1) The `boy-*` flags (25 references in `src/World/MapEvents/content.ts`,
+  6 in `Coastal-Village/maps.ts`) assume a child; X is now a grown man who
+  served The Covenant. Renaming is engine work (THE BLANK PAGE ¶2).
+  (2) The ribbon/advisor-selection rite: the river court at `cr-9`, the
+  village-green rite at `tar-4` (sets `sweetheart-was-nominated`,
+  `content.ts` ~2000/2015), and the capital's Herald and Ribbon-Picker
+  (`Northern-Continent/maps.ts` ~838/906, gated on that flag). It gives
+  people a different reason to go to the capital than ruling 11 (the last
+  refuge from The Covenant). Confidence 70 that it conflicts; T has not ruled.
+- next: T call on the ribbon thread (keep, rewrite, or cut) in an attended
+  session. The flag rename follows whatever the Drowned Parish rewrite
+  decides.
+
+### [content] Story systems the new rulings require that the game does not have (2026-09-24)
+- category: content
+- impact: 7
+- ease: 3
+- detail: `story-overview.md` rulings name five things with no representation
+  in the build:
+  - the opening world-framing (ruling 11: The Covenant occupies nearly the
+    whole world; the capital is the last bastion of hope);
+  - a **memories** section in the Memoir tab, organized chronologically
+    (ruling 12; `axiomancer-mobile/app/(tabs)/memoir/` lists quests only),
+    through which the prologue reaches the player;
+  - The Covenant itself (rulings 13–14) — no faction, guard enemies or
+    Covenant roster exists (`src/Enemy/enemy.library.ts`);
+  - X's inherited money debt (ruling 8);
+  - the pursuing guards (ruling 7).
+- next: the memories section and the opening framing are systems work that
+  can be designed now (what triggers a memory, the chronological scheme).
+  What each memory *says* waits on the prologue's delivery plan. Route to
+  `/expand` as phase candidates. The Covenant roster waits on the Drowned
+  Parish session deciding who pressures X.
+
 ### [docs] Live docs whose bodies describe retired systems — banner-only pass, rewrites owed (2026-09-23)
 - category: docs
 - impact: 5

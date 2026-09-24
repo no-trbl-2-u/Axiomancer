@@ -19,7 +19,8 @@
 > and it invents no new canon about X, the second guard, or anyone's fate.
 >
 > **Addendum, 2026-09-23 (same day, later in this session).** T set a new
-> `story-overview.md` Standing Fact after this spec shipped: the capital is
+> `story-overview.md` fact after this spec shipped (now ruling 6 of the
+> over-arching story, which replaced the road the same day): the capital is
 > commonly believed to be the annexation's last unconquered ground, and
 > that belief is wrong — not because it fell, but because it was never a
 > refuge; its coldness is its own nature. T confirmed this reads as

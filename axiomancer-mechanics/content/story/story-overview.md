@@ -1,219 +1,230 @@
-# Story overview — the road, event by event
+# Story overview — the over-arching story
 
-> Session 2026-09-18, T present. Built from nothing — no prior canon, by
-> T's instruction (THE BLANK PAGE, plan/bearings.md). This file is the
-> first story this game has.
-> Player: **X** — no name, no figure, no identifiers (decided 2026-09-18,
-> §2 of `plan/2026-09-17-story-outline.prompt.md`). X is a placeholder for
-> brainstorming, never shipped text.
-> Status: walking. (§4 condition 2 was recommended after event 5 and T
-> declined it — see `Pivot recommendation`. That condition is spent; it is
-> not raised again unless something new fires it.)
+> Session 2026-09-23, T present (`/world-spec`, attended). This file
+> **replaces** the road-by-event overview of 2026-09-18 on T's ruling:
+> "replace the contents of story-overview", clean slate. The previous
+> road (events 1–6, its Standing Facts, its pivot notes) is discarded, not
+> archived here; it is recoverable from git at commit `5089f43`.
+> Player: **X** — no name (decided 2026-09-18). X is a placeholder for
+> brainstorming, never shipped text. **No longer figureless:** T's own
+> prologue (below) gives X a sex ("he"), a past (an old friend of the
+> prisoner, before the war), a station (serving the annexing power), and a
+> habit (drinking). Those are T's words, not inference.
+> Status: **drafting.** The prologue is ruled; the journey after it is open
+> (see `Open questions`).
 
-## Standing facts (established by T, not events)
+## Rulings
 
-Facts the road carries from the moment they were set. They are not beats and
-have no position in the sequence; every beat after them may assume them.
+Everything below was chosen by T in this session. Nothing else in this file
+is canon; the map table and the open questions are working material.
 
-- **X is a traitor to his people.** The land X stands on is being annexed by
-  another people, and X, in cowardice, turned on his own. Set by T at event 3,
-  2026-09-18. The dungeon X guards is therefore the annexer's, and X's post in
-  it is what the betrayal bought.
-- **A second guard saw what X did in the cell.** Seeded by T at event 5 as a
-  future character. He is not yet a beat; he is a loaded gun the road has
-  not fired. Whatever he wants from X, he has had it since the night itself.
-- **She was injured in the siege of their city.** The pain is real, chronic,
-  and the reason she has the remedy at all. Set by T at event 5.
-- **T's write-in refers to X as "his."** Recorded as written. This is the first
-  identifier X has carried and it sits against §2's "no figure" — see
-  `Noted for the pivot`. Not re-litigated here.
-- **The capital was believed to be the annexation's last unconquered
-  ground — the belief was always false.** Common knowledge along the road
-  (not X's private hope alone): ordinary people believe the capital is the
-  last place the annexation hasn't reached — it's why the river-court
-  islanders and the sweetheart's own village send a chosen child there
-  each generation, the safest bet either place has. The belief is wrong,
-  and not because the annexer got there first: the capital was never
-  conquered, but it was also never a refuge. Its coldness — ribbons
-  weighed instead of faces, a ledger that "balances either way" — is the
-  capital's own nature, nothing the annexation did to it. Whoever arrives
-  expecting the last safe place finds out it never was, immediately, on
-  arrival. Set by T, 2026-09-23. (Note: the shipped, non-canon Herald
-  dialogue at `the-capital`'s `cap-2` already reads almost exactly this
-  way — "ribbons instead of faces," "the tally balances either way" — a
-  coincidence of an earlier draft, not evidence it was ever canon, but
-  worth knowing if a future beat is authored there: the existing text
-  needs no retheming to fit this fact, only a frame that it is not
-  reassuring.)
+1. **Clean slate.** This document is the whole story. Nothing from the
+   previous road carries over unless re-ruled here.
+2. **The art is artwork only.** Every map and arena plate is a Gustave Doré
+   engraving from two books: Dante's *Divine Comedy* and *London: A
+   Pilgrimage* (1872). T ruled the plates are **imagery, not structure**:
+   the story does not follow Dante's descent-and-ascent, and a place's plate
+   does not dictate what happens there. (Earlier the same session T chose
+   "skeleton"; T reversed it: "I don't want to lean so much on Dante's
+   Inferno. Artwork only.")
+3. **The opening.** A prologue at a fort on the coast, held by an annexing
+   power, then the woman's house in **the Drowned Parish** (the fishing
+   village). Written out in full by T — see `The prologue` below.
+4. ~~**There is a lie, and it holds until the capital.**~~ **Superseded by
+   T's prologue — see open question 1.** In the prologue the guards tell her
+   the truth, and she dies before the adventure begins. The lie *to her*
+   does not reach the capital.
+5. ~~**The record breaks it.**~~ **Needs re-ruling — see open question 1.**
+   As first ruled: the capital's ledgers hold the fort's own records, the
+   truth is in them, and X cannot talk past a ledger. With her gone, what
+   the record breaks at the capital is undecided.
+6. **The capital is believed to be the last refuge, and never was one.**
+   T's words: "the capital was THOUGHT to be the last bastion of hope. But
+   their beliefs are shown to be incorrect the moment they enter." This is
+   common belief along the road, not X's alone. The capital was not
+   conquered; its coldness is its own nature.
+7. **Why X travels, and whether she comes.** She does not come; X leaves the
+   house by sneaking out. **He goes north fleeing the guards** (T,
+   2026-09-23): the capital is the one place people say the annexers cannot
+   reach, so it is where a hunted man runs.
+8. **The debt is money.** The prisoner's debt, transferred onto X at the
+   fort, is a literal sum owed to the annexing power (T, 2026-09-23).
+9. **She does not die, and it comes to light later.** Her fall from the
+   cliff does not kill her (T, 2026-09-23). X does not know this; he never
+   looked for her body. Her survival **is revealed later** in the story (T,
+   2026-09-23). When, how, and to whom is open (open question 1).
 
-## Shipped inventory (read 2026-09-18)
+10. **The game opens knowing almost nothing.** At the start the player
+    knows only that X is fleeing the Drowned Parish, that the annexing
+    power is tracking him, and that he must keep moving. None of the
+    prologue (the fort, the child, the prisoner, the debt, the lie, the
+    raid, the cliff) is told at the start (T, 2026-09-24).
+11. **The opening frames the world.** The game begins by telling the
+    player that the annexing power is waging a campaign against the world
+    and now occupies just about all of it; that the capital is the last
+    bastion of hope; and that X is fleeing their grasp. The player is told
+    the capital is a refuge and believes it. Ruling 6 (it never was)
+    stays hidden from the player until the capital (T, 2026-09-24). This
+    also answers part of open question 4: the annexers' reach is nearly
+    the whole world.
+12. **The prologue arrives later, as memories.** The player learns the
+    prologue's story over the journey through a **memories** section in
+    the Memoir tab (T, 2026-09-24; T's "option 3" with notes). The memories
+    are **organized in some chronological way**; the exact scheme is open
+    (T: "I don't know how we'll organize it yet, but it should be organized
+    in some chronological way"). One distinction to settle then: the order
+    the events happened (the fort first) versus the order the player
+    unlocks them.
+13. **The Covenant.** The annexing power's organization is called **The
+    Covenant** (T, 2026-09-24; "for now"). It is distinct from the country
+    its people come from; **the origin country is unnamed** (open question
+    4).
+14. **The Covenant is everything at once.** One body is the army, the local
+    law enforcement, the federal law enforcement, the intelligence wing, the
+    religious sect, the lawyers and the academics. There is no line between
+    religion, state, courts and enforcement: there is no separate local
+    police, and the army rules the land directly. Every member is versed in
+    "the truth" and has every right to be judge, jury and executioner.
+    Modeled on real-world countries where the army, not local police,
+    enforces the law (T, 2026-09-24).
+15. **The cataclysm and the covenant.** A cataclysmic event was prophesied
+    before The Covenant took power. Their covenant (the promise the name
+    refers to) is that they can stop it. On realizing they cannot, even
+    after taking all of the world's resources, they began killing anyone who
+    claims the cataclysm is coming (T, 2026-09-24). T calls this the world's
+    "lie": a lie at world scale, beside X's own.
+16. **Nobody remembers how The Covenant rose.** X lives in a time when no one
+    knows how, when, or why The Covenant came to power (T, 2026-09-24).
+17. **Whether the cataclysm is real: open.** T is weighing three routes
+    (2026-09-24): (1) X must become the new head of The Covenant, the
+    *Snowpiercer* route; (2) the cataclysm is not real but a necessary evil
+    to keep peace, the *Watchmen* route; (3) The Covenant is greedy, though
+    it began with good intentions. Split into two questions, **both deferred
+    by T (2026-09-24)**: (A) is the cataclysm real — route 2 says no, route
+    3 implies yes; (B) where X ends up relative to The Covenant — route 1,
+    compatible with either answer to A. Notes for when they are decided:
+    route 2 needs the inner Covenant to know the prophecy is false (ruling
+    15 has them believing they failed to stop it); a real, coming cataclysm
+    re-imports the guaranteed apocalypse `plan/north-star-mork-borg.md` R-A
+    (lines 47–52) deliberately declined.
 
-Seven playable maps, in shipped travel order. None of this is canon; it is
-what an earlier draft assumed, recorded here so the road knows what exists.
+## The prologue
 
-- **fishing-village** — Salt village that has not hauled a full net since
-  the breakwater went quiet. Old Marrow hires the player to kill the King
-  of Revenge at the breakwater (every route passes it). Three dilemma
-  nodes set `boy-*` flags: a father asking what a boat will cost, a
-  borrowed hook, a stranger's net. Post-boss: a beggar, a captain, a
-  daughter, an anvil, then the coast road north.
-- **northern-forest** — Pine wood inland. Gather-wood and reach-the-cave
-  quests, a shrine keeper, a chronicler, a philosopher, a ranger, a hermit,
-  an ambushed trader. Two dilemmas: a crowning watched from the trees, a
-  frightened friend. Ends at the cave mouth, which is the door onward.
-- **caverns** — Iron galleries under the mountains. The Delver mines alone;
-  a tally-board with nine chalked names, eight crossed out; a sealed stair
-  to the city; the Under-Gate boss; the gate opens.
-- **northern-city** — Stone, guild iron, a harbor that prices everything.
-  The Gate-Clerk keeps a dead office's ledger. A shipwright builds a
-  drowned man's hull. An assize bell, an iron market, a rumor node, a
-  chained river-gate, the Harbormaster, then the water.
-- **connecting-river** — Fog-wide river. The Boatwoman goes one direction
-  only. The **river court**: an old woman ties a fish-bone circlet on a
-  boy — "Carried, not chosen. He goes to the capital in the spring boat.
-  If he doesn't come back, the tally still balances." The Landing trades.
-  The Waterreeve weighs everything that crosses.
-- **town-across-river** — Small, kinder. The Sweetheart at the well. The
-  **village green**: the same rite, a ribbon instead of a circlet, and she
-  is the one it names. The Portreeve rules on every dispute. The
-  ribbon-road runs to the capital.
-- **the-capital** — A wall tall enough to lose the sky behind. The Herald
-  reads ribbons before faces. A petition line that does not move. The
-  Ribbon-Picker sorts what the gate refused. The **court convenes**: the
-  Factor reads ribbons, not faces, and the ledger balances by the hour's
-  end. The Factor is the last fight shipped.
+Ruled by T, 2026-09-23, in T's own telling. This happens **before** play;
+T: "The adventure starts with X leaving the house." None of it is told at
+the start; the player learns it later as memories in the Memoir tab
+(rulings 10–12).
 
-Also live: 19 `boy-*` flags and ~186 dialogue nodes across those maps.
+1. **The fort.** X serves the annexing power. He is drunk, as usual,
+   carrying the shame and guilt of oppressing his own people. He is ordered
+   to threaten to torture a prisoner's child, to make the prisoner talk. The
+   prisoner was an old friend of X's before the war.
+2. **The child.** X is too drunk to stand, and accidentally kills the
+   struggling child.
+3. **The prisoner.** In a fit of grief, the prisoner grabs the dagger from
+   X's belt and plunges it into his own stomach.
+4. **The debt.** The annexing power transfers the prisoner's debt onto X.
+5. **The flight.** X flees to a nearby fishing village (the Drowned Parish)
+   and spends the night looking for shelter. The last hut he can ask at is
+   his dead friend's home. The prisoner's wife takes him in.
+6. **The lie.** X makes up a story: he was trying to rescue his people, and
+   now men are after him.
+7. **The house.** They fall in love. He still drinks heavily.
+8. **The bar.** After a quarrel in a bar one night, he draws the guards'
+   attention.
+9. **The raid.** When he gets home, the guards seize the house. They assault
+   her and make X watch. It happens off-screen: T's direction is that the
+   player is told the guards "pass her around" and left to imagine the rest.
+   The guards then tell her the truth: that X killed her only child.
+10. **The cliff.** Broken, she throws herself from the window, which opens
+    off a cliff into the ocean.
+11. **X leaves.** During the distraction, X sneaks out, shamelessly, and
+    never looks for her body. **The adventure starts here, with X leaving
+    the house.**
 
-## The road
+## The maps — place and theme
 
-### 1. Drunk on the dungeon watch
-X begins drunk, guarding a prisoner in the castle dungeon.
-— Tension: X holds a post X is unfit to hold, and someone else's captivity
-  depends on it. Proposes a figure for X (a station: guard; a condition:
-  drunk) — taken knowingly by T. Keeps no shipped node: the road's start
-  moves off `fishing-village` entirely. No flag yet.
+What each shipped place *is*, from its authored `description` and its plates.
+These are not events. The last column is the open design question for that
+map.
 
-### 2. They bring his child down
-The prisoner's child is brought down the stair to make him talk, and X is
-the one told to hold the child still.
-— Tension: X's complicity stops being passive. The first event made X unfit
-  for the post; this one makes X an instrument of it, and gives the prisoner
-  a reason to remember X's face specifically. Proposes that the prisoner has
-  a child, and that X takes orders from someone further up the stair. Keeps
-  no shipped node. No flag yet; a future beat almost certainly reads this
-  back.
+| Map (region name) | Shipped description | Exploration plate | Combat plate | Open |
+|---|---|---|---|---|
+| fishing-village (the Drowned Parish) | "Your home town: familiar faces, salty air, old shacks lining the docks." | Wentworth Street, Whitechapel: a crowded slum street | Fishermen crowding a moored boat's rigging | Where the lie is lived (ruled). What happens here beyond that? |
+| northern-forest (Northern Forest) | "A pine-thick wood inland from the village; cold springs, low light, and a cave mouth at the far edge." | A lone figure lost in a dark wood | None (falls back to *The New Zealander*: a traveller sketching a ruined city) | What the wood is for in the arc. |
+| caverns (The Caverns) | "Iron galleries under the northern mountains; the ore is honest, the dark is not, and the only stair to the city is sealed." | Chained giants at the edge of a pit | A vast gateway cut into a rock face, two small figures at the threshold | What happens underground. |
+| northern-city (The Northern City) | "The first city of the north. Stone streets, guild iron, a harbor that prices everything, and a river-gate nobody opens." | Ludgate Hill: a dome, a railway bridge, traffic and advertising | Tenement backyards under a railway viaduct | The first city: what it foreshadows about the capital. |
+| connecting-river (The Connecting River) | "A river wide enough to lose the banks in fog. The islanders hold their court on it once a year, and the current takes whoever argues with it." | A ferryman poling a boat across rough water | A crowd pressing at a dock gate at night | The crossing: what it costs. |
+| town-across-river (The Sweetheart's Village) | "Smaller than the city, kinder than the caverns. Woodsmoke over rooftops, and a well that remembers your face." | Wentworth Street (shared with the Drowned Parish) | A slum lane full of children | The last kind place before the capital. |
+| the-capital (The Capital) | "A wall tall enough to lose the sky behind. Every gate has a line; this one has the longest." | Ludgate Hill (shared with the Northern City) | A spiralling host of winged forms around a blinding light | Where hope fails (ruled). What the record breaks here is open (open question 1). |
 
-### 3. X kills the child, and the prisoner kills himself
-X is ordered to torture the child to make the prisoner speak. X, too drunk
-and jaded, ends up killing the child. The prisoner, so distraught, ends up
-getting loose and killing himself.
-— Tension: X is now the author of the harm, not the instrument of it, and
-  both witnesses to the night are dead. Nobody is left who can accuse X and
-  nobody is left who can absolve X. Establishes X as a traitor to his own
-  people in a land under annexation (see `Standing facts`), which reframes
-  events 1-2: the post, the drink and the orders are all the price of the
-  betrayal. Keeps no shipped node. No flag yet.
+The capital's combat plate is Doré's vision of Heaven (Paradiso XXXI). Under
+ruling 2 that is imagery only, but it reads as the belief of ruling 6: the
+paradise people expect, laid over the ledger-and-line reality of its
+exploration plate.
 
-### 4. The mother at the gate, and the lie
-The child's mother comes for her family at the gate, and X is the one sent
-out to tell her what became of them. But X falls in love with her at first
-sight and decides to lie to her, painting himself as the hero.
-— Tension: the first thing X builds after the cell is founded on the cell.
-  The lie has to be maintained, which means every later beat either feeds it
-  or threatens it, and the only two people who could have contradicted X are
-  the two people X is lying about. Gives X the first relationship the road
-  has (§2 ¶2: proposed, and T took it). Keeps no shipped node. No flag yet;
-  this is the road's first obvious flag candidate — what X told her, and
-  whether it holds.
+## Open questions
 
-### 5. She takes X in, and X finds the remedy
-She has nobody left, so she takes X into her house. X keeps drinking all day
-regardless, and she offers him the herbal remedy she takes for pain — a
-morphine in all but name — to settle the sickness that comes on him every
-morning. She uses it only for the worst of the injury the siege left her.
-X takes it all the time, becomes addicted, and begins suggesting she take it
-more often.
-— Tension: X starts converting her mercy into supply, and the last line of
-  the beat is X beginning to damage her on purpose to cover the damage X is
-  doing to himself. The lie from event 4 now has an economy attached: X needs
-  the house, so X needs the lie, so X needs her not to get better. Keeps no
-  shipped node. Two flag candidates: whether X takes the first dose, and
-  whether X pushes hers.
+Ordered by what the rest depends on. Each notes what it blocks.
 
-### 6. For a while things are okay
-For a while things are okay.
-— Tension: none, and that is the beat. The road buys a lull on credit —
-  everything in events 1-5 is still true underneath it, nothing has been
-  paid off, and the only thing that has changed is that X has stopped being
-  punished for it. Whatever ends this is worse for having been waited for.
-  Keeps no shipped node. No flag.
+Answered by the prologue and closed: what X did at the fort; who she is (the
+prisoner's wife, mother of the child); whether she comes (she does not).
 
-## Noted for the pivot
-- The road starts in a castle dungeon; the build starts at `fishing-village`
-  fv-1. Someone has to decide whether the village becomes later, becomes a
-  memory, or is cut. Not a decision for a turn.
-- The 21 shipped `boy-*` flags assume a figure X does not have. Renaming is
-  deferred engine work (THE BLANK PAGE ¶2), but the cost is real and grows
-  with every beat that reads one back.
-- "Castle" is a place the world does not have. No shipped map is a castle.
-- X now carries an identifier ("his," from T's own write-in at event 3) and a
-  station (a turncoat in the annexer's service). §2 said X has no figure and
-  that who X is would be an *output* of the road. That is happening early and
-  by accretion rather than by decision. Worth naming deliberately at the
-  pivot, not patching mid-walk.
-- The annexation is a world-scale fact with no world attached: who annexes
-  whom, and where the seven shipped maps sit relative to that line, is
-  undecided. **Partially answered 2026-09-23** (see `Standing facts`): the
-  capital's *reputation* is now set (believed unconquered, wrongly believed
-  safe). Still undecided: whether it's genuinely outside the annexation's
-  reach or simply never tested, and where the other six maps
-  (fishing-village through town-across-river) sit relative to the line.
+1. **What the capital's record breaks now, and whether her survival comes to
+   light.** Rulings 4–5 had the lie to her breaking at the capital; the
+   prologue breaks it in her house instead. The capital's ledger and the
+   fort's records are still ruled (5), but what they expose, and to whom, is
+   open. Her survival is ruled to come to light later (ruling 9); when, how,
+   and to whom is open, as is whether that reveal and the capital's record
+   are the same moment. Blocks 7.
+2. ~~**Why X goes north.**~~ Answered: fleeing the guards (ruling 7). Still
+   open inside it: what keeps him going map after map, and whether the
+   guards stay on his trail.
+3. **The debt: who holds it, and does it follow him?** Answered that it is
+   money (ruling 8). Open: who collects it, and whether it follows him north.
+   *Implication, not a ruling (confidence 55):* a sum in a ledger is a
+   natural thread to the capital, which weighs and records everyone.
+4. **The Covenant's origin and the capital's tie to it.** Named and defined
+   (rulings 13–14); reach is nearly the whole world (ruling 11). Open: the
+   **name of the origin country**, what "the truth" they are versed in
+   actually is, and how the fort's records came to sit in the capital's
+   ledgers. *Implication, not a ruling (confidence 60):* ruling 5 means the
+   capital and The Covenant share paperwork, which suggests the capital is
+   administratively tied to the power people believe it stands against.
+   That would be the concrete form of ruling 6.
+   *Implication, not a ruling (confidence 50):* the guards who raided the
+   house in the prologue are Covenant, and so are the fort's jailers. A
+   body that calls its doctrine "the truth" is a sharp counterweight to a
+   story about X's lie.
+5. ~~**How the player learns the prologue.**~~ Answered (T, 2026-09-24):
+   withheld at the start and learned later, through a memories section in
+   the Memoir tab — rulings 10–12. Still open: what triggers each memory,
+   and which parts of the prologue come when. The assault stays off-screen
+   whichever way (T's direction).
+6. **What happens on each middle map** (forest through the Sweetheart's
+   Village; the table's last column).
+7. **After the capital.** What the story does once the record is read.
+   Blocks the ending, and whether W-02's door onward past the capital leads
+   anywhere.
 
-## Pivot recommendation
+## Noted
 
-> **Declined by T after event 5, 2026-09-18.** The road kept walking. Per §4,
-> condition 2 is spent and is not raised again unless something new fires it.
-> The recommendation is kept below because its four questions are still the
-> right four, and the higher-level session will still want them.
-
-**Condition 2 fired: three or more events lean on the same unresolved
-tension.** Events 2, 3, 4 and 5 all turn on one thing no single beat can
-settle — what X did in that cell, and the fact that the only people who could
-name it are dead, gone quiet, or waiting. Event 5 is what made it a spine
-rather than an aftermath: the road left the dungeon, changed place, changed
-company, and the tension came with it and started paying rent.
-
-What the road has established:
-
-- X is a coward and a turncoat who took the annexer's coin, and the post in
-  the dungeon is what that purchase bought.
-- X killed a child in that cell out of drunk incompetence, and the child's
-  father killed himself over it. Both witnesses to the night are dead.
-- X lied to the one survivor, cast himself as her hero, and was loved for it.
-- X is now living inside that lie, addicted, and has begun steering her
-  toward the drug that keeps her manageable and himself supplied.
-- One other man saw the whole thing and has said nothing yet.
-
-What the higher-level session should decide first, in this order:
-
-1. **Is the lie survivable?** Everything after event 5 is either the lie
-   holding or the lie breaking, and the road cannot pick its next event
-   without knowing which shape it is walking toward. This is the ending
-   question wearing a different hat.
-2. **What is the second guard for?** He is the only mechanism the road has
-   for the truth arriving from outside. Decide whether he is blackmail, a
-   reckoning, or a mirror before he is written, because he determines
-   whether X is ever caught or only ever known.
-3. **Where does the annexation put the seven shipped maps?** The road's world
-   has a conquest in it and the build's world does not. Until someone rules
-   on that line, no beat can be placed on an existing map, and
-   `fishing-village` is still where a player actually starts.
-4. **What is X's relationship to the LOCKED MECHANICS?** Conviction, Surge
-   and Dice are untouched and unclaimed by this road. Addiction, withdrawal
-   and a maintained lie are unusually mechanical material; deciding whether
-   they feed the locked three or want something of their own is a design
-   call, not an outline one.
-
-Next session's input is this file. Do not resume at §3.1 until the pivot has
-answered at least question 1.
+- **Shipped narrative is not canon.** ~186 dialogue nodes and 21 `boy-*`
+  flags across the seven maps are legacy text kept so the build works. The
+  flags assume a boy; X is now a grown man who served the annexers, so the
+  flag names are wrong as well as legacy. Renaming is deferred engine work.
+- **The shipped Drowned Parish opens differently.** The live fishing-village
+  map starts X at the docks and hands him a quest from Old Marrow. Under the
+  prologue, play starts as X leaves the dead friend's house. Reconciling the
+  first map with the prologue is future work, not ruled here.
+- **The title.** *Miserere mei, Deus* is Psalm 51, traditionally David's
+  penitence after the prophet Nathan confronted him over Bathsheba and Uriah
+  (2 Samuel 11–12). A lie undone by a record fits that confrontation shape.
+  Offered as a lens, not ruled.
+- **The shape of this file changed.** `plan/2026-09-17-story-outline.prompt.md`
+  and `axiomancer-mechanics/CLAUDE.md` describe this file as a road walked
+  one event per turn. As of 2026-09-23 it is an over-arching story document.
+  Those two descriptions are stale until updated.
+- **`specs/world/W-02-the-capital-door-onward.md`** cross-references ruling 6
+  (it cited the discarded Standing Fact; the fact carries forward here as
+  ruling 6).
