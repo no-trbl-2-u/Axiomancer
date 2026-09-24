@@ -57,8 +57,9 @@ is canon; the map table and the open questions are working material.
 ## The prologue
 
 Ruled by T, 2026-09-23, in T's own telling. This happens **before** play;
-T: "The adventure starts with X leaving the house." Whether any of it is
-shown (an intro sequence) or only told is open (open question 5).
+T: "The adventure starts with X leaving the house." The player must learn
+this story at some point (T, 2026-09-24); when and how is open (open
+question 5).
 
 1. **The fort.** X serves the annexing power. He is drunk, as usual,
    carrying the shame and guilt of oppressing his own people. He is ordered
@@ -135,9 +136,12 @@ prisoner's wife, mother of the child); whether she comes (she does not).
    paperwork, which suggests the capital is administratively tied to the power
    people believe it stands against. That would be the concrete form of
    ruling 6.
-5. **Is the prologue shown?** Played, shown as an intro sequence, or only
-   told as backstory. The assault stays off-screen whichever way (T's
-   direction).
+5. **How the player learns the prologue.** Ruled (T, 2026-09-24): **the
+   player must learn the prologue's story at some point.** Open: when and
+   through what — at the start, through the journal (the Memoir tab, which
+   today lists quests only), or split across the journey. T: "At the
+   beginning? I don't know. Maybe within Journal? I don't know." The
+   assault stays off-screen whichever way (T's direction).
 6. **What happens on each middle map** (forest through the Sweetheart's
    Village; the table's last column).
 7. **After the capital.** What the story does once the record is read.
