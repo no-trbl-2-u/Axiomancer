@@ -69,9 +69,12 @@ is canon; the map table and the open questions are working material.
     the whole world.
 12. **The prologue arrives later, as memories.** The player learns the
     prologue's story over the journey through a **memories** section in
-    the Memoir tab (T, 2026-09-24; T's "option 3" with notes). The rest of
-    T's note on the memories section was cut off mid-sentence and is being
-    asked for.
+    the Memoir tab (T, 2026-09-24; T's "option 3" with notes). The memories
+    are **organized in some chronological way**; the exact scheme is open
+    (T: "I don't know how we'll organize it yet, but it should be organized
+    in some chronological way"). One distinction to settle then: the order
+    the events happened (the fort first) versus the order the player
+    unlocks them.
 13. **The annexing power needs a name** (T, 2026-09-24). Being chosen.
 
 ## The prologue
