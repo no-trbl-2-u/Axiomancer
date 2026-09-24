@@ -87,6 +87,19 @@ is canon; the map table and the open questions are working material.
     "the truth" and has every right to be judge, jury and executioner.
     Modeled on real-world countries where the army, not local police,
     enforces the law (T, 2026-09-24).
+15. **The cataclysm and the covenant.** A cataclysmic event was prophesied
+    before The Covenant took power. Their covenant (the promise the name
+    refers to) is that they can stop it. On realizing they cannot, even
+    after taking all of the world's resources, they began killing anyone who
+    claims the cataclysm is coming (T, 2026-09-24). T calls this the world's
+    "lie": a lie at world scale, beside X's own.
+16. **Nobody remembers how The Covenant rose.** X lives in a time when no one
+    knows how, when, or why The Covenant came to power (T, 2026-09-24).
+17. **Whether the cataclysm is real: open.** T is weighing three routes
+    (2026-09-24): (1) X must become the new head of The Covenant, the
+    *Snowpiercer* route; (2) the cataclysm is not real but a necessary evil
+    to keep peace, the *Watchmen* route; (3) The Covenant is greedy, though
+    it began with good intentions.
 
 ## The prologue
 
