@@ -14,10 +14,94 @@
 | cards | `skills/adjust-cards.md` | 2026-09-24 | f155b027 | 18 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-24 | bdcd4c7e | 18 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-24 | 6f13b2d0 | 18 |
-| keywords | `skills/adjust-keywords.md` | 2026-09-23 | 71648d3a | 17 |
+| keywords | `skills/adjust-keywords.md` | 2026-09-24 | c57a7e73 | 18 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-24 | f3c09826 | 17 |
 
 ## Log
+
+```
+> **[adjust-keywords pass 18, 2026-09-24, commit c57a7e73]** Zero-CREATE,
+> zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
+> content-lifecycle gate (Step 3b): `keywords` (`71648d3a`
+> 2026-09-23T18:47:44Z, 31 commits behind HEAD `ed4af7e2`
+> 2026-09-24T18:43:15Z, ~24h) was the stalest qualifying category — `cards`
+> (`f155b027`, 24 commits), `equipment` (`bdcd4c7e`, 22 commits), `enemies`
+> (`6f13b2d0`, 21 commits) and `npcs` (`f3c09826`, 26 commits) all qualified
+> too (past the 15-commit threshold) but were less stale by last-pass
+> timestamp. Deploy confirmed green pre-tick (`npm run deploy:check` at HEAD
+> `ed4af7e2`: no gated workflow yet for this docs/plan-only tick — grace
+> window, nothing to block on). No phase work pending (Step 3a of `/march`
+> empty — no `[ ]` row in `plan/steps/01_build_plan.md`).
+>
+> **Step 0:** re-read `axiomancer-mechanics/CLAUDE.md` (THE BIG NUMBERS
+> REWRITE — no CQI/status-engagement-floor grading), the live
+> `docs/keyword-atlas.md` (72 rows, discipline unchanged since the
+> 2026-09-02 rewrite), and `docs/retheme-map.json` (NL-8 collision law)
+> fresh rather than trusting pass 17's reading.
+>
+> **Step 1 structural audit — fresh, not re-cited:** `git log
+> 71648d3a..HEAD` against the full keyword-surface path set
+> (`src/Cards/types.ts`, `src/Combat/combat.cards.ts`,
+> `src/Combat/combat.engine.ts`, `src/Effects/**`,
+> `axiomancer-mobile/state/combat/keywords.ts`, `docs/keyword-atlas.md`,
+> `axiomancer-card-editor/src/data/mechanics.ts`,
+> `src/Enemy/enemy-keywords.ts`) is EMPTY — none of the 31 intervening
+> commits touched any keyword-surface path. Re-ran every Step 1 signal
+> anyway: (1) carrier-count/orphan sweep — every `kind:` literal in
+> `CardSpecialMechanic`/`CardRider` (`src/Cards/types.ts`, 55 kinds)
+> against every `case '...':` in `combat.cards.ts`'s `mechanicText`
+> switch (55 cases): byte-identical 55/55 coverage, zero silent
+> `default:` arms, matching pass 17's count exactly; (2) `axio_keywords`'s
+> live registry (72 rows across player/enemy/system) matches the atlas
+> file exactly, unchanged from pass 17; (3) `node --test
+> scripts/content-drift.test.mjs`: 11/11 green, matching pass 17
+> byte-for-byte; (4) REMOVE-signal spot-check on three lower-population
+> keywords via `axio_cards` — OMEN (2 carriers: The Ducking Stool, The
+> Summing Up), IMMOLATE (2 carriers: Confession of Judgment, Distraint),
+> TICK (3 carriers: Communion of the Worm, The Feast of All Corruption,
+> The Sexton's Bell) — all clear the ≥2-carrier bar, no retirement
+> candidate.
+>
+> **Step 1b widened KB cross-reference:** ran it per this tick's dispatch
+> instructions despite the zero-diff Step 1 result. Two fresh angles not
+> used by passes 9/11/14/15/16/17 (which already covered Chaos/Order/
+> Balance, Stunned/Silenced, Weakness, Frozen, Rally, Synergy, Ward):
+> **Momentum** (`kb:dawncaster` glossary — "Whenever you have 5 or more
+> Momentum, remove all stacks and draw a card") — same running-tally
+> -to-threshold-payoff shape our own CHARGE keyword already drills
+> ("A running tally. When it reaches the count printed on the card that
+> spends it, that payoff fires free and the tally resets."); a
+> near-synonym of an existing keyword, not a gap, so not filed. Traced
+> our own engine's `buff_grace_momentum` (`Cards/library/choir.cards.ts`,
+> `apocrypha.cards.ts`, `Effects/buffs.library.json`) to rule out a
+> silent-arm bug on the same name: `card-keywords.ts:23` maps it to
+> `PLEA` and `axiomancer-mobile/state/combat/keywords.ts:74` glosses it
+> under `Plea` too — it already folds under PLEA's existing face
+> presentation by design (KW-1, 2026-09-02), not an orphaned keyword.
+> **Exile/Banish** (`kb:dawncaster/cards/0161-banish-85173`,
+> `1047-oblivion-408548`) — an instant-loss-condition card family with no
+> analogue in our system (no alternate-loss condition exists at all,
+> only alternate WINS via CONDEMN/RELENT); a genuinely different design
+> axis, but not a keyword-registry gap on its own terms — an alternate
+> LOSS condition is a combat-engine design call (mechanics-expert
+> territory), not a card-vocabulary drill, so not filed here. Zero-diff
+> confirmed on the widened check too.
+>
+> **Residue:** `plan/PHASE_CANDIDATES.md`'s `[score 3.0]` Ward
+> -interception-hook candidate (filed pass 17) re-confirmed still open,
+> not re-filed — same finding, no new information since.
+>
+> **Ship (Step 3):** none on the keyword surface itself — zero CREATE,
+> zero UPDATE, zero REMOVE (zero intervening commits touched the
+> surface at all). Ledger bump only.
+>
+> **Gates:** `npm run verify --workspace axiomancer-mechanics` (231
+> files, 3746 tests + build green), `npm run verify --workspace
+> axiomancer-mobile` (lint/typecheck/jest/asset/critique-drive suites,
+> exit 0), `npm run type-check --workspace axiomancer-card-editor`
+> (clean), and `npm test` (root, 218 tests incl. `content-drift.test.mjs`
+> 11/11) all green.
+```
 
 ```
 > **[adjust-enemies pass 18, 2026-09-24, commit 6f13b2d0]** Zero-CREATE,
