@@ -1,7 +1,7 @@
 # Critique log
 
-> Last pass: 2026-09-22 at commit 87a8b6fc
-> Pass count: 48
+> Last pass: 2026-09-24 at commit 94b6b96f
+> Pass count: 49
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
@@ -701,6 +701,36 @@
 > covered card to play. Filed below.
 
 ## Pending
+
+### [LOW] combat — a DoT's paid-value chip word-wraps mid-token on the small hand-card face ("8/play" → "8/p" / "ay")
+- pass: 49 (commit 94b6b96f)
+- viewport: both (375×812 and 1280×800) — reproduces at both, worse on
+  desktop where the card is otherwise unobscured by the fan overlap
+- category: visual
+- observation: on the small (non-inspect) hand-card face, a card whose
+  paid clause is a DoT (e.g. Spoiled Poultice's POISON) renders its
+  value chip as `${perTick}${unit}` (e.g. "8/play"). The chip's `Text`
+  allows `numberOfLines={2}` at small size, and the container is narrow
+  enough that RN's default word-break wraps *inside* the token instead
+  of at the "/" — "8/play" breaks to "8/p" on one line and "ay" on the
+  next, reading as a rendering glitch rather than the intended "8 per
+  play" tick. The keyword line above it clips to "POIS" for the same
+  reason. Short values ("+8", "12", "+5") never hit this because they
+  fit on one line; only the longer DoT tick strings do.
+- evidence: `axiomancer-mobile/components/combat/encounter/CombatBoard.tsx:2161-2170`
+  — `paidValue` `Text` with `numberOfLines={large ? 1 : 2}`, `styles.paidValue`
+  has no `maxWidth`/break-word override (line 2520); `axiomancer-mobile/state/presenters/combat-encounter.engine.ts:2729-2738`
+  `clauseValue()` builds the DoT string as `${c.dot.perTick}${unit}${clock}…`
+  with `unit` one of `/play | /hit | /payoff | /turn` — no non-breaking
+  join between the number and the unit. Reproduced via `critique:drive`
+  pass 49, screen `combat-board`, both viewports, card "Spoiled Poultice"
+  in a 5-card hand (`.critique-artifacts/{mobile,desktop}/04-combat-board.png`).
+- suggested fix: join the number and unit with a non-breaking space (or
+  `wordBreak: 'keep-all'`/`hyphenationFrequency: 'none'` at the RN-web
+  layer) in `clauseValue()`, or cap the chip at `numberOfLines={1}` with
+  `adjustsFontSizeToFit` like the paid-apply line above it (line 676)
+  so a too-long value shrinks instead of wrapping.
+- source: critique-drive (unattended, §3.5)
 
 ### [MED] combat — the only SUMMON carrier cannot reach wave 2, so half the spawn rule is dead on the roster
 - pass: burn-day audit 2026-09-19 (row 3.9)
