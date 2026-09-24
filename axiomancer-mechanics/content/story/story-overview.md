@@ -54,12 +54,32 @@ is canon; the map table and the open questions are working material.
    looked for her body. Her survival **is revealed later** in the story (T,
    2026-09-23). When, how, and to whom is open (open question 1).
 
+10. **The game opens knowing almost nothing.** At the start the player
+    knows only that X is fleeing the Drowned Parish, that the annexing
+    power is tracking him, and that he must keep moving. None of the
+    prologue (the fort, the child, the prisoner, the debt, the lie, the
+    raid, the cliff) is told at the start (T, 2026-09-24).
+11. **The opening frames the world.** The game begins by telling the
+    player that the annexing power is waging a campaign against the world
+    and now occupies just about all of it; that the capital is the last
+    bastion of hope; and that X is fleeing their grasp. The player is told
+    the capital is a refuge and believes it. Ruling 6 (it never was)
+    stays hidden from the player until the capital (T, 2026-09-24). This
+    also answers part of open question 4: the annexers' reach is nearly
+    the whole world.
+12. **The prologue arrives later, as memories.** The player learns the
+    prologue's story over the journey through a **memories** section in
+    the Memoir tab (T, 2026-09-24; T's "option 3" with notes). The rest of
+    T's note on the memories section was cut off mid-sentence and is being
+    asked for.
+13. **The annexing power needs a name** (T, 2026-09-24). Being chosen.
+
 ## The prologue
 
 Ruled by T, 2026-09-23, in T's own telling. This happens **before** play;
-T: "The adventure starts with X leaving the house." The player must learn
-this story at some point (T, 2026-09-24); when and how is open (open
-question 5).
+T: "The adventure starts with X leaving the house." None of it is told at
+the start; the player learns it later as memories in the Memoir tab
+(rulings 10–12).
 
 1. **The fort.** X serves the annexing power. He is drunk, as usual,
    carrying the shame and guilt of oppressing his own people. He is ordered
@@ -136,12 +156,11 @@ prisoner's wife, mother of the child); whether she comes (she does not).
    paperwork, which suggests the capital is administratively tied to the power
    people believe it stands against. That would be the concrete form of
    ruling 6.
-5. **How the player learns the prologue.** Ruled (T, 2026-09-24): **the
-   player must learn the prologue's story at some point.** Open: when and
-   through what — at the start, through the journal (the Memoir tab, which
-   today lists quests only), or split across the journey. T: "At the
-   beginning? I don't know. Maybe within Journal? I don't know." The
-   assault stays off-screen whichever way (T's direction).
+5. ~~**How the player learns the prologue.**~~ Answered (T, 2026-09-24):
+   withheld at the start and learned later, through a memories section in
+   the Memoir tab — rulings 10–12. Still open: what triggers each memory,
+   and which parts of the prologue come when. The assault stays off-screen
+   whichever way (T's direction).
 6. **What happens on each middle map** (forest through the Sweetheart's
    Village; the table's last column).
 7. **After the capital.** What the story does once the record is read.
