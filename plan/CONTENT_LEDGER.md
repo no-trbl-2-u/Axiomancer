@@ -20,6 +20,68 @@
 ## Log
 
 ```
+> **[adjust-cards pass 18, 2026-09-24, commit <PENDING>]** Zero-diff pass —
+> dispatched autonomously by `/march`'s content-lifecycle gate (Step 3b):
+> `cards` (`68769014` 2026-09-23T07:01:18Z, 47 commits behind HEAD
+> `76dbe0df` 2026-09-24T04:44:09Z, ~25.8h) was the stalest qualifying
+> category this tick — `equipment` (`9a162fc8` 2026-09-23T08:50:03Z, 45
+> commits) and `enemies` (`96f73da3` 2026-09-23T16:47:29Z, 31 commits)
+> both also qualified on commit count but were less stale by last-pass
+> timestamp; `keywords` (`71648d3a` 2026-09-23T18:47:44Z, 6 commits) and
+> `npcs` (`f3c09826` 2026-09-24T04:44:05Z, 1 commit) did NOT qualify —
+> under both the 15-commit and 36h thresholds. Deploy confirmed green
+> (`npm run deploy:check` at HEAD `76dbe0df`: no gated workflow yet within
+> the grace window, no verify-* workflow triggered for HEAD's paths). No
+> phase work pending (`plan/steps/01_build_plan.md` has zero `[ ]` rows).
+> Critique gate did not fire ahead of this tick — `plan/CRITIQUE.md`
+> carries an open `[HIGH]` pending row (pass 48, mobile late-game-hub map
+> render), so condition 3 ("no pending HIGH critique already queued for
+> iterate") failed and the gate fell through to dispatch. Growth floor
+> clear (`src/World` commits within 7 days).
+>
+> **Step 1 audit — fresh, not re-cited (delegated to `card-expert`,
+> consult mode):** `git diff 68769014..HEAD` over every card-authoring
+> surface (`cards.library.ts`, `combat.starter-deck-presets.ts`,
+> `cards.sandbox-sets.ts`, `combat.deck-draft.ts`, `cards.allies.ts`,
+> `cards.haunts.ts`, `library/{choir,trial,vigil}.cards.ts`) shows only
+> comment-only doc corrections from the `comments-docs-audit` merge
+> (`fb1bffd5`/`f5db5ca6`/`adf35108` via `f58637ca`) — stale counts/
+> doctrine references fixed in prose, no card id/text/mechanic/price
+> touched; the only other card-adjacent commit in the window
+> (`96f73da3`) is `/adjust-enemies` pass 17's RawheadRex retrofit,
+> enemy-side. Re-ran the full card-surface e2e trio fresh:
+> `pricing.engine.test.ts` 263/263, `curated-library.engine.test.ts`
+> 14/14 (FREE-line + reachability), `deck-presets.engine.test.ts` 9/9
+> (aspect-thirds) — all green, byte-identical to pass 17. `axio_overview`
+> reconfirms 134 cards / 8 themes unchanged.
+>
+> **Step 1b widened audit — fresh angle:** ran KB cross-reference on
+> Slay the Spire's Retain family (`kb:slay-the-spire/cards/0132-
+> equilibrium-undo`, `0250-protect-protect`, `0348-well-laid-plans-
+> well_laid_plans`, `0238-perseverance-perseverance`, `0353-windmill-
+> strike-windmillstrike`). Finding: **not a gap, already structurally
+> subsumed** — Axiomancer's hand-carryover rule (`combat.engine.ts`
+> ~L5204-5226, the "keep-hand rule, 2026-07-13" comment) makes every
+> unplayed card stay in hand by default, unlike Slay the Spire's
+> discard-by-default baseline that Retain exists to escape. Also
+> spot-checked AOE/multi-target (no gap — `CardTarget` is `'self' |
+> 'enemy'` only and encounters never carry more than one enemy by
+> design) and dodge/evasion (no gap by doctrine — a chance-based no-op
+> play conflicts with THE BIG NUMBERS REWRITE's "every play visibly
+> moves something" pillar). Recorded here so a future pass doesn't
+> re-propose Retain as an unbuilt gap.
+>
+> **Step 2/3:** nothing to ship — zero actionable findings from Step 1
+> or Step 1b (skill §5 failure mode 4: no manufactured change). Pass
+> 17's filed candidate (`plan/PHASE_CANDIDATES.md` [score 3.0], the
+> in-combat/temporary card-upgrade niche) reconfirmed still open, still
+> accurate, still correctly sized past this steward's ship-small
+> ceiling — no code has landed against `card-upgrades.ts` or the
+> `CardSpecialMechanic` union in the window.
+>
+> Verify: green (mechanics 231 files/3746 tests + build; mobile
+> lint/typecheck/jest/asset/critique-drive; card-editor type-check).
+
 > **[adjust-npcs pass 17, 2026-09-24, commit f3c09826]** Zero-diff pass —
 > audit re-confirmed byte-identical to pass 16, no new CREATE/UPDATE/
 > REMOVE, ledger bump only. Dispatched autonomously by `/march`'s
