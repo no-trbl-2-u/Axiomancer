@@ -40,7 +40,7 @@ contradict existing design:
 | Topic | Read first |
 |---|---|
 | Existing characters | list files in `specs/characters/`, `content/characters/` |
-| Story premise | `content/story/story-overview.md` — the road, event by event. Short and still being walked; a beat it does not cover does not exist yet. The player is still **X**: no name, no figure, no identifiers. |
+| Story premise | `content/story/story-overview.md` — the over-arching story: numbered rulings (canon), the prologue, a per-map place-and-theme table, open questions (not decided). A fact it does not carry does not exist yet. The player is still **X**: no name; who X is comes from the overview's prologue and nothing may be added to it. |
 | NPC mechanical model | `docs/npcs.md` |
 | Morality model (if relevant) | `specs/10-moral-difficulty-meter.md` |
 | Loose character notes | `braindump/` (recent files) |

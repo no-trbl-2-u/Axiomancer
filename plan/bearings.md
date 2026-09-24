@@ -631,6 +631,10 @@ ambiguity.)
      to be chosen later. The 21 shipped `boy-*` flags are identifiers,
      not a claim about who the player is; renaming them is deferred
      engine work, not a story decision.
+     **Amended 2026-09-24 (T, attended):** "no figure" no longer holds.
+     T's own prologue in the overview gives X a sex, a past, a station and
+     a habit. X still has no name and `X` is still scaffolding. The overview
+     is the only source for who X is; nothing may be added beyond it.
   3. **Shipped narrative content is not canon.** ~186 dialogue nodes
      across seven maps stay playable because removing them would break a
      working game, not because they are true. A shipped line is evidence
@@ -654,13 +658,21 @@ ambiguity.)
      `plan/2026-09-17-story-outline.prompt.md`.
      `axiomancer-mechanics/content/story/story-overview.md` exists as of
      2026-09-18, so **¶1 is lifted**: canon exists again, and it is
-     whatever that file says — nothing more. ¶2 (the player is X), ¶3
-     (shipped content is not canon), ¶4 (the loop does not invent canon
-     beyond the road) and ¶5 stand unchanged. The road is short and still
-     being walked; a beat the overview does not cover does not exist, and
-     the loop still says so and stops rather than filling the gap.
-  Marker in the tree: `content/story/story-overview.md` (the road);
-  `content/story/README.md` is the superseded record of the clearing.
+     whatever that file says — nothing more. ¶2 (the player is X, amended
+     2026-09-24 above), ¶3 (shipped content is not canon), ¶4 (the loop
+     does not invent canon beyond the overview) and ¶5 stand. A fact the
+     overview does not cover does not exist, and the loop still says so
+     and stops rather than filling the gap.
+  7. **The road became a top-down document (T, attended 2026-09-23/24).**
+     T replaced the event-by-event road with an over-arching story
+     document, clean slate: numbered rulings, T's prologue, a per-map
+     place-and-theme table, and ordered open questions. The 2026-09-18
+     road is recoverable at `5089f43` and is not a draft to return to.
+     `plan/2026-09-17-story-outline.prompt.md`'s one-event-per-turn method
+     is superseded; the overview grows in attended sessions with T.
+  Marker in the tree: `content/story/story-overview.md` (the over-arching
+  story); `content/story/README.md` is the superseded record of the
+  clearing.
 
 - **THE GROWTH FLOOR (T direct, attended `/oversight` 2026-09-17) — the
   growth mandate gets guaranteed tick budget, and stewards ship small

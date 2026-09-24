@@ -1,10 +1,12 @@
 # Shipped narrative content — a catalogue, NOT canon
 
-> **The story lives in `content/story/story-overview.md`** — the road,
-> event by event, built from nothing with T present (2026-09-18). That
-> file supersedes `content/story/README.md`'s "THERE IS NO STORY" ruling,
-> which is now the historical record of the clearing. The player is **X**:
-> no name, no figure, no identifiers.
+> **The story lives in `content/story/story-overview.md`** — an
+> over-arching story document built with T present (2026-09-23/24):
+> numbered rulings, T's prologue, a per-map place-and-theme table, and open
+> questions. It replaced the 2026-09-18 event-by-event road. That file
+> supersedes `content/story/README.md`'s "THERE IS NO STORY" ruling, which
+> is now the historical record of the clearing. The player is **X**: no
+> name; who X is comes from the overview's prologue and nowhere else.
 >
 > **What this file is:** a catalogue of narrative content that currently
 > ships, so an engineer can find it. Every entry below documents text
@@ -12,7 +14,7 @@
 >
 > **Do not read an arc out of this file.** The overview is the only
 > place an arc is authored; this catalogue is downstream of it and may
-> describe beats the road has already discarded. The premise this document
+> describe beats the overview has already discarded. The premise this document
 > used to open with — a king, a dead advisor, a succession, a labyrinth
 > at the heart of a city — was cleared with the rest of the story law.
 > Shipped lines are evidence of what an old draft assumed, nothing more.

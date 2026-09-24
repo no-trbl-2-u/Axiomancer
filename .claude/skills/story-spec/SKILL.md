@@ -33,7 +33,7 @@ contradict existing design:
 |---|---|
 | Morality / difficulty | `specs/10-moral-difficulty-meter.md` |
 | NPC types and world state | `docs/npcs.md`, `docs/world.md` |
-| Story premise | `docs/story.md` |
+| Story premise | `content/story/story-overview.md` — the over-arching story: numbered rulings (canon), the prologue, open questions (not decided). A fact it does not carry does not exist yet. `docs/story.md` only catalogues shipped (non-canon) content. |
 | Existing story specs | list files in `specs/story/` |
 | Loose story notes | `braindump/` (recent files) |
 
@@ -260,7 +260,7 @@ exists outside the moral arc.">
   always cite the specific NPC, quest, or design pattern.
 - ❌ Inventing player reception — "players loved this character" without
   basis.
-- ❌ Proposing dialogue that contradicts `docs/story.md` or existing story
+- ❌ Proposing dialogue that contradicts `content/story/story-overview.md` or existing story
   specs without explicitly flagging the contradiction.
 - ❌ Treating fallacy/paradox flavor as optional — it's load-bearing theme;
   surface it when it fits an NPC's voice or quest structure.
