@@ -13,7 +13,7 @@ export {
     createCharacter,
     allocateStatPoint,
     previewStatAllocation,
-    equipItem, unequipItem, getEquipmentModifiers, getEquippedItems,
+    equipItem, unequipItem, getEquippedItems,
     emptyLoadout,
     computeEquipDelta,
     honeDieGear, temperDieGear, swapDieGear,
@@ -26,9 +26,9 @@ export {
     levelLadderPresets, ladderL1Preset, ladderL15Preset, ladderL30Preset, ladderL50Preset,
 } from './Character';
 export type {
-    Character, BaseStats, DerivedStats, NonCombatStats, EquipmentLoadout,
+    Character, BaseStats, EquipmentLoadout,
     PreviewAllocation, PreviewResult,
-    CreateCharacterOptions, AggregatedEquipmentModifiers,
+    CreateCharacterOptions,
     CharacterPreset, CharacterPresetEquipmentEntry,
     EquipDelta, EquipDeltaMode,
     StatDeltaEntry, SignatureDeltaEntry,
@@ -43,7 +43,7 @@ export {
     DEFAULT_XP_BY_DIFFICULTY,
 } from './Enemy';
 export type {
-    Enemy, EnemyLogic, EnemyDifficulty, Tier1EffectOverrides,
+    Enemy, EnemyLogic, EnemyDifficulty,
     LootTableEntry, CreateEnemyOptions,
     LootRng,
     FriendshipReward, BefriendabilityConfig,
@@ -60,16 +60,11 @@ export type { EnemySlug } from './Enemy/enemy.library';
 
 // ─── Combat ───────────────────────────────────────────────────────────────────
 export {
-    determineAdvantage, getAdvantageModifier, hasAdvantage,
-    resolveEffectiveAdvantage,
-    getBaseStat, getAttackStat, getDefenseStat, getSaveStat,
-    isCriticalHit, isCriticalMiss,
-    applyCriticalMultiplier, calculateFinalDamage, selectCritDamage, isAttackSuccessful,
     applyDamage, heal, isAlive, isDefeated, getHealthPercentage,
     getStudyMarkIntensity, getActiveRollModifier, getThornsReflect,
     updateEffectDuration, tickAllEffects,
     removeRandomBuff, extendRandomBuffDuration, applyRegen,
-    getActiveEffectModifiers, getEffectiveStats, canAct,
+    getActiveEffectModifiers, canAct,
     // 0.34.0 status-depth epic — HP-model selectors + tunable scalars
     getDamageTakenMultiplier, getPendingDotTotal, consumeDotEffects,
     getDistinctDebuffCount, getDistinctControlCount,
@@ -86,9 +81,7 @@ export {
     getOutgoingThreatDamageMult,
     getDotAmplificationByEffect, getActiveDotTotal, getActiveDotAmplifications,
     resolveEffectApplication,
-    calculateDamageResistance,
     healCharacter,
-    calculateEnemyStatMultiplier, applyMoralMeterScaling,
     // `CombatState` constructor — shared infrastructure for the card / effects
     // / equipment engines (the Hazard-Pattern shim builds the same shape).
     initializeCombat,
@@ -98,7 +91,7 @@ export {
 export type {
     Stance, Action, Advantage, CritStyle, CombatAction, CombatPhase,
     CombatState, Combatant,
-    AggregatedEffectModifiers, EffectiveStats, DamageType,
+    AggregatedEffectModifiers,
     // 0.34.0 status-depth epic — selector result types
     PendingDotEntry, ActiveDotEntry, ActiveDotAmplification,
 } from './Combat';
@@ -120,7 +113,7 @@ export {
     getThreatSequence, generateDefaultThreatSequence,
     AUTHORED_THREAT_ENEMY_IDS,
     RAGE_UNLOCK_ROUND, RAGE_DAMAGE_WEIGHT, RAGE_HEAL_FRACTION,
-    simulateHazardPatternCombat, runHazardCombatAutoEncounter,
+    simulateHazardPatternCombat,
     mechanicText,
     // Spec 26 / 26b — stance draft, hidden read, Conviction, Signature Skills
     TURN_DICE_COUNT, rollTurnDice, dieHasStance,
@@ -167,7 +160,7 @@ export {
     // depth epic — the read bites status in REAL units (P0-truth) + the escalation clock
     READ_ADVANTAGE_INTENSITY_BONUS, READ_DISADVANTAGE_DURATION_PENALTY,
     THREAT_ESCALATION_PER_ROUND, THREAT_ESCALATION_GRACE, THREAT_ESCALATION_MAX,
-    THREAT_ESCALATION_BOSS_MULT, THREAT_EFFECT_ESCALATION_STEP, THREAT_ENCHANT_CURSE_EVERY_ROUNDS,
+    THREAT_ESCALATION_BOSS_MULT, THREAT_EFFECT_ESCALATION_STEP,
     // Phase 169 — curated combat loadout codec + synergy live-check
     COMBAT_LOADOUT_FLAG_PREFIX, COMBAT_LOADOUT_MAX,
     decodeCombatLoadout, getCombatLoadout, addToLoadout, removeFromLoadout,
@@ -197,7 +190,6 @@ export type { MomentumV2, UpgradeableDieFace, UpgradeableDieGear } from './Comba
  * sole caller; any future mobile adopter migrates next minor. Removal is a
  * semver-major phase (locked-barrel rule), so the exports stay.
  */
-export { resolveCardDieCost, cardDieCostPreview } from './Combat';
 export type {
     CombatEncounterState, CombatEncounterPhase, CombatTransition,
     CombatManaDie, CombatDieColor, CombatDieState,
@@ -209,13 +201,12 @@ export type {
     ThreatBranchCondition, CombatThreatBranch, CombatThreatBranchOutcome,
     AuthoredThreatPhase, AuthoredThreatBranch, AuthoredThreatStep,
     CombatSimStats, CombatSimPolicyId,
-    HazardAutoPolicyId, HazardCombatAutoOptions, HazardCombatAutoResult,
     CombatIntentType, CombatReadResult,
     SignatureSkill, SignatureSkillId, SignatureSkillKind, PlayerArchetype,
     CombatDeckPreset, CombatDeckFocus,
     // Phase 31 — the momentum wheel / THE STAKE shared stance subset
     WheelStance,
-    CardDieCost, FinisherProjection, CombatOutcomeProjection,
+    FinisherProjection, CombatOutcomeProjection,
     // Phase 33d — GLYPHS pilot (sandbox-only): the charge-and-crack seal zone
     GlyphInstance, GlyphPayload,
     // Phase 102 — SUMMON's brood: one member of an add wave
@@ -232,7 +223,6 @@ export {
     draftCombatDeck, resolveDeckSelection, applyDeckSwaps,
     COMBAT_SIM_POLICIES, COMBAT_SIM_POLICY_ORDER, getSimPolicy, listSimPolicies,
     runPlaytestCell, runPlaytestMatrix, formatPlaytestReport,
-    evaluateWinRateCurve, CURVE_SHAPE_TOLERANCES,
 } from './Combat';
 export type {
     CombatSimRunOptions, CombatSimDetailedOptions, CombatCardUsage, WinPathCounts,
@@ -241,7 +231,6 @@ export type {
     CombatSimPolicy,
     PlaytestCellSpec, PlaytestCellResult, PlaytestMatrixOptions,
     PlaytestStageSummary, PlaytestReport,
-    WinRateCurveClass, WinRateCurvePoint, WinRateCurveResult, CurveShapeTolerances,
 } from './Combat';
 export type { PlaytestPresetSummary, PlaytestPresetStageRow } from './Combat/combat.playtest';
 
@@ -301,22 +290,18 @@ export type {
 
 // ─── Effects ──────────────────────────────────────────────────────────────────
 export {
-    applyEffect, applyTier1CombatEffect,
-    clearTier1EffectsForStance,
+    applyEffect,
     lookupEffect, getEffectByName, getEffectsByType, effectsLibrary,
-    processWorldEffectTick, getActiveHazards,
     // Phase 142 — Status effect depth functionality
-    evaluateInteractions, checkInteractionTrigger, applyInteractionResult,
-    EFFECT_INTERACTIONS, getInteractionsForEffect, getAllInteractionIds,
-    getInteractionById, validateInteractions,
+    evaluateInteractions, checkInteractionTrigger,
+    EFFECT_INTERACTIONS,
+    validateInteractions,
 } from './Effects';
 export type {
     Effect, EffectType, EffectTier, EffectStacking, EffectCategory, EffectPayload,
     ActiveEffect, EffectApplicationResult,
     StatModifier, DamageOverTime, RegenerationConfig, ActionRestriction, AdvantageModifier,
-    EffectStatTarget,
-    ApplyEffectOptions, Tier1Outcome,
-    WorldTickResult, ActiveHazard,
+    ApplyEffectOptions,
     // Phase 142 — Status effect interaction types
     EffectInteraction, InteractionTrigger, InteractionResult, InteractionTriggerType,
 } from './Effects';
@@ -369,12 +354,11 @@ export type {
     // Spec 32 v3 — the rank ladder / rarity / card-type axes
     CardRank, CardRarity, CardType, CardRider,
     // Phase 142 — Extended synergy predicates
-    ExtendedSynergyPredicate,
     // WS4.2 — combat-state synergy predicate + its ledger view (spec 32 §12 #4)
     SynergyStatePredicate, SynergyLedgerView,
 } from './Cards';
 export {
-    calculateCardDamage, executeCard,
+    executeCard,
     // Spec 32 v3 — rank/rarity helpers (mobile renders rank names off these)
     CARD_RANK_NAMES, rankToRarity,
     getAvailableCards, learnCard,
@@ -382,8 +366,6 @@ export {
     // WS2.1 — the Haunt registry (spec 34 R-13: was Thoughtform; CONJURE targets; outside the pinned 70)
     hauntLibrary, getHauntById,
     // Phase 142 — Extended synergy predicate functionality
-    evaluateExtendedSynergyPredicate, checkSinglePredicate, checkAnyCountPredicate,
-    checkAllRequiredPredicate, checkBuffDebuffCombo, checkTotalIntensityPredicate,
     // WS4.2 — the combat-ledger gate evaluator
     checkStatePredicate,
     // Spec 32 §3/§6 — card themes + keyword families (phase 29 parity lint)
@@ -404,9 +386,8 @@ export {
     selectPlayer, selectIsInCombat,
     selectInventory, selectVersion, selectMoralMeter,
     nullAdapter,
-    STAT_MULTIPLIERS, RESOURCE_MULTIPLIERS, EXPERIENCE_PER_LEVEL,
+    RESOURCE_MULTIPLIERS, EXPERIENCE_PER_LEVEL,
     STAT_POINTS_PER_LEVEL,
-    DEFENSE_MULTIPLIERS, PASSIVE_DEFENSE_MULTIPLIER,
     MAX_EFFECT_INTENSITY, MAX_EFFECT_DURATION, FRIENDSHIP_COUNTER_MAX,
     RESOURCE_CARRY,
     generateRunId, STARTING_REGION,
@@ -470,8 +451,6 @@ export {
     completeNode, unlockNode, changeContinent, completeUniqueEvent,
     revealAdjacent, markNodeConsumed, unlockAdjacent,
     // Phase 135: Persistence functions
-    recordHazardOutcome, blockMapRoute, getHazardOutcomesForNode, isRouteBlocked,
-    validateMoveToNode, findAlternativePaths, getBlockedRoutesFromNode, getReachableNodes,
     // 2026-08-08 first-map audit: traversal queries + the strand audit.
     legalMovesFrom, isStranded, isMapTerminalNode, auditMapTraversal,
     // D1 (2026-09-21) — frontier roaming: the derived spent/frontier sets
@@ -480,8 +459,6 @@ export {
     visitedNodes, isNodeSpent, frontierNodes, isFrontierExhausted, forwardEdges,
     // Phase 53c — the route-coverage walk, beside the strand audit.
     auditRouteCoverage,
-    // Phase 148: Minigame Harness
-    runMinigameHarness, summarizeHarnessReport,
 } from './World';
 export {
     resolveMapEvent,
@@ -543,9 +520,7 @@ export type {
     ApplyDialogueChoiceResult,
     SeedInput,
     // Phase 135: Persistence types
-    HazardModifierEntry, HazardNodeOutcome, BlockedRoute, RouteValidationResult,
-    // Phase 148: Minigame Harness types
-    MinigameHarnessConfig, MinigameHarnessReport, MinigameHarnessSummary,
+    HazardModifierEntry, HazardNodeOutcome, BlockedRoute,
 } from './World';
 
 // ─── Ledger (Phase 42 cube + 27-cell registry; né Philosophy, Phase 44h) ─────
@@ -559,17 +534,6 @@ export type {
     PhilosophicalAlignmentCell,
 } from './Ledger';
 
-// ─── Faction (Phase 110 — faction reputation system for boss befriend consequences) ──
-export {
-    FACTION_REPUTATION_MIN, FACTION_REPUTATION_MAX, DEFAULT_FACTION_REPUTATION,
-    clampFactionReputation, createDefaultFactionReputations,
-    applyFactionReputationDeltas, getFactionReputation,
-    factionLibrary, getFactionInfo, getAllFactions,
-} from './Faction';
-export type {
-    FactionReputation, FactionReputations, FactionReputationDelta, FactionInfo,
-} from './Faction';
-
 // ─── NPCs (types + dialogue helpers) ──────────────────────────────────────────
 export type {
     NPC, DialogueMap, DialogueTree, DialogueNode, DialogueChoice, DialogueContext,
@@ -582,7 +546,7 @@ export {
     clamp, randomInt, deepClone, average, sum, max, min, inRange,
     capitalize, formatPercent,
     createDie, createDieRoll, determineRollAdvantageModifier,
-    deriveStats, deriveNonCombatStats, calculateMaxHealth,
+    calculateMaxHealth,
 } from './Utils';
 export { setRng, getRng, setSeed } from './Utils/rng';
 export type { Rng } from './Utils/rng';

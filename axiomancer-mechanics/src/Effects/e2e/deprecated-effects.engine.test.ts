@@ -140,7 +140,6 @@ function effectIdsReferencedBy(card: Card): string[] {
         if ('rider' in m && m.rider) fromRider(m.rider);
     }
     if (card.synergy?.predicate) ids.push(card.synergy.predicate.effectId);
-    if (card.synergy?.applyEffectOnFire) ids.push(card.synergy.applyEffectOnFire.effectId);
     return ids;
 }
 

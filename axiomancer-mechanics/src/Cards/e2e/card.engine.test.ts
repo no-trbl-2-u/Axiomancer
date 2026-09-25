@@ -5,7 +5,7 @@ import { createEnemy } from '../../Enemy';
 import { initializeCombat } from '../../Combat/combat.reducer';
 import { mockSequentialRng } from '../../test-utils';
 import { restoreOriginalRng } from '../../test-utils/rng';
-import { calculateCardDamage, executeCard } from '../card.engine';
+import { executeCard } from '../card.engine';
 import { Card } from '../types';
 import { CombatState } from '../../Combat/types';
 
@@ -76,15 +76,6 @@ const fixtureState = (): CombatState => initializeCombat(fixturePlayer(), fixtur
 
 const lookup = (id: string): Card | undefined =>
     [dotCard, buffCard, debuffCard].find(s => s.id === id);
-
-describe('calculateCardDamage — THE STRIKE IS DEAD (spec 32 v3 §1)', () => {
-    it('returns 0 unconditionally: no card deals stat-scaled damage', () => {
-        const player = fixturePlayer(); // body 6 — irrelevant by design
-        expect(calculateCardDamage(player, dotCard)).toBe(0);
-        expect(calculateCardDamage(player, buffCard)).toBe(0);
-        expect(calculateCardDamage(player, debuffCard, fixtureEnemy())).toBe(0);
-    });
-});
 
 describe('executeCard — no direct HP movement (spec 32 v3)', () => {
     it('an enemy-target card leaves HP untouched', () => {

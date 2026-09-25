@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
     completeMap, unlockMap, completeNode, unlockNode, completeUniqueEvent,
-    changeContinent, completeCurrentNode, moveToNode, blockMapRoute,
+    changeContinent, completeCurrentNode, moveToNode,
     frontierNodes, isFrontierExhausted, isNodeSpent, visitedNodes,
     legalMovesFrom, isStranded, IllegalMoveError,
 } from './world.reducer';
@@ -10,6 +10,14 @@ import { getMapDefinition } from './map.registry';
 import type { MapState, WorldState } from './types';
 
 const world = () => createStartingWorld();
+
+/** Test fixture: block the route between two nodes (either direction). The
+ *  engine's own blocker (`blockMapRoute`) was deleted in TRIM THE FAT T2a;
+ *  movement still honours `MapState.blockedRoutes`, which this writes. */
+const withBlockedRoute = (map: MapState, from: string, to: string, reason: string): MapState => ({
+    ...map,
+    blockedRoutes: [...map.blockedRoutes, { from, to, reason }],
+});
 
 /** A fishing-village world with the runtime map fields overridden. */
 const fvWorld = (patch: Partial<MapState>): WorldState => {
@@ -232,7 +240,7 @@ describe('D1 — the frontier', () => {
 describe('D1 — blocked routes still block', () => {
     it('drops a node whose only approach is blocked off the frontier', () => {
         const w = world();
-        const blocked = { ...w, currentMap: blockMapRoute(w.currentMap, 'fv-1', 'fv-2', 'Test blockage') };
+        const blocked = { ...w, currentMap: withBlockedRoute(w.currentMap, 'fv-1', 'fv-2', 'Test blockage') };
         expect(frontierNodes(blocked.currentMap)).toEqual([]);
         expect(isFrontierExhausted(blocked.currentMap)).toBe(true);
         // And the refusal names the blockage rather than the frontier.
@@ -247,7 +255,7 @@ describe('D1 — blocked routes still block', () => {
         w = advance(w, 'fv-2');
         w = advance(w, 'fv-26');
         w = advance(w, 'fv-16');
-        const blocked = { ...w, currentMap: blockMapRoute(w.currentMap, 'fv-26', 'fv-3', 'The tide-line gave way') };
+        const blocked = { ...w, currentMap: withBlockedRoute(w.currentMap, 'fv-26', 'fv-3', 'The tide-line gave way') };
         expect(frontierNodes(blocked.currentMap)).toContain('fv-3');
         expect(moveToNode(blocked, 'fv-3').currentMap.currentNode).toBe('fv-3');
     });

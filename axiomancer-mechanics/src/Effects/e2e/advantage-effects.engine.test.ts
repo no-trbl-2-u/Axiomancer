@@ -4,7 +4,7 @@
  * Drains the Phase 79 LOW "Advantage-category effects (13 of 14 uncovered)"
  * CRITIQUE row. For each effect, asserts it applies cleanly and that
  * `getActiveEffectModifiers` reflects the expected advantageGrants/Denies +
- * any stat deltas or defenseModifier.
+ * any defenseModifier.
  */
 
 import { afterEach, describe, it, expect, vi } from 'vitest';
@@ -39,9 +39,8 @@ describe('Phase 88 — Advantage buffs: advantageGrants via getActiveEffectModif
             const { activeEffects } = applyEffect([], effect!, 1);
             const mods = getActiveEffectModifiers(activeEffects);
             expect(mods.advantageGrants).toEqual(new Set(['body', 'mind', 'heart']));
-            // The dead surfaces are gone — no lingering inert roll/stat payload.
+            // The dead surface is gone — no lingering inert roll payload.
             expect(effect!.payload.rollModifier ?? 0).toBe(0);
-            expect(effect!.payload.statModifiers ?? []).toEqual([]);
         },
     );
 

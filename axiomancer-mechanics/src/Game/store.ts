@@ -42,7 +42,6 @@ import {
 import { DialogueTree, DialogueChoice } from '../NPCs/types';
 import { PhilosophicalAlignment } from '../Ledger/types';
 import { applyAlignmentDelta } from '../Ledger/alignment.engine';
-import { applyFactionReputationDeltas } from '../Faction/faction.engine';
 import { GameState } from './types';
 import { GameAction } from './actions.types';
 import { gameReducer, createNewGameState } from './game.reducer';
@@ -125,15 +124,6 @@ export interface CombatEndReport {
          * `CodexLibrary` registry). Closes GH#65 ask 3.
          */
         codexEntryUnlocked?: { id: string; title: string };
-        /**
-         * Phase 110 — when the befriended enemy carries `factionDeltas`
-         * and the deltas are non-empty, surfaces the post-clamp
-         * `FactionReputations` for the consumer to render (the
-         * END_COMBAT reducer has already written the new values to
-         * `state.factionReputations` by the time this surfaces).
-         * Mirrors the way `alignmentShift` surfaces alignment changes.
-         */
-        factionReputationShift?: { [factionId: string]: number };
     };
 }
 
@@ -353,12 +343,12 @@ export function createGameStore(
                 const {
                     currentEncounter: _drop, version, runId, player, world, quests, flags,
                     moralMeter, rngState, philosophicalAlignment,
-                    lastSeenAlignmentCells, codex, regionConsequences, factionReputations, mapGoodwill,
+                    lastSeenAlignmentCells, codex, regionConsequences, mapGoodwill,
                 } = next;
                 adapter.save({
                     version, runId, player, world, quests, flags,
                     moralMeter, rngState, philosophicalAlignment,
-                    lastSeenAlignmentCells, codex, regionConsequences, factionReputations, mapGoodwill,
+                    lastSeenAlignmentCells, codex, regionConsequences, mapGoodwill,
                 });
             }
             return next;
@@ -418,13 +408,11 @@ export function createGameStore(
                         ? pre.codex.unlockedEntries.includes(entry.id)
                         : true;
                     const willUnlockCodex = entry && !codexAlreadyKnown;
-                    const hasFactionDeltas = fr?.factionDeltas && Object.keys(fr.factionDeltas).length > 0;
-                    if (fr?.narrative || fr?.alignmentDelta || willUnlockCodex || hasFactionDeltas) {
+                    if (fr?.narrative || fr?.alignmentDelta || willUnlockCodex) {
                         const friendshipReport: {
                             narrative?: string;
                             alignmentShift?: PhilosophicalAlignment;
                             codexEntryUnlocked?: { id: string; title: string };
-                            factionReputationShift?: { [factionId: string]: number };
                         } = {};
                         if (fr?.narrative) friendshipReport.narrative = fr.narrative;
                         if (fr?.alignmentDelta) {
@@ -432,20 +420,6 @@ export function createGameStore(
                                 pre.philosophicalAlignment,
                                 fr.alignmentDelta,
                             );
-                        }
-                        if (hasFactionDeltas && fr.factionDeltas) {
-                            // Phase 110 — surface the post-clamp faction reputation
-                            // changes for consumer rendering
-                            const updatedReputations = applyFactionReputationDeltas(
-                                pre.factionReputations,
-                                fr.factionDeltas,
-                            );
-                            // Only include factions that actually changed
-                            const changedFactions: { [factionId: string]: number } = {};
-                            for (const factionId of Object.keys(fr.factionDeltas)) {
-                                changedFactions[factionId] = updatedReputations[factionId];
-                            }
-                            friendshipReport.factionReputationShift = changedFactions;
                         }
                         if (willUnlockCodex && entry) {
                             // Phase 73 — surface the unlocked entry's id +
@@ -535,12 +509,12 @@ export function createGameStore(
                 const {
                     currentEncounter: _drop, version, runId, player, world, quests, flags,
                     moralMeter, rngState, philosophicalAlignment,
-                    lastSeenAlignmentCells, codex, regionConsequences, factionReputations, mapGoodwill,
+                    lastSeenAlignmentCells, codex, regionConsequences, mapGoodwill,
                 } = next;
                 adapter.save({
                     version, runId, player, world, quests, flags,
                     moralMeter, rngState, philosophicalAlignment,
-                    lastSeenAlignmentCells, codex, regionConsequences, factionReputations, mapGoodwill,
+                    lastSeenAlignmentCells, codex, regionConsequences, mapGoodwill,
                 });
                 if (emitter) emitter.emit({ type: 'game:saved', payload: { state: next } });
             },

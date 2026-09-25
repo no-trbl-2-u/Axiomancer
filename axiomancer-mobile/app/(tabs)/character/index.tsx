@@ -252,20 +252,6 @@ export default function CharacterScreen() {
             const mind = vm.base.find((r) => r.stanceKey === 'mind')?.value ?? 0;
             return { heart, body, mind };
           })()}
-          currentDerived={(() => {
-            // Phase 88: Map derived stats to modal format
-            const physical = vm.derived.find((r) => r.label === 'PHYSICAL');
-            const mental = vm.derived.find((r) => r.label === 'MENTAL');
-            const emotional = vm.derived.find((r) => r.label === 'EMOTIONAL');
-            
-            if (!physical || !mental || !emotional) return undefined;
-            
-            return {
-              heart: { attack: emotional.attack, defense: emotional.defense },
-              body: { attack: physical.attack, defense: physical.defense },
-              mind: { attack: mental.attack, defense: mental.defense },
-            };
-          })()}
           onCommit={onCommitAllocation}
           onCancel={onCloseLevelUp}
         />
@@ -381,68 +367,6 @@ export default function CharacterScreen() {
         </View>
       </View>
 
-      {/* Derived + Saves — two columns (D&D character-sheet body) */}
-      <View style={styles.section}>
-       <View style={styles.twoCol}>
-        <View style={styles.colHalf} accessible accessibilityLabel={vm.a11y.derivedStats}>
-        <SectionLabel size={13}>✠ DERIVED</SectionLabel>
-        <View style={styles.derivedTable}>
-          {/* FE-015: two headers, because there are two columns of numbers.
-            * This row advertised ATK / SKL / DEF while every data row below
-            * renders only attack and defense, and the header's empty label cell
-            * used a different flex from the data rows' label cell — so three
-            * headers sat over two values, none of them aligned: '7' landed
-            * between ATK and SKL, '21' under DEF. DerivedStatRow carries no
-            * skill value, so SKL was advertising a column that does not exist. */}
-          <View style={[styles.derivedRow, styles.derivedHeader]}>
-            <Text style={[styles.derivedCell, styles.derivedRowLabel]} />
-            <Text style={[styles.derivedCell, styles.derivedHeaderCell]}>ATK</Text>
-            <Text style={[styles.derivedCell, styles.derivedHeaderCell]}>DEF</Text>
-          </View>
-          {vm.derived.map((row) => (
-            <View key={row.label} style={[styles.derivedRow, styles.derivedDataRow]}>
-              <Text style={[styles.derivedCell, styles.derivedRowLabel]}>{row.label.slice(0, 4)}</Text>
-              <TooltipTarget kind="item-stat" id={row.attackId} style={styles.derivedCell} accessibilityLabel={`Explain ${row.label} attack`} accessibilityHint="tap to read description" testID={`self-derived-${row.attackId}`}>
-                <Text style={styles.derivedData}>{row.attack}</Text>
-              </TooltipTarget>
-              <TooltipTarget kind="item-stat" id={row.defenseId} style={styles.derivedCell} accessibilityLabel={`Explain ${row.label} defense`} accessibilityHint="tap to read description" testID={`self-derived-${row.defenseId}`}>
-                <Text style={styles.derivedData}>{row.defense}</Text>
-              </TooltipTarget>
-            </View>
-          ))}
-          <View style={styles.luckRow}>
-            <Text style={styles.luckLabel}>LUCK · AVG</Text>
-            <Text style={styles.luckValue}>{vm.luckLabel}</Text>
-          </View>
-        </View>
-        </View>
-        <View style={styles.colHalf} accessible accessibilityLabel={vm.a11y.saves}>
-        <SectionLabel size={13}>✠ SAVES &amp; TESTS</SectionLabel>
-        <View style={styles.savesGrid}>
-          {vm.saves.map((s) => (
-            // Phase 74 follow-up walkthrough Tick 4: wrap each
-            // save/test cell in a TooltipTarget pointing at the
-            // new kind:'derived' content (6 ids for the
-            // save/test x stance matrix). Closes the SELF
-            // walkthrough row.
-            <TooltipTarget
-              key={s.id}
-              kind="derived"
-              id={s.id}
-              accessibilityLabel={`Explain ${s.label}`}
-              accessibilityHint="tap to read description"
-              testID={`self-derived-${s.id}`}
-            >
-              <View style={styles.saveCell}>
-                <Text style={styles.saveKey}>{s.label}</Text>
-                <Text style={styles.saveVal}>{s.value}</Text>
-              </View>
-            </TooltipTarget>
-          ))}
-        </View>
-        </View>
-       </View>
-      </View>
 
       {/* Phase 92 — Grace (né Morale, Phase 44h).
         * FE-003: this section and the GRACE bar under POOLS are the same
@@ -569,8 +493,6 @@ const useStyles = makeStyles((AXM) => ({
   levelBox: { width: 60, height: 66, borderWidth: 2, borderColor: AXM.parchment, backgroundColor: AXM.deepBg, alignItems: 'center', justifyContent: 'center' },
   levelText: { fontFamily: FONTS.gothic, fontSize: 34, lineHeight: 36, color: AXM.sulfur },
   levelCaption: { fontFamily: FONTS.sans, fontSize: 8, letterSpacing: 2, color: AXM.bone },
-  twoCol: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
-  colHalf: { flex: 1 },
   ledgerHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   ledgerChevron: { fontFamily: FONTS.mono, fontSize: 12, color: AXM.sulfur },
   xpRow: { flexDirection: 'column', marginBottom: 2 },
@@ -586,26 +508,6 @@ const useStyles = makeStyles((AXM) => ({
   baseCard: { flex: 1, paddingVertical: 10, paddingHorizontal: 6, backgroundColor: AXM.panelBg, borderWidth: 1, borderColor: AXM.ash, alignItems: 'center' },
   baseStatLabel: { fontFamily: FONTS.sans, fontSize: 13, letterSpacing: 2, color: AXM.bone, marginTop: 3 },
   baseStatValue: { fontFamily: FONTS.gothic, fontSize: 32, color: AXM.sulfur, lineHeight: 34, marginTop: 2 },
-  derivedTable: { marginTop: 3, backgroundColor: AXM.panelBg, borderWidth: 1, borderColor: AXM.ash, padding: 5, paddingHorizontal: 8 },
-  derivedRow: { flexDirection: 'row' },
-  derivedHeader: { borderBottomWidth: 1, borderBottomColor: AXM.ash, borderStyle: 'dashed', paddingBottom: 2, marginBottom: 0 },
-  derivedDataRow: { borderBottomWidth: 1, borderBottomColor: AXM.ash, paddingVertical: 2 },
-  derivedCell: { flex: 1 },
-  // Larger type across the sheet for low-vision readability (visual-audit
-  // 2026-06) — the freed space (no WORN & WIELDED, two columns) is spent
-  // on legibility, not density.
-  derivedRowLabel: { fontFamily: FONTS.sans, fontSize: 11, color: AXM.parchment, letterSpacing: 0.5, flex: 1.8 },
-  derivedHeaderCell: { fontFamily: FONTS.mono, fontSize: 10, color: AXM.bone, textAlign: 'center', letterSpacing: 1 },
-  derivedData: { fontFamily: FONTS.gothic, fontSize: 15, color: AXM.parchment, textAlign: 'center' },
-  luckRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 5, paddingTop: 4 },
-  luckLabel: { fontFamily: FONTS.sans, fontSize: 11, color: AXM.bone, letterSpacing: 1 },
-  luckValue: { fontFamily: FONTS.gothic, fontSize: 17, color: AXM.sulfur },
-  // SAVES & TESTS — a clean single-column list (was a cramped 3-up grid of
-  // tiny chips): label left, value right, hairline-separated rows.
-  savesGrid: { marginTop: 4, borderWidth: 1, borderColor: AXM.ash, backgroundColor: AXM.panelBg, paddingHorizontal: 8 },
-  saveCell: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 5, borderBottomWidth: 1, borderBottomColor: AXM.ash, borderStyle: 'dashed' },
-  saveKey: { fontFamily: FONTS.sans, fontSize: 13, color: AXM.parchment, letterSpacing: 0.5 },
-  saveVal: { fontFamily: FONTS.gothic, fontSize: 17, color: AXM.sulfur },
   alignmentCellName: { fontFamily: FONTS.gothic, fontSize: 17, color: AXM.parchment, letterSpacing: 1, marginTop: 3 },
   alignmentAxesRow: { flexDirection: 'row', gap: 6, marginTop: 5 },
   alignmentAxisChip: { flex: 1, borderWidth: 1, borderColor: AXM.ash, borderStyle: 'dashed', paddingVertical: 5, paddingHorizontal: 6 },

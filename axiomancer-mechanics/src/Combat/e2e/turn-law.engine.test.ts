@@ -28,7 +28,7 @@ import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     draftStanceDie, startTurn, endTurn, resolveThreatPhase, isMomentumDieId,
 } from '../combat.engine';
-import { runHazardCombatAutoEncounter } from '../combat.autoplay';
+import { runHazardCombatAutoEncounter } from '../../test-utils/combat-autoplay';
 import { runOneEncounter } from '../combat.encounter.sim';
 import { COMBAT_SIM_POLICY_ORDER } from '../combat.sim-policies';
 import type { CombatEncounterState } from '../combat.encounter.types';

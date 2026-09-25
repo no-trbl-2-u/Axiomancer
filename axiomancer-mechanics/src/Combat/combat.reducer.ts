@@ -25,7 +25,7 @@ import { CombatState } from './types';
  * Phase 20 decoupled equipment from effects; phase 23 tore down item sets. No
  * equipment (individual or set) seeds combat-start tokens or applies passive
  * effects any more — the counters start at zero. Items contribute only their
- * `statModifiers` (folded into `derivedStats` at equip-time).
+ * worn signatures and the armor relics' +max VITAE (folded at equip-time).
  */
 export function initializeCombat(player: Character, enemy: Enemy): CombatState {
     return {

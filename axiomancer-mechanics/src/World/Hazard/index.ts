@@ -135,26 +135,6 @@ export {
 export type { SimStats } from './hazard.sim';
 export { simulateHazard } from './hazard.sim';
 
-// ── Divergence audit (Phase 140) ───────────────────────────────────────────
-export type {
-    DivergenceItem,
-    ImplementationGap,
-    VerificationResult,
-} from './audit/divergence.verification';
-
-export {
-    verifyHazardDivergence,
-    formatDivergenceReport,
-} from './audit/divergence.verification';
-
-export type { GapAnalysis } from './audit/gap.report';
-
-export {
-    analyzeHazardGaps,
-    formatGapReport,
-    executeGapAudit,
-} from './audit/gap.report';
-
 // ── Phase 149 — Engagement mechanics ───────────────────────────────────────
 export {
     classifyDeckFocus,

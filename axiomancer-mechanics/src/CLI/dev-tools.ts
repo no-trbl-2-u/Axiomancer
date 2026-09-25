@@ -29,7 +29,6 @@ export function devSetLevel(store: Store, targetLevel: number): DevResult {
         equipment: getEquippedItems(p.equipment),
         knownCards: [...p.knownCards],
         effects: [...p.effects],
-        procUnlocks: p.procUnlocks,
     });
 
     store.setState({ player: rebuilt });
@@ -55,7 +54,6 @@ export function devSetStats(store: Store, stats: Partial<BaseStats>): DevResult 
         equipment: getEquippedItems(p.equipment),
         knownCards: [...p.knownCards],
         effects: [...p.effects],
-        procUnlocks: p.procUnlocks,
     });
 
     store.setState({ player: rebuilt });

@@ -608,19 +608,6 @@ async function characterTab(store: GameStoreHandle): Promise<void> {
     log('\nBase stats:');
     log(`  heart ${p.baseStats.heart}   body ${p.baseStats.body}   mind ${p.baseStats.mind}`);
 
-    log('\nDerived stats:');
-    const ds = p.derivedStats;
-    log(`  physical  attack ${ds.physicalAttack}    defense ${ds.physicalDefense}`);
-    log(`  mental    attack ${ds.mentalAttack}        defense ${ds.mentalDefense}`);
-    log(`  emotional attack ${ds.emotionalAttack}   defense ${ds.emotionalDefense}`);
-    log(`  luck      ${ds.luck}`);
-
-    log('\nNon-combat stats:');
-    const nc = p.nonCombatStats;
-    log(`  physical  save ${nc.physicalSave}    test ${nc.physicalTest}`);
-    log(`  mental    save ${nc.mentalSave}      test ${nc.mentalTest}`);
-    log(`  emotional save ${nc.emotionalSave}   test ${nc.emotionalTest}`);
-
     log('\nEquipment:');
     const loadout = p.equipment;
     const logSlot = (label: string, eq: typeof loadout.weapon): void => {

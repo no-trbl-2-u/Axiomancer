@@ -54,8 +54,8 @@ const blade: Equipment = {
 };
 
 // A stat-bearing weapon used to exercise the equip stat-delta surface:
-// it adds physical attack and a passive effect, so swapping it in over
-// the plain `blade` produces a real, non-empty set of changes.
+// it adds max health (`maxHp`, the only equipment stat line), so swapping
+// it in over the plain `blade` produces a real, non-empty set of changes.
 const runeBlade: Equipment = {
     id: 'rune-blade',
     name: 'Rune Blade',
@@ -64,20 +64,20 @@ const runeBlade: Equipment = {
     slot: 'weapon',
     
     
-    statModifiers: [{ stat: 'physicalAttack', value: 5, isMultiplier: false }],
+    statModifiers: [{ stat: 'maxHp', value: 5 }],
 };
 
-// A weapon granting a fractional luck modifier — exercises the
-// one-decimal rounding of the luck display.
-const luckBlade: Equipment = {
-    id: 'luck-blade',
-    name: 'Lucky Blade',
-    description: 'Suspiciously fortunate.',
+// A weapon granting a fractional max-health modifier — exercises the
+// one-decimal rounding of stat values in the modal.
+const fractionBlade: Equipment = {
+    id: 'fraction-blade',
+    name: 'Fractional Blade',
+    description: 'Suspiciously precise.',
     category: 'equipment',
     slot: 'weapon',
     
     
-    statModifiers: [{ stat: 'luck', value: 1.55432728, isMultiplier: false }],
+    statModifiers: [{ stat: 'maxHp', value: 1.55432728 }],
 };
 
 // Two named (affixed) weapons used to prove the equip/swap block shows
@@ -362,10 +362,10 @@ describe('selectItemModalViewModel: equipment preview (Q5)', () => {
             expect(delta.delta).not.toBe(0);
             expect(delta.after - delta.before).toBe(delta.delta);
         }
-        // Rune Blade adds +5 physical attack over the plain blade.
-        const atk = vm.statDeltas.find((d) => d.id === 'physicalAttack');
-        expect(atk).toBeDefined();
-        expect(atk!.delta).toBe(5);
+        // Rune Blade adds +5 max health over the plain blade.
+        const hp = vm.statDeltas.find((d) => d.label === 'MAX HP');
+        expect(hp).toBeDefined();
+        expect(hp!.delta).toBe(5);
     });
 
     // A swap that changes nothing (identical stat-less weapons) shows an
@@ -387,10 +387,7 @@ describe('selectItemModalViewModel: equipment preview (Q5)', () => {
         const vm = selectItemModalViewModel(store.getState(), 'rune-blade')!;
 
         const labels = vm.itemModifiers.map((m) => m.label);
-        expect(labels).toContain('+5 PHYS ATK');
-        // The stat line carries its engine key for tooltip wiring.
-        const atk = vm.itemModifiers.find((m) => m.label === '+5 PHYS ATK');
-        expect(atk?.id).toBe('physicalAttack');
+        expect(labels).toContain('+5 MAX HP');
     });
 
     // A plain common item (no modifiers) exposes an empty modifier list.
@@ -402,27 +399,27 @@ describe('selectItemModalViewModel: equipment preview (Q5)', () => {
         expect(vm.itemModifiers).toHaveLength(0);
     });
 
-    // Luck is fractional; the modifier window rounds it to one decimal.
-    it('rounds a luck modifier to one decimal in the intrinsic list', () => {
-        const store = makeStore([luckBlade]);
+    // A fractional modifier value is rounded to one decimal in the intrinsic list.
+    it('rounds a fractional modifier to one decimal in the intrinsic list', () => {
+        const store = makeStore([fractionBlade]);
 
-        const vm = selectItemModalViewModel(store.getState(), 'luck-blade')!;
+        const vm = selectItemModalViewModel(store.getState(), 'fraction-blade')!;
 
-        const luck = vm.itemModifiers.find((m) => m.label.includes('LUCK'));
-        expect(luck?.label).toBe('+1.6 LUCK');
+        const hp = vm.itemModifiers.find((m) => m.label.includes('MAX HP'));
+        expect(hp?.label).toBe('+1.6 MAX HP');
     });
 
-    it('rounds a luck stat delta to one decimal', () => {
-        // Worn plain blade + lucky peer: tapping the peer previews the
-        // swap, whose luck delta must read at one decimal.
-        const store = makeStore([blade, luckBlade]);
+    it('rounds a fractional stat delta to one decimal', () => {
+        // Worn plain blade + fractional peer: tapping the peer previews the
+        // swap, whose max-health delta must read at one decimal.
+        const store = makeStore([blade, fractionBlade]);
 
-        const vm = selectItemModalViewModel(store.getState(), 'luck-blade')!;
+        const vm = selectItemModalViewModel(store.getState(), 'fraction-blade')!;
 
-        const luck = vm.statDeltas.find((d) => d.id === 'luck' || d.label === 'LUCK');
-        expect(luck).toBeDefined();
+        const hp = vm.statDeltas.find((d) => d.label === 'MAX HP');
+        expect(hp).toBeDefined();
         // Every surfaced number carries at most one decimal place.
-        for (const n of [luck!.before, luck!.after, luck!.delta]) {
+        for (const n of [hp!.before, hp!.after, hp!.delta]) {
             expect(Number.isInteger(n * 10)).toBe(true);
         }
     });
@@ -439,22 +436,6 @@ describe('selectItemModalViewModel: equipment preview (Q5)', () => {
         expect(labels.some((l) => l.includes('Glittering'))).toBe(false);
         expect(labels.some((l) => l.includes('Dull'))).toBe(false);
         expect(labels.some((l) => l.includes('rune-ward'))).toBe(false);
-    });
-
-
-    // Phase 80a — equipment stat-delta rows carry an `id` engine-stat
-    // key so the inventory item modal's TooltipTarget wrap can fire a
-    // `kind:'item-stat'` synthesizer tooltip on tap. The combat /
-    // non-combat stat keys follow the `<dimension><Verb>` pattern the
-    // synthesizer resolves; pin physical-attack so a future rename in
-    // the engine surfaces here as a test failure.
-    it('equipment stat deltas carry engine stat-key ids for tooltip wiring (Phase 80a)', () => {
-        const store = makeStore([blade, runeBlade]);
-
-        const vm = selectItemModalViewModel(store.getState(), 'rune-blade')!;
-
-        const atk = vm.statDeltas.find((d) => d.label === 'PHYS ATK');
-        expect(atk?.id).toBe('physicalAttack');
     });
 });
 

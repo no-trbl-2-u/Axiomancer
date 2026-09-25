@@ -199,7 +199,7 @@ Order chosen so every step leaves CI green and each PR is reviewable.
 | Step | Phase | Gate |
 |---|---|---|
 | T1 | Binaries + dead docs (Tier 1 rows 3-4, Tier 2 image rows) | `npm run verify` root; `check-lexicon`; `site:public` still builds |
-| T2 | Engine dead code (Tier 1 engine table) + Tier 0 items 1, 2, 3, 4, 5 | `verify -w axiomancer-mechanics`, `verify -w axiomancer-mobile`, `type-check -w axiomancer-card-editor`; `baseline:check` re-stamped |
+| T2 | Engine dead code (Tier 1 engine table) + Tier 0 items 1, 2, 3, 4, 5 — split per D13 into T2a (this row) and T2b (D7 flag collapse) | `verify -w axiomancer-mechanics`, `verify -w axiomancer-mobile`, `type-check -w axiomancer-card-editor`; `baseline:check` re-stamped |
 | T3 | Mobile orphans + Tier 0 items 6, 7, 8 | `verify -w axiomancer-mobile`, `verify:visual` |
 | T4 | `plan/` compaction (Tier 2 markdown rows) | `check-lexicon`; every skill that greps a moved path updated in the same commit |
 | T5 | Tier 3, one block per PR, after §5 is answered | per block |
@@ -235,6 +235,9 @@ all eight commands (D10). Nothing open.
    or collapse the five overlapping playtest loops.
 
 ## 6. Guards
+
+- `Potential Assets/icons-TBR` is the icon source pool (D11). It has no
+  inbound references by design; never delete it as unreferenced.
 
 - Never delete a file that `__tests__/store-submission.test.js`,
   `check-devlog-not-served.test`, `asset-provenance.test`, or

@@ -39,13 +39,6 @@ describe('createCharacter — seedStartingRelics', () => {
         expect(c.health).toBe(c.maxHealth);
     });
 
-    it('folds the worn weapon/accessory stat bumps into derivedStats', () => {
-        const bare = createCharacter({ name: 'B', level: 1, baseStats: { heart: 5, body: 5, mind: 5 } });
-        const relic = createCharacter({ name: 'R', level: 1, baseStats: { heart: 5, body: 5, mind: 5 }, seedStartingRelics: true });
-        // +2 body (Gorgon Brand) raises physicalAttack; +2 mind/heart raise the others.
-        expect(relic.derivedStats.physicalAttack).toBeGreaterThan(bare.derivedStats.physicalAttack);
-    });
-
     it('is off by default — a bare character has an empty loadout and no relics', () => {
         const c = createCharacter({ name: 'T', level: 1, baseStats: { heart: 5, body: 5, mind: 5 } });
         expect(c.equipment.weapon).toBeNull();

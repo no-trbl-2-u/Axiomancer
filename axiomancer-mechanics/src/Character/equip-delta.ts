@@ -7,7 +7,7 @@
  * and one `grantsSignature` — the rarity / affix / rolled-modifier / passive-
  * effect / proc / resource machinery is gone. So the delta is just:
  *
- *   - net signed **stat** deltas (derived stats + maxHealth), and
+ *   - the net signed **max-VITAE** delta (armor relics' `maxHp`), and
  *   - the **signature** gained / lost (signet relics).
  *
  * Contract:
@@ -69,12 +69,10 @@ export interface EquipDelta {
 
 // ─── Stat aggregation ──────────────────────────────────────────────────────────
 
-/** Aggregate flat additive `statModifiers` into a stat → value map. Multipliers
- * are skipped (the display delta is additive-only for legibility). */
+/** Aggregate an item's flat `statModifiers` into a stat → value map. */
 function aggregateStats(equipment: Equipment): Map<string, number> {
     const out = new Map<string, number>();
     for (const mod of equipment.statModifiers ?? []) {
-        if (mod.isMultiplier) continue;
         out.set(mod.stat, (out.get(mod.stat) ?? 0) + mod.value);
     }
     return out;
@@ -93,12 +91,6 @@ function computeStatDeltas(candidate: Map<string, number>, against: Map<string, 
 
 function characterStats(character: Character): Map<string, number> {
     const out = new Map<string, number>();
-    for (const [stat, value] of Object.entries(character.derivedStats ?? {})) {
-        if (typeof value === 'number' && Number.isFinite(value)) out.set(stat, value);
-    }
-    for (const [stat, value] of Object.entries(character.nonCombatStats ?? {})) {
-        if (typeof value === 'number' && Number.isFinite(value)) out.set(stat, value);
-    }
     if (typeof character.maxHealth === 'number' && Number.isFinite(character.maxHealth)) {
         out.set('maxHealth', character.maxHealth);
     }

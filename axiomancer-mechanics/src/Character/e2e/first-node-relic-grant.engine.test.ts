@@ -137,7 +137,6 @@ describe('grantFirstNodeRelic — the hand-over', () => {
         expect(getSignaturesForLoadout(granted.equipment))
             .toEqual(expect.arrayContaining(getSignaturesForLoadout(seeded.equipment)));
         expect(getSignaturesForLoadout(granted.equipment)).toHaveLength(5);
-        expect(granted.derivedStats).toEqual(seeded.derivedStats);
         expect(granted.maxHealth).toBe(seeded.maxHealth);
         expect(ids(granted).slice().sort()).toEqual(ids(seeded).slice().sort());
         expect(accIds(granted).slice().sort()).toEqual(accIds(seeded).slice().sort());

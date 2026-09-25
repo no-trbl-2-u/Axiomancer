@@ -1,12 +1,9 @@
 import { Card } from '../Cards/types';
 import { MapName } from '../World/map.library';
-import { Stance } from '../Combat/types';
-import { BaseStats, DerivedStats } from '../Character/types';
+import { BaseStats } from '../Character/types';
 import { ActiveEffect } from '../Effects/types';
-import { ProcOverrides, ProcUnlocks } from '../Combat/combat-effects';
 import { Item } from '../Items/types';
 import { PhilosophicalAlignment } from '../Ledger/types';
-import { FactionReputationDelta } from '../Faction/types';
 // Phase 73 — CodexEntry's semantic home is src/Game/types.ts (alongside
 // CodexState + the Game-loop persistence surface). It's re-exported here
 // so `Enemy.journalEntry?: CodexEntry` decoration works at the per-foe
@@ -81,14 +78,6 @@ export type EnemyLogic =
 export type EnemyDifficulty = 'simple' | 'normal' | 'elite' | 'boss' | 'unique';
 
 /**
- * Per-enemy override for the default Tier 1 stance-effect map. Only the
- * effect ID is overridden; the action's target (self/opponent) and stacking
- * options are preserved from the global map.
- */
-export type Tier1EffectOverrides =
-    Partial<Record<Stance, Partial<Record<'attack' | 'defend', string>>>>;
-
-/**
  * Phase 60 — per-enemy content awarded when combat resolves via
  * friendship (Phase 36's `outcome === 'friendship'` path).
  *
@@ -133,15 +122,6 @@ export interface FriendshipReward {
      * default.
      */
     alignmentDelta?: Partial<PhilosophicalAlignment>;
-    /**
-     * Phase 110 — optional shift applied to the player's faction reputation
-     * standings on the friendship outcome. The END_COMBAT reducer routes
-     * the delta through `applyFactionReputationDeltas(state.factionReputations,
-     * factionDeltas)` (Phase 110's clamp helper); each faction clamps to
-     * `[-100, +100]`. Authoring band: ±5..±15 per faction for boss encounters
-     * (demonstrates lose-with-one / gain-with-another tradeoffs).
-     */
-    factionDeltas?: FactionReputationDelta;
 }
 
 /**
@@ -216,7 +196,6 @@ export interface CauseLines {
  * @property mapName      - The map this enemy belongs to.
  * @property logic        - AI strategy.
  * @property difficulty   - Optional encounter classification.
- * @property tier1Overrides - Optional Tier 1 effect ID overrides per stance.
  * @property cards        - Optional card rotation the enemy can use.
  * @property loot         - Optional weighted drop table (Spec 07 Q7B). Each
  *                          successful kill rolls the table once. May be empty
@@ -231,22 +210,9 @@ export interface Enemy {
     health: number;
     maxHealth: number;
     baseStats: BaseStats;
-    derivedStats: DerivedStats;
     mapName: MapName;
     logic: EnemyLogic;
     difficulty?: EnemyDifficulty;
-    tier1Overrides?: Tier1EffectOverrides;
-    /**
-     * Spec 03 — per-cell proc unlock caps for this enemy. Default cap is
-     * tier 1; elite / boss enemies bump the cap to enable higher-tier procs.
-     */
-    procUnlocks?: ProcUnlocks;
-    /**
-     * Spec 03 — per-cell custom proc tables that fully replace the global
-     * entries for that Stance × action combo. Bosses get unique tables here;
-     * elite / basic enemies receive map-themed overrides (Q7).
-     */
-    procOverrides?: ProcOverrides;
     cards?: Card[];
     /** Weighted drop table — see {@link LootTableEntry}. */
     loot?: LootTableEntry[];

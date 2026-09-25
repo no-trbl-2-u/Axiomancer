@@ -54,11 +54,9 @@ describe('createNewGameState — the very start', () => {
     it('keeps the apprentice baseline stats (5/5/5) — the floor is items, not stats', () => {
         const s = createNewGameState();
         expect(s.player.baseStats).toEqual({ heart: 5, body: 5, mind: 5 });
-        // No worn armor → maxHealth is the bare level-1 ceiling, and the
-        // derived stats are the bare base-stat derivation (no relic bumps).
+        // No worn armor → maxHealth is the bare level-1 ceiling.
         const bare = createCharacter({ name: 'Bare', level: 1, baseStats: { heart: 5, body: 5, mind: 5 } });
         expect(s.player.maxHealth).toBe(bare.maxHealth);
-        expect(s.player.derivedStats).toEqual(bare.derivedStats);
     });
 
     it('the first node hands over the ring and nothing else', () => {
@@ -76,10 +74,9 @@ describe("the Suppliant's Ring — skill only", () => {
         expect(getRelicById(FIRST_NODE_RELIC_ID)!.statModifiers).toEqual([]);
     });
 
-    it('wearing it changes no derived stat and no maxHealth', () => {
+    it('wearing it changes no maxHealth', () => {
         const s = createNewGameState();
         const g = grantFirstNodeRelic(s.player, s.flags);
-        expect(g.character.derivedStats).toEqual(s.player.derivedStats);
         expect(g.character.maxHealth).toBe(s.player.maxHealth);
     });
 });

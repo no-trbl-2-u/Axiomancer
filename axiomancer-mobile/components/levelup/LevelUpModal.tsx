@@ -19,14 +19,12 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
-import { DerivedPreviewRibbon } from '@/components/levelup/DerivedPreviewRibbon';
 import { StanceRow, type LevelStance } from '@/components/levelup/StanceRow';
 import { pickFlavor } from '@/components/levelup/levelUpFlavor';
 import { FONTS } from '@/theme/axm';
 import { makeStyles } from '@/theme/runtime';
 import { toRomanLower } from '@/state/presenters/roman';
 import { STANCES } from '@/state/presenters/stances';
-import { calculateDerivedPreview } from '@/state/presenters/levelup.engine';
 
 
 export interface LevelUpModalProps {
@@ -36,12 +34,6 @@ export interface LevelUpModalProps {
     totalPoints: number;
     /** Base-stat values BEFORE the allocation session. */
     current: { heart: number; body: number; mind: number };
-    /** Current derived stats for preview baseline (Phase 88) */
-    currentDerived?: {
-        heart: { attack: number; defense: number };
-        body: { attack: number; defense: number };
-        mind: { attack: number; defense: number };
-    };
     /**
      * Called once per allocation; the parent dispatches the engine
      * action. The modal manages local `spent` state until COMMIT.
@@ -58,7 +50,6 @@ export function LevelUpModal({
     toLevel,
     totalPoints,
     current,
-    currentDerived,
     onCommit,
     onCancel,
 }: LevelUpModalProps) {
@@ -110,24 +101,6 @@ export function LevelUpModal({
     }, [fullyAllocated, onCommit, spent]);
 
     const flavor = useMemo(() => pickFlavor(toLevel), [toLevel]);
-
-    // Phase 88: Derived stats preview calculation
-    const derivedPreview = useMemo(() => {
-        if (!currentDerived) {
-            // Fallback: no preview if derived stats not provided
-            return currentDerived;
-        }
-        
-        try {
-            return calculateDerivedPreview(current, spent, fromLevel);
-        } catch (error) {
-            // Error fallback: show current stats without preview
-            if (__DEV__) {
-                console.warn('Derived stats preview calculation failed:', error);
-            }
-            return currentDerived;
-        }
-    }, [current, currentDerived, spent, fromLevel]);
 
     const styles = useStyles();
 
@@ -196,15 +169,6 @@ export function LevelUpModal({
                         />
                     ))}
                 </View>
-
-                {/* Phase 88: Derived stats preview ribbon */}
-                {currentDerived && derivedPreview && (
-                    <DerivedPreviewRibbon
-                        current={currentDerived}
-                        preview={derivedPreview}
-                        hasAllocations={sumSpent > 0}
-                    />
-                )}
 
                 {/* Reset link */}
                 <View style={styles.resetRow}>

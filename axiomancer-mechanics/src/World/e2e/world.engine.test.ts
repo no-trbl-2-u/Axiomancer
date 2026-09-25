@@ -3,7 +3,6 @@
  *
  * Coverage:
  *   - moveToNode adjacency / completed-lock / locked-node validation.
- *   - processWorldEffectTick + getActiveHazards behaviour over multiple steps.
  *   - Per-objective quest engine (start / progress / complete).
  *   - resolveMapEvent dispatch for every kind the demo map exercises
  *     (post-Phase 25 — processNode + the legacy MapEvent surface removed).
@@ -16,7 +15,7 @@ import {
     resolveMapEvent, applyDialogueChoice, getMapDefinition, createMapState,
     emptyQuestLog, startQuest, progressQuest, isQuestComplete, completeQuest,
 } from '../index';
-import { processWorldEffectTick, getActiveHazards, applyEffect, lookupEffect } from '../../Effects';
+import { applyEffect, lookupEffect } from '../../Effects';
 import { createCharacter } from '../../Character';
 import { createNewGameState } from '../../Game/game.reducer';
 import { GameState } from '../../Game/types';
@@ -75,61 +74,6 @@ describe('moveToNode', () => {
         const world = createStartingWorld();
         const same = moveToNode(world, world.currentMap.currentNode);
         expect(same).toBe(world);
-    });
-});
-
-// ── processWorldEffectTick (Q3) ─────────────────────────────────────────────
-
-describe('processWorldEffectTick + getActiveHazards', () => {
-    it('applies poison DoT each step (two steps verified)', () => {
-        const player = createCharacter({
-            name: 'Tester',
-            level: 5,
-            baseStats: { heart: 5, body: 5, mind: 5 },
-        });
-        const poison = lookupEffect('debuff_poison');
-        expect(poison).toBeDefined();
-        const { activeEffects } = applyEffect(player.effects, poison!, 0);
-        const poisoned = { ...player, effects: activeEffects };
-
-        const hpBefore = poisoned.health;
-        const step1 = processWorldEffectTick(poisoned);
-        expect(step1.damage).toBeGreaterThan(0);
-        expect(step1.player.health).toBeLessThan(hpBefore);
-
-        const step2 = processWorldEffectTick(step1.player);
-        expect(step2.player.health).toBeLessThan(step1.player.health);
-    });
-
-    it('exposes active hazards via getActiveHazards (Q4)', () => {
-        const player = createCharacter({
-            name: 'Tester',
-            level: 5,
-            baseStats: { heart: 5, body: 5, mind: 5 },
-        });
-        const poison = lookupEffect('debuff_poison')!;
-        const { activeEffects } = applyEffect(player.effects, poison, 0);
-        const hazards = getActiveHazards({ effects: activeEffects });
-        expect(hazards.length).toBeGreaterThan(0);
-        expect(hazards[0].effectId).toBe('debuff_poison');
-        expect(hazards[0].damagePerStep).toBeGreaterThan(0);
-    });
-
-    it('decrements duration each step and drops expired effects', () => {
-        const player = createCharacter({
-            name: 'Tester',
-            level: 5,
-            baseStats: { heart: 5, body: 5, mind: 5 },
-        });
-        const poison = lookupEffect('debuff_poison')!;
-        let target = { ...player, effects: applyEffect(player.effects, poison, 0).activeEffects };
-        const startDuration = target.effects[0].remainingDuration;
-        const after = processWorldEffectTick(target);
-        if (after.player.effects.length > 0) {
-            expect(after.player.effects[0].remainingDuration).toBe(startDuration - 1);
-        } else {
-            expect(after.expired.length).toBeGreaterThan(0);
-        }
     });
 });
 

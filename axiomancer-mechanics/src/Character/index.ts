@@ -1,11 +1,10 @@
 import { Character, BaseStats, PreviewAllocation, PreviewResult, emptyLoadout } from './types';
 import { ActiveEffect } from '../Effects/types';
-import { ProcUnlocks } from '../Combat/combat-effects';
 import { Equipment, Item } from '../Items/types';
-import { deriveStats, deriveNonCombatStats, calculateMaxHealth } from '../Utils';
+import { calculateMaxHealth } from '../Utils';
 import { getRng } from '../Utils/rng';
 import { EXPERIENCE_PER_LEVEL } from '../Game/game-mechanics.constants';
-import { equipItem, getEquipmentModifiers, recomputeDerivedStats } from './equipment.reducer';
+import { equipItem, wornMaxHpBonus } from './equipment.reducer';
 import { cloneStartingRelics } from '../Items/relic.library';
 
 /**
@@ -41,10 +40,9 @@ export interface CreateCharacterOptions {
      * Optional starting equipment as an ordered list of pieces to equip
      * (Phase 18). Each is equipped via `equipItem`, so weapon/armor replace in
      * place and accessories fill the first 3 free positions (a 4th accessory is
-     * a guarded no-op — order the list so the worn 3 come first). Stat
-     * modifiers are folded into the resulting `derivedStats` at create-time
-     * (Spec 05 Q3 option A) so the returned `Character` is already
-     * "post-equipment".
+     * a guarded no-op — order the list so the worn 3 come first). A worn
+     * armor relic's +max VITAE is folded in at create-time, so the returned
+     * `Character` is already "post-equipment".
      */
     equipment?: Equipment[];
     /**
@@ -60,17 +58,16 @@ export interface CreateCharacterOptions {
     seedStartingRelics?: boolean;
     effects?: ActiveEffect[];
     knownCards?: string[];
-    procUnlocks?: ProcUnlocks;
 }
 
 /**
- * Builds a fully-initialised Character. Resources and derived stats are
- * computed automatically from `baseStats` and `level`.
+ * Builds a fully-initialised Character. Max VITAE is computed from
+ * `baseStats` (plus any worn armor relic's bonus).
  */
 export function createCharacter(options: CreateCharacterOptions): Character {
     const {
         id, name, level, baseStats, inventory = [], currency = 0, equipment = [], effects = [],
-        knownCards = [], procUnlocks, seedStartingRelics = false,
+        knownCards = [], seedStartingRelics = false,
     } = options;
 
     // Phase 19 — the 11 signet relics: 5 default-worn, 6 benched.
@@ -99,19 +96,16 @@ export function createCharacter(options: CreateCharacterOptions): Character {
         health: maxHealth,
         maxHealth,
         baseStats,
-        derivedStats: deriveStats(baseStats),
-        nonCombatStats: deriveNonCombatStats(baseStats),
         inventory: seededInventory,
         currency,
         equipment: emptyLoadout(),
         effects,
         knownCards,
         availableStatPoints: 0,
-        procUnlocks,
     };
 
-    // Equip every worn piece in order so stat modifiers and
-    // the maxHp fold get applied via the canonical path (weapon/armor replace,
+    // Equip every worn piece in order so the maxHp fold gets applied via the
+    // canonical path (weapon/armor replace,
     // accessories fill the first 3 positions).
     let initialised = baseChar;
     for (const piece of wornPieces) {
@@ -122,8 +116,8 @@ export function createCharacter(options: CreateCharacterOptions): Character {
 
 /**
  * Spec 06 Q3 — spend one entry from `availableStatPoints` to raise the
- * named base stat by 1, re-derive equipment-aware derived stats + non-
- * combat stats + maxHealth, and grow current HP by the maxHealth delta.
+ * named base stat by 1, recompute maxHealth, and grow current HP by the
+ * maxHealth delta.
  *
  * Returns the unchanged character (and logs a warning at the call site,
  * not here) when `availableStatPoints <= 0`.
@@ -140,10 +134,8 @@ export function allocateStatPoint(
         ...character.baseStats,
         [stat]: character.baseStats[stat] + 1,
     };
-    const mods = getEquipmentModifiers(character.equipment);
-    const nextDerived = recomputeDerivedStats(nextBase, mods);
-    const nextNonCombat = deriveNonCombatStats(nextBase);
-    const nextMaxHealth = calculateMaxHealth(character.level, nextBase);
+    // Tier 0 item 4 (TRIM THE FAT T2a): keep the worn armor relics' bonus.
+    const nextMaxHealth = calculateMaxHealth(character.level, nextBase) + wornMaxHpBonus(character.equipment);
     // Grow current HP by the maxHealth delta — allocation isn't a free
     // heal, but neither does raising max-HP leave the player stuck below
     // the new ceiling.
@@ -152,8 +144,6 @@ export function allocateStatPoint(
     return {
         ...character,
         baseStats:           nextBase,
-        derivedStats:        nextDerived,
-        nonCombatStats:      nextNonCombat,
         maxHealth:           nextMaxHealth,
         health:              character.health + hpDelta,
         availableStatPoints: character.availableStatPoints - 1,
@@ -161,9 +151,8 @@ export function allocateStatPoint(
 }
 
 /**
- * Phase 97 — preview exact derived stats for hypothetical stat point allocation.
- * Enables mobile level-up modal to show accurate cross-stat effects without
- * duplicating the engine's stat derivation formula.
+ * Phase 97 — preview max VITAE for a hypothetical stat point allocation, so
+ * the mobile level-up modal never duplicates the engine's VITAE formula.
  *
  * Takes current base stats, character level, and allocation delta. Returns computed
  * stats without mutating any character data. Pure function.
@@ -180,22 +169,12 @@ export function previewStatAllocation(
         mind: baseStats.mind + allocation.mind,
     };
 
-    // Compute derived stats using the same functions as allocateStatPoint
-    const derivedStats = deriveStats(previewStats);
-    const nonCombatStats = deriveNonCombatStats(previewStats);
-    const maxHealth = calculateMaxHealth(level, previewStats);
-
-    return {
-        derivedStats,
-        nonCombatStats,
-        maxHealth,
-    };
+    return { maxHealth: calculateMaxHealth(level, previewStats) };
 }
 
-export type { Character, BaseStats, DerivedStats, NonCombatStats, PreviewAllocation, PreviewResult, EquipmentLoadout } from './types';
+export type { Character, BaseStats, PreviewAllocation, PreviewResult, EquipmentLoadout } from './types';
 export { emptyLoadout } from './types';
-export { equipItem, unequipItem, getEquipmentModifiers, getEquippedItems } from './equipment.reducer';
-export type { AggregatedEquipmentModifiers } from './equipment.reducer';
+export { equipItem, unequipItem, getEquippedItems, wornMaxHpBonus } from './equipment.reducer';
 export {
     grantFirstNodeRelic, withholdFirstNodeRelic, isFirstNodeRelicPending,
     FIRST_NODE_RELIC_ID, STAND_IN_RELIC_ID, FIRST_NODE_RELIC_FLAG,

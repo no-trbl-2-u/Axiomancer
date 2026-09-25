@@ -1,16 +1,15 @@
 /**
  * Hermetic e2e tests for persistence schema migrations.
  *
- * Covers the v1 → v2 migration that backfills missing derivedStats
- * and nonCombatStats fields using engine derivation helpers, and
+ * Covers the v1 → v2 migration that validates the save's base stats
+ * (it no longer backfills derivedStats / nonCombatStats — those stats were
+ * deleted from the engine in TRIM THE FAT T2a), and
  * the v2 → v3 migration that backfills `state.philosophicalAlignment` (engine
  * Phase 42, mobile Phase 51 bump from 0.7.0 → 0.10.0).
  */
 
 import {
     defaultAlignment,
-    deriveStats,
-    deriveNonCombatStats,
     createNewGameState,
     GAME_STATE_VERSION,
 } from '@mechanics';
@@ -51,89 +50,27 @@ describe('migrations.engine', () => {
             version: '0.4.0',
         };
 
-        test('adds missing derivedStats to v1 save', () => {
+        test('passes a valid v1 save through unchanged', () => {
             const v1Envelope: StoredEnvelope = {
                 schemaVersion: 1,
                 state: mockV1GameState,
             };
 
-            const migrated = unwrap(v1Envelope);
-            const expectedDerived = deriveStats(mockBaseStats);
+            const migrated = unwrap(v1Envelope) as unknown as Record<string, unknown>;
 
-            expect(migrated.player.derivedStats).toEqual(expectedDerived);
+            expect(migrated.player).toEqual(mockV1GameState.player);
         });
 
-        test('adds missing nonCombatStats to v1 save', () => {
+        test('does not add the retired derivedStats / nonCombatStats keys', () => {
             const v1Envelope: StoredEnvelope = {
                 schemaVersion: 1,
                 state: mockV1GameState,
             };
 
-            const migrated = unwrap(v1Envelope);
-            const expectedNonCombat = deriveNonCombatStats(mockBaseStats);
+            const migrated = unwrap(v1Envelope) as unknown as { player: Record<string, unknown> };
 
-            expect(migrated.player.nonCombatStats).toEqual(expectedNonCombat);
-        });
-
-        test('preserves existing derivedStats if present', () => {
-            const existingDerived = {
-                physicalAttack: 999,
-                physicalSkill: 999,
-                physicalDefense: 999,
-                mentalAttack: 999,
-                mentalSkill: 999,
-                mentalDefense: 999,
-                emotionalAttack: 999,
-                emotionalSkill: 999,
-                emotionalDefense: 999,
-                luck: 999,
-            };
-
-            const v1WithDerived = {
-                ...mockV1GameState,
-                player: {
-                    ...mockV1GameState.player,
-                    derivedStats: existingDerived,
-                },
-            };
-
-            const v1Envelope: StoredEnvelope = {
-                schemaVersion: 1,
-                state: v1WithDerived,
-            };
-
-            const migrated = unwrap(v1Envelope);
-
-            expect(migrated.player.derivedStats).toEqual(existingDerived);
-        });
-
-        test('preserves existing nonCombatStats if present', () => {
-            const existingNonCombat = {
-                physicalSave: 888,
-                mentalSave: 888,
-                emotionalSave: 888,
-                physicalTest: 888,
-                mentalTest: 888,
-                emotionalTest: 888,
-                maxHealth: 888,
-            };
-
-            const v1WithNonCombat = {
-                ...mockV1GameState,
-                player: {
-                    ...mockV1GameState.player,
-                    nonCombatStats: existingNonCombat,
-                },
-            };
-
-            const v1Envelope: StoredEnvelope = {
-                schemaVersion: 1,
-                state: v1WithNonCombat,
-            };
-
-            const migrated = unwrap(v1Envelope);
-
-            expect(migrated.player.nonCombatStats).toEqual(existingNonCombat);
+            expect(migrated.player).not.toHaveProperty('derivedStats');
+            expect(migrated.player).not.toHaveProperty('nonCombatStats');
         });
 
         test('throws on malformed player data', () => {
@@ -181,11 +118,7 @@ describe('migrations.engine', () => {
         test('v2 envelope migrates to v3 by backfilling philosophicalAlignment', () => {
             const v2State = {
                 ...mockV1GameState,
-                player: {
-                    ...mockV1GameState.player,
-                    derivedStats: deriveStats(mockBaseStats),
-                    nonCombatStats: deriveNonCombatStats(mockBaseStats),
-                },
+                player: { ...mockV1GameState.player },
             };
 
             const v2Envelope: StoredEnvelope = {

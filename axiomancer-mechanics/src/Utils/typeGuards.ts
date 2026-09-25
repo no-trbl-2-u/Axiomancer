@@ -7,9 +7,9 @@ import { Enemy } from '../Enemy/types';
 import { Encounter } from '../World/types';
 import { GameState } from '../Game/types';
 
-/** True if `entity` is a Character (has `nonCombatStats`). */
+/** True if `entity` is a Character (has `knownCards`; enemies never do). */
 export function isCharacter(entity: Character | Enemy): entity is Character {
-    return 'nonCombatStats' in entity;
+    return 'knownCards' in entity;
 }
 
 /** True if `entity` is an Enemy (has `logic`). */

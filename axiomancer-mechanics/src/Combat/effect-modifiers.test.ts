@@ -10,7 +10,6 @@ import { effectsLibrary } from '../Effects/effects.library';
 import {
     getActiveEffectModifiers,
     getActiveDotTotal,
-    getEffectiveStats,
     canAct,
 } from './effect-modifiers';
 import {
@@ -18,19 +17,18 @@ import {
     processDamageOverTime, processRoundStartEffects, processRoundEndEffects,
     applyCleanse, applyDispel,
 } from './effects';
-import { resolveEffectiveAdvantage } from './advantage';
-import { getAttackStat, getDefenseStat } from './stats';
 
 /**
  * The spec 32 v3 keyword reset deleted the library effects that used to carry
- * derived-stat / save flat bands, negative-regen drain, grant-disadvantage, and
- * action-restriction payloads. No surviving library effect carries those
- * shapes, so — rather than weaken the machinery coverage those shapes exercise —
- * we register test-only `Effect` fixtures into the shared registry (the same
- * lookup `getActiveEffectModifiers` / `canAct` / the effect helpers resolve
+ * negative-regen drain, grant-disadvantage, and action-restriction payloads.
+ * No surviving library effect carries those shapes, so — rather than weaken
+ * the machinery coverage those shapes exercise — we register test-only
+ * `Effect` fixtures into the shared registry (the same lookup
+ * `getActiveEffectModifiers` / `canAct` / the effect helpers resolve
  * through). These ids never touch the library JSON. Payloads that a surviving
- * effect DOES cover (defenseModifier, regeneration, advantage-grant,
- * multipliers, DoT, flat base-stat mods) are repointed to those real survivors.
+ * effect DOES cover (defenseModifier, regeneration, advantage-grant, DoT) are
+ * repointed to those real survivors. (Effect stat modifiers were deleted
+ * outright by TRIM THE FAT T2a / D14, so they have no fixture here.)
  */
 const mk = (id: string, type: 'buff' | 'debuff', payload: Effect['payload']): Effect => ({
     id,
@@ -45,28 +43,6 @@ const mk = (id: string, type: 'buff' | 'debuff', payload: Effect['payload']): Ef
 });
 
 const TEST_EFFECTS: Effect[] = [
-    // body +3, physicalDefense +4, physicalSave +3 — the retired stat-band shape.
-    mk('test_band', 'buff', {
-        statModifiers: [
-            { stat: 'body', value: 3, isMultiplier: false },
-            { stat: 'physicalDefense', value: 4, isMultiplier: false },
-            { stat: 'physicalSave', value: 3, isMultiplier: false },
-        ],
-    }),
-    // ×1.25 on body — a second body multiplier for additive composition.
-    mk('test_mult125', 'buff', {
-        statModifiers: [{ stat: 'body', value: 1.25, isMultiplier: true }],
-    }),
-    // ×1.5 on body/mind/heart — the retired crit-damage shape, kept synthetic
-    // so the additive-composition assertion no longer depends on a library
-    // effect's payload (buff_critical_damage_up was re-themed to advantage).
-    mk('test_mult15', 'buff', {
-        statModifiers: [
-            { stat: 'body', value: 1.5, isMultiplier: true },
-            { stat: 'mind', value: 1.5, isMultiplier: true },
-            { stat: 'heart', value: 1.5, isMultiplier: true },
-        ],
-    }),
     // Negative-regen drain shapes.
     mk('test_drain1', 'debuff', { regeneration: { healthPerRound: -1 } }),
     mk('test_drain2', 'debuff', { regeneration: { healthPerRound: -2 } }),
@@ -103,24 +79,6 @@ const ae = (effectId: string, intensity = 1, remainingDuration = 3): ActiveEffec
     ({ effectId, intensity, remainingDuration, appliedAt: 1, tier: 2 });
 
 describe('getActiveEffectModifiers', () => {
-    it('aggregates flat statModifiers scaled by intensity (Q2)', () => {
-        // test_band — +3 body, +4 physicalDefense (retired stat-band shape).
-        const mods = getActiveEffectModifiers([ae('test_band', 2)]);
-        expect(mods.statFlat.get('body')).toBe(6);
-        expect(mods.statFlat.get('physicalDefense')).toBe(8);
-    });
-
-    it('composes multipliers additively (Q3)', () => {
-        // test_mult15 has ×1.5 on body, mind, heart at intensity 1
-        // test_mult125 has ×1.25 on body
-        // Combined on body: (1.5 - 1) + (1.25 - 1) = 0.75 (additive composition)
-        const mods = getActiveEffectModifiers([
-            ae('test_mult15',  1, 3),
-            ae('test_mult125', 1, 5),
-        ]);
-        expect(mods.statMultBonus.get('body')).toBeCloseTo(0.75, 4);
-    });
-
     it('aggregates ROUND-CLOCK DoT damage by tick phase (Q4) — event clocks stay off the boundary', () => {
         // WS3.3: poison/bleed moved to event clocks — the round aggregator
         // must carry ZERO for them. The round-clocked card-local species
@@ -213,62 +171,6 @@ describe('canAct (Q7 precedence)', () => {
         const result = canAct([], 'mind');
         expect(result.canAct).toBe(true);
         expect(result.resolvedStance).toBe('mind');
-    });
-});
-
-describe('getEffectiveStats', () => {
-    it('flat stat modifier on a base stat re-derives derived stats', () => {
-        // test_band — +3 body, +4 physicalDefense (retired stat-band shape).
-        const t = fixture([ae('test_band')]);
-        const eff = getEffectiveStats(t);
-        // body 5 + 3 = 8; physicalAttack derives from body × 1
-        expect(eff.baseStats.body).toBe(8);
-        expect(eff.derivedStats.physicalAttack).toBe(8);
-        // physicalDefense = body(8) × 3 + 4 direct = 28
-        expect(eff.derivedStats.physicalDefense).toBe(28);
-    });
-
-    it('multiplier on body scales every body-derived stat', () => {
-        // test_mult125: ×1.25 on body
-        const t = fixture([ae('test_mult125')]);
-        const eff = getEffectiveStats(t);
-        expect(eff.baseStats.body).toBe(5 * 1.25);
-        // physicalDefense = body * 3 = 5 * 1.25 * 3 = 18.75
-        expect(eff.derivedStats.physicalDefense).toBeCloseTo(18.75, 4);
-    });
-
-    it('exposes defenseDelta separately from stats', () => {
-        // buff_damage_reduction: defenseModifier +5
-        const t = fixture([ae('buff_damage_reduction')]);
-        const eff = getEffectiveStats(t);
-        expect(eff.defenseDelta).toBe(5);
-    });
-
-    it('intensity scales flat modifiers', () => {
-        const t = fixture([ae('test_band', 3)]);
-        const eff = getEffectiveStats(t);
-        // +3 body × 3 intensity = +9 body; physicalDefense +4 × 3 = +12 direct
-        expect(eff.baseStats.body).toBe(14);
-        expect(eff.derivedStats.physicalDefense).toBe(14 * 3 + 12);
-    });
-});
-
-describe('stat lookup helpers honor effective stats and defenseDelta', () => {
-    it('getDefenseStat folds defenseDelta into derived defense', () => {
-        const t = fixture([ae('buff_damage_reduction')]); // +5 defenseModifier
-        // physicalDefense base = body(5) × 3 = 15; +5 delta = 20
-        expect(getDefenseStat(t, 'body')).toBe(20);
-    });
-
-    it('getAttackStat reflects re-derived stat after base-stat mod', () => {
-        const t = fixture([ae('test_band')]); // +3 body
-        // physicalAttack = body(8) × 1 = 8
-        expect(getAttackStat(t, 'body')).toBe(8);
-    });
-
-    it('getResistStat returns effective base stat', () => {
-        const t = fixture([ae('test_band')]); // +3 body
-        expect(getEffectiveStats(t).baseStats.body).toBe(8);
     });
 });
 
@@ -378,26 +280,3 @@ describe('applyCleanse / applyDispel (Q10)', () => {
     });
 });
 
-describe('resolveEffectiveAdvantage (Q8)', () => {
-    it('granted advantage on attacker stance overrides matchup', () => {
-        // matchup is disadvantage but test_adv_body grants advantage on body
-        const adv = resolveEffectiveAdvantage('disadvantage', [ae('test_adv_body')], 'body');
-        expect(adv).toBe('advantage');
-    });
-
-    it('granted disadvantage overrides matchup advantage', () => {
-        // grantDisadvantage on body via test_disadv_all
-        const adv = resolveEffectiveAdvantage('advantage', [ae('test_disadv_all')], 'body');
-        expect(adv).toBe('disadvantage');
-    });
-
-    it('falls back to matchup when no override applies', () => {
-        const adv = resolveEffectiveAdvantage('neutral', [], 'body');
-        expect(adv).toBe('neutral');
-    });
-
-    it('grant on a different stance does not affect this stance', () => {
-        const adv = resolveEffectiveAdvantage('neutral', [ae('test_adv_body')], 'heart');
-        expect(adv).toBe('neutral');
-    });
-});

@@ -213,13 +213,9 @@ describe('grantItem — equipping into a free slot', () => {
         const incoming = relic('relic-read');
         const res = grantItem(before, incoming, { equip: true });
 
-        const hpMod = (incoming.statModifiers ?? []).find(m => m.stat === 'maxHp' && !m.isMultiplier);
-        if (hpMod) {
-            expect(res.character.maxHealth).toBe(before.maxHealth + hpMod.value);
-        } else {
-            // No maxHp on this relic — assert the derived stats moved instead.
-            expect(res.character.derivedStats).not.toEqual(before.derivedStats);
-        }
+        const hpMod = (incoming.statModifiers ?? []).find(m => m.stat === 'maxHp');
+        expect(hpMod).toBeDefined();
+        expect(res.character.maxHealth).toBe(before.maxHealth + hpMod!.value);
     });
 });
 
@@ -386,7 +382,7 @@ describe('qualifiesForItemRewardScreen — the D5 trigger (routes the intended i
             description: '',
             category: 'equipment',
             slot: 'armor',
-            statModifiers: [{ stat: 'physicalDefense', value: 2 }],
+            statModifiers: [{ stat: 'maxHp', value: 2 }],
         };
         expect(qualifiesForItemRewardScreen(plainGear)).toBe(true);
     });

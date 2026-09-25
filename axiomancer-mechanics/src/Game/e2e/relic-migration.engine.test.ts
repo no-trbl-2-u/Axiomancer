@@ -4,7 +4,7 @@
  * A v12 save has the 5-slot loadout but no signet relics. Migrating seeds the
  * relics via `cloneStartingRelics` (default 5 worn, displaced gear + the
  * benched rest to inventory) and recomputes
- * derivedStats / maxHealth so a loaded save derives a full signature kit from the
+ * maxHealth so a loaded save derives a full signature kit from the
  * worn loadout instead of the retired archetype kit.
  */
 
@@ -17,7 +17,7 @@ import type { Equipment } from '../../Items/types';
 const oldSword: Equipment = {
     id: 'old-sword', name: 'Old Sword', description: '', category: 'equipment',
     slot: 'weapon', 
-    statModifiers: [{ stat: 'body', value: 1, isMultiplier: false }],
+    statModifiers: [{ stat: 'maxHp', value: 1 }],
 };
 
 /** A v12 save: 5-slot loadout with an old worn weapon (also present in

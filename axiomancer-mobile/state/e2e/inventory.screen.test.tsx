@@ -114,34 +114,24 @@ describe('inventory screen: use modal', () => {
     });
 });
 
-// Phase 80a — Tooltip overlay portal. The inventory item modal
-// renders inside RN <Modal>, which mounts outside the React tree
-// — so the root TooltipProvider's overlay can't paint above the
-// modal chrome. The fix wraps the modal contents in a sibling
-// <TooltipProvider> and adds <TooltipTarget kind="item-stat"
-// id=<engine-stat-key>> around each delta row. These tests pin
-// the wiring contract: the rows render with their testIDs, and
-// the modal renders without throwing.
-describe('inventory screen: item-modal stat tooltips (Phase 80a)', () => {
-    it('renders TooltipTarget-wrapped stat rows for an equipment modal', () => {
+// Phase 80a — the inventory item modal renders an equip-swap's changed
+// stats as before → after rows. (Those rows used to be TooltipTarget-wrapped
+// with an `inv-modal-stat-<key>` testID for the derived stats; the derived
+// stats and their tooltips were deleted in TRIM THE FAT T2a, and the only
+// diffable stat left, max health, carries no tooltip.) This pins that the
+// equip modal still renders its stat row without throwing.
+describe('inventory screen: item-modal stat rows (Phase 80a)', () => {
+    it('renders the changed stat row for an equipment modal', () => {
         // `sword` is worn (first-in-slot, no stat mods). A stat-bearing
-        // peer previews an equip-swap, so every stat it changes shows up
-        // as a TooltipTarget-wrapped row. The modal shows *only* changed
-        // stats, so the peer must move all four pinned keys.
+        // peer previews an equip-swap, so the stat it changes shows up
+        // as a row. The modal shows *only* changed stats.
         const statSword: Equipment = {
             id: 'rune-blade',
             name: 'Rune Blade',
             description: 'Etched with a humming sigil.',
             category: 'equipment',
             slot: 'weapon',
-            
-            
-            statModifiers: [
-                { stat: 'physicalAttack', value: 5, isMultiplier: false },
-                { stat: 'physicalDefense', value: 3, isMultiplier: false },
-                { stat: 'mentalAttack', value: 2, isMultiplier: false },
-                { stat: 'emotionalDefense', value: 4, isMultiplier: false },
-            ],
+            statModifiers: [{ stat: 'maxHp', value: 5 }],
         };
         const store = makeStore([sword, statSword]);
 
@@ -150,11 +140,9 @@ describe('inventory screen: item-modal stat tooltips (Phase 80a)', () => {
         // Press the (non-worn) peer row to open its equip modal.
         fireEvent.press(tree.getByTestId('item-rune-blade'));
 
-        // Each changed stat row carries a testID `inv-modal-stat-<key>`
-        // driven by `StatDelta.id`.
-        expect(tree.getByTestId('inv-modal-stat-physicalAttack')).toBeTruthy();
-        expect(tree.getByTestId('inv-modal-stat-physicalDefense')).toBeTruthy();
-        expect(tree.getByTestId('inv-modal-stat-mentalAttack')).toBeTruthy();
-        expect(tree.getByTestId('inv-modal-stat-emotionalDefense')).toBeTruthy();
+        // The changed stat renders as a labelled before → after row.
+        const maxHealth = store.getState().player.maxHealth;
+        expect(tree.getByText('MAX HP')).toBeTruthy();
+        expect(tree.getByText(`${maxHealth} → ${maxHealth + 5} (+5)`)).toBeTruthy();
     });
 });

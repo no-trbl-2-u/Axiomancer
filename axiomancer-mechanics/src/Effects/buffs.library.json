@@ -215,28 +215,6 @@
       "resistedBy": "heart",
       "resistDR": 14,
       "payload": {
-        "statModifiers": [
-          {
-            "stat": "body",
-            "value": 2,
-            "isMultiplier": false
-          },
-          {
-            "stat": "mind",
-            "value": 2,
-            "isMultiplier": false
-          },
-          {
-            "stat": "heart",
-            "value": 2,
-            "isMultiplier": false
-          },
-          {
-            "stat": "luck",
-            "value": 1,
-            "isMultiplier": false
-          }
-        ],
         "rollModifier": 1
       },
       "tier": 2,
@@ -312,14 +290,7 @@
         "regeneration": {
           "healthPerRound": 4
         },
-        "defenseModifier": 1,
-        "statModifiers": [
-          {
-            "stat": "heart",
-            "value": 1,
-            "isMultiplier": false
-          }
-        ]
+        "defenseModifier": 1
       },
       "tier": 2,
       "addedIn": "2026-06-07",

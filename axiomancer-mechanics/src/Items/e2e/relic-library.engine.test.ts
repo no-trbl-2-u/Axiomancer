@@ -57,30 +57,19 @@ describe('relic library — roster + slot split', () => {
         }
     });
 
-    it('stat pool is Body×2 (weapons), maxHp×2 (armor), Mind×3 + Heart×1 + Body×2 (accessories); the ring carries none', () => {
-        const statOf = (id: string) => getRelicById(id)!.statModifiers![0];
+    it('stat pool is maxHp +5 on the two armor relics only; every other relic carries no stat line', () => {
+        // TRIM THE FAT T2a (D14) cut the +2 body/mind/heart lines; relics other
+        // than the armor pair grant only their signature (the Suppliant's Ring
+        // already did — owner call 2026-09-23).
+        const ARMOR_RELIC_IDS = ['relic-read', 'relic-second-wind'];
         for (const r of relicLibrary) {
-            if (r.id === 'relic-disarming-plea') {
-                // Owner call 2026-09-23: the Suppliant's Ring grants ONLY its
-                // signature (The Open Hand) — no stat bump at all.
-                expect(r.statModifiers).toEqual([]);
-                continue;
+            if (ARMOR_RELIC_IDS.includes(r.id)) {
+                expect(r.slot).toBe('armor');
+                expect(r.statModifiers).toEqual([{ stat: 'maxHp', value: 5 }]);
+            } else {
+                expect(r.statModifiers, r.id).toEqual([]);
             }
-            const mod = r.statModifiers![0];
-            expect(r.statModifiers).toHaveLength(1);
-            expect(mod.isMultiplier).toBe(false);
-            if (r.slot === 'weapon') { expect(mod.stat).toBe('body'); expect(mod.value).toBe(2); }
-            else if (r.slot === 'armor') { expect(mod.stat).toBe('maxHp'); expect(mod.value).toBe(5); }
-            else { expect(['mind', 'heart', 'body']).toContain(mod.stat); expect(mod.value).toBe(2); }
         }
-        // Phase 85 added a 3rd mind accessory (head) and 2 body accessories
-        // (hands, feet) — closing the accessories' body-stat gap.
-        const accStats = relicLibrary
-            .filter(r => r.slot === 'accessory' && r.id !== 'relic-disarming-plea')
-            .map(r => statOf(r.id).stat);
-        expect(accStats.filter(s => s === 'mind')).toHaveLength(3);
-        expect(accStats.filter(s => s === 'heart')).toHaveLength(1);
-        expect(accStats.filter(s => s === 'body')).toHaveLength(2);
     });
 });
 

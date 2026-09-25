@@ -32,7 +32,6 @@ import type { AppStoreState } from '@/state/store';
 
 export type TooltipKind =
     | 'stat'
-    | 'derived'
     | 'alignment'
     | 'affliction'
     | 'blessing'
@@ -228,45 +227,6 @@ const BURDEN_CONTENT: Record<string, TooltipContent> = {
     },
 };
 
-// Phase 74 follow-up walkthrough Tick 4 — saves & tests content.
-// Keys match the kebab-case ids on `SaveOrTestRow.id` (e.g.
-// `'body-save'`, `'mind-test'`). Each entry: title (existing
-// chrome label), body explaining the mechanic + which stance
-// scales it. Six entries total — 3 saves (passive resistance)
-// + 3 tests (active difficulty check).
-const DERIVED_CONTENT: Record<string, TooltipContent> = {
-    'body-save': {
-        title: 'BODY SAVE',
-        body: 'passive resistance to physical strikes. roll target vs. attacker; higher save absorbs the hit.',
-        footnote: 'scales with BODY',
-    },
-    'mind-save': {
-        title: 'MIND SAVE',
-        body: 'passive resistance to mental coercion — illusion, charm, fear. high save means the trick does not land.',
-        footnote: 'scales with MIND',
-    },
-    'heart-save': {
-        title: 'HEART SAVE',
-        body: 'passive resistance to despair, grief, dread. the will to keep standing when the news is bad.',
-        footnote: 'scales with HEART',
-    },
-    'body-test': {
-        title: 'BODY TEST',
-        body: 'active check against a physical difficulty — force a door, hold a rope, endure a sprint.',
-        footnote: 'scales with BODY',
-    },
-    'mind-test': {
-        title: 'MIND TEST',
-        body: 'active check against a mental difficulty — recall, decipher, see through a deception.',
-        footnote: 'scales with MIND',
-    },
-    'heart-test': {
-        title: 'HEART TEST',
-        body: 'active check against an emotional difficulty — convince, console, hold a vow under pressure.',
-        footnote: 'scales with HEART',
-    },
-};
-
 // Phase 74 follow-up walkthrough Tick 3 — equipment slot content.
 // Keys match the Phase-18 engine `EquipmentSlot` kinds (`weapon | armor |
 // accessory`). SELF equipment cells pass the slotKey verbatim as the tooltip
@@ -425,62 +385,19 @@ export function formatEffectStatEffect(
 }
 
 /**
- * Phase 74 follow-up — inventory walkthrough Tick 2: item-stat
- * tooltip synthesizer. Engine stat keys follow a `<dimension><Verb>`
- * pattern (`physicalAttack`, `mentalDefense`, etc.) or are bare
- * stance ids (`heart`, `body`, `mind`) or `luck`. Rather than
- * authoring 19 individual entries, this function parses the key
- * into dimension + verb and synthesizes consistent content.
+ * Phase 74 follow-up — inventory walkthrough Tick 2: item-stat tooltip
+ * synthesizer. The only stat keys left are the bare stances (`heart`,
+ * `body`, `mind`), which reuse the `kind:'stat'` copy. The derived
+ * `<dimension><Verb>` keys and `luck` it used to synthesize were deleted
+ * with those stats in TRIM THE FAT T2a.
  *
- * Returns `null` for unknown / malformed keys so the chip stays
- * silent (preserves Tick A's defensive contract).
+ * Returns `null` for unknown keys so the chip stays silent.
  */
-const VERB_DESCRIPTIONS: Record<string, string> = {
-    Attack: 'active offense in this dimension. higher means more damage on a successful hit.',
-    Card: 'active card power in this dimension. higher means cards land harder.',
-    Defense: 'passive defense in this dimension. higher absorbs more damage.',
-    Save: 'passive resistance roll. higher resists more effects.',
-    Test: 'active check modifier. higher passes more checks.',
-};
-
-const DIMENSION_TO_STANCE: Record<string, string> = {
-    physical: 'BODY',
-    mental: 'MIND',
-    emotional: 'HEART',
-};
-
-function camelSplit(key: string): string {
-    return key.replace(/([A-Z])/g, ' $1').toLowerCase().trim();
-}
-
 function synthesizeItemStatContent(id: string): TooltipContent | null {
-    if (!id) return null;
-    // Bare stance / aggregate stats — keep the existing kind:'stat'
-    // copy where it overlaps (HEART/BODY/MIND); otherwise inline.
     if (id === 'heart' || id === 'body' || id === 'mind') {
         return STAT_CONTENT[id.toUpperCase()] ?? null;
     }
-    if (id === 'luck') {
-        return {
-            title: 'LUCK',
-            body: 'the average of your three base stats. nudges close calls; not directly trainable.',
-            footnote: 'avg(heart, body, mind)',
-            accent: 'neutral',
-        };
-    }
-    // Match `<dimension><Verb>` (e.g. `physicalAttack`).
-    const m = /^(physical|mental|emotional)([A-Z][a-z]+)$/.exec(id);
-    if (!m) return null;
-    const [, dimension, verb] = m;
-    const body = VERB_DESCRIPTIONS[verb];
-    if (!body) return null;
-    const stance = DIMENSION_TO_STANCE[dimension];
-    return {
-        title: camelSplit(id).toUpperCase(),
-        body,
-        footnote: `scales with ${stance}`,
-        accent: accentForStat(id),
-    };
+    return null;
 }
 
 /** Derive the accent for an effect from its primary stat target. */
@@ -514,9 +431,6 @@ export function selectTooltipContentFor(
     }
     if (kind === 'slot') {
         return SLOT_CONTENT[id] ?? null;
-    }
-    if (kind === 'derived') {
-        return DERIVED_CONTENT[id] ?? null;
     }
     if (kind === 'burden') {
         return BURDEN_CONTENT[id] ?? null;

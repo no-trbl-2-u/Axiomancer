@@ -56,7 +56,6 @@ export type {
     MapDefinition, MapState, QuestObjective, QuestObjectiveType, QuestStatus, QuestLog,
     HazardModifierEntry, HazardNodeOutcome, BlockedRoute,
 } from './types';
-export type { RouteValidationResult } from './map.dispatcher';
 export type { MapName, ContinentName } from './map.library';
 export type { QuestName } from './quest.library';
 
@@ -85,7 +84,6 @@ export {
     changeMap, completeMap, unlockMap,
     completeNode, unlockNode, changeContinent, completeUniqueEvent,
     revealAdjacent, markNodeConsumed, unlockAdjacent,
-    recordHazardOutcome, blockMapRoute, getHazardOutcomesForNode, isRouteBlocked,
     teleportToNode, placeOnNode, unblockMapRoute,
     // 2026-08-08 first-map audit: traversal queries + the strand audit.
     legalMovesFrom, isStranded, isMapTerminalNode, auditMapTraversal,
@@ -102,9 +100,6 @@ export type { MapStrand, MapTraversalAudit, MapRouteCoverage } from './world.red
 export { auditNarrativeReachability } from './narrative-reachability';
 export type { NarrativeReachabilityAudit } from './narrative-reachability';
 
-export {
-    validateMoveToNode, findAlternativePaths, getBlockedRoutesFromNode, getReachableNodes,
-} from './map.dispatcher';
 
 // Spec 23 — MapEvents engine.
 // Importing `./MapEvents/content` for its side effect registers every
@@ -177,11 +172,3 @@ export type {
     LabyrinthProgress, LabyrinthHintPurchase, LabyrinthBossOutcome,
     LabyrinthVisibleDoor, LabyrinthInspectResult, LabyrinthGateResult,
 } from './Labyrinth/types';
-
-// Minigame Harness (Phase 148) — composable cross-minigame testing
-export {
-    runMinigameHarness, summarizeHarnessReport,
-} from './minigame-harness.resolver';
-export type {
-    MinigameHarnessConfig, MinigameHarnessReport, MinigameHarnessSummary,
-} from './minigame-harness.types';

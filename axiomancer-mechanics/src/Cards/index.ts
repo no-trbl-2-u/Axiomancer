@@ -23,22 +23,16 @@ import { getCardById } from './cards.library';
 import { cardKeywords } from './card-keywords';
 
 // Phase 142 — Extended synergy predicate types
-export type { ExtendedSynergyPredicate, SynergyLedgerView } from './synergy-predicates';
+export type { SynergyLedgerView } from './synergy-predicates';
 
 // Phase 142 — Extended synergy predicate functionality
 // (+ WS4.2 checkStatePredicate — the combat-ledger gate evaluator)
 export {
-    evaluateExtendedSynergyPredicate,
-    checkSinglePredicate,
-    checkAnyCountPredicate,
-    checkAllRequiredPredicate,
-    checkBuffDebuffCombo,
-    checkTotalIntensityPredicate,
     checkStatePredicate,
 } from './synergy-predicates';
 
 export {
-    calculateCardDamage, executeCard,
+    executeCard,
     getAvailableCards, learnCard,
 } from './card.engine';
 

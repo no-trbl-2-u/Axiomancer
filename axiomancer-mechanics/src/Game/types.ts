@@ -2,7 +2,6 @@ import { WorldState, QuestLog, Encounter } from '../World/types';
 import { LabyrinthProgress } from '../World/Labyrinth/types';
 import { Character } from '../Character/types';
 import { PhilosophicalAlignment } from '../Ledger/types';
-import { FactionReputations } from '../Faction/types';
 
 /**
  * Top-level game state. The root object that aggregates the player,
@@ -141,13 +140,6 @@ export interface GameState {
      * on new games.
      */
     regionConsequences: RegionConsequences;
-    /**
-     * Phase 110 — faction reputation standings. Tracks player reputation
-     * with various political factions across regions. Boss Befriend outcomes
-     * can alter these standings. Required state slice; defaults to `{}`
-     * (empty, all factions neutral) on new games.
-     */
-    factionReputations: FactionReputations;
     /**
      * W-01 — cross-act labyrinth (The Aporia) progress: pocket of
      * fragments, opened gates, revealed secrets, the debt ledger, and

@@ -5,19 +5,6 @@
  */
 
 // ============================================================================
-// CHARACTER — STAT DERIVATION MULTIPLIERS
-// ============================================================================
-// Applied to each base stat (body / mind / heart) to produce the four
-// derived combat stats for that attribute category.
-
-export const STAT_MULTIPLIERS = {
-    ATTACK:  1,   // physicalAttack / mentalAttack / emotionalAttack — combat rolls
-    DEFENSE: 3,
-    SAVE:    2,
-    TEST:    4,
-} as const;
-
-// ============================================================================
 // CHARACTER — RESOURCE CALCULATIONS
 // ============================================================================
 // THE BIG NUMBERS REWRITE (2026-09-02) — the player's VITAE pool.
@@ -46,30 +33,6 @@ export const EXPERIENCE_PER_LEVEL = 1000;
 // no level cap today, so the points stream is uncapped — content authors
 // decide where progression naturally stops.
 export const STAT_POINTS_PER_LEVEL = 3;
-
-// ============================================================================
-// COMBAT — DEFENSE MULTIPLIERS
-// ============================================================================
-// Applied to a combatant's base defense stat when they choose the 'defend'
-// action.  The multiplier is selected based on the defender's type-advantage
-// relative to the attacker (heart > body > mind > heart).
-//
-//   Defending with ADVANTAGE    → 2× defense  (picked the right counter-type)
-//   Defending with NEUTRAL      → 1.5× defense (same type, no bonus)
-//   Defending with DISADVANTAGE → 1× defense  (picked the wrong type, weaker)
-//
-// Keys deliberately match the Advantage union type so they can be used as
-// a direct lookup: DEFENSE_MULTIPLIERS[advantage].
-
-export const DEFENSE_MULTIPLIERS: Record<'advantage' | 'neutral' | 'disadvantage', number> = {
-    advantage:    2,
-    neutral:      1.5,
-    disadvantage: 1.0,
-} as const;
-
-// Applied when a combatant did NOT choose the 'defend' action (i.e. they are
-// taking damage after losing an attack contest with no active defense bonus).
-export const PASSIVE_DEFENSE_MULTIPLIER = 1;
 
 // ============================================================================
 // EFFECTS — STACKING CAPS
@@ -156,14 +119,6 @@ export const EFFECTS_RESOLUTION_DOT_DAMAGE_THRESHOLD = 2;
 // alone never resolved L30+ timeouts; raising this horizon lets a strong DoT
 // resolve a fight it will demonstrably win before the cap. Tuned by the loop.
 export const EFFECTS_RESOLUTION_DOT_MAX_ROUNDS_TO_KILL = 10;
-
-// Base intensity granted per proc-applied status effect when the trigger does
-// not override it. Control effects stack by DURATION (their intensity stays at
-// this base), so the saturation-yield route's combined-intensity threshold is
-// only reachable when several control effects are active OR this base is raised.
-// Symmetric (applies to whoever procs the effect), so the defeat-regression
-// guard bounds it; engagement-positive (more decisive status). Tuned by the loop.
-export const EFFECT_BASE_PROC_INTENSITY = 2; // Phase 130 — raised from 1 for l15 STRATEGIST targeting
 
 // ============================================================================
 // ENEMY — STAT BUDGET PER LEVEL

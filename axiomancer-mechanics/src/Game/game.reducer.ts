@@ -16,7 +16,6 @@ import { GameAction } from './actions.types';
 import { Character } from '../Character/types';
 import { Encounter, QuestLog } from '../World/types';
 import { Enemy } from '../Enemy/types';
-import { applyMoralMeterScaling } from '../Combat/difficulty';
 import {
     useConsumable as useConsumableItem,
 } from '../Items/item.reducer';
@@ -26,6 +25,7 @@ import { lookupEffect } from '../Effects/effects.library';
 import {
     equipItem as equipItemReducer,
     unequipItem as unequipItemReducer,
+    wornMaxHpBonus,
 } from '../Character/equipment.reducer';
 import { createCharacter, allocateStatPoint } from '../Character';
 import {
@@ -42,7 +42,6 @@ import { EXPERIENCE_PER_LEVEL, STAT_POINTS_PER_LEVEL } from './game-mechanics.co
 import { addItemStacking, rollEncounterLoot, totalEncounterXp } from './combat-grants';
 import { getRng } from '../Utils/rng';
 import { applyAlignmentDelta, defaultAlignment } from '../Ledger';
-import { applyFactionReputationDeltas, createDefaultFactionReputations } from '../Faction';
 import { generateRunId } from './run-loop';
 
 /**
@@ -62,7 +61,7 @@ import { generateRunId } from './run-loop';
  * Phase 19 — bumped 12 → 13: seed the 8 signet relics onto the player (default 5
  *   worn, displaced gear + other 3 relics to inventory) so loaded saves derive a
  *   full signature kit from the worn loadout instead of the retired archetype
- *   kit; recompute derivedStats/maxHealth (see `game.migrate.ts`).
+ *   kit; recompute maxHealth (see `game.migrate.ts`).
  * Phase 21 — bumped 13 → 14: the procedural equipment library is retired, so
  *   purge every non-relic `Equipment` from the loadout + inventory (relics are
  *   the only equipment that survives); backfill any stripped loadout slot with
@@ -141,8 +140,13 @@ import { generateRunId } from './run-loop';
  *   save SHAPE is unchanged, so existing saves need no migration — they keep
  *   whatever kit they already carry. The ring still arrives at the first
  *   node; the other ten relics are village-market wares (owner call).
+ * 2026-09-25 — bumped 24 → 25: TRIM THE FAT T2a (D14). Derived stats, luck,
+ *   the non-combat saves/tests, every non-maxHp stat line on equipment and
+ *   the write-only `factionReputations` slice are retired; the hop strips
+ *   them from loaded saves (see
+ *   `game.migrate.ts`).
  */
-export const GAME_STATE_VERSION = 24;
+export const GAME_STATE_VERSION = 25;
 
 /** Builds a brand-new GameState with default player and world. */
 export function createNewGameState(): GameState {
@@ -187,7 +191,6 @@ export function createNewGameState(): GameState {
         philosophicalAlignment: defaultAlignment(),
         codex: { unlockedEntries: [] },
         regionConsequences: { exploitedRegions: [], sparedRegions: [] },
-        factionReputations: createDefaultFactionReputations(),
         mapGoodwill: {},
     };
 }
@@ -201,14 +204,16 @@ function isEncounter(target: Enemy | Encounter): target is Encounter {
 
 /**
  * Level-up step. While the player has accumulated enough XP for the next
- * level, increment `level`, recompute `maxHealth`, raise the threshold, refill
+ * level, increment `level`, recompute `maxHealth` (base-stat pool plus the worn
+ * armor relics' bonus), raise the threshold, refill
  * HP, and bank Spec 06's stat points (spent later via `ALLOCATE_STAT_POINT`).
  */
 function applyLevelUps(player: Character): Character {
     let next = player;
     while (next.experience >= next.experienceToNextLevel) {
         const level = next.level + 1;
-        const maxHealth = calculateMaxHealth(level, next.baseStats);
+        // Tier 0 item 4 (TRIM THE FAT T2a): keep the worn armor relics' bonus.
+        const maxHealth = calculateMaxHealth(level, next.baseStats) + wornMaxHpBonus(next.equipment);
         next = {
             ...next,
             level,
@@ -293,13 +298,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 throw new Error('START_COMBAT: encounter has no enemies.');
             }
 
-            // Apply moral meter scaling to enemy stats (Phase 92)
+            // The Phase 92 moral-meter stat scaling that stood here was a
+            // provable no-op (uniform scaling never changes the argmax
+            // stance, and combat reads no stat) — deleted in TRIM THE FAT T2a.
             const enemy = encounter.enemies[0]!;
-            const scaledBaseStats = applyMoralMeterScaling(enemy.baseStats, staged.moralMeter);
-            let scaledEnemy = {
-                ...enemy,
-                baseStats: scaledBaseStats,
-            };
+            let scaledEnemy = { ...enemy };
             
             // Phase 109 — Apply 'open-minded' status to region bosses when the region was spared
             const isBoss = enemy.difficulty === 'boss';
@@ -423,23 +426,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                     nextAlignment = applyAlignmentDelta(nextAlignment, delta);
                 }
             }
-            // Phase 110 — friendship resolutions apply the per-enemy
-            // `factionDeltas` to state.factionReputations via the
-            // Phase 110 `applyFactionReputationDeltas` clamp helper. Each
-            // faction clamps to [-100, +100]; missing factions pass through.
-            // Boss befriend outcomes demonstrate lose-with-one / gain-with-another
-            // tradeoffs.
-            let nextFactionReputations = state.factionReputations;
-            if (outcome === 'friendship') {
-                const factionDeltas = foe.friendshipReward?.factionDeltas;
-                if (factionDeltas) {
-                    nextFactionReputations = applyFactionReputationDeltas(
-                        nextFactionReputations,
-                        factionDeltas,
-                    );
-                }
-            }
-
             // Phase 73 — friendship resolutions auto-fire the per-enemy
             // codex unlock. The entry's id is appended to
             // state.codex.unlockedEntries (de-duped); the store layer
@@ -464,7 +450,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 quests: nextQuests,
                 flags: nextFlags,
                 philosophicalAlignment: nextAlignment,
-                factionReputations: nextFactionReputations,
                 codex: nextCodex,
                 currentEncounter: undefined,
             };
@@ -593,7 +578,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 moralMeter: state.moralMeter,
                 rngState: state.rngState,
                 philosophicalAlignment: state.philosophicalAlignment,
-                factionReputations: state.factionReputations,
                 codex: state.codex,
                 regionConsequences: state.regionConsequences,
                 // mapGoodwill (Phase 63) carries forward — village goodwill

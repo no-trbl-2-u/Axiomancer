@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { previewStatAllocation, allocateStatPoint, createCharacter } from '../index';
 import { BaseStats } from '../types';
+import { calculateMaxHealth } from '../../Utils';
 
 describe('previewStatAllocation', () => {
     const baseStats: BaseStats = { heart: 3, body: 4, mind: 5 };
@@ -10,17 +11,13 @@ describe('previewStatAllocation', () => {
         const allocation = { heart: 1, body: 0, mind: 0 };
         const preview = previewStatAllocation(baseStats, level, allocation);
 
-        expect(preview.derivedStats.emotionalAttack).toBeGreaterThan(0);
-        expect(preview.derivedStats.emotionalDefense).toBeGreaterThan(0);
-        expect(preview.nonCombatStats.emotionalSave).toBeGreaterThan(0);
-        expect(preview.nonCombatStats.emotionalTest).toBeGreaterThan(0);
         expect(preview.maxHealth).toBeGreaterThan(0);
     });
 
     it('should match allocateStatPoint results without character mutation', () => {
         // `previewStatAllocation` is equipment-agnostic (base-stat math only), so
         // it only equals `allocateStatPoint` for an UNEQUIPPED character — build a
-        // bare one (Phase 19 presets wear relics whose stat bumps would diverge).
+        // bare one (Phase 19 presets wear armor relics whose +maxHp would diverge).
         const character = createCharacter({
             name: 'Preview Test', level: 2, baseStats: { heart: 3, body: 4, mind: 5 },
         });
@@ -36,8 +33,6 @@ describe('previewStatAllocation', () => {
         const afterAllocation = allocateStatPoint(character, 'heart');
 
         // Preview should match the real allocation results
-        expect(preview.derivedStats).toEqual(afterAllocation.derivedStats);
-        expect(preview.nonCombatStats).toEqual(afterAllocation.nonCombatStats);
         expect(preview.maxHealth).toEqual(afterAllocation.maxHealth);
 
         // Original character should be unchanged
@@ -49,7 +44,6 @@ describe('previewStatAllocation', () => {
         const preview = previewStatAllocation(baseStats, level, allocation);
 
         // Should compute stats for combined allocation
-        expect(preview.derivedStats.luck).toBeGreaterThan(0);
         expect(preview.maxHealth).toBeGreaterThan(0);
 
         // Verify the preview stats reflect the combined base stats
@@ -59,11 +53,7 @@ describe('previewStatAllocation', () => {
             mind: baseStats.mind + allocation.mind,
         };
 
-        // We can't directly check the computed values match expectedStats,
-        // but we can ensure cross-stat effects are included
-        expect(preview.derivedStats.luck).toEqual(
-            (expectedStats.heart + expectedStats.body + expectedStats.mind) / 3
-        );
+        expect(preview.maxHealth).toEqual(calculateMaxHealth(level, expectedStats));
     });
 
     it('should handle zero allocation (no-op preview)', () => {
@@ -71,9 +61,7 @@ describe('previewStatAllocation', () => {
         const preview = previewStatAllocation(baseStats, level, allocation);
 
         // Should return stats for unchanged base stats
-        expect(preview.derivedStats.luck).toEqual(
-            (baseStats.heart + baseStats.body + baseStats.mind) / 3
-        );
+        expect(preview.maxHealth).toEqual(calculateMaxHealth(level, baseStats));
     });
 
     it('should handle negative allocation (stat reduction)', () => {
@@ -82,9 +70,7 @@ describe('previewStatAllocation', () => {
 
         // Should compute stats for reduced base stats
         const reducedStats = { ...baseStats, heart: baseStats.heart - 1 };
-        expect(preview.derivedStats.luck).toEqual(
-            (reducedStats.heart + reducedStats.body + reducedStats.mind) / 3
-        );
+        expect(preview.maxHealth).toEqual(calculateMaxHealth(level, reducedStats));
     });
 
     it('should compute maxHealth from allocated stat sum, not level multiplier', () => {

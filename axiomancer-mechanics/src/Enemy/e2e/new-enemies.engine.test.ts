@@ -8,7 +8,7 @@
  *   - every roster enemy has an AUTHORED threat sequence (no generator
  *     fallbacks in the shipped roster),
  *   - tier tags cover early/mid/late with >=12 enemies each,
- *   - derivedStats and maxHealth are positive across the roster.
+ *   - maxHealth is positive across the roster.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -81,14 +81,11 @@ describe('2026-07-06: the art-driven base roster', () => {
     });
 
     describe('derived resources are positive', () => {
-        it('has positive maxHealth and derivedStats for every roster enemy', () => {
+        it('has positive maxHealth for every roster enemy', () => {
             for (const slug of ROSTER_SLUGS) {
                 const enemy = ENEMY_REGISTRY[slug] as Enemy;
                 expect(enemy.maxHealth, `slug ${slug} maxHealth`).toBeGreaterThan(0);
                 expect(enemy.health, `slug ${slug} health`).toBeGreaterThan(0);
-                for (const [key, value] of Object.entries(enemy.derivedStats)) {
-                    expect(value, `slug ${slug} derivedStats.${key}`).toBeGreaterThan(0);
-                }
             }
         });
     });
@@ -300,9 +297,6 @@ describe('2026-07-06: the art-driven base roster', () => {
             for (const slug of APORIA_BOSS_SLUGS) {
                 const enemy = ENEMY_REGISTRY[slug] as Enemy;
                 expect(enemy.maxHealth, `slug ${slug} maxHealth`).toBeGreaterThan(0);
-                for (const [key, value] of Object.entries(enemy.derivedStats)) {
-                    expect(value, `slug ${slug} derivedStats.${key}`).toBeGreaterThan(0);
-                }
             }
         });
 

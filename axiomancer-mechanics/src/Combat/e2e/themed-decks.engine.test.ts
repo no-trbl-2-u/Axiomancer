@@ -32,7 +32,7 @@ import {
     getFloatingDiceColors, getDraftedDie, selectCapitulationChoice,
 } from '../combat.engine';
 import { FLOATING_DICE_CAP } from '../combat.dice';
-import { runHazardCombatAutoEncounter } from '../combat.autoplay';
+import { runHazardCombatAutoEncounter } from '../../test-utils/combat-autoplay';
 import { THREAT_RUNGS } from '../effects';
 import { buildPresetDeck, COMBAT_DECK_PRESET_ORDER } from '../combat.starter-deck-presets';
 import { registerSandboxCards, clearSandboxCards } from '../../Cards/cards.sandbox';

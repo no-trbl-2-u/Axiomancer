@@ -64,7 +64,9 @@ const CLEANSE_WARE = consumableWhoseEffect((p) => p.cleanse === true)!;
 const TIMED_WARE = consumableWhoseEffect(
     (p, duration) => duration > 0 && (p.advantageModifier?.grantAdvantage?.length ?? 0) > 0,
 )!;
-const RELIC = relicLibrary[0]!;
+// A relic that still carries a stat line (since TRIM THE FAT T2a only the two
+// armor relics do — their +maxHp), so the stat-bump clause has something to state.
+const RELIC = relicLibrary.find((r) => (r.statModifiers ?? []).length > 0)!;
 
 /** A village seated on one stall selling `ware`, with coin enough to buy it. */
 function villageStore(wareId: string): AppStore {

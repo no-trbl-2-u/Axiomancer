@@ -20,9 +20,7 @@ import {
     cardLibrary,
     getCardById,
     getActiveEffectModifiers,
-    getEffectiveStats,
     canAct,
-    resolveEffectiveAdvantage,
     nullAdapter,
 } from '../../index';
 import type {
@@ -62,21 +60,18 @@ describe('Phase 50 — public barrel exposes cardLibrary + getCardById', () => {
     });
 });
 
-describe('iterate (post-critique-21) — public barrel exposes 4 Combat-tier aggregators', () => {
+describe('iterate (post-critique-21) — public barrel exposes the Combat-tier aggregators', () => {
     // Pins the four effect/combat aggregators that `docs/effects.md` lists
     // as public Combat-tier helpers. Until this iterate tick they lived only
     // on `src/Combat/index.ts` and were unreachable from the top-level
     // `axiomancer-mechanics` barrel — external consumers (e.g. mobile
-    // building custom UI on top of `getEffectiveStats`) had no path in.
+    // building custom UI on top of these helpers) had no path in. The
+    // getEffectiveStats / resolveEffectiveAdvantage pins were deleted with
+    // those helpers in TRIM THE FAT T2a.
 
     it('getActiveEffectModifiers is a function', () => {
         expect(getActiveEffectModifiers).toBeDefined();
         expect(typeof getActiveEffectModifiers).toBe('function');
-    });
-
-    it('getEffectiveStats is a function', () => {
-        expect(getEffectiveStats).toBeDefined();
-        expect(typeof getEffectiveStats).toBe('function');
     });
 
     it('canAct is a function', () => {
@@ -84,10 +79,6 @@ describe('iterate (post-critique-21) — public barrel exposes 4 Combat-tier agg
         expect(typeof canAct).toBe('function');
     });
 
-    it('resolveEffectiveAdvantage is a function', () => {
-        expect(resolveEffectiveAdvantage).toBeDefined();
-        expect(typeof resolveEffectiveAdvantage).toBe('function');
-    });
 });
 
 describe('Phase 55 — PersistenceAdapter is reachable + shape-stable', () => {

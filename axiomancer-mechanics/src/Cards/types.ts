@@ -704,31 +704,15 @@ export type SynergyStatePredicate =
     | { kind: 'eventide' };
 
 /**
- * Phase 66 — Tier 2 synergy clause. Optional payload on `Card` that
- * rewards stance-switching by conditioning damage / effect application
- * on the presence of an ActiveEffect already on the field (or, for
- * Resonance Detonation, on the unconditional cast).
+ * Synergy clause on a `Card`. Every library synergy is a combat-state
+ * gate: `statePredicate` is read by `playCombatCard` and, when it holds,
+ * `rider` fires FREE.
  *
- * Synergy damage (added to the card's base damage; doesn't replace):
- * ```
- * synergyDamage = bonusDamage
- *               + matched.intensity            × intensityDamageMul
- *               + matched.remainingDuration    × durationDamageMul
- * ```
- *
- * Side effects (in resolution order):
- *   1. Synergy damage applies to the target.
- *   2. `consumeMatched` clears the matched ActiveEffect on the
- *      predicate's `on` side.
- *   3. `clearAllEffectsBothSides` clears all ActiveEffects on both
- *      combatants (Phase 60 set-bonus passives included — design
- *      intent per Phase 66 D9).
- *   4. `applyEffectOnFire` applies a fresh effect (typically used to
- *      "swap type" — body Thorns → heart Bat-Swarm-Haunt).
- *
- * Synergy runs in `executeCard` AFTER `calculateCardDamage` but
- * BEFORE the card's own `combatEffects` apply, so consumed effects
- * don't get post-fire effects layered on top.
+ * The Phase 66 effect-matching payload (bonus damage, damage multipliers,
+ * consume / clear-all / apply-on-fire side effects) and the `executeCard`
+ * branch that evaluated it were deleted in TRIM THE FAT T2a: no library card
+ * carried them. `predicate` survives because the Phase 169 preview helper
+ * `isCombatSynergySatisfied` still reads it.
  */
 export interface CardSynergy {
     /** Optional predicate. If absent, the synergy fires unconditionally
@@ -745,22 +729,9 @@ export interface CardSynergy {
     statePredicate?: SynergyStatePredicate;
     /**
      * WS4.2 — the rider fired (free, real units) when `statePredicate` holds.
-     * Post-v3 vocabulary: the damage-multiplier fields below are dead with the
-     * strike; new state-gated synergies speak `CardRider` instead.
+     * Post-v3 vocabulary: state-gated synergies speak `CardRider`.
      */
     rider?: CardRider;
-    /** Flat bonus damage on match. */
-    bonusDamage?: number;
-    /** Multiplier × matched effect's `remainingDuration`. */
-    durationDamageMul?: number;
-    /** Multiplier × matched effect's `intensity`. */
-    intensityDamageMul?: number;
-    /** Clear the matched effect from the predicate's `on` side. */
-    consumeMatched?: boolean;
-    /** Clear all ActiveEffects from both combatants. */
-    clearAllEffectsBothSides?: boolean;
-    /** Apply an additional effect on the caster when synergy fires. */
-    applyEffectOnFire?: CardCombatEffects;
 }
 
 /**
@@ -841,11 +812,7 @@ export interface Card {
     paidSummary?: string;
     combatEffects?: CardCombatEffects[];
     specialMechanics?: CardSpecialMechanic[];
-    /**
-     * Phase 66 — Tier 2 synergy clause. When present, the card engine
-     * evaluates the synergy after `calculateCardDamage` and before
-     * applying `combatEffects` / `specialMechanics`. See {@link CardSynergy}.
-     */
+    /** Synergy clause — a combat-state gate plus the rider it fires. See {@link CardSynergy}. */
     synergy?: CardSynergy;
     /**
      * Phase 91 — Optional friendship counter increment. When present, executeCard

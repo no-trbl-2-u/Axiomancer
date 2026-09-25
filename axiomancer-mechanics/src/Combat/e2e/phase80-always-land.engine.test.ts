@@ -28,14 +28,6 @@ const minimalCombatant = (): Combatant => ({
     id: 'phase80-target',
     name: 'Phase 80 target',
     baseStats: { body: 5, mind: 5, heart: 5 },
-    derivedStats: {
-        maxHealth: 30, health: 30,
-        physicalAttack: 5, physicalDefense: 5, physicalSave: 5, physicalTest: 5,
-        mentalAttack: 5, mentalDefense: 5, mentalSave: 5, mentalTest: 5,
-        emotionalAttack: 5, emotionalDefense: 5, emotionalSave: 5, emotionalTest: 5,
-        luck: 0,
-    },
-    nonCombatStats: { wisdom: 0, charisma: 0, perception: 0, willpower: 0 },
     effects: [],
     maxHealth: 30,
     health: 30,
@@ -106,31 +98,37 @@ describe('Phase 80 — Tier 3 always lands (Nat-20 escape removed)', () => {
     });
 });
 
-describe('Phase 80 — Tier 2 buff caster fumble/crit KEPT (Phase 79 D8)', () => {
-    it('fumbles on Nat 1 (buff fails)', () => {
+/**
+ * D12 (plan/2026-09-25-refactor-strategy.decisions.md; trim spec Tier 0
+ * item 5) — the hidden caster-side d20 on Tier 2 buffs is gone. It fizzled
+ * 5 % of buffs and doubled 5 %, and the player was never shown the roll.
+ * Buffs now apply exactly as printed, whatever the RNG would have rolled.
+ */
+describe('D12 — Tier 2 buffs apply as printed (no hidden d20)', () => {
+    it('lands where the old roll was a Nat 1 (no fizzle)', () => {
         const target = minimalCombatant();
         const effect = buildActiveEffect('buff_haste', 2, 1, 3);
 
-        mockSequentialRng(0.0); // d20 = 1
-
-        const result = resolveEffectApplication(target, effect, 'buff');
-
-        expect(result.success).toBe(false);
-        expect(result.roll?.wasFumble).toBe(true);
-        expect(result.message).toMatch(/Fumble/);
-    });
-
-    it('crits on Nat 20 (double intensity)', () => {
-        const target = minimalCombatant();
-        const effect = buildActiveEffect('buff_haste', 2, 2, 3);
-
-        mockSequentialRng(0.99); // d20 = 20
+        mockSequentialRng(0.0); // old d20 = 1 → fumble
 
         const result = resolveEffectApplication(target, effect, 'buff');
 
         expect(result.success).toBe(true);
-        expect(result.activeEffect?.intensity).toBe(4); // 2 × 2
-        expect(result.roll?.wasCrit).toBe(true);
+        expect(result.activeEffect).toBe(effect);
+        expect(result.roll).toBeUndefined();
+    });
+
+    it('keeps printed intensity where the old roll was a Nat 20 (no doubling)', () => {
+        const target = minimalCombatant();
+        const effect = buildActiveEffect('buff_haste', 2, 2, 3);
+
+        mockSequentialRng(0.99); // old d20 = 20 → crit ×2
+
+        const result = resolveEffectApplication(target, effect, 'buff');
+
+        expect(result.success).toBe(true);
+        expect(result.activeEffect?.intensity).toBe(2);
+        expect(result.roll).toBeUndefined();
     });
 });
 

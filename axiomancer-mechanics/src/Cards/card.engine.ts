@@ -10,7 +10,6 @@ import { Character } from '../Character/types';
 import { Enemy } from '../Enemy/types';
 import { ActiveEffect, Effect } from '../Effects/types';
 import { lookupEffect, applyEffect } from '../Effects';
-import { applyDamage, heal } from '../Combat/health';
 import { removeRandomBuff } from '../Combat/effects';
 import { resolveEffectApplication } from '../Combat/resist';
 import { incrementFriendship } from '../Combat/combat.reducer';
@@ -21,23 +20,6 @@ import {
     CardSpecialMechanic,
 } from './types';
 import { cardLibrary, getCardById } from './cards.library';
-
-// ─── Damage Calculation ──────────────────────────────────────────────────────
-
-/**
- * Spec 32 v3 §1 deleted `basePower` from the Card schema; THE BIG NUMBERS
- * REWRITE (2026-09-02) brought direct damage back as the combat-engine-owned
- * `deal` mechanic, not as a card magnitude, so the legacy card engine still
- * deals no damage of its own. This function is kept for API compatibility
- * (sim policies / projections multiply by it) and returns 0 unconditionally.
- */
-export function calculateCardDamage(
-    _actor: Combatant,
-    _card: Card,
-    _target?: Combatant,
-): number {
-    return 0;
-}
 
 // ─── Card Learning (Phase 30) ───────────────────────────────────────────────
 
@@ -92,11 +74,6 @@ export type CardEvent =
         appliedTo: 'self' | 'enemy';
         effect: Effect;
         message: string }
-    | { kind: 'buff-fumbled';
-        cardId: string;
-        appliedTo: 'self' | 'enemy';
-        effect: Effect;
-        message: string }
     | { kind: 'buff-stripped';
         cardId: string;
         target: 'self' | 'enemy';
@@ -105,15 +82,6 @@ export type CardEvent =
         cardId: string;
         effect: Effect | null;
         message: string }
-    | { kind: 'synergy-fired';
-        cardId: string;
-        /** Synergy damage added on top of the card's base damage.
-         *  Already applied to the target by the time this event fires. */
-        bonusDamage: number;
-        /** Effect ids consumed from caster/target by `consumeMatched`. */
-        consumedEffectIds: { caster: string[]; target: string[] };
-        /** True if `clearAllEffectsBothSides` swept both sides. */
-        clearedAllEffects: boolean }
     | { kind: 'friendship-incremented'; 
         cardId: string; 
         amount: number }
@@ -140,9 +108,14 @@ export interface CardLookup {
  *
  *   1. Validate the card is owned (player: known / reward / haunt / curse) or
  *      in the enemy's rotation.
- *   2. Apply damage / heal based on `targetType`.
- *   3. Resolve each `combatEffects` payload through `resolveEffectApplication`
- *      so resist tier matches the card's `tier`.
+ *   2. Resolve each `combatEffects` payload through `resolveEffectApplication`
+ *      (every effect lands as printed — D12).
+ *   3. Resolve `specialMechanics` and the friendship increment.
+ *
+ * The card engine deals no direct damage: direct damage is the combat
+ * engine's `deal` mechanic (THE BIG NUMBERS REWRITE), and the Phase 66
+ * effect-matching synergy branch was deleted in TRIM THE FAT T2a because
+ * every library synergy is a combat-state predicate the combat engine owns.
  *
  * The caller — not this function — is responsible for surfacing the returned
  * `CardEvent[]` to any higher-level event stream.
@@ -210,109 +183,6 @@ export function executeCard(
 
     let workingCaster: Combatant = caster;
     let workingTarget: Combatant = target;
-
-    // Phase 93: Only apply damage resistance for enemy-targeting cards
-    // Self-targeting cards (heals) shouldn't have resistance applied
-    const resistanceTarget = card.targetType === 'enemy' ? workingTarget : undefined;
-    const damage = calculateCardDamage(workingCaster, card, resistanceTarget);
-
-    // Phase 66 — synergy clause. Evaluate predicate against the
-    // pre-damage effects pool (so the matched effect's intensity /
-    // duration still reflects the field-state the caster saw); apply
-    // synergy damage on top of the base damage; then run any
-    // side-effects (consume matched / consume all resources / clear
-    // both sides / apply effect on fire). Per D7, this happens before
-    // the card's own `combatEffects` apply.
-    // WS4.2 — a synergy clause carrying a combat-STATE predicate is
-    // Hazard-Pattern-combat vocabulary (its ledger doesn't exist here): the
-    // card engine no-ops it, mirroring how it no-ops `specialMechanics`.
-    if (card.synergy && !card.synergy.statePredicate) {
-        const syn = card.synergy;
-        const pool = syn.predicate?.on === 'caster' ? workingCaster.effects : workingTarget.effects;
-        const matched = syn.predicate
-            ? pool.find(e =>
-                e.effectId === syn.predicate!.effectId
-                && (syn.predicate!.intensityMin === undefined || (e.intensity ?? 0) >= syn.predicate!.intensityMin)
-                && (syn.predicate!.durationMin === undefined || (e.remainingDuration ?? 0) >= syn.predicate!.durationMin)
-            ) ?? null
-            : null;
-        const fired = !syn.predicate || matched !== null;
-        if (fired) {
-            const bonusDamage =
-                (syn.bonusDamage ?? 0)
-                + (matched ? (matched.intensity ?? 0) * (syn.intensityDamageMul ?? 0) : 0)
-                + (matched ? (matched.remainingDuration ?? 0) * (syn.durationDamageMul ?? 0) : 0);
-
-            // Apply synergy damage to the same side as the card's
-            // primary damage (enemy-targeted cards hit the enemy;
-            // self-targeted cards heal the caster).
-            if (bonusDamage > 0) {
-                if (card.targetType === 'enemy') {
-                    workingTarget = applyDamage(workingTarget, bonusDamage);
-                } else {
-                    workingCaster = heal(workingCaster, bonusDamage);
-                }
-            }
-
-            // consumeMatched — clear the matched ActiveEffect.
-            const consumedEffectIds: { caster: string[]; target: string[] } = { caster: [], target: [] };
-            if (syn.consumeMatched && matched && syn.predicate) {
-                if (syn.predicate.on === 'caster') {
-                    workingCaster = { ...workingCaster, effects: workingCaster.effects.filter(e => e !== matched) };
-                    consumedEffectIds.caster.push(matched.effectId);
-                } else {
-                    workingTarget = { ...workingTarget, effects: workingTarget.effects.filter(e => e !== matched) };
-                    consumedEffectIds.target.push(matched.effectId);
-                }
-            }
-
-            // clearAllEffectsBothSides — clear every ActiveEffect on
-            // both combatants. Per D9 this includes Phase 60 set-bonus
-            // passives (sourceId: 'set-bonus', remainingDuration: -1).
-            if (syn.clearAllEffectsBothSides) {
-                workingCaster = { ...workingCaster, effects: [] };
-                workingTarget = { ...workingTarget, effects: [] };
-            }
-
-            // applyEffectOnFire — apply the additional effect on the
-            // caster. Uses the same applyCardEffect path the rest of
-            // the engine uses (so resist / rebound / stacking semantics
-            // are honoured).
-            if (syn.applyEffectOnFire) {
-                const result = applyCardEffect(
-                    syn.applyEffectOnFire, card, workingCaster, workingTarget, state.round,
-                );
-                workingCaster = result.caster;
-                workingTarget = result.target;
-                events.push(...result.events);
-            }
-
-            events.push({
-                kind: 'synergy-fired', cardId,
-                bonusDamage,
-                consumedEffectIds,
-                clearedAllEffects: syn.clearAllEffectsBothSides ?? false,
-            });
-        }
-    }
-
-    if (damage > 0) {
-        if (card.targetType === 'enemy') {
-            const hpBefore = workingTarget.health;
-            workingTarget = applyDamage(workingTarget, damage);
-            events.push({
-                kind: 'damage', cardId, target: 'enemy',
-                amount: damage, hpBefore, hpAfter: workingTarget.health,
-            });
-        } else {
-            const hpBefore = workingCaster.health;
-            workingCaster = heal(workingCaster, damage);
-            events.push({
-                kind: 'heal', cardId, target: 'self',
-                amount: damage, hpBefore, hpAfter: workingCaster.health,
-            });
-        }
-    }
 
     for (const payload of card.combatEffects ?? []) {
         const result = applyCardEffect(
@@ -409,12 +279,7 @@ function applyCardEffect(
     const durationOverride  = payload.duration;
 
     const built = buildActiveEffect(effect, round, intensityOverride, durationOverride);
-    const result = resolveEffectApplication(
-        effectTarget,
-        built,
-        effect.type,
-        caster.baseStats.heart,
-    );
+    const result = resolveEffectApplication(effectTarget, built, effect.type);
 
     // When the card payload explicitly overrides duration we must apply in
     // `additive` mode so the override survives the apply path, which otherwise
@@ -433,15 +298,6 @@ function applyCardEffect(
             durationDelta:  duration,
         };
     };
-
-    if (!result.success) {
-        events.push({
-            kind: 'buff-fumbled', cardId: card.id,
-            appliedTo: targetIsSelf ? 'self' : 'enemy',
-            effect, message: result.message,
-        });
-        return { caster, target, events };
-    }
 
     const appliedIntensity = result.activeEffect?.intensity ?? intensityOverride ?? 1;
     const appliedDuration  = result.activeEffect?.remainingDuration ?? durationOverride ?? effect.duration;

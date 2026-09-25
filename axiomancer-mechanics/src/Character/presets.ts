@@ -131,7 +131,6 @@ export const sagePreset: CharacterPreset = {
     consumables: [
         { id: 'healing-potion', quantity: 6 },
         { id: 'clarity-serum', quantity: 2 },
-        { id: 'focus-vial', quantity: 2 },
     ],
     currency: 75,
 };
@@ -209,7 +208,6 @@ export const ladderL30Preset: CharacterPreset = {
     consumables: [
         { id: 'greater-healing-potion', quantity: 6 },
         { id: 'clarity-serum', quantity: 3 },
-        { id: 'focus-vial', quantity: 3 },
     ],
     currency: 250,
 };
@@ -242,7 +240,6 @@ export const ladderL50Preset: CharacterPreset = {
         { id: 'supreme-healing-potion', quantity: 8 },
         { id: 'regeneration-tonic', quantity: 3 },
         { id: 'phoenix-tear', quantity: 2 },
-        { id: 'greater-resonance-crystal', quantity: 3 },
     ],
     currency: 1000,
 };

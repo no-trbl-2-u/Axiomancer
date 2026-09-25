@@ -137,7 +137,7 @@ describe('stage-eligible card pools', () => {
 });
 
 describe('buildStagePlayer', () => {
-    it('sets level, base stats, HP, and derived stats from the profile', () => {
+    it('sets level, base stats, and HP from the profile', () => {
         for (const id of COMBAT_STAGE_ORDER) {
             const stage = COMBAT_STAGE_PROFILES[id];
             const player = buildStagePlayer(stage);
@@ -148,8 +148,6 @@ describe('buildStagePlayer', () => {
             const derived = calculateMaxHealth(stage.playerLevel, stage.playerBaseStats);
             expect(player.health).toBe(derived);
             expect(player.maxHealth).toBe(derived);
-            // Derived stats track the stage's base stats, not the mock's level-1 spread.
-            expect(player.derivedStats).not.toEqual(Player.derivedStats);
         }
     });
 

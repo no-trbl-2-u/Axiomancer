@@ -55,26 +55,6 @@ export const EFFECT_INTERACTIONS: EffectInteraction[] = [
 ];
 
 /**
- * Get all interactions that could trigger for a given effect ID.
- */
-export function getInteractionsForEffect(effectId: string): EffectInteraction[] {
-    return EFFECT_INTERACTIONS.filter(interaction =>
-        interaction.trigger.primaryEffectId === effectId ||
-        interaction.trigger.secondaryEffectIds.includes(effectId)
-    );
-}
-
-/** Get all interaction IDs for debugging/logging. */
-export function getAllInteractionIds(): string[] {
-    return EFFECT_INTERACTIONS.map(interaction => interaction.id);
-}
-
-/** Find an interaction by its ID. */
-export function getInteractionById(interactionId: string): EffectInteraction | undefined {
-    return EFFECT_INTERACTIONS.find(interaction => interaction.id === interactionId);
-}
-
-/**
  * Validate that all effect IDs referenced in interactions exist.
  * Development helper to catch typos in effect references.
  */

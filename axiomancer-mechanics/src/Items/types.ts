@@ -74,9 +74,8 @@ export const SLOT_CAPACITY: Record<EquipmentSlot, number> = {
  * @property slot           - The equipment slot this item occupies.
  * @property accessoryKind  - Set iff `slot === 'accessory'` (Phase 18); the worn
  *                            flavour (head / hands / feet / amulet / ring / charm).
- * @property statModifiers  - Persistent stat modifiers folded into the wearer's
- *                            `derivedStats` (and `maxHealth`, for `maxHp`) at
- *                            equip-time. The SOLE mechanical channel.
+ * @property statModifiers  - Persistent stat lines; today only the armor relics'
+ *                            `maxHp`, folded onto `maxHealth` at equip-time.
  * @property grantsSignature - The one signature skill this signet relic grants
  *                            while worn (Phase 19). Combat-init derives
  *                            `CombatEncounterState.signatures` from the worn

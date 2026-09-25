@@ -23,7 +23,7 @@ import {
     resolveThreatPhase, draftStanceDie,
     READ_ADVANTAGE_INTENSITY_BONUS, READ_DISADVANTAGE_DURATION_PENALTY,
     THREAT_ESCALATION_PER_ROUND, THREAT_ESCALATION_GRACE, THREAT_ESCALATION_MAX,
-    THREAT_ESCALATION_BOSS_MULT, THREAT_EFFECT_ESCALATION_STEP, THREAT_ENCHANT_CURSE_EVERY_ROUNDS,
+    THREAT_ESCALATION_BOSS_MULT, THREAT_EFFECT_ESCALATION_STEP,
 } from '../combat.engine';
 import type { CombatDieColor, CombatEncounterState } from '../combat.encounter.types';
 
@@ -192,33 +192,29 @@ describe('combat depth epic — H5: the clock also intensifies enemy-inflicted S
     });
 });
 
-describe('combat depth epic — H6: every N rounds, a new enchant or curse', () => {
+/**
+ * TRIM THE FAT Tier 0 item 3 (`plan/2026-09-25-trim-the-fat.spec.md`): the H6
+ * threat-clock enchant is gone. Every 5 rounds it put Sorites Ascension on the
+ * enemy or Grelling's Malediction on the player and announced it, but both
+ * were no-ops: the enemy's +1 roll bonus is never read (only enemy roll
+ * PENALTIES are), and the player's roll modifier is never read at all. A
+ * visible event that changes nothing lied to the player, so the clock tier
+ * was removed rather than left as theatre.
+ */
+describe('combat depth epic — H6 retired: no threat-clock enchant or curse', () => {
     function stateAtRound(round: number): CombatEncounterState {
         let s = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(300, 'body'), [DOT_BODY], 1);
         s = rollEncounterDice(s).state;
         return { ...s, round };
     }
 
-    it('THREAT_ENCHANT_CURSE_EVERY_ROUNDS defaults to 5', () => {
-        expect(THREAT_ENCHANT_CURSE_EVERY_ROUNDS).toBe(5);
-    });
-
-    it('on the cadence round, empowers the enemy when the roll favors it', () => {
-        const s = stateAtRound(THREAT_ENCHANT_CURSE_EVERY_ROUNDS - 1); // resolvedRound hits the cadence
-        const after = resolveThreatPhase(s, () => 0.1).state; // < 0.5 → empower
-        expect(after.enemy.effects.some(e => e.effectId === 'buff_all_stats_up')).toBe(true);
-    });
-
-    it('on the cadence round, curses the player when the roll favors it', () => {
-        const s = stateAtRound(THREAT_ENCHANT_CURSE_EVERY_ROUNDS - 1);
-        const after = resolveThreatPhase(s, () => 0.9).state; // >= 0.5 → curse
-        expect(after.player.effects.some(e => e.effectId === 'debuff_curse')).toBe(true);
-    });
-
-    it('does not fire off the cadence', () => {
-        const s = stateAtRound(THREAT_ENCHANT_CURSE_EVERY_ROUNDS - 2); // resolvedRound one short
-        const after = resolveThreatPhase(s, () => 0.1).state;
-        expect(after.enemy.effects.some(e => e.effectId === 'buff_all_stats_up')).toBe(false);
-        expect(after.player.effects.some(e => e.effectId === 'debuff_curse')).toBe(false);
-    });
+    for (const [label, roll] of [['a low roll', 0.1], ['a high roll', 0.9]] as const) {
+        it(`the old cadence round (resolvedRound 5) applies nothing on ${label}`, () => {
+            const s = stateAtRound(4); // resolvedRound = 5, the retired cadence
+            const res = resolveThreatPhase(s, () => roll);
+            expect(res.state.enemy.effects.some(e => e.effectId === 'buff_all_stats_up')).toBe(false);
+            expect(res.state.player.effects.some(e => e.effectId === 'debuff_curse')).toBe(false);
+            expect(res.events.some(e => (e as { kind: string }).kind === 'threat-clock-enchant')).toBe(false);
+        });
+    }
 });

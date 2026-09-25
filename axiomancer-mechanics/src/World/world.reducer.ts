@@ -3,7 +3,7 @@
  * makes sense (locking/unlocking, completing).
  */
 
-import { WorldState, MapState, MapDefinition, MapNode, NodeId, HazardNodeOutcome, Continent } from './types';
+import { WorldState, MapState, MapDefinition, MapNode, NodeId, Continent } from './types';
 import { MapName, ContinentName } from './map.library';
 import { getMapDefinition } from './map.registry';
 
@@ -476,39 +476,7 @@ export function unlockAdjacent(state: MapState, nodeId: NodeId): MapState {
     });
 }
 
-// ── Hazard Persistence (Phase 135) ─────────────────────────────────────────
-
-/**
- * Records a persistent hazard outcome for a specific node. Authored for the
- * retired Phase-135 hazard library (H08, H12, H15 — see
- * `Hazard/e2e/hazard.persistence.engine.test.ts`); no engine caller today.
- * Idempotent — overwrites existing outcome for same hazardId/nodeId.
- */
-export function recordHazardOutcome(state: MapState, outcome: HazardNodeOutcome): MapState {
-    const existing = state.hazardOutcomes.filter(
-        h => !(h.nodeId === outcome.nodeId && h.hazardId === outcome.hazardId)
-    );
-    return {
-        ...state,
-        hazardOutcomes: [...existing, outcome]
-    };
-}
-
-/**
- * Blocks a bidirectional route between two nodes. Authored for the retired
- * H12 "Riddled Bridge" final-round failure (Phase 135); today only tests
- * call it. Idempotent — overwrites existing block for same route pair.
- */
-export function blockMapRoute(state: MapState, from: NodeId, to: NodeId, reason: string): MapState {
-    const existing = state.blockedRoutes.filter(
-        route => !((route.from === from && route.to === to) || 
-                   (route.from === to && route.to === from))
-    );
-    return {
-        ...state,
-        blockedRoutes: [...existing, { from, to, reason }]
-    };
-}
+// ── Route blocking (Labyrinth doors, W-01) ─────────────────────────────────
 
 /**
  * Removes any block on the route between two nodes (either direction).
@@ -543,14 +511,6 @@ export function teleportToNode(state: WorldState, nodeId: NodeId): WorldState {
     // A teleport PLACES the player (the Oubliette's eject, a waystone recall):
     // no door was walked, so no arrival is owed at the far end.
     return { ...state, currentMap: { ...map, currentNode: nodeId, pendingArrival: null } };
-}
-
-/**
- * Query all hazard outcomes affecting a specific node. Authored for the
- * retired Phase-135 threshold-modifier system; no engine caller today.
- */
-export function getHazardOutcomesForNode(state: MapState, nodeId: NodeId): HazardNodeOutcome[] {
-    return state.hazardOutcomes.filter(outcome => outcome.nodeId === nodeId);
 }
 
 /**

@@ -170,7 +170,7 @@ describe('isCombatSynergySatisfied', () => {
         rank: 2,
         cardType: 'spell',
         targetType: 'enemy',
-        synergy: { predicate: { effectId: 'debuff_bleed', on: 'target', intensityMin: 1, durationMin: 2 }, bonusDamage: 0 },
+        synergy: { predicate: { effectId: 'debuff_bleed', on: 'target', intensityMin: 1, durationMin: 2 } },
     }]);
 
     it('returns true when target-side predicate is satisfied', () => {
@@ -223,7 +223,7 @@ describe('isCombatSynergySatisfied', () => {
             rank: 3,
             cardType: 'spell',
             targetType: 'enemy',
-            synergy: { predicate: { effectId: 'buff_regeneration', on: 'caster', intensityMin: 1 }, bonusDamage: 5 },
+            synergy: { predicate: { effectId: 'buff_regeneration', on: 'caster', intensityMin: 1 } },
         }]);
         const card = buildCard('qa-caster-synergy');
         expect(card).not.toBeNull();

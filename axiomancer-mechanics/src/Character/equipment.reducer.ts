@@ -1,163 +1,66 @@
 /**
  * Equipment reducers — pure transitions over a `Character` for `equipItem`
- * and `unequipItem`, plus the `getEquipmentModifiers` aggregator the engine
- * uses to fold equipment stat bonuses into `derivedStats` at equip-time
- * (Spec 05 Q3 option A).
+ * and `unequipItem`, plus `wornMaxHpBonus`, the one stat fold equipment
+ * still performs.
  *
  * Design notes:
  *
- * - Equipment `statModifiers` are persistent and folded into `derivedStats`
- *   *at equip-time*. We recompute `derivedStats` from `baseStats` (+ equipment
- *   modifiers) on every equip / unequip, mirroring `deriveStats` so the math
- *   stays in one place.
+ * - The only equipment stat line is `maxHp` (the two armor relics' +5 max
+ *   VITAE), folded onto `Character.maxHealth` at equip-time. TRIM THE FAT T2a
+ *   (D14) deleted the derived-stat recompute this module used to run on every
+ *   equip — derived stats no longer exist and the relics' body / mind / heart
+ *   bumps were cut.
  * - Equipment is DECOUPLED FROM EFFECTS (phases 20-23). Equipping/unequipping
- *   applies no effect to `Character.effects`; the old effect channels
- *   (`passiveEffects` / `onHitEffects` / `onDefendEffects` / `combatStartTokens`
- *   / `generationBonus`) and their fields were stripped from `Equipment` in the
- *   phase-23 teardown. `statModifiers` (incl. the phase-19 `maxHp`) is now the
- *   SOLE channel from equipment to the character.
+ *   applies no effect to `Character.effects`; `statModifiers` (now `maxHp`
+ *   only) and `grantsSignature` are the SOLE channels from equipment to the
+ *   character.
  */
 
-import { Character, BaseStats, DerivedStats, EquipmentLoadout } from './types';
+import { Character, EquipmentLoadout } from './types';
 import { Equipment, EquipmentSlot, SLOT_CAPACITY } from '../Items/types';
 import { StatModifier } from '../Effects/types';
-import { Stance } from '../Combat/types';
-import { deriveStats } from '../Utils';
 
 /**
- * Aggregated equipment modifier bundle keyed by stat. Mirrors the shape
- * produced by `getActiveEffectModifiers` for active effects so equipment
- * and effects can share the same recompute pipeline.
- */
-export interface AggregatedEquipmentModifiers {
-    statFlat:      Map<string, number>;
-    statMultBonus: Map<string, number>;
-}
-
-const emptyAgg = (): AggregatedEquipmentModifiers => ({
-    statFlat:      new Map(),
-    statMultBonus: new Map(),
-});
-
-const addToMap = (m: Map<string, number>, key: string, value: number): void => {
-    m.set(key, (m.get(key) ?? 0) + value);
-};
-
-const STANCE_KEYS: ReadonlyArray<Stance> = ['body', 'mind', 'heart'];
-const isStanceKey = (s: string): s is Stance =>
-    (STANCE_KEYS as readonly string[]).includes(s);
-
-/**
- * Folds every worn item's `statModifiers` into a single aggregated bundle.
- * Same intensity / multiplier conventions as the active-effects path: flat
- * mods sum, multiplier mods accumulate additively over 1.0 so the consumer
- * applies them as `base × (1 + Σ (m - 1))`.
- */
-export function getEquipmentModifiers(
-    loadout: EquipmentLoadout,
-): AggregatedEquipmentModifiers {
-    const agg = emptyAgg();
-    for (const piece of getEquippedItems(loadout)) {
-        if (!piece.statModifiers) continue;
-        for (const mod of piece.statModifiers) {
-            if (mod.isMultiplier) {
-                addToMap(agg.statMultBonus, mod.stat, mod.value - 1);
-            } else {
-                addToMap(agg.statFlat, mod.stat, mod.value);
-            }
-        }
-    }
-    return agg;
-}
-
-/**
- * Recomputes `derivedStats` from the wearer's `baseStats` plus every equipped
- * item's `statModifiers`. Per Spec 05 Q2 we use the same `StatModifier` shape
- * as effects so both systems can plug into the same aggregate.
+ * Summed worn `maxHp` bonus (Phase 19): the flat `{ stat: 'maxHp' }` lines of
+ * every worn item. Folded onto `Character.maxHealth` by `withLoadout`, and by
+ * stat allocation / level-up so a rebuilt `maxHealth` keeps the relic bonus.
  *
- * Pipeline:
- *   1. Effective base stats = (base + Σ flat) × (1 + Σ (mult - 1))
- *   2. Re-derive `derivedStats` from the effective base stats.
- *   3. Add per-derived-stat flat / multiplier modifiers on top.
- */
-function applyFlatAndMult(base: number, flat: number, multBonus: number): number {
-    return (base + flat) * (1 + multBonus);
-}
-
-export function recomputeDerivedStats(
-    baseStats: BaseStats,
-    mods: AggregatedEquipmentModifiers,
-): DerivedStats {
-    const stanceFlat = (s: Stance): number => mods.statFlat.get(s) ?? 0;
-    const stanceMult = (s: Stance): number => mods.statMultBonus.get(s) ?? 0;
-
-    const effBase: BaseStats = {
-        body:  applyFlatAndMult(baseStats.body,  stanceFlat('body'),  stanceMult('body')),
-        mind:  applyFlatAndMult(baseStats.mind,  stanceFlat('mind'),  stanceMult('mind')),
-        heart: applyFlatAndMult(baseStats.heart, stanceFlat('heart'), stanceMult('heart')),
-    };
-
-    const derived = deriveStats(effBase);
-
-    const derivedKeys = [
-        'physicalAttack', 'physicalDefense',
-        'mentalAttack',   'mentalDefense',
-        'emotionalAttack','emotionalDefense',
-        'luck',
-    ] as const;
-
-    const patched = { ...derived } as DerivedStats;
-    for (const key of derivedKeys) {
-        const flat = mods.statFlat.get(key) ?? 0;
-        const mult = mods.statMultBonus.get(key) ?? 0;
-        patched[key] = applyFlatAndMult(derived[key], flat, mult);
-    }
-    return patched;
-}
-
-/**
- * Summed worn `maxHp` bonus (Phase 19). The two armor relics carry a flat
- * `{ stat: 'maxHp' }` modifier; it is folded onto `Character.maxHealth` here,
- * NOT into `DerivedStats` (which has no HP field — `recomputeDerivedStats`
- * reads only stance/derived keys, so a `maxHp` entry in `statFlat` is inert
- * there). Multiplier `maxHp` mods are unsupported (no content uses them).
+ * @param loadout - The worn equipment.
+ * @returns The total max-VITAE bonus from worn equipment (0 when none).
  */
 export function wornMaxHpBonus(loadout: EquipmentLoadout): number {
-    return getEquipmentModifiers(loadout).statFlat.get('maxHp') ?? 0;
+    let total = 0;
+    for (const piece of getEquippedItems(loadout)) {
+        for (const mod of piece.statModifiers ?? []) {
+            if (mod.stat === 'maxHp') total += mod.value;
+        }
+    }
+    return total;
 }
 
 /**
- * Rebuilds a `Character` around a new loadout: recomputes `derivedStats` and
- * folds the worn `maxHp` delta onto `maxHealth` (growing/clamping current
- * `health` by the same delta, mirroring the stat-allocation HP convention).
- * Shared tail for equip/unequip.
- *
- * Phase 20 — equipment is decoupled from effects: equipping/unequipping no
- * longer touches `Character.effects` (no `passiveEffects` are applied or
- * removed). `statModifiers` (incl. the phase-19 `maxHp`) is the SOLE channel
- * from equipment to the character.
+ * Rebuilds a `Character` around a new loadout: folds the worn `maxHp` delta
+ * onto `maxHealth` (growing/clamping current `health` by the same delta,
+ * mirroring the stat-allocation HP convention). Shared tail for
+ * equip/unequip.
  */
 function withLoadout(
     character: Character,
     nextLoadout: EquipmentLoadout,
 ): Character {
-    const mods = getEquipmentModifiers(nextLoadout);
-    const nextDerived = recomputeDerivedStats(character.baseStats, mods);
-
-    // Fold the worn maxHp delta onto maxHealth. Equipping a +maxHp armor relic
-    // grows current health by the same delta; unequipping lowers maxHealth and
-    // clamps health down. `character.maxHealth` already includes the previous
-    // loadout's bonus, so the delta is exact and idempotent.
-    const hpDelta = (mods.statFlat.get('maxHp') ?? 0) - wornMaxHpBonus(character.equipment);
+    // `character.maxHealth` already includes the previous loadout's bonus, so
+    // the delta is exact and idempotent. Equipping a +maxHp armor relic grows
+    // current health by the same delta; unequipping lowers maxHealth and
+    // clamps health down.
+    const hpDelta = wornMaxHpBonus(nextLoadout) - wornMaxHpBonus(character.equipment);
     const nextMaxHealth = character.maxHealth + hpDelta;
     const nextHealth = Math.max(0, Math.min(character.health + hpDelta, nextMaxHealth));
 
     return {
         ...character,
-        equipment:    nextLoadout,
-        derivedStats: nextDerived,
-        maxHealth:    nextMaxHealth,
-        health:       nextHealth,
+        equipment: nextLoadout,
+        maxHealth: nextMaxHealth,
+        health:    nextHealth,
     };
 }
 
@@ -250,8 +153,6 @@ export function getEquippedItems(loadout: EquipmentLoadout): Equipment[] {
     return out;
 }
 
-// Internal helper exported only for tests / hermetic e2e introspection.
-export { isStanceKey as _isStanceKey };
 // Re-export so `equipment.reducer` is a single import surface for callers that
 // also want a single `StatModifier`-shaped contract.
 export type { StatModifier };

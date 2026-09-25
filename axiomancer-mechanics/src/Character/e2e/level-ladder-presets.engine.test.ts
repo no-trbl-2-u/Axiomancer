@@ -61,7 +61,6 @@ describe('level-ladder presets', () => {
         expect(character.level).toBe(level);
         expect(character.maxHealth).toBeGreaterThan(0);
         expect(character.health).toBe(character.maxHealth);
-        expect(character.derivedStats).toBeDefined();
         expect(character.knownCards.length).toBeGreaterThan(0);
     });
 

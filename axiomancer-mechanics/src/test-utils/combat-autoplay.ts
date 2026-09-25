@@ -17,8 +17,8 @@ import {
     getSignatureSkill,
     selectMercyChoice,
     selectCapitulationChoice,
-} from './combat.engine';
-import type { CombatCard, CombatEncounterState, CombatOutcome } from './combat.encounter.types';
+} from '../Combat/combat.engine';
+import type { CombatCard, CombatEncounterState, CombatOutcome } from '../Combat/combat.encounter.types';
 
 export type HazardAutoPolicyId = 'naive' | 'safe' | 'aggressive' | 'status';
 

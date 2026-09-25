@@ -19,9 +19,6 @@ import { createEnemy } from '../../Enemy';
 import { initializeCombat } from '../../Combat/combat.reducer';
 import { executeCard } from '../../Cards/card.engine';
 import type { Card } from '../../Cards/types';
-import { applyProcOutcome } from '../../Combat/combat-effects';
-import type { ProcRollOutcome } from '../../Combat/combat-effects';
-import type { Effect } from '../types';
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -103,58 +100,6 @@ describe('Phase 38 — player card applies buff onto self', () => {
         const applied = next.player.effects.find(e => e.effectId === 'buff_thorns');
         expect(applied).toBeDefined();
         expect(applied!.sourceId).toBe('char-player-shopper');
-    });
-});
-
-describe('Phase 38 — enemy proc applies debuff onto player', () => {
-    it('player effect carries sourceId === enemy.id', () => {
-        mockSequentialRng(0.05);
-        const player = fixturePlayer();
-        const enemy = fixtureEnemy();
-
-        // Synthesise a tier-1 proc outcome the enemy applies onto the player.
-        const tier1Debuff: Effect = {
-            id: 'tier1_mind_mark',
-            name: 'Exposed Reasoning',
-            description: 'test',
-            type: 'debuff',
-            category: 'stat',
-            duration: 1,
-            stacking: 'intensity',
-            tier: 1,
-            payload: {},
-        };
-
-        const outcome: ProcRollOutcome = {
-            trigger: {
-                stance: 'mind',
-                action: 'attack',
-                tier: 1,
-                effectId: 'tier1_mind_mark',
-                target: 'opponent',
-                baseChance: 1.0,
-            },
-            effect: tier1Debuff,
-            decision: 'normal',
-            intensityBonus: 0,
-            durationBonus: 0,
-            appliedTo: 'opponent',
-        };
-
-        const result = applyProcOutcome(
-            outcome,
-            enemy, enemy.effects,
-            player, player.effects,
-            0,
-        );
-
-        // appliedTo === 'opponent' means the effect lands on `opponent`,
-        // which is the player in this call. The new ActiveEffect should
-        // carry the enemy's id (the actor) as sourceId.
-        expect(result.appliedTo).toBe('opponent');
-        const applied = result.opponentEffects.find(e => e.effectId === 'tier1_mind_mark');
-        expect(applied).toBeDefined();
-        expect(applied!.sourceId).toBe('enemy-rat-7');
     });
 });
 

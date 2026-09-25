@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { clamp, average, sum, max, min, inRange, deriveStats, calculateMaxHealth } from './index';
+import { clamp, average, sum, max, min, inRange, calculateMaxHealth } from './index';
 
 describe('clamp', () => {
   it('clamps above max', () => expect(clamp(15, 0, 10)).toBe(10));
@@ -24,17 +24,6 @@ describe('inRange', () => {
   it('inclusive boundaries', () => {
     expect(inRange(1, 1, 10)).toBe(true);
     expect(inRange(10, 1, 10)).toBe(true);
-  });
-});
-
-describe('deriveStats', () => {
-  it('applies multipliers correctly', () => {
-    const stats = deriveStats({ body: 3, heart: 4, mind: 2 });
-    expect(stats.physicalAttack).toBe(3);   // body × 1
-    expect(stats.physicalDefense).toBe(9);  // body × 3
-    expect(stats.emotionalAttack).toBe(4);  // heart × 1
-    expect(stats.mentalDefense).toBe(6);    // mind × 3
-    expect(stats.luck).toBe(3);             // avg(3,4,2)
   });
 });
 

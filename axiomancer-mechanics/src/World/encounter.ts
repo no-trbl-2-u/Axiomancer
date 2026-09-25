@@ -15,7 +15,6 @@
 
 import { Enemy, EnemyDifficulty } from '../Enemy/types';
 import { deepClone } from '../Utils';
-import { deriveStats } from '../Utils';
 import { EnemiesByMap } from '../Enemy/enemy.library';
 import { DEFAULT_XP_BY_DIFFICULTY, applyHideRamp, enemyVitae } from '../Enemy';
 import { MapName } from './map.library';
@@ -103,8 +102,8 @@ function scaleBaseStatsToLevel(baseStats: BaseStats, level: number): BaseStats {
 }
 
 /**
- * Returns a fresh `Enemy` scaled to `targetLevel`. Recomputes maxHealth and
- * derivedStats so the scaling stays internally consistent. `xpReward` is
+ * Returns a fresh `Enemy` scaled to `targetLevel`. Recomputes maxHealth so
+ * the scaling stays internally consistent. `xpReward` is
  * also rescaled by the new level when the original was a level-multiplier
  * default (the common case).
  */
@@ -123,7 +122,6 @@ export function scaleEnemyToLevel(source: Enemy, targetLevel: number): Enemy {
         : undefined;
     scaled.maxHealth = enemyVitae(level, source.difficulty, authored);
     scaled.health = scaled.maxHealth;
-    scaled.derivedStats = deriveStats(scaled.baseStats);
     // THE EARLY HIDE RAMP (see `Enemy/index.ts`): a foe pinned or scaled
     // down to the opening levels sheds the HIDE its home-level kit authored —
     // the fishing village's level-3 King of Revenge fights bare-skinned.
