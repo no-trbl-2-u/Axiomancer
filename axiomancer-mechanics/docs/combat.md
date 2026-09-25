@@ -4,7 +4,7 @@
 
 **Hazard-Pattern Combat (Spec 25) is the ONLY combat engine** — consumed by the mobile
 app, driven by the combat CLI (`npm run combat`), and exercised by the `/combat-playtest`
-and `/deck-tuning` loops. It is a card-and-dice system where the enemy's sole bar is
+and `/adjust-cards` loops. It is a card-and-dice system where the enemy's sole bar is
 VITAE. Direct damage, damage-over-time, walls-and-reprisal, control, harvest and the
 mercy lines are all first-class ways to empty it — none is the doctrinal path (THE BIG
 NUMBERS REWRITE, 2026-09-02).
@@ -389,7 +389,7 @@ design rationale for the separate Cards system.
 
 ## Hazard-Pattern Combat (Spec 25)
 
-**The only combat engine** (mobile map encounters, the combat CLI, the `/combat-playtest` + `/deck-tuning` loops).
+**The only combat engine** (mobile map encounters, the combat CLI, the `/combat-playtest` + `/adjust-cards` loops).
 A card-and-dice system structurally mirrored on the Hazard minigame: every verb is a
 combat card, and the enemy's **sole bar is VITAE** — dropping it to 0 (`isDefeated(enemy)`)
 is the main win condition, beside the authored alt-wins (Befriend, RELENT, CONDEMN).

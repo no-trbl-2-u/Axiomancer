@@ -374,9 +374,17 @@ async function playRound(page, sink, seed, round) {
         // Rightmost first: the fan's right end sits on top of the z-order, clear
         // of the corner medallions that otherwise swallow the pointer-down.
         const card = [...hand].reverse()[0]
+        // Only a matching-stance or wild die is a LEGAL power for this card
+        // (THE COLOR LAW — `resolveDieDropTarget`/`dieCanPowerCardVM` in
+        // CombatBoard.tsx, mirroring `combatDieCanPower` in the engine). Any
+        // other usable die will have its drop REJECTED at the board, so
+        // reaching for one is not "a legal die going unused" — it is the
+        // harness attempting an illegal play and then blaming the drag.
+        // Measured 2026-09-25: that false "usable" fallback was exactly what
+        // inflated `powerMissed` and tripped the inert-power crash below on
+        // seeds where the hand's only usable dice were off-color.
         const die = dice.find((d) => d.usable && d.color === card.stance)
             ?? dice.find((d) => d.usable && d.color === 'wild')
-            ?? dice.find((d) => d.usable)
 
         // Stage it.
         for (let a = 0; a < 3 && !(await has(page.getByTestId(`combat-staged-${card.uid}`))); a++) {

@@ -7,7 +7,7 @@
 > that true at every stage of the campaign.
 >
 > Loops that consume this: `/combat-playtest` (evidence + verdict, report
-> only) and `/deck-tuning` (cards/decks). Engine constants are tuned
+> only) and `/adjust-cards` (cards/decks). Engine constants are tuned
 > manually against this harness's evidence.
 
 ## Stage profiles
@@ -92,7 +92,7 @@ a loaded set is visible to the whole engine — decks, drafts, sims, CLIs.
    the card's evidence.
 3. **Promote.** A card that proves out across >= 2 stages and >= 2 policies
    without breaking the balance bands moves into `cards.library.ts` in the
-   same PR (the `/deck-tuning` skill owns this path). Sandbox content itself
+   same PR (the `/adjust-cards` steward owns this path). Sandbox content itself
    never ships.
 
 ## CLI cookbook

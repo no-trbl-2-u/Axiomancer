@@ -43,11 +43,8 @@ Two layers live here:
 | `consolidate.yml` | `/consolidate` | monthly (2nd, 07:23 UTC) + manual | Memory curator: compacts `plan/` durable memory (bearings, CRITIQUE archive, lessons/reflexes hygiene). Curation only — meaning never changes. Pushes to `main`. |
 | `triage.yml` | `/triage` | manual only (per-issue `issues:` trigger removed 2026-08) | Manual pass on a specific issue; march's triage gate is the standing sweep. |
 | `ci-autofix.yml` | `/fix-ci` | `verify-*` failure on `main` + manual | Red-main first responder. Pushes the fix to `main`. |
-| `dep-upgrades.yml` | `/dep-upgrades` | manual (Mon 06:13 UTC cron disabled 2026-07-08) | Patch/minor bumps, full verify, one PR. Locked stack untouched. |
 | `iterate.yml`, `critique.yml`, `expand.yml`, `ship-a-phase.yml`, `plan-a-phase.yml` | same-named | manual only | March dispatches these on its own; direct dispatch = force one tick. `iterate.yml` runs Opus 4.8 (medium effort) — a deliberate quality pass; march-dispatched iterate stays on Sonnet 5. |
-| `deck-tuning.yml`, `hazard-tuning.yml`, `world-tuning.yml` | same-named | manual (weekly 03:29 UTC crons disabled 2026-07-08) | Mechanics balance loops; each delivers a branch + PR, never `main`. |
 | `combat-playtest.yml` | `/combat-playtest` | manual (monthly cron disabled 2026-07-08) | Report-only doctrine verdict, branch + PR. |
-| `critic-loop.yml`, `deep-playtest.yml`, `combat-ux-tuning.yml`, `hermes-playtest.yml` | same-named | manual only | Mobile expo-web loops; install Playwright, long-running. |
 | `claude.yml` | — | `@claude` mention in issues/PRs | Interactive responder. |
 
 Skills that need a human in the loop (`/oversight`, `/jot`, the

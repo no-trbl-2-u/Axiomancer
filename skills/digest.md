@@ -78,9 +78,9 @@ its own cadence.
       Report CQI and terminal outcomes separately. The
       transitional-library hold on tuning work is LIFTED (THE PIPELINE
       LIBERATION, 2026-08-22 — `plan/bearings.md`): a measured
-      regression MAY be filed as a `/deck-tuning` candidate again.
+      regression MAY be filed as an `/adjust-cards` candidate again.
       **Measure and report only** — card/deck fixes stay with
-      `/deck-tuning`; engine-constant findings route to the tuning
+      `/adjust-cards`; engine-constant findings route to the tuning
       loops too (THE OPEN GATE ¶4, 2026-08-28 — the manual-only
       wall is lifted; §4.2-4.3 rails otherwise apply). A reduced pass is directionally honest,
       not confirmation-grade: never cite it for close calls
