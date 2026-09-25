@@ -3,7 +3,7 @@
  * the encounter modal seal once `lastOutcome === 'victory'`.
  *
  * Phase 70 Tick A port of the handoff bundle's `CombatVictoryModal`
- * (`design/handoff-2026-05-22/project/screens/aftermath-modal.jsx`
+ * (`plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-22/project/screens/aftermath-modal.jsx`
  * lines 217-375). The component is a pure render of the VM produced
  * by `selectAftermathViewModel`; the dismiss handler is wired
  * upstream by `<EncounterModalOverlay>` so the same modal seal that

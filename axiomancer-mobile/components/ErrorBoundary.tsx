@@ -6,7 +6,7 @@
  * web, native red box on iOS/Android).
  *
  * Phase 70 Tick D port of the handoff bundle's `ErrorScreen`
- * (`design/handoff-2026-05-22/project/screens/aftermath-modal.jsx:
+ * (`plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-22/project/screens/aftermath-modal.jsx:
  * 709-809`). The fallback now lives in the same gothic-chronicle
  * register as the rest of the app:
  *

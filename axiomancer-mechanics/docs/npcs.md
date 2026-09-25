@@ -4,7 +4,7 @@
 > legacy flat `dialogue` map and/or a structured `dialogueTree`; the engine
 > exports tree-traversal helpers and a `GameState`-side-effect applier.
 > Shop NPCs are typed but shop reducers (inventory, prices, stock refresh)
-> are still pending — see [`specs/08-world-content-and-hazards.md`](../specs/08-world-content-and-hazards.md).
+> are still pending — see [`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/08-world-content-and-hazards.md` (archived)](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/08-world-content-and-hazards.md).
 
 ## Type Shape
 
@@ -246,5 +246,5 @@ Each NPC demonstrates the alignment system across diverse life situations with m
   observer-style branches that hide until the player has shifted cells
   since the last interaction with the tree.
 
-See [`specs/08-world-content-and-hazards.md`](../specs/08-world-content-and-hazards.md)
-+ [`specs/14-philosophical-alignment.md`](../specs/14-philosophical-alignment.md).
+See [`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/08-world-content-and-hazards.md` (archived)](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/08-world-content-and-hazards.md)
++ [`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/14-philosophical-alignment.md` (archived)](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/14-philosophical-alignment.md).

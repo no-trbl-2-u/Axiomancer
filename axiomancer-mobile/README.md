@@ -24,7 +24,6 @@ the question you are trying to answer, not by topic:
 | Get the app running / build / deploy on a fresh machine   | [`setup/`](./setup/)     | `docs/`      |
 | Understand a runtime concept (testing standard, engine upgrade, AI-assist prompts) | [`docs/`](./docs/)       | `setup/`     |
 | Know **why** a durable architecture or product call was made | [`docs/adr/`](./docs/adr/)  | `docs/`      |
-| Plan or implement a new feature against its written contract | [`specs/`](./specs/)     | `docs/`      |
 | Understand T's game vision / UX doctrine before major UX work | [`VISION.md`](./VISION.md) | `docs/adr/`  |
 
 The boundaries, stated plainly:
@@ -39,9 +38,10 @@ The boundaries, stated plainly:
 - **[`docs/adr/`](./docs/adr/)** is **decisions** — Architecture Decision
   Records capturing the *why* behind durable architecture and product
   calls that sit above day-to-day build-plan execution.
-- **[`specs/`](./specs/)** is **contracts** — the written specification
-  for a surface *before* it is built. Start at
-  [`specs/README.md`](./specs/README.md) for workflow and status.
+- The former **`specs/`** folder (the 2026-05 screen-wiring contracts,
+  all shipped) is archived at
+  [`plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/`](../plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/).
+  New work is planned through the root loop (`plan/`, `skills/`).
 - **[`VISION.md`](./VISION.md)** is **doctrine** — T's game vision and UX
   guardrails. Read before major mobile UX, combat, mercy/friendship, or
   alignment work.
@@ -207,7 +207,6 @@ components/                reusable presentational components
 theme/                     palette + font tokens
   axm.ts                   AXM.* colours + FONTS.* family names
 assets/                    images + fonts (mostly empty placeholders)
-specs/                     planning specs — start at specs/README.md
 docs/                      design notes
   testing.md               hermetic e2e testing standard (REQUIRED)
   prompts/                 AI-assist prompt templates
@@ -253,16 +252,14 @@ Presenters are the hermetic-e2e contract — that's where the testing standard l
 
 ## AI workflow
 
-This repo uses a structured spec-driven workflow optimised for AI-
-assisted development. Pick up the loop here:
+This repo is developed through the root nexus loop. Pick it up here:
 
 - **First time?** [`AGENTS.md`](./AGENTS.md) — orientation for any
   coding agent (Claude Code, Codex, or otherwise).
-- **Picking up work?** [`specs/README.md`](./specs/README.md) — the
-  recommended order. **Spec 01 is a hard prerequisite** for every
-  other spec.
-- **Planning a change?** [`specs/00-how-to-use-specs.md`](./specs/00-how-to-use-specs.md)
-  — the operator's manual.
+- **Picking up work?** The root [`plan/bearings.md`](../plan/bearings.md)
+  and the loop verbs in [`skills/`](../skills/). The original mobile
+  screen-wiring specs (01–12, all shipped) are archived at
+  `plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/`.
 - **Writing tests?** [`docs/testing.md`](./docs/testing.md) — hermetic
   e2e standard. Every implementation must land with at least one.
 - **Engine:** `axiomancer-mechanics` — sibling workspace, consumed as
@@ -282,7 +279,8 @@ no real timers / no real fonts) + deterministic (`Math.random`
 stubbed) + isolated (`afterEach(() => jest.restoreAllMocks())`).
 
 See [`docs/testing.md`](./docs/testing.md) for the full standard.
-The harness itself ships with [`specs/01-test-harness-setup.md`](./specs/01-test-harness-setup.md).
+The harness itself shipped with spec 01 (archived:
+[`01-test-harness-setup.md`](../plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/01-test-harness-setup.md)).
 
 ## Theme
 
@@ -349,8 +347,10 @@ web coverage catches most regressions.
 ## SVG assets
 
 Every SVG in this codebase is a coded placeholder. The swap contract
-lives in [`SVG_ASSET_SPEC.md`](./SVG_ASSET_SPEC.md) and is executed
-by [`specs/11-asset-pipeline.md`](./specs/11-asset-pipeline.md).
+lives in [`SVG_ASSET_SPEC.md`](./SVG_ASSET_SPEC.md); the ingest rules for
+raster art are in [`docs/asset-conventions.md`](./docs/asset-conventions.md)
+(the original spec 11 asset pipeline is archived under
+`plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/`).
 
 ## License
 

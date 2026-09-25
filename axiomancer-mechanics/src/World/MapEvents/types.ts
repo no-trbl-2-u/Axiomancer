@@ -3,7 +3,7 @@
  *
  * Eleven event kinds plus a weighted-pool authoring model. ('quest' joined
  * the original eight in Phase 137 and was retired in Phase 61 — the
- * Quest Board minigame it launched is gone.) See `specs/23-map-events.md`
+ * Quest Board minigame it launched is gone.) See `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/23-map-events.md`
  * for the original spec; see
  * `src/World/MapEvents/resolve-map-event.ts` for the dispatcher.
  */

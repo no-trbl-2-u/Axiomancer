@@ -396,7 +396,7 @@ only node-event dispatcher.
   - `getNodePrimaryEventKind(continent, mapName, nodeId)` — the
     highest-weight kind, or `undefined` for an empty/unregistered pool.
 
-See `specs/23-map-events.md` for the spec and
+See `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/23-map-events.md` (archived) for the spec and
 `src/World/MapEvents/e2e/map-events.engine.test.ts` for the hermetic
 walkthrough covering all eight kinds.
 
@@ -417,7 +417,7 @@ as rest). Only the hazard minigame still carries a live balance sim
 
 ## See Also
 
-- [`specs/08-world-content-and-hazards.md`](../specs/08-world-content-and-hazards.md)
-- [`specs/23-map-events.md`](../specs/23-map-events.md)
+- [`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/08-world-content-and-hazards.md` (archived)](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/08-world-content-and-hazards.md)
+- [`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/23-map-events.md` (archived)](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/23-map-events.md)
 - [`docs/npcs.md`](./npcs.md) — branching dialogue UI conventions.
 - [`docs/effects.md`](./effects.md) — the effects engine.

@@ -37,7 +37,7 @@
   / amulet / ring / charm). The 7-slot model and (per the phase 19-23
   epic, as it ships) the procedural modifier/rarity/affix machinery are
   legacy.
-- Authority for meaning disputes: `docs/source-of-truth-hierarchy.md`
+- Authority for meaning disputes: root `docs/truth-sources.md` § Source-of-truth hierarchy
   (specs and ADRs outrank docs; docs outrank memory).
 
 ## How the enforcement works

@@ -1,7 +1,7 @@
 # North Star — Mörk Borg as the delivery register
 
 > **Status: RATIFIED 2026-08-22.** The five forks below were put to T
-> directly in the session `new-north-star.prompt.md` triggered
+> directly in the session `plan/archive/2026-09-25-trim-t5/new-north-star.prompt.md` triggered
 > (2026-08-20) and T picked an option for each; T then widened the
 > mandate in the same session (R-F, THE LONGER LEASH — verbatim in §1).
 > T ratified this file **as-is** in the 2026-08-22 content-pipelines

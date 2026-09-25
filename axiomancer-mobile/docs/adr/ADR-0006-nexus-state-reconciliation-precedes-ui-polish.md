@@ -24,6 +24,6 @@ Mobile already showed drift: Phase 98 had shipped but remained marked pending un
 ## Links
 
 - Phase 99 — Glanton Nexus state reconciliation guardrail
-- `docs/source-of-truth-hierarchy.md`
+- Root `docs/truth-sources.md` § Source-of-truth hierarchy
 - CDR-0001 — Source-of-truth hierarchy
 - CDR-0002 — Hermes and Nexus authority boundary

@@ -83,7 +83,7 @@ export interface InventoryItemRow {
      * `null` for non-equipment, equipped equipment, or equipment in
      * an empty slot (where the preview reduces to "no replacement —
      * the item's own stats win unopposed"). Phase 35 (ported from
-     * `design/handoff-2026-05-16/project/screens/inventory.jsx:215-225`
+     * `plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-16/project/screens/inventory.jsx:215-225`
      * `computeDelta`).
      */
     replacePreview: ReplacePreview | null;
@@ -373,7 +373,7 @@ function aggregateEquipmentStats(equipment: Equipment): Map<string, number> {
 
 /**
  * Compute the net stat-delta from replacing `oldItem` with `newItem`.
- * Mirrors `design/handoff-2026-05-16/project/screens/inventory.jsx:215-225`
+ * Mirrors `plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-16/project/screens/inventory.jsx:215-225`
  * `computeDelta` — start with new item's aggregated stats, subtract
  * the equipped item's stats, drop zero entries. Phase 35 preview.
  */

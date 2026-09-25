@@ -3,7 +3,7 @@
  * the encounter modal seal once `lastOutcome === 'defeat'`.
  *
  * Phase 70 Tick C port of the handoff bundle's `CombatDefeatModal`
- * (`design/handoff-2026-05-22/project/screens/aftermath-modal.jsx:
+ * (`plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-22/project/screens/aftermath-modal.jsx:
  * 585-703`). Sibling of `<CombatVictoryPanel>` /
  * `<CombatFriendshipPanel>` but tuned darker — no splatter, no
  * pixel emblem, no celebration. A spent-wick hairline above the

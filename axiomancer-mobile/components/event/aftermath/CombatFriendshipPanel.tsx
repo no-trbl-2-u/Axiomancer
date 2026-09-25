@@ -3,7 +3,7 @@
  * inside the encounter modal seal once `lastOutcome === 'parley'`.
  *
  * Phase 70 Tick B port of the handoff bundle's
- * `CombatFriendshipModal` (`design/handoff-2026-05-22/project/
+ * `CombatFriendshipModal` (`plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-22/project/
  * screens/aftermath-modal.jsx:446-579`). Sibling of
  * `<CombatVictoryPanel>` — same vertical rhythm, but the centerpiece
  * is the pixel-art emblem (the app's lone pixel-art carve-out;

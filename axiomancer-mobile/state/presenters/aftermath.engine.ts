@@ -89,7 +89,7 @@ export interface AftermathVictoryViewModel {
  * the friendship panel. Engine doesn't yet expose per-foe codex
  * entries, so this stays null in Tick B; the panel collapses the
  * section. Bundle shape per
- * `design/handoff-2026-05-22/project/screens/aftermath-modal.jsx:454-458`.
+ * `plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-22/project/screens/aftermath-modal.jsx:454-458`.
  */
 export interface AftermathJournalEntry {
     bookName: string;

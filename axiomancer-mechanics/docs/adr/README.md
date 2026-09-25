@@ -4,13 +4,7 @@ ADRs capture durable mechanics-engine decisions. They sit above build plans and 
 
 ## Source-of-truth hierarchy
 
-1. T's latest explicit decision.
-2. CDRs / ADRs.
-3. Central SomberSoft ledger.
-4. Active build plan.
-5. Phase candidates.
-6. Critique/audit logs.
-7. Historical reports.
+See root [`docs/truth-sources.md` § Source-of-truth hierarchy](../../../docs/truth-sources.md#source-of-truth-hierarchy--decision-authority) (the one copy).
 
 ## Records
 

@@ -2,7 +2,7 @@
  * LevelUpModal — "the ledger opens"
  *
  * Phase 73 port of the 2026-05-23 design handoff
- * (`design/handoff-2026-05-23/project/screens/levelup.jsx:246-449`).
+ * (`plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-23/project/screens/levelup.jsx:246-449`).
  *
  * Full-screen non-tap-out-dismissible stat-allocation modal. Three
  * stance rows (HEART / BODY / MIND) with ± controls, derived-preview

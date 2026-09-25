@@ -27,7 +27,7 @@ Replace the turn-based attack/defend loop with the Hazard minigame structure. Ev
 
 ## Decision / leaning
 
-**Option C — Combat as a Hazard.** Full spec written at [`specs/25-hazard-pattern-combat.md`](../specs/25-hazard-pattern-combat.md).
+**Option C — Combat as a Hazard.** Full spec written at [`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/25-hazard-pattern-combat.md` (archived)](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/25-hazard-pattern-combat.md).
 
 ## Key design choices locked in the spec
 

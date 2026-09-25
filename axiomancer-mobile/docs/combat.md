@@ -9,7 +9,7 @@
 > live in [`axiomancer-mechanics/docs/combat.md`](../../axiomancer-mechanics/docs/combat.md);
 > this doc describes only what the **mobile screen** renders and how it
 > drives that engine. (History: the retired screen was pinned by
-> [Spec 04](../specs/04-combat-screen-wiring.md), kept as a decision
+> [Spec 04](../../plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/04-combat-screen-wiring.md), archived as a decision
 > record — do not treat it as current.)
 
 ## Entry points

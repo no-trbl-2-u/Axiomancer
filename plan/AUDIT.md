@@ -58,6 +58,44 @@
 
 ## Pending
 
+### [debt] T5 Tier 2 docs — named for archive but still have consumers (2026-09-25)
+
+- **Context:** trim T5 archived the Tier 2 docs rows
+  (`plan/archive/2026-09-25-trim-t5/`). Six files the spec named have inbound
+  pointers the trim could not repoint, because the pointers live under
+  `.claude/` (classifier-blocked for autonomous runs; see the T5 hand-off
+  item 2). Kept in place per the trim standing frame ¶1; the spec's Tier 2
+  row over-counted them.
+- `axiomancer-mechanics/docs/effects.md`, `docs/enemy.md` — cited by
+  `.claude/skills/brainstorm-mechanics/SKILL.md:40,42` and
+  `.claude/skills/world-spec/SKILL.md:44`, plus live docs (`quickstart.md`,
+  `api.md`, `combat.md`, `world.md`, `morality.md`, mobile
+  `asset-conventions.md`) and a `public-barrel.engine.test.ts` comment. These
+  are reference docs kept current in place (effects.md's API table was edited
+  in T3); their stale bodies are already filed in the "stale docs" row
+  below. Rewrite in place, do not archive.
+- `axiomancer-mechanics/docs/profane-canon.md` (already HISTORICAL) — cited by
+  `.claude/agents/card-expert.md:110,150,363`, `skills/adjust-cards.md`,
+  `skills/forge.md`, spec 34, and `src/Combat/combat.objective.ts:108`.
+- `axiomancer-mechanics/specs/10-moral-difficulty-meter.md` — cited by
+  `.claude/skills/{brainstorm-mechanics,character-spec,story-spec}/SKILL.md`.
+- `axiomancer-mechanics/specs/35-objective-function-v2.md` (already
+  HISTORICAL) — cited by `.claude/agents/card-expert.md:109` and
+  `.claude/commands/combat-playtest.md:46` (and `deck-tuning.md`, which D10
+  deletes).
+- `axiomancer-mechanics/docs/reports/swap-pool-fanout-2026-07-18.md` — cited
+  only by `.claude/commands/deck-tuning.md:626` (deleted by D10) and
+  `plan/PHASE_CANDIDATES.md:298`; archive it once the D10 deletion lands.
+- **next:** in an attended session, repoint the `.claude/` citations to
+  `plan/archive/2026-09-25-trim-t5/...` (or to the live replacement doc), then
+  archive profane-canon, spec 10, spec 35 and swap-pool-fanout the same way.
+- **Hazard duplicates (spec row "hazard docs ×3"):** only one was a true
+  copy — the mobile mirror `design/encounters/hazard-card-library.md`,
+  archived in T5 (the mechanics file is the one copy). The mobile
+  `design/encounters/hazard.md` and `design/hazard-minigame-mobile.md` are
+  distinct mobile-UX docs that already point at the mechanics rules docs;
+  kept.
+
 ### [debt] T2b dice-flag collapse — live content the OFF path was carrying (2026-09-25)
 
 - **Context:** D7 deleted the Upgradeable-Dice OFF path (stance draft, hidden read, STAKE, v1 wheel, fate-X powering). The shipped model already ignored all of these; the items below were already inert in players' builds and are now visibly so.
@@ -188,11 +226,11 @@
     examples on `state.combat` / `selectStance` / `resolveCombatRound` /
     `choosing_stance` — `docs/combat.md`,
     `state/presenters/combat-encounter.engine.ts`.
-  - `axiomancer-mobile/specs/10-navigation-and-app-shell.md`,
-    `11-asset-pipeline.md`, `12-accessibility-and-theming.md` — "Current
-    state" inventories (five tabs incl. event; no assets; no type scale; no
-    a11y labels; expo-haptics) — `state/presenters/tabs.engine.ts`,
-    `assets/images/*/index.ts`, `theme/axm.ts`, `lib/platform/haptics.ts`.
+  - ~~`axiomancer-mobile/specs/10-navigation-and-app-shell.md`,
+    `11-asset-pipeline.md`, `12-accessibility-and-theming.md`~~ — archived
+    2026-09-25 (trim T5) with the whole mobile `specs/` folder to
+    `plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/`; no rewrite
+    needed.
   - `.claude/agents/playtester.md` Path A steps 3-5 and Path B — prelude modal
     / FIGHT-FLEE / stance / STAND-DO-CLASH-LET round loop —
     `axiomancer-mobile/docs/combat.md`,
@@ -200,9 +238,8 @@
 - next: one `/iterate` tick per file (or per section for combat.md): rewrite
   the body from the named live source, drop the banner. Also dated-record
   drift the audit saw but did not touch, for the same pass if cheap:
-  `axiomancer-mobile/specs/README.md` DONE dates disagree with the spec
-  headers (01: 05-11 not 05-08; 02: 05-11 not 05-09; 03: 05-12; 05/06/07/09:
-  05-13); `axiomancer-mobile/docs/E2E_INVENTORY.md` is stamped against commit
+  (the mobile `specs/README.md` DONE-date drift is moot: archived 2026-09-25,
+  trim T5); `axiomancer-mobile/docs/E2E_INVENTORY.md` is stamped against commit
   12a485d; `axiomancer-mechanics/docs/world.md:306,393,414` still says
   "all 8 MapEventKind" (union is eleven); `docs/hazard-minigame-api.md`
   names a `HazardCardEffect` type that does not exist.
@@ -893,13 +930,6 @@ present. Row stays open until that session runs.
   `CLARITY` keyword, and mobile fixtures still deck `slippery-slope` /
   `straw-mans-jab`.
 
-### `RELEASES.md` and `CHANGELOG.md` describe the retired `healFraction` as current
-- category: docs
-- impact: 2
-- ease: 9
-- detail: filed 2026-08-08 by Phase 52b. Left alone as dated release records;
-  the next release cut should note the retirement rather than rewriting them.
-
 ### Fixture player rebuild seeds the relic kit a real new game no longer has
 - category: divergence
 - impact: 3
@@ -1310,6 +1340,13 @@ present. Row stays open until that session runs.
   a flow that is otherwise working.
 
 ## Done
+
+### [x] `RELEASES.md` and `CHANGELOG.md` describe the retired `healFraction` as current — RESOLVED by archiving
+- filed 2026-08-08 by Phase 52b (docs, impact 2, ease 9). Both logs are now
+  archived with a HISTORICAL banner: `RELEASES.md` in trim T1,
+  `CHANGELOG.md` in trim T5 (2026-09-25,
+  `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/CHANGELOG.md`). No
+  live file describes `healFraction` as current.
 
 ### [x] [3.2] `CardSpecialMechanic` deprecated-name not exported — stale/resolved
 - drained 2026-07-14 via scheduled oversight: current `main` exports

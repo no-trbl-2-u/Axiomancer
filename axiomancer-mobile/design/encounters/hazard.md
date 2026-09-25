@@ -5,11 +5,11 @@
 >
 > Mechanics rules (engine, card library, thresholds) live in the mechanics repo:
 > - `docs/encounters/hazard.md` — rules source of truth
-> - `docs/encounters/hazard-card-library.md` — full card catalogue
+> - `docs/encounters/hazard-card-library.md` — full card catalogue (the only copy)
 >
 > Design history:
 > - `design/hazard-minigame-mobile.md` — original UX brief (still canonical for layout intent)
-> - `design/handoff-2026-05-16/` — Figma prototype and chat logs
+> - `plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-16/` — Figma prototype and chat logs (archived)
 
 ---
 
@@ -283,5 +283,5 @@ claimHazardRewards(cardId)     ← null = skip
 
 ## Card library
 
-See `design/encounters/hazard-card-library.md` for the full card catalogue
+See `axiomancer-mechanics/docs/encounters/hazard-card-library.md` for the full card catalogue
 (IDs, names, colors, free/surge actions, mechanics, roles, balancing notes).

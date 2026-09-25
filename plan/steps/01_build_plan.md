@@ -967,14 +967,14 @@ See the status rows above; generate briefs on demand.
   → "Miserere Mei, Deus"). Confirmed T's request: yes — T ruled the
   naming session directly mid-`/oversight` conversation, decided alongside
   setting *Mörk Borg* as the game's new tonal North Star (art/narration/
-  encounters; mechanics unchanged) — see `new-north-star.prompt.md`. T's
+  encounters; mechanics unchanged) — see `plan/archive/2026-09-25-trim-t5/new-north-star.prompt.md`. T's
   stated reason: "Miserere Mei, Deus" sounds good, chosen directly rather
   than from either naming-session pass; T explicitly scoped this
   `/oversight` tick to the name only, deferring the wider pivot to a
   future brainstorm session. Resulting commit: this one, plus
   `plan/AUDIT.md`'s product-name row (`[x]` resolved),
   `plan/archive/2026-09-25-trim-t4/plan/naming-session-2026-08-12.md` §6 (closed), `plan/bearings.md`'s
-  name line, and `new-north-star.prompt.md`; brief for 67 still to
+  name line, and `plan/archive/2026-09-25-trim-t5/new-north-star.prompt.md`; brief for 67 still to
   generate.
 
 - **2026-08-22** — actor: **T via remote Claude Code session** (the

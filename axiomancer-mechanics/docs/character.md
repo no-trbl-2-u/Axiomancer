@@ -78,7 +78,7 @@ base stats, character level, and allocation delta; returns `{ maxHealth }`
 using the same formula as `allocateStatPoint`. Pure function
 for mobile's "what-if" preview. Added by Phase 97. `allocateStatPoint`
 shipped by Phase 29 (`9f2e3f6` + `121aea8` + `db7c26f`); closes
-`specs/06-character-progression.md` Q3 + Q8.
+`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/06-character-progression.md` (archived) Q3 + Q8.
 
 ## Active Effects
 

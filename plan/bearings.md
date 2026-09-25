@@ -34,7 +34,7 @@ npm workspaces (`axiomancer-mechanics`, `axiomancer-mobile`), the repo
 and folder name, `GH_REPO`, the `axiomancer` URL scheme and
 `com.axiomancer.mobile` — and the title-screen wordmark, which is
 painted into `title-embark.jpg` and waits on new art. See
-`new-north-star.prompt.md` (repo root) for the broader Mörk-Borg-directed
+`plan/archive/2026-09-25-trim-t5/new-north-star.prompt.md` for the broader Mörk-Borg-directed
 tonal pivot this name change was decided alongside.
 
 **One hosted web surface: the public DevLog.** The product ships as
@@ -197,7 +197,7 @@ Axiomancer/
 ├── spec.md                     # product spec
 ├── AGENTS.md                   # monorepo guide + nexus standing rules
 ├── CLAUDE.md                   # pointer at AGENTS.md
-├── README.md · new-north-star.prompt.md
+├── README.md
 ├── package.json                # workspaces + root verify/deploy:check
 ├── axiomancer-mechanics/       # engine + CLI (has its own AGENTS/CLAUDE)
 ├── axiomancer-mobile/          # Expo-hosted RN app (has its own AGENTS/CLAUDE)
@@ -697,9 +697,8 @@ ambiguity.)
   Minigames: Hazard -> CDR-0006 targets. The Gathering, loot-cache (Pick
   Pool), Quest Board and Rest-posture doctrines are void with their
   retired minigames (Phases 76, 63, 61, 52e).
-- **Source-of-truth hierarchy:** T's latest explicit decision >
-  ADRs/CDRs > build plan > candidates > critique/audit >
-  historical reports. On contradiction, stop and surface drift.
+- **Source-of-truth hierarchy:** see `docs/truth-sources.md` §
+  Source-of-truth hierarchy (the one copy).
 - **Hermes-decided work lands in the queue** (adopted via /oversight
   2026-07-18): every work item decided on the Hermes side files a
   GitHub issue (or a build-plan phase row) before or alongside its
