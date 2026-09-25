@@ -84,19 +84,6 @@ function drop(id: string, weight: number): LootTableEntry {
     return { item: consumable(id), weight };
 }
 
-// ─── Canonical Tier 1 stance overrides ────────────────────────────────────────
-
-/**
- * Every authored enemy plugs the same Spec 03 Tier 1 effect IDs into its
- * `tier1Overrides`. Doing it once here keeps the library definitions
- * focused on stats / personality.
- */
-const T1_DEFAULT = {
-    body:  { attack: 'tier1_body_attack',  defend: 'tier1_body_defend'  },
-    mind:  { attack: 'tier1_mind_attack',  defend: 'tier1_mind_defend'  },
-    heart: { attack: 'tier1_heart_attack', defend: 'tier1_heart_defend' },
-} as const;
-
 const ADDED = '2026-07-06';
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -119,7 +106,6 @@ export const GraveLarva = createEnemy({
     mapName: 'fishing-village',
     difficulty: 'simple',
     logic: 'aggressive',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(80), drop('minor-healing-potion', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
     finalBlowLines: {
@@ -152,7 +138,6 @@ export const FloatEye = createEnemy({
     mapName: 'fishing-village',
     difficulty: 'normal',
     logic: 'balanced',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(70), drop('minor-healing-potion', 25), drop('healing-potion', 5)],
     philosophicalAlignment: { epistemology: 0, outlook: 0, scope: 67 },
     finalBlowLines: {
@@ -180,7 +165,6 @@ export const ChatteringSkull = createEnemy({
     mapName: 'fishing-village',
     difficulty: 'simple',
     logic: 'random',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(75), drop('clarity-serum', 20), drop('focus-vial', 5)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
     finalBlowLines: {
@@ -213,7 +197,6 @@ export const LittleBelle = createEnemy({
     mapName: 'fishing-village',
     difficulty: 'normal',
     logic: 'balanced',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(60), drop('heart-draught', 30), drop('minor-healing-potion', 10)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: -67 },
     cards: [card('thin-hymn')],
@@ -266,7 +249,6 @@ export const FootStealer = createEnemy({
     mapName: 'fishing-village',
     difficulty: 'normal',
     logic: 'aggressive',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(60), drop('body-elixir', 25), drop('minor-healing-potion', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
     finalBlowLines: {
@@ -299,7 +281,6 @@ export const WaterHolger = createEnemy({
     mapName: 'fishing-village',
     difficulty: 'normal',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(50), drop('heart-draught', 30), drop('healing-potion', 15), drop('antidote', 5)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
     cards: [card('thin-hymn')],
@@ -355,7 +336,6 @@ export const CursedHead = createEnemy({
     mapName: 'fishing-village',
     difficulty: 'normal',
     logic: 'random',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(60), drop('heart-draught', 25), drop('minor-healing-potion', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
     finalBlowLines: {
@@ -383,7 +363,6 @@ export const Ghast = createEnemy({
     mapName: 'fishing-village',
     difficulty: 'normal',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(55), drop('clarity-serum', 25), drop('focus-vial', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
     cards: [card('scolds-bridle')],
@@ -412,7 +391,6 @@ export const DoomEgg = createEnemy({
     mapName: 'fishing-village',
     difficulty: 'normal',
     logic: 'defensive',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(55), drop('antidote', 25), drop('healing-potion', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
     finalBlowLines: {
@@ -440,10 +418,6 @@ export const TheButcher = createEnemy({
     mapName: 'fishing-village',
     difficulty: 'elite',
     logic: 'aggressive',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 2, defend: 2 },
-    },
     loot: [none(35), drop('body-elixir', 35), drop('healing-potion', 20), drop('berserker-brew', 10)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
     cards: [card('unction-of-boils')],
@@ -472,10 +446,6 @@ export const BrineHag = createEnemy({
     mapName: 'fishing-village',
     difficulty: 'elite',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        heart: { attack: 2, defend: 2 },
-    },
     loot: [none(35), drop('heart-draught', 30), drop('healing-potion', 20), drop('resonance-crystal', 15)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
     cards: [card('thin-hymn')],
@@ -534,10 +504,6 @@ export const TheFerryman = createEnemy({
     mapName: 'fishing-village',
     difficulty: 'elite',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        mind: { attack: 2, defend: 2 },
-    },
     loot: [none(35), drop('clarity-serum', 25), drop('focus-vial', 25), drop('philosopher-tea', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
     cards: [card('the-long-lent')],
@@ -630,11 +596,6 @@ export const KingOfRevenge = createEnemy({
             curseCardId: 'arrears',
         },
     ],
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body:  { attack: 3, defend: 3 },
-        heart: { attack: 2, defend: 2 },
-    },
     loot: [
         drop('healing-potion', 50),
         drop('body-elixir', 30),
@@ -715,7 +676,6 @@ export const Wichtlein = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'normal',
     logic: 'defensive',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(55), drop('focus-vial', 25), drop('clarity-serum', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 },
     cards: [card('scolds-bridle')],
@@ -784,12 +744,6 @@ export const Kudan = createEnemy({
             threatBonus: 0.6,
         },
     ],
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body:  { attack: 3, defend: 3 },
-        mind:  { attack: 3, defend: 3 },
-        heart: { attack: 3, defend: 3 },
-    },
     loot: [
         drop('void-essence', 60),
         drop('philosopher-tea', 30),
@@ -831,7 +785,6 @@ export const BullBegger = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'normal',
     logic: 'aggressive',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(60), drop('body-elixir', 25), drop('healing-potion', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
     finalBlowLines: {
@@ -859,7 +812,6 @@ export const WeepingHead = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'normal',
     logic: 'defensive',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(55), drop('heart-draught', 30), drop('healing-potion', 15)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: -67 },
     cards: [card('thin-hymn')],
@@ -888,7 +840,6 @@ export const GoblinShaman = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'normal',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(50), drop('clarity-serum', 25), drop('focus-vial', 15), drop('philosopher-tea', 10)],
     philosophicalAlignment: { epistemology: -67, outlook: 0, scope: 0 },
     cards: [card('shallow-grave')],
@@ -917,7 +868,6 @@ export const Sugata = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'normal',
     logic: 'random',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(55), drop('heart-draught', 25), drop('quicksilver-vial', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: 0, scope: -67 },
     finalBlowLines: {
@@ -945,7 +895,6 @@ export const PaleBrood = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'normal',
     logic: 'aggressive',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(60), drop('body-elixir', 25), drop('healing-potion', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
     finalBlowLines: {
@@ -978,7 +927,6 @@ export const TriEyes = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'normal',
     logic: 'balanced',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(50), drop('clarity-serum', 30), drop('healing-potion', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 0 },
     cards: [card('scolds-bridle'), card('passing-bell')],
@@ -1029,10 +977,6 @@ export const Mabadi = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 2, defend: 2 },
-    },
     loot: [none(40), drop('body-elixir', 30), drop('whetstone-oil', 20), drop('healing-potion', 10)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: -67 },
     cards: [card('knucklebone-recant')],
@@ -1061,10 +1005,6 @@ export const FrayedOne = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        mind: { attack: 2, defend: 2 },
-    },
     loot: [none(40), drop('clarity-serum', 25), drop('void-essence', 20), drop('philosopher-tea', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
     cards: [card('the-long-lent')],
@@ -1093,10 +1033,6 @@ export const BoneTotem = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'defensive',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        mind: { attack: 2, defend: 2 },
-    },
     loot: [none(40), drop('iron-skin-draught', 25), drop('clarity-serum', 20), drop('void-essence', 15)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 67 },
     cards: [card('unction-of-boils')],
@@ -1125,10 +1061,6 @@ export const BoneWizard = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        mind: { attack: 2, defend: 2 },
-    },
     loot: [none(35), drop('philosopher-tea', 25), drop('clarity-serum', 25), drop('void-essence', 15)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 67 },
     cards: [card('spoiled-poultice')],
@@ -1186,12 +1118,6 @@ export const Mirac = createEnemy({
             curseCardId: 'overheard-name',
         },
     ],
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 3, defend: 3 },
-        mind: { attack: 3, defend: 3 },
-        heart: { attack: 2, defend: 2 },
-    },
     loot: [
         drop('philosopher-tea', 40),
         drop('void-essence', 30),
@@ -1229,10 +1155,6 @@ export const CursedPaladin = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'balanced',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 2, defend: 2 },
-    },
     loot: [none(35), drop('iron-skin-draught', 25), drop('body-elixir', 25), drop('healing-potion', 15)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
     cards: [card('knucklebone-recant'), card('thin-hymn')],
@@ -1261,7 +1183,6 @@ export const VampireThrall = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'normal',
     logic: 'aggressive',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(55), drop('body-elixir', 25), drop('healing-potion', 20)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
     cards: [card('unction-of-boils')],
@@ -1290,10 +1211,6 @@ export const HasshakuSama = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        heart: { attack: 2, defend: 2 },
-    },
     loot: [none(30), drop('heart-draught', 30), drop('healing-potion', 25), drop('resonance-crystal', 15)],
     philosophicalAlignment: { epistemology: -67, outlook: 0, scope: -67 },
     cards: [card('thin-hymn'), card('thin-hymn')],
@@ -1354,10 +1271,6 @@ export const JeweledTree = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'defensive',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        heart: { attack: 2, defend: 2 },
-    },
     // Phase 102 — the gemstone eyes do not stay in the bark. SUMMON 2.
     // `keywords` REPLACES `defaultEnemyKeywords` wholesale (see `Enemy/index.ts`),
     // so HIDE 5 is re-listed by hand to keep the retrofit from being a silent
@@ -1396,10 +1309,6 @@ export const OgreNaga = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'aggressive',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 2, defend: 2 },
-    },
     loot: [none(35), drop('body-elixir', 30), drop('hunters-elixir', 20), drop('greater-healing-potion', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
     cards: [card('unction-of-boils')],
@@ -1428,10 +1337,6 @@ export const Sidelle = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 2, defend: 2 },
-    },
     loot: [none(35), drop('whetstone-oil', 25), drop('body-elixir', 25), drop('greater-healing-potion', 15)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
     cards: [card('knucklebone-recant')],
@@ -1494,11 +1399,6 @@ export const RawheadRex = createEnemy({
             curseCardId: 'gnaw-marks',
         },
     ],
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body:  { attack: 3, defend: 3 },
-        heart: { attack: 2, defend: 2 },
-    },
     loot: [
         drop('greater-healing-potion', 40),
         drop('body-elixir', 25),
@@ -1557,11 +1457,6 @@ export const FateSpinner = createEnemy({
             threatBonus: 0.5,
         },
     ],
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        mind:  { attack: 3, defend: 3 },
-        heart: { attack: 2, defend: 2 },
-    },
     loot: [
         drop('philosopher-tea', 40),
         drop('clarity-serum', 30),
@@ -1633,11 +1528,6 @@ export const AshenBoneDrake = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'balanced',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 2, defend: 2 },
-        mind: { attack: 2, defend: 2 },
-    },
     loot: [none(30), drop('iron-skin-draught', 25), drop('greater-healing-potion', 25), drop('war-horn-draught', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 0 },
     cards: [card('knucklebone-recant'), card('shallow-grave')],
@@ -1690,11 +1580,6 @@ export const RaAminKa = createEnemy({
             threatBonus: 0.5,
         },
     ],
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        mind: { attack: 3, defend: 3 },
-        body: { attack: 2, defend: 2 },
-    },
     loot: [
         drop('philosopher-tea', 35),
         drop('void-essence', 30),
@@ -1728,10 +1613,6 @@ export const LadyGabriella = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        heart: { attack: 2, defend: 2 },
-    },
     loot: [none(30), drop('heart-draught', 30), drop('regeneration-tonic', 20), drop('greater-healing-potion', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
     cards: [card('thin-hymn'), card('thin-hymn')],
@@ -1792,10 +1673,6 @@ export const Zoma = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        mind: { attack: 2, defend: 2 },
-    },
     loot: [none(30), drop('philosopher-tea', 30), drop('clarity-serum', 25), drop('greater-resonance-crystal', 15)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 0 },
     cards: [card('scolds-bridle'), card('shallow-grave')],
@@ -1824,11 +1701,6 @@ export const MabadiUndrowned = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 2, defend: 2 },
-        mind: { attack: 2, defend: 2 },
-    },
     loot: [none(30), drop('body-elixir', 25), drop('whetstone-oil', 25), drop('supreme-healing-potion', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
     cards: [card('knucklebone-recant'), card('spoiled-poultice')],
@@ -1861,10 +1733,6 @@ export const TriEyesHollowed = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        mind: { attack: 3, defend: 3 },
-    },
     loot: [none(30), drop('clarity-serum', 25), drop('philosopher-tea', 25), drop('void-essence', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 67 },
     cards: [card('passing-bell'), card('the-long-lent')],
@@ -1893,10 +1761,6 @@ export const BlackDeath = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'aggressive',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 3, defend: 3 },
-    },
     loot: [none(25), drop('antidote', 30), drop('supreme-healing-potion', 25), drop('phoenix-tear', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
     cards: [card('unction-of-boils'), card('knucklebone-recant')],
@@ -1925,10 +1789,6 @@ export const TheUnnameable = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        mind: { attack: 3, defend: 3 },
-    },
     loot: [none(25), drop('void-essence', 35), drop('philosopher-tea', 20), drop('supreme-healing-potion', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: 67 },
     cards: [card('spoiled-poultice'), card('shallow-grave')],
@@ -1957,10 +1817,6 @@ export const FireGiant = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'aggressive',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 3, defend: 3 },
-    },
     loot: [none(25), drop('war-horn-draught', 30), drop('supreme-healing-potion', 25), drop('iron-skin-draught', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: 0, scope: -67 },
     cards: [card('unction-of-boils'), card('knucklebone-recant')],
@@ -1989,11 +1845,6 @@ export const GreaterDevil = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'elite',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 3, defend: 3 },
-        mind: { attack: 2, defend: 2 },
-    },
     loot: [none(25), drop('void-essence', 30), drop('supreme-healing-potion', 25), drop('greater-resonance-crystal', 20)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 },
     cards: [card('scolds-bridle'), card('ossuary-drawer')],
@@ -2047,11 +1898,6 @@ export const Rangda = createEnemy({
             threatBonus: 0.55,
         },
     ],
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        heart: { attack: 3, defend: 3 },
-        mind:  { attack: 2, defend: 2 },
-    },
     loot: [
         drop('phoenix-tear', 35),
         drop('supreme-healing-potion', 25),
@@ -2148,11 +1994,6 @@ export const ZomaAscendant = createEnemy({
             threatBonus: 0.55,
         },
     ],
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        mind:  { attack: 3, defend: 3 },
-        heart: { attack: 2, defend: 2 },
-    },
     loot: [
         drop('philosopher-tea', 35),
         drop('void-essence', 30),
@@ -2211,11 +2052,6 @@ export const ElderFireGiant = createEnemy({
             threatBonus: 0.6,
         },
     ],
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 3, defend: 3 },
-        mind: { attack: 2, defend: 2 },
-    },
     loot: [
         drop('supreme-healing-potion', 35),
         drop('war-horn-draught', 25),
@@ -2274,11 +2110,6 @@ export const Tezcatlipoca = createEnemy({
             threatBonus: 0.5,
         },
     ],
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        mind:  { attack: 3, defend: 3 },
-        heart: { attack: 2, defend: 2 },
-    },
     loot: [
         drop('void-essence', 35),
         drop('philosopher-tea', 25),
@@ -2336,11 +2167,6 @@ export const ArchDemon = createEnemy({
             curseCardId: 'gnaw-marks',
         },
     ],
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 3, defend: 3 },
-        mind: { attack: 3, defend: 3 },
-    },
     loot: [
         drop('void-essence', 35),
         drop('supreme-healing-potion', 25),
@@ -2399,12 +2225,6 @@ export const Beelzebub = createEnemy({
             threatBonus: 0.55,
         },
     ],
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body:  { attack: 3, defend: 3 },
-        mind:  { attack: 3, defend: 3 },
-        heart: { attack: 3, defend: 3 },
-    },
     loot: [
         drop('void-essence', 40),
         drop('revive-crystal', 25),
@@ -2471,12 +2291,6 @@ export const Death = createEnemy({
             curseCardId: 'arrears',
         },
     ],
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body:  { attack: 3, defend: 3 },
-        mind:  { attack: 3, defend: 3 },
-        heart: { attack: 3, defend: 3 },
-    },
     loot: [
         drop('void-essence', 45),
         drop('revive-crystal', 30),
@@ -2554,12 +2368,6 @@ export const TheAbortive = createEnemy({
             threatBonus: 0.6,
         },
     ],
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body:  { attack: 3, defend: 3 },
-        mind:  { attack: 3, defend: 3 },
-        heart: { attack: 3, defend: 3 },
-    },
     loot: [
         drop('void-essence', 50),
         drop('revive-crystal', 25),
@@ -2615,7 +2423,6 @@ export const SeamTick = createEnemy({
     mapName: 'caverns',
     difficulty: 'normal',
     logic: 'aggressive',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(60), drop('body-elixir', 20), drop('healing-potion', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
     finalBlowLines: {
@@ -2643,7 +2450,6 @@ export const PropWight = createEnemy({
     mapName: 'caverns',
     difficulty: 'normal',
     logic: 'defensive',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(55), drop('clarity-serum', 25), drop('focus-vial', 20)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
     finalBlowLines: {
@@ -2671,10 +2477,6 @@ export const UnpaidDelver = createEnemy({
     mapName: 'caverns',
     difficulty: 'elite',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 2, defend: 2 },
-    },
     loot: [none(40), drop('whetstone-oil', 25), drop('iron-skin-draught', 20), drop('healing-potion', 15)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
     finalBlowLines: {
@@ -2702,7 +2504,6 @@ export const SumpMaren = createEnemy({
     mapName: 'caverns',
     difficulty: 'normal',
     logic: 'defensive',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(55), drop('heart-draught', 30), drop('healing-potion', 15)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: -67 },
     finalBlowLines: {
@@ -2744,7 +2545,6 @@ export const NinthRungSpider = createEnemy({
     mapName: 'caverns',
     difficulty: 'normal',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(55), drop('focus-vial', 25), drop('healing-potion', 20)],
     philosophicalAlignment: { epistemology: 33, outlook: -67, scope: -33 },
     finalBlowLines: {
@@ -2772,10 +2572,6 @@ export const SporeWarden = createEnemy({
     mapName: 'caverns',
     difficulty: 'elite',
     logic: 'defensive',
-    procUnlocks: {
-        body: { attack: 2, defend: 2 },
-    },
-    tier1Overrides: T1_DEFAULT,
     loot: [none(40), drop('iron-skin-draught', 25), drop('clarity-serum', 20), drop('greater-healing-potion', 15)],
     philosophicalAlignment: { epistemology: -33, outlook: -33, scope: 33 },
     finalBlowLines: {
@@ -2803,7 +2599,6 @@ export const TollSergeant = createEnemy({
     mapName: 'northern-city',
     difficulty: 'normal',
     logic: 'aggressive',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(50), drop('body-elixir', 25), drop('healing-potion', 25)],
     philosophicalAlignment: { epistemology: 0, outlook: 0, scope: -67 },
     finalBlowLines: {
@@ -2831,10 +2626,6 @@ export const GuildKnife = createEnemy({
     mapName: 'northern-city',
     difficulty: 'elite',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 2, defend: 2 },
-    },
     // Phase 90 — a short blade doesn't deliver its invoice in one stroke:
     // FLURRY 3 (clause by clause, per the cause line already on the books).
     keywords: [{ kind: 'flurry', n: 3 }],
@@ -2865,7 +2656,6 @@ export const TheFactor = createEnemy({
     mapName: 'northern-city',
     difficulty: 'normal',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(50), drop('clarity-serum', 25), drop('philosopher-tea', 15), drop('focus-vial', 10)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: 0 },
     finalBlowLines: {
@@ -2893,7 +2683,6 @@ export const WharfShrike = createEnemy({
     mapName: 'northern-city',
     difficulty: 'normal',
     logic: 'random',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(60), drop('quicksilver-vial', 20), drop('healing-potion', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
     finalBlowLines: {
@@ -2952,12 +2741,6 @@ export const TheHarbormaster = createEnemy({
             curseCardId: 'mouthful-of-brine',
         },
     ],
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 3, defend: 3 },
-        mind: { attack: 3, defend: 3 },
-        heart: { attack: 2, defend: 2 },
-    },
     loot: [
         drop('philosopher-tea', 40),
         drop('void-essence', 30),
@@ -3017,7 +2800,6 @@ export const TheStamper = createEnemy({
     mapName: 'the-capital',
     difficulty: 'normal',
     logic: 'aggressive',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(50), drop('body-elixir', 25), drop('healing-potion', 25)],
     philosophicalAlignment: { epistemology: 33, outlook: -67, scope: -67 },
     finalBlowLines: {
@@ -3045,7 +2827,6 @@ export const TheUnderclerk = createEnemy({
     mapName: 'the-capital',
     difficulty: 'normal',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(50), drop('clarity-serum', 25), drop('focus-vial', 25)],
     philosophicalAlignment: { epistemology: 67, outlook: -33, scope: -67 },
     finalBlowLines: {
@@ -3090,7 +2871,6 @@ export const ReedAmbusher = createEnemy({
     mapName: 'connecting-river',
     difficulty: 'normal',
     logic: 'aggressive',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(55), drop('healing-potion', 25), drop('body-elixir', 20)],
     philosophicalAlignment: { epistemology: 0, outlook: -67, scope: -67 },
     finalBlowLines: {
@@ -3118,7 +2898,6 @@ export const TollSkiff = createEnemy({
     mapName: 'connecting-river',
     difficulty: 'normal',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(50), drop('quicksilver-vial', 25), drop('clarity-serum', 25)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: -67 },
     finalBlowLines: {
@@ -3146,10 +2925,6 @@ export const WeirWidow = createEnemy({
     mapName: 'connecting-river',
     difficulty: 'elite',
     logic: 'defensive',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        heart: { attack: 2, defend: 2 },
-    },
     loot: [none(45), drop('heart-draught', 30), drop('healing-potion', 25)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: -67 },
     finalBlowLines: {
@@ -3185,7 +2960,6 @@ export const DriftAnchor = createEnemy({
     mapName: 'connecting-river',
     difficulty: 'normal',
     logic: 'aggressive',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(50), drop('body-elixir', 30), drop('healing-potion', 20)],
     philosophicalAlignment: { epistemology: -33, outlook: -67, scope: -33 },
     finalBlowLines: {
@@ -3244,12 +3018,6 @@ export const TheWaterreeve = createEnemy({
             curseCardId: 'arrears',
         },
     ],
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 2, defend: 2 },
-        mind: { attack: 3, defend: 3 },
-        heart: { attack: 2, defend: 2 },
-    },
     loot: [
         drop('philosopher-tea', 35),
         drop('void-essence', 25),
@@ -3282,7 +3050,6 @@ export const DowryCollector = createEnemy({
     mapName: 'town-across-river',
     difficulty: 'normal',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(50), drop('clarity-serum', 25), drop('focus-vial', 25)],
     philosophicalAlignment: { epistemology: 67, outlook: -67, scope: -67 },
     finalBlowLines: {
@@ -3310,10 +3077,6 @@ export const TheKeptSuitor = createEnemy({
     mapName: 'town-across-river',
     difficulty: 'elite',
     logic: 'aggressive',
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        heart: { attack: 2, defend: 2 },
-    },
     loot: [none(40), drop('heart-draught', 30), drop('whetstone-oil', 20), drop('healing-potion', 10)],
     philosophicalAlignment: { epistemology: -67, outlook: -67, scope: 0 },
     finalBlowLines: {
@@ -3348,7 +3111,6 @@ export const TheAdjuster = createEnemy({
     mapName: 'town-across-river',
     difficulty: 'normal',
     logic: 'strategic',
-    tier1Overrides: T1_DEFAULT,
     loot: [none(50), drop('clarity-serum', 25), drop('quicksilver-vial', 25)],
     philosophicalAlignment: { epistemology: 67, outlook: -33, scope: -33 },
     finalBlowLines: {
@@ -3407,12 +3169,6 @@ export const ThePortreeve = createEnemy({
             curseCardId: 'arrears',
         },
     ],
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 3, defend: 3 },
-        mind: { attack: 2, defend: 2 },
-        heart: { attack: 2, defend: 2 },
-    },
     loot: [
         drop('quicksilver-vial', 30),
         drop('void-essence', 30),
@@ -3484,11 +3240,6 @@ export const TheDoorwarden = createEnemy({
             threatBonus: 0.5,
         },
     ],
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 3, defend: 3 },
-        mind: { attack: 2, defend: 2 },
-    },
     loot: [
         drop('healing-potion', 40),
         drop('iron-skin-draught', 25),
@@ -3565,11 +3316,6 @@ export const TheIndex = createEnemy({
             curseCardId: 'overheard-name',
         },
     ],
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        mind: { attack: 3, defend: 3 },
-        body: { attack: 2, defend: 2 },
-    },
     loot: [
         drop('philosopher-tea', 35),
         drop('clarity-serum', 25),
@@ -3650,12 +3396,6 @@ export const TheSophist = createEnemy({
             curseCardId: 'overheard-name',
         },
     ],
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        mind:  { attack: 3, defend: 3 },
-        heart: { attack: 3, defend: 3 },
-        body:  { attack: 2, defend: 2 },
-    },
     loot: [
         drop('philosopher-tea', 35),
         drop('clarity-serum', 25),
@@ -3737,7 +3477,6 @@ export const Sandbag_01 = createEnemy({
     mapName: 'northern-forest',
     difficulty: 'simple',
     logic: 'random',
-    tier1Overrides: T1_DEFAULT,
     philosophicalAlignment: { epistemology: 0, outlook: 0, scope: 0 },
 });
 
@@ -3815,12 +3554,6 @@ export const TheIncompleteness = createEnemy({
             curseCardId: 'overheard-name',
         },
     ],
-    tier1Overrides: T1_DEFAULT,
-    procUnlocks: {
-        body: { attack: 3, defend: 3 },
-        mind: { attack: 3, defend: 3 },
-        heart: { attack: 3, defend: 3 },
-    },
     // It drops nothing; the fight is the lesson.
     loot: [none(100)],
     philosophicalAlignment: { epistemology: 67, outlook: 0, scope: 67 },

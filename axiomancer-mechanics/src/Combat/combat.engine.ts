@@ -3384,8 +3384,6 @@ function playBottomAction(
             } else if (active) {
                 events.push({ kind: 'effect-landed', cardId: card.id, effectId: def.id, target, effectKind: 'none', intensity: active.intensity, effect: def });
             }
-        } else if (ev.kind === 'buff-fumbled') {
-            events.push({ kind: 'effect-fizzled', cardId: card.id, effectId: ev.effect.id, message: ev.message });
         } else if (ev.kind === 'buff-stripped') {
             events.push({
                 kind: 'buff-stripped', cardId: card.id, target: ev.target,

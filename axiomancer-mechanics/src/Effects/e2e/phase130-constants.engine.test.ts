@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { EFFECTS_RESOLUTION_DEBUFF_INTENSITY_THRESHOLD, EFFECTS_RESOLUTION_DOT_DAMAGE_THRESHOLD, EFFECT_BASE_PROC_INTENSITY } from '../../Game/game-mechanics.constants';
+import { EFFECTS_RESOLUTION_DEBUFF_INTENSITY_THRESHOLD, EFFECTS_RESOLUTION_DOT_DAMAGE_THRESHOLD} from '../../Game/game-mechanics.constants';
 import { TriEyes, LadyGabriella, HasshakuSama } from '../../Enemy/enemy.library';
 
 describe('Phase 130 — Constants and config verification', () => {
@@ -18,12 +18,6 @@ describe('Phase 130 — Constants and config verification', () => {
 
         it('should have lowered DoT damage threshold from 3 to 2', () => {
             expect(EFFECTS_RESOLUTION_DOT_DAMAGE_THRESHOLD).toBe(2);
-        });
-    });
-
-    describe('Base proc intensity increased for STRATEGIST targeting', () => {
-        it('should have increased base proc intensity from 1 to 2', () => {
-            expect(EFFECT_BASE_PROC_INTENSITY).toBe(2);
         });
     });
 

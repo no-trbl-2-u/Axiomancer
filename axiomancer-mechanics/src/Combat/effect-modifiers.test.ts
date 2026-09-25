@@ -10,7 +10,6 @@ import { effectsLibrary } from '../Effects/effects.library';
 import {
     getActiveEffectModifiers,
     getActiveDotTotal,
-    getEffectiveStats,
     canAct,
 } from './effect-modifiers';
 import {
@@ -18,8 +17,6 @@ import {
     processDamageOverTime, processRoundStartEffects, processRoundEndEffects,
     applyCleanse, applyDispel,
 } from './effects';
-import { resolveEffectiveAdvantage } from './advantage';
-import { getAttackStat, getDefenseStat } from './stats';
 
 /**
  * The spec 32 v3 keyword reset deleted the library effects that used to carry
@@ -216,62 +213,6 @@ describe('canAct (Q7 precedence)', () => {
     });
 });
 
-describe('getEffectiveStats', () => {
-    it('flat stat modifier on a base stat re-derives derived stats', () => {
-        // test_band — +3 body, +4 physicalDefense (retired stat-band shape).
-        const t = fixture([ae('test_band')]);
-        const eff = getEffectiveStats(t);
-        // body 5 + 3 = 8; physicalAttack derives from body × 1
-        expect(eff.baseStats.body).toBe(8);
-        expect(eff.derivedStats.physicalAttack).toBe(8);
-        // physicalDefense = body(8) × 3 + 4 direct = 28
-        expect(eff.derivedStats.physicalDefense).toBe(28);
-    });
-
-    it('multiplier on body scales every body-derived stat', () => {
-        // test_mult125: ×1.25 on body
-        const t = fixture([ae('test_mult125')]);
-        const eff = getEffectiveStats(t);
-        expect(eff.baseStats.body).toBe(5 * 1.25);
-        // physicalDefense = body * 3 = 5 * 1.25 * 3 = 18.75
-        expect(eff.derivedStats.physicalDefense).toBeCloseTo(18.75, 4);
-    });
-
-    it('exposes defenseDelta separately from stats', () => {
-        // buff_damage_reduction: defenseModifier +5
-        const t = fixture([ae('buff_damage_reduction')]);
-        const eff = getEffectiveStats(t);
-        expect(eff.defenseDelta).toBe(5);
-    });
-
-    it('intensity scales flat modifiers', () => {
-        const t = fixture([ae('test_band', 3)]);
-        const eff = getEffectiveStats(t);
-        // +3 body × 3 intensity = +9 body; physicalDefense +4 × 3 = +12 direct
-        expect(eff.baseStats.body).toBe(14);
-        expect(eff.derivedStats.physicalDefense).toBe(14 * 3 + 12);
-    });
-});
-
-describe('stat lookup helpers honor effective stats and defenseDelta', () => {
-    it('getDefenseStat folds defenseDelta into derived defense', () => {
-        const t = fixture([ae('buff_damage_reduction')]); // +5 defenseModifier
-        // physicalDefense base = body(5) × 3 = 15; +5 delta = 20
-        expect(getDefenseStat(t, 'body')).toBe(20);
-    });
-
-    it('getAttackStat reflects re-derived stat after base-stat mod', () => {
-        const t = fixture([ae('test_band')]); // +3 body
-        // physicalAttack = body(8) × 1 = 8
-        expect(getAttackStat(t, 'body')).toBe(8);
-    });
-
-    it('getResistStat returns effective base stat', () => {
-        const t = fixture([ae('test_band')]); // +3 body
-        expect(getEffectiveStats(t).baseStats.body).toBe(8);
-    });
-});
-
 describe('DoT and drain HP changes', () => {
     it('processDamageOverTime applies start-phase damage only', () => {
         // WS3.3: poison left the round clocks — the round-clocked witness is
@@ -378,26 +319,3 @@ describe('applyCleanse / applyDispel (Q10)', () => {
     });
 });
 
-describe('resolveEffectiveAdvantage (Q8)', () => {
-    it('granted advantage on attacker stance overrides matchup', () => {
-        // matchup is disadvantage but test_adv_body grants advantage on body
-        const adv = resolveEffectiveAdvantage('disadvantage', [ae('test_adv_body')], 'body');
-        expect(adv).toBe('advantage');
-    });
-
-    it('granted disadvantage overrides matchup advantage', () => {
-        // grantDisadvantage on body via test_disadv_all
-        const adv = resolveEffectiveAdvantage('advantage', [ae('test_disadv_all')], 'body');
-        expect(adv).toBe('disadvantage');
-    });
-
-    it('falls back to matchup when no override applies', () => {
-        const adv = resolveEffectiveAdvantage('neutral', [], 'body');
-        expect(adv).toBe('neutral');
-    });
-
-    it('grant on a different stance does not affect this stance', () => {
-        const adv = resolveEffectiveAdvantage('neutral', [ae('test_adv_body')], 'heart');
-        expect(adv).toBe('neutral');
-    });
-});

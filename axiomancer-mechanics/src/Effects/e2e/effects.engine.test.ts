@@ -1,5 +1,5 @@
 import { afterEach, describe, it, expect, vi } from 'vitest';
-import { applyEffect, clearTier1EffectsForStance, removeEffect, removeEffectsByType } from '../index';
+import { applyEffect, removeEffect, removeEffectsByType } from '../index';
 
 afterEach(() => {
     vi.restoreAllMocks();
@@ -95,32 +95,6 @@ describe('applyEffect', () => {
             const { activeEffects: second } = applyEffect(first, effect, 2, { sourceId: 'enemy-b' });
             expect(second[0].sourceId).toBe('enemy-b');
         });
-    });
-});
-
-describe('clearTier1EffectsForStance', () => {
-    it('clears buffs from other stances', () => {
-        const effects: ActiveEffect[] = [
-            { effectId: 'tier1_body_attack', remainingDuration: 2, intensity: 1, appliedAt: 1, tier: 1 },
-            { effectId: 'tier1_heart_defend', remainingDuration: 3, intensity: 1, appliedAt: 1, tier: 1 },
-        ];
-        const { activeEffects, cleared } = clearTier1EffectsForStance(effects, 'body');
-        expect(activeEffects).toHaveLength(1);
-        expect(activeEffects[0].effectId).toBe('tier1_body_attack');
-        expect(cleared).toHaveLength(1);
-    });
-
-    // The tier1_* library entries were retired by the spec 32 v3 keyword
-    // reset; the id-prefix machinery survives for save back-compat, so the
-    // clear only ever touches ids with the `tier1_` prefix.
-    it('keeps non-tier1 effects (card-vocabulary statuses are never stance-cleared)', () => {
-        const effects: ActiveEffect[] = [
-            { effectId: 'debuff_mark', remainingDuration: 3, intensity: 2, appliedAt: 1, tier: 1 },
-            { effectId: 'buff_thorns', remainingDuration: 2, intensity: 1, appliedAt: 1, tier: 1 },
-        ];
-        const { activeEffects, cleared } = clearTier1EffectsForStance(effects, 'body');
-        expect(activeEffects).toHaveLength(2);
-        expect(cleared).toHaveLength(0);
     });
 });
 

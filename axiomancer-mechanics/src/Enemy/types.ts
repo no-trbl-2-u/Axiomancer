@@ -1,9 +1,7 @@
 import { Card } from '../Cards/types';
 import { MapName } from '../World/map.library';
-import { Stance } from '../Combat/types';
 import { BaseStats, DerivedStats } from '../Character/types';
 import { ActiveEffect } from '../Effects/types';
-import { ProcOverrides, ProcUnlocks } from '../Combat/combat-effects';
 import { Item } from '../Items/types';
 import { PhilosophicalAlignment } from '../Ledger/types';
 import { FactionReputationDelta } from '../Faction/types';
@@ -79,14 +77,6 @@ export type EnemyLogic =
  * Difficulty classification used by the world to seed encounters.
  */
 export type EnemyDifficulty = 'simple' | 'normal' | 'elite' | 'boss' | 'unique';
-
-/**
- * Per-enemy override for the default Tier 1 stance-effect map. Only the
- * effect ID is overridden; the action's target (self/opponent) and stacking
- * options are preserved from the global map.
- */
-export type Tier1EffectOverrides =
-    Partial<Record<Stance, Partial<Record<'attack' | 'defend', string>>>>;
 
 /**
  * Phase 60 — per-enemy content awarded when combat resolves via
@@ -216,7 +206,6 @@ export interface CauseLines {
  * @property mapName      - The map this enemy belongs to.
  * @property logic        - AI strategy.
  * @property difficulty   - Optional encounter classification.
- * @property tier1Overrides - Optional Tier 1 effect ID overrides per stance.
  * @property cards        - Optional card rotation the enemy can use.
  * @property loot         - Optional weighted drop table (Spec 07 Q7B). Each
  *                          successful kill rolls the table once. May be empty
@@ -235,18 +224,6 @@ export interface Enemy {
     mapName: MapName;
     logic: EnemyLogic;
     difficulty?: EnemyDifficulty;
-    tier1Overrides?: Tier1EffectOverrides;
-    /**
-     * Spec 03 — per-cell proc unlock caps for this enemy. Default cap is
-     * tier 1; elite / boss enemies bump the cap to enable higher-tier procs.
-     */
-    procUnlocks?: ProcUnlocks;
-    /**
-     * Spec 03 — per-cell custom proc tables that fully replace the global
-     * entries for that Stance × action combo. Bosses get unique tables here;
-     * elite / basic enemies receive map-themed overrides (Q7).
-     */
-    procOverrides?: ProcOverrides;
     cards?: Card[];
     /** Weighted drop table — see {@link LootTableEntry}. */
     loot?: LootTableEntry[];

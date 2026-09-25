@@ -16,7 +16,6 @@ import { GameAction } from './actions.types';
 import { Character } from '../Character/types';
 import { Encounter, QuestLog } from '../World/types';
 import { Enemy } from '../Enemy/types';
-import { applyMoralMeterScaling } from '../Combat/difficulty';
 import {
     useConsumable as useConsumableItem,
 } from '../Items/item.reducer';
@@ -293,13 +292,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
                 throw new Error('START_COMBAT: encounter has no enemies.');
             }
 
-            // Apply moral meter scaling to enemy stats (Phase 92)
+            // The Phase 92 moral-meter stat scaling that stood here was a
+            // provable no-op (uniform scaling never changes the argmax
+            // stance, and combat reads no stat) — deleted in TRIM THE FAT T2a.
             const enemy = encounter.enemies[0]!;
-            const scaledBaseStats = applyMoralMeterScaling(enemy.baseStats, staged.moralMeter);
-            let scaledEnemy = {
-                ...enemy,
-                baseStats: scaledBaseStats,
-            };
+            let scaledEnemy = { ...enemy };
             
             // Phase 109 — Apply 'open-minded' status to region bosses when the region was spared
             const isBoss = enemy.difficulty === 'boss';

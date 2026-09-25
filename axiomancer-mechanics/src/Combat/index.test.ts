@@ -1,8 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
-  determineAdvantage, getAdvantageModifier, hasAdvantage,
-  calculateFinalDamage, applyDamage, heal, tickAllEffects,
-  isCriticalHit, isCriticalMiss, isAttackSuccessful,
+  applyDamage, heal, tickAllEffects,
   isAlive, isDefeated, getHealthPercentage,
   removeRandomBuff, extendRandomBuffDuration, updateEffectDuration,
   getStudyMarkIntensity, getThornsReflect, getActiveRollModifier,
@@ -17,52 +15,6 @@ const makeEnemy = () => createEnemy({
   id: 'e1', name: 'Foe', description: '', level: 1,
   baseStats: { heart: 1, body: 1, mind: 1 },
   mapName: 'fishing-village', logic: 'random',
-});
-
-describe('determineAdvantage', () => {
-  it('heart > body', () => expect(determineAdvantage('heart', 'body')).toBe('advantage'));
-  it('body > mind', () => expect(determineAdvantage('body', 'mind')).toBe('advantage'));
-  it('mind > heart', () => expect(determineAdvantage('mind', 'heart')).toBe('advantage'));
-  it('same = neutral', () => expect(determineAdvantage('body', 'body')).toBe('neutral'));
-  it('heart < mind', () => expect(determineAdvantage('heart', 'mind')).toBe('disadvantage'));
-});
-
-describe('getAdvantageModifier', () => {
-  it('+2 for advantage', () => expect(getAdvantageModifier('advantage')).toBe(2));
-  it('-2 for disadvantage', () => expect(getAdvantageModifier('disadvantage')).toBe(-2));
-  it('0 for neutral', () => expect(getAdvantageModifier('neutral')).toBe(0));
-});
-
-describe('hasAdvantage', () => {
-  it('true for heart vs body', () => expect(hasAdvantage('heart', 'body')).toBe(true));
-  it('false for heart vs mind', () => expect(hasAdvantage('heart', 'mind')).toBe(false));
-});
-
-describe('calculateFinalDamage', () => {
-  it('subtracts defense', () => expect(calculateFinalDamage(10, 3, false)).toBe(7));
-  it('minimum 0', () => expect(calculateFinalDamage(2, 10, false)).toBe(0));
-  it('doubles on crit', () => expect(calculateFinalDamage(10, 3, true)).toBe(17));
-  it('adds damage bonus', () => expect(calculateFinalDamage(10, 3, false, 2)).toBe(9));
-
-  // ── Phase 32 — critStyle auto-selection ──
-  it('crit against low defense — double wins (10 → 2*10-3 = 17 vs 10)', () => {
-    // double = 17, pierce = 10 → max 17.
-    expect(calculateFinalDamage(10, 3, true)).toBe(17);
-  });
-  it('crit against high defense — pierce wins (8 → 2*8-12 = 4 vs 8)', () => {
-    // double = max(0, 16-12) = 4, pierce = 8 → max 8.
-    expect(calculateFinalDamage(8, 12, true)).toBe(8);
-  });
-  it('crit with bonus — bonus rides both paths', () => {
-    // base=5, defense=8, bonus=3.
-    // double = max(0, 2*5+3-8) = 5; pierce = 5+3 = 8 → max 8.
-    expect(calculateFinalDamage(5, 8, true, 3)).toBe(8);
-  });
-  it('crit with bonus enough to flip — double wins after bonus', () => {
-    // base=5, defense=8, bonus=10.
-    // double = max(0, 2*5+10-8) = 12; pierce = 5+10 = 15 → max 15.
-    expect(calculateFinalDamage(5, 8, true, 10)).toBe(15);
-  });
 });
 
 describe('applyDamage', () => {
@@ -98,23 +50,6 @@ describe('getHealthPercentage', () => {
   it('50% at half health', () => {
     const p = makePlayer();
     expect(getHealthPercentage({ ...p, health: p.maxHealth / 2 })).toBe(50);
-  });
-});
-
-describe('crit/miss checks', () => {
-  it('nat 20 = crit', () => expect(isCriticalHit(20)).toBe(true));
-  it('nat 1 = miss', () => expect(isCriticalMiss(1)).toBe(true));
-  it('other rolls are neither', () => {
-    expect(isCriticalHit(19)).toBe(false);
-    expect(isCriticalMiss(2)).toBe(false);
-  });
-});
-
-describe('isAttackSuccessful', () => {
-  it('higher attack wins', () => expect(isAttackSuccessful(15, 10)).toBe(true));
-  it('equal or lower fails', () => {
-    expect(isAttackSuccessful(10, 10)).toBe(false);
-    expect(isAttackSuccessful(5, 10)).toBe(false);
   });
 });
 

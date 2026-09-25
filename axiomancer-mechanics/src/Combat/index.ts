@@ -23,10 +23,6 @@ export type {
     CombatPhase, CombatState, Combatant,
 } from './types';
 
-export { determineAdvantage, hasAdvantage, getAdvantageModifier, resolveEffectiveAdvantage } from './advantage';
-export { getBaseStat, getAttackStat, getDefenseStat, getSaveStat } from './stats';
-export { isCriticalHit, isCriticalMiss } from './dice';
-export { applyCriticalMultiplier, calculateFinalDamage, selectCritDamage, isAttackSuccessful } from './damage';
 export { applyDamage, heal, isAlive, isDefeated, getHealthPercentage } from './health';
 export {
     MIND_MARK_ID,
@@ -61,29 +57,18 @@ export {
 } from './effects';
 export type { PendingDotEntry, DotTriggerResult } from './effects';
 export {
-    getActiveEffectModifiers, getEffectiveStats, canAct,
+    getActiveEffectModifiers, canAct,
     // 0.34.0 — surfaced DoT amplification (Hemorrhage / Dissolution / Corrosive Fire)
     getDotAmplificationByEffect, getActiveDotTotal, getActiveDotAmplifications,
     // WS3 — DoT clock classification (round clocks vs event clocks)
     dotRoundClockPhase, dotEventTrigger,
 } from './effect-modifiers';
 export type {
-    AggregatedEffectModifiers, EffectiveStats,
+    AggregatedEffectModifiers,
     ActiveDotEntry, ActiveDotAmplification,
     DotEventTrigger,
 } from './effect-modifiers';
 export { resolveEffectApplication } from './resist';
-export { calculateDamageResistance } from './damage-resist';
-export type { DamageType } from './damage-resist';
-export {
-    rollForCombatEffects, applyProcOutcome, applyFumbleOutcome,
-    getEligibleTriggers, calculateProcChance, combatEffectsLibrary,
-} from './combat-effects';
-export type {
-    CombatEffectTrigger, ProcUnlocks, ProcOverrides,
-    ProcRollOutcome, FumbleOutcome, RollForCombatEffectsParams,
-} from './combat-effects';
-export { calculateEnemyStatMultiplier, applyMoralMeterScaling } from './difficulty';
 
 // `CombatState` constructor — shared by the card / effects / equipment engines
 // (and the Hazard-Pattern shim builds the same shape inline). The legacy

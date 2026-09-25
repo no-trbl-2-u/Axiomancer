@@ -91,6 +91,24 @@ are deleted in T5; the playtest matrix stays as npm scripts. A `/jot`
 note records the intent to rebuild them once the game mechanics have a
 firmer footing.
 
+**D11 — Icon pool stays in-repo.** T1 deleted `Potential Assets/icons-BBR`
+(a black-on-white duplicate). The usable pool is
+`Potential Assets/icons-TBR` (game-icons.net, 4,181 icons, CC BY 3.0 /
+CC0, licence in `icons-TBR/license.txt`). When a new icon is needed, pick
+it there and run `node axiomancer-mobile/scripts/extract-game-icons.mjs`,
+which reads that path. Never trim `icons-TBR` as "unreferenced": it is a
+source pool, not a shipped asset. *Rejected:* a separate repo (extractor
+rework, one more clone) and a sibling directory outside the repo (cloud
+sessions clone only this repo and could not reach it).
+
+**D12 — Tier-2 buffs lose their hidden d20.** The 5 % fizzle / 5 % double
+roll in `Combat/resist.ts` is removed; buffs apply as printed (trim spec
+Tier 0 item 5). *Rejected:* surfacing the roll in the UI.
+
+**D13 — T2 ships as two PRs.** T2a: engine dead code + Tier 0 items 1-5.
+T2b: the Upgradeable-Dice flag collapse (D7). T2b starts after T2a
+merges.
+
 ## Open follow-ups
 
 - Audit tick (D1 step 1, D3 scope) — DONE 2026-09-25; keep/cut list and

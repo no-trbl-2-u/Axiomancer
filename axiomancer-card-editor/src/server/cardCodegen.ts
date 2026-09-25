@@ -144,11 +144,9 @@ function synergyLines(s: NonNullable<CardDraft['synergy']>): string[] {
     if (entries.length === 0) return [];
     const lines = [`${IND}synergy: {`];
     for (const [k, v] of entries) {
-        // `applyEffectOnFire` and `predicate` keep their dedicated shapes so the
-        // emitted source still matches the library's hand-authored formatting.
-        if (k === 'applyEffectOnFire' && v != null) {
-            lines.push(`${IND}${IND}${k}: ${effectObj(v as CardDraft['combatEffects'][number])},`);
-        } else if (k === 'predicate' && v != null) {
+        // `predicate` keeps its dedicated shape so the emitted source still
+        // matches the library's hand-authored formatting.
+        if (k === 'predicate' && v != null) {
             lines.push(`${IND}${IND}${k}: ${predicateObj(v as NonNullable<NonNullable<CardDraft['synergy']>['predicate']>)},`);
         } else {
             lines.push(`${IND}${IND}${k}: ${valOf(v)},`);

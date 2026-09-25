@@ -3,7 +3,7 @@
  *
  * One pass over a combatant's `ActiveEffect[]` builds a single
  * `AggregatedEffectModifiers` object the rest of the combat module reads from
- * (effective stats, defense bonus, advantage grants, action restrictions, DoT
+ * (defense bonus, advantage grants, action restrictions, DoT
  * totals, regen / drain). Per-application stacking caps and intensity scaling
  * (Q2) are applied here so the consumers stay simple.
  */
@@ -13,10 +13,7 @@ import { lookupEffect } from '../Effects/effects.library';
 import { evaluateInteractions, checkInteractionTrigger } from '../Effects/interactions';
 import { EFFECT_INTERACTIONS } from '../Effects/amplification.registry';
 import { INTERACTION_AMPLIFICATION } from './resolution.constants';
-import { Stance, Combatant } from './types';
-import { BaseStats, DerivedStats, NonCombatStats } from '../Character/types';
-import { deriveStats, deriveNonCombatStats } from '../Utils';
-import { isCharacter } from '../Utils/typeGuards';
+import { Stance } from './types';
 
 /**
  * Phase 156 — live DoT combo amplification.
@@ -298,85 +295,6 @@ export function getActiveEffectModifiers(effects: ActiveEffect[], currentRound?:
     }
 
     return agg;
-}
-
-/**
- * Effective stats for a combatant after applying every active effect's stat
- * modifiers. Per Q1, modifiers explicitly target either a base stat
- * (`heart`/`body`/`mind`) — which re-derives every dependent derived stat — or
- * a specific derived stat — which is patched directly.
- *
- * Pipeline:
- *   1. Effective base stat = (base + Σ flat × intensity) × (1 + Σ (mult - 1) × intensity)
- *   2. Re-derive `derivedStats` from the effective base stats.
- *   3. Add per-derived-stat flat / multiplier modifiers on top.
- *   4. `nonCombatStats` for Characters re-derives from effective base stats and
- *      then folds in any per-save flat modifiers (e.g. `buff_resistance_*`).
- */
-export interface EffectiveStats {
-    baseStats: BaseStats;
-    derivedStats: DerivedStats;
-    nonCombatStats: NonCombatStats | null;
-    /** Stance-agnostic flat defense bonus from `defenseModifier` payloads. */
-    defenseDelta: number;
-}
-
-const applyFlatAndMult = (
-    base: number,
-    flat: number,
-    multBonus: number,
-): number => (base + flat) * (1 + multBonus);
-
-const stanceFlat = (mods: AggregatedEffectModifiers, stance: Stance): number =>
-    mods.statFlat.get(stance) ?? 0;
-const stanceMult = (mods: AggregatedEffectModifiers, stance: Stance): number =>
-    mods.statMultBonus.get(stance) ?? 0;
-
-const derivedFlat = (mods: AggregatedEffectModifiers, key: keyof DerivedStats): number =>
-    mods.statFlat.get(key as EffectStatTarget) ?? 0;
-const derivedMult = (mods: AggregatedEffectModifiers, key: keyof DerivedStats): number =>
-    mods.statMultBonus.get(key as EffectStatTarget) ?? 0;
-const ncsFlat = (mods: AggregatedEffectModifiers, key: keyof NonCombatStats): number =>
-    mods.statFlat.get(key as EffectStatTarget) ?? 0;
-
-/**
- * Computes the combatant's effective stats with active-effect modifiers applied.
- * Pure; recomputes on every call. Combat is small so the work is negligible.
- */
-export function getEffectiveStats(combatant: Combatant): EffectiveStats {
-    const mods = getActiveEffectModifiers(combatant.effects);
-
-    const baseStats: BaseStats = {
-        body:  applyFlatAndMult(combatant.baseStats.body,  stanceFlat(mods, 'body'),  stanceMult(mods, 'body')),
-        mind:  applyFlatAndMult(combatant.baseStats.mind,  stanceFlat(mods, 'mind'),  stanceMult(mods, 'mind')),
-        heart: applyFlatAndMult(combatant.baseStats.heart, stanceFlat(mods, 'heart'), stanceMult(mods, 'heart')),
-    };
-
-    const reDerived = deriveStats(baseStats);
-    const derivedStats: DerivedStats = {
-        physicalAttack:   applyFlatAndMult(reDerived.physicalAttack,   derivedFlat(mods, 'physicalAttack'),   derivedMult(mods, 'physicalAttack')),
-        physicalDefense:  applyFlatAndMult(reDerived.physicalDefense,  derivedFlat(mods, 'physicalDefense'),  derivedMult(mods, 'physicalDefense')),
-        mentalAttack:     applyFlatAndMult(reDerived.mentalAttack,     derivedFlat(mods, 'mentalAttack'),     derivedMult(mods, 'mentalAttack')),
-        mentalDefense:    applyFlatAndMult(reDerived.mentalDefense,    derivedFlat(mods, 'mentalDefense'),    derivedMult(mods, 'mentalDefense')),
-        emotionalAttack:  applyFlatAndMult(reDerived.emotionalAttack,  derivedFlat(mods, 'emotionalAttack'),  derivedMult(mods, 'emotionalAttack')),
-        emotionalDefense: applyFlatAndMult(reDerived.emotionalDefense, derivedFlat(mods, 'emotionalDefense'), derivedMult(mods, 'emotionalDefense')),
-        luck:             applyFlatAndMult(reDerived.luck,             derivedFlat(mods, 'luck'),             derivedMult(mods, 'luck')),
-    };
-
-    let nonCombatStats: NonCombatStats | null = null;
-    if (isCharacter(combatant)) {
-        const reNcs = deriveNonCombatStats(baseStats);
-        nonCombatStats = {
-            physicalSave:   reNcs.physicalSave   + ncsFlat(mods, 'physicalSave'),
-            physicalTest:   reNcs.physicalTest   + ncsFlat(mods, 'physicalTest'),
-            mentalSave:     reNcs.mentalSave     + ncsFlat(mods, 'mentalSave'),
-            mentalTest:     reNcs.mentalTest     + ncsFlat(mods, 'mentalTest'),
-            emotionalSave:  reNcs.emotionalSave  + ncsFlat(mods, 'emotionalSave'),
-            emotionalTest:  reNcs.emotionalTest  + ncsFlat(mods, 'emotionalTest'),
-        };
-    }
-
-    return { baseStats, derivedStats, nonCombatStats, defenseDelta: mods.defenseDelta };
 }
 
 /**

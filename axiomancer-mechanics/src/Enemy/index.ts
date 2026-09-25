@@ -3,14 +3,13 @@ import { MapName } from '../World/map.library';
 import { ActiveEffect } from '../Effects/types';
 import { BaseStats } from '../Character/types';
 import { deriveStats } from '../Utils';
-import { ProcOverrides, ProcUnlocks } from '../Combat/combat-effects';
 import { PhilosophicalAlignment } from '../Ledger/types';
 import {
     ENEMY_STAT_PER_LEVEL, ENEMY_GEAR_TIER_PER_LEVEL,
     ENEMY_VITAE_BASE, ENEMY_VITAE_PER_LEVEL, ENEMY_VITAE_MULT,
 } from '../Game/game-mechanics.constants';
 import {
-    Enemy, EnemyLogic, EnemyDifficulty, Tier1EffectOverrides, LootTableEntry,
+    Enemy, EnemyLogic, EnemyDifficulty, LootTableEntry,
     FriendshipReward, BefriendabilityConfig,
     FinalBlowLines, PactLines, CauseLines,
     CodexEntry,
@@ -29,9 +28,6 @@ export interface CreateEnemyOptions {
     mapName: MapName;
     logic: EnemyLogic;
     difficulty?: EnemyDifficulty;
-    tier1Overrides?: Tier1EffectOverrides;
-    procUnlocks?: ProcUnlocks;
-    procOverrides?: ProcOverrides;
     cards?: Card[];
     loot?: LootTableEntry[];
     xpReward?: number;
@@ -316,7 +312,7 @@ export function defaultEnemyStages(
 export function createEnemy(options: CreateEnemyOptions): Enemy {
     const {
         id, name, description, level, baseStats, mapName, logic,
-        difficulty, tier1Overrides, procUnlocks, procOverrides,
+        difficulty,
         cards, loot, xpReward, effects = [], philosophicalAlignment,
         friendshipReward, befriendabilityConfig,
         finalBlowLines, pactLines, causeLines,
@@ -335,8 +331,7 @@ export function createEnemy(options: CreateEnemyOptions): Enemy {
         baseStats,
         derivedStats: deriveStats(baseStats),
         mapName, logic,
-        difficulty, tier1Overrides,
-        procUnlocks, procOverrides,
+        difficulty,
         cards,
         loot,
         xpReward: resolvedXp,
@@ -369,7 +364,7 @@ export type { EnemyKeyword, EnemyStage } from './enemy-keywords';
 export { rollLoot, rollLootMany } from './loot';
 export type { LootRng } from './loot';
 export type {
-    Enemy, EnemyLogic, EnemyDifficulty, Tier1EffectOverrides, LootTableEntry,
+    Enemy, EnemyLogic, EnemyDifficulty, LootTableEntry,
     FriendshipReward, BefriendabilityConfig,
     FinalBlowLines, PactLines, CauseLines,
     CodexEntry,

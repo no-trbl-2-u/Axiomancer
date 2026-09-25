@@ -157,14 +157,6 @@ export const EFFECTS_RESOLUTION_DOT_DAMAGE_THRESHOLD = 2;
 // resolve a fight it will demonstrably win before the cap. Tuned by the loop.
 export const EFFECTS_RESOLUTION_DOT_MAX_ROUNDS_TO_KILL = 10;
 
-// Base intensity granted per proc-applied status effect when the trigger does
-// not override it. Control effects stack by DURATION (their intensity stays at
-// this base), so the saturation-yield route's combined-intensity threshold is
-// only reachable when several control effects are active OR this base is raised.
-// Symmetric (applies to whoever procs the effect), so the defeat-regression
-// guard bounds it; engagement-positive (more decisive status). Tuned by the loop.
-export const EFFECT_BASE_PROC_INTENSITY = 2; // Phase 130 — raised from 1 for l15 STRATEGIST targeting
-
 // ============================================================================
 // ENEMY — STAT BUDGET PER LEVEL
 // ============================================================================

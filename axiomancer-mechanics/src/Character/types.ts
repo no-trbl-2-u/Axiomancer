@@ -1,6 +1,5 @@
 import { Item, Equipment } from '../Items/types';
 import { ActiveEffect } from '../Effects/types';
-import { ProcUnlocks } from '../Combat/combat-effects';
 import type { UpgradeableDieGear } from '../Combat/combat.encounter.types';
 
 /**
@@ -121,12 +120,6 @@ export interface Character {
     effects: ActiveEffect[];
     knownCards: string[];
     availableStatPoints: number;
-    /**
-     * Per-cell Spec 03 proc unlock caps. Defaults to tier 1 in every cell —
-     * basic actors only roll the lowest-tier proc table entries. Cards /
-     * progression in Spec 04 / 06 raise the cap to unlock T2 / T3 entries.
-     */
-    procUnlocks?: ProcUnlocks;
     /**
      * Spec 26b deckbuilder — extra combat cards earned as play rewards (card
      * ids, duplicates allowed), MERGED into the combat deck on top of the cards

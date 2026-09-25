@@ -43,7 +43,7 @@ export {
     DEFAULT_XP_BY_DIFFICULTY,
 } from './Enemy';
 export type {
-    Enemy, EnemyLogic, EnemyDifficulty, Tier1EffectOverrides,
+    Enemy, EnemyLogic, EnemyDifficulty,
     LootTableEntry, CreateEnemyOptions,
     LootRng,
     FriendshipReward, BefriendabilityConfig,
@@ -60,16 +60,11 @@ export type { EnemySlug } from './Enemy/enemy.library';
 
 // ─── Combat ───────────────────────────────────────────────────────────────────
 export {
-    determineAdvantage, getAdvantageModifier, hasAdvantage,
-    resolveEffectiveAdvantage,
-    getBaseStat, getAttackStat, getDefenseStat, getSaveStat,
-    isCriticalHit, isCriticalMiss,
-    applyCriticalMultiplier, calculateFinalDamage, selectCritDamage, isAttackSuccessful,
     applyDamage, heal, isAlive, isDefeated, getHealthPercentage,
     getStudyMarkIntensity, getActiveRollModifier, getThornsReflect,
     updateEffectDuration, tickAllEffects,
     removeRandomBuff, extendRandomBuffDuration, applyRegen,
-    getActiveEffectModifiers, getEffectiveStats, canAct,
+    getActiveEffectModifiers, canAct,
     // 0.34.0 status-depth epic — HP-model selectors + tunable scalars
     getDamageTakenMultiplier, getPendingDotTotal, consumeDotEffects,
     getDistinctDebuffCount, getDistinctControlCount,
@@ -86,9 +81,7 @@ export {
     getOutgoingThreatDamageMult,
     getDotAmplificationByEffect, getActiveDotTotal, getActiveDotAmplifications,
     resolveEffectApplication,
-    calculateDamageResistance,
     healCharacter,
-    calculateEnemyStatMultiplier, applyMoralMeterScaling,
     // `CombatState` constructor — shared infrastructure for the card / effects
     // / equipment engines (the Hazard-Pattern shim builds the same shape).
     initializeCombat,
@@ -98,7 +91,7 @@ export {
 export type {
     Stance, Action, Advantage, CritStyle, CombatAction, CombatPhase,
     CombatState, Combatant,
-    AggregatedEffectModifiers, EffectiveStats, DamageType,
+    AggregatedEffectModifiers,
     // 0.34.0 status-depth epic — selector result types
     PendingDotEntry, ActiveDotEntry, ActiveDotAmplification,
 } from './Combat';
@@ -301,8 +294,7 @@ export type {
 
 // ─── Effects ──────────────────────────────────────────────────────────────────
 export {
-    applyEffect, applyTier1CombatEffect,
-    clearTier1EffectsForStance,
+    applyEffect,
     lookupEffect, getEffectByName, getEffectsByType, effectsLibrary,
     processWorldEffectTick, getActiveHazards,
     // Phase 142 — Status effect depth functionality
@@ -315,7 +307,7 @@ export type {
     ActiveEffect, EffectApplicationResult,
     StatModifier, DamageOverTime, RegenerationConfig, ActionRestriction, AdvantageModifier,
     EffectStatTarget,
-    ApplyEffectOptions, Tier1Outcome,
+    ApplyEffectOptions,
     WorldTickResult, ActiveHazard,
     // Phase 142 — Status effect interaction types
     EffectInteraction, InteractionTrigger, InteractionResult, InteractionTriggerType,
@@ -369,12 +361,11 @@ export type {
     // Spec 32 v3 — the rank ladder / rarity / card-type axes
     CardRank, CardRarity, CardType, CardRider,
     // Phase 142 — Extended synergy predicates
-    ExtendedSynergyPredicate,
     // WS4.2 — combat-state synergy predicate + its ledger view (spec 32 §12 #4)
     SynergyStatePredicate, SynergyLedgerView,
 } from './Cards';
 export {
-    calculateCardDamage, executeCard,
+    executeCard,
     // Spec 32 v3 — rank/rarity helpers (mobile renders rank names off these)
     CARD_RANK_NAMES, rankToRarity,
     getAvailableCards, learnCard,
@@ -382,8 +373,6 @@ export {
     // WS2.1 — the Haunt registry (spec 34 R-13: was Thoughtform; CONJURE targets; outside the pinned 70)
     hauntLibrary, getHauntById,
     // Phase 142 — Extended synergy predicate functionality
-    evaluateExtendedSynergyPredicate, checkSinglePredicate, checkAnyCountPredicate,
-    checkAllRequiredPredicate, checkBuffDebuffCombo, checkTotalIntensityPredicate,
     // WS4.2 — the combat-ledger gate evaluator
     checkStatePredicate,
     // Spec 32 §3/§6 — card themes + keyword families (phase 29 parity lint)

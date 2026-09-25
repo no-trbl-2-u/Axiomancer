@@ -1,6 +1,5 @@
 import { Character, BaseStats, PreviewAllocation, PreviewResult, emptyLoadout } from './types';
 import { ActiveEffect } from '../Effects/types';
-import { ProcUnlocks } from '../Combat/combat-effects';
 import { Equipment, Item } from '../Items/types';
 import { deriveStats, deriveNonCombatStats, calculateMaxHealth } from '../Utils';
 import { getRng } from '../Utils/rng';
@@ -60,7 +59,6 @@ export interface CreateCharacterOptions {
     seedStartingRelics?: boolean;
     effects?: ActiveEffect[];
     knownCards?: string[];
-    procUnlocks?: ProcUnlocks;
 }
 
 /**
@@ -70,7 +68,7 @@ export interface CreateCharacterOptions {
 export function createCharacter(options: CreateCharacterOptions): Character {
     const {
         id, name, level, baseStats, inventory = [], currency = 0, equipment = [], effects = [],
-        knownCards = [], procUnlocks, seedStartingRelics = false,
+        knownCards = [], seedStartingRelics = false,
     } = options;
 
     // Phase 19 — the 11 signet relics: 5 default-worn, 6 benched.
@@ -107,7 +105,6 @@ export function createCharacter(options: CreateCharacterOptions): Character {
         effects,
         knownCards,
         availableStatPoints: 0,
-        procUnlocks,
     };
 
     // Equip every worn piece in order so stat modifiers and
