@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — Phase D9 (plan/phases/phase_D9_stance_check_variety.md):
+ * Hermetic E2E — Phase D9 (plan/archive/2026-09-25-trim-t4/plan/phases/phase_D9_stance_check_variety.md):
  * authored stance-check variety, salvaged from closed PR #109.
  *
  * Two things ship here:

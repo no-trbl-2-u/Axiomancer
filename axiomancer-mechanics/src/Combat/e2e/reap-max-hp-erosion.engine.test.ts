@@ -1,6 +1,6 @@
 /**
  * Hermetic E2E — Phase 32 part 1 (Harvest — REAP attacks MAXIMUM HP,
- * plan/phases/phase_32_theme_deep_work.md §Part 1).
+ * plan/archive/2026-09-25-trim-t4/plan/phases/phase_32_theme_deep_work.md §Part 1).
  *
  * Additive design (see brief's "Decisions made upfront"): REAP's existing
  * current-HP burst is UNCHANGED; REAP now ALSO permanently lowers

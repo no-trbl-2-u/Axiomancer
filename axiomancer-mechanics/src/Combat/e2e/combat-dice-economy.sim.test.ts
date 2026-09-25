@@ -19,7 +19,7 @@
  * day (owner call: the Gambler's Knot is default-worn — every starter loadout
  * carries Press Fate), so the suite now pins the sink being ACTIVE.
  *
- * D7 RATIFICATION (2026-07-18, plan/tuning/2026-07-18-d7-ratification.md): the
+ * D7 RATIFICATION (2026-07-18, plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-18-d7-ratification.md): the
  * dice-math gates below are the ratified, stable numbers (no win-band is
  * asserted). The `spec 33 D7` block ratifies the realized ◆-income ENVELOPE.
  * The flag itself — and the flag-off STAKE-gap comparison arm — were deleted

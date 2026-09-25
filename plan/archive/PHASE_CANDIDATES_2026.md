@@ -1,0 +1,2575 @@
+# Phase candidates archive — 2026 (append-only; rows moved verbatim from `plan/PHASE_CANDIDATES.md`)
+
+## Archived 2026-09-25 (T4 plan compaction, trim spec Tier 2)
+
+### Per-pass banners from the file header
+
+> **[expand pass 9, 2026-08-27] No candidates filed.** Read all eight
+> signal sources (§4 A-H). Findings: (A) AUDIT.md's ~49 pending rows have
+> no impact≥8/ease≤4 outlier and no coherent 3+ cluster — the nearest
+> thing, three `[docs]` rows, are independently cheap (ease 8 each) and
+> unrelated in root cause (a stale CLI doc, a retired-metric skill
+> reference, a lexicon-registration gap), the same shape the pass-8
+> candidate explicitly ruled did NOT warrant a meta-phase; (B) CRITIQUE's
+> last 2 passes (28, 29) are clean, reconfirming one already-filed MED
+> cosmetic row with no new findings; (C) only one open issue per triage
+> label (#132, #183) — below the 4+ clustering bar; (D) spec.md's only
+> change since pass 8 is the Phase-67 title migration, already fully
+> phased; (E) both `specs/`/`braindump/` touches since pass 8 belong to
+> already-shipped phases (60, 53d); (G) no repeated `fix:` commits on one
+> surface; (H) all three `[skipped]` build-plan rows (17, 45a, 45b) are
+> explicitly superseded by shipped work, and the one large structural
+> candidate already on file (fold treasure/quest/rest/narration into
+> "encounter") is itself fully promoted/closed (Phases 58-65, 76, all
+> shipped) but still sits in `## Pending` un-struck — a bookkeeping gap,
+> not a signal. Net: the 2026-08-22 content-pipelines audit already
+> converted every real structural gap into build-plan rows (Phases
+> 71-76); nothing outgrew the plan since. Re-check next pass.
+
+> **[expand pass 10, 2026-09-01] 2 candidates filed.** Read all eight
+> signal sources (§4 A-H). (A) `plan/AUDIT.md`'s ~30 open pending rows
+> have no fresh impact≥8/ease≤4 outlier; the closest, "verify gate is
+> blind to the Playwright journeys" (impact 7/ease 5, filed 2026-08-09),
+> is a single-root, single-fix row squarely `/iterate`'s job, not a
+> cluster. (B) `plan/CRITIQUE.md`'s Pending section carries **two
+> independent HIGH rows, both "user crash the harness cannot reproduce"**
+> (2026-08-19 mid-combat, 2026-08-29 post-combat-reward-accept) — this is
+> the real signal, detailed below. (C) triage labels unchanged at one
+> item each (#132, #183) — below the 4+ bar. (D) spec.md unchanged since
+> pass 9. (E) no new `specs/`/`braindump/` files since pass 9. (F) no
+> content-surface growth outpacing a planned browsing/codex surface yet.
+> (G) no repeated `fix:` run on one surface. (H) the `[skipped]` rows
+> (17, 45a, 45b) remain correctly superseded; the encounter-fold
+> candidate's un-struck `## Pending` heading is bookkeeping, not a
+> signal (flagged for `/oversight`, not filed as a candidate). Two real
+> patterns emerged instead, both below.
+
+> **[expand pass 11, 2026-09-03] 3 candidates filed.** Read all nine
+> signal sources (§4 A-I). (A) `plan/AUDIT.md`'s ~20 open pending rows
+> are mostly single-root/single-fix (ease 5-9), squarely `/iterate`'s
+> job — no fresh impact≥8/ease≤4 outlier. (B) `plan/CRITIQUE.md`'s two
+> HIGH crash rows are already covered by pass 10's promoted candidate
+> (Phase 77); one MED row (pass 23, arena backdrop) still carries its
+> own unfollowed "route via /expand" instruction — filed below. (C)
+> triage labels unchanged at one item each (#132, #183) — below the 4+
+> bar. (D) spec.md changed materially since pass 10: THE BIG NUMBERS
+> REWRITE (2026-09-02, commit `63e3741f`) retired the status-primacy
+> doctrine pillar outright — the identical failure class Phase 66 was
+> built for, and its doctrine-row mechanism has zero entries for this
+> retirement while two live surfaces still assert the retired doctrine
+> as current; filed below. (E) no new `specs/`/`braindump/` files since
+> pass 10. (F) world content grew sharply (Phases W1-W5: three
+> continents, ~10 new maps) while the combat arena backdrop stayed a
+> single fixed image — confirms and revives the unfiled pass-23
+> critique row, below. (G) no repeated `fix:` runs on one surface beyond
+> the doctrine-drift pattern already covered in (D). (H) the three
+> `[skipped]` build-plan rows (17, 45a, 45b) remain correctly
+> superseded. (I) no new KB reception clustering checked this pass. One
+> additional strong signal outside the A-I checklist: THE PATH's own
+> tuning-pass record (`plan/2026-09-02-big-numbers-overhaul.decisions.md`)
+> documents a late-campaign difficulty cliff (4%, 4/6 cells at 0%) that
+> survived a full measured pass and names three fixes it explicitly
+> declined as "a design decision rather than a tuning one" — filed below
+> as the third candidate.
+
+> **[expand pass 12, 2026-09-09] 3 candidates filed.** Dispatched from
+> `/march` (81 commits / 6+ days since pass 11, `plan/CRITIQUE.md`
+> Pending rows as the qualifying signal). Read all nine signal sources
+> (§4 A-I) via a research sub-agent plus direct verification. (A)
+> `plan/AUDIT.md`'s ~20 genuinely-open pending rows (most `[x]`-marked
+> or inline-RESOLVED but header-stale — a bookkeeping gap, not a
+> signal, left alone) are mostly single-root/single-fix — the highest
+> live score, the die a11y copy-drift `[debt]` row (4.8, CI red three
+> consecutive digests), is a routine same-file regex port, squarely
+> `/iterate`'s job, not filed here. Two `[loop-call]` rows *are*
+> too-big-for-a-fix (need an owner call before scope is knowable):
+> the mid/late equipment gap and the 19-orphaned-`zoneHas` residue —
+> both filed below. (B) `plan/CRITIQUE.md`'s open rows cluster twice:
+> two MED early-game-difficulty findings (Brine Hag's 3-phase open,
+> Ash Mire boss on the natural path) from two different signal types
+> (playtest vs. real user session) — filed below; and three
+> art-direction rows (arena register incoherent, fixed backdrop,
+> Phase-78 art-pass candidates) that all resolve to the same blocked
+> owner call already sitting in AUDIT.md as `[gap][needs-user-call]` —
+> scope isn't knowable until that call lands, so held back (see
+> Considered). (C) triage labels unchanged at one item each (#132,
+> #183) — below the 4+ bar. (D) zero commits to `spec.md` or
+> `specs/`/`braindump/` since pass 11 — no drift signal. (E) covered
+> under D — none. (F)/(G) no repeated `fix:` streak or content-growth
+> mismatch found this window; the one multi-report pattern (a
+> mid-combat crash needing 3 user reports + ~30 seeded runs to pin) is
+> already fixed, not filed. (H) `[skipped]` Phase 17 (quest-board
+> tutorial) remains correctly parked behind the unfiled
+> early-game-redesign CRITIQUE row (see Considered) — deferred as its
+> own item since it's a design pivot, not a scoped phase yet. (I) no
+> new KB reception clustering checked this pass.
+
+> **[expand pass 13, 2026-09-10] No candidates filed.** Dispatched from
+> `/march` (21 commits / ~29h since pass 12, bold posture, `plan/AUDIT.md`
+> + `plan/CRITIQUE.md` Pending rows as the qualifying signal — no pending
+> phase, no content-lifecycle category due, `/forge`'s 48h world-growth
+> window still open via `f56fa198`). Read all nine signal sources (§4 A-I)
+> via a research sub-agent plus direct verification against
+> `2028bb64..HEAD`. Headline: this window is exceptionally quiet — 14
+> commits since pass 12, of which 4 touched `AUDIT.md` and 4 touched
+> `CRITIQUE.md`, every one a finding *closure* (audit findings [6.8] and
+> [9.0], the die-a11y-copy-drift part-b debt row) or a clean
+> re-confirmation (critique pass 35: zero new findings; four `adjust-*`
+> passes: three zero-action, one single-comment fix). (A) `AUDIT.md`'s
+> Top-5 is unchanged in shape from pass 12 — no impact≥8/ease≤4 outlier,
+> no fresh 3+ cluster; the two genuinely new `[loop-call]` rows
+> (phase-numbering bookkeeping at line 86, The Capital's enemy-pool reuse
+> at line 107) are both `/forge`'s own Step-6 residue, already routed to
+> their correct owners (no action / a future `/adjust-enemies` pass), not
+> expand-shaped. (B) `CRITIQUE.md` Pending is unchanged from what pass 12
+> already triaged — the difficulty pair and equipment gap are already
+> filed below; the art-incoherence cluster stays correctly held in
+> Considered pending the blocked owner call. (C) triage labels unchanged
+> at one item each (#132, #183) — below the 4+ bar. (D) zero commits to
+> `spec.md` since pass 12. (E) zero new `specs/`/`braindump/` files. (F)
+> The Capital's own residue (the frontier-continuation gap, the backdrop
+> cross-reference) was filed directly by `/forge` itself as this file's
+> current top two Pending rows — already present, not re-filed here; the
+> four content-steward passes this window were health-reconfirmations,
+> not growth outpacing a planned surface. (G) no repeated `fix:` streak.
+> (H) `[skipped]` rows (17, 45a, 45b) remain correctly parked, nothing
+> unblocked this window. (I) no KB reception clustering checked — no
+> other signal pointed at a specific mechanic worth it. Net: every real
+> signal already lives in this file's Pending or Considered sections;
+> nothing this window clears the "plan outgrew itself" bar. Re-check next
+> pass.
+
+> **[expand pass 14, 2026-09-11] No candidates filed.** Dispatched from
+> `/march` (22 commits / ~24h since pass 13, bold posture, `plan/CRITIQUE.md`
+> Pending HIGH rows as the qualifying signal — no pending phase, no
+> content-lifecycle category due at dispatch time since all five just
+> ran their own pass-6 ticks minutes to hours earlier, `/forge`'s 48h
+> world-growth window still open via `f56fa198`/`47bcda82` so 3c did not
+> fire either). Read all nine signal sources (§4 A-I) directly against
+> `86f23b01..HEAD`. Headline: this window is the quietest yet — of the 22
+> commits since pass 13, 12 were the five `adjust-*` stewards' own pass-6
+> ticks (four zero-CREATE/UPDATE/REMOVE re-audits plus one 2-enemy capital
+> backfill, each already ledgered in `plan/CONTENT_LEDGER.md`), one was a
+> digest, and three were audit-fix pairs (dialogue reply-card echo,
+> hazard route-select fan legibility, exploration off-screen node fit) —
+> routine `/iterate`-shaped closures, not expand-shaped growth. (A)
+> `AUDIT.md`'s Top-5 is unchanged in shape from pass 13 — no impact≥8/
+> ease≤4 outlier (the crash row sits at impact 9/ease 6, not ≤4), no fresh
+> 3+ cluster; the one `[loop-call]` that closed this window (The
+> Capital's enemy-pool reuse) resolved via `/adjust-enemies` pass 6
+> exactly as pass 13 predicted, not a new signal. (B) `CRITIQUE.md`
+> Pending is unchanged from what pass 12 already triaged and pass 13
+> re-confirmed — same three open HIGH rows (equipment-progression gap,
+> the twice-unreproduced post-combat-accept crash, the parked late-stage
+> collapse) and the art-incoherence cluster still correctly held pending
+> the blocked owner call; critique pass 35 (2026-09-09, pre-dating this
+> window) found zero new rows. (C) triage labels unchanged at one item
+> each (#132, #183) — below the 4+ bar. (D) zero commits to `spec.md`
+> since pass 13 (`git log 86f23b01..HEAD -- spec.md` empty). (E) zero new
+> `specs/`/`braindump/` files (`git log 86f23b01..HEAD --
+> axiomancer-mechanics/specs/ axiomancer-mechanics/braindump/` empty).
+> (F) the five content-steward passes this window were overwhelmingly
+> health-reconfirmations (four zero-action) plus one additive-but-bounded
+> capital backfill already scoped by a standing `[loop-call]` from pass
+> 13's own window — none surfaced a surface outgrowing its planned shape.
+> (G) no repeated `fix:` streak (the two audit-fix commits touch unrelated
+> mobile surfaces — dialogue reply cards, hazard route-select). (H)
+> `[skipped]` rows (17, 45a, 45b) remain correctly parked, nothing
+> unblocked this window. (I) no KB reception clustering checked — no
+> other signal pointed at a specific mechanic worth it. Net: identical
+> verdict to pass 13, one window later — every real signal already lives
+> in this file's Pending or Considered sections; nothing this window
+> clears the "plan outgrew itself" bar. Re-check next pass.
+
+> **[expand pass 15, 2026-09-14] No candidates filed.** Dispatched from
+> `/march` (127 commits / ~68h since pass 14, bold posture, open Pending
+> rows in both `plan/AUDIT.md` and `plan/CRITIQUE.md` as the qualifying
+> signal — no pending phase, no content-lifecycle category past its own
+> threshold, `/forge`'s 48h world-growth window not open — `c6ca37d7`/
+> `abb3da01` both touch `src/World` inside the window). Read all nine
+> signal sources (§4 A-I) via a research sub-agent plus direct
+> verification against `8cc9db34..HEAD`. Headline: this is the largest
+> window yet by commit count (127, vs. 14-22 for passes 10-14) but its
+> mass is almost entirely the 2026-09-12 `ui-fresh-eyes` swarm (~80
+> commits, FE-001 through FE-058 plus regression-repair shards) and the
+> five content-lifecycle stewards' own routine pass-9/10 ticks — both
+> already fully reconciled into `AUDIT.md`/`CRITIQUE.md` rather than left
+> as raw signal. (A) `AUDIT.md`'s newly-dated rows (2026-09-12/13) are all
+> `[loop-call]`s that are either single-fix scope (the `critique:drive`
+> artifact-directory wipe, the baseline watch-path false-staleness on a
+> speech-mark-only diff — both `/iterate`-shaped, not phase-shaped) or
+> pure bookkeeping (the W6/W5 label collision) or explicitly
+> not-CREATE-shaped (the Dawncaster Chaos/generic-Upgrade keyword-family
+> gap, filed as observation only, no concrete card idea attached). The
+> one row with real mass — "UI fresh-eyes left six product decisions and
+> a 309-row unverified candidate set" — decomposes on inspection: the two
+> recurring cross-row themes it names ("one concept, several words";
+> "definitions/glyphs/meters nobody can reach") are verbatim the same
+> themes already filed as this file's own top two Pending candidates
+> (score 6.5 naming pass, score 6.0 glossary reachability — the latter's
+> own "Status after the 2026-09-12 swarm" note confirms it already
+> absorbed the glyph-key and meter-unit fixes FE-058/FE-053/FE-054
+> shipped and left the structural half open); the six named product
+> calls (fanned hand, signet rail, `/rest` greyout, hazard-deck palette,
+> LEAGUES noun/unit, opening-art captions) are `/oversight`-sized
+> individual decisions, not a batchable phase. No impact≥8/ease≤4
+> outlier. (B) `CRITIQUE.md`'s Pending rows are unchanged in shape from
+> pass 14 — same three open HIGH rows (equipment-progression gap, the
+> now-thrice-flagged post-combat-accept crash still reading
+> "likely-already-fixed, pending owner verification on a native build,"
+> the parked late-stage collapse) plus two new MED rows this window (a
+> mobile hand-fan overlap sharing root cause with an already-fixed
+> `RouteSelect.tsx` case; two shop wares printing identical effect text
+> at different prices) — both single-root/single-fix, `/iterate`- or
+> `/adjust-equipment`-shaped, not clusters. The art-incoherence trio
+> stays correctly held in Considered pending the same blocked owner
+> call pass 12 first flagged. (C) triage labels unchanged at one item
+> each (#132, #183) — below the 4+ bar. (D) zero commits to `spec.md`
+> since pass 14 (`git log 8cc9db34..HEAD -- spec.md` empty). (E) zero new
+> `specs/`/`braindump/` files (`git log 8cc9db34..HEAD --
+> axiomancer-mechanics/specs/ axiomancer-mechanics/braindump/` empty).
+> (F) no content-surface growth outpacing a planned browsing surface —
+> the swarm's volume is UI-fix mass, not new-content mass. (G) no 5+
+> `fix:`-in-a-row streak on one surface; the swarm's ~80 commits are each
+> a distinct named finding (FE-NNN), not a retry loop, and are already
+> reconciled in `CRITIQUE.md`'s own meta-status rows. (H) `[skipped]`
+> rows (17, 45a, 45b) remain correctly parked, nothing unblocked this
+> window. (I) no KB reception clustering checked — no signal source this
+> window pointed at a specific mechanic warranting one; the one
+> keyword-family-gap row in (A) is itself already a KB-sourced reading
+> with no ratified verb class attached. Net: despite the window's size,
+> every real recurring signal already lives in this file's Pending or
+> Considered sections, and the standing older-carryover clusters in
+> `AUDIT.md` (`[contract]`/`[gap]`/`[docs]`, ~15 rows) remain correctly
+> assessed as noise by six consecutive prior passes with nothing new
+> this window to revisit that call. Re-check next pass.
+
+> **[expand pass 16, 2026-09-14] No candidates filed.** Dispatched from
+> `/iterate`'s own failure-mode-6 fallback (top audit score under the 3.0
+> floor: the sole freshly-scored `/march`-tick item, the hand-fan overlap
+> row, re-verified live against `CombatBoard.tsx`'s `handFanLayout` and
+> confirmed unchanged since pass 8's read — still sitting at the
+> documented structural floor for a 5-card hand on a 375pt screen, score
+> ~2.5; `web:container` [1.6] and card-editor [1.5] both unchanged;
+> bold posture, per `skills/expand.md` §9's last paragraph). Only 3
+> commits / ~5.6h separate this pass from pass 15 at `2d65f87b` — the
+> smallest window of any pass to date — so this was a confirmation read,
+> not a fresh 9-signal deep-dive: (D) `git log 2d65f87b..HEAD -- spec.md`
+> empty; (E) same for `specs/`/`braindump/`; (A)/(B) the only two
+> `plan/AUDIT.md`/`plan/CRITIQUE.md` deltas since pass 15 are the
+> shop-effect-duplication row (already shipped and moved Pending → Done,
+> commit `f19afd0d`/`bedb9ed2`) and this tick's own hand-fan re-read —
+> neither is new signal; (C) triage labels unchanged at one item each
+> (#132, #183), still below the 4+ bar. Net: pass 15's read stands
+> untouched; nothing in this tiny window moved any signal past
+> threshold. Re-check next pass once more ground has shipped.
+
+> **[expand pass 17, 2026-09-17] 1 candidate filed.** Dispatched from
+> `/march` (66 commits / ~65.5h since pass 16 at `bedb9ed2`, bold posture,
+> `plan/CRITIQUE.md` Pending rows as the qualifying signal — no pending
+> phase, all five content-lifecycle categories under their own
+> 15-commit/36h threshold, `/forge`'s 48h world-growth window still open
+> via `2227fe9c`'s World-surface test commit). Read all nine signal
+> sources (§4 A-I). (A) `plan/AUDIT.md`'s open rows are mostly
+> single-root/single-fix or already resolved but header-stale
+> (bookkeeping debt, not signal — e.g. the dead-`zoneHas`/TWIN-trigger
+> rows both closed by Phase 86, the cross-package-checklist and
+> keyword-wiring-drift `[contract]` rows both closed by the same PR that
+> filed them, the allowlist `[contract]` row closed by Phase 72); no
+> fresh impact≥8/ease≤4 outlier or 3+ same-root cluster. (B)
+> `plan/CRITIQUE.md`'s open rows: the mobile hand-fan overlap (pass 37)
+> is fresh but single-signal and already narrowly scoped to a known fix
+> shape (the RouteSelect.tsx precedent) — `/iterate`'s job, not filed
+> here. The art-register-incoherence cluster (pass-4 "painted foe,
+> flat-vector dice, mono chrome" + the pass-23 fixed-backdrop row) was
+> explicitly held back at pass 12 pending the art-pipeline owner call and
+> the Phase-78 W5 art-pass pick — both have since landed (Phase 73
+> pipeline, Phase 83 region-keyed backdrop for coastal village, Phase 88
+> wiring the W5 enemy-portrait pick 2026-09-16, one day before this
+> pass). Re-verified live: the die is now isometric (recut 2026-07-19)
+> but still a fully programmatic saturated-vector glyph, not painted; HUD
+> chrome is still `JetBrainsMono_400Regular` throughout
+> `CombatBoard.tsx`/`CombatEncounterPanel.tsx`; no target-register doc
+> exists anywhere in `specs/`/`braindump/`/mobile `docs/`. The blocker
+> this candidate was held on has cleared — filed below. (C) triage
+> labels unchanged at one item (#132) — below the 4+ bar. (D)/(E) zero
+> commits to `spec.md` or `specs/`/`braindump/` since pass 16 — no drift
+> signal. (F)/(G) no repeated `fix:` streak or content-growth mismatch
+> this window. (H) the one `[skipped]` row (Phase 17, quest-board
+> tutorial) and the early-game-redesign CRITIQUE row it was parked
+> behind were both already resolved via Phase 46a/46b/46c (2026-08-08) —
+> `plan/CRITIQUE.md`'s row (pass-1, 2026-07-08) is stale/unmarked, not
+> fresh signal. (I) no new KB reception clustering checked this pass
+> (not applicable to a visual-art-direction candidate).
+
+> **[expand pass 18, 2026-09-19] No candidates filed.** Dispatched from
+> `/march` (67 commits / ~56h since pass 17 at `aeeec931`, bold posture,
+> `plan/AUDIT.md`'s ~57 nominally-open Pending rows as the qualifying
+> signal — no pending phase, no content-lifecycle category past its own
+> 15-commit/36h threshold at dispatch, `/forge`'s 48h world-growth window
+> not open (`900f4858` touches `src/World` inside the window)). Read all
+> nine signal sources (§4 A-I) directly against `aeeec931..HEAD`.
+> Headline: this window is almost entirely routine closure — of the 67
+> commits, ~52 are the five content-lifecycle stewards' own pass-13/12
+> ticks (cards/equipment/enemies/keywords pass 13, npcs pass 12, each
+> already ledgered in `plan/CONTENT_LEDGER.md`), Phase 91-95 shipping
+> (amber-CI recovery, march job-ceiling, card-base reconciliation,
+> critique:drive artifact scope, the UI fresh-eyes six), two digests, and
+> an attended `/oversight` session (`e20ac4b0`, 2026-09-17: refilled the
+> phase queue, closed stale rulings) plus THE BLANK PAGE narrative reset
+> (`a38d6721`, 2026-09-18, attended). (A) `plan/AUDIT.md`'s Pending
+> section reads large (~57 non-`[x]` rows) but on direct inspection most
+> are the same stale-but-unmarked bookkeeping six consecutive prior
+> passes have already characterized as noise, not signal — confirmed two
+> fresh instances this pass (the starter-bundle-collapses-to-8-cards and
+> Phase-169-loadout-dead pair, both closed by Phase 93 2026-09-17; the
+> six `doctrine-curve` confirmation rows, all orphaned by THE BIG NUMBERS
+> REWRITE's 2026-09-02 repeal of the win-rate doctrine they measure) —
+> consistent with, not a departure from, the standing judgment; left for
+> `/iterate`'s ordinary bookkeeping, not filed as an expand candidate.
+> No fresh impact≥8/ease≤4 outlier (the crash row still sits at impact
+> 9/ease 6, blocked on the owner's device log; unchanged since pass 14).
+> No fresh 3+ same-root cluster. (B) `plan/CRITIQUE.md`'s only new row
+> since pass 17 (critique pass 41, 2026-09-18) is one LOW copy fix (two
+> consumables using "wearer" language) — single-signal, `/adjust-
+> equipment` territory, not filed here. The art-register-incoherence
+> finding pass 17 filed off this same file was promoted and shipped as
+> Phase 89 (dice faces + HUD chrome restyle) plus Phase 83 (region-keyed
+> backdrop) — both confirmed live this pass, closing that thread. The
+> mobile hand-fan overlap (pass 37) remains open but is, per five
+> consecutive prior passes' judgment, single-signal and `/iterate`-
+> shaped, not revisited here absent new information. (C) triage labels
+> unchanged at one item (#132) — below the 4+ bar. (D) zero commits to
+> `spec.md` since pass 17. (E) three `specs`/`braindump`-adjacent commits
+> landed (`a38d6721`/`30201990`/`5e14166b`, THE BLANK PAGE narrative
+> reset) but its own ¶4 explicitly forbids the loop from inventing story
+> canon while it stands and routes replacement canon-building to future
+> **attended** sessions — proposing an unattended story-authoring phase
+> would conflict with this fresh ruling; noted, not filed (hard rule 3).
+> (F) no content-surface growth outpacing a planned browsing surface —
+> the window's content-steward passes were routine health passes, not
+> structural growth. (G) no repeated `fix:` streak on one surface. (H)
+> the `[skipped]`/`[-]` build-plan rows are all either correctly parked
+> or already carry their own explicit next-step instruction (Phase 90's
+> summoner carry-over says "re-file as its own `PHASE_CANDIDATES.md`
+> row" — already done, sitting above as this file's top Pending row,
+> not re-filed twice). (I) checked KB reception evidence directly this
+> pass (unchecked for several prior passes): searched for keyword-bloat/
+> cognitive-overload and runaway-leader/snowball complaint clustering
+> against Axiomancer's large keyword registry and Surge/Conviction
+> economy — `runaway-leader` carries only 2 labeled games (thin evidence,
+> the corpus doc itself says so); no keyword-bloat/status-overload
+> complaint pattern exists in the corpus at all (zero `kb_search` hits
+> across all scopes); `onboarding` has 13 games but documents a
+> rules-cliff pattern (whole engine at session one), a different shape
+> than vocabulary size, and is itself sourced from single-review
+> inferences per its own header. No 3+-source clustering found on either
+> angle — no candidate from KB evidence this pass. Net: nothing this
+> window clears the "plan outgrew itself" bar. Re-check next pass.
+>
+> **Considered:** the accumulated stale-but-unmarked `plan/AUDIT.md`
+> Pending rows (bookkeeping debt, not signal — same judgment as passes 9,
+> 12, 13, 17); the mobile hand-fan overlap (single-signal, `/iterate`'s
+> job — same judgment as passes 13-17); THE BLANK PAGE's narrative gap
+> (explicitly not loop-decidable while the ruling stands).
+
+> **[expand pass 19, 2026-09-23] 1 candidate filed.** Dispatched from
+> `/march` (161 commits / ~4 days since pass 18 at `e38d7239`, bold
+> posture; no pending phase, no content-lifecycle category past its own
+> 15-commit/36h threshold at dispatch — cards 4/equipment 2/enemies
+> 10/keywords 8/npcs 6 commits behind their own last passes, all under
+> 10h old — and `/forge`'s 48h world-growth window not open, three
+> `src/World` commits inside it). Read all nine signal sources (§4 A-I)
+> directly against `e38d7239..HEAD`. (A) `plan/AUDIT.md` gained five
+> fresh `[loop-call]` rows (2026-09-20, filed while shipping the public
+> DevLog): the 90-file art-licence gap was already converted straight to
+> a Pending candidate by that same commit (`03df2daa`, sitting above as
+> this file's top three rows) — not re-filed. Of the other four, two are
+> `next: /oversight` process/bookkeeping items too small to be phases
+> (impact 3/ease 9 "seven calls made" log; impact 5/ease 9 bearings.md
+> staleness gated on a Pages project that doesn't exist yet) — left for
+> oversight review, not filed. The remaining two (impact 7/ease 6 "verify
+> gate vs. CI disagree about green"; impact 6/ease 5 "two layers own save
+> policy") sit below the impact≥8/ease≤4 outlier bar individually, but
+> the second one clusters with a fresh (B) signal below — filed. (B)
+> `plan/CRITIQUE.md` gained two rows since pass 18, both dated
+> 2026-09-20 from the 2026-09-19 burn-day audit: a MED "SUMMON's second
+> wave is unreachable on the only carrier" (row 3.9) — single-root, a
+> named one-enemy retrofit plus a reachability guard, squarely
+> `/iterate`-shaped, not filed; and a MED "a reload taken DURING a live
+> encounter still lands past the fight" (row 3.1 residual) — this one
+> explicitly reads "the choice is a design call, not a mechanical one"
+> and names two candidate shapes it forbids shipping together. That is
+> the expand-shaped half of this window: paired with (A)'s "two layers
+> own save policy" ownership gap (engine `DURABLE_ACTIONS` vs. mobile's
+> `wrapDeflectingAdapter`, same root — nothing written down says which
+> layer owns persistence), two independent signal types converge on one
+> real, undecided architecture question. Filed below. (C) triage labels
+> unchanged at one item (#132) — below the 4+ bar. (D) zero commits to
+> `spec.md` since pass 18. (E) one `specs`/`braindump`-adjacent commit
+> (`304825e6`, audit-row correction to a shipped phase brief's prose) —
+> not a design landing. (F) no content-surface growth outpacing a
+> planned surface; the five `adjust-*` stewards' passes this window were
+> routine health passes (cards pass 17 filed its own KB-sourced candidate
+> directly, already sitting in Pending below — not re-filed here). (G)
+> zero `fix:` commits in the whole window — no repeated-fix streak. (H)
+> the `[skipped]`/`[-]` build-plan rows are unchanged from pass 18's
+> characterization; no new information. (I) searched the KB corpus for
+> reload/mid-session persistence-loss reception patterns (`reload`,
+> `lost progress`, `mid-encounter save`) — zero hits across all scopes,
+> so no KB corroboration for the save-ownership candidate; filed on (A)
+> + (B) signal multiplicity alone, which is sufficient per §5. Net: one
+> real architecture question the plan has no phase for; everything else
+> this window is routine.
+
+> **[expand pass 20, 2026-09-24] No candidates filed.** Dispatched from
+> `/march` (48 commits / ~29h since pass 19 at `a8479c99`, bold posture;
+> no pending phase — the Status block has zero `[ ]` rows; no
+> content-lifecycle category past its own 15-commit/36h threshold at
+> dispatch — cards 4/equipment 2/enemies 1 commits behind their own last
+> pass all under 6h old, keywords 11 commits/~20h, npcs 6 commits/~10h;
+> `/forge`'s 48h world-growth window not open, two `src/World` commits
+> inside it). Read all nine signal sources (§4 A-I) directly against
+> `a8479c99..HEAD`. (A) `plan/AUDIT.md` gained two fresh Pending rows
+> (2026-09-23, filed by the comments/docs accuracy audit): "Live docs
+> whose bodies describe retired systems" (impact 5/ease 4, ~14 files
+> across mechanics/mobile/.claude) and "Five code-side defects surfaced
+> by the comments audit" (impact 4/ease 6). Neither clears the impact≥8/
+> ease≤4 outlier bar, and both rows' own `next` fields already route them
+> as an iterate-drain queue (one `/iterate` tick per file; verify-then-
+> fix per defect) rather than a single multi-file finding masquerading as
+> 3+ — respected that routing rather than duplicating it as a phase. Not
+> filed. (B) `plan/CRITIQUE.md` gained one fresh Pending row since pass
+> 19: `[HIGH]` "the late-game hub's node-graph map renders completely
+> blank on mobile" (critique pass 48, 2026-09-22) — single root cause
+> already diagnosed to a specific function (`MapCanvas.tsx`
+> `computeFocusTransform`'s first-layout-wins viewport capture) with a
+> suggested unit-test-first fix; HIGH severity but single-signal, no
+> other currently-open Pending row shares its family (checked: one MED
+> reload-timing row, one LOW copy-wording row, both unrelated roots).
+> Squarely `/iterate`-shaped, not filed. Noted in passing, not acted on
+> here: the open MED "SUMMON's only carrier can't reach wave 2" row
+> (burn-day audit 3.9) was resolved by `content: adjust-enemies pass 17`
+> (RawheadRex SUMMON retrofit, commit `96f73da3`) but is still unmarked
+> `[x]` in this file — a CRITIQUE bookkeeping gap for `/iterate`, not an
+> expand signal. (C) triage labels unchanged at one item per label (#132
+> loop-queued, #183 reviewed) — below the 4+ clustering bar. (D)
+> `spec.md` changed twice since pass 19 (a merge, and `docs: correct root
+> guidance against the current tree`) — accuracy correction only, no new
+> feature paragraphs or non-goal removals. (E) one `specs/`-adjacent
+> landing, the Phase 84 the-capital world-spec re-scope — already tied to
+> a shipped phase, not an orphan. (F) no content-surface growth outpacing
+> a planned surface; all five `adjust-*` stewards logged routine passes
+> this window (cards/equipment/enemies pass 18, keywords pass 17,
+> npcs pass 17), several zero-diff. (G) no repeated `fix:` streak; the
+> window is dominated by the comments/docs accuracy audit (8 doc-fix
+> commits) and one owner-directed feature ("the very start": empty new
+> game, three save slots, main menu, settings — "Owner calls 2026-09-23"
+> in the commit body, shipped outside phase tracking by direct
+> instruction, not a gap for `/expand` to surface). (H) the `[skipped]`
+> rows (Phase 17, 45a, 45b) are unchanged from prior passes'
+> characterization — no new information this window. (I) tried
+> `kb_find_games(better_if_label: "onboarding")` looking for
+> corroboration on the exploration-hub rendering gap; the query returned
+> effectively the full games corpus rather than a filtered cluster (label
+> match too broad to trust as signal), so treated as no result rather
+> than cited as evidence. Net: a routine window — a large-but-already-
+> self-routed docs/debt audit, one HIGH single-root UI bug already
+> diagnosed for `/iterate`, an owner-directed feature landing outside the
+> phase system, and on-cadence content stewardship. No signal this pass
+> clears the phase-worthy bar (§5's multiplicity/urgency/impact tests);
+> nothing filed.
+
+> **[expand pass 21, 2026-09-25] 2 candidates filed.** Dispatched from
+> `/march` (30 commits / ~22h since pass 20 at `c9e7ab70`, bold posture;
+> no pending phase — the Status block has zero `[ ]` rows; no
+> content-lifecycle category past its own 15-commit/36h threshold at
+> dispatch — cards 6/equipment 4/enemies 2 commits behind their own last
+> pass, all under 6h old; keywords 9 commits/~12h; npcs 8 commits/~8h;
+> `/forge`'s 48h and 7-day world-growth windows both open, `bc4ef749`
+> inside both). Read all nine signal sources (§4 A-I) against
+> `c9e7ab70..HEAD`. (A) `plan/AUDIT.md` gained three fresh `[content]`
+> rows (2026-09-24) plus one `[docs]` and one `[debt]` row (2026-09-23),
+> all off the 2026-09-23/24 attended story sessions (`story-overview.md`
+> clean-slate rewrite, commits `6086e83d`..`c826b7e8`) and the
+> comments/docs accuracy audit. The `[docs]`/`[debt]` pair are both
+> self-routed to an `/iterate` drain queue in their own `next` fields —
+> respected, not duplicated, the same call pass 20 made for the prior
+> docs/debt pair. The three `[content]` rows are the real signal: "the
+> shipped Drowned Parish opening contradicts the ruled story" (impact
+> 8/ease 3), "legacy story threads...boy-* flags and the ribbon rite"
+> (impact 5/ease 3, same root — its own `next` field ties the flag
+> rename to "whatever the Drowned Parish rewrite decides"), and "story
+> systems the new rulings require the game does not have" (impact
+> 7/ease 3), whose `next` field says outright: "the memories section
+> and the opening framing are systems work that can be designed
+> now... Route to `/expand` as phase candidates." Filed as two
+> candidates below. (B) `plan/CRITIQUE.md` gained no new Pending rows
+> since pass 20's `[HIGH]` mobile node-graph row, which has since
+> shipped (`2dfcafeb`/`8772551f`); the sole remaining open row is pass
+> 49's `[LOW]` DoT-chip word-wrap — single-root, `/iterate`-shaped, not
+> filed. (C) triage labels unchanged at one item each (#132
+> loop-queued, #183 reviewed) — below the 4+ clustering bar. (D)
+> `spec.md` unchanged since pass 20. (E) the story-overview.md rewrite
+> itself (`axiomancer-mechanics/content/story/`, 10 commits, 2026-09-23/24)
+> is exactly this signal type — a design landing with no corresponding
+> phase — reinforcing (A) rather than adding an independent candidate.
+> (F) no content-surface growth outpacing a planned surface this
+> window; all five `adjust-*` stewards logged routine passes
+> (cards/equipment/enemies pass 19, npcs pass 18, keywords pass 18),
+> several zero-diff. (G) no repeated `fix:` streak. (H) the `[skipped]`
+> rows (17, 45a, 45b) unchanged from prior characterization. (I) not
+> queried this pass — no reception-shaped question in play. Net: the
+> story rewrite is the one real signal window this pass, converging
+> three independent AUDIT rows and a fresh design landing on the same
+> root event; two candidates filed below, both respecting THE BLANK
+> PAGE's no-invention carve-out (`axiomancer-mechanics/CLAUDE.md`) by
+> scoping the undecided parts as attended sessions rather than
+> loop-authored canon.
+
+### Struck-through rows from `## Pending`
+
+### ~~[score 5.5] Summoner / add-spawning enemy archetype~~ PROMOTED to Phase 102 and SHIPPED 2026-09-19
+- proposed: 2026-09-17, `/ship-a-phase` (Phase 90 split)
+- source signals:
+  - carried over from `/adjust-enemies` pass 11's filed finding (commit
+    `b718b421`, promoted to Phase 90 via `/oversight` 2026-09-17): a KB
+    cross-reference (StS-BG/Gloomhaven/Aeon's End) found summoner/
+    add-spawning enemies as grounded, well-liked prior art genuinely
+    absent from the ~78-enemy roster.
+  - Phase 90 shipped that finding's OTHER half (a multi-hit archetype,
+    `FLURRY` keyword) in one tick because it turned out to be a small
+    resolution-time keyword, not an engine change. The summoner half is
+    NOT the same shape: verified directly in `resolveThreatPhase` and
+    `CombatEncounterState` — combat is hard-coded to exactly one enemy
+    throughout (`state.enemy` singular, read/written unconditionally by
+    every soak/rider/keyword function in the ~250-line phase resolver;
+    `World/encounter.ts`'s `enemies: [scaled]`). A literal summoner needs
+    a new `state.enemy` shape (array or a distinct adds-list), new UI
+    (multiple enemy panes/targeting), and every one of those functions
+    re-plumbed — genuinely a different, larger problem than the keyword
+    Phase 90 shipped.
+- rationale: real, evidenced, and still open — but "expensive-or-uncertain"
+  (engine-architecture question, not a content/keyword addition), so it
+  does not inherit the cheap half's ease. Not urgent (no fresh spec/design
+  change since it was filed); single signal source (the original KB
+  cross-reference, not re-multiplied by re-filing).
+- proposed scope: a `mechanics-expert` design session first (the shape
+  Phase 85 used for the accessory-kind gap) to settle the state-shape
+  question — e.g. a fixed-size adds array alongside the primary enemy vs.
+  a full N-combatant model — before any engine code, then the engine
+  change, then a first summoner enemy to prove it end-to-end. Likely 2-3
+  phases, not one.
+- estimated phases: 2-3
+- conflicts: none against spec.md non-goals; Hazard-Pattern Combat's
+  single-enemy-bar doctrine (`CLAUDE.md` "the enemy's sole bar VITAE") is
+  about win-condition legibility, not combatant count — a design session
+  would need to confirm adds don't erode that legibility before landing.
+
+- **[2026-09-19 burn-day design pass] The design is now SETTLED and the row is
+  re-scored 3.5 -> 5.5** (same impact, much lower uncertainty: the shape is
+  decided, the traps are named, and the sizing is honest). A three-lens
+  adversarial panel — doctrine/legibility, KB prior-art/reception, and
+  engineering risk — reviewed one concrete proposal against the live tree.
+  **All three returned SOUND_WITH_CHANGES.** The changes are load-bearing and
+  are recorded here so the next tick builds the amended design, not the
+  refuted one.
+
+  **THE SHAPE (agreed).** Keep `state.enemy` untouched as the primary foe and
+  the sole VITAE win condition. Add an optional `adds?: CombatAdd[]` of
+  LIGHTWEIGHT records (`id`/`name`/`vitae`/`maxVitae`/`bite`) — never
+  `Enemy[]`, which drags in threat sequences, stages, keywords, loot, art and
+  prose and is what makes a literal `state.enemies` XL. A new
+  `{ kind: 'summon'; n }` EnemyKeyword follows the FLURRY precedent (39e2915e).
+  Adds render as tappable CHIPS, never a second bar. Doctrine verified as
+  enforced by CODE, not convention: `checkImmediateOutcome`
+  (`combat.engine.ts:3860-3866`) and `pendingOutcome` (`:4587-4591`) read only
+  `state.enemy`/`state.player`, so no adds array can create or block a win.
+
+  **REFUTED — do NOT append the add bite to `threatEffects`.** This was the
+  proposal's whole cheapness argument (one synthetic `{damage}` entry, and the
+  entire GUARD/BARRIER/RIPOSTE soak chain applies free). Two reviewers
+  independently found it corrupts combat accounting: the appended entry
+  increments `attacksLanded` (`:4176`) and `attacksFullyBlocked` (`:4300`),
+  which feed `lastThreatFullyBlocked` (`:4520`) and the coveted-die `'block'`
+  steal; it is emitted verbatim on the `threat-fired` event (`:4443`) and
+  pushed into `penaltiesApplied` -> `CombatPhaseResult` (`:4411`, `:4462`), so
+  the authored telegraph would report a hit the enemy never printed. It is
+  also inside the `if (!hindered && !isDefeated(enemy))` gate at `:4173`, so
+  STAGGER/DISRUPT on the primary foe would silence the adds too. **No existing
+  test catches any of this**, because every fixture uses a non-SUMMON foe.
+  Correct approach: resolve the add bite as its own block AFTER the
+  `for (const eff of threatEffects)` loop, reusing the soak arithmetic through
+  an extracted helper.
+
+  **REFUTED — the "sim is blind to `strikeAdd` like it is to `crackGlyph`"
+  hazard is factually FALSE**, and it was the stated excuse for keeping SUMMON
+  off the measured matrix. `crackGlyph` was taught to the sim in Phase 51:
+  `crackAt?: number` exists on the policy (`combat.sim-policies.ts:98-110`) and
+  is set on five of the eight policies (`:264`, `:279`, `:306`, `:329`, `:366`).
+  **All three reviewers independently concluded: TEACH THE SIM POLICY**, adding
+  a mirror knob (`strikeAddAt`) in the same increment — ~12 lines beside the
+  `crackAt` block, one optional field, absent = never, so the default is
+  byte-identical. An archetype permanently excluded from the baseline can never
+  be balanced by measurement, only by vibes (AGENTS.md "Measured truth").
+
+  **REFUTED — `crackGlyph` is the wrong template for a PRICED verb.** It spends
+  nothing (`combat.engine.ts:5412-5457`) — deliberately. Take the phase gate,
+  the silent no-op on an unknown id, the immutable rebuild, the single event
+  push, `withLog` and `checkImmediateOutcome` from `crackGlyph`; take the
+  Conviction debit from `playSignatureSkill` (or `placeStake`, `:965-983`).
+  Note `placeStake`'s guard silently no-ops when Conviction is short — the add
+  chip needs an explicit unaffordable state and a rejection event instead.
+
+  **OTHER MUST-CHANGES.** (a) Spawn must bind to a one-shot event (stage entry,
+  reusing the `stagesEntered` ledger at `:4805`) with a hard per-encounter cap,
+  NOT to an emptiness check — "spawn when none are alive" makes clearing cause
+  the next spawn. (b) Spawn AFTER the stage block, since REGROW deliberately
+  resolves before the stage check (`:4788-4791`). (c) Bar RAVENOUS
+  (`:4231-4239`) and WOUNDING (`:4259-4262`) from firing off the add term, or
+  the primary enemy heals off damage credited to the brood — writing add damage
+  into the sole VITAE bar. (d) `projectIncomingThreat` (`:5697-5744`) must
+  mirror the add term in the SAME increment or the on-screen wall math
+  understates incoming damage; note it already omits `enemyThreatMult`,
+  `stageThreatBonus`, `stanceCheck.mult` and the SWIFT/BRUTAL terms. (e) The
+  add chips need their OWN row with a distinct shell — they cannot join the
+  enemy's `hudRight` column, which already carries keyword and effect chips on
+  the `EffectChips` shell. (f) **Prerequisite, not a follow-up:** move
+  `enemyFigureWrap` off the static `COMBAT_HUD_HEIGHT` constant
+  (`CombatCombatantPane.tsx:786`, `:89`) onto the measured HUD height before
+  adding any HUD row, or the portrait anchor drifts. (g) Amend
+  `enemy-keywords.ts`'s header, which states every keyword changes "the
+  arithmetic of" a phase — SUMMON is a deliberate second class.
+
+  **NUMBERS.** `kb_cards` has no prior art for enemy-side summon costs (all
+  Dawncaster "Summon" hits are player-side Clones/Totems/Followers), so N and
+  bite are un-grounded. Panel recommendation: ship **N = 2** with
+  **sum(bite) strictly below the foe's own printed threat term**, so adds read
+  as a modifier on the wall rather than a second wall — accounting for
+  `THREAT_ESCALATION_MAX = 2.0`. Reception grounding that DID land: adds are a
+  famously resented archetype when the only answer is a tax. Arkham's
+  engagement cost is survivable because it offers a cheaper non-kill
+  alternative; the panel asks for a second honest line before shipping (the
+  synthetic-routing already makes the add term soakable by GUARD/BARRIER —
+  surface that to the player rather than leaving "clear them" as the only play).
+
+  **SIZING, corrected.** The recon's figures were wrong by 10-130% and a plan
+  whose sizing is that far off should not carry "one session" confidence: the
+  engine carries **110** `.enemy` refs (not 121), **30** damage-application
+  sites — 20 `applyEnemyDamage(` + 10 `applyDamage(enemy` (not 31), and
+  **seven** mutable `enemy` locals (not three). `resolveThreatPhase` is
+  `combat.engine.ts:3973-4583`, ~611 lines — NOT the "~250-line phase resolver"
+  this row claimed before today. The conclusion survives (a literal
+  `state.enemies: Enemy[]` with real targeting is XL), but the adds-as-chips
+  increment is **2 phases, not 1**: one for the engine (state shape, keyword,
+  spawn, the post-loop bite block, `strikeAdd`, the sim knob, the projection
+  term) and one for the UI (its own chip row, the HUD-height prerequisite, the
+  confirm sheet, the log/ledger event lines) plus the first summoner foe.
+
+  **WHY IT DID NOT SHIP ON THE 2026-09-19 BURN DAY.** Not blocked — deliberately
+  deferred. The cheap path was refuted the same day it was proposed, two of the
+  must-changes are prerequisites that touch the combat HUD's anchoring, and the
+  accounting corruption above is invisible to every existing test. Shipping it
+  half-right would put a silent defect into the one screen the player spends
+  most of their time on. The design work is the durable output; the build is a
+  clean 2-phase job for a tick that can start from this row.
+- **[correction, same day] The full implementation order is now written up as
+  `plan/phases/phase_102_summon_adds_archetype.md`**, and completing it refuted
+  THREE claims made in the summary above. Recorded here because the summary was
+  already pushed and a reader should not act on it uncorrected:
+  1. **"Adding to `CombatEvent` breaks four exhaustive sites at typecheck" is
+     WRONG.** Both mobile switches carry a `default:`
+     (`combat-encounter.engine.ts:1153`, `:1286`), so new event members break
+     nothing there. The real typecheck gate is the `EnemyKeyword` union's four
+     sites in `Enemy/enemy-keywords.ts`.
+  2. **The soak ordering above was under-specified.** The corrected design
+     resolves the add bite in its own block AFTER the
+     `if (!hindered && !isDefeated(enemy))` block closes, through a shared
+     helper — which also settles a ruling the summary did not name: staggering
+     the boss does NOT silence the brood (bodies act), and killing the boss
+     still ends the fight, a deliberate divergence from STS:BG's persistent
+     summons (`kb:slay-the-spire-the-board-game/rules/edge-cases-faq:62-63`).
+  3. **"Spawn on a one-shot event with a per-encounter cap" now has numbers.**
+     N = 2 per wave, `ADD_WAVE_CAP` = 2, adds are 1/1 (one strike kills one),
+     `bite = max(2, round(enemy.level * 0.2))` snapshotted at spawn, and
+     `STRIKE_ADD_COST` = 2 conviction against a cap of 12. At L22 a full wave
+     is ~8 against the foe's own ~31 telegraph — 26%, "a modifier on the wall,
+     not a second wall". The finite-wave shape is grounded in Aeon's End's
+     finite nemesis deck and STS:BG's per-Act summon deck, both cited in the
+     brief.
+  The brief also carries the second honest line the prior-art lens demanded: a
+  live GUARD wall answers the brood, so eating the bite costs a defend card
+  every round while clearing costs a one-time 2 conviction. That is the
+  decision, and both sides are visible in the telegraph.
+- estimated phases: 2 (was "2-3", now bounded by a settled design)
+- **SHIPPED 2026-09-19 as Phase 102 — engine AND surface, in one pass.** The
+  design above is what landed, with one correction found during the build: the
+  brief's §9b formula for "the wall left over after the boss's hit" charged
+  riposte's parry and barrier's share against GUARD, which would have
+  overstated the add term and broken the parity the brief itself calls the ship
+  gate. Shipped as explicit absorbed-minimums instead; `netDamage` byte
+  unchanged.
+  The surface half turned up a live defect the design pass had not predicted:
+  `IntentIcon` printed a bare `DENIED` and said "no damage lands" whenever the
+  foe was hindered — while the engine resolves adds OUTSIDE that gate on the
+  deliberate principle that bodies act. A player who staggered the summoner was
+  being instructed by the telegraph to take free damage. The readout now carries
+  the brood's soaked share beside the foe's own. See
+  `plan/phases/phase_102_summon_adds_archetype.md` → "## SHIPPED".
+
+### ~~[score 3.5] Consumables have no anti-hoarding lever — no cantrip-style secondary effect, no HP-conditional scaling~~ PROMOTED to Phase 96 and SHIPPED 2026-09-19 (commit 417b931)
+- proposed: 2026-09-19, `/adjust-equipment` pass 13 (Step 1b widened audit,
+  angle deliberately off pass 12's own relic/loot-model query to avoid
+  re-asking the same question)
+- source signals:
+  - Step 1's own six structural signals re-derived clean and byte-identical
+    to pass 12 (2 weapons/2 armor/7 accessories spanning all 6
+    `AccessoryKind`s, no dominated same-slot pair, all 22 consumables
+    reachable — 12 shop-stocked, 10 via `rollCacheReward`'s uniform draw —
+    all `grantsSignature`/`effectId` values resolve live) — a genuine
+    zero-diff pass on the data itself, so the Step 1b widened KB check ran.
+  - `kb_cards` (dawncaster) cross-reference on potion/consumable design
+    (not equipment/relic models, already covered pass 12) surfaced three
+    concrete anti-hoarding levers the corpus uses that Axiomancer's item
+    set has none of: (1) near-every potion pairs its core effect with an
+    always-good secondary ("Draw a card" — `kb:dawncaster/0526-diamond-potion`,
+    `/1455-steelskin-potion`, `/1114-potion-of-alacrity`), so using one is
+    never strictly worse than sitting on it; (2) conditional scaling baked
+    into the item itself rather than left to player judgment — Healing
+    Potion: "Gain 10 HEALTH. If you are below 50% health, gain 15 HEALTH
+    instead" (`kb:dawncaster/0796-healing-potion`); (3) potions as a
+    renewable categorical resource with a generation/payoff loop
+    (`0041-alchemic-presence`, `0063-another-round`, `1117-potion-sash`,
+    `1152-quick-chemistry`), not a scarce hoard to protect.
+  - Verified against the live tree before filing: `Consumable.healAmount`
+    (`Items/types.ts`) is a flat number; `useConsumableEffect`
+    (`Items/equipment.engine.ts` line ~61) applies it unconditionally with
+    no read of the caller's current HP anywhere in the function — none of
+    the three levers exist today, not even partially.
+- rationale: real and KB-grounded, not a re-ask of pass 12's relic-model
+  finding (that one was about acquisition — run-found vs. fixed starting
+  kit, already deferred in `docs/equipment.md`; this one is about in-combat
+  incentive to actually use what's already owned). Single signal source
+  (one KB cross-reference) and no urgency (no recent spec change), but the
+  scope reads as genuinely small once landed: no new item category, no new
+  UI, just a new optional field + one conditional branch.
+- proposed scope: pick ONE lever to avoid scope creep — HP-conditional
+  scaling (closest fit: `Consumable` already carries flat numeric fields,
+  and `useConsumableEffect` already reads `player` so the HP check is a
+  local branch, not new plumbing). Add an optional field (e.g.
+  `healAmountBelowHalf`) to `Consumable`, branch on it in
+  `useConsumableEffect` against `player.health / player.maxHealth < 0.5`,
+  and retune the flat-`healAmount` potions (healing-potion,
+  minor-healing-potion, greater-/supreme-healing-potion, phoenix-tear) to
+  use it. This is new engine wiring (a new field + a new conditional branch
+  in `useConsumableEffect`), which is why this pass files rather than ships
+  it solo (THE GROWTH FLOOR ¶2) — `/adjust-equipment`'s own remit is
+  data-only.
+- estimated phases: 1
+- conflicts: none against spec.md non-goals or `docs/equipment.md`'s
+  lean-shape doctrine (this touches consumables, not the fixed relic set,
+  and adds no rarity/affix machinery).
+
+### ~~[ ] [score 5.0] Art-direction coherence — restyle the dice faces + HUD chrome to the painted portrait register, now that the pipeline blocker has cleared~~ PROMOTED to Phase 89 via /oversight 2026-09-17
+- proposed: 2026-09-17, expand pass 17
+- source signals:
+  - `plan/CRITIQUE.md` [MED] "the arena's art registers are incoherent
+    (painted foe, flat-vector dice, mono chrome)" (owner playtest,
+    2026-09-04, still open)
+  - `plan/CRITIQUE.md` [MED] "every encounter renders the same fixed
+    'ruined city' arena backdrop" (pass 23) — explicitly folds into the
+    same art-direction pass per its own suggested fix; its own half is
+    now partly shipped (Phase 83, coastal village only, via the Phase
+    73/78 pipeline)
+  - `plan/AUDIT.md` "[loop-call] Phase 78 — W5 art-pass candidates" —
+    CLOSED by Phase 88 (2026-09-16), confirming the art pipeline now
+    reliably ships picks
+  - this file's own pass-12 "Considered (below threshold)" note: this
+    exact cluster was held back solely because it "resolves to the same
+    blocked owner call" — that call (art pipeline route + license
+    question) was answered 2026-08-22 and the pipeline has since shipped
+    four phases (73, 78, 83, 88)
+- rationale: a real 3-signal cluster (two independent CRITIQUE findings
+  + one AUDIT tracking row) that was correctly deferred three passes
+  running while genuinely blocked, and is now genuinely unblocked — the
+  exact "re-evaluate once `/oversight` rules on the pipeline gate"
+  instruction pass 12 left for a future pass. Re-verified live today,
+  not stale: `CombatDie.tsx` is a fully programmatic isometric SVG with
+  saturated stance-hex fills (recut 2026-07-19, still not a painted
+  asset); `CombatBoard.tsx`/`CombatEncounterPanel.tsx` HUD chrome is
+  still `JetBrainsMono_400Regular` throughout (`theme/axm.ts:27`); Phase
+  88 wired painted portraits for enemies only, widening rather than
+  narrowing the register gap on the same screen. No existing design doc
+  names a target register — a future phase would decide it, not find
+  it.
+- proposed scope: a design decision (pick the register — the painted
+  portraits are the most finished asset, per the original finding)
+  followed by a restyle of the two named surfaces (die-face treatment,
+  HUD chip/text chrome) using the now-proven Phase 73/78 art pipeline
+  for any new assets. Likely a `mechanics-expert`- or design-session-
+  first shape, the way Phase 85 resolved the equipment-slot gap, rather
+  than a guessed implementation.
+- estimated phases: 1-2 (design session, possibly folded with the
+  restyle if scope stays UI-token/asset-swap sized; split if the die
+  needs newly generated art)
+- conflicts: none against spec.md non-goals; no contract conflict —
+  purely additive to the mobile UI/art surfaces.
+
+> **Flagged via /oversight 2026-09-15:** of this section's ~60 rows, only 11
+> carried an active `[score N]` tag; the other ~49 are pre-scoring-convention
+> rows from the 2026-07/08 era, mostly already struck through as
+> PROMOTED/ABSORBED/SUPERSEDED/RESOLVED but left un-struck from Pending as
+> bookkeeping debt. Recommend a `/consolidate` pass to strike or archive the
+> dead ~49 so this section reflects only live candidates going forward.
+
+### ~~[score 4.5] No summoner/add-spawning or multi-hit-vs-stacked-wall enemy archetype~~ PROMOTED to Phase 90 via /oversight 2026-09-17
+- proposed: 2026-09-16, `/adjust-enemies` pass 11 (Step 1b widened audit,
+  added via `/oversight` 2026-09-15 to catch a steady-state plateau after
+  passes 9-10 both logged zero-diff)
+- source signals:
+  - a KB cross-reference (`kb-query` MCP, corpus `slay-the-spire-the-board-game`
+    + `gloomhaven` + `aeons-end`) found three archetypes as grounded, well-liked
+    prior art that the current ~78-enemy roster has no equivalent of:
+    **summoner enemies that spawn adds** (`kb:slay-the-spire-the-board-game/rules/edge-cases-faq`,
+    src-002/src-004 — the Gremlin Leader's Summon deck, adds persisting past
+    their summoner's death), **a multi-hit attack that punishes one stacked
+    GUARD/BARRIER instead of chip damage** (StS-BG's Buffer keyword, src-002 —
+    "triggers separately per hit of a multi-attack"), and **elite-tier
+    monster AI sharing a normal monster's card but at a harder stat tier**
+    (`kb:gloomhaven/rules/edge-cases-faq`, src-009/src-010 — praised as fast
+    yet unpredictable enough to force a plan revision).
+  - checked our roster against each before filing, so this isn't a blind
+    KB-says-so: the "elite tier" archetype is already well covered
+    (`difficulty: 'elite'` is a real tag across 20+ enemies with its own
+    stat/deck weight) and the "junk the player's deck" archetype is already
+    extensively covered (`curseCardId` — most Northern Forest/Capital elites
+    and several bosses are "THE archetype's single curse-injector"), so both
+    are struck from this finding; only the summoner/adds and the multi-hit
+    "punish a stacked wall" archetypes are genuinely absent.
+  - both are engine-structural, not content-only, so this pass files rather
+    than ships (skill §5 failure mode 2: "a finding needs an engine constant
+    change — file it, don't fake it" — this needs more than a constant).
+    Verified before filing: combat is hard-coded 1-enemy
+    (`World/encounter.ts`'s `enemies: [scaled]`, `combat.engine.ts` reads a
+    singular `state.enemy` throughout) — a literal summoner needs real
+    multi-enemy combat state, not a keyword. A multi-hit mechanic is smaller
+    but still needs new engine control flow: `resolveThreatPhase`
+    (`combat.engine.ts`) resolves exactly one telegraphed hit against
+    GUARD/BARRIER/RIPOSTE per phase, and `EnemyCard` (`combat.enemy-cards.ts`)
+    has no repeat/hit-count field to drive a loop — this is closer to
+    `EnemyKeyword`'s existing HIDE/SWIFT/BRUTAL shape (arithmetic changers)
+    than to a new content item, but the loop needs an explicit choice between
+    the two shapes (or both) before either is buildable.
+  - impact: moderate — every fight is still "one enemy telegraphs one hit,
+    player answers it"; the KB reception evidence (Gloomhaven, Aeon's End)
+    is specifically about the antagonist FEELING structurally different from
+    fight to fight, not just numerically bigger, which THE BIG NUMBERS
+    REWRITE's numeric axis doesn't cover.
+  - ease: low — genuine engine design work (an architecture choice + new
+    control flow), not a same-tick content pass; sized for a dedicated
+    phase, ideally with a `mechanics-expert` design session the way Phase 85
+    resolved the accessory-kind gap.
+
+### ~~[score 6.5] One concept, one word — a naming pass across the player-facing surfaces~~ PROMOTED to Phase 80 via /oversight 2026-09-15
+The 2026-09-12 UI fresh-eyes sweep found the same concept wearing several names
+on screens a player sees in the same minute, raised independently by three or
+more observation lenses: money is `SHILLING` / `PURSE` / `WALLET` / `12s`; the
+journal is `THE LEDGER` in the nav, `THE BOOK OF DEEDS` on the page it opens,
+`THE ACCOUNT` on the character sheet and `THE FOURTH LEDGER` in the labyrinth;
+`SEALED` is an inventory tab, a map node state and a no-retreat lock; `SURGE`
+is an enemy phase header, a hazard card keyword and the momentum chain; and
+"the deck" is unqualified on screens where the run carries two of them. Two of
+the smaller cases shipped in the sweep (the map legend's SHUT, the inventory's
+ACCESSORY), which is the pattern: each is a one-line change, and the value is
+in doing them together against a written lexicon rather than one at a time.
+Evidence and the full list: `axiomancer-mobile/docs/reports/UI_FRESH_EYES_2026-09-12.candidates.md`.
+
+**Status after the 2026-09-12 swarm (PR #302): still open, and now better
+evidenced.** The swarm put all five naming clusters through a three-lens
+adversarial panel and every one was refuted — the adjudicator's reason in each
+case was that the competing senses never appear on the same screen, and appear
+in different grammar when they are near each other. That is a fair verdict on
+each name taken alone and an argument *for* doing them together against a
+written lexicon, which is what this candidate is. Three single-screen cases did
+ship in the swarm: the forge now prices in shillings rather than the combat
+glyph (`FE-056`), the gear section stopped naming a state it does not describe
+(`FE-037`), and the title copy lowercased LEAGUES to match the map (`FE-057`).
+Per-row verdicts: `UI_FRESH_EYES_SWARM_2026-09-12.ledger.md`.
+
+### ~~[score 6.0] Make the glossary reachable from the screens that need it~~ PROMOTED to Phase 82 via /oversight 2026-09-15
+The same sweep found definitions that exist but cannot be got at: the hazard
+deck's fourteen keyword chips render in a plain `View` with no tooltip target,
+its four headline stats (`DISTINCT`, `ACQUIRED`, `SCARS`) are display-only, and
+the combat board's `PLEA`/`CHARGE`/`◆` were named only in accessibility labels
+until the sweep surfaced two of them. The tooltip registry already carries most
+of the content; the gap is that the screens do not mount targets for it.
+
+**Status after the 2026-09-12 swarm (PR #302): partly shipped, keep open.**
+The hazard deck's two unkeyed glyph-and-number pairs now carry an on-screen key
+(`FE-058`), the combat board's empty stance chip names the action that fills it
+(`FE-053`), and the primer stopped teaching a meter the board never draws
+(`FE-054`). The structural half is untouched: the fourteen keyword chips still
+render in a plain `View` with no tooltip target, and the panel refuted the
+row that reported it on the ground that the registry content exists — which is
+exactly this candidate's point, that content nobody can reach is not reachable.
+
+### ~~[score 5.5] The Capital is the new frontier — no door onward yet, same as town-across-river before it~~ PROMOTED to Phase 84 via /oversight 2026-09-15
+- proposed: 2026-09-10, /forge (Phase W6, commit f56fa198)
+- source signals:
+  - THE CAPITAL (map 5 of the northern continent) ships terminal at
+    cap-9 (The Factor), deliberately — the next continent isn't
+    authored. This is the exact shape town-across-river had before
+    this same tick gave it a door; the pattern will repeat every time
+    `/forge` closes one frontier.
+  - The advisor-selection narrative thread (ncy-5 → cr-9 → tar-4 →
+    cap-8) is now fully paid off at the capital. A genuine next beat
+    (what happens to the chosen nominee? does the player's own arc
+    continue past the selection, or does the thread simply end here?)
+    is open — a story-spec question, not just a map-graph one.
+  - `labyrinth-continent` (THE APORIA, W-01) stays deliberately
+    dev-menu/CLI-only until "the last continent" exists (T's binding
+    2026-07-07 ruling, `specs/world/W-01-aporia-labyrinth-continent.md`
+    §Access) — the-capital does NOT change that gate; no door was (or
+    should be) wired from the-capital into the labyrinth by this pass.
+- rationale: `/forge`'s own standing weakness (one reachable
+  continent's worth of linear content) narrows every tick it runs, but
+  each map it ships just moves the frontier one map further out rather
+  than closing the gap outright — worth tracking explicitly so the
+  next `/forge` tick (or a `/world-spec` session) picks a deliberate
+  next beat instead of mechanically bolting on "map 6" with no new
+  narrative arc.
+- proposed scope: either (a) a `/forge` tick ships map 6 continuing
+  the ribbon-road literally (what's past the capital's gate — open
+  question), or (b) a `/world-spec`/`story-spec` session first decides
+  what the capital's selection actually SETS UP for the player
+  character before more geography ships on top of it.
+- estimated phases: 1 (map growth) or 1-2 (design session + map, if
+  (b) is picked).
+- conflicts: none. Does not touch the labyrinth-continent gate.
+
+### ~~[score 4.5] The combat arena backdrop gap (score-6.0 row below) now also covers the-capital and its own settlement flavor~~ FOLDED into Phase 83 (the score-6.0 backdrop candidate below) via /oversight 2026-09-15 — no independent phase
+- proposed: 2026-09-10, /forge (Phase W6)
+- source signals: the-capital ships with no dedicated backdrop plate —
+  it free-rides whatever the existing region-string regex resolves to
+  (the northern-city/LUDGATE_HILL pattern), same as every prior
+  northern-continent map. This is not a new gap, just one more data
+  point for the already-filed backdrop candidate below (score 6.0) —
+  filed here as a cross-reference rather than a duplicate entry.
+- rationale: no new phase needed; the existing candidate's scope
+  already covers this.
+- proposed scope: n/a — see the score-6.0 backdrop candidate.
+- estimated phases: 0 (folded into the existing candidate).
+- conflicts: none.
+
+### ~~[score 5.0] Retheme the six Northern-Forest dialogue trees to the ratified register (spec 34 §2) — all now reachable~~ SHIPPED 2026-09-13 (adjust-npcs pass 8)
+- proposed: 2026-09-05, adjust-npcs pass 1
+- **SHIPPED 2026-09-13 (`/adjust-npcs` pass 8, content-curator):** rewrote all
+  six trees (`axiomancer-mechanics/src/World/Continents/Northern-Forest/
+  npcs.ts`) in place — same node ids, same `choices`/`requires`/`effect`
+  objects (no schema or mechanical change), only `text`/`description`
+  strings rewritten into the house register: short clauses, concrete
+  objects per speaker (stone-tending tools, a Chronicle's tally slats,
+  a whittled peg, blaze marks and wage numbers, a cold hearth, an
+  overturned cart), and a distinct voice card per NPC (Shrine
+  Keeper/exacting, Chronicler/accumulating, Wandering Philosopher/
+  corrective-Socratic, Forest Ranger/clipped-practical, Hermit
+  Sage/spare, Lost Trader/transactional) so each reads apart with
+  names removed. Cut the cited "wordier interiority" lines verbatim
+  (e.g. Hermit Sage's "touches my heart deeply") and every "ancient/
+  otherworldly/transcendent" filler adjective. KB gate run first
+  (`kb_search` for dialogue-voice/NPC-writing prior art, scopes
+  boardgames/all) — zero matches, corpus is card/mechanics-centric per
+  the skill's own anticipated miss; filed
+  `no-trbl-2-u/game-knowledge-base#80` and proceeded UNGROUNDED per
+  skill §3 Step 2. Updated the two engine tests that asserted the old
+  prose verbatim (`World/Continents/e2e/continents.engine.test.ts`,
+  `NPCs/e2e/story-npcs.engine.test.ts`) to match the new lines — every
+  other test-anchored substring (e.g. `'logging operation'`, `'wisdom
+  earned in isolation'`, `'Bandits took everything'`, `'Providence'`,
+  `'*Talk'`) was deliberately preserved verbatim in the new prose so no
+  further test edit was needed. `lint:content` and the full mechanics +
+  mobile verify gates green (see the pass-8 ledger log entry in
+  `plan/CONTENT_LEDGER.md` for exact counts).
+- source signals:
+  - `/adjust-npcs` pass 1 staged the last two of `Northern-Forest/npcs.ts`'s
+    six NPCs (Forest Ranger, Lost Trader) — all six trees (Shrine Keeper,
+    the Chronicler, the Wandering Philosopher, Forest Ranger, Hermit Sage,
+    Lost Trader) are now reachable in live play for the first time.
+  - Every one of the six was authored pre-44g (Phase 115/117-era) and reads
+    noticeably off the house register: wordier interiority ("I feel called
+    past them," "touches my heart deeply"), no thee/thou/exclamation
+    violations found on inspection, but sustained above the "one clause per
+    line, terse, cold and old" bar spec 34 §2 sets and Phase 44g already
+    proved out on the eight coastal trees.
+  - Direct precedent: S-02 drew exactly this line for the coastal eight
+    ("This spec deliberately does not retheme a single existing line...
+    Phase 44g owns rewriting them") and 44g executed it as its own
+    dedicated pass rather than folding it into the staging phase (53c).
+    This candidate is the same split, one tier over: staging (this pass)
+    is done; retheme is real, sized, and not this skill's job to rush.
+  - Grounding: the two newly-staged trees are the ones with immediate
+    reader traffic (the Ranger's `get-to-cave` grant is now the sole live
+    path to a real quest); a mismatch between the Ranger's own voice
+    ("How do we balance the forest's future against people's immediate
+    needs?") and the terse register the interaction description around him
+    was just written in (this pass's own nf-21 prose) is a visible seam a
+    player can notice in one conversation.
+- rationale: sized like 44g (six trees, no mechanical changes, pure prose)
+  and low-risk (no schema/effect changes) — a clean `content-curator` job,
+  not a design decision. Not actioned this pass to avoid diluting the
+  staging fix with a six-tree rewrite in the same diff, and because 44g's
+  own precedent treats staging and retheme as sequential, separable work.
+
+### ~~[score 8.0] Register the 2026-09-02 status-primacy doctrine retirement in `lexicon.json`'s doctrine mechanism — two live surfaces still assert it as current~~ PROMOTED to Phase 79 via /oversight 2026-09-15
+- proposed: 2026-09-03, expand pass 11
+- source signals:
+  - spec.md diff (commit `63e3741f`, 2026-09-02): "Status effects are
+    the main fun... Low status-effect engagement is a balance failure"
+    replaced outright by THE BIG NUMBERS REWRITE's "Bigger numbers" /
+    "Richer verbs, competing lines" pillars — no line is doctrinal, no
+    objective function grades combat from above.
+  - Verified directly: `axiomancer-mechanics/docs/lexicon.json`'s
+    `retired` array has 19 rows, ALL type `identifier` — zero rows use
+    the `type: "doctrine"` shape the file's own `__comment` describes
+    and Phase 66 built specifically for this failure class (retired
+    STRIKE-IS-DEAD / statusEngagement-objective doctrine, 2026-08-20).
+  - Verified directly: the retired doctrine is still asserted as
+    CURRENT design law in two live (non-HISTORICAL-exempt) surfaces —
+    `axiomancer-mobile/components/combat/statusGlyphs.ts:5-6` ("the
+    doctrine: status effects are the main fun, and they must be
+    legible") and `axiomancer-mechanics/docs/tuning.md:58-60`
+    ("### Status-First Doctrine ... enforces the game's core design
+    principle: status effects are the main fun"). tuning.md's own
+    banner is phrased `> **HISTORICAL:**`, not the `**Status:**
+    HISTORICAL` string `check-lexicon.mjs`'s `BANNER_RE` requires, so
+    even a doctrine row wouldn't exempt it today.
+  - `/iterate` already independently found and fixed one sibling
+    instance this same window (2026-09-01 commit: "content: rewrite
+    combat coach copy off the retired status-dominance doctrine") — a
+    third occurrence of exactly the bare-hands discovery cost the
+    doctrine-lexicon mechanism exists to eliminate.
+- rationale: this is the identical shape to the already-promoted Phase
+  66 candidate, one doctrine-generation later. The mechanism
+  (doctrine-type lexicon rows, CI-wired) is proven and idle; the design
+  law it needs to track just changed for the second time in the
+  project's life (2026-08-08 STRIKE-IS-DEAD retirement, now 2026-09-02
+  status-primacy retirement), and the loop is already paying the
+  "find it by hand, one file at a time" tax again (the coach-copy fix).
+  Multiple independent signals: the spec diff itself, the empty
+  doctrine registry, two live un-exempted hits, and a fresh iterate fix
+  on a sibling surface.
+- proposed scope: one bounded phase. Add `type: "doctrine"` lexicon
+  rows for "status effects are the main fun" / "status-effect
+  engagement... balance failure" (replacement: THE BIG NUMBERS
+  REWRITE's bigger-numbers/richer-verbs framing, spec.md current); fix
+  the two flagged sites in the same commit (rewrite statusGlyphs.ts's
+  header comment off the retired doctrine; either give tuning.md a
+  correct `**Status:** HISTORICAL` banner or excise its dead
+  Status-First Doctrine section, since the whole module it describes
+  is already retired); sweep for any further hits the new lint catches.
+- estimated phases: 1
+- conflicts: none. Purely additive to an existing, CI-wired,
+  already-ratified mechanism; touches no spec.md non-goal.
+
+### ~~[score 6.5] The late-campaign difficulty cliff (4% win rate, 4 of 6 cells at 0%) survived THE PATH tuning pass and needs a named design-level fix, not another tuning pass~~ PROMOTED to Phase 81 via /oversight 2026-09-15
+- proposed: 2026-09-03, expand pass 11
+- source signals:
+  - `plan/2026-09-02-big-numbers-overhaul.decisions.md` (from the
+    "docs: record the tuning pass, the five bugs, and the
+    late-campaign gap" commit, 2026-09-02): "The matrix reads late 4%,
+    with four of six cells at 0%. This is a real, unresolved gap, not a
+    measurement artefact — it survived every tuning lever above." The
+    doc's own diagnosis: "card power is flat in level while enemy pools
+    are not."
+  - The same doc names three candidate fixes verbatim and explicitly
+    declines all three: "give cards a level-scaling term (the biggest
+    change...); flatten enemy VITAE growth to near-zero past the mid
+    campaign; give the walls a late-game answer (the vigil `reprisal`
+    verb... would turn a 60-point wall into a 60-point answer and is
+    the cheapest of the three)" — "none of them attempted here because
+    each is a design decision rather than a tuning one."
+  - The very next commit in the same overhaul (`515ac4d9`, "THE PATH
+    lands") measurably moved the late band (9% -> 44%) via a different
+    lever entirely (card upgrades/deck tiers/CONDEMN rescale) — worth a
+    fresh `baseline:check` read before this ships, since THE PATH may
+    have already narrowed or closed the gap this row describes; if so
+    the candidate narrows to picking among the three named options
+    rather than re-proving the gap exists.
+- rationale: this is not "run another tuning pass" — the pass that
+  produced this evidence explicitly ruled out tuning as the tool and
+  named three structural options, unprompted, in its own written
+  record. Single source but unusually well-evidenced (a measured
+  baseline plus an explicit self-declared design-decision boundary from
+  the authoring session itself) and fresh (one day old at filing).
+  Exactly the "impact high, ease low because the scope is a design
+  call, not a fix" shape §5 flags for expand rather than iterate.
+- proposed scope: needs an `/oversight` design pick among the three
+  named options (or confirmation the gap already closed via THE PATH)
+  before it becomes a build-plan phase.
+- estimated phases: 1-3 depending which option is picked (the
+  level-scaling option is explicitly flagged by its own source doc as
+  "the biggest change")
+- conflicts: none — directly serves the just-ratified "every play
+  should visibly move something" / "richer verbs, competing lines, none
+  protected" pillars; touches no non-goal.
+
+### ~~[score 6.0] The combat arena backdrop is still one fixed image across (now) three continents of distinct settings — critique's own routing instruction to `/expand` was never followed~~ PROMOTED to Phase 83 via /oversight 2026-09-15
+- proposed: 2026-09-03, expand pass 11
+- source signals:
+  - `plan/CRITIQUE.md` Pending, pass 23: "every encounter renders the
+    same fixed 'ruined city' arena backdrop, regardless of the
+    encounter's own narrative setting" — `CombatCombatantPane.tsx:49`'s
+    `ARENA_BG` is a single `require('.../arena-ruined-city.jpg')` used
+    for literally every fight. The row's own suggested fix: "out of
+    scope for a one-line fix... a candidate for a dedicated art-asset
+    or backdrop-selection phase... Route via `/expand` if picked up."
+    Never filed until now.
+  - Verified directly: the world has grown well past the single-village
+    premise that finding was written against. `axiomancer-mechanics/
+    src/World/map.library.ts`'s header now documents three continents
+    (`coastal-continent`, `northern-continent`, `labyrinth-continent`)
+    spanning at least caverns, a northern city, a connecting river, a
+    town across the river, and a three-act MAZE-style labyrinth
+    (`aporia-colonnade`/`archive`/`proof`) — all shipped since the
+    finding was filed (Phases W1-W5, 2026-08-28 through today). Every
+    fight in every one of these tonally distinct places still renders
+    the same storm-lit ruined-city cracked-stone floor.
+  - The art pipeline this needs now exists where it didn't at pass 23:
+    Phase 73 (hosted gpt-image adapter) and the Phase 78 W5 sourcing
+    pass (CC/open-source enemy-art research, license+provenance
+    documented) give this candidate a concrete acquisition path it
+    lacked before.
+- rationale: this is critique's own explicit hand-off, sitting unfiled
+  for multiple expand passes (9 and 10 both swept CRITIQUE without
+  surfacing it, most likely because pass 23's finding predates pass 9
+  and is a MED/visual row easily under-weighted against HIGH functional
+  rows). The world-growth signal (F) independently confirms it: three
+  continents' worth of distinct settings now share one backdrop, a
+  materially bigger gap than the single-village case the finding was
+  filed against.
+- proposed scope: N-phase mini-plan. A small backdrop set keyed to
+  map/region (coastal village first, per the original finding), sourced
+  through the now-proven Phase 73/78 art pipeline; wire backdrop
+  selection off the encounter's map/continent id in
+  `CombatCombatantPane.tsx`.
+- estimated phases: 2-3 (asset sourcing/generation, then wiring +
+  fallback default)
+- conflicts: none.
+
+### ~~[score 8.5] In-house crash capture — global error/promise-rejection handlers + next-launch crash prompt (mobile)~~ PROMOTED to Phase 77 via /oversight 2026-09-02
+- proposed: 2026-09-01, expand pass 10
+- source signals:
+  - `plan/PHASE_CANDIDATES.md`'s own "In-house crash capture" row (below,
+    under the 2026-07-20 owner-ruled section) — fully scoped by the owner
+    six weeks ago (near-verbatim: "in-house first" — a global JS error
+    handler, an unhandled-promise-rejection hook, and a next-launch
+    "previous session crashed" prompt reusing the ErrorBoundary's report
+    rendering) and never promoted to a build-plan phase.
+  - `plan/CRITIQUE.md` Pending: **"[HIGH] combat — user hit a mid-combat
+    crash that 30 seeded UI runs could not reproduce"** (spotted
+    2026-08-19, `combat-round-e2e.mjs` built in PR #216 to hunt it,
+    30 runs across 15 seeds still couldn't reproduce it) and **"[HIGH]
+    combat — user crash on ACCEPTING the post-combat card reward (second
+    unreproduced crash report)"** (2026-08-29) — the second row's own
+    text calls out the first by name ("same signature — user crash the
+    harness cannot see, possibly the same underlying cause") and its
+    suggested fix is literally "get the crash's identity from the user's
+    device" via the DEV-only diagnostics panel.
+  - Verified directly: no global handler exists anywhere in the mobile
+    app — `grep -rn "ErrorUtils\|onerror\|unhandledrejection"
+    axiomancer-mobile/{*.tsx,components,app}` returns nothing. Only a
+    React-render `ErrorBoundary.tsx` + a persisted `@axiomancer/logtail:v1`
+    tail exist, surfaced through a **dev-only** `DevToolsSections.tsx`
+    DIAGNOSTICS section (`grep -n "DIAGNOSTICS" axiomancer-mobile/components/dev/DevToolsSections.tsx`)
+    — exactly the gap the 2026-07-20 ruling's parts (a)/(b) were scoped
+    to close, and exactly why two independent crash reports have now
+    gone unreproduced by both automated e2e and manual repro sessions.
+- rationale: this is not "go fix two CRITIQUE rows" — both rows already
+  tried the direct fix (harder e2e hunting) and it did not work twice.
+  The owner-ruled candidate is the actual fix (capture the crash on the
+  user's own device instead of trying to reproduce it blind), it has sat
+  fully scoped and unpromoted for six weeks, and the cost of leaving it
+  unpromoted just compounded a second time. Two independent user-witnessed
+  incidents plus a pre-existing ratified design is exactly the "multiple
+  independent signals = real" bar, not model imagination.
+- proposed scope: one bounded mobile-only phase, per the existing
+  2026-07-20 ruling verbatim: (a) `ErrorUtils.setGlobalHandler` (native) /
+  `window.onerror` (web) feeding the existing `error` log domain +
+  `flushLogTail()`; (b) an unhandled-promise-rejection hook, same sink;
+  (c) a next-launch check of the persisted crash tail that offers
+  "previous session crashed — view/copy report", reusing the
+  ErrorBoundary's report rendering (not the dev-only diagnostics panel).
+  No third-party SDK (Sentry stays an explicit later opt-in, per the same
+  ruling).
+- estimated phases: 1
+- conflicts: none. The owner already ruled the scope and the "no
+  third-party SDK" constraint in the 2026-07-20 session; this candidate
+  only asks to promote work already approved, not to invent new scope.
+
+### ~~[score 6.5] Register the ten retired starter-preset ids (and the retired Hazard/route ids) in `lexicon.json` so `check-lexicon.mjs` catches them~~ CLOSED as stale via /oversight 2026-09-15 — see note below
+- proposed: 2026-09-01, expand pass 10
+- source signals:
+  - `plan/AUDIT.md` "Combat playtest reference still names the retired
+    ten-preset campaign" (filed 2026-08-28, AFTER expand pass 9 —
+    `axiomancer-mechanics/docs/playtest.md` still teaches `erosion` /
+    `oratory` / `foundry` / `penitent` / `standstill` / `augury` /
+    `tithe` / `grace` / `bastion` / `refrain` as the preset grammar; the
+    live CLI only accepts `threadbare` / `pilgrim` / `apostate`).
+  - `plan/AUDIT.md` "Card-work docs describe a dead world — /deck-tuning
+    is unexecutable as written" (filed 2026-08-22) — `.claude/agents/
+    card-expert.md`, `.claude/commands/deck-tuning.md`, and
+    `.github/workflows/deck-tuning.yml`'s dropdown all still name the
+    same ten retired preset ids.
+  - `plan/AUDIT.md` "Scheduled playtest references name retired Hazard
+    and Fishing Village route identities" (filed 2026-08-21) — a sibling
+    instance of the identical failure mode one layer down (Hazard node
+    ids like `H01`, route ids like `fv-2 -> fv-12`), independently
+    rediscovered a week apart.
+  - Verified directly: `grep -n "erosion\|oratory\|foundry\|H01\|preset"
+    axiomancer-mechanics/docs/lexicon.json` returns **zero rows** — the
+    exact mechanism that has caught 20+ other rename incidents
+    (`lexicon.json` + `scripts/check-lexicon.mjs`, CI-wired since Phase
+    44a) was never pointed at the preset consolidation at all.
+- rationale: this is the identical shape to the already-promoted
+  (Phase 66) "extend lexicon for retired doctrine phrases" candidate —
+  a proven, CI-wired mechanism exists for exactly this failure mode
+  (retired identifier silently reads as current) but has a real, provably
+  empty registry gap for one whole class of identifiers, and that gap has
+  now been independently rediscovered three times in eight days
+  (2026-08-21, -22, -28) by three different sessions, each paying the
+  full cost of re-finding it by hand. Pass 9 saw three unrelated docs
+  rows and correctly declined a meta-phase; the 2026-08-28 row is new
+  since pass 9 and, read together with the -21/-22 rows, is the same
+  preset/route-id root cause, not the three-unrelated-causes shape pass 9
+  ruled on.
+- proposed scope: one bounded phase. Add `lexicon.json` rows for the ten
+  retired preset ids and the retired Hazard/route ids (`check-lexicon.mjs`
+  already supports plain identifier rows; no `type: "doctrine"` extension
+  needed, unlike Phase 66), fix the three already-known instances
+  (`playtest.md`, `cli.md` + the fishing-village walkthrough, and the
+  card-expert/deck-tuning docs + workflow dropdown) in the same commit.
+- estimated phases: 1
+- conflicts: none. Purely additive to an existing, CI-wired, already-
+  ratified mechanism; touches no spec.md non-goal.
+
+**CLOSED as stale via /oversight 2026-09-15:** all three cited evidence
+sites are already fixed in the current tree — `playtest.md`, `cli.md` +
+the fishing-village walkthrough, and the card-expert/deck-tuning docs all
+show zero hits for the retired preset/route ids. The `plan/AUDIT.md` row
+this candidate cites (Hazard/route ids, `[5.6]`) was closed today
+(2026-09-14, commits `541e4ad`/`593650a`) via a direct docs fix, not via
+the `lexicon.json` mechanism this candidate proposed. Not promoted — its
+evidence base is gone even though the underlying "add a lint row" idea has
+residual merit; re-file if the failure mode recurs.
+
+### ~~[score 7.5] Extend `lexicon.json`/`check-lexicon.mjs` to catch retired-doctrine prose, not just retired identifiers~~ PROMOTED to Phase 66 via /oversight 2026-08-20
+- proposed: 2026-08-15, expand pass 8
+- source signals:
+  - `plan/AUDIT.md` "axio-query overview still publishes the retired 'THE
+    STRIKE IS DEAD' doctrine after Phase 41" (filed 2026-08-08, promoted
+    directly to build-plan **Phase 55** on 2026-08-12 after sitting stuck
+    through two `/march` ticks) — the live `axio_overview` MCP tool quoted
+    a doctrine T voided on 2026-08-08 back to anyone who queried it.
+  - The SAME day Phase 55 shipped (2026-08-14) it filed **two more, freshly
+    discovered instances of the identical pattern**: `plan/AUDIT.md`
+    "`axiomancer-mechanics/CLAUDE.md` still asserts the retired
+    STRIKE-IS-DEAD / status-primacy doctrine as current" and
+    "`axiomancer-mechanics/docs/profane-canon.md` still asserts 'THE
+    STRIKE stays DEAD' as current design law" — both explicitly noting a
+    *dedicated* reconciliation pass two days earlier (`9caf2a26`,
+    "docs: reconcile combat doctrine after unshackling", 2026-08-13) had
+    already swept `AGENTS.md`, `axiomancer-mechanics/AGENTS.md`,
+    `VISION.md` (both packages) and `skills/digest.md` for this exact
+    class of drift and still missed these two files.
+  - `plan/AUDIT.md` "`/deck-tuning` and `/combat-playtest` still name
+    `statusEngagement` as the objective function" (filed 2026-08-08 by
+    Phase 43, retiring win-rate/statusEngagement as a grading term) and
+    "`skills/digest.md` §3b still reads baseline health against the
+    win-rate doctrine curve Phase 43 retired" (filed 2026-08-09) — the
+    same shape one doctrine-retirement earlier: a law voided in the
+    engine, prose in `skills/`/docs left asserting it as current, no
+    mechanism to catch the mismatch. `skills/digest.md` §3b is still open
+    today; the 2026-08-14 digest entry notes it explicitly ("needs a
+    design ruling before it can be rewritten against CQI directly").
+  - The repo already solved an adjacent problem this way and it works:
+    `axiomancer-mechanics/docs/lexicon.json` +
+    `scripts/check-lexicon.mjs` is a wired-in-CI lint that stops a
+    *retired identifier* (e.g. `basePower`, `Pressure Tracks`) from
+    quietly re-entering live prose — 20 registry rows, exercised on
+    every rename phase since 44a. Checked its registry directly: it has
+    **zero rows for doctrine-law phrases** ("no card deals raw HP
+    damage", "THE STRIKE IS DEAD", "status effects are the MAIN fun...",
+    "statusEngagement... objective function") — only code-identifier/
+    term patterns. A multi-sentence doctrine claim doesn't match any
+    existing pattern, so it sails through the lint that would otherwise
+    have caught exactly the four instances above before a human/audit
+    had to find each one by hand.
+- rationale: this is not "go fix four AUDIT rows" — three of those four
+  are already individually cheap (ease 8-9) and squarely `/iterate`'s job
+  under the standing AUDIT-DRAIN banner; fixing them one at a time is
+  exactly what has already happened twice (2026-08-12 MCP fix, 2026-08-13
+  reconciliation pass) and both times left siblings undiscovered for the
+  next incident to find. The real gap is that the repo has a proven,
+  working mechanism for "retired X must not silently read as current" —
+  built, wired into CI, and load-bearing for every rename phase since
+  44a — and it does not cover the failure mode that has now bitten three
+  independent times in one week (MCP server 2026-08-08/12, a dedicated
+  reconciliation pass 2026-08-13, Phase 55 itself 2026-08-14). Multiple
+  independent incidents across a week, not one audit row's speculation.
+- proposed scope: one bounded phase. Add a `type: "doctrine"` (or similar)
+  row shape to `lexicon.json` for retired *design-law* phrases (starting
+  with the STRIKE-IS-DEAD/status-primacy sentence and the
+  statusEngagement/win-rate-is-the-objective sentence — both have a
+  known-good replacement already written, in `VISION.md`'s reconciled
+  §Combat vision language and Phase 43's CQI framing, respectively);
+  extend `check-lexicon.mjs`'s pattern matching to handle multi-clause
+  phrase patterns if the existing regex approach doesn't already cover
+  them cleanly; fix the two rows `check-lexicon.mjs` newly flags
+  (`CLAUDE.md`, `profane-canon.md`) in the same commit, the same way
+  every rename phase fixes what its own new registry rows catch.
+  `skills/digest.md` §3b stays open pending the CQI-band design ruling
+  it's explicitly waiting on — the lint would still flag it, but the
+  *rewrite* target isn't decided yet, so leave that row for whoever rules
+  on it.
+- estimated phases: 1
+- conflicts: none. Purely additive to an existing, already-ratified
+  mechanism (`lexicon.json`/`check-lexicon.mjs`); touches no spec.md
+  non-goal, no bearings contract.
+
+### ~~Raise (or split around) the `march` workflow's 90-minute job ceiling~~ PROMOTED to Phase 92 via /oversight 2026-09-17
+- source: filed 2026-08-09 by digest, from the pulse. Run `31301228665`
+  (2026-08-09) chained phases 44a and 44b into one tick and hit
+  `.github/workflows/march.yml`'s `timeout_minutes: 90` exactly
+  (`1:30:18`), getting force-cancelled by the runner — see the paired
+  `plan/AUDIT.md` "march ticks are creeping toward the 90-minute job
+  timeout" row for the evidence. The prior tick (`2026-08-08T07:26:19Z`)
+  already ran `1:26:24`, 4 minutes under the ceiling, so this reads as a
+  trend (multi-phase ticks) rather than a one-off.
+- shape: a design decision, not a mechanical bump — either raise
+  `timeout_minutes` (simplest, but just moves the cliff further out for
+  the next multi-phase tick), or have `march`/`ship-a-phase` cap itself to
+  one phase per tick so a tick's own scope stays well under any ceiling
+  (addresses the cause rather than the symptom, but changes loop cadence
+  — more ticks needed to drain the same queue). A third option: keep
+  chaining phases but checkpoint progress mid-tick so a timeout-kill loses
+  only the in-flight phase, not silently — related to, but distinct from,
+  the already-filed "Loop turns that end while CI is amber leave
+  post-green work undone, with no retry" row below (that one is about
+  CI-wait early exits; this is about the job's own wall-clock ceiling).
+- why it matters now: ticks that ship two full phases (design + build +
+  verify + commit, twice) are apparently common enough to threaten the
+  ceiling twice in two days. A future tick that times out mid-*commit*
+  (rather than the ~6 idle minutes this one wasted after its last push)
+  would be a worse outcome than either fix costs.
+
+### ~~Reconcile the card base: do duplicates reach the deck, and are loadout flags wired?~~ PROMOTED to Phase 93 via /oversight 2026-09-17
+- source: filed 2026-08-08 by Phase 52a (`dd5c46a`), paired with two
+  `plan/AUDIT.md` rows. `buildCombatDeck` de-dupes whichever card base is in
+  force, so the Threadbare recipe's 3x copies collapse and a live starting run
+  deals 8 cards against a machine-checked 18. Separately, `GameState.flags`
+  never reaches `initializeCombatEncounter`, so the loadout path is dead in
+  the shipped runtime.
+- shape: one decision with two implementations. Either the card base honours
+  duplicates (making the preset recipes real in-app, and the LINEAGE LAW
+  measurable against what players hold), or the presets are declared unique
+  sets and the sim stops measuring a deck nobody plays. Then wire flags
+  through `initializeCombatEncounter` so the loadout path is live.
+- why it matters now: it decides what "deck size" means, and both Phase 52a's
+  floor of 12 and Phase 52f's price calibration rest on that number. **Should
+  land before 52f**, and 52f should recheck the floor afterward — if
+  duplicates start reaching the deck, 12 becomes conservative.
+
+### ~~Loop turns that end while CI is amber leave post-green work undone, with no retry~~ PROMOTED to Phase 91 via /oversight 2026-09-17
+- source: filed 2026-08-08 by Phase 48 (`0aac2d3`) from march run
+  31184116798, which ended with `result: "Waiting on CI — will resume once
+  the verify-mobile run for commit 615ff26b finishes."` Nothing resumes: the
+  container dies and the next tick re-audits from scratch.
+- shape: `close-trailers` fixes the issue-close symptom by moving it onto the
+  push. The general defect is untouched — the same early exit skips the
+  deploy-URL comment and every other `deploy:check`-gated step. Either resume
+  on deploy-gate completion, or make the post-green steps unconditional and
+  idempotent so a later tick can safely re-run them.
+
+### ~~Post-D8 flag-on curve repair~~ PROMOTED to Phase 39 via /oversight 2026-08-08
+> Merged with "Library theme-symmetry restoration" (below) into ONE
+> bounded phase, per this row's own "promote as ONE bounded phase, not
+> three" instruction. Full row kept here for the phase brief to draw on;
+> see `## Promoted` for the promotion record.
+
+- source: Phase D8 ship (10ec4fe8, 2026-07-18). The D8 brief's own law:
+  "a red curve becomes the next bounded tuning phase" — that phase is now
+  unblocked and MEASURABLE (every preset exposes a live valve; casts/run
+  0.76–1.75, zero dead valves).
+- the gap, measured on the final D8 tree (blind, flag-on, seeds 1–5:
+  `plan/tuning/2026-07-18-d8-preset-dice-valves.md` §gate rerun): early
+  in-band for erosion/oratory/refrain only (augury 40, penitent 51,
+  standstill/foundry 59); mid is a cliff for 8/10 (oratory 66 over-band,
+  refrain 18, rest ≤10); late/impossible ~0 everywhere except oratory
+  (23/19 — the dominance finding).
+- levers already ranked by the 07-18 metrics accumulation + Card Ledger
+  dashboard: duplicate proven staples into the failing decks (the
+  venom-and-vein pattern; 13 candidates charted), cut the remaining
+  flag-off-seated drags (crown-of-thorns −19 dWR, mirror-of-guilt −15,
+  self-flagellant −10 — untouchable in D8 by the byte-identity law),
+  retune the fizz gates (ouroboros 25%, second-thoughts 16%), and give
+  each deck an oratory-style mid-game second gear. Overlaps the standing
+  "Starter-library trim + duplication" and "scoreCard v2 re-tune"
+  candidates below — promote as ONE bounded phase, not three.
+
+### ~~Library theme-symmetry restoration (post-D8 ragged shape)~~ PROMOTED to Phase 39 via /oversight 2026-08-08
+> Merged into the curve-repair phase above — the owner took the
+> "promote both together" option precisely because this row's new cards
+> can BE the mid-game second gear the failing decks need.
+
+- source: Phase D8 ten-in/ten-out ledger (forced by the preset-reference
+  law; 10ec4fe8). The spec-32 §6-7 per-theme symmetry is broken and
+  pinned as-is in `curated-library.engine.test.ts` (POST_D8_SHAPE):
+  peroration and harvest at 6 cards, akrasia and bulwark at 8;
+  peroration lost BOTH its ench and dis; forge carries 2 ench / 0 dis;
+  control/oracle/harvest each miss one of the pair.
+- shape: author replacement rare ench/dis cards for the broken themes
+  (peroration ench+dis, forge dis, control ench, oracle dis, harvest
+  dis) and decide whether akrasia/bulwark keep their 8th card or trade
+  it — a /deck-tuning authoring pass with the sandbox-first court, ending
+  with the POST_D8_SHAPE pin restored to a symmetric law. Pairs
+  naturally with the curve-repair phase above (new cards can be the
+  mid-game second-gear payoffs the failing decks need).
+
+### ~~Expo decouple (CI/CD re-platform)~~ PROMOTED to Phase 47 via /oversight 2026-08-08
+> T's "not now" is LIFTED by the unshackling. The banked decision
+> inputs below are the phase's starting material; do NOT self-promote
+> further sub-phases from this row — Phase 47 sequences them.
+- source: owner design session 2026-07-18 (roll-ritual chat). Owner intent,
+  verbatim scope: *"start decoupling from expo in a coming set of phases (not
+  now) in order to change our CI/CD."* Filed here so the intent survives
+  until the owner promotes it via /oversight — do NOT self-promote; "not
+  now" is the standing instruction, and the D-batch (D6a–f, D7) drains
+  first.
+- decision inputs already banked (2026-07-18 session):
+  - The dependency graph is Expo-coupled at the app shell, NOT the
+    animation layer: `expo-router` (biggest — navigation), `expo-image`,
+    `expo-font` + `@expo-google-fonts/*`, `expo-haptics` (→
+    react-native-haptic-feedback or similar), `expo-constants`,
+    `expo-linking`, `expo-splash-screen`, `expo-status-bar`,
+    `expo-navigation-bar`. Reanimated 4 / gesture-handler / rn-svg /
+    screens / safe-area-context are bare-RN libraries and carry over.
+  - Post-decouple, RN↔native-lib version compatibility (Reanimated, etc.)
+    becomes manually managed — today Expo SDK 54 curates it.
+  - `@shopify/react-native-skia` was evaluated for the D6f roll ritual and
+    parked as the POST-decouple upgrade path (RN-coupled, not
+    Expo-coupled; needs react-native>=0.79 + react>=19 — satisfied; adds a
+    native binary + a CanvasKit-WASM web-loading step that should be wired
+    ONCE, into the kept pipeline). Re-evaluate here.
+  - Surfaces that assume Expo today: `expo start`-based dev/web scripts +
+    dev-server container, EAS deploy scripts (`deploy:preview`/
+    `deploy:production`), `jest-expo` preset, `expo lint` config, the
+    bundle-time combat-flag plumbing (D6a's runtime flag hook reduces
+    this), and the `/dep-upgrades` skill's locked-stack language (React
+    pin, Expo SDK) — the lock definition itself changes when Expo goes.
+- when promoted: scope as a multi-phase epic (inventory/spike → shell
+  swap (router/nav) → per-module expo-* replacements → CI/CD cutover →
+  Skia re-evaluation), each phase leaving main green + playable.
+
+> Seeded 2026-07-03 from the retired `/archive` phase history —
+> the strongest ideas already went straight into
+> `plan/steps/01_build_plan.md` (phases 1-12). These are the
+> next-tier candidates awaiting `/oversight` promotion. Verify
+> "already shipped?" notes before promoting.
+
+### ~~Re-tune the starter library against `scoreCard` v2~~ ABSORBED into Phase 39 via /oversight 2026-08-08
+> Same cards, pricing axis. Do not re-promote separately.
+- source: Phase 36a + 36b follow-through (2026-07-17). The pricing model is
+  now honest about two axes it was blind to when the shipped 70-card library /
+  10 presets were authored: **alt-win currencies** (36a — SWAY→CAPITULATE at
+  0.9/stack, a +3 CONCEDE capstone) and **tempo** (36b — DoTs priced at
+  tempo-weighted lifetime, so a slow ramp is no longer overpaid vs a
+  front-loaded burst). The seeds=5 proof-gate re-run
+  (`axiomancer-mechanics/scratch/price-experiment/report/FINDINGS-36b-seed5.md`)
+  shows the mismatches the honest budget now exposes: alt-win decks still rank
+  backwards in-play (cheap Grace ≈ pricier Foundry; Oratory alone alive late
+  via unpriced-until-36a CONCEDE), and the slow-ramp DoT decks (erosion,
+  penitent) crawl late because their ramp never collects before the ~4-round
+  death clock. 36a/36b changed the LINT (design pressure); the LIBRARY itself
+  was tuned under the old model and has not been re-examined against the new
+  one.
+- decision: NOT a build-plan phase — this is `/deck-tuning`'s empirical court
+  (sandbox-first card/deck A/Bs). Scope for that skill: (a) re-examine the
+  alt-win presets (charm/peroration/forge) now that their win engines price
+  honestly; (b) re-shape the slow-ramp DoT cards toward front-loaded / faster-
+  maturing payoff (the fix-card test converted +11 mid / >2× late for +0.54
+  avgSpell by doing exactly this); (c) confirm the tempo horizon constant
+  `DOT_TEMPO_SURVIVAL = 0.75` at higher seeds (FINDINGS rec #5 flags the
+  seeds=2 origin as noisy). Left here as a pointer so the follow-through isn't
+  lost in the phase briefs.
+- minor tripwire (same source): `creeping_doom` prices at −38% under the tempo
+  horizon (growth + no-calendar puts its biggest ticks latest). No card uses
+  it today, but any FUTURE no-calendar growth DoT must carry a front-loaded
+  kicker or it under-prices into the rank floor — a card-comment-convention
+  note for whoever authors one.
+
+### ~~Fate Engine P1 — dice get a second read~~ SHIPPED 2026-07-05
+- source: spec-31 §9 (shipped with the curated trim in the same PR)
+
+### ~~Fate Engine P3 — the 88-card library rewrite~~ RETIRED 2026-07-17 (Phase D1)
+- source: spec-31
+- Superseded: the library rewrite was overtaken by spec 32 v3's shipped
+  70-card/10-theme library; per-card dice-text re-authoring is now
+  literally Phase D4's mandate; mobile UI for resonance/reserve is D6's;
+  OMEN v2 already shipped (phase 32 part 4d). Sole live remainder
+  extracted below.
+
+### ~~Re-home dice upgrades off the blacksmith~~ PROMOTED to Phase 45 via /oversight 2026-08-08
+> Design session + implementation now carry a phase row. Full context
+> below stays as the brief's source material.
+- source: /oversight 2026-07-18 — owner ruled "wrong surface — rethink"
+  on the standing blacksmith cadence/identity `[needs-user-call]`
+  (AUDIT, now resolved).
+- shape: the D5 HONE/TEMPER die-gear economy is KEPT (engine untouched,
+  prices placeholder), but the player-facing affordance moves off the
+  blacksmith to a surface still to be designed — candidates named at the
+  call: rest site, relic, event. The blacksmith screen stays
+  dev-menu-only meanwhile (AUDIT row gates the first-map MapEvent node
+  back to dev). Cadence (when/how often the player upgrades dice across
+  a run) is decided as part of the same design session, not separately.
+- needs: an attended design session (`/brainstorm-mechanics` or
+  `/world-spec`) with the owner BEFORE any engine/mobile work — this is
+  identity design, not implementation. Output: a spec or decisive brief,
+  then a phase row.
+- status: **design session AUTHORIZED via /oversight 2026-08-08** — the
+  owner released this thread; the attended `/brainstorm-mechanics` (or
+  `/world-spec`) session may now be scheduled. Still do NOT promote to a
+  build-plan phase until that session picks the surface — the session's
+  output (a spec or decisive brief) is the promotion trigger, and the
+  session is attended, so a cron tick cannot run it unsupervised.
+
+### ~~[score 7.0] GLYPHS pilot (Phase 33d) post-ship follow-ups~~ PROMOTED to Phases 49-51 via /oversight 2026-08-08
+> Sequenced exactly as this row proposed: 49 completeness-critic touch-UX
+> gate, 50 mobile UI, 51 sim `crackAt` policy + promotion court.
+> SOUL/Harvest parity, the library retrofit and a 3rd theme remain
+> explicit non-goals unless the pilot graduates.
+- proposed: 2026-07-21, expand pass 1
+- source signals:
+  - Phase 33d brief (`plan/phases/phase_33d_glyphs_pilot.md`) §
+    "Follow-ups (out of scope this phase)" — five explicit deferred
+    threads authored by the shipping phase itself, landed today
+    (`ac1853b2`/`535b5117`): mobile UI (glyph chip row + tap-confirm
+    sheet), a sim `crackAt` policy heuristic + the full A/B promotion
+    court, SOUL/Harvest parity, existing-library FREE-line retrofits
+    (the `slippery-slope` idea), and a possible 3rd theme (`grace`).
+  - `plan/AUDIT.md` "GLYPHS (Phase 33d) has no formal spec" (filed
+    2026-07-18) — closed by this brief per its own commit-body
+    statement; the governance gap that finding tracked is now resolved
+    by the brief existing, confirming the design thread is real and
+    was already flagged before this ship.
+  - source braindump
+    (`axiomancer-mechanics/braindump/2026-07-13-enchant-curse-spell-grammar.md`)
+    still records Option A ("more enchant density") and Option C
+    ("effects that don't expire") as "still open — conversation
+    deliverable" beyond the Option-B pilot that just shipped.
+- rationale: real, not noise — the phase that just shipped wrote its
+  own follow-up list, and no existing candidate row anywhere in this
+  file mentions GLYPHS/glyphs. Each follow-up is explicitly gated on
+  evidence this pilot itself must produce first (a completeness-critic
+  touch-UX check before mobile UI; playtest-observed cracking behavior
+  before the promotion court), so this is a sequencing thread, not a
+  single ready-to-ship phase.
+- proposed scope: N-phase mini-plan, sequenced — (1) completeness-critic
+  touch-UX pass (the source doc's own pre-mobile-UI gate), (2) mobile UI
+  phase once that check clears, (3) sim `crackAt` policy + the A/B
+  promotion court once mobile lets a playtester actually observe
+  cracking behavior. SOUL/Harvest parity, the library retrofit, and the
+  3rd theme stay explicit non-goals until/unless the pilot graduates.
+- estimated phases: 2-3
+- conflicts: none — explicitly anticipated by the shipping phase's own
+  brief; no spec.md non-goal touched.
+
+### ~~[score 4.0] Early-game rethink~~ PROMOTED to Phase 46 via /oversight 2026-08-08
+> Design session then N content/mobile phases; now depends on Phase 42
+> (tutorial copy is theme-bearing).
+- proposed: 2026-07-21, expand pass 1
+- source signals:
+  - `plan/CRITIQUE.md` [MED] "rethink early-game as canned preset-deck
+    tutorial, defer deckbuilding to labyrinth choice" (user-jot,
+    2026-07-08) — unaddressed 13 days, no direction locked, no
+    follow-on session yet.
+  - `plan/steps/01_build_plan.md` Phase 17 (Quest Board first-session
+    tutorial) sits `[skipped]` (via `/oversight` 2026-07-10) explicitly
+    because this same rethink "would subsume or reshape this scope" —
+    the skip has stood 11 days with no design pass to re-derive it.
+- rationale: two independent plan surfaces (a critique row and a
+  skipped build-plan phase) point at the same unresolved question, old
+  enough to not be noise, and it is actively blocking Phase 17 from
+  ever being re-derived into real work. This is an attended-design gap,
+  not something the loop can resolve unilaterally — the user proposed
+  an idea, not a spec.
+- proposed scope: NOT engine/mobile work yet — a `/brainstorm-mechanics`
+  or `/plan-a-phase` design session with the owner to decide whether to
+  restructure the pre-labyrinth game as scripted preset-deck tutorials,
+  before any tutorial phase (including a re-derived Phase 17) ships.
+- estimated phases: 1 design session -> N content/mobile phases
+  (unscoped until the session happens)
+- conflicts: none identified; does not touch a spec.md non-goal.
+
+### ~~[score 8.5, escalated] Root-cause + fix the `Closes #N` trailer silently no-op'ing on direct-to-main pushes~~ RESOLVED 2026-08-03 (commit 0441c554, issue #166)
+- resolution: `close-comment` (the shipping-skill close path) now closes
+  finding-mirror issues via the GitHub API directly instead of relying on
+  the commit-trailer keyword, mirroring the fix `phase-close` already
+  had. `plan/AUDIT.md` [2.4] confirmed RESOLVED 2026-08-03 against the
+  same commit. Thirteen confirmed instances (#83 through #165) — no new
+  ones logged since the fix landed.
+- proposed: 2026-07-31, expand pass 4
+- escalated: 2026-08-02, expand pass 5 — score raised 6.0 → 8.5. Since
+  filing, `plan/AUDIT.md` [2.4] has grown FIVE more confirmed instances
+  in 2 days (#157 noted 807ad137, #158 shipped ef19091e, #159 shipped
+  d0d83e06, #160 noted ef492fff, #163 noted 43665d1e), doubling the
+  "trailer present, didn't fire" count from five to ten (#83, #151, #155, #129, #156,
+  #157, #158, #159, #160, #163) without a single tick picking up the
+  candidate. The 2026-08-01 AUDIT update also surfaced a second failure
+  mode layered on the first: #158/#159 sat open with no same-session
+  catch at all — only a `/digest` pulse pass found them — so the
+  by-hand-close safety net is itself inconsistent, not just the
+  trailer. Score adjustment per §5: signal multiplicity +3 (AUDIT row
+  now the single most-updated finding in the file, ten independent
+  repro instances, plus its own recurring-commit-pattern signal),
+  urgency +2 (actively degrading the phase-mirror bookkeeping every
+  `/oversight`/`/digest` reads, worsening tick over tick), cheap-and-
+  impactful +2 (still a 1-phase tooling fix, unchanged scope) — net
+  6.0 base, capped presentation at 8.5. This is now the strongest
+  candidate in this file by evidence density; recommend `/oversight`
+  promote it ahead of the other Pending rows.
+- source signals:
+  - `plan/AUDIT.md` "[2.4] Phase-mirror issue close is unreliable" row —
+    updated FIVE times now (initial filing 2026-07-14ish, then 2026-07-23,
+    2026-07-29, and twice on 2026-07-30) confirming the same symptom
+    across #83, #151, #155, #129, #156: a correctly-numbered `Closes #N`
+    trailer on a direct push to `main` (verify green) simply doesn't fire,
+    and the issue has to be closed by hand every time.
+  - commit-pattern signal, this pass's own window (15 commits since expand
+    pass 3): 3 of them are `audit: note Nth Closes-trailer-doesn't-fire
+    instance` commits (#155, #129, #156) — two on the same day
+    (2026-07-30). The finding is recurring FASTER than any tick has
+    fixed it; each occurrence is currently just re-filed as `next:
+    /iterate` and never actually picked (its own composite score —
+    impact 4 / ease 5 — keeps losing to fresher/higher-scored AUDIT rows).
+  - every skill that ships work and expects auto-close (ship-a-phase §10,
+    `/iterate`'s finding-mirror drain, `/triage`) is silently degraded by
+    this — the phase-mirror issue list that `/oversight` and `/digest`
+    read is now, in the row's own words, "some unpredictable mix of
+    in-flight and long-done."
+- rationale: real, not noise — a textbook §4G case (3+ same-shape commits
+  in one window, each re-filing rather than resolving) layered on a
+  finding independently reconfirmed 5 times over 2+ weeks without ever
+  getting the actual investigation tick. Leading hypothesis worth
+  checking first: the shipping identity here is a GitHub App/bot account
+  (`claude[bot]`) pushing directly to `main` — GitHub's commit-keyword
+  auto-close is known to be unreliable for App-authored pushes that lack
+  the right `issues` write scope, which would explain "not universal,
+  but recurs unpredictably." A fix doesn't strictly require nailing the
+  platform root cause, though: any shipping step can be taught to
+  explicitly `gh issue close` right after the push instead of relying
+  solely on the commit-message keyword, which kills the recurring
+  by-hand-close tax regardless of cause.
+- proposed scope: 1 phase — (a) a quick check of the pushing token/app's
+  granted repo permissions (does its `issues` scope include write?) to
+  confirm or rule out the leading hypothesis; (b) whichever way that
+  lands, add an explicit `gh issue close <N>` call to the shipping
+  skills' commit/push step (ship-a-phase §10, iterate's finding-drain,
+  triage) as the reliable close mechanism, keeping the commit-message
+  trailer as a free secondary hint rather than the sole mechanism; (c)
+  sweep-close any still-open confirmed-stale issues from the row's
+  history. Small, self-contained, no spec/engine surface touched.
+- estimated phases: 1
+- conflicts: none — process/tooling fix only; no spec.md non-goal
+  touched.
+
+### ~~[score 5.5] Fill the 3 empty accessory kinds (head/hands/feet) with new mid/late signature skills + relics~~ PROMOTED to Phase 85 via /oversight 2026-09-15
+- proposed: 2026-09-09, expand pass 12
+- source signals:
+  - `plan/CRITIQUE.md:511` `[HIGH]` "no mid/late equipment or signature
+    skills exist for THE PATH's sixth axis" — a direct user-jot (commit
+    `343d7e98`, 2026-09-03T11:20:00Z), still open in Pending six days
+    later.
+  - `plan/AUDIT.md:161` `[loop-call]` "No mid/late equipment progression"
+    (2026-09-04) — `/adjust-equipment` pass 1's structural audit
+    confirmed the mechanism: the 8 signet relics are 1:1-locked to the
+    8 existing `SignatureSkillId`s ("1:1 and load-bearing" per
+    `relic.library.ts`'s own header); the 3 empty `AccessoryKind`s
+    can't be filled without either designing new signature skills first
+    or breaking `relic.library.ts`'s own stated relic-identity rule
+    (`grantsSignature !== undefined`) with stat-only accessories.
+  - persistence: three subsequent `/adjust-equipment` passes (2, 3, 4)
+    have each left this specific row untouched — correctly, since it's
+    a design-scope call, not a content-authoring one — but that means
+    it has sat unowned for 6 days across 4 passes with no route to
+    `/oversight` until now.
+- rationale: real demand, not model imagination — a literal user ask,
+  independently reconfirmed by a dedicated structural audit that ruled
+  out the cheap shortcut (stat-only accessories contradict the relic
+  schema's own identity rule). It is exactly the shape `/expand`
+  exists to catch: an owner-call-gated gap that no routine `adjust-*`
+  tick can responsibly resolve solo, sitting in `AUDIT.md` with no path
+  to the build plan until promoted.
+- proposed scope: 2-phase mini-plan — (1) mechanics-expert design
+  session: 1-3 new signature skills sized for head/hands/feet
+  accessories (or a ratified decision to break the 1:1 relic-identity
+  rule for those 3 kinds instead with stat-only accessories — AUDIT
+  `:161` names both options, plus "something else," as live choices
+  for `/oversight` to pick before this phase can be briefed); (2)
+  author + wire the corresponding relics into `relic.library.ts`,
+  mirroring the existing 8's shape.
+- estimated phases: 2
+- conflicts: none against spec.md non-goals (does not reintroduce the
+  two-Pressure-Track model or a governing objective function). Needs
+  an `/oversight` scope call among AUDIT `:161`'s options before phase
+  1 can be briefed — that call is the point of filing this here rather
+  than leaving it in AUDIT.md.
+
+### ~~[score 4.5] Sweep dead profane-canon engine hooks — 19 orphaned `zoneHas` sites + the-sextons-count's missing TWIN wire~~ PROMOTED to Phase 86 via /oversight 2026-09-15
+- proposed: 2026-09-09, expand pass 12
+- source signals:
+  - `plan/AUDIT.md:201` `[loop-call]` "Dead engine hooks — 19 orphaned
+    `zoneHas` sites in combat.engine.ts" (2026-09-04) — pre-BIG-
+    NUMBERS-REWRITE "profane canon" era leftovers keyed to card ids
+    that resolve nowhere (`forge-masters-stamp`, `crown-of-thorns`,
+    `venom-and-vein`, `bone-orchard`, `stuck-in-their-head`,
+    `anvil-of-form`, `practiced-cadence`, `mirror-of-guilt`,
+    `entropy-tax`, `quagmire-of-doubt`, `hedgehogs-dilemma`,
+    `mirror-of-longing`, `crumbling-resolve`,
+    `achilles-and-the-tortoise`, `fated-course`, `the-oracles-eye`,
+    `irresistible-grace`, `captive-audience`, `resonant-chamber`),
+    each pinned by its own dead test.
+  - `plan/AUDIT.md:220` `[loop-call]` "the-sextons-count is missing its
+    TWIN trigger" (2026-09-04) — same residue family, found during the
+    same `/adjust-cards` pass 1 sweep: RECALL/REPLAY got fixed, but
+    TWIN's real "card resolved twice" wire was deliberately left
+    unshipped (sits in a different variable scope than the RECALL/
+    REPLAY sites, before `directDamage`/`drawPile`/`discard` locals are
+    declared; wiring it risked double-counting with `reprise`) rather
+    than shipped wrong — the card's printed TWIN clause was trimmed
+    instead.
+  - `plan/CRITIQUE.md:992` `[LOW]` "fated-course engine hook survives
+    its retired card as a test harness" — independently confirms one
+    of the 19 `zoneHas` sites from the critique side, and adds a
+    constraint the AUDIT row doesn't mention: `oracle-omen-v2.engine.
+    test.ts` depends on the dead hook as its deterministic telegraph
+    harness, so removal isn't a pure delete — it needs a harness
+    rewrite alongside.
+- rationale: 3 findings, 2 source types (AUDIT + CRITIQUE), one root
+  cause — THE BIG NUMBERS REWRITE's profane-canon retirement left
+  engine-side residue that no `/adjust-cards` pass owns (it's mechanics
+  cleanup, not card content). Matches §4A/G's "3+ findings same
+  category -> refactor phase" shape, and each row already carries
+  enough detail (card-id list, line numbers, the double-count risk,
+  the harness dependency) to brief a phase without further discovery.
+- proposed scope: 1 phase — delete/neutralize the 18 truly-dead
+  `zoneHas` hooks and their pinning tests, rewrite `oracle-omen-v2.
+  engine.test.ts`'s deterministic-telegraph harness off the
+  `fated-course` hook before removing it, and wire `the-sextons-count`'s
+  TWIN clause correctly scoped (after the `directDamage`/`drawPile`/
+  `discard` locals, guarding against double-count with `reprise`) —
+  restoring the card's trimmed printed-text badge only once it's
+  actually wired.
+- estimated phases: 1
+- conflicts: none identified.
+
+### ~~[score 4.0] Smooth the first two forced/likely encounters — Brine Hag's 3-phase elite open + Ash Mire boss sitting on the natural forward path~~ PROMOTED to Phase 87 via /oversight 2026-09-15
+- proposed: 2026-09-09, expand pass 12
+- source signals:
+  - `plan/CRITIQUE.md:463` `[MED]` "the first map fight is an
+    elite-tier foe with a 3-phase threat sequence" (playtest
+    2026-09-04) — Brine Hag opens a fresh save with HIDE + RAVENOUS and
+    a 3-phase telegraph before the tutorial has taught staging or the
+    stance check; suggested fix: gate the first encounter of a fresh
+    save to a one-phase, zero-keyword foe, let Brine Hag be fight two.
+  - `plan/CRITIQUE.md:545` `[MED]` "the Ash Mire boss sits three
+    natural steps from a fresh spawn and flattens a level-1 pilgrim"
+    (real user session, 2026-08-29) — the most obvious open path from
+    a fresh run reaches a 150-VITAE, 4-phase boss with ordinary
+    encounter/rest nodes still sealed around it; it killed the level-1
+    starter-deck pilgrim (80 VITAE) in four rounds.
+- rationale: 2 independent CRITIQUE findings, same category (early-game
+  difficulty spikes hitting fresh saves before they have deck or
+  stance-check literacy), from two different signal types (a playtest
+  and a real user session) — the §4B "repeated MED findings across
+  paths -> restructure phase" shape. Both rows already carry a
+  concrete, narrow suggested fix (encounter-table/spawn-order/unlock-
+  graph policy, not a UI change), so this is cheap relative to its
+  impact on new-player first impressions.
+- proposed scope: 1 phase — world/encounter-table tuning: (a) gate the
+  fresh-save first encounter roll to a one-phase, zero-keyword foe per
+  the Brine Hag row's own suggested fix; (b) audit the fishing-village
+  unlock graph so at least one ordinary encounter/rest node opens
+  before or beside the Ash Mire boss edge. Check both against
+  world-tuning's per-map doctrine before implementation.
+- estimated phases: 1
+- conflicts: none against spec.md non-goals.
+
+### Resolved rows from `## Pending` (D9)
+
+### Fold treasure/quest/rest/narration into one "encounter" shape; retire the Gathering, Quest Board, and Loot Cache minigames
+- **PARTIALLY PROMOTED 2026-08-15 (T direct, attended web session) —
+  build-plan Phases 58-65. This candidate stays OPEN for its remaining
+  quarter.** T defined rest, loot cache and quest outright in that
+  session and said "queue all of these up". What that covers: **rest**
+  (Phase 59 — heal 25% / cut, and the anvil re-homed by Phase 60,
+  finishing what 52c/52d/52e started); **quest** (Phase 61 — the Boy's
+  Almanac minigame retired entire, though T narrowed the ruling to the
+  minigame only: the QuestLog objective tracker and `starting-quest`
+  survive, so Phase 53c is NOT voided); **loot cache** (Phase 63 — the
+  Reliquary's delving session replaced by a card / item / sacrifice
+  choice, with a per-map goodwill counter, Phases 64-65 paying it back
+  through the journal and village); and **narration**, which turned out
+  to be the session's real headline (Phase 58 — 59 authored node
+  descriptions exist and are dropped at the resolver because
+  `ResolvedEvent` has no field to carry them).
+- **CLOSED 2026-08-22 — the last quarter is now ruled and queued.** T
+  named Gathering among the minigames he has been trying to retire and
+  handed the shape to the loop ("You decide everything"). The loop's
+  call, queued as **build-plan Phase 76**: retire The Gleaning minigame
+  (`World/Gathering/`, its CLI, `gathering-tuning` skill + workflow, the
+  mobile slice/route and the interception at `actions.ts:1693`) but KEEP
+  the `gathering` MapEventKind and its 8 authored nodes — that node's
+  payload is already a plain `items[] + description`, so it is the very
+  "options and their effects" shape this candidate asks for, it keeps map
+  density, and it feeds `advanceCollectObjectives` for collect-type quest
+  objectives. Same narrowing T himself ruled for quest ("Minigame only
+  and keep it"). With Phase 76 queued alongside 58-65, **this candidate
+  is fully promoted and closes.**
+- source: filed 2026-08-10 via `/oversight`, T's own framing verbatim:
+  *"I want to discuss folding the treasure, quest, rest, and narration
+  events into a single 'encounter' event, taking away the minigames and
+  replacing them with just a simple 'here are some options, here are
+  their effects'. The minigames as they are are just time consuming and
+  seem to add nothing."*
+- scope, as ruled in the same session: combat/hazard-pattern combat
+  stays a distinct system — the critique is about the four *non-combat*
+  event types only. The Gathering minigame ("The Gleaning"), the Quest
+  Board minigame ("The Boy's Almanac"), and the Loot Cache minigame
+  ("The Reliquary") — plus their tuning skills/CLIs
+  (`gathering-tuning`, `quest-board-tuning`, `loot-cache-tuning`) —
+  retire entirely rather than staying dormant as an opt-in depth layer.
+  Narration/dialogue events fold into the same plain choice+effect shape
+  as the other three.
+- **rest is a special case — likely already substantially covered.**
+  The queued rest-choice epic (build-plan Phases 52c "the rest-choice
+  engine" and 52d "the rest-choice screen") already replaces the Night
+  Watch minigame with exactly this shape: a plain choice among Rest
+  (heal 20%) / Blacksmith (upgrade a die) / Remove a card, no minigame
+  resolution. Whoever scopes this candidate into a phase should read
+  52c/52d's briefs first — the "rest" quarter of this ask may need
+  nothing beyond what's already queued, narrowing the real net-new work
+  to treasure, quest, and narration/dialogue events.
+- not yet scoped as a phase (T chose "file as a candidate now" over a
+  dedicated brainstorm session first). Concretely undefined: what an
+  "encounter" event's choice+effect data shape looks like (is it a
+  static option list with numeric effects, or does it carry
+  conditionals/rolls the way a minigame outcome tier does?), how much of
+  the removed minigames' *tuning depth* (skill vs. greed vs. restraint
+  doctrines each minigame currently encodes) needs to survive in the
+  simpler model vs. being accepted as lost, and what happens to each
+  minigame's existing authored content (card ratios, part economy, dice
+  pools, plot yields) — ported into the new effect tables, or dropped.
+  A design pass (`/plan-a-phase` or a dedicated brainstorm session) is
+  the next step before this becomes a build-plan phase — likely several
+  phases, given four subsystems plus their tuning-skill retirement.
+- why it matters: this is a significant net-reduction pivot — deleting
+  three shipped minigame engines and their tuning skills is a larger
+  removal than any single phase in the current queue. Surfacing it here
+  rather than deciding it inline keeps the decision-of-record with T
+  while giving the loop a landing spot to pick up the design work.
+- archived 2026-09-25 (T4, D9): resolved — fully promoted (Phases 58-65 and 76, all shipped `[x]`); the row itself records "this candidate is fully promoted and closes".
+
+### [x] Inter-map travel — the first map has no exit — PROMOTED to build-plan Phase W1 (THE OPEN GATE session, 2026-08-28)
+- **promotion note:** T direct 2026-08-28 ("NEW CONTINENTS, NEW MAPS!.
+  Why do I still only see the first continent?") — promoted and
+  implemented in the same session as Phase W1, with Phase W2 (the
+  caverns) opening the northern continent behind it. The open design
+  question below is ANSWERED as a `[loop-call]`: arriving on a new map
+  PRESERVES the old map's `MapState` — the world is a place you can
+  move around in, the reading `completedMaps` always implied; the
+  gauntlet law governs traversal WITHIN a map, not between maps.
+- source: first-map audit 2026-08-08 (`axiomancer-mechanics/docs/reports/FIRST-MAP-AUDIT.md`,
+  finding F4). Filed as a candidate rather than shipped in that pass: it is a
+  missing FEATURE, not a broken one, and building it under an audit banner
+  would have been scope the audit was not asked for.
+- evidence: there is no in-game path from `fishing-village` to
+  `northern-forest`. `changeMap` exists as a store action but its only caller
+  is `DebugMapResetButton`; `northern-forest` sits in `lockedMaps` and nothing
+  anywhere calls `unlockMap`. The `get-to-forest` quest's objective is
+  `reach / nf-1` — a node on a map the player cannot travel to — so the quest
+  is uncompletable even now that its grant path works again (F3).
+  Consequence: with the audit's fixes in, a run walks the village's ten beats,
+  kills the King of Revenge, completes `starting-quest`, takes Old Marrow's
+  reward, is granted `get-to-forest` — and then stands at the terminal column
+  with nowhere to go and no way to satisfy it.
+- shape: a `travel` (or `wayfare`) MapEventKind is the smallest coherent
+  version — payload names the destination continent+map, the handler unlocks
+  and switches, mobile routes it like any other paced event. Touches
+  `MapEvents/types.ts` + `handlers.ts`, the mobile event presenter and a new
+  or reused screen, `unlockMap` wiring, and the save shape (`currentMap` is
+  already persisted; confirm a mid-map switch round-trips). Cross-package, so
+  it carries the AGENTS.md impact checklist.
+- open question the phase must settle: whether arriving on a new map resets
+  or preserves the old map's `MapState`, i.e. whether the coastal continent is
+  a sequence of one-way acts or a place you can move around in. The gauntlet
+  traversal law implies the former; the `completedMaps` field implies someone
+  once meant the latter.
+- archived 2026-09-25 (T4, D9): resolved — promoted to Phase W1, shipped `[x]`.
+
+### In-house crash capture — global handlers + next-launch crash prompt (owner-ruled 2026-07-20)
+- source: owner session 2026-07-20 (missing-layers survey). The 2026-07-20
+  logging layer left crash capture half-done: only React RENDER errors
+  reach the crash tail (via `ErrorBoundary.tsx`); unhandled promise
+  rejections and non-render JS errors vanish, and nothing surfaces a
+  prior-session crash on next launch. The owner daily-drives EAS preview
+  APKs, so field crashes currently die silently on-device.
+- decision (owner, near-verbatim ruling "in-house first"): NO third-party
+  SDK now. Scope: (a) a global JS error handler (`ErrorUtils.setGlobalHandler`
+  on native, `window.onerror`/`unhandledrejection` on web) feeding the
+  existing `error` log domain + `flushLogTail()`; (b) an unhandled-promise-
+  rejection hook, same sink; (c) a next-launch check of the persisted crash
+  tail (`@axiomancer/logtail:v1`) that offers "previous session crashed —
+  view/copy report" reusing the ErrorBoundary's report rendering. $0, no
+  network touchpoint — consistent with the offline doctrine.
+- Sentry (symbolicated stacks for minified Hermes builds + native-crash
+  capture) is explicitly a LATER opt-in bolt-on, only if minified preview-
+  APK stacks actually bite; the insertion point stays documented in
+  `ErrorBoundary.tsx`. Do not add it in this phase.
+- small phase; mobile-only; pairs with the existing crash-tail e2e surface
+  for its witness.
+- archived 2026-09-25 (T4, D9): resolved — promoted to Phase 77 (see the struck score-8.5 row and `## Promoted`), shipped `[x]`.
+
+### Card-text grammar + full copy pass (owner-ruled 2026-07-18) — UNLOCKED via /oversight 2026-08-08
+> **Promoted to build-plan Phase 40** (2026-08-08). Ruled approved
+> 2026-07-18 but never queued; the owner released it this oversight.
+> Sequencing: runs AFTER Phase 39, so the copy pass covers whatever card
+> set the curve repair leaves standing rather than rewriting faces that
+> are about to change.
+
+- source: fan-out ballot ruling R4 + the wording audit (Dawncaster corpus,
+  1,592 faces). Diagnosis: mean face length is already genre-normal (12.8w
+  vs 12.9) — the failures are variance and dialect: four competing status
+  templates, em-dashes on 12/64 faces (corpus: 0/1,592), real costs hidden
+  in parentheses (cassandras-burden's "ante 2 Conviction"), FOUR faces
+  shipping generated machine text (straw-mans-jab renders raw "bleed i2
+  d2"), and a render that clips at ~130 chars while the honesty guard
+  allows 200 (the-closing-word at 153c likely clips today).
+- decision: ADOPT the templating grammar (seven clause templates; one
+  effect one sentence; gate/cost/condition before payoff; colon = trigger
+  label only; em-dash/semicolon banned from faces; parens carry numbers
+  only; bare keywords, panel is the gloss; "the foe" fixed vocabulary;
+  ≤16 words target / 130-char hard cap / lead clause ≤5 words) and run the
+  FULL copy pass: the 12 before→after rewrites, author the 4 machine-text
+  faces, 6 gloss rewrites (Pip, Omen, Riposte, Forge, Doom, Poison),
+  tighten the honesty-guard budget 200 → 130 chars + add an
+  em-dash/semicolon lint. Sub-calls approved in the same ruling: drop the
+  word PERORATION from the-closing-word's face (SYSTEM_GLOSSARY row
+  stays); reprice the-overtake's `fuelPerPip` 3.5 → integer via A/B so no
+  face carries a decimal.
+- witnesses: `paid-summary-honesty.engine.test.ts` (number parity + caps
+  discipline + tightened budget), the mobile keyword-scanner lints, one
+  emulator screenshot of the-closing-word's inspect face to confirm the
+  130c render cap before pinning it.
+- archived 2026-09-25 (T4, D9): resolved — promoted to Phase 40, shipped `[x]` (`0048e3ea`).
+
+### D1–D7 — Upgradeable-Dice combat rework (spec 33)
+- source: T direct, 2026-07-17 brainstorm session
+  (`axiomancer-mechanics/braindump/2026-07-17-upgradeable-dice-combat.md`;
+  two mechanics-expert passes). Design CDR:
+  `axiomancer-mechanics/specs/33-upgradeable-dice.md` — all constraining
+  questions owner-decided in-session (Gold=wild, tokens=Conviction,
+  subsystems reinterpret, stance-from-cards replaces the RPS read,
+  strict persistent momentum, fixed-4 pool law).
+- The rework replaces the 3-die shared-bag draft with 4 fixed colored d6
+  (R/B/P: 1 special/2 mana/3 miss; Gold wild: 1/1/4), four permanent dice
+  whose face distributions upgrade — NOT swappable equipment (FORGE =
+  between-fight face-swap economy), stance as an output
+  of paid card play checked against open enemy telegraphs, and the momentum
+  wheel absorbed into the stance chain. Large, multi-phase: promote as a
+  SEQUENCE with per-phase gates, not one blob.
+  - **D1 — spec 33 review-and-land**: mechanics-expert review vs doctrine
+    (status-centrality, win-curve, dice honesty); settle §9 open items.
+    Prove: clean review verdict.
+  - **D2 — engine core, flagged**: per-die face tables + momentum machine +
+    stance checks behind a flag. `CombatManaDie` shape change is
+    public-barrel-breaking — migrate mobile + card-editor same phase;
+    re-verify `npm run verify -w axiomancer-mobile`. Prove: hermetic vitest
+    (`mockSequentialRng`).
+  - **D3 — sim harness**: autoplay policies + Monte-Carlo witness for the
+    spec §7 bands (whiff, mana/round, ◆ income, surge rate). Prove:
+    measured values in bands.
+  - **D4 — pricing re-derivation**: re-fit `cards.pricing.ts`; re-author
+    Forge's 7 die-cards; add one dice-interaction card per theme. Prove:
+    effectiveness lint + curated-library tests green.
+  - **D5 — dice-face upgrade layer**: per-die mutable face distributions
+    (the 4 dice are permanent — NO inventory/loadout, no equip/unequip),
+    FORGE face-swap + in-combat FORGE upgrades, reward hooks, persistence
+    via the spec-05 save/versioning machinery, `GAME_STATE_VERSION`
+    migration. Prove: migration tests.
+  - **D6 — mobile UI**: dice tray rework, face-inspection panel
+    (payload-only, Dawncaster-terse; illegal actions prevented loudly),
+    momentum/stance chips, keyword glosses. Prove: Playwright e2e.
+  - **D7 — tuning + honest re-baseline**: full combat-playtest matrix vs
+    80/50/25-35/0; statusEngagement re-baseline (blind spots stated);
+    playtester agents.
+- Interactions to respect at promotion: supersedes parts of Fate Engine
+  P2/P3 above (the read/wheel/draft surfaces they touch — reconcile scopes
+  before promoting either); the 2026-07-09 dice-law rework is superseded by
+  spec 33 §1; EA-6 (wheel) and EA-7 (STAKE) surfaces are reinterpreted, not
+  duplicated.
+- archived 2026-09-25 (T4, D9): resolved — Phases D1-D7 all shipped `[x]`; the flag the rework sat behind was collapsed in T2b (d565910d).
+
+### Section `Considered (below threshold) — pass 12 additions`
+
+
+- **Art-direction coherence** (`plan/CRITIQUE.md:446` arena art
+  incoherent, `:709` fixed "ruined city" backdrop everywhere,
+  `plan/AUDIT.md:299` Phase 78 art-pass candidates awaiting pick) — a
+  real 3-signal cluster, but scope isn't knowable yet: it resolves to
+  the same blocked owner call already filed as `plan/AUDIT.md`'s
+  `[gap][needs-user-call]` "Art pipeline: two queued owner calls block
+  everything." Filing a phase candidate on top would duplicate that
+  routing rather than add information. Re-evaluate once `/oversight`
+  rules on the pipeline gate.
+- **Early-game redesign** (`plan/CRITIQUE.md:1521` "rethink early-game
+  as canned preset-deck tutorial, defer deckbuilding," plus
+  `plan/steps/01_build_plan.md`'s `[skipped]` Phase 17 quest-board
+  tutorial, parked pending exactly this redesign) — real signal, but a
+  multi-phase design pivot with unscoped depth ("N content/mobile
+  phases, unscoped until the session happens" per the pass-10 framing
+  of the same row still sitting above). The narrower, cheap-and-honest
+  slice of this cluster (the two difficulty spikes) was extracted and
+  filed above instead of gold-plating the mega-redesign into this pass.
+
+### Section `Promoted`
+
+
+### Doctrine lexicon: register the status-primacy retirement (2026-09-15)
+- promoted: 2026-09-15 via `/oversight`, as **Phase 79**.
+- source row (stays in `## Pending` above, struck through): "[score 8.0]
+  Register the 2026-09-02 status-primacy doctrine retirement in
+  `lexicon.json`'s doctrine mechanism" (proposed 2026-09-03, expand pass 11).
+- why now: build-plan queue was fully drained; this is the highest-scored
+  clean candidate. Add `type: "doctrine"` lexicon rows for the retired
+  status-primacy language, fix `statusGlyphs.ts` and `tuning.md`'s two live
+  un-exempted hits, sweep for further lint catches.
+
+### Naming pass: one concept, one word (2026-09-15)
+- promoted: 2026-09-15 via `/oversight`, as **Phase 80**.
+- source row: "[score 6.5] One concept, one word — a naming pass across the
+  player-facing surfaces" (proposed 2026-09-12 swarm, PR #302).
+- why now: queue refill. Scope carries the written-lexicon approach the
+  source row argues for (money/journal/SEALED/SURGE/"the deck" clusters);
+  three single-screen cases already shipped in the swarm (FE-056/037/057).
+
+### Late-campaign difficulty cliff: verify then fix (2026-09-15)
+- promoted: 2026-09-15 via `/oversight`, as **Phase 81**.
+- source row: "[score 6.5] The late-campaign difficulty cliff... needs a
+  named design-level fix" (proposed 2026-09-03, expand pass 11).
+- **open sub-choice carried into the brief, NOT resolved by this
+  promotion:** the source row itself asks for a fresh `baseline:check`
+  read first — THE PATH (commit `515ac4d9`) may have already narrowed or
+  closed the 4%/0%-cells gap this row measured. Phase 81's first step is
+  that verification; only if the gap is still open does it need a pick
+  among the three named options (card level-scaling term / flatten enemy
+  VITAE growth / vigil `reprisal` wall answer) — that pick may need its
+  own `/oversight` touch once real numbers are in hand.
+
+### Glossary reachability: keyword-chip tooltips (2026-09-15)
+- promoted: 2026-09-15 via `/oversight`, as **Phase 82**.
+- source row: "[score 6.0] Make the glossary reachable from the screens
+  that need it" (proposed 2026-09-12 swarm, PR #302).
+- why now: queue refill. Three of four sub-findings already shipped in the
+  swarm (FE-058/053/054); this phase finishes the structural half — mount
+  tooltip targets on the hazard deck's 14 keyword chips.
+
+### Combat arena backdrop: region-keyed backdrops (2026-09-15)
+- promoted: 2026-09-15 via `/oversight`, as **Phase 83**. Absorbs the
+  struck-through [score 4.5] "capital cross-reference" row above — folded,
+  not independently promoted.
+- source row: "[score 6.0] The combat arena backdrop is still one fixed
+  image across (now) three continents" (proposed 2026-09-03, expand pass
+  11; itself a hand-off from `plan/CRITIQUE.md` pass 23).
+- why now: queue refill. Source row's own scope note flags 2-3 phases
+  (asset sourcing via the Phase 73/78 pipeline, then wiring); Phase 83
+  covers the first leg.
+
+### The Capital: narrative next-beat design session (2026-09-15)
+- promoted: 2026-09-15 via `/oversight`, as **Phase 84**.
+- source row: "[score 5.5] The Capital is the new frontier — no door
+  onward yet" (proposed 2026-09-10, `/forge` Phase W6).
+- **sub-choice decided:** the source row offered (a) ship map 6 literally,
+  or (b) a `/world-spec`/`story-spec` session decides what the capital's
+  advisor-selection payoff sets up for the player character before more
+  geography ships. Ruled **(b)** — an attended design session, not a
+  mechanical "map 6" bolt-on. Phase 84 is that session; it does not ship
+  a map itself.
+
+### Equipment progression: new signature skill(s) for empty accessory kinds (2026-09-15)
+- promoted: 2026-09-15 via `/oversight`, as **Phase 85**. Closes
+  `plan/AUDIT.md`'s "[loop-call] No mid/late equipment progression" row.
+- source row: "[score 5.5] Fill the 3 empty accessory kinds (head/hands/
+  feet)..." (proposed 2026-09-09, expand pass 12).
+- **sub-choice decided:** the source row's own AUDIT cross-reference named
+  three options — (a) design N new signature skills first, preserving the
+  1:1 relic-identity rule, (b) break the 1:1 rule with stat-only
+  accessories, or (c) something else. Ruled **(a)**: a mechanics-expert
+  design session for 1-3 new signature skills, then relics carrying them
+  into head/hands/feet, mirroring the existing 8's shape.
+
+### Engine hook sweep: dead zoneHas cleanup + TWIN wire (2026-09-15)
+- promoted: 2026-09-15 via `/oversight`, as **Phase 86**. Closes
+  `plan/AUDIT.md`'s "[loop-call] Dead engine hooks" and "[loop-call]
+  the-sextons-count is missing its TWIN trigger" rows.
+- source row: "[score 4.5] Sweep dead profane-canon engine hooks — 19
+  orphaned `zoneHas` sites + the-sextons-count's missing TWIN wire"
+  (proposed 2026-09-09, expand pass 12).
+- scope: delete/neutralize the 18 truly-dead `zoneHas` hooks and their
+  pinning tests, rewrite `oracle-omen-v2.engine.test.ts`'s deterministic
+  telegraph harness off the `fated-course` hook before removing it, wire
+  `the-sextons-count`'s TWIN clause correctly scoped (after the
+  `directDamage`/`drawPile`/`discard` locals, guarding against
+  double-counting with `reprise`).
+
+### Early-game encounter smoothing: Brine Hag / Ash Mire (2026-09-15)
+- promoted: 2026-09-15 via `/oversight`, as **Phase 87**.
+- source row: "[score 4.0] Smooth the first two forced/likely encounters —
+  Brine Hag's 3-phase elite open + Ash Mire boss sitting on the natural
+  forward path" (proposed 2026-09-09, expand pass 12).
+- scope: gate the fresh-save first encounter roll to a one-phase,
+  zero-keyword foe; audit the fishing-village unlock graph so at least one
+  ordinary encounter/rest node opens before or beside the Ash Mire boss
+  edge. Check both against `/world-tuning`'s per-map doctrine before
+  implementation.
+
+### W5 art adoption: wire the licensed replacement candidates (2026-09-15)
+- promoted: 2026-09-15 via `/oversight`, as **Phase 88**. Direct oversight
+  instruction, not an `/expand`-filed candidate — no source row to strike
+  (same shape as Phase 77/78's direct promotions). Closes `plan/AUDIT.md`'s
+  "[loop-call] Phase 78 — W5 art-pass candidates" row.
+- scope: adopt the first-listed (top) licensed candidate for each of the 9
+  W5 enemies researched in Phase 78 (`plan/phases/phase_78_art_pass_w5_sourcing.md`),
+  replacing the game-icons.net silhouette placeholders; carry over Phase
+  78's open sourcing notes (thin results for toll-sergeant/the-factor/
+  wharf-shrike; unpaid-delver needs compositing, not a single drop-in).
+
+### Art-pass: open-source art sourcing research for W5 portraits (2026-09-02)
+- promoted: 2026-09-02 via `/oversight`, as **Phase 78**. Direct T
+  instruction, not an `/expand`-filed candidate — no source row to
+  strike.
+- origin: raised during the W3 loop-call walkthrough on the W5
+  silhouette-portrait call (game-icons.net silhouettes, a deliberate
+  departure from the 52-painting style since that license is
+  UNRESOLVED). T ratified the silhouette call as filed but wants a
+  standing sourcing process going forward instead of ad hoc per-enemy
+  picks.
+- scope, T's own words: "create an 'art-pass' phase where an agent
+  researches online for some open source art that fits the theme.
+  Gather two candidates from a few sources, and then present them
+  during the next oversight. Once I decide, that'll be our new art
+  source until we end up generating our own."
+- shape: RESEARCH-AND-PRESENT, not auto-ship. The phase's deliverable
+  is a short report (candidate sources + license/provenance for each,
+  2 candidates minimum, sourced from a few different sites) surfaced as
+  a `[loop-call]`-style row in `plan/AUDIT.md` awaiting the next
+  `/oversight`'s pick — no art gets wired into the game or committed as
+  the standing source until T selects one. Supersedes the ad hoc
+  silhouette sourcing from the W3/W5 drain until T picks a source, and
+  stands as the source going forward until in-house art generation
+  (Phase 73's pipeline) is ready to take over.
+
+### In-house crash capture — global handlers + next-launch crash prompt (2026-09-02)
+- promoted: 2026-09-02 via `/oversight`, as **Phase 77**.
+- source row (stays in `## Pending` above, struck through): "[score 8.5]
+  In-house crash capture — global error/promise-rejection handlers +
+  next-launch crash prompt (mobile)" (proposed 2026-09-01, expand pass
+  10). Full rationale and proposed scope live there — carry it into the
+  Phase 77 brief rather than re-deriving.
+- why now: the owner ruled the scope on 2026-07-20 and it sat unpromoted
+  six weeks while two independent user crash reports (both [HIGH] in
+  `plan/CRITIQUE.md`) went unreproduced by e2e hunting; T confirmed via
+  `/oversight` questionnaire ("Promote top candidate").
+
+### Lexicon lint: catch retired-doctrine prose, not just retired identifiers (2026-08-20)
+- promoted: 2026-08-20 via `/oversight`, as **Phase 66**.
+- source row (stays in `## Pending` above, struck through): "[score 7.5]
+  Extend `lexicon.json`/`check-lexicon.mjs` to catch retired-doctrine
+  prose, not just retired identifiers" (proposed 2026-08-15, expand pass
+  8). Full rationale and proposed scope live there — carry it into the
+  Phase 66 brief rather than re-deriving.
+- why now: unpromoted since 2026-08-15 despite being cheap and
+  well-bounded; the pattern it guards against (retired design-law prose
+  surviving a rename pass) has bitten three independent times in one
+  week per the source row's own evidence.
+
+### Post-D8 flag-on curve repair + library theme-symmetry restoration (owner-selected 2026-08-08)
+- promoted: 2026-08-08 via `/oversight`, as **Phase 39** — the first
+  build-plan row since the queue drained at Phase 38.
+- source rows (both stay in `## Pending` above, struck through, so the
+  phase brief can draw on their full evidence): "Post-D8 flag-on curve
+  repair" + "Library theme-symmetry restoration". Merged per the former's
+  own instruction ("promote as ONE bounded phase, not three") and the
+  latter's ("pairs naturally with the curve-repair phase above").
+- why now: the flag-on curve has read blind early 61.1% / mid 0.0% /
+  late 0% / impossible 0% against the 80/50/25-35/0 doctrine for SIX
+  consecutive nightly baselines (08-01 → 08-07), byte-identical every
+  read; `plan/CRITIQUE.md` carries the same signal as its only [HIGH]
+  ("late-stage global collapse — all 10 presets 0.00 late"). D8's brief
+  promised "a red curve becomes the next bounded tuning phase" and that
+  phase had never been queued — so `/march` had nothing but 2.x-score
+  hygiene rows to pick, and shipped test files while the doctrine stayed
+  contradicted by the project's own measurements.
+- **owner ruling folded in (2026-08-08): foundry/grace 0% statusEngagement
+  is a DOCTRINE FAILURE, not an identity.** Both decks post 0% at every
+  stage in every arm and win ~100% by CAPITULATE/SWAY (foundry 1,783 of
+  1,784 wins). Restore `entropy-tax` to foundry's seat (it is foundry's
+  ONLY status engine; its exile also causes `the-overtake`'s empty
+  detonations) and `heart-of-the-matter` to grace's (its authored SWAY
+  finisher, seat currently held by off-theme fizzly `ouroboros`) — both
+  are in the stable dead-10, both handled inside THIS phase's authoring
+  pass rather than a separate one. The SWAY/RAPPORT metric blind spot
+  (statusEngagement counts only enemy-side lands) is acknowledged but is
+  NOT the accepted explanation — the owner declined the "exempt them and
+  fix the metric" reading.
+- absorbs (do not promote separately): "Starter-library trim +
+  duplication pass" and "Re-tune the starter library against `scoreCard`
+  v2" — same seats, same evidence base.
+- execution: `/deck-tuning` owns the sandbox-first court; the
+  swap-pool measurement pass (ungated the same day) runs against THIS
+  tree, not the pre-repair one.
+
+### Central juice/animation layer (mobile — owner-selected 2026-07-20)
+- source: owner session 2026-07-20 (missing-layers survey). Reanimated
+  animation logic spread across ~33 component files with no shared
+  shake/particle/transition system; combat feel is uncoordinated
+  per-component work.
+- decision (T direct, 2026-07-20): promote as a bounded first phase —
+  shared juice module + combat-encounter adoption, incremental migration
+  after, zero new deps, reduced-motion gated, Expo-decouple respected.
+- promoted to build plan as **Phase 38**. Brief:
+  `plan/phases/phase_38_juice_layer.md`.
+
+### D8 — one dice valve in every starter preset
+- source: T direct, 2026-07-18. Resolves D7's 5/5/5 owner blocker.
+- decision: under Upgradeable Dice, every one of the ten starter presets
+  replaces exactly one same-aspect card instance with one dice-interaction
+  valve; never append. Preserve 15 cards, 5/5/5, flag-off byte identity, and
+  the 70-card curated library through a ten-in/ten-out promotion ledger.
+  Prefer D4's staged thematic valves; bare-minimum fallback is FREE reroll one
+  chosen eligible die / PAID reroll all eligible dice, including the powering
+  die. No flag flip in this phase.
+- promoted to build plan as **Phase D8**. Brief:
+  `plan/phases/phase_D8_preset_dice_valves.md`.
+
+### Tempo-aware + alt-win-aware card pricing (mechanics — `scoreCard`)
+- source: T direct, 2026-07-17 ultracode playtest ("does raising card
+  price raise win-rate?"). Evidence:
+  `axiomancer-mechanics/scratch/price-experiment/report/FINDINGS.md`
+  (+ data-viz + `out/*.json`, 10 presets × 4 stages + 2 within-deck
+  price ladders, blind policy, seeds=2). Findings in brief: `scoreCard`
+  is blind to TEMPO (slow ramps price like front-loaded bursts, but the
+  late death clock is set by enemy output — erosion ladder late crawls
+  0.04→0.12 across 4x price, while tempo-axis fix-cards converted
+  +12 pts mid / >2x late for +0.5 avg-spell) and blind to ALT-WIN
+  engines (enchant/disenchant → 0; SWAY/Premise/Befriend only as minor
+  riders; Grace 5.46 beats Foundry 7.52 early — the model ranks alt-win
+  decks backwards).
+- decision (T direct, 2026-07-17 chat session): promote both, alt-win
+  first (structural, enemy-independent), tempo second with its proof
+  gate re-run ON TOP OF phase 33b's enemies at seeds ≥ 5 — the
+  experiment data predates 33b (sibling branches) and the ladder's
+  down-scaler clamp needs fixing before the sub-1x tiers mean anything.
+- promoted to build plan as **Phases 36a (alt-win) / 36b (tempo)**.
+
+### Enchant/disenchant pricing — `scoreCard` v2, part 3 (mechanics)
+- source: Phase 36a in-flight re-scope (2026-07-17). 36a's mandate bundled
+  "price enchant/disenchant persistent passives" with the SWAY/CONCEDE
+  currency reprice, but the mechanics-expert design pass found the two are
+  not one phase: enchantments/disenchants carry their effect as **free prose**
+  (`persistentEffect: string` — e.g. `irresistible-grace`'s "SWAY does not
+  decay…", `practiced-cadence`'s "+1 PREMISE on your first card each turn"),
+  NOT a scoreable payload. `scoreCard` returns 0 for every non-spell card and
+  the pricing lint asserts it. This is the LARGEST remaining alt-win
+  blindness (Grace's decay-kill engine, the Foundry forge enchants, the
+  peroration Premise-drip) — but pricing it requires structuring
+  `persistentEffect` into machine-readable mechanics (a schema change to
+  `Card`/types), then an executable pricer that reproduces the
+  "min-4-triggers" hand-priced card comments (`irresistible-grace` ≈ 12,
+  `practiced-cadence` ≈ 12, …), then dropping the lint's "=0" assertion.
+- decision: 36a shipped the enemy-independent currency half only and kept the
+  "=0" assertion honest; this is the deferred remainder. Promote to a build-
+  plan phase (**36c**) when the queue has room. Deps: 36a (shared `scoreCard`
+  surface). Evidence:
+  `axiomancer-mechanics/scratch/price-experiment/report/FINDINGS.md` rec #3;
+  brief `plan/phases/phase_36a_alt_win_pricing.md` § Follow-ups.
+
+### EA-1..EA-8 — Engagement-overhaul roadmap
+- source: `plan/tuning/2026-07-10-engagement-overhaul-roadmap.md`
+  (batch added 2026-07-10, T direct request). Sequencing and evidence
+  live in the tuning docs (turn-law-and-honest-baseline, turn-texture,
+  keyword-registry, momentum-scoping, out-of-flow-mechanics,
+  theme-identity). All four owner decision gates ratified same day
+  (§4: FREE lines = constrained fork + weak-deposit DRAW kicker;
+  momentum wheel = global, engine-native, keeps the name; TICK =
+  killed entirely; DoT clocks = distinct triggers). No EA phase was
+  owner-blocked; only inter-phase gates remained (EA-2 needs EA-1;
+  EA-5/6 repricing needs EA-2).
+- decision (via `/oversight` 2026-07-10): promote all 8 in order,
+  preserving their stated gating.
+- promoted to build plan as **Phases 26-33** (EA-1->26, EA-2->27,
+  EA-3->28, EA-4->29, EA-5->30, EA-6->31, EA-7->32, EA-8->33).
+
+### Mechanics CLI verify-gate coverage
+- source: T direct promotion 2026-07-09 after the mechanics game CLI failed under `ts-node` while the normal mechanics typecheck lanes stayed green.
+- decision: add a durable CLI typecheck/smoke lane so `src/CLI` TypeScript errors and stale documented CLI examples fail before `main` ships.
+- promoted to build plan as **Phase 22**.
+
+### First-map route audit and survivorship semantics
+- source: Kid playthrough report `/root/Workspace/reports/axiomancer-playthrough/2026-07-04.md`
+- decision (T direct promotion 2026-07-04): fix the map/playthrough evidence issue before trusting first-continent coverage. The current route reaches 19/25 Fishing Village nodes, cannot prove all branch nodes in one legal run, counts `fv-1` only as a start position, and continues after boss combat `defeat`.
+- promoted to build plan as **Phase 14**.
+
+### Hazard v2 port (mechanics absorbs mobile's living engine)
+- source: divergence DIV-MECH-002
+- decision (via `/oversight` 2026-07-03): mechanics absorbs
+  mobile's `state/hazard/` engine; mobile migrates to mechanics'
+  `World/Hazard/` and deletes its duplicate.
+- promoted to build plan as **Phase 13**.
+
+### Starter Press-Fate affordance + dice-valve promotion + flag re-test (spec 33 finale unblocker)
+- source: Phase D7 ratification (`plan/tuning/2026-07-18-d7-ratification.md`, §10 + `[needs-user-call]` 2). The flag-on Upgradeable-Dice model is NOT flip-ready: the win curve misses at every stage AND is worse than flag-off (early 61–66 vs ~80, a −15 regression the flag itself causes), and statusEngagement drops ~9pts — because the leaner economy's ONLY ◆ sink (Press Fate) fires 0.000×/round: `sig-press-the-point` isn't equipped on starter loadouts (D3-F3), so there is nothing to spend the specials on and the STAKE-retirement gap widened to +13.6%.
+- decision (needs-user-call — owner picks the mechanism): land the reroll sink on starter loadouts (grant `sig-press-the-point`, OR promote a dice-valve reroll card into the preset recipe — which also drains the deferred `dice-valves-33` promotion), then re-run the D7 flag-on matrix. Once the sink is active the D7 flag-not-ready canaries (in `combat-dice-economy.sim.test.ts`) flip red, forcing the re-test, and the flag becomes evaluable for flip. **This is THE unblocker for the whole spec-33 finale.** Also entangled: signature flag-gated cost machinery (to ratify D3's 2/3/4 table) + the between-combat souls economy pass (to de-placeholder blacksmith prices) — both owner/eng-backlog prerequisites for full economy ratification.
+- status: RESOLVED via /oversight 2026-07-18 — owner calls: (1) sink
+  mechanism = **D8's per-preset dice valves only**, no starter
+  `sig-press-the-point` grant now (revisit only if the post-D8 re-test
+  shows the valves under-sink); (2) the flag flips **NOW** — owner
+  explicitly overrode D7's DO-NOT-FLIP recommendation, accepting the
+  regressions as transitional; queued as build-plan **Phase D-FLIP**
+  (before D8); (3) signature flag-gated cost machinery **deferred** —
+  not built now, D3's 2/3/4 table stays unratified until it exists;
+  (4) blacksmith prices stay placeholder — the blacksmith was ruled the
+  wrong dice-upgrade surface entirely (see "Re-home dice upgrades off
+  the blacksmith" below + AUDIT). The D7 matrix re-runs after D8 per
+  the D8 row.
+- **SUPERSEDED via /oversight 2026-08-15 — build-plan Phase 56.** Call
+  (1) above is reversed: T ruled the starter `sig-press-the-point` grant
+  **and** the dice-valve reroll promotion, both. This is not a
+  contradiction of the 2026-07-18 call but the trigger that call named —
+  D8's row conditioned "no starter Press Fate grant *unless the re-test
+  shows the valves under-sink*", and the post-D8 nightlies read
+  under-sink (mid near-total collapse from digest 2026-07-30, holding
+  mid-0.0 / late-0 for six straight reduced-nightly reads through
+  2026-08-07). Calls (2), (3) and (4) are untouched: the flag is already
+  flipped (D-FLIP shipped), the signature cost machinery stays deferred,
+  and the blacksmith stays ruled the wrong surface.
+- **housekeeping note:** this row's "decision (needs-user-call — owner
+  picks the mechanism)" line above is historical text inside a resolved,
+  already-promoted row. It has twice been matched by `/oversight`'s
+  `[needs-user-call]` sweep as though it were an open item (most
+  recently 2026-08-15). Left in place because rows are not rewritten
+  after the fact, but read it as the record of a question already
+  answered, not a live one.
+
+### Section `Considered (below threshold)`
+
+
+### Expand pass 8 (2026-08-15) — 1 candidate filed, several clusters evaluated and dropped
+- signals checked: `plan/AUDIT.md` Pending (~9 live rows, the rest already
+  `[x]`-closed in place per this repo's convention of not moving closed
+  rows to Done immediately); `plan/CRITIQUE.md` Pending (4 live MED/LOW
+  rows plus older 2026-07-12-era rows); `plan/PHASE_CANDIDATES.md`'s own
+  34 Pending rows (checked for duplication before filing anything new);
+  `plan/steps/01_build_plan.md` Status block (AUDIT-DRAIN MODE banner
+  read in full — biases this pass toward NOT proposing anything whose
+  real job is draining an individual AUDIT row, per the banner's own
+  intent); `spec.md` diff since 2026-08-06T11:40:43Z (one commit, phase
+  44i's product-shell retheme — fully executed same commit, no residue);
+  `axiomancer-mechanics/specs/`+`braindump/` diffs since last pass (S-02
+  fishing-village-voices, spec 34 dark-fantasy-campaign, spec 35
+  objective-function-v2 — all three fully absorbed into shipped/queued
+  phases: 44a-44i, 53a-53e, Phase 43); commit log since last pass (~95
+  commits: the 44a-44i retheme batch, Phase 41 unshackling, Phase 43 CQI,
+  the first-map + narrative-encounter audits and 52-/53-series epics, the
+  Woodcut Codex V-series kickoff, Phase 54/55, a CI Actions-usage cut, no
+  5+-commit single-surface `fix:` cluster per §4G beyond what's already
+  tracked); `gh issue list` open (6 issues — #183 single-item and
+  explicitly `/deck-tuning`-shaped/owner-deferred behind the in-flight
+  card redesign, #177 is the Phase 39 tracking issue, #152/#147/#146 are
+  single-item `loop:opened` audit-sourced rows already `/iterate`'s to
+  drain, #132 single-item `triage:loop-queued` since 2026-07-19 — no 4+
+  cluster on any one feature ask).
+- filed: the `lexicon.json`/`check-lexicon.mjs` doctrine-drift extension
+  (above) — the one cluster this pass found that is genuinely
+  expand-shaped: a pattern (not a single row) recurring across three
+  independent incidents in one week, fixable by extending an existing,
+  proven mechanism rather than building something new or draining a
+  queue row.
+- evaluated and dropped:
+  - **Cloudflare Pages private-DevLog exposure** (`plan/AUDIT.md`,
+    impact 8, ease 6) — real and unresolved, but ease 6 puts it inside
+    `/iterate`'s reach per the AUDIT-DRAIN banner's own criteria, and the
+    row already carries its own "next" (restrict/disable Pages, in-repo
+    `build-devlog.yml` change). Proposing a candidate here would just be
+    "go drain this AUDIT row," which the dispatch brief for this pass
+    explicitly named as out of scope while AUDIT-DRAIN mode holds.
+  - **Verify gate blind to the Playwright e2e journeys** (`plan/AUDIT.md`,
+    impact 7, ease 5) — real (PR #186 proved it: a routing regression
+    passed local verify clean, failed CI), but the row's own `next:`
+    line names `/iterate` and offers three concrete options for that
+    tick to choose between. Same reasoning as above — not re-filed.
+  - **Stale post-Profane-Canon card-id references** (`combat-sim`'s dead
+    default loadout, dead id-keyed engine hooks, three stale mobile
+    comments — three separate `plan/AUDIT.md` rows, all ease 6-9) —
+    superficially a shape-A cluster, but all three trace to ONE historical
+    event (the 2026-08-08 Profane Canon library rewrite), not a recurring
+    pattern the way the doctrine-drift rows are. Building a referential-
+    integrity lint for this would be solving a one-time cleanup with
+    permanent machinery — self-assessment step 3 ("real demand or model
+    imagination?") says imagination here. Left for `/iterate` to drain
+    individually, same as filed.
+  - **`plan/PHASE_CANDIDATES.md`'s own "Raise (or split around) the
+    `march` workflow's 90-minute job ceiling" row** (already Pending, not
+    re-filed) — worth flagging for whoever picks it up: `b53dac5d`
+    (2026-08-14, Actions-usage cut) LOWERED `march`'s timeout 90->75 for
+    budget reasons, with bearings now stating "a tick that genuinely
+    needs more should be split, not have its cap raised silently." That
+    makes the existing candidate's underlying risk (a multi-phase tick
+    getting force-killed mid-commit) MORE live than when it was filed,
+    not less — the fix direction that shipped addressed cost, not the
+    kill-mid-flight risk this row tracks. Not edited per this skill's
+    append-only contract on prior passes; noted here for visibility.
+  - **Two exploration-hub CRITIQUE MED rows on the same screen** (legend
+    clipped on desktop, header count disagrees with the legend) — real,
+    same screen, same UI family, but only 2 findings and both MED, short
+    of shape B's "3+ HIGH" cluster bar; each is independently a small,
+    single-file `/iterate` fix. Not clustered into a candidate.
+  - **`[MED] ratified-exception HP arms bypass the damage-instance clock
+    funnel`** (`plan/CRITIQUE.md`, dated 2026-07-12) — its entire premise
+    (three *ratified exceptions* to a no-direct-damage rule) looks voided
+    by the 2026-08-08 unshackling, which made direct damage legal for
+    every card, not just three. Likely stale, but confirming that needs a
+    code read this pass didn't do, and "audit old rows for staleness" is
+    `/oversight`'s established sweep (see the 2026-08-12 pass that closed
+    11 such rows), not a phase-candidate shape. Flagged, not filed.
+  - **Card-redesign-adjacent ideas** (a codex/browse surface for the
+    rewritten library, re-arming the suspended balance bands per issue
+    #183) — deliberately not proposed. `plan/bearings.md`'s "THE CURRENT
+    CARD LIBRARY IS TRANSITIONAL" rule is explicit: "A card redesign is
+    in flight... If a tick needs to know [its scope], ask at the next
+    `/oversight` — do not infer, and do not start it." Filing a candidate
+    that presumes a shape for that redesign would be exactly the
+    inference the ruling forbids.
+
+### Expand pass 7 (2026-08-06) — reviewed, 0 new candidates filed
+- signals checked: `plan/AUDIT.md` pending rows (the only new header since
+  pass 6 is the digest's fifth consecutive "Doctrine-curve confirmation"
+  row, 2026-08-06 — byte-identical mid/late-collapse read; still fully
+  owned by the standing "Post-D8 flag-on curve repair" candidate above,
+  no new dimension); everything else in the window is resolutions (round-
+  clock `paidSummary` DoT wording, catalog keyword-bolding) or routine
+  digest/critique ticks, `plan/CRITIQUE.md` pending rows (pass 17 filed
+  2026-08-05 with zero fresh findings — self-assessed all captures against
+  the current Pending/Done log; the one row that closed this window is the
+  `paidSummary` DoT finding, now RESOLVED and mirrored in AUDIT), `gh issue
+  list` triage-queued (#132 unchanged since pass 2, still single-item and
+  `/iterate`-shaped; `triage:needs-user` empty), `spec.md` diff since last
+  pass (none), `axiomancer-mechanics/specs/` + `braindump/` diffs since
+  last pass (none), commit log since last pass (11 commits: 4 audit-
+  resolution/note ticks, 2 digests, 2 critique passes, 1 content fix, 1
+  code fix, the pass-6 expand commit itself — no 5+-commit single-surface
+  cluster per §4G), build-plan gaps (still only Phase 17 `[skipped]`,
+  already covered by the standing "Early-game rethink" candidate).
+- conclusion: no new design/scope-expanding signal this window; every
+  diff either closed a row or reconfirmed one already tracked here. No
+  candidates filed this pass.
+
+### Expand pass 6 (2026-08-04) — reviewed, 0 new candidates filed, 1 resolved
+- signals checked: `plan/AUDIT.md` pending rows (no new headers since
+  pass 5 — the window's diffs are all resolutions: `[2.4]` Closes-trailer
+  RESOLVED 2026-08-03 commit 0441c554, SWAY-meter RESOLVED 2026-08-03,
+  night-workflow-Playwright `[3.2]` RESOLVED, engine-doc-drift RESOLVED),
+  `plan/CRITIQUE.md` pending rows (no new rows; the standing HIGH —
+  late-stage global collapse — is unchanged and still owned by the
+  standing "Post-D8 flag-on curve repair" candidate above), `gh issue
+  list` triage-queued (#132 unchanged, still single-item and
+  `/iterate`-shaped; `triage:needs-user` empty), `spec.md` diff since
+  last pass (none), `axiomancer-mechanics/specs/` + `braindump/` diffs
+  since last pass (none), commit log since last pass (15 commits: 4
+  audit-resolution/note ticks, 3 digests, 1 critique pass, the
+  Closes-trailer fix itself, a CI fix, a docs rewrite — no 5+-commit
+  single-surface cluster per §4G), build-plan gaps (still only Phase 17
+  `[skipped]`, already covered by the standing "Early-game rethink"
+  candidate).
+- conclusion: the one actionable move was closing out the escalated
+  Closes-trailer candidate now that it shipped (commit 0441c554,
+  `plan/AUDIT.md` [2.4] confirmed RESOLVED) — see the struck-through
+  entry above. No new design/scope-expanding signal this window; every
+  other diff either closed a row or reconfirmed one already tracked
+  here.
+
+### Expand pass 5 (2026-08-02) — reviewed, 0 new candidates filed, 1 escalated
+- signals checked: `plan/AUDIT.md` pending rows (no new headers since
+  pass 4 — all diffs are either resolutions (`[3.5]`, control-lock
+  threat-blind, exploration-hub LEVEL/LVL, tuning-harness draft scorer)
+  or updates to the standing `[2.4]` Closes-trailer row, which grew
+  from five to ten confirmed instances this window — escalated above,
+  not re-filed), `plan/CRITIQUE.md` pending rows (the tuning-harness
+  draft-scorer HIGH resolved 2026-08-02, commit fbace426, issue #163;
+  the remaining standing HIGH — late-stage global collapse — is
+  unchanged and still owned by the standing "Post-D8 flag-on curve
+  repair" candidate above; no new rows added this window), `gh issue
+  list` triage-queued (#132 unchanged, still single-item and
+  `/iterate`-shaped; `triage:needs-user` holds only #144, unchanged),
+  `spec.md` diff since last pass (none), `axiomancer-mechanics/specs/`
+  + `braindump/` diffs since last pass (none), commit log since last
+  pass (17 commits: 6 audit-resolution/note ticks, 2 digests, 5
+  mechanics/mobile fixes across distinct surfaces — no 5+-commit
+  single-surface cluster per §4G beyond the already-tracked
+  Closes-trailer pattern), build-plan gaps (still only Phase 17
+  `[skipped]`, already covered by the standing "Early-game rethink"
+  candidate).
+- conclusion: no new design/scope-expanding signal this window; every
+  diff either closed a row or reconfirmed one already tracked here.
+  The one actionable move was escalating the Closes-trailer candidate
+  given its evidence doubled since filing at pass 4 — see the updated
+  entry above. No new candidates filed this pass.
+
+### Expand pass 3 (2026-07-29) — reviewed, no new candidates filed
+- signals checked: `plan/AUDIT.md` pending rows (no new headers since pass
+  2 — the only diffs are four rows flipping to `[x]`/resolved: the
+  Upgradeable Dice activation-law divergence, the first-map blacksmith
+  gate, the persistent-header VITAE bar, and a `Closes #N` no-op
+  provenance update; `[user-issue #129]` Hermes-provenance logging is
+  still HIGH but still explicitly routed to `/iterate`), `plan/CRITIQUE.md`
+  pending rows (same two standing HIGH rows — tuning-harness draft
+  scorer, late-stage global collapse — still own the standing "Post-D8
+  flag-on curve repair" candidate above, per pass 2's finding; one more
+  MED row closed this window, none added), `gh issue list`
+  triage-queued (#129, #132 — unchanged from pass 2, still single-item
+  and `/iterate`-shaped), `spec.md` diff since last pass (none),
+  `axiomancer-mechanics/specs/`+`braindump/` diffs since last pass
+  (none), commit log since last pass (12 commits: audit-resolution
+  ticks, a digest, an expand no-op, an ops workflow add+revert, two
+  mechanics fixes, one docs clarification — no new design or
+  scope-expanding pattern).
+- conclusion: strictly less new material than pass 2 — every AUDIT/
+  CRITIQUE diff this window closes a row rather than opening one. The
+  existing Pending list still covers every live thread. No candidates
+  filed this pass.
+
+### Expand pass 2 (2026-07-23) — reviewed, no new candidates filed
+- signals checked: `plan/AUDIT.md` pending rows (all single-finding,
+  low composite score; `[user-issue #129]` Hermes-provenance logging is
+  HIGH but explicitly routed to `/iterate`, not a phase-shaped signal),
+  `plan/CRITIQUE.md` pending rows (two HIGH rows — tuning-harness draft
+  scorer, late-stage global collapse — both already own the standing
+  "Post-D8 flag-on curve repair" candidate above per the just-resolved
+  "doctrine curve unmeasured" row's own cross-reference; no new
+  clustering), `gh issue list` triage-queued (#129, #132 — both single-
+  item, already `/iterate`-shaped), `spec.md` diff since last pass
+  (none), `axiomancer-mechanics/specs/`+`braindump/` diffs since last
+  pass (none), commit log since last pass (digest/audit-resolution
+  ticks only — no new design or scope-expanding pattern).
+- conclusion: nothing since pass 1 (2026-07-21) rises to a genuine
+  "reality outpaced the plan" signal; the existing Pending list already
+  covers the live threads. No candidates filed this pass.

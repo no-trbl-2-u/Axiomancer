@@ -208,7 +208,8 @@ The unified **nexus** harness was re-onboarded onto the monorepo on
   **read this first**), `steps/01_build_plan.md` (the phase queue),
   `AUDIT.md` + `CRITIQUE.md` (the drain queues), `PHASE_CANDIDATES.md`,
   `CONTENT_LEDGER.md` (per-category `adjust-*` last-pass metadata),
-  `CURRENT-STATE.md`, `reflexes.md`, `lessons.md`, `phases/`.
+  `reflexes.md`, `lessons.md`, `phases/` (open + recent briefs), and
+  `archive/` (rotated history, verbatim).
 - `scripts/` — `deploy-check.mjs` (CI-green deploy gate),
   `notify.mjs` (pager), `loop-issue.mjs` (GitHub issue mirror).
 - `spec.md` — the product spec the loop builds against.

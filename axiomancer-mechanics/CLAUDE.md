@@ -33,7 +33,7 @@ and ordered open questions.
 Full ruling: `plan/bearings.md` → THE BLANK PAGE (¶1 lifted; ¶2 amended
 2026-09-24; ¶3–¶5 stand). `content/story/README.md` is the superseded record
 of the clearing — history, not law. The overview grows in attended sessions
-with T; `plan/2026-09-17-story-outline.prompt.md` (one event per turn) is
+with T; `plan/archive/2026-09-25-trim-t4/plan/2026-09-17-story-outline.prompt.md` (one event per turn) is
 superseded.
 
 ## Load-bearing doctrine (THE BIG NUMBERS REWRITE, 2026-09-02)

@@ -1,6 +1,6 @@
 /**
  * Hermetic e2e — WS3.2 trigger-clock DoT substrate (spec 32 §12, ratified
- * 2026-07-11 #3; plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md
+ * 2026-07-11 #3; plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md
  * WS3).
  *
  * The WS3.3 data sweep (2026-07-11) put the substrate on live data: POISON

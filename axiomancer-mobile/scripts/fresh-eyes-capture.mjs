@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // scripts/fresh-eyes-capture.mjs — THROWAWAY driver for the 2026-09-12 UI
-// fresh-eyes sweep (plan/2026-09-12-ui-fresh-eyes.prompt.md §3.3.4).
+// fresh-eyes sweep (plan/archive/2026-09-25-trim-t4/plan/2026-09-12-ui-fresh-eyes.prompt.md §3.3.4).
 // Delete before the final commit.
 //
 // Purpose: capture every route in §3.2 at both viewports in one pass —

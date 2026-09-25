@@ -1,6 +1,6 @@
 # UI FRESH-EYES SWEEP — 2026-09-12
 
-> Run against [`plan/2026-09-12-ui-fresh-eyes.prompt.md`](../../../plan/2026-09-12-ui-fresh-eyes.prompt.md),
+> Run against [`plan/archive/2026-09-25-trim-t4/plan/2026-09-12-ui-fresh-eyes.prompt.md`](../../../plan/archive/2026-09-25-trim-t4/plan/2026-09-12-ui-fresh-eyes.prompt.md),
 > adjusted for ultracode at the head of the run (commit `7d7565c`).
 > Persona, taxonomy, scope walls and gate are that prompt's; what ultracode
 > changed is how much ran in parallel and how hard each row was tested.

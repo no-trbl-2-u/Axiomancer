@@ -1,6 +1,6 @@
 /**
  * Hermetic E2E — Phase 32 part 4f (Echo — REPLAY_LAST targets the last spell
- * that LANDED A STATUS, plan/phases/phase_32_theme_deep_work.md §Part 4f).
+ * that LANDED A STATUS, plan/archive/2026-09-25-trim-t4/plan/phases/phase_32_theme_deep_work.md §Part 4f).
  *
  * Profane Canon (2026-08-08): the carrier moved — `ouroboros` is retired; the
  * library's `replay_last` card is now `open-every-grave` (REPLAY ×2 +

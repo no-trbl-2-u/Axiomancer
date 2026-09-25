@@ -1,6 +1,6 @@
 /**
  * Hermetic E2E — the WS6.2 cross-theme bridge rewards
- * (plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md §WS6;
+ * (plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md §WS6;
  * sandbox set `bridge-rewards` in cards.sandbox-sets.ts).
  *
  * Pinned here:

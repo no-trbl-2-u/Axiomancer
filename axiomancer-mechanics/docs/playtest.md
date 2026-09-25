@@ -158,4 +158,4 @@ and should tighten toward it as calibration runs land — a starter preset
 clearing late/impossible well above this curve is a dominance finding, not a
 success, since starter presets are early/mid-game decks by design (the
 player trades into a new mid-game deck after the labyrinth). Correction
-history: `plan/tuning/2026-07-08-win-path-scaling.md`.
+history: `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-08-win-path-scaling.md`.

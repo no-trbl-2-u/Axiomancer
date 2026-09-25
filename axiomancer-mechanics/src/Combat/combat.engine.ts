@@ -1038,7 +1038,7 @@ function gainSouls(
     return next;
 }
 
-/** PLEA gain (spec 32 v3 §9, reworked by plan/tuning/
+/** PLEA gain (spec 32 v3 §9, reworked by plan/archive/2026-09-25-trim-t4/plan/tuning/
  *  2026-07-08-win-path-scaling.md item 1a to a Dawncaster Charmed-style
  *  `resolve` threshold — see `capitulateThreshold`): PLEA ≥ the enemy's
  *  resolve opens an explicit ACCEPT / CONTINUE choice. It never resolves the
@@ -1176,7 +1176,7 @@ function gainPremises(
     const decl = next.peroration;
     if (!decl) return { state: next, concede: false };
     const total = next.premises ?? 0;
-    // Win-path scaling (plan/tuning/2026-07-08-win-path-scaling.md item 1a):
+    // Win-path scaling (plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-08-win-path-scaling.md item 1a):
     // the-closing-word's flat concedeAt (8) let Oratory land CONDEMN
     // identically against a 100 HP early wolf and a 1,500+ HP late boss —
     // Battle Lab round 2 clocked it at 100% win rate on EVERY stage. The
@@ -2318,7 +2318,7 @@ function playBottomAction(
             }
             case 'rupture': {
                 // Overtake 2-pip gate (phase 28, CONFIRMED in
-                // plan/tuning/2026-07-10-theme-identity.md — "the Overtake
+                // plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-theme-identity.md — "the Overtake
                 // fires for 18 on turn 1 because nothing marks a CHARGED
                 // Overtake"). Scoped to fuelPerPip-paired rupture only (only
                 // `the-overtake` carries fuelPerPip today) — a plain rupture
@@ -3324,7 +3324,7 @@ function endCombat(state: CombatEncounterState, outcome: CombatEncounterState['f
  * used to disagree (`getDisruptMeter.willDeny` never saw a pure-rung deny;
  * phase 28 fixed that by sharing this helper instead of patching the symptom
  * in two places). Boss/unique rung REGROWTH
- * (plan/tuning/2026-07-08-win-path-scaling.md item 1c, anti-permalock):
+ * (plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-08-win-path-scaling.md item 1c, anti-permalock):
  * accrued resilience from prior rounds where this boss's telegraph was
  * denied/weakened.
  */

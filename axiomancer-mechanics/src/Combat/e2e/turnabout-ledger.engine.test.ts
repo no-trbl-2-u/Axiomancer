@@ -1,6 +1,6 @@
 /**
  * Hermetic E2E — Phase 32 part 4a (Control — TURNABOUT,
- * plan/phases/phase_32_theme_deep_work.md §Part 4a).
+ * plan/archive/2026-09-25-trim-t4/plan/phases/phase_32_theme_deep_work.md §Part 4a).
  *
  * Scope (see brief's Decisions): `rungsDeniedTotal` accrues in
  * `resolveThreatPhase`, at the EXACT same expression BACKFIRE's per-phase

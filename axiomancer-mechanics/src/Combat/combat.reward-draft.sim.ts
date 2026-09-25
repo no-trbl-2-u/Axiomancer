@@ -1,6 +1,6 @@
 /**
  * WS6.1 — the reward-draft harness (card-library improvement plan,
- * `plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md`).
+ * `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md`).
  *
  * Simulates the post-combat REWARD SCREEN per preset ORIGIN: for a given
  * preset (theme), roll N reward screens through `rollCombatCardRewards` with a

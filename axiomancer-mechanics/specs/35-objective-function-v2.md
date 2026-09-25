@@ -90,7 +90,7 @@ other term sees that.
 
 **WIDTH 0.20.** The other named blind spot — a metric that rewards more
 applications without more *decisions* is a failed metric
-(`plan/ideas/COMBAT_SYSTEM_FOUNDATIONAL_REDESIGN_PLAN.md`, "status metric
+(`plan/archive/2026-09-25-trim-t4/plan/ideas/COMBAT_SYSTEM_FOUNDATIONAL_REDESIGN_PLAN.md`, "status metric
 law"). Ranked below arc because it measures the *opportunity* for a decision:
 the sim policies are instruments, so width bounds what a human could have
 chosen among and cannot prove they chose well.

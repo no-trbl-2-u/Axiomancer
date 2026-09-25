@@ -267,7 +267,7 @@ export const SELF_COST_CREDIT = 0.75;
  * ratifies, NOT a pricing re-fit. This table is the PRICING-ONLY view:
  *
  * - `card-played` → **1.83** — D3's measured realized cadence
- *   (`plan/tuning/2026-07-17-d3-dice-economy.md`: ~1.83 PAID plays/round at
+ *   (`plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-17-d3-dice-economy.md`: ~1.83 PAID plays/round at
  *   stock gear; FREE lines never tick this clock — `combat.engine.ts`
  *   `fireClock('card-played')` fires once per PAID play), down from the WS3.3
  *   ~2-plays estimate baked into the old lifetime. A fractional rate is priced

@@ -1,5 +1,5 @@
 // scripts/check-devlog-not-served.test.mjs — witness for the phase 57 guard
-// (plan/phases/phase_57_devlog_pages_scopedown.md). Confirms the generated/
+// (plan/archive/2026-09-25-trim-t4/plan/phases/phase_57_devlog_pages_scopedown.md). Confirms the generated/
 // source split the phase turned into policy: generated DevLog output is
 // flagged, the source it's derived from is not.
 //

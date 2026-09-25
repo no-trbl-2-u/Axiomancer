@@ -1,6 +1,6 @@
 /**
  * Hermetic E2E — Phase 32 part 3 (Akrasia — DEBT ledger,
- * plan/phases/phase_32_theme_deep_work.md §Part 3), refitted to the Profane
+ * plan/archive/2026-09-25-trim-t4/plan/phases/phase_32_theme_deep_work.md §Part 3), refitted to the Profane
  * Canon library (2026-08-08): the debt theme's RECOIL carriers are now
  * `promissory-cut` (PAID recoil 3 + draw 2; FREE recoil 1 + draw 1) and
  * `the-vig`; the old Akrasia cards (`self-flagellant`, `pact-of-akrasia`)

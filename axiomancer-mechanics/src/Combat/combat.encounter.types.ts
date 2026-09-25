@@ -707,7 +707,7 @@ export type CombatEvent =
 
 // ---------------------------------------------------------------------------
 // GLYPHS (Phase 33d pilot) — sandbox-only charge-and-crack seals. See
-// `plan/phases/phase_33d_glyphs_pilot.md`. No new keyword: both payloads
+// `plan/archive/2026-09-25-trim-t4/plan/phases/phase_33d_glyphs_pilot.md`. No new keyword: both payloads
 // speak existing status verbs (spec 32 v3 §3's 30-keyword cap untouched).
 // ---------------------------------------------------------------------------
 
@@ -878,7 +878,7 @@ export interface CombatEncounterState {
     /** Spec 32 v3 T5 — STAGGER rungs accumulated against the enemy's NEXT
      *  telegraphed action (consumed at threat resolution). Optional. */
     staggerRungs?: number;
-    /** plan/tuning/2026-07-08-win-path-scaling.md item 1c — boss/unique
+    /** plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-08-win-path-scaling.md item 1c — boss/unique
      *  anti-permalock: rungs a boss/unique has REGROWN back after a phase
      *  where its telegraph was denied/weakened by STAGGER. Raises the
      *  effective rung total (`THREAT_RUNGS_BOSS` + this, capped at double)

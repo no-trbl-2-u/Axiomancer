@@ -7,7 +7,7 @@ the game's public face: the log, the evidence and the full catalog, written for
 a player rather than a maintainer. Its design system is
 [`DESIGN.md`](./DESIGN.md); its builder is `scripts/build-devlog-public.mjs`.
 T reversed the 2026-08-15 content policy on 2026-09-20 with the spoiler cost
-stated — see `plan/2026-09-20-devlog-public-publish.prompt.md`. Publication
+stated — see `plan/archive/2026-09-25-trim-t4/plan/2026-09-20-devlog-public-publish.prompt.md`. Publication
 happens at DEPLOY time, from that build directory, which is gitignored and
 guarded like every other generated output here: nothing generated is ever
 committed, so publishing stays a deliberate act.

@@ -2,7 +2,7 @@
 
 > **Status:** IMPLEMENTED — **D1–D8 shipped and D7 ratified by 2026-07-18**
 > (decision history remains in the D-series phase briefs and
-> `plan/tuning/2026-07-18-d7-ratification.md`). Current player and playtest
+> `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-18-d7-ratification.md`). Current player and playtest
 > paths use Upgradeable Dice. The blacksmith implementation remains a dev/test
 > surface only: T rejected it as the player-facing upgrade home, which stays
 > unresolved in `plan/PHASE_CANDIDATES.md` under “Re-home dice upgrades off
@@ -188,7 +188,7 @@ valves:
 
    **D8 shipped (2026-07-18):** all ten themed valves passed the promotion
    court (per-seat A/B, early stage, blind+greedy, seeds 1-5, flag-on; report:
-   `plan/tuning/2026-07-18-d8-preset-dice-valves.md`) — the fallback was never
+   `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-18-d8-preset-dice-valves.md`) — the fallback was never
    needed. Ratified seats (`PRESET_DICE_VALVES` in
    `combat.starter-deck-presets.ts`; valve <- displaced one-instance source):
    erosion recurring-symptom <- slippery-slope; oratory restate-the-point <-
@@ -341,7 +341,7 @@ verify Mobile and Card Editor under the root impact checklist.
 ## 9. D1 review — resolved 2026-07-17 + residual opens
 
 Resolved (decision log:
-`plan/phases/phase_D1_upgradeable_dice_spec_review.md`):
+`plan/archive/2026-09-25-trim-t4/plan/phases/phase_D1_upgradeable_dice_spec_review.md`):
 
 1. Momentum rule 3 = **reset to null** (owner call — supersedes the
    shipped restart-at-played-color truth table).

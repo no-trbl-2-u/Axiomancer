@@ -8,7 +8,7 @@
 
 > **SUPERSEDED IN PART (T direct, /oversight 2026-08-08 — "THE
 > UNSHACKLING," commit `ad934542`; executed by Phase 41,
-> `plan/phases/phase_41_constraint_demolition.md`):** §1's no-strike
+> `plan/archive/2026-09-25-trim-t4/plan/phases/phase_41_constraint_demolition.md`):** §1's no-strike
 > doctrine and the FREE-line law below (amendment item 1) are VOID. Cards
 > MAY deal raw enemy-HP damage; a FREE line is no longer required to
 > deposit theme currency. Both retired laws' enforcing tests
@@ -23,28 +23,28 @@
 >
 > **AMENDMENT (owner-ratified 2026-07-10, engagement-audit session —
 > decisions of record in
-> `plan/tuning/2026-07-10-engagement-overhaul-roadmap.md` §4):**
+> `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-engagement-overhaul-roadmap.md` §4):**
 > 1. **FREE-line law (amends §2) — VOID 2026-08-08, see supersession
 >    note above.** ~~every FREE line must deposit theme currency
 >    (Premises, Souls, pips, DoT seeds, rapport, wheel/loop
 >    advancement…) — never damage, never a bare generic draw. A
 >    weak-enough deposit MAY additionally carry a `DRAW 1`-class utility
 >    kicker. Lint-enforced like the no-strike gate. Executes as the
->    70-card pass in `plan/tuning/2026-07-10-turn-texture.md` §1 (EA-5).~~
+>    70-card pass in `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-turn-texture.md` §1 (EA-5).~~
 > 2. **TICK is retired from the registry (amends §3):** killed entirely,
 >    not renamed; the 10 `free: tickOne` lines die with the FREE pass and
 >    PAID tick effects re-author as theme verbs. The registry count may
 >    drop below 30 — the "exactly 30" directive yields to earned support
->    (see `plan/tuning/2026-07-10-keyword-registry.md`).
+>    (see `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-keyword-registry.md`).
 > 3. **DoT clocks differentiate by TRIGGER (amends §3 semantics):**
 >    POISON / BLEED / MARK get distinct firing conditions (per-card-played
 >    / per-damage-instance / on-payoff class), specced in EA-7.
 > 4. **MOMENTUM names the global combat wheel** (engine-native port
 >    pending); the Hazard minigame's carry system and
->    `buff_grace_momentum` rename (`plan/tuning/2026-07-10-momentum-scoping.md`).
+>    `buff_grace_momentum` rename (`plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-momentum-scoping.md`).
 >
 > **AMENDMENT (phase 29, 2026-07-11 — the keyword-language pass,
-> `plan/phases/phase_29_keyword_registry.md`):** §3's table below is
+> `plan/archive/2026-09-25-trim-t4/plan/phases/phase_29_keyword_registry.md`):** §3's table below is
 > corrected to the shipped registry (30 keywords, drifted from the
 > original 30 via renames/merges/retirements — not the same 30):
 > FESTER→PROLONG, TRANSMUTE→REARGUE, REPRISE→RECALL (renames); BARRIER
@@ -535,7 +535,7 @@ contract).
 Provenance: decisions adopted via the owner's full-plan implementation
 directive (2026-07-11 session); each item adopts the documented
 recommendation of the card-library improvement plan
-(`plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md`).
+(`plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md`).
 
 1. **WS0.2 direct-HP exceptions** — classes (a) status-gated payoffs,
    (b) A5 enchant-gated drips, and reflect (THORNS/RIPOSTE) are legal

@@ -1,6 +1,6 @@
 /**
  * Hermetic E2E — Phase 32 part 4d (Oracle — OMEN v2,
- * plan/phases/phase_32_theme_deep_work.md §Part 4d).
+ * plan/archive/2026-09-25-trim-t4/plan/phases/phase_32_theme_deep_work.md §Part 4d).
  *
  * OMEN v2 turns the pre-existing OMEN mechanic (spec 32 v3 T6) from a
  * silent lookup — the prediction fell out of whichever die powered the

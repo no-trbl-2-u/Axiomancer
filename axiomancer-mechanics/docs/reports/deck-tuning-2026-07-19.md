@@ -40,7 +40,7 @@ D8 dice valve: `slippery-slope` only
 spell-type only) has no enchant/disenchant candidates, so `venom-and-vein`
 and `suppurating-curse` are not swap-testable from this pool.
 
-**Prior settled work (not reopened):** `plan/tuning/2026-07-19-swap-pool-measurement-residue.md`
+**Prior settled work (not reopened):** `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-19-swap-pool-measurement-residue.md`
 and `docs/reports/deck-tuning-2026-07-18.md` §1 already measured all four
 spell-slot arms with an obvious trial-first candidate:
 
@@ -233,7 +233,7 @@ body 5→7) plus the pool→library promotion gate.
 **Nothing applied this pass.**
 
 1. Standing owner ruling R1 + open ballot item C1
-   (`plan/tuning/2026-07-19-swap-pool-measurement-residue.md`) blocks ALL
+   (`plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-19-swap-pool-measurement-residue.md`) blocks ALL
    swap-pool→library promotion pending explicit ratification — unchanged
    since 2026-07-18, still binding.
 2. H2 and H3 (the only arms with positive signal) both break the 5/5/5

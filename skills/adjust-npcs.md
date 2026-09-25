@@ -139,6 +139,13 @@ npm run verify --workspace axiomancer-mobile   # NPCs/** drives mobile's dialogu
 Update `plan/CONTENT_LEDGER.md`: bump the `npcs` row, append a log
 entry.
 
+Rotate the log when it grows: it keeps at most 3 entries per
+category. If your new entry makes 4 for this category, move the older
+ones (every entry but the new one) verbatim to the end of
+`plan/archive/CONTENT_LEDGER_<YYYY>.md` (rotation year; create it with
+a one-line header if missing) and `git add` it in the same commit.
+Archive, never delete or edit an entry.
+
 ```bash
 git add <explicit files> plan/CONTENT_LEDGER.md
 git commit -m "$(cat <<'EOF'

@@ -3,7 +3,7 @@
  * CONJURE creates (spec 32 v3 §3: "create a one-use Thoughtform card into
  * hand (removed after play / combat end)").
  *
- * WS2.1 (plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md,
+ * WS2.1 (plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md,
  * correction C-11): Haunts are REAL `Card` records resolved through
  * `getCardById`'s lookup chain, but they must NOT live in
  * `cards.library.ts` — the library's count pins (57 cards / 45 spells at the

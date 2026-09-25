@@ -3,10 +3,10 @@
  * amended 2026-07-11 by the Phase 29 language pass).
  *
  * 30 KEYWORDS (down from a drifted 32 — the "exactly 30" directive yields
- * to earned support: see `plan/tuning/2026-07-10-keyword-registry.md`).
+ * to earned support: see `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-keyword-registry.md`).
  * Spec 33 §6 (D4, 2026-07-17) registers three more die-gear rows: BOON
  * (the face payload) plus the blacksmith upgrade verbs HONE and TEMPER.
- * Phase 29 (`plan/phases/phase_29_keyword_registry.md`) folded six
+ * Phase 29 (`plan/archive/2026-09-25-trim-t4/plan/phases/phase_29_keyword_registry.md`) folded six
  * previously-unmapped debuff ids into registry keywords, renamed three
  * colliding words (FESTER→PROLONG, TRANSMUTE→CURDLE, REPRISE→RECALL),
  * retired/merged three ghosts (BARRIER into GUARD, CONJURE — zero library

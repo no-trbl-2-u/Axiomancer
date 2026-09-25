@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — Phase 33d (plan/phases/phase_33d_glyphs_pilot.md): GLYPHS,
+ * Hermetic E2E — Phase 33d (plan/archive/2026-09-25-trim-t4/plan/phases/phase_33d_glyphs_pilot.md): GLYPHS,
  * the Option-B grammar pilot (charging seals, player-cracked).
  *
  * `state.glyphs` is a new persistent battlefield zone: a card's PAID line can

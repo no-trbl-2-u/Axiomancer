@@ -1,5 +1,5 @@
 /**
- * The ALLY registry (Phase 62 — plan/phases/phase_62_ally_cards.md).
+ * The ALLY registry (Phase 62 — plan/archive/2026-09-25-trim-t4/plan/phases/phase_62_ally_cards.md).
  *
  * Design decision (the phase 62 brief's central question — "what an ally
  * card IS mechanically"): an Ally is a real `Card` record of the EXISTING

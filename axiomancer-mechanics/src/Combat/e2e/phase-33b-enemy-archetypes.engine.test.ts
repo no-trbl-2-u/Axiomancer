@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — Phase 33b (plan/phases/phase_33b_enemy-archetypes-variable-rungs.md):
+ * Hermetic E2E — Phase 33b (plan/archive/2026-09-25-trim-t4/plan/phases/phase_33b_enemy-archetypes-variable-rungs.md):
  * enemy archetypes + variable-rung telegraphs.
  *
  * Two things ship here:

@@ -3,7 +3,7 @@
 > **This document is no longer in force.** As of 2026-09-18 a new story
 > overview exists at `content/story/story-overview.md`, built from nothing
 > event by event with T present, per
-> `plan/2026-09-17-story-outline.prompt.md`. THE BLANK PAGE ¶1 ("no canon
+> `plan/archive/2026-09-25-trim-t4/plan/2026-09-17-story-outline.prompt.md`. THE BLANK PAGE ¶1 ("no canon
 > exists") lifted at the moment that file was created — see
 > `plan/bearings.md`, which says so in its own terms.
 >

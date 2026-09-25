@@ -1,6 +1,6 @@
 /**
  * Hermetic E2E — WS5.2 + WS5.3: the sequencing-grammar microset
- * (plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md §WS5;
+ * (plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-card-library-improvement-plan-detailed.md §WS5;
  * spec 32 §12 "Ratified 2026-07-11" item 4 supplies the ledgers).
  *
  * Pinned here:

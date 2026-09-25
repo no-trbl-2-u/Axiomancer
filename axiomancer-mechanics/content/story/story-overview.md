@@ -221,7 +221,7 @@ prisoner's wife, mother of the child); whether she comes (she does not).
   penitence after the prophet Nathan confronted him over Bathsheba and Uriah
   (2 Samuel 11–12). A lie undone by a record fits that confrontation shape.
   Offered as a lens, not ruled.
-- **The shape of this file changed.** `plan/2026-09-17-story-outline.prompt.md`
+- **The shape of this file changed.** `plan/archive/2026-09-25-trim-t4/plan/2026-09-17-story-outline.prompt.md`
   and `axiomancer-mechanics/CLAUDE.md` describe this file as a road walked
   one event per turn. As of 2026-09-23 it is an over-arching story document.
   Those two descriptions are stale until updated.

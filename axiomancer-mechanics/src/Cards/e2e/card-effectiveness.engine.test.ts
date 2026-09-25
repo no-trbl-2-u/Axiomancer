@@ -1,5 +1,5 @@
 /**
- * Hermetic E2E — Card Effectiveness Lint (plan/tuning/2026-07-08-win-path-scaling.md #6).
+ * Hermetic E2E — Card Effectiveness Lint (plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-08-win-path-scaling.md #6).
  *
  * The Ouroboros-class-bug witness. Ouroboros (theme Echo) shipped with its
  * finisher damage authored on the FREE line, which never fires alongside the
@@ -82,7 +82,7 @@ const GENERICALLY_ASSERTED: readonly CardSpecialMechanic['kind'][] = [
 // ── Per-card fixture tweaks ───────────────────────────────────────────────────
 // The shared fixture's 1-pip reserve (headroom for pip-adding mechanics, not a
 // floor) satisfies every card except `the-overtake`, which phase 28 gated at
-// 2+ spent pips (plan/tuning/2026-07-10-theme-identity.md — "the Overtake
+// 2+ spent pips (plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-theme-identity.md — "the Overtake
 // fires for 18 on turn 1"). Bump its reserve to clear the gate; every other
 // card keeps the unmodified shared fixture.
 const FIXTURE_OVERRIDES: Readonly<Record<string, (state: CombatEncounterState) => CombatEncounterState>> = {

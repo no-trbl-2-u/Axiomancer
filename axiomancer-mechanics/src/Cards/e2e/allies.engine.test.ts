@@ -1,6 +1,6 @@
 /**
  * Hermetic E2E — the ALLY registry (Phase 62 —
- * plan/phases/phase_62_ally_cards.md).
+ * plan/archive/2026-09-25-trim-t4/plan/phases/phase_62_ally_cards.md).
  *
  * Allies (`cards.allies.ts`) are real `Card` records that live OUTSIDE the
  * curated library, mirroring the Haunt sibling-pool pattern
