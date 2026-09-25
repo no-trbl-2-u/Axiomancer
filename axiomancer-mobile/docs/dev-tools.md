@@ -108,7 +108,6 @@ read the log.** Section container ids are `dev-section-<key>`.
 
 | Leaf | What it does | Test ids |
 |---|---|---|
-| `AestheticDevToggle` | Flip canonical / codex aesthetic | `debug-aesthetic-toggle` |
 
 ### RUN & DIAGNOSTICS — `dev-section-run`
 

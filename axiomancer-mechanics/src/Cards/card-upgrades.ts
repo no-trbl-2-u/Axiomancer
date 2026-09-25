@@ -40,7 +40,7 @@
  *     extend_dots.turns, convert_dots.bonusIntensity, boost_all_dots.intensity,
  *     flay.stacks, replay_last.times, and the rider fields drawCards /
  *     cleanse / souls / premises / foretell / millCards / stagger / pips /
- *     conviction / flay / glyphCharge / bonusIntensity.
+ *     conviction / flay / bonusIntensity.
  *
  *   DOT INTENSITY  intensity -> intensity + 1, clamped to MAX_EFFECT_INTENSITY
  *     Every `combatEffects` entry and every `applyEffect` rider payload.
@@ -198,7 +198,7 @@ const RIDER_MAGNITUDE_FIELDS = ['damage', 'guard', 'barrier', 'healHp', 'sway'] 
 const RIDER_RATE_FIELDS = ['wrath', 'chain', 'ruptureMarks', 'intensityPerPip'] as const;
 const RIDER_COUNT_FIELDS = [
     'drawCards', 'cleanse', 'souls', 'premises', 'foretell', 'millCards',
-    'stagger', 'pips', 'conviction', 'flay', 'glyphCharge', 'bonusIntensity',
+    'stagger', 'pips', 'conviction', 'flay', 'bonusIntensity',
 ] as const;
 
 /** Raise every payoff field of a rider IN PLACE (the rider is already a copy).
@@ -217,7 +217,6 @@ function upgradeRiderDefault(rider: CardRider): void {
     if (ae && !isSelfCost(ae.effectId, ae.to === 'self')) {
         ae.intensity = intensity(ae.intensity ?? 1);
     }
-    if (rider.glyphChargeFallback) upgradeRiderDefault(rider.glyphChargeFallback);
 }
 
 // ─── The default rule: mechanics ────────────────────────────────────────────
@@ -375,7 +374,7 @@ function delta(n: number | undefined): number {
 
 function applyRiderPatch(rider: CardRider, patch: CardRiderUpgrade): void {
     for (const key of Object.keys(patch) as (keyof CardRiderUpgrade)[]) {
-        if (key === 'applyEffect' || key === 'glyphChargeFallback') continue;
+        if (key === 'applyEffect') continue;
         const d = delta(patch[key] as number | undefined);
         if (d === 0) continue;
         const f = key as UpgradableRiderField;
@@ -387,9 +386,6 @@ function applyRiderPatch(rider: CardRider, patch: CardRiderUpgrade): void {
         const dd = delta(patch.applyEffect.duration);
         if (di) ae.intensity = capIntensity((ae.intensity ?? 1) + di);
         if (dd && ae.duration !== undefined) ae.duration = ae.duration + dd;
-    }
-    if (patch.glyphChargeFallback && rider.glyphChargeFallback) {
-        applyRiderPatch(rider.glyphChargeFallback, patch.glyphChargeFallback);
     }
 }
 

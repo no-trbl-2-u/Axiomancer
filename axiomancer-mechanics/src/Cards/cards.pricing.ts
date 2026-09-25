@@ -15,7 +15,6 @@
  */
 
 import type { Card, CardRider, CardSpecialMechanic } from './types';
-import type { GlyphPayload } from '../Combat/combat.encounter.types';
 import { lookupEffect } from '../Effects/effects.library';
 import { dotEventTrigger } from '../Combat/effect-modifiers';
 import { EXPECTED_TRIGGERS_PER_ROUND } from '../Combat/effects';
@@ -200,12 +199,6 @@ export const VERB_POINTS = Object.freeze({
     /** MILL, per card moved deck→discard (phase 30 FREE-currency rider —
      *  Echo's "advance the loop"; weaker than draw, no card-advantage). */
     millPerCard: 1,
-    /** GLYPH CHARGE, per charge deposited (phase 33d pilot FREE-currency
-     *  rider — priced like the `millPerCard`/`pip`-family small deposits;
-     *  the fallback deposit it falls back to when no glyph exists is
-     *  unscored here, matching the "one line fires" convention every other
-     *  fallback verb follows). */
-    glyphChargePerCharge: 0.4,
     // ── THE BIG NUMBERS REWRITE (2026-09-02) — direct damage and its family ──
     // Anchored against HEAL (1/3 per HP): removing an HP from the foe is worth
     // roughly what restoring one to yourself is, and both are cheaper per point
@@ -248,12 +241,6 @@ export const CONDITION_DISCOUNTS = Object.freeze({
     /** Theme-state gates (FALLEN). */
     fallen: 0.5,
 });
-
-/** Phase 33d (GLYPHS pilot) — a glyph's expected crack value discounts like
- *  `dieBonus`: it fires LATER, not guaranteed at print time (the ripening
- *  dilemma — "never cracked" is a real, printable outcome), so it prices
- *  the same way a die-bonus rider does rather than at full face value. */
-export const GLYPH_CRACK_DISCOUNT = 0.6;
 
 /** Self-cost credit: a printed cost refunds −0.75 × its point value. */
 export const SELF_COST_CREDIT = 0.75;
@@ -425,21 +412,6 @@ export function statusPoints(effectId: string, intensity?: number, duration?: nu
     return VERB_POINTS.statusPerIntensityTurn * i * d;
 }
 
-/**
- * Phase 33d (GLYPHS pilot) — expected points for a glyph's crack payload, at
- * a "reasonable" crack timing (`cap / 2` charges — cracking early is a real,
- * common line per the design's own ripening dilemma, NOT the max/full-cap
- * charges). Scored through the SAME verb-points table as any other status/
- * barrier rider — poison via `statusPoints` (a DoT, tempo-weighted like every
- * other one), barrier via the flat `barrierPerHp` rate.
- */
-export function glyphExpectedValue(glyph: { payload: GlyphPayload; cap: number }): number {
-    const expectedCharges = glyph.cap / 2;
-    return glyph.payload.kind === 'poison'
-        ? statusPoints('debuff_poison', glyph.payload.baseIntensity + expectedCharges, glyph.payload.duration)
-        : (glyph.payload.baseAmount + expectedCharges) * VERB_POINTS.barrierPerHp;
-}
-
 // ─── Rider pricing ───────────────────────────────────────────────────────────
 
 /** Points for a `CardRider` bundle (FREE lines and condition riders alike). */
@@ -477,10 +449,6 @@ export function scoreRider(rider: CardRider | undefined): number {
     pts += (rider.barrier ?? 0) * VERB_POINTS.barrierPerHp;
     if (rider.recoil) pts += -(rider.recoil * VERB_POINTS.healPerHp) * SELF_COST_CREDIT;
     pts += (rider.millCards ?? 0) * VERB_POINTS.millPerCard;
-    // Phase 33d (GLYPHS pilot) — the fallback rider itself is unscored here
-    // (exactly one of glyphCharge-succeeds / glyphChargeFallback fires per
-    // play; `glyphChargePerCharge` already represents the FREE line's value).
-    pts += (rider.glyphCharge ?? 0) * VERB_POINTS.glyphChargePerCharge;
     // THE BIG NUMBERS REWRITE — the damage family on a rider (FREE lines and
     // condition payoffs), priced identically to the mechanic form.
     pts += (rider.damage ?? 0) * VERB_POINTS.damagePerHp;
@@ -685,10 +653,6 @@ export function scoreCard(card: Card): number {
     if (card.synergy?.statePredicate && card.synergy.rider) {
         pts += scoreRider(card.synergy.rider) * CONDITION_DISCOUNTS.threshold;
     }
-    // Phase 33d (GLYPHS pilot) — the PAID-line inscribe: its own scoring
-    // branch (not a state-gated rider), discounted like a die-bonus (fires
-    // later, not guaranteed at print time).
-    if (card.glyph) pts += glyphExpectedValue(card.glyph) * GLYPH_CRACK_DISCOUNT;
 
     return pts;
 }

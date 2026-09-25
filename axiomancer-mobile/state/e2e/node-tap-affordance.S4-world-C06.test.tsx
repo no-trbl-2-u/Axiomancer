@@ -34,7 +34,6 @@ jest.mock('@/lib/platform/router', () => {
     };
 });
 
-import { AestheticModeProvider } from '@/state/aesthetic-mode';
 import { CombatModeProvider } from '@/state/combat-mode';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
 import { createAppStore, type AppStore } from '@/state/store';
@@ -57,13 +56,11 @@ function makeStore(): AppStore {
 
 function mountExploration(store: AppStore) {
     const tree = render(
-        <AestheticModeProvider skipHydration>
-            <CombatModeProvider>
-                <GameStoreProvider store={store}>
-                    <ExplorationScreen />
-                </GameStoreProvider>
-            </CombatModeProvider>
-        </AestheticModeProvider>,
+        <CombatModeProvider>
+            <GameStoreProvider store={store}>
+                <ExplorationScreen />
+            </GameStoreProvider>
+        </CombatModeProvider>,
     );
     // The start-node arrival is deferred a tick (see the screen's own
     // comment); advance by one so the map settles, not `runAllTimers()` —

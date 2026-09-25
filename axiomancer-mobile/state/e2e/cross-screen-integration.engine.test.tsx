@@ -58,7 +58,6 @@ jest.mock('@/lib/platform/router', () => {
 });
 
 import { Tabs } from '@/lib/platform/router';
-import { AestheticModeProvider } from '@/state/aesthetic-mode';
 import { CombatModeProvider } from '@/state/combat-mode';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
 import { createAppStore, EMPTY_EVENT_SLICE, type AppStore } from '@/state/store';
@@ -104,11 +103,9 @@ const ENCOUNTER_EVENT: ResolveMapEventResult = {
 
 function withProviders(store: AppStore, tree: React.ReactNode) {
     return (
-        <AestheticModeProvider skipHydration>
-            <CombatModeProvider>
-                <GameStoreProvider store={store}>{tree}</GameStoreProvider>
-            </CombatModeProvider>
-        </AestheticModeProvider>
+        <CombatModeProvider>
+            <GameStoreProvider store={store}>{tree}</GameStoreProvider>
+        </CombatModeProvider>
     );
 }
 

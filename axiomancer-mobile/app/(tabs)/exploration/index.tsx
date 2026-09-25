@@ -5,7 +5,6 @@ import { makeStyles } from '@/theme/runtime';
 import { ScreenBg } from '@/components/ScreenBg';
 import { StatusCard } from '@/components/StatusCard';
 import { SectionLabel } from '@/components/SectionLabel';
-import { ExplorationCodexHeader } from '@/components/ExplorationCodexHeader';
 import { MapCanvas } from '@/components/exploration/MapCanvas';
 import { mapBackdropFor } from '@/assets/images/maps';
 import { NodeGrid } from '@/components/exploration/NodeGrid';
@@ -13,9 +12,7 @@ import { NodeConfirmPanel } from '@/components/exploration/NodeConfirmPanel';
 import { EventBadge } from '@/components/exploration/EventBadge';
 import { NodeToast } from '@/components/exploration/NodeToast';
 import { MapOverlays } from '@/components/exploration/MapOverlays';
-import { useAesthetic } from '@/state/aesthetic-mode';
 import { useCombatMode } from '@/state/combat-mode';
-import { selectExplorationCodexHeader } from '@/state/presenters/exploration.codex.engine';
 import { useGameActions, useGameState, useGameStore } from '@/state/GameStoreProvider';
 import {
     selectExplorationViewModel,
@@ -41,7 +38,6 @@ export default function ExplorationScreen() {
         lastOutcome,
         recordDeepestNode,
     } = useCombatMode();
-    const { mode: aesthetic } = useAesthetic();
     const [nodeTip, setNodeTip] = useState<string | null>(null);
     const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
     // First-visit hint: shown once on mount, auto-dismissed after 5s or on first node tap.
@@ -294,11 +290,6 @@ export default function ExplorationScreen() {
               * while the modal owns the screen, matching the "full-screen"
               * design intent instead of wiring a new cross-boundary read. */}
             {!showEncounterModal && <StatusCard />}
-
-            {aesthetic === 'codex' && (() => {
-                const { left, right } = selectExplorationCodexHeader(vm);
-                return <ExplorationCodexHeader left={left} right={right} />;
-            })()}
 
             {/* Region Header */}
             <View style={styles.regionHeader}>

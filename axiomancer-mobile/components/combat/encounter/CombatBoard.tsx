@@ -45,7 +45,7 @@ import { makeStyles, usePalette } from '@/theme/runtime';
 import type {
     CombatViewModel, CombatCardVM, CombatDieVM,
     CombatSignatureVM, CombatEffectChipVM, CombatPerorationVM,
-    CombatMomentumV2VM, CombatStanceChipVM, CombatSealVM, CombatAddVM,
+    CombatMomentumV2VM, CombatStanceChipVM, CombatAddVM,
 } from '@/state/presenters/combat-encounter.engine';
 import { armedReadValue, dieCanPowerCardVM, STANCE_COLORS } from '@/state/presenters/combat-encounter.engine';
 // D4 (2026-09-21) — the ONE mobile source for the rarity band. The face never
@@ -53,7 +53,7 @@ import { armedReadValue, dieCanPowerCardVM, STANCE_COLORS } from '@/state/presen
 import { rarityFor, RARITY_LABEL, RARITY_PIPS, RARITY_COLOR } from '@/state/presenters/card-rarity.engine';
 import { TrashGlyph, LedgerMark } from '@/components/hazard/glyphs';
 import { glyphShapeFor } from '@/components/combat/glyphShapes';
-import { CombatCombatantPane, EffectChips, SealChips, PlayerMedallion, COMBAT_HUD_HEIGHT, PLAYER_DOCK_FOOTPRINT_W, type CombatFx } from './CombatCombatantPane';
+import { CombatCombatantPane, EffectChips, PlayerMedallion, COMBAT_HUD_HEIGHT, PLAYER_DOCK_FOOTPRINT_W, type CombatFx } from './CombatCombatantPane';
 import { CombatDie } from './CombatDie';
 import { RollingDie } from './RollingDie';
 import { useReducedMotion } from '@/hooks/useReducedMotion';
@@ -867,12 +867,8 @@ export interface CombatBoardProps {
     resolving?: boolean;
     onInspect: (card: CombatCardVM) => void;
     onChip?: (e: CombatEffectChipVM) => void;
-    /** Tap a Seal chip (Phase 50) → the CRACK/WAIT confirm sheet. */
-    onSeal?: (s: CombatSealVM) => void;
-    /** Tap an add chip (Phase 102, SUMMON) → the STRIKE/WAIT confirm sheet.
-     *  Same shape as `onSeal` deliberately: both are dieless board actions
-     *  taken outside the card economy, so they should feel like one gesture
-     *  the player learns once. */
+    /** Tap an add chip (Phase 102, SUMMON) → the STRIKE/WAIT confirm sheet:
+     *  a dieless board action taken outside the card economy. */
     onAdd?: (a: CombatAddVM) => void;
     /** Long-press (or tap while unaffordable) on a signature rune → info popup. */
     onSignatureInfo?: (s: CombatSignatureVM) => void;
@@ -905,7 +901,7 @@ export interface CombatBoardProps {
 }
 
 export const CombatBoard = React.memo(function CombatBoard({
-    vm, drag, stagedUids, onApply, onStage, onUnstage, onDiscard, onSignature, onEndPhase, resolving = false, onInspect, onChip, onSeal, onAdd, onSignatureInfo, onPlayerInspect, onMomentumInfo, fx,
+    vm, drag, stagedUids, onApply, onStage, onUnstage, onDiscard, onSignature, onEndPhase, resolving = false, onInspect, onChip, onAdd, onSignatureInfo, onPlayerInspect, onMomentumInfo, fx,
     onReprisalNeeded, onHudLayout, region,
 }: CombatBoardProps) {
     const AXM = usePalette();
@@ -1426,7 +1422,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                     hand's gesture area swallowed the taps) so every tile stays tappable.
                     RIGHT-aligned (owner playtest 2026-07-18): the left edge belongs to
                     the signature-rune column, which was hiding these tiles. */}
-                {(vm.player.effects.length > 0 || vm.player.guard > 0 || vm.player.seals.length > 0
+                {(vm.player.effects.length > 0 || vm.player.guard > 0
                     || vm.player.wrathVisible || vm.player.chainVisible || vm.player.twinArmed) && (
                     <View style={styles.statusStrip} pointerEvents="box-none">
                         {vm.player.guard > 0 ? <Text style={styles.guardChip} testID="combat-guard">🛡 {vm.player.guard}</Text> : null}
@@ -1451,9 +1447,6 @@ export const CombatBoard = React.memo(function CombatBoard({
                             </Text>
                         ) : null}
                         <EffectChips effects={vm.player.effects} onChip={onChip} align="flex-end" />
-                        {/* Phase 50 — Seal chips (Phase 33d's state.glyphs, renamed "Seal" per
-                            Phase 49 decision 3), merged into this row per Phase 49 decision 1. */}
-                        <SealChips seals={vm.player.seals} onSeal={onSeal} />
                     </View>
                 )}
 

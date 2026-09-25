@@ -41,7 +41,6 @@ import {
     type Card, type CardCombatEffects, type EnemyDifficulty,
     type UpgradeableDieGear,
     type WheelStance,
-    type GlyphInstance, type GlyphPayload,
     // Phase 102 (SUMMON) — the brood. `STRIKE_ADD_COST` is imported rather than
     // restated: a price the UI hardcodes is a price that drifts from the engine
     // that charges it, and the confirm sheet quotes this number to the player.
@@ -110,18 +109,13 @@ const BEFRIEND_COLOR = '#5bbf6a';
 const INERT_COLOR = '#6b6257';
 const ENCHANT_COLOR = '#7fb3a6';
 
-// Phase 50 — Seal chips (Phase 33d's `state.glyphs`, renamed "Seal" for
-// UI-facing copy per Phase 49 decision 3, never "glyph" — that name is
-// already `EFFECT_GLYPHS`'s per-status icon system). A single gold accent
-// (matches `STANCE_COLORS.wild`, the existing "charged token" identity)
-// keeps a Seal from ever reading as a live status effect on the board.
-const SEAL_COLOR = '#d9b44a';
-const SEAL_GLYPHS: Record<GlyphPayload['kind'], string> = { poison: '◈', barrier: '❖' };
-const SEAL_LABELS: Record<GlyphPayload['kind'], string> = { poison: 'Poison Seal', barrier: 'Barrier Seal' };
+// A single gold accent (matches `STANCE_COLORS.wild`, the existing "charged
+// token" identity) — the Signature line in the combat log.
+const GOLD_ACCENT = '#d9b44a';
 
 // Phase 102 — SUMMON's brood. A colour of its own, deliberately NOT
 // `ENEMY_KEYWORD_COLOR` (iron grey, "a property of the thing you are hitting")
-// and NOT `SEAL_COLOR` (gold, "a charged token of yours"): an add is a live
+// and NOT `GOLD_ACCENT` (gold, "a charged token of yours"): an add is a live
 // THING ON THE BOARD that acts against you, so it borrows the threat register.
 export const ADD_COLOR = '#b4543f';
 const ADD_GLYPH = '•';
@@ -443,8 +437,8 @@ export interface CombatEnemyPaneVM {
     /** Phase 102 (SUMMON) — the foe's living brood, one chip per body. Empty
      *  for every foe that does not summon, which is all but one of them, so
      *  this row simply does not render in the ordinary fight. On the ENEMY
-     *  pane and not the player's: a Seal is a token of YOURS that you spend,
-     *  an add is a body of THEIRS that you remove. */
+     *  pane and not the player's: an add is a body of THEIRS that you
+     *  remove. */
     adds: CombatAddVM[];
     /** What one `strikeAdd` costs in Conviction, and whether the player can
      *  pay it right now. Forwarded from the engine constant rather than
@@ -475,26 +469,8 @@ export interface CombatAddVM {
     cost: number;
     affordable: boolean;
 }
-/** Phase 50 — a renderable "Seal" (Phase 33d's `GlyphInstance`, engine name
- *  unchanged, UI-facing label renamed per Phase 49 decision 3). `crackValue`/
- *  `previewText` mirror `crackGlyph`'s own payload formula (`baseIntensity`/
- *  `baseAmount` + `charges`) so the confirm sheet never lies about what a
- *  tap will actually do (WI-2 acceptance criterion 4 — "the foretold next
- *  crack value"). */
-export interface CombatSealVM {
-    id: string;
-    kind: GlyphPayload['kind'];
-    glyph: string;
-    color: string;
-    label: string;
-    charges: number;
-    cap: number;
-    crackValue: number;
-    previewText: string;
-}
 export interface CombatPlayerPaneVM {
     name: string; hp: number; maxHp: number; hpPct: number; guard: number; effects: CombatEffectChipVM[];
-    seals: CombatSealVM[];
     /** THE BIG NUMBERS REWRITE — the damage-scaler ledgers, surfaced on the
      *  same terms as the alt-win meters (a value, or a deck that feeds one).
      *  WRATH is combat-long and never fades; CHAIN loads the NEXT hit and
@@ -1058,7 +1034,6 @@ function enemyActionLines(effects: readonly CombatThreatEffect[]): EnemyActionLi
         if (e.enemyCleanse && e.enemyCleanse > 0) lines.push({ text: `SHEDS ${e.enemyCleanse}`, color: INTENT_ICONS.buff.color, source: 'telegraph' });
         if (e.swayCleanse && e.swayCleanse > 0) lines.push({ text: `−${e.swayCleanse} PLEA`, color: INTENT_ICONS.debuff.color, source: 'telegraph' });
         if (e.premiseShed && e.premiseShed > 0) lines.push({ text: `−${e.premiseShed} PREMISE`, color: INTENT_ICONS.debuff.color, source: 'telegraph' });
-        if (e.glyphShatter) lines.push({ text: 'SHATTERS A GLYPH', color: INTENT_ICONS.debuff.color, source: 'telegraph' });
         if (e.curseCardId) lines.push({ text: 'CURSES YOUR DECK', color: INTENT_ICONS.debuff.color, source: 'telegraph' });
     }
     return lines;
@@ -1442,7 +1417,7 @@ export function selectCombatLogHistory(state: CombatEncounterState): CombatLogHi
                 break;
             }
             case 'signature-cast':
-                push('player', SEAL_COLOR, `${e.name} — Signature, ◆${e.cost}.`);
+                push('player', GOLD_ACCENT, `${e.name} — Signature, ◆${e.cost}.`);
                 break;
             case 'barrier-absorbed':
                 push('player', GUARD_COLOR, `Barrier absorbs ${e.amount}.`);
@@ -1575,20 +1550,6 @@ function enemyPane(state: CombatEncounterState): CombatEnemyPaneVM {
     };
 }
 
-/** Phase 50 — maps one engine `GlyphInstance` to its renderable Seal chip. */
-function sealVM(g: GlyphInstance): CombatSealVM {
-    const kind = g.payload.kind;
-    const crackValue = kind === 'poison' ? g.payload.baseIntensity + g.charges : g.payload.baseAmount + g.charges;
-    const previewText = kind === 'poison' ? `Poison ${crackValue}, ${g.payload.duration} rounds` : `Barrier ${crackValue}`;
-    return {
-        id: g.id, kind, glyph: SEAL_GLYPHS[kind], color: SEAL_COLOR, label: SEAL_LABELS[kind],
-        charges: g.charges, cap: g.cap, crackValue, previewText,
-    };
-}
-function sealsVM(glyphs: GlyphInstance[] | undefined): CombatSealVM[] {
-    return (glyphs ?? []).map(sealVM);
-}
-
 /**
  * Phase 102 — maps the engine's brood to renderable chips.
  *
@@ -1622,7 +1583,6 @@ function playerPane(state: CombatEncounterState): CombatPlayerPaneVM {
             ...chips(p.effects),
             ...standingChips(state.persistentZone ?? [], state.tempZone ?? [], 'enchant'),
         ],
-        seals: sealsVM(state.glyphs),
         wrath, wrathVisible: wrath > 0 || deckFeedsMechanic(state, ['wrath']),
         chain, chainVisible: chain > 0 || deckFeedsMechanic(state, ['chain']),
         twinArmed: state.twinArmed === true,

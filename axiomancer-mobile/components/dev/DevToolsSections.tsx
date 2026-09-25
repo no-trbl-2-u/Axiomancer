@@ -62,7 +62,6 @@ const DebugRewardTriggers = lazyNamed(() => import('@/components/DebugRewardTrig
 const DebugDialogueJump = lazyNamed(() => import('@/components/DebugDialogueJump'), 'DebugDialogueJump');
 const DebugQuestState = lazyNamed(() => import('@/components/DebugQuestState'), 'DebugQuestState');
 // ── UI ──
-const AestheticDevToggle = lazyNamed(() => import('@/components/AestheticDevToggle'), 'AestheticDevToggle');
 // ── RUN & DIAGNOSTICS ──
 const DebugRunControls = lazyNamed(() => import('@/components/DebugRunControls'), 'DebugRunControls');
 const DebugLogViewer = lazyNamed(() => import('@/components/DebugLogViewer'), 'DebugLogViewer');
@@ -138,10 +137,6 @@ export function DevToolsSections() {
                 <DevSection label="STORY" hint="real NPC trees · real quests" testID="dev-section-story">
                     <DebugDialogueJump />
                     <DebugQuestState />
-                </DevSection>
-
-                <DevSection label="UI" hint="aesthetic" testID="dev-section-ui">
-                    <AestheticDevToggle />
                 </DevSection>
 
                 <DevSection label="RUN & DIAGNOSTICS" hint="save · reset · galleries · log" testID="dev-section-run">

@@ -36,7 +36,6 @@ jest.mock('@/lib/platform/router', () => {
     };
 });
 
-import { AestheticModeProvider } from '@/state/aesthetic-mode';
 import { CombatModeProvider } from '@/state/combat-mode';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
 import { createAppStore, EMPTY_EVENT_SLICE, type AppStore } from '@/state/store';
@@ -61,13 +60,11 @@ function makeStore(): AppStore {
 
 function mountExploration(store: AppStore) {
     const tree = render(
-        <AestheticModeProvider skipHydration>
-            <CombatModeProvider>
-                <GameStoreProvider store={store}>
-                    <ExplorationScreen />
-                </GameStoreProvider>
-            </CombatModeProvider>
-        </AestheticModeProvider>,
+        <CombatModeProvider>
+            <GameStoreProvider store={store}>
+                <ExplorationScreen />
+            </GameStoreProvider>
+        </CombatModeProvider>,
     );
     // The arrival is deliberately deferred a tick so a caller that navigates
     // here and opens its own session in the same handler wins the race — see
@@ -133,13 +130,11 @@ describe('start-node arrival: the map resolves the node it puts you on', () => {
         const actions = createAppActions(store);
 
         render(
-            <AestheticModeProvider skipHydration>
-                <CombatModeProvider>
-                    <GameStoreProvider store={store}>
-                        <ExplorationScreen />
-                    </GameStoreProvider>
-                </CombatModeProvider>
-            </AestheticModeProvider>,
+            <CombatModeProvider>
+                <GameStoreProvider store={store}>
+                    <ExplorationScreen />
+                </GameStoreProvider>
+            </CombatModeProvider>,
         );
         // Mounted, decision still pending — now the caller opens its session.
         act(() => { actions.beginLootCacheChoice({ tier: 'modest', currency: 25 }); });

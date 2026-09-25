@@ -1,5 +1,8 @@
 # GLYPHS crackAt A/B — 2026-08-23: sim policy heuristic evidence pass
 
+> **Status:** HISTORICAL — archived 2026-09-25 (trim T5). The GLYPHS pilot,
+> its sandbox set and the `crackAt` sim heuristic were cut (decision D8).
+
 Working agent: card-expert (`/ship-a-phase`, Phase 51,
 `plan/archive/2026-09-25-trim-t4/plan/phases/phase_51_crackat_policy_and_ab_court.md`). Mandate: give the sim
 bots a `crackAt` charge-threshold heuristic so they can play the "ripening

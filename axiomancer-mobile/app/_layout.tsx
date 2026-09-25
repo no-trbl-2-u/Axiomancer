@@ -7,7 +7,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 import { StatusBar } from '@/lib/platform/status-bar';
 import { TooltipProvider } from '@/components/tooltip/TooltipProvider';
-import { AestheticModeProvider } from '@/state/aesthetic-mode';
 import { CombatModeProvider } from '@/state/combat-mode';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
 import { FontProvider } from '@/hooks/useFontFallbacks';
@@ -231,147 +230,145 @@ function RootLayout() {
             user-jot 2026-05-22 oversight 29th). */}
         <ErrorBoundary>
           <FontProvider secondaryLoaded={secondaryFontsLoaded}>
-          <AestheticModeProvider>
           <CombatModeProvider>
           <TooltipProvider>
             {/* PLAYTEST_BUGS_2026-09-18 BUG-02: a returning player's very
-                first paint is `<Redirect href="/exploration">` (no title
-                screen to click through), which could fire BEFORE this
-                container attached. `dispatchTo` dropped it silently and
-                `Redirect`'s effect — keyed only on `[href]` — could never
-                re-run, so the app sat on a blank screen forever. The router
-                now queues that request; `onReady` is where it gets replayed. */}
+            first paint is `<Redirect href="/exploration">` (no title
+            screen to click through), which could fire BEFORE this
+            container attached. `dispatchTo` dropped it silently and
+            `Redirect`'s effect — keyed only on `[href]` — could never
+            re-run, so the app sat on a blank screen forever. The router
+            now queues that request; `onReady` is where it gets replayed. */}
             <NavigationContainer
-              ref={navigationRef}
-              linking={linking}
-              onReady={flushPendingNavigation}
+          ref={navigationRef}
+          linking={linking}
+          onReady={flushPendingNavigation}
             >
-              <StatusBar barStyle="light-content" />
-              <HardwareBackHandler />
-              <NavLogger />
-              <EventGate />
-              <HazardGate />
-              <RestGate />
-              <CacheGate />
-              <ItemRewardGate />
-              <BlacksmithGate />
-              <ToastHost />
-              {/* PLAYTEST_BUGS_2026-09-18 BUG-03: the app had no save-on-exit
-                  of any kind, and the adapter's 500ms write debounce could eat
-                  even a legitimate checkpoint if the player closed inside it.
-                  This takes a final save and flushes it on background/pagehide. */}
-              <SaveOnExit adapter={storeAdapter} />
-              <FixtureBoot />
-              {/* `initialRouteName="index"`: every launch begins at the title
-                  and its menu (owner call 2026-09-23). Without it the native
-                  stack would open on the first registered screen — the tabs
-                  — and skip the title on a phone while web (URL `/`) showed
-                  it. The former dev-only auto-seed (`DevAutoSeed`) is gone
-                  with the same call: a new game starts with nothing, in dev
-                  builds too; the `/dev` route still seeds on demand. */}
-              <Stack initialRouteName="index" screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="index" component={IndexScreen} options={{ headerShown: false }} />
-                <Stack.Screen name="(tabs)" component={TabLayout} options={{ headerShown: false }} />
-                <Stack.Screen
-                  name="saves/index"
-                  component={SaveSlotsScreen}
-                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
-                />
-                <Stack.Screen
-                  name="settings/index"
-                  component={SettingsScreen}
-                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
-                />
-                <Stack.Screen
-                  name="event/index"
-                  component={EventScreen}
-                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
-                />
-                <Stack.Screen
-                  name="hazard/index"
-                  component={HazardScreen}
-                  options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
-                />
-                <Stack.Screen
-                  name="combat-encounter/index"
-                  component={CombatEncounterScreen}
-                  options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
-                />
-                <Stack.Screen
-                  name="hazard-deck/index"
-                  component={HazardDeckScreen}
-                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
-                />
-                {/* D7 — the ONE reward screen that is dismissible on purpose.
-                    No `gestureEnabled: false` and no <HardwareBackHandler>: the
-                    item is already the player's and every exit commits it as
-                    CONFIRM (see `app/item-reward/index.tsx`). Do not "fix" this
-                    to match the hazard/cache/rest screens beside it. */}
-                <Stack.Screen
-                  name="item-reward/index"
-                  component={ItemRewardScreen}
-                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
-                />
-                <Stack.Screen
-                  name="rest/index"
-                  component={RestScreen}
-                  options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
-                />
-                <Stack.Screen
-                  name="cache/index"
-                  component={CacheScreen}
-                  options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
-                />
-                <Stack.Screen
-                  name="blacksmith/index"
-                  component={BlacksmithScreen}
-                  options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
-                />
-                <Stack.Screen
-                  name="village/index"
-                  component={VillageScreen}
-                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
-                />
-                <Stack.Screen
-                  name="dialogue/index"
-                  component={DialogueScreen}
-                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
-                />
-                <Stack.Screen
-                  name="cutscene/index"
-                  component={CutsceneScreen}
-                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
-                />
-                <Stack.Screen
-                  name="dev/index"
-                  component={DevToolsScreen}
-                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
-                />
-                <Stack.Screen
-                  name="labyrinth/index"
-                  component={LabyrinthScreen}
-                  options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
-                />
-                <Stack.Screen
-                  name="devart/index"
-                  component={DevArtGallery}
-                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
-                />
-                <Stack.Screen
-                  name="devart/rooms"
-                  component={DevRoomGallery}
-                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
-                />
-                <Stack.Screen
-                  name="devaftermath/index"
-                  component={DevAftermathPanel}
-                  options={{ headerShown: false, presentation: 'fullScreenModal' }}
-                />
-              </Stack>
+          <StatusBar barStyle="light-content" />
+          <HardwareBackHandler />
+          <NavLogger />
+          <EventGate />
+          <HazardGate />
+          <RestGate />
+          <CacheGate />
+          <ItemRewardGate />
+          <BlacksmithGate />
+          <ToastHost />
+          {/* PLAYTEST_BUGS_2026-09-18 BUG-03: the app had no save-on-exit
+              of any kind, and the adapter's 500ms write debounce could eat
+              even a legitimate checkpoint if the player closed inside it.
+              This takes a final save and flushes it on background/pagehide. */}
+          <SaveOnExit adapter={storeAdapter} />
+          <FixtureBoot />
+          {/* `initialRouteName="index"`: every launch begins at the title
+              and its menu (owner call 2026-09-23). Without it the native
+              stack would open on the first registered screen — the tabs
+              — and skip the title on a phone while web (URL `/`) showed
+              it. The former dev-only auto-seed (`DevAutoSeed`) is gone
+              with the same call: a new game starts with nothing, in dev
+              builds too; the `/dev` route still seeds on demand. */}
+          <Stack initialRouteName="index" screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="index" component={IndexScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="(tabs)" component={TabLayout} options={{ headerShown: false }} />
+            <Stack.Screen
+              name="saves/index"
+              component={SaveSlotsScreen}
+              options={{ headerShown: false, presentation: 'fullScreenModal' }}
+            />
+            <Stack.Screen
+              name="settings/index"
+              component={SettingsScreen}
+              options={{ headerShown: false, presentation: 'fullScreenModal' }}
+            />
+            <Stack.Screen
+              name="event/index"
+              component={EventScreen}
+              options={{ headerShown: false, presentation: 'fullScreenModal' }}
+            />
+            <Stack.Screen
+              name="hazard/index"
+              component={HazardScreen}
+              options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="combat-encounter/index"
+              component={CombatEncounterScreen}
+              options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="hazard-deck/index"
+              component={HazardDeckScreen}
+              options={{ headerShown: false, presentation: 'fullScreenModal' }}
+            />
+            {/* D7 — the ONE reward screen that is dismissible on purpose.
+                No `gestureEnabled: false` and no <HardwareBackHandler>: the
+                item is already the player's and every exit commits it as
+                CONFIRM (see `app/item-reward/index.tsx`). Do not "fix" this
+                to match the hazard/cache/rest screens beside it. */}
+            <Stack.Screen
+              name="item-reward/index"
+              component={ItemRewardScreen}
+              options={{ headerShown: false, presentation: 'fullScreenModal' }}
+            />
+            <Stack.Screen
+              name="rest/index"
+              component={RestScreen}
+              options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="cache/index"
+              component={CacheScreen}
+              options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="blacksmith/index"
+              component={BlacksmithScreen}
+              options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="village/index"
+              component={VillageScreen}
+              options={{ headerShown: false, presentation: 'fullScreenModal' }}
+            />
+            <Stack.Screen
+              name="dialogue/index"
+              component={DialogueScreen}
+              options={{ headerShown: false, presentation: 'fullScreenModal' }}
+            />
+            <Stack.Screen
+              name="cutscene/index"
+              component={CutsceneScreen}
+              options={{ headerShown: false, presentation: 'fullScreenModal' }}
+            />
+            <Stack.Screen
+              name="dev/index"
+              component={DevToolsScreen}
+              options={{ headerShown: false, presentation: 'fullScreenModal' }}
+            />
+            <Stack.Screen
+              name="labyrinth/index"
+              component={LabyrinthScreen}
+              options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }}
+            />
+            <Stack.Screen
+              name="devart/index"
+              component={DevArtGallery}
+              options={{ headerShown: false, presentation: 'fullScreenModal' }}
+            />
+            <Stack.Screen
+              name="devart/rooms"
+              component={DevRoomGallery}
+              options={{ headerShown: false, presentation: 'fullScreenModal' }}
+            />
+            <Stack.Screen
+              name="devaftermath/index"
+              component={DevAftermathPanel}
+              options={{ headerShown: false, presentation: 'fullScreenModal' }}
+            />
+          </Stack>
             </NavigationContainer>
           </TooltipProvider>
           </CombatModeProvider>
-          </AestheticModeProvider>
           </FontProvider>
         </ErrorBoundary>
         </SettingsProvider>

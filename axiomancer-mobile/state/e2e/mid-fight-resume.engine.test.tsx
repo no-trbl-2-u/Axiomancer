@@ -16,7 +16,6 @@ jest.mock('@/lib/platform/router', () => ({
     useRouter: () => ({ replace: jest.fn(), push: jest.fn(), back: jest.fn(), canGoBack: () => false }),
 }));
 
-import { AestheticModeProvider } from '@/state/aesthetic-mode';
 import { CombatModeProvider } from '@/state/combat-mode';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
 import { createAppStore, type AppStore } from '@/state/store';
@@ -51,13 +50,11 @@ function makeStore(): AppStore {
 
 function mountExploration(store: AppStore) {
     const tree = render(
-        <AestheticModeProvider skipHydration>
-            <CombatModeProvider>
-                <GameStoreProvider store={store}>
-                    <ExplorationScreen />
-                </GameStoreProvider>
-            </CombatModeProvider>
-        </AestheticModeProvider>,
+        <CombatModeProvider>
+            <GameStoreProvider store={store}>
+                <ExplorationScreen />
+            </GameStoreProvider>
+        </CombatModeProvider>,
     );
     act(() => { jest.advanceTimersByTime(1); });
     return tree;

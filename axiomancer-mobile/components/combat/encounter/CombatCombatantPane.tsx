@@ -36,7 +36,7 @@ import { arenaAltTextFor, arenaBackdropFor } from '@/assets/images/combat';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import type {
-    CombatEnemyPaneVM, CombatPlayerPaneVM, CombatEffectChipVM, CombatSealVM, CombatAddVM,
+    CombatEnemyPaneVM, CombatPlayerPaneVM, CombatEffectChipVM, CombatAddVM,
 } from '@/state/presenters/combat-encounter.engine';
 import { ADD_COLOR, selectCombatLogLines } from '@/state/presenters/combat-encounter.engine';
 import { getCardById, type CombatEvent } from '@mechanics';
@@ -265,52 +265,14 @@ export function EffectChips({ effects, onChip, align = 'flex-start' }: {
     );
 }
 
-// ── Seal chips (Phase 50 — Phase 33d's `state.glyphs`, renamed "Seal" for
-//    UI-facing copy per Phase 49 decision 3) ───────────────────────────────
-
-/** Same chip shell as `EffectChips` (Phase 49 decision 1 — merge into the
- *  existing statusStrip row, no new in-flow row) but a charges/cap fraction
- *  badge instead of the intensity/duration pair (Seals have no duration; a
- *  Seal is always tappable — `crackGlyph` has no minimum-charge gate — so
- *  every chip opens the confirm sheet, no locked/ready state to render). */
-export function SealChips({ seals, onSeal }: {
-    seals: CombatSealVM[];
-    onSeal?: (s: CombatSealVM) => void;
-}) {
-    const styles = useStyles();
-    if (seals.length === 0) return null;
-    return (
-        <View style={styles.chipRow} pointerEvents="box-none">
-            {seals.map((s) => (
-                <Pressable
-                    key={s.id}
-                    onPress={() => onSeal?.(s)}
-                    style={[styles.chip, { borderColor: s.color }]}
-                    hitSlop={6}
-                    testID={`combat-seal-${s.id}`}
-                    accessibilityRole="button"
-                    accessibilityLabel={`${s.label}, ${s.charges} of ${s.cap} charges. Tap to crack now for ${s.previewText}.`}
-                >
-                    <View style={[StyleSheet.absoluteFill, { backgroundColor: s.color, opacity: 0.16 }]} />
-                    <Text style={[styles.chipGlyph, { color: s.color, textShadowColor: s.color }]}>{s.glyph}</Text>
-                    <View style={styles.chipBadge}>
-                        <Text style={styles.chipBadgeText} allowFontScaling={false}>{s.charges}/{s.cap}</Text>
-                    </View>
-                </Pressable>
-            ))}
-        </View>
-    );
-}
-
 // ── Add chips (Phase 102 — SUMMON's brood) ──────────────────────────────────
 
 /**
  * One chip per living add, on the ENEMY side of the board.
  *
- * ## Why not a Seal chip, and why not a status chip
+ * ## Why not a status chip
  *
- * `SealChips` renders tokens the player OWNS and spends; `EffectChips` renders
- * statuses and keywords, which are arithmetic rather than things. An add is
+ * `EffectChips` renders statuses and keywords, which are arithmetic rather than things. An add is
  * neither: it is a body standing on the foe's side that acts on its own every
  * phase until the player removes it. So it gets the threat-register colour, a
  * solid-dot glyph (a body, not a mark), and its own row — merging it into the

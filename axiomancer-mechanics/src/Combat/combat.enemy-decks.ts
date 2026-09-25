@@ -248,7 +248,7 @@ export const ENEMY_DECKS: Record<string, EnemyDeckSpec> = {
         tier1: ['litany-of-thresholds', 'the-door-kept-open'],
         tier2: ['the-bronze-frame', 'ap-the-margin-note'],
         tier3: ['what-shuts-stays-shut', 'ap-the-proof-completed', 'ap-the-question-that-eats'],
-    }, // Act I labyrinth boss (L8), 4 cards matching the current phase count. Escalation: 1.0 opener -> 0.9 stake wager (SECOND card, per boss law) -> 1.2 glyphShatter punish -> 1.4 spike with MARK i3 cashing 
+    }, // Act I labyrinth boss (L8), 4 cards matching the current phase count. Escalation: 1.0 opener -> 0.9 stake wager (SECOND card, per boss law) -> 1.2 MARK punish -> 1.4 spike with MARK i3 cashing 
     // BOSS — TIERED. The drawer opens (1.30/1.35), you are corrected in oak
     // and iron (1.45/1.30), the errata is read aloud and the shelf closes
     // (1.60/1.50). Act II
@@ -256,7 +256,7 @@ export const ENEMY_DECKS: Record<string, EnemyDeckSpec> = {
         tier1: ['the-drawer-opens', 'filed-under-kindling'],
         tier2: ['oak-and-iron', 'ap-the-corrected-you'],
         tier3: ['the-errata-read-aloud', 'ap-the-shelf-closes'],
-    }, // Act II labyrinth boss (L12), 4 cards matching the current phase count. Escalation: 1.0 curse-injecting opener -> 0.9 stake wager (SECOND card) -> 1.2 body glyphShatter -> 1.4 POISON i3 spike; the DoT 
+    }, // Act II labyrinth boss (L12), 4 cards matching the current phase count. Escalation: 1.0 curse-injecting opener -> 0.9 stake wager (SECOND card) -> 1.2 body BLEED spike -> 1.4 POISON i3 spike; the DoT 
     // BOSS — TIERED (5 cards → tier 3 at round 5). Your position improved and
     // a courteous concession (1.30/1.35), signed in thirds (1.45), then your
     // OPENING perfected against you and every door at once (1.60/1.55). Act III
@@ -366,7 +366,6 @@ function faceToPhase(face: EnemyCardFace): AuthoredThreatPhase {
         enemyCleanse: face.enemyCleanse,
         swayCleanse: face.swayCleanse,
         premiseShed: face.premiseShed,
-        glyphShatter: face.glyphShatter,
         curseCardId: face.curseCardId,
         actionText: face.actionText,
         stanceHint: face.stanceHint,
@@ -445,7 +444,6 @@ function cardToStep(
         enemyCleanse: card.enemyCleanse,
         swayCleanse: card.swayCleanse,
         premiseShed: card.premiseShed,
-        glyphShatter: card.glyphShatter,
         curseCardId: card.curseCardId,
         rungs: card.rungs,
         stake: stake || undefined,

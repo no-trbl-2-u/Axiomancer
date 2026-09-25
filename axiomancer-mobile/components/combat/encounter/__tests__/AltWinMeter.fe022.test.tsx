@@ -23,13 +23,13 @@ import type {
 import { withAllProviders } from '@/test-utils/withAllProviders';
 
 const PLAYER: CombatPlayerPaneVM = {
-    name: 'Pilgrim', hp: 40, maxHp: 50, hpPct: 0.8, guard: 0, effects: [], seals: [],
+    name: 'Pilgrim', hp: 40, maxHp: 50, hpPct: 0.8, guard: 0, effects: [],
     wrath: 0, wrathVisible: false, chain: 0, chainVisible: false, twinArmed: false,
 };
 
 /** A minimal enemy pane VM with every meter off; tests switch one on. */
 const BASE_ENEMY = {
-    name: 'Brine Hag', hp: 120, maxHp: 120, hpPct: 1, guard: 0, effects: [], seals: [],
+    name: 'Brine Hag', hp: 120, maxHp: 120, hpPct: 1, guard: 0, effects: [],
     intent: {
         type: 'damage', icon: '⚔', label: 'ATTACKS', color: '#e2543b',
         description: 'A telegraphed strike.', damage: 10, debuffs: false, branch: null, next: null,

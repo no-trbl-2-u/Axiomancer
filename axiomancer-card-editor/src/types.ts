@@ -73,9 +73,6 @@ export interface CardDraft {
     tags: string[];
     /** Marks a deliberate free/paid asymmetry so the symmetry lint skips it. */
     intentionallyAsymmetric?: boolean;
-    /** The face's glyph payload + cap. Round-tripped verbatim; it has no form
-     *  control yet, which is exactly why losing it on save went unnoticed. */
-    glyph?: Card['glyph'];
 }
 
 /** A fresh, valid blank card ready for the CREATE tab. */
@@ -104,7 +101,6 @@ export function blankCard(): CardDraft {
         addedIn: undefined,
         tags: [],
         intentionallyAsymmetric: undefined,
-        glyph: undefined,
     };
 }
 
@@ -134,7 +130,6 @@ export function toDraft(card: Card): CardDraft {
         addedIn: card.addedIn,
         tags: card.tags ? [...card.tags] : [],
         intentionallyAsymmetric: card.intentionallyAsymmetric,
-        glyph: card.glyph ? { ...card.glyph } : undefined,
     };
 }
 
@@ -176,7 +171,6 @@ export function fromDraft(draft: CardDraft): Card {
     if (draft.intentionallyAsymmetric != null) {
         card.intentionallyAsymmetric = draft.intentionallyAsymmetric;
     }
-    if (draft.glyph != null) card.glyph = { ...draft.glyph };
 
     return card;
 }
