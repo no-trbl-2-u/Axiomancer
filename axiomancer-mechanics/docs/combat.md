@@ -18,12 +18,12 @@ and [§Scale](#scale--the-numbers-the-big-numbers-rewrite-2026-09-02) for the li
 
 The shared combat mechanics live in:
 
-- `Combat/index.ts` — module barrel + small mechanics helpers (advantage, stats, dice, damage, health, effect queries).
+- `Combat/index.ts` — module barrel + small mechanics helpers (health, effect queries).
 - `Combat/combat.reducer.ts` — `initializeCombat`, the `CombatState` constructor shared by the card / effects / equipment engines, plus `incrementFriendship`.
 - `Combat/combat.engine.ts` — the Hazard-Pattern Combat driver (see §Hazard-Pattern Combat below).
 
-The sections that follow document the shared mechanics (stances, advantage,
-effects, procs, damage resistance, the friendship path) that both the card /
+The sections that follow document the shared mechanics (stances, the read,
+effects, the friendship path) that both the card /
 effects engines and the Hazard-Pattern driver consume.
 
 ## Type System
@@ -43,10 +43,9 @@ Heart > Body > Mind > Heart
 | Same type | **Neutral** |
 | Reverse of above | **Disadvantage** |
 
-Advantage modifier (flat roll bonus/penalty from `getAdvantageModifier()`):
-- Advantage: +2
-- Neutral: 0
-- Disadvantage: −2
+The matchup's live consequence is the read (`resolveRead`, see Spec 26 / 26b
+below): `READ_DAMAGE_MULT` 1.5 / 1.0 / 0.5 for advantage / neutral /
+disadvantage.
 
 ## Actions
 
@@ -71,94 +70,6 @@ The Combat CLI currently drives both selection phases inline rather than persist
 on `state.phase`; the reducer still exposes `setPhase(state, phase)` for consumers that
 want explicit phase tracking.
 
-## Defense Multipliers
-
-Applied to the defender's base defense stat when the `defend` action is chosen.
-The multiplier depends on the defender's type-advantage over the attacker.
-
-| Defender's Advantage | Multiplier |
-|---------------------|------------|
-| Advantage (picked the right counter-type) | 3× |
-| Neutral (same type) | 2× |
-| Disadvantage (wrong type) | 1.5× |
-| Not defending (took damage after losing attack contest) | 1× (passive) |
-
-## Tier 1 Auto-Effects
-
-> **Superseded (2026-09-23):** the stance attack/defend auto-effect loop below belongs to the removed turn-based resolver; `combat.engine.ts` does not call `applyTier1CombatEffect` / `clearTier1EffectsForStance` — live truth: src/Combat/combat.engine.ts, src/Effects/index.ts. Body kept as a historical record pending rewrite (plan/AUDIT.md).
-
-Every `attack` or `defend` action automatically applies a Tier 1 effect — no resist roll.
-Switching action types removes the previous type's self-buff immediately via `clearTier1EffectsForStance()`.
-
-| Action | Effect | Applied To |
-|--------|--------|------------|
-| Body + Attack | `tier1_body_attack` — Ad Baculum (physical attack stance) | self |
-| Body + Defend | `tier1_body_defend` — Briar Stance (thorns reflect) | self |
-| Mind + Attack | `tier1_mind_mark` — Exposed Reasoning (+1 intensity / +1 duration) | opponent |
-| Mind + Defend | `tier1_mind_mark` — Exposed Reasoning (+3 intensity / +3 duration) | opponent |
-| Heart + Attack | `tier1_heart_attack` — Fleeting Kindness (emotional pressure) | self |
-| Heart + Defend | `tier1_heart_defend` — Vital Empathy (regen) | self |
-
-## Effect-Based Combat Specials (Active)
-
-These are live engine helpers in `src/Combat/effects.ts` (no CLI inline math — the CLI just renders the events the engine emits):
-
-| Mechanic | When | What |
-|----------|------|------|
-| **Study Mark** (Mind/Attack) | Before damage roll | `getStudyMarkIntensity(enemy)` → added to damage roll as bonus |
-| **Thorns Reflect** (Body/Defend) | After any hit on the bearer | `getThornsReflect(bearer)` → sums `reflectDamage × intensity`; dealt back to attacker |
-| **Heart/Attack — strip buff** | On hit | `removeRandomBuff(enemy)` → one random enemy buff removed |
-| **Heart/Attack — extend buff** | On hit | `extendRandomBuffDuration(player, 1)` → one random player buff gets +1 duration |
-| **Heart/Attack — roll penalty** | Roll phase | −5 to the player's attack modifier |
-
-## Spec 03 — Tier 2 / Tier 3 Effect Procs
-
-> **Superseded (2026-09-23):** the proc matrix below is not read by live Hazard-Pattern combat (see the legacy note that follows) — live truth: src/Combat/combat.engine.ts, src/Combat/combat-effects.ts. Body kept as a historical record pending rewrite (plan/AUDIT.md).
-
-> **Legacy subsystem.** This basic-attack/defend proc engine is not wired into
-> live Hazard-Pattern combat (`combat.engine.ts` does not read it). Its runtime
-> functions have no live callers, and most of the effects the matrix below named
-> were retired with the 2026-07 unused-effect cleanup, so `combat-effects.library.json`
-> was reduced to the few triggers whose effects still resolve. The `ProcUnlocks` /
-> `ProcOverrides` / `CombatEffectTrigger` *types* survive because `Character` /
-> `Enemy` still carry the fields. Kept as design history; the matrix below is the
-> pre-cleanup shape.
-
-Every basic `attack` or `defend` that lands a hit also rolls for effect procs from `combat-effects.library.json`. The proc table is organised as Stance × action × tier triples. Basic actors only roll the tier-1 entries; tier-2 and tier-3 procs are gated by per-cell unlocks on the actor (`procUnlocks` field on Character / Enemy).
-
-**Trigger gate** — procs only fire on a successful hit (i.e. inside `resolveAttackHit`). The attacker rolls procs from their `attack` table; the defender, when they actively defended, additionally rolls procs from their `defend` table.
-
-**Final proc chance** —
-
-```
-chance = baseChance
-       + (stanceBaseStat       × 0.02)    // STAT_PROC_BONUS_PER_POINT
-       + (statusChanceIntensity × 0.05)    // STATUS_CHANCE_BUFF_BONUS  (from buff_status_chance_up)
-```
-
-Clamped to [0, 1].
-
-**Crit (nat 20 attack roll)** — every eligible proc in the table fires automatically with +1 intensity / +1 duration on top of the trigger's defaults.
-
-**Fumble (nat 1 attack roll)** — applies the cell's `fumbleEffectId` to the actor as a self-debuff and skips other procs for that cell.
-
-**Application path** — procs hand off to `applyEffect` (to materialise the ActiveEffect with the right intensity / duration) and then `resolveEffectApplication` (Tier 2 buff caster fumble/crit; Tier 2 debuff + Tier 3 always land post-Phase-80). Tier 1 procs auto-apply via `applyEffect` alone.
-
-**Default proc matrix:**
-
-| Stance / Action | Tier 1 (basic) | Tier 2 (unlock) | Tier 3 (unlock) | Fumble (self) |
-|-----------------|----------------|------------------|------------------|----------------|
-| Body / Attack | `debuff_post_hoc_tremor` (opponent, 10%) | `debuff_bleed` (opponent, 18%) | `debuff_petrify` (opponent, 6%) | `debuff_post_hoc_tremor` |
-| Body / Defend | `buff_ad_hoc_patch` (self, 10%) | `buff_resistance_body` (self, 15%) | `buff_invincibility` (self, 5%) | `debuff_post_hoc_tremor` |
-| Mind / Attack | `debuff_affirming_consequent` (opponent, 10%) | `debuff_confusion` (opponent, 18%) | `debuff_petrify` (opponent, 6%) | `debuff_affirming_consequent` |
-| Mind / Defend | `buff_gettiters_flicker` (self, 10%) | `buff_resistance_mind` (self, 15%) | `buff_haste` (self, 5%) | `debuff_affirming_consequent` |
-| Heart / Attack | `debuff_straw_man_echo` (opponent, 10%) | `debuff_fear` (opponent, 18%) | `debuff_petrify` (opponent, 6%) | `debuff_straw_man_echo` |
-| Heart / Defend | `buff_petitio_pulse` (self, 10%) | `buff_resistance_heart` (self, 15%) | `buff_invincibility` (self, 5%) | `debuff_straw_man_echo` |
-
-**Enemy customisation (Q7)** — `Enemy.procOverrides` swaps the entire cell's table wholesale (used for bosses with signature procs and elite / basic enemies whose tables depend on the encounter map). `Enemy.procUnlocks` raises the per-cell tier cap independently.
-
-**Switching (Q5)** — out of scope for this spec. The card engine (Spec 04) will hook switching into a different effect pool; basic procs do not currently apply a switching multiplier.
-
 ## Effect Application Rules (`resolveEffectApplication`)
 
 | Tier | Rule |
@@ -169,32 +80,6 @@ Clamped to [0, 1].
 | **Tier 3** | **Always lands.** Inescapable. (Phase 80 — Nat-20 escape removed.) |
 
 See `docs/effects.md` for the full per-tier breakdown and stacking rules.
-
-## Damage Resistance (Phase 93)
-
-> **Superseded (2026-09-23):** `calculateSkillDamage` no longer exists; direct damage is the `DEAL` mechanic resolved in the combat engine — live truth: src/Combat/combat.engine.ts, src/Combat/combat.cards.ts. Body kept as a historical record pending rewrite (plan/AUDIT.md).
-
-Phase 93 completes Phase 80's direction (a) "pure split": effects always land (Phase 80), damage applies resistance separately (Phase 93).
-
-Cards now apply damage resistance based on the target's stats:
-- **Physical damage** (body-scaling cards) → reduced by target's body stat
-- **Mental damage** (mind-scaling cards) → reduced by target's mind stat  
-- **Emotional damage** (heart-scaling cards) → reduced by target's heart stat
-
-**Linear resistance model:** Each point of resistance stat reduces damage by 1.
-**Minimum damage:** Damage is clamped to at least 1 (high resistance reduces but never completely negates damage).
-
-```typescript
-// Physical card against high-body target
-const damage = calculateSkillDamage(caster, bodySkill, target);
-// If bodySkill would deal 10 damage, but target has 7 body stat,
-// final damage = 10 - 7 = 3
-
-// Very high resistance still allows minimum damage
-// If target has 15 body stat vs 10 damage, result = 1 (not 0)
-```
-
-This affects `calculateSkillDamage` when a target is provided. Calls without a target maintain backward compatibility (no resistance applied).
 
 ## Friendship Path
 
@@ -375,27 +260,6 @@ legacy driver. In Hazard-Pattern Combat the same doctrine is served directly by
 the HP model: DoT erodes the enemy's sole HP bar, control denies its telegraphed
 turns, and the escalation clock punishes stalling.
 
-## Battle Log
-
-`CombatState.log: BattleLogEntry[]` is an opt-in coarse summary slot from
-the pre-Phase-9 combat design. The `BattleLogEntry` shape remains exported
-for consumers that want the summary shape:
-
-```typescript
-{
-  round, playerAction, enemyAction, advantage,
-  playerRoll, playerRollDetails,
-  enemyRoll, enemyRollDetails,
-  damageToPlayer, damageToEnemy,
-  playerHPAfter, enemyHPAfter,
-  result
-}
-```
-
-The live per-encounter signal that consumers actually subscribe to is the
-`CombatEvent[]` stream returned by the Hazard-Pattern engine transitions
-(`playCombatCard`, `resolveThreatPhase`, `processBetweenPhases`, ...).
-
 ## Combat Reducer API
 
 Defined in `src/Combat/combat.reducer.ts`. These are small, single-concept
@@ -410,23 +274,8 @@ with the legacy driver.)
 
 ## Combat Mechanics API
 
-> **Superseded (2026-09-23):** `rollSkillCheck` and `getSkillDamageType` below no longer exist (the stat / advantage / crit helpers are still exported but the attack contest that used them went with the turn-based resolver) — live truth: src/Combat/index.ts, src/Combat/combat.engine.ts. Body kept as a historical record pending rewrite (plan/AUDIT.md).
-
 | Function | Description |
 |----------|-------------|
-| `determineAdvantage(attacker, defender)` | Returns advantage relationship |
-| `getAdvantageModifier(advantage)` | Returns +2 / 0 / −2 |
-| `hasAdvantage(attacker, defender)` | Boolean shorthand |
-| `getBaseStat(entity, stance)` | Raw base stat for a stance |
-| `getAttackStat(entity, stance)` | Attack derived stat for a stance |
-| `getDefenseStat(entity, stance)` | Defense derived stat for a stance |
-| `getSaveStat(entity, stance)` | Save stat for a stance (enemies fall back to defense) |
-| `getEffectiveStats(entity).baseStats[resistedBy]` | Base stat used when resisting an effect |
-| `rollSkillCheck(baseStat, advantage)` | d20 + modifier with advantage/disadvantage |
-| `calculateFinalDamage(base, reduction, crit, bonus)` | Damage after reductions. On crit, picks the higher of `double` (2× base − defence) vs `pierce` (base, defence ignored) — Phase 32 auto-selection. |
-| `selectCritDamage(base, reduction, bonus)` | Phase 32 — returns `{ style, damage }` for the crit auto-selection in isolation, useful for tests / future damage previews. |
-| `calculateDamageResistance(target, baseDamage, damageType)` | Phase 93 — applies target's resistance to damage (linear reduction, minimum 1) |
-| `getSkillDamageType(scalingStat)` | Phase 93 — maps card scaling stat to damage type for resistance calculation |
 | `applyDamage(entity, damage)` | Reduces HP (clamps to 0) |
 | `heal(entity, amount)` (alias `healCharacter`) | Restores HP (clamps to max) |
 | `resolveEffectApplication(target, effect, type, heart, equip)` | Effect application (Tier 2 buff fumble/crit; Tier 2 debuff + Tier 3 always land) |
@@ -443,9 +292,6 @@ with the legacy driver.)
 | `getHealthPercentage(combatant)` | `health / maxHealth` as a 0–1 fraction |
 | `updateEffectDuration(target, effectId)` | Decrements one effect's duration by 1 and removes it when it reaches 0 |
 | `getActiveEffectModifiers(effects)` | Aggregates all `ActiveEffect` modifiers into an `AggregatedEffectModifiers` object |
-| `getEffectiveStats(combatant)` | Returns `EffectiveStats` — base stats and derived stats after all active-effect modifiers are applied |
-| `calculateEnemyStatMultiplier(moralMeter)` | Maps moral-meter value (−100…+100) to an enemy-stat scale factor (0.5×…2×) |
-| `applyMoralMeterScaling(baseStats, moralMeter)` | Returns a copy of `BaseStats` with every stat scaled by `calculateEnemyStatMultiplier(moralMeter)` |
 
 ### Combat Types
 
@@ -455,11 +301,8 @@ with the legacy driver.)
 | `CritStyle` | `'double' \| 'pierce'` — Phase 32 auto-selected crit variant |
 | `CombatAction` | `{ stance: Stance; action: Action }` — the combined stance + action choice for one side of a round |
 | `CombatPhase` | `'choosing_stance' \| 'choosing_action' \| 'mercy_choice' \| 'resolving' \| 'ended'` — the state-machine phase of a turn-based combat encounter |
-| `AggregatedEffectModifiers` | Summed numeric modifiers from all active effects; consumed by `getEffectiveStats` |
-| `EffectiveStats` | `{ baseStats, derivedStats, nonCombatStats, defenseDelta }` — combatant stats after all active-effect modifiers are applied; produced by `getEffectiveStats` |
-| `DamageType` | `'physical' \| 'mental' \| 'emotional'` — damage category used by resistance calculations |
+| `AggregatedEffectModifiers` | Summed numeric modifiers from all active effects (`getActiveEffectModifiers`) |
 | `Combatant` | `Character \| Enemy` — the union type for any participant in a combat encounter |
-| `BattleLogEntry` | Per-round log record (`round`, `playerAction`, `enemyAction`, `advantage`, rolls, damage fields, `result`) stored in `CombatState.log` |
 
 ## Card terminology
 
@@ -561,7 +404,7 @@ one-bar model 2026-06-22, and its status-primacy successor was repealed 2026-09-
 The engine lives in `src/Combat/`:
 
 - `combat.engine.ts` — phase loop (`resolveCombatPhase` / `playCombatCard` /
-  `resolveThreatPhase` / `processBetweenPhases`), RPS die-cost scaling, the
+  `resolveThreatPhase` / `processBetweenPhases`), the stance read, the
   self-reinforcing die-refresh loop, and `buildCombatSummary`.
 - `combat.dice.ts` — the four colored mana dice and their state machine.
 - `combat.deck.ts` — Fisher-Yates shuffle + draw-up-to-`COMBAT_HAND_SIZE`.
@@ -576,7 +419,6 @@ The engine lives in `src/Combat/`:
 |-----------------|-------------|
 | `initializeCombatEncounter(...)` | Builds the `CombatEncounterState` for a fight (deck, dice, threat sequence). |
 | `rollEncounterDice(state)` | Rolls the colored mana dice at phase start. |
-| `resolveCardDieCost(cardColor, enemyPhaseStance)` | Returns the `CardDieCost` for playing a card: `{ cost, advantage }`. Advantage if card stance beats the enemy phase stance (RPS), disadvantage if beaten, neutral otherwise. Wild/X dice always cost 1. |
 | `COMBAT_DICE_COUNT` / `COMBAT_HAND_SIZE` / `COMBAT_DIE_FACES` | Spec 25 tuning constants: opening dice pool size (4), hand-size target (5 — keep-hand rule 2026-07-13: the round boundary keeps unplayed cards and refills the hand up to the target), and the die-face bag (`heart`/`body`/`mind`/`wild` at 1/6 each; `x` at 2/6). |
 | `rollCombatDice(count?, rng?)` / `combatDieCanPower(die, cardColor)` / `refreshOneDie(dice, color)` | Dice helpers: roll the opening pool; check whether a die can power a card of a given color (wild powers any; x powers nothing unless flipped); refresh one spent die of a matching color back to available (self-reinforcing status loop, §4.7). |
 | `toCombatCard(cardId, lookupSkill, lookupEffect)` / `projectDeck(cardIds, lookupSkill, lookupEffect)` | Card-view converters: project a single card (or synthetic card) into a `CombatCard` view, or an entire deck of ids into a `CombatCard[]` (unknown ids dropped). |
@@ -587,10 +429,10 @@ The engine lives in `src/Combat/`:
 | `resolveThreatPhase(state)` | Resolves the enemy threat phase (Clear / Overwhelmed ledger). |
 | `processBetweenPhases(state)` | Between-phase upkeep — persistent buffs, die refresh, momentum carry. |
 | `selectEncounterMercyChoice(...)` | Opens the Befriend mercy choice (Phase 112 logic intact). |
-| `getCard` / `handCards` / `cardDieCostPreview` / `availableDice` | Read-only previews for a UI to render the hand and affordances. |
+| `getCard` / `handCards` / `availableDice` | Read-only previews for a UI to render the hand and affordances. |
 | `buildCombatSummary(state)` | End-of-fight `CombatSummary` with per-effect attribution rows. |
 | `simulateHazardPatternCombat(...)` | Monte-Carlo greedy bot returning `CombatSimStats` for balance runs. |
-| `CardEffectKind` | `'dot' \| 'control' \| 'none'` — the status-payload classification tag on every `CombatCard` (set by `classifyVerbClass`); drives the mobile card frame and deck-preset focus logic. The baseline GUARD defense card (`'brace-for-impact'`) is included in `STARTING_SKILL_IDS`. **`GOLD_CARD_IDS` / `isGoldCard` were deleted in Spec 32 v3** (2026-07-08) along with the three rare card ids they named — rarity is now derived from `rank` via `rankToRarity` (`rare` = rank 5-6), and the wild-die-auto-advantage-on-gold behavior was removed with them (a wild/x die is always neutral advantage now — see `resolveCardDieCost`). |
+| `CardEffectKind` | `'dot' \| 'control' \| 'none'` — the status-payload classification tag on every `CombatCard` (set by `classifyVerbClass`); drives the mobile card frame and deck-preset focus logic. The baseline GUARD defense card (`'brace-for-impact'`) is included in `STARTING_SKILL_IDS`. **`GOLD_CARD_IDS` / `isGoldCard` were deleted in Spec 32 v3** (2026-07-08) along with the three rare card ids they named — rarity is now derived from `rank` via `rankToRarity` (`rare` = rank 5-6), and the wild-die-auto-advantage-on-gold behavior was removed with them (a wild/x die has no stance, so its read is `none` — see `resolveRead`). |
 | `CombatEncounterState`, `CombatCard`, `CombatThreatPhase`, `CombatOutcome`, `CombatSummary` | The core encounter type family. (`CombatPressureTracks` was REMOVED 2026-06-22 — VITAE is the one bar.) `CombatCard.skillId` is the canonical field for the backing learned-card id (`string \| null`; `null` for synthetic cards, if any are ever added again). `CombatOutcome`/`CombatVerbClass` still list `'retreat'` as a union member for now (no live code path can produce it — no escape card exists) rather than risk an unverified type-cascade removal. Use `skillId` to trace a projected card back to its source card. |
 | `CombatAttributionRow`, `LandedEffect` | Attribution sub-types for `buildCombatSummary`. `CombatAttributionRow` is a per-card row (`cardId`, `name`, `dotDamage`, `damageDealt`, `phases`); `LandedEffect` is a snapshot of one live effect used internally during attribution (`effectId`, `effect`, `active`, `target`). |
 
@@ -668,7 +510,6 @@ progression levers.
 | `THREAT_WEAKEN_PER_ROLL` / `THREAT_DENY_AT` / `THREAT_WEAKEN_FLOOR` | Soft-control and stat-debuff threat tunables (0.33.0). Each point of enemy roll penalty (from confusion, fear, blind, slow, accuracy/attack-down etc.) reduces the incoming hit by `THREAT_WEAKEN_PER_ROLL` (default 0.06). When the cumulative roll penalty reaches `THREAT_DENY_AT` (default 8), the turn is fully denied (same as hard control). `THREAT_WEAKEN_FLOOR` (default 0.4) clamps the minimum damage multiplier for a weakened-but-not-denied enemy. Read these to display soft-control thresholds in the UI. |
 | `COMBAT_DECK_PRESETS` / `COMBAT_DECK_PRESET_ORDER` / `listDeckPresets()` / `getDeckPreset(id)` / `buildPresetDeck(id)` | The three campaign-stage preset decks (`src/Combat/combat.starter-deck-presets.ts`): `threadbare` ("The Threadbare Office", early), `pilgrim` ("The Pilgrim's Burden", mid), `apostate` ("The Apostate's Canon", late), plus `PRESET_LINEAGE` describing the removals/additions that walk one rung to the next. **The one surviving deck law is exact aspect thirds** — every preset splits evenly across body/mind/heart by `philosophicalAspect`. Deck sizes, copy limits and the lineage multiset are no longer laws (2026-09-02). `buildPresetDeck` appends no escape card — there is no in-combat retreat — and is ready to feed `initializeCombatEncounter`. |
 | `CombatDeckPreset`, `CombatDeckFocus` | `CombatDeckPreset` describes a single named preset deck entry (id, name, theme, focus, description, cardIds). `CombatDeckFocus` is the discriminated string union of the (now six) coarse design-lever tags used by draft/sim-policy consumers — `'dot' \| 'control' \| 'utility' \| 'damage' \| 'rush-execute' \| 'balanced'` (not the old per-preset name union). Both are importable as `import type { CombatDeckPreset, CombatDeckFocus } from 'axiomancer-mechanics'`. |
-| `CardDieCost` | Die-cost helper type — `{ cost: number; advantage: boolean }` returned by `resolveCardDieCost` and `cardDieCostPreview`. Importable as `import type { CardDieCost } from 'axiomancer-mechanics'`. |
 | `CombatIntentType`, `CombatReadResult`, `SignatureSkill`, `SignatureSkillId`, `SignatureSkillKind`, `PlayerArchetype` | The depth-layer type family. |
 
 ### Phase 169 — Curated Combat Loadout
@@ -742,8 +583,7 @@ vitae = round((ENEMY_VITAE_BASE + ENEMY_VITAE_PER_LEVEL × level) × ENEMY_VITAE
 | unique | 3.2 |
 
 Reference points: L1 normal ≈ 48, L7 elite ≈ 250, L6 boss ≈ 345, L13 normal ≈
-264, L18 boss ≈ 885, L110 unique ≈ 6,432. `baseStats` still drives stance procs,
-derived combat stats and befriend logic, but no longer drives VITAE — so the
+264, L18 boss ≈ 885, L110 unique ≈ 6,432. `baseStats` no longer drives enemy VITAE — so the
 difficulty bands separate cleanly and a boss can be a wall without a grotesque
 stat budget.
 
@@ -819,11 +659,10 @@ escalation clock their consumer-facing surface.
 | `THREAT_ESCALATION_BOSS_MULT` | Boss/unique enemies escalate at `THREAT_ESCALATION_PER_ROUND × THREAT_ESCALATION_BOSS_MULT` per round (default 1.6). Makes long boss fights qualitatively more lethal than equivalently long normal fights — incentivises finishing bosses quickly via DoT or denying their turns via control. Normal/elite enemies use the base rate (multiplier 1.0). |
 | `THREAT_EFFECT_ESCALATION_STEP` | The SAME clock (`escalation`, above — already boss-scaled, already capped at `THREAT_ESCALATION_MAX`) also intensifies the enemy's telegraphed STATUS application, not just its raw damage: `effectIntensityBonus = floor((escalation - 1) / THREAT_EFFECT_ESCALATION_STEP)` is added to the intensity of whatever status the enemy's hit applies this phase (default step 0.34, capping the bonus around +2 at max escalation). Reuses the damage clock's numbers rather than a second independent ramp. |
 
-All seven are exported from `src/Combat/combat.engine.ts` and re-exported via
+They are exported from `src/Combat/combat.engine.ts` and re-exported via
 the root barrel. Used by `resolveCombatPhase` / `processBetweenPhases`;
 consumers read them to render the escalation clock UI (e.g. showing current
-multiplier vs. cap, surfacing the boss-tier escalation warning, and flagging
-the next enchant/curse round).
+multiplier vs. cap, and surfacing the boss-tier escalation warning).
 
 ### Phase 167/168 — Sim damage-source metrics + AMPLIFY mechanic + Conclusion sig
 
@@ -873,7 +712,7 @@ The Spec 02 / 03 / 04 / 05 work this section used to track has
 shipped, and the legacy turn-based resolver it produced has since been
 removed. Combat is exercised end-to-end via the Hazard-Pattern engine
 (`initializeCombatEncounter` → `playCombatCard` → `resolveThreatPhase` →
-`processBetweenPhases`); Tier 2/3 procs are in `Combat/combat-effects.ts`.
+`processBetweenPhases`).
 The CLI log utilities were dropped when Phase 17 unified the CLI
 surface around `npm run game` — no log strings exist in the engine
 today; consumers render directly from the typed `CombatEvent` stream.

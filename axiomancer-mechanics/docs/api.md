@@ -15,19 +15,19 @@ unchanged, but the absolute semver guarantee starts at 1.0.
 ### Character
 
 - `createCharacter()` — Stable.
-- `Character`, `BaseStats`, `DerivedStats`, `NonCombatStats`,
-  `CreateCharacterOptions`, `AggregatedEquipmentModifiers` types — Stable.
+- `Character`, `BaseStats`, `EquipmentLoadout`,
+  `CreateCharacterOptions` types — Stable.
 - Equipment functions (`equipItem`, `unequipItem`,
-  `getEquipmentModifiers`) — Stable.
+  `getEquippedItems`) — Stable.
 - **Character presets (Phase 18):** `characterPresets`,
   `getPresetById`, `buildCharacterFromPreset` — Stable.
   `CharacterPreset`, `CharacterPresetEquipmentEntry` types — Stable.
 - **Stat allocation (Phase 29):** `allocateStatPoint(character, stat)`,
   `previewStatAllocation(baseStats, level, allocation)` — Stable. 
   `allocateStatPoint` spends one `availableStatPoints` to raise the chosen base
-  stat by 1 and re-derive `derivedStats` / `nonCombatStats` /
-  `maxHealth`. `previewStatAllocation` computes exact derived stats for
-  mobile's level-up allocation preview without mutating character data.
+  stat by 1 and re-derive `maxHealth`. `previewStatAllocation` computes
+  the resulting max VITAE for mobile's level-up allocation preview
+  without mutating character data.
   Pairs with `STAT_POINTS_PER_LEVEL = 3` (granted on level-up via the
   game reducer) and the `ALLOCATE_STAT_POINT` action.
   `Character.availableStatPoints: number` is on the public type. Closes
@@ -47,7 +47,7 @@ unchanged, but the absolute semver guarantee starts at 1.0.
   `simulateHazardPatternCombat`, etc.) — Stable. The ONLY combat engine;
   the legacy turn-based `resolveCombatRound` (and its `RoundEvent` /
   `RoundResolution` surface) was removed.
-- `determineAdvantage()`, advantage and damage / healing functions — Stable.
+- Healing (`healCharacter`) — Stable.
 - Combat state management (`initializeCombat` — the shared `CombatState`
   constructor) — Stable.
 - Combat types (`CombatState`, `Action`, `Stance`,
@@ -55,16 +55,11 @@ unchanged, but the absolute semver guarantee starts at 1.0.
 - **Phase 80 always-land contract:** `resolveEffectApplication` rewritten —
   Tier 2 debuffs + Tier 3 always land (no target-resist roll); only Tier 2
   buff caster fumble/crit survives. `EffectApplicationResult.rebounded`
-  removed; `getResistStat` removed at v0.13.0 (use `getSaveStat`). See [`effects.md`](./effects.md).
+  removed. See [`effects.md`](./effects.md).
 - **Effect aggregators (iterate `7ee0745`):** `getActiveEffectModifiers`,
-  `getEffectiveStats`, `canAct`, `resolveEffectiveAdvantage` — Stable.
-  The four Combat-tier aggregators `docs/effects.md` "API at a glance"
-  names; previously reachable only via `src/Combat/index.ts`, now
-  re-exported through the top-level barrel. Types
-  `AggregatedEffectModifiers`, `EffectiveStats` ride alongside.
-  Power-user RN consumers composing custom UI may want to read these
-  directly rather than going through one stance/stat at a time via
-  the wrapper accessors (`getAttackStat` / `getDefenseStat` / etc.).
+  `canAct` — Stable. Previously reachable only via `src/Combat/index.ts`,
+  now re-exported through the top-level barrel. Type
+  `AggregatedEffectModifiers` rides alongside.
 
 ### Game Store and State
 
@@ -394,8 +389,7 @@ reality.
 
 > **Superseded (2026-09-23):** `canUseSkill`, `SkillTier` and the "21-card library" below are retired; the live library is `cardLibrary` (129 cards assembled from `src/Cards/library/*.cards.ts`) and learning is ungated — live truth: src/Cards/cards.library.ts, src/Cards/card.engine.ts, src/index.ts. Body kept as a historical record pending rewrite (plan/AUDIT.md).
 
-- Card execution (`executeCard`, `canUseSkill`,
-  `calculateCardDamage`, `spendResources`) — Stable.
+- Card execution (`executeCard`, `canUseSkill`) — Stable.
 - Card types (`Card`, `SkillsStatType`,
   `SkillTier`, `SkillTarget`, `ResourceCost`,
   `SkillResolution`, etc.) — Stable. Phase 37 (2026-07-20) retired
@@ -414,24 +408,6 @@ reality.
   card)` — Stable. The `LEARN_CARD` action wires this through the
   game reducer; the Character tab in `npm run game` exposes it. Closes
   Spec 06 Q7.
-- **Tier 2 synergy (Phase 66):** Beta. Optional
-  `Card.synergy?: SkillSynergy` clause + matching `SynergyPredicate`
-  shape lets a card condition bonus damage / effect consumption /
-  type-swap / detonation on the presence of an `ActiveEffect` already
-  on the field. `executeCard` evaluates synergy after
-  `calculateCardDamage` but before `combatEffects` apply. A new
-  `synergy-fired` `SkillEvent` (and matching `SkillPhaseEvent`
-  variant) surfaces the bonus damage, consumed effect ids,
-  consumed-token count, and clear/consume flags for UI / agent
-  rendering. Five Tier 2 cards ship as the first authored batch:
-  `resonance-bleed` (heart, cross-stance duration amp),
-  `intensity-feedback` (mind, cross-stance intensity amp),
-  `bat-swarm-thoughtform` (heart, buff type-swap consuming
-  `tier1_body_defend`), `resonance-burst` (mind, consume opposing
-  debuff for damage), `resonance-detonation` (heart, no predicate;
-  apex burn — consume full combat-resource pool + clear all effects
-  + damage proportional to consumed tokens). See `docs/cards.md` §
-  "Tier 2 synergy (Phase 66)" for the schema + the per-card table.
 - **Phase 84 SkillEvent cleanup:** `effect-resisted` renamed to
   `buff-fumbled` (only fires on Tier 2 buff caster fumble); dead-code
   `effect-rebounded` variant removed. **BREAKING** for consumers
@@ -480,12 +456,9 @@ hermetic walkthrough.
 
 ### Effects
 
-- Effect application (`applyEffect`, `applyTier1CombatEffect`,
-  `clearTier1EffectsForStance`,
+- Effect application (`applyEffect`,
   `lookupEffect`, `getEffectByName`, `getEffectsByType`,
   `effectsLibrary`) — Stable.
-- World-effect tick (`processWorldEffectTick`,
-  `getActiveHazards`) — Stable.
 - Effect types (`Effect`, `EffectType`, `EffectTier`,
   `EffectStacking`, `EffectCategory`, `EffectPayload`,
   `ActiveEffect`, `StatModifier`, `DamageOverTime`,
@@ -533,32 +506,6 @@ authoring; the first batch is live as of Phase 44.
 - `DialogueContext.alignment?: PhilosophicalAlignment` — Beta. Optional context field threaded through `visibleChoices` so callers can preview gates without committing dispatch.
 - 2 live gates authored on `nirvana-fallacy` (`outlook ≤ -34`) + `appeal-to-fear` (`scope ≥ 34`); 2 dialogue branches gated on Old Marrow + Coastal Beggar. See [docs/oaths.md "Authoring gates (Phase 46)"](./oaths.md) for operator semantics + authoring guidance.
 
-### Faction (Phase 110) — Beta
-
-Reputation system for boss befriend consequences. See
-[docs/faction.md](./faction.md) for authoring guidelines.
-
-- Types (`FactionReputation`, `FactionReputations`, 
-  `FactionReputationDelta`, `FactionInfo`) — Beta.
-- Engine (`clampFactionReputation`, `createDefaultFactionReputations`,
-  `applyFactionReputationDeltas`, `getFactionReputation`) — Beta.
-- Constants (`FACTION_REPUTATION_MIN`, `FACTION_REPUTATION_MAX`,
-  `DEFAULT_FACTION_REPUTATION`) — Beta.
-- Library (`factionLibrary`, `getFactionInfo`, `getAllFactions`) — Beta.
-  Registry of known factions with metadata (name, description).
-- State field `GameState.factionReputations` — Beta. Persists
-  across save/load and run resets when `keepCharacter: true`.
-
-**Boss befriend integration:**
-- `FriendshipReward.factionDeltas?: FactionReputationDelta` — Beta. Applied
-  by the `END_COMBAT` reducer on friendship outcomes via 
-  `applyFactionReputationDeltas`.
-- `CombatEndReport.friendshipReward.factionReputationShift?: { [factionId: string]: number }` — Beta. Surfaces post-clamp reputation values for changed factions.
-
-Boss befriend outcomes can demonstrate lose-with-one / gain-with-another
-tradeoffs (±10..±15 per faction for boss-tier encounters). The system makes
-mercy decisions consequential rather than reward-only.
-
 ### NPCs & Dialogue
 
 - NPC types (`NPC`, `DialogueMap`, `DialogueTree`, `DialogueNode`,
@@ -572,8 +519,7 @@ mercy decisions consequential rather than reward-only.
   `sum`, `max`, `min`, `inRange`, `capitalize`, `formatPercent`,
   `createDie`, `createDieRoll`,
   `determineRollAdvantageModifier`) — Stable.
-- Stat derivation (`deriveStats`, `deriveNonCombatStats`,
-  `calculateMaxHealth`) — Stable.
+- Max VITAE derivation (`calculateMaxHealth`) — Stable.
 - RNG (`setRng`, `getRng`, `setSeed`, `Rng`) — Stable.
 - Type guards (`isCharacter`, `isEnemy`, `isCombatActive`) — Stable.
 

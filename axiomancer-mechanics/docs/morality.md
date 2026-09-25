@@ -1,9 +1,10 @@
 # Morality System
 
 > **Status:** Phase 92 complete — moral choice tracking, friendship bonus,
-> dialogue integration, difficulty scaling, and save migration (v2→v3) are live. 
-> The beggar encounter in fishing-village demonstrates the moral choice pipeline, 
-> and difficulty scaling affects all combat encounters.
+> dialogue integration, and save migration (v2→v3) are live.
+> The beggar encounter in fishing-village demonstrates the moral choice pipeline.
+> The Phase 92 moral-meter enemy stat scaling was removed in TRIM THE FAT T2a
+> (2026-09-25); the meter no longer changes combat difficulty.
 >
 > **Display name (Phase 44h):** the player-facing name for this meter is
 > **GRACE**, in three bands — **In Arrears** (≤ -34), **Indifferent**,
@@ -16,9 +17,8 @@
 
 The morality system tracks player alignment through choices made in dialogue,
 combat outcomes, and quest resolutions. The moral meter influences available 
-dialogue options, story paths, endings, and combat difficulty—not through 
-direct gating but by affecting which narrative branches open over time and
-how challenging encounters become.
+dialogue options, story paths, and endings—not through
+direct gating but by affecting which narrative branches open over time.
 
 ## Relationship to `philosophicalAlignment` (Phase 42)
 
@@ -117,47 +117,6 @@ if (outcome === 'friendship') {
 }
 ```
 
-### Combat: Difficulty Scaling (Phase 92)
-
-The moral meter directly affects combat difficulty through enemy stat scaling.
-Ruthless choices make enemies stronger; compassionate choices make them weaker.
-
-**Scaling Formula:**
-```ts
-// Linear interpolation between configured thresholds
-const DIFFICULTY_SCALING = [
-    { moralMeterThreshold: -100, statMultiplier: 2.0 },  // ruthless = 2x enemy stats
-    { moralMeterThreshold: -50,  statMultiplier: 1.5 },
-    { moralMeterThreshold: 0,    statMultiplier: 1.0 },  // neutral = baseline
-    { moralMeterThreshold: 50,   statMultiplier: 0.75 },
-    { moralMeterThreshold: 100,  statMultiplier: 0.5 }   // compassionate = 0.5x enemy stats
-];
-```
-
-**Mechanical Effect:**
-- At moral meter **-100** (ruthless): All enemy stats are **doubled** (2x health, attack, defense)
-- At moral meter **0** (neutral): No scaling applied (1x baseline stats) 
-- At moral meter **+100** (compassionate): All enemy stats are **halved** (0.5x stats)
-- Values between thresholds are linearly interpolated
-
-**Implementation:** Scaling is applied during `START_COMBAT` action processing.
-The `gameReducer` calls `applyMoralMeterScaling` to modify the enemy's `baseStats`
-before passing it to `initializeCombat`. All subsequent combat resolution 
-(health calculation, damage, derived stats) uses the scaled values.
-
-```ts
-// Applied automatically in START_COMBAT case
-const scaledBaseStats = applyMoralMeterScaling(enemy.baseStats, state.moralMeter);
-const scaledEnemy = { ...enemy, baseStats: scaledBaseStats };
-const combat = initializeCombat(state.player, scaledEnemy);
-```
-
-**Design Rationale:** This resolves the original braindump-vs-Spec-10 divergence.
-The BRAINDUMP described "difficulty scaling driven by moral choices" but Spec 10 Q4
-was marked as "A (for now)" to defer the feature. Phase 92 implements the intended
-behavior: the evil path becomes mechanically harder (requiring stronger tactical play)
-while offering greater rewards (per Spec 10 Q5), creating meaningful moral tension.
-
 ### Dialogue: Flag-Based Processing
 
 Dialogue choices can set flags that trigger moral meter shifts. The system
@@ -214,8 +173,8 @@ the immediate moral shift.
 
 ## Future Expansions
 
-The current implementation (Phase 92) includes moral choice tracking, friendship
-bonuses, and combat difficulty scaling. Future phases will expand the system:
+The current implementation (Phase 92) includes moral choice tracking and friendship
+bonuses. Future phases will expand the system:
 
 - **Multi-axis morality:** Honor, cunning, and compassion as separate tracks
 - **NPC reputation:** Per-character relationship scores
@@ -237,16 +196,13 @@ from their first post-migration choice.
 
 - **Pure reducers:** All moral meter changes flow through `shiftMoralMeter`
 - **Event-driven:** Dialogue effects trigger via flag mapping  
-- **Combat integration:** Difficulty scaling applied in `START_COMBAT` via `applyMoralMeterScaling`
 - **Bounds-safe:** Automatic clamping prevents overflow/underflow
-- **Testable:** Complete e2e test coverage in `moral.meter.engine.test.ts` and `difficulty.scaling.engine.test.ts`
+- **Testable:** Complete e2e test coverage in `moral.meter.engine.test.ts`
 - **Persistent:** Moral meter is included in save/load operations
 
 ## See Also
 
 - [`src/Game/e2e/moral.meter.engine.test.ts`](../src/Game/e2e/moral.meter.engine.test.ts) — moral choice test coverage
-- [`src/Combat/e2e/difficulty.scaling.engine.test.ts`](../src/Combat/e2e/difficulty.scaling.engine.test.ts) — difficulty scaling test coverage
-- [`src/Combat/difficulty.ts`](../src/Combat/difficulty.ts) — difficulty scaling implementation
 - [`src/World/dialogue.runtime.ts`](../src/World/dialogue.runtime.ts) — flag-to-moral-shift processing
 - [`src/World/Continents/Coastal-Village/maps.ts`](../src/World/Continents/Coastal-Village/maps.ts) — beggar demo content
 - [`specs/10-moral-difficulty-meter.md`](../specs/10-moral-difficulty-meter.md) — original implementation spec

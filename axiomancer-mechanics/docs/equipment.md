@@ -17,7 +17,9 @@ The **only equipment content is the 11 fixed "signet" relics**
 ([`src/Items/relic.library.ts`](../src/Items/relic.library.ts)) — 2 weapons, 2
 armor, 7 accessories (Phase 85 filled the `head`/`hands`/`feet` kinds that
 shipped empty in Phase 19). Each grants **one signature skill**
-(`grantsSignature`) plus a single **static stat bump** (`statModifiers`). The
+(`grantsSignature`); the two armor relics also carry a **+5 max VITAE** bump
+(`statModifiers: [{ stat: 'maxHp', value: 5 }]`), and every other relic has
+`statModifiers: []`. The
 player owns all 11 and wears 1 weapon + 1 armor + 3 of the 7 accessories =
 **140 possible loadouts** (2 × 2 × C(7,3)).
 
@@ -28,7 +30,7 @@ interface Equipment extends BaseItem {
     category: 'equipment';
     slot: 'weapon' | 'armor' | 'accessory';
     accessoryKind?: 'head' | 'hands' | 'feet' | 'amulet' | 'ring' | 'charm'; // iff accessory
-    statModifiers?: StatModifier[];   // the SOLE mechanical channel (incl. 'maxHp')
+    statModifiers?: StatModifier[];   // { stat: 'maxHp'; value } — the only stat line
     grantsSignature?: SignatureSkillId; // one signature while worn (relics only)
 }
 ```
@@ -40,9 +42,10 @@ There is no rarity, `requiredLevel`, `rolledMods`, affix, `passiveEffects`,
 
 - **Stats** — `equipItem`/`unequipItem`
   ([`src/Character/equipment.reducer.ts`](../src/Character/equipment.reducer.ts))
-  fold each worn piece's `statModifiers` into `derivedStats` at equip-time. The
-  first-class `'maxHp'` target folds onto `Character.maxHealth` (growing/clamping
-  current `health`); it is NOT a `DerivedStats` field.
+  fold each worn piece's `'maxHp'` line onto `Character.maxHealth` at
+  equip-time (growing/clamping current `health`). `maxHp` is the only stat an
+  item can modify; the derived-stat targets were retired in TRIM THE FAT T2a
+  (2026-09-25), and the worn bonus survives stat allocation and level-up.
 - **Signatures** — combat-init derives `CombatEncounterState.signatures` from the
   worn loadout via `getSignaturesForLoadout(loadout)` (weapon → armor →
   accessories, de-duplicated). Archetype no longer selects signatures
@@ -90,6 +93,7 @@ Reliquary, enemy drops) still yield consumables / currency only (phase 21).
 
 The v11→current chain keeps working: v11→v12 (re-slot to the 5-slot model),
 v12→v13 (seed the signet relics), v13→v14 (purge non-relic equipment),
-v21→v22 (seed the Phase 85 head/hands/feet relics). See
+v21→v22 (seed the Phase 85 head/hands/feet relics), v24→v25 (strip every
+non-`maxHp` stat line). See
 [`src/Game/game.migrate.ts`](../src/Game/game.migrate.ts). `LEGACY_SLOT_MAP`
 stays for old-save upgrades.

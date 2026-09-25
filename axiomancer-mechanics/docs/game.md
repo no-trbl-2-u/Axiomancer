@@ -27,7 +27,6 @@ The `GameState` type is the root object that aggregates all game data:
 | `quests` | `QuestLog` | Player's quest progress and objectives |
 | `moralMeter` | `number` | Moral choice alignment (-100 to +100) |
 | `philosophicalAlignment` | `PhilosophicalAlignment` | Three-axis philosophy cube |
-| `factionReputations` | `FactionReputations` | Standing with various factions |
 | `codex` | `CodexState` | Unlocked journal entries and lore |
 | `runId` | `string` | Unique identifier for this playthrough |
 | `rngState` | `number` | Deterministic RNG seed state |
@@ -192,15 +191,10 @@ Core balance values are defined in `game-mechanics.constants.ts`:
 
 | Constant | Value | Purpose |
 |----------|-------|---------|
-| `STAT_MULTIPLIERS.ATTACK` | `1` | Base stat to attack conversion |
-| `STAT_MULTIPLIERS.DEFENSE` | `3` | Base stat to defense conversion |
-| `STAT_MULTIPLIERS.SAVE` / `.TEST` | `2` / `4` | Base stat to save / ability-test conversion |
 | `PLAYER_VITAE_BASE` | `50` | Flat floor of every player VITAE pool |
 | `RESOURCE_MULTIPLIERS.HEALTH_PER_STAT` | `8` | Per-stat term: VITAE = base + (body + heart + mind) × 8 |
 | `EXPERIENCE_PER_LEVEL` | `1000` | XP required per level |
 | `STAT_POINTS_PER_LEVEL` | `3` | Stat points gained per level |
-| `DEFENSE_MULTIPLIERS` | `{ advantage: 3, neutral: 2, disadvantage: 1.5 }` | Active defense stance bonuses |
-| `PASSIVE_DEFENSE_MULTIPLIER` | `1` | Defense multiplier when not in active defense stance |
 | `MAX_EFFECT_INTENSITY` | `30` | Maximum effect stack intensity |
 | `MAX_EFFECT_DURATION` | `10` | Maximum effect duration in rounds |
 | `FRIENDSHIP_COUNTER_MAX` | `3` | Befriend attempts before success |

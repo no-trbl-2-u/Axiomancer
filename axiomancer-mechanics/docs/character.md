@@ -2,47 +2,23 @@
 
 ## Overview
 
-Characters are player-controlled entities with base stats, derived stats, resources, and progression. Created via `createCharacter()` in `Character/index.ts`.
+Characters are player-controlled entities with base stats, resources, and progression. Created via `createCharacter()` in `Character/index.ts`.
 
 ## Base Stats
 
-Three core stats. All derived stats and resources scale from these.
+Three core stats. Max VITAE scales from their sum (see Resources below).
+They also set the stance colours' rock-paper-scissors order
+(`heart` beats `body`, `body` beats `mind`, `mind` beats `heart`).
 
 | Stat | Role |
 |------|------|
-| `body` | Physical strength. Governs HP, physical combat and cards, body-type advantage. |
-| `mind` | Intelligence and reflexes. Governs mental combat and cards, mind-type advantage. |
-| `heart` | Willpower and emotion. Governs HP (shared with body), emotional combat and cards, heart-type advantage. |
+| `body` | Physical strength and constitution. Feeds max VITAE. |
+| `mind` | Intelligence, reflexes, perception. Feeds max VITAE. |
+| `heart` | Emotion, willpower, charisma. Feeds max VITAE. |
 
-## Derived Stats (`DerivedStats` — shared with Enemies)
-
-Each base stat produces three combat-derived values plus a global `luck`. Multipliers
-are defined in `Game/game-mechanics.constants.ts`.
-
-| Derived Stat | Formula | Purpose |
-|--------------|---------|---------|
-| `physicalAttack` | `body × ATTACK (1)` | Combat roll modifier for body-type attacks |
-| `physicalDefense` | `body × DEFENSE (3)` | Defense against body-type attacks |
-| `mentalAttack` | `mind × ATTACK (1)` | Combat roll modifier for mind-type attacks |
-| `mentalDefense` | `mind × DEFENSE (3)` | Defense against mind-type attacks |
-| `emotionalAttack` | `heart × ATTACK (1)` | Combat roll modifier for heart-type attacks |
-| `emotionalDefense` | `heart × DEFENSE (3)` | Defense against heart-type attacks |
-| `luck` | `average(body, heart, mind)` | Crits, random events |
-
-## Non-Combat Stats (`NonCombatStats` — Character only)
-
-Saving throws and ability tests live on `character.nonCombatStats`. Enemies do not have
-these fields and fall back to their defense stats when a save is requested via
-`getSaveStat()`.
-
-| Non-Combat Stat | Formula | Purpose |
-|-----------------|---------|---------|
-| `physicalSave` | `body × SAVE (2)` | Saving throw vs body-type effects |
-| `physicalTest` | `body × TEST (4)` | General body ability tests |
-| `mentalSave` | `mind × SAVE (2)` | Saving throw vs mind-type effects |
-| `mentalTest` | `mind × TEST (4)` | General mind ability tests |
-| `emotionalSave` | `heart × SAVE (2)` | Saving throw vs heart-type effects |
-| `emotionalTest` | `heart × TEST (4)` | General heart ability tests |
+The six derived attack/defence stats, `luck`, and the six non-combat
+save/test stats were retired in TRIM THE FAT T2a (2026-09-25); the v24→v25
+save migration strips them from old saves.
 
 ## Resources
 
@@ -90,16 +66,16 @@ previewStatAllocation(baseStats, level, allocation)  // mobile preview helper
 ```
 
 `allocateStatPoint` raises the chosen base stat by 1, decrements
-`availableStatPoints`, and re-derives `derivedStats`, `nonCombatStats`, and
-`maxHealth` so the change is immediately visible. The Game reducer exposes
+`availableStatPoints`, and re-derives `maxHealth` (keeping any worn armor
+relic's `maxHp` bonus) so the change is immediately visible. The Game reducer exposes
 this as the `ALLOCATE_STAT_POINT` action; the Character tab in
 `npm run game` walks the player through allocation while points are
 available.
 
-`previewStatAllocation` computes exact derived stats for mobile's
+`previewStatAllocation` computes the resulting max VITAE for mobile's
 level-up allocation preview without mutating character data. Takes current
-base stats, character level, and allocation delta; returns computed stats
-using the same derivation formulas as `allocateStatPoint`. Pure function
+base stats, character level, and allocation delta; returns `{ maxHealth }`
+using the same formula as `allocateStatPoint`. Pure function
 for mobile's "what-if" preview. Added by Phase 97. `allocateStatPoint`
 shipped by Phase 29 (`9f2e3f6` + `121aea8` + `db7c26f`); closes
 `specs/06-character-progression.md` Q3 + Q8.
@@ -108,23 +84,11 @@ shipped by Phase 29 (`9f2e3f6` + `121aea8` + `db7c26f`); closes
 
 `effects: ActiveEffect[]` — effects currently applied to this character. Managed by the effect engine (`Effects/index.ts`). Never mutate directly; use `applyEffect`.
 
-## Resist Stat Lookup
-
-When resisting an effect, the target's **base stat** for the resisting stance is used
-via `getEffectiveStats(target).baseStats[stance]` in `Combat/effect-modifiers.ts`:
-
-| `resistedBy` | Stat used |
-|-------------|-----------|
-| `body` | `baseStats.body` |
-| `mind` | `baseStats.mind` |
-| `heart` | `baseStats.heart` |
-
 ## API
 
 | Function | Description |
 |----------|-------------|
 | `createCharacter(options)` | Factory — creates a fully derived Character from name, level, and base stats |
-| `getEffectiveStats(target).baseStats[resistedBy]` | Base stat value for the resisting stance (lives in `Combat/effect-modifiers.ts`) |
 | `characterPresets` / `getPresetById` / `buildCharacterFromPreset` | Curated progression-tier roster (apprentice / wanderer / sage). The builder lifts a declarative `CharacterPreset` into a `Character` via the canonical `createCharacter` + `dropItem` paths. Presets express card progression as unlocked `knownCards`; the legacy `equippedSkills` preset field was removed in Phase 159. `npm run game` prompts the player to pick one at boot. |
 | `levelLadderPresets` / `ladderL1Preset` / `ladderL15Preset` / `ladderL30Preset` / `ladderL50Preset` | Level-explicit evidence ladder (L1 / L15 / L30 / L50), kept **separate** from `characterPresets`. Used for tuning/evidence runs that need a clean per-level baseline. `getPresetById` resolves ladder ids (`kid-l1` … `kid-l50`) as well as the curated roster. |
 | `computeEquipDelta(candidate, worn, player?)` | Equip-change delta model (Phase 154). Simulates equipping/unequipping `candidate` against the worn sibling in the same slot through the `equipItem` / `unequipItem` reducers and diffs the resulting `Character` stats, returning an `EquipDelta` (`mode`: `equip` / `unequip` / `swap`; `stats`; `gained` / `lost` sides; `isEmpty`). Lets a client show **only what changes** without rendering the full sheet. Pure — no string formatting beyond engine effect/affix labels. |

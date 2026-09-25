@@ -93,19 +93,6 @@ its neighbours. Both reducers are pure.
 
 `IllegalMoveError` is thrown for any invalid move.
 
-## Hazard Tick on Movement (Spec 08 Q3, Q4)
-
-Each `moveToNode` should be paired with a player tick. Spec 08 keeps the
-world reducer pure (`moveToNode` only touches `WorldState`) and exposes the
-player-side helpers under `Effects/`:
-
-- `processWorldEffectTick(player) → { player, healed, damage, expired }` —
-  applies regen, drain, and DoT, then ticks duration / drops expired effects.
-  One world-step per call.
-- `getActiveHazards(player) → ActiveHazard[]` — UI-facing list of hazards
-  currently dealing world-step damage. The HUD renders these (engine only
-  exposes the data — Q4).
-
 ## Node Event Dispatcher
 
 The current dispatcher is `resolveMapEvent(state, rng?)` from
@@ -432,5 +419,4 @@ skill (`hazard.sim.ts`, `/hazard-tuning`).
 - [`specs/08-world-content-and-hazards.md`](../specs/08-world-content-and-hazards.md)
 - [`specs/23-map-events.md`](../specs/23-map-events.md)
 - [`docs/npcs.md`](./npcs.md) — branching dialogue UI conventions.
-- [`docs/effects.md`](./effects.md) — `processWorldEffectTick` integration with
-  the broader effects engine.
+- [`docs/effects.md`](./effects.md) — the effects engine.

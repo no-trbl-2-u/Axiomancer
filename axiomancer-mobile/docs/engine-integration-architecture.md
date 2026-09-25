@@ -153,8 +153,8 @@ vm.player.effects = player.effects.slice(0, MAX_EFFECTS_SHOWN);
 
 #### 3. Touch Interaction Patterns
 ```typescript
-// Engine: stance relationships
-determineAdvantage('heart', 'body') // → 'advantage'
+// Engine: stance relationships (drafted die vs the enemy's hidden stance)
+resolveRead('heart', 'body') // → 'advantage'
 
 // Mobile: touch-friendly stance picker
 vm.stancePicker.options = [
@@ -214,7 +214,7 @@ Bug: "Heart stance shows wrong advantage against Body enemy"
 
 Investigation path:
 1. Is the engine calculation wrong?
-   → Check determineAdvantage('heart', 'body') in engine tests
+   → Check resolveRead('heart', 'body') in engine tests
 2. Is the presenter mapping wrong?
    → Check stanceAdvantage() in combat.engine.ts
 3. Is the component display wrong?

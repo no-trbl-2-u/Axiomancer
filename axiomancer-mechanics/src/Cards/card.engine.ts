@@ -57,18 +57,6 @@ export function learnCard(
 
 /** One discrete thing that happened while a card resolved. */
 export type CardEvent =
-    | { kind: 'damage';
-        cardId: string;
-        target: 'self' | 'enemy';
-        amount: number;
-        hpBefore: number;
-        hpAfter: number }
-    | { kind: 'heal';
-        cardId: string;
-        target: 'self' | 'enemy';
-        amount: number;
-        hpBefore: number;
-        hpAfter: number }
     | { kind: 'effect-applied';
         cardId: string;
         appliedTo: 'self' | 'enemy';

@@ -10,7 +10,7 @@ The `Utils` module provides fundamental utilities used across the engine:
 - **Math utilities**: clamp, randomInt, average, sum, min/max, range checks
 - **String utilities**: capitalize, formatPercent  
 - **Dice system**: createDie, createDieRoll, advantage/disadvantage rolling
-- **Stat derivation**: deriveStats, deriveNonCombatStats, calculateMaxHealth
+- **Max VITAE**: calculateMaxHealth
 - **General**: deepClone for immutable operations
 
 All utilities follow the engine's RNG conventions — die rolls use `getRng()` instead of `Math.random` for deterministic testing.
@@ -135,34 +135,7 @@ const neutralMod = determineRollAdvantageModifier('neutral'); // returns sum
 const disMod = determineRollAdvantageModifier('disadvantage'); // returns min
 ```
 
-### Stat derivation
-
-#### `deriveStats(baseStats: BaseStats): DerivedStats`
-
-Calculates combat-relevant derived stats from base stats (body/heart/mind). Used by both Characters and Enemies.
-
-```typescript
-const derivedStats = deriveStats({ body: 10, heart: 8, mind: 12 });
-// Returns: physicalAttack, physicalDefense,
-//          mentalAttack, mentalDefense,  
-//          emotionalAttack, emotionalDefense, luck
-```
-
-The derivation uses constants from `game-mechanics.constants.ts`:
-- Attack stats: `baseStatValue * ATTACK_MULTIPLIER`
-- Card stats: `baseStatValue * SKILL_MULTIPLIER`  
-- Defense stats: `baseStatValue * DEFENSE_MULTIPLIER`
-- Luck: `average(body, heart, mind)`
-
-#### `deriveNonCombatStats(baseStats: BaseStats): NonCombatStats`
-
-Calculates non-combat stats for Characters (Enemies don't have these).
-
-```typescript
-const nonCombat = deriveNonCombatStats({ body: 10, heart: 8, mind: 12 });
-// Returns: physicalSave, physicalTest, mentalSave, mentalTest,
-//          emotionalSave, emotionalTest
-```
+### Max VITAE
 
 #### `calculateMaxHealth(level: number, healthStats: BaseStats): number`
 
@@ -199,38 +172,17 @@ setRng(mockSequentialRng([1, 2, 3, 4, 5, 6]));
 const roll = randomInt(1, 6);  // Will return 1, then 2, then 3...
 ```
 
-### Stat derivation pipeline
+### Max VITAE
 
-Character and Enemy creation both use the stat derivation utilities:
+`createCharacter` and `allocateStatPoint` both derive `maxHealth` from the
+base stats through `calculateMaxHealth` (`allocateStatPoint` adds back any
+worn armor relic's `maxHp` bonus):
 
 ```typescript
-import { deriveStats, calculateMaxHealth } from 'axiomancer-mechanics';
+import { calculateMaxHealth } from 'axiomancer-mechanics';
 
 const baseStats = { body: 10, heart: 8, mind: 12 };
-const derived = deriveStats(baseStats);
 const maxHealth = calculateMaxHealth(level, baseStats);
-
-const character = {
-  baseStats,
-  derivedStats: derived,
-  maxHealth,
-  currentHealth: maxHealth,
-  // ...
-};
-```
-
-### Advantage/disadvantage dice
-
-The dice system integrates with the combat advantage mechanics:
-
-```typescript
-import { createDieRoll } from 'axiomancer-mechanics';
-
-function rollAttack(advantage: Advantage): number {
-  const roll = createDieRoll(advantage);
-  const attackStat = getAttackStat(attacker, stance);
-  return roll() + attackStat;
-}
 ```
 
 ## Testing
