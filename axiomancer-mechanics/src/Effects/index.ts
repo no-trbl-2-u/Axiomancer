@@ -181,29 +181,9 @@ export function removeEffectsByType(
     return { activeEffects: remaining, removed };
 }
 
-export { lookupEffect, getEffectByName, getEffectsByType, effectsLibrary } from './effects.library';
-
-// Phase 142 — Status effect depth functionality
-export { 
-    evaluateInteractions, 
-    checkInteractionTrigger, 
-} from './interactions';
-export { 
-    EFFECT_INTERACTIONS, 
-    validateInteractions
-} from './amplification.registry';
+export { lookupEffect, effectsLibrary } from './effects.library';
 
 export type {
-    Effect, EffectType, EffectStacking, EffectTier, EffectCategory, EffectPayload,
-    ActiveEffect, EffectApplicationResult,
-    StatModifier, DamageOverTime, RegenerationConfig, ActionRestriction, AdvantageModifier,
-    // WS3 (spec 32 §12 #3) — trigger-clock DoT substrate
-    DotTriggerClock,
+    Effect, EffectType, EffectCategory,
+    ActiveEffect,
 } from './types';
-// Phase 142 — Status effect interaction types
-export type {
-    EffectInteraction,
-    InteractionTrigger,
-    InteractionResult,
-    InteractionTriggerType
-} from './interactions';

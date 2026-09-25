@@ -12,10 +12,7 @@
  */
 
 export type {
-    AxisBucket,
     PhilosophicalAlignment,
-    BesettingSin,
-    PhilosophicalAlignmentCell,
 } from './types';
 
 export {
@@ -23,8 +20,6 @@ export {
     getAlignmentCell,
     applyAlignmentDelta,
     defaultAlignment,
-    AXIS_HIGH_THRESHOLD,
     AXIS_LOW_THRESHOLD,
 } from './alignment.engine';
 
-export { philosophicalAlignmentLibrary } from './alignment.library';

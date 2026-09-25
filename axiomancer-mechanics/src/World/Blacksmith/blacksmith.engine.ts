@@ -30,7 +30,6 @@ import type { SeedInput } from '../seed';
 import {
     validateDieGear,
     concreteDefaultRail,
-    dieGearMissFaces,
     type DieGearColor,
     type DieGearRail,
 } from '../../Character/dieGear.reducer';
@@ -300,20 +299,4 @@ export function leaveBlacksmith(s: BlacksmithSession): BlacksmithSession {
 export function claimBlacksmithOutcome(s: BlacksmithSession): BlacksmithSession {
     if (s.phase !== 'outcome' || s.outcome === null) return s;
     return { ...s, phase: 'done' };
-}
-
-// ---------------------------------------------------------------------------
-// Read-only helpers (host UI / tests)
-// ---------------------------------------------------------------------------
-
-/** True when HONE would be legal for `color` (ignores budget). */
-export function canHone(rail: DieGearRail, color: DieGearColor): boolean {
-    return dieGearMissFaces(rail[color]) >= 2;
-}
-
-/** True when TEMPER would be legal for `color` (ignores budget). */
-export function canTemper(rail: DieGearRail, color: DieGearColor): boolean {
-    const gear = rail[color];
-    if (gear.manaFaces < 1) return false;
-    return validateDieGear({ ...gear, specialFaces: gear.specialFaces + 1, manaFaces: gear.manaFaces - 1 }, color) === null;
 }

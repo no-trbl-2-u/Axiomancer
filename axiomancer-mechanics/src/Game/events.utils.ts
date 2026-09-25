@@ -12,9 +12,9 @@
 import type { GameEvent } from './events';
 import type {
     TypedCombatStartedEvent, TypedCombatEndedEvent,
-    TypedWorldMovedEvent, TypedWorldProcessedEvent,
+    TypedWorldMovedEvent,
     TypedLevelUpEvent, TypedInventoryChangedEvent,
-    TypedDialogueAppliedEvent, TypedGameSavedEvent, TypedGameLoadedEvent,
+    TypedDialogueAppliedEvent,
 } from './events.types';
 
 export function isCombatStartedEvent(e: GameEvent): e is TypedCombatStartedEvent {
@@ -26,9 +26,6 @@ export function isCombatEndedEvent(e: GameEvent): e is TypedCombatEndedEvent {
 export function isWorldMovedEvent(e: GameEvent): e is TypedWorldMovedEvent {
     return e.type === 'world:moved';
 }
-export function isWorldProcessedEvent(e: GameEvent): e is TypedWorldProcessedEvent {
-    return e.type === 'world:processed';
-}
 export function isLevelUpEvent(e: GameEvent): e is TypedLevelUpEvent {
     return e.type === 'character:levelup';
 }
@@ -37,10 +34,4 @@ export function isInventoryChangedEvent(e: GameEvent): e is TypedInventoryChange
 }
 export function isDialogueAppliedEvent(e: GameEvent): e is TypedDialogueAppliedEvent {
     return e.type === 'dialogue:applied';
-}
-export function isGameSavedEvent(e: GameEvent): e is TypedGameSavedEvent {
-    return e.type === 'game:saved';
-}
-export function isGameLoadedEvent(e: GameEvent): e is TypedGameLoadedEvent {
-    return e.type === 'game:loaded';
 }

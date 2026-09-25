@@ -561,26 +561,10 @@ export function legalMovesFrom(map: MapState): NodeId[] {
  * exhausted — every node has been resolved, or the survivors are cut off
  * behind blocked routes. Walking into a corner is no longer possible: the
  * frontier does not depend on where the player stands, so a dead-end lane
- * is a detour, not a soft-lock. `isMapTerminalNode` still distinguishes the
- * authored end of a map.
+ * is a detour, not a soft-lock.
  */
 export function isStranded(map: MapState): boolean {
     return legalMovesFrom(map).length === 0;
-}
-
-/**
- * True when `nodeId` is an AUTHORED terminal node — one the map definition
- * gives no outgoing edges at all. Running out of moves here is the map
- * ending, not a soft-lock.
- */
-export function isMapTerminalNode(map: MapState, nodeId: NodeId): boolean {
-    const def = getMapDefinition(map.continent, map.name);
-    const node = def.nodes.find(n => n.id === nodeId);
-    if (node === undefined) return false;
-    // Forward skeleton, not raw edges: D1's lateral lane ribs are traversal,
-    // not progression, so a last-column node that gained a rib is still the
-    // authored end of the map.
-    return (forwardEdges(def).get(nodeId) ?? []).length === 0;
 }
 
 /** One strand a traversal audit found: entering `nodeId` by `via` dead-ends. */

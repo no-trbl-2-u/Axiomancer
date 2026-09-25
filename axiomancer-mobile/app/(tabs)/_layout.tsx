@@ -81,8 +81,8 @@ export default function TabLayout() {
   const AXM = usePalette();
   const styles = useStyles();
   const { inEncounterModal } = useCombatMode();
-  // Tab configuration: Combat moved to encounter modal (Phase 63d).
-  // STRIFE tab hidden from bar but route preserved for dev tools.
+  // Tab configuration: Combat moved to encounter modal (Phase 63d), so
+  // there is no combat tab; the five tabs are registered below.
   // Subscribe to the slim slices `selectTabBadges` reads, then memo
   // the badges object. The presenter returns a stable `EMPTY_BADGES`
   // reference in the no-event / no-levelup steady state but a fresh

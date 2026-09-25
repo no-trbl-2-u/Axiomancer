@@ -12,6 +12,13 @@ unchanged, but the absolute semver guarantee starts at 1.0.
 
 ## Core Exports (from `'axiomancer-mechanics'`)
 
+> **Barrel pruned 2026-09-25 (TRIM THE FAT).** `src/index.ts` now carries only
+> the names a consumer outside the engine imports (axiomancer-mobile,
+> axiomancer-card-editor, root scripts). Names listed below that are no longer
+> on the barrel are still exported from their defining module under `src/`;
+> import them from there. Symbols that had no consumer at all were deleted and
+> are struck from this page.
+
 ### Character
 
 - `createCharacter()` — Stable.
@@ -67,7 +74,7 @@ unchanged, but the absolute semver guarantee starts at 1.0.
 - `gameReducer()` — Stable.
 - `GameState`, `GameAction`, `GameActions` types — Stable.
 - Event emitter (`createEventEmitter`) — Stable.
-- Selectors (`selectPlayer`, `selectIsInCombat`, `selectInventory`,
+- Selectors (`selectPlayer`, `selectIsInCombat`,
   `selectMoralMeter`, etc.) — Stable.
 - `PersistenceAdapter` interface — Stable. (The concrete
   `createNodeAdapter` lives on the `./node` subpath only — see Node.js
@@ -295,12 +302,14 @@ the engine envelope above. Per-topic aliases ship for all 9
 - `TypedDialogueAppliedEvent`, `TypedGameSavedEvent`,
   `TypedGameLoadedEvent`
 
-And 9 type guards for filter / find style narrowing:
+And 6 type guards for filter / find style narrowing (the unused
+`isWorldProcessedEvent` / `isGameSavedEvent` / `isGameLoadedEvent` were
+deleted 2026-09-25):
 
 - `isCombatStartedEvent`, `isCombatEndedEvent`
-- `isWorldMovedEvent`, `isWorldProcessedEvent`
+- `isWorldMovedEvent`
 - `isLevelUpEvent`, `isInventoryChangedEvent`
-- `isDialogueAppliedEvent`, `isGameSavedEvent`, `isGameLoadedEvent`
+- `isDialogueAppliedEvent`
 
 Phase 21 removed the seven pre-existing `Typed*Payload` interfaces
 (`CombatStartedPayload`, etc.) and `create*Event` factories — the
@@ -342,7 +351,7 @@ reality.
   one call. Same soft-error + deterministic-rng convention as the
   single-cell helper.
 - Inventory management (`addItem`, `removeItem`, `useConsumable`,
-  `stackItem`, `addItemToInventory`, `removeItemFromInventory`) — Stable.
+  `stackItem`) — Stable.
 - Item types (`Item`, `Equipment`, `Consumable`, `Material`,
   `QuestItem`, `ItemCategory`, `EquipmentSlot`, `ItemRarity`,
   `RolledModifier`, etc.) — Stable.
@@ -457,8 +466,7 @@ hermetic walkthrough.
 ### Effects
 
 - Effect application (`applyEffect`,
-  `lookupEffect`, `getEffectByName`, `getEffectsByType`,
-  `effectsLibrary`) — Stable.
+  `lookupEffect`, `effectsLibrary`) — Stable.
 - Effect types (`Effect`, `EffectType`, `EffectTier`,
   `EffectStacking`, `EffectCategory`, `EffectPayload`,
   `ActiveEffect`, `StatModifier`, `DamageOverTime`,
@@ -521,7 +529,6 @@ authoring; the first batch is live as of Phase 44.
   `determineRollAdvantageModifier`) — Stable.
 - Max VITAE derivation (`calculateMaxHealth`) — Stable.
 - RNG (`setRng`, `getRng`, `setSeed`, `Rng`) — Stable.
-- Type guards (`isCharacter`, `isEnemy`, `isCombatActive`) — Stable.
 
 ## Node.js Exports (from `'axiomancer-mechanics/node'`)
 

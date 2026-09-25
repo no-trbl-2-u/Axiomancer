@@ -8,27 +8,15 @@
  * budget + variant offers and applies the upgraded rail to `Character.dieGear`
  * at claim.
  *
- * Seeded-RNG helpers are aliased `blacksmith*` because sibling modules already
- * export `seedRng`/`nextFloat`/… from the package root.
+ * The seeded RNG (`blacksmith.rng.ts`) is internal: the engine threads its
+ * state but never draws from it, so nothing re-exports it.
  */
 
 // ── Engine types ───────────────────────────────────────────────────────────
 export type {
-    BlacksmithVerb,
     BlacksmithVariantOffer,
-    BlacksmithCard,
-    BlacksmithOutcome,
-    BlacksmithPhase,
     BlacksmithSession,
 } from './blacksmith.types';
-
-// ── Seeded RNG (aliased — see module note) ─────────────────────────────────
-export type { BlacksmithRngState } from './blacksmith.rng';
-export {
-    seedRng as blacksmithSeedRng,
-    nextFloat as blacksmithNextFloat,
-    nextInt as blacksmithNextInt,
-} from './blacksmith.rng';
 
 // ── Tuning ─────────────────────────────────────────────────────────────────
 export { ANVIL_VERB_PRICING } from './blacksmith.engine';
@@ -46,6 +34,4 @@ export {
     continueBlacksmithCard,
     leaveBlacksmith,
     claimBlacksmithOutcome,
-    canHone,
-    canTemper,
 } from './blacksmith.engine';

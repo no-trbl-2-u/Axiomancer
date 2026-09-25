@@ -15,6 +15,7 @@ import {
 } from '@/state/store';
 import {
     selectActiveTab,
+    selectResumableFight,
     selectTabBadges,
     selectNavigationViewModel,
 } from '../presenters/navigation.engine';
@@ -32,15 +33,45 @@ function makeEnemy() {
 }
 
 describe('navigation.engine', () => {
-    describe('selectActiveTab', () => {
-        it('returns combat-encounter when in combat', () => {
+    describe('selectResumableFight', () => {
+        it('is null when no fight was in progress', () => {
             const store = createGameStore(createMemoryAdapter());
-            
-            // Start combat to set combat state
+            expect(selectResumableFight(store.getState())).toBeNull();
+        });
+
+        it('hands back the saved foe, walk-away allowed for an ordinary foe', () => {
+            const store = createGameStore(createMemoryAdapter());
             store.getState().startCombat(makeEnemy());
-            
+
+            const fight = selectResumableFight(store.getState());
+            expect(fight?.enemy.id).toBe('test-enemy');
+            expect(fight?.fleeAllowed).toBe(true);
+        });
+
+        it('seals WITHDRAW for a boss, as its prelude does', () => {
+            const store = createGameStore(createMemoryAdapter());
+            store.getState().startCombat({ ...makeEnemy(), difficulty: 'boss' } as never);
+
+            expect(selectResumableFight(store.getState())?.fleeAllowed).toBe(false);
+        });
+
+        it('is null once the fight has ended', () => {
+            const store = createGameStore(createMemoryAdapter());
+            store.getState().startCombat(makeEnemy());
+            store.getState().endCombat('victory');
+
+            expect(selectResumableFight(store.getState())).toBeNull();
+        });
+    });
+
+    describe('selectActiveTab', () => {
+        it('returns exploration when saved mid-fight (never the dev sandbox route)', () => {
+            const store = createGameStore(createMemoryAdapter());
+
+            store.getState().startCombat(makeEnemy());
+
             const result = selectActiveTab(store.getState());
-            expect(result).toBe('combat-encounter');
+            expect(result).toBe('exploration');
         });
 
         it('returns exploration when not in combat and no active event', () => {
@@ -294,14 +325,13 @@ describe('navigation.engine', () => {
             });
         });
 
-        it('reflects combat state in active route', () => {
+        it('keeps the map as the active route mid-fight (the map restarts the fight)', () => {
             const store: AppStore = createAppStore({ adapter: createMemoryAdapter() });
 
-            // Start combat
             store.getState().startCombat(makeEnemy());
 
             const result = selectNavigationViewModel(store.getState());
-            expect(result.activeTab).toBe('combat-encounter');
+            expect(result.activeTab).toBe('exploration');
         });
 
         it('is frozen in development', () => {

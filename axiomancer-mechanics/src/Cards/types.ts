@@ -414,16 +414,6 @@ type AssertNever<T extends never> = T;
 type _KindListCoversUnion = AssertNever<MissingFromKindList>;
 type _KindListHasNoStrays = AssertNever<NotAKind>;
 
-/** Narrowing guard for data read from outside the type system (JSON, MCP). */
-export function isCardSpecialMechanicKind(
-    value: unknown,
-): value is CardSpecialMechanic['kind'] {
-    return (
-        typeof value === 'string' &&
-        (CARD_SPECIAL_MECHANIC_KINDS as readonly string[]).includes(value)
-    );
-}
-
 /**
  * Fate Engine P1 — a card RIDER: a bundle of real-unit bonuses fired by a
  * die-interaction line (`threshold` / `dieBonus` / `fate`). Every field is an

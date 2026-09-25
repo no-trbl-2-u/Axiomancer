@@ -66,11 +66,6 @@ export const STARTING_CARD_IDS: readonly string[] = Object.freeze([
  *  drafts shown — a SKIP does not advance it. See `rollCombatCardRewards`. */
 export const REWARD_RANDOM_PICKS = 3;
 
-/** The single OFFENSIVE card a brand-new player started with before Phase 104
- *  (no longer in `STARTING_CARD_IDS`). Kept for back-compat; prefer
- *  `STARTING_CARD_IDS`. */
-export const STARTING_CARD_ID = 'spoiled-poultice';
-
 /**
  * A valid reward-pool entry must resolve to a real card. `extraPool` (WS6.2 —
  * the sandbox-injection hook) appends extra candidate ids to the library pool:

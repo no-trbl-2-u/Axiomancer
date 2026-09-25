@@ -44,8 +44,6 @@ export const DICE_ECONOMY_VERBS = Object.freeze([
     'die-refreshed', 'die-cracked', 'die-overflowed', 'press-fate-rerolled',
 ] as const);
 
-export type DiceEconomyVerb = (typeof DICE_ECONOMY_VERBS)[number];
-
 const DICE_ECONOMY_VERB_SET: ReadonlySet<string> = new Set<string>(DICE_ECONOMY_VERBS);
 
 /**

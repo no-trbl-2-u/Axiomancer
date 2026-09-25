@@ -70,12 +70,8 @@ import {
 } from '@/state/selectors/combat-cards';
 import { resolveWareItem } from '@/state/presenters/village.engine';
 import {
-    applyCombatDeckPresetAction,
     chosenStarterBundle,
-    randomizeCombatDeckAction,
     BUNDLE_CHOSEN_FLAG,
-    type CombatDeckPresetId,
-    type CombatDeckPresetResult,
 } from './combat/store-actions';
 import { EMPTY_EVENT_SLICE, EMPTY_LABYRINTH_SLICE, type AppStore } from './store';
 import {
@@ -455,17 +451,6 @@ export interface AppActions {
     applyHazardDeckPreset: (presetId: HazardDeckPresetId) => HazardDeckPresetResult;
     /** Marks the guided first crossing done (completed or skipped). */
     completeHazardTutorial: (skipped: boolean) => void;
-    /**
-     * Dev tool — swap the player's combat deck for a preset: replaces
-     * `knownCards` with the preset's card ids and clears earned reward
-     * cards, so the next encounter deals exactly that deck.
-     */
-    applyCombatDeckPreset: (presetId: CombatDeckPresetId) => CombatDeckPresetResult;
-    /**
-     * Dev tool — rebuild the combat deck as a random pull from every
-     * defined combat card (starter + reward pool). Returns the granted ids.
-     */
-    randomizeCombatDeck: () => string[];
 
     // -----------------------------------------------------------------
     // Rest-choice encounter (see state/rest/). One irreversible choice
@@ -854,8 +839,6 @@ export function createAppActions(store: AppStore): AppActions {
         randomizeHazardDeck: () => randomizeHazardDeckAction(store),
         applyHazardDeckPreset: (presetId) => applyHazardDeckPresetAction(store, presetId),
         completeHazardTutorial: (skipped) => completeHazardTutorialAction(store, skipped),
-        applyCombatDeckPreset: (presetId) => applyCombatDeckPresetAction(store, presetId),
-        randomizeCombatDeck: () => randomizeCombatDeckAction(store),
         // ── The Labyrinth (THE APORIA) ──
         enterLabyrinth: (actId) => {
             enterLabyrinthAction(store, actId);

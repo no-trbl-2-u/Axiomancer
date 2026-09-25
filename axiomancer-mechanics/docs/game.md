@@ -92,7 +92,6 @@ The store provides typed selectors for common queries:
 |----------|-------------|---------|
 | `selectPlayer(state)` | `Character` | Current player character |
 | `selectIsInCombat(state)` | `boolean` | Whether player is in combat |
-| `selectInventory(state)` | `Item[]` | Player inventory items |
 | `selectVersion(state)` | `number` | Game state schema version |
 | `selectMoralMeter(state)` | `number` | Current moral alignment |
 

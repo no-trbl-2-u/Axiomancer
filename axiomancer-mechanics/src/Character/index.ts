@@ -172,29 +172,26 @@ export function previewStatAllocation(
     return { maxHealth: calculateMaxHealth(level, previewStats) };
 }
 
-export type { Character, BaseStats, PreviewAllocation, PreviewResult, EquipmentLoadout } from './types';
-export { emptyLoadout } from './types';
-export { equipItem, unequipItem, getEquippedItems, wornMaxHpBonus } from './equipment.reducer';
+export type { Character, BaseStats } from './types';
+export { equipItem, unequipItem, getEquippedItems } from './equipment.reducer';
 export {
     grantFirstNodeRelic, withholdFirstNodeRelic, isFirstNodeRelicPending,
     FIRST_NODE_RELIC_ID, STAND_IN_RELIC_ID, FIRST_NODE_RELIC_FLAG,
 } from './first-node-grant';
-export type { FirstNodeRelicGrant, FirstNodeGrantReason } from './first-node-grant';
 export { computeEquipDelta } from './equip-delta';
 export type {
-    EquipDelta, EquipDeltaMode,
-    StatDeltaEntry, SignatureDeltaEntry,
+    EquipDelta,
+    SignatureDeltaEntry,
 } from './equip-delta';
 export {
-    honeDieGear, temperDieGear, swapDieGear,
-    validateDieGear, concreteDefaultRail, characterDieGear,
+    validateDieGear, concreteDefaultRail,
     dieSpecialCap, dieGearMissFaces,
-    DIE_GEAR_COLORS, DIE_GEAR_FACE_COUNT,
+    DIE_GEAR_COLORS,
 } from './dieGear.reducer';
-export type { DieGearColor, DieGearRail, DieGearOutcome } from './dieGear.reducer';
+export type { DieGearColor, DieGearRail } from './dieGear.reducer';
 export {
-    characterPresets, apprenticePreset, wandererPreset, sagePreset,
-    levelLadderPresets, ladderL1Preset, ladderL15Preset, ladderL30Preset, ladderL50Preset,
+    characterPresets,
+    levelLadderPresets,
     getPresetById, buildCharacterFromPreset,
 } from './presets';
-export type { CharacterPreset, CharacterPresetEquipmentEntry } from './presets';
+export type { CharacterPreset } from './presets';

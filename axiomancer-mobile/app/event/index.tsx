@@ -1,15 +1,18 @@
 /**
- * /event — DEFENSIVE FALLBACK SHELL (Phase 137 cleanup).
+ * /event — the generic paced-event card (Phase 137 cleanup; gathering
+ * receipt 2026-09-21).
  *
- * Every event kind now has a dedicated surface: interaction →
+ * Most event kinds have a dedicated surface: interaction / narration →
  * /dialogue, village → /village, cutscene → /cutscene; rest /
- * gathering / loot-cache / hazard / quest are intercepted in
- * `resolveCurrentMapEventAction` and launch minigame sessions;
- * encounters render via `<EncounterModalOverlay>` over the map. In
- * production NOTHING routes here anymore — the screen survives only
- * as the `selectPacedEventRoute` fallback so an unforeseen paced kind
- * degrades to a readable generic modal instead of a dead end. The
- * kind-specific chrome (category headers/sashes) and the dialogue-
+ * loot-cache / hazard are intercepted in `resolveCurrentMapEventAction`
+ * and launch minigame sessions; encounters render via
+ * `<EncounterModalOverlay>` over the map. In production this screen is
+ * the GATHERING acknowledgement: a gather node grants its items and
+ * `selectPacedEventRoute` mounts this card so the player is told what
+ * they picked up (`state/e2e/gathering-acknowledgement.engine.test.ts`).
+ * It is also the `selectPacedEventRoute` fallback, so an unforeseen
+ * paced kind degrades to a readable generic card instead of a dead end.
+ * The kind-specific chrome (category headers/sashes) and the dialogue-
  * confirmation flash moved out with their kinds.
  */
 

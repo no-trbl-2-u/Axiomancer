@@ -6,8 +6,7 @@
  * Two props (left / right), single render branch. Pin: passthrough
  * of both tokens, accessibilityRole='header' on the wrapper, and
  * the codex-distinct palette split — parchment for the left
- * (region), bone for the right (node id). Mirrors the test shape
- * of `CodexStatusStrip` but with a paired-token contract.
+ * (region), bone for the right (node id).
  */
 
 import { describe, expect, it } from '@jest/globals';

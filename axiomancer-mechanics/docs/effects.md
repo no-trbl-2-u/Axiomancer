@@ -442,8 +442,6 @@ Full per-effect documentation (archived 2026-09-25): `plan/archive/2026-09-25-tr
 | Function | File | Description |
 |----------|------|-------------|
 | `lookupEffect(effectId)` | `src/Effects/effects.library.ts` | O(1) lookup by effect ID from the registry |
-| `getEffectByName(name)` | `src/Effects/effects.library.ts` | Find effect by display name (slower linear scan) |
-| `getEffectsByType(type)` | `src/Effects/effects.library.ts` | Get all buffs or all debuffs |
 | `applyEffect(effects, effect, round, options?)` | `src/Effects/index.ts` | Core stacking engine — applies an effect respecting all stacking modes |
 | `removeEffect(effects, effectId)` | `src/Effects/index.ts` | Removes the first ActiveEffect with the given ID |
 | `removeEffectsByType(effects, type, maxTier?)` | `src/Effects/index.ts` | Bulk strip by buff/debuff with optional tier cap (used by cleanse/dispel) |

@@ -51,13 +51,3 @@ export const THEME_KEYWORDS: Record<CardTheme, readonly string[]> = Object.freez
     // The grey office carries no archetype keywords by design (Phase 104).
     grey: [],
 });
-
-/** The keyword family for a theme (empty for an unknown key). */
-export function keywordsForTheme(theme: CardTheme): readonly string[] {
-    return THEME_KEYWORDS[theme] ?? [];
-}
-
-/** True when the string is a known card theme. */
-export function isCardTheme(v: string): v is CardTheme {
-    return (CARD_THEMES as readonly string[]).includes(v);
-}

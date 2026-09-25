@@ -33,10 +33,6 @@ export interface JuiceTiming {
         fadeDurationMs: number;
         riseDurationMs: number;
     };
-    transitions: {
-        enterMs: number;
-        exitMs: number;
-    };
     /**
      * The looping "this thing is alive" idle — a breath swell plus a slower
      * vertical float. Two ends of a weight axis (a scurrying vermin vs a
@@ -57,7 +53,6 @@ export const JUICE_TIMING: JuiceTiming = {
     flash: { inMs: 90, outMs: 260, peakOpacity: 0.4 },
     pulse: { peakScale: 1.12, inMs: 90, outMs: 220 },
     numberPop: { riseDistancePx: 34, fadeDelayMs: 120, fadeDurationMs: 760, riseDurationMs: 880 },
-    transitions: { enterMs: 180, exitMs: 140 },
     idle: {
         breathMs: { light: 1500, heavy: 2600 },
         breathScale: { light: 1.014, heavy: 1.032 },

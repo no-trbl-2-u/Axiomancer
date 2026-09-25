@@ -57,6 +57,3 @@ export type GameAction =
     | { type: 'LOAD_GAME';      payload?: undefined }
     | { type: 'RESET_RUN';      payload: { keepCharacter: boolean } }
     | { type: 'UNLOCK_CODEX_ENTRY'; payload: { entryId: string } };
-
-/** Narrowed action type, extracted by `type` discriminator. */
-export type GameActionOf<T extends GameAction['type']> = Extract<GameAction, { type: T }>;

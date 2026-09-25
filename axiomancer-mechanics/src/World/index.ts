@@ -44,62 +44,37 @@ export function createStartingWorld(): WorldState {
 }
 
 export type { SeedInput } from './seed';
-export { seedInputToUint32, minigameRunSeed, branchMinigameSeed } from './seed';
 
 export {
-    MAP_REGISTRY, getMapDefinition, createMapState, MapNotFoundError,
+    MAP_REGISTRY, getMapDefinition, createMapState,
 } from './map.registry';
 
 export type {
-    WorldState, Continent, Quest, UniqueEvent,
-    Reward, MapNode, NodeId, Encounter,
-    MapDefinition, MapState, QuestObjective, QuestObjectiveType, QuestStatus, QuestLog,
-    HazardModifierEntry, HazardNodeOutcome, BlockedRoute,
+    WorldState, Quest,
+    Encounter,
+    MapState, QuestObjective, QuestLog,
 } from './types';
 export type { MapName, ContinentName } from './map.library';
 export type { QuestName } from './quest.library';
 
 export {
-    generateEncounter, scaleEnemyToLevel, scaledEncounterLevel,
-    DIFFICULTY_LEVEL_BANDS,
-} from './encounter';
-export type { GenerateEncounterOptions } from './encounter';
-
-export {
-    emptyQuestLog, isQuestComplete, findActiveQuest, findQuest,
-    startQuest, progressQuest, completeQuest, discoverQuest,
-    reachableObjectives, killObjectives, collectObjectives, advanceKillObjectives,
+    emptyQuestLog, isQuestComplete, findActiveQuest,
+    startQuest, progressQuest, completeQuest,
 } from './quest.engine';
-
-// The `Reward` union resolver. `quest.engine.ts` owns log/objective machinery
-// and pays nothing; this is the payout half, including the `{ kind: 'item' }`
-// and bare-`Item` reward shapes the store's END_COMBAT branch never handled.
-export {
-    payQuestReward, payQuestRewards, isItemReward, isKindedReward, itemOf,
-} from './quest-reward';
-export type { QuestRewardPayout } from './quest-reward';
 
 export {
     moveToNode, completeCurrentNode, IllegalMoveError,
     changeMap, completeMap, unlockMap,
-    completeNode, unlockNode, changeContinent, completeUniqueEvent,
-    revealAdjacent, markNodeConsumed, unlockAdjacent,
+    completeNode, unlockNode, changeContinent,
+    revealAdjacent, markNodeConsumed,
     teleportToNode, placeOnNode, unblockMapRoute,
     // 2026-08-08 first-map audit: traversal queries + the strand audit.
-    legalMovesFrom, isStranded, isMapTerminalNode, auditMapTraversal,
+    legalMovesFrom,
     // D1 (2026-09-21) — frontier roaming: the derived spent/frontier sets
     // every surface classifies nodes from, plus the forward skeleton the
     // progression audits walk.
-    visitedNodes, isNodeSpent, frontierNodes, isFrontierExhausted, forwardEdges,
-    // Phase 53c — the route-coverage walk, beside the strand audit.
-    auditRouteCoverage,
+    forwardEdges,
 } from './world.reducer';
-export type { MapStrand, MapTraversalAudit, MapRouteCoverage } from './world.reducer';
-
-// Phase 53a — narrative reachability guard.
-export { auditNarrativeReachability } from './narrative-reachability';
-export type { NarrativeReachabilityAudit } from './narrative-reachability';
-
 
 // Spec 23 — MapEvents engine.
 // Importing `./MapEvents/content` for its side effect registers every
@@ -108,39 +83,30 @@ import './MapEvents/content';
 
 export {
     resolveMapEvent,
-    registerMapEventPool,
-    setDefaultMapEventPool,
-    setNodeEventPoolOverride,
     getNodeEventPool,
-    getNodeEventKinds,
     getNodePrimaryEventKind,
-    getShadowedNodeOverrideKeys,
 } from './MapEvents/resolve-map-event';
 export type {
-    MapEventKind, MapEventPayload, MapEventPool, MapEventPoolEntry,
-    EncounterPayload, InteractionPayload, GatheringPayload, RestPayload,
-    VillagePayload, CutscenePayload, HazardPayload, LootCachePayload,
-    NarrationPayload, BlacksmithPayload, TravelPayload, ResolvedEvent, ResolveMapEventResult,
+    MapEventKind,
+    ResolvedEvent, ResolveMapEventResult,
 } from './MapEvents/types';
 // Phase 52b — rest shelter classification (replaces the healFraction >= 1.0
 // inn heuristic). Mobile gates the hazard-scar mend on `shelter === 'inn'`.
 export type { RestShelter } from './MapEvents/types';
 export {
-    DEFAULT_REST_SHELTER, REST_PASSIVE_HEAL_FRACTION, restShelterOf, isInnShelter,
+    DEFAULT_REST_SHELTER, isInnShelter,
 } from './MapEvents/rest-shelter';
 
 // Phase 65 — village goodwill reward tiers (discount / Ally grant / bonus).
 export {
-    GOODWILL_DISCOUNT_THRESHOLD, GOODWILL_DISCOUNT_RATE,
     GOODWILL_ALLY_THRESHOLD, GOODWILL_ALLY_CARD_ID,
-    GOODWILL_BONUS_THRESHOLD, GOODWILL_BONUS_CURRENCY, GOODWILL_BONUS_FLAG_PREFIX,
+    GOODWILL_BONUS_THRESHOLD, GOODWILL_BONUS_CURRENCY,
     applyGoodwillDiscount, goodwillBonusFlag,
 } from './village-goodwill';
 
 export {
     applyDialogueChoice,
 } from './dialogue.runtime';
-export type { ApplyDialogueChoiceResult } from './dialogue.runtime';
 
 // Hazard Minigame (Phase 131)
 export * from './Hazard';
@@ -150,25 +116,18 @@ export * from './Hazard';
 import './Labyrinth/labyrinth.pools';
 
 export {
-    createLabyrinthProgress, visibleDoors, canTraverse, inspectPoi,
-    submitGateAnswer, preConfirmedWords, buyHint, hintPrice, nextHopToward,
+    createLabyrinthProgress, visibleDoors, inspectPoi,
+    submitGateAnswer, preConfirmedWords, buyHint, hintPrice,
     debtPoints, borrowedPremiseStacks, settleDebt, activateWaystone,
-    lastWaystone, namingForkOpen, recordBossOutcome, getRoom, edgeKey,
+    lastWaystone, namingForkOpen, recordBossOutcome, getRoom,
     recordWalk, walkedEdgesOf, isSophistTrueName,
-    LabyrinthContentError,
-    HINT_TIER_POINTS, ASSERTION_POINTS,
-    BORROWED_PREMISE_THRESHOLDS, BORROWED_PREMISE_CAP,
     SETTLE_PRICE_PER_POINT,
 } from './Labyrinth/labyrinth.engine';
 export { resolvePoiTrap } from './Labyrinth/labyrinth.pools';
 export {
-    APORIA_ACTS, getAporiaAct, getAporiaActByMap,
-    buildLabyrinthMapDefinition,
-    aporiaColonnade, aporiaArchive, aporiaProof,
+    APORIA_ACTS, getAporiaAct,
 } from './Labyrinth/maps';
 export type {
-    LabyrinthActDef, LabyrinthActId, LabyrinthRoomDef, LabyrinthPoiDef,
-    LabyrinthDoorDef, LabyrinthGateDef, LabyrinthRealm, LabyrinthFragment,
-    LabyrinthProgress, LabyrinthHintPurchase, LabyrinthBossOutcome,
-    LabyrinthVisibleDoor, LabyrinthInspectResult, LabyrinthGateResult,
+    LabyrinthActDef, LabyrinthActId,
+    LabyrinthProgress, LabyrinthBossOutcome,
 } from './Labyrinth/types';

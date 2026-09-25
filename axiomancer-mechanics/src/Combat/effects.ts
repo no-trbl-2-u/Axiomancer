@@ -648,14 +648,6 @@ export function getBackfirePerRung(bearer: Combatant): number {
     }, 0);
 }
 
-/** Total MARK stacks on the bearer (the conclusion-burst fuel). Pure. */
-export function getMarkStacks(bearer: Combatant): number {
-    return bearer.effects.reduce((total, ae) => {
-        const p = lookupEffect(ae.effectId)?.payload;
-        return total + ((p?.tickAmplifyFlat ?? 0) > 0 ? (ae.intensity ?? 1) : 0);
-    }, 0);
-}
-
 /** Consumes every MARK-class effect on the bearer, returning the stacks removed. */
 export function consumeMarks<T extends Combatant>(bearer: T): { combatant: T; stacks: number } {
     let stacks = 0;

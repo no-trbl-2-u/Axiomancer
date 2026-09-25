@@ -19,56 +19,32 @@ import { FRIENDSHIP_COUNTER_MAX } from '../Game/game-mechanics.constants';
 import { CombatState } from './types';
 
 export type {
-    Stance, Action, Advantage, CritStyle, CombatAction, PlayerCombatAction,
-    CombatPhase, CombatState, Combatant,
+    Stance,
 } from './types';
 
 export { applyDamage, heal, isAlive, isDefeated, getHealthPercentage } from './health';
 export {
-    MIND_MARK_ID,
     getStudyMarkIntensity, getActiveRollModifier, getThornsReflect,
     updateEffectDuration, tickAllEffects,
-    removeRandomBuff, extendRandomBuffDuration, applyRegen, applyDrain,
-    processDamageOverTime, processRoundStartEffects, processRoundEndEffects,
-    applyCleanse, applyDispel,
+    removeRandomBuff, extendRandomBuffDuration,
     // 0.34.0 status-depth epic — HP-model selectors + tunable scalars
-    getDamageTakenMultiplier, getPendingDotTotal, consumeDotEffects, computeRoundsToKill,
-    getDistinctDebuffCount, getDistinctControlCount,
-    VULNERABLE_MAX_MULT, RESOLUTE_MIN_MULT, RUPTURE_CAP_FRACTION, ruptureBurstCap,
-    RUPTURE_PER_AFFLICTION_STACK, DISRUPT_DENY_AT, THREAT_RUNGS, THREAT_RUNGS_BOSS,
+    VULNERABLE_MAX_MULT, RUPTURE_CAP_FRACTION,
+    DISRUPT_DENY_AT,
     CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
     // CONDEMN Premise floor per enemy difficulty — the single source the engine
     // AND every presenter/catalog surface share (WI-6 concede ladder).
     concedeFloorFor,
     // RELENT (PLEA) resolve threshold — presenters read the live target off
     // this instead of duplicating the rule (WI-5 sway meter).
-    capitulateThreshold, CAPITULATE_RESOLVE_FRACTION, CAPITULATE_MIN,
-    // Spec 32 v3 — themed-deck selectors
-    consumeAfflictions, consumeOneAffliction, getBackfirePerRung,
-    getMarkStacks, consumeMarks,
-    // P0-truth — the formerly-inert payload channels are real; presenters read
-    // the live multipliers off these instead of hard-coding.
-    getHealingReceivedMult, getOutgoingDamageMult, decayDotsOnHeal, consumeEffect,
-    hasPayloadFlag,
-    // WS3.2 — trigger-clock DoT substrate (spec 32 §12 #3)
-    fireDotTrigger, growPerEnemyActionDots, EXPECTED_TRIGGERS_PER_ROUND,
-    // WS8.2 — telegraph-damage control surface (spec 32 §12 #6)
-    getOutgoingThreatDamageMult,
+    capitulateThreshold,
 } from './effects';
-export type { PendingDotEntry, DotTriggerResult } from './effects';
+
 export {
     getActiveEffectModifiers, canAct,
-    // 0.34.0 — surfaced DoT amplification (Hemorrhage / Dissolution / Corrosive Fire)
-    getDotAmplificationByEffect, getActiveDotTotal, getActiveDotAmplifications,
-    // WS3 — DoT clock classification (round clocks vs event clocks)
-    dotRoundClockPhase, dotEventTrigger,
 } from './effect-modifiers';
 export type {
     AggregatedEffectModifiers,
-    ActiveDotEntry, ActiveDotAmplification,
-    DotEventTrigger,
 } from './effect-modifiers';
-export { resolveEffectApplication } from './resist';
 
 // `CombatState` constructor — shared by the card / effects / equipment engines
 // (and the Hazard-Pattern shim builds the same shape inline). The legacy
@@ -128,24 +104,19 @@ export function isBefriendAttemptEligible(state: CombatState): boolean {
 // that imported `applyDamage` and `healCharacter` separately.
 export { heal as healCharacter } from './health';
 
-// Phase 142 — effect-interaction amplification bounds (shared infrastructure).
-export { INTERACTION_AMPLIFICATION } from './resolution.constants';
-
 // ─── Spec 25 — Hazard-Pattern Combat ──────────────────────────────────────────
 // The card-and-dice combat driver; the
 // effects + card engines are unchanged (Spec 25 §12 Q4 recommendation (b)).
 export type {
-    CombatEncounterState, CombatEncounterPhase, CombatTransition,
-    CombatManaDie, CombatDieColor, CombatDieState,
-    CombatCard, CombatHandEntry, CardPlay, CombatVerbClass, CardEffectKind,
+    CombatEncounterState,
+    CombatManaDie, CombatDieColor,
+    CombatCard, CombatVerbClass, CardEffectKind,
     CombatThreatPhase, CombatThreatAction, CombatThreatEffect,
-    CombatThreatMark, CombatPhaseResult, CombatOutcome, CombatEvent,
-    CombatSummary, CombatAttributionRow, LandedEffect,
+    CombatOutcome, CombatEvent,
+    CombatSummary,
     // Spec 26 / 26b additions
     CombatIntentType, CombatReadResult,
-    SignatureSkill, SignatureSkillId, SignatureSkillKind,
-    // WS9 (spec 32 §12 #7) — legible conditional threat branches
-    ThreatBranchCondition, CombatThreatBranch, CombatThreatBranchOutcome,
+    SignatureSkill,
     // The three chain/stance colours (spec 33 momentum chain + stance checks)
     WheelStance,
     // Spec 33 (Phase D2) — the die-gear interface (D5 makes it a real rail)
@@ -157,149 +128,69 @@ export type {
 } from './combat.encounter.types';
 export {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
-    resolveCombatPhase, resolveThreatPhase, processBetweenPhases,
+    resolveThreatPhase, processBetweenPhases,
     selectMercyChoice as selectEncounterMercyChoice, selectCapitulationChoice, getCard,
-    handCards, availableDice, buildCombatSummary,
+    handCards, buildCombatSummary,
     // Spec 26b / spec 33 — turn lifecycle + Conviction + Signature Skills
-    startTurn, endTurn, discardCombatCard, firstLegalPoweringDie,
-    playSignatureSkill, isPhaseStanceRevealed, revealedCurrentStance,
+    startTurn, endTurn, discardCombatCard,
+    playSignatureSkill, isPhaseStanceRevealed,
     // Phase 33d — GLYPHS pilot: the dieless crack action
     crackGlyph,
     // Phase 102 — SUMMON: the dieless-but-priced add clear, and its constants
-    strikeAdd, ADD_WAVE_CAP, STRIKE_ADD_COST, ADD_BITE_PER_LEVEL,
-    // WS8.2 — stance-blur readout flag (mobile renders the stance panel fogged)
-    isStanceReadoutBlurred,
-    projectCardImpact, getSignatureSkill, SIGNATURE_SKILLS, SIGNATURE_SKILL_LIST,
+    strikeAdd, ADD_WAVE_CAP, STRIKE_ADD_COST,
+    getSignatureSkill,
     READ_DAMAGE_MULT,
-    COLOR_MATCH_DAMAGE_BONUS,
     // THE BIG NUMBERS REWRITE — the LIVE colour-match rule. Mobile's presenter
-    // must consume this, not the deprecated flat constant above, or the card
-    // face prints a bonus the engine does not apply.
+    // must consume this, or the card face prints a bonus the engine does not
+    // apply.
     colorMatchBonus,
-    COLOR_MATCH_BONUS_PCT,
-    COLOR_MATCH_BONUS_MIN,
-    THREAT_WEAKEN_PER_ROLL, THREAT_DENY_AT, THREAT_WEAKEN_FLOOR,
-    // depth epic — the clock escalates threat
-    THREAT_ESCALATION_PER_ROUND, THREAT_ESCALATION_GRACE, THREAT_ESCALATION_MAX,
-    THREAT_ESCALATION_BOSS_MULT, THREAT_EFFECT_ESCALATION_STEP,
     // Fate Engine P1 (spec 31) — the dice get a second read
     riderText,
-    PIP_INTENSITY_BONUS, PIP_GUARD_BONUS, COLOR_MATCH_STATUS_DURATION_BONUS,
     // 0.34.0 status-depth epic — honesty selectors
-    getEnemyIncomingDamageMultiplier, getDisruptMeter,
-    projectRupture, projectRuptureBurst, projectSiphonHeal, projectReapAll,
+    projectRuptureBurst,
     // phase 28 — legibility sweep
     projectIncomingThreat,
     // WS7.2 — chosen X-cost clamp range (`recoil_x`), engine-owned
     recoilXRange,
     // Phase 2 — projected-lethality readout (spec 30); heal-aware since 2026-09-04
-    projectCombatOutcome, projectEnemyHealPerRound,
+    projectCombatOutcome,
     // Spec 32 v3 — floating dice save-back + sway decay knob
     getFloatingDiceColors, SWAY_DECAY_PER_TURN,
-    // Spec 33 (Phase D2) — Upgradeable Dice: OVERHEAT's primitive
-    overheatSpentDie,
 } from './combat.engine';
 // Spec 33 — the Upgradeable-Dice model: THE combat dice model (the flag was
 // collapsed in D7, 2026-09-25).
 export {
-    UPGRADEABLE_DIE_COLORS, UPGRADEABLE_TABLE_CEILING, KINDLE_CONCURRENT_CAP,
-    PRESS_FATE_COST, OVERHEAT_CRACK_CHANCE, SPECIAL_FIRES_ON_USE,
+    PRESS_FATE_COST,
     SPECIAL_CONVICTION_DEFAULT, MOMENTUM_CHAIN_ORDER, MOMENTUM_SURGE_LENGTH,
-    SURGE_DIE_PREFIX, DEFAULT_DIE_GEAR, activeDieGear, honedDieGear,
-    rollUpgradeableFace, rollUpgradeableDice, rollGoldLeadPair,
-    advanceMomentumV2, rerollMissFacesHonest, resolveStanceCheck,
-    tableDieObjectCount, tableHasRoom, isChainStance,
+    DEFAULT_DIE_GEAR, activeDieGear,
 } from './combat.upgradeable-dice';
-export type { MomentumV2, UpgradeableDieFace } from './combat.upgradeable-dice';
-/**
- * @deprecated Superseded by the COLOR LAW for die COST / play legality
- * (`playCombatCard`'s color-match gate); retained only as the legacy 0/1/2
- * advantage-READ classifier (spec 25 §4.8). No `axiomancer-mobile` consumers
- * as of 2026-07-11 (grep-verified) — the mechanics CLI hand renderer is the
- * sole caller; any future mobile adopter migrates next minor. Removal is a
- * semver-major phase (locked-barrel rule), so the exports stay.
- */
-export type { FinisherProjection, CombatOutcomeProjection } from './combat.engine';
+
 export {
-    COMBAT_DIE_FACES, rollCombatDieColor, dieHasStance,
-    combatDieCanPower, refreshOneDie,
-    // The `reroll_spent` card mechanic's partial re-roll
-    dieIsRerollable, hasRerollableDice, rerollSpentDice,
-    // Master Spec §4 — wild-die permanent-growth mechanic
-    MAX_PERMANENT_WILD_DICE,
-    RESERVE_MAX, RESERVE_PIP_CAP, ripenReserve,
-    // Phase 32 part 4c — Forge OVERHEAT (the press-your-luck pip push)
-    OVERHEAT_PIP_CEILING, OVERHEAT_BUST_CHANCE, overheatReserve,
+    combatDieCanPower,
+    RESERVE_MAX,
 } from './combat.dice';
-export { COMBAT_HAND_SIZE, buildCombatDeck, drawCombatCards, shuffleCombatDeck } from './combat.deck';
+export { COMBAT_HAND_SIZE, buildCombatDeck } from './combat.deck';
 export {
     COMBAT_DECK_PRESETS, COMBAT_DECK_PRESET_ORDER,
     // aspect-thirds recipe color law (spec 32 §12 item 9) — the documented borrow map
     PRESET_LINEAGE,
-    listDeckPresets, getDeckPreset, buildPresetDeck,
+    listDeckPresets, getDeckPreset,
 } from './combat.starter-deck-presets';
-export type { CombatDeckPreset, CombatDeckFocus } from './combat.starter-deck-presets';
+
 export {
-    toCombatCard, projectDeck, classifyVerbClass,
+    toCombatCard,
 
     mechanicText,
-    // WS4.2 — printed text for a combat-state synergy condition (P0-truth)
-    statePredicateText,
-    isCombatSynergySatisfied,
 } from './combat.cards';
 export {
-    getThreatSequence, generateDefaultThreatSequence,
-    deriveIntentType, AUTHORED_THREAT_ENEMY_IDS,
-    RAGE_UNLOCK_ROUND, RAGE_DAMAGE_WEIGHT, RAGE_HEAL_FRACTION,
-    // WS9 — branch-node authoring + phase-START commit
-    isBranchStep, flattenAuthoredSteps,
-    describeThreatBranchCondition, evaluateThreatBranchCondition, commitThreatBranch,
+    getThreatSequence,
 } from './combat.threat';
-export type { AuthoredThreatPhase, AuthoredThreatBranch, AuthoredThreatStep } from './combat.threat';
+
 export {
-    simulateHazardPatternCombat, simulateHazardPatternCombatDetailed, runOneEncounter,
-} from './combat.encounter.sim';
-export type {
-    CombatSimStats, CombatSimPolicyId,
-    CombatSimRunOptions, CombatSimDetailedOptions, CombatCardUsage, WinPathCounts,
-} from './combat.encounter.sim';
-// ─── Playtest supercharge — stage profiles, deck drafting, policy roster, matrix ──
-export {
-    COMBAT_STAGE_ORDER, COMBAT_STAGE_PROFILES,
-    getStageProfile, isCombatStageId, stageEligibleCardIds, buildStagePlayer,
-} from './combat.stage-profiles';
-export type { CombatStageId, CombatStageProfile } from './combat.stage-profiles';
-export { draftCombatDeck, resolveDeckSelection, applyDeckSwaps } from './combat.deck-draft';
-export type { DeckDraftOptions, CombatDeckSelection, CombatDeckSwap } from './combat.deck-draft';
-export {
-    COMBAT_SIM_POLICIES, COMBAT_SIM_POLICY_ORDER, getSimPolicy, listSimPolicies,
-} from './combat.sim-policies';
-export type { CombatSimPolicy } from './combat.sim-policies';
-export {
-    runPlaytestCell, runPlaytestMatrix, formatPlaytestReport, PRESET_DOCTRINE_WIN_BANDS,
-} from './combat.playtest';
-export type {
-    PlaytestCellSpec, PlaytestCellResult, PlaytestMatrixOptions,
-    PlaytestStageSummary, PlaytestReport,
-    PlaytestPresetSummary, PlaytestPresetStageRow,
-} from './combat.playtest';
-// Metrics slate (2026-07-18) — static card/preset complexity instrument.
-export { cardComplexity, presetComplexity } from './combat.card-complexity';
-export type { CardComplexityRow, PresetComplexity } from './combat.card-complexity';
-// Phase 19/23 — archetype→signature gating retired; playerArchetype kept for portrait.
-export { playerArchetype, CONCLUDE_DMG_PER_STACK } from './combat.signature';
-export {
-    COMBAT_REWARD_POOL, STARTING_CARD_ID, STARTING_CARD_IDS, rollCombatCardRewards, addRewardCard,
+    COMBAT_REWARD_POOL, STARTING_CARD_IDS, rollCombatCardRewards, addRewardCard,
     unlockCardViaDilemma,
-    // Theme-aware reward draft (2026-08-08) — the deck-theme read + its pivot lever.
-    REWARD_RARITY_WEIGHTS, REWARD_THEMES, REWARD_OFF_THEME_RATE,
-    // Phase 104 — the first-three-takes-uniform gate for the keyword pull.
-    REWARD_RANDOM_PICKS,
-    deckThemeCounts, deckThemeShares,
 } from './combat.rewards';
-export type { RewardTheme } from './combat.rewards';
-export type { PlayerArchetype } from './combat.encounter.types';
+
 export {
-    COMBAT_LOADOUT_FLAG_PREFIX, COMBAT_LOADOUT_MAX,
-    decodeCombatLoadout, getCombatLoadout, addToLoadout, removeFromLoadout,
+    getCombatLoadout, addToLoadout,
 } from './combat.loadout';

@@ -67,7 +67,3 @@ export function stackItem(inventory: Item[], itemId: string, amount: number): It
         return item;
     });
 }
-
-// Legacy aliases used by older tests / callers.
-export const addItemToInventory = addItem;
-export const removeItemFromInventory = removeItem;

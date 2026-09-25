@@ -458,8 +458,6 @@ export interface HazardRiskRouteDef {
     penaltyVitae: number;
 }
 
-export type HazardRouteDef = HazardSafeRouteDef | HazardRiskRouteDef;
-
 export interface HazardDef {
     id: string;
     title: string;
