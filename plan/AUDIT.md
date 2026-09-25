@@ -65,7 +65,7 @@
 - **Advantage buffs:** `buff_haste`, `buff_accuracy_up`, `buff_critical_damage_up` and kin grant advantage through the deleted read, so they do nothing in combat. Retire or re-hook (`/adjust-keywords`).
 - **`reroll_spent` relic mechanic** still rerolls from the legacy face bag (`rerollSpentDice`/`COMBAT_DIE_FACES`), so it can mint X or faceless dice. `float_x_die` always pays +1◆ now.
 - **Sim:** the `blind` policy now plays identically to `greedy` (kept so the matrix keeps its column); retire or redefine it at the next `/combat-playtest`.
-- **Stale copy:** "drafted die" in `grave.cards.ts` card copy and the FORGE row of `docs/keyword-atlas.md` (both feed generated devlog data); `.claude/commands/deck-tuning.md` still documents `--legacy-dice` (now a clear error).
+- **Stale copy:** "drafted die" in `grave.cards.ts` card copy and the FORGE row of `docs/keyword-atlas.md` (both feed generated devlog data).
 - **Vestigial params:** `card-played.advantage` is always `'neutral'`; `scalePlayerHit`'s `readMult` is always 1.
 - **Card faces print a dead read:** status card faces still show ▲/▼ read numbers, but every play lands at read `'none'`. Mobile froze `READ_ADVANTAGE_INTENSITY_BONUS` / `READ_DISADVANTAGE_DURATION_PENALTY` (both 1) as local constants atop `combat-encounter.engine.ts` so it compiles; delete them with a card-face pass.
 - **CLARITY is inert:** its `forceWildOnNextDie` flag was only read on the deleted OFF path.
@@ -193,15 +193,6 @@
     state" inventories (five tabs incl. event; no assets; no type scale; no
     a11y labels; expo-haptics) — `state/presenters/tabs.engine.ts`,
     `assets/images/*/index.ts`, `theme/axm.ts`, `lib/platform/haptics.ts`.
-  - `.claude/commands/deck-tuning.md` §4/§4a — balance-band contract with
-    `PRESET_FLOORS` / `PRESET_CEILING` / `// PLAYTEST-CALIBRATION`, repealed
-    2026-09-02 — `src/Combat/e2e/combat-playtest.balance-bands.sim.test.ts`
-    header, `plan/bearings.md` THE BIG NUMBERS REWRITE.
-  - `.claude/commands/hazard-tuning.md` — both "Known engine gaps" tables cite
-    `penaltiesApplied` TODO, `refreshDiceBetweenRounds`, `advanceToNextRound`,
-    `processBetweenRounds`, `resolveRound`, none in the engine —
-    `src/World/Hazard/hazard.engine.ts` (`resolveHazardRound`,
-    `continueHazardAfterResolve`) vs CDR-0006.
   - `.claude/agents/playtester.md` Path A steps 3-5 and Path B — prelude modal
     / FIGHT-FLEE / stance / STAND-DO-CLASH-LET round loop —
     `axiomancer-mobile/docs/combat.md`,

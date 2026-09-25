@@ -89,31 +89,33 @@ consumer gates locally anyway — CI catching a break means it already reached
 `main`.
 
 The
-mechanics-only tuning skills (`combat-playtest`, `deck-tuning`,
-`hazard-tuning`,
-`world-tuning`) each carry a closing step that
-references this checklist rather than re-deriving it — update it here
+mechanics-only tuning command (`combat-playtest`) carries a closing step
+that references this checklist rather than re-deriving it — update it here
 first if the mechanics subsystem list changes. `rest-tuning` was
 retired in Phase 52e, `quest-board-tuning` in Phase 61,
 `gathering-tuning` in Phase 76, and `loot-cache-tuning` in Phase 63,
-each along with the minigame it tuned.
+each along with the minigame it tuned. `deck-tuning`, `hazard-tuning`,
+`world-tuning`, `combat-ux-tuning`, `critic-loop`, `deep-playtest`,
+`hermes-playtest` and `dep-upgrades` were retired in trim T5 (2026-09-25,
+decision D10) with zero invocations in six weeks; they are to be rebuilt
+once the mechanics settle (after the D4 stat hooks and the card rework).
+The playtest matrix stays as `npm run combat-playtest -w axiomancer-mechanics`.
 
 ## Root `.claude/`
 
 Live, at the repo root:
-- `.claude/commands/` — domain **slash commands** (tuning + playtest): mechanics
-  `combat-playtest`, `deck-tuning`, `hazard-tuning`,
-  `world-tuning`; mobile
-  `critic-loop`, `deep-playtest`, `combat-ux-tuning`, `hermes-playtest`. Each is
+- `.claude/commands/` — domain **slash commands**: mechanics
+  `combat-playtest` (the stage matrix plus `playtester` agents). Each is
   self-contained and carries a header naming the package it runs against (paths
   are package-relative — `cd` there or use `-w`). `combat-tuning`,
   `legacy-combat-tuning`, `playtest`, `resolve-playtest`, and `bump-engine`
-  (npm-pin-era engine bumps, retired with the monorepo merge) were trimmed.
+  (npm-pin-era engine bumps, retired with the monorepo merge) were trimmed,
+  and the eight tuning/playtest commands above went in trim T5 (D10).
 - `.claude/skills/` — design skills: `brainstorm-mechanics`, `character-spec`,
   `story-spec`, `world-spec`; plus the `kb-query` lookup skill.
 - `.claude/agents/` — `scout`, `reader`, `mechanics-expert`, `playtester`,
   `card-expert` (card/keyword design AND implementation — the working
-  agent behind `/deck-tuning`; grounded in the Dawncaster corpus — see
+  agent behind `/adjust-cards` and `/adjust-keywords`; grounded in the Dawncaster corpus — see
   "Truth sources" below), `content-curator` (narrative
   writer-shipper — dialogue trees, event prose, flavor — `/iterate`'s
   content-gap worker).
@@ -140,7 +142,7 @@ run and any claim from memory is marked UNGROUNDED.
 | **Measured baselines** (`deck-matrix-baseline.json`) | Win-rate curves, status engagement, preset spreads | Only as fresh as the last sim — run `npm run baseline:check` and NAME the stamp before citing numbers |
 
 Measuring is not tuning: regenerating a baseline is briefing; acting
-on it belongs to `/deck-tuning`. Engine constants are open to the
+on it belongs to `/adjust-cards` (cards and decks). Engine constants are open to the
 tuning loops with measured evidence (THE OPEN GATE ¶4, 2026-08-28).
 Full protocols (consumption surfaces, wishlist, regen/confidence
 rules): [`docs/truth-sources.md`](docs/truth-sources.md). The complete
