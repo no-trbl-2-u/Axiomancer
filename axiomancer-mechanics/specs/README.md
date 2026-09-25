@@ -71,7 +71,7 @@ plus the authored content folders `characters/`, `story/`, `world/`
 | 7 DONE | [`07-enemy-content-and-ai.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/07-enemy-content-and-ai.md) *(archived T1)* | Phase 6 enemy content + AI. |
 | 8 DONE | [`08-world-content-and-hazards.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/08-world-content-and-hazards.md) *(archived T5)* | Phase 7 world content; live API in `docs/world.md`. |
 | 9 DONE | [`09-game-loop-orchestration.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/09-game-loop-orchestration.md) *(archived T5)* | Phase 8 orchestration + `createGameStore`. |
-| 10 DONE | [`10-moral-difficulty-meter.md`](./10-moral-difficulty-meter.md) | Moral-choice difficulty meter; live doc `docs/morality.md`. Kept here while `.claude/skills` still cite it. |
+| 10 DONE | [`10-moral-difficulty-meter.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/10-moral-difficulty-meter.md) *(archived T5)* | Moral-choice difficulty meter; live doc `docs/morality.md`. |
 | 11 DONE | [`11-rng-seeding-and-test-harness.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/11-rng-seeding-and-test-harness.md) *(archived T5)* | Seeded RNG + test harness. |
 | 12 DONE | [`12-package-architecture-and-events.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/12-package-architecture-and-events.md) *(archived T5)* | Engine ↔ UI boundary. |
 | 14 DONE | [`14-philosophical-alignment.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/14-philosophical-alignment.md) *(archived T5)* | Phases 42–46 alignment cube. |
@@ -86,7 +86,7 @@ plus the authored content folders `characters/`, `story/`, `world/`
 | 32 HISTORICAL | [`32-no-strike-card-library.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/32-no-strike-card-library.md) *(archived T5)* | Themed no-strike library; superseded by THE BIG NUMBERS REWRITE (2026-09-02). |
 | 33 IMPLEMENTED | [`33-upgradeable-dice.md`](./33-upgradeable-dice.md) | The four-die combat model; implemented and current. |
 | 34 RATIFIED | [`34-dark-fantasy-campaign.md`](./34-dark-fantasy-campaign.md) | Dark Fantasy campaign bible (design charter, 2026-08-08). |
-| 35 HISTORICAL | [`35-objective-function-v2.md`](./35-objective-function-v2.md) | Combat Quality Index — repealed 2026-09-02; `combat.objective.ts` still computes it as a report-only reading. Kept here while `.claude/` files still cite it. |
+| 35 HISTORICAL | [`35-objective-function-v2.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/35-objective-function-v2.md) *(archived T5)* | Combat Quality Index — repealed 2026-09-02; `combat.objective.ts` still computes it as a report-only reading. |
 
 ## Conventions
 

@@ -106,8 +106,8 @@ All paths relative to `axiomancer-mechanics/`. Authoritative docs:
 (the source of truth it summarizes), and `VISION.md`. HISTORICAL
 (period records, read for provenance and voice only): spec 32,
 `specs/34-dark-fantasy-campaign.md` §3/§8,
-`specs/35-objective-function-v2.md` (CQI — repealed), and
-`docs/profane-canon.md` (its §1 tonal brief survives as voice
+`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/35-objective-function-v2.md` (CQI — repealed), and
+`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/profane-canon.md` (its §1 tonal brief survives as voice
 guidance; its counts and structural laws do not). Read the relevant
 section before opining or editing; current-doctrine answers outrank
 your judgment.
@@ -147,7 +147,7 @@ your judgment.
   quality bar for keeping a keyword, just not a wall against adding
   one.
 - **Self-contained themes** (the Profane Canon's six archetype
-  packages plus starters/relics/curses — see `docs/profane-canon.md`
+  packages plus starters/relics/curses — see `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/profane-canon.md`
   for the live roster). A new card speaks its theme's vocabulary, not
   a neighbor's; cross-theme borrowing is legal but deliberate.
 
@@ -362,7 +362,7 @@ and what does / does not transfer.
   the Threadbare Office deliberately weak, the later rungs winning
   through their theme packages. A preset that only wins via shared
   utility verbs is a dishonest archetype — a design finding, not a
-  numbers problem. `docs/profane-canon.md` is HISTORICAL, but its
+  numbers problem. `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/profane-canon.md` is HISTORICAL, but its
   record of which asymmetries were intentional is still worth
   checking before "fixing" one.
 - If the correct fix is an engine constant (threat damage, Conviction

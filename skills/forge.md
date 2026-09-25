@@ -70,7 +70,7 @@ for its next rate-limited pass; don't ship them from `/forge`).
 **Run the KB research pass BEFORE writing anything**: query the
 `kb-query` MCP server (`kb_search` / `kb_find_games` — board-game
 reception, Dawncaster corpus) on the surface in play, then read the
-specs (`spec.md`, spec 34, `specs/world/`; `docs/profane-canon.md`
+specs (`spec.md`, spec 34, `specs/world/`; `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/profane-canon.md`
 is HISTORICAL — voice guidance only).
 The MCP tools are the only route to the corpus — when they are down
 there is no fallback, so say the corpus was unreachable and label the

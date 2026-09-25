@@ -37,7 +37,7 @@ Work mode:
   never be backgrounded, no `--no-verify`, no `-F` commit messages, no
   Co-Authored-By trailers. Work with them, not around them.
 - Prose register: the game's tonal North Star is Mörk Borg by way of the
-  "Profane Canon" (`axiomancer-mechanics/docs/profane-canon.md`,
+  "Profane Canon" (`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/profane-canon.md`,
   `plan/north-star-mork-borg.md`) — doom-liturgical, terse, cruel, funny in
   the dark. This is voice guidance, not a law. Names like *the Black Cap*,
   *Communion of the Worm*, *Edict of the Open Wound* are the register.
@@ -130,13 +130,13 @@ enforcement** so `verify` stops defending them. Locations:
 | L15 | Enemy stat law total = k×level | `Enemy/e2e/enemy.engine.test.ts:85-118`, `ENEMY_STAT_PER_LEVEL` (`src/Game/game-mechanics.constants.ts:168`), `enemyStatBudget` (`Enemy/index.ts:97`). |
 | L16 | 1:1 art law | `enemy.library.ts:4-6`, `new-enemies.engine.test.ts:54-62`. (Practically: keep every existing `portraitAsset` binding — art exists, don't orphan it — but the *law* is gone.) |
 | L17 | Rank bands / pricing lint (common 1.5–7.5 … rare 7–19) | `pricing.engine.test.ts:41-82` **and the three clones** `roles-themes.engine.test.ts:86`, `bridge-rewards.engine.test.ts:69`, `haunts.engine.test.ts:376`; `cards.pricing.ts VERB_POINTS`. See §10. |
-| L18 | Archetype package shape (7 cards = 2c/2u/1r/1 oath/1 hex; library = 57) | `curated-library.engine.test.ts:35-66`, `docs/profane-canon.md §2`, `cards.library.ts:1-52`. |
+| L18 | Archetype package shape (7 cards = 2c/2u/1r/1 oath/1 hex; library = 57) | `curated-library.engine.test.ts:35-66`, `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/profane-canon.md §2`, `cards.library.ts:1-52`. |
 | L19 | Deck-size laws 18/30/45, cap 50, ≤4 copies, LINEAGE multiset | `combat.starter-deck-presets.ts:22-30,:65,:169`, `deck-presets.engine.test.ts` (keep only the thirds assertion). |
 | L20 | Card-keyword doctrine (every mechanic a registry KEYWORD; atlas row at 3+ cards) | `keywords.ts:20-24`, `keyword-atlas.md:27-45`. Replaced by §6's own discipline. |
 | L21 | Registry count pin (42 rows) | `axiomancer-mobile/state/combat/__tests__/keywords.test.ts:31-44`. No count pins survive (§10). |
 | L22 | P0-truth style clauses (≤130 chars, no em dash/semicolon, "the foe") | `paid-summary-honesty.engine.test.ts:1-38`, `types.ts:629-641`. **Keep the number-parity half** (every number the engine applies appears on the face) — that's a bug detector, not a law. Drop the style clauses. |
 | L23 | Doctrine win-rate curve 80/50/30/0 | `combat.playtest.ts:127-133,:418`, `combat.curve-shape.ts`, `balance-bands.sim.test.ts:159-239`, `axiomancer-mechanics/CLAUDE.md`, `VISION.md`. |
-| L24 | CQI objective function / win-rate-not-a-term | `specs/35-objective-function-v2.md`, `docs/lexicon.json:184-191`. |
+| L24 | CQI objective function / win-rate-not-a-term | `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/35-objective-function-v2.md`, `docs/lexicon.json:184-191`. |
 | L25 | HP sole win condition; alt-wins are exceptions | `VISION.md:20-28`, `spec.md:114-125`, `lexicon.json:26-32` (`pressure-tracks`). |
 | L26 | Reshuffle law / no fatigue ever | `specs/32:151`. (Dawncaster's HEAVY/One Use and Mage Knight's wounds are now legal ideas.) |
 | L27 | Conditionality law (exactly one condition line at Tier 2+) | `src/Cards/types.ts:672-675`, `specs/32:150-151`. |
@@ -150,7 +150,7 @@ enforcement** so `verify` stops defending them. Locations:
 | L8 | Round-turn law as *law* | See §2.3 — kept as a bug fix. |
 
 Doc hygiene after repeal: mark `specs/32`, `specs/34 §3/§8`, `specs/35`,
-`plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-*.md`, `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-*`, `docs/profane-canon.md`
+`plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-10-*.md`, `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-11-*`, `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/profane-canon.md`
 as `**Status:** HISTORICAL` in their first 40 lines (this is also the
 check-lexicon banner exemption). Rewrite `axiomancer-mechanics/CLAUDE.md`'s
 "Load-bearing doctrine" block and `VISION.md`'s combat section to state §1–§2
@@ -666,7 +666,7 @@ fails when the game is *different*. Delete laws.
   `vitae`, `keywords`, `stages`, per-card advisory score to the export.
 - **Docs**: `docs/keyword-atlas.md` rewritten (one row per live keyword,
   reminder text, which cards/enemies use it, optional `kb:` receipt);
-  `docs/combat.md` numbers; `docs/profane-canon.md` → HISTORICAL banner;
+  `docs/combat.md` numbers; `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/profane-canon.md` → HISTORICAL banner;
   `axiomancer-mechanics/CLAUDE.md` doctrine block → §1–§2 of this prompt;
   `VISION.md` combat section; `spec.md:42-46, :114-125`; `plan/bearings.md`
   one paragraph pointing at this overhaul (bearings is lexicon-linted —

@@ -43,7 +43,7 @@ Per `VISION.md` / `CLAUDE.md`, **combat must make its interacting systems
 legible and consequential** — status, direct damage and the mercy lines all
 compete on merit since THE UNSHACKLING (2026-08-08). HP is the only win
 condition. The tuning loops prove the NUMBERS obey CQI
-(`specs/35-objective-function-v2.md`); this skill proves the EXPERIENCE does:
+(`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/35-objective-function-v2.md`); this skill proves the EXPERIENCE does:
 
 1. **At every stage, does the deck's own engine run in the player's hands** —
    does a line assemble across turns, is there more than one live option at

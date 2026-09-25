@@ -105,7 +105,7 @@ export interface CombatQualityWeights {
  *
  * `arc` **0.25** — the second-largest, because "volume-based and arc-blind"
  * was the parked AUDIT row's own diagnosis of what `statusEngagement` got
- * wrong. Every one of the six shipped archetypes (`docs/profane-canon.md` §2)
+ * wrong. Every one of the six shipped archetypes (`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/profane-canon.md` §2)
  * is a setup→payoff engine: rot plants then RUPTUREs, debt borrows then bills,
  * grave fills then REQUIEMs, vigil banks quiet rounds, trial stacks CHARGE
  * toward CONDEMN, choir hoards SOUL then REAPs. A flat damage profile means

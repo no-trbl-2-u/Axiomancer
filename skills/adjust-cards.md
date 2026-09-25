@@ -43,7 +43,7 @@ status-engagement-floor; nothing older than 2026-09-02 governs
 combat numbers), `axiomancer-mechanics/VISION.md`, and
 `plan/bearings.md` (LOCKED MECHANICS: Conviction, Surge, Dice —
 never removed or no-op'd, may be interacted with).
-`docs/profane-canon.md` is HISTORICAL — its tonal brief (names,
+`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/profane-canon.md` is HISTORICAL — its tonal brief (names,
 register) survives as voice guidance; its counts, package shapes,
 and structural rules are a period record, not law.
 
@@ -237,7 +237,7 @@ axiomancer-mechanics/src/Cards/cards.library.ts
 axiomancer-mechanics/src/Cards/cards.pricing.ts
 axiomancer-mechanics/src/Cards/cards.sandbox-sets.ts
 axiomancer-mechanics/src/Combat/combat.starter-deck-presets.ts
-axiomancer-mechanics/docs/profane-canon.md   # HISTORICAL — voice only
+plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/profane-canon.md   # HISTORICAL — voice only
 plan/CONTENT_LEDGER.md
 
 # Sub-agent

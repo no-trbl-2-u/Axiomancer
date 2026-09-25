@@ -58,7 +58,7 @@
 
 ## Pending
 
-### [debt] T5 Tier 2 docs — named for archive but still have consumers (2026-09-25)
+### [debt] T5 Tier 2 docs — named for archive but still have consumers (2026-09-25; archive part resolved, effects/enemy rewrite open)
 
 - **Context:** trim T5 archived the Tier 2 docs rows
   (`plan/archive/2026-09-25-trim-t5/`). Six files the spec named have inbound
@@ -74,19 +74,15 @@
   are reference docs kept current in place (effects.md's API table was edited
   in T3); their stale bodies are already filed in the "stale docs" row
   below. Rewrite in place, do not archive.
-- `axiomancer-mechanics/docs/profane-canon.md` (already HISTORICAL) — cited by
-  `.claude/agents/card-expert.md:110,150,363`, `skills/adjust-cards.md`,
-  `skills/forge.md`, spec 34, and `src/Combat/combat.objective.ts:108`.
-- `axiomancer-mechanics/specs/10-moral-difficulty-meter.md` — cited by
-  `.claude/skills/{brainstorm-mechanics,character-spec,story-spec}/SKILL.md`.
-- `axiomancer-mechanics/specs/35-objective-function-v2.md` (already
-  HISTORICAL) — cited by `.claude/agents/card-expert.md:109` and
-  `.claude/commands/combat-playtest.md:46` (`deck-tuning.md` is gone, D10).
-- ~~`swap-pool-fanout-2026-07-18.md`~~ — archived in the T5 residue once
-  D10 deleted `deck-tuning.md` (now under `plan/archive/2026-09-25-trim-t5/`).
-- **next:** in an attended session, repoint the `.claude/` citations to
-  `plan/archive/2026-09-25-trim-t5/...` (or to the live replacement doc), then
-  archive profane-canon, spec 10 and spec 35 the same way.
+- **Resolved 2026-09-25 (attended, post-T5):** `profane-canon.md`, spec 10
+  and spec 35 archived to `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/`.
+  The `.claude/` citations were repointed: `card-expert.md` and
+  `combat-playtest.md` now cite the archive paths, and the three design
+  skills cite the live `docs/morality.md` in place of spec 10. So were
+  `skills/adjust-cards.md`, `skills/forge.md`, spec 34, the big-numbers
+  prompt, bearings and the `combat.objective.ts` comment. The
+  `swap-pool-fanout` ledger went in the T5 residue. Only the
+  `effects.md` / `enemy.md` rewrite-in-place item above stays open.
 - **Hazard duplicates (spec row "hazard docs ×3"):** only one was a true
   copy — the mobile mirror `design/encounters/hazard-card-library.md`,
   archived in T5 (the mechanics file is the one copy). The mobile

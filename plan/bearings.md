@@ -286,7 +286,7 @@ ambiguity.)
   numbers as a design pillar (the §5 scale ladder), a richer keyword
   language with direct damage as a first-class verb, and enemies with
   keywords, VITAE pools, tiered decks and stages. Specs 32, 34 §3/§8
-  and 35 and `docs/profane-canon.md` are marked HISTORICAL; there is no
+  and 35 and `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/profane-canon.md` are marked HISTORICAL; there is no
   governing objective function any more.
 - **THE CONTENT LIFECYCLE SPLIT (T direct, 2026-09-02/03).** Per-item
   content (cards, equipment, enemies, keywords, NPCs/dialogue) split

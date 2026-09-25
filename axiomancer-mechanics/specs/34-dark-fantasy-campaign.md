@@ -22,7 +22,7 @@
 > PROFANE CANON") landed on `main` after the Phase 42 row was written and
 > already rethemed the player card library (57 cards, 6 archetypes), the
 > campaign presets, and shipped a brand-new enemy card library. Its design
-> record is `axiomancer-mechanics/docs/profane-canon.md`. **This spec
+> record is `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/profane-canon.md`. **This spec
 > codifies and generalises the Profane Canon; it does not compete with it.**
 > Where the canon already answered a question, §-by-§ below says so, cites
 > the shipped artifact, and ratifies it.
