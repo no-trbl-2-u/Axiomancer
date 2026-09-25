@@ -12,12 +12,88 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-25 | 08cc633d | 19 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-24 | bdcd4c7e | 18 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-25 | pending-self-ref | 19 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-24 | 6f13b2d0 | 18 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-24 | c57a7e73 | 18 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-25 | 1d5f4bcc | 18 |
 
 ## Log
+
+```
+> **[adjust-equipment pass 19, 2026-09-25, commit pending-self-ref]**
+> Zero-CREATE, zero-UPDATE, zero-REMOVE pass — dispatched autonomously
+> by `/march`'s content-lifecycle gate (Step 3b): `equipment`
+> (`bdcd4c7e` 2026-09-24T10:42:53Z, 27 commits behind HEAD `5a69d6a9`
+> 2026-09-25T06:49:04Z, ~20.3h) and `enemies` (`6f13b2d0`
+> 2026-09-24T10:43:06Z, 26 commits) both qualified past the
+> 15-commit/36h threshold; `equipment` was stalest by last-pass
+> timestamp (13s earlier) and also leads the fixed rotation order.
+> `cards` (`08cc633d`, 1 commit) and `npcs` (`1d5f4bcc`, 3 commits) had
+> just ticked and did not qualify; `keywords`'s ledger-recorded commit
+> (`c57a7e73`) does not resolve in this tree (a stale self-ref from
+> pass 18 that never got its follow-up correction), so staleness was
+> computed against its actual shipping commit `13d3f1f4`
+> (2026-09-24T22:42:56Z, 4 commits) — nowhere near the threshold either
+> way; flagging the dangling ref for whichever `adjust-keywords` pass
+> next touches that row. Deploy confirmed green (`npm run deploy:check`
+> at HEAD `5a69d6a9`: no gated workflow yet within the grace window,
+> docs/plan-only tick, nothing to check). No phase work pending
+> (`plan/steps/01_build_plan.md` has zero `[ ]` rows). Growth floor
+> clear (`src/World` commits within 7 days).
+>
+> **Step 1 audit — fresh, not re-cited:** re-derived every structural
+> signal against the current tree. Slot coverage: 2 weapons, 2 armor, 7
+> accessories across all 6 live `AccessoryKind`s (amulet ×1, charm ×2,
+> ring ×1, head ×1, hands ×1, feet ×1) — no kind empty, each
+> capacity-1 slot still offers 2 picks, accessory (capacity 3) offers
+> 7. Dominance: no same-slot relic pair is strictly worse on every
+> `statModifiers` value with no offsetting `grantsSignature` difference
+> (weapon/armor pairs tie in magnitude but differ in signature by
+> design). Signature drift: all 11 `grantsSignature` values resolve
+> live against `SignatureSkillId` in `combat.encounter.types.ts` (1:1,
+> no orphans). Consumable `effectId` resolution: all 15 referencing
+> consumables resolve against `buffs.library.json`/`debuffs.library.json`
+> (`buff_cleanse`, `buff_cleanse_minor`, `buff_accuracy_up` ×2,
+> `buff_status_chance_up`, `buff_stoic_resolve`, `buff_haste` ×2,
+> `buff_liars_gambit`, `buff_all_stats_up` ×2, `buff_invincibility`,
+> `buff_abyssal_presence`, `buff_regeneration`, `buff_damage_reduction`,
+> `buff_critical_rate_up`, `buff_haste_surge`, `buff_phoenix_vigor`).
+> Shop/reward reachability re-derived from scratch (not re-cited): all
+> 10 sellable relics (the Suppliant's Ring is the deliberate
+> first-node grant, never sold) appear in >=1 village-market
+> `shop.wares` block in `content.ts`; all 22 consumables appear in
+> exactly one `drop(...)` row across `enemy.library.ts`'s loot tables
+> (id-for-id diff against `consumableLibrary`, zero missing, zero
+> orphaned loot ids) as well as `rollCacheReward`'s uniform draw over
+> the full library (The Reliquary). Re-checked the shared-`effectId`
+> co-occurrence bug class (pass 11/14/15/17/18): `focus-vial`/
+> `hunters-elixir` (`buff_accuracy_up`) and `berserker-brew`/
+> `quicksilver-vial` (`buff_haste`) remain the only same-effect pairs,
+> and neither co-occurs in a single shop ware block or enemy loot row —
+> reconfirmed, not re-opened. A genuine zero-diff pass on the data
+> itself, so the Step 1b widened KB check ran.
+>
+> **Step 1b widened KB check:** queried a fresh angle — Dawncaster's
+> own `Equipment` card type (`kb_cards` on "equip": Aegis, Battle
+> Station, Blaster, Decommission, Legplates, etc.) rather than the
+> `relic`/`itemization` boardgame tags pass 17/18 already exhausted.
+> That corpus's Equipment is a durability-tracked, drawn-into-deck card
+> type with activate/reactivate/Frenzy triggers — a materially
+> different design (procedural, in-deck, consumable-durability) from
+> our lean persistent signet-relic shape, and adopting any of it would
+> mean resurrecting exactly the retired procedural/effect-channel
+> system §4 rule 3 forbids without a deliberate design call. No
+> transferable gap surfaced. Also re-ran `kb_find_games` against
+> `deck-building`/loot-adjacent titles (Aeon's End, Mage Knight, Slay
+> the Spire board game) — no indexed `better-if` complaint maps onto a
+> concrete gap in the 11-relic/22-consumable set; Slay the Spire board
+> game's better-if doc is entirely onboarding/teardown/pacing, nothing
+> itemization-shaped. No new corpus angle surfaced a finding.
+>
+> Verify: green (mechanics 231 files/3746 tests + build; mobile
+> lint/typecheck/jest/asset/critique-drive). Commit only the ledger
+> bump — no code diff this pass.
+```
 
 ```
 > **[adjust-cards pass 19, 2026-09-25, commit 08cc633d]** Zero-diff
