@@ -210,6 +210,11 @@ should be built on a stat model that exists, not beside the dead one.
 
 ## 5. Owner decisions needed before T5
 
+Answered 2026-09-25 (recorded as D4-D7 in the strategy decisions
+file): 1 → real hooks per stat; 2 → wire an entry (Labyrinth leaves
+every trim count); 4 → collapse the flag; 5 → deletion allowed for
+binaries, raw output, vendored scans, e2e output. Open: 3, 6, 7.
+
 1. **Stat model direction** (Tier 3 row 1). Recommendation: (b), real
    hooks, because item 3 of the strategy needs them anyway.
 2. **Labyrinth**: park, wire, or cut. Recommendation: park, keep the

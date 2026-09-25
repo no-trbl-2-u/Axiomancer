@@ -54,6 +54,26 @@ memory.** Output is a keep/cut list with consumer counts per item. The
 `plan/` portion overlaps `/consolidate`; run the audit's `plan/` pass
 through that skill rather than a second curator.
 
+**D4 — Stat model: real combat hooks per stat.** body/mind/heart each
+drive a distinct combat quantity; the damage-scaling hook (D1 step 3)
+plugs into this model. Rejected: merging into one VITAE point;
+deferring to the card rework.
+
+**D5 — Labyrinth / Aporia: wire an entry.** Not parked, not cut. A map
+event or door reaches it from normal play. Scope lands with the map
+re-authoring (D2). Its engine, CLI, mobile route, art and
+`plan/labyrinth/acts` are excluded from every trim count.
+
+**D6 — Deletion policy exception to hard rule 4.** Images, raw sim
+output, vendored third-party scans and committed e2e output may be
+deleted outright. Markdown still archives into `plan/archive/`. A delete
+does not shrink git history; history is never rewritten.
+
+**D7 — Collapse the Upgradeable-Dice flag.** The OFF path (stance
+draft, hidden read, STAKE, momentum wheel) and its mobile UI are
+deleted; tests and sims pinned to OFF are rewritten to the shipped
+model.
+
 ## Open follow-ups
 
 - Audit tick (D1 step 1, D3 scope) — DONE 2026-09-25; keep/cut list and
@@ -61,5 +81,7 @@ through that skill rather than a second curator.
   started; §5 of that spec lists the owner decisions gating Tier 3.
 - Map re-authoring brief (D2) — needs the region count and target node
   count per map before authoring.
-- Scaling formula (D1 step 3) — needs T's call on which stat(s) drive
-  which damage kinds; ask in the next attended session, not before.
+- Scaling formula (D1 step 3) — D4 settles the direction (per-stat
+  hooks); the exact stat-to-quantity mapping is designed with the hook.
+- Still open from the trim spec §5: card upgrades and GLYPHS (wire or
+  cut), resolved rows under Pending, the tuning/playtest command set.
