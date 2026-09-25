@@ -761,6 +761,13 @@ ambiguity.)
   requested it, T's stated reason (or "reason not stated"), and the
   resulting commit/issue/brief. Forward-looking only; do not
   reconstruct pre-2026-07-30 queue history into the log.
+- **THE REFACTOR STRATEGY (T, attended session 2026-09-25).** No
+  restart, no content purge. Sequenced rework: trim audit (engine +
+  mobile + docs + `plan/`) -> hand-authored wide map graphs -> card
+  damage scaling hook -> story-dependent revamp after the story
+  adjustments land. Record and evidence:
+  `plan/2026-09-25-refactor-strategy.decisions.md`. Never re-ask
+  restart/purge; never propose a procedural map generator.
 
 ## AUDIT category taxonomy (this project)
 
