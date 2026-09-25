@@ -39,10 +39,10 @@ const mockEquipmentModalVm: ItemModalViewModel = {
     confirmLabel: 'EQUIP · REPLACE RUSTY DAGGER',
     previewLines: ['Slot · WEAPON', 'Weapon slot.'],
     statDeltas: [
-        { label: 'PHYS ATK', before: 10, after: 15, delta: 5, id: 'physicalAttack' },
-        { label: 'PHYS DEF', before: 8, after: 8, delta: 0, id: 'physicalDefense' },
-        { label: 'MENT ATK', before: 5, after: 5, delta: 0, id: 'mentalAttack' },
-        { label: 'EMOT DEF', before: 6, after: 6, delta: 0, id: 'emotionalDefense' },
+        { label: 'PHYS ATK', before: 10, after: 15, delta: 5 },
+        { label: 'PHYS DEF', before: 8, after: 8, delta: 0 },
+        { label: 'MENT ATK', before: 5, after: 5, delta: 0 },
+        { label: 'EMOT DEF', before: 6, after: 6, delta: 0 },
     ],
     effectDeltas: [],
     itemModifiers: [],
@@ -256,23 +256,6 @@ describe('ItemModal: accessibility', () => {
         expect(cancelButton.props.accessibilityLabel).toBe('Cancel');
         expect(cancelButton.props.accessibilityRole).toBe('button');
     });
-
-    it('equipment stat rows with ids have testID for tooltip targeting', () => {
-        const store = makeStore();
-        const tree = render(
-            withProvider(store,
-                <ItemModal
-                    modalVm={mockEquipmentModalVm}
-                    onConfirm={() => undefined}
-                    onCancel={() => undefined}
-                />
-            ),
-        );
-        expect(tree.getByTestId('inv-modal-stat-physicalAttack')).toBeTruthy();
-        expect(tree.getByTestId('inv-modal-stat-physicalDefense')).toBeTruthy();
-        expect(tree.getByTestId('inv-modal-stat-mentalAttack')).toBeTruthy();
-        expect(tree.getByTestId('inv-modal-stat-emotionalDefense')).toBeTruthy();
-    });
 });
 
 describe('ItemModal: conditional rendering', () => {
@@ -359,12 +342,12 @@ describe('ItemModal: conditional rendering', () => {
         expect(tree.queryByText('10 → 15 (+5)')).not.toBeNull();
     });
 
-    it('renders stat rows without ids as plain Views (no testID)', () => {
+    it('renders every stat row as a plain label + before → after', () => {
         const vmWithMixedStats: ItemModalViewModel = {
             ...mockEquipmentModalVm,
             statDeltas: [
-                { label: 'PHYS ATK', before: 10, after: 15, delta: 5, id: 'physicalAttack' },
-                { label: 'CUSTOM STAT', before: 1, after: 2, delta: 1 }, // No id
+                { label: 'PHYS ATK', before: 10, after: 15, delta: 5 },
+                { label: 'CUSTOM STAT', before: 1, after: 2, delta: 1 },
             ],
         };
         const store = makeStore();
@@ -377,8 +360,7 @@ describe('ItemModal: conditional rendering', () => {
                 />
             ),
         );
-        expect(tree.getByTestId('inv-modal-stat-physicalAttack')).toBeTruthy();
-        expect(tree.queryByTestId('inv-modal-stat-CUSTOM STAT')).toBeNull();
+        expect(tree.queryByText('PHYS ATK')).not.toBeNull();
         expect(tree.queryByText('CUSTOM STAT')).not.toBeNull();
         expect(tree.queryByText('1 → 2 (+1)')).not.toBeNull();
     });

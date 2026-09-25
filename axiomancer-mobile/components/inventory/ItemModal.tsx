@@ -3,7 +3,6 @@ import { Modal, Pressable, View, Text, TouchableOpacity } from 'react-native';
 import { FONTS } from '@/theme/axm';
 import { makeStyles, usePalette } from '@/theme/runtime';
 import { TooltipProvider } from '@/components/tooltip/TooltipProvider';
-import { TooltipTarget } from '@/components/tooltip/TooltipTarget';
 import type { ItemModalViewModel } from '@/state/presenters/inventory.modal.engine';
 
 interface ItemModalProps {
@@ -43,7 +42,6 @@ export function ItemModal({ modalVm, onConfirm, onCancel }: ItemModalProps) {
                                             <Text
                                                 key={`${m.label}-${i}`}
                                                 style={styles.modalModLine}
-                                                testID={m.id ? `item-mod-${m.id}` : undefined}
                                             >
                                                 {m.label}
                                             </Text>
@@ -52,29 +50,15 @@ export function ItemModal({ modalVm, onConfirm, onCancel }: ItemModalProps) {
                                 )}
                                 {modalVm.statDeltas.length > 0 && (
                                     <View style={styles.modalStatTable}>
-                                        {modalVm.statDeltas.map((d) => {
-                                            const row = (
-                                                <View style={styles.modalStatRow}>
-                                                    <Text style={styles.modalStatLabel}>{d.label}</Text>
-                                                    <Text style={styles.modalStatVal}>
-                                                        {d.before} → {d.after}
-                                                        {d.delta === 0 ? '' : ` (${d.delta > 0 ? '+' : ''}${d.delta})`}
-                                                    </Text>
-                                                </View>
-                                            );
-                                            return d.id !== undefined ? (
-                                                <TooltipTarget
-                                                    key={d.label}
-                                                    kind="item-stat"
-                                                    id={d.id}
-                                                    testID={`inv-modal-stat-${d.id}`}
-                                                >
-                                                    {row}
-                                                </TooltipTarget>
-                                            ) : (
-                                                <View key={d.label}>{row}</View>
-                                            );
-                                        })}
+                                        {modalVm.statDeltas.map((d) => (
+                                            <View key={d.label} style={styles.modalStatRow}>
+                                                <Text style={styles.modalStatLabel}>{d.label}</Text>
+                                                <Text style={styles.modalStatVal}>
+                                                    {d.before} → {d.after}
+                                                    {d.delta === 0 ? '' : ` (${d.delta > 0 ? '+' : ''}${d.delta})`}
+                                                </Text>
+                                            </View>
+                                        ))}
                                     </View>
                                 )}
                                 {modalVm.effectDeltas.length > 0 && (

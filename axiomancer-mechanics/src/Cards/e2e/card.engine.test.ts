@@ -82,11 +82,10 @@ describe('executeCard — no direct HP movement (spec 32 v3)', () => {
         mockSequentialRng(0.05); // land the tiered resist roll
         const state = fixtureState();
         const enemyHpBefore = state.enemy.health;
-        const { state: next, events } = executeCard(state, dotCard.id, lookup);
+        const { state: next } = executeCard(state, dotCard.id, lookup);
 
         // HP falls to DoT ticks / payoffs / drips / reflect — never to the play.
         expect(next.enemy.health).toBe(enemyHpBefore);
-        expect(events.find(e => e.kind === 'damage')).toBeUndefined();
         // But the affliction lands — the efficient path.
         expect(next.enemy.effects.some(e => e.effectId === 'debuff_bleed')).toBe(true);
     });
@@ -96,10 +95,9 @@ describe('executeCard — no direct HP movement (spec 32 v3)', () => {
         const player = fixturePlayer();
         const state = initializeCombat({ ...player, health: player.maxHealth - 10 }, fixtureEnemy());
         const hpBefore = state.player.health;
-        const { state: next, events } = executeCard(state, buffCard.id, lookup);
+        const { state: next } = executeCard(state, buffCard.id, lookup);
 
         expect(next.player.health).toBe(hpBefore); // no stat-scaled self-heal
-        expect(events.find(e => e.kind === 'heal')).toBeUndefined();
         expect(next.player.effects.some(e => e.effectId === 'buff_thorns')).toBe(true);
     });
 });
@@ -150,12 +148,11 @@ describe('executeCard — Phase 49 casterSide=enemy', () => {
         const state: CombatState = initializeCombat(fixturePlayer(), enemy);
         const playerHpBefore = state.player.health;
 
-        const { state: next, events } = executeCard(state, dotCard.id, lookup, 'enemy');
+        const { state: next } = executeCard(state, dotCard.id, lookup, 'enemy');
 
         // Spec 32 v3: the play itself never moves HP — the DoT does the work.
         expect(next.player.health).toBe(playerHpBefore);
         expect(next.enemy.health).toBe(state.enemy.health);
-        expect(events.find(e => e.kind === 'damage')).toBeUndefined();
         // targetType 'enemy' is relative to the CASTER: the debuff lands on the player.
         expect(next.player.effects.some(e => e.effectId === 'debuff_bleed')).toBe(true);
     });
@@ -168,12 +165,11 @@ describe('executeCard — Phase 49 casterSide=enemy', () => {
         const enemyHpBefore = state.enemy.health;
         const playerHpBefore = state.player.health;
 
-        const { state: next, events } = executeCard(state, buffCard.id, lookup, 'enemy');
+        const { state: next } = executeCard(state, buffCard.id, lookup, 'enemy');
 
         // No stat-scaled heal any more — the buff is the whole payload.
         expect(next.enemy.health).toBe(enemyHpBefore);
         expect(next.player.health).toBe(playerHpBefore);
-        expect(events.find(e => e.kind === 'heal')).toBeUndefined();
         expect(next.enemy.effects.some(e => e.effectId === 'buff_thorns')).toBe(true);
         expect(next.player.effects.some(e => e.effectId === 'buff_thorns')).toBe(false);
     });

@@ -116,7 +116,6 @@ export function resolveWareItem(ware: ShopWare): Item | null {
  */
 interface WarePayload {
     cleanse?: boolean;
-    statModifiers?: readonly { stat: string; value: number; isMultiplier?: boolean }[];
     regeneration?: { healthPerRound?: number };
     defenseModifier?: number;
     rollModifier?: number;
@@ -148,15 +147,14 @@ function statWords(stat: string): string {
 }
 
 /**
- * One stat modifier as a phrase.
+ * One relic stat modifier as a phrase.
  *
- * @param mod - a flat or multiplicative stat modifier off an effect payload
- *   or a relic.
- * @returns `+2 body` / `x1.5 physical attack`. Cluster: S5-talk-C04.
+ * @param mod - a flat stat modifier off a relic (only `maxHp` since TRIM THE
+ *   FAT T2a; effects no longer carry stat lines).
+ * @returns `+5 max VITAE`. Cluster: S5-talk-C04.
  */
-function modWords(mod: { stat: string; value: number; isMultiplier?: boolean }): string {
-    const value = mod.isMultiplier ? `x${mod.value}` : signed(mod.value);
-    return `${value} ${statWords(mod.stat)}`;
+function modWords(mod: { stat: string; value: number }): string {
+    return `${signed(mod.value)} ${statWords(mod.stat)}`;
 }
 
 /**
@@ -171,7 +169,6 @@ function modWords(mod: { stat: string; value: number; isMultiplier?: boolean }):
 function effectWords(effect: Effect): string {
     const payload = (effect.payload ?? {}) as WarePayload;
     const parts: string[] = [];
-    for (const mod of payload.statModifiers ?? []) parts.push(modWords(mod));
     const regen = payload.regeneration?.healthPerRound ?? 0;
     if (regen !== 0) parts.push(`${signed(regen)} VITAE / round`);
     if (payload.defenseModifier) parts.push(`${signed(payload.defenseModifier)} defense`);

@@ -282,8 +282,8 @@ describe('card engine — every combat-engine-owned mechanic kind is a NO-OP thr
             };
             const res = executeCard(state, 'test-mech-card', id => id === 'test-mech-card' ? card : getCardById(id), 'player');
 
-            // No damage/heal/effect events from the mechanic itself.
-            expect(res.events.some(e => e.kind === 'damage' || e.kind === 'heal' || e.kind === 'effect-applied')).toBe(false);
+            // No effect events from the mechanic itself.
+            expect(res.events.some(e => e.kind === 'effect-applied')).toBe(false);
             expect(res.state.enemy.health).toBe(100);
             expect(res.state.player.health).toBe(player.health);
             expect(res.state.enemy.effects.map(e => e.effectId)).toEqual(['debuff_poison']);

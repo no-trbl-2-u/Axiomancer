@@ -347,70 +347,19 @@ describe('selectTooltipContentFor', () => {
 // ---------------------------------------------------------------------------
 
 describe('accentForStat', () => {
-    it('maps physical* → body', () => {
-        expect(accentForStat('physicalAttack')).toBe('body');
-        expect(accentForStat('physicalDefense')).toBe('body');
+    it('maps each bare stance to itself', () => {
         expect(accentForStat('body')).toBe('body');
-    });
-
-    it('maps mental* → mind', () => {
-        expect(accentForStat('mentalAttack')).toBe('mind');
         expect(accentForStat('mind')).toBe('mind');
-    });
-
-    it('maps emotional* → heart', () => {
-        expect(accentForStat('emotionalAttack')).toBe('heart');
         expect(accentForStat('heart')).toBe('heart');
     });
 
-    it('maps unknown / luck → neutral', () => {
-        expect(accentForStat('luck')).toBe('neutral');
+    it('maps anything else → neutral', () => {
+        expect(accentForStat('physicalAttack')).toBe('neutral');
         expect(accentForStat('whatever')).toBe('neutral');
     });
 });
 
 describe('formatEffectStatEffect', () => {
-    it('formats a single positive stat modifier', () => {
-        expect(
-            formatEffectStatEffect(
-                { statModifiers: [{ stat: 'physicalAttack', value: 1 }] },
-                'fallback',
-            ),
-        ).toBe('+1 physical attack');
-    });
-
-    it('formats a negative stat modifier', () => {
-        expect(
-            formatEffectStatEffect(
-                { statModifiers: [{ stat: 'mentalDefense', value: -2 }] },
-                'fallback',
-            ),
-        ).toBe('-2 mental defense');
-    });
-
-    it('formats a multiplier modifier with × notation', () => {
-        expect(
-            formatEffectStatEffect(
-                { statModifiers: [{ stat: 'emotionalAttack', value: 2, isMultiplier: true }] },
-                'fallback',
-            ),
-        ).toBe('×2 emotional attack');
-    });
-
-    it('annotates additional modifiers as "+N more"', () => {
-        expect(
-            formatEffectStatEffect(
-                {
-                    statModifiers: [
-                        { stat: 'physicalAttack', value: 1 },
-                        { stat: 'physicalDefense', value: 1 },
-                    ],
-                },
-                'fallback',
-            ),
-        ).toBe('+1 physical attack (+1 more)');
-    });
-
     it('formats regeneration as "+N hp / round"', () => {
         expect(
             formatEffectStatEffect({ regeneration: { healthPerRound: 2 } }, 'fallback'),
@@ -420,7 +369,7 @@ describe('formatEffectStatEffect', () => {
     it('formats damage-over-time as "-N hp / round"', () => {
         expect(
             formatEffectStatEffect(
-                { damageOverTime: { damagePerRound: 3, damageType: 'physicalAttack' } },
+                { damageOverTime: { damagePerRound: 3, damageType: 'body' } },
                 'fallback',
             ),
         ).toBe('-3 hp / round');
@@ -449,7 +398,7 @@ describe('formatEffectStatEffect', () => {
         ).toBe('advantage on body');
     });
 
-    it('formats rollModifier when statModifiers is empty', () => {
+    it('formats rollModifier', () => {
         expect(formatEffectStatEffect({ rollModifier: 2 }, 'fallback')).toBe('+2 to rolls');
     });
 

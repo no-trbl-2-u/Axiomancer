@@ -296,7 +296,6 @@ const ALIGNMENT_CONTENT: Record<string, TooltipContent> = {
 // ---------------------------------------------------------------------------
 
 interface EffectPayloadLike {
-    statModifiers?: { stat: string; value: number; isMultiplier?: boolean }[];
     damageOverTime?: { damagePerRound: number; damageType: string };
     regeneration?: { healthPerRound?: number };
     actionRestriction?: { forcedStance?: string; blockedStances?: string[]; skipTurn?: boolean };
@@ -306,11 +305,6 @@ interface EffectPayloadLike {
     reflectDamage?: number;
 }
 
-/** lowerCamel → "lower camel" (e.g. "physicalAttack" → "physical attack"). */
-function statLabel(stat: string): string {
-    return stat.replace(/([A-Z])/g, ' $1').toLowerCase().trim();
-}
-
 function sign(n: number): string {
     if (n > 0) return `+${n}`;
     if (n < 0) return `${n}`;
@@ -318,24 +312,19 @@ function sign(n: number): string {
 }
 
 /**
- * Derive the stance accent from a stat-name prefix. Engine stat
- * vocabulary (`EffectStatTarget` in `axiomancer-mechanics/Effects/
- * types.d.ts`) splits into `physical*` (body), `mental*` (mind),
- * `emotional*` (heart). The bare stances `'heart' | 'body' | 'mind'`
- * map to themselves; `'luck'` and any other catch-all return
- * `'neutral'`.
+ * Derive the accent from a stance key. The bare stances
+ * `'heart' | 'body' | 'mind'` map to themselves; anything else returns
+ * `'neutral'`. (The `physical*` / `mental*` / `emotional*` stat prefixes it
+ * also mapped were deleted with `EffectStatTarget` in TRIM THE FAT T2a.)
  */
 export function accentForStat(stat: string): TooltipAccent {
-    if (stat === 'heart' || stat.startsWith('emotional')) return 'heart';
-    if (stat === 'body' || stat.startsWith('physical')) return 'body';
-    if (stat === 'mind' || stat.startsWith('mental')) return 'mind';
+    if (stat === 'heart' || stat === 'body' || stat === 'mind') return stat;
     return 'neutral';
 }
 
 /**
  * Format `Effect.payload` as a short stat-effect line. Picks the
- * single most-informative summand (statModifier first, then
- * regeneration, then DOT, then action restriction, then roll /
+ * single most-informative summand (regeneration first, then DOT, then action restriction, then roll /
  * defense / reflect modifiers). Returns the engine `description`
  * fallback when no payload data is present — defensive only;
  * Tier-1+ engine effects all carry payload.
@@ -345,13 +334,6 @@ export function formatEffectStatEffect(
     fallback: string,
 ): string {
     if (!payload) return fallback;
-    const mods = payload.statModifiers ?? [];
-    if (mods.length > 0) {
-        const mod = mods[0];
-        const more = mods.length > 1 ? ` (+${mods.length - 1} more)` : '';
-        const valueStr = mod.isMultiplier ? `×${mod.value}` : sign(mod.value);
-        return `${valueStr} ${statLabel(mod.stat)}${more}`;
-    }
     if (payload.regeneration?.healthPerRound !== undefined) {
         return `${sign(payload.regeneration.healthPerRound)} hp / round`;
     }
@@ -400,11 +382,9 @@ function synthesizeItemStatContent(id: string): TooltipContent | null {
     return null;
 }
 
-/** Derive the accent for an effect from its primary stat target. */
+/** Derive the accent for an effect from its DoT stance, if any. */
 function accentForEffect(payload: EffectPayloadLike | undefined): TooltipAccent {
     if (!payload) return 'neutral';
-    const firstStat = payload.statModifiers?.[0]?.stat;
-    if (firstStat) return accentForStat(firstStat);
     if (payload.damageOverTime?.damageType) return accentForStat(payload.damageOverTime.damageType);
     return 'neutral';
 }

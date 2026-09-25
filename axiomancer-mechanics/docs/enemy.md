@@ -17,23 +17,17 @@ Defined in [`src/Enemy/types.ts`](../src/Enemy/types.ts).
 | `name`, `description` | `string` | Display + flavour. |
 | `level`, `health`, `maxHealth` | `number` | Resources. |
 | `baseStats` | `BaseStats` | Heart/Body/Mind. |
-| `derivedStats` | `DerivedStats` | Computed combat stats (no `NonCombatStats`). |
 | `mapName` | `MapName` | Map the enemy belongs to. |
 | `logic` | `EnemyLogic` | AI strategy — see "AI strategies" below. |
 | `difficulty?` | `EnemyDifficulty` | `simple` / `normal` / `elite` / `boss` / `unique`. |
-| `tier1Overrides?` | `Tier1EffectOverrides` | Per-stance Tier 1 effect ID overrides. |
-| `procUnlocks?` | `ProcUnlocks` | Spec 03 — per-cell tier cap (default 1). Elites bump to 2, bosses to 3. |
-| `procOverrides?` | `ProcOverrides` | Spec 03 — per-cell custom proc tables. |
 | `cards?` | `Card[]` | Optional card list (Spec 04 / 04b — currently unused on shipped enemies; reserved for elite/boss card rotations). |
 | `loot?` | `LootTableEntry[]` | Weighted drop table (Spec 07 Q7B). |
 | `xpReward?` | `number` | Flat XP awarded on kill. Defaults to `level × DEFAULT_XP_BY_DIFFICULTY[difficulty]`. |
 | `effects` | `ActiveEffect[]` | Live status effects. |
 
-Enemies do not have `nonCombatStats`; `getSaveStat()` falls back to `getDefenseStat()`.
-
 ## Factory
 
-`createEnemy(options): Enemy` — derives `derivedStats`, `maxHealth`, and the
+`createEnemy(options): Enemy` — derives `maxHealth` and the
 default `xpReward` from `level` / `baseStats` / `difficulty`. Starts the enemy
 at full HP.
 

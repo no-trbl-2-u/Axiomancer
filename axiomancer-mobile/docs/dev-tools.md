@@ -52,7 +52,7 @@ read the log.** Section container ids are `dev-section-<key>`.
 
 | Leaf | Helper | What it does |
 |---|---|---|
-| `DebugStateInspector` | `state/dev/inspector.ts` → `selectInspectorSections` | Live read-only key/value view. Groups: RUN (run id, save version, rng, open session), PLAYER (level/xp/points, vitae, stats, shillings, souls, effects, moral, alignment), DECK & GEAR (known/reward cards, removals, hazard deck, dice, die gear, worn relics, inventory), WORLD (continent/map/node, node counts, maps done/open/locked, goodwill, exploited/spared, factions), STORY (quests, journal, flags), THE APORIA (act, acts done, completed, pocket, gates, debt, waystones, boss outcomes). Tap a chip to expand a group. |
+| `DebugStateInspector` | `state/dev/inspector.ts` → `selectInspectorSections` | Live read-only key/value view. Groups: RUN (run id, save version, rng, open session), PLAYER (level/xp/points, vitae, stats, shillings, souls, effects, moral, alignment), DECK & GEAR (known/reward cards, removals, hazard deck, dice, die gear, worn relics, inventory), WORLD (continent/map/node, node counts, maps done/open/locked, goodwill, exploited/spared), STORY (quests, journal, flags), THE APORIA (act, acts done, completed, pocket, gates, debt, waystones, boss outcomes). Tap a chip to expand a group. |
 
 ### PLAYER — `dev-section-player`
 

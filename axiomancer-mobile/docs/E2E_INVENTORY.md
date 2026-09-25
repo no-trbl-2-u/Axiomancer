@@ -88,7 +88,7 @@ assertions. Suites that need the player seated somewhere boot from a
 | File | Pattern | Pins | desc | it |
 |---|---|---|---:|---:|
 | `asyncStorageAdapter.engine.test.ts` | P2 | `createAsyncStorageAdapter` round-trips via AsyncStorage's jest mock; envelope wrap/unwrap; error recovery; v2 envelope → v3 alignment backfill end-to-end (Phase 51) | 4 | 16 |
-| `migrations.engine.test.ts` | P1 (pure) | v1→v2 migration backfills `derivedStats` / `nonCombatStats`; v2→v3 migration backfills `state.alignment` via `defaultAlignment()`; schema version pin + DEFAULT_MIGRATIONS infrastructure (Phase 51) | 4 | 0¹ |
+| `migrations.engine.test.ts` | P1 (pure) | v1→v2 migration no longer adds the retired `derivedStats` / `nonCombatStats` keys; v2→v3 migration backfills `state.alignment` via `defaultAlignment()`; schema version pin + DEFAULT_MIGRATIONS infrastructure (Phase 51) | 4 | 0¹ |
 
 ¹ All assertions live in `describe`-level setup or `test()` (not `it()`) — see source.
 

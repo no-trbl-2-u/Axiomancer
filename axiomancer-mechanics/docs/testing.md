@@ -41,7 +41,7 @@ Examples of e2e entry points by module:
 | Module           | Hermetic e2e entry point                                                             |
 | ---------------- | ------------------------------------------------------------------------------------- |
 | `Combat`         | The Hazard-Pattern engine transitions (`initializeCombatEncounter` / `playCombatCard` / `resolveThreatPhase` in `Combat/combat.engine.ts`) + the `createGameStore` lifecycle |
-| `Effects`        | `applyEffect` / `applyTier1CombatEffect` / `tickAllEffects` driving an effect to expiry; Phase 88 coverage sweep: `stat-band-effects.engine.test.ts`, `advantage-effects.engine.test.ts` |
+| `Effects`        | `applyEffect` / `tickAllEffects` driving an effect to expiry; Phase 88 coverage sweep: `advantage-effects.engine.test.ts` |
 | `Enemy`          | `createEnemy` + AI / strategy assertions in `enemy.engine.test.ts`; per-enemy content pins in `alignment.engine.test.ts` (Phase 45), `befriendability-config.engine.test.ts` (Phase 68), `aftermath-lines.engine.test.ts` (Phase 71) |
 | `Game`           | `createGameStore(nullAdapter, …)` driven through `startCombat` / `updateCombat` / `endCombat`; run-loop semantics in `run-loop.engine.test.ts` (Phase 72); codex unlocks in `codex.engine.test.ts` (Phase 73) |
 | `World`          | World reducer chained through map → node → continent transitions                      |
@@ -348,42 +348,6 @@ Before opening a PR, confirm:
 
 If you cannot satisfy this list, write a one-paragraph "Hermetic-test debt"
 note in the PR description explaining why and what would unblock it.
-
-## Minigame Harness — Cross-Minigame Balance Testing (Phase 148)
-
-The **minigame harness** provides unified balance testing for the live
-minigame (Hazard) in a single invocation. It orchestrates A/B testing,
-playstyle divergence measurement, and pass/fail evaluation for use as a
-standard verification gate in balance phases. (Phase 61 retired the
-Quest Board arm and Phase 76 retired the Gathering arm, each along
-with the minigame it tuned.)
-
-```ts
-import { runMinigameHarness } from 'axiomancer-mechanics';
-
-const report = runMinigameHarness({
-  minigames: ['hazard'],
-  runs: 300,
-  seed: 'balance-test-seed',
-  abTestVariants: {
-    hazard: [configA, configB], // Optional A/B testing
-  },
-});
-
-// Check overall balance health
-if (!report.passFail.overall) {
-  console.log('Balance issues detected:', report.recommendations);
-}
-```
-
-**Key features:**
-- **Deterministic execution** via seed parameter for reproducible results
-- **Individual and unified reporting** with per-minigame pass/fail bands
-- **Optional A/B testing** for comparing configuration variants
-- **Aggregated recommendations** from all minigame balance analyzers
-
-The harness is tested hermetically at `src/World/e2e/minigame-harness.engine.test.ts`
-and designed for integration into automated balance verification workflows.
 
 ## The hermeticity guard
 

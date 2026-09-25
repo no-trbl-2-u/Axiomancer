@@ -48,14 +48,6 @@ export interface StatDelta {
     before: number;
     after: number;
     delta: number;
-    /**
-     * Engine stat key (e.g. `'physicalAttack'`, `'mentalDefense'`).
-     * Consumed by the inventory item-modal's TooltipTarget wrap
-     * (Phase 80a) to fire a `kind:'item-stat'` synthesizer tooltip
-     * on tap. Optional so callers building deltas without a stat
-     * binding can omit it; the view falls back to a plain row.
-     */
-    id?: string;
 }
 
 /**
@@ -74,16 +66,11 @@ export interface ModalEffectDelta {
 }
 
 /**
- * One line of an item's *intrinsic* modifier block — the stats and
- * effects the item itself grants (independent of equip state). Stat
- * lines read e.g. "+5 PHYS ATK"; effect lines read the resolved effect
- * name. This is what makes an affixed drop ("Keen Iron Blade of
- * Clarity") show *what* its affixes do, not just its name.
+ * One line of an item's *intrinsic* modifier block — the stat lines the
+ * item itself grants (independent of equip state), e.g. "+5 MAX HP".
  */
 export interface ItemModifierLine {
     label: string;
-    /** Engine stat key for tooltip wiring, when the line is a stat. */
-    id?: string;
 }
 
 export interface ItemModalViewModel {
@@ -102,9 +89,8 @@ export interface ItemModalViewModel {
     /** Preview lines (Q2 / Q5 — "potential results"). */
     previewLines: readonly string[];
     /**
-     * Stat deltas for an equip preview (Q5). Covers *every* stat the
-     * equip changes — combat stats, non-combat saves/tests, luck, and
-     * max health — and includes **only** stats whose value actually
+     * Stat deltas for an equip preview (Q5). Max health is the only stat
+     * equipment can change; a row appears **only** when its value actually
      * changes (unchanged stats are dropped, per the design brief).
      */
     statDeltas: readonly StatDelta[];
@@ -344,19 +330,6 @@ function buildEquipmentModal(player: Character, item: Item): ItemModalViewModel 
  */
 const STAT_LABELS: Record<string, string> = {
     maxHealth: 'MAX HP',
-    physicalAttack: 'PHYS ATK',
-    physicalDefense: 'PHYS DEF',
-    mentalAttack: 'MENT ATK',
-    mentalDefense: 'MENT DEF',
-    emotionalAttack: 'EMOT ATK',
-    emotionalDefense: 'EMOT DEF',
-    luck: 'LUCK',
-    physicalSave: 'BODY SAVE',
-    physicalTest: 'BODY TEST',
-    mentalSave: 'MIND SAVE',
-    mentalTest: 'MIND TEST',
-    emotionalSave: 'HEART SAVE',
-    emotionalTest: 'HEART TEST',
 };
 
 function statLabelFor(key: string): string {
@@ -368,8 +341,8 @@ function statLabelFor(key: string): string {
 
 /**
  * Round a stat value to one decimal place for display. Integer stats
- * stay integers (`15`); fractional stats like luck read cleanly (`1.5`
- * rather than `1.55432728`).
+ * stay integers (`15`); a fractional value reads cleanly (`1.5` rather
+ * than `1.55432728`).
  */
 function round1(n: number): number {
     return Math.round(n * 10) / 10;
@@ -393,51 +366,30 @@ function characterStatMap(character: Character): Map<string, number> {
 /**
  * Diff every stat between the player and the post-operation character,
  * emitting a before→after row for each stat that *changed*. Unchanged
- * stats are dropped. Ordered by `STAT_LABELS` declaration order so the
- * combat stats lead and the rest follow stably; unknown keys trail in
- * alphabetical order.
+ * stats are dropped. Rows sort by label.
  */
 function computeStatDeltas(before: Character, after: Character): StatDelta[] {
     const beforeMap = characterStatMap(before);
     const afterMap = characterStatMap(after);
     const keys = new Set<string>([...beforeMap.keys(), ...afterMap.keys()]);
 
-    const known = Object.keys(STAT_LABELS);
-    const orderOf = (key: string) => {
-        const i = known.indexOf(key);
-        return i === -1 ? Number.MAX_SAFE_INTEGER : i;
-    };
-
     const out: StatDelta[] = [];
     for (const key of keys) {
-        // Round to one decimal so fractional stats (luck) read as e.g.
+        // Round to one decimal so a fractional value reads as e.g.
         // 1.5, and compare the rounded values so a sub-0.05 wobble never
         // surfaces a "+0.0" row.
         const b = round1(beforeMap.get(key) ?? 0);
         const a = round1(afterMap.get(key) ?? 0);
         if (a === b) continue;
         const d = round1(a - b);
-        // No row carries a tooltip id: the only diffable stat left is max
-        // VITAE, which the item-stat synthesizer does not describe.
         out.push({ label: statLabelFor(key), before: b, after: a, delta: d });
     }
-    out.sort((x, y) => {
-        const ox = orderOf(idOrLabelKey(x));
-        const oy = orderOf(idOrLabelKey(y));
-        if (ox !== oy) return ox - oy;
-        return x.label.localeCompare(y.label);
-    });
+    out.sort((x, y) => x.label.localeCompare(y.label));
     return out;
 }
 
-/** Recover the engine stat key for ordering: prefer the explicit id,
- * else fall back to the label (unknown keys, which trail anyway). */
-function idOrLabelKey(row: StatDelta): string {
-    return row.id ?? row.label;
-}
-
 /** Signed stat-value string, rounded to one decimal (`+5` / `-2` /
- * `+1.5` for luck). */
+ * `+1.5`). */
 function signed(n: number): string {
     const r = round1(n);
     return r >= 0 ? `+${r}` : `${r}`;
@@ -453,11 +405,9 @@ function effectName(id: string): string {
 }
 
 /**
- * Build the item's intrinsic modifier block — the stats (with values)
- * and effects it grants on its own. Stat lines carry the engine stat
- * key as `id` so the view can wire a tooltip. Values render as `+N` /
- * `-N`. Returns `[]` for an item with no
- * modifiers (a plain common drop).
+ * Build the item's intrinsic modifier block — the stat lines (with
+ * values) it grants on its own. Values render as `+N` / `-N`. Returns
+ * `[]` for an item with no modifiers (a plain common drop).
  */
 function computeItemModifiers(eq: Equipment): ItemModifierLine[] {
     const out: ItemModifierLine[] = [];
