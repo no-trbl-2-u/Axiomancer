@@ -15,11 +15,102 @@
 | equipment | `skills/adjust-equipment.md` | 2026-09-24 | bdcd4c7e | 18 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-24 | 6f13b2d0 | 18 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-24 | c57a7e73 | 18 |
-| npcs | `skills/adjust-npcs.md` | 2026-09-24 | f3c09826 | 17 |
+| npcs | `skills/adjust-npcs.md` | 2026-09-25 | <PENDING> | 18 |
 
 ## Log
 
 ```
+> **[adjust-npcs pass 18, 2026-09-25, commit <PENDING>]** Zero-diff pass —
+> audit re-confirmed byte-identical to pass 17, no new CREATE/UPDATE/
+> REMOVE, ledger bump only. Dispatched autonomously by `/march`'s
+> content-lifecycle gate (Step 3b): `npcs` (`f3c09826`
+> 2026-09-24T04:44:05Z, 27 commits behind HEAD `13d3f1f4`
+> 2026-09-24T22:42:56Z) was the stalest qualifying category this tick —
+> `cards` (`f155b027` 2026-09-24T08:52:50Z, 25 commits), `equipment`
+> (`bdcd4c7e` 2026-09-24T10:42:53Z, 23 commits) and `enemies` (`6f13b2d0`
+> 2026-09-24T10:43:06Z, 22 commits) all qualified too but were less
+> stale; `keywords` (real commit `13d3f1f4`, ~4h old — the ledger row's
+> recorded hash `c57a7e73` is a stale self-reference from its own
+> pending-commit write) had just ticked and did not qualify. Deploy
+> confirmed green (`npm run deploy:check` at HEAD `13d3f1f4`: no gated
+> workflow yet — docs/plan-only tick, nothing to check). No phase work
+> pending (`plan/steps/01_build_plan.md` has zero `[ ]` rows). Growth
+> floor clear (`src/World` commits within 7 days, e.g. `bc4ef749`/
+> `e8369e19`/`1da16935`), so 3b-pre didn't pre-empt this dispatch. The
+> critique gate (`/march` Step 2) did not fire ahead of this tick either
+> — only 2 commits and ~8h since pass 49 (`94b6b96f`), under both the
+> 12-commit and 24h thresholds.
+>
+> **Step 0:** re-read `axiomancer-mechanics/CLAUDE.md` fresh — THE STORY
+> IS THE OVERVIEW now governs (superseded THE STORY IS THE ROAD that
+> pass 17 read; T cleared the road 2026-09-18 and replaced it with an
+> over-arching story document in attended sessions 2026-09-23/24). Hard
+> rule 3 (don't invent a named character's personhood autonomously)
+> stands unchanged and is reinforced by the new doctrine's own "do not
+> invent canon beyond the overview" clause. Read the new
+> `content/story/story-overview.md` in full: T's prologue, the
+> rulings, the per-map place-and-theme table, and the ordered open
+> questions.
+>
+> **Step 1 structural audit — fresh, not re-cited:** `git log
+> f3c09826..HEAD -- src/NPCs src/World/Continents src/World/MapEvents
+> src/World/types.ts specs/story specs/characters` returns zero
+> commits — none of the 27 intervening commits touch the NPC/dialogue
+> surface at all (they're story-overview rewrite, a mobile canvas-pivot
+> fix, cards/equipment/enemies/keywords steward passes, and an `/expand`
+> no-candidates tick). Ran every Step 1 signal fresh anyway:
+> - All 21 `const *: NPC` entries unchanged in count and each still
+>   referenced from exactly one map's `npcs:` array — no orphan.
+> - Zero legacy `dialogue: {` (flat `DialogueMap`) usage; every NPC
+>   still on `dialogueTree`.
+> - Zero `teachCard` usage in NPC content; `startQuest` names unchanged
+>   from pass 17 and type-checked green by the verify gate below.
+> - Coastal-Village's 3-NPC `unstagedNpcs` backlog (Tide-Shopkeeper,
+>   Dockworker's Union Leader, Merchant's Widow) unchanged — still
+>   blocked on the missing `openShop`-shaped effect surface, re-confirmed
+>   against the current `DialogueChoice.effect` shape in
+>   `src/NPCs/types.ts`.
+> - Northern-Continent's three 1-NPC maps (`caverns`/theDelver,
+>   `connecting-river`/theBoatwoman, `town-across-river`/theSweetheart)
+>   unchanged; cross-referenced against the new story-overview's map
+>   table, which lists "what happens on each middle map" as its own
+>   **open question (6)** — this reinforces, not changes, `plan/AUDIT.md`'s
+>   `[gap]` row (DECIDED via `/oversight` 2026-09-15, still needs an
+>   attended `character-spec`/`story-spec` session before this steward
+>   can act): the story doctrine now says explicitly, in its own words,
+>   that what these maps need is undecided, not this autonomous tick's
+>   call to invent.
+> - The new doctrine's "Noted" section flags ~186 legacy dialogue nodes
+>   and 21 `boy-*` flags as non-canon text kept only so the build works,
+>   and explicitly defers renaming/reconciliation as future engine work
+>   — not a Step 1 structural signal (nothing is broken, dead-ended, or
+>   misreferenced) and not this steward's call to act on unprompted.
+>
+> **Step 1b widened check:** Step 1 returned nothing actionable, so ran
+> the deeper KB cross-reference before accepting zero-diff. `kb_overview`
+> confirms the corpus is unchanged (46 board/card games, 2801 okf docs).
+> Fresh-angle `kb_search` runs (`retcon|non-canon|placeholder narrative|
+> story rewrite`, scope all; `quest.giver|dialogue.branch|npc.voice`,
+> scope boardgames) returned zero matches — the corpus is card/board-game
+> reception data and doesn't carry narrative-authoring or story-retcon
+> prior art, a documented, accepted miss (skill §3 Step 2) rather than a
+> tooling failure. No CREATE/UPDATE is gated on this pass, so no wishlist
+> issue filed. Zero-diff confirmed on the widened check too.
+>
+> **Verify:** green — mechanics (231 test files, 3746 tests, build) and
+> mobile (`npm run verify --workspace axiomancer-mobile`).
+>
+> **Ship:** ledger bump only, no code changes on the NPC surface this
+> pass.
+>
+> **Residue:** none new. The two open items both remain exactly where
+> pass 17 left them: the Coastal-Village 3-NPC unstaged backlog stays
+> blocked on the missing shop-effect surface, and Northern-Continent's
+> three 1-NPC maps stay parked on `plan/AUDIT.md`'s `[gap]` row pending
+> an attended `character-spec`/`story-spec` session — now additionally
+> cross-referenced against the story-overview rewrite's own open
+> question 6, same blocked status, no new AUDIT row warranted.
+
 > **[adjust-keywords pass 18, 2026-09-24, commit c57a7e73]** Zero-CREATE,
 > zero-UPDATE, zero-REMOVE pass — dispatched autonomously by `/march`'s
 > content-lifecycle gate (Step 3b): `keywords` (`71648d3a`
