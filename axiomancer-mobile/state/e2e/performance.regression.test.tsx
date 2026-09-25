@@ -23,11 +23,9 @@ jest.mock('@/lib/platform/router', () => ({
 }));
 
 // Import components that should have performance optimizations
-import { AestheticModeProvider } from '@/state/aesthetic-mode';
 import { GameStoreProvider, useGameState } from '@/state/GameStoreProvider';
 
-// Test wrapper that provides necessary contexts - simplified version without AestheticModeProvider
-// to avoid act() warnings in basic tests
+// Test wrapper that provides necessary contexts
 function TestWrapper({ children }: { children: React.ReactNode }) {
     return (
         <GameStoreProvider>

@@ -30,7 +30,6 @@ import { fireEvent, render } from '@testing-library/react-native';
 import React from 'react';
 
 import { EncounterModalOverlay } from '../EncounterModalOverlay';
-import { AestheticModeProvider, type AestheticMode } from '@/state/aesthetic-mode';
 import { CombatModeProvider, useCombatMode } from '@/state/combat-mode';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
 import { createAppStore } from '@/state/store';
@@ -44,14 +43,12 @@ import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 // Phase 70 Tick A follow-up: overlay also reads `useCombatMode()` to
 // watch `lastOutcome` / `aftermathData` for the in-modal aftermath
 // swap. Tests now mount inside <CombatModeProvider> too.
-function withAesthetic(child: React.ReactNode, mode: AestheticMode = 'canonical') {
+function withProviders(child: React.ReactNode) {
     const store = createAppStore({ adapter: createMemoryAdapter() });
     return (
-        <AestheticModeProvider initialMode={mode} skipHydration>
-            <GameStoreProvider store={store}>
-                <CombatModeProvider>{child}</CombatModeProvider>
-            </GameStoreProvider>
-        </AestheticModeProvider>
+        <GameStoreProvider store={store}>
+            <CombatModeProvider>{child}</CombatModeProvider>
+        </GameStoreProvider>
     );
 }
 
@@ -143,7 +140,7 @@ function makeNarrativeChoiceVm(): EventViewModel {
 describe('EncounterModalOverlay: mount conditions', () => {
     it('returns null when the VM is narrative-choice (paced event, not combat-prelude)', () => {
         const tree = render(
-            withAesthetic(<EncounterModalOverlay vm={makeNarrativeChoiceVm()} onFight={() => {}} onFlee={() => {}} />),
+            withProviders(<EncounterModalOverlay vm={makeNarrativeChoiceVm()} onFight={() => {}} onFlee={() => {}} />),
         );
         // A null return from a component renders no children; the
         // root tree is `null` when the component renders nothing.
@@ -153,14 +150,14 @@ describe('EncounterModalOverlay: mount conditions', () => {
     it('returns null when preludeChrome is null (defensive — should not happen post-withPreludeChrome)', () => {
         const vm = makeCombatPreludeVm({ preludeChrome: null });
         const tree = render(
-            withAesthetic(<EncounterModalOverlay vm={vm} onFight={() => {}} onFlee={() => {}} />),
+            withProviders(<EncounterModalOverlay vm={vm} onFight={() => {}} onFlee={() => {}} />),
         );
         expect(tree.toJSON()).toBeNull();
     });
 
     it('mounts the overlay on a combat-prelude VM with populated preludeChrome', () => {
         const tree = render(
-            withAesthetic(<EncounterModalOverlay vm={makeCombatPreludeVm()} onFight={() => {}} onFlee={() => {}} />),
+            withProviders(<EncounterModalOverlay vm={makeCombatPreludeVm()} onFight={() => {}} onFlee={() => {}} />),
         );
         expect(tree.queryByTestId('encounter-modal-overlay')).not.toBeNull();
         // Two chain bars (top + bottom) carry the SEALED · NO RETREAT
@@ -177,13 +174,11 @@ describe('EncounterModalOverlay: auto-engage (the prelude popup is retired)', ()
     function withAllProviders(child: React.ReactNode) {
         const store = createAppStore({ adapter: createMemoryAdapter() });
         return (
-            <AestheticModeProvider initialMode="canonical" skipHydration>
-                <CombatModeProvider>
-                    <GameStoreProvider store={store}>
-                        {child}
-                    </GameStoreProvider>
-                </CombatModeProvider>
-            </AestheticModeProvider>
+            <CombatModeProvider>
+                <GameStoreProvider store={store}>
+                    {child}
+                </GameStoreProvider>
+            </CombatModeProvider>
         );
     }
 
@@ -237,13 +232,11 @@ describe('EncounterModalOverlay: combat mode survives vm.kind change', () => {
     function withAllProviders(child: React.ReactNode) {
         const store = createAppStore({ adapter: createMemoryAdapter() });
         return (
-            <AestheticModeProvider initialMode="canonical" skipHydration>
-                <CombatModeProvider>
-                    <GameStoreProvider store={store}>
-                        {child}
-                    </GameStoreProvider>
-                </CombatModeProvider>
-            </AestheticModeProvider>
+            <CombatModeProvider>
+                <GameStoreProvider store={store}>
+                    {child}
+                </GameStoreProvider>
+            </CombatModeProvider>
         );
     }
 
@@ -286,7 +279,7 @@ describe('EncounterModalOverlay: combat mode survives vm.kind change', () => {
 describe('EncounterModalOverlay: non-dismissible backdrop (chat1 invariant)', () => {
     it('the overlay container has no onPress handler (backdrop swallows taps)', () => {
         const tree = render(
-            withAesthetic(<EncounterModalOverlay vm={makeCombatPreludeVm()} onFight={() => {}} onFlee={() => {}} />),
+            withProviders(<EncounterModalOverlay vm={makeCombatPreludeVm()} onFight={() => {}} onFlee={() => {}} />),
         );
         const overlay = tree.getByTestId('encounter-modal-overlay');
         // The pin: a future refactor that adds onPress to the overlay
@@ -322,14 +315,12 @@ describe('EncounterModalOverlay: combat → aftermath swap', () => {
             return null;
         }
         return (
-            <AestheticModeProvider initialMode="canonical" skipHydration>
-                <CombatModeProvider>
-                    <GameStoreProvider store={store}>
-                        {child}
-                        <VictoryTrigger />
-                    </GameStoreProvider>
-                </CombatModeProvider>
-            </AestheticModeProvider>
+            <CombatModeProvider>
+                <GameStoreProvider store={store}>
+                    {child}
+                    <VictoryTrigger />
+                </GameStoreProvider>
+            </CombatModeProvider>
         );
     }
 
@@ -400,14 +391,12 @@ describe('EncounterModalOverlay: combat → aftermath swap (parley)', () => {
             return null;
         }
         return (
-            <AestheticModeProvider initialMode="canonical" skipHydration>
-                <CombatModeProvider>
-                    <GameStoreProvider store={store}>
-                        {child}
-                        <ParleyTrigger />
-                    </GameStoreProvider>
-                </CombatModeProvider>
-            </AestheticModeProvider>
+            <CombatModeProvider>
+                <GameStoreProvider store={store}>
+                    {child}
+                    <ParleyTrigger />
+                </GameStoreProvider>
+            </CombatModeProvider>
         );
     }
 
@@ -471,14 +460,12 @@ describe('EncounterModalOverlay: combat → aftermath swap (defeat)', () => {
             return null;
         }
         return (
-            <AestheticModeProvider initialMode="canonical" skipHydration>
-                <CombatModeProvider>
-                    <GameStoreProvider store={store}>
-                        {child}
-                        <DefeatTrigger />
-                    </GameStoreProvider>
-                </CombatModeProvider>
-            </AestheticModeProvider>
+            <CombatModeProvider>
+                <GameStoreProvider store={store}>
+                    {child}
+                    <DefeatTrigger />
+                </GameStoreProvider>
+            </CombatModeProvider>
         );
     }
 
@@ -578,18 +565,16 @@ describe('EncounterModalOverlay: combat → aftermath swap (defeat)', () => {
         }
 
         const tree = render(
-            <AestheticModeProvider initialMode="canonical" skipHydration>
-                <CombatModeProvider>
-                    <GameStoreProvider store={store}>
-                        <EncounterModalOverlay
-                            vm={makeCombatPreludeVm()}
-                            onFight={() => {}}
-                            onFlee={() => {}}
-                        />
-                        <DefeatTrigger />
-                    </GameStoreProvider>
-                </CombatModeProvider>
-            </AestheticModeProvider>,
+            <CombatModeProvider>
+                <GameStoreProvider store={store}>
+                    <EncounterModalOverlay
+                        vm={makeCombatPreludeVm()}
+                        onFight={() => {}}
+                        onFlee={() => {}}
+                    />
+                    <DefeatTrigger />
+                </GameStoreProvider>
+            </CombatModeProvider>,
         );
 
         expect(tree.queryByTestId('combat-defeat-panel')).not.toBeNull();
@@ -611,13 +596,11 @@ describe('EncounterModalOverlay: phase-aware seal chrome', () => {
     function withAllProviders(child: React.ReactNode) {
         const store = createAppStore({ adapter: createMemoryAdapter() });
         return (
-            <AestheticModeProvider initialMode="canonical" skipHydration>
-                <CombatModeProvider>
-                    <GameStoreProvider store={store}>
-                        {child}
-                    </GameStoreProvider>
-                </CombatModeProvider>
-            </AestheticModeProvider>
+            <CombatModeProvider>
+                <GameStoreProvider store={store}>
+                    {child}
+                </GameStoreProvider>
+            </CombatModeProvider>
         );
     }
 
@@ -679,11 +662,9 @@ describe('EncounterModalOverlay: phase-aware seal chrome', () => {
 describe('EncounterModalOverlay: in-place hazard combat (Phase 200)', () => {
     function withAllProviders(child: React.ReactNode, store: ReturnType<typeof createAppStore>) {
         return (
-            <AestheticModeProvider initialMode="canonical" skipHydration>
-                <CombatModeProvider>
-                    <GameStoreProvider store={store}>{child}</GameStoreProvider>
-                </CombatModeProvider>
-            </AestheticModeProvider>
+            <CombatModeProvider>
+                <GameStoreProvider store={store}>{child}</GameStoreProvider>
+            </CombatModeProvider>
         );
     }
 

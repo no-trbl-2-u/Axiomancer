@@ -103,9 +103,7 @@ FONTS.mono    JetBrainsMono    — codex header strips, hints, stat rows
 
 - **✠ eyebrow + hairline rule** — the standing header convention
   (small-caps or mono label prefixed with ✠, a 1px rule beneath).
-  Audited into shared components in V3; see
-  `ExplorationCodexHeader.tsx` for the two-token mono strip variant
-  (blood-accent left token, bone right token).
+  Audited into shared components in V3.
 - **Iron/wax furniture** — rivets, seals, hairline borders in `AXM.ash`/
   `AXM.parchment` — the metal-and-wax-seal vocabulary from the original
   design handoff, kept consistent across SELF / SATCHEL / MEMOIR and

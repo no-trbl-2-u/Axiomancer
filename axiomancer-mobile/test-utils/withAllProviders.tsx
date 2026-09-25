@@ -3,14 +3,13 @@
  * (Phase 64 Tick A).
  *
  * Every integration test that mounts a screen-level component
- * needs the same four contexts in the right nesting order:
+ * needs the same contexts in the right nesting order:
  *
- *   <AestheticModeProvider>            // canonical | codex toggle
- *     <CombatModeProvider>             // inCombat + lastOutcome + inEncounterModal
- *       <GameStoreProvider store>      // engine + mobile slices
- *         <SaveSlotsProvider>          // the three save slots (in-memory here)
- *           <SettingsProvider>         // player settings (never touches storage here)
- *             <NavigationContainer> ... </NavigationContainer>  // (callers add if needed)
+ *   <CombatModeProvider>             // inCombat + lastOutcome + inEncounterModal
+ *     <GameStoreProvider store>      // engine + mobile slices
+ *       <SaveSlotsProvider>          // the three save slots (in-memory here)
+ *         <SettingsProvider>         // player settings (never touches storage here)
+ *           <NavigationContainer> ... </NavigationContainer>  // (callers add if needed)
  *
  * Inline copies of this scaffold appeared in
  * `EncounterModalOverlay.test.tsx`, `DebugCombatButton.test.tsx`,
@@ -29,15 +28,12 @@ import { TooltipProvider } from '@/components/tooltip/TooltipProvider';
 import { CombatModeProvider } from '@/state/combat-mode';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
 import { SaveSlotsProvider } from '@/state/SaveSlotsProvider';
-import { AestheticModeProvider, type AestheticMode } from '@/state/aesthetic-mode';
 import type { SaveSlotStore } from '@/state/persistence/saveSlots';
 import { SettingsProvider, createSettingsStore, type SettingsStore } from '@/state/settings';
 import { createAppStore, type AppStore } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 
 export interface AllProvidersOptions {
-    /** Aesthetic mode to seed. Defaults to `'canonical'`. */
-    aesthetic?: AestheticMode;
     /** Optional pre-built store. Defaults to a fresh memory-adapter store. */
     store?: AppStore;
     /** Optional slot store (2026-09-23). Defaults to a fresh in-memory one. */
@@ -73,17 +69,15 @@ export function withAllProviders(
     const store = options.store ?? createAppStore({ adapter: createMemoryAdapter() });
     const settings = options.settings ?? createSettingsStore({ storage: NO_STORAGE });
     const tree = (
-        <AestheticModeProvider initialMode={options.aesthetic ?? 'canonical'} skipHydration>
-            <CombatModeProvider>
-                <GameStoreProvider store={store}>
-                    <SaveSlotsProvider slots={options.slots}>
-                        <SettingsProvider store={settings}>
-                            <TooltipProvider>{child}</TooltipProvider>
-                        </SettingsProvider>
-                    </SaveSlotsProvider>
-                </GameStoreProvider>
-            </CombatModeProvider>
-        </AestheticModeProvider>
+        <CombatModeProvider>
+            <GameStoreProvider store={store}>
+                <SaveSlotsProvider slots={options.slots}>
+                    <SettingsProvider store={settings}>
+                        <TooltipProvider>{child}</TooltipProvider>
+                    </SettingsProvider>
+                </SaveSlotsProvider>
+            </GameStoreProvider>
+        </CombatModeProvider>
     );
     return { tree, store };
 }

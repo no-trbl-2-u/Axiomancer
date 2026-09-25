@@ -18,7 +18,6 @@ import { TooltipProvider } from '@/components/tooltip/TooltipProvider';
 import { useTooltip } from '@/hooks/useTooltip';
 import { CombatModeProvider } from '@/state/combat-mode';
 import { GameStoreProvider } from '@/state/GameStoreProvider';
-import { AestheticModeProvider } from '@/state/aesthetic-mode';
 import { createAppStore } from '@/state/store';
 import { createMemoryAdapter } from '@/test-utils/memoryAdapter';
 import { withAllProviders } from '@/test-utils/withAllProviders';
@@ -168,15 +167,13 @@ describe('<TooltipProvider> placement math', () => {
     ) {
         const store = createAppStore({ adapter: createMemoryAdapter() });
         return render(
-            <AestheticModeProvider initialMode="canonical" skipHydration>
-                <CombatModeProvider>
-                    <GameStoreProvider store={store}>
-                        <TooltipProvider windowSize={windowSize}>
-                            <AnchorChild measureMock={measureMock} />
-                        </TooltipProvider>
-                    </GameStoreProvider>
-                </CombatModeProvider>
-            </AestheticModeProvider>,
+            <CombatModeProvider>
+                <GameStoreProvider store={store}>
+                    <TooltipProvider windowSize={windowSize}>
+                        <AnchorChild measureMock={measureMock} />
+                    </TooltipProvider>
+                </GameStoreProvider>
+            </CombatModeProvider>,
         );
     }
 
