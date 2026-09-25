@@ -3,7 +3,7 @@
 > Derived from `src/World/Hazard/hazard.content.ts` as of 2026-06-15.
 >
 > This is the canonical card-library reference for both mechanics and mobile.
-> Mobile mirrors this doc at `design/encounters/hazard-card-library.md`.
+> This is the only copy; the mobile mirror (`design/encounters/hazard-card-library.md`) was retired 2026-09-25 (trim T5).
 >
 > Related docs:
 > - `docs/encounters/hazard.md` — encounter rules and engine API

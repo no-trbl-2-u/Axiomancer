@@ -62,7 +62,7 @@ See [`adr/README.md`](./adr/README.md) for ADR process and templates.
 
 | File | Coverage | Priority |
 |------|----------|----------|
-| [`source-of-truth-hierarchy.md`](./source-of-truth-hierarchy.md) | Decision-making authority and conflict resolution | **ESSENTIAL** |
+| [`docs/truth-sources.md` § Source-of-truth hierarchy](../../docs/truth-sources.md#source-of-truth-hierarchy--decision-authority) (root, one copy for the monorepo) | Decision-making authority and conflict resolution | **ESSENTIAL** |
 | [`store-submission-checklist.md`](./store-submission-checklist.md) | App store submission process and requirements | **REFERENCE** |
 
 ## Navigation

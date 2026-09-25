@@ -6,7 +6,7 @@
  * strip that the design source places at the top of the codex
  * exploration variant.
  *
- * Design source: `design/handoff-2026-05-16/project/app.jsx`
+ * Design source: `plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-16/project/app.jsx`
  * `function ScreenWildsCodex` — the `REGION/... · DAY=... ·
  * STATE=...` line at the top. Mobile doesn't carry a day counter
  * yet (engine-gated — see `plan/archive/2026-09-25-trim-t1/axiomancer-mobile/design-spec.md` item 14 (archived 2026-09-25) and

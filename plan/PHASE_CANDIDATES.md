@@ -360,7 +360,7 @@
 > ruling R2 (see the status update at the end of this row) — Phase 39
 > must not cut cards. Do not re-promote this row separately.
 - source: owner session 2026-07-18 (metrics-slate chat; PR #119 + report
-  `axiomancer-mechanics/docs/reports/preset-sweep-2026-07-18.md`). Owner
+  `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/reports/preset-sweep-2026-07-18.md`). Owner
   intent, near-verbatim: TRIM cards first, then run DUPLICATES within each
   preset and across presets — (1) fewer distinct cards = a tunable baseline
   the library has never had, (2) shared cards = a more consistent experience
@@ -613,7 +613,7 @@
   `baseline:regen` / the reduced nightly pass and stamp a second
   artifact next to `deck-matrix-baseline.json`, so preset drift is
   watched instead of sampled. First measurement:
-  `axiomancer-mechanics/docs/reports/preset-sweep-2026-07-18.md`.
+  `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/reports/preset-sweep-2026-07-18.md`.
   Sequencing note: re-stamp after D-FLIP/D8 land — the 07-18 report
   measures the flag-off model.
 

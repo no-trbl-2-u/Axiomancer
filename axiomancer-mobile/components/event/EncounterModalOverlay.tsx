@@ -402,7 +402,7 @@ const useStyles = makeStyles((AXM) => ({
         // Backdrop opacity tuned to the design's diegetic-stack target
         // (chat 2 §IV — "map persists at 35% opacity behind every
         // modal"). 0.65 backdrop fill = ~35% map visibility. Mirrors
-        // `design/handoff-2026-05-16/project/prototype.jsx:454`
+        // `plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-16/project/prototype.jsx:454`
         // `'rgba(10,10,10,0.6)'` for the combat-event shell; ours is
         // marginally darker (0.65 vs 0.6) so the panel border reads
         // sharp on the lighter regions of the exploration map. Phase
@@ -461,7 +461,7 @@ const useStyles = makeStyles((AXM) => ({
     combatScroll: { flex: 1 },
     // Phase 72 — combat-body horizontal inset aligns with the
     // design bundle's `PtCombatBody` outer wrap
-    // (`design/handoff-2026-05-23/project/prototype.jsx:697`
+    // (`plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-23/project/prototype.jsx:697`
     // `padding: '8px 14px 12px'`). Pre-Phase-72 the scroll was
     // edge-to-edge and the EnemyPanel + phase rows looked cramped
     // against the modal border.

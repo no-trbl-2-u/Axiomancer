@@ -16,7 +16,7 @@ with dependencies so you can pick the right one to pull next.
 ## Quick links
 
 - **First time here?** Read [`00-how-to-use-specs.md`](./00-how-to-use-specs.md).
-- **Back for another session?** Skip to the **Recommended order** table below.
+- **Back for another session?** Skip to the **Index** table below.
 
 ## How to use a spec (the conversation loop)
 
@@ -36,7 +36,7 @@ Every spec follows the same shape:
 ### The conversation loop
 
 ```
-1. Pick a spec from the recommended order below.
+1. Pick a spec from the index below.
 2. Read it end-to-end; skim sections (1)-(3).
 3. Answer the questions in section (4) inline. Short answers are fine
    ("yes / no / option B"); add a note when you have a strong opinion.
@@ -53,37 +53,40 @@ Every spec follows the same shape:
 If a spec turns out to be too big once you start, say so — the AI will split
 it into a follow-up spec rather than ploughing on.
 
-## Recommended order
+## Index
 
-The order below is the AI's default suggestion. Items at the top unblock the
-most other work. Feel free to override.
+Every numbered spec, current or archived. Most are shipped history; the
+live rules are in `docs/` and the source. Current specs: **33**, **34**,
+plus the authored content folders `characters/`, `story/`, `world/`
+(templates + `W-01`, `W-02`).
 
-| # | Spec | Why this order |
-|---|------|----------------|
-| 1 **DONE** | [`01-effects-engine-completion.md`](./01-effects-engine-completion.md) | Many roadmap items reference unwired effect mechanics (DoT, stat mods, action restrictions). Finish them first. |
-| 2 **DONE** | [`02-combat-round-resolver.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/02-combat-round-resolver.md) *(archived 2026-09-25)* | Replaces the inline CLI loop with `resolveCombatRound`. Required before skills/items can plug in cleanly. |
-| 3 **DONE** | [`03-tier2-tier3-effect-procs.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/03-tier2-tier3-effect-procs.md) *(archived 2026-09-25)* | Phase 2b: `Stance × action` proc tables. Builds on (1) + (2). |
-| 4 **REMOVED** | `04-skills-engine.md` | The card engine (formerly "skills"). Spec removed in the skill→card unification; the engine lives in `src/Cards/card.engine.ts`. |
-| 4b **REMOVED** | `04b-skills-library-and-e2e.md` | The card library + e2e. Spec removed in the skill→card unification; content lives in `src/Cards/cards.library.ts`. |
-| 5 **DONE** | [`05-equipment-engine.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/05-equipment-engine.md) *(archived 2026-09-25)* | Phase 4. Depends on (1) for stat-mod aggregation. Ships types + engine only (no library content). |
-| 5b **DONE** | [`05b-equipment-library.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/05b-equipment-library.md) *(archived 2026-09-25)* | Companion to (5). Ships 50 equipment pieces + 12 consumables with resource economy interactions. Depends on (5). |
-| 6 **DONE** | [`06-character-progression.md`](./06-character-progression.md) | Phase 5. Depends on (4) for skill learning. |
-| 7 **DONE** | [`07-enemy-content-and-ai.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/07-enemy-content-and-ai.md) *(archived 2026-09-25)* | Phase 6. Depends on (3) for richer AI behaviour. |
-| 8 **DONE** | [`08-world-content-and-hazards.md`](./08-world-content-and-hazards.md) | Phase 7. Depends on (1) for hazard ticks while exploring. |
-| 9 **DONE** | [`09-game-loop-orchestration.md`](./09-game-loop-orchestration.md) | Phase 8. Top-level orchestration + `createGameStore` wiring for world/exploration; depends on (8) and most of the above. |
-| 10 **DONE** | [`10-moral-difficulty-meter.md`](./10-moral-difficulty-meter.md) | Touches multiple systems; OK to spec early; implement after (9) (and (8) where it touches `MapEvent` / `processNode`). |
-| 11 **DONE** | [`11-rng-seeding-and-test-harness.md`](./11-rng-seeding-and-test-harness.md) | Cross-cutting test infra. Doable any time; biggest payoff when (1) & (2) are landing. |
-| 12 **DONE** | [`12-package-architecture-and-events.md`](./12-package-architecture-and-events.md) | Defines the engine ↔ React Native UI boundary. Pull this in before the UI consumer starts. |
-| 13 **DONE** | [`23-map-events.md`](./23-map-events.md) | Phase 23. MapEvents engine + pool authoring pattern; acceptance fully ticked at Phase 41 unit 3 + Phase 43 alignmentDelta extension. |
-| 14 **DONE** | [`14-philosophical-alignment.md`](./14-philosophical-alignment.md) | Phases 42–46. 3-axis alignment cube (Epistemology × Outlook × Scope) + 27-cell content registry; observable, payloadable, enemy-side, and gated. Spec authored retroactively at Phase 58 (engine shipped Phase 42 `bdfda00`; content surface filled through Phase 46). |
-| 15 **DONE** | [`15-difficulty-curve.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/15-difficulty-curve.md) *(archived 2026-09-25)* | Phase 116. Difficulty doctrine defining target bands per progression tier (fishing-village / northern-forest / endgame): rounds-to-resolve, survivability %, damage ratios, friendship reachability. References Phase 104 probe fields as measurement surface. Pure docs/spec. |
-| 16 **DONE** | Phase 99 — unlocked skill access (brief no longer in `plan/phases/`) | Phase 99 (shipped `5759932`; re-shipped as Phase 141 `aad63c5`). Removes the legacy equipped-skill/loadout gate. Learned/unlocked skills become combat-accessible; combat/CLI/playtest consumers show only currently affordable skills. |
-| 25 **DONE** | [`25-hazard-pattern-combat.md`](./25-hazard-pattern-combat.md) | 2026-06-21. Hazard-Pattern Combat — the card-and-dice driver (`resolveCombatPhase`) where status effects fill two Pressure Tracks (DoT Erosion + Control Saturation) that are the only practical win conditions. Ships alongside the legacy `resolveCombatRound`. Engine + mobile + glyphs shipped; tuned by `/combat-playtest` + `/deck-tuning`. |
-| 26 *draft* | [`26-catalyst-multiplicative-scaling.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/26-catalyst-multiplicative-scaling.md) *(archived 2026-09-25)* | Combat depth follow-up #1. Catalyst card class — multiply stacked DoT into an explosive DoT-track spike (StS Catalyst). The build-then-detonate payoff the linear pressure model lacks. Depends on Spec 25. |
-| 27 *draft* | [`27-card-salvage-sideways-play.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/27-card-salvage-sideways-play.md) *(archived 2026-09-25)* | Combat depth follow-up #2. Spend any card sideways for a generic benefit (mint a die / chip pressure) — Mage Knight's no-dead-cards rule. Ports the Hazard salvage pattern. Depends on Spec 25. |
-| 28 *draft* | [`28-curated-combat-deck-and-synergy.md`](./28-curated-combat-deck-and-synergy.md) | Combat depth follow-up #3. A curated combat loadout (8–10 cards) + surfaced synergy combos, replacing "draw from all known skills" — StS deck-building. Depends on Spec 25 + Spec 04. |
-| 29 *superseded (partially shipped)* | [`29-reactive-enemies-telegraphed-intent.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/29-reactive-enemies-telegraphed-intent.md) *(archived 2026-09-25)* | Combat depth follow-up #4. Reactive enemies that telegraph + respond (cleanse / harden / enrage / adapt-stance) — StS intents + Into the Breach counterplay. Depends on Spec 25 + Spec 07. |
-| 30 *superseded (shipped)* | [`30-projected-lethality-readout.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/30-projected-lethality-readout.md) *(archived 2026-09-25)* | Combat depth follow-up #5. Surface the Phase 125 lethality projection ("lethal in N" + a Finish affordance) so the kill is foreseeable — StS visible poison / Into the Breach foresight. Depends on Spec 25 + Phase 125. |
+| # | Spec | Notes |
+|---|------|-------|
+| 1 DONE | [`01-effects-engine-completion.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/01-effects-engine-completion.md) *(archived T5)* | Unwired effect mechanics (DoT, stat mods, action restrictions). |
+| 2 DONE | [`02-combat-round-resolver.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/02-combat-round-resolver.md) *(archived T1)* | Legacy `resolveCombatRound` (removed in trim T2a). |
+| 3 DONE | [`03-tier2-tier3-effect-procs.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/03-tier2-tier3-effect-procs.md) *(archived T1)* | Stance × action proc tables (legacy round model). |
+| 4 / 4b REMOVED | `04-skills-engine.md`, `04b-skills-library-and-e2e.md` | Removed in the skill→card unification; see `src/Cards/`. |
+| 5 / 5b DONE | [`05-equipment-engine.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/05-equipment-engine.md) *(archived T1)*, [`05b-equipment-library.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/05b-equipment-library.md) *(archived T1)* | Equipment engine + library. |
+| 6 DONE | [`06-character-progression.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/06-character-progression.md) *(archived T5)* | Phase 5 character progression. |
+| 7 DONE | [`07-enemy-content-and-ai.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/07-enemy-content-and-ai.md) *(archived T1)* | Phase 6 enemy content + AI. |
+| 8 DONE | [`08-world-content-and-hazards.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/08-world-content-and-hazards.md) *(archived T5)* | Phase 7 world content; live API in `docs/world.md`. |
+| 9 DONE | [`09-game-loop-orchestration.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/09-game-loop-orchestration.md) *(archived T5)* | Phase 8 orchestration + `createGameStore`. |
+| 10 DONE | [`10-moral-difficulty-meter.md`](./10-moral-difficulty-meter.md) | Moral-choice difficulty meter; live doc `docs/morality.md`. Kept here while `.claude/skills` still cite it. |
+| 11 DONE | [`11-rng-seeding-and-test-harness.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/11-rng-seeding-and-test-harness.md) *(archived T5)* | Seeded RNG + test harness. |
+| 12 DONE | [`12-package-architecture-and-events.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/12-package-architecture-and-events.md) *(archived T5)* | Engine ↔ UI boundary. |
+| 14 DONE | [`14-philosophical-alignment.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/14-philosophical-alignment.md) *(archived T5)* | Phases 42–46 alignment cube. |
+| 15 DONE | [`15-difficulty-curve.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/15-difficulty-curve.md) *(archived T1)* | Phase 116 difficulty bands. |
+| 16 DONE | Phase 99 — unlocked skill access (no spec file) | Shipped `5759932`; re-shipped as Phase 141 `aad63c5`. |
+| 23 DONE | [`23-map-events.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/23-map-events.md) *(archived T5)* | MapEvents engine + pool authoring; live doc `docs/world.md`. |
+| 25 SUPERSEDED | [`25-hazard-pattern-combat.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/25-hazard-pattern-combat.md) *(archived T5)* | The card-and-dice driver (`resolveCombatPhase`), now the only combat engine. Its two-pressure-track win condition was removed 2026-06-22 (VITAE is the sole enemy bar) and the legacy `resolveCombatRound` it shipped beside is gone (T2a). Live rules: `docs/combat.md`. |
+| 26 / 27 draft | [`26-catalyst-multiplicative-scaling.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/26-catalyst-multiplicative-scaling.md) *(archived T1)*, [`27-card-salvage-sideways-play.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/27-card-salvage-sideways-play.md) *(archived T1)* | Never built. |
+| 28 draft | [`28-curated-combat-deck-and-synergy.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/28-curated-combat-deck-and-synergy.md) *(archived T5)* | Superseded by the preset-deck model and THE BIG NUMBERS REWRITE. |
+| 29 / 30 superseded | [`29-reactive-enemies-telegraphed-intent.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/29-reactive-enemies-telegraphed-intent.md) *(archived T1)*, [`30-projected-lethality-readout.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/30-projected-lethality-readout.md) *(archived T1)* | Partially shipped / shipped by other phases. |
+| 31 HISTORICAL | [`31-fate-engine-card-effect-revamp.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/31-fate-engine-card-effect-revamp.md) *(archived T5)* | Fate Engine revamp (P0 shipped 2026-07-05); superseded by specs 32 → 33 and THE BIG NUMBERS REWRITE. |
+| 32 HISTORICAL | [`32-no-strike-card-library.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/32-no-strike-card-library.md) *(archived T5)* | Themed no-strike library; superseded by THE BIG NUMBERS REWRITE (2026-09-02). |
+| 33 IMPLEMENTED | [`33-upgradeable-dice.md`](./33-upgradeable-dice.md) | The four-die combat model; implemented and current. |
+| 34 RATIFIED | [`34-dark-fantasy-campaign.md`](./34-dark-fantasy-campaign.md) | Dark Fantasy campaign bible (design charter, 2026-08-08). |
+| 35 HISTORICAL | [`35-objective-function-v2.md`](./35-objective-function-v2.md) | Combat Quality Index — repealed 2026-09-02; `combat.objective.ts` still computes it as a report-only reading. Kept here while `.claude/` files still cite it. |
 
 ## Conventions
 

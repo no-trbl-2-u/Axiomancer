@@ -2,7 +2,7 @@
  * Dev-only toggle for the canonical / codex aesthetic mode (Phase 50
  * tick A). Renders **nothing** in production builds (`__DEV__` is
  * false there) — the wider design caveat from
- * `design/handoff-2026-05-16/chats/chat2.md` is that the cold-codex
+ * `plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-16/chats/chat2.md` is that the cold-codex
  * variant is a follow-up direction the user wants to validate before
  * exposing it broadly. Until that decision settles, the toggle lives
  * here as a dev-only affordance.

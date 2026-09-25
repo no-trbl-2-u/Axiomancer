@@ -5,7 +5,7 @@
  * surfaces (WILDS / STRIFE / EVENT): **canonical** (marginalia gloss —
  * the current ship) and **cold codex** (bone-and-ash chrome, heavier
  * hairlines, drops sulfur saturation). See
- * `design/handoff-2026-05-16/chats/chat2.md` "Open caveats" and the
+ * `plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-16/chats/chat2.md` "Open caveats" and the
  * `aesthetic B · cold codex` artboards in `app.jsx`.
  *
  * Tick A wires the toggle infrastructure end-to-end:

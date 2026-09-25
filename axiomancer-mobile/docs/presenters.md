@@ -1,6 +1,6 @@
 # Presenters — the engine → screen contract
 
-> Status: locked by [Spec 03](../specs/03-presenter-layer.md).
+> Status: locked by [Spec 03](../../plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/03-presenter-layer.md) (spec archived 2026-09-25; this doc is the live contract).
 
 Every screen in `app/(tabs)/` has a sibling **presenter** under
 `state/presenters/<screen>.engine.ts` whose job is to map the engine

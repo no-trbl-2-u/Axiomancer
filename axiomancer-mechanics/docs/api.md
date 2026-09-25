@@ -316,7 +316,7 @@ Phase 21 removed the seven pre-existing `Typed*Payload` interfaces
 engine never produced the per-topic payloads, and consumer-side
 fabrication had no use case. If you need rich per-topic payloads on
 a future spec, the path is to rewrite the engine's emit sites; see
-`specs/23-map-events.md` for the precedent that aligned types with
+`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/23-map-events.md` (archived) for the precedent that aligned types with
 reality.
 
 ### Items, Equipment & Inventory
@@ -459,7 +459,7 @@ consumption model.
   `MapEventPoolEntry`, `ResolvedEvent`, `ResolveMapEventResult`,
   plus per-kind payload aliases (`EncounterPayload`, etc.).
 
-See `specs/23-map-events.md` for the spec and
+See `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/23-map-events.md` (archived) for the spec and
 `src/World/MapEvents/e2e/map-events.engine.test.ts` for the
 hermetic walkthrough.
 

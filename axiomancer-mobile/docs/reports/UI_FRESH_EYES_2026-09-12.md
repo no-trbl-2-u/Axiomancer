@@ -200,7 +200,7 @@ signal: the fan's clipped card ledger was raised by four separate lenses, one
 at confidence 100. Twenty-seven rows are fixed above; the rest are filed, not
 fixed.
 
-The full table is in [`UI_FRESH_EYES_2026-09-12.candidates.md`](./UI_FRESH_EYES_2026-09-12.candidates.md),
+The full table is in [`UI_FRESH_EYES_2026-09-12.candidates.md`](../../../plan/archive/2026-09-25-trim-t5/axiomancer-mobile/docs/reports/UI_FRESH_EYES_2026-09-12.candidates.md) (archived),
 sorted by severity with each row's confidence and suspected source. Strongest
 recurring themes, each raised independently by three or more lenses:
 

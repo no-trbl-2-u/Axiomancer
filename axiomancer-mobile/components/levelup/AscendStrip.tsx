@@ -5,7 +5,7 @@
  *
  * Phase 73 Tick A port of the handoff bundle's
  * `SelfTabHeaderWithLevelUp` design
- * (`design/handoff-2026-05-23/project/screens/levelup.jsx` + chat5
+ * (`plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-23/project/screens/levelup.jsx` + chat5
  * brief lines 109-167). The strip is the LOUDEST single element on
  * the SELF tab when armed — full-width, ~64px tall, sulfur-banded.
  * The carve-out is deliberate per the brief: the seal sits on the
@@ -98,7 +98,7 @@ function renderChevrons(n: number): string {
 /**
  * LockSeal glyph — wax-seal motif with an inset lock. Mirrors the
  * `<LockSeal>` primitive the design's encounter-modal.jsx ships
- * (`design/handoff-2026-05-23/project/screens/encounter-modal.jsx:18-34`).
+ * (`plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-23/project/screens/encounter-modal.jsx:18-34`).
  * Rendered in sulfur here per the ASCEND brand color.
  */
 function LockSealGlyph() {

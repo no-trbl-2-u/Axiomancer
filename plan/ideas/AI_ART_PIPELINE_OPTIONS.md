@@ -3,7 +3,7 @@
 > Decision document for how Axiomancer generates, post-processes, and
 > ingests its illustration set. Written 2026-07-19 from a repo survey
 > plus a web research pass (sources + confidence at the bottom).
-> Companion to `axiomancer-mobile/specs/11-asset-pipeline.md`, which
+> Companion to `plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/11-asset-pipeline.md`, which
 > already decided **art source = AI-generated + post-processed** — this
 > doc chooses *how* and turns it into a pipeline.
 >
@@ -80,7 +80,7 @@ content size: **~150+ discrete illustrations**, growing with content.
 
 ### 1.2 Standing decisions already made (do not re-litigate)
 
-- `axiomancer-mobile/specs/11-asset-pipeline.md`: art source is
+- `plan/archive/2026-09-25-trim-t5/axiomancer-mobile/specs/11-asset-pipeline.md`: art source is
   **AI-generated + post-processed**; typed `assets/index.ts` registry;
   dark-mode-only v1; mixed formats (SVG icons / raster illos).
 - Style: **"cold-codex"** woodcut/ink, dark painterly figures on

@@ -6,7 +6,7 @@
 The former release-engineering layer (deploy gate, public-surface contract,
 autonomous-loop issue mirror) was removed at the monorepo merge:
 `axiomancer-mechanics` is consumed as local source via the `@mechanics`
-workspace alias, not published to npm. See `CHANGELOG.md` for
+workspace alias, not published to npm. See the archived `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/CHANGELOG.md` for
 the historical record.
 
 ## Tools
@@ -27,7 +27,7 @@ above, and give failure messages that name the canonical fix
 
 ## Related docs
 
-- [`CHANGELOG.md`](../CHANGELOG.md) — version history.
+- [`CHANGELOG.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/CHANGELOG.md) — version history (archived 2026-09-25).
 - [`automation/README.md`](../automation/README.md) — sibling
   directory for non-hermetic CLI walkthroughs + the agent-graded
   Vitest reporter.

@@ -6,6 +6,51 @@
 > external-system register (ownership, credentials, recovery) is
 > [`external-architecture.md`](./external-architecture.md).
 
+## Source-of-truth hierarchy — decision authority
+
+The one copy of the Nexus hierarchy for the whole monorepo (merged here
+2026-09-25, trim T5, from the per-package `docs/source-of-truth-hierarchy.md`
+files and the `docs/adr/README.md` lists; every other place points here).
+It governs state reconciliation for autonomous workers in every package:
+when two layers contradict each other, stop and surface the drift rather
+than execute stale information.
+
+1. **T's latest explicit decision** — highest authority.
+2. **CDRs / ADRs** (`~/Workspace/decisions/`, each package's `docs/adr/`) —
+   durable decision records.
+3. **Central SomberSoft ledger** (`~/Workspace/SOMBERSOFT_COMMAND_LEDGER.md`) —
+   company-wide doctrine and operating law.
+4. **Active build plan** (`plan/steps/01_build_plan.md`) — current execution
+   queue and shipped phase ledger.
+5. **Phase candidates** (`plan/PHASE_CANDIDATES.md`) — promotable work, not
+   marching authority until accepted.
+6. **Critique/audit logs** (`plan/CRITIQUE.md`, `plan/AUDIT.md`) — findings
+   queues and evidence of known rot.
+7. **Historical reports** (`plan/archive/`, `docs/reports/`, dated devlog
+   entries) — archived evidence, subordinate to current law.
+
+If a lower layer contradicts a higher one, a worker must:
+
+1. **Stop execution** — do not proceed with stale information.
+2. **Surface the drift** — report the specific contradiction and the files
+   involved.
+3. **Request reconciliation** — surface to T and reconcile before resuming.
+
+Examples:
+
+- A phase row says a feature is pending, but an ADR or build-plan row says it
+  shipped → stop and reconcile.
+- A candidate proposes a rule that conflicts with a CDR/ADR → stop; the
+  decision record wins until amended.
+- A critique finding references shipped work as still open → surface it as
+  drift and drain or annotate the row.
+- A historical report contradicts the central ledger or an ADR → treat the
+  report as stale evidence, not marching law.
+
+Phase shipping drains or annotates matching critique/audit/candidate rows.
+CDRs/ADRs are not optional commentary; they sit above the central ledger in
+repo execution disputes.
+
 ## Game knowledge base — external prior art
 
 `no-trbl-2-u/game-knowledge-base` is the OKF corpus of board-game rules

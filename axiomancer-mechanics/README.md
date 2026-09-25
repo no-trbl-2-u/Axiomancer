@@ -12,11 +12,12 @@ verify gates, and pointers to deeper docs.
 
 See [`VISION.md`](./VISION.md) for T's current game vision and doctrine guardrail before major mechanics, combat, friendship, or balance work.
 
-See `CHANGELOG.md` (and the archived `plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/RELEASES.md`) for short-form per-version
-summaries (at-a-glance "what shipped in 0.X.Y?"),
-[`CHANGELOG.md`](./CHANGELOG.md) for the full per-phase detail per
-release (both historical logs from the pre-monorepo npm era),
-[`docs/source-of-truth-hierarchy.md`](./docs/source-of-truth-hierarchy.md)
+See the archived `plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/RELEASES.md`
+for short-form per-version summaries (at-a-glance "what shipped in 0.X.Y?"),
+the archived [`CHANGELOG.md`](../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/CHANGELOG.md)
+for the full per-phase detail per release (both historical logs from the
+pre-monorepo npm era, frozen 2026-07-05),
+[`docs/truth-sources.md` § Source-of-truth hierarchy](../docs/truth-sources.md#source-of-truth-hierarchy--decision-authority)
 for the documentation hierarchy, and [`docs/adr/`](./docs/adr/) for durable
 architecture and product decisions that govern mechanics work.
 
@@ -196,7 +197,7 @@ automation/                # standalone walkthrough script + replay fixtures
 
 - [`docs/narrative/STYLE_CONSTITUTION.md`](./docs/narrative/STYLE_CONSTITUTION.md) — narrative constitution, with linked voice registers, lexicon, anti-imitation safeguards, evaluation rubric, and encounter pilot
 - [`../plan/steps/01_build_plan.md`](../plan/steps/01_build_plan.md) — phased development plan with progress tracking
-- [`docs/source-of-truth-hierarchy.md`](./docs/source-of-truth-hierarchy.md) — Nexus hierarchy for resolving T decisions, CDRs/ADRs, central ledger, build plans, candidates, critique/audit, and reports
+- [`docs/truth-sources.md` § Source-of-truth hierarchy](../docs/truth-sources.md#source-of-truth-hierarchy--decision-authority) — Nexus hierarchy for resolving T decisions, CDRs/ADRs, central ledger, build plans, candidates, critique/audit, and reports
 - [`../plan/AUDIT.md`](../plan/AUDIT.md) — code audit and quality findings (drained by `/iterate`)
 - [`../plan/CRITIQUE.md`](../plan/CRITIQUE.md) — architecture / quality findings filed by `/critique`
 - [`../plan/PHASE_CANDIDATES.md`](../plan/PHASE_CANDIDATES.md) — open design and intent questions (with [`../plan/AUDIT.md`](../plan/AUDIT.md))

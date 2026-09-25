@@ -9,7 +9,7 @@
  * Pure display — content comes from
  * `selectExplorationCodexHeader(vm)`.
  *
- * Design source: `design/handoff-2026-05-16/project/app.jsx`
+ * Design source: `plan/archive/2026-09-25-trim-t5/axiomancer-mobile/design/handoff-2026-05-16/project/app.jsx`
  * `function ScreenWildsCodex` header line.
  *
  * Parchment-left rather than the blood-left of the retired event codex

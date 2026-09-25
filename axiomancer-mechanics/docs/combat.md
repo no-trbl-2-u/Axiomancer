@@ -347,7 +347,7 @@ card library files themselves, not duplicated here):
   engine-gated drips (BACKFIRE, persistent-card hooks) and reflect (THORNS /
   RIPOSTE) are all still live VITAE sources; they now compete with `DEAL`
   rather than substituting for it. The prior no-strike accounting in
-  [`specs/32-no-strike-card-library.md`](../specs/32-no-strike-card-library.md)
+  [`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/32-no-strike-card-library.md` (archived)](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/32-no-strike-card-library.md)
   is historical, as are its 70-card / 10-theme / "exactly 30 keywords" /
   rank-band pricing rules. `cards.pricing.ts` survives as an **advisory**
   scorer, not a gate.
@@ -382,8 +382,8 @@ card library files themselves, not duplicated here):
 The canonical design record for the current library is
 `plan/2026-09-02-big-numbers-overhaul.prompt.md` (the scale ladder, the keyword
 language, the enemy model) alongside
-[`specs/25-hazard-pattern-combat.md`](../specs/25-hazard-pattern-combat.md) for
-the underlying engine loop. `specs/32-no-strike-card-library.md` is HISTORICAL.
+[`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/25-hazard-pattern-combat.md` (archived)](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/25-hazard-pattern-combat.md) for
+the underlying engine loop. `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/32-no-strike-card-library.md` (archived) is HISTORICAL.
 `src/Cards/types.ts` / `card.engine.ts` carry the most complete
 design rationale for the separate Cards system.
 
@@ -397,7 +397,7 @@ Direct damage (`DEAL`), DoT ticks, affliction-payoff bursts, engine-gated drips 
 reflect are all live VITAE sources and compete on merit; control denies the enemy's
 telegraphed threat turn outright rather than merely discouraging a parallel damage
 track. Full design:
-[`specs/25-hazard-pattern-combat.md`](../specs/25-hazard-pattern-combat.md) for the
+[`plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/25-hazard-pattern-combat.md` (archived)](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/25-hazard-pattern-combat.md) for the
 engine loop and `plan/2026-09-02-big-numbers-overhaul.prompt.md` for the current card
 and enemy model (note: spec 25's two-pressure-track narrative was superseded by the
 one-bar model 2026-06-22, and its status-primacy successor was repealed 2026-09-02 —
