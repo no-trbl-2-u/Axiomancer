@@ -155,7 +155,8 @@ function stateFor(reserve: CombatManaDie[]): CombatEncounterState {
 
 function playPaid(state: CombatEncounterState, value: number): { events: CombatEvent[]; after: CombatEncounterState } {
     mockSequentialRng(value); // same value on every Math.random() call this play
-    const { state: after, events } = playCombatCard(state, { uid: 'under-test' }, true);
+    // Powered by the fixture's wild tray die (spec 33: a paid play names its die).
+    const { state: after, events } = playCombatCard(state, { uid: 'under-test' }, true, 'fx-die');
     return { events, after };
 }
 

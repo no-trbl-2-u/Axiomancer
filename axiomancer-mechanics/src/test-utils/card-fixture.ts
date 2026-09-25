@@ -81,15 +81,13 @@ export function buildFixtureState(options: { clean?: boolean } = {}): CombatEnco
 
     // A single WILD powering die: payable regardless of a card's own stance
     // color, so no card is starved of a legal play by die-color mismatch.
-    const wildDie: CombatManaDie = { id: 'fx-die', color: 'wild', state: 'available', temporary: false };
+    const wildDie: CombatManaDie = { id: 'fx-die', color: 'wild', state: 'available', temporary: false, face: 'mana' };
 
     return {
         ...base,
         phase: 'phase-play',
         turn: 1,
         dice: [wildDie],
-        draftedDieId: wildDie.id,
-        lastRead: 'neutral',
         // 1 of RESERVE_MAX(2) slots used, with 1 pip (<RESERVE_PIP_CAP(2)) —
         // room for create_temporary_die/reap-kindle/bank_spent_die to add one
         // more, and for grant_pip to ripen further. CLEAN zeroes the pip:

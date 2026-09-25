@@ -8,14 +8,15 @@
  * laws are pinned against the v3 cards and effects:
  *   1. `bottomDamagePreview` is the DoT's real lifetime HP on a neutral read,
  *      and 0 (no number) otherwise.
- *   2. The deterministic read rule lands the printed numbers EXACTLY on a
- *      neutral read; a color match adds exactly +1 duration (Fate Engine R7).
+ *   2. A paid play lands the printed numbers EXACTLY (spec 33 retired the
+ *      hidden-stance read); a color match adds exactly +1 duration (Fate
+ *      Engine R7).
  *   3. `projectCardImpact` never advertises a strike number — there is none.
  *   4. QUARTER (the v3 charm-vocabulary debuff) really dampens the enemy's
- *      outgoing threat damage; CHARM's forced stance is visible to the read.
+ *      outgoing threat damage.
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
@@ -24,11 +25,11 @@ import { GraveLarva } from '../../Enemy/enemy.library';
 import { cardLibrary } from '../../Cards/cards.library';
 import type { Card } from '../../Cards/types';
 import { deepClone } from '../../Utils';
-import { lookupEffect, effectsLibrary } from '../../Effects/effects.library';
-import type { ActiveEffect, Effect } from '../../Effects/types';
+import { lookupEffect } from '../../Effects/effects.library';
+import type { ActiveEffect } from '../../Effects/types';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
-    draftStanceDie, getCard, projectCardImpact,
+    getCard, projectCardImpact,
     THREAT_DAMAGE_SCALE,
 } from '../combat.engine';
 import {
@@ -54,13 +55,15 @@ function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind'): Enemy {
     return e;
 }
 
+/** Spec 33 tray: every non-X die shows a MANA face (can power a paid line). */
 function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatEncounterState {
     const turn = state.turn || 1;
     const dice = colors.map((c, i) => ({
         id: `t${turn}-d${i}`, color: c,
         state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
+        face: c === 'x' ? ('miss' as const) : ('mana' as const),
     }));
-    return { ...state, dice, draftedDieId: null, turn };
+    return { ...state, dice, turn };
 }
 
 function activeEffect(effectId: string, intensity = 1, duration = 3, appliedAt = 1): ActiveEffect {
@@ -201,21 +204,19 @@ describe('P0-truth — the card preview is the applied number', () => {
         let s = initializeCombatEncounter(makePlayer(['spoiled-poultice']), makeEnemy(500, 'heart'), ['spoiled-poultice'], 7);
         s = rollEncounterDice(s).state;
         s = setDice(s, ['heart']);
-        s = draftStanceDie(s, s.dice[0].id).state;
         const entry = s.hand.find(h => h.cardId === 'spoiled-poultice')!;
-        const res = playCombatCard(s, { uid: entry.uid }, true);
-        expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
+        const res = playCombatCard(s, { uid: entry.uid }, true, s.dice[0].id);
+        expect(res.events.some(e => e.kind === 'effect-fizzled' && /colors must match/.test(e.message))).toBe(true);
         expect(res.state.enemy.effects.length).toBe(0);
     });
 
     it('a color-MATCHED status play lands +1 duration (Fate Engine R7 — printed on the card)', () => {
-        // body die vs body-stance enemy: neutral read, color match → +1 turn.
+        // body die powers the body card: printed numbers, color match → +1 turn.
         let s = initializeCombatEncounter(makePlayer(['spoiled-poultice']), makeEnemy(500, 'body'), ['spoiled-poultice'], 7);
         s = rollEncounterDice(s).state;
         s = setDice(s, ['body']);
-        s = draftStanceDie(s, s.dice[0].id).state;
         const entry = s.hand.find(h => h.cardId === 'spoiled-poultice')!;
-        const after = playCombatCard(s, { uid: entry.uid }, true).state;
+        const after = playCombatCard(s, { uid: entry.uid }, true, s.dice[0].id).state;
         const authored = cardLibrary.find(c => c.id === 'spoiled-poultice')!.combatEffects!
             .find(e => e.appliedTo === 'opponent')!;
         const landed = after.enemy.effects.find(e => e.effectId === authored.effectId)!;
@@ -236,18 +237,6 @@ describe('P0-truth — the card preview is the applied number', () => {
 });
 
 describe('P0-truth — threat-side payloads bite for real', () => {
-    // CHARM's forcedStance debuff was deleted by the spec 32 v3 keyword reset and
-    // no surviving library effect carries an actionRestriction, so the
-    // forced-stance-is-visible-to-the-read law is driven by a test-only fixture
-    // registered into the shared registry. Never touches the library JSON.
-    const CHARM_FIXTURE: Effect = {
-        id: 'test_charm', name: 'test charm', description: 'test forcedStance heart',
-        type: 'debuff', category: 'control', duration: 3, stacking: 'none', tier: 2,
-        payload: { actionRestriction: { forcedStance: 'heart' } },
-    };
-    beforeAll(() => { effectsLibrary.registry.set(CHARM_FIXTURE.id, CHARM_FIXTURE); });
-    afterAll(() => { effectsLibrary.registry.delete(CHARM_FIXTURE.id); });
-
     it('baseline: a 10-damage threat lands round(10 × THREAT_DAMAGE_SCALE)', () => {
         const s = threatState([{ damage: 10 }]);
         const after = resolveThreatPhase(s).state;
@@ -258,18 +247,6 @@ describe('P0-truth — threat-side payloads bite for real', () => {
         const s = threatState([{ damage: 10 }], { enemyEffects: [activeEffect('debuff_quarter', 2, 2)] });
         const after = resolveThreatPhase(s).state;
         expect(s.player.health - after.player.health).toBe(Math.round(10 * THREAT_DAMAGE_SCALE * 0.8));
-    });
-
-    it('charm (forcedStance) makes the enemy fight from the forced stance — the read sees it', () => {
-        let s = initializeCombatEncounter(makePlayer(['spoiled-poultice']), makeEnemy(500, 'body'), ['spoiled-poultice'], 7);
-        s = rollEncounterDice(s).state;
-        // Enemy phase stance is body, but charm forces heart → a MIND die now
-        // reads ADVANTAGE (mind beats heart), where vs body it would read
-        // disadvantage. The charm names the door.
-        s = { ...s, enemy: { ...s.enemy, effects: [activeEffect('test_charm', 1, 2)] } };
-        s = setDice(s, ['mind']);
-        s = draftStanceDie(s, s.dice[0].id).state;
-        expect(s.lastRead).toBe('advantage');
     });
 });
 

@@ -16,7 +16,7 @@ import { deepClone } from '../../Utils';
 import { mockSequentialRng } from '../../test-utils/rng';
 import type { ActiveEffect } from '../../Effects/types';
 import {
-    initializeCombatEncounter, rollEncounterDice, draftStanceDie, playCombatCard,
+    initializeCombatEncounter, rollEncounterDice, playCombatCard,
     projectRupture, projectRuptureBurst, projectIncomingThreat, getDisruptMeter,
 } from '../combat.engine';
 import type { CombatDieColor, CombatEncounterState } from '../combat.encounter.types';
@@ -86,23 +86,15 @@ function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind' = 'mind', effec
     return e;
 }
 
-/** Forces this turn's draft pool to known colors (deterministic reads). */
-function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatEncounterState {
-    const turn = state.turn || 1;
-    const dice = colors.map((c, i) => ({
-        id: `t${turn}-d${i}`, color: c,
-        state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
-    }));
-    return { ...state, dice, draftedDieId: null, turn };
-}
+/** The powering die's id — spec 33 PAID plays must name their die. */
+const DIE = 'pw-die';
 
-/** Opens phase-play, forces the pool, and drafts die 0 (color `die`). */
-function openAndDraft(player: Character, enemy: Enemy, deck: string[], die: CombatDieColor, seed = 7): CombatEncounterState {
+/** Opens phase-play and forces the tray to ONE mana-face die of color `die`
+ *  (spec 33: no draft; the PAID play names `DIE` explicitly). */
+function openWithDie(player: Character, enemy: Enemy, deck: string[], die: CombatDieColor, seed = 7): CombatEncounterState {
     let state = initializeCombatEncounter(player, enemy, deck, seed);
     state = rollEncounterDice(state).state;
-    state = setDice(state, [die, 'x']);
-    state = draftStanceDie(state, state.dice[0].id).state;
-    return state;
+    return { ...state, dice: [{ id: DIE, color: die, state: 'available', temporary: false, face: 'mana' }] };
 }
 
 describe('projectRuptureBurst — per-card-accurate rupture preview (phase 28)', () => {
@@ -114,7 +106,7 @@ describe('projectRuptureBurst — per-card-accurate rupture preview (phase 28)',
     it('matches projectRupture for a card with no card-specific rupture mechanic', () => {
         mockSequentialRng(0.05);
         const enemyEffects = [ae('debuff_poison', 2, 4)];
-        const state = openAndDraft(makePlayer([PLAIN]), makeEnemy(300, 'heart', enemyEffects), [PLAIN], 'heart');
+        const state = openWithDie(makePlayer([PLAIN]), makeEnemy(300, 'heart', enemyEffects), [PLAIN], 'heart');
         const card = state.hand.find(h => h.cardId === PLAIN)!;
         expect(projectRuptureBurst(state, { uid: card.uid, id: PLAIN } as never)).toBe(projectRupture(state));
     });
@@ -122,7 +114,7 @@ describe('projectRuptureBurst — per-card-accurate rupture preview (phase 28)',
     it('adds bonusPct for the amplified detonation (undershoots without it)', () => {
         mockSequentialRng(0.05);
         const enemyEffects = [ae('debuff_poison', 2, 4)];
-        const state = openAndDraft(makePlayer([BONUS]), makeEnemy(900, 'mind', enemyEffects), [BONUS], 'mind');
+        const state = openWithDie(makePlayer([BONUS]), makeEnemy(900, 'mind', enemyEffects), [BONUS], 'mind');
         const card = state.hand.find(h => h.cardId === BONUS)!;
         const flat = projectRupture(state);
         const perCard = projectRuptureBurst(state, { uid: card.uid, id: BONUS } as never);
@@ -132,7 +124,7 @@ describe('projectRuptureBurst — per-card-accurate rupture preview (phase 28)',
 
     it('incorporates fuelPerPip × banked reserve/floating pips for the pip-fed rupture', () => {
         mockSequentialRng(0.05);
-        let state = openAndDraft(makePlayer([PIP_FED]), makeEnemy(900, 'mind', []), [PIP_FED], 'mind');
+        let state = openWithDie(makePlayer([PIP_FED]), makeEnemy(900, 'mind', []), [PIP_FED], 'mind');
         const card = state.hand.find(h => h.cardId === PIP_FED)!;
         const noPips = projectRuptureBurst(state, { uid: card.uid, id: PIP_FED } as never);
         state = { ...state, reserve: [{ id: 'r0', color: 'mind', state: 'available', temporary: false, pips: 4 }] };
@@ -148,9 +140,9 @@ describe('Overtake 2-pip gate (phase 28)', () => {
 
     it('fizzles the rupture payoff below 2 spent pips (no HP loss from the mechanic)', () => {
         mockSequentialRng(0.05);
-        const state = openAndDraft(makePlayer([OVERTAKE]), makeEnemy(900, 'mind', []), [OVERTAKE], 'body');
+        const state = openWithDie(makePlayer([OVERTAKE]), makeEnemy(900, 'mind', []), [OVERTAKE], 'body');
         const hpBefore = state.enemy.health;
-        const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === OVERTAKE)!.uid }, true);
+        const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === OVERTAKE)!.uid }, true, DIE);
         const fizzle = res.events.find(e => e.kind === 'effect-fizzled') as { message: string } | undefined;
         const detonated = res.events.find(e => e.kind === 'rupture-detonated');
         expect(fizzle?.message).toBe('needs 2+ spent pips to detonate');
@@ -160,9 +152,9 @@ describe('Overtake 2-pip gate (phase 28)', () => {
 
     it('fires normally at 2+ spent pips', () => {
         mockSequentialRng(0.05);
-        let state = openAndDraft(makePlayer([OVERTAKE]), makeEnemy(900, 'mind', []), [OVERTAKE], 'body');
+        let state = openWithDie(makePlayer([OVERTAKE]), makeEnemy(900, 'mind', []), [OVERTAKE], 'body');
         state = { ...state, reserve: [{ id: 'r0', color: 'body', state: 'available', temporary: false, pips: 2 }] };
-        const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === OVERTAKE)!.uid }, true);
+        const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === OVERTAKE)!.uid }, true, DIE);
         const detonated = res.events.find(e => e.kind === 'rupture-detonated');
         expect(detonated).toBeDefined();
     });
@@ -171,8 +163,8 @@ describe('Overtake 2-pip gate (phase 28)', () => {
         mockSequentialRng(0.05);
         const RUP = 'communion-of-the-worm';
         const enemyEffects = [ae('debuff_poison', 2, 4)];
-        const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'heart', enemyEffects), [RUP], 'heart');
-        const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true);
+        const state = openWithDie(makePlayer([RUP]), makeEnemy(300, 'heart', enemyEffects), [RUP], 'heart');
+        const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true, DIE);
         expect(res.events.find(e => e.kind === 'rupture-detonated')).toBeDefined();
         expect(res.events.find(e => e.kind === 'effect-fizzled')).toBeUndefined();
     });
@@ -201,11 +193,11 @@ describe('REPRISE songbook choice (phase 28)', () => {
 
     it('returns the player-chosen discard card, not the argmax pick', () => {
         mockSequentialRng(0.05);
-        let state = openAndDraft(makePlayer([REPRISE_CARD]), makeEnemy(300, 'heart', []), [REPRISE_CARD], 'heart');
+        let state = openWithDie(makePlayer([REPRISE_CARD]), makeEnemy(300, 'heart', []), [REPRISE_CARD], 'heart');
         // A low-rank and a high-rank card in discard — argmax would pick the high-rank one.
         state = { ...state, discard: ['spoiled-poultice', 'open-every-grave'] };
         const uid = state.hand.find(h => h.cardId === REPRISE_CARD)!.uid;
-        const res = playCombatCard(state, { uid }, true, undefined, undefined, { reprisalCardId: 'spoiled-poultice' });
+        const res = playCombatCard(state, { uid }, true, DIE, undefined, { reprisalCardId: 'spoiled-poultice' });
         const reprised = res.events.find(e => e.kind === 'reprised') as { returned: string[] } | undefined;
         expect(reprised).toBeDefined();
         expect(reprised!.returned).toEqual(['spoiled-poultice']);
@@ -213,10 +205,10 @@ describe('REPRISE songbook choice (phase 28)', () => {
 
     it('falls back to the highest-rank auto-pick when no choice is given', () => {
         mockSequentialRng(0.05);
-        let state = openAndDraft(makePlayer([REPRISE_CARD]), makeEnemy(300, 'heart', []), [REPRISE_CARD], 'heart');
+        let state = openWithDie(makePlayer([REPRISE_CARD]), makeEnemy(300, 'heart', []), [REPRISE_CARD], 'heart');
         state = { ...state, discard: ['spoiled-poultice', 'open-every-grave'] };
         const uid = state.hand.find(h => h.cardId === REPRISE_CARD)!.uid;
-        const res = playCombatCard(state, { uid }, true);
+        const res = playCombatCard(state, { uid }, true, DIE);
         const reprised = res.events.find(e => e.kind === 'reprised') as { returned: string[] } | undefined;
         expect(reprised).toBeDefined();
         expect(reprised!.returned).toEqual(['open-every-grave']); // higher rank (5 vs 1)
@@ -224,10 +216,10 @@ describe('REPRISE songbook choice (phase 28)', () => {
 
     it('falls back to auto-pick when the chosen id is not in the discard pile', () => {
         mockSequentialRng(0.05);
-        let state = openAndDraft(makePlayer([REPRISE_CARD]), makeEnemy(300, 'heart', []), [REPRISE_CARD], 'heart');
+        let state = openWithDie(makePlayer([REPRISE_CARD]), makeEnemy(300, 'heart', []), [REPRISE_CARD], 'heart');
         state = { ...state, discard: ['spoiled-poultice', 'open-every-grave'] };
         const uid = state.hand.find(h => h.cardId === REPRISE_CARD)!.uid;
-        const res = playCombatCard(state, { uid }, true, undefined, undefined, { reprisalCardId: 'not-in-discard' });
+        const res = playCombatCard(state, { uid }, true, DIE, undefined, { reprisalCardId: 'not-in-discard' });
         const reprised = res.events.find(e => e.kind === 'reprised') as { returned: string[] } | undefined;
         expect(reprised!.returned).toEqual(['open-every-grave']);
     });

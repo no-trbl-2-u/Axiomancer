@@ -1,5 +1,5 @@
 /**
- * Spec 33 — Upgradeable Dice: the four-die combat model (Phase D2, FLAGGED).
+ * Spec 33 — Upgradeable Dice: the four-die combat model (Phase D2; shipped, D7).
  *
  * Four fixed, single-color d6 rolled every round — Body (red), Mind (blue),
  * Heart (purple) at 1 special / 2 mana / 3 miss, and the wild Gold die at
@@ -11,13 +11,13 @@
  * The dice are immutable; ALL progression lives on DIE GEAR (D5). D2 ships the
  * gear INTERFACE with the hardcoded default loadout (`DEFAULT_DIE_GEAR`).
  *
- * Everything here is inert until `setUpgradeableDice(true)` — the flag-off
- * engine is byte-identical to the pre-spec-33 model. Randomness flows through
- * caller-supplied `rng` closures exactly like `combat.dice.ts`, so hermetic
- * tests pin faces via sequential mocks and the sim stays reproducible.
+ * This is THE shipped combat dice model (D7, 2026-09-25: the flag is gone and
+ * the pre-spec-33 draft/read/STAKE/wheel model was deleted). Randomness flows
+ * through caller-supplied `rng` closures, so hermetic tests pin faces via
+ * sequential mocks and the sim stays reproducible.
  *
  * Dice honesty (2026-07-09 law, re-affirmed at D1): NOTHING in this module
- * rigs a roll — no stance guarantee, no pity floor. Press Fate's flag-on form
+ * rigs a roll — no stance guarantee, no pity floor. Press Fate
  * (`rerollMissFacesHonest`) rerolls every miss face and accepts whatever the
  * gear tables return; the ~0.7% double-whiff residue is carried by FREE lines.
  */
@@ -27,23 +27,6 @@ import type {
     CombatDieColor, CombatEncounterState, CombatManaDie, UpgradeableDieGear, WheelStance,
 } from './combat.encounter.types';
 import type { CardAspect } from '../Cards/types';
-
-// ---------------------------------------------------------------------------
-// The flag
-// ---------------------------------------------------------------------------
-
-let upgradeableDiceEnabled = false;
-
-/** Turns the spec-33 model on/off (default OFF — the shipped combat is
- *  untouched until D7 recommends the flip). Tests toggle per-suite. */
-export function setUpgradeableDice(on: boolean): void {
-    upgradeableDiceEnabled = on;
-}
-
-/** True while the spec-33 Upgradeable-Dice model is active. */
-export function isUpgradeableDiceEnabled(): boolean {
-    return upgradeableDiceEnabled;
-}
 
 // ---------------------------------------------------------------------------
 // Constants (spec 33 §1, §4, §6 — [owner-locked] unless noted)
@@ -57,11 +40,11 @@ export const UPGRADEABLE_DIE_COLORS: readonly ('heart' | 'body' | 'mind' | 'wild
  *  that would create the 8th object converts to +1◆ instead. */
 export const UPGRADEABLE_TABLE_CEILING = 7;
 
-/** §6 — KINDLE concurrency cap under the flag (at most one temporary kindled
+/** §6 — KINDLE concurrency cap (at most one temporary kindled
  *  die at a time; further grants convert to +1◆). */
 export const KINDLE_CONCURRENT_CAP = 1;
 
-/** §4 — Press Fate's flag-on price: 1◆ rerolls ALL miss faces, once/round. */
+/** §4 — Press Fate's price: 1◆ rerolls ALL miss faces, once/round. */
 export const PRESS_FATE_COST = 1;
 
 /** §6 — OVERHEAT: pushing an already-spent die to power a second card risks
@@ -120,7 +103,7 @@ const UPGRADEABLE_DIE_FACE_COUNT = 6;
  *
  * Under spec 33 that sentence is literal: a HONE turns one MISS face into a
  * MANA face. This is the potent form of the axis, because spec 33 retired the
- * draft (`draftStanceDie` is a no-op under the flag) — every usable die powers
+ * draft — every usable die powers
  * a card, so a mana face the player didn't have before is a PAID play they
  * didn't have before.
  *
@@ -233,7 +216,7 @@ export function rollUpgradeableDice(
     ];
 }
 
-/** §6 — the rare permanent gold+lead pair (cap 1 pair, flag-on reading of
+/** §6 — the rare permanent gold+lead pair (cap 1 pair, the spec-33 reading of
  *  `permanentWildDice`): a 2nd gold die (stock gold gear faces) plus the
  *  LEADEN die — 5 miss / 1 gold-colored mana. Fate pushes back. */
 export function rollGoldLeadPair(
@@ -279,13 +262,13 @@ export function advanceMomentumV2(
 }
 
 // ---------------------------------------------------------------------------
-// Press Fate (§4) — the honest flag-on reroll
+// Press Fate (§4) — the honest reroll
 // ---------------------------------------------------------------------------
 
 /**
  * Rerolls every MISS face in the tray from its gear table — honestly: no
- * stance/mana guarantee (explicitly supersedes `rerollSpentDice`'s
- * stance-bearing conversion, which is a rig under the spec-33 law). Dice
+ * stance/mana guarantee (a stance-bearing conversion would be a rig under
+ * the spec-33 law). Dice
  * whose color is cracked this round are excluded. Spent/available dice are
  * untouched — Press Fate revives the dead, it never re-rolls the living.
  */

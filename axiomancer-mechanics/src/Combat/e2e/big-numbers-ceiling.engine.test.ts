@@ -34,7 +34,7 @@ import { lookupEffect } from '../../Effects/effects.library';
 import { applyEffect } from '../../Effects';
 import { cardLibrary, getCardById } from '../../Cards/cards.library';
 import {
-    initializeCombatEncounter, rollEncounterDice, draftStanceDie, playCombatCard,
+    initializeCombatEncounter, rollEncounterDice, playCombatCard,
 } from '../combat.engine';
 import type { CombatDieColor, CombatEncounterState } from '../combat.encounter.types';
 
@@ -81,7 +81,7 @@ function feed(enemy: Enemy, round = 1): Enemy {
 }
 
 /** Opens an encounter with `cardId` seated in hand and a colour-legal die
- *  drafted, with the foe's board already fed. */
+ *  in the tray, with the foe's board already fed. */
 function openFed(cardId: string, color: CombatDieColor): CombatEncounterState {
     const deck = [cardId, cardId, cardId, cardId, cardId];
     let s = initializeCombatEncounter(richPlayer(deck), feed(fatEnemy()), deck, 7);
@@ -90,8 +90,7 @@ function openFed(cardId: string, color: CombatDieColor): CombatEncounterState {
         { id: 't1-d0', color, state: 'available' as const, temporary: false },
         { id: 't1-d1', color, state: 'available' as const, temporary: false },
     ];
-    s = { ...s, dice, draftedDieId: null };
-    s = draftStanceDie(s, 't1-d0').state;
+    s = { ...s, dice };
     return {
         ...s,
         hand: [{ uid: 'ceiling-under-test', cardId }, ...s.hand],

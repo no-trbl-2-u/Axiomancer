@@ -24,7 +24,7 @@ import { lookupEffect } from '../../Effects';
 import { effectsLibrary } from '../../Effects/effects.library';
 import type { ActiveEffect, Effect } from '../../Effects/types';
 import {
-    initializeCombatEncounter, rollEncounterDice, draftStanceDie, playCombatCard,
+    initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveThreatPhase, processBetweenPhases,
     projectRupture, projectSiphonHeal,
     getDisruptMeter, getEnemyIncomingDamageMultiplier,
@@ -112,23 +112,29 @@ function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind' = 'mind', effec
     return e;
 }
 
-/** Forces this turn's draft pool to known colors (deterministic reads). */
+/** Forces this turn's tray to known colors (deterministic). Spec 33: every
+ *  non-X die shows a MANA face; an X die is a dead miss. */
 function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatEncounterState {
     const turn = state.turn || 1;
     const dice = colors.map((c, i) => ({
         id: `t${turn}-d${i}`, color: c,
         state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
+        face: c === 'x' ? ('miss' as const) : ('mana' as const),
     }));
-    return { ...state, dice, draftedDieId: null, turn };
+    return { ...state, dice, turn };
 }
 
-/** Opens phase-play, forces the pool, and drafts die 0 (color `die`). */
-function openAndDraft(player: Character, enemy: Enemy, deck: string[], die: CombatDieColor, seed = 7): CombatEncounterState {
+/** Opens phase-play and forces the tray: die 0 (color `die`) powers paid plays. */
+function openWithDie(player: Character, enemy: Enemy, deck: string[], die: CombatDieColor, seed = 7): CombatEncounterState {
     let state = initializeCombatEncounter(player, enemy, deck, seed);
     state = rollEncounterDice(state).state;
     state = setDice(state, [die, 'x']);
-    state = draftStanceDie(state, state.dice[0].id).state;
     return state;
+}
+
+/** PAID play of `cardId` from hand, powered by tray die 0. */
+function playPaid(state: CombatEncounterState, cardId: string) {
+    return playCombatCard(state, { uid: state.hand.find(h => h.cardId === cardId)!.uid }, true, state.dice[0].id);
 }
 
 const enemyDotSum = (events: readonly CombatEvent[]): number =>
@@ -179,16 +185,16 @@ describe('RUPTURE — detonate the foe afflictions for the pending total', () =>
     it('strips ALL afflictions, bursts for projectRupture, and yields Souls per instance', () => {
         mockSequentialRng(0.05);
         const enemyEffects = [ae('debuff_poison', 2, 4), ae('debuff_bleed', 1, 4)];
-        // HEART die on the heart card (color law) vs a heart foe → neutral read ×1.
-        const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'heart', enemyEffects), [RUP, RUP, RUP], 'heart');
-        const projected = projectRupture(state); // neutral read (heart die vs heart) → ×1
+        // HEART die on the heart card (color law); spec 33 lands it printed (×1).
+        const state = openWithDie(makePlayer([RUP]), makeEnemy(300, 'heart', enemyEffects), [RUP, RUP, RUP], 'heart');
+        const projected = projectRupture(state); // no read under spec 33 → ×1
         // WS3.3 clock fuel: poison RAMPS + Hemorrhage on the card-played
         // clock (2 expected ticks/round): per-round dprs 6,6,9,9 × 2 = 60;
         // bleed i1 DECAYS — exactly one tick of 3. pending = 63.
         expect(projected).toBe(63);
 
         const hpBefore = state.enemy.health;
-        const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true);
+        const res = playPaid(state, RUP);
         const det = res.events.find(e => e.kind === 'rupture-detonated') as { amount: number; consumed: string[] } | undefined;
         expect(det).toBeDefined();
         expect(det!.amount).toBe(projected);
@@ -203,8 +209,8 @@ describe('RUPTURE — detonate the foe afflictions for the pending total', () =>
     it('adds a flat burst per NON-DoT affliction stack consumed (marks)', () => {
         mockSequentialRng(0.05);
         const enemyEffects = [ae('debuff_mark', 3, 2)];
-        const state = openAndDraft(makePlayer([RUP]), makeEnemy(300, 'heart', enemyEffects), [RUP, RUP, RUP], 'heart');
-        const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true);
+        const state = openWithDie(makePlayer([RUP]), makeEnemy(300, 'heart', enemyEffects), [RUP, RUP, RUP], 'heart');
+        const res = playPaid(state, RUP);
         const det = res.events.find(e => e.kind === 'rupture-detonated') as { amount: number } | undefined;
         // No DoT fuel; RUPTURE_PER_AFFLICTION_STACK (3) × 3 mark stacks = 9.
         expect(det!.amount).toBe(9);
@@ -218,9 +224,9 @@ describe('RUPTURE — detonate the foe afflictions for the pending total', () =>
     it('is UNCAPPED — a huge affliction bank detonates for its whole fuel', () => {
         mockSequentialRng(0.05);
         const enemyEffects = [ae('debuff_poison', 10, 10)];
-        const state = openAndDraft(makePlayer([RUP]), makeEnemy(900, 'heart', enemyEffects), [RUP, RUP, RUP], 'heart');
+        const state = openWithDie(makePlayer([RUP]), makeEnemy(900, 'heart', enemyEffects), [RUP, RUP, RUP], 'heart');
         const projected = projectRupture(state);
-        const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === RUP)!.uid }, true);
+        const res = playPaid(state, RUP);
         const det = res.events.find(e => e.kind === 'rupture-detonated') as { amount: number } | undefined;
         expect(ruptureBurstCap(900)).toBe(Number.POSITIVE_INFINITY);
         expect(det!.amount).toBe(projected);
@@ -248,11 +254,11 @@ describe('RUPTURE — detonate the foe afflictions for the pending total', () =>
     it.fails('the library detonator\'s preview equals its burst (PROJECTION BUG: its own DEAL spends the fuel first)', () => {
         mockSequentialRng(0.05);
         const enemyEffects = [ae('debuff_poison', 2, 4), ae('debuff_bleed', 1, 4)];
-        const state = openAndDraft(
+        const state = openWithDie(
             makePlayer([LIBRARY_RUP]), makeEnemy(300, 'heart', enemyEffects),
             [LIBRARY_RUP, LIBRARY_RUP, LIBRARY_RUP], 'heart');
         const projected = projectRupture(state);
-        const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === LIBRARY_RUP)!.uid }, true);
+        const res = playPaid(state, LIBRARY_RUP);
         const det = res.events.find(e => e.kind === 'rupture-detonated') as { amount: number } | undefined;
         expect(det!.amount).toBe(projected);
     });
@@ -348,9 +354,9 @@ describe('BARRIER — a persistent, stacking soak', () => {
     it('a powered Adamant Wall STACKS onto any existing barrier', () => {
         mockSequentialRng(0.05);
         const WALL = 'nothing-crossed-the-ice';
-        const state = openAndDraft(makePlayer([WALL]), makeEnemy(300, 'mind'), [WALL, WALL, WALL], 'mind');
+        const state = openWithDie(makePlayer([WALL]), makeEnemy(300, 'mind'), [WALL, WALL, WALL], 'mind');
         const seeded = { ...state, barrier: 10 };
-        const res = playCombatCard(seeded, { uid: seeded.hand.find(h => h.cardId === WALL)!.uid }, true);
+        const res = playPaid(seeded, WALL);
         expect(res.state.barrier ?? 0).toBeGreaterThan(10); // stacked, not replaced
     });
 
@@ -432,8 +438,8 @@ describe('RIPOSTE — counters only when Guard/Barrier fully blocked the attack'
     it('a powered Reprisal Bell arms the parry AND grants Guard', () => {
         mockSequentialRng(0.05);
         const MA = 'the-reprisal-bell';
-        const state = openAndDraft(makePlayer([MA]), makeEnemy(300, 'heart'), [MA, MA, MA], 'heart');
-        const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === MA)!.uid }, true);
+        const state = openWithDie(makePlayer([MA]), makeEnemy(300, 'heart'), [MA, MA, MA], 'heart');
+        const res = playPaid(state, MA);
         expect(res.state.riposte).toBeDefined();
         expect(res.state.guard ?? 0).toBeGreaterThan(0);
     });
@@ -448,9 +454,9 @@ describe('SIPHON — heal for part of the HP the payoff eroded', () => {
         const player = makePlayer([SIP]);
         player.health = 100; // leave headroom to observe the heal
         const enemyEffects = [ae('debuff_poison', 2, 4)];
-        const state = openAndDraft(player, makeEnemy(300, 'heart', enemyEffects), [SIP, SIP, SIP], 'heart');
+        const state = openWithDie(player, makeEnemy(300, 'heart', enemyEffects), [SIP, SIP, SIP], 'heart');
         expect(projectSiphonHeal(state, toCombatCard(SIP, getCardById, lookupEffect)!)).toBeGreaterThan(0);
-        const res = playCombatCard(state, { uid: state.hand.find(h => h.cardId === SIP)!.uid }, true);
+        const res = playPaid(state, SIP);
         const heal = res.events.find(e => e.kind === 'damage-dealt' && e.target === 'self') as { amount: number } | undefined;
         expect(heal).toBeDefined();
         expect(heal!.amount).toBeLessThan(0);           // negative amount == heal

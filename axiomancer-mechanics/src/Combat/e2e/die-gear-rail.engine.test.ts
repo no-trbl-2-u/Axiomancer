@@ -8,10 +8,10 @@
  *   - a banked special spent from the Reserve fires the rail payload too
  *     (use-triggered timing — the trigger is USE, not roll);
  *   - a HONE'd rail rolls more mana faces than the default.
- * All rolls pinned via sequential rng closures; the flag is restored after.
+ * All rolls pinned via sequential rng closures.
  */
 
-import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
@@ -23,15 +23,12 @@ import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, endTurn, startTurn,
     CONVICTION_CAP,
 } from '../combat.engine';
-import { setUpgradeableDice } from '../combat.upgradeable-dice';
 import { honeDieGear } from '../../Character/dieGear.reducer';
 import type { CombatEncounterState, CombatEvent } from '../combat.encounter.types';
 
 afterEach(() => {
-    setUpgradeableDice(false);
     vi.restoreAllMocks();
 });
-beforeEach(() => setUpgradeableDice(true));
 
 registerSandboxCards([
     {

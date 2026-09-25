@@ -17,13 +17,9 @@
  * 2. CONTENT: a first batch of authored open stance checks across 14 roster
  *    enemies (spec 33 §2 authoring law — bosses may name two stances). Ported
  *    from PR #109's batch.
- *
- * The checks are inert while the flag is off (`resolveThreatPhase` is gated
- * on `isUpgradeableDiceEnabled`), so authoring them never disturbs the
- * flag-off baseline — pinned below.
  */
 
-import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
@@ -35,7 +31,6 @@ import {
 } from '../combat.engine';
 import { getThreatSequence, commitThreatBranch, flattenAuthoredSteps } from '../combat.threat';
 import { AUTHORED_THREAT_SEQUENCES } from '../combat.threat-sequences';
-import { setUpgradeableDice } from '../combat.upgradeable-dice';
 import type { CombatEncounterState, CombatThreatPhase } from '../combat.encounter.types';
 import type { Stance } from '../types';
 
@@ -113,9 +108,8 @@ describe('Phase D9 — authored stance checks thread through getThreatSequence',
 
 // ── 2. The authored check drives resolveStanceCheck through the engine ───────
 
-describe('Phase D9 — authored checks drive resolveStanceCheck (flag on)', () => {
-    beforeEach(() => setUpgradeableDice(true));
-    afterEach(() => { setUpgradeableDice(false); vi.restoreAllMocks(); });
+describe('Phase D9 — authored checks drive resolveStanceCheck', () => {
+    afterEach(() => { vi.restoreAllMocks(); });
 
     it('ending Grave Larva phase 0 in the YIELDED stance (mind) blunts the hit and pays +1◆', () => {
         const neutral = stateAtPhase(GraveLarva, 0, null); // stance-less → check inert
@@ -153,21 +147,6 @@ describe('Phase D9 — authored checks drive resolveStanceCheck (flag on)', () =
         const offCheck = stateAtPhase(GraveLarva, 0, 'body'); // phase 0 checks mind, not body
         expect(hpLoss(offCheck, resolveThreatPhase(offCheck, rng).state))
             .toBe(hpLoss(neutral, resolveThreatPhase(neutral, rng).state));
-    });
-});
-
-// ── 3. Flag-off — authored checks are inert (baseline undisturbed) ───────────
-
-describe('Phase D9 — authored checks are inert while the flag is off', () => {
-    afterEach(() => setUpgradeableDice(false));
-
-    it('the yielded stance takes the full neutral hit and pays no ◆ under the flag-off model', () => {
-        setUpgradeableDice(false);
-        const neutral = stateAtPhase(GraveLarva, 0, null);
-        const wouldYield = stateAtPhase(GraveLarva, 0, 'mind');
-        expect(hpLoss(wouldYield, resolveThreatPhase(wouldYield, rng).state))
-            .toBe(hpLoss(neutral, resolveThreatPhase(neutral, rng).state));
-        expect(resolveThreatPhase(wouldYield, rng).state.conviction).toBe(wouldYield.conviction);
     });
 });
 

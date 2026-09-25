@@ -221,7 +221,7 @@ const KEYWORD_GLOSS: Record<string, string> = {
     // ── Utility (9) ──
     Draw: 'Draw that many cards from your deck, up to your hand limit.',
     Forge:
-        'Forges a GHOST die (or revives a dead X die as WILD) that plays beside your drafted die and is spent for good. '
+        'Forges a GHOST die (or revives a dead X die as WILD) that joins your tray and is spent for good. '
         + 'At 3 dice, it grants +1 Conviction instead.',
     Guard:
         'Blocks that much incoming attack damage during the next threat phase. '
@@ -458,9 +458,9 @@ export const SYSTEM_GLOSSARY: readonly { term: string; def: string }[] = [
     { term: 'CONVICTION ◆', def: 'A spend-anytime resource banked from unspent dice and overflow. It never decays.' },
     { term: 'TOLL ⬡', def: 'A running tally, for the whole combat, of dice you spend by color. A ⬡ threshold line fires once you have spent that many dice of its color this combat.' },
     { term: 'RESERVE & PIPS', def: 'Up to 2 dice held between phases instead of played. Each gains +1 pip per phase it survives, spent for extra intensity or Guard.' },
-    { term: 'GHOST ✦', def: 'A forged die that plays alongside your drafted die, never rerolls, and is gone forever when spent.' },
+    { term: 'GHOST ✦', def: 'A forged die that joins your tray, never rerolls, and is gone forever when spent.' },
     { term: 'RUNGS', def: "The foe's telegraphed action has rungs: 2 on a normal action, 3 on a boss. Losing all of them denies the action." },
-    { term: 'WILD / X', def: 'A WILD die counts as any color. A dead X die powers nothing, but can be Forged wild or fate-tapped.' },
+    { term: 'WILD / X', def: 'A WILD die counts as any color. A dead X die powers nothing, but can be Forged wild.' },
     // 2026-07-12 (owner directive: every printed term pops a definition) —
     // the two card-local Sentence-payoff words. SENTENCE was demoted from
     // the keyword registry (phase 29) but still prints on the-closing-word;

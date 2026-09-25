@@ -33,7 +33,7 @@ const REPO_ROOT = resolve(__dirname, '..')
 const EXPORT_DIR = resolve(REPO_ROOT, '.smoke-dist')
 const SHOT_DIR = resolve(REPO_ROOT, 'screenshots/combat-redesign')
 const VIEWPORT = { width: 390, height: 844 }
-// Seed 16 rolls a draftable first die (t1-d0 = mind) for the 5-card demo deck.
+// Seed 16 pins the spec-33 tray roll for the 5-card demo deck.
 const SEED = 16
 
 const MIME = {

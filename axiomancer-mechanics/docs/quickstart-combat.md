@@ -31,19 +31,22 @@ UI client (CLI, mobile, automated tester) can drive combat without
 re-implementing the math.
 
 ```typescript
-import { draftStanceDie, playCombatCard, endTurn } from 'axiomancer-mechanics';
+import { getCard, firstLegalPoweringDie, playCombatCard, endTurn } from 'axiomancer-mechanics';
 
-// 1. Draft one of the rolled dice as your stance (the unpicked die grants Conviction).
-({ state } = draftStanceDie(state, state.dice[0].id));
-
-// 2. Play cards from hand. `useBottom: true` powers the full effect (spends a die);
-//    `false` takes the free top action.
+// 1. The round's four dice are already rolled (spec 33 — no draft). Each live
+//    mana/special face may power ONE paid line of its colour (gold = any).
 const entry = state.hand[0];
-let t = playCombatCard(state, { uid: entry.uid }, true);
+const die = firstLegalPoweringDie(state, getCard(entry.cardId)!);
+
+// 2. Play cards from hand. `useBottom: true` powers the full effect with the
+//    named die; `false` takes the free top action (no die).
+let t = die
+    ? playCombatCard(state, { uid: entry.uid }, true, die.id)
+    : playCombatCard(state, { uid: entry.uid }, false);
 state = t.state;
 // t.events — typed CombatEvent[] stream for rendering
 
-// 3. Close the turn.
+// 3. Close the turn (one unspent die banks to the Reserve).
 ({ state } = endTurn(state));
 ```
 
@@ -91,6 +94,6 @@ const stats = simulateHazardPatternCombat(player, enemy, 300);
 ## Deep-dive
 
 - Full API surface: [`combat.md`](./combat.md) § Hazard-Pattern Combat API
-- Stance draft / the read / Conviction / Signature Skills: [`combat.md`](./combat.md) § Spec 26 / 26b
+- The dice / Conviction / Signature Skills: [`combat.md`](./combat.md) § Spec 26 / 26b + spec 33
 - Deck building and presets: [`combat.md`](./combat.md) § Phase 169 — Curated Combat Loadout
 - Playtest loop: [`playtest.md`](./playtest.md)

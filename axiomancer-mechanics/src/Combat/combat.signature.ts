@@ -2,8 +2,9 @@
  * Spec 26b §4 — Signature Skills.
  *
  * A small, ALWAYS-available kit (independent of the shuffled deck) funded by
- * Conviction (◆). Conviction accrues from the per-turn dice draft (the unpicked
- * die) and from winning the hidden-stance read. Signature Skills are the
+ * Conviction (◆). Conviction accrues from BOON (special) faces used to power a
+ * card, answered stance-check yields, scraps and card effects. Signature
+ * Skills are the
  * player's reliable plan through a bad draw — the agency lever the deck cannot
  * guarantee.
  *
@@ -20,9 +21,8 @@ import type { Character } from '../Character/types';
 import type { Enemy } from '../Enemy/types';
 import { applyDamage, heal } from './health';
 import { drawCombatCards } from './combat.deck';
-import { rerollSpentDice } from './combat.dice';
 import {
-    isUpgradeableDiceEnabled, rerollMissFacesHonest, crackedColorsForTurn, PRESS_FATE_COST,
+    rerollMissFacesHonest, crackedColorsForTurn, PRESS_FATE_COST,
 } from './combat.upgradeable-dice';
 import { recordAttribution } from './combat.attribution';
 import { effectImpact } from './combat.cards';
@@ -43,7 +43,7 @@ export const SIGNATURE_SKILLS: Record<SignatureSkillId, SignatureSkill> = {
     },
     'sig-press-the-point': {
         id: 'sig-press-the-point', name: 'Press Fate', kind: 'reroll', cost: 4, magnitude: 0,
-        description: 'Bend fate — re-roll only your spent and blocked (X) dice; keep the ones still in play.',
+        description: 'Bend fate — once a round, re-roll every miss face; keep the dice still in play.',
     },
     'sig-second-wind': {
         id: 'sig-second-wind', name: 'Second Wind', kind: 'sustain', cost: 4, magnitude: 2,
@@ -83,12 +83,12 @@ export const SIGNATURE_SKILLS: Record<SignatureSkillId, SignatureSkill> = {
     'sig-rallying-blow': {
         id: 'sig-rallying-blow', name: "The Butcher's Bill", kind: 'conclude', cost: 6,
         magnitude: 0,
-        description: 'BODY — a finisher: deals damage for every stack of every effect on the enemy, then refreshes your stance die. Build the board, then conclude.',
+        description: 'BODY — a finisher: deals damage for every stack of every effect on the enemy. Build the board, then conclude.',
     },
     'sig-clever-gambit': {
         id: 'sig-clever-gambit', name: 'Cold Counsel', kind: 'draw', cost: 4,
         magnitude: 2,
-        description: 'MIND — draw 2 and refresh your stance die: turn information into tempo.',
+        description: 'MIND — draw 2: turn information into tempo.',
     },
     // ── Phase 85 (equipment progression — head/hands/feet accessories) ───────
     'sig-mounting-dread': {
@@ -164,33 +164,15 @@ export function applySignatureSkill(
             break;
         }
         case 'reroll': {
-            // Spec 33 §4 (flag-gated) — Press Fate's HONEST form: reroll every
-            // MISS face from its gear table, once per round, no stance/mana
-            // guarantee (this explicitly supersedes `rerollSpentDice`'s
-            // stance-bearing conversion — a rig under the spec-33 law). Cracked
-            // dice are excluded. The engine wrapper charged PRESS_FATE_COST.
-            if (isUpgradeableDiceEnabled()) {
-                const cracked = crackedColorsForTurn(state, state.turn);
-                const honest = rerollMissFacesHonest(state.dice, state, cracked, rng);
-                next = { ...state, dice: honest.dice, pressFateRound: state.round };
-                events.push({ kind: 'press-fate-rerolled', dieIds: honest.rerolledIds, cost: PRESS_FATE_COST });
-                events.push({ kind: 'turn-dice-rolled', turn: state.turn, dice: honest.dice });
-                break;
-            }
-            // Press Fate — bend fate on the BAD dice only: re-roll the dice you've
-            // USED (spent/exhausted) or that show a dead X face, and KEEP every
-            // still-usable die. The engine wrapper spends the Conviction; this is a
-            // pure partial re-roll.
-            const { dice, rerolledIds } = rerollSpentDice(state.dice, rng);
-            // The draft survives unless its die was one of the re-rolled (used/X)
-            // dice — in which case the read is gone and the player can re-draft.
-            const draftRerolled = state.draftedDieId !== null && rerolledIds.includes(state.draftedDieId);
-            next = {
-                ...state, dice,
-                draftedDieId: draftRerolled ? null : state.draftedDieId,
-                lastRead: draftRerolled ? 'none' : state.lastRead,
-            };
-            events.push({ kind: 'turn-dice-rolled', turn: state.turn, dice });
+            // Spec 33 §4 — Press Fate's HONEST form: reroll every MISS face
+            // from its gear table, once per round, no stance/mana guarantee.
+            // Cracked dice are excluded. The engine wrapper charged
+            // PRESS_FATE_COST.
+            const cracked = crackedColorsForTurn(state, state.turn);
+            const honest = rerollMissFacesHonest(state.dice, state, cracked, rng);
+            next = { ...state, dice: honest.dice, pressFateRound: state.round };
+            events.push({ kind: 'press-fate-rerolled', dieIds: honest.rerolledIds, cost: PRESS_FATE_COST });
+            events.push({ kind: 'turn-dice-rolled', turn: state.turn, dice: honest.dice });
             break;
         }
         case 'sustain': {
@@ -205,14 +187,14 @@ export function applySignatureSkill(
         case 'conclude': {
             // Finisher — reads the enemy's current effect board and deals
             // CONCLUDE_DMG_PER_STACK × total stacks (sum of all effect intensities).
-            // Then refreshes the drafted die so the BODY archetype keeps swinging.
+            // (Its draft-era die refresh was deleted with the draft, D7.)
             const totalStacks = state.enemy.effects.reduce((sum, ae) => sum + ae.intensity, 0);
             const dmg = Math.max(1, Math.round(CONCLUDE_DMG_PER_STACK * totalStacks));
             const enemy = applyDamage(state.enemy, dmg) as Enemy;
             const attribution = recordAttribution(state.attribution, skill.id, skill.name, null, dmg, state.enemy.health);
             events.push({ kind: 'conclude-hit', amount: dmg, totalStacks });
             events.push({ kind: 'damage-dealt', cardId: skill.id, target: 'enemy', amount: dmg });
-            next = refreshDraftedDie({ ...state, enemy, attribution });
+            next = { ...state, enemy, attribution };
             break;
         }
         case 'control':
@@ -264,11 +246,12 @@ export function applySignatureSkill(
             break;
         }
         case 'draw': {
-            // MIND tempo — draw cards AND refresh the drafted die.
+            // MIND tempo — draw cards. (Its draft-era die refresh was deleted
+            // with the draft, D7.)
             const draw = drawCombatCards(state.drawPile, state.discard, state.deck, skill.magnitude, rng);
             let uid = state.turn * 1000 + 31;
             const newHand = [...state.hand, ...draw.drawn.map(cardId => ({ uid: `cg${++uid}`, cardId }))];
-            next = refreshDraftedDie({ ...state, hand: newHand, drawPile: draw.drawPile, discard: draw.discard });
+            next = { ...state, hand: newHand, drawPile: draw.drawPile, discard: draw.discard };
             events.push({ kind: 'hand-drawn', cards: draw.drawn });
             break;
         }
@@ -295,15 +278,6 @@ export function applySignatureSkill(
     }
 
     return { state: next, events };
-}
-
-/** Refreshes the currently drafted die back to `available` (for conclude/draw). */
-function refreshDraftedDie(state: CombatEncounterState): CombatEncounterState {
-    if (!state.draftedDieId) return state;
-    return {
-        ...state,
-        dice: state.dice.map(d => (d.id === state.draftedDieId && d.color !== 'x' ? { ...d, state: 'available' as const } : d)),
-    };
 }
 
 /** Convenience: which stances a scout would reveal (for presenter previews). */

@@ -123,7 +123,8 @@ function play(before: CombatEncounterState, paid: boolean): {
     after: CombatEncounterState; events: CombatEvent[];
 } {
     mockSequentialRng(0.5);
-    const { state: after, events } = playCombatCard(before, { uid: 'under-test' }, paid);
+    // Spec 33: a PAID play names its powering die (the fixture's wild die).
+    const { state: after, events } = playCombatCard(before, { uid: 'under-test' }, paid, paid ? 'fx-die' : undefined);
     expect(
         events.find(e => e.kind === 'effect-fizzled'),
         'the play fizzled',
@@ -483,7 +484,6 @@ function seqBase(threat: CombatThreatPhase): CombatEncounterState {
         },
         hand: SEQ_HAND.map(cardId => ({ uid: cardId, cardId })),
         dice: tray,
-        draftedDieId: null,
         floatingDice: tray,
         reserve: [],
         guard: 0,

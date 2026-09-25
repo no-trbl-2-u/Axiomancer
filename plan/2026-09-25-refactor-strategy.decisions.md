@@ -118,6 +118,28 @@ luck modifiers on `buff_all_stats_up`, `buff_phoenix_vigor` and
 re-authors any stat bonus it wants. *Rejected:* keeping them as data for
 the future hooks; keeping them but hiding them in the UI.
 
+**D15 — Map backdrops: atmosphere now, the map itself later.** (T,
+2026-09-25.) For the D2 re-authoring, the node graph is authored first and
+the backdrop is made to fit it as atmosphere. The target state is the
+reverse: nodes placed ON the backdrop's landmarks, with the art panning
+and zooming under the same gestures as the nodes. *Deferred, not
+rejected.* Most of the plumbing already exists: `MapCanvas` draws the
+plate inside the same fixed 360×400 × `SPREAD` canvas that pans and
+zooms with the nodes (so `cover` crops identically on every device), and
+node positions are hand-placed `x, y` in that viewBox in the per-map
+mobile layout, not derived from the engine's column/lane. What the later
+phase adds: a per-map canvas size/aspect (today every map shares one
+portrait canvas), a stronger plate (opacity 0.2 today), and authoring
+the layout `x, y` against the image.
+
+**D16 — D2 map parameters.** (T, 2026-09-25.) Four regions, ~20 nodes
+per map. A map must not read as a climb: the layout spreads in every
+direction from the entry, so reaching the whole map needs panning up,
+down, left and right. The engine's forward skeleton (column order) still
+governs progression; only the mobile layout's `x, y` is freed from the
+bottom-to-top ladder. The per-map canvas must be larger than the viewport
+on both axes (D15's per-map canvas size lands with or before this).
+
 ## Open follow-ups
 
 - Audit tick (D1 step 1, D3 scope) — DONE 2026-09-25; keep/cut list and
@@ -128,8 +150,10 @@ the future hooks; keeping them but hiding them in the UI.
   fully answered (D4–D10).
   Pick-up prompt for the execution session:
   `plan/2026-09-25-trim-the-fat.prompt.md`.
-- Map re-authoring brief (D2) — needs the region count and target node
-  count per map before authoring.
+- Map re-authoring brief (D2) — parameters set by D16 (4 regions, ~20
+  nodes/map, spread in all directions). Graph first, backdrop second (D15).
+- Backdrop-anchored map renderer (D15) — nodes in image coordinates,
+  art pans/zooms with the node layer. Its own phase, after D2.
 - Scaling formula (D1 step 3) — D4 settles the direction (per-stat
   hooks); the exact stat-to-quantity mapping is designed with the hook.
 - Trim spec §5.3 / §5.6 / §5.7 answered 2026-09-25 as D8 / D9 / D10.

@@ -4,15 +4,12 @@ import {
     initializeCombatEncounter,
     rollEncounterDice,
     startTurn,
-    draftStanceDie,
     endTurn,
     playCombatCard,
     playSignatureSkill,
     resolveThreatPhase,
     handCards,
-    getDraftedDie,
-    revealedCurrentStance,
-    chooseDraft,
+    firstLegalPoweringDie,
     buildCombatSummary,
     getSignatureSkill,
     selectMercyChoice,
@@ -35,12 +32,9 @@ export interface HazardCombatAutoResult {
     phaseCount: number;
 }
 
-const bestAutoCard = (s: CombatEncounterState, policy: HazardAutoPolicyId, matchColor?: string): { uid: string; card: CombatCard } | null => {
-    // Dice-law (2026-07-09): with a powering die in hand, only same-color cards
-    // are playable (wild matches everything).
-    const cards = handCards(s).filter(c => c.card.verbClass !== 'retreat')
-        .filter(c => !matchColor || matchColor === 'wild' || c.card.stance === 'any' || c.card.stance === matchColor);
-    if (cards.length === 0) return null;
+/** The hand (retreat excluded), ranked by the auto policy, best first. */
+const rankedAutoCards = (s: CombatEncounterState, policy: HazardAutoPolicyId): { uid: string; card: CombatCard }[] => {
+    const cards = handCards(s).filter(c => c.card.verbClass !== 'retreat');
     const activeIds = new Set(s.enemy.effects.map(e => e.effectId));
     return cards.sort((a, b) => {
         switch (policy) {
@@ -61,7 +55,7 @@ const bestAutoCard = (s: CombatEncounterState, policy: HazardAutoPolicyId, match
             default:
                 return 0;
         }
-    })[0] ?? null;
+    });
 };
 
 const bestAutoSignature = (s: CombatEncounterState): string | null => {
@@ -75,28 +69,22 @@ const bestAutoSignature = (s: CombatEncounterState): string | null => {
 
 /**
  * Plays one threat phase under the ROUND-TURN LAW (Gate 0, 2026-07-10): ONE
- * tray roll per phase — draft once, ride the drafted die's combo refresh for
- * the paid plays, drain the leftover hand through the FREE tops, then end the
- * turn. The safety counter is kept but never binds on legal play (the old
- * `endTurn → startTurn` loop is gone).
+ * tray roll per phase. Spec 33 — each paid play takes the best-ranked card a
+ * live die can LEGALLY power (`firstLegalPoweringDie`), until none can; then
+ * the leftover hand drains through the FREE tops and the turn ends. The
+ * safety counter is kept but never binds on legal play.
  */
 const playAutoPhase = (state: CombatEncounterState, policy: HazardAutoPolicyId, phaseTurnLimit: number): CombatEncounterState => {
     let s = state;
     let safety = 0;
 
-    // The ONE legal tray roll + stance draft for this phase.
-    if (s.dice.length === 0 && s.draftedDieId === null && !s.turnTakenThisPhase) {
+    // The ONE legal tray roll for this phase.
+    if (s.dice.length === 0 && !s.turnTakenThisPhase) {
         s = startTurn(s).state;
         if (s.phase !== 'phase-play') return s;
     }
-    if (s.draftedDieId === null && s.dice.length > 0) {
-        const want = bestAutoCard(s, policy);
-        const enemyStance = revealedCurrentStance(s);
-        const pick = chooseDraft(s.dice, want?.card.stance ?? 'wild', enemyStance);
-        if (pick) s = draftStanceDie(s, pick).state;
-    }
 
-    // Paid plays off the drafted die while the combo refresh keeps it alive.
+    // Paid plays: each spends one live die on a colour-legal card.
     while (s.phase === 'phase-play' && !s.finalOutcome && !s.mercyChoiceActive && safety < phaseTurnLimit * 6) {
         safety++;
         if (s.conviction >= 6) {
@@ -106,11 +94,12 @@ const playAutoPhase = (state: CombatEncounterState, policy: HazardAutoPolicyId, 
                 if (cast.state !== s) { s = cast.state; if (s.finalOutcome) break; continue; }
             }
         }
-        const drafted = getDraftedDie(s);
-        if (!drafted || drafted.state !== 'available' || drafted.color === 'x') break;
-        const want = bestAutoCard(s, policy, drafted.color);
-        if (!want) break;
-        const res = playCombatCard(s, { uid: want.uid }, true);
+        const current = s;
+        const want = rankedAutoCards(current, policy)
+            .map(c => ({ ...c, die: firstLegalPoweringDie(current, c.card) }))
+            .find(c => c.die !== null);
+        if (!want || !want.die) break;
+        const res = playCombatCard(s, { uid: want.uid }, true, want.die.id);
         if (res.events.some(e => e.kind === 'effect-fizzled')) {
             s = playCombatCard(s, { uid: want.uid }, false).state;
             continue;
@@ -126,7 +115,7 @@ const playAutoPhase = (state: CombatEncounterState, policy: HazardAutoPolicyId, 
         if (!topCard) break;
         s = playCombatCard(s, { uid: topCard.uid }, false).state;
     }
-    if (s.phase === 'phase-play' && !s.finalOutcome && s.draftedDieId !== null) s = endTurn(s).state;
+    if (s.phase === 'phase-play' && !s.finalOutcome && s.turnTakenThisPhase) s = endTurn(s).state;
     return s;
 };
 

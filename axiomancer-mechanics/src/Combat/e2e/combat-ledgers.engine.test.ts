@@ -5,8 +5,7 @@
  * WS9 threat-branch condition, in real units:
  *
  *   - `recoilPaidThisTurn` — every blood price this turn (the `recoil` mech
- *     case AND the fate-recoil pay) accumulates; resets with
- *     `spellsPlayedThisTurn` at `startTurn`.
+ *     case) accumulates; resets with `spellsPlayedThisTurn` at `startTurn`.
  *   - `enemyDamageThisTurn` — post-soak HP the enemy's threat landed on the
  *     player, written in `resolveThreatPhase`.
  *   - `enemyDamageLastRound` — the rollover in `processBetweenPhases`
@@ -29,7 +28,7 @@ import { deepClone } from '../../Utils';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
-    draftStanceDie, startTurn, resolveThreatPhase, processBetweenPhases,
+    startTurn, resolveThreatPhase, processBetweenPhases,
     THREAT_DAMAGE_SCALE,
 } from '../combat.engine';
 import type {
@@ -38,7 +37,7 @@ import type {
 
 afterEach(() => vi.restoreAllMocks());
 
-// Sandbox fixtures isolate the two recoil WRITE sites (the curated library's
+// A sandbox fixture isolates the recoil WRITE site (the curated library's
 // recoil cards carry extra payoff mechanics; a fixture pins the LEDGER rule).
 registerSandboxCards([
     {
@@ -47,13 +46,6 @@ registerSandboxCards([
         tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
         combatEffects: [{ effectId: 'debuff_bleed', appliedTo: 'opponent', intensity: 1, duration: 2 }],
         specialMechanics: [{ kind: 'recoil', hp: 4 }],
-    },
-    {
-        id: 'qa-ledger-fate', name: 'QA Ledger Fate',
-        philosophicalAspect: 'mind', description: 'fate-recoil ledger fixture',
-        tier: 1, targetType: 'enemy', rank: 1, cardType: 'spell',
-        combatEffects: [{ effectId: 'debuff_confusion', appliedTo: 'opponent', duration: 2 }],
-        fate: { rider: { bonusDuration: 1 }, recoilHp: 3 },
     },
 ]);
 
@@ -81,8 +73,9 @@ function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatE
     const dice = colors.map((c, i) => ({
         id: `t${turn}-d${i}`, color: c,
         state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
+        face: c === 'x' ? ('miss' as const) : ('mana' as const),
     }));
-    return { ...state, dice, draftedDieId: null, turn };
+    return { ...state, dice, turn };
 }
 
 /** A single authored damage-only threat phase (loops as the final phase). */
@@ -122,28 +115,23 @@ const scaled = (damage: number): number => Math.round(damage * THREAT_DAMAGE_SCA
 // ── recoilPaidThisTurn ───────────────────────────────────────────────────────
 
 describe('combat ledgers — recoilPaidThisTurn', () => {
-    it('accumulates across BOTH write sites this turn, then resets at startTurn', () => {
-        let s = open(['qa-ledger-recoil', 'qa-ledger-fate']);
-        s = setDice(s, ['body', 'x']);
-        s = draftStanceDie(s, s.dice[0].id).state;
+    it('accumulates across every blood price this turn, then resets at startTurn', () => {
+        let s = open(['qa-ledger-recoil', 'qa-ledger-recoil']);
+        s = setDice(s, ['body', 'body']);
         expect(s.recoilPaidThisTurn ?? 0).toBe(0);
 
-        // Site 1 — the `recoil` mech case (printed blood price 4).
-        const recoilEntry = s.hand.find(h => h.cardId === 'qa-ledger-recoil')!;
+        // First pay — the `recoil` mech case (printed blood price 4).
+        const [first, second] = s.hand.filter(h => h.cardId === 'qa-ledger-recoil');
         let hpBefore = s.player.health;
-        s = playCombatCard(s, { uid: recoilEntry.uid }, true).state;
+        s = playCombatCard(s, { uid: first.uid }, true, s.dice[0].id).state;
         expect(hpBefore - s.player.health).toBe(4);
         expect(s.recoilPaidThisTurn).toBe(4);
 
-        // Site 2 — the fate-recoil pay (X die powers the fate card, recoil 3).
-        const xDie = s.dice.find(d => d.color === 'x')!;
-        const fateEntry = s.hand.find(h => h.cardId === 'qa-ledger-fate')!;
+        // Second pay, same turn — the ledger accumulates.
         hpBefore = s.player.health;
-        const fatePlay = playCombatCard(s, { uid: fateEntry.uid }, true, xDie.id);
-        expect(fatePlay.events.some(e => e.kind === 'fate-powered')).toBe(true);
-        s = fatePlay.state;
-        expect(hpBefore - s.player.health).toBe(3);
-        expect(s.recoilPaidThisTurn).toBe(4 + 3);
+        s = playCombatCard(s, { uid: second.uid }, true, s.dice[1].id).state;
+        expect(hpBefore - s.player.health).toBe(4);
+        expect(s.recoilPaidThisTurn).toBe(4 + 4);
 
         // The ledger resets with the turn — same lifecycle hook as
         // `spellsPlayedThisTurn` (startTurn after the phase boundary).

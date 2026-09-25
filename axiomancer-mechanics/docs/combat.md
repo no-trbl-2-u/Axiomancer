@@ -43,9 +43,12 @@ Heart > Body > Mind > Heart
 | Same type | **Neutral** |
 | Reverse of above | **Disadvantage** |
 
-The matchup's live consequence is the read (`resolveRead`, see Spec 26 / 26b
-below): `READ_DAMAGE_MULT` 1.5 / 1.0 / 0.5 for advantage / neutral /
-disadvantage.
+The matchup's live consequence is the spec-33 open stance check at phase end
+(`resolveStanceCheck`): ending a phase in the stance the enemy `punishes` lands
+its hit at `READ_DAMAGE_MULT.advantage` (x1.5); ending in the stance it
+`yields` to blunts it to `READ_DAMAGE_MULT.disadvantage` (x0.5) and pays +1◆.
+(The draft-era hidden-stance read, `resolveRead`, was deleted with the
+Upgradeable-Dice flag collapse, D7 2026-09-25.)
 
 ## Actions
 
@@ -436,7 +439,7 @@ The engine lives in `src/Combat/`:
 | `CombatEncounterState`, `CombatCard`, `CombatThreatPhase`, `CombatOutcome`, `CombatSummary` | The core encounter type family. (`CombatPressureTracks` was REMOVED 2026-06-22 — VITAE is the one bar.) `CombatCard.skillId` is the canonical field for the backing learned-card id (`string \| null`; `null` for synthetic cards, if any are ever added again). `CombatOutcome`/`CombatVerbClass` still list `'retreat'` as a union member for now (no live code path can produce it — no escape card exists) rather than risk an unverified type-cascade removal. Use `skillId` to trace a projected card back to its source card. |
 | `CombatAttributionRow`, `LandedEffect` | Attribution sub-types for `buildCombatSummary`. `CombatAttributionRow` is a per-card row (`cardId`, `name`, `dotDamage`, `damageDealt`, `phases`); `LandedEffect` is a snapshot of one live effect used internally during attribution (`effectId`, `effect`, `active`, `target`). |
 
-### Spec 26 / 26b — stance draft, the read, Conviction, Signature Skills, deckbuilding
+### Spec 26 / 26b + spec 33 — the dice, Conviction, Signature Skills, deckbuilding
 
 A depth layer built **on top of** the Spec 25 Hazard engine (it does not replace
 it). It turns each turn into a small read-and-commit decision and adds two
@@ -447,19 +450,20 @@ progression levers.
 > yet, and is distinct from
 > [`specs/26-catalyst-multiplicative-scaling.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/26-catalyst-multiplicative-scaling.md) (archived 2026-09-25).
 
-- **Stance draft + the read (dice-law rework 2026-07-09).** Each turn rolls
-  `TURN_DICE_COUNT` (**3**) dice — an honest roll, no stance-die guarantee; the
-  player **drafts** one as their stance. Every unpicked die converts to
-  Conviction tokens: colored `+CONVICTION_PER_UNPICKED_DIE` (1), wild
-  `+CONVICTION_PER_UNPICKED_WILD` (2), dead X `+0` (a card effect —
-  `float_x_die`, the FORGE X→WILD sense — can turn a tray X into a wild
-  floating die instead).
-  The enemy's phase stance is hidden behind a thematic hint; the drafted die's
-  color is the player's **read** of it. A winning read (`resolveRead` →
-  `advantage`) multiplies the damage of cards played that turn
-  (`READ_DAMAGE_MULT` 1.5 / 1.0 / 0.5). Floating dice bypass the one-die draft
-  entirely: all of them may be spent in one round, each is consumed forever, and
-  they never bank tokens.
+- **The four-die tray (spec 33, `combat.upgradeable-dice.ts`).** Each round
+  rolls four fixed dice — Body, Mind, Heart at 1 special / 2 mana / 3 miss and
+  the wild Gold die at 1 / 1 / 4 (faces come from each die's gear,
+  `activeDieGear`; HONE / `dieUpgradeLevel` turns misses into mana) — plus any
+  act-reward dice, the gold+lead pair (`permanentWildDice`) and floating dice.
+  There is **no draft**: every live mana/special face (and every Reserve or
+  floating die) may power one PAID line, named by `dieId`. A special face fires
+  its gear payload (+2◆) when USED. At end of round `endTurn` banks one unspent
+  die to the Reserve. The player's stance is the stance of the last PAID card
+  (`playerStance`); PAID plays build the momentum chain (heart → body → mind),
+  whose third link SURGES a temporary gold die. Press Fate (1◆, once a round)
+  rerolls every miss face honestly. The draft-era model (the 3-die stance
+  draft, the hidden read, THE STAKE, the v1 momentum wheel, the fate tap and
+  X-die powering) was deleted with the flag collapse (D7, 2026-09-25).
 - **The colour match is a MECHANIC, not a law.** A die powers a card of ITS
   colour — WILD (rendered gold) matches every card; an off-colour play fizzles
   in `playBottomAction` (`combat.engine.ts`). This is the default *rule of the
@@ -476,9 +480,10 @@ progression levers.
   `COLOR_MATCH_DAMAGE_BONUS = 3` survives only as a deprecated alias for
   unmigrated call sites — call `colorMatchBonus()`. On a status card the match
   still adds `COLOR_MATCH_STATUS_DURATION_BONUS` (1) turn of duration instead.
-- **Conviction (◆).** The generic token pool that accrues per unused rolled die
-  (see the color law above) and from winning the read
-  (`CONVICTION_READ_WIN_BONUS`). It funds Signature Skills.
+- **Conviction (◆).** The generic token pool: it accrues from BOON (special)
+  faces used to power a card, answered stance-check yields, table-ceiling
+  overflow, scraps and card effects (capped at `CONVICTION_CAP`). It funds
+  Signature Skills, Press Fate and `strikeAdd`.
 - **Signature Skills.** A small, **always-available** kit (`SIGNATURE_SKILLS`,
   `SIGNATURE_KITS`, biased per `playerArchetype`) independent of the shuffled
   deck — the reliable plan through a bad draw. Played via `playSignatureSkill`,
@@ -491,22 +496,21 @@ progression levers.
 
 | Function / Type | Description |
 |-----------------|-------------|
-| `startTurn` / `endTurn` | Open a turn (roll the draft pool) / close it (resolve carry + upkeep). |
-| `draftStanceDie(state, dieId)` / `getDraftedDie` / `chooseDraft` | Commit one die as the stance; read the committed die. |
-| `resolveRead(dieColor, enemyStance)` → `CombatReadResult` | The drafted die vs the hidden enemy stance: `advantage` / `neutral` / `disadvantage` / `none`. |
-| `isPhaseStanceRevealed` / `revealedCurrentStance` | Whether (and what) the enemy's hidden stance is now known. |
-| `cardReadPreview` / `projectCardImpact` | UI previews — a card's read result + color match, and its projected HP impact. |
+| `startTurn` / `endTurn` | Open a round (roll the four-die tray; one roll per threat phase) / close it (bank one unspent die to the Reserve). |
+| `firstLegalPoweringDie(state, card)` | The first die that can legally power a card's PAID line: a colour-legal live tray die, then Reserve, then floating. `resolveCombatPhase` uses it for plays submitted without a `dieId`. |
+| `isPhaseStanceRevealed` / `revealedCurrentStance` | Whether (and what) the enemy's phase stance is now known. |
+| `projectCardImpact` | UI preview — kept for the mobile presenter contract; `amount` is always 0 (the strike is dead). |
 | `discardCombatCard` | Discard a card from hand (tempo/sculpting). |
 | `playSignatureSkill(state, id, ...)` / `getSignatureSkill` | Spend Conviction on an always-available Signature Skill. |
 | `SIGNATURE_SKILLS` / `SIGNATURE_SKILL_LIST` / `SIGNATURE_KITS` / `signaturesForArchetype` / `playerArchetype` | The signature kit catalogue + per-archetype selection. |
 | `rollCombatCardRewards` / `addRewardCard` / `COMBAT_REWARD_POOL` | Post-combat deckbuilder draft + persist. |
 | `unlockSkillViaDilemma` / `STARTING_SKILL_ID` / `STARTING_SKILL_IDS` | Forward hook for ethical-dilemma card unlocks; the new-player starting card (`STARTING_SKILL_ID = 'slippery-slope'`). `STARTING_SKILL_IDS` is the preferred array (`['slippery-slope', 'brace-for-impact']`) that also grants the baseline GUARD defense card — use this to seed `knownSkills` for a new character. |
-| `READ_DAMAGE_MULT`, `CONVICTION_PER_UNPICKED_DIE`, `CONVICTION_PER_UNPICKED_WILD`, `CONVICTION_READ_WIN_BONUS`, `colorMatchBonus` / `COLOR_MATCH_BONUS_PCT` / `COLOR_MATCH_BONUS_MIN`, `TURN_DICE_COUNT`, `CONVICTION_CAP` | Tuning constants for the read / Conviction / draft economy. `READ_DAMAGE_MULT` = 1.5 / 1.0 / 0.5 (advantage / neutral / disadvantage), `TURN_DICE_COUNT` = 3, wild banks double, `CONVICTION_CAP` = 12. The colour-match reward is `colorMatchBonus(base)` = +25%, minimum +2 (2026-09-02); `COLOR_MATCH_DAMAGE_BONUS = 3` is a deprecated flat alias. |
-| `rollTurnDice` / `dieHasStance` / `deriveIntentType` | Draft-pool roll + stance helpers. |
+| `READ_DAMAGE_MULT`, `colorMatchBonus` / `COLOR_MATCH_BONUS_PCT` / `COLOR_MATCH_BONUS_MIN`, `CONVICTION_CAP` | Tuning constants. `READ_DAMAGE_MULT` = 1.5 / 1.0 / 0.5 — the stance-check rails (punished / neutral / yielded), `CONVICTION_CAP` = 12. The colour-match reward is `colorMatchBonus(base)` = +25%, minimum +2 (2026-09-02); `COLOR_MATCH_DAMAGE_BONUS = 3` is a deprecated flat alias. |
+| `dieHasStance` / `deriveIntentType` | Stance helpers. |
 | `AUTHORED_THREAT_ENEMY_IDS` | Read-only array of every enemy slug with a deterministic authored threat sequence — the keys of `AUTHORED_THREAT_SEQUENCES`, which is now compiled from `ENEMY_DECKS` (`combat.enemy-decks.ts`) rather than hand-authored, so it is exactly "every enemy that has a deck". Read the array; do not pin its length. |
 | `getThreatSequence(enemy)` | Returns the threat phase sequence for an enemy: explicit `enemy.threatSequence` wins; otherwise an authored sequence keyed by enemy id; otherwise the generated default. |
 | `generateDefaultThreatSequence(enemy)` | Generates a 3-phase fallback threat sequence from the enemy's dominant stance, rotating through Heart / Body / Mind. Used automatically by `getThreatSequence` when no authored sequence exists. |
-| `rerollSpentDice(state, rng?)` / `hasRerollableDice(state)` / `dieIsRerollable(die)` | PR #190 — partial Press Fate re-roll: re-rolls only spent/exhausted + dead `x`-face dice, leaving usable dice in play. A no-op (refunds Conviction) when nothing is rerollable. |
+| `rerollSpentDice(state, rng?)` / `hasRerollableDice(state)` / `dieIsRerollable(die)` | The `reroll_spent` card mechanic's partial re-roll: re-rolls only spent/exhausted + dead `x`-face dice from the legacy face bag, leaving usable dice in play. (Press Fate itself uses spec 33's honest `rerollMissFacesHonest`.) |
 | `THREAT_WEAKEN_PER_ROLL` / `THREAT_DENY_AT` / `THREAT_WEAKEN_FLOOR` | Soft-control and stat-debuff threat tunables (0.33.0). Each point of enemy roll penalty (from confusion, fear, blind, slow, accuracy/attack-down etc.) reduces the incoming hit by `THREAT_WEAKEN_PER_ROLL` (default 0.06). When the cumulative roll penalty reaches `THREAT_DENY_AT` (default 8), the turn is fully denied (same as hard control). `THREAT_WEAKEN_FLOOR` (default 0.4) clamps the minimum damage multiplier for a weakened-but-not-denied enemy. Read these to display soft-control thresholds in the UI. |
 | `COMBAT_DECK_PRESETS` / `COMBAT_DECK_PRESET_ORDER` / `listDeckPresets()` / `getDeckPreset(id)` / `buildPresetDeck(id)` | The three campaign-stage preset decks (`src/Combat/combat.starter-deck-presets.ts`): `threadbare` ("The Threadbare Office", early), `pilgrim` ("The Pilgrim's Burden", mid), `apostate` ("The Apostate's Canon", late), plus `PRESET_LINEAGE` describing the removals/additions that walk one rung to the next. **The one surviving deck law is exact aspect thirds** — every preset splits evenly across body/mind/heart by `philosophicalAspect`. Deck sizes, copy limits and the lineage multiset are no longer laws (2026-09-02). `buildPresetDeck` appends no escape card — there is no in-combat retreat — and is ready to feed `initializeCombatEncounter`. |
 | `CombatDeckPreset`, `CombatDeckFocus` | `CombatDeckPreset` describes a single named preset deck entry (id, name, theme, focus, description, cardIds). `CombatDeckFocus` is the discriminated string union of the (now six) coarse design-lever tags used by draft/sim-policy consumers — `'dot' \| 'control' \| 'utility' \| 'damage' \| 'rush-execute' \| 'balanced'` (not the old per-preset name union). Both are importable as `import type { CombatDeckPreset, CombatDeckFocus } from 'axiomancer-mechanics'`. |

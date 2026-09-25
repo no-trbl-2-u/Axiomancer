@@ -2,9 +2,9 @@
  * Hermetic e2e — the combat sim policy roster (`combat.sim-policies`) and the
  * policy-driven sim extensions (`combat.encounter.sim`).
  *
- * Verifies the roster resolves, `greedy`/`blind` still encode the legacy
- * witness EXACTLY (pinned decision sequences on seeded encounters — the
- * bit-identical guarantee behind the balance oracle), `chaos` randomness flows
+ * Verifies the roster resolves, `greedy`/`blind` still encode their ranking
+ * EXACTLY (pinned decision sequences on seeded encounters — the determinism
+ * guarantee behind the balance oracle), `chaos` randomness flows
  * only through the injected seeded rng (never `Math.random`), and the new
  * per-card telemetry + deck/focus options are consistent with the aggregate
  * counters. Doctrine: status effects are the MAIN fun — greedy's ranking must
@@ -27,7 +27,6 @@ import {
 import { runOneEncounter, upgradeablePlayPhase } from '../combat.encounter.sim';
 import { initializeCombatEncounter, rollEncounterDice, projectIncomingThreat } from '../combat.engine';
 import { emptyObjectiveTelemetry, foldObjectiveEvents } from '../combat.objective.telemetry';
-import { setUpgradeableDice } from '../combat.upgradeable-dice';
 import { toCombatCard } from '../combat.cards';
 import type { CombatCard, CombatEncounterState, GlyphInstance } from '../combat.encounter.types';
 
@@ -63,7 +62,6 @@ registerSandboxCards([
 
 afterEach(() => {
     vi.restoreAllMocks();
-    setUpgradeableDice(false);
 });
 
 const ALL_POLICY_IDS: readonly CombatSimPolicyId[] = [
@@ -130,8 +128,6 @@ describe('policy roster — every id resolves', () => {
             expect(policy.mercyChoice).toBe('spare');
             expect(policy.rankSignature).toBeUndefined();
         }
-        expect(COMBAT_SIM_POLICIES.greedy.blind).toBe(false);
-        expect(COMBAT_SIM_POLICIES.blind.blind).toBe(true);
     });
 
     it('aggro-brute is the doctrinal weak baseline: pure damage preview, no status awareness', () => {
@@ -238,12 +234,18 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // card-played DoT clock like PAID plays always did, so the poison the
     // greedy line stacks ticks on every play and the same seed closes in ONE
     // round (plays/statusPlays unchanged).
+    //
+    // Re-measured 2026-09-25 (D7 flag collapse): until now this file's
+    // `afterEach` switched the Upgradeable-Dice flag OFF, so every test after
+    // the first — these pins included — silently measured the deleted
+    // draft-era model. First honest spec-33 measurement: same one-round
+    // victory, fewer status lands (3→1).
     it('seed 11 vs LittleBelle: a status victory', () => {
         const r = runOneEncounter(loadout(MIX), LittleBelle, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 1, plays: 5, statusPlays: 3 });
+            .toEqual({ outcome: 'victory', rounds: 1, plays: 5, statusPlays: 1 });
         expect(r.cardUsage['spoiled-poultice']).toEqual({
-            cardId: 'spoiled-poultice', plays: 1, bottomPlays: 1, topPlays: 0, statusLands: 1, discards: 0,
+            cardId: 'spoiled-poultice', plays: 1, bottomPlays: 0, topPlays: 1, statusLands: 0, discards: 0,
         });
         // Telemetry stays internally consistent whatever the sequence is: the
         // per-card counters sum to the aggregates (the actual bug detector).
@@ -281,10 +283,13 @@ describe('greedy object reproduces the pinned decision sequences', () => {
     // Re-measured 2026-09-04 (free-line card-played clock, see the LittleBelle
     // pin above): one fewer play (8→7, statusPlays 6→5) for the same
     // two-round status victory.
+    // Re-measured 2026-09-25 (D7 flag collapse, see the LittleBelle pin
+    // above): the first spec-33 measurement of this line — a three-round
+    // victory (plays 11, statusPlays 2).
     it('seed 11 vs KingOfRevenge: a status victory (Gate 0 law: one tray per phase)', () => {
         const r = runOneEncounter(loadout(MIX), KingOfRevenge, 11, 'greedy');
         expect({ outcome: r.outcome, rounds: r.rounds, plays: r.plays, statusPlays: r.statusPlays })
-            .toEqual({ outcome: 'victory', rounds: 2, plays: 7, statusPlays: 5 });
+            .toEqual({ outcome: 'victory', rounds: 3, plays: 11, statusPlays: 2 });
         // Determinism, not balance: the same seed must reproduce the same
         // sequence byte-for-byte. (The exact figures above are a fidelity
         // measurement of the CURRENT library + engine and are expected to be
@@ -382,17 +387,15 @@ describe('crackAt roster assignment (combat.sim-policies)', () => {
 });
 
 // ── Phase 51 — the crackAt decision seam (combat.encounter.sim) ─────────────
-// Wired ONLY into `upgradeablePlayPhase` (spec-33 flag-on driver); the
-// flag-off `policyPlayPhase` legacy body never reads `policy.crackAt` — these
-// cases drive `upgradeablePlayPhase` directly with a hand-built glyph and a
-// policy stub, per the phase brief's own test spec.
+// Read by `upgradeablePlayPhase` (the spec-33 driver) — these cases drive it
+// directly with a hand-built glyph and a policy stub, per the phase brief's
+// own test spec.
 describe('crackAt decision seam — upgradeablePlayPhase (combat.encounter.sim)', () => {
     function stubPolicy(crackAt: number | undefined): CombatSimPolicy {
         return {
             id: 'greedy',
             name: 'crackAt test stub',
             description: 'test-only witness for the crackAt decision seam',
-            blind: false,
             preferredFocus: 'balanced',
             rankCard: () => 0,
             signatureKinds: [],
@@ -405,10 +408,9 @@ describe('crackAt decision seam — upgradeablePlayPhase (combat.encounter.sim)'
         };
     }
 
-    /** A four-fixed-dice phase-play state (spec-33 flag-on), the only shape
+    /** A four-fixed-dice phase-play state (spec 33), the only shape
      *  `upgradeablePlayPhase` reads. */
     function upgradeableState(seed = 5): CombatEncounterState {
-        setUpgradeableDice(true);
         const initial = initializeCombatEncounter(loadout(MIX), deepClone(GraveLarva), undefined, seed);
         return rollEncounterDice(initial).state;
     }
@@ -485,17 +487,14 @@ describe('strikeAddsAt roster assignment (combat.sim-policies)', () => {
 });
 
 // ── Phase 102 — the strikeAddsAt decision seam (combat.encounter.sim) ───────
-// Mirrors the `crackAt` seam above in shape, INCLUDING its deliberate gap: the
-// knob is wired only into `upgradeablePlayPhase`, so the flag-off legacy
-// `policyPlayPhase` body still never strikes an add. That is mirrored on
-// purpose and is not claimed as full sim parity.
+// Mirrors the `crackAt` seam above in shape: the knob is read by
+// `upgradeablePlayPhase`.
 describe('strikeAddsAt decision seam — upgradeablePlayPhase (combat.encounter.sim)', () => {
     function stubPolicy(strikeAddsAt: number | undefined): CombatSimPolicy {
         return {
             id: 'greedy',
             name: 'strikeAddsAt test stub',
             description: 'test-only witness for the strikeAddsAt decision seam',
-            blind: false,
             preferredFocus: 'balanced',
             rankCard: () => 0,
             signatureKinds: [],
@@ -507,7 +506,6 @@ describe('strikeAddsAt decision seam — upgradeablePlayPhase (combat.encounter.
     }
 
     function broodState(over: Partial<CombatEncounterState> = {}): CombatEncounterState {
-        setUpgradeableDice(true);
         const initial = initializeCombatEncounter(loadout(MIX), deepClone(GraveLarva), undefined, 5);
         return {
             ...rollEncounterDice(initial).state,

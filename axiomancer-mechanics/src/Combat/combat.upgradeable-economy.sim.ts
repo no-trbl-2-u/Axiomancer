@@ -1,22 +1,19 @@
 /**
  * Spec 33 — Upgradeable Dice: the D3 economy witness.
  *
- * Runs flag-ON encounters through the real engine + policy driver
- * (`policyPlayPhase`'s spec-33 branch) across the starter presets × stage
- * profiles × seeds, then reads the recorded transcript to measure spec 33 §7's
- * **D3 gate table**: E[usable dice/round], whiff rate, per-color access, dead
- * rounds, realized ◆ income (specials-on-use + yield + overflow), surge
- * frequency, momentum-break rate, and the STAKE-retirement gap (vs a flag-off
- * baseline run of the same cells).
+ * Runs encounters through the real engine + policy driver
+ * (`upgradeablePlayPhase`) across the starter presets × stage profiles ×
+ * seeds, then reads the recorded transcript to measure spec 33 §7's **D3 gate
+ * table**: E[usable dice/round], whiff rate, per-color access, dead rounds,
+ * realized ◆ income (specials-on-use + yield + overflow), surge frequency and
+ * momentum-break rate. (The STAKE-retirement gap arm — a flag-off comparison
+ * run — was deleted with the flag, D7.)
  *
  * Every number is READ FROM THE ENGINE'S OWN EVENT STREAM — the roll gates from
  * the `turn-dice-rolled` events (the fresh four-die roll, not a post-spend
  * snapshot), realized income from `special-fired` / `stance-check-resolved` /
  * `die-overflowed`, surges from `momentum-surged`. Nothing is recomputed by a
  * parallel model, so the witness cannot drift from the engine it measures.
- *
- * The flag is toggled around each batch and restored in a `finally`, so a
- * measurement run never leaks spec-33 state into the flag-off suite.
  */
 
 import { setSeed } from '../Utils/rng';
@@ -24,10 +21,9 @@ import {
     initializeCombatEncounter, rollEncounterDice, resolveThreatPhase,
     selectMercyChoice, selectCapitulationChoice, getSignatureSkill,
 } from './combat.engine';
-import { runOneEncounter, playSimPhase } from './combat.encounter.sim';
+import { playSimPhase } from './combat.encounter.sim';
 import {
-    setUpgradeableDice, isUpgradeableDiceEnabled, SPECIAL_CONVICTION_DEFAULT, OVERHEAT_CRACK_CHANCE,
-    rollUpgradeableDice,
+    SPECIAL_CONVICTION_DEFAULT, OVERHEAT_CRACK_CHANCE, rollUpgradeableDice,
 } from './combat.upgradeable-dice';
 import {
     COMBAT_STAGE_PROFILES, COMBAT_STAGE_ORDER, buildStagePlayer, type CombatStageId,
@@ -78,24 +74,18 @@ export interface DiceMathWitness {
 }
 
 export function measureDiceMath(rolls = 200000, seed = 4242): DiceMathWitness {
-    const wasOn = isUpgradeableDiceEnabled();
-    setUpgradeableDice(true);
     setSeed(seed);
     let usable = 0, whiff = 0, specials = 0;
     const colorHits: Record<ChainColor, number> = { body: 0, mind: 0, heart: 0 };
-    try {
-        for (let i = 0; i < rolls; i++) {
-            const dice = rollUpgradeableDice(1, {}, new Set());
-            const u = dice.filter(d => d.face === 'special' || d.face === 'mana');
-            usable += u.length;
-            specials += dice.filter(d => d.face === 'special').length;
-            if (u.length === 0) whiff++;
-            for (const c of CHAIN_COLORS) {
-                if (dice.some(d => (d.color === c || d.color === 'wild') && (d.face === 'special' || d.face === 'mana'))) colorHits[c]++;
-            }
+    for (let i = 0; i < rolls; i++) {
+        const dice = rollUpgradeableDice(1, {}, new Set());
+        const u = dice.filter(d => d.face === 'special' || d.face === 'mana');
+        usable += u.length;
+        specials += dice.filter(d => d.face === 'special').length;
+        if (u.length === 0) whiff++;
+        for (const c of CHAIN_COLORS) {
+            if (dice.some(d => (d.color === c || d.color === 'wild') && (d.face === 'special' || d.face === 'mana'))) colorHits[c]++;
         }
-    } finally {
-        setUpgradeableDice(wasOn);
     }
     return {
         rolls,
@@ -230,8 +220,7 @@ function foldEvents(acc: EconomyAccumulator, events: readonly CombatEncounterSta
     }
 }
 
-/** Runs one flag-ON encounter, folding its transcript into `acc`. Assumes the
- *  caller has already set the flag on. A single log cursor advances through the
+/** Runs one encounter, folding its transcript into `acc`. A single log cursor advances through the
  *  whole transcript so the round-1 roll (emitted by `rollEncounterDice`, before
  *  the loop) is counted exactly once — the fix for the >100% special spend-rate
  *  a per-phase `logStart` produced by dropping round 1's roll. */
@@ -328,16 +317,13 @@ function finalize(acc: EconomyAccumulator): UpgradeableEconomyStats {
 }
 
 /**
- * The D3 economy witness: flag-ON encounters across presets × stages × seeds,
- * measured from the transcript. Returns the pooled stats plus per-cell rows and
- * the STAKE-retirement gap (flag-off baseline escalation pressure the retired
- * wager used to add). The flag is set on for the batch and restored after.
+ * The D3 economy witness: encounters across presets × stages × seeds,
+ * measured from the transcript. Returns the pooled stats plus per-cell rows.
  */
 export function simulateUpgradeableEconomy(options: UpgradeableEconomyOptions = {}): {
     diceMath: DiceMathWitness;
     pooled: UpgradeableEconomyStats;
     cells: UpgradeableEconomyCell[];
-    stakeGap: StakeRetirementGap;
     config: { presets: readonly string[]; stages: readonly CombatStageId[]; seeds: readonly number[]; policy: CombatSimPolicyId };
 } {
     const presets = options.presets ?? COMBAT_DECK_PRESET_ORDER;
@@ -347,100 +333,26 @@ export function simulateUpgradeableEconomy(options: UpgradeableEconomyOptions = 
 
     const diceMath = measureDiceMath();
 
-    const wasOn = isUpgradeableDiceEnabled();
-    setUpgradeableDice(true);
-    try {
-        const pooledAcc = emptyAcc();
-        const cells: UpgradeableEconomyCell[] = [];
-        for (const preset of presets) {
-            for (const stage of stages) {
-                const cellAcc = emptyAcc();
-                for (const seed of seeds) {
-                    accumulateEncounter(pooledAcc, preset, stage, seed, policy);
-                    accumulateEncounter(cellAcc, preset, stage, seed, policy);
-                }
-                cells.push({ preset, stage, stats: finalize(cellAcc) });
-            }
-        }
-        const pooled = finalize(pooledAcc);
-        const stakeGap = measureStakeGap(presets, stages, seeds, policy);
-        return { diceMath, pooled, cells, stakeGap, config: { presets, stages, seeds, policy } };
-    } finally {
-        setUpgradeableDice(wasOn);
-    }
-}
-
-export interface StakeRetirementGap {
-    /** Flag-on escalation clock (avg rounds to the escalation tier under §3). */
-    flagOnAvgRounds: number;
-    /** Flag-off baseline avg rounds (STAKE + read economy present). */
-    flagOffAvgRounds: number;
-    /** The retired ◆ sink: STAKE's 2/4/6◆ wager tiers no longer draw down ◆. */
-    retiredSinkTiersConviction: readonly number[];
-    /** Prose note on the escalation-pressure delta (§5). */
-    note: string;
-}
-
-/** The STAKE-retirement gap (§5): what the retired wager used to add. Compares
- *  flag-on vs flag-off average encounter length on the same cells (the STAKE
- *  loss-tick was an escalation-clock pressure source; its removal lengthens
- *  fights unless repriced elsewhere). Runs the flag-off arm via the shared
- *  `runOneEncounter`. */
-function measureStakeGap(
-    presets: readonly string[],
-    stages: readonly CombatStageId[],
-    seeds: readonly number[],
-    policy: CombatSimPolicyId,
-): StakeRetirementGap {
-    // flag-on arm — reuse a compact accumulator for encounter length only.
-    let onRounds = 0, onN = 0;
+    const pooledAcc = emptyAcc();
+    const cells: UpgradeableEconomyCell[] = [];
     for (const preset of presets) {
         for (const stage of stages) {
+            const cellAcc = emptyAcc();
             for (const seed of seeds) {
-                const acc = emptyAcc();
-                accumulateEncounter(acc, preset, stage, seed, policy);
-                onRounds += acc.totalRounds; onN += acc.encounters;
+                accumulateEncounter(pooledAcc, preset, stage, seed, policy);
+                accumulateEncounter(cellAcc, preset, stage, seed, policy);
             }
+            cells.push({ preset, stage, stats: finalize(cellAcc) });
         }
     }
-    // flag-off arm — same cells through the legacy driver.
-    const wasOn = isUpgradeableDiceEnabled();
-    setUpgradeableDice(false);
-    let offRounds = 0, offN = 0;
-    try {
-        for (const preset of presets) {
-            for (const stage of stages) {
-                const profile = COMBAT_STAGE_PROFILES[stage];
-                const enemy = ENEMY_REGISTRY[profile.enemySlugs[0] as keyof typeof ENEMY_REGISTRY];
-                const deck = buildPresetDeck(preset);
-                const player = buildStagePlayer(profile);
-                player.knownCards = deck.slice();
-                for (const seed of seeds) {
-                    setSeed(seed);
-                    const res = runOneEncounter(player, enemy, seed, policy, { deck });
-                    offRounds += res.rounds; offN++;
-                }
-            }
-        }
-    } finally {
-        setUpgradeableDice(wasOn);
-    }
-    return {
-        flagOnAvgRounds: onN > 0 ? onRounds / onN : 0,
-        flagOffAvgRounds: offN > 0 ? offRounds / offN : 0,
-        retiredSinkTiersConviction: [2, 4, 6],
-        note: 'STAKE retired entirely (spec 33 §5, D1 owner-lock): its 2/4/6◆ wager '
-            + 'tiers and its escalation-tick-on-loss are removed, not rewired. The ◆ '
-            + 'sink delta is the wager spend that no longer occurs; the escalation-clock '
-            + 'delta is the loss-tick that no longer pressures long fights. Press Fate '
-            + '(1◆/round) is the intended replacement sink.',
-    };
+    const pooled = finalize(pooledAcc);
+    return { diceMath, pooled, cells, config: { presets, stages, seeds, policy } };
 }
 
 /** Aligned text report of the pooled gates + per-cell rows + derived-constant
  *  proposals, for the D3 tuning doc and the CLI. */
 export function formatUpgradeableEconomyReport(result: ReturnType<typeof simulateUpgradeableEconomy>): string {
-    const { diceMath, pooled, cells, stakeGap, config } = result;
+    const { diceMath, pooled, cells, config } = result;
     const pct = (x: number) => `${(x * 100).toFixed(1)}%`;
     const num = (x: number) => x.toFixed(3);
     const band = (v: number, lo: number, hi: number) => (v >= lo && v <= hi ? 'PASS' : 'MISS');
@@ -458,7 +370,7 @@ export function formatUpgradeableEconomyReport(result: ReturnType<typeof simulat
     lines.push(`  per-color heart      = ${pct(diceMath.perColorAccess.heart)}   band >= 65%   [${geq(diceMath.perColorAccess.heart, 0.65)}]`);
     lines.push(`  gross special income = ${num(diceMath.grossSpecialIncomePerRound)}◆/round   (E[specials]=${num(diceMath.specialsPerRound)} × ${SPECIAL_CONVICTION_DEFAULT}◆)`);
     lines.push('');
-    lines.push('REALIZED PLAY — IN-ENCOUNTER WITNESS (flag-on matrix, same face tables through the engine RNG)');
+    lines.push('REALIZED PLAY — IN-ENCOUNTER WITNESS (same face tables through the engine RNG)');
     lines.push(`  E[usable dice/round] = ${num(pooled.usablePerRound)}   (dice-math ${num(diceMath.usablePerRound)}; delta = RNG-lattice skew, see report)`);
     lines.push(`  whiff rate           = ${pct(pooled.whiffRate)}   (dice-math ${pct(diceMath.whiffRate)})`);
     lines.push(`  per-color body/mind/heart = ${pct(pooled.perColorAccess.body)} / ${pct(pooled.perColorAccess.mind)} / ${pct(pooled.perColorAccess.heart)}`);
@@ -468,10 +380,6 @@ export function formatUpgradeableEconomyReport(result: ReturnType<typeof simulat
     lines.push(`  surge frequency      = ${num(pooled.surgePerRound)}/round   (momentum breaks ${num(pooled.momentumBreakPerRound)}/round)`);
     lines.push(`  dead rounds (0◆ FREE-only) = ${pct(pooled.deadRoundRate)}   (no band — measured only)`);
     lines.push(`  Press Fate casts     = ${num(pooled.pressFatePerRound)}/round`);
-    lines.push('');
-    lines.push('STAKE-retirement gap (§5)');
-    lines.push(`  flag-on avg rounds  = ${num(stakeGap.flagOnAvgRounds)}   flag-off avg rounds = ${num(stakeGap.flagOffAvgRounds)}`);
-    lines.push(`  retired ◆ sink tiers = ${stakeGap.retiredSinkTiersConviction.join('/')}◆`);
     lines.push('');
     lines.push('OVERHEAT (constant, not policy-exercised): crack chance = ' + `${(OVERHEAT_CRACK_CHANCE * 100).toFixed(0)}%`);
     lines.push('');

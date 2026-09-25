@@ -153,8 +153,8 @@ vm.player.effects = player.effects.slice(0, MAX_EFFECTS_SHOWN);
 
 #### 3. Touch Interaction Patterns
 ```typescript
-// Engine: stance relationships (drafted die vs the enemy's hidden stance)
-resolveRead('heart', 'body') // → 'advantage'
+// Engine: the colour law (a die powers only a card of its colour; WILD powers any)
+combatDieCanPower(die, 'body') // → true for a BODY or WILD die
 
 // Mobile: touch-friendly stance picker
 vm.stancePicker.options = [
@@ -210,15 +210,15 @@ export function useCombatViewModel(localUi: CombatLocalUi = {}): CombatViewModel
 When a bug occurs, the architecture helps isolate the problem:
 
 ```
-Bug: "Heart stance shows wrong advantage against Body enemy"
+Bug: "A BODY die is refused by a BODY card"
 
 Investigation path:
 1. Is the engine calculation wrong?
-   → Check resolveRead('heart', 'body') in engine tests
+   → Check combatDieCanPower(die, 'body') in engine tests
 2. Is the presenter mapping wrong?
-   → Check stanceAdvantage() in combat.engine.ts
+   → Check dieCanPowerCardVM() in combat-encounter.engine.ts
 3. Is the component display wrong?
-   → Check StanceCard rendering of vm.advantage prop
+   → Check CombatBoard's resolveDieDropTarget / staged-card rendering
 ```
 
 ### Migration Patterns

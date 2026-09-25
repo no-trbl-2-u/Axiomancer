@@ -64,7 +64,7 @@ let state = initializeCombatEncounter(player, enemy);
 ({ state } = rollEncounterDice(state));
 
 while (state.phase !== 'complete') {
-  // ...draft a stance die, play cards (playCombatCard), then
+  // ...play cards (playCombatCard, one die per PAID line), then
   // resolveThreatPhase + processBetweenPhases per turn...
   break;
 }

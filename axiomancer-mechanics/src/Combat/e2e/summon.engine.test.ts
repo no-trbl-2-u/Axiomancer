@@ -41,12 +41,11 @@ import {
     strikeAdd, projectIncomingThreat, projectEnemyHealPerRound,
     ADD_WAVE_CAP, STRIKE_ADD_COST, ADD_BITE_PER_LEVEL,
 } from '../combat.engine';
-import { setUpgradeableDice } from '../combat.upgradeable-dice';
 import type {
     CombatAdd, CombatEncounterState, CombatEvent, CombatThreatEffect,
 } from '../combat.encounter.types';
 
-afterEach(() => { setUpgradeableDice(false); vi.restoreAllMocks(); });
+afterEach(() => { vi.restoreAllMocks(); });
 
 function findEvents<K extends CombatEvent['kind']>(events: CombatEvent[], kind: K): Extract<CombatEvent, { kind: K }>[] {
     return events.filter((e): e is Extract<CombatEvent, { kind: K }> => e.kind === kind);
@@ -449,7 +448,6 @@ describe("the brood does not contaminate the foe's ledgers", () => {
         // Under it a fully-blocked telegraph silently STOPS paying out the
         // moment a body is on the board, and every other test in this repo
         // stays green.
-        setUpgradeableDice(true);
 
         const foe = makeEnemy({ keywords: [{ kind: 'summon', n: 1 }] });
         const staked = (s: CombatEncounterState): CombatEncounterState => {
@@ -550,9 +548,9 @@ describe('the telegraph does not lie', () => {
     // than by exclusion: `makeEnemy` clones GraveLarva with `keywords` and
     // `stages` overridden, so the fixture carries no BRUTAL, no FLURRY and no
     // stage (`stageThreatBonus === 0`); its `getOutgoingThreatDamageMult` is 1;
-    // each cell telegraphs at most ONE damaging effect; and the
-    // Upgradeable-Dice flag is off, so no authored `stanceCheck` multiplies the
-    // telegraph. Those are exactly the divergences `projectIncomingThreat`'s
+    // each cell telegraphs at most ONE damaging effect; and the player is
+    // stance-less (no paid play set `playerStance`), so no `stanceCheck`
+    // multiplies the telegraph. Those are exactly the divergences `projectIncomingThreat`'s
     // docblock still leaves open. A foe carrying any of them is outside this
     // matrix's scope — widen the fixture and you must close them first.
     const MATRIX_GUARDS = [0, 3, 5, 8, 10, 20, 24, 32, 40];

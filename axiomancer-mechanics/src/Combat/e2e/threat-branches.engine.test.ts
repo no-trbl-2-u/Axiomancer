@@ -32,16 +32,15 @@ import { TriEyes, Tezcatlipoca } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import {
-    initializeCombatEncounter, rollEncounterDice, playCombatCard,
-    draftStanceDie, resolveThreatPhase,
+    initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
 } from '../combat.engine';
 import { getThreatSequence } from '../combat.threat';
 import type { CombatDieColor, CombatEncounterState } from '../combat.encounter.types';
 
 afterEach(() => vi.restoreAllMocks());
 
-// Three distinct afflictions (all mind-aspect so ONE drafted die chains them —
-// each play lands a status NEW to the chain, refreshing the die).
+// Three distinct afflictions, all mind-aspect — each paid play is powered by
+// its own mind MANA die (spec 33: one die per paid line, no chain refresh).
 registerSandboxCards([
     {
         id: 'qa-branch-bleed', name: 'QA Branch Bleed',
@@ -80,10 +79,10 @@ function makePlayer(hp: number): Character {
 function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatEncounterState {
     const turn = state.turn || 1;
     const dice = colors.map((c, i) => ({
-        id: `t${turn}-d${i}`, color: c,
-        state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
+        id: `t${turn}-d${i}`, color: c, face: 'mana' as const,
+        state: 'available' as const, temporary: false,
     }));
-    return { ...state, dice, draftedDieId: null, turn };
+    return { ...state, dice, turn };
 }
 
 /**
@@ -94,14 +93,15 @@ function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatE
 function afflictionLine(seed: number, play: boolean): CombatEncounterState {
     let s = initializeCombatEncounter(makePlayer(3000), deepClone(TriEyes), DECK, seed);
     s = rollEncounterDice(s, rng).state;
-    s = setDice(s, ['mind', 'x']);
-    s = draftStanceDie(s, s.dice[0].id).state;
+    s = setDice(s, ['mind', 'mind', 'mind']);
     if (play) {
-        for (const id of DECK) {
+        DECK.forEach((id, i) => {
             const entry = s.hand.find(h => h.cardId === id);
             expect(entry, `${id} missing from the opening hand`).toBeDefined();
-            s = playCombatCard(s, { uid: entry!.uid }, true, undefined, rng).state;
-        }
+            const res = playCombatCard(s, { uid: entry!.uid }, true, s.dice[i].id, rng);
+            expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(false);
+            s = res.state;
+        });
     }
     return resolveThreatPhase(s, rng).state;
 }

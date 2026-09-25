@@ -11,8 +11,7 @@
  * drops from above the tray rotated hard, lands, and micro-bounces to rest.
  * The drop geometry constants below mirror that overlay verbatim.
  *
- * All values are FLAG-ON only (the ritual never runs flag-off). They describe
- * PRESENTATION; the engine RNG already decided every outcome — nothing here can
+ * They describe PRESENTATION; the engine RNG already decided every outcome — nothing here can
  * change what a settled die shows (dice-honesty law, 2026-07-09).
  */
 

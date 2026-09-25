@@ -73,7 +73,6 @@ npm run combat -- --enemy foot-stealer --preset wanderer
 **State-log records** (for agentic consumers):
 - `hazardCombat:start` — encounter initialised (player + enemy + policy)
 - `hazardCombat:autoPhase` — one full auto-played threat phase
-- `hazardCombat:draft` — die drafted (interactive)
 - `hazardCombat:playCard` — card played (interactive)
 - `hazardCombat:resolveThreat` — threat phase resolved + between-phases
 - `hazardCombat:mercy` — mercy choice made
@@ -100,7 +99,7 @@ npm run combat-sim -- --runs=300 --seed=1 --blind
 
 | Flag | Effect |
 | --- | --- |
-| `--blind` | Realistic-player witness: the bot drafts using only information a real player can see (no hidden-stance peek). Use to gauge the difficulty a real player feels. Default is `--greedy` (omniscient bot, the balance ceiling). |
+| `--blind` | Runs the `blind` policy. Since the D7 flag collapse (2026-09-25) deleted the stance draft, it plays identically to the default `greedy` witness; kept so old commands still run. |
 | `--enemy <Name>` | Run against one enemy only (e.g. `KingOfRevenge`, `FateSpinner`). Omit to run the full tier sweep. |
 | `--loadout <ids>` | Comma-separated card IDs for the player's deck (default `slippery-slope`). |
 | `--runs <n>` | Number of Monte-Carlo playthroughs (default `200`). |

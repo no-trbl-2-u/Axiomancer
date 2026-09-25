@@ -7,7 +7,7 @@
  * deliberate focus on the doctrine-critical surface:
  *
  *   - the self-reinforcing status-loop dice primitives (`combatDieCanPower` /
- *     `refreshOneDie` / `rollCombatDice`) — HP is the sole win condition
+ *     `refreshOneDie` / `rollCombatDieColor`) — HP is the sole win condition
  *     (2026-06-22); DoT/control cards deplete HP far faster than the weak
  *     basic strike; `dotErosionReached` / `controlSaturationReached` were
  *     removed with the old Pressure-Track model;
@@ -40,7 +40,7 @@ import {
 import { recordAttribution, buildCombatSummary } from '../combat.attribution';
 import type { CombatAttributionRow, LandedEffect } from '../combat.encounter.types';
 import {
-    rollCombatDice, combatDieCanPower, refreshOneDie, COMBAT_DICE_COUNT,
+    rollCombatDieColor, combatDieCanPower, refreshOneDie,
     dieIsRerollable, hasRerollableDice, rerollSpentDice,
 } from '../combat.dice';
 import { buildCombatDeck, COMBAT_HAND_SIZE } from '../combat.deck';
@@ -101,22 +101,13 @@ const fixed = (v: number) => (): number => v;
 
 // ── Dice primitives (§4.2 / §4.7) — the self-reinforcing status loop ─────────
 
-describe('Spec 25 §4.2 — rollCombatDice', () => {
-    it('rolls COMBAT_DICE_COUNT dice with unique ids and bag-legal colors', () => {
-        // The 6-face bag is [heart, body, mind, wild, x, x]; index 3 → wild.
-        const dice = rollCombatDice(COMBAT_DICE_COUNT, fixed(3 / 6));
-        expect(dice).toHaveLength(COMBAT_DICE_COUNT);
-        expect(new Set(dice.map(d => d.id)).size).toBe(COMBAT_DICE_COUNT);
-        for (const d of dice) {
-            expect(d.color).toBe('wild');
-            expect(d.state).toBe('available');
-            expect(d.temporary).toBe(false);
-        }
-    });
-
-    it('rolls X faces as locked (the 2/6 blocked outcome)', () => {
-        const dice = rollCombatDice(2, fixed(5 / 6)); // index 5 → x
-        expect(dice.every(d => d.color === 'x' && d.state === 'locked')).toBe(true);
+describe('Spec 25 §4.2 — rollCombatDieColor (the legacy bag behind `reroll_spent`)', () => {
+    it('reads the 6-face bag [heart, body, mind, wild, x, x] by rng index', () => {
+        expect(rollCombatDieColor(fixed(0))).toBe('heart');
+        expect(rollCombatDieColor(fixed(3 / 6))).toBe('wild');
+        expect(rollCombatDieColor(fixed(5 / 6))).toBe('x');
+        // rng()=1 clamps to the last face rather than indexing past the bag.
+        expect(rollCombatDieColor(fixed(1))).toBe('x');
     });
 });
 

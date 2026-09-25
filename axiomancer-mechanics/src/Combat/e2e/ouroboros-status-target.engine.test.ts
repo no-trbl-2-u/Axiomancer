@@ -81,18 +81,19 @@ function stateFor(cardId: string, overrides: Partial<CombatEncounterState> = {})
 
 function playPaid(state: CombatEncounterState, uid = 'under-test'): { events: CombatEvent[]; after: CombatEncounterState } {
     mockSequentialRng(0.5); // neutral d20, no fumble/crit
-    const { state: after, events } = playCombatCard(state, { uid }, true);
+    // Spec 33: a PAID play must name its powering die — the fixture's wild die.
+    const { state: after, events } = playCombatCard(state, { uid }, true, 'fx-die');
     return { events, after };
 }
 
-/** A no-status play (e.g. `qa-turnabout`) does not "meaningfully land", so it
- *  does not refresh the drafted die per the combo-chain rule. Re-drafting
- *  between chained test plays stands in for the next turn's real draft — the
- *  point under test is `lastSpellCardId`/replay targeting, not chain upkeep. */
-function redraft(state: CombatEncounterState): CombatEncounterState {
+/** Each PAID play spends the wild powering die (spec 33 — no drafted-die
+ *  combo refresh). Re-readying it between chained test plays stands in for
+ *  the next turn's fresh tray — the point under test is `lastSpellCardId`/
+ *  replay targeting, not dice upkeep. */
+function readyDie(state: CombatEncounterState): CombatEncounterState {
     return {
         ...state,
-        dice: state.dice.map(d => (d.id === state.draftedDieId ? { ...d, state: 'available' as const } : d)),
+        dice: state.dice.map(d => (d.id === 'fx-die' ? { ...d, state: 'available' as const } : d)),
     };
 }
 
@@ -107,7 +108,7 @@ describe('A no-status play never overwrites lastSpellCardId', () => {
         expect(firstResult.after.enemy.effects.some(e => e.effectId === 'debuff_creeping_doom')).toBe(true);
 
         const second: CombatEncounterState = {
-            ...firstResult.after,
+            ...readyDie(firstResult.after),
             hand: [{ uid: 'under-test-2', cardId: 'qa-turnabout' }],
         };
         const secondResult = playPaid(second, 'under-test-2');
@@ -125,7 +126,7 @@ describe('A second status-landing play still updates lastSpellCardId (regression
         expect(firstResult.after.lastSpellCardId).toBe('the-vig');
 
         const second: CombatEncounterState = {
-            ...firstResult.after,
+            ...readyDie(firstResult.after),
             hand: [{ uid: 'under-test-2', cardId: 'spoiled-poultice' }],
         };
         const secondResult = playPaid(second, 'under-test-2');
@@ -142,16 +143,15 @@ describe('End-to-end: open-every-grave replays the last STATUS-landing spell acr
         expect(firstResult.after.lastSpellCardId).toBe('the-vig');
 
         const second: CombatEncounterState = {
-            ...firstResult.after,
+            ...readyDie(firstResult.after),
             hand: [{ uid: 'under-test-2', cardId: 'qa-turnabout' }],
         };
         const secondResult = playPaid(second, 'under-test-2');
         expect(secondResult.after.lastSpellCardId).toBe('the-vig'); // still pinned
 
-        // qa-turnabout landed no status, so the combo-chain refresh did not
-        // fire (see `redraft`'s doc comment) — redraft before the 3rd play.
+        // Ready the spent die before the 3rd play (see `readyDie`).
         const third: CombatEncounterState = {
-            ...redraft(secondResult.after),
+            ...readyDie(secondResult.after),
             hand: [{ uid: 'under-test-3', cardId: 'open-every-grave' }],
         };
         const thirdResult = playPaid(third, 'under-test-3');

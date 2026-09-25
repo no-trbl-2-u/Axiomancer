@@ -137,8 +137,7 @@ are covered by Playwright playthroughs against the exported web build:
 - `npm run e2e:hazard` — `scripts/hazard-e2e.mjs`: both hazard routes,
   drag gestures, the no-re-cast dice doctrine.
 - `npm run e2e:combat`, `e2e:encounters`, `e2e:exploration-roundtrip`,
-  `e2e:upgradeable-dice`, `e2e:combat-round` — the other `scripts/*-e2e.mjs`
-  journeys.
+  `e2e:combat-round` — the other `scripts/*-e2e.mjs` journeys.
 - `npm run e2e:minigames` — all of the above, sharing one `expo export`.
 
 They are deterministic (seeds pinned through the `__AXM_*` dev hooks)

@@ -180,8 +180,9 @@ function assertMechanic(
 
 /** Plays `cardId`'s PAID face from a fresh rich fixture and runs the full
  *  kind-aware assertion set (no fizzles, combatEffects landed, mechanics
- *  delivered). `dieId` defaults to the drafted wild die. */
-function assertPaidFaceEffective(cardId: string, dieId?: string): void {
+ *  delivered). `dieId` defaults to the fixture's WILD tray die (spec 33 —
+ *  a PAID line must name its powering die). */
+function assertPaidFaceEffective(cardId: string, dieId = 'fx-die'): void {
     mockSequentialRng(0.5);
     const card = getCardById(cardId);
     expect(card, cardId).toBeDefined();
@@ -269,7 +270,7 @@ describe('conjured Haunts — playable, one-use on play (both faces) and on scra
     function conjureCinder(): { state: CombatEncounterState; cjUid: string } {
         mockSequentialRng(0.5);
         const start = fixtureWithHand([{ uid: 'sprite', cardId: 'foundry-sprite' }]);
-        const { state, events } = playCombatCard(start, { uid: 'sprite' }, true);
+        const { state, events } = playCombatCard(start, { uid: 'sprite' }, true, 'fx-die');
         expect(findEvent(events, 'effect-fizzled'), 'sprite fizzled').toBeUndefined();
         const entry = state.hand.find(h => h.cardId === 'ht-cinder');
         expect(entry, 'conjured Cinder missing from hand').toBeDefined();
@@ -279,14 +280,13 @@ describe('conjured Haunts — playable, one-use on play (both faces) and on scra
 
     it('PAID face: the conjured Cinder lands its ember, then leaves the combat entirely', () => {
         const { state, cjUid } = conjureCinder();
-        // Re-arm the tray (the Sprite play spent the drafted die): a fresh
-        // drafted WILD die, exactly as a new turn's draft would provide.
+        // Re-arm the tray (the Sprite play spent the fixture's die): a fresh
+        // WILD mana-face die, exactly as a new turn's roll would provide.
         const armed: CombatEncounterState = {
             ...state,
-            dice: [{ id: 'fx-die-2', color: 'wild', state: 'available', temporary: false }],
-            draftedDieId: 'fx-die-2',
+            dice: [{ id: 'fx-die-2', color: 'wild', state: 'available', temporary: false, face: 'mana' }],
         };
-        const { state: after, events } = playCombatCard(armed, { uid: cjUid }, true);
+        const { state: after, events } = playCombatCard(armed, { uid: cjUid }, true, 'fx-die-2');
         expect(findEvent(events, 'effect-fizzled'), 'cinder fizzled').toBeUndefined();
         const ember = after.enemy.effects.find(e => e.effectId === 'debuff_kindling_ember');
         expect(ember, 'ember did not land').toBeDefined();
@@ -339,7 +339,7 @@ describe('conjured Haunts — playable, one-use on play (both faces) and on scra
     it('Corollary conjures a Minor Charge whose FREE face cashes the tally and vanishes', () => {
         mockSequentialRng(0.5);
         const start = fixtureWithHand([{ uid: 'corollary', cardId: 'corollary' }]);
-        const first = playCombatCard(start, { uid: 'corollary' }, true);
+        const first = playCombatCard(start, { uid: 'corollary' }, true, 'fx-die');
         expect(findEvent(first.events, 'effect-fizzled')).toBeUndefined();
         expect(first.state.premises ?? 0).toBe((start.premises ?? 0) + 1);
         const entry = first.state.hand.find(h => h.cardId === 'ht-minor-charge');

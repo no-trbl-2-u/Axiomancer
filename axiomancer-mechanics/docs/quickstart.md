@@ -51,7 +51,7 @@ tabs:
 |---|---|
 | **Character** | View items, allocate stat points (Phase 29), learn cards (Phase 30) |
 | **Map** | Walk available nodes, resolve MapEvents (`resolveMapEvent`), see discovered / consumed nodes |
-| **Combat** | Hazard-Pattern Combat via the `combat` subcommand (`npm run combat`): draft a stance die, play cards, resolve the threat phase |
+| **Combat** | Hazard-Pattern Combat via the `combat` subcommand (`npm run combat`): power cards with the round's four dice, resolve the threat phase |
 | **Save / Load** | Persistence via the configured `PersistenceAdapter` (default: file slot via `--save-file`) |
 | **DEV** | Spawn arbitrary enemies for testing (`debugSpawn`); useful for combat / loot validation |
 | **Quit** | Exit cleanly; the engine emits a final `cli:exit` event |
@@ -108,8 +108,8 @@ the full inventory + exit expectations.
 
 1. Enter combat: `store.startCombat(enemy)` (or `Encounter` for
    multi-enemy; length-1 today).
-2. Each turn (Hazard-Pattern Combat): draft a stance die, play cards
-   from hand (`playCombatCard`), then resolve the enemy's telegraphed
+2. Each turn (Hazard-Pattern Combat): play cards from hand
+   (`playCombatCard`, each PAID line powered by one of the round's dice), then resolve the enemy's telegraphed
    threat phase (`resolveThreatPhase`).
 3. **Victory path** — when `enemy.health <= 0`, `endCombat()` reports
    `outcome: 'victory'`, grants full XP + the weighted loot roll.

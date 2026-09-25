@@ -27,7 +27,7 @@ import { deepClone } from '../../Utils';
 import { mockSequentialRng } from '../../test-utils/rng';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
-    resolveThreatPhase, draftStanceDie, selectCapitulationChoice,
+    resolveThreatPhase, selectCapitulationChoice,
 } from '../combat.engine';
 import {
     CONCEDE_PREMISES_BASE, CONCEDE_PREMISES_ELITE, CONCEDE_PREMISES_BOSS,
@@ -65,21 +65,23 @@ function makeEnemy(
     return e;
 }
 
+/** Spec 33 tray: every non-X die shows a MANA face (can power a paid line). */
 function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatEncounterState {
     const turn = state.turn || 1;
     const dice = colors.map((c, i) => ({
         id: `t${turn}-d${i}`, color: c,
         state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
+        face: c === 'x' ? ('miss' as const) : ('mana' as const),
     }));
     const floating = state.dice.filter(d => d.floating);
-    return { ...state, dice: [...dice, ...floating], draftedDieId: null, turn };
+    return { ...state, dice: [...dice, ...floating], turn };
 }
 
-function openAndDraft(player: Character, enemy: Enemy, deck: string[], die: CombatDieColor, seed = 7): CombatEncounterState {
+/** Opens the encounter with a known tray: `die` (powers paid plays) + a dead X. */
+function openWithDie(player: Character, enemy: Enemy, deck: string[], die: CombatDieColor, seed = 7): CombatEncounterState {
     let state = initializeCombatEncounter(player, enemy, deck, seed);
     state = rollEncounterDice(state).state;
     state = setDice(state, [die, 'x']);
-    state = draftStanceDie(state, state.dice[0].id).state;
     return state;
 }
 
@@ -104,10 +106,10 @@ describe('CONDEMN Premises scale with enemy difficulty (item 1a)', () => {
 
     function declared(enemy: Enemy): CombatEncounterState {
         mockSequentialRng(0.05);
-        const state = openAndDraft(
+        const state = openWithDie(
             makePlayer([CLOSER, OPENER]), enemy,
             [CLOSER, OPENER, OPENER, OPENER, OPENER], 'heart');
-        const res = playFromHand(state, CLOSER);
+        const res = playFromHand(state, CLOSER, true, state.dice[0].id);
         expect(res.events.some(e => e.kind === 'peroration-declared')).toBe(true);
         return res.state;
     }

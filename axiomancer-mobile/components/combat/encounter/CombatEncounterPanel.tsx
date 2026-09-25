@@ -32,8 +32,8 @@ import Svg, { Circle, Defs, Line, Polygon, RadialGradient, Stop } from 'react-na
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
-    startTurn, endTurn, draftStanceDie, discardCombatCard, playSignatureSkill, crackGlyph, strikeAdd,
-    tapFateDie, getPendingDotTotal, getFloatingDiceColors,
+    startTurn, endTurn, discardCombatCard, playSignatureSkill, crackGlyph, strikeAdd,
+    getFloatingDiceColors,
     selectEncounterMercyChoice, selectCapitulationChoice, buildCombatSummary,
     getLogger,
     type CombatEncounterState, type CombatOutcome, type Character, type Enemy, type CombatEvent,
@@ -52,7 +52,7 @@ import { currentCombatTutorialStep } from '@/components/combat/encounter/combat-
 import { Image } from '@/lib/platform/image';
 import { getEncounterEnemyArt } from '@/assets/images/enemies';
 import {
-    INTENT_ICONS, buildCombatViewModel, resolveApplyRouting, rewardCardVMs, selectEnemyActionCard, STANCE_COLORS,
+    INTENT_ICONS, buildCombatViewModel, rewardCardVMs, selectEnemyActionCard, STANCE_COLORS,
     selectCombatLogHistory, COMBAT_LOG_TOGGLE_TEXT, COMBAT_LOG_TOGGLE_A11Y, COMBAT_LOG_CLOSE_A11Y,
     type CombatCardVM, type CombatEffectChipVM, type CombatSealVM, type CombatAddVM, type CombatSignatureVM, type EnemyActionCardVM,
 } from '@/state/presenters/combat-encounter.engine';
@@ -454,9 +454,8 @@ export function CombatEncounterPanel({
     const live = state ?? initial;
     const vm = useMemo(() => buildCombatViewModel(live), [live]);
 
-    // ── momentum wheel (Phase 31 — engine-native; see combat.engine.ts's
-    // `advanceMomentumWheel`) — `vm.momentum` is read straight off engine
-    // state, no panel-owned wheel state or grant logic left here. ──
+    // ── momentum chain (spec 33 §3 — engine-native) — `vm.momentumV2` is read
+    // straight off engine state; the panel owns only the how-it-works popup. ──
     const [momentumInfoOpen, setMomentumInfoOpen] = useState(false);
 
     // Playtest fix 2026-09-04 — the persistent combat log. `topInset` mirrors
@@ -549,25 +548,11 @@ export function CombatEncounterPanel({
     }, []);
     const onUnstage = useCallback((uid: string) => unstageUid(uid), [unstageUid]);
     // APPLY one staged card (hazard model — the die is OPTIONAL). `power` true →
-    // draft the dragged die (unless one is already drafted, the combo case) + power
-    // the card (bottom action); `power` false → the FREE base action (top action,
-    // no die). One commit; the card leaves staging.
+    // the dragged die powers the card (bottom action); `power` false → the FREE
+    // base action (top action, no die). One commit; the card leaves staging.
     // Fate Engine P1 R3, recut 2026-07-18 (owner) — the spare/bank toggle chip
     // is GONE from the tray: the spare die always burns for +1◆ (the default).
     // The Reserve still fills through cards (KINDLE / bank_spent_die).
-    // R4 — the universal fate tap: advance the strongest enemy DoT when one is
-    // ticking, else bank +1 Conviction. Once per turn (engine-gated).
-    const onFateTap = useCallback((dieId: string) => {
-        apply((s) => {
-            const choice = getPendingDotTotal(s.enemy, s.round).total > 0 ? 'dot-tick' as const : 'conviction' as const;
-            const t = tapFateDie(s, dieId, choice);
-            fxRef.current = t.events;
-            return t.state;
-        });
-        setFxSeq((n) => n + 1);
-    }, [apply]);
-    // THE STAKE (Phase 31/EA-7) is retired everywhere (owner call 2026-07-18)
-    // — no wager wiring; the board no longer renders the chip on any surface.
     // Per-play choices threaded to `playCombatCard`: WS7.2 `chosenX` (the
     // X-cost stepper's pick) and phase 28 `reprisalCardId` (the REPRISE
     // songbook discard-pile pick — omitted/skipped falls back to the engine's
@@ -575,31 +560,23 @@ export function CombatEncounterPanel({
     const onApply = useCallback((uid: string, dieId: string | null, power: boolean, choices?: { chosenX?: number; reprisalCardId?: string }) => {
         if (resolvingRef.current) return; // WI-3 — a drag must not land mid-resolution
         apply((s) => {
-            let ns = s;
-            // Fate Engine P1 R8 — the dragged die is HONORED: a banked Reserve die
-            // (or, for fate cards, a dead X die) powers the play directly; a fresh
-            // tray die drafts first (bank-or-burn applies to the spare die).
-            // Spec 32 v3 §5 — a Reserve / fate-X / GHOST die is its own power
-            // source (explicit dieId, never drafted); a fresh tray die drafts
-            // first. Routing extracted to `resolveApplyRouting` (tested).
-            const routing = resolveApplyRouting(s, dieId);
-            if (power && routing.draftFirst && dieId) {
-                ns = draftStanceDie(ns, dieId, { bankUnpicked: false }).state;
-            }
+            // Spec 33 — every dropped die (fresh tray face, Reserve, or GHOST)
+            // is its OWN power source and is forwarded as the explicit `dieId`:
+            // the engine's `playBottomAction` REQUIRES one (no dieId fizzles
+            // "choose a die to power this card").
             // WS7.2 chosenX + phase 28 reprisalCardId ride through to the
             // engine (which clamps X to [min, affordable] and validates the
             // reprisal pick against the live discard pile). Phase 31 — the
             // engine's `playCombatCard` also advances the momentum wheel and
             // grants its die internally now; the panel no longer does either.
             const t = playCombatCard(
-                ns, { uid }, power, routing.explicitDieId, undefined,
+                s, { uid }, power, dieId ?? undefined, undefined,
                 choices && (choices.chosenX !== undefined || choices.reprisalCardId !== undefined)
                     ? choices
                     : undefined,
             );
             fxRef.current = t.events;
-            ns = t.state;
-            return ns;
+            return t.state;
         });
         setFxSeq((n) => n + 1);
         unstageUid(uid);
@@ -657,13 +634,11 @@ export function CombatEncounterPanel({
         resolvingRef.current = true;
         setResolving(true);
         apply((s) => {
-            // Fate Engine P1 R2 — close the turn BEFORE the phase resolves: an
-            // unspent (still-available, non-X) drafted die BANKS to the Reserve
-            // when a slot is free, else burns for Conviction (`endTurn`,
-            // combat.engine.ts). The panel used to skip straight to
-            // `resolveThreatPhase`, whose boundary just WIPES the tray — the
-            // sim path (`ensureDraftForCard`) always ran `endTurn`, so mobile
-            // silently lost the banked die the engine's R2 promises.
+            // Spec 33 §6 — close the turn BEFORE the phase resolves: ONE unspent
+            // mana/special tray die BANKS to the Reserve when a slot is free
+            // (`endTurn`, combat.engine.ts). The panel used to skip straight to
+            // `resolveThreatPhase`, whose boundary just WIPES the tray, so
+            // mobile silently lost the banked die the engine promises.
             // END-TURN BREADCRUMBS. The owner's repeat crash report is "the
             // app closes when I end my turn", and it is a NATIVE process
             // death (EAS preview APK) that no web harness reproduces — so
@@ -777,7 +752,6 @@ export function CombatEncounterPanel({
     }, []);
     const onPlayerInspect = useCallback(() => setPilgrimOpen(true), []);
     const onMomentumInfo = useCallback(() => setMomentumInfoOpen(true), []);
-    const momentum = vm.momentum;
 
     // Ghost stays MOUNTED once the first drag begins (opacity-gated by dragShown):
     // remounting the face + image on every drag begin cost a mount + decode while
@@ -819,10 +793,8 @@ export function CombatEncounterPanel({
                     onAdd={onAdd}
                     onSignatureInfo={setSigInfo}
                     onPlayerInspect={onPlayerInspect}
-                    momentum={momentum}
                     onMomentumInfo={onMomentumInfo}
                     fx={fx}
-                    onFateTap={onFateTap}
                     onReprisalNeeded={onReprisalNeeded}
                     onHudLayout={setHudBottom}
                     region={region}

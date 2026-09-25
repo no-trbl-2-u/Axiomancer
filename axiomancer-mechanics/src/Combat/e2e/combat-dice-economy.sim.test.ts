@@ -1,8 +1,8 @@
 /**
- * Hermetic sim e2e — spec 33 (Upgradeable Dice) D3 economy gates, FLAG-ON.
+ * Hermetic sim e2e — spec 33 (Upgradeable Dice) D3 economy gates.
  *
  * Pins the D3 witness (`simulateUpgradeableEconomy` +`measureDiceMath`, driven
- * through the real engine + `policyPlayPhase`'s spec-33 branch). Two tiers,
+ * through the real engine + `upgradeablePlayPhase`). Two tiers,
  * matching the report's two-witness split:
  *
  *   1. DICE-MATH gates (authoritative): the face tables (§1) measured by a
@@ -20,24 +20,17 @@
  * carries Press Fate), so the suite now pins the sink being ACTIVE.
  *
  * D7 RATIFICATION (2026-07-18, plan/tuning/2026-07-18-d7-ratification.md): the
- * dice-math gates below are the ratified, stable numbers (the win-curve bands
- * are NOT ratified — flag-on misses early ~80 by −15 and depresses
- * statusEngagement ~9pts, so the flag stays OFF and no win-band is asserted).
- * The `spec 33 D7` block ratifies the realized ◆-income ENVELOPE and pins the
- * two flag-not-ready canaries — the inactive sink (F3) and the widened STAKE
- * gap — so the suite goes red the moment the flag becomes flippable and D7 must
- * be re-run.
+ * dice-math gates below are the ratified, stable numbers (no win-band is
+ * asserted). The `spec 33 D7` block ratifies the realized ◆-income ENVELOPE.
+ * The flag itself — and the flag-off STAKE-gap comparison arm — were deleted
+ * in the D7 flag collapse (2026-09-25).
  */
 
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 import {
     measureDiceMath, simulateUpgradeableEconomy,
 } from '../combat.upgradeable-economy.sim';
-import { isUpgradeableDiceEnabled, setUpgradeableDice } from '../combat.upgradeable-dice';
-
-// The witness toggles the flag internally and restores it; belt-and-suspenders.
-afterEach(() => setUpgradeableDice(false));
 
 describe('spec 33 D3 — dice-math gates (authoritative face-table witness)', () => {
     const dm = measureDiceMath(120000, 4242);
@@ -62,13 +55,9 @@ describe('spec 33 D3 — dice-math gates (authoritative face-table witness)', ()
         expect(dm.grossSpecialIncomePerRound).toBeGreaterThanOrEqual(1.25);
         expect(dm.grossSpecialIncomePerRound).toBeLessThanOrEqual(1.42);
     });
-
-    it('leaves the flag OFF (no leak into the flag-off suite)', () => {
-        expect(isUpgradeableDiceEnabled()).toBe(false);
-    });
 });
 
-describe('spec 33 D3 — realized-play invariants (flag-on matrix)', () => {
+describe('spec 33 D3 — realized-play invariants', () => {
     // A small, fast slice — invariants hold for any config.
     const result = simulateUpgradeableEconomy({
         presets: ['threadbare', 'pilgrim', 'apostate'],
@@ -77,10 +66,9 @@ describe('spec 33 D3 — realized-play invariants (flag-on matrix)', () => {
     });
     const p = result.pooled;
 
-    it('the matrix ran real rounds and left the flag off', () => {
+    it('the matrix ran real rounds', () => {
         expect(p.rounds).toBeGreaterThan(50);
         expect(p.encounters).toBe(30);
-        expect(isUpgradeableDiceEnabled()).toBe(false);
     });
 
     it('special spend-rate never exceeds 1 (can\'t realize more ◆ than rolled)', () => {
@@ -150,7 +138,7 @@ describe('spec 33 D3 — realized-play invariants (flag-on matrix)', () => {
     });
 });
 
-describe('spec 33 D7 — ratified economy envelope + flag-not-ready canaries', () => {
+describe('spec 33 D7 — ratified economy envelope', () => {
     // The D7 witness config: the full preset roster over the three graded
     // stages, seeds 1-8 (enough that the F1 RNG-skew has converged — the
     // realized income reads 1.15 at 5 seeds, 1.48 at 8, trending to the
@@ -184,32 +172,5 @@ describe('spec 33 D7 — ratified economy envelope + flag-not-ready canaries', (
     //    sink's activity instead of its absence.
     it('F3 drained: the ◆ sink (Press Fate) is ACTIVE from the starter loadout', () => {
         expect(p.pressFatePerRound).toBeGreaterThan(0);
-    });
-
-    it('STAKE-gap: the clock gap INVERTED once THE PATH reached the shipped roll', () => {
-        // HISTORY. This assertion used to read `flagOn > flagOff` — flag-on
-        // fights ran LONGER (5.38 vs 4.83, +11.5%) because STAKE retired its
-        // sink and clock and Press Fate at 0.060 casts/round could not close
-        // the gap. Its comment predicted a flip "when a real escalation-
-        // pressure replacement lands."
-        //
-        // It flipped for a different reason (2026-09-03). Wiring THE PATH's
-        // two dice axes into the spec-33 roll is worth far more under the flag
-        // than off it, because spec 33 RETIRED THE DRAFT (`draftStanceDie`
-        // no-ops) — every usable die powers a card. So a honed die and an
-        // act-reward die each buy a PAID PLAY flag-on, while flag-off they only
-        // buy colour selection and banked ◆ under roll-N-draft-one. Flag-on
-        // fights got shorter: re-measured 3.17 vs 3.75 (-15%).
-        //
-        // Pinned in the NEW direction because a re-flip is now a real bug
-        // signal: it would mean the axes stopped reaching the shipped roll.
-        expect(result.stakeGap.flagOnAvgRounds).toBeLessThan(result.stakeGap.flagOffAvgRounds);
-        // Structural floor — both models must still fight real rounds.
-        expect(result.stakeGap.flagOnAvgRounds).toBeGreaterThan(1);
-        expect(result.stakeGap.flagOffAvgRounds).toBeGreaterThan(1);
-    });
-
-    it('leaves the flag OFF (no leak; the flag is not flipped by D7)', () => {
-        expect(isUpgradeableDiceEnabled()).toBe(false);
     });
 });

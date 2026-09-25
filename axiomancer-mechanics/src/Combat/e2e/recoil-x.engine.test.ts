@@ -25,7 +25,7 @@ import { deepClone } from '../../Utils';
 import { mockSequentialRng } from '../../test-utils/rng';
 import type { ActiveEffect } from '../../Effects/types';
 import {
-    initializeCombatEncounter, rollEncounterDice, draftStanceDie, playCombatCard,
+    initializeCombatEncounter, rollEncounterDice, playCombatCard,
     handCards, recoilXRange,
 } from '../combat.engine';
 import { COMBAT_SIM_POLICIES } from '../combat.sim-policies';
@@ -54,31 +54,29 @@ function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind' = 'heart', effe
     return e;
 }
 
-/** Forces this turn's draft pool to known colors (deterministic reads). */
+/** Forces this turn's tray to known colors, every die on its mana face. */
 function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatEncounterState {
     const turn = state.turn || 1;
     const dice = colors.map((c, i) => ({
-        id: `t${turn}-d${i}`, color: c,
-        state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
+        id: `t${turn}-d${i}`, color: c, state: 'available' as const, temporary: false, face: 'mana' as const,
     }));
-    return { ...state, dice, draftedDieId: null, turn };
+    return { ...state, dice, turn };
 }
 
-/** Opens phase-play, forces the pool, and drafts a HEART die (Blank Indenture
- *  is a heart card vs a heart foe → neutral read, no intensity skew). */
-function openAndDraft(player: Character, enemy: Enemy, seed = 7): CombatEncounterState {
+/** Opens phase-play and forces a single HEART mana die into the tray — the
+ *  die every PAID play names (spec 33: a paid line must choose its die; the
+ *  color law admits heart for this heart card). */
+function openWithHeartDie(player: Character, enemy: Enemy, seed = 7): CombatEncounterState {
     const deck = [VEIN, VEIN, VEIN, VEIN, VEIN];
     let state = initializeCombatEncounter(player, enemy, deck, seed);
     state = rollEncounterDice(state).state;
-    state = setDice(state, ['heart', 'x']);
-    state = draftStanceDie(state, state.dice[0].id).state;
-    return state;
+    return setDice(state, ['heart']);
 }
 
 function playVein(state: CombatEncounterState, chosenX?: number): CombatTransition {
     const uid = state.hand.find(h => h.cardId === VEIN)!.uid;
     return playCombatCard(
-        state, { uid }, true, undefined, undefined,
+        state, { uid }, true, state.dice[0].id, undefined,
         chosenX !== undefined ? { chosenX } : undefined,
     );
 }
@@ -103,7 +101,7 @@ function lcg(seed: number): () => number {
 describe('RECOIL X — the engine clamps X and scales the POISON payoff', () => {
     it('absent chosenX plays the printed minimum (RECOIL 6 → POISON i6)', () => {
         mockSequentialRng(0.05);
-        const state = openAndDraft(makePlayer([VEIN]), makeEnemy(400));
+        const state = openWithHeartDie(makePlayer([VEIN]), makeEnemy(400));
         const hpBefore = state.player.health;
         const res = playVein(state);
         expect(recoilPaid(res)).toBe(MIN_X);
@@ -113,7 +111,7 @@ describe('RECOIL X — the engine clamps X and scales the POISON payoff', () => 
 
     it('clamps a chosenX below the printed minimum up to it', () => {
         mockSequentialRng(0.05);
-        const state = openAndDraft(makePlayer([VEIN]), makeEnemy(400));
+        const state = openWithHeartDie(makePlayer([VEIN]), makeEnemy(400));
         const res = playVein(state, 1);
         expect(recoilPaid(res)).toBe(MIN_X);
         expect(poisonIntensity(res)).toBe(Math.ceil(MIN_X * POISON_PER_X)); // 6
@@ -121,7 +119,7 @@ describe('RECOIL X — the engine clamps X and scales the POISON payoff', () => 
 
     it('clamps a greedy chosenX to affordability (live HP − 1) — the play never self-kills', () => {
         mockSequentialRng(0.05);
-        let state = openAndDraft(makePlayer([VEIN]), makeEnemy(400));
+        let state = openWithHeartDie(makePlayer([VEIN]), makeEnemy(400));
         state = { ...state, player: { ...state.player, health: 10 } };
         expect(recoilXRange(state, { id: VEIN })).toEqual({ min: MIN_X, max: 9 });
         const res = playVein(state, 50);
@@ -132,7 +130,7 @@ describe('RECOIL X — the engine clamps X and scales the POISON payoff', () => 
 
     it('POISON scales with the paid X: ceil(X × poisonPerX) intensity', () => {
         mockSequentialRng(0.05);
-        const state = openAndDraft(makePlayer([VEIN]), makeEnemy(400));
+        const state = openWithHeartDie(makePlayer([VEIN]), makeEnemy(400));
         const hpBefore = state.player.health;
         const res = playVein(state, 9);
         expect(recoilPaid(res)).toBe(9);
@@ -144,7 +142,7 @@ describe('RECOIL X — the engine clamps X and scales the POISON payoff', () => 
 
     it('the landed stack still obeys the engine-global intensity ceiling', () => {
         mockSequentialRng(0.05);
-        const state = openAndDraft(makePlayer([VEIN]), makeEnemy(400));
+        const state = openWithHeartDie(makePlayer([VEIN]), makeEnemy(400));
         const hpBefore = state.player.health;
         // Chosen above the ceiling on purpose, so this exercises the clamp
         // rather than a value that happens to sit under it. (It was 20 when
@@ -171,7 +169,7 @@ describe('chosen-X non-degeneracy across sim policies (the WS7.2 gate)', () => {
             const paid: number[] = [];
             for (let seed = 1; seed <= 5; seed++) {
                 mockSequentialRng(0.05);
-                const state = openAndDraft(makePlayer([VEIN]), makeEnemy(400), seed);
+                const state = openWithHeartDie(makePlayer([VEIN]), makeEnemy(400), seed);
                 const entry = handCards(state).find(h => h.card.id === VEIN)!;
                 const range = recoilXRange(state, entry.card)!;
                 const x = policy.chooseX

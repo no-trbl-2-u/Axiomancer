@@ -217,7 +217,7 @@ jobs:
           COMBAT_ROUND_E2E_SEEDS: '16,8'
 
       # AUDIT.md [3.5] "Verify gate is blind to the Playwright journeys":
-      # these three scripts had no CI trigger at all — not in `verify`, not
+      # these scripts had no CI trigger at all — not in `verify`, not
       # as a workflow step — so a regression on any of them could reach
       # main with a fully green build. `ci-e2e-scope.mjs` has no suite of
       # its own for any of them; each rides the existing scope output that
@@ -231,9 +231,3 @@ jobs:
         run: npm run e2e:exploration-roundtrip --workspace axiomancer-mobile
         env:
           ROUNDTRIP_E2E_REUSE_EXPORT: '1'
-
-      - name: Upgradeable-dice flag-on tray (Spec 33)
-        if: steps.scope.outputs.combat == 'true'
-        run: npm run e2e:upgradeable-dice --workspace axiomancer-mobile
-        env:
-          UPGRADEABLE_DICE_E2E_REUSE_EXPORT: '1'

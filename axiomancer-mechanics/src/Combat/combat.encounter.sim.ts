@@ -7,30 +7,27 @@
  * HP; control hinders the enemy's turn), strikes are the weak baseline. Every
  * run is reproducible from its seed.
  *
- * The default `greedy` policy models a read-playing human: each turn it rolls
- * 3 dice, drafts the one that wins the hidden-stance read (preferring a
- * color-match), powers the best STATUS card (favouring a NEW distinct status
- * for the combo refresh), rides the combo loop, banks Conviction and spends it
- * on damaging Signatures, and Befriends a low-HP foe to take the mercy/spare
- * path. The full roster (dot-weaver, control-lock, aggro-brute, turtle, chaos,
- * mercy-seeker) lives in `combat.sim-policies.ts`; `greedy`/`blind` keep
- * bit-identical behavior to the pre-roster sim.
+ * Every policy plays the spec-33 four-die round (`upgradeablePlayPhase`):
+ * each live die powers one paid line of its colour (gold = wild), momentum-
+ * steered toward the chain successor, Press Fate on a whiffed round, banked
+ * Conviction spent on Signatures, FREE tops drain the rest of the hand. The
+ * policy supplies only the card/signature ranking. The full roster
+ * (dot-weaver, control-lock, aggro-brute, turtle, chaos, mercy-seeker) lives in
+ * `combat.sim-policies.ts`.
  */
 
 import type { Character } from '../Character/types';
 import type { Enemy } from '../Enemy/types';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
-    resolveThreatPhase, startTurn, draftStanceDie, endTurn, chooseDraft, revealedCurrentStance,
-    playSignatureSkill, getDraftedDie, handCards, selectMercyChoice, selectCapitulationChoice, getSignatureSkill,
-    tapFateDie, recoilXRange, placeStake, crackGlyph,
+    resolveThreatPhase, startTurn, endTurn,
+    playSignatureSkill, handCards, selectMercyChoice, selectCapitulationChoice, getSignatureSkill,
+    recoilXRange, crackGlyph,
     // Phase 102 (SUMMON) — the witness has to be TAUGHT the brood; a policy
     // that cannot see `strikeAdd` measures a fight no player would play.
     strikeAdd, STRIKE_ADD_COST, projectIncomingThreat,
 } from './combat.engine';
-import { RESERVE_MAX } from './combat.dice';
-import { isUpgradeableDiceEnabled, MOMENTUM_CHAIN_ORDER } from './combat.upgradeable-dice';
-import { getPendingDotTotal } from './effects';
+import { MOMENTUM_CHAIN_ORDER } from './combat.upgradeable-dice';
 import { getRng } from '../Utils/rng';
 import type {
     CombatAttributionRow, CombatCard, CombatEncounterState, CombatEvent, CombatOutcome,
@@ -46,14 +43,9 @@ import {
 import { scoreCombatObjective, type CombatQualityScore } from './combat.objective';
 
 /**
- * `greedy` — a competent omniscient witness: drafts using the enemy's hidden
- * stance for the sharpest balance signal. `blind` — a realistic-player witness:
- * drafts using ONLY player-visible info (the stance is unknown until revealed via
- * the read or a Scout), so it can't pre-seek advantage. Tune player-facing
- * difficulty against `blind`; tune ceilings against `greedy`. The wider roster
- * (dot-weaver, control-lock, aggro-brute, turtle, chaos, mercy-seeker) is
- * defined in `combat.sim-policies.ts`; the id type is re-exported here so
- * existing importers keep working.
+ * The policy roster (greedy, blind, dot-weaver, control-lock, aggro-brute,
+ * turtle, chaos, mercy-seeker, ...) is defined in `combat.sim-policies.ts`; the
+ * id type is re-exported here so existing importers keep working.
  */
 export type { CombatSimPolicyId } from './combat.sim-policies';
 
@@ -201,15 +193,8 @@ export interface CombatSimRunOptions {
     focusCardIds?: readonly string[];
 }
 
-const currentPhase = (s: CombatEncounterState) =>
-    s.threatPhases[Math.min(s.currentPhaseIndex, s.threatPhases.length - 1)];
-
 /** Dominates every policy score band so a focused card always ranks first. */
 const FOCUS_CARD_BOOST = 1e18;
-
-/** Phase 31 (EA-7) — the wager size an informed sim policy risks per stake;
- *  the cheapest tier (a colored float, no pip bonus). */
-const STAKE_SIM_AMOUNT = 2;
 
 /**
  * The best card in hand to POWER now, per the active policy's `rankCard`
@@ -368,20 +353,19 @@ export interface PlayPhaseResult {
 }
 
 /**
- * Spec 33 (Upgradeable Dice, flag-on) — the four-die play phase. No draft: the
+ * Plays a single threat phase to a stop — spec 33's four-die round under the
+ * ROUND-TURN LAW (Gate 0, 2026-07-10: ONE tray roll per phase). No draft: the
  * four fixed dice (+ Reserve + surge floats) each power one paid line of their
  * color (gold = wild), momentum-steered toward the chain successor. A whiffed
- * round Presses Fate (a `reroll`-kind signature, repriced to 1◆ flag-on) when
+ * round Presses Fate (a `reroll`-kind signature, 1◆) when
  * it can afford it. FREE tops drain the leftover hand, then `endTurn` banks the
  * best unspent die to Reserve. A pure measurement instrument — legible, not an
  * AI: it reuses the policy's `rankCard`/`bestSignature`, adding only the
  * momentum-steer ordering and the whiff-reroll, both spec-mandated levers.
  *
- * Phase 51 — also the ONLY driver that reads `policy.crackAt` (GLYPHS): a
- * witness with the field set cracks its highest-charge eligible Seal once
- * per loop pass, alongside the existing signature-cast check. The flag-off
- * legacy `policyPlayPhase` body never reads it — see that function's own
- * comment for why it stays byte-identical.
+ * Phase 51 — reads `policy.crackAt` (GLYPHS): a witness with the field set
+ * cracks its highest-charge eligible Seal once per loop pass, alongside the
+ * existing signature-cast check.
  */
 export function upgradeablePlayPhase(
     state: CombatEncounterState,
@@ -413,7 +397,7 @@ export function upgradeablePlayPhase(
     }
 
     // Press Fate (§4): a full-miss round rerolls its misses once for 1◆ — cast
-    // the player's `reroll` signature (repriced flag-on). Skipped silently when
+    // the player's `reroll` signature. Skipped silently when
     // the loadout carries none (a starter-signature gap D4/D5 fills) or the
     // player can't afford it.
     const fixedUsable = () => working.dice.some(d => !d.floating && d.state === 'available' && (d.face === 'special' || d.face === 'mana'));
@@ -548,176 +532,9 @@ export function upgradeablePlayPhase(
 }
 
 /**
- * Plays a single threat phase to a stop under the ROUND-TURN LAW (Gate 0,
- * 2026-07-10): ONE tray roll (`startTurn`) per phase. The turn's powered plays
- * run off the drafted die (riding the combo refresh), then the Reserve, then
- * the floating pool — the law caps TRAY ROLLS, not card plays — after which
- * the policy drains the leftover hand through the FREE tops and ends the turn.
- * The guard counters are kept but never bind on legal play: the old
- * `endTurn → startTurn` Conviction farm is gone.
- *
- * Spec 33 (Upgradeable Dice): when the flag is on, delegates to
- * `upgradeablePlayPhase` (no draft; four fixed dice). The flag-OFF body below is
- * byte-identical to the pre-spec-33 driver — the pinned sim e2e depend on it.
- */
-function policyPlayPhase(
-    state: CombatEncounterState,
-    policy: CombatSimPolicy,
-    rng: () => number,
-    usage: Record<string, CombatCardUsage>,
-    lines: Record<string, CombatCardLineTelemetry>,
-    focusIds?: ReadonlySet<string>,
-): PlayPhaseResult {
-    if (isUpgradeableDiceEnabled()) return upgradeablePlayPhase(state, policy, rng, usage, lines, focusIds);
-    let working = state;
-    let plays = 0;
-    let statusPlays = 0;
-    let decisionPoints = 0;
-    let liveOptions = 0;
-    let guard = 0;
-    const fizzledUids = new Set<string>();
-
-    // WS7.2 chosen X-costs — the policy's temperament picks X inside the
-    // engine's own clamp range; policies without a `chooseX` play the printed
-    // minimum. Undefined for cards without a chosen-X mechanic.
-    const chosenXFor = (card: CombatCard): { chosenX: number } | undefined => {
-        const range = recoilXRange(working, card);
-        if (!range) return undefined;
-        const x = policy.chooseX ? policy.chooseX(working, card, range, rng) : range.min;
-        return { chosenX: x };
-    };
-
-    // WS1.1 — plays the FREE (top) line and records its line telemetry. A top
-    // play can itself fizzle (e.g. a free enchant whose permanent is already
-    // standing); it still counts a play, exactly as before the telemetry.
-    const playFreeTop = (uid: string, card: CombatCard): void => {
-        const resT = playCombatCard(working, { uid }, false);
-        const row = lineRow(lines, card.id);
-        row.freeHpSwing += playHpSwing(working, resT.state, resT.events);
-        if (resT.events.some(e => e.kind === 'effect-fizzled')) row.fizzles++;
-        working = resT.state;
-        plays++;
-        bumpUsage(usage, card, 'top');
-    };
-
-    // ── The ONE legal tray roll + stance draft for this phase ────────────────
-    if (working.dice.length === 0 && working.draftedDieId === null && !working.turnTakenThisPhase) {
-        working = startTurn(working).state;
-        if (working.phase !== 'phase-play') return { state: working, plays, statusPlays, decisionPoints, liveOptions };
-    }
-    if (working.draftedDieId === null && working.dice.some(d => !d.floating)) {
-        const want = selectCard(working, policy, rng, fizzledUids, focusIds);
-        // Blind play drafts off only what the player can see: the stance is
-        // `null` until revealed (via the read or a Scout), so chooseDraft can't
-        // pre-seek advantage — it color-matches like a real player on turn one.
-        const enemyStance = policy.blind ? revealedCurrentStance(working) : currentPhase(working).enemyStance;
-        const pick = chooseDraft(working.dice, want?.card.stance ?? 'wild', enemyStance);
-        if (pick) {
-            // Fate Engine P1 — BANK the unpicked die when the Reserve has room
-            // and Conviction isn't starved (pips beat a flat +1◆).
-            const bankUnpicked = (working.reserve ?? []).length < RESERVE_MAX && working.conviction >= 2;
-            working = draftStanceDie(working, pick, { bankUnpicked }).state;
-        }
-        // Fate Engine P1 — the universal FATE TAP: a dead X die in the tray
-        // advances the strongest enemy DoT (or banks +1 Conviction).
-        const xDie = working.dice.find(d => d.color === 'x' && d.state !== 'spent' && d.id !== working.draftedDieId);
-        if (xDie && working.fateTappedTurn !== working.turn) {
-            const choice = getPendingDotTotal(working.enemy, working.round).total > 0 ? 'dot-tick' as const : 'conviction' as const;
-            working = tapFateDie(working, xDie.id, choice).state;
-        }
-    }
-
-    // Phase 31 (EA-7) — THE STAKE: an informed witness (never omniscient —
-    // only when the CURRENT phase's stance is already REVEALED) risks a
-    // small wager once it has Conviction to spare above its signature
-    // threshold, so an informed read pays without starving the signature
-    // economy. `blind` never carries `stakesWhenInformed` — that's the
-    // measured gap THE STAKE is meant to open.
-    if (policy.stakesWhenInformed && !working.stake) {
-        const known = revealedCurrentStance(working);
-        if (known && working.conviction >= policy.convictionThreshold + STAKE_SIM_AMOUNT) {
-            working = placeStake(working, known, STAKE_SIM_AMOUNT).state;
-        }
-    }
-
-    // ── Powered plays WITHIN the one turn ────────────────────────────────────
-    // Power sources in order: the drafted die while it lives (the combo
-    // refresh keeps it alive across NEW statuses), then the Reserve (oldest =
-    // ripest first), then the floating pool (the multi-float turn: ALL floats
-    // are spendable in this one round).
-    while (working.phase === 'phase-play' && guard < 60) {
-        guard++;
-        if (working.finalOutcome || working.mercyChoiceActive) break;
-
-        // Spend banked Conviction on a damaging Signature when flush.
-        if (working.conviction >= policy.convictionThreshold) {
-            const sigId = bestSignature(working, policy, rng);
-            if (sigId) {
-                const cast = playSignatureSkill(working, sigId);
-                if (cast.state !== working) { working = cast.state; if (working.finalOutcome) break; continue; }
-            }
-        }
-
-        const drafted = getDraftedDie(working);
-        const sources: { dieId?: string; color: string }[] = [];
-        if (drafted && drafted.state === 'available' && drafted.color !== 'x') {
-            sources.push({ color: drafted.color });
-        }
-        for (const banked of working.reserve ?? []) sources.push({ dieId: banked.id, color: banked.color });
-        for (const f of working.dice) {
-            if (f.floating && f.state === 'available') sources.push({ dieId: f.id, color: f.color });
-        }
-        if (sources.length === 0) break; // powered plays exhausted — wind down
-
-        let attempted = false;
-        for (const src of sources) {
-            const want = selectCard(working, policy, rng, fizzledUids, focusIds, src.color);
-            if (!want) continue;
-            attempted = true;
-            // Phase 43 — decision width, sampled where the driver actually chose.
-            decisionPoints++;
-            liveOptions += countLiveOptions(working, fizzledUids, src.color);
-            const res = playCombatCard(working, { uid: want.uid }, true, src.dieId, undefined, chosenXFor(want.card));
-            if (res.events.some(e => e.kind === 'effect-fizzled')) {
-                // Token-gated with no banked token — skip it (the wind-down
-                // drain below still gets its free top).
-                lineRow(lines, want.card.id).fizzles++;
-                fizzledUids.add(want.uid);
-                break; // re-enter the loop with the fizzle excluded
-            }
-            lineRow(lines, want.card.id).paidHpSwing += playHpSwing(working, res.state, res.events);
-            working = res.state;
-            plays++;
-            const landed = res.events.some(e => e.kind === 'effect-landed' && e.target === 'enemy');
-            if (landed) statusPlays++;
-            bumpUsage(usage, want.card, 'bottom', landed);
-            break;
-        }
-        if (!attempted) break; // no card matches any live die color — wind down
-    }
-
-    // ── Wind-down: the turn's dice are exhausted or colorless — drain the
-    // leftover hand through the FREE tops (legal, dieless; retreat stays in
-    // hand), then end the turn. The engine's draw-fresh site discards what
-    // remains at the phase boundary.
-    let drain = 0;
-    while (working.phase === 'phase-play' && !working.finalOutcome && !working.mercyChoiceActive && drain < 30) {
-        drain++;
-        const top = handCards(working).find(c => c.card.verbClass !== 'retreat');
-        if (!top) break;
-        playFreeTop(top.uid, top.card);
-    }
-    if (working.phase === 'phase-play' && !working.finalOutcome && working.draftedDieId !== null) {
-        working = endTurn(working).state;
-    }
-
-    return { state: working, plays, statusPlays, decisionPoints, liveOptions };
-}
-
-/**
  * Plays ONE threat phase for an external sim harness (the spec-33 D3 economy
- * witness), routed through the same `policyPlayPhase` the matrix uses so the
- * flag-on branch is exactly what gets measured. `usage`/`lines` collect
+ * witness), routed through the same `upgradeablePlayPhase` the matrix uses so
+ * the harness measures exactly what the matrix plays. `usage`/`lines` collect
  * telemetry the caller may discard.
  */
 export function playSimPhase(
@@ -729,7 +546,7 @@ export function playSimPhase(
 ): PlayPhaseResult {
     const policy = COMBAT_SIM_POLICIES[policyId];
     if (!policy) throw new Error(`Unknown combat sim policy '${String(policyId)}'`);
-    return policyPlayPhase(state, policy, rng, usage, lines);
+    return upgradeablePlayPhase(state, policy, rng, usage, lines);
 }
 
 /** Runs a single seeded encounter and returns its outcome (+ per-card telemetry). */
@@ -747,12 +564,6 @@ export function runOneEncounter(
      *  transcript. A legal policy NEVER trips the law: pinned 0 by the
      *  turn-law e2e. */
     turnLawBlocked: number;
-    /** Phase 31 (EA-7) — THE STAKE: how many times this run wagered and how
-     *  many of those wagers won. Zero for every policy without
-     *  `stakesWhenInformed` (the `blind` baseline THE STAKE's win-rate gap is
-     *  measured against). */
-    stakesPlaced: number;
-    stakesWon: number;
     /** Phase 31 (EA-8/Gate 0 §4) — signature-cast counts by id, for the
      *  repricing pass's dominance measurement (signature damage isn't
      *  attributed per-card the way `attribution` is — cast-share is the
@@ -830,7 +641,7 @@ export function runOneEncounter(
         }
         if (state.phase === 'phase-play') {
             enemyHpSamples.push(state.enemy.health);
-            const r = policyPlayPhase(state, policyObj, rng, cardUsage, cardLineTelemetry, focusIds);
+            const r = upgradeablePlayPhase(state, policyObj, rng, cardUsage, cardLineTelemetry, focusIds);
             state = r.state;
             plays += r.plays;
             statusPlays += r.statusPlays;
@@ -942,8 +753,6 @@ export function runOneEncounter(
         statusPlays,
         convictionSpent,
         turnLawBlocked: state.log.filter(ev => ev.kind === 'turn-law-blocked').length,
-        stakesPlaced: state.log.filter(ev => ev.kind === 'stake-placed').length,
-        stakesWon: state.log.filter(ev => ev.kind === 'stake-won').length,
         signatureCastsByKind: state.log.reduce<Record<string, number>>((acc, ev) => {
             if (ev.kind === 'signature-cast') acc[ev.signatureId] = (acc[ev.signatureId] ?? 0) + 1;
             return acc;

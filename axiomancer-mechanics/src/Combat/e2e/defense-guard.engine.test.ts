@@ -7,7 +7,7 @@
  *
  *   - the card adapter classifies a `guard` card as the `defend` verb class
  *     (0 pressure — it's a tempo/survival tool, not a pressure source);
- *   - playing one (POWER) grants read-scaled GUARD onto the state;
+ *   - playing one (POWER) grants its printed GUARD (+ colour match) onto the state;
  *   - GUARD absorbs the next threat — a defending player takes strictly LESS HP
  *     than the same player who played an offensive card instead;
  *   - the three authored defense cards are real + reachable via COMBAT_REWARD_POOL.
@@ -30,7 +30,7 @@ import { getCardById } from '../../Cards/cards.library';
 import { lookupEffect } from '../../Effects';
 import {
     initializeCombatEncounter, resolveCombatPhase, rollEncounterDice,
-    draftStanceDie, playCombatCard,
+    playCombatCard,
 } from '../combat.engine';
 import { classifyVerbClass, toCombatCard } from '../combat.cards';
 import { COMBAT_REWARD_POOL } from '../combat.rewards';
@@ -65,14 +65,21 @@ function makeEnemy(hp: number, stance: 'heart' | 'body' | 'mind' = 'mind'): Enem
     return e;
 }
 
-/** Forces this turn's draft pool to known colors (deterministic reads). */
+/** Forces this turn's tray to known colors, every die showing a mana face
+ *  (spec 33 — a PAID play names its powering die; no draft). */
 function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatEncounterState {
     const turn = state.turn || 1;
     const dice = colors.map((c, i) => ({
         id: `t${turn}-d${i}`, color: c,
         state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
+        face: 'mana' as const,
     }));
-    return { ...state, dice, draftedDieId: null, turn };
+    return { ...state, dice, turn };
+}
+
+/** Opens phase-play on a known BODY + MIND tray. */
+function openPhase(state: CombatEncounterState): CombatEncounterState {
+    return setDice(rollEncounterDice(state).state, ['body', 'mind']);
 }
 
 // ── Card adapter (§6) ────────────────────────────────────────────────────────
@@ -106,21 +113,18 @@ describe('Spec 26b — defense cards classify as `defend`', () => {
 // ── Granting GUARD (§4) ──────────────────────────────────────────────────────
 
 describe('Spec 26b — playing a defense card grants GUARD', () => {
-    it('a POWERED brace scales the shield by the stance read + color match', () => {
+    it('a POWERED brace grants its printed GUARD plus the color match', () => {
         mockSequentialRng(0.05);
-        // BODY die vs a MIND-stance enemy = advantage read (1.5×), then the
-        // colour match pays +25% of the read-scaled figure (min +2).
-        // GUARD 10 (frostbitten-palisade) → round(10 × 1.5) = 15, +round(15 × 0.25) = +4 → 19.
-        let state = initializeCombatEncounter(makePlayer([BRACE]), makeEnemy(80, 'mind'), [BRACE, BRACE, BRACE, BRACE, BRACE], 7);
-        state = rollEncounterDice(state).state;   // open phase-play (draw hand + roll pool)
-        state = setDice(state, ['body', 'mind']);
-        state = draftStanceDie(state, state.dice[0].id).state;
+        // Spec 33 retired the hidden stance read — every play lands printed
+        // (1.0×); a BODY die powering a BODY card still pays the colour match
+        // (+25%, min +2). GUARD 10 (frostbitten-palisade) + round(10 × 0.25) = +3 → 13.
+        const state = openPhase(initializeCombatEncounter(makePlayer([BRACE]), makeEnemy(80, 'mind'), [BRACE, BRACE, BRACE, BRACE, BRACE], 7));
 
         const entry = state.hand.find(h => h.cardId === BRACE);
         expect(entry, 'brace should be in hand').toBeDefined();
-        const res = playCombatCard(state, { uid: entry!.uid }, true);
+        const res = playCombatCard(state, { uid: entry!.uid }, true, state.dice[0].id);
 
-        expect(res.state.guard).toBe(19);
+        expect(res.state.guard).toBe(13);
         // Defense deals no HP to the enemy (status stays the win path).
         expect(res.state.enemy.health).toBe(80);
     });
@@ -134,17 +138,18 @@ describe('Spec 26b — GUARD absorbs the next enemy threat', () => {
         const enemyHp = 120;
         const seed = 11;
 
+        // Both cards are BODY — each names the tray's BODY die (spec 33).
         mockSequentialRng(0.05);
         const control = resolveCombatPhase(
-            initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(enemyHp, 'mind'), [DOT_BODY, DOT_BODY, DOT_BODY], seed),
-            [{ cardId: DOT_BODY, useBottom: true }],
+            openPhase(initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(enemyHp, 'mind'), [DOT_BODY, DOT_BODY, DOT_BODY], seed)),
+            [{ cardId: DOT_BODY, useBottom: true, dieId: 't1-d0' }],
         );
         const controlLoss = 200 - control.state.player.health;
 
         mockSequentialRng(0.05);
         const defended = resolveCombatPhase(
-            initializeCombatEncounter(makePlayer([BRACE]), makeEnemy(enemyHp, 'mind'), [BRACE, BRACE, BRACE], seed),
-            [{ cardId: BRACE, useBottom: true }],
+            openPhase(initializeCombatEncounter(makePlayer([BRACE]), makeEnemy(enemyHp, 'mind'), [BRACE, BRACE, BRACE], seed)),
+            [{ cardId: BRACE, useBottom: true, dieId: 't1-d0' }],
         );
         const defendedLoss = 200 - defended.state.player.health;
 

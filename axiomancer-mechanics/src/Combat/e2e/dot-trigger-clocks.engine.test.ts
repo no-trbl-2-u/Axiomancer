@@ -105,7 +105,8 @@ afterAll(() => { for (const e of SYNTHETICS) effectsLibrary.registry.delete(e.id
 const ae = (effectId: string, intensity: number, remainingDuration: number, appliedAt = 0): ActiveEffect =>
     ({ effectId, intensity, remainingDuration, appliedAt, tier: 1 });
 
-/** Clean fixture with the given effects staged on the ENEMY. */
+/** Clean fixture with the given effects staged on the ENEMY. PAID plays
+ *  name its wild die `fx-die` (spec 33: no implicit powering die). */
 function stateWithEnemyEffects(effects: ActiveEffect[], hand: { uid: string; cardId: string }[] = []): CombatEncounterState {
     const s = buildFixtureState({ clean: true });
     return { ...s, hand, enemy: { ...s.enemy, effects } };
@@ -235,7 +236,7 @@ describe("engine call site — 'card-played' (player-side plays only, ratified)"
             [ae('ws3x_card_played', 2, 4)],
             [{ uid: 't1', cardId: 'spoiled-poultice' }],
         );
-        const { state: after, events } = playCombatCard(before, { uid: 't1' }, true);
+        const { state: after, events } = playCombatCard(before, { uid: 't1' }, true, 'fx-die');
 
         // Everything the foe lost beyond the card's own hit IS the clock tick:
         // spoiled-poultice's fresh POISON stack is clock-capped out of this
@@ -254,7 +255,7 @@ describe("engine call site — 'card-played' (player-side plays only, ratified)"
             [ae('ws3x_cp_decay', 1, -1)],
             [{ uid: 't1', cardId: 'spoiled-poultice' }],
         );
-        const { state: after, events } = playCombatCard(before, { uid: 't1' }, true);
+        const { state: after, events } = playCombatCard(before, { uid: 't1' }, true, 'fx-die');
 
         expect(before.enemy.health - after.enemy.health).toBe(directDamageToEnemy(events) + 5);
         expect(after.enemy.effects.some(e => e.effectId === 'ws3x_cp_decay')).toBe(false);
@@ -329,7 +330,7 @@ describe("engine call site — 'payoff' (rupture / consume_affliction / reap_all
             [ae('ws3x_payoff', 1, 3)],
             [{ uid: 't1', cardId: 'communion-of-the-worm' }],
         );
-        const { state: after, events } = playCombatCard(before, { uid: 't1' }, true);
+        const { state: after, events } = playCombatCard(before, { uid: 't1' }, true, 'fx-die');
 
         const ticks = findEvents(events, 'dot-tick').filter(e => e.effectId === 'ws3x_payoff');
         expect(ticks).toEqual([{ kind: 'dot-tick', effectId: 'ws3x_payoff', label: 'ws3x_payoff', amount: 4, target: 'enemy' }]);
@@ -519,7 +520,7 @@ describe('legacy parity — an untagged DoT keeps exactly the old behavior', () 
             [ae('ws3x_legacy', 2, 4)],
             [{ uid: 't1', cardId: 'spoiled-poultice' }],
         );
-        const { state: after, events } = playCombatCard(before, { uid: 't1' }, true);
+        const { state: after, events } = playCombatCard(before, { uid: 't1' }, true, 'fx-die');
         // The card's own hit lands; the untagged DoT contributes NOTHING.
         expect(before.enemy.health - after.enemy.health).toBe(directDamageToEnemy(events));
         expect(findEvents(events, 'dot-tick')).toEqual([]);

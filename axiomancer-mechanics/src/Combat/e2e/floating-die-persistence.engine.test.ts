@@ -7,8 +7,8 @@
  *   fight 1: forge a float (a sandbox fixture mirroring the retired
  *   ex-nihilo — see the FORGE registration below) → combat ends →
  *   getFloatingDiceColors → Character.floatingDice (the save-back) →
- *   fight 2: the float materializes in the opening tray → spend it (bypassing
- *   the draft) → gone forever → fight 3 opens with an empty pool.
+ *   fight 2: the float materializes in the opening tray → spend it (named as
+ *   the powering die) → gone forever → fight 3 opens with an empty pool.
  *
  * Plus the seam under the real auto-runner (`runHazardCombatAutoEncounter` ×2
  * — the map-run shape): the pool never grows without a forge card in the deck
@@ -26,7 +26,7 @@ import { GraveLarva } from '../../Enemy/enemy.library';
 import { deepClone } from '../../Utils';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import {
-    initializeCombatEncounter, rollEncounterDice, playCombatCard, draftStanceDie,
+    initializeCombatEncounter, rollEncounterDice, playCombatCard,
     getFloatingDiceColors,
 } from '../combat.engine';
 import { FLOATING_DICE_CAP } from '../combat.dice';
@@ -69,15 +69,17 @@ function makeEnemy(hp: number): Enemy {
     return e;
 }
 
-/** Forces this turn's draft pool to known colors (deterministic; keeps floats). */
+/** Forces this turn's tray to known colors (deterministic; keeps floats).
+ *  Spec 33: every non-X die shows a MANA face; an X die is a dead miss. */
 function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatEncounterState {
     const turn = state.turn || 1;
     const dice = colors.map((c, i) => ({
         id: `t${turn}-d${i}`, color: c,
         state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
+        face: c === 'x' ? ('miss' as const) : ('mana' as const),
     }));
     const floating = state.dice.filter(d => d.floating);
-    return { ...state, dice: [...dice, ...floating], draftedDieId: null, turn };
+    return { ...state, dice: [...dice, ...floating], turn };
 }
 
 function playFromHand(state: CombatEncounterState, cardId: string, useBottom = true, dieId?: string) {
@@ -93,8 +95,7 @@ describe('GHOST DICE — cross-combat persistence (the save-back seam, full loop
         let s1 = initializeCombatEncounter(player1, makeEnemy(80), [FORGE, DOT, DOT, DOT, DOT], 7);
         s1 = rollEncounterDice(s1).state;
         s1 = setDice(s1, ['mind', 'x']);
-        s1 = draftStanceDie(s1, s1.dice[0].id).state;
-        const forged = playFromHand(s1, FORGE, true);
+        const forged = playFromHand(s1, FORGE, true, s1.dice[0].id);
         const floated = forged.events.find(e => e.kind === 'die-floated') as { dieId: string; color: string } | undefined;
         expect(floated).toBeDefined();
         expect(floated!.color).toBe('wild');
@@ -114,9 +115,8 @@ describe('GHOST DICE — cross-combat persistence (the save-back seam, full loop
         expect(tray!.state).toBe('available');
         expect(tray!.color).toBe('wild');
 
-        // Spend it WITHOUT drafting (floats bypass the 1-die rule); a wild
-        // float is color-legal on the body DoT.
-        expect(s2.draftedDieId).toBeNull();
+        // Spend it by naming it as the powering die; a wild float is
+        // color-legal on the body DoT.
         const spent = playFromHand(s2, DOT, true, tray!.id);
         expect(spent.events.some(e => e.kind === 'effect-fizzled')).toBe(false);
         expect(spent.events.some(e => e.kind === 'floating-die-spent')).toBe(true);

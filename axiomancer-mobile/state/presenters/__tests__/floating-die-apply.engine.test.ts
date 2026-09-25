@@ -1,27 +1,25 @@
 /**
  * Dice-law rework (2026-07-09) — floating dice apply end-to-end.
  *
- * Pins the exact drag-drop commit path the panel runs (`resolveApplyRouting`
- * → `playCombatCard`) against the REAL engine, guarding the three floating-die
- * laws the UI once broke:
- *   1. a floating die is routed as an EXPLICIT power source (never drafted —
- *      the old code drafted it, the engine refused, and the play fizzled
- *      "draft a stance die first": the snap-back bug);
- *   2. floating dice bypass the one-die-per-round draft — several can power
- *      plays in the same turn, before or after the stance draft;
- *   3. a spent floating die is GONE FOREVER (leaves `floatingDice`) and floats
- *      never bank tokens.
+ * Pins the exact commit the panel runs on APPLY — `playCombatCard(s, { uid },
+ * true, dieId)` with the dropped die forwarded as the EXPLICIT power source —
+ * against the REAL engine, guarding the floating-die laws the UI once broke:
+ *   1. a floating die commits as an explicit power source (the old code
+ *      drafted it, the engine refused, and the play fizzled: the snap-back
+ *      bug);
+ *   2. several dice — floats and a tray die — power plays in the same turn;
+ *   3. a spent floating die is GONE FOREVER (leaves `floatingDice`).
  * Plus the color law: a floating die must match the card's color (wild floats
- * match everything).
+ * match everything), and a fresh tray die commits a paid play (the D6d
+ * "die spent, PLEA 0, card bounces" regression).
  */
 
 import {
-    createCharacter, initializeCombatEncounter, rollEncounterDice, playCombatCard, draftStanceDie,
-    setUpgradeableDice,
+    createCharacter, initializeCombatEncounter, rollEncounterDice, playCombatCard,
 } from '@mechanics';
 import type { CombatEncounterState, CombatManaDie } from '@mechanics';
 
-import { resolveApplyRouting, buildCombatViewModel } from '../combat-encounter.engine';
+import { buildCombatViewModel } from '../combat-encounter.engine';
 import { createMockEncounterEnemy } from '../../mocks/combat.mock';
 
 const DECK = ['spoiled-poultice', 'spoiled-poultice', 'chilblain-watch', 'chilblain-watch', 'first-spadeful', 'first-spadeful'];
@@ -40,30 +38,13 @@ function findHand(state: CombatEncounterState, cardId: string): string {
     return entry.uid;
 }
 
-describe('floating-die APPLY routing (the snap-back bug)', () => {
-    it('routes a floating die as an explicit power source, never a draft', () => {
-        const s = openEncounter(['wild']);
-        const float = s.dice.find(d => d.floating)!;
-        expect(float).toBeDefined();
-        const routing = resolveApplyRouting(s, float.id);
-        expect(routing.draftFirst).toBe(false);
-        expect(routing.explicitDieId).toBe(float.id);
-    });
-
-    it('routes a fresh tray die through the draft', () => {
-        const s = openEncounter([]);
-        const tray = s.dice.find(d => !d.floating && d.color !== 'x')!;
-        const routing = resolveApplyRouting(s, tray.id);
-        expect(routing.draftFirst).toBe(true);
-        expect(routing.explicitDieId).toBeUndefined();
-    });
-
+describe('floating-die APPLY (the snap-back bug)', () => {
     it('a wild floating die COMMITS a play (no fizzle) and is consumed forever', () => {
         const s = openEncounter(['wild']);
         const float = s.dice.find(d => d.floating)!;
+        expect(float).toBeDefined();
         const uid = findHand(s, 'spoiled-poultice');
-        const routing = resolveApplyRouting(s, float.id);
-        const res = playCombatCard(s, { uid }, true, routing.explicitDieId);
+        const res = playCombatCard(s, { uid }, true, float.id);
         expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(false);
         expect(res.events.some(e => e.kind === 'floating-die-spent')).toBe(true);
         // Gone from the tray AND the persistent pool — forever.
@@ -71,19 +52,23 @@ describe('floating-die APPLY routing (the snap-back bug)', () => {
         expect((res.state.floatingDice ?? []).some(d => d.id === float.id)).toBe(false);
     });
 
-    it('floating dice bypass the one-die law — two floats + the drafted die in ONE turn', () => {
+    it('several dice power plays in ONE turn — a tray die, then two floats', () => {
         let s = openEncounter(['wild', 'wild']);
         const floats = s.dice.filter(d => d.floating);
         expect(floats.length).toBe(2);
-        // Draft a stance die first (the one rolled die the round allows)...
-        const tray = s.dice.find(d => !d.floating && d.color !== 'x' && d.state === 'available');
-        if (tray) s = draftStanceDie(s, tray.id).state;
+        // A live WILD tray die powers the first play (colour-legal for any card)...
+        const trayIdx = s.dice.findIndex(d => !d.floating && d.state === 'available' && d.face !== 'miss');
+        expect(trayIdx).toBeGreaterThanOrEqual(0);
+        s = { ...s, dice: s.dice.map((d, i) => (i === trayIdx ? { ...d, color: 'wild' as const, face: 'mana' as const } : d)) };
+        const trayId = s.dice[trayIdx].id;
+        // (first-spadeful is skipped: its own effect needs a discard pile.)
+        const nextUid = () => s.hand.find(h => ['spoiled-poultice', 'chilblain-watch'].includes(h.cardId))!.uid;
+        let res = playCombatCard(s, { uid: nextUid() }, true, trayId);
+        expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(false);
+        s = res.state;
         // ...then BOTH floats still power plays in the same turn.
         for (const f of floats) {
-            const uid = s.hand.find(h => h.cardId === 'spoiled-poultice' || h.cardId === 'chilblain-watch' || h.cardId === 'first-spadeful')!.uid;
-            const routing = resolveApplyRouting(s, f.id);
-            expect(routing.explicitDieId).toBe(f.id);
-            const res = playCombatCard(s, { uid }, true, routing.explicitDieId);
+            res = playCombatCard(s, { uid: nextUid() }, true, f.id);
             expect(res.events.some(e => e.kind === 'floating-die-spent')).toBe(true);
             s = res.state;
         }
@@ -94,35 +79,26 @@ describe('floating-die APPLY routing (the snap-back bug)', () => {
         const s = openEncounter(['body']);
         const float = s.dice.find(d => d.floating)!;
         const uid = findHand(s, 'first-spadeful'); // mind spell
-        const res = playCombatCard(s, { uid }, true, resolveApplyRouting(s, float.id).explicitDieId);
+        const res = playCombatCard(s, { uid }, true, float.id);
         expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
         // The mismatch never consumes the float.
         expect((res.state.floatingDice ?? []).some(d => d.id === float.id)).toBe(true);
     });
 
-    it('the view-model tags floating dice so the tray keeps them draggable post-draft', () => {
+    it('the view-model tags floating dice so the tray can tell them from turn dice', () => {
         const s = openEncounter(['wild']);
         const vm = buildCombatViewModel(s);
         const float = vm.dice.find(d => d.floating);
         expect(float).toBeDefined();
     });
 
-    // The stuck-ghost / dead-drop bug (found live 2026-07-10): draggability
-    // flipped false the moment the die's OWN drag began, unmounting its
-    // GestureDetector mid-gesture — on web the pan died without onEnd, so the
-    // drop never resolved. `draggable` is now presenter-owned and depends only
-    // on engine state, never on live drag state.
-    // ── Flag-ON regression (D6d, the "die spent, PLEA 0, card bounces" bug) ──
-    // Under the Upgradeable-Dice model the DRAFT is retired: `draftStanceDie` is
-    // a no-op and the engine's flag-on `playBottomAction` REQUIRES an explicit
-    // `dieId` (undefined fizzles "choose a die"). The presenter used to route a
-    // fresh tray die draft-first (draftFirst=true, explicitDieId=undefined) — so
-    // the commit reached the engine with no die and fizzled while the tray die
-    // read spent + the card bounced. The fix: flag-on, ANY dropped die is an
-    // explicit power source.
-    describe('flag-ON tray-die APPLY routing (D6d PLEA-commit bug)', () => {
-        afterEach(() => setUpgradeableDice(false));
-
+    // ── D6d regression (the "die spent, PLEA 0, card bounces" bug) ──
+    // The engine's `playBottomAction` REQUIRES an explicit `dieId` (undefined
+    // fizzles "choose a die"). The presenter once routed a fresh tray die
+    // draft-first, so the commit reached the engine with no die and fizzled
+    // while the tray die read spent + the card bounced. The panel now forwards
+    // every dropped die as the explicit power source.
+    describe('tray-die APPLY (D6d PLEA-commit bug)', () => {
         function openHeartEncounter(): CombatEncounterState {
             const deck = ['thin-hymn', 'thin-hymn', 'chilblain-watch', 'chilblain-watch', 'first-spadeful', 'first-spadeful'];
             const player = createCharacter({ name: 'Hero', level: 3, baseStats: { heart: 8, body: 8, mind: 8 } });
@@ -132,22 +108,11 @@ describe('floating-die APPLY routing (the snap-back bug)', () => {
         }
         const heartMana = (): CombatManaDie => ({ id: 'u-heart', color: 'heart', face: 'mana', state: 'available', temporary: false });
 
-        it('routes a fresh tray die as an EXPLICIT power source (never draft-first)', () => {
-            setUpgradeableDice(true);
-            const s = openHeartEncounter();
-            s.dice = [heartMana()];
-            const routing = resolveApplyRouting(s, 'u-heart');
-            expect(routing.draftFirst).toBe(false);
-            expect(routing.explicitDieId).toBe('u-heart');
-        });
-
         it('a heart tray die COMMITS Soft Word paid — PLEA rises, die spends, card leaves hand, no fizzle', () => {
-            setUpgradeableDice(true);
             const s = openHeartEncounter();
             s.dice = [heartMana()];
             const uid = findHand(s, 'thin-hymn');
-            const routing = resolveApplyRouting(s, 'u-heart');
-            const res = playCombatCard(s, { uid }, true, routing.explicitDieId);
+            const res = playCombatCard(s, { uid }, true, 'u-heart');
             // card-played:1, fizzled:0 (the hermetic probe's exact signature).
             expect(res.events.some(e => e.kind === 'card-played')).toBe(true);
             expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(false);
@@ -157,22 +122,37 @@ describe('floating-die APPLY routing (the snap-back bug)', () => {
             expect(res.state.dice.find(d => d.id === 'u-heart')?.state).not.toBe('available');
             expect(res.state.hand.some(h => h.uid === uid)).toBe(false);
         });
+
+        it('a paid play with NO die fizzles — the panel must always forward the die', () => {
+            const s = openHeartEncounter();
+            s.dice = [heartMana()];
+            const uid = findHand(s, 'thin-hymn');
+            const res = playCombatCard(s, { uid }, true, undefined);
+            expect(res.events.some(e => e.kind === 'effect-fizzled')).toBe(true);
+            expect(res.state.dice.find(d => d.id === 'u-heart')?.state).toBe('available');
+        });
     });
 
-    it('draggable is presenter-computed: floats stay draggable AFTER the draft; turn dice do not', () => {
+    // The stuck-ghost / dead-drop bug (found live 2026-07-10): draggability
+    // flipped false the moment the die's OWN drag began, unmounting its
+    // GestureDetector mid-gesture — on web the pan died without onEnd, so the
+    // drop never resolved. `draggable` is presenter-owned and depends only on
+    // engine state, never on live drag state.
+    it('draggable is presenter-computed from engine state: live dice drag, spent dice do not', () => {
         let s = openEncounter(['wild']);
-        const preDraft = buildCombatViewModel(s);
-        const float = preDraft.dice.find(d => d.floating)!;
-        expect(float.draggable).toBe(true);
-        const tray = preDraft.dice.find(d => !d.floating && d.color !== 'x')!;
-        expect(tray.draggable).toBe(true);
+        const pre = buildCombatViewModel(s);
+        expect(pre.dice.find(d => d.floating)!.draggable).toBe(true);
+        const tray = s.dice.find(d => !d.floating && d.state === 'available' && d.face !== 'miss')!;
+        expect(pre.dice.find(d => d.id === tray.id)!.draggable).toBe(true);
 
-        // Draft a turn die → floats STILL draggable, undrafted turn dice not.
-        s = draftStanceDie(s, tray.id).state;
+        // Spend that tray die → it stops dragging; the float and the other
+        // live tray dice keep dragging (no draft locks the rest of the tray).
+        s = { ...s, dice: s.dice.map(d => (d.id === tray.id ? { ...d, state: 'spent' as const } : d)) };
         const post = buildCombatViewModel(s);
+        expect(post.dice.find(d => d.id === tray.id)!.draggable).toBe(false);
         expect(post.dice.find(d => d.floating)!.draggable).toBe(true);
-        for (const d of post.dice.filter(x => !x.floating && !x.reserve)) {
-            expect(d.draggable).toBe(false);
+        for (const d of post.dice.filter(x => !x.floating && !x.reserve && x.id !== tray.id)) {
+            expect(d.draggable).toBe(d.face !== 'miss' && !d.isX && !d.spent);
         }
     });
 });

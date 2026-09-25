@@ -6,17 +6,16 @@
  * status-engagement stats.
  *
  * Usage:
- *   npm run combat-sim                              # omniscient ('greedy') witness
- *   npm run combat-sim -- --blind                  # realistic-player witness (no hidden-stance peek)
+ *   npm run combat-sim                              # 'greedy' witness
+ *   npm run combat-sim -- --blind                  # 'blind' witness (identical play since D7)
  *   npm run combat-sim -- --enemy=KingOfRevenge    # one enemy only
  *   npm run combat-sim -- --loadout=slippery-slope,festering-argument,soft-word
  *   npm run combat-sim -- --runs=300 --seed=1 --blind
  *
- * `--blind`: the bot drafts using ONLY information a real player can currently see
- * — the enemy's stance is unknown until it's revealed (by the read, or a Scout
- * signature), so the bot can't pre-seek advantage on turn one. Use it to gauge the
- * difficulty a real player feels (the omniscient bot over-performs). `--greedy`
- * (default) keeps the hidden-stance peek for the sharpest balance ceiling.
+ * `--blind` selects the `blind` policy. Its hidden-stance difference (drafting
+ * off only revealed stances) died with the draft in the D7 flag collapse
+ * (2026-09-25); it now plays exactly like `greedy` and is kept so old commands
+ * still run.
  */
 
 import { Player } from '../Character/characters.mock';

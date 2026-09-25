@@ -101,7 +101,9 @@ function play(before: CombatEncounterState, paid: boolean): {
     after: CombatEncounterState; events: CombatEvent[];
 } {
     mockSequentialRng(0.5);
-    const { state: after, events } = playCombatCard(before, { uid: 'under-test' }, paid);
+    // A PAID line names its powering die (spec 33 — no implicit default):
+    // the fixture's single WILD tray die.
+    const { state: after, events } = playCombatCard(before, { uid: 'under-test' }, paid, paid ? 'fx-die' : undefined);
     expect(
         events.find(e => e.kind === 'effect-fizzled'),
         'the play fizzled',

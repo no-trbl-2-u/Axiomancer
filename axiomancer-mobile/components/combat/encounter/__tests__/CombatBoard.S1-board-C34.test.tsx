@@ -9,10 +9,10 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react-native';
-import { afterAll, afterEach, beforeAll, describe, expect, it, jest } from '@jest/globals';
+import { afterAll, beforeAll, describe, expect, it, jest } from '@jest/globals';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 
-import { initializeCombatEncounter, rollEncounterDice, setUpgradeableDice } from '@mechanics';
+import { initializeCombatEncounter, rollEncounterDice } from '@mechanics';
 import { CombatBoard, type DragController } from '@/components/combat/encounter/CombatBoard';
 import { buildCombatViewModel, type CombatViewModel } from '@/state/presenters/combat-encounter.engine';
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
@@ -31,7 +31,6 @@ beforeAll(() => {
 afterAll(() => {
     Object.defineProperty(RN, 'useWindowDimensions', { configurable: true, value: realUseWindowDimensions });
 });
-afterEach(() => setUpgradeableDice(false));
 
 const noopDrag = (): DragController =>
     ({ begin: () => undefined, end: () => undefined, active: null, x: { value: 0 }, y: { value: 0 } } as unknown as DragController);
@@ -41,11 +40,10 @@ const boardCallbacks = () => ({
     onSignature: jest.fn(), onEndPhase: jest.fn(), onInspect: jest.fn(),
 });
 
-/** Builds a flag-on view model, optionally with a stance already taken. */
-function flagOnVM(stance: 'heart' | 'body' | 'mind' | null): {
+/** Builds a view model, optionally with a stance already taken. */
+function stanceVM(stance: 'heart' | 'body' | 'mind' | null): {
     store: ReturnType<typeof withAllProviders>['store']; vm: CombatViewModel;
 } {
-    setUpgradeableDice(true);
     const { store } = withAllProviders(<></>);
     const base = store.getState().player;
     const player = { ...base, knownCards: CARDS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 129, maxHealth: 200 };
@@ -66,8 +64,8 @@ function renderBoard(vm: CombatViewModel, store: ReturnType<typeof withAllProvid
 
 describe('S1-board-C34 — the empty stance chip names the action that fills it', () => {
     it('the presenter hands the empty state an instruction, not just a state word', () => {
-        const { vm } = flagOnVM(null);
-        const chip = vm.playerStance!;
+        const { vm } = stanceVM(null);
+        const chip = vm.playerStance;
         expect(chip.label).toBe('NO STANCE');
         expect(chip.hint).toBeTruthy();
         // It must be an ACTION — a verb the player can carry out on this board.
@@ -75,13 +73,13 @@ describe('S1-board-C34 — the empty stance chip names the action that fills it'
     });
 
     it('a held stance drops the instruction — the value is the whole answer', () => {
-        const { vm } = flagOnVM('body');
-        expect(vm.playerStance!.label).toBe('BODY');
-        expect(vm.playerStance!.hint).toBeNull();
+        const { vm } = stanceVM('body');
+        expect(vm.playerStance.label).toBe('BODY');
+        expect(vm.playerStance.hint).toBeNull();
     });
 
     it('the board prints the instruction beside NO STANCE', () => {
-        const { store, vm } = flagOnVM(null);
+        const { store, vm } = stanceVM(null);
         renderBoard(vm, store);
         expect(screen.getByTestId('combat-player-stance')).toBeTruthy();
         const hint = screen.getByTestId('combat-player-stance-hint');
@@ -89,7 +87,7 @@ describe('S1-board-C34 — the empty stance chip names the action that fills it'
     });
 
     it('the board shows no instruction once a stance is held', () => {
-        const { store, vm } = flagOnVM('heart');
+        const { store, vm } = stanceVM('heart');
         renderBoard(vm, store);
         expect(screen.getByTestId('combat-player-stance')).toBeTruthy();
         expect(screen.queryByTestId('combat-player-stance-hint')).toBeNull();

@@ -19,10 +19,10 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { render, screen } from '@testing-library/react-native';
-import { afterAll, afterEach, beforeAll, describe, expect, it, jest } from '@jest/globals';
+import { afterAll, beforeAll, describe, expect, it, jest } from '@jest/globals';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 
-import { initializeCombatEncounter, rollEncounterDice, setUpgradeableDice } from '@mechanics';
+import { initializeCombatEncounter, rollEncounterDice } from '@mechanics';
 import {
     CombatBoard, compactFree, handFanLayout,
     HAND_CARD_W, HAND_FAN_LEFT, HAND_FAN_RIGHT, HAND_FAN_MIN_STEP,
@@ -48,7 +48,6 @@ beforeAll(() => {
 afterAll(() => {
     Object.defineProperty(RN, 'useWindowDimensions', { configurable: true, value: realUseWindowDimensions });
 });
-afterEach(() => setUpgradeableDice(false));
 
 const noopDrag = (): DragController =>
     ({ begin: () => undefined, end: () => undefined, active: null, x: { value: 0 }, y: { value: 0 } } as unknown as DragController);
@@ -80,11 +79,14 @@ function renderBoard(shape: (vm: CombatViewModel) => CombatViewModel = (v) => v)
     return vm;
 }
 
-/** An unspent DRAFTED die is what makes END print its consequence line — the
- *  one piece of board chrome that used to reach past the screen's right edge. */
-const withUnspentDraft = (vm: CombatViewModel): CombatViewModel => ({
+/** A DEAD TRAY (live dice, none of which can power any card in hand) is what
+ *  makes END print its consequence line — the one piece of board chrome that
+ *  used to reach past the screen's right edge. Every die reads HEART, every
+ *  card BODY: no colour-law pairing exists. */
+const withDeadTray = (vm: CombatViewModel): CombatViewModel => ({
     ...vm,
-    dice: vm.dice.map((d, i) => (i === 0 ? { ...d, drafted: true, spent: false, isX: false } : d)),
+    dice: vm.dice.map((d) => ({ ...d, color: 'heart', face: 'mana' as const, spent: false, isX: false, draggable: true })),
+    hand: vm.hand.map((c) => ({ ...c, stance: 'body' })),
 });
 
 const flat = (testID: string) => StyleSheet.flatten(screen.getByTestId(testID).props.style) as Record<string, unknown>;
@@ -150,7 +152,7 @@ describe('S1-board-C12 — nothing on the board runs past the viewport', () => {
     });
 
     it('the END consequence line is anchored inward, not off the right edge', () => {
-        renderBoard(withUnspentDraft);
+        renderBoard(withDeadTray);
         expect(screen.getByTestId('combat-end-consequence')).toBeTruthy();
         const wrap = flat('combat-end-consequence-wrap');
         // Anchored to the medallion's right edge: the box runs INTO the board.
@@ -164,20 +166,15 @@ describe('S1-board-C12 — nothing on the board runs past the viewport', () => {
 // ── C19: the tappable chip is the one that looks tappable ───────────────────
 
 describe('S1-board-C19 — the momentum chip and the stance chip read apart', () => {
-    function renderFlagOn(): void {
-        setUpgradeableDice(true);
-        renderBoard();
-    }
-
     it('the momentum chip is a button and carries a visible tap mark', () => {
-        renderFlagOn();
+        renderBoard();
         const chip = screen.getByTestId('combat-momentum-v2');
         expect(chip.props.accessibilityRole).toBe('button');
         expect(screen.getByTestId('combat-momentum-info-mark')).toBeTruthy();
     });
 
     it('the stance chip stays an inert readout and names itself', () => {
-        renderFlagOn();
+        renderBoard();
         const chip = screen.getByTestId('combat-player-stance');
         expect(chip.props.accessibilityRole).toBe('text');
         // Either it prints the canon word as its caption, or its value already

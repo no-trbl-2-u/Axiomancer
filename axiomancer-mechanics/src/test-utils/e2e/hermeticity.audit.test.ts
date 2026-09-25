@@ -118,8 +118,6 @@ describe('hermeticity guard: isolation (no disk / network / subprocess)', () => 
         'CLI/e2e/game.cli.route-audit.engine.test.ts',
         'CLI/e2e/cli.docs-examples.engine.test.ts',
         'CLI/e2e/cli.process-smoke.engine.test.ts',
-        // Public process contract for combat-playtest dice-model switches.
-        'Combat/e2e/playtest-dice-mode.sim.test.ts',
         'Game/persistence/node.adapter.test.ts',
         'test-utils/e2e/agent-vitest-reporter.engine.test.ts',
         'test-utils/e2e/hermeticity.audit.test.ts',
