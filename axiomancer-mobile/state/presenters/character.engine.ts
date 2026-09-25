@@ -2,8 +2,10 @@
  * Screen-level presenter for `app/(tabs)/character/index.tsx`.
  *
  * Implements `selectCharacterViewModel` from engine state (Spec 05).
- * Reads player stats, derived stats, save/test modifiers, active effects,
- * and equipment slots directly from `state.player`. Cards are deferred
+ * Reads base stats, active effects, and equipment slots directly from
+ * `state.player`. (The derived attack/defence, luck and save/test panels were
+ * deleted with the engine stats in TRIM THE FAT T2a — they were display-only
+ * numbers combat never read.) Cards are deferred
  * to engine Spec 04.
  *
  * VM is *data only* per Q5 — no colour tokens, no icons. The screen
@@ -22,7 +24,6 @@ import {
 } from '@mechanics';
 
 import { freezeViewModel } from './freeze';
-import { formatAveragedStat } from './stat-format';
 import { wornPerSlot, SLOT_CAPACITY, getSignatureSkill } from '@mechanics';
 import type { Equipment } from '@mechanics';
 
@@ -61,28 +62,6 @@ export interface BaseStatRow {
     label: string;
     /** Raw stat value. */
     value: number;
-}
-
-export interface DerivedStatRow {
-    /** Row label, e.g. `'PHYSICAL'`. */
-    label: string;
-    attack: number;
-    defense: number;
-    attackId: string;
-    defenseId: string;
-}
-
-export interface SaveOrTestRow {
-    /**
-     * Phase 74 follow-up walkthrough Tick 4 — kebab-case id used by
-     * the SELF tap-tooltip wrapper to look up `kind: 'derived'`
-     * content. One of: `'body-save' | 'mind-save' | 'heart-save' |
-     * 'body-test' | 'mind-test' | 'heart-test'`.
-     */
-    id: string;
-    label: string;
-    /** Already-formatted display string (e.g. `'14'` or `'+2'`). */
-    value: string;
 }
 
 export interface CharacterEffectRow {
@@ -178,17 +157,6 @@ export interface CharacterViewModel {
      */
     levelUpReady: boolean;
     base: readonly BaseStatRow[];
-    derived: readonly DerivedStatRow[];
-    /** Average of the three base stats — the engine's "luck" surface. */
-    luck: number;
-    /**
-     * `luck` formatted for display (FE-001). The raw average is a float
-     * (`(3+6+9)/3` is exact, `(5+5+8)/3` is not), and the SELF sheet prints
-     * it in a column of integer stats; `formatAveragedStat` caps it at one
-     * decimal so it reads as a stat rather than a rendering fault.
-     */
-    luckLabel: string;
-    saves: readonly SaveOrTestRow[];
     effects: readonly CharacterEffectRow[];
     /**
      * Visible placeholder rendered when `effects` is empty. Lowercase
@@ -237,8 +205,6 @@ export interface CharacterViewModel {
         level: string;
         experience: string;
         baseStats: string;
-        derivedStats: string;
-        saves: string;
         equipment: string;
         effects: string;
         /**
@@ -269,30 +235,6 @@ function buildBase(player: Character): readonly BaseStatRow[] {
         { stanceKey: 'heart', label: 'HEART', value: heart },
         { stanceKey: 'body', label: 'BODY', value: body },
         { stanceKey: 'mind', label: 'MIND', value: mind },
-    ];
-}
-
-function buildDerived(player: Character): readonly DerivedStatRow[] {
-    // derivedStats are guaranteed present after v1→v2 persistence migration
-    const d = player.derivedStats;
-    return [
-        { label: 'PHYSICAL', attack: d.physicalAttack, defense: d.physicalDefense, attackId: 'physicalAttack', defenseId: 'physicalDefense' },
-        { label: 'MENTAL',   attack: d.mentalAttack,   defense: d.mentalDefense,   attackId: 'mentalAttack',   defenseId: 'mentalDefense' },
-        { label: 'EMOTIONAL',attack: d.emotionalAttack, defense: d.emotionalDefense, attackId: 'emotionalAttack', defenseId: 'emotionalDefense' },
-    ];
-}
-
-function buildSaves(player: Character): readonly SaveOrTestRow[] {
-    // nonCombatStats are guaranteed present after v1→v2 persistence migration
-    const n = player.nonCombatStats;
-    const sign = (v: number) => (v >= 0 ? `+${v}` : `${v}`);
-    return [
-        { id: 'body-save',  label: 'Body Save',  value: String(n.physicalSave) },
-        { id: 'mind-save',  label: 'Mind Save',  value: String(n.mentalSave) },
-        { id: 'heart-save', label: 'Heart Save', value: String(n.emotionalSave) },
-        { id: 'body-test',  label: 'Body Test',  value: sign(n.physicalTest) },
-        { id: 'mind-test',  label: 'Mind Test',  value: sign(n.mentalTest) },
-        { id: 'heart-test', label: 'Heart Test', value: sign(n.emotionalTest) },
     ];
 }
 
@@ -451,9 +393,6 @@ export function graceBreakLegend(): string {
 
 export function selectCharacterViewModel(state: GameStore): CharacterViewModel {
     const player = state.player;
-    // derivedStats.luck is guaranteed present after v1→v2 persistence migration
-    const luck: number = player.derivedStats.luck;
-
     const alignment = buildAlignmentSlice(state);
     // Character-audit [2.5] fix 2026-05-22: lifted `buildEffects(player)`
     // to a single call. Pre-fix called it 3x (vm field + 2x a11y
@@ -472,10 +411,6 @@ export function selectCharacterViewModel(state: GameStore): CharacterViewModel {
         levelUpReady:
             (player.experience ?? 0) >= (player.experienceToNextLevel ?? Infinity),
         base: buildBase(player),
-        derived: buildDerived(player),
-        luck,
-        luckLabel: formatAveragedStat(luck),
-        saves: buildSaves(player),
         effects,
         emptyEffectsMessage: 'none at hand.',
         equipment: buildEquipment(player),
@@ -492,8 +427,6 @@ export function selectCharacterViewModel(state: GameStore): CharacterViewModel {
             level: `Level ${player.level}`,
             experience: `Experience: ${player.experience} of ${player.experienceToNextLevel}`,
             baseStats: 'Base statistics: Heart, Body, Mind',
-            derivedStats: 'Derived statistics: attack, card, and defense values',
-            saves: 'Saving throws and ability tests',
             equipment: 'Equipment slots and equipped items',
             effects: effects.length > 0
                 ? `${effects.length} active effects`

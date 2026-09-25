@@ -4,7 +4,7 @@
  * Signatures no longer come from the player's archetype — they come from WORN
  * equipment. Each relic is an ordinary `Equipment` typed into the Phase-18 slot
  * model (2 weapons, 2 armor, 7 accessories) that grants exactly ONE signature
- * (`grantsSignature`) plus a single static stat bump. A character wears 1 weapon
+ * (`grantsSignature`); the two armor relics also add +5 max VITAE. A character wears 1 weapon
  * + 1 armor + 3 of the 7 accessories = 5 worn, so the slot model itself is the
  * wear-cap and the build choice (2 × 2 × C(7,3) = 140 loadouts).
  *
@@ -19,13 +19,11 @@
  * The two armor relics carry the first-class `'maxHp'` stat modifier (Phase 19),
  * folded onto `Character.maxHealth` by the equip reducers — no effect involved.
  *
- * Stat pool (locked, balance-tunable later): Body ×2 (weapons), +5 maxHp ×2
- * (armor), Mind ×3 + Heart ×1 + Body ×2 (accessories — Phase 85 filled the
- * `head`/`hands`/`feet` kinds that shipped empty in Phase 19, closing the
- * accessories' body-stat gap: `head` mind, `hands`/`feet` body). The
- * Suppliant's Ring is the one relic with NO stat bump (owner call
- * 2026-09-23): it is the first-node hand-over, and the hand-over grants the
- * signature skill only. `defaultWorn` still names the Phase-19 kit, but that
+ * Stat pool: +5 maxHp on the two armor relics, nothing else. The +2
+ * body / mind / heart bumps the other eight relics carried were inert (VITAE
+ * reads raw base stats; combat reads no stat) and were cut in TRIM THE FAT
+ * T2a (D14, `plan/2026-09-25-refactor-strategy.decisions.md`); D4's stat
+ * hooks decide what, if anything, relics add back. `defaultWorn` still names the Phase-19 kit, but that
  * kit is no longer SEEDED into a fresh run (see `Game/game.reducer.ts`
  * `createNewGameState`, owner call 2026-09-23 — the player starts with
  * nothing, earns the ring at the first node, and buys the other ten from the
@@ -49,11 +47,10 @@ interface RelicSpec {
     accessoryKind?: Equipment['accessoryKind'];
     grantsSignature: SignatureSkillId;
     /**
-     * The single static stat bump. Optional: a relic without one grants
-     * ONLY its signature (`statModifiers: []`). Today that is the Suppliant's
-     * Ring alone.
+     * The +max-VITAE bump (armor relics only). Absent on every other relic,
+     * which grants ONLY its signature (`statModifiers: []`).
      */
-    stat?: 'body' | 'mind' | 'heart' | 'maxHp';
+    stat?: 'maxHp';
     /** The bump's magnitude; ignored when `stat` is absent. */
     value?: number;
     defaultWorn: boolean;
@@ -66,18 +63,18 @@ interface RelicSpec {
  * copy-tunable; the id → signature mapping is 1:1 and load-bearing.
  */
 const RELIC_SPECS: readonly RelicSpec[] = [
-    // ── Weapons (2) — Body bumps ──────────────────────────────────────────────
+    // ── Weapons (2) ──────────────────────────────────────────────
     {
         id: 'relic-overwhelming', name: 'Gorgon Brand',
         description: 'A blade that turns the argument to stone. Grants The Stilling.',
         slot: 'weapon', grantsSignature: 'sig-overwhelming-argument',
-        stat: 'body', value: 2, defaultWorn: true,
+        defaultWorn: true,
     },
     {
         id: 'relic-conclusion', name: 'Capstone Maul',
         description: "The finisher made manifest. Grants The Butcher's Bill.",
         slot: 'weapon', grantsSignature: 'sig-rallying-blow',
-        stat: 'body', value: 2, defaultWorn: false,
+        defaultWorn: false,
     },
     // ── Armor (2) — maxHp bumps ───────────────────────────────────────────────
     {
@@ -92,7 +89,7 @@ const RELIC_SPECS: readonly RelicSpec[] = [
         slot: 'armor', grantsSignature: 'sig-second-wind',
         stat: 'maxHp', value: 5, defaultWorn: false,
     },
-    // ── Accessories (4) — Mind ×2 + Heart ×2 ──────────────────────────────────
+    // ── Accessories (4) ──────────────────────────────────
     {
         // Benched by owner call 2026-07-18 (was default-worn): the Gambler's
         // Knot takes this seat so every starter opens with Press Fate — the
@@ -102,13 +99,13 @@ const RELIC_SPECS: readonly RelicSpec[] = [
         id: 'relic-conviction-strike', name: 'Venom Sigil',
         description: 'A venom that cannot fizzle. Grants The Oath Kept.',
         slot: 'accessory', accessoryKind: 'amulet', grantsSignature: 'sig-conviction-strike',
-        stat: 'mind', value: 2, defaultWorn: false,
+        defaultWorn: false,
     },
     {
         id: 'relic-clever-gambit', name: 'Gambit Chit',
         description: 'Turn information into tempo. Grants Cold Counsel.',
         slot: 'accessory', accessoryKind: 'charm', grantsSignature: 'sig-clever-gambit',
-        stat: 'mind', value: 2, defaultWorn: true,
+        defaultWorn: true,
     },
     {
         // Owner call 2026-09-23: the ring is the first-node hand-over and
@@ -125,26 +122,26 @@ const RELIC_SPECS: readonly RelicSpec[] = [
         id: 'relic-press-the-point', name: "Gambler's Knot",
         description: 'Bend fate on the bad dice. Grants Press Fate.',
         slot: 'accessory', accessoryKind: 'charm', grantsSignature: 'sig-press-the-point',
-        stat: 'heart', value: 2, defaultWorn: true,
+        defaultWorn: true,
     },
     // ── Phase 85 — head/hands/feet accessories (were empty since Phase 19) ───
     {
         id: 'relic-mounting-dread', name: "Cassandra's Circlet",
         description: 'A dread that will not be reasoned with. Grants The Mounting Dread.',
         slot: 'accessory', accessoryKind: 'head', grantsSignature: 'sig-mounting-dread',
-        stat: 'mind', value: 2, defaultWorn: false,
+        defaultWorn: false,
     },
     {
         id: 'relic-endless-labor', name: "Sisyphus's Grip",
         description: 'The strength that does not rest. Grants The Endless Labor.',
         slot: 'accessory', accessoryKind: 'hands', grantsSignature: 'sig-endless-labor',
-        stat: 'body', value: 2, defaultWorn: false,
+        defaultWorn: false,
     },
     {
         id: 'relic-unbroken-stride', name: "Achilles' Greaves",
         description: 'A fleetness that punishes hesitation. Grants The Unbroken Stride.',
         slot: 'accessory', accessoryKind: 'feet', grantsSignature: 'sig-unbroken-stride',
-        stat: 'body', value: 2, defaultWorn: false,
+        defaultWorn: false,
     },
 ];
 
@@ -156,10 +153,10 @@ function relicFromSpec(spec: RelicSpec): Equipment {
         description: spec.description,
         category: 'equipment',
         slot: spec.slot,
-        // A spec without a `stat` is a signature-only relic (the ring).
+        // A spec without a `stat` is a signature-only relic.
         statModifiers: spec.stat === undefined
             ? []
-            : [{ stat: spec.stat, value: spec.value ?? 0, isMultiplier: false }],
+            : [{ stat: spec.stat, value: spec.value ?? 0 }],
         grantsSignature: spec.grantsSignature,
     };
     if (spec.slot === 'accessory') relic.accessoryKind = spec.accessoryKind;

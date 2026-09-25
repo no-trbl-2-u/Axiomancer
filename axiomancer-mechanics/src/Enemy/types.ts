@@ -1,6 +1,6 @@
 import { Card } from '../Cards/types';
 import { MapName } from '../World/map.library';
-import { BaseStats, DerivedStats } from '../Character/types';
+import { BaseStats } from '../Character/types';
 import { ActiveEffect } from '../Effects/types';
 import { Item } from '../Items/types';
 import { PhilosophicalAlignment } from '../Ledger/types';
@@ -220,7 +220,6 @@ export interface Enemy {
     health: number;
     maxHealth: number;
     baseStats: BaseStats;
-    derivedStats: DerivedStats;
     mapName: MapName;
     logic: EnemyLogic;
     difficulty?: EnemyDifficulty;

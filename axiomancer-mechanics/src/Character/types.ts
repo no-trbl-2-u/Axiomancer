@@ -36,37 +36,6 @@ export interface BaseStats {
 }
 
 /**
- * Combat stats derived from BaseStats. Each stance contributes two values:
- * `*Attack` (used in attack rolls) and `*Defense` (used as damage reduction).
- * The legacy `*Card` axis (a carry-over from the removed turn-based card-check
- * combat) was deleted 2026-07-08.
- *
- * `luck` is the average of the three base stats and gates random outcomes.
- */
-export interface DerivedStats {
-    physicalAttack: number;
-    physicalDefense: number;
-    mentalAttack: number;
-    mentalDefense: number;
-    emotionalAttack: number;
-    emotionalDefense: number;
-    luck: number;
-}
-
-/**
- * Out-of-combat stats — saving throws and ability tests. Player-only.
- * Saves resist effects of that stance; tests are general ability checks.
- */
-export interface NonCombatStats {
-    physicalSave: number;
-    physicalTest: number;
-    mentalSave: number;
-    mentalTest: number;
-    emotionalSave: number;
-    emotionalTest: number;
-}
-
-/**
  * The player character.
  *
  * @property id                     - Stable identifier (Knowledge-Gaps Q12 /
@@ -79,15 +48,12 @@ export interface NonCombatStats {
  * @property experience             - Total XP earned.
  * @property experienceToNextLevel  - XP threshold for the next level-up.
  * @property baseStats              - Heart/Body/Mind core attributes.
- * @property derivedStats           - Combat stats derived from baseStats.
- * @property nonCombatStats         - Saves and ability tests.
  * @property inventory              - Items the character is carrying.
  * @property equipment              - The worn `EquipmentLoadout` (Phase 18):
  *                                    1 weapon + 1 armor + ≤3 accessories.
- *                                    Spec 05 Q3: equipment `statModifiers` are
- *                                    folded into `derivedStats` at equip-time,
- *                                    so the character's `derivedStats` is
- *                                    already "post-equipment".
+ *                                    Equipment's only stat line is the armor
+ *                                    relics' `maxHp`, folded onto `maxHealth`
+ *                                    at equip-time.
  * @property effects                - Active status effects on the character.
  * @property knownCards            - IDs of cards the character has learned/unlocked.
  *                                    The combat catalogue is the learned set
@@ -108,8 +74,6 @@ export interface Character {
     health: number;
     maxHealth: number;
     baseStats: BaseStats;
-    derivedStats: DerivedStats;
-    nonCombatStats: NonCombatStats;
     inventory: Item[];
     /**
      * Spec 08 Q8 — generic in-game currency counter. Spent / earned through the
@@ -202,7 +166,7 @@ export interface Character {
 }
 
 /**
- * Hypothetical stat point allocation for previewing derived stats.
+ * Hypothetical stat point allocation for previewing max VITAE.
  * Each field represents additional points to add to the corresponding base stat.
  */
 export interface PreviewAllocation {
@@ -215,7 +179,5 @@ export interface PreviewAllocation {
  * Result of previewing stat allocation — computed stats without character mutation.
  */
 export interface PreviewResult {
-    derivedStats: DerivedStats;
-    nonCombatStats: NonCombatStats;
     maxHealth: number;
 }

@@ -2,7 +2,6 @@ import { Card } from '../Cards/types';
 import { MapName } from '../World/map.library';
 import { ActiveEffect } from '../Effects/types';
 import { BaseStats } from '../Character/types';
-import { deriveStats } from '../Utils';
 import { PhilosophicalAlignment } from '../Ledger/types';
 import {
     ENEMY_STAT_PER_LEVEL, ENEMY_GEAR_TIER_PER_LEVEL,
@@ -329,7 +328,6 @@ export function createEnemy(options: CreateEnemyOptions): Enemy {
         id, name, description, level,
         health: maxHealth, maxHealth,
         baseStats,
-        derivedStats: deriveStats(baseStats),
         mapName, logic,
         difficulty,
         cards,

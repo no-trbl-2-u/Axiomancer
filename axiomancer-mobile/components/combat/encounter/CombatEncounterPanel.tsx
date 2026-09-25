@@ -56,7 +56,6 @@ import {
     selectCombatLogHistory, COMBAT_LOG_TOGGLE_TEXT, COMBAT_LOG_TOGGLE_A11Y, COMBAT_LOG_CLOSE_A11Y,
     type CombatCardVM, type CombatEffectChipVM, type CombatSealVM, type CombatAddVM, type CombatSignatureVM, type EnemyActionCardVM,
 } from '@/state/presenters/combat-encounter.engine';
-import { formatAveragedStat } from '@/state/presenters/stat-format';
 import { PlayerPortraitImage } from '@/components/art/PlayerPortraitImage';
 import { useGameState, useGameStore } from '@/state/GameStoreProvider';
 import {
@@ -1372,17 +1371,10 @@ export function CombatEncounterPanel({
                 </Pressable>
             )}
 
-            {/* pilgrim modal — tap the player medallion: ALL stats + status effects */}
+            {/* pilgrim modal — tap the player medallion: base stats, XP + status effects */}
             {pilgrimOpen && (() => {
                 const p = live.player;
                 const stats = p.baseStats ?? { heart: 0, body: 0, mind: 0 };
-                const d = p.derivedStats ?? ({} as Partial<Character['derivedStats']>);
-                const nc = p.nonCombatStats ?? ({} as Partial<Character['nonCombatStats']>);
-                const axes = [
-                    { label: 'PHYSICAL', color: STANCE_COLORS.body, atk: d.physicalAttack, def: d.physicalDefense, save: nc.physicalSave, test: nc.physicalTest },
-                    { label: 'MENTAL', color: STANCE_COLORS.mind, atk: d.mentalAttack, def: d.mentalDefense, save: nc.mentalSave, test: nc.mentalTest },
-                    { label: 'EMOTIONAL', color: STANCE_COLORS.heart, atk: d.emotionalAttack, def: d.emotionalDefense, save: nc.emotionalSave, test: nc.emotionalTest },
-                ] as const;
                 return (
                     <Pressable style={styles.backdrop} testID="combat-pilgrim-modal" onPress={() => setPilgrimOpen(false)}>
                         <View style={styles.pilgrimWrap} onStartShouldSetResponder={() => true}>
@@ -1404,27 +1396,7 @@ export function CombatEncounterPanel({
                                     ))}
                                 </View>
 
-                                {/* the FULL stat table — attack/defense + save/test per axis */}
-                                <View style={styles.pilgrimGridHead}>
-                                    <Text style={styles.pilgrimGridLabel} />
-                                    {['ATK', 'DEF', 'SAVE', 'TEST'].map((h) => (
-                                        <Text key={h} style={styles.pilgrimGridCol} allowFontScaling={false}>{h}</Text>
-                                    ))}
-                                </View>
-                                {axes.map((a) => (
-                                    <View key={a.label} style={styles.pilgrimGridRow}>
-                                        <Text style={[styles.pilgrimGridLabel, { color: a.color }]} allowFontScaling={false}>{a.label}</Text>
-                                        {[a.atk, a.def, a.save, a.test].map((v, i) => (
-                                            <Text key={i} style={styles.pilgrimGridVal} allowFontScaling={false}>{v ?? 0}</Text>
-                                        ))}
-                                    </View>
-                                ))}
                                 <View style={styles.pilgrimMetaRow}>
-                                    {/* FE-001: `derivedStats.luck` is an average, so it is
-                                      * usually a float; print it through the shared formatter
-                                      * so this chip and the SELF sheet agree and neither shows
-                                      * a 17-digit tail. */}
-                                    <Text style={styles.pilgrimMetaChip} allowFontScaling={false}>🍀 LUCK {formatAveragedStat(d.luck ?? 0)}</Text>
                                     <Text style={styles.pilgrimMetaChip} allowFontScaling={false}>XP {p.experience ?? 0} / {p.experienceToNextLevel ?? 0}</Text>
                                 </View>
 
@@ -1639,11 +1611,6 @@ const useStyles = makeStyles((AXM) => ({
     pilgrimStatVal: { fontFamily: FONTS.gothic, fontSize: 20, lineHeight: 23 },
     pilgrimStatLabel: { fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 1.6, color: AXM.bone, marginTop: 1 },
     // full stat table
-    pilgrimGridHead: { flexDirection: 'row', alignItems: 'center', marginTop: 8, paddingHorizontal: 4 },
-    pilgrimGridRow: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', borderRadius: 5, backgroundColor: 'rgba(0,0,0,0.4)', paddingVertical: 6, paddingHorizontal: 4, marginTop: 4 },
-    pilgrimGridLabel: { flex: 1.6, fontFamily: FONTS.sans, fontSize: 10, letterSpacing: 1.2, color: AXM.bone, paddingLeft: 4 },
-    pilgrimGridCol: { flex: 1, fontFamily: FONTS.sans, fontSize: 9, letterSpacing: 1, color: AXM.bone, textAlign: 'center', opacity: 0.75 },
-    pilgrimGridVal: { flex: 1, fontFamily: FONTS.mono, fontSize: 13, color: AXM.parchment, textAlign: 'center' },
     pilgrimMetaRow: { flexDirection: 'row', gap: 8, marginTop: 6 },
     pilgrimMetaChip: { fontFamily: FONTS.sans, fontSize: 11, color: AXM.bone, letterSpacing: 0.4, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)', borderRadius: 4, backgroundColor: 'rgba(0,0,0,0.4)', paddingHorizontal: 7, paddingVertical: 3, overflow: 'hidden' },
     pilgrimSection: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 2, color: AXM.sulfur, marginTop: 14, marginBottom: 6 },

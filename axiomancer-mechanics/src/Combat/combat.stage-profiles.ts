@@ -22,7 +22,7 @@ import type { Card, CardTier, CardRank } from '../Cards/types';
 import { cardLibrary } from '../Cards/cards.library';
 import { UPGRADE_SUFFIX } from '../Cards/card-upgrades';
 import { Player } from '../Character/characters.mock';
-import { deepClone, deriveStats, calculateMaxHealth } from '../Utils';
+import { deepClone, calculateMaxHealth } from '../Utils';
 import { MAX_DIE_UPGRADE_LEVEL } from './combat.dice';
 
 /**
@@ -237,15 +237,13 @@ export function stageEligibleCardIds(
 
 /**
  * Builds the stage's player: a deep clone of the canonical `Player` mock with
- * level / base stats / HP set from the profile, derived stats recomputed from
- * the new base stats, and `knownCards` = the full stage-eligible card pool
+ * level / base stats / HP set from the profile, and `knownCards` = the full stage-eligible card pool
  * (so `buildCombatDeck` and deck drafting both see the same maturity gate).
  */
 export function buildStagePlayer(stage: CombatStageProfile): Character {
     const player = deepClone(Player);
     player.level = stage.playerLevel;
     player.baseStats = { ...stage.playerBaseStats };
-    player.derivedStats = deriveStats(player.baseStats);
     // THE BIG NUMBERS REWRITE (2026-09-02) — DERIVE the pool, never author it.
     // These profiles used to hard-code `playerMaxHealth` at the old
     // `stats x 5` scale (mid 255, late 570). When the formula moved to

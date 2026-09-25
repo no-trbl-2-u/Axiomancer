@@ -6,29 +6,29 @@
  *   • accessories fill the first free of 3 positions; a 4th with the row full
  *     is a guarded no-op (same reference) unless `replaceIndex` is passed.
  *   • unequipItem frees the right accessory position (index required).
- *   • getEquippedItems / getEquipmentModifiers fold the whole loadout.
- *   • derivedStats track every equip/unequip.
+ *   • getEquippedItems / wornMaxHpBonus fold the whole loadout.
+ *   • maxHealth tracks the worn maxHp lines on every equip/unequip.
  */
 
 import { describe, it, expect } from 'vitest';
 
 import { createCharacter } from '../index';
 import {
-    equipItem, unequipItem, getEquippedItems, getEquipmentModifiers,
+    equipItem, unequipItem, getEquippedItems, wornMaxHpBonus,
 } from '../equipment.reducer';
 import type { Equipment, AccessoryKind } from '../../Items/types';
 import type { StatModifier } from '../../Effects/types';
 
-function weapon(id: string, body = 0): Equipment {
-    const statModifiers: StatModifier[] = body ? [{ stat: 'body', value: body, isMultiplier: false }] : [];
+function weapon(id: string, maxHp = 0): Equipment {
+    const statModifiers: StatModifier[] = maxHp ? [{ stat: 'maxHp', value: maxHp }] : [];
     return { id, name: id, description: '', category: 'equipment', slot: 'weapon', statModifiers };
 }
-function armor(id: string, body = 0): Equipment {
-    const statModifiers: StatModifier[] = body ? [{ stat: 'body', value: body, isMultiplier: false }] : [];
+function armor(id: string, maxHp = 0): Equipment {
+    const statModifiers: StatModifier[] = maxHp ? [{ stat: 'maxHp', value: maxHp }] : [];
     return { id, name: id, description: '', category: 'equipment', slot: 'armor', statModifiers };
 }
-function accessory(id: string, kind: AccessoryKind = 'ring', mind = 0): Equipment {
-    const statModifiers: StatModifier[] = mind ? [{ stat: 'mind', value: mind, isMultiplier: false }] : [];
+function accessory(id: string, kind: AccessoryKind = 'ring', maxHp = 0): Equipment {
+    const statModifiers: StatModifier[] = maxHp ? [{ stat: 'maxHp', value: maxHp }] : [];
     return { id, name: id, description: '', category: 'equipment', slot: 'accessory', accessoryKind: kind, statModifiers };
 }
 
@@ -103,20 +103,18 @@ describe('Phase 18 — EquipmentLoadout equip/unequip', () => {
         expect(c.equipment.armor?.id).toBe('mail');
     });
 
-    it('derivedStats fold every worn piece and drop on unequip', () => {
+    it('maxHealth folds every worn piece\'s maxHp and drops on unequip', () => {
         let c = fresh();
-        const bodyBefore = c.derivedStats.physicalAttack;
+        const hpBefore = c.maxHealth;
         c = equipItem(c, weapon('sword', 4));
         c = equipItem(c, accessory('ring', 'ring', 6));
-        const withGear = c.derivedStats;
-        expect(withGear.physicalAttack).toBeGreaterThan(bodyBefore);
+        const withGear = c.maxHealth;
+        expect(withGear).toBeGreaterThan(hpBefore);
 
-        // getEquipmentModifiers over the loadout sees both flat mods.
-        const mods = getEquipmentModifiers(c.equipment);
-        expect(mods.statFlat.get('body')).toBe(4);
-        expect(mods.statFlat.get('mind')).toBe(6);
+        // wornMaxHpBonus over the loadout sums both pieces' maxHp lines.
+        expect(wornMaxHpBonus(c.equipment)).toBe(10);
 
         c = unequipItem(c, 'weapon');
-        expect(c.derivedStats.physicalAttack).toBeLessThan(withGear.physicalAttack);
+        expect(c.maxHealth).toBeLessThan(withGear);
     });
 });

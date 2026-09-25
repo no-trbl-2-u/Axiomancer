@@ -1,8 +1,6 @@
-import type { GameState, BaseStats } from '@mechanics';
+import type { GameState } from '@mechanics';
 import {
     defaultAlignment,
-    deriveStats,
-    deriveNonCombatStats,
     migrate,
     GAME_STATE_VERSION,
 } from '@mechanics';
@@ -46,8 +44,11 @@ export type Migration = (state: unknown) => unknown;
 export type MigrationMap = Record<number, Migration>;
 
 /**
- * Migration from schema v1 to v2: backfill missing derivedStats and
- * nonCombatStats fields in player data using engine derivation helpers.
+ * Migration from schema v1 to v2. Originally backfilled the player's
+ * `derivedStats` / `nonCombatStats`; those stats were deleted from the engine
+ * in TRIM THE FAT T2a (engine save v25), so the step now only validates that
+ * the pre-engine save carries usable base stats. It stays in the chain so a
+ * v1 envelope still walks v1 → v2 → v3 before the engine's `migrate` runs.
  */
 function migrateV1ToV2(state: unknown): unknown {
     if (!state || typeof state !== 'object') {
@@ -69,21 +70,6 @@ function migrateV1ToV2(state: unknown): unknown {
         typeof baseStats.body !== 'number' ||
         typeof baseStats.mind !== 'number') {
         throw new Error('Migration v1→v2: invalid baseStats structure');
-    }
-
-    const typedBaseStats: BaseStats = {
-        heart: baseStats.heart,
-        body: baseStats.body,
-        mind: baseStats.mind,
-    };
-
-    // Only add missing fields, preserve existing ones
-    if (!player.derivedStats) {
-        player.derivedStats = deriveStats(typedBaseStats);
-    }
-
-    if (!player.nonCombatStats) {
-        player.nonCombatStats = deriveNonCombatStats(typedBaseStats);
     }
 
     return gameState;

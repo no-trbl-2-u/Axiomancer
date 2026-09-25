@@ -47,15 +47,13 @@ describe('applyCharacterPreset: replaces player with engine preset', () => {
         },
     );
 
-    it('builds a complete Character — derived stats, max health, equipped cards all populated', () => {
+    it('builds a complete Character — max health, equipped cards all populated', () => {
         const { store, actions } = makeStore();
         actions.applyCharacterPreset('apprentice');
 
         const player = store.getState().player;
         expect(player.maxHealth).toBeGreaterThan(0);
         expect(player.health).toBe(player.maxHealth);
-        expect(player.derivedStats).toBeDefined();
-        expect(player.derivedStats.physicalDefense).toBeGreaterThan(0);
         expect(player.knownCards?.length ?? 0).toBeGreaterThan(0);
         expect(player.inventory?.length ?? 0).toBeGreaterThan(0);
     });

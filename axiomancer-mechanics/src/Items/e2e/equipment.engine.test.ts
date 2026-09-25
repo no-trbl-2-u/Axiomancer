@@ -2,22 +2,21 @@
  * Hermetic E2E — equip / unequip stat folding + consumable lifecycle.
  *
  * After the equipment-signature epic (phases 18-23) equipment carries only
- * static `statModifiers` (folded into `derivedStats` / `maxHealth` at
- * equip-time) and one `grantsSignature`. The rarity / affix / rolled-modifier /
+ * static `statModifiers` (now only the `maxHp` line, folded into `maxHealth`
+ * at equip-time) and one `grantsSignature`. The rarity / affix / rolled-modifier /
  * passive-effect / proc / resource-token machinery is gone, so this suite pins
  * only the surviving contracts:
  *
- *   • `equipItem` folds `statModifiers` into `derivedStats`; `unequipItem` reverts.
+ *   • `equipItem` folds `statModifiers` into `maxHealth`; `unequipItem` reverts.
  *   • Equipment applies NO effects (stat-only) — `Character.effects` untouched.
- *   • `getEquipmentModifiers` aggregation invariants.
+ *   • Equip / unequip invariants.
  *   • Consumable heal / stack lifecycle through the store.
  */
 
 import { afterEach, describe, it, expect, vi } from 'vitest';
 
 import { createCharacter } from '../../Character/index';
-import { equipItem, unequipItem, getEquipmentModifiers } from '../../Character/equipment.reducer';
-import { emptyLoadout } from '../../Character/types';
+import { equipItem, unequipItem } from '../../Character/equipment.reducer';
 import { createGameStore } from '../../Game/store';
 import { nullAdapter } from '../../Game/persistence/null.adapter';
 import { Consumable, Equipment } from '../types';
@@ -33,13 +32,10 @@ const buildPlayer = () => createCharacter({
 const ironWeapon: Equipment = {
     id: 'eq_iron_blade',
     name: 'Iron Blade',
-    description: 'A simple iron blade. +2 body, +1 physicalAttack.',
+    description: 'A simple iron blade. +3 max VITAE.',
     category: 'equipment',
     slot: 'weapon',
-    statModifiers: [
-        { stat: 'body',           value: 2 },
-        { stat: 'physicalAttack', value: 1 },
-    ],
+    statModifiers: [{ stat: 'maxHp', value: 3 }],
 };
 
 /** A plain accessory (no effects — equipment is stat-only post-epic). */
@@ -66,22 +62,20 @@ afterEach(() => {
 });
 
 describe('equipItem / unequipItem', () => {
-    it('folds statModifiers into derivedStats at equip-time and reverts on unequip', () => {
+    it('folds statModifiers into maxHealth at equip-time and reverts on unequip', () => {
         const player = buildPlayer();
         expect(player.baseStats.body).toBe(3);
-        expect(player.derivedStats.physicalAttack).toBe(3); // body * 1
+        const bare = player.maxHealth;
 
         const equipped = equipItem(player, ironWeapon);
-        // +2 body → 5 body; derived physicalAttack = 5 + 1 patch = 6.
+        // +3 maxHp → maxHealth grows by 3.
         expect(equipped.equipment.weapon).toBe(ironWeapon);
-        expect(equipped.derivedStats.physicalAttack).toBe(6);
-        expect(equipped.derivedStats.physicalDefense).toBe(15);
+        expect(equipped.maxHealth).toBe(bare + 3);
         expect(equipped.baseStats.body).toBe(3); // baseStats untouched
 
         const unequipped = unequipItem(equipped, 'weapon');
         expect(unequipped.equipment.weapon).toBeNull();
-        expect(unequipped.derivedStats.physicalAttack).toBe(3);
-        expect(unequipped.derivedStats.physicalDefense).toBe(9);
+        expect(unequipped.maxHealth).toBe(bare);
     });
 
     it('equipment is stat-only — equipping/unequipping never touches Character.effects', () => {
@@ -95,15 +89,15 @@ describe('equipItem / unequipItem', () => {
 
     it('replacing a weapon swaps its statModifiers and leaves effects empty', () => {
         const player = buildPlayer();
-        const bodyWeapon: Equipment = { ...ironWeapon, id: 'eq_body_weapon', statModifiers: [{ stat: 'body', value: 2 }] };
-        const withWeapon = equipItem(player, bodyWeapon);
+        const hpWeapon: Equipment = { ...ironWeapon, id: 'eq_hp_weapon', statModifiers: [{ stat: 'maxHp', value: 2 }] };
+        const withWeapon = equipItem(player, hpWeapon);
         expect(withWeapon.effects).toHaveLength(0);
-        expect(withWeapon.derivedStats.physicalAttack).toBe(5); // +2 body (3→5)
+        expect(withWeapon.maxHealth).toBe(player.maxHealth + 2); // +2 maxHp
 
-        const replacement: Equipment = { ...bodyWeapon, id: 'eq_other_weapon', statModifiers: [] };
+        const replacement: Equipment = { ...hpWeapon, id: 'eq_other_weapon', statModifiers: [] };
         const replaced = equipItem(withWeapon, replacement);
         expect(replaced.effects).toHaveLength(0);
-        expect(replaced.derivedStats.physicalAttack).toBe(3); // prior +2 body reverted
+        expect(replaced.maxHealth).toBe(player.maxHealth); // prior +2 maxHp reverted
     });
 
     it('createCharacter accepts a starting equipment list and folds stats but applies no effects', () => {
@@ -113,18 +107,12 @@ describe('equipItem / unequipItem', () => {
             baseStats: { heart: 4, body: 3, mind: 2 },
             equipment: [ironWeapon, plainCirclet],
         });
-        expect(player.derivedStats.physicalAttack).toBe(6);
+        expect(player.maxHealth).toBe(buildPlayer().maxHealth + 3);
         expect(player.effects).toHaveLength(0);
     });
 });
 
 describe('Invariants', () => {
-    it('getEquipmentModifiers on an empty slot map returns zeroed maps', () => {
-        const agg = getEquipmentModifiers(emptyLoadout());
-        expect(agg.statFlat.size).toBe(0);
-        expect(agg.statMultBonus.size).toBe(0);
-    });
-
     it('unequipping an empty slot is a no-op (returns the same reference)', () => {
         const player = buildPlayer();
         expect(unequipItem(player, 'weapon')).toBe(player);
@@ -146,11 +134,11 @@ describe('Game store lifecycle: equipment & consumables with nullAdapter', () =>
 
         store.getState().equipItem(ironWeapon);
         expect(store.getState().player.equipment.weapon).toBe(ironWeapon);
-        expect(store.getState().player.derivedStats.physicalAttack).toBe(6);
+        expect(store.getState().player.maxHealth).toBe(player.maxHealth + 3);
 
         store.getState().unequipItem('weapon');
         expect(store.getState().player.equipment.weapon).toBeNull();
-        expect(store.getState().player.derivedStats.physicalAttack).toBe(3);
+        expect(store.getState().player.maxHealth).toBe(player.maxHealth);
 
         expect(saveSpy).not.toHaveBeenCalled();
     });

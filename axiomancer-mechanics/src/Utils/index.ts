@@ -3,8 +3,8 @@
  */
 
 import { Advantage } from "../Combat/types";
-import { STAT_MULTIPLIERS, RESOURCE_MULTIPLIERS, PLAYER_VITAE_BASE } from "../Game/game-mechanics.constants";
-import { BaseStats, DerivedStats, NonCombatStats } from "../Character/types";
+import { RESOURCE_MULTIPLIERS, PLAYER_VITAE_BASE } from "../Game/game-mechanics.constants";
+import { BaseStats } from "../Character/types";
 import { getRng, Rng } from './rng';
 
 // ===============================================
@@ -151,38 +151,6 @@ export function createDieRoll(advantage: Advantage): () => number {
 // ===============================================
 // ENTITY STAT CALCULATIONS
 // ===============================================
-
-/**
- * Derives the combat stats of an entity based on their base stats.
- * Shared between Characters and Enemies.
- * @param baseStats - The base stats of the entity
- * @returns The derived combat stats
- */
-export const deriveStats = ({ body, heart, mind }: BaseStats): DerivedStats => ({
-  physicalAttack:    body  * STAT_MULTIPLIERS.ATTACK,
-  physicalDefense:   body  * STAT_MULTIPLIERS.DEFENSE,
-  mentalAttack:      mind  * STAT_MULTIPLIERS.ATTACK,
-  mentalDefense:     mind  * STAT_MULTIPLIERS.DEFENSE,
-  emotionalAttack:   heart * STAT_MULTIPLIERS.ATTACK,
-  emotionalDefense:  heart * STAT_MULTIPLIERS.DEFENSE,
-  luck: average(body, heart, mind),
-});
-
-/**
- * Derives the non-combat stats of a Character from their base stats.
- * Enemies do not have these — they are only relevant outside of combat
- * (saving throws, ability tests).
- * @param baseStats - The base stats of the character
- * @returns The non-combat stats
- */
-export const deriveNonCombatStats = ({ body, heart, mind }: BaseStats): NonCombatStats => ({
-  physicalSave:   body  * STAT_MULTIPLIERS.SAVE,
-  physicalTest:   body  * STAT_MULTIPLIERS.TEST,
-  mentalSave:     mind  * STAT_MULTIPLIERS.SAVE,
-  mentalTest:     mind  * STAT_MULTIPLIERS.TEST,
-  emotionalSave:  heart * STAT_MULTIPLIERS.SAVE,
-  emotionalTest:  heart * STAT_MULTIPLIERS.TEST,
-});
 
 /**
  * Calculates the maximum VITAE of a PLAYER-side entity from all base stats.

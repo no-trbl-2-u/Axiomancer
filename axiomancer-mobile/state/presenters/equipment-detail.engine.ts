@@ -158,9 +158,8 @@ function round1(n: number): number {
  * @param isMultiplier - Whether the engine applies it multiplicatively.
  * @returns `'×1.5'` for multipliers, `'+2'` / `'-1'` for flat modifiers.
  */
-function formatStatValue(value: number, isMultiplier: boolean | undefined): string {
+function formatStatValue(value: number): string {
     const r = round1(value);
-    if (isMultiplier) return `×${r}`;
     return r >= 0 ? `+${r}` : `${r}`;
 }
 
@@ -175,7 +174,7 @@ function buildStatLines(eq: Equipment): EquipmentStatLine[] {
     return (eq.statModifiers ?? []).map((mod) => ({
         id: mod.stat,
         label: statLabelFor(mod.stat),
-        value: formatStatValue(mod.value, mod.isMultiplier),
+        value: formatStatValue(mod.value),
     }));
 }
 

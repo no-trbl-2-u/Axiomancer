@@ -29,7 +29,7 @@ const lcg = (seed: number) => { let s = seed; return () => { s = (s * 48271) % 2
 // over there rather than seeded silently at t=0
 // (`Character/first-node-grant.ts`), so settling the grant here is what makes
 // this "a real level-1 fresh player": it restores the exact worn loadout,
-// signature kit and derived stats these pins were measured against, and is
+// signature kit and max VITAE these pins were measured against, and is
 // also the only state a fight can actually be reached from (`START_COMBAT`
 // settles the grant too).
 // 2026-09-23 (THE VERY START): `createNewGameState` seeds NO relics any more

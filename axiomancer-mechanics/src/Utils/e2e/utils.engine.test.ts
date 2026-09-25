@@ -2,12 +2,12 @@
  * Hermetic E2E Tests — Utils module
  *
  * Drives the Utils module's public surface through hermetic tests covering
- * the primary entry points: stat derivation, die rolling, math utilities,
+ * the primary entry points: max-health derivation, die rolling, math utilities,
  * and string formatting functions. RNG-dependent functions use stubbed
  * RNG for deterministic testing.
  *
  * Coverage areas:
- *   1. Stat derivation: deriveStats, deriveNonCombatStats, calculateMaxHealth
+ *   1. Stat derivation: calculateMaxHealth
  *   2. Die rolling: createDie, createDieRoll, determineRollAdvantageModifier
  *   3. Math utilities: clamp, randomInt, deepClone, average, sum, max, min, inRange
  *   4. String utilities: capitalize, formatPercent
@@ -38,8 +38,6 @@ import {
   determineRollAdvantageModifier,
   
   // Stat derivation
-  deriveStats,
-  deriveNonCombatStats,
   calculateMaxHealth
 } from '../index';
 
@@ -173,33 +171,6 @@ describe('Utils engine', () => {
   });
 
   describe('Stat derivation', () => {
-    it('derives combat stats from base stats', () => {
-      const baseStats = { body: 10, heart: 8, mind: 12 };
-      const derived = deriveStats(baseStats);
-      
-      // Derived stats use STAT_MULTIPLIERS (attack=1, card=1, defense=3)
-      expect(derived.physicalAttack).toBe(10);    // 10 * 1
-      expect(derived.physicalDefense).toBe(30);   // 10 * 3
-      expect(derived.mentalAttack).toBe(12);      // 12 * 1
-      expect(derived.mentalDefense).toBe(36);     // 12 * 3
-      expect(derived.emotionalAttack).toBe(8);    // 8 * 1
-      expect(derived.emotionalDefense).toBe(24);  // 8 * 3
-      expect(derived.luck).toBe(10);              // average(10, 8, 12) = 10
-    });
-
-    it('derives non-combat stats from base stats', () => {
-      const baseStats = { body: 10, heart: 8, mind: 12 };
-      const nonCombat = deriveNonCombatStats(baseStats);
-      
-      // Non-combat stats use save=2, test=4 multipliers
-      expect(nonCombat.physicalSave).toBe(20);    // 10 * 2
-      expect(nonCombat.physicalTest).toBe(40);    // 10 * 4
-      expect(nonCombat.mentalSave).toBe(24);      // 12 * 2
-      expect(nonCombat.mentalTest).toBe(48);      // 12 * 4
-      expect(nonCombat.emotionalSave).toBe(16);   // 8 * 2
-      expect(nonCombat.emotionalTest).toBe(32);   // 8 * 4
-    });
-
     it('calculates max health from base stats', () => {
       const baseStats = { body: 10, heart: 8, mind: 12 };
       const level = 5; // Should be ignored per function documentation

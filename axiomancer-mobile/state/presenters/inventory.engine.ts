@@ -361,15 +361,11 @@ function canDiscardFor(item: Item): boolean {
 
 /**
  * Aggregate an equipment item's flat statModifiers into a stat → value
- * map. Multipliers are skipped for the v1 equip-preview (Phase 35) —
- * the preview surfaces additive deltas only; the engine itself still
- * applies the multipliers correctly when the actual equip lands. A
- * future refinement could surface multiplier deltas separately.
+ * map (today only the armor relics' `maxHp`).
  */
 function aggregateEquipmentStats(equipment: Equipment): Map<string, number> {
     const out = new Map<string, number>();
     for (const mod of equipment.statModifiers ?? []) {
-        if (mod.isMultiplier) continue;
         out.set(mod.stat, (out.get(mod.stat) ?? 0) + mod.value);
     }
     return out;

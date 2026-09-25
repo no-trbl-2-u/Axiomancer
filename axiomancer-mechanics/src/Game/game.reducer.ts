@@ -61,7 +61,7 @@ import { generateRunId } from './run-loop';
  * Phase 19 — bumped 12 → 13: seed the 8 signet relics onto the player (default 5
  *   worn, displaced gear + other 3 relics to inventory) so loaded saves derive a
  *   full signature kit from the worn loadout instead of the retired archetype
- *   kit; recompute derivedStats/maxHealth (see `game.migrate.ts`).
+ *   kit; recompute maxHealth (see `game.migrate.ts`).
  * Phase 21 — bumped 13 → 14: the procedural equipment library is retired, so
  *   purge every non-relic `Equipment` from the loadout + inventory (relics are
  *   the only equipment that survives); backfill any stripped loadout slot with
@@ -140,8 +140,12 @@ import { generateRunId } from './run-loop';
  *   save SHAPE is unchanged, so existing saves need no migration — they keep
  *   whatever kit they already carry. The ring still arrives at the first
  *   node; the other ten relics are village-market wares (owner call).
+ * 2026-09-25 — bumped 24 → 25: TRIM THE FAT T2a (D14). Derived stats, luck,
+ *   the non-combat saves/tests and every non-maxHp stat line on equipment
+ *   are retired; the hop strips them from loaded saves (see
+ *   `game.migrate.ts`).
  */
-export const GAME_STATE_VERSION = 24;
+export const GAME_STATE_VERSION = 25;
 
 /** Builds a brand-new GameState with default player and world. */
 export function createNewGameState(): GameState {

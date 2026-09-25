@@ -359,12 +359,6 @@ const STAT_LABELS: Record<string, string> = {
     emotionalTest: 'HEART TEST',
 };
 
-/** Engine stat keys the inventory item-stat tooltip synthesizer can
- * resolve (`<dimension><Verb>` — see `tooltip.engine.ts`). Only these
- * get a `StatDelta.id` so the row's TooltipTarget never renders an
- * empty chip for a key the synthesizer can't describe. */
-const TOOLTIP_STAT_KEY = /^(physical|mental|emotional)(Attack|Card|Defense|Save|Test)$/;
-
 function statLabelFor(key: string): string {
     return (
         STAT_LABELS[key]
@@ -382,17 +376,16 @@ function round1(n: number): number {
 }
 
 /**
- * Flatten a character's numeric stats into one `key → value` map —
- * derived combat stats, non-combat saves/tests, and max health — so the
- * modal can diff any of them.
+ * Flatten a character's diffable stats into one `key → value` map. Max
+ * health is the only stat equipment can change (the armor relics' +max
+ * VITAE); the derived and save/test stats this used to include were deleted
+ * in TRIM THE FAT T2a.
  */
 function characterStatMap(character: Character): Map<string, number> {
     const out = new Map<string, number>();
     const add = (key: string, value: unknown) => {
         if (typeof value === 'number' && Number.isFinite(value)) out.set(key, value);
     };
-    for (const [key, value] of Object.entries(character.derivedStats ?? {})) add(key, value);
-    for (const [key, value] of Object.entries(character.nonCombatStats ?? {})) add(key, value);
     add('maxHealth', character.maxHealth);
     return out;
 }
@@ -424,10 +417,9 @@ function computeStatDeltas(before: Character, after: Character): StatDelta[] {
         const a = round1(afterMap.get(key) ?? 0);
         if (a === b) continue;
         const d = round1(a - b);
-        const row: StatDelta = TOOLTIP_STAT_KEY.test(key)
-            ? { label: statLabelFor(key), before: b, after: a, delta: d, id: key }
-            : { label: statLabelFor(key), before: b, after: a, delta: d };
-        out.push(row);
+        // No row carries a tooltip id: the only diffable stat left is max
+        // VITAE, which the item-stat synthesizer does not describe.
+        out.push({ label: statLabelFor(key), before: b, after: a, delta: d });
     }
     out.sort((x, y) => {
         const ox = orderOf(idOrLabelKey(x));
@@ -463,18 +455,15 @@ function effectName(id: string): string {
 /**
  * Build the item's intrinsic modifier block — the stats (with values)
  * and effects it grants on its own. Stat lines carry the engine stat
- * key as `id` so the view can wire a tooltip. Multipliers render as
- * `×N`, flat modifiers as `+N` / `-N`. Returns `[]` for an item with no
+ * key as `id` so the view can wire a tooltip. Values render as `+N` /
+ * `-N`. Returns `[]` for an item with no
  * modifiers (a plain common drop).
  */
 function computeItemModifiers(eq: Equipment): ItemModifierLine[] {
     const out: ItemModifierLine[] = [];
     for (const mod of eq.statModifiers ?? []) {
-        const value = mod.isMultiplier ? `×${round1(mod.value)}` : signed(mod.value);
-        const line: ItemModifierLine = TOOLTIP_STAT_KEY.test(mod.stat)
-            ? { label: `${value} ${statLabelFor(mod.stat)}`, id: mod.stat }
-            : { label: `${value} ${statLabelFor(mod.stat)}` };
-        out.push(line);
+        const value = signed(mod.value);
+        out.push({ label: `${value} ${statLabelFor(mod.stat)}` });
     }
     // Phase 23 — equipment is stat-only + `grantsSignature`; there are no
     // passive-effect / proc / resource lines to list. The granted signature is

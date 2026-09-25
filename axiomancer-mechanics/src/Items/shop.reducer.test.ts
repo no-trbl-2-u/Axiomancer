@@ -23,17 +23,6 @@ function freshCharacter(overrides: Partial<Character> = {}): Character {
         health: 10,
         maxHealth: 10,
         baseStats: { heart: 1, body: 1, mind: 1 },
-        derivedStats: {
-            physicalAttack: 1, physicalDefense: 1,
-            mentalAttack: 1, mentalDefense: 1,
-            emotionalAttack: 1, emotionalDefense: 1,
-            luck: 1,
-        },
-        nonCombatStats: {
-            physicalSave: 1, physicalTest: 1,
-            mentalSave: 1, mentalTest: 1,
-            emotionalSave: 1, emotionalTest: 1,
-        },
         inventory: [],
         currency: 0,
         equipment: emptyLoadout(),

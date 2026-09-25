@@ -29,7 +29,7 @@ function makeEquipment(id: string, extra: Partial<Equipment> = {}): Equipment {
 describe('computeEquipDelta (Phase 23 — stat + signature diff only)', () => {
     it('equip into an empty slot → mode equip, stat gain surfaced', () => {
         const candidate = makeEquipment('blade', {
-            statModifiers: [{ stat: 'physicalAttack', value: 3 }],
+            statModifiers: [{ stat: 'maxHp', value: 3 }],
         });
         const d = computeEquipDelta(candidate, null, buildPlayer());
         expect(d.mode).toBe('equip');
@@ -38,15 +38,15 @@ describe('computeEquipDelta (Phase 23 — stat + signature diff only)', () => {
     });
 
     it('unequip the worn item → mode unequip, against the item', () => {
-        const worn = makeEquipment('blade', { statModifiers: [{ stat: 'physicalAttack', value: 3 }] });
+        const worn = makeEquipment('blade', { statModifiers: [{ stat: 'maxHp', value: 3 }] });
         const d = computeEquipDelta(worn, worn, buildPlayer());
         expect(d.mode).toBe('unequip');
         expect(d.against).toEqual({ id: 'blade', name: 'blade' });
     });
 
     it('swap → mode swap, against the worn sibling', () => {
-        const worn = makeEquipment('old', { statModifiers: [{ stat: 'physicalAttack', value: 1 }] });
-        const candidate = makeEquipment('new', { statModifiers: [{ stat: 'physicalAttack', value: 4 }] });
+        const worn = makeEquipment('old', { statModifiers: [{ stat: 'maxHp', value: 1 }] });
+        const candidate = makeEquipment('new', { statModifiers: [{ stat: 'maxHp', value: 4 }] });
         const d = computeEquipDelta(candidate, worn, buildPlayer());
         expect(d.mode).toBe('swap');
         expect(d.against).toEqual({ id: 'old', name: 'old' });

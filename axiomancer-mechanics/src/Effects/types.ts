@@ -32,27 +32,19 @@ export type EffectCategory =
     | 'stat' | 'damage' | 'defense' | 'control' | 'regeneration' | 'advantage';
 
 /**
- * Stat target for an effect's modifiers: a base stat (`heart`/`body`/`mind`)
- * or any specific derived stat name.
+ * A persistent stat line on a piece of equipment. The only stat an item can
+ * modify is `maxHp` (the two armor relics' +5 max VITAE), folded onto
+ * `Character.maxHealth` by the equip reducers.
+ *
+ * TRIM THE FAT T2a (D14) deleted every other target: the derived attack /
+ * defence / save / test stats and luck (display-only — combat read none of
+ * them) and the body / mind / heart lines on relics and effects (inert —
+ * VITAE reads the raw base stats). Stat hooks come back with D4.
  */
-export type EffectStatTarget =
-    | Stance
-    | 'physicalAttack'  | 'physicalDefense' | 'physicalSave' | 'physicalTest'
-    | 'mentalAttack'    | 'mentalDefense'   | 'mentalSave'   | 'mentalTest'
-    | 'emotionalAttack' | 'emotionalDefense'| 'emotionalSave'| 'emotionalTest'
-    | 'luck'
-    // Phase 19 — first-class max-HP modifier. Handled specially by the equip
-    // reducers (folded onto `Character.maxHealth`, NOT into `DerivedStats`,
-    // which has no HP field); the two armor relics are its only users. Inert
-    // for effects (no effect payload targets it today).
-    | 'maxHp';
-
-/** A single stat modifier applied by an effect's payload. */
 export interface StatModifier {
-    stat: EffectStatTarget;
+    stat: 'maxHp';
+    /** Flat delta added to max VITAE while the item is worn. */
     value: number;
-    /** If true, `value` is a multiplier (1.5 = +50%); otherwise it's a flat delta. */
-    isMultiplier?: boolean;
 }
 
 /** When in a round a DoT effect ticks. Different damage flavours feel different. */
@@ -74,7 +66,8 @@ export type DotTriggerClock =
  */
 export interface DamageOverTime {
     damagePerRound: number;
-    damageType: EffectStatTarget;
+    /** Which stance the damage reads as. Informational (UI accent only). */
+    damageType: Stance;
     /** Where in the round this DoT ticks. Defaults to `'start'`. */
     tickPhase?: DotTickPhase;
     /** WS3 trigger clock. Absent = legacy `tickPhase` behavior (round clock);
@@ -104,10 +97,9 @@ export interface AdvantageModifier {
 
 /**
  * Mechanical payload of an effect. Every field is optional; an effect may
- * combine several (e.g. a buff that grants stat bonuses AND a roll modifier).
+ * combine several (e.g. a regeneration buff that also raises defense).
  */
 export interface EffectPayload {
-    statModifiers?: StatModifier[];
     damageOverTime?: DamageOverTime;
     regeneration?: RegenerationConfig;
     actionRestriction?: ActionRestriction;

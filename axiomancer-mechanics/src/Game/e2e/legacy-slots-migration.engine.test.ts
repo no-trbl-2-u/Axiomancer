@@ -4,7 +4,7 @@
  * `LEGACY_SLOT_MAP` / `reslotLegacyEquipment` / `reslotLegacyLoadout` fold the
  * old 7-slot shape into the 5-slot loadout; `migrate` applies the whole
  * transform to a v11 save (body loses to armor, fixed accessory order, overflow
- * to inventory, item slot strings re-mapped, derivedStats recomputed).
+ * to inventory, item slot strings re-mapped).
  */
 
 import { describe, it, expect } from 'vitest';
@@ -19,8 +19,8 @@ import type { StatModifier } from '../../Effects/types';
 import type { LegacySlot } from '../index';
 
 /** Build a legacy-shaped Equipment instance (slot may be a pre-Phase-18 kind). */
-function legacy(id: string, slot: LegacySlot, mind = 0): Equipment {
-    const statModifiers: StatModifier[] = mind ? [{ stat: 'mind', value: mind, isMultiplier: false }] : [];
+function legacy(id: string, slot: LegacySlot, maxHp = 0): Equipment {
+    const statModifiers: StatModifier[] = maxHp ? [{ stat: 'maxHp', value: maxHp }] : [];
     return {
         id, name: id, description: '', category: 'equipment',
         slot: slot as Equipment['slot'], statModifiers,
@@ -100,7 +100,7 @@ describe('Phase 18 — migrate v11 → v12', () => {
         return raw as unknown;
     }
 
-    it('folds the legacy record into a loadout and recomputes derivedStats', () => {
+    it('folds the legacy record into a loadout', () => {
         // Pin toVersion=12 to exercise the Phase-18 hop in isolation; the
         // Phase-19 v12→v13 relic seeding (which would replace this loadout) is
         // covered separately in the relic-library migration test.

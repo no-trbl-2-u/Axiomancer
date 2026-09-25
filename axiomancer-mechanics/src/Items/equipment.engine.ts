@@ -2,7 +2,7 @@
  * Consumable engine — combat-side consumable helper (Spec 05).
  *
  * Phases 20-23 decoupled equipment from combat entirely: equipment contributes
- * only `statModifiers` (folded into `derivedStats` at equip-time), so the old
+ * only its signature and the armor relics' `maxHp` line, so the old
  * equipment combat helpers (`aggregateCombatStartTokens`,
  * `applyEquipmentGenerationBonus`, `getEquipmentProcTriggers`) are gone. Only
  * the consumable helper remains here:

@@ -58,14 +58,6 @@ describe('devSetStats', () => {
         const { baseStats } = store.getState().player;
         expect(baseStats).toEqual({ heart: 15, body: 12, mind: 18 });
     });
-
-    it('recomputes derivedStats', () => {
-        const store = freshStore();
-        const before = store.getState().player.derivedStats;
-        devSetStats(store, { body: 20 });
-        const after = store.getState().player.derivedStats;
-        expect(after.physicalAttack).toBeGreaterThan(before.physicalAttack);
-    });
 });
 
 describe('devLearnCards', () => {

@@ -13,7 +13,7 @@ export {
     createCharacter,
     allocateStatPoint,
     previewStatAllocation,
-    equipItem, unequipItem, getEquipmentModifiers, getEquippedItems,
+    equipItem, unequipItem, getEquippedItems,
     emptyLoadout,
     computeEquipDelta,
     honeDieGear, temperDieGear, swapDieGear,
@@ -26,9 +26,9 @@ export {
     levelLadderPresets, ladderL1Preset, ladderL15Preset, ladderL30Preset, ladderL50Preset,
 } from './Character';
 export type {
-    Character, BaseStats, DerivedStats, NonCombatStats, EquipmentLoadout,
+    Character, BaseStats, EquipmentLoadout,
     PreviewAllocation, PreviewResult,
-    CreateCharacterOptions, AggregatedEquipmentModifiers,
+    CreateCharacterOptions,
     CharacterPreset, CharacterPresetEquipmentEntry,
     EquipDelta, EquipDeltaMode,
     StatDeltaEntry, SignatureDeltaEntry,
@@ -306,7 +306,6 @@ export type {
     Effect, EffectType, EffectTier, EffectStacking, EffectCategory, EffectPayload,
     ActiveEffect, EffectApplicationResult,
     StatModifier, DamageOverTime, RegenerationConfig, ActionRestriction, AdvantageModifier,
-    EffectStatTarget,
     ApplyEffectOptions,
     WorldTickResult, ActiveHazard,
     // Phase 142 — Status effect interaction types
@@ -393,9 +392,8 @@ export {
     selectPlayer, selectIsInCombat,
     selectInventory, selectVersion, selectMoralMeter,
     nullAdapter,
-    STAT_MULTIPLIERS, RESOURCE_MULTIPLIERS, EXPERIENCE_PER_LEVEL,
+    RESOURCE_MULTIPLIERS, EXPERIENCE_PER_LEVEL,
     STAT_POINTS_PER_LEVEL,
-    DEFENSE_MULTIPLIERS, PASSIVE_DEFENSE_MULTIPLIER,
     MAX_EFFECT_INTENSITY, MAX_EFFECT_DURATION, FRIENDSHIP_COUNTER_MAX,
     RESOURCE_CARRY,
     generateRunId, STARTING_REGION,
@@ -571,7 +569,7 @@ export {
     clamp, randomInt, deepClone, average, sum, max, min, inRange,
     capitalize, formatPercent,
     createDie, createDieRoll, determineRollAdvantageModifier,
-    deriveStats, deriveNonCombatStats, calculateMaxHealth,
+    calculateMaxHealth,
 } from './Utils';
 export { setRng, getRng, setSeed } from './Utils/rng';
 export type { Rng } from './Utils/rng';

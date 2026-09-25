@@ -2,20 +2,18 @@
  * Hermetic E2E Tests — Character module (Spec 01 + Spec 05 Q3 fold-in)
  *
  * Drives the Character module's public surface — `createCharacter`,
- * `equipItem`, `unequipItem`, `getEquipmentModifiers` — through the
- * library entry points without going through combat. Equipment ↔ combat
- * integration is already covered by `src/Items/e2e/equipment.engine.test.ts`;
- * this suite focuses on character-level invariants:
+ * `equipItem`, `unequipItem` — through the library entry points without
+ * going through combat. Equipment ↔ combat integration is already covered by
+ * `src/Items/e2e/equipment.engine.test.ts`; this suite focuses on
+ * character-level invariants:
  *
- *   1. Stat / health / xp derivation contracts from `createCharacter`.
+ *   1. Health / xp derivation contracts from `createCharacter`.
  *   2. Default fields and option pass-through.
- *   3. Spec 05 Q3 option A: starting `equipment` is folded into `derivedStats`
- *      at create-time (Phase 20: equipment applies NO effects).
- *   4. `equipItem` slot replacement keeps `effects` untouched and recomputes
- *      `derivedStats`.
+ *   3. Spec 05 Q3 option A: starting `equipment`'s `maxHp` line is folded
+ *      into `maxHealth` at create-time (Phase 20: equipment applies NO effects).
+ *   4. `equipItem` slot replacement keeps `effects` untouched and refolds
+ *      the worn `maxHp` delta onto `maxHealth`.
  *   5. `unequipItem` on an empty slot is a referential no-op.
- *   6. `getEquipmentModifiers` aggregates flat + multiplier modifiers
- *      across slots (multiplier convention: store m−1 in `statMultBonus`).
  *
  * Hermetic: no Math.random, no I/O. All inputs constructed inline.
  */
@@ -28,10 +26,8 @@ import { mockSequentialRng } from '../../test-utils/rng';
 import {
     equipItem,
     unequipItem,
-    getEquipmentModifiers,
 } from '../equipment.reducer';
 import {
-    STAT_MULTIPLIERS,
     RESOURCE_MULTIPLIERS,
     PLAYER_VITAE_BASE,
     EXPERIENCE_PER_LEVEL,
@@ -56,32 +52,27 @@ const buildPlayer = (overrides: Partial<Parameters<typeof createCharacter>[0]> =
         ...overrides,
     });
 
-const armorFlatBody = (): Equipment => ({
-    id: 'test-armor-flat-body',
+const armorMaxHpSmall = (): Equipment => ({
+    id: 'test-armor-maxhp-small',
     name: 'Test Cuirass',
-    description: 'Adds flat body.',
+    description: '+2 max VITAE.',
     category: 'equipment',
     slot: 'armor',
-    statModifiers: [{ stat: 'body', value: 2 }],
+    statModifiers: [{ stat: 'maxHp', value: 2 }],
 });
 
-const armorMultBody = (): Equipment => ({
-    id: 'test-armor-mult-body',
+const armorMaxHpLarge = (): Equipment => ({
+    id: 'test-armor-maxhp-large',
     name: 'Test Robe',
-    description: '+50% body multiplier.',
+    description: '+5 max VITAE.',
     category: 'equipment',
     slot: 'armor',
-    statModifiers: [{ stat: 'body', value: 1.5, isMultiplier: true }],
+    statModifiers: [{ stat: 'maxHp', value: 5 }],
 });
 
-const weaponFlatPhysAtk = (): Equipment => ({
-    id: 'test-weapon-flat-physatk',
-    name: 'Test Blade',
-    description: '+4 physicalAttack.',
-    category: 'equipment',
-    slot: 'weapon',
-    statModifiers: [{ stat: 'physicalAttack', value: 4 }],
-});
+/** VITAE of the bare `buildBaseStats()` player (no worn maxHp). */
+const bareMaxHealth = (): number =>
+    PLAYER_VITAE_BASE + (3 + 4 + 2) * RESOURCE_MULTIPLIERS.HEALTH_PER_STAT;
 
 /** Real effect from the library so passiveEffects round-trip via lookupEffect. */
 const armorWithPassive = (): Equipment => ({
@@ -95,26 +86,6 @@ const armorWithPassive = (): Equipment => ({
 // ─── createCharacter — derivation + defaults ─────────────────────────────────
 
 describe('createCharacter — derivation contracts', () => {
-    it('computes derivedStats from baseStats via STAT_MULTIPLIERS', () => {
-        mockSequentialRng(0.5);
-        const ch = buildPlayer();
-        // physical → body, mental → mind, emotional → heart.
-        expect(ch.derivedStats.physicalAttack).toBe(3 * STAT_MULTIPLIERS.ATTACK);
-        expect(ch.derivedStats.physicalDefense).toBe(3 * STAT_MULTIPLIERS.DEFENSE);
-        expect(ch.derivedStats.emotionalDefense).toBe(4 * STAT_MULTIPLIERS.DEFENSE);
-        // luck = average(body, heart, mind) = (3+4+2)/3 = 3.
-        expect(ch.derivedStats.luck).toBe(3);
-    });
-
-    it('computes nonCombatStats (saves and tests) via STAT_MULTIPLIERS', () => {
-        mockSequentialRng(0.5);
-        const ch = buildPlayer();
-        expect(ch.nonCombatStats.physicalSave).toBe(3 * STAT_MULTIPLIERS.SAVE);
-        expect(ch.nonCombatStats.physicalTest).toBe(3 * STAT_MULTIPLIERS.TEST);
-        expect(ch.nonCombatStats.emotionalSave).toBe(4 * STAT_MULTIPLIERS.SAVE);
-        expect(ch.nonCombatStats.mentalTest).toBe(2 * STAT_MULTIPLIERS.TEST);
-    });
-
     it('sets VITAE = PLAYER_VITAE_BASE + sum(body, heart, mind) × HEALTH_PER_STAT and seeds it full', () => {
         mockSequentialRng(0.5);
         const ch = buildPlayer({ level: 3 });
@@ -161,18 +132,15 @@ describe('createCharacter — defaults and option pass-through', () => {
 });
 
 describe('createCharacter — Spec 05 Q3 starting equipment fold-in', () => {
-    it('folds a flat base-stat modifier into derivedStats at create-time', () => {
+    it('folds a worn maxHp modifier into maxHealth at create-time', () => {
         mockSequentialRng(0.5);
-        const ch = buildPlayer({ equipment: [armorFlatBody()] });
-        // body 3 + 2 = 5 → physicalAttack = 5 × STAT_MULTIPLIERS.ATTACK.
-        expect(ch.derivedStats.physicalAttack).toBe(5 * STAT_MULTIPLIERS.ATTACK);
-        expect(ch.derivedStats.physicalDefense).toBe(5 * STAT_MULTIPLIERS.DEFENSE);
-        // heart/mind untouched.
-        expect(ch.derivedStats.emotionalAttack).toBe(4 * STAT_MULTIPLIERS.ATTACK);
-        expect(ch.derivedStats.mentalAttack).toBe(2 * STAT_MULTIPLIERS.ATTACK);
-        // baseStats stay raw — fold-in is on derived, not base.
+        const ch = buildPlayer({ equipment: [armorMaxHpSmall()] });
+        // bare VITAE + 2 from the worn armor, seeded full.
+        expect(ch.maxHealth).toBe(bareMaxHealth() + 2);
+        expect(ch.health).toBe(bareMaxHealth() + 2);
+        // baseStats stay raw — fold-in is on maxHealth, not base.
         expect(ch.baseStats).toEqual(buildBaseStats());
-        expect(ch.equipment.armor?.id).toBe('test-armor-flat-body');
+        expect(ch.equipment.armor?.id).toBe('test-armor-maxhp-small');
     });
 
     it('Phase 20 — a passiveEffects item applies NO ActiveEffect (equipment is stat-only)', () => {
@@ -185,23 +153,23 @@ describe('createCharacter — Spec 05 Q3 starting equipment fold-in', () => {
 // ─── equipItem / unequipItem — slot replacement and effect tracking ─────────
 
 describe('equipItem — slot replacement', () => {
-    it('replaces the existing occupant and recomputes derivedStats', () => {
+    it('replaces the existing occupant and refolds the worn maxHp delta', () => {
         mockSequentialRng(0.5);
-        const start = buildPlayer({ equipment: [armorFlatBody()] });
-        // Before: body 3 + 2 flat = 5 effective → physicalAttack 5.
-        expect(start.derivedStats.physicalAttack).toBe(5 * STAT_MULTIPLIERS.ATTACK);
+        const start = buildPlayer({ equipment: [armorMaxHpSmall()] });
+        // Before: bare VITAE + 2 from the worn armor.
+        expect(start.maxHealth).toBe(bareMaxHealth() + 2);
 
-        // Swap to multiplier armor: body 3 × (1 + 0.5) = 4.5 → physicalAttack 4.5.
-        const next = equipItem(start, armorMultBody());
-        expect(next.equipment.armor?.id).toBe('test-armor-mult-body');
-        expect(next.derivedStats.physicalAttack).toBe(4.5 * STAT_MULTIPLIERS.ATTACK);
+        // Swap to the +5 armor: the +2 comes off, the +5 goes on.
+        const next = equipItem(start, armorMaxHpLarge());
+        expect(next.equipment.armor?.id).toBe('test-armor-maxhp-large');
+        expect(next.maxHealth).toBe(bareMaxHealth() + 5);
         // Original character is unmutated.
-        expect(start.derivedStats.physicalAttack).toBe(5 * STAT_MULTIPLIERS.ATTACK);
+        expect(start.maxHealth).toBe(bareMaxHealth() + 2);
     });
 
     it('Phase 20 — equipping/swapping never adds equipment effects and leaves unrelated effects untouched', () => {
         const prior = armorWithPassive();
-        const replacement = armorFlatBody();
+        const replacement = armorMaxHpSmall();
         mockSequentialRng(0.5);
         const start = buildPlayer({ equipment: [prior] });
         // The passive item added no effect in the first place.
@@ -236,63 +204,21 @@ describe('unequipItem', () => {
         expect(unequipItem(ch, 'armor')).toBe(ch);
     });
 
-    it('removes the slot and restores derivedStats (equipment never added effects — Phase 20)', () => {
+    it('removes the slot (equipment never added effects — Phase 20)', () => {
         mockSequentialRng(0.5);
         const start = buildPlayer({ equipment: [armorWithPassive()] });
         expect(start.effects.some(e => e.sourceId === 'test-armor-with-passive')).toBe(false);
 
         const stripped = unequipItem(start, 'armor');
         expect(stripped.equipment.armor).toBeNull();
-        // Body modifier was zero on this armor (passive only), so derivedStats
-        // returns to the bare-base-stat shape.
-        expect(stripped.derivedStats.physicalAttack).toBe(3 * STAT_MULTIPLIERS.ATTACK);
         expect(stripped.effects.some(e => e.sourceId === 'test-armor-with-passive')).toBe(false);
-    });
-});
-
-// ─── getEquipmentModifiers — aggregation contract ────────────────────────────
-
-describe('getEquipmentModifiers', () => {
-    it('returns empty aggregates when no equipment is worn', () => {
-        const agg = getEquipmentModifiers(emptyLoadout());
-        expect(agg.statFlat.size).toBe(0);
-        expect(agg.statMultBonus.size).toBe(0);
-    });
-
-    it('sums flat modifiers for the same stat across multiple slots', () => {
-        const agg = getEquipmentModifiers({
-            weapon: weaponFlatPhysAtk(), // +4 physicalAttack flat
-            armor: armorFlatBody(),      // +2 body flat
-            accessories: [],
-        });
-        expect(agg.statFlat.get('body')).toBe(2);
-        expect(agg.statFlat.get('physicalAttack')).toBe(4);
-        expect(agg.statMultBonus.size).toBe(0);
-    });
-
-    it('stores multipliers as (value − 1) in statMultBonus', () => {
-        const agg = getEquipmentModifiers({ weapon: null, armor: armorMultBody(), accessories: [] }); // 1.5
-        expect(agg.statMultBonus.get('body')).toBeCloseTo(0.5);
-        expect(agg.statFlat.size).toBe(0);
-    });
-
-    it('keeps flat and multiplier streams independent for the same stat', () => {
-        // The aggregator walks every worn piece regardless of slot kind, so the
-        // second body-modifying piece rides an accessory position here.
-        const agg = getEquipmentModifiers({
-            weapon: null,
-            armor:  armorFlatBody(),        // +2 body flat
-            accessories: [armorMultBody()], // +50% body multiplier
-        });
-        expect(agg.statFlat.get('body')).toBe(2);
-        expect(agg.statMultBonus.get('body')).toBeCloseTo(0.5);
     });
 });
 
 // ─── allocateStatPoint — Spec 06 Q3 + Q8 ──────────────────────────────────────
 
 describe('allocateStatPoint', () => {
-    it('decrements the pool, raises baseStat, and re-derives derived/non-combat/maxHealth', () => {
+    it('decrements the pool, raises baseStat, and re-derives maxHealth', () => {
         mockSequentialRng(0.5);
         const before = buildPlayer({});
         // Seed available points so the allocation succeeds.
@@ -301,14 +227,6 @@ describe('allocateStatPoint', () => {
 
         expect(after.availableStatPoints).toBe(1);
         expect(after.baseStats.body).toBe(before.baseStats.body + 1);
-        // derived stats follow the body increase via STAT_MULTIPLIERS.DEFENSE = 3.
-        expect(after.derivedStats.physicalDefense).toBe(
-            (before.baseStats.body + 1) * STAT_MULTIPLIERS.DEFENSE,
-        );
-        // non-combat stats also fold body changes (physicalSave = body × SAVE).
-        expect(after.nonCombatStats.physicalSave).toBe(
-            (before.baseStats.body + 1) * STAT_MULTIPLIERS.SAVE,
-        );
         // maxHealth depends on (body, heart) averages; raising body bumps it.
         expect(after.maxHealth).toBeGreaterThan(before.maxHealth);
         // HP grows by exactly the maxHealth delta — not a free heal.

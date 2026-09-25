@@ -109,6 +109,15 @@ Tier 0 item 5). *Rejected:* surfacing the roll in the UI.
 T2b: the Upgradeable-Dice flag collapse (D7). T2b starts after T2a
 merges.
 
+**D14 — Cut the base-stat lines on relics and effects too.** The trim
+spec's "relic stat lines" and "effect statModifiers" are read literally:
+the +2 body/mind/heart lines on 8 signet relics and the body/mind/heart/
+luck modifiers on `buff_all_stats_up`, `buff_phoenix_vigor` and
+`debuff_curse` are deleted in T2a. Relics keep their granted signature
+(and the two armor relics their +5 max VITAE). Step 3 (D4 stat hooks)
+re-authors any stat bonus it wants. *Rejected:* keeping them as data for
+the future hooks; keeping them but hiding them in the UI.
+
 ## Open follow-ups
 
 - Audit tick (D1 step 1, D3 scope) — DONE 2026-09-25; keep/cut list and

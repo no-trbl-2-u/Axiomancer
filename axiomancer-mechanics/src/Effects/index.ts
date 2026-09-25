@@ -203,7 +203,6 @@ export type {
     Effect, EffectType, EffectStacking, EffectTier, EffectCategory, EffectPayload,
     ActiveEffect, EffectApplicationResult,
     StatModifier, DamageOverTime, RegenerationConfig, ActionRestriction, AdvantageModifier,
-    EffectStatTarget,
     // WS3 (spec 32 §12 #3) — trigger-clock DoT substrate
     DotTriggerClock,
 } from './types';

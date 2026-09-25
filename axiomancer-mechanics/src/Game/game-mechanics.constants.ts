@@ -5,19 +5,6 @@
  */
 
 // ============================================================================
-// CHARACTER — STAT DERIVATION MULTIPLIERS
-// ============================================================================
-// Applied to each base stat (body / mind / heart) to produce the four
-// derived combat stats for that attribute category.
-
-export const STAT_MULTIPLIERS = {
-    ATTACK:  1,   // physicalAttack / mentalAttack / emotionalAttack — combat rolls
-    DEFENSE: 3,
-    SAVE:    2,
-    TEST:    4,
-} as const;
-
-// ============================================================================
 // CHARACTER — RESOURCE CALCULATIONS
 // ============================================================================
 // THE BIG NUMBERS REWRITE (2026-09-02) — the player's VITAE pool.
@@ -46,30 +33,6 @@ export const EXPERIENCE_PER_LEVEL = 1000;
 // no level cap today, so the points stream is uncapped — content authors
 // decide where progression naturally stops.
 export const STAT_POINTS_PER_LEVEL = 3;
-
-// ============================================================================
-// COMBAT — DEFENSE MULTIPLIERS
-// ============================================================================
-// Applied to a combatant's base defense stat when they choose the 'defend'
-// action.  The multiplier is selected based on the defender's type-advantage
-// relative to the attacker (heart > body > mind > heart).
-//
-//   Defending with ADVANTAGE    → 2× defense  (picked the right counter-type)
-//   Defending with NEUTRAL      → 1.5× defense (same type, no bonus)
-//   Defending with DISADVANTAGE → 1× defense  (picked the wrong type, weaker)
-//
-// Keys deliberately match the Advantage union type so they can be used as
-// a direct lookup: DEFENSE_MULTIPLIERS[advantage].
-
-export const DEFENSE_MULTIPLIERS: Record<'advantage' | 'neutral' | 'disadvantage', number> = {
-    advantage:    2,
-    neutral:      1.5,
-    disadvantage: 1.0,
-} as const;
-
-// Applied when a combatant did NOT choose the 'defend' action (i.e. they are
-// taking damage after losing an attack contest with no active defense bonus).
-export const PASSIVE_DEFENSE_MULTIPLIER = 1;
 
 // ============================================================================
 // EFFECTS — STACKING CAPS

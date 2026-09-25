@@ -8,7 +8,7 @@
  * (Q2) are applied here so the consumers stay simple.
  */
 
-import { ActiveEffect, DamageOverTime, DotTickPhase, EffectStatTarget } from '../Effects/types';
+import { ActiveEffect, DamageOverTime, DotTickPhase } from '../Effects/types';
 import { lookupEffect } from '../Effects/effects.library';
 import { evaluateInteractions, checkInteractionTrigger } from '../Effects/interactions';
 import { EFFECT_INTERACTIONS } from '../Effects/amplification.registry';
@@ -176,17 +176,13 @@ export function getActiveDotAmplifications(effects: ActiveEffect[]): ActiveDotAm
 /**
  * Aggregated, intensity-scaled modifiers from every active effect on a combatant.
  *
- * - `statFlat` and `statMultBonus` are keyed by `EffectStatTarget` and are summed
- *   across every modifier targeting that stat.
- * - Multipliers compose **additively** per Q3: `final = base × (1 + Σ (m - 1))`.
  * - Every numeric is intensity-scaled per Q2: a value of `v` at intensity `n`
- *   contributes `v × n` (multipliers contribute `(m - 1) × n` to `statMultBonus`).
+ *   contributes `v × n`. (The stat-modifier maps this carried were deleted
+ *   with effect stat modifiers in TRIM THE FAT T2a, D14.)
  * - DoT damage is split by tick phase (Q4). Drain is kept separate from regen
  *   so the consumer can render them differently (Q6).
  */
 export interface AggregatedEffectModifiers {
-    statFlat: Map<EffectStatTarget, number>;
-    statMultBonus: Map<EffectStatTarget, number>;
     defenseDelta: number;
     advantageGrants: Set<Stance>;
     advantageDenies: Set<Stance>;
@@ -200,8 +196,6 @@ export interface AggregatedEffectModifiers {
 }
 
 const emptyAgg = (): AggregatedEffectModifiers => ({
-    statFlat:        new Map(),
-    statMultBonus:   new Map(),
     defenseDelta:    0,
     advantageGrants: new Set(),
     advantageDenies: new Set(),
@@ -213,10 +207,6 @@ const emptyAgg = (): AggregatedEffectModifiers => ({
     healthRegen:     0,
     healthDrain:     0,
 });
-
-const addToMap = (map: Map<EffectStatTarget, number>, key: EffectStatTarget, value: number): void => {
-    map.set(key, (map.get(key) ?? 0) + value);
-};
 
 /**
  * Walks `effects` once and returns the aggregated modifier bundle. Pure.
@@ -234,16 +224,6 @@ export function getActiveEffectModifiers(effects: ActiveEffect[], currentRound?:
 
         const intensity = ae.intensity ?? 1;
         const payload = def.payload;
-
-        for (const mod of payload.statModifiers ?? []) {
-            const scaled = mod.value * intensity;
-            if (mod.isMultiplier) {
-                // Convert to bonus-over-1.0 and accumulate additively (Q3).
-                addToMap(agg.statMultBonus, mod.stat, (mod.value - 1) * intensity);
-            } else {
-                addToMap(agg.statFlat, mod.stat, scaled);
-            }
-        }
 
         if (payload.defenseModifier) {
             agg.defenseDelta += payload.defenseModifier * intensity;

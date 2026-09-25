@@ -20,14 +20,15 @@ import {
 
 /**
  * The spec 32 v3 keyword reset deleted the library effects that used to carry
- * derived-stat / save flat bands, negative-regen drain, grant-disadvantage, and
- * action-restriction payloads. No surviving library effect carries those
- * shapes, so — rather than weaken the machinery coverage those shapes exercise —
- * we register test-only `Effect` fixtures into the shared registry (the same
- * lookup `getActiveEffectModifiers` / `canAct` / the effect helpers resolve
+ * negative-regen drain, grant-disadvantage, and action-restriction payloads.
+ * No surviving library effect carries those shapes, so — rather than weaken
+ * the machinery coverage those shapes exercise — we register test-only
+ * `Effect` fixtures into the shared registry (the same lookup
+ * `getActiveEffectModifiers` / `canAct` / the effect helpers resolve
  * through). These ids never touch the library JSON. Payloads that a surviving
- * effect DOES cover (defenseModifier, regeneration, advantage-grant,
- * multipliers, DoT, flat base-stat mods) are repointed to those real survivors.
+ * effect DOES cover (defenseModifier, regeneration, advantage-grant, DoT) are
+ * repointed to those real survivors. (Effect stat modifiers were deleted
+ * outright by TRIM THE FAT T2a / D14, so they have no fixture here.)
  */
 const mk = (id: string, type: 'buff' | 'debuff', payload: Effect['payload']): Effect => ({
     id,
@@ -42,28 +43,6 @@ const mk = (id: string, type: 'buff' | 'debuff', payload: Effect['payload']): Ef
 });
 
 const TEST_EFFECTS: Effect[] = [
-    // body +3, physicalDefense +4, physicalSave +3 — the retired stat-band shape.
-    mk('test_band', 'buff', {
-        statModifiers: [
-            { stat: 'body', value: 3, isMultiplier: false },
-            { stat: 'physicalDefense', value: 4, isMultiplier: false },
-            { stat: 'physicalSave', value: 3, isMultiplier: false },
-        ],
-    }),
-    // ×1.25 on body — a second body multiplier for additive composition.
-    mk('test_mult125', 'buff', {
-        statModifiers: [{ stat: 'body', value: 1.25, isMultiplier: true }],
-    }),
-    // ×1.5 on body/mind/heart — the retired crit-damage shape, kept synthetic
-    // so the additive-composition assertion no longer depends on a library
-    // effect's payload (buff_critical_damage_up was re-themed to advantage).
-    mk('test_mult15', 'buff', {
-        statModifiers: [
-            { stat: 'body', value: 1.5, isMultiplier: true },
-            { stat: 'mind', value: 1.5, isMultiplier: true },
-            { stat: 'heart', value: 1.5, isMultiplier: true },
-        ],
-    }),
     // Negative-regen drain shapes.
     mk('test_drain1', 'debuff', { regeneration: { healthPerRound: -1 } }),
     mk('test_drain2', 'debuff', { regeneration: { healthPerRound: -2 } }),
@@ -100,24 +79,6 @@ const ae = (effectId: string, intensity = 1, remainingDuration = 3): ActiveEffec
     ({ effectId, intensity, remainingDuration, appliedAt: 1, tier: 2 });
 
 describe('getActiveEffectModifiers', () => {
-    it('aggregates flat statModifiers scaled by intensity (Q2)', () => {
-        // test_band — +3 body, +4 physicalDefense (retired stat-band shape).
-        const mods = getActiveEffectModifiers([ae('test_band', 2)]);
-        expect(mods.statFlat.get('body')).toBe(6);
-        expect(mods.statFlat.get('physicalDefense')).toBe(8);
-    });
-
-    it('composes multipliers additively (Q3)', () => {
-        // test_mult15 has ×1.5 on body, mind, heart at intensity 1
-        // test_mult125 has ×1.25 on body
-        // Combined on body: (1.5 - 1) + (1.25 - 1) = 0.75 (additive composition)
-        const mods = getActiveEffectModifiers([
-            ae('test_mult15',  1, 3),
-            ae('test_mult125', 1, 5),
-        ]);
-        expect(mods.statMultBonus.get('body')).toBeCloseTo(0.75, 4);
-    });
-
     it('aggregates ROUND-CLOCK DoT damage by tick phase (Q4) — event clocks stay off the boundary', () => {
         // WS3.3: poison/bleed moved to event clocks — the round aggregator
         // must carry ZERO for them. The round-clocked card-local species

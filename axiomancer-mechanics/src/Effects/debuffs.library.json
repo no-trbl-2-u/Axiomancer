@@ -13,7 +13,7 @@
       "payload": {
         "damageOverTime": {
           "damagePerRound": 2,
-          "damageType": "mentalAttack",
+          "damageType": "mind",
           "trigger": "card-played"
         },
         "dotModifiers": {
@@ -42,7 +42,7 @@
       "payload": {
         "damageOverTime": {
           "damagePerRound": 3,
-          "damageType": "physicalAttack",
+          "damageType": "body",
           "trigger": "damage-instance"
         },
         "dotModifiers": {
@@ -132,23 +132,6 @@
       "resistedBy": "body",
       "resistDR": 14,
       "payload": {
-        "statModifiers": [
-          {
-            "stat": "body",
-            "value": -1,
-            "isMultiplier": false
-          },
-          {
-            "stat": "mind",
-            "value": -1,
-            "isMultiplier": false
-          },
-          {
-            "stat": "heart",
-            "value": -2,
-            "isMultiplier": false
-          }
-        ],
         "rollModifier": -2
       },
       "tier": 2,
@@ -170,7 +153,7 @@
       "payload": {
         "damageOverTime": {
           "damagePerRound": 1,
-          "damageType": "mentalAttack",
+          "damageType": "mind",
           "tickPhase": "start"
         }
       },
@@ -196,7 +179,7 @@
       "payload": {
         "damageOverTime": {
           "damagePerRound": 2,
-          "damageType": "physicalAttack",
+          "damageType": "body",
           "tickPhase": "end"
         },
         "dotModifiers": {
@@ -225,7 +208,7 @@
       "payload": {
         "damageOverTime": {
           "damagePerRound": 1,
-          "damageType": "mentalAttack"
+          "damageType": "mind"
         },
         "dotModifiers": {
           "calendarExpiry": false,

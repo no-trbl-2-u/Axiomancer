@@ -51,10 +51,7 @@ describe('selectCharacterViewModel: shape contract', () => {
         expect(typeof vm.xp).toBe('number');
         expect(typeof vm.xpMax).toBe('number');
         expect(typeof vm.pendingPoints).toBe('number');
-        expect(typeof vm.luck).toBe('number');
         expect(Array.isArray(vm.base)).toBe(true);
-        expect(Array.isArray(vm.derived)).toBe(true);
-        expect(Array.isArray(vm.saves)).toBe(true);
         expect(Array.isArray(vm.effects)).toBe(true);
         expect(Array.isArray(vm.equipment)).toBe(true);
         expect(Array.isArray(vm.cards)).toBe(true);
@@ -134,45 +131,6 @@ describe('selectCharacterViewModel: shape contract', () => {
         }
     });
 
-    it('every derived row has attack/card/defense as numbers', () => {
-        const store = createGameStore(createMemoryAdapter());
-
-        const vm = selectCharacterViewModel(store.getState());
-
-        expect(vm.derived).toHaveLength(3);
-        for (const row of vm.derived) {
-            expect(typeof row.label).toBe('string');
-            expect(typeof row.attack).toBe('number');
-            expect(typeof row.defense).toBe('number');
-        }
-    });
-
-    it('every derived row carries engine stat ids for tooltip wiring', () => {
-        const store = createGameStore(createMemoryAdapter());
-        const vm = selectCharacterViewModel(store.getState());
-        const ids = vm.derived.flatMap((r) => [r.attackId, r.defenseId]);
-        expect(ids).toEqual([
-            'physicalAttack', 'physicalDefense',
-            'mentalAttack', 'mentalDefense',
-            'emotionalAttack', 'emotionalDefense',
-        ]);
-    });
-
-    it('exposes six saves/tests rows (3 saves, 3 tests)', () => {
-        const store = createGameStore(createMemoryAdapter());
-
-        const vm = selectCharacterViewModel(store.getState());
-
-        expect(vm.saves).toHaveLength(6);
-        const labels = vm.saves.map((s) => s.label);
-        expect(labels).toContain('Body Save');
-        expect(labels).toContain('Mind Save');
-        expect(labels).toContain('Heart Save');
-        expect(labels).toContain('Body Test');
-        expect(labels).toContain('Mind Test');
-        expect(labels).toContain('Heart Test');
-    });
-
     it('exposes five equipment slot rows in display order', () => {
         const store = createGameStore(createMemoryAdapter());
 
@@ -234,48 +192,6 @@ describe('selectCharacterViewModel: happy path', () => {
         expect(heartRow.value).toBe(4);
         expect(bodyRow.value).toBe(8);
         expect(mindRow.value).toBe(6);
-    });
-
-    it('derived PHYSICAL row uses body base stat (attack == body)', () => {
-        const base = createCharacter({ name: 'Hero', level: 1, baseStats: { heart: 1, body: 10, mind: 1 } });
-        const store = createGameStore(createMemoryAdapter(), { player: base });
-
-        const vm = selectCharacterViewModel(store.getState());
-
-        const physical = vm.derived.find((r) => r.label === 'PHYSICAL')!;
-        // STAT_MULTIPLIERS.ATTACK = 1, so physicalAttack = body * 1 = 10
-        expect(physical.attack).toBe(10);
-    });
-
-    it('luck is the average of the three base stats', () => {
-        const base = createCharacter({ name: 'Hero', level: 1, baseStats: { heart: 3, body: 6, mind: 9 } });
-        const store = createGameStore(createMemoryAdapter(), { player: base });
-
-        const vm = selectCharacterViewModel(store.getState());
-
-        expect(vm.luck).toBeCloseTo((3 + 6 + 9) / 3);
-    });
-
-    it('test values are formatted with a leading + for non-negative values', () => {
-        const store = createGameStore(createMemoryAdapter());
-
-        const vm = selectCharacterViewModel(store.getState());
-
-        const tests = vm.saves.filter((s) => s.label.includes('Test'));
-        for (const t of tests) {
-            expect(t.value).toMatch(/^[+-]/);
-        }
-    });
-
-    it('save values are plain integers (no + prefix)', () => {
-        const store = createGameStore(createMemoryAdapter());
-
-        const vm = selectCharacterViewModel(store.getState());
-
-        const saves = vm.saves.filter((s) => s.label.includes('Save'));
-        for (const s of saves) {
-            expect(s.value).toMatch(/^\d+$/);
-        }
     });
 });
 
@@ -415,8 +331,6 @@ describe('selectCharacterViewModel: invariants', () => {
 
         expect(Object.isFrozen(vm)).toBe(true);
         expect(Object.isFrozen(vm.base)).toBe(true);
-        expect(Object.isFrozen(vm.derived)).toBe(true);
-        expect(Object.isFrozen(vm.saves)).toBe(true);
         expect(Object.isFrozen(vm.equipment)).toBe(true);
     });
 
@@ -469,7 +383,7 @@ describe('selectCharacterViewModel: store lifecycle', () => {
 // ---------------------------------------------------------------------------
 
 describe('selectCharacterViewModel: createCharacter fixture', () => {
-    it('a level-7 character with meaningful stats produces correct derived values', () => {
+    it('a level-7 character with meaningful stats produces correct level, name and base values', () => {
         const base = createCharacter({
             name: 'WORM-EATEN PILGRIM',
             level: 7,
@@ -484,13 +398,6 @@ describe('selectCharacterViewModel: createCharacter fixture', () => {
 
         const body = vm.base.find((r) => r.stanceKey === 'body')!;
         expect(body.value).toBe(14);
-
-        const physical = vm.derived.find((r) => r.label === 'PHYSICAL')!;
-        expect(physical.attack).toBe(14);   // body * ATTACK(1)
-        expect(physical.defense).toBe(42);  // body * DEFENSE(3)
-
-        // luck = avg(12, 14, 10) = 12
-        expect(vm.luck).toBeCloseTo(12);
     });
 });
 
@@ -511,8 +418,6 @@ describe('selectCharacterViewModel: a11y block', () => {
         expect(typeof vm.a11y.level).toBe('string');
         expect(typeof vm.a11y.experience).toBe('string');
         expect(typeof vm.a11y.baseStats).toBe('string');
-        expect(typeof vm.a11y.derivedStats).toBe('string');
-        expect(typeof vm.a11y.saves).toBe('string');
         expect(typeof vm.a11y.equipment).toBe('string');
         expect(typeof vm.a11y.effects).toBe('string');
         // Crucible button label lives on the presenter (added when
@@ -665,25 +570,6 @@ describe('FE-004: xp label names the NEXT level', () => {
         const store = makeStore({ level: 15 });
         const vm = selectCharacterViewModel(store.getState() as never);
         expect(vm.xpLabel).toBe('XP TO LVL 16');
-    });
-});
-
-/**
- * FE-015 — the DERIVED table's headers must match its columns. It advertised
- * ATK / SKL / DEF over rows that render only attack and defense.
- */
-describe('FE-015: derived rows carry exactly the two advertised columns', () => {
-    it('exposes attack and defense per row, and no third value', () => {
-        const store = makeStore();
-        const vm = selectCharacterViewModel(store.getState() as never);
-
-        expect(vm.derived.length).toBeGreaterThan(0);
-        for (const row of vm.derived) {
-            expect(typeof row.attack).toBe('number');
-            expect(typeof row.defense).toBe('number');
-            // Nothing on the row is a "skill" value the header could mean.
-            expect(Object.keys(row).filter((k) => /skill|skl/i.test(k))).toEqual([]);
-        }
     });
 });
 

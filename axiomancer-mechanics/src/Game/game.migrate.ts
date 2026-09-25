@@ -18,7 +18,8 @@
  * (2026-09-20, strip the starting curated-loadout flags that shadowed the
  * starter bundle), and v23 → v24 (2026-09-21, stamp the first-node relic
  * grant as already settled — every existing save already wears the
- * Suppliant's Ring). The hops chain, so a v11 save lands at v24 in one
+ * Suppliant's Ring), and v24 → v25 (2026-09-25, strip the retired derived
+ * stats and non-maxHp stat lines). The hops chain, so a v11 save lands at v25 in one
  * `migrate` call. Every other version mismatch still rejects.
  */
 
@@ -26,7 +27,7 @@ import { GameState } from './types';
 import type { Character, EquipmentLoadout } from '../Character/types';
 import type { Equipment, Item } from '../Items/types';
 import { isEquipment } from '../Items/types';
-import { getEquipmentModifiers, recomputeDerivedStats, getEquippedItems, wornMaxHpBonus } from '../Character/equipment.reducer';
+import { getEquippedItems, wornMaxHpBonus } from '../Character/equipment.reducer';
 import { cloneStartingRelics } from '../Items/relic.library';
 import { calculateMaxHealth } from '../Utils';
 import { reslotLegacyLoadout, reslotLegacyEquipment, type LegacySlot } from './legacy-slots';
@@ -39,7 +40,7 @@ import { FIRST_NODE_RELIC_FLAG } from '../Character/first-node-grant';
  * v11 → v12 (Phase 18): fold the player's 7-slot equipment record into the
  * 5-slot `EquipmentLoadout`, re-slot every persisted inventory equipment
  * instance, return worn overflow (a displaced `body` piece, 4th+ accessories)
- * to inventory, and recompute `derivedStats` from the new loadout. Pure over a
+ * to inventory. Pure over a
  * raw (untyped) save payload — casts are expected for save-data plumbing.
  */
 function migrateV11ToV12(raw: Record<string, unknown>): Record<string, unknown> {
@@ -62,10 +63,6 @@ function migrateV11ToV12(raw: Record<string, unknown>): Record<string, unknown> 
         equipment: nextLoadout,
         inventory: [...inventory, ...overflow],
     };
-    migratedPlayer.derivedStats = recomputeDerivedStats(
-        migratedPlayer.baseStats,
-        getEquipmentModifiers(nextLoadout),
-    );
 
     return { ...raw, player: migratedPlayer, version: 12 };
 }
@@ -75,7 +72,7 @@ function migrateV11ToV12(raw: Record<string, unknown>): Record<string, unknown> 
  * save derives a full signature kit from the worn loadout (signatures no longer
  * come from the archetype). The fixed default 5 relics become the worn loadout;
  * any previously-worn gear is displaced to inventory; the other 3 relics also go
- * to inventory. `derivedStats` + `maxHealth` are recomputed off the relic
+ * to inventory. `maxHealth` is recomputed off the relic
  * loadout (the two armor relics fold a +5 maxHp bonus onto `maxHealth`), and
  * current `health` is clamped to the new ceiling. Pure over a raw save payload.
  */
@@ -115,7 +112,6 @@ function migrateV12ToV13(raw: Record<string, unknown>): Record<string, unknown> 
         ...(player as Character),
         equipment: relicLoadout,
         inventory,
-        derivedStats: recomputeDerivedStats(player.baseStats, getEquipmentModifiers(relicLoadout)),
         maxHealth: nextMaxHealth,
         health: Math.max(0, Math.min(priorHealth, nextMaxHealth)),
     };
@@ -171,7 +167,6 @@ function migrateV13ToV14(raw: Record<string, unknown>): Record<string, unknown> 
         ...(player as Character),
         equipment: relicLoadout,
         inventory,
-        derivedStats: recomputeDerivedStats(player.baseStats, getEquipmentModifiers(relicLoadout)),
         maxHealth: nextMaxHealth,
         health: Math.max(0, Math.min(priorHealth, nextMaxHealth)),
     };
@@ -452,6 +447,72 @@ function migrateV23ToV24(raw: Record<string, unknown>): Record<string, unknown> 
 }
 
 /**
+ * Drops every stat line an item may no longer carry: v25 items hold only
+ * `{ stat: 'maxHp', value }`. Non-object entries pass through untouched.
+ */
+function stripRetiredStatLines(item: unknown): unknown {
+    if (!item || typeof item !== 'object') return item;
+    const it = item as Record<string, unknown>;
+    if (!Array.isArray(it.statModifiers)) return item;
+    const lines = (it.statModifiers as Record<string, unknown>[])
+        .filter(m => m && m.stat === 'maxHp')
+        .map(m => ({ stat: 'maxHp', value: m.value }));
+    return { ...it, statModifiers: lines };
+}
+
+/**
+ * v24 → v25 (2026-09-25, TRIM THE FAT T2a / D14): derived stats retired.
+ *
+ * The six derived attack/defence stats, luck and the six non-combat
+ * saves/tests were display-only (combat read none of them), and the
+ * body/mind/heart lines on relics were inert (VITAE reads raw base stats).
+ * All were deleted from the engine. This hop strips what a v24 save still
+ * carries:
+ *
+ * - `player.derivedStats` and `player.nonCombatStats`;
+ * - `derivedStats` on any staged encounter enemy;
+ * - every non-`maxHp` stat line (and the retired `isMultiplier` flag) on
+ *   owned and worn equipment.
+ *
+ * Nothing that still means something changes: base stats, `maxHealth`,
+ * `health` and the loadout pass through (the stripped lines never touched
+ * VITAE). Idempotent and pure over a raw save payload.
+ */
+function migrateV24ToV25(raw: Record<string, unknown>): Record<string, unknown> {
+    const out: Record<string, unknown> = { ...raw, version: 25 };
+
+    const player = raw.player as Record<string, unknown> | undefined;
+    if (player && typeof player === 'object') {
+        const { derivedStats: _d, nonCombatStats: _n, ...rest } = player;
+        const next: Record<string, unknown> = { ...rest };
+        if (Array.isArray(rest.inventory)) next.inventory = rest.inventory.map(stripRetiredStatLines);
+        const eq = rest.equipment as Record<string, unknown> | undefined;
+        if (eq && typeof eq === 'object') {
+            next.equipment = {
+                ...eq,
+                weapon: stripRetiredStatLines(eq.weapon ?? null),
+                armor: stripRetiredStatLines(eq.armor ?? null),
+                accessories: Array.isArray(eq.accessories) ? eq.accessories.map(stripRetiredStatLines) : eq.accessories,
+            };
+        }
+        out.player = next;
+    }
+
+    const enc = raw.currentEncounter as Record<string, unknown> | null | undefined;
+    if (enc && typeof enc === 'object' && Array.isArray(enc.enemies)) {
+        out.currentEncounter = {
+            ...enc,
+            enemies: (enc.enemies as unknown[]).map(e => {
+                if (!e || typeof e !== 'object') return e;
+                const { derivedStats: _d, ...rest } = e as Record<string, unknown>;
+                return rest;
+            }),
+        };
+    }
+    return out;
+}
+
+/**
  * Narrow a raw save payload to the current `GameState`. Only the current
  * version is accepted; any other version throws (the caller resets to a new
  * game). The name/signature is kept so the persistence layer's call site is
@@ -484,8 +545,8 @@ export function migrate(
     // v20 → v21 seeds the continent catalogue for inter-map travel; v21 → v22
     // appends the Phase 85 head/hands/feet signet relics to inventory; v22 →
     // v23 strips the curated-loadout seed flags; v23 → v24 stamps the
-    // first-node relic grant settled. Chained so a v11 save lands at v24 in
-    // one call.
+    // first-node relic grant settled; v24 → v25 strips the retired derived
+    // stats and stat lines. Chained so a v11 save lands at v25 in one call.
     if (version === 11 && toVersion >= 12) {
         working = migrateV11ToV12(working);
         version = 12;
@@ -537,6 +598,10 @@ export function migrate(
     if (version === 23 && toVersion >= 24) {
         working = migrateV23ToV24(working);
         version = 24;
+    }
+    if (version === 24 && toVersion >= 25) {
+        working = migrateV24ToV25(working);
+        version = 25;
     }
 
     if (version !== toVersion) {
