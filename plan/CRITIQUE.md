@@ -1,13 +1,38 @@
 # Critique log
 
-> Last pass: 2026-09-25 at commit 6619fc10
-> Pass count: 50
+> Last pass: 2026-09-25 at commit e073bb6e
+> Pass count: 51
 
 > External-observer feedback for Axiomancer. Populated by
 > `/critique` (which drives the local expo-web build with the
 > `playtester` agent — there is no hosted URL), drained by
 > `/iterate`. See `skills/critique.md` for the contract and
 > `plan/bearings.md` § Surface for the local-build adaptation.
+
+> **[critique pass 51, 2026-09-25, commit e073bb6e] Unattended `/march`
+> tick.** Used the non-MCP `critique:drive` transport (§3.5,
+> `CRITIQUE_VIEWPORT=both`), mobile (375×812) and desktop (1280×800),
+> against the full 11-screen set (title, onboarding, combat preview,
+> live combat-board, exploration hub, dialogue, village, cutscene,
+> rest, hazard, late-game hub) — 22 captures, 0 nav trouble, 0
+> console/page errors. Read every screenshot directly across both
+> viewports. This pass lands right after the T2a trim merge
+> (`cb178978`/`e073bb6e` — legacy d20 pipeline + derived-stats cut) and
+> its CI-repair follow-up; confirmed no visible regression from that
+> work on any of the 11 screens. Previously-filed candidates
+> reconfirmed unchanged and not re-filed: the village "Void
+> Essence"/"Heart Draught" wearer wording (pass 41, still Pending), the
+> dialogue reply-card label echo ("WHAT NEEDS DOING?"/"LEAVE HIM BE.",
+> still Pending), the mobile and desktop combat-board's DoT paid-value
+> chip mid-token wrap (`SPOILED POULTICE` → "8/p"/"ay", pass 49, still
+> Pending; desktop `THE LONG LENT` "Deal 14" chip also still wraps at
+> the same card width), the late-game hub's faint unlabeled desktop
+> oval (declined per pass 34/39/40, still ambiguous). The relics'
+> description-repeats-signature-name pattern (e.g. Gorgon Brand: "A
+> blade that turns the argument to stone. Grants The Stilling.") was
+> checked against `relic.library.ts` and confirmed to be the
+> deliberate house format across all 11 relics, not a copy bug — not
+> filed. Zero fresh findings this pass.
 
 > **[critique pass 50, 2026-09-25, commit 6619fc10] Unattended `/march`
 > tick.** Used the non-MCP `critique:drive` transport (§3.5,
