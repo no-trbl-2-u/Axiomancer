@@ -81,14 +81,12 @@
   `.claude/skills/{brainstorm-mechanics,character-spec,story-spec}/SKILL.md`.
 - `axiomancer-mechanics/specs/35-objective-function-v2.md` (already
   HISTORICAL) — cited by `.claude/agents/card-expert.md:109` and
-  `.claude/commands/combat-playtest.md:46` (and `deck-tuning.md`, which D10
-  deletes).
-- `axiomancer-mechanics/docs/reports/swap-pool-fanout-2026-07-18.md` — cited
-  only by `.claude/commands/deck-tuning.md:626` (deleted by D10) and
-  `plan/PHASE_CANDIDATES.md:298`; archive it once the D10 deletion lands.
+  `.claude/commands/combat-playtest.md:46` (`deck-tuning.md` is gone, D10).
+- ~~`swap-pool-fanout-2026-07-18.md`~~ — archived in the T5 residue once
+  D10 deleted `deck-tuning.md` (now under `plan/archive/2026-09-25-trim-t5/`).
 - **next:** in an attended session, repoint the `.claude/` citations to
   `plan/archive/2026-09-25-trim-t5/...` (or to the live replacement doc), then
-  archive profane-canon, spec 10, spec 35 and swap-pool-fanout the same way.
+  archive profane-canon, spec 10 and spec 35 the same way.
 - **Hazard duplicates (spec row "hazard docs ×3"):** only one was a true
   copy — the mobile mirror `design/encounters/hazard-card-library.md`,
   archived in T5 (the mechanics file is the one copy). The mobile

@@ -215,7 +215,9 @@ file): 1 → real hooks per stat; 2 → wire an entry (Labyrinth leaves
 every trim count); 4 → collapse the flag; 5 → deletion allowed for
 binaries, raw output, vendored scans, e2e output. 3 → cut GLYPHS,
 defer card upgrades (D8); 6 → move resolved rows in T4 (D9); 7 → retire
-all eight commands (D10). Nothing open.
+all eight commands (D10). Nothing open. The Tier 3 blocks outside §5 were
+balloted in T5: Codex cut (D18), Debug\* tools kept (D19), die growth and
+`bankedSouls` kept (D20). T1–T5 all merged 2026-09-25 (#369–#380).
 
 1. **Stat model direction** (Tier 3 row 1). Recommendation: (b), real
    hooks, because item 3 of the strategy needs them anyway.

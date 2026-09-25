@@ -739,9 +739,10 @@ ambiguity.)
   adjustments land. Record and evidence:
   `plan/2026-09-25-refactor-strategy.decisions.md`. Never re-ask
   restart/purge; never propose a procedural map generator. Progress:
-  trim phases T1-T3 merged 2026-09-25; T4 (`plan/` compaction) is this
-  pass; T5 (Tier-3 blocks) pending — `plan/2026-09-25-trim-the-fat.spec.md`
-  §4.
+  the trim (T1-T5, #369-#380) is complete as of 2026-09-25; next is the
+  D2 map re-authoring (D15/D16), then the D4 stat hooks + damage-scaling
+  formula, then the card rework (decides D8 card upgrades and D20 die
+  growth). Never re-propose cutting the Debug\* tools (D19).
 
 ## AUDIT category taxonomy (this project)
 

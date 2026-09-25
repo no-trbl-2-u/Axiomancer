@@ -148,14 +148,37 @@ Continue lands on the map, which reopens the saved foe as a fresh fight
 WITHDRAW) and resolving the save as a flee. Accepted cost: quitting a
 losing fight resets it to pre-fight HP. Shipped in T3 (#374).
 
+**D18 — The "Codex" aesthetic: cut.** (T, 2026-09-25, T5 ballot.) The
+dev-toggle-only cold-codex mode (`aesthetic-mode`, `AestheticDevToggle`,
+`ExplorationCodexHeader`, `exploration.codex.engine`) changed one header and
+nothing else. *Rejected:* finishing it as a player-facing mode. Shipped in
+T5 (#380).
+
+**D19 — The Debug\* tools: keep all.** (T, 2026-09-25, T5 ballot.) The
+manual-only Debug\* components stay beside the CI-driven ones: dev-only,
+outside the player path, and T's daily local-play shortcuts. *Rejected:*
+cutting everything no CI testID drives. Do not re-propose the cut in trim
+or audit passes.
+
+**D20 — Die growth and banked souls: keep; wire with the card rework.**
+(T, 2026-09-25, T5 ballot.) `bonusTurnDice` / `dieUpgradeLevel` stay (the
+engine reads them; only the stage-profile sim sets them today) and get a
+real grant path in the card rework (D1 step 4), alongside card upgrades
+(D8). `bankedSouls` stays: combat writes it and the memoir's soul line
+reads it, so it was never dead. *Rejected:* cutting the die fields (it
+would change the sim's late-stage numbers).
+
 ## Open follow-ups
 
 - Audit tick (D1 step 1, D3 scope) — DONE 2026-09-25; keep/cut list and
   sequencing in `plan/2026-09-25-trim-the-fat.spec.md`. **T1–T4 merged
   2026-09-25** (T1 #369, T2a #370 + fix `e073bb6e`, T2a baselines #371,
-  T2a residue #372, T2b #373, T3 #374, T4 #375). **T5 is next**; pick-up
-  prompt: `plan/2026-09-25-trim-t5-handoff.prompt.md`. §5 of the spec is
-  fully answered (D4–D10).
+  T2a residue #372, T2b #373, T3 #374, T4 #375). **T5 merged 2026-09-25**:
+  GLYPHS cut #376 (D8), eight commands retired #378 (D10; rebuild `/jot`
+  row on main `1fc33003`), Tier 2 docs archive #377, platform icons #379,
+  Codex cut #380 (D18). D19/D20 keep the Debug\* tools and die growth.
+  **TRIM THE FAT is complete.** Leftover: the `.claude`-cited docs row at
+  the top of `plan/AUDIT.md` Pending (profane-canon, specs 10/35).
 - Map re-authoring brief (D2) — parameters set by D16 (4 regions, ~20
   nodes/map, spread in all directions). Graph first, backdrop second (D15).
 - Backdrop-anchored map renderer (D15) — nodes in image coordinates,

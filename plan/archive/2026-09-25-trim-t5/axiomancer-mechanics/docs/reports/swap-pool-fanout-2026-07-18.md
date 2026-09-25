@@ -1,5 +1,8 @@
 # Swap-pool fan-out — 2026-07-18
 
+> **Status:** HISTORICAL — archived 2026-09-25 (trim T5). The ten swap sets it
+> ledgers were cleared by the Profane Canon reset; `/deck-tuning` was retired (D10).
+
 **What shipped:** ten per-theme sandbox card sets (`swap-<theme>`,
 `src/Cards/swap-pool/<theme>.swap-pool.ts`) — 300 new SPELLS (30 per theme,
 10 commons / 12 uncommons / 8 rares each) authored as `/deck-tuning`

@@ -1,5 +1,10 @@
 # Prompt: TRIM THE FAT — T5 and the leftover Tier 2 docs rows
 
+> **Status:** EXECUTED 2026-09-25 (attended). §1.1 GLYPHS #376 · §1.2
+> commands #378 + `/jot` `1fc33003` · §1.3 docs #377 · §1.4 icons #379 ·
+> §1.5 ballot answered as D18 (Codex cut, #380), D19 (Debug\* kept), D20
+> (die growth kept). Do not re-run. Next steps: §3.
+
 > Written 2026-09-25 at T's direction, after T1–T4 merged (#369–#375).
 > Read first, in order: `plan/2026-09-25-refactor-strategy.decisions.md`
 > (D1–D17), `plan/2026-09-25-trim-the-fat.spec.md` (§ Tier 2, Tier 3, §6

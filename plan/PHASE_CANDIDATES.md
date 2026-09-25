@@ -287,8 +287,9 @@
   measurement-seat candidates; the `+swap:` deck grammar and multi-set
   `--sandbox` lists are live; contract pinned by
   `swap-pool.engine.test.ts`. Full ledger:
-  `axiomancer-mechanics/docs/reports/swap-pool-fanout-2026-07-18.md`.
-- shape: a `/deck-tuning` pass swapping candidates into preset seats
+  `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/reports/swap-pool-fanout-2026-07-18.md`.
+- shape: an `/adjust-cards` pass (was `/deck-tuning`, retired T5/D10)
+  swapping candidates into preset seats
   (control = unswapped recipe, same seeds), leading with the estimator's
   trial-first picks and the flagged spam-risk cards; delivers evidence
   tables + proposed preset compositions on its own PR, never auto-merged.
@@ -411,8 +412,8 @@
   home carriers), weight commons (the current pyramid is inverted at 43%
   rare), live in sandbox sets; a candidate enters a recipe only by beating
   the incumbent seat in swap-variant A/Bs across ≥2 stages and ≥2 policies.
-- execution: `/deck-tuning` (the skill's swap-pool candidate program bullet,
-  added same day). Interacts with the trim/duplication row above (same
+- execution: `/adjust-cards` (was `/deck-tuning`'s swap-pool candidate
+  program bullet; that command was retired in T5, D10). Interacts with the trim/duplication row above (same
   seats) and D8 (valves move the curve the candidates are judged against).
 - promotion path (owner-ratified /oversight 2026-07-20): ruling R1
   (pool = tuning-only, refused-by-default) is SUPERSEDED for the promotion
@@ -420,7 +421,7 @@
   standing path: measured A/B (≥2 stages ×2 policies, identical seeds) →
   owner ballot → recolor-not-repartition → combined-matrix re-verify → pins
   in the same PR (template: `plan/archive/2026-09-25-trim-t4/plan/tuning/2026-07-19-swap-pool-promotions-residue.md`
-  §E). `/deck-tuning` may propose promotions against this path without
+  §E). `/adjust-cards` may propose promotions against this path without
   re-asking the policy.
 
 ### The Incompleteness premiseShed — close the CONCEDE hole at impossible (owner-ruled 2026-07-18)
