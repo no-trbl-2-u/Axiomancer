@@ -56,8 +56,9 @@ through that skill rather than a second curator.
 
 ## Open follow-ups
 
-- Audit tick (D1 step 1, D3 scope) — not yet started; first deliverable
-  is the keep/cut list, not deletions.
+- Audit tick (D1 step 1, D3 scope) — DONE 2026-09-25; keep/cut list and
+  sequencing in `plan/2026-09-25-trim-the-fat.spec.md`. Deletions not
+  started; §5 of that spec lists the owner decisions gating Tier 3.
 - Map re-authoring brief (D2) — needs the region count and target node
   count per map before authoring.
 - Scaling formula (D1 step 3) — needs T's call on which stat(s) drive
