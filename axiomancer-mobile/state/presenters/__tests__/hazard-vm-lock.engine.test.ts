@@ -7,7 +7,7 @@
  * surfaces (enchantments / vow / choose). Any change to the hazard UI/UX
  * contract — a renamed field, a dropped surface, a new view affordance —
  * trips these snapshots so it is surfaced and consciously re-blessed
- * (`jest -u`) with a note in `docs/hazard-card-expansion-2026-06-11-spec.md`,
+ * (`jest -u`) with a note in `axiomancer-mechanics/docs/hazard-card-expansion-2026-06-11-spec.md`,
  * never slipped in silently.
  *
  * It locks the SHAPE, not the numbers, so deliberate balance tweaks do not

@@ -5,7 +5,7 @@
 > screen `app/hazard/`, components `components/hazard/`. Final rules follow
 > the Claude Design handoff prototype plus user-confirmed doctrine (notably:
 > dice never re-cast between rounds on either route). Where this brief and the
-> shipped rules differ, see `docs/hazard-v2-vs-mechanics-divergence.md`.
+> shipped rules differ, see `plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/hazard-v2-vs-mechanics-divergence.md` (archived 2026-09-25).
 
 > **Design-first phase output.** This document translates the mechanics-repo Hazard Minigame doctrine (CDR-0006) into mobile presentation guidance. The mechanics repo owns rules, state, dice, cards, scoring, and tuning. Mobile owns clarity, touch flow, presenter shape, and player comprehension.
 
@@ -412,7 +412,7 @@ The screen should answer the immediate question first: **what do I need, what ca
 - **Implemented (2026-06-11):** the `aura` effect adds session `modifiers` for the
   rest of the hazard; the board renders an `ENCHANTMENTS` strip (chips) below the
   meter listing each active modifier, plus a primed gold-VOW chip. See
-  `docs/hazard-card-expansion-2026-06-11-spec.md`.
+  `axiomancer-mechanics/docs/hazard-card-expansion-2026-06-11-spec.md`.
 
 ### Two-Tone (Multi-Colour) — added 2026-06-11
 

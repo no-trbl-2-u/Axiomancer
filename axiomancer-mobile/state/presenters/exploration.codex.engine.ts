@@ -9,7 +9,7 @@
  * Design source: `design/handoff-2026-05-16/project/app.jsx`
  * `function ScreenWildsCodex` — the `REGION/... · DAY=... ·
  * STATE=...` line at the top. Mobile doesn't carry a day counter
- * yet (engine-gated — see `design-spec.md` item 14 and
+ * yet (engine-gated — see `plan/archive/2026-09-25-trim-t1/axiomancer-mobile/design-spec.md` item 14 (archived 2026-09-25) and
  * `plan/AUDIT.md`), so the strip renders only what the
  * exploration VM actually exposes: region + current-node id.
  */

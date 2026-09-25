@@ -12,7 +12,7 @@ verify gates, and pointers to deeper docs.
 
 See [`VISION.md`](./VISION.md) for T's current game vision and doctrine guardrail before major mechanics, combat, friendship, or balance work.
 
-See [`RELEASES.md`](./RELEASES.md) for short-form per-version
+See `CHANGELOG.md` (and the archived `plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/RELEASES.md`) for short-form per-version
 summaries (at-a-glance "what shipped in 0.X.Y?"),
 [`CHANGELOG.md`](./CHANGELOG.md) for the full per-phase detail per
 release (both historical logs from the pre-monorepo npm era),
@@ -185,8 +185,7 @@ src/
   Utils/                   # math, dice, stat derivation, type guards
   CLI/                     # interactive CLIs (not exported by the package)
 docs/                      # design notes per system
-docs/effects/              # one markdown per buff/debuff
-docs/references/           # source material (fallacies, paradoxes, pantheon, Mörk Borg)
+docs/references/           # source material (Mörk Borg)
 specs/                     # implementation specs (numbered 01–35, with story/world/character subdirs from Phase 22)
 content/                   # author's notebook: characters / locations / story (not loaded by engine)
 ../plan/                   # build plan, phase briefs, AUDIT.md, CRITIQUE.md, PHASE_CANDIDATES.md (monorepo root)
@@ -213,8 +212,7 @@ automation/                # standalone walkthrough script + replay fixtures
 - [`specs/`](./specs) — implementation specs (`00-how-to-use-specs.md` is the template; `story/` / `world/` / `characters/` hold the Phase 22 narrative specs)
 - [`docs/`](./docs) — per-system references (combat, effects, character, world, etc.)
 - [`docs/api.md`](./docs/api.md) — Public API reference (stability levels + RN integration recipe)
-- [`docs/effects/`](./docs/effects) — per-effect deep-dives (one file per buff/debuff; see `docs/effects/README.md` first)
-- [`docs/references/`](./docs/references) — source material (fallacies, paradoxes, pantheon, story)
+- [`docs/references/`](./docs/references) — source material (Mörk Borg; fallacies/paradoxes/pantheon archived 2026-09-25)
 
 ## Scripts
 

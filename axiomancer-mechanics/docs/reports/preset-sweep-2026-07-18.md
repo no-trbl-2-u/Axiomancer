@@ -103,7 +103,7 @@ dWR columns) reproduce deterministically from the command above.
 Superseded in resolution by the full-matrix accumulation: all 8 policies ×
 runs=60 × both dice arms × two seeds (345,600 encounters), per-preset card
 telemetry, and a de-confounded per-cell dWR estimator. Data:
-`docs/reports/preset-metrics/2026-07-18-*.json` + `2026-07-18-analysis-tables.md`;
+`docs/reports/preset-metrics/2026-07-18-*.json` (deleted 2026-09-25, T1) + `2026-07-18-analysis-tables.md` (archived: `plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/reports/preset-metrics/`);
 reading: `plan/tuning/2026-07-18-card-library-metrics-accumulation.md`.
 Headlines survive at full resolution; new on top: the flag-ON (live, post-FLIP)
 arm sits 5–24 points below this sweep's flag-OFF numbers with statusEngagement

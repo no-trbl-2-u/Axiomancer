@@ -447,7 +447,7 @@ export type { QuestRewardPayout } from './World';
 // The full public surface (engine transitions, content, tuning, deck-flag
 // codec, seeded RNG, and types) is exported directly from the Hazard module;
 // mobile has deleted its local engine and imports these.
-// See `docs/hazard-v2-vs-mechanics-divergence.md`.
+// See `plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/hazard-v2-vs-mechanics-divergence.md` (archived 2026-09-25).
 export * from './World/Hazard';
 
 // Quest Board minigame ("The Boy's Almanac") — retired in Phase 61; nothing

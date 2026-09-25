@@ -313,7 +313,7 @@ export const NO_CALENDAR_PRICING_ROUNDS = 4;
  * horizon, NOT a per-stage one (that would break scoreCard's stage-
  * independence and re-litigate the late wall through the price lever the
  * erosion ladder proves cannot climb it). Source:
- * `scratch/price-experiment/report/FINDINGS.md` rec #2.
+ * `plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/scratch/price-experiment/report/FINDINGS.md` rec #2 (archived 2026-09-25).
  * // PLAYTEST-CALIBRATION (seeds=2 origin makes the exact p provisional —
  * // /deck-tuning is the empirical court for a higher-seed confirmation)
  */

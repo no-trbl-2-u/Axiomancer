@@ -2,7 +2,7 @@
  * Hazard Parity Audit Tests
  *
  * Hermetic e2e tests verifying mechanics implementation matches documented
- * mobile behavior from `docs/hazard-v2-vs-mechanics-divergence.md`.
+ * mobile behavior from `plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/hazard-v2-vs-mechanics-divergence.md` (archived 2026-09-25).
  * Tests key mobile behavior requirements to ensure parity.
  */
 

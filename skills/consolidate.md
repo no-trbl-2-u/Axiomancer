@@ -102,7 +102,7 @@ own loop shape with its own cadence.
      grows via the curator, not via ad-hoc 3-day cleanups.
    - **Dated doc posing as current law** → add a `**Status:**
      HISTORICAL` banner (existing convention — see
-     `docs/hazard-pattern-combat-reconciliation-gaps.md`).
+     `docs/hazard-pattern-combat-reconciliation-gaps.md`, archived 2026-09-25).
    - **Suspected-dead agent-facing file** (references a removed
      system, e.g. an engine path deleted per a lexicon row) →
      flag it as a `plan/AUDIT.md` finding. Do not delete it —

@@ -71,7 +71,7 @@ export const RESOLUTE_MIN_MULT = 0.5;
  *  emptying the whole bank IS the price.
  *  // PLAYTEST-CALIBRATION (swept 2026-07-12, spec 32 §12 item 5): the ratified
  *  //  sweep F ∈ {0.25, 0.35, 0.45, 0.60} ran the full matrix + Foundry/Tithe
- *  //  preset probes at seeds 1-2 (docs/reports/rebaseline-scratch/sweep-F*).
+ *  //  preset probes at seeds 1-2 (docs/reports/rebaseline-scratch/sweep-F*, raw output deleted 2026-09-25; findings archived under plan/archive/2026-09-25-trim-t1/).
  *  //  0.60 WON: Foundry (the RUPTURE preset) lifts monotonically with F
  *  //  (greedy early 57.8→64.8%, mid 0→1.4%) while the policy-pick matrix is
  *  //  F-invariant (early 85.1% at every F — in band) and dominance never

@@ -103,7 +103,7 @@ sandbox registry pin also cover all 300 automatically.
 
 ## The estimates ledger (post-merge addendum, same day)
 
-`swap-pool-estimates-2026-07-18.json` (this directory) carries the
+`swap-pool-estimates-2026-07-18.json` (this directory; deleted 2026-09-25, T1) carried the
 per-card DESIGN ESTIMATES a second card-expert pass produced after the
 merge: for each of the 300 cards — why it exists (<=12 words), expected
 effect on its preset if seated, the recipe seat it contends for,

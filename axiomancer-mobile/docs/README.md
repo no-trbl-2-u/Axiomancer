@@ -29,26 +29,10 @@ upgrade guides were removed (git history preserves them).
 | File | Coverage | Priority |
 |------|----------|----------|
 | [`engine-integration-architecture.md`](./engine-integration-architecture.md) | How the app consumes the engine | **HELPFUL** |
-| [`engine-map-reconciliation-2026-05-24.md`](./engine-map-reconciliation-2026-05-24.md) | Map system reconciliation notes | **HELPFUL** |
-
-## UI audit documentation
-
-| File | Screen Coverage | Priority |
-|------|-----------------|----------|
-| [`mechanics-ui-audit-2026-05-22-character.md`](./mechanics-ui-audit-2026-05-22-character.md) | Character screen UI audit | **REFERENCE** |
-| [`mechanics-ui-audit-2026-05-22-event.md`](./mechanics-ui-audit-2026-05-22-event.md) | Event handling UI audit | **REFERENCE** |
-| [`mechanics-ui-audit-2026-05-22-exploration.md`](./mechanics-ui-audit-2026-05-22-exploration.md) | Exploration screen UI audit | **REFERENCE** |
-| [`mechanics-ui-audit-2026-05-22-inventory.md`](./mechanics-ui-audit-2026-05-22-inventory.md) | Inventory screen UI audit | **REFERENCE** |
-| [`mechanics-ui-audit-2026-05-22-memoir.md`](./mechanics-ui-audit-2026-05-22-memoir.md) | Memoir screen UI audit | **REFERENCE** |
 
 ## Hazard minigame documentation
 
-| File | Coverage | Priority |
-|------|----------|----------|
-| [`hazard-balance-recommendations.md`](./hazard-balance-recommendations.md) | Game balance tuning recommendations | **REFERENCE** |
-| [`hazard-card-expansion-2026-06-11-spec.md`](./hazard-card-expansion-2026-06-11-spec.md) | Card expansion specification | **REFERENCE** |
-| [`hazard-playtest-2026-06-10-spec.md`](./hazard-playtest-2026-06-10-spec.md) | Playtest specification and results | **REFERENCE** |
-| [`hazard-v2-vs-mechanics-divergence.md`](./hazard-v2-vs-mechanics-divergence.md) | Version differences and reconciliation | **REFERENCE** |
+The hazard docs live in `axiomancer-mechanics/docs/` (`hazard-balance-recommendations.md`, `hazard-card-expansion-2026-06-11-spec.md`, `hazard-playtest-2026-06-10-spec.md`); the mobile copies and `hazard-v2-vs-mechanics-divergence.md` were archived 2026-09-25 to `plan/archive/2026-09-25-trim-t1/`.
 
 ## Design and UX documentation
 
@@ -56,7 +40,6 @@ upgrade guides were removed (git history preserves them).
 |------|----------|----------|
 | [`combat.md`](./combat.md) | Combat system design documentation | **HELPFUL** |
 | [`early-combat-ux.md`](./early-combat-ux.md) | Combat UX evolution and design decisions | **REFERENCE** |
-| [`claude-design-prompt-2026-05-16.md`](./claude-design-prompt-2026-05-16.md) | Design handoff documentation and prompts | **REFERENCE** |
 
 ## Architecture Decision Records (ADRs)
 
@@ -81,12 +64,6 @@ See [`adr/README.md`](./adr/README.md) for ADR process and templates.
 |------|----------|----------|
 | [`source-of-truth-hierarchy.md`](./source-of-truth-hierarchy.md) | Decision-making authority and conflict resolution | **ESSENTIAL** |
 | [`store-submission-checklist.md`](./store-submission-checklist.md) | App store submission process and requirements | **REFERENCE** |
-
-## AI assistance and templates
-
-| File | Coverage | Priority |
-|------|----------|----------|
-| [`prompts/onboarding-interview.prompt.md`](./prompts/onboarding-interview.prompt.md) | AI-assist onboarding interview template | **REFERENCE** |
 
 ## Navigation
 

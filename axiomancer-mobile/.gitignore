@@ -70,6 +70,10 @@ app-example
 /ios
 /android
 screenshots/hazard-e2e/
+# e2e run output (scripts/upgradeable-dice-e2e.mjs, scripts/combat-encounter-e2e.mjs);
+# removed from git 2026-09-25 (TRIM THE FAT T1, D6).
+screenshots/upgradeable-dice-e2e/
+screenshots/combat-redesign/
 # combat-round-e2e run artefacts — per-seed final/CRASH shots + result.json,
 # rewritten on every invocation. Diagnostics for the run in front of you, not
 # baselines; ~9MB a sweep, so never committed.

@@ -22,8 +22,8 @@
 >
 > Related docs:
 > - `docs/encounters/hazard.md` — encounter rules and engine API
-> - `docs/hazard-card-expansion-2026-06-11-spec.md` — expansion spec (authored pre-implementation)
-> - `docs/hazard-balance-recommendations.md` — balance evidence
+> - `axiomancer-mechanics/docs/hazard-card-expansion-2026-06-11-spec.md` — expansion spec (authored pre-implementation)
+> - `axiomancer-mechanics/docs/hazard-balance-recommendations.md` — balance evidence
 
 ---
 

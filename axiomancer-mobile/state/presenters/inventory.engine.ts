@@ -529,7 +529,7 @@ function readShilling(state: GameStore): number {
     // mobile chrome label for the same value — the VM field name +
     // the SHILLING screen literal carry the voice-register choice.
     // Closes the [2.5] DRIFT row from
-    // `docs/mechanics-ui-audit-2026-05-22-inventory.md` row 7: the
+    // archived `plan/archive/2026-09-25-trim-t1/axiomancer-mobile/docs/mechanics-ui-audit-2026-05-22-inventory.md` row 7: the
     // earlier `p.shilling ?? p.currency` fallback hid which engine
     // field was canonical; no save / migration / fixture writes
     // `shilling` (cross-tree grep confirms) so the fallback was
@@ -546,7 +546,7 @@ function computeBurden(rows: readonly InventoryItemRow[]): number {
     // correct because the bar can't visualize "more than full" —
     // but the numeric text on the label row carries the overflow
     // signal. Closes the [3.0] DRIFT row from
-    // `docs/mechanics-ui-audit-2026-05-22-inventory.md` row 11.
+    // archived `plan/archive/2026-09-25-trim-t1/axiomancer-mobile/docs/mechanics-ui-audit-2026-05-22-inventory.md` row 11.
     return rows.reduce((acc, r) => acc + r.quantity, 0);
 }
 

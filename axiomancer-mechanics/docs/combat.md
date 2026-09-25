@@ -603,7 +603,7 @@ progression levers.
 > "Spec 26b" (stance draft / Conviction / Signature Skills / deckbuilder) is
 > in-flight scaffolding carried in via PR #184; it has no spec file of its own
 > yet, and is distinct from
-> [`specs/26-catalyst-multiplicative-scaling.md`](../specs/26-catalyst-multiplicative-scaling.md).
+> [`specs/26-catalyst-multiplicative-scaling.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/specs/26-catalyst-multiplicative-scaling.md) (archived 2026-09-25).
 
 - **Stance draft + the read (dice-law rework 2026-07-09).** Each turn rolls
   `TURN_DICE_COUNT` (**3**) dice — an honest roll, no stance-die guarantee; the

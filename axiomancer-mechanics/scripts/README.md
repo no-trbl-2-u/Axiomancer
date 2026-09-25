@@ -6,7 +6,7 @@
 The former release-engineering layer (deploy gate, public-surface contract,
 autonomous-loop issue mirror) was removed at the monorepo merge:
 `axiomancer-mechanics` is consumed as local source via the `@mechanics`
-workspace alias, not published to npm. See `CHANGELOG.md` / `RELEASES.md` for
+workspace alias, not published to npm. See `CHANGELOG.md` for
 the historical record.
 
 ## Tools

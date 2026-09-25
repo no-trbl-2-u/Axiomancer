@@ -232,7 +232,7 @@ Each NPC demonstrates the alignment system across diverse life situations with m
   + `defaultSellPrice` reducers in `src/Items/shop.reducer.ts`; CLI
   affordance lives in `src/CLI/game.cli.ts` `shopLoop`. `NPC.isShopkeeper`
   is consulted by the dialogue runtime to route into the shop. See
-  [`docs/items.md`](./items.md#shop-economy-phase-37) for the engine
+  the archived [`docs/items.md`](../../plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/items.md#shop-economy-phase-37) for the engine
   description.
 - ~~Moral gating (read-side via `state.moralMeter`)~~ — Spec 10 Q4 locked
   `moralMeter` as narrative-only by design. The read-side gating

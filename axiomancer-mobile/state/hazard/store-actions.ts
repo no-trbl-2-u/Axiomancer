@@ -6,7 +6,7 @@
  * wrappers thread the session through the mobile store slice and, at
  * claim time, apply the outcome to the real engine `GameState`
  * (VITAE, max VITAE, currency, deck flags). See
- * `docs/hazard-v2-vs-mechanics-divergence.md` for what applies live
+ * `plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/hazard-v2-vs-mechanics-divergence.md` (archived 2026-09-25) for what applies live
  * vs. what is recorded as flags pending engine systems.
  */
 
@@ -84,7 +84,7 @@ export const HAZARD_TOKEN_FLAG_PREFIX = 'hazard-token-banked:';
  * is also baked into `player.maxHealth` at claim (the live effect); the
  * flag is the durable record an inn rest reads to restore the loss
  * toward baseline. Mobile-only adapter — `axiomancer-mechanics` owns no
- * scar-recovery truth (see docs/hazard-v2-vs-mechanics-divergence.md).
+ * scar-recovery truth (see the archived plan/archive/2026-09-25-trim-t1/axiomancer-mechanics/docs/hazard-v2-vs-mechanics-divergence.md).
  */
 export const HAZARD_SCAR_FLAG_PREFIX = 'hazard-scar:';
 

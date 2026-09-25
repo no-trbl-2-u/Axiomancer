@@ -59,7 +59,7 @@
     stated as current, not a mention of its retirement. Otherwise every
     reconciliation the lint asks for would create a new finding.
 - **Exempt by zone** (dated records, allowed to speak in period terms):
-  `CHANGELOG.md`, `RELEASES.md`, `braindump/`, `devlog/`, `plan/`
+  `CHANGELOG.md`, `braindump/`, `devlog/`, `plan/`
   (except `bearings.md`), `docs/reports/`, `docs/adr/`, `automation/`,
   and `specs/`.
 - **Exempt by banner:** a file whose head carries
