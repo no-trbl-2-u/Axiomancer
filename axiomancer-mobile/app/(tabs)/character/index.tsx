@@ -375,7 +375,7 @@ export default function CharacterScreen() {
         * two different numbers, so the heading now names this one as the
         * balance and a line under it states the relationship. Copy comes from
         * the presenter (`vm.graceCopy`); the screen carries no literal. */}
-      <View style={[styles.section, { marginTop: -18 }]}>
+      <View style={styles.section}>
         <SectionLabel size={13}>{vm.graceCopy.balanceHeading}</SectionLabel>
         <View style={styles.moraleRow}>
           <Text style={styles.moraleValue}>{Number.isFinite(vm.morale) ? vm.morale : 0}</Text>
