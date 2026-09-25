@@ -25,6 +25,7 @@ const baseIntent: CombatIntentVM = {
         // cases keep pinning exactly the behaviour they were written for.
         addDamage: 0, addNetDamage: 0, totalNetDamage: 10,
     },
+    stanceCheck: null,
 };
 
 describe('IntentIcon — wall-math readout', () => {

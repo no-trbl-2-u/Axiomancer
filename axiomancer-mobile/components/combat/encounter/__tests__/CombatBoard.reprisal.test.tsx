@@ -1,7 +1,7 @@
 /**
  * CombatBoard — REPRISE songbook interception (phase 28).
  *
- * APPLYing a staged `reprise`-mechanic card with a drafted die (a POWERED
+ * APPLYing a staged `reprise`-mechanic card with a chosen die (a POWERED
  * play — the only face reprise ever fires on) and a non-empty discard pile
  * must call `onReprisalNeeded` instead of `onApply`, so the panel can pop its
  * picker. Every other combination (no reprise mechanic, empty discard, or
@@ -13,14 +13,15 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 
 import {
-    initializeCombatEncounter, rollEncounterDice, draftStanceDie,
+    initializeCombatEncounter, rollEncounterDice,
     registerSandboxCards, clearSandboxCards,
 } from '@mechanics';
-import type { Card, CombatEncounterState, CombatDieColor } from '@mechanics';
+import type { Card, CombatEncounterState } from '@mechanics';
 import { CombatBoard, type DragController } from '@/components/combat/encounter/CombatBoard';
 import { buildCombatViewModel } from '@/state/presenters/combat-encounter.engine';
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
+import { tapCombatDie } from '@/test-utils/tapCombatDie';
 
 const CARDS = ['shallow-grave', 'spoiled-poultice'];
 
@@ -33,18 +34,18 @@ const boardCallbacks = () => ({
     onReprisalNeeded: jest.fn(),
 });
 
-/** Rolls dice, forces the pool to a known color, and drafts die 0 — mirrors
- *  the mechanics e2e `openAndDraft` helper so `vm.drafted` is a usable die. */
-function openAndDraft(player: ReturnType<typeof buildPlayer>, deck: string[], die: CombatDieColor): CombatEncounterState {
+/** The one tray die these fixtures hand the player. */
+const DIE = 't1-u-power';
+
+/** Rolls dice, then replaces the tray with ONE live MANA die matching
+ *  `cardId`'s colour — so choosing it (`tapCombatDie(DIE)`) makes the staged
+ *  card's APPLY a POWERED, colour-legal play. */
+function openWithDie(player: ReturnType<typeof buildPlayer>, deck: string[], cardId: string): CombatEncounterState {
     let s = initializeCombatEncounter(player, createMockEncounterEnemy(), deck, 7);
     s = rollEncounterDice(s).state;
-    const turn = s.turn || 1;
-    const dice = [die, 'x' as const].map((c, i) => ({
-        id: `t${turn}-d${i}`, color: c, state: (c === 'x' ? 'locked' : 'available') as 'locked' | 'available', temporary: false,
-    }));
-    s = { ...s, dice, draftedDieId: null, turn };
-    s = draftStanceDie(s, s.dice[0].id).state;
-    return s;
+    const stance = buildCombatViewModel(s).hand.find(c => c.cardId === cardId)!.stance;
+    const color = stance === 'any' ? 'wild' : stance;
+    return { ...s, dice: [{ id: DIE, color: color as 'heart' | 'body' | 'mind' | 'wild', face: 'mana', state: 'available', temporary: false }] };
 }
 
 function buildPlayer(store: ReturnType<typeof withAllProviders>['store']) {
@@ -55,10 +56,10 @@ function buildPlayer(store: ReturnType<typeof withAllProviders>['store']) {
 afterEach(() => { jest.clearAllMocks(); });
 
 describe('CombatBoard — REPRISE songbook interception', () => {
-    it('calls onReprisalNeeded (not onApply) for a powered reprise card with a non-empty discard', () => {
+    it('calls onReprisalNeeded (not onApply) for a powered reprise card with a non-empty discard', async () => {
         const { store } = withAllProviders(<></>);
         const player = buildPlayer(store);
-        let s = openAndDraft(player, CARDS, 'heart'); // shallow-grave is philosophicalAspect 'heart'
+        let s = openWithDie(player, CARDS, 'shallow-grave');
         s = { ...s, discard: ['unction-of-boils'] };
         const vm = buildCombatViewModel(s);
         const uid = vm.hand.find(c => c.cardId === 'shallow-grave')!.uid;
@@ -69,18 +70,19 @@ describe('CombatBoard — REPRISE songbook interception', () => {
             { store },
         );
         render(tree);
+        await tapCombatDie(DIE);
 
         fireEvent.press(screen.getByTestId(`combat-apply-${uid}`));
 
         expect(cbs.onReprisalNeeded).toHaveBeenCalledTimes(1);
-        expect(cbs.onReprisalNeeded).toHaveBeenCalledWith(uid, null, true, undefined);
+        expect(cbs.onReprisalNeeded).toHaveBeenCalledWith(uid, DIE, true, undefined);
         expect(cbs.onApply).not.toHaveBeenCalled();
     });
 
-    it('holds the deferred play (nothing consumed): a second APPLY re-defers with identical args, so a panel cancel restores the pre-play state', () => {
+    it('holds the deferred play (nothing consumed): a second APPLY re-defers with identical args, so a panel cancel restores the pre-play state', async () => {
         const { store } = withAllProviders(<></>);
         const player = buildPlayer(store);
-        let s = openAndDraft(player, CARDS, 'heart');
+        let s = openWithDie(player, CARDS, 'shallow-grave');
         s = { ...s, discard: ['unction-of-boils'] };
         const vm = buildCombatViewModel(s);
         const uid = vm.hand.find(c => c.cardId === 'shallow-grave')!.uid;
@@ -91,6 +93,7 @@ describe('CombatBoard — REPRISE songbook interception', () => {
             { store },
         );
         render(tree);
+        await tapCombatDie(DIE);
 
         // First APPLY defers; the board must NOT clear its staging bookkeeping
         // (the panel's backdrop can cancel). A second APPLY therefore defers
@@ -99,12 +102,12 @@ describe('CombatBoard — REPRISE songbook interception', () => {
         fireEvent.press(screen.getByTestId(`combat-apply-${uid}`));
 
         expect(cbs.onReprisalNeeded).toHaveBeenCalledTimes(2);
-        expect(cbs.onReprisalNeeded).toHaveBeenNthCalledWith(1, uid, null, true, undefined);
-        expect(cbs.onReprisalNeeded).toHaveBeenNthCalledWith(2, uid, null, true, undefined);
+        expect(cbs.onReprisalNeeded).toHaveBeenNthCalledWith(1, uid, DIE, true, undefined);
+        expect(cbs.onReprisalNeeded).toHaveBeenNthCalledWith(2, uid, DIE, true, undefined);
         expect(cbs.onApply).not.toHaveBeenCalled();
     });
 
-    it('threads the chosen X through the deferral (a deferred X-card must not fall back to min X)', () => {
+    it('threads the chosen X through the deferral (a deferred X-card must not fall back to min X)', async () => {
         // No library card carries both `reprise` and `recoil_x` today — author
         // a sandbox one so the combination stays covered as sets grow.
         const xReprise: Card = {
@@ -128,7 +131,7 @@ describe('CombatBoard — REPRISE songbook interception', () => {
         try {
             const { store } = withAllProviders(<></>);
             const player = { ...buildPlayer(store), knownCards: [...CARDS, xReprise.id] };
-            let s = openAndDraft(player, [xReprise.id, 'spoiled-poultice'], 'mind');
+            let s = openWithDie(player, [xReprise.id, 'spoiled-poultice'], xReprise.id);
             s = { ...s, discard: ['unction-of-boils'] };
             const vm = buildCombatViewModel(s);
             const card = vm.hand.find(c => c.cardId === xReprise.id)!;
@@ -141,6 +144,7 @@ describe('CombatBoard — REPRISE songbook interception', () => {
                 { store },
             );
             render(tree);
+            await tapCombatDie(DIE);
 
             // Step X up from the printed min, then APPLY: the deferral must
             // carry the stepped X, not silently drop it to the min.
@@ -148,17 +152,17 @@ describe('CombatBoard — REPRISE songbook interception', () => {
             fireEvent.press(screen.getByTestId(`combat-apply-${uid}`));
 
             expect(cbs.onReprisalNeeded).toHaveBeenCalledTimes(1);
-            expect(cbs.onReprisalNeeded).toHaveBeenCalledWith(uid, null, true, card.chooseX!.min + 1);
+            expect(cbs.onReprisalNeeded).toHaveBeenCalledWith(uid, DIE, true, card.chooseX!.min + 1);
             expect(cbs.onApply).not.toHaveBeenCalled();
         } finally {
             clearSandboxCards();
         }
     });
 
-    it('applies directly when the discard pile is empty (nothing to choose)', () => {
+    it('applies directly when the discard pile is empty (nothing to choose)', async () => {
         const { store } = withAllProviders(<></>);
         const player = buildPlayer(store);
-        const s = openAndDraft(player, CARDS, 'heart'); // discard starts empty
+        const s = openWithDie(player, CARDS, 'shallow-grave'); // discard starts empty
         const vm = buildCombatViewModel(s);
         const uid = vm.hand.find(c => c.cardId === 'shallow-grave')!.uid;
 
@@ -168,20 +172,21 @@ describe('CombatBoard — REPRISE songbook interception', () => {
             { store },
         );
         render(tree);
+        await tapCombatDie(DIE);
 
         fireEvent.press(screen.getByTestId(`combat-apply-${uid}`));
 
-        expect(cbs.onApply).toHaveBeenCalledWith(uid, null, true);
+        expect(cbs.onApply).toHaveBeenCalledWith(uid, DIE, true);
         expect(cbs.onReprisalNeeded).not.toHaveBeenCalled();
     });
 
-    it('applies directly for a non-reprise card even with a non-empty discard', () => {
+    it('applies directly for a non-reprise card even with a non-empty discard', async () => {
         const { store } = withAllProviders(<></>);
         const player = buildPlayer(store);
-        // slippery-slope is philosophicalAspect 'body' — the drafted die must
-        // match it: THE COLOR LAW gate (2026-07-12) demotes an off-color
-        // drafted die to the FREE action instead of routing a fizzle.
-        let s = openAndDraft(player, CARDS, 'body');
+        // The die matches spoiled-poultice's colour: THE COLOR LAW gate
+        // (2026-07-12) refuses an off-color die, which would demote the play
+        // to FREE and make this assertion pass for the wrong reason.
+        let s = openWithDie(player, CARDS, 'spoiled-poultice');
         s = { ...s, discard: ['unction-of-boils'] };
         const vm = buildCombatViewModel(s);
         const uid = vm.hand.find(c => c.cardId === 'spoiled-poultice')!.uid;
@@ -192,10 +197,11 @@ describe('CombatBoard — REPRISE songbook interception', () => {
             { store },
         );
         render(tree);
+        await tapCombatDie(DIE);
 
         fireEvent.press(screen.getByTestId(`combat-apply-${uid}`));
 
-        expect(cbs.onApply).toHaveBeenCalledWith(uid, null, true);
+        expect(cbs.onApply).toHaveBeenCalledWith(uid, DIE, true);
         expect(cbs.onReprisalNeeded).not.toHaveBeenCalled();
     });
 });

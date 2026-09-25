@@ -41,7 +41,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = resolve(__dirname, '..')
 const EXPORT_DIR = resolve(REPO_ROOT, '.critique-dist')
 const ARTIFACT_ROOT = resolve(REPO_ROOT, '.critique-artifacts')
-// Seed 16 rolls a draftable first die for the combat screen's demo deck (same
+// Seed 16 pins the tray roll for the combat screen's demo deck (same
 // pin the combat e2e uses), so the combat capture is deterministic.
 const COMBAT_SEED = 16
 

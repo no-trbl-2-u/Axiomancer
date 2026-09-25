@@ -325,7 +325,7 @@ async function playHazard(page, baseUrl, route, seed) {
     // (phase 47b: `web.output` moved to `"single"`, so there's no per-route
     // manifest for `expo-constants` to read), so the SELF → /dev affordance
     // this harness drives from needs the documented opt-in
-    // (lib/buildProfile.ts) — the same one upgradeable-dice-e2e sets. Inert
+    // (lib/buildProfile.ts) — the same one combat-round-e2e sets. Inert
     // in real builds: nothing sets the global there.
     await page.addInitScript(() => { globalThis.__AXM_FORCE_DEV_TOOLS__ = true })
     await page.goto(`${baseUrl}/character`, { waitUntil: 'networkidle' })

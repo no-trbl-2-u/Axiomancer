@@ -14,7 +14,7 @@
 
 ## Entry points
 
-Combat is a card-and-dice-drafting surface hosted by
+Combat is a card-and-dice surface hosted by
 [`<CombatEncounterPanel>`](../components/combat/encounter/CombatEncounterPanel.tsx),
 mounted from two places:
 
@@ -31,8 +31,8 @@ mounted from two places:
 CombatEncounterState (pure, from axiomancer-mechanics)
         │  held in <CombatEncounterPanel>'s local React state
         │  advanced by calling engine transition functions directly
-        │  (initializeCombatEncounter, rollEncounterDice, draftStanceDie,
-        │   playCombatCard, endTurn, resolveThreatPhase, playSignatureSkill, …)
+        │  (initializeCombatEncounter, rollEncounterDice, playCombatCard,
+        │   endTurn, resolveThreatPhase, playSignatureSkill, …)
         ▼
 buildCombatViewModel(state)  ──►  CombatViewModel
   (state/presenters/combat-encounter.engine.ts)
@@ -60,7 +60,7 @@ The engine's `CombatEncounterState.phase` (`CombatEncounterPhase` in
 |---|---|
 | `reveal` | Enemy + opening hand visible, before dice are rolled. |
 | `dice-roll` | Player rolls stance dice (`rollEncounterDice`). |
-| `phase-play` | Player plays cards (`draftStanceDie`, `playCombatCard`, `endTurn` to re-roll). |
+| `phase-play` | Player plays cards (`playCombatCard` with the chosen die; `endTurn` banks one unspent die). |
 | `phase-resolve` | Effect kinds compared, enemy threat action fires, phase graded Clear/Overwhelmed (`resolveThreatPhase`). |
 | `between-phases` | DoT ticks, durations tick, hand draws back to 5. |
 | `mercy-choice` | Control Saturation opened the spare/exploit modal (`selectMercyChoice`). |
@@ -68,10 +68,11 @@ The engine's `CombatEncounterState.phase` (`CombatEncounterPhase` in
 
 ## Turn flow (Spec 26b)
 
-Per turn, inside `phase-play`: **reveal → roll 2 dice → DRAFT one as your
-stance die (the other converts to Conviction) → drag the drafted die onto
-a staged card to POWER it → END TURN to discard + re-roll → END PHASE to
-resolve the threat phase.**
+Per turn, inside `phase-play` (spec 33, the Upgradeable-Dice model — the
+only combat model since the D7 flag collapse): **reveal → roll the four
+fixed-colour dice (each shows a SPECIAL, MANA or MISS face) → drag any live
+die onto a staged card of its colour (WILD powers any) to POWER it → END
+PHASE to bank one unspent die and resolve the threat phase.**
 
 The drag-to-power interaction model (unchanged since introduction, per
 `CombatBoard.tsx`'s own header comment):
@@ -81,11 +82,11 @@ The drag-to-power interaction model (unchanged since introduction, per
 2. Drag a **die** onto the staged card to power it — this only *selects*
    the die; it isn't committed yet, and can be re-dragged to a different
    card.
-3. Read the card's live keyword line (stance-read + projected hit).
+3. Read the card's live keyword line (the projected hit).
 4. Tap **APPLY** (the ribbon fused to the staged card) to commit.
 
-A landed status effect refreshes the drafted die (the combo loop): it
-returns to the tray draggable ("↻ AGAIN") for another card via an
+A die powers only the card it was dropped (or tapped) onto. A die a
+refresh rider hands back stays live in the tray for another card via an
 explicit re-drop — it never auto-attaches to the next staged card.
 
 ## Board layout
@@ -111,10 +112,9 @@ plus transient FX (`CombatFx`).
 
 `CombatViewModel` (`state/presenters/combat-encounter.engine.ts`) is the
 single frozen object the board renders — `phase`, `enemy`, `player`,
-`dice`, `hand`, `read`, `conviction`, `signatures`, `resonance`,
-`momentum` (and the flag-gated Spec 33 `momentumV2` / `playerStance` /
-`dieGear` / `pressFate` variants), plus draft-state flags (`drafted`,
-`hasDraft`, `needsDraft`, `diceRolled`). See the file's own interfaces
+`dice`, `hand`, `conviction`, `signatures`, `resonance`, the Spec 33
+`momentumV2` / `playerStance` / `dieGear` / `pressFate` surfaces, and
+`diceRolled`. See the file's own interfaces
 (`CombatEnemyPaneVM`, `CombatPlayerPaneVM`, `CombatCardVM`, `CombatDieVM`,
 …) for the full per-region shape — they're the source of truth, not this
 doc.

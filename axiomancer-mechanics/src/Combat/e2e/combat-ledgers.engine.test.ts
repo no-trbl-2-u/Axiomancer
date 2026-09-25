@@ -75,7 +75,7 @@ function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatE
         state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
         face: c === 'x' ? ('miss' as const) : ('mana' as const),
     }));
-    return { ...state, dice, draftedDieId: null, turn };
+    return { ...state, dice, turn };
 }
 
 /** A single authored damage-only threat phase (loops as the final phase). */

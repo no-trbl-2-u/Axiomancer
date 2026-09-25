@@ -1,19 +1,18 @@
 /**
- * Spec 33 (Phase D6a) — flag-on combat render CORE, presenter contract.
+ * Spec 33 (Phase D6a) — combat render CORE, presenter contract.
  *
- * Pins the three view-model surfaces the flag-on dice tray + Press Fate control
- * read, against the REAL engine + presenter:
+ * Pins the view-model surfaces the dice tray + Press Fate control read,
+ * against the REAL engine + presenter:
  *   1. the CombatDieVM face axis (special / mana / miss) + the OVERHEAT `cracked`
  *      read, and that a MISS face is DEAD (never draggable);
  *   2. the Press-Fate VM (enabled / disabled + the loud refusal reason), mirroring
- *      the engine's `playSignatureSkill` reroll gate;
- *   3. FLAG-OFF is byte-identical — no `face` / `cracked` keys reach the tray VM,
- *      `pressFate` is null, and draggability is unchanged.
+ *      the engine's `playSignatureSkill` reroll gate.
+ * (The flag-OFF byte-identity pins were deleted with the flag, D7.)
  */
 
-import { afterEach, describe, expect, it } from '@jest/globals';
+import { describe, expect, it } from '@jest/globals';
 import {
-    createCharacter, initializeCombatEncounter, rollEncounterDice, setUpgradeableDice,
+    createCharacter, initializeCombatEncounter, rollEncounterDice,
 } from '@mechanics';
 import type { CombatEncounterState, CombatManaDie } from '@mechanics';
 
@@ -29,16 +28,14 @@ function openEncounter(): CombatEncounterState {
     return rollEncounterDice(state).state;
 }
 
-/** A hand-crafted faced tray die (the flag-on gear roll shape). */
+/** A hand-crafted faced tray die (the gear roll shape). */
 function facedDie(color: CombatManaDie['color'], face: 'special' | 'mana' | 'miss'): CombatManaDie {
     return { id: `u-${color}`, color, face, state: face === 'miss' ? 'locked' : 'available', temporary: false };
 }
 
-afterEach(() => setUpgradeableDice(false));
 
-describe('CombatDieVM face axis (flag-on)', () => {
+describe('CombatDieVM face axis', () => {
     it('maps special / mana / miss faces and marks a cracked die', () => {
-        setUpgradeableDice(true);
         const s = openEncounter();
         s.dice = [
             facedDie('body', 'special'),
@@ -63,7 +60,6 @@ describe('CombatDieVM face axis (flag-on)', () => {
     });
 
     it('a MISS face is DEAD — never draggable; a live special/mana face is', () => {
-        setUpgradeableDice(true);
         const s = openEncounter();
         s.dice = [facedDie('body', 'special'), facedDie('mind', 'mana'), facedDie('heart', 'miss')];
         const dice = buildCombatViewModel(s).dice;
@@ -73,36 +69,8 @@ describe('CombatDieVM face axis (flag-on)', () => {
     });
 });
 
-describe('CombatDieVM flag-OFF is byte-identical', () => {
-    it('carries no face / cracked keys and pressFate is null', () => {
-        const s = openEncounter(); // flag stays OFF
-        const vm = buildCombatViewModel(s);
-        for (const d of vm.dice) {
-            expect(Object.prototype.hasOwnProperty.call(d, 'face')).toBe(false);
-            expect(Object.prototype.hasOwnProperty.call(d, 'cracked')).toBe(false);
-        }
-        expect(vm.pressFate).toBeNull();
-    });
-
-    it('the tray VM output is identical whether or not crackedDice/faces sit on state', () => {
-        // Flag-off, the presenter must not read the spec-33 state fields at all:
-        // a state carrying faces + cracks renders the SAME tray as one without.
-        const bare = openEncounter();
-        const loaded = openEncounter();
-        loaded.dice = loaded.dice.map(d => ({ ...d, face: 'miss' as const }));
-        loaded.crackedDice = [{ color: 'body', turn: loaded.turn }];
-        loaded.pressFateRound = loaded.round;
-        // Same roll (same seed) → compare the tray VM shape key-for-key.
-        const a = buildCombatViewModel(bare).dice.map(d => Object.keys(d).sort());
-        const b = buildCombatViewModel(loaded).dice.map(d => Object.keys(d).sort());
-        expect(b).toEqual(a);
-        expect(buildCombatViewModel(loaded).pressFate).toBeNull();
-    });
-});
-
-describe('Press Fate VM (flag-on reroll gate)', () => {
+describe('Press Fate VM (reroll gate)', () => {
     function stateWithMiss(): CombatEncounterState {
-        setUpgradeableDice(true);
         const s = openEncounter();
         s.dice = [facedDie('body', 'miss'), facedDie('mind', 'mana')];
         s.signatures = ['sig-press-the-point'];
@@ -110,15 +78,7 @@ describe('Press Fate VM (flag-on reroll gate)', () => {
         return s;
     }
 
-    it('is null flag-off', () => {
-        const s = openEncounter();
-        s.dice = [facedDie('body', 'miss')];
-        s.signatures = ['sig-press-the-point'];
-        expect(buildCombatViewModel(s).pressFate).toBeNull();
-    });
-
-    it('is null flag-on when the loadout carries no reroll signature', () => {
-        setUpgradeableDice(true);
+    it('is null when the loadout carries no reroll signature', () => {
         const s = openEncounter();
         s.dice = [facedDie('body', 'miss')];
         s.signatures = [];
@@ -171,12 +131,11 @@ describe('Press Fate VM (flag-on reroll gate)', () => {
     });
 });
 
-describe('Press Fate signature rune (flag-on reshape — owner call 2026-07-19)', () => {
-    // Press Fate is cast from the rune column like any signature; flag-on its
+describe('Press Fate signature rune (spec-33 reshape — owner call 2026-07-19)', () => {
+    // Press Fate is cast from the rune column like any signature; its
     // rune must present the spec-33 truth (1◆, the FULL firing gate + reason),
     // never the printed legacy cost the engine no longer charges.
     function stateWithRune(): CombatEncounterState {
-        setUpgradeableDice(true);
         const s = openEncounter();
         s.dice = [facedDie('body', 'miss'), facedDie('mind', 'mana')];
         s.signatures = ['sig-press-the-point'];
@@ -185,7 +144,7 @@ describe('Press Fate signature rune (flag-on reshape — owner call 2026-07-19)'
         return s;
     }
 
-    it('flag-on: the rune costs 1◆ and is castable when the full gate passes', () => {
+    it('the rune costs 1◆ and is castable when the full gate passes', () => {
         const rune = buildCombatViewModel(stateWithRune()).signatures.find(x => x.id === 'sig-press-the-point')!;
         expect(rune.cost).toBe(1);
         expect(rune.affordable).toBe(true);
@@ -193,7 +152,7 @@ describe('Press Fate signature rune (flag-on reshape — owner call 2026-07-19)'
         expect(rune.description).toMatch(/re-roll every miss/i);
     });
 
-    it('flag-on: the rune refuses (with the reason) once pressed this round', () => {
+    it('the rune refuses (with the reason) once pressed this round', () => {
         const s = stateWithRune();
         s.pressFateRound = s.round;
         const rune = buildCombatViewModel(s).signatures.find(x => x.id === 'sig-press-the-point')!;
@@ -201,22 +160,12 @@ describe('Press Fate signature rune (flag-on reshape — owner call 2026-07-19)'
         expect(rune.reason).toMatch(/already pressed/i);
     });
 
-    it('flag-on: the rune refuses (with the reason) when no live miss exists', () => {
+    it('the rune refuses (with the reason) when no live miss exists', () => {
         const s = stateWithRune();
         s.dice = [facedDie('body', 'mana')];
         const rune = buildCombatViewModel(s).signatures.find(x => x.id === 'sig-press-the-point')!;
         expect(rune.affordable).toBe(false);
         expect(rune.reason).toMatch(/no miss/i);
-    });
-
-    it('flag-off: the rune keeps its printed cost + description', () => {
-        const s = openEncounter(); // flag stays OFF
-        s.signatures = ['sig-press-the-point'];
-        s.conviction = 4;
-        const rune = buildCombatViewModel(s).signatures.find(x => x.id === 'sig-press-the-point')!;
-        expect(rune.cost).toBe(4);
-        expect(rune.affordable).toBe(true);
-        expect(rune.description).toMatch(/spent and blocked/i);
     });
 });
 
@@ -224,17 +173,9 @@ describe('inspect modal — BOON die-gear gloss (owner playtest 2026-07-18)', ()
     it('never rides a card inspect unprompted — a die-face rule is not card vocabulary', () => {
         // The D6a always-on BOON push is retired: the gloss surfaces only
         // when a card's OWN printed lines name it (via the printed sweep).
-        const on = openEncounter();
-        setUpgradeableDice(true);
-        const onHand = buildCombatViewModel(on).hand;
-        expect(onHand.length).toBeGreaterThan(0);
-        for (const card of onHand) {
-            expect(card.detail.keywords.map(k => k.name)).not.toContain('BOON');
-        }
-
-        setUpgradeableDice(false);
-        const offHand = buildCombatViewModel(openEncounter()).hand;
-        for (const card of offHand) {
+        const hand = buildCombatViewModel(openEncounter()).hand;
+        expect(hand.length).toBeGreaterThan(0);
+        for (const card of hand) {
             expect(card.detail.keywords.map(k => k.name)).not.toContain('BOON');
         }
     });

@@ -40,10 +40,10 @@ describe('StagedCard — combat adoption of lib/juice primitives', () => {
     it('a rising rejectKey fires the shake primitive', () => {
         const card = freshCard();
         const { rerender } = render(
-            <StagedCard card={card} assignedDie={null} read="none" onApply={jest.fn()} gesture={Gesture.Exclusive(Gesture.Tap())} register={jest.fn()} rejectKey={0} />,
+            <StagedCard card={card} assignedDie={null} onApply={jest.fn()} gesture={Gesture.Exclusive(Gesture.Tap())} register={jest.fn()} rejectKey={0} />,
         );
         rerender(
-            <StagedCard card={card} assignedDie={null} read="none" onApply={jest.fn()} gesture={Gesture.Exclusive(Gesture.Tap())} register={jest.fn()} rejectKey={1} />,
+            <StagedCard card={card} assignedDie={null} onApply={jest.fn()} gesture={Gesture.Exclusive(Gesture.Tap())} register={jest.fn()} rejectKey={1} />,
         );
         const calls = (Juice.useJuiceShake as jest.Mock).mock.calls;
         expect(calls.some(([key, intensity]) => key === 1 && intensity === 'low')).toBe(true);
@@ -52,10 +52,10 @@ describe('StagedCard — combat adoption of lib/juice primitives', () => {
     it('a rising popKey (drop confirm) fires the pulse primitive at a subtle intensity', () => {
         const card = freshCard();
         const { rerender } = render(
-            <StagedCard card={card} assignedDie={null} read="none" onApply={jest.fn()} gesture={Gesture.Exclusive(Gesture.Tap())} register={jest.fn()} popKey={0} />,
+            <StagedCard card={card} assignedDie={null} onApply={jest.fn()} gesture={Gesture.Exclusive(Gesture.Tap())} register={jest.fn()} popKey={0} />,
         );
         rerender(
-            <StagedCard card={card} assignedDie={null} read="none" onApply={jest.fn()} gesture={Gesture.Exclusive(Gesture.Tap())} register={jest.fn()} popKey={1} />,
+            <StagedCard card={card} assignedDie={null} onApply={jest.fn()} gesture={Gesture.Exclusive(Gesture.Tap())} register={jest.fn()} popKey={1} />,
         );
         const calls = (Juice.useJuicePulse as jest.Mock).mock.calls;
         expect(calls.some(([key, intensity]) => key === 1 && intensity === 0.4)).toBe(true);

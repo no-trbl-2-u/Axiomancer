@@ -13,8 +13,8 @@
  * never in doubt (and screen readers / e2e read the settled face immediately).
  * The cast is pure transform over it.
  *
- * FLAG-ON ONLY. `DiceRow` renders this in place of a bare `CombatDie` only when
- * the Upgradeable-Dice flag is on; flag-off keeps the old, untouched render.
+ * `DiceRow` renders this in place of a bare `CombatDie` for every rolled tray
+ * die that has a roll plan.
  *
  * Modes (resolved by the caller via `resolveRollMode`):
  *   · animate  → the staggered fall + spring settle + haptic tick.

@@ -74,7 +74,7 @@ function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatE
         state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
         face: 'mana' as const,
     }));
-    return { ...state, dice, draftedDieId: null, turn };
+    return { ...state, dice, turn };
 }
 
 /** Opens phase-play on a known BODY + MIND tray. */

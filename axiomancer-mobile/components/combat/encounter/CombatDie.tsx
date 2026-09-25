@@ -14,13 +14,11 @@
  * faint cross-hatch on the shell faces plus an inner hairline (echoing the
  * card plate's own hairline rule) nudges the die toward that ink register
  * without touching geometry, colour semantics, or interaction — the stance
- * colour, dead/greyed/cracked states, and drafted ring are all unchanged.
+ * colour and the dead/greyed/cracked states are all unchanged.
  *
-
- * Renders the spec-33 four-die tray (the shipped default since THE FLIP,
- * 2026-07-18): every usable face may power a card of its color this round.
- * Under the legacy kill-switch (`EXPO_PUBLIC_UPGRADEABLE_DICE=0`) the same
- * component renders the old 2-die draft pool — faceless dice, one draft.
+ * Renders the spec-33 four-die tray (the shipped combat model): every usable
+ * face may power a card of its color this round. Unrolled dice (Reserve,
+ * GHOST, forged) carry no face and power by colour alone.
  *
  * The face language (owner directive 2026-07-18) is unchanged and lives on the
  * FRONT face. The die's COLOUR carries the stance — no printed stance label,
@@ -55,9 +53,8 @@ import { spentDieTreatment } from '@/lib/juice';
  *
  * Every draggable state says "drag onto"; every dead or used state says why,
  * so the e2e harness can tell a usable die from a dead one by wording alone.
- *
- * Flag-off (the legacy draft pool, `EXPO_PUBLIC_UPGRADEABLE_DICE=0`) dice
- * carry no `face`; that branch keeps its own draft-model phrases.
+ * Unrolled dice (Reserve, GHOST, forged) carry no `face` and are named by
+ * where they sit instead.
  */
 export function combatDieA11yLabel(
     die: CombatDieVM,
@@ -68,13 +65,12 @@ export function combatDieA11yLabel(
     const noun = wild ? `${colour} (gold) die` : `${colour} die`;
     if (die.isX) return `${noun}: blocked, powers nothing`;
     if (!die.face) {
-        // Legacy draft pool (flag-off) — one draft, faceless dice.
-        const state = die.drafted
-            ? (die.spent ? 'spent as your stance' : 'drafted as your stance')
+        // Unrolled dice — no face, colour alone powers them.
+        const state = die.spent ? 'spent, it already powered a card this turn'
             : die.reserve ? 'banked in the Reserve, drag onto a staged card to power it'
                 : die.floating ? 'ghost, a second power source, drag onto a staged card to power it'
-                    : die.draggable === false ? 'spent, burned for Conviction'
-                        : 'drag onto a staged card to draft it as your stance';
+                    : die.draggable === false ? 'not usable right now'
+                        : 'drag onto a staged card to power it';
         return `${noun}: ${state}`;
     }
     if (die.cracked) return `${noun}, CRACKED face: dead this round, powers nothing`;
@@ -88,7 +84,7 @@ export function combatDieA11yLabel(
     if (die.spent) return `${noun}, ${face} face: spent, it already powered a card this turn`;
     if (opts.assigned) return `${noun}, ${face} face: assigned to a staged card, APPLY to ${power}`;
     if (die.draggable === false) return `${noun}, ${face} face: not usable right now`;
-    const where = die.reserve ? ', banked in the Reserve' : die.floating ? ', a ghost' : die.refreshed ? ', refreshed' : '';
+    const where = die.reserve ? ', banked in the Reserve' : die.floating ? ', a ghost' : '';
     return `${noun}, ${face} face${where}: drag onto ${target} to ${power}`;
 }
 
@@ -157,7 +153,7 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
     const accent = die.colorHex;
     const special = die.face === 'special';
     const cracked = die.cracked === true;
-    // A "dead" face powers nothing — the X die OR a flag-on miss/cracked face.
+    // A "dead" face powers nothing — the X die OR a miss/cracked face.
     // EVERY dead face greys out (owner directive 2026-07-18): a miss must read
     // as an undraggable dead die at a glance, so it drops its stance colour
     // like a crack/X does — only the rim hue tells a crack from a plain miss.
@@ -167,7 +163,7 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
     // not an animated primitive.
     const spentTreatment = spentDieTreatment({ spent: die.spent === true, dead });
     const greyed = spentTreatment.greyed;
-    const ring = die.drafted ? accent : cracked ? '#6b3030' : greyed ? '#3a3a3a' : special ? accent : `${accent}aa`;
+    const ring = cracked ? '#6b3030' : greyed ? '#3a3a3a' : special ? accent : `${accent}aa`;
     const glow = !dead && !dimmed;
     // Cube face colours — lit top, shaded right, dark front (the art surface).
     const liteFace = greyed ? '#2b2a31' : mixHex(accent, '#ffffff', 0.35);
@@ -179,7 +175,7 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
     const H = size + o;
     const glowSize = W * 1.6;
     const gradId = `axmDieGlow-${die.color}`;
-    const bodyId = `axmDieBody-${die.color}-${greyed ? 'grey' : die.drafted ? 'drafted' : 'live'}`;
+    const bodyId = `axmDieBody-${die.color}-${greyed ? 'grey' : 'live'}`;
     const gemId = `axmDieGem-${die.color}`;
     // The a11y state must not lie — see `combatDieA11yLabel` (spec 33 wording:
     // colour, face, what the die can do, spent / assigned).
@@ -190,7 +186,7 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
             accessible
             accessibilityRole="button"
             accessibilityLabel={a11yLabel}
-            style={{ width: W, height: H + size * 0.18, opacity: dimmed && !die.drafted ? 0.45 : spentTreatment.opacity }}
+            style={{ width: W, height: H + size * 0.18, opacity: dimmed ? 0.45 : spentTreatment.opacity }}
         >
             {glow && (
                 <Svg
@@ -202,7 +198,7 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
                 >
                     <Defs>
                         <RadialGradient id={gradId} cx="50%" cy="50%" r="50%">
-                            <Stop offset="0%" stopColor={accent} stopOpacity={die.drafted ? 0.5 : special ? 0.44 : 0.3} />
+                            <Stop offset="0%" stopColor={accent} stopOpacity={special ? 0.44 : 0.3} />
                             <Stop offset="70%" stopColor={accent} stopOpacity={0.08} />
                             <Stop offset="100%" stopColor={accent} stopOpacity={0} />
                         </RadialGradient>
@@ -227,7 +223,7 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
                 <Defs>
                     {/* Front-face depth: a lit top-left falling to a dark lower edge. */}
                     <SvgLinearGradient id={bodyId} x1="0%" y1="0%" x2="80%" y2="100%">
-                        <Stop offset="0%" stopColor={accent} stopOpacity={greyed ? 0.1 : die.drafted ? 0.6 : 0.42} />
+                        <Stop offset="0%" stopColor={accent} stopOpacity={greyed ? 0.1 : 0.42} />
                         <Stop offset="45%" stopColor={accent} stopOpacity={greyed ? 0.05 : 0.16} />
                         <Stop offset="100%" stopColor="#000000" stopOpacity={0.55} />
                     </SvgLinearGradient>
@@ -273,7 +269,7 @@ export const CombatDie = React.memo(function CombatDie({ die, size = 54, dimmed 
                 {/* front face (mid — carries the face art) */}
                 <Rect x={0} y={OV} width={F} height={F} fill="#0b0812" stroke={edge} strokeWidth={1.5} />
                 <Rect x={0} y={OV} width={F} height={F} fill={`url(#${bodyId})`} />
-                {/* rim — the drafted/special/dead state ring, on the front face */}
+                {/* rim — the special/dead state ring, on the front face */}
                 <Rect x={2} y={OV + 2} width={F - 4} height={F - 4} fill="none" stroke={ring} strokeWidth={4} />
                 {/* inner hairline — the card plate's own hairline-rule motif,
                     quiet chrome that never competes with the state ring's colour */}

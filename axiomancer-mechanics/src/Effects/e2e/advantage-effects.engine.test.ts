@@ -28,9 +28,10 @@ const ae = (effectId: string, intensity = 1): ActiveEffect => ({
 describe('Phase 88 — Advantage buffs: advantageGrants via getActiveEffectModifiers', () => {
     // The precision/crit buffs were re-themed onto `advantageModifier`
     // (2026-07-14): under "THE STRIKE IS DEAD" the player has no roll/crit/stat
-    // surface, so a flat rollModifier or stat multiplier was inert. Granting
-    // advantage on the drafted stance is the one player-offense surface the
-    // stance-read model reads (see `clampPlayerRead` in combat.engine.ts).
+    // surface, so a flat rollModifier or stat multiplier was inert. They grant
+    // advantage on a stance. NOTE (D7 flag collapse, 2026-09-25): the hidden-
+    // stance read that consumed `advantageGrants` was deleted with the draft,
+    // so this pins the aggregator only — combat no longer reads the grant.
     it.each(['buff_accuracy_up', 'buff_critical_rate_up', 'buff_critical_damage_up'])(
         '%s grants advantage on all stances (re-themed from inert roll/stat payloads)',
         (effectId) => {

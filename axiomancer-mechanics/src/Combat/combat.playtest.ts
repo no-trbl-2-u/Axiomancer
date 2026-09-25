@@ -42,7 +42,6 @@ import {
 import {
     COMBAT_DECK_PRESET_ORDER, getDeckPreset, type CombatDeckFocus,
 } from './combat.starter-deck-presets';
-import { isUpgradeableDiceEnabled } from './combat.upgradeable-dice';
 import { presetComplexity, type PresetComplexity } from './combat.card-complexity';
 import { COMBAT_SIM_POLICIES, type CombatSimPolicy, type CombatSimPolicyId } from './combat.sim-policies';
 import {
@@ -188,16 +187,7 @@ export interface PlaytestPresetSummary {
     complexity: PresetComplexity | null;
 }
 
-/** Which combat dice model produced a report (spec 33 flag state at run time).
- *  `upgradeable` = the spec-33 four-die model the shipped app boots ON;
- *  `legacy` = the pre-spec-33 model (explicit comparison mode). */
-export type CombatDiceModel = 'upgradeable' | 'legacy';
-
 export interface PlaytestReport {
-    /** The dice model in force while this matrix ran — stamped from the live
-     *  `isUpgradeableDiceEnabled()` flag so every human/JSON reader can see
-     *  which combat the numbers describe. */
-    diceModel: CombatDiceModel;
     cells: PlaytestCellResult[];
     /** **THE OBJECTIVE FUNCTION (Phase 43)** for the WHOLE sweep — scored from
      *  every cell's pooled objective telemetry. This is the headline number
@@ -512,7 +502,6 @@ export function runPlaytestMatrix(options: PlaytestMatrixOptions = {}): Playtest
     const deadCardRate = poolSize > 0 ? neverPlayed.length / poolSize : 0;
 
     return {
-        diceModel: isUpgradeableDiceEnabled() ? 'upgradeable' : 'legacy',
         cells,
         combatQuality: scoreCombatObjective(
             poolObjectiveTelemetry(cells.map(c => c.stats.objectiveTelemetry)),
@@ -521,13 +510,6 @@ export function runPlaytestMatrix(options: PlaytestMatrixOptions = {}): Playtest
         presetSummaries: summarizePresets(cells),
         cardCoverage: { exercised, neverPlayed, deadCardRate },
     };
-}
-
-/** Human-readable label for a dice model, for report headers and CLI banners. */
-export function diceModelLabel(model: CombatDiceModel): string {
-    return model === 'upgradeable'
-        ? 'UPGRADEABLE (spec 33 — the shipped app default)'
-        : 'LEGACY (pre-spec-33 comparison model)';
 }
 
 function deckLabel(selection: CombatDeckSelection): string {
@@ -552,7 +534,6 @@ const pct = (n: number): string => `${(n * 100).toFixed(0).padStart(3)}%`;
 export function formatPlaytestReport(report: PlaytestReport, opts?: { perCard?: boolean }): string {
     const lines: string[] = [];
     lines.push('Hazard combat playtest matrix');
-    lines.push(`Dice model: ${diceModelLabel(report.diceModel)}`);
     lines.push('(win = enemy HP→0 or befriend-spare; V/M/D/R = victory/mercy/defeat/retreat;');
     lines.push(' statusEng + dotFrac are LEGACY warning lights — the status-dominance doctrine they');
     lines.push('   enforced was voided by THE UNSHACKLING; they are informational, not the target;');

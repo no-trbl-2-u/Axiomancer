@@ -88,8 +88,6 @@ export function buildFixtureState(options: { clean?: boolean } = {}): CombatEnco
         phase: 'phase-play',
         turn: 1,
         dice: [wildDie],
-        draftedDieId: wildDie.id,
-        lastRead: 'neutral',
         // 1 of RESERVE_MAX(2) slots used, with 1 pip (<RESERVE_PIP_CAP(2)) —
         // room for create_temporary_die/reap-kindle/bank_spent_die to add one
         // more, and for grant_pip to ripen further. CLEAN zeroes the pip:

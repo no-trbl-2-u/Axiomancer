@@ -70,11 +70,10 @@ export interface CombatManaDie {
      */
     pips?: number;
     /**
-     * Spec 33 (Upgradeable Dice, flag-gated) — the FACE this fixed-color die
-     * rolled this round: `mana` powers a card of its color, `special` powers a
-     * card AND fires its gear payload (+◆) when USED, `miss` is dead (state
-     * `locked`). Absent on every legacy face-bag die — flag-off states never
-     * carry it.
+     * Spec 33 (Upgradeable Dice) — the FACE this fixed-color die rolled this
+     * round: `mana` powers a card of its color, `special` powers a card AND
+     * fires its gear payload (+◆) when USED, `miss` is dead (state `locked`).
+     * Absent on dice that are not rolled (GHOST/forged dice, state literals).
      */
     face?: 'special' | 'mana' | 'miss';
 }
@@ -174,8 +173,9 @@ export interface CardPlay {
 // Stance read + Conviction + Signature Skills (Spec 26b §1, §2, §4)
 // ---------------------------------------------------------------------------
 
-/** Outcome of the hidden-stance RPS read when a die is drafted. `none` = the
- *  drafted die was Wild/X (no stance contest). */
+/** The advantage/disadvantage rail labels. Spec 33 retired the hidden-stance
+ *  read; `READ_DAMAGE_MULT` keeps the advantage (x1.5) / disadvantage (x0.5)
+ *  rails for the open stance checks (`resolveThreatPhase`). */
 export type CombatReadResult = 'advantage' | 'neutral' | 'disadvantage' | 'none';
 
 /** What a signature skill does (drives the engine dispatch + the UI icon). */
@@ -381,13 +381,13 @@ export interface CombatThreatPhase {
      *  every phase authored before this epic behaves exactly as before. */
     rungs?: number;
 
-    /** Spec 33 §2 (Upgradeable Dice, flag-gated) — the phase's OPEN stance
+    /** Spec 33 §2 (Upgradeable Dice) — the phase's OPEN stance
      *  check, resolved against the player's stance-from-cards at phase END
      *  (`resolveThreatPhase`): ending in `punishes` lands the hit at
      *  `READ_DAMAGE_MULT.advantage` (x1.5); ending in `yields` blunts it to
      *  `READ_DAMAGE_MULT.disadvantage` (x0.5) and pays +1 Conviction. No
      *  hidden information — the telegraph renders both fields. Undefined =
-     *  no check this phase (and always inert while the flag is off). */
+     *  no check this phase. */
     stanceCheck?: { punishes?: Stance; yields?: Stance };
 
     /** Phase 33c (spec 33 §1) — this phase carries THE COVETED DIE: denying
@@ -396,8 +396,7 @@ export interface CombatThreatPhase {
      *  (`resolveThreatPhase`, ceiling-gated — overflow → +1◆). Authored at
      *  the DECK level (`DECK_STAKES` in `combat.enemy-decks.ts`; the default
      *  seats it on a BOSS/UNIQUE deck's 2nd card) — never backfilled.
-     *  Undefined = no coveted die this phase (the common case). Inert while
-     *  the flag is off. */
+     *  Undefined = no coveted die this phase (the common case). */
     stake?: boolean;
 }
 
@@ -479,10 +478,8 @@ export type CombatEvent =
     // Gate 0 (2026-07-10 round-turn law) — a second `startTurn` inside one
     // threat phase was refused (the state is untouched; the tray stays as-is).
     | { kind: 'turn-law-blocked'; turn: number; phaseIndex: number }
-    | { kind: 'die-drafted'; dieId: string; color: CombatDieColor; read: CombatReadResult }
-    | { kind: 'conviction-gained'; amount: number; total: number; reason: 'unpicked-die' | 'read-win' | 'effect' | 'scrap' }
+    | { kind: 'conviction-gained'; amount: number; total: number; reason: 'effect' | 'scrap' }
     | { kind: 'stance-revealed'; phaseIndex: number; stance: Stance }
-    | { kind: 'read-result'; stance: CombatDieColor; enemyStance: Stance; result: CombatReadResult }
     | { kind: 'signature-cast'; signatureId: SignatureSkillId; name: string; cost: number }
     | { kind: 'card-played'; cardId: string; useBottom: boolean; dieId: string | null;
         advantage: 'advantage' | 'neutral' | 'disadvantage'; colorMatch?: boolean }
@@ -523,12 +520,9 @@ export type CombatEvent =
     // event so 'die-ripened' consumers are unaffected, matching
     // 'debt-tier-payoff'/'max-hp-eroded' precedent.
     | { kind: 'overheat-bust'; dieId: string; cardId: string; pips: number }
-    | { kind: 'omen-revealed'; dieColor: CombatDieColor; phaseIndex: number; stance: Stance }
-    | { kind: 'fate-tapped'; dieId: string; choice: 'dot-tick' | 'conviction'; amount: number }
     | { kind: 'resonance-gained'; color: 'heart' | 'body' | 'mind'; total: number }
     | { kind: 'threshold-fired'; cardId: string; color: 'heart' | 'body' | 'mind'; count: number; riderText: string }
     | { kind: 'die-bonus-fired'; cardId: string; riderText: string }
-    | { kind: 'fate-powered'; cardId: string; dieId: string; recoil: number; riderText: string }
     // WS4.1 — `bonus: 'mark'` = spend_all_pips `markPer` (amount = MARK stacks
     // landed); `pips-overflowed` = grant_pip pips that found no room and fired
     // the printed overflow rider instead (Slag Runoff class).
@@ -673,16 +667,7 @@ export type CombatEvent =
     | { kind: 'hand-drawn'; cards: string[] }
     | { kind: 'cards-milled'; cards: string[] }
     | { kind: 'mercy-opened'; message: string }
-    // Phase 31 — the engine-native momentum wheel (ported from the mobile
-    // host-side write; see `momentumWheel` on state).
-    | { kind: 'wheel-lit'; lit: WheelStance[] }
-    | { kind: 'wheel-completed'; dieId: string }
-    // Phase 31 — THE STAKE: a pre-play Conviction wager on the hidden stance.
-    | { kind: 'stake-placed'; color: WheelStance; amount: 2 | 4 | 6 }
-    | { kind: 'stake-won'; color: WheelStance; payout: 'colored' | 'colored-pip' | 'wild' }
-    | { kind: 'stake-lost'; amount: 2 | 4 | 6 }
-    // ── Spec 33 (Upgradeable Dice, flag-gated) — none of these fire while the
-    //    flag is off. ─────────────────────────────────────────────────────────
+    // ── Spec 33 (Upgradeable Dice) — the shipped dice model's events. ──────
     // The player's stance shifted (stance = the last PAID card's stance).
     | { kind: 'stance-shifted'; stance: WheelStance }
     // Momentum chain advanced (length grew) or started (length 1).
@@ -696,7 +681,7 @@ export type CombatEvent =
     // A BOON face fired its gear payload because its die was USED to power a
     // card (the owner-ratified use-triggered rule).
     | { kind: 'special-fired'; dieId: string; conviction: number; total: number }
-    // Press Fate (flag-on form): 1 Conviction rerolled ALL miss faces, honestly.
+    // Press Fate: 1 Conviction rerolled ALL miss faces, honestly.
     | { kind: 'press-fate-rerolled'; dieIds: string[]; cost: number }
     // The phase's open stance check resolved at phase end.
     | { kind: 'stance-check-resolved'; phaseIndex: number; outcome: 'punished' | 'yielded' | 'none'; stance: Stance | null }
@@ -775,11 +760,10 @@ export interface CombatEncounterState {
     phase: CombatEncounterPhase;
     enemy: Enemy;                          // unchanged — HP, effects, stats (deep-cloned)
     player: Character;                     // unchanged — HP, effects, stats (deep-cloned)
-    /** Spec 26b §1 — the CURRENT TURN's rolled dice (2 of them). Rolled fresh
-     *  each turn; one is drafted as the stance, the other → Conviction. */
+    /** Spec 33 §1 — the CURRENT ROUND's tray: the four fixed dice (plus act
+     *  reward dice, the gold+lead pair, and GHOST/surge floats). Rolled fresh
+     *  each round; every live mana/special face may power one paid line. */
     dice: CombatManaDie[];
-    /** The drafted stance die id for this turn (null before draft / between turns). */
-    draftedDieId: string | null;
     /** Turn counter within the encounter (drives die ids + display). */
     turn: number;
     /** Gate 0 (2026-07-10 round-turn law) — true once this threat phase's ONE
@@ -810,40 +794,20 @@ export interface CombatEncounterState {
     riposte?: { damage: number; reduce: number };
     /** Phase indices whose hidden enemy stance the player has revealed (§2). */
     revealedStances: number[];
-    /** Read result of the most recent draft (transient — for the UI flash). */
-    lastRead: CombatReadResult;
-    /** Distinct OFFENSIVE effect ids landed during the current drafted-die chain
-     *  (this turn). The status-combo loop refreshes the die only when a card lands
-     *  a status NEW to this chain, so a long "big turn" comes from playing
-     *  DIFFERENT cards; re-applying the same status ends the turn. Reset on each
-     *  draft. Optional for back-compat with state literals. */
-    chainEffectIds?: string[];
-    /** A carried unspent drafted die color, kept into the next turn so a good die
-     *  isn't wasted (Spec 26b tuning §3). Null when nothing carried.
-     *  @deprecated Fate Engine P1 — superseded by the visible `reserve` (R2).
-     *  Kept for state-literal back-compat; the engine no longer writes it. */
-    carriedDie: CombatDieColor | null;
     /**
      * Fate Engine P1 (spec 31 R2) — the RESERVE: banked dice (max
      * `RESERVE_MAX`), each ripening +1 pip per threat phase survived. A bottom
-     * action may be powered by the drafted die OR a Reserve die (still exactly
-     * one die — the single-die law is untouched). Optional for back-compat
-     * (absent = empty).
+     * action may be powered by a tray die OR a Reserve die (one die per paid
+     * line). Optional for back-compat (absent = empty).
      */
     reserve?: CombatManaDie[];
     /**
      * Fate Engine P1 (spec 31 R1) — the TOLL tally: every die spent this
-     * encounter (powering, burning for Conviction, banking) adds 1 of its color;
+     * encounter to power a paid line adds 1 of its color;
      * a Wild adds to the color of the card it powered. Cards with a `threshold`
      * check this tally at play time. Optional for back-compat (absent = zeros).
      */
     resonance?: { heart: number; body: number; mind: number };
-    /**
-     * Fate Engine P1 (spec 31 R4) — the turn number of the last universal
-     * FATE TAP (tap an X die → +1 tick on one enemy DoT or +1 Conviction),
-     * gating it to once per turn. Optional for back-compat (absent = never).
-     */
-    fateTappedTurn?: number;
     /** The player's archetype (dominant base stat). */
     archetype: PlayerArchetype;
     /** The player's resolved Signature Skill kit for this combat (per-archetype). */
@@ -893,37 +857,12 @@ export interface CombatEncounterState {
     /** Spec 32 v3 §5 — the GHOST die pool (live tray): merged into every
      *  turn's dice, exempt from rerolls, persists across combats. Optional. */
     floatingDice?: CombatManaDie[];
-    /** Phase 31 (EA-6) — the combat MOMENTUM wheel, engine-native (kills the
-     *  mobile host-side write). Lights heart -> body -> mind on every LANDED
-     *  card play in that stance (top or bottom — the wheel tracks the card's
-     *  printed stance, not its power source); a wrong or repeated stance
-     *  resets the wheel to just that stance. Lighting the third node mints a
-     *  one-shot wild floating die (id-prefixed `momentum-`, always
-     *  `temporary: true` so `getFloatingDiceColors` excludes it from the
-     *  cross-combat character save — momentum never persists past this fight,
-     *  owner-ratified 2026-07-10) and empties the wheel. While a
-     *  `momentum-`-prefixed die is still unspent in {@link floatingDice}, the
-     *  wheel does not advance on further plays. Optional for back-compat
-     *  (absent = empty wheel). */
-    momentumWheel?: WheelStance[];
-    /** Phase 31 (EA-7) — THE STAKE: an optional pre-play wager placed after
-     *  drafting this turn's stance die (`placeStake`), settled at the top of
-     *  `resolveThreatPhase` against the phase's hidden `enemyStance`. Cleared
-     *  on settlement regardless of outcome; at most one stake live at a time.
-     *  Optional (absent = no stake placed this phase). */
-    stake?: { color: WheelStance; amount: 2 | 4 | 6 };
     /** Phase 33c (spec 33 §1) — phase INDICES whose coveted die has already
      *  been claimed THIS COMBAT (one-time-per-phase steal, so a repeating/
      *  locked final phase can't be farmed on every loop). Initialized `[]` in
      *  `initializeCombatEncounter`. Optional for back-compat (absent = none
      *  claimed yet). */
     covetedDiceClaimed?: number[];
-    /** Phase 31 (EA-7) — extra "round-equivalents" folded into THE CLOCK's
-     *  escalation basis (`resolveThreatPhase`'s `state.round - GRACE` term)
-     *  every time a placed stake is LOST — a wasted read costs time the same
-     *  way a slow round does. Monotonic (never decreases). Optional (absent
-     *  = 0, the pre-STAKE behavior). */
-    stakeEscalationBonus?: number;
     /** Spec 32 v3 T2 — the CHARGE tally (Peroration theme). Optional. */
     premises?: number;
     /** Phase 32 part 4b (Oratory — milestone drip): cumulative Premises EVER
@@ -1095,20 +1034,20 @@ export interface CombatEncounterState {
     mercyChoiceActive?: boolean;
     /**
      * Master Spec §4 — permanent wild-die pool growth. Unlike `dice` (rolled
-     * fresh each turn) and `carriedDie` (one turn's carryover), these persist
-     * for the REST of the encounter once granted by a `grant_permanent_wild_die`
-     * card special mechanic: `startTurn` appends `permanentWildDice` extra Wild
-     * dice and `permanentDeadDice` extra locked X dice to every turn's draft
-     * pool from here on. Never reset by `startTurn`/`endTurn`. Optional for
-     * back-compat with state literals (treated as 0 when absent).
+     * fresh each round), these persist for the REST of the encounter once
+     * granted by a `grant_permanent_wild_die` card special mechanic. Under
+     * spec 33 any non-zero pool adds the gold+lead pair (`rollGoldLeadPair`,
+     * cap 1 pair) to every round's tray. Never reset by `startTurn`/`endTurn`.
+     * Optional for back-compat with state literals (treated as 0 when absent).
      */
     permanentWildDice?: number;
-    /** See `permanentWildDice`. Every permanent Wild die is paired with one
-     *  permanent dead (locked `x`) die — the visible "fate pushes back" cost. */
+    /** See `permanentWildDice`. The grant's paired dead-die tally (reported by
+     *  `permanent-wild-die-granted`); under spec 33 the LEADEN die of the
+     *  gold+lead pair is the visible "fate pushes back" cost. */
     permanentDeadDice?: number;
 
-    // ── Spec 33 (Upgradeable Dice, flag-gated) — all optional; absent on every
-    //    flag-off state (byte-identical back-compat). ─────────────────────────
+    // ── Spec 33 (Upgradeable Dice) — all optional for back-compat with state
+    //    literals. ─────────────────────────────────────────────────────────
     /** §2 — the player's stance: the stance of the last PAID card played.
      *  Fights open stance-less (null/absent). FREE lines never change it. */
     playerStance?: WheelStance | null;
@@ -1116,7 +1055,7 @@ export interface CombatEncounterState {
      *  Breaks reset to NULL (owner-locked D1); persists across rounds; surge
      *  (length 3) grants the temp gold die and resets to null. */
     momentumV2?: { color: WheelStance; length: number } | null;
-    /** §4 — the round Press Fate (flag-on form: 1◆ rerolls all miss faces) was
+    /** §4 — the round Press Fate (1◆ rerolls all miss faces) was
      *  last used, gating it to once per round. Absent = never used. */
     pressFateRound?: number;
     /** §6 OVERHEAT — dice cracked by an overheat push: each entry forces that

@@ -32,8 +32,9 @@ import { SURGE_DIE_PREFIX } from './combat.upgradeable-dice';
 /**
  * Dice-system verbs whose PRESENCE (not volume) proves the dice economy was
  * actually PLAYED rather than merely rolled: banking, ripening, forging,
- * converting, floating, refreshing, cracking, overflowing, Pressing Fate,
- * the fate tap, and THE STAKE. A deck that only rolls-and-spends touches none
+ * converting, floating, refreshing, cracking, overflowing, and Pressing Fate
+ * (the draft-era fate tap and THE STAKE were deleted with the D7 flag
+ * collapse). A deck that only rolls-and-spends touches none
  * of them — that is the failure mode the breadth term exists to catch.
  *
  * Order is stable so the derived breadth count is deterministic.
@@ -41,7 +42,6 @@ import { SURGE_DIE_PREFIX } from './combat.upgradeable-dice';
 export const DICE_ECONOMY_VERBS = Object.freeze([
     'die-banked', 'die-ripened', 'die-forged', 'die-converted', 'die-floated',
     'die-refreshed', 'die-cracked', 'die-overflowed', 'press-fate-rerolled',
-    'fate-tapped', 'stake-placed',
 ] as const);
 
 export type DiceEconomyVerb = (typeof DICE_ECONOMY_VERBS)[number];
@@ -60,8 +60,8 @@ export interface CombatObjectiveTelemetry {
     rounds: number;
 
     // ── LOCKED MECHANIC 1 — CONVICTION ───────────────────────────────────────
-    /** Σ `conviction-gained`.amount — every income source (unpicked die, read
-     *  win, fate tap, BOON, surge overflow, scrap, card effects). */
+    /** Σ `conviction-gained`.amount — every income source (BOON, yield,
+     *  overflow, scrap, card effects). */
     convictionGained: number;
     /** Σ `signature-cast`.cost + `add-struck`.cost — Conviction actually
      *  CONVERTED into a play, across both sinks the powered sim can reach.
@@ -76,12 +76,11 @@ export interface CombatObjectiveTelemetry {
     specialsFired: number;
 
     // ── LOCKED MECHANIC 2 — THE SURGE METER ──────────────────────────────────
-    /** Chain steps that advanced without completing: `momentum-advanced`
-     *  (spec 33 wheel) + `wheel-lit` (legacy comparison model). */
+    /** Chain steps that advanced without completing: `momentum-advanced`. */
     momentumAdvances: number;
     /** `momentum-broken` — a chain thrown away by an off-successor stance. */
     momentumBreaks: number;
-    /** Completed chains: `momentum-surged` + legacy `wheel-completed` +
+    /** Completed chains: `momentum-surged` +
      *  `die-overflowed` with source `'surge'` (a surge the table had no room
      *  for still COMPLETED — crediting it keeps a full table from reading as
      *  chain failure). */
@@ -252,9 +251,9 @@ export function foldObjectiveEvents(
         } else if (ev.kind === 'special-fired') into.specialsFired++;
 
         // ── Surge / momentum (both dice models) ─────────────────────────────
-        if (ev.kind === 'momentum-advanced' || ev.kind === 'wheel-lit') into.momentumAdvances++;
+        if (ev.kind === 'momentum-advanced') into.momentumAdvances++;
         else if (ev.kind === 'momentum-broken') into.momentumBreaks++;
-        else if (ev.kind === 'momentum-surged' || ev.kind === 'wheel-completed') into.surges++;
+        else if (ev.kind === 'momentum-surged') into.surges++;
         else if (ev.kind === 'die-overflowed' && ev.source === 'surge') into.surges++;
 
         // ── Dice ────────────────────────────────────────────────────────────
@@ -271,7 +270,7 @@ export function foldObjectiveEvents(
     return into;
 }
 
-/** Distinct `DICE_ECONOMY_VERBS` the telemetry actually observed (0–11). */
+/** Distinct `DICE_ECONOMY_VERBS` the telemetry actually observed (0–9). */
 export function diceEconomyBreadth(telemetry: CombatObjectiveTelemetry): number {
     let n = 0;
     for (const verb of DICE_ECONOMY_VERBS) {

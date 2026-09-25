@@ -4,7 +4,7 @@
  *
  * One per aspect, seated across the campaign by `PRESET_DICE_VALVES`
  * (`src/Combat/combat.starter-deck-presets.ts`): body at Threadbare, mind at
- * Pilgrim, heart at Apostate. They are the flag-gated Upgradeable-Dice seats,
+ * Pilgrim, heart at Apostate. They are the Upgradeable-Dice valve seats,
  * so their identity is DICE, not damage — a valve fixes a dead tray, banks a
  * die, or mints one. That is why their numbers stayed modest while everything
  * else on the ladder grew: a relic that also hit for 30 would be played for

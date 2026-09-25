@@ -431,6 +431,16 @@
 
 ## Pending
 
+### [debt] T2b dice-flag collapse — live content the OFF path was carrying (2026-09-25)
+
+- **Context:** D7 deleted the Upgradeable-Dice OFF path (stance draft, hidden read, STAKE, v1 wheel, fate-X powering). The shipped model already ignored all of these; the items below were already inert in players' builds and are now visibly so.
+- **Fate cards:** `the-note-falls-due`, `miserere`, `dead-pledge` carry a `fate` rider that can no longer fire (no X die ever rolls), their faces still say an X die may power them, and pricing still credits the rider. Card-content call (`/adjust-cards`).
+- **Advantage buffs:** `buff_haste`, `buff_accuracy_up`, `buff_critical_damage_up` and kin grant advantage through the deleted read, so they do nothing in combat. Retire or re-hook (`/adjust-keywords`).
+- **`reroll_spent` relic mechanic** still rerolls from the legacy face bag (`rerollSpentDice`/`COMBAT_DIE_FACES`), so it can mint X or faceless dice. `float_x_die` always pays +1◆ now.
+- **Sim:** the `blind` policy now plays identically to `greedy` (kept so the matrix keeps its column); retire or redefine it at the next `/combat-playtest`.
+- **Stale copy:** "drafted die" in `grave.cards.ts` card copy and the FORGE row of `docs/keyword-atlas.md` (both feed generated devlog data); `.claude/commands/deck-tuning.md` still documents `--legacy-dice` (now a clear error).
+- **Vestigial params:** `card-played.advantage` is always `'neutral'`; `scalePlayerHit`'s `readMult` is always 1.
+
 ### [debt] TRIM THE FAT T2a merged unverified — finish list (2026-09-25)
 
 - **Context:** owner call 2026-09-25 — T2a merged mid-work without re-running the gates. Full hand-off: `plan/2026-09-25-trim-t2a-handoff.prompt.md`.

@@ -48,7 +48,7 @@ export function IntentIcon({ intent, onPress }: { intent: CombatIntentVM; onPres
     const rungsRemaining = Math.max(0, rungsTotal - rungsLost);
     const rungLabel = ` Carries ${rungsTotal} STAGGER rung${rungsTotal === 1 ? '' : 's'}`
         + (rungsLost > 0 ? `, ${rungsRemaining} remaining.` : '.');
-    // Spec 33 §5 (flag-on) — the OPEN stance-check telegraph: what this hit does
+    // Spec 33 §5 — the OPEN stance-check telegraph: what this hit does
     // to the player's current stance, plus the last resolved outcome.
     const sc = intent.stanceCheck ?? null;
     const stanceA11y = sc
@@ -116,7 +116,7 @@ export function IntentIcon({ intent, onPress }: { intent: CombatIntentVM; onPres
                     </Text>
                 ))}
             </View>
-            {/* Spec 33 §5 (flag-on) — the open stance-check telegraph. No hidden
+            {/* Spec 33 §5 — the open stance-check telegraph. No hidden
                 information: both branches print, and the resolved outcome shows. */}
             {sc ? (
                 <View style={styles.stanceCheck} testID="combat-intent-stance-check">

@@ -105,8 +105,8 @@ export {
     resolveCombatPhase, resolveThreatPhase, processBetweenPhases,
     selectEncounterMercyChoice, selectCapitulationChoice, getCard,
     handCards, availableDice, buildCombatSummary,
-    COMBAT_DICE_COUNT, COMBAT_HAND_SIZE, COMBAT_DIE_FACES,
-    rollCombatDice, combatDieCanPower, refreshOneDie,
+    COMBAT_HAND_SIZE, COMBAT_DIE_FACES,
+    combatDieCanPower, refreshOneDie,
     toCombatCard, projectDeck, classifyVerbClass, buildCombatDeck,
     COMBAT_DECK_PRESETS, COMBAT_DECK_PRESET_ORDER, PRESET_LINEAGE,
     listDeckPresets, getDeckPreset, buildPresetDeck,
@@ -115,18 +115,18 @@ export {
     RAGE_UNLOCK_ROUND, RAGE_DAMAGE_WEIGHT, RAGE_HEAL_FRACTION,
     simulateHazardPatternCombat,
     mechanicText,
-    // Spec 26 / 26b — stance draft, hidden read, Conviction, Signature Skills
-    TURN_DICE_COUNT, rollTurnDice, dieHasStance,
-    startTurn, draftStanceDie, endTurn, resolveRead, chooseDraft, discardCombatCard,
-    playSignatureSkill, getDraftedDie, isPhaseStanceRevealed, revealedCurrentStance,
+    // Spec 26b / spec 33 — turn lifecycle, Conviction, Signature Skills
+    dieHasStance,
+    startTurn, endTurn, discardCombatCard, firstLegalPoweringDie,
+    playSignatureSkill, isPhaseStanceRevealed, revealedCurrentStance,
     // Phase 33d — GLYPHS pilot (sandbox-only): the dieless crack action
     crackGlyph,
     // Phase 102 — SUMMON: the dieless-but-priced add clear, and its constants
     strikeAdd, ADD_WAVE_CAP, STRIKE_ADD_COST, ADD_BITE_PER_LEVEL,
     // WS8.2 — stance-blur readout flag (mobile renders the stance panel fogged)
     isStanceReadoutBlurred,
-    cardReadPreview, projectCardImpact, getSignatureSkill, SIGNATURE_SKILLS, SIGNATURE_SKILL_LIST,
-    READ_DAMAGE_MULT, CONVICTION_PER_UNPICKED_DIE, CONVICTION_PER_UNPICKED_WILD, CONVICTION_READ_WIN_BONUS,
+    projectCardImpact, getSignatureSkill, SIGNATURE_SKILLS, SIGNATURE_SKILL_LIST,
+    READ_DAMAGE_MULT,
     COLOR_MATCH_DAMAGE_BONUS, colorMatchBonus, COLOR_MATCH_BONUS_PCT, COLOR_MATCH_BONUS_MIN,
     deriveIntentType,
     // 0.34.0 status-depth epic — honesty selectors + deny-threshold consts
@@ -153,12 +153,11 @@ export {
     // Phase 104 — the first-three-takes-uniform gate for the keyword pull.
     REWARD_RANDOM_PICKS,
     deckThemeCounts, deckThemeShares,
-    // PR #190 Press Fate partial re-roll
+    // The `reroll_spent` card mechanic's partial re-roll
     dieIsRerollable, hasRerollableDice, rerollSpentDice,
     // soft-control + stat-debuff threat tunables
     THREAT_WEAKEN_PER_ROLL, THREAT_DENY_AT, THREAT_WEAKEN_FLOOR,
-    // depth epic — the read bites status in REAL units (P0-truth) + the escalation clock
-    READ_ADVANTAGE_INTENSITY_BONUS, READ_DISADVANTAGE_DURATION_PENALTY,
+    // depth epic — the escalation clock
     THREAT_ESCALATION_PER_ROUND, THREAT_ESCALATION_GRACE, THREAT_ESCALATION_MAX,
     THREAT_ESCALATION_BOSS_MULT, THREAT_EFFECT_ESCALATION_STEP,
     // Phase 169 — curated combat loadout codec + synergy live-check
@@ -166,17 +165,15 @@ export {
     decodeCombatLoadout, getCombatLoadout, addToLoadout, removeFromLoadout,
     isCombatSynergySatisfied,
     // Master Spec §4 — wild-die permanent-growth mechanic
-    MAX_PERMANENT_WILD_DICE, rollPermanentBonusDice,
+    MAX_PERMANENT_WILD_DICE,
     // Fate Engine P1 (spec 31) — the dice get a second read
-    tapFateDie, riderText, RESERVE_MAX, RESERVE_PIP_CAP, ripenReserve,
-    PIP_INTENSITY_BONUS, PIP_GUARD_BONUS, COLOR_MATCH_STATUS_DURATION_BONUS, FATE_TAP_CONVICTION,
+    riderText, RESERVE_MAX, RESERVE_PIP_CAP, ripenReserve,
+    PIP_INTENSITY_BONUS, PIP_GUARD_BONUS, COLOR_MATCH_STATUS_DURATION_BONUS,
     // Phase 32 part 4c — Forge OVERHEAT
     OVERHEAT_PIP_CEILING, OVERHEAT_BUST_CHANCE, overheatReserve,
-    // Phase 31 — the engine-native momentum wheel + THE STAKE
-    isMomentumDieId, placeStake,
-    // Spec 33 (Phase D2, FLAGGED) — Upgradeable Dice: the flag + the surfaces
-    // the app/sim layers need. Inert until setUpgradeableDice(true).
-    setUpgradeableDice, isUpgradeableDiceEnabled, overheatSpentDie,
+    // Spec 33 — Upgradeable Dice (THE combat dice model since the D7 flag
+    // collapse): the surfaces the app/sim layers need.
+    overheatSpentDie,
     UPGRADEABLE_DIE_COLORS, UPGRADEABLE_TABLE_CEILING, PRESS_FATE_COST,
     SPECIAL_CONVICTION_DEFAULT, MOMENTUM_CHAIN_ORDER, MOMENTUM_SURGE_LENGTH,
     SURGE_DIE_PREFIX, DEFAULT_DIE_GEAR, activeDieGear, honedDieGear,
@@ -204,7 +201,7 @@ export type {
     CombatIntentType, CombatReadResult,
     SignatureSkill, SignatureSkillId, SignatureSkillKind, PlayerArchetype,
     CombatDeckPreset, CombatDeckFocus,
-    // Phase 31 — the momentum wheel / THE STAKE shared stance subset
+    // The three chain/stance colours (spec 33 momentum chain + stance checks)
     WheelStance,
     FinisherProjection, CombatOutcomeProjection,
     // Phase 33d — GLYPHS pilot (sandbox-only): the charge-and-crack seal zone

@@ -74,7 +74,7 @@ function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatE
         face: c === 'x' ? ('miss' as const) : ('mana' as const),
     }));
     const floating = state.dice.filter(d => d.floating);
-    return { ...state, dice: [...dice, ...floating], draftedDieId: null, turn };
+    return { ...state, dice: [...dice, ...floating], turn };
 }
 
 /** Opens the encounter with a known tray: `die` (powers paid plays) + a dead X. */

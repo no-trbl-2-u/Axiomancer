@@ -6,7 +6,7 @@
  * §10) — preset sizes are open. What survives (§2.1, the ONLY kept preset
  * law): every preset splits into exact aspect thirds by
  * `philosophicalAspect`, no curse cards in any preset, valves seat
- * same-aspect under the dice flag, the builder appends no escape-hatch
+ * same-aspect in the built deck, the builder appends no escape-hatch
  * card, and a preset deck drives a real encounter end to end.
  */
 
@@ -18,7 +18,6 @@ import {
     listDeckPresets, getDeckPreset, buildPresetDeck,
     PILGRIM_REMOVED, APOSTATE_REMOVED,
 } from '../combat.starter-deck-presets';
-import { setUpgradeableDice, isUpgradeableDiceEnabled } from '../combat.upgradeable-dice';
 import { getCardById } from '../../Cards/cards.library';
 import { initializeCombatEncounter, rollEncounterDice } from '../combat.engine';
 import { Player } from '../../Character/characters.mock';
@@ -87,22 +86,16 @@ describe('campaign presets — the evolving deck', () => {
         }
     });
 
-    it('buildPresetDeck returns the recipe with no escape-hatch card (flag off)', () => {
-        const prior = isUpgradeableDiceEnabled();
-        setUpgradeableDice(false);
-        try {
-            for (const id of SPEC_PRESET_IDS) {
-                const deck = buildPresetDeck(id);
-                expect(deck).toEqual([...getDeckPreset(id)!.cardIds]);
-                expect(deck).not.toContain('retreat');
-            }
-            expect(buildPresetDeck('unknown-preset')).toEqual([]);
-        } finally {
-            setUpgradeableDice(prior);
+    it('buildPresetDeck is the valve-seated recipe with no escape-hatch card', () => {
+        for (const id of SPEC_PRESET_IDS) {
+            const deck = buildPresetDeck(id);
+            expect(deck).toEqual(buildUpgradeableDicePresetDeck(id));
+            expect(deck).not.toContain('retreat');
         }
+        expect(buildPresetDeck('unknown-preset')).toEqual([]);
     });
 
-    it('D8 valve law: every preset seats a same-aspect dice valve under the flag', () => {
+    it('D8 valve law: every preset seats a same-aspect dice valve in the built deck', () => {
         for (const id of SPEC_PRESET_IDS) {
             const seat = PRESET_DICE_VALVES[id];
             expect(seat, id).toBeDefined();
@@ -114,9 +107,9 @@ describe('campaign presets — the evolving deck', () => {
             expect(deck.length).toBe(getDeckPreset(id)!.cardIds.length);
             expect(deck.filter(c => c === seat.valveId)).toHaveLength(1);
             // One instance swapped: the source loses exactly one copy.
-            const flagOff = counts(getDeckPreset(id)!.cardIds);
-            const flagOn = counts(deck);
-            expect(flagOn.get(seat.replacesId) ?? 0).toBe((flagOff.get(seat.replacesId) ?? 0) - 1);
+            const recipe = counts(getDeckPreset(id)!.cardIds);
+            const built = counts(deck);
+            expect(built.get(seat.replacesId) ?? 0).toBe((recipe.get(seat.replacesId) ?? 0) - 1);
         }
     });
 

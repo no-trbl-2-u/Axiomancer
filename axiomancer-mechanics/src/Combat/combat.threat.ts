@@ -95,9 +95,8 @@ export interface AuthoredThreatPhase {
      *  independent (a boss may name one of each, across different phases, to
      *  satisfy the §2 "two stances" boss law). Undefined = no authored check —
      *  `getThreatSequence`'s backfill (`defaultStanceCheck`) fills the uniform
-     *  D6e default instead; an authored value here always wins. Only resolved
-     *  while the upgradeable-dice flag is on (`resolveStanceCheck`); inert
-     *  otherwise, so authoring it never disturbs the flag-off baseline. */
+     *  D6e default instead; an authored value here always wins. Resolved at
+     *  phase end by `resolveStanceCheck`. */
     stanceCheck?: { punishes?: Stance; yields?: Stance };
     /** Phase 33c (spec 33 §1) — THE COVETED DIE: seated at the DECK level by
      *  `compileEnemyDeck` (`DECK_STAKES`, defaulting to a BOSS/UNIQUE deck's
@@ -478,9 +477,8 @@ export const RAGE_HEAL_FRACTION = 0.5;
  * blunted ×0.5 and pays +1◆) — so the telegraph teaches the chain: don't mirror
  * the enemy, flow past it. Because `enemyStance` rotates across the fight, all
  * three stances appear as `yields` in turn, so a mono-color build faces 1–2
- * off-color checks per fight (§2 authoring law). Wholly inert while the flag is
- * off (`resolveThreatPhase` gates its resolution on `isUpgradeableDiceEnabled`).
- * Density (every phase) + payout (+1◆) are D7 dials — this is the uniform first
+ * off-color checks per fight (§2 authoring law). Resolved at phase end by
+ * `resolveThreatPhase`. Density (every phase) + payout (+1◆) are D7 dials — this is the uniform first
  * pass; per-enemy authored checks live at the deck level (`DECK_STANCE_CHECKS`
  * in `combat.enemy-decks.ts`, Phase D9) and win over this backfill.
  */
@@ -490,7 +488,7 @@ export function defaultStanceCheck(enemyStance: Stance): { punishes: Stance; yie
 
 /** Generates a default escalating sequence for an unauthored enemy (§10),
  *  topped with a locked rage phase (Phase 3). Each phase carries a spec-33 §2
- *  open stance check (`defaultStanceCheck`) — inert unless the flag is on. */
+ *  open stance check (`defaultStanceCheck`). */
 export function generateDefaultThreatSequence(enemy: Enemy): CombatThreatPhase[] {
     const base = dominantStance(enemy);
     const PHASES = 3;
@@ -543,7 +541,7 @@ export function getThreatSequence(enemy: Enemy): CombatThreatPhase[] {
     // through (explicit `threatSequence`, `AUTHORED_THREAT_SEQUENCES`, and the
     // default generator alike — the sim's witness enemies carry short explicit
     // sequences the generator never touched). A hand-authored check is
-    // preserved; only absent ones are filled. Inert while the flag is off.
+    // preserved; only absent ones are filled.
     //
     // ROUND-KEYED DECK TIERS (2026-09-02) — the ANTI-STALL guarantee, applied
     // at the same choke point: the OPENING phase is never round-gated,

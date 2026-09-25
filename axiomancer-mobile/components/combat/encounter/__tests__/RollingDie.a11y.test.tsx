@@ -20,7 +20,7 @@ import type { DieRollPlan } from '@/state/combat/dice-roll-ritual';
 
 const HEART: CombatDieVM = {
     id: 'd-heart', color: 'heart', colorHex: '#c23b3b', glyph: '♥', stanceLabel: 'HEART',
-    drafted: false, spent: false, isX: false, readPip: null, draggable: true, face: 'special',
+    spent: false, isX: false, draggable: true, face: 'special',
 } as CombatDieVM;
 
 // A settled (non-tumbling) plan — the ritual's resting state, same shape

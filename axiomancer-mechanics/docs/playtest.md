@@ -37,8 +37,8 @@ Defined in `src/Combat/combat.sim-policies.ts`; consult
 
 | Id | Sees hidden stances? | Plays like |
 |---|---|---|
-| `greedy` | yes (omniscient) | The canonical ceiling: the original bestCard ordering — payoff timing, new-status-first, status-over-strike. Bit-identical to the pre-roster sim. |
-| `blind` | no | The canonical player-feel witness: greedy's ordering on revealed information only. Bit-identical to the pre-roster sim. |
+| `greedy` | no | The canonical witness: the original bestCard ordering — payoff timing, new-status-first, status-over-strike. |
+| `blind` | no | Identical play to `greedy` since D7: its only difference (drafting off revealed stances only) died with the draft. Kept so the matrix keeps its column. |
 | `dot-weaver` | yes | DoT and rupture/amplify payoffs above all; utility only once the enemy is already bleeding. |
 | `control-lock` | yes | Control and stat-debuffs first — aims to deny the enemy's telegraphed threat phases. |
 | `aggro-brute` | yes | Raw bottom-damage preview, no payoff timing. The doctrine's weak baseline — its underperformance IS the design. |
@@ -130,12 +130,11 @@ npm run combat -- --enemy audit-sentinel --stage mid --deck draft:dot --seed 11 
 The `combat-playtest` CLI (`src/CLI/combat-playtest.cli.ts`) accepts
 `--stage=early|mid|late|impossible|all`, `--policy=<id|all>`,
 `--deck=<grammar above>`, `--enemy=<slug>`, `--runs=N`, `--seed=N`,
-`--sandbox=<setId>`, `--cards`, `--json`. The sweep DEFAULTS to the spec-33
-Upgradeable-Dice model (the combat the shipped app boots ON); pass
-`--legacy-dice` for the pre-spec-33 comparison model (`--upgradeable-dice` is
-the redundant explicit-ON switch, mutually exclusive with `--legacy-dice`).
-Every run declares its model — the text report prints a `Dice model:` header
-and the `--json` `PlaytestReport` carries a `diceModel` field. The interactive
+`--sandbox=<setId>`, `--cards`, `--json`. Every sweep runs spec 33's
+Upgradeable Dice — the only combat model since the flag collapse (D7,
+2026-09-25). `--upgradeable-dice` is still accepted as a no-op for old
+scripts; `--legacy-dice` fails loudly (that model was deleted), and the report
+no longer carries a `Dice model:` header or a `diceModel` field. The interactive
 `combat` CLI's answer protocol (script/stdin JSONL) lives in `src/CLI/io.ts`.
 
 ## The e2e bands were the balance contract

@@ -1,7 +1,8 @@
 /**
- * Hermetic E2E — Spec 33 Upgradeable Dice (Phase D2, FLAGGED).
+ * Hermetic E2E — Spec 33 Upgradeable Dice (Phase D2; the only dice model
+ * since the D7 flag collapse, 2026-09-25).
  *
- * Pins the flag-on model to exact engine behavior:
+ * Pins the model to exact engine behavior:
  *   §1 ROLL LAW — 4 fixed-color dice every round, faces from the gear tables;
  *      the color law gates powering (gold = wild); no draft, no single-die law
  *   §1 BOON — fires its gear payload (+2◆) only when the die is USED
@@ -17,15 +18,12 @@
  *      stance/mana guarantee — an all-miss reroll result stands)
  *   §6 OVERHEAT — a spent die powers a second card; a crack forces all-miss
  *      next round and excludes the die from that round's Press Fate
- *   RETIREMENTS — the draft, THE STAKE, and the read economy refuse under the
- *      flag; flag-off rolls stay byte-identical to the face-bag model
  *
  * All rolls are pinned via explicit sequential rng closures (no singleton
- * dependence). The flag is set per-test and ALWAYS restored in afterEach so
- * no other suite ever sees flag-on state.
+ * dependence).
  */
 
-import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 
 import { Player } from '../../Character/characters.mock';
 import type { Character } from '../../Character/types';
@@ -35,21 +33,18 @@ import { deepClone } from '../../Utils';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard, resolveThreatPhase,
-    draftStanceDie, endTurn, placeStake, playSignatureSkill, overheatSpentDie, startTurn,
+    endTurn, playSignatureSkill, overheatSpentDie, startTurn,
     READ_DAMAGE_MULT, CONVICTION_CAP,
 } from '../combat.engine';
 import {
-    setUpgradeableDice, UPGRADEABLE_DIE_COLORS, UPGRADEABLE_TABLE_CEILING,
+    UPGRADEABLE_DIE_COLORS, UPGRADEABLE_TABLE_CEILING,
     PRESS_FATE_COST, SPECIAL_CONVICTION_DEFAULT, SURGE_DIE_PREFIX,
 } from '../combat.upgradeable-dice';
-import { TURN_DICE_COUNT } from '../combat.dice';
 import type { CombatEncounterState, CombatEvent } from '../combat.encounter.types';
 
 afterEach(() => {
-    setUpgradeableDice(false);
     vi.restoreAllMocks();
 });
-beforeEach(() => setUpgradeableDice(true));
 
 // ── Fixtures ────────────────────────────────────────────────────────────────
 
@@ -172,7 +167,7 @@ describe('spec 33 §1 — the four-die roll law', () => {
         expect(fizzle.kind === 'effect-fizzled' && fizzle.message).toContain('miss face is dead');
     });
 
-    it('the read is retired — every flag-on play lands printed (neutral)', () => {
+    it('the read is retired — every play lands printed (neutral)', () => {
         const s = open([MANA, MANA, MANA, MANA]);
         const res = paid(s, 'ud-body-dot', trayDie(s, 'body').id);
         const played = events(res, 'card-played')[0];
@@ -422,7 +417,7 @@ describe('spec 33 §6 — OVERHEAT (second play at 35% crack risk)', () => {
 
         // Next round: the body die is ALL-MISS without consuming rng for it —
         // the sequence below feeds mind, heart, wild only (heart rolls miss).
-        s = { ...s, turnTakenThisPhase: false, draftedDieId: null };
+        s = { ...s, turnTakenThisPhase: false };
         s = startTurn(s, seqRng(MANA, MISS, MANA)).state;
         expect(trayDie(s, 'body').face).toBe('miss');
         expect(trayDie(s, 'mind').face).toBe('mana');
@@ -445,29 +440,5 @@ describe('spec 33 §6 — OVERHEAT (second play at 35% crack risk)', () => {
         const pushed = overheatSpentDie(s, bodyDie.id, seqRng(0.9));
         expect(events(pushed, 'die-cracked')).toHaveLength(0);
         expect(pushed.state.crackedDice ?? []).toHaveLength(0);
-    });
-});
-
-// ── Retirements + flag-off byte-compat ──────────────────────────────────────
-
-describe('spec 33 — retirements under the flag; flag-off untouched', () => {
-    it('the draft and THE STAKE refuse silently under the flag', () => {
-        const s = open([MANA, MANA, MANA, MANA]);
-        const drafted = draftStanceDie(s, trayDie(s, 'body').id);
-        expect(drafted.events).toHaveLength(0);
-        expect(drafted.state.draftedDieId).toBeNull();
-
-        const staked = placeStake({ ...s, conviction: 8 }, 'body', 4);
-        expect(staked.events).toHaveLength(0);
-        expect(staked.state.stake).toBeUndefined();
-    });
-
-    it('flag-off startTurn still rolls the face-bag draft pool (no face field)', () => {
-        setUpgradeableDice(false);
-        let s = initializeCombatEncounter(makePlayer(DECK), makeEnemy(500, 'body'), DECK, 7);
-        s = rollEncounterDice(s, seqRng(0.05, 0.2, 0.4)).state;
-        const tray = s.dice.filter(d => !d.floating);
-        expect(tray).toHaveLength(TURN_DICE_COUNT);
-        expect(tray.every(d => d.face === undefined)).toBe(true);
     });
 });

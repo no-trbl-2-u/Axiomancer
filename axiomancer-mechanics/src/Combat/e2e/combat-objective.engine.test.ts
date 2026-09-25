@@ -64,7 +64,7 @@ function healthyTelemetry(): CombatObjectiveTelemetry {
     t.diceRolled = 200;
     t.diceSpent = 120;
     t.diceEconomyVerbs = {
-        'die-banked': 30, 'die-forged': 10, 'die-floated': 8, 'fate-tapped': 6,
+        'die-banked': 30, 'die-forged': 10, 'die-floated': 8, 'die-cracked': 6,
     };
     // Arc / width / identity.
     t.arcRuns = 10;
@@ -268,7 +268,7 @@ describe('component arithmetic — the Dice system (locked)', () => {
     it('rolling without spending scores 0', () => {
         const t = emptyObjectiveTelemetry();
         t.diceRolled = 100;
-        t.diceEconomyVerbs = { 'die-banked': 10, 'die-forged': 5, 'die-floated': 5, 'fate-tapped': 5 };
+        t.diceEconomyVerbs = { 'die-banked': 10, 'die-forged': 5, 'die-floated': 5, 'die-cracked': 5 };
         expect(scoreDiceUse(t)).toBe(0);
     });
 
@@ -411,8 +411,8 @@ describe('component arithmetic — IDENTITY', () => {
 describe('telemetry — folding a transcript reads the locked systems', () => {
     it('reads Conviction, Surge and Dice off their OWN events', () => {
         const events: CombatEvent[] = [
-            { kind: 'conviction-gained', amount: 2, total: 2, reason: 'unpicked-die' },
-            { kind: 'conviction-gained', amount: 1, total: 3, reason: 'read-win' },
+            { kind: 'conviction-gained', amount: 2, total: 2, reason: 'effect' },
+            { kind: 'conviction-gained', amount: 1, total: 3, reason: 'scrap' },
             { kind: 'signature-cast', signatureId: 'sig-press-the-point', name: 'Press', cost: 2 },
             { kind: 'special-fired', dieId: 'die-0', conviction: 2, total: 4 },
             { kind: 'momentum-advanced', color: 'heart', length: 1 },
@@ -425,7 +425,7 @@ describe('telemetry — folding a transcript reads the locked systems', () => {
             { kind: 'die-spent', dieId: 'die-0', color: 'heart' },
             { kind: 'floating-die-spent', dieId: 'surge-1-2', color: 'wild', poolSize: 0 },
             { kind: 'die-banked', dieId: 'die-1', color: 'heart', pips: 0 },
-            { kind: 'fate-tapped', dieId: 'die-3', choice: 'conviction', amount: 1 },
+            { kind: 'die-cracked', dieId: 'die-3', color: 'heart' },
         ];
         const t = foldObjectiveEvents(events, emptyObjectiveTelemetry());
 
@@ -442,7 +442,7 @@ describe('telemetry — folding a transcript reads the locked systems', () => {
 
         expect(t.diceRolled).toBe(3);
         expect(t.diceSpent).toBe(2);
-        // die-overflowed + die-banked + fate-tapped (the two overflows are one verb).
+        // die-overflowed + die-banked + die-cracked (the two overflows are one verb).
         expect(diceEconomyBreadth(t)).toBe(3);
     });
 
@@ -455,7 +455,7 @@ describe('telemetry — folding a transcript reads the locked systems', () => {
         // deck for playing the locked system, which is the opposite of what the
         // locked-mechanics guard exists to do.
         const events: CombatEvent[] = [
-            { kind: 'conviction-gained', amount: 12, total: 12, reason: 'unpicked-die' },
+            { kind: 'conviction-gained', amount: 12, total: 12, reason: 'effect' },
             { kind: 'add-struck', addId: 'a1', name: 'QA Shoot', cost: 2 },
             { kind: 'add-struck', addId: 'a2', name: 'QA Bough', cost: 2 },
         ];
@@ -467,18 +467,6 @@ describe('telemetry — folding a transcript reads the locked systems', () => {
         // read as the `signature-cast` COUNT; folding strikes into it would
         // make that counter lie the way `convictionSpent` used to.
         expect(t.signatureCasts).toBe(0);
-    });
-
-    it('reads the LEGACY wheel too, so the comparison dice model is not scored as chain failure', () => {
-        const events: CombatEvent[] = [
-            { kind: 'wheel-lit', lit: ['heart'] },
-            { kind: 'wheel-lit', lit: ['heart', 'body'] },
-            { kind: 'wheel-completed', dieId: 'wheel-0' },
-        ];
-        const t = foldObjectiveEvents(events, emptyObjectiveTelemetry());
-        expect(t.momentumAdvances).toBe(2);
-        expect(t.surges).toBe(1);
-        expect(t.momentumBreaks).toBe(0);
     });
 
     it('an empty transcript leaves every counter at 0 and scores 0', () => {
@@ -496,14 +484,14 @@ describe('telemetry — merging is additive and pooling is the correct rollup', 
         const a = healthyTelemetry();
         const b = healthyTelemetry();
         b.damageByCard = { 'lead-card': 100, 'fifth-card': 50 };
-        b.diceEconomyVerbs = { 'die-banked': 5, 'stake-placed': 2 };
+        b.diceEconomyVerbs = { 'die-banked': 5, 'die-converted': 2 };
         const m = mergeObjectiveTelemetry(a, b);
         expect(m.runs).toBe(a.runs + b.runs);
         expect(m.convictionGained).toBe(a.convictionGained + b.convictionGained);
         expect(m.damageByCard['lead-card']).toBe(400);
         expect(m.damageByCard['fifth-card']).toBe(50);
         expect(m.diceEconomyVerbs['die-banked']).toBe(35);
-        expect(m.diceEconomyVerbs['stake-placed']).toBe(2);
+        expect(m.diceEconomyVerbs['die-converted']).toBe(2);
         // Merging is pure — neither input is mutated.
         expect(a).toEqual(healthyTelemetry());
     });

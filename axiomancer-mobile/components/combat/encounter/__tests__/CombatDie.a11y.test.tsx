@@ -20,7 +20,7 @@ import type { CombatDieVM } from '@/state/presenters/combat-encounter.engine';
 
 const HEART: CombatDieVM = {
     id: 'd-heart', color: 'heart', colorHex: '#c23b3b', glyph: '♥', stanceLabel: 'HEART',
-    drafted: false, spent: false, isX: false, readPip: null, draggable: true,
+    spent: false, isX: false, draggable: true,
 } as CombatDieVM;
 
 const GOLD: CombatDieVM = { ...HEART, id: 'd-wild', color: 'wild', glyph: '★', stanceLabel: 'WILD' } as CombatDieVM;

@@ -95,10 +95,9 @@ describe('Gate 0 — the round-turn law (one tray roll per threat phase)', () =>
         expect(second.events).toEqual([
             { kind: 'turn-law-blocked', turn: s.turn, phaseIndex: s.currentPhaseIndex },
         ]);
-        // The refusal is a no-op on the game state: same tray, same turn, no draft.
+        // The refusal is a no-op on the game state: same tray, same turn.
         expect(second.state.dice).toEqual(s.dice);
         expect(second.state.turn).toBe(s.turn);
-        expect(second.state.draftedDieId).toBe(s.draftedDieId);
     });
 
     it('kills the Conviction farm: endTurn → startTurn is blocked mid-phase', () => {

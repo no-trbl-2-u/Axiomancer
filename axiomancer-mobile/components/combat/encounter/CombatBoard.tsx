@@ -8,10 +8,10 @@
  *      yet committed — you can re-drag a different die);
  *   3. read the card's live keyword line (the stance-read + projected hit);
  *   4. tap APPLY (the ribbon fused to the staged card) to commit.
- * A landed status refreshes the drafted die (the combo loop): it returns to the
- * tray draggable ("↻ AGAIN") and can power ANOTHER card via an explicit re-drop.
- * It never auto-attaches to the next staged card — that was the stale-powered
- * bug ("the NEXT card appears powered", owner playtest 2026-07-12).
+ * Every die is chosen explicitly (spec 33 — no draft): a die powers only the
+ * card it was dropped (or tapped) onto, and a card with no die commits FREE.
+ * Nothing auto-attaches — that was the stale-powered bug ("the NEXT card
+ * appears powered", owner playtest 2026-07-12).
  *
  * The housing is new — a full-bleed battlefield with floating chrome:
  *   battlefield + top HUD      → CombatCombatantPane (absolute-fill overlay)
@@ -51,9 +51,6 @@ import { armedReadValue, dieCanPowerCardVM, STANCE_COLORS } from '@/state/presen
 // D4 (2026-09-21) — the ONE mobile source for the rarity band. The face never
 // re-bands a rank and never re-types a rarity hue; see `card-rarity.engine.ts`.
 import { rarityFor, RARITY_LABEL, RARITY_PIPS, RARITY_COLOR } from '@/state/presenters/card-rarity.engine';
-import { wheelNext, type WheelStance } from '@/state/combat/momentum';
-import type { CombatReadResult } from '@mechanics';
-import { isUpgradeableDiceEnabled } from '@mechanics';
 import { TrashGlyph, LedgerMark } from '@/components/hazard/glyphs';
 import { glyphShapeFor } from '@/components/combat/glyphShapes';
 import { CombatCombatantPane, EffectChips, SealChips, PlayerMedallion, COMBAT_HUD_HEIGHT, PLAYER_DOCK_FOOTPRINT_W, type CombatFx } from './CombatCombatantPane';
@@ -138,9 +135,10 @@ export function resolveDieDropTarget(
     return eligible[0] ?? null;
 }
 
-const READ_ACCENT: Record<string, string> = {
-    advantage: '#5bbf6a', neutral: '#c2a14e', disadvantage: '#e2543b', none: '#8a8273',
-};
+/** The armed staged card's tint (keyword/value/border + the APPLY ribbon).
+ *  Spec 33 retired the hidden-stance read — every play lands printed — so
+ *  there is one armed tint, not an ▲/▼ read palette. */
+const ARMED_ACCENT = '#8a8273';
 
 // Render a sentence with each keyword name BOLDED (Sanguine-Step style). Shared by
 // the large inspect card FACE (here) and the inspect modal (CombatEncounterPanel).
@@ -337,39 +335,34 @@ export function handFanLayout(screenW: number, n: number): { band: number; step:
 }
 
 function DiceRow({
-    vm, dieGesture, draggingDieId, assignedDieIds, onFateTap,
+    vm, dieGesture, draggingDieId, assignedDieIds,
 }: {
     vm: CombatViewModel;
     dieGesture: (die: CombatDieVM) => ReturnType<typeof Gesture.Exclusive>;
     draggingDieId: string | null;
     assignedDieIds: Set<string>;
-    onFateTap?: (dieId: string) => void;
 }) {
     const AXM = usePalette();
     const styles = useStyles();
 
-    // ── Spec 33 (Phase D6f) — The Roll Ritual (flag-on only) ─────────────────
+    // ── Spec 33 (Phase D6f) — The Roll Ritual ────────────────────────────────
     // The tumble choreographs the four dice onto the faces the engine ALREADY
-    // rolled — it never decides an outcome. Flag-off, `ritual` is false and this
-    // whole block collapses: the tray renders the untouched, byte-identical
-    // `CombatDie` path below.
-    const ritual = isUpgradeableDiceEnabled();
+    // rolled — it never decides an outcome.
     const reducedMotion = useReducedMotion();
     const mode = resolveRollMode({ reducedMotion, instantSettle: shouldInstantSettleDice() });
     // Previous roll's face signatures — diffed so a round-start roll re-tumbles
     // everything while a Press-Fate reroll re-tumbles ONLY the rerolled dice.
     const prevSigRef = useRef<Record<string, string> | null>(null);
     const plansById = useMemo<Record<string, DieRollPlan>>(() => {
-        if (!ritual) return {};
         const plans = planDiceRoll(vm.dice, prevSigRef.current, mode, DICE_ROLL_TIMING);
         const byId: Record<string, DieRollPlan> = {};
         for (const p of plans) byId[p.id] = p;
         return byId;
         // vm.dice is the roll identity; prevSigRef is read intentionally-stale.
-    }, [vm.dice, mode, ritual]);
+    }, [vm.dice, mode]);
     useEffect(() => {
-        if (ritual) prevSigRef.current = rollSignatureMap(vm.dice);
-    }, [vm.dice, ritual]);
+        prevSigRef.current = rollSignatureMap(vm.dice);
+    }, [vm.dice]);
     // Tap-to-skip + the tray overlay gate (only while a die is mid-tumble).
     const [skipNonce, setSkipNonce] = useState(0);
     const tumblingIds = useRef<Set<string>>(new Set());
@@ -383,44 +376,30 @@ function DiceRow({
     return (
         <View style={styles.diceRow} testID="combat-dice-tray" pointerEvents="box-none">
             {vm.dice.map((die) => {
-                // Fate Engine P1 — a Reserve die is a SECOND power source: draggable
-                // onto a card any time (the single-die law still holds per play).
-                // Spec 32 v3 §5 — a GHOST die likewise bypasses the one-die
-                // draft: draggable whenever it is unspent, drafted or not.
+                // Every live die — tray face, Reserve, or GHOST — drags onto a
+                // card until it is spent (one die per play).
                 // Presenter-computed (CombatDieVM.draggable) so it can never flip
                 // while the die's own drag is live — that unmounted the
                 // GestureDetector mid-gesture, which on web killed the pan without
                 // onEnd/onFinalize: the drop never resolved and the ghost stuck.
                 const draggable = die.draggable;
                 const isAssigned = assignedDieIds.has(die.id);
-                // R4 — a dead X face is never dead: tap it to advance the strongest
-                // enemy DoT (or bank +1 Conviction), once per turn.
+                // An X die (the `reroll_spent` legacy bag can still land one) is
+                // dead — a static struck pip, never draggable.
                 if (die.isX) {
-                    return die.fateTappable && onFateTap ? (
-                        <Pressable
-                            key={die.id}
-                            onPress={() => onFateTap(die.id)}
-                            style={[styles.dieXPip, { borderColor: AXM.sulfur }]}
-                            accessibilityRole="button"
-                            accessibilityLabel="Fate die — tap to advance the strongest enemy status (or bank Conviction)"
-                            testID={`combat-fate-tap-${die.id}`}
-                        >
-                            <Text style={[styles.dieXGlyph, { color: AXM.sulfur }]}>✕</Text>
-                            <Text style={styles.dieFateHint}>TAP</Text>
-                        </Pressable>
-                    ) : (
-                        <View key={die.id} style={styles.dieXPip} accessible accessibilityLabel="X die — spent this turn">
+                    return (
+                        <View key={die.id} style={styles.dieXPip} accessible accessibilityLabel="X die — blocked, powers nothing">
                             <Text style={styles.dieXGlyph}>✕</Text>
                         </View>
                     );
                 }
-                const dieDimmed = (!die.reserve && !die.floating && vm.hasDraft && !die.drafted) || draggingDieId === die.id;
+                const dieDimmed = draggingDieId === die.id;
                 // The SPECIAL face's real payload (gear may raise it above the
                 // stock 2) — spoken in the die's a11y label.
                 const specialConviction = vm.dieGear?.slots.find((s) => s.color === die.color)?.specialConviction;
                 const node = (
                     <View style={isAssigned ? styles.dieAssigned : undefined}>
-                        {ritual && plansById[die.id] ? (
+                        {plansById[die.id] ? (
                             <RollingDie
                                 die={die}
                                 size={TRAY_DIE_SIZE}
@@ -445,25 +424,6 @@ function DiceRow({
                                 ✦ GHOST
                             </Text>
                         ) : null}
-                        {draggable && !die.reserve && !die.floating && die.readPip && die.readPip !== 'none' ? (
-                            <Text style={[styles.diePip, { color: READ_ACCENT[die.readPip] }]}>
-                                {die.readPip === 'advantage' ? '▲ ADV' : die.readPip === 'disadvantage' ? '▼ DIS' : '— EVEN'}
-                            </Text>
-                        ) : null}
-                        {/* P2 — the spare was already converted at draft; the old
-                            future-tense "→ +1 ◆" lied. State it in the past.
-                            Spec 33 (flag-on): a faced die (mana/special/miss) is
-                            not a draft-burned spare — the gem carries its face
-                            state, so this legacy spare label is suppressed. */}
-                        {!die.reserve && !die.floating && !die.face && vm.hasDraft && !die.drafted && <Text style={styles.dieConv}>burned +1 ◆</Text>}
-                        {/* A REFRESHED combo die is live again — it reads as a
-                            re-draggable die, not as the locked STANCE draft
-                            (stale-powered fix, 2026-07-12). */}
-                        {die.drafted && (
-                            <Text style={[styles.dieConv, { color: AXM.sulfur }]} testID={die.refreshed ? `combat-refreshed-${die.id}` : undefined}>
-                                {die.spent ? 'SPENT' : die.refreshed ? '↻ AGAIN' : 'STANCE'}
-                            </Text>
-                        )}
                     </View>
                 );
                 return draggable ? (
@@ -480,7 +440,7 @@ function DiceRow({
                 transparent overlay catches a tap and snaps every die to its
                 settled (engine-rolled) face. Absent once settled, so it never
                 sits in front of the dice drags. */}
-            {ritual && anyTumbling ? (
+            {anyTumbling ? (
                 <Pressable
                     style={StyleSheet.absoluteFill}
                     onPress={() => setSkipNonce((n) => n + 1)}
@@ -496,12 +456,11 @@ function DiceRow({
 // ── Staged card (die socket · fused APPLY ribbon) ────────────────────────────
 
 export const StagedCard = React.memo(function StagedCard({
-    card, assignedDie, read, onApply, gesture, register, compact = false, popKey = 0, socketPulse = false,
+    card, assignedDie, onApply, gesture, register, compact = false, popKey = 0, socketPulse = false,
     dropIneligible = false, chosenX = null, onChangeX, rejectKey = 0, freeProminent = false,
 }: {
     card: CombatCardVM;
     assignedDie: CombatDieVM | null;
-    read: string;
     /** Stable dispatcher — called with the card uid (memo-friendly). */
     onApply: (uid: string) => void;
     gesture: ReturnType<typeof Gesture.Exclusive>;
@@ -543,35 +502,30 @@ export const StagedCard = React.memo(function StagedCard({
     const popStyle = useJuicePulse(popKey, 0.4);
     const shakeStyle = useJuiceShake(rejectKey, 'low');
     const armed = assignedDie !== null;
-    const readColor = armed ? (READ_ACCENT[read] ?? AXM.bone) : AXM.bone;
+    const readColor = armed ? ARMED_ACCENT : AXM.bone;
     // Option A rail needs width: staged faces track the hand-card proportion
     // (shaved with it in the 2026-07-19 declutter pass).
     const cardW = compact ? 92 : 112;
     const cardH = compact ? 135 : 164;
     // The keyword line shows the POWER value; for read-dependent kinds (guard) it is
-    // recomputed live at the known read so the staged number is exact at commit.
+    // recomputed live — printed (read 'none') plus the colour-match bonus the
+    // armed die earns — so the staged number is exact at commit.
     let heroOverride: string | undefined;
     if (armed && f.readDependent) {
         // Phase 104 — a grey card's colour-match bonus is neutral, even off wild.
         const colorMatch = card.stance !== 'any'
             && (assignedDie!.color === card.stance || assignedDie!.color === 'wild');
-        const g = armedReadValue(f, read as CombatReadResult, colorMatch);
+        const g = armedReadValue(f, 'none', colorMatch);
         // Read-scaled commit value: Guard NN / +NN% Vulnerable / NN DoT total.
         if (g != null) heroOverride = f.kind === 'guard' ? `Guard ${g}` : f.kind === 'vulnerable' ? `+${g}%` : `${g}`;
     }
-    const readPip = armed && f.readDependent
-        ? (read === 'advantage' ? '▲' : read === 'disadvantage' ? '▼' : '—')
-        : null;
-    // P2 — spell out the APPLY suffix instead of a bare glyph. A read-dependent
-    // powered play names the read (WON / LOST / EVEN); a plain powered play names
-    // the die color; the dieless out reads FREE.
+    // P2 — spell out the APPLY suffix instead of a bare glyph: a powered play
+    // names the die color; the dieless out reads FREE.
     const applyLabel = !armed
         ? 'APPLY · FREE'
-        : f.readDependent
-            ? `APPLY · ${read === 'advantage' ? '▲ WON READ' : read === 'disadvantage' ? '▼ LOST READ' : '— EVEN READ'}`
-            : assignedDie?.color
-                ? `APPLY · ${assignedDie.color.toUpperCase()} DIE`
-                : 'APPLY · POWERED';
+        : assignedDie?.color
+            ? `APPLY · ${assignedDie.color.toUpperCase()} DIE`
+            : 'APPLY · POWERED';
     return (
         <View style={styles.stagedCol}>
             <GestureDetector gesture={gesture}>
@@ -600,7 +554,6 @@ export const StagedCard = React.memo(function StagedCard({
                         width={cardW}
                         height={cardH}
                         accent={armed ? readColor : null}
-                        readPip={readPip}
                         heroOverride={heroOverride}
                     />
                     {/* die socket notched into the top-right corner: dashed target while
@@ -681,61 +634,7 @@ export const StagedCard = React.memo(function StagedCard({
     );
 });
 
-// ── Momentum wheel (stance-sequencing combo tracker) ─────────────────────────
-
-const WHEEL_META: { stance: WheelStance; glyph: string }[] = [
-    { stance: 'heart', glyph: '♥' },
-    { stance: 'body', glyph: '⚡' },
-    { stance: 'mind', glyph: '★' },
-];
-
-/** Three stance nodes in wheel order. Playing cards that step the wheel
- *  (heart → body → mind → heart…) lights nodes; a full cycle forges a wild
- *  MOMENTUM die (rendered charged: every node gold + the ✦ tag). */
-function MomentumWheel({ lit, charged, onPress }: { lit: WheelStance[]; charged: boolean; onPress?: () => void }) {
-    const AXM = usePalette();
-    const styles = useStyles();
-    const litSet = new Set(lit);
-    const next = charged ? null : wheelNext(lit);
-    const a11y = charged
-        ? 'Momentum charged — a wild momentum die waits in your tray; it can power any card.'
-        : lit.length === 0
-            ? 'Momentum wheel empty — play any stance to start the cycle.'
-            : `Momentum ${lit.length} of 3 — next stance ${next?.toUpperCase() ?? ''}.`;
-    return (
-        <Pressable
-            style={styles.wheelRow}
-            onPress={onPress}
-            testID="combat-momentum"
-            accessibilityRole="button"
-            accessibilityLabel={a11y}
-            accessibilityHint="Tap for how momentum works"
-        >
-            {WHEEL_META.map(({ stance, glyph }, i) => {
-                const isLit = charged || litSet.has(stance);
-                const isNext = !charged && next === stance;
-                const color = charged ? AXM.sulfur : STANCE_COLORS[stance];
-                return (
-                    <React.Fragment key={stance}>
-                        {i > 0 ? <Text style={styles.wheelChevron} allowFontScaling={false}>›</Text> : null}
-                        <View
-                            style={[
-                                styles.wheelNode,
-                                { borderColor: isLit ? color : isNext ? `${color}aa` : AXM.ash, backgroundColor: isLit ? `${color}30` : 'rgba(0,0,0,0.5)' },
-                                isNext && styles.wheelNodeNext,
-                            ]}
-                        >
-                            <Text style={[styles.wheelGlyph, { color: isLit ? color : AXM.ash, textShadowColor: isLit ? color : 'transparent' }]} allowFontScaling={false}>{glyph}</Text>
-                        </View>
-                    </React.Fragment>
-                );
-            })}
-            {charged ? <Text style={[styles.wheelCharged, { color: AXM.sulfur, textShadowColor: AXM.sulfur }]} allowFontScaling={false}>✦ MOMENTUM</Text> : null}
-        </Pressable>
-    );
-}
-
-// ── Spec 33 §3 (Phase D6b, flag-on) — Momentum-V2 chain chip ─────────────────
+// ── Spec 33 §3 (Phase D6b) — the momentum chain chip ─────────────────────────
 
 const CHAIN_GLYPHS: Record<string, string> = { heart: '♥', body: '⚡', mind: '★' };
 
@@ -822,7 +721,7 @@ function MomentumChainChip({ vm, onPress }: { vm: CombatMomentumV2VM; onPress?: 
     );
 }
 
-// ── Spec 33 §2 (Phase D6b, flag-on) — player current-stance chip ─────────────
+// ── Spec 33 §2 (Phase D6b) — player current-stance chip ──────────────────────
 
 /** The player's current stance, as an INERT readout.
  *
@@ -863,11 +762,6 @@ function StanceChip({ vm }: { vm: CombatStanceChipVM }) {
         </View>
     );
 }
-
-// THE STAKE (Phase 31/EA-7) is RETIRED EVERYWHERE (owner call 2026-07-18,
-// completing spec 33 §5's flag-on retirement): the pre-play wager UI is gone
-// on every surface, legacy kill-switch included. Engine plumbing
-// (`placeStake`/`settleStake`) awaits its own mechanics-side removal.
 
 // ── Charge track + CONDEMN beat (phase 28) ──────────────────────────────────
 
@@ -956,9 +850,9 @@ export interface CombatBoardProps {
     vm: CombatViewModel;
     drag: DragController;
     stagedUids: string[];
-    /** Commit the staged card. `power` true → power it with `dieId` (null when a die
-     *  is already drafted, the combo case); `power` false → the FREE base action,
-     *  no die (hazard model — the die is optional). `choices.chosenX` (WS7.2)
+    /** Commit the staged card. `power` true → power it with `dieId` (the die the
+     *  player dropped on it); `power` false → the FREE base action, no die
+     *  (hazard model — the die is optional). `choices.chosenX` (WS7.2)
      *  rides along only when the card carries an X mechanic and the stepper was
      *  touched; `choices.reprisalCardId` (phase 28) carries the songbook pick. */
     onApply: (uid: string, dieId: string | null, power: boolean, choices?: { chosenX?: number; reprisalCardId?: string }) => void;
@@ -984,16 +878,10 @@ export interface CombatBoardProps {
     onSignatureInfo?: (s: CombatSignatureVM) => void;
     /** Tap the player medallion → pilgrim stats/effects modal. */
     onPlayerInspect?: () => void;
-    /** Momentum wheel state (panel-owned): lit nodes + whether a wild momentum
-     *  die is currently live in the tray. */
-    momentum?: { lit: WheelStance[]; charged: boolean };
-    /** Tap the wheel → how-momentum-works popup. */
+    /** Tap the momentum chip → how-momentum-works popup. */
     onMomentumInfo?: () => void;
     /** Latest resolved engine events (drives enemy/player resolution feedback). */
     fx?: CombatFx;
-    // ── Fate Engine P1 ──
-    /** Tap a dead X die → the universal fate tap (once per turn). */
-    onFateTap?: (dieId: string) => void;
     /** phase 28 — REPRISE songbook choice. Called INSTEAD of `onApply` when the
      *  card being APPLYd carries a `reprise` mechanic and the discard pile is
      *  non-empty; the panel opens its picker and calls `onApply` itself once
@@ -1017,8 +905,8 @@ export interface CombatBoardProps {
 }
 
 export const CombatBoard = React.memo(function CombatBoard({
-    vm, drag, stagedUids, onApply, onStage, onUnstage, onDiscard, onSignature, onEndPhase, resolving = false, onInspect, onChip, onSeal, onAdd, onSignatureInfo, onPlayerInspect, momentum, onMomentumInfo, fx,
-    onFateTap, onReprisalNeeded, onHudLayout, region,
+    vm, drag, stagedUids, onApply, onStage, onUnstage, onDiscard, onSignature, onEndPhase, resolving = false, onInspect, onChip, onSeal, onAdd, onSignatureInfo, onPlayerInspect, onMomentumInfo, fx,
+    onReprisalNeeded, onHudLayout, region,
 }: CombatBoardProps) {
     const AXM = usePalette();
     const styles = useStyles();
@@ -1043,9 +931,7 @@ export const CombatBoard = React.memo(function CombatBoard({
 
     // Per-card die selection: the die the player has dragged onto each staged card
     // but not yet APPLYd. Local UI state — selecting/re-selecting is free; APPLY is
-    // the commit. (Combat drafts ONE stance die per turn, so once a die is drafted
-    // it — or its combo refresh — powers whichever card APPLYs next; before that,
-    // each staged card shows the die dragged onto it.)
+    // the commit. Each staged card shows exactly the die dragged onto it.
     const [pendingDieByUid, setPendingDieByUid] = useState<Record<string, string>>({});
     // WS7.2 chosen X-cost: the stepper pick per staged X card (absent → the
     // card's printed min). Local UI state; APPLY forwards it as `chosenX`.
@@ -1087,54 +973,22 @@ export const CombatBoard = React.memo(function CombatBoard({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [stagedKey]);
 
-    const draftedDie = vm.dice.find((d) => d.drafted && !d.spent) ?? null;
     // Card stance by uid — the COLOR LAW checks key off this (uid → stance is
     // immutable for the life of the hand entry).
     const stanceOfUid = (uid: string): string | undefined => vm.hand.find((c) => c.uid === uid)?.stance;
-    // THE COLOR LAW (engine: playCombatCard's gate, combat.engine.ts ~:1339;
-    // UI mirror: dieCanPowerCardVM): can the shared drafted die legally power
-    // the card at `uid`? Off-color routing would fizzle at resolution, so the
-    // board never arms — and never commits — an illegal pairing.
-    const draftedLegalFor = (uid: string): boolean => {
-        if (!draftedDie) return false;
-        const stance = stanceOfUid(uid);
-        return !!stance && dieCanPowerCardVM(draftedDie, stance);
-    };
-    // The ONE staged card a FRESH drafted die visibly arms: the first
-    // color-legal staged card without its own dropped die. The stale-powered
-    // fix (owner report 2026-07-12: "the NEXT card appears powered"): a
-    // REFRESHED combo die — one that already powered a play this turn and was
-    // handed back by a landed status — NEVER auto-attaches to another card.
-    // It returns to the tray draggable (vm `refreshed`), and powering a second
-    // card takes an explicit re-drop, exactly like any other die.
-    const comboTargetUid = draftedDie && !draftedDie.refreshed
-        ? (stagedUids.find((u) => !pendingDieByUid[u] && draftedLegalFor(u))
-            ?? stagedUids.find((u) => draftedLegalFor(u))
-            ?? null)
-        : null;
-    // DISPLAY (decoupled from commit): resolve the per-card dropped die FIRST (only
-    // when still usable AND color-legal — drops are already gated, this is the belt
-    // to the drop's braces; a REFRESHED drafted die counts, its re-drop was
-    // explicit), then show the fresh drafted die on the single comboTargetUid,
-    // else null → the card reads as FREE (no die).
+    // DISPLAY (decoupled from commit): a staged card shows the die dropped on
+    // it, but only while that die is still usable AND color-legal (drops are
+    // already gated — this is the belt to the drop's braces), else null → the
+    // card reads as FREE (no die). Nothing ever auto-attaches.
     const assignedDieFor = (uid: string): CombatDieVM | null => {
         const pid = pendingDieByUid[uid];
-        if (pid) {
-            const d = vm.dice.find((x) => x.id === pid);
-            const stance = stanceOfUid(uid);
-            if (d && !d.spent && !d.isX && (!d.drafted || d.refreshed) && stance && dieCanPowerCardVM(d, stance)) return d;
-        }
-        if (draftedDie && uid === comboTargetUid) return draftedDie;
-        return null;
+        if (!pid) return null;
+        const d = vm.dice.find((x) => x.id === pid);
+        const stance = stanceOfUid(uid);
+        return d && !d.spent && !d.isX && stance && dieCanPowerCardVM(d, stance) ? d : null;
     };
-    const readFor = (die: CombatDieVM | null): string =>
-        (die ? (die.drafted ? vm.read.result : die.readPip) : 'none') ?? 'none';
-    // Dim every die that's already drafted or pending-assigned to some card.
-    // A REFRESHED die is live again — it dims only while pending on a card.
-    const assignedDieIds = new Set<string>(
-        [draftedDie && !draftedDie.refreshed ? draftedDie.id : null, ...Object.values(pendingDieByUid)]
-            .filter(Boolean) as string[],
-    );
+    // Dim every die that's pending-assigned to some card.
+    const assignedDieIds = new Set<string>(Object.values(pendingDieByUid));
 
     const resolveDrop = useCallback(async (payload: DragPayload, x: number, y: number) => {
         if (x < 0 && y < 0) return;
@@ -1297,7 +1151,12 @@ export const CombatBoard = React.memo(function CombatBoard({
                 .onUpdate((e) => { gx.value = e.absoluteX; gy.value = e.absoluteY; })
                 .onEnd((e) => { runOnJS(endJS)(e.absoluteX, e.absoluteY); })
                 .onFinalize((e, ok) => { if (!ok) runOnJS(endJS)(-1, -1); });
-            const tap = Gesture.Tap().maxDistance(9).onEnd(() => { runOnJS(tapDieJS)(die.id); });
+            // `withTestId` — RNGH's own test affordance (inert in production,
+            // same as the card tap above): lets a suite drive the real
+            // tap-to-power path, the one way a jest harness can CHOOSE a die.
+            const tap = Gesture.Tap().maxDistance(9)
+                .withTestId(`combat-die-tap-${die.id}`)
+                .onEnd(() => { runOnJS(tapDieJS)(die.id); });
             g = Gesture.Exclusive(pan, tap);
             gestureCacheRef.current.set(key, g);
         }
@@ -1381,24 +1240,18 @@ export const CombatBoard = React.memo(function CombatBoard({
     const playableDice = vm.dice.filter((d) => d.draggable && !d.isX && !d.spent);
     const deadTray = vm.diceRolled && playableDice.length > 0 && vm.hand.length > 0
         && playableDice.every((d) => vm.hand.every((c) => !dieCanPowerCardVM(d, c.stance)));
-    // The END consequence — VERIFIED engine behavior, never invented copy:
-    // `endTurn` (called by the panel before the phase resolves) banks an
-    // unspent drafted die to the Reserve when a slot is free, else burns it
-    // for Conviction; dice never drafted are simply discarded — the fresh
-    // tray rolls next phase (`processBetweenPhases` clears the old one).
-    const unspentDraft = draftedDie !== null;
-    const endConsequence = unspentDraft
-        ? (vm.reserveRoom ? 'unspent die ⏳ banks to Reserve' : 'unspent die burns → ◆')
-        : deadTray
-            ? 'unusable dice are discarded · fresh roll next phase'
-            : null;
+    // The END consequence on a dead tray. Engine truth (`endTurn`, spec 33 §6):
+    // ONE unspent mana/special die banks to the Reserve when a slot is free;
+    // the rest expire and the fresh tray rolls next phase. NOTE: this line
+    // predates the flag collapse and does not name the bank — see the D7
+    // residue list before rewording it.
+    const endConsequence = deadTray
+        ? 'unusable dice are discarded · fresh roll next phase'
+        : null;
 
-    // Commit ONE staged card. A FRESH drafted die stays SHARED: if one exists,
-    // APPLY this card powered regardless of comboTargetUid. A REFRESHED combo
-    // die (it already powered a play this turn) powers only the card it was
-    // explicitly re-dropped on — commit mirrors display (stale-powered fix,
-    // 2026-07-12). Else if this card has a usable dropped die, draft+power it;
-    // else FREE (no die).
+    // Commit ONE staged card: powered by the die the player dropped on it
+    // (when still usable and colour-legal), else FREE (no die). Commit
+    // mirrors display (the stale-powered fix, 2026-07-12).
     // Latest-closure ref + a stable dispatcher so memoized StagedCards never
     // re-render just because the board did.
     // `autoResolve` (phase 28) — true only from the END PHASE batch below: a
@@ -1410,32 +1263,13 @@ export const CombatBoard = React.memo(function CombatBoard({
     handleApplyRef.current = (uid: string, autoResolve = false) => {
         // WS7.2 — forward the stepper's chosen X (absent = no X mechanic).
         const chosenX = chosenXRef.current[uid];
-        // THE COLOR LAW at commit (engine: playCombatCard's gate, ~:1339): an
+        // THE COLOR LAW at commit (engine: playCombatCard's gate): an
         // off-color die must never be routed at a card — the engine would
-        // fizzle the play. An off-color DRAFTED die falls through to the
-        // card's own dropped die (a Reserve/floating die is its own power
-        // source even while a draft is live; a fresh tray die can only power
-        // via draft-first, i.e. when nothing is drafted yet), else FREE.
-        const stance = stanceOfUid(uid);
-        const legalHere = (d: CombatDieVM | null): boolean =>
-            !!d && !!stance && dieCanPowerCardVM(d, stance);
-        const pid = pendingDieByUid[uid];
-        const pending = pid ? vm.dice.find((x) => x.id === pid) ?? null : null;
-        const pendingUsable = !!pending && !pending.spent && !pending.isX && !pending.drafted && legalHere(pending);
-        let dieId: string | null = null;
-        let power: boolean;
-        // Stale-powered fix (2026-07-12): a REFRESHED drafted die powers this
-        // card only when the player explicitly re-dropped it HERE (pid match) —
-        // commit mirrors display, so a card that reads FREE commits FREE. A
-        // fresh (not-yet-played) drafted die keeps the shared-commit combo law.
-        if (draftedDie && legalHere(draftedDie)
-            && (!draftedDie.refreshed || pid === draftedDie.id)) {
-            dieId = null; power = true;
-        } else if (pendingUsable && pending && (pending.reserve || pending.floating || !draftedDie)) {
-            dieId = pending.id; power = true;
-        } else {
-            dieId = null; power = false;
-        }
+        // fizzle the play. `assignedDieFor` applies the same gate the display
+        // uses, so a card that reads FREE commits FREE.
+        const armedDie = assignedDieFor(uid);
+        const dieId: string | null = armedDie ? armedDie.id : null;
+        const power = armedDie !== null;
         const card = handMapRef.current.get(uid);
         if (!autoResolve && power && card?.needsReprisalChoice && vm.discardCards.length > 0 && onReprisalNeeded) {
             // DEFER, don't commit: the songbook backdrop may CANCEL this play,
@@ -1465,7 +1299,7 @@ export const CombatBoard = React.memo(function CombatBoard({
 
     // A staged card is a committed intent — END PHASE must never silently drop it.
     // Auto-APPLY every still-staged card first (each exactly as its own APPLY button
-    // would: honoring a dropped/drafted die, else FREE), THEN resolve the phase. The
+    // would: honoring a dropped die, else FREE), THEN resolve the phase. The
     // applies and the resolve all compose through the panel's functional setState, so
     // cards land before the enemy acts.
     const handleEndPhase = () => {
@@ -1542,7 +1376,6 @@ export const CombatBoard = React.memo(function CombatBoard({
                                         key={card.uid}
                                         card={card}
                                         assignedDie={adie}
-                                        read={readFor(adie)}
                                         onApply={handleApply}
                                         gesture={stagedGesture(card)}
                                         register={registerStaged}
@@ -1580,16 +1413,11 @@ export const CombatBoard = React.memo(function CombatBoard({
                     </View>
                 </View>
 
-                {/* momentum — spec-33 chain chip (flag-on) supersedes the old
-                    three-node wheel; both stance-sequence combo trackers. */}
-                {vm.momentumV2 ? (
-                    <MomentumChainChip vm={vm.momentumV2} onPress={onMomentumInfo} />
-                ) : momentum ? (
-                    <MomentumWheel lit={momentum.lit} charged={momentum.charged} onPress={onMomentumInfo} />
-                ) : null}
+                {/* momentum — the spec-33 stance-sequence chain chip. */}
+                <MomentumChainChip vm={vm.momentumV2} onPress={onMomentumInfo} />
 
-                {/* Spec 33 §2 (flag-on) — the player's current-stance chip. */}
-                {vm.playerStance ? <StanceChip vm={vm.playerStance} /> : null}
+                {/* Spec 33 §2 — the player's current-stance chip. */}
+                <StanceChip vm={vm.playerStance} />
 
                 {/* Charge track + CONDEMN beat (phase 28) — the Sentence theme's win condition */}
                 <PerorationTrack peroration={vm.peroration} />
@@ -1639,7 +1467,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                 ) : null}
                 {/* Spec 33 §4 — Press Fate has NO board control of its own (owner
                     call 2026-07-19): it is a signature, cast from the rune column
-                    like every other. The presenter reshapes its rune flag-on
+                    like every other. The presenter reshapes its rune
                     (1◆ cost + the full firing gate + refusal reason). */}
                 {/* The tray outranks the rune column in z-order (2026-09-13,
                     re-fixed 2026-09-13). `sigTop` keeps the column clear of the
@@ -1673,7 +1501,7 @@ export const CombatBoard = React.memo(function CombatBoard({
                     pointerEvents="box-none"
                     style={styles.trayLayer}
                 >
-                    <DiceRow vm={vm} dieGesture={dieGesture} draggingDieId={draggingDieId} assignedDieIds={assignedDieIds} onFateTap={onFateTap} />
+                    <DiceRow vm={vm} dieGesture={dieGesture} draggingDieId={draggingDieId} assignedDieIds={assignedDieIds} />
                 </View>
 
                 {/* signature rune column — left edge. A sibling of the tray
@@ -1993,7 +1821,7 @@ function RarityTrack({ pips, color, large, label }: { pips: number; color: strin
 }
 
 export const CombatCardFace = React.memo(function CombatCardFace({
-    card, width, height, large = false, accent = null, readPip = null, heroOverride, namePeek = null, children,
+    card, width, height, large = false, accent = null, heroOverride, namePeek = null, children,
 }: {
     card: CombatCardVM;
     width: number;
@@ -2009,8 +1837,6 @@ export const CombatCardFace = React.memo(function CombatCardFace({
     namePeek?: number | null;
     /** Override the keyword/value/border colour (the armed staged-card read tint). */
     accent?: string | null;
-    /** ▲ / ▼ / — read pip beside the keyword (read-dependent staged cards). */
-    readPip?: string | null;
     /** Override the hero value text (e.g. the live-recomputed Guard number). */
     heroOverride?: string;
     children?: React.ReactNode;
@@ -2146,7 +1972,6 @@ export const CombatCardFace = React.memo(function CombatCardFace({
                     {hasFree ? <View style={narrow ? styles.plateRuleAcross : styles.plateRule} /> : null}
                     <View style={styles.platePaidCell}>
                         <StanceCube color={band} size={large ? 20 : narrow ? 12 : 14} />
-                        {readPip ? <Text style={[styles.paidRead, { color: kwColor }]} allowFontScaling={false}>{readPip}</Text> : null}
                         <View style={styles.paidTextWrap}>
                             {f.keyword ? (
                                 <Text
@@ -2282,24 +2107,18 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
     dieAssigned: { opacity: 0.4 },
     // Drawn X/dud die — a small greyed pip, not a full slot.
     dieXPip: { width: 24, height: 24, borderRadius: 6, borderWidth: 1, borderColor: '#3a3a3a', backgroundColor: 'rgba(0,0,0,0.4)', alignItems: 'center', justifyContent: 'center', opacity: 0.6, alignSelf: 'center' },
-    dieFateHint: { fontFamily: FONTS.sans, fontSize: 7, color: '#d4c026', marginTop: 1 },
-    // Spec 33 §4 — Press Fate reroll control (flag-on).
     dieXGlyph: { fontFamily: FONTS.sans, fontSize: 12, color: '#8a8273' },
     dieConv: { fontFamily: FONTS.sans, fontSize: 9, color: AXM.bone, textAlign: 'center', marginTop: 2, letterSpacing: 0.5, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },
-    diePip: { fontFamily: FONTS.sans, fontSize: 10, textAlign: 'center', marginTop: 2, letterSpacing: 0.6, textShadowColor: 'rgba(0,0,0,0.9)', textShadowRadius: 3 },
 
     // ── the hand dock ── (Option A: fits the 194pt card raised ~20pt off the
     // screen bottom — was 178 for the 158pt card flush against the rail)
     dock: { height: 216, overflow: 'hidden' },
 
-    // ── momentum wheel ──
+    // ── momentum chip row (shared by the chain chip's nodes + SURGED tag) ──
     wheelRow: { alignSelf: 'center', flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 3, paddingHorizontal: 10, marginBottom: 2 },
-    wheelNode: { width: 26, height: 26, borderRadius: 13, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
-    wheelNodeNext: { borderStyle: 'dashed' },
     wheelGlyph: { fontSize: 12, lineHeight: 15, textShadowRadius: 6, textShadowOffset: { width: 0, height: 0 } },
-    wheelChevron: { fontFamily: FONTS.sans, fontSize: 13, color: '#5a5346', marginHorizontal: -1 },
     wheelCharged: { fontFamily: FONTS.sans, fontSize: 11, letterSpacing: 1.6, marginLeft: 7, textShadowRadius: 7, textShadowOffset: { width: 0, height: 0 } },
-    // ── Spec 33 §3 — momentum-V2 chain chip ──
+    // ── Spec 33 §3 — momentum chain chip ──
     chainNode: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
     chainNext: { fontFamily: FONTS.sans, fontSize: 13, marginLeft: 4 },
     // CRITIQUE pass 21 — bare "○ no momentum" text vanished against the arena
@@ -2512,7 +2331,6 @@ export const useCombatBoardStyles = makeStyles((AXM) => ({
     plateRule: { width: StyleSheet.hairlineWidth, alignSelf: 'stretch', marginVertical: 6, backgroundColor: AXM.divider },
     plateRuleAcross: { height: StyleSheet.hairlineWidth, alignSelf: 'stretch', backgroundColor: AXM.divider },
     platePaidCell: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 5 },
-    paidRead: { fontFamily: FONTS.sans, fontSize: 11, marginTop: 1 },
     paidTextWrap: { flex: 1 },
     // The keyword is the loudest word on the face — it is the whole read now.
     paidKeyword: { fontFamily: FONTS.sans, fontSize: 12, lineHeight: 14, letterSpacing: 0.8 },

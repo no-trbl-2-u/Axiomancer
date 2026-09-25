@@ -121,7 +121,7 @@ function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatE
         state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
         face: c === 'x' ? ('miss' as const) : ('mana' as const),
     }));
-    return { ...state, dice, draftedDieId: null, turn };
+    return { ...state, dice, turn };
 }
 
 /** Opens phase-play and forces the tray: die 0 (color `die`) powers paid plays. */

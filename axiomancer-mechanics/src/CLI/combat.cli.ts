@@ -36,7 +36,7 @@
  *                        [min, affordable])
  *   --stdin              JSONL answers (shared io.ts layer)
  *   --json-events        machine-clean stdout event stream; --auto runs emit
- *                        the full per-play transcript (turnStart / draft /
+ *                        the full per-play transcript (turnStart /
  *                        signature / card / turnEnd / resolvedPhase / mercy)
  *   --state-log <path>   JSONL state mutation log
  *
@@ -52,21 +52,17 @@ import {
     initializeCombatEncounter,
     rollEncounterDice,
     startTurn,
-    draftStanceDie,
     endTurn,
     playCombatCard,
     playSignatureSkill,
     resolveThreatPhase,
     handCards,
-    getDraftedDie,
     revealedCurrentStance,
-    chooseDraft,
+    firstLegalPoweringDie,
     buildCombatSummary,
     getSignatureSkill,
     selectMercyChoice,
     selectCapitulationChoice,
-    resolveRead,
-    isMomentumDieId,
 } from '../Combat/combat.engine';
 import type {
     CombatEncounterState,
@@ -244,12 +240,9 @@ export function parseCombatArgv(args: string[]): CombatCliFlags {
 
 // ── Auto-policy helper (reuses combat.encounter.sim logic + extends for CLI) ─
 
-const currentPhaseStance = (s: CombatEncounterState) =>
-    s.threatPhases[Math.min(s.currentPhaseIndex, s.threatPhases.length - 1)]?.enemyStance ?? 'heart';
-
-function bestAutoCard(s: CombatEncounterState, policy: CombatAutoPolicyId) {
+/** The hand (retreat excluded) ranked by the auto policy, best first. */
+function rankedAutoCards(s: CombatEncounterState, policy: CombatAutoPolicyId) {
     const cards = handCards(s).filter(c => c.card.verbClass !== 'retreat');
-    if (cards.length === 0) return null;
     const activeIds = new Set(s.enemy.effects.map(e => e.effectId));
 
     return cards.sort((a, b) => {
@@ -271,7 +264,7 @@ function bestAutoCard(s: CombatEncounterState, policy: CombatAutoPolicyId) {
             default:
                 return 0;
         }
-    })[0] ?? null;
+    });
 }
 
 function bestAutoSignature(s: CombatEncounterState): string | null {
@@ -285,10 +278,12 @@ function bestAutoSignature(s: CombatEncounterState): string | null {
 
 /**
  * Runs one full phase in auto mode under the ROUND-TURN LAW (Gate 0,
- * 2026-07-10): ONE tray roll per phase — draft once, ride the drafted die's
- * combo refresh for the paid plays, drain the leftover hand through the FREE
- * tops, then end the turn. The safety counter is kept but never binds on
- * legal play (the old `endTurn → startTurn` loop is gone).
+ * 2026-07-10): ONE tray roll per phase. Spec 33 — no draft: each paid play
+ * takes the policy's best-ranked card that some live die can LEGALLY power
+ * (`firstLegalPoweringDie`: a colour-legal tray die, then Reserve, then
+ * floating), until no card can be powered; then the leftover hand drains
+ * through the FREE tops and the turn ends. The safety counter is kept but
+ * never binds on legal play.
  *
  * Every engine verb `emit`s its events (Gate 0 §2, 2026-07-10): auto mode
  * carries the same per-play transcript the interactive loop does, so a
@@ -303,31 +298,18 @@ function autoPlayPhase(
     let s = state;
     let safety = 0;
 
-    // The ONE legal tray roll + stance draft for this phase.
-    if (s.dice.length === 0 && s.draftedDieId === null && !s.turnTakenThisPhase) {
+    // The ONE legal tray roll for this phase.
+    if (s.dice.length === 0 && !s.turnTakenThisPhase) {
         const turned = startTurn(s);
         s = turned.state;
         emit({
             type: 'hazardCombat:turnStart',
-            payload: { turn: s.turn, dice: s.dice.map(d => `${d.id}[${d.color}]`), events: turned.events },
+            payload: { turn: s.turn, dice: s.dice.map(d => `${d.id}[${d.color}${d.face ? `:${d.face}` : ''}]`), events: turned.events },
         });
         if (s.phase !== 'phase-play') return s;
     }
-    if (s.draftedDieId === null && s.dice.length > 0) {
-        const want = bestAutoCard(s, policy);
-        const enemyStance = revealedCurrentStance(s);
-        const pick = chooseDraft(s.dice, want?.card.stance ?? 'wild', enemyStance);
-        if (pick) {
-            const drafted = draftStanceDie(s, pick);
-            s = drafted.state;
-            emit({
-                type: 'hazardCombat:draft',
-                payload: { dieId: pick, color: getDraftedDie(s)?.color, read: s.lastRead, events: drafted.events },
-            });
-        }
-    }
 
-    // Paid plays off the drafted die while the combo refresh keeps it alive.
+    // Paid plays: each one spends one live die on a colour-legal card.
     while (s.phase === 'phase-play' && !s.finalOutcome && !s.mercyChoiceActive && safety < phaseTurnLimit * 6) {
         safety++;
 
@@ -345,26 +327,27 @@ function autoPlayPhase(
             }
         }
 
-        const drafted = getDraftedDie(s);
-        if (!drafted || drafted.state !== 'available' || drafted.color === 'x') break;
-        const want = bestAutoCard(s, policy);
-        if (!want) break;
+        const current = s;
+        const pick = rankedAutoCards(current, policy)
+            .map(c => ({ ...c, die: firstLegalPoweringDie(current, c.card) }))
+            .find(c => c.die !== null);
+        if (!pick || !pick.die) break;
 
-        const res = playCombatCard(s, { uid: want.uid }, true);
+        const res = playCombatCard(s, { uid: pick.uid }, true, pick.die.id);
         if (res.events.some(e => e.kind === 'effect-fizzled')) {
             // Fizzled — drain via free top.
-            const free = playCombatCard(s, { uid: want.uid }, false);
+            const free = playCombatCard(s, { uid: pick.uid }, false);
             s = free.state;
             emit({
                 type: 'hazardCombat:card',
-                payload: { uid: want.uid, cardId: want.card.id, useBottom: false, events: free.events },
+                payload: { uid: pick.uid, cardId: pick.card.id, useBottom: false, events: free.events },
             });
             continue;
         }
         s = res.state;
         emit({
             type: 'hazardCombat:card',
-            payload: { uid: want.uid, cardId: want.card.id, useBottom: true, events: res.events },
+            payload: { uid: pick.uid, cardId: pick.card.id, useBottom: true, dieId: pick.die.id, events: res.events },
         });
     }
 
@@ -381,7 +364,7 @@ function autoPlayPhase(
             payload: { uid: topCard.uid, cardId: topCard.card.id, useBottom: false, events: free.events },
         });
     }
-    if (s.phase === 'phase-play' && !s.finalOutcome && s.draftedDieId !== null) {
+    if (s.phase === 'phase-play' && !s.finalOutcome && s.turnTakenThisPhase) {
         const ended = endTurn(s);
         s = ended.state;
         emit({ type: 'hazardCombat:turnEnd', payload: { events: ended.events } });
@@ -392,37 +375,21 @@ function autoPlayPhase(
 
 // ── New Hazard-style combat loop (interactive) ───────────────────────────────
 
-async function promptDraftChoice(state: CombatEncounterState): Promise<string | null> {
-    const diePairs = state.dice.filter(d => d.state !== 'spent');
-    if (diePairs.length === 0) return null;
-    const choices = diePairs.map(d => ({
-        name: `${d.id}  [${d.color}]${d.state === 'locked' ? ' (locked-X)' : ''}`,
-        value: d.id,
-    }));
-    choices.push({ name: 'skip (end turn)', value: '__skip__' });
-    const { dieId } = await prompt<{ dieId: string }>([{
-        type: 'rawlist', name: 'dieId', message: 'Draft a stance die:', choices,
-    }]);
-    return dieId === '__skip__' ? null : dieId;
-}
-
 async function promptCardChoice(state: CombatEncounterState): Promise<{ uid: string; useBottom: boolean; chosenX?: number } | null> {
     const cards = handCards(state);
     if (cards.length === 0) return null;
-    const enemyStance = revealedCurrentStance(state);
     const choices = cards.flatMap(({ uid, card }) => {
-        // P0-truth: every powered play costs exactly the drafted die. The read
-        // (the card's stance against the enemy's phase stance) is the real
-        // lever; a grey 'any' card has no stance to read.
-        const read = card.stance === 'any' ? 'neutral' : resolveRead(card.stance, currentPhaseStance(state));
-        const stanceLabel = enemyStance ? ` vs ${enemyStance}:${read}` : '';
+        // Spec 33: a powered play costs exactly one live die of the card's
+        // colour (gold = any); the CLI powers it with the first legal one.
+        const die = firstLegalPoweringDie(state, card);
+        const dieLabel = die ? `die ${die.id}` : 'no legal die';
         return [
             { name: `[top] ${card.name}  (${card.stance}, ${card.effectKind})`, value: `top:${uid}` },
-            { name: `[bot] ${card.name}  cost 1 die${stanceLabel}  ${card.bottomActionText}`, value: `bot:${uid}` },
+            { name: `[bot] ${card.name}  (${dieLabel})  ${card.bottomActionText}`, value: `bot:${uid}` },
         ];
     });
     choices.push({ name: 'resolve phase (stop playing cards)', value: '__resolve__' });
-    choices.push({ name: 'end turn (clear draft)', value: '__end__' });
+    choices.push({ name: 'end turn', value: '__end__' });
 
     const { action } = await prompt<{ action: string }>([{
         type: 'rawlist', name: 'action', message: 'Play a card or resolve:', choices,
@@ -497,32 +464,20 @@ async function interactiveHazardCombatLoop(
         log(`  Player HP ${s.player.health}/${s.player.maxHealth}  Conviction ${s.conviction}◆`);
         log(`  Enemy intent: ${phase?.intentType ?? 'unknown'}  stance: ${revealed ?? '?'}  guard: ${s.guard ?? 0}`);
         log(`  Threat: ${phase?.threatAction.description ?? '?'}`);
-        const charged = (s.floatingDice ?? []).some(d => isMomentumDieId(d.id));
-        const wheel = s.momentumWheel ?? [];
-        log(`  Wheel: [${wheel.join(',') || '—'}]${charged ? ' charged ✦' : ''}${s.stake ? `  Stake: ${s.stake.amount}◆ on ${s.stake.color}` : ''}`);
+        const momentum = s.momentumV2 ? `${s.momentumV2.color} x${s.momentumV2.length}` : '—';
+        log(`  Stance: ${s.playerStance ?? '—'}  Momentum: ${momentum}`);
 
         const before = s;
 
         // Start turn: roll dice — but only when this phase's ONE legal tray
         // roll hasn't happened yet (rollEncounterDice already rolled phase 1's;
         // an unguarded startTurn would log a false 'turn-law-blocked' event).
-        if (s.dice.length === 0 && s.draftedDieId === null && !s.turnTakenThisPhase) {
+        if (s.dice.length === 0 && !s.turnTakenThisPhase) {
             const turned = startTurn(s);
             s = turned.state;
             logState('hazardCombat:start', before, s, { turn: s.turn, dice: s.dice.map(d => `${d.id}[${d.color}]`) });
         }
-
-        // Draft phase.
-        const dieId = await promptDraftChoice(s);
-        if (dieId) {
-            const drafted = draftStanceDie(s, dieId);
-            const beforeDraft = s;
-            s = drafted.state;
-            logState('hazardCombat:draft', beforeDraft, s, {
-                dieId, color: getDraftedDie(s)?.color, read: s.lastRead,
-            });
-            log(`  Read: ${s.lastRead}  (Conviction: ${s.conviction}◆)`);
-        }
+        log(`  Dice: ${s.dice.map(d => `${d.id}[${d.color}${d.face ? `:${d.face}` : ''}${d.state === 'available' ? '' : ` ${d.state}`}]`).join('  ') || '—'}`);
 
         // Signature opportunity (before cards).
         const sigId = await promptSignatureChoice(s);
@@ -541,8 +496,12 @@ async function interactiveHazardCombatLoop(
             if (cardChoice.uid === '__end__') { s = endTurn(s).state; break; }
 
             const beforeCard = s;
+            const chosen = handCards(s).find(h => h.uid === cardChoice.uid);
+            const dieId = cardChoice.useBottom && chosen
+                ? firstLegalPoweringDie(s, chosen.card)?.id
+                : undefined;
             const res = playCombatCard(
-                s, { uid: cardChoice.uid }, cardChoice.useBottom, undefined, undefined,
+                s, { uid: cardChoice.uid }, cardChoice.useBottom, dieId, undefined,
                 cardChoice.chosenX !== undefined ? { chosenX: cardChoice.chosenX } : undefined,
             );
             s = res.state;

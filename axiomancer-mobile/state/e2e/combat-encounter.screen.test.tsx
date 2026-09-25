@@ -3,10 +3,10 @@
  *
  * Mounts the real `/combat-encounter` screen against a rigged store player and
  * walks the redesigned flow: the reveal → ENTER → the board (portraits, visible
- * HP, the 2-die DRAFT, Conviction + Signature Skills,
- * the hidden-stance read) → END PHASE. Determinism comes from the engine seed
- * (`__AXM_COMBAT_SEED__`); seed 16 rolls a draftable first die (mind, heart).
- * The engine owns the rules; this asserts the presenter + screen wiring.
+ * HP, the spec-33 four-die tray, Conviction + Signature Skills, the open
+ * stance check) → END PHASE. Determinism comes from the engine seed
+ * (`__AXM_COMBAT_SEED__`). The engine owns the rules; this asserts the
+ * presenter + screen wiring.
  */
 
 import React from 'react';
@@ -70,9 +70,12 @@ describe('combat-encounter screen — drag-to-power flow (2026-06-22)', () => {
     it('renders draggable dice + the empty play area; the FREE/POWER split + read banner are gone', () => {
         mount();
         enter();
-        // The 2 turn dice render in the tray, to be DRAGGED onto a staged card.
+        // The four spec-33 dice (one per colour) render in the tray, to be
+        // DRAGGED onto a staged card.
         expect(screen.getByTestId('combat-dice-tray')).toBeTruthy();
-        expect(screen.getByTestId('combat-die-t1-d0')).toBeTruthy();
+        for (const color of ['heart', 'body', 'mind', 'wild']) {
+            expect(screen.getByTestId(`combat-die-t1-u-${color}`)).toBeTruthy();
+        }
         // The play area is the staging zone (empty until a card is dragged up).
         expect(screen.getByTestId('combat-play-area')).toBeTruthy();
         // The redesign removes the tap-draft read banner and the FREE/POWER buttons.

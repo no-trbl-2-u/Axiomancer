@@ -21,10 +21,10 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { render, screen } from '@testing-library/react-native';
-import { afterAll, afterEach, beforeAll, describe, expect, it, jest } from '@jest/globals';
+import { afterAll, beforeAll, describe, expect, it, jest } from '@jest/globals';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 
-import { initializeCombatEncounter, rollEncounterDice, setUpgradeableDice } from '@mechanics';
+import { initializeCombatEncounter, rollEncounterDice } from '@mechanics';
 import {
     CombatBoard, handFanLayout,
     HAND_CARD_W, HAND_FAN_LEFT, HAND_FAN_RIGHT, HAND_FAN_MIN_STEP, HAND_FAN_BOARD_EDGE,
@@ -54,7 +54,6 @@ beforeAll(() => {
 afterAll(() => {
     Object.defineProperty(RN, 'useWindowDimensions', { configurable: true, value: realUseWindowDimensions });
 });
-afterEach(() => setUpgradeableDice(false));
 
 const noopDrag = (): DragController =>
     ({ begin: () => undefined, end: () => undefined, active: null, x: { value: 0 }, y: { value: 0 } } as unknown as DragController);
@@ -199,18 +198,11 @@ describe('C19-R — the momentum tap mark carries its own backing plate', () => 
     /** Force the chip's empty state — the one the desktop capture shows. */
     const emptyChain = (vm: CombatViewModel): CombatViewModel => ({
         ...vm,
-        momentumV2: vm.momentumV2
-            ? { ...vm.momentumV2, color: null, length: 0, chain: [], next: null, broke: false, surged: false }
-            : vm.momentumV2,
+        momentumV2: { ...vm.momentumV2, color: null, length: 0, chain: [], next: null, broke: false, surged: false },
     });
 
-    function renderFlagOn(): void {
-        setUpgradeableDice(true);
-        renderBoard(emptyChain);
-    }
-
     it('plates the mark exactly as the readout beside it is plated', () => {
-        renderFlagOn();
+        renderBoard(emptyChain);
         const mark = flat('combat-momentum-info-mark');
         const readout = flat('combat-momentum-empty');
         // Bare, the glyph sat on the arena floor art at ~1.5:1 and vanished.
@@ -221,7 +213,7 @@ describe('C19-R — the momentum tap mark carries its own backing plate', () => 
     });
 
     it('mirrors the mark on the row’s leading edge so the readout stays centred', () => {
-        renderFlagOn();
+        renderBoard(emptyChain);
         const mark = flat('combat-momentum-info-mark');
         const gutter = flat('combat-momentum-info-gutter');
         expect(mark.width).toBe(CHIP_INFO_MARK_W);
@@ -232,7 +224,7 @@ describe('C19-R — the momentum tap mark carries its own backing plate', () => 
     });
 
     it('still marks the chip as the tappable half of the pair', () => {
-        renderFlagOn();
+        renderBoard(emptyChain);
         expect(screen.getByTestId('combat-momentum-v2').props.accessibilityRole).toBe('button');
         expect(screen.getByTestId('combat-momentum-info-mark')).toBeTruthy();
     });

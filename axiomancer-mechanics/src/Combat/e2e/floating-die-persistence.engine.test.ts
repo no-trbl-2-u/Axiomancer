@@ -79,7 +79,7 @@ function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatE
         face: c === 'x' ? ('miss' as const) : ('mana' as const),
     }));
     const floating = state.dice.filter(d => d.floating);
-    return { ...state, dice: [...dice, ...floating], draftedDieId: null, turn };
+    return { ...state, dice: [...dice, ...floating], turn };
 }
 
 function playFromHand(state: CombatEncounterState, cardId: string, useBottom = true, dieId?: string) {

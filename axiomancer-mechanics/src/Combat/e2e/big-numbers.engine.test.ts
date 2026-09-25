@@ -24,7 +24,7 @@ import { enemyVitae } from '../../Enemy';
 import { registerSandboxCards } from '../../Cards/cards.sandbox';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
-    draftStanceDie, resolveThreatPhase,
+    resolveThreatPhase,
     scalePlayerHit, scalePlayerHitDetailed, effectiveHide, FLAY_DAMAGE_MULT, EXECUTE_DAMAGE_MULT,
     BRUTAL_DAMAGE_MULT, WOUND_CARD_ID,
 } from '../combat.engine';
@@ -251,10 +251,9 @@ describe('the DEAL family lands the printed number', () => {
         const seated = seat(s, 'qa-bn-multi');
         const die = seated.dice.find(d => d.state === 'available' && d.color === 'body');
         if (!die) return; // colour-legal die not in this tray; the unit test above covers the maths
-        const drafted = draftStanceDie(seated, die.id).state;
-        const entry = drafted.hand.find(h => h.cardId === 'qa-bn-multi')!;
-        const before = drafted.enemy.health;
-        const after = playCombatCard(drafted, { uid: entry.uid }, true, die.id, rng).state;
+        const entry = seated.hand.find(h => h.cardId === 'qa-bn-multi')!;
+        const before = seated.enemy.health;
+        const after = playCombatCard(seated, { uid: entry.uid }, true, die.id, rng).state;
         const dealt = before - after.enemy.health;
         // Three hits, each shaved by HIDE 4 — never the un-shaved 30.
         expect(dealt).toBeLessThan(30);
@@ -303,10 +302,9 @@ describe('ECHO multiplies the hit COUNT, not the per-hit magnitude', () => {
         const seated = seat(s, 'qa-bn-echo-deal');
         const die = seated.dice.find(d => d.state === 'available' && d.color === 'body');
         if (!die) return; // no colour-legal die in this tray; the unit maths is covered above
-        const drafted = draftStanceDie(seated, die.id).state;
-        const entry = drafted.hand.find(h => h.cardId === 'qa-bn-echo-deal')!;
-        const before = drafted.enemy.health;
-        const res = playCombatCard(drafted, { uid: entry.uid }, true, die.id, rng);
+        const entry = seated.hand.find(h => h.cardId === 'qa-bn-echo-deal')!;
+        const before = seated.enemy.health;
+        const res = playCombatCard(seated, { uid: entry.uid }, true, die.id, rng);
         const hits = res.events.filter(e => e.kind === 'damage-dealt'
             && (e as { target?: string }).target === 'enemy');
         expect(hits.length, 'an echoed DEAL must emit two damage instances').toBe(2);

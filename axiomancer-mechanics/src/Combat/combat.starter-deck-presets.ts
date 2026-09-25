@@ -34,7 +34,6 @@
  */
 
 import { getCardById } from '../Cards/cards.library';
-import { isUpgradeableDiceEnabled } from './combat.upgradeable-dice';
 
 /**
  * The design lever a preset leans on. Kept coarse for the draft/sim-policy
@@ -273,16 +272,16 @@ export function cardOrigin(cardId: string): CardOrigin {
     return { source: 'reward' };
 }
 
-// ── PHASE D8 — the flag-on dice-valve seats (spec 33 §4 valve 3) ────────────
-// Under Upgradeable Dice every preset's BUILT deck swaps exactly one
-// same-aspect card INSTANCE of `replacesId` for the stage's reliquary-die
-// relic. `cardIds` above stays the flag-off truth.
+// ── PHASE D8 — the dice-valve seats (spec 33 §4 valve 3) ─────────────────────
+// Every preset's BUILT deck swaps exactly one same-aspect card INSTANCE of
+// `replacesId` for the stage's reliquary-die relic. `cardIds` above stays the
+// base recipe the swap is applied to.
 
-/** One preset's valve seat: the valve card and the flag-off source it replaces. */
+/** One preset's valve seat: the valve card and the base-recipe card it replaces. */
 export interface PresetDiceValveSeat {
     /** The dice-interaction card (tagged `dice` + `valve`). */
     valveId: string;
-    /** The flag-off card whose ONE instance the valve replaces (same aspect). */
+    /** The base-recipe card whose ONE instance the valve replaces (same aspect). */
     replacesId: string;
 }
 
@@ -301,7 +300,7 @@ function isDiceValveCard(id: string): boolean {
 }
 
 /**
- * Derives a preset's Upgradeable-Dice deck: the flag-off recipe with exactly
+ * Derives a preset's Upgradeable-Dice deck: the base recipe with exactly
  * one instance of the seat's `replacesId` swapped for its valve. Fails LOUDLY
  * (throws) on any structural-law violation — a silent fallback here would
  * ship a wrong-sized or valveless deck into live combat. Returns `[]` only
@@ -328,7 +327,7 @@ export function buildUpgradeableDicePresetDeck(
     const idx = preset.cardIds.indexOf(seat.replacesId);
     if (idx < 0) throw new Error(`D8 valve law: '${seat.replacesId}' is not in preset '${presetId}'.`);
     if (preset.cardIds.some(isDiceValveCard)) {
-        throw new Error(`D8 valve law: preset '${presetId}' flag-off recipe already carries a valve.`);
+        throw new Error(`D8 valve law: preset '${presetId}' base recipe already carries a valve.`);
     }
     const deck = [...preset.cardIds];
     deck[idx] = seat.valveId;
@@ -342,18 +341,12 @@ export function buildUpgradeableDicePresetDeck(
 }
 
 /**
- * Builds a ready-to-play deck from a preset: the curated cards (invalid ids
+ * Builds a ready-to-play deck from a preset: the curated recipe with its
+ * dice-valve seat applied ({@link buildUpgradeableDicePresetDeck}; invalid ids
  * dropped). No escape-hatch card is appended — once combat is joined it
  * resolves only by winning or losing. Returns an empty array for an unknown
  * preset id (callers can fall back to `buildCombatDeck`).
- *
- * Flag-aware since Phase D8: under Upgradeable Dice the deck is derived by
- * {@link buildUpgradeableDicePresetDeck}; flag-off it is the byte-identical
- * curated recipe.
  */
 export function buildPresetDeck(presetId: string): string[] {
-    if (isUpgradeableDiceEnabled()) return buildUpgradeableDicePresetDeck(presetId);
-    const preset = getDeckPreset(presetId);
-    if (!preset) return [];
-    return preset.cardIds.filter(isValidPresetCard);
+    return buildUpgradeableDicePresetDeck(presetId);
 }

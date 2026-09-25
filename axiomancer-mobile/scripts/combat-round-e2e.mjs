@@ -436,14 +436,6 @@ async function playRound(page, sink, seed, round) {
         acted.applied++
     }
 
-    // Fate-tap a dead X die if one is offered (R4 path — never covered elsewhere).
-    const fate = page.locator('[data-testid^="combat-fate-tap-"]').first()
-    if (await has(fate)) {
-        await fate.click({ force: true, timeout: 1500 }).catch(() => {})
-        await page.waitForTimeout(200)
-        await assertAlive(page, sink, at('fate-tapping an X die'))
-    }
-
     // Fire the first affordable signature. NOTE the two traps here:
     //   * `combat-signature-bar` is the BAR CONTAINER, not a signature — it
     //     shares the `combat-signature-` prefix and carries no aria-label, so a
@@ -501,7 +493,7 @@ async function enterLive(page, baseUrl, seed) {
     await page.addInitScript((s) => { globalThis.__AXM_COMBAT_SEED__ = s }, seed)
     // A static web export can't surface `extra.devToolsEnabled` at runtime, so
     // the SELF → /dev affordance needs the documented opt-in (lib/buildProfile.ts),
-    // the same one the roundtrip + upgradeable-dice harnesses set. Inert in real
+    // the same one the roundtrip + hazard harnesses set. Inert in real
     // builds — nothing sets the global there.
     await page.addInitScript(() => { globalThis.__AXM_FORCE_DEV_TOOLS__ = true })
     await page.goto(`${baseUrl}/character`, { waitUntil: 'networkidle' })

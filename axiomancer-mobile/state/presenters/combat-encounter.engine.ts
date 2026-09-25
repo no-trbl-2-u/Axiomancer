@@ -4,8 +4,9 @@
  * Pure function `buildCombatViewModel(state)`: maps the engine
  * `CombatEncounterState` into a single render-ready `CombatViewModel`. No store
  * writes, no rules — the engine owns truth, this shapes it for the board
- * (portraits, visible enemy HP, intent telegraph, the hidden-stance read, the
- * 2-die draft, and Conviction + Signature Skills — the HP-only model).
+ * (portraits, visible enemy HP, intent telegraph, the open stance check, the
+ * spec-33 faced dice tray, and Conviction + Signature Skills — the HP-only
+ * model).
  *
  * The redesign (Spec 26b): the enemy STANCE is hidden until revealed, so this
  * presenter only surfaces a stance colour/label once `isPhaseStanceRevealed`;
@@ -14,10 +15,9 @@
 
 import {
     handCards as engineHandCards, getCard, getCardById,
-    getDraftedDie, isPhaseStanceRevealed, cardReadPreview,
-    revealedCurrentStance, resolveRead, getSignatureSkill,
+    isPhaseStanceRevealed, getSignatureSkill,
     lookupEffect, READ_DAMAGE_MULT, colorMatchBonus,
-    READ_ADVANTAGE_INTENSITY_BONUS, READ_DISADVANTAGE_DURATION_PENALTY, RESERVE_MAX,
+    RESERVE_MAX,
     RUPTURE_CAP_FRACTION, recoilXRange, riderText,
     VULNERABLE_MAX_MULT, DISRUPT_DENY_AT,
     // phase 28 — legibility sweep
@@ -30,18 +30,17 @@ import {
     // Playtest fix 2026-09-04 — the turn-boundary PLEA decay is narrated in
     // the combat log with the engine's own constant, never a copied literal.
     SWAY_DECAY_PER_TURN,
-    // Spec 33 (Phase D6a) — flag-on combat render core: the die-face axis, the
-    // OVERHEAT-crack read, and the Press Fate reroll price. Inert flag-off.
-    isUpgradeableDiceEnabled, PRESS_FATE_COST,
-    // Spec 33 (Phase D6b) — the momentum-V2 chain, stance-check telegraph, and
-    // die-gear rail. All inert flag-off (the fields never reach the VM).
+    // Spec 33 (Phase D6a) — the Press Fate reroll price.
+    PRESS_FATE_COST,
+    // Spec 33 (Phase D6b) — the momentum chain, stance-check telegraph, and
+    // die-gear rail.
     MOMENTUM_CHAIN_ORDER, MOMENTUM_SURGE_LENGTH, activeDieGear, DEFAULT_DIE_GEAR,
     type CombatEncounterState, type CombatCard, type CombatManaDie, type CombatEvent,
     type CombatThreatPhase, type CombatThreatEffect, type CombatIntentType, type CombatReadResult,
     type CombatSummary, type SignatureSkill, type Stance,
     type Card, type CardCombatEffects, type EnemyDifficulty,
     type UpgradeableDieGear,
-    isMomentumDieId, type WheelStance,
+    type WheelStance,
     type GlyphInstance, type GlyphPayload,
     // Phase 102 (SUMMON) — the brood. `STRIKE_ADD_COST` is imported rather than
     // restated: a price the UI hardcodes is a price that drifts from the engine
@@ -80,6 +79,17 @@ export const STANCE_COLORS: Record<string, string> = {
     // (never a literal, unlike the fixed dice-identity hexes above).
     any: AXM.bone,
 };
+// RESIDUE (D7 flag collapse, 2026-09-25). The hidden-stance READ is retired
+// in the shipped spec-33 model — every play lands at read 'none' — and the
+// engine deleted `READ_ADVANTAGE_INTENSITY_BONUS` /
+// `READ_DISADVANTAGE_DURATION_PENALTY` with the legacy draft path. The card
+// face / detail copy below still prints the old ▲/▼ read triplets; that copy
+// is a separate honesty pass (it re-lays every status card face). Until it
+// lands, the two numbers are frozen here at their last engine values so the
+// faces render unchanged. Delete these with the triplet copy — do not reuse.
+const READ_ADVANTAGE_INTENSITY_BONUS = 1;
+const READ_DISADVANTAGE_DURATION_PENALTY = 1;
+
 const DIE_GLYPHS: Record<string, string> = { heart: '♥', body: '⚡', mind: '★', wild: '✦', x: '✕', any: '✦' };
 const STANCE_LABELS: Record<string, string> = { heart: 'HEART', body: 'BODY', mind: 'MIND', wild: 'WILD', x: 'X', any: 'ANY' };
 
@@ -359,11 +369,11 @@ export interface CombatIntentVM {
          *  worst lie this readout can tell. */
         addDamage: number; addNetDamage: number; totalNetDamage: number;
     };
-    /** Spec 33 §5 (Phase D6b, FLAG-ON ONLY) — the OPEN stance-check telegraph for
-     *  this phase (D6e authored `punishes`/`yields` on every threat phase): what
+    /** Spec 33 §5 (Phase D6b) — the OPEN stance-check telegraph for this
+     *  phase (D6e authored `punishes`/`yields` on every threat phase): what
      *  this hit does to the player's current stance, plus the end-of-phase
-     *  resolution feedback. ABSENT flag-off (key-for-key byte-identical). */
-    stanceCheck?: CombatStanceCheckVM | null;
+     *  resolution feedback. Null when the phase carries no check. */
+    stanceCheck: CombatStanceCheckVM | null;
 }
 /**
  * Spec 33 §5 (Phase D6b) — the open stance check on a threat phase. NO hidden
@@ -497,37 +507,28 @@ export interface CombatPlayerPaneVM {
 }
 export interface CombatDieVM {
     id: string; color: string; colorHex: string; glyph: string; stanceLabel: string;
-    drafted: boolean; spent: boolean; isX: boolean;
-    /** Read vs the (revealed) enemy stance: advantage/neutral/disadvantage/none/null(hidden). */
-    readPip: CombatReadResult | null;
+    spent: boolean; isX: boolean;
     // ── Fate Engine P1 ──
     /** A banked Reserve die — a second power source, ripening between phases. */
     reserve?: boolean;
     /** Ripening pips (+1 intensity per pip on a status play; +2 Guard on a defend). */
     pips?: number;
-    /** A dead X face that can still be FATE-TAPPED this turn (R4). */
-    fateTappable?: boolean;
-    /** Spec 32 v3 §5 — a GHOST die: always spendable (bypasses the one-die
-     *  draft), consumed forever when spent, persists across combats. */
+    /** Spec 32 v3 §5 — a GHOST die: consumed forever when spent, persists
+     *  across combats, never rerolls. */
     floating?: boolean;
-    /** 2026-07-12 (stale-powered fix) — the drafted die already powered a play
-     *  this turn and a landed status handed it back (the combo refresh). It is
-     *  draggable again, but it never auto-arms another staged card: powering a
-     *  second card takes an explicit re-drop. */
-    refreshed?: boolean;
     /** The board may attach a drag gesture to this die. Computed HERE (not in
      *  the render) so it can never depend on transient drag state — flipping
      *  it mid-drag unmounts the GestureDetector, which on web kills the pan
      *  without onEnd/onFinalize (the stuck-ghost / dead-drop bug). */
     draggable: boolean;
-    /** Spec 33 (Phase D6a, FLAG-ON ONLY) — the rolled gear face: `mana` powers a
-     *  card of its color (the normal look), `special` also fires its +◆ payload
-     *  (the marked face), `miss` is DEAD (unpowerable). ABSENT flag-off — a die
-     *  is color-only there, so the whole VM stays byte-identical. */
+    /** Spec 33 (Phase D6a) — the rolled gear face: `mana` powers a card of its
+     *  color (the normal look), `special` also fires its +◆ payload (the
+     *  marked face), `miss` is DEAD (unpowerable). ABSENT on unrolled dice
+     *  (GHOST / forged / Reserve) — those power by colour alone. */
     face?: 'special' | 'mana' | 'miss';
-    /** Spec 33 §6 (Phase D6a, FLAG-ON ONLY) — an OVERHEAT crack forced this
-     *  die's color all-miss this round; it reads as a distinct struck-out state
-     *  and is excluded from Press Fate. ABSENT flag-off. */
+    /** Spec 33 §6 (Phase D6a) — an OVERHEAT crack forced this die's color
+     *  all-miss this round; it reads as a distinct struck-out state and is
+     *  excluded from Press Fate. */
     cracked?: boolean;
 }
 /**
@@ -540,8 +541,8 @@ export interface CombatDieVM {
  * rides its own tap path, never a drag) and `combatDieCanPower`
  * (src/Combat/combat.dice.ts), which additionally wants the die's live
  * `state`. The board only holds VMs mid-drag, so this derives the SAME verdict
- * from the VM's color fields; spent/drafted/X gating stays where it already
- * lives (CombatDieVM.draggable + the board's pending-die checks). Reserve and
+ * from the VM's color fields; spent/X gating stays where it already lives
+ * (CombatDieVM.draggable + the board's pending-die checks). Reserve and
  * floating dice obey the same law — the engine checks every power source
  * alike.
  */
@@ -550,9 +551,8 @@ export function dieCanPowerCardVM(
     cardStance: string,
 ): boolean {
     if (die.isX || die.color === 'x') return false;
-    // Spec 33 (flag-on): a MISS face is dead — it powers nothing, so any drop
-    // is refused just like an off-color one. Flag-off dice carry no `.face`,
-    // so this check never fires and the verdict is byte-identical.
+    // Spec 33: a MISS face is dead — it powers nothing, so any drop is
+    // refused just like an off-color one.
     if (die.face === 'miss') return false;
     if (cardStance === 'wild') return true;   // parity with combatDieCanPower
     // Phase 104 — a grey card ('any') is powered by every non-X, non-miss die.
@@ -711,8 +711,6 @@ export interface CombatCardVM {
     face: CombatCardFaceVM;
     /** Honest, render-ready inspect detail (outcome + free/die + math + keywords). */
     detail: CombatCardDetailVM;
-    /** Read tier if powered with the current drafted die (null until a die is drafted). */
-    read: CombatReadResult | null; colorMatch: boolean;
     /** Authored flavor prose (`Card.description`) — overlay BOTTOM only, never
      *  on the face (owner directive 2026-07-09: the face is purely functional). */
     flavor: string | null;
@@ -729,13 +727,9 @@ export interface CombatCardVM {
 export interface CombatSignatureVM {
     id: string; name: string; description: string; cost: number; affordable: boolean; icon: string;
     /** The refusal reason while the rune can't fire (null when castable). Only
-     *  the flag-on Press Fate rune carries reasons beyond affordability (once
+     *  the Press Fate rune carries reasons beyond affordability (once
      *  per round / no miss dice) — see `signaturesVM`'s spec-33 reshape. */
     reason?: string | null;
-}
-export interface CombatReadVM {
-    active: boolean; result: CombatReadResult; dieStance: string; enemyStance: string | null;
-    text: string;
 }
 /** phase 28 — the Charge track + CONDEMN beat (Sentence theme). Was fully
  *  engine-side state with zero combat-UI rendering before this phase. */
@@ -750,16 +744,15 @@ export interface CombatPerorationVM {
     cardName: string;
 }
 /**
- * Spec 33 §4 (Phase D6a, FLAG-ON ONLY) — the Press Fate control: a 1◆ reroll of
- * every live miss face, once per round (the flag-on `sig-press-the-point`
- * reroll). Owner-UI doctrine: the control is never hidden — when it can't fire
+ * Spec 33 §4 (Phase D6a) — the Press Fate control: a 1◆ reroll of every live
+ * miss face, once per round (the `sig-press-the-point` reroll). Owner-UI doctrine: the control is never hidden — when it can't fire
  * it renders DISABLED with the reason, so the illegal action is refused loudly.
- * `null` flag-off, or when the loadout carries no reroll signature to cast.
+ * `null` when the loadout carries no reroll signature to cast.
  */
 export interface CombatPressFateVM {
     /** The reroll signature the board casts (via `playSignatureSkill`). */
     signatureId: string;
-    /** The flag-on price (`PRESS_FATE_COST`, 1◆). */
+    /** The price (`PRESS_FATE_COST`, 1◆). */
     cost: number;
     /** True only when the reroll can actually fire right now. */
     enabled: boolean;
@@ -767,9 +760,8 @@ export interface CombatPressFateVM {
     reason: string | null;
 }
 /**
- * Spec 33 §3 (Phase D6b, FLAG-ON ONLY) — the Momentum-V2 chain chip. Replaces
- * the three-node wheel's `{ lit, charged }` read: spec-33 momentum is a single
- * chain `{ color, length }`. A BREAK collapses it to null and the chip must
+ * Spec 33 §3 (Phase D6b) — the momentum chain chip. Spec-33 momentum is a
+ * single chain `{ color, length }`. A BREAK collapses it to null and the chip must
  * teach that LOUDLY; a SURGE forges a temporary gold die and also resets. Both
  * transient states are derived from the event log (the null value alone can't
  * tell an empty chain from a just-broken one).
@@ -796,7 +788,7 @@ export interface CombatMomentumV2VM {
     a11y: string;
 }
 /**
- * Spec 33 §2 (Phase D6b, FLAG-ON ONLY) — the player's CURRENT stance chip (the
+ * Spec 33 §2 (Phase D6b) — the player's CURRENT stance chip (the
  * stance of the last PAID card). A clear "no stance" renders when null.
  */
 export interface CombatStanceChipVM {
@@ -828,7 +820,7 @@ export interface CombatDieGearSlotVM {
     upgraded: boolean;
     a11y: string;
 }
-/** Spec 33 §6 (Phase D6b, FLAG-ON ONLY) — the 4-slot die-gear rail. */
+/** Spec 33 §6 (Phase D6b) — the 4-slot die-gear rail. */
 export interface CombatDieGearRailVM {
     slots: CombatDieGearSlotVM[];   // heart, body, mind, wild (rail order)
 }
@@ -837,11 +829,7 @@ export interface CombatViewModel {
     enemy: CombatEnemyPaneVM;
     player: CombatPlayerPaneVM;
     dice: CombatDieVM[];
-    drafted: boolean;           // a USABLE drafted die exists (powers a card)
-    hasDraft: boolean;          // a die has been drafted this turn (may be spent)
-    needsDraft: boolean;        // dice present, none drafted yet
     diceRolled: boolean;        // a turn pool exists
-    read: CombatReadVM;
     conviction: number;
     signatures: CombatSignatureVM[];
     hand: CombatCardVM[];
@@ -860,21 +848,15 @@ export interface CombatViewModel {
     discardCards: { id: string; name: string }[];
     /** phase 28 — the Premise track + CONDEMN beat. */
     peroration: CombatPerorationVM;
-    /** Phase 31 — the engine-native momentum wheel's lit nodes (empty = no
-     *  cycle in progress). `charged` mirrors the panel's old derivation: a
-     *  live, unspent `momentum-`-prefixed die in {@link dice} IS the charge. */
-    momentum: { lit: WheelStance[]; charged: boolean };
-    /** Spec 33 §4 (flag-on) — the Press Fate reroll affordance, or null (flag-off
-     *  / no reroll signature in the loadout). */
+    /** Spec 33 §4 — the Press Fate reroll affordance, or null when the
+     *  loadout carries no reroll signature. */
     pressFate: CombatPressFateVM | null;
-    /** Spec 33 §3 (Phase D6b, flag-on) — the Momentum-V2 chain chip, or null
-     *  flag-off (the old three-node `momentum` wheel renders instead). */
-    momentumV2: CombatMomentumV2VM | null;
-    /** Spec 33 §2 (Phase D6b, flag-on) — the player's current-stance chip, or
-     *  null flag-off. */
-    playerStance: CombatStanceChipVM | null;
-    /** Spec 33 §6 (Phase D6b, flag-on) — the die-gear rail, or null flag-off. */
-    dieGear: CombatDieGearRailVM | null;
+    /** Spec 33 §3 (Phase D6b) — the momentum chain chip. */
+    momentumV2: CombatMomentumV2VM;
+    /** Spec 33 §2 (Phase D6b) — the player's current-stance chip. */
+    playerStance: CombatStanceChipVM;
+    /** Spec 33 §6 (Phase D6b) — the die-gear rail. */
+    dieGear: CombatDieGearRailVM;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -967,16 +949,15 @@ function branchVM(phase: CombatThreatPhase | undefined): CombatIntentBranchVM | 
     };
 }
 
-/** Spec 33 §5 (Phase D6b, flag-on) — the OPEN stance-check telegraph for a
- *  phase. Reads D6e's authored `punishes`/`yields`, previews what the player's
+/** Spec 33 §5 (Phase D6b) — the OPEN stance-check telegraph for a phase.
+ *  Reads D6e's authored `punishes`/`yields`, previews what the player's
  *  CURRENT stance walks into, and surfaces the last resolved outcome from the
- *  event log. Null when the flag is off or the phase carries no check. */
+ *  event log. Null when the phase carries no check. */
 function stanceCheckVM(
     state: CombatEncounterState,
     phase: CombatThreatPhase | undefined,
     phaseIndex: number,
 ): CombatStanceCheckVM | null {
-    if (!isUpgradeableDiceEnabled()) return null;
     const check = phase?.stanceCheck;
     if (!check || (!check.punishes && !check.yields)) return null;
     const punishes = (check.punishes ?? null) as WheelStance | null;
@@ -1504,8 +1485,7 @@ function intentVM(state: CombatEncounterState): CombatIntentVM {
     const damage = effects.reduce((s, e) => s + (e.damage ?? 0), 0);
     const debuffs = effects.some((e) => !!e.effectId);
     const threat = projectIncomingThreat(state);
-    // Spec 33 §5 (flag-on): the open stance-check telegraph. Spread so the key is
-    // ABSENT flag-off — the threat readout VM stays byte-identical.
+    // Spec 33 §5: the open stance-check telegraph.
     const stanceCheck = stanceCheckVM(state, cur, curIdx);
     return {
         type, icon: meta.icon, label: cur?.intentLabel ?? meta.label, color: meta.color,
@@ -1521,7 +1501,7 @@ function intentVM(state: CombatEncounterState): CombatIntentVM {
             addDamage: threat.addDamage, addNetDamage: threat.addNetDamage,
             totalNetDamage: threat.totalNetDamage,
         },
-        ...(isUpgradeableDiceEnabled() ? { stanceCheck } : {}),
+        stanceCheck,
     };
 }
 
@@ -1650,55 +1630,30 @@ function playerPane(state: CombatEncounterState): CombatPlayerPaneVM {
 }
 
 function diceVM(state: CombatEncounterState): CombatDieVM[] {
-    const drafted = getDraftedDie(state);
-    const hasDraft = !!state.draftedDieId;
-    // 2026-07-12 (owner playtest, the stale-powered bug) — a REFRESHED combo
-    // die: the drafted die already powered a play this turn (a landed status
-    // handed it back, still available). It no longer auto-arms the next
-    // staged card — the player re-drags it — so the board needs to tell a
-    // refreshed die from a fresh draft.
-    const alreadyPlayed = (state.spellsPlayedThisTurn ?? 0) > 0;
-    // Per-die read pip — only once the phase stance is known (revealed/scouted).
-    const stance = revealedCurrentStance(state) as Stance | null;
-    // Spec 33 (Phase D6a) — the flag-on die-face axis. Flag-off `v2` is false,
-    // so `face`/`cracked` stay absent and `isMiss` false: every branch below
-    // reduces to its pre-spec-33 form and the tray VM is byte-identical.
-    const v2 = isUpgradeableDiceEnabled();
-    // §6 OVERHEAT — colors whose die was forced all-miss this round (`turn` is
-    // the crack's bite turn; round-turn law: one turn == one round). Derived
-    // inline so the mechanics barrel is untouched.
-    const crackedColors = v2
-        ? new Set<string>((state.crackedDice ?? []).filter(c => c.turn === state.turn).map(c => c.color))
-        : null;
+    // Spec 33 §6 OVERHEAT — colors whose die was forced all-miss this round
+    // (`turn` is the crack's bite turn; round-turn law: one turn == one round).
+    // Derived inline so the mechanics barrel is untouched.
+    const crackedColors = new Set<string>(
+        (state.crackedDice ?? []).filter(c => c.turn === state.turn).map(c => c.color),
+    );
     const tray: CombatDieVM[] = state.dice.map((d: CombatManaDie) => {
-        const isDrafted = drafted?.id === d.id;
         const spent = d.state === 'spent';
         const isX = d.color === 'x';
         const floating = d.floating === true;
-        const refreshed = isDrafted && !spent && !isX && alreadyPlayed;
-        // Flag-on face read: `mana`/`special` power a card, `miss` is DEAD.
-        const face = v2 ? d.face : undefined;
+        // The rolled face: `mana`/`special` power a card, `miss` is DEAD.
+        const face = d.face;
         const isMiss = face === 'miss';
-        const cracked = v2 && !!crackedColors?.has(d.color);
+        const cracked = crackedColors.has(d.color);
         return {
             id: d.id, color: d.color, colorHex: STANCE_COLORS[d.color] ?? '#888',
             glyph: DIE_GLYPHS[d.color] ?? '?', stanceLabel: STANCE_LABELS[d.color] ?? '?',
-            drafted: isDrafted, spent, isX,
-            readPip: stance ? resolveRead(d.color, stance) : null,
-            // R4 — a dead X face is never dead: tappable once per turn.
-            fateTappable: isX && d.state !== 'spent' && state.fateTappedTurn !== state.turn,
-            // Spec 32 v3 §5 — the board must know a floating die from a turn die:
-            // floats stay draggable after the draft (they bypass the one-die law).
+            spent, isX,
+            // Spec 32 v3 §5 — the board must know a floating die from a turn die.
             floating: floating || undefined,
-            refreshed: refreshed || undefined,
-            // A float drags whenever unspent (post-draft too); a REFRESHED
-            // combo die drags again (the re-arm is an explicit drop, never an
-            // auto-attach); a turn die only before the draft. NEVER a function
-            // of live drag state (see the CombatDieVM.draggable doc note).
-            // Spec 33 (flag-on): a MISS face is DEAD — never draggable. Flag-off
-            // `isMiss` is false, so the expression is unchanged (byte-identical).
-            draggable: isMiss ? false : floating ? !spent : refreshed ? true : !hasDraft && !isX && !isDrafted && !spent,
-            // Absent flag-off (v2 false → face undefined, cracked false).
+            // Every live die drags until it is spent; a MISS face and an X die
+            // are DEAD — never draggable. NEVER a function of live drag state
+            // (see the CombatDieVM.draggable doc note).
+            draggable: !isMiss && !isX && !spent,
             ...(face ? { face } : {}),
             ...(cracked ? { cracked: true } : {}),
         };
@@ -1707,8 +1662,7 @@ function diceVM(state: CombatEncounterState): CombatDieVM[] {
     const banked: CombatDieVM[] = (state.reserve ?? []).map((d: CombatManaDie) => ({
         id: d.id, color: d.color, colorHex: STANCE_COLORS[d.color] ?? '#888',
         glyph: DIE_GLYPHS[d.color] ?? '?', stanceLabel: STANCE_LABELS[d.color] ?? '?',
-        drafted: false, spent: false, isX: false,
-        readPip: null,
+        spent: false, isX: false,
         reserve: true, pips: d.pips ?? 0,
         draggable: true,
     }));
@@ -2500,7 +2454,7 @@ function buildDetailKeywords(card: CombatCard, c: CardCalc, sourceCard?: Card): 
             if (keywordGloss(title)) push(title, false);
         }
     }
-    // Owner playtest 2026-07-18 — the flag-on always-on BOON gloss is GONE:
+    // Owner playtest 2026-07-18 — the always-on BOON gloss is GONE:
     // a die-face rule is unrelated to the card being inspected, so it no longer
     // rides every panel. BOON/HONE/TEMPER still resolve through the printed
     // sweep above whenever a card's OWN lines name them.
@@ -2650,7 +2604,7 @@ function detailCore(card: CombatCard, sourceCard?: Card, enemyDifficulty?: Enemy
         case 'sensoryNull': return { subtitle: `${Title} the enemy — its reads and controls dull.`, metaChip, outcomeLine: `Apply ${Title} · ${c.turns} turns.`, outcomeStats: [{ label: 'TURNS', value: `${c.turns}` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — blocks the foe's advantage reads and dulls its control accuracy for ${c.turns} turns, plus a small hit.`, readNote: `${Title} denies the foe's own read/control edge — no fabricated number, just the blocked mechanic.`, mathLine: `${Title} blocks advantage-read access and reduces control accuracy for ${c.turns} turns.`, keywords };
         case 'isolated': return { subtitle: `${Title} the enemy — no help is coming.`, metaChip, outcomeLine: `Apply ${Title} · ${c.turns} turn${c.turns === 1 ? '' : 's'}.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: apply ${Title} — denies the foe ally-buff targeting (solo fights deny its own self-buff card instead) for ${c.turns} turn${c.turns === 1 ? '' : 's'}, plus a small hit.`, readNote: `${Title} denies a targeting option, not a number — real-units-or-no-number.`, mathLine: `${Title} denies ally-buff targeting (or, solo, denies a self-buff card) for ${c.turns} turn${c.turns === 1 ? '' : 's'}.`, keywords };
         case 'overextended': return { subtitle: `${Title} — a self-cost for reaching too far.`, metaChip, outcomeLine: `Take ${Title} · ${c.turns} turn${c.turns === 1 ? '' : 's'}.`, outcomeStats: [], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: this play also costs you ${Title} — your own next card play is forced to weak-tier, then consumed.`, readNote: `${Title} is consumed on your own next play — the price of this card's payoff.`, mathLine: `${Title} forces your own next play to weak-tier, then is consumed — no fixed number (real-units-or-no-number).`, keywords };
-        case 'clarity': return { subtitle: `${Title} — your next die is Wild.`, metaChip, outcomeLine: `Gain ${Title} — next die: WILD.`, outcomeStats: [{ label: 'NEXT DIE', value: 'WILD' }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: gain ${Title} — the next die you draft counts as Wild, plus a small hit.`, readNote: `${Title} is exact — the next die is Wild, full stop, then consumed.`, mathLine: `${Title}: next die → Wild (forceWildOnNextDie), consumed on use.`, keywords };
+        case 'clarity': return { subtitle: `${Title} — your next die is Wild.`, metaChip, outcomeLine: `Gain ${Title} — next die: WILD.`, outcomeStats: [{ label: 'NEXT DIE', value: 'WILD' }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: gain ${Title} — your next die counts as Wild, plus a small hit.`, readNote: `${Title} is exact — the next die is Wild, full stop, then consumed.`, mathLine: `${Title}: next die → Wild (forceWildOnNextDie), consumed on use.`, keywords };
         case 'resolute': return { subtitle: `${Title} — you take less damage.`, metaChip, outcomeLine: `Gain ${Title} ${c.resolutePct}% · ${c.turns} turns.`, outcomeStats: [{ label: 'DMG TAKEN', value: `${c.resolutePct}%` }, { label: 'TURNS', value: `${c.turns}` }], stacksText: c.stacks ? 'Stacks by intensity.' : null, freeLine, powerLine: `◆ WITH A DIE: gain ${Title} — ${c.resolutePct}% damage taken for ${c.turns} turns, plus a small hit.`, readNote: `Your damage reduction takes no read — ${Title} is exact (a self-buff, not scaled by the stance read).`, mathLine: `${c.resolutePct}% = (damageTakenMult − 1) × 100 on an even application${c.stacks ? '; stacks by intensity' : ''}.`, keywords };
         case 'barrier': { const b = c.barrierAmt; const adv = Math.max(1, Math.round(b * READ_DAMAGE_MULT.advantage)); const dis = Math.max(1, Math.round(b * READ_DAMAGE_MULT.disadvantage)); return { subtitle: 'Barrier — a stacking shield that soaks damage.', metaChip, outcomeLine: `Gain ${Title} ${b}.`, outcomeStats: [{ label: 'SOAK', value: `${b} (▲${adv} · —${b} · ▼${dis})` }], stacksText: null, freeLine, powerLine: `◆ WITH A DIE: gain Barrier ${b}; ▲ read raises it to ${adv}, ▼ drops it to ${dis}; +${colorMatchBonus(b)} on a ${STANCE} match.`, readNote: `The read scales the Barrier granted: ▲ ×${READ_DAMAGE_MULT.advantage}, ▼ ×${READ_DAMAGE_MULT.disadvantage}.`, mathLine: `Soak ${b} base × read + ${colorMatchBonus(b)} on a colour match; barriers stack.`, keywords }; }
         case 'riposte': { const guardLine = c.guardAmount ? ` · Guard ${c.guardAmount}` : ''; const stats = [{ label: 'COUNTER', value: `${c.riposteDmg}` }, { label: 'REDUCE', value: `-${c.riposteReduce}` }]; if (c.guardAmount) stats.push({ label: 'GUARD', value: `${c.guardAmount}` }); return { subtitle: 'Riposte — counter the next hit and blunt it.', metaChip, outcomeLine: `Arm ${Title} — Counter ${c.riposteDmg} · Cut ${c.riposteReduce}${guardLine}.`, outcomeStats: stats, stacksText: null, freeLine, powerLine: `◆ WITH A DIE: arm Riposte — counter ${c.riposteDmg}, reduce ${c.riposteReduce}${c.guardAmount ? `, +Guard ${c.guardAmount}` : ''}; the read scales it.`, readNote: 'The read scales both the counter damage and the reduction.', mathLine: `Counter ${c.riposteDmg} & reduce ${c.riposteReduce}, each × read (+${colorMatchBonus(c.riposteDmg)} counter on a colour match).`, keywords }; }
@@ -2876,47 +2830,12 @@ export function armedReadValue(face: CombatCardFaceVM, read: CombatReadResult, c
     return null;
 }
 
-/**
- * How an APPLY commit routes its dragged die (dice-law 2026-07-09 / spec 32 v3
- * §5): a Reserve, fate-X, or GHOST die is its OWN power source — it is
- * forwarded to `playCombatCard` as the explicit dieId and must never be
- * drafted (the engine rejects drafting a floating die, which used to make the
- * drop silently fizzle and snap back). A fresh tray die drafts first.
- */
-export function resolveApplyRouting(
-    state: CombatEncounterState,
-    dieId: string | null,
-): { draftFirst: boolean; explicitDieId: string | undefined } {
-    // Spec 33 (flag-on): the DRAFT is retired — there is no single-die law and
-    // no `draftedDieId`. Every dropped die (fresh tray face, Reserve, or
-    // floating) is its OWN power source: it MUST be forwarded to
-    // `playCombatCard` as the explicit `dieId` (the engine's flag-on
-    // `playBottomAction` REQUIRES an explicit die — `dieId === undefined`
-    // fizzles "choose a die to power this card"). Draft-first would call
-    // `draftStanceDie`, a flag-on no-op, leaving `explicitDieId` undefined and
-    // fizzling the play while spending nothing — the D6d "die spent, PLEA 0,
-    // card bounces" bug. Flag-off keeps the draft-model routing byte-identical.
-    if (isUpgradeableDiceEnabled()) {
-        return { draftFirst: false, explicitDieId: dieId ?? undefined };
-    }
-    const isReserveDie = !!dieId && (state.reserve ?? []).some((d) => d.id === dieId);
-    const isFateX = !!dieId && state.dice.some((d) => d.id === dieId && d.color === 'x');
-    const isFloating = !!dieId && state.dice.some((d) => d.id === dieId && d.floating === true);
-    const explicit = isReserveDie || isFateX || isFloating;
-    return {
-        draftFirst: !!dieId && !explicit && state.draftedDieId === null,
-        explicitDieId: explicit && dieId ? dieId : undefined,
-    };
-}
-
 function handVM(state: CombatEncounterState): CombatCardVM[] {
-    const drafted = getDraftedDie(state);
     return engineHandCards(state)
         // Retreat is no longer an in-combat card — fleeing is offered at the
         // encounter prelude (ENGAGE / FLEE), not from the hand.
         .filter(({ card }: { card: CombatCard }) => card.id !== 'card-retreat' && card.verbClass !== 'retreat')
         .map(({ uid, card }: { uid: string; card: CombatCard }) => {
-        const preview = drafted ? cardReadPreview(state, card) : null;
         const sourceCard = getCardById(card.id);
         // WI-6 — the hand is IN combat, so the live enemy difficulty is known:
         // a CONDEMN face resolves its tier-floored threshold ("concede at 10 vs
@@ -2945,7 +2864,6 @@ function handVM(state: CombatEncounterState): CombatCardVM[] {
             dieLines: card.dieLines?.map(vitaeCopy),
             face,
             detail: detailStats(card, sourceCard, state.enemy.difficulty),
-            read: preview?.read ?? null, colorMatch: preview?.colorMatch ?? false,
             flavor: sourceCard?.description ?? null,
             // WS7.2 — the engine's live chosen-X clamp range (null = no X mechanic).
             chooseX: recoilXRange(state, card),
@@ -2963,8 +2881,8 @@ const SIG_ICON: Record<string, string> = {
 function signaturesVM(state: CombatEncounterState): CombatSignatureVM[] {
     // The player's per-archetype kit (Spec 26b §B), resolved on the encounter.
     // Spec 33 §4 — Press Fate is a SIGNATURE, cast from this rune column like
-    // any other (owner call 2026-07-19: no separate board control). Flag-on,
-    // the reroll rune must present the spec-33 truth the engine enforces
+    // any other (owner call 2026-07-19: no separate board control). The
+    // reroll rune must present the spec-33 truth the engine enforces
     // (`playSignatureSkill`'s v2Reroll branch): cost PRESS_FATE_COST (1◆, not
     // the printed legacy 4), the honest reroll text, and the full firing gate
     // (◆ / once per round / a live miss face) with its refusal reason.
@@ -2993,26 +2911,6 @@ function signaturesVM(state: CombatEncounterState): CombatSignatureVM[] {
         });
 }
 
-const READ_TEXT: Record<CombatReadResult, string> = {
-    advantage: 'ADVANTAGE — you read them right (+1 ◆, boosted)',
-    neutral: 'NEUTRAL — an even contest',
-    disadvantage: 'DISADVANTAGE — they had your number (halved)',
-    none: 'WILD — no stance contest',
-};
-
-function readVM(state: CombatEncounterState): CombatReadVM {
-    const drafted = getDraftedDie(state);
-    const cur = currentPhase(state);
-    const revealed = isPhaseStanceRevealed(state, Math.min(state.currentPhaseIndex, state.threatPhases.length - 1));
-    return {
-        active: !!drafted,
-        result: state.lastRead,
-        dieStance: drafted?.color ?? '',
-        enemyStance: revealed ? cur?.enemyStance ?? null : null,
-        text: READ_TEXT[state.lastRead] ?? '',
-    };
-}
-
 // ── Deckbuilder reward offers (Spec 26b §C) ──────────────────────────────────
 
 /**
@@ -3027,8 +2925,7 @@ function readVM(state: CombatEncounterState): CombatReadVM {
  * lying to them.
  *
  * There is no encounter state here (the reward is post-combat), so the face is
- * built at the card's authored truth: no drafted-die read, no live enemy
- * difficulty, no chosen-X clamp. Every number still comes from `faceStats` /
+ * built at the card's authored truth: no live enemy difficulty, no chosen-X clamp. Every number still comes from `faceStats` /
  * `detailStats` — the same engine selectors the hand uses.
  */
 export function rewardCardVMs(ids: readonly string[]): CombatCardVM[] {
@@ -3052,8 +2949,6 @@ export function rewardCardVMs(ids: readonly string[]): CombatCardVM[] {
             dieLines: card.dieLines?.map(vitaeCopy),
             face: faceStats(card, sourceCard),
             detail: detailStats(card, sourceCard),
-            // No die is drafted at the reward screen — there is no read to show.
-            read: null, colorMatch: false,
             flavor: sourceCard?.description ?? null,
             chooseX: null,
             needsReprisalChoice: false,
@@ -3078,17 +2973,16 @@ function perorationVM(state: CombatEncounterState): CombatPerorationVM {
     return { active: true, premises: state.premises ?? 0, at: decl.at, concedeAt, cardName: card?.name ?? '' };
 }
 
-// ── Spec 33 §4 — Press Fate (flag-on reroll affordance) ──────────────────────
+// ── Spec 33 §4 — Press Fate (the reroll affordance) ─────────────────────────
 
 /**
- * Mirrors `playSignatureSkill`'s flag-on reroll gate (combat.engine.ts) exactly
- * so the control's enabled/disabled verdict — and its reason — can never lie
- * about the live one: cost (1◆) first, then once-per-round, then "a live
- * non-cracked miss face must exist to revive". Returns null flag-off, or when
- * the loadout carries no reroll signature (nothing to cast).
+ * Mirrors `playSignatureSkill`'s reroll gate (combat.engine.ts) exactly so the
+ * control's enabled/disabled verdict — and its reason — can never lie about
+ * the live one: cost (1◆) first, then once-per-round, then "a live
+ * non-cracked miss face must exist to revive". Returns null when the loadout
+ * carries no reroll signature (nothing to cast).
  */
 function pressFateVM(state: CombatEncounterState): CombatPressFateVM | null {
-    if (!isUpgradeableDiceEnabled()) return null;
     const signatureId = (state.signatures ?? []).find(id => getSignatureSkill(id)?.kind === 'reroll');
     if (!signatureId) return null;
     const cost = PRESS_FATE_COST;
@@ -3101,7 +2995,7 @@ function pressFateVM(state: CombatEncounterState): CombatPressFateVM | null {
     return { signatureId, cost, enabled: reason === null, reason };
 }
 
-// ── Spec 33 §3 — Momentum-V2 chain chip (flag-on) ────────────────────────────
+// ── Spec 33 §3 — the momentum chain chip ─────────────────────────────────────
 
 /** The stance that advances the chain next — the successor in chain order. */
 function nextChainColor(s: WheelStance): WheelStance {
@@ -3109,14 +3003,12 @@ function nextChainColor(s: WheelStance): WheelStance {
 }
 
 /**
- * Reshapes momentum to the spec-33 chain. Returns null flag-off (the old
- * three-node `momentum` wheel renders instead). Flag-on, `state.momentumV2`
+ * Reshapes momentum to the spec-33 chain. `state.momentumV2`
  * ({color,length}|null) drives it; the transient BREAK / SURGE states — both of
  * which leave momentum null — are recovered from the most-recent momentum event
  * in the log so a just-broken chain reads LOUD, not merely empty.
  */
-function momentumV2VM(state: CombatEncounterState): CombatMomentumV2VM | null {
-    if (!isUpgradeableDiceEnabled()) return null;
+function momentumV2VM(state: CombatEncounterState): CombatMomentumV2VM {
     const m = state.momentumV2 ?? null;
     const color = m?.color ?? null;
     const length = m?.length ?? 0;
@@ -3152,21 +3044,20 @@ function momentumV2VM(state: CombatEncounterState): CombatMomentumV2VM | null {
     };
 }
 
-// ── Spec 33 §2 — player current-stance chip (flag-on) ────────────────────────
+// ── Spec 33 §2 — player current-stance chip ──────────────────────────────────
 
 /**
  * Reshapes the player's current stance into its board chip.
  *
  * Purpose: the chip is the only surface that names the stance the player
  * holds. Input: the encounter state (`state.playerStance`). Output: the chip
- * VM, or null when the upgradeable-dice flag is off and the chip never mounts.
+ * VM.
  *
  * Cluster S1-board-C34 — the empty read was a bare state word, 'NO STANCE',
  * on a chip that answers nothing when tapped: it named a hole and not the
  * action that fills it. The empty state now carries that action as `hint`.
  */
-function playerStanceVM(state: CombatEncounterState): CombatStanceChipVM | null {
-    if (!isUpgradeableDiceEnabled()) return null;
+function playerStanceVM(state: CombatEncounterState): CombatStanceChipVM {
     const stance = state.playerStance ?? null;
     if (!stance) {
         return {
@@ -3182,7 +3073,7 @@ function playerStanceVM(state: CombatEncounterState): CombatStanceChipVM | null 
     };
 }
 
-// ── Spec 33 §6 — die-gear rail + payload-only inspection (flag-on) ────────────
+// ── Spec 33 §6 — die-gear rail + payload-only inspection ─────────────────────
 
 const GEAR_RAIL_ORDER: readonly ('heart' | 'body' | 'mind' | 'wild')[] = ['heart', 'body', 'mind', 'wild'];
 
@@ -3206,8 +3097,7 @@ function gearSlotVM(state: CombatEncounterState, color: 'heart' | 'body' | 'mind
     };
 }
 
-function dieGearRailVM(state: CombatEncounterState): CombatDieGearRailVM | null {
-    if (!isUpgradeableDiceEnabled()) return null;
+function dieGearRailVM(state: CombatEncounterState): CombatDieGearRailVM {
     return { slots: GEAR_RAIL_ORDER.map((c) => gearSlotVM(state, c)) };
 }
 
@@ -3216,25 +3106,15 @@ function dieGearRailVM(state: CombatEncounterState): CombatDieGearRailVM | null 
 export function buildCombatViewModel(state: CombatEncounterState): CombatViewModel {
     const total = state.threatPhases.length;
     const idx = Math.min(state.currentPhaseIndex, total - 1);
-    const draftedDie = getDraftedDie(state);
-    const usableDraft = !!draftedDie && draftedDie.state === 'available' && draftedDie.color !== 'x';
     const dice = diceVM(state);
     return {
         phase: state.phase,
         enemy: enemyPane(state),
         player: playerPane(state),
         dice,
-        momentum: {
-            lit: state.momentumWheel ?? [],
-            charged: dice.some((d) => isMomentumDieId(d.id) && !d.spent && !d.isX),
-        },
         reserveRoom: (state.reserve ?? []).length < RESERVE_MAX,
         resonance: { heart: 0, body: 0, mind: 0, ...(state.resonance ?? {}) },
-        drafted: usableDraft,
-        hasDraft: !!state.draftedDieId,
-        needsDraft: state.dice.length > 0 && !state.draftedDieId,
         diceRolled: state.dice.length > 0,
-        read: readVM(state),
         conviction: state.conviction,
         signatures: signaturesVM(state),
         hand: handVM(state),

@@ -12,11 +12,12 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import { afterEach, describe, expect, it, jest } from '@jest/globals';
 
-import { initializeCombatEncounter, rollEncounterDice, draftStanceDie } from '@mechanics';
+import { initializeCombatEncounter, rollEncounterDice } from '@mechanics';
 import { CombatBoard, type DragController } from '@/components/combat/encounter/CombatBoard';
 import { buildCombatViewModel } from '@/state/presenters/combat-encounter.engine';
 import { createMockEncounterEnemy } from '@/state/mocks/combat.mock';
 import { withAllProviders } from '@/test-utils/withAllProviders';
+import { tapCombatDie } from '@/test-utils/tapCombatDie';
 
 // Spec 32 v3 fixtures: two Affliction DoTs, the Bulwark guard, a Charm sway.
 const CARDS = ['spoiled-poultice', 'unction-of-boils', 'frostbitten-palisade', 'thin-hymn'];
@@ -81,7 +82,7 @@ describe('CombatBoard — multi-card staging', () => {
 
         fireEvent.press(screen.getByTestId('combat-end-phase'));
 
-        // Each staged card was committed (no drafted/dropped die here → FREE apply)...
+        // Each staged card was committed (no die chosen here → FREE apply)...
         expect(cbs.onApply).toHaveBeenCalledTimes(2);
         for (const uid of uids) expect(cbs.onApply).toHaveBeenCalledWith(uid, null, false);
         // ...and only then did the phase resolve.
@@ -138,30 +139,41 @@ describe('CombatBoard — multi-card staging', () => {
 
 // ── Invariants (locked, not brittle snapshots) ───────────────────────────────
 describe('CombatBoard — die-attribution + DoT-notation invariants', () => {
-    // (c) A single drafted (combo) die must light up EXACTLY ONE staged card — the
-    // next-to-consume comboTarget — never every staged card at once.
-    it('the shared drafted die arms exactly ONE staged card (one staged-die slot)', () => {
+    // (c) A chosen die lights up EXACTLY ONE staged card — the one it was
+    // dropped on — never every staged card at once, and staging a second card
+    // afterwards never shares or moves it.
+    it('a chosen die arms exactly ONE staged card (one staged-die slot)', async () => {
         const { store } = withAllProviders(<></>);
         const base = store.getState().player;
         const player = { ...base, knownCards: CARDS, baseStats: { heart: 8, body: 8, mind: 8 }, health: 200, maxHealth: 200 };
 
         let s = initializeCombatEncounter(player, createMockEncounterEnemy(), undefined, 16);
         s = rollEncounterDice(s).state;
-        const usable = s.dice.find((d) => d.color !== 'x');
-        expect(usable).toBeTruthy();
-        s = draftStanceDie(s, usable!.id).state;          // one drafted/combo die exists
+        // A live WILD mana die powers any card, so the only thing limiting the
+        // arming is the one-die-one-card law itself.
+        const first = s.dice.findIndex((d) => d.state === 'available' && !d.floating && d.face !== 'miss');
+        expect(first).toBeGreaterThanOrEqual(0);
+        s = { ...s, dice: s.dice.map((d, i) => (i === first ? { ...d, color: 'wild' as const, face: 'mana' as const } : d)) };
+        const dieId = s.dice[first].id;
         const vm = buildCombatViewModel(s);
-        expect(vm.dice.some((d) => d.drafted)).toBe(true);
-
         const uids = [vm.hand[0].uid, vm.hand[1].uid];
+
         const { tree } = withAllProviders(
+            <CombatBoard vm={vm} drag={noopDrag()} stagedUids={[uids[0]]} {...boardCallbacks()} />,
+            { store },
+        );
+        const view = render(tree);
+        await tapCombatDie(dieId);
+        expect(screen.getAllByTestId('combat-staged-die')).toHaveLength(1);
+
+        // Stage the second card: the die stays on the first — still ONE slot.
+        const { tree: tree2 } = withAllProviders(
             <CombatBoard vm={vm} drag={noopDrag()} stagedUids={uids} {...boardCallbacks()} />,
             { store },
         );
-        render(tree);
-
-        // INVARIANT: the combo die shows on the single comboTarget, not on both cards.
+        view.rerender(tree2);
         expect(screen.getAllByTestId('combat-staged-die')).toHaveLength(1);
+        expect(screen.getByTestId(`combat-socket-${uids[1]}`)).toBeTruthy();
     });
 
     // (c) The DoT face VM is legible — never the user-rejected 'n/t·t' bare-slash

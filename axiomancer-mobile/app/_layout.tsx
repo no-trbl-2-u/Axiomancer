@@ -35,7 +35,6 @@ import { ItemRewardGate } from '@/components/item-reward/ItemRewardGate';
 import { RestGate } from '@/components/RestGate';
 import { NavLogger } from '@/components/NavLogger';
 import { ToastHost } from '@/components/ToastHost';
-import { applyCombatFlagsFromEnv } from '@/state/combat/flags';
 import { getLogger } from '@mechanics';
 import { initAppLogging } from '@/state/logging';
 import { attachCrashBreadcrumbs, initCrashReporting, withCrashReporting } from '@/lib/monitoring';
@@ -72,10 +71,6 @@ const BebasNeue_400Regular = require('@/assets/fonts/BebasNeue_400Regular.ttf');
 const JetBrainsMono_400Regular = require('@/assets/fonts/JetBrainsMono_400Regular.ttf');
 
 SplashScreen.preventAutoHideAsync();
-
-// Spec 33 — build-time combat flags (Upgradeable Dice preview opt-in).
-// Applied at module load, before any store/provider touches the engine.
-applyCombatFlagsFromEnv();
 
 // Crash reporting (lib/monitoring.ts) — FIRST, so a crash during the boot
 // below is still reported. Native-only and DSN-gated; a no-op on web.

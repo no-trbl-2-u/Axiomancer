@@ -169,7 +169,7 @@ export const COMBAT_QUALITY_CALIBRATION = Object.freeze({
      *  spent rather than wasted. Half: the spec-33 tray rolls four fixed dice
      *  and miss faces are real, so 100% is not a reachable target. */
     diceSpendShare: 0.5,
-    /** Distinct `DICE_ECONOMY_VERBS` (of 11) that count as full breadth. Four:
+    /** Distinct `DICE_ECONOMY_VERBS` (of 9) that count as full breadth. Four:
      *  enough that rolling-and-spending alone cannot reach it, low enough that
      *  a deck need not carry every relic to score. */
     diceEconomyBreadth: 4,

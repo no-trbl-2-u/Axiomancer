@@ -484,7 +484,6 @@ function seqBase(threat: CombatThreatPhase): CombatEncounterState {
         },
         hand: SEQ_HAND.map(cardId => ({ uid: cardId, cardId })),
         dice: tray,
-        draftedDieId: null,
         floatingDice: tray,
         reserve: [],
         guard: 0,

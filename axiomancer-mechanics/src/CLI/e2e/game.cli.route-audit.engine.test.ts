@@ -192,11 +192,16 @@ describe('Phase 14 — route survivorship vs coverage-audit classification', () 
         // narration dilemma ("The Stranger's Net"), so the route now runs
         // through fv-11 -> fv-13 (little-belle) instead of fv-3 -> fv-4 to
         // reach the pre-boss fodder fight.
+        //
+        // D7 flag collapse (2026-09-25): the CLI auto-player finally makes
+        // spec-33 PAID plays (it used to wait on a stance draft that never
+        // came, so it only ever played FREE lines), which closed Little Belle
+        // inside the cap on seed 32. Seed 1 keeps fv-13 UNRESOLVED at the cap.
         await runGameCli([
             '--route', 'fv-2,fv-26,fv-11,fv-27,fv-13,fv-28,fv-5,fv-6,fv-7',
             '--auto-combat',
             '--combat-policy', 'naive',
-            '--combat-seed', '32',
+            '--combat-seed', '1',
             '--combat-max-turns', '2',
             '--combat-enemy', 'the-incompleteness',
             '--combat-enemy-node', 'fv-6',

@@ -3,25 +3,23 @@
  *
  * A `CombatSimPolicy` bundles every decision seam of the encounter sim
  * (`combat.encounter.sim.ts`): how to rank candidate powered plays, which
- * Signature Skills to fund, when to spend Conviction, whether to peek at the
- * hidden enemy stance, and how a mercy choice resolves. The sim driver stays
+ * Signature Skills to fund, when to spend Conviction, and how a mercy choice
+ * resolves. The sim driver stays
  * one loop; the policies make it a matrix.
  *
  * HP is the sole win condition (the old status-primacy doctrine is retired —
  * see `docs/lexicon.json`). The roster was built to witness status play: `dot-weaver` and `control-lock` play the doctrinal game,
  * `aggro-brute` is the deliberately weak basic-attack baseline (its
  * underperformance IS the design), and `greedy`/`blind` remain the tuned
- * balance witnesses with bit-identical behavior to the pre-roster sim.
+ * balance witnesses.
  *
  * Behavior guarantee: `greedy` and `blind`'s `rankCard`/`bestSignature`
  * ordering encodes EXACTLY the legacy per-card score (payoff cards at
  * DoT/debuff thresholds, Befriend-at-lowHp, new-status-first,
  * status-over-strike, damage preview) — never consumes rng, so the seeded
- * engine stream is untouched there. Phase 31 (EA-7) adds one NEW, orthogonal
- * decision seam on top — `stakesWhenInformed` (THE STAKE) — which
- * deliberately makes `greedy`'s and `blind`'s outputs diverge (that
- * divergence is the acceptance criterion: an informed read must out-earn a
- * blind one). It never touches `rankCard`/`bestSignature`.
+ * engine stream is untouched there. Since the D7 flag collapse (2026-09-25)
+ * deleted the hidden-stance draft and THE STAKE, `greedy` and `blind` differ
+ * only in `crackAt` / `strikeAddsAt` (whatever the entries below set).
  */
 
 import { getCardById } from '../Cards/cards.library';
@@ -47,8 +45,6 @@ export interface CombatSimPolicy {
     name: string;
     /** One line, doctrine-aware: what this witness proves about status play. */
     description: string;
-    /** True = drafts off only REVEALED stances (player-feel); false = omniscient. */
-    blind: boolean;
     /** Deck focus used when a playtest cell says `{ kind: 'policy-pick' }`. */
     preferredFocus: CombatDeckFocus;
     /** Rank candidate powered plays; highest first. Receives the same candidate
@@ -85,26 +81,16 @@ export interface CombatSimPolicy {
      */
     chooseX?(state: CombatEncounterState, card: CombatCard, range: { min: number; max: number }, rng: () => number): number;
     /**
-     * OPTIONAL (Phase 31/EA-7 THE STAKE): true if this witness ever wagers a
-     * pre-play stake. The sim only stakes when the CURRENT phase's stance is
-     * already REVEALED — never omniscient, even for `greedy`: a stake is a
-     * bet on information the player actually has, not a peek at the engine's
-     * hidden state. Absent/false = never stakes (the `blind` baseline this
-     * witness's win-rate gap is measured against).
-     */
-    stakesWhenInformed?: boolean;
-    /**
      * Phase 51 — a charge-count threshold for the GLYPHS `crackAt` heuristic
-     * (mirrors `stakesWhenInformed`'s optional-decision-seam shape): once a
+     * (an optional decision seam): once a
      * glyph the player controls has `charges >= crackAt`, the witness cracks
      * it (dieless, no source/die consumed). Absent = never cracks — the
      * strict default, so every policy without this field is byte-identical
      * to its pre-Phase-51 behavior. Multiple eligible glyphs: the
      * highest-charge one wins; ties resolve to `state.glyphs` array order
      * (mirrors `glyphsOfKind`'s own deterministic, no-RNG doctrine in
-     * `combat.engine.ts`). Wired only into `upgradeablePlayPhase`
-     * (`combat.encounter.sim.ts`) — the flag-off legacy `policyPlayPhase`
-     * body never reads it.
+     * `combat.engine.ts`). Read by `upgradeablePlayPhase`
+     * (`combat.encounter.sim.ts`).
      */
     crackAt?: number;
     /**
@@ -124,9 +110,7 @@ export interface CombatSimPolicy {
      * card pass and the wind-down, because a witness that reads the opening
      * wall can buy a body its own next play would have answered for free.
      * Ties on bite resolve to `state.adds` order — no RNG.
-     * Wired ONLY into `upgradeablePlayPhase`; the flag-off legacy
-     * `policyPlayPhase` body never reads it, the same deliberate gap `crackAt`
-     * carries (see above). Not full sim parity, and not claimed as such.
+     * Read by `upgradeablePlayPhase`.
      */
     strikeAddsAt?: number;
 }
@@ -267,8 +251,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
     greedy: {
         id: 'greedy',
         name: 'Greedy (omniscient witness)',
-        description: 'The tuned balance ceiling: plays the status game with a hidden-stance peek — new DoTs first, payoffs on time, strikes last.',
-        blind: false,
+        description: 'The tuned balance witness: plays the status game — new DoTs first, payoffs on time, strikes last.',
         preferredFocus: 'balanced',
         rankCard: (s, card) => greedyRankCard(s, card),
         signatureKinds: LEGACY_SIGNATURE_KINDS,
@@ -276,10 +259,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         mercyChoice: 'spare',
         capitulationChoice: 'continue',
         chooseX: (_s, card, range) => greedyChooseX(card, range),
-        // Phase 31 (EA-7) — the informed read finally has a payday: greedy
-        // stakes when it actually knows the phase's stance (via the draft
-        // reveal or a scout), same as a well-played human would.
-        stakesWhenInformed: true,
         // Phase 51 — payoffs-on-time is literally greedy's description; a
         // ripened Seal is exactly the kind of timed payoff it already reads.
         crackAt: 2,
@@ -288,8 +267,7 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
     blind: {
         id: 'blind',
         name: 'Blind (player-feel witness)',
-        description: 'The same status-first play as greedy, drafting off only REVEALED stances — the difficulty a real player feels.',
-        blind: true,
+        description: 'The same status-first play as greedy. Its hidden-stance difference died with the draft (D7); kept so the playtest matrix keeps its column.',
         preferredFocus: 'balanced',
         rankCard: (s, card) => greedyRankCard(s, card),
         signatureKinds: LEGACY_SIGNATURE_KINDS,
@@ -305,7 +283,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         id: 'dot-weaver',
         name: 'DoT Weaver',
         description: 'All-in on erosion: fresh DoTs and rupture/reap payoffs above all; utility only once the foe is already bleeding.',
-        blind: false,
         preferredFocus: 'dot',
         rankCard: (s, card) => {
             const kinds = cardMechKinds(card);
@@ -333,7 +310,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         id: 'control-lock',
         name: 'Control Lock',
         description: 'Denial play: control and stat-debuff locks first (fresh ones for the combo), aiming to erase the enemy\'s telegraphed turns.',
-        blind: false,
         preferredFocus: 'control',
         rankCard: (s, card) => {
             if (isControlClass(card)) {
@@ -357,7 +333,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         id: 'aggro-brute',
         name: 'Aggro Brute',
         description: 'The doctrine\'s weak baseline: raw damage preview, no payoff timing, no status game — its underperformance IS the design.',
-        blind: false,
         preferredFocus: 'damage',
         rankCard: (_s, card) => card.bottomDamagePreview,
         signatureKinds: ['conclude'],
@@ -369,7 +344,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         id: 'turtle',
         name: 'Turtle',
         description: 'Outlast play: guard/barrier walls first, DoT erosion second — status still does the killing, just from behind a shield.',
-        blind: false,
         preferredFocus: 'utility',
         rankCard: (s, card) => {
             if (card.verbClass === 'defend') return BAND_PRIMARY + card.bottomDamagePreview;
@@ -395,7 +369,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         id: 'chaos',
         name: 'Chaos',
         description: 'A seeded coin-flipper: uniform-random plays and signatures (blind) — the floor any deliberate status play must beat.',
-        blind: true,
         preferredFocus: 'balanced',
         rankCard: (_s, _card, rng) => rng(),
         signatureKinds: ALL_SIGNATURE_KINDS,
@@ -410,7 +383,6 @@ export const COMBAT_SIM_POLICIES: Record<CombatSimPolicyId, CombatSimPolicy> = {
         id: 'mercy-seeker',
         name: 'Mercy Seeker',
         description: 'The spare path: control status to survive, Befriend at the first opening, and always choose mercy over the kill.',
-        blind: false,
         preferredFocus: 'utility',
         rankCard: (s, card) => {
             if (card.verbClass === 'befriend') return BAND_BEFRIEND_LOW_HP;

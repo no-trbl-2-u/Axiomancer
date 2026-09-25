@@ -82,8 +82,8 @@ export function resolveRollMode(opts: { reducedMotion?: boolean; instantSettle?:
 }
 
 /**
- * The instant-settle escape hatch — a runtime global mirroring D6a's
- * `__AXM_UPGRADEABLE_DICE__` flag hook. The seeded e2e sets
+ * The instant-settle escape hatch — a runtime test global in the
+ * `__AXM_COMBAT_SEED__` pattern. The seeded e2e sets
  * `globalThis.__AXM_DICE_INSTANT_SETTLE__` BEFORE the bundle boots so the roll
  * ritual snaps straight to the settled faces and the harness never waits on
  * (nor races) an animation. Inert in production — nothing sets it there.

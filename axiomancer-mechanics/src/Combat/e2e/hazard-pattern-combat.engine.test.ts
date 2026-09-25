@@ -26,7 +26,7 @@ import { mockSequentialRng } from '../../test-utils/rng';
 import {
     initializeCombatEncounter, rollEncounterDice, playCombatCard,
     resolveCombatPhase, resolveThreatPhase, processBetweenPhases,
-    resolveRead, getCard, buildCombatSummary, isPhaseStanceRevealed,
+    getCard, buildCombatSummary, isPhaseStanceRevealed,
     playSignatureSkill, discardCombatCard, projectCardImpact, endTurn,
     startTurn, SCRAP_CONVICTION_CAP_PER_TURN,
 } from '../combat.engine';
@@ -111,7 +111,7 @@ function setDice(state: CombatEncounterState, colors: CombatDieColor[]): CombatE
         state: c === 'x' ? ('locked' as const) : ('available' as const), temporary: false,
         face: c === 'x' ? ('miss' as const) : ('mana' as const),
     }));
-    return { ...state, dice, draftedDieId: null, turn };
+    return { ...state, dice, turn };
 }
 
 const fizzled = (events: readonly CombatEvent[]): boolean => events.some(e => e.kind === 'effect-fizzled');
@@ -145,26 +145,6 @@ function batchRound(state: CombatEncounterState, cardId: string, maxPlays: numbe
     const plays = poweringDice(s, cardId).slice(0, maxPlays).map(dieId => ({ cardId, useBottom: true, dieId }));
     return resolveCombatPhase(s, plays);
 }
-
-// ── RPS read (§1) — pure, no RNG ─────────────────────────────────────────────
-
-describe('Spec 26b §1 — the hidden-stance read', () => {
-    it('a die whose stance beats the enemy stance is an advantage read', () => {
-        expect(resolveRead('heart', 'body')).toBe('advantage');
-        expect(resolveRead('body', 'mind')).toBe('advantage');
-        expect(resolveRead('mind', 'heart')).toBe('advantage');
-    });
-    it('a die whose stance loses to the enemy stance is a disadvantage read', () => {
-        expect(resolveRead('body', 'heart')).toBe('disadvantage');
-        expect(resolveRead('mind', 'body')).toBe('disadvantage');
-        expect(resolveRead('heart', 'mind')).toBe('disadvantage');
-    });
-    it('a same-stance die is neutral; a wild/x die has no contest', () => {
-        expect(resolveRead('heart', 'heart')).toBe('neutral');
-        expect(resolveRead('wild', 'mind')).toBe('none');
-        expect(resolveRead('x', 'mind')).toBe('none');
-    });
-});
 
 // ── Intent derivation (Spec 26 §2) ───────────────────────────────────────────
 
@@ -225,7 +205,6 @@ describe('Spec 33 §1 — initialization + the four-die tray', () => {
             expect(['mana', 'special', 'miss']).toContain(d.face);
             expect(d.state).toBe(d.face === 'miss' ? 'locked' : 'available');
         }
-        expect(state.draftedDieId).toBeNull(); // no draft under spec 33
     });
 
     it('getThreatSequence gives every enemy a telegraphed attack each phase (HP model)', () => {
@@ -469,7 +448,7 @@ describe('Spec 26b §4 — Signature Skills (Conviction-funded)', () => {
         let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(200), [DOT_BODY], 6);
         state = rollEncounterDice(state).state;
         // Simulate a turn that already spent its scrap budget, then re-arm the roll.
-        state = { ...state, scrapsThisTurn: SCRAP_CONVICTION_CAP_PER_TURN, draftedDieId: null, turnTakenThisPhase: false };
+        state = { ...state, scrapsThisTurn: SCRAP_CONVICTION_CAP_PER_TURN, turnTakenThisPhase: false };
         const next = startTurn(state).state;
         expect(next.scrapsThisTurn).toBe(0);
     });
@@ -617,8 +596,6 @@ describe('Spec 26b tuning — projection + carry', () => {
         // One live heart die (unspent) + a dead X: only the live face can bank.
         state = setDice(state, ['heart', 'x']);
         state = endTurn(state).state;
-        // The invisible carriedDie slot-steal is retired; the die is player-owned now.
-        expect(state.carriedDie).toBeNull();
         expect(state.reserve?.map(d => d.color)).toEqual(['heart']);
         expect(state.reserve?.[0].pips).toBe(0);
         // Surviving a threat phase RIPENS it (+1 pip, toward the cap).
@@ -776,6 +753,33 @@ describe('Spec 25 §9 — resolveCombatPhase batch entry point', () => {
         expect(fizzled(res.events)).toBe(false);
         expect(res.events.some(e => e.kind === 'card-played')).toBe(true);
         expect(res.state.phaseResults.length + (res.state.finalOutcome ? 1 : 0)).toBeGreaterThan(0);
+    });
+
+    // D7 (2026-09-25): a play submitted WITHOUT a dieId used to ask for a
+    // stance draft — a no-op under spec 33 — and fell back to Reserve/floating
+    // only, so a dieless PAID play fizzled with a live tray die in hand.
+    it('powers a dieless PAID play with the first colour-legal live tray die', () => {
+        mockSequentialRng(0.05);
+        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(200, 'mind'), [DOT_BODY, DOT_BODY], 13);
+        // A dead X (miss face), an off-colour heart, then the body die.
+        state = setDice(rollEncounterDice(state).state, ['x', 'heart', 'body']);
+        state = { ...state, reserve: [], floatingDice: [] };
+        const res = resolveCombatPhase(state, [{ cardId: DOT_BODY, useBottom: true }]);
+        expect(fizzled(res.events)).toBe(false);
+        const played = res.events.find(e => e.kind === 'card-played');
+        expect(played && played.kind === 'card-played' && played.dieId).toBe(state.dice[2].id);
+    });
+
+    it('falls back to a colour-legal Reserve die when no tray die can power the play', () => {
+        mockSequentialRng(0.05);
+        let state = initializeCombatEncounter(makePlayer([DOT_BODY]), makeEnemy(200, 'mind'), [DOT_BODY, DOT_BODY], 13);
+        state = setDice(rollEncounterDice(state).state, ['x', 'heart']);
+        const banked = { id: 'rsv-body', color: 'body' as const, state: 'available' as const, temporary: false, face: 'mana' as const, pips: 0 };
+        state = { ...state, reserve: [banked], floatingDice: [] };
+        const res = resolveCombatPhase(state, [{ cardId: DOT_BODY, useBottom: true }]);
+        expect(fizzled(res.events)).toBe(false);
+        const played = res.events.find(e => e.kind === 'card-played');
+        expect(played && played.kind === 'card-played' && played.dieId).toBe('rsv-body');
     });
 });
 

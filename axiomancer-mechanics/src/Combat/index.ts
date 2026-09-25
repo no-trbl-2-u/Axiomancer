@@ -146,7 +146,7 @@ export type {
     SignatureSkill, SignatureSkillId, SignatureSkillKind,
     // WS9 (spec 32 §12 #7) — legible conditional threat branches
     ThreatBranchCondition, CombatThreatBranch, CombatThreatBranchOutcome,
-    // Phase 31 — the momentum wheel / THE STAKE shared stance subset
+    // The three chain/stance colours (spec 33 momentum chain + stance checks)
     WheelStance,
     // Spec 33 (Phase D2) — the die-gear interface (D5 makes it a real rail)
     UpgradeableDieGear,
@@ -160,17 +160,17 @@ export {
     resolveCombatPhase, resolveThreatPhase, processBetweenPhases,
     selectMercyChoice as selectEncounterMercyChoice, selectCapitulationChoice, getCard,
     handCards, availableDice, buildCombatSummary,
-    // Spec 26b — turn lifecycle + read + Conviction + Signature Skills
-    startTurn, draftStanceDie, endTurn, resolveRead, chooseDraft, discardCombatCard,
-    playSignatureSkill, getDraftedDie, isPhaseStanceRevealed, revealedCurrentStance,
+    // Spec 26b / spec 33 — turn lifecycle + Conviction + Signature Skills
+    startTurn, endTurn, discardCombatCard, firstLegalPoweringDie,
+    playSignatureSkill, isPhaseStanceRevealed, revealedCurrentStance,
     // Phase 33d — GLYPHS pilot: the dieless crack action
     crackGlyph,
     // Phase 102 — SUMMON: the dieless-but-priced add clear, and its constants
     strikeAdd, ADD_WAVE_CAP, STRIKE_ADD_COST, ADD_BITE_PER_LEVEL,
     // WS8.2 — stance-blur readout flag (mobile renders the stance panel fogged)
     isStanceReadoutBlurred,
-    cardReadPreview, projectCardImpact, getSignatureSkill, SIGNATURE_SKILLS, SIGNATURE_SKILL_LIST,
-    READ_DAMAGE_MULT, CONVICTION_PER_UNPICKED_DIE, CONVICTION_PER_UNPICKED_WILD, CONVICTION_READ_WIN_BONUS,
+    projectCardImpact, getSignatureSkill, SIGNATURE_SKILLS, SIGNATURE_SKILL_LIST,
+    READ_DAMAGE_MULT,
     COLOR_MATCH_DAMAGE_BONUS,
     // THE BIG NUMBERS REWRITE — the LIVE colour-match rule. Mobile's presenter
     // must consume this, not the deprecated flat constant above, or the card
@@ -179,13 +179,12 @@ export {
     COLOR_MATCH_BONUS_PCT,
     COLOR_MATCH_BONUS_MIN,
     THREAT_WEAKEN_PER_ROLL, THREAT_DENY_AT, THREAT_WEAKEN_FLOOR,
-    // depth epic — the read bites status in REAL units (P0-truth); the clock escalates threat
-    READ_ADVANTAGE_INTENSITY_BONUS, READ_DISADVANTAGE_DURATION_PENALTY,
+    // depth epic — the clock escalates threat
     THREAT_ESCALATION_PER_ROUND, THREAT_ESCALATION_GRACE, THREAT_ESCALATION_MAX,
     THREAT_ESCALATION_BOSS_MULT, THREAT_EFFECT_ESCALATION_STEP,
     // Fate Engine P1 (spec 31) — the dice get a second read
-    tapFateDie, riderText,
-    PIP_INTENSITY_BONUS, PIP_GUARD_BONUS, COLOR_MATCH_STATUS_DURATION_BONUS, FATE_TAP_CONVICTION,
+    riderText,
+    PIP_INTENSITY_BONUS, PIP_GUARD_BONUS, COLOR_MATCH_STATUS_DURATION_BONUS,
     // 0.34.0 status-depth epic — honesty selectors
     getEnemyIncomingDamageMultiplier, getDisruptMeter,
     projectRupture, projectRuptureBurst, projectSiphonHeal, projectReapAll,
@@ -197,15 +196,12 @@ export {
     projectCombatOutcome, projectEnemyHealPerRound,
     // Spec 32 v3 — floating dice save-back + sway decay knob
     getFloatingDiceColors, SWAY_DECAY_PER_TURN,
-    // Phase 31 — the engine-native momentum wheel + THE STAKE
-    isMomentumDieId, placeStake,
-    // Spec 33 (Phase D2) — Upgradeable Dice: OVERHEAT's flag-on primitive
+    // Spec 33 (Phase D2) — Upgradeable Dice: OVERHEAT's primitive
     overheatSpentDie,
 } from './combat.engine';
-// Spec 33 (Phase D2, FLAGGED) — the Upgradeable-Dice model. Everything here is
-// inert until `setUpgradeableDice(true)`; the flag-off engine is byte-identical.
+// Spec 33 — the Upgradeable-Dice model: THE combat dice model (the flag was
+// collapsed in D7, 2026-09-25).
 export {
-    setUpgradeableDice, isUpgradeableDiceEnabled,
     UPGRADEABLE_DIE_COLORS, UPGRADEABLE_TABLE_CEILING, KINDLE_CONCURRENT_CAP,
     PRESS_FATE_COST, OVERHEAT_CRACK_CHANCE, SPECIAL_FIRES_ON_USE,
     SPECIAL_CONVICTION_DEFAULT, MOMENTUM_CHAIN_ORDER, MOMENTUM_SURGE_LENGTH,
@@ -225,12 +221,12 @@ export type { MomentumV2, UpgradeableDieFace } from './combat.upgradeable-dice';
  */
 export type { FinisherProjection, CombatOutcomeProjection } from './combat.engine';
 export {
-    COMBAT_DICE_COUNT, TURN_DICE_COUNT, COMBAT_DIE_FACES, rollCombatDice, rollTurnDice,
-    rollCombatDieColor, dieHasStance,
+    COMBAT_DIE_FACES, rollCombatDieColor, dieHasStance,
     combatDieCanPower, refreshOneDie,
+    // The `reroll_spent` card mechanic's partial re-roll
     dieIsRerollable, hasRerollableDice, rerollSpentDice,
     // Master Spec §4 — wild-die permanent-growth mechanic
-    MAX_PERMANENT_WILD_DICE, rollPermanentBonusDice,
+    MAX_PERMANENT_WILD_DICE,
     RESERVE_MAX, RESERVE_PIP_CAP, ripenReserve,
     // Phase 32 part 4c — Forge OVERHEAT (the press-your-luck pip push)
     OVERHEAT_PIP_CEILING, OVERHEAT_BUST_CHANCE, overheatReserve,
