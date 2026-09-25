@@ -40,7 +40,7 @@ don't contradict existing design:
 | Effects, tiers, stacking | `docs/effects.md`, relevant `specs/0*-*.md` |
 | Skills (fallacy/paradox) | `docs/skills.md` |
 | Enemies | `docs/enemy.md`, `src/**/*.library.ts` |
-| Morality / difficulty | `specs/10-moral-difficulty-meter.md`, `BRAINDUMP.md` |
+| Morality / difficulty | `docs/morality.md`, `BRAINDUMP.md` |
 | Anything new | `BRAINDUMP.md` for prior loose notes |
 
 One quick read is enough. Don't audit the whole codebase before talking.

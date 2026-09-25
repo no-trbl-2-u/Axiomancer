@@ -63,7 +63,7 @@ introduces a new uppercase word.
 3. **`.claude/agents/card-expert.md` describes a dead world** — "70-card
    library", "10 themes", "exactly 30 keywords", "THE STRIKE IS DEAD",
    "sandbox-first is law" — all superseded 2026-08-08.
-   `axiomancer-mechanics/CLAUDE.md:22-32` and `docs/profane-canon.md:33`
+   `axiomancer-mechanics/CLAUDE.md:22-32` and `plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/docs/profane-canon.md:33`
    carry the same drift; `cards.library.ts:22` says the opposite in the
    same tree.
 4. **New-card tripwires with no doctrine.** Five hardcoded `57` count

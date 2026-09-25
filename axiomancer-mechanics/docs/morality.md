@@ -205,4 +205,4 @@ from their first post-migration choice.
 - [`src/Game/e2e/moral.meter.engine.test.ts`](../src/Game/e2e/moral.meter.engine.test.ts) — moral choice test coverage
 - [`src/World/dialogue.runtime.ts`](../src/World/dialogue.runtime.ts) — flag-to-moral-shift processing
 - [`src/World/Continents/Coastal-Village/maps.ts`](../src/World/Continents/Coastal-Village/maps.ts) — beggar demo content
-- [`specs/10-moral-difficulty-meter.md`](../specs/10-moral-difficulty-meter.md) — original implementation spec
+- [`specs/10-moral-difficulty-meter.md`](../../plan/archive/2026-09-25-trim-t5/axiomancer-mechanics/specs/10-moral-difficulty-meter.md) — original implementation spec *(archived T5)*

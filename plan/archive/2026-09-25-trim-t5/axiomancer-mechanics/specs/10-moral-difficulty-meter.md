@@ -1,5 +1,8 @@
 # Spec 10 — Moral Choice Difficulty Meter
 
+> **Status:** HISTORICAL — archived 2026-09-25 (trim T5). The implementation
+> spec for the moral meter; the live doc is `axiomancer-mechanics/docs/morality.md`.
+
 ## Goal
 
 Encode the moral-choice difficulty meter described in `BRAINDUMP.md` into the

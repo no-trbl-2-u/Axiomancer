@@ -181,6 +181,8 @@ would change the sim's late-stage numbers).
   the top of `plan/AUDIT.md` Pending (profane-canon, specs 10/35).
 - Map re-authoring brief (D2) — parameters set by D16 (4 regions, ~20
   nodes/map, spread in all directions). Graph first, backdrop second (D15).
+  **Kickoff prompt:** `plan/2026-09-25-map-revamp-kickoff.prompt.md` (phases
+  M0–M5; opens with a four-question owner ballot).
 - Backdrop-anchored map renderer (D15) — nodes in image coordinates,
   art pans/zooms with the node layer. Its own phase, after D2 — or folded
   into D2, since D16's per-map canvas is the same change.

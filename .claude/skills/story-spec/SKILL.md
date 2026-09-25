@@ -31,7 +31,7 @@ contradict existing design:
 
 | Topic | Read first |
 |---|---|
-| Morality / difficulty | `specs/10-moral-difficulty-meter.md` |
+| Morality / difficulty | `docs/morality.md` |
 | NPC types and world state | `docs/npcs.md`, `docs/world.md` |
 | Story premise | `content/story/story-overview.md` — the over-arching story: numbered rulings (canon), the prologue, open questions (not decided). A fact it does not carry does not exist yet. `docs/story.md` only catalogues shipped (non-canon) content. |
 | Existing story specs | list files in `specs/story/` |
