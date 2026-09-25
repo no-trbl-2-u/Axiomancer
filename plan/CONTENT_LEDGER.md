@@ -13,11 +13,93 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-25 | 08cc633d | 19 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-25 | 4d21e8ee | 19 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-24 | 6f13b2d0 | 18 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-25 | pending-self-ref | 19 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-24 | c57a7e73 | 18 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-25 | 1d5f4bcc | 18 |
 
 ## Log
+
+```
+> **[adjust-enemies pass 19, 2026-09-25, commit pending-self-ref]**
+> Zero-CREATE, zero-UPDATE, zero-REMOVE pass — dispatched autonomously
+> by `/march`'s content-lifecycle gate (Step 3b): `enemies` (`6f13b2d0`
+> 2026-09-24T10:43:06Z, 28 commits behind HEAD `e67f5e46`) was the sole
+> qualifying category this tick past the 15-commit/36h threshold —
+> `cards` (`08cc633d`, 1 commit) and `equipment` (`4d21e8ee`, 1 commit)
+> had just ticked this same session and did not qualify; `npcs`
+> (`1d5f4bcc`, 3 commits) and `keywords` (`13d3f1f4` — the actual
+> shipping commit, not the ledger's stale `c57a7e73` self-ref pass 19
+> equipment already flagged — ~10h/6 commits) were both under
+> threshold either way. Deploy confirmed green (`npm run deploy:check`
+> at HEAD `e67f5e46`: docs/plan-only tick, no gated workflow, nothing
+> to block on). No phase work pending (`plan/steps/01_build_plan.md`
+> has zero `[ ]` rows). Growth floor clear (`src/World` commits within
+> 7 days).
+>
+> **Step 1 audit — fresh, not re-cited:** `git diff 6f13b2d0..HEAD --
+> axiomancer-mechanics/src/` returns byte-zero — not one line changed
+> anywhere in the mechanics source tree across all 28 intervening
+> commits (they were story-overview drafting, a mobile late-game-hub
+> canvas-transform fix, and the other four stewards' own zero/near-
+> zero-diff passes). Re-derived all seven structural signals from
+> scratch against the live tree rather than trusting that emptiness:
+> pool floor / sibling overlap unchanged (fishing-village 13,
+> northern-forest 39, caverns 16, northern-city 8, connecting-river 5,
+> town-across-river 4, the-capital 8, aporia-colonnade/archive 8/8,
+> aporia-proof 11; tightest sibling pair northern-city/the-capital
+> 5/8 = 62.5%, under the 70% ceiling). Orphans: `TheIncompleteness`
+> (explicit never-enters-EnemiesByMap design requirement) and
+> `Sandbag_01` (documented test fixture) remain the only two enemies
+> outside every pool — both intentional, not REMOVE candidates
+> (confirmed via a full `EnemyLibrary`-vs-`EnemiesByMap` diff, not a
+> re-cite). Deck law: all 10 distinct `card(...)` ids independently
+> cross-referenced against `src/Cards/library/*.cards.ts` (choir,
+> grave, relics, rot, starters, trial) — all resolve. Keyword kinds: all
+> 11 `kind:` values used in `enemy.library.ts` match
+> `ENEMY_KEYWORD_KINDS` (`enemy-keywords.ts:92-103`) exactly, zero
+> stray/missing. Portrait collisions: 77 `portraitAsset` values, zero
+> duplicates (`sort | uniq -d` empty). VITAE band: 21 explicit `vitae:`
+> overrides, byte-identical to pass 16/18's measured set. Aftermath
+> prose / voice: zero `\b(thee|thou|thy|thine|ye)\b` hits. Loot table:
+> all 22 distinct `drop('...')` ids diffed id-for-id against
+> `consumable.library.ts`'s `id:` set — zero missing, zero orphaned.
+> All seven signals clean, independently re-derived rather than copied
+> forward from pass 18.
+>
+> **Step 1b widened KB check:** Step 1 returned nothing, so ran the
+> floor-raise. Tried a fresh angle not in passes 9-18's search history:
+> `kb_find_games(better_if_label: 'combat-resolution')` — surfaces
+> `kingdom-death-monster` and `bloodborne-the-card-game`, both
+> monster/enemy-centric campaign or hunt games, neither previously
+> queried by any `/adjust-enemies` pass. `BoardGames/patterns/
+> combat-resolution.okf.md`: the pattern's actual content is about
+> hidden-information/dice-randomness communication (Dune Imperium's
+> hidden combat power, KDM's unclear point-of-decision randomness
+> feedback) — doesn't transfer, our threat telegraphs are already
+> fully visible to the player pre-decision, nothing hidden to
+> communicate better. KDM's own `better-if.okf.md` (needs_followup,
+> low confidence): onboarding/campaign-bookkeeping/randomness-
+> communication asks, nothing about monster/AI-deck variety or
+> roster shape. Bloodborne's `better-if.okf.md` flags its own thin
+> base-game encounter/Final Boss pool as a repeat-play risk — the
+> generic "same three fights" thinness shape the skill already
+> instructs this steward to watch for — but not a differentiated new
+> finding here: Step 1's own pool-floor/sibling-overlap check this
+> same pass came back clean (no map under floor, no pair over the 70%
+> ceiling), so there is no concrete gap in *our* roster for that
+> complaint to land on. No new citable gap surfaced.
+>
+> A genuine zero-diff pass — the strongest reading yet, since unlike
+> prior zero-diff passes (which at least saw comment-only or unrelated
+> mechanics commits) this window's 28 commits touched zero bytes of
+> `axiomancer-mechanics/src/` at all. Commit is the ledger bump only,
+> per skill §5 failure mode 4. Nothing filed to `PHASE_CANDIDATES.md`
+> or `AUDIT.md` — no map-scale finding and no owner-flavored call
+> surfaced this pass.
+>
+> Verify: green (mechanics 231 files/3746 tests + build; mobile
+> lint/typecheck/jest/asset/critique-drive, exit 0).
+```
 
 ```
 > **[adjust-equipment pass 19, 2026-09-25, commit 4d21e8ee]**
