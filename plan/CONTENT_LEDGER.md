@@ -13,14 +13,14 @@
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-25 | 08cc633d | 19 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-25 | 4d21e8ee | 19 |
-| enemies | `skills/adjust-enemies.md` | 2026-09-25 | pending-self-ref | 19 |
+| enemies | `skills/adjust-enemies.md` | 2026-09-25 | be37a6a3 | 19 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-24 | c57a7e73 | 18 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-25 | 1d5f4bcc | 18 |
 
 ## Log
 
 ```
-> **[adjust-enemies pass 19, 2026-09-25, commit pending-self-ref]**
+> **[adjust-enemies pass 19, 2026-09-25, commit be37a6a3]**
 > Zero-CREATE, zero-UPDATE, zero-REMOVE pass — dispatched autonomously
 > by `/march`'s content-lifecycle gate (Step 3b): `enemies` (`6f13b2d0`
 > 2026-09-24T10:43:06Z, 28 commits behind HEAD `e67f5e46`) was the sole
