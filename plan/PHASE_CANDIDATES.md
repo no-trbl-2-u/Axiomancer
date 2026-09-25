@@ -2686,6 +2686,69 @@ residual merit; re-file if the failure mode recurs.
 - conflicts: none against spec.md non-goals; doesn't touch the 3
   surviving big-numbers constraints or the LOCKED MECHANICS.
 
+### [ ] [score 3.0] No mechanic lets a card offer the player a choice among revealed/generated options — Slay the Spire's Discovery / Dawncaster's Delve niche has no analogue
+- proposed: 2026-09-25, `/adjust-cards` pass 19 (Step 1b widened KB
+  cross-reference; Step 1's own structural audit read zero-diff — same
+  134 cards / 8 themes / 72 keywords, `pricing.engine.test.ts` 263/263,
+  `curated-library.engine.test.ts` 14/14, `deck-presets.engine.test.ts`
+  9/9 all green and byte-identical to pass 18's own citation; `git diff
+  f155b027..HEAD` over every card-authoring surface — `cards.library.ts`,
+  `combat.starter-deck-presets.ts`, `cards.sandbox-sets.ts`,
+  `combat.deck-draft.ts`, `cards.allies.ts`, `cards.haunts.ts`,
+  `library/*.cards.ts` — returns zero changes across the 27-commit
+  window).
+- source signals:
+  - KB: `kb:dawncaster/keywords/delve.okf.md` (src-001, community,
+    medium) — "Select 1 of 3 randomly selected cards" (Deck Management
+    function, ordinal 43 of 141).
+  - KB: `kb:slay-the-spire/cards/0111-discovery-discovery` (community)
+    — "Choose 1 of 3 random cards to add into your hand. It costs 0
+    this turn. Exhaust." A genre-staple "pick one of a revealed set"
+    primitive, distinct from our FORETELL (peek-and-reorder the deck,
+    no choice among alternatives) and RECALL (deterministic
+    highest-rank-first retrieval, no choice involved).
+  - Live-code check: a grep for choice/choose/select across
+    `src/Cards/types.ts` finds nothing on the mechanic surface (the one
+    hit is the unrelated `befriend_attempt` mercy-choice comment, see
+    below); the full `CardSpecialMechanic` union (50+ kinds) has no
+    member that presents the player a set of options to pick from, and
+    `axio_keywords`'s 72 registry rows are all single-resolution
+    effects — none branches on a player pick.
+  - This is a genuine gap, not a near-synonym for an existing keyword:
+    FORETELL/RECALL manage what's already committed (deck order,
+    discard retrieval by a fixed rule); Delve/Discovery hand the player
+    an active choice among freshly-generated or revealed alternatives —
+    a mid-resolution decision point, not a deterministic effect.
+- rationale: real and KB-grounded, but structurally large — no
+  generic "offer N options, resolve on player pick" surface exists
+  mid-card-resolution today. Building it needs a new
+  `CardSpecialMechanic` kind (e.g. `choose_one`), a transient
+  combat-state shape to hold the offered options pending a player pick,
+  a mobile UI screen/modal to present and resolve the choice (today's
+  mobile combat screen has no such component), the full 12-step keyword
+  wiring checklist (mobile gloss, card-editor vocabulary, atlas row),
+  and a card-editor authoring surface for "N options, pick 1." Past
+  this steward's ship-small ceiling by a wide margin — this reads
+  closer to a UI feature than a card content addition. Notably, the
+  engine already carries ONE player-facing mid-resolution choice state
+  (`befriend_attempt`'s mercy-choice gate, Phase 108, `CardSpecialMechanic`
+  doc comment: "opening a mercy choice state if successful") — a
+  `choose_one` primitive could plausibly reuse that plumbing rather than
+  building fresh, which is exactly the kind of call a design session
+  should make before any code is written.
+- proposed scope: a `mechanics-expert` design session first (what
+  "options" means here — 3 random cards from the reward pool, 3 cards
+  from the player's own deck/discard, or a fixed authored triplet per
+  card; whether the pick resolves synchronously at play-time or is
+  queued like the mercy-choice state; whether it reuses that state's
+  plumbing), then the full keyword/engine wiring checklist for the
+  resulting primitive, then 1-2 carrying cards once it exists (grave's
+  MILL/RECALL register or choir's harvesting register are the closest
+  thematic fits).
+- estimated phases: 1-2
+- conflicts: none against spec.md non-goals; doesn't touch the 3
+  surviving big-numbers constraints or the LOCKED MECHANICS.
+
 ### [ ] [score 2.0] Consider a service layer for cross-project/external-API needs — no concrete need filed yet
 - proposed: 2026-09-23, via `/oversight` (T's own architecture question,
   raised as the session's free-form adjustment)

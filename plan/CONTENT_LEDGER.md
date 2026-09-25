@@ -11,7 +11,7 @@
 
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
-| cards | `skills/adjust-cards.md` | 2026-09-24 | f155b027 | 18 |
+| cards | `skills/adjust-cards.md` | 2026-09-25 | pending-self-ref | 19 |
 | equipment | `skills/adjust-equipment.md` | 2026-09-24 | bdcd4c7e | 18 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-24 | 6f13b2d0 | 18 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-24 | c57a7e73 | 18 |
@@ -20,6 +20,95 @@
 ## Log
 
 ```
+> **[adjust-cards pass 19, 2026-09-25, commit pending-self-ref]** Zero-diff
+> pass — audit re-confirmed byte-identical to pass 18, no new CREATE/
+> UPDATE/REMOVE, ledger bump only. Dispatched autonomously by `/march`'s
+> content-lifecycle gate (Step 3b): `cards` (`f155b027`
+> 2026-09-24T08:52:50Z, 27 commits behind HEAD `35133bf8`) was the
+> stalest qualifying category this tick — `equipment` (`bdcd4c7e`,
+> 25 commits) and `enemies` (`6f13b2d0`, 24 commits) both qualified too
+> but were less stale; `keywords` (`13d3f1f4`, same-day) and `npcs`
+> (`1d5f4bcc`, same-day) had just ticked and did not qualify. No phase
+> work pending, deploy green, growth floor clear (recent `src/World`
+> commits exist).
+>
+> **Step 0:** re-read `axiomancer-mechanics/CLAUDE.md` fresh — THE BIG
+> NUMBERS REWRITE still governs (no CQI, no rank-bands, no win-rate
+> curve, no status-engagement floor); `axiomancer-mechanics/VISION.md`
+> and `plan/bearings.md`'s LOCKED MECHANICS section (Conviction, Surge,
+> Dice — never removed/no-op'd) reconfirmed unchanged.
+>
+> **Step 1 structural audit — fresh, not re-cited:** `git log
+> f155b027..HEAD -- axiomancer-mechanics/src/Cards/cards.library.ts
+> axiomancer-mechanics/src/Combat/combat.starter-deck-presets.ts
+> axiomancer-mechanics/src/Cards/cards.sandbox-sets.ts
+> axiomancer-mechanics/src/Combat/combat.deck-draft.ts
+> axiomancer-mechanics/src/Cards/cards.allies.ts
+> axiomancer-mechanics/src/Cards/cards.haunts.ts
+> axiomancer-mechanics/src/Cards/library/` returns zero commits across
+> all 27 commits since pass 18 (`git diff --stat` over the same paths:
+> empty). Re-ran the full card-surface e2e trio fresh:
+> `pricing.engine.test.ts` 263/263, `curated-library.engine.test.ts`
+> 14/14 (FREE-line + reachability), `deck-presets.engine.test.ts` 9/9
+> (aspect-thirds) — all green, byte-identical to pass 18. `axio_overview`
+> reconfirms 134 cards / 8 themes / 72 keywords unchanged. Ran two extra
+> checks not covered by the standing e2e trio: an orphan scan (every
+> card cross-referenced against every preset, `COMBAT_REWARD_POOL`, and
+> `STARTING_CARD_IDS`) turns up only the 5 curse cards, which are
+> enemy-injected via `enemy.library.ts`/`combat.enemy-cards.ts`/
+> `combat.enemy-decks.ts` by design, not orphaned; and a per-theme
+> aspect tally, which is uneven by raw count (e.g. choir leans heart
+> 10/5/6, curse is deliberately tiny) but that imbalance is legal — the
+> surviving 5/5/5 law binds the PRESET decks, which `deck-presets
+> .engine.test.ts` already confirms green, not the raw per-theme pool.
+> No REMOVE/UPDATE signal from Step 1.
+>
+> **Step 1b widened audit — fresh angle (four checked, all ruled out or
+> covered):** ran a KB cross-reference on mechanic families not yet
+> checked by prior passes (pass 18 already ruled out Retain, AOE/
+> multi-target, and dodge/evasion — not re-checked here). (1)
+> Cost-reduction/discount (Dawncaster Haste/Slow, `kb:dawncaster/
+> keywords/haste.okf.md`, `slow.okf.md`) — doesn't transfer: those
+> reduce/raise a drawn card's Energy cost, and Axiomancer has no
+> per-card Energy cost to modify (cards are powered by dice color, not
+> spent Energy); the closest existing analogues (KINDLE/FORGE/pip
+> economy) already cover the "make dice go further" fantasy. (2)
+> Card-draw-manipulation — already well covered: DRAW, FORETELL, RECALL,
+> MILL between them cover Dawncaster's Foretell/Frozen (peek+reorder)
+> and Focus/Momentum-style draw triggers (our FALLEN/EVENTIDE/UNMOVED
+> threshold-state family already fires free lines off deck/hand state).
+> (3) Sacrifice/self-damage-for-value — already fully covered: RECOIL,
+> RECOIL_X, and IMMOLATE are Axiomancer's Blood/Darkness analogue, and
+> the debt theme is built entirely around this register. (4) Delayed/
+> echo effects — already covered: ECHO, REPLAY_LAST, REPRISE, and
+> PROLONG (DoT-specific) cover Dawncaster's Echo/Lasting/Rebound
+> register. One genuine, KB-grounded gap surfaced along the way and
+> logged separately (not from the four assigned angles): no mechanic
+> lets a card offer the player a CHOICE among revealed/generated
+> options (`kb:dawncaster/keywords/delve.okf.md` src-001, "Select 1 of
+> 3 randomly selected cards"; `kb:slay-the-spire/cards/0111-discovery-
+> discovery`, "Choose 1 of 3 random cards to add into your hand").
+> Confirmed via grep across `CardSpecialMechanic` (50+ kinds, no
+> choice-among-options member) and `axio_keywords` (72 rows, all
+> single-resolution). Real, but structurally LARGE — needs a new
+> `CardSpecialMechanic` kind, a transient combat-state shape, a mobile
+> UI modal (none exists today), and the full 12-step keyword wiring
+> checklist — past this steward's ship-small ceiling (THE GROWTH FLOOR
+> ¶2). Filed as `plan/PHASE_CANDIDATES.md` `[score 3.0]` "No mechanic
+> lets a card offer the player a choice among revealed/generated
+> options" so a future pass doesn't re-propose it from scratch; pass
+> 17's standing `[score 3.0]` in-combat/temporary card-upgrade candidate
+> was also reconfirmed still open and correctly sized past this
+> steward's ceiling — no code has landed against `card-upgrades.ts` or
+> the `CardSpecialMechanic` union in the window.
+>
+> **Step 2/3:** nothing to ship — zero actionable CREATE/UPDATE/REMOVE
+> findings from Step 1 or Step 1b (skill §5 failure mode 4: no
+> manufactured change).
+>
+> Verify: green (mechanics 231 files/3746+ tests + build; mobile
+> lint/typecheck/jest/asset/critique-drive; card-editor type-check).
+>
 > **[adjust-npcs pass 18, 2026-09-25, commit 1d5f4bcc]** Zero-diff pass —
 > audit re-confirmed byte-identical to pass 17, no new CREATE/UPDATE/
 > REMOVE, ledger bump only. Dispatched autonomously by `/march`'s
