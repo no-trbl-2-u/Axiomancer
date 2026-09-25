@@ -241,7 +241,7 @@ Defined under `.claude/agents/`. Spawn aggressively.
 | `playtester` | Play the game via the running expo-web build (Playwright) — the real `/critique` observer for this project | Structured playtest report |
 | `mechanics-expert` | Second opinion on a mechanic design / balance call | Structured analysis (never code) |
 | `content-curator` | Author + ship narrative content (dialogue trees, event prose, flavor) in the house voice — `/iterate`'s content-gap worker | Shipped content through the gates |
-| `card-expert` | Design + implement cards/keywords with prior-art receipts — the working agent behind `/deck-tuning` and the `adjust-cards` / `adjust-keywords` lifecycle | Shipped cards/keywords through the gates |
+| `card-expert` | Design + implement cards/keywords with prior-art receipts — the working agent behind the `adjust-cards` / `adjust-keywords` lifecycle | Shipped cards/keywords through the gates |
 
 For `/critique`, prefer **`playtester`** (it already drives the
 app end-to-end) over the generic `reader`; there is no hosted URL
@@ -334,7 +334,8 @@ ambiguity.)
   1. **The strike is alive.** Cards MAY deal raw enemy-HP damage. Spec 32
      v3 §1/§12's no-strike law and the status-dominance balance doctrine
      are retired for combat (their enforcing tests came down in Phase 41).
-  2. **`/deck-tuning` has full card authority** — no sandbox-first
+  2. **Card-pool work (`/adjust-cards`; `/deck-tuning` until its T5
+     retirement) has full card authority** — no sandbox-first
      quarantine, no byte-identity law, no recolor-not-repartition rule,
      no per-change owner ballot, no `[needs-user-call]` on recolors or
      new cards. Anything about any card is fair game — **bounded only by
@@ -377,7 +378,7 @@ ambiguity.)
   these pipelines? Try to do it yourself first"*. Under the
   source-of-truth hierarchy that is T's latest explicit decision, and
   it rules the following:
-  1. **The transitional-library ruling is LIFTED.** `/deck-tuning`'s
+  1. **The transitional-library ruling is LIFTED.** Card-pool work's
      full card authority is live against the current library: balance
      findings are work, replacement cards may be authored, tuning passes
      may open. (The superseded ruling is archived; see its stub below.)

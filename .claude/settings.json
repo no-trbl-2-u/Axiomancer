@@ -81,7 +81,6 @@
       "Bash(npm run hazard:*)",
       "Bash(npm run labyrinth:*)",
       "Bash(npm run combat:*)",
-      "Bash(npm run deck-tuning:*)",
       "Bash(npm run critique:drive:*)",
       "Bash(npm run devlog:build:*)",
       "Bash(npm run devlog:shots:*)",

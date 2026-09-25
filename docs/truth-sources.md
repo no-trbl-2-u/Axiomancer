@@ -149,5 +149,5 @@ Rules when citing measured numbers:
    never confirmation-grade — close calls need the full multi-seed
    pass before anyone acts on them.
 4. Measuring is not tuning: regenerating the baseline is briefing;
-   reading it into card/deck changes stays with `/deck-tuning`, and
+   reading it into card/deck changes stays with `/adjust-cards`, and
    engine constants stay manual.

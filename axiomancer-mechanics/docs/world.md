@@ -411,8 +411,9 @@ the rest node is now a one-shot, deterministic player choice,
 items inline with no minigame behind it), and `lootcache.sim.ts`
 (`loot-cache-tuning`, retired Phase 63 — the `loot-cache` node is now a
 one-shot, deterministic player choice, `World/LootCacheChoice`, same shape
-as rest). Only the hazard minigame still carries a live balance-sim + tuning
-skill (`hazard.sim.ts`, `/hazard-tuning`).
+as rest). Only the hazard minigame still carries a live balance sim
+(`hazard.sim.ts`); its `/hazard-tuning` command was retired in trim T5
+(2026-09-25, D10).
 
 ## See Also
 

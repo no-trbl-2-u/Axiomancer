@@ -16,7 +16,7 @@
 //
 // MEASUREMENT ONLY: this regenerates the stamped truth surface. Reading the
 // new numbers against the doctrine curve and proposing tuning stays with
-// /deck-tuning and the digest's proposals panel — never in here.
+// /adjust-cards and the digest's proposals panel — never in here.
 //
 // PROVENANCE: the sweep reads the WORKING TREE; the stamp records
 // `git rev-parse --short HEAD`. When the two disagree the stamp is a false

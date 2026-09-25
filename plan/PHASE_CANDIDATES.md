@@ -261,14 +261,6 @@
 - shape: that is a substantial authored-prose job, not a rename. It is the
   clean cut if 44h runs long — split it rather than rushing the prose.
 
-### `/world-tuning` still lists rest `healFraction` as a tuning lever
-- source: filed 2026-08-08 by Phase 52b. `.claude/commands/world-tuning.md`
-  lines 77 and 98 name a field that no longer exists.
-- shape: one-line harness fix. Phase 52f's "decide the tuning home" is the
-  natural owner, since 52e deletes `/rest-tuning` and the rest node would
-  otherwise have no lane — which is exactly how D5's prices went unratified
-  for a month.
-
 ### AXM Log follow-ups — minigame engine taps, Sentry slot, native clipboard
 - source: repo-wide structured logging shipped 2026-07-20 (owner-directed,
   direct-to-main; contract in `docs/logging.md`). V1 taps combat
@@ -980,7 +972,8 @@ Earlier entries are archived verbatim in `plan/archive/PHASE_CANDIDATES_2026.md`
 
 ## Rejected
 
-(empty)
+- `/world-tuning` still lists rest `healFraction` as a tuning lever: moot,
+  since `/world-tuning` was retired in trim T5 (2026-09-25, D10).
 
 ## Considered (below threshold)
 

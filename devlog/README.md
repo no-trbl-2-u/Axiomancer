@@ -106,7 +106,7 @@ pages refresh automatically on the next digest commit (no manual step).
 
 Each file in `tuning-lab/` (other than `index.html`) is a hand-authored,
 self-contained tuning report — e.g. a Battle Lab playtest ledger from
-`/deck-tuning` or a similar balance pass. `scripts/build-devlog.mjs` doesn't
+the retired `/deck-tuning` or a similar balance pass. `scripts/build-devlog.mjs` doesn't
 parse or restyle them; it just lists every `*.html` file in the folder (using
 each file's own `<title>`) on `tuning-lab/index.html`, linked from the hub.
 Drop a new report file in `tuning-lab/` and the next `npm run devlog:build`

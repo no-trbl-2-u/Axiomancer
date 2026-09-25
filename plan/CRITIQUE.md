@@ -437,6 +437,16 @@
   swapping).
 - source: loop
 
+### [MED] general — rebuild the retired tuning/playtest commands later
+- pass: user-jot (commit cc26613c)
+- viewport: unspecified
+- auth_state: anonymous
+- category: observation
+- observation: Rebuild the retired tuning/playtest commands (deck-tuning, hazard-tuning, world-tuning, combat-ux-tuning, critic-loop, deep-playtest, hermes-playtest, dep-upgrades — retired in trim T5, D10) once the mechanics settle: after the D4 stat hooks + damage-scaling formula and the card rework. Recover old doctrine with `git show c7de2d6d:.claude/commands/<name>.md`; rebuild fewer, merged loops, not eight.
+- evidence: user-spotted at 2026-09-25T20:06:40Z
+- suggested fix: [user has not specified — iterate to determine]
+- source: user
+
 ## Done
 
 ### [x] [HIGH] exploration — the late-game hub's node-graph map renders completely blank on mobile — RESOLVED 2026-09-24 (commit 2dfcafeb, issue #366)
