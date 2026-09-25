@@ -12,7 +12,7 @@
 | category | skill | last pass | commit | pass count |
 |---|---|---|---|---|
 | cards | `skills/adjust-cards.md` | 2026-09-25 | 08cc633d | 19 |
-| equipment | `skills/adjust-equipment.md` | 2026-09-25 | pending-self-ref | 19 |
+| equipment | `skills/adjust-equipment.md` | 2026-09-25 | 4d21e8ee | 19 |
 | enemies | `skills/adjust-enemies.md` | 2026-09-24 | 6f13b2d0 | 18 |
 | keywords | `skills/adjust-keywords.md` | 2026-09-24 | c57a7e73 | 18 |
 | npcs | `skills/adjust-npcs.md` | 2026-09-25 | 1d5f4bcc | 18 |
@@ -20,7 +20,7 @@
 ## Log
 
 ```
-> **[adjust-equipment pass 19, 2026-09-25, commit pending-self-ref]**
+> **[adjust-equipment pass 19, 2026-09-25, commit 4d21e8ee]**
 > Zero-CREATE, zero-UPDATE, zero-REMOVE pass — dispatched autonomously
 > by `/march`'s content-lifecycle gate (Step 3b): `equipment`
 > (`bdcd4c7e` 2026-09-24T10:42:53Z, 27 commits behind HEAD `5a69d6a9`
