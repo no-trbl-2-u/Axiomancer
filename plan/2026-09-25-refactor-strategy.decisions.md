@@ -118,6 +118,17 @@ luck modifiers on `buff_all_stats_up`, `buff_phoenix_vigor` and
 re-authors any stat bonus it wants. *Rejected:* keeping them as data for
 the future hooks; keeping them but hiding them in the UI.
 
+**D15 — Map backdrops: atmosphere now, the map itself later.** (T,
+2026-09-25.) For the D2 re-authoring, the node graph is authored first on
+the column × lane grid and the backdrop is made to fit it as atmosphere
+(`MapCanvas` draws it `contentFit="cover"`, so it crops per screen and
+carries no positions). The target state is the reverse: nodes placed ON
+the backdrop's landmarks, in image coordinates, with the art panning and
+zooming under the same gestures as the nodes. That needs its own renderer
+phase (fixed-aspect canvas, node coordinates in image space, a new
+layout-parity test) before any art-first map is authored. *Deferred, not
+rejected.*
+
 ## Open follow-ups
 
 - Audit tick (D1 step 1, D3 scope) — DONE 2026-09-25; keep/cut list and
@@ -129,7 +140,9 @@ the future hooks; keeping them but hiding them in the UI.
   Pick-up prompt for the execution session:
   `plan/2026-09-25-trim-the-fat.prompt.md`.
 - Map re-authoring brief (D2) — needs the region count and target node
-  count per map before authoring.
+  count per map before authoring. Graph first, backdrop second (D15).
+- Backdrop-anchored map renderer (D15) — nodes in image coordinates,
+  art pans/zooms with the node layer. Its own phase, after D2.
 - Scaling formula (D1 step 3) — D4 settles the direction (per-stat
   hooks); the exact stat-to-quantity mapping is designed with the hook.
 - Trim spec §5.3 / §5.6 / §5.7 answered 2026-09-25 as D8 / D9 / D10.
